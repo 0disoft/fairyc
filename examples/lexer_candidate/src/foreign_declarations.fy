@@ -1,4 +1,5 @@
 module foreign_declarations;
+import c_abi_types as c_types;
 import pointer_types as pointers;
 import syntax as syntax;
 import type_state as state;
@@ -6,7 +7,7 @@ import ffi_symbols as symbols;
 import std::bytes as bytes;
 pub struct Info {u32 code;usize start;usize end;usize link_start;usize link_end;}
 fn u32 scalar_type(ref syntax::Parsed p,usize root){
-    if(root==0){return 0;}if(syntax::type_at(p,root).kind==11 || syntax::type_at(p,root).kind==12){return pointers::resolve(p,root);}if(syntax::type_at(p,root).kind!=1){return 0;}let text=syntax::type_text(p,root);
+    if(root==0){return 0;}let u32 c_type=c_types::resolve(p,root);if(c_types::valid(c_type)){return c_type;}if(syntax::type_at(p,root).kind==11 || syntax::type_at(p,root).kind==12){return pointers::resolve(p,root);}if(syntax::type_at(p,root).kind!=1){return 0;}let text=syntax::type_text(p,root);
     if(bytes::equal(text,b"i32") || bytes::equal(text,b"i64") || bytes::equal(text,b"u8") || bytes::equal(text,b"u32") || bytes::equal(text,b"usize") || bytes::equal(text,b"void")){return state::primitive(p,root);}return 0;
 }
 pub fn Info read(ref syntax::Parsed p,usize index){

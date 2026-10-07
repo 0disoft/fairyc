@@ -1,4 +1,5 @@
 module c_text;
+import c_abi_types as c_types;
 import pointer_types as pointers;
 import reference_types as refs;
 import std::bytes as bytes;
@@ -18,6 +19,7 @@ pub fn bool number(ref mut bytes::Buffer out, ref mut State s, usize value) {
     if (!bytes::append_usize(out,value).is_ok) { s.code = 3; return false; } return true;
 }
 pub fn bool type(ref mut bytes::Buffer out, ref mut State s, u32 code) {
+    if(c_types::valid(code)){return text(out,s,c_types::spelling(code));}
     if(pointers::valid(code)){return type(out,s,pointers::inner(code)) && text(out,s,if(pointers::mutable(code)){b" *"}else{b" const *"});}
     if(refs::valid(code)){return type(out,s,refs::inner(code)) && text(out,s,if(refs::mutable(code)){b" *"}else{b" const *"});}
     if (code == 11) { return text(out,s,b"struct fy_bytes_mut"); }

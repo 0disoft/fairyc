@@ -6,6 +6,8 @@ import mir_lower as lower;
 import mir_verify as verify;
 import c_emit as c;
 import pointer_types as pointers;
+import c_abi_types as c_types;
+import scalar_casts as casts;
 import tagged_types as tags;
 import array_types as arrays;
 import std::bytes as bytes;
@@ -46,4 +48,13 @@ fn m::Program changed(ref m::Program p,u32 mutation){
 @test fn void pointer_casts_reject_lost_provenance(){
     let p=switch(lower::lower(fixture::retained(b"module main;fn i32 main(){let i32 n=7;let ptr i32 p=unsafe{ref n as ptr i32};assert(p!=null);return 7;}"))){case .ok(p):{p}case .err(_):{assert(false);return;}};
     assert(verify::check(ref p).code==0);var u32 mutation=7;while(mutation<=8){let bad=changed(ref p,mutation);assert(verify::check(ref bad).code==1001);var bytes::Buffer out=bytes::empty();assert(bytes::append(ref mut out,b"prefix").is_ok);assert(c::render(ref bad,ref mut out)!=0 && bytes::equal(bytes::view(ref out),b"prefix"));mutation+=1;}
+}
+
+@test fn void c_scalar_identity_and_cast_lane_are_closed(){
+    var u32 type=128;while(type<=143){assert(c_types::valid(type)==(type!=138));assert(!pointers::valid(type) && !tags::builtin(type) && !arrays::valid(type));type+=1;}
+    assert(c_types::named(b"c::int")==132 && c_types::named(b"c::longdouble")==0 && c_types::named(b"c::ssize_t")==138);
+    assert(casts::allowed(1,132) && casts::allowed(132,1));assert(!casts::allowed(4,140) && !casts::allowed(128,6));
+    let p=switch(lower::lower(fixture::retained(b"module main;@link_name(\"fixture_make_int\")unsafe extern C fn c::int host();fn i32 main(){let c::int n=unsafe{host()};return n as i32;}"))){case .ok(p):{p}case .err(_):{assert(false);return;}};
+    assert(verify::check(ref p).code==0);let bad=changed(ref p,2);assert(verify::check(ref bad).code!=0);
+    var bytes::Buffer out=bytes::empty();assert(c::render(ref p,ref mut out)==0);
 }

@@ -1,4 +1,5 @@
 module hir_shapes;
+import c_abi_types as c_types;
 import pointer_types as pointers;
 import borrow_shapes as borrows;
 import reference_types as refs;
@@ -50,7 +51,7 @@ pub fn u32 array_element(ref Table p,u32 type) {
     let usize id=find(p,type);return if(id==0){0}else{field_at(p,at(p,id-1).field_start+1).type};
 }
 pub fn bool has_owned_arrays(ref Table p) { var usize i=0;while(i<count(p)){if(arrays::owned(at(p,i).type)){return true;}i+=1;}return false; }
-pub fn bool valid_type(ref Table p, u32 type, bool allow_void) { if(pointers::valid(type)){return true;}if(refs::valid(type)){return valid_type(p,refs::inner(type),false);}return (type >= 1 && type <= if (allow_void) { 7 } else { 6 }) || literals::valid(type) || type == 11 || arrays::valid(type) && (!arrays::owned(type) || find(p,type)!=0) || ((nominal::valid(type) || resources::valid(type) || enums::valid(type)) && find(p,type) != 0); }
+pub fn bool valid_type(ref Table p, u32 type, bool allow_void) { if(c_types::valid(type) || pointers::valid(type)){return true;}if(refs::valid(type)){return valid_type(p,refs::inner(type),false);}return (type >= 1 && type <= if (allow_void) { 7 } else { 6 }) || literals::valid(type) || type == 11 || arrays::valid(type) && (!arrays::owned(type) || find(p,type)!=0) || ((nominal::valid(type) || resources::valid(type) || enums::valid(type)) && find(p,type) != 0); }
 fn bool visit(ref Table p, usize i, ref mut u8[] colors, usize depth) {
     if (colors[i] == 2) { return true; } if (colors[i] == 1 || depth >= 64) { return false; }
     colors[i] = 1; let Shape s = at(p,i); var usize j = 0;

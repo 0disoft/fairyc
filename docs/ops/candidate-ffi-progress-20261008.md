@@ -40,3 +40,21 @@ not attached to the resulting raw pointer: foreign lifetime/aliasing obligations
 remain with the unsafe wrapper, as in the existing public ABI contract.
 
 Evidence: `evidence/candidate-resource-pointer-casts-20261008.json`.
+
+## Target C scalar transport
+
+Fifteen TargetSpec C scalar families have distinct candidate identities and
+preserve their exact C spelling through foreign results, locals, copies,
+parameters, returns, and ordinary stored fields. Fairy `bool` remains separate
+from `c::bool`. C scalars have no implicit literals, arithmetic, comparison, or
+integer conversion; only explicit `i32` / `c::int` conversion is admitted.
+
+`c_abi_contract.fy` emits size/alignment checks for used families and signedness
+checks for integer families. The `c::int` cast additionally requires the exact
+signed 32-bit range. `long` / `unsigned long` check LLP64 on Windows and LP64 on
+Linux; the Linux branch has not been executed in this task. POSIX-only
+`c::ssize_t` remains rejected until the candidate carries explicit target
+selection. It is never silently substituted with `intptr_t`.
+
+The independent provider returns and consumes every supported C scalar family.
+Evidence: `evidence/candidate-resource-c-scalars-20261008.json`.

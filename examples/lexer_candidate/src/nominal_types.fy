@@ -1,4 +1,5 @@
 module nominal_types;
+import c_abi_types as c_types;
 import pointer_types as pointers;
 import borrow_shapes as borrows;
 import reference_types as refs;
@@ -19,6 +20,7 @@ pub fn u32 named(ref syntax::Parsed p, ref u8[] spelling) {
 }
 pub fn u32 resolve(ref syntax::Parsed p, usize root) {
     if (root == 0) { return 0; }
+    let u32 c_type=c_types::resolve(p,root);if(c_types::valid(c_type)){return c_type;}
     if(syntax::type_at(p,root).kind==11 || syntax::type_at(p,root).kind==12){return pointers::resolve(p,root);}
     if (syntax::type_at(p,root).kind == 6) { let u32 type=tagged::resolve(p,root);return if(borrows::count(type)<=1){type}else{0}; }
     if ((syntax::type_at(p,root).kind == 2 || syntax::type_at(p,root).kind == 3)) { let u32 literal=literals::resolve(p,root);return if(literal!=0){literal}else{refs::resolve(p,root)}; }
