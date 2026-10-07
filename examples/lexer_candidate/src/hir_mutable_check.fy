@@ -25,6 +25,7 @@ fn usize generation(ref h::Program p, ref mut Context c, ref mut v::Vec<Slot> sl
     var usize base = 0; var usize parent = 0; var usize receiver = old.receiver;
     var bool fresh = old.fresh; var usize start = e.start;
     if (kind == 16) { base = id; fresh = true; receiver = e.left;var usize root=e.left;var usize steps=0;while(steps<64 && (h::expression_code(h::expression_at(p,root).kind)==10 || h::expression_code(h::expression_at(p,root).kind)==13)){root=h::expression_at(p,root).left;steps+=1;}if(refs::valid(h::type_code(h::expression_at(p,root).type))){parent=generation(p,c,slots,initial,summaries,root,depth+1);} }
+    else if(kind==25){parent=generation(p,c,slots,initial,summaries,e.left,depth+1);base=id;fresh=true;receiver=e.left;start=e.end;}
     else if (kind == 17) { parent = generation(p,c,slots,initial,summaries,e.left,depth+1); base = if (mutable) { id } else { parent }; fresh = mutable; receiver = e.left; start = e.end; }
     else if (kind == 3) {
         let b = h::binding_at(p,e.binding);
@@ -43,7 +44,7 @@ fn usize generation(ref h::Program p, ref mut Context c, ref mut v::Vec<Slot> sl
                 j += 1;
             } } i += 1;
         }
-        if (parent == 0 && mutable) { return fail(c,2103,e.start,e.end); } base = if (mutable) { id } else { parent }; fresh = mutable; start = e.end;
+        if (parent == 0 && mutable) { return fail(c,2103,e.start,e.end); } base = id; fresh = true; start = e.end;
     } else { return fail(c,2103,e.start,e.end); }
     if (old.argument && base != id) { parent = base; base = id; receiver = id; start = e.start; }
     if (base == 0) { return if (mutable) { fail(c,2103,e.start,e.end) } else { 0 }; }
@@ -73,6 +74,7 @@ fn usize held_end(ref h::Program p, usize id) {
         } i += 1;
     } return end;
 }
+fn bool competing(ref h::Program p,usize id){let e=h::expression_at(p,id);var usize i=1;while(i<=h::statement_count(p)){let s=h::statement_at(p,i);if(h::statement_code(s.kind)==3){let t=h::expression_at(p,s.target);if(e.start>=t.start && e.end<=t.end){return true;}}i+=1;}i=1;while(i<=h::expression_count(p)){let x=h::expression_at(p,i);if(h::expression_code(x.kind)==6){var usize j=0;while(j<x.edge_count){let a=h::expression_at(p,h::edge_at(p,x.edge_start+j));if((h::type_code(a.type)==11 || refs::mutable(h::type_code(a.type))) && e.start>=a.start && e.end<=a.end){return true;}j+=1;}}i+=1;}return false;}
 pub fn h::Problem check(ref h::Program p, ref usize[] initial, ref usize[] last, ref usize[] summaries, ref v::Vec<usize> origins) {
     var bool needed = false; var usize i = 1;
     while (i <= h::expression_count(p)) { needed = needed || (h::type_code(h::expression_at(p,i).type) == 11 || refs::mutable(h::type_code(h::expression_at(p,i).type))); i += 1; }
@@ -130,7 +132,7 @@ if (type == 10 || type == 11 || refs::valid(type)) { discard generation(p,ref mu
                     let bool creating = e.start >= receiver.start && e.end <= receiver.end;
                     if (!creating) {
                         let u32 type = h::type_code(e.type);
-                        if (e.binding == owner && loan.mutable || (type == 11 || refs::mutable(type)) && *v::at<usize>(origins,j) == owner && !ancestor(ref slots,i,other.generation)) { return h::Problem { .code=2101,.start=e.start,.end=e.end }; }
+                        if (e.binding == owner && loan.mutable || (type == 11 || refs::mutable(type)) && *v::at<usize>(origins,j) == owner && !ancestor(ref slots,i,other.generation) && (loan.mutable || competing(p,j))) { return h::Problem { .code=2101,.start=e.start,.end=e.end }; }
                     }
                 }
                 j += 1;

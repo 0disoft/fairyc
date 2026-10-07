@@ -198,6 +198,18 @@ REJECTIONS[33]=[
  ('mut-deref-compound','fn i32 main(){var i32 n=7;let ref mut i32 p=ref mut n;*p+=1;return *p;}'),
 ]
 
+CASES[34]=[
+ ('shared-call-from-mut','fn i32 read(ref i32 p){return *p;}fn i32 main(){var i32 n=7;let ref mut i32 p=ref mut n;let i32 value=read(p);*p=9;return value+n;}', '',16,0),
+ ('shared-child-resumes','fn ref i32 share(ref i32 p){return p;}fn i32 main(){var i32 n=7;let ref mut i32 p=ref mut n;let ref i32 child=share(p);let ref i32 alias=child;let i32 value=*alias;*p=9;return value+n;}', '',16,0),
+ ('shared-field-through-mut','struct S{i32 n;}fn i32 main(){var S s=S{.n=7};let ref mut S p=ref mut s;let ref i32 child=ref p.n;let i32 value=p.n+*child;p.n=9;return value+s.n;}', '',23,0),
+ ('owner-after-last-use','fn i32 main(){var i32 n=7;let ref i32 p=ref n;let i32 value=*p;n=9;return value+n;}', '',16,0),
+]
+REJECTIONS[34]=[
+ ('shared-return-parent-write','fn ref i32 share(ref i32 p){return p;}fn i32 main(){var i32 n=7;let ref mut i32 p=ref mut n;let ref i32 child=share(p);*p=9;return *child;}', 'E2101'),
+ ('shared-return-parent-call','fn ref i32 share(ref i32 p){return p;}fn void edit(ref mut i32 p){*p=9;}fn i32 main(){var i32 n=7;let ref mut i32 p=ref mut n;let ref i32 child=share(p);edit(p);return *child;}', 'E2101'),
+ ('shared-implicit-binding','fn i32 main(){var i32 n=7;let ref mut i32 p=ref mut n;let ref i32 child=p;return *child;}'),
+]
+
 def sha(path): return hashlib.sha256(path.read_bytes()).hexdigest()
 def save(path, value): path.write_text(json.dumps(value, ensure_ascii=False, indent=2)+'\n', encoding='utf-8', newline='\n')
 

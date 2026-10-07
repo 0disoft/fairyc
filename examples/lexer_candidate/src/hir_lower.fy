@@ -1,4 +1,5 @@
 module hir_lower;
+import reference_types as refs;
 import resource_abilities as abilities;
 import hir_model as h;
 import tagged_types as tagged;
@@ -226,7 +227,9 @@ fn usize expression(ref typing::Typed input, ref v::Vec<h::Binding> bindings, re
         e.block = block(input,bindings,links,c,expressions,statements,blocks,edges,payload,branches.left,depth + 1);
         e.alternative = expression(input,bindings,links,c,expressions,statements,blocks,edges,payload,branches.right,depth + 1);
     } else { return state::fail(c,4,node.start,node.end); }
-    return state::push_expression(expressions,h::Expression { .kind, .type, .operator, .start = e.start, .end = e.end, .left = e.left, .right = e.right, .alternative = e.alternative, .block = e.block, .binding = e.binding, .edge_start = e.edge_start, .edge_count = e.edge_count, .payload_start = e.payload_start, .payload_end = e.payload_end, .boolean = e.boolean },c);
+    let usize retained=state::push_expression(expressions,h::Expression { .kind, .type, .operator, .start = e.start, .end = e.end, .left = e.left, .right = e.right, .alternative = e.alternative, .block = e.block, .binding = e.binding, .edge_start = e.edge_start, .edge_count = e.edge_count, .payload_start = e.payload_start, .payload_end = e.payload_end, .boolean = e.boolean },c);
+    if(retained==0 || !typing::shared_argument(input,id)){return retained;}
+    return state::push_expression(expressions,h::Expression{.kind=.Reborrow,.type=state::type(refs::make(refs::inner(h::type_code(type)),false)),.operator=.None,.start=e.start,.end=e.end,.left=retained,.right=0,.alternative=0,.block=0,.binding=0,.edge_start=0,.edge_count=0,.payload_start=0,.payload_end=0,.boolean=false},c);
 }
 
 fn usize statement(ref typing::Typed input, ref v::Vec<h::Binding> bindings, ref v::Vec<state::Link> links, ref mut state::Context c, ref mut v::Vec<h::Expression> expressions, ref mut v::Vec<h::Statement> statements, ref mut v::Vec<h::Block> blocks, ref mut v::Vec<usize> edges, ref mut bytes::Buffer payload, usize id, usize depth) {

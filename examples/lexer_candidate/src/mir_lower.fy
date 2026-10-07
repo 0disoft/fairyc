@@ -146,6 +146,7 @@ fn usize expression(ref h::Program input, ref mut v::Vec<m::Local> locals, ref m
     if(kind==4 && operator==5 && refs::valid(h::type_code(h::expression_at(input,e.left).type))){
         if(shapes::needs_drop(type)){return state::fail(c,4,e.start,e.end);}let usize owner=expression(input,locals,blocks,operations,edges,payload,c,e.left,depth+1);let usize result=state::local(locals,c,type,0,false,false,e.start,e.end);let u32 owner_type=h::type_code(h::expression_at(input,e.left).type);return if(state::emit(operations,blocks,c,state::operation(29,result,type,owner_type,0,owner,0,e.start,e.end))!=0){result}else{0};
     }
+    if(kind==25){let usize owner=expression(input,locals,blocks,operations,edges,payload,c,e.left,depth+1);if(owner==0){return 0;}let usize result=state::local(locals,c,type,0,false,false,e.start,e.end);return if(state::emit(operations,blocks,c,state::operation(34,result,type,h::type_code(h::expression_at(input,e.left).type),0,owner,0,e.start,e.end))!=0){result}else{0};}
     if (kind == 16) {
         if(refs::valid(type)){return address(input,locals,blocks,operations,edges,payload,c,e.left,e.boolean,depth+1);}
         let usize owner = c.locals[h::expression_at(input,e.left).binding];

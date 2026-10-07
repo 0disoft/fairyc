@@ -33,7 +33,7 @@ fn usize origin(ref h::Program p, ref mut Context c, usize id, usize depth) {
     c.work += 1; if (depth >= 64 || c.work > 1048576) { return fail(c,2,e.start,e.end); }
     if (!byte_view(h::type_code(e.type)) || kind == 15) { return 0; }
     if (kind == 16) { let usize owner=root(p,e.left); if(owner!=0 && byte_view(h::type_code(h::binding_at(p,owner).type))){return origin(p,c,base(p,e.left),depth+1);}return owner; }
-    if (kind == 17) { return origin(p,c,e.left,depth + 1); }
+    if (kind == 17 || kind==25) { return origin(p,c,e.left,depth + 1); }
     if (kind == 3) {
         let b = h::binding_at(p,e.binding);
         if (h::binding_code(b.kind) == 2) { return e.binding; }
@@ -108,7 +108,7 @@ fn usize held_end(ref h::Program p, usize id, h::Expression e) {
 fn usize first(ref h::Program p, ref mut Context c, usize id, usize depth) {
     let e=h::expression_at(p,id);let u32 kind=h::expression_code(e.kind);
     if(depth>=64){discard fail(c,2,e.start,e.end);return e.start;}
-    if(kind==17){return first(p,c,e.left,depth+1);}
+    if(kind==17 || kind==25){return first(p,c,e.left,depth+1);}
     if(kind==7){let usize tail=h::block_at(p,e.block).tail;return if(tail==0){e.start}else{first(p,c,tail,depth+1)};}
     if(kind==8){let usize yes=h::block_at(p,e.block).tail;if(yes==0 || e.alternative==0){return e.start;}let usize a=first(p,c,yes,depth+1);let usize b=first(p,c,e.alternative,depth+1);return if(a<b){a}else{b};}
     if(kind==6){

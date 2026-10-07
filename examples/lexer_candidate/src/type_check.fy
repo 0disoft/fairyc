@@ -182,7 +182,7 @@ fn state::Value expression(ref names::Resolved resolved, ref mut v::Vec<state::S
                 let u32 type = names::external_parameter(resolved,start + argument);
                 let state::Value actual = expression(resolved,tables,problem,argument_id,type,result_type,depth + 1,loop_depth);
                 if (problem.code != 0) { return actual; }
-                if (actual.type != type) { let syntax::Expression source = syntax::expression_at(parsed,argument_id); return error(problem,1,source.start,source.end,type,actual.type); }
+                if(actual.type!=type){if(refs::valid(type) && !refs::mutable(type) && refs::mutable(actual.type) && refs::inner(type)==refs::inner(actual.type)){state::set_flags(tables,argument_id-1,4096);}else{let source=syntax::expression_at(parsed,argument_id);return error(problem,1,source.start,source.end,type,actual.type);}}
                 terminates = terminates || actual.terminates; argument += 1;
             }
             let u32 type = state::symbols(tables,callee_id - 1);
@@ -201,7 +201,7 @@ fn state::Value expression(ref names::Resolved resolved, ref mut v::Vec<state::S
                 let usize argument_id = syntax::call_argument(parsed,id,argument); let u32 type = nominal::resolve(parsed,entry.type_root);
                 let state::Value actual = expression(resolved,tables,problem,argument_id,type,result_type,depth + 1,loop_depth);
                 if (problem.code != 0) { return actual; }
-                if (actual.type != type) { let syntax::Expression source = syntax::expression_at(parsed,argument_id); return error(problem,1,source.start,source.end,type,actual.type); }
+                if(actual.type!=type){if(refs::valid(type) && !refs::mutable(type) && refs::mutable(actual.type) && refs::inner(type)==refs::inner(actual.type)){state::set_flags(tables,argument_id-1,4096);}else{let source=syntax::expression_at(parsed,argument_id);return error(problem,1,source.start,source.end,type,actual.type);}}
                 terminates = terminates || actual.terminates; argument += 1;
             }
             entry_index += 1;
@@ -511,3 +511,5 @@ pub fn usize field_target(ref Typed typed, usize id) { assert(typed.problem.code
 pub fn bool result_is_ok(ref Typed typed, usize id) { assert(typed.problem.code==0); return state::flags(ref typed.tables,id-1)==2048; }
 pub fn bool moving(ref Typed typed, usize id) { assert(typed.problem.code==0); return state::moving(ref typed.tables,id-1); }
 pub fn bool signed_minimum(ref Typed typed, usize id) { assert(typed.problem.code == 0 && id > 0 && id <= syntax::expression_count(names::parsed(ref typed.source))); return syntax::expression_at(names::parsed(ref typed.source),id).kind == 4 && state::flags(ref typed.tables,id - 1) == 1; }
+
+pub fn bool shared_argument(ref Typed p,usize id){return state::flags(ref p.tables,id-1)==4096;}

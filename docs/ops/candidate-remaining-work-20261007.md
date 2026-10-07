@@ -65,7 +65,7 @@ evidence/candidate-result-handling-alignment-20261007.json에 새 검사·도구
 31. 완료: 스칼라·구조체·resource의 명시적 참조와 역참조, 스칼라 필드 읽기 및 함수 인자 실행. high-half 타입 ID와 MIR 주소/읽기 검증을 연결하고 지역·값 인자 반환, 대여 중 수정·이동을 거부. 14개 fixture, native 14회. 근거: `evidence/candidate-resource-references-20261007.json`. 필드 주소·참조 수정은 다음 단위에서 연결.
 32. 완료: 중첩 구조체 필드·이름 있는 배열 원소 및 원소 필드의 공유 주소를 실제 저장 위치에서 생성. whole-owner origin과 검사한 인덱스를 유지하며 지역 escape·대여 중 수정·임시 root를 거부. 10개 fixture, native 12회와 주소 HIR/MIR API test. 필드 배열·다차원 원소의 주소는 현재 명시적 거부. 근거: `evidence/candidate-resource-projections-20261007.json`.
 33. 완료: 스칼라 역참조 대입과 plain 필드·배열 원소의 가변 주소, 참조 경유 필드 수정을 연결. 저장 위치를 RHS 이전에 고정하며 immutable/shared 수정·sibling 대여·resource 필드 가변 주소·역참조 복합 대입은 거부. 후보 릴리스 재빌드는 40번에서 묶어 확인. 11개 fixture, 생성 C native 12회. 근거: `evidence/candidate-resource-reference-stores-20261007.json`.
-34. 공유 재대여, 소유자 수정 제한, 마지막 사용 이후 대여 종료 연결.
+34. 완료: 정확한 referent의 mutable→shared 호출 재대여와 반환된 공유 자식·alias의 whole-owner hold를 연결. 공유 읽기는 공존하고 부모 수정·가변 호출은 자식 마지막 사용까지 금지하며 이후 재개. 직접 바인딩의 암시적 변환은 거부. 7개 fixture, 생성 C native 8회. 근거: `evidence/candidate-resource-shared-reborrows-20261007.json`.
 35. 가변 재대여 중 부모 사용 제한과 종료 후 부모 사용 재개.
 36. 뒤쪽 인자 평가 중 앞쪽 인자의 재대여 유지.
 37. 참조·뷰 반환 origin 요약과 호출자 origin 치환.
