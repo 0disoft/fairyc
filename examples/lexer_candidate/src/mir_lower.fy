@@ -436,7 +436,12 @@ fn bool statement(ref h::Program input, ref mut v::Vec<m::Local> locals, ref mut
         let u32 destination_type = v::at<m::Local>(locals,destination - 1).type;
         if(resources::valid(destination_type)){
             if(kind==3 && h::expression_code(h::expression_at(input,s.target).kind)==10){return value==destination;}
-            if(c.live[binding]!=0){discard state::fail(c,4,s.start,s.end);return false;}
+            // The complete RHS is frozen above. A move of the old root has
+            // already discharged it; otherwise retire its previous generation.
+            if(c.live[binding]!=0){
+                if(c.live[binding]!=1){discard state::fail(c,1104,s.start,s.end);return false;}
+                c.live[binding]=0;if(!lifetime::drop(input,locals,blocks,operations,edges,c,destination,s.start,s.end)){return false;}
+            }
             c.live[binding]=1;return state::emit(operations,blocks,c,state::operation(24,destination,destination_type,destination_type,0,value,0,s.start,s.end))!=0;
         }
         return state::emit(operations,blocks,c,state::operation(2,destination,destination_type,destination_type,0,value,0,s.start,s.end)) != 0;

@@ -2735,3 +2735,8 @@ Unit 24 connects body and nested-scope cleanup before nearest-loop break/continu
 and before the for post statement, preserving enclosing roots. Repeated body
 construction, zero iterations, nested loop targets and return execute in both
 profiles; evidence: `candidate-resource-loop-exits-20261007.json`.
+
+Unit 25 evaluates and freezes a replacement before dropping the old generation.
+Self moves and transferred donors discharge once; failed scalar propagation
+leaves the previous generation for the function-exit cleanup. Owned tagged
+factory propagation remains the unit-27 integration test.

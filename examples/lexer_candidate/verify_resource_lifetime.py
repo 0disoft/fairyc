@@ -29,6 +29,14 @@ CASES = {
         ('short-return', 'resource R{i32 n;cleanup{mark(this.n);}}fn i32 f(bool yes){let R r=R{.n=65};discard yes && {return 7;true};return 8;}fn i32 main(){return f(false)+f(true);}', 'AA', 15, 0),
         ('cleanup-local', 'resource S{cleanup{mark(83);}}resource R{cleanup{let S s=S{};mark(82);return;}}fn i32 main(){let R r=R{};return 0;}', 'RS', 0, 0),
     ],
+    25: [
+        ('overwrite-live', 'resource R{i32 n;cleanup{mark(this.n);}}fn R make(){mark(88);return R{.n=66};}fn i32 main(){var R r=R{.n=65};r=make();mark(89);return r.n;}', 'XAYB', 66, 0),
+        ('overwrite-donor', 'resource R{i32 n;cleanup{mark(this.n);}}fn i32 main(){var R r=R{.n=65};let R donor=R{.n=66};r=donor;return 0;}', 'AB', 0, 0),
+        ('overwrite-self', 'resource R{i32 n;cleanup{mark(this.n);}}fn i32 main(){var R r=R{.n=65};r=r;return 0;}', 'A', 0, 0),
+        ('overwrite-dead', 'resource R{i32 n;cleanup{mark(this.n);}}fn void take(R r){mark(88);}fn i32 main(){var R r=R{.n=65};take(r);r=R{.n=66};return 0;}', 'XAB', 0, 0),
+        ('overwrite-error', 'resource R{i32 n;cleanup{mark(this.n);}}fn Result<i32,bool> next(){mark(88);return .err(true);}fn Result<i32,bool> f(){var R r=R{.n=65};r=R{.n=next()?};return .ok(r.n);}fn i32 main(){return switch(f()){case .ok(n):{n}case .err(_):{1}};}', 'XA', 1, 0),
+        ('overwrite-success', 'resource R{i32 n;cleanup{mark(this.n);}}fn Result<i32,bool> next(){mark(88);return .ok(66);}fn Result<i32,bool> f(){var R r=R{.n=65};r=R{.n=next()?};return .ok(r.n);}fn i32 main(){return switch(f()){case .ok(n):{n}case .err(_):{1}};}', 'XAB', 66, 0),
+    ],
     24: [
         ('loop-fallthrough', 'resource R{i32 n;cleanup{mark(this.n);}}fn i32 main(){let R o=R{.n=79};var i32 n=0;while(n<3){let R r=R{.n=65};n+=1;}return 0;}', 'AAAO', 0, 0),
         ('loop-continue-break', 'resource R{i32 n;cleanup{mark(this.n);}}fn i32 main(){let R o=R{.n=79};var i32 n=0;while(n<3){let R r=R{.n=65};n+=1;{let R b=R{.n=66};if(n==1){continue;}else{break;};};}mark(88);return 0;}', 'BABAXO', 0, 0),
@@ -48,6 +56,10 @@ REJECTIONS = {
         ('break-live', 'resource R{cleanup{}}fn i32 main(){while(true){let R r=R{};break;}return 0;}'),
         ('overwrite-live', 'resource R{cleanup{}}fn i32 main(){var R r=R{};r=R{};return 0;}'),
         ('nested-field', 'resource S{cleanup{}}resource R{S s;cleanup{}}fn i32 main(){let R r=R{.s=S{}};return 0;}'),
+    ],
+    25: [
+        ('nested-field', 'resource S{cleanup{}}resource R{S s;cleanup{}}fn i32 main(){let R r=R{.s=S{}};return 0;}'),
+        ('maybe-live', 'resource R{cleanup{}}fn void take(R r){}fn void f(bool yes){var R r=R{};if(yes){take(r);};r=R{};}fn i32 main(){f(true);return 0;}'),
     ],
     24: [
         ('overwrite-live', 'resource R{cleanup{}}fn i32 main(){var R r=R{};r=R{};return 0;}'),
