@@ -2824,3 +2824,19 @@ section fanout adjustment in ADR 0473. The validation bootstrap still uses the
 explicit 120-second command-timeout overlay recorded in the receipt; integrating
 production timeout policy remains unit 75. Linux and self-hosting stage proofs
 remain later work.
+
+Unit 40 completion audit additionally retains all incoming exclusive generations
+for if/switch results rather than rejecting a same-owner join as ambiguous.
+Synthetic DAG nodes preserve every possible parent until the joined descriptor's
+last use; parent operations resume only after all retained children expire.
+Mutually exclusive creators are compared by their creation spans, separately
+from the extended lifetime of the joined result. A payload-free Option arm has
+no incoming generation. There are 30 final fixtures and 40 native runs for unit
+40, plus 60 fixtures/64 native runs for final units 33-39 regression. The final
+unit-24 success replay has six fixtures/12 native runs, repairing the old receipt's
+missing post-correction successful harness row. Earlier temporary admission
+rejections remain historical, since later units implement those operations.
+See `docs/ops/evidence/candidate-resource-borrow-flow-joins-20261007.json`,
+`candidate-resource-borrow-joins-regression-20261007.json`,
+`candidate-resource-loop-exits-final-20261007.json` and
+`candidate-units-21-40-completion-audit-20261007.json` in that evidence directory.

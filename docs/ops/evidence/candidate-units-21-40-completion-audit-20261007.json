@@ -1,0 +1,777 @@
+{
+  "schema": "fairyc.candidate-unit-completion-audit/v1",
+  "originalPlanCommit": "8b4880bd42c139f8c2b880f9808ed4f34ed54840",
+  "scope": "Original units 21-40; no units 41 onward are promoted by this audit.",
+  "passed": true,
+  "units": [
+    {
+      "unit": 21,
+      "originalRequirement": "21. cleanup 본문과 receiver 소유권, 허용 연산 검사.",
+      "implementation": [
+        {
+          "path": "examples/lexer_candidate/src/type_check.fy",
+          "sha256": "e5340dc3f2e224406a06a2064b5be232cf5cfea272bd0557bb6cab0085452c8f"
+        },
+        {
+          "path": "examples/lexer_candidate/src/resource_use.fy",
+          "sha256": "e66ab3d2962ab1d04b3640a001a7670fc6dda51bfc96247e9aa84f96441f0b17"
+        },
+        {
+          "path": "examples/lexer_candidate/src/resource_flow.fy",
+          "sha256": "45a803db99854e04e54bb5d6b5e451b86413983d0c00b6d5e47cec8019b9f0cf"
+        },
+        {
+          "path": "examples/lexer_candidate/src/cleanup_syntax.fy",
+          "sha256": "1374cdcbfa6139a5e82e4e74606cc28ba46d9e81df62f7a0dd397f856fb0ad6f"
+        }
+      ],
+      "evidence": "docs/ops/evidence/candidate-resource-cleanup-20261007.json",
+      "evidenceSHA256": "3025518efc0a240a2bc981fde713b844a4737abb2ddef366a394c912809b33eb",
+      "firstEvidenceCommit": "2ffa1593be6d9c289a35795f5b59794bf44483ae",
+      "fixtures": [
+        "read-write",
+        "nested-shadow",
+        "nested-write",
+        "loop-return",
+        "local-transfer",
+        "move-call",
+        "move-binding",
+        "overwrite-receiver",
+        "partial-move",
+        "wrong-field-type",
+        "return-value",
+        "tail-value",
+        "fallible-cleanup",
+        "local-reuse",
+        "local-result",
+        "out-of-scope",
+        "unknown-field"
+      ],
+      "nativeRuns": 0,
+      "candidateImageHashesVerified": true,
+      "passed": true
+    },
+    {
+      "unit": 22,
+      "originalRequirement": "22. 정상 스코프 종료에서 자원을 계약 순서대로 한 번씩 정리.",
+      "implementation": [
+        {
+          "path": "examples/lexer_candidate/src/mir_lower.fy",
+          "sha256": "e0cf5b4d135ee5307d30c0d5770c850b88634b5a2ec12ac4e13ddc43a911c158"
+        },
+        {
+          "path": "examples/lexer_candidate/src/mir_resource_lower.fy",
+          "sha256": "cd6a9fbef9de7e2400ac5871ab9e0f5cbd198037d26ffaa91aa0d17c07055d2a"
+        },
+        {
+          "path": "examples/lexer_candidate/src/mir_verify_resources.fy",
+          "sha256": "c389bdd0a4517246f0ec9d886cd25ea0e59519475cd97a8121e55c38d70cdf05"
+        },
+        {
+          "path": "examples/lexer_candidate/src/c_resource.fy",
+          "sha256": "d0e8475894669c7aa4f3438a06c3596c93197b85b6a5702b8e43c81a6548e68c"
+        }
+      ],
+      "evidence": "docs/ops/evidence/candidate-resource-exit-20261007.json",
+      "evidenceSHA256": "1049694d06069d4a9f52159353a45b61040b076b070cc21074e8e5c56845af3e",
+      "firstEvidenceCommit": "c5b4d63bb31f5749bb41180868b9e5ec50f7fa5e",
+      "fixtures": [
+        "lifo",
+        "nested",
+        "move-binding",
+        "call-transfer",
+        "receiver-store",
+        "empty",
+        "shadow",
+        "wide-field",
+        "return-live",
+        "break-live",
+        "overwrite-live",
+        "nested-field"
+      ],
+      "nativeRuns": 16,
+      "candidateImageHashesVerified": true,
+      "passed": true
+    },
+    {
+      "unit": 23,
+      "originalRequirement": "23. 직접 return과 Result ?의 성공·오류 경로에 cleanup 연결.",
+      "implementation": [
+        {
+          "path": "examples/lexer_candidate/src/mir_lower.fy",
+          "sha256": "e0cf5b4d135ee5307d30c0d5770c850b88634b5a2ec12ac4e13ddc43a911c158"
+        },
+        {
+          "path": "examples/lexer_candidate/src/mir_resource_lower.fy",
+          "sha256": "cd6a9fbef9de7e2400ac5871ab9e0f5cbd198037d26ffaa91aa0d17c07055d2a"
+        },
+        {
+          "path": "examples/lexer_candidate/src/mir_cleanup.fy",
+          "sha256": "7c91a4946c2156ce9a895e02ff90f5edf09cd7844ca47e8abd35128141a5fad1"
+        }
+      ],
+      "evidence": "docs/ops/evidence/candidate-resource-return-20261007.json",
+      "evidenceSHA256": "5485ba36a07310cfff8964077d9dcdad94d3552dde69134328ecfa8fe0591ae8",
+      "firstEvidenceCommit": "92855746cc955a004544ebac4fa890e5cd2ebc3e",
+      "fixtures": [
+        "return-root",
+        "return-nested",
+        "return-frozen",
+        "return-donor",
+        "return-if",
+        "return-switch",
+        "question-ok",
+        "question-err",
+        "short-return",
+        "cleanup-local",
+        "break-live",
+        "overwrite-live",
+        "nested-field"
+      ],
+      "nativeRuns": 20,
+      "candidateImageHashesVerified": true,
+      "passed": true
+    },
+    {
+      "unit": 24,
+      "originalRequirement": "24. 반복 본문 종료·break·continue에 cleanup 연결.",
+      "implementation": [
+        {
+          "path": "examples/lexer_candidate/src/mir_lower.fy",
+          "sha256": "e0cf5b4d135ee5307d30c0d5770c850b88634b5a2ec12ac4e13ddc43a911c158"
+        },
+        {
+          "path": "examples/lexer_candidate/src/mir_resource_lower.fy",
+          "sha256": "cd6a9fbef9de7e2400ac5871ab9e0f5cbd198037d26ffaa91aa0d17c07055d2a"
+        },
+        {
+          "path": "examples/lexer_candidate/src/mir_cleanup.fy",
+          "sha256": "7c91a4946c2156ce9a895e02ff90f5edf09cd7844ca47e8abd35128141a5fad1"
+        }
+      ],
+      "evidence": "docs/ops/evidence/candidate-resource-loop-exits-20261007.json",
+      "evidenceSHA256": "39d864873877435bbe39db26541acdea97b79febdc23bd9de34ce0f270766553",
+      "firstEvidenceCommit": "58f7fdd9888144b157698e2232bbf5fb151af4c9",
+      "fixtures": [
+        "loop-fallthrough",
+        "loop-continue-break",
+        "nearest-loop",
+        "for-post-order",
+        "loop-return",
+        "loop-zero",
+        "overwrite-live",
+        "nested-field"
+      ],
+      "nativeRuns": 12,
+      "candidateImageHashesVerified": true,
+      "passed": true,
+      "latestReplay": "docs/ops/evidence/candidate-resource-loop-exits-final-20261007.json",
+      "historicalCorrection": "Old validation list ends at the failed pre-correction fixture harness. Final native outcomes were correct; this audit additionally replays all six success cases with current images (12 native runs). Two old admission failures were subsequently implemented by units 25/26."
+    },
+    {
+      "unit": 25,
+      "originalRequirement": "25. 자원 덮어쓰기에서 이전 세대 정리와 donor 이동 구분.",
+      "implementation": [
+        {
+          "path": "examples/lexer_candidate/src/mir_lower.fy",
+          "sha256": "e0cf5b4d135ee5307d30c0d5770c850b88634b5a2ec12ac4e13ddc43a911c158"
+        },
+        {
+          "path": "examples/lexer_candidate/src/mir_state.fy",
+          "sha256": "511504ac0f771fe4e71f4e86cef3d27583f53f424a06e019d84aad7eb0859b8a"
+        },
+        {
+          "path": "examples/lexer_candidate/src/resource_flow.fy",
+          "sha256": "45a803db99854e04e54bb5d6b5e451b86413983d0c00b6d5e47cec8019b9f0cf"
+        }
+      ],
+      "evidence": "docs/ops/evidence/candidate-resource-overwrite-20261007.json",
+      "evidenceSHA256": "6efae9366e64218d8c29e59d4c3fbc46c58efda71054b6718e3b3f3a06ea5adc",
+      "firstEvidenceCommit": "cb0c98c3e82df3e907c8f66462f29e2580fe2a8a",
+      "fixtures": [
+        "overwrite-live",
+        "overwrite-donor",
+        "overwrite-self",
+        "overwrite-dead",
+        "overwrite-error",
+        "overwrite-success",
+        "nested-field",
+        "maybe-live"
+      ],
+      "nativeRuns": 12,
+      "candidateImageHashesVerified": true,
+      "passed": true
+    },
+    {
+      "unit": 26,
+      "originalRequirement": "26. 부분 초기화 실패와 중첩 resource 필드 정리 순서 처리.",
+      "implementation": [
+        {
+          "path": "examples/lexer_candidate/src/mir_lower.fy",
+          "sha256": "e0cf5b4d135ee5307d30c0d5770c850b88634b5a2ec12ac4e13ddc43a911c158"
+        },
+        {
+          "path": "examples/lexer_candidate/src/mir_resource_lower.fy",
+          "sha256": "cd6a9fbef9de7e2400ac5871ab9e0f5cbd198037d26ffaa91aa0d17c07055d2a"
+        },
+        {
+          "path": "examples/lexer_candidate/src/c_resource.fy",
+          "sha256": "d0e8475894669c7aa4f3438a06c3596c93197b85b6a5702b8e43c81a6548e68c"
+        }
+      ],
+      "evidence": "docs/ops/evidence/candidate-resource-partial-20261007.json",
+      "evidenceSHA256": "2012bea63d67f4cb8a2bfe920319f2708d1bb4debc519d46d431a336ab5d6f16",
+      "firstEvidenceCommit": "846b34bff59761e632b3eb6fbcc21f76580c8905",
+      "fixtures": [
+        "partial-factory",
+        "nested-success",
+        "partial-middle",
+        "partial-first",
+        "partial-nested",
+        "later-argument-fails",
+        "nested-move",
+        "temporary-expression",
+        "owned-tag",
+        "field-transfer"
+      ],
+      "nativeRuns": 16,
+      "candidateImageHashesVerified": true,
+      "passed": true
+    },
+    {
+      "unit": 27,
+      "originalRequirement": "27. 기존 계약이 허용하는 resource 필드·집합 값 이동 지원.",
+      "implementation": [
+        {
+          "path": "examples/lexer_candidate/src/mir_lower.fy",
+          "sha256": "e0cf5b4d135ee5307d30c0d5770c850b88634b5a2ec12ac4e13ddc43a911c158"
+        },
+        {
+          "path": "examples/lexer_candidate/src/mir_resource_lower.fy",
+          "sha256": "cd6a9fbef9de7e2400ac5871ab9e0f5cbd198037d26ffaa91aa0d17c07055d2a"
+        },
+        {
+          "path": "examples/lexer_candidate/src/c_resource.fy",
+          "sha256": "d0e8475894669c7aa4f3438a06c3596c93197b85b6a5702b8e43c81a6548e68c"
+        }
+      ],
+      "evidence": "docs/ops/evidence/candidate-resource-tagged-20261007.json",
+      "evidenceSHA256": "09e41fb72323c803ed03b6743e8d4a6cdd4a25159aa6969026bc6fe695bed763",
+      "firstEvidenceCommit": "654ba51f60bae335b062a28e0d901c479f9d42e0",
+      "fixtures": [
+        "wildcard-scope-order",
+        "wildcard-continue",
+        "option-some-move",
+        "option-none",
+        "option-wildcard",
+        "option-nested",
+        "resource-tag-field",
+        "result-ok",
+        "result-err-resource",
+        "replace-question-ok",
+        "replace-question-err",
+        "tagged-if-return",
+        "partial-field-move",
+        "tag-use-after-move"
+      ],
+      "nativeRuns": 24,
+      "candidateImageHashesVerified": true,
+      "passed": true
+    },
+    {
+      "unit": 28,
+      "originalRequirement": "28. 실제 소스에 쓰이는 resource ability와 명시적 burn 규칙 연결.",
+      "implementation": [
+        {
+          "path": "examples/lexer_candidate/src/resource_abilities.fy",
+          "sha256": "fee5bcba1f3a1be3808e45e1f2d1097ec3444ee89ef520b63c1dfc12546eabf3"
+        },
+        {
+          "path": "examples/lexer_candidate/src/resource_properties.fy",
+          "sha256": "fe0372ce1c546422e8b09d5ae9c9aa16f1bc11682fdded971e0820e96d30bac2"
+        },
+        {
+          "path": "examples/lexer_candidate/src/mir_lower.fy",
+          "sha256": "e0cf5b4d135ee5307d30c0d5770c850b88634b5a2ec12ac4e13ddc43a911c158"
+        },
+        {
+          "path": "examples/lexer_candidate/src/c_resource.fy",
+          "sha256": "d0e8475894669c7aa4f3438a06c3596c93197b85b6a5702b8e43c81a6548e68c"
+        }
+      ],
+      "evidence": "docs/ops/evidence/candidate-resource-abilities-20261007.json",
+      "evidenceSHA256": "fd36dd09baa34a31aa3d1874cd15b537daf64332fc0f0918f0508387690dfc11",
+      "firstEvidenceCommit": "ac62852d87adcecb4adcb2c573ad81e2d0d28d5b",
+      "fixtures": [
+        "burn-no-glue",
+        "burn-parameter",
+        "burn-moved-local",
+        "explicit-drop",
+        "burn-branches",
+        "burn-loop",
+        "implicit-no-drop",
+        "overwrite-no-drop",
+        "nested-no-drop",
+        "option-no-drop",
+        "burn-drop",
+        "burn-nested",
+        "burn-twice",
+        "burn-temporary",
+        "burn-wrapper",
+        "bad-ability",
+        "duplicate-ability",
+        "key-without-store"
+      ],
+      "nativeRuns": 12,
+      "candidateImageHashesVerified": true,
+      "passed": true
+    },
+    {
+      "unit": 29,
+      "originalRequirement": "29. 기존 lexical defer와 resource cleanup 실행 순서 통합.",
+      "implementation": [
+        {
+          "path": "examples/lexer_candidate/src/mir_cleanup.fy",
+          "sha256": "7c91a4946c2156ce9a895e02ff90f5edf09cd7844ca47e8abd35128141a5fad1"
+        },
+        {
+          "path": "examples/lexer_candidate/src/mir_state.fy",
+          "sha256": "511504ac0f771fe4e71f4e86cef3d27583f53f424a06e019d84aad7eb0859b8a"
+        },
+        {
+          "path": "examples/lexer_candidate/src/mir_lower.fy",
+          "sha256": "e0cf5b4d135ee5307d30c0d5770c850b88634b5a2ec12ac4e13ddc43a911c158"
+        }
+      ],
+      "evidence": "docs/ops/evidence/candidate-resource-defer-20261007.json",
+      "evidenceSHA256": "55a7c7f4164e3cd7d8b4e9f7185faa0dd53a5b7033dc6f545e999c2e2f75bed3",
+      "firstEvidenceCommit": "8fcf5a46b6c85a12133d5e091a314033cb47b516",
+      "fixtures": [
+        "defer-scope",
+        "defer-return-capture",
+        "defer-crossed",
+        "defer-loop",
+        "defer-question-error",
+        "defer-question-success",
+        "defer-argument-order",
+        "defer-in-cleanup",
+        "defer-resource",
+        "defer-aggregate",
+        "defer-result"
+      ],
+      "nativeRuns": 16,
+      "candidateImageHashesVerified": true,
+      "passed": true
+    },
+    {
+      "unit": 30,
+      "originalRequirement": "30. 일반 trap이 cleanup을 풀지 않는 기존 계약을 생성 코드에도 유지.",
+      "implementation": [
+        {
+          "path": "examples/lexer_candidate/src/mir_lower.fy",
+          "sha256": "e0cf5b4d135ee5307d30c0d5770c850b88634b5a2ec12ac4e13ddc43a911c158"
+        },
+        {
+          "path": "examples/lexer_candidate/src/mir_cleanup.fy",
+          "sha256": "7c91a4946c2156ce9a895e02ff90f5edf09cd7844ca47e8abd35128141a5fad1"
+        },
+        {
+          "path": "examples/lexer_candidate/src/c_resource.fy",
+          "sha256": "d0e8475894669c7aa4f3438a06c3596c93197b85b6a5702b8e43c81a6548e68c"
+        }
+      ],
+      "evidence": "docs/ops/evidence/candidate-resource-traps-20261007.json",
+      "evidenceSHA256": "6389f36e25fcd3d168b5742fe47ab2f59f892c7b925543eac1bce6d2c55cbb49",
+      "firstEvidenceCommit": "2796e11d8bb371594fd1433eea0111b3d241c0e2",
+      "fixtures": [
+        "trap-assertion",
+        "trap-overflow",
+        "trap-division",
+        "trap-deferred-call",
+        "trap-cleanup-stops",
+        "trap-partial-constructor",
+        "trap-linear-obligation"
+      ],
+      "nativeRuns": 14,
+      "candidateImageHashesVerified": true,
+      "passed": true
+    },
+    {
+      "unit": 31,
+      "originalRequirement": "31. 스칼라·구조체·resource place 참조와 역참조 구현.",
+      "implementation": [
+        {
+          "path": "examples/lexer_candidate/src/reference_types.fy",
+          "sha256": "66e68f9539a7ffbffab383d5de8ceb197c7f7efe621583c9847d7e44221dd6c3"
+        },
+        {
+          "path": "examples/lexer_candidate/src/mir_reference.fy",
+          "sha256": "5d77f3e57797b5e65aa84d6d8a9a14c0736ff76f3b345e7c25e21790d3e164ea"
+        },
+        {
+          "path": "examples/lexer_candidate/src/hir_view_check.fy",
+          "sha256": "5aceaf0b772a39836a5ec16f410d125b0665e4e37021bb0c00c2c471b1c6fb6b"
+        }
+      ],
+      "evidence": "docs/ops/evidence/candidate-resource-references-20261007.json",
+      "evidenceSHA256": "d098ab4adcb2070d2d183534316cf3a668f4acb9a16320553af2e17ec5557334",
+      "firstEvidenceCommit": "cfbd1dce88e8bbbbbff839e026d91b0aa228557d",
+      "fixtures": [
+        "ref-i32",
+        "ref-wide",
+        "ref-bool",
+        "ref-struct",
+        "ref-struct-copy",
+        "ref-resource",
+        "ref-mut-read",
+        "ref-local-return",
+        "ref-value-param-return",
+        "ref-deref-integer",
+        "ref-immutable-mut",
+        "ref-owner-write",
+        "ref-owner-move",
+        "ref-field-storage"
+      ],
+      "nativeRuns": 14,
+      "candidateImageHashesVerified": true,
+      "passed": true
+    },
+    {
+      "unit": 32,
+      "originalRequirement": "32. 필드·인덱스 공유 대여에서 실제 소유자 추적.",
+      "implementation": [
+        {
+          "path": "examples/lexer_candidate/src/mir_reference.fy",
+          "sha256": "5d77f3e57797b5e65aa84d6d8a9a14c0736ff76f3b345e7c25e21790d3e164ea"
+        },
+        {
+          "path": "examples/lexer_candidate/src/hir_view_check.fy",
+          "sha256": "5aceaf0b772a39836a5ec16f410d125b0665e4e37021bb0c00c2c471b1c6fb6b"
+        }
+      ],
+      "evidence": "docs/ops/evidence/candidate-resource-projections-20261007.json",
+      "evidenceSHA256": "ebe0cb1bd281af28a45c51bfcf583d2c5760209e472384b4287b293ed23f8820",
+      "firstEvidenceCommit": "d305347c85714795afe0bb82d4ffb364d1c2be03",
+      "fixtures": [
+        "shared-field",
+        "shared-nested",
+        "shared-index",
+        "shared-index-field",
+        "shared-resource-field",
+        "shared-index-bounds",
+        "shared-field-owner-write",
+        "shared-index-owner-write",
+        "shared-field-escape",
+        "shared-field-temporary"
+      ],
+      "nativeRuns": 12,
+      "candidateImageHashesVerified": true,
+      "passed": true
+    },
+    {
+      "unit": 33,
+      "originalRequirement": "33. 필드·인덱스 가변 대여와 참조를 통한 수정 지원.",
+      "implementation": [
+        {
+          "path": "examples/lexer_candidate/src/mir_reference.fy",
+          "sha256": "5d77f3e57797b5e65aa84d6d8a9a14c0736ff76f3b345e7c25e21790d3e164ea"
+        },
+        {
+          "path": "examples/lexer_candidate/src/hir_mutable_check.fy",
+          "sha256": "9b03db6d82744ad4458a2355115719f424f163ba159a362fd520dcbfe22e0cfe"
+        },
+        {
+          "path": "examples/lexer_candidate/src/hir_view_check.fy",
+          "sha256": "5aceaf0b772a39836a5ec16f410d125b0665e4e37021bb0c00c2c471b1c6fb6b"
+        }
+      ],
+      "evidence": "docs/ops/evidence/candidate-resource-reference-stores-20261007.json",
+      "evidenceSHA256": "882f3b91675680f62a26d5be5d57dc1c919c5fe3088a9fc1936c541f184fc8b9",
+      "firstEvidenceCommit": "e12215cf6c150529e75af7f32960a1e8aebf6cfc",
+      "fixtures": [
+        "mut-scalar-store",
+        "mut-field",
+        "mut-nested",
+        "mut-index",
+        "mut-reference-field",
+        "mut-resource-reference-field",
+        "mut-shared-write",
+        "mut-field-immutable",
+        "mut-field-siblings",
+        "mut-resource-field-address",
+        "mut-deref-compound"
+      ],
+      "nativeRuns": 12,
+      "candidateImageHashesVerified": true,
+      "passed": true,
+      "latestReplay": "docs/ops/evidence/candidate-resource-borrow-joins-regression-20261007.json"
+    },
+    {
+      "unit": 34,
+      "originalRequirement": "34. 공유 재대여, 소유자 수정 제한, 마지막 사용 이후 대여 종료 연결.",
+      "implementation": [
+        {
+          "path": "examples/lexer_candidate/src/hir_mutable_check.fy",
+          "sha256": "9b03db6d82744ad4458a2355115719f424f163ba159a362fd520dcbfe22e0cfe"
+        },
+        {
+          "path": "examples/lexer_candidate/src/hir_view_check.fy",
+          "sha256": "5aceaf0b772a39836a5ec16f410d125b0665e4e37021bb0c00c2c471b1c6fb6b"
+        }
+      ],
+      "evidence": "docs/ops/evidence/candidate-resource-shared-reborrows-20261007.json",
+      "evidenceSHA256": "7bd4dd15103c92a7e931e6d423b23834b51f910921b68e1c1c20b0a74fbc6910",
+      "firstEvidenceCommit": "ef6d5b9391b1b5b0da1ef82ba0212495bcab9332",
+      "fixtures": [
+        "shared-call-from-mut",
+        "shared-child-resumes",
+        "shared-field-through-mut",
+        "owner-after-last-use",
+        "shared-return-parent-write",
+        "shared-return-parent-call",
+        "shared-implicit-binding"
+      ],
+      "nativeRuns": 8,
+      "candidateImageHashesVerified": true,
+      "passed": true,
+      "latestReplay": "docs/ops/evidence/candidate-resource-borrow-joins-regression-20261007.json"
+    },
+    {
+      "unit": 35,
+      "originalRequirement": "35. 가변 재대여 중 부모 사용 제한과 종료 후 부모 사용 재개.",
+      "implementation": [
+        {
+          "path": "examples/lexer_candidate/src/hir_mutable_check.fy",
+          "sha256": "9b03db6d82744ad4458a2355115719f424f163ba159a362fd520dcbfe22e0cfe"
+        },
+        {
+          "path": "examples/lexer_candidate/src/hir_view_check.fy",
+          "sha256": "5aceaf0b772a39836a5ec16f410d125b0665e4e37021bb0c00c2c471b1c6fb6b"
+        }
+      ],
+      "evidence": "docs/ops/evidence/candidate-resource-mutable-reborrows-20261007.json",
+      "evidenceSHA256": "404a6d3fb5abef90c3cb514c39375367492ef5290dc9a941b8a297b6ca3939df",
+      "firstEvidenceCommit": "24f03548375adaadb7b3b65edeffc00f925e8f8e",
+      "fixtures": [
+        "mut-child-resume",
+        "mut-descendant-resume",
+        "mut-call-return-resume",
+        "shared-explicit-deref",
+        "mut-child-parent-write",
+        "mut-child-parent-read",
+        "mut-child-parent-alias",
+        "mut-from-shared-deref"
+      ],
+      "nativeRuns": 8,
+      "candidateImageHashesVerified": true,
+      "passed": true,
+      "latestReplay": "docs/ops/evidence/candidate-resource-borrow-joins-regression-20261007.json"
+    },
+    {
+      "unit": 36,
+      "originalRequirement": "36. 뒤쪽 인자 평가 중 앞쪽 인자의 재대여 유지.",
+      "implementation": [
+        {
+          "path": "examples/lexer_candidate/src/hir_mutable_check.fy",
+          "sha256": "9b03db6d82744ad4458a2355115719f424f163ba159a362fd520dcbfe22e0cfe"
+        },
+        {
+          "path": "examples/lexer_candidate/src/hir_view_check.fy",
+          "sha256": "5aceaf0b772a39836a5ec16f410d125b0665e4e37021bb0c00c2c471b1c6fb6b"
+        }
+      ],
+      "evidence": "docs/ops/evidence/candidate-resource-argument-loans-20261007.json",
+      "evidenceSHA256": "7e570eb2835ef96eeb5af90a54b8fcaa55887e59d51d492db28e4885f5fa67c3",
+      "firstEvidenceCommit": "3c4a7fa8141ead33476c14bf17e681512222098d",
+      "fixtures": [
+        "args-source-order",
+        "arg-read-before-edit",
+        "nested-returned-arg",
+        "distinct-arg-owners",
+        "arg-shared-then-mutable",
+        "arg-mutable-then-shared",
+        "arg-first-then-nested-edit",
+        "arg-returned-then-edit",
+        "arg-exclusive-parent-read"
+      ],
+      "nativeRuns": 8,
+      "candidateImageHashesVerified": true,
+      "passed": true,
+      "latestReplay": "docs/ops/evidence/candidate-resource-borrow-joins-regression-20261007.json"
+    },
+    {
+      "unit": 37,
+      "originalRequirement": "37. 참조·뷰 반환 origin 요약과 호출자 origin 치환.",
+      "implementation": [
+        {
+          "path": "examples/lexer_candidate/src/hir_origin_targets.fy",
+          "sha256": "f72fb54ce53116c8916d73684951b148284d6cd8aadd6ae1f07557d6dbdedf3c"
+        },
+        {
+          "path": "examples/lexer_candidate/src/hir_view_check.fy",
+          "sha256": "5aceaf0b772a39836a5ec16f410d125b0665e4e37021bb0c00c2c471b1c6fb6b"
+        }
+      ],
+      "evidence": "docs/ops/evidence/candidate-resource-return-origins-20261007.json",
+      "evidenceSHA256": "0561dc0c6c32349a26434a3f201b083986ff80d3a7b28470e07ffd1e7be37f91",
+      "firstEvidenceCommit": "f68549f85f2ae0fbcdb0d0d67f2b0154b7e90c98",
+      "fixtures": [
+        "origin-forward-reorder",
+        "origin-wrapper-chain",
+        "origin-switch",
+        "origin-view-return",
+        "origin-selected-owner-write",
+        "origin-wrapper-local-escape",
+        "origin-two-inputs"
+      ],
+      "nativeRuns": 8,
+      "candidateImageHashesVerified": true,
+      "passed": true,
+      "latestReplay": "docs/ops/evidence/candidate-resource-borrow-joins-regression-20261007.json"
+    },
+    {
+      "unit": 38,
+      "originalRequirement": "38. 실제 소스에 필요한 혼합·재귀 반환 origin 처리. 지원 전에는 추측하지 않고 거부.",
+      "implementation": [
+        {
+          "path": "examples/lexer_candidate/src/hir_view_check.fy",
+          "sha256": "5aceaf0b772a39836a5ec16f410d125b0665e4e37021bb0c00c2c471b1c6fb6b"
+        }
+      ],
+      "evidence": "docs/ops/evidence/candidate-resource-recursive-origins-20261007.json",
+      "evidenceSHA256": "7e7bbfda98fd51977011cbc86b8bcf6b43ce57eda98679bdbb62af800f9f66a2",
+      "firstEvidenceCommit": "d2a8774cd0198495cc9d9bab52c8c657c8985875",
+      "fixtures": [
+        "recursive-single-origin",
+        "mutual-single-origin",
+        "static-shortened-origin",
+        "recursive-unproven",
+        "recursive-swaps-origins",
+        "static-local-escape"
+      ],
+      "nativeRuns": 6,
+      "candidateImageHashesVerified": true,
+      "passed": true,
+      "latestReplay": "docs/ops/evidence/candidate-resource-borrow-joins-regression-20261007.json"
+    },
+    {
+      "unit": 39,
+      "originalRequirement": "39. 공개 언어 계약이 허용하는 참조·뷰 보유 집합 타입 지원.",
+      "implementation": [
+        {
+          "path": "examples/lexer_candidate/src/borrow_shapes.fy",
+          "sha256": "5fdacc0768840d24f7ea8c19ad8c1e04ab82cd9c2760f11a631b08c320e3edd2"
+        },
+        {
+          "path": "examples/lexer_candidate/src/tagged_types.fy",
+          "sha256": "d93cad308c8091fbc13ddcf5b878b5fffb1d876cdcaeb4a873df0b9b21aca750"
+        },
+        {
+          "path": "examples/lexer_candidate/src/tagged_encoding.fy",
+          "sha256": "4f28b1708816926a0e7fa7af31bf7af928e33a753f4234d8e95a5039592a7e24"
+        },
+        {
+          "path": "examples/lexer_candidate/src/hir_mutable_check.fy",
+          "sha256": "9b03db6d82744ad4458a2355115719f424f163ba159a362fd520dcbfe22e0cfe"
+        }
+      ],
+      "evidence": "docs/ops/evidence/candidate-resource-tagged-borrows-20261007.json",
+      "evidenceSHA256": "b81c735188def12fb80ad91b1f1ba23cb1e8c20f4f5182b0fbcd23209219a3c6",
+      "firstEvidenceCommit": "e132b1c4a8d9a811cd91dcdcbef129e09aaf757e",
+      "fixtures": [
+        "option-mut-none",
+        "option-ref-return",
+        "option-ref-none",
+        "option-nested-ref",
+        "result-ref-success",
+        "result-ref-error",
+        "option-mut-reference",
+        "option-local-escape",
+        "option-holds-owner",
+        "result-error-local-escape",
+        "struct-tagged-reference",
+        "two-borrow-leaves"
+      ],
+      "nativeRuns": 14,
+      "candidateImageHashesVerified": true,
+      "passed": true,
+      "latestReplay": "docs/ops/evidence/candidate-resource-borrow-joins-regression-20261007.json"
+    },
+    {
+      "unit": 40,
+      "originalRequirement": "40. 분기·반복·조기 종료에서 borrow·loan 상태 합류.",
+      "implementation": [
+        {
+          "path": "examples/lexer_candidate/src/hir_borrow_paths.fy",
+          "sha256": "8104c0e50f4335c7cb2fc04990f942be9d400ab7c7bc5593edde7182d65f404c"
+        },
+        {
+          "path": "examples/lexer_candidate/src/hir_mutable_check.fy",
+          "sha256": "9b03db6d82744ad4458a2355115719f424f163ba159a362fd520dcbfe22e0cfe"
+        },
+        {
+          "path": "examples/lexer_candidate/src/hir_view_check.fy",
+          "sha256": "5aceaf0b772a39836a5ec16f410d125b0665e4e37021bb0c00c2c471b1c6fb6b"
+        }
+      ],
+      "evidence": "docs/ops/evidence/candidate-resource-borrow-flow-joins-20261007.json",
+      "evidenceSHA256": "6a9ff50fb9f1f8c5f70321363fc2d33c15cc3445342e05b85e7da98397ec07c8",
+      "firstEvidenceCommit": "included in this audit commit",
+      "fixtures": [
+        "zero-iteration-borrow-return",
+        "mutable-join-call-return",
+        "mutable-if-join",
+        "mutable-child-if-join",
+        "mutable-switch-join",
+        "mutable-nested-join",
+        "mutable-loop-join",
+        "mutable-option-join",
+        "loop-child-break-resume",
+        "branch-shared-loan",
+        "branch-exclusive-loan",
+        "switch-loan",
+        "early-return-release",
+        "loop-fresh-loans",
+        "loop-break-no-backedge",
+        "loop-last-use-release",
+        "branch-resource-move",
+        "unreachable-last-use",
+        "for-break-no-backedge",
+        "unreachable-origin",
+        "for-backedge-post-owner-write",
+        "mutable-join-holds-owner",
+        "mutable-join-holds-parent",
+        "mutable-switch-holds-parent",
+        "branch-loan-after-join",
+        "continue-dead-break",
+        "branch-continue-dead-break",
+        "loop-reentrant-owner-write",
+        "loop-child-parent-write",
+        "mixed-input-return"
+      ],
+      "nativeRuns": 40,
+      "candidateImageHashesVerified": true,
+      "passed": true
+    }
+  ],
+  "currentReplays": {
+    "unit24": {
+      "fixtures": 6,
+      "nativeRuns": 12
+    },
+    "unit40": {
+      "fixtures": 30,
+      "nativeRuns": 40
+    },
+    "units33to39": {
+      "fixtures": 60,
+      "nativeRuns": 64
+    }
+  },
+  "boundary": "Earlier-unit fixtures are historical per-unit evidence. Temporary admission rejections are not reintroduced after their later implementation. Latest replay receipts bind current sources and both current candidate images. Linux/performance/self-hosting remain outside this goal and deferred.",
+  "skills": [
+    "feature",
+    "bugfix",
+    "completion-evidence-gate"
+  ]
+}

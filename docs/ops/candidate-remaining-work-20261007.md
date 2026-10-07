@@ -11,6 +11,10 @@ Linux 검증과 빌드 비용 측정은 요청대로 뒤에 묶어서 수행한�
 21~40번은 순차 구현·검증·로컬 커밋을 완료했다. COFF 섹션 상한 수정(ADR0473)을
 선행 커밋으로 분리했고, 33~39번의 미뤘던 릴리스 검증은 40번에서 묶어 완료했다.
 
+21~40번의 원래 요구사항·현재 담당 소스·단위 커밋·실행 결과·바이너리 해시 대조는
+`evidence/candidate-units-21-40-completion-audit-20261007.json`에 기록했다. 24번의
+과거 실패 harness 기록도 최종 후보로 정상 사례 6개·native 12회를 다시 확인해 보완했다.
+
 근거는 candidate-tagged-ownership-progress.md, examples/lexer_candidate/README.md와
 실제 Fairy 후보 소스, 기존 Go semantic/MIR/package/CLI 구현,
 docs/architecture/self-hosting-readiness-v0.md다.
@@ -55,7 +59,7 @@ evidence/candidate-result-handling-alignment-20261007.json에 새 검사·도구
 21. 완료: cleanup 본문을 void 문맥에서 이름·타입·지역 자원/Result 흐름 검사. 컴파일러 소유 `this` 수신자는 필드 읽기·직접 스칼라 필드 수정만 허용하며 전체 이동·덮어쓰기는 E1102, 부분 자원 필드 이동은 E1103으로 거부. 자원 receiver의 중첩 필드 쓰기는 Go 대조에서 확인한 기존 금지를 유지. `?`와 값 반환은 거부. 비어 있지 않은 cleanup의 HIR/MIR/C 연결은 22번에서 처리하며 그 전에는 명시적으로 실패. 증거는 `evidence/candidate-resource-cleanup-20261007.json`.
 22. 완료: 정상 fallthrough에서 live root를 선언 역순으로 한 번씩 정리. 이동 donor·shadow·소비 인자·빈/비어 있지 않은 정리·직접 scalar receiver 수정·i64 필드를 실행. owned HIR/MIR 연결 및 위조 정리 검사는 별도 부분 receipt에 보존. `evidence/candidate-resource-exit-20261007.json`의 12개 소스 사례, CLI 관찰 81개, 생성 C native 실행 16회와 프로필별 API 테스트 3개가 근거. return/?, 반복 종료, 덮어쓰기, 중첩 소유 필드는 후속 번호에서 연결.
 23. 완료: 직접·중첩 return, 반환값 고정, 자원 factory/호출/if/switch 반환과 scalar Result ? 성공·오류 경로의 정리 연결. 오류 반환을 생성한 뒤 성공 경로의 소유 상태를 복원하며 short-circuit의 종료 경로가 미평가 경로 상태를 훼손하지 않음. `evidence/candidate-resource-return-20261007.json`: 13개 사례, CLI 93개, 생성 C native 20회, 프로필별 API 테스트 1개(그래프 3개). 자원 보유 tagged payload는 27번에서 연결.
-24. 완료: 반복 본문 fallthrough와 nearest-loop break/continue에서 실제로 빠져나가는 중첩 본문만 정리. 바깥 root 보존, for post 이전 정리, 반복 재생성과 return을 dev/release native 실행. 근거는 `evidence/candidate-resource-loop-exits-20261007.json`.
+24. 완료: 반복 본문 fallthrough와 nearest-loop break/continue에서 실제로 빠져나가는 중첩 본문만 정리. 바깥 root 보존, for post 이전 정리, 반복 재생성과 return을 dev/release native 실행. 근거는 `evidence/candidate-resource-loop-exits-20261007.json`, 최종 후보 재실행은 `evidence/candidate-resource-loop-exits-final-20261007.json`.
 25. 완료: RHS를 먼저 고정한 뒤 live 이전 세대만 정리하고 새 donor를 설치. 자기 이동·소비 후 복원·factory 호출과 scalar Result ? 실패/성공을 구분하며 MaybeLive는 기존 Flow 검사로 거부. resource-bearing Result의 직접 make()? 성공·오류 실행도 27번에서 검증했다. 근거: `evidence/candidate-resource-overwrite-20261007.json`.
 26. 완료: 중첩 resource의 outer cleanup → 필드 역순 정리와 부분 초기화의 완료 임시값만 역순 정리. 이후 필드/인자의 ? 실패, factory 반환 필드, 첫 필드 실패와 donor 이동을 구분. 실패한 바깥 glue는 호출하지 않음. 4096 local/function 상한을 두며 tagged 소유는 27번에서 연결. 근거: `evidence/candidate-resource-partial-20261007.json`.
 27. 완료: resource 필드 및 Option/Result의 전체 이동, active payload 추출·무시·중첩 정리와 ? 반환을 실행. 임시 자원도 실제 lexical scope 종료와 source 순서로 정리하며 wildcard arm의 내부 root 및 continue를 구분. `old=make()?`의 양쪽 결과를 직접 검증. 부분 필드 이동과 resource 고정 배열은 기존 제한 유지. 근거: `evidence/candidate-resource-tagged-20261007.json`.
@@ -74,7 +78,7 @@ evidence/candidate-result-handling-alignment-20261007.json에 새 검사·도구
 37. 완료: 반환 입력 origin을 호출자의 정확한 실제 인자로 치환하며 forward·재배치·wrapper·switch·뷰 반환을 연결. 미선택 입력의 loan은 호출 후 종료하고 선택된 입력 수정·지역 escape·두 입력 반환은 거부. CLI E2103을 명시. 7개 fixture, 생성 C native 8회. 근거: `evidence/candidate-resource-return-origins-20261007.json`.
 38. 완료: Unknown과 Static을 분리하고 단일 입력 origin의 직접·상호 재귀 요약을 bounded 고정점으로 증명. Static의 입력 origin 단축은 허용하고 근거 없는 cycle·입력 교환 재귀·지역 escape는 거부. 6개 fixture, 생성 C native 6회. 근거: `evidence/candidate-resource-recursive-origins-20261007.json`.
 39. 완료: Option/Result의 단일 safe-borrow leaf를 정체성·레이아웃·C payload·origin·generation에 연결. pattern 캡처와 ? 성공·암시적 오류 반환, mutable none을 검증. 명명 집합/배열에 참조 저장과 두 borrow leaf는 거부하며 30bit 표현 상한은 유지. 12개 fixture, 생성 C native 14회. 근거: `evidence/candidate-resource-tagged-borrows-20261007.json`.
-40. 완료: 도달 가능한 분기 arm·조기 종료·fallthrough/break/continue를 구분해 borrow와 재대여 loan의 합류를 연결. join 뒤 사용과 실제 backedge는 owner hold를 유지하며 dead return/use 및 continue 뒤 dead break가 origin이나 종료 증명을 바꾸지 않음. shared/mutable 분기·resource move·while/for와 오류 경로 18개 fixture, 두 후보 프로필의 CLI 관찰 및 생성 C native 24회. 33~39번도 최종 dev/release 후보로 60개 fixture·native 64회 통과. 근거: `evidence/candidate-resource-borrow-flow-20261007.json`, `evidence/candidate-resource-borrow-profile-regression-20261007.json`. 정확한 predicate 상관·가변 참조 binding 재대입·full CFG fixed point는 이번 slice에 포함하지 않음.
+40. 완료: 도달 가능한 분기 arm·조기 종료·fallthrough/break/continue의 대여 상태를 합류. 서로 다른 분기에서 만든 동일 owner의 가변 참조·재대여를 bounded DAG로 함께 보존하며 부모 사용은 모든 자식 종료 뒤 재개. if/switch·중첩 분기·반복·Option none·함수 반환, join 뒤 owner/parent 수정 거부와 dead return/use/continue 뒤 dead break를 검증. 최종 30개 fixture·두 후보 프로필·생성 C native 40회, 33~39 회귀 60개 fixture·native 64회. 근거: `evidence/candidate-resource-borrow-flow-joins-20261007.json`, `evidence/candidate-resource-borrow-joins-regression-20261007.json`. 기존 immutable borrow descriptor·whole-owner 독점 모델을 유지하며 predicate 상관과 가변 descriptor binding 재대입은 기존 제한으로 남김.
 41. 필요한 ref str·바이트 메타데이터를 SDK와 연결하고 텍스트 bracket 제한 유지.
 42. 실제 사용과 기존 계약이 뒷받침하는 경우에만 임시·필드 배열 뷰 확장.
 43. ADR0415 제한 유지: 가변 부분 뷰를 여러 가변 sibling 동시 보유로 확대하지 않기.

@@ -278,6 +278,16 @@ REJECTIONS[39]=[
 ]
 
 CASES[40]=[
+ ('zero-iteration-borrow-return','fn ref i32 f(ref i32 p,bool go){while(go){return p;}return p;}fn i32 main(){let i32 n=7;return *f(ref n,false);}', '',7,0),
+ ('mutable-join-call-return','fn ref mut i32 pick(ref mut i32 p,bool yes){return if(yes){ref mut *p}else{ref mut *p};}fn i32 f(bool yes){var i32 n=7;let ref mut i32 p=ref mut n;let ref mut i32 q=pick(p,yes);*q=9;*p=11;return n;}fn i32 main(){return f(true)+f(false);}', '',22,0),
+
+ ('mutable-if-join','fn i32 f(bool yes){var i32 n=7;let ref mut i32 p=if(yes){ref mut n}else{ref mut n};*p=9;return n;}fn i32 main(){return f(true)+f(false);}', '',18,0),
+ ('mutable-child-if-join','fn i32 f(bool yes){var i32 n=7;let ref mut i32 p=ref mut n;let ref mut i32 q=if(yes){ref mut *p}else{ref mut *p};*q=9;*p=11;return n;}fn i32 main(){return f(true)+f(false);}', '',22,0),
+ ('mutable-switch-join','enum E{A;B;C;}fn i32 f(E e){var i32 n=7;let ref mut i32 p=switch(e){case .A:{ref mut n}case .B:{ref mut n}case .C:{ref mut n}};*p=9;return n;}fn i32 main(){return f(.A)+f(.B)+f(.C);}', '',27,0),
+ ('mutable-nested-join','fn i32 f(bool a,bool b){var i32 n=7;let ref mut i32 p=if(a){if(b){ref mut n}else{ref mut n}}else{ref mut n};*p=9;return n;}fn i32 main(){return f(true,true)+f(true,false)+f(false,true);}', '',27,0),
+ ('mutable-loop-join','fn i32 main(){var i32 n=0;while(n<3){let ref mut i32 p=if(n==0){ref mut n}else{ref mut n};*p=*p+1;}return n;}', '',3,0),
+ ('mutable-option-join','fn i32 f(bool yes){var i32 n=7;let Option<ref mut i32> p=if(yes){.some(ref mut n)}else{.none};switch(p){case .some(p):{*p=9;}case .none:{}};n=n+1;return n;}fn i32 main(){return f(true)+f(false);}', '',18,0),
+
  ('loop-child-break-resume','fn i32 main(){var i32 n=7;let ref mut i32 p=ref mut n;let ref mut i32 child=ref mut *p;while(*child==7){*p=9;break;}return n;}', '',9,0),
  ('branch-shared-loan','fn i32 f(bool yes){var i32 n=7;let ref i32 p=ref n;if(yes){n=9;}else{return *p;};return n;}fn i32 main(){return f(true)+f(false);}', '',16,0),
  ('branch-exclusive-loan','fn i32 f(bool yes){var i32 n=7;let ref mut i32 p=ref mut n;if(yes){n=9;}else{return *p;};return n;}fn i32 main(){return f(true)+f(false);}', '',16,0),
@@ -292,6 +302,12 @@ CASES[40]=[
  ('unreachable-origin','fn ref i32 id(ref i32 p){return p;let i32 n=7;return ref n;}fn i32 main(){let i32 n=7;return *id(ref n);}', '',7,0),
 ]
 REJECTIONS[40]=[
+ ('for-backedge-post-owner-write','fn i32 main(){var i32 n=7;let ref i32 p=ref n;for(;*p==7;n=9){}return n;}', 'E2101'),
+
+ ('mutable-join-holds-owner','fn i32 main(){var i32 n=7;let ref mut i32 p=if(true){ref mut n}else{ref mut n};n=9;return *p;}', 'E2101'),
+ ('mutable-join-holds-parent','fn i32 main(){var i32 n=7;let ref mut i32 p=ref mut n;let ref mut i32 q=if(true){ref mut *p}else{ref mut *p};*p=9;return *q;}', 'E2101'),
+ ('mutable-switch-holds-parent','enum E{A;B;C;}fn i32 main(){let E e=.A;var i32 n=7;let ref mut i32 p=ref mut n;let ref mut i32 q=switch(e){case .A:{ref mut *p}case .B:{ref mut *p}case .C:{ref mut *p}};*p=9;return *q;}', 'E2101'),
+
  ('branch-loan-after-join','fn i32 main(){var i32 n=7;let ref i32 p=ref n;if(true){n=9;}else{};return *p;}', 'E2101'),
  ('continue-dead-break','fn i32 main(){var i32 n=7;let ref i32 p=ref n;while(*p==7){n=9;continue;break;}return n;}', 'E2101'),
  ('branch-continue-dead-break','fn i32 main(){var i32 n=7;let ref i32 p=ref n;while(*p==7){n=9;if(true){continue;}else{break;};break;}return n;}', 'E2101'),

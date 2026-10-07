@@ -11,12 +11,21 @@ import std::vec as v;
 // An immutable mutable descriptor keeps one exclusive generation. Aliases share
 // it; slices, returned call reborrows and call arguments create child generations.
 // The parent and its aliases resume only after all retained children expire.
-struct Slot { usize generation; usize parent; usize start; usize end; usize receiver; bool fresh; bool argument; bool mutable; }
+struct Slot { usize generation; usize parent; usize alternate; usize start; usize end; usize receiver; bool fresh; bool argument; bool mutable; }
 struct Context { usize work; h::Problem problem; }
 fn usize fail(ref mut Context c, u32 code, usize start, usize end) {
     if (c.problem.code == 0) { c.problem = h::Problem { .code,.start,.end }; } return 0;
 }
 fn bool charge(ref mut Context c) { c.work += 1; return c.work <= 1048576; }
+// Branch joins retain all possible incoming generations in a bounded DAG.
+fn usize merge(ref mut Context c, ref mut v::Vec<Slot> slots, usize a, usize b, usize start, usize end, bool mutable) {
+    if (a == b || b == 0) { return a; }
+    if (a == 0) { return b; }
+    if (!charge(c) || v::len<Slot>(slots) >= 16384) { return fail(c,2,start,end); }
+    let usize id = v::len<Slot>(slots);
+    if (!v::push<Slot>(slots,Slot { .generation=id,.parent=a,.alternate=b,.start,.end,.receiver=0,.fresh=true,.argument=false,.mutable }).is_ok) { return fail(c,3,start,end); }
+    return id;
+}
 fn usize generation(ref h::Program p, ref mut Context c, ref mut v::Vec<Slot> slots, ref usize[] initial, ref usize[] summaries, usize id, usize depth) {
     if (id == 0 || c.problem.code != 0) { return 0; }
     let e = h::expression_at(p,id); let u32 kind = h::expression_code(e.kind);
@@ -27,7 +36,7 @@ fn usize generation(ref h::Program p, ref mut Context c, ref mut v::Vec<Slot> sl
     if(kind==18 && e.edge_count==0){return 0;}
     if (depth >= 64 || !charge(c)) { return fail(c,2,e.start,e.end); }
     let Slot old = *v::at<Slot>(slots,id); if (old.generation != 0) { return old.generation; }
-    var usize base = 0; var usize parent = 0; var usize receiver = old.receiver;
+    var usize base = 0; var usize parent = 0; var usize alternate = 0; var usize receiver = old.receiver;
     var bool fresh = old.fresh; var usize start = e.start;
     if(kind==18){receiver=h::edge_at(p,e.edge_start);base=generation(p,c,slots,initial,summaries,receiver,depth+1);if(base==0){return 0;}}
     else if(kind==22 || kind==11){receiver=e.left;base=generation(p,c,slots,initial,summaries,receiver,depth+1);}
@@ -41,8 +50,20 @@ fn usize generation(ref h::Program p, ref mut Context c, ref mut v::Vec<Slot> sl
     else if (kind == 8) {
         let usize yes = generation(p,c,slots,initial,summaries,h::block_at(p,e.block).tail,depth+1);
         let usize no = generation(p,c,slots,initial,summaries,e.alternative,depth+1);
-        if(yes!=no && (mutable || yes!=0 && no!=0)){return fail(c,2103,e.start,e.end);}base=if(yes!=0){yes}else{no};
-    } else if(kind==19){var bool seen=false;var usize i=0;while(i<e.edge_count){let arm=h::expression_at(p,h::edge_at(p,e.edge_start+i));let usize tail=h::block_at(p,arm.block).tail;if(tail!=0){let usize value=generation(p,c,slots,initial,summaries,tail,depth+1);if(seen && value!=base){return fail(c,2103,e.start,e.end);}base=value;seen=true;}i+=1;}
+        if (yes == no || yes == 0 || no == 0) { base = if (yes != 0) { yes } else { no }; }
+        else { base=id; parent=yes; alternate=no; fresh=true; receiver=0; start=e.end; }
+    } else if (kind == 19) {
+        var usize i = 0;
+        while (i < e.edge_count) {
+            let arm=h::expression_at(p,h::edge_at(p,e.edge_start+i));
+            let usize tail=h::block_at(p,arm.block).tail;
+            if (tail != 0) {
+                let usize value=generation(p,c,slots,initial,summaries,tail,depth+1);
+                base=merge(c,slots,base,value,e.start,e.end,mutable);
+            }
+            i+=1;
+        }
+        if (base != 0 && base != id) { parent=base; base=id; fresh=true; receiver=0; start=e.end; }
     } else if (kind == 6) {
         let usize returned = summaries[e.binding]; var usize i = 0;
         while (i < h::function_count(p)) {
@@ -57,18 +78,23 @@ fn usize generation(ref h::Program p, ref mut Context c, ref mut v::Vec<Slot> sl
     } else { return fail(c,2103,e.start,e.end); }
     if (old.argument && base != id) { parent = base; base = id; receiver = id; start = e.start; }
     if(base==0 && kind==3 && initial[e.binding]!=0 && tagged::builtin(h::type_code(h::expression_at(p,initial[e.binding]).type))){return 0;}
+    if (base == 0 && tagged::builtin(h::type_code(e.type))) { return 0; }
     if (base == 0) { return if (mutable) { fail(c,2103,e.start,e.end) } else { 0 }; }
     let ref mut Slot stored = v::at_mut<Slot>(slots,id);
-    stored.generation = base; stored.parent = parent; stored.receiver = receiver;
+    stored.generation = base; stored.parent = parent; stored.alternate = alternate; stored.receiver = receiver;
     stored.fresh = fresh; stored.mutable = mutable; stored.start = start;
     if (stored.end < e.end) { stored.end = e.end; }
     return base;
 }
-fn bool ancestor(ref v::Vec<Slot> slots, usize parent, usize child) {
-    var usize current = child; var usize depth = 0;
-    while (current != 0 && depth < 64) { if (current == parent) { return true; } current = v::at<Slot>(slots,current).parent; depth += 1; }
-    return false;
+fn bool ancestor(ref v::Vec<Slot> slots, usize parent, usize child, usize depth, ref mut usize work) {
+    if (child == 0) { return false; }
+    if (parent == child) { return true; };
+    *work = *work + 1;
+    if (depth >= 64 || *work > 1048576) { return false; }
+    let s = *v::at<Slot>(slots,child);
+    return ancestor(slots,parent,s.parent,depth+1,work) || ancestor(slots,parent,s.alternate,depth+1,work);
 }
+
 fn usize held_end(ref h::Program p, usize id) {
     let e = h::expression_at(p,id); var usize end = e.end; var usize i = 1;
     while (i <= h::expression_count(p)) {
@@ -92,7 +118,7 @@ pub fn h::Problem check(ref h::Program p, ref usize[] initial, ref usize[] last,
     var v::Vec<Slot> slots = v::empty<Slot>();
     var Context c = Context {.work=0,.problem=h::Problem { .code=0,.start=0,.end=0 } };
     i = 0; while (i <= 4096 + h::binding_count(p)) {
-        if (!v::push<Slot>(ref mut slots,Slot { .generation=0,.parent=0,.start=0,.end=0,.receiver=0,.fresh=false,.argument=false,.mutable=false }).is_ok) { return h::Problem { .code=3,.start=0,.end=0 }; } i += 1;
+        if (!v::push<Slot>(ref mut slots,Slot { .generation=0,.parent=0,.alternate=0,.start=0,.end=0,.receiver=0,.fresh=false,.argument=false,.mutable=false }).is_ok) { return h::Problem { .code=3,.start=0,.end=0 }; } i += 1;
     }
     // Exact mutable parameters create call-bounded reborrows even for void calls.
     i = 1; while (i <= h::expression_count(p)) {
@@ -121,10 +147,11 @@ if (borrows::count(type)!=0) { discard generation(p,ref mut c,ref mut slots,init
     }
     // Returned descendants keep every ancestor's whole-owner hold alive.
     var bool changed = true;
-    while (changed) { changed=false; i=1; while (i <= h::expression_count(p)) {
+    while (changed) { changed=false; i=1; while (i < v::len<Slot>(ref slots)) {
         if (!charge(ref mut c)) { return h::Problem { .code=2,.start=0,.end=0 }; }
         let s = *v::at<Slot>(ref slots,i);
         if (s.fresh && s.parent != 0) { let ref mut Slot parent = v::at_mut<Slot>(ref mut slots,s.parent); if (s.end > parent.end) { parent.end=s.end; changed=true; } }
+        if (s.fresh && s.alternate != 0) { let ref mut Slot parent = v::at_mut<Slot>(ref mut slots,s.alternate); if (s.end > parent.end) { parent.end=s.end; changed=true; } }
         i += 1;
     } }
     i = 1; while (i <= h::expression_count(p)) {
@@ -133,16 +160,15 @@ if (borrows::count(type)!=0) { discard generation(p,ref mut c,ref mut slots,init
             var usize j = 1; while (j <= h::expression_count(p)) {
                 if (!charge(ref mut c)) { return h::Problem { .code=2,.start=0,.end=0 }; }
                 let other = *v::at<Slot>(ref slots,j);
-                if (j > i && other.fresh && (loan.mutable || other.mutable) && *v::at<usize>(origins,j) == owner && loan.start < other.end && other.start < loan.end && !ancestor(ref slots,i,j) && !ancestor(ref slots,j,i) && !paths::separate(p,loan.start,other.start,other.end,ref mut c.work) && !paths::separate(p,loan.end-1,other.start,other.end,ref mut c.work)) { let e=h::expression_at(p,j); return h::Problem { .code=2101,.start=e.start,.end=e.end }; }
                 let e = h::expression_at(p,j);
+                if (j > i && other.fresh && (loan.mutable || other.mutable) && *v::at<usize>(origins,j) == owner && loan.start < other.end && other.start < loan.end && !ancestor(ref slots,i,j,0,ref mut c.work) && !ancestor(ref slots,j,i,0,ref mut c.work) && !paths::separate(p,loan.start,e.start,e.end,ref mut c.work) && !paths::separate(p,loan.end-1,e.start,e.end,ref mut c.work)) { let e=h::expression_at(p,j); return h::Problem { .code=2101,.start=e.start,.end=e.end }; }
                 if (h::expression_code(e.kind) == 3 && loan.start < e.end && e.start < loan.end) {
                     // The occurrence creating this loan is allowed; bounds and
                     // later arguments are separate occurrences and stay checked.
-                    let receiver = h::expression_at(p,loan.receiver);
-                    let bool creating = e.start >= receiver.start && e.end <= receiver.end;
+                    let bool creating = if (loan.receiver != 0) { let receiver = h::expression_at(p,loan.receiver); e.start >= receiver.start && e.end <= receiver.end } else { false };
                     if (!creating && paths::reachable(p,e.start,e.end,ref mut c.work) && !paths::separate(p,loan.start,e.start,e.end,ref mut c.work) && !paths::separate(p,loan.end-1,e.start,e.end,ref mut c.work)) {
                         let u32 type = h::type_code(e.type);
-                        if (e.binding == owner && loan.mutable || (type == 11 || refs::mutable(type)) && *v::at<usize>(origins,j) == owner && !ancestor(ref slots,i,other.generation) && (loan.mutable || competing(p,j))) { return h::Problem { .code=2101,.start=e.start,.end=e.end }; }
+                        if (e.binding == owner && loan.mutable || (type == 11 || refs::mutable(type)) && *v::at<usize>(origins,j) == owner && !ancestor(ref slots,i,other.generation,0,ref mut c.work) && (loan.mutable || competing(p,j))) { return h::Problem { .code=2101,.start=e.start,.end=e.end }; }
                     }
                 }
                 j += 1;
