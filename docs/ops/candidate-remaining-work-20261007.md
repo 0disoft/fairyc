@@ -8,6 +8,9 @@
 의존성이 맞는 작은 구현 단위로 묶어 순차 커밋한다.
 Linux 검증과 빌드 비용 측정은 요청대로 뒤에 묶어서 수행한다.
 
+21~40번은 순차 구현·검증·로컬 커밋을 완료했다. COFF 섹션 상한 수정(ADR0473)을
+선행 커밋으로 분리했고, 33~39번의 미뤘던 릴리스 검증은 40번에서 묶어 완료했다.
+
 근거는 candidate-tagged-ownership-progress.md, examples/lexer_candidate/README.md와
 실제 Fairy 후보 소스, 기존 Go semantic/MIR/package/CLI 구현,
 docs/architecture/self-hosting-readiness-v0.md다.
@@ -64,14 +67,14 @@ evidence/candidate-result-handling-alignment-20261007.json에 새 검사·도구
 
 31. 완료: 스칼라·구조체·resource의 명시적 참조와 역참조, 스칼라 필드 읽기 및 함수 인자 실행. high-half 타입 ID와 MIR 주소/읽기 검증을 연결하고 지역·값 인자 반환, 대여 중 수정·이동을 거부. 14개 fixture, native 14회. 근거: `evidence/candidate-resource-references-20261007.json`. 필드 주소·참조 수정은 다음 단위에서 연결.
 32. 완료: 중첩 구조체 필드·이름 있는 배열 원소 및 원소 필드의 공유 주소를 실제 저장 위치에서 생성. whole-owner origin과 검사한 인덱스를 유지하며 지역 escape·대여 중 수정·임시 root를 거부. 10개 fixture, native 12회와 주소 HIR/MIR API test. 필드 배열·다차원 원소의 주소는 현재 명시적 거부. 근거: `evidence/candidate-resource-projections-20261007.json`.
-33. 완료: 스칼라 역참조 대입과 plain 필드·배열 원소의 가변 주소, 참조 경유 필드 수정을 연결. 저장 위치를 RHS 이전에 고정하며 immutable/shared 수정·sibling 대여·resource 필드 가변 주소·역참조 복합 대입은 거부. 후보 릴리스 재빌드는 40번에서 묶어 확인. 11개 fixture, 생성 C native 12회. 근거: `evidence/candidate-resource-reference-stores-20261007.json`.
+33. 완료: 스칼라 역참조 대입과 plain 필드·배열 원소의 가변 주소, 참조 경유 필드 수정을 연결. 저장 위치를 RHS 이전에 고정하며 immutable/shared 수정·sibling 대여·resource 필드 가변 주소·역참조 복합 대입은 거부. 후보 릴리스 재빌드와 33~39 회귀를 40번에서 묶어 확인 완료. 11개 fixture, 생성 C native 12회. 근거: `evidence/candidate-resource-reference-stores-20261007.json`.
 34. 완료: 정확한 referent의 mutable→shared 호출 재대여와 반환된 공유 자식·alias의 whole-owner hold를 연결. 공유 읽기는 공존하고 부모 수정·가변 호출은 자식 마지막 사용까지 금지하며 이후 재개. 직접 바인딩의 암시적 변환은 거부. 7개 fixture, 생성 C native 8회. 근거: `evidence/candidate-resource-shared-reborrows-20261007.json`.
 35. 완료: 명시적 ref mut *parent와 반환된 mutable 자식·후손의 세대를 연결. 부모와 부모 alias의 읽기·수정은 자식 마지막 사용까지 금지하고 이후 재개하며 shared→mutable 확대를 거부. 8개 fixture, 생성 C native 8회. 근거: `evidence/candidate-resource-mutable-reborrows-20261007.json`.
 36. 완료: 인자와 참조·필드·역참조 consumer의 평가 종료까지 loan을 유지. 앞쪽 shared/mutable 인자와 뒤쪽 경쟁 접근을 양쪽 순서로 거부하고, 앞쪽에서 복사한 scalar 읽기는 이후 수정과 공존. 반환된 중첩 호출 인자도 hold를 유지. 9개 fixture, 생성 C native 8회. 근거: `evidence/candidate-resource-argument-loans-20261007.json`.
 37. 완료: 반환 입력 origin을 호출자의 정확한 실제 인자로 치환하며 forward·재배치·wrapper·switch·뷰 반환을 연결. 미선택 입력의 loan은 호출 후 종료하고 선택된 입력 수정·지역 escape·두 입력 반환은 거부. CLI E2103을 명시. 7개 fixture, 생성 C native 8회. 근거: `evidence/candidate-resource-return-origins-20261007.json`.
 38. 완료: Unknown과 Static을 분리하고 단일 입력 origin의 직접·상호 재귀 요약을 bounded 고정점으로 증명. Static의 입력 origin 단축은 허용하고 근거 없는 cycle·입력 교환 재귀·지역 escape는 거부. 6개 fixture, 생성 C native 6회. 근거: `evidence/candidate-resource-recursive-origins-20261007.json`.
 39. 완료: Option/Result의 단일 safe-borrow leaf를 정체성·레이아웃·C payload·origin·generation에 연결. pattern 캡처와 ? 성공·암시적 오류 반환, mutable none을 검증. 명명 집합/배열에 참조 저장과 두 borrow leaf는 거부하며 30bit 표현 상한은 유지. 12개 fixture, 생성 C native 14회. 근거: `evidence/candidate-resource-tagged-borrows-20261007.json`.
-40. 분기·반복·조기 종료에서 borrow·loan 상태 합류.
+40. 완료: 도달 가능한 분기 arm·조기 종료·fallthrough/break/continue를 구분해 borrow와 재대여 loan의 합류를 연결. join 뒤 사용과 실제 backedge는 owner hold를 유지하며 dead return/use 및 continue 뒤 dead break가 origin이나 종료 증명을 바꾸지 않음. shared/mutable 분기·resource move·while/for와 오류 경로 18개 fixture, 두 후보 프로필의 CLI 관찰 및 생성 C native 24회. 33~39번도 최종 dev/release 후보로 60개 fixture·native 64회 통과. 근거: `evidence/candidate-resource-borrow-flow-20261007.json`, `evidence/candidate-resource-borrow-profile-regression-20261007.json`. 정확한 predicate 상관·가변 참조 binding 재대입·full CFG fixed point는 이번 slice에 포함하지 않음.
 41. 필요한 ref str·바이트 메타데이터를 SDK와 연결하고 텍스트 bracket 제한 유지.
 42. 실제 사용과 기존 계약이 뒷받침하는 경우에만 임시·필드 배열 뷰 확장.
 43. ADR0415 제한 유지: 가변 부분 뷰를 여러 가변 sibling 동시 보유로 확대하지 않기.
@@ -226,5 +229,5 @@ evidence/candidate-result-handling-alignment-20261007.json에 새 검사·도구
 20번 완료 후 주요 작업 99개(21~119)와 선택 검토 8개(120~127)를 구분한다. 주요 작업 모두가
 셀프호스팅 전에 끝나야 한다는 뜻은 아니며, 자기 소스의 도달 가능한 기능이 단계 전환을 결정한다.
 
-즉시 다음 작업은 **21번 비어 있지 않은 cleanup 본문과 receiver 검사 → 자원 MIR/C 실행 연결**이다.
+즉시 다음 작업은 **41번 ref str·바이트 메타데이터의 SDK 연결**이다.
 선택 기능은 별도 도입 판단을 거친다. 이 목록은 push·PR·설치·release를 승인하지 않는다.

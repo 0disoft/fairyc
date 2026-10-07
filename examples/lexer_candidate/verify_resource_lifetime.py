@@ -277,6 +277,29 @@ REJECTIONS[39]=[
  ('two-borrow-leaves','fn Result<ref i32,ref u8[]> bad(ref i32 p,ref u8[] q){return .ok(p);}fn i32 main(){return 0;}'),
 ]
 
+CASES[40]=[
+ ('loop-child-break-resume','fn i32 main(){var i32 n=7;let ref mut i32 p=ref mut n;let ref mut i32 child=ref mut *p;while(*child==7){*p=9;break;}return n;}', '',9,0),
+ ('branch-shared-loan','fn i32 f(bool yes){var i32 n=7;let ref i32 p=ref n;if(yes){n=9;}else{return *p;};return n;}fn i32 main(){return f(true)+f(false);}', '',16,0),
+ ('branch-exclusive-loan','fn i32 f(bool yes){var i32 n=7;let ref mut i32 p=ref mut n;if(yes){n=9;}else{return *p;};return n;}fn i32 main(){return f(true)+f(false);}', '',16,0),
+ ('switch-loan','enum E{A;B;}fn i32 f(E e){var i32 n=7;let ref i32 p=ref n;return switch(e){case .A:{n=9;n}case .B:{*p}};}fn i32 main(){return f(.A)+f(.B);}', '',16,0),
+ ('early-return-release','fn i32 f(bool yes){var i32 n=7;let ref i32 p=ref n;if(yes){return *p;};n=9;return n;}fn i32 main(){return f(true)+f(false);}', '',16,0),
+ ('loop-fresh-loans','fn i32 main(){var i32 n=0;while(n<3){let ref mut i32 p=ref mut n;*p=*p+1;}return n;}', '',3,0),
+ ('loop-break-no-backedge','fn i32 main(){var i32 n=7;let ref i32 p=ref n;while(*p==7){n=9;break;}return n;}', '',9,0),
+ ('loop-last-use-release','fn i32 main(){var i32 n=7;let ref i32 p=ref n;var i32 i=0;while(i<2){assert(*p==7);i+=1;continue;}n=9;return n;}', '',9,0),
+ ('branch-resource-move','resource R{i32 n;cleanup{mark(65);}}fn void take(R r){}fn i32 f(bool yes){let R r=R{.n=7};let ref i32 p=ref r.n;if(yes){take(r);return 9;}else{return *p;};return 0;}fn i32 main(){return f(true)+f(false);}', 'AA',16,0),
+ ('unreachable-last-use','fn i32 main(){var i32 n=7;let ref i32 p=ref n;n=9;return n;discard *p;}', '',9,0),
+ ('for-break-no-backedge','fn i32 main(){var i32 n=7;let ref i32 p=ref n;for(;*p==7;){n=9;break;}return n;}', '',9,0),
+ ('unreachable-origin','fn ref i32 id(ref i32 p){return p;let i32 n=7;return ref n;}fn i32 main(){let i32 n=7;return *id(ref n);}', '',7,0),
+]
+REJECTIONS[40]=[
+ ('branch-loan-after-join','fn i32 main(){var i32 n=7;let ref i32 p=ref n;if(true){n=9;}else{};return *p;}', 'E2101'),
+ ('continue-dead-break','fn i32 main(){var i32 n=7;let ref i32 p=ref n;while(*p==7){n=9;continue;break;}return n;}', 'E2101'),
+ ('branch-continue-dead-break','fn i32 main(){var i32 n=7;let ref i32 p=ref n;while(*p==7){n=9;if(true){continue;}else{break;};break;}return n;}', 'E2101'),
+ ('loop-reentrant-owner-write','fn i32 main(){var i32 n=7;let ref i32 p=ref n;while(*p==7){n=9;continue;}return n;}', 'E2101'),
+ ('loop-child-parent-write','fn i32 main(){var i32 n=7;let ref mut i32 p=ref mut n;let ref mut i32 child=ref mut *p;while(*child==7){*p=9;return *child;}return n;}', 'E2101'),
+ ('mixed-input-return','fn ref i32 f(ref i32 a,ref i32 b,bool yes){return if(yes){a}else{b};}fn i32 main(){return 0;}', 'E2103'),
+]
+
 def sha(path): return hashlib.sha256(path.read_bytes()).hexdigest()
 def save(path, value): path.write_text(json.dumps(value, ensure_ascii=False, indent=2)+'\n', encoding='utf-8', newline='\n')
 

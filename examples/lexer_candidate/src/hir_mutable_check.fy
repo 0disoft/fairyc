@@ -1,4 +1,5 @@
 module hir_mutable_check;
+import hir_borrow_paths as paths;
 import borrow_shapes as borrows;
 import tagged_types as tagged;
 import reference_types as refs;
@@ -19,6 +20,7 @@ fn bool charge(ref mut Context c) { c.work += 1; return c.work <= 1048576; }
 fn usize generation(ref h::Program p, ref mut Context c, ref mut v::Vec<Slot> slots, ref usize[] initial, ref usize[] summaries, usize id, usize depth) {
     if (id == 0 || c.problem.code != 0) { return 0; }
     let e = h::expression_at(p,id); let u32 kind = h::expression_code(e.kind);
+    if(!paths::reachable(p,e.start,e.end,ref mut c.work)){return 0;}
     let bool mutable = borrows::mutable(h::type_code(e.type));
     if (borrows::count(h::type_code(e.type))==0) { return 0; }
     if (kind == 15 || kind==21) { return 0; }
@@ -131,14 +133,14 @@ if (borrows::count(type)!=0) { discard generation(p,ref mut c,ref mut slots,init
             var usize j = 1; while (j <= h::expression_count(p)) {
                 if (!charge(ref mut c)) { return h::Problem { .code=2,.start=0,.end=0 }; }
                 let other = *v::at<Slot>(ref slots,j);
-                if (j > i && other.fresh && (loan.mutable || other.mutable) && *v::at<usize>(origins,j) == owner && loan.start < other.end && other.start < loan.end && !ancestor(ref slots,i,j) && !ancestor(ref slots,j,i)) { let e=h::expression_at(p,j); return h::Problem { .code=2101,.start=e.start,.end=e.end }; }
+                if (j > i && other.fresh && (loan.mutable || other.mutable) && *v::at<usize>(origins,j) == owner && loan.start < other.end && other.start < loan.end && !ancestor(ref slots,i,j) && !ancestor(ref slots,j,i) && !paths::separate(p,loan.start,other.start,other.end,ref mut c.work) && !paths::separate(p,loan.end-1,other.start,other.end,ref mut c.work)) { let e=h::expression_at(p,j); return h::Problem { .code=2101,.start=e.start,.end=e.end }; }
                 let e = h::expression_at(p,j);
                 if (h::expression_code(e.kind) == 3 && loan.start < e.end && e.start < loan.end) {
                     // The occurrence creating this loan is allowed; bounds and
                     // later arguments are separate occurrences and stay checked.
                     let receiver = h::expression_at(p,loan.receiver);
                     let bool creating = e.start >= receiver.start && e.end <= receiver.end;
-                    if (!creating) {
+                    if (!creating && paths::reachable(p,e.start,e.end,ref mut c.work) && !paths::separate(p,loan.start,e.start,e.end,ref mut c.work) && !paths::separate(p,loan.end-1,e.start,e.end,ref mut c.work)) {
                         let u32 type = h::type_code(e.type);
                         if (e.binding == owner && loan.mutable || (type == 11 || refs::mutable(type)) && *v::at<usize>(origins,j) == owner && !ancestor(ref slots,i,other.generation) && (loan.mutable || competing(p,j))) { return h::Problem { .code=2101,.start=e.start,.end=e.end }; }
                     }
@@ -147,5 +149,5 @@ if (borrows::count(type)!=0) { discard generation(p,ref mut c,ref mut slots,init
             }
         } i += 1;
     }
-    return c.problem;
+    return if(c.work>1048576){h::Problem{.code=2,.start=0,.end=0}}else{c.problem};
 }

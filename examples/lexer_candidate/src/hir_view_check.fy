@@ -1,4 +1,5 @@
 module hir_view_check;
+import hir_borrow_paths as paths;
 import borrow_shapes as borrows;
 import tagged_types as tagged;
 import reference_types as refs;
@@ -35,6 +36,7 @@ fn usize joined(ref mut Context c,usize a,usize b,usize start,usize end){if(a==6
 fn usize origin(ref h::Program p, ref mut Context c, usize id, usize depth) {
     if (id == 0 || c.problem.code != 0) { return 0; }
     let e = h::expression_at(p,id); let u32 kind = h::expression_code(e.kind);
+    if(!paths::reachable(p,e.start,e.end,ref mut c.work)){return 0;}
     c.work += 1; if (depth >= 64 || c.work > 1048576) { return fail(c,2,e.start,e.end); }
     if (!byte_view(h::type_code(e.type)) || kind == 15) { return 0; }
     if(kind==21){return 0;} // Capture metadata is not an evaluated reference value.
@@ -70,7 +72,7 @@ fn usize summary(ref h::Program p, ref mut Context c, usize binding, usize depth
     let f = h::function_at(p,fid); var usize result = 65538; var bool seen = false; var usize i = 1;
     while (i <= h::statement_count(p)) {
         let s = h::statement_at(p,i);
-        if (h::statement_code(s.kind) == 2 && s.start >= f.start && s.end <= f.end && s.expression != 0) {
+        if (h::statement_code(s.kind) == 2 && s.start >= f.start && s.end <= f.end && s.expression != 0 && paths::reachable(p,s.start,s.end,ref mut c.work)) {
             let usize value = origin(p,c,s.expression,depth + 1);
             result=joined(c,result,value,s.start,s.end);seen=seen || value!=65538;
         } i += 1;
@@ -84,18 +86,18 @@ fn usize summary(ref h::Program p, ref mut Context c, usize binding, usize depth
     }
     c.summary[binding] = result; c.color[binding] = 2; return result;
 }
-fn usize loop_end(ref h::Program p, h::Expression e) {
+fn usize loop_end(ref h::Program p, h::Expression e,ref mut Context c) {
     var usize end = e.end;
     if (h::expression_code(e.kind) == 3) {
         let binding = h::binding_at(p,e.binding); var usize i = 1;
         while (i <= h::statement_count(p)) {
             let s = h::statement_at(p,i); let u32 kind = h::statement_code(s.kind);
-            if ((kind == 5 || kind == 6) && e.start >= s.start && e.end <= s.end && binding.start < s.start && s.end > end) { end = s.end; } i += 1;
+            if ((kind == 5 || kind == 6) && e.start >= s.start && e.end <= s.end && binding.start < s.start && s.end > end && paths::reenters(p,s,ref mut c.work)) { end = s.end; } i += 1;
         }
     } return end;
 }
-fn usize held_end(ref h::Program p, usize id, h::Expression e) {
-    var usize end=loop_end(p,e);var usize i=1;
+fn usize held_end(ref h::Program p, usize id, h::Expression e,ref mut Context c) {
+    var usize end=loop_end(p,e,c);var usize i=1;
     while(i<=h::expression_count(p)){
         let parent=h::expression_at(p,i);let u32 kind=h::expression_code(parent.kind);
         if((kind==13 || kind==17 || kind==25 || kind==4 || kind==10 || kind==14) && parent.left==id && parent.end>end){end=parent.end;}
@@ -146,8 +148,8 @@ pub fn h::Problem check(ref h::Program p) {
     }
     i=1;while(i<=h::expression_count(p)){let e=h::expression_at(p,i);if(h::expression_code(e.kind)==19){var usize a=0;while(a<e.edge_count){let arm=h::expression_at(p,h::edge_at(p,e.edge_start+a));var usize j=0;while(j<arm.edge_count){let capture=h::expression_at(p,h::edge_at(p,arm.edge_start+j));if(capture.edge_count==1){c.initial[h::edge_at(p,capture.edge_start)]=e.left;}j+=1;}a+=1;}}i+=1;}
     i = 1; while (i <= h::expression_count(p)) {
-        let e = h::expression_at(p,i); if (h::expression_code(e.kind) == 3 && byte_view(h::type_code(e.type))) {
-            let usize end = held_end(p,i,e); if (end > c.last[e.binding]) { c.last[e.binding] = end; }
+        let e = h::expression_at(p,i); if (h::expression_code(e.kind) == 3 && byte_view(h::type_code(e.type)) && paths::reachable(p,e.start,e.end,ref mut c.work)) {
+            let usize end = held_end(p,i,e,ref mut c); if (end > c.last[e.binding]) { c.last[e.binding] = end; }
         } i += 1;
     }
     var bool changed=true;var usize rounds=0;while(changed && c.problem.code==0){changed=false;rounds+=1;if(rounds>64){return h::Problem{.code=2,.start=0,.end=0};}c.color=[0;1153];i=0;while(i<h::function_count(p)){let f=h::function_at(p,i);if(byte_view(h::type_code(h::binding_at(p,f.binding).type))){let usize old=c.summary[f.binding];let usize next=summary(p,ref mut c,f.binding,0);changed=changed || old!=next;}i+=1;}}
@@ -165,14 +167,14 @@ pub fn h::Problem check(ref h::Program p) {
     i = 1; while (i <= h::statement_count(p) && c.problem.code == 0) {
         let s = h::statement_at(p,i);
         if(h::statement_code(s.kind)==11){let call=h::expression_at(p,s.expression);var usize j=0;while(j<call.edge_count){let arg=h::expression_at(p,h::edge_at(p,call.edge_start+j));let u32 type=h::type_code(arg.type);if(type==9 || byte_view(type)){discard fail(ref mut c,4,arg.start,arg.end);}j+=1;}}
-        if (h::statement_code(s.kind) == 3) {
+        if (h::statement_code(s.kind) == 3 && paths::reachable(p,s.start,s.end,ref mut c.work)) {
             let usize owner = root(p,s.target);
             let bool through_mutable = owner != 0 && (h::type_code(h::binding_at(p,owner).type) == 11 || refs::mutable(h::type_code(h::binding_at(p,owner).type)));
             if (origin(p,ref mut c,s.expression,0) != 0 && byte_view(h::type_code(h::expression_at(p,s.target).type))) { discard fail(ref mut c,2102,s.start,s.end); }
             var usize j = 1; while (!through_mutable && j <= h::expression_count(p) && c.problem.code == 0) {
                 let e = h::expression_at(p,j); let usize loan = origin(p,ref mut c,j,0);
                 if (loan != 0 && loan == owner) {
-                    let usize start=first(p,ref mut c,j,0);var usize end = held_end(p,j,e); var usize k = 1;
+                    let usize start=first(p,ref mut c,j,0);var usize end = held_end(p,j,e,ref mut c); var usize k = 1;
                     while (k <= h::binding_count(p)) { if (c.initial[k] == j && c.last[k] > end) { end = c.last[k]; } k += 1; }
                     // Arguments stay held through later arguments and the call.
                     k = 1; while (k <= h::expression_count(p)) {
@@ -182,19 +184,21 @@ pub fn h::Problem check(ref h::Program p) {
                     }
                     // Source spans are half-open: an assignment ending at the borrow
                     // start completes before the loan begins.
-                    if (start < s.end && end > s.start) { discard fail(ref mut c,2101,s.start,s.end); }
+                    if (start < s.end && end > s.start && !paths::separate(p,start,s.start,s.end,ref mut c.work) && !paths::separate(p,end-1,s.start,s.end,ref mut c.work)) { discard fail(ref mut c,2101,s.start,s.end); }
                 } j += 1;
             }
         } i += 1;
     }
     // A whole resource move/burn is a competing access, just like replacement.
-    i=1;while(i<=h::expression_count(p) && c.problem.code==0){let moved=h::expression_at(p,i);if(h::expression_code(moved.kind)==24){var usize j=1;while(j<=h::expression_count(p)){let loan=h::expression_at(p,j);if(byte_view(h::type_code(loan.type)) && origin(p,ref mut c,j,0)==moved.binding){let usize begin=first(p,ref mut c,j,0);var usize end=held_end(p,j,loan);var usize local=1;while(local<=h::binding_count(p)){if(c.initial[local]==j && c.last[local]>end){end=c.last[local];}local+=1;}if(begin<moved.end && moved.start<end){discard fail(ref mut c,2101,moved.start,moved.end);}}j+=1;}}i+=1;}
+    i=1;while(i<=h::expression_count(p) && c.problem.code==0){let moved=h::expression_at(p,i);if(h::expression_code(moved.kind)==24){var usize j=1;while(j<=h::expression_count(p)){let loan=h::expression_at(p,j);if(byte_view(h::type_code(loan.type)) && origin(p,ref mut c,j,0)==moved.binding){let usize begin=first(p,ref mut c,j,0);var usize end=held_end(p,j,loan,ref mut c);var usize local=1;while(local<=h::binding_count(p)){if(c.initial[local]==j && c.last[local]>end){end=c.last[local];}local+=1;}if(begin<moved.end && moved.start<end && paths::reachable(p,moved.start,moved.end,ref mut c.work) && !paths::separate(p,begin,moved.start,moved.end,ref mut c.work) && !paths::separate(p,end-1,moved.start,moved.end,ref mut c.work)){discard fail(ref mut c,2101,moved.start,moved.end);}}j+=1;}}i+=1;}
+    if(c.work>1048576){return h::Problem{.code=2,.start=0,.end=0};}
     if (c.problem.code != 0) { return c.problem; }
     var v::Vec<usize> origins = v::empty<usize>(); i = 0;
     while (i <= h::expression_count(p)) {
         let usize value = origin(p,ref mut c,i,0);
         if (!v::push<usize>(ref mut origins,value).is_ok) { return h::Problem { .code=3,.start=0,.end=0 }; } i += 1;
     }
+    if(c.work>1048576){return h::Problem{.code=2,.start=0,.end=0};}
     if (c.problem.code != 0) { return c.problem; }
     return exclusive::check(p,ref c.initial[..],ref c.last[..],ref c.summary[..],ref origins);
 }

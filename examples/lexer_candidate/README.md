@@ -2800,3 +2800,27 @@ Unit 37: substitute return origins across calls and switches. See `docs/ops/evid
 Unit 38: prove bounded recursive return origin summaries. See `docs/ops/evidence/candidate-resource-recursive-origins-20261007.json` for the bounded executable fixtures and current profile identities.
 
 Unit 39: carry safe borrow leaves through Option and Result. See `docs/ops/evidence/candidate-resource-tagged-borrows-20261007.json` for the bounded executable fixtures and current profile identities.
+
+Unit 40 joins safe-borrow holds across reachable branches and loop exits. Shared
+and exclusive loans are released on paths whose last use is in another arm or
+that return before the access. A use after the join retains the whole owner.
+Loop fallthrough and continue retain external-owner loans across the backedge;
+break/return cannot turn a later unreachable break into an exit proof. Dead
+returns and uses contribute no origin or last-use hold. Path depth is bounded
+at 32 with the shared 1,048,576-work budget; unknown paths stay conservative and
+work exhaustion rejects the input. Mutable sibling loans remain exclusive.
+
+This is conservative source-span/outcome analysis for the candidate's admitted
+immutable borrow bindings, not the Go frontend's general CFG fixed point.
+Predicate correlation, mutable borrow binding reassignment and safe-borrow
+storage inside named aggregates/arrays remain closed. Unit 40's 18 fixtures and
+24 native runs cover both final candidate profiles. Units 33-39 were also
+replayed with those profiles (60 fixtures, 64 native runs). See
+`docs/ops/evidence/candidate-resource-borrow-flow-20261007.json` and
+`docs/ops/evidence/candidate-resource-borrow-profile-regression-20261007.json`.
+
+The candidate release build required the product COFF inspector's bounded
+section fanout adjustment in ADR 0473. The validation bootstrap still uses the
+explicit 120-second command-timeout overlay recorded in the receipt; integrating
+production timeout policy remains unit 75. Linux and self-hosting stage proofs
+remain later work.
