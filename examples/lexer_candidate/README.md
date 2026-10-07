@@ -2852,3 +2852,7 @@ Same-module `fn T id<T>(T n)` and `id<i32>(7)` specialize in Fairy code before o
 ### 후보 60: 값 보존 스칼라 캐스트
 
 `as`는 u8→i32/i64/u32/usize, i32→i64, u32→i64/usize의 기존 값 보존 조합만 연결한다. 피연산자는 한 번 평가하고 원래 정수 trap 의미를 유지한다. HIR kind 26/MIR kind 35는 원본·결과 타입을 독립 검증하며 위조 타입과 operator를 거부한다. 좁히기·부호 변경·같은 타입·bool/enum/포인터 cast는 허용하지 않는다. 실행 증거는 `docs/ops/evidence/candidate-resource-scalar-casts-20261007.json`에 있다. 전체 자기 소스 분류는 아직 완료로 세지 않는다.
+
+### 후보 53a: 함수 효과 권한
+
+`@effects`는 language/11의 12개 효과를 중복 없는 bitset으로 보존한다. 함수와 scalar generic 특수화의 직접 호출은 caller가 callee의 효과를 모두 선언해야 하며, forward/재귀·실행되지 않는 short-circuit 호출도 검사한다. HIR binding과 MIR target이 권한을 소유하며 MIR 검증은 caller 권한 제거와 미지 비트를 거부한다. 자원 cleanup과 모듈 import 전파는 아직 연결하지 않았다. 검증은 `docs/ops/evidence/candidate-resource-effects-calls-20261007.json`에 있고 원시 C/실행 기록은 `.cache/candidate-unit53`에 보관한다.

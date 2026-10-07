@@ -29,7 +29,7 @@ fn u32 mutated(ref h::Program p,u32 mutation){
     var v::Vec<h::Expression> expressions=v::empty<h::Expression>();var v::Vec<h::Statement> statements=v::empty<h::Statement>();
     var v::Vec<h::Block> blocks=v::empty<h::Block>();var v::Vec<usize> edges=v::empty<usize>();var v::Vec<h::Signature> signatures=v::empty<h::Signature>();var v::Vec<h::Drop> drops=v::empty<h::Drop>();
     var usize i=1;while(i<=h::binding_count(p)){var h::Binding b=h::binding_at(p,i);
-        let h::Binding changed=h::Binding{.kind=if(i==drop.function && mutation==13){.Function}else if(i==drop.receiver && mutation==5){.Parameter}else{b.kind},.type=if(i==drop.function && mutation==4){.I32}else{b.type},.start=b.start,.end=b.end,.owner=if(i==drop.receiver && mutation==6){1}else{b.owner},.scope=b.scope,.module_index=b.module_index,.declaration=b.declaration,.signature_start=b.signature_start,.signature_count=b.signature_count};
+        let h::Binding changed=h::Binding{.effects=b.effects,.kind=if(i==drop.function && mutation==13){.Function}else if(i==drop.receiver && mutation==5){.Parameter}else{b.kind},.type=if(i==drop.function && mutation==4){.I32}else{b.type},.start=b.start,.end=b.end,.owner=if(i==drop.receiver && mutation==6){1}else{b.owner},.scope=b.scope,.module_index=b.module_index,.declaration=b.declaration,.signature_start=b.signature_start,.signature_count=b.signature_count};
         assert(v::push<h::Binding>(ref mut bindings,changed).is_ok);i+=1;
     }
     i=0;while(i<h::function_count(p)){var h::Function f=h::function_at(p,i);if(f.binding==drop.function && mutation==7){f.public=true;}assert(v::push<h::Function>(ref mut functions,f).is_ok);i+=1;}

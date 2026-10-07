@@ -1,5 +1,6 @@
 module name_resolution;
 import syntax as syntax;
+import effect_declarations as effects;
 import generic_expand as generics;
 import nominal_types as nominal;
 import module_registry as modules;
@@ -242,10 +243,12 @@ fn Problem collect(ref syntax::Parsed parsed, ref mut Context context, ref mut v
     var usize index = 0;
     while (index < syntax::declaration_count(parsed)) {
         let syntax::Declaration item = syntax::declaration_at(parsed,index);
+        if(item.kind==12){let e=effects::read(parsed,index);if(e.code!=0){return fail(e.code,e.start,e.end);}}
         if (item.kind != 1 && item.kind!=12 && !(context.modules && item.kind == 2)) {
-            if ((item.kind != 3 && item.kind != 4 && item.kind != 6 && item.kind != 11) || item.owner_end != 0 || item.unsafe_end != 0 || (item.attribute_count != 0 && item.kind!=6) ||
+            if ((item.kind != 3 && item.kind != 4 && item.kind != 6 && item.kind != 11) || item.owner_end != 0 || item.unsafe_end != 0 || (item.attribute_count != 0 && item.kind!=6 && item.kind!=3) ||
                 item.generic_parameters != 0 || (item.kind == 3 && !scalar_type(parsed,item.result_type,true))) { return fail(3,item.start,item.end); }
-            // Effects/attributes remain closed until their own implementation.
+            if(item.kind==3){let e=effects::read(parsed,index);if(e.code!=0){return fail(e.code,e.start,e.end);}}
+            // Resource attributes stay closed except for existing abilities.
             if(item.kind==6 && (item.cleanup_body==0 || item.cleanup_attribute_count!=0)){return fail(3,item.start,item.end);}
             if (!simple(source[item.name_start..item.name_end])) { return fail(3,item.name_start,item.name_end); }
             var usize previous = 0;

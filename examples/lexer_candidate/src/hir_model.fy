@@ -34,7 +34,7 @@ pub struct Signature { Type type; }
 // Binding owner is the enclosing Function Binding ID; scope is its lexical scope
 // ID. Function/External use module_index+declaration as authoritative call target.
 // Callable result is type; signature_start/count index the Type signature arena.
-pub struct Binding { BindingKind kind; Type type; usize start; usize end; usize owner; usize scope; usize module_index; usize declaration; usize signature_start; usize signature_count; }
+pub struct Binding { u32 effects; BindingKind kind; Type type; usize start; usize end; usize owner; usize scope; usize module_index; usize declaration; usize signature_start; usize signature_count; }
 pub struct Function { usize binding; usize start; usize end; usize scope; bool public; usize body; usize parameter_start; usize parameter_count; }
 // An empty body has no callable/receiver. Every resource owns exactly one
 // classified drop definition; a nonempty body links one private typed function.
@@ -191,7 +191,7 @@ pub fn Result<Program,Problem> assemble_resources(bytes::Buffer source, bytes::B
     var usize i = 0;
     while (i < nb) {
         let Binding b = *v::at<Binding>(ref bindings,i);
-        if (b.start > b.end || b.end > ns || b.owner > nb || type_code(b.type) == type_code(.Invalid) || type_code(b.type) == type_code(.Callable) || b.signature_start > ntypes || b.signature_count > ntypes - b.signature_start) { return .err(Problem { .code = 4, .start = b.start, .end = b.end }); }
+        if (b.effects>4095 || (b.effects!=0 && !function_kind(b.kind) && binding_code(b.kind)!=5) || b.start > b.end || b.end > ns || b.owner > nb || type_code(b.type) == type_code(.Invalid) || type_code(b.type) == type_code(.Callable) || b.signature_start > ntypes || b.signature_count > ntypes - b.signature_start) { return .err(Problem { .code = 4, .start = b.start, .end = b.end }); }
         if (!represented_type(b.type) || !shapes::valid_type(ref nominal,type_code(b.type),true) || ((binding_code(b.kind) >= 6 && binding_code(b.kind) <= 8) && shapes::find(ref nominal,type_code(b.type)) == 0)) { return .err(Problem { .code = 4, .start = b.start, .end = b.end }); }
         if ((binding_code(b.kind) >= 6 && binding_code(b.kind) <= 8) && shapes::at(ref nominal,shapes::find(ref nominal,type_code(b.type)) - 1).binding != i + 1) { return .err(Problem { .code = 4, .start = b.start, .end = b.end }); }
         if (function_kind(b.kind) || binding_code(b.kind) == binding_code(.External) || binding_code(b.kind) == binding_code(.Struct) || binding_code(b.kind) == 7 || binding_code(b.kind)==8) { if (b.owner != 0 || b.scope != 0 || b.declaration == 0) { return .err(Problem { .code = 4, .start = b.start, .end = b.end }); } }
@@ -234,6 +234,9 @@ pub fn Result<Program,Problem> assemble_resources(bytes::Buffer source, bytes::B
             let Binding b = *v::at<Binding>(ref bindings,e.binding - 1);
             if (type_code(e.type) != type_code(b.type) || ((kind == 3 || kind == 24) && (function_kind(b.kind) || binding_code(b.kind) == binding_code(.External) || binding_code(b.kind) == binding_code(.Struct) || binding_code(b.kind) == 7 || binding_code(b.kind)==8)) || (expression_code(e.kind) == expression_code(.Call) && binding_code(b.kind) != binding_code(.Function) && binding_code(b.kind) != binding_code(.External))) { return .err(Problem { .code = 4, .start = e.start, .end = e.end }); }
             if (expression_code(e.kind) == expression_code(.Call)) {
+                var bool attached=false;var usize owner_index=0;
+                while(owner_index<nf){let f=*v::at<Function>(ref functions,owner_index);if(f.start<=e.start && e.end<=f.end){attached=true;if((v::at<Binding>(ref bindings,f.binding-1).effects&b.effects)!=b.effects){return .err(Problem{.code=7102,.start=e.start,.end=e.end});}}owner_index+=1;}
+                if(!attached){return .err(Problem{.code=4,.start=e.start,.end=e.end});}
                 if (e.edge_count != b.signature_count) { return .err(Problem { .code = 4, .start = e.start, .end = e.end }); }
                 var usize j = 0;
                 while (j < e.edge_count) {

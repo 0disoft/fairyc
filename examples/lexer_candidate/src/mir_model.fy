@@ -19,7 +19,7 @@ import resource_identity as resources;
 // 6 bool, 7 void. Operators match hir_model's exhaustive operator_code.
 pub struct Problem { u32 code; usize start; usize end; }
 pub struct Signature { u32 type; }
-pub struct Target { usize binding; usize module_index; usize declaration; u32 result; usize signature_start; usize signature_count; usize start; usize end; bool external; }
+pub struct Target { u32 effects; usize binding; usize module_index; usize declaration; u32 result; usize signature_start; usize signature_count; usize start; usize end; bool external; }
 pub struct Function { usize target; usize entry; usize local_start; usize local_count; usize block_start; usize block_count; usize parameter_start; usize parameter_count; usize start; usize end; bool public; }
 pub struct Local { usize function; usize binding; u32 type; bool parameter; bool mutable; usize start; usize end; }
 pub struct Drop { u32 abilities; u32 type; usize target; bool nonempty; }

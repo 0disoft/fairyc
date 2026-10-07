@@ -8,6 +8,7 @@ import enum_types as enums;
 import name_resolution as names;
 import syntax as syntax;
 import scalar_casts as casts;
+import effect_declarations as effects;
 import type_state as state;
 import nominal_types as nominal;
 import resource_identity as resources;
@@ -190,6 +191,8 @@ fn state::Value expression(ref names::Resolved resolved, ref mut v::Vec<state::S
             let u32 type = state::symbols(tables,callee_id - 1);
             return recorded(tables,id,value(type,terminates));
         }
+        let required=effects::read(parsed,callee.declaration-1);
+        if(!effects::includes(effects::caller(parsed,node.start,node.end),required.bits)){return error(problem,7102,node.start,node.end,required.bits,0);}
         let syntax::Declaration function = syntax::declaration_at(parsed,callee.declaration - 1);
         var usize parameters = 0; var usize entry_index = function.entry_start;
         while (entry_index < function.entry_start + function.entry_count) {

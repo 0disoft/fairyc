@@ -20,7 +20,7 @@ fn shapes::Table layout(u32 mutation) {
 }
 fn m::Program forged(u32 mutation) {
     var bytes::Buffer source=bytes::empty();assert(bytes::append(ref mut source,b"main").is_ok);var bytes::Buffer payload=bytes::empty();assert(bytes::append(ref mut payload,b"4").is_ok);
-    var v::Vec<m::Target> targets=v::empty<m::Target>();assert(v::push<m::Target>(ref mut targets,m::Target{.binding=1,.module_index=0,.declaration=1,.result=1,.signature_start=0,.signature_count=0,.start=0,.end=4,.external=false}).is_ok);
+    var v::Vec<m::Target> targets=v::empty<m::Target>();assert(v::push<m::Target>(ref mut targets,m::Target{.effects=0,.binding=1,.module_index=0,.declaration=1,.result=1,.signature_start=0,.signature_count=0,.start=0,.end=4,.external=false}).is_ok);
     var v::Vec<m::Function> functions=v::empty<m::Function>();assert(v::push<m::Function>(ref mut functions,m::Function{.target=1,.entry=1,.local_start=0,.local_count=5,.block_start=0,.block_count=1,.parameter_start=0,.parameter_count=0,.start=0,.end=4,.public=false}).is_ok);
     var v::Vec<m::Local> locals=v::empty<m::Local>();assert(v::push<m::Local>(ref mut locals,local(1)).is_ok);assert(v::push<m::Local>(ref mut locals,local(196609)).is_ok);assert(v::push<m::Local>(ref mut locals,local(1)).is_ok);assert(v::push<m::Local>(ref mut locals,local(1)).is_ok);assert(v::push<m::Local>(ref mut locals,local(196610)).is_ok);
     var m::Operation value=state::operation(1,1,1,1,0,0,0,0,1);value.function=1;value.block=1;value.payload_end=1;value.next=2;

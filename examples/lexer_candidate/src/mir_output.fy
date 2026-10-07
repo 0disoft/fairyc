@@ -40,7 +40,8 @@ pub fn u32 render(ref m::Program p, ref mut bytes::Buffer out) {
         if (bytes::len(out) > 2097152 - 1024) { return 4; }
         let m::Target t = m::target_at(p,id);
         let usize[20] fields = [id,t.binding,t.module_index,t.declaration,t.result as usize,t.signature_start,t.signature_count,t.start,t.end,if (t.external) { 1 } else { 0 },0,0,0,0,0,0,0,0,0,0];
-        if (!row(out,b"T",fields,10) || !end(out)) { return 3; } id += 1;
+        if (!row(out,b"T",fields,10) || !end(out)) { return 3; }
+        if(t.effects!=0){let usize[20] authority=[id,t.effects as usize,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];if(!row(out,b"A",authority,2) || !end(out)){return 3;}}id += 1;
     }
     id = 0;
     while (id < m::signature_count(p)) {

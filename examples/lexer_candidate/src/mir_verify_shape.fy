@@ -123,7 +123,7 @@ pub fn m::Problem check(ref m::Program p) {
     }
     i = 1; while (i <= m::target_count(p)) {
         let m::Target t = m::target_at(p,i);
-        if (t.external || t.module_index != m::module_index(p) || *v::at<usize>(ref bodies,i) == 0) { return problem(1001,t.start,t.end); }
+        if (t.effects>4095 || t.external || t.module_index != m::module_index(p) || *v::at<usize>(ref bodies,i) == 0) { return problem(1001,t.start,t.end); }
         var usize j = 1; while (j < i) {
             let m::Target other = m::target_at(p,j);
             if (other.binding == t.binding || other.module_index == t.module_index && other.declaration == t.declaration) { return problem(1001,t.start,t.end); } j += 1;
@@ -168,6 +168,7 @@ pub fn m::Problem check(ref m::Program p) {
             }
         } else if (b.kind == 5) {
             let m::Target t = m::target_at(p,b.callee);
+            if((m::target_at(p,f.target).effects&t.effects)!=t.effects){return problem(7102,b.start,b.end);}
             let usize drop=if(b.type==0){0}else{m::drop_index(p,b.type)};
             if (b.left!=0 || b.right!=0 || b.operator!=0 || b.check!=0 || b.trap_mask!=0 || b.value != 0 || b.alternative != 0 || (if(b.type==0){m::drop_target(p,b.callee)}else{drop==0 || m::drop_at(p,drop-1).target!=b.callee}) || (if (t.result == 7) { b.destination != 0 } else { !local(p,b.destination,b.function,t.result) })) { return problem(1001,b.start,b.end); }
             if (b.destination != 0) { let ref mut usize count = v::at_mut<usize>(ref mut definitions,b.destination); *count += 1; }

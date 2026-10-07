@@ -400,6 +400,28 @@ REJECTIONS[60]=[
  ('enum-cast','enum E{A;}fn i32 main(){let E e=.A;discard e as i32;return 0;}'),
 ]
 
+CASES[53]=[
+ ('declared-call','@effects(console)fn i32 f(){mark(65);return 7;}@effects(console)fn i32 main(){return f();}','A',7,0),
+ ('canonical-union','@effects(console,filesystem)fn i32 f(){return 7;}@effects(filesystem,console,random)fn i32 main(){return f();}','',7,0),
+ ('wrapper-forward','@effects(clock)fn i32 wrap(){return f();}@effects(clock)fn i32 f(){return 7;}@effects(clock)fn i32 main(){return wrap();}','',7,0),
+ ('pure-recursion','@effects(random)fn i32 count(i32 n){return if(n==0){7}else{count(n-1)};}@effects(random)fn i32 main(){return count(3);}','',7,0),
+ ('generic-authority','@effects(clock)fn T id<T>(T n){return n;}@effects(clock)fn i32 main(){return id<i32>(7);}','',7,0),
+ ('onchain-set','@effects(storage_write,storage_read,external_call,emit,block_context)fn i32 f(){return 7;}@effects(block_context,emit,external_call,storage_read,storage_write)fn i32 main(){return f();}','',7,0),
+]
+REJECTIONS[53]=[
+ ('missing-call','@effects(console)fn i32 f(){return 7;}fn i32 main(){return f();}','E7102'),
+ ('missing-wrapper','@effects(clock)fn i32 f(){return 7;}fn i32 wrapper(){return f();}fn i32 main(){return wrapper();}','E7102'),
+ ('unexecuted-call','@effects(console)fn bool f(){return true;}fn i32 main(){discard false&&f();return 0;}','E7102'),
+ ('write-not-read','@effects(storage_read)fn i32 f(){return 7;}@effects(storage_write)fn i32 main(){return f();}','E7102'),
+ ('empty-effects','@effects()fn i32 main(){return 0;}','E7101'),
+ ('duplicate-argument','@effects(console,console)fn i32 main(){return 0;}','E7101'),
+ ('duplicate-attribute','@effects(console)@effects(clock)fn i32 main(){return 0;}','E7101'),
+ ('unknown-effect','@effects(allocate)fn i32 main(){return 0;}','E7101'),
+ ('literal-effect','@effects(1)fn i32 main(){return 0;}','E7101'),
+ ('qualified-effect','@effects(std::console)fn i32 main(){return 0;}','E7101'),
+ ('unused-template-effects','@effects(unknown)fn T id<T>(T n){return n;}fn i32 main(){return 0;}','E7101'),
+]
+
 def sha(path): return hashlib.sha256(path.read_bytes()).hexdigest()
 def save(path, value): path.write_text(json.dumps(value, ensure_ascii=False, indent=2)+'\n', encoding='utf-8', newline='\n')
 

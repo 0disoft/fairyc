@@ -11,7 +11,7 @@ fn m::Program fixture(u32 mutation) {
     let u32 array=arrays::make(3,1);
     var bytes::Buffer source=bytes::empty();assert(bytes::append(ref mut source,b"main a b").is_ok);
     var bytes::Buffer payload=bytes::empty();assert(bytes::append(ref mut payload,b"07").is_ok);
-    var v::Vec<m::Target> targets=v::empty<m::Target>();assert(v::push<m::Target>(ref mut targets,m::Target { .binding=1,.module_index=0,.declaration=1,.result=if(mutation==6){11}else{1},.signature_start=0,.signature_count=0,.start=0,.end=4,.external=false }).is_ok);
+    var v::Vec<m::Target> targets=v::empty<m::Target>();assert(v::push<m::Target>(ref mut targets,m::Target { .effects = 0, .binding=1,.module_index=0,.declaration=1,.result=if(mutation==6){11}else{1},.signature_start=0,.signature_count=0,.start=0,.end=4,.external=false }).is_ok);
     var v::Vec<m::Function> functions=v::empty<m::Function>();assert(v::push<m::Function>(ref mut functions,m::Function { .target=1,.entry=1,.local_start=0,.local_count=8,.block_start=0,.block_count=1,.parameter_start=0,.parameter_count=0,.start=0,.end=8,.public=false }).is_ok);
     var v::Vec<m::Local> locals=v::empty<m::Local>();var usize i=1;
     while(i<=8){assert(v::push<m::Local>(ref mut locals,m::Local { .function=1,.binding=if(i==1){1}else{0},.type=if(i==1){array}else if(i==3){11}else if(i==4 || i==5){5}else if(i==8){1}else{3},.parameter=false,.mutable=i==1 && mutation!=1,.start=0,.end=4 }).is_ok);i+=1;}
