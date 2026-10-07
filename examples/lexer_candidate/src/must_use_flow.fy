@@ -17,7 +17,8 @@ fn void expression(ref names::Resolved resolved,ref v::Vec<state::Slot> types,re
     if(id==0 || c.problem.code!=0){return;}let p=names::parsed(resolved);let e=syntax::expression_at(p,id);c.work+=1;
     if(depth>=64 || c.work>1048576){fail(c,10,e.start,e.end);return;}
     if(e.kind==6){let usize target=state::uses(types,e.left-1);if(target!=0){let symbol=names::symbol_at(resolved,target);
-        if(symbol.kind==1){let info=attributes::read(p,symbol.declaration-1);if(info.must_use && !handled){fail(c,4202,e.start,e.end);c.problem.move_start=info.must_start;c.problem.move_end=info.must_end;return;}}}
+        if(symbol.kind==1){let info=attributes::read(p,symbol.declaration-1);if(info.must_use && !handled){fail(c,4202,e.start,e.end);c.problem.move_start=info.must_start;c.problem.move_end=info.must_end;return;}}
+        else if(symbol.kind==5 && names::external_signature(resolved,target).must_use && !handled){fail(c,4202,e.start,e.end);return;}}
         var usize i=0;while(i<syntax::call_argument_count(p,id)){expression(resolved,types,c,syntax::call_argument(p,id,i),true,depth+1);i+=1;}return;
     }
     if(e.kind==3){expression(resolved,types,c,e.left,handled,depth+1);return;}

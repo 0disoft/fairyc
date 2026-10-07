@@ -114,7 +114,7 @@ evidence/candidate-result-handling-alignment-20261007.json에 새 검사·도구
 
 61. 기존 스칼라 다중 파일 검사에 nominal/tagged/resource 타입 연결.
 62. 모듈 간 선언 정체성과 private/public 범위 연결.
-63. 가져온 함수 시그니처·제네릭 인스턴스·반환 origin 요약 연결.
+63. 부분 완료: imported scalar 함수의 effects·must-use를 Registry → Resolved → owned HIR에 복사해 보존. 공급자 선언 오류와 caller 권한 누락·반환값 무시를 거부하며 Registry 정리 후에도 metadata가 유지됨. dev/release native API test 각 2개 통과. 근거: `evidence/candidate-resource-module-contracts-20261007.json`. nominal/generic/반환 origin과 전 프로그램 MIR/C 연결은 남음.
 64. 모듈 간 HIR/MIR·호출·레이아웃 순서·C 심벌 이름 통합.
 65. manifest 기반 소스 탐색과 source-root/module 경로 검사.
 66. 패키지 의존성·version/UID/language 정체성·순환 오류 처리.
@@ -233,5 +233,5 @@ evidence/candidate-result-handling-alignment-20261007.json에 새 검사·도구
 20번 완료 후 주요 작업 99개(21~119)와 선택 검토 8개(120~127)를 구분한다. 주요 작업 모두가
 셀프호스팅 전에 끝나야 한다는 뜻은 아니며, 자기 소스의 도달 가능한 기능이 단계 전환을 결정한다.
 
-즉시 다음 작업은 **53번 effects 선언·호출 검사와 54~55번 unsafe/FFI 및 61~64번 모듈 정체성 선행 연결**이다. 41번 SDK 텍스트 연결과 46~52번 컨테이너·파일은 이 의존성 이후에 이어간다.
+즉시 다음 작업은 **54~55번 unsafe/FFI 및 61~64번 nominal 모듈 정체성 선행 연결**이다. 41번 SDK 텍스트 연결과 46~52번 컨테이너·파일은 이 의존성 이후에 이어간다.
 선택 기능은 별도 도입 판단을 거친다. 이 목록은 push·PR·설치·release를 승인하지 않는다.

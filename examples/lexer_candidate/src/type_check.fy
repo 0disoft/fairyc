@@ -177,6 +177,7 @@ fn state::Value expression(ref names::Resolved resolved, ref mut v::Vec<state::S
         if (callee.kind != 1 && callee.kind != 5) { let syntax::Expression source = syntax::expression_at(parsed,node.left); return error(problem,6,source.start,source.end,8,state::symbols(tables,callee_id - 1)); }
         state::set_expressions(tables,node.left - 1,8);
         if (callee.kind == 5) {
+            let signature=names::external_signature(resolved,callee_id);if(!effects::includes(effects::caller(parsed,node.start,node.end),signature.effects)){return error(problem,7102,node.start,node.end,signature.effects,0);}
             let usize count = names::external_signature(resolved,callee_id).parameter_count;
             let usize start = names::external_signature(resolved,callee_id).parameter_start;
             if (count != syntax::call_argument_count(parsed,id)) { return error(problem,5,node.start,node.end,0,0); }

@@ -2864,3 +2864,7 @@ Same-module `fn T id<T>(T n)` and `id<i32>(7)` specialize in Fairy code before o
 ### 후보 56a: must-use 호출 계약
 
 단일 무인자 `@must_use`는 inert 반환 함수에만 붙인다. 직접 무시한 호출 및 괄호·블록·if/switch의 무시된 끝값은 E4202로 거부한다. binding/return/argument/operator/cast/condition/aggregate 또는 명시 `discard`는 호출 값의 처리로 인정한다. 일반 함수와 scalar generic 특수화의 HIR binding에 marker를 소유하며 MIR/C에는 실행 비용을 추가하지 않는다. resource/Result/safe borrow/void 반환과 malformed 선언은 E4201이다. @test/@const_eval과 import marker 연결은 아직 남았다. 증거: `docs/ops/evidence/candidate-resource-must-use-20261007.json`. tagged .some 생성자를 함수로 잘못 분류하던 초기 walker 오류는 수정했고 정상 Option 처리 fixture로 검증했다.
+
+### Imported scalar call contracts (unit 63 partial)
+
+Registry items own effects and must-use markers; copied external signatures and HIR bindings preserve them after registry cleanup. Provider declaration errors and caller authority/ignored-value failures are checked at the actual imported target. Both native profiles pass two API tests; see `docs/ops/evidence/candidate-resource-module-contracts-20261007.json`. Imported nominal types, generic instances, borrow origins and whole-program linking remain pending.

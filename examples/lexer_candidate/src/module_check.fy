@@ -10,7 +10,7 @@ import std::io as io;
 
 @effects(console)
 fn void message(u32 code) {
-    discard io::write_stderr(if (code == 1) { "duplicate module" } else if (code == 2) { "duplicate name in scope" }
+    discard io::write_stderr(if(code==7101){"E7101 invalid effects declaration"}else if(code==4201){"E4201 invalid must_use declaration"}else if (code == 1) { "duplicate module" } else if (code == 2) { "duplicate name in scope" }
         else if (code == 3 || code == 4) { "unresolved import" }
         else if (code == 5) { "unresolved imported item" } else if (code == 6) { "private imported item" }
         else if (code == 7) { "duplicate import alias" }
@@ -29,7 +29,7 @@ pub fn i32 run(syntax::Parsed parsed, ref modules::Registry registry, usize modu
     let names::Resolved resolved = names::resolve_modules(parsed,registry,module_index);
     let names::Problem name_problem = names::problem(ref resolved);
     if (name_problem.code != 0) {
-        if (name_problem.code < 7) { return name_output::errors(ref resolved,path); }
+        if (name_problem.code < 7 || name_problem.code==4201 || name_problem.code==7101) { return name_output::errors(ref resolved,path); }
         output::prefix(names::source_view(ref resolved),path,name_problem.start);
         message(if (name_problem.code == 7) { 4 } else if (name_problem.code == 8) { 5 } else if (name_problem.code == 9) { 6 } else { 9 });
         output::range(name_problem.start,name_problem.end); return 2;

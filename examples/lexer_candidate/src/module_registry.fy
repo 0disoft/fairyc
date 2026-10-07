@@ -1,5 +1,6 @@
 module module_registry;
 import syntax as syntax;
+import effect_declarations as attributes;
 import scanner as scanner;
 import type_state as state;
 import std::bytes as bytes;
@@ -10,7 +11,7 @@ import std::vec as v;
 pub struct Problem { u32 code; usize module_index; usize start; usize end; }
 pub struct Module { usize start; usize end; }
 pub struct Import { usize module_index; usize alias_start; usize alias_end; usize path_start; usize path_end; usize start; usize end; }
-pub struct Item { usize module_index; usize declaration; usize start; usize end; bool public; u32 result; usize parameter_start; usize parameter_count; }
+pub struct Item { u32 effects; bool must_use; usize module_index; usize declaration; usize start; usize end; bool public; u32 result; usize parameter_start; usize parameter_count; }
 pub struct Lookup { u32 code; usize item; }
 pub resource Registry { bytes::Buffer spellings; v::Vec<Module> modules; v::Vec<Import> imports; v::Vec<Item> items; v::Vec<u32> parameters; cleanup { } }
 pub fn Registry empty() { return Registry { .spellings = bytes::empty(), .modules = v::empty<Module>(), .imports = v::empty<Import>(), .items = v::empty<Item>(), .parameters = v::empty<u32>() }; }
@@ -113,7 +114,9 @@ pub fn Result<Registry,Problem> build(ref v::Vec<syntax::Parsed> sources) {
         } else {
             function_count += 1;
             if (function_count > 128) { return .err(fail(10,module_index,declaration.start,declaration.end)); }
-            if (declaration.owner_end != 0 || declaration.unsafe_end != 0 || declaration.attribute_count != 0 || declaration.generic_parameters != 0 || !scalar(parsed,declaration.result_type,true)) { return .err(fail(9,module_index,declaration.start,declaration.end)); }
+            if (declaration.owner_end != 0 || declaration.unsafe_end != 0 || declaration.generic_parameters != 0 || !scalar(parsed,declaration.result_type,true)) { return .err(fail(9,module_index,declaration.start,declaration.end)); }
+            let info=attributes::read(parsed,index);if(info.code!=0){return .err(fail(if(info.code==3){9}else{info.code},module_index,info.start,info.end));}
+            if(info.must_use && state::primitive(parsed,declaration.result_type)==7){return .err(fail(4201,module_index,info.must_start,info.must_end));}
             let usize parameter_start = v::len<u32>(ref parameters);
             var usize e = declaration.entry_start;
             while (e < declaration.entry_start + declaration.entry_count) {
@@ -126,7 +129,7 @@ pub fn Result<Registry,Problem> build(ref v::Vec<syntax::Parsed> sources) {
             }
             let usize parameter_count = v::len<u32>(ref parameters) - parameter_start;
             if (parameter_count > 128) { return .err(fail(10,module_index,declaration.start,declaration.end)); }
-            let Item entry = Item { .module_index, .declaration = index + 1, .start = name_start, .end = name_end, .public = declaration.public, .result = state::primitive(parsed,declaration.result_type), .parameter_start, .parameter_count };
+            let Item entry = Item { .effects=info.bits,.must_use=info.must_use,.module_index, .declaration = index + 1, .start = name_start, .end = name_end, .public = declaration.public, .result = state::primitive(parsed,declaration.result_type), .parameter_start, .parameter_count };
             if (!v::push<Item>(ref mut item_entries,entry).is_ok) { return .err(fail(11,module_index,declaration.start,declaration.end)); }
         }
         index += 1;
