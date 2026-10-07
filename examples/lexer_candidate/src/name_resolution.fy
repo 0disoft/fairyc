@@ -1,6 +1,7 @@
 module name_resolution;
 import syntax as syntax;
 import effect_declarations as effects;
+import foreign_declarations as foreign;
 import generic_expand as generics;
 import nominal_types as nominal;
 import module_registry as modules;
@@ -245,9 +246,10 @@ fn Problem collect(ref syntax::Parsed parsed, ref mut Context context, ref mut v
         let syntax::Declaration item = syntax::declaration_at(parsed,index);
         if(item.attribute_count!=0){let e=effects::read(parsed,index);if(e.code==4201 || item.kind==12 && e.code!=0){return fail(e.code,e.start,e.end);}}
         if (item.kind != 1 && item.kind!=12 && !(context.modules && item.kind == 2)) {
-            if ((item.kind != 3 && item.kind != 4 && item.kind != 6 && item.kind != 11) || item.owner_end != 0 || (item.attribute_count != 0 && item.kind!=6 && item.kind!=3) ||
+            if ((item.kind != 3 && item.kind != 4 && item.kind != 6 && item.kind != 9 && item.kind != 11) || item.owner_end != 0 || (item.attribute_count != 0 && item.kind!=6 && item.kind!=3 && item.kind!=9) ||
                 item.generic_parameters != 0 || (item.kind == 3 && !scalar_type(parsed,item.result_type,true))) { return fail(3,item.start,item.end); }
-            if(item.kind==3 || item.kind==6){let e=effects::read(parsed,index);if(e.code!=0){return fail(e.code,e.start,e.end);}}
+            if(item.kind==3 || item.kind==6 || item.kind==9){let e=effects::read(parsed,index);if(e.code!=0){return fail(e.code,e.start,e.end);}}
+            if(item.kind==9){let f=foreign::read(parsed,index);if(f.code!=0){return fail(f.code,f.start,f.end);}}
             // Resource attributes stay closed except for existing abilities.
             if(item.kind==6 && (item.cleanup_body==0 || item.cleanup_attribute_count!=0)){return fail(3,item.start,item.end);}
             if (!simple(source[item.name_start..item.name_end])) { return fail(3,item.name_start,item.name_end); }
@@ -258,7 +260,7 @@ fn Problem collect(ref syntax::Parsed parsed, ref mut Context context, ref mut v
             }
             if (context.global_count >= 128) { return fail(4,item.name_start,item.name_end); }
             let usize slot = context.global_count;
-            let Symbol value = Symbol { .kind = if (item.kind == 4) { 6 } else if (item.kind == 6) { 9 } else if (item.kind == 11) { 7 } else { 1 }, .start = item.name_start, .end = item.name_end, .scope = 0,
+            let Symbol value = Symbol { .kind = if (item.kind == 4) { 6 } else if (item.kind == 6) { 9 } else if (item.kind == 11) { 7 } else if(item.kind==9){11}else { 1 }, .start = item.name_start, .end = item.name_end, .scope = 0,
                 .owner = 0, .type_root = item.result_type, .entry = 0, .declaration = index + 1 };
             if (!v::push<Symbol>(symbols,value).is_ok) { return fail(5,item.name_start,item.name_end); }
             let usize symbol = v::len<Symbol>(symbols);

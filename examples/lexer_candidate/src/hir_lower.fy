@@ -3,6 +3,7 @@ import reference_types as refs;
 import resource_abilities as abilities;
 import hir_model as h;
 import unsafe_scopes as unsafe_scopes;
+import foreign_declarations as foreign;
 import effect_declarations as effects;
 import tagged_types as tagged;
 import hir_view_check as views;
@@ -33,11 +34,12 @@ fn bool prepare(ref typing::Typed input, usize module_index, ref mut v::Vec<h::B
     while (i <= names::symbol_count(resolved)) {
         let names::Symbol s = names::symbol_at(resolved,i);
         let h::Type type = state::type(typing::symbol_type(input,i));
-        if (s.kind < 1 || s.kind > 10 || h::type_code(type) == h::type_code(.Invalid) || h::type_code(type) == h::type_code(.Callable) || s.start > s.end || s.end > syntax::source_view(parsed).len || s.owner > names::symbol_count(resolved)) { discard state::fail(c,4,s.start,s.end); return false; }
+        if (s.kind < 1 || s.kind > 11 || h::type_code(type) == h::type_code(.Invalid) || h::type_code(type) == h::type_code(.Callable) || s.start > s.end || s.end > syntax::source_view(parsed).len || s.owner > names::symbol_count(resolved)) { discard state::fail(c,4,s.start,s.end); return false; }
         var usize target_module = module_index; var usize declaration = s.declaration;
         if (s.kind == 5) { let signature = names::external_signature(resolved,i); target_module = signature.module_index; declaration = signature.declaration; }
         let usize owner=if(s.owner!=0 && names::symbol_at(resolved,s.owner).kind==9){dropping[names::symbol_at(resolved,s.owner).declaration]}else{s.owner};
-        let h::Binding binding = h::Binding { .unsafe_call=if(s.kind==5){names::external_signature(resolved,i).unsafe_call}else{s.kind==1 && syntax::declaration_at(parsed,s.declaration-1).unsafe_end!=0}, .must_use = if(s.kind==5){names::external_signature(resolved,i).must_use}else{s.kind==1 && effects::read(parsed,s.declaration-1).must_use}, .effects = if(s.kind==1 || s.kind==9){effects::read(parsed,s.declaration-1).bits}else if(s.kind==5){names::external_signature(resolved,i).effects}else{0}, .kind = if(s.kind==8){.Let}else{state::binding_kind(s.kind)}, .type, .start = s.start, .end = s.end, .owner, .scope = s.scope, .module_index = target_module, .declaration = if(s.kind==8 || s.kind==10){0}else{declaration}, .signature_start = 0, .signature_count = 0 };
+        let ffi=if(s.kind==11){foreign::read(parsed,s.declaration-1)}else{foreign::Info{.code=0,.start=0,.end=0,.link_start=0,.link_end=0}};
+        let h::Binding binding = h::Binding { .link_start=ffi.link_start,.link_end=ffi.link_end, .unsafe_call=if(s.kind==5){names::external_signature(resolved,i).unsafe_call}else{(s.kind==1 || s.kind==11) && syntax::declaration_at(parsed,s.declaration-1).unsafe_end!=0}, .must_use = if(s.kind==5){names::external_signature(resolved,i).must_use}else{(s.kind==1 || s.kind==11) && effects::read(parsed,s.declaration-1).must_use}, .effects = if(s.kind==1 || s.kind==9 || s.kind==11){effects::read(parsed,s.declaration-1).bits}else if(s.kind==5){names::external_signature(resolved,i).effects}else{0}, .kind = if(s.kind==8){.Let}else{state::binding_kind(s.kind)}, .type, .start = s.start, .end = s.end, .owner, .scope = s.scope, .module_index = target_module, .declaration = if(s.kind==8 || s.kind==10){0}else{declaration}, .signature_start = 0, .signature_count = 0 };
         if (!v::push<h::Binding>(bindings,binding).is_ok) { discard state::fail(c,3,s.start,s.end); return false; }
         if(s.kind==8){if(s.declaration==0 || s.declaration>length){discard state::fail(c,4,s.start,s.end);return false;}let ref mut state::Link link=v::at_mut<state::Link>(links,s.declaration-1);link.use=i;}
         if (s.entry != 0) {
@@ -53,7 +55,7 @@ fn bool prepare(ref typing::Typed input, usize module_index, ref mut v::Vec<h::B
     }
     declaration=0;while(declaration<syntax::declaration_count(parsed)){let d=syntax::declaration_at(parsed,declaration);let usize target=dropping[declaration+1];
         if(target!=0){
-            if(target!=v::len<h::Binding>(bindings)+1 || !v::push<h::Binding>(bindings,h::Binding{ .unsafe_call=false,.must_use=false,.effects=effects::read(parsed,declaration).bits,.kind=.DropFunction,.type=.Void,.start=d.cleanup_start,.end=d.cleanup_end,.owner=0,.scope=0,.module_index,.declaration=declaration+1,.signature_start=0,.signature_count=0}).is_ok){discard state::fail(c,3,d.cleanup_start,d.cleanup_end);return false;}
+            if(target!=v::len<h::Binding>(bindings)+1 || !v::push<h::Binding>(bindings,h::Binding{ .link_start=0,.link_end=0, .unsafe_call=false,.must_use=false,.effects=effects::read(parsed,declaration).bits,.kind=.DropFunction,.type=.Void,.start=d.cleanup_start,.end=d.cleanup_end,.owner=0,.scope=0,.module_index,.declaration=declaration+1,.signature_start=0,.signature_count=0}).is_ok){discard state::fail(c,3,d.cleanup_start,d.cleanup_end);return false;}
             let ref mut state::Link link=v::at_mut<state::Link>(links,declaration);link.function=target;
         }declaration+=1;}
     i = 1;
@@ -72,6 +74,7 @@ fn bool prepare(ref typing::Typed input, usize module_index, ref mut v::Vec<h::B
                 }
                 entry += 1;
             }
+        } else if(s.kind==11){let d=syntax::declaration_at(parsed,s.declaration-1);var usize entry=d.entry_start;while(entry<d.entry_start+d.entry_count){let e=syntax::entry_at(parsed,entry);if(e.kind==1){if(!v::push<h::Signature>(signatures,h::Signature{.type=state::type(typing_ids::primitive(parsed,e.type_root))}).is_ok){discard state::fail(c,3,e.start,e.end);return false;}}entry+=1;}
         } else if (s.kind == 5) {
             let signature = names::external_signature(resolved,i); var usize parameter = 0;
             if (signature.parameter_count > 32768 - v::len<h::Signature>(signatures) || signature.declaration == 0) { discard state::fail(c,2,b.start,b.end); return false; }
@@ -148,7 +151,7 @@ fn usize expression(ref typing::Typed input, ref v::Vec<h::Binding> bindings, re
         kind = .Call; e.binding = state::use(links,node.left);
         if (e.binding == 0) { return state::fail(c,4,node.start,node.end); }
         let h::Binding callee = *v::at<h::Binding>(bindings,e.binding - 1);e.boolean=callee.unsafe_call;
-        if ((h::binding_code(callee.kind) != h::binding_code(.Function) && h::binding_code(callee.kind) != h::binding_code(.External)) || h::type_code(callee.type) != h::type_code(type)) { return state::fail(c,4,node.start,node.end); }
+        if ((h::binding_code(callee.kind) != h::binding_code(.Function) && h::binding_code(callee.kind) != h::binding_code(.External) && h::binding_code(callee.kind)!=11) || h::type_code(callee.type) != h::type_code(type)) { return state::fail(c,4,node.start,node.end); }
         e.edge_count = syntax::call_argument_count(parsed,id);
         if (callee.signature_count != e.edge_count) { return state::fail(c,4,node.start,node.end); }
         e.edge_start = state::reserve_edges(edges,e.edge_count,c); if (c.problem.code != 0) { return 0; }
@@ -352,7 +355,7 @@ pub fn Result<h::Program,h::Problem> lower(typing::Typed input, usize module_ind
             let usize body = block(ref input,ref bindings,ref links,ref mut c,ref mut expressions,ref mut statements,ref mut blocks,ref mut edges,ref mut payload,if(drop_body){d.cleanup_body}else{d.body},0);
             c.scope_count -= 1; if (c.problem.code != 0) { return .err(c.problem); }
             if (!v::push<h::Function>(ref mut functions,h::Function { .binding = c.owner, .start = if(drop_body){d.cleanup_start}else{d.start}, .end = if(drop_body){d.cleanup_end}else{d.end}, .scope, .public = !drop_body && d.public, .body, .parameter_start = start, .parameter_count = count }).is_ok) { return .err(h::Problem { .code = 3, .start = d.start, .end = d.end }); }
-        } else if (d.kind != 12 && d.kind != 1 && d.kind != 2 && d.kind != 4 && d.kind != 6 && d.kind != 11) { return .err(h::Problem { .code = 4, .start = d.start, .end = d.end }); }
+        } else if (d.kind != 12 && d.kind != 1 && d.kind != 2 && d.kind != 4 && d.kind != 6 && d.kind != 9 && d.kind != 11) { return .err(h::Problem { .code = 4, .start = d.start, .end = d.end }); }
         if(d.kind==6){let u32 type=98303+typing_ids::small_id(i+1);
             if(!v::push<h::Drop>(ref mut drops,h::Drop{.abilities=abilities::mask(parsed,i),.type,.function=if(drop_body){c.owner}else{0},.receiver,.start=d.cleanup_start,.end=d.cleanup_end,.nonempty=drop_body}).is_ok){return .err(h::Problem{.code=3,.start=d.start,.end=d.end});}
         }

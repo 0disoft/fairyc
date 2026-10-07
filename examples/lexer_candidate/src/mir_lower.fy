@@ -325,7 +325,8 @@ fn bool statement(ref h::Program input, ref mut v::Vec<m::Local> locals, ref mut
     if (kind == 11) {
         let h::Expression call = h::expression_at(input,s.expression);
         let usize callee = c.targets[call.binding];
-        if (h::expression_code(call.kind) != 6 || h::type_code(call.type) != 7 || callee == 0 || h::binding_code(h::binding_at(input,call.binding).kind) != 1) { discard state::fail(c,4,s.start,s.end); return false; }
+        let u32 target_kind=h::binding_code(h::binding_at(input,call.binding).kind);
+        if (h::expression_code(call.kind) != 6 || h::type_code(call.type) != 7 || callee == 0 || (target_kind!=1 && target_kind!=11)) { discard state::fail(c,4,s.start,s.end); return false; }
         if (c.defer_count >= 256) { discard state::fail(c,2,s.start,s.end); return false; }
         let usize captured = c.capture_count; var usize j = 0;
         while (j < call.edge_count) {

@@ -11,13 +11,13 @@ struct Context {usize work;state::Problem problem;}
 fn void fail(ref mut Context c,u32 code,usize start,usize end){if(c.problem.code==0){c.problem=state::fail(code,start,end,0,0);}}
 pub fn bool eligible(u32 type){return type!=0 && type!=7 && type!=8 && !tagged::result(type) && borrows::count(type)==0 && !resources::needs_drop(type);}
 pub fn state::Problem declarations(ref names::Resolved resolved,ref v::Vec<state::Slot> types){let p=names::parsed(resolved);var usize id=1;
-    while(id<=names::symbol_count(resolved)){let s=names::symbol_at(resolved,id);if(s.kind==1){let info=attributes::read(p,s.declaration-1);if(info.must_use && !eligible(state::symbols(types,id-1))){return state::fail(4201,info.must_start,info.must_end,0,0);}}id+=1;}return state::ok();
+    while(id<=names::symbol_count(resolved)){let s=names::symbol_at(resolved,id);if(s.kind==1 || s.kind==11){let info=attributes::read(p,s.declaration-1);if(info.must_use && !eligible(state::symbols(types,id-1))){return state::fail(4201,info.must_start,info.must_end,0,0);}}id+=1;}return state::ok();
 }
 fn void expression(ref names::Resolved resolved,ref v::Vec<state::Slot> types,ref mut Context c,usize id,bool handled,usize depth){
     if(id==0 || c.problem.code!=0){return;}let p=names::parsed(resolved);let e=syntax::expression_at(p,id);c.work+=1;
     if(depth>=64 || c.work>1048576){fail(c,10,e.start,e.end);return;}
     if(e.kind==6){let usize target=state::uses(types,e.left-1);if(target!=0){let symbol=names::symbol_at(resolved,target);
-        if(symbol.kind==1){let info=attributes::read(p,symbol.declaration-1);if(info.must_use && !handled){fail(c,4202,e.start,e.end);c.problem.move_start=info.must_start;c.problem.move_end=info.must_end;return;}}
+        if(symbol.kind==1 || symbol.kind==11){let info=attributes::read(p,symbol.declaration-1);if(info.must_use && !handled){fail(c,4202,e.start,e.end);c.problem.move_start=info.must_start;c.problem.move_end=info.must_end;return;}}
         else if(symbol.kind==5 && names::external_signature(resolved,target).must_use && !handled){fail(c,4202,e.start,e.end);return;}}
         var usize i=0;while(i<syntax::call_argument_count(p,id)){expression(resolved,types,c,syntax::call_argument(p,id,i),true,depth+1);i+=1;}return;
     }

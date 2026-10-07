@@ -8,7 +8,7 @@ import std::bytes as bytes;
 import std::vec as v;
 
 fn m::Local local(u32 type, bool parameter) { return m::Local { .function = 1, .binding = 0, .type, .parameter, .mutable = false, .start = 0, .end = 1 }; }
-fn m::Target target(u32 result, u32 parameter) { return m::Target { .unsafe_call=false, .effects = 0, .binding = 1, .module_index = 0, .declaration = 1, .result, .signature_start = 0, .signature_count = if (parameter == 0) { 0 } else { 1 }, .start = 0, .end = 1, .external = false }; }
+fn m::Target target(u32 result, u32 parameter) { return m::Target { .foreign=false,.link_start=0,.link_end=0, .unsafe_call=false, .effects = 0, .binding = 1, .module_index = 0, .declaration = 1, .result, .signature_start = 0, .signature_count = if (parameter == 0) { 0 } else { 1 }, .start = 0, .end = 1, .external = false }; }
 fn m::Function function(usize locals, usize blocks, usize entry, usize parameters) {
     return m::Function { .target = 1, .entry, .local_start = 0, .local_count = locals, .block_start = 0, .block_count = blocks, .parameter_start = 0, .parameter_count = parameters, .start = 0, .end = 1, .public = false };
 }

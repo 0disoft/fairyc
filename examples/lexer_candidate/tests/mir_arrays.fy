@@ -10,7 +10,7 @@ fn m::Program fixture(u32 mutation) {
     var bytes::Buffer source=bytes::empty(); assert(bytes::append(ref mut source,b"main abc").is_ok);
     var bytes::Buffer payload=bytes::empty(); assert(bytes::append(ref mut payload,b"10").is_ok);
     var v::Vec<m::Target> targets=v::empty<m::Target>();
-    assert(v::push<m::Target>(ref mut targets,m::Target { .unsafe_call=false, .effects = 0, .binding=1,.module_index=0,.declaration=1,.result=1,.signature_start=0,.signature_count=0,.start=0,.end=4,.external=false }).is_ok);
+    assert(v::push<m::Target>(ref mut targets,m::Target { .foreign=false,.link_start=0,.link_end=0, .unsafe_call=false, .effects = 0, .binding=1,.module_index=0,.declaration=1,.result=1,.signature_start=0,.signature_count=0,.start=0,.end=4,.external=false }).is_ok);
     var v::Vec<m::Function> functions=v::empty<m::Function>();
     assert(v::push<m::Function>(ref mut functions,m::Function { .target=1,.entry=1,.local_start=0,.local_count=6,.block_start=0,.block_count=1,.parameter_start=0,.parameter_count=0,.start=0,.end=8,.public=false }).is_ok);
     var v::Vec<m::Local> locals=v::empty<m::Local>(); var usize i=1;

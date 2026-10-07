@@ -2,6 +2,7 @@ module hir_model;
 import borrow_shapes as borrows;
 import scalar_casts as casts;
 import must_use_flow as must_use;
+import ffi_symbols as ffi;
 import reference_types as refs;
 import array_types as arrays;
 import resource_identity as resources;
@@ -18,7 +19,7 @@ import hir_shapes as shapes;
 // plus one (including module/import declarations). Binding IDs preserve resolved
 // symbol IDs, but their owner/target/type facts below are independently owned.
 pub enum Type { Borrowed { u32 id; }; Invalid; I32; I64; U8; U32; Usize; Bool; Void; Callable; Resource { u32 id; }; Nominal { u32 id; }; Array { u32 id; }; Text; Bytes; MutableBytes; Enumeration { u32 id; }; Option { u32 id; }; Result { u32 id; }; }
-pub enum BindingKind { Function; Parameter; Let; Var; External; Struct; Enum; Resource; DropFunction; DropReceiver; }
+pub enum BindingKind { Function; Parameter; Let; Var; External; Foreign; Struct; Enum; Resource; DropFunction; DropReceiver; }
 pub enum ExpressionKind { Integer; Boolean; Reference; Unary; Binary; Call; Block; If; Construct; Field; Initializer; Array; Index; Length; Literal; Borrow; Slice; Variant; Switch; Arm; Capture; Propagate; IsOk; Move; Reborrow; Cast; }
 pub enum StatementKind { Binding; Return; Assignment; Expression; While; For; Break; Continue; Assert; Discard; Defer; Burn; }
 pub enum Operator { None; Plus; Minus; Not; Complement; Multiply; Divide; Remainder; BitAnd; BitOr; BitXor; ShiftLeft; ShiftRight; Equal; NotEqual; Less; LessEqual; Greater; GreaterEqual; And; Or; Assign; }
@@ -26,7 +27,7 @@ pub enum Operator { None; Plus; Minus; Not; Complement; Multiply; Divide; Remain
 // These exhaustive private-format tags also permit exact scalar comparisons.
 pub fn u32 type_code(Type value) { return switch(value) { case .Borrowed { .id=id }: { id } case .Invalid: { 0 } case .I32: { 1 } case .I64: { 2 } case .U8: { 3 } case .U32: { 4 } case .Usize: { 5 } case .Bool: { 6 } case .Void: { 7 } case .Callable: { 8 } case .Text: { 9 } case .Bytes: { 10 } case .MutableBytes: { 11 } case .Option { .id = id }: { id } case .Result { .id = id }: { id } case .Enumeration { .id = id }: { id } case .Resource { .id = id }: { id } case .Nominal { .id = id }: { id } case .Array { .id = id }: { id } }; }
 pub fn bool represented_type(Type value) { return switch(value) { case .Borrowed { .id=id }: { refs::valid(id) } case .Invalid: { false } case .Callable: { false } case .Option { .id = id }: { tagged::option(id) } case .Result { .id = id }: { tagged::result(id) } case .Enumeration { .id = id }: { enums::valid(id) && !tagged::builtin(id) } case .Resource { .id = id }: { resources::valid(id) } case .Nominal { .id = id }: { id >= 256 && id <= 767 } case .Array { .id = id }: { arrays::valid(id) } case .I32: { true } case .I64: { true } case .U8: { true } case .U32: { true } case .Usize: { true } case .Bool: { true } case .Void: { true } case .Text: { true } case .Bytes: { true } case .MutableBytes: { true } }; }
-pub fn u32 binding_code(BindingKind value) { return switch(value) { case .Function: { 1 } case .Parameter: { 2 } case .Let: { 3 } case .Var: { 4 } case .External: { 5 } case .Struct: { 6 } case .Enum: { 7 } case .Resource: { 8 } case .DropFunction: { 9 } case .DropReceiver: { 10 } }; }
+pub fn u32 binding_code(BindingKind value) { return switch(value) { case .Function: { 1 } case .Parameter: { 2 } case .Let: { 3 } case .Var: { 4 } case .Foreign:{11} case .External: { 5 } case .Struct: { 6 } case .Enum: { 7 } case .Resource: { 8 } case .DropFunction: { 9 } case .DropReceiver: { 10 } }; }
 pub fn u32 expression_code(ExpressionKind value) { return switch(value) { case .Integer: { 1 } case .Boolean: { 2 } case .Reference: { 3 } case .Unary: { 4 } case .Binary: { 5 } case .Call: { 6 } case .Block: { 7 } case .If: { 8 } case .Construct: { 9 } case .Field: { 10 } case .Initializer: { 11 } case .Array: { 12 } case .Index: { 13 } case .Length: { 14 } case .Literal: { 15 } case .Borrow: { 16 } case .Slice: { 17 } case .Variant: { 18 } case .Switch: { 19 } case .Arm: { 20 } case .Capture: { 21 } case .Propagate: { 22 } case .IsOk: { 23 } case .Move: { 24 } case .Reborrow: { 25 } case .Cast: { 26 } }; }
 pub fn u32 statement_code(StatementKind value) { return switch(value) { case .Binding: { 1 } case .Return: { 2 } case .Assignment: { 3 } case .Expression: { 4 } case .While: { 5 } case .For: { 6 } case .Break: { 7 } case .Continue: { 8 } case .Assert: { 9 } case .Discard: { 10 } case .Defer: { 11 } case .Burn: { 12 } }; }
 pub fn u32 operator_code(Operator value) { return switch(value) { case .None: { 0 } case .Plus: { 1 } case .Minus: { 2 } case .Not: { 3 } case .Complement: { 4 } case .Multiply: { 5 } case .Divide: { 6 } case .Remainder: { 7 } case .BitAnd: { 8 } case .BitOr: { 9 } case .BitXor: { 10 } case .ShiftLeft: { 11 } case .ShiftRight: { 12 } case .Equal: { 13 } case .NotEqual: { 14 } case .Less: { 15 } case .LessEqual: { 16 } case .Greater: { 17 } case .GreaterEqual: { 18 } case .And: { 19 } case .Or: { 20 } case .Assign: { 21 } }; }
@@ -35,7 +36,7 @@ pub struct Signature { Type type; }
 // Binding owner is the enclosing Function Binding ID; scope is its lexical scope
 // ID. Function/External use module_index+declaration as authoritative call target.
 // Callable result is type; signature_start/count index the Type signature arena.
-pub struct Binding { bool unsafe_call; bool must_use; u32 effects; BindingKind kind; Type type; usize start; usize end; usize owner; usize scope; usize module_index; usize declaration; usize signature_start; usize signature_count; }
+pub struct Binding { usize link_start; usize link_end; bool unsafe_call; bool must_use; u32 effects; BindingKind kind; Type type; usize start; usize end; usize owner; usize scope; usize module_index; usize declaration; usize signature_start; usize signature_count; }
 pub struct Function { usize binding; usize start; usize end; usize scope; bool public; usize body; usize parameter_start; usize parameter_count; }
 // An empty body has no callable/receiver. Every resource owns exactly one
 // classified drop definition; a nonempty body links one private typed function.
@@ -201,10 +202,14 @@ pub fn Result<Program,Problem> assemble_resources(bytes::Buffer source, bytes::B
     var usize i = 0;
     while (i < nb) {
         let Binding b = *v::at<Binding>(ref bindings,i);
-        if (b.must_use && (binding_code(b.kind)!=1 && binding_code(b.kind)!=5 || !must_use::eligible(type_code(b.type))) || b.effects>4095 || (b.effects!=0 && !function_kind(b.kind) && binding_code(b.kind)!=5 && binding_code(b.kind)!=8) || b.start > b.end || b.end > ns || b.owner > nb || type_code(b.type) == type_code(.Invalid) || type_code(b.type) == type_code(.Callable) || b.signature_start > ntypes || b.signature_count > ntypes - b.signature_start) { return .err(Problem { .code = 4, .start = b.start, .end = b.end }); }
+        if(binding_code(b.kind)==11){if(!b.unsafe_call || b.link_start>=b.link_end || b.link_end>ns || !ffi::valid(bytes::view(ref source)[b.link_start..b.link_end]) || !ffi::scalar(type_code(b.type),true)){return .err(Problem{.code=5106,.start=b.start,.end=b.end});}
+            var usize n=0;while(n<b.signature_count){if(b.signature_start+n>=ntypes || !ffi::scalar(type_code(v::at<Signature>(ref signatures,b.signature_start+n).type),false)){return .err(Problem{.code=5102,.start=b.start,.end=b.end});}n+=1;}
+            var usize other=0;while(other<i){let old=*v::at<Binding>(ref bindings,other);if(binding_code(old.kind)==11 && old.link_end<=ns && bytes::equal(bytes::view(ref source)[old.link_start..old.link_end],bytes::view(ref source)[b.link_start..b.link_end])){if(type_code(old.type)!=type_code(b.type) || old.signature_count!=b.signature_count){return .err(Problem{.code=5106,.start=b.start,.end=b.end});}n=0;while(n<b.signature_count){if(type_code(v::at<Signature>(ref signatures,old.signature_start+n).type)!=type_code(v::at<Signature>(ref signatures,b.signature_start+n).type)){return .err(Problem{.code=5106,.start=b.start,.end=b.end});}n+=1;}}other+=1;}
+        }else if(b.link_start!=0 || b.link_end!=0){return .err(Problem{.code=4,.start=b.start,.end=b.end});}
+        if (b.must_use && (binding_code(b.kind)!=1 && binding_code(b.kind)!=5 && binding_code(b.kind)!=11 || !must_use::eligible(type_code(b.type))) || b.effects>4095 || (b.effects!=0 && !function_kind(b.kind) && binding_code(b.kind)!=5 && binding_code(b.kind)!=8 && binding_code(b.kind)!=11) || b.start > b.end || b.end > ns || b.owner > nb || type_code(b.type) == type_code(.Invalid) || type_code(b.type) == type_code(.Callable) || b.signature_start > ntypes || b.signature_count > ntypes - b.signature_start) { return .err(Problem { .code = 4, .start = b.start, .end = b.end }); }
         if (!represented_type(b.type) || !shapes::valid_type(ref nominal,type_code(b.type),true) || ((binding_code(b.kind) >= 6 && binding_code(b.kind) <= 8) && shapes::find(ref nominal,type_code(b.type)) == 0)) { return .err(Problem { .code = 4, .start = b.start, .end = b.end }); }
         if ((binding_code(b.kind) >= 6 && binding_code(b.kind) <= 8) && shapes::at(ref nominal,shapes::find(ref nominal,type_code(b.type)) - 1).binding != i + 1) { return .err(Problem { .code = 4, .start = b.start, .end = b.end }); }
-        if (function_kind(b.kind) || binding_code(b.kind) == binding_code(.External) || binding_code(b.kind) == binding_code(.Struct) || binding_code(b.kind) == 7 || binding_code(b.kind)==8) { if (b.owner != 0 || b.scope != 0 || b.declaration == 0) { return .err(Problem { .code = 4, .start = b.start, .end = b.end }); } }
+        if (function_kind(b.kind) || (binding_code(b.kind) == binding_code(.External) || binding_code(b.kind)==11) || binding_code(b.kind) == binding_code(.Struct) || binding_code(b.kind) == 7 || binding_code(b.kind)==8) { if (b.owner != 0 || b.scope != 0 || b.declaration == 0) { return .err(Problem { .code = 4, .start = b.start, .end = b.end }); } }
         else if (b.owner == 0 || b.scope == 0 || type_code(b.type) == type_code(.Void) || b.signature_count != 0 || !function_kind(v::at<Binding>(ref bindings,b.owner - 1).kind)) { return .err(Problem { .code = 4, .start = b.start, .end = b.end }); }
         i += 1;
     }
@@ -242,7 +247,7 @@ pub fn Result<Program,Problem> assemble_resources(bytes::Buffer source, bytes::B
         if (expression_code(e.kind) == expression_code(.If) && (e.left == 0 || type_code(v::at<Expression>(ref expressions,e.left - 1).type) != type_code(.Bool))) { return .err(Problem { .code = 4, .start = e.start, .end = e.end }); }
         if (kind == 3 || kind == 24 || kind == 6) {
             let Binding b = *v::at<Binding>(ref bindings,e.binding - 1);
-            if (type_code(e.type) != type_code(b.type) || ((kind == 3 || kind == 24) && (function_kind(b.kind) || binding_code(b.kind) == binding_code(.External) || binding_code(b.kind) == binding_code(.Struct) || binding_code(b.kind) == 7 || binding_code(b.kind)==8)) || (expression_code(e.kind) == expression_code(.Call) && binding_code(b.kind) != binding_code(.Function) && binding_code(b.kind) != binding_code(.External))) { return .err(Problem { .code = 4, .start = e.start, .end = e.end }); }
+            if (type_code(e.type) != type_code(b.type) || ((kind == 3 || kind == 24) && (function_kind(b.kind) || (binding_code(b.kind) == binding_code(.External) || binding_code(b.kind)==11) || binding_code(b.kind) == binding_code(.Struct) || binding_code(b.kind) == 7 || binding_code(b.kind)==8)) || (expression_code(e.kind) == expression_code(.Call) && binding_code(b.kind) != binding_code(.Function) && binding_code(b.kind) != binding_code(.External) && binding_code(b.kind)!=11)) { return .err(Problem { .code = 4, .start = e.start, .end = e.end }); }
             if (expression_code(e.kind) == expression_code(.Call)) {
                 var bool attached=false;var usize owner_index=0;
                 while(owner_index<nf){let f=*v::at<Function>(ref functions,owner_index);if(f.start<=e.start && e.end<=f.end){attached=true;if((v::at<Binding>(ref bindings,f.binding-1).effects&b.effects)!=b.effects){return .err(Problem{.code=7102,.start=e.start,.end=e.end});}}owner_index+=1;}
@@ -380,7 +385,7 @@ fn bool unsafe_block(ref Program p,usize id,bool inherited,usize depth,ref mut U
 }
 pub fn Problem unsafe_check(ref Program p){
     var UnsafeBudget c=UnsafeBudget{.calls=[0;4096],.work=0,.problem=Problem{.code=0,.start=0,.end=0}};var usize i=1;var bool needed=false;
-    while(i<=binding_count(p)){let b=binding_at(p,i);if(b.unsafe_call && binding_code(b.kind)!=1 && binding_code(b.kind)!=5){discard unsafe_fail(ref mut c,4,b.start,b.end);return c.problem;}i+=1;}
+    while(i<=binding_count(p)){let b=binding_at(p,i);if(b.unsafe_call && binding_code(b.kind)!=1 && binding_code(b.kind)!=5 && binding_code(b.kind)!=11){discard unsafe_fail(ref mut c,4,b.start,b.end);return c.problem;}i+=1;}
     i=1;while(i<=binding_count(p)){needed=needed || binding_at(p,i).unsafe_call;i+=1;}
     i=1;while(i<=expression_count(p)){let e=expression_at(p,i);needed=needed || expression_code(e.kind)==6 && e.boolean;i+=1;}
     if(!needed){return c.problem;}

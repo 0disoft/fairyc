@@ -12,8 +12,8 @@ fn u32 program(u32 mutation,bool body){
     var v::Vec<shapes::Shape> records=v::empty<shapes::Shape>();assert(v::push<shapes::Shape>(ref mut records,shapes::Shape{.type=98304,.binding=1,.field_start=0,.field_count=0,.public=false}).is_ok);
     let shapes::Table table=shapes::assemble(records,v::empty<shapes::Field>());
     var v::Vec<m::Target> targets=v::empty<m::Target>();var v::Vec<m::Signature> signatures=v::empty<m::Signature>();
-    assert(v::push<m::Target>(ref mut targets,m::Target{ .unsafe_call=false,.effects=0,.binding=2,.module_index=0,.declaration=2,.result=7,.signature_start=0,.signature_count=0,.start=1,.end=2,.external=false}).is_ok);
-    if(body){assert(v::push<m::Target>(ref mut targets,m::Target{ .unsafe_call=false,.effects=0,.binding=3,.module_index=0,.declaration=1,.result=7,.signature_start=0,.signature_count=1,.start=0,.end=1,.external=false}).is_ok);assert(v::push<m::Signature>(ref mut signatures,m::Signature{.type=98304}).is_ok);}
+    assert(v::push<m::Target>(ref mut targets,m::Target{ .foreign=false,.link_start=0,.link_end=0, .unsafe_call=false,.effects=0,.binding=2,.module_index=0,.declaration=2,.result=7,.signature_start=0,.signature_count=0,.start=1,.end=2,.external=false}).is_ok);
+    if(body){assert(v::push<m::Target>(ref mut targets,m::Target{ .foreign=false,.link_start=0,.link_end=0, .unsafe_call=false,.effects=0,.binding=3,.module_index=0,.declaration=1,.result=7,.signature_start=0,.signature_count=1,.start=0,.end=1,.external=false}).is_ok);assert(v::push<m::Signature>(ref mut signatures,m::Signature{.type=98304}).is_ok);}
     var v::Vec<m::Function> functions=v::empty<m::Function>();var v::Vec<m::Local> locals=v::empty<m::Local>();var v::Vec<m::Block> blocks=v::empty<m::Block>();var v::Vec<usize> edges=v::empty<usize>();
     let usize count=if(body){2}else{3};var usize i=0;
     while(i<count){assert(v::push<m::Local>(ref mut locals,m::Local{.function=1,.binding=0,.type=98304,.parameter=false,.mutable=false,.start=0,.end=1}).is_ok);i+=1;}

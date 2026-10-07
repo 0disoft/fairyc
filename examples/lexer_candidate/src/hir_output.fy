@@ -28,7 +28,7 @@ fn bool type_name(ref mut bytes::Buffer out, h::Type type) {
 fn bool binding_kind(ref mut bytes::Buffer out, h::BindingKind kind) {
     return tab(out) && switch(kind) {
         case .Function: { put(out,b"function") } case .Parameter: { put(out,b"parameter") }
-        case .Let: { put(out,b"let") } case .Var: { put(out,b"var") } case .External: { put(out,b"external") }
+        case .Let: { put(out,b"let") } case .Var: { put(out,b"var") } case .Foreign:{put(out,b"foreign")} case .External: { put(out,b"external") }
         case .Resource: { put(out,b"resource") } case .Struct: { put(out,b"struct") } case .Enum: { put(out,b"enum") }
         case .DropFunction: { put(out,b"drop-function") } case .DropReceiver: { put(out,b"drop-receiver") }
     };

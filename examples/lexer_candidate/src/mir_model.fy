@@ -19,7 +19,7 @@ import resource_identity as resources;
 // 6 bool, 7 void. Operators match hir_model's exhaustive operator_code.
 pub struct Problem { u32 code; usize start; usize end; }
 pub struct Signature { u32 type; }
-pub struct Target { bool unsafe_call; u32 effects; usize binding; usize module_index; usize declaration; u32 result; usize signature_start; usize signature_count; usize start; usize end; bool external; }
+pub struct Target { bool foreign; usize link_start; usize link_end; bool unsafe_call; u32 effects; usize binding; usize module_index; usize declaration; u32 result; usize signature_start; usize signature_count; usize start; usize end; bool external; }
 pub struct Function { usize target; usize entry; usize local_start; usize local_count; usize block_start; usize block_count; usize parameter_start; usize parameter_count; usize start; usize end; bool public; }
 pub struct Local { usize function; usize binding; u32 type; bool parameter; bool mutable; usize start; usize end; }
 pub struct Drop { u32 abilities; u32 type; usize target; bool nonempty; }
@@ -98,6 +98,7 @@ pub fn Operation operation_at(ref Program p, usize id) { assert(id > 0 && id <= 
 pub fn u32 signature_at(ref Program p, usize index) { assert(index < signature_count(p)); return v::at<Signature>(ref p.signatures,index).type; }
 pub fn usize edge_at(ref Program p, usize index) { assert(index < edge_count(p)); return *v::at<usize>(ref p.edges,index); }
 pub fn ref u8[] source_view(ref Program p) { assert(p.success); return bytes::view(ref p.source); }
+pub fn ref u8[] foreign_text(ref Program p,usize id){let t=target_at(p,id);return source_view(p)[t.link_start..t.link_end];}
 pub fn ref u8[] target_text(ref Program p, usize id) { let Target t = target_at(p,id); return source_view(p)[t.start..t.end]; }
 pub fn ref u8[] literal_text(ref Program p, usize id) { let Operation o = operation_at(p,id); return bytes::view(ref p.payload)[o.payload_start..o.payload_end]; }
 
@@ -129,6 +130,7 @@ pub fn Result<Program,Problem> assemble_resources(bytes::Buffer source, bytes::B
     var usize i = 0;
     while (i < nt) {
         let Target t = *v::at<Target>(ref targets,i);
+        if(t.link_start>t.link_end || t.link_end>ns || t.foreign && t.link_start==t.link_end){return .err(Problem{.code=4,.start=t.start,.end=t.end});}
         if (t.binding == 0 || t.declaration == 0 || !shapes::valid_type(ref nominal,t.result,true) || t.start >= t.end || t.end > ns || t.signature_start > ng || t.signature_count > ng - t.signature_start) { return .err(Problem { .code = 4, .start = t.start, .end = t.end }); }
         i += 1;
     }

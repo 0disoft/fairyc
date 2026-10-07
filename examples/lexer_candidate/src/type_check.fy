@@ -75,7 +75,7 @@ fn state::Value expression(ref names::Resolved resolved, ref mut v::Vec<state::S
         let usize symbol_id = state::uses(tables,id - 1); assert(symbol_id != 0);
         let names::Symbol symbol = names::symbol_at(resolved,symbol_id);
         if (symbol.kind == 6 || symbol.kind == 7 || symbol.kind==9) { return error(problem,16,node.start,node.end,0,0); }
-        let u32 type = if (symbol.kind == 1 || symbol.kind == 5) { 8 } else { state::symbols(tables,symbol_id - 1) };
+        let u32 type = if (symbol.kind == 1 || symbol.kind == 5 || symbol.kind==11) { 8 } else { state::symbols(tables,symbol_id - 1) };
         return recorded(tables,id,value(type,false));
     }
     if (node.kind == 28) {
@@ -175,7 +175,7 @@ fn state::Value expression(ref names::Resolved resolved, ref mut v::Vec<state::S
     }
     if (node.kind == 6) {
         let usize callee_id = state::uses(tables,node.left - 1); let names::Symbol callee = names::symbol_at(resolved,callee_id);
-        if (callee.kind != 1 && callee.kind != 5) { let syntax::Expression source = syntax::expression_at(parsed,node.left); return error(problem,6,source.start,source.end,8,state::symbols(tables,callee_id - 1)); }
+        if (callee.kind != 1 && callee.kind != 5 && callee.kind!=11) { let syntax::Expression source = syntax::expression_at(parsed,node.left); return error(problem,6,source.start,source.end,8,state::symbols(tables,callee_id - 1)); }
         state::set_expressions(tables,node.left - 1,8);
         if (callee.kind == 5) {
             let signature=names::external_signature(resolved,callee_id);if(signature.unsafe_call && !unsafe_scopes::allowed(parsed,node.start,node.end)){return error(problem,5101,node.start,node.end,0,0);}if(!effects::includes(effects::caller(parsed,node.start,node.end),signature.effects)){return error(problem,7102,node.start,node.end,signature.effects,0);}

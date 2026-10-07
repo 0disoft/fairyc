@@ -27,7 +27,7 @@ fn shapes::Table layout() {
 fn m::Program forged(u32 mutation,bool error) {
     let u32 type=tagged::make_result(1,6);let u32 other=tagged::make_result(2,1);
     var bytes::Buffer source=bytes::empty();assert(bytes::append(ref mut source,b"main").is_ok);var bytes::Buffer payload=bytes::empty();assert(bytes::append(ref mut payload,b"4").is_ok);
-    var v::Vec<m::Target> targets=v::empty<m::Target>();assert(v::push<m::Target>(ref mut targets,m::Target{ .unsafe_call=false,.effects=0,.binding=1,.module_index=0,.declaration=1,.result=1,.signature_start=0,.signature_count=0,.start=0,.end=4,.external=false}).is_ok);
+    var v::Vec<m::Target> targets=v::empty<m::Target>();assert(v::push<m::Target>(ref mut targets,m::Target{ .foreign=false,.link_start=0,.link_end=0, .unsafe_call=false,.effects=0,.binding=1,.module_index=0,.declaration=1,.result=1,.signature_start=0,.signature_count=0,.start=0,.end=4,.external=false}).is_ok);
     var v::Vec<m::Function> functions=v::empty<m::Function>();assert(v::push<m::Function>(ref mut functions,m::Function{.target=1,.entry=1,.local_start=0,.local_count=8,.block_start=0,.block_count=1,.parameter_start=0,.parameter_count=0,.start=0,.end=4,.public=false}).is_ok);
     var v::Vec<m::Local> locals=v::empty<m::Local>();
     assert(v::push<m::Local>(ref mut locals,local(1)).is_ok);assert(v::push<m::Local>(ref mut locals,local(6)).is_ok);

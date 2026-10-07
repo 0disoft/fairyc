@@ -20,9 +20,10 @@ import (
 )
 
 type job struct {
-	Name    string `json:"name"`
-	Source  string `json:"source"`
-	Observe bool   `json:"observe"`
+	Name          string `json:"name"`
+	Source        string `json:"source"`
+	Observe       bool   `json:"observe"`
+	ForeignSource string `json:"foreignSource,omitempty"`
 }
 type request struct {
 	Schema string `json:"schema"`
@@ -38,6 +39,8 @@ type observation struct {
 	Source          string `json:"source"`
 	SourceSHA256    string `json:"sourceSHA256"`
 	RuntimeSHA256   string `json:"runtimeSHA256"`
+	ForeignSource   string `json:"foreignSource,omitempty"`
+	ForeignSHA256   string `json:"foreignSHA256,omitempty"`
 	Image           string `json:"image"`
 	ImageSHA256     string `json:"imageSHA256"`
 	Exit            int32  `json:"exit"`
@@ -127,6 +130,16 @@ func run() error {
 		if len(unit) == 0 || len(unit) > 2<<20+4096 {
 			return fmt.Errorf("C unit size invalid for %s", item.Name)
 		}
+		var foreign []byte
+		if item.ForeignSource != "" {
+			foreign, e = os.ReadFile(item.ForeignSource)
+			if e != nil {
+				return e
+			}
+			if len(foreign) == 0 || len(foreign) > 64<<10 {
+				return fmt.Errorf("foreign fixture size invalid for %s", item.Name)
+			}
+		}
 		for _, profile := range []cdriver.Profile{cdriver.LowProfile, cdriver.OptimizedProfile} {
 			names := []string{"msvc"}
 			if runtime.GOOS == "linux" {
@@ -134,10 +147,17 @@ func run() error {
 			}
 			for index, name := range names {
 				row := observation{Name: item.Name, Profile: profile.Name, Compiler: name, Source: item.Source, SourceSHA256: digest(unit)}
+				if len(foreign) != 0 {
+					row.ForeignSource = item.ForeignSource
+					row.ForeignSHA256 = digest(foreign)
+				}
 				var image []byte
 				var source string
 				if runtime.GOOS == "windows" {
 					source, e = cruntime.WindowsRunSource(120)
+					if e == nil && len(foreign) != 0 {
+						source += "\n" + string(foreign)
+					}
 					row.CompilerPath = windows.Path
 					row.CompilerVersion = windows.Version
 					if e == nil {
@@ -172,6 +192,9 @@ func run() error {
 					}
 				} else {
 					source, e = cruntime.LinuxRunSource(120)
+					if e == nil && len(foreign) != 0 {
+						source += "\n" + string(foreign)
+					}
 					row.CompilerPath = linux[index].Path
 					row.CompilerVersion = linux[index].Version
 					if e == nil {

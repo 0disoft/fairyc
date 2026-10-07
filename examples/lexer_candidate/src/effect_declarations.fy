@@ -17,9 +17,10 @@ pub fn Info read(ref syntax::Parsed p,usize declaration){
     var bool seen=false;var usize i=0;
     while(i<d.attribute_count){let a=syntax::attribute_at(p,d.attribute_start+i);let name=syntax::source_view(p)[a.name_start..a.name_end];
         if(bytes::equal(name,b"must_use")){
-            if((d.kind!=3 && d.kind!=12) || info.must_use || a.argument_count!=0){info.code=4201;info.start=a.start;info.end=a.end;return info;}
+            if((d.kind!=3 && d.kind!=9 && d.kind!=12) || info.must_use || a.argument_count!=0){info.code=4201;info.start=a.start;info.end=a.end;return info;}
             info.must_use=true;info.must_start=a.start;info.must_end=a.end;i+=1;continue;
         }
+        if(bytes::equal(name,b"link_name") && d.kind==9){i+=1;continue;}
         if(!bytes::equal(name,b"effects") && d.kind==6){i+=1;continue;}
         if(!bytes::equal(name,b"effects")){info.code=3;info.start=a.start;info.end=a.end;return info;}
         if(seen || a.argument_count==0){info.code=7101;info.start=a.start;info.end=a.end;return info;}seen=true;

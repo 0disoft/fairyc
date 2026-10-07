@@ -2855,7 +2855,7 @@ Same-module `fn T id<T>(T n)` and `id<i32>(7)` specialize in Fairy code before o
 
 ### 후보 53a: 함수 효과 권한
 
-`@effects`는 language/11의 12개 효과를 중복 없는 bitset으로 보존한다. 함수와 scalar generic 특수화의 직접 호출은 caller가 callee의 효과를 모두 선언해야 하며, forward/재귀·실행되지 않는 short-circuit 호출도 검사한다. HIR binding과 MIR target이 권한을 소유하며 MIR 검증은 caller 권한 제거와 미지 비트를 거부한다. 자원 cleanup과 모듈 import 전파는 아직 연결하지 않았다. 검증은 `docs/ops/evidence/candidate-resource-effects-calls-20261007.json`에 있고 원시 C/실행 기록은 `.cache/candidate-unit53`에 보관한다.
+`@effects`는 language/11의 12개 효과를 중복 없는 bitset으로 보존한다. 함수와 scalar generic 특수화의 직접 호출은 caller가 callee의 효과를 모두 선언해야 하며, forward/재귀·실행되지 않는 short-circuit 호출도 검사한다. HIR binding과 MIR target이 권한을 소유하며 MIR 검증은 caller 권한 제거와 미지 비트를 거부한다. 자원 cleanup은 53b, scalar import 전파는 63번 부분 단위에서 연결했다. 검증은 `docs/ops/evidence/candidate-resource-effects-calls-20261007.json`에 있고 원시 C/실행 기록은 `.cache/candidate-unit53`에 보관한다.
 
 ### 후보 53b: 자원 정리 효과
 
@@ -2863,7 +2863,7 @@ Same-module `fn T id<T>(T n)` and `id<i32>(7)` specialize in Fairy code before o
 
 ### 후보 56a: must-use 호출 계약
 
-단일 무인자 `@must_use`는 inert 반환 함수에만 붙인다. 직접 무시한 호출 및 괄호·블록·if/switch의 무시된 끝값은 E4202로 거부한다. binding/return/argument/operator/cast/condition/aggregate 또는 명시 `discard`는 호출 값의 처리로 인정한다. 일반 함수와 scalar generic 특수화의 HIR binding에 marker를 소유하며 MIR/C에는 실행 비용을 추가하지 않는다. resource/Result/safe borrow/void 반환과 malformed 선언은 E4201이다. @test/@const_eval과 import marker 연결은 아직 남았다. 증거: `docs/ops/evidence/candidate-resource-must-use-20261007.json`. tagged .some 생성자를 함수로 잘못 분류하던 초기 walker 오류는 수정했고 정상 Option 처리 fixture로 검증했다.
+단일 무인자 `@must_use`는 inert 반환 함수에만 붙인다. 직접 무시한 호출 및 괄호·블록·if/switch의 무시된 끝값은 E4202로 거부한다. binding/return/argument/operator/cast/condition/aggregate 또는 명시 `discard`는 호출 값의 처리로 인정한다. 일반 함수와 scalar generic 특수화의 HIR binding에 marker를 소유하며 MIR/C에는 실행 비용을 추가하지 않는다. resource/Result/safe borrow/void 반환과 malformed 선언은 E4201이다. scalar import marker는 63번, extern-C marker는 55번에서 연결했다. @test/@const_eval 조합은 남았다. 증거: `docs/ops/evidence/candidate-resource-must-use-20261007.json`. tagged .some 생성자를 함수로 잘못 분류하던 초기 walker 오류는 수정했고 정상 Option 처리 fixture로 검증했다.
 
 ### Imported scalar call contracts (unit 63 partial)
 
@@ -2872,3 +2872,25 @@ Registry items own effects and must-use markers; copied external signatures and 
 ### Unsafe lexical call scopes (unit 54 partial)
 
 Unsafe Fairy functions and explicit blocks authorize unsafe calls only within their lexical body. Effects, must-use, moves and borrows remain independently checked. Generic cloning remaps unsafe blocks; defer retains permission from registration and cleanup requires its own explicit block. Owned HIR checks the actual block tree, and MIR rejects stripped or mismatched call provenance before C output. Two candidate profiles, 17 fixtures, 18 generated-C native runs and two mutation API tests passed. See `docs/ops/evidence/candidate-resource-unsafe-scopes-20261007.json`. Extern-C imports and raw-pointer values remain pending the next unit.
+
+### Scalar extern-C imports (units 54–55 partial)
+
+`unsafe extern C fn` accepts exact i32/i64/u8/u32/usize parameters and results,
+plus void results. A single `@link_name("symbol")` selects an unescaped ASCII
+identifier of at most 256 bytes; invalid/reserved C names and incompatible
+aliases fail before output. Ordinary Fairy names retain numeric C symbols.
+Owned HIR/MIR retain the validated linker span, foreign target, effects,
+must-use and unsafe-call facts. Defer captures permission at registration;
+resource cleanup still checks its own effects and explicit unsafe block.
+
+The test consumer optionally appends a bounded foreign fixture to its separate
+runtime translation unit and hashes those bytes into the build identity.
+The generated product translation unit is unchanged by that fixture. Both
+candidate profiles pass 24 source fixtures; two C profiles execute 18 native
+calls across the object boundary. One native API test rejects four linker/ABI
+mutations before C output. Eight earlier unsafe CLI cases still match.
+See `docs/ops/evidence/candidate-resource-scalar-foreign-20261008.json`.
+
+Raw pointers, C scalar transport, repr(C) aggregate values, escaped linker names,
+authenticated SDK fy_ symbols and imported nominal signatures remain pending.
+This does not complete SDK Vec/Buffer/File integration or self-hosting.
