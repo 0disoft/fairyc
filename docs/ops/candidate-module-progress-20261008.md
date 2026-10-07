@@ -34,3 +34,19 @@ This unit does **not** complete nominal multi-file body typing, HIR/MIR linking,
 SDK admission, or native compilation of a multi-file user program. The older
 scalar-only module CLI remains closed until those consumers can own the same
 type and layout graph. Linux execution is deferred to the combined phase.
+
+## Owned callable signatures
+
+`module_signatures.fy` resolves provider and caller annotations into the same
+canonical type graph, including nominal/resource/enum leaves, Option/Result,
+references, C scalars, and the exact pointer output slot. The published owner
+retains result/parameter IDs, module/declaration coordinates, public visibility,
+effects, unsafe, must-use, and exact C linker bytes after the parser owners leave
+scope. Conflicting C alias prototypes are rejected across modules; identical
+prototypes retain their shared linker name.
+
+Invalid declaration effects/must-use, private type imports, and void parameters
+fail before publication. Generic signatures, receivers, body checking, and SDK
+authentication remain outside this unit. Signature success is not a whole-program
+check result. Evidence: `evidence/candidate-module-signatures-20261008.json`,
+with actual Fairy dev/release native API execution.
