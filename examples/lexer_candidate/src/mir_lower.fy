@@ -150,11 +150,13 @@ fn usize expression(ref h::Program input, ref mut v::Vec<m::Local> locals, ref m
     if(kind==25){let usize owner=expression(input,locals,blocks,operations,edges,payload,c,e.left,depth+1);if(owner==0){return 0;}let usize result=state::local(locals,c,type,0,false,false,e.start,e.end);return if(state::emit(operations,blocks,c,state::operation(34,result,type,h::type_code(h::expression_at(input,e.left).type),0,owner,0,e.start,e.end))!=0){result}else{0};}
     if (kind == 16) {
         if(refs::valid(type)){return address(input,locals,blocks,operations,edges,payload,c,e.left,e.boolean,depth+1);}
-        let usize owner = c.locals[h::expression_at(input,e.left).binding];
+        let h::Expression source=h::expression_at(input,e.left);
+        let bool projected=h::expression_code(source.kind)==10;
+        let usize owner=if(projected){address(input,locals,blocks,operations,edges,payload,c,e.left,e.boolean,depth+1)}else{c.locals[source.binding]};
         if (owner == 0) { return state::fail(c,4,e.start,e.end); }
         let u32 array_type = h::type_code(h::expression_at(input,e.left).type);
         let usize result = state::local(locals,c,type,0,false,false,e.start,e.end);
-        if (state::emit(operations,blocks,c,state::operation(18,result,type,array_type,0,owner,0,e.start,e.end)) == 0) { return 0; } return result;
+        if (state::emit(operations,blocks,c,state::operation(18,result,type,if(projected){v::at<m::Local>(locals,owner-1).type}else{array_type},0,owner,0,e.start,e.end)) == 0) { return 0; } return result;
     }
     if (kind == 17) {
         let usize owner = expression(input,locals,blocks,operations,edges,payload,c,e.left,depth + 1); if (c.current == 0 || c.problem.code != 0) { return 0; }

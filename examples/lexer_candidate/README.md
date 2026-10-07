@@ -2840,3 +2840,7 @@ See `docs/ops/evidence/candidate-resource-borrow-flow-joins-20261007.json`,
 `candidate-resource-borrow-joins-regression-20261007.json`,
 `candidate-resource-loop-exits-final-20261007.json` and
 `candidate-units-21-40-completion-audit-20261007.json` in that evidence directory.
+
+### Stored byte-array field views (unit 42)
+
+`ref value.field` and `ref mut value.field` borrow stored rank-one `u8[N]` fields, including nested plain struct fields. MIR projects an address into original storage before constructing the descriptor; writes are visible in the owner. Shared struct-reference parameters can return a field view with the parameter origin. Temporary roots remain rejected, and retained mutable siblings keep the ADR0415 whole-owner restriction. SDK text conversion is still pending its unsafe/cast and module dependencies.

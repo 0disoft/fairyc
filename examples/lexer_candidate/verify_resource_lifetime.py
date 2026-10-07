@@ -316,6 +316,23 @@ REJECTIONS[40]=[
  ('mixed-input-return','fn ref i32 f(ref i32 a,ref i32 b,bool yes){return if(yes){a}else{b};}fn i32 main(){return 0;}', 'E2103'),
 ]
 
+CASES[42]=[
+ ('field-shared','struct S{u8[3] data;}fn i32 main(){let S s=S{.data=[65,66,67]};let ref u8[] b=ref s.data;assert(b.len==3 && b[1]==66);return 7;}', '',7,0),
+ ('nested-field-mutable','struct Inner{u8[3] data;}struct S{Inner inner;}fn i32 main(){var S s=S{.inner=Inner{.data=[65,66,67]}};let ref mut u8[] b=ref mut s.inner.data;b[1]=9;return if(s.inner.data[1]==9){7}else{1};}', '',7,0),
+ ('field-subview','struct S{u8[3] data;}fn i32 main(){var S s=S{.data=[65,66,67]};let ref mut u8[] b=ref mut s.data;let q=b[1..];q[0]=9;return if(s.data[1]==9){7}else{1};}', '',7,0),
+ ('parameter-field','struct S{u8[3] data;}fn ref u8[] read(ref S s){return ref s.data;}fn i32 main(){let S s=S{.data=[65,66,67]};let b=read(ref s);return if(b[2]==67){7}else{1};}', '',7,0),
+ ('local-metadata','fn usize text_len(ref str s){return s.len;}fn bool empty(ref u8[] b){return b.is_empty;}fn i32 main(){assert(text_len("한글") == 6 && empty(b"") && !empty(b"x"));return 7;}', '',7,0),
+]
+REJECTIONS[42]=[
+ ('field-owner-held','struct S{u8[3] data;}fn i32 main(){var S s=S{.data=[1,2,3]};let ref u8[] b=ref s.data;s.data[0]=9;return if(b[0]==1){7}else{1};}', 'E2101'),
+ ('field-local-escape','struct S{u8[3] data;}fn ref u8[] f(){let S s=S{.data=[1,2,3]};return ref s.data;}fn i32 main(){return 0;}', 'E2102'),
+ ('temporary-owner','struct S{u8[3] data;}fn S make(){return S{.data=[1,2,3]};}fn i32 main(){let ref u8[] b=ref make().data;return 0;}'),
+ ('immutable-owner','struct S{u8[3] data;}fn i32 main(){let S s=S{.data=[1,2,3]};let ref mut u8[] b=ref mut s.data;return 0;}'),
+ ('text-index','fn i32 main(){let ref str s="한글";discard s[0];return 0;}'),
+ ('text-slice','fn i32 main(){let ref str s="한글";discard s[..];return 0;}'),
+ ('retained-siblings','struct S{u8[3] data;}fn i32 main(){var S s=S{.data=[1,2,3]};let ref mut u8[] b=ref mut s.data;let left=b[..1];let right=b[1..];left[0]=9;right[0]=8;return 0;}', 'E2101'),
+]
+
 def sha(path): return hashlib.sha256(path.read_bytes()).hexdigest()
 def save(path, value): path.write_text(json.dumps(value, ensure_ascii=False, indent=2)+'\n', encoding='utf-8', newline='\n')
 

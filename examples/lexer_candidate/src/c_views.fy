@@ -1,5 +1,6 @@
 module c_views;
 import mir_model as m;
+import reference_types as refs;
 import array_types as arrays;
 import c_text as w;
 import std::bytes as bytes;
@@ -10,7 +11,7 @@ pub fn bool operation(ref m::Program p, m::Operation o, ref mut bytes::Buffer ou
         return w::text(out,s,b"    ") && w::local(out,s,o.left) && w::text(out,s,b".fy_data[") && w::local(out,s,o.right) && w::text(out,s,b"]=") && w::local(out,s,value) && w::text(out,s,b";\n");
     }
     if (o.kind == 18) {
-        return w::text(out,s,b"    ") && w::local(out,s,o.result) && w::text(out,s,b"=(") && w::type(out,s,o.type) && w::text(out,s,b"){") && w::local(out,s,o.left) && w::text(out,s,b".fy_items,((uintptr_t)") && w::number(out,s,arrays::length(o.owner_type)) && w::text(out,s,b")};\n");
+        return w::text(out,s,b"    ") && w::local(out,s,o.result) && w::text(out,s,b"=(") && w::type(out,s,o.type) && w::text(out,s,b"){") && w::local(out,s,o.left) && w::text(out,s,if(refs::valid(o.owner_type)){b"->fy_items,((uintptr_t)"}else{b".fy_items,((uintptr_t)"}) && w::number(out,s,arrays::length(if(refs::valid(o.owner_type)){refs::inner(o.owner_type)}else{o.owner_type})) && w::text(out,s,b")};\n");
     }
     let usize end = m::edge_at(p,o.argument_start);
     // Volatile bounds prevent a compiler from treating a known trap branch as
