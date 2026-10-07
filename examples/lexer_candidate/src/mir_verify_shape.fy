@@ -1,5 +1,6 @@
 module mir_verify_shape;
 import mir_reference as refs;
+import scalar_casts as casts;
 import mir_model as m;
 import std::bytes as bytes;
 import std::vec as v;
@@ -51,6 +52,7 @@ fn bool integer(ref u8[] text, u32 type) {
     return true;
 }
 fn bool operation(ref m::Program p, usize id, m::Operation o) {
+    if(o.kind==35){return casts::allowed(o.owner_type,o.type) && local(p,o.result,o.function,o.type) && local(p,o.left,o.function,o.owner_type) && o.result!=o.left && o.right==0 && o.operator==0 && o.argument_start==0 && o.argument_count==0 && o.payload_start==0 && o.payload_end==0 && !o.boolean;}
     if(o.kind>=28){return refs::operation(p,o);}
     if(o.kind==24 || o.kind==25 || o.kind==26 || o.kind==27){
         if(!shapes::needs_drop(o.type) || o.owner_type!=o.type || o.operator!=0 || o.right!=0 || o.argument_start!=0 || o.argument_count!=0 || o.payload_start!=0 || o.payload_end!=0 || o.boolean || !local(p,o.left,o.function,o.type)){return false;}

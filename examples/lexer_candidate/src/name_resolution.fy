@@ -134,6 +134,7 @@ fn Problem expression(ref syntax::Parsed parsed, ref mut Context context, usize 
         while (i < count) { let Problem p = expression(parsed,context,if (node.kind == 29) { node.left } else { syntax::array_element(parsed,id,i) },depth + 1,symbols,references); if (p.code != 0) { return p; } i += 1; }
         return ok();
     }
+    if(node.kind==23){return expression(parsed,context,node.left,depth+1,symbols,references);}
     if (node.kind == 8) { return expression(parsed,context,node.left,depth + 1,symbols,references); }
     if (node.kind == 10) {
         let Problem target = expression(parsed,context,node.left,depth + 1,symbols,references);

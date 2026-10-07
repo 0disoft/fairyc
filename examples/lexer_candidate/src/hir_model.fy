@@ -1,5 +1,6 @@
 module hir_model;
 import borrow_shapes as borrows;
+import scalar_casts as casts;
 import reference_types as refs;
 import array_types as arrays;
 import resource_identity as resources;
@@ -17,7 +18,7 @@ import hir_shapes as shapes;
 // symbol IDs, but their owner/target/type facts below are independently owned.
 pub enum Type { Borrowed { u32 id; }; Invalid; I32; I64; U8; U32; Usize; Bool; Void; Callable; Resource { u32 id; }; Nominal { u32 id; }; Array { u32 id; }; Text; Bytes; MutableBytes; Enumeration { u32 id; }; Option { u32 id; }; Result { u32 id; }; }
 pub enum BindingKind { Function; Parameter; Let; Var; External; Struct; Enum; Resource; DropFunction; DropReceiver; }
-pub enum ExpressionKind { Integer; Boolean; Reference; Unary; Binary; Call; Block; If; Construct; Field; Initializer; Array; Index; Length; Literal; Borrow; Slice; Variant; Switch; Arm; Capture; Propagate; IsOk; Move; Reborrow; }
+pub enum ExpressionKind { Integer; Boolean; Reference; Unary; Binary; Call; Block; If; Construct; Field; Initializer; Array; Index; Length; Literal; Borrow; Slice; Variant; Switch; Arm; Capture; Propagate; IsOk; Move; Reborrow; Cast; }
 pub enum StatementKind { Binding; Return; Assignment; Expression; While; For; Break; Continue; Assert; Discard; Defer; Burn; }
 pub enum Operator { None; Plus; Minus; Not; Complement; Multiply; Divide; Remainder; BitAnd; BitOr; BitXor; ShiftLeft; ShiftRight; Equal; NotEqual; Less; LessEqual; Greater; GreaterEqual; And; Or; Assign; }
 // The fixed SDK/compiler admits enum switching, not enum equality or enum casts.
@@ -25,7 +26,7 @@ pub enum Operator { None; Plus; Minus; Not; Complement; Multiply; Divide; Remain
 pub fn u32 type_code(Type value) { return switch(value) { case .Borrowed { .id=id }: { id } case .Invalid: { 0 } case .I32: { 1 } case .I64: { 2 } case .U8: { 3 } case .U32: { 4 } case .Usize: { 5 } case .Bool: { 6 } case .Void: { 7 } case .Callable: { 8 } case .Text: { 9 } case .Bytes: { 10 } case .MutableBytes: { 11 } case .Option { .id = id }: { id } case .Result { .id = id }: { id } case .Enumeration { .id = id }: { id } case .Resource { .id = id }: { id } case .Nominal { .id = id }: { id } case .Array { .id = id }: { id } }; }
 pub fn bool represented_type(Type value) { return switch(value) { case .Borrowed { .id=id }: { refs::valid(id) } case .Invalid: { false } case .Callable: { false } case .Option { .id = id }: { tagged::option(id) } case .Result { .id = id }: { tagged::result(id) } case .Enumeration { .id = id }: { enums::valid(id) && !tagged::builtin(id) } case .Resource { .id = id }: { resources::valid(id) } case .Nominal { .id = id }: { id >= 256 && id <= 767 } case .Array { .id = id }: { arrays::valid(id) } case .I32: { true } case .I64: { true } case .U8: { true } case .U32: { true } case .Usize: { true } case .Bool: { true } case .Void: { true } case .Text: { true } case .Bytes: { true } case .MutableBytes: { true } }; }
 pub fn u32 binding_code(BindingKind value) { return switch(value) { case .Function: { 1 } case .Parameter: { 2 } case .Let: { 3 } case .Var: { 4 } case .External: { 5 } case .Struct: { 6 } case .Enum: { 7 } case .Resource: { 8 } case .DropFunction: { 9 } case .DropReceiver: { 10 } }; }
-pub fn u32 expression_code(ExpressionKind value) { return switch(value) { case .Integer: { 1 } case .Boolean: { 2 } case .Reference: { 3 } case .Unary: { 4 } case .Binary: { 5 } case .Call: { 6 } case .Block: { 7 } case .If: { 8 } case .Construct: { 9 } case .Field: { 10 } case .Initializer: { 11 } case .Array: { 12 } case .Index: { 13 } case .Length: { 14 } case .Literal: { 15 } case .Borrow: { 16 } case .Slice: { 17 } case .Variant: { 18 } case .Switch: { 19 } case .Arm: { 20 } case .Capture: { 21 } case .Propagate: { 22 } case .IsOk: { 23 } case .Move: { 24 } case .Reborrow: { 25 } }; }
+pub fn u32 expression_code(ExpressionKind value) { return switch(value) { case .Integer: { 1 } case .Boolean: { 2 } case .Reference: { 3 } case .Unary: { 4 } case .Binary: { 5 } case .Call: { 6 } case .Block: { 7 } case .If: { 8 } case .Construct: { 9 } case .Field: { 10 } case .Initializer: { 11 } case .Array: { 12 } case .Index: { 13 } case .Length: { 14 } case .Literal: { 15 } case .Borrow: { 16 } case .Slice: { 17 } case .Variant: { 18 } case .Switch: { 19 } case .Arm: { 20 } case .Capture: { 21 } case .Propagate: { 22 } case .IsOk: { 23 } case .Move: { 24 } case .Reborrow: { 25 } case .Cast: { 26 } }; }
 pub fn u32 statement_code(StatementKind value) { return switch(value) { case .Binding: { 1 } case .Return: { 2 } case .Assignment: { 3 } case .Expression: { 4 } case .While: { 5 } case .For: { 6 } case .Break: { 7 } case .Continue: { 8 } case .Assert: { 9 } case .Discard: { 10 } case .Defer: { 11 } case .Burn: { 12 } }; }
 pub fn u32 operator_code(Operator value) { return switch(value) { case .None: { 0 } case .Plus: { 1 } case .Minus: { 2 } case .Not: { 3 } case .Complement: { 4 } case .Multiply: { 5 } case .Divide: { 6 } case .Remainder: { 7 } case .BitAnd: { 8 } case .BitOr: { 9 } case .BitXor: { 10 } case .ShiftLeft: { 11 } case .ShiftRight: { 12 } case .Equal: { 13 } case .NotEqual: { 14 } case .Less: { 15 } case .LessEqual: { 16 } case .Greater: { 17 } case .GreaterEqual: { 18 } case .And: { 19 } case .Or: { 20 } case .Assign: { 21 } }; }
 pub struct Problem { u32 code; usize start; usize end; }
@@ -241,6 +242,7 @@ pub fn Result<Program,Problem> assemble_resources(bytes::Buffer source, bytes::B
                 }
             }
         }
+        if(kind==26 && (e.left==0 || !casts::allowed(type_code(v::at<Expression>(ref expressions,e.left-1).type),type) || e.right!=0 || e.alternative!=0 || e.block!=0 || e.binding!=0 || e.edge_count!=0 || e.payload_start!=0 || e.payload_end!=0 || e.boolean || operator_code(e.operator)!=0)){return .err(Problem{.code=4,.start=e.start,.end=e.end});}
         if(kind==25 && (e.left==0 || !refs::valid(type) || refs::mutable(type) || !refs::mutable(type_code(v::at<Expression>(ref expressions,e.left-1).type)) || refs::inner(type_code(v::at<Expression>(ref expressions,e.left-1).type))!=refs::inner(type) || e.right!=0 || e.alternative!=0 || e.binding!=0 || e.edge_count!=0)){return .err(Problem{.code=4,.start=e.start,.end=e.end});}
         if(kind==24 && (!shapes::needs_drop(type) || binding_code(v::at<Binding>(ref bindings,e.binding-1).kind)==10 || e.left!=0 || e.right!=0 || e.alternative!=0 || e.block!=0 || e.edge_count!=0 || e.payload_start!=0 || e.payload_end!=0 || e.boolean)){return .err(Problem{.code=4,.start=e.start,.end=e.end});}
         if (kind == 12) {

@@ -101,7 +101,7 @@ evidence/candidate-result-handling-alignment-20261007.json에 새 검사·도구
 57. 모듈 상수·제한된 스칼라 컴파일 타임 계산·static_assert 연결.
 58. 정확한 source_location 전개와 선언 문서 주석 연결.
 59. 도달 가능한 소스에서 쓰는 경우 바이트 읽기 반복·region 할당 의미 연결.
-60. 자기 소스의 거부 문법을 계약·담당별로 분류. 현재 후보가 이름 검사에서 거부하는 `as` 캐스트도 포함. 스크립트 대체 컴파일로 우회하지 않기.
+60. 부분 완료: 값 보존 scalar `as` 캐스트를 이름·타입·owned HIR·MIR 검증·C 실행까지 연결. u8→i32/i64/u32/usize, i32→i64, u32→i64/usize만 허용. narrowing·부호 변경·bool/enum/raw-pointer·동일 타입은 기존 계약에 따라 거부. 12개 fixture·두 후보 프로필·native 12회 및 위조 MIR 거부 1개 API test 통과. 근거: `evidence/candidate-resource-scalar-casts-20261007.json`. 전체 자기 소스 inventory·모듈·unsafe/포인터 연결은 후속 단위에서 마무리하며 스크립트 대체 컴파일로 우회하지 않음.
 
 현재 30비트 tagged 타입 표현은 nominal/resource leaf 하나에 14비트를 쓴다.
 따라서 예시 조합 `Result<Option<Token>,Problem>`에서 양쪽 leaf가 nominal/resource라면
@@ -233,5 +233,5 @@ evidence/candidate-result-handling-alignment-20261007.json에 새 검사·도구
 20번 완료 후 주요 작업 99개(21~119)와 선택 검토 8개(120~127)를 구분한다. 주요 작업 모두가
 셀프호스팅 전에 끝나야 한다는 뜻은 아니며, 자기 소스의 도달 가능한 기능이 단계 전환을 결정한다.
 
-즉시 다음 작업은 **41번 ref str·바이트 메타데이터의 SDK 연결**이다.
+즉시 다음 작업은 **53번 effects 선언·호출 검사와 54~55번 unsafe/FFI 및 61~64번 모듈 정체성 선행 연결**이다. 41번 SDK 텍스트 연결과 46~52번 컨테이너·파일은 이 의존성 이후에 이어간다.
 선택 기능은 별도 도입 판단을 거친다. 이 목록은 push·PR·설치·release를 승인하지 않는다.

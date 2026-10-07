@@ -7,6 +7,7 @@ import tagged_check as tagged_check;
 import enum_types as enums;
 import name_resolution as names;
 import syntax as syntax;
+import scalar_casts as casts;
 import type_state as state;
 import nominal_types as nominal;
 import resource_identity as resources;
@@ -121,6 +122,7 @@ fn state::Value expression(ref names::Resolved resolved, ref mut v::Vec<state::S
         if(join==9 || join==10 || join==11){return error(problem,28,node.start,node.end,0,join);}
         return recorded(tables,id,value(join,subject.terminates || terminates));
     }
+    if(node.kind==23){let actual=expression(resolved,tables,problem,node.left,0,result_type,depth+1,loop_depth);if(problem.code!=0){return actual;}let u32 target=nominal::resolve(parsed,node.right);if(!casts::allowed(actual.type,target)){return error(problem,52,node.start,node.end,target,actual.type);}return recorded(tables,id,value(target,actual.terminates));}
     if (node.kind == 3) { let state::Value actual = expression(resolved,tables,problem,node.left,expected,result_type,depth + 1,loop_depth); return recorded(tables,id,actual); }
     if (node.kind == 4) {
         let bool minus = bytes::equal(op,b"-"); let bool plus = bytes::equal(op,b"+"); let bool complement = bytes::equal(op,b"~");

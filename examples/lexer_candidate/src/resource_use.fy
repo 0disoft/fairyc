@@ -15,7 +15,7 @@ fn void expression(ref syntax::Parsed p,ref mut v::Vec<state::Slot> tables,ref m
     if(e.kind==2){let bool moving=consume && properties::needs_drop(state::expressions(tables,id-1));
         if(moving && c.receiver!=0 && state::uses(tables,id-1)==c.receiver){fail(c,48,e.start,e.end);return;}
         state::set_moving(tables,id-1,moving);return;}
-    if(e.kind==3){expression(p,tables,c,e.left,consume,depth+1);return;}
+    if(e.kind==3 || e.kind==23){expression(p,tables,c,e.left,consume,depth+1);return;}
     if(e.kind==8){
         let bool is_ok=state::flags(tables,id-1)==2048;
         if(!is_ok && consume && properties::needs_drop(state::expressions(tables,id-1))){fail(c,44,e.start,e.end);return;}

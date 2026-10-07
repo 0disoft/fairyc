@@ -383,6 +383,23 @@ REJECTIONS[45]=[
  ('per-declaration-limit','fn i32 many<A,B,C,D,E>(A a){return 7;}fn i32 main(){'+''.join('discard many<'+','.join('bool' if (i>>j)&1 else 'i32' for j in range(5))+'>'+(' (true);' if i&1 else '(7);') for i in range(17))+'return 0;}', 'E4503'),
 ]
 
+CASES[60]=[
+ ('u8-widenings','fn i32 main(){let u8 n=255;assert(n as i32==255 && n as i64==255 && n as u32==255 && n as usize==255);return 7;}', '',7,0),
+ ('i32-negative','fn i32 main(){let i32 n=-2147483648;let i64 wide=n as i64;assert(wide==-2147483648);return 7;}', '',7,0),
+ ('u32-maximum','fn i32 main(){let u32 n=4294967295;assert(n as i64==4294967295 && n as usize==4294967295);return 7;}', '',7,0),
+ ('operand-once','fn u8 next(){mark(65);return 7;}fn i32 main(){return next() as i32;}', 'A',7,0),
+ ('generic-cast','fn i64 wide<T>(T n){return n as i64;}fn i32 main(){assert(wide<i32>(-7)==-7 && wide<u32>(4294967295)==4294967295);return 7;}', '',7,0),
+ ('widen-then-overflow','fn i32 main(){let u8 n=1;return (n as i32)+2147483647;}', '',0,1),
+]
+REJECTIONS[60]=[
+ ('narrowing','fn i32 main(){let i64 n=7;discard n as i32;return 0;}'),
+ ('sign-change','fn i32 main(){let i32 n=7;discard n as u32;return 0;}'),
+ ('bool-cast','fn i32 main(){discard true as i32;return 0;}'),
+ ('same-type-cast','fn i32 main(){let i32 n=7;discard n as i32;return 0;}'),
+ ('pointer-without-unsafe','fn i32 main(){let u8[2] a=[1,2];let ref u8[] b=ref a;discard b as ptr u8;return 0;}'),
+ ('enum-cast','enum E{A;}fn i32 main(){let E e=.A;discard e as i32;return 0;}'),
+]
+
 def sha(path): return hashlib.sha256(path.read_bytes()).hexdigest()
 def save(path, value): path.write_text(json.dumps(value, ensure_ascii=False, indent=2)+'\n', encoding='utf-8', newline='\n')
 
