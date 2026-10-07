@@ -138,6 +138,16 @@ REJECTIONS[29] = [
  ('defer-result','fn i32 give(){return 1;}fn i32 main(){defer give();return 0;}'),
 ]
 
+CASES[30] = [
+ ('trap-assertion','resource R{cleanup{mark(65);}}fn i32 main(){let R r=R{};defer mark(66);mark(88);assert(false);}', 'X', 0, 5),
+ ('trap-overflow','resource R{cleanup{mark(65);}}fn i32 main(){let R r=R{};defer mark(66);mark(88);var i32 n=2147483647;return n+1;}', 'X', 0, 1),
+ ('trap-division','resource R{cleanup{mark(65);}}fn i32 main(){let R r=R{};defer mark(66);mark(88);var i32 zero=0;return 7/zero;}', 'X', 0, 2),
+ ('trap-deferred-call','resource R{cleanup{mark(65);}}fn void fail(){mark(88);assert(false);}fn i32 main(){let R r=R{};defer mark(66);defer fail();return 0;}', 'X', 0, 5),
+ ('trap-cleanup-stops','resource R{i32 n;cleanup{mark(this.n);assert(false);}}fn i32 main(){let R a=R{.n=65};let R b=R{.n=66};defer mark(88);return 0;}', 'XB', 0, 5),
+ ('trap-partial-constructor','resource S{cleanup{mark(65);}}resource R{S s;i32 n;cleanup{mark(66);}}fn i32 main(){var i32 n=2147483647;let R r=R{.s=S{},.n=n+1};return 0;}', '', 0, 1),
+ ('trap-linear-obligation','@abilities(store)resource R{cleanup{mark(65);}}fn i32 main(){let R r=R{};mark(88);assert(false);}', 'X', 0, 5),
+]
+
 def sha(path): return hashlib.sha256(path.read_bytes()).hexdigest()
 def save(path, value): path.write_text(json.dumps(value, ensure_ascii=False, indent=2)+'\n', encoding='utf-8', newline='\n')
 

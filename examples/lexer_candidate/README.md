@@ -2768,3 +2768,9 @@ suffix in reverse order, then discharge resources. Registration captures only
 copy scalars immediately and in argument order; resource/aggregate captures and
 value-returning calls remain rejected. Defer in a cleanup body follows the same
 policy without owning the compiler's `this` receiver.
+
+Unit 30 verifies the existing non-unwinding trap policy under both native profiles.
+Arithmetic/assertion traps skip pending defer and owned cleanup, including partial
+construction. A trap inside defer or cleanup preserves effects already executed
+and stops the remaining chain. A no-drop value may terminate in a trap; this does
+not turn trap into a destruction permission or a normal return.
