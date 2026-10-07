@@ -1,0 +1,1381 @@
+{
+  "schema": "fairyc.resource-cleanup-check/v1",
+  "unit": 21,
+  "passed": true,
+  "images": [
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\candidate-dev.exe",
+      "sha256": "db102ebfc6c4af06d04a78805f64263808d0c06a5396aa6af0980b07887af429"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\candidate-release.exe",
+      "sha256": "2f7df28e78ffd021c245b0ba9aaa11ef3e5ea8ea2ca87a6b96b7221fa1a59557"
+    }
+  ],
+  "fixtures": [
+    {
+      "name": "read-write",
+      "inputHex": "6d6f64756c65206d61696e3b7265736f7572636520527b693332206e3b636c65616e75707b6c65742069333220783d746869732e6e3b746869732e6e3d782b313b7d7d666e20693332206d61696e28297b72657475726e20303b7d",
+      "sha256": "c7f340f17b594436e3b31cfafb66a9a8463a215a6b86bb585614ee56410adb80",
+      "diagnostic": null
+    },
+    {
+      "name": "nested-shadow",
+      "inputHex": "6d6f64756c65206d61696e3b73747275637420507b693332206e3b7d7265736f7572636520527b5020703b636c65616e75707b746869732e702e6e3d333b7b6c65742069333220746869733d343b6c65742069333220783d746869733b7d3b6c65742069333220793d746869732e702e6e3b7d7d",
+      "sha256": "2a7dbc9d6d794295b030de1e576e977d05af1678a3d131f26de5d03eee5d0625",
+      "diagnostic": null
+    },
+    {
+      "name": "loop-return",
+      "inputHex": "6d6f64756c65206d61696e3b7265736f7572636520527b693332206e3b636c65616e75707b7661722069333220693d303b7768696c6528693c32297b746869732e6e2b3d313b692b3d313b7d72657475726e3b7d7d",
+      "sha256": "9881787dea680d6cb931c74d14bb5a3dfe3357a4481c24d7884c0e48dcde4bfa",
+      "diagnostic": null
+    },
+    {
+      "name": "local-transfer",
+      "inputHex": "6d6f64756c65206d61696e3b7265736f7572636520537b636c65616e75707b7d7d7265736f7572636520527b636c65616e75707b6c6574205320733d537b7d3b74616b652873293b7d7d666e20766f69642074616b6528532073297b7d",
+      "sha256": "4e12af6912ed301fe9531f065237c3ac41d793b6481e5784736e0600b2b1d331",
+      "diagnostic": null
+    },
+    {
+      "name": "move-call",
+      "inputHex": "6d6f64756c65206d61696e3b7265736f7572636520527b636c65616e75707b74616b652874686973293b7d7d666e20766f69642074616b6528522072297b7d",
+      "sha256": "7093991158eae70f20c48cfad72e77e99cd27cf797d4cf6d8d95836694ce6a5e",
+      "diagnostic": "E1102"
+    },
+    {
+      "name": "move-binding",
+      "inputHex": "6d6f64756c65206d61696e3b7265736f7572636520527b636c65616e75707b6c65742052206f746865723d746869733b7d7d",
+      "sha256": "40267e331feb8d9850867913491ab9895c7d6535e678f59519bc3961615bb444",
+      "diagnostic": "E1102"
+    },
+    {
+      "name": "overwrite-receiver",
+      "inputHex": "6d6f64756c65206d61696e3b7265736f7572636520527b636c65616e75707b746869733d527b7d3b7d7d",
+      "sha256": "726d51b872b964b78c8acd4a009fbe9242004d3f4ec593fd0ebd82f101f39ef3",
+      "diagnostic": "E1102"
+    },
+    {
+      "name": "partial-move",
+      "inputHex": "6d6f64756c65206d61696e3b7265736f7572636520537b636c65616e75707b7d7d7265736f7572636520527b5320733b636c65616e75707b74616b6528746869732e73293b7d7d666e20766f69642074616b6528532073297b7d",
+      "sha256": "c152d1f9d4164fea766606857a8b8573d78606c384890d44a04f027476e27b09",
+      "diagnostic": "E1103"
+    },
+    {
+      "name": "wrong-field-type",
+      "inputHex": "6d6f64756c65206d61696e3b7265736f7572636520527b693332206e3b636c65616e75707b746869732e6e3d747275653b7d7d",
+      "sha256": "0b7d22347b568dc55ee61721bc72394bfb3968510bc39641ca6fa04eb88576e7",
+      "diagnostic": "type mismatch"
+    },
+    {
+      "name": "return-value",
+      "inputHex": "6d6f64756c65206d61696e3b7265736f7572636520527b636c65616e75707b72657475726e20313b7d7d",
+      "sha256": "adbe4fb0fb9fbd8d87e86a8de6d5c2d1b3d1c73f985c0b96563edf5f05ba611a",
+      "diagnostic": "type mismatch"
+    },
+    {
+      "name": "tail-value",
+      "inputHex": "6d6f64756c65206d61696e3b7265736f7572636520527b636c65616e75707b317d7d",
+      "sha256": "3eda16faf28ddd46b351dcec1d24608cd536687040a9d1f9b8041d70f08c9da4",
+      "diagnostic": "expected ;"
+    },
+    {
+      "name": "fallible-cleanup",
+      "inputHex": "6d6f64756c65206d61696e3b7265736f7572636520527b636c65616e75707b6c65742069333220783d6628293f3b7d7d666e20526573756c743c6933322c626f6f6c3e206628297b72657475726e202e6f6b2831293b7d",
+      "sha256": "875caa3b786b39c062d4fb41b8e22ac78f1fb140a663d11b71b44fbdc57076f6",
+      "diagnostic": "? requires enclosing Result"
+    },
+    {
+      "name": "local-reuse",
+      "inputHex": "6d6f64756c65206d61696e3b7265736f7572636520537b636c65616e75707b7d7d7265736f7572636520527b636c65616e75707b6c6574205320733d537b7d3b74616b652873293b74616b652873293b7d7d666e20766f69642074616b6528532073297b7d",
+      "sha256": "10bc377f1fc9bdb49c3ff114625b0b4154c165e339fd4df28bfb9b8ca72e454f",
+      "diagnostic": "E1101"
+    },
+    {
+      "name": "local-result",
+      "inputHex": "6d6f64756c65206d61696e3b7265736f7572636520527b636c65616e75707b6c657420526573756c743c6933322c626f6f6c3e20783d6628293b7d7d666e20526573756c743c6933322c626f6f6c3e206628297b72657475726e202e6f6b2831293b7d",
+      "sha256": "b96bb8c6164f1f34818d387a743454f999c159c9d8a10ccf9274dd8efcd04c71",
+      "diagnostic": "Result value must be handled"
+    },
+    {
+      "name": "out-of-scope",
+      "inputHex": "6d6f64756c65206d61696e3b7265736f7572636520527b693332206e3b636c65616e75707b6c65742069333220783d746869732e6e3b7d7d666e20766f6964206628297b6c657420693332206e3d746869732e6e3b7d",
+      "sha256": "3beacfbc85bc90dc7159fdd2fed147c9c695a0036629bc678f24bab83c462fb1",
+      "diagnostic": "unresolved"
+    },
+    {
+      "name": "unknown-field",
+      "inputHex": "6d6f64756c65206d61696e3b7265736f7572636520527b636c65616e75707b6c657420693332206e3d746869732e6d697373696e673b7d7d",
+      "sha256": "475e1d0e9a5817f88ec5e5b796c45b82e76fb331a20a2084fa8bcd6607ece3a7",
+      "diagnostic": "unknown field"
+    }
+  ],
+  "cli": [
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\candidate-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\read-write.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\candidate-dev.exe",
+        "--hir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\read-write.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "error: invalid or unsupported HIR input\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\candidate-dev.exe",
+        "--mir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\read-write.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "error: HIR lowering failed\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\candidate-dev.exe",
+        "--c-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\read-write.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "error: HIR lowering failed\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\candidate-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\read-write.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\candidate-release.exe",
+        "--hir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\read-write.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "error: invalid or unsupported HIR input\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\candidate-release.exe",
+        "--mir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\read-write.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "error: HIR lowering failed\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\candidate-release.exe",
+        "--c-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\read-write.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "error: HIR lowering failed\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\candidate-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\nested-shadow.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\candidate-dev.exe",
+        "--hir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\nested-shadow.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "error: invalid or unsupported HIR input\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\candidate-dev.exe",
+        "--mir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\nested-shadow.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "error: HIR lowering failed\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\candidate-dev.exe",
+        "--c-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\nested-shadow.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "error: HIR lowering failed\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\candidate-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\nested-shadow.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\candidate-release.exe",
+        "--hir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\nested-shadow.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "error: invalid or unsupported HIR input\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\candidate-release.exe",
+        "--mir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\nested-shadow.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "error: HIR lowering failed\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\candidate-release.exe",
+        "--c-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\nested-shadow.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "error: HIR lowering failed\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\candidate-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\loop-return.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\candidate-dev.exe",
+        "--hir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\loop-return.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "error: invalid or unsupported HIR input\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\candidate-dev.exe",
+        "--mir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\loop-return.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "error: HIR lowering failed\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\candidate-dev.exe",
+        "--c-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\loop-return.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "error: HIR lowering failed\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\candidate-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\loop-return.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\candidate-release.exe",
+        "--hir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\loop-return.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "error: invalid or unsupported HIR input\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\candidate-release.exe",
+        "--mir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\loop-return.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "error: HIR lowering failed\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\candidate-release.exe",
+        "--c-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\loop-return.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "error: HIR lowering failed\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\candidate-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\local-transfer.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\candidate-dev.exe",
+        "--hir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\local-transfer.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "error: invalid or unsupported HIR input\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\candidate-dev.exe",
+        "--mir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\local-transfer.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "error: HIR lowering failed\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\candidate-dev.exe",
+        "--c-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\local-transfer.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "error: HIR lowering failed\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\candidate-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\local-transfer.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\candidate-release.exe",
+        "--hir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\local-transfer.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "error: invalid or unsupported HIR input\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\candidate-release.exe",
+        "--mir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\local-transfer.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "error: HIR lowering failed\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\candidate-release.exe",
+        "--c-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\local-transfer.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "error: HIR lowering failed\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\candidate-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\move-call.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\move-call.fy:1:37: error: E1102 cleanup receiver cannot transfer or replace its obligation (bytes 36..40)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\candidate-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\move-call.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\move-call.fy:1:37: error: E1102 cleanup receiver cannot transfer or replace its obligation (bytes 36..40)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\candidate-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\move-binding.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\move-binding.fy:1:44: error: E1102 cleanup receiver cannot transfer or replace its obligation (bytes 43..47)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\candidate-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\move-binding.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\move-binding.fy:1:44: error: E1102 cleanup receiver cannot transfer or replace its obligation (bytes 43..47)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\candidate-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\overwrite-receiver.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\overwrite-receiver.fy:1:32: error: E1102 cleanup receiver cannot transfer or replace its obligation (bytes 31..35)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\candidate-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\overwrite-receiver.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\overwrite-receiver.fy:1:32: error: E1102 cleanup receiver cannot transfer or replace its obligation (bytes 31..35)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\candidate-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\partial-move.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\partial-move.fy:1:62: error: E1103 partial resource field move (bytes 61..67)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\candidate-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\partial-move.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\partial-move.fy:1:62: error: E1103 partial resource field move (bytes 61..67)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\candidate-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\wrong-field-type.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\wrong-field-type.fy:1:45: error: type mismatch (bytes 44..48)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\candidate-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\wrong-field-type.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\wrong-field-type.fy:1:45: error: type mismatch (bytes 44..48)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\candidate-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\return-value.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\return-value.fy:1:39: error: type mismatch (bytes 38..39)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\candidate-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\return-value.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\return-value.fy:1:39: error: type mismatch (bytes 38..39)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\candidate-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\tail-value.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\tail-value.fy:1:33: error: expected ; (bytes 32..33)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\candidate-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\tail-value.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\tail-value.fy:1:33: error: expected ; (bytes 32..33)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\candidate-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\fallible-cleanup.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\fallible-cleanup.fy:1:45: error: ? requires enclosing Result with identical error type (bytes 44..45)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\candidate-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\fallible-cleanup.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\fallible-cleanup.fy:1:45: error: ? requires enclosing Result with identical error type (bytes 44..45)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\candidate-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\local-reuse.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\local-reuse.fy:1:78: error: E1101 resource used after move (bytes 77..78)\n  move: C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\local-reuse.fy:1:70: error:  (bytes 69..70)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\candidate-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\local-reuse.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\local-reuse.fy:1:78: error: E1101 resource used after move (bytes 77..78)\n  move: C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\local-reuse.fy:1:70: error:  (bytes 69..70)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\candidate-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\local-result.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\local-result.fy:1:55: error: Result value must be handled (bytes 54..57)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\candidate-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\local-result.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\local-result.fy:1:55: error: Result value must be handled (bytes 54..57)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\candidate-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\out-of-scope.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\out-of-scope.fy:1:79: error: unresolved name (bytes 78..82)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\candidate-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\out-of-scope.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\out-of-scope.fy:1:79: error: unresolved name (bytes 78..82)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\candidate-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\unknown-field.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\unknown-field.fy:1:47: error: unknown field (bytes 46..53)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\candidate-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\unknown-field.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\unknown-field.fy:1:47: error: unknown field (bytes 46..53)\n"
+    }
+  ],
+  "sources": [
+    {
+      "path": "src\\array_types.fy",
+      "sha256": "c3464ae8a26111f3d32d92e5f36c2026b0fc7703a5f283e61403f40433ad54ba"
+    },
+    {
+      "path": "src\\attributes.fy",
+      "sha256": "dafe2e1c020446224fa8784e701e522096a58776a1066920f934c0717667b5e6"
+    },
+    {
+      "path": "src\\binding_output.fy",
+      "sha256": "2f84ce6df37c835a7886c8a263de058b1290d8cef76d3aa2634f369ec3bbc2bb"
+    },
+    {
+      "path": "src\\bodies.fy",
+      "sha256": "b1bc7304d778caee8659d3cbf77e0e38aa8b88a2489d631978d9d69abac2afbc"
+    },
+    {
+      "path": "src\\body_state.fy",
+      "sha256": "75c13fd685fc21f4710ac2fa2d89adc652b62a7c4ad943b275d73e887bf68ffa"
+    },
+    {
+      "path": "src\\budget.fy",
+      "sha256": "c2793aa302279b9d27f0af32edd71f70de4e93cb4f76f55facd3e757641cc494"
+    },
+    {
+      "path": "src\\c_arrays.fy",
+      "sha256": "4638424d71de95b2d9756d7995a7ef67150fe271157fc55052e8380aa7dc97de"
+    },
+    {
+      "path": "src\\c_cli.fy",
+      "sha256": "3a9b5f1d71c4527cb6da16621ba44ab9e663dda291209cc373b36a51310a49f2"
+    },
+    {
+      "path": "src\\c_emit.fy",
+      "sha256": "e2734c3016045c184f47c42707c38f6cd54d3cb5430d44801cbdecc7725ee613"
+    },
+    {
+      "path": "src\\c_flow.fy",
+      "sha256": "e13817d9c26140f45b2a6ebf217dc9ad2f7c535431576e900535062b11ace313"
+    },
+    {
+      "path": "src\\c_guard.fy",
+      "sha256": "b021440f2f50ee11df4a2fa16036cea7191b83964a3e378b4d0e9aff7a8f75fd"
+    },
+    {
+      "path": "src\\c_guard_facts.fy",
+      "sha256": "4509588b0d4e3f850a6b7843452d461b8209719c5fa712145949c582b2d5a909"
+    },
+    {
+      "path": "src\\c_literals.fy",
+      "sha256": "0851889caa20b841c39c78f4c71e92a17727fffe7288c18312bd4b5ca5e281c0"
+    },
+    {
+      "path": "src\\c_nominal.fy",
+      "sha256": "ee72441265d16c86680dc1abc3a579f38806819981f896573227065d013b25e3"
+    },
+    {
+      "path": "src\\c_scalar.fy",
+      "sha256": "85fae5d5e4b5918ac996f8fa597e5f5d9852c6777cbdc93681cc188345e07e6e"
+    },
+    {
+      "path": "src\\c_text.fy",
+      "sha256": "058054bc0b1213b26690eeff6f0e8bb11a64ab2fed427d8e4169e02fb8f42f4d"
+    },
+    {
+      "path": "src\\c_views.fy",
+      "sha256": "0b2ce428c716d62ce1ac66504dc409fd7c46ef85306dd06b3b6cac87e4af931f"
+    },
+    {
+      "path": "src\\cleanup_syntax.fy",
+      "sha256": "1374cdcbfa6139a5e82e4e74606cc28ba46d9e81df62f7a0dd397f856fb0ad6f"
+    },
+    {
+      "path": "src\\declaration_output.fy",
+      "sha256": "2eb7859b28000386f9ca29510f3e3117e5907ec2e7f7fd5801a67bcf4051e5bd"
+    },
+    {
+      "path": "src\\diagnostics.fy",
+      "sha256": "ee95f81ed3b3224702196fceef2888434e9713341b81abf01e03945592c4de8b"
+    },
+    {
+      "path": "src\\enum_types.fy",
+      "sha256": "d257e7cb599fd4f3bafc1f7d9ccf11d00d19f2719df063271186cf7c432f0a96"
+    },
+    {
+      "path": "src\\file_cli.fy",
+      "sha256": "28a6f26d93ad3b46dac6d77109395e55dd7a99bff57272d679d2274a7e8e5870"
+    },
+    {
+      "path": "src\\file_syntax.fy",
+      "sha256": "0ae878df46a5d151449801481c9686b6ffa2099ce4f8d76c18e08d0405ed3ddc"
+    },
+    {
+      "path": "src\\hir_array_shapes.fy",
+      "sha256": "abbd6f86a748f3c1fd36f22c9ec6461c67f780f1f19a06165660941e4fc2b576"
+    },
+    {
+      "path": "src\\hir_cli.fy",
+      "sha256": "8128075037487308d0f212688473400f478e4e1d6e328a56dba153a19ff743d2"
+    },
+    {
+      "path": "src\\hir_lower.fy",
+      "sha256": "bfba86a4957a460a03d11aef737551f641d1f45855bfcd3bbb5ffb7a2ea5bf08"
+    },
+    {
+      "path": "src\\hir_model.fy",
+      "sha256": "efc75a43d9563d170cc36ba139cae76cdd0d8beb3ff17519e6628f3f0a221cb2"
+    },
+    {
+      "path": "src\\hir_mutable_check.fy",
+      "sha256": "9bfe9a3e8967f3442e327b9f5b0df3b1446e0026710e1cf424b2760c3ae5425a"
+    },
+    {
+      "path": "src\\hir_output.fy",
+      "sha256": "36232d44accb263f2fd5ce39ebb91074f61eae7fdbf2627dcbc001361e8a2c0b"
+    },
+    {
+      "path": "src\\hir_shape_lower.fy",
+      "sha256": "9d73e40920e38fa1682bacc1873b304caf804413ff26d0dc2fbd8d3cc837cf94"
+    },
+    {
+      "path": "src\\hir_shapes.fy",
+      "sha256": "53e5cd7497687bfb539295852e19dfa446a0dbbe6ebe4e61f1dc6018c8700e0f"
+    },
+    {
+      "path": "src\\hir_state.fy",
+      "sha256": "208b0c658d39d40e06125cedf815158cc5af386fa65994c5902642233a63e464"
+    },
+    {
+      "path": "src\\hir_view_check.fy",
+      "sha256": "97cb3ae84301ec5dd7be101a46f7d634d04fc707eef7a8772987f9c62f5b394d"
+    },
+    {
+      "path": "src\\integrity.fy",
+      "sha256": "be52239cc18af1ccc4894bf9099caff177448d843287eaffbe395dceab7fed83"
+    },
+    {
+      "path": "src\\literal_types.fy",
+      "sha256": "33d37658af0f45e89aa009837f0937e7f55ae58f7014231645c90f80f584e0b9"
+    },
+    {
+      "path": "src\\main.fy",
+      "sha256": "756a923bad8723216f4d9a8281aadad9eb4b90defba4a0f7f4a95d0731d980c0"
+    },
+    {
+      "path": "src\\mir_arrays.fy",
+      "sha256": "f57287d7cc073f8d2f5f9979a886620d90ded73c955b7f78bbdfbbe1c7bed30d"
+    },
+    {
+      "path": "src\\mir_cleanup.fy",
+      "sha256": "920dacb886eec70dc0407656149c48d70775623fcd11f7fdfffa0ffa6968aa19"
+    },
+    {
+      "path": "src\\mir_cli.fy",
+      "sha256": "77fad7857d50b0874b5d1043a4f64bd8f92e403a19746e25ed0d03c99b1e2128"
+    },
+    {
+      "path": "src\\mir_lower.fy",
+      "sha256": "5892c8a142e821db337bfa6bd339635af9378c49ac091700e457b2854995e2b1"
+    },
+    {
+      "path": "src\\mir_model.fy",
+      "sha256": "f95c1f782f8969ee8ed993d5e47164bad4115f750c13f1497e1080adc125cdd7"
+    },
+    {
+      "path": "src\\mir_nominal.fy",
+      "sha256": "e9fc7a50c45270783f1282cc519c5f952073b38d9bf1940106ed8062dd2d1403"
+    },
+    {
+      "path": "src\\mir_output.fy",
+      "sha256": "77d96e70e538a38d4a3ab1b6974145abfb7c722a3b86935aba36b42322eaf297"
+    },
+    {
+      "path": "src\\mir_places.fy",
+      "sha256": "7092dda7d9249ec69b872276286ac2c47e815e3d52e3ed4aae1588fd62e10e26"
+    },
+    {
+      "path": "src\\mir_propagation.fy",
+      "sha256": "e57f26b8eb255092dada85d2cd69266cb684f359a1a180267433d412ca23d5d3"
+    },
+    {
+      "path": "src\\mir_state.fy",
+      "sha256": "18eb5e5f0827a10099a12bf032d46909064e986a7d0b1154cbc239a51cf32fad"
+    },
+    {
+      "path": "src\\mir_verify.fy",
+      "sha256": "b99b8713e1cfcb3080f679a4957529460e7b050b721aee33812e8dca689786be"
+    },
+    {
+      "path": "src\\mir_verify_arrays.fy",
+      "sha256": "d7e937b9eb676b88adf81c13e77f0c0747d9f1456165bcab8107668f3bebbe20"
+    },
+    {
+      "path": "src\\mir_verify_enums.fy",
+      "sha256": "8a4f0902ee7bd60d7fafd84c6f7e5f91e9a451c53d19b278d9b328ac954a6839"
+    },
+    {
+      "path": "src\\mir_verify_flow.fy",
+      "sha256": "aa0e87f6b689d1466be0f4f894fe5e07b3e41aaf95c149d931b7277b16220b4f"
+    },
+    {
+      "path": "src\\mir_verify_literals.fy",
+      "sha256": "92fad4c2db07f67db19a151059b67c2c4e7a0543b5afdc89c8fed4bac1940f5a"
+    },
+    {
+      "path": "src\\mir_verify_nominal.fy",
+      "sha256": "e6d1757aa1758b6fac362276530027da00047ec6e92f37d9270b995f011bf203"
+    },
+    {
+      "path": "src\\mir_verify_shape.fy",
+      "sha256": "c7d8176bd226705001bafa5ebf3e2077b4aea6c156864988b5de7adf02ff8d1d"
+    },
+    {
+      "path": "src\\mir_verify_views.fy",
+      "sha256": "dd4b5a3b92ab0017f72a8b7d3964c0dcfa33cbb34366083f6bc9813455a03e78"
+    },
+    {
+      "path": "src\\module_check.fy",
+      "sha256": "d426e9743bea62ca6ac6e34103cffccf3a121a8acd9a34190753e7b00aa3526d"
+    },
+    {
+      "path": "src\\module_cli.fy",
+      "sha256": "176bc5079420f7102b27b4973370ce008e12f746840d9834b2cbf51636b4756f"
+    },
+    {
+      "path": "src\\module_registry.fy",
+      "sha256": "d02e983f3d9cabf9b5200d45c7150f5a9d2f2721efc5882cf138f1a0db963f06"
+    },
+    {
+      "path": "src\\name_cli.fy",
+      "sha256": "7bed00913f774e8929380936aa4a669bf9b6a708d18d5470d58a232b2ce6b343"
+    },
+    {
+      "path": "src\\name_resolution.fy",
+      "sha256": "e36e268558d9c30b5b9100e1232e5f4a580e073eb9ac1ba78ef3d7fc122fdc6e"
+    },
+    {
+      "path": "src\\nominal_identity.fy",
+      "sha256": "ab92ce842502bdb1f0dcc1322136ea5b699adf20462b5c1c11fa897bb7f7d738"
+    },
+    {
+      "path": "src\\nominal_types.fy",
+      "sha256": "9084cd53443409cd73dcb1be278616cb8bd7a6ba04591d0600f30bcf68cb0733"
+    },
+    {
+      "path": "src\\numbers.fy",
+      "sha256": "ee8b40b5e8061317d70d3594c386c9e4c70d95132a7e4243ea6402947a4c3556"
+    },
+    {
+      "path": "src\\pages.fy",
+      "sha256": "4f4306b894510a83af7e892bb2c8d116a2107c1abf1f0820a5cd637e3eb32c87"
+    },
+    {
+      "path": "src\\parse_tokens.fy",
+      "sha256": "91984eb1086ff7faafa4a6c64a232fc2ddce365b8cd7c2ef23b143bb91d4c9a6"
+    },
+    {
+      "path": "src\\records.fy",
+      "sha256": "e2d1d3540285509aded981b476d4b2340857d8c7370364f4b1410bfd6883f6dd"
+    },
+    {
+      "path": "src\\resource_flow.fy",
+      "sha256": "905ec276c2462c8c8f1d292b6d99c266dcc75eac9d85eff5e883825387bc9f76"
+    },
+    {
+      "path": "src\\resource_identity.fy",
+      "sha256": "7d85c65df4d6cc02f004f854d5108ec3cc7ba8ddb4885ea54c634f88f93594aa"
+    },
+    {
+      "path": "src\\resource_properties.fy",
+      "sha256": "fe0372ce1c546422e8b09d5ae9c9aa16f1bc11682fdded971e0820e96d30bac2"
+    },
+    {
+      "path": "src\\resource_use.fy",
+      "sha256": "6fe65c99fdf2c91fbbb914d7caa5846d163fe3e6f20bddde4933593e817a2f85"
+    },
+    {
+      "path": "src\\result_flow.fy",
+      "sha256": "544e73b45d2420926f2cf8498afc20300ce4ecfa0a6d4f34fb5bde5318332c32"
+    },
+    {
+      "path": "src\\result_flow_graph.fy",
+      "sha256": "0c062b2818d30b17d8aa5e79feac76dcb6c670c8eebf4c14bdf0fa73a827d7d5"
+    },
+    {
+      "path": "src\\scanner.fy",
+      "sha256": "bfbc305c0bf69063812f019e7f3e9cca505a8afb22744e0d50f51c7f72692c2f"
+    },
+    {
+      "path": "src\\strings.fy",
+      "sha256": "8f26db7c4d4039c8c8d9fbc6078097859c8f714ca5887957fdf0e69269dca521"
+    },
+    {
+      "path": "src\\syntax.fy",
+      "sha256": "2dcb64d8b7272b1adba8d82ab1658775010b567687bab1cbe00bc707edd0a373"
+    },
+    {
+      "path": "src\\tagged_check.fy",
+      "sha256": "1692313a6569515619d3835a9e03946a41d328d99f6d593d1011b46164498186"
+    },
+    {
+      "path": "src\\tagged_encoding.fy",
+      "sha256": "8c80c90ee5762e195fc67f5e6744b6cdbdaa8e7831e92fa0a49acbc933d632a9"
+    },
+    {
+      "path": "src\\tagged_types.fy",
+      "sha256": "58a17e432b7ea8b6b4f9e1d7238d04fe72fa2d58c8b3ed666fa8c02094218e4a"
+    },
+    {
+      "path": "src\\token_output.fy",
+      "sha256": "1e08aded3f7efec90bb915b97011cdb46b63da5231a33231ea755552b648d11b"
+    },
+    {
+      "path": "src\\type_check.fy",
+      "sha256": "ac534cbdd01a6a4839c1550d1d37a46f3785f4ebedec078b58bd08c988894ed1"
+    },
+    {
+      "path": "src\\type_cli.fy",
+      "sha256": "1ed87111e3da96c5e97ce3996ae27cff5365dca8be3bcfb32904fa65ca1db065"
+    },
+    {
+      "path": "src\\type_control.fy",
+      "sha256": "2ebd9714228e5711657d496591b579fb9c13799ffa8729b1c40af7a244aac626"
+    },
+    {
+      "path": "src\\type_state.fy",
+      "sha256": "7dbbf7d50be1e9513dc8aafd99b11afda5d8e2d7ce87d96b6436c4752c2123a0"
+    },
+    {
+      "path": "src\\types.fy",
+      "sha256": "53a77948af92724f00de0609837fd1507899df8e2b59b6d2778ef1f3c344395a"
+    },
+    {
+      "path": "src\\utf8.fy",
+      "sha256": "4a5425cea9efbfb1bff2c31a38c2bd8e392c6792af09f24e906c9a743621870d"
+    }
+  ],
+  "executionBoundary": "Cleanup source type/ownership checks are active. Nonempty cleanup HIR/MIR/C fails closed until unit 22 owns private glue.",
+  "validation": [
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\compiler.exe",
+        "check",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "check ok: 2 instance(s), 92 source file(s), 1178 MIR function(s), lock verified\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\compiler.exe",
+        "build",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "built: build/lexer-candidate.exe (x86_64-windows-msvc, development, lock verified)\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\compiler-build-120s.exe",
+        "build",
+        "--release",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "built: build/lexer-candidate.exe (x86_64-windows-msvc, release, lock verified)\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\compiler-build-120s.exe",
+        "test",
+        "--native",
+        "--release",
+        "--json",
+        "--file",
+        "tests/resource_cleanup.fy",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "{\"schemaVersion\":\"fairyc.test-report/v1\",\"engine\":\"native\",\"target\":\"x86_64-windows-msvc\",\"profile\":\"release\",\"tests\":[{\"identity\":\"tests::resource_cleanup::cleanup_checks_types_and_is_infallible\",\"outcome\":\"passed\",\"trapCategory\":null},{\"identity\":\"tests::resource_cleanup::ordinary_cleanup_locals_keep_move_and_result_obligations\",\"outcome\":\"passed\",\"trapCategory\":null},{\"identity\":\"tests::resource_cleanup::receiver_is_scoped_mutable_and_cannot_escape_as_a_second_owner\",\"outcome\":\"passed\",\"trapCategory\":null},{\"identity\":\"tests::resource_cleanup::receiver_shadow_and_nested_fields_do_not_change_other_owners\",\"outcome\":\"passed\",\"trapCategory\":null}],\"count\":4,\"passed\":4,\"failed\":0,\"status\":\"ok\",\"lock\":\"verified\"}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "python",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\verify_resource_cleanup.py",
+        "--images",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\candidate-dev.exe",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\candidate-release.exe",
+        "--receipt",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\observation.json"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "PASS cleanup: 16 fixtures; 56 CLI observations\n",
+      "stderr": ""
+    }
+  ],
+  "bootstrap": [
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\compiler.exe",
+      "sha256": "ad49997c82179b8269cf2b07ed07c3469353fae59983511f2c06d2f744635aad"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\compiler-build-120s.exe",
+      "sha256": "1e5aa3a20f59f01d905c9331155171882b5ad4b1b2b50d7c9b4bcd4f229b0124"
+    }
+  ],
+  "sdkAndPackageLock": {
+    "path": "examples/lexer_candidate/fairy.lock",
+    "sha256": "67baff1285fc35c475e8894af050f8ee2b9cce6fb43e600851e8174fa1b15201",
+    "content": {
+      "schema": "fairyc.lock/v1",
+      "packageInstanceAlgorithm": "fairyc.package-instance/v1",
+      "sourceDigestAlgorithm": "fairyc.package-source/v1",
+      "language": "fairyc-language/20",
+      "root": "fypi1-sha256-2bb103f9ac54aac72726fc73a1a0d6421e67cd585f8e218806872c8f41aec4e2",
+      "packages": [
+        {
+          "id": "fypi1-sha256-2bb103f9ac54aac72726fc73a1a0d6421e67cd585f8e218806872c8f41aec4e2",
+          "role": "root",
+          "packageUid": "example.lexer-candidate",
+          "sourceKind": "local",
+          "localPath": ".",
+          "sdkIdentity": "",
+          "runtimeAbi": "",
+          "sourceIdentity": "fysrc1-sha256-1f6803320256852d0b4e4022416a46a3b7f52487fb160dabb5710051b511a4d4",
+          "sourceDigest": "fysrc1-sha256-1f6803320256852d0b4e4022416a46a3b7f52487fb160dabb5710051b511a4d4",
+          "version": "0.52.0",
+          "features": []
+        },
+        {
+          "id": "fypi1-sha256-86c14252642af2b070e755759e12b841707c27c8a222a96de9401af4159ff406",
+          "role": "standard-library",
+          "packageUid": "fairyc.std",
+          "sourceKind": "sdk",
+          "localPath": "",
+          "sdkIdentity": "fairyc-sdk-stdlib/0",
+          "runtimeAbi": "fairyc-runtime/0",
+          "sourceIdentity": "fairyc-sdk-stdlib/0;fairyc-runtime/0;fysrc1-sha256-aab51ddcd0ccc7e895837a4f7276011bf3206204f8d3efb6760b6218ca277039",
+          "sourceDigest": "fysrc1-sha256-aab51ddcd0ccc7e895837a4f7276011bf3206204f8d3efb6760b6218ca277039",
+          "version": "0.0.0-stage0.86",
+          "features": []
+        }
+      ],
+      "dependencies": [
+        {
+          "owner": "fypi1-sha256-2bb103f9ac54aac72726fc73a1a0d6421e67cd585f8e218806872c8f41aec4e2",
+          "binding": "stdlib",
+          "target": "fypi1-sha256-86c14252642af2b070e755759e12b841707c27c8a222a96de9401af4159ff406"
+        }
+      ]
+    }
+  },
+  "nativeApiDevelopment": {
+    "argv": [
+      "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\compiler.exe",
+      "test",
+      "--native",
+      "--json",
+      "--file",
+      "tests/resource_cleanup.fy",
+      "--locked"
+    ],
+    "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+    "exit": 0,
+    "stdout": "{\"schemaVersion\":\"fairyc.test-report/v1\",\"engine\":\"native\",\"target\":\"x86_64-windows-msvc\",\"profile\":\"development\",\"tests\":[{\"identity\":\"tests::resource_cleanup::cleanup_checks_types_and_is_infallible\",\"outcome\":\"passed\",\"trapCategory\":null},{\"identity\":\"tests::resource_cleanup::ordinary_cleanup_locals_keep_move_and_result_obligations\",\"outcome\":\"passed\",\"trapCategory\":null},{\"identity\":\"tests::resource_cleanup::receiver_is_scoped_mutable_and_cannot_escape_as_a_second_owner\",\"outcome\":\"passed\",\"trapCategory\":null},{\"identity\":\"tests::resource_cleanup::receiver_shadow_and_nested_fields_do_not_change_other_owners\",\"outcome\":\"passed\",\"trapCategory\":null}],\"count\":4,\"passed\":4,\"failed\":0,\"status\":\"ok\",\"lock\":\"verified\"}\n",
+    "stderr": ""
+  },
+  "testSources": [
+    {
+      "path": "tests/resource_cleanup.fy",
+      "sha256": "3ed9fcf1faf3273950c1fe6a98c458960f5189586ad97be95158d43b8b196be8"
+    }
+  ],
+  "reference": [
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\compiler.exe",
+        "experimental",
+        "check-semantics",
+        "main.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\reference-read-write",
+      "exit": 0,
+      "stdout": "semantics ok: main.fy (typed HIR: 2 function(s))\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\compiler.exe",
+        "experimental",
+        "check-semantics",
+        "main.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\reference-move-call",
+      "exit": 3,
+      "stdout": "",
+      "stderr": "main.fy:1:37: E1102: Operation would create or execute a second cleanup obligation. [bytes 36..40]\n  declaration: main.fy:1:24 [bytes 23..43]\n  move: main.fy:1:37 [bytes 36..40]\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\compiler.exe",
+        "experimental",
+        "check-semantics",
+        "main.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\reference-wrong-field-type",
+      "exit": 3,
+      "stdout": "",
+      "stderr": "main.fy:1:45: E1006: incompatible expected and actual types [bytes 44..48]\n  expected-type: main.fy:1:38 [bytes 37..43]\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-enums\\compiler.exe",
+        "experimental",
+        "check-semantics",
+        "main.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\reference-partial-move",
+      "exit": 3,
+      "stdout": "",
+      "stderr": "main.fy:1:62: E1103: moving a field out of a resource is not supported [bytes 61..67]\n  field: main.fy:1:47 [bytes 46..47]\n  owner: main.fy:1:49 [bytes 48..70]\n"
+    }
+  ],
+  "priorRegression": [
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\candidate-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\previous-while-read.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\candidate-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\previous-while-read.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\candidate-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\previous-while-restore.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\candidate-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\previous-while-restore.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\candidate-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\previous-nested-local-break.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\candidate-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\previous-nested-local-break.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\candidate-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\previous-while-normal.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\previous-while-normal.fy:1:75: error: E1105 incompatible resource state at loop edge (bytes 74..92)\n  loop-header: C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\previous-while-normal.fy:1:75: error:  (bytes 74..81)\n  move: C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\previous-while-normal.fy:1:89: error:  (bytes 88..89)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\candidate-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\previous-while-normal.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\previous-while-normal.fy:1:75: error: E1105 incompatible resource state at loop edge (bytes 74..92)\n  loop-header: C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\previous-while-normal.fy:1:75: error:  (bytes 74..81)\n  move: C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\previous-while-normal.fy:1:89: error:  (bytes 88..89)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\candidate-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\previous-condition-continue-use.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\previous-condition-continue-use.fy:1:97: error: E1101 resource used after move (bytes 96..97)\n  move: C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\previous-condition-continue-use.fy:1:97: error:  (bytes 96..97)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\candidate-release.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\previous-condition-continue-use.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\previous-condition-continue-use.fy:1:97: error: E1101 resource used after move (bytes 96..97)\n  move: C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-cleanup21\\previous-condition-continue-use.fy:1:97: error:  (bytes 96..97)\n"
+    }
+  ],
+  "limitations": [
+    "Nonempty cleanup HIR/MIR/C remains closed until private glue is connected in unit22.",
+    "Effects/attributes, borrow, partial construction, abilities and cross-module integration remain numbered later work.",
+    "Linux, performance and self-hosting deferred to the requested batch."
+  ]
+}

@@ -49,7 +49,7 @@ evidence/candidate-result-handling-alignment-20261007.json에 새 검사·도구
 
 ## B. 이동 검사 이후 resource 수명 관리
 
-21. cleanup 본문과 receiver 소유권, 허용 연산 검사.
+21. 완료: cleanup 본문을 void 문맥에서 이름·타입·지역 자원/Result 흐름 검사. 컴파일러 소유 `this` 수신자는 필드 읽기·수정만 허용하며 전체 이동·덮어쓰기는 E1102, 부분 자원 필드 이동은 E1103으로 거부. `?`와 값 반환은 거부. 비어 있지 않은 cleanup의 HIR/MIR/C 연결은 22번에서 처리하며 그 전에는 명시적으로 실패. 증거는 `evidence/candidate-resource-cleanup-20261007.json`.
 22. 정상 스코프 종료에서 자원을 계약 순서대로 한 번씩 정리.
 23. 직접 return과 Result ?의 성공·오류 경로에 cleanup 연결.
 24. 반복 본문 종료·break·continue에 cleanup 연결.

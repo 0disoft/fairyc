@@ -7,12 +7,14 @@ import std::vec as v;
 
 // Classify consumption after exact typing, without sharing the field/member
 // flag arena. This unit records transfers; liveness is checked by later flow.
-struct Context { usize work; state::Problem problem; }
+struct Context { usize work; usize receiver; state::Problem problem; }
 fn void fail(ref mut Context c,u32 code,usize start,usize end){if(c.problem.code==0){c.problem=state::fail(code,start,end,0,0);}}
 fn void expression(ref syntax::Parsed p,ref mut v::Vec<state::Slot> tables,ref mut Context c,usize id,bool consume,usize depth){
     if(id==0 || c.problem.code!=0){return;}let e=syntax::expression_at(p,id);c.work+=1;
     if(depth>=64 || c.work>1048576){fail(c,10,e.start,e.end);return;}
-    if(e.kind==2){let bool moving=consume && properties::needs_drop(state::expressions(tables,id-1));state::set_moving(tables,id-1,moving);return;}
+    if(e.kind==2){let bool moving=consume && properties::needs_drop(state::expressions(tables,id-1));
+        if(moving && c.receiver!=0 && state::uses(tables,id-1)==c.receiver){fail(c,48,e.start,e.end);return;}
+        state::set_moving(tables,id-1,moving);return;}
     if(e.kind==3){expression(p,tables,c,e.left,consume,depth+1);return;}
     if(e.kind==8){
         let bool is_ok=state::flags(tables,id-1)==2048;
@@ -51,7 +53,10 @@ fn void block(ref syntax::Parsed p,ref mut v::Vec<state::Slot> tables,ref mut Co
     expression(p,tables,c,syntax::statement_at(p,id).expression,consume,depth+1);
 }
 pub fn state::Problem classify(ref names::Resolved resolved,ref mut v::Vec<state::Slot> tables){
-    let ref syntax::Parsed p=names::parsed(resolved);var Context c=Context{.work=0,.problem=state::ok()};var usize i=0;
-    while(i<syntax::declaration_count(p)){let d=syntax::declaration_at(p,i);if(d.kind==3){block(p,tables,ref mut c,d.body,true,0);}i+=1;}
+    let ref syntax::Parsed p=names::parsed(resolved);var Context c=Context{.work=0,.receiver=0,.problem=state::ok()};var usize i=0;
+    while(i<syntax::declaration_count(p)){let d=syntax::declaration_at(p,i);
+        if(d.kind==3){c.receiver=0;block(p,tables,ref mut c,d.body,true,0);}
+        else if(d.kind==6){c.receiver=0;var usize n=1;while(n<=names::symbol_count(resolved)){let s=names::symbol_at(resolved,n);if(s.kind==10 && s.declaration==i+1){c.receiver=n;}n+=1;}block(p,tables,ref mut c,d.cleanup_body,false,0);}
+        i+=1;}
     return c.problem;
 }

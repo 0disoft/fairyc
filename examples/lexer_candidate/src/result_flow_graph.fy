@@ -164,9 +164,9 @@ fn Result<Graph,state::Problem> build_kind(ref names::Resolved resolved,ref v::V
     var v::Vec<Node> nodes=v::empty<Node>();if(ownership && width==0){return .ok(Graph{.nodes,.columns,.width});}
     var Context c=Context{.current=0,.scopes=[0;64],.captures=[0;64],.scope_depth=0,.breaks=[0;64],.continues=[0;64],.loop_base=[0;64],.loop_states=[0;64],.loop_ends=[0;64],.loops=0,.work=0,.ownership,.problem=state::ok()};
     c.current=fresh(ref mut nodes,ref mut c,0,0,0,0);i=1;
-    while(i<=names::symbol_count(resolved)){let s=names::symbol_at(resolved,i);let usize col=column(ref columns,i);if(col!=0 && s.kind==2){discard emit(ref mut nodes,ref mut c,2,col,s.start,s.end);}i+=1;}
+    while(i<=names::symbol_count(resolved)){let s=names::symbol_at(resolved,i);let usize col=column(ref columns,i);if(col!=0 && (s.kind==2 || s.kind==10)){discard emit(ref mut nodes,ref mut c,2,col,s.start,s.end);}i+=1;}
     let d=syntax::declaration_at(p,names::symbol_at(resolved,function).declaration-1);
-    block(p,types,ref columns,ref mut nodes,ref mut c,d.body,4,0,0);discard emit(ref mut nodes,ref mut c,5,0,d.start,d.end);
+    block(p,types,ref columns,ref mut nodes,ref mut c,if(d.kind==6){d.cleanup_body}else{d.body},4,0,0);discard emit(ref mut nodes,ref mut c,5,0,d.start,d.end);
     if(c.problem.code!=0){return .err(c.problem);}
     return .ok(Graph{.nodes,.columns,.width});
 }

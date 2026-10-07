@@ -364,7 +364,8 @@ fn state::Value statement(ref names::Resolved resolved, ref mut v::Vec<state::Sl
             let state::Value actual = expression(resolved,tables,problem,item.expression,expected,result_type,depth + 1,loop_depth);
             if (problem.code != 0) { return actual; }
             let syntax::Expression place = syntax::expression_at(parsed,item.target);
-            if (symbol_id == 0 || (names::symbol_at(resolved,symbol_id).kind != 4 && !(checked_place.kind == 9 && state::expressions(tables,checked_place.left - 1) == 11))) { return error(problem,4,place.start,place.end,0,target.type); }
+            if (symbol_id == 0 || (names::symbol_at(resolved,symbol_id).kind != 4 && names::symbol_at(resolved,symbol_id).kind != 10 && !(checked_place.kind == 9 && state::expressions(tables,checked_place.left - 1) == 11))) { return error(problem,4,place.start,place.end,0,target.type); }
+            if(names::symbol_at(resolved,symbol_id).kind==10 && (fields==0 || nominal::contains_resource(parsed,expected,0))){return error(problem,48,place.start,place.end,0,target.type);}
             if (expected != actual.type) { let syntax::Expression source = syntax::expression_at(parsed,item.expression); return error(problem,1,source.start,source.end,expected,actual.type); }
             if (!bytes::equal(syntax::assignment_operator(parsed,id),b"=") && !state::integer(expected)) { return error(problem,9,item.start,item.end,0,expected); }
             return value(7,actual.terminates);
@@ -445,7 +446,7 @@ fn state::Problem collect(ref names::Resolved resolved, ref mut v::Vec<state::Sl
     let state::Problem declarations = nominal::validate(parsed); if (declarations.code != 0) { return declarations; }
     var usize id = 1;
     while (id <= names::symbol_count(resolved)) {
-        let names::Symbol symbol = names::symbol_at(resolved,id); let u32 type = if (symbol.kind == 5) { names::external_signature(resolved,id).result } else if (symbol.kind == 6) { 255 + state::small_id(symbol.declaration) } else if(symbol.kind==9){98303+state::small_id(symbol.declaration)} else if (symbol.kind == 7) { 131071 + state::small_id(symbol.declaration) } else { nominal::resolve(parsed,symbol.type_root) };
+        let names::Symbol symbol = names::symbol_at(resolved,id); let u32 type = if (symbol.kind == 5) { names::external_signature(resolved,id).result } else if (symbol.kind == 6) { 255 + state::small_id(symbol.declaration) } else if(symbol.kind==9 || symbol.kind==10){98303+state::small_id(symbol.declaration)} else if (symbol.kind == 7) { 131071 + state::small_id(symbol.declaration) } else { nominal::resolve(parsed,symbol.type_root) };
         state::set_symbols(tables,id - 1,type);
         if (symbol.entry != 0) { state::set_entries(tables,symbol.entry - 1,id); }
         id += 1;
@@ -472,6 +473,10 @@ fn state::Problem collect(ref names::Resolved resolved, ref mut v::Vec<state::Sl
             if (body.expression != 0) {
                 if (actual.type != result_type) { let syntax::Expression tail = syntax::expression_at(parsed,body.expression); return state::fail(1,tail.start,tail.end,result_type,actual.type); }
             } else if (result_type != 7 && !control::block_terminates(parsed,function.body,0)) { return state::fail(7,body.start,body.end,result_type,7); }
+        } else if(function.kind==6){
+            let state::Value actual=block(resolved,tables,ref mut problem,function.cleanup_body,7,7,0,0);
+            if(problem.code!=0){return problem;}
+            if(actual.type!=7){let body=syntax::statement_at(parsed,function.cleanup_body);let tail=syntax::expression_at(parsed,body.expression);return state::fail(1,tail.start,tail.end,7,actual.type);}
         }
         index += 1;
     }

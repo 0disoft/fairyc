@@ -15,6 +15,10 @@ import std::vec as v;
 fn bool prepare(ref typing::Typed input, usize module_index, ref mut v::Vec<h::Binding> bindings, ref mut v::Vec<h::Signature> signatures, ref mut v::Vec<state::Link> links, ref mut state::Context c) {
     let ref names::Resolved resolved = typing::resolved(input);
     let ref syntax::Parsed parsed = names::parsed(resolved);
+    var usize declaration=0;while(declaration<syntax::declaration_count(parsed)){let d=syntax::declaration_at(parsed,declaration);
+        // Typed cleanup is unit 21; until glue is owned by HIR, fail closed.
+        if(d.kind==6 && (syntax::block_statement_count(parsed,d.cleanup_body)!=0 || syntax::statement_at(parsed,d.cleanup_body).expression!=0)){discard state::fail(c,4,d.cleanup_start,d.cleanup_end);return false;}
+        declaration+=1;}
     if (syntax::source_view(parsed).len > 32768 || syntax::declaration_count(parsed) > 512 || names::symbol_count(resolved) > 1152 || syntax::expression_count(parsed) > 4096 || syntax::entry_count(parsed) > 1024 || syntax::statement_count(parsed) > 8192 || names::reference_count(resolved) > 4096) { discard state::fail(c,2,0,syntax::source_view(parsed).len); return false; }
     let usize length = if (syntax::expression_count(parsed) > 1024) { syntax::expression_count(parsed) } else { 1024 };
     var usize i = 0;

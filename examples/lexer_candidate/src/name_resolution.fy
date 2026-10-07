@@ -12,14 +12,14 @@ pub struct Reference { usize expression; usize start; usize end; usize symbol; }
 struct Name { usize start; usize end; usize scope; usize symbol; }
 struct Context {
     Name[128] globals; usize global_count; Name[128] locals; usize local_count;
-    usize scope; usize next_scope; usize owner; bool modules;
+    usize scope; usize next_scope; usize owner; usize receiver; bool modules;
 }
 pub resource Resolved { syntax::Parsed source; Context context; v::Vec<Symbol> symbols; v::Vec<Reference> references; v::Vec<modules::Item> external; v::Vec<u32> parameters; Problem problem; cleanup { } }
 fn Problem ok() { return Problem { .code = 0, .start = 0, .end = 0 }; }
 fn Problem fail(u32 code, usize start, usize end) { return Problem { .code, .start, .end }; }
 fn Context empty() {
     return Context { .globals = [Name { .start = 0, .end = 0, .scope = 0, .symbol = 0 }; 128], .global_count = 0,
-        .locals = [Name { .start = 0, .end = 0, .scope = 0, .symbol = 0 }; 128], .local_count = 0, .scope = 0, .next_scope = 1, .owner = 0, .modules = false };
+        .locals = [Name { .start = 0, .end = 0, .scope = 0, .symbol = 0 }; 128], .local_count = 0, .scope = 0, .next_scope = 1, .owner = 0, .receiver = 0, .modules = false };
 }
 fn bool simple(ref u8[] name) {
     if (name.len == 0) { return false; }
@@ -35,7 +35,12 @@ fn bool same(ref u8[] source, Name name, usize start, usize end) {
 fn usize known(ref syntax::Parsed parsed, ref Context context, usize start, usize end) {
     let ref u8[] source = syntax::source_view(parsed);
     var usize index = context.local_count;
-    while (index > 0) { index -= 1; if (same(source, context.locals[index], start, end)) { return context.locals[index].symbol; } }
+    while (index > 0) { index -= 1;
+        let Name name = context.locals[index];
+        if (name.symbol == context.receiver && context.receiver != 0) {
+            if (bytes::equal(source[start..end],b"this")) { return name.symbol; }
+        } else if (same(source,name,start,end)) { return name.symbol; }
+    }
     index = 0;
     while (index < context.global_count) {
         if (same(source, context.globals[index], start, end)) { return context.globals[index].symbol; } index += 1;
@@ -235,8 +240,8 @@ fn Problem collect(ref syntax::Parsed parsed, ref mut Context context, ref mut v
         if (item.kind != 1 && !(context.modules && item.kind == 2)) {
             if ((item.kind != 3 && item.kind != 4 && item.kind != 6 && item.kind != 11) || item.owner_end != 0 || item.unsafe_end != 0 || item.attribute_count != 0 ||
                 item.generic_parameters != 0 || (item.kind == 3 && !scalar_type(parsed,item.result_type,true))) { return fail(3,item.start,item.end); }
-            // Cleanup semantics are a later unit; do not silently omit a body.
-            if(item.kind==6 && (item.cleanup_body==0 || item.cleanup_attribute_count!=0 || syntax::block_statement_count(parsed,item.cleanup_body)!=0 || syntax::statement_at(parsed,item.cleanup_body).expression!=0)){return fail(3,item.start,item.end);}
+            // Effects/attributes remain closed until their own implementation.
+            if(item.kind==6 && (item.cleanup_body==0 || item.cleanup_attribute_count!=0)){return fail(3,item.start,item.end);}
             if (!simple(source[item.name_start..item.name_end])) { return fail(3,item.name_start,item.name_end); }
             var usize previous = 0;
             while (previous < context.global_count) {
@@ -257,6 +262,7 @@ fn Problem collect(ref syntax::Parsed parsed, ref mut Context context, ref mut v
     while (index < syntax::declaration_count(parsed)) {
         let syntax::Declaration item = syntax::declaration_at(parsed,index);
         if (item.kind == 3) {
+            context.receiver = 0;
             context.local_count = 0; context.scope = context.next_scope; context.next_scope += 1;
             context.owner = known(parsed,context,item.name_start,item.name_end);
             var usize entry_index = item.entry_start;
@@ -271,6 +277,19 @@ fn Problem collect(ref syntax::Parsed parsed, ref mut Context context, ref mut v
             }
             let Problem result = block(parsed,context,item.body,0,symbols,references);
             if (result.code != 0) { return result; }
+        } else if (item.kind == 6 && (syntax::block_statement_count(parsed,item.cleanup_body)!=0 || syntax::statement_at(parsed,item.cleanup_body).expression!=0)) {
+            context.local_count=0;context.scope=context.next_scope;context.next_scope+=1;
+            context.owner=known(parsed,context,item.name_start,item.name_end);
+            let usize start=item.cleanup_start;let usize end=start+7;
+            // Kind 10 is a compiler-owned dropping receiver, never a second
+            // ordinary by-value parameter or a source-visible callable.
+            if(!v::push<Symbol>(symbols,Symbol{.kind=10,.start,.end,.scope=context.scope,.owner=context.owner,.type_root=0,.entry=0,.declaration=index+1}).is_ok){return fail(5,start,end);}
+            context.receiver=v::len<Symbol>(symbols);
+            let usize scope=context.scope;let usize receiver=context.receiver;
+            context.locals[0]=Name{.start,.end,.scope,.symbol=receiver};context.local_count=1;
+            let Problem result=block(parsed,context,item.cleanup_body,0,symbols,references);
+            if(result.code!=0){return result;}
+            context.receiver=0;
         }
         index += 1;
     }

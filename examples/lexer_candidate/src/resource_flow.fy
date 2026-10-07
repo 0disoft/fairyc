@@ -60,7 +60,7 @@ fn state::Problem analyze(ref graph::Graph g){
 }
 pub fn state::Problem check(ref names::Resolved resolved,ref v::Vec<state::Slot> types){
     var usize i=1;var state::Problem first=state::ok();
-    while(i<=names::symbol_count(resolved)){let s=names::symbol_at(resolved,i);if(s.kind==1){
+    while(i<=names::symbol_count(resolved)){let s=names::symbol_at(resolved,i);if(s.kind==1 || s.kind==9){
         let g=switch(graph::build_resources(resolved,types,i)){case .ok(g):{g}case .err(p):{return p;}};
         let p=analyze(ref g);if(p.code!=0 && (first.code==0 || p.start<first.start || p.start==first.start && p.end<first.end)){first=p;}
     }i+=1;}return first;
