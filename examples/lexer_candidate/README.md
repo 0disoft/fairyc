@@ -9,6 +9,16 @@ same-file nominal structs (see [Owned nominal C](#owned-nominal-c)). The candida
 owns recognition, typing, HIR, MIR and C generation; the native C compiler and
 runtime link the resulting unit. This remains an experimental compiler slice.
 
+Unit 22 connects same-file resource roots to owned HIR/MIR drop definitions
+and native C execution at ordinary scope fallthrough. Live roots drop in reverse
+declaration order; whole-value moves and consuming parameters transfer one
+obligation. Empty cleanup needs no runtime call; nonempty cleanup calls an exact
+private typed function whose receiver cannot move or recursively drop itself.
+Direct scalar receiver updates preserve that same execution view. Resource
+returns/propagation, loop exits, overwrite, owned fields/tagged values and borrow
+expansion remain the following numbered units. Native evidence is in
+`docs/ops/evidence/candidate-resource-exit-20261007.json`.
+
 ## Owned consumer API
 
 `scanner::collect` consumes an input `bytes::Buffer` and the same explicit revision
@@ -2696,8 +2706,8 @@ attributes remain outside this milestone.
 
 `tests/resource_cleanup.fy` executes four native compiler API tests and
 `verify_resource_cleanup.py` observes 17 source fixtures with UTF-8 output
-readers. Nonempty cleanup currently fails closed in owned HIR/MIR/C: source
-checks do not claim cleanup execution. Unit 22 will attach private drop glue.
+readers. At unit 21 nonempty cleanup failed closed in owned HIR/MIR/C. Unit 22
+adds the owned glue and normal-exit execution described at the top of this file.
 Evidence is `docs/ops/evidence/candidate-resource-cleanup-20261007.json`.
 
 The Go reference previously evaluated an ownership-consuming `while` condition
@@ -2710,6 +2720,6 @@ Full diagnostic lists need not be identical. Pre-fix observations stay separate.
 
 The requested units 1..20 are complete in the progress ledger. The final audit
 retains their individual commit/evidence identities and a bounded native smoke
-using the final images. Resource source execution still rejects before MIR/C
-publication until cleanup is integrated; these native API tests execute compiler
-logic. Linux, performance and stage1/stage2 promotion remain later work.
+using the final images. Those historical API tests do not themselves claim
+resource execution; unit 22 supplies separate generated-C native evidence.
+Linux, performance and stage1/stage2 promotion remain later work.

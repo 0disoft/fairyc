@@ -50,7 +50,7 @@ evidence/candidate-result-handling-alignment-20261007.json에 새 검사·도구
 ## B. 이동 검사 이후 resource 수명 관리
 
 21. 완료: cleanup 본문을 void 문맥에서 이름·타입·지역 자원/Result 흐름 검사. 컴파일러 소유 `this` 수신자는 필드 읽기·직접 스칼라 필드 수정만 허용하며 전체 이동·덮어쓰기는 E1102, 부분 자원 필드 이동은 E1103으로 거부. 자원 receiver의 중첩 필드 쓰기는 Go 대조에서 확인한 기존 금지를 유지. `?`와 값 반환은 거부. 비어 있지 않은 cleanup의 HIR/MIR/C 연결은 22번에서 처리하며 그 전에는 명시적으로 실패. 증거는 `evidence/candidate-resource-cleanup-20261007.json`.
-22. 진행 중: owned HIR은 선언마다 정리 정의 하나를 보존하고 비어 있지 않은 본문을 private void 함수와 전용 수신자에 연결. 13가지 위조 연결을 거부하며 양쪽 프로필 API 테스트 통과. 증거는 `evidence/candidate-cleanup-hir-20261007.json`. 정상 스코프 종료의 MIR/C 정리 실행은 다음 부분에서 연결하며 아직 완료가 아님.
+22. 완료: 정상 fallthrough에서 live root를 선언 역순으로 한 번씩 정리. 이동 donor·shadow·소비 인자·빈/비어 있지 않은 정리·직접 scalar receiver 수정·i64 필드를 실행. owned HIR/MIR 연결 및 위조 정리 검사는 별도 부분 receipt에 보존. `evidence/candidate-resource-exit-20261007.json`의 12개 소스 사례, CLI 관찰 81개, 생성 C native 실행 16회와 프로필별 API 테스트 3개가 근거. return/?, 반복 종료, 덮어쓰기, 중첩 소유 필드는 후속 번호에서 연결.
 23. 직접 return과 Result ?의 성공·오류 경로에 cleanup 연결.
 24. 반복 본문 종료·break·continue에 cleanup 연결.
 25. 자원 덮어쓰기에서 이전 세대 정리와 donor 이동 구분.

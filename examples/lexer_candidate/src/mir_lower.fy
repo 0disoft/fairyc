@@ -9,6 +9,8 @@ import hir_shapes as shapes;
 import mir_model as m;
 import mir_state as state;
 import mir_cleanup as finalize;
+import mir_resource_lower as lifetime;
+import resource_identity as resources;
 import mir_verify as verify;
 import mir_nominal as nominal;
 import mir_propagation as propagation;
@@ -21,7 +23,7 @@ fn bool prepare(ref h::Program input, ref mut v::Vec<m::Target> targets, ref mut
     var usize id = 1;
     while (id <= h::binding_count(input)) {
         let h::Binding b = h::binding_at(input,id); let u32 kind = h::binding_code(b.kind);
-        if (kind == 1 || kind == 5) {
+        if (kind == 1 || kind == 5 || kind==9) {
             if (v::len<m::Target>(targets) >= 512 || b.signature_count > 65536 - v::len<m::Signature>(signatures)) { discard state::fail(c,2,b.start,b.end); return false; }
             let usize start = v::len<m::Signature>(signatures); var usize j = 0;
             while (j < b.signature_count) { if (!v::push<m::Signature>(signatures,m::Signature { .type = h::type_code(h::signature_at(input,b.signature_start + j)) }).is_ok) { discard state::fail(c,3,b.start,b.end); return false; } j += 1; }
@@ -59,6 +61,11 @@ fn usize expression(ref h::Program input, ref mut v::Vec<m::Local> locals, ref m
     if (id == 0 || c.current == 0 || c.problem.code != 0) { return 0; }
     let h::Expression e = h::expression_at(input,id); let u32 kind = h::expression_code(e.kind); let u32 type = h::type_code(e.type); let u32 operator = h::operator_code(e.operator);
     if (depth >= 64) { return state::fail(c,2,e.start,e.end); }
+    if(kind==24){
+        let usize donor=c.locals[e.binding];if(!resources::valid(type) || donor==0 || c.live[e.binding]!=1){return state::fail(c,4,e.start,e.end);}
+        let usize result=state::local(locals,c,type,0,false,false,e.start,e.end);c.live[e.binding]=0;
+        if(state::emit(operations,blocks,c,state::operation(24,result,type,type,0,donor,0,e.start,e.end))==0){return 0;}return result;
+    }
     if (kind == 23) {
         let usize subject = expression(input,locals,blocks,operations,edges,payload,c,e.left,depth+1);
         if (c.current == 0 || c.problem.code != 0) { return 0; }
@@ -135,6 +142,7 @@ fn usize expression(ref h::Program input, ref mut v::Vec<m::Local> locals, ref m
     if (kind == 3) {
         let usize original = c.locals[e.binding];
         if (original == 0) { return state::fail(c,4,e.start,e.end); }
+        if(resources::valid(type)){return original;}
         // Freeze source reads before later child expressions can assign/call.
         let usize result = state::local(locals,c,type,0,false,false,e.start,e.end);
         if (state::emit(operations,blocks,c,state::operation(2,result,type,type,0,original,0,e.start,e.end)) == 0) { return 0; } return result;
@@ -282,14 +290,17 @@ fn usize expression(ref h::Program input, ref mut v::Vec<m::Local> locals, ref m
         let usize consequent = state::new_block(blocks,c,e.start,e.end); let usize alternative = state::new_block(blocks,c,e.start,e.end);
         if (!state::branch(blocks,c,condition,consequent,alternative,e.start,e.end)) { return 0; }
         let usize result = if (type == 7) { 0 } else { state::local(locals,c,type,0,false,false,e.start,e.end) };
+        let u8[1153] incoming=c.live;
         c.current = consequent; let usize yes = block(input,locals,blocks,operations,edges,payload,c,e.block,depth + 1);
         if (c.problem.code != 0) { return 0; }
         if (c.current != 0 && result != 0 && state::emit(operations,blocks,c,state::operation(2,result,type,type,0,yes,0,e.start,e.end)) == 0) { return 0; }
         let usize yes_end = c.current;
+        let u8[1153] yes_live=c.live;c.live=incoming;
         c.current = alternative; let usize no = expression(input,locals,blocks,operations,edges,payload,c,e.alternative,depth + 1);
         if (c.problem.code != 0) { return 0; }
         if (c.current != 0 && result != 0 && state::emit(operations,blocks,c,state::operation(2,result,type,type,0,no,0,e.start,e.end)) == 0) { return 0; }
         let usize no_end = c.current;
+        if(yes_end!=0){c.live=yes_live;}
         // Allocate a join only for live fallthrough; both returning arms leave
         // no orphan unfinished block and suppress enclosing RHS/store/return.
         if (yes_end == 0 && no_end == 0) { c.current = 0; return 0; }
@@ -321,6 +332,7 @@ fn bool statement(ref h::Program input, ref mut v::Vec<m::Local> locals, ref mut
         return true;
     }
     if (kind == 7 || kind == 8) {
+        if(lifetime::any_live(c)){discard state::fail(c,4,s.start,s.end);return false;}
         if (c.loop_depth == 0 || c.loop_ids[c.loop_depth - 1] != s.loop_target) { discard state::fail(c,4,s.start,s.end); return false; }
         let usize frame = c.loop_depth - 1;
         if (kind == 8 && c.continues[frame] == 0) {
@@ -416,11 +428,18 @@ fn bool statement(ref h::Program input, ref mut v::Vec<m::Local> locals, ref mut
         if (kind == 3 && operator != 21) { value = binary(locals,blocks,operations,c,type,type,operator,left,value,s.start,s.end); }
         if (kind == 3) { value = nominal::store(input,s.target,destination,value,locals,blocks,operations,c,s.start,s.end); if (value == 0) { return false; } }
         let u32 destination_type = v::at<m::Local>(locals,destination - 1).type;
+        if(resources::valid(destination_type)){
+            if(kind==3 && h::expression_code(h::expression_at(input,s.target).kind)==10){return value==destination;}
+            if(c.live[binding]!=0){discard state::fail(c,4,s.start,s.end);return false;}
+            c.live[binding]=1;return state::emit(operations,blocks,c,state::operation(24,destination,destination_type,destination_type,0,value,0,s.start,s.end))!=0;
+        }
         return state::emit(operations,blocks,c,state::operation(2,destination,destination_type,destination_type,0,value,0,s.start,s.end)) != 0;
     }
     if (kind == 2) {
         let usize value = expression(input,locals,blocks,operations,edges,payload,c,s.expression,depth + 1);
         if (c.current == 0 || c.problem.code != 0) { return c.problem.code == 0; }
+        // Unit 23 connects abrupt cleanup and resource return transfer.
+        if(lifetime::any_live(c) || value!=0 && resources::valid(v::at<m::Local>(locals,value-1).type)){discard state::fail(c,4,s.start,s.end);return false;}
         if (!finalize::emit_deferred(blocks,edges,c,0)) { return false; }
         var m::Block term = state::block(c.function,s.start,s.end); term.kind = 1; term.value = value;
         return state::terminate(blocks,c,term);
@@ -450,31 +469,30 @@ fn usize block(ref h::Program input, ref mut v::Vec<m::Local> locals, ref mut v:
         if (!statement(input,locals,blocks,operations,edges,payload,c,h::edge_at(input,b.edge_start + i),depth + 1)) { return 0; } i += 1;
     }
     let usize value = expression(input,locals,blocks,operations,edges,payload,c,b.tail,depth + 1);
-    if (c.current != 0 && c.problem.code == 0) { discard finalize::emit_deferred(blocks,edges,c,deferred_base); }
+    if (c.current != 0 && c.problem.code == 0) { if(!finalize::emit_deferred(blocks,edges,c,deferred_base) || !lifetime::scope(input,locals,blocks,operations,edges,c,b.scope,b.start,b.end)){return 0;} }
     c.defer_count = deferred_base; c.capture_count = capture_base;
     return value;
 }
 
 pub fn Result<m::Program,m::Problem> lower(h::Program input) {
-    // Resource type/ownership HIR precedes moves and cleanup execution. Never
-    // publish resource values through the existing copy-only MIR/C operations.
-    if(shapes::has_resources(h::nominal(ref input))){return .err(m::Problem{.code=4,.start=0,.end=h::source_view(ref input).len});}
     let h::Problem proof = views::check(ref input); if (proof.code != 0) { return .err(m::Problem { .code=proof.code,.start=proof.start,.end=proof.end }); }
     let shapes::Table table = switch(shapes::copy(h::nominal(ref input))) { case .ok(value): { value } case .err(code): { return .err(m::Problem { .code, .start = 0, .end = 0 }); } };
     var state::Context c = state::empty(); var bytes::Buffer source = bytes::empty(); var bytes::Buffer payload = bytes::empty();
     var v::Vec<m::Target> targets = v::empty<m::Target>(); var v::Vec<m::Signature> signatures = v::empty<m::Signature>();
+    var v::Vec<m::Drop> drops=v::empty<m::Drop>();
     var v::Vec<m::Function> functions = v::empty<m::Function>(); var v::Vec<m::Local> locals = v::empty<m::Local>();
     var v::Vec<m::Block> blocks = v::empty<m::Block>(); var v::Vec<m::Operation> operations = v::empty<m::Operation>(); var v::Vec<usize> edges = v::empty<usize>();
     if (!prepare(ref input,ref mut targets,ref mut signatures,ref mut c)) { return .err(c.problem); }
+    var usize dropping=0;while(dropping<h::drop_count(ref input)){let d=h::drop_at(ref input,dropping);if(!v::push<m::Drop>(ref mut drops,m::Drop{.type=d.type,.target=if(d.nonempty){c.targets[d.function]}else{0},.nonempty=d.nonempty}).is_ok){return .err(m::Problem{.code=3,.start=d.start,.end=d.end});}dropping+=1;}
     if (!bytes::append(ref mut source,h::source_view(ref input)).is_ok) { return .err(m::Problem { .code = 3, .start = 0, .end = 0 }); }
     var usize index = 0;
     while (index < h::function_count(ref input)) {
-        let h::Function f = h::function_at(ref input,index); c.function = index + 1;
+        let h::Function f = h::function_at(ref input,index); c.function = index + 1;c.live=[0;1153];
         let usize local_start = v::len<m::Local>(ref locals); let usize block_start = v::len<m::Block>(ref blocks);
         var usize id = 1;
         while (id <= h::binding_count(ref input)) {
             let h::Binding b = h::binding_at(ref input,id);
-            if (b.owner == f.binding) { let usize local = state::local(ref mut locals,ref mut c,h::type_code(b.type),id,h::binding_code(b.kind) == 2,h::binding_code(b.kind) == 4,b.start,b.end); c.locals[id] = local; }
+            if (b.owner == f.binding) { let usize local = state::local(ref mut locals,ref mut c,h::type_code(b.type),id,h::binding_code(b.kind) == 2 || h::binding_code(b.kind)==10,h::binding_code(b.kind) == 4 || h::binding_code(b.kind)==10,b.start,b.end); c.locals[id] = local;if(h::binding_code(b.kind)==2 && resources::valid(h::type_code(b.type))){c.live[id]=1;} }
             id += 1;
         }
         let usize parameter_start = v::len<usize>(ref edges); var usize j = 0;
@@ -483,6 +501,7 @@ pub fn Result<m::Program,m::Problem> lower(h::Program input) {
         discard block(ref input,ref mut locals,ref mut blocks,ref mut operations,ref mut edges,ref mut payload,ref mut c,f.body,0);
         if (c.problem.code != 0) { return .err(c.problem); }
         if (c.current != 0) {
+            if(!lifetime::scope(ref input,ref mut locals,ref mut blocks,ref mut operations,ref mut edges,ref mut c,f.scope,f.start,f.end)){return .err(c.problem);}
             if (h::type_code(h::binding_at(ref input,f.binding).type) != 7) { return .err(m::Problem { .code = 4, .start = f.start, .end = f.end }); }
             var m::Block term = state::block(c.function,f.start,f.end); term.kind = 1;
             if (!state::terminate(ref mut blocks,ref mut c,term)) { return .err(c.problem); }
@@ -490,7 +509,7 @@ pub fn Result<m::Program,m::Problem> lower(h::Program input) {
         if (!v::push<m::Function>(ref mut functions,m::Function { .target = c.targets[f.binding], .entry, .local_start, .local_count = v::len<m::Local>(ref locals) - local_start, .block_start, .block_count = v::len<m::Block>(ref blocks) - block_start, .parameter_start, .parameter_count = f.parameter_count, .start = f.start, .end = f.end, .public = f.public }).is_ok) { return .err(m::Problem { .code = 3, .start = f.start, .end = f.end }); }
         index += 1;
     }
-    let m::Program result = switch(m::assemble_nominal(source,payload,targets,signatures,functions,locals,blocks,operations,edges,h::module_index(ref input),table)) {
+    let m::Program result = switch(m::assemble_resources(source,payload,targets,signatures,functions,locals,blocks,operations,edges,h::module_index(ref input),table,drops)) {
         case .ok(value): { value } case .err(problem): { return .err(problem); }
     };
     let m::Problem problem = verify::check(ref result);

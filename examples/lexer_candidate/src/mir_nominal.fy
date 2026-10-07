@@ -3,6 +3,7 @@ import hir_model as h;
 import mir_model as m;
 import mir_state as state;
 import type_state as ids;
+import resource_identity as resources;
 import std::vec as v;
 
 // Assignment places are static paths rooted in mutable source locals. Ordinary
@@ -14,7 +15,7 @@ pub fn usize root(ref h::Program p, usize id) {
         if (depth >= 64) { return 0; } current = h::expression_at(p,current).left; depth += 1;
     }
     let h::Expression e = h::expression_at(p,current);
-    return if (h::expression_code(e.kind) == 3 && h::binding_code(h::binding_at(p,e.binding).kind) == 4) { e.binding } else { 0 };
+    return if (h::expression_code(e.kind) == 3 && (h::binding_code(h::binding_at(p,e.binding).kind) == 4 || h::binding_code(h::binding_at(p,e.binding).kind)==10)) { e.binding } else { 0 };
 }
 pub fn usize read(ref mut v::Vec<m::Local> locals, ref mut v::Vec<m::Block> blocks, ref mut v::Vec<m::Operation> operations, ref mut state::Context c, usize owner, u32 type, usize field, usize start, usize end) {
     let usize result = state::local(locals,c,type,0,false,false,start,end);
@@ -30,7 +31,7 @@ fn usize update(ref h::Program input, ref v::Vec<usize> path, usize at, usize ow
         replacement = update(input,path,at - 1,child,value,locals,blocks,operations,c,start,end);
         if (replacement == 0) { return 0; }
     }
-    let u32 type = v::at<m::Local>(locals,owner - 1).type; let usize result = state::local(locals,c,type,0,false,false,start,end);
+    let u32 type = v::at<m::Local>(locals,owner - 1).type; let usize result = if(resources::valid(type)){owner}else{state::local(locals,c,type,0,false,false,start,end)};
     if (state::emit(operations,blocks,c,state::operation(8,result,type,type,ids::small_id(field.binding),owner,replacement,start,end)) == 0) { return 0; } return result;
 }
 pub fn usize store(ref h::Program input, usize target, usize owner, usize value, ref mut v::Vec<m::Local> locals, ref mut v::Vec<m::Block> blocks, ref mut v::Vec<m::Operation> operations, ref mut state::Context c, usize start, usize end) {

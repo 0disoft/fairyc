@@ -19,7 +19,7 @@ fn void private_drop_body_receiver_and_classification_are_owned(){
     assert(bytes::equal(h::source_view(ref p)[d.start..d.start+7],b"cleanup"));
     var bytes::Buffer out=bytes::empty();assert(output::render(ref p,ref mut out)==0);
     assert(bytes::view(ref out).len>25 && bytes::equal(bytes::view(ref out)[..23],b"fairyc.resource-hir/v2\n"));
-    let u32 code=switch(mir::lower(p)){case .ok(_):{0}case .err(e):{e.code}};assert(code==4);
+    let u32 code=switch(mir::lower(p)){case .ok(_):{0}case .err(e):{e.code}};assert(code==0);
 }
 
 fn u32 mutated(ref h::Program p,u32 mutation){

@@ -3,12 +3,13 @@ import array_types as arrays;
 import enum_types as enums;
 import literal_types as literals;
 import mir_model as m;
+import resource_identity as resources;
 import std::vec as v;
 
 // Active loop frames are bounded by the existing recursion-depth budget.
 // Defer descriptors/captures are compile-time scope stacks, never runtime queues.
-pub struct Context { m::Problem problem; usize function; usize current; usize[1153] locals; usize[1153] targets; usize loop_depth; usize[64] loop_ids; usize[64] breaks; usize[64] continues; usize[64] loop_defer_base; usize defer_count; usize capture_count; usize[256] deferred_targets; usize[256] deferred_starts; usize[256] deferred_ends; usize[256] deferred_arg_starts; usize[256] deferred_arg_counts; usize[4096] captures; }
-pub fn Context empty() { return Context { .problem = m::Problem { .code = 0, .start = 0, .end = 0 }, .function = 0, .current = 0, .locals = [0;1153], .targets = [0;1153], .loop_depth = 0, .loop_ids = [0;64], .breaks = [0;64], .continues = [0;64], .loop_defer_base = [0;64], .defer_count = 0, .capture_count = 0, .deferred_targets = [0;256], .deferred_starts = [0;256], .deferred_ends = [0;256], .deferred_arg_starts = [0;256], .deferred_arg_counts = [0;256], .captures = [0;4096] }; }
+pub struct Context { m::Problem problem; usize function; usize current; usize[1153] locals; usize[1153] targets; u8[1153] live; usize loop_depth; usize[64] loop_ids; usize[64] breaks; usize[64] continues; usize[64] loop_defer_base; usize defer_count; usize capture_count; usize[256] deferred_targets; usize[256] deferred_starts; usize[256] deferred_ends; usize[256] deferred_arg_starts; usize[256] deferred_arg_counts; usize[4096] captures; }
+pub fn Context empty() { return Context { .problem = m::Problem { .code = 0, .start = 0, .end = 0 }, .function = 0, .current = 0, .locals = [0;1153], .targets = [0;1153], .live=[0;1153], .loop_depth = 0, .loop_ids = [0;64], .breaks = [0;64], .continues = [0;64], .loop_defer_base = [0;64], .defer_count = 0, .capture_count = 0, .deferred_targets = [0;256], .deferred_starts = [0;256], .deferred_ends = [0;256], .deferred_arg_starts = [0;256], .deferred_arg_counts = [0;256], .captures = [0;4096] }; }
 pub fn usize fail(ref mut Context c, u32 code, usize start, usize end) { if (c.problem.code == 0) { c.problem = m::Problem { .code, .start, .end }; } return 0; }
 pub fn bool edge(ref mut v::Vec<usize> edges, usize id, ref mut Context c) {
     if (c.problem.code != 0) { return false; }
@@ -17,7 +18,7 @@ pub fn bool edge(ref mut v::Vec<usize> edges, usize id, ref mut Context c) {
 }
 pub fn usize local(ref mut v::Vec<m::Local> locals, ref mut Context c, u32 type, usize binding, bool parameter, bool mutable, usize start, usize end) {
     if (c.problem.code != 0) { return 0; }
-    if (!(type >= 1 && type <= 6 || literals::valid(type) || type == 11 || type >= 256 && type <= 767 || arrays::valid(type) || enums::valid(type)) || c.function == 0 || start >= end) { return fail(c,4,start,end); }
+    if (!(type >= 1 && type <= 6 || resources::valid(type) || literals::valid(type) || type == 11 || type >= 256 && type <= 767 || arrays::valid(type) || enums::valid(type)) || c.function == 0 || start >= end) { return fail(c,4,start,end); }
     if (v::len<m::Local>(locals) >= 16384) { return fail(c,2,start,end); }
     if (!v::push<m::Local>(locals,m::Local { .function = c.function, .binding, .type, .parameter, .mutable, .start, .end }).is_ok) { return fail(c,3,start,end); }
     return v::len<m::Local>(locals);
