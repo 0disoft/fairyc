@@ -2684,16 +2684,18 @@ Evidence is `docs/ops/evidence/candidate-resource-loops-20261007.json`.
 
 Version 0.52.0 checks nonempty cleanup bodies in the declaring resource's
 scope. The implicit `this` is a distinct compiler-owned dropping receiver.
-Scalar field reads and updates, local values, ordinary calls, control flow and
+Field reads, direct scalar field updates, local values, ordinary calls, control flow and
 void return use the existing type and flow checks. Transferring or replacing
 the complete receiver rejects E1102; moving a resource field still rejects
 E1103. Cleanup cannot return a value or propagate a fallible Result with `?`.
 Local resources and Results keep their usual move and handling obligations.
 Receiver shadows refer to their own bindings and `this` does not leak outside
-cleanup. Declaration/cleanup attributes remain outside this milestone.
+cleanup. Nested field writes through the resource receiver remain rejected,
+matching the existing plain-struct-only store contract. Declaration/cleanup
+attributes remain outside this milestone.
 
 `tests/resource_cleanup.fy` executes four native compiler API tests and
-`verify_resource_cleanup.py` observes 16 source fixtures with UTF-8 output
+`verify_resource_cleanup.py` observes 17 source fixtures with UTF-8 output
 readers. Nonempty cleanup currently fails closed in owned HIR/MIR/C: source
 checks do not claim cleanup execution. Unit 22 will attach private drop glue.
 Evidence is `docs/ops/evidence/candidate-resource-cleanup-20261007.json`.

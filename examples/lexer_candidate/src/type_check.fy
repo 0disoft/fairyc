@@ -365,6 +365,7 @@ fn state::Value statement(ref names::Resolved resolved, ref mut v::Vec<state::Sl
             if (problem.code != 0) { return actual; }
             let syntax::Expression place = syntax::expression_at(parsed,item.target);
             if (symbol_id == 0 || (names::symbol_at(resolved,symbol_id).kind != 4 && names::symbol_at(resolved,symbol_id).kind != 10 && !(checked_place.kind == 9 && state::expressions(tables,checked_place.left - 1) == 11))) { return error(problem,4,place.start,place.end,0,target.type); }
+            if(names::symbol_at(resolved,symbol_id).kind==10 && fields>1){return error(problem,4,place.start,place.end,0,target.type);}
             if(names::symbol_at(resolved,symbol_id).kind==10 && (fields==0 || nominal::contains_resource(parsed,expected,0))){return error(problem,48,place.start,place.end,0,target.type);}
             if (expected != actual.type) { let syntax::Expression source = syntax::expression_at(parsed,item.expression); return error(problem,1,source.start,source.end,expected,actual.type); }
             if (!bytes::equal(syntax::assignment_operator(parsed,id),b"=") && !state::integer(expected)) { return error(problem,9,item.start,item.end,0,expected); }

@@ -28,7 +28,8 @@ fn void ordinary_cleanup_locals_keep_move_and_result_obligations(){
 }
 @test
 fn void receiver_shadow_and_nested_fields_do_not_change_other_owners(){
-    accepted(b"module main;struct Pair{i32 n;}resource R{Pair p;cleanup{this.p.n=3;{let i32 this=5;let i32 x=this;};let i32 y=this.p.n;}}");
+    accepted(b"module main;struct Pair{i32 n;}resource R{Pair p;cleanup{{let i32 this=5;let i32 x=this;};let i32 y=this.p.n;}}");
+    rejected(b"module main;struct Pair{i32 n;}resource R{Pair p;cleanup{this.p.n=3;}}",4,b"this.p.n");
     rejected(b"module main;resource S{cleanup{}}resource R{S s;cleanup{take(this.s);}}fn void take(S s){}",44,b"this.s");
     let r=fixture::resolved(b"module main;resource R{cleanup{let i32 x=1;}}fn void f(){let i32 x=this.n;}");assert(names::problem(ref r).code==1);
 }

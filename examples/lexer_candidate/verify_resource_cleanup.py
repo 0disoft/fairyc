@@ -6,7 +6,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent
 CASES = [
     ('read-write', 'resource R{i32 n;cleanup{let i32 x=this.n;this.n=x+1;}}fn i32 main(){return 0;}', None),
-    ('nested-shadow', 'struct P{i32 n;}resource R{P p;cleanup{this.p.n=3;{let i32 this=4;let i32 x=this;};let i32 y=this.p.n;}}', None),
+    ('nested-shadow', 'struct P{i32 n;}resource R{P p;cleanup{{let i32 this=4;let i32 x=this;};let i32 y=this.p.n;}}', None),
+    ('nested-write', 'struct P{i32 n;}resource R{P p;cleanup{this.p.n=3;}}', 'assignment target is immutable'),
     ('loop-return', 'resource R{i32 n;cleanup{var i32 i=0;while(i<2){this.n+=1;i+=1;}return;}}', None),
     ('local-transfer', 'resource S{cleanup{}}resource R{cleanup{let S s=S{};take(s);}}fn void take(S s){}', None),
     ('move-call', 'resource R{cleanup{take(this);}}fn void take(R r){}', 'E1102'),
