@@ -403,6 +403,13 @@ pub fn usize record_field(ref Parsed parsed, usize id, usize index) {
     return link;
 }
 pub fn types::Node type_at(ref Parsed parsed, usize id) { return *v::at<types::Node>(ref parsed.types,id - 1); }
+// Owned arena composition remaps token IDs by exact original source offsets.
+pub fn scanner::TokenInfo token_info(ref Parsed parsed,usize id){return scanner::token_info(ref parsed.source,id);}
+pub fn usize token_count(ref Parsed parsed){return scanner::token_count(ref parsed.source);}
+// Single-file parser results contain one module. Joined private arenas retain
+// each original module declaration and therefore recover its source domain.
+pub fn usize module_index(ref Parsed parsed,usize position){var usize module_index=0;var bool seen=false;var usize i=0;while(i<declaration_count(parsed)){let d=declaration_at(parsed,i);if(d.kind==1 && d.start<=position){if(seen){module_index+=1;}seen=true;}i+=1;}return module_index;}
+pub fn usize module_count(ref Parsed parsed){var usize count=0;var usize i=0;while(i<declaration_count(parsed)){if(declaration_at(parsed,i).kind==1){count+=1;}i+=1;}return count;}
 pub fn usize pattern_field_count(ref Parsed parsed, usize id) {
     assert(expression_at(parsed,id).kind == 32); return record_field_count(parsed,id);
 }

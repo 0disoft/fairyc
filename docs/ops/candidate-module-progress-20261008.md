@@ -50,3 +50,24 @@ fail before publication. Generic signatures, receivers, body checking, and SDK
 authentication remain outside this unit. Signature success is not a whole-program
 check result. Evidence: `evidence/candidate-module-signatures-20261008.json`,
 with actual Fairy dev/release native API execution.
+
+## Owned AST composition
+
+`module_ast_join.fy` copies parser-owned arenas into one source-set arena.
+Original source bytes remain exact with a single newline between files; names
+are not substituted and the concatenation is not reparsed. Expression, statement,
+type, field, entry and attribute links shift by their own arena bases. Token
+indices are mapped through their original byte positions, including trivia that
+merges at the separator. `syntax.fy` exposes token facts and module-position
+queries for these consumers.
+
+The focused native test checks every source span against the original owners,
+plus call arguments, literal cooking, assignment operators, query tokens,
+tagged captures, switch and if bodies, for headers, cleanup receivers and enum
+payload fields. Empty, generic and over-count inputs fail before publication.
+Evidence: `evidence/candidate-module-join-20261008.json`.
+
+This arena is bounded to 32 files and 32768 combined source bytes, 512
+declarations, 4096 expressions/types/attributes/arguments, 8192 statements and
+1024 entries/fields. Generic expansion, source-set binding and program lowering
+are separate consumers; AST composition alone does not claim their completion.
