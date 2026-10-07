@@ -30,11 +30,12 @@ fn usize generation(ref h::Program p, ref mut Context c, ref mut v::Vec<Slot> sl
     else if (kind == 3) {
         let b = h::binding_at(p,e.binding);
         base = if (h::binding_code(b.kind) == 2) { 4096 + e.binding } else { generation(p,c,slots,initial,summaries,initial[e.binding],depth+1) };
-    } else if (kind == 7) { receiver = h::block_at(p,e.block).tail; base = generation(p,c,slots,initial,summaries,receiver,depth+1); }
+    } else if ((kind == 7 || kind==20)) { receiver = h::block_at(p,e.block).tail; base = generation(p,c,slots,initial,summaries,receiver,depth+1); }
     else if (kind == 8) {
         let usize yes = generation(p,c,slots,initial,summaries,h::block_at(p,e.block).tail,depth+1);
         let usize no = generation(p,c,slots,initial,summaries,e.alternative,depth+1);
         if (yes != no) { return fail(c,2103,e.start,e.end); } base = yes;
+    } else if(kind==19){var bool seen=false;var usize i=0;while(i<e.edge_count){let arm=h::expression_at(p,h::edge_at(p,e.edge_start+i));let usize tail=h::block_at(p,arm.block).tail;if(tail!=0){let usize value=generation(p,c,slots,initial,summaries,tail,depth+1);if(seen && value!=base){return fail(c,2103,e.start,e.end);}base=value;seen=true;}i+=1;}
     } else if (kind == 6) {
         let usize returned = summaries[e.binding]; var usize i = 0;
         while (i < h::function_count(p)) {

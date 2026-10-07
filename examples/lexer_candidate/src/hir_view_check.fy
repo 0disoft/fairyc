@@ -1,6 +1,7 @@
 module hir_view_check;
 import reference_types as refs;
 import hir_model as h;
+import hir_origin_targets as targets;
 import hir_mutable_check as exclusive;
 import std::vec as v;
 
@@ -39,21 +40,16 @@ fn usize origin(ref h::Program p, ref mut Context c, usize id, usize depth) {
         if (h::binding_code(b.kind) == 2) { return e.binding; }
         let usize initial = c.initial[e.binding]; return origin(p,c,initial,depth + 1);
     }
-    if (kind == 7) { return origin(p,c,h::block_at(p,e.block).tail,depth + 1); }
+    if ((kind == 7 || kind==20)) { return origin(p,c,h::block_at(p,e.block).tail,depth + 1); }
+    if(kind==19){var usize result=0;var bool seen=false;var usize i=0;while(i<e.edge_count){let arm=h::expression_at(p,h::edge_at(p,e.edge_start+i));let usize tail=h::block_at(p,arm.block).tail;if(tail!=0){let usize value=origin(p,c,tail,depth+1);if(seen && value!=result){return fail(c,2103,e.start,e.end);}result=value;seen=true;}i+=1;}return result;}
     if (kind == 8) {
         let usize yes = origin(p,c,h::block_at(p,e.block).tail,depth + 1);
         let usize no = origin(p,c,e.alternative,depth + 1);
-        if (yes != no) { return fail(c,2103,e.start,e.end); } return yes;
+        if(h::block_at(p,e.block).tail==0){return no;}if(!byte_view(h::type_code(h::expression_at(p,e.alternative).type))){return yes;}if (yes != no) { return fail(c,2103,e.start,e.end); } return yes;
     }
     if (kind == 6) {
         let usize returned = summary(p,c,e.binding,depth + 1); if (returned == 0 || c.problem.code != 0) { return 0; }
-        var usize i = 0; while (i < h::function_count(p)) {
-            let f = h::function_at(p,i); if (f.binding == e.binding) {
-                var usize j = 0; while (j < f.parameter_count) {
-                    if (h::edge_at(p,f.parameter_start + j) == returned) { return origin(p,c,h::edge_at(p,e.edge_start + j),depth + 1); } j += 1;
-                }
-            } i += 1;
-        } return fail(c,2103,e.start,e.end);
+        let usize parameter=targets::parameter(p,e.binding,returned);return if(parameter!=0){origin(p,c,h::edge_at(p,e.edge_start+parameter-1),depth+1)}else{fail(c,2103,e.start,e.end)};
     } return fail(c,2103,e.start,e.end);
 }
 fn usize summary(ref h::Program p, ref mut Context c, usize binding, usize depth) {

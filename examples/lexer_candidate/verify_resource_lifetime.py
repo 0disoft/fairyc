@@ -237,6 +237,18 @@ REJECTIONS[36]=[
  ('arg-exclusive-parent-read','fn i32 pair(ref mut i32 p,i32 n){return *p+n;}fn i32 main(){var i32 n=7;let ref mut i32 p=ref mut n;return pair(p,*p);}', 'E2101'),
 ]
 
+CASES[37]=[
+ ('origin-forward-reorder','fn ref i32 wrap(ref i32 a,ref i32 b){return choose(b,a);}fn ref i32 choose(ref i32 a,ref i32 b){return b;}fn i32 main(){var i32 a=7;var i32 b=1;let ref i32 p=wrap(ref a,ref b);b=9;return *p+b;}', '',16,0),
+ ('origin-wrapper-chain','fn ref i32 one(ref i32 a){return two(a);}fn ref i32 two(ref i32 a){return three(a);}fn ref i32 three(ref i32 a){return a;}fn i32 main(){let i32 n=7;return *one(ref n);}', '',7,0),
+ ('origin-switch','enum E{A;B;}fn ref i32 choose(ref i32 p,E e){return switch(e){case .A:{p}case .B:{p}};}fn i32 main(){let i32 n=7;return *choose(ref n,.B);}', '',7,0),
+ ('origin-view-return','fn ref u8[] tail(ref u8[] p){return p[1..];}fn i32 main(){let u8[2] a=[1,7];let ref u8[] p=ref a;let ref u8[] q=tail(p);assert(q.len==1 && q[0]==7);return 0;}', '',0,0),
+]
+REJECTIONS[37]=[
+ ('origin-selected-owner-write','fn ref i32 second(ref i32 a,ref i32 b){return b;}fn i32 main(){var i32 a=7;var i32 b=1;let ref i32 p=second(ref a,ref b);b=9;return *p;}', 'E2101'),
+ ('origin-wrapper-local-escape','fn ref i32 id(ref i32 p){return p;}fn ref i32 bad(){let i32 n=7;return id(ref n);}fn i32 main(){return 0;}', 'E2102'),
+ ('origin-two-inputs','fn ref i32 choose(ref i32 a,ref i32 b,bool yes){return if(yes){a}else{b};}fn i32 main(){return 0;}', 'E2103'),
+]
+
 def sha(path): return hashlib.sha256(path.read_bytes()).hexdigest()
 def save(path, value): path.write_text(json.dumps(value, ensure_ascii=False, indent=2)+'\n', encoding='utf-8', newline='\n')
 
