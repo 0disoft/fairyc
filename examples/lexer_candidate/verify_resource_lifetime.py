@@ -333,6 +333,22 @@ REJECTIONS[42]=[
  ('retained-siblings','struct S{u8[3] data;}fn i32 main(){var S s=S{.data=[1,2,3]};let ref mut u8[] b=ref mut s.data;let left=b[..1];let right=b[1..];left[0]=9;right[0]=8;return 0;}', 'E2101'),
 ]
 
+CASES[43]=[
+ ('child-last-use','fn i32 main(){var u8[3] a=[1,2,3];let ref mut u8[] p=ref mut a;let q=p[1..];q[0]=9;p[0]=7;return if(a[0]==7 && a[1]==9){7}else{1};}', '',7,0),
+ ('empty-at-end','fn i32 main(){var u8[3] a=[1,2,3];let ref mut u8[] p=ref mut a;let q=p[3..3];assert(q.is_empty && q.len==0);p[0]=7;return if(a[0]==7){7}else{1};}', '',7,0),
+ ('reversed-bounds','fn i32 main(){var u8[3] a=[1,2,3];let ref mut u8[] p=ref mut a;discard p[2..1];return 0;}', '',0,6),
+ ('past-end','fn i32 main(){var u8[3] a=[1,2,3];let ref mut u8[] p=ref mut a;discard p[..4];return 0;}', '',0,6),
+ ('bound-once','fn usize start(){mark(65);return 0;}fn usize end(){mark(66);return 2;}fn i32 main(){var u8[3] a=[1,2,3];let ref mut u8[] p=ref mut a;let q=p[start()..end()];assert(q.len==2);return 7;}', 'AB',7,0),
+]
+REJECTIONS[43]=[
+ ('disjoint-siblings','fn i32 main(){var u8[3] a=[1,2,3];let ref mut u8[] p=ref mut a;let q=p[..1];let r=p[1..];q[0]=9;r[0]=8;return 0;}', 'E2101'),
+ ('copied-parent-read','fn i32 main(){var u8[3] a=[1,2,3];let ref mut u8[] p=ref mut a;let alias=p;let q=p[1..];assert(alias[0]==1);q[0]=9;return 0;}', 'E2101'),
+ ('empty-child-hold','fn i32 main(){var u8[3] a=[1,2,3];let ref mut u8[] p=ref mut a;let q=p[3..3];p[0]=9;assert(q.is_empty);return 0;}', 'E2101'),
+ ('grandchild-hold','fn i32 main(){var u8[3] a=[1,2,3];let ref mut u8[] p=ref mut a;let q=p[1..];let r=q[..1];q[0]=9;assert(r[0]==2);return 0;}', 'E2101'),
+ ('owner-write','fn i32 main(){var u8[3] a=[1,2,3];let ref mut u8[] p=ref mut a;let q=p[1..];a[0]=9;assert(q[0]==2);return 0;}', 'E2101'),
+ ('shared-escalation','fn i32 main(){let ref u8[] p=b"abc";let ref mut u8[] q=p[..];return 0;}'),
+]
+
 def sha(path): return hashlib.sha256(path.read_bytes()).hexdigest()
 def save(path, value): path.write_text(json.dumps(value, ensure_ascii=False, indent=2)+'\n', encoding='utf-8', newline='\n')
 
