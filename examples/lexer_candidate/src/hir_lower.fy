@@ -2,6 +2,7 @@ module hir_lower;
 import reference_types as refs;
 import resource_abilities as abilities;
 import hir_model as h;
+import unsafe_scopes as unsafe_scopes;
 import effect_declarations as effects;
 import tagged_types as tagged;
 import hir_view_check as views;
@@ -36,7 +37,7 @@ fn bool prepare(ref typing::Typed input, usize module_index, ref mut v::Vec<h::B
         var usize target_module = module_index; var usize declaration = s.declaration;
         if (s.kind == 5) { let signature = names::external_signature(resolved,i); target_module = signature.module_index; declaration = signature.declaration; }
         let usize owner=if(s.owner!=0 && names::symbol_at(resolved,s.owner).kind==9){dropping[names::symbol_at(resolved,s.owner).declaration]}else{s.owner};
-        let h::Binding binding = h::Binding { .must_use = if(s.kind==5){names::external_signature(resolved,i).must_use}else{s.kind==1 && effects::read(parsed,s.declaration-1).must_use}, .effects = if(s.kind==1 || s.kind==9){effects::read(parsed,s.declaration-1).bits}else if(s.kind==5){names::external_signature(resolved,i).effects}else{0}, .kind = if(s.kind==8){.Let}else{state::binding_kind(s.kind)}, .type, .start = s.start, .end = s.end, .owner, .scope = s.scope, .module_index = target_module, .declaration = if(s.kind==8 || s.kind==10){0}else{declaration}, .signature_start = 0, .signature_count = 0 };
+        let h::Binding binding = h::Binding { .unsafe_call=if(s.kind==5){names::external_signature(resolved,i).unsafe_call}else{s.kind==1 && syntax::declaration_at(parsed,s.declaration-1).unsafe_end!=0}, .must_use = if(s.kind==5){names::external_signature(resolved,i).must_use}else{s.kind==1 && effects::read(parsed,s.declaration-1).must_use}, .effects = if(s.kind==1 || s.kind==9){effects::read(parsed,s.declaration-1).bits}else if(s.kind==5){names::external_signature(resolved,i).effects}else{0}, .kind = if(s.kind==8){.Let}else{state::binding_kind(s.kind)}, .type, .start = s.start, .end = s.end, .owner, .scope = s.scope, .module_index = target_module, .declaration = if(s.kind==8 || s.kind==10){0}else{declaration}, .signature_start = 0, .signature_count = 0 };
         if (!v::push<h::Binding>(bindings,binding).is_ok) { discard state::fail(c,3,s.start,s.end); return false; }
         if(s.kind==8){if(s.declaration==0 || s.declaration>length){discard state::fail(c,4,s.start,s.end);return false;}let ref mut state::Link link=v::at_mut<state::Link>(links,s.declaration-1);link.use=i;}
         if (s.entry != 0) {
@@ -52,7 +53,7 @@ fn bool prepare(ref typing::Typed input, usize module_index, ref mut v::Vec<h::B
     }
     declaration=0;while(declaration<syntax::declaration_count(parsed)){let d=syntax::declaration_at(parsed,declaration);let usize target=dropping[declaration+1];
         if(target!=0){
-            if(target!=v::len<h::Binding>(bindings)+1 || !v::push<h::Binding>(bindings,h::Binding{.must_use=false,.effects=effects::read(parsed,declaration).bits,.kind=.DropFunction,.type=.Void,.start=d.cleanup_start,.end=d.cleanup_end,.owner=0,.scope=0,.module_index,.declaration=declaration+1,.signature_start=0,.signature_count=0}).is_ok){discard state::fail(c,3,d.cleanup_start,d.cleanup_end);return false;}
+            if(target!=v::len<h::Binding>(bindings)+1 || !v::push<h::Binding>(bindings,h::Binding{ .unsafe_call=false,.must_use=false,.effects=effects::read(parsed,declaration).bits,.kind=.DropFunction,.type=.Void,.start=d.cleanup_start,.end=d.cleanup_end,.owner=0,.scope=0,.module_index,.declaration=declaration+1,.signature_start=0,.signature_count=0}).is_ok){discard state::fail(c,3,d.cleanup_start,d.cleanup_end);return false;}
             let ref mut state::Link link=v::at_mut<state::Link>(links,declaration);link.function=target;
         }declaration+=1;}
     i = 1;
@@ -146,7 +147,7 @@ fn usize expression(ref typing::Typed input, ref v::Vec<h::Binding> bindings, re
     } else if (node.kind == 6) {
         kind = .Call; e.binding = state::use(links,node.left);
         if (e.binding == 0) { return state::fail(c,4,node.start,node.end); }
-        let h::Binding callee = *v::at<h::Binding>(bindings,e.binding - 1);
+        let h::Binding callee = *v::at<h::Binding>(bindings,e.binding - 1);e.boolean=callee.unsafe_call;
         if ((h::binding_code(callee.kind) != h::binding_code(.Function) && h::binding_code(callee.kind) != h::binding_code(.External)) || h::type_code(callee.type) != h::type_code(type)) { return state::fail(c,4,node.start,node.end); }
         e.edge_count = syntax::call_argument_count(parsed,id);
         if (callee.signature_count != e.edge_count) { return state::fail(c,4,node.start,node.end); }
@@ -221,7 +222,7 @@ fn usize expression(ref typing::Typed input, ref v::Vec<h::Binding> bindings, re
             let h::Expression child=h::Expression{.kind=.Arm,.type=state::type(typing::expression_type(input,arm_id)),.operator=.None,.start=arm.start,.end=arm.end,.block=body,.binding=typing::field_target(input,arm_id),.left=0,.right=0,.alternative=0,.edge_start=captures,.edge_count=count,.payload_start=0,.payload_end=0,.boolean=false};
             let usize lowered=state::push_expression(expressions,child,c);if(lowered==0){return 0;}remaining-=1;state::set_edge(edges,e.edge_start+remaining,lowered);link=syntax::expression_at(parsed,link).right;
         }
-    } else if (node.kind == 12) {
+    } else if ((node.kind==12 || node.kind==31)) {
         kind = .Block; e.block = block(input,bindings,links,c,expressions,statements,blocks,edges,payload,node.left,depth + 1);
     } else if (node.kind == 13) {
         kind = .If; e.left = expression(input,bindings,links,c,expressions,statements,blocks,edges,payload,node.left,depth + 1);
@@ -306,7 +307,7 @@ fn usize block(ref typing::Typed input, ref v::Vec<h::Binding> bindings, ref v::
     let usize tail = expression(input,bindings,links,c,expressions,statements,blocks,edges,payload,source.expression,depth + 1);
     c.scope_count -= 1;
     if (c.problem.code != 0) { return 0; }
-    let h::Block b = h::Block { .start = source.start, .end = source.end, .owner = c.owner, .scope, .parent_scope, .edge_start = start, .edge_count = count, .tail };
+    let h::Block b = h::Block { .unsafe_body=unsafe_scopes::block(parsed,id), .start = source.start, .end = source.end, .owner = c.owner, .scope, .parent_scope, .edge_start = start, .edge_count = count, .tail };
     if (!v::push<h::Block>(blocks,b).is_ok) { return state::fail(c,3,b.start,b.end); }
     return v::len<h::Block>(blocks);
 }

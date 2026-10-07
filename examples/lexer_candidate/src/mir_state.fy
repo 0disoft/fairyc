@@ -10,8 +10,8 @@ import std::vec as v;
 
 // Active loop frames are bounded by the existing recursion-depth budget.
 // Defer descriptors/captures are compile-time scope stacks, never runtime queues.
-pub struct Context { m::Problem problem; usize function; usize current; usize[1153] locals; usize[1153] targets; u8[1153] live; u8[4096] pending; u32[4096] pending_scopes; u32[4096] pending_starts; usize scope; usize base; usize keep; usize loop_depth; usize[64] loop_ids; usize[64] breaks; usize[64] continues; usize[64] loop_defer_base; usize defer_count; usize capture_count; usize[256] deferred_targets; usize[256] deferred_starts; usize[256] deferred_ends; usize[256] deferred_arg_starts; usize[256] deferred_arg_counts; usize[4096] captures; }
-pub fn Context empty() { return Context { .problem = m::Problem { .code = 0, .start = 0, .end = 0 }, .function = 0, .current = 0, .locals = [0;1153], .targets = [0;1153], .live=[0;1153], .pending=[0;4096], .pending_scopes=[0;4096], .pending_starts=[0;4096], .scope=0, .base=0, .keep=0, .loop_depth = 0, .loop_ids = [0;64], .breaks = [0;64], .continues = [0;64], .loop_defer_base = [0;64], .defer_count = 0, .capture_count = 0, .deferred_targets = [0;256], .deferred_starts = [0;256], .deferred_ends = [0;256], .deferred_arg_starts = [0;256], .deferred_arg_counts = [0;256], .captures = [0;4096] }; }
+pub struct Context { m::Problem problem; usize function; usize current; usize[1153] locals; usize[1153] targets; u8[1153] live; u8[4096] pending; u32[4096] pending_scopes; u32[4096] pending_starts; usize scope; usize base; usize keep; usize loop_depth; usize[64] loop_ids; usize[64] breaks; usize[64] continues; usize[64] loop_defer_base; usize defer_count; usize capture_count; bool[256] deferred_unsafe; usize[256] deferred_targets; usize[256] deferred_starts; usize[256] deferred_ends; usize[256] deferred_arg_starts; usize[256] deferred_arg_counts; usize[4096] captures; }
+pub fn Context empty() { return Context { .problem = m::Problem { .code = 0, .start = 0, .end = 0 }, .function = 0, .current = 0, .locals = [0;1153], .targets = [0;1153], .live=[0;1153], .pending=[0;4096], .pending_scopes=[0;4096], .pending_starts=[0;4096], .scope=0, .base=0, .keep=0, .loop_depth = 0, .loop_ids = [0;64], .breaks = [0;64], .continues = [0;64], .loop_defer_base = [0;64], .defer_count = 0, .capture_count = 0, .deferred_unsafe=[false;256], .deferred_targets = [0;256], .deferred_starts = [0;256], .deferred_ends = [0;256], .deferred_arg_starts = [0;256], .deferred_arg_counts = [0;256], .captures = [0;4096] }; }
 // Pending temporary state is indexed within one function (4096-local bound),
 // keeping branch snapshots off the 64K aggregate lane and within native stack.
 fn u32 compact(usize value){assert(value<=32768);var usize n=value;var u32 result=0;var u32 bit=1;while(n!=0){if(n%2!=0){result+=bit;}n/=2;if(n!=0){bit*=2;}}return result;}
@@ -35,7 +35,7 @@ pub fn usize local(ref mut v::Vec<m::Local> locals, ref mut Context c, u32 type,
     if (!v::push<m::Local>(locals,m::Local { .function = c.function, .binding, .type, .parameter, .mutable, .start, .end }).is_ok) { return fail(c,3,start,end); }
     let usize id=v::len<m::Local>(locals);set_pending(c,id,if(binding==0){0}else{2});let usize at=id-c.base-1;assert(start<=32768);c.pending_starts[at]=compact(start);return id;
 }
-pub fn m::Block block(usize function, usize start, usize end) { return m::Block { .function, .first = 0, .last = 0, .kind = 0, .value = 0, .left = 0, .right = 0, .operator = 0, .type = 0, .target = 0, .alternative = 0, .check = 0, .callee = 0, .destination = 0, .argument_start = 0, .argument_count = 0, .trap_mask = 0, .start, .end }; }
+pub fn m::Block block(usize function, usize start, usize end) { return m::Block { .unsafe_call=false, .function, .first = 0, .last = 0, .kind = 0, .value = 0, .left = 0, .right = 0, .operator = 0, .type = 0, .target = 0, .alternative = 0, .check = 0, .callee = 0, .destination = 0, .argument_start = 0, .argument_count = 0, .trap_mask = 0, .start, .end }; }
 pub fn usize new_block(ref mut v::Vec<m::Block> blocks, ref mut Context c, usize start, usize end) {
     if (c.problem.code != 0) { return 0; }
     if (v::len<m::Block>(blocks) >= 16384) { return fail(c,2,start,end); }
@@ -64,6 +64,7 @@ pub fn bool terminate(ref mut v::Vec<m::Block> blocks, ref mut Context c, m::Blo
     b.kind = value.kind; b.value = value.value; b.left = value.left; b.right = value.right;
     b.operator = value.operator; b.type = value.type; b.target = value.target; b.alternative = value.alternative;
     b.check = value.check; b.callee = value.callee; b.destination = value.destination;
+    b.unsafe_call=value.unsafe_call;
     b.argument_start = value.argument_start; b.argument_count = value.argument_count;
     b.trap_mask = value.trap_mask; b.start = value.start; b.end = value.end;
     c.current = 0; return true;

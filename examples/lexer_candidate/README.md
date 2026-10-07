@@ -2868,3 +2868,7 @@ Same-module `fn T id<T>(T n)` and `id<i32>(7)` specialize in Fairy code before o
 ### Imported scalar call contracts (unit 63 partial)
 
 Registry items own effects and must-use markers; copied external signatures and HIR bindings preserve them after registry cleanup. Provider declaration errors and caller authority/ignored-value failures are checked at the actual imported target. Both native profiles pass two API tests; see `docs/ops/evidence/candidate-resource-module-contracts-20261007.json`. Imported nominal types, generic instances, borrow origins and whole-program linking remain pending.
+
+### Unsafe lexical call scopes (unit 54 partial)
+
+Unsafe Fairy functions and explicit blocks authorize unsafe calls only within their lexical body. Effects, must-use, moves and borrows remain independently checked. Generic cloning remaps unsafe blocks; defer retains permission from registration and cleanup requires its own explicit block. Owned HIR checks the actual block tree, and MIR rejects stripped or mismatched call provenance before C output. Two candidate profiles, 17 fixtures, 18 generated-C native runs and two mutation API tests passed. See `docs/ops/evidence/candidate-resource-unsafe-scopes-20261007.json`. Extern-C imports and raw-pointer values remain pending the next unit.

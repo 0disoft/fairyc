@@ -24,7 +24,7 @@ pub fn bool emit_deferred(ref mut v::Vec<m::Block> blocks, ref mut v::Vec<usize>
         }
         let usize next = state::new_block(blocks,c,start,end);
         var m::Block call = state::block(c.function,start,end);
-        call.kind = 5; call.callee = callee; call.argument_start = arguments;
+        call.kind = 5; call.unsafe_call=c.deferred_unsafe[i]; call.callee = callee; call.argument_start = arguments;
         call.argument_count = count; call.target = next;
         if (!state::terminate(blocks,c,call)) { return false; }
         c.current = next;

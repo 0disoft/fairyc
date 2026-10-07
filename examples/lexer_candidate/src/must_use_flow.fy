@@ -22,7 +22,7 @@ fn void expression(ref names::Resolved resolved,ref v::Vec<state::Slot> types,re
         var usize i=0;while(i<syntax::call_argument_count(p,id)){expression(resolved,types,c,syntax::call_argument(p,id,i),true,depth+1);i+=1;}return;
     }
     if(e.kind==3){expression(resolved,types,c,e.left,handled,depth+1);return;}
-    if(e.kind==12){block(resolved,types,c,e.left,handled,depth+1);return;}
+    if((e.kind==12 || e.kind==31)){block(resolved,types,c,e.left,handled,depth+1);return;}
     if(e.kind==13){expression(resolved,types,c,e.left,true,depth+1);let branches=syntax::expression_at(p,e.right);block(resolved,types,c,branches.left,handled,depth+1);expression(resolved,types,c,branches.right,handled,depth+1);return;}
     if(e.kind==15){expression(resolved,types,c,e.left,true,depth+1);var usize link=e.right;while(link!=0 && c.problem.code==0){let pair=syntax::expression_at(p,link);let arm=syntax::expression_at(p,pair.left);block(resolved,types,c,arm.right,handled,depth+1);link=pair.right;}return;}
     if(e.kind==10){var usize i=0;while(i<syntax::record_field_count(p,id)){let f=syntax::expression_at(p,syntax::record_field(p,id,i));expression(resolved,types,c,f.left,true,depth+1);i+=1;}return;}

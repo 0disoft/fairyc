@@ -137,6 +137,7 @@ pub fn m::Problem check(ref m::Program p) {
     }
     i = 1; while (i <= m::block_count(p)) {
         let m::Block b = m::block_at(p,i); let m::Function f = m::function_at(p,b.function);
+        if(b.kind!=5 && b.unsafe_call){return problem(1001,b.start,b.end);}
         var usize op = b.first;
         while (op != 0) {
             let m::Operation o = m::operation_at(p,op);
@@ -169,6 +170,7 @@ pub fn m::Problem check(ref m::Program p) {
             }
         } else if (b.kind == 5) {
             let m::Target t = m::target_at(p,b.callee);
+            if(b.unsafe_call!=t.unsafe_call){return problem(5101,b.start,b.end);}
             if((m::target_at(p,f.target).effects&t.effects)!=t.effects){return problem(7102,b.start,b.end);}
             let usize drop=if(b.type==0){0}else{m::drop_index(p,b.type)};
             if (b.left!=0 || b.right!=0 || b.operator!=0 || b.check!=0 || b.trap_mask!=0 || b.value != 0 || b.alternative != 0 || (if(b.type==0){m::drop_target(p,b.callee)}else{drop==0 || m::drop_at(p,drop-1).target!=b.callee}) || (if (t.result == 7) { b.destination != 0 } else { !local(p,b.destination,b.function,t.result) })) { return problem(1001,b.start,b.end); }

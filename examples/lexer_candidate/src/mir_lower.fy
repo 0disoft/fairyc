@@ -287,7 +287,7 @@ fn usize expression(ref h::Program input, ref mut v::Vec<m::Local> locals, ref m
         }
         let usize destination = if (type == 7) { 0 } else { state::local(locals,c,type,0,false,false,e.start,e.end) };
         let usize continuation = state::new_block(blocks,c,e.start,e.end);
-        var m::Block term = state::block(c.function,e.start,e.end); term.kind = 5; term.callee = callee;
+        var m::Block term = state::block(c.function,e.start,e.end); term.kind = 5; term.callee = callee; term.unsafe_call=e.boolean;
         term.destination = destination; term.argument_start = start; term.argument_count = e.edge_count; term.target = continuation;
         if (!state::terminate(blocks,c,term)) { return 0; } c.current = continuation;if(shapes::needs_drop(type)){state::hold(c,destination);}return destination;
     }
@@ -336,7 +336,7 @@ fn bool statement(ref h::Program input, ref mut v::Vec<m::Local> locals, ref mut
             let usize slot = c.capture_count; c.captures[slot] = value; c.capture_count += 1; j += 1;
         }
         let usize at = c.defer_count; c.defer_count += 1;
-        c.deferred_targets[at] = callee; c.deferred_starts[at] = s.start; c.deferred_ends[at] = s.end;
+        c.deferred_unsafe[at]=call.boolean; c.deferred_targets[at] = callee; c.deferred_starts[at] = s.start; c.deferred_ends[at] = s.end;
         c.deferred_arg_starts[at] = captured; c.deferred_arg_counts[at] = call.edge_count;
         return true;
     }

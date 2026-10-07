@@ -35,7 +35,7 @@ pub struct Signature { Type type; }
 // Binding owner is the enclosing Function Binding ID; scope is its lexical scope
 // ID. Function/External use module_index+declaration as authoritative call target.
 // Callable result is type; signature_start/count index the Type signature arena.
-pub struct Binding { bool must_use; u32 effects; BindingKind kind; Type type; usize start; usize end; usize owner; usize scope; usize module_index; usize declaration; usize signature_start; usize signature_count; }
+pub struct Binding { bool unsafe_call; bool must_use; u32 effects; BindingKind kind; Type type; usize start; usize end; usize owner; usize scope; usize module_index; usize declaration; usize signature_start; usize signature_count; }
 pub struct Function { usize binding; usize start; usize end; usize scope; bool public; usize body; usize parameter_start; usize parameter_count; }
 // An empty body has no callable/receiver. Every resource owns exactly one
 // classified drop definition; a nonempty body links one private typed function.
@@ -60,7 +60,7 @@ pub struct Expression { ExpressionKind kind; Type type; Operator operator; usize
 pub struct Statement { StatementKind kind; usize start; usize end; usize scope; usize expression; usize target; usize binding; Operator operator; usize body; usize initial; usize post; usize loop_target; }
 // Ordered statement IDs in edge arena; tail is optional Expression ID.
 // owner is Function Binding ID; scope is the resolver lexical scope ID.
-pub struct Block { usize start; usize end; usize owner; usize scope; usize parent_scope; usize edge_start; usize edge_count; usize tail; }
+pub struct Block { bool unsafe_body; usize start; usize end; usize owner; usize scope; usize parent_scope; usize edge_start; usize edge_count; usize tail; }
 pub resource Program {
     shapes::Table nominal;
     v::Vec<Drop> drops;
@@ -346,5 +346,44 @@ pub fn Result<Program,Problem> assemble_resources(bytes::Buffer source, bytes::B
         }i+=1;
     }
     i=1;while(i<=nb){let u32 kind=binding_code(v::at<Binding>(ref bindings,i-1).kind);if((kind==9 || kind==10) && linked[i]!=1){return .err(Problem{.code=4,.start=0,.end=ns});}i+=1;}
-    return .ok(Program { .nominal, .drops, .source, .payload, .functions, .bindings, .expressions, .statements, .blocks, .edges, .signatures, .module_index, .success = true });
+    let Program result=Program { .nominal, .drops, .source, .payload, .functions, .bindings, .expressions, .statements, .blocks, .edges, .signatures, .module_index, .success = true };
+    let Problem unsafe_proof=unsafe_check(ref result);if(unsafe_proof.code!=0){return .err(unsafe_proof);}return .ok(result);
+}
+
+// Walk owned lexical structure rather than trusting the source-side permission
+// flag. Unsafe never grants effect authority or alters borrow/cleanup policy.
+struct UnsafeBudget { u8[4096] calls; usize work; Problem problem; }
+fn bool unsafe_fail(ref mut UnsafeBudget c,u32 code,usize start,usize end){
+    if(c.problem.code==0){c.problem=Problem{.code,.start,.end};}return false;
+}
+fn bool unsafe_expression(ref Program p,usize id,bool allowed,usize depth,ref mut UnsafeBudget c){
+    if(id==0){return true;}let e=expression_at(p,id);let u32 kind=expression_code(e.kind);
+    if(depth>=64 || c.work>=1048576){return unsafe_fail(c,2,e.start,e.end);}c.work+=1;
+    if(kind==6){let b=binding_at(p,e.binding);if(e.boolean!=b.unsafe_call || b.unsafe_call && !allowed){return unsafe_fail(c,5101,e.start,e.end);}c.calls[id-1]=1;}
+    if(!unsafe_expression(p,e.left,allowed,depth+1,c) || !unsafe_expression(p,e.right,allowed,depth+1,c) || !unsafe_expression(p,e.alternative,allowed,depth+1,c)){return false;}
+    if(e.block!=0 && !unsafe_block(p,e.block,allowed,depth+1,c)){return false;}
+    // Capture edges name bindings, all other expression edges name expressions.
+    var usize i=0;while(kind!=21 && i<e.edge_count){if(!unsafe_expression(p,edge_at(p,e.edge_start+i),allowed,depth+1,c)){return false;}i+=1;}return true;
+}
+fn bool unsafe_statement(ref Program p,usize id,bool allowed,usize depth,ref mut UnsafeBudget c){
+    if(id==0){return true;}let s=statement_at(p,id);
+    if(depth>=64 || c.work>=1048576){return unsafe_fail(c,2,s.start,s.end);}c.work+=1;
+    return unsafe_expression(p,s.expression,allowed,depth+1,c) && unsafe_expression(p,s.target,allowed,depth+1,c)
+        && (s.body==0 || unsafe_block(p,s.body,allowed,depth+1,c))
+        && unsafe_statement(p,s.initial,allowed,depth+1,c) && unsafe_statement(p,s.post,allowed,depth+1,c);
+}
+fn bool unsafe_block(ref Program p,usize id,bool inherited,usize depth,ref mut UnsafeBudget c){
+    let b=block_at(p,id);if(depth>=64 || c.work>=1048576){return unsafe_fail(c,2,b.start,b.end);}c.work+=1;
+    let bool allowed=inherited || b.unsafe_body;var usize i=0;
+    while(i<b.edge_count){if(!unsafe_statement(p,edge_at(p,b.edge_start+i),allowed,depth+1,c)){return false;}i+=1;}
+    return unsafe_expression(p,b.tail,allowed,depth+1,c);
+}
+pub fn Problem unsafe_check(ref Program p){
+    var UnsafeBudget c=UnsafeBudget{.calls=[0;4096],.work=0,.problem=Problem{.code=0,.start=0,.end=0}};var usize i=1;var bool needed=false;
+    while(i<=binding_count(p)){let b=binding_at(p,i);if(b.unsafe_call && binding_code(b.kind)!=1 && binding_code(b.kind)!=5){discard unsafe_fail(ref mut c,4,b.start,b.end);return c.problem;}i+=1;}
+    i=1;while(i<=binding_count(p)){needed=needed || binding_at(p,i).unsafe_call;i+=1;}
+    i=1;while(i<=expression_count(p)){let e=expression_at(p,i);needed=needed || expression_code(e.kind)==6 && e.boolean;i+=1;}
+    if(!needed){return c.problem;}
+    i=0;while(i<function_count(p)){let f=function_at(p,i);if(!unsafe_block(p,f.body,binding_at(p,f.binding).unsafe_call,0,ref mut c)){return c.problem;}i+=1;}
+    i=1;while(i<=expression_count(p)){let e=expression_at(p,i);if(expression_code(e.kind)==6 && c.calls[i-1]==0){discard unsafe_fail(ref mut c,4,e.start,e.end);return c.problem;}i+=1;}return c.problem;
 }

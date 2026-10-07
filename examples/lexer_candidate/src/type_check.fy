@@ -10,6 +10,7 @@ import syntax as syntax;
 import scalar_casts as casts;
 import effect_declarations as effects;
 import must_use_flow as must_use;
+import unsafe_scopes as unsafe_scopes;
 import type_state as state;
 import nominal_types as nominal;
 import resource_identity as resources;
@@ -177,7 +178,7 @@ fn state::Value expression(ref names::Resolved resolved, ref mut v::Vec<state::S
         if (callee.kind != 1 && callee.kind != 5) { let syntax::Expression source = syntax::expression_at(parsed,node.left); return error(problem,6,source.start,source.end,8,state::symbols(tables,callee_id - 1)); }
         state::set_expressions(tables,node.left - 1,8);
         if (callee.kind == 5) {
-            let signature=names::external_signature(resolved,callee_id);if(!effects::includes(effects::caller(parsed,node.start,node.end),signature.effects)){return error(problem,7102,node.start,node.end,signature.effects,0);}
+            let signature=names::external_signature(resolved,callee_id);if(signature.unsafe_call && !unsafe_scopes::allowed(parsed,node.start,node.end)){return error(problem,5101,node.start,node.end,0,0);}if(!effects::includes(effects::caller(parsed,node.start,node.end),signature.effects)){return error(problem,7102,node.start,node.end,signature.effects,0);}
             let usize count = names::external_signature(resolved,callee_id).parameter_count;
             let usize start = names::external_signature(resolved,callee_id).parameter_start;
             if (count != syntax::call_argument_count(parsed,id)) { return error(problem,5,node.start,node.end,0,0); }
@@ -196,6 +197,7 @@ fn state::Value expression(ref names::Resolved resolved, ref mut v::Vec<state::S
         let required=effects::read(parsed,callee.declaration-1);
         if(!effects::includes(effects::caller(parsed,node.start,node.end),required.bits)){return error(problem,7102,node.start,node.end,required.bits,0);}
         let syntax::Declaration function = syntax::declaration_at(parsed,callee.declaration - 1);
+        if(function.unsafe_end!=0 && !unsafe_scopes::allowed(parsed,node.start,node.end)){return error(problem,5101,node.start,node.end,0,0);}
         var usize parameters = 0; var usize entry_index = function.entry_start;
         while (entry_index < function.entry_start + function.entry_count) {
             if (syntax::entry_at(parsed,entry_index).kind == 1) { parameters += 1; } entry_index += 1;
@@ -335,7 +337,7 @@ fn state::Value expression(ref names::Resolved resolved, ref mut v::Vec<state::S
         }
         return recorded(tables,id,value(consequent.type,consequent.terminates && alternative.terminates));
     }
-    if (node.kind == 12) { let state::Value actual = block(resolved,tables,problem,node.left,expected,result_type,depth + 1,loop_depth); return recorded(tables,id,actual); }
+    if ((node.kind==12 || node.kind==31)) { let state::Value actual = block(resolved,tables,problem,node.left,expected,result_type,depth + 1,loop_depth); return recorded(tables,id,actual); }
     return error(problem,11,node.start,node.end,0,0);
 }
 fn state::Value statement(ref names::Resolved resolved, ref mut v::Vec<state::Slot> tables, ref mut state::Problem problem, usize id, u32 result_type, usize depth, usize loop_depth) {

@@ -23,7 +23,7 @@ fn void expression(ref syntax::Parsed p,ref mut v::Vec<state::Slot> tables,ref m
     }
     if(e.kind==6){var usize i=0;while(i<syntax::call_argument_count(p,id)){expression(p,tables,c,syntax::call_argument(p,id,i),true,depth+1);i+=1;}return;}
     if(e.kind==10){var usize i=0;while(i<syntax::record_field_count(p,id)){let f=syntax::expression_at(p,syntax::record_field(p,id,i));expression(p,tables,c,f.left,true,depth+1);i+=1;}return;}
-    if(e.kind==12){block(p,tables,c,e.left,consume,depth+1);return;}
+    if((e.kind==12 || e.kind==31)){block(p,tables,c,e.left,consume,depth+1);return;}
     if(e.kind==13){expression(p,tables,c,e.left,false,depth+1);let branches=syntax::expression_at(p,e.right);block(p,tables,c,branches.left,consume,depth+1);expression(p,tables,c,branches.right,consume,depth+1);return;}
     if(e.kind==15){expression(p,tables,c,e.left,true,depth+1);var usize link=e.right;while(link!=0){let pair=syntax::expression_at(p,link);let arm=syntax::expression_at(p,pair.left);block(p,tables,c,arm.right,consume,depth+1);link=pair.right;}return;}
     if(e.kind==30){expression(p,tables,c,e.left,true,depth+1);return;}

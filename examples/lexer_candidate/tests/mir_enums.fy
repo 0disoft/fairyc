@@ -29,7 +29,7 @@ fn m::Program mutated(u32 mutation) {
     assert(v::push<shapes::Shape>(ref mut records,shapes::Shape{.type=131074,.binding=2,.field_start=1,.field_count=1,.public=false}).is_ok);
     assert(v::push<shapes::Field>(ref mut fields,shapes::Field{.owner=131073,.type=0,.start=0,.end=1,.payload_start=0,.payload_count=0}).is_ok);
     assert(v::push<shapes::Field>(ref mut fields,shapes::Field{.owner=131074,.type=0,.start=1,.end=2,.payload_start=0,.payload_count=0}).is_ok);
-    var v::Vec<m::Target> targets=v::empty<m::Target>(); assert(v::push<m::Target>(ref mut targets,m::Target{.effects=0,.binding=3,.module_index=0,.declaration=1,.result=1,.signature_start=0,.signature_count=0,.start=0,.end=1,.external=false}).is_ok);
+    var v::Vec<m::Target> targets=v::empty<m::Target>(); assert(v::push<m::Target>(ref mut targets,m::Target{ .unsafe_call=false,.effects=0,.binding=3,.module_index=0,.declaration=1,.result=1,.signature_start=0,.signature_count=0,.start=0,.end=1,.external=false}).is_ok);
     var v::Vec<m::Function> functions=v::empty<m::Function>(); assert(v::push<m::Function>(ref mut functions,m::Function{.target=1,.entry=1,.local_start=0,.local_count=5,.block_start=0,.block_count=1,.parameter_start=0,.parameter_count=0,.start=0,.end=2,.public=false}).is_ok);
     var v::Vec<m::Local> locals=v::empty<m::Local>(); assert(v::push<m::Local>(ref mut locals,local(131073)).is_ok); assert(v::push<m::Local>(ref mut locals,local(6)).is_ok); assert(v::push<m::Local>(ref mut locals,local(1)).is_ok); assert(v::push<m::Local>(ref mut locals,local(131073)).is_ok); assert(v::push<m::Local>(ref mut locals,local(131074)).is_ok);
     var m::Operation value=state::operation(21,1,131073,131073,0,0,0,0,1); value.function=1;value.block=1;value.next=2;

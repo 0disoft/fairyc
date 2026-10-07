@@ -162,7 +162,7 @@ fn Problem expression(ref syntax::Parsed parsed, ref mut Context context, usize 
         if (consequent.code != 0) { return consequent; }
         return expression(parsed,context,branches.right,depth + 1,symbols,references);
     }
-    if (node.kind == 12) { return block(parsed,context,node.left,depth + 1,symbols,references); }
+    if ((node.kind==12 || node.kind==31)) { return block(parsed,context,node.left,depth + 1,symbols,references); }
     return fail(3,node.start,node.end);
 }
 fn Problem statement(ref syntax::Parsed parsed, ref mut Context context, usize id, usize depth, ref mut v::Vec<Symbol> symbols, ref mut v::Vec<Reference> references) {
@@ -245,7 +245,7 @@ fn Problem collect(ref syntax::Parsed parsed, ref mut Context context, ref mut v
         let syntax::Declaration item = syntax::declaration_at(parsed,index);
         if(item.attribute_count!=0){let e=effects::read(parsed,index);if(e.code==4201 || item.kind==12 && e.code!=0){return fail(e.code,e.start,e.end);}}
         if (item.kind != 1 && item.kind!=12 && !(context.modules && item.kind == 2)) {
-            if ((item.kind != 3 && item.kind != 4 && item.kind != 6 && item.kind != 11) || item.owner_end != 0 || item.unsafe_end != 0 || (item.attribute_count != 0 && item.kind!=6 && item.kind!=3) ||
+            if ((item.kind != 3 && item.kind != 4 && item.kind != 6 && item.kind != 11) || item.owner_end != 0 || (item.attribute_count != 0 && item.kind!=6 && item.kind!=3) ||
                 item.generic_parameters != 0 || (item.kind == 3 && !scalar_type(parsed,item.result_type,true))) { return fail(3,item.start,item.end); }
             if(item.kind==3 || item.kind==6){let e=effects::read(parsed,index);if(e.code!=0){return fail(e.code,e.start,e.end);}}
             // Resource attributes stay closed except for existing abilities.

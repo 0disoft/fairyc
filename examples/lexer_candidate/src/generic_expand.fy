@@ -56,7 +56,7 @@ fn usize instance(ref u8[] source,ref mut v::Vec<syntax::Declaration> declaratio
     let usize entry_start=v::len<bodies::Entry>(entries);i=d.entry_start+1;
     while(i<=d.entry_start+d.entry_count){var usize at=0;while(at<nb && v::at<bodies::Entry>(entries,at).id!=i){at+=1;}if(at==nb){discard fail(plan,4501,call.start,call.end);return 0;}var bodies::Entry node=*v::at<bodies::Entry>(entries,at);node.id=v::len<bodies::Entry>(entries)+1;node.type_root=mapped(ref type_map,node.type_root);node.expression=mapped(ref expression_map,node.expression);if(v::len<bodies::Entry>(entries)>=1024 || !v::push<bodies::Entry>(entries,node).is_ok){discard fail(plan,4503,call.start,call.end);return 0;}set(ref mut entry_map,i,node.id);i+=1;}
     i=1;while(i<=ne){let usize target_node=get(ref expression_map,i);if(target_node!=0){var ast::Node node=*v::at<ast::Node>(expressions,target_node-1);
-        if(node.kind==12 || node.kind==14){node.left=mapped(ref statement_map,node.left);}else{node.left=mapped(ref expression_map,node.left);}
+        if(node.kind==12 || node.kind==31 || node.kind==14){node.left=mapped(ref statement_map,node.left);}else{node.left=mapped(ref expression_map,node.left);}
         if(node.kind==18){node.right=mapped(ref statement_map,node.right);}else if(node.kind==20 || node.kind==23){node.right=mapped(ref type_map,node.right);}else{node.right=mapped(ref expression_map,node.right);}
         let ref mut ast::Node cell=v::at_mut<ast::Node>(expressions,target_node-1);*cell=node;
     }i+=1;}

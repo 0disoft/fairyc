@@ -472,6 +472,28 @@ REJECTIONS[56]=[
  ('must-use-wrong-target','@must_use resource R{cleanup{}}fn i32 main(){return 0;}','E4201'),
 ]
 
+CASES[54]=[
+ ('unsafe-block','unsafe fn i32 host(i32 n){return n+1;}fn i32 main(){return unsafe{host(6)};}','',7,0),
+ ('unsafe-function','unsafe fn i32 host(){return 7;}unsafe fn i32 wrapper(){return host();}fn i32 main(){return unsafe{wrapper()};}','',7,0),
+ ('unsafe-generic','unsafe fn T id<T>(T n){return unsafe{n};}fn i32 main(){return unsafe{id<i32>(7)};}','',7,0),
+ ('unsafe-nested','unsafe fn i32 host(){return 7;}fn i32 main(){return unsafe{if(true){{host()}}else{0}};}','',7,0),
+ ('unsafe-defer','unsafe fn void host(i32 n){mark(n);}fn i32 main(){unsafe{defer host(65);mark(88);};mark(89);return 7;}','XAY',7,0),
+ ('unsafe-cleanup','unsafe fn void host(){mark(65);}resource R{cleanup{unsafe{host();};}}fn i32 main(){let R r=R{};return 7;}','A',7,0),
+ ('unsafe-must-use','@must_use unsafe fn i32 host(){return 7;}fn i32 main(){return unsafe{host()};}','',7,0),
+ ('unsafe-owner-borrow','unsafe fn i32 read(ref i32 n){return *n;}fn i32 main(){let i32 n=7;return unsafe{read(ref n)};}','',7,0),
+ ('unsafe-resource-flow','resource R{cleanup{mark(65);}}unsafe fn void take(R r){}fn i32 main(){let R r=R{};unsafe{take(r);};return 7;}','A',7,0),
+]
+REJECTIONS[54]=[
+ ('unsafe-direct-call','unsafe fn i32 host(){return 7;}fn i32 main(){return host();}','E5101'),
+ ('unsafe-call-after-block','unsafe fn i32 host(){return 7;}fn i32 main(){unsafe{discard host();};return host();}','E5101'),
+ ('unsafe-body-not-caller','unsafe fn i32 host(){return 7;}fn i32 wrapper(){return host();}fn i32 main(){return unsafe{wrapper()};}','E5101'),
+ ('unsafe-effects-independent','@effects(console)unsafe fn i32 host(){return 7;}fn i32 main(){return unsafe{host()};}','E7102'),
+ ('unsafe-must-use-tail','@must_use unsafe fn i32 host(){return 7;}fn i32 main(){unsafe{host()};return 0;}','E4202'),
+ ('unsafe-loan-conflict','fn i32 main(){var i32 n=7;let ref i32 p=ref n;unsafe{n=8;};return *p;}','E2101'),
+ ('unsafe-move-conflict','resource R{cleanup{}}unsafe fn void take(R r){}fn i32 main(){let R r=R{};unsafe{take(r);};unsafe{take(r);};return 0;}','E1101'),
+ ('unsafe-defer-outside','unsafe fn void host(i32 n){mark(n);}fn i32 main(){defer host(65);return 0;}','E5101'),
+]
+
 def sha(path): return hashlib.sha256(path.read_bytes()).hexdigest()
 def save(path, value): path.write_text(json.dumps(value, ensure_ascii=False, indent=2)+'\n', encoding='utf-8', newline='\n')
 

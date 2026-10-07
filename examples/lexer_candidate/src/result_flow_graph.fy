@@ -71,8 +71,8 @@ fn void expression(ref syntax::Parsed p,ref v::Vec<state::Slot> types,ref v::Vec
     if(id==0 || c.current==0 || c.problem.code!=0){return;}
     let e=syntax::expression_at(p,id);c.work+=1;if(depth>=64 || c.work>1048576){fail(c,10,e.start,e.end);return;}
     if(e.kind==2){discard take(p,types,columns,nodes,c,id,use);return;}
-    if(e.kind==12 || e.kind==3){let u32 child_use=if(tagged::result(state::expressions(types,id-1))){2}else{use};
-        if(e.kind==12){block(p,types,columns,nodes,c,e.left,child_use,0,depth+1);}else{expression(p,types,columns,nodes,c,e.left,child_use,depth+1);}
+    if((e.kind==12 || e.kind==31) || e.kind==3){let u32 child_use=if(tagged::result(state::expressions(types,id-1))){2}else{use};
+        if((e.kind==12 || e.kind==31)){block(p,types,columns,nodes,c,e.left,child_use,0,depth+1);}else{expression(p,types,columns,nodes,c,e.left,child_use,depth+1);}
         if(c.current!=0){discard take(p,types,columns,nodes,c,id,use);}return;
     }
     if(e.kind==30){
