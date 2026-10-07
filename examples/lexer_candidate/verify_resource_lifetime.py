@@ -28,6 +28,14 @@ CASES = {
         ('question-err', 'resource R{i32 n;cleanup{mark(this.n);}}fn Result<i32,bool> f(bool ok){let R r=R{.n=65};let Result<i32,bool> input=if(ok){.ok(7)}else{.err(true)};let i32 n=input?;mark(88);return .ok(n);}fn i32 main(){return switch(f(false)){case .ok(n):{n}case .err(e):{if(e){1}else{2}}};}', 'A', 1, 0),
         ('short-return', 'resource R{i32 n;cleanup{mark(this.n);}}fn i32 f(bool yes){let R r=R{.n=65};discard yes && {return 7;true};return 8;}fn i32 main(){return f(false)+f(true);}', 'AA', 15, 0),
         ('cleanup-local', 'resource S{cleanup{mark(83);}}resource R{cleanup{let S s=S{};mark(82);return;}}fn i32 main(){let R r=R{};return 0;}', 'RS', 0, 0),
+    ],
+    24: [
+        ('loop-fallthrough', 'resource R{i32 n;cleanup{mark(this.n);}}fn i32 main(){let R o=R{.n=79};var i32 n=0;while(n<3){let R r=R{.n=65};n+=1;}return 0;}', 'AAAO', 0, 0),
+        ('loop-continue-break', 'resource R{i32 n;cleanup{mark(this.n);}}fn i32 main(){let R o=R{.n=79};var i32 n=0;while(n<3){let R r=R{.n=65};n+=1;{let R b=R{.n=66};if(n==1){continue;}else{break;};};}mark(88);return 0;}', 'BABAXO', 0, 0),
+        ('nearest-loop', 'resource R{i32 n;cleanup{mark(this.n);}}fn i32 main(){let R o=R{.n=79};var i32 n=0;while(n<2){let R a=R{.n=65};while(true){let R b=R{.n=66};break;}mark(88);n+=1;}return 0;}', 'BXABXAO', 0, 0),
+        ('for-post-order', 'resource R{i32 n;cleanup{mark(this.n);}}fn i32 main(){for(var i32 n=0;n<2;n+=1){let R a=R{.n=65+n};continue;}return 0;}', 'AB', 0, 0),
+        ('loop-return', 'resource R{i32 n;cleanup{mark(this.n);}}fn i32 main(){let R o=R{.n=79};while(true){let R a=R{.n=65};return 7;}return 0;}', 'AO', 7, 0),
+        ('loop-zero', 'resource R{i32 n;cleanup{mark(this.n);}}fn i32 main(){let R o=R{.n=79};while(false){let R a=R{.n=65};break;}return 0;}', 'O', 0, 0),
     ]
 }
 REJECTIONS = {
@@ -38,6 +46,10 @@ REJECTIONS = {
     ],
     23: [
         ('break-live', 'resource R{cleanup{}}fn i32 main(){while(true){let R r=R{};break;}return 0;}'),
+        ('overwrite-live', 'resource R{cleanup{}}fn i32 main(){var R r=R{};r=R{};return 0;}'),
+        ('nested-field', 'resource S{cleanup{}}resource R{S s;cleanup{}}fn i32 main(){let R r=R{.s=S{}};return 0;}'),
+    ],
+    24: [
         ('overwrite-live', 'resource R{cleanup{}}fn i32 main(){var R r=R{};r=R{};return 0;}'),
         ('nested-field', 'resource S{cleanup{}}resource R{S s;cleanup{}}fn i32 main(){let R r=R{.s=S{}};return 0;}'),
     ]

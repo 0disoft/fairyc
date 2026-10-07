@@ -2730,3 +2730,8 @@ retains their individual commit/evidence identities and a bounded native smoke
 using the final images. Those historical API tests do not themselves claim
 resource execution; unit 22 supplies separate generated-C native evidence.
 Linux, performance and stage1/stage2 promotion remain later work.
+
+Unit 24 connects body and nested-scope cleanup before nearest-loop break/continue
+and before the for post statement, preserving enclosing roots. Repeated body
+construction, zero iterations, nested loop targets and return execute in both
+profiles; evidence: `candidate-resource-loop-exits-20261007.json`.

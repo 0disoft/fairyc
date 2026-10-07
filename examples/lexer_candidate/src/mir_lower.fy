@@ -336,7 +336,6 @@ fn bool statement(ref h::Program input, ref mut v::Vec<m::Local> locals, ref mut
         return true;
     }
     if (kind == 7 || kind == 8) {
-        if(lifetime::any_live(c)){discard state::fail(c,4,s.start,s.end);return false;}
         if (c.loop_depth == 0 || c.loop_ids[c.loop_depth - 1] != s.loop_target) { discard state::fail(c,4,s.start,s.end); return false; }
         let usize frame = c.loop_depth - 1;
         if (kind == 8 && c.continues[frame] == 0) {
@@ -348,6 +347,8 @@ fn bool statement(ref h::Program input, ref mut v::Vec<m::Local> locals, ref mut
         let usize target = if (kind == 7) { c.breaks[frame] } else { c.continues[frame] };
         let usize from = c.loop_defer_base[frame];
         if (!finalize::emit_deferred(blocks,edges,c,from)) { return false; }
+        let h::Statement owner=h::statement_at(input,s.loop_target);
+        if(!lifetime::exited(input,locals,blocks,operations,edges,c,h::block_at(input,owner.body).scope,s.start,s.end)){return false;}
         return state::jump(blocks,c,target,s.start,s.end);
     }
     if (kind == 5 || kind == 6) {
@@ -369,6 +370,7 @@ fn bool statement(ref h::Program input, ref mut v::Vec<m::Local> locals, ref mut
         if (!state::branch(blocks,c,condition,body,exit,s.start,s.end)) { return false; }
         if (c.loop_depth >= 64) { discard state::fail(c,2,s.start,s.end); return false; }
         let usize frame = c.loop_depth; c.loop_depth += 1;
+        let u8[1153] incoming=c.live;
         c.loop_ids[frame] = id; c.breaks[frame] = exit;
         let usize deferred_base = c.defer_count; c.loop_defer_base[frame] = deferred_base;
         c.continues[frame] = if (s.post == 0) { header } else { 0 };
@@ -386,7 +388,7 @@ fn bool statement(ref h::Program input, ref mut v::Vec<m::Local> locals, ref mut
             if (!statement(input,locals,blocks,operations,edges,payload,c,s.post,depth + 1)) { return false; }
             if (c.current != 0 && !state::jump(blocks,c,header,s.start,s.end)) { return false; }
         }
-        c.current = exit; return true;
+        c.live=incoming;c.current = exit; return true;
     }
     if (kind == 3 && h::expression_code(h::expression_at(input,s.target).kind) == 13 && h::type_code(h::expression_at(input,h::expression_at(input,s.target).left).type) == 11) {
         let target = h::expression_at(input,s.target); let u32 operator = h::operator_code(s.operator);

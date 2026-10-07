@@ -23,8 +23,9 @@ fn m::Program compiled(ref u8[] source){return switch(lower::lower(fixture::reta
     assert(m::drop_count(ref p)==1 && !m::drop_at(ref p,0).nonempty && verify::check(ref p).code==0);
     var usize drops=0;var usize i=1;while(i<=m::operation_count(ref p)){if(m::operation_at(ref p,i).kind==25){drops+=1;}i+=1;}assert(drops==1);
 }
-@test fn void loop_resource_exits_stay_closed_until_next_unit(){
-    let u32 broken=switch(lower::lower(fixture::retained(b"module main;resource R{cleanup{}}fn i32 main(){while(true){let R r=R{};break;}return 0;}"))){case .ok(_):{0}case .err(e):{e.code}};assert(broken==4);
+@test fn void loop_exits_discharge_only_body_and_nested_roots(){
+    let p=compiled(b"module main;resource R{cleanup{}}fn i32 main(){let R outer=R{};var i32 n=0;while(n<2){let R r=R{};n+=1;{let R inner=R{};if(n==1){continue;}else{break;};};}return 0;}");assert(verify::check(ref p).code==0);
+    var usize drops=0;var usize i=1;while(i<=m::operation_count(ref p)){if(m::operation_at(ref p,i).kind==25){drops+=1;}i+=1;}assert(drops==5);
 }
 @test fn void return_and_propagation_discharge_live_roots_and_preserve_donors(){
     let p=compiled(b"module main;resource R{i32 n;cleanup{}}fn R make(){return R{.n=65};}fn R id(R r){return r;}fn i32 main(){let R r=id(make());return r.n;}");assert(verify::check(ref p).code==0);
