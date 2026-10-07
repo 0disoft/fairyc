@@ -193,11 +193,14 @@ pub fn Result<Program,Problem> assemble_resources(bytes::Buffer source, bytes::B
     let usize nk = v::len<Block>(ref blocks); let usize na = v::len<usize>(ref edges); let usize ntypes = v::len<Signature>(ref signatures);
     if (ns > 32768 || np > 86016 || nf > 512 || nb > 1152 || ne > 4096 || nt > 8192 || nk > 8192 || na > 32768 || ntypes > 32768 || v::len<Drop>(ref drops)>512) { return .err(Problem { .code = 2, .start = 0, .end = ns }); }
     if (!shapes::valid(ref nominal,ns,nb)) { return .err(Problem { .code = 4, .start = 0, .end = ns }); }
+    if(!shapes::abi_valid(ref nominal,bytes::view(ref source))){return .err(Problem{.code=5102,.start=0,.end=ns});}
     var usize shape_index = 0;
     while (shape_index < shapes::count(ref nominal)) {
         let shapes::Shape shape = shapes::at(ref nominal,shape_index);
         if(tagged::builtin(shape.type) || arrays::owned(shape.type)){shape_index+=1;continue;}
         let Binding b = *v::at<Binding>(ref bindings,shape.binding - 1);
+        let usize abi_slot=shapes::abi_find(ref nominal,shape.type);
+        if(abi_slot!=0){let a=shapes::abi_at(ref nominal,abi_slot-1);if(a.name_start!=b.start || a.name_end!=b.end || a.declaration!=b.declaration){return .err(Problem{.code=5102,.start=b.start,.end=b.end});}}
         if (binding_code(b.kind) != if(resources::valid(shape.type)){8}else if(enums::valid(shape.type)){7}else{6} || type_code(b.type) != shape.type || b.declaration != (shape.type - if(resources::valid(shape.type)){98303}else if(enums::valid(shape.type)){131071}else{255}) as usize || b.signature_count != 0 || b.module_index != module_index) { return .err(Problem { .code = 4, .start = b.start, .end = b.end }); }
         shape_index += 1;
     }

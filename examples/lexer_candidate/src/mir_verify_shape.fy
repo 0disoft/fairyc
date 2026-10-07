@@ -101,6 +101,7 @@ fn bool filled(ref bytes::Buffer flags, usize first) {
 // Precondition: assemble has checked all arena indexes/ranges. No executable
 // record, call signature or checked edge is trusted merely because it links.
 pub fn m::Problem check(ref m::Program p) {
+    if(!shapes::abi_valid(m::nominal(p),m::source_view(p))){return problem(5102,0,m::source_view(p).len);}
     var bytes::Buffer params = bytes::empty(); var bytes::Buffer ops = bytes::empty();
     var bytes::Buffer edges = bytes::empty(); var bytes::Buffer signatures = bytes::empty();
     var bytes::Buffer false_constants = bytes::empty(); var v::Vec<usize> definitions = v::empty<usize>();

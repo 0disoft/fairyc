@@ -78,7 +78,10 @@ pub fn u32 render(ref h::Program p, ref mut bytes::Buffer out) {
     let ref shapes::Table nominal = h::nominal(p);
     var bool array = false; var usize id = 1; while (id <= h::binding_count(p)) { array = array || arrays::valid(h::type_code(h::binding_at(p,id).type)); id += 1; }
     id = 1; while (id <= h::expression_count(p)) { array = array || arrays::valid(h::type_code(h::expression_at(p,id).type)); id += 1; }
-    if (!put(out,if(shapes::has_resources(nominal)){b"fairyc.resource-hir/v2\nP"} else if (shapes::has_payloads(nominal)) { b"fairyc.enum-payload-hir/v1\nP" } else if (shapes::has_enums(nominal)) { b"fairyc.enum-hir/v1\nP" } else if (h::has_views(p)) { b"fairyc.view-hir/v1\nP" } else if (h::has_literals(p)) { b"fairyc.literal-hir/v1\nP" } else if (array) { b"fairyc.array-hir/v1\nP" } else if (shapes::count(nominal) == 0) { b"fairyc.scalar-hir/v1\nP" } else { b"fairyc.nominal-hir/v1\nP" }) || !number(out,h::module_index(p)) || !put(out,b"\n")) { return 3; }
+    if (!put(out,if(shapes::abi_count(nominal)!=0){b"fairyc.repr-c-hir/v1\nP"}else if(shapes::has_resources(nominal)){b"fairyc.resource-hir/v2\nP"} else if (shapes::has_payloads(nominal)) { b"fairyc.enum-payload-hir/v1\nP" } else if (shapes::has_enums(nominal)) { b"fairyc.enum-hir/v1\nP" } else if (h::has_views(p)) { b"fairyc.view-hir/v1\nP" } else if (h::has_literals(p)) { b"fairyc.literal-hir/v1\nP" } else if (array) { b"fairyc.array-hir/v1\nP" } else if (shapes::count(nominal) == 0) { b"fairyc.scalar-hir/v1\nP" } else { b"fairyc.nominal-hir/v1\nP" }) || !number(out,h::module_index(p)) || !put(out,b"\n")) { return 3; }
+    var usize abi_index=0;while(abi_index<shapes::abi_count(nominal)){let a=shapes::abi_at(nominal,abi_index);
+        if(!put(out,b"Q") || !number(out,a.type as usize) || !number(out,a.declaration) || !number(out,a.name_start) || !number(out,a.name_end) || !number(out,a.marker_start) || !number(out,a.marker_end) || !put(out,b"\n")){return 3;}abi_index+=1;
+    }
     var usize drop_index=0;while(drop_index<h::drop_count(p)){let d=h::drop_at(p,drop_index);
         if(bytes::len(out)>2097152-1024){return 4;}
         if(!put(out,b"K") || !number(out,d.type as usize) || !number(out,d.function) || !number(out,d.receiver) || !number(out,d.start) || !number(out,d.end) || !number(out,if(d.nonempty){1}else{0}) || !put(out,b"\n")){return 3;}drop_index+=1;

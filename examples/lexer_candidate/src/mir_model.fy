@@ -116,6 +116,7 @@ pub fn Result<Program,Problem> assemble_resources(bytes::Buffer source, bytes::B
     let usize nl = v::len<Local>(ref locals); let usize nb = v::len<Block>(ref blocks); let usize no = v::len<Operation>(ref operations); let usize ne = v::len<usize>(ref edges);
     if (ns > 32768 || np > 688128 || nt > 512 || nf > 512 || nl > 16384 || nb > 16384 || no > 32768 || ne > 65536 || ng > 65536) { return .err(Problem { .code = 2, .start = 0, .end = ns }); }
     if (!shapes::valid(ref nominal,ns,1152) || v::len<Drop>(ref drops)>512) { return .err(Problem { .code = 4, .start = 0, .end = ns }); }
+    if(!shapes::abi_valid(ref nominal,bytes::view(ref source))){return .err(Problem{.code=5102,.start=0,.end=ns});}
     var usize resource_count=0;var usize shape_index=0;
     while(shape_index<shapes::count(ref nominal)){let shape=shapes::at(ref nominal,shape_index);if(resources::valid(shape.type)){resource_count+=1;}
         shape_index+=1;

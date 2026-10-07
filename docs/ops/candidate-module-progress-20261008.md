@@ -127,3 +127,22 @@ validation bootstrap timed out building the enlarged release CLI. A separate
 validation-only 240-second Go driver overlay preserves the original compiler
 source bytes; the receipt records its exact compiler and overlay hashes. This
 does not resolve the production CLI timeout task (75).
+
+## Owned repr(C) permission
+
+`repr_c_declarations.fy` admits an exact single `@repr(C)` marker on nonempty
+inert structs with C identifiers and closed scalar/C-scalar/raw-pointer fields.
+Arrays, nested records, borrows, resources and tagged fields remain outside this
+lane. Marker errors use private code 5106; unsupported field lanes use 5102.
+
+`hir_shapes::Abi` retains the nominal declaration identity plus marker/name spans
+in owned source bytes. HIR publication checks the actual binding, field layout
+and marker bytes; MIR publication and verification recheck the same permission.
+This is a separate layout proof, not a caller-supplied repr flag. HIR and MIR
+observation schemas include Q rows for these records.
+
+The focused native API tests cover declaration admission, exact retained spans,
+owner teardown, HIR-to-MIR survival, missing/wrong marker bytes and forged field
+lanes. Evidence: `evidence/candidate-module-repr-20261008.json`.
+By-value foreign results and C names/layout transport are the next unit; this
+declaration unit does not claim them. Linux remains deferred.

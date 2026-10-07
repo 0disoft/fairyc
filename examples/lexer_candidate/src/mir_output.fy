@@ -18,9 +18,11 @@ pub fn u32 render(ref m::Program p, ref mut bytes::Buffer out) {
     let m::Problem problem = verify::check(p);
     if (problem.code != 0) { return problem.code; }
     let ref shapes::Table table = m::nominal(p); let bool nominal = shapes::count(table) != 0;
+    var usize abi_index=0;
     let bool array = m::has_arrays(p);
-    if (!bytes::append(out,if (shapes::has_resources(table)) { b"fairyc.resource-mir/v1\nP\t" } else if (shapes::has_payloads(table)) { b"fairyc.enum-payload-mir/v1\nP\t" } else if (shapes::has_enums(table)) { b"fairyc.enum-mir/v1\nP\t" } else if (m::has_views(p)) { b"fairyc.view-mir/v1\nP\t" } else if (m::has_literals(p)) { b"fairyc.literal-mir/v1\nP\t" } else if (array) { b"fairyc.array-mir/v1\nP\t" } else if (nominal) { b"fairyc.nominal-mir/v1\nP\t" } else { b"fairyc.scalar-mir/v1\nP\t" }).is_ok || !bytes::append_usize(out,m::module_index(p)).is_ok || !end(out)) { return 3; }
+    if (!bytes::append(out,if(shapes::abi_count(table)!=0){b"fairyc.repr-c-mir/v1\nP\t"}else if (shapes::has_resources(table)) { b"fairyc.resource-mir/v1\nP\t" } else if (shapes::has_payloads(table)) { b"fairyc.enum-payload-mir/v1\nP\t" } else if (shapes::has_enums(table)) { b"fairyc.enum-mir/v1\nP\t" } else if (m::has_views(p)) { b"fairyc.view-mir/v1\nP\t" } else if (m::has_literals(p)) { b"fairyc.literal-mir/v1\nP\t" } else if (array) { b"fairyc.array-mir/v1\nP\t" } else if (nominal) { b"fairyc.nominal-mir/v1\nP\t" } else { b"fairyc.scalar-mir/v1\nP\t" }).is_ok || !bytes::append_usize(out,m::module_index(p)).is_ok || !end(out)) { return 3; }
     var usize index = 0;
+    while(abi_index<shapes::abi_count(table)){let a=shapes::abi_at(table,abi_index);let usize[20] proof=[a.type as usize,a.declaration,a.name_start,a.name_end,a.marker_start,a.marker_end,0,0,0,0,0,0,0,0,0,0,0,0,0,0];if(!row(out,b"Q",proof,6) || !end(out)){return 3;}abi_index+=1;}
     while(index<m::drop_count(p)){let d=m::drop_at(p,index);let usize[20] fields=[d.type as usize,d.target,if(d.nonempty){1}else{0},0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];if(!row(out,b"K",fields,3) || !end(out)){return 3;}index+=1;}index=0;
     while (index < shapes::count(table)) {
         let shapes::Shape shape = shapes::at(table,index);

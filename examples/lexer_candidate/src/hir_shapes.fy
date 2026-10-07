@@ -10,14 +10,46 @@ import literal_types as literals;
 import nominal_identity as nominal;
 import resource_identity as resources;
 import resource_properties as properties;
+import ffi_symbols as ffi;
+import std::bytes as bytes;
 import std::vec as v;
 
 // Source-independent nominal layout facts. Field IDs are one-based; shape type
 // IDs preserve 256 + declaration index. Every name/span indexes owned HIR bytes.
 pub struct Shape { u32 type; usize binding; usize field_start; usize field_count; bool public; }
 pub struct Field { u32 owner; u32 type; usize start; usize end; usize payload_start; usize payload_count; }
-pub resource Table { v::Vec<Shape> shapes; v::Vec<Field> fields; cleanup { } }
-pub fn Table empty() { return Table { .shapes = v::empty<Shape>(), .fields = v::empty<Field>() }; }
+pub struct Abi {u32 type;usize declaration;usize name_start;usize name_end;usize marker_start;usize marker_end;}
+pub resource Table { v::Vec<Shape> shapes; v::Vec<Field> fields;v::Vec<Abi> abi; cleanup { } }
+pub fn Table empty() { return Table { .shapes = v::empty<Shape>(), .fields = v::empty<Field>(),.abi=v::empty<Abi>() }; }
+pub fn usize abi_count(ref Table p){return v::len<Abi>(ref p.abi);}
+pub fn Abi abi_at(ref Table p,usize index){return *v::at<Abi>(ref p.abi,index);}
+pub fn usize abi_find(ref Table p,u32 type){var usize i=0;while(i<abi_count(p)){if(abi_at(p,i).type==type){return i+1;}i+=1;}return 0;}
+pub fn bool abi_field(u32 type){return type>=1 && type<=6 || c_types::valid(type) || pointers::valid(type);}
+fn usize abi_trivia(ref u8[] input,usize index){var usize i=index;while(i<input.len){
+    if(input[i]==9 || input[i]==10 || input[i]==13 || input[i]==32){i+=1;continue;}
+    if(i+1<input.len && input[i]==47 && input[i+1]==47){i+=2;while(i<input.len && input[i]!=10){i+=1;}continue;}
+    if(i+1<input.len && input[i]==47 && input[i+1]==42){i+=2;while(i+1<input.len && !(input[i]==42 && input[i+1]==47)){i+=1;}if(i+1>=input.len){return input.len+1;}i+=2;continue;}
+    break;
+}return i;}
+fn bool abi_marker(ref u8[] input){var usize i=abi_trivia(input,0);var usize part=0;while(part<5){
+    let token=if(part==0){b"@"}else if(part==1){b"repr"}else if(part==2){b"("}else if(part==3){b"C"}else{b")"};
+    if(i>input.len || token.len>input.len-i || !bytes::equal(input[i..i+token.len],token)){return false;}i=abi_trivia(input,i+token.len);part+=1;
+}return i==input.len;}
+// ABI permission is tied to owned declaration/name/attribute bytes and a
+// rechecked closed field layout, never a caller-supplied boolean by itself.
+pub fn bool abi_valid(ref Table p,ref u8[] source){
+    if(abi_count(p)>count(p)){return false;}var usize i=0;
+    while(i<abi_count(p)){let a=abi_at(p,i);let usize slot=find(p,a.type);
+        if(!nominal::valid(a.type) || slot==0 || a.declaration!=(a.type-255) as usize || a.name_start>=a.name_end || a.name_end>source.len || a.marker_start>=a.marker_end || a.marker_end>a.name_start){return false;}
+        if(!ffi::valid(source[a.name_start..a.name_end]) || !abi_marker(source[a.marker_start..a.marker_end])){return false;}
+        let s=at(p,slot-1);if(s.field_count==0 || s.field_start>field_count(p) || s.field_count>field_count(p)-s.field_start){return false;}
+        var usize j=0;while(j<i){let old=abi_at(p,j);if(old.type==a.type || bytes::equal(source[old.name_start..old.name_end],source[a.name_start..a.name_end])){return false;}j+=1;}
+        j=0;while(j<s.field_count){let f=field_at(p,s.field_start+j+1);
+            if(f.owner!=a.type || f.start>=f.end || f.end>source.len || !abi_field(f.type) || !ffi::valid(source[f.start..f.end])){return false;}
+            var usize k=0;while(k<j){let old=field_at(p,s.field_start+k+1);if(bytes::equal(source[old.start..old.end],source[f.start..f.end])){return false;}k+=1;}j+=1;
+        }i+=1;
+    }return true;
+}
 pub fn usize count(ref Table p) { return v::len<Shape>(ref p.shapes); }
 pub fn bool has_enums(ref Table p) { var usize i=0;while(i<count(p)){if(enums::valid(at(p,i).type)){return true;}i+=1;}return false; }
 pub fn bool has_payloads(ref Table p) { var usize i=1;while(i<=field_count(p)){if(field_at(p,i).payload_count!=0){return true;}i+=1;}return false; }
@@ -105,11 +137,13 @@ pub fn bool valid(ref Table p, usize source_bytes, usize bindings) {
     var u8[512] colors = [0;512]; i = 0;
     while (i < count(p)) { if (!visit(p,i,ref mut colors[..],0)) { return false; } i += 1; } return true;
 }
-pub fn Table assemble(v::Vec<Shape> shapes, v::Vec<Field> fields) { return Table { .shapes, .fields }; }
+pub fn Table assemble(v::Vec<Shape> shapes, v::Vec<Field> fields) { return Table { .shapes, .fields,.abi=v::empty<Abi>() }; }
+pub fn Table assemble_abi(v::Vec<Shape> shapes,v::Vec<Field> fields,v::Vec<Abi> abi){return Table{.shapes,.fields,.abi};}
 pub fn Result<Table,u32> copy(ref Table p) {
     var v::Vec<Shape> records = v::empty<Shape>(); var v::Vec<Field> fields = v::empty<Field>();
     var usize i = 0;
     while (i < count(p)) { if (!v::push<Shape>(ref mut records,at(p,i)).is_ok) { return .err(3); } i += 1; }
     i = 1; while (i <= field_count(p)) { if (!v::push<Field>(ref mut fields,field_at(p,i)).is_ok) { return .err(3); } i += 1; }
-    return .ok(assemble(records,fields));
+    var v::Vec<Abi> abi=v::empty<Abi>();i=0;while(i<abi_count(p)){if(!v::push<Abi>(ref mut abi,abi_at(p,i)).is_ok){return .err(3);}i+=1;}
+    return .ok(assemble_abi(records,fields,abi));
 }

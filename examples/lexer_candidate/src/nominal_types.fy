@@ -10,6 +10,7 @@ import literal_types as literals;
 import syntax as syntax;
 import nominal_identity as identity;
 import resource_identity as resources;
+import repr_c_declarations as repr;
 import type_state as state;
 import std::bytes as bytes;
 
@@ -93,6 +94,7 @@ pub fn state::Problem validate(ref syntax::Parsed p) {
     var u8[512] colors = [0;512]; var usize i = 0;
     while (i < syntax::declaration_count(p)) {
         let syntax::Declaration d = syntax::declaration_at(p,i);
+        if(d.kind==4){let representation=repr::read(p,i);if(representation.repr_c && !repr::layout(p,i)){return state::fail(5102,d.start,d.end,0,0);}}
         if (d.kind == 4 || d.kind==6) { let state::Problem problem = visit(p,i,ref mut colors[..],0); if (problem.code != 0) { return problem; } } i += 1;
     }
     return state::ok();

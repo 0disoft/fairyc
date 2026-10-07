@@ -122,7 +122,7 @@ def main():
     parser.add_argument("--images", type=Path, nargs="+")
     parser.add_argument("--native-runner", type=Path)
     parser.add_argument("--bootstrap-receipt", type=Path)
-    parser.add_argument("--phase", choices=("join", "program", "cli"), required=True)
+    parser.add_argument("--phase", choices=("join", "program", "cli", "repr"), required=True)
     args = parser.parse_args()
     if args.phase == "cli":
         if not args.images or len(args.images) != 2 or not args.native_runner or not args.compiler:
@@ -150,15 +150,20 @@ def main():
         return result
 
     run([compiler, "check"])
-    test = ("tests::module_ast_join::joined_arenas_remap_ids_spans_and_tokens"
-            if args.phase == "join" else
-            "tests::module_program::nominal_module_consumers_keep_identity_and_privacy")
+    tests = (["tests::module_ast_join::joined_arenas_remap_ids_spans_and_tokens"]
+             if args.phase == "join" else
+             ["tests::repr_c_declarations::repr_c_declaration_native_contract",
+              "tests::repr_c_shapes::owned_repr_c_layout_survives_hir_and_mir"]
+             if args.phase == "repr" else
+             ["tests::module_program::nominal_module_consumers_keep_identity_and_privacy"])
     for release in (False, True):
-        argv = [compiler, "test", "--native", "--locked", "--exact", test, "--json"]
+        argv = [compiler, "test", "--native", "--locked", "--json"]
+        for test in tests:
+            argv.extend(["--exact", test])
         if release:
             argv.append("--release")
         report = json.loads(run(argv).stdout)
-        assert report["count"] == 1 and report["passed"] == 1 and report["status"] == "ok"
+        assert report["count"] == len(tests) and report["passed"] == len(tests) and report["status"] == "ok"
 
     def digest(path):
         return dict(path=str(path.relative_to(ROOT)),
@@ -167,8 +172,10 @@ def main():
     evidence = dict(schema="fairyc.candidate-module-" + args.phase + "/v1",
                     passed=True, bootstrap=digest(compiler), validation=rows,
                     sources=[digest(p) for p in sorted((PROJECT / "src").glob("*.fy"))],
-                    tests=digest(PROJECT / "tests" / ("module_ast_join.fy" if
-                                 args.phase == "join" else "module_program.fy")),
+                    tests=([digest(PROJECT / "tests" / "repr_c_declarations.fy"),
+                            digest(PROJECT / "tests" / "repr_c_shapes.fy")]
+                           if args.phase == "repr" else digest(PROJECT / "tests" /
+                           ("module_ast_join.fy" if args.phase == "join" else "module_program.fy"))),
                     lock=digest(PROJECT / "fairy.lock"),
                     limits=["bounded private candidate source-set API",
                             "SDK and generic import admission pending", "Linux deferred"])

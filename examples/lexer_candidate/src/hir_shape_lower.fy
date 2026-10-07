@@ -6,6 +6,7 @@ import type_check as typing;
 import nominal_types as nominal;
 import name_resolution as names;
 import syntax as syntax;
+import repr_c_declarations as repr;
 import std::vec as v;
 
 pub fn Result<shapes::Table,u32> collect(ref typing::Typed input) {
@@ -13,6 +14,7 @@ pub fn Result<shapes::Table,u32> collect(ref typing::Typed input) {
     let ref syntax::Parsed parsed = names::parsed(resolved);
     var v::Vec<shapes::Shape> records = v::empty<shapes::Shape>();
     var v::Vec<shapes::Field> fields = v::empty<shapes::Field>();
+    var v::Vec<shapes::Abi> abi=v::empty<shapes::Abi>();
     var usize index = 0;
     while (index < syntax::declaration_count(parsed)) {
         let syntax::Declaration d = syntax::declaration_at(parsed,index);
@@ -24,6 +26,8 @@ pub fn Result<shapes::Table,u32> collect(ref typing::Typed input) {
             }
             if (binding == 0 || d.field_start != v::len<shapes::Field>(ref fields)) { return .err(4); }
             let u32 owner = typing::symbol_type(input,binding);
+            let permission=repr::read(parsed,index);
+            if(permission.repr_c && !v::push<shapes::Abi>(ref mut abi,shapes::Abi{.type=owner,.declaration=index+1,.name_start=d.name_start,.name_end=d.name_end,.marker_start=permission.start,.marker_end=permission.end}).is_ok){return .err(3);}
             if (!v::push<shapes::Shape>(ref mut records,shapes::Shape { .type = owner, .binding, .field_start = d.field_start, .field_count = d.field_count, .public = d.public }).is_ok) { return .err(3); }
             var usize j = 0;
             while (j < d.field_count) {
@@ -47,5 +51,5 @@ pub fn Result<shapes::Table,u32> collect(ref typing::Typed input) {
         index+=1;
     }
     let u32 array_code=arrays::collect(input,ref mut records,ref mut fields);if(array_code!=0){return .err(array_code);}
-    return .ok(shapes::assemble(records,fields));
+    return .ok(shapes::assemble_abi(records,fields,abi));
 }
