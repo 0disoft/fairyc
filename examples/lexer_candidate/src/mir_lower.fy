@@ -332,6 +332,7 @@ fn bool statement(ref h::Program input, ref mut v::Vec<m::Local> locals, ref mut
         if(!lifetime::exited(input,locals,blocks,operations,edges,c,h::block_at(input,owner.body).scope,s.start,s.end)){return false;}
         return state::jump(blocks,c,target,s.start,s.end);
     }
+    if(kind==12){let e=h::expression_at(input,s.expression);let usize binding=e.binding;let usize local=c.locals[binding];if(h::expression_code(e.kind)!=24 || local==0 || c.live[binding]==0){discard state::fail(c,4,s.start,s.end);return false;}c.live[binding]=0;state::release(c,local);let u32 type=h::type_code(e.type);return state::emit(operations,blocks,c,state::operation(27,0,type,type,0,local,0,s.start,s.end))!=0;}
     if (kind == 5 || kind == 6) {
         if (s.initial != 0 && !statement(input,locals,blocks,operations,edges,payload,c,s.initial,depth + 1)) { return false; }
         if (c.current == 0 || c.problem.code != 0) { return c.problem.code == 0; }
@@ -477,7 +478,7 @@ pub fn Result<m::Program,m::Problem> lower(h::Program input) {
     var v::Vec<m::Function> functions = v::empty<m::Function>(); var v::Vec<m::Local> locals = v::empty<m::Local>();
     var v::Vec<m::Block> blocks = v::empty<m::Block>(); var v::Vec<m::Operation> operations = v::empty<m::Operation>(); var v::Vec<usize> edges = v::empty<usize>();
     if (!targets_lower::prepare(ref input,ref mut targets,ref mut signatures,ref mut c)) { return .err(c.problem); }
-    var usize dropping=0;while(dropping<h::drop_count(ref input)){let d=h::drop_at(ref input,dropping);if(!v::push<m::Drop>(ref mut drops,m::Drop{.type=d.type,.target=if(d.nonempty){c.targets[d.function]}else{0},.nonempty=d.nonempty}).is_ok){return .err(m::Problem{.code=3,.start=d.start,.end=d.end});}dropping+=1;}
+    var usize dropping=0;while(dropping<h::drop_count(ref input)){let d=h::drop_at(ref input,dropping);if(!v::push<m::Drop>(ref mut drops,m::Drop{.abilities=d.abilities,.type=d.type,.target=if(d.nonempty){c.targets[d.function]}else{0},.nonempty=d.nonempty}).is_ok){return .err(m::Problem{.code=3,.start=d.start,.end=d.end});}dropping+=1;}
     if (!bytes::append(ref mut source,h::source_view(ref input)).is_ok) { return .err(m::Problem { .code = 3, .start = 0, .end = 0 }); }
     var usize index = 0;
     while (index < h::function_count(ref input)) {

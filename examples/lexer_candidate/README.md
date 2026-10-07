@@ -2754,3 +2754,10 @@ nearest continue; later declared arm resources clean first. Source-order tempora
 metadata uses bounded u32 storage, avoiding the development stack overflow found
 in the larger representation. Direct `old=make()?` success/failure now execute.
 Partial field moves and resource fixed arrays keep their existing rejection.
+
+Unit 28 admits the closed drop/store/key attribute and explicit bare-local burn.
+No-drop obligations follow nested resources and Option/Result through normal,
+return, loop and overwrite edges. Burn has a distinct verified MIR operation 27
+and emits no cleanup call. Direct no-drop resources with owned fields, wrappers,
+temporary operands, droppable operands and repeated consumption remain rejected.
+External-module resource identity stays closed until module integration.

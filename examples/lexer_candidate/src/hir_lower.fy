@@ -1,4 +1,5 @@
 module hir_lower;
+import resource_abilities as abilities;
 import hir_model as h;
 import tagged_types as tagged;
 import hir_view_check as views;
@@ -234,7 +235,7 @@ fn usize statement(ref typing::Typed input, ref v::Vec<h::Binding> bindings, ref
     if (id > syntax::statement_count(parsed)) { return state::fail(c,4,0,0); }
     let syntax::Statement source = syntax::statement_at(parsed,id);
     if (depth >= 64) { return state::fail(c,2,source.start,source.end); }
-    let h::StatementKind kind = if (source.kind == 2) { .Binding } else if (source.kind == 3) { .Return } else if (source.kind == 4) { .Assignment } else if (source.kind == 8) { .While } else if (source.kind == 14) { .For } else if (source.kind == 9) { .Break } else if (source.kind == 10) { .Continue } else if (source.kind == 11) { .Assert } else if (source.kind == 12) { .Discard } else if (source.kind == 13) { .Defer } else { .Expression };
+    let h::StatementKind kind = if (source.kind == 2) { .Binding } else if (source.kind == 3) { .Return } else if (source.kind == 4) { .Assignment } else if (source.kind == 8) { .While } else if (source.kind == 14) { .For } else if (source.kind == 9) { .Break } else if (source.kind == 10) { .Continue } else if (source.kind == 11) { .Assert } else if (source.kind == 12) { .Discard } else if (source.kind == 13) { .Defer } else if(source.kind==16){.Burn}else { .Expression };
     let h::Operator operator = if (source.kind == 4) { state::operator(syntax::assignment_operator(parsed,id)) } else { .None };
     var h::Statement s = h::Statement { .kind, .start = source.start, .end = source.end, .scope = state::scope(c), .expression = 0, .target = 0, .binding = 0, .operator, .body = 0, .initial = 0, .post = 0, .loop_target = 0 };
     let usize result = state::push_statement(statements,s,c); if (result == 0) { return 0; }
@@ -252,7 +253,7 @@ fn usize statement(ref typing::Typed input, ref v::Vec<h::Binding> bindings, ref
         if (h::operator_code(s.operator) == h::operator_code(.None)) { return state::fail(c,4,s.start,s.end); }
         s.target = expression(input,bindings,links,c,expressions,statements,blocks,edges,payload,source.target,depth + 1);
         s.expression = expression(input,bindings,links,c,expressions,statements,blocks,edges,payload,source.expression,depth + 1);
-    } else if (source.kind == 6 || source.kind == 11 || source.kind == 12 || source.kind == 13) {
+    } else if (source.kind == 6 || source.kind == 11 || source.kind == 12 || source.kind == 13 || source.kind==16) {
 
         s.expression = expression(input,bindings,links,c,expressions,statements,blocks,edges,payload,source.expression,depth + 1);
     } else if (source.kind == 9 || source.kind == 10) {
@@ -347,7 +348,7 @@ pub fn Result<h::Program,h::Problem> lower(typing::Typed input, usize module_ind
             if (!v::push<h::Function>(ref mut functions,h::Function { .binding = c.owner, .start = if(drop_body){d.cleanup_start}else{d.start}, .end = if(drop_body){d.cleanup_end}else{d.end}, .scope, .public = !drop_body && d.public, .body, .parameter_start = start, .parameter_count = count }).is_ok) { return .err(h::Problem { .code = 3, .start = d.start, .end = d.end }); }
         } else if (d.kind != 1 && d.kind != 2 && d.kind != 4 && d.kind != 6 && d.kind != 11) { return .err(h::Problem { .code = 4, .start = d.start, .end = d.end }); }
         if(d.kind==6){let u32 type=98303+typing_ids::small_id(i+1);
-            if(!v::push<h::Drop>(ref mut drops,h::Drop{.type,.function=if(drop_body){c.owner}else{0},.receiver,.start=d.cleanup_start,.end=d.cleanup_end,.nonempty=drop_body}).is_ok){return .err(h::Problem{.code=3,.start=d.start,.end=d.end});}
+            if(!v::push<h::Drop>(ref mut drops,h::Drop{.abilities=abilities::mask(parsed,i),.type,.function=if(drop_body){c.owner}else{0},.receiver,.start=d.cleanup_start,.end=d.cleanup_end,.nonempty=drop_body}).is_ok){return .err(h::Problem{.code=3,.start=d.start,.end=d.end});}
         }
         i += 1;
     }

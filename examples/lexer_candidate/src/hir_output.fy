@@ -51,7 +51,7 @@ fn bool statement_kind(ref mut bytes::Buffer out, h::StatementKind kind) {
         case .Assignment: { put(out,b"assignment") } case .Expression: { put(out,b"expression") }
         case .While: { put(out,b"while") } case .For: { put(out,b"for") }
         case .Break: { put(out,b"break") } case .Continue: { put(out,b"continue") }
-        case .Assert: { put(out,b"assert") } case .Discard: { put(out,b"discard") } case .Defer: { put(out,b"defer") }
+        case .Assert: { put(out,b"assert") } case .Discard: { put(out,b"discard") } case .Defer: { put(out,b"defer") } case .Burn: { put(out,b"burn") }
     };
 }
 fn bool operator(ref mut bytes::Buffer out, h::Operator op) {

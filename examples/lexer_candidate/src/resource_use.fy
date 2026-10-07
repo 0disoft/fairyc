@@ -35,7 +35,7 @@ fn void expression(ref syntax::Parsed p,ref mut v::Vec<state::Slot> tables,ref m
 fn void statement(ref syntax::Parsed p,ref mut v::Vec<state::Slot> tables,ref mut Context c,usize id,usize depth){
     if(id==0 || c.problem.code!=0){return;}let s=syntax::statement_at(p,id);
     if(depth>=64){fail(c,10,s.start,s.end);return;}
-    if(s.kind==2 || s.kind==3 || s.kind==12){expression(p,tables,c,s.expression,true,depth+1);return;}
+    if(s.kind==2 || s.kind==3 || s.kind==12 || s.kind==16){expression(p,tables,c,s.expression,true,depth+1);return;}
     if(s.kind==4){
         // A resource root replacement consumes the RHS before installing the
         // target; its target is a place, not a second consuming expression.

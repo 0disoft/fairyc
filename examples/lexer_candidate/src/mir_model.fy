@@ -1,4 +1,5 @@
 module mir_model;
+import tagged_encoding as tagged;
 import array_types as arrays;
 import literal_types as literals;
 import std::bytes as bytes;
@@ -19,7 +20,7 @@ pub struct Signature { u32 type; }
 pub struct Target { usize binding; usize module_index; usize declaration; u32 result; usize signature_start; usize signature_count; usize start; usize end; bool external; }
 pub struct Function { usize target; usize entry; usize local_start; usize local_count; usize block_start; usize block_count; usize parameter_start; usize parameter_count; usize start; usize end; bool public; }
 pub struct Local { usize function; usize binding; u32 type; bool parameter; bool mutable; usize start; usize end; }
-pub struct Drop { u32 type; usize target; bool nonempty; }
+pub struct Drop { u32 abilities; u32 type; usize target; bool nonempty; }
 // Operation kinds: 1 constant, 2 copy/assignment, 3 unary, 4 binary, 5 check,
 // 6 construct (declaration-order operands), 7 field read, 8 functional update.
 // 9 array construct (boolean means repeat once), 10 indexed read, 11 array
@@ -56,6 +57,10 @@ pub resource Program {
 pub fn usize target_count(ref Program p) { assert(p.success); return v::len<Target>(ref p.targets); }
 pub fn usize drop_count(ref Program p) { assert(p.success); return v::len<Drop>(ref p.drops); }
 pub fn Drop drop_at(ref Program p,usize index) { assert(index<drop_count(p)); return *v::at<Drop>(ref p.drops,index); }
+pub fn bool burnable(ref Program p,u32 type){let usize at=drop_index(p,type);if(at==0 || (drop_at(p,at-1).abilities&1)!=0){return false;}let sh=shapes::at(nominal(p),shapes::find(nominal(p),type)-1);var usize i=0;while(i<sh.field_count){if(shapes::needs_drop(shapes::field_at(nominal(p),sh.field_start+i+1).type)){return false;}i+=1;}return true;}
+pub fn bool may_drop(ref Program p,u32 type,usize depth){if(depth>=64){return false;}if(!shapes::needs_drop(type)){return true;}
+    if(tagged::option(type)){return may_drop(p,tagged::inner(type),depth+1);}if(tagged::result(type)){return may_drop(p,tagged::success(type),depth+1) && may_drop(p,tagged::failure(type),depth+1);}
+    let usize at=drop_index(p,type);if(at==0 || (drop_at(p,at-1).abilities&1)==0){return false;}let sh=shapes::at(nominal(p),shapes::find(nominal(p),type)-1);var usize i=0;while(i<sh.field_count){if(!may_drop(p,shapes::field_at(nominal(p),sh.field_start+i+1).type,depth+1)){return false;}i+=1;}return true;}
 pub fn usize drop_index(ref Program p,u32 type) { var usize i=0;while(i<drop_count(p)){if(drop_at(p,i).type==type){return i+1;}i+=1;}return 0; }
 pub fn bool drop_target(ref Program p,usize target) {var usize i=0;while(i<drop_count(p)){if(drop_at(p,i).target!=0 && drop_at(p,i).target==target){return true;}i+=1;}return false;}
 pub fn usize drop_receiver(ref Program p,usize function) {let f=function_at(p,function);return if(drop_target(p,f.target)){edge_at(p,f.parameter_start)}else{0};}
@@ -162,8 +167,8 @@ pub fn Result<Program,Problem> assemble_resources(bytes::Buffer source, bytes::B
     i = 0;
     while (i < no) {
         let Operation o = *v::at<Operation>(ref operations,i);
-        if (o.function == 0 || o.function > nf || o.block == 0 || o.block > nb || o.kind < 1 || o.kind > 26 || o.result > nl || o.left > nl || o.right > nl || o.next > no || (o.next != 0 && o.next <= i + 1) || o.start >= o.end || o.end > ns || o.payload_start > o.payload_end || o.payload_end > np || o.argument_start > ne || o.argument_count > ne - o.argument_start || v::at<Block>(ref blocks,o.block - 1).function != o.function) { return .err(Problem { .code = 4, .start = o.start, .end = o.end }); }
-        if ((o.kind != 5 && o.kind != 20 && o.kind!=25 && o.kind!=26 && (o.result == 0 || !shapes::valid_type(ref nominal,o.type,false))) || ((o.kind == 5 || o.kind == 20 || o.kind==25 || o.kind==26) && o.result != 0)) { return .err(Problem { .code = 4, .start = o.start, .end = o.end }); } i += 1;
+        if (o.function == 0 || o.function > nf || o.block == 0 || o.block > nb || o.kind < 1 || o.kind > 27 || o.result > nl || o.left > nl || o.right > nl || o.next > no || (o.next != 0 && o.next <= i + 1) || o.start >= o.end || o.end > ns || o.payload_start > o.payload_end || o.payload_end > np || o.argument_start > ne || o.argument_count > ne - o.argument_start || v::at<Block>(ref blocks,o.block - 1).function != o.function) { return .err(Problem { .code = 4, .start = o.start, .end = o.end }); }
+        if ((o.kind != 5 && o.kind != 20 && o.kind!=25 && o.kind!=26 && o.kind!=27 && (o.result == 0 || !shapes::valid_type(ref nominal,o.type,false))) || ((o.kind == 5 || o.kind == 20 || o.kind==25 || o.kind==26 || o.kind==27) && o.result != 0)) { return .err(Problem { .code = 4, .start = o.start, .end = o.end }); } i += 1;
     }
     return .ok(Program { .nominal, .drops, .source, .payload, .targets, .signatures, .functions, .locals, .blocks, .operations, .edges, .module_index, .success = true });
 }

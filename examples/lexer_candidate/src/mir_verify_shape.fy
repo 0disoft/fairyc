@@ -50,9 +50,11 @@ fn bool integer(ref u8[] text, u32 type) {
     return true;
 }
 fn bool operation(ref m::Program p, usize id, m::Operation o) {
-    if(o.kind==24 || o.kind==25 || o.kind==26){
+    if(o.kind==24 || o.kind==25 || o.kind==26 || o.kind==27){
         if(!shapes::needs_drop(o.type) || o.owner_type!=o.type || o.operator!=0 || o.right!=0 || o.argument_start!=0 || o.argument_count!=0 || o.payload_start!=0 || o.payload_end!=0 || o.boolean || !local(p,o.left,o.function,o.type)){return false;}
         if(o.kind==24){return o.result!=o.left && local(p,o.result,o.function,o.type);}
+        if(o.kind==27){return o.result==0 && m::burnable(p,o.type);}
+        if(!m::may_drop(p,o.type,0)){return false;}
         if(o.kind==26){return o.result==0 && shapes::valid_type(m::nominal(p),o.type,false);}
         let usize at=m::drop_index(p,o.type);return o.result==0 && at!=0 && !m::drop_at(p,at-1).nonempty;
     }

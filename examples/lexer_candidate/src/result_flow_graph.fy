@@ -132,12 +132,14 @@ fn void statement(ref syntax::Parsed p,ref v::Vec<state::Slot> types,ref v::Vec<
         let usize col=column(columns,if(s.kind==2){state::entries(types,s.entry-1)}else{state::uses(types,s.target-1)});
         if(col!=0 && c.current!=0){let e=syntax::expression_at(p,s.expression);if(s.kind==4){discard emit(nodes,c,3,col,s.start,s.end);}discard emit(nodes,c,2,col,e.start,e.end);}return;
     }
+    if(s.kind==16){expression(p,types,columns,nodes,c,s.expression,4,depth+1);return;}
     if(s.kind==3){expression(p,types,columns,nodes,c,s.expression,4,depth+1);discard emit(nodes,c,5,0,s.start,s.end);c.current=0;return;}
     if(s.kind==9 || s.kind==10){
         if(c.loops==0){fail(c,13,s.start,s.end);return;}let usize frame=c.loops-1;var usize scope=c.loop_base[frame];
         while(scope<c.scope_depth){let usize scope_id=c.scopes[scope];leave(p,types,columns,nodes,c,scope_id);scope+=1;}
         loop_edge(nodes,c,frame);let usize destination=if(s.kind==9){c.breaks[frame]}else{c.continues[frame]};jump(nodes,c,destination);return;
     }
+    if(s.kind==11 && syntax::expression_at(p,s.expression).kind==1 && bytes::equal(syntax::expression_text(p,s.expression),b"false")){c.current=0;return;}
     if(s.kind==8 || s.kind==14){
         let header=syntax::statement_at(p,if(s.kind==14){s.second}else{id});
         if(s.kind==14){statement(p,types,columns,nodes,c,header.first,depth+1);}
@@ -171,6 +173,7 @@ fn Result<Graph,state::Problem> build_kind(ref names::Resolved resolved,ref v::V
     return .ok(Graph{.nodes,.columns,.width});
 }
 pub fn usize count(ref Graph p){return v::len<Node>(ref p.nodes);}
+pub fn usize root_column(ref Graph p,usize symbol){return column(ref p.columns,symbol);}
 pub fn usize width(ref Graph p){return p.width;}
 pub fn Node at(ref Graph p,usize id){return *v::at<Node>(ref p.nodes,id-1);}
 

@@ -1,5 +1,10 @@
 # Drop Elaboration v0
 
+The Fairy candidate's unit 28 carries static ability masks into its owned HIR/MIR.
+Implicit drop paths reject recursive no-drop values. Private operation 27 is Burn:
+it consumes one authorized direct no-drop root and invokes no user cleanup or field
+glue. This candidate transport tag is separate from the Go MIR operation enum.
+
 - Status: Draft Stage 0 contract
 - MIR source: `docs/mir/mir-v0.md`
 - Language source: `docs/language/0001-values-and-resources.md`

@@ -29,7 +29,7 @@ fn u32 program(u32 mutation,bool body){
     if(body){var m::Block exit=state::block(1,0,1);exit.kind=1;assert(v::push<m::Block>(ref mut blocks,exit).is_ok);var m::Block drop_body=state::block(2,0,1);drop_body.kind=1;
         if(mutation==12){var m::Operation recur=op(25,0,3);recur.function=2;recur.block=3;assert(v::push<m::Operation>(ref mut operations,recur).is_ok);drop_body.first=3;drop_body.last=3;}
         assert(v::push<m::Block>(ref mut blocks,drop_body).is_ok);}
-    var v::Vec<m::Drop> drops=v::empty<m::Drop>();let m::Drop d=m::Drop{.type=98304,.target=if(body){2}else{0},.nonempty=body || mutation==6};
+    var v::Vec<m::Drop> drops=v::empty<m::Drop>();let m::Drop d=m::Drop{.abilities=1,.type=98304,.target=if(body){2}else{0},.nonempty=body || mutation==6};
     if(mutation!=7){assert(v::push<m::Drop>(ref mut drops,d).is_ok);}if(mutation==8){assert(v::push<m::Drop>(ref mut drops,d).is_ok);}
     let p=switch(m::assemble_resources(source,bytes::empty(),targets,signatures,functions,locals,blocks,operations,edges,0,table,drops)){case .ok(value):{value}case .err(e):{return e.code;}};
     return verify::check(ref p).code;

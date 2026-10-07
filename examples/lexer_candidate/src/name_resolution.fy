@@ -170,7 +170,7 @@ fn Problem statement(ref syntax::Parsed parsed, ref mut Context context, usize i
         if (value.code != 0) { return value; }
         return local(parsed,context,entry,item.entry,symbols);
     }
-    if (item.kind == 3 || item.kind == 4 || item.kind == 6 || item.kind == 11 || item.kind == 12 || item.kind == 13) {
+    if (item.kind == 3 || item.kind == 4 || item.kind == 6 || item.kind == 11 || item.kind == 12 || item.kind == 13 || item.kind==16) {
         if (item.kind == 4) {
             if (syntax::expression_at(parsed,item.target).kind != 2 && syntax::expression_at(parsed,item.target).kind != 8 && syntax::expression_at(parsed,item.target).kind != 9) { return fail(3,item.start,item.end); }
             let Problem target = expression(parsed,context,item.target,depth,symbols,references);
@@ -238,7 +238,7 @@ fn Problem collect(ref syntax::Parsed parsed, ref mut Context context, ref mut v
     while (index < syntax::declaration_count(parsed)) {
         let syntax::Declaration item = syntax::declaration_at(parsed,index);
         if (item.kind != 1 && !(context.modules && item.kind == 2)) {
-            if ((item.kind != 3 && item.kind != 4 && item.kind != 6 && item.kind != 11) || item.owner_end != 0 || item.unsafe_end != 0 || item.attribute_count != 0 ||
+            if ((item.kind != 3 && item.kind != 4 && item.kind != 6 && item.kind != 11) || item.owner_end != 0 || item.unsafe_end != 0 || (item.attribute_count != 0 && item.kind!=6) ||
                 item.generic_parameters != 0 || (item.kind == 3 && !scalar_type(parsed,item.result_type,true))) { return fail(3,item.start,item.end); }
             // Effects/attributes remain closed until their own implementation.
             if(item.kind==6 && (item.cleanup_body==0 || item.cleanup_attribute_count!=0)){return fail(3,item.start,item.end);}

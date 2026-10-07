@@ -44,6 +44,10 @@ integration remain later numbered work; these rows do not claim them complete.
 
 ## Requested sequence closure
 
+Unit 28 implements static resource abilities and bounded explicit burn in the
+Fairy candidate. Its source, compiler identities and normal/error native evidence
+are retained in `evidence/candidate-resource-abilities-20261007.json`.
+
 All requested units 1..20 have implementation and unit evidence. The final
 `candidate-units-1-20-audit-20261007.json` checks each requirement against its
 retained receipt, unit commit, fixture bytes, compiler image hashes and native

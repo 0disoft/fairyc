@@ -14,7 +14,7 @@ pub fn bool exited(ref h::Program input,ref mut v::Vec<m::Local> locals,ref mut 
     }discard state::fail(c,4,start,end);return false;
 }
 pub fn bool drop(ref h::Program input,ref mut v::Vec<m::Local> locals,ref mut v::Vec<m::Block> blocks,ref mut v::Vec<m::Operation> operations,ref mut v::Vec<usize> edges,ref mut state::Context c,usize local,usize start,usize end){
-    state::release(c,local);let u32 type=v::at<m::Local>(locals,local-1).type;
+    let u32 type=v::at<m::Local>(locals,local-1).type;if(!h::may_drop(input,type,0)){discard state::fail(c,1108,start,end);return false;}state::release(c,local);
     if(shapes::needs_drop(type) && !resources::valid(type)){return state::emit(operations,blocks,c,state::operation(26,0,type,type,0,local,0,start,end))!=0;}
     var usize i=0;
     while(i<h::drop_count(input) && h::drop_at(input,i).type!=type){i+=1;}

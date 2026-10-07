@@ -1,4 +1,5 @@
 module type_check;
+import resource_abilities as abilities;
 import array_types as arrays;
 import tagged_types as tagged;
 import tagged_check as tagged_check;
@@ -370,6 +371,10 @@ fn state::Value statement(ref names::Resolved resolved, ref mut v::Vec<state::Sl
             if (expected != actual.type) { let syntax::Expression source = syntax::expression_at(parsed,item.expression); return error(problem,1,source.start,source.end,expected,actual.type); }
             if (!bytes::equal(syntax::assignment_operator(parsed,id),b"=") && !state::integer(expected)) { return error(problem,9,item.start,item.end,0,expected); }
             return value(7,actual.terminates);
+        } else if(item.kind==16){
+            let actual=expression(resolved,tables,problem,item.expression,0,result_type,depth+1,loop_depth);if(problem.code!=0){return actual;}
+            let e=syntax::expression_at(parsed,item.expression);let usize local=state::uses(tables,item.expression-1);
+            if(e.kind!=2 || local==0 || (names::symbol_at(resolved,local).kind!=2 && names::symbol_at(resolved,local).kind!=3 && names::symbol_at(resolved,local).kind!=4) || !abilities::burnable(parsed,actual.type)){return error(problem,51,item.start,item.end,0,actual.type);}return value(7,false);
         } else if (item.kind == 6 || item.kind == 12 || item.kind == 13) {
             let state::Value actual = expression(resolved,tables,problem,item.expression,0,result_type,depth + 1,loop_depth);
             if (problem.code != 0) { return actual; }
@@ -443,6 +448,7 @@ fn state::Problem collect(ref names::Resolved resolved, ref mut v::Vec<state::Sl
     if (names::symbol_count(resolved) > 1152 || syntax::expression_count(parsed) > 4096 || syntax::entry_count(parsed) > 1024 || syntax::declaration_count(parsed) > 512) { return state::fail(10,0,syntax::source_view(parsed).len,0,0); }
     if(syntax::field_count(parsed)>1024 || tagged::field_slots(parsed)>1024-syntax::field_count(parsed)){return state::fail(10,0,syntax::source_view(parsed).len,0,0);}
     if (!state::initialize(tables,names::symbol_count(resolved),syntax::expression_count(parsed),syntax::entry_count(parsed))) { return state::fail(12,0,syntax::source_view(parsed).len,0,0); }
+    let state::Problem ability=abilities::validate(parsed);if(ability.code!=0){return ability;}
     let state::Problem enumeration = enums::validate(parsed); if (enumeration.code != 0) { return enumeration; }
     let state::Problem declarations = nominal::validate(parsed); if (declarations.code != 0) { return declarations; }
     var usize id = 1;

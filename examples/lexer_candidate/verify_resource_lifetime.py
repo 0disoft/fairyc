@@ -99,6 +99,29 @@ REJECTIONS = {
     ]
 }
 
+CASES[28] = [
+ ('burn-no-glue', '@abilities(store,key)resource R{i32 n;cleanup{mark(this.n);}}fn i32 main(){let R r=R{.n=65};burn r;mark(88);return 7;}', 'X', 7, 0),
+ ('burn-parameter', '@abilities(store)resource R{i32 n;cleanup{mark(this.n);}}fn void destroy(R r){burn r;mark(88);}fn i32 main(){destroy(R{.n=65});return 0;}', 'X', 0, 0),
+ ('burn-moved-local', '@abilities(store)resource R{cleanup{mark(65);}}fn i32 main(){let R a=R{};let R b=a;burn b;return 0;}', '', 0, 0),
+ ('explicit-drop', '@abilities(drop,store,key)resource R{cleanup{mark(65);}}fn i32 main(){let R r=R{};return 0;}', 'A', 0, 0),
+ ('burn-branches', '@abilities(store)resource R{cleanup{mark(65);}}fn void destroy(R r,bool yes){if(yes){burn r;}else{burn r;};}fn i32 main(){destroy(R{},true);destroy(R{},false);return 0;}', '', 0, 0),
+ ('burn-loop', '@abilities(store)resource R{cleanup{mark(65);}}fn i32 main(){var i32 n=0;while(n<2){let R r=R{};burn r;n+=1;}return n;}', '', 2, 0),
+]
+REJECTIONS[28] = [
+ ('implicit-no-drop','@abilities(store)resource R{cleanup{}}fn i32 main(){let R r=R{};return 0;}', 'E1108'),
+ ('overwrite-no-drop','@abilities(store)resource R{cleanup{}}fn i32 main(){var R r=R{};r=R{};burn r;return 0;}', 'E1108'),
+ ('nested-no-drop','@abilities(store)resource S{cleanup{}}resource R{S s;cleanup{}}fn i32 main(){let R r=R{.s=S{}};return 0;}', 'E1108'),
+ ('option-no-drop','@abilities(store)resource S{cleanup{}}fn i32 main(){let Option<S> s=.some(S{});return 0;}', 'E1108'),
+ ('burn-drop','resource R{cleanup{}}fn i32 main(){let R r=R{};burn r;return 0;}', 'E1109'),
+ ('burn-nested','@abilities(store)resource S{cleanup{}}@abilities(store)resource R{S s;cleanup{}}fn i32 main(){let R r=R{.s=S{}};burn r;return 0;}', 'E1109'),
+ ('burn-twice','@abilities(store)resource R{cleanup{}}fn i32 main(){let R r=R{};burn r;burn r;return 0;}', 'E1101'),
+ ('burn-temporary','@abilities(store)resource R{cleanup{}}fn i32 main(){burn R{};return 0;}', 'E1109'),
+ ('burn-wrapper','@abilities(store)resource R{cleanup{}}fn i32 main(){let Option<R> r=.some(R{});burn r;return 0;}', 'E1109'),
+ ('bad-ability','@abilities(copy)resource R{cleanup{}}fn i32 main(){return 0;}', 'E1107'),
+ ('duplicate-ability','@abilities(drop,drop)resource R{cleanup{}}fn i32 main(){return 0;}', 'E1107'),
+ ('key-without-store','@abilities(key)resource R{cleanup{}}fn i32 main(){return 0;}', 'E1107'),
+]
+
 def sha(path): return hashlib.sha256(path.read_bytes()).hexdigest()
 def save(path, value): path.write_text(json.dumps(value, ensure_ascii=False, indent=2)+'\n', encoding='utf-8', newline='\n')
 
@@ -143,12 +166,15 @@ def main():
             observed = receipt.parent/(name+'.observed.c'); observed.write_text(wrapper+code+observer, encoding='utf-8', newline='\n')
             jobs.append(dict(name=name, source=str(observed), observe=not trap))
             units.append(dict(name=name, emittedSHA256=sha(plain), observedSHA256=sha(observed)))
-        for name, source in REJECTIONS.get(args.unit, []):
+        for rejection in REJECTIONS.get(args.unit, []):
+            name, source = rejection[:2]
+            diagnostic = rejection[2] if len(rejection)>2 else None
             path = receipt.parent/(name+'.fy'); path.write_text(PREFIX+source, encoding='utf-8', newline='\n')
             fixtures.append(dict(name=name, inputHex=path.read_bytes().hex(), sha256=sha(path), rejectedAt='MIR/C'))
             for image in images:
                 for mode in ('--mir-file', '--c-file'):
                     row = run([image, mode, path], 2); assert not row['stdout'] and row['stderr'], row
+                    if diagnostic: assert diagnostic in row['stderr'], row
         request = receipt.parent/'native-request.json'; report = receipt.parent/'native.json'
         save(request, dict(schema='fairyc.candidate-c-native-request/v1', output=str(receipt.parent/'native'), jobs=jobs))
         run([runner, request, report], timeout=300)
