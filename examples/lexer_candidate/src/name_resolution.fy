@@ -95,7 +95,7 @@ fn Problem expression(ref syntax::Parsed parsed, ref mut Context context, usize 
         return ok();
     }
     if (node.kind == 3 || node.kind == 4 || node.kind == 5) {
-        if (node.kind == 4 && bytes::equal(spelling,b"*")) { return fail(3,node.start,node.end); }
+        // Safe dereference is checked against exact reference types by typing.
         let Problem left = expression(parsed,context,node.left,depth + 1,symbols,references);
         if (left.code != 0) { return left; }
         return if (node.kind == 5) { expression(parsed,context,node.right,depth + 1,symbols,references) } else { ok() };

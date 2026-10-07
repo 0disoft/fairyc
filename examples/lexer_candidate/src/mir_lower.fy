@@ -1,4 +1,5 @@
 module mir_lower;
+import reference_types as refs;
 import array_types as arrays;
 import type_state as ids;
 import mir_arrays as array;
@@ -131,7 +132,11 @@ fn usize expression(ref h::Program input, ref mut v::Vec<m::Local> locals, ref m
         let usize result = state::local(locals,c,type,0,false,false,e.start,e.end);
         if (state::emit(operations,blocks,c,state::operation(2,result,type,type,0,original,0,e.start,e.end)) == 0) { return 0; } return result;
     }
+    if(kind==4 && operator==5 && refs::valid(h::type_code(h::expression_at(input,e.left).type))){
+        if(shapes::needs_drop(type)){return state::fail(c,4,e.start,e.end);}let usize owner=expression(input,locals,blocks,operations,edges,payload,c,e.left,depth+1);let usize result=state::local(locals,c,type,0,false,false,e.start,e.end);let u32 owner_type=h::type_code(h::expression_at(input,e.left).type);return if(state::emit(operations,blocks,c,state::operation(29,result,type,owner_type,0,owner,0,e.start,e.end))!=0){result}else{0};
+    }
     if (kind == 16) {
+        if(refs::valid(type)){let e_owner=h::expression_at(input,e.left);let usize owner=c.locals[e_owner.binding];if(owner==0){return state::fail(c,4,e.start,e.end);}let usize result=state::local(locals,c,type,0,false,false,e.start,e.end);return if(state::emit(operations,blocks,c,state::operation(28,result,type,refs::inner(type),0,owner,0,e.start,e.end))!=0){result}else{0};}
         let usize owner = c.locals[h::expression_at(input,e.left).binding];
         if (owner == 0) { return state::fail(c,4,e.start,e.end); }
         let u32 array_type = h::type_code(h::expression_at(input,e.left).type);
@@ -193,6 +198,8 @@ fn usize expression(ref h::Program input, ref mut v::Vec<m::Local> locals, ref m
     if (kind == 10) {
         let usize owner = expression(input,locals,blocks,operations,edges,payload,c,e.left,depth + 1);
         if (c.current == 0 || c.problem.code != 0) { return 0; }
+        let u32 receiver_type=h::type_code(h::expression_at(input,e.left).type);if(refs::valid(receiver_type)){
+            if(shapes::needs_drop(type)){return state::fail(c,4,e.start,e.end);}let usize result=state::local(locals,c,type,0,false,false,e.start,e.end);return if(state::emit(operations,blocks,c,state::operation(31,result,type,receiver_type,ids::small_id(e.binding),owner,0,e.start,e.end))!=0){result}else{0};}
         return nominal::read(locals,blocks,operations,c,owner,type,e.binding,e.start,e.end);
     }
     if (kind == 9) {

@@ -1,4 +1,5 @@
 module nominal_types;
+import reference_types as refs;
 import array_types as arrays;
 import tagged_types as tagged;
 import enum_types as enums;
@@ -17,7 +18,7 @@ pub fn u32 named(ref syntax::Parsed p, ref u8[] spelling) {
 pub fn u32 resolve(ref syntax::Parsed p, usize root) {
     if (root == 0) { return 0; }
     if (syntax::type_at(p,root).kind == 6) { return tagged::resolve(p,root); }
-    if ((syntax::type_at(p,root).kind == 2 || syntax::type_at(p,root).kind == 3)) { return literals::resolve(p,root); }
+    if ((syntax::type_at(p,root).kind == 2 || syntax::type_at(p,root).kind == 3)) { let u32 literal=literals::resolve(p,root);return if(literal!=0){literal}else{refs::resolve(p,root)}; }
     if (syntax::type_at(p,root).kind == 8) { return arrays::resolve(p,root); }
     if (syntax::type_at(p,root).kind != 1) { return 0; }
     let ref u8[] spelling = syntax::type_text(p,root);
@@ -46,7 +47,7 @@ fn state::Problem visit(ref syntax::Parsed p, usize id, ref mut u8[] colors, usi
     colors[id] = 1; var usize i = d.field_start;
     while (i < d.field_start + d.field_count) {
         let f = syntax::field_at(p,i); let u32 type = resolve(p,f.type_root);
-        if (type == 0 || type == 7 || type == 11 || literals::valid(type)) { return state::fail(16,f.start,f.end,0,type); }
+        if (type == 0 || type == 7 || type == 11 || refs::valid(type) || literals::valid(type)) { return state::fail(16,f.start,f.end,0,type); }
         if((d.kind==4 || arrays::valid(type)) && contains_resource(p,type,0)){return state::fail(43,f.start,f.end,0,type);}
         var usize j = d.field_start; while (j < i) {
             let previous = syntax::field_at(p,j);

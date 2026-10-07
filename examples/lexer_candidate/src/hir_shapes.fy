@@ -1,4 +1,5 @@
 module hir_shapes;
+import reference_types as refs;
 import array_types as arrays;
 import enum_types as enums;
 import tagged_types as tagged;
@@ -47,7 +48,7 @@ pub fn u32 array_element(ref Table p,u32 type) {
     let usize id=find(p,type);return if(id==0){0}else{field_at(p,at(p,id-1).field_start+1).type};
 }
 pub fn bool has_owned_arrays(ref Table p) { var usize i=0;while(i<count(p)){if(arrays::owned(at(p,i).type)){return true;}i+=1;}return false; }
-pub fn bool valid_type(ref Table p, u32 type, bool allow_void) { return (type >= 1 && type <= if (allow_void) { 7 } else { 6 }) || literals::valid(type) || type == 11 || arrays::valid(type) && (!arrays::owned(type) || find(p,type)!=0) || ((nominal::valid(type) || resources::valid(type) || enums::valid(type)) && find(p,type) != 0); }
+pub fn bool valid_type(ref Table p, u32 type, bool allow_void) { if(refs::valid(type)){return valid_type(p,refs::inner(type),false);}return (type >= 1 && type <= if (allow_void) { 7 } else { 6 }) || literals::valid(type) || type == 11 || arrays::valid(type) && (!arrays::owned(type) || find(p,type)!=0) || ((nominal::valid(type) || resources::valid(type) || enums::valid(type)) && find(p,type) != 0); }
 fn bool visit(ref Table p, usize i, ref mut u8[] colors, usize depth) {
     if (colors[i] == 2) { return true; } if (colors[i] == 1 || depth >= 64) { return false; }
     colors[i] = 1; let Shape s = at(p,i); var usize j = 0;
@@ -91,7 +92,7 @@ pub fn bool valid(ref Table p, usize source_bytes, usize bindings) {
                     if(j>f.payload_count && field_at(p,offset+j-f.payload_count).type!=0){return false;}
                 }else if(f.payload_count!=0 || f.payload_start!=0 || j+1==s.field_count){return false;}
             }else if(f.payload_count!=0 || f.payload_start!=0){return false;}
-            if (f.owner != s.type || f.start >= f.end || f.end > source_bytes || (if(enums::valid(s.type)){f.type>6 && !(tagged::builtin(s.type) && (tagged::builtin(f.type) || nominal::valid(f.type) || resources::valid(f.type)) && valid_type(p,f.type,false))}else{literals::valid(f.type) || f.type==11 || !valid_type(p,f.type,false)})) { return false; }
+            if (f.owner != s.type || f.start >= f.end || f.end > source_bytes || (if(enums::valid(s.type)){f.type>6 && !(tagged::builtin(s.type) && (tagged::builtin(f.type) || nominal::valid(f.type) || resources::valid(f.type)) && valid_type(p,f.type,false))}else{literals::valid(f.type) || refs::valid(f.type) || f.type==11 || !valid_type(p,f.type,false)})) { return false; }
             if(!resources::valid(s.type) && !tagged::builtin(s.type) && needs_drop(f.type)){return false;}j += 1;
         }
         offset += s.field_count; i += 1;

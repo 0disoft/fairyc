@@ -148,6 +148,25 @@ CASES[30] = [
  ('trap-linear-obligation','@abilities(store)resource R{cleanup{mark(65);}}fn i32 main(){let R r=R{};mark(88);assert(false);}', 'X', 0, 5),
 ]
 
+CASES[31] = [
+ ('ref-i32','fn i32 read(ref i32 p){return *p;}fn i32 main(){let i32 n=7;let ref i32 p=ref n;return read(p);}', '', 7, 0),
+ ('ref-wide','fn i64 read(ref i64 p){return *p;}fn i32 main(){let i64 n=4000000000;let ref i64 p=ref n;assert(read(p)==4000000000);return 0;}', '', 0, 0),
+ ('ref-bool','fn bool read(ref bool p){return *p;}fn i32 main(){let bool n=true;let ref bool p=ref n;return if(read(p)){1}else{0};}', '', 1, 0),
+ ('ref-struct','struct S{i32 n;}fn i32 read(ref S p){return p.n;}fn i32 main(){let S s=S{.n=7};let ref S p=ref s;return read(p);}', '', 7, 0),
+ ('ref-struct-copy','struct S{i32 n;}fn S read(ref S p){return *p;}fn i32 main(){let S s=S{.n=7};let ref S p=ref s;let S copy=read(p);return copy.n;}', '', 7, 0),
+ ('ref-resource','resource R{i32 n;cleanup{mark(this.n);}}fn i32 read(ref R p){return p.n;}fn i32 main(){let R r=R{.n=65};let ref R p=ref r;let i32 n=read(p);return n;}', 'A', 65, 0),
+ ('ref-mut-read','fn i32 read(ref mut i32 p){return *p;}fn i32 main(){var i32 n=7;let ref mut i32 p=ref mut n;return read(p);}', '', 7, 0),
+]
+REJECTIONS[31] = [
+ ('ref-local-return','fn ref i32 bad(){let i32 n=7;return ref n;}fn i32 main(){return 0;}'),
+ ('ref-value-param-return','fn ref i32 bad(i32 n){return ref n;}fn i32 main(){return 0;}'),
+ ('ref-deref-integer','fn i32 main(){let i32 n=7;return *n;}'),
+ ('ref-immutable-mut','fn i32 main(){let i32 n=7;let ref mut i32 p=ref mut n;return *p;}'),
+ ('ref-owner-write','fn i32 main(){var i32 n=7;let ref i32 p=ref n;n=9;return *p;}'),
+ ('ref-owner-move','resource R{i32 n;cleanup{}}fn void take(R r){}fn i32 main(){let R r=R{.n=7};let ref R p=ref r;take(r);return p.n;}'),
+ ('ref-field-storage','struct S{ref i32 p;}fn i32 main(){return 0;}'),
+]
+
 def sha(path): return hashlib.sha256(path.read_bytes()).hexdigest()
 def save(path, value): path.write_text(json.dumps(value, ensure_ascii=False, indent=2)+'\n', encoding='utf-8', newline='\n')
 

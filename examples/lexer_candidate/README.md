@@ -2774,3 +2774,9 @@ Arithmetic/assertion traps skip pending defer and owned cleanup, including parti
 construction. A trap inside defer or cleanup preserves effects already executed
 and stops the remaining chain. A no-drop value may terminate in a trap; this does
 not turn trap into a destruction permission or a normal return.
+
+Unit 31 admits explicit scalar/struct/resource references, dereference reads and
+copyable field reads through references. Canonical reference IDs occupy a separate
+high-half namespace; MIR address/load validation and C pointers retain the
+original storage. Local/by-value parameter escape, owner mutation/move during
+a retained loan, and borrowed fields in ordinary records remain rejected.

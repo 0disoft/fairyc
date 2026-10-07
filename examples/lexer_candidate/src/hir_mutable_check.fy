@@ -1,4 +1,5 @@
 module hir_mutable_check;
+import reference_types as refs;
 import hir_model as h;
 import array_types as arrays;
 import std::vec as v;
@@ -15,8 +16,8 @@ fn bool charge(ref mut Context c) { c.work += 1; return c.work <= 1048576; }
 fn usize generation(ref h::Program p, ref mut Context c, ref mut v::Vec<Slot> slots, ref usize[] initial, ref usize[] summaries, usize id, usize depth) {
     if (id == 0 || c.problem.code != 0) { return 0; }
     let e = h::expression_at(p,id); let u32 kind = h::expression_code(e.kind);
-    let bool mutable = h::type_code(e.type) == 11;
-    if (!mutable && h::type_code(e.type) != 10) { return 0; }
+    let bool mutable = h::type_code(e.type) == 11 || refs::mutable(h::type_code(e.type));
+    if (!mutable && h::type_code(e.type) != 10 && !refs::valid(h::type_code(e.type))) { return 0; }
     if (kind == 15) { return 0; }
     if (depth >= 64 || !charge(c)) { return fail(c,2,e.start,e.end); }
     let Slot old = *v::at<Slot>(slots,id); if (old.generation != 0) { return old.generation; }
@@ -73,7 +74,7 @@ fn usize held_end(ref h::Program p, usize id) {
 }
 pub fn h::Problem check(ref h::Program p, ref usize[] initial, ref usize[] last, ref usize[] summaries, ref v::Vec<usize> origins) {
     var bool needed = false; var usize i = 1;
-    while (i <= h::expression_count(p)) { needed = needed || h::type_code(h::expression_at(p,i).type) == 11; i += 1; }
+    while (i <= h::expression_count(p)) { needed = needed || (h::type_code(h::expression_at(p,i).type) == 11 || refs::mutable(h::type_code(h::expression_at(p,i).type))); i += 1; }
     if (!needed) { return h::Problem { .code=0,.start=0,.end=0 }; }
     var v::Vec<Slot> slots = v::empty<Slot>();
     var Context c = Context {.work=0,.problem=h::Problem { .code=0,.start=0,.end=0 } };
@@ -84,13 +85,13 @@ pub fn h::Problem check(ref h::Program p, ref usize[] initial, ref usize[] last,
     i = 1; while (i <= h::expression_count(p)) {
         let e = h::expression_at(p,i); if (h::expression_code(e.kind) == 6) { var usize j = 0; while (j < e.edge_count) {
             let usize id = h::edge_at(p,e.edge_start+j); let arg = h::expression_at(p,id);
-            if (h::type_code(arg.type) == 11) { let ref mut Slot s = v::at_mut<Slot>(ref mut slots,id); s.fresh=true; s.argument=true; s.end=e.end; }
+            if ((h::type_code(arg.type) == 11 || refs::mutable(h::type_code(arg.type)))) { let ref mut Slot s = v::at_mut<Slot>(ref mut slots,id); s.fresh=true; s.argument=true; s.end=e.end; }
             j += 1;
         } } i += 1;
     }
     i = 1; while (i <= h::expression_count(p)) {
         let e = h::expression_at(p,i); let u32 type = h::type_code(e.type);
-if (type == 10 || type == 11) { discard generation(p,ref mut c,ref mut slots,initial,summaries,i,0); }
+if (type == 10 || type == 11 || refs::valid(type)) { discard generation(p,ref mut c,ref mut slots,initial,summaries,i,0); }
         if (c.problem.code != 0) { return c.problem; } i += 1;
     }
     // Every alias and direct temporary consumer extends its actual generation.
@@ -100,7 +101,7 @@ if (type == 10 || type == 11) { discard generation(p,ref mut c,ref mut slots,ini
         i += 1;
     }
     i = 1; while (i <= h::binding_count(p)) {
-        if (initial[i] != 0 && (h::type_code(h::binding_at(p,i).type) == 10 || h::type_code(h::binding_at(p,i).type) == 11)) {
+        if (initial[i] != 0 && (h::type_code(h::binding_at(p,i).type) == 10 || h::type_code(h::binding_at(p,i).type) == 11 || refs::valid(h::type_code(h::binding_at(p,i).type)))) {
             let usize gen = generation(p,ref mut c,ref mut slots,initial,summaries,initial[i],0);
             if (gen != 0) { let ref mut Slot g = v::at_mut<Slot>(ref mut slots,gen); if (last[i] > g.end) { g.end=last[i]; } }
         } i += 1;
@@ -128,7 +129,7 @@ if (type == 10 || type == 11) { discard generation(p,ref mut c,ref mut slots,ini
                     let bool creating = e.start >= receiver.start && e.end <= receiver.end;
                     if (!creating) {
                         let u32 type = h::type_code(e.type);
-                        if (arrays::valid(type) && e.binding == owner && loan.mutable || type == 11 && *v::at<usize>(origins,j) == owner && !ancestor(ref slots,i,other.generation)) { return h::Problem { .code=2101,.start=e.start,.end=e.end }; }
+                        if (e.binding == owner && loan.mutable || (type == 11 || refs::mutable(type)) && *v::at<usize>(origins,j) == owner && !ancestor(ref slots,i,other.generation)) { return h::Problem { .code=2101,.start=e.start,.end=e.end }; }
                     }
                 }
                 j += 1;

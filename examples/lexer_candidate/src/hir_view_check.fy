@@ -1,4 +1,5 @@
 module hir_view_check;
+import reference_types as refs;
 import hir_model as h;
 import hir_mutable_check as exclusive;
 import std::vec as v;
@@ -12,7 +13,7 @@ struct Context {
     usize[1153] summary; u8[1153] color;
     usize work; h::Problem problem;
 }
-fn bool byte_view(u32 type) { return type == 10 || type == 11; }
+fn bool byte_view(u32 type) { return type == 10 || type == 11 || refs::valid(type); }
 fn usize fail(ref mut Context c, u32 code, usize start, usize end) {
     if (c.problem.code == 0) { c.problem = h::Problem { .code,.start,.end }; } return 0;
 }
@@ -120,7 +121,7 @@ fn usize root(ref h::Program p, usize id) {
     var usize current = id; var usize depth = 0; while (current != 0 && depth < 64) {
         let e = h::expression_at(p,current); let u32 kind = h::expression_code(e.kind);
         if (kind == 3) { return e.binding; }
-        if (kind != 10 && kind != 13) { return 0; } current = e.left; depth += 1;
+        if (kind != 10 && kind != 13 && !(kind==4 && h::operator_code(e.operator)==5)) { return 0; } current = e.left; depth += 1;
     } return 0;
 }
 pub fn h::Problem check(ref h::Program p) {
@@ -160,7 +161,7 @@ pub fn h::Problem check(ref h::Program p) {
         if(h::statement_code(s.kind)==11){let call=h::expression_at(p,s.expression);var usize j=0;while(j<call.edge_count){let arg=h::expression_at(p,h::edge_at(p,call.edge_start+j));let u32 type=h::type_code(arg.type);if(type==9 || byte_view(type)){discard fail(ref mut c,4,arg.start,arg.end);}j+=1;}}
         if (h::statement_code(s.kind) == 3) {
             let usize owner = root(p,s.target);
-            let bool through_mutable = owner != 0 && h::type_code(h::binding_at(p,owner).type) == 11;
+            let bool through_mutable = owner != 0 && (h::type_code(h::binding_at(p,owner).type) == 11 || refs::mutable(h::type_code(h::binding_at(p,owner).type)));
             if (origin(p,ref mut c,s.expression,0) != 0 && byte_view(h::type_code(h::expression_at(p,s.target).type))) { discard fail(ref mut c,2102,s.start,s.end); }
             var usize j = 1; while (!through_mutable && j <= h::expression_count(p) && c.problem.code == 0) {
                 let e = h::expression_at(p,j); let usize loan = origin(p,ref mut c,j,0);
@@ -180,6 +181,8 @@ pub fn h::Problem check(ref h::Program p) {
             }
         } i += 1;
     }
+    // A whole resource move/burn is a competing access, just like replacement.
+    i=1;while(i<=h::expression_count(p) && c.problem.code==0){let moved=h::expression_at(p,i);if(h::expression_code(moved.kind)==24){var usize j=1;while(j<=h::expression_count(p)){let loan=h::expression_at(p,j);if(byte_view(h::type_code(loan.type)) && origin(p,ref mut c,j,0)==moved.binding){let usize begin=first(p,ref mut c,j,0);var usize end=held_end(p,j,loan);var usize local=1;while(local<=h::binding_count(p)){if(c.initial[local]==j && c.last[local]>end){end=c.last[local];}local+=1;}if(begin<moved.end && moved.start<end){discard fail(ref mut c,2101,moved.start,moved.end);}}j+=1;}}i+=1;}
     if (c.problem.code != 0) { return c.problem; }
     var v::Vec<usize> origins = v::empty<usize>(); i = 0;
     while (i <= h::expression_count(p)) {
