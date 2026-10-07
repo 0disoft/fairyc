@@ -26,6 +26,7 @@ pub fn u32 resolve(ref syntax::Parsed p, usize root) {
     if ((syntax::type_at(p,root).kind == 2 || syntax::type_at(p,root).kind == 3)) { let u32 literal=literals::resolve(p,root);return if(literal!=0){literal}else{refs::resolve(p,root)}; }
     if (syntax::type_at(p,root).kind == 8) { return arrays::resolve(p,root); }
     if (syntax::type_at(p,root).kind != 1) { return 0; }
+    let u32 bound=identity::bound(p,root);if(bound!=0){return bound;}
     let ref u8[] spelling = syntax::type_text(p,root);
     let u32 primitive = state::primitive(p,root);
     if (primitive != 7 || bytes::equal(spelling,b"void")) { return primitive; }

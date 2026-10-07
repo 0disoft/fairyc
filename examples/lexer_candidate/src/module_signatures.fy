@@ -12,6 +12,10 @@ import std::vec as v;
 // body typing and nominal layout ownership can consume this exact graph.
 pub struct Signature {usize module_index;usize declaration;bool public;usize result;usize parameter_start;usize parameter_count;u32 effects;bool must_use;bool unsafe_call;bool foreign;usize link_start;usize link_end;}
 pub resource Program {catalog::Catalog declarations;types::Graph graph;v::Vec<Signature> signatures;v::Vec<usize> parameters;bytes::Buffer links;cleanup{}}
+pub fn usize module_count(ref Program p){return catalog::module_count(ref p.declarations);}
+pub fn bool source_matches(ref Program p,usize module_index,ref syntax::Parsed source){return catalog::source_matches(ref p.declarations,module_index,source);}
+pub fn catalog::Lookup declaration_lookup(ref Program p,usize module_index,ref u8[] spelling){return catalog::lookup(ref p.declarations,module_index,spelling);}
+pub fn catalog::Declaration declaration_at(ref Program p,usize id){return catalog::declaration_at(ref p.declarations,id);}
 pub fn usize count(ref Program p){return v::len<Signature>(ref p.signatures);}
 pub fn Signature at(ref Program p,usize id){assert(id>0 && id<=count(p));return *v::at<Signature>(ref p.signatures,id-1);}
 pub fn usize parameter_at(ref Program p,usize index){return *v::at<usize>(ref p.parameters,index);}

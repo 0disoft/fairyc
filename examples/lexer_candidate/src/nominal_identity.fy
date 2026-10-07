@@ -17,3 +17,7 @@ pub fn u32 named(ref syntax::Parsed p, ref u8[] spelling) {
     }
     return resources::named(p,spelling);
 }
+
+// A program-owned path binds one exact declaration in the joined arena.
+// Numeric layout tags remain local to this complete source-set owner.
+pub fn u32 bound(ref syntax::Parsed p,usize root){if(root==0){return 0;}let n=syntax::type_at(p,root);if(n.kind!=1 || n.left==0 || n.left>syntax::declaration_count(p) || n.left>512){return 0;}let d=syntax::declaration_at(p,n.left-1);return if(d.kind==4){255+state::small_id(n.left)}else if(d.kind==6){98303+state::small_id(n.left)}else if(d.kind==11){131071+state::small_id(n.left)}else{0};}

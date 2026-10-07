@@ -19,7 +19,7 @@ pub fn u32 make_result(u32 success,u32 failure){return encoding::make_result(suc
 pub fn u32 make_option(u32 child){return encoding::make_option(child);}
 fn u32 resolved(ref syntax::Parsed p,usize root,usize depth){
     if(root==0 || depth>=16){return 0;}let node=syntax::type_at(p,root);
-    if(node.kind==1){let u32 scalar=state::primitive(p,root);return if(scalar>=1 && scalar<=6){scalar}else{nominal::named(p,syntax::type_text(p,root))};}
+    if(node.kind==1){let u32 scalar=state::primitive(p,root);return if(scalar>=1 && scalar<=6){scalar}else if(nominal::bound(p,root)!=0){nominal::bound(p,root)}else{nominal::named(p,syntax::type_text(p,root))};}
     if(node.kind==2 || node.kind==3){let u32 literal=literals::resolve(p,root);return if(literal!=0){literal}else{refs::resolve(p,root)};}
     if(node.kind!=6){return 0;}let usize count=syntax::type_argument_count(p,root);
     if(bytes::equal(syntax::type_text(p,node.left),b"Option") && count==1){

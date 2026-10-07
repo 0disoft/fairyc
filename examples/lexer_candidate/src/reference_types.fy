@@ -17,5 +17,5 @@ pub fn u32 make(u32 type,bool exclusive){return if(referent(type)){2147483648+ty
 pub fn u32 resolve(ref syntax::Parsed p,usize root){let n=syntax::type_at(p,root);if(n.kind!=2 && n.kind!=3){return 0;}let child=syntax::type_at(p,n.left);
     if(child.kind==12 && syntax::type_at(p,child.left).kind==1 && bytes::equal(syntax::type_text(p,child.left),b"void")){return make(pointers::make(7,true),n.kind==3);}
     if(child.kind!=1){return 0;}
-    let text=syntax::type_text(p,n.left);let u32 scalar=state::primitive(p,n.left);let u32 type=if(scalar!=7){scalar}else{nominal::named(p,text)};return make(type,n.kind==3);
+    let text=syntax::type_text(p,n.left);let u32 scalar=state::primitive(p,n.left);let u32 type=if(scalar!=7){scalar}else if(nominal::bound(p,n.left)!=0){nominal::bound(p,n.left)}else{nominal::named(p,text)};return make(type,n.kind==3);
 }

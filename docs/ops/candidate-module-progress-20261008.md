@@ -71,3 +71,35 @@ This arena is bounded to 32 files and 32768 combined source bytes, 512
 declarations, 4096 expressions/types/attributes/arguments, 8192 statements and
 1024 entries/fields. Generic expansion, source-set binding and program lowering
 are separate consumers; AST composition alone does not claim their completion.
+
+## Nominal program consumers
+
+`module_bind.fy` resolves named annotations and qualified expression uses through
+the owned declaration catalog, then translates each exact module/declaration
+coordinate to a unique declaration slot in the joined arena. Its input must
+match both the signature owner's retained source set and the joined source bytes.
+Aliases retain the same slot; identical names from different modules retain
+different slots. These slots are transient program-owned identities, not stable
+package IDs or persisted interface keys.
+
+`module_program.fy` composes signature publication, AST join, binding, ordinary
+name and type checking, owned HIR lowering, and MIR lowering. Name lookup and
+duplicate checks stay within the source module. Bound nominal leaves flow into
+borrow, tagged and array type consumers. Cross-module resource field access and
+direct resource construction reject with private candidate code 6201; factories
+and provider-owned borrowed access remain available. Callable effects, unsafe and
+must-use are checked against the actual provider declarations.
+
+The focused native API test renders verified C for imported structs/resources/
+enums, aliases and duplicate helper names, and rejects mismatched nominal types,
+private calls/representation, missing permissions, ignored must-use, and an
+invalid provider with its original file-local position. It also rejects stale
+signature inputs. Evidence: `evidence/candidate-module-program-20261008.json`.
+
+This private API currently reuses one joined HIR/MIR owner (module number zero,
+unique joined declaration numbers). The catalog-to-arena mapping is owned during
+compilation; persistent package identity and per-file debug maps are not claimed.
+The combined source/global-name limits remain 32768 bytes/128 globals. SDK,
+generic and receiver admission, imported return-origin generalization, CLI
+program output and actual execution of the emitted multi-file C remain separate
+work. The existing scalar-only `--check-modules-file` command is unchanged.

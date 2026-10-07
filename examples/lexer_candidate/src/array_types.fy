@@ -52,7 +52,7 @@ pub fn u32 resolve(ref syntax::Parsed p, usize root) {
     let child = syntax::type_at(p,node.left); var u32 element = 0;
     if (child.kind == 1) {
         element=state::primitive(p,node.left);
-        if(element==7){element=nominal::named(p,syntax::type_text(p,node.left));}
+        if(element==7){element=if(nominal::bound(p,node.left)!=0){nominal::bound(p,node.left)}else{nominal::named(p,syntax::type_text(p,node.left))};}
         if(element==0){element=enums::named(p,syntax::type_text(p,node.left));}
     }else if(child.kind==6){element=tagged::resolve(p,node.left);}
     else if(child.kind==8 && syntax::type_at(p,child.left).kind!=8){element=resolve(p,node.left);}

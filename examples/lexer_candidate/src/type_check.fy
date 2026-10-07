@@ -289,6 +289,7 @@ fn state::Value expression(ref names::Resolved resolved, ref mut v::Vec<state::S
         if (arrays::valid(owner.type) && bytes::equal(op,b"len")) { return recorded(tables,id,value(5,owner.terminates)); }
         let usize field = nominal::field(parsed,if(refs::valid(owner.type)){refs::inner(owner.type)}else{owner.type},op);
         if (field == 0) { return error(problem,18,node.end - op.len,node.end,owner.type,0); }
+        let u32 owner_type=if(refs::valid(owner.type)){refs::inner(owner.type)}else{owner.type};if(resources::valid(owner_type)){let d=syntax::declaration_at(parsed,(owner_type-98304) as usize);if(syntax::module_index(parsed,d.start)!=syntax::module_index(parsed,node.start)){return error(problem,6201,node.start,node.end,0,0);}}
         let u32 type = nominal::resolve(parsed,syntax::field_at(parsed,field - 1).type_root);
         state::set_flags(tables,id - 1,state::small_id(field));
         return recorded(tables,id,value(type,owner.terminates));
@@ -315,6 +316,7 @@ fn state::Value expression(ref names::Resolved resolved, ref mut v::Vec<state::S
         if (symbol_id == 0 || (names::symbol_at(resolved,symbol_id).kind != 6 && names::symbol_at(resolved,symbol_id).kind != 9)) { return error(problem,16,target.start,target.end,0,0); }
         let u32 type = state::symbols(tables,symbol_id - 1);
         let syntax::Declaration declaration = syntax::declaration_at(parsed,(type - if(resources::valid(type)){98304}else{256}) as usize);
+        if(resources::valid(type) && syntax::module_index(parsed,declaration.start)!=syntax::module_index(parsed,node.start)){return error(problem,6201,node.start,node.end,0,0);}
         var u8[1024] seen = [0;1024]; var bool terminates = false; var usize i = 0;
         while (i < syntax::record_field_count(parsed,id)) {
             let usize entry = syntax::record_field(parsed,id,i); let syntax::Expression field = syntax::expression_at(parsed,entry);
