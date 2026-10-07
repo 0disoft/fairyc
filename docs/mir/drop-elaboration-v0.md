@@ -75,3 +75,9 @@ and call arguments remain separate temporary obligations; propagation cleans
 these in reverse completion order without calling the unfinished outer body.
 The candidate has a 4096-local per-function bound in addition to its existing
 16384-local program arena. No partial-construction flags are exposed to source.
+
+Unit 27 extends the candidate's typed structural drop to owned Option/Result.
+Construction transfers payload donors; payload extraction discharges the complete
+subject and produces the selected payload. Ignored captures retain an arm-scope
+temporary obligation. Scope cleanup merges these temporary obligations with roots
+in reverse lexical source order, walking inner scopes first.

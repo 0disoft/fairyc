@@ -29,6 +29,20 @@ CASES = {
         ('short-return', 'resource R{i32 n;cleanup{mark(this.n);}}fn i32 f(bool yes){let R r=R{.n=65};discard yes && {return 7;true};return 8;}fn i32 main(){return f(false)+f(true);}', 'AA', 15, 0),
         ('cleanup-local', 'resource S{cleanup{mark(83);}}resource R{cleanup{let S s=S{};mark(82);return;}}fn i32 main(){let R r=R{};return 0;}', 'RS', 0, 0),
     ],
+    27: [
+        ('wildcard-scope-order', 'resource R{i32 n;cleanup{mark(this.n);}}fn i32 main(){let Option<R> x=.some(R{.n=65});discard switch(x){case .some(_):{let R b=R{.n=66};mark(88);}case .none:{mark(89);}};return 0;}', 'XBA', 0, 0),
+        ('wildcard-continue', 'resource R{i32 n;cleanup{mark(this.n);}}fn i32 main(){var i32 n=0;while(n<2){let Option<R> x=.some(R{.n=65});n+=1;discard switch(x){case .some(_):{let R b=R{.n=66};continue;}case .none:{break;}};}return 0;}', 'BABA', 0, 0),
+        ('option-some-move', 'resource R{i32 n;cleanup{mark(this.n);}}fn i32 main(){let Option<R> x=.some(R{.n=65});let Option<R> y=x;return switch(y){case .some(r):{r.n}case .none:{0}};}', 'A', 65, 0),
+        ('option-none', 'resource R{i32 n;cleanup{mark(this.n);}}fn i32 main(){let Option<R> x=.none;return 0;}', '', 0, 0),
+        ('option-wildcard', 'resource R{i32 n;cleanup{mark(this.n);}}fn i32 main(){let Option<R> x=.some(R{.n=65});discard switch(x){case .some(_):{mark(88);}case .none:{mark(89);}};return 0;}', 'XA', 0, 0),
+        ('option-nested', 'resource R{i32 n;cleanup{mark(this.n);}}fn i32 main(){let Option<Option<R>> x=.some(.some(R{.n=65}));return 0;}', 'A', 0, 0),
+        ('resource-tag-field', 'resource S{i32 n;cleanup{mark(this.n);}}resource R{Option<S> s;cleanup{mark(82);}}fn i32 main(){let R r=R{.s=.some(S{.n=65})};return 0;}', 'RA', 0, 0),
+        ('result-ok', 'resource R{i32 n;cleanup{mark(this.n);}}fn Result<R,bool> make(){return .ok(R{.n=65});}fn i32 main(){return switch(make()){case .ok(r):{r.n}case .err(_):{0}};}', 'A', 65, 0),
+        ('result-err-resource', 'resource R{i32 n;cleanup{mark(this.n);}}fn Result<i32,R> make(){return .err(R{.n=69});}fn Result<i32,R> f(){let R a=R{.n=65};let i32 n=make()?;return .ok(n);}fn i32 main(){return switch(f()){case .ok(n):{n}case .err(e):{e.n}};}', 'AE', 69, 0),
+        ('replace-question-ok', 'resource R{i32 n;cleanup{mark(this.n);}}fn Result<R,bool> make(){mark(88);return .ok(R{.n=66});}fn Result<i32,bool> f(){var R old=R{.n=65};old=make()?;return .ok(old.n);}fn i32 main(){return switch(f()){case .ok(n):{n}case .err(_):{1}};}', 'XAB', 66, 0),
+        ('replace-question-err', 'resource R{i32 n;cleanup{mark(this.n);}}fn Result<R,bool> make(){mark(88);return .err(true);}fn Result<i32,bool> f(){var R old=R{.n=65};old=make()?;return .ok(old.n);}fn i32 main(){return switch(f()){case .ok(n):{n}case .err(_):{1}};}', 'XA', 1, 0),
+        ('tagged-if-return', 'resource R{i32 n;cleanup{mark(this.n);}}fn Option<R> f(bool yes){return if(yes){.some(R{.n=65})}else{.none};}fn i32 main(){let Option<R> a=f(true);let Option<R> b=f(false);return 0;}', 'A', 0, 0),
+    ],
     26: [
         ('partial-factory', 'resource S{i32 n;cleanup{mark(this.n);}}resource R{S s;i32 n;cleanup{mark(82);}}fn S make(){return S{.n=65};}fn Result<i32,bool> bad(){return .err(true);}fn Result<i32,bool> f(){let R r=R{.s=make(),.n=bad()?};return .ok(0);}fn i32 main(){return switch(f()){case .ok(n):{n}case .err(_):{1}};}', 'A', 1, 0),
         ('nested-success', 'resource S{i32 n;cleanup{mark(this.n);}}resource R{S a;S b;cleanup{mark(82);}}fn i32 main(){let R r=R{.a=S{.n=65},.b=S{.n=66}};return 0;}', 'RBA', 0, 0),
@@ -66,6 +80,10 @@ REJECTIONS = {
         ('break-live', 'resource R{cleanup{}}fn i32 main(){while(true){let R r=R{};break;}return 0;}'),
         ('overwrite-live', 'resource R{cleanup{}}fn i32 main(){var R r=R{};r=R{};return 0;}'),
         ('nested-field', 'resource S{cleanup{}}resource R{S s;cleanup{}}fn i32 main(){let R r=R{.s=S{}};return 0;}'),
+    ],
+    27: [
+        ('partial-field-move', 'resource S{cleanup{}}resource R{S s;cleanup{}}fn void take(S s){}fn i32 main(){let R r=R{.s=S{}};take(r.s);return 0;}'),
+        ('tag-use-after-move', 'resource R{cleanup{}}fn void take(Option<R> r){}fn i32 main(){let Option<R> r=.some(R{});take(r);take(r);return 0;}'),
     ],
     26: [
         ('owned-tag', 'resource S{cleanup{}}fn i32 main(){let Option<S> s=.some(S{});return 0;}'),

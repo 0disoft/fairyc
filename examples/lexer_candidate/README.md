@@ -2746,3 +2746,11 @@ On propagation, only completed temporaries clean in reverse completion order.
 Complete nested resources run outer cleanup before reverse recursive field cleanup.
 A function admits at most 4096 MIR locals (16384 program-wide); earlier larger
 recursive snapshot stack failure is resolved, not treated as passing evidence.
+
+Unit 27 carries owned Option/Result roots through construction, moves, pattern
+captures, calls, returns and propagation. Structural drops visit only the active
+payload. Ignored owned captures live until their arm exits, including return and
+nearest continue; later declared arm resources clean first. Source-order temporary
+metadata uses bounded u32 storage, avoiding the development stack overflow found
+in the larger representation. Direct `old=make()?` success/failure now execute.
+Partial field moves and resource fixed arrays keep their existing rejection.

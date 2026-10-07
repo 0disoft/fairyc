@@ -101,9 +101,7 @@ pub fn Result<Program,Problem> assemble_resources(bytes::Buffer source, bytes::B
     if (!shapes::valid(ref nominal,ns,1152) || v::len<Drop>(ref drops)>512) { return .err(Problem { .code = 4, .start = 0, .end = ns }); }
     var usize resource_count=0;var usize shape_index=0;
     while(shape_index<shapes::count(ref nominal)){let shape=shapes::at(ref nominal,shape_index);if(resources::valid(shape.type)){resource_count+=1;}
-        // Recursive field and tagged ownership are connected in later units.
-        if(shapes::needs_drop(shape.type) && !resources::valid(shape.type)){return .err(Problem{.code=4,.start=0,.end=ns});}
-        var usize field=0;while(field<shape.field_count){if(shapes::needs_drop(shapes::field_at(ref nominal,shape.field_start+field+1).type) && !resources::valid(shapes::field_at(ref nominal,shape.field_start+field+1).type)){return .err(Problem{.code=4,.start=0,.end=ns});}field+=1;}shape_index+=1;
+        shape_index+=1;
     }
     if(resource_count!=v::len<Drop>(ref drops)){return .err(Problem{.code=4,.start=0,.end=ns});}
     var usize dropping=0;while(dropping<v::len<Drop>(ref drops)){let Drop d=*v::at<Drop>(ref drops,dropping);
