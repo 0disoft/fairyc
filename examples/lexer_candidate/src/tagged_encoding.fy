@@ -26,7 +26,7 @@ pub fn bool option(u32 code){return code>=196609 && code<=196614 || valid(code) 
 pub fn bool result(u32 code){return code>=262145 && code<=262180 || valid(code) && code&3==3;}
 fn u32 bits(u32 code) {
     if(code==9){return 16;}if(code==10){return 32;}if(code==11){return 48;}
-    if(refs::valid(code)){let u32 t=refs::inner(code);let u32 category=if(t<=6){1}else if(t<98304){2}else{3};let u32 index=t-if(category==1){1}else if(category==2){256}else{98304};return category<<2|if(refs::mutable(code)){16}else{0}|index<<5;}
+    if(refs::valid(code)){let u32 t=refs::inner(code);if(t>98815){return 0;}let u32 category=if(t<=6){1}else if(t<98304){2}else{3};let u32 index=t-if(category==1){1}else if(category==2){256}else{98304};return category<<2|if(refs::mutable(code)){16}else{0}|index<<5;}
     if(code>=1 && code<=6){return (code-1)<<2|1;}
     if(code>=256 && code<=767){return 25|(code-256)<<5;}
     if(code>=98304 && code<=98815){return 29|(code-98304)<<5;}

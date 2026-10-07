@@ -8,6 +8,7 @@ import c_emit as c;
 import pointer_types as pointers;
 import c_abi_types as c_types;
 import scalar_casts as casts;
+import reference_types as refs;
 import tagged_types as tags;
 import array_types as arrays;
 import std::bytes as bytes;
@@ -57,4 +58,12 @@ fn m::Program changed(ref m::Program p,u32 mutation){
     let p=switch(lower::lower(fixture::retained(b"module main;@link_name(\"fixture_make_int\")unsafe extern C fn c::int host();fn i32 main(){let c::int n=unsafe{host()};return n as i32;}"))){case .ok(p):{p}case .err(_):{assert(false);return;}};
     assert(verify::check(ref p).code==0);let bad=changed(ref p,2);assert(verify::check(ref bad).code!=0);
     var bytes::Buffer out=bytes::empty();assert(c::render(ref p,ref mut out)==0);
+}
+
+@test fn void only_mutable_opaque_pointer_output_slots_are_admitted(){
+    let u32 pointer=pointers::make(7,true);let u32 slot=pointers::make(pointer,true);let u32 borrowed=refs::make(pointer,true);
+    assert(pointer==1048591 && slot==1048601 && pointers::valid(slot) && pointers::inner(slot)==pointer && pointers::mutable(slot));
+    assert(refs::valid(borrowed) && refs::inner(borrowed)==pointer && refs::mutable(borrowed) && pointers::cast_allowed(borrowed,slot));
+    assert(pointers::make(pointer,false)==0 && pointers::make(pointers::make(3,true),true)==0);
+    assert(!pointers::cast_allowed(refs::make(pointer,false),slot) && tags::make_option(borrowed)==0);
 }

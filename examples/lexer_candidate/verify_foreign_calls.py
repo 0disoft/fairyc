@@ -23,6 +23,7 @@ int32_t fixture_bytes(const uint8_t *p,uintptr_t n){return n==2&&p[0]==65&&p[1]=
 void fixture_emit(int32_t n){(void)fputc((unsigned char)n,stdout);(void)fflush(stdout);}
 '''
 PROVIDER += '\n#include <stddef.h>\n_Bool fixture_make_bool(void){return 1;}\nint32_t fixture_consume_bool(_Bool n){return n==1?7:0;}\nchar fixture_make_char(void){return -3;}\nint32_t fixture_consume_char(char n){return n==-3?7:0;}\ndouble fixture_make_double(void){return 1.25;}\nint32_t fixture_consume_double(double n){return n==1.25?7:0;}\nfloat fixture_make_float(void){return 1.25f;}\nint32_t fixture_consume_float(float n){return n==1.25f?7:0;}\nint fixture_make_int(void){return -7;}\nint32_t fixture_consume_int(int n){return n==-7?7:0;}\nlong fixture_make_long(void){return -9L;}\nint32_t fixture_consume_long(long n){return n==-9L?7:0;}\nlong long fixture_make_longlong(void){return -11LL;}\nint32_t fixture_consume_longlong(long long n){return n==-11LL?7:0;}\nsigned char fixture_make_schar(void){return -13;}\nint32_t fixture_consume_schar(signed char n){return n==-13?7:0;}\nshort fixture_make_short(void){return -15;}\nint32_t fixture_consume_short(short n){return n==-15?7:0;}\nsize_t fixture_make_size_t(void){return 17;}\nint32_t fixture_consume_size_t(size_t n){return n==17?7:0;}\nunsigned char fixture_make_uchar(void){return 19;}\nint32_t fixture_consume_uchar(unsigned char n){return n==19?7:0;}\nunsigned int fixture_make_uint(void){return 23U;}\nint32_t fixture_consume_uint(unsigned int n){return n==23U?7:0;}\nunsigned long fixture_make_ulong(void){return 29UL;}\nint32_t fixture_consume_ulong(unsigned long n){return n==29UL?7:0;}\nunsigned long long fixture_make_ulonglong(void){return 31ULL;}\nint32_t fixture_consume_ulonglong(unsigned long long n){return n==31ULL?7:0;}\nunsigned short fixture_make_ushort(void){return 37;}\nint32_t fixture_consume_ushort(unsigned short n){return n==37?7:0;}\n'
+PROVIDER += 'int32_t fixture_slot(void **out){static int32_t n=7;*out=&n;return 7;}\nvoid fixture_clear_slot(void **out){*out=NULL;}\nint32_t fixture_mut_opaque(void *p){return *(int32_t*)p;}\n'
 CASES=[
  ('default-symbol','unsafe extern C fn i32 fixture_add(i32 n);fn i32 main(){return unsafe{fixture_add(6)};}','',7),
  ('linked-alias','@link_name("fixture_add")unsafe extern C fn i32 foreign(i32 n);fn i32 main(){return unsafe{foreign(6)};}','',7),
@@ -75,6 +76,20 @@ ABI_REJECTIONS=[
  ('c-ssize-target-pending','unsafe extern C fn c::ssize_t host();fn i32 main(){return 0;}','E5102'),
  ('c-unknown','unsafe extern C fn c::longdouble host();fn i32 main(){return 0;}','E5102'),
 ]
+SLOT_CASES=[
+ ('direct-output-slot','unsafe extern C fn i32 fixture_slot(ptr mut ptr mut void out);unsafe extern C fn i32 fixture_mut_opaque(ptr mut void p);unsafe extern C fn void fixture_clear_slot(ptr mut ptr mut void out);fn i32 main(){var ptr mut void p=null;unsafe{assert(fixture_slot(ref mut p as ptr mut ptr mut void)==7);assert(fixture_mut_opaque(p)==7);fixture_clear_slot(ref mut p as ptr mut ptr mut void);};assert(p==null);return 7;}','',7),
+ ('borrowed-output-slot','unsafe extern C fn i32 fixture_slot(ptr mut ptr mut void out);unsafe extern C fn i32 fixture_mut_opaque(ptr mut void p);unsafe fn i32 fill(ref mut ptr mut void out){return fixture_slot(out as ptr mut ptr mut void);}fn i32 main(){var ptr mut void p=null;unsafe{assert(fill(ref mut p)==7);assert(fixture_mut_opaque(p)==7);};return 7;}','',7),
+ ('slot-null','unsafe extern C fn ptr mut ptr mut void fixture_slot_identity(ptr mut ptr mut void p);fn i32 main(){let ptr mut ptr mut void p=null;assert(p==null);return 7;}','',7),
+]
+SLOT_REJECTIONS=[
+ ('slot-shared-outer','unsafe extern C fn i32 host(ptr ptr mut void p);fn i32 main(){return 0;}','E5102'),
+ ('slot-shared-inner','unsafe extern C fn i32 host(ptr mut ptr void p);fn i32 main(){return 0;}','E5102'),
+ ('slot-other-pointee','unsafe extern C fn i32 host(ptr mut ptr mut u8 p);fn i32 main(){return 0;}','E5102'),
+ ('slot-third-level','unsafe extern C fn i32 host(ptr mut ptr mut ptr mut void p);fn i32 main(){return 0;}','E5102'),
+ ('slot-shared-borrow','fn i32 main(){var ptr mut void p=null;let q=unsafe{ref p as ptr mut ptr mut void};return 0;}','unsupported explicit cast'),
+ ('slot-unsafe-required','fn i32 main(){var ptr mut void p=null;let q=ref mut p as ptr mut ptr mut void;return 0;}','E5101'),
+ ('slot-tagged-ref','fn i32 main(){var ptr mut void p=null;let Option<ref mut ptr mut void> q=.some(ref mut p);return 0;}','error:'),
+]
 POINTER_REJECTIONS=[
  ('null-integer','fn i32 main(){let i32 x=null;return x;}','type mismatch'),
  ('null-inferred','fn i32 main(){let x=null;return 0;}','type mismatch'),
@@ -106,8 +121,8 @@ REJECTIONS=[
 def sha(p):return hashlib.sha256(p.read_bytes()).hexdigest()
 def save(p,data):p.write_text(json.dumps(data,ensure_ascii=False,indent=2)+'\n',encoding='utf-8',newline='\n')
 def main():
- ap=argparse.ArgumentParser();ap.add_argument('--images',nargs='+',required=True);ap.add_argument('--native-runner',required=True);ap.add_argument('--receipt',required=True);ap.add_argument('--cli-only',action='store_true');ap.add_argument('--lane',choices=['scalar','pointer','cast','abi'],default='scalar');args=ap.parse_args()
- cases=ABI_CASES if args.lane=='abi' else CAST_CASES if args.lane=='cast' else POINTER_CASES if args.lane=='pointer' else CASES;rejections=ABI_REJECTIONS if args.lane=='abi' else CAST_REJECTIONS if args.lane=='cast' else POINTER_REJECTIONS if args.lane=='pointer' else REJECTIONS
+ ap=argparse.ArgumentParser();ap.add_argument('--images',nargs='+',required=True);ap.add_argument('--native-runner',required=True);ap.add_argument('--receipt',required=True);ap.add_argument('--cli-only',action='store_true');ap.add_argument('--lane',choices=['scalar','pointer','cast','abi','slot'],default='scalar');args=ap.parse_args()
+ cases=SLOT_CASES if args.lane=='slot' else ABI_CASES if args.lane=='abi' else CAST_CASES if args.lane=='cast' else POINTER_CASES if args.lane=='pointer' else CASES;rejections=SLOT_REJECTIONS if args.lane=='slot' else ABI_REJECTIONS if args.lane=='abi' else CAST_REJECTIONS if args.lane=='cast' else POINTER_REJECTIONS if args.lane=='pointer' else REJECTIONS
  images=[Path(s).resolve() for s in args.images];runner=Path(args.native_runner).resolve();receipt=Path(args.receipt).resolve();receipt.parent.mkdir(parents=True,exist_ok=True);rows=[];fixtures=[];jobs=[];native=[];passed=False
  def run(argv,expected=0):
   q=subprocess.run(list(map(str,argv)),cwd=ROOT,capture_output=True,encoding='utf-8',timeout=360);row=dict(argv=list(map(str,argv)),cwd=str(ROOT),exit=q.returncode,stdout=q.stdout,stderr=q.stderr);rows.append(row);save(receipt.parent/'raw.json',rows);assert q.returncode==expected,row;return row

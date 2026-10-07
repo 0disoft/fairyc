@@ -129,7 +129,7 @@ fn state::Value expression(ref names::Resolved resolved, ref mut v::Vec<state::S
     }
     if(node.kind==23){let actual=expression(resolved,tables,problem,node.left,0,result_type,depth+1,loop_depth);if(problem.code!=0){return actual;}let u32 target=nominal::resolve(parsed,node.right);
         if(pointers::cast_allowed(actual.type,target)){
-            if(pointers::inner(target)==7){var usize child=node.left;while(syntax::expression_at(parsed,child).kind==3){child=syntax::expression_at(parsed,child).left;}let e=syntax::expression_at(parsed,child);if(e.kind!=2 && !((e.kind==21 || e.kind==22) && syntax::expression_at(parsed,e.left).kind==2)){return error(problem,52,node.start,node.end,target,actual.type);}}
+            if(pointers::inner(target)==7 || target==1048601){var usize child=node.left;while(syntax::expression_at(parsed,child).kind==3){child=syntax::expression_at(parsed,child).left;}let e=syntax::expression_at(parsed,child);if(e.kind!=2 && !((e.kind==21 || e.kind==22) && syntax::expression_at(parsed,e.left).kind==2)){return error(problem,52,node.start,node.end,target,actual.type);}}
             if(!unsafe_scopes::allowed(parsed,node.start,node.end)){return error(problem,5101,node.start,node.end,0,0);}
         }else if(!casts::allowed(actual.type,target)){return error(problem,52,node.start,node.end,target,actual.type);}
         return recorded(tables,id,value(target,actual.terminates));}

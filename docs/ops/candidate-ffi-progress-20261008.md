@@ -17,8 +17,8 @@ The native API test checks forged null operands and C output preservation on
 verification failure. The observer links an independent provider translation unit
 and compares program values in development and release C builds.
 
-Pointer-to-opaque-pointer output slots, nominal pointees, and C scalars belong
-to subsequent units. Raw dereference, arithmetic, integer-pointer
+Nominal pointees belong to subsequent units. The exact opaque-pointer output
+slot and target C scalar transport are described below. Raw dereference, arithmetic, integer-pointer
 conversion, and implicit mutability conversion remain outside the current public
 contract. Linux execution is deferred to the user's combined validation phase.
 
@@ -58,3 +58,21 @@ selection. It is never silently substituted with `intptr_t`.
 
 The independent provider returns and consumes every supported C scalar family.
 Evidence: `evidence/candidate-resource-c-scalars-20261008.json`.
+
+## Mutable opaque-pointer output slot
+
+The candidate admits only the existing `ptr mut ptr mut void` output slot.
+`pointer_identity.fy` owns the closed raw-pointer identities so the safe-reference
+namespace can represent a borrow of `ptr mut void` without an import cycle.
+An unsafe cast takes either the direct local mutable borrow or an exact local
+reference variable. The resulting C call receives `void **`, writes the pointer,
+and can clear it again; subsequent reads observe the original pointer storage.
+
+Shared outer/inner pointers, other pointees, third-level nesting, shared-borrow
+strengthening, and safe casts remain rejected. Option/Result cannot encode the
+new pointer borrow: the bounded tag encoding explicitly rejects it rather than
+overlapping an existing tag identity. Raw pointers still carry no safe origin.
+
+Evidence: `evidence/candidate-resource-output-slot-20261008.json`. Both candidate
+profiles, the independent two-profile provider, the foreign-call API tests, and
+the pointer/cast/C-scalar regressions are recorded there. Linux remains deferred.
