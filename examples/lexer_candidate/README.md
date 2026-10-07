@@ -15,9 +15,16 @@ declaration order; whole-value moves and consuming parameters transfer one
 obligation. Empty cleanup needs no runtime call; nonempty cleanup calls an exact
 private typed function whose receiver cannot move or recursively drop itself.
 Direct scalar receiver updates preserve that same execution view. Resource
-returns/propagation, loop exits, overwrite, owned fields/tagged values and borrow
-expansion remain the following numbered units. Native evidence is in
+loop exits, overwrite, owned fields/tagged values and borrow expansion remain
+the following numbered units. Native evidence is in
 `docs/ops/evidence/candidate-resource-exit-20261007.json`.
+
+Unit 23 adds direct/nested return cleanup, resource-value return transfer and
+scalar Result `?` cleanup. Return values are frozen before remaining roots drop;
+the error-return chain does not alter the continuing success path. Resource
+factory/call/if/switch returns and terminal short-circuit paths execute. Evidence
+is `docs/ops/evidence/candidate-resource-return-20261007.json`; owned tagged
+payloads remain unit 27.
 
 ## Owned consumer API
 

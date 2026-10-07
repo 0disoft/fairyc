@@ -23,7 +23,11 @@ fn m::Program compiled(ref u8[] source){return switch(lower::lower(fixture::reta
     assert(m::drop_count(ref p)==1 && !m::drop_at(ref p,0).nonempty && verify::check(ref p).code==0);
     var usize drops=0;var usize i=1;while(i<=m::operation_count(ref p)){if(m::operation_at(ref p,i).kind==25){drops+=1;}i+=1;}assert(drops==1);
 }
-@test fn void abrupt_resource_exits_stay_closed_until_next_units(){
-    let u32 returned=switch(lower::lower(fixture::retained(b"module main;resource R{cleanup{}}fn i32 main(){let R r=R{};return 0;}"))){case .ok(_):{0}case .err(e):{e.code}};assert(returned==4);
+@test fn void loop_resource_exits_stay_closed_until_next_unit(){
     let u32 broken=switch(lower::lower(fixture::retained(b"module main;resource R{cleanup{}}fn i32 main(){while(true){let R r=R{};break;}return 0;}"))){case .ok(_):{0}case .err(e):{e.code}};assert(broken==4);
+}
+@test fn void return_and_propagation_discharge_live_roots_and_preserve_donors(){
+    let p=compiled(b"module main;resource R{i32 n;cleanup{}}fn R make(){return R{.n=65};}fn R id(R r){return r;}fn i32 main(){let R r=id(make());return r.n;}");assert(verify::check(ref p).code==0);
+    let result=compiled(b"module main;resource R{cleanup{}}fn Result<i32,bool> f(bool ok){let R r=R{};let Result<i32,bool> input=if(ok){.ok(7)}else{.err(true)};let i32 n=input?;return .ok(n);}fn i32 main(){return switch(f(false)){case .ok(n):{n}case .err(_):{1}};}");assert(verify::check(ref result).code==0);
+    let selected=compiled(b"module main;resource R{cleanup{}}fn R f(bool yes){return if(yes){R{}}else{R{}};}fn i32 main(){let R r=f(true);return 0;}");assert(verify::check(ref selected).code==0);
 }

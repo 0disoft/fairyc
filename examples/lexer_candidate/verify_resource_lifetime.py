@@ -16,14 +16,30 @@ CASES = {
         ('empty', 'resource R{cleanup{}}fn void take(R r){}fn i32 main(){{let R a=R{};let R b=a;take(b);};return 0;}', '', 0, 0),
         ('shadow', 'resource R{i32 n;cleanup{mark(this.n);}}fn i32 main(){{let R r=R{.n=65};{let R r=R{.n=66};};};return 0;}', 'BA', 0, 0),
         ('wide-field', 'resource R{i64 n;cleanup{assert(this.n==4000000000);mark(65);}}fn i32 main(){{let R r=R{.n=4000000000};assert(r.n==4000000000);};return 7;}', 'A', 7, 0),
+    ],
+    23: [
+        ('return-root', 'resource R{i32 n;cleanup{mark(this.n);}}fn i32 main(){let R r=R{.n=65};return 7;}', 'A', 7, 0),
+        ('return-nested', 'resource R{i32 n;cleanup{mark(this.n);}}fn i32 main(){let R a=R{.n=65};{let R b=R{.n=66};return 9;};return 0;}', 'BA', 9, 0),
+        ('return-frozen', 'resource R{i32 n;cleanup{this.n+=1;mark(this.n);}}fn i32 main(){let R r=R{.n=65};return r.n;}', 'B', 65, 0),
+        ('return-donor', 'resource R{i32 n;cleanup{mark(this.n);}}fn R make(){return R{.n=65};}fn R id(R r){return r;}fn i32 main(){let R r=id(make());return 7;}', 'A', 7, 0),
+        ('return-if', 'resource R{i32 n;cleanup{mark(this.n);}}fn R select(bool yes){return if(yes){R{.n=65}}else{R{.n=66}};}fn i32 main(){let R a=select(true);let R b=select(false);return 0;}', 'BA', 0, 0),
+        ('return-switch', 'resource R{i32 n;cleanup{mark(this.n);}}enum E{A;B;}fn R select(E e){return switch(e){case .A:{R{.n=65}}case .B:{R{.n=66}}};}fn i32 main(){let R r=select(.B);return 0;}', 'B', 0, 0),
+        ('question-ok', 'resource R{i32 n;cleanup{mark(this.n);}}fn Result<i32,bool> f(bool ok){let R r=R{.n=65};let Result<i32,bool> input=if(ok){.ok(7)}else{.err(true)};let i32 n=input?;mark(88);return .ok(n);}fn i32 main(){return switch(f(true)){case .ok(n):{n}case .err(_):{99}};}', 'XA', 7, 0),
+        ('question-err', 'resource R{i32 n;cleanup{mark(this.n);}}fn Result<i32,bool> f(bool ok){let R r=R{.n=65};let Result<i32,bool> input=if(ok){.ok(7)}else{.err(true)};let i32 n=input?;mark(88);return .ok(n);}fn i32 main(){return switch(f(false)){case .ok(n):{n}case .err(e):{if(e){1}else{2}}};}', 'A', 1, 0),
+        ('short-return', 'resource R{i32 n;cleanup{mark(this.n);}}fn i32 f(bool yes){let R r=R{.n=65};discard yes && {return 7;true};return 8;}fn i32 main(){return f(false)+f(true);}', 'AA', 15, 0),
+        ('cleanup-local', 'resource S{cleanup{mark(83);}}resource R{cleanup{let S s=S{};mark(82);return;}}fn i32 main(){let R r=R{};return 0;}', 'RS', 0, 0),
     ]
 }
 REJECTIONS = {
     22: [
-        ('return-live', 'resource R{cleanup{}}fn i32 main(){let R r=R{};return 0;}'),
         ('break-live', 'resource R{cleanup{}}fn i32 main(){while(true){let R r=R{};break;}return 0;}'),
         ('overwrite-live', 'resource R{cleanup{}}fn i32 main(){{var R r=R{};r=R{};};return 0;}'),
         ('nested-field', 'resource S{cleanup{}}resource R{S s;cleanup{}}fn i32 main(){{let R r=R{.s=S{}};};return 0;}'),
+    ],
+    23: [
+        ('break-live', 'resource R{cleanup{}}fn i32 main(){while(true){let R r=R{};break;}return 0;}'),
+        ('overwrite-live', 'resource R{cleanup{}}fn i32 main(){var R r=R{};r=R{};return 0;}'),
+        ('nested-field', 'resource S{cleanup{}}resource R{S s;cleanup{}}fn i32 main(){let R r=R{.s=S{}};return 0;}'),
     ]
 }
 

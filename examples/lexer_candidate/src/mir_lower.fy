@@ -101,8 +101,10 @@ fn usize expression(ref h::Program input, ref mut v::Vec<m::Local> locals, ref m
         let u32 owner = h::type_code(h::expression_at(input,e.left).type);
         let shapes::Shape shape = shapes::at(h::nominal(input),shapes::find(h::nominal(input),owner) - 1);
         let usize result = if (type == 7) { 0 } else { state::local(locals,c,type,0,false,false,e.start,e.end) };
+        let u8[1153] incoming=c.live;var u8[1153] merged=[0;1153];var bool continuing=false;
         var v::Vec<usize> ends = v::empty<usize>(); var usize i = 0;
         while (i < e.edge_count) {
+            c.live=incoming;
             let h::Expression arm = h::expression_at(input,h::edge_at(input,e.edge_start + i)); var usize next = 0;
             if (i + 1 < e.edge_count) {
                 let usize condition = state::local(locals,c,6,0,false,false,arm.start,arm.end);
@@ -119,7 +121,8 @@ fn usize expression(ref h::Program input, ref mut v::Vec<m::Local> locals, ref m
             let usize value = block(input,locals,blocks,operations,edges,payload,c,arm.block,depth + 1);
             if (c.problem.code != 0) { return 0; }
             if (c.current != 0) {
-                if (result != 0 && state::emit(operations,blocks,c,state::operation(2,result,type,type,0,value,0,arm.start,arm.end)) == 0) { return 0; }
+                if (result != 0 && state::emit(operations,blocks,c,state::operation(if(resources::valid(type)){24}else{2},result,type,type,0,value,0,arm.start,arm.end)) == 0) { return 0; }
+                if(!continuing){merged=c.live;continuing=true;}
                 if (!v::push<usize>(ref mut ends,c.current).is_ok) { return state::fail(c,3,arm.start,arm.end); }
             }
             c.current = next; i += 1;
@@ -127,7 +130,7 @@ fn usize expression(ref h::Program input, ref mut v::Vec<m::Local> locals, ref m
         if (v::len<usize>(ref ends) == 0) { c.current = 0; return 0; }
         let usize join = state::new_block(blocks,c,e.start,e.end); i = 0;
         while (i < v::len<usize>(ref ends)) { c.current = *v::at<usize>(ref ends,i); if (!state::jump(blocks,c,join,e.start,e.end)) { return 0; } i += 1; }
-        c.current = join; return result;
+        c.live=merged;c.current = join; return result;
     }
     if (kind == 1 || kind == 2) {
         let usize result = state::local(locals,c,type,0,false,false,e.start,e.end);
@@ -245,12 +248,13 @@ fn usize expression(ref h::Program input, ref mut v::Vec<m::Local> locals, ref m
                 let usize consequent = if (operator == 19) { rhs } else { join };
                 let usize alternative = if (operator == 19) { join } else { rhs };
                 if (!state::branch(blocks,c,left,consequent,alternative,e.start,e.end)) { return 0; }
+                let u8[1153] skipped=c.live;
                 c.current = rhs; let usize right = expression(input,locals,blocks,operations,edges,payload,c,e.right,depth + 1);
                 if (c.problem.code != 0) { return 0; }
                 if (c.current != 0) {
                     if (state::emit(operations,blocks,c,state::operation(2,result,6,6,0,right,0,e.start,e.end)) == 0 || !state::jump(blocks,c,join,e.start,e.end)) { return 0; }
                 }
-                c.current = join; return result;
+                c.live=skipped;c.current = join; return result;
             }
             let usize right = expression(input,locals,blocks,operations,edges,payload,c,e.right,depth + 1);
             if (c.current == 0 || c.problem.code != 0) { return 0; }
@@ -293,12 +297,12 @@ fn usize expression(ref h::Program input, ref mut v::Vec<m::Local> locals, ref m
         let u8[1153] incoming=c.live;
         c.current = consequent; let usize yes = block(input,locals,blocks,operations,edges,payload,c,e.block,depth + 1);
         if (c.problem.code != 0) { return 0; }
-        if (c.current != 0 && result != 0 && state::emit(operations,blocks,c,state::operation(2,result,type,type,0,yes,0,e.start,e.end)) == 0) { return 0; }
+        if (c.current != 0 && result != 0 && state::emit(operations,blocks,c,state::operation(if(resources::valid(type)){24}else{2},result,type,type,0,yes,0,e.start,e.end)) == 0) { return 0; }
         let usize yes_end = c.current;
         let u8[1153] yes_live=c.live;c.live=incoming;
         c.current = alternative; let usize no = expression(input,locals,blocks,operations,edges,payload,c,e.alternative,depth + 1);
         if (c.problem.code != 0) { return 0; }
-        if (c.current != 0 && result != 0 && state::emit(operations,blocks,c,state::operation(2,result,type,type,0,no,0,e.start,e.end)) == 0) { return 0; }
+        if (c.current != 0 && result != 0 && state::emit(operations,blocks,c,state::operation(if(resources::valid(type)){24}else{2},result,type,type,0,no,0,e.start,e.end)) == 0) { return 0; }
         let usize no_end = c.current;
         if(yes_end!=0){c.live=yes_live;}
         // Allocate a join only for live fallthrough; both returning arms leave
@@ -438,9 +442,7 @@ fn bool statement(ref h::Program input, ref mut v::Vec<m::Local> locals, ref mut
     if (kind == 2) {
         let usize value = expression(input,locals,blocks,operations,edges,payload,c,s.expression,depth + 1);
         if (c.current == 0 || c.problem.code != 0) { return c.problem.code == 0; }
-        // Unit 23 connects abrupt cleanup and resource return transfer.
-        if(lifetime::any_live(c) || value!=0 && resources::valid(v::at<m::Local>(locals,value-1).type)){discard state::fail(c,4,s.start,s.end);return false;}
-        if (!finalize::emit_deferred(blocks,edges,c,0)) { return false; }
+        if (!finalize::emit_deferred(blocks,edges,c,0) || !lifetime::scope(input,locals,blocks,operations,edges,c,0,s.start,s.end)) { return false; }
         var m::Block term = state::block(c.function,s.start,s.end); term.kind = 1; term.value = value;
         return state::terminate(blocks,c,term);
     }
