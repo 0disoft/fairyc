@@ -42,3 +42,8 @@ fn m::Program changed(ref m::Program p){
     assert(verify::check(ref p).code==0);let bad=changed(ref p);assert(verify::check(ref bad).code==5101);
     var bytes::Buffer out=bytes::empty();assert(bytes::append(ref mut out,b"prefix").is_ok);assert(c::render(ref bad,ref mut out)!=0 && bytes::equal(bytes::view(ref out),b"prefix"));
 }
+
+@test fn void owned_hir_rechecks_pointer_cast_permission(){
+    let p=fixture::retained(b"module main;fn i32 main(){let i32 n=7;let ptr i32 p=unsafe{ref n as ptr i32};assert(p!=null);return 7;}");
+    assert(reassembled(ref p,0)==0 && reassembled(ref p,1)==5101);
+}

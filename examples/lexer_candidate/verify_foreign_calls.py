@@ -16,6 +16,10 @@ uintptr_t fixture_size(uintptr_t n){return n;}
 int32_t fixture_signed(int32_t n){return n;}
 int32_t fixture_trace(int32_t n){(void)fputc((unsigned char)n,stdout);(void)fflush(stdout);return n;}
 int32_t fixture_pair(int32_t a,int32_t b){return a+b;}
+int32_t fixture_read(const int32_t *p){return *p;}
+void fixture_store(int32_t *p,int32_t n){*p=n;}
+int32_t fixture_read_opaque(const void *p){return *(const int32_t*)p;}
+int32_t fixture_bytes(const uint8_t *p,uintptr_t n){return n==2&&p[0]==65&&p[1]==66?7:0;}
 void fixture_emit(int32_t n){(void)fputc((unsigned char)n,stdout);(void)fflush(stdout);}
 '''
 CASES=[
@@ -34,6 +38,24 @@ POINTER_CASES=[
  ('pointer-roundtrip','unsafe extern C fn ptr i32 fixture_pointer(ptr i32 p);fn ptr i32 forward(ptr i32 p){return p;}fn i32 main(){let ptr i32 p=unsafe{fixture_pointer(null)};assert(p!=null);assert(null!=p);assert(forward(p)==p);return 7;}','',7),
  ('mutable-opaque','unsafe extern C fn ptr mut void fixture_opaque(ptr mut void p);fn i32 main(){var ptr mut void p=null;p=unsafe{fixture_opaque(p)};assert(p==null);assert(null==p);return 7;}','',7),
  ('pointer-field','struct S{ptr u8 p;}fn i32 main(){let S s=S{.p=null};assert(s.p==null);return 7;}','',7),
+]
+CAST_CASES=[
+ ('scalar-shared','unsafe extern C fn i32 fixture_read(ptr i32 p);fn i32 main(){let i32 n=7;return unsafe{fixture_read(ref n as ptr i32)};}','',7),
+ ('scalar-mutable','unsafe extern C fn void fixture_store(ptr mut i32 p,i32 n);fn i32 main(){var i32 n=1;unsafe{fixture_store(ref mut n as ptr mut i32,7);};return n;}','',7),
+ ('mutable-to-shared','unsafe extern C fn i32 fixture_read(ptr i32 p);fn i32 main(){var i32 n=7;let ref mut i32 r=ref mut n;return unsafe{fixture_read(r as ptr i32)};}','',7),
+ ('opaque-owner','unsafe extern C fn i32 fixture_read_opaque(ptr void p);fn i32 main(){let i32 n=7;return unsafe{fixture_read_opaque(ref n as ptr void)};}','',7),
+ ('byte-view-data','unsafe extern C fn i32 fixture_bytes(ptr u8 p,usize n);fn i32 main(){let u8[2] a=[65,66];let ref u8[] r=ref a;return unsafe{fixture_bytes(r as ptr u8,2)};}','',7),
+ ('text-data','unsafe extern C fn i32 fixture_bytes(ptr u8 p,usize n);fn i32 main(){let ref str s="AB";return unsafe{fixture_bytes(s as ptr u8,2)};}','',7),
+ ('unsafe-wrapper','unsafe fn ptr i32 address(ref i32 n){return n as ptr i32;}unsafe extern C fn i32 fixture_read(ptr i32 p);fn i32 main(){let i32 n=7;return unsafe{fixture_read(address(ref n))};}','',7),
+]
+CAST_REJECTIONS=[
+ ('safe-cast','fn i32 main(){let i32 n=7;let ptr i32 p=ref n as ptr i32;return 0;}','E5101'),
+ ('strengthened-cast','fn i32 main(){let i32 n=7;let p=unsafe{ref n as ptr mut i32};return 0;}','unsupported explicit cast'),
+ ('wrong-pointee-cast','fn i32 main(){let i32 n=7;let p=unsafe{ref n as ptr u8};return 0;}','unsupported explicit cast'),
+ ('integer-pointer-cast','fn i32 main(){let p=unsafe{7 as ptr i32};return 0;}','unsupported explicit cast'),
+ ('pointer-integer-cast','fn i32 main(){let ptr i32 p=null;let n=unsafe{p as usize};return 0;}','unsupported explicit cast'),
+ ('text-mutable-cast','fn i32 main(){let ref str s="AB";let p=unsafe{s as ptr mut u8};return 0;}','unsupported explicit cast'),
+ ('opaque-projection-cast','struct S{i32 n;}fn i32 main(){let S s=S{.n=7};let p=unsafe{ref s.n as ptr void};return 0;}','unsupported explicit cast'),
 ]
 POINTER_REJECTIONS=[
  ('null-integer','fn i32 main(){let i32 x=null;return x;}','type mismatch'),
@@ -66,8 +88,8 @@ REJECTIONS=[
 def sha(p):return hashlib.sha256(p.read_bytes()).hexdigest()
 def save(p,data):p.write_text(json.dumps(data,ensure_ascii=False,indent=2)+'\n',encoding='utf-8',newline='\n')
 def main():
- ap=argparse.ArgumentParser();ap.add_argument('--images',nargs='+',required=True);ap.add_argument('--native-runner',required=True);ap.add_argument('--receipt',required=True);ap.add_argument('--cli-only',action='store_true');ap.add_argument('--lane',choices=['scalar','pointer'],default='scalar');args=ap.parse_args()
- cases=POINTER_CASES if args.lane=='pointer' else CASES;rejections=POINTER_REJECTIONS if args.lane=='pointer' else REJECTIONS
+ ap=argparse.ArgumentParser();ap.add_argument('--images',nargs='+',required=True);ap.add_argument('--native-runner',required=True);ap.add_argument('--receipt',required=True);ap.add_argument('--cli-only',action='store_true');ap.add_argument('--lane',choices=['scalar','pointer','cast'],default='scalar');args=ap.parse_args()
+ cases=CAST_CASES if args.lane=='cast' else POINTER_CASES if args.lane=='pointer' else CASES;rejections=CAST_REJECTIONS if args.lane=='cast' else POINTER_REJECTIONS if args.lane=='pointer' else REJECTIONS
  images=[Path(s).resolve() for s in args.images];runner=Path(args.native_runner).resolve();receipt=Path(args.receipt).resolve();receipt.parent.mkdir(parents=True,exist_ok=True);rows=[];fixtures=[];jobs=[];native=[];passed=False
  def run(argv,expected=0):
   q=subprocess.run(list(map(str,argv)),cwd=ROOT,capture_output=True,encoding='utf-8',timeout=360);row=dict(argv=list(map(str,argv)),cwd=str(ROOT),exit=q.returncode,stdout=q.stdout,stderr=q.stderr);rows.append(row);save(receipt.parent/'raw.json',rows);assert q.returncode==expected,row;return row

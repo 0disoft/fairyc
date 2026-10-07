@@ -162,7 +162,7 @@ fn usize expression(ref typing::Typed input, ref v::Vec<h::Binding> bindings, re
             let usize argument = expression(input,bindings,links,c,expressions,statements,blocks,edges,payload,syntax::call_argument(parsed,id,i),depth + 1);
             if (argument == 0) { return 0; } state::set_edge(edges,e.edge_start + i,argument); i += 1;
         }
-    } else if(node.kind==23){kind=.Cast;e.left=expression(input,bindings,links,c,expressions,statements,blocks,edges,payload,node.left,depth+1);
+    } else if(node.kind==23){kind=if(pointers::valid(h::type_code(type))){.PointerCast}else{.Cast};e.boolean=pointers::valid(h::type_code(type));e.left=expression(input,bindings,links,c,expressions,statements,blocks,edges,payload,node.left,depth+1);
     } else if (node.kind == 24 || node.kind == 29) {
         kind = .Array; e.boolean = node.kind == 29;
         e.edge_count = if (e.boolean) { 1 } else { syntax::array_element_count(parsed,id) };

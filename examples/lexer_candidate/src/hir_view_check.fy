@@ -100,7 +100,7 @@ fn usize held_end(ref h::Program p, usize id, h::Expression e,ref mut Context c)
     var usize end=loop_end(p,e,c);var usize i=1;
     while(i<=h::expression_count(p)){
         let parent=h::expression_at(p,i);let u32 kind=h::expression_code(parent.kind);
-        if((kind==13 || kind==17 || kind==25 || kind==4 || kind==10 || kind==14) && parent.left==id && parent.end>end){end=parent.end;}
+        if((kind==13 || kind==17 || kind==25 || kind==28 || kind==4 || kind==10 || kind==14) && parent.left==id && parent.end>end){end=parent.end;}
         if(kind==6){var usize j=0;while(j<parent.edge_count){if(h::edge_at(p,parent.edge_start+j)==id && parent.end>end){end=parent.end;}j+=1;}}i+=1;
     }
     i = 1; while (i <= h::statement_count(p)) {

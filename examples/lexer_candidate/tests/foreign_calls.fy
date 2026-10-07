@@ -14,7 +14,7 @@ import std::vec as v;
 fn m::Program changed(ref m::Program p,u32 mutation){
     var bytes::Buffer source=bytes::empty();assert(bytes::append(ref mut source,m::source_view(p)).is_ok);
     var bytes::Buffer payload=bytes::empty();var v::Vec<m::Operation> ops=v::empty<m::Operation>();var usize i=1;
-    while(i<=m::operation_count(p)){var o=m::operation_at(p,i);if(o.kind==36){if(mutation==5){o.boolean=true;}else if(mutation==6){o.left=o.result;}}if(o.payload_end>o.payload_start){assert(bytes::append(ref mut payload,m::literal_text(p,i)).is_ok);}assert(v::push<m::Operation>(ref mut ops,o).is_ok);i+=1;}
+    while(i<=m::operation_count(p)){var o=m::operation_at(p,i);if(o.kind==37){if(mutation==7){o.boolean=false;}else if(mutation==8){o.operator=1;}}if(o.kind==36){if(mutation==5){o.boolean=true;}else if(mutation==6){o.left=o.result;}}if(o.payload_end>o.payload_start){assert(bytes::append(ref mut payload,m::literal_text(p,i)).is_ok);}assert(v::push<m::Operation>(ref mut ops,o).is_ok);i+=1;}
     var v::Vec<m::Target> targets=v::empty<m::Target>();i=1;while(i<=m::target_count(p)){var t=m::target_at(p,i);if(t.foreign){if(mutation==1){t.link_start=7;t.link_end=11;}else if(mutation==2){t.result=6;}else if(mutation==3){t.foreign=false;}else if(mutation==4){t.unsafe_call=false;}}assert(v::push<m::Target>(ref mut targets,t).is_ok);i+=1;}
     var v::Vec<m::Signature> signatures=v::empty<m::Signature>();i=0;while(i<m::signature_count(p)){assert(v::push<m::Signature>(ref mut signatures,m::Signature{.type=m::signature_at(p,i)}).is_ok);i+=1;}
     var v::Vec<m::Function> functions=v::empty<m::Function>();i=1;while(i<=m::function_count(p)){assert(v::push<m::Function>(ref mut functions,m::function_at(p,i)).is_ok);i+=1;}
@@ -41,4 +41,9 @@ fn m::Program changed(ref m::Program p,u32 mutation){
 @test fn void pointer_type_ids_are_disjoint_from_tags_arrays_and_borrows(){
     var u32 element=1;while(element<=7){if(element!=6){let u32 shared=pointers::make(element,false);let u32 exclusive=pointers::make(element,true);assert(pointers::valid(shared) && pointers::valid(exclusive));assert(pointers::inner(shared)==element && !pointers::mutable(shared) && pointers::mutable(exclusive));assert(!tags::builtin(shared) && !arrays::valid(shared));}element+=1;}
     assert(pointers::make(6,false)==0 && !pointers::valid(196610) && !pointers::valid(1048588));
+}
+
+@test fn void pointer_casts_reject_lost_provenance(){
+    let p=switch(lower::lower(fixture::retained(b"module main;fn i32 main(){let i32 n=7;let ptr i32 p=unsafe{ref n as ptr i32};assert(p!=null);return 7;}"))){case .ok(p):{p}case .err(_):{assert(false);return;}};
+    assert(verify::check(ref p).code==0);var u32 mutation=7;while(mutation<=8){let bad=changed(ref p,mutation);assert(verify::check(ref bad).code==1001);var bytes::Buffer out=bytes::empty();assert(bytes::append(ref mut out,b"prefix").is_ok);assert(c::render(ref bad,ref mut out)!=0 && bytes::equal(bytes::view(ref out),b"prefix"));mutation+=1;}
 }

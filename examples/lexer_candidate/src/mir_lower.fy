@@ -49,6 +49,7 @@ fn usize expression(ref h::Program input, ref mut v::Vec<m::Local> locals, ref m
     if (id == 0 || c.current == 0 || c.problem.code != 0) { return 0; }
     let h::Expression e = h::expression_at(input,id); let u32 kind = h::expression_code(e.kind); let u32 type = h::type_code(e.type); let u32 operator = h::operator_code(e.operator);
     if (depth >= 64) { return state::fail(c,2,e.start,e.end); }
+    if(kind==28){let usize owner=expression(input,locals,blocks,operations,edges,payload,c,e.left,depth+1);if(c.current==0 || c.problem.code!=0){return 0;}let usize result=state::local(locals,c,type,0,false,false,e.start,e.end);var m::Operation o=state::operation(37,result,type,h::type_code(h::expression_at(input,e.left).type),0,owner,0,e.start,e.end);o.boolean=e.boolean;return if(state::emit(operations,blocks,c,o)!=0){result}else{0};}
     if(kind==26){let usize owner=expression(input,locals,blocks,operations,edges,payload,c,e.left,depth+1);if(c.current==0 || c.problem.code!=0){return 0;}let usize result=state::local(locals,c,type,0,false,false,e.start,e.end);return if(state::emit(operations,blocks,c,state::operation(35,result,type,h::type_code(h::expression_at(input,e.left).type),0,owner,0,e.start,e.end))!=0){result}else{0};}
     if(kind==24){
         let usize donor=c.locals[e.binding];if(!shapes::needs_drop(type) || donor==0 || c.live[e.binding]!=1){return state::fail(c,4,e.start,e.end);}

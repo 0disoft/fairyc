@@ -1,5 +1,6 @@
 module pointer_types;
 import syntax as syntax;
+import reference_types as refs;
 import type_state as state;
 import std::bytes as bytes;
 
@@ -14,4 +15,12 @@ pub fn u32 resolve(ref syntax::Parsed p,usize root){
     let n=syntax::type_at(p,root);if(n.kind!=11 && n.kind!=12 || syntax::type_at(p,n.left).kind!=1){return 0;}
     let u32 type=state::primitive(p,n.left);if(type==7 && !bytes::equal(syntax::type_text(p,n.left),b"void")){return 0;}
     return make(type,n.kind==12);
+}
+
+// The caller separately validates direct-place syntax for opaque erasure.
+// Safe view descriptors contribute their data address, never the descriptor.
+pub fn bool cast_allowed(u32 source,u32 target){
+    if(!valid(target)){return false;}
+    if(refs::valid(source)){return (!mutable(target) || refs::mutable(source)) && (inner(target)==refs::inner(source) || inner(target)==7);}
+    return inner(target)==3 && (source==9 && !mutable(target) || source==10 && !mutable(target) || source==11);
 }

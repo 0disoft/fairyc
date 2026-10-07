@@ -43,7 +43,7 @@ fn bool expression_kind(ref mut bytes::Buffer out, h::ExpressionKind kind) {
         case .Construct: { put(out,b"construct") } case .Field: { put(out,b"field") } case .Initializer: { put(out,b"initializer") } case .Array: { put(out,b"array") } case .Index: { put(out,b"index") } case .Length: { put(out,b"length") } case .Borrow: { put(out,b"borrow-array") } case .Slice: { put(out,b"slice") }
         case .Variant: { put(out,b"variant") } case .Switch: { put(out,b"switch") } case .Arm: { put(out,b"arm") } case .Capture: { put(out,b"capture") }
         case .Propagate: { put(out,b"propagate") }
-        case .IsOk: { put(out,b"is-ok") } case .Cast: { put(out,b"scalar-cast") } case .Null:{put(out,b"null")} case .Move: { put(out,b"move") } case .Reborrow: { put(out,b"shared-reborrow") }
+        case .IsOk: { put(out,b"is-ok") } case .Cast: { put(out,b"scalar-cast") } case .Null:{put(out,b"null")} case .PointerCast:{put(out,b"pointer-cast")} case .Move: { put(out,b"move") } case .Reborrow: { put(out,b"shared-reborrow") }
         case .Literal: { put(out,b"literal") }
     };
 }

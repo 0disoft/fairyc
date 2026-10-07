@@ -52,7 +52,7 @@ pub fn i32 errors(ref typing::Typed typed, ref u8[] path) {
                 else if (problem.code == 38) { "invalid Result pattern" } else { "non-exhaustive Result switch" });
             output::range(problem.start,problem.end); return 2;
         }
-        discard io::write_stderr(if(problem.code==52){"unsupported scalar cast"}else if (problem.code == 1) { "type mismatch" } else if (problem.code == 2) { "integer literal out of range" }
+        discard io::write_stderr(if(problem.code==52){"unsupported explicit cast"}else if (problem.code == 1) { "type mismatch" } else if (problem.code == 2) { "integer literal out of range" }
             else if (problem.code == 3) { "expected bool operand" } else if (problem.code == 4) { "assignment target is immutable" }
             else if (problem.code == 5) { "call argument count mismatch" } else if (problem.code == 6) { "expression is not callable" }
             else if (problem.code == 7) { "missing return value" } else if (problem.code == 8) { "non-scalar binding value" }
