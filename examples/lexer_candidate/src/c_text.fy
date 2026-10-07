@@ -2,6 +2,7 @@ module c_text;
 import std::bytes as bytes;
 import enum_types as enums;
 import tagged_types as tagged;
+import resource_identity as resources;
 
 pub struct State { u32 code; }
 pub fn bool text(ref mut bytes::Buffer out, ref mut State s, ref u8[] value) {
@@ -20,6 +21,7 @@ pub fn bool type(ref mut bytes::Buffer out, ref mut State s, u32 code) {
     if (tagged::option(code)) { return text(out,s,b"struct fy_o_") && number(out,s,tagged::inner(code) as usize); }
     if (tagged::result(code)) { return text(out,s,b"struct fy_r_") && number(out,s,tagged::success(code) as usize) && text(out,s,b"_") && number(out,s,tagged::failure(code) as usize); }
     if (enums::valid(code)) { return text(out,s,b"struct fy_e_") && number(out,s,code as usize); }
+    if(resources::valid(code)){return text(out,s,b"struct fy_resource_") && number(out,s,code as usize);}
     if (code >= 1024) { return text(out,s,b"struct fy_a_") && number(out,s,code as usize); }
     if (code >= 256) { return text(out,s,b"struct fy_s_") && number(out,s,code as usize); }
     return text(out,s,if (code == 1 || code == 6) { b"int32_t" } else if (code == 2) { b"int64_t" }

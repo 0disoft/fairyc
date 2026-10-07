@@ -4,6 +4,7 @@ import literal_types as literals;
 import std::bytes as bytes;
 import std::vec as v;
 import hir_shapes as shapes;
+import resource_identity as resources;
 
 // Enum operations: 21 constructs a tag and declaration-order payload operands;
 // 22 tests a tag. Operator is the dense member ordinal, excluding payload fields.
@@ -18,6 +19,7 @@ pub struct Signature { u32 type; }
 pub struct Target { usize binding; usize module_index; usize declaration; u32 result; usize signature_start; usize signature_count; usize start; usize end; bool external; }
 pub struct Function { usize target; usize entry; usize local_start; usize local_count; usize block_start; usize block_count; usize parameter_start; usize parameter_count; usize start; usize end; bool public; }
 pub struct Local { usize function; usize binding; u32 type; bool parameter; bool mutable; usize start; usize end; }
+pub struct Drop { u32 type; usize target; bool nonempty; }
 // Operation kinds: 1 constant, 2 copy/assignment, 3 unary, 4 binary, 5 check,
 // 6 construct (declaration-order operands), 7 field read, 8 functional update.
 // 9 array construct (boolean means repeat once), 10 indexed read, 11 array
@@ -28,6 +30,9 @@ pub struct Local { usize function; usize binding; u32 type; bool parameter; bool
 // 16 checked view index (left frozen descriptor, right raw usize), 17 byte read.
 // A check defines no local. It must end its block immediately before a matching
 // checked terminator. Actual arithmetic occurs only in the success block.
+// 24 transfers one owned root (donor becomes Dead); 25 discharges an empty
+// cleanup. Nonempty cleanup uses a kind-5 call with type=exact resource type;
+// ordinary calls have type=0 and cannot call a private drop target.
 pub struct Operation { usize function; usize block; u32 kind; usize result; u32 type; u32 owner_type; u32 operator; usize left; usize right; usize next; usize payload_start; usize payload_end; bool boolean; usize start; usize end; usize argument_start; usize argument_count; }
 // Terminators: 1 return, 2 goto, 3 bool branch, 4 checked switch, 5 call,
 // 6 trap, 7 unreachable. Calls have one normal successor, no unwind edge.
@@ -37,6 +42,7 @@ pub struct Operation { usize function; usize block; u32 kind; usize result; u32 
 pub struct Block { usize function; usize first; usize last; u32 kind; usize value; usize left; usize right; u32 operator; u32 type; usize target; usize alternative; usize check; usize callee; usize destination; usize argument_start; usize argument_count; u32 trap_mask; usize start; usize end; }
 pub resource Program {
     shapes::Table nominal;
+    v::Vec<Drop> drops;
     bytes::Buffer source; bytes::Buffer payload;
     v::Vec<Target> targets; v::Vec<Signature> signatures;
     v::Vec<Function> functions; v::Vec<Local> locals; v::Vec<Block> blocks;
@@ -48,6 +54,11 @@ pub resource Program {
 // 16384 blocks, 32768 operations, 65536 edges/signatures, 688128 payload bytes.
 // 1 invalid input, 2 budget, 3 allocation, 4 malformed/unsupported graph.
 pub fn usize target_count(ref Program p) { assert(p.success); return v::len<Target>(ref p.targets); }
+pub fn usize drop_count(ref Program p) { assert(p.success); return v::len<Drop>(ref p.drops); }
+pub fn Drop drop_at(ref Program p,usize index) { assert(index<drop_count(p)); return *v::at<Drop>(ref p.drops,index); }
+pub fn usize drop_index(ref Program p,u32 type) { var usize i=0;while(i<drop_count(p)){if(drop_at(p,i).type==type){return i+1;}i+=1;}return 0; }
+pub fn bool drop_target(ref Program p,usize target) {var usize i=0;while(i<drop_count(p)){if(drop_at(p,i).target!=0 && drop_at(p,i).target==target){return true;}i+=1;}return false;}
+pub fn usize drop_receiver(ref Program p,usize function) {let f=function_at(p,function);return if(drop_target(p,f.target)){edge_at(p,f.parameter_start)}else{0};}
 pub fn usize signature_count(ref Program p) { assert(p.success); return v::len<Signature>(ref p.signatures); }
 pub fn usize function_count(ref Program p) { assert(p.success); return v::len<Function>(ref p.functions); }
 pub fn usize local_count(ref Program p) { assert(p.success); return v::len<Local>(ref p.locals); }
@@ -80,11 +91,27 @@ pub fn Result<Program,Problem> assemble(bytes::Buffer source, bytes::Buffer payl
     return assemble_nominal(source,payload,targets,signatures,functions,locals,blocks,operations,edges,module_index,shapes::empty());
 }
 pub fn Result<Program,Problem> assemble_nominal(bytes::Buffer source, bytes::Buffer payload, v::Vec<Target> targets, v::Vec<Signature> signatures, v::Vec<Function> functions, v::Vec<Local> locals, v::Vec<Block> blocks, v::Vec<Operation> operations, v::Vec<usize> edges, usize module_index, shapes::Table nominal) {
+    return assemble_resources(source,payload,targets,signatures,functions,locals,blocks,operations,edges,module_index,nominal,v::empty<Drop>());
+}
+pub fn Result<Program,Problem> assemble_resources(bytes::Buffer source, bytes::Buffer payload, v::Vec<Target> targets, v::Vec<Signature> signatures, v::Vec<Function> functions, v::Vec<Local> locals, v::Vec<Block> blocks, v::Vec<Operation> operations, v::Vec<usize> edges, usize module_index, shapes::Table nominal,v::Vec<Drop> drops) {
     let usize ns = bytes::len(ref source); let usize np = bytes::len(ref payload);
     let usize nt = v::len<Target>(ref targets); let usize ng = v::len<Signature>(ref signatures); let usize nf = v::len<Function>(ref functions);
     let usize nl = v::len<Local>(ref locals); let usize nb = v::len<Block>(ref blocks); let usize no = v::len<Operation>(ref operations); let usize ne = v::len<usize>(ref edges);
     if (ns > 32768 || np > 688128 || nt > 512 || nf > 512 || nl > 16384 || nb > 16384 || no > 32768 || ne > 65536 || ng > 65536) { return .err(Problem { .code = 2, .start = 0, .end = ns }); }
-    if (!shapes::valid(ref nominal,ns,1152) || shapes::has_resources(ref nominal)) { return .err(Problem { .code = 4, .start = 0, .end = ns }); }
+    if (!shapes::valid(ref nominal,ns,1152) || v::len<Drop>(ref drops)>512) { return .err(Problem { .code = 4, .start = 0, .end = ns }); }
+    var usize resource_count=0;var usize shape_index=0;
+    while(shape_index<shapes::count(ref nominal)){let shape=shapes::at(ref nominal,shape_index);if(resources::valid(shape.type)){resource_count+=1;}
+        // Recursive field and tagged ownership are connected in later units.
+        if(shapes::needs_drop(shape.type) && !resources::valid(shape.type)){return .err(Problem{.code=4,.start=0,.end=ns});}
+        var usize field=0;while(field<shape.field_count){if(shapes::needs_drop(shapes::field_at(ref nominal,shape.field_start+field+1).type)){return .err(Problem{.code=4,.start=0,.end=ns});}field+=1;}shape_index+=1;
+    }
+    if(resource_count!=v::len<Drop>(ref drops)){return .err(Problem{.code=4,.start=0,.end=ns});}
+    var usize dropping=0;while(dropping<v::len<Drop>(ref drops)){let Drop d=*v::at<Drop>(ref drops,dropping);
+        if(!resources::valid(d.type) || shapes::find(ref nominal,d.type)==0 || d.target>nt || d.nonempty!=(d.target!=0)){return .err(Problem{.code=4,.start=0,.end=ns});}
+        var usize other=0;while(other<dropping){let Drop previous=*v::at<Drop>(ref drops,other);if(previous.type==d.type || d.target!=0 && previous.target==d.target){return .err(Problem{.code=4,.start=0,.end=ns});}other+=1;}
+        if(d.nonempty){let Target t=*v::at<Target>(ref targets,d.target-1);if(t.external || t.result!=7 || t.signature_count!=1 || t.signature_start>=ng || v::at<Signature>(ref signatures,t.signature_start).type!=d.type || t.declaration!=(d.type-98303) as usize){return .err(Problem{.code=4,.start=t.start,.end=t.end});}}
+        dropping+=1;
+    }
     var usize i = 0;
     while (i < nt) {
         let Target t = *v::at<Target>(ref targets,i);
@@ -137,8 +164,8 @@ pub fn Result<Program,Problem> assemble_nominal(bytes::Buffer source, bytes::Buf
     i = 0;
     while (i < no) {
         let Operation o = *v::at<Operation>(ref operations,i);
-        if (o.function == 0 || o.function > nf || o.block == 0 || o.block > nb || o.kind < 1 || o.kind > 23 || o.result > nl || o.left > nl || o.right > nl || o.next > no || (o.next != 0 && o.next <= i + 1) || o.start >= o.end || o.end > ns || o.payload_start > o.payload_end || o.payload_end > np || o.argument_start > ne || o.argument_count > ne - o.argument_start || v::at<Block>(ref blocks,o.block - 1).function != o.function) { return .err(Problem { .code = 4, .start = o.start, .end = o.end }); }
-        if ((o.kind != 5 && o.kind != 20 && (o.result == 0 || !shapes::valid_type(ref nominal,o.type,false))) || ((o.kind == 5 || o.kind == 20) && o.result != 0)) { return .err(Problem { .code = 4, .start = o.start, .end = o.end }); } i += 1;
+        if (o.function == 0 || o.function > nf || o.block == 0 || o.block > nb || o.kind < 1 || o.kind > 25 || o.result > nl || o.left > nl || o.right > nl || o.next > no || (o.next != 0 && o.next <= i + 1) || o.start >= o.end || o.end > ns || o.payload_start > o.payload_end || o.payload_end > np || o.argument_start > ne || o.argument_count > ne - o.argument_start || v::at<Block>(ref blocks,o.block - 1).function != o.function) { return .err(Problem { .code = 4, .start = o.start, .end = o.end }); }
+        if ((o.kind != 5 && o.kind != 20 && o.kind!=25 && (o.result == 0 || !shapes::valid_type(ref nominal,o.type,false))) || ((o.kind == 5 || o.kind == 20 || o.kind==25) && o.result != 0)) { return .err(Problem { .code = 4, .start = o.start, .end = o.end }); } i += 1;
     }
-    return .ok(Program { .nominal, .source, .payload, .targets, .signatures, .functions, .locals, .blocks, .operations, .edges, .module_index, .success = true });
+    return .ok(Program { .nominal, .drops, .source, .payload, .targets, .signatures, .functions, .locals, .blocks, .operations, .edges, .module_index, .success = true });
 }

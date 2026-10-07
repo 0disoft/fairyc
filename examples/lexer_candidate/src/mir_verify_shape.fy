@@ -8,6 +8,7 @@ import mir_verify_arrays as arrays;
 import mir_verify_literals as literals;
 import mir_verify_views as views;
 import mir_verify_enums as enums;
+import resource_identity as resources;
 
 pub fn m::Problem problem(u32 code, usize start, usize end) { return m::Problem { .code, .start, .end }; }
 pub fn bool local(ref m::Program p, usize id, usize function, u32 type) {
@@ -49,13 +50,18 @@ fn bool integer(ref u8[] text, u32 type) {
     return true;
 }
 fn bool operation(ref m::Program p, usize id, m::Operation o) {
+    if(o.kind==24 || o.kind==25){
+        if(!resources::valid(o.type) || o.owner_type!=o.type || o.operator!=0 || o.right!=0 || o.argument_start!=0 || o.argument_count!=0 || o.payload_start!=0 || o.payload_end!=0 || o.boolean || !local(p,o.left,o.function,o.type)){return false;}
+        if(o.kind==24){return o.result!=o.left && local(p,o.result,o.function,o.type);}
+        let usize at=m::drop_index(p,o.type);return o.result==0 && at!=0 && !m::drop_at(p,at-1).nonempty;
+    }
     if (o.kind >= 21) { return enums::operation(p,o); }
     if (o.kind >= 18) { return views::operation(p,o); }
     if (o.kind >= 14) { return literals::operation(p,id,o); }
     if (o.kind >= 9) { return arrays::operation(p,o); }
     if (o.kind >= 6) { return nominal::operation(p,o); }
     if (o.argument_start != 0 || o.argument_count != 0) { return false; }
-    if (o.kind == 2) { return local(p,o.result,o.function,o.type) && local(p,o.left,o.function,o.type) && o.owner_type == o.type && o.operator == 0 && o.right == 0 && o.payload_start == 0 && o.payload_end == 0 && !o.boolean; }
+    if (o.kind == 2) { return !shapes::needs_drop(o.type) && local(p,o.result,o.function,o.type) && local(p,o.left,o.function,o.type) && o.owner_type == o.type && o.operator == 0 && o.right == 0 && o.payload_start == 0 && o.payload_end == 0 && !o.boolean; }
     if (o.owner_type < 1 || o.owner_type > 6 || o.type < 1 || o.type > 6) { return false; }
     if (o.kind != 5 && !local(p,o.result,o.function,o.type)) { return false; }
     if (o.kind == 1) {
@@ -99,6 +105,7 @@ pub fn m::Problem check(ref m::Program p) {
     }
     i = 1; while (i <= m::function_count(p)) {
         let m::Function f = m::function_at(p,i); let m::Target t = m::target_at(p,f.target);
+        if(m::drop_target(p,f.target) && (f.public || f.parameter_count!=1)){return problem(1001,f.start,f.end);}
         if (*v::at<usize>(ref bodies,f.target) != 0) { return problem(1001,f.start,f.end); }
         { let ref mut usize slot = v::at_mut<usize>(ref mut bodies,f.target); *slot = i; }
         var usize j = 0; while (j < f.parameter_count) {
@@ -154,7 +161,8 @@ pub fn m::Problem check(ref m::Program p) {
             }
         } else if (b.kind == 5) {
             let m::Target t = m::target_at(p,b.callee);
-            if (!empty_fields(b) || b.value != 0 || b.type != 0 || b.alternative != 0 || (if (t.result == 7) { b.destination != 0 } else { !local(p,b.destination,b.function,t.result) })) { return problem(1001,b.start,b.end); }
+            let usize drop=if(b.type==0){0}else{m::drop_index(p,b.type)};
+            if (b.left!=0 || b.right!=0 || b.operator!=0 || b.check!=0 || b.trap_mask!=0 || b.value != 0 || b.alternative != 0 || (if(b.type==0){m::drop_target(p,b.callee)}else{drop==0 || m::drop_at(p,drop-1).target!=b.callee}) || (if (t.result == 7) { b.destination != 0 } else { !local(p,b.destination,b.function,t.result) })) { return problem(1001,b.start,b.end); }
             if (b.destination != 0) { let ref mut usize count = v::at_mut<usize>(ref mut definitions,b.destination); *count += 1; }
             var usize j = 0; while (j < b.argument_count) {
                 let usize at = b.argument_start + j;

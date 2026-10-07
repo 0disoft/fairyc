@@ -28,5 +28,5 @@ pub fn bool operation(ref m::Program p, m::Operation o) {
     let shapes::Field field = shapes::field_at(table,field_id);
     if (enums::valid(field.owner)) { return false; }
     if (o.kind == 7) { return o.type == field.type && o.owner_type == field.owner && local(p,o.left,o.function,field.owner) && o.right == 0; }
-    return o.kind == 8 && o.type == field.owner && o.owner_type == field.owner && local(p,o.left,o.function,field.owner) && local(p,o.right,o.function,field.type);
+    return o.kind == 8 && o.type == field.owner && o.owner_type == field.owner && (!shapes::needs_drop(o.type) || o.result==o.left) && local(p,o.left,o.function,field.owner) && local(p,o.right,o.function,field.type);
 }
