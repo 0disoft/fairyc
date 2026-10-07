@@ -94,7 +94,7 @@ evidence/candidate-result-handling-alignment-20261007.json에 새 검사·도구
 50. CLI의 UTF-8 검사·프로세스 인자·콘솔 출력 연결.
 51. File open/read/write/sync/close/replace 연결.
 52. SDK enum·오류·태그 타입을 일반 import 경로에서 해석.
-53. 부분 완료: 닫힌 language/11 효과 집합과 일반·scalar generic 함수 선언, 직접 호출·forward/재귀·defer의 권한 포함 관계 연결. owned HIR binding/MIR target에 effect bitset을 보존하며 MIR call의 제거된 권한·미지 비트를 거부. 17개 정상/오류 fixture·두 후보 프로필·native 12회 및 MIR mutation API test 통과. 근거: `evidence/candidate-resource-effects-calls-20261007.json`. 자원 cleanup 효과와 다중 모듈 전파는 다음 단위에서 연결.
+53. 부분 완료: 닫힌 language/11 효과 집합과 일반·scalar generic 함수 선언, 직접 호출·forward/재귀·defer의 권한 포함 관계 연결. owned HIR binding/MIR target에 effect bitset을 보존하며 MIR call의 제거된 권한·미지 비트를 거부. 17개 정상/오류 fixture·두 후보 프로필·native 12회 및 MIR mutation API test 통과. 근거: `evidence/candidate-resource-effects-calls-20261007.json`. 자원 cleanup 효과도 연결: 정리 권한과 중첩·Option/Result union을 정상 종료/return/덮어쓰기/반복 및 부분 임시값의 실제 drop에 적용. 이동 sender·trap·no-drop burn은 정리 권한을 요구하지 않으며 abilities/effects의 순서는 무관. 19개 fixture·native 22회·tagged drop 권한 위조 API test 통과. Go 대표 6개 중 5개 일치, literal assert(false) 뒤 효과 요구 여부는 차이로 보존해 83번에서 검토. 근거: `evidence/candidate-resource-effects-cleanup-20261007.json`. 다중 모듈 전파는 61~64번에서 연결.
 54. unsafe 범위와 기존 extern-C 선언·호출 검사.
 55. SDK/runtime의 C ABI 스칼라·포인터·집합 값 전달 연결.
 56. 이미 파싱하는 @test, @must_use, @effects, @const_eval 등의 의미 연결.

@@ -141,6 +141,7 @@ pub fn m::Problem check(ref m::Program p) {
         while (op != 0) {
             let m::Operation o = m::operation_at(p,op);
             if (!mark(ref mut ops,op) || !operation(p,op,o) || o.kind == 5 && (op != b.last || b.kind != 4 || b.check != op)) { return problem(1001,o.start,o.end); }
+            if(o.kind==26 || o.kind==25){let u32 required=m::required_drop_effects(p,o.type);if((m::target_at(p,f.target).effects&required)!=required){return problem(7102,o.start,o.end);}}
             if (o.kind == 6 || o.kind == 21 || o.kind == 9 || o.kind == 11 || (o.kind == 19 || o.kind == 20)) { var usize j = 0; while (j < o.argument_count) { if (!mark(ref mut edges,o.argument_start + j)) { return problem(1001,o.start,o.end); } j += 1; } }
             if (o.result != 0) { let ref mut usize count = v::at_mut<usize>(ref mut definitions,o.result); *count += 1; }
             if (o.kind == 1 && o.type == 6 && !o.boolean) { let ref mut u8[] flags = bytes::view_mut(ref mut false_constants); flags[o.result] = 1; }

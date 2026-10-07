@@ -88,6 +88,15 @@ pub fn bool may_drop(ref Program p,u32 type,usize depth){
     var usize at=0;while(at<drop_count(p) && drop_at(p,at).type!=type){at+=1;}if(at==drop_count(p) || (drop_at(p,at).abilities&1)==0){return false;}
     let sh=shapes::at(nominal(p),shapes::find(nominal(p),type)-1);var usize i=0;while(i<sh.field_count){if(!may_drop(p,shapes::field_at(nominal(p),sh.field_start+i+1).type,depth+1)){return false;}i+=1;}return true;
 }
+struct EffectBudget {usize work;}
+fn u32 drop_effects_walk(ref Program p,u32 type,usize depth,ref mut EffectBudget work){
+    if(depth>=64 || work.work>=16384){return 4096;}work.work+=1;if(!shapes::needs_drop(type)){return 0;}
+    if(tagged::option(type)){return drop_effects_walk(p,tagged::inner(type),depth+1,work);}
+    if(tagged::result(type)){let u32 first=drop_effects_walk(p,tagged::success(type),depth+1,work);return first|drop_effects_walk(p,tagged::failure(type),depth+1,work);}
+    let shape=shapes::at(nominal(p),shapes::find(nominal(p),type)-1);var u32 bits=binding_at(p,shape.binding).effects;var usize i=0;
+    while(i<shape.field_count){bits|=drop_effects_walk(p,shapes::field_at(nominal(p),shape.field_start+i+1).type,depth+1,work);i+=1;}return bits;
+}
+pub fn u32 required_drop_effects(ref Program p,u32 type){var EffectBudget work=EffectBudget{.work=0};return drop_effects_walk(p,type,0,ref mut work);}
 pub fn usize drop_count(ref Program p){assert(p.success);return v::len<Drop>(ref p.drops);}
 pub fn Drop drop_at(ref Program p,usize index){assert(index<drop_count(p));return *v::at<Drop>(ref p.drops,index);}
 pub fn bool function_kind(BindingKind kind){let u32 code=binding_code(kind);return code==1 || code==9;}
@@ -191,7 +200,7 @@ pub fn Result<Program,Problem> assemble_resources(bytes::Buffer source, bytes::B
     var usize i = 0;
     while (i < nb) {
         let Binding b = *v::at<Binding>(ref bindings,i);
-        if (b.effects>4095 || (b.effects!=0 && !function_kind(b.kind) && binding_code(b.kind)!=5) || b.start > b.end || b.end > ns || b.owner > nb || type_code(b.type) == type_code(.Invalid) || type_code(b.type) == type_code(.Callable) || b.signature_start > ntypes || b.signature_count > ntypes - b.signature_start) { return .err(Problem { .code = 4, .start = b.start, .end = b.end }); }
+        if (b.effects>4095 || (b.effects!=0 && !function_kind(b.kind) && binding_code(b.kind)!=5 && binding_code(b.kind)!=8) || b.start > b.end || b.end > ns || b.owner > nb || type_code(b.type) == type_code(.Invalid) || type_code(b.type) == type_code(.Callable) || b.signature_start > ntypes || b.signature_count > ntypes - b.signature_start) { return .err(Problem { .code = 4, .start = b.start, .end = b.end }); }
         if (!represented_type(b.type) || !shapes::valid_type(ref nominal,type_code(b.type),true) || ((binding_code(b.kind) >= 6 && binding_code(b.kind) <= 8) && shapes::find(ref nominal,type_code(b.type)) == 0)) { return .err(Problem { .code = 4, .start = b.start, .end = b.end }); }
         if ((binding_code(b.kind) >= 6 && binding_code(b.kind) <= 8) && shapes::at(ref nominal,shapes::find(ref nominal,type_code(b.type)) - 1).binding != i + 1) { return .err(Problem { .code = 4, .start = b.start, .end = b.end }); }
         if (function_kind(b.kind) || binding_code(b.kind) == binding_code(.External) || binding_code(b.kind) == binding_code(.Struct) || binding_code(b.kind) == 7 || binding_code(b.kind)==8) { if (b.owner != 0 || b.scope != 0 || b.declaration == 0) { return .err(Problem { .code = 4, .start = b.start, .end = b.end }); } }
@@ -323,11 +332,12 @@ pub fn Result<Program,Problem> assemble_resources(bytes::Buffer source, bytes::B
         let Drop d=*v::at<Drop>(ref drops,i);
         if(!resources::valid(d.type) || shapes::find(ref nominal,d.type)==0 || d.start>=d.end || d.end>ns || d.function>nb || d.receiver>nb){return .err(Problem{.code=4,.start=d.start,.end=d.end});}
         var usize j=0;while(j<i){if(v::at<Drop>(ref drops,j).type==d.type){return .err(Problem{.code=4,.start=d.start,.end=d.end});}j+=1;}
-        if(!d.nonempty){if(d.function!=0 || d.receiver!=0){return .err(Problem{.code=4,.start=d.start,.end=d.end});}}
+        if(!d.nonempty){if(v::at<Binding>(ref bindings,shapes::at(ref nominal,shapes::find(ref nominal,d.type)-1).binding-1).effects!=0){return .err(Problem{.code=4,.start=d.start,.end=d.end});}if(d.function!=0 || d.receiver!=0){return .err(Problem{.code=4,.start=d.start,.end=d.end});}}
         else{
             if(d.function==0 || d.receiver==0 || d.function==d.receiver || linked[d.function]!=0 || linked[d.receiver]!=0){return .err(Problem{.code=4,.start=d.start,.end=d.end});}
             let Binding b=*v::at<Binding>(ref bindings,d.function-1);let Binding receiver=*v::at<Binding>(ref bindings,d.receiver-1);
-            if(binding_code(b.kind)!=9 || type_code(b.type)!=7 || b.declaration!=(d.type-98303) as usize || b.signature_count!=1 || b.start!=d.start || b.end!=d.end || binding_code(receiver.kind)!=10 || receiver.owner!=d.function || type_code(receiver.type)!=d.type || receiver.declaration!=0){return .err(Problem{.code=4,.start=d.start,.end=d.end});}
+            let u32 authority=v::at<Binding>(ref bindings,shapes::at(ref nominal,shapes::find(ref nominal,d.type)-1).binding-1).effects;
+            if(b.effects!=authority || binding_code(b.kind)!=9 || type_code(b.type)!=7 || b.declaration!=(d.type-98303) as usize || b.signature_count!=1 || b.start!=d.start || b.end!=d.end || binding_code(receiver.kind)!=10 || receiver.owner!=d.function || type_code(receiver.type)!=d.type || receiver.declaration!=0){return .err(Problem{.code=4,.start=d.start,.end=d.end});}
             var usize matches=0;j=0;while(j<nf){let Function f=*v::at<Function>(ref functions,j);if(f.binding==d.function){
                 if(f.public || f.parameter_count!=1 || *v::at<usize>(ref edges,f.parameter_start)!=d.receiver || f.start!=d.start || f.end!=d.end){return .err(Problem{.code=4,.start=d.start,.end=d.end});}matches+=1;
             }j+=1;}if(matches!=1){return .err(Problem{.code=4,.start=d.start,.end=d.end});}

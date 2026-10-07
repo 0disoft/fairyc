@@ -2856,3 +2856,7 @@ Same-module `fn T id<T>(T n)` and `id<i32>(7)` specialize in Fairy code before o
 ### 후보 53a: 함수 효과 권한
 
 `@effects`는 language/11의 12개 효과를 중복 없는 bitset으로 보존한다. 함수와 scalar generic 특수화의 직접 호출은 caller가 callee의 효과를 모두 선언해야 하며, forward/재귀·실행되지 않는 short-circuit 호출도 검사한다. HIR binding과 MIR target이 권한을 소유하며 MIR 검증은 caller 권한 제거와 미지 비트를 거부한다. 자원 cleanup과 모듈 import 전파는 아직 연결하지 않았다. 검증은 `docs/ops/evidence/candidate-resource-effects-calls-20261007.json`에 있고 원시 C/실행 기록은 `.cache/candidate-unit53`에 보관한다.
+
+### 후보 53b: 자원 정리 효과
+
+자원 선언의 `@effects`는 비어 있지 않은 cleanup에만 붙인다. 실제로 정리되는 root·임시값·중첩 자원·Option/Result payload의 권한 union을 검사한다. 반환/전달하는 sender, 비-unwind trap과 no-drop burn에는 자동 정리 권한을 요구하지 않는다. `@abilities`와 `@effects`는 순서와 무관하게 해석한다. owned HIR의 resource와 cleanup 함수 권한이 일치해야 하며, MIR은 직접 cleanup call과 tagged/중첩 drop op의 권한을 독립 검증한다. source flow는 root의 Live/Dead 상태를 쓰고 최종 MIR은 부분 임시값까지 확인한다. 증거는 `docs/ops/evidence/candidate-resource-effects-cleanup-20261007.json`. 최초 assertion trap 기대값 1은 실제 계약의 5로 수정했다. 고정 Go 기준 도구는 literal assert(false) 뒤에도 정리 효과를 요구하는 차이가 있다. 후보의 기존 30번 trap 규칙은 유지했고 이를 일치로 세지 않았다.

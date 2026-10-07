@@ -16,7 +16,7 @@ import std::io as io;
 
 @effects(console)
 fn void verification_error(u32 code) {
-    discard io::write_stderr(if (code == 1001) { "error: MIR verification V1001\n" } else if (code == 1002) { "error: MIR verification V1002\n" }
+    discard io::write_stderr(if(code==7102){"error: E7102 cleanup requires declared effects\n"}else if (code == 1001) { "error: MIR verification V1001\n" } else if (code == 1002) { "error: MIR verification V1002\n" }
         else if (code == 1501) { "error: MIR verification V1501\n" } else if (code == 2) { "error: MIR limit\n" }
         else if (code == 3) { "error: buffer allocation failed\n" } else { "error: invalid or unsupported MIR input\n" });
 }

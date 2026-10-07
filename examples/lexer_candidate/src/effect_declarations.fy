@@ -16,15 +16,17 @@ pub fn Info read(ref syntax::Parsed p,usize declaration){
     let d=syntax::declaration_at(p,declaration);var Info info=Info{.bits=0,.code=0,.start=d.start,.end=d.end};
     var bool seen=false;var usize i=0;
     while(i<d.attribute_count){let a=syntax::attribute_at(p,d.attribute_start+i);let name=syntax::source_view(p)[a.name_start..a.name_end];
+        if(!bytes::equal(name,b"effects") && d.kind==6){i+=1;continue;}
         if(!bytes::equal(name,b"effects")){info.code=3;info.start=a.start;info.end=a.end;return info;}
         if(seen || a.argument_count==0){info.code=7101;info.start=a.start;info.end=a.end;return info;}seen=true;
         var usize j=0;while(j<a.argument_count){let arg=syntax::attribute_argument_at(p,a.argument_start+j);let u32 b=bit(syntax::attribute_argument_text(p,a.argument_start+j));
             if(arg.kind!=1 || b==0 || (info.bits&b)!=0){info.code=7101;info.start=arg.start;info.end=arg.end;return info;}info.bits|=b;j+=1;}i+=1;
     }
+    if(seen && d.kind==6 && syntax::block_statement_count(p,d.cleanup_body)==0 && syntax::statement_at(p,d.cleanup_body).expression==0){info.code=7101;}
     return info;
 }
 // Generic clones retain source spans and the original declaration authority.
 // Only source diagnostics use spans; MIR checks exact function IDs.
 pub fn u32 caller(ref syntax::Parsed p,usize start,usize end){var usize i=0;
-    while(i<syntax::declaration_count(p)){let d=syntax::declaration_at(p,i);if(d.kind==3 && d.body!=0){let b=syntax::statement_at(p,d.body);if(b.start<=start && end<=b.end){return read(p,i).bits;}}i+=1;}return 0;
+    while(i<syntax::declaration_count(p)){let d=syntax::declaration_at(p,i);if((d.kind==3 || d.kind==6) && (d.body!=0 || d.cleanup_body!=0)){let b=syntax::statement_at(p,if(d.kind==6){d.cleanup_body}else{d.body});if(b.start<=start && end<=b.end){return read(p,i).bits;}}i+=1;}return 0;
 }

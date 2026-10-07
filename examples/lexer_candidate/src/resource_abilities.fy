@@ -8,23 +8,21 @@ import std::bytes as bytes;
 
 // Closed static metadata: drop=1, store=2, key=4. Unannotated resources drop.
 pub fn u32 mask(ref syntax::Parsed p,usize declaration){
-    let d=syntax::declaration_at(p,declaration);if(d.attribute_count==0){return 1;}
-    let a=syntax::attribute_at(p,d.attribute_start);var u32 bits=0;var usize i=0;
-    while(i<a.argument_count){let text=syntax::attribute_argument_text(p,a.argument_start+i);
-        bits|=if(bytes::equal(text,b"drop")){1}else if(bytes::equal(text,b"store")){2}else{4};i+=1;}
-    return bits;
+    let d=syntax::declaration_at(p,declaration);var usize i=0;
+    while(i<d.attribute_count){let a=syntax::attribute_at(p,d.attribute_start+i);let name=syntax::source_view(p)[a.name_start..a.name_end];
+        if(bytes::equal(name,b"abilities")){var u32 bits=0;var usize j=0;while(j<a.argument_count){let text=syntax::attribute_argument_text(p,a.argument_start+j);bits|=if(bytes::equal(text,b"drop")){1}else if(bytes::equal(text,b"store")){2}else{4};j+=1;}return bits;}i+=1;}
+    return 1;
 }
 pub fn state::Problem validate(ref syntax::Parsed p){
     var usize i=0;while(i<syntax::declaration_count(p)){let d=syntax::declaration_at(p,i);
-        if(d.kind==6 && d.attribute_count!=0){
-            if(d.attribute_count!=1){return state::fail(49,d.start,d.end,0,0);}
-            let a=syntax::attribute_at(p,d.attribute_start);let name=syntax::source_view(p)[a.name_start..a.name_end];
-            if(!bytes::equal(name,b"abilities") || a.argument_count==0){return state::fail(49,a.start,a.end,0,0);}
+        if(d.kind==6){var bool seen=false;var usize at=0;while(at<d.attribute_count){let a=syntax::attribute_at(p,d.attribute_start+at);let name=syntax::source_view(p)[a.name_start..a.name_end];at+=1;
+            if(bytes::equal(name,b"effects")){continue;}
+            if(!bytes::equal(name,b"abilities") || seen || a.argument_count==0){return state::fail(49,a.start,a.end,0,0);}seen=true;
             var u32 bits=0;var usize j=0;while(j<a.argument_count){let arg=syntax::attribute_argument_at(p,a.argument_start+j);let text=syntax::attribute_argument_text(p,a.argument_start+j);
                 let u32 bit=if(bytes::equal(text,b"drop")){1}else if(bytes::equal(text,b"store")){2}else if(bytes::equal(text,b"key")){4}else{0};
                 if(arg.kind!=1 || bit==0 || (bits&bit)!=0){return state::fail(49,arg.start,arg.end,0,0);}bits|=bit;j+=1;}
             if((bits&4)!=0 && (bits&2)==0){return state::fail(49,a.start,a.end,0,0);}
-        }i+=1;
+        }}i+=1;
     }return state::ok();
 }
 // Return the declaration withholding drop, including recursive containment.

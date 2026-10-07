@@ -63,6 +63,15 @@ pub fn bool burnable(ref Program p,u32 type){let usize at=drop_index(p,type);if(
 pub fn bool may_drop(ref Program p,u32 type,usize depth){if(depth>=64){return false;}if(!shapes::needs_drop(type)){return true;}
     if(tagged::option(type)){return may_drop(p,tagged::inner(type),depth+1);}if(tagged::result(type)){return may_drop(p,tagged::success(type),depth+1) && may_drop(p,tagged::failure(type),depth+1);}
     let usize at=drop_index(p,type);if(at==0 || (drop_at(p,at-1).abilities&1)==0){return false;}let sh=shapes::at(nominal(p),shapes::find(nominal(p),type)-1);var usize i=0;while(i<sh.field_count){if(!may_drop(p,shapes::field_at(nominal(p),sh.field_start+i+1).type,depth+1)){return false;}i+=1;}return true;}
+struct EffectBudget {usize work;}
+fn u32 drop_effects_walk(ref Program p,u32 type,usize depth,ref mut EffectBudget work){
+    if(depth>=64 || work.work>=16384){return 4096;}work.work+=1;if(!shapes::needs_drop(type)){return 0;}
+    if(tagged::option(type)){return drop_effects_walk(p,tagged::inner(type),depth+1,work);}
+    if(tagged::result(type)){let u32 first=drop_effects_walk(p,tagged::success(type),depth+1,work);return first|drop_effects_walk(p,tagged::failure(type),depth+1,work);}
+    let usize at=drop_index(p,type);if(at==0){return 4096;}let d=drop_at(p,at-1);var u32 bits=if(d.target!=0){target_at(p,d.target).effects}else{0};
+    let shape=shapes::at(nominal(p),shapes::find(nominal(p),type)-1);var usize i=0;while(i<shape.field_count){bits|=drop_effects_walk(p,shapes::field_at(nominal(p),shape.field_start+i+1).type,depth+1,work);i+=1;}return bits;
+}
+pub fn u32 required_drop_effects(ref Program p,u32 type){var EffectBudget work=EffectBudget{.work=0};return drop_effects_walk(p,type,0,ref mut work);}
 pub fn usize drop_index(ref Program p,u32 type) { var usize i=0;while(i<drop_count(p)){if(drop_at(p,i).type==type){return i+1;}i+=1;}return 0; }
 pub fn bool drop_target(ref Program p,usize target) {var usize i=0;while(i<drop_count(p)){if(drop_at(p,i).target!=0 && drop_at(p,i).target==target){return true;}i+=1;}return false;}
 pub fn usize drop_receiver(ref Program p,usize function) {let f=function_at(p,function);return if(drop_target(p,f.target)){edge_at(p,f.parameter_start)}else{0};}

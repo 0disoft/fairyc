@@ -422,6 +422,30 @@ REJECTIONS[53]=[
  ('unused-template-effects','@effects(unknown)fn T id<T>(T n){return n;}fn i32 main(){return 0;}','E7101'),
 ]
 
+CASES[153]=[
+ ('effect-scope','@effects(console)resource R{i32 id;cleanup{mark(this.id);}}@effects(console)fn i32 main(){let R r=R{.id=65};return 7;}','A',7,0),
+ ('effect-transfer','@effects(console)resource R{i32 id;cleanup{mark(this.id);}}fn R make(){return R{.id=65};}@effects(console)fn i32 take(R r){return 7;}@effects(console)fn i32 main(){return take(make());}','A',7,0),
+ ('effect-tagged','@effects(console)resource R{i32 id;cleanup{mark(this.id);}}@effects(console)fn i32 main(){let Option<R> r=.some(R{.id=65});return 7;}','A',7,0),
+ ('effect-temporary','@effects(console)resource R{i32 id;cleanup{mark(this.id);}}@effects(console)fn i32 main(){discard R{.id=65};return 7;}','A',7,0),
+ ('effect-nested','@effects(console)resource Inner{i32 id;cleanup{mark(this.id);}}resource Outer{Inner inner;cleanup{}}@effects(console)fn i32 main(){let Outer r=Outer{.inner=Inner{.id=65}};return 7;}','A',7,0),
+ ('effect-overwrite','@effects(console)resource R{i32 id;cleanup{mark(this.id);}}@effects(console)fn i32 main(){var R r=R{.id=65};r=R{.id=66};return 7;}','AB',7,0),
+ ('effect-loop','@effects(console)resource R{i32 id;cleanup{mark(this.id);}}@effects(console)fn i32 main(){var i32 i=0;while(i<2){let R r=R{.id=65+i};i+=1;continue;}return 7;}','AB',7,0),
+ ('effect-order-with-abilities','@effects(console)@abilities(drop,store)resource R{i32 id;cleanup{mark(this.id);}}@effects(console)fn i32 main(){let R r=R{.id=65};return 7;}','A',7,0),
+ ('abilities-first','@abilities(drop,store)@effects(console)resource R{i32 id;cleanup{mark(this.id);}}@effects(console)fn i32 main(){let R r=R{.id=65};return 7;}','A',7,0),
+ ('no-drop-burn','@abilities(store)@effects(console)resource R{i32 id;cleanup{mark(this.id);}}fn i32 main(){let R r=R{.id=65};burn r;return 7;}','',7,0),
+ ('trap-does-not-drop','@effects(console)resource R{i32 id;cleanup{mark(this.id);}}fn i32 main(){let R r=R{.id=65};assert(false);return 7;}','',0,5),
+]
+REJECTIONS[153]=[
+ ('missing-scope-effect','@effects(console)resource R{i32 id;cleanup{mark(this.id);}}fn i32 main(){let R r=R{.id=65};return 7;}','E7102'),
+ ('missing-temporary-effect','@effects(console)resource R{i32 id;cleanup{mark(this.id);}}fn i32 main(){discard R{.id=65};return 7;}','E7102'),
+ ('missing-nested-effect','@effects(console)resource R{i32 id;cleanup{mark(this.id);}}resource Outer{R r;cleanup{}}fn i32 main(){let Outer o=Outer{.r=R{.id=65}};return 7;}','E7102'),
+ ('missing-overwrite-effect','@effects(console)resource R{i32 id;cleanup{mark(this.id);}}fn R replace(R r){var R v=r;v=R{.id=66};return v;}fn i32 main(){return 7;}','E7102'),
+ ('cleanup-call-effect','@effects(console)fn void f(){mark(65);}resource R{i32 id;cleanup{f();}}fn i32 main(){return 7;}','E7102'),
+ ('empty-cleanup-effect','@effects(console)resource R{i32 id;cleanup{}}fn i32 main(){return 7;}','E7101'),
+ ('duplicate-resource-effect','@effects(console)@effects(console)resource R{i32 id;cleanup{mark(this.id);}}fn i32 main(){return 7;}','E7101'),
+ ('tagged-none-still-requires','@effects(console)resource R{i32 id;cleanup{mark(this.id);}}fn i32 main(){let Option<R> r=.none;return 7;}','E7102'),
+]
+
 def sha(path): return hashlib.sha256(path.read_bytes()).hexdigest()
 def save(path, value): path.write_text(json.dumps(value, ensure_ascii=False, indent=2)+'\n', encoding='utf-8', newline='\n')
 

@@ -36,7 +36,7 @@ fn bool prepare(ref typing::Typed input, usize module_index, ref mut v::Vec<h::B
         var usize target_module = module_index; var usize declaration = s.declaration;
         if (s.kind == 5) { let signature = names::external_signature(resolved,i); target_module = signature.module_index; declaration = signature.declaration; }
         let usize owner=if(s.owner!=0 && names::symbol_at(resolved,s.owner).kind==9){dropping[names::symbol_at(resolved,s.owner).declaration]}else{s.owner};
-        let h::Binding binding = h::Binding { .effects = if(s.kind==1){effects::read(parsed,s.declaration-1).bits}else{0}, .kind = if(s.kind==8){.Let}else{state::binding_kind(s.kind)}, .type, .start = s.start, .end = s.end, .owner, .scope = s.scope, .module_index = target_module, .declaration = if(s.kind==8 || s.kind==10){0}else{declaration}, .signature_start = 0, .signature_count = 0 };
+        let h::Binding binding = h::Binding { .effects = if(s.kind==1 || s.kind==9){effects::read(parsed,s.declaration-1).bits}else{0}, .kind = if(s.kind==8){.Let}else{state::binding_kind(s.kind)}, .type, .start = s.start, .end = s.end, .owner, .scope = s.scope, .module_index = target_module, .declaration = if(s.kind==8 || s.kind==10){0}else{declaration}, .signature_start = 0, .signature_count = 0 };
         if (!v::push<h::Binding>(bindings,binding).is_ok) { discard state::fail(c,3,s.start,s.end); return false; }
         if(s.kind==8){if(s.declaration==0 || s.declaration>length){discard state::fail(c,4,s.start,s.end);return false;}let ref mut state::Link link=v::at_mut<state::Link>(links,s.declaration-1);link.use=i;}
         if (s.entry != 0) {
@@ -52,7 +52,7 @@ fn bool prepare(ref typing::Typed input, usize module_index, ref mut v::Vec<h::B
     }
     declaration=0;while(declaration<syntax::declaration_count(parsed)){let d=syntax::declaration_at(parsed,declaration);let usize target=dropping[declaration+1];
         if(target!=0){
-            if(target!=v::len<h::Binding>(bindings)+1 || !v::push<h::Binding>(bindings,h::Binding{.effects=0,.kind=.DropFunction,.type=.Void,.start=d.cleanup_start,.end=d.cleanup_end,.owner=0,.scope=0,.module_index,.declaration=declaration+1,.signature_start=0,.signature_count=0}).is_ok){discard state::fail(c,3,d.cleanup_start,d.cleanup_end);return false;}
+            if(target!=v::len<h::Binding>(bindings)+1 || !v::push<h::Binding>(bindings,h::Binding{.effects=effects::read(parsed,declaration).bits,.kind=.DropFunction,.type=.Void,.start=d.cleanup_start,.end=d.cleanup_end,.owner=0,.scope=0,.module_index,.declaration=declaration+1,.signature_start=0,.signature_count=0}).is_ok){discard state::fail(c,3,d.cleanup_start,d.cleanup_end);return false;}
             let ref mut state::Link link=v::at_mut<state::Link>(links,declaration);link.function=target;
         }declaration+=1;}
     i = 1;

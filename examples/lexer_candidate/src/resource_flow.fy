@@ -1,5 +1,7 @@
 module resource_flow;
 import resource_abilities as abilities;
+import resource_effects as effects;
+import effect_declarations as declarations;
 import syntax as syntax;
 import result_flow_graph as graph;
 import name_resolution as names;
@@ -21,7 +23,7 @@ fn usize loop_error(ref graph::Graph g,usize a,usize b,usize old_move,usize new_
         if(x.start<=y.start && y.end<=x.end){return b;}if(y.start<=x.start && x.end<=y.end){return a;}}
     return earlier(g,a,b);
 }
-fn state::Problem analyze(ref graph::Graph g,ref names::Resolved resolved,ref v::Vec<state::Slot> types){
+fn state::Problem analyze(ref graph::Graph g,ref names::Resolved resolved,ref v::Vec<state::Slot> types,usize function){
     let usize count=graph::count(g);let usize width=graph::width(g);if(width==0 || count==0){return state::ok();}
     if(count>262144/width){return state::fail(10,0,0,0,0);}
     var v::Vec<Cell> input=v::empty<Cell>();var v::Vec<Cell> output=v::empty<Cell>();var v::Vec<usize> queue=v::empty<usize>();
@@ -47,6 +49,11 @@ fn state::Problem analyze(ref graph::Graph g,ref names::Resolved resolved,ref v:
     }
     let ref syntax::Parsed source=names::parsed(resolved);
     var usize root=1;while(root<=names::symbol_count(resolved)){let usize col=graph::root_column(g,root);if(col!=0 && names::symbol_at(resolved,root).kind!=10){let usize denial=abilities::denied(source,state::symbols(types,root-1),0);if(denial!=0){var usize node=1;while(node<=count){let n=graph::at(g,node);if(*v::at<u8>(ref seen,node-1)!=0 && (n.kind==5 || (n.kind==3 || n.kind==4) && n.column==col) && (*v::at<Cell>(ref input,(node-1)*width+col-1)).states!=2){let d=syntax::declaration_at(source,denial-1);var p=state::fail(50,n.start,n.end,0,0);p.move_start=d.start;p.move_end=d.end;return p;}node+=1;}}}root+=1;}
+    let u32 authority=declarations::read(source,names::symbol_at(resolved,function).declaration-1).bits;
+    root=1;while(root<=names::symbol_count(resolved)){let usize col=graph::root_column(g,root);if(col!=0 && names::symbol_at(resolved,root).kind!=10){
+        let u32 required=effects::required(source,state::symbols(types,root-1));if(!declarations::includes(authority,required)){var usize node=1;while(node<=count){let n=graph::at(g,node);
+            if(*v::at<u8>(ref seen,node-1)!=0 && (n.kind==5 || (n.kind==3 || n.kind==4) && n.column==col) && (*v::at<Cell>(ref input,(node-1)*width+col-1)).states!=2){return state::fail(if(required>4095){10}else{7102},n.start,n.end,required,authority);}node+=1;}}
+    }root+=1;}
     var usize error=0;var usize move=0;var usize header=0;var u32 code=45;i=1;
     while(i<=count){let n=graph::at(g,i);
         if(*v::at<u8>(ref seen,i-1)!=0 && n.column!=0 && (n.kind==1 || n.kind==7)){
@@ -66,6 +73,6 @@ pub fn state::Problem check(ref names::Resolved resolved,ref v::Vec<state::Slot>
     var usize i=1;var state::Problem first=state::ok();
     while(i<=names::symbol_count(resolved)){let s=names::symbol_at(resolved,i);if(s.kind==1 || s.kind==9){
         let g=switch(graph::build_resources(resolved,types,i)){case .ok(g):{g}case .err(p):{return p;}};
-        let p=analyze(ref g,resolved,types);if(p.code!=0 && (first.code==0 || p.start<first.start || p.start==first.start && p.end<first.end)){first=p;}
+        let p=analyze(ref g,resolved,types,i);if(p.code!=0 && (first.code==0 || p.start<first.start || p.start==first.start && p.end<first.end)){first=p;}
     }i+=1;}return first;
 }
