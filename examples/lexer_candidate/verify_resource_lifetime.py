@@ -260,6 +260,23 @@ REJECTIONS[38]=[
  ('static-local-escape','fn ref u8[] choose(bool yes){let u8[2] a=[1,2];let ref u8[] p=ref a;return if(yes){p}else{b"xy"};}fn i32 main(){return 0;}', 'E2102'),
 ]
 
+CASES[39]=[
+ ('option-mut-none','fn Option<ref mut i32> no(){return .none;}fn i32 main(){return switch(no()){case .some(p):{*p}case .none:{7}};}', '',7,0),
+ ('option-ref-return','fn Option<ref i32> id(ref i32 p){return .some(p);}fn i32 main(){let i32 n=7;return switch(id(ref n)){case .some(p):{*p}case .none:{0}};}', '',7,0),
+ ('option-ref-none','fn Option<ref i32> id(){return .none;}fn i32 main(){return switch(id()){case .some(p):{*p}case .none:{7}};}', '',7,0),
+ ('option-nested-ref','fn Option<Option<ref i32>> id(ref i32 p){return .some(.some(p));}fn i32 main(){let i32 n=7;return switch(id(ref n)){case .some(p):{switch(p){case .some(q):{*q}case .none:{0}}}case .none:{0}};}', '',7,0),
+ ('result-ref-success','fn Result<ref i32,bool> id(ref i32 p){return .ok(p);}fn Result<i32,bool> f(){let i32 n=7;let ref i32 p=id(ref n)?;return .ok(*p);}fn i32 main(){return switch(f()){case .ok(n):{n}case .err(_):{0}};}', '',7,0),
+ ('result-ref-error','fn Result<i32,ref i32> bad(ref i32 p){return .err(p);}fn Result<i32,ref i32> f(ref i32 p){let i32 n=bad(p)?;return .ok(n);}fn i32 main(){let i32 n=7;return switch(f(ref n)){case .ok(n):{n}case .err(p):{*p}};}', '',7,0),
+ ('option-mut-reference','fn Option<ref mut i32> id(ref mut i32 p){return .some(p);}fn i32 main(){var i32 n=7;let ref mut i32 p=ref mut n;let Option<ref mut i32> x=id(p);discard switch(x){case .some(q):{*q=8;}case .none:{}};*p=9;return n;}', '',9,0),
+]
+REJECTIONS[39]=[
+ ('option-local-escape','fn Option<ref i32> bad(){let i32 n=7;return .some(ref n);}fn i32 main(){return 0;}', 'E2102'),
+ ('option-holds-owner','fn Option<ref i32> id(ref i32 p){return .some(p);}fn i32 main(){var i32 n=7;let Option<ref i32> x=id(ref n);n=9;return switch(x){case .some(p):{*p}case .none:{0}};}', 'E2101'),
+ ('result-error-local-escape','fn Result<i32,ref i32> bad(ref i32 p){return .err(p);}fn Result<i32,ref i32> f(){let i32 n=7;let i32 value=bad(ref n)?;return .ok(value);}fn i32 main(){return 0;}', 'E2102'),
+ ('struct-tagged-reference','struct S{Option<ref i32> p;}fn i32 main(){return 0;}'),
+ ('two-borrow-leaves','fn Result<ref i32,ref u8[]> bad(ref i32 p,ref u8[] q){return .ok(p);}fn i32 main(){return 0;}'),
+]
+
 def sha(path): return hashlib.sha256(path.read_bytes()).hexdigest()
 def save(path, value): path.write_text(json.dumps(value, ensure_ascii=False, indent=2)+'\n', encoding='utf-8', newline='\n')
 

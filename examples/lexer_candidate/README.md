@@ -2798,3 +2798,5 @@ Unit 36: hold reference arguments through later evaluation. See `docs/ops/eviden
 Unit 37: substitute return origins across calls and switches. See `docs/ops/evidence/candidate-resource-return-origins-20261007.json` for the bounded executable fixtures and current profile identities.
 
 Unit 38: prove bounded recursive return origin summaries. See `docs/ops/evidence/candidate-resource-recursive-origins-20261007.json` for the bounded executable fixtures and current profile identities.
+
+Unit 39: carry safe borrow leaves through Option and Result. See `docs/ops/evidence/candidate-resource-tagged-borrows-20261007.json` for the bounded executable fixtures and current profile identities.

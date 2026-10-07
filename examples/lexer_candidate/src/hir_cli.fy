@@ -29,6 +29,7 @@ pub fn i32 run(scanner::Stream stream, ref u8[] path) {
     let model::Program program = switch(lower::lower(typed,0)) {
         case .ok(value): { value }
         case .err(problem): {
+            discard io::write_stderr("HIR bytes ");discard io::write_stderr_usize(problem.start);discard io::write_stderr("..");discard io::write_stderr_usize(problem.end);discard io::write_stderr("\n");
             discard io::write_stderr(if (problem.code == 2101) { "error: HIR E2101 active byte-view loan\n" } else if (problem.code == 2102) { "error: HIR E2102 local view escape or mutable descriptor\n" } else if (problem.code == 2103) { "error: HIR E2103 ambiguous or recursive borrow return origin\n" } else if (problem.code == 2) { "error: HIR limit\n" }
                 else if (problem.code == 3) { "error: buffer allocation failed\n" }
                 else { "error: invalid or unsupported HIR input\n" }); return 2;

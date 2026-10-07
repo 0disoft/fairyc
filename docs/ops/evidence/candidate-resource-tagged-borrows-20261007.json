@@ -1,0 +1,1322 @@
+{
+  "schema": "fairyc.resource-lifetime-native/v1",
+  "unit": 39,
+  "passed": true,
+  "images": [
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-unit39\\candidate-dev.exe",
+      "sha256": "c550dc85162fb7b549815f7d94a501719cb7bd51495eb4bf90940ef4672ae801"
+    }
+  ],
+  "nativeRunner": {
+    "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-c-file-cli\\native-runner.exe",
+    "sha256": "995d9b5410aad2e22a622e18c0aaeeb00e6e362b030cfc2415ff9558938c659a"
+  },
+  "fixtures": [
+    {
+      "name": "option-mut-none",
+      "inputHex": "6d6f64756c65206d61696e3b666e20766f6964206d61726b28693332206e297b7d666e204f7074696f6e3c726566206d7574206933323e206e6f28297b72657475726e202e6e6f6e653b7d666e20693332206d61696e28297b72657475726e20737769746368286e6f2829297b63617365202e736f6d652870293a7b2a707d63617365202e6e6f6e653a7b377d7d3b7d",
+      "sha256": "9a05845e622f449d18ddc693e740255ad7f71bd6efbc28be579247f3afcd07b2",
+      "expectedTrace": "",
+      "expectedValue": 7,
+      "expectedTrap": 0
+    },
+    {
+      "name": "option-ref-return",
+      "inputHex": "6d6f64756c65206d61696e3b666e20766f6964206d61726b28693332206e297b7d666e204f7074696f6e3c726566206933323e20696428726566206933322070297b72657475726e202e736f6d652870293b7d666e20693332206d61696e28297b6c657420693332206e3d373b72657475726e2073776974636828696428726566206e29297b63617365202e736f6d652870293a7b2a707d63617365202e6e6f6e653a7b307d7d3b7d",
+      "sha256": "f7f87c163aa43989f4be8ca8dc65bc0e7ef7e0123aec29f9cb36d09ebe0dbbd2",
+      "expectedTrace": "",
+      "expectedValue": 7,
+      "expectedTrap": 0
+    },
+    {
+      "name": "option-ref-none",
+      "inputHex": "6d6f64756c65206d61696e3b666e20766f6964206d61726b28693332206e297b7d666e204f7074696f6e3c726566206933323e20696428297b72657475726e202e6e6f6e653b7d666e20693332206d61696e28297b72657475726e207377697463682869642829297b63617365202e736f6d652870293a7b2a707d63617365202e6e6f6e653a7b377d7d3b7d",
+      "sha256": "157cd3a106b28dca3fabfefa32f8b19b2cbf902ac15700c0e2dfd2d02ab9d566",
+      "expectedTrace": "",
+      "expectedValue": 7,
+      "expectedTrap": 0
+    },
+    {
+      "name": "option-nested-ref",
+      "inputHex": "6d6f64756c65206d61696e3b666e20766f6964206d61726b28693332206e297b7d666e204f7074696f6e3c4f7074696f6e3c726566206933323e3e20696428726566206933322070297b72657475726e202e736f6d65282e736f6d65287029293b7d666e20693332206d61696e28297b6c657420693332206e3d373b72657475726e2073776974636828696428726566206e29297b63617365202e736f6d652870293a7b7377697463682870297b63617365202e736f6d652871293a7b2a717d63617365202e6e6f6e653a7b307d7d7d63617365202e6e6f6e653a7b307d7d3b7d",
+      "sha256": "8a3a82693ad60621fa518eea5d6ca15931fbc5b6ef5b71b44ea3de72af7d1838",
+      "expectedTrace": "",
+      "expectedValue": 7,
+      "expectedTrap": 0
+    },
+    {
+      "name": "result-ref-success",
+      "inputHex": "6d6f64756c65206d61696e3b666e20766f6964206d61726b28693332206e297b7d666e20526573756c743c726566206933322c626f6f6c3e20696428726566206933322070297b72657475726e202e6f6b2870293b7d666e20526573756c743c6933322c626f6f6c3e206628297b6c657420693332206e3d373b6c6574207265662069333220703d696428726566206e293f3b72657475726e202e6f6b282a70293b7d666e20693332206d61696e28297b72657475726e2073776974636828662829297b63617365202e6f6b286e293a7b6e7d63617365202e657272285f293a7b307d7d3b7d",
+      "sha256": "21a23ee0afb2298dac54318a035774eaae099a30cc825d2597f335cd2b063e2c",
+      "expectedTrace": "",
+      "expectedValue": 7,
+      "expectedTrap": 0
+    },
+    {
+      "name": "result-ref-error",
+      "inputHex": "6d6f64756c65206d61696e3b666e20766f6964206d61726b28693332206e297b7d666e20526573756c743c6933322c726566206933323e2062616428726566206933322070297b72657475726e202e6572722870293b7d666e20526573756c743c6933322c726566206933323e206628726566206933322070297b6c657420693332206e3d6261642870293f3b72657475726e202e6f6b286e293b7d666e20693332206d61696e28297b6c657420693332206e3d373b72657475726e20737769746368286628726566206e29297b63617365202e6f6b286e293a7b6e7d63617365202e6572722870293a7b2a707d7d3b7d",
+      "sha256": "3a3403b607aeda61b4d1d871fd7b7a22d1089262da544f5a2ee66f1b4ab592f8",
+      "expectedTrace": "",
+      "expectedValue": 7,
+      "expectedTrap": 0
+    },
+    {
+      "name": "option-mut-reference",
+      "inputHex": "6d6f64756c65206d61696e3b666e20766f6964206d61726b28693332206e297b7d666e204f7074696f6e3c726566206d7574206933323e20696428726566206d7574206933322070297b72657475726e202e736f6d652870293b7d666e20693332206d61696e28297b76617220693332206e3d373b6c657420726566206d75742069333220703d726566206d7574206e3b6c6574204f7074696f6e3c726566206d7574206933323e20783d69642870293b64697363617264207377697463682878297b63617365202e736f6d652871293a7b2a713d383b7d63617365202e6e6f6e653a7b7d7d3b2a703d393b72657475726e206e3b7d",
+      "sha256": "e2d7b3a4408c0293de87188aee8e4f89ff28747c2d59cdb2a949ef55b41ed460",
+      "expectedTrace": "",
+      "expectedValue": 9,
+      "expectedTrap": 0
+    },
+    {
+      "name": "option-local-escape",
+      "inputHex": "6d6f64756c65206d61696e3b666e20766f6964206d61726b28693332206e297b7d666e204f7074696f6e3c726566206933323e2062616428297b6c657420693332206e3d373b72657475726e202e736f6d6528726566206e293b7d666e20693332206d61696e28297b72657475726e20303b7d",
+      "sha256": "b6d08b042ddf906fb23f43aeae4013beda84563e9c7811b5307a1652871a3d86",
+      "rejectedAt": "MIR/C"
+    },
+    {
+      "name": "option-holds-owner",
+      "inputHex": "6d6f64756c65206d61696e3b666e20766f6964206d61726b28693332206e297b7d666e204f7074696f6e3c726566206933323e20696428726566206933322070297b72657475726e202e736f6d652870293b7d666e20693332206d61696e28297b76617220693332206e3d373b6c6574204f7074696f6e3c726566206933323e20783d696428726566206e293b6e3d393b72657475726e207377697463682878297b63617365202e736f6d652870293a7b2a707d63617365202e6e6f6e653a7b307d7d3b7d",
+      "sha256": "18872f816952f04be6b3eca8f4c27eee66ba81a7a1e99be737c7cb2e7b9d99a1",
+      "rejectedAt": "MIR/C"
+    },
+    {
+      "name": "result-error-local-escape",
+      "inputHex": "6d6f64756c65206d61696e3b666e20766f6964206d61726b28693332206e297b7d666e20526573756c743c6933322c726566206933323e2062616428726566206933322070297b72657475726e202e6572722870293b7d666e20526573756c743c6933322c726566206933323e206628297b6c657420693332206e3d373b6c6574206933322076616c75653d62616428726566206e293f3b72657475726e202e6f6b2876616c7565293b7d666e20693332206d61696e28297b72657475726e20303b7d",
+      "sha256": "ab2c4cb2002eabf76d60a4198a299f7b95386fea906277fc10ca4d46cbf9cd1a",
+      "rejectedAt": "MIR/C"
+    },
+    {
+      "name": "struct-tagged-reference",
+      "inputHex": "6d6f64756c65206d61696e3b666e20766f6964206d61726b28693332206e297b7d73747275637420537b4f7074696f6e3c726566206933323e20703b7d666e20693332206d61696e28297b72657475726e20303b7d",
+      "sha256": "986e814cd93341b0d3e5178dcc825237beb9446d29e98afa6fe955f0c9e62090",
+      "rejectedAt": "MIR/C"
+    },
+    {
+      "name": "two-borrow-leaves",
+      "inputHex": "6d6f64756c65206d61696e3b666e20766f6964206d61726b28693332206e297b7d666e20526573756c743c726566206933322c7265662075385b5d3e20626164287265662069333220702c7265662075385b5d2071297b72657475726e202e6f6b2870293b7d666e20693332206d61696e28297b72657475726e20303b7d",
+      "sha256": "2a83b379fbd6f82b3dfc99802c73e849daeda14ad10d34b2b282c965666188bf",
+      "rejectedAt": "MIR/C"
+    }
+  ],
+  "units": [
+    {
+      "name": "option-mut-none",
+      "emittedSHA256": "5e831042238a5bb6d9e872a6ad5d434d3a21c70fdd3d4d7ddd06a287ad1c2425",
+      "observedSHA256": "d376064e7e7ad5c069724bc54839282c6a48a26696316952a45fe61272934b23"
+    },
+    {
+      "name": "option-ref-return",
+      "emittedSHA256": "002156903a71edbabe4fd0c67e0271fae9099c597435ee4ae8d2b8812493dbf4",
+      "observedSHA256": "eedcedfd42c41ee4137e2943bf19f8aad7f6cf1dd0e1190599d22ee8c5100206"
+    },
+    {
+      "name": "option-ref-none",
+      "emittedSHA256": "00de05c0ff0608292f641a0f2c54e0e3f19fab0ce65ea47c95c9f151b972c465",
+      "observedSHA256": "344753c41b707fc57fc84f4e70a6bff8bad3367d7a233f0e9bb1c45857ab6bf0"
+    },
+    {
+      "name": "option-nested-ref",
+      "emittedSHA256": "40b1fa3395219d9568fab372b774736be90035a7654966b4e1c3cc95d5ea2b00",
+      "observedSHA256": "fce38db873276410cfedc3717506e9d38a626092747ef66c70434ec9a26da528"
+    },
+    {
+      "name": "result-ref-success",
+      "emittedSHA256": "2e7ae974bfb51b906a3603379c37f03399d927d4cb8ada552a64877090bcff37",
+      "observedSHA256": "0fd5c3d8f9dcb9496456e6b1862a35f9fd62d26e82a4dc61aa3d7ef3def0adb7"
+    },
+    {
+      "name": "result-ref-error",
+      "emittedSHA256": "6b0e6aee6c8eb3d0b8afc23f41ec8f68383926a64ab38a143b3028f4a0283822",
+      "observedSHA256": "956582fd42fe81c4d349b09d24e00566ad40de0c2fd4204b9ac3b432ee0b2993"
+    },
+    {
+      "name": "option-mut-reference",
+      "emittedSHA256": "d0e2f339a648917572e3adaf194e9157897b4adc9333f42b8c13e9bfb784ae05",
+      "observedSHA256": "e4acc6257ef08afc2303c206c67a1be9786869493bd469bf20dd5e8ba51b2383"
+    }
+  ],
+  "cli": [
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-unit39\\candidate-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-unit39\\execution\\option-mut-none.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-unit39\\candidate-dev.exe",
+        "--hir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-unit39\\execution\\option-mut-none.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "fairyc.enum-payload-hir/v1\nP\t0\nN\t1073741906\t0\t0\t3\t0\nD\t1\t1073741906\t2147483651\t36\t55\t0\t0\nD\t2\t1073741906\t0\t36\t55\t0\t1\nD\t3\t1073741906\t0\t36\t55\t0\t0\nF\t1\t1\t12\t33\t1\t1\t0\t1\t0\nF\t2\t2\t33\t75\t3\t2\t1\t0\t0\nF\t3\t3\t75\t144\t5\t5\t2\t0\t0\nB\t1\tfunction\tvoid\t20\t24\t0\t0\t0\t2\t0\t1\nB\t2\tfunction\toption:2147483651\t56\t58\t0\t0\t0\t3\t1\t0\nB\t3\tfunction\ti32\t82\t86\t0\t0\t0\t4\t1\t0\nB\t4\tparameter\ti32\t29\t30\t1\t1\t0\t0\t1\t0\nB\t5\tlet\tref:2147483651\t120\t121\t3\t8\t0\t0\t1\t0\nE\t1\tvariant\toption:2147483651\t-\t68\t73\t0\t0\t0\t0\t3\t0\t0\t0\t-\nE\t2\tcall\toption:2147483651\t-\t103\t107\t0\t0\t0\t0\t2\t3\t0\t0\t-\nE\t3\tinteger\ti32\t-\t139\t140\t0\t0\t0\t0\t0\t0\t0\t0\t7\nE\t4\tarm\ti32\t-\t127\t141\t0\t0\t0\t3\t3\t5\t0\t0\t-\nE\t5\tcapture\tref:2147483651\t-\t120\t121\t0\t0\t0\t0\t1\t6\t1\t0\t-\nE\t6\treference\tref:2147483651\t-\t125\t126\t0\t0\t0\t0\t5\t0\t0\t0\t-\nE\t7\tunary\ti32\t*\t124\t126\t6\t0\t0\t0\t0\t0\t0\t0\t-\nE\t8\tarm\ti32\t-\t109\t127\t0\t0\t0\t4\t2\t5\t1\t0\t-\nE\t9\tswitch\ti32\t-\t96\t142\t2\t0\t0\t0\t0\t3\t2\t0\t-\nS\t1\treturn\t61\t74\t4\t1\t0\t0\t-\t0\t0\t0\t0\nS\t2\treturn\t89\t143\t6\t9\t0\t0\t-\t0\t0\t0\t0\nK\t1\t31\t33\t1\t2\t1\t1\t0\t0\nK\t2\t60\t75\t2\t4\t3\t1\t1\t0\nK\t3\t138\t141\t3\t7\t6\t5\t0\t3\nK\t4\t123\t127\t3\t8\t6\t7\t0\t7\nK\t5\t88\t144\t3\t6\t5\t2\t1\t0\nA\t0\t4\nA\t1\t1\nA\t2\t2\nA\t3\t8\nA\t4\t4\nA\t5\t5\nA\t6\t5\nT\t0\ti32\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-unit39\\candidate-dev.exe",
+        "--mir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-unit39\\execution\\option-mut-none.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "fairyc.enum-payload-mir/v1\nP\t0\nN\t1073741906\t0\t0\t3\t0\nD\t1\t1073741906\t2147483651\t36\t55\t0\t0\nD\t2\t1073741906\t0\t36\t55\t0\t1\nD\t3\t1073741906\t0\t36\t55\t0\t0\nT\t1\t1\t0\t2\t7\t0\t1\t20\t24\t0\nT\t2\t2\t0\t3\t1073741906\t1\t0\t56\t58\t0\nT\t3\t3\t0\t4\t1\t1\t0\t82\t86\t0\nS\t0\t1\nF\t1\t1\t1\t0\t1\t0\t1\t0\t1\t12\t33\t0\nF\t2\t2\t2\t1\t1\t1\t1\t1\t0\t33\t75\t0\nF\t3\t3\t3\t2\t7\t2\t5\t1\t0\t75\t144\t0\nL\t1\t1\t4\t1\t1\t0\t29\t30\nL\t2\t2\t0\t1073741906\t0\t0\t68\t73\nL\t3\t3\t5\t2147483651\t0\t0\t120\t121\nL\t4\t3\t0\t1073741906\t0\t0\t103\t107\nL\t5\t3\t0\t1\t0\t0\t96\t142\nL\t6\t3\t0\t6\t0\t0\t109\t127\nL\t7\t3\t0\t2147483651\t0\t0\t125\t126\nL\t8\t3\t0\t1\t0\t0\t124\t126\nL\t9\t3\t0\t1\t0\t0\t139\t140\nB\t1\t1\t0\t0\t1\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t12\t33\nB\t2\t2\t1\t1\t1\t2\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t61\t74\nB\t3\t3\t0\t0\t5\t0\t0\t0\t0\t0\t4\t0\t0\t2\t4\t1\t0\t0\t103\t107\nB\t4\t3\t2\t2\t3\t6\t0\t0\t0\t6\t5\t6\t0\t0\t0\t0\t0\t0\t109\t127\nB\t5\t3\t3\t6\t2\t0\t0\t0\t0\t0\t7\t0\t0\t0\t0\t0\t0\t0\t96\t142\nB\t6\t3\t7\t8\t2\t0\t0\t0\t0\t0\t7\t0\t0\t0\t0\t0\t0\t0\t96\t142\nB\t7\t3\t0\t0\t1\t5\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t89\t143\nO\t1\t2\t2\t21\t2\t1073741906\t1073741906\t1\t0\t0\t0\t0\t0\t0\t68\t73\t-\t0\t0\nO\t2\t3\t4\t22\t6\t6\t1073741906\t0\t4\t0\t0\t0\t0\t0\t109\t127\t-\t0\t0\nO\t3\t3\t5\t23\t3\t2147483651\t1073741906\t1\t4\t0\t4\t0\t0\t0\t120\t121\t-\t0\t0\nO\t4\t3\t5\t2\t7\t2147483651\t2147483651\t0\t3\t0\t5\t0\t0\t0\t125\t126\t-\t0\t0\nO\t5\t3\t5\t29\t8\t1\t2147483651\t0\t7\t0\t6\t0\t0\t0\t124\t126\t-\t0\t0\nO\t6\t3\t5\t2\t5\t1\t1\t0\t8\t0\t0\t0\t0\t0\t109\t127\t-\t0\t0\nO\t7\t3\t6\t1\t9\t1\t1\t0\t0\t0\t8\t0\t1\t0\t139\t140\t7\t0\t0\nO\t8\t3\t6\t2\t5\t1\t1\t0\t9\t0\t0\t0\t0\t0\t127\t141\t-\t0\t0\nA\t0\t1\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-unit39\\candidate-dev.exe",
+        "--c-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-unit39\\execution\\option-mut-none.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "/* fairyc.candidate-option-c/v1; C11, 64-bit transport */\n#include <stdint.h>\n#include <limits.h>\n#include <string.h>\n_Static_assert(CHAR_BIT==8 && UINTPTR_MAX==UINT64_MAX,\"requires 64-bit byte-addressed target\");\n_Static_assert(INT32_MIN==(-INT32_MAX-1) && INT64_MIN==(-INT64_MAX-1),\"requires two's complement signed integers\");\n_Noreturn void fy_runtime_trap(uint32_t category);\nstruct fy_text { const uint8_t *fy_data; uintptr_t fy_length; };\nstruct fy_bytes { const uint8_t *fy_data; uintptr_t fy_length; };\nstruct fy_bytes_mut { uint8_t *fy_data; uintptr_t fy_length; };\nstruct fy_o_2147483651{ uint32_t fy_tag;\n    union {\n        struct {\n            int32_t * fy_f_1;\n        } fy_f_2;\n    } fy_payload;\n};\nvoid fy_fn_1(int32_t fy_l_1);\nstruct fy_o_2147483651 fy_fn_2(void);\nint32_t fy_fn_3(void);\nvoid fy_fn_1(int32_t fy_l_1){\n    (void)fy_l_1;\n    goto fy_b_1;\nfy_b_1:;\n    return;\n}\nstruct fy_o_2147483651 fy_fn_2(void){\n    struct fy_o_2147483651 fy_l_2;\n    memset(&fy_l_2,0,sizeof(fy_l_2));\n    (void)fy_l_2;\n    goto fy_b_2;\nfy_b_2:;\n    memset(&fy_l_2,0,sizeof(fy_l_2));\n    fy_l_2.fy_tag=UINT32_C(1);\n    return fy_l_2;\n}\nint32_t fy_fn_3(void){\n    int32_t * fy_l_3;\n    memset(&fy_l_3,0,sizeof(fy_l_3));\n    (void)fy_l_3;\n    struct fy_o_2147483651 fy_l_4;\n    memset(&fy_l_4,0,sizeof(fy_l_4));\n    (void)fy_l_4;\n    int32_t fy_l_5=0;\n    (void)fy_l_5;\n    int32_t fy_l_6=0;\n    (void)fy_l_6;\n    int32_t * fy_l_7;\n    memset(&fy_l_7,0,sizeof(fy_l_7));\n    (void)fy_l_7;\n    int32_t fy_l_8=0;\n    (void)fy_l_8;\n    int32_t fy_l_9=0;\n    (void)fy_l_9;\n    goto fy_b_3;\nfy_b_3:;\n    fy_l_4=fy_fn_2();\n    goto fy_b_4;\nfy_b_4:;\n    fy_l_6 = fy_l_4.fy_tag == UINT32_C(0);\n    if(fy_l_6){ goto fy_b_5;\n}else{ goto fy_b_6;\n}\nfy_b_5:;\n    if (fy_l_4.fy_tag != UINT32_C(0)) fy_runtime_trap(7);\n    fy_l_3 = fy_l_4.fy_payload.fy_f_2.fy_f_1;\n    fy_l_7 = fy_l_3;\n    fy_l_8 = *fy_l_7;\n    fy_l_5 = fy_l_8;\n    goto fy_b_7;\nfy_b_6:;\n    fy_l_9 = INT32_C(7);\n    fy_l_5 = fy_l_9;\n    goto fy_b_7;\nfy_b_7:;\n    return fy_l_5;\n}\nint32_t fy_candidate_entry(void){return fy_fn_3();}\n#ifndef FY_CANDIDATE_NO_MAIN\nint main(void){return (int)fy_candidate_entry();}\n#endif\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-unit39\\candidate-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-unit39\\execution\\option-ref-return.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-unit39\\candidate-dev.exe",
+        "--hir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-unit39\\execution\\option-ref-return.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "fairyc.enum-payload-hir/v1\nP\t0\nN\t1073741842\t0\t0\t3\t0\nD\t1\t1073741842\t2147483650\t36\t51\t0\t0\nD\t2\t1073741842\t0\t36\t51\t0\t1\nD\t3\t1073741842\t0\t36\t51\t0\t0\nF\t1\t1\t12\t33\t1\t1\t0\t1\t0\nF\t2\t2\t33\t83\t3\t2\t1\t1\t0\nF\t3\t3\t83\t169\t5\t5\t4\t0\t0\nB\t1\tfunction\tvoid\t20\t24\t0\t0\t0\t2\t0\t1\nB\t2\tfunction\toption:2147483650\t52\t54\t0\t0\t0\t3\t1\t1\nB\t3\tfunction\ti32\t90\t94\t0\t0\t0\t4\t2\t0\nB\t4\tparameter\ti32\t29\t30\t1\t1\t0\t0\t2\t0\nB\t5\tparameter\tref:2147483650\t63\t64\t2\t3\t0\t0\t2\t0\nB\t6\tlet\ti32\t105\t106\t3\t6\t0\t0\t2\t0\nB\t7\tlet\tref:2147483650\t145\t146\t3\t8\t0\t0\t2\t0\nE\t1\treference\tref:2147483650\t-\t79\t80\t0\t0\t0\t0\t5\t0\t0\t0\t-\nE\t2\tinitializer\tref:2147483650\t-\t79\t80\t1\t0\t0\t0\t1\t0\t0\t0\t-\nE\t3\tvariant\toption:2147483650\t-\t73\t81\t0\t0\t0\t0\t2\t3\t1\t0\t-\nE\t4\tinteger\ti32\t-\t107\t108\t0\t0\t0\t0\t0\t0\t0\t0\t7\nE\t5\treference\ti32\t-\t130\t131\t0\t0\t0\t0\t6\t0\t0\t0\t-\nE\t6\tborrow-array\tref:2147483650\t-\t126\t131\t5\t0\t0\t0\t0\t0\t0\t0\t-\nE\t7\tcall\toption:2147483650\t-\t123\t132\t0\t0\t0\t0\t2\t6\t1\t0\t-\nE\t8\tinteger\ti32\t-\t164\t165\t0\t0\t0\t0\t0\t0\t0\t0\t0\nE\t9\tarm\ti32\t-\t152\t166\t0\t0\t0\t3\t3\t9\t0\t0\t-\nE\t10\tcapture\tref:2147483650\t-\t145\t146\t0\t0\t0\t0\t1\t10\t1\t0\t-\nE\t11\treference\tref:2147483650\t-\t150\t151\t0\t0\t0\t0\t7\t0\t0\t0\t-\nE\t12\tunary\ti32\t*\t149\t151\t11\t0\t0\t0\t0\t0\t0\t0\t-\nE\t13\tarm\ti32\t-\t134\t152\t0\t0\t0\t4\t2\t9\t1\t0\t-\nE\t14\tswitch\ti32\t-\t116\t167\t7\t0\t0\t0\t0\t7\t2\t0\t-\nS\t1\treturn\t66\t82\t4\t3\t0\t0\t-\t0\t0\t0\t0\nS\t2\tbinding\t97\t109\t6\t4\t0\t6\t-\t0\t0\t0\t0\nS\t3\treturn\t109\t168\t6\t14\t0\t0\t-\t0\t0\t0\t0\nK\t1\t31\t33\t1\t2\t1\t1\t0\t0\nK\t2\t65\t83\t2\t4\t3\t2\t1\t0\nK\t3\t163\t166\t3\t7\t6\t9\t0\t8\nK\t4\t148\t152\t3\t8\t6\t11\t0\t12\nK\t5\t96\t169\t3\t6\t5\t4\t2\t0\nA\t0\t4\nA\t1\t5\nA\t2\t1\nA\t3\t2\nA\t4\t2\nA\t5\t3\nA\t6\t6\nA\t7\t13\nA\t8\t9\nA\t9\t10\nA\t10\t7\nT\t0\ti32\nT\t1\tref:2147483650\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-unit39\\candidate-dev.exe",
+        "--mir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-unit39\\execution\\option-ref-return.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "fairyc.enum-payload-mir/v1\nP\t0\nN\t1073741842\t0\t0\t3\t0\nD\t1\t1073741842\t2147483650\t36\t51\t0\t0\nD\t2\t1073741842\t0\t36\t51\t0\t1\nD\t3\t1073741842\t0\t36\t51\t0\t0\nT\t1\t1\t0\t2\t7\t0\t1\t20\t24\t0\nT\t2\t2\t0\t3\t1073741842\t1\t1\t52\t54\t0\nT\t3\t3\t0\t4\t1\t2\t0\t90\t94\t0\nS\t0\t1\nS\t1\t2147483650\nF\t1\t1\t1\t0\t1\t0\t1\t0\t1\t12\t33\t0\nF\t2\t2\t2\t1\t3\t1\t1\t1\t1\t33\t83\t0\nF\t3\t3\t3\t4\t10\t2\t5\t3\t0\t83\t169\t0\nL\t1\t1\t4\t1\t1\t0\t29\t30\nL\t2\t2\t5\t2147483650\t1\t0\t63\t64\nL\t3\t2\t0\t2147483650\t0\t0\t79\t80\nL\t4\t2\t0\t1073741842\t0\t0\t73\t81\nL\t5\t3\t6\t1\t0\t0\t105\t106\nL\t6\t3\t7\t2147483650\t0\t0\t145\t146\nL\t7\t3\t0\t1\t0\t0\t107\t108\nL\t8\t3\t0\t2147483650\t0\t0\t130\t131\nL\t9\t3\t0\t1073741842\t0\t0\t123\t132\nL\t10\t3\t0\t1\t0\t0\t116\t167\nL\t11\t3\t0\t6\t0\t0\t134\t152\nL\t12\t3\t0\t2147483650\t0\t0\t150\t151\nL\t13\t3\t0\t1\t0\t0\t149\t151\nL\t14\t3\t0\t1\t0\t0\t164\t165\nB\t1\t1\t0\t0\t1\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t12\t33\nB\t2\t2\t1\t2\t1\t4\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t66\t82\nB\t3\t3\t3\t5\t5\t0\t0\t0\t0\t0\t4\t0\t0\t2\t9\t3\t1\t0\t123\t132\nB\t4\t3\t6\t6\t3\t11\t0\t0\t0\t6\t5\t6\t0\t0\t0\t0\t0\t0\t134\t152\nB\t5\t3\t7\t10\t2\t0\t0\t0\t0\t0\t7\t0\t0\t0\t0\t0\t0\t0\t116\t167\nB\t6\t3\t11\t12\t2\t0\t0\t0\t0\t0\t7\t0\t0\t0\t0\t0\t0\t0\t116\t167\nB\t7\t3\t0\t0\t1\t10\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t109\t168\nO\t1\t2\t2\t2\t3\t2147483650\t2147483650\t0\t2\t0\t2\t0\t0\t0\t79\t80\t-\t0\t0\nO\t2\t2\t2\t21\t4\t1073741842\t1073741842\t0\t0\t0\t0\t0\t0\t0\t73\t81\t-\t2\t1\nO\t3\t3\t3\t1\t7\t1\t1\t0\t0\t0\t4\t0\t1\t0\t107\t108\t7\t0\t0\nO\t4\t3\t3\t2\t5\t1\t1\t0\t7\t0\t5\t0\t0\t0\t97\t109\t-\t0\t0\nO\t5\t3\t3\t28\t8\t2147483650\t1\t0\t5\t0\t0\t0\t0\t0\t130\t131\t-\t0\t0\nO\t6\t3\t4\t22\t11\t6\t1073741842\t0\t9\t0\t0\t0\t0\t0\t134\t152\t-\t0\t0\nO\t7\t3\t5\t23\t6\t2147483650\t1073741842\t1\t9\t0\t8\t0\t0\t0\t145\t146\t-\t0\t0\nO\t8\t3\t5\t2\t12\t2147483650\t2147483650\t0\t6\t0\t9\t0\t0\t0\t150\t151\t-\t0\t0\nO\t9\t3\t5\t29\t13\t1\t2147483650\t0\t12\t0\t10\t0\t0\t0\t149\t151\t-\t0\t0\nO\t10\t3\t5\t2\t10\t1\t1\t0\t13\t0\t0\t0\t0\t0\t134\t152\t-\t0\t0\nO\t11\t3\t6\t1\t14\t1\t1\t0\t0\t0\t12\t1\t2\t0\t164\t165\t0\t0\t0\nO\t12\t3\t6\t2\t10\t1\t1\t0\t14\t0\t0\t0\t0\t0\t152\t166\t-\t0\t0\nA\t0\t1\nA\t1\t2\nA\t2\t3\nA\t3\t8\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-unit39\\candidate-dev.exe",
+        "--c-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-unit39\\execution\\option-ref-return.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "/* fairyc.candidate-option-c/v1; C11, 64-bit transport */\n#include <stdint.h>\n#include <limits.h>\n#include <string.h>\n_Static_assert(CHAR_BIT==8 && UINTPTR_MAX==UINT64_MAX,\"requires 64-bit byte-addressed target\");\n_Static_assert(INT32_MIN==(-INT32_MAX-1) && INT64_MIN==(-INT64_MAX-1),\"requires two's complement signed integers\");\n_Noreturn void fy_runtime_trap(uint32_t category);\nstruct fy_text { const uint8_t *fy_data; uintptr_t fy_length; };\nstruct fy_bytes { const uint8_t *fy_data; uintptr_t fy_length; };\nstruct fy_bytes_mut { uint8_t *fy_data; uintptr_t fy_length; };\nstruct fy_o_2147483650{ uint32_t fy_tag;\n    union {\n        struct {\n            int32_t const * fy_f_1;\n        } fy_f_2;\n    } fy_payload;\n};\nvoid fy_fn_1(int32_t fy_l_1);\nstruct fy_o_2147483650 fy_fn_2(int32_t const * fy_l_2);\nint32_t fy_fn_3(void);\nvoid fy_fn_1(int32_t fy_l_1){\n    (void)fy_l_1;\n    goto fy_b_1;\nfy_b_1:;\n    return;\n}\nstruct fy_o_2147483650 fy_fn_2(int32_t const * fy_l_2){\n    (void)fy_l_2;\n    int32_t const * fy_l_3;\n    memset(&fy_l_3,0,sizeof(fy_l_3));\n    (void)fy_l_3;\n    struct fy_o_2147483650 fy_l_4;\n    memset(&fy_l_4,0,sizeof(fy_l_4));\n    (void)fy_l_4;\n    goto fy_b_2;\nfy_b_2:;\n    fy_l_3 = fy_l_2;\n    memset(&fy_l_4,0,sizeof(fy_l_4));\n    fy_l_4.fy_tag=UINT32_C(0);\n    fy_l_4.fy_payload.fy_f_2.fy_f_1=fy_l_3;\n    return fy_l_4;\n}\nint32_t fy_fn_3(void){\n    int32_t fy_l_5=0;\n    (void)fy_l_5;\n    int32_t const * fy_l_6;\n    memset(&fy_l_6,0,sizeof(fy_l_6));\n    (void)fy_l_6;\n    int32_t fy_l_7=0;\n    (void)fy_l_7;\n    int32_t const * fy_l_8;\n    memset(&fy_l_8,0,sizeof(fy_l_8));\n    (void)fy_l_8;\n    struct fy_o_2147483650 fy_l_9;\n    memset(&fy_l_9,0,sizeof(fy_l_9));\n    (void)fy_l_9;\n    int32_t fy_l_10=0;\n    (void)fy_l_10;\n    int32_t fy_l_11=0;\n    (void)fy_l_11;\n    int32_t const * fy_l_12;\n    memset(&fy_l_12,0,sizeof(fy_l_12));\n    (void)fy_l_12;\n    int32_t fy_l_13=0;\n    (void)fy_l_13;\n    int32_t fy_l_14=0;\n    (void)fy_l_14;\n    goto fy_b_3;\nfy_b_3:;\n    fy_l_7 = INT32_C(7);\n    fy_l_5 = fy_l_7;\n    fy_l_8 = &fy_l_5;\n    fy_l_9=fy_fn_2(fy_l_8);\n    goto fy_b_4;\nfy_b_4:;\n    fy_l_11 = fy_l_9.fy_tag == UINT32_C(0);\n    if(fy_l_11){ goto fy_b_5;\n}else{ goto fy_b_6;\n}\nfy_b_5:;\n    if (fy_l_9.fy_tag != UINT32_C(0)) fy_runtime_trap(7);\n    fy_l_6 = fy_l_9.fy_payload.fy_f_2.fy_f_1;\n    fy_l_12 = fy_l_6;\n    fy_l_13 = *fy_l_12;\n    fy_l_10 = fy_l_13;\n    goto fy_b_7;\nfy_b_6:;\n    fy_l_14 = INT32_C(0);\n    fy_l_10 = fy_l_14;\n    goto fy_b_7;\nfy_b_7:;\n    return fy_l_10;\n}\nint32_t fy_candidate_entry(void){return fy_fn_3();}\n#ifndef FY_CANDIDATE_NO_MAIN\nint main(void){return (int)fy_candidate_entry();}\n#endif\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-unit39\\candidate-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-unit39\\execution\\option-ref-none.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-unit39\\candidate-dev.exe",
+        "--hir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-unit39\\execution\\option-ref-none.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "fairyc.enum-payload-hir/v1\nP\t0\nN\t1073741842\t0\t0\t3\t0\nD\t1\t1073741842\t2147483650\t36\t51\t0\t0\nD\t2\t1073741842\t0\t36\t51\t0\t1\nD\t3\t1073741842\t0\t36\t51\t0\t0\nF\t1\t1\t12\t33\t1\t1\t0\t1\t0\nF\t2\t2\t33\t71\t3\t2\t1\t0\t0\nF\t3\t3\t71\t140\t5\t5\t2\t0\t0\nB\t1\tfunction\tvoid\t20\t24\t0\t0\t0\t2\t0\t1\nB\t2\tfunction\toption:2147483650\t52\t54\t0\t0\t0\t3\t1\t0\nB\t3\tfunction\ti32\t78\t82\t0\t0\t0\t4\t1\t0\nB\t4\tparameter\ti32\t29\t30\t1\t1\t0\t0\t1\t0\nB\t5\tlet\tref:2147483650\t116\t117\t3\t8\t0\t0\t1\t0\nE\t1\tvariant\toption:2147483650\t-\t64\t69\t0\t0\t0\t0\t3\t0\t0\t0\t-\nE\t2\tcall\toption:2147483650\t-\t99\t103\t0\t0\t0\t0\t2\t3\t0\t0\t-\nE\t3\tinteger\ti32\t-\t135\t136\t0\t0\t0\t0\t0\t0\t0\t0\t7\nE\t4\tarm\ti32\t-\t123\t137\t0\t0\t0\t3\t3\t5\t0\t0\t-\nE\t5\tcapture\tref:2147483650\t-\t116\t117\t0\t0\t0\t0\t1\t6\t1\t0\t-\nE\t6\treference\tref:2147483650\t-\t121\t122\t0\t0\t0\t0\t5\t0\t0\t0\t-\nE\t7\tunary\ti32\t*\t120\t122\t6\t0\t0\t0\t0\t0\t0\t0\t-\nE\t8\tarm\ti32\t-\t105\t123\t0\t0\t0\t4\t2\t5\t1\t0\t-\nE\t9\tswitch\ti32\t-\t92\t138\t2\t0\t0\t0\t0\t3\t2\t0\t-\nS\t1\treturn\t57\t70\t4\t1\t0\t0\t-\t0\t0\t0\t0\nS\t2\treturn\t85\t139\t6\t9\t0\t0\t-\t0\t0\t0\t0\nK\t1\t31\t33\t1\t2\t1\t1\t0\t0\nK\t2\t56\t71\t2\t4\t3\t1\t1\t0\nK\t3\t134\t137\t3\t7\t6\t5\t0\t3\nK\t4\t119\t123\t3\t8\t6\t7\t0\t7\nK\t5\t84\t140\t3\t6\t5\t2\t1\t0\nA\t0\t4\nA\t1\t1\nA\t2\t2\nA\t3\t8\nA\t4\t4\nA\t5\t5\nA\t6\t5\nT\t0\ti32\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-unit39\\candidate-dev.exe",
+        "--mir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-unit39\\execution\\option-ref-none.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "fairyc.enum-payload-mir/v1\nP\t0\nN\t1073741842\t0\t0\t3\t0\nD\t1\t1073741842\t2147483650\t36\t51\t0\t0\nD\t2\t1073741842\t0\t36\t51\t0\t1\nD\t3\t1073741842\t0\t36\t51\t0\t0\nT\t1\t1\t0\t2\t7\t0\t1\t20\t24\t0\nT\t2\t2\t0\t3\t1073741842\t1\t0\t52\t54\t0\nT\t3\t3\t0\t4\t1\t1\t0\t78\t82\t0\nS\t0\t1\nF\t1\t1\t1\t0\t1\t0\t1\t0\t1\t12\t33\t0\nF\t2\t2\t2\t1\t1\t1\t1\t1\t0\t33\t71\t0\nF\t3\t3\t3\t2\t7\t2\t5\t1\t0\t71\t140\t0\nL\t1\t1\t4\t1\t1\t0\t29\t30\nL\t2\t2\t0\t1073741842\t0\t0\t64\t69\nL\t3\t3\t5\t2147483650\t0\t0\t116\t117\nL\t4\t3\t0\t1073741842\t0\t0\t99\t103\nL\t5\t3\t0\t1\t0\t0\t92\t138\nL\t6\t3\t0\t6\t0\t0\t105\t123\nL\t7\t3\t0\t2147483650\t0\t0\t121\t122\nL\t8\t3\t0\t1\t0\t0\t120\t122\nL\t9\t3\t0\t1\t0\t0\t135\t136\nB\t1\t1\t0\t0\t1\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t12\t33\nB\t2\t2\t1\t1\t1\t2\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t57\t70\nB\t3\t3\t0\t0\t5\t0\t0\t0\t0\t0\t4\t0\t0\t2\t4\t1\t0\t0\t99\t103\nB\t4\t3\t2\t2\t3\t6\t0\t0\t0\t6\t5\t6\t0\t0\t0\t0\t0\t0\t105\t123\nB\t5\t3\t3\t6\t2\t0\t0\t0\t0\t0\t7\t0\t0\t0\t0\t0\t0\t0\t92\t138\nB\t6\t3\t7\t8\t2\t0\t0\t0\t0\t0\t7\t0\t0\t0\t0\t0\t0\t0\t92\t138\nB\t7\t3\t0\t0\t1\t5\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t85\t139\nO\t1\t2\t2\t21\t2\t1073741842\t1073741842\t1\t0\t0\t0\t0\t0\t0\t64\t69\t-\t0\t0\nO\t2\t3\t4\t22\t6\t6\t1073741842\t0\t4\t0\t0\t0\t0\t0\t105\t123\t-\t0\t0\nO\t3\t3\t5\t23\t3\t2147483650\t1073741842\t1\t4\t0\t4\t0\t0\t0\t116\t117\t-\t0\t0\nO\t4\t3\t5\t2\t7\t2147483650\t2147483650\t0\t3\t0\t5\t0\t0\t0\t121\t122\t-\t0\t0\nO\t5\t3\t5\t29\t8\t1\t2147483650\t0\t7\t0\t6\t0\t0\t0\t120\t122\t-\t0\t0\nO\t6\t3\t5\t2\t5\t1\t1\t0\t8\t0\t0\t0\t0\t0\t105\t123\t-\t0\t0\nO\t7\t3\t6\t1\t9\t1\t1\t0\t0\t0\t8\t0\t1\t0\t135\t136\t7\t0\t0\nO\t8\t3\t6\t2\t5\t1\t1\t0\t9\t0\t0\t0\t0\t0\t123\t137\t-\t0\t0\nA\t0\t1\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-unit39\\candidate-dev.exe",
+        "--c-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-unit39\\execution\\option-ref-none.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "/* fairyc.candidate-option-c/v1; C11, 64-bit transport */\n#include <stdint.h>\n#include <limits.h>\n#include <string.h>\n_Static_assert(CHAR_BIT==8 && UINTPTR_MAX==UINT64_MAX,\"requires 64-bit byte-addressed target\");\n_Static_assert(INT32_MIN==(-INT32_MAX-1) && INT64_MIN==(-INT64_MAX-1),\"requires two's complement signed integers\");\n_Noreturn void fy_runtime_trap(uint32_t category);\nstruct fy_text { const uint8_t *fy_data; uintptr_t fy_length; };\nstruct fy_bytes { const uint8_t *fy_data; uintptr_t fy_length; };\nstruct fy_bytes_mut { uint8_t *fy_data; uintptr_t fy_length; };\nstruct fy_o_2147483650{ uint32_t fy_tag;\n    union {\n        struct {\n            int32_t const * fy_f_1;\n        } fy_f_2;\n    } fy_payload;\n};\nvoid fy_fn_1(int32_t fy_l_1);\nstruct fy_o_2147483650 fy_fn_2(void);\nint32_t fy_fn_3(void);\nvoid fy_fn_1(int32_t fy_l_1){\n    (void)fy_l_1;\n    goto fy_b_1;\nfy_b_1:;\n    return;\n}\nstruct fy_o_2147483650 fy_fn_2(void){\n    struct fy_o_2147483650 fy_l_2;\n    memset(&fy_l_2,0,sizeof(fy_l_2));\n    (void)fy_l_2;\n    goto fy_b_2;\nfy_b_2:;\n    memset(&fy_l_2,0,sizeof(fy_l_2));\n    fy_l_2.fy_tag=UINT32_C(1);\n    return fy_l_2;\n}\nint32_t fy_fn_3(void){\n    int32_t const * fy_l_3;\n    memset(&fy_l_3,0,sizeof(fy_l_3));\n    (void)fy_l_3;\n    struct fy_o_2147483650 fy_l_4;\n    memset(&fy_l_4,0,sizeof(fy_l_4));\n    (void)fy_l_4;\n    int32_t fy_l_5=0;\n    (void)fy_l_5;\n    int32_t fy_l_6=0;\n    (void)fy_l_6;\n    int32_t const * fy_l_7;\n    memset(&fy_l_7,0,sizeof(fy_l_7));\n    (void)fy_l_7;\n    int32_t fy_l_8=0;\n    (void)fy_l_8;\n    int32_t fy_l_9=0;\n    (void)fy_l_9;\n    goto fy_b_3;\nfy_b_3:;\n    fy_l_4=fy_fn_2();\n    goto fy_b_4;\nfy_b_4:;\n    fy_l_6 = fy_l_4.fy_tag == UINT32_C(0);\n    if(fy_l_6){ goto fy_b_5;\n}else{ goto fy_b_6;\n}\nfy_b_5:;\n    if (fy_l_4.fy_tag != UINT32_C(0)) fy_runtime_trap(7);\n    fy_l_3 = fy_l_4.fy_payload.fy_f_2.fy_f_1;\n    fy_l_7 = fy_l_3;\n    fy_l_8 = *fy_l_7;\n    fy_l_5 = fy_l_8;\n    goto fy_b_7;\nfy_b_6:;\n    fy_l_9 = INT32_C(7);\n    fy_l_5 = fy_l_9;\n    goto fy_b_7;\nfy_b_7:;\n    return fy_l_5;\n}\nint32_t fy_candidate_entry(void){return fy_fn_3();}\n#ifndef FY_CANDIDATE_NO_MAIN\nint main(void){return (int)fy_candidate_entry();}\n#endif\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-unit39\\candidate-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-unit39\\execution\\option-nested-ref.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-unit39\\candidate-dev.exe",
+        "--hir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-unit39\\execution\\option-nested-ref.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "fairyc.enum-payload-hir/v1\nP\t0\nN\t1073741842\t0\t0\t3\t0\nN\t1073741898\t0\t3\t3\t0\nD\t1\t1073741842\t2147483650\t43\t58\t0\t0\nD\t2\t1073741842\t0\t43\t58\t0\t1\nD\t3\t1073741842\t0\t43\t58\t0\t0\nD\t4\t1073741898\t1073741842\t36\t59\t0\t0\nD\t5\t1073741898\t0\t36\t59\t3\t1\nD\t6\t1073741898\t0\t36\t59\t0\t0\nF\t1\t1\t12\t33\t1\t1\t0\t1\t0\nF\t2\t2\t33\t98\t3\t2\t1\t1\t0\nF\t3\t3\t98\t225\t5\t7\t5\t0\t0\nB\t1\tfunction\tvoid\t20\t24\t0\t0\t0\t2\t0\t1\nB\t2\tfunction\toption:1073741842\t60\t62\t0\t0\t0\t3\t1\t1\nB\t3\tfunction\ti32\t105\t109\t0\t0\t0\t4\t2\t0\nB\t4\tparameter\ti32\t29\t30\t1\t1\t0\t0\t2\t0\nB\t5\tparameter\tref:2147483650\t71\t72\t2\t3\t0\t0\t2\t0\nB\t6\tlet\ti32\t120\t121\t3\t6\t0\t0\t2\t0\nB\t7\tlet\toption:2147483650\t160\t161\t3\t8\t0\t0\t2\t0\nB\t8\tlet\tref:2147483650\t185\t186\t3\t10\t0\t0\t2\t0\nE\t1\treference\tref:2147483650\t-\t93\t94\t0\t0\t0\t0\t5\t0\t0\t0\t-\nE\t2\tinitializer\tref:2147483650\t-\t93\t94\t1\t0\t0\t0\t1\t0\t0\t0\t-\nE\t3\tvariant\toption:2147483650\t-\t87\t95\t0\t0\t0\t0\t2\t4\t1\t0\t-\nE\t4\tinitializer\toption:2147483650\t-\t87\t95\t3\t0\t0\t0\t4\t0\t0\t0\t-\nE\t5\tvariant\toption:1073741842\t-\t81\t96\t0\t0\t0\t0\t5\t3\t1\t0\t-\nE\t6\tinteger\ti32\t-\t122\t123\t0\t0\t0\t0\t0\t0\t0\t0\t7\nE\t7\treference\ti32\t-\t145\t146\t0\t0\t0\t0\t6\t0\t0\t0\t-\nE\t8\tborrow-array\tref:2147483650\t-\t141\t146\t7\t0\t0\t0\t0\t0\t0\t0\t-\nE\t9\tcall\toption:1073741842\t-\t138\t147\t0\t0\t0\t0\t2\t7\t1\t0\t-\nE\t10\tinteger\ti32\t-\t220\t221\t0\t0\t0\t0\t0\t0\t0\t0\t0\nE\t11\tarm\ti32\t-\t208\t222\t0\t0\t0\t3\t6\t10\t0\t0\t-\nE\t12\tcapture\toption:2147483650\t-\t160\t161\t0\t0\t0\t0\t4\t11\t1\t0\t-\nE\t13\treference\toption:2147483650\t-\t171\t172\t0\t0\t0\t0\t7\t0\t0\t0\t-\nE\t14\tinteger\ti32\t-\t204\t205\t0\t0\t0\t0\t0\t0\t0\t0\t0\nE\t15\tarm\ti32\t-\t192\t206\t0\t0\t0\t4\t3\t14\t0\t0\t-\nE\t16\tcapture\tref:2147483650\t-\t185\t186\t0\t0\t0\t0\t1\t15\t1\t0\t-\nE\t17\treference\tref:2147483650\t-\t190\t191\t0\t0\t0\t0\t8\t0\t0\t0\t-\nE\t18\tunary\ti32\t*\t189\t191\t17\t0\t0\t0\t0\t0\t0\t0\t-\nE\t19\tarm\ti32\t-\t174\t192\t0\t0\t0\t5\t2\t14\t1\t0\t-\nE\t20\tswitch\ti32\t-\t164\t207\t13\t0\t0\t0\t0\t12\t2\t0\t-\nE\t21\tarm\ti32\t-\t149\t208\t0\t0\t0\t6\t5\t10\t1\t0\t-\nE\t22\tswitch\ti32\t-\t131\t223\t9\t0\t0\t0\t0\t8\t2\t0\t-\nS\t1\treturn\t74\t97\t4\t5\t0\t0\t-\t0\t0\t0\t0\nS\t2\tbinding\t112\t124\t6\t6\t0\t6\t-\t0\t0\t0\t0\nS\t3\treturn\t124\t224\t6\t22\t0\t0\t-\t0\t0\t0\t0\nK\t1\t31\t33\t1\t2\t1\t1\t0\t0\nK\t2\t73\t98\t2\t4\t3\t2\t1\t0\nK\t3\t219\t222\t3\t7\t6\t10\t0\t10\nK\t4\t203\t206\t3\t9\t8\t14\t0\t14\nK\t5\t188\t192\t3\t10\t8\t16\t0\t18\nK\t6\t163\t208\t3\t8\t6\t12\t0\t20\nK\t7\t111\t225\t3\t6\t5\t5\t2\t0\nA\t0\t4\nA\t1\t5\nA\t2\t1\nA\t3\t4\nA\t4\t2\nA\t5\t2\nA\t6\t3\nA\t7\t8\nA\t8\t21\nA\t9\t11\nA\t10\t12\nA\t11\t7\nA\t12\t19\nA\t13\t15\nA\t14\t16\nA\t15\t8\nT\t0\ti32\nT\t1\tref:2147483650\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-unit39\\candidate-dev.exe",
+        "--mir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-unit39\\execution\\option-nested-ref.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "fairyc.enum-payload-mir/v1\nP\t0\nN\t1073741842\t0\t0\t3\t0\nN\t1073741898\t0\t3\t3\t0\nD\t1\t1073741842\t2147483650\t43\t58\t0\t0\nD\t2\t1073741842\t0\t43\t58\t0\t1\nD\t3\t1073741842\t0\t43\t58\t0\t0\nD\t4\t1073741898\t1073741842\t36\t59\t0\t0\nD\t5\t1073741898\t0\t36\t59\t3\t1\nD\t6\t1073741898\t0\t36\t59\t0\t0\nT\t1\t1\t0\t2\t7\t0\t1\t20\t24\t0\nT\t2\t2\t0\t3\t1073741898\t1\t1\t60\t62\t0\nT\t3\t3\t0\t4\t1\t2\t0\t105\t109\t0\nS\t0\t1\nS\t1\t2147483650\nF\t1\t1\t1\t0\t1\t0\t1\t0\t1\t12\t33\t0\nF\t2\t2\t2\t1\t4\t1\t1\t1\t1\t33\t98\t0\nF\t3\t3\t3\t5\t15\t2\t8\t4\t0\t98\t225\t0\nL\t1\t1\t4\t1\t1\t0\t29\t30\nL\t2\t2\t5\t2147483650\t1\t0\t71\t72\nL\t3\t2\t0\t2147483650\t0\t0\t93\t94\nL\t4\t2\t0\t1073741842\t0\t0\t87\t95\nL\t5\t2\t0\t1073741898\t0\t0\t81\t96\nL\t6\t3\t6\t1\t0\t0\t120\t121\nL\t7\t3\t7\t1073741842\t0\t0\t160\t161\nL\t8\t3\t8\t2147483650\t0\t0\t185\t186\nL\t9\t3\t0\t1\t0\t0\t122\t123\nL\t10\t3\t0\t2147483650\t0\t0\t145\t146\nL\t11\t3\t0\t1073741898\t0\t0\t138\t147\nL\t12\t3\t0\t1\t0\t0\t131\t223\nL\t13\t3\t0\t6\t0\t0\t149\t208\nL\t14\t3\t0\t1073741842\t0\t0\t171\t172\nL\t15\t3\t0\t1\t0\t0\t164\t207\nL\t16\t3\t0\t6\t0\t0\t174\t192\nL\t17\t3\t0\t2147483650\t0\t0\t190\t191\nL\t18\t3\t0\t1\t0\t0\t189\t191\nL\t19\t3\t0\t1\t0\t0\t204\t205\nL\t20\t3\t0\t1\t0\t0\t220\t221\nB\t1\t1\t0\t0\t1\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t12\t33\nB\t2\t2\t1\t3\t1\t5\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t74\t97\nB\t3\t3\t4\t6\t5\t0\t0\t0\t0\t0\t4\t0\t0\t2\t11\t4\t1\t0\t138\t147\nB\t4\t3\t7\t7\t3\t13\t0\t0\t0\t6\t5\t6\t0\t0\t0\t0\t0\t0\t149\t208\nB\t5\t3\t8\t10\t3\t16\t0\t0\t0\t6\t7\t8\t0\t0\t0\t0\t0\t0\t174\t192\nB\t6\t3\t18\t19\t2\t0\t0\t0\t0\t0\t10\t0\t0\t0\t0\t0\t0\t0\t131\t223\nB\t7\t3\t11\t14\t2\t0\t0\t0\t0\t0\t9\t0\t0\t0\t0\t0\t0\t0\t164\t207\nB\t8\t3\t15\t16\t2\t0\t0\t0\t0\t0\t9\t0\t0\t0\t0\t0\t0\t0\t164\t207\nB\t9\t3\t17\t17\t2\t0\t0\t0\t0\t0\t10\t0\t0\t0\t0\t0\t0\t0\t131\t223\nB\t10\t3\t0\t0\t1\t12\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t124\t224\nO\t1\t2\t2\t2\t3\t2147483650\t2147483650\t0\t2\t0\t2\t0\t0\t0\t93\t94\t-\t0\t0\nO\t2\t2\t2\t21\t4\t1073741842\t1073741842\t0\t0\t0\t3\t0\t0\t0\t87\t95\t-\t2\t1\nO\t3\t2\t2\t21\t5\t1073741898\t1073741898\t0\t0\t0\t0\t0\t0\t0\t81\t96\t-\t3\t1\nO\t4\t3\t3\t1\t9\t1\t1\t0\t0\t0\t5\t0\t1\t0\t122\t123\t7\t0\t0\nO\t5\t3\t3\t2\t6\t1\t1\t0\t9\t0\t6\t0\t0\t0\t112\t124\t-\t0\t0\nO\t6\t3\t3\t28\t10\t2147483650\t1\t0\t6\t0\t0\t0\t0\t0\t145\t146\t-\t0\t0\nO\t7\t3\t4\t22\t13\t6\t1073741898\t0\t11\t0\t0\t0\t0\t0\t149\t208\t-\t0\t0\nO\t8\t3\t5\t23\t7\t1073741842\t1073741898\t4\t11\t0\t9\t0\t0\t0\t160\t161\t-\t0\t0\nO\t9\t3\t5\t2\t14\t1073741842\t1073741842\t0\t7\t0\t10\t0\t0\t0\t171\t172\t-\t0\t0\nO\t10\t3\t5\t22\t16\t6\t1073741842\t0\t14\t0\t0\t0\t0\t0\t174\t192\t-\t0\t0\nO\t11\t3\t7\t23\t8\t2147483650\t1073741842\t1\t14\t0\t12\t0\t0\t0\t185\t186\t-\t0\t0\nO\t12\t3\t7\t2\t17\t2147483650\t2147483650\t0\t8\t0\t13\t0\t0\t0\t190\t191\t-\t0\t0\nO\t13\t3\t7\t29\t18\t1\t2147483650\t0\t17\t0\t14\t0\t0\t0\t189\t191\t-\t0\t0\nO\t14\t3\t7\t2\t15\t1\t1\t0\t18\t0\t0\t0\t0\t0\t174\t192\t-\t0\t0\nO\t15\t3\t8\t1\t19\t1\t1\t0\t0\t0\t16\t1\t2\t0\t204\t205\t0\t0\t0\nO\t16\t3\t8\t2\t15\t1\t1\t0\t19\t0\t0\t0\t0\t0\t192\t206\t-\t0\t0\nO\t17\t3\t9\t2\t12\t1\t1\t0\t15\t0\t0\t0\t0\t0\t149\t208\t-\t0\t0\nO\t18\t3\t6\t1\t20\t1\t1\t0\t0\t0\t19\t2\t3\t0\t220\t221\t0\t0\t0\nO\t19\t3\t6\t2\t12\t1\t1\t0\t20\t0\t0\t0\t0\t0\t208\t222\t-\t0\t0\nA\t0\t1\nA\t1\t2\nA\t2\t3\nA\t3\t4\nA\t4\t10\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-unit39\\candidate-dev.exe",
+        "--c-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-unit39\\execution\\option-nested-ref.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "/* fairyc.candidate-option-c/v1; C11, 64-bit transport */\n#include <stdint.h>\n#include <limits.h>\n#include <string.h>\n_Static_assert(CHAR_BIT==8 && UINTPTR_MAX==UINT64_MAX,\"requires 64-bit byte-addressed target\");\n_Static_assert(INT32_MIN==(-INT32_MAX-1) && INT64_MIN==(-INT64_MAX-1),\"requires two's complement signed integers\");\n_Noreturn void fy_runtime_trap(uint32_t category);\nstruct fy_text { const uint8_t *fy_data; uintptr_t fy_length; };\nstruct fy_bytes { const uint8_t *fy_data; uintptr_t fy_length; };\nstruct fy_bytes_mut { uint8_t *fy_data; uintptr_t fy_length; };\nstruct fy_o_2147483650{ uint32_t fy_tag;\n    union {\n        struct {\n            int32_t const * fy_f_1;\n        } fy_f_2;\n    } fy_payload;\n};\nstruct fy_o_1073741842{ uint32_t fy_tag;\n    union {\n        struct {\n            struct fy_o_2147483650 fy_f_4;\n        } fy_f_5;\n    } fy_payload;\n};\nvoid fy_fn_1(int32_t fy_l_1);\nstruct fy_o_1073741842 fy_fn_2(int32_t const * fy_l_2);\nint32_t fy_fn_3(void);\nvoid fy_fn_1(int32_t fy_l_1){\n    (void)fy_l_1;\n    goto fy_b_1;\nfy_b_1:;\n    return;\n}\nstruct fy_o_1073741842 fy_fn_2(int32_t const * fy_l_2){\n    (void)fy_l_2;\n    int32_t const * fy_l_3;\n    memset(&fy_l_3,0,sizeof(fy_l_3));\n    (void)fy_l_3;\n    struct fy_o_2147483650 fy_l_4;\n    memset(&fy_l_4,0,sizeof(fy_l_4));\n    (void)fy_l_4;\n    struct fy_o_1073741842 fy_l_5;\n    memset(&fy_l_5,0,sizeof(fy_l_5));\n    (void)fy_l_5;\n    goto fy_b_2;\nfy_b_2:;\n    fy_l_3 = fy_l_2;\n    memset(&fy_l_4,0,sizeof(fy_l_4));\n    fy_l_4.fy_tag=UINT32_C(0);\n    fy_l_4.fy_payload.fy_f_2.fy_f_1=fy_l_3;\n    memset(&fy_l_5,0,sizeof(fy_l_5));\n    fy_l_5.fy_tag=UINT32_C(0);\n    fy_l_5.fy_payload.fy_f_5.fy_f_4=fy_l_4;\n    return fy_l_5;\n}\nint32_t fy_fn_3(void){\n    int32_t fy_l_6=0;\n    (void)fy_l_6;\n    struct fy_o_2147483650 fy_l_7;\n    memset(&fy_l_7,0,sizeof(fy_l_7));\n    (void)fy_l_7;\n    int32_t const * fy_l_8;\n    memset(&fy_l_8,0,sizeof(fy_l_8));\n    (void)fy_l_8;\n    int32_t fy_l_9=0;\n    (void)fy_l_9;\n    int32_t const * fy_l_10;\n    memset(&fy_l_10,0,sizeof(fy_l_10));\n    (void)fy_l_10;\n    struct fy_o_1073741842 fy_l_11;\n    memset(&fy_l_11,0,sizeof(fy_l_11));\n    (void)fy_l_11;\n    int32_t fy_l_12=0;\n    (void)fy_l_12;\n    int32_t fy_l_13=0;\n    (void)fy_l_13;\n    struct fy_o_2147483650 fy_l_14;\n    memset(&fy_l_14,0,sizeof(fy_l_14));\n    (void)fy_l_14;\n    int32_t fy_l_15=0;\n    (void)fy_l_15;\n    int32_t fy_l_16=0;\n    (void)fy_l_16;\n    int32_t const * fy_l_17;\n    memset(&fy_l_17,0,sizeof(fy_l_17));\n    (void)fy_l_17;\n    int32_t fy_l_18=0;\n    (void)fy_l_18;\n    int32_t fy_l_19=0;\n    (void)fy_l_19;\n    int32_t fy_l_20=0;\n    (void)fy_l_20;\n    goto fy_b_3;\nfy_b_3:;\n    fy_l_9 = INT32_C(7);\n    fy_l_6 = fy_l_9;\n    fy_l_10 = &fy_l_6;\n    fy_l_11=fy_fn_2(fy_l_10);\n    goto fy_b_4;\nfy_b_4:;\n    fy_l_13 = fy_l_11.fy_tag == UINT32_C(0);\n    if(fy_l_13){ goto fy_b_5;\n}else{ goto fy_b_6;\n}\nfy_b_5:;\n    if (fy_l_11.fy_tag != UINT32_C(0)) fy_runtime_trap(7);\n    fy_l_7 = fy_l_11.fy_payload.fy_f_5.fy_f_4;\n    fy_l_14 = fy_l_7;\n    fy_l_16 = fy_l_14.fy_tag == UINT32_C(0);\n    if(fy_l_16){ goto fy_b_7;\n}else{ goto fy_b_8;\n}\nfy_b_6:;\n    fy_l_20 = INT32_C(0);\n    fy_l_12 = fy_l_20;\n    goto fy_b_10;\nfy_b_7:;\n    if (fy_l_14.fy_tag != UINT32_C(0)) fy_runtime_trap(7);\n    fy_l_8 = fy_l_14.fy_payload.fy_f_2.fy_f_1;\n    fy_l_17 = fy_l_8;\n    fy_l_18 = *fy_l_17;\n    fy_l_15 = fy_l_18;\n    goto fy_b_9;\nfy_b_8:;\n    fy_l_19 = INT32_C(0);\n    fy_l_15 = fy_l_19;\n    goto fy_b_9;\nfy_b_9:;\n    fy_l_12 = fy_l_15;\n    goto fy_b_10;\nfy_b_10:;\n    return fy_l_12;\n}\nint32_t fy_candidate_entry(void){return fy_fn_3();}\n#ifndef FY_CANDIDATE_NO_MAIN\nint main(void){return (int)fy_candidate_entry();}\n#endif\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-unit39\\candidate-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-unit39\\execution\\result-ref-success.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-unit39\\candidate-dev.exe",
+        "--hir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-unit39\\execution\\result-ref-success.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "fairyc.enum-payload-hir/v1\nP\t0\nN\t262150\t0\t0\t4\t0\nN\t1075118099\t0\t4\t4\t0\nD\t1\t262150\t1\t89\t105\t0\t0\nD\t2\t262150\t0\t89\t105\t0\t1\nD\t3\t262150\t6\t89\t105\t0\t0\nD\t4\t262150\t0\t89\t105\t2\t1\nD\t5\t1075118099\t2147483650\t36\t56\t0\t0\nD\t6\t1075118099\t0\t36\t56\t4\t1\nD\t7\t1075118099\t6\t36\t56\t0\t0\nD\t8\t1075118099\t0\t36\t56\t6\t1\nF\t1\t1\t12\t33\t1\t1\t0\t1\t0\nF\t2\t2\t33\t86\t3\t2\t1\t1\t0\nF\t3\t3\t86\t163\t5\t3\t4\t0\t0\nF\t4\t4\t163\t230\t7\t6\t9\t0\t0\nB\t1\tfunction\tvoid\t20\t24\t0\t0\t0\t2\t0\t1\nB\t2\tfunction\tresult:2147483650:6\t57\t59\t0\t0\t0\t3\t1\t1\nB\t3\tfunction\tresult:1:6\t106\t107\t0\t0\t0\t4\t2\t0\nB\t4\tfunction\ti32\t170\t174\t0\t0\t0\t5\t2\t0\nB\t5\tparameter\ti32\t29\t30\t1\t1\t0\t0\t2\t0\nB\t6\tparameter\tref:2147483650\t68\t69\t2\t3\t0\t0\t2\t0\nB\t7\tlet\ti32\t118\t119\t3\t6\t0\t0\t2\t0\nB\t8\tlet\tref:2147483650\t134\t135\t3\t6\t0\t0\t2\t0\nB\t9\tlet\ti32\t205\t206\t4\t10\t0\t0\t2\t0\nE\t1\treference\tref:2147483650\t-\t82\t83\t0\t0\t0\t0\t6\t0\t0\t0\t-\nE\t2\tinitializer\tref:2147483650\t-\t82\t83\t1\t0\t0\t0\t5\t0\t0\t0\t-\nE\t3\tvariant\tresult:2147483650:6\t-\t78\t84\t0\t0\t0\t0\t6\t3\t1\t0\t-\nE\t4\tinteger\ti32\t-\t120\t121\t0\t0\t0\t0\t0\t0\t0\t0\t7\nE\t5\treference\ti32\t-\t143\t144\t0\t0\t0\t0\t7\t0\t0\t0\t-\nE\t6\tborrow-array\tref:2147483650\t-\t139\t144\t5\t0\t0\t0\t0\t0\t0\t0\t-\nE\t7\tcall\tresult:2147483650:6\t-\t136\t145\t0\t0\t0\t0\t2\t7\t1\t0\t-\nE\t8\tpropagate\tref:2147483650\t-\t136\t146\t7\t0\t0\t0\t3\t0\t0\t0\t-\nE\t9\treference\tref:2147483650\t-\t159\t160\t0\t0\t0\t0\t8\t0\t0\t0\t-\nE\t10\tunary\ti32\t*\t158\t160\t9\t0\t0\t0\t0\t0\t0\t0\t-\nE\t11\tinitializer\ti32\t-\t158\t160\t10\t0\t0\t0\t1\t0\t0\t0\t-\nE\t12\tvariant\tresult:1:6\t-\t154\t161\t0\t0\t0\t0\t2\t8\t1\t0\t-\nE\t13\tcall\tresult:1:6\t-\t191\t194\t0\t0\t0\t0\t3\t10\t0\t0\t-\nE\t14\tcapture\tbool\t-\t221\t222\t0\t0\t0\t0\t3\t0\t0\t0\t-\nE\t15\tinteger\ti32\t-\t225\t226\t0\t0\t0\t0\t0\t0\t0\t0\t0\nE\t16\tarm\ti32\t-\t211\t227\t0\t0\t0\t4\t4\t12\t1\t0\t-\nE\t17\tcapture\ti32\t-\t205\t206\t0\t0\t0\t0\t1\t14\t1\t0\t-\nE\t18\treference\ti32\t-\t209\t210\t0\t0\t0\t0\t9\t0\t0\t0\t-\nE\t19\tarm\ti32\t-\t196\t211\t0\t0\t0\t5\t2\t13\t1\t0\t-\nE\t20\tswitch\ti32\t-\t184\t228\t13\t0\t0\t0\t0\t10\t2\t0\t-\nS\t1\treturn\t71\t85\t4\t3\t0\t0\t-\t0\t0\t0\t0\nS\t2\tbinding\t110\t122\t6\t4\t0\t7\t-\t0\t0\t0\t0\nS\t3\tbinding\t122\t147\t6\t8\t0\t8\t-\t0\t0\t0\t0\nS\t4\treturn\t147\t162\t6\t12\t0\t0\t-\t0\t0\t0\t0\nS\t5\treturn\t177\t229\t8\t20\t0\t0\t-\t0\t0\t0\t0\nK\t1\t31\t33\t1\t2\t1\t1\t0\t0\nK\t2\t70\t86\t2\t4\t3\t2\t1\t0\nK\t3\t109\t163\t3\t6\t5\t4\t3\t0\nK\t4\t224\t227\t4\t9\t8\t13\t0\t15\nK\t5\t208\t211\t4\t10\t8\t15\t0\t18\nK\t6\t176\t230\t4\t8\t7\t9\t1\t0\nA\t0\t5\nA\t1\t6\nA\t2\t1\nA\t3\t2\nA\t4\t2\nA\t5\t3\nA\t6\t4\nA\t7\t6\nA\t8\t11\nA\t9\t5\nA\t10\t19\nA\t11\t16\nA\t12\t14\nA\t13\t17\nA\t14\t9\nT\t0\ti32\nT\t1\tref:2147483650\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-unit39\\candidate-dev.exe",
+        "--mir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-unit39\\execution\\result-ref-success.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "fairyc.enum-payload-mir/v1\nP\t0\nN\t262150\t0\t0\t4\t0\nN\t1075118099\t0\t4\t4\t0\nD\t1\t262150\t1\t89\t105\t0\t0\nD\t2\t262150\t0\t89\t105\t0\t1\nD\t3\t262150\t6\t89\t105\t0\t0\nD\t4\t262150\t0\t89\t105\t2\t1\nD\t5\t1075118099\t2147483650\t36\t56\t0\t0\nD\t6\t1075118099\t0\t36\t56\t4\t1\nD\t7\t1075118099\t6\t36\t56\t0\t0\nD\t8\t1075118099\t0\t36\t56\t6\t1\nT\t1\t1\t0\t2\t7\t0\t1\t20\t24\t0\nT\t2\t2\t0\t3\t1075118099\t1\t1\t57\t59\t0\nT\t3\t3\t0\t4\t262150\t2\t0\t106\t107\t0\nT\t4\t4\t0\t5\t1\t2\t0\t170\t174\t0\nS\t0\t1\nS\t1\t2147483650\nF\t1\t1\t1\t0\t1\t0\t1\t0\t1\t12\t33\t0\nF\t2\t2\t2\t1\t3\t1\t1\t1\t1\t33\t86\t0\nF\t3\t3\t3\t4\t12\t2\t4\t3\t0\t86\t163\t0\nF\t4\t4\t7\t16\t6\t6\t5\t6\t0\t163\t230\t0\nL\t1\t1\t5\t1\t1\t0\t29\t30\nL\t2\t2\t6\t2147483650\t1\t0\t68\t69\nL\t3\t2\t0\t2147483650\t0\t0\t82\t83\nL\t4\t2\t0\t1075118099\t0\t0\t78\t84\nL\t5\t3\t7\t1\t0\t0\t118\t119\nL\t6\t3\t8\t2147483650\t0\t0\t134\t135\nL\t7\t3\t0\t1\t0\t0\t120\t121\nL\t8\t3\t0\t2147483650\t0\t0\t143\t144\nL\t9\t3\t0\t1075118099\t0\t0\t136\t145\nL\t10\t3\t0\t6\t0\t0\t136\t146\nL\t11\t3\t0\t6\t0\t0\t136\t146\nL\t12\t3\t0\t262150\t0\t0\t136\t146\nL\t13\t3\t0\t2147483650\t0\t0\t136\t146\nL\t14\t3\t0\t2147483650\t0\t0\t159\t160\nL\t15\t3\t0\t1\t0\t0\t158\t160\nL\t16\t3\t0\t262150\t0\t0\t154\t161\nL\t17\t4\t9\t1\t0\t0\t205\t206\nL\t18\t4\t0\t262150\t0\t0\t191\t194\nL\t19\t4\t0\t1\t0\t0\t184\t228\nL\t20\t4\t0\t6\t0\t0\t196\t211\nL\t21\t4\t0\t1\t0\t0\t209\t210\nL\t22\t4\t0\t1\t0\t0\t225\t226\nB\t1\t1\t0\t0\t1\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t12\t33\nB\t2\t2\t1\t2\t1\t4\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t71\t85\nB\t3\t3\t3\t5\t5\t0\t0\t0\t0\t0\t4\t0\t0\t2\t9\t3\t1\t0\t136\t145\nB\t4\t3\t6\t6\t3\t10\t0\t0\t0\t6\t5\t6\t0\t0\t0\t0\t0\t0\t136\t146\nB\t5\t3\t9\t13\t1\t16\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t147\t162\nB\t6\t3\t7\t8\t1\t12\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t136\t146\nB\t7\t4\t0\t0\t5\t0\t0\t0\t0\t0\t8\t0\t0\t3\t18\t6\t0\t0\t191\t194\nB\t8\t4\t14\t14\t3\t20\t0\t0\t0\t6\t9\t10\t0\t0\t0\t0\t0\t0\t196\t211\nB\t9\t4\t15\t17\t2\t0\t0\t0\t0\t0\t11\t0\t0\t0\t0\t0\t0\t0\t184\t228\nB\t10\t4\t18\t19\t2\t0\t0\t0\t0\t0\t11\t0\t0\t0\t0\t0\t0\t0\t184\t228\nB\t11\t4\t0\t0\t1\t19\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t177\t229\nO\t1\t2\t2\t2\t3\t2147483650\t2147483650\t0\t2\t0\t2\t0\t0\t0\t82\t83\t-\t0\t0\nO\t2\t2\t2\t21\t4\t1075118099\t1075118099\t0\t0\t0\t0\t0\t0\t0\t78\t84\t-\t2\t1\nO\t3\t3\t3\t1\t7\t1\t1\t0\t0\t0\t4\t0\t1\t0\t120\t121\t7\t0\t0\nO\t4\t3\t3\t2\t5\t1\t1\t0\t7\t0\t5\t0\t0\t0\t110\t122\t-\t0\t0\nO\t5\t3\t3\t28\t8\t2147483650\t1\t0\t5\t0\t0\t0\t0\t0\t143\t144\t-\t0\t0\nO\t6\t3\t4\t22\t10\t6\t1075118099\t0\t9\t0\t0\t0\t0\t0\t136\t146\t-\t0\t0\nO\t7\t3\t6\t23\t11\t6\t1075118099\t7\t9\t0\t8\t0\t0\t0\t136\t146\t-\t0\t0\nO\t8\t3\t6\t21\t12\t262150\t262150\t1\t0\t0\t0\t0\t0\t0\t136\t146\t-\t4\t1\nO\t9\t3\t5\t23\t13\t2147483650\t1075118099\t5\t9\t0\t10\t0\t0\t0\t136\t146\t-\t0\t0\nO\t10\t3\t5\t2\t6\t2147483650\t2147483650\t0\t13\t0\t11\t0\t0\t0\t122\t147\t-\t0\t0\nO\t11\t3\t5\t2\t14\t2147483650\t2147483650\t0\t6\t0\t12\t0\t0\t0\t159\t160\t-\t0\t0\nO\t12\t3\t5\t29\t15\t1\t2147483650\t0\t14\t0\t13\t0\t0\t0\t158\t160\t-\t0\t0\nO\t13\t3\t5\t21\t16\t262150\t262150\t0\t0\t0\t0\t0\t0\t0\t154\t161\t-\t5\t1\nO\t14\t4\t8\t22\t20\t6\t262150\t0\t18\t0\t0\t0\t0\t0\t196\t211\t-\t0\t0\nO\t15\t4\t9\t23\t17\t1\t262150\t1\t18\t0\t16\t0\t0\t0\t205\t206\t-\t0\t0\nO\t16\t4\t9\t2\t21\t1\t1\t0\t17\t0\t17\t0\t0\t0\t209\t210\t-\t0\t0\nO\t17\t4\t9\t2\t19\t1\t1\t0\t21\t0\t0\t0\t0\t0\t196\t211\t-\t0\t0\nO\t18\t4\t10\t1\t22\t1\t1\t0\t0\t0\t19\t1\t2\t0\t225\t226\t0\t0\t0\nO\t19\t4\t10\t2\t19\t1\t1\t0\t22\t0\t0\t0\t0\t0\t211\t227\t-\t0\t0\nA\t0\t1\nA\t1\t2\nA\t2\t3\nA\t3\t8\nA\t4\t11\nA\t5\t15\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-unit39\\candidate-dev.exe",
+        "--c-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-unit39\\execution\\result-ref-success.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "/* fairyc.candidate-result-c/v1; C11, 64-bit transport */\n#include <stdint.h>\n#include <limits.h>\n#include <string.h>\n_Static_assert(CHAR_BIT==8 && UINTPTR_MAX==UINT64_MAX,\"requires 64-bit byte-addressed target\");\n_Static_assert(INT32_MIN==(-INT32_MAX-1) && INT64_MIN==(-INT64_MAX-1),\"requires two's complement signed integers\");\n_Noreturn void fy_runtime_trap(uint32_t category);\nstruct fy_text { const uint8_t *fy_data; uintptr_t fy_length; };\nstruct fy_bytes { const uint8_t *fy_data; uintptr_t fy_length; };\nstruct fy_bytes_mut { uint8_t *fy_data; uintptr_t fy_length; };\nstruct fy_r_1_6{ uint32_t fy_tag;\n    union {\n        struct {\n            int32_t fy_f_1;\n        } fy_f_2;\n        struct {\n            int32_t fy_f_3;\n        } fy_f_4;\n    } fy_payload;\n};\nstruct fy_r_2147483650_6{ uint32_t fy_tag;\n    union {\n        struct {\n            int32_t const * fy_f_5;\n        } fy_f_6;\n        struct {\n            int32_t fy_f_7;\n        } fy_f_8;\n    } fy_payload;\n};\nvoid fy_fn_1(int32_t fy_l_1);\nstruct fy_r_2147483650_6 fy_fn_2(int32_t const * fy_l_2);\nstruct fy_r_1_6 fy_fn_3(void);\nint32_t fy_fn_4(void);\nvoid fy_fn_1(int32_t fy_l_1){\n    (void)fy_l_1;\n    goto fy_b_1;\nfy_b_1:;\n    return;\n}\nstruct fy_r_2147483650_6 fy_fn_2(int32_t const * fy_l_2){\n    (void)fy_l_2;\n    int32_t const * fy_l_3;\n    memset(&fy_l_3,0,sizeof(fy_l_3));\n    (void)fy_l_3;\n    struct fy_r_2147483650_6 fy_l_4;\n    memset(&fy_l_4,0,sizeof(fy_l_4));\n    (void)fy_l_4;\n    goto fy_b_2;\nfy_b_2:;\n    fy_l_3 = fy_l_2;\n    memset(&fy_l_4,0,sizeof(fy_l_4));\n    fy_l_4.fy_tag=UINT32_C(0);\n    fy_l_4.fy_payload.fy_f_6.fy_f_5=fy_l_3;\n    return fy_l_4;\n}\nstruct fy_r_1_6 fy_fn_3(void){\n    int32_t fy_l_5=0;\n    (void)fy_l_5;\n    int32_t const * fy_l_6;\n    memset(&fy_l_6,0,sizeof(fy_l_6));\n    (void)fy_l_6;\n    int32_t fy_l_7=0;\n    (void)fy_l_7;\n    int32_t const * fy_l_8;\n    memset(&fy_l_8,0,sizeof(fy_l_8));\n    (void)fy_l_8;\n    struct fy_r_2147483650_6 fy_l_9;\n    memset(&fy_l_9,0,sizeof(fy_l_9));\n    (void)fy_l_9;\n    int32_t fy_l_10=0;\n    (void)fy_l_10;\n    int32_t fy_l_11=0;\n    (void)fy_l_11;\n    struct fy_r_1_6 fy_l_12;\n    memset(&fy_l_12,0,sizeof(fy_l_12));\n    (void)fy_l_12;\n    int32_t const * fy_l_13;\n    memset(&fy_l_13,0,sizeof(fy_l_13));\n    (void)fy_l_13;\n    int32_t const * fy_l_14;\n    memset(&fy_l_14,0,sizeof(fy_l_14));\n    (void)fy_l_14;\n    int32_t fy_l_15=0;\n    (void)fy_l_15;\n    struct fy_r_1_6 fy_l_16;\n    memset(&fy_l_16,0,sizeof(fy_l_16));\n    (void)fy_l_16;\n    goto fy_b_3;\nfy_b_3:;\n    fy_l_7 = INT32_C(7);\n    fy_l_5 = fy_l_7;\n    fy_l_8 = &fy_l_5;\n    fy_l_9=fy_fn_2(fy_l_8);\n    goto fy_b_4;\nfy_b_4:;\n    fy_l_10 = fy_l_9.fy_tag == UINT32_C(0);\n    if(fy_l_10){ goto fy_b_5;\n}else{ goto fy_b_6;\n}\nfy_b_5:;\n    if (fy_l_9.fy_tag != UINT32_C(0)) fy_runtime_trap(7);\n    fy_l_13 = fy_l_9.fy_payload.fy_f_6.fy_f_5;\n    fy_l_6 = fy_l_13;\n    fy_l_14 = fy_l_6;\n    fy_l_15 = *fy_l_14;\n    fy_l_16 = (struct fy_r_1_6){.fy_tag=UINT32_C(0),.fy_payload={.fy_f_2={.fy_f_1=fy_l_15}}};\n    return fy_l_16;\nfy_b_6:;\n    if (fy_l_9.fy_tag != UINT32_C(1)) fy_runtime_trap(7);\n    fy_l_11 = fy_l_9.fy_payload.fy_f_8.fy_f_7;\n    fy_l_12 = (struct fy_r_1_6){.fy_tag=UINT32_C(1),.fy_payload={.fy_f_4={.fy_f_3=fy_l_11}}};\n    return fy_l_12;\n}\nint32_t fy_fn_4(void){\n    int32_t fy_l_17=0;\n    (void)fy_l_17;\n    struct fy_r_1_6 fy_l_18;\n    memset(&fy_l_18,0,sizeof(fy_l_18));\n    (void)fy_l_18;\n    int32_t fy_l_19=0;\n    (void)fy_l_19;\n    int32_t fy_l_20=0;\n    (void)fy_l_20;\n    int32_t fy_l_21=0;\n    (void)fy_l_21;\n    int32_t fy_l_22=0;\n    (void)fy_l_22;\n    goto fy_b_7;\nfy_b_7:;\n    fy_l_18=fy_fn_3();\n    goto fy_b_8;\nfy_b_8:;\n    fy_l_20 = fy_l_18.fy_tag == UINT32_C(0);\n    if(fy_l_20){ goto fy_b_9;\n}else{ goto fy_b_10;\n}\nfy_b_9:;\n    if (fy_l_18.fy_tag != UINT32_C(0)) fy_runtime_trap(7);\n    fy_l_17 = fy_l_18.fy_payload.fy_f_2.fy_f_1;\n    fy_l_21 = fy_l_17;\n    fy_l_19 = fy_l_21;\n    goto fy_b_11;\nfy_b_10:;\n    fy_l_22 = INT32_C(0);\n    fy_l_19 = fy_l_22;\n    goto fy_b_11;\nfy_b_11:;\n    return fy_l_19;\n}\nint32_t fy_candidate_entry(void){return fy_fn_4();}\n#ifndef FY_CANDIDATE_NO_MAIN\nint main(void){return (int)fy_candidate_entry();}\n#endif\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-unit39\\candidate-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-unit39\\execution\\result-ref-error.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-unit39\\candidate-dev.exe",
+        "--hir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-unit39\\execution\\result-ref-error.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "fairyc.enum-payload-hir/v1\nP\t0\nN\t1073742343\t0\t0\t4\t0\nD\t1\t1073742343\t1\t36\t55\t0\t0\nD\t2\t1073742343\t0\t36\t55\t0\t1\nD\t3\t1073742343\t2147483650\t36\t55\t0\t0\nD\t4\t1073742343\t0\t36\t55\t2\t1\nF\t1\t1\t12\t33\t1\t1\t0\t1\t0\nF\t2\t2\t33\t87\t3\t2\t1\t1\t0\nF\t3\t3\t87\t156\t5\t3\t4\t1\t0\nF\t4\t4\t156\t241\t7\t6\t9\t0\t0\nB\t1\tfunction\tvoid\t20\t24\t0\t0\t0\t2\t0\t1\nB\t2\tfunction\tresult:1:2147483650\t56\t59\t0\t0\t0\t3\t1\t1\nB\t3\tfunction\tresult:1:2147483650\t110\t111\t0\t0\t0\t4\t2\t1\nB\t4\tfunction\ti32\t163\t167\t0\t0\t0\t5\t3\t0\nB\t5\tparameter\ti32\t29\t30\t1\t1\t0\t0\t3\t0\nB\t6\tparameter\tref:2147483650\t68\t69\t2\t3\t0\t0\t3\t0\nB\t7\tparameter\tref:2147483650\t120\t121\t3\t5\t0\t0\t3\t0\nB\t8\tlet\ti32\t131\t132\t3\t6\t0\t0\t3\t0\nB\t9\tlet\ti32\t178\t179\t4\t8\t0\t0\t3\t0\nB\t10\tlet\tref:2147483650\t231\t232\t4\t9\t0\t0\t3\t0\nB\t11\tlet\ti32\t215\t216\t4\t10\t0\t0\t3\t0\nE\t1\treference\tref:2147483650\t-\t83\t84\t0\t0\t0\t0\t6\t0\t0\t0\t-\nE\t2\tinitializer\tref:2147483650\t-\t83\t84\t1\t0\t0\t0\t3\t0\t0\t0\t-\nE\t3\tvariant\tresult:1:2147483650\t-\t78\t85\t0\t0\t0\t0\t4\t3\t1\t0\t-\nE\t4\treference\tref:2147483650\t-\t137\t138\t0\t0\t0\t0\t7\t0\t0\t0\t-\nE\t5\tcall\tresult:1:2147483650\t-\t133\t139\t0\t0\t0\t0\t2\t7\t1\t0\t-\nE\t6\tpropagate\ti32\t-\t133\t140\t5\t0\t0\t0\t3\t0\t0\t0\t-\nE\t7\treference\ti32\t-\t152\t153\t0\t0\t0\t0\t8\t0\t0\t0\t-\nE\t8\tinitializer\ti32\t-\t152\t153\t7\t0\t0\t0\t1\t0\t0\t0\t-\nE\t9\tvariant\tresult:1:2147483650\t-\t148\t154\t0\t0\t0\t0\t2\t8\t1\t0\t-\nE\t10\tinteger\ti32\t-\t180\t181\t0\t0\t0\t0\t0\t0\t0\t0\t7\nE\t11\treference\ti32\t-\t202\t203\t0\t0\t0\t0\t9\t0\t0\t0\t-\nE\t12\tborrow-array\tref:2147483650\t-\t198\t203\t11\t0\t0\t0\t0\t0\t0\t0\t-\nE\t13\tcall\tresult:1:2147483650\t-\t196\t204\t0\t0\t0\t0\t3\t11\t1\t0\t-\nE\t14\tcapture\tref:2147483650\t-\t231\t232\t0\t0\t0\t0\t3\t15\t1\t0\t-\nE\t15\treference\tref:2147483650\t-\t236\t237\t0\t0\t0\t0\t10\t0\t0\t0\t-\nE\t16\tunary\ti32\t*\t235\t237\t15\t0\t0\t0\t0\t0\t0\t0\t-\nE\t17\tarm\ti32\t-\t221\t238\t0\t0\t0\t4\t4\t14\t1\t0\t-\nE\t18\tcapture\ti32\t-\t215\t216\t0\t0\t0\t0\t1\t17\t1\t0\t-\nE\t19\treference\ti32\t-\t219\t220\t0\t0\t0\t0\t11\t0\t0\t0\t-\nE\t20\tarm\ti32\t-\t206\t221\t0\t0\t0\t5\t2\t16\t1\t0\t-\nE\t21\tswitch\ti32\t-\t189\t239\t13\t0\t0\t0\t0\t12\t2\t0\t-\nS\t1\treturn\t71\t86\t4\t3\t0\t0\t-\t0\t0\t0\t0\nS\t2\tbinding\t123\t141\t6\t6\t0\t8\t-\t0\t0\t0\t0\nS\t3\treturn\t141\t155\t6\t9\t0\t0\t-\t0\t0\t0\t0\nS\t4\tbinding\t170\t182\t8\t10\t0\t9\t-\t0\t0\t0\t0\nS\t5\treturn\t182\t240\t8\t21\t0\t0\t-\t0\t0\t0\t0\nK\t1\t31\t33\t1\t2\t1\t1\t0\t0\nK\t2\t70\t87\t2\t4\t3\t2\t1\t0\nK\t3\t122\t156\t3\t6\t5\t5\t2\t0\nK\t4\t234\t238\t4\t9\t8\t16\t0\t16\nK\t5\t218\t221\t4\t10\t8\t18\t0\t19\nK\t6\t169\t241\t4\t8\t7\t9\t2\t0\nA\t0\t5\nA\t1\t6\nA\t2\t1\nA\t3\t2\nA\t4\t7\nA\t5\t2\nA\t6\t3\nA\t7\t4\nA\t8\t8\nA\t9\t4\nA\t10\t5\nA\t11\t12\nA\t12\t20\nA\t13\t17\nA\t14\t14\nA\t15\t10\nA\t16\t18\nA\t17\t11\nT\t0\ti32\nT\t1\tref:2147483650\nT\t2\tref:2147483650\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-unit39\\candidate-dev.exe",
+        "--mir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-unit39\\execution\\result-ref-error.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "fairyc.enum-payload-mir/v1\nP\t0\nN\t1073742343\t0\t0\t4\t0\nD\t1\t1073742343\t1\t36\t55\t0\t0\nD\t2\t1073742343\t0\t36\t55\t0\t1\nD\t3\t1073742343\t2147483650\t36\t55\t0\t0\nD\t4\t1073742343\t0\t36\t55\t2\t1\nT\t1\t1\t0\t2\t7\t0\t1\t20\t24\t0\nT\t2\t2\t0\t3\t1073742343\t1\t1\t56\t59\t0\nT\t3\t3\t0\t4\t1073742343\t2\t1\t110\t111\t0\nT\t4\t4\t0\t5\t1\t3\t0\t163\t167\t0\nS\t0\t1\nS\t1\t2147483650\nS\t2\t2147483650\nF\t1\t1\t1\t0\t1\t0\t1\t0\t1\t12\t33\t0\nF\t2\t2\t2\t1\t3\t1\t1\t1\t1\t33\t87\t0\nF\t3\t3\t3\t4\t10\t2\t4\t3\t1\t87\t156\t0\nF\t4\t4\t7\t14\t11\t6\t5\t7\t0\t156\t241\t0\nL\t1\t1\t5\t1\t1\t0\t29\t30\nL\t2\t2\t6\t2147483650\t1\t0\t68\t69\nL\t3\t2\t0\t2147483650\t0\t0\t83\t84\nL\t4\t2\t0\t1073742343\t0\t0\t78\t85\nL\t5\t3\t7\t2147483650\t1\t0\t120\t121\nL\t6\t3\t8\t1\t0\t0\t131\t132\nL\t7\t3\t0\t2147483650\t0\t0\t137\t138\nL\t8\t3\t0\t1073742343\t0\t0\t133\t139\nL\t9\t3\t0\t6\t0\t0\t133\t140\nL\t10\t3\t0\t2147483650\t0\t0\t133\t140\nL\t11\t3\t0\t1073742343\t0\t0\t133\t140\nL\t12\t3\t0\t1\t0\t0\t133\t140\nL\t13\t3\t0\t1\t0\t0\t152\t153\nL\t14\t3\t0\t1073742343\t0\t0\t148\t154\nL\t15\t4\t9\t1\t0\t0\t178\t179\nL\t16\t4\t10\t2147483650\t0\t0\t231\t232\nL\t17\t4\t11\t1\t0\t0\t215\t216\nL\t18\t4\t0\t1\t0\t0\t180\t181\nL\t19\t4\t0\t2147483650\t0\t0\t202\t203\nL\t20\t4\t0\t1073742343\t0\t0\t196\t204\nL\t21\t4\t0\t1\t0\t0\t189\t239\nL\t22\t4\t0\t6\t0\t0\t206\t221\nL\t23\t4\t0\t1\t0\t0\t219\t220\nL\t24\t4\t0\t2147483650\t0\t0\t236\t237\nL\t25\t4\t0\t1\t0\t0\t235\t237\nB\t1\t1\t0\t0\t1\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t12\t33\nB\t2\t2\t1\t2\t1\t4\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t71\t86\nB\t3\t3\t3\t3\t5\t0\t0\t0\t0\t0\t4\t0\t0\t2\t8\t4\t1\t0\t133\t139\nB\t4\t3\t4\t4\t3\t9\t0\t0\t0\t6\t5\t6\t0\t0\t0\t0\t0\t0\t133\t140\nB\t5\t3\t7\t10\t1\t14\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t141\t155\nB\t6\t3\t5\t6\t1\t11\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t133\t140\nB\t7\t4\t11\t13\t5\t0\t0\t0\t0\t0\t8\t0\t0\t3\t20\t7\t1\t0\t196\t204\nB\t8\t4\t14\t14\t3\t22\t0\t0\t0\t6\t9\t10\t0\t0\t0\t0\t0\t0\t206\t221\nB\t9\t4\t15\t17\t2\t0\t0\t0\t0\t0\t11\t0\t0\t0\t0\t0\t0\t0\t189\t239\nB\t10\t4\t18\t21\t2\t0\t0\t0\t0\t0\t11\t0\t0\t0\t0\t0\t0\t0\t189\t239\nB\t11\t4\t0\t0\t1\t21\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t182\t240\nO\t1\t2\t2\t2\t3\t2147483650\t2147483650\t0\t2\t0\t2\t0\t0\t0\t83\t84\t-\t0\t0\nO\t2\t2\t2\t21\t4\t1073742343\t1073742343\t1\t0\t0\t0\t0\t0\t0\t78\t85\t-\t2\t1\nO\t3\t3\t3\t2\t7\t2147483650\t2147483650\t0\t5\t0\t0\t0\t0\t0\t137\t138\t-\t0\t0\nO\t4\t3\t4\t22\t9\t6\t1073742343\t0\t8\t0\t0\t0\t0\t0\t133\t140\t-\t0\t0\nO\t5\t3\t6\t23\t10\t2147483650\t1073742343\t3\t8\t0\t6\t0\t0\t0\t133\t140\t-\t0\t0\nO\t6\t3\t6\t21\t11\t1073742343\t1073742343\t1\t0\t0\t0\t0\t0\t0\t133\t140\t-\t5\t1\nO\t7\t3\t5\t23\t12\t1\t1073742343\t1\t8\t0\t8\t0\t0\t0\t133\t140\t-\t0\t0\nO\t8\t3\t5\t2\t6\t1\t1\t0\t12\t0\t9\t0\t0\t0\t123\t141\t-\t0\t0\nO\t9\t3\t5\t2\t13\t1\t1\t0\t6\t0\t10\t0\t0\t0\t152\t153\t-\t0\t0\nO\t10\t3\t5\t21\t14\t1073742343\t1073742343\t0\t0\t0\t0\t0\t0\t0\t148\t154\t-\t6\t1\nO\t11\t4\t7\t1\t18\t1\t1\t0\t0\t0\t12\t0\t1\t0\t180\t181\t7\t0\t0\nO\t12\t4\t7\t2\t15\t1\t1\t0\t18\t0\t13\t0\t0\t0\t170\t182\t-\t0\t0\nO\t13\t4\t7\t28\t19\t2147483650\t1\t0\t15\t0\t0\t0\t0\t0\t202\t203\t-\t0\t0\nO\t14\t4\t8\t22\t22\t6\t1073742343\t0\t20\t0\t0\t0\t0\t0\t206\t221\t-\t0\t0\nO\t15\t4\t9\t23\t17\t1\t1073742343\t1\t20\t0\t16\t0\t0\t0\t215\t216\t-\t0\t0\nO\t16\t4\t9\t2\t23\t1\t1\t0\t17\t0\t17\t0\t0\t0\t219\t220\t-\t0\t0\nO\t17\t4\t9\t2\t21\t1\t1\t0\t23\t0\t0\t0\t0\t0\t206\t221\t-\t0\t0\nO\t18\t4\t10\t23\t16\t2147483650\t1073742343\t3\t20\t0\t19\t0\t0\t0\t231\t232\t-\t0\t0\nO\t19\t4\t10\t2\t24\t2147483650\t2147483650\t0\t16\t0\t20\t0\t0\t0\t236\t237\t-\t0\t0\nO\t20\t4\t10\t29\t25\t1\t2147483650\t0\t24\t0\t21\t0\t0\t0\t235\t237\t-\t0\t0\nO\t21\t4\t10\t2\t21\t1\t1\t0\t25\t0\t0\t0\t0\t0\t221\t238\t-\t0\t0\nA\t0\t1\nA\t1\t2\nA\t2\t3\nA\t3\t5\nA\t4\t7\nA\t5\t10\nA\t6\t13\nA\t7\t19\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-unit39\\candidate-dev.exe",
+        "--c-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-unit39\\execution\\result-ref-error.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "/* fairyc.candidate-result-c/v1; C11, 64-bit transport */\n#include <stdint.h>\n#include <limits.h>\n#include <string.h>\n_Static_assert(CHAR_BIT==8 && UINTPTR_MAX==UINT64_MAX,\"requires 64-bit byte-addressed target\");\n_Static_assert(INT32_MIN==(-INT32_MAX-1) && INT64_MIN==(-INT64_MAX-1),\"requires two's complement signed integers\");\n_Noreturn void fy_runtime_trap(uint32_t category);\nstruct fy_text { const uint8_t *fy_data; uintptr_t fy_length; };\nstruct fy_bytes { const uint8_t *fy_data; uintptr_t fy_length; };\nstruct fy_bytes_mut { uint8_t *fy_data; uintptr_t fy_length; };\nstruct fy_r_1_2147483650{ uint32_t fy_tag;\n    union {\n        struct {\n            int32_t fy_f_1;\n        } fy_f_2;\n        struct {\n            int32_t const * fy_f_3;\n        } fy_f_4;\n    } fy_payload;\n};\nvoid fy_fn_1(int32_t fy_l_1);\nstruct fy_r_1_2147483650 fy_fn_2(int32_t const * fy_l_2);\nstruct fy_r_1_2147483650 fy_fn_3(int32_t const * fy_l_5);\nint32_t fy_fn_4(void);\nvoid fy_fn_1(int32_t fy_l_1){\n    (void)fy_l_1;\n    goto fy_b_1;\nfy_b_1:;\n    return;\n}\nstruct fy_r_1_2147483650 fy_fn_2(int32_t const * fy_l_2){\n    (void)fy_l_2;\n    int32_t const * fy_l_3;\n    memset(&fy_l_3,0,sizeof(fy_l_3));\n    (void)fy_l_3;\n    struct fy_r_1_2147483650 fy_l_4;\n    memset(&fy_l_4,0,sizeof(fy_l_4));\n    (void)fy_l_4;\n    goto fy_b_2;\nfy_b_2:;\n    fy_l_3 = fy_l_2;\n    memset(&fy_l_4,0,sizeof(fy_l_4));\n    fy_l_4.fy_tag=UINT32_C(1);\n    fy_l_4.fy_payload.fy_f_4.fy_f_3=fy_l_3;\n    return fy_l_4;\n}\nstruct fy_r_1_2147483650 fy_fn_3(int32_t const * fy_l_5){\n    (void)fy_l_5;\n    int32_t fy_l_6=0;\n    (void)fy_l_6;\n    int32_t const * fy_l_7;\n    memset(&fy_l_7,0,sizeof(fy_l_7));\n    (void)fy_l_7;\n    struct fy_r_1_2147483650 fy_l_8;\n    memset(&fy_l_8,0,sizeof(fy_l_8));\n    (void)fy_l_8;\n    int32_t fy_l_9=0;\n    (void)fy_l_9;\n    int32_t const * fy_l_10;\n    memset(&fy_l_10,0,sizeof(fy_l_10));\n    (void)fy_l_10;\n    struct fy_r_1_2147483650 fy_l_11;\n    memset(&fy_l_11,0,sizeof(fy_l_11));\n    (void)fy_l_11;\n    int32_t fy_l_12=0;\n    (void)fy_l_12;\n    int32_t fy_l_13=0;\n    (void)fy_l_13;\n    struct fy_r_1_2147483650 fy_l_14;\n    memset(&fy_l_14,0,sizeof(fy_l_14));\n    (void)fy_l_14;\n    goto fy_b_3;\nfy_b_3:;\n    fy_l_7 = fy_l_5;\n    fy_l_8=fy_fn_2(fy_l_7);\n    goto fy_b_4;\nfy_b_4:;\n    fy_l_9 = fy_l_8.fy_tag == UINT32_C(0);\n    if(fy_l_9){ goto fy_b_5;\n}else{ goto fy_b_6;\n}\nfy_b_5:;\n    if (fy_l_8.fy_tag != UINT32_C(0)) fy_runtime_trap(7);\n    fy_l_12 = fy_l_8.fy_payload.fy_f_2.fy_f_1;\n    fy_l_6 = fy_l_12;\n    fy_l_13 = fy_l_6;\n    memset(&fy_l_14,0,sizeof(fy_l_14));\n    fy_l_14.fy_tag=UINT32_C(0);\n    fy_l_14.fy_payload.fy_f_2.fy_f_1=fy_l_13;\n    return fy_l_14;\nfy_b_6:;\n    if (fy_l_8.fy_tag != UINT32_C(1)) fy_runtime_trap(7);\n    fy_l_10 = fy_l_8.fy_payload.fy_f_4.fy_f_3;\n    memset(&fy_l_11,0,sizeof(fy_l_11));\n    fy_l_11.fy_tag=UINT32_C(1);\n    fy_l_11.fy_payload.fy_f_4.fy_f_3=fy_l_10;\n    return fy_l_11;\n}\nint32_t fy_fn_4(void){\n    int32_t fy_l_15=0;\n    (void)fy_l_15;\n    int32_t const * fy_l_16;\n    memset(&fy_l_16,0,sizeof(fy_l_16));\n    (void)fy_l_16;\n    int32_t fy_l_17=0;\n    (void)fy_l_17;\n    int32_t fy_l_18=0;\n    (void)fy_l_18;\n    int32_t const * fy_l_19;\n    memset(&fy_l_19,0,sizeof(fy_l_19));\n    (void)fy_l_19;\n    struct fy_r_1_2147483650 fy_l_20;\n    memset(&fy_l_20,0,sizeof(fy_l_20));\n    (void)fy_l_20;\n    int32_t fy_l_21=0;\n    (void)fy_l_21;\n    int32_t fy_l_22=0;\n    (void)fy_l_22;\n    int32_t fy_l_23=0;\n    (void)fy_l_23;\n    int32_t const * fy_l_24;\n    memset(&fy_l_24,0,sizeof(fy_l_24));\n    (void)fy_l_24;\n    int32_t fy_l_25=0;\n    (void)fy_l_25;\n    goto fy_b_7;\nfy_b_7:;\n    fy_l_18 = INT32_C(7);\n    fy_l_15 = fy_l_18;\n    fy_l_19 = &fy_l_15;\n    fy_l_20=fy_fn_3(fy_l_19);\n    goto fy_b_8;\nfy_b_8:;\n    fy_l_22 = fy_l_20.fy_tag == UINT32_C(0);\n    if(fy_l_22){ goto fy_b_9;\n}else{ goto fy_b_10;\n}\nfy_b_9:;\n    if (fy_l_20.fy_tag != UINT32_C(0)) fy_runtime_trap(7);\n    fy_l_17 = fy_l_20.fy_payload.fy_f_2.fy_f_1;\n    fy_l_23 = fy_l_17;\n    fy_l_21 = fy_l_23;\n    goto fy_b_11;\nfy_b_10:;\n    if (fy_l_20.fy_tag != UINT32_C(1)) fy_runtime_trap(7);\n    fy_l_16 = fy_l_20.fy_payload.fy_f_4.fy_f_3;\n    fy_l_24 = fy_l_16;\n    fy_l_25 = *fy_l_24;\n    fy_l_21 = fy_l_25;\n    goto fy_b_11;\nfy_b_11:;\n    return fy_l_21;\n}\nint32_t fy_candidate_entry(void){return fy_fn_4();}\n#ifndef FY_CANDIDATE_NO_MAIN\nint main(void){return (int)fy_candidate_entry();}\n#endif\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-unit39\\candidate-dev.exe",
+        "--check-types-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-unit39\\execution\\option-mut-reference.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-unit39\\candidate-dev.exe",
+        "--hir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-unit39\\execution\\option-mut-reference.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "fairyc.enum-payload-hir/v1\nP\t0\nN\t1073741906\t0\t0\t3\t0\nD\t1\t1073741906\t2147483651\t36\t55\t0\t0\nD\t2\t1073741906\t0\t36\t55\t0\t1\nD\t3\t1073741906\t0\t36\t55\t0\t0\nF\t1\t1\t12\t33\t1\t1\t0\t1\t0\nF\t2\t2\t33\t91\t3\t2\t1\t1\t0\nF\t3\t3\t91\t246\t5\t5\t4\t0\t0\nB\t1\tfunction\tvoid\t20\t24\t0\t0\t0\t2\t0\t1\nB\t2\tfunction\toption:2147483651\t56\t58\t0\t0\t0\t3\t1\t1\nB\t3\tfunction\ti32\t98\t102\t0\t0\t0\t4\t2\t0\nB\t4\tparameter\ti32\t29\t30\t1\t1\t0\t0\t2\t0\nB\t5\tparameter\tref:2147483651\t71\t72\t2\t3\t0\t0\t2\t0\nB\t6\tvar\ti32\t113\t114\t3\t6\t0\t0\t2\t0\nB\t7\tlet\tref:2147483651\t133\t134\t3\t6\t0\t0\t2\t0\nB\t8\tlet\toption:2147483651\t169\t170\t3\t6\t0\t0\t2\t0\nB\t9\tlet\tref:2147483651\t206\t207\t3\t8\t0\t0\t2\t0\nE\t1\treference\tref:2147483651\t-\t87\t88\t0\t0\t0\t0\t5\t0\t0\t0\t-\nE\t2\tinitializer\tref:2147483651\t-\t87\t88\t1\t0\t0\t0\t1\t0\t0\t0\t-\nE\t3\tvariant\toption:2147483651\t-\t81\t89\t0\t0\t0\t0\t2\t3\t1\t0\t-\nE\t4\tinteger\ti32\t-\t115\t116\t0\t0\t0\t0\t0\t0\t0\t0\t7\nE\t5\treference\ti32\t-\t143\t144\t0\t0\t0\t0\t6\t0\t0\t0\t-\nE\t6\tborrow-array\tref:2147483651\t-\t135\t144\t5\t0\t0\t0\t0\t0\t0\t1\t-\nE\t7\treference\tref:2147483651\t-\t174\t175\t0\t0\t0\t0\t7\t0\t0\t0\t-\nE\t8\tcall\toption:2147483651\t-\t171\t176\t0\t0\t0\t0\t2\t10\t1\t0\t-\nE\t9\treference\toption:2147483651\t-\t192\t193\t0\t0\t0\t0\t8\t0\t0\t0\t-\nE\t10\tarm\tvoid\t-\t216\t229\t0\t0\t0\t3\t3\t13\t0\t0\t-\nE\t11\tcapture\tref:2147483651\t-\t206\t207\t0\t0\t0\t0\t1\t14\t1\t0\t-\nE\t12\treference\tref:2147483651\t-\t211\t212\t0\t0\t0\t0\t9\t0\t0\t0\t-\nE\t13\tunary\ti32\t*\t210\t212\t12\t0\t0\t0\t0\t0\t0\t0\t-\nE\t14\tinteger\ti32\t-\t213\t214\t0\t0\t0\t0\t0\t0\t0\t0\t8\nE\t15\tarm\tvoid\t-\t195\t216\t0\t0\t0\t4\t2\t13\t1\t0\t-\nE\t16\tswitch\tvoid\t-\t185\t230\t9\t0\t0\t0\t0\t11\t2\t0\t-\nE\t17\treference\tref:2147483651\t-\t232\t233\t0\t0\t0\t0\t7\t0\t0\t0\t-\nE\t18\tunary\ti32\t*\t231\t233\t17\t0\t0\t0\t0\t0\t0\t0\t-\nE\t19\tinteger\ti32\t-\t234\t235\t0\t0\t0\t0\t0\t0\t0\t0\t9\nE\t20\treference\ti32\t-\t243\t244\t0\t0\t0\t0\t6\t0\t0\t0\t-\nS\t1\treturn\t74\t90\t4\t3\t0\t0\t-\t0\t0\t0\t0\nS\t2\tbinding\t105\t117\t6\t4\t0\t6\t-\t0\t0\t0\t0\nS\t3\tbinding\t117\t145\t6\t6\t0\t7\t-\t0\t0\t0\t0\nS\t4\tbinding\t145\t177\t6\t8\t0\t8\t-\t0\t0\t0\t0\nS\t5\tdiscard\t177\t231\t6\t16\t0\t0\t-\t0\t0\t0\t0\nS\t6\tassignment\t210\t215\t8\t14\t13\t0\t=\t0\t0\t0\t0\nS\t7\tassignment\t231\t236\t6\t19\t18\t0\t=\t0\t0\t0\t0\nS\t8\treturn\t236\t245\t6\t20\t0\t0\t-\t0\t0\t0\t0\nK\t1\t31\t33\t1\t2\t1\t1\t0\t0\nK\t2\t73\t91\t2\t4\t3\t2\t1\t0\nK\t3\t227\t229\t3\t7\t6\t13\t0\t0\nK\t4\t209\t216\t3\t8\t6\t15\t1\t0\nK\t5\t104\t246\t3\t6\t5\t4\t6\t0\nA\t0\t4\nA\t1\t5\nA\t2\t1\nA\t3\t2\nA\t4\t2\nA\t5\t3\nA\t6\t4\nA\t7\t5\nA\t8\t7\nA\t9\t8\nA\t10\t7\nA\t11\t15\nA\t12\t10\nA\t13\t11\nA\t14\t9\nA\t15\t6\nT\t0\ti32\nT\t1\tref:2147483651\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-unit39\\candidate-dev.exe",
+        "--mir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-unit39\\execution\\option-mut-reference.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "fairyc.enum-payload-mir/v1\nP\t0\nN\t1073741906\t0\t0\t3\t0\nD\t1\t1073741906\t2147483651\t36\t55\t0\t0\nD\t2\t1073741906\t0\t36\t55\t0\t1\nD\t3\t1073741906\t0\t36\t55\t0\t0\nT\t1\t1\t0\t2\t7\t0\t1\t20\t24\t0\nT\t2\t2\t0\t3\t1073741906\t1\t1\t56\t58\t0\nT\t3\t3\t0\t4\t1\t2\t0\t98\t102\t0\nS\t0\t1\nS\t1\t2147483651\nF\t1\t1\t1\t0\t1\t0\t1\t0\t1\t12\t33\t0\nF\t2\t2\t2\t1\t3\t1\t1\t1\t1\t33\t91\t0\nF\t3\t3\t3\t4\t15\t2\t5\t3\t0\t91\t246\t0\nL\t1\t1\t4\t1\t1\t0\t29\t30\nL\t2\t2\t5\t2147483651\t1\t0\t71\t72\nL\t3\t2\t0\t2147483651\t0\t0\t87\t88\nL\t4\t2\t0\t1073741906\t0\t0\t81\t89\nL\t5\t3\t6\t1\t0\t1\t113\t114\nL\t6\t3\t7\t2147483651\t0\t0\t133\t134\nL\t7\t3\t8\t1073741906\t0\t0\t169\t170\nL\t8\t3\t9\t2147483651\t0\t0\t206\t207\nL\t9\t3\t0\t1\t0\t0\t115\t116\nL\t10\t3\t0\t2147483651\t0\t0\t143\t144\nL\t11\t3\t0\t2147483651\t0\t0\t174\t175\nL\t12\t3\t0\t1073741906\t0\t0\t171\t176\nL\t13\t3\t0\t1073741906\t0\t0\t192\t193\nL\t14\t3\t0\t6\t0\t0\t195\t216\nL\t15\t3\t0\t2147483651\t0\t0\t211\t212\nL\t16\t3\t0\t1\t0\t0\t213\t214\nL\t17\t3\t0\t2147483651\t0\t0\t232\t233\nL\t18\t3\t0\t1\t0\t0\t234\t235\nL\t19\t3\t0\t1\t0\t0\t243\t244\nB\t1\t1\t0\t0\t1\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t12\t33\nB\t2\t2\t1\t2\t1\t4\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t74\t90\nB\t3\t3\t3\t7\t5\t0\t0\t0\t0\t0\t4\t0\t0\t2\t12\t3\t1\t0\t171\t176\nB\t4\t3\t8\t10\t3\t14\t0\t0\t0\t6\t5\t6\t0\t0\t0\t0\t0\t0\t195\t216\nB\t5\t3\t11\t14\t2\t0\t0\t0\t0\t0\t7\t0\t0\t0\t0\t0\t0\t0\t185\t230\nB\t6\t3\t0\t0\t2\t0\t0\t0\t0\t0\t7\t0\t0\t0\t0\t0\t0\t0\t185\t230\nB\t7\t3\t15\t18\t1\t19\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t236\t245\nO\t1\t2\t2\t2\t3\t2147483651\t2147483651\t0\t2\t0\t2\t0\t0\t0\t87\t88\t-\t0\t0\nO\t2\t2\t2\t21\t4\t1073741906\t1073741906\t0\t0\t0\t0\t0\t0\t0\t81\t89\t-\t2\t1\nO\t3\t3\t3\t1\t9\t1\t1\t0\t0\t0\t4\t0\t1\t0\t115\t116\t7\t0\t0\nO\t4\t3\t3\t2\t5\t1\t1\t0\t9\t0\t5\t0\t0\t0\t105\t117\t-\t0\t0\nO\t5\t3\t3\t28\t10\t2147483651\t1\t0\t5\t0\t6\t0\t0\t0\t143\t144\t-\t0\t0\nO\t6\t3\t3\t2\t6\t2147483651\t2147483651\t0\t10\t0\t7\t0\t0\t0\t117\t145\t-\t0\t0\nO\t7\t3\t3\t2\t11\t2147483651\t2147483651\t0\t6\t0\t0\t0\t0\t0\t174\t175\t-\t0\t0\nO\t8\t3\t4\t2\t7\t1073741906\t1073741906\t0\t12\t0\t9\t0\t0\t0\t145\t177\t-\t0\t0\nO\t9\t3\t4\t2\t13\t1073741906\t1073741906\t0\t7\t0\t10\t0\t0\t0\t192\t193\t-\t0\t0\nO\t10\t3\t4\t22\t14\t6\t1073741906\t0\t13\t0\t0\t0\t0\t0\t195\t216\t-\t0\t0\nO\t11\t3\t5\t23\t8\t2147483651\t1073741906\t1\t13\t0\t12\t0\t0\t0\t206\t207\t-\t0\t0\nO\t12\t3\t5\t2\t15\t2147483651\t2147483651\t0\t8\t0\t13\t0\t0\t0\t211\t212\t-\t0\t0\nO\t13\t3\t5\t1\t16\t1\t1\t0\t0\t0\t14\t1\t2\t0\t213\t214\t8\t0\t0\nO\t14\t3\t5\t30\t0\t1\t2147483651\t0\t15\t16\t0\t0\t0\t0\t210\t215\t-\t0\t0\nO\t15\t3\t7\t2\t17\t2147483651\t2147483651\t0\t6\t0\t16\t0\t0\t0\t232\t233\t-\t0\t0\nO\t16\t3\t7\t1\t18\t1\t1\t0\t0\t0\t17\t2\t3\t0\t234\t235\t9\t0\t0\nO\t17\t3\t7\t30\t0\t1\t2147483651\t0\t17\t18\t18\t0\t0\t0\t231\t236\t-\t0\t0\nO\t18\t3\t7\t2\t19\t1\t1\t0\t5\t0\t0\t0\t0\t0\t243\t244\t-\t0\t0\nA\t0\t1\nA\t1\t2\nA\t2\t3\nA\t3\t11\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-unit39\\candidate-dev.exe",
+        "--c-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-unit39\\execution\\option-mut-reference.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "/* fairyc.candidate-option-c/v1; C11, 64-bit transport */\n#include <stdint.h>\n#include <limits.h>\n#include <string.h>\n_Static_assert(CHAR_BIT==8 && UINTPTR_MAX==UINT64_MAX,\"requires 64-bit byte-addressed target\");\n_Static_assert(INT32_MIN==(-INT32_MAX-1) && INT64_MIN==(-INT64_MAX-1),\"requires two's complement signed integers\");\n_Noreturn void fy_runtime_trap(uint32_t category);\nstruct fy_text { const uint8_t *fy_data; uintptr_t fy_length; };\nstruct fy_bytes { const uint8_t *fy_data; uintptr_t fy_length; };\nstruct fy_bytes_mut { uint8_t *fy_data; uintptr_t fy_length; };\nstruct fy_o_2147483651{ uint32_t fy_tag;\n    union {\n        struct {\n            int32_t * fy_f_1;\n        } fy_f_2;\n    } fy_payload;\n};\nvoid fy_fn_1(int32_t fy_l_1);\nstruct fy_o_2147483651 fy_fn_2(int32_t * fy_l_2);\nint32_t fy_fn_3(void);\nvoid fy_fn_1(int32_t fy_l_1){\n    (void)fy_l_1;\n    goto fy_b_1;\nfy_b_1:;\n    return;\n}\nstruct fy_o_2147483651 fy_fn_2(int32_t * fy_l_2){\n    (void)fy_l_2;\n    int32_t * fy_l_3;\n    memset(&fy_l_3,0,sizeof(fy_l_3));\n    (void)fy_l_3;\n    struct fy_o_2147483651 fy_l_4;\n    memset(&fy_l_4,0,sizeof(fy_l_4));\n    (void)fy_l_4;\n    goto fy_b_2;\nfy_b_2:;\n    fy_l_3 = fy_l_2;\n    memset(&fy_l_4,0,sizeof(fy_l_4));\n    fy_l_4.fy_tag=UINT32_C(0);\n    fy_l_4.fy_payload.fy_f_2.fy_f_1=fy_l_3;\n    return fy_l_4;\n}\nint32_t fy_fn_3(void){\n    int32_t fy_l_5=0;\n    (void)fy_l_5;\n    int32_t * fy_l_6;\n    memset(&fy_l_6,0,sizeof(fy_l_6));\n    (void)fy_l_6;\n    struct fy_o_2147483651 fy_l_7;\n    memset(&fy_l_7,0,sizeof(fy_l_7));\n    (void)fy_l_7;\n    int32_t * fy_l_8;\n    memset(&fy_l_8,0,sizeof(fy_l_8));\n    (void)fy_l_8;\n    int32_t fy_l_9=0;\n    (void)fy_l_9;\n    int32_t * fy_l_10;\n    memset(&fy_l_10,0,sizeof(fy_l_10));\n    (void)fy_l_10;\n    int32_t * fy_l_11;\n    memset(&fy_l_11,0,sizeof(fy_l_11));\n    (void)fy_l_11;\n    struct fy_o_2147483651 fy_l_12;\n    memset(&fy_l_12,0,sizeof(fy_l_12));\n    (void)fy_l_12;\n    struct fy_o_2147483651 fy_l_13;\n    memset(&fy_l_13,0,sizeof(fy_l_13));\n    (void)fy_l_13;\n    int32_t fy_l_14=0;\n    (void)fy_l_14;\n    int32_t * fy_l_15;\n    memset(&fy_l_15,0,sizeof(fy_l_15));\n    (void)fy_l_15;\n    int32_t fy_l_16=0;\n    (void)fy_l_16;\n    int32_t * fy_l_17;\n    memset(&fy_l_17,0,sizeof(fy_l_17));\n    (void)fy_l_17;\n    int32_t fy_l_18=0;\n    (void)fy_l_18;\n    int32_t fy_l_19=0;\n    (void)fy_l_19;\n    goto fy_b_3;\nfy_b_3:;\n    fy_l_9 = INT32_C(7);\n    fy_l_5 = fy_l_9;\n    fy_l_10 = &fy_l_5;\n    fy_l_6 = fy_l_10;\n    fy_l_11 = fy_l_6;\n    fy_l_12=fy_fn_2(fy_l_11);\n    goto fy_b_4;\nfy_b_4:;\n    fy_l_7 = fy_l_12;\n    fy_l_13 = fy_l_7;\n    fy_l_14 = fy_l_13.fy_tag == UINT32_C(0);\n    if(fy_l_14){ goto fy_b_5;\n}else{ goto fy_b_6;\n}\nfy_b_5:;\n    if (fy_l_13.fy_tag != UINT32_C(0)) fy_runtime_trap(7);\n    fy_l_8 = fy_l_13.fy_payload.fy_f_2.fy_f_1;\n    fy_l_15 = fy_l_8;\n    fy_l_16 = INT32_C(8);\n    *fy_l_15 = fy_l_16;\n    goto fy_b_7;\nfy_b_6:;\n    goto fy_b_7;\nfy_b_7:;\n    fy_l_17 = fy_l_6;\n    fy_l_18 = INT32_C(9);\n    *fy_l_17 = fy_l_18;\n    fy_l_19 = fy_l_5;\n    return fy_l_19;\n}\nint32_t fy_candidate_entry(void){return fy_fn_3();}\n#ifndef FY_CANDIDATE_NO_MAIN\nint main(void){return (int)fy_candidate_entry();}\n#endif\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-unit39\\candidate-dev.exe",
+        "--mir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-unit39\\execution\\option-local-escape.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "HIR bytes 33..91\nerror: HIR E2102 local view escape or mutable descriptor\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-unit39\\candidate-dev.exe",
+        "--c-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-unit39\\execution\\option-local-escape.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "HIR bytes 33..91\nerror: HIR E2102 local view escape or mutable descriptor\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-unit39\\candidate-dev.exe",
+        "--mir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-unit39\\execution\\option-holds-owner.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "HIR bytes 141..145\nerror: HIR E2101 active byte-view loan\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-unit39\\candidate-dev.exe",
+        "--c-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-unit39\\execution\\option-holds-owner.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "HIR bytes 141..145\nerror: HIR E2101 active byte-view loan\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-unit39\\candidate-dev.exe",
+        "--mir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-unit39\\execution\\result-error-local-escape.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "HIR bytes 87..171\nerror: HIR E2102 local view escape or mutable descriptor\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-unit39\\candidate-dev.exe",
+        "--c-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-unit39\\execution\\result-error-local-escape.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "HIR bytes 87..171\nerror: HIR E2102 local view escape or mutable descriptor\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-unit39\\candidate-dev.exe",
+        "--mir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-unit39\\execution\\struct-tagged-reference.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-unit39\\execution\\struct-tagged-reference.fy:1:43: error: invalid nominal type (bytes 42..60)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-unit39\\candidate-dev.exe",
+        "--c-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-unit39\\execution\\struct-tagged-reference.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-unit39\\execution\\struct-tagged-reference.fy:1:43: error: invalid nominal type (bytes 42..60)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-unit39\\candidate-dev.exe",
+        "--mir-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-unit39\\execution\\two-borrow-leaves.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-unit39\\execution\\two-borrow-leaves.fy:1:34: error: unsupported name-check syntax (bytes 33..102)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-unit39\\candidate-dev.exe",
+        "--c-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-unit39\\execution\\two-borrow-leaves.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-unit39\\execution\\two-borrow-leaves.fy:1:34: error: unsupported name-check syntax (bytes 33..102)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-c-file-cli\\native-runner.exe",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-unit39\\execution\\native-request.json",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-unit39\\execution\\native.json"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "PASS: 14 native C executions\n",
+      "stderr": ""
+    }
+  ],
+  "native": [
+    {
+      "name": "option-mut-none",
+      "profile": "low",
+      "compiler": "msvc",
+      "compilerPath": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+      "compilerVersion": "14.51.36231",
+      "source": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-unit39\\execution\\option-mut-none.observed.c",
+      "sourceSHA256": "d376064e7e7ad5c069724bc54839282c6a48a26696316952a45fe61272934b23",
+      "runtimeSHA256": "9e6f00b2d175d9cba6b4f2f3745321be004c3d7cff1d5bb7d215dbbb8c182475",
+      "image": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-unit39\\execution\\native\\option-mut-none-msvc-low.exe",
+      "imageSHA256": "9501878809aeade57050795a4f40d22038c6552bf168b7fa91afd6bef00a61c9",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "fairyc-candidate-result/v1:7\r\n",
+      "stdoutBytes": "",
+      "stderrBytes": "ZmFpcnljLWNhbmRpZGF0ZS1yZXN1bHQvdjE6Nw0K",
+      "trap": 0,
+      "value": 7
+    },
+    {
+      "name": "option-mut-none",
+      "profile": "optimized",
+      "compiler": "msvc",
+      "compilerPath": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+      "compilerVersion": "14.51.36231",
+      "source": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-unit39\\execution\\option-mut-none.observed.c",
+      "sourceSHA256": "d376064e7e7ad5c069724bc54839282c6a48a26696316952a45fe61272934b23",
+      "runtimeSHA256": "9e6f00b2d175d9cba6b4f2f3745321be004c3d7cff1d5bb7d215dbbb8c182475",
+      "image": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-unit39\\execution\\native\\option-mut-none-msvc-optimized.exe",
+      "imageSHA256": "314449fc4af574d11cc71472986fb67a49b3a131faf8045652ef50a560ed6518",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "fairyc-candidate-result/v1:7\r\n",
+      "stdoutBytes": "",
+      "stderrBytes": "ZmFpcnljLWNhbmRpZGF0ZS1yZXN1bHQvdjE6Nw0K",
+      "trap": 0,
+      "value": 7
+    },
+    {
+      "name": "option-ref-return",
+      "profile": "low",
+      "compiler": "msvc",
+      "compilerPath": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+      "compilerVersion": "14.51.36231",
+      "source": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-unit39\\execution\\option-ref-return.observed.c",
+      "sourceSHA256": "eedcedfd42c41ee4137e2943bf19f8aad7f6cf1dd0e1190599d22ee8c5100206",
+      "runtimeSHA256": "9e6f00b2d175d9cba6b4f2f3745321be004c3d7cff1d5bb7d215dbbb8c182475",
+      "image": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-unit39\\execution\\native\\option-ref-return-msvc-low.exe",
+      "imageSHA256": "2f18778df657884fc8b78a8ffb6b450d68f49a187f72c987cefe9fd93062343a",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "fairyc-candidate-result/v1:7\r\n",
+      "stdoutBytes": "",
+      "stderrBytes": "ZmFpcnljLWNhbmRpZGF0ZS1yZXN1bHQvdjE6Nw0K",
+      "trap": 0,
+      "value": 7
+    },
+    {
+      "name": "option-ref-return",
+      "profile": "optimized",
+      "compiler": "msvc",
+      "compilerPath": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+      "compilerVersion": "14.51.36231",
+      "source": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-unit39\\execution\\option-ref-return.observed.c",
+      "sourceSHA256": "eedcedfd42c41ee4137e2943bf19f8aad7f6cf1dd0e1190599d22ee8c5100206",
+      "runtimeSHA256": "9e6f00b2d175d9cba6b4f2f3745321be004c3d7cff1d5bb7d215dbbb8c182475",
+      "image": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-unit39\\execution\\native\\option-ref-return-msvc-optimized.exe",
+      "imageSHA256": "e56ea77a67576d9074a982f41ff466070249d4b79fd35912f276fe8ab1329ea6",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "fairyc-candidate-result/v1:7\r\n",
+      "stdoutBytes": "",
+      "stderrBytes": "ZmFpcnljLWNhbmRpZGF0ZS1yZXN1bHQvdjE6Nw0K",
+      "trap": 0,
+      "value": 7
+    },
+    {
+      "name": "option-ref-none",
+      "profile": "low",
+      "compiler": "msvc",
+      "compilerPath": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+      "compilerVersion": "14.51.36231",
+      "source": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-unit39\\execution\\option-ref-none.observed.c",
+      "sourceSHA256": "344753c41b707fc57fc84f4e70a6bff8bad3367d7a233f0e9bb1c45857ab6bf0",
+      "runtimeSHA256": "9e6f00b2d175d9cba6b4f2f3745321be004c3d7cff1d5bb7d215dbbb8c182475",
+      "image": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-unit39\\execution\\native\\option-ref-none-msvc-low.exe",
+      "imageSHA256": "33801849c0b9527ca1cb0ed182b65a6f7b06555cf1bbd4d21153bdb9c5285eee",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "fairyc-candidate-result/v1:7\r\n",
+      "stdoutBytes": "",
+      "stderrBytes": "ZmFpcnljLWNhbmRpZGF0ZS1yZXN1bHQvdjE6Nw0K",
+      "trap": 0,
+      "value": 7
+    },
+    {
+      "name": "option-ref-none",
+      "profile": "optimized",
+      "compiler": "msvc",
+      "compilerPath": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+      "compilerVersion": "14.51.36231",
+      "source": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-unit39\\execution\\option-ref-none.observed.c",
+      "sourceSHA256": "344753c41b707fc57fc84f4e70a6bff8bad3367d7a233f0e9bb1c45857ab6bf0",
+      "runtimeSHA256": "9e6f00b2d175d9cba6b4f2f3745321be004c3d7cff1d5bb7d215dbbb8c182475",
+      "image": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-unit39\\execution\\native\\option-ref-none-msvc-optimized.exe",
+      "imageSHA256": "285df13977a006daf7111dab162a1c9794701d3a244b3505c6b244d4dc2b0997",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "fairyc-candidate-result/v1:7\r\n",
+      "stdoutBytes": "",
+      "stderrBytes": "ZmFpcnljLWNhbmRpZGF0ZS1yZXN1bHQvdjE6Nw0K",
+      "trap": 0,
+      "value": 7
+    },
+    {
+      "name": "option-nested-ref",
+      "profile": "low",
+      "compiler": "msvc",
+      "compilerPath": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+      "compilerVersion": "14.51.36231",
+      "source": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-unit39\\execution\\option-nested-ref.observed.c",
+      "sourceSHA256": "fce38db873276410cfedc3717506e9d38a626092747ef66c70434ec9a26da528",
+      "runtimeSHA256": "9e6f00b2d175d9cba6b4f2f3745321be004c3d7cff1d5bb7d215dbbb8c182475",
+      "image": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-unit39\\execution\\native\\option-nested-ref-msvc-low.exe",
+      "imageSHA256": "b70fe38c5d0ff8b6680488c59a7af0c2834ea6706c7c0e72d2560d6e28066381",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "fairyc-candidate-result/v1:7\r\n",
+      "stdoutBytes": "",
+      "stderrBytes": "ZmFpcnljLWNhbmRpZGF0ZS1yZXN1bHQvdjE6Nw0K",
+      "trap": 0,
+      "value": 7
+    },
+    {
+      "name": "option-nested-ref",
+      "profile": "optimized",
+      "compiler": "msvc",
+      "compilerPath": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+      "compilerVersion": "14.51.36231",
+      "source": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-unit39\\execution\\option-nested-ref.observed.c",
+      "sourceSHA256": "fce38db873276410cfedc3717506e9d38a626092747ef66c70434ec9a26da528",
+      "runtimeSHA256": "9e6f00b2d175d9cba6b4f2f3745321be004c3d7cff1d5bb7d215dbbb8c182475",
+      "image": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-unit39\\execution\\native\\option-nested-ref-msvc-optimized.exe",
+      "imageSHA256": "856569be9f47c8042539bb4df0000352bb9647071d8c5a6b67e71c5f2faf0d56",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "fairyc-candidate-result/v1:7\r\n",
+      "stdoutBytes": "",
+      "stderrBytes": "ZmFpcnljLWNhbmRpZGF0ZS1yZXN1bHQvdjE6Nw0K",
+      "trap": 0,
+      "value": 7
+    },
+    {
+      "name": "result-ref-success",
+      "profile": "low",
+      "compiler": "msvc",
+      "compilerPath": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+      "compilerVersion": "14.51.36231",
+      "source": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-unit39\\execution\\result-ref-success.observed.c",
+      "sourceSHA256": "0fd5c3d8f9dcb9496456e6b1862a35f9fd62d26e82a4dc61aa3d7ef3def0adb7",
+      "runtimeSHA256": "9e6f00b2d175d9cba6b4f2f3745321be004c3d7cff1d5bb7d215dbbb8c182475",
+      "image": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-unit39\\execution\\native\\result-ref-success-msvc-low.exe",
+      "imageSHA256": "aabce7efd4ac8d92febce72dae9287fbdd91fd44cd8a29d245a907a4b1dd0e55",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "fairyc-candidate-result/v1:7\r\n",
+      "stdoutBytes": "",
+      "stderrBytes": "ZmFpcnljLWNhbmRpZGF0ZS1yZXN1bHQvdjE6Nw0K",
+      "trap": 0,
+      "value": 7
+    },
+    {
+      "name": "result-ref-success",
+      "profile": "optimized",
+      "compiler": "msvc",
+      "compilerPath": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+      "compilerVersion": "14.51.36231",
+      "source": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-unit39\\execution\\result-ref-success.observed.c",
+      "sourceSHA256": "0fd5c3d8f9dcb9496456e6b1862a35f9fd62d26e82a4dc61aa3d7ef3def0adb7",
+      "runtimeSHA256": "9e6f00b2d175d9cba6b4f2f3745321be004c3d7cff1d5bb7d215dbbb8c182475",
+      "image": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-unit39\\execution\\native\\result-ref-success-msvc-optimized.exe",
+      "imageSHA256": "182beaa91f817471620e13bde15c0415861b7a0938b91df4b657e99a647f1541",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "fairyc-candidate-result/v1:7\r\n",
+      "stdoutBytes": "",
+      "stderrBytes": "ZmFpcnljLWNhbmRpZGF0ZS1yZXN1bHQvdjE6Nw0K",
+      "trap": 0,
+      "value": 7
+    },
+    {
+      "name": "result-ref-error",
+      "profile": "low",
+      "compiler": "msvc",
+      "compilerPath": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+      "compilerVersion": "14.51.36231",
+      "source": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-unit39\\execution\\result-ref-error.observed.c",
+      "sourceSHA256": "956582fd42fe81c4d349b09d24e00566ad40de0c2fd4204b9ac3b432ee0b2993",
+      "runtimeSHA256": "9e6f00b2d175d9cba6b4f2f3745321be004c3d7cff1d5bb7d215dbbb8c182475",
+      "image": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-unit39\\execution\\native\\result-ref-error-msvc-low.exe",
+      "imageSHA256": "8d6b684445b26e06ac1881c018abb412260cd924b2f2fbb97762a44f94d71f1f",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "fairyc-candidate-result/v1:7\r\n",
+      "stdoutBytes": "",
+      "stderrBytes": "ZmFpcnljLWNhbmRpZGF0ZS1yZXN1bHQvdjE6Nw0K",
+      "trap": 0,
+      "value": 7
+    },
+    {
+      "name": "result-ref-error",
+      "profile": "optimized",
+      "compiler": "msvc",
+      "compilerPath": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+      "compilerVersion": "14.51.36231",
+      "source": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-unit39\\execution\\result-ref-error.observed.c",
+      "sourceSHA256": "956582fd42fe81c4d349b09d24e00566ad40de0c2fd4204b9ac3b432ee0b2993",
+      "runtimeSHA256": "9e6f00b2d175d9cba6b4f2f3745321be004c3d7cff1d5bb7d215dbbb8c182475",
+      "image": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-unit39\\execution\\native\\result-ref-error-msvc-optimized.exe",
+      "imageSHA256": "6ff7b2765448c64d5876f21ae598eae69aeea1ecb84a7f7549649fd3646b2d42",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "fairyc-candidate-result/v1:7\r\n",
+      "stdoutBytes": "",
+      "stderrBytes": "ZmFpcnljLWNhbmRpZGF0ZS1yZXN1bHQvdjE6Nw0K",
+      "trap": 0,
+      "value": 7
+    },
+    {
+      "name": "option-mut-reference",
+      "profile": "low",
+      "compiler": "msvc",
+      "compilerPath": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+      "compilerVersion": "14.51.36231",
+      "source": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-unit39\\execution\\option-mut-reference.observed.c",
+      "sourceSHA256": "e4acc6257ef08afc2303c206c67a1be9786869493bd469bf20dd5e8ba51b2383",
+      "runtimeSHA256": "9e6f00b2d175d9cba6b4f2f3745321be004c3d7cff1d5bb7d215dbbb8c182475",
+      "image": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-unit39\\execution\\native\\option-mut-reference-msvc-low.exe",
+      "imageSHA256": "7e3b18ec27c992582b0371a01bbffdecacc093f2a9cac6aa71a6e16cf6f42df7",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "fairyc-candidate-result/v1:9\r\n",
+      "stdoutBytes": "",
+      "stderrBytes": "ZmFpcnljLWNhbmRpZGF0ZS1yZXN1bHQvdjE6OQ0K",
+      "trap": 0,
+      "value": 9
+    },
+    {
+      "name": "option-mut-reference",
+      "profile": "optimized",
+      "compiler": "msvc",
+      "compilerPath": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+      "compilerVersion": "14.51.36231",
+      "source": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-unit39\\execution\\option-mut-reference.observed.c",
+      "sourceSHA256": "e4acc6257ef08afc2303c206c67a1be9786869493bd469bf20dd5e8ba51b2383",
+      "runtimeSHA256": "9e6f00b2d175d9cba6b4f2f3745321be004c3d7cff1d5bb7d215dbbb8c182475",
+      "image": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-unit39\\execution\\native\\option-mut-reference-msvc-optimized.exe",
+      "imageSHA256": "f7bf470634c6528f9b5a46d56eaf039747cf4312de9a3a9bdacd2210c7fc1ce7",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "fairyc-candidate-result/v1:9\r\n",
+      "stdoutBytes": "",
+      "stderrBytes": "ZmFpcnljLWNhbmRpZGF0ZS1yZXN1bHQvdjE6OQ0K",
+      "trap": 0,
+      "value": 9
+    }
+  ],
+  "sources": [
+    {
+      "path": "examples\\lexer_candidate\\src\\array_types.fy",
+      "sha256": "a183997ff2555029334850f2ccd11d5ae337f82bf0673e9e85b8c50bc03b2bb7"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\attributes.fy",
+      "sha256": "dafe2e1c020446224fa8784e701e522096a58776a1066920f934c0717667b5e6"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\binding_output.fy",
+      "sha256": "187b26aaeacda92630312c0ef2dc159d7d874e91dc052802cf1757e036790855"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\bodies.fy",
+      "sha256": "b1bc7304d778caee8659d3cbf77e0e38aa8b88a2489d631978d9d69abac2afbc"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\body_state.fy",
+      "sha256": "75c13fd685fc21f4710ac2fa2d89adc652b62a7c4ad943b275d73e887bf68ffa"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\borrow_shapes.fy",
+      "sha256": "5fdacc0768840d24f7ea8c19ad8c1e04ab82cd9c2760f11a631b08c320e3edd2"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\budget.fy",
+      "sha256": "c2793aa302279b9d27f0af32edd71f70de4e93cb4f76f55facd3e757641cc494"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\c_arrays.fy",
+      "sha256": "4638424d71de95b2d9756d7995a7ef67150fe271157fc55052e8380aa7dc97de"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\c_cli.fy",
+      "sha256": "3a9b5f1d71c4527cb6da16621ba44ab9e663dda291209cc373b36a51310a49f2"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\c_emit.fy",
+      "sha256": "e2734c3016045c184f47c42707c38f6cd54d3cb5430d44801cbdecc7725ee613"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\c_flow.fy",
+      "sha256": "e13817d9c26140f45b2a6ebf217dc9ad2f7c535431576e900535062b11ace313"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\c_guard.fy",
+      "sha256": "b021440f2f50ee11df4a2fa16036cea7191b83964a3e378b4d0e9aff7a8f75fd"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\c_guard_facts.fy",
+      "sha256": "4509588b0d4e3f850a6b7843452d461b8209719c5fa712145949c582b2d5a909"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\c_literals.fy",
+      "sha256": "0851889caa20b841c39c78f4c71e92a17727fffe7288c18312bd4b5ca5e281c0"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\c_nominal.fy",
+      "sha256": "435ad9c8a8b081c512f4d80f1b17c3584d1f51687cd12ecbe9457e1a1833cccb"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\c_resource.fy",
+      "sha256": "d0e8475894669c7aa4f3438a06c3596c93197b85b6a5702b8e43c81a6548e68c"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\c_scalar.fy",
+      "sha256": "b2aea02fad4e3bc476db9e0aa14d845df5bbea330ba092ed69c3cf5c33ed1ef4"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\c_text.fy",
+      "sha256": "b9400e5be397a825eaf2164a5a3a819a24727d68f0c02938cebca1956f35a6bd"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\c_views.fy",
+      "sha256": "0b2ce428c716d62ce1ac66504dc409fd7c46ef85306dd06b3b6cac87e4af931f"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\cleanup_syntax.fy",
+      "sha256": "1374cdcbfa6139a5e82e4e74606cc28ba46d9e81df62f7a0dd397f856fb0ad6f"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\declaration_output.fy",
+      "sha256": "2eb7859b28000386f9ca29510f3e3117e5907ec2e7f7fd5801a67bcf4051e5bd"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\diagnostics.fy",
+      "sha256": "ee95f81ed3b3224702196fceef2888434e9713341b81abf01e03945592c4de8b"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\enum_types.fy",
+      "sha256": "d257e7cb599fd4f3bafc1f7d9ccf11d00d19f2719df063271186cf7c432f0a96"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\file_cli.fy",
+      "sha256": "28a6f26d93ad3b46dac6d77109395e55dd7a99bff57272d679d2274a7e8e5870"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\file_syntax.fy",
+      "sha256": "0ae878df46a5d151449801481c9686b6ffa2099ce4f8d76c18e08d0405ed3ddc"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\hir_array_shapes.fy",
+      "sha256": "abbd6f86a748f3c1fd36f22c9ec6461c67f780f1f19a06165660941e4fc2b576"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\hir_cli.fy",
+      "sha256": "05fc82e5a6b140fd45356a2809d1355e819d1cba6793ed6a6033dfecccfa2df2"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\hir_lower.fy",
+      "sha256": "38cd3e5bfce62c2f54e4b01fc4bbddf8e6c09c83c457383619882c3c17e653ee"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\hir_model.fy",
+      "sha256": "91f5a6c44b2959a2835ccadb9b8e916fbd314a19934aa50d478409cf31fffc24"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\hir_mutable_check.fy",
+      "sha256": "5289da69ac6a836ef74479d5bdb29f0be2b206760bcbe2f65e996859a605e908"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\hir_origin_targets.fy",
+      "sha256": "f72fb54ce53116c8916d73684951b148284d6cd8aadd6ae1f07557d6dbdedf3c"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\hir_output.fy",
+      "sha256": "dcc1c72ed584138ea9dfeb33b6875bbeeccf688dbc1c8e8e0d3e244b8c8c3cf3"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\hir_shape_lower.fy",
+      "sha256": "9d73e40920e38fa1682bacc1873b304caf804413ff26d0dc2fbd8d3cc837cf94"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\hir_shapes.fy",
+      "sha256": "7acfc933eddcf1d912638c5d3d0697e448ddc8948d6dd45214b4a891ddc37c0d"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\hir_state.fy",
+      "sha256": "f2b0abf1e81e50cf084a718ab75bcdd6ca4d8fe7f35eef18611984f286260d44"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\hir_view_check.fy",
+      "sha256": "b200d405da5415f1130ade04fa8c968d66ebc6a0a1e0294f9c623c6f14e16286"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\integrity.fy",
+      "sha256": "be52239cc18af1ccc4894bf9099caff177448d843287eaffbe395dceab7fed83"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\literal_types.fy",
+      "sha256": "33d37658af0f45e89aa009837f0937e7f55ae58f7014231645c90f80f584e0b9"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\main.fy",
+      "sha256": "756a923bad8723216f4d9a8281aadad9eb4b90defba4a0f7f4a95d0731d980c0"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\mir_arrays.fy",
+      "sha256": "f57287d7cc073f8d2f5f9979a886620d90ded73c955b7f78bbdfbbe1c7bed30d"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\mir_cleanup.fy",
+      "sha256": "7c91a4946c2156ce9a895e02ff90f5edf09cd7844ca47e8abd35128141a5fad1"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\mir_cli.fy",
+      "sha256": "32b577ff3781b03ed4ec702c5886a8eaeaa0c91c04f4984f8dffa604e34408f9"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\mir_lower.fy",
+      "sha256": "e0cf5b4d135ee5307d30c0d5770c850b88634b5a2ec12ac4e13ddc43a911c158"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\mir_math.fy",
+      "sha256": "0a0d922d39730c56841d4b5b3e256e022aaa6ebc792f48592cb296c090112086"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\mir_model.fy",
+      "sha256": "edc5583649511fa6e41724ec8a7966d376d143de883057b6e4c8579231add5d4"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\mir_nominal.fy",
+      "sha256": "0667cb62b0977e1bb6c1e97de26410eb9308296d905a9ce5d190cf3b8685aeab"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\mir_output.fy",
+      "sha256": "31003075286977c58392f064cd40f65dd51a48dce17e1d89ad61e4768e71c4e7"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\mir_places.fy",
+      "sha256": "7092dda7d9249ec69b872276286ac2c47e815e3d52e3ed4aae1588fd62e10e26"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\mir_propagation.fy",
+      "sha256": "3a891887a8892287ddc853fe7f5c30f352957d9e16cc496a5de203e03cb20e08"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\mir_reference.fy",
+      "sha256": "5d77f3e57797b5e65aa84d6d8a9a14c0736ff76f3b345e7c25e21790d3e164ea"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\mir_resource_lower.fy",
+      "sha256": "cd6a9fbef9de7e2400ac5871ab9e0f5cbd198037d26ffaa91aa0d17c07055d2a"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\mir_state.fy",
+      "sha256": "511504ac0f771fe4e71f4e86cef3d27583f53f424a06e019d84aad7eb0859b8a"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\mir_targets.fy",
+      "sha256": "798b4ad927d53b9a50cb70b95daef0cf53843a2c3cd0e8085866c27823b3ea1f"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\mir_verify.fy",
+      "sha256": "13726599bb623987eab8c6e90356ff649108ab004eb066d2dd2812e99ccae278"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\mir_verify_arrays.fy",
+      "sha256": "7efe23771653cf8c39c4bb9c800d6468ee418e6d845e9cb9f76cb6ce583ddbce"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\mir_verify_enums.fy",
+      "sha256": "8a6d7cc6a1540acbb80beb394577214c7e2fee22426baf8a6f18303d074daa0d"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\mir_verify_flow.fy",
+      "sha256": "aa0e87f6b689d1466be0f4f894fe5e07b3e41aaf95c149d931b7277b16220b4f"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\mir_verify_literals.fy",
+      "sha256": "92fad4c2db07f67db19a151059b67c2c4e7a0543b5afdc89c8fed4bac1940f5a"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\mir_verify_nominal.fy",
+      "sha256": "938f60b94690c9e223d28b20c98ae12471ce89413194fbefd484524aa9ad7ad6"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\mir_verify_resources.fy",
+      "sha256": "c389bdd0a4517246f0ec9d886cd25ea0e59519475cd97a8121e55c38d70cdf05"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\mir_verify_shape.fy",
+      "sha256": "a784d8f1f93d6ba4e53c8918adf304c4916341ac5e0ed58173c99628dbcf787e"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\mir_verify_views.fy",
+      "sha256": "a05261d318b91fbc3a244e0a548a0303c4ab401abc04fb853da4051c62c02923"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\module_check.fy",
+      "sha256": "d426e9743bea62ca6ac6e34103cffccf3a121a8acd9a34190753e7b00aa3526d"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\module_cli.fy",
+      "sha256": "176bc5079420f7102b27b4973370ce008e12f746840d9834b2cbf51636b4756f"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\module_registry.fy",
+      "sha256": "d02e983f3d9cabf9b5200d45c7150f5a9d2f2721efc5882cf138f1a0db963f06"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\name_cli.fy",
+      "sha256": "7bed00913f774e8929380936aa4a669bf9b6a708d18d5470d58a232b2ce6b343"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\name_resolution.fy",
+      "sha256": "b08fc9573e587cd926edc8b6b047e06717e0aee2acedc41e8ea6556bb5f75411"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\nominal_identity.fy",
+      "sha256": "ab92ce842502bdb1f0dcc1322136ea5b699adf20462b5c1c11fa897bb7f7d738"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\nominal_types.fy",
+      "sha256": "7518d5e6f79bc694adc9d338cf829b17615a338b3bfb6325e552721e88bd7d49"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\numbers.fy",
+      "sha256": "ee8b40b5e8061317d70d3594c386c9e4c70d95132a7e4243ea6402947a4c3556"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\pages.fy",
+      "sha256": "4f4306b894510a83af7e892bb2c8d116a2107c1abf1f0820a5cd637e3eb32c87"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\parse_tokens.fy",
+      "sha256": "91984eb1086ff7faafa4a6c64a232fc2ddce365b8cd7c2ef23b143bb91d4c9a6"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\records.fy",
+      "sha256": "e2d1d3540285509aded981b476d4b2340857d8c7370364f4b1410bfd6883f6dd"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\reference_types.fy",
+      "sha256": "66e68f9539a7ffbffab383d5de8ceb197c7f7efe621583c9847d7e44221dd6c3"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\resource_abilities.fy",
+      "sha256": "fee5bcba1f3a1be3808e45e1f2d1097ec3444ee89ef520b63c1dfc12546eabf3"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\resource_flow.fy",
+      "sha256": "45a803db99854e04e54bb5d6b5e451b86413983d0c00b6d5e47cec8019b9f0cf"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\resource_identity.fy",
+      "sha256": "7d85c65df4d6cc02f004f854d5108ec3cc7ba8ddb4885ea54c634f88f93594aa"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\resource_properties.fy",
+      "sha256": "fe0372ce1c546422e8b09d5ae9c9aa16f1bc11682fdded971e0820e96d30bac2"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\resource_use.fy",
+      "sha256": "e66ab3d2962ab1d04b3640a001a7670fc6dda51bfc96247e9aa84f96441f0b17"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\result_flow.fy",
+      "sha256": "544e73b45d2420926f2cf8498afc20300ce4ecfa0a6d4f34fb5bde5318332c32"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\result_flow_graph.fy",
+      "sha256": "e1c8c9bb6382a86fb9be091ad177d2a0798d41643a9b0381cf0221597a3359af"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\scanner.fy",
+      "sha256": "bfbc305c0bf69063812f019e7f3e9cca505a8afb22744e0d50f51c7f72692c2f"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\strings.fy",
+      "sha256": "8f26db7c4d4039c8c8d9fbc6078097859c8f714ca5887957fdf0e69269dca521"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\syntax.fy",
+      "sha256": "2dcb64d8b7272b1adba8d82ab1658775010b567687bab1cbe00bc707edd0a373"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\tagged_check.fy",
+      "sha256": "1692313a6569515619d3835a9e03946a41d328d99f6d593d1011b46164498186"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\tagged_encoding.fy",
+      "sha256": "4f28b1708816926a0e7fa7af31bf7af928e33a753f4234d8e95a5039592a7e24"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\tagged_types.fy",
+      "sha256": "d93cad308c8091fbc13ddcf5b878b5fffb1d876cdcaeb4a873df0b9b21aca750"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\token_output.fy",
+      "sha256": "1e08aded3f7efec90bb915b97011cdb46b63da5231a33231ea755552b648d11b"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\type_check.fy",
+      "sha256": "e5340dc3f2e224406a06a2064b5be232cf5cfea272bd0557bb6cab0085452c8f"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\type_cli.fy",
+      "sha256": "a9ded6956f473428d6b73f253a19b9e03374658c9410e152af67d2e95a87e927"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\type_control.fy",
+      "sha256": "2ebd9714228e5711657d496591b579fb9c13799ffa8729b1c40af7a244aac626"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\type_state.fy",
+      "sha256": "7dbbf7d50be1e9513dc8aafd99b11afda5d8e2d7ce87d96b6436c4752c2123a0"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\types.fy",
+      "sha256": "53a77948af92724f00de0609837fd1507899df8e2b59b6d2778ef1f3c344395a"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\utf8.fy",
+      "sha256": "4a5425cea9efbfb1bff2c31a38c2bd8e392c6792af09f24e906c9a743621870d"
+    }
+  ],
+  "observer": {
+    "path": "examples/lexer_candidate/verify_resource_lifetime.py",
+    "sha256": "d74ecc9ed8f680420010b52938802796a968a12e8fb460ac65d25dd219c2c1f4"
+  },
+  "lock": {
+    "sha256": "9bd38c679a8a6f8f60735e16bc2e6ca5597e50ca55538301c56a9183ccf5bf26",
+    "packages": [
+      {
+        "id": "fypi1-sha256-0e1386b0ff6048f28835bbfaff7a3d36e19d339115d009638d6b79721b0bd5d6",
+        "role": "root",
+        "packageUid": "example.lexer-candidate",
+        "sourceKind": "local",
+        "localPath": ".",
+        "sdkIdentity": "",
+        "runtimeAbi": "",
+        "sourceIdentity": "fysrc1-sha256-6eaddccc819aba69b43b53f1979f6dbd0ec7da98a54e4586b811ca44a0a76b22",
+        "sourceDigest": "fysrc1-sha256-6eaddccc819aba69b43b53f1979f6dbd0ec7da98a54e4586b811ca44a0a76b22",
+        "version": "0.52.0",
+        "features": []
+      },
+      {
+        "id": "fypi1-sha256-86c14252642af2b070e755759e12b841707c27c8a222a96de9401af4159ff406",
+        "role": "standard-library",
+        "packageUid": "fairyc.std",
+        "sourceKind": "sdk",
+        "localPath": "",
+        "sdkIdentity": "fairyc-sdk-stdlib/0",
+        "runtimeAbi": "fairyc-runtime/0",
+        "sourceIdentity": "fairyc-sdk-stdlib/0;fairyc-runtime/0;fysrc1-sha256-aab51ddcd0ccc7e895837a4f7276011bf3206204f8d3efb6760b6218ca277039",
+        "sourceDigest": "fysrc1-sha256-aab51ddcd0ccc7e895837a4f7276011bf3206204f8d3efb6760b6218ca277039",
+        "version": "0.0.0-stage0.86",
+        "features": []
+      }
+    ]
+  },
+  "validation": [
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\compiler-build-120s.exe",
+        "check"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "check ok: 2 instance(s), 102 source file(s), 1251 MIR function(s), lock updated\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\compiler-build-120s.exe",
+        "check",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "check ok: 2 instance(s), 102 source file(s), 1251 MIR function(s), lock verified\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\compiler-build-120s.exe",
+        "build",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "built: build/lexer-candidate.exe (x86_64-windows-msvc, development, lock verified)\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\compiler-build-120s.exe",
+        "test",
+        "--native",
+        "--file",
+        "tests/reference_places.fy",
+        "--json"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "{\"schemaVersion\":\"fairyc.test-report/v1\",\"engine\":\"native\",\"target\":\"x86_64-windows-msvc\",\"profile\":\"development\",\"tests\":[{\"identity\":\"tests::reference_places::mutable_pointer_store_has_no_result\",\"outcome\":\"passed\",\"trapCategory\":null},{\"identity\":\"tests::reference_places::projection_keeps_original_owner\",\"outcome\":\"passed\",\"trapCategory\":null}],\"count\":2,\"passed\":2,\"failed\":0,\"status\":\"ok\",\"lock\":\"unchanged\"}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "python",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\verify_resource_lifetime.py",
+        "--unit",
+        "39",
+        "--images",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-unit39\\candidate-dev.exe",
+        "--native-runner",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-c-file-cli\\native-runner.exe",
+        "--receipt",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-unit39\\execution\\observation.json"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "exit": 0,
+      "stdout": "PASS unit 39: 12 fixtures, 14 native runs\n",
+      "stderr": ""
+    }
+  ],
+  "bootstrap": {
+    "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\compiler-build-120s.exe",
+    "sha256": "1e5aa3a20f59f01d905c9331155171882b5ad4b1b2b50d7c9b4bcd4f229b0124"
+  }
+}

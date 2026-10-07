@@ -1,4 +1,6 @@
 module hir_view_check;
+import borrow_shapes as borrows;
+import tagged_types as tagged;
 import reference_types as refs;
 import hir_model as h;
 import hir_origin_targets as targets;
@@ -14,7 +16,7 @@ struct Context {
     usize[1153] summary; u8[1153] color;
     usize work; h::Problem problem;
 }
-fn bool byte_view(u32 type) { return type == 10 || type == 11 || refs::valid(type); }
+fn bool byte_view(u32 type) { return borrows::count(type)!=0; }
 fn usize fail(ref mut Context c, u32 code, usize start, usize end) {
     if (c.problem.code == 0) { c.problem = h::Problem { .code,.start,.end }; } return 0;
 }
@@ -35,6 +37,9 @@ fn usize origin(ref h::Program p, ref mut Context c, usize id, usize depth) {
     let e = h::expression_at(p,id); let u32 kind = h::expression_code(e.kind);
     c.work += 1; if (depth >= 64 || c.work > 1048576) { return fail(c,2,e.start,e.end); }
     if (!byte_view(h::type_code(e.type)) || kind == 15) { return 0; }
+    if(kind==21){return 0;} // Capture metadata is not an evaluated reference value.
+    if(kind==18){return if(e.edge_count==1){origin(p,c,h::edge_at(p,e.edge_start),depth+1)}else{0};}
+    if(kind==22 || kind==11){return origin(p,c,e.left,depth+1);}
     if (kind == 16) { let usize owner=root(p,e.left); if(owner!=0 && byte_view(h::type_code(h::binding_at(p,owner).type))){return origin(p,c,base(p,e.left),depth+1);}return owner; }
     if (kind == 17 || kind==25) { return origin(p,c,e.left,depth + 1); }
     if (kind == 3) {
@@ -70,6 +75,7 @@ fn usize summary(ref h::Program p, ref mut Context c, usize binding, usize depth
             result=joined(c,result,value,s.start,s.end);seen=seen || value!=65538;
         } i += 1;
     }
+    i=1;while(i<=h::expression_count(p)){let e=h::expression_at(p,i);if(h::expression_code(e.kind)==22 && e.binding==binding && tagged::result(h::type_code(h::expression_at(p,e.left).type)) && borrows::count(tagged::failure(h::type_code(h::expression_at(p,e.left).type)))!=0){let usize value=origin(p,c,e.left,depth+1);result=joined(c,result,value,e.start,e.end);}i+=1;}
     let body = h::block_at(p,f.body);
     if (body.tail != 0) { let usize value = origin(p,c,body.tail,depth + 1); result=joined(c,result,value,body.start,body.end); }
     if (result != 0 && result!=65538) {
@@ -107,7 +113,7 @@ fn usize held_end(ref h::Program p, usize id, h::Expression e) {
 fn usize first(ref h::Program p, ref mut Context c, usize id, usize depth) {
     let e=h::expression_at(p,id);let u32 kind=h::expression_code(e.kind);
     if(depth>=64){discard fail(c,2,e.start,e.end);return e.start;}
-    if(kind==17 || kind==25){return first(p,c,e.left,depth+1);}
+    if(kind==17 || kind==25 || kind==11 || kind==18 && e.edge_count==1){return first(p,c,if(kind==18){h::edge_at(p,e.edge_start)}else{e.left},depth+1);}
     if(kind==7){let usize tail=h::block_at(p,e.block).tail;return if(tail==0){e.start}else{first(p,c,tail,depth+1)};}
     if(kind==8){let usize yes=h::block_at(p,e.block).tail;if(yes==0 || e.alternative==0){return e.start;}let usize a=first(p,c,yes,depth+1);let usize b=first(p,c,e.alternative,depth+1);return if(a<b){a}else{b};}
     if(kind==6){
@@ -138,6 +144,7 @@ pub fn h::Problem check(ref h::Program p) {
     var usize i = 1; while (i <= h::statement_count(p)) {
         let s = h::statement_at(p,i); if (h::statement_code(s.kind) == 1) { c.initial[s.binding] = s.expression; } i += 1;
     }
+    i=1;while(i<=h::expression_count(p)){let e=h::expression_at(p,i);if(h::expression_code(e.kind)==19){var usize a=0;while(a<e.edge_count){let arm=h::expression_at(p,h::edge_at(p,e.edge_start+a));var usize j=0;while(j<arm.edge_count){let capture=h::expression_at(p,h::edge_at(p,arm.edge_start+j));if(capture.edge_count==1){c.initial[h::edge_at(p,capture.edge_start)]=e.left;}j+=1;}a+=1;}}i+=1;}
     i = 1; while (i <= h::expression_count(p)) {
         let e = h::expression_at(p,i); if (h::expression_code(e.kind) == 3 && byte_view(h::type_code(e.type))) {
             let usize end = held_end(p,i,e); if (end > c.last[e.binding]) { c.last[e.binding] = end; }

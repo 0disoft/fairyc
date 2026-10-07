@@ -1,4 +1,5 @@
 module hir_model;
+import borrow_shapes as borrows;
 import reference_types as refs;
 import array_types as arrays;
 import resource_identity as resources;
@@ -90,7 +91,7 @@ pub fn usize drop_count(ref Program p){assert(p.success);return v::len<Drop>(ref
 pub fn Drop drop_at(ref Program p,usize index){assert(index<drop_count(p));return *v::at<Drop>(ref p.drops,index);}
 pub fn bool function_kind(BindingKind kind){let u32 code=binding_code(kind);return code==1 || code==9;}
 pub fn ref u8[] literal_bytes(ref Program p, usize id) { let Expression e = expression_at(p,id); assert(expression_code(e.kind) == 15); return bytes::view(ref p.payload)[e.payload_start..e.payload_end]; }
-pub fn bool has_views(ref Program p) { var usize i=1; while(i<=expression_count(p)){let u32 kind=expression_code(expression_at(p,i).kind);if(kind==16 || kind==17 || refs::valid(type_code(expression_at(p,i).type)) || type_code(expression_at(p,i).type)==11){return true;}i+=1;}return false; }
+pub fn bool has_views(ref Program p) { var usize i=1; while(i<=expression_count(p)){let u32 kind=expression_code(expression_at(p,i).kind);if(kind==16 || kind==17 || borrows::count(type_code(expression_at(p,i).type))!=0 || type_code(expression_at(p,i).type)==11){return true;}i+=1;}return false; }
 pub fn bool has_literals(ref Program p) { var usize i = 1; while (i <= binding_count(p)) { if (literals::valid(type_code(binding_at(p,i).type))) { return true; } i += 1; } i = 1; while (i <= expression_count(p)) { if (literals::valid(type_code(expression_at(p,i).type))) { return true; } i += 1; } return false; }
 pub fn ref shapes::Table nominal(ref Program p) { assert(p.success); return ref p.nominal; }
 pub fn usize module_index(ref Program p) { assert(p.success); return p.module_index; }

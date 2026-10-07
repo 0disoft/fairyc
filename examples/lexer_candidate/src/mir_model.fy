@@ -1,4 +1,5 @@
 module mir_model;
+import borrow_shapes as borrows;
 import reference_types as refs;
 import tagged_encoding as tagged;
 import array_types as arrays;
@@ -71,7 +72,7 @@ pub fn usize local_count(ref Program p) { assert(p.success); return v::len<Local
 pub fn usize block_count(ref Program p) { assert(p.success); return v::len<Block>(ref p.blocks); }
 pub fn usize operation_count(ref Program p) { assert(p.success); return v::len<Operation>(ref p.operations); }
 pub fn usize edge_count(ref Program p) { assert(p.success); return v::len<usize>(ref p.edges); }
-pub fn bool has_views(ref Program p) { var usize i=1;while(i<=local_count(p)){if(local_at(p,i).type==11 || refs::valid(local_at(p,i).type)){return true;}i+=1;}i=1;while(i<=operation_count(p)){if(operation_at(p,i).kind>=18 && operation_at(p,i).kind<=20){return true;}i+=1;}return false; }
+pub fn bool has_views(ref Program p) { var usize i=1;while(i<=local_count(p)){if(local_at(p,i).type==11 || borrows::count(local_at(p,i).type)!=0){return true;}i+=1;}i=1;while(i<=operation_count(p)){if(operation_at(p,i).kind>=18 && operation_at(p,i).kind<=20){return true;}i+=1;}return false; }
 pub fn bool has_literals(ref Program p) { var usize i = 1; while (i <= local_count(p)) { if (literals::valid(local_at(p,i).type)) { return true; } i += 1; } i = 1; while (i <= target_count(p)) { if (literals::valid(target_at(p,i).result)) { return true; } i += 1; } return false; }
 pub fn bool has_arrays(ref Program p) {
     var usize i = 1; while (i <= local_count(p)) { if (arrays::valid(local_at(p,i).type)) { return true; } i += 1; }

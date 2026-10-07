@@ -1,11 +1,12 @@
 module mir_verify_views;
+import borrow_shapes as borrows;
 import reference_types as refs;
 import mir_model as m;
 import array_types as arrays;
 import hir_shapes as shapes;
 import std::vec as v;
 
-fn bool byte_view(u32 type){return type==10 || type==11 || refs::valid(type);}
+fn bool byte_view(u32 type){return borrows::count(type)!=0;}
 fn bool local(ref m::Program p, usize id, usize function, u32 type) { return id>0 && id<=m::local_count(p) && m::local_at(p,id).function==function && m::local_at(p,id).type==type; }
 pub fn bool operation(ref m::Program p, m::Operation o) {
     if(o.kind==20){return o.result==0 && o.type==3 && o.owner_type==11 && local(p,o.left,o.function,11) && local(p,o.right,o.function,5) && o.argument_count==1 && local(p,m::edge_at(p,o.argument_start),o.function,3) && o.operator==0 && !o.boolean && o.payload_start==0 && o.payload_end==0;}
@@ -44,7 +45,7 @@ pub fn m::Problem check(ref m::Program p) {
         changed=false;work+=m::operation_count(p)+m::block_count(p);if(work>1048576){return m::Problem{.code=2,.start=0,.end=0};}
         i=1;while(i<=m::operation_count(p)){
             let o=m::operation_at(p,i);if(byte_view(o.type)){
-                let usize origin=if(o.kind==14){0}else if(o.kind==18 || o.kind==28 || o.kind==33){o.left}else if(o.kind==2 || o.kind==19 || o.kind==32 || o.kind==34){get(ref values,o.left)}else{65538};
+                let usize origin=if(o.kind==21){if(o.argument_count==1 && byte_view(m::local_at(p,m::edge_at(p,o.argument_start)).type)){get(ref values,m::edge_at(p,o.argument_start))}else{0}}else if(o.kind==23){get(ref values,o.left)}else if(o.kind==14){0}else if(o.kind==18 || o.kind==28 || o.kind==33){o.left}else if(o.kind==2 || o.kind==19 || o.kind==32 || o.kind==34){get(ref values,o.left)}else{65538};
                 if(!merge(ref mut values,o.result,origin,ref mut changed,ref mut problem,o.start,o.end)){return problem;}
             }i+=1;
         }
