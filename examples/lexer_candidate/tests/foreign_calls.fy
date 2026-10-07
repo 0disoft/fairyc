@@ -17,7 +17,7 @@ import std::vec as v;
 fn m::Program changed(ref m::Program p,u32 mutation){
     var bytes::Buffer source=bytes::empty();assert(bytes::append(ref mut source,m::source_view(p)).is_ok);
     var bytes::Buffer payload=bytes::empty();var v::Vec<m::Operation> ops=v::empty<m::Operation>();var usize i=1;
-    while(i<=m::operation_count(p)){var o=m::operation_at(p,i);if(o.kind==37){if(mutation==7){o.boolean=false;}else if(mutation==8){o.operator=1;}}if(o.kind==36){if(mutation==5){o.boolean=true;}else if(mutation==6){o.left=o.result;}}if(o.payload_end>o.payload_start){assert(bytes::append(ref mut payload,m::literal_text(p,i)).is_ok);}assert(v::push<m::Operation>(ref mut ops,o).is_ok);i+=1;}
+    while(i<=m::operation_count(p)){var o=m::operation_at(p,i);if(o.kind==38){if(mutation==9){o.boolean=false;}else if(mutation==10){o.owner_type=1048582;o.left=o.right;}else if(mutation==11){o.argument_count=0;}}if(o.kind==37){if(mutation==7){o.boolean=false;}else if(mutation==8){o.operator=1;}}if(o.kind==36){if(mutation==5){o.boolean=true;}else if(mutation==6){o.left=o.result;}}if(o.payload_end>o.payload_start){assert(bytes::append(ref mut payload,m::literal_text(p,i)).is_ok);}assert(v::push<m::Operation>(ref mut ops,o).is_ok);i+=1;}
     var v::Vec<m::Target> targets=v::empty<m::Target>();i=1;while(i<=m::target_count(p)){var t=m::target_at(p,i);if(t.foreign){if(mutation==1){t.link_start=7;t.link_end=11;}else if(mutation==2){t.result=6;}else if(mutation==3){t.foreign=false;}else if(mutation==4){t.unsafe_call=false;}}assert(v::push<m::Target>(ref mut targets,t).is_ok);i+=1;}
     var v::Vec<m::Signature> signatures=v::empty<m::Signature>();i=0;while(i<m::signature_count(p)){assert(v::push<m::Signature>(ref mut signatures,m::Signature{.type=m::signature_at(p,i)}).is_ok);i+=1;}
     var v::Vec<m::Function> functions=v::empty<m::Function>();i=1;while(i<=m::function_count(p)){assert(v::push<m::Function>(ref mut functions,m::function_at(p,i)).is_ok);i+=1;}
@@ -49,6 +49,14 @@ fn m::Program changed(ref m::Program p,u32 mutation){
 @test fn void pointer_casts_reject_lost_provenance(){
     let p=switch(lower::lower(fixture::retained(b"module main;fn i32 main(){let i32 n=7;let ptr i32 p=unsafe{ref n as ptr i32};assert(p!=null);return 7;}"))){case .ok(p):{p}case .err(_):{assert(false);return;}};
     assert(verify::check(ref p).code==0);var u32 mutation=7;while(mutation<=8){let bad=changed(ref p,mutation);assert(verify::check(ref bad).code==1001);var bytes::Buffer out=bytes::empty();assert(bytes::append(ref mut out,b"prefix").is_ok);assert(c::render(ref bad,ref mut out)!=0 && bytes::equal(bytes::view(ref out),b"prefix"));mutation+=1;}
+}
+
+@test fn void raw_views_reject_lost_owner_or_unsafe_permission(){
+    let p=switch(lower::lower(fixture::retained(b"module main;fn i32 main(){let ref u8[] owner=b\"AB\";let ptr u8 data=unsafe{owner as ptr u8};let ref u8[] v=unsafe{byte_slice::from_raw_parts(owner,data,2)};assert(v[0]==65);return 7;}"))){case .ok(p):{p}case .err(_):{assert(false);return;}};
+    assert(verify::check(ref p).code==0);
+    var u32 mutation=9;while(mutation<=11){let bad=changed(ref p,mutation);assert(verify::check(ref bad).code!=0);
+        var bytes::Buffer out=bytes::empty();assert(bytes::append(ref mut out,b"prefix").is_ok);
+        assert(c::render(ref bad,ref mut out)!=0 && bytes::equal(bytes::view(ref out),b"prefix"));mutation+=1;}
 }
 
 @test fn void c_scalar_identity_and_cast_lane_are_closed(){

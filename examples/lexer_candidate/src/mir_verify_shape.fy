@@ -6,6 +6,7 @@ import mir_model as m;
 import std::bytes as bytes;
 import std::vec as v;
 import hir_shapes as shapes;
+import raw_view_intrinsics as raw;
 import mir_verify_nominal as nominal;
 import mir_verify_arrays as arrays;
 import mir_verify_literals as literals;
@@ -54,6 +55,8 @@ fn bool integer(ref u8[] text, u32 type) {
     return true;
 }
 fn bool operation(ref m::Program p, usize id, m::Operation o) {
+    if(o.kind==38){return (o.type==9 || o.type==10 || o.type==11) && o.boolean && raw::owner(o.owner_type,o.type) && local(p,o.result,o.function,o.type) && local(p,o.left,o.function,o.owner_type)
+        && o.right>0 && o.right<=m::local_count(p) && raw::data(m::local_at(p,o.right).type,o.type) && m::local_at(p,o.right).function==o.function && o.operator==0 && o.argument_count==1 && local(p,m::edge_at(p,o.argument_start),o.function,5) && o.payload_start==0 && o.payload_end==0;}
     if(o.kind==37){return pointers::cast_allowed(o.owner_type,o.type) && o.boolean && local(p,o.result,o.function,o.type) && local(p,o.left,o.function,o.owner_type) && o.result!=o.left && o.right==0 && o.operator==0 && o.argument_start==0 && o.argument_count==0 && o.payload_start==0 && o.payload_end==0;}
     if(o.kind==36){return pointers::valid(o.type) && o.owner_type==o.type && local(p,o.result,o.function,o.type) && o.left==0 && o.right==0 && o.operator==0 && o.argument_start==0 && o.argument_count==0 && o.payload_start==0 && o.payload_end==0 && !o.boolean;}
     if(o.kind==35){return casts::allowed(o.owner_type,o.type) && local(p,o.result,o.function,o.type) && local(p,o.left,o.function,o.owner_type) && o.result!=o.left && o.right==0 && o.operator==0 && o.argument_start==0 && o.argument_count==0 && o.payload_start==0 && o.payload_end==0 && !o.boolean;}
@@ -151,7 +154,7 @@ pub fn m::Problem check(ref m::Program p) {
             let m::Operation o = m::operation_at(p,op);
             if (!mark(ref mut ops,op) || !operation(p,op,o) || o.kind == 5 && (op != b.last || b.kind != 4 || b.check != op)) { return problem(1001,o.start,o.end); }
             if(o.kind==26 || o.kind==25){let u32 required=m::required_drop_effects(p,o.type);if((m::target_at(p,f.target).effects&required)!=required){return problem(7102,o.start,o.end);}}
-            if (o.kind == 6 || o.kind == 21 || o.kind == 9 || o.kind == 11 || (o.kind == 19 || o.kind == 20)) { var usize j = 0; while (j < o.argument_count) { if (!mark(ref mut edges,o.argument_start + j)) { return problem(1001,o.start,o.end); } j += 1; } }
+            if (o.kind == 6 || o.kind == 21 || o.kind == 9 || o.kind == 11 || (o.kind == 19 || o.kind == 20 || o.kind==38)) { var usize j = 0; while (j < o.argument_count) { if (!mark(ref mut edges,o.argument_start + j)) { return problem(1001,o.start,o.end); } j += 1; } }
             if (o.result != 0) { let ref mut usize count = v::at_mut<usize>(ref mut definitions,o.result); *count += 1; }
             if (o.kind == 1 && o.type == 6 && !o.boolean) { let ref mut u8[] flags = bytes::view_mut(ref mut false_constants); flags[o.result] = 1; }
             op = o.next;

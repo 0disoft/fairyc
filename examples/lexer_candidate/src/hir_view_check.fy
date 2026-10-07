@@ -43,7 +43,7 @@ fn usize origin(ref h::Program p, ref mut Context c, usize id, usize depth) {
     if(kind==18){return if(e.edge_count==1){origin(p,c,h::edge_at(p,e.edge_start),depth+1)}else{0};}
     if(kind==22 || kind==11){return origin(p,c,e.left,depth+1);}
     if (kind == 16) { let usize owner=root(p,e.left); if(owner!=0 && byte_view(h::type_code(h::binding_at(p,owner).type))){return origin(p,c,base(p,e.left),depth+1);}return owner; }
-    if (kind == 17 || kind==25) { return origin(p,c,e.left,depth + 1); }
+    if (kind == 17 || kind==25 || kind==29) { return origin(p,c,e.left,depth + 1); }
     if (kind == 3) {
         let b = h::binding_at(p,e.binding);
         if (h::binding_code(b.kind) == 2) { return e.binding; }
@@ -100,7 +100,7 @@ fn usize held_end(ref h::Program p, usize id, h::Expression e,ref mut Context c)
     var usize end=loop_end(p,e,c);var usize i=1;
     while(i<=h::expression_count(p)){
         let parent=h::expression_at(p,i);let u32 kind=h::expression_code(parent.kind);
-        if((kind==13 || kind==17 || kind==25 || kind==28 || kind==4 || kind==10 || kind==14) && parent.left==id && parent.end>end){end=parent.end;}
+        if((kind==13 || kind==17 || kind==25 || kind==28 || kind==29 || kind==4 || kind==10 || kind==14) && parent.left==id && parent.end>end){end=parent.end;}
         if(kind==6){var usize j=0;while(j<parent.edge_count){if(h::edge_at(p,parent.edge_start+j)==id && parent.end>end){end=parent.end;}j+=1;}}i+=1;
     }
     i = 1; while (i <= h::statement_count(p)) {
@@ -115,7 +115,7 @@ fn usize held_end(ref h::Program p, usize id, h::Expression e,ref mut Context c)
 fn usize first(ref h::Program p, ref mut Context c, usize id, usize depth) {
     let e=h::expression_at(p,id);let u32 kind=h::expression_code(e.kind);
     if(depth>=64){discard fail(c,2,e.start,e.end);return e.start;}
-    if(kind==17 || kind==25 || kind==11 || kind==18 && e.edge_count==1){return first(p,c,if(kind==18){h::edge_at(p,e.edge_start)}else{e.left},depth+1);}
+    if(kind==17 || kind==25 || kind==29 || kind==11 || kind==18 && e.edge_count==1){return first(p,c,if(kind==18){h::edge_at(p,e.edge_start)}else{e.left},depth+1);}
     if(kind==7){let usize tail=h::block_at(p,e.block).tail;return if(tail==0){e.start}else{first(p,c,tail,depth+1)};}
     if(kind==8){let usize yes=h::block_at(p,e.block).tail;if(yes==0 || e.alternative==0){return e.start;}let usize a=first(p,c,yes,depth+1);let usize b=first(p,c,e.alternative,depth+1);return if(a<b){a}else{b};}
     if(kind==6){

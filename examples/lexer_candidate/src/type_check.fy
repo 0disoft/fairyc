@@ -12,6 +12,7 @@ import scalar_casts as casts;
 import effect_declarations as effects;
 import must_use_flow as must_use;
 import unsafe_scopes as unsafe_scopes;
+import raw_view_intrinsics as raw;
 import type_state as state;
 import nominal_types as nominal;
 import resource_identity as resources;
@@ -184,6 +185,19 @@ fn state::Value expression(ref names::Resolved resolved, ref mut v::Vec<state::S
         return recorded(tables,id,value(if (compare) { 6 } else { left.type },left.terminates || right.terminates));
     }
     if (node.kind == 6) {
+        let u32 raw_type=raw::call(parsed,id);
+        if(raw_type!=0){
+            if(!unsafe_scopes::allowed(parsed,node.start,node.end)){return error(problem,5101,node.start,node.end,0,0);}
+            if(syntax::call_argument_count(parsed,id)!=3){return error(problem,5,node.start,node.end,0,0);}
+            var bool terminates=false;var usize arg=0;
+            while(arg<3){let usize child=syntax::call_argument(parsed,id,arg);
+                let state::Value actual=expression(resolved,tables,problem,child,if(arg==2){5}else{0},result_type,depth+1,loop_depth);
+                if(problem.code!=0){return actual;}
+                if(!(if(arg==0){raw::owner(actual.type,raw_type)}else if(arg==1){raw::data(actual.type,raw_type)}else{actual.type==5})){let a=syntax::expression_at(parsed,child);return error(problem,16,a.start,a.end,if(arg==2){5}else{0},actual.type);}
+                terminates=terminates || actual.terminates;arg+=1;
+            }
+            return recorded(tables,id,value(raw_type,terminates));
+        }
         let usize callee_id = state::uses(tables,node.left - 1); let names::Symbol callee = names::symbol_at(resolved,callee_id);
         if (callee.kind != 1 && callee.kind != 5 && callee.kind!=11) { let syntax::Expression source = syntax::expression_at(parsed,node.left); return error(problem,6,source.start,source.end,8,state::symbols(tables,callee_id - 1)); }
         state::set_expressions(tables,node.left - 1,8);

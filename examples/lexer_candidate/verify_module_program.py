@@ -24,6 +24,8 @@ CLI_CASES = (
      "module provider;@repr(C)pub struct Packet{u32 code;u32 amount;}pub fn i32 value(ref Packet p){assert(p.code==41 && p.amount==1);return 7;}", "", 7),
     ("branch-stack", "module main;struct Large{u32 a;u32 b;u32 c;u32 d;u32 e;}fn i32 main(){let Large p=Large{.a=1,.b=2,.c=3,.d=4,.e=5};assert(p.a==1 && p.b==2 && p.c==3 && p.d==4 && p.e==5);return 7;}",
      "module provider;", "", 7),
+    ("raw-import", "module main;import provider as p;fn i32 main(){let ref u8[] owner=b\"AB\";let ptr u8 data=unsafe{owner as ptr u8};let ref u8[] v=p::wrap(owner,data,2);assert(v[1]==66);return 7;}",
+     "module provider;pub fn ref u8[] wrap(ref u8[] owner,ptr u8 data,usize length){return unsafe{byte_slice::from_raw_parts(owner,data,length)};}", "", 7),
 )
 
 

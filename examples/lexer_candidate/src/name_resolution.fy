@@ -1,5 +1,6 @@
 module name_resolution;
 import syntax as syntax;
+import raw_view_intrinsics as raw;
 import effect_declarations as effects;
 import foreign_declarations as foreign;
 import repr_c_declarations as repr;
@@ -110,7 +111,7 @@ fn Problem expression(ref syntax::Parsed parsed, ref mut Context context, usize 
     if (node.kind == 6) {
         let u32 callee_kind=syntax::expression_at(parsed,node.left).kind;
         if (callee_kind != 2 && callee_kind != 28) { return fail(3,node.start,node.end); }
-        if(callee_kind==2){let Problem callee = expression(parsed,context,node.left,depth + 1,symbols,references);if (callee.code != 0) { return callee; }}
+        if(callee_kind==2 && raw::call(parsed,id)==0){let Problem callee = expression(parsed,context,node.left,depth + 1,symbols,references);if (callee.code != 0) { return callee; }}
         var usize index = 0;
         while (index < syntax::call_argument_count(parsed,id)) {
             let usize entry_id = syntax::call_argument_entry(parsed,id,index);

@@ -79,7 +79,7 @@ evidence/candidate-result-handling-alignment-20261007.json에 새 검사·도구
 38. 완료: Unknown과 Static을 분리하고 단일 입력 origin의 직접·상호 재귀 요약을 bounded 고정점으로 증명. Static의 입력 origin 단축은 허용하고 근거 없는 cycle·입력 교환 재귀·지역 escape는 거부. 6개 fixture, 생성 C native 6회. 근거: `evidence/candidate-resource-recursive-origins-20261007.json`.
 39. 완료: Option/Result의 단일 safe-borrow leaf를 정체성·레이아웃·C payload·origin·generation에 연결. pattern 캡처와 ? 성공·암시적 오류 반환, mutable none을 검증. 명명 집합/배열에 참조 저장과 두 borrow leaf는 거부하며 30bit 표현 상한은 유지. 12개 fixture, 생성 C native 14회. 근거: `evidence/candidate-resource-tagged-borrows-20261007.json`.
 40. 완료: 도달 가능한 분기 arm·조기 종료·fallthrough/break/continue의 대여 상태를 합류. 서로 다른 분기에서 만든 동일 owner의 가변 참조·재대여를 bounded DAG로 함께 보존하며 부모 사용은 모든 자식 종료 뒤 재개. if/switch·중첩 분기·반복·Option none·함수 반환, join 뒤 owner/parent 수정 거부와 dead return/use/continue 뒤 dead break를 검증. 최종 30개 fixture·두 후보 프로필·생성 C native 40회, 33~39 회귀 60개 fixture·native 64회. 근거: `evidence/candidate-resource-borrow-flow-joins-20261007.json`, `evidence/candidate-resource-borrow-joins-regression-20261007.json`. 기존 immutable borrow descriptor·whole-owner 독점 모델을 유지하며 predicate 상관과 가변 descriptor binding 재대입은 기존 제한으로 남김.
-41. 필요한 ref str·바이트 메타데이터를 SDK와 연결하고 텍스트 bracket 제한 유지.
+41. 부분 완료: str::from_raw_parts·byte_slice::from_raw_parts·from_raw_parts_mut를 unsafe 검사, owner 기반 HIR/MIR origin·대여와 C descriptor 생성에 연결. 포인터는 origin을 공급하지 않으며 shared/exclusive owner·u8/void pointer·usize 길이를 검사. 지역 owner 탈출·이동·mutable sibling 및 위조 MIR을 거부하고 텍스트 bracket 제한을 유지. 근거: evidence/candidate-raw-views-20261008.json, evidence/candidate-raw-view-modules-20261008.json. CStr 표현형과 인증된 SDK 본문 연결은 후속 단위.
 42. 완료: 저장된 구조체·중첩 구조체의 rank-one u8 배열 필드 뷰를 원래 저장 공간에서 생성. 공유 구조체 인자에서 반환하는 뷰도 origin을 보존. 임시 owner는 기존 계약에 따라 거부. 일반·릴리스 후보와 생성 C 두 프로필, 정상 5개·오류 7개를 검증. 근거: `evidence/candidate-resource-field-views-20261007.json`.
 43. 완료: ADR0415 제한을 유지하고 disjoint sibling·copied parent·빈 child·grandchild·owner 경쟁 접근을 거부. 마지막 사용 후 parent 재개, 끝의 빈 범위, 경계 trap, bounds 평가 순서를 두 후보·C 프로필로 검증. 정상 5개·오류 6개·native 10회. 근거: `evidence/candidate-resource-subview-limit-20261007.json`.
 
@@ -233,5 +233,5 @@ evidence/candidate-result-handling-alignment-20261007.json에 새 검사·도구
 20번 완료 후 주요 작업 99개(21~119)와 선택 검토 8개(120~127)를 구분한다. 주요 작업 모두가
 셀프호스팅 전에 끝나야 한다는 뜻은 아니며, 자기 소스의 도달 가능한 기능이 단계 전환을 결정한다.
 
-즉시 다음 작업은 **41번 owner 기반 from_raw_parts와 46번 SDK Vec 인증·제네릭 레이아웃 연결**이다. 61~64번 nominal source-set와 54~55번 inert repr(C) 반환값 연결은 완료했으며, SDK/영속 package 정체성 등 남은 범위는 각 항목에 유지했다.
+즉시 다음 작업은 **46번 SDK 인증·Vec 제네릭 레이아웃과 41번 CStr 표현형 연결**이다. 61~64번 nominal source-set와 54~55번 inert repr(C) 반환값 연결은 완료했으며, SDK/영속 package 정체성 등 남은 범위는 각 항목에 유지했다.
 선택 기능은 별도 도입 판단을 거친다. 이 목록은 push·PR·설치·release를 승인하지 않는다.

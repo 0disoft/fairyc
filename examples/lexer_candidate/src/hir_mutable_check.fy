@@ -41,7 +41,7 @@ fn usize generation(ref h::Program p, ref mut Context c, ref mut v::Vec<Slot> sl
     if(kind==18){receiver=h::edge_at(p,e.edge_start);base=generation(p,c,slots,initial,summaries,receiver,depth+1);if(base==0){return 0;}}
     else if(kind==22 || kind==11){receiver=e.left;base=generation(p,c,slots,initial,summaries,receiver,depth+1);}
     else if (kind == 16) { base = id; fresh = true; receiver = e.left;var usize root=e.left;var usize steps=0;while(steps<64 && (h::expression_code(h::expression_at(p,root).kind)==10 || h::expression_code(h::expression_at(p,root).kind)==13 || h::expression_code(h::expression_at(p,root).kind)==4 && h::operator_code(h::expression_at(p,root).operator)==5)){root=h::expression_at(p,root).left;steps+=1;}if(refs::valid(h::type_code(h::expression_at(p,root).type))){parent=generation(p,c,slots,initial,summaries,root,depth+1);} }
-    else if(kind==25){parent=generation(p,c,slots,initial,summaries,e.left,depth+1);base=id;fresh=true;receiver=e.left;start=e.end;}
+    else if(kind==25 || kind==29){parent=generation(p,c,slots,initial,summaries,e.left,depth+1);base=id;fresh=true;receiver=e.left;start=e.end;}
     else if (kind == 17) { parent = generation(p,c,slots,initial,summaries,e.left,depth+1); base = if (mutable) { id } else { parent }; fresh = mutable; receiver = e.left; start = e.end; }
     else if (kind == 3) {
         let b = h::binding_at(p,e.binding);
@@ -99,7 +99,7 @@ fn usize held_end(ref h::Program p, usize id) {
     let e = h::expression_at(p,id); var usize end = e.end; var usize i = 1;
     while (i <= h::expression_count(p)) {
         let x = h::expression_at(p,i); let u32 kind = h::expression_code(x.kind);
-        if ((kind == 13 || kind == 17 || kind==25 || kind==28 || kind==4 || kind==10 || kind==14) && x.left == id && x.end > end) { end = x.end; }
+        if ((kind == 13 || kind == 17 || kind==25 || kind==28 || kind==29 || kind==4 || kind==10 || kind==14) && x.left == id && x.end > end) { end = x.end; }
         if (kind == 6) { var usize j = 0; while (j < x.edge_count) { if (h::edge_at(p,x.edge_start+j) == id && x.end > end) { end = x.end; } j += 1; } }
         i += 1;
     }

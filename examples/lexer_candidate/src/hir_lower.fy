@@ -16,6 +16,7 @@ import type_check as typing;
 import literal_types as literals;
 import name_resolution as names;
 import syntax as syntax;
+import raw_view_intrinsics as raw;
 import std::bytes as bytes;
 import std::vec as v;
 import type_state as typing_ids;
@@ -149,6 +150,11 @@ fn usize expression(ref typing::Typed input, ref v::Vec<h::Binding> bindings, re
         let bool first=typing::field_target(input,id)==tagged::member(parsed,h::type_code(type),true);
         let h::Expression initializer=h::Expression{.kind=.Initializer,.type=state::type(typing::expression_type(input,arg)),.operator=.None,.start=a.start,.end=a.end,.left=value,.right=0,.alternative=0,.block=0,.binding=tagged::payload_for(parsed,h::type_code(type),first),.edge_start=0,.edge_count=0,.payload_start=0,.payload_end=0,.boolean=false};
         let usize child=state::push_expression(expressions,initializer,c);if(child==0){return 0;}state::set_edge(edges,e.edge_start,child);
+    } else if (raw::call(parsed,id)!=0) {
+        kind=.RawView;e.boolean=true;
+        e.left=expression(input,bindings,links,c,expressions,statements,blocks,edges,payload,syntax::call_argument(parsed,id,0),depth+1);
+        e.right=expression(input,bindings,links,c,expressions,statements,blocks,edges,payload,syntax::call_argument(parsed,id,1),depth+1);
+        e.alternative=expression(input,bindings,links,c,expressions,statements,blocks,edges,payload,syntax::call_argument(parsed,id,2),depth+1);
     } else if (node.kind == 6) {
         kind = .Call; e.binding = state::use(links,node.left);
         if (e.binding == 0) { return state::fail(c,4,node.start,node.end); }

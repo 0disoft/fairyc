@@ -2895,8 +2895,21 @@ calls across the object boundary. One native API test rejects four linker/ABI
 mutations before C output. Eight earlier unsafe CLI cases still match.
 See `docs/ops/evidence/candidate-resource-scalar-foreign-20261008.json`.
 
-Raw pointers, C scalar transport, repr(C) aggregate values, escaped linker names,
-authenticated SDK fy_ symbols and imported nominal signatures remain pending.
+Raw pointers, closed C scalar transport, inert repr(C) results and imported
+nominal signatures now have separate implementation and native evidence. Escaped
+linker names and authenticated SDK fy_ symbols remain pending.
 This does not complete SDK Vec/Buffer/File integration or self-hosting.
 
 Raw-pointer candidate FFI progress and exact remaining boundaries: [candidate FFI progress](../../docs/ops/candidate-ffi-progress-20261008.md).
+
+The candidate also lowers unsafe `str::from_raw_parts(owner,data,length)`,
+`byte_slice::from_raw_parts(owner,data,length)` and
+`byte_slice::from_raw_parts_mut(owner,data,length)`. The owner must be a shared
+safe borrow for text/shared bytes, or an exclusive safe borrow for mutable bytes;
+data is an admitted raw u8/void pointer and length is usize. Returned origins and
+loans follow the owner, including safe wrapper calls. Unsafe callers must supply
+valid accessible storage and valid UTF-8 for text; construction does not scan or
+allocate. Text bracket indexing stays closed. CStr representation and authenticated
+SDK Vec/Buffer/String/File integration remain pending. See the
+[module progress](../../docs/ops/candidate-module-progress-20261008.md) and
+[remaining work](../../docs/ops/candidate-remaining-work-20261007.md).

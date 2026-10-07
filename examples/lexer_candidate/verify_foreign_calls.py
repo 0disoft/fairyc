@@ -51,6 +51,25 @@ REPR_REJECTIONS=[
  ('repr-conflict','@repr(C)struct Packet{u32 n;}@link_name("fixture_packet")unsafe extern C fn Packet make();@link_name("fixture_packet")unsafe extern C fn i32 wrong();fn i32 main(){return 7;}','E5106'),
  ('repr-unsafe','@repr(C)struct Packet{u32 n;}unsafe extern C fn Packet fixture_packet();fn i32 main(){let Packet p=fixture_packet();return 7;}','E5101'),
 ]
+RAW_CASES=[
+ ('raw-shared','fn i32 main(){let ref u8[] owner=b"AB";let ptr u8 data=unsafe{owner as ptr u8};let ref u8[] v=unsafe{byte_slice::from_raw_parts(owner,data,2)};assert(v[0]==65 && v[1]==66);return 7;}','',7),
+ ('raw-text','fn i32 main(){let ref str owner="한";let ptr u8 data=unsafe{owner as ptr u8};let ref str v=unsafe{str::from_raw_parts(owner,data,3)};assert(v.len==3);return 7;}','',7),
+ ('raw-local','fn ref u8[] wrap(ref u8[] owner,ptr u8 data,usize length){return unsafe{byte_slice::from_raw_parts(owner,data,length)};}fn i32 main(){let u8[2] a=[65,66];let ref u8[] owner=ref a;let ptr u8 data=unsafe{owner as ptr u8};let ref u8[] v=wrap(owner,data,2);assert(v[1]==66);return 7;}','',7),
+ ('raw-resource','resource Owner{ptr u8 data;cleanup{}}fn ref u8[] wrap(ref Owner owner){return unsafe{byte_slice::from_raw_parts(owner,owner.data,2)};}fn i32 main(){let ref u8[] text=b"AB";let Owner o=Owner{.data=unsafe{text as ptr u8}};let ref u8[] v=wrap(ref o);assert(v[0]==65);return 7;}','',7),
+ ('raw-mutable','fn i32 main(){var u8[2] a=[65,66];let ref mut u8[] owner=ref mut a;let ptr mut u8 data=unsafe{owner as ptr mut u8};let ref mut u8[] v=unsafe{byte_slice::from_raw_parts_mut(owner,data,2)};v[1]=67;assert(v[0]==65 && v[1]==67);owner[0]=68;return 7;}','',7),
+ ('raw-empty','fn i32 main(){let ref u8[] owner=b"";let ptr u8 data=null;let ref u8[] v=unsafe{byte_slice::from_raw_parts(owner,data,0)};assert(v.len==0);return 7;}','',7),
+]
+RAW_REJECTIONS=[
+ ('raw-unsafe','fn i32 main(){let ref u8[] a=b"x";let ptr u8 p=null;let ref u8[] v=byte_slice::from_raw_parts(a,p,0);return 7;}','E5101'),
+ ('raw-count','fn i32 main(){let ref u8[] a=b"x";let ptr u8 p=null;let ref u8[] v=unsafe{byte_slice::from_raw_parts(a,p)};return 7;}','call argument count mismatch'),
+ ('raw-owned','resource Owner{i32 n;cleanup{}}fn i32 main(){let Owner o=Owner{.n=1};let ptr u8 p=null;let ref u8[] v=unsafe{byte_slice::from_raw_parts(o,p,0)};return 7;}','invalid nominal type'),
+ ('raw-shared-to-mut','fn i32 main(){let ref u8[] a=b"x";let ptr mut u8 p=null;let ref mut u8[] v=unsafe{byte_slice::from_raw_parts_mut(a,p,0)};return 7;}','invalid nominal type'),
+ ('raw-const-data','fn i32 main(){var u8[1] a=[65];let ref mut u8[] o=ref mut a;let ptr u8 p=null;let ref mut u8[] v=unsafe{byte_slice::from_raw_parts_mut(o,p,0)};return 7;}','invalid nominal type'),
+ ('raw-wrong-pointee','fn i32 main(){let ref u8[] a=b"x";let ptr i32 p=null;let ref u8[] v=unsafe{byte_slice::from_raw_parts(a,p,0)};return 7;}','invalid nominal type'),
+ ('raw-local-return','fn ref u8[] bad(){let u8[1] a=[65];let ref u8[] o=ref a;let ptr u8 p=unsafe{o as ptr u8};return unsafe{byte_slice::from_raw_parts(o,p,1)};}fn i32 main(){return 7;}','E2102'),
+ ('raw-owner-move','resource Owner{ptr u8 data;cleanup{}}fn void consume(Owner o){}fn i32 main(){let Owner o=Owner{.data=null};let ref u8[] v=unsafe{byte_slice::from_raw_parts(ref o,o.data,0)};consume(o);return if(v.len==0){7}else{0};}','E2101'),
+ ('raw-sibling','fn i32 main(){var u8[2] a=[65,66];let ref mut u8[] o=ref mut a;let ptr mut u8 p=unsafe{o as ptr mut u8};let ref mut u8[] x=unsafe{byte_slice::from_raw_parts_mut(o,p,1)};let ref mut u8[] y=unsafe{byte_slice::from_raw_parts_mut(o,p,1)};x[0]=1;y[0]=2;return 7;}','E2101'),
+]
 CASES=[
  ('default-symbol','unsafe extern C fn i32 fixture_add(i32 n);fn i32 main(){return unsafe{fixture_add(6)};}','',7),
  ('linked-alias','@link_name("fixture_add")unsafe extern C fn i32 foreign(i32 n);fn i32 main(){return unsafe{foreign(6)};}','',7),
@@ -148,8 +167,8 @@ REJECTIONS=[
 def sha(p):return hashlib.sha256(p.read_bytes()).hexdigest()
 def save(p,data):p.write_text(json.dumps(data,ensure_ascii=False,indent=2)+'\n',encoding='utf-8',newline='\n')
 def main():
- ap=argparse.ArgumentParser();ap.add_argument('--images',nargs='+',required=True);ap.add_argument('--native-runner',required=True);ap.add_argument('--receipt',required=True);ap.add_argument('--cli-only',action='store_true');ap.add_argument('--lane',choices=['scalar','pointer','cast','abi','slot','repr'],default='scalar');args=ap.parse_args()
- cases=REPR_CASES if args.lane=='repr' else SLOT_CASES if args.lane=='slot' else ABI_CASES if args.lane=='abi' else CAST_CASES if args.lane=='cast' else POINTER_CASES if args.lane=='pointer' else CASES;rejections=REPR_REJECTIONS if args.lane=='repr' else SLOT_REJECTIONS if args.lane=='slot' else ABI_REJECTIONS if args.lane=='abi' else CAST_REJECTIONS if args.lane=='cast' else POINTER_REJECTIONS if args.lane=='pointer' else REJECTIONS
+ ap=argparse.ArgumentParser();ap.add_argument('--images',nargs='+',required=True);ap.add_argument('--native-runner',required=True);ap.add_argument('--receipt',required=True);ap.add_argument('--cli-only',action='store_true');ap.add_argument('--lane',choices=['scalar','pointer','cast','abi','slot','repr','raw'],default='scalar');args=ap.parse_args()
+ cases=RAW_CASES if args.lane=='raw' else REPR_CASES if args.lane=='repr' else SLOT_CASES if args.lane=='slot' else ABI_CASES if args.lane=='abi' else CAST_CASES if args.lane=='cast' else POINTER_CASES if args.lane=='pointer' else CASES;rejections=RAW_REJECTIONS if args.lane=='raw' else REPR_REJECTIONS if args.lane=='repr' else SLOT_REJECTIONS if args.lane=='slot' else ABI_REJECTIONS if args.lane=='abi' else CAST_REJECTIONS if args.lane=='cast' else POINTER_REJECTIONS if args.lane=='pointer' else REJECTIONS
  images=[Path(s).resolve() for s in args.images];runner=Path(args.native_runner).resolve();receipt=Path(args.receipt).resolve();receipt.parent.mkdir(parents=True,exist_ok=True);rows=[];fixtures=[];jobs=[];native=[];passed=False
  def run(argv,expected=0):
   q=subprocess.run(list(map(str,argv)),cwd=ROOT,capture_output=True,encoding='utf-8',timeout=360);row=dict(argv=list(map(str,argv)),cwd=str(ROOT),exit=q.returncode,stdout=q.stdout,stderr=q.stderr);rows.append(row);save(receipt.parent/'raw.json',rows);assert q.returncode==expected,row;return row

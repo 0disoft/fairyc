@@ -177,3 +177,34 @@ nine errors, twelve native executions), `evidence/candidate-module-repr-cli-2026
 development-native API checks. Both candidate build profiles succeeded with the
 validation-only 240-second bootstrap. SDK symbols, nested repr(C) layouts,
 by-value struct parameters and Linux execution remain subsequent work.
+
+## Owner-based raw text and byte views
+
+The candidate recognizes `str::from_raw_parts`, `byte_slice::from_raw_parts` and
+`byte_slice::from_raw_parts_mut` as compiler operations inside an unsafe boundary.
+Exactly three ordered arguments provide a safe owner borrow, a raw u8/void
+pointer and usize length. Shared constructors require a shared owner; mutable
+bytes require an exclusive owner and mutable pointer. A by-value resource or raw
+pointer cannot supply owner provenance. CStr admission is still pending.
+
+HIR RawView nodes retain all three operands and independently check lexical
+unsafe permission and exact types. Origin summaries, retained loans and mutable
+generation ancestry follow only the owner operand. MIR operation 38 retains the
+owner even though C emission needs only the pointer and length; its independent
+origin fixed point substitutes the owner's parameter at calls. Removed unsafe
+permission, owner replaced with a pointer, and missing length edges fail before
+any C is appended. Existing byte indexing bounds checks remain in force; text
+bracket indexing remains unavailable.
+
+Unsafe callers remain responsible for accessible pointer extent, lifetime and
+valid UTF-8 for text. Construction performs no new allocation, pointer/owner
+identity test, or UTF-8 scan. The native examples use valid backing storage and
+exercise static/local/resource owners, parameter-return wrappers, UTF-8 text,
+mutable updates, parent resumption and null/zero-length construction. Error
+examples cover unsafe permission, argument types, local escape, donor movement
+and simultaneous mutable siblings. Candidate donor-movement rejection currently
+uses its existing private HIR E2101 loan diagnostic, not Go's E2105 spelling.
+
+Evidence: `evidence/candidate-raw-views-20261008.json` and
+`evidence/candidate-raw-view-modules-20261008.json`. SDK package authentication,
+Vec specialization, CStr representation and Linux execution remain separate.
