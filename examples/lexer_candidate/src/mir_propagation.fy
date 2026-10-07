@@ -33,7 +33,7 @@ pub fn usize lower(ref h::Program input, h::Expression e, usize subject,
     var m::Operation make = state::operation(21,result,returned,returned,1,0,0,e.start,e.end);
     make.argument_start = v::len<usize>(edges); make.argument_count = 1;
     state::release(c,error);c.keep=result;
-    if (!state::edge(edges,error,c) || state::emit(operations,blocks,c,make) == 0 || !finalize::emit_deferred(blocks,edges,c,0) || !lifetime::scope(input,locals,blocks,operations,edges,c,0,e.start,e.end)) { return 0; }
+    if (!state::edge(edges,error,c) || state::emit(operations,blocks,c,make) == 0 || !finalize::exit(input,locals,blocks,operations,edges,c,0,0,false,e.start,e.end)) { return 0; }
     var m::Block exit = state::block(c.function,e.start,e.end); exit.kind = 1; exit.value = result;
     if (!state::terminate(blocks,c,exit)) { return 0; }
     c.live=continuing;c.pending=pending;c.keep=0;c.current = success;

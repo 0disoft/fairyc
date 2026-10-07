@@ -1,4 +1,6 @@
 module mir_cleanup;
+import hir_model as h;
+import mir_resource_lower as lifetime;
 import mir_model as m;
 import mir_state as state;
 import std::vec as v;
@@ -28,4 +30,11 @@ pub fn bool emit_deferred(ref mut v::Vec<m::Block> blocks, ref mut v::Vec<usize>
         c.current = next;
     }
     return true;
+}
+
+// One exit policy: evaluate/freeze the result at the caller, invoke the exiting
+// lexical defer suffix, then discharge resources. Traps have no cleanup edge.
+pub fn bool exit(ref h::Program input,ref mut v::Vec<m::Local> locals,ref mut v::Vec<m::Block> blocks,ref mut v::Vec<m::Operation> operations,ref mut v::Vec<usize> edges,ref mut state::Context c,usize from,usize scope,bool crossed,usize start,usize end){
+    if(!emit_deferred(blocks,edges,c,from)){return false;}
+    return if(crossed){lifetime::exited(input,locals,blocks,operations,edges,c,scope,start,end)}else{lifetime::scope(input,locals,blocks,operations,edges,c,scope,start,end)};
 }

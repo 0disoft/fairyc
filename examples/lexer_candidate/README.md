@@ -2761,3 +2761,10 @@ return, loop and overwrite edges. Burn has a distinct verified MIR operation 27
 and emits no cleanup call. Direct no-drop resources with owned fields, wrappers,
 temporary operands, droppable operands and repeated consumption remain rejected.
 External-module resource identity stays closed until module integration.
+
+Unit 29 shares one cleanup-edge policy for lexical fallthrough, return,
+propagation and nearest loop exits: freeze the value, run the exiting defer
+suffix in reverse order, then discharge resources. Registration captures only
+copy scalars immediately and in argument order; resource/aggregate captures and
+value-returning calls remain rejected. Defer in a cleanup body follows the same
+policy without owning the compiler's `this` receiver.

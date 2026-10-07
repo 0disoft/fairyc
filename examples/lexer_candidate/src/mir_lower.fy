@@ -309,6 +309,7 @@ fn bool statement(ref h::Program input, ref mut v::Vec<m::Local> locals, ref mut
             let usize value = expression(input,locals,blocks,operations,edges,payload,c,h::edge_at(input,call.edge_start + j),depth + 1);
             if (c.current == 0 || c.problem.code != 0) { return c.problem.code == 0; }
             if (c.capture_count >= 4096) { discard state::fail(c,2,s.start,s.end); return false; }
+            let u32 capture_type=v::at<m::Local>(locals,value-1).type;if(capture_type<1 || capture_type>6){discard state::fail(c,4,s.start,s.end);return false;}
             let usize slot = c.capture_count; c.captures[slot] = value; c.capture_count += 1; j += 1;
         }
         let usize at = c.defer_count; c.defer_count += 1;
@@ -327,9 +328,8 @@ fn bool statement(ref h::Program input, ref mut v::Vec<m::Local> locals, ref mut
         }
         let usize target = if (kind == 7) { c.breaks[frame] } else { c.continues[frame] };
         let usize from = c.loop_defer_base[frame];
-        if (!finalize::emit_deferred(blocks,edges,c,from)) { return false; }
         let h::Statement owner=h::statement_at(input,s.loop_target);
-        if(!lifetime::exited(input,locals,blocks,operations,edges,c,h::block_at(input,owner.body).scope,s.start,s.end)){return false;}
+        if(!finalize::exit(input,locals,blocks,operations,edges,c,from,h::block_at(input,owner.body).scope,true,s.start,s.end)){return false;}
         return state::jump(blocks,c,target,s.start,s.end);
     }
     if(kind==12){let e=h::expression_at(input,s.expression);let usize binding=e.binding;let usize local=c.locals[binding];if(h::expression_code(e.kind)!=24 || local==0 || c.live[binding]==0){discard state::fail(c,4,s.start,s.end);return false;}c.live[binding]=0;state::release(c,local);let u32 type=h::type_code(e.type);return state::emit(operations,blocks,c,state::operation(27,0,type,type,0,local,0,s.start,s.end))!=0;}
@@ -432,7 +432,7 @@ fn bool statement(ref h::Program input, ref mut v::Vec<m::Local> locals, ref mut
         let usize value = expression(input,locals,blocks,operations,edges,payload,c,s.expression,depth + 1);
         if (c.current == 0 || c.problem.code != 0) { return c.problem.code == 0; }
         c.keep=value;
-        if (!finalize::emit_deferred(blocks,edges,c,0) || !lifetime::scope(input,locals,blocks,operations,edges,c,0,s.start,s.end)) { return false; }
+        if (!finalize::exit(input,locals,blocks,operations,edges,c,0,0,false,s.start,s.end)) { return false; }
         var m::Block term = state::block(c.function,s.start,s.end); term.kind = 1; term.value = value;
         return state::terminate(blocks,c,term);
     }
@@ -463,7 +463,7 @@ fn usize block(ref h::Program input, ref mut v::Vec<m::Local> locals, ref mut v:
     }
     let usize value = expression(input,locals,blocks,operations,edges,payload,c,b.tail,depth + 1);
     let usize kept=c.keep;c.keep=value;
-    if (c.current != 0 && c.problem.code == 0) { if(!finalize::emit_deferred(blocks,edges,c,deferred_base) || !lifetime::scope(input,locals,blocks,operations,edges,c,b.scope,b.start,b.end)){return 0;} }
+    if (c.current != 0 && c.problem.code == 0) { if(!finalize::exit(input,locals,blocks,operations,edges,c,deferred_base,b.scope,false,b.start,b.end)){return 0;} }
     c.defer_count = deferred_base; c.capture_count = capture_base;c.keep=kept;c.scope=previous_scope;
     if(c.current!=0 && value!=0 && shapes::needs_drop(h::type_code(h::expression_at(input,b.tail).type))){state::hold(c,value);}
     return value;

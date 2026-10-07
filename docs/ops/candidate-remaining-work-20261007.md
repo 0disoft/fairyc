@@ -57,7 +57,7 @@ evidence/candidate-result-handling-alignment-20261007.json에 새 검사·도구
 26. 완료: 중첩 resource의 outer cleanup → 필드 역순 정리와 부분 초기화의 완료 임시값만 역순 정리. 이후 필드/인자의 ? 실패, factory 반환 필드, 첫 필드 실패와 donor 이동을 구분. 실패한 바깥 glue는 호출하지 않음. 4096 local/function 상한을 두며 tagged 소유는 27번에서 연결. 근거: `evidence/candidate-resource-partial-20261007.json`.
 27. 완료: resource 필드 및 Option/Result의 전체 이동, active payload 추출·무시·중첩 정리와 ? 반환을 실행. 임시 자원도 실제 lexical scope 종료와 source 순서로 정리하며 wildcard arm의 내부 root 및 continue를 구분. `old=make()?`의 양쪽 결과를 직접 검증. 부분 필드 이동과 resource 고정 배열은 기존 제한 유지. 근거: `evidence/candidate-resource-tagged-20261007.json`.
 28. 완료: 닫힌 drop/store/key 선언 검사, 재귀 no-drop 정리 금지(E1107/E1108), 같은 소스 모듈의 bare local/parameter burn(E1109), 별도 MIR op 27과 cleanup 없는 C 실행. 18개 정상·오류 fixture 및 두 C 프로필 native 12회. 모듈 import의 선언 소유권 연결은 61~64번에서 처리하며 그 전 외부 resource 입력은 거부. 근거: `evidence/candidate-resource-abilities-20261007.json`.
-29. 기존 lexical defer와 resource cleanup 실행 순서 통합.
+29. 완료: scope/return/?/break/continue를 공통 종료 정책으로 통합. 값·인자를 먼저 고정하고 종료하는 defer suffix를 역순 실행한 뒤 resource 정리. cleanup 안의 defer와 즉시 인자 캡처를 실행하며 자원/집합/값반환 defer는 거부. 11개 fixture, native 16회. 근거: `evidence/candidate-resource-defer-20261007.json`.
 30. 일반 trap이 cleanup을 풀지 않는 기존 계약을 생성 코드에도 유지.
 
 ## C. 자기 소스에 필요한 borrow·뷰 확장

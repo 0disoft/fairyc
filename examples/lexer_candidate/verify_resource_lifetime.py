@@ -122,6 +122,22 @@ REJECTIONS[28] = [
  ('key-without-store','@abilities(key)resource R{cleanup{}}fn i32 main(){return 0;}', 'E1107'),
 ]
 
+CASES[29] = [
+ ('defer-scope','resource R{i32 n;cleanup{mark(this.n);}}fn i32 main(){{let R r=R{.n=65};defer mark(66);defer mark(67);mark(88);};return 0;}', 'XCBA', 0, 0),
+ ('defer-return-capture','resource R{cleanup{mark(65);}}fn i32 main(){let R r=R{};var i32 n=66;defer mark(n);n=67;defer mark(n);return n;}', 'CBA', 67, 0),
+ ('defer-crossed','resource R{i32 n;cleanup{mark(this.n);}}fn i32 main(){let R outer=R{.n=79};defer mark(68);{let R inner=R{.n=65};defer mark(66);return 7;};return 0;}', 'BDAO', 7, 0),
+ ('defer-loop','resource R{cleanup{mark(65);}}fn i32 main(){defer mark(79);var i32 n=0;while(n<2){let R r=R{};defer mark(66);n+=1;if(n==1){continue;}break;}return n;}', 'BABAO', 2, 0),
+ ('defer-question-error','resource R{cleanup{mark(65);}}fn Result<i32,bool> bad(){mark(88);return .err(true);}fn Result<i32,bool> f(){let R r=R{};defer mark(66);let i32 n=bad()?;return .ok(n);}fn i32 main(){return switch(f()){case .ok(n):{n}case .err(_):{1}};}', 'XBA', 1, 0),
+ ('defer-question-success','resource R{cleanup{mark(65);}}fn Result<i32,bool> good(){mark(88);return .ok(7);}fn Result<i32,bool> f(){let R r=R{};defer mark(66);let i32 n=good()?;mark(89);return .ok(n);}fn i32 main(){return switch(f()){case .ok(n):{n}case .err(_):{1}};}', 'XYBA', 7, 0),
+ ('defer-argument-order','resource R{cleanup{mark(65);}}fn i32 arg(i32 n){mark(n);return n+2;}fn void final(i32 a,i32 b){mark(a);mark(b);}fn i32 main(){let R r=R{};defer final(arg(66),arg(67));mark(88);return 0;}', 'BCXDEA', 0, 0),
+ ('defer-in-cleanup','resource R{cleanup{defer mark(65);mark(66);}}fn i32 main(){let R r=R{};defer mark(67);return 0;}', 'CBA', 0, 0),
+]
+REJECTIONS[29] = [
+ ('defer-resource','resource R{cleanup{}}fn void take(R r){}fn i32 main(){let R r=R{};defer take(r);return 0;}'),
+ ('defer-aggregate','struct S{i32 n;}fn void take(S s){}fn i32 main(){defer take(S{.n=1});return 0;}'),
+ ('defer-result','fn i32 give(){return 1;}fn i32 main(){defer give();return 0;}'),
+]
+
 def sha(path): return hashlib.sha256(path.read_bytes()).hexdigest()
 def save(path, value): path.write_text(json.dumps(value, ensure_ascii=False, indent=2)+'\n', encoding='utf-8', newline='\n')
 
