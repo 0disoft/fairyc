@@ -1,0 +1,64 @@
+module module_catalog;
+import syntax as syntax;
+import module_registry as scalar_modules;
+import std::bytes as bytes;
+import std::vec as v;
+
+// Program-local declaration coordinates. Names and aliases never define type
+// equality. This owner contains no borrowed syntax or source buffers.
+pub struct Problem {u32 code;usize module_index;usize start;usize end;}
+pub struct Module {usize start;usize end;usize source_start;usize source_end;}
+pub struct Declaration {u32 kind;usize module_index;usize declaration;bool public;usize start;usize end;usize source_start;usize source_end;}
+pub struct Import {usize module_index;usize start;usize end;usize path_start;usize path_end;usize source_start;usize source_end;}
+pub struct Lookup {u32 code;usize item;}
+pub resource Catalog {bytes::Buffer names;bytes::Buffer sources;v::Vec<Module> modules;v::Vec<Declaration> declarations;v::Vec<Import> imports;cleanup{}}
+fn Problem fail(u32 code,usize module_index,usize start,usize end){return Problem{.code,.module_index,.start,.end};}
+fn bool append(ref mut bytes::Buffer out,ref u8[] value){return bytes::len(out)<=1048576 && value.len<=1048576-bytes::len(out) && bytes::append(out,value).is_ok;}
+fn bool same(ref Catalog c,usize start,usize end,ref u8[] name){return bytes::equal(bytes::view(ref c.names)[start..end],name);}
+fn bool spelling_same(ref bytes::Buffer names,usize start,usize end,ref u8[] name){return bytes::equal(bytes::view(names)[start..end],name);}
+pub fn usize module_count(ref Catalog c){return v::len<Module>(ref c.modules);}
+pub fn usize declaration_count(ref Catalog c){return v::len<Declaration>(ref c.declarations);}
+pub fn bool source_matches(ref Catalog c,usize module_index,ref syntax::Parsed p){if(module_index>=module_count(c)){return false;}let m=*v::at<Module>(ref c.modules,module_index);return bytes::equal(bytes::view(ref c.sources)[m.source_start..m.source_end],syntax::source_view(p));}
+pub fn Declaration declaration_at(ref Catalog c,usize id){assert(id>0 && id<=declaration_count(c));return *v::at<Declaration>(ref c.declarations,id-1);}
+pub fn usize identity(ref Catalog c,usize module_index,usize declaration){var usize i=1;while(i<=declaration_count(c)){let d=declaration_at(c,i);if(d.module_index==module_index && d.declaration==declaration){return i;}i+=1;}return 0;}
+pub fn bool same_declaration(Declaration a,Declaration b){return a.kind==b.kind && a.module_index==b.module_index && a.declaration==b.declaration;}
+fn usize destination(ref Catalog c,Import i){var usize n=0;while(n<module_count(c)){let m=*v::at<Module>(ref c.modules,n);if(same(c,m.start,m.end,bytes::view(ref c.names)[i.path_start..i.path_end])){return n+1;}n+=1;}return 0;}
+pub fn Lookup lookup(ref Catalog c,usize module_index,ref u8[] spelling){
+    if(module_index>=module_count(c)){return Lookup{.code=9,.item=0};}
+    var bytes::Buffer canonical=bytes::empty();let u32 code=scalar_modules::normalize(spelling,ref mut canonical);if(code!=0){return Lookup{.code,.item=0};}
+    let name=bytes::view(ref canonical);var usize split=0;while(split<name.len && name[split]!=58){split+=1;}
+    var usize target=module_index;var usize start=0;
+    if(split<name.len){if(split+2>=name.len || name[split+1]!=58){return Lookup{.code=9,.item=0};}var usize found=0;var usize n=0;
+        while(n<v::len<Import>(ref c.imports)){let i=*v::at<Import>(ref c.imports,n);if(i.module_index==module_index && same(c,i.start,i.end,name[..split])){found=destination(c,i);break;}n+=1;}
+        if(found==0){return Lookup{.code=4,.item=0};}target=found-1;start=split+2;
+    }
+    var usize n=1;while(n<=declaration_count(c)){let d=declaration_at(c,n);if(d.module_index==target && same(c,d.start,d.end,name[start..])){return Lookup{.code=if(split<name.len && !d.public){6}else{0},.item=n};}n+=1;}
+    return Lookup{.code=5,.item=0};
+}
+pub fn Result<Catalog,Problem> build(ref v::Vec<syntax::Parsed> sources){
+    var bytes::Buffer names=bytes::empty();var bytes::Buffer source_bytes=bytes::empty();
+    var v::Vec<Module> modules=v::empty<Module>();var v::Vec<Declaration> declarations=v::empty<Declaration>();var v::Vec<Import> imports=v::empty<Import>();
+    if(v::len<syntax::Parsed>(sources)==0 || v::len<syntax::Parsed>(sources)>32){return .err(fail(10,0,0,0));}
+    var usize module_index=0;while(module_index<v::len<syntax::Parsed>(sources)){
+        let p=v::at<syntax::Parsed>(sources,module_index);if(syntax::problem_count(p)!=0 || syntax::declaration_count(p)==0){return .err(fail(9,module_index,0,0));}
+        let first=syntax::declaration_at(p,0);if(first.kind!=1){return .err(fail(9,module_index,first.start,first.end));}
+        var bytes::Buffer path=bytes::empty();let u32 status=scalar_modules::normalize(syntax::source_view(p)[first.name_start..first.name_end],ref mut path);if(status!=0){return .err(fail(status,module_index,first.name_start,first.name_end));}
+        var usize n=0;while(n<v::len<Module>(ref modules)){let m=*v::at<Module>(ref modules,n);if(spelling_same(ref names,m.start,m.end,bytes::view(ref path))){return .err(fail(1,module_index,first.name_start,first.name_end));}n+=1;}
+        let usize start=bytes::len(ref names);let usize source_start=bytes::len(ref source_bytes);if(syntax::source_view(p).len>32768){return .err(fail(10,module_index,0,syntax::source_view(p).len));}
+        if(!append(ref mut source_bytes,syntax::source_view(p)) || !append(ref mut names,bytes::view(ref path)) || !v::push<Module>(ref mut modules,Module{.start,.end=bytes::len(ref names),.source_start,.source_end=bytes::len(ref source_bytes)}).is_ok){return .err(fail(11,module_index,first.start,first.end));}
+        var usize index=1;var usize count=0;while(index<syntax::declaration_count(p)){
+            let d=syntax::declaration_at(p,index);if(d.kind!=2 && d.kind!=3 && d.kind!=4 && d.kind!=6 && d.kind!=7 && d.kind!=9 && d.kind!=11 || d.owner_end!=0){return .err(fail(9,module_index,d.start,d.end));}
+            let name=syntax::source_view(p)[d.name_start..d.name_end];if(bytes::equal(name,b"source_location")){return .err(fail(9,module_index,d.name_start,d.name_end));}
+            n=0;while(n<v::len<Declaration>(ref declarations)){let old=*v::at<Declaration>(ref declarations,n);if(old.module_index==module_index && spelling_same(ref names,old.start,old.end,name)){return .err(fail(2,module_index,d.name_start,d.name_end));}n+=1;}
+            n=0;while(n<v::len<Import>(ref imports)){let old=*v::at<Import>(ref imports,n);if(old.module_index==module_index && spelling_same(ref names,old.start,old.end,name)){return .err(fail(if(d.kind==2){7}else{2},module_index,d.name_start,d.name_end));}n+=1;}
+            count+=1;if(count>128 || v::len<Declaration>(ref declarations)>=4096 || v::len<Import>(ref imports)>=4096){return .err(fail(10,module_index,d.start,d.end));}
+            let usize name_start=bytes::len(ref names);if(!append(ref mut names,name)){return .err(fail(11,module_index,d.name_start,d.name_end));}let usize name_end=bytes::len(ref names);
+            if(d.kind==2){if(d.public || d.attribute_count!=0){return .err(fail(9,module_index,d.start,d.end));}var bytes::Buffer target=bytes::empty();let u32 code=scalar_modules::normalize(syntax::source_view(p)[d.start..d.end],ref mut target);if(code!=0){return .err(fail(code,module_index,d.start,d.end));}let usize path_start=bytes::len(ref names);if(!append(ref mut names,bytes::view(ref target)) || !v::push<Import>(ref mut imports,Import{.module_index,.start=name_start,.end=name_end,.path_start,.path_end=bytes::len(ref names),.source_start=d.start,.source_end=d.end}).is_ok){return .err(fail(11,module_index,d.start,d.end));}}
+            else{if(!v::push<Declaration>(ref mut declarations,Declaration{.kind=d.kind,.module_index,.declaration=index+1,.public=d.public,.start=name_start,.end=name_end,.source_start=d.start,.source_end=d.end}).is_ok){return .err(fail(11,module_index,d.start,d.end));}}
+            index+=1;
+        }module_index+=1;
+    }
+    let Catalog c=Catalog{.names,.sources=source_bytes,.modules,.declarations,.imports};
+    var usize n=0;while(n<v::len<Import>(ref c.imports)){let i=*v::at<Import>(ref c.imports,n);if(destination(ref c,i)==0){return .err(fail(3,i.module_index,i.source_start,i.source_end));}n+=1;}
+    return .ok(c);
+}

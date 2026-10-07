@@ -112,8 +112,8 @@ evidence/candidate-result-handling-alignment-20261007.json에 새 검사·도구
 
 ## E. 모듈·패키지·실제로 쓸 수 있는 컴파일러 명령
 
-61. 기존 스칼라 다중 파일 검사에 nominal/tagged/resource 타입 연결.
-62. 모듈 간 선언 정체성과 private/public 범위 연결.
+61. 부분 완료: `module_catalog`와 `module_types`가 실제 Parsed source set의 모듈/선언 좌표와 nominal/tagged/borrow descriptor를 소유. 서로 다른 모듈의 같은 로컬 선언 번호는 구분하고 같은 공급자의 별칭은 canonical ID로 합침. exact source set 검증·private 접근·오류 시 interning rollback·위조 graph publication 거부를 일반/릴리스 native API에서 확인. 근거: `evidence/candidate-module-type-graph-20261008.json`. 기존 scalar-only CLI의 nominal 본문 typing과 HIR/MIR 연결은 미완료.
+62. 부분 완료: 새 declaration catalog의 qualified lookup에 public/private와 module/declaration 정체성 검사 적용. 기존 본문 checker와 imported field/representation 접근 연결은 남음. 근거: `evidence/candidate-module-type-graph-20261008.json`.
 63. 부분 완료: imported scalar 함수의 effects·must-use를 Registry → Resolved → owned HIR에 복사해 보존. 공급자 선언 오류와 caller 권한 누락·반환값 무시를 거부하며 Registry 정리 후에도 metadata가 유지됨. dev/release native API test 각 2개 통과. 근거: `evidence/candidate-resource-module-contracts-20261007.json`. nominal/generic/반환 origin과 전 프로그램 MIR/C 연결은 남음.
 64. 모듈 간 HIR/MIR·호출·레이아웃 순서·C 심벌 이름 통합.
 65. manifest 기반 소스 탐색과 source-root/module 경로 검사.
