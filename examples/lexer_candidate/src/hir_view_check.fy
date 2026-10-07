@@ -28,6 +28,8 @@ fn bool within(ref h::Program p, usize child, usize parent) {
         scope = next; depth += 1;
     } return false;
 }
+// Unknown is distinct from Static; cycles never bootstrap a guessed origin.
+fn usize joined(ref mut Context c,usize a,usize b,usize start,usize end){if(a==65538){return b;}if(b==65538){return a;}if(a==0){return b;}if(b==0 || a==b){return a;}return fail(c,2103,start,end);}
 fn usize origin(ref h::Program p, ref mut Context c, usize id, usize depth) {
     if (id == 0 || c.problem.code != 0) { return 0; }
     let e = h::expression_at(p,id); let u32 kind = h::expression_code(e.kind);
@@ -41,35 +43,36 @@ fn usize origin(ref h::Program p, ref mut Context c, usize id, usize depth) {
         let usize initial = c.initial[e.binding]; return origin(p,c,initial,depth + 1);
     }
     if ((kind == 7 || kind==20)) { return origin(p,c,h::block_at(p,e.block).tail,depth + 1); }
-    if(kind==19){var usize result=0;var bool seen=false;var usize i=0;while(i<e.edge_count){let arm=h::expression_at(p,h::edge_at(p,e.edge_start+i));let usize tail=h::block_at(p,arm.block).tail;if(tail!=0){let usize value=origin(p,c,tail,depth+1);if(seen && value!=result){return fail(c,2103,e.start,e.end);}result=value;seen=true;}i+=1;}return result;}
+    if(kind==19){var usize result=0;var bool seen=false;var usize i=0;while(i<e.edge_count){let arm=h::expression_at(p,h::edge_at(p,e.edge_start+i));let usize tail=h::block_at(p,arm.block).tail;if(tail!=0){let usize value=origin(p,c,tail,depth+1);result=if(seen){joined(c,result,value,e.start,e.end)}else{value};seen=true;}i+=1;}return result;}
     if (kind == 8) {
         let usize yes = origin(p,c,h::block_at(p,e.block).tail,depth + 1);
         let usize no = origin(p,c,e.alternative,depth + 1);
-        if(h::block_at(p,e.block).tail==0){return no;}if(!byte_view(h::type_code(h::expression_at(p,e.alternative).type))){return yes;}if (yes != no) { return fail(c,2103,e.start,e.end); } return yes;
+        if(h::block_at(p,e.block).tail==0){return no;}if(!byte_view(h::type_code(h::expression_at(p,e.alternative).type))){return yes;}return joined(c,yes,no,e.start,e.end);
     }
     if (kind == 6) {
-        let usize returned = summary(p,c,e.binding,depth + 1); if (returned == 0 || c.problem.code != 0) { return 0; }
+        let usize returned = summary(p,c,e.binding,depth + 1); if (returned == 0 || c.problem.code != 0) { return 0; }if(returned==65538){return 65538;}
         let usize parameter=targets::parameter(p,e.binding,returned);return if(parameter!=0){origin(p,c,h::edge_at(p,e.edge_start+parameter-1),depth+1)}else{fail(c,2103,e.start,e.end)};
     } return fail(c,2103,e.start,e.end);
 }
 fn usize summary(ref h::Program p, ref mut Context c, usize binding, usize depth) {
     if (c.color[binding] == 2) { return c.summary[binding]; }
     let b = h::binding_at(p,binding);
-    if (c.color[binding] == 1 || depth >= 64 || h::binding_code(b.kind) != 1) { return fail(c,2103,b.start,b.end); }
+    if(c.color[binding]==1){return c.summary[binding];}
+    if (depth >= 64 || h::binding_code(b.kind) != 1) { return fail(c,2103,b.start,b.end); }
     c.color[binding] = 1; var usize fid = 0;
     while (fid < h::function_count(p) && h::function_at(p,fid).binding != binding) { fid += 1; }
     if (fid == h::function_count(p)) { return fail(c,2103,b.start,b.end); }
-    let f = h::function_at(p,fid); var usize result = 0; var bool seen = false; var usize i = 1;
+    let f = h::function_at(p,fid); var usize result = 65538; var bool seen = false; var usize i = 1;
     while (i <= h::statement_count(p)) {
         let s = h::statement_at(p,i);
         if (h::statement_code(s.kind) == 2 && s.start >= f.start && s.end <= f.end && s.expression != 0) {
             let usize value = origin(p,c,s.expression,depth + 1);
-            if (seen && result != value) { return fail(c,2103,s.start,s.end); } result = value; seen = true;
+            result=joined(c,result,value,s.start,s.end);seen=seen || value!=65538;
         } i += 1;
     }
     let body = h::block_at(p,f.body);
-    if (body.tail != 0) { let usize value = origin(p,c,body.tail,depth + 1); if (seen && result != value) { return fail(c,2103,body.start,body.end); } result = value; }
-    if (result != 0) {
+    if (body.tail != 0) { let usize value = origin(p,c,body.tail,depth + 1); result=joined(c,result,value,body.start,body.end); }
+    if (result != 0 && result!=65538) {
         let owner = h::binding_at(p,result);
         if (h::binding_code(owner.kind) != 2 || !byte_view(h::type_code(owner.type)) || owner.owner != binding) { return fail(c,2102,f.start,f.end); }
     }
@@ -131,7 +134,7 @@ pub fn h::Problem check(ref h::Program p) {
         parameter += 1;
     }
     if (!needed) { return h::Problem { .code=0,.start=0,.end=0 }; }
-    var Context c = Context { .initial=[0;1153],.last=[0;1153],.summary=[0;1153],.color=[0;1153],.work=0,.problem=h::Problem { .code=0,.start=0,.end=0 } };
+    var Context c = Context { .initial=[0;1153],.last=[0;1153],.summary=[65538;1153],.color=[0;1153],.work=0,.problem=h::Problem { .code=0,.start=0,.end=0 } };
     var usize i = 1; while (i <= h::statement_count(p)) {
         let s = h::statement_at(p,i); if (h::statement_code(s.kind) == 1) { c.initial[s.binding] = s.expression; } i += 1;
     }
@@ -140,9 +143,8 @@ pub fn h::Problem check(ref h::Program p) {
             let usize end = held_end(p,i,e); if (end > c.last[e.binding]) { c.last[e.binding] = end; }
         } i += 1;
     }
-    i = 0; while (i < h::function_count(p)) {
-        let f = h::function_at(p,i); if (byte_view(h::type_code(h::binding_at(p,f.binding).type))) { discard summary(p,ref mut c,f.binding,0); } i += 1;
-    }
+    var bool changed=true;var usize rounds=0;while(changed && c.problem.code==0){changed=false;rounds+=1;if(rounds>64){return h::Problem{.code=2,.start=0,.end=0};}c.color=[0;1153];i=0;while(i<h::function_count(p)){let f=h::function_at(p,i);if(byte_view(h::type_code(h::binding_at(p,f.binding).type))){let usize old=c.summary[f.binding];let usize next=summary(p,ref mut c,f.binding,0);changed=changed || old!=next;}i+=1;}}
+    i=0;while(i<h::function_count(p)){let f=h::function_at(p,i);if(byte_view(h::type_code(h::binding_at(p,f.binding).type)) && c.summary[f.binding]==65538){discard fail(ref mut c,2103,f.start,f.end);}i+=1;}
     i = 1; while (i <= h::binding_count(p)) {
         let b = h::binding_at(p,i); if (byte_view(h::type_code(b.type)) && c.initial[i] != 0) {
             let usize initial = c.initial[i]; let usize owner = origin(p,ref mut c,initial,0);

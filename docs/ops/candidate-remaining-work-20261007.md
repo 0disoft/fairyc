@@ -69,7 +69,7 @@ evidence/candidate-result-handling-alignment-20261007.json에 새 검사·도구
 35. 완료: 명시적 ref mut *parent와 반환된 mutable 자식·후손의 세대를 연결. 부모와 부모 alias의 읽기·수정은 자식 마지막 사용까지 금지하고 이후 재개하며 shared→mutable 확대를 거부. 8개 fixture, 생성 C native 8회. 근거: `evidence/candidate-resource-mutable-reborrows-20261007.json`.
 36. 완료: 인자와 참조·필드·역참조 consumer의 평가 종료까지 loan을 유지. 앞쪽 shared/mutable 인자와 뒤쪽 경쟁 접근을 양쪽 순서로 거부하고, 앞쪽에서 복사한 scalar 읽기는 이후 수정과 공존. 반환된 중첩 호출 인자도 hold를 유지. 9개 fixture, 생성 C native 8회. 근거: `evidence/candidate-resource-argument-loans-20261007.json`.
 37. 완료: 반환 입력 origin을 호출자의 정확한 실제 인자로 치환하며 forward·재배치·wrapper·switch·뷰 반환을 연결. 미선택 입력의 loan은 호출 후 종료하고 선택된 입력 수정·지역 escape·두 입력 반환은 거부. CLI E2103을 명시. 7개 fixture, 생성 C native 8회. 근거: `evidence/candidate-resource-return-origins-20261007.json`.
-38. 실제 소스에 필요한 혼합·재귀 반환 origin 처리. 지원 전에는 추측하지 않고 거부.
+38. 완료: Unknown과 Static을 분리하고 단일 입력 origin의 직접·상호 재귀 요약을 bounded 고정점으로 증명. Static의 입력 origin 단축은 허용하고 근거 없는 cycle·입력 교환 재귀·지역 escape는 거부. 6개 fixture, 생성 C native 6회. 근거: `evidence/candidate-resource-recursive-origins-20261007.json`.
 39. 공개 언어 계약이 허용하는 참조·뷰 보유 집합 타입 지원.
 40. 분기·반복·조기 종료에서 borrow·loan 상태 합류.
 41. 필요한 ref str·바이트 메타데이터를 SDK와 연결하고 텍스트 bracket 제한 유지.

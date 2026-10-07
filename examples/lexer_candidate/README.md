@@ -2796,3 +2796,5 @@ Unit 35: retain mutable reborrow ancestry and last use. See `docs/ops/evidence/c
 Unit 36: hold reference arguments through later evaluation. See `docs/ops/evidence/candidate-resource-argument-loans-20261007.json` for the bounded executable fixtures and current profile identities.
 
 Unit 37: substitute return origins across calls and switches. See `docs/ops/evidence/candidate-resource-return-origins-20261007.json` for the bounded executable fixtures and current profile identities.
+
+Unit 38: prove bounded recursive return origin summaries. See `docs/ops/evidence/candidate-resource-recursive-origins-20261007.json` for the bounded executable fixtures and current profile identities.

@@ -249,6 +249,17 @@ REJECTIONS[37]=[
  ('origin-two-inputs','fn ref i32 choose(ref i32 a,ref i32 b,bool yes){return if(yes){a}else{b};}fn i32 main(){return 0;}', 'E2103'),
 ]
 
+CASES[38]=[
+ ('recursive-single-origin','fn ref i32 walk(ref i32 p,i32 n){if(n==0){return p;};return walk(p,n-1);}fn i32 main(){let i32 n=7;return *walk(ref n,3);}', '',7,0),
+ ('mutual-single-origin','fn ref i32 a(ref i32 p,i32 n){if(n==0){return p;};return b(p,n-1);}fn ref i32 b(ref i32 p,i32 n){return a(p,n);}fn i32 main(){let i32 n=7;return *a(ref n,3);}', '',7,0),
+ ('static-shortened-origin','fn ref u8[] choose(ref u8[] p,bool yes){return if(yes){p}else{b"xy"};}fn i32 main(){let u8[2] a=[1,7];let ref u8[] p=ref a;let ref u8[] q=choose(p,false);assert(q[0]==120);return 0;}', '',0,0),
+]
+REJECTIONS[38]=[
+ ('recursive-unproven','fn ref i32 a(ref i32 p){return b(p);}fn ref i32 b(ref i32 p){return a(p);}fn i32 main(){return 0;}', 'E2103'),
+ ('recursive-swaps-origins','fn ref i32 a(ref i32 p,ref i32 q,i32 n){if(n==0){return p;};return a(q,p,n-1);}fn i32 main(){return 0;}', 'E2103'),
+ ('static-local-escape','fn ref u8[] choose(bool yes){let u8[2] a=[1,2];let ref u8[] p=ref a;return if(yes){p}else{b"xy"};}fn i32 main(){return 0;}', 'E2102'),
+]
+
 def sha(path): return hashlib.sha256(path.read_bytes()).hexdigest()
 def save(path, value): path.write_text(json.dumps(value, ensure_ascii=False, indent=2)+'\n', encoding='utf-8', newline='\n')
 

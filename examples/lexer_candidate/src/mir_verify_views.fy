@@ -16,7 +16,8 @@ pub fn bool operation(ref m::Program p, m::Operation o) {
 fn usize get(ref v::Vec<usize> values, usize id){return *v::at<usize>(values,id);}
 fn bool merge(ref mut v::Vec<usize> values, usize id, usize origin, ref mut bool changed, ref mut m::Problem problem, usize start, usize end) {
     if(origin==65538){return true;} let usize old=get(values,id);
-    if(old!=65538 && old!=origin){*problem=m::Problem{.code=2103,.start,.end};return false;}
+    if(origin==0 && old!=65538){return true;}
+    if(old!=65538 && old!=0 && old!=origin){*problem=m::Problem{.code=2103,.start,.end};return false;}
     if(old!=origin){let ref mut usize slot=v::at_mut<usize>(values,id);*slot=origin;*changed=true;}return true;
 }
 // Origin fixed point: 0 Static, 1..16384 exact function-local backing array,
