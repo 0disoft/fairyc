@@ -4,6 +4,10 @@ This is the first Fairy-written recognition slice, built by the Go stage0
 compiler for Windows AMD64 MSVC. It is not a compiler replacement or stable CLI.
 `src/scanner.fy` recognizes original bytes directly; Go does not supply its tokens.
 
+Version 0.61.0 adds `--c-modules-file <source-list>` for bounded multi-file nominal
+programs. See [module program progress](../../docs/ops/candidate-module-progress-20261008.md)
+for the source-list rules, execution evidence and remaining SDK/package limits.
+
 Example version 0.19.0 adds C11 emission and native execution verification for
 same-file nominal structs (see [Owned nominal C](#owned-nominal-c)). The candidate
 owns recognition, typing, HIR, MIR and C generation; the native C compiler and

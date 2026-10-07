@@ -44,32 +44,34 @@ pub fn Result<bytes::Buffer, u32> load(ref u8[] path_bytes) {
 @effects(filesystem, console)
 pub fn i32 run() {
     let usize argc = process::arg_count();
-    if (argc != 2 && argc != 3) { return error("usage: lexer-candidate --tokens-file <path>\n       lexer-candidate --declarations-file <path>\n       lexer-candidate --check-names-file <path>\n       lexer-candidate --bindings-file <path>\n       lexer-candidate --check-types-file <path>\n       lexer-candidate --check-modules-file <manifest>\n       lexer-candidate --hir-file <path>\n       lexer-candidate --mir-file <path>\n       lexer-candidate --c-file <path>\n"); }
+    if (argc != 2 && argc != 3) { return error("usage: lexer-candidate --tokens-file <path>\n       lexer-candidate --declarations-file <path>\n       lexer-candidate --check-names-file <path>\n       lexer-candidate --bindings-file <path>\n       lexer-candidate --check-types-file <path>\n       lexer-candidate --check-modules-file <manifest>\n       lexer-candidate --c-modules-file <manifest>\n       lexer-candidate --hir-file <path>\n       lexer-candidate --mir-file <path>\n       lexer-candidate --c-file <path>\n"); }
     var bytes::Buffer argument = bytes::empty();
     if (!bytes::resize_zeroed(ref mut argument, 4096).is_ok) { return error("error: buffer allocation failed\n"); }
     let usize flag_length = switch(process::arg(1, bytes::view_mut(ref mut argument))) {
-        case .ok(value): { value } case .err(_): { return error("usage: lexer-candidate --tokens-file <path>\n       lexer-candidate --declarations-file <path>\n       lexer-candidate --check-names-file <path>\n       lexer-candidate --bindings-file <path>\n       lexer-candidate --check-types-file <path>\n       lexer-candidate --check-modules-file <manifest>\n       lexer-candidate --hir-file <path>\n       lexer-candidate --mir-file <path>\n       lexer-candidate --c-file <path>\n"); }
+        case .ok(value): { value } case .err(_): { return error("usage: lexer-candidate --tokens-file <path>\n       lexer-candidate --declarations-file <path>\n       lexer-candidate --check-names-file <path>\n       lexer-candidate --bindings-file <path>\n       lexer-candidate --check-types-file <path>\n       lexer-candidate --check-modules-file <manifest>\n       lexer-candidate --c-modules-file <manifest>\n       lexer-candidate --hir-file <path>\n       lexer-candidate --mir-file <path>\n       lexer-candidate --c-file <path>\n"); }
     };
     let ref u8[] flag = bytes::view(ref argument)[..flag_length];
     if (argc == 2 && bytes::equal(flag, b"--help")) {
-        return if (io::write("usage: lexer-candidate --tokens-file <path>\n       lexer-candidate --declarations-file <path>\n       lexer-candidate --check-names-file <path>\n       lexer-candidate --bindings-file <path>\n       lexer-candidate --check-types-file <path>\n       lexer-candidate --check-modules-file <manifest>\n       lexer-candidate --hir-file <path>\n       lexer-candidate --mir-file <path>\n       lexer-candidate --c-file <path>\n       lexer-candidate --help\nNo arguments: private binary stdin protocol.\n").is_ok) { 0 }
+        return if (io::write("usage: lexer-candidate --tokens-file <path>\n       lexer-candidate --declarations-file <path>\n       lexer-candidate --check-names-file <path>\n       lexer-candidate --bindings-file <path>\n       lexer-candidate --check-types-file <path>\n       lexer-candidate --check-modules-file <manifest>\n       lexer-candidate --c-modules-file <manifest>\n       lexer-candidate --hir-file <path>\n       lexer-candidate --mir-file <path>\n       lexer-candidate --c-file <path>\n       lexer-candidate --help\nNo arguments: private binary stdin protocol.\n").is_ok) { 0 }
             else { error("error: stdout write failed\n") };
     }
     let bool binding_mode = bytes::equal(flag,b"--bindings-file");
     let bool type_mode = bytes::equal(flag,b"--check-types-file");
     let bool module_mode = bytes::equal(flag,b"--check-modules-file");
+    let bool program_mode = bytes::equal(flag,b"--c-modules-file");
     let bool hir_mode = bytes::equal(flag,b"--hir-file");
     let bool mir_mode = bytes::equal(flag,b"--mir-file");
     let bool c_mode = bytes::equal(flag,b"--c-file");
     let bool name_mode = bytes::equal(flag, b"--check-names-file");
     let bool declaration_mode = bytes::equal(flag, b"--declarations-file");
-    if (argc != 3 || (!bytes::equal(flag, b"--tokens-file") && !declaration_mode && !name_mode && !binding_mode && !type_mode && !module_mode && !hir_mode && !mir_mode && !c_mode)) { return error("usage: lexer-candidate --tokens-file <path>\n       lexer-candidate --declarations-file <path>\n       lexer-candidate --check-names-file <path>\n       lexer-candidate --bindings-file <path>\n       lexer-candidate --check-types-file <path>\n       lexer-candidate --check-modules-file <manifest>\n       lexer-candidate --hir-file <path>\n       lexer-candidate --mir-file <path>\n       lexer-candidate --c-file <path>\n"); }
+    if (argc != 3 || (!bytes::equal(flag, b"--tokens-file") && !declaration_mode && !name_mode && !binding_mode && !type_mode && !module_mode && !program_mode && !hir_mode && !mir_mode && !c_mode)) { return error("usage: lexer-candidate --tokens-file <path>\n       lexer-candidate --declarations-file <path>\n       lexer-candidate --check-names-file <path>\n       lexer-candidate --bindings-file <path>\n       lexer-candidate --check-types-file <path>\n       lexer-candidate --check-modules-file <manifest>\n       lexer-candidate --c-modules-file <manifest>\n       lexer-candidate --hir-file <path>\n       lexer-candidate --mir-file <path>\n       lexer-candidate --c-file <path>\n"); }
     let usize length = switch(process::arg(2, bytes::view_mut(ref mut argument))) {
         case .ok(value): { value } case .err(_): { return error("error: file path limit (4095 UTF-8 bytes)\n"); }
     };
     if (length > 4095) { return error("error: file path limit (4095 UTF-8 bytes)\n"); }
     let ref u8[] path = bytes::view(ref argument)[..length];
     if (module_mode) { return modules::run(path); }
+    if (program_mode) { return modules::emit(path); }
     let bytes::Buffer input = switch(load(path)) {
         case .ok(value): { value }
         case .err(code): { return error(if (code == 4) { "error: source limit (32768 bytes)\n" }

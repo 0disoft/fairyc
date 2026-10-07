@@ -6,6 +6,8 @@ import scanner as scanner;
 import syntax as syntax;
 import token_output as output;
 import declaration_output as declarations;
+import module_program as programs;
+import c_emit as c;
 import std::bytes as bytes;
 import std::text as text;
 import std::vec as v;
@@ -57,7 +59,7 @@ pub fn u32 paths(ref u8[] source, ref mut v::Vec<Path> result) {
     return 0;
 }
 @effects(filesystem,console)
-pub fn i32 run(ref u8[] path) {
+fn i32 execute(ref u8[] path,bool program_mode) {
     let bytes::Buffer manifest_source = switch(manifest(path)) {
         case .ok(value): { value }
         case .err(code): { return error(if (code == 4) { "error: manifest limit (8192 bytes)\n" } else if (code == 3) { "error: buffer allocation failed\n" } else { "error: manifest file read failed\n" }); }
@@ -86,6 +88,21 @@ pub fn i32 run(ref u8[] path) {
         if (!v::push<syntax::Parsed>(ref mut parsed_files,parsed).is_ok) { return error("error: buffer allocation failed\n"); }
         index += 1;
     }
+    if(program_mode){
+        let program=switch(programs::compile(ref parsed_files)){
+            case .ok(p):{p}
+            case .err(p):{
+                let Path entry=*v::at<Path>(ref entries,p.module_index);
+                output::prefix(syntax::source_view(v::at<syntax::Parsed>(ref parsed_files,p.module_index)),source[entry.start..entry.end],p.start);
+                discard io::write_stderr("module program phase ");discard io::write_stderr_u32(p.phase);
+                discard io::write_stderr(" code ");discard io::write_stderr_u32(p.code);output::range(p.start,p.end);return 2;
+            }
+        };
+        var bytes::Buffer out=bytes::empty();let u32 code=c::render(ref program,ref mut out);
+        if(code!=0){return error(if(code==1){"error: C entry requires exactly one fn i32 main()\n"}else if(code==4){"error: C output limit (2097152 bytes)\n"}else if(code==3){"error: buffer allocation failed\n"}else{"error: invalid module C input\n"});}
+        let data=bytes::view(ref out);
+        return if(switch(io::write_bytes(data)){case .ok(n):{n==data.len}case .err(_):{false}}){0}else{error("error: stdout write failed\n")};
+    }
     let modules::Registry registry = switch(modules::build(ref parsed_files)) {
         case .ok(value): { value }
         case .err(problem): { let Path entry = *v::at<Path>(ref entries,problem.module_index); return checking::error(v::at<syntax::Parsed>(ref parsed_files,problem.module_index),source[entry.start..entry.end],problem); }
@@ -104,3 +121,8 @@ pub fn i32 run(ref u8[] path) {
     }
     return if (io::write("modules ok\n").is_ok) { 0 } else { error("error: stdout write failed\n") };
 }
+
+@effects(filesystem,console)
+pub fn i32 run(ref u8[] path){return execute(path,false);}
+@effects(filesystem,console)
+pub fn i32 emit(ref u8[] path){return execute(path,true);}

@@ -103,3 +103,27 @@ The combined source/global-name limits remain 32768 bytes/128 globals. SDK,
 generic and receiver admission, imported return-origin generalization, CLI
 program output and actual execution of the emitted multi-file C remain separate
 work. The existing scalar-only `--check-modules-file` command is unchanged.
+
+## Multi-file C CLI
+
+`--c-modules-file <source-list>` uses the same file loader and explicit relative
+path-list rules as `--check-modules-file`, then compiles the whole source set
+through `module_program.fy`. It publishes buffered C only after every provider
+and caller body, owned HIR/MIR and C entry check succeeds. Diagnostics retain the
+original path and byte range, with private phase/code values. C output requires
+exactly one nonforeign `fn i32 main()` across the input set. This is an explicit
+source list, not the production workspace/package manifest command.
+
+`verify_module_program.py --phase cli` compares emitted C from development and
+release candidate images, then executes separately compiled observed C at low
+and optimized profiles. The resource case calls a separately compiled C helper
+from its provider-owned cleanup; the expected single `A` trace checks exactly
+one destruction after return. Other cases exercise imported struct values,
+duplicate helper names and enum aliases. Private access, provider errors and
+missing entry fail with empty stdout; input bytes are unchanged.
+
+Evidence: `evidence/candidate-module-cli-20261008.json`. The previous 120-second
+validation bootstrap timed out building the enlarged release CLI. A separate
+validation-only 240-second Go driver overlay preserves the original compiler
+source bytes; the receipt records its exact compiler and overlay hashes. This
+does not resolve the production CLI timeout task (75).
