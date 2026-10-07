@@ -1,4 +1,5 @@
 module type_check;
+import pointer_types as pointers;
 import reference_types as refs;
 import resource_abilities as abilities;
 import array_types as arrays;
@@ -65,6 +66,7 @@ fn state::Value expression(ref names::Resolved resolved, ref mut v::Vec<state::S
         return recorded(tables,id,value(expected,actual.terminates));
     }
     if (node.kind == 1) {
+        if(bytes::equal(op,b"null")){if(!pointers::valid(expected)){return error(problem,1,node.start,node.end,expected,0);}return recorded(tables,id,value(expected,false));}
         let u32 literal = syntax::literal_kind(parsed,id);
         if (literal == 7 || literal == 8) { return recorded(tables,id,value(if (literal == 7) { 9 } else { 10 },false)); }
         let u32 type = if (syntax::literal_kind(parsed,id) == 5) { if (state::integer(expected)) { expected } else { 1 } } else { 6 };
@@ -153,7 +155,10 @@ fn state::Value expression(ref names::Resolved resolved, ref mut v::Vec<state::S
         let bool arithmetic = state::operation(op); let bool compare = state::comparison(op);
         let u32 context = if (arithmetic && state::integer(expected)) { expected } else { 0 };
         var state::Value left = value(0,false); var state::Value right = value(0,false);
-        if ((arithmetic || compare) && state::flexible(tables,node.left - 1) && !state::flexible(tables,node.right - 1)) {
+        if(compare && bytes::equal(syntax::expression_text(parsed,node.left),b"null")){
+            right=expression(resolved,tables,problem,node.right,0,result_type,depth+1,loop_depth);if(problem.code!=0){return right;}
+            left=expression(resolved,tables,problem,node.left,right.type,result_type,depth+1,loop_depth);
+        } else if ((arithmetic || compare) && state::flexible(tables,node.left - 1) && !state::flexible(tables,node.right - 1)) {
             right = expression(resolved,tables,problem,node.right,context,result_type,depth + 1,loop_depth);
             if (problem.code != 0) { return right; }
             left = expression(resolved,tables,problem,node.left,if (state::integer(right.type)) { right.type } else { context },result_type,depth + 1,loop_depth);
@@ -170,7 +175,7 @@ fn state::Value expression(ref names::Resolved resolved, ref mut v::Vec<state::S
             return recorded(tables,id,value(6,left.terminates && right.terminates));
         }
         if (left.type != right.type) { return error(problem,1,rhs.start,rhs.end,left.type,right.type); }
-        if (!state::integer(left.type) && !(state::equal(op) && left.type == 6)) { return error(problem,9,node.start,node.end,0,left.type); }
+        if (!state::integer(left.type) && !(state::equal(op) && (left.type == 6 || pointers::valid(left.type)))) { return error(problem,9,node.start,node.end,0,left.type); }
         return recorded(tables,id,value(if (compare) { 6 } else { left.type },left.terminates || right.terminates));
     }
     if (node.kind == 6) {

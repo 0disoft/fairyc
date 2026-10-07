@@ -1,4 +1,5 @@
 module mir_lower;
+import pointer_types as pointers;
 import reference_types as refs;
 import array_types as arrays;
 import type_state as ids;
@@ -127,6 +128,7 @@ fn usize expression(ref h::Program input, ref mut v::Vec<m::Local> locals, ref m
         while (i < v::len<usize>(ref ends)) { c.current = *v::at<usize>(ref ends,i); if (!state::jump(blocks,c,join,e.start,e.end)) { return 0; } i += 1; }
         c.live=merged;c.current = join; return result;
     }
+    if(kind==27){let usize result=state::local(locals,c,type,0,false,false,e.start,e.end);return if(state::emit(operations,blocks,c,state::operation(36,result,type,type,0,0,0,e.start,e.end))!=0){result}else{0};}
     if (kind == 1 || kind == 2) {
         let usize result = state::local(locals,c,type,0,false,false,e.start,e.end);
         var m::Operation o = state::operation(1,result,type,type,0,0,0,e.start,e.end); o.boolean = e.boolean;

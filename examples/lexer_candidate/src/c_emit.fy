@@ -1,4 +1,5 @@
 module c_emit;
+import pointer_types as pointers;
 import mir_model as m;
 import hir_shapes as shapes;
 import mir_verify as verify;
@@ -29,7 +30,7 @@ fn bool function(ref m::Program p, ref flow::Plan plan, m::Function f, ref mut b
     var usize id = f.local_start + 1; while (id <= f.local_start + f.local_count) {
         let m::Local l = m::local_at(p,id);
         if (!l.parameter) {
-            let bool aggregate = l.type >= 256;
+            let bool aggregate = l.type >= 256 && !pointers::valid(l.type);
             if (!w::text(out,s,b"    ") || !w::type(out,s,l.type) || !w::text(out,s,b" ") || !w::local(out,s,id)
                 || !w::text(out,s,if(aggregate){b";\n"}else if(l.type == 9 || l.type == 10 || l.type == 11){b"={0};\n"}else{b"=0;\n"})) { return false; }
             // MSVC recursively expands aggregate zero initializers and reaches

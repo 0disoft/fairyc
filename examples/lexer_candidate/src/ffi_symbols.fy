@@ -1,9 +1,10 @@
 module ffi_symbols;
+import pointer_types as pointers;
 import std::bytes as bytes;
 
 // Candidate scalar C ABI lane. SDK-owned fy_ symbols need authenticated SDK
 // admission later; ordinary source cannot mint compiler/runtime identifiers.
-pub fn bool scalar(u32 type,bool result){return type>=1 && type<=5 || result && type==7;}
+pub fn bool scalar(u32 type,bool result){return type>=1 && type<=5 || result && type==7 || pointers::valid(type);}
 fn bool letter(u8 c){return c>=65 && c<=90 || c>=97 && c<=122;}
 pub fn bool valid(ref u8[] name){
     if(name.len==0 || name.len>256 || !letter(name[0])){return false;}

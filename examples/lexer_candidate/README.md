@@ -2894,3 +2894,5 @@ See `docs/ops/evidence/candidate-resource-scalar-foreign-20261008.json`.
 Raw pointers, C scalar transport, repr(C) aggregate values, escaped linker names,
 authenticated SDK fy_ symbols and imported nominal signatures remain pending.
 This does not complete SDK Vec/Buffer/File integration or self-hosting.
+
+Raw-pointer candidate FFI progress and exact remaining boundaries: [candidate FFI progress](../../docs/ops/candidate-ffi-progress-20261008.md).

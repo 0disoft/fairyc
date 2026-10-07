@@ -11,6 +11,7 @@ fn bool tab(ref mut bytes::Buffer out) { return put(out,b"\t"); }
 fn bool number(ref mut bytes::Buffer out, usize value) { return tab(out) && bytes::append_usize(out,value).is_ok; }
 fn bool type_name(ref mut bytes::Buffer out, h::Type type) {
     return tab(out) && switch(type) {
+        case .Pointer{.id=id}:{put(out,b"ptr:") && bytes::append_u32(out,id).is_ok}
         case .Borrowed { .id=id }: { put(out,b"ref:") && bytes::append_u32(out,id).is_ok }
         case .Invalid: { put(out,b"invalid") } case .I32: { put(out,b"i32") }
         case .I64: { put(out,b"i64") } case .U8: { put(out,b"u8") } case .U32: { put(out,b"u32") }
@@ -42,7 +43,7 @@ fn bool expression_kind(ref mut bytes::Buffer out, h::ExpressionKind kind) {
         case .Construct: { put(out,b"construct") } case .Field: { put(out,b"field") } case .Initializer: { put(out,b"initializer") } case .Array: { put(out,b"array") } case .Index: { put(out,b"index") } case .Length: { put(out,b"length") } case .Borrow: { put(out,b"borrow-array") } case .Slice: { put(out,b"slice") }
         case .Variant: { put(out,b"variant") } case .Switch: { put(out,b"switch") } case .Arm: { put(out,b"arm") } case .Capture: { put(out,b"capture") }
         case .Propagate: { put(out,b"propagate") }
-        case .IsOk: { put(out,b"is-ok") } case .Cast: { put(out,b"scalar-cast") } case .Move: { put(out,b"move") } case .Reborrow: { put(out,b"shared-reborrow") }
+        case .IsOk: { put(out,b"is-ok") } case .Cast: { put(out,b"scalar-cast") } case .Null:{put(out,b"null")} case .Move: { put(out,b"move") } case .Reborrow: { put(out,b"shared-reborrow") }
         case .Literal: { put(out,b"literal") }
     };
 }

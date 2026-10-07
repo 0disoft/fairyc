@@ -21,7 +21,7 @@ fn void results_own_distinct_payloads_captures_and_source_spans() {
         let e=h::expression_at(ref p,id);
         assert(e.start<=e.end && e.end<=source.len);
         if(h::expression_code(e.kind)==18){
-            assert(switch(e.type){case .Result{.id=id}:{id==type}case .Borrowed{.id=_}:{false}case .Invalid:{false}case .I32:{false}case .I64:{false}case .U8:{false}case .U32:{false}case .Usize:{false}case .Bool:{false}case .Void:{false}case .Callable:{false}case .Resource{.id=_}:{false}case .Nominal{.id=_}:{false}case .Array{.id=_}:{false}case .Text:{false}case .Bytes:{false}case .MutableBytes:{false}case .Enumeration{.id=_}:{false}case .Option{.id=_}:{false}});
+            assert(switch(e.type){case .Result{.id=id}:{id==type}case .Pointer{.id=_}:{false}case .Borrowed{.id=_}:{false}case .Invalid:{false}case .I32:{false}case .I64:{false}case .U8:{false}case .U32:{false}case .Usize:{false}case .Bool:{false}case .Void:{false}case .Callable:{false}case .Resource{.id=_}:{false}case .Nominal{.id=_}:{false}case .Array{.id=_}:{false}case .Text:{false}case .Bytes:{false}case .MutableBytes:{false}case .Enumeration{.id=_}:{false}case .Option{.id=_}:{false}});
             assert(e.binding==2 || e.binding==4);variants+=1;
         }
         if(h::expression_code(e.kind)==21){assert(e.binding==1 || e.binding==3);assert(h::type_code(e.type)==if(e.binding==1){2}else{6});captures+=1;}

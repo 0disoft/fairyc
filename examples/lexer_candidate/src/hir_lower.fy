@@ -1,4 +1,6 @@
 module hir_lower;
+import pointer_types as pointers;
+import nominal_types as nominal;
 import reference_types as refs;
 import resource_abilities as abilities;
 import hir_model as h;
@@ -74,7 +76,7 @@ fn bool prepare(ref typing::Typed input, usize module_index, ref mut v::Vec<h::B
                 }
                 entry += 1;
             }
-        } else if(s.kind==11){let d=syntax::declaration_at(parsed,s.declaration-1);var usize entry=d.entry_start;while(entry<d.entry_start+d.entry_count){let e=syntax::entry_at(parsed,entry);if(e.kind==1){if(!v::push<h::Signature>(signatures,h::Signature{.type=state::type(typing_ids::primitive(parsed,e.type_root))}).is_ok){discard state::fail(c,3,e.start,e.end);return false;}}entry+=1;}
+        } else if(s.kind==11){let d=syntax::declaration_at(parsed,s.declaration-1);var usize entry=d.entry_start;while(entry<d.entry_start+d.entry_count){let e=syntax::entry_at(parsed,entry);if(e.kind==1){if(!v::push<h::Signature>(signatures,h::Signature{.type=state::type(nominal::resolve(parsed,e.type_root))}).is_ok){discard state::fail(c,3,e.start,e.end);return false;}}entry+=1;}
         } else if (s.kind == 5) {
             let signature = names::external_signature(resolved,i); var usize parameter = 0;
             if (signature.parameter_count > 32768 - v::len<h::Signature>(signatures) || signature.declaration == 0) { discard state::fail(c,2,b.start,b.end); return false; }
@@ -116,7 +118,7 @@ fn usize expression(ref typing::Typed input, ref v::Vec<h::Binding> bindings, re
     var h::ExpressionKind kind = .Integer; var h::Operator operator = .None;
     if (h::type_code(type) == h::type_code(.Invalid)) { return state::fail(c,4,node.start,node.end); }
     if (node.kind == 1 || (node.kind == 4 && typing::signed_minimum(input,id))) {
-        if (h::type_code(type) == 9 || h::type_code(type) == 10) {
+        if(pointers::valid(h::type_code(type))){kind=.Null;}else if (h::type_code(type) == 9 || h::type_code(type) == 10) {
             kind = .Literal; let ref u8[] cooked = syntax::literal_cooked(parsed,id);
             e.payload_start = bytes::len(payload); let u32 code = literals::decode(payload,cooked);
             if (code != 0) { return state::fail(c,code,node.start,node.end); } e.payload_end = bytes::len(payload);

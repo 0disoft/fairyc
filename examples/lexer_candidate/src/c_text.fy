@@ -1,4 +1,5 @@
 module c_text;
+import pointer_types as pointers;
 import reference_types as refs;
 import std::bytes as bytes;
 import enum_types as enums;
@@ -17,6 +18,7 @@ pub fn bool number(ref mut bytes::Buffer out, ref mut State s, usize value) {
     if (!bytes::append_usize(out,value).is_ok) { s.code = 3; return false; } return true;
 }
 pub fn bool type(ref mut bytes::Buffer out, ref mut State s, u32 code) {
+    if(pointers::valid(code)){return type(out,s,pointers::inner(code)) && text(out,s,if(pointers::mutable(code)){b" *"}else{b" const *"});}
     if(refs::valid(code)){return type(out,s,refs::inner(code)) && text(out,s,if(refs::mutable(code)){b" *"}else{b" const *"});}
     if (code == 11) { return text(out,s,b"struct fy_bytes_mut"); }
     if (code == 9 || code == 10) { return text(out,s,if (code == 9) { b"struct fy_text" } else { b"struct fy_bytes" }); }

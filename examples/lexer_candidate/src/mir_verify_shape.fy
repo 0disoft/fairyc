@@ -1,4 +1,5 @@
 module mir_verify_shape;
+import pointer_types as pointers;
 import mir_reference as refs;
 import scalar_casts as casts;
 import mir_model as m;
@@ -31,7 +32,7 @@ fn bool unary(u32 operator, u32 type) {
         else { (operator == 1 || operator == 4) && type >= 1 && type <= 5 };
 }
 fn bool binary(u32 operator, u32 type) {
-    return operator >= 1 && operator <= 18 && (type >= 1 && type <= 5 || type == 6 && (operator == 13 || operator == 14));
+    return operator >= 1 && operator <= 18 && (type >= 1 && type <= 5 || (type == 6 || pointers::valid(type)) && (operator == 13 || operator == 14));
 }
 fn bool integer(ref u8[] text, u32 type) {
     if (text.len == 0) { return false; }
@@ -53,6 +54,7 @@ fn bool integer(ref u8[] text, u32 type) {
     return true;
 }
 fn bool operation(ref m::Program p, usize id, m::Operation o) {
+    if(o.kind==36){return pointers::valid(o.type) && o.owner_type==o.type && local(p,o.result,o.function,o.type) && o.left==0 && o.right==0 && o.operator==0 && o.argument_start==0 && o.argument_count==0 && o.payload_start==0 && o.payload_end==0 && !o.boolean;}
     if(o.kind==35){return casts::allowed(o.owner_type,o.type) && local(p,o.result,o.function,o.type) && local(p,o.left,o.function,o.owner_type) && o.result!=o.left && o.right==0 && o.operator==0 && o.argument_start==0 && o.argument_count==0 && o.payload_start==0 && o.payload_end==0 && !o.boolean;}
     if(o.kind>=28){return refs::operation(p,o);}
     if(o.kind==24 || o.kind==25 || o.kind==26 || o.kind==27){
@@ -70,6 +72,7 @@ fn bool operation(ref m::Program p, usize id, m::Operation o) {
     if (o.kind >= 6) { return nominal::operation(p,o); }
     if (o.argument_start != 0 || o.argument_count != 0) { return false; }
     if (o.kind == 2) { return !shapes::needs_drop(o.type) && local(p,o.result,o.function,o.type) && local(p,o.left,o.function,o.type) && o.owner_type == o.type && o.operator == 0 && o.right == 0 && o.payload_start == 0 && o.payload_end == 0 && !o.boolean; }
+    if(o.kind==4 && pointers::valid(o.owner_type)){return binary(o.operator,o.owner_type) && o.type==6 && local(p,o.result,o.function,6) && local(p,o.left,o.function,o.owner_type) && local(p,o.right,o.function,o.owner_type) && o.argument_start==0 && o.argument_count==0 && o.payload_start==0 && o.payload_end==0 && !o.boolean;}
     if (o.owner_type < 1 || o.owner_type > 6 || o.type < 1 || o.type > 6) { return false; }
     if (o.kind != 5 && !local(p,o.result,o.function,o.type)) { return false; }
     if (o.kind == 1) {
