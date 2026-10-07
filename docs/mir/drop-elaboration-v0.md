@@ -63,3 +63,15 @@ The error branch of `?` moves the error payload into the return value, then trav
 ## Verification cases
 
 `spec/fixtures/mir/manifest-v0.json` now covers a resource call move, reverse lexical cleanup, `Result` error-path cleanup, resource-bearing tagged moves, live/dead reassignment ordering, Region fallthrough and scope-indexed cleanup/reset on direct return, Result propagation, nested exits, and nearest-loop `break` and `continue`, plus the absence of cleanup on a trap path. Loop-control cleanup drops inner Region resources, resets each exited Region with the edge's exit kind, then drops remaining body-local resources before the goto. Interpreter fixtures additionally prove those Region paths, repeated continue execution, nearest nested targets, successful and propagated-error reassignment traces, and consuming-close success and failure ownership. Failed aggregate fields, resource arguments evaluated before a failing later argument, and cleanup-suffix merging remain explicit deferred groups.
+
+## Fairy candidate unit 26
+
+The candidate retains nested resource fields and lowers their complete-root
+structural cleanup to typed operation 26. Its verifier consumes constructor
+field donors exactly once and rejects by-value resource field extraction.
+The C transport invokes the exact retained outer private body, then recursively
+cleans declaration-order fields in reverse. Partially completed literal fields
+and call arguments remain separate temporary obligations; propagation cleans
+these in reverse completion order without calling the unfinished outer body.
+The candidate has a 4096-local per-function bound in addition to its existing
+16384-local program arena. No partial-construction flags are exposed to source.

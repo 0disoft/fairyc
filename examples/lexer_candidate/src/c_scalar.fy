@@ -6,6 +6,7 @@ import c_nominal as nominal;
 import c_arrays as arrays;
 import c_literals as literals;
 import c_views as views;
+import c_resource as owned;
 import std::bytes as bytes;
 
 pub fn bool cast_local(ref mut bytes::Buffer out, ref mut w::State s, usize id, u32 type) {
@@ -26,6 +27,7 @@ fn bool constant(ref m::Program p, usize id, m::Operation o, ref mut bytes::Buff
 }
 pub fn bool operation(ref m::Program p, usize id, ref mut bytes::Buffer out, ref mut w::State s) {
     let m::Operation o = m::operation_at(p,id);
+    if(o.kind==26){return owned::operation(p,o,out,s);}
     if(o.kind==25){return true;}
     if(o.kind==24){return w::text(out,s,b"    ") && w::local(out,s,o.result) && w::text(out,s,b" = ") && w::local(out,s,o.left) && w::text(out,s,b";\n");}
     if (o.kind >= 21) { return nominal::enum_operation(p,o,out,s); }

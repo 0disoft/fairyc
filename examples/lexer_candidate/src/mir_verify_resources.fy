@@ -23,8 +23,9 @@ fn u32 transfer(ref m::Program p,m::Block b,usize base,ref mut bytes::Buffer sta
     while(op!=0){let o=m::operation_at(p,op);
         if(!read(p,state,base,o.left) || !read(p,state,base,o.right)){return fail(1101);}
         var usize j=0;while(j<o.argument_count){if(!read(p,state,base,m::edge_at(p,o.argument_start+j))){return fail(1101);}j+=1;}
+        if(o.kind==6){var usize j=0;while(j<o.argument_count){if(!consume(p,state,base,m::edge_at(p,o.argument_start+j))){return fail(1101);}j+=1;}}
         if(o.kind==24){if(!consume(p,state,base,o.left) || !create(p,state,base,o.result)){return fail(1101);}}
-        else if(o.kind==25){if(!consume(p,state,base,o.left)){return fail(1101);}}
+        else if(o.kind==25 || o.kind==26){if(!consume(p,state,base,o.left)){return fail(1101);}}
         else if(owned(p,o.result) && o.kind!=8){if(!create(p,state,base,o.result)){return fail(1101);}}
         op=o.next;
     }

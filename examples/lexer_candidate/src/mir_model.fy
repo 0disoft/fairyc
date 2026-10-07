@@ -103,7 +103,7 @@ pub fn Result<Program,Problem> assemble_resources(bytes::Buffer source, bytes::B
     while(shape_index<shapes::count(ref nominal)){let shape=shapes::at(ref nominal,shape_index);if(resources::valid(shape.type)){resource_count+=1;}
         // Recursive field and tagged ownership are connected in later units.
         if(shapes::needs_drop(shape.type) && !resources::valid(shape.type)){return .err(Problem{.code=4,.start=0,.end=ns});}
-        var usize field=0;while(field<shape.field_count){if(shapes::needs_drop(shapes::field_at(ref nominal,shape.field_start+field+1).type)){return .err(Problem{.code=4,.start=0,.end=ns});}field+=1;}shape_index+=1;
+        var usize field=0;while(field<shape.field_count){if(shapes::needs_drop(shapes::field_at(ref nominal,shape.field_start+field+1).type) && !resources::valid(shapes::field_at(ref nominal,shape.field_start+field+1).type)){return .err(Problem{.code=4,.start=0,.end=ns});}field+=1;}shape_index+=1;
     }
     if(resource_count!=v::len<Drop>(ref drops)){return .err(Problem{.code=4,.start=0,.end=ns});}
     var usize dropping=0;while(dropping<v::len<Drop>(ref drops)){let Drop d=*v::at<Drop>(ref drops,dropping);
@@ -164,8 +164,8 @@ pub fn Result<Program,Problem> assemble_resources(bytes::Buffer source, bytes::B
     i = 0;
     while (i < no) {
         let Operation o = *v::at<Operation>(ref operations,i);
-        if (o.function == 0 || o.function > nf || o.block == 0 || o.block > nb || o.kind < 1 || o.kind > 25 || o.result > nl || o.left > nl || o.right > nl || o.next > no || (o.next != 0 && o.next <= i + 1) || o.start >= o.end || o.end > ns || o.payload_start > o.payload_end || o.payload_end > np || o.argument_start > ne || o.argument_count > ne - o.argument_start || v::at<Block>(ref blocks,o.block - 1).function != o.function) { return .err(Problem { .code = 4, .start = o.start, .end = o.end }); }
-        if ((o.kind != 5 && o.kind != 20 && o.kind!=25 && (o.result == 0 || !shapes::valid_type(ref nominal,o.type,false))) || ((o.kind == 5 || o.kind == 20 || o.kind==25) && o.result != 0)) { return .err(Problem { .code = 4, .start = o.start, .end = o.end }); } i += 1;
+        if (o.function == 0 || o.function > nf || o.block == 0 || o.block > nb || o.kind < 1 || o.kind > 26 || o.result > nl || o.left > nl || o.right > nl || o.next > no || (o.next != 0 && o.next <= i + 1) || o.start >= o.end || o.end > ns || o.payload_start > o.payload_end || o.payload_end > np || o.argument_start > ne || o.argument_count > ne - o.argument_start || v::at<Block>(ref blocks,o.block - 1).function != o.function) { return .err(Problem { .code = 4, .start = o.start, .end = o.end }); }
+        if ((o.kind != 5 && o.kind != 20 && o.kind!=25 && o.kind!=26 && (o.result == 0 || !shapes::valid_type(ref nominal,o.type,false))) || ((o.kind == 5 || o.kind == 20 || o.kind==25 || o.kind==26) && o.result != 0)) { return .err(Problem { .code = 4, .start = o.start, .end = o.end }); } i += 1;
     }
     return .ok(Program { .nominal, .drops, .source, .payload, .targets, .signatures, .functions, .locals, .blocks, .operations, .edges, .module_index, .success = true });
 }

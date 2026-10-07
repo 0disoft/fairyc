@@ -50,9 +50,10 @@ fn bool integer(ref u8[] text, u32 type) {
     return true;
 }
 fn bool operation(ref m::Program p, usize id, m::Operation o) {
-    if(o.kind==24 || o.kind==25){
+    if(o.kind==24 || o.kind==25 || o.kind==26){
         if(!resources::valid(o.type) || o.owner_type!=o.type || o.operator!=0 || o.right!=0 || o.argument_start!=0 || o.argument_count!=0 || o.payload_start!=0 || o.payload_end!=0 || o.boolean || !local(p,o.left,o.function,o.type)){return false;}
         if(o.kind==24){return o.result!=o.left && local(p,o.result,o.function,o.type);}
+        if(o.kind==26){return o.result==0 && m::drop_index(p,o.type)!=0;}
         let usize at=m::drop_index(p,o.type);return o.result==0 && at!=0 && !m::drop_at(p,at-1).nonempty;
     }
     if (o.kind >= 21) { return enums::operation(p,o); }

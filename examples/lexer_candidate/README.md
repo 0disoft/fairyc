@@ -2740,3 +2740,9 @@ Unit 25 evaluates and freezes a replacement before dropping the old generation.
 Self moves and transferred donors discharge once; failed scalar propagation
 leaves the previous generation for the function-exit cleanup. Owned tagged
 factory propagation remains the unit-27 integration test.
+
+Unit 26 tracks completed owned field and argument temporaries until installation.
+On propagation, only completed temporaries clean in reverse completion order.
+Complete nested resources run outer cleanup before reverse recursive field cleanup.
+A function admits at most 4096 MIR locals (16384 program-wide); earlier larger
+recursive snapshot stack failure is resolved, not treated as passing evidence.

@@ -29,6 +29,16 @@ CASES = {
         ('short-return', 'resource R{i32 n;cleanup{mark(this.n);}}fn i32 f(bool yes){let R r=R{.n=65};discard yes && {return 7;true};return 8;}fn i32 main(){return f(false)+f(true);}', 'AA', 15, 0),
         ('cleanup-local', 'resource S{cleanup{mark(83);}}resource R{cleanup{let S s=S{};mark(82);return;}}fn i32 main(){let R r=R{};return 0;}', 'RS', 0, 0),
     ],
+    26: [
+        ('partial-factory', 'resource S{i32 n;cleanup{mark(this.n);}}resource R{S s;i32 n;cleanup{mark(82);}}fn S make(){return S{.n=65};}fn Result<i32,bool> bad(){return .err(true);}fn Result<i32,bool> f(){let R r=R{.s=make(),.n=bad()?};return .ok(0);}fn i32 main(){return switch(f()){case .ok(n):{n}case .err(_):{1}};}', 'A', 1, 0),
+        ('nested-success', 'resource S{i32 n;cleanup{mark(this.n);}}resource R{S a;S b;cleanup{mark(82);}}fn i32 main(){let R r=R{.a=S{.n=65},.b=S{.n=66}};return 0;}', 'RBA', 0, 0),
+        ('partial-middle', 'resource S{i32 n;cleanup{mark(this.n);}}resource R{S a;S b;i32 n;cleanup{mark(82);}}fn Result<i32,bool> bad(){mark(88);return .err(true);}fn Result<i32,bool> f(){let S outer=S{.n=79};let R r=R{.b=S{.n=66},.a=S{.n=65},.n=bad()?};return .ok(0);}fn i32 main(){return switch(f()){case .ok(n):{n}case .err(_):{1}};}', 'XABO', 1, 0),
+        ('partial-first', 'resource S{i32 n;cleanup{mark(this.n);}}resource R{i32 n;S a;cleanup{mark(82);}}fn Result<i32,bool> bad(){return .err(true);}fn Result<i32,bool> f(){let R r=R{.n=bad()?,.a=S{.n=65}};return .ok(0);}fn i32 main(){return switch(f()){case .ok(n):{n}case .err(_):{1}};}', '', 1, 0),
+        ('partial-nested', 'resource S{i32 n;cleanup{mark(this.n);}}resource Inner{S s;cleanup{mark(73);}}resource R{Inner a;i32 n;cleanup{mark(82);}}fn Result<i32,bool> bad(){return .err(true);}fn Result<i32,bool> f(){let R r=R{.a=Inner{.s=S{.n=65}},.n=bad()?};return .ok(0);}fn i32 main(){return switch(f()){case .ok(n):{n}case .err(_):{1}};}', 'IA', 1, 0),
+        ('later-argument-fails', 'resource S{i32 n;cleanup{mark(this.n);}}fn void take(S a,S b,i32 n){mark(84);}fn Result<i32,bool> bad(){mark(88);return .err(true);}fn Result<i32,bool> f(){take(S{.n=65},S{.n=66},bad()?);return .ok(0);}fn i32 main(){return switch(f()){case .ok(n):{n}case .err(_):{1}};}', 'XBA', 1, 0),
+        ('nested-move', 'resource S{i32 n;cleanup{mark(this.n);}}resource R{S a;cleanup{mark(82);}}fn R make(){return R{.a=S{.n=65}};}fn i32 main(){let R a=make();let R b=a;return 0;}', 'RA', 0, 0),
+        ('temporary-expression', 'resource S{i32 n;cleanup{mark(this.n);}}fn i32 main(){discard S{.n=65};mark(88);return 0;}', 'AX', 0, 0),
+    ],
     25: [
         ('overwrite-live', 'resource R{i32 n;cleanup{mark(this.n);}}fn R make(){mark(88);return R{.n=66};}fn i32 main(){var R r=R{.n=65};r=make();mark(89);return r.n;}', 'XAYB', 66, 0),
         ('overwrite-donor', 'resource R{i32 n;cleanup{mark(this.n);}}fn i32 main(){var R r=R{.n=65};let R donor=R{.n=66};r=donor;return 0;}', 'AB', 0, 0),
@@ -56,6 +66,10 @@ REJECTIONS = {
         ('break-live', 'resource R{cleanup{}}fn i32 main(){while(true){let R r=R{};break;}return 0;}'),
         ('overwrite-live', 'resource R{cleanup{}}fn i32 main(){var R r=R{};r=R{};return 0;}'),
         ('nested-field', 'resource S{cleanup{}}resource R{S s;cleanup{}}fn i32 main(){let R r=R{.s=S{}};return 0;}'),
+    ],
+    26: [
+        ('owned-tag', 'resource S{cleanup{}}fn i32 main(){let Option<S> s=.some(S{});return 0;}'),
+        ('field-transfer', 'resource S{cleanup{}}resource R{S s;cleanup{}}fn void take(S s){}fn i32 main(){let R r=R{.s=S{}};take(r.s);return 0;}'),
     ],
     25: [
         ('nested-field', 'resource S{cleanup{}}resource R{S s;cleanup{}}fn i32 main(){let R r=R{.s=S{}};return 0;}'),
