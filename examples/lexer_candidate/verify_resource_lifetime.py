@@ -182,13 +182,29 @@ REJECTIONS[32]=[
  ('shared-field-temporary','struct S{i32 n;}fn S make(){return S{.n=7};}fn i32 main(){let ref i32 p=ref make().n;return *p;}'),
 ]
 
+CASES[33]=[
+ ('mut-scalar-store','fn void edit(ref mut i64 p){*p=*p+1;}fn i32 main(){var i64 n=4000000000;edit(ref mut n);assert(n==4000000001);return 0;}', '',0,0),
+ ('mut-field','struct S{i32 n;i32 other;}fn void edit(ref mut i32 p){*p=9;}fn i32 main(){var S s=S{.n=7,.other=3};edit(ref mut s.n);return s.n+s.other;}', '',12,0),
+ ('mut-nested','struct S{i32 n;}struct T{S s;}fn void edit(ref mut i32 p){*p=9;}fn i32 main(){var T t=T{.s=S{.n=7}};edit(ref mut t.s.n);return t.s.n;}', '',9,0),
+ ('mut-index','fn void edit(ref mut i32 p){*p=9;}fn i32 main(){var i32[2] a=[1,2];edit(ref mut a[1]);return a[0]+a[1];}', '',10,0),
+ ('mut-reference-field','struct S{i32 n;}fn void edit(ref mut S s){s.n+=2;}fn i32 main(){var S s=S{.n=7};edit(ref mut s);return s.n;}', '',9,0),
+ ('mut-resource-reference-field','resource R{i32 n;cleanup{mark(this.n);}}fn void edit(ref mut R p){p.n+=1;}fn i32 main(){var R r=R{.n=65};edit(ref mut r);return r.n;}', 'B',66,0),
+]
+REJECTIONS[33]=[
+ ('mut-shared-write','fn i32 main(){let i32 n=7;let ref i32 p=ref n;*p=9;return *p;}'),
+ ('mut-field-immutable','struct S{i32 n;}fn i32 main(){let S s=S{.n=7};let ref mut i32 p=ref mut s.n;return *p;}'),
+ ('mut-field-siblings','struct S{i32 a;i32 b;}fn i32 main(){var S s=S{.a=1,.b=2};let ref mut i32 a=ref mut s.a;let ref mut i32 b=ref mut s.b;return *a+*b;}', 'E2101'),
+ ('mut-resource-field-address','resource R{i32 n;cleanup{}}fn i32 main(){var R r=R{.n=7};let ref mut i32 p=ref mut r.n;return *p;}'),
+ ('mut-deref-compound','fn i32 main(){var i32 n=7;let ref mut i32 p=ref mut n;*p+=1;return *p;}'),
+]
+
 def sha(path): return hashlib.sha256(path.read_bytes()).hexdigest()
 def save(path, value): path.write_text(json.dumps(value, ensure_ascii=False, indent=2)+'\n', encoding='utf-8', newline='\n')
 
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--unit', type=int, required=True)
-    ap.add_argument('--images', nargs=2, required=True)
+    ap.add_argument('--images', nargs='+', required=True)
     ap.add_argument('--native-runner', required=True)
     ap.add_argument('--receipt', required=True)
     args = ap.parse_args()
@@ -214,7 +230,7 @@ def main():
                     row = run([image, mode, path]); assert row['stdout'] and not row['stderr'], row
                     if mode == '--c-file': outputs.append(row['stdout'])
                 assert sha(path) == digest
-            assert outputs[0] == outputs[1], name
+            assert all(value==outputs[0] for value in outputs), name
             plain = receipt.parent/(name+'.c'); plain.write_text(outputs[0], encoding='utf-8', newline='\n')
             signature = 'void fy_fn_1(int32_t fy_l_1){\n'
             assert outputs[0].count(signature) == 1, name

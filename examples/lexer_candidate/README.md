@@ -2786,3 +2786,5 @@ elements (including struct-element fields), without copying intermediate records
 Checked index dominance and whole-root origins are verified before C emission.
 Temporary roots, field-array addresses and multi-dimensional element addresses
 remain explicitly unsupported in this bounded lane.
+
+Unit 33: lower mutable reference stores and projections. See `docs/ops/evidence/candidate-resource-reference-stores-20261007.json` for the bounded executable fixtures and current profile identities.

@@ -172,7 +172,7 @@ fn Problem statement(ref syntax::Parsed parsed, ref mut Context context, usize i
     }
     if (item.kind == 3 || item.kind == 4 || item.kind == 6 || item.kind == 11 || item.kind == 12 || item.kind == 13 || item.kind==16) {
         if (item.kind == 4) {
-            if (syntax::expression_at(parsed,item.target).kind != 2 && syntax::expression_at(parsed,item.target).kind != 8 && syntax::expression_at(parsed,item.target).kind != 9) { return fail(3,item.start,item.end); }
+            if (syntax::expression_at(parsed,item.target).kind != 2 && syntax::expression_at(parsed,item.target).kind != 8 && syntax::expression_at(parsed,item.target).kind != 9 && syntax::expression_at(parsed,item.target).kind!=4 && syntax::expression_at(parsed,item.target).kind!=3) { return fail(3,item.start,item.end); }
             let Problem target = expression(parsed,context,item.target,depth,symbols,references);
             if (target.code != 0) { return target; }
         }

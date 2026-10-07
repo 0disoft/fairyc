@@ -226,13 +226,13 @@ fn state::Value expression(ref names::Resolved resolved, ref mut v::Vec<state::S
     }
     if (node.kind == 21 || node.kind == 22) {
         let u32 view_type = if (node.kind == 22) { 11 } else { 10 };
-        var usize root = node.left; while (syntax::expression_at(parsed,root).kind == 3 || node.kind==21 && (syntax::expression_at(parsed,root).kind==8 || syntax::expression_at(parsed,root).kind==9)) { root = syntax::expression_at(parsed,root).left; }
+        var usize root = node.left; while (syntax::expression_at(parsed,root).kind == 3 || (syntax::expression_at(parsed,root).kind==8 || syntax::expression_at(parsed,root).kind==9)) { root = syntax::expression_at(parsed,root).left; }
         if (syntax::expression_at(parsed,root).kind != 2) { return error(problem,16,node.start,node.end,10,0); }
         let state::Value owner = expression(resolved,tables,problem,node.left,0,result_type,depth + 1,loop_depth);
         if (problem.code != 0) { return owner; }
         if(refs::referent(owner.type)){
             let u32 type=refs::make(owner.type,node.kind==22);if(expected!=0 && expected!=type){return error(problem,1,node.start,node.end,expected,type);}
-            if(node.kind==22 && names::symbol_at(resolved,state::uses(tables,root-1)).kind!=4){return error(problem,4,node.start,node.end,0,owner.type);}return recorded(tables,id,value(type,owner.terminates));
+            if(node.kind==22 && (names::symbol_at(resolved,state::uses(tables,root-1)).kind!=4 && !refs::mutable(state::expressions(tables,root-1)) || node.left!=root && resources::valid(state::expressions(tables,root-1)))){return error(problem,4,node.start,node.end,0,owner.type);}return recorded(tables,id,value(type,owner.terminates));
         }
         if (expected!=view_type || !arrays::valid(owner.type) || arrays::source_element(parsed,owner.type) != 3) { return error(problem,16,node.start,node.end,10,owner.type); }
         if (view_type == 11 && names::symbol_at(resolved,state::uses(tables,root - 1)).kind != 4) { return error(problem,4,node.start,node.end,11,owner.type); }
@@ -361,17 +361,19 @@ fn state::Value statement(ref names::Resolved resolved, ref mut v::Vec<state::Sl
             let syntax::Expression checked_place = syntax::expression_at(parsed,place_id);
             if (checked_place.kind == 9 && state::expressions(tables,checked_place.left - 1) == 10 || checked_place.kind == 8 && state::flags(tables,place_id - 1) == 0) { return error(problem,4,checked_place.start,checked_place.end,0,target.type); }
             var usize root = item.target; var usize fields = 0;
-            while (syntax::expression_at(parsed,root).kind == 8 || syntax::expression_at(parsed,root).kind == 3 || syntax::expression_at(parsed,root).kind == 9) {
+            while (syntax::expression_at(parsed,root).kind == 8 || syntax::expression_at(parsed,root).kind == 3 || syntax::expression_at(parsed,root).kind == 9 || syntax::expression_at(parsed,root).kind==4 && bytes::equal(syntax::expression_text(parsed,root),b"*")) {
                 if (syntax::expression_at(parsed,root).kind == 8) { fields += 1; }
                 root = syntax::expression_at(parsed,root).left;
             }
             if (fields > 1 && nominal::contains_tagged(parsed,state::expressions(tables,root - 1),0)) { return error(problem,4,checked_place.start,checked_place.end,0,target.type); }
             let usize symbol_id = if (syntax::expression_at(parsed,root).kind == 2) { state::uses(tables,root - 1) } else { 0 };
+            let bool indirect=refs::mutable(state::expressions(tables,root-1)) && item.target!=root;
+            if(checked_place.kind==4 && (!indirect || !bytes::equal(syntax::assignment_operator(parsed,id),b"="))){return error(problem,4,checked_place.start,checked_place.end,0,target.type);}
             let u32 expected = target.type;
             let state::Value actual = expression(resolved,tables,problem,item.expression,expected,result_type,depth + 1,loop_depth);
             if (problem.code != 0) { return actual; }
             let syntax::Expression place = syntax::expression_at(parsed,item.target);
-            if (symbol_id == 0 || (names::symbol_at(resolved,symbol_id).kind != 4 && names::symbol_at(resolved,symbol_id).kind != 10 && !(checked_place.kind == 9 && state::expressions(tables,checked_place.left - 1) == 11))) { return error(problem,4,place.start,place.end,0,target.type); }
+            if (symbol_id == 0 || (names::symbol_at(resolved,symbol_id).kind != 4 && names::symbol_at(resolved,symbol_id).kind != 10 && !indirect && !(checked_place.kind == 9 && state::expressions(tables,checked_place.left - 1) == 11))) { return error(problem,4,place.start,place.end,0,target.type); }
             if(names::symbol_at(resolved,symbol_id).kind==10 && fields>1){return error(problem,4,place.start,place.end,0,target.type);}
             if(names::symbol_at(resolved,symbol_id).kind==10 && (fields==0 || nominal::contains_resource(parsed,expected,0))){return error(problem,48,place.start,place.end,0,target.type);}
             if (expected != actual.type) { let syntax::Expression source = syntax::expression_at(parsed,item.expression); return error(problem,1,source.start,source.end,expected,actual.type); }

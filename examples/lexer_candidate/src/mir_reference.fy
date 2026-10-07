@@ -4,6 +4,7 @@ import reference_types as refs;
 import hir_shapes as shapes;
 import array_types as arrays;
 pub fn bool operation(ref m::Program p,m::Operation o){
+    if(o.kind==30){return o.result==0 && o.left!=0 && o.right!=0 && refs::mutable(o.owner_type) && refs::inner(o.owner_type)==o.type && !shapes::needs_drop(o.type) && o.operator==0 && !o.boolean && o.argument_count==0 && o.argument_start==0 && o.payload_start==0 && o.payload_end==0 && m::local_at(p,o.left).type==o.owner_type && m::local_at(p,o.right).type==o.type && m::local_at(p,o.left).function==o.function && m::local_at(p,o.right).function==o.function;}
     if(o.argument_count!=0 || o.argument_start!=0 || o.boolean || o.payload_start!=0 || o.payload_end!=0 || o.result==0 || o.left==0){return false;}
     let left=m::local_at(p,o.left);let result=m::local_at(p,o.result);if(left.function!=o.function || result.function!=o.function || left.type!=o.owner_type || result.type!=o.type){return false;}
     if(o.kind==28){return refs::valid(o.type) && refs::inner(o.type)==o.owner_type && o.operator==0 && o.right==0 && left.binding!=0 && (!refs::mutable(o.type) || left.mutable);}

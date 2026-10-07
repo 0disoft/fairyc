@@ -390,6 +390,15 @@ fn bool statement(ref h::Program input, ref mut v::Vec<m::Local> locals, ref mut
         }
         c.live=incoming;c.pending=incoming_pending;c.current = exit; return true;
     }
+    if(kind==3){let target=h::expression_at(input,s.target);let usize root=places::root(input,s.target,false);let bool deref=h::expression_code(target.kind)==4 && h::operator_code(target.operator)==5;
+        if(deref || root!=0 && refs::mutable(h::type_code(h::binding_at(input,root).type)) && s.target!=0 && h::expression_code(target.kind)==10){
+            let usize pointer=if(deref){expression(input,locals,blocks,operations,edges,payload,c,target.left,depth+1)}else{address(input,locals,blocks,operations,edges,payload,c,s.target,true,depth+1)};if(pointer==0 || c.current==0){return c.problem.code==0;}
+            let u32 type=h::type_code(target.type);let u32 owner_type=v::at<m::Local>(locals,pointer-1).type;let u32 op=h::operator_code(s.operator);var usize prior=0;
+            if(op!=21){prior=state::local(locals,c,type,0,false,false,s.start,s.end);if(state::emit(operations,blocks,c,state::operation(29,prior,type,owner_type,0,pointer,0,s.start,s.end))==0){return false;}}
+            var usize value=expression(input,locals,blocks,operations,edges,payload,c,s.expression,depth+1);if(c.current==0 || c.problem.code!=0){return c.problem.code==0;}if(op!=21){value=math::binary(locals,blocks,operations,c,type,type,op,prior,value,s.start,s.end);}
+            return state::emit(operations,blocks,c,state::operation(30,0,type,owner_type,0,pointer,value,s.start,s.end))!=0;
+        }
+    }
     if (kind == 3 && h::expression_code(h::expression_at(input,s.target).kind) == 13 && h::type_code(h::expression_at(input,h::expression_at(input,s.target).left).type) == 11) {
         let target = h::expression_at(input,s.target); let u32 operator = h::operator_code(s.operator);
         // Freeze the descriptor, then evaluate and check the index before RHS.
