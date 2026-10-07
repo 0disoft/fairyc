@@ -617,7 +617,8 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   native result must agree at both profiles. ADR 0243 adds a fourth exact generated object with a
   version-2 bigobj header and 20-byte symbols. Its internal REL32, exact map owner, final
   displacement, and native result must agree at both profiles while the 4,096-section inspection
-  budget stays unchanged. ADR 0238 compiles the two C inputs with `/Z7`, requires exact function-targeted
+  budget originally stayed unchanged; ADR 0473 subsequently extends it to 16,384 for the growing
+  compiler candidate while preserving structural and byte budgets. ADR 0238 compiles the two C inputs with `/Z7`, requires exact function-targeted
   `.debug$S` `SECREL`/`SECTION` pairs and object-level formulas, and binds the final PE RSDS GUID/age
   to the bounded MSF 7 PDB information stream at both profiles. ADR 0239 then requires system
   DbgHelp to resolve the exact source-function start to its name and `caller.c` line with zero

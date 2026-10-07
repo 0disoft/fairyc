@@ -297,8 +297,9 @@ The raw COFF object inspector follows the same internal-policy rule. ADR 0231's
 `fairyc.coff-object-fixtures/v0` manifest versions internal test inputs and exact structural
 expectations for primary symbols, AMD64 relocation types, and COMDAT selection; it is not a public
 object format, serialized compiler receipt, or compiler-produced whole-object byte promise. Its
-4,096-section and 64 MiB object budgets bound parser work while admitting current MSVC function-level
-section fanout; the synthetic 154-section regression case is evidence, not a stable output count.
+16,384-section (ADR 0473) and 64 MiB object budgets bound parser work while admitting the growing
+MSVC function-level section fanout; synthetic counts and the observed 4,135-section candidate are
+regression evidence, not a stable output count.
 `fairyc.coff-generated-object-fixtures/v0` separately versions explicit inputs and exact byte
 digests for the deterministic weak-external search-mode, relocation-overflow, and version-2 bigobj test
 generators. Its complete symbol receipts and relocation-run partitions are compiler-private
@@ -346,8 +347,9 @@ declarations, arbitrary prebuilt objects, or a public object/linker compatibilit
 ADR 0242 likewise keeps the generated overflow-object bytes, 1,048,576-record inspection budget,
 map identity, and leaf code private. They may evolve with synchronized parser, mutation, and native
 evidence updates; they do not stabilize a Fairy object writer or public prebuilt-object contract.
-ADR 0243 keeps the bigobj header version/GUID, generated 161-byte object, 4,096-section and
-262,144-symbol inspection budgets, map identity, and internal REL32 proof private. It does not
+ADR 0243 keeps the bigobj header version/GUID, generated 161-byte object,
+262,144-symbol inspection budget, map identity, and internal REL32 proof private.
+ADR 0473 extends the shared section budget to 16,384. This does not
 promise public bigobj emission, arbitrary prebuilt-object compatibility, or theoretical 2^32
 section capacity.
 Microsoft x64 unwind inspection is likewise an internal validation policy. Neither the observed

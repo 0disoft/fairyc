@@ -9,10 +9,13 @@ import (
 )
 
 const (
-	coffFileHeaderBytes          = 20
-	coffSectionHeaderBytes       = 40
-	coffRelocationBytes          = 10
-	maxObjectSections            = 4096
+	coffFileHeaderBytes    = 20
+	coffSectionHeaderBytes = 40
+	coffRelocationBytes    = 10
+	// Bounded fanout for the growing generated compiler; ordinary COFF section
+	// numbers remain below the signed 16-bit range. Byte/symbol/relocation
+	// budgets and structural validation still apply (ADR 0473).
+	maxObjectSections            = 16384
 	maxObjectRelocations         = 1 << 20
 	maxObjectSymbols             = 1 << 18
 	sectionRelocationOverflow    = 0x01000000

@@ -280,7 +280,7 @@ entry point. This does not inspect object symbols or relocations, unwind/debug p
 API compatibility, signing, installer packaging, or distribution behavior.
 The driver also parses every intermediate `.obj` from `build-host`, every `run-host` case, and both
 profiles of all native probes before linking results leave the temporary root. Raw AMD64 COFF,
-at most 4,096 sections inside the 64 MiB object budget, bounded section and relocation ranges,
+at most 16,384 sections (ADR 0473) inside the 64 MiB object budget, bounded section and relocation ranges,
 readable executable `.text`/`.text$...`, valid primary relocation symbols and AMD64 types, and exact
 COMDAT definitions are mandatory; storage-free `.bss` is admitted only with the uninitialized-data
 characteristic. Object bytes are not uploaded or retained. ADR 0231 fixes exact synthetic primary

@@ -2,6 +2,7 @@ package pecoff
 
 import (
 	"encoding/binary"
+	"fmt"
 	"strings"
 	"testing"
 )
@@ -121,13 +122,17 @@ func TestInspectObjectAcceptsMSVCTextSubsection(t *testing.T) {
 
 func TestInspectObjectAcceptsMSVCFunctionLevelSectionCount(t *testing.T) {
 	t.Parallel()
-	const observedSections = 154
-	report, err := InspectObject(manySectionAMD64COFF(observedSections))
-	if err != nil {
-		t.Fatal(err)
-	}
-	if len(report.Sections) != observedSections || report.Sections[0].Name != ".text$mn" {
-		t.Fatalf("COFF section receipt = %d, %q", len(report.Sections), report.Sections[0].Name)
+	// 4,135 is the real optimized candidate's observed section fanout.
+	for _, count := range []int{154, 4096, 4135, maxObjectSections} {
+		t.Run(fmt.Sprint(count), func(t *testing.T) {
+			report, err := InspectObject(manySectionAMD64COFF(count))
+			if err != nil {
+				t.Fatal(err)
+			}
+			if len(report.Sections) != count || report.Sections[0].Name != ".text$mn" {
+				t.Fatalf("COFF section receipt = %d, %q", len(report.Sections), report.Sections[0].Name)
+			}
+		})
 	}
 }
 
