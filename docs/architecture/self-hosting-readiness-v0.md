@@ -130,8 +130,9 @@ exact effect authority and failure results independently verified. The
 records the exact native evidence. Copied byte iteration now also executes
 through existing owned HIR/MIR loops, including one-time slice bounds and
 resource exits. Fixed byte-array field subranges also preserve original storage and
-execute in both candidate profiles. The unchanged scanner reaches HIR; its
-payload selector still needs mixed-origin tracking before scanner integration. Project-driver
+execute in both candidate profiles. Local mixed-origin payload selections now retain every possible owner
+in HIR and independently recomputed MIR. The unchanged scanner still reaches
+a HIR analysis-limit rejection before complete scanner execution. Project-driver
 and platform work also remain. These prerequisite executions do not establish
 the differential acceptance or stage1/stage2 gate above.
 

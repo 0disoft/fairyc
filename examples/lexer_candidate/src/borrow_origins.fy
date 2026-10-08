@@ -36,10 +36,11 @@ pub fn Result<usize,u32> join(ref mut v::Vec<Entry> sets,ref mut v::Vec<usize> m
     return .ok(262144+v::len<Entry>(sets)-1);
 }
 pub fn bool contains(ref v::Vec<Entry> sets,ref v::Vec<usize> members,usize origin,usize leaf,ref mut usize work){
-    if(leaf==0 || leaf==65538){return false;}var usize i=0;let usize size=count(sets,origin);
+    if(leaf==0 || leaf==65538){return false;}if(!mixed(origin)){return origin==leaf;}var usize i=0;let usize size=count(sets,origin);
     while(i<size){if(!charge(work)){return false;}let usize item=at(sets,members,origin,i);if(item==leaf){return true;}if(item>leaf){return false;}i+=1;}return false;
 }
 pub fn bool overlap(ref v::Vec<Entry> sets,ref v::Vec<usize> members,usize a,usize b,ref mut usize work){
+    if(!mixed(a) && !mixed(b)){return a!=0 && a!=65538 && a==b;}
     let usize na=count(sets,a);let usize nb=count(sets,b);var usize ia=0;var usize ib=0;
     while(ia<na && ib<nb){if(!charge(work)){return false;}let usize left=at(sets,members,a,ia);let usize right=at(sets,members,b,ib);if(left==right){return true;}if(left<right){ia+=1;}else{ib+=1;}}return false;
 }

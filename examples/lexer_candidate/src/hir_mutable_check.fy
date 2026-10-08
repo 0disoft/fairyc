@@ -4,6 +4,7 @@ import borrow_shapes as borrows;
 import tagged_types as tagged;
 import reference_types as refs;
 import hir_model as h;
+import borrow_origins as owners;
 
 import array_types as arrays;
 import std::vec as v;
@@ -111,7 +112,7 @@ fn usize held_end(ref h::Program p, usize id) {
     } return end;
 }
 fn bool competing(ref h::Program p,usize id){let e=h::expression_at(p,id);var usize i=1;while(i<=h::statement_count(p)){let s=h::statement_at(p,i);if(h::statement_code(s.kind)==3){let t=h::expression_at(p,s.target);if(e.start>=t.start && e.end<=t.end){return true;}}i+=1;}i=1;while(i<=h::expression_count(p)){let x=h::expression_at(p,i);if(h::expression_code(x.kind)==6){var usize j=0;while(j<x.edge_count){let a=h::expression_at(p,h::edge_at(p,x.edge_start+j));if((borrows::mutable(h::type_code(a.type))) && e.start>=a.start && e.end<=a.end){return true;}j+=1;}}i+=1;}return false;}
-pub fn h::Problem check(ref h::Program p, ref usize[] initial, ref usize[] last, ref usize[] summaries, ref v::Vec<usize> origins) {
+pub fn h::Problem check(ref h::Program p, ref usize[] initial, ref usize[] last, ref usize[] summaries, ref v::Vec<usize> origins,ref v::Vec<owners::Entry> sets,ref v::Vec<usize> members) {
     var bool needed = false; var usize i = 1;
     while (i <= h::expression_count(p)) { needed = needed || borrows::mutable(h::type_code(h::expression_at(p,i).type)); i += 1; }
     if (!needed) { return h::Problem { .code=0,.start=0,.end=0 }; }
@@ -161,13 +162,13 @@ if (borrows::count(type)!=0) { discard generation(p,ref mut c,ref mut slots,init
                 if (!charge(ref mut c)) { return h::Problem { .code=2,.start=0,.end=0 }; }
                 let other = *v::at<Slot>(ref slots,j);
                 let e = h::expression_at(p,j);
-                if (j > i && other.fresh && (loan.mutable || other.mutable) && *v::at<usize>(origins,j) == owner && loan.start < other.end && other.start < loan.end && !ancestor(ref slots,i,j,0,ref mut c.work) && !ancestor(ref slots,j,i,0,ref mut c.work) && !paths::separate(p,loan.start,e.start,e.end,ref mut c.work) && !paths::separate(p,loan.end-1,e.start,e.end,ref mut c.work)) { let e=h::expression_at(p,j); return h::Problem { .code=2101,.start=e.start,.end=e.end }; }
+                if (j > i && other.fresh && (loan.mutable || other.mutable) && owners::overlap(sets,members,*v::at<usize>(origins,j),owner,ref mut c.work) && loan.start < other.end && other.start < loan.end && !ancestor(ref slots,i,j,0,ref mut c.work) && !ancestor(ref slots,j,i,0,ref mut c.work) && !paths::separate(p,loan.start,e.start,e.end,ref mut c.work) && !paths::separate(p,loan.end-1,e.start,e.end,ref mut c.work)) { let e=h::expression_at(p,j); return h::Problem { .code=2101,.start=e.start,.end=e.end }; }
                 if (h::expression_code(e.kind) == 3 && loan.start < e.end && e.start < loan.end) {
                     // The occurrence creating this loan is allowed; bounds and
                     // later arguments are separate occurrences and stay checked.
                     let bool creating = if (loan.receiver != 0) { let receiver = h::expression_at(p,loan.receiver); e.start >= receiver.start && e.end <= receiver.end } else { false };
                     let u32 type = h::type_code(e.type);
-                    let bool access = e.binding == owner && loan.mutable || borrows::mutable(type) && *v::at<usize>(origins,j) == owner && !ancestor(ref slots,i,other.generation,0,ref mut c.work) && (loan.mutable || competing(p,j));
+                    let bool access = owners::contains(sets,members,owner,e.binding,ref mut c.work) && loan.mutable || borrows::mutable(type) && owners::overlap(sets,members,*v::at<usize>(origins,j),owner,ref mut c.work) && !ancestor(ref slots,i,other.generation,0,ref mut c.work) && (loan.mutable || competing(p,j));
                     if (!creating && access && paths::reachable(p,e.start,e.end,ref mut c.work) && !paths::separate(p,loan.start,e.start,e.end,ref mut c.work) && !paths::separate(p,loan.end-1,e.start,e.end,ref mut c.work)) {
                         return h::Problem { .code=2101,.start=e.start,.end=e.end };
                     }

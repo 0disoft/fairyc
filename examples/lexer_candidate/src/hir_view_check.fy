@@ -1,5 +1,6 @@
 module hir_view_check;
 import scalar_views as views;
+import borrow_origins as owners;
 import hir_borrow_paths as paths;
 import borrow_shapes as borrows;
 import tagged_types as tagged;
@@ -9,10 +10,9 @@ import hir_origin_targets as targets;
 import hir_mutable_check as exclusive;
 import std::vec as v;
 
-// Zero means Static; a nonzero origin is one exact local-array or byte-view
-// parameter binding. This slice admits immutable local descriptors only when
-// their origin is non-Static. Mixed origins and recursive view-return summaries
-// stay closed, rather than silently forgetting a possible owner.
+// Zero means Static; leaves name one owner and canonical sets retain all
+// possible local owners across selection. Return summaries still require one
+// exact input parameter; recursive/ambiguous returns remain closed.
 struct Context {
     usize[1153] initial; usize[1153] last;
     usize[1153] summary; u8[1153] color;
@@ -33,35 +33,41 @@ fn bool within(ref h::Program p, usize child, usize parent) {
     } return false;
 }
 // Unknown is distinct from Static; cycles never bootstrap a guessed origin.
-fn usize joined(ref mut Context c,usize a,usize b,usize start,usize end){if(a==65538){return b;}if(b==65538){return a;}if(a==0){return b;}if(b==0 || a==b){return a;}return fail(c,2103,start,end);}
-fn usize origin(ref h::Program p, ref mut Context c, usize id, usize depth) {
+fn usize joined(ref mut Context c,ref mut v::Vec<owners::Entry> sets,ref mut v::Vec<usize> members,usize a,usize b,usize start,usize end){return switch(owners::join(sets,members,a,b,ref mut c.work)){case .ok(id):{id}case .err(code):{fail(c,code,start,end)}};}
+fn bool scope_check(ref h::Program p,ref v::Vec<owners::Entry> sets,ref v::Vec<usize> members,usize origin,usize scope,bool escape){
+    var usize i=0;let usize count=owners::count(sets,origin);
+    while(i<count){let b=h::binding_at(p,owners::at(sets,members,origin,i));
+        if(escape && within(p,b.scope,scope)){return true;}if(!escape && !within(p,scope,b.scope)){return false;}i+=1;
+    }return !escape;
+}
+fn usize origin(ref h::Program p, ref mut Context c, ref mut v::Vec<owners::Entry> sets, ref mut v::Vec<usize> members, usize id, usize depth) {
     if (id == 0 || c.problem.code != 0) { return 0; }
     let e = h::expression_at(p,id); let u32 kind = h::expression_code(e.kind);
     if (!byte_view(h::type_code(e.type)) || kind == 15 || kind == 21) { return 0; }
     if(!paths::reachable(p,e.start,e.end,ref mut c.work)){return 0;}
     c.work += 1; if (depth >= 64 || c.work > 1048576) { return fail(c,2,e.start,e.end); }
-    if(kind==18){return if(e.edge_count==1){origin(p,c,h::edge_at(p,e.edge_start),depth+1)}else{0};}
-    if(kind==22 || kind==11){return origin(p,c,e.left,depth+1);}
-    if (kind == 16) { let usize owner=root(p,e.left); if(owner!=0 && byte_view(h::type_code(h::binding_at(p,owner).type))){return origin(p,c,base(p,e.left),depth+1);}return owner; }
-    if (kind == 17 || kind==25 || kind==29 || kind==30) { return origin(p,c,e.left,depth + 1); }
+    if(kind==18){return if(e.edge_count==1){origin(p,c,sets,members,h::edge_at(p,e.edge_start),depth+1)}else{0};}
+    if(kind==22 || kind==11){return origin(p,c,sets,members,e.left,depth+1);}
+    if (kind == 16) { let usize owner=root(p,e.left); if(owner!=0 && byte_view(h::type_code(h::binding_at(p,owner).type))){return origin(p,c,sets,members,base(p,e.left),depth+1);}return owner; }
+    if (kind == 17 || kind==25 || kind==29 || kind==30) { return origin(p,c,sets,members,e.left,depth + 1); }
     if (kind == 3) {
         let b = h::binding_at(p,e.binding);
         if (h::binding_code(b.kind) == 2) { return e.binding; }
-        let usize initial = c.initial[e.binding]; return origin(p,c,initial,depth + 1);
+        let usize initial = c.initial[e.binding]; return origin(p,c,sets,members,initial,depth + 1);
     }
-    if ((kind == 7 || kind==20)) { return origin(p,c,h::block_at(p,e.block).tail,depth + 1); }
-    if(kind==19){var usize result=0;var bool seen=false;var usize i=0;while(i<e.edge_count){let arm=h::expression_at(p,h::edge_at(p,e.edge_start+i));let usize tail=h::block_at(p,arm.block).tail;if(tail!=0){let usize value=origin(p,c,tail,depth+1);result=if(seen){joined(c,result,value,e.start,e.end)}else{value};seen=true;}i+=1;}return result;}
+    if ((kind == 7 || kind==20)) { return origin(p,c,sets,members,h::block_at(p,e.block).tail,depth + 1); }
+    if(kind==19){var usize result=0;var bool seen=false;var usize i=0;while(i<e.edge_count){let arm=h::expression_at(p,h::edge_at(p,e.edge_start+i));let usize tail=h::block_at(p,arm.block).tail;if(tail!=0){let usize value=origin(p,c,sets,members,tail,depth+1);result=if(seen){joined(c,sets,members,result,value,e.start,e.end)}else{value};seen=true;}i+=1;}return result;}
     if (kind == 8) {
-        let usize yes = origin(p,c,h::block_at(p,e.block).tail,depth + 1);
-        let usize no = origin(p,c,e.alternative,depth + 1);
-        if(h::block_at(p,e.block).tail==0){return no;}if(!byte_view(h::type_code(h::expression_at(p,e.alternative).type))){return yes;}return joined(c,yes,no,e.start,e.end);
+        let usize yes = origin(p,c,sets,members,h::block_at(p,e.block).tail,depth + 1);
+        let usize no = origin(p,c,sets,members,e.alternative,depth + 1);
+        if(h::block_at(p,e.block).tail==0){return no;}if(!byte_view(h::type_code(h::expression_at(p,e.alternative).type))){return yes;}return joined(c,sets,members,yes,no,e.start,e.end);
     }
     if (kind == 6) {
-        let usize returned = summary(p,c,e.binding,depth + 1); if (returned == 0 || c.problem.code != 0) { return 0; }if(returned==65538){return 65538;}
-        let usize parameter=targets::parameter(p,e.binding,returned);return if(parameter!=0){origin(p,c,h::edge_at(p,e.edge_start+parameter-1),depth+1)}else{fail(c,2103,e.start,e.end)};
+        let usize returned = summary(p,c,sets,members,e.binding,depth + 1); if (returned == 0 || c.problem.code != 0) { return 0; }if(returned==65538){return 65538;}
+        let usize parameter=targets::parameter(p,e.binding,returned);return if(parameter!=0){origin(p,c,sets,members,h::edge_at(p,e.edge_start+parameter-1),depth+1)}else{fail(c,2103,e.start,e.end)};
     } return fail(c,2103,e.start,e.end);
 }
-fn usize summary(ref h::Program p, ref mut Context c, usize binding, usize depth) {
+fn usize summary(ref h::Program p, ref mut Context c, ref mut v::Vec<owners::Entry> sets, ref mut v::Vec<usize> members, usize binding, usize depth) {
     if (c.color[binding] == 2) { return c.summary[binding]; }
     let b = h::binding_at(p,binding);
     if(c.color[binding]==1){return c.summary[binding];}
@@ -74,14 +80,15 @@ fn usize summary(ref h::Program p, ref mut Context c, usize binding, usize depth
         let s = h::statement_at(p,i);
         // Specializations retain the same source bytes, but own distinct scopes.
         if (h::statement_code(s.kind) == 2 && within(p,s.scope,f.scope) && s.expression != 0 && paths::reachable(p,s.start,s.end,ref mut c.work)) {
-            let usize value = origin(p,c,s.expression,depth + 1);
-            result=joined(c,result,value,s.start,s.end);seen=seen || value!=65538;
+            let usize value = origin(p,c,sets,members,s.expression,depth + 1);
+            result=joined(c,sets,members,result,value,s.start,s.end);seen=seen || value!=65538;
         } i += 1;
     }
-    i=1;while(i<=h::expression_count(p)){let e=h::expression_at(p,i);if(h::expression_code(e.kind)==22 && e.binding==binding && tagged::result(h::type_code(h::expression_at(p,e.left).type)) && borrows::count(tagged::failure(h::type_code(h::expression_at(p,e.left).type)))!=0){let usize value=origin(p,c,e.left,depth+1);result=joined(c,result,value,e.start,e.end);}i+=1;}
+    i=1;while(i<=h::expression_count(p)){let e=h::expression_at(p,i);if(h::expression_code(e.kind)==22 && e.binding==binding && tagged::result(h::type_code(h::expression_at(p,e.left).type)) && borrows::count(tagged::failure(h::type_code(h::expression_at(p,e.left).type)))!=0){let usize value=origin(p,c,sets,members,e.left,depth+1);result=joined(c,sets,members,result,value,e.start,e.end);}i+=1;}
     let body = h::block_at(p,f.body);
-    if (body.tail != 0) { let usize value = origin(p,c,body.tail,depth + 1); result=joined(c,result,value,body.start,body.end); }
+    if (body.tail != 0) { let usize value = origin(p,c,sets,members,body.tail,depth + 1); result=joined(c,sets,members,result,value,body.start,body.end); }
     if (result != 0 && result!=65538) {
+        if(owners::mixed(result)){return fail(c,2103,f.start,f.end);}
         let owner = h::binding_at(p,result);
         if (h::binding_code(owner.kind) != 2 || !byte_view(h::type_code(owner.type)) || owner.owner != binding) { return fail(c,2102,f.start,f.end); }
     }
@@ -113,15 +120,15 @@ fn usize held_end(ref h::Program p, usize id, h::Expression e,ref mut Context c)
     }
     return end;
 }
-fn usize first(ref h::Program p, ref mut Context c, usize id, usize depth) {
+fn usize first(ref h::Program p, ref mut Context c, ref mut v::Vec<owners::Entry> sets, ref mut v::Vec<usize> members, usize id, usize depth) {
     let e=h::expression_at(p,id);let u32 kind=h::expression_code(e.kind);
     if(depth>=64){discard fail(c,2,e.start,e.end);return e.start;}
-    if(kind==17 || kind==25 || kind==29 || kind==30 || kind==11 || kind==18 && e.edge_count==1){return first(p,c,if(kind==18){h::edge_at(p,e.edge_start)}else{e.left},depth+1);}
-    if(kind==7){let usize tail=h::block_at(p,e.block).tail;return if(tail==0){e.start}else{first(p,c,tail,depth+1)};}
-    if(kind==8){let usize yes=h::block_at(p,e.block).tail;if(yes==0 || e.alternative==0){return e.start;}let usize a=first(p,c,yes,depth+1);let usize b=first(p,c,e.alternative,depth+1);return if(a<b){a}else{b};}
+    if(kind==17 || kind==25 || kind==29 || kind==30 || kind==11 || kind==18 && e.edge_count==1){return first(p,c,sets,members,if(kind==18){h::edge_at(p,e.edge_start)}else{e.left},depth+1);}
+    if(kind==7){let usize tail=h::block_at(p,e.block).tail;return if(tail==0){e.start}else{first(p,c,sets,members,tail,depth+1)};}
+    if(kind==8){let usize yes=h::block_at(p,e.block).tail;if(yes==0 || e.alternative==0){return e.start;}let usize a=first(p,c,sets,members,yes,depth+1);let usize b=first(p,c,sets,members,e.alternative,depth+1);return if(a<b){a}else{b};}
     if(kind==6){
-        let usize returned=summary(p,c,e.binding,depth+1);var usize i=0;while(i<h::function_count(p)){
-            let f=h::function_at(p,i);if(f.binding==e.binding){var usize j=0;while(j<f.parameter_count){if(h::edge_at(p,f.parameter_start+j)==returned){return first(p,c,h::edge_at(p,e.edge_start+j),depth+1);}j+=1;}}i+=1;
+        let usize returned=summary(p,c,sets,members,e.binding,depth+1);var usize i=0;while(i<h::function_count(p)){
+            let f=h::function_at(p,i);if(f.binding==e.binding){var usize j=0;while(j<f.parameter_count){if(h::edge_at(p,f.parameter_start+j)==returned){return first(p,c,sets,members,h::edge_at(p,e.edge_start+j),depth+1);}j+=1;}}i+=1;
         }
     }return e.start;
 }
@@ -143,6 +150,7 @@ pub fn h::Problem check(ref h::Program p) {
         parameter += 1;
     }
     if (!needed) { return h::Problem { .code=0,.start=0,.end=0 }; }
+    var v::Vec<owners::Entry> sets=v::empty<owners::Entry>();var v::Vec<usize> members=v::empty<usize>();
     var Context c = Context { .initial=[0;1153],.last=[0;1153],.summary=[65538;1153],.color=[0;1153],.work=0,.problem=h::Problem { .code=0,.start=0,.end=0 } };
     var usize i = 1; while (i <= h::statement_count(p)) {
         let s = h::statement_at(p,i); if (h::statement_code(s.kind) == 1) { c.initial[s.binding] = s.expression; } i += 1;
@@ -153,14 +161,14 @@ pub fn h::Problem check(ref h::Program p) {
             let usize end = held_end(p,i,e,ref mut c); if (end > c.last[e.binding]) { c.last[e.binding] = end; }
         } i += 1;
     }
-    var bool changed=true;var usize rounds=0;while(changed && c.problem.code==0){changed=false;rounds+=1;if(rounds>64){return h::Problem{.code=2,.start=0,.end=0};}c.color=[0;1153];i=0;while(i<h::function_count(p)){let f=h::function_at(p,i);if(byte_view(h::type_code(h::binding_at(p,f.binding).type))){let usize old=c.summary[f.binding];let usize next=summary(p,ref mut c,f.binding,0);changed=changed || old!=next;}i+=1;}}
+    var bool changed=true;var usize rounds=0;while(changed && c.problem.code==0){changed=false;rounds+=1;if(rounds>64){return h::Problem{.code=2,.start=0,.end=0};}c.color=[0;1153];i=0;while(i<h::function_count(p)){let f=h::function_at(p,i);if(byte_view(h::type_code(h::binding_at(p,f.binding).type))){let usize old=c.summary[f.binding];let usize next=summary(p,ref mut c,ref mut sets,ref mut members,f.binding,0);changed=changed || old!=next;}i+=1;}}
     i=0;while(i<h::function_count(p)){let f=h::function_at(p,i);if(byte_view(h::type_code(h::binding_at(p,f.binding).type)) && c.summary[f.binding]==65538){discard fail(ref mut c,2103,f.start,f.end);}i+=1;}
     // Initializers and return summaries are fixed before this pass. Reuse the
     // same origins for assignment/move conflicts instead of retracing every
     // loan for every scalar store in the complete authenticated SDK.
     var v::Vec<usize> origins = v::empty<usize>(); i = 0;
     while (i <= h::expression_count(p)) {
-        let usize value = origin(p,ref mut c,i,0);
+        let usize value = origin(p,ref mut c,ref mut sets,ref mut members,i,0);
         if (!v::push<usize>(ref mut origins,value).is_ok) { return h::Problem { .code=3,.start=0,.end=0 }; } i += 1;
     }
     if(c.work>1048576){return h::Problem{.code=2,.start=0,.end=0};}
@@ -168,12 +176,12 @@ pub fn h::Problem check(ref h::Program p) {
     i = 1; while (i <= h::binding_count(p)) {
         let b = h::binding_at(p,i); if (byte_view(h::type_code(b.type)) && c.initial[i] != 0) {
             let usize initial = c.initial[i]; let usize owner = *v::at<usize>(ref origins,initial);
-            if (owner != 0 && (h::binding_code(b.kind) == 4 || !within(p,b.scope,h::binding_at(p,owner).scope))) { discard fail(ref mut c,2102,b.start,b.end); }
+            if (owner != 0 && (h::binding_code(b.kind) == 4 || !scope_check(p,ref sets,ref members,owner,b.scope,false))) { discard fail(ref mut c,2102,b.start,b.end); }
         } i += 1;
     }
     i = 1; while (i <= h::block_count(p)) {
         let b = h::block_at(p,i); let usize owner = *v::at<usize>(ref origins,b.tail);
-        if (owner != 0 && within(p,h::binding_at(p,owner).scope,b.scope)) { discard fail(ref mut c,2102,b.start,b.end); } i += 1;
+        if (owner != 0 && scope_check(p,ref sets,ref members,owner,b.scope,true)) { discard fail(ref mut c,2102,b.start,b.end); } i += 1;
     }
     i = 1; while (i <= h::statement_count(p) && c.problem.code == 0) {
         let s = h::statement_at(p,i);
@@ -184,8 +192,8 @@ pub fn h::Problem check(ref h::Program p) {
             if (*v::at<usize>(ref origins,s.expression) != 0 && byte_view(h::type_code(h::expression_at(p,s.target).type))) { discard fail(ref mut c,2102,s.start,s.end); }
             var usize j = 1; while (!through_mutable && j <= h::expression_count(p) && c.problem.code == 0) {
                 let e = h::expression_at(p,j); let usize loan = *v::at<usize>(ref origins,j);
-                if (loan != 0 && loan == owner) {
-                    let usize start=first(p,ref mut c,j,0);var usize end = held_end(p,j,e,ref mut c); var usize k = 1;
+                if (loan != 0 && owners::contains(ref sets,ref members,loan,owner,ref mut c.work)) {
+                    let usize start=first(p,ref mut c,ref mut sets,ref mut members,j,0);var usize end = held_end(p,j,e,ref mut c); var usize k = 1;
                     while (k <= h::binding_count(p)) { if (c.initial[k] == j && c.last[k] > end) { end = c.last[k]; } k += 1; }
                     // Arguments stay held through later arguments and the call.
                     k = 1; while (k <= h::expression_count(p)) {
@@ -201,8 +209,8 @@ pub fn h::Problem check(ref h::Program p) {
         } i += 1;
     }
     // A whole resource move/burn is a competing access, just like replacement.
-    i=1;while(i<=h::expression_count(p) && c.problem.code==0){let moved=h::expression_at(p,i);if(h::expression_code(moved.kind)==24){var usize j=1;while(j<=h::expression_count(p)){let loan=h::expression_at(p,j);if(byte_view(h::type_code(loan.type)) && *v::at<usize>(ref origins,j)==moved.binding){let usize begin=first(p,ref mut c,j,0);var usize end=held_end(p,j,loan,ref mut c);var usize local=1;while(local<=h::binding_count(p)){if(c.initial[local]==j && c.last[local]>end){end=c.last[local];}local+=1;}if(begin<moved.end && moved.start<end && paths::reachable(p,moved.start,moved.end,ref mut c.work) && !paths::separate(p,begin,moved.start,moved.end,ref mut c.work) && !paths::separate(p,end-1,moved.start,moved.end,ref mut c.work)){discard fail(ref mut c,2101,moved.start,moved.end);}}j+=1;}}i+=1;}
+    i=1;while(i<=h::expression_count(p) && c.problem.code==0){let moved=h::expression_at(p,i);if(h::expression_code(moved.kind)==24){var usize j=1;while(j<=h::expression_count(p)){let loan=h::expression_at(p,j);if(byte_view(h::type_code(loan.type)) && owners::contains(ref sets,ref members,*v::at<usize>(ref origins,j),moved.binding,ref mut c.work)){let usize begin=first(p,ref mut c,ref mut sets,ref mut members,j,0);var usize end=held_end(p,j,loan,ref mut c);var usize local=1;while(local<=h::binding_count(p)){if(c.initial[local]==j && c.last[local]>end){end=c.last[local];}local+=1;}if(begin<moved.end && moved.start<end && paths::reachable(p,moved.start,moved.end,ref mut c.work) && !paths::separate(p,begin,moved.start,moved.end,ref mut c.work) && !paths::separate(p,end-1,moved.start,moved.end,ref mut c.work)){discard fail(ref mut c,2101,moved.start,moved.end);}}j+=1;}}i+=1;}
     if(c.work>1048576){return h::Problem{.code=2,.start=0,.end=0};}
     if (c.problem.code != 0) { return c.problem; }
-    return exclusive::check(p,ref c.initial[..],ref c.last[..],ref c.summary[..],ref origins);
+    return exclusive::check(p,ref c.initial[..],ref c.last[..],ref c.summary[..],ref origins,ref sets,ref members);
 }

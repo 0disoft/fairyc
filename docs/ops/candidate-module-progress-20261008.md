@@ -851,3 +851,38 @@ project commands and Linux execution remain pending.
   shared 1048576 work budget. Allocation/work failures remain explicit. HIR and
   independent MIR wiring, scanner execution and release validation are pending.
   No public API/runtime/schema, dependency, DB or CI change.
+
+## Local mixed-origin HIR/MIR wiring (2026-10-09)
+
+- HIR selections retain canonical unions of every possible local backing owner.
+  Initializer/scope checks inspect each member. Assignment, replacement and
+  resource move holds test membership; exclusive generations test intersection
+  so either incoming parent stays frozen until the selected child expires.
+  Static branches add no owner and Unknown remains distinct. Singleton checks
+  retain their constant-time path without introducing set traversal work.
+- Independent MIR provenance reconstructs unions from owned operations and CFG
+  merge destinations. A caller's single-parameter return summary can substitute
+  a local union argument. Function returns still require Static or one exact
+  input parameter; mixed/ambiguous returns remain E2103. No source origin hint or
+  published HIR/MIR field grants this proof. Set/work/allocation bounds remain.
+- Development/release each pass four programs, eight rejections and sixteen total
+  low/optimized C executions, with identical generated C. Tests cover the actual
+  input-versus-cooked-Vec selection shape, borrowed identity forwarding, byte
+  iteration, tagged extraction, Static joins, exclusive owner selection, nested
+  and scalar-generic joins. Either owner's modification, move and parent access,
+  inner-owner escape and ambiguous input/local returns reject.
+- Two development native API tests pass. Canonical set convergence remains valid;
+  an independently reconstructed MIR whose scalar return is forged into a mixed
+  local-view return rejects E2103 and preserves a preexisting C-output prefix.
+  The development String/CString/UTF-8 regression passes six programs, seven
+  rejections and twelve native executions.
+- Evidence: `evidence/candidate-mixed-origins-dev-20261009.json`,
+  `evidence/candidate-mixed-origins-release-20261009.json`,
+  `evidence/candidate-mixed-origins-api-20261009.json` and
+  `evidence/candidate-mixed-origin-text-regression-20261009.json`.
+- The unchanged scanner now passes mixed-origin admission but still exits at the
+  HIR analysis limit (phase 6, code 2, span 0..0). The precise budget/round guard
+  has not yet been profiled; no limit has been raised. Evidence:
+  `evidence/candidate-scanner-mixed-origin-admission-20261009.json`. Item 48's
+  complete scanner execution remains pending. Release API, Linux and self-hosting
+  are pending. No public language, runtime ABI/schema, dependency, DB or CI change.

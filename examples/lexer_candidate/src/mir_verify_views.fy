@@ -1,5 +1,6 @@
 module mir_verify_views;
 import scalar_views as views;
+import borrow_origins as owners;
 import borrow_shapes as borrows;
 import reference_types as refs;
 import mir_model as m;
@@ -17,14 +18,14 @@ pub fn bool operation(ref m::Program p, m::Operation o) {
     return o.kind==19 && o.owner_type==o.type && local(p,o.left,o.function,o.type) && local(p,o.right,o.function,5) && o.argument_count==1 && local(p,m::edge_at(p,o.argument_start),o.function,5);
 }
 fn usize get(ref v::Vec<usize> values, usize id){return *v::at<usize>(values,id);}
-fn bool merge(ref mut v::Vec<usize> values, usize id, usize origin, ref mut bool changed, ref mut m::Problem problem, usize start, usize end) {
-    if(origin==65538){return true;} let usize old=get(values,id);
-    if(origin==0 && old!=65538){return true;}
-    if(old!=65538 && old!=0 && old!=origin){*problem=m::Problem{.code=2103,.start,.end};return false;}
-    if(old!=origin){let ref mut usize slot=v::at_mut<usize>(values,id);*slot=origin;*changed=true;}return true;
+fn bool merge(ref mut v::Vec<usize> values,ref mut v::Vec<owners::Entry> sets,ref mut v::Vec<usize> members,ref mut usize work,usize id,usize origin,ref mut bool changed,ref mut m::Problem problem,usize start,usize end){
+    let usize old=get(values,id);
+    let usize next=switch(owners::join(sets,members,old,origin,work)){case .ok(id):{id}case .err(code):{*problem=m::Problem{.code,.start,.end};return false;}};
+    if(old!=next){let ref mut usize slot=v::at_mut<usize>(values,id);*slot=next;*changed=true;}return true;
 }
-// Origin fixed point: 0 Static, 1..16384 exact function-local backing array,
-// 131072+parameter-index caller origin, 65538 reserved unknown. A function
+// Origin fixed point: 0 Static, local IDs exact function-local backing storage,
+// 131072+parameter-index caller origin, 65538 Unknown and canonical owner sets.
+// Local selections retain the union. A function
 // may return only Static or one byte
 // parameter. Actual call arguments substitute that summary before any return.
 // This verifier recomputes provenance from MIR; it does not trust source spans
@@ -36,6 +37,7 @@ pub fn m::Problem check(ref m::Program p) {
         parameter += 1;
     }
     if (!needed) { return m::Problem { .code=0,.start=0,.end=0 }; }
+    var v::Vec<owners::Entry> sets=v::empty<owners::Entry>();var v::Vec<usize> members=v::empty<usize>();
     var v::Vec<usize> values=v::empty<usize>();var v::Vec<usize> summaries=v::empty<usize>();
     var usize i=0;while(i<=m::local_count(p)){if(!v::push<usize>(ref mut values,65538).is_ok){return m::Problem{.code=3,.start=0,.end=0};}i+=1;}
     i=0;while(i<=m::target_count(p)){if(!v::push<usize>(ref mut summaries,65538).is_ok){return m::Problem{.code=3,.start=0,.end=0};}i+=1;}
@@ -48,20 +50,21 @@ pub fn m::Problem check(ref m::Program p) {
         i=1;while(i<=m::operation_count(p)){
             let o=m::operation_at(p,i);if(byte_view(o.type)){
                 let usize origin=if(o.kind==21){if(o.argument_count==1 && byte_view(m::local_at(p,m::edge_at(p,o.argument_start)).type)){get(ref values,m::edge_at(p,o.argument_start))}else{0}}else if(o.kind==23){get(ref values,o.left)}else if(o.kind==14){0}else if(o.kind==18 && refs::valid(o.owner_type)){get(ref values,o.left)}else if(o.kind==18 || o.kind==28 || o.kind==33){o.left}else if(o.kind==2 || o.kind==19 || o.kind==32 || o.kind==34 || o.kind==38 || o.kind==39 && o.operator>=6){get(ref values,o.left)}else{65538};
-                if(!merge(ref mut values,o.result,origin,ref mut changed,ref mut problem,o.start,o.end)){return problem;}
+                if(!merge(ref mut values,ref mut sets,ref mut members,ref mut work,o.result,origin,ref mut changed,ref mut problem,o.start,o.end)){return problem;}
             }i+=1;
         }
         i=1;while(i<=m::block_count(p)){
             let b=m::block_at(p,i);
             if(b.kind==5 && b.destination!=0 && byte_view(m::local_at(p,b.destination).type)){
                 let usize summary=get(ref summaries,b.callee);var usize origin=summary;
-                if(summary>=131072){let usize index=summary-131072;if(index>=b.argument_count){return m::Problem{.code=1001,.start=b.start,.end=b.end};}origin=get(ref values,m::edge_at(p,b.argument_start+index));}
-                if(!merge(ref mut values,b.destination,origin,ref mut changed,ref mut problem,b.start,b.end)){return problem;}
+                if(summary>=131072 && !owners::mixed(summary)){let usize index=summary-131072;if(index>=b.argument_count){return m::Problem{.code=1001,.start=b.start,.end=b.end};}origin=get(ref values,m::edge_at(p,b.argument_start+index));}
+                if(!merge(ref mut values,ref mut sets,ref mut members,ref mut work,b.destination,origin,ref mut changed,ref mut problem,b.start,b.end)){return problem;}
             }
             if(b.kind==1 && b.value!=0 && byte_view(m::local_at(p,b.value).type)){
                 let usize origin=get(ref values,b.value);
+                if(owners::mixed(origin)){return m::Problem{.code=2103,.start=b.start,.end=b.end};}
                 if((origin>0 && origin<65538) || origin==0 && views::mutable(m::local_at(p,b.value).type)){return m::Problem{.code=2102,.start=b.start,.end=b.end};}
-                if(!merge(ref mut summaries,m::function_at(p,b.function).target,origin,ref mut changed,ref mut problem,b.start,b.end)){return problem;}
+                if(!merge(ref mut summaries,ref mut sets,ref mut members,ref mut work,m::function_at(p,b.function).target,origin,ref mut changed,ref mut problem,b.start,b.end)){return problem;}
             }i+=1;
         }
     }
