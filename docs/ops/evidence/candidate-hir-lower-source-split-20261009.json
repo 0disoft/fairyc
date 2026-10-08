@@ -1,0 +1,59 @@
+{
+  "schema": "fairyc.candidate-hir-lower-source-split/v1",
+  "passed": true,
+  "originalCommit": "46893b9a",
+  "functionsIdentical": [
+    "block",
+    "lower",
+    "prepare",
+    "expression",
+    "statement"
+  ],
+  "sourceDepthRetained": true,
+  "limitsChanged": false,
+  "parserImplementationUnchanged": true,
+  "observer": {
+    "path": "examples/lexer_candidate/verify_hir_lower_source_split.py",
+    "bytes": 2971,
+    "sha256": "738283ba06c03b9c390d9411c77ff82bff99300e239b2d2efe5744c09fb9cec6"
+  },
+  "parser": {
+    "path": ".cache/candidate-fs/candidate-loader-dev.exe",
+    "bytes": 3339776,
+    "sha256": "91bdd1118c66d3596fb12ebd8f1ddf2f30a4758dcb890ff1d812f3c5e5d08ac3"
+  },
+  "parseObservations": [
+    {
+      "path": "examples/lexer_candidate/src/hir_lower.fy",
+      "bytes": 7659,
+      "sha256": "993da43f0d8e6fe6d0585a17d922f29f60e4ba1faf5ef6b772ca719794c5091f",
+      "exit": 0,
+      "stdoutBytes": 626,
+      "stderr": ""
+    },
+    {
+      "path": "examples/lexer_candidate/src/hir_bindings_lower.fy",
+      "bytes": 10401,
+      "sha256": "9c383dda30d39812b69406652752bfa15185954a90111ac113485c0ba44a3d9c",
+      "exit": 0,
+      "stdoutBytes": 426,
+      "stderr": ""
+    },
+    {
+      "path": "examples/lexer_candidate/src/hir_expression_lower.fy",
+      "bytes": 16276,
+      "sha256": "3ceb58ba65a493f6b154b31c1e18b30b4945409937a874803f0f6ccf938c5560",
+      "exit": 0,
+      "stdoutBytes": 581,
+      "stderr": ""
+    },
+    {
+      "path": "examples/lexer_candidate/src/hir_statement_lower.fy",
+      "bytes": 6225,
+      "sha256": "56a2c796f63cdf99e55234b548024e1c95e7dcf0133edf87f551a5ee0e705e17",
+      "exit": 0,
+      "stdoutBytes": 400,
+      "stderr": ""
+    }
+  ]
+}

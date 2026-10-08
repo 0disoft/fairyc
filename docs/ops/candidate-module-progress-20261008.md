@@ -1311,3 +1311,24 @@ project commands and Linux execution remain pending.
   Release-candidate rebuilding, Linux and whole-dispatcher native execution were
   not repeated. Public language, SDK/runtime ABI, DB, dependencies, CI runner
   settings and all admission bounds are unchanged.
+
+## HIR-lowering self-source admission (2026-10-09)
+
+- `hir_lower.fy` retains the block/program coordinator. Binding/signature
+  preparation, expression lowering and statement lowering have three helpers.
+  All four files parse under existing bounds; all five function bodies are
+  identical after module qualification, including depth and edge ordering.
+- Check and the development SDK driver build pass. Three focused programs
+  retain byte-identical generated C and pass twelve native MSVC runs; the
+  argument-borrow rejection is retained. Evidence:
+  `evidence/candidate-hir-lower-source-split-20261009.json`,
+  `evidence/candidate-hir-lower-source-split-cli-20261009.json` and
+  `evidence/candidate-sdk-module-driver-hir-lower-split-dev-20261009.json`.
+- The actual complete dispatcher now passes parsing and reaches module-program
+  phase 1, code 10 at the cumulative source-byte cap. Its input is 160 files and
+  1055400 joined bytes. Source deduplication remains necessary before further
+  self-source admission. Evidence:
+  `evidence/candidate-dispatcher-admission-after-hir-lower-split-20261009.json`.
+  Release-candidate rebuilding, Linux and whole-dispatcher native execution were
+  not repeated. Language, SDK/runtime, DB, dependency, runner and budget
+  contracts are unchanged.

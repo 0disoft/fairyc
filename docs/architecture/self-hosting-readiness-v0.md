@@ -186,6 +186,14 @@ parsing. HIR lowering partitioning and source deduplication below the unchanged
 1MiB budget remain prerequisites. Evidence:
 `docs/ops/evidence/candidate-type-source-split-20261009.json` and
 `docs/ops/evidence/candidate-dispatcher-admission-after-type-split-20261009.json`.
+HIR lowering has subsequently been split into four parser-admitted files with
+all five function bodies retained. The full dispatcher now passes parsing and
+reaches phase 1 code 10 at the cumulative source cap: 160 files and 1055400
+joined bytes. Source deduplication below 1MiB remains necessary before later
+admission stages can be evaluated. Focused C is identical and twelve native
+runs pass. Evidence:
+`docs/ops/evidence/candidate-hir-lower-source-split-20261009.json` and
+`docs/ops/evidence/candidate-dispatcher-admission-after-hir-lower-split-20261009.json`.
 
 `stage0` is the current Go compiler built by the supported Go toolchain.
 
