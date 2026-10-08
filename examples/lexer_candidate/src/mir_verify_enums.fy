@@ -19,7 +19,7 @@ pub fn bool operation(ref m::Program p, m::Operation o) {
         let usize field=o.operator as usize;
         if(field==0 || field>shapes::field_count(m::nominal(p)) || o.argument_start!=0 || o.argument_count!=0){return false;}
         let f=shapes::field_at(m::nominal(p),field);
-        return f.owner==o.owner_type && f.type==o.type && (f.type>=1 && f.type<=6 || tagged::builtin(o.owner_type) && (tagged::builtin(f.type) || nominal::valid(f.type) || resources::valid(f.type) || borrows::count(f.type)==1))
+        return f.owner==o.owner_type && f.type==o.type && (f.type>=1 && f.type<=6 || tagged::builtin(o.owner_type) && (enums::valid(f.type) || nominal::valid(f.type) || resources::valid(f.type) || borrows::count(f.type)==1))
             && shapes::payload_member(m::nominal(p),o.owner_type,field)!=0 && local(p,o.left,o.function,o.owner_type);
     }
     let usize member=shapes::member_at(m::nominal(p),o.owner_type,o.operator as usize);if(member==0){return false;}

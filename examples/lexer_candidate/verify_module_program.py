@@ -31,14 +31,24 @@ CLI_CASES = (
 )
 
 
-def verify_cli(images, runner, compiler, bootstrap_receipt, receipt=None, generics=False):
+def verify_cli(images, runner, compiler, bootstrap_receipt, receipt=None, lane="modules"):
+    generics = lane == "generics"
+    sdk_num = lane == "num"
     cases = (
         ("generic-provider", "module main;import provider as p;import provider as q;fn T id<T>(T x){return x;}fn i32 main(){assert(p::id<bool>(true));return p::id<i32>(q::id<i32>(id<i32>(7)));}",
          "module provider;fn T helper<T>(T x){return x;}pub fn T id<T>(T x){return helper<T>(x);}", "", 7),
         ("generic-nominal", "module main;import provider as p;fn i32 main(){return p::pick<i32>(7,p::make());}",
          "module provider;pub struct Token{i32 n;}pub fn Token make(){return Token{.n=7};}pub fn T pick<T>(T x,Token t){assert(t.n==7);return x;}", "", 7),
     ) if generics else CLI_CASES
-    output = ROOT / (".cache/candidate-module-generics-cli" if generics else ".cache/candidate-module-cli")
+    sdk_source = ROOT / "internal/sdkstdlib/sources/std/num.fy"
+    if sdk_num:
+        sdk = sdk_source.read_text(encoding="utf-8")
+        cases = (
+            ("sdk-num-parse", 'module main;import std::num as n;fn i64 parse(ref u8[] s){return switch(n::parse_i64_decimal(s)){case .ok(v):{v}case .err(_):{assert(false);0}};}fn i32 error(ref u8[] s){return switch(n::parse_i64_decimal(s)){case .ok(_):{0}case .err(e):{switch(e){case .Empty:{1}case .InvalidDecimal:{2}case .OutOfRange:{3}}}};}fn i32 main(){assert(parse(b"0")==0 && parse(b"-0")==0 && parse(b"4000000000")==4000000000);assert(parse(b"9223372036854775807")==9223372036854775807 && parse(b"-9223372036854775808")==-9223372036854775808);assert(error(b"")==1 && error(b"-")==2 && error(b"+1")==2 && error(b"1x")==2);assert(error(b"9223372036854775808")==3 && error(b"-9223372036854775809")==3);return 7;}', sdk, "", 7),
+            ("sdk-num-convert", 'module main;import std::num as n;fn i32 main(){assert(switch(n::u8_from_i64(255)){case .ok(v):{v==255}case .err(_):{false}});assert(switch(n::u8_from_i64(-1)){case .ok(_):{false}case .err(e):{switch(e){case .Negative:{true}case .OutOfRange:{false}}}});assert(!n::u8_from_i64(256).is_ok);assert(switch(n::i64_from_usize(9223372036854775807)){case .ok(v):{v==9223372036854775807}case .err(_):{false}});assert(!n::i64_from_usize(18446744073709551615).is_ok);assert(switch(n::usize_from_i64(9223372036854775807)){case .ok(v):{v==9223372036854775807}case .err(_):{false}});assert(!n::usize_from_i64(-1).is_ok);return 7;}', sdk, "", 7),
+            ("enum-local", 'module main;enum Error{Bad;Good;}struct Item{Option<Error> value;}fn Result<i64,Error> make(bool ok){return if(ok){.ok(4000000000)}else{.err(.Bad)};}fn i32 main(){let Item x=Item{.value=.some(.Good)};assert(switch(x.value){case .some(e):{switch(e){case .Bad:{false}case .Good:{true}}}case .none:{false}});assert(switch(make(true)){case .ok(v):{v==4000000000}case .err(_):{false}});assert(switch(make(false)){case .ok(_):{false}case .err(e):{switch(e){case .Bad:{true}case .Good:{false}}}});return 7;}', "module provider;", "", 7),
+        )
+    output = ROOT / (".cache/candidate-sdk-num-cli" if sdk_num else ".cache/candidate-module-generics-cli" if generics else ".cache/candidate-module-cli")
     output.mkdir(parents=True, exist_ok=True)
     rows, fixtures, jobs = [], [], []
 
@@ -75,6 +85,10 @@ def verify_cli(images, runner, compiler, bootstrap_receipt, receipt=None, generi
         path = manifest(name, first, second)
         emitted = [run([image, "--c-modules-file", path]) for image in images]
         assert all(not row["stderr"] and row["stdout"] == emitted[0]["stdout"] for row in emitted)
+        if name == "enum-local":
+            for image in images:
+                single = run([image, "--c-file", output / (name + "-main.fy")])
+                assert single["stdout"] == emitted[0]["stdout"] and not single["stderr"]
         if name == "helpers":
             for image in images:
                 prior = run([image, "--check-modules-file", path])
@@ -105,6 +119,12 @@ def verify_cli(images, runner, compiler, bootstrap_receipt, receipt=None, generi
         ("repr-private", "module main;import provider as p;unsafe extern C fn p::Packet fixture_packet();fn i32 main(){return 7;}",
          "module provider;@repr(C)struct Packet{u32 code;u32 amount;}", "code 6"),
     )
+    if sdk_num:
+        rejections = (
+            ("sdk-tampered", "module main;import std::num as n;fn i32 main(){return 7;}", sdk + "\n", "phase 1 code 6801"),
+            ("sdk-forged", "module main;import std::num as n;fn i32 main(){return 7;}", "module std::num;pub enum ParseI64Error{Empty;InvalidDecimal;OutOfRange;}", "phase 1 code 6801"),
+            ("enum-distinct", 'module main;import std::num as n;enum ParseI64Error{Empty;InvalidDecimal;OutOfRange;}fn Result<i64,ParseI64Error> wrong(){return n::parse_i64_decimal(b"1");}fn i32 main(){return 7;}', sdk, "phase 5 code 1"),
+        )
     for name, first, second, diagnostic in rejections:
         path = manifest(name, first, second)
         for image in images:
@@ -120,6 +140,29 @@ def verify_cli(images, runner, compiler, bootstrap_receipt, receipt=None, generi
         trace, value = expected[row["name"]]
         assert not row.get("error") and row["trap"] == 0 and row["exit"] == 0
         assert row["stdout"] == trace and row["value"] == value and row["foreignSHA256"] == digest(provider), row
+    reference = []
+    if sdk_num:
+        # The same assertions run through the Go bootstrap's shipped SDK. Python
+        # only writes fixture metadata and compares process outcomes.
+        for name, first, _, trace, value in cases:
+            project = output / "go-reference" / name
+            (project / "src").mkdir(parents=True, exist_ok=True)
+            (project / "src/main.fy").write_text(first, encoding="utf-8", newline="\n")
+            (project / "fairy.toml").write_text('schema = "fairyc.manifest/v1"\n[package]\nuid = "probe.sdk-num"\nname = "sdk-num-probe"\nversion = "0.1.0"\nlanguage = "fairyc-language/20"\nsource = "src"\n', encoding="utf-8", newline="\n")
+            for release in (False, True):
+                argv = [str(compiler), "build"] + (["--release"] if release else [])
+                q = subprocess.run(argv, cwd=project, capture_output=True, encoding="utf-8", timeout=120)
+                build = dict(argv=argv, cwd=str(project), exit=q.returncode, stdout=q.stdout, stderr=q.stderr)
+                reference.append(build)
+                save(output / "reference-raw.json", reference)
+                assert q.returncode == 0 and not q.stderr, build
+                exe = project / "build" / ("sdk-num-probe.exe" if os.name == "nt" else "sdk-num-probe")
+                q = subprocess.run([str(exe)], cwd=project, capture_output=True, encoding="utf-8", timeout=30)
+                result = dict(argv=[str(exe)], cwd=str(project), exit=q.returncode, stdout=q.stdout,
+                              stderr=q.stderr, imageSHA256=digest(exe))
+                reference.append(result)
+                save(output / "reference-raw.json", reference)
+                assert (q.returncode, q.stdout, q.stderr) == (value, trace, ""), result
     assert all(digest(Path(f["path"])) == f["sha256"] for f in fixtures)
     bootstrap = None
     if bootstrap_receipt:
@@ -135,9 +178,10 @@ def verify_cli(images, runner, compiler, bootstrap_receipt, receipt=None, generi
          dict(schema="fairyc.candidate-module-cli/v1", passed=True, validation=rows,
               images=[dict(path=str(p), sha256=digest(p)) for p in images],
               compiler=dict(path=str(compiler), sha256=digest(compiler)),
+              sdkSource=dict(path=str(sdk_source), sha256=digest(sdk_source)) if sdk_num else None,
               validationOnlyBootstrapOverlay=bootstrap,
               runner=dict(path=str(runner), sha256=digest(runner)), fixtures=fixtures,
-              native=native, sources=[dict(path=str(p.relative_to(ROOT)), sha256=digest(p))
+              native=native, reference=reference, sources=[dict(path=str(p.relative_to(ROOT)), sha256=digest(p))
                                       for p in sorted((PROJECT / "src").glob("*.fy"))],
               lockSHA256=digest(PROJECT / "fairy.lock"),
               limits=["explicit source-list CLI, not workspace manifest resolution",
@@ -152,12 +196,12 @@ def main():
     parser.add_argument("--native-runner", type=Path)
     parser.add_argument("--bootstrap-receipt", type=Path)
     parser.add_argument("--receipt", type=Path)
-    parser.add_argument("--phase", choices=("join", "program", "cli", "cli-generics", "repr"), required=True)
+    parser.add_argument("--phase", choices=("join", "program", "cli", "cli-generics", "cli-num", "repr"), required=True)
     args = parser.parse_args()
-    if args.phase in ("cli", "cli-generics"):
+    if args.phase in ("cli", "cli-generics", "cli-num"):
         if not args.images or len(args.images) != 2 or not args.native_runner or not args.compiler:
             parser.error("cli phase requires two --images, --native-runner and --compiler")
-        verify_cli([p.resolve() for p in args.images], args.native_runner.resolve(), args.compiler.resolve(), args.bootstrap_receipt, args.receipt, args.phase == "cli-generics")
+        verify_cli([p.resolve() for p in args.images], args.native_runner.resolve(), args.compiler.resolve(), args.bootstrap_receipt, args.receipt, "num" if args.phase == "cli-num" else "generics" if args.phase == "cli-generics" else "modules")
         return
     if not args.compiler:
         parser.error("API phases require --compiler")

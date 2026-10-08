@@ -129,7 +129,7 @@ pub fn bool valid(ref Table p, usize source_bytes, usize bindings) {
                     if(j>f.payload_count && field_at(p,offset+j-f.payload_count).type!=0){return false;}
                 }else if(f.payload_count!=0 || f.payload_start!=0 || j+1==s.field_count){return false;}
             }else if(f.payload_count!=0 || f.payload_start!=0){return false;}
-            if (f.owner != s.type || f.start >= f.end || f.end > source_bytes || (if(enums::valid(s.type)){f.type>6 && !(tagged::builtin(s.type) && (tagged::builtin(f.type) || nominal::valid(f.type) || resources::valid(f.type) || borrows::count(f.type)==1) && valid_type(p,f.type,false))}else{borrows::count(f.type)!=0 || !valid_type(p,f.type,false)})) { return false; }
+            if (f.owner != s.type || f.start >= f.end || f.end > source_bytes || (if(enums::valid(s.type)){f.type>6 && !(tagged::builtin(s.type) && (enums::valid(f.type) || nominal::valid(f.type) || resources::valid(f.type) || borrows::count(f.type)==1) && valid_type(p,f.type,false))}else{borrows::count(f.type)!=0 || !valid_type(p,f.type,false)})) { return false; }
             if(!resources::valid(s.type) && !tagged::builtin(s.type) && needs_drop(f.type)){return false;}j += 1;
         }
         offset += s.field_count; i += 1;

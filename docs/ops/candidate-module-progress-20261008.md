@@ -323,3 +323,26 @@ Generic aggregate and receiver declarations remain rejected. SDK Vec body
 instantiation and persistent package identity are subsequent work. Evidence:
 `evidence/candidate-module-generics-api-20261008.json` and
 `evidence/candidate-module-generics-cli-20261008.json`.
+
+## SDK enum errors and authenticated numeric bodies
+
+Option/Result payloads retain user enum declaration IDs, including imported SDK
+errors. A closed sixteen-bit enum leaf uses an unused prefix; existing scalar,
+struct, resource, view and reference encodings are unchanged. The thirty-bit
+compound budget remains enforced: two enum leaves need 34 bits and are rejected.
+HIR shape validation requires the exact retained enum layout and MIR capture
+validation requires the exact payload type. Removing the enum layout or changing
+its ID fails before publication.
+
+`std::num` runs from the complete authenticated bundled Fairy source through the
+ordinary module, HIR, MIR and C path. Three programs cover i64 decimal limits,
+syntax/range errors, checked integer conversions and local enum Option/Result
+storage and switches. Three errors reject modified/spoofed SDK sources and a
+same-spelled but distinct caller enum. The same assertions run through the Go
+bootstrap in development and release; Python only writes fixtures and compares
+outcomes. Evidence: `evidence/candidate-enum-tags-api-20261008.json` and
+`evidence/candidate-sdk-num-cli-20261008.json`.
+
+SDK Vec specialization, storage intrinsics, allocation/file/console runtime
+symbols and the candidate project driver remain pending. This numeric-body unit
+does not establish complete SDK compilation or self-hosting.
