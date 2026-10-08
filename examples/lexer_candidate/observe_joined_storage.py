@@ -23,9 +23,10 @@ def main():
     ap.add_argument("--manifest", type=Path, required=True)
     ap.add_argument("--native-test-report", type=Path, required=True)
     ap.add_argument("--receipt", type=Path, required=True)
+    ap.add_argument("--probe", choices=("joined_scanner_storage", "partitioned_module_join"), default="joined_scanner_storage")
     args = ap.parse_args()
     compiler, manifest = args.compiler.resolve(), args.manifest.resolve()
-    probe = PROJECT / "probes/joined_scanner_storage.fy"
+    probe = PROJECT / "probes" / (args.probe + ".fy")
     output = REPO / ".cache/candidate-tagged/scanner-storage-observation"
     output.mkdir(parents=True, exist_ok=True)
     workspace = Path(tempfile.mkdtemp(prefix="workspace-", dir=output)).resolve()
@@ -65,7 +66,7 @@ def main():
         run([workspace / "build/lexer-candidate.exe", manifest], REPO)
         passed = True
     finally:
-        receipt = dict(schema="fairyc.candidate-cooked-storage/v1", passed=passed,
+        receipt = dict(schema="fairyc.candidate-cooked-storage/v1" if args.probe == "joined_scanner_storage" else "fairyc.candidate-module-units/v1", passed=passed,
                        compiler=identity(compiler), probe=identity(probe), observer=identity(Path(__file__)),
                        manifest=identity(manifest), sources=[identity(p) for p in sources],
                        nativeTests=tests, commands=commands,

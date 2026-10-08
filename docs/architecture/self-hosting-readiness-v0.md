@@ -269,6 +269,18 @@ and stage1/stage2 are still open. Evidence:
 `docs/ops/evidence/candidate-file-tokens-cooked-intern-20261009.json` and
 `docs/ops/evidence/candidate-mutable-record-array-view-native-20261009.json`.
 
+The AST partition layer now preserves the actual 160-module dispatcher in
+twelve independently bounded joined owners. The 1046245-byte full input still
+fits 1MiB; all 152020 expressions and 11509 entries are retained across groups.
+Eight development native API regressions pass. Each group remains within the
+original joined AST bounds, and range-join errors retain full-source module
+coordinates. This does not yet connect groups to body binding, HIR/MIR, C output
+or final linking. The current command dispatcher still uses one joined owner.
+Cross-unit declaration identity is the next compiler connection; stage1/stage2
+and promotion remain open. Architecture:
+`docs/architecture/candidate-compilation-units-v0.md`; evidence:
+`docs/ops/evidence/candidate-module-units-20261009.json`.
+
 `stage0` is the current Go compiler built by the supported Go toolchain.
 
 `stage1` is produced by `stage0` from the admitted Fairy compiler sources.

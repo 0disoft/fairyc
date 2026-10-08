@@ -52,6 +52,12 @@ Limits of the joined owner: 256 inputs, 1048576 joined bytes including separator
 1024 fields and 4096 attributes and attribute arguments. The existing scanner
 token, diagnostic and work budgets apply to the joined source.
 
+`join_range(sources, first, stop)` now joins one nonempty half-open range while
+keeping these same per-owner limits. Errors retain full-vector module indexes.
+The original full join delegates to the entire range. Whole-module partitioning
+and the remaining cross-unit compiler work are described in
+`candidate-compilation-units-v0.md`.
+
 ## Parsed arena observations
 
 Private declarations: 1 module, 2 import, 3 function, 4 struct, 6 resource, 7 const,

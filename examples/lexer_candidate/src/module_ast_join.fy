@@ -91,29 +91,31 @@ fn Problem generic(ref syntax::Parsed file,usize module_index){
     return Problem{.code=0,.module_index=0,.start=0,.end=0};
 }
 
-pub fn Result<syntax::Parsed,Problem> join(ref v::Vec<syntax::Parsed> sources){
-    let usize count=v::len<syntax::Parsed>(sources);
-    if(count==0 || count>limits::source_files()){return .err(fail(10,0,0,0));}
+pub fn Result<syntax::Parsed,Problem> join_range(ref v::Vec<syntax::Parsed> sources,usize first,usize stop){
+    let usize total=v::len<syntax::Parsed>(sources);
+    if(total==0 || total>limits::source_files()){return .err(fail(10,0,0,0));}
+    if(first>=stop || stop>total){return .err(fail(9,if(first<total){first}else{0},0,0));}
+    let usize count=stop-first;
     var bytes::Buffer joined=bytes::empty();
     var usize index=0;
     while(index<count){
-        let ref syntax::Parsed file=v::at<syntax::Parsed>(sources,index);
-        if(syntax::problem_count(file)!=0){return .err(fail(9,index,0,syntax::source_view(file).len));}
-        if(syntax::declaration_count(file)==0 || syntax::declaration_at(file,0).kind!=1){return .err(fail(9,index,0,0));}
-        let Problem rejected=generic(file,index);
+        let ref syntax::Parsed file=v::at<syntax::Parsed>(sources,first+index);
+        if(syntax::problem_count(file)!=0){return .err(fail(9,first+index,0,syntax::source_view(file).len));}
+        if(syntax::declaration_count(file)==0 || syntax::declaration_at(file,0).kind!=1){return .err(fail(9,first+index,0,0));}
+        let Problem rejected=generic(file,first+index);
         if(rejected.code!=0){return .err(rejected);}
         let usize separator=if(index+1<count){1}else{0};
-        if(syntax::source_view(file).len>limits::source_bytes() || bytes::len(ref joined)>limits::program_bytes()-separator || syntax::source_view(file).len>limits::program_bytes()-separator-bytes::len(ref joined)){return .err(fail(10,index,0,syntax::source_view(file).len));}
-        if(!bytes::append(ref mut joined,syntax::source_view(file)).is_ok){return .err(fail(11,index,0,0));}
-        if(index+1<count && !bytes::append(ref mut joined,b"\n").is_ok){return .err(fail(11,index,0,0));}
-        if(bytes::len(ref joined)>limits::program_bytes()){return .err(fail(10,index,0,syntax::source_view(file).len));}
+        if(syntax::source_view(file).len>limits::source_bytes() || bytes::len(ref joined)>limits::program_bytes()-separator || syntax::source_view(file).len>limits::program_bytes()-separator-bytes::len(ref joined)){return .err(fail(10,first+index,0,syntax::source_view(file).len));}
+        if(!bytes::append(ref mut joined,syntax::source_view(file)).is_ok){return .err(fail(11,first+index,0,0));}
+        if(index+1<count && !bytes::append(ref mut joined,b"\n").is_ok){return .err(fail(11,first+index,0,0));}
+        if(bytes::len(ref joined)>limits::program_bytes()){return .err(fail(10,first+index,0,syntax::source_view(file).len));}
         index+=1;
     }
     let scanner::Stream stream=switch(scanner::collect_joined(joined)){
         case .ok(value):{value}
-        case .err(code):{return .err(fail(if(code==3){11}else if(code==4){10}else{9},0,0,0));}
+        case .err(code):{return .err(fail(if(code==3){11}else if(code==4){10}else{9},first,0,0));}
     };
-    if(scanner::diagnostic_count(ref stream)!=0){return .err(fail(if(scanner::diagnostic_info(ref stream,0).code==10){10}else{9},0,0,0));}
+    if(scanner::diagnostic_count(ref stream)!=0){return .err(fail(if(scanner::diagnostic_info(ref stream,0).code==10){10}else{9},first,0,0));}
     var v::Vec<syntax::Declaration> declarations=v::empty<syntax::Declaration>();
     var v::Vec<syntax::Problem> problems=v::empty<syntax::Problem>();
     var v::Vec<body::Node> expressions=v::empty<body::Node>();
@@ -127,7 +129,7 @@ pub fn Result<syntax::Parsed,Problem> join(ref v::Vec<syntax::Parsed> sources){
     var usize offset=0;
     index=0;
     while(index<count){
-        let ref syntax::Parsed file=v::at<syntax::Parsed>(sources,index);
+        let ref syntax::Parsed file=v::at<syntax::Parsed>(sources,first+index);
         discard v::clear<usize>(ref mut tokens);
         var usize cursor=0; var usize position_of=0;
         while(position_of<syntax::token_count(file)){
@@ -136,8 +138,8 @@ pub fn Result<syntax::Parsed,Problem> join(ref v::Vec<syntax::Parsed> sources){
             var usize mapped=0;
             if(cursor<scanner::token_count(ref stream) && scanner::token_info(ref stream,cursor).start==position){mapped=cursor;}
             else if(cursor>0 && scanner::token_info(ref stream,cursor-1).start<=position && position<scanner::token_info(ref stream,cursor-1).end){mapped=cursor-1;}
-            else{return .err(fail(9,index,syntax::token_info(file,position_of).start,syntax::token_info(file,position_of).end));}
-            if(!v::push<usize>(ref mut tokens,mapped).is_ok){return .err(fail(11,index,0,0));}
+            else{return .err(fail(9,first+index,syntax::token_info(file,position_of).start,syntax::token_info(file,position_of).end));}
+            if(!v::push<usize>(ref mut tokens,mapped).is_ok){return .err(fail(11,first+index,0,0));}
             position_of+=1;
         }
         let usize expression_base=v::len<body::Node>(ref expressions);
@@ -152,41 +154,43 @@ pub fn Result<syntax::Parsed,Problem> join(ref v::Vec<syntax::Parsed> sources){
             var syntax::Declaration d=declaration(syntax::declaration_at(file,at),offset,expression_base,statement_base,type_base,entry_base,field_base,attribute_base);
             // A joined module owns the complete original file, including trivia.
             if(d.kind==1){d.start=offset;d.end=offset+syntax::source_view(file).len;}
-            if(!v::push<syntax::Declaration>(ref mut declarations,d).is_ok){return .err(fail(11,index,0,0));}
+            if(!v::push<syntax::Declaration>(ref mut declarations,d).is_ok){return .err(fail(11,first+index,0,0));}
             at+=1;}
         at=1;
         while(at<=syntax::expression_count(file)){
-            if(!v::push<body::Node>(ref mut expressions,expression(syntax::expression_at(file,at),offset,expression_base,statement_base,type_base,ref tokens)).is_ok){return .err(fail(11,index,0,0));}
+            if(!v::push<body::Node>(ref mut expressions,expression(syntax::expression_at(file,at),offset,expression_base,statement_base,type_base,ref tokens)).is_ok){return .err(fail(11,first+index,0,0));}
             at+=1;}
         at=1;
         while(at<=syntax::statement_count(file)){
-            if(!v::push<body::Statement>(ref mut statements,statement(syntax::statement_at(file,at),offset,expression_base,statement_base,type_base,entry_base,ref tokens)).is_ok){return .err(fail(11,index,0,0));}
+            if(!v::push<body::Statement>(ref mut statements,statement(syntax::statement_at(file,at),offset,expression_base,statement_base,type_base,entry_base,ref tokens)).is_ok){return .err(fail(11,first+index,0,0));}
             at+=1;}
         at=0;
         while(at<syntax::entry_count(file)){
-            if(!v::push<bodies::Entry>(ref mut entries,entry(syntax::entry_at(file,at),at+1+entry_base,offset,expression_base,type_base)).is_ok){return .err(fail(11,index,0,0));}
+            if(!v::push<bodies::Entry>(ref mut entries,entry(syntax::entry_at(file,at),at+1+entry_base,offset,expression_base,type_base)).is_ok){return .err(fail(11,first+index,0,0));}
             at+=1;}
         at=1;
         while(at<=syntax::type_count(file)){
-            if(!v::push<types::Node>(ref mut types_arena,type_node(syntax::type_at(file,at),offset,type_base)).is_ok){return .err(fail(11,index,0,0));}
+            if(!v::push<types::Node>(ref mut types_arena,type_node(syntax::type_at(file,at),offset,type_base)).is_ok){return .err(fail(11,first+index,0,0));}
             at+=1;}
         at=0;
         while(at<syntax::field_count(file)){
-            if(!v::push<records::Field>(ref mut fields,field(syntax::field_at(file,at),offset,type_base,field_base)).is_ok){return .err(fail(11,index,0,0));}
+            if(!v::push<records::Field>(ref mut fields,field(syntax::field_at(file,at),offset,type_base,field_base)).is_ok){return .err(fail(11,first+index,0,0));}
             at+=1;}
         at=0;
         while(at<syntax::attribute_count(file)){
-            if(!v::push<attributes::Attribute>(ref mut attributes_arena,attribute(syntax::attribute_at(file,at),offset,argument_base)).is_ok){return .err(fail(11,index,0,0));}
+            if(!v::push<attributes::Attribute>(ref mut attributes_arena,attribute(syntax::attribute_at(file,at),offset,argument_base)).is_ok){return .err(fail(11,first+index,0,0));}
             at+=1;}
         at=0;
         while(at<syntax::attribute_argument_count(file)){
-            if(!v::push<attributes::Argument>(ref mut arguments,argument(syntax::attribute_argument_at(file,at),offset,ref tokens)).is_ok){return .err(fail(11,index,0,0));}
+            if(!v::push<attributes::Argument>(ref mut arguments,argument(syntax::attribute_argument_at(file,at),offset,ref tokens)).is_ok){return .err(fail(11,first+index,0,0));}
             at+=1;}
-        if(v::len<syntax::Declaration>(ref declarations)>512 || v::len<body::Node>(ref expressions)>limits::program_expressions() || v::len<body::Statement>(ref statements)>8192){return .err(fail(10,index,0,0));}
-        if(v::len<bodies::Entry>(ref entries)>1024 || v::len<types::Node>(ref types_arena)>4096 || v::len<records::Field>(ref fields)>1024){return .err(fail(10,index,0,0));}
-        if(v::len<attributes::Attribute>(ref attributes_arena)>4096 || v::len<attributes::Argument>(ref arguments)>4096){return .err(fail(10,index,0,0));}
+        if(v::len<syntax::Declaration>(ref declarations)>512 || v::len<body::Node>(ref expressions)>limits::program_expressions() || v::len<body::Statement>(ref statements)>8192){return .err(fail(10,first+index,0,0));}
+        if(v::len<bodies::Entry>(ref entries)>1024 || v::len<types::Node>(ref types_arena)>4096 || v::len<records::Field>(ref fields)>1024){return .err(fail(10,first+index,0,0));}
+        if(v::len<attributes::Attribute>(ref attributes_arena)>4096 || v::len<attributes::Argument>(ref arguments)>4096){return .err(fail(10,first+index,0,0));}
         offset+=syntax::source_view(file).len+1;
         index+=1;
     }
     return .ok(syntax::assemble(stream,declarations,problems,expressions,entries,statements,types_arena,fields,attributes_arena,arguments));
 }
+
+pub fn Result<syntax::Parsed,Problem> join(ref v::Vec<syntax::Parsed> sources){return join_range(sources,0,v::len<syntax::Parsed>(sources));}

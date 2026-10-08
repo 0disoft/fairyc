@@ -1546,3 +1546,29 @@ project commands and Linux execution remain pending.
   `evidence/candidate-sdk-module-driver-cooked-intern-dev-20261009.json`,
   `evidence/candidate-file-tokens-cooked-intern-20261009.json` and
   `evidence/candidate-mutable-record-array-view-native-20261009.json`.
+
+## Bounded whole-module AST units (2026-10-09)
+
+- `module_units` measures actual parser arenas and groups manifest-ordered
+  whole modules into maximal contiguous ranges. The existing source-set bounds
+  and every joined arena cap remain unchanged. No unused user body is discarded.
+- `module_ast_join::join_range` borrows the original source vector and remaps
+  only its selected range. Each returned AST starts at local byte offset zero,
+  while rejection positions retain the original full-vector module index.
+  Existing `join` behavior is retained by delegation to the full range.
+- Development check and probe build pass. Eight native API tests pass, including
+  a 1206-entry input that the full join rejects but two bounded owners preserve,
+  exact bytes, original error coordinates, invalid ranges, and the existing
+  module-join and cooked-storage regressions.
+- The actual dispatcher is 160 modules and 1046245 joined bytes. All modules
+  join successfully into twelve bounded owners, retaining 152020 expressions
+  and 11509 entries. Observed group maxima are 305 declarations, 16234
+  expressions, 4002 statements, 1017 entries, 1899 types, 342 fields, 159
+  attributes and 163 attribute arguments. No arena bound was increased.
+- This completes the AST grouping layer, not compiler integration. The current
+  CLI still attempts one joined owner. Cross-unit names/types, HIR/MIR targets,
+  C symbols and final linking are next. Full C/native compilation, stage1/stage2,
+  release rebuilding and Linux remain open. The architecture owner is
+  `docs/architecture/candidate-compilation-units-v0.md`; evidence is
+  `evidence/candidate-module-units-20261009.json`. Language/SDK ABI, DB, CI and
+  runner implementations are unchanged.
