@@ -1,0 +1,63 @@
+{
+  "schema": "fairyc.candidate-mir-source-split/v1",
+  "passed": true,
+  "originalCommit": "2ee431a312b65e2633851a108802b41c153355ef",
+  "bodyEquivalence": true,
+  "functions": 13,
+  "parserImplementationUnchanged": true,
+  "parseImage": {
+    "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-fs\\candidate-loader-dev.exe",
+    "sha256": "91bdd1118c66d3596fb12ebd8f1ddf2f30a4758dcb890ff1d812f3c5e5d08ac3"
+  },
+  "parseObservations": [
+    {
+      "path": "examples\\lexer_candidate\\src\\mir_lower.fy",
+      "bytes": 11685,
+      "sha256": "f4b1e3ff136c6ee2267b012a3a82fdac4fb78a1cbce976edc0bef99708098a03",
+      "exit": 0,
+      "stdoutBytes": 1059,
+      "stderr": ""
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\mir_value_lower.fy",
+      "bytes": 9113,
+      "sha256": "0c99569e4a5aa80005ce8bd02d783be9f0291bff3cf2015ae3d82b002c4c2de6",
+      "exit": 0,
+      "stdoutBytes": 555,
+      "stderr": ""
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\mir_extended_lower.fy",
+      "bytes": 6397,
+      "sha256": "011c3b0778bc01fc06abb34c8ef6bb2ece818eb69ac99d68ec99d82599469b4e",
+      "exit": 0,
+      "stdoutBytes": 400,
+      "stderr": ""
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\mir_view_lower.fy",
+      "bytes": 6877,
+      "sha256": "ab2c0a21faaf5b517b0741af9f61e2999cac5fbf2f136e3b50b2aa991eb83849",
+      "exit": 0,
+      "stdoutBytes": 327,
+      "stderr": ""
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\mir_control_lower.fy",
+      "bytes": 9607,
+      "sha256": "dddf190146792265c1ea6983df96a61d4add5e49973d7ee4f74a88ce26ff6226",
+      "exit": 0,
+      "stdoutBytes": 487,
+      "stderr": ""
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\mir_statement_lower.fy",
+      "bytes": 15044,
+      "sha256": "573af7cc2ea7b3daaf1c2d28b25bb2436806a2d547900a3cfb4e06674d4adb63",
+      "exit": 0,
+      "stdoutBytes": 511,
+      "stderr": ""
+    }
+  ],
+  "limitsChanged": false
+}

@@ -1217,3 +1217,34 @@ project commands and Linux execution remain pending.
   authored production CLI keeps its original full-AST route. Linux, whole-CLI
   native execution and stage1/stage2 promotion have not been run. No public
   language, SDK/runtime ABI, DB, dependency or CI workflow changed.
+
+## MIR self-source parser admission (2026-10-09)
+
+- The actual full-dispatcher source inventory initially contains 137 imported
+  files and 1038311 bytes. Its Fairy compilation rejects at parsing. The native
+  declaration CLI reproduces the parser limit in `hir_model`, `mir_lower`,
+  `type_check` and `hir_lower`; the other eight largest files parse successfully.
+  This is a node-budget failure, not a 64KiB file-byte failure. Evidence:
+  `evidence/candidate-dispatcher-admission-20261009.json` and
+  `evidence/candidate-self-parse-probe-20261009.json`.
+- MIR lowering now separates extended values, scalar/views, aggregate/calls,
+  control flow and statements from its coordinator. All six files parse within
+  the unchanged limits; each is at most 15044 bytes. The original 13 function
+  bodies are identical after accounting for module qualification and internal
+  visibility. Shared context, source-depth increments and final MIR verification
+  remain intact. No new forwarding runtime frame or allocation is introduced.
+- Check and a rebuilt development candidate pass. Three programs cover views,
+  arrays/casts, short circuit, enum/Result branches, foreign calls, factory moves
+  and exact cleanup counts. Their emitted C is byte-identical to the pre-split
+  release candidate, and all twelve low/optimized MSVC executions pass. A real
+  later-argument loan conflict still rejects. Evidence:
+  `evidence/candidate-mir-source-split-20261009.json`,
+  `evidence/candidate-mir-source-split-cli-20261009.json` and
+  `evidence/candidate-sdk-module-driver-mir-split-dev-20261009.json`.
+- The updated full-dispatcher inventory is 142 files and 1041199 bytes. It still
+  rejects at parsing; the remaining self-source units are `hir_model`,
+  `type_check` and `hir_lower`. This does not complete item 50 or self-hosting.
+  `evidence/candidate-dispatcher-admission-after-mir-split-20261009.json` retains
+  that rejection. Linux, whole CLI execution and new release-candidate rebuilding
+  were not repeated for this body-equivalent split. SDK/runtime, DB, dependency,
+  CI runner settings and all admission budgets are unchanged.

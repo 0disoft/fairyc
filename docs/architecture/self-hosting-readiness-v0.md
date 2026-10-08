@@ -164,6 +164,12 @@ conflicts still reject. Evidence:
 `docs/ops/evidence/candidate-file-tokens-fixed-release-20261009.json` and
 `docs/ops/evidence/candidate-byte-loop-calls-release-20261009.json`.
 The complete command dispatcher and project-driver integration are still open.
+Full-dispatcher self-source admission has now been observed directly: MIR
+lowering was split into six parser-admitted units while preserving all original
+function bodies and byte-identical generated C for the focused regression.
+The current 142-file input still rejects at parsing; HIR model, type checking
+and HIR lowering source splits remain. These observations retain the existing
+budgets and do not establish whole-compiler native execution or promotion.
 Project-driver and platform work remain. These scanner results do not establish
 the complete compiler's stage1/stage2 or promotion gates.
 

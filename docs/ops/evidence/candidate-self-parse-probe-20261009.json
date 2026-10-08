@@ -1,0 +1,107 @@
+{
+  "schema": "fairyc.candidate-self-parse-probe/v1",
+  "passed": false,
+  "method": "Actual maintained Fairy declaration CLI parses the twelve largest current authored source files; parser implementation unchanged from the recorded baseline image",
+  "image": {
+    "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-fs\\candidate-loader-dev.exe",
+    "sha256": "91bdd1118c66d3596fb12ebd8f1ddf2f30a4758dcb890ff1d812f3c5e5d08ac3"
+  },
+  "rows": [
+    {
+      "path": "examples/lexer_candidate/src/hir_model.fy",
+      "bytes": 56358,
+      "sha256": "cfa0499e5561fbe70d6b89867858b6703c8100b030a1dc58711f0119227746cf",
+      "exit": 2,
+      "stdoutBytes": 0,
+      "stderr": "error: parser limit\n"
+    },
+    {
+      "path": "examples/lexer_candidate/src/mir_lower.fy",
+      "bytes": 55835,
+      "sha256": "f2ad11f10d89c896bae4c92f9053a785319bffce53cb55bf17b0e2fb5c9ab26f",
+      "exit": 2,
+      "stdoutBytes": 0,
+      "stderr": "error: parser limit\n"
+    },
+    {
+      "path": "examples/lexer_candidate/src/type_check.fy",
+      "bytes": 54329,
+      "sha256": "c4973fd7be6b87730b42de6262a11b9cf8cbb3199ebd60f7ef951711af430a8d",
+      "exit": 2,
+      "stdoutBytes": 0,
+      "stderr": "error: parser limit\n"
+    },
+    {
+      "path": "examples/lexer_candidate/src/hir_lower.fy",
+      "bytes": 39435,
+      "sha256": "35651d60396b09d2f934c8d9945c8fb550a4f779216c8b95d0afca711135e91f",
+      "exit": 2,
+      "stdoutBytes": 0,
+      "stderr": "error: parser limit\n"
+    },
+    {
+      "path": "examples/lexer_candidate/src/syntax.fy",
+      "bytes": 33957,
+      "sha256": "9d5daa610e90963c6920c186d0ad85ae92bb9a199a1f5c0eb2c8e9bac90c786e",
+      "exit": 0,
+      "stdoutBytes": 3381,
+      "stderr": ""
+    },
+    {
+      "path": "examples/lexer_candidate/src/bodies.fy",
+      "bytes": 29681,
+      "sha256": "b1bc7304d778caee8659d3cbf77e0e38aa8b88a2489d631978d9d69abac2afbc",
+      "exit": 0,
+      "stdoutBytes": 691,
+      "stderr": ""
+    },
+    {
+      "path": "examples/lexer_candidate/src/name_resolution.fy",
+      "bytes": 28970,
+      "sha256": "74137e3d50318a520ec56e2389ef353ee0520e8bf6ac1540a04f87c62008d3b7",
+      "exit": 0,
+      "stdoutBytes": 1747,
+      "stderr": ""
+    },
+    {
+      "path": "examples/lexer_candidate/src/generic_expand.fy",
+      "bytes": 24029,
+      "sha256": "e864272ccf5b391268c33beb3e908bd684e87a7ee431f95b5d77b83f126c692d",
+      "exit": 0,
+      "stdoutBytes": 1487,
+      "stderr": ""
+    },
+    {
+      "path": "examples/lexer_candidate/src/scanner.fy",
+      "bytes": 21896,
+      "sha256": "de435293648d9cf277b75ec1d223c75ee02e0d6e50b6e763c08d843ea3369f60",
+      "exit": 0,
+      "stdoutBytes": 1750,
+      "stderr": ""
+    },
+    {
+      "path": "examples/lexer_candidate/src/mir_verify_shape.fy",
+      "bytes": 20451,
+      "sha256": "012654d605c4890e543454a9f8abd9b56488cbd7215f51b2da06ef47fa82e844",
+      "exit": 0,
+      "stdoutBytes": 986,
+      "stderr": ""
+    },
+    {
+      "path": "examples/lexer_candidate/src/mir_model.fy",
+      "bytes": 20341,
+      "sha256": "cc5856a6f5ba9892a7a9a80690b1616af08bb3b4d0a0744bd6690a4844a4580b",
+      "exit": 0,
+      "stdoutBytes": 2177,
+      "stderr": ""
+    },
+    {
+      "path": "examples/lexer_candidate/src/hir_view_check.fy",
+      "bytes": 19664,
+      "sha256": "e5c06d5a0e9aeff66311b98668f08e60603a9d039f1c82abafc13545eea5483a",
+      "exit": 0,
+      "stdoutBytes": 938,
+      "stderr": ""
+    }
+  ]
+}
