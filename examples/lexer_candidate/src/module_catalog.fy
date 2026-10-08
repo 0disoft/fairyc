@@ -3,6 +3,7 @@ import syntax as syntax;
 import module_registry as scalar_modules;
 import std::bytes as bytes;
 import std::vec as v;
+import sdk_authority as sdk;
 
 // Program-local declaration coordinates. Names and aliases never define type
 // equality. This owner contains no borrowed syntax or source buffers.
@@ -19,6 +20,11 @@ fn bool spelling_same(ref bytes::Buffer names,usize start,usize end,ref u8[] nam
 pub fn usize module_count(ref Catalog c){return v::len<Module>(ref c.modules);}
 pub fn usize declaration_count(ref Catalog c){return v::len<Declaration>(ref c.declarations);}
 pub fn bool source_matches(ref Catalog c,usize module_index,ref syntax::Parsed p){if(module_index>=module_count(c)){return false;}let m=*v::at<Module>(ref c.modules,module_index);return bytes::equal(bytes::view(ref c.sources)[m.source_start..m.source_end],syntax::source_view(p));}
+pub fn bool sdk_vector(ref Catalog c,usize module_index,usize declaration){
+    if(module_index>=module_count(c)){return false;}let m=*v::at<Module>(ref c.modules,module_index);
+    if(!same(c,m.start,m.end,b"std::vec") || !sdk::authentic(b"std::vec",bytes::view(ref c.sources)[m.source_start..m.source_end])){return false;}
+    let usize id=identity(c,module_index,declaration);return id!=0 && declaration_at(c,id).kind==6 && same(c,declaration_at(c,id).start,declaration_at(c,id).end,b"Vec");
+}
 pub fn Declaration declaration_at(ref Catalog c,usize id){assert(id>0 && id<=declaration_count(c));return *v::at<Declaration>(ref c.declarations,id-1);}
 pub fn usize identity(ref Catalog c,usize module_index,usize declaration){var usize i=1;while(i<=declaration_count(c)){let d=declaration_at(c,i);if(d.module_index==module_index && d.declaration==declaration){return i;}i+=1;}return 0;}
 pub fn bool same_declaration(Declaration a,Declaration b){return a.kind==b.kind && a.module_index==b.module_index && a.declaration==b.declaration;}
@@ -43,6 +49,7 @@ pub fn Result<Catalog,Problem> build(ref v::Vec<syntax::Parsed> sources){
         let p=v::at<syntax::Parsed>(sources,module_index);if(syntax::problem_count(p)!=0 || syntax::declaration_count(p)==0){return .err(fail(9,module_index,0,0));}
         let first=syntax::declaration_at(p,0);if(first.kind!=1){return .err(fail(9,module_index,first.start,first.end));}
         var bytes::Buffer path=bytes::empty();let u32 status=scalar_modules::normalize(syntax::source_view(p)[first.name_start..first.name_end],ref mut path);if(status!=0){return .err(fail(status,module_index,first.name_start,first.name_end));}
+        if(sdk::reserved(bytes::view(ref path)) && !sdk::authentic(bytes::view(ref path),syntax::source_view(p))){return .err(fail(6801,module_index,first.name_start,first.name_end));}
         var usize n=0;while(n<v::len<Module>(ref modules)){let m=*v::at<Module>(ref modules,n);if(spelling_same(ref names,m.start,m.end,bytes::view(ref path))){return .err(fail(1,module_index,first.name_start,first.name_end));}n+=1;}
         let usize start=bytes::len(ref names);let usize source_start=bytes::len(ref source_bytes);if(syntax::source_view(p).len>32768){return .err(fail(10,module_index,0,syntax::source_view(p).len));}
         if(!append(ref mut source_bytes,syntax::source_view(p)) || !append(ref mut names,bytes::view(ref path)) || !v::push<Module>(ref mut modules,Module{.start,.end=bytes::len(ref names),.source_start,.source_end=bytes::len(ref source_bytes)}).is_ok){return .err(fail(11,module_index,first.start,first.end));}

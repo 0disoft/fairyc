@@ -208,3 +208,26 @@ uses its existing private HIR E2101 loan diagnostic, not Go's E2105 spelling.
 Evidence: `evidence/candidate-raw-views-20261008.json` and
 `evidence/candidate-raw-view-modules-20261008.json`. SDK package authentication,
 Vec specialization, CStr representation and Linux execution remain separate.
+
+## SDK source authentication and Vec graph admission
+
+`sha256.fy` computes bounded SHA-256 directly in Fairy. Checked arithmetic uses
+16-bit limbs for modular additions and masks discarded rotation bits before
+left shifts. `sdk_authority.fy` pins the exact bundled language/20 runtime/0
+sources, including the optional vector module. A source-set module claiming the
+reserved std namespace must match these bytes; a name or caller-supplied digest
+does not grant authority.
+
+The owned module type graph now records authenticated Vec instantiations with
+the canonical provider declaration and one canonical element edge. Aliases of
+the same provider reuse the same identity; differing scalar or resource elements
+remain distinct. The six storage fields are opaque data followed by five usize
+fields, independent of the element identity. Bare templates, safe borrow elements
+including nested tagged borrows, mutated source bytes and forged provider
+coordinates fail admission. Failed resolution rolls back speculative interning.
+
+Evidence: `evidence/candidate-sdk-authority-20261008.json`. Native API tests use
+an explicit SDK source argument because isolated native tests run in temporary
+directories. The type graph does not yet instantiate SDK function/resource ASTs
+or publish executable Vec HIR/MIR/C layouts; those are subsequent work in 46/47.
+The existing ordinary module graph contract is included as the narrow regression.
