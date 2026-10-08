@@ -46,6 +46,18 @@ fn usize outcomes(ref h::Program p, usize id, usize depth, ref mut usize work) {
 pub fn bool reenters(ref h::Program p, h::Statement s, ref mut usize work) {
     return (outcomes(p,s.body,0,work) & 5) != 0;
 }
+// The suffix after any definite exit cannot execute. Keep the same conservative
+// outcome/depth rules as reachable(), including zero-iteration nested loops.
+pub fn usize unreachable_start(ref h::Program p, usize id, ref mut usize work) {
+    let b = h::block_at(p,id); var usize start = b.end+1; var usize i = 0;
+    while (i < b.edge_count) {
+        if (!charge(work)) { return b.end+1; }
+        let usize sid = h::edge_at(p,b.edge_start+i); let s = h::statement_at(p,sid);
+        if (s.end < start && (statement_outcomes(p,sid,0,work) & 1) == 0) { start = s.end; }
+        i += 1;
+    }
+    return start;
+}
 pub fn bool reachable(ref h::Program p, usize start, usize end, ref mut usize work) {
     var usize i = 1;
     while (i <= h::block_count(p)) {

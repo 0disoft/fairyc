@@ -1,0 +1,11 @@
+{
+  "schema": "fairyc.candidate-borrow-index-api/v1",
+  "compiler": ".cache/candidate-tagged/compiler-build-240s.exe",
+  "cwd": "examples/lexer_candidate",
+  "argv": ["test", "--native", "--json", "--file", "tests/hir_borrow_cache.fy", "--file", "tests/mixed_origins.fy", "--locked"],
+  "exit": 0,
+  "report": {"schemaVersion":"fairyc.test-report/v1","engine":"native","target":"x86_64-windows-msvc","profile":"development","tests":[{"identity":"tests::hir_borrow_cache::indexed_reachability_preserves_definite_exits_and_loop_backedges","outcome":"passed","trapCategory":null},{"identity":"tests::mixed_origins::independent_mir_retains_union_and_rejects_forged_escape","outcome":"passed","trapCategory":null}],"count":2,"passed":2,"failed":0,"status":"ok","lock":"verified"},
+  "releaseApiValidated": false,
+  "linuxValidated": false,
+  "selfHostingValidated": false
+}

@@ -44,6 +44,8 @@ fn T pick<T>(T marker,ref u8[] a,ref u8[] b,ref u8[] c,bool first,bool second){
 ''',
 }
 observer.REJECT={
+"recursive-return-unknown":('fn ref u8[] bad(ref u8[] data){return bad(data);}fn i32 main(){return 7;}',"code 2103"),
+"cached-origin-depth":('fn i32 main(){let u8[1] a=[1];let ref u8[] p0=ref a;'+''.join(f'let ref u8[] p{i}=p{i-1};' for i in range(1,71))+'return p70[0] as i32;}',"code 2 ("),
 "left-owner-write":('fn i32 main(){var u8[1] a=[1];var u8[1] b=[2];let ref u8[] p=if(true){ref a}else{ref b};a[0]=9;return p[0] as i32;}',"code 2101"),
 "right-owner-write":('fn i32 main(){var u8[1] a=[1];var u8[1] b=[2];let ref u8[] p=if(true){ref a}else{ref b};b[0]=9;return p[0] as i32;}',"code 2101"),
 "resource-move-held":('fn i32 main(){let b::Buffer a=b::empty();let b::Buffer other=b::empty();let ref u8[] p=if(true){b::view(ref a)}else{b::view(ref other)};let b::Buffer moved=other;discard p.len;return 7;}',"code 2101"),

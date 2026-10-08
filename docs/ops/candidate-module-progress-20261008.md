@@ -886,3 +886,25 @@ project commands and Linux execution remain pending.
   `evidence/candidate-scanner-mixed-origin-admission-20261009.json`. Item 48's
   complete scanner execution remains pending. Release API, Linux and self-hosting
   are pending. No public language, runtime ABI/schema, dependency, DB or CI change.
+
+## Indexed HIR borrow reachability and origins (2026-10-09)
+
+- Definite-exit suffixes now form a sorted containment index. Reachability is
+  computed once per expression/statement instead of scanning all blocks for
+  every origin query. Existing conservative outcomes for zero-iteration loops,
+  branches, return/break/continue and depth/work exhaustion remain.
+- Origin memoization starts only after return summaries converge. Cached facts
+  retain their required traversal depth, so reuse cannot admit an over-depth
+  alias chain. Unknown recursive returns still reject E2103. The 1048576 work
+  limit remains unchanged and index allocation/work failures stay explicit.
+- Development native API tests pass for indexed-versus-original reachability,
+  budget exhaustion and independent mixed-origin MIR mutation rejection.
+  Development/release mixed-origin and String/CString/UTF-8 execution receipts
+  are `evidence/candidate-borrow-index-{mixed,text}-{dev,release}-20261009.json`.
+- Diagnostic-only guard profiling establishes that the unchanged scanner now
+  passes initial HIR origins and assignment/move holds. Its next failure is the
+  exclusive competing-access scan (guard 60112), which still compares every
+  fresh loan against every expression. Evidence:
+  `evidence/candidate-scanner-reach-limit-profile-20261009.json`. Production
+  diagnostic codes remain unchanged; complete scanner execution is pending.
+- No public language/API, HIR/MIR schema, runtime ABI, dependency, DB or CI change.

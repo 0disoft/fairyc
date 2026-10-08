@@ -132,7 +132,9 @@ through existing owned HIR/MIR loops, including one-time slice bounds and
 resource exits. Fixed byte-array field subranges also preserve original storage and
 execute in both candidate profiles. Local mixed-origin payload selections now retain every possible owner
 in HIR and independently recomputed MIR. The unchanged scanner still reaches
-a HIR analysis-limit rejection before complete scanner execution. Project-driver
+a HIR exclusive-access analysis-limit rejection before complete scanner execution.
+Indexed reachability and finalized-origin caching pass the prior initial-origin
+limit without raising the work budget. Project-driver
 and platform work also remain. These prerequisite executions do not establish
 the differential acceptance or stage1/stage2 gate above.
 

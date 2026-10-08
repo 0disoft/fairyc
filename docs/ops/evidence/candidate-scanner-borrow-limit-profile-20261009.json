@@ -1,0 +1,71 @@
+{
+  "schema": "fairyc.candidate-borrow-limit-diagnostic/v1",
+  "guardCodes": {
+    "60264": "HIR summary rounds",
+    "60101": "HIR initial origins",
+    "60102": "HIR assignment/move holds",
+    "60111": "exclusive generation propagation",
+    "60112": "exclusive competing accesses",
+    "60113": "exclusive final budget"
+  },
+  "executions": [
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\compiler-build-240s.exe",
+        "check"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "check ok: 2 instance(s), 135 source file(s), 1638 MIR function(s), lock updated\n",
+      "stderr": "",
+      "elapsedSeconds": 6.89
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\compiler-build-240s.exe",
+        "experimental",
+        "build-workspace",
+        "--target",
+        "x86_64-windows-msvc",
+        "--profile",
+        "low",
+        "--output",
+        "build/budget-probe.exe",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "built workspace: build/budget-probe.exe (x86_64-windows-msvc, msvc 14.51.36231, low, lock verified)\n",
+      "stderr": "",
+      "elapsedSeconds": 14.0
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-scanner\\budget-probe.exe",
+        "--c-modules-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-scanner\\sources.txt"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "exit": 2,
+      "stdout": "",
+      "stderr": ".cache/candidate-scanner/main.fy:1:1: error: module program phase 6 code 60101 (bytes 0..0)\n",
+      "elapsedSeconds": 29.48
+    }
+  ],
+  "originalFiles": [
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\hir_view_check.fy",
+      "sha256": "472c3eababd1d042278de13e49e2e81007707b6ec19310de99ccf1fa41a7df1a"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\hir_mutable_check.fy",
+      "sha256": "29291577e4b6df4c028d123454aac3c4cf2d298f986e6855a48ea160794d3865"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\fairy.lock",
+      "sha256": "d87e99a35fd102987facec55bf5344bfb1c38729d28ddc747b7713340316bc01"
+    }
+  ],
+  "originalBytesRestored": true,
+  "productionErrorCodesChanged": false
+}

@@ -270,5 +270,7 @@ SDK 본문 연결과 나머지 분석량 제한은 계속 남는다.
 20번 완료 후 주요 작업 99개(21~119)와 선택 검토 8개(120~127)를 구분한다. 주요 작업 모두가
 셀프호스팅 전에 끝나야 한다는 뜻은 아니며, 자기 소스의 도달 가능한 기능이 단계 전환을 결정한다.
 
-즉시 다음 작업은 **48번 scanner HIR 분석 상한의 원인 계측·반복 계산 축소와 실제 토큰·진단 통합**이다. local 혼합 origin은 HIR/독립 MIR와 두 후보 실행에 연결했다. 구조체 배열 필드 subrange 대여는 두 프로필로 검증했다. 50번 콘솔 SDK와 59번 copied byte 반복은 실행 검증을 마쳤다. 47번 스칼라 Vec와 48번 resource/struct 원소 실행, 49번 Buffer/String/CString·UTF-8 실행은 연결했다. 41번 CStr 표현형과 50번 process runtime의 bounded 실행도 연결했으며, 다른 SDK 본문 및 프로젝트 driver는 남는다. 61~64번 nominal source-set와 54~55번 inert repr(C) 반환값 연결은 완료했으며, SDK/영속 package 정체성 등 남은 범위는 각 항목에 유지했다.
+즉시 다음 작업은 **48번 scanner 가변 대여 충돌 검사의 전체 식 비교 축소와 실제 토큰·진단 통합**이다. local 혼합 origin은 HIR/독립 MIR와 두 후보 실행에 연결했다. 구조체 배열 필드 subrange 대여는 두 프로필로 검증했다. 50번 콘솔 SDK와 59번 copied byte 반복은 실행 검증을 마쳤다. 47번 스칼라 Vec와 48번 resource/struct 원소 실행, 49번 Buffer/String/CString·UTF-8 실행은 연결했다. 41번 CStr 표현형과 50번 process runtime의 bounded 실행도 연결했으며, 다른 SDK 본문 및 프로젝트 driver는 남는다. 61~64번 nominal source-set와 54~55번 inert repr(C) 반환값 연결은 완료했으며, SDK/영속 package 정체성 등 남은 범위는 각 항목에 유지했다.
 선택 기능은 별도 도입 판단을 거친다. 이 목록은 push·PR·설치·release를 승인하지 않는다.
+
+2026-10-09: 85번 HIR 도달성 구간 인덱스와 반환 summary 확정 후 origin 캐시를 연결했다. 개발/릴리스 혼합 origin 정상 4개·거부 10개·native 합계 16회, String/CString/UTF-8 정상 6개·거부 7개·native 합계 24회와 개발 API 2개가 통과했다. 깊이 초과 alias와 미확정 recursive 반환은 계속 거부한다. Scanner는 초기 origin 상한을 지나 가변 대여의 전체 식 충돌 비교 상한에서 멈춘다. 분석량 상한은 올리지 않았다. 근거: `evidence/candidate-scanner-reach-limit-profile-20261009.json`, `evidence/candidate-borrow-index-mixed-dev-20261009.json`, `evidence/candidate-borrow-index-mixed-release-20261009.json`, `evidence/candidate-borrow-index-text-dev-20261009.json`, `evidence/candidate-borrow-index-text-release-20261009.json`.
