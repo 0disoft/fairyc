@@ -161,10 +161,10 @@ fn void require_spans(ref syntax::Parsed owner,ref syntax::Parsed original,usize
     // Empty, oversized and generic inputs fail closed with module-local positions.
     var v::Vec<syntax::Parsed> none=v::empty<syntax::Parsed>();
     assert(switch(join::join(ref none)){case .ok(_):{let u32 zero=0;zero}case .err(p):{p.code}}==10);
-    let join::Problem generic_declaration=rejection(b"module g;",b"module h;fn i32 f<U>(U x){return 0;}");
-    assert(generic_declaration.code==9 && generic_declaration.module_index==1 && generic_declaration.end>generic_declaration.start);
-    assert(rejection(b"module g;fn i32 f<U>(U x){return 0;}",b"module h;").code==9);
-    assert(rejection(b"module g;fn i32 f(){return 0;}",b"module h;fn i32 g(){return f<i32>(0);}").code==9);
+    let join::Problem generic_declaration=rejection(b"module g;",b"module h;struct S<U>{U x;}");
+    assert(generic_declaration.code==4501 && generic_declaration.module_index==1 && generic_declaration.end>generic_declaration.start);
+    assert(rejection(b"module g;resource S<U>{U x;cleanup{}}",b"module h;").code==4501);
+    let syntax::Parsed template_owner=owner(b"module g;fn U f<U>(U x){return x;}",b"module h;fn i32 g(){return f<i32>(0);}");assert(syntax::declaration_count(ref template_owner)==4);
     var v::Vec<syntax::Parsed> many=v::empty<syntax::Parsed>();
     i=0;
     while(i<257){assert(v::push<syntax::Parsed>(ref mut many,parsed(b"module m;")).is_ok);i+=1;}

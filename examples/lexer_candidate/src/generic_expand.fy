@@ -28,11 +28,17 @@ fn usize argument(ref v::Vec<types::Node> nodes,usize root,usize index){var usiz
 fn u32 scalar_type(ref u8[] name){return if(bytes::equal(name,b"i32")){1}else if(bytes::equal(name,b"i64")){2}else if(bytes::equal(name,b"u8")){3}else if(bytes::equal(name,b"u32")){4}else if(bytes::equal(name,b"usize")){5}else if(bytes::equal(name,b"bool")){6}else{7};}
 fn bool inside(usize start,usize end,syntax::Declaration d){return start>=d.start && end<=d.end;}
 fn usize parameter(ref u8[] source,ref v::Vec<types::Node> types,syntax::Declaration d,ref u8[] name){var usize i=0;while(i<argument_count(types,d.generic_parameters)){let n=type_at(types,argument(types,d.generic_parameters,i));if(bytes::equal(source[n.start..n.end],name)){return i+1;}i+=1;}return 0;}
+fn usize module_at(ref v::Vec<syntax::Declaration> declarations,usize start){
+    var usize owner=0;var usize position=0;var usize i=0;
+    while(i<v::len<syntax::Declaration>(declarations)){let d=*v::at<syntax::Declaration>(declarations,i);
+        if(d.kind==1 && d.start<=start && (owner==0 || d.start>=position)){owner=i+1;position=d.start;}i+=1;
+    }return owner;
+}
 fn usize instance(ref u8[] source,ref mut v::Vec<syntax::Declaration> declarations,ref mut v::Vec<ast::Node> expressions,ref mut v::Vec<ast::Statement> statements,ref mut v::Vec<bodies::Entry> entries,ref mut v::Vec<types::Node> types,ref mut v::Vec<Instance> instances,ref mut Plan plan,usize id,usize depth){
     let call=expression_at(expressions,id);let base=expression_at(expressions,call.left);
     if(depth>=32){discard fail(plan,4503,call.start,call.end);return 0;}
     var usize declaration=0;var usize i=0;
-    while(i<v::len<syntax::Declaration>(declarations)){let d=*v::at<syntax::Declaration>(declarations,i);if(d.generic_parameters!=0 && bytes::equal(source[d.name_start..d.name_end],source[base.start..base.end])){declaration=i+1;break;}i+=1;}
+    while(i<v::len<syntax::Declaration>(declarations)){let d=*v::at<syntax::Declaration>(declarations,i);if(d.generic_parameters!=0 && (base.right!=0 && i+1==base.right || base.right==0 && module_at(declarations,d.start)==module_at(declarations,base.start) && bytes::equal(source[d.name_start..d.name_end],source[base.start..base.end]))){declaration=i+1;break;}i+=1;}
     if(declaration==0){discard fail(plan,4501,call.start,call.end);return 0;}
     let d=*v::at<syntax::Declaration>(declarations,declaration-1);let usize count=argument_count(types,call.right);
     if(count==0 || count>8 || count!=argument_count(types,d.generic_parameters)){discard fail(plan,4501,call.start,call.end);return 0;}
@@ -50,7 +56,7 @@ fn usize instance(ref u8[] source,ref mut v::Vec<syntax::Declaration> declaratio
     i=1;while(i<=nt){let node=type_at(types,i);if(inside(node.start,node.end,d)){
         let usize param=if(node.kind==1 || node.kind==13){parameter(source,types,d,source[node.start..node.end])}else{0};
         if(param!=0){set(ref mut type_map,i,roots[param-1]);}
-        else{var types::Node copy=node;copy.left=mapped(ref type_map,node.left);copy.right=mapped(ref type_map,node.right);if(v::len<types::Node>(types)>=4096 || !v::push<types::Node>(types,copy).is_ok){discard fail(plan,4503,call.start,call.end);return 0;}set(ref mut type_map,i,v::len<types::Node>(types));}
+        else{var types::Node copy=node;copy.left=if(node.kind==1){node.left}else{mapped(ref type_map,node.left)};copy.right=mapped(ref type_map,node.right);if(v::len<types::Node>(types)>=4096 || !v::push<types::Node>(types,copy).is_ok){discard fail(plan,4503,call.start,call.end);return 0;}set(ref mut type_map,i,v::len<types::Node>(types));}
     }i+=1;}
     i=1;while(i<=ne){let node=*v::at<ast::Node>(expressions,i-1);if(inside(node.start,node.end,d)){if(v::len<ast::Node>(expressions)>=4096 || !v::push<ast::Node>(expressions,node).is_ok){discard fail(plan,4503,call.start,call.end);return 0;}set(ref mut expression_map,i,v::len<ast::Node>(expressions));}i+=1;}
     i=1;while(i<=ns){let node=*v::at<ast::Statement>(statements,i-1);if(inside(node.start,node.end,d)){if(v::len<ast::Statement>(statements)>=8192 || !v::push<ast::Statement>(statements,node).is_ok){discard fail(plan,4503,call.start,call.end);return 0;}set(ref mut statement_map,i,v::len<ast::Statement>(statements));}i+=1;}
@@ -58,7 +64,7 @@ fn usize instance(ref u8[] source,ref mut v::Vec<syntax::Declaration> declaratio
     while(i<=d.entry_start+d.entry_count){var usize at=0;while(at<nb && v::at<bodies::Entry>(entries,at).id!=i){at+=1;}if(at==nb){discard fail(plan,4501,call.start,call.end);return 0;}var bodies::Entry node=*v::at<bodies::Entry>(entries,at);node.id=v::len<bodies::Entry>(entries)+1;node.type_root=mapped(ref type_map,node.type_root);node.expression=mapped(ref expression_map,node.expression);if(v::len<bodies::Entry>(entries)>=1024 || !v::push<bodies::Entry>(entries,node).is_ok){discard fail(plan,4503,call.start,call.end);return 0;}set(ref mut entry_map,i,node.id);i+=1;}
     i=1;while(i<=ne){let usize target_node=get(ref expression_map,i);if(target_node!=0){var ast::Node node=*v::at<ast::Node>(expressions,target_node-1);
         if(node.kind==12 || node.kind==31 || node.kind==14){node.left=mapped(ref statement_map,node.left);}else{node.left=mapped(ref expression_map,node.left);}
-        if(node.kind==18){node.right=mapped(ref statement_map,node.right);}else if(node.kind==20 || node.kind==23){node.right=mapped(ref type_map,node.right);}else{node.right=mapped(ref expression_map,node.right);}
+        if(node.kind==18){node.right=mapped(ref statement_map,node.right);}else if(node.kind==20 || node.kind==23){node.right=mapped(ref type_map,node.right);}else if(node.kind!=2){node.right=mapped(ref expression_map,node.right);}
         let ref mut ast::Node cell=v::at_mut<ast::Node>(expressions,target_node-1);*cell=node;
     }i+=1;}
     i=1;while(i<=ns){let usize target_node=get(ref statement_map,i);if(target_node!=0){var ast::Statement node=*v::at<ast::Statement>(statements,target_node-1);node.expression=mapped(ref expression_map,node.expression);node.target=mapped(ref expression_map,node.target);node.entry=mapped(ref entry_map,node.entry);node.first=mapped(ref statement_map,node.first);if(node.kind!=1){node.second=mapped(ref statement_map,node.second);}let ref mut ast::Statement cell=v::at_mut<ast::Statement>(statements,target_node-1);*cell=node;}i+=1;}
@@ -72,8 +78,8 @@ fn Problem prepare(ref u8[] source,ref mut v::Vec<syntax::Declaration> declarati
 let usize originals=v::len<syntax::Declaration>(declarations);let usize expression_limit=v::len<ast::Node>(expressions);var usize i=0;
     while(i<originals){let d=*v::at<syntax::Declaration>(declarations,i);if(d.generic_parameters!=0){
         if(d.kind!=3 || d.owner_end!=0 || argument_count(types,d.generic_parameters)>8){discard fail(plan,4501,d.start,d.end);return plan.problem;}
-        var usize j=0;while(j<originals){let other=*v::at<syntax::Declaration>(declarations,j);if(j!=i && bytes::equal(source[d.name_start..d.name_end],source[other.name_start..other.name_end])){discard fail(plan,2,d.name_start,d.name_end);return plan.problem;}j+=1;}
-        j=0;while(j<v::len<bodies::Entry>(entries)){let entry=*v::at<bodies::Entry>(entries,j);if(entry.name_end>entry.name_start && bytes::equal(source[d.name_start..d.name_end],source[entry.name_start..entry.name_end])){discard fail(plan,4501,entry.name_start,entry.name_end);return plan.problem;}j+=1;}
+        var usize j=0;while(j<originals){let other=*v::at<syntax::Declaration>(declarations,j);if(j!=i && module_at(declarations,d.start)==module_at(declarations,other.start) && bytes::equal(source[d.name_start..d.name_end],source[other.name_start..other.name_end])){discard fail(plan,2,d.name_start,d.name_end);return plan.problem;}j+=1;}
+        j=0;while(j<v::len<bodies::Entry>(entries)){let entry=*v::at<bodies::Entry>(entries,j);if(entry.name_end>entry.name_start && module_at(declarations,d.start)==module_at(declarations,entry.start) && bytes::equal(source[d.name_start..d.name_end],source[entry.name_start..entry.name_end])){discard fail(plan,4501,entry.name_start,entry.name_end);return plan.problem;}j+=1;}
         j=0;while(j<argument_count(types,d.generic_parameters)){let a=type_at(types,argument(types,d.generic_parameters,j));var usize n=0;while(n<j){let b=type_at(types,argument(types,d.generic_parameters,n));if(bytes::equal(source[a.start..a.end],source[b.start..b.end])){discard fail(plan,4501,a.start,a.end);return plan.problem;}n+=1;}j+=1;}
     }i+=1;}
     i=1;while(i<=expression_limit){let node=expression_at(expressions,i);if(node.kind==20){var bool template=false;var usize n=0;while(n<originals){let d=*v::at<syntax::Declaration>(declarations,n);template=template || d.generic_parameters!=0 && inside(node.start,node.end,d);n+=1;}if(!template && !request(source,declarations,expressions,statements,entries,types,instances,plan,i,0)){return plan.problem;}}i+=1;}

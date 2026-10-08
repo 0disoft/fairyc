@@ -114,17 +114,13 @@ fn attributes::Argument argument(attributes::Argument a,usize offset,ref v::Vec<
     return attributes::Argument{.kind=a.kind,.start=moved(a.start,offset),.end=moved(a.end,offset),.token=token_at(tokens,a.token)};
 }
 
-// Generic declarations and explicit specialization requests stay out of this
-// bounded unit; a caller that needs them must expand generics before joining.
+// Scalar function templates retain original source ownership until binding and
+// specialization. Generic aggregate/receiver declarations remain closed here.
 fn Problem generic(ref syntax::Parsed file,usize module_index){
-    var usize i=0;
-    while(i<syntax::declaration_count(file)){let d=syntax::declaration_at(file,i);
-        if(d.generic_parameters!=0 || d.generic_start!=0){return fail(9,module_index,d.start,d.end);}
-        i+=1;}
-    var usize e=1;
-    while(e<=syntax::expression_count(file)){let n=syntax::expression_at(file,e);
-        if(n.kind==20){return fail(9,module_index,n.start,n.end);}
-        e+=1;}
+    var usize i=0;while(i<syntax::declaration_count(file)){let d=syntax::declaration_at(file,i);
+        if(d.generic_parameters!=0 && (d.kind!=3 || d.owner_end!=0)){return fail(4501,module_index,d.start,d.end);}
+        i+=1;
+    }
     return Problem{.code=0,.module_index=0,.start=0,.end=0};
 }
 

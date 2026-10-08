@@ -28,7 +28,7 @@ pub fn Result<Program,catalog::Problem> build(ref v::Vec<syntax::Parsed> sources
     let c=switch(catalog::build(sources)){case .ok(c):{c}case .err(p):{return .err(p);}};
     var v::Vec<types::Type> graph=v::empty<types::Type>();var v::Vec<Signature> signatures=v::empty<Signature>();var v::Vec<usize> parameters=v::empty<usize>();var bytes::Buffer links=bytes::empty();
     var usize module_index=0;while(module_index<v::len<syntax::Parsed>(sources)){let p=v::at<syntax::Parsed>(sources,module_index);var usize index=1;
-        while(index<syntax::declaration_count(p)){let d=syntax::declaration_at(p,index);if(d.kind==3 || d.kind==9){
+        while(index<syntax::declaration_count(p)){let d=syntax::declaration_at(p,index);if((d.kind==3 || d.kind==9) && d.generic_parameters==0){
             if(d.owner_end!=0 || d.generic_parameters!=0){return .err(fail(4501,module_index,d.start,d.end));}
             let contract=effects::read(p,index);if(contract.code!=0){return .err(fail(contract.code,module_index,contract.start,contract.end));}
             var usize link_start=0;var usize link_end=0;

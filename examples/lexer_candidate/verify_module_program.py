@@ -31,8 +31,14 @@ CLI_CASES = (
 )
 
 
-def verify_cli(images, runner, compiler, bootstrap_receipt, receipt=None):
-    output = ROOT / ".cache/candidate-module-cli"
+def verify_cli(images, runner, compiler, bootstrap_receipt, receipt=None, generics=False):
+    cases = (
+        ("generic-provider", "module main;import provider as p;import provider as q;fn T id<T>(T x){return x;}fn i32 main(){assert(p::id<bool>(true));return p::id<i32>(q::id<i32>(id<i32>(7)));}",
+         "module provider;fn T helper<T>(T x){return x;}pub fn T id<T>(T x){return helper<T>(x);}", "", 7),
+        ("generic-nominal", "module main;import provider as p;fn i32 main(){return p::pick<i32>(7,p::make());}",
+         "module provider;pub struct Token{i32 n;}pub fn Token make(){return Token{.n=7};}pub fn T pick<T>(T x,Token t){assert(t.n==7);return x;}", "", 7),
+    ) if generics else CLI_CASES
+    output = ROOT / (".cache/candidate-module-generics-cli" if generics else ".cache/candidate-module-cli")
     output.mkdir(parents=True, exist_ok=True)
     rows, fixtures, jobs = [], [], []
 
@@ -65,7 +71,7 @@ def verify_cli(images, runner, compiler, bootstrap_receipt, receipt=None):
 
     provider = output / "provider.c"
     provider.write_text('#include <stdint.h>\n#include <stdio.h>\nvoid fixture_drop(int32_t n){(void)fputc(n,stdout);}\nstruct Packet{uint32_t code;uint32_t amount;};\nstruct Packet fixture_packet(void){struct Packet p={41,1};return p;}\n', encoding="utf-8", newline="\n")
-    for name, first, second, trace, value in CLI_CASES:
+    for name, first, second, trace, value in cases:
         path = manifest(name, first, second)
         emitted = [run([image, "--c-modules-file", path]) for image in images]
         assert all(not row["stderr"] and row["stdout"] == emitted[0]["stdout"] for row in emitted)
@@ -78,6 +84,15 @@ def verify_cli(images, runner, compiler, bootstrap_receipt, receipt=None):
                           'int main(void){int32_t (*volatile entry)(void)=fy_candidate_entry;int32_t n=entry();fprintf(stderr,"fairyc-candidate-result/v1:%" PRId32 "\\n",n);return 0;}\n', encoding="utf-8", newline="\n")
         jobs.append(dict(name=name, source=str(source), foreignSource=str(provider), observe=True))
     rejections = (
+        ("generic-private", "module main;import provider as p;fn i32 main(){return p::id<i32>(7);}",
+         "module provider;fn T id<T>(T x){return x;}", "phase 3 code 6"),
+        ("generic-mismatch", "module main;import provider as p;fn i32 main(){discard p::id<bool>(7);return 0;}",
+         "module provider;pub fn T id<T>(T x){return x;}", "phase 5 code 1"),
+        ("generic-aggregate", "module main;fn i32 main(){return 0;}",
+         "module provider;pub struct Box<T>{T x;}", "phase 2 code 4501"),
+        ("generic-body-error", "module main;import provider as p;fn i32 main(){return p::id<i32>(7);}",
+         "module provider;pub fn T id<T>(T x){return missing;}", "-provider.fy:1:"),
+    ) if generics else (
         ("private", "module main;import provider as p;fn i32 main(){return p::secret();}",
          "module provider;fn i32 secret(){return 7;}", "phase 3 code 6"),
         ("field", "module main;import provider as p;fn i32 main(){let p::Owner x=p::make();return x.n;}",
@@ -99,8 +114,8 @@ def verify_cli(images, runner, compiler, bootstrap_receipt, receipt=None):
     save(request, dict(schema="fairyc.candidate-c-native-request/v1", output=str(output / "native"), jobs=jobs))
     run([runner, request, report])
     native = json.loads(report.read_text(encoding="utf-8"))
-    assert len(native) == (2 if os.name == "nt" else 4) * len(CLI_CASES)
-    expected = {name: (trace, value) for name, _, _, trace, value in CLI_CASES}
+    assert len(native) == (2 if os.name == "nt" else 4) * len(cases)
+    expected = {name: (trace, value) for name, _, _, trace, value in cases}
     for row in native:
         trace, value = expected[row["name"]]
         assert not row.get("error") and row["trap"] == 0 and row["exit"] == 0
@@ -126,8 +141,8 @@ def verify_cli(images, runner, compiler, bootstrap_receipt, receipt=None):
                                       for p in sorted((PROJECT / "src").glob("*.fy"))],
               lockSHA256=digest(PROJECT / "fairy.lock"),
               limits=["explicit source-list CLI, not workspace manifest resolution",
-                      "SDK/generic imports pending", "Linux deferred"]))
-    print(f"module CLI: {len(CLI_CASES)} programs, {len(rejections)} errors, {len(native)} native C executions passed", flush=True)
+                      "SDK aggregate instantiation pending", "Linux deferred"]))
+    print(f"module CLI: {len(cases)} programs, {len(rejections)} errors, {len(native)} native C executions passed", flush=True)
 
 
 def main():
@@ -137,12 +152,12 @@ def main():
     parser.add_argument("--native-runner", type=Path)
     parser.add_argument("--bootstrap-receipt", type=Path)
     parser.add_argument("--receipt", type=Path)
-    parser.add_argument("--phase", choices=("join", "program", "cli", "repr"), required=True)
+    parser.add_argument("--phase", choices=("join", "program", "cli", "cli-generics", "repr"), required=True)
     args = parser.parse_args()
-    if args.phase == "cli":
+    if args.phase in ("cli", "cli-generics"):
         if not args.images or len(args.images) != 2 or not args.native_runner or not args.compiler:
             parser.error("cli phase requires two --images, --native-runner and --compiler")
-        verify_cli([p.resolve() for p in args.images], args.native_runner.resolve(), args.compiler.resolve(), args.bootstrap_receipt, args.receipt)
+        verify_cli([p.resolve() for p in args.images], args.native_runner.resolve(), args.compiler.resolve(), args.bootstrap_receipt, args.receipt, args.phase == "cli-generics")
         return
     if not args.compiler:
         parser.error("API phases require --compiler")

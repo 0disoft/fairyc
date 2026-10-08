@@ -88,6 +88,14 @@ evidence/candidate-result-handling-alignment-20261007.json에 새 검사·도구
 44. 완료: 같은 소스 모듈의 명시적 scalar 함수 제네릭을 별도 AST arena에서 치환한 뒤 일반 typing/HIR/MIR로 연결. 순서 있는 타입 인자·forwarding·본문·분기·반복·스칼라 정체성 및 오류 20개 fixture, native 20회 검증. public import와 SDK nominal 예외는 46/61~64에서 연결. 근거: `evidence/candidate-resource-scalar-generics-20261007.json`.
 45. 완료: build-local 원 선언 ID + 순서 있는 scalar 타입 조합으로 중복 제거. 반복 소스 호출은 그대로 실행. 재귀·depth 32·선언당 16개·전체 64개·분석량 1048576 및 AST arena 상한을 유지. 독립 HIR API 검사 2개, planner 정상/오류 4개·native 4회. 패키지 정체성 연결은 63번. 근거: `evidence/candidate-resource-generic-plan-20261007.json`.
 46. 부분 완료: Fairy SHA-256과 bundled SDK 모듈별 원본 digest로 std namespace를 인증. 모듈 타입 그래프의 Vec 원소·공급자·별칭 정체성 및 6필드 storage 형식을 연결. 변조·SDK 사칭·bare Vec·직접/중첩 borrow 원소·위조 공급자를 거부하며 실패한 타입 interning을 되돌림. 근거: `evidence/candidate-sdk-authority-20261008.json`. SDK template의 구체화와 owned HIR/MIR/C 레이아웃 연결은 다음 단위.
+
+44/45/61~64번의 imported scalar generic 함수는 provider 선언과 순서 있는 타입 인자로
+구체화하며 같은 공급자의 별칭 호출을 중복 제거한다. 같은 이름의 caller/provider 함수와
+provider-local helper 및 nominal 인자는 원래 선언 정체성을 보존한다. 일반 API 3개와
+릴리스 대표 API 1개, CLI 정상 2개·오류 4개 및 C native 4회가 근거다:
+`evidence/candidate-module-generics-api-20261008.json`,
+`evidence/candidate-module-generics-cli-20261008.json`. Vec/aggregate template와
+영속 package 정체성은 아직 남는다.
 47. Vec 할당·초기화된 prefix·push/pop·대여 접근·cleanup 연결.
 48. Vec의 resource 원소, 할당 실패 시 donor 반환, 토큰·진단의 중첩 자원 정리.
 49. Buffer/String 할당·크기 변경·바이트 접근·소유권 전달 연결.

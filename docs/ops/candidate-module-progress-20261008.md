@@ -302,3 +302,24 @@ same C bytes as the prior candidate. Evidence:
 `evidence/candidate-large-arrays-api-20261008.json` and
 `evidence/candidate-large-arrays-cli-20261008.json`. Larger ranks and general
 resource-array ownership are outside this unit; SDK instantiation remains pending.
+
+## Imported scalar function specializations
+
+Joined source sets retain function templates until private/public binding has
+resolved their provider declaration. Expansion keys use that declaration and
+ordered scalar arguments; two aliases share one specialization and same-named
+caller/provider functions remain distinct. Nested template helpers retain the
+provider module, nominal type bindings and declaration references during cloning.
+The existing per-template, total, depth and work budgets remain unchanged.
+
+Development runs three selected API tests; release runs the new provider-identity
+test. An earlier release selection hit the observer's 360-second whole-selection
+timeout, without a completed result. It is not counted as a passing run. The
+observer now budgets each selected compilation and terminates its process tree
+on a timeout, and can append a narrow continuation only when compiler, source,
+test and lock digests are unchanged.
+
+Generic aggregate and receiver declarations remain rejected. SDK Vec body
+instantiation and persistent package identity are subsequent work. Evidence:
+`evidence/candidate-module-generics-api-20261008.json` and
+`evidence/candidate-module-generics-cli-20261008.json`.

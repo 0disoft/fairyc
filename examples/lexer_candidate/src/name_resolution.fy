@@ -311,7 +311,7 @@ fn Problem collect(ref syntax::Parsed parsed, ref mut Context context, ref mut v
 
 /// Keep source, syntax and declaration-use links in one owner. Failure retains
 /// only diagnostic authority; table queries cannot publish partial resolution.
-pub fn Resolved resolve_program(syntax::Parsed parsed){var Context context=empty();context.modules=true;var v::Vec<Symbol> symbols=v::empty<Symbol>();var v::Vec<Reference> references=v::empty<Reference>();let Problem problem=collect(ref parsed,ref mut context,ref mut symbols,ref mut references);return Resolved{.source=parsed,.context,.symbols,.references,.external=v::empty<modules::Item>(),.parameters=v::empty<u32>(),.problem};}
+pub fn Resolved resolve_program(syntax::Parsed input){let syntax::Parsed parsed=generics::expand(input);var Context context=empty();context.modules=true;var v::Vec<Symbol> symbols=v::empty<Symbol>();var v::Vec<Reference> references=v::empty<Reference>();let Problem problem=collect(ref parsed,ref mut context,ref mut symbols,ref mut references);return Resolved{.source=parsed,.context,.symbols,.references,.external=v::empty<modules::Item>(),.parameters=v::empty<u32>(),.problem};}
 pub fn Resolved resolve(syntax::Parsed parsed) {
     let syntax::Parsed prepared=generics::expand(parsed);
     var Context context = empty();
