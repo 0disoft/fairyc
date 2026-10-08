@@ -1,5 +1,6 @@
 """Observe candidate-emitted Result pair programs; all type logic stays Fairy."""
 import sys
+from pathlib import Path
 import verify_resource_lifetime as observer
 
 UNIT = 151
@@ -14,4 +15,17 @@ observer.REJECTIONS[UNIT] = [
 ]
 if __name__ == "__main__":
     sys.argv[1:1] = ["--unit", str(UNIT)]
-    observer.main()
+    # Native build products belong in the cache even when the requested receipt
+    # is a checked-in evidence document.
+    at = sys.argv.index("--receipt") + 1
+    destination = Path(sys.argv[at]).resolve()
+    cache = observer.REPO / ".cache/candidate-result-pairs"
+    cache.mkdir(parents=True, exist_ok=True)
+    receipt = cache / "observation.json"
+    sys.argv[at] = str(receipt)
+    try:
+        observer.main()
+    finally:
+        if receipt.exists():
+            destination.parent.mkdir(parents=True, exist_ok=True)
+            destination.write_bytes(receipt.read_bytes())

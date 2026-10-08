@@ -144,7 +144,10 @@ Authenticated file SDK extern declarations and C record authority now also
 pass development/release native API tests, including 14 rejected mutations.
 A separate private Result encoding now preserves enum/record and
 Option-record/record pairs without changing prior valid IDs or analysis bounds.
-Full File SDK execution and project integration remain separate checks.
+Original File SDK open/read/write/sync/close/replace bodies now also execute
+with the Windows runtime in both candidate and native profiles, including
+UTF-8/NUL data, buffer preservation and failure/effect cases. Project integration
+remains a separate check.
 Project-driver and platform work remain. These scanner results do not establish
 the complete compiler's stage1/stage2 or promotion gates.
 

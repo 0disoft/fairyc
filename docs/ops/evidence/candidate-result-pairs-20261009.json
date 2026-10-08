@@ -76,7 +76,7 @@
       "argv": [
         "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-fs\\candidate-pairs-dev.exe",
         "--check-types-file",
-        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\docs\\ops\\evidence\\enum-record.fy"
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-result-pairs\\enum-record.fy"
       ],
       "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
       "exit": 0,
@@ -87,7 +87,7 @@
       "argv": [
         "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-fs\\candidate-pairs-dev.exe",
         "--hir-file",
-        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\docs\\ops\\evidence\\enum-record.fy"
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-result-pairs\\enum-record.fy"
       ],
       "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
       "exit": 0,
@@ -98,7 +98,7 @@
       "argv": [
         "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-fs\\candidate-pairs-dev.exe",
         "--mir-file",
-        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\docs\\ops\\evidence\\enum-record.fy"
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-result-pairs\\enum-record.fy"
       ],
       "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
       "exit": 0,
@@ -109,7 +109,7 @@
       "argv": [
         "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-fs\\candidate-pairs-dev.exe",
         "--c-file",
-        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\docs\\ops\\evidence\\enum-record.fy"
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-result-pairs\\enum-record.fy"
       ],
       "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
       "exit": 0,
@@ -120,7 +120,7 @@
       "argv": [
         "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-fs\\candidate-pairs-release.exe",
         "--check-types-file",
-        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\docs\\ops\\evidence\\enum-record.fy"
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-result-pairs\\enum-record.fy"
       ],
       "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
       "exit": 0,
@@ -131,7 +131,7 @@
       "argv": [
         "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-fs\\candidate-pairs-release.exe",
         "--hir-file",
-        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\docs\\ops\\evidence\\enum-record.fy"
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-result-pairs\\enum-record.fy"
       ],
       "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
       "exit": 0,
@@ -142,7 +142,7 @@
       "argv": [
         "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-fs\\candidate-pairs-release.exe",
         "--mir-file",
-        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\docs\\ops\\evidence\\enum-record.fy"
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-result-pairs\\enum-record.fy"
       ],
       "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
       "exit": 0,
@@ -153,7 +153,7 @@
       "argv": [
         "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-fs\\candidate-pairs-release.exe",
         "--c-file",
-        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\docs\\ops\\evidence\\enum-record.fy"
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-result-pairs\\enum-record.fy"
       ],
       "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
       "exit": 0,
@@ -164,7 +164,7 @@
       "argv": [
         "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-fs\\candidate-pairs-dev.exe",
         "--check-types-file",
-        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\docs\\ops\\evidence\\record-enum.fy"
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-result-pairs\\record-enum.fy"
       ],
       "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
       "exit": 0,
@@ -175,7 +175,7 @@
       "argv": [
         "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-fs\\candidate-pairs-dev.exe",
         "--hir-file",
-        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\docs\\ops\\evidence\\record-enum.fy"
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-result-pairs\\record-enum.fy"
       ],
       "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
       "exit": 0,
@@ -186,7 +186,7 @@
       "argv": [
         "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-fs\\candidate-pairs-dev.exe",
         "--mir-file",
-        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\docs\\ops\\evidence\\record-enum.fy"
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-result-pairs\\record-enum.fy"
       ],
       "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
       "exit": 0,
@@ -197,7 +197,7 @@
       "argv": [
         "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-fs\\candidate-pairs-dev.exe",
         "--c-file",
-        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\docs\\ops\\evidence\\record-enum.fy"
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-result-pairs\\record-enum.fy"
       ],
       "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
       "exit": 0,
@@ -208,7 +208,7 @@
       "argv": [
         "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-fs\\candidate-pairs-release.exe",
         "--check-types-file",
-        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\docs\\ops\\evidence\\record-enum.fy"
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-result-pairs\\record-enum.fy"
       ],
       "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
       "exit": 0,
@@ -219,7 +219,7 @@
       "argv": [
         "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-fs\\candidate-pairs-release.exe",
         "--hir-file",
-        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\docs\\ops\\evidence\\record-enum.fy"
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-result-pairs\\record-enum.fy"
       ],
       "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
       "exit": 0,
@@ -230,7 +230,7 @@
       "argv": [
         "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-fs\\candidate-pairs-release.exe",
         "--mir-file",
-        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\docs\\ops\\evidence\\record-enum.fy"
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-result-pairs\\record-enum.fy"
       ],
       "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
       "exit": 0,
@@ -241,7 +241,7 @@
       "argv": [
         "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-fs\\candidate-pairs-release.exe",
         "--c-file",
-        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\docs\\ops\\evidence\\record-enum.fy"
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-result-pairs\\record-enum.fy"
       ],
       "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
       "exit": 0,
@@ -252,7 +252,7 @@
       "argv": [
         "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-fs\\candidate-pairs-dev.exe",
         "--check-types-file",
-        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\docs\\ops\\evidence\\option-record.fy"
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-result-pairs\\option-record.fy"
       ],
       "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
       "exit": 0,
@@ -263,7 +263,7 @@
       "argv": [
         "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-fs\\candidate-pairs-dev.exe",
         "--hir-file",
-        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\docs\\ops\\evidence\\option-record.fy"
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-result-pairs\\option-record.fy"
       ],
       "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
       "exit": 0,
@@ -274,7 +274,7 @@
       "argv": [
         "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-fs\\candidate-pairs-dev.exe",
         "--mir-file",
-        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\docs\\ops\\evidence\\option-record.fy"
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-result-pairs\\option-record.fy"
       ],
       "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
       "exit": 0,
@@ -285,7 +285,7 @@
       "argv": [
         "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-fs\\candidate-pairs-dev.exe",
         "--c-file",
-        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\docs\\ops\\evidence\\option-record.fy"
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-result-pairs\\option-record.fy"
       ],
       "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
       "exit": 0,
@@ -296,7 +296,7 @@
       "argv": [
         "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-fs\\candidate-pairs-release.exe",
         "--check-types-file",
-        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\docs\\ops\\evidence\\option-record.fy"
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-result-pairs\\option-record.fy"
       ],
       "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
       "exit": 0,
@@ -307,7 +307,7 @@
       "argv": [
         "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-fs\\candidate-pairs-release.exe",
         "--hir-file",
-        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\docs\\ops\\evidence\\option-record.fy"
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-result-pairs\\option-record.fy"
       ],
       "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
       "exit": 0,
@@ -318,7 +318,7 @@
       "argv": [
         "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-fs\\candidate-pairs-release.exe",
         "--mir-file",
-        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\docs\\ops\\evidence\\option-record.fy"
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-result-pairs\\option-record.fy"
       ],
       "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
       "exit": 0,
@@ -329,7 +329,7 @@
       "argv": [
         "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-fs\\candidate-pairs-release.exe",
         "--c-file",
-        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\docs\\ops\\evidence\\option-record.fy"
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-result-pairs\\option-record.fy"
       ],
       "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
       "exit": 0,
@@ -340,95 +340,95 @@
       "argv": [
         "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-fs\\candidate-pairs-dev.exe",
         "--mir-file",
-        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\docs\\ops\\evidence\\different-record.fy"
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-result-pairs\\different-record.fy"
       ],
       "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
       "exit": 2,
       "stdout": "",
-      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\docs\\ops\\evidence\\different-record.fy:1:120: error: type mismatch (bytes 119..120)\n"
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-result-pairs\\different-record.fy:1:120: error: type mismatch (bytes 119..120)\n"
     },
     {
       "argv": [
         "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-fs\\candidate-pairs-dev.exe",
         "--c-file",
-        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\docs\\ops\\evidence\\different-record.fy"
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-result-pairs\\different-record.fy"
       ],
       "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
       "exit": 2,
       "stdout": "",
-      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\docs\\ops\\evidence\\different-record.fy:1:120: error: type mismatch (bytes 119..120)\n"
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-result-pairs\\different-record.fy:1:120: error: type mismatch (bytes 119..120)\n"
     },
     {
       "argv": [
         "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-fs\\candidate-pairs-release.exe",
         "--mir-file",
-        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\docs\\ops\\evidence\\different-record.fy"
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-result-pairs\\different-record.fy"
       ],
       "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
       "exit": 2,
       "stdout": "",
-      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\docs\\ops\\evidence\\different-record.fy:1:120: error: type mismatch (bytes 119..120)\n"
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-result-pairs\\different-record.fy:1:120: error: type mismatch (bytes 119..120)\n"
     },
     {
       "argv": [
         "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-fs\\candidate-pairs-release.exe",
         "--c-file",
-        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\docs\\ops\\evidence\\different-record.fy"
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-result-pairs\\different-record.fy"
       ],
       "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
       "exit": 2,
       "stdout": "",
-      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\docs\\ops\\evidence\\different-record.fy:1:120: error: type mismatch (bytes 119..120)\n"
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-result-pairs\\different-record.fy:1:120: error: type mismatch (bytes 119..120)\n"
     },
     {
       "argv": [
         "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-fs\\candidate-pairs-dev.exe",
         "--mir-file",
-        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\docs\\ops\\evidence\\nested-pair-bound.fy"
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-result-pairs\\nested-pair-bound.fy"
       ],
       "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
       "exit": 2,
       "stdout": "",
-      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\docs\\ops\\evidence\\nested-pair-bound.fy:1:62: error: unsupported name-check syntax (bytes 61..105)\n"
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-result-pairs\\nested-pair-bound.fy:1:62: error: unsupported name-check syntax (bytes 61..105)\n"
     },
     {
       "argv": [
         "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-fs\\candidate-pairs-dev.exe",
         "--c-file",
-        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\docs\\ops\\evidence\\nested-pair-bound.fy"
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-result-pairs\\nested-pair-bound.fy"
       ],
       "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
       "exit": 2,
       "stdout": "",
-      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\docs\\ops\\evidence\\nested-pair-bound.fy:1:62: error: unsupported name-check syntax (bytes 61..105)\n"
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-result-pairs\\nested-pair-bound.fy:1:62: error: unsupported name-check syntax (bytes 61..105)\n"
     },
     {
       "argv": [
         "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-fs\\candidate-pairs-release.exe",
         "--mir-file",
-        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\docs\\ops\\evidence\\nested-pair-bound.fy"
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-result-pairs\\nested-pair-bound.fy"
       ],
       "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
       "exit": 2,
       "stdout": "",
-      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\docs\\ops\\evidence\\nested-pair-bound.fy:1:62: error: unsupported name-check syntax (bytes 61..105)\n"
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-result-pairs\\nested-pair-bound.fy:1:62: error: unsupported name-check syntax (bytes 61..105)\n"
     },
     {
       "argv": [
         "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-fs\\candidate-pairs-release.exe",
         "--c-file",
-        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\docs\\ops\\evidence\\nested-pair-bound.fy"
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-result-pairs\\nested-pair-bound.fy"
       ],
       "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
       "exit": 2,
       "stdout": "",
-      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\docs\\ops\\evidence\\nested-pair-bound.fy:1:62: error: unsupported name-check syntax (bytes 61..105)\n"
+      "stderr": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-result-pairs\\nested-pair-bound.fy:1:62: error: unsupported name-check syntax (bytes 61..105)\n"
     },
     {
       "argv": [
         "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-c-file-cli\\native-runner.exe",
-        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\docs\\ops\\evidence\\native-request.json",
-        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\docs\\ops\\evidence\\native.json"
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-result-pairs\\native-request.json",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-result-pairs\\native.json"
       ],
       "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
       "exit": 0,
@@ -443,11 +443,11 @@
       "compiler": "msvc",
       "compilerPath": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
       "compilerVersion": "14.51.36231",
-      "source": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\docs\\ops\\evidence\\enum-record.observed.c",
+      "source": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-result-pairs\\enum-record.observed.c",
       "sourceSHA256": "386001047af50274853f99a44535221977c30284e3d8120b1c0e7172d4fb6956",
       "runtimeSHA256": "9e6f00b2d175d9cba6b4f2f3745321be004c3d7cff1d5bb7d215dbbb8c182475",
-      "image": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\docs\\ops\\evidence\\native\\enum-record-msvc-low.exe",
-      "imageSHA256": "d2cd5d725eed864c6aa301c1ee9242f710a7900c3dd24e1ac4e318394c87de7d",
+      "image": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-result-pairs\\native\\enum-record-msvc-low.exe",
+      "imageSHA256": "46c20a4e2245e4a48eda16581bb636d60dbe12aba9cd71e2be1876ac2ea00595",
       "exit": 0,
       "stdout": "",
       "stderr": "fairyc-candidate-result/v1:7\r\n",
@@ -462,11 +462,11 @@
       "compiler": "msvc",
       "compilerPath": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
       "compilerVersion": "14.51.36231",
-      "source": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\docs\\ops\\evidence\\enum-record.observed.c",
+      "source": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-result-pairs\\enum-record.observed.c",
       "sourceSHA256": "386001047af50274853f99a44535221977c30284e3d8120b1c0e7172d4fb6956",
       "runtimeSHA256": "9e6f00b2d175d9cba6b4f2f3745321be004c3d7cff1d5bb7d215dbbb8c182475",
-      "image": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\docs\\ops\\evidence\\native\\enum-record-msvc-optimized.exe",
-      "imageSHA256": "a1ca4180462b971123120107b4da66ec14552597be421e17a1adb4ae89766f29",
+      "image": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-result-pairs\\native\\enum-record-msvc-optimized.exe",
+      "imageSHA256": "823e0db2e79a5973d666c7ce151e7a3372c9a26036f9fdff79d5e5d019ced0c9",
       "exit": 0,
       "stdout": "",
       "stderr": "fairyc-candidate-result/v1:7\r\n",
@@ -481,11 +481,11 @@
       "compiler": "msvc",
       "compilerPath": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
       "compilerVersion": "14.51.36231",
-      "source": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\docs\\ops\\evidence\\record-enum.observed.c",
+      "source": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-result-pairs\\record-enum.observed.c",
       "sourceSHA256": "740990538aea982bd9f6e6be86379e2c40073ab7b97fd25d8aaf9f4af9daeffa",
       "runtimeSHA256": "9e6f00b2d175d9cba6b4f2f3745321be004c3d7cff1d5bb7d215dbbb8c182475",
-      "image": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\docs\\ops\\evidence\\native\\record-enum-msvc-low.exe",
-      "imageSHA256": "d36be3015d920c9975d87229026cbccee1cf4127a88f8e98e4a130a3f14f0705",
+      "image": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-result-pairs\\native\\record-enum-msvc-low.exe",
+      "imageSHA256": "2ef03afd7ae46b5a051539ee51729c446e527299fc6b11f7f0357842ddb3bdbd",
       "exit": 0,
       "stdout": "",
       "stderr": "fairyc-candidate-result/v1:7\r\n",
@@ -500,11 +500,11 @@
       "compiler": "msvc",
       "compilerPath": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
       "compilerVersion": "14.51.36231",
-      "source": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\docs\\ops\\evidence\\record-enum.observed.c",
+      "source": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-result-pairs\\record-enum.observed.c",
       "sourceSHA256": "740990538aea982bd9f6e6be86379e2c40073ab7b97fd25d8aaf9f4af9daeffa",
       "runtimeSHA256": "9e6f00b2d175d9cba6b4f2f3745321be004c3d7cff1d5bb7d215dbbb8c182475",
-      "image": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\docs\\ops\\evidence\\native\\record-enum-msvc-optimized.exe",
-      "imageSHA256": "7d9d2da824dc01c71dba4f06d15e01ebad180f9ca62fa9021177c069273c4b5a",
+      "image": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-result-pairs\\native\\record-enum-msvc-optimized.exe",
+      "imageSHA256": "69d7c70752c0fb7305de114c5e3280a10320e439de93264dff373bd1165375ca",
       "exit": 0,
       "stdout": "",
       "stderr": "fairyc-candidate-result/v1:7\r\n",
@@ -519,11 +519,11 @@
       "compiler": "msvc",
       "compilerPath": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
       "compilerVersion": "14.51.36231",
-      "source": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\docs\\ops\\evidence\\option-record.observed.c",
+      "source": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-result-pairs\\option-record.observed.c",
       "sourceSHA256": "29833366c111e8edfaf0a1974c8c383f237483b20a9b3761b433876e31584c10",
       "runtimeSHA256": "9e6f00b2d175d9cba6b4f2f3745321be004c3d7cff1d5bb7d215dbbb8c182475",
-      "image": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\docs\\ops\\evidence\\native\\option-record-msvc-low.exe",
-      "imageSHA256": "3f7297fabe22f59d4cf820df08fe0af3dab18d55ffd4f4b56767254fb9fff27b",
+      "image": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-result-pairs\\native\\option-record-msvc-low.exe",
+      "imageSHA256": "846a7cbc222746ec052e1862d4c73ecf544de3005b44863803500b0f500b244a",
       "exit": 0,
       "stdout": "",
       "stderr": "fairyc-candidate-result/v1:7\r\n",
@@ -538,11 +538,11 @@
       "compiler": "msvc",
       "compilerPath": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
       "compilerVersion": "14.51.36231",
-      "source": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\docs\\ops\\evidence\\option-record.observed.c",
+      "source": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-result-pairs\\option-record.observed.c",
       "sourceSHA256": "29833366c111e8edfaf0a1974c8c383f237483b20a9b3761b433876e31584c10",
       "runtimeSHA256": "9e6f00b2d175d9cba6b4f2f3745321be004c3d7cff1d5bb7d215dbbb8c182475",
-      "image": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\docs\\ops\\evidence\\native\\option-record-msvc-optimized.exe",
-      "imageSHA256": "3d1934902721477efa869a17a216f486f590240a2a1de8b110240eed8382c3f0",
+      "image": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-result-pairs\\native\\option-record-msvc-optimized.exe",
+      "imageSHA256": "6b4925e0f189e72bf3b764598bd3f11df44276c34def470c6c63ec9d32ce539a",
       "exit": 0,
       "stdout": "",
       "stderr": "fairyc-candidate-result/v1:7\r\n",
@@ -1109,10 +1109,6 @@
       }
     ]
   },
-  "caseObserver": {
-    "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\verify_result_pairs.py",
-    "sha256": "c1fb5564c949bbc52b0e868eb26cf124b1bc6b721e61989839d8f9dccc3af49d"
-  },
   "apiValidation": {
     "command": [
       ".cache/candidate-tagged/compiler-build-240s.exe",
@@ -1148,5 +1144,9 @@
     "Compact pair leaves are struct/resource/enum declarations and one Option layer; wrapping the new pair in another builtin remains rejected.",
     "512 declaration identities; unchanged source, stack, depth and work bounds.",
     "File SDK C compilation and initial open/close native probe passed; full file lifecycle and project integration remain separate."
-  ]
+  ],
+  "caseObserver": {
+    "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\verify_result_pairs.py",
+    "sha256": "d66bea49a43691823feecde5860e33ee68ad7afc3ea6e80c851ac0e3744eb82a"
+  }
 }

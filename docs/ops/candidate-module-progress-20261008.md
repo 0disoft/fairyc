@@ -1034,3 +1034,29 @@ project commands and Linux execution remain pending.
   The original complete File SDK now compiles to C with the development
   candidate, and an initial original-runtime open/close probe passed in both
   native profiles. Complete file lifecycle and project-driver checks remain.
+
+
+## File SDK native lifecycle (item 51 complete, 2026-10-09)
+
+- Both candidate profiles compile the unmodified original File and Buffer SDK
+  bodies. Original Windows runtime execution covers UTF-8 creation/open,
+  write/write_all, sync, replacement, read/EOF, FileKind Result, close and
+  removal. The fixture uses Korean paths and UTF-8/NUL bytes, checks the unused
+  read-buffer suffix, rejects an interior-NUL path, and observes missing files
+  after replacement and removal. Both test files are removed on success.
+- Both candidates reject missing filesystem authority and a user declaration
+  claiming the reserved file runtime symbol. The successful program runs in
+  native low/optimized profiles for both candidates: four executions. Evidence:
+  `evidence/candidate-sdk-file-lifecycle-20261009.json`.
+- The native observer includes original runtime source files in its bounded
+  wrapper, retaining each file digest in both the receipt and wrapper text so
+  native cache invalidation follows library changes. The MSVC allocator probe
+  uses the same explicit 16-byte maximum alignment as existing SDK probes.
+  No compiler or native runner limits changed.
+- Item 51's File transport and lifecycle slice is complete. Candidate compilation
+  of `file_cli::load` and actual project commands remain item 50 work. Linux,
+  stage1/stage2 and promotion remain later gates; native sync is not a power-loss
+  experiment. SDK receipt appends now require matching program inputs, and the
+  Result-pair observer keeps generated C/native products in the cache.
+- Only observers, evidence and progress documents changed in this slice. No
+  public SDK/runtime/API, dependency, DB or CI workflow change.

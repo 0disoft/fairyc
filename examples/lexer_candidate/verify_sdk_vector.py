@@ -15,6 +15,7 @@ TRAPS = {}
 STREAMS = {}  # case -> (stdin, exact stdout, exact stderr)
 CASE_OBSERVER = Path(__file__)
 RUNTIME_NAMES = ("stage0_system_heap.c", "stage0_vector_storage.c")
+RUNTIME_INCLUDES = False
 PREAMBLE = "module main;import std::vec as v;"
 FOREIGN = """
 unsafe extern C fn usize fixture_live();
@@ -160,7 +161,12 @@ def main():
     passed = False
     runtime_paths = [REPO / "internal/cstdlib" / p for p in RUNTIME_NAMES]
     foreign = output / "runtime.c"
-    foreign.write_text(PREFIX + "\n".join(p.read_text(encoding="utf-8") for p in runtime_paths) + SUFFIX, encoding="utf-8")
+    # Including source files keeps the runner's foreign fixture bounded. Put
+    # each library digest in the wrapper so native cache reuse tracks its bytes.
+    runtime = "\n".join(
+        f'// SHA256 {identity(p)["sha256"]}\n#include "{p.as_posix()}"'
+        if RUNTIME_INCLUDES else p.read_text(encoding="utf-8") for p in runtime_paths)
+    foreign.write_text(PREFIX + runtime + SUFFIX, encoding="utf-8")
 
     def run(argv):
         p = subprocess.Popen([str(x) for x in argv], cwd=REPO, stdout=subprocess.PIPE, stderr=subprocess.PIPE,

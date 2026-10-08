@@ -32,6 +32,11 @@ def main():
     if args.append:
         prior = json.loads(receipt.read_text(encoding="utf-8"))
         assert prior["compiler"] == identity(compiler)
+        if "sdk" in prior:
+            assert prior["sdk"] == identity(args.sdk_source.resolve())
+            assert prior["inputs"] == [identity(p.resolve()) for p in args.input]
+        expected_inputs = [str(args.sdk_source.resolve()), *[str(p.resolve()) for p in args.input]]
+        assert all(r["argv"][r["argv"].index("--")+1:] == expected_inputs for r in prior["executions"])
         assert prior["lock"] == identity(PROJECT / "fairy.lock")
         assert prior["sources"] == [identity(p) for p in sorted((PROJECT / "src").glob("*.fy"))]
         assert prior["tests"] == [identity(p) for p in sorted((PROJECT / "tests").glob("*.fy"))]
