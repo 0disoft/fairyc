@@ -63,7 +63,7 @@ pub fn bool enum_operation(ref m::Program p, m::Operation o, ref mut bytes::Buff
     let ref shapes::Table table = m::nominal(p);
     let usize member = if (o.kind == 23) { shapes::payload_member(table,o.owner_type,o.operator as usize) }
         else { shapes::member_at(table,o.owner_type,o.operator as usize) };
-    if (o.kind == 21 && o.type >= 1073741824 && tagged::builtin(o.type)) {
+    if (o.kind == 21 && o.type > 262180 && tagged::builtin(o.type)) {
         // Avoid implicit recursive aggregate initialization of inactive arms.
         if (!w::text(out,s,b"    memset(&") || !w::local(out,s,o.result) || !w::text(out,s,b",0,sizeof(")
             || !w::local(out,s,o.result) || !w::text(out,s,b"));\n    ") || !w::local(out,s,o.result)

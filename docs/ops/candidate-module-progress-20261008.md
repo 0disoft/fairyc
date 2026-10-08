@@ -1012,3 +1012,25 @@ project commands and Linux execution remain pending.
 - Candidate Fairy implementation, native API test, observer, lock and progress
   documents changed. No public language/SDK/runtime implementation, dependency,
   DB, CI workflow or release change.
+
+
+## Wide Result declaration pairs (2026-10-09)
+
+- Added a disjoint private Result identity band for two declaration leaves,
+  each retaining its nine-bit struct/resource/enum index and optional single
+  Option layer. The fallback is used only when the existing prefix encoding
+  cannot fit, so previous valid IDs retain their values and aliases reject.
+- Updated owned C initialization and array-layout verification to recognize
+  the new non-scalar tagged identities. No stack, work, depth or source bounds
+  increased. The compact pair cannot itself be nested in another builtin.
+- Development native tests: all six `tests/nested_tagged.fy` tests passed,
+  including 512 declaration-index roundtrips and owned HIR/MIR/C survival.
+  Both candidate builds passed. Three candidate-emitted programs cover both
+  arms of enum/record, record/enum and Option-record/record Results. Their C is
+  identical across candidates and passes six native low/optimized executions;
+  wrong nominal identity and unsupported nesting reject in both candidates.
+  Evidence: `evidence/candidate-result-pairs-20261009.json`.
+- This resolves the tagged identity blocker recorded above for the File SDK.
+  The original complete File SDK now compiles to C with the development
+  candidate, and an initial original-runtime open/close probe passed in both
+  native profiles. Complete file lifecycle and project-driver checks remain.

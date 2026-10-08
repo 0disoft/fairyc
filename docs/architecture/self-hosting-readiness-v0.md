@@ -142,8 +142,9 @@ Go lexer through candidate-emitted C in both native profiles (7670 cases per
 profile, plus malformed framing). This proves the scanner component scope.
 Authenticated file SDK extern declarations and C record authority now also
 pass development/release native API tests, including 14 rejected mutations.
-File SDK body execution remains open because the current tagged encoding
-cannot represent its enum plus struct Result payload.
+A separate private Result encoding now preserves enum/record and
+Option-record/record pairs without changing prior valid IDs or analysis bounds.
+Full File SDK execution and project integration remain separate checks.
 Project-driver and platform work remain. These scanner results do not establish
 the complete compiler's stage1/stage2 or promotion gates.
 

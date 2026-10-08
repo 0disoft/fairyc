@@ -62,3 +62,28 @@ fn void nested_missing_child_layout_and_wrong_payload_are_rejected() {
         let bad=shapes::assemble(records,fields);assert(!shapes::valid(ref bad,h::source_view(ref p).len,h::binding_count(ref p)));mutation+=1;
     }
 }
+
+@test fn void wide_result_pairs_preserve_leaf_identity_and_reject_aliases(){
+    var u32 index=0;while(index<512){
+        let u32 e=131072+index;let u32 n=256+511-index;let u32 r=98304+index;
+        let u32 en=tagged::make_result(e,n);let u32 ne=tagged::make_result(n,e);
+        let u32 er=tagged::make_result(e,r);let u32 ee=tagged::make_result(e,131583-index);
+        let u32 on=tagged::make_option(n);let u32 orn=tagged::make_result(on,r);
+        assert(en!=0 && ne!=en && er!=en && ee!=en && orn!=0);
+        assert(encoding::valid(en) && tagged::result(en) && !tagged::option(en));
+        assert(tagged::success(en)==e && tagged::failure(en)==n);
+        assert(tagged::success(ne)==n && tagged::failure(ne)==e);
+        assert(tagged::success(er)==e && tagged::failure(er)==r);
+        assert(tagged::success(ee)==e && tagged::failure(ee)==131583-index);
+        assert(tagged::success(orn)==on && tagged::failure(orn)==r);
+        assert(tagged::make_option(en)==0 && tagged::make_result(en,1)==0);
+        index+=1;
+    }
+    assert(!encoding::valid(536870912)); // Alias of already representable struct pair.
+    assert(!encoding::valid(553648128) && !encoding::valid(536873984)); // Band/category boundary.
+}
+@test fn void enum_record_results_survive_owned_hir_mir_and_c(){
+    let p=fixture::retained(b"module main;enum Kind{A;B;}struct Error{u32 code;}fn Result<Kind,Error> f(bool ok){return if(ok){.ok(.B)}else{.err(Error{.code=9})};}fn i32 main(){assert(switch(f(true)){case .ok(k):{switch(k){case .A:{false}case .B:{true}}}case .err(_):{false}});assert(switch(f(false)){case .ok(_):{false}case .err(e):{e.code==9}});return 7;}");
+    let ir=switch(lower::lower(p)){case .ok(value):{value}case .err(_):{assert(false);return;}};
+    assert(verify::check(ref ir).code==0);var bytes::Buffer output=bytes::empty();assert(c::render(ref ir,ref mut output)==0);
+}
