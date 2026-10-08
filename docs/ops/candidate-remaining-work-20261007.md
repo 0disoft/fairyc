@@ -148,7 +148,11 @@ evidence/candidate-result-handling-alignment-20261007.json에 새 검사·도구
 API 3개를 두 native 프로필로, CLI 정상 2개·오류 5개와 C native 4회로 확인했다.
 근거: `evidence/candidate-source-limits-20261008.json`,
 `evidence/candidate-source-limits-cli-20261008.json`. 별도 노드/분석량 상한과
-큰 배열·SDK 본문 연결은 계속 남는다. 87번 README 분리는 기존 60개 절을
+SDK 본문 연결과 나머지 분석량 제한은 계속 남는다.
+60/78/79/84/85번의 큰 rank-one 배열은 최대 4096개 원소까지 연결했다.
+일반/릴리스 API와 정상 4개·오류 6개·native 8회, 기존 작은 배열 C 출력 일치를 확인했다.
+근거: `evidence/candidate-large-arrays-api-20261008.json`,
+`evidence/candidate-large-arrays-cli-20261008.json`. 큰 rank-two 및 자원 원소 배열은 제외한다. 87번 README 분리는 기존 60개 절을
 7개 guide 문서로 옮겨 원문·상대 링크·기존 anchor를 확인했다.
 
 ### 실제 소스로 더 구체화한 선행 작업

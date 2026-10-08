@@ -243,7 +243,7 @@ fn state::Value expression(ref names::Resolved resolved, ref mut v::Vec<state::S
     }
     if (node.kind == 24 || node.kind == 29) {
         let usize count = if (node.kind == 29) { arrays::count(syntax::expression_text(parsed,node.right)) } else { syntax::array_element_count(parsed,id) };
-        if (count == 0 || count > 64) { return error(problem,16,node.start,node.end,0,0); }
+        if (count == 0 || count > 4096) { return error(problem,16,node.start,node.end,0,0); }
         var u32 element = if (arrays::valid(expected)) { arrays::source_element(parsed,expected) } else { 0 };
         if (arrays::valid(expected) && arrays::length(expected) != count) { return error(problem,1,node.start,node.end,expected,0); }
         var usize i = 0; var bool terminates = false;

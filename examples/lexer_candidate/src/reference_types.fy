@@ -1,4 +1,5 @@
 module reference_types;
+import array_identity as arrays;
 import syntax as syntax;
 import pointer_identity as pointers;
 import std::bytes as bytes;
@@ -8,9 +9,9 @@ import type_state as state;
 // Safe references occupy the high-half namespace, disjoint from tagged IDs.
 // Internal pointers to rank-one byte-array storage support field views.
 // Source ref u8[N] annotations still resolve through the byte-view admission.
-pub fn bool byte_array(u32 type){return type>=1035 && type<=1539 && (type-1024)%8==3;}
+pub fn bool byte_array(u32 type){return arrays::flat(type) && arrays::element(type)==3;}
 pub fn bool referent(u32 type){return pointers::borrowable(type) || byte_array(type) || type>=1 && type<=6 || type>=256 && type<=767 || resources::valid(type);}
-pub fn bool valid(u32 type){return type>=2147483648 && type<2149580832 && referent((type-2147483648)/2);}
+pub fn bool valid(u32 type){return type>=2147483648 && type<2214658062 && referent((type-2147483648)/2);}
 pub fn u32 inner(u32 type){assert(valid(type));return (type-2147483648)/2;}
 pub fn bool mutable(u32 type){return valid(type) && type%2==1;}
 pub fn u32 make(u32 type,bool exclusive){return if(referent(type)){2147483648+type*2+if(exclusive){1}else{0}}else{0};}

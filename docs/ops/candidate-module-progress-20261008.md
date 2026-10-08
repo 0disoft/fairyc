@@ -277,3 +277,28 @@ in `evidence/candidate-source-limits-cli-20261008.json`.
 This change retains independent node, declaration, binding, depth and analysis
 budgets. It admits larger input; it does not establish complete SDK-body or
 self-source compilation. Runtime/cache source identity and Linux remain pending.
+
+## Bounded large rank-one arrays
+
+Rank-one scalar and inert aggregate arrays now admit lengths 1..4096. The earlier
+1..64 scalar/composite IDs remain unchanged; extended scalar and owned element
+keys use separate closed namespaces below tagged IDs. The count parser rejects
+overflow before multiplication. Safe byte-array backing references recognize the
+new canonical scalar IDs; arbitrary holes, resource/view elements and large
+rank-two dimensions remain rejected. Rank two retains its existing 1..64 bounds.
+
+C array definitions use bounded ordered ID vectors instead of indexing a 520-bit
+table with an extended type ID. Repetition, field initialization, array/record
+copies, element access and length queries retain their existing owned HIR/MIR
+checks and runtime index checks. This implements the actual `u8[4096]`,
+`usize[1153]`, `i64[1024]` and inert `Token[128]` forms without raising AST,
+binding, recursion or output budgets.
+
+One owned-transport/identity API test passes in both native profiles. Four
+programs and six errors pass through both candidate images; eight low/optimized
+native executions cover full record copies, amounts above i32, a mutable byte
+subview and the exact index-boundary trap. A legacy rank-two program emits the
+same C bytes as the prior candidate. Evidence:
+`evidence/candidate-large-arrays-api-20261008.json` and
+`evidence/candidate-large-arrays-cli-20261008.json`. Larger ranks and general
+resource-array ownership are outside this unit; SDK instantiation remains pending.

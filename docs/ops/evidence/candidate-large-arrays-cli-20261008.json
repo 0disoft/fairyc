@@ -1,0 +1,715 @@
+{
+  "schema": "fairyc.candidate-large-arrays-cli/v1",
+  "passed": true,
+  "images": [
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-large-arrays-development.exe",
+      "sha256": "672f154b5495218e968c4d8ee0fb544b31fcf699e13bc6c70f7de028b484574e"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-large-arrays-release.exe",
+      "sha256": "9596bc06594e893c5e490326fb7d96ec9b74700adf168c7b4d0491b845bd872e"
+    }
+  ],
+  "fixtures": [
+    {
+      "name": "state-fields",
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-large-arrays-cli\\state-fields.fy",
+      "sha256": "bc0d3f502f2e9f4ba162b9ec9fdfc45eb31c56425f74c582707861a8dceee931",
+      "trap": 0
+    },
+    {
+      "name": "i64-copy",
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-large-arrays-cli\\i64-copy.fy",
+      "sha256": "cb8abbe8d763c58a391d6dc531ace0b267923daae7b6ee5c21b2c66d1493b89a",
+      "trap": 0
+    },
+    {
+      "name": "mutable-byte-subview",
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-large-arrays-cli\\mutable-byte-subview.fy",
+      "sha256": "2dc63a79860370f12b21327737468646371016a5786851c0809ca91347734b47",
+      "trap": 0
+    },
+    {
+      "name": "large-index-trap",
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-large-arrays-cli\\large-index-trap.fy",
+      "sha256": "8f3c7c1926882d3798a73a9edab577c4622943ead2f7427aa4812fb29552f943",
+      "trap": 6
+    },
+    {
+      "name": "over",
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-large-arrays-cli\\over.fy",
+      "sha256": "e8caf711316e20847524eb13e907c59b1942320630e9ae21713da77be0c07b0f",
+      "rejected": true
+    },
+    {
+      "name": "zero",
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-large-arrays-cli\\zero.fy",
+      "sha256": "3fbbbe27af4787616f21a105ccb82dce795349fc29650755a9f4cd90604e51c5",
+      "rejected": true
+    },
+    {
+      "name": "decimal-overflow",
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-large-arrays-cli\\decimal-overflow.fy",
+      "sha256": "9baa5d17e5fc426652a1bc1720035ee5d1b107dffae734f1e44fa755b8aed392",
+      "rejected": true
+    },
+    {
+      "name": "wrong-length",
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-large-arrays-cli\\wrong-length.fy",
+      "sha256": "41a9782b705aa67f927943c709b254774734387f5e969760e85dfcc9cf7d0fa6",
+      "rejected": true
+    },
+    {
+      "name": "resource-element",
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-large-arrays-cli\\resource-element.fy",
+      "sha256": "410b11eeb879880e47aa0f3c8a87874be38103cabcccc4164e1665f631ef126e",
+      "rejected": true
+    },
+    {
+      "name": "large-rank-two",
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-large-arrays-cli\\large-rank-two.fy",
+      "sha256": "982f794659271badfc50925e1a658c3590d9f993e9baa709d17de92a3fcd4868",
+      "rejected": true
+    }
+  ],
+  "native": [
+    {
+      "name": "state-fields",
+      "profile": "low",
+      "compiler": "msvc",
+      "compilerPath": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+      "compilerVersion": "14.51.36231",
+      "source": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-large-arrays-cli\\state-fields.observed.c",
+      "sourceSHA256": "2a5ce60f9022a6f28a205737e467908749f226ec33fb9003d984b6aa20b53dc1",
+      "runtimeSHA256": "9e6f00b2d175d9cba6b4f2f3745321be004c3d7cff1d5bb7d215dbbb8c182475",
+      "image": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-large-arrays-cli\\native\\state-fields-msvc-low.exe",
+      "imageSHA256": "c4faa365e5dc92b910c6ae207e5b4516b72df831a7db77628751da34da9990e6",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "fairyc-candidate-result/v1:7\r\n",
+      "stdoutBytes": "",
+      "stderrBytes": "ZmFpcnljLWNhbmRpZGF0ZS1yZXN1bHQvdjE6Nw0K",
+      "trap": 0,
+      "value": 7
+    },
+    {
+      "name": "state-fields",
+      "profile": "optimized",
+      "compiler": "msvc",
+      "compilerPath": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+      "compilerVersion": "14.51.36231",
+      "source": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-large-arrays-cli\\state-fields.observed.c",
+      "sourceSHA256": "2a5ce60f9022a6f28a205737e467908749f226ec33fb9003d984b6aa20b53dc1",
+      "runtimeSHA256": "9e6f00b2d175d9cba6b4f2f3745321be004c3d7cff1d5bb7d215dbbb8c182475",
+      "image": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-large-arrays-cli\\native\\state-fields-msvc-optimized.exe",
+      "imageSHA256": "63fb6ec57faec56bc38cf2cd411747dda6cd597ddd506fae4f3d4d56c7f421b7",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "fairyc-candidate-result/v1:7\r\n",
+      "stdoutBytes": "",
+      "stderrBytes": "ZmFpcnljLWNhbmRpZGF0ZS1yZXN1bHQvdjE6Nw0K",
+      "trap": 0,
+      "value": 7
+    },
+    {
+      "name": "i64-copy",
+      "profile": "low",
+      "compiler": "msvc",
+      "compilerPath": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+      "compilerVersion": "14.51.36231",
+      "source": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-large-arrays-cli\\i64-copy.observed.c",
+      "sourceSHA256": "1477dcc1721600e208eecf5be9116f37e3e205de1c0da9dc3a494c44aaee683f",
+      "runtimeSHA256": "9e6f00b2d175d9cba6b4f2f3745321be004c3d7cff1d5bb7d215dbbb8c182475",
+      "image": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-large-arrays-cli\\native\\i64-copy-msvc-low.exe",
+      "imageSHA256": "a5f914f3f099371cf7dc98960d040a064315a62729613cfe64f00c36df1a1314",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "fairyc-candidate-result/v1:7\r\n",
+      "stdoutBytes": "",
+      "stderrBytes": "ZmFpcnljLWNhbmRpZGF0ZS1yZXN1bHQvdjE6Nw0K",
+      "trap": 0,
+      "value": 7
+    },
+    {
+      "name": "i64-copy",
+      "profile": "optimized",
+      "compiler": "msvc",
+      "compilerPath": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+      "compilerVersion": "14.51.36231",
+      "source": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-large-arrays-cli\\i64-copy.observed.c",
+      "sourceSHA256": "1477dcc1721600e208eecf5be9116f37e3e205de1c0da9dc3a494c44aaee683f",
+      "runtimeSHA256": "9e6f00b2d175d9cba6b4f2f3745321be004c3d7cff1d5bb7d215dbbb8c182475",
+      "image": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-large-arrays-cli\\native\\i64-copy-msvc-optimized.exe",
+      "imageSHA256": "3163e187b8c198dcb3fb76e39db51492eb94f4e3acf0ff21d111a9ebc74aa152",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "fairyc-candidate-result/v1:7\r\n",
+      "stdoutBytes": "",
+      "stderrBytes": "ZmFpcnljLWNhbmRpZGF0ZS1yZXN1bHQvdjE6Nw0K",
+      "trap": 0,
+      "value": 7
+    },
+    {
+      "name": "mutable-byte-subview",
+      "profile": "low",
+      "compiler": "msvc",
+      "compilerPath": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+      "compilerVersion": "14.51.36231",
+      "source": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-large-arrays-cli\\mutable-byte-subview.observed.c",
+      "sourceSHA256": "20257bb7c2ef061e15dc5464feefeda9ee32137d87019edb03f3368af5090789",
+      "runtimeSHA256": "9e6f00b2d175d9cba6b4f2f3745321be004c3d7cff1d5bb7d215dbbb8c182475",
+      "image": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-large-arrays-cli\\native\\mutable-byte-subview-msvc-low.exe",
+      "imageSHA256": "474fd923c3b5fae4ea91e81cb863ff13ddf022a7a2fe2dd60dd0230428442a81",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "fairyc-candidate-result/v1:7\r\n",
+      "stdoutBytes": "",
+      "stderrBytes": "ZmFpcnljLWNhbmRpZGF0ZS1yZXN1bHQvdjE6Nw0K",
+      "trap": 0,
+      "value": 7
+    },
+    {
+      "name": "mutable-byte-subview",
+      "profile": "optimized",
+      "compiler": "msvc",
+      "compilerPath": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+      "compilerVersion": "14.51.36231",
+      "source": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-large-arrays-cli\\mutable-byte-subview.observed.c",
+      "sourceSHA256": "20257bb7c2ef061e15dc5464feefeda9ee32137d87019edb03f3368af5090789",
+      "runtimeSHA256": "9e6f00b2d175d9cba6b4f2f3745321be004c3d7cff1d5bb7d215dbbb8c182475",
+      "image": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-large-arrays-cli\\native\\mutable-byte-subview-msvc-optimized.exe",
+      "imageSHA256": "a11d3e0c00202c78c0316dfaa1c91fd665d388dd5b85fa2cdbc94320ec4b49f0",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "fairyc-candidate-result/v1:7\r\n",
+      "stdoutBytes": "",
+      "stderrBytes": "ZmFpcnljLWNhbmRpZGF0ZS1yZXN1bHQvdjE6Nw0K",
+      "trap": 0,
+      "value": 7
+    },
+    {
+      "name": "large-index-trap",
+      "profile": "low",
+      "compiler": "msvc",
+      "compilerPath": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+      "compilerVersion": "14.51.36231",
+      "source": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-large-arrays-cli\\large-index-trap.observed.c",
+      "sourceSHA256": "76c35a921594fc1ea573653ccef62a4db4f94ea5739859e3d837ee87d5fe0e67",
+      "runtimeSHA256": "9e6f00b2d175d9cba6b4f2f3745321be004c3d7cff1d5bb7d215dbbb8c182475",
+      "image": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-large-arrays-cli\\native\\large-index-trap-msvc-low.exe",
+      "imageSHA256": "c1efbc115e4680c7e55e9ce24727c4933150af45095a55a46fcb181ae36053ec",
+      "exit": 126,
+      "stdout": "",
+      "stderr": "",
+      "stdoutBytes": "",
+      "stderrBytes": "",
+      "trap": 6,
+      "value": 0
+    },
+    {
+      "name": "large-index-trap",
+      "profile": "optimized",
+      "compiler": "msvc",
+      "compilerPath": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+      "compilerVersion": "14.51.36231",
+      "source": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-large-arrays-cli\\large-index-trap.observed.c",
+      "sourceSHA256": "76c35a921594fc1ea573653ccef62a4db4f94ea5739859e3d837ee87d5fe0e67",
+      "runtimeSHA256": "9e6f00b2d175d9cba6b4f2f3745321be004c3d7cff1d5bb7d215dbbb8c182475",
+      "image": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-large-arrays-cli\\native\\large-index-trap-msvc-optimized.exe",
+      "imageSHA256": "ea6748ae1bfa5c19a67c5ca5303056573c870a6e4523c017201d72b491d2280e",
+      "exit": 126,
+      "stdout": "",
+      "stderr": "",
+      "stdoutBytes": "",
+      "stderrBytes": "",
+      "trap": 6,
+      "value": 0
+    }
+  ],
+  "raw": {
+    "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-large-arrays-cli\\raw.json",
+    "sha256": "736725ca14ae98a83906747fb9b6b3a3a07b1ace03354aa57fd3207d8fa96b55"
+  },
+  "sources": [
+    {
+      "path": "examples\\lexer_candidate\\src\\array_identity.fy",
+      "sha256": "8b501b0f72bb2805c00abc59afb195b5ba2c199796982122b62958bab64966ee"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\array_types.fy",
+      "sha256": "661e57ec5f65ea1d0be93eef637ce5235fc6e3f84e4ddf5babd8a4afd89f6688"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\attributes.fy",
+      "sha256": "dafe2e1c020446224fa8784e701e522096a58776a1066920f934c0717667b5e6"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\binding_output.fy",
+      "sha256": "187b26aaeacda92630312c0ef2dc159d7d874e91dc052802cf1757e036790855"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\bodies.fy",
+      "sha256": "b1bc7304d778caee8659d3cbf77e0e38aa8b88a2489d631978d9d69abac2afbc"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\body_state.fy",
+      "sha256": "75c13fd685fc21f4710ac2fa2d89adc652b62a7c4ad943b275d73e887bf68ffa"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\borrow_shapes.fy",
+      "sha256": "9a38ab3c1697ca83ef5603d64fee77516088565ae4e271acb3f39bc4d06c79a2"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\budget.fy",
+      "sha256": "c2793aa302279b9d27f0af32edd71f70de4e93cb4f76f55facd3e757641cc494"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\c_abi_contract.fy",
+      "sha256": "97bb60bd4596599480901b2693ea7a147f9eb434003e9e4e9c7c89f6632e5852"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\c_abi_types.fy",
+      "sha256": "fdfb462bff12028ae1c8b805e21addd001bfdd152dd9cfd89cf7b9a1a8f7166a"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\c_arrays.fy",
+      "sha256": "e433681a2be034ece9cc871730f48c85c6a42411bada66c44c720bbcdcb94ba8"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\c_cli.fy",
+      "sha256": "3a9b5f1d71c4527cb6da16621ba44ab9e663dda291209cc373b36a51310a49f2"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\c_emit.fy",
+      "sha256": "5e93d56ad4a4780e36c1887fa422f9506fc3049c78ee91f57efb5447001af4ce"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\c_flow.fy",
+      "sha256": "e13817d9c26140f45b2a6ebf217dc9ad2f7c535431576e900535062b11ace313"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\c_guard.fy",
+      "sha256": "b021440f2f50ee11df4a2fa16036cea7191b83964a3e378b4d0e9aff7a8f75fd"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\c_guard_facts.fy",
+      "sha256": "4509588b0d4e3f850a6b7843452d461b8209719c5fa712145949c582b2d5a909"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\c_literals.fy",
+      "sha256": "1a3d868d5a4780465ef77202ed93e0fed3e81fdf9bc63e0f6c1e50d32d6bbc41"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\c_nominal.fy",
+      "sha256": "edb8282390633456fe6ccc4cd8102dee6e1be4b1cd69eace0ac0f9eff2072e7a"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\c_resource.fy",
+      "sha256": "d0e8475894669c7aa4f3438a06c3596c93197b85b6a5702b8e43c81a6548e68c"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\c_scalar.fy",
+      "sha256": "acb515a3f71cd91c69c7c70f2611bdf420baacca376021617a7ba15ee6d5e494"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\c_text.fy",
+      "sha256": "e5ea486263f617248cffc4a5243c403238ef863056cf381a9ad1d6287df4ee6f"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\c_views.fy",
+      "sha256": "0ac0418e4282d3ad331482be0904fcde25b375266877df29b44d1713ff713441"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\candidate_limits.fy",
+      "sha256": "b4bd06e427045f539bb5969baeae9b68171c697ba933fdcdfe88dbed288cf7b6"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\cleanup_syntax.fy",
+      "sha256": "1374cdcbfa6139a5e82e4e74606cc28ba46d9e81df62f7a0dd397f856fb0ad6f"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\declaration_output.fy",
+      "sha256": "2eb7859b28000386f9ca29510f3e3117e5907ec2e7f7fd5801a67bcf4051e5bd"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\diagnostics.fy",
+      "sha256": "ee95f81ed3b3224702196fceef2888434e9713341b81abf01e03945592c4de8b"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\effect_declarations.fy",
+      "sha256": "fd1670ba32fd1f94d7d8834b210b845afd797ff56d7c48819a872efa56d0c6ab"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\enum_types.fy",
+      "sha256": "d257e7cb599fd4f3bafc1f7d9ccf11d00d19f2719df063271186cf7c432f0a96"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\ffi_symbols.fy",
+      "sha256": "bf90ce5c6b76ad6d60fd499c5c168079520edbf5720ea757e705b99489b6cd29"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\file_cli.fy",
+      "sha256": "7db4dcab1c3d3a97acbf1ea4ccdd63c5371da36e694e0e89fd2ba1125804e5d6"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\file_syntax.fy",
+      "sha256": "0ae878df46a5d151449801481c9686b6ffa2099ce4f8d76c18e08d0405ed3ddc"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\foreign_declarations.fy",
+      "sha256": "2195e7d4a8136f4c616d1efba3d2427734f22fa7b5c016391bc2761f8aa06a86"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\generic_expand.fy",
+      "sha256": "496a8246d2be11850cc88d38e0da932f2e93fcfca8a9a715385e89c1b6930dc4"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\hir_array_shapes.fy",
+      "sha256": "abbd6f86a748f3c1fd36f22c9ec6461c67f780f1f19a06165660941e4fc2b576"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\hir_borrow_paths.fy",
+      "sha256": "8104c0e50f4335c7cb2fc04990f942be9d400ab7c7bc5593edde7182d65f404c"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\hir_cli.fy",
+      "sha256": "b4961fab2735796a0aadd4a33374c66a1981b31369651841bd5e22700f3f8257"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\hir_lower.fy",
+      "sha256": "06e8e293bd13b9804363c98147786d119e637f7f0c27a3a0e918a92d5966d290"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\hir_model.fy",
+      "sha256": "704227b8d546f7a06753d14ed9700038ea25ca4852493a10e208580fb5043946"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\hir_mutable_check.fy",
+      "sha256": "341ce62a863d1216615deb7cb5b93b2487ca59eff4674479383aa206a8bc7193"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\hir_origin_targets.fy",
+      "sha256": "f72fb54ce53116c8916d73684951b148284d6cd8aadd6ae1f07557d6dbdedf3c"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\hir_output.fy",
+      "sha256": "c507171c30c2fcb89d33e980665977b02d8bb94a6ee97df8b89a18d1fb6316bc"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\hir_shape_lower.fy",
+      "sha256": "c4563002bbc0418752c86df13ef9f0391b12d8bf497c257655e5c9587aa9f831"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\hir_shapes.fy",
+      "sha256": "d630c8aab026e014448c2968427e3ccd9e9ce0bf74fd8621652f38944d36a2b4"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\hir_state.fy",
+      "sha256": "b11f899b8521b42d0a2f0e18675003137f28817dac0bf72fe0a49d92da7346df"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\hir_view_check.fy",
+      "sha256": "d60fe18ce87f6da8c994a723ea7aa54ddf2d5ac4323ec8676fab060c379a381a"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\integrity.fy",
+      "sha256": "be52239cc18af1ccc4894bf9099caff177448d843287eaffbe395dceab7fed83"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\literal_types.fy",
+      "sha256": "d6b224753a2a5a8ce1aab04d62429cdac832ba0358bfa8e2dcae091d8d8e258a"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\main.fy",
+      "sha256": "756a923bad8723216f4d9a8281aadad9eb4b90defba4a0f7f4a95d0731d980c0"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\mir_arrays.fy",
+      "sha256": "f57287d7cc073f8d2f5f9979a886620d90ded73c955b7f78bbdfbbe1c7bed30d"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\mir_cleanup.fy",
+      "sha256": "9c57f38e4ecb5ae058db4df65d6925533a653cd0dd2c78d7c45fa7723c3b3ed7"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\mir_cli.fy",
+      "sha256": "ccf158d7dac3d1413f867929a197d4a9da1148f31f7130e7944fec23eab23a06"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\mir_lower.fy",
+      "sha256": "0bb2e36e8f5421ccbd421b83b5c23fe6b1e20676f8a3275279ccd107596bf671"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\mir_math.fy",
+      "sha256": "0a0d922d39730c56841d4b5b3e256e022aaa6ebc792f48592cb296c090112086"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\mir_model.fy",
+      "sha256": "a5b36058bd2d174f9d79fdc5bf44b834acad734bbbc1bea480ffc51470c246ee"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\mir_nominal.fy",
+      "sha256": "0667cb62b0977e1bb6c1e97de26410eb9308296d905a9ce5d190cf3b8685aeab"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\mir_output.fy",
+      "sha256": "d12f1770be33cd25a9945eed89d2461912885db91b3ce5246f4a5361dfcb5e09"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\mir_places.fy",
+      "sha256": "7092dda7d9249ec69b872276286ac2c47e815e3d52e3ed4aae1588fd62e10e26"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\mir_propagation.fy",
+      "sha256": "3a891887a8892287ddc853fe7f5c30f352957d9e16cc496a5de203e03cb20e08"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\mir_reference.fy",
+      "sha256": "5d77f3e57797b5e65aa84d6d8a9a14c0736ff76f3b345e7c25e21790d3e164ea"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\mir_resource_lower.fy",
+      "sha256": "0d7026a2b08f1a4fba8989637e91c9c9aaaef6df74d954a9c642b3f61ce32448"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\mir_state.fy",
+      "sha256": "430e1c69ec68ea917309a394554b313b95826e82b546164564f53b0e50cc3e9a"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\mir_targets.fy",
+      "sha256": "07a5a72d23acea4a786768ef47322e7c3b00cdf1ac39674dc1a2dcc8ed829ebf"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\mir_verify.fy",
+      "sha256": "13726599bb623987eab8c6e90356ff649108ab004eb066d2dd2812e99ccae278"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\mir_verify_arrays.fy",
+      "sha256": "7efe23771653cf8c39c4bb9c800d6468ee418e6d845e9cb9f76cb6ce583ddbce"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\mir_verify_enums.fy",
+      "sha256": "8a6d7cc6a1540acbb80beb394577214c7e2fee22426baf8a6f18303d074daa0d"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\mir_verify_flow.fy",
+      "sha256": "aa0e87f6b689d1466be0f4f894fe5e07b3e41aaf95c149d931b7277b16220b4f"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\mir_verify_literals.fy",
+      "sha256": "8ee290b3e71d523745d915df088676638c290cc9df7226794f8ffa9ca6b110de"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\mir_verify_nominal.fy",
+      "sha256": "938f60b94690c9e223d28b20c98ae12471ce89413194fbefd484524aa9ad7ad6"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\mir_verify_resources.fy",
+      "sha256": "c389bdd0a4517246f0ec9d886cd25ea0e59519475cd97a8121e55c38d70cdf05"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\mir_verify_shape.fy",
+      "sha256": "5e9f6dad3d73a3803a9e047ce4cb9ddc72f71452b17ed691dd353e32cdf362fd"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\mir_verify_views.fy",
+      "sha256": "227f6f6c46f381a8d20a78168d6dc89baf45871b7d672e0b85b0349ee8197a0a"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\module_ast_join.fy",
+      "sha256": "ee76c98ffe756f0a2b446361411c75f47898d72050009fedc7d57fa5e11e0795"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\module_bind.fy",
+      "sha256": "a3e9b645430c7a294386b07e7542befd0c22f18b99600c8b888de41b3bffdcea"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\module_catalog.fy",
+      "sha256": "742d799263d68a565ba4c9e779e0a054604917c6ebffac04b79cc93e853d4b09"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\module_check.fy",
+      "sha256": "5fa27606c3ab359a048053b4cf7348cf9327324f2dc864719523015634cc410a"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\module_cli.fy",
+      "sha256": "bbec4f98a1be6aa9b0ebc7be6df642753dfe13a3ac70f187b61eb15b0d410b20"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\module_program.fy",
+      "sha256": "d1f3e3701108cf3103b1608c020b70de97b8ab362d5679d44627923f65faa229"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\module_registry.fy",
+      "sha256": "f8e92470432ab130868b957f3c8e84df1d81ff5184740b5a21f06ae1fbb9cf52"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\module_signatures.fy",
+      "sha256": "605aa39814a0b5e08f1696162a079b723c104d1961687716c37fac05ab9c7032"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\module_types.fy",
+      "sha256": "67e052fbba9ad45ddf0d771e57d49343f1e215461cde1e3ac1ae2316363d3f9d"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\must_use_flow.fy",
+      "sha256": "a02d930305cf42e5bb273992889a4682579f5f7711fd052749f4bf2c8527e57b"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\name_cli.fy",
+      "sha256": "4a9b342e7b01b34c199305395eccf19b41e7060a479a4e00ff23ec135b5d56df"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\name_resolution.fy",
+      "sha256": "a35bbab6dea14119d64a92ee1dcb6c0beedc8437b1fd0f55808342d74ce87f57"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\nominal_identity.fy",
+      "sha256": "634cba7ac0667481c0863953640668841216554d852e0e1b1b245c8bc1606958"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\nominal_types.fy",
+      "sha256": "67f08ae69f35b1bcdf1d53eb080b5a5fa043a244ab0c48de2a1af26d38a63072"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\numbers.fy",
+      "sha256": "ee8b40b5e8061317d70d3594c386c9e4c70d95132a7e4243ea6402947a4c3556"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\pages.fy",
+      "sha256": "4f4306b894510a83af7e892bb2c8d116a2107c1abf1f0820a5cd637e3eb32c87"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\parse_tokens.fy",
+      "sha256": "91984eb1086ff7faafa4a6c64a232fc2ddce365b8cd7c2ef23b143bb91d4c9a6"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\pointer_identity.fy",
+      "sha256": "393def50da86f039e1dcd9bf6d4bee3fb79e7f9ae834c216b89b50e42e39e626"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\pointer_types.fy",
+      "sha256": "8861c5447e344ba37617f62ad2d4634f3f577a1e1535c37278ab28d5cdee1775"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\raw_view_intrinsics.fy",
+      "sha256": "d01c264221b717c7344f8119a9e645794037b0ce7b589e4eac31228c2b4af0d5"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\records.fy",
+      "sha256": "e2d1d3540285509aded981b476d4b2340857d8c7370364f4b1410bfd6883f6dd"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\reference_types.fy",
+      "sha256": "4a8bf7a0e139e6cb47c5c2e0b6deb1593761b8455862759ad43cb63820373161"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\repr_c_declarations.fy",
+      "sha256": "9d161a374b4760acf3716e292831b8c1c2c5ae49fe80e1ae240ac5c7f26de9a5"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\resource_abilities.fy",
+      "sha256": "dc7130999289147aae266ff75ff88d1fb140673b1ce8330ff7a1720180eae318"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\resource_effects.fy",
+      "sha256": "eab0aa0401a11df79852fa215bd67eac0e59cb08bc79af14f4998976e00ce0bc"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\resource_flow.fy",
+      "sha256": "80aa7407ea3905d7f7655b3ee6de0d72d562e4b2e11c0379c7cf2261c50681cb"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\resource_identity.fy",
+      "sha256": "7d85c65df4d6cc02f004f854d5108ec3cc7ba8ddb4885ea54c634f88f93594aa"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\resource_properties.fy",
+      "sha256": "fe0372ce1c546422e8b09d5ae9c9aa16f1bc11682fdded971e0820e96d30bac2"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\resource_use.fy",
+      "sha256": "91a8fb9d3ea164360e8acbddc2f70d55e5a53ff50923a4a264f784cbef9c7a41"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\result_flow.fy",
+      "sha256": "544e73b45d2420926f2cf8498afc20300ce4ecfa0a6d4f34fb5bde5318332c32"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\result_flow_graph.fy",
+      "sha256": "ad7030a04316edd0b348b1fc87d29e41b7b8d75c6197987b6a1f82bfcad1732c"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\scalar_casts.fy",
+      "sha256": "4976894d09b88b1df8253b04d654626b99efeb64298acf8dfa0ca1b8947d235e"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\scanner.fy",
+      "sha256": "5909ac2ea0510260da7160627212fbf4d77f815c9ebce302d127752614874b5e"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\sdk_authority.fy",
+      "sha256": "ae0f2e21819a625a6bb5fe331173dd3366599486f3c203a523693680a0c4ee6c"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\sha256.fy",
+      "sha256": "4558eb7b75c94a5cda08022f397ae4ae1a9afafdede24ae89ac03f6a6ad09793"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\strings.fy",
+      "sha256": "8f26db7c4d4039c8c8d9fbc6078097859c8f714ca5887957fdf0e69269dca521"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\syntax.fy",
+      "sha256": "8c2cca69e551770c9efde3a62528b107ec0678018dea855964a6f1aa7d9865c7"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\tagged_check.fy",
+      "sha256": "1692313a6569515619d3835a9e03946a41d328d99f6d593d1011b46164498186"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\tagged_encoding.fy",
+      "sha256": "e2ab973fbd20ae40a1db26b3f3553a5c1dd234c67c0757571b4fcf48ccfec96c"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\tagged_types.fy",
+      "sha256": "7e4d4fcf2294408d0167b14eae1b39227f81e9f89ba39a62341ad33d8693c200"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\token_output.fy",
+      "sha256": "1e08aded3f7efec90bb915b97011cdb46b63da5231a33231ea755552b648d11b"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\type_check.fy",
+      "sha256": "394aa688d8ecd71dd2dd4815ed55000cd32a107e2033a4d44af1be3e8d08889b"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\type_cli.fy",
+      "sha256": "4220f2241df3f2ad6a1ed16fadcec8ba06a7f7f61879d2ccc9961950bd65a5ca"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\type_control.fy",
+      "sha256": "2ebd9714228e5711657d496591b579fb9c13799ffa8729b1c40af7a244aac626"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\type_state.fy",
+      "sha256": "7dbbf7d50be1e9513dc8aafd99b11afda5d8e2d7ce87d96b6436c4752c2123a0"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\types.fy",
+      "sha256": "53a77948af92724f00de0609837fd1507899df8e2b59b6d2778ef1f3c344395a"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\unsafe_scopes.fy",
+      "sha256": "e655a51e391a5870fec2cc8ba1b2701da48914c6b229e4ba2225407d515a48eb"
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\utf8.fy",
+      "sha256": "4a5425cea9efbfb1bff2c31a38c2bd8e392c6792af09f24e906c9a743621870d"
+    }
+  ],
+  "lockSHA256": "29074bb6679b8cbe5219a87638c1aecb0132276db6c89adf1d3434825d7d5384",
+  "observerSHA256": "df467a87da4618947519c6c4cfc3232b4db6e602ffcde9cead1c232838b16bd7",
+  "linuxValidated": false
+}
