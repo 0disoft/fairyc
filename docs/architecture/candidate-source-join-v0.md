@@ -88,3 +88,24 @@ Exact, untrimmed UTF-8 relative path lines. LF/CRLF and no final newline;
 no empty lines, BOM, control bytes, colon/ADS, or leading slash/backslash.
 Relative traversal is allowed: this is a cwd resolver, not a sandbox.
 1 invalid manifest, 3 allocation, 4 path bound, 5 module bound.
+
+## Joined scanner cooked storage
+
+`scanner::collect_joined` preserves the ordinary scanner's source, token kinds,
+trivia, spans, canonical cooked spelling and diagnostics while sharing equal
+nonempty cooked buffers. Canonical string cooked data is hex text; its storage
+length is twice the decoded string byte count. Token kinds retain their meaning
+when different literal spellings or kinds share equal cooked text.
+
+A private 256-slot fixed index uses exact byte comparison after hashing. When
+the index fills, a charged scan of the owned value table also finds values that
+were never indexed. The 65536-byte pool cap counts distinct owned payloads.
+Hashing, probing and byte comparisons consume the existing 16777216 scanner
+work budget; exhaustion produces the existing lossless E0010 stream. Fixed
+slots avoid extra Vec specializations, and mutable slot access uses the existing
+scalar-array view path. Stream snapshots copy each owned value once and retain
+every token's original value index.
+
+Ordinary `scanner::collect` and the lexer protocol keep their existing storage
+and work behavior. Joined module declarations own complete original files,
+including trivia; declaration name spans still identify the original module.

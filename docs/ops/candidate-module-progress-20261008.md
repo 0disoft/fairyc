@@ -1510,3 +1510,39 @@ project commands and Linux execution remain pending.
   `docs/architecture/candidate-source-join-v0.md` to retain the 1MiB input bound.
   Release rebuilding and Linux remain open. Only the candidate mutable-vector
   API changed; numeric bounds, language/SDK ABI, DB and CI settings did not.
+
+## Joined cooked storage sharing (2026-10-09)
+
+- The joined scanner shares equal nonempty canonical cooked buffers through a
+  private 256-slot index. Exact comparison handles collisions and a charged
+  table search retains values added after the index fills. The 65536-byte pool
+  bound now counts distinct owned payloads; ordinary file scanning is unchanged.
+  Work exhaustion retains E0010 and the module join rejects the incomplete
+  stream before publishing any AST arenas.
+- Mutable record parameters can expose scalar fixed-array field storage through
+  the existing mutable view path. HIR and MIR retain the original record owner;
+  shared parameters and access to a sibling while the view is held are rejected.
+  The scanner reads and writes its index through this admitted path.
+- Development check and SDK observation-driver build pass. Eight native API
+  tests cover sharing, hash collisions, cross-kind equality, exact snapshots,
+  pool capacity, full-index fallback, work exhaustion and array field storage.
+  Seven array-view programs, nine rejections and fourteen low/optimized native
+  runs pass. Four file-token cases retain exact reference stdout/stderr/status;
+  three rejections and two low/optimized native runs also pass. Generated C
+  changed with the scanner implementation; no byte-identical C claim is made.
+- The authored storage probe observes the actual 160-file dispatcher at 1045810
+  joined bytes: logical cooked data is 69949 bytes, distinct owned data is 41226
+  bytes, and joined scanning has zero diagnostics. The dispatcher advances to
+  AST joining at module 18 (`module_cli.fy`), where the compacted source set has
+  1049 entries against the unchanged 1024-entry bound. Other cumulative counts
+  there are 286 declarations, 10562 expressions, 3705 statements, 1752 types,
+  68 fields, 86 attributes and 93 attribute arguments. Arena partitioning or
+  reduction is next; full dispatcher C/native and stage1/stage2 remain open.
+- HIR/MIR numeric notes moved into the architecture model documents to keep
+  the actual input below 1MiB. Language/SDK ABI, numeric limits, DB and CI are
+  unchanged. Release rebuilding and Linux validation remain open.
+  Evidence: `evidence/candidate-cooked-storage-20261009.json`,
+  `evidence/candidate-dispatcher-admission-cooked-intern-20261009.json`,
+  `evidence/candidate-sdk-module-driver-cooked-intern-dev-20261009.json`,
+  `evidence/candidate-file-tokens-cooked-intern-20261009.json` and
+  `evidence/candidate-mutable-record-array-view-native-20261009.json`.

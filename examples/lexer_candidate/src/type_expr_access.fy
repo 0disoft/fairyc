@@ -47,7 +47,8 @@ pub fn state::Value expression(ref names::Resolved resolved, ref mut v::Vec<stat
         }
         view_type=if(arrays::valid(owner.type)){views::make(arrays::source_element(parsed,owner.type),node.kind==22)}else{0};
         if (view_type==0 || expected!=view_type || !arrays::valid(owner.type)) { return tc::error(problem,16,node.start,node.end,10,owner.type); }
-        if (views::mutable(view_type) && (names::symbol_at(resolved,state::uses(tables,root - 1)).kind != 4 || resources::valid(state::expressions(tables,root-1)))) { return tc::error(problem,4,node.start,node.end,11,owner.type); }
+        let u32 root_type=state::expressions(tables,root-1);
+        if (views::mutable(view_type) && (names::symbol_at(resolved,state::uses(tables,root - 1)).kind != 4 && !refs::mutable(root_type) || resources::valid(root_type) || refs::valid(root_type) && resources::valid(refs::inner(root_type)))) { return tc::error(problem,4,node.start,node.end,11,owner.type); }
         var bool terminates=owner.terminates;
         if(sliced){
             let bounds=syntax::expression_at(parsed,selected.right);var usize i=0;

@@ -9,21 +9,40 @@ import utf8 as utf8;
 import strings as strings;
 import budget as budget;
 
+struct CookedIndex {usize[256] slots;usize stored;}
+fn Result<usize,i32> intern(ref mut CookedIndex index,ref mut v::Vec<bytes::Buffer> values,bytes::Buffer cooked,ref mut budget::Work work){
+    let value=bytes::view(ref cooked);if(!budget::charge(work,value.len)){return .err(5);}var usize hash=0;var usize i=0;
+    while(i<value.len){hash=(hash*131+(value[i] as usize))%1048573;i+=1;}
+    var usize slot=hash%256;var usize probes=0;
+    while(probes<256){if(!budget::charge(work,1)){return .err(5);}let ref mut usize[] slots=ref mut index.slots;let usize id=slots[slot];if(id==0){break;}
+        let old=bytes::view(v::at<bytes::Buffer>(values,id-1));if(old.len==value.len){if(!budget::charge(work,value.len)){return .err(5);}if(bytes::equal(old,value)){return .ok(id);}}slot=(slot+1)%256;probes+=1;
+    }
+    if(probes==256){i=0;while(i<v::len<bytes::Buffer>(values)){if(!budget::charge(work,1)){return .err(5);}let old=bytes::view(v::at<bytes::Buffer>(values,i));
+        if(old.len==value.len){if(!budget::charge(work,value.len)){return .err(5);}if(bytes::equal(old,value)){return .ok(i+1);}}i+=1;
+    }}
+    if(value.len>65536-index.stored){return .err(4);}index.stored+=value.len;
+    let usize added=switch(v::push<bytes::Buffer>(values,cooked)){case .ok(n):{n}case .err(_):{return .err(3);}};
+    if(probes<256){let ref mut usize[] slots=ref mut index.slots;slots[slot]=added;}return .ok(added);
+}
+
 // Private numeric observations mirror internal/lexer/token.go, not a stable ABI.
 struct Token {
     u32 kind; u32 trivia; usize start; usize end;
     usize cooked_index;
 }
-// Only tokens with nonempty cooked bytes own a Buffer descriptor in this table.
+// Joined tokens share equal nonempty cooked values; the table owns each Buffer.
 // Index zero means an empty cooked view; all other indices are one-based.
 fn bool emit(ref mut v::Vec<Token> tokens, bool admitted, u32 kind, u32 trivia, usize start, usize end) {
     if (!admitted) { return append(tokens, 0, 0, start, end); }
     return append(tokens, kind, trivia, start, end);
 }
 
-fn bool emit_cooked(ref mut v::Vec<Token> tokens, ref mut v::Vec<bytes::Buffer> cooked_values, bool admitted, u32 kind, usize start, usize end, bytes::Buffer cooked) {
-    if (!admitted) { return append(tokens, 0, 0, start, end); }
-    return append_cooked(tokens, cooked_values, kind, 0, start, end, cooked);
+fn i32 emit_cooked(ref mut v::Vec<Token> tokens, ref mut v::Vec<bytes::Buffer> values, bool admitted, u32 kind, usize start, usize end, bytes::Buffer cooked,bool shared,ref mut CookedIndex index,ref mut budget::Work work) {
+    if(!admitted){return if(append(tokens,0,0,start,end)){0}else{3};}
+    if(!shared){return if(append_cooked(tokens,values,kind,0,start,end,cooked)){0}else{3};}
+    if(bytes::len(ref cooked)==0){return if(append(tokens,kind,0,start,end)){0}else{3};}
+    let usize id=switch(intern(index,values,cooked,work)){case .ok(n):{n}case .err(c):{return c;}};
+    return if(v::push<Token>(tokens,Token{.kind,.trivia=0,.start,.end,.cooked_index=id}).is_ok){0}else{3};
 }
 
 fn i32 exhausted(ref u8[] input, usize position, ref mut v::Vec<Token> tokens, ref mut v::Vec<diagnostics::Entry> errors) {
@@ -114,7 +133,7 @@ fn usize symbol_width(ref u8[] input, usize start) {
 
 // 0 success; 2 not implemented input; 3 allocation failure; 4 candidate size limit.
 // No partial token stream escapes on any failure. Full Go budget parity is pending.
-fn i32 scan(ref u8[] input, ref mut v::Vec<Token> tokens, ref mut v::Vec<bytes::Buffer> cooked_values, ref mut v::Vec<diagnostics::Entry> errors, bool previous, usize max_bytes, usize max_tokens, usize max_diagnostics, usize max_work) {
+fn i32 scan(ref u8[] input, ref mut v::Vec<Token> tokens, ref mut v::Vec<bytes::Buffer> cooked_values, ref mut v::Vec<diagnostics::Entry> errors, bool previous, usize max_bytes, usize max_tokens, usize max_diagnostics, usize max_work,bool shared) {
     if (input.len > limits::program_bytes()) { return 4; }
     if (input.len > max_bytes) { return exhausted(input, 0, tokens, errors); }
     var usize token_count = 0;
@@ -122,6 +141,7 @@ fn i32 scan(ref u8[] input, ref mut v::Vec<Token> tokens, ref mut v::Vec<bytes::
     var bool token_exhausted = false;
     var usize position = 0;
     var usize cooked_bytes = 0;
+    var CookedIndex index=CookedIndex{.slots=[0;256],.stored=0};
     var budget::Work work = budget::create(max_work);
     if (matches(input, 0, b"\xEF\xBB\xBF")) {
         if (!budget::charge(ref mut work, 3)) { return exhausted(input, 0, tokens, errors); }
@@ -192,9 +212,9 @@ fn i32 scan(ref u8[] input, ref mut v::Vec<Token> tokens, ref mut v::Vec<bytes::
             position = step.end;
             let usize length = bytes::len(ref cooked);
             let usize cooked_limit = 65536;
-            if (length > cooked_limit - cooked_bytes) { return 4; }
-            cooked_bytes += length;
-            if (!emit_cooked(tokens, cooked_values, !token_exhausted, kind, start, position, cooked)) { return 3; }
+            if(!shared){if (length > cooked_limit - cooked_bytes) { return 4; }cooked_bytes += length;}
+            let i32 stored=emit_cooked(tokens,cooked_values,!token_exhausted,kind,start,position,cooked,shared,ref mut index,ref mut work);
+            if(stored==5){return work_exhausted(input,start,position,tokens,errors);}if(stored!=0){return stored;}
             continue;
         } else if (letter(current)) {
             position += 1;
@@ -212,9 +232,9 @@ fn i32 scan(ref u8[] input, ref mut v::Vec<Token> tokens, ref mut v::Vec<bytes::
             if (status == 3 || status == 4) { return status; }
             let usize length = bytes::len(ref cooked);
             let usize cooked_limit = 65536;
-            if (length > cooked_limit - cooked_bytes) { return 4; }
-            cooked_bytes += length;
-            if (!emit_cooked(tokens, cooked_values, !token_exhausted, kind, start, position, cooked)) { return 3; }
+            if(!shared){if (length > cooked_limit - cooked_bytes) { return 4; }cooked_bytes += length;}
+            let i32 stored=emit_cooked(tokens,cooked_values,!token_exhausted,kind,start,position,cooked,shared,ref mut index,ref mut work);
+            if(stored==5){return work_exhausted(input,start,position,tokens,errors);}if(stored!=0){return stored;}
             if (status == 1 && !token_exhausted) {
                 let i32 added = diagnostics::add_limited(errors, diagnostic_count, max_diagnostics, 4, start, position, false, b"");
                 if (added == 5) { return exhausted(input, position, tokens, errors); }
@@ -285,7 +305,7 @@ pub fn i32 report_work(ref u8[] input, bool previous, usize max_bytes, usize max
     var v::Vec<Token> tokens = v::empty<Token>();
     var v::Vec<bytes::Buffer> cooked_values = v::empty<bytes::Buffer>();
     var v::Vec<diagnostics::Entry> errors = v::empty<diagnostics::Entry>();
-    let i32 status = scan(input, ref mut tokens, ref mut cooked_values, ref mut errors, previous, max_bytes, max_tokens, max_diagnostics, max_work);
+    let i32 status = scan(input, ref mut tokens, ref mut cooked_values, ref mut errors, previous, max_bytes, max_tokens, max_diagnostics, max_work,false);
     if (status != 0) { return status; }
     var usize index = 0;
     var usize position = 0;
@@ -322,14 +342,16 @@ pub struct TokenInfo { u32 kind; u32 trivia; usize start; usize end; }
 
 // Input is consumed on success and failure. Reference-budget exhaustion is a
 // successful lossless stream with E0010, not an allocation/storage failure.
-pub fn Result<Stream, i32> collect(bytes::Buffer input, bool previous, usize max_bytes, usize max_tokens, usize max_diagnostics, usize max_work) {
+fn Result<Stream, i32> collect_mode(bytes::Buffer input, bool previous, usize max_bytes, usize max_tokens, usize max_diagnostics, usize max_work,bool shared) {
     var v::Vec<Token> tokens = v::empty<Token>();
     var v::Vec<bytes::Buffer> cooked_values = v::empty<bytes::Buffer>();
     var v::Vec<diagnostics::Entry> errors = v::empty<diagnostics::Entry>();
-    let i32 status = scan(bytes::view(ref input), ref mut tokens, ref mut cooked_values, ref mut errors, previous, max_bytes, max_tokens, max_diagnostics, max_work);
+    let i32 status = scan(bytes::view(ref input), ref mut tokens, ref mut cooked_values, ref mut errors, previous, max_bytes, max_tokens, max_diagnostics, max_work,shared);
     if (status != 0) { return .err(status); }
     return .ok(Stream { .source = input, .tokens = tokens, .cooked = cooked_values, .errors = errors });
 }
+pub fn Result<Stream,i32> collect(bytes::Buffer input,bool previous,usize max_bytes,usize max_tokens,usize max_diagnostics,usize max_work){return collect_mode(input,previous,max_bytes,max_tokens,max_diagnostics,max_work,false);}
+pub fn Result<Stream,i32> collect_joined(bytes::Buffer input){return collect_mode(input,false,limits::program_bytes(),1048576,256,16777216,true);}
 
 pub fn usize token_count(ref Stream stream) { return v::len<Token>(ref stream.tokens); }
 pub fn void release(Stream stream) { }

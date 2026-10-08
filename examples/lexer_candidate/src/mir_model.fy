@@ -9,39 +9,14 @@ import std::vec as v;
 import hir_shapes as shapes;
 import resource_identity as resources;
 
-// Enum operations: 21 constructs a tag and declaration-order payload operands;
-// 22 tests a tag. Operator is the dense member ordinal, excluding payload fields.
-// 23 checks the active tag and copies one scalar payload field; operator is its
-// Field ID. A mismatch traps as unreachable (7) before accessing union storage.
-// Private mutable-local scalar MIR. IDs are one-based; zero is absent.
-// Ranges and edge/signature indexes are zero-based. No HIR tree is retained.
-// Scalar type tags match hir_model: 1 i32, 2 i64, 3 u8, 4 u32, 5 usize,
-// 6 bool, 7 void. Operators match hir_model's exhaustive operator_code.
+// Private model notes: docs/architecture/candidate-mir-model-v0.md.
 pub struct Problem { u32 code; usize start; usize end; }
 pub struct Signature { u32 type; }
 pub struct Target { bool foreign; usize link_start; usize link_end; bool unsafe_call; u32 effects; usize binding; usize module_index; usize declaration; u32 result; usize signature_start; usize signature_count; usize start; usize end; bool external; }
 pub struct Function { usize target; usize entry; usize local_start; usize local_count; usize block_start; usize block_count; usize parameter_start; usize parameter_count; usize start; usize end; bool public; }
 pub struct Local { usize function; usize binding; u32 type; bool parameter; bool mutable; usize start; usize end; }
 pub struct Drop { u32 abilities; u32 type; usize target; bool nonempty; }
-// Operation kinds: 1 constant, 2 copy/assignment, 3 unary, 4 binary, 5 check,
-// 6 construct (declaration-order operands), 7 field read, 8 functional update.
-// 9 array construct (boolean means repeat once), 10 indexed read, 11 array
-// update (one value edge), 12 checked index, 13 array length. Checked indexes
-// freeze usize operands and trap bounds before loads or RHS/store effects.
-// 18 shared named u8-array view, 19 checked byte slice (one end-bound edge).
-// 14 static literal descriptor, 15 view length/empty (boolean selects empty),
-// 16 checked view index (left frozen descriptor, right raw usize), 17 byte read.
-// A check defines no local. It must end its block immediately before a matching
-// checked terminator. Actual arithmetic occurs only in the success block.
-// 24 transfers one owned root (donor becomes Dead); 25 discharges an empty
-// cleanup. Nonempty cleanup uses a kind-5 call with type=exact resource type;
-// ordinary calls have type=0 and cannot call a private drop target.
 pub struct Operation { usize function; usize block; u32 kind; usize result; u32 type; u32 owner_type; u32 operator; usize left; usize right; usize next; usize payload_start; usize payload_end; bool boolean; usize start; usize end; usize argument_start; usize argument_count; }
-// Terminators: 1 return, 2 goto, 3 bool branch, 4 checked switch, 5 call,
-// 6 trap, 7 unreachable. Calls have one normal successor, no unwind edge.
-// Checked switches name check Operation ID plus frozen local operands.
-// Trap mask: 1 integer-overflow, 2 division-by-zero, 4 signed-division-overflow,
-// 8 invalid-shift, 16 assertion-failed. Trap blocks have no successor/cleanup.
 pub struct Block { bool unsafe_call; usize function; usize first; usize last; u32 kind; usize value; usize left; usize right; u32 operator; u32 type; usize target; usize alternative; usize check; usize callee; usize destination; usize argument_start; usize argument_count; u32 trap_mask; usize start; usize end; }
 pub resource Program {
     shapes::Table nominal;
@@ -53,9 +28,6 @@ pub resource Program {
     usize module_index; bool success;
     cleanup { }
 }
-// Construction caps: 1048576 source bytes, 512 functions/targets, 16384 locals,
-// 16384 blocks, 32768 operations, 65536 edges/signatures, 688128 payload bytes.
-// 1 invalid input, 2 budget, 3 allocation, 4 malformed/unsupported graph.
 pub fn usize target_count(ref Program p) { assert(p.success); return v::len<Target>(ref p.targets); }
 pub fn usize drop_count(ref Program p) { assert(p.success); return v::len<Drop>(ref p.drops); }
 pub fn Drop drop_at(ref Program p,usize index) { assert(index<drop_count(p)); return *v::at<Drop>(ref p.drops,index); }
@@ -102,8 +74,6 @@ pub fn ref u8[] foreign_text(ref Program p,usize id){let t=target_at(p,id);retur
 pub fn ref u8[] target_text(ref Program p, usize id) { let Target t = target_at(p,id); return source_view(p)[t.start..t.end]; }
 pub fn ref u8[] literal_text(ref Program p, usize id) { let Operation o = operation_at(p,id); return bytes::view(ref p.payload)[o.payload_start..o.payload_end]; }
 
-// This is a checked construction boundary, not the future complete MIR verifier.
-// It rejects unfinished blocks, malformed links and ownership/range drift.
 pub fn Result<Program,Problem> assemble(bytes::Buffer source, bytes::Buffer payload, v::Vec<Target> targets, v::Vec<Signature> signatures, v::Vec<Function> functions, v::Vec<Local> locals, v::Vec<Block> blocks, v::Vec<Operation> operations, v::Vec<usize> edges, usize module_index) {
     return assemble_nominal(source,payload,targets,signatures,functions,locals,blocks,operations,edges,module_index,shapes::empty());
 }

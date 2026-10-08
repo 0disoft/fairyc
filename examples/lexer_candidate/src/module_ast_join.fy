@@ -109,10 +109,11 @@ pub fn Result<syntax::Parsed,Problem> join(ref v::Vec<syntax::Parsed> sources){
         if(bytes::len(ref joined)>limits::program_bytes()){return .err(fail(10,index,0,syntax::source_view(file).len));}
         index+=1;
     }
-    let scanner::Stream stream=switch(scanner::collect(joined,false,limits::program_bytes(),1048576,256,16777216)){
+    let scanner::Stream stream=switch(scanner::collect_joined(joined)){
         case .ok(value):{value}
         case .err(code):{return .err(fail(if(code==3){11}else if(code==4){10}else{9},0,0,0));}
     };
+    if(scanner::diagnostic_count(ref stream)!=0){return .err(fail(if(scanner::diagnostic_info(ref stream,0).code==10){10}else{9},0,0,0));}
     var v::Vec<syntax::Declaration> declarations=v::empty<syntax::Declaration>();
     var v::Vec<syntax::Problem> problems=v::empty<syntax::Problem>();
     var v::Vec<body::Node> expressions=v::empty<body::Node>();

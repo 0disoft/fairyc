@@ -23,7 +23,7 @@ fn void require_spans(ref syntax::Parsed owner,ref syntax::Parsed original,usize
     let ref u8[] joined=syntax::source_view(owner);
     let ref u8[] origin=syntax::source_view(original);
     var usize i=0;
-    while(i<syntax::declaration_count(original)){let syntax::Declaration d=syntax::declaration_at(original,i);let syntax::Declaration q=syntax::declaration_at(owner,i+declarations);assert(bytes::equal(joined[q.start..q.end],origin[d.start..d.end]));i+=1;}
+    while(i<syntax::declaration_count(original)){let syntax::Declaration d=syntax::declaration_at(original,i);let syntax::Declaration q=syntax::declaration_at(owner,i+declarations);if(d.kind==1){assert(bytes::equal(joined[q.start..q.end],origin) && bytes::equal(joined[q.name_start..q.name_end],origin[d.name_start..d.name_end]));}else{assert(bytes::equal(joined[q.start..q.end],origin[d.start..d.end]));}i+=1;}
     i=1;
     while(i<=syntax::expression_count(original)){let syntax::Expression d=syntax::expression_at(original,i);let syntax::Expression q=syntax::expression_at(owner,i+expressions);assert(bytes::equal(joined[q.start..q.end],origin[d.start..d.end]));i+=1;}
     i=1;

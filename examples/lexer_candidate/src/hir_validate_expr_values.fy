@@ -22,7 +22,8 @@ pub fn h::Problem check(ref bytes::Buffer payload, ref v::Vec<h::Binding> bindin
         if(kind==16 && (views::valid(type))){var usize root=e.left;var usize steps=0;
             while(steps<64 && h::expression_code(v::at<h::Expression>(expressions,root-1).kind)==10){root=v::at<h::Expression>(expressions,root-1).left;steps+=1;}
             let base=*v::at<h::Expression>(expressions,root-1);
-            if(h::expression_code(base.kind)!=3 || views::mutable(type) && (h::binding_code(v::at<h::Binding>(bindings,base.binding-1).kind)!=4 || resources::valid(h::type_code(base.type)))){return h::Problem{.code=4,.start=e.start,.end=e.end};}
+            let u32 root_type=h::type_code(base.type);
+            if(h::expression_code(base.kind)!=3 || views::mutable(type) && (h::binding_code(v::at<h::Binding>(bindings,base.binding-1).kind)!=4 && !refs::mutable(root_type) || resources::valid(root_type) || refs::valid(root_type) && resources::valid(refs::inner(root_type)))){return h::Problem{.code=4,.start=e.start,.end=e.end};}
         }
         if (kind == 17 && ((!views::valid(type)) || e.left == 0 || e.right == 0 || e.alternative == 0 || h::type_code(v::at<h::Expression>(expressions,e.left - 1).type) != type || h::type_code(v::at<h::Expression>(expressions,e.right - 1).type) != 5 || h::type_code(v::at<h::Expression>(expressions,e.alternative - 1).type) != 5 || e.binding != 0 || e.edge_count != 0)) { return h::Problem { .code = 4, .start = e.start, .end = e.end }; }
         if (kind == 15 && (!literals::valid(type) || type == 9 && !literals::text(bytes::view(payload)[e.payload_start..e.payload_end]) || type==12 && !literals::cstring(bytes::view(payload)[e.payload_start..e.payload_end]) || e.left != 0 || e.right != 0 || e.binding != 0 || e.edge_count != 0 || e.block != 0 || e.alternative != 0 || e.boolean || h::operator_code(e.operator) != 0)) { return h::Problem { .code = 4, .start = e.start, .end = e.end }; }

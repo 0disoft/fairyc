@@ -252,6 +252,23 @@ Cooked-storage reduction is next; joined AST/HIR/MIR and stage1/stage2 remain
 open. Evidence: `docs/ops/evidence/candidate-ast-owner-transfer-20261009.json`
 and `docs/ops/evidence/candidate-dispatcher-admission-in-place-20261009.json`.
 
+The joined scanner now shares equal canonical cooked buffers, preserving token
+kinds, spans, diagnostics and snapshot indices. Its original 65536-byte pool
+and 16777216 work bounds remain fixed. Mutable scalar-array field views through
+record parameters retain the original owner. Eight development native API
+tests and fourteen array-view low/optimized native runs pass; file-token
+stdout/stderr/status remain identical to the reference in two native profiles.
+The 160-file dispatcher is now 1045810 joined bytes. Its 69949 logical cooked
+bytes occupy 41226 owned bytes, with zero scanner diagnostics. The next observed
+failure is phase 2 code 10 at module 18 (`module_cli.fy`): compacted cumulative
+AST entries reach 1049 against the unchanged 1024-entry bound. Partitioning or
+reducing those arenas is next; complete joined AST/HIR/MIR, full-dispatcher C,
+and stage1/stage2 are still open. Evidence:
+`docs/ops/evidence/candidate-cooked-storage-20261009.json`,
+`docs/ops/evidence/candidate-dispatcher-admission-cooked-intern-20261009.json`,
+`docs/ops/evidence/candidate-file-tokens-cooked-intern-20261009.json` and
+`docs/ops/evidence/candidate-mutable-record-array-view-native-20261009.json`.
+
 `stage0` is the current Go compiler built by the supported Go toolchain.
 
 `stage1` is produced by `stage0` from the admitted Fairy compiler sources.

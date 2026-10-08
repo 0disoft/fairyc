@@ -1,4 +1,5 @@
 module hir_model;
+// Private model notes: docs/architecture/candidate-hir-model-v0.md.
 import hir_validate_symbols as symbols;
 import hir_validate_control as control;
 import hir_validate_drops as drops;
@@ -21,18 +22,11 @@ import std::bytes as bytes;
 import std::vec as v;
 import hir_shapes as shapes;
 
-// Private owned HIR. No syntax/type input table is retained. All entity IDs are
-// one-based; zero is absent. Query table indexes and edge offsets are zero-based.
-// Module indexes remain zero-based and declaration IDs retain their source index
-// plus one (including module/import declarations). Binding IDs preserve resolved
-// symbol IDs, but their owner/target/type facts below are independently owned.
 pub enum Type { ScalarView{u32 id;}; CScalar{u32 id;}; Pointer {u32 id;}; Borrowed { u32 id; }; Invalid; I32; I64; U8; U32; Usize; Bool; Void; Callable; Resource { u32 id; }; Nominal { u32 id; }; Array { u32 id; }; Text; Bytes; MutableBytes; CStr; Enumeration { u32 id; }; Option { u32 id; }; Result { u32 id; }; }
 pub enum BindingKind { Function; Parameter; Let; Var; External; Foreign; Struct; Enum; Resource; DropFunction; DropReceiver; }
 pub enum ExpressionKind { Integer; Boolean; Reference; Unary; Binary; Call; Block; If; Construct; Field; Initializer; Array; Index; Length; Literal; Borrow; Slice; Variant; Switch; Arm; Capture; Propagate; IsOk; Move; Reborrow; Cast; Null; PointerCast; RawView; Storage {u32 code;u32 element;}; }
 pub enum StatementKind { Binding; Return; Assignment; Expression; While; For; Break; Continue; Assert; Discard; Defer; Burn; }
 pub enum Operator { None; Plus; Minus; Not; Complement; Multiply; Divide; Remainder; BitAnd; BitOr; BitXor; ShiftLeft; ShiftRight; Equal; NotEqual; Less; LessEqual; Greater; GreaterEqual; And; Or; Assign; }
-// The fixed SDK/compiler admits enum switching, not enum equality or enum casts.
-// These exhaustive private-format tags also permit exact scalar comparisons.
 pub fn u32 type_code(Type value) { return switch(value) { case .ScalarView{.id=id}:{id} case .CScalar{.id=id}:{id} case .Pointer{.id=id}:{id} case .Borrowed { .id=id }: { id } case .Invalid: { 0 } case .I32: { 1 } case .I64: { 2 } case .U8: { 3 } case .U32: { 4 } case .Usize: { 5 } case .Bool: { 6 } case .Void: { 7 } case .Callable: { 8 } case .Text: { 9 } case .Bytes: { 10 } case .MutableBytes: { 11 } case .CStr:{12} case .Option { .id = id }: { id } case .Result { .id = id }: { id } case .Enumeration { .id = id }: { id } case .Resource { .id = id }: { id } case .Nominal { .id = id }: { id } case .Array { .id = id }: { id } }; }
 pub fn bool represented_type(Type value) { return switch(value) { case .ScalarView{.id=id}:{views::extended(id)} case .CScalar{.id=id}:{c_types::valid(id)} case .Pointer{.id=id}:{pointers::valid(id)} case .Borrowed { .id=id }: { refs::valid(id) } case .Invalid: { false } case .Callable: { false } case .Option { .id = id }: { tagged::option(id) } case .Result { .id = id }: { tagged::result(id) } case .Enumeration { .id = id }: { enums::valid(id) && !tagged::builtin(id) } case .Resource { .id = id }: { resources::valid(id) } case .Nominal { .id = id }: { id >= 256 && id <= 767 } case .Array { .id = id }: { arrays::valid(id) } case .I32: { true } case .I64: { true } case .U8: { true } case .U32: { true } case .Usize: { true } case .Bool: { true } case .Void: { true } case .Text: { true } case .Bytes: { true } case .MutableBytes: { true } case .CStr:{true} }; }
 pub fn u32 binding_code(BindingKind value) { return switch(value) { case .Function: { 1 } case .Parameter: { 2 } case .Let: { 3 } case .Var: { 4 } case .Foreign:{11} case .External: { 5 } case .Struct: { 6 } case .Enum: { 7 } case .Resource: { 8 } case .DropFunction: { 9 } case .DropReceiver: { 10 } }; }
@@ -43,34 +37,11 @@ pub fn u32 statement_code(StatementKind value) { return switch(value) { case .Bi
 pub fn u32 operator_code(Operator value) { return switch(value) { case .None: { 0 } case .Plus: { 1 } case .Minus: { 2 } case .Not: { 3 } case .Complement: { 4 } case .Multiply: { 5 } case .Divide: { 6 } case .Remainder: { 7 } case .BitAnd: { 8 } case .BitOr: { 9 } case .BitXor: { 10 } case .ShiftLeft: { 11 } case .ShiftRight: { 12 } case .Equal: { 13 } case .NotEqual: { 14 } case .Less: { 15 } case .LessEqual: { 16 } case .Greater: { 17 } case .GreaterEqual: { 18 } case .And: { 19 } case .Or: { 20 } case .Assign: { 21 } }; }
 pub struct Problem { u32 code; usize start; usize end; }
 pub struct Signature { Type type; }
-// Binding owner is the enclosing Function Binding ID; scope is its lexical scope
-// ID. Function/External use module_index+declaration as authoritative call target.
-// Callable result is type; signature_start/count index the Type signature arena.
 pub struct Binding { usize link_start; usize link_end; bool unsafe_call; bool must_use; u32 effects; BindingKind kind; Type type; usize start; usize end; usize owner; usize scope; usize module_index; usize declaration; usize signature_start; usize signature_count; }
 pub struct Function { usize binding; usize start; usize end; usize scope; bool public; usize body; usize parameter_start; usize parameter_count; }
-// An empty body has no callable/receiver. Every resource owns exactly one
-// classified drop definition; a nonempty body links one private typed function.
 pub struct Drop { u32 abilities; u32 type; usize function; usize receiver; usize start; usize end; bool nonempty; }
-// left/right/alternative are Expression IDs. If uses left=condition,
-// block=consequent Block ID, alternative=else Expression ID (zero if absent),
-// right=0. Binary uses left/right; Unary uses left.
-// block is Block ID (Block expression or If consequent). Call binding is target;
-// edge_start/count index ordered argument Expression IDs. Reference binding is
-// authoritative; callee syntax and grouping nodes are eliminated. Integer stores
-// canonical decimal ASCII in payload[start..end]; signed-minimum has no child.
-// Construct binding is a Struct or Resource Binding ID; its edges retain Initializer
-// Expression IDs in written order. Initializer/Field binding is a one-based
-// nominal Field ID. Initializer left is the value; Field left is the owner.
 pub struct Expression { ExpressionKind kind; Type type; Operator operator; usize start; usize end; usize left; usize right; usize alternative; usize block; usize binding; usize edge_start; usize edge_count; usize payload_start; usize payload_end; bool boolean; }
-// expression and target are Expression IDs; binding is defined local Binding ID.
-// body is Block ID; initial/post are Statement IDs for explicit For clauses.
-// Omitted for condition is expression=0 (true), initial/post=0 mean absent.
-// Assignment operator is Assign or its arithmetic/bitwise operation; RHS is
-// evaluated once. Defer captures an unevaluated void Call expression for scope
-// exit. Break/Continue target the nearest enclosing While/For Statement ID.
 pub struct Statement { StatementKind kind; usize start; usize end; usize scope; usize expression; usize target; usize binding; Operator operator; usize body; usize initial; usize post; usize loop_target; }
-// Ordered statement IDs in edge arena; tail is optional Expression ID.
-// owner is Function Binding ID; scope is the resolver lexical scope ID.
 pub struct Block { bool unsafe_body; usize start; usize end; usize owner; usize scope; usize parent_scope; usize edge_start; usize edge_count; usize tail; }
 pub resource Program {
     shapes::Table nominal;
@@ -82,11 +53,6 @@ pub resource Program {
     usize module_index; bool success;
     cleanup { }
 }
-// Hard caps: source 1048576 bytes, 512 functions/declarations, 1152 bindings,
-// 16384 expressions, 8192 statements, 8192 blocks, 32768 edges, 32768 signature
-// entries, 344064 canonical payload bytes (16384*21), recursion depth 64.
-// Errors: 1 unsuccessful input, 2 budget, 3 allocation, 4 unsupported/malformed
-// semantic graph. Failure returns .err only, never a partially usable Program.
 pub fn usize function_count(ref Program p) { assert(p.success); return v::len<Function>(ref p.functions); }
 pub fn usize binding_count(ref Program p) { assert(p.success); return v::len<Binding>(ref p.bindings); }
 pub fn usize expression_count(ref Program p) { assert(p.success); return v::len<Expression>(ref p.expressions); }
@@ -128,11 +94,6 @@ pub fn ref u8[] source_view(ref Program p) { assert(p.success); return bytes::vi
 pub fn ref u8[] integer_text(ref Program p, usize id) { let Expression e = expression_at(p,id); assert(expression_code(e.kind) == expression_code(.Integer)); return bytes::view(ref p.payload)[e.payload_start..e.payload_end]; }
 pub fn ref u8[] binding_text(ref Program p, usize id) { let Binding b = binding_at(p,id); return source_view(p)[b.start..b.end]; }
 
-// Keep enum shape/capture checks outside the large general assembly verifier.
-// Earlier expressions have already passed their local shape checks.
-// Resource fields are module-private. This checked factory is the lowering
-// handoff, after all local SDK containers have been populated. No container
-// mutation through a resource field is required by either construction or query.
 pub fn Result<Program,Problem> assemble(bytes::Buffer source, bytes::Buffer payload, v::Vec<Function> functions, v::Vec<Binding> bindings, v::Vec<Expression> expressions, v::Vec<Statement> statements, v::Vec<Block> blocks, v::Vec<usize> edges, v::Vec<Signature> signatures, usize module_index) {
     return assemble_nominal(source,payload,functions,bindings,expressions,statements,blocks,edges,signatures,module_index,shapes::empty());
 }
@@ -159,6 +120,4 @@ pub fn Result<Program,Problem> assemble_resources(bytes::Buffer source, bytes::B
     let Problem unsafe_proof=unsafe_check(ref result);if(unsafe_proof.code!=0){return .err(unsafe_proof);}return .ok(result);
 }
 
-// Walk owned lexical structure rather than trusting the source-side permission
-// flag. Unsafe never grants effect authority or alters borrow/cleanup policy.
 pub fn Problem unsafe_check(ref Program p){return unsafe_proof::unsafe_check(p);}

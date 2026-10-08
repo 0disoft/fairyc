@@ -33,3 +33,11 @@ fn void owned_subrange_selects_original_nested_field_storage() {
     assert(fields==2 && views==1 && ranges==1);
     var bytes::Buffer out=bytes::empty();assert(c::render(ref mir,ref mut out)==0 && bytes::len(ref out)!=0);
 }
+
+@test fn void mutable_record_parameter_keeps_original_array_field_storage(){
+    let hir=fixture::retained(b"module main;struct Index{usize[4] slots;}fn void set(ref mut Index p,usize at,usize value){let ref mut usize[] slots=ref mut p.slots;slots[at]=value;}fn i32 main(){var Index p=Index{.slots=[0;4]};set(ref mut p,2,7);assert(p.slots[2]==7);return 7;}");
+    let mir=switch(lower::lower(hir)){case .ok(p):{p}case .err(_):{assert(false);return;}};assert(verify::check(ref mir).code==0);
+    var usize fields=0;var usize views=0;var usize stores=0;var usize i=1;
+    while(i<=m::operation_count(ref mir)){let o=m::operation_at(ref mir,i);if(o.kind==32){assert(refs::mutable(o.type));fields+=1;}if(o.kind==18){assert(o.type==27 && refs::mutable(o.owner_type));views+=1;}if(o.kind==20){assert(o.type==5 && o.owner_type==27);stores+=1;}i+=1;}
+    assert(fields==1 && views==1 && stores==1);var bytes::Buffer out=bytes::empty();assert(c::render(ref mir,ref mut out)==0 && bytes::len(ref out)!=0);
+}
