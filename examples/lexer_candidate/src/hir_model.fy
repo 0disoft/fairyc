@@ -1,4 +1,11 @@
 module hir_model;
+import hir_validate_symbols as symbols;
+import hir_validate_control as control;
+import hir_validate_drops as drops;
+import hir_validate_expr_basic as expr_basic;
+import hir_validate_expr_unsafe as expr_unsafe;
+import hir_validate_expr_values as expr_values;
+import hir_validate_unsafe as unsafe_proof;
 import scalar_views as views;
 import candidate_limits as limits;
 import sdk_scopes as sdk;
@@ -129,61 +136,6 @@ pub fn ref u8[] binding_text(ref Program p, usize id) { let Binding b = binding_
 
 // Keep enum shape/capture checks outside the large general assembly verifier.
 // Earlier expressions have already passed their local shape checks.
-fn bool terminal_arm(ref v::Vec<Block> blocks,ref v::Vec<Statement> statements,ref v::Vec<Expression> expressions,ref v::Vec<usize> edges,usize id,bool allow_return) {
-    if(id==0 || id>v::len<Block>(blocks)){return false;}let b=*v::at<Block>(blocks,id-1);
-    if(b.tail!=0 || b.edge_count==0 || b.edge_start>v::len<usize>(edges) || b.edge_count>v::len<usize>(edges)-b.edge_start){return false;}
-    let usize sid=*v::at<usize>(edges,b.edge_start+b.edge_count-1);if(sid==0 || sid>v::len<Statement>(statements)){return false;}
-    let s=*v::at<Statement>(statements,sid-1);if(allow_return && statement_code(s.kind)==2){return true;}if(statement_code(s.kind)!=9 || s.expression==0 || s.expression>v::len<Expression>(expressions)){return false;}
-    let e=*v::at<Expression>(expressions,s.expression-1);return expression_code(e.kind)==2 && type_code(e.type)==6 && !e.boolean;
-}
-fn bool enum_expression(ref shapes::Table nominal, ref v::Vec<Expression> expressions, ref v::Vec<Block> blocks, ref v::Vec<Statement> statements, ref v::Vec<Binding> bindings, ref v::Vec<usize> edges, Expression e, usize i) {
-    let u32 kind=expression_code(e.kind);let u32 type=type_code(e.type);let usize nb=v::len<Binding>(bindings);
-        if (kind == 23) {
-            return e.left != 0 && type == 6 && tagged::result(type_code(v::at<Expression>(expressions,e.left-1).type))
-                && e.binding == 0 && e.right == 0 && e.alternative == 0 && e.block == 0 && e.edge_count == 0 && e.edge_start == 0
-                && e.payload_start == 0 && e.payload_end == 0 && !e.boolean && operator_code(e.operator) == 0;
-        }
-        if (kind == 22) {
-            if (e.left == 0 || e.binding == 0 || e.binding > nb || e.right != 0 || e.alternative != 0 || e.block != 0
-                || e.edge_count != 0 || e.edge_start != 0 || e.payload_start != 0 || e.payload_end != 0 || e.boolean || operator_code(e.operator) != 0) { return false; }
-            let u32 operand = type_code(v::at<Expression>(expressions,e.left-1).type);
-            let Binding owner = *v::at<Binding>(bindings,e.binding-1); let u32 returned = type_code(owner.type);
-            return tagged::result(operand) && tagged::result(returned) && binding_code(owner.kind) == 1
-                && tagged::failure(operand) == tagged::failure(returned) && type == tagged::success(operand);
-        }
-        if (kind == 18 || kind == 20) {
-            if (e.binding == 0 || e.binding > shapes::field_count(nominal) || e.left != 0 || e.right != 0 || e.alternative != 0 || e.boolean || e.payload_start != 0 || e.payload_end != 0 || operator_code(e.operator) != 0) { return false; }
-            let shapes::Field member = shapes::field_at(nominal,e.binding);
-            if (!enums::valid(member.owner) || member.type != 0 || kind == 18 && (type != member.owner || e.block != 0) || kind == 20 && e.block == 0) { return false; }
-            if(e.edge_count!=member.payload_count){return false;}
-            var u8[1024] payload_seen=[0;1024];var usize n=0;
-            while(n<e.edge_count){let usize id=*v::at<usize>(edges,e.edge_start+n);if(id==0 || id>i){return false;}
-                let Expression f=*v::at<Expression>(expressions,id-1);if(expression_code(f.kind)!=if(kind==18){11}else{21} || f.binding<=member.payload_start || f.binding>member.payload_start+member.payload_count || payload_seen[f.binding-1]!=0){return false;}
-                payload_seen[f.binding-1]=1;
-                if(kind==20 && f.edge_count==1){let usize binding=*v::at<usize>(edges,f.edge_start);let Binding b=*v::at<Binding>(bindings,binding-1);let Block arm=*v::at<Block>(blocks,e.block-1);if(b.scope!=arm.scope || b.owner!=arm.owner){return false;}}
-                n+=1;
-            }
-            if (kind == 20) { let Block arm = *v::at<Block>(blocks,e.block-1); if (arm.tail > i) { return false; } if (type != if(arm.tail==0){7}else{type_code(v::at<Expression>(expressions,arm.tail-1).type)} && !(tagged::builtin(member.owner) && terminal_arm(blocks,statements,expressions,edges,e.block,tagged::result(member.owner)))) { return false; } }
-        }
-        if(kind==21){
-            if(e.binding==0 || e.binding>shapes::field_count(nominal) || e.edge_count>1 || e.left!=0 || e.right!=0 || e.alternative!=0 || e.block!=0 || e.boolean || e.payload_start!=0 || e.payload_end!=0 || operator_code(e.operator)!=0){return false;}
-            let shapes::Field field=shapes::field_at(nominal,e.binding);if(!enums::valid(field.owner) || field.type==0 || type!=field.type){return false;}
-            if(e.edge_count==1){let usize binding=*v::at<usize>(edges,e.edge_start);if(binding==0 || binding>nb){return false;}let Binding b=*v::at<Binding>(bindings,binding-1);if(binding_code(b.kind)!=3 || type_code(b.type)!=type){return false;}}
-        }
-        if (kind == 19) {
-            if(e.left==0 || e.right!=0 || e.alternative!=0 || e.block!=0 || e.binding!=0 || e.boolean || e.payload_start!=0 || e.payload_end!=0 || operator_code(e.operator)!=0){return false;}
-            let u32 subject = type_code(v::at<Expression>(expressions,e.left-1).type); let usize shape = shapes::find(nominal,subject);
-            if(!enums::valid(subject) || shape==0){return false;}
-            let shapes::Shape layout = shapes::at(nominal,shape-1);if(e.edge_count!=shapes::member_count(nominal,subject)){return false;}
-            var u8[1024] seen=[0;1024];var usize j=0;
-            while(j<e.edge_count){let usize id=*v::at<usize>(edges,e.edge_start+j);if(id==0 || id>i){return false;}
-                let Expression arm=*v::at<Expression>(expressions,id-1);if(expression_code(arm.kind)!=20 || type_code(arm.type)!=type || arm.binding<=layout.field_start || arm.binding>layout.field_start+layout.field_count || seen[arm.binding-1]!=0){return false;}
-                seen[arm.binding-1]=1;j+=1;
-            }
-        }
-    return true;
-}
-
 // Resource fields are module-private. This checked factory is the lowering
 // handoff, after all local SDK containers have been populated. No container
 // mutation through a resource field is required by either construction or query.
@@ -199,229 +151,20 @@ pub fn Result<Program,Problem> assemble_resources(bytes::Buffer source, bytes::B
     let usize ne = v::len<Expression>(ref expressions); let usize nt = v::len<Statement>(ref statements);
     let usize nk = v::len<Block>(ref blocks); let usize na = v::len<usize>(ref edges); let usize ntypes = v::len<Signature>(ref signatures);
     if (ns > limits::program_bytes() || np > limits::program_expressions()*21 || nf > 512 || nb > 1152 || ne > limits::program_expressions() || nt > 8192 || nk > 8192 || na > 32768 || ntypes > 32768 || v::len<Drop>(ref drops)>512) { return .err(Problem { .code = 2, .start = 0, .end = ns }); }
-    if (!shapes::valid(ref nominal,ns,nb)) { return .err(Problem { .code = 4, .start = 0, .end = ns }); }
-    if(!shapes::abi_valid(ref nominal,bytes::view(ref source))){return .err(Problem{.code=5102,.start=0,.end=ns});}
-    var usize shape_index = 0;
-    while (shape_index < shapes::count(ref nominal)) {
-        let shapes::Shape shape = shapes::at(ref nominal,shape_index);
-        if(tagged::builtin(shape.type) || arrays::owned(shape.type)){shape_index+=1;continue;}
-        let Binding b = *v::at<Binding>(ref bindings,shape.binding - 1);
-        let usize abi_slot=shapes::abi_find(ref nominal,shape.type);
-        if(abi_slot!=0){let a=shapes::abi_at(ref nominal,abi_slot-1);if(a.name_start!=b.start || a.name_end!=b.end || a.declaration!=b.declaration){return .err(Problem{.code=5102,.start=b.start,.end=b.end});}}
-        if (binding_code(b.kind) != if(resources::valid(shape.type)){8}else if(enums::valid(shape.type)){7}else{6} || type_code(b.type) != shape.type || b.declaration != (shape.type - if(resources::valid(shape.type)){98303}else if(enums::valid(shape.type)){131071}else{255}) as usize || b.signature_count != 0 || b.module_index != module_index) { return .err(Problem { .code = 4, .start = b.start, .end = b.end }); }
-        shape_index += 1;
+    let symbols_problem=symbols::check(ref source, ref functions, ref bindings, ref blocks, ref edges, ref signatures, ref nominal, module_index);if(symbols_problem.code!=0){return .err(symbols_problem);}
+    var usize i=0;while(i<ne){
+        let Expression e=*v::at<Expression>(ref expressions,i);
+    let expr_basic_problem=expr_basic::check(ref source, ref payload, ref functions, ref bindings, ref expressions, ref blocks, ref edges, ref signatures, ref nominal, e, i);if(expr_basic_problem.code!=0){return .err(expr_basic_problem);}
+    let expr_unsafe_problem=expr_unsafe::check(ref source, ref bindings, ref expressions, ref nominal, e);if(expr_unsafe_problem.code!=0){return .err(expr_unsafe_problem);}
+    let expr_values_problem=expr_values::check(ref payload, ref bindings, ref expressions, ref statements, ref blocks, ref edges, ref nominal, e, i);if(expr_values_problem.code!=0){return .err(expr_values_problem);}
+        i+=1;
     }
-    var usize i = 0;
-    while (i < nb) {
-        let Binding b = *v::at<Binding>(ref bindings,i);
-        if(binding_code(b.kind)==11){if(!b.unsafe_call || b.link_start>=b.link_end || b.link_end>ns || !shapes::foreign_result(ref nominal,type_code(b.type))){return .err(Problem{.code=5106,.start=b.start,.end=b.end});}
-            let usize rule=shapes::sdk_rule(ref nominal,bytes::view(ref source),b.start,b.end,b.link_start,b.link_end);
-            if(!ffi::valid(bytes::view(ref source)[b.link_start..b.link_end]) && rule==0){return .err(Problem{.code=5106,.start=b.start,.end=b.end});}
-            if(rule!=0 && (!shapes::sdk_result(ref nominal,bytes::view(ref source),rule,type_code(b.type)) || b.effects!=sdk::effects(rule) || b.signature_count!=sdk::parameter_count(rule))){return .err(Problem{.code=5102,.start=b.start,.end=b.end});}
-            var usize n=0;while(n<b.signature_count){if(b.signature_start+n>=ntypes || !shapes::foreign_scalar(ref nominal,type_code(v::at<Signature>(ref signatures,b.signature_start+n).type),false) || rule!=0 && !shapes::sdk_parameter(ref nominal,bytes::view(ref source),rule,n,type_code(v::at<Signature>(ref signatures,b.signature_start+n).type))){return .err(Problem{.code=5102,.start=b.start,.end=b.end});}n+=1;}
-            var usize other=0;while(other<i){let old=*v::at<Binding>(ref bindings,other);if(binding_code(old.kind)==11 && old.link_end<=ns && bytes::equal(bytes::view(ref source)[old.link_start..old.link_end],bytes::view(ref source)[b.link_start..b.link_end])){if(type_code(old.type)!=type_code(b.type) || old.signature_count!=b.signature_count){return .err(Problem{.code=5106,.start=b.start,.end=b.end});}n=0;while(n<b.signature_count){if(type_code(v::at<Signature>(ref signatures,old.signature_start+n).type)!=type_code(v::at<Signature>(ref signatures,b.signature_start+n).type)){return .err(Problem{.code=5106,.start=b.start,.end=b.end});}n+=1;}}other+=1;}
-        }else if(b.link_start!=0 || b.link_end!=0){return .err(Problem{.code=4,.start=b.start,.end=b.end});}
-        if (b.must_use && (binding_code(b.kind)!=1 && binding_code(b.kind)!=5 && binding_code(b.kind)!=11 || !must_use::eligible(type_code(b.type))) || b.effects>4095 || (b.effects!=0 && !function_kind(b.kind) && binding_code(b.kind)!=5 && binding_code(b.kind)!=8 && binding_code(b.kind)!=11) || b.start > b.end || b.end > ns || b.owner > nb || type_code(b.type) == type_code(.Invalid) || type_code(b.type) == type_code(.Callable) || b.signature_start > ntypes || b.signature_count > ntypes - b.signature_start) { return .err(Problem { .code = 4, .start = b.start, .end = b.end }); }
-        if (!represented_type(b.type) || !shapes::valid_type(ref nominal,type_code(b.type),true) || ((binding_code(b.kind) >= 6 && binding_code(b.kind) <= 8) && shapes::find(ref nominal,type_code(b.type)) == 0)) { return .err(Problem { .code = 4, .start = b.start, .end = b.end }); }
-        if ((binding_code(b.kind) >= 6 && binding_code(b.kind) <= 8) && shapes::at(ref nominal,shapes::find(ref nominal,type_code(b.type)) - 1).binding != i + 1) { return .err(Problem { .code = 4, .start = b.start, .end = b.end }); }
-        if (function_kind(b.kind) || (binding_code(b.kind) == binding_code(.External) || binding_code(b.kind)==11) || binding_code(b.kind) == binding_code(.Struct) || binding_code(b.kind) == 7 || binding_code(b.kind)==8) { if (b.owner != 0 || b.scope != 0 || b.declaration == 0) { return .err(Problem { .code = 4, .start = b.start, .end = b.end }); } }
-        else if (b.owner == 0 || b.scope == 0 || type_code(b.type) == type_code(.Void) || b.signature_count != 0 || !function_kind(v::at<Binding>(ref bindings,b.owner - 1).kind)) { return .err(Problem { .code = 4, .start = b.start, .end = b.end }); }
-        i += 1;
-    }
-    i = 0; while (i < ntypes) { let Type type = v::at<Signature>(ref signatures,i).type; if (!represented_type(type) || !shapes::valid_type(ref nominal,type_code(type),false)) { return .err(Problem { .code = 4, .start = 0, .end = ns }); } i += 1; }
-    i = 0;
-    while (i < nf) {
-        let Function f = *v::at<Function>(ref functions,i);
-        if (f.start > f.end || f.end > ns || f.binding == 0 || f.binding > nb || f.body == 0 || f.body > nk || f.parameter_start > na || f.parameter_count > na - f.parameter_start || f.scope == 0) { return .err(Problem { .code = 4, .start = f.start, .end = f.end }); }
-        let Binding b = *v::at<Binding>(ref bindings,f.binding - 1); let Block body = *v::at<Block>(ref blocks,f.body - 1);
-        if (!function_kind(b.kind) || b.module_index != module_index || b.signature_count != f.parameter_count || body.owner != f.binding || body.parent_scope != f.scope) { return .err(Problem { .code = 4, .start = f.start, .end = f.end }); }
-        var usize j = 0;
-        while (j < f.parameter_count) {
-            let usize id = *v::at<usize>(ref edges,f.parameter_start + j);
-            if (id == 0 || id > nb) { return .err(Problem { .code = 4, .start = f.start, .end = f.end }); }
-            let Binding parameter = *v::at<Binding>(ref bindings,id - 1);
-            if (binding_code(parameter.kind) != if(binding_code(b.kind)==9){10}else{2} || parameter.owner != f.binding || parameter.scope != f.scope || type_code(parameter.type) != type_code(v::at<Signature>(ref signatures,b.signature_start + j).type)) { return .err(Problem { .code = 4, .start = parameter.start, .end = parameter.end }); }
-            j += 1;
-        }
-        i += 1;
-    }
-    i = 0;
-    while (i < ne) {
-        let Expression e = *v::at<Expression>(ref expressions,i);
-        let u32 kind = expression_code(e.kind); let u32 type = type_code(e.type);
-        let bool is_field = kind == 10 || kind == 11 || kind == 18 || kind == 20 || kind == 21;
-        if (e.start > e.end || e.end > ns || !represented_type(e.type) || !shapes::valid_type(ref nominal,type,true) || e.left > ne || e.right > ne || e.alternative > ne || e.block > nk || (!is_field && e.binding > nb) || e.edge_start > na || e.edge_count > na - e.edge_start || e.payload_start > e.payload_end || e.payload_end > np) { return .err(Problem { .code = 4, .start = e.start, .end = e.end }); }
-        // Expression links are postorder and cannot create cycles.
-        if (e.left > i || e.right > i || e.alternative > i) { return .err(Problem { .code = 4, .start = e.start, .end = e.end }); }
-        if (expression_code(e.kind) == expression_code(.Integer) && (e.payload_start == e.payload_end || type < 1 || type > 5)) { return .err(Problem { .code = 4, .start = e.start, .end = e.end }); }
-        if (expression_code(e.kind) == expression_code(.Boolean) && type_code(e.type) != type_code(.Bool)) { return .err(Problem { .code = 4, .start = e.start, .end = e.end }); }
-        if ((kind==3 || kind==24 || kind==6) && e.binding == 0) { return .err(Problem { .code = 4, .start = e.start, .end = e.end }); }
-        if ((expression_code(e.kind) == expression_code(.Unary) || expression_code(e.kind) == expression_code(.Binary)) && (e.left == 0 || operator_code(e.operator) == operator_code(.None))) { return .err(Problem { .code = 4, .start = e.start, .end = e.end }); }
-        if (expression_code(e.kind) == expression_code(.Binary) && e.right == 0) { return .err(Problem { .code = 4, .start = e.start, .end = e.end }); }
-        if ((expression_code(e.kind) == expression_code(.Block) || expression_code(e.kind) == expression_code(.If)) && e.block == 0) { return .err(Problem { .code = 4, .start = e.start, .end = e.end }); }
-        if (expression_code(e.kind) == expression_code(.If) && (e.left == 0 || type_code(v::at<Expression>(ref expressions,e.left - 1).type) != type_code(.Bool))) { return .err(Problem { .code = 4, .start = e.start, .end = e.end }); }
-        if (kind == 3 || kind == 24 || kind == 6) {
-            let Binding b = *v::at<Binding>(ref bindings,e.binding - 1);
-            if (type_code(e.type) != type_code(b.type) || ((kind == 3 || kind == 24) && (function_kind(b.kind) || (binding_code(b.kind) == binding_code(.External) || binding_code(b.kind)==11) || binding_code(b.kind) == binding_code(.Struct) || binding_code(b.kind) == 7 || binding_code(b.kind)==8)) || (expression_code(e.kind) == expression_code(.Call) && binding_code(b.kind) != binding_code(.Function) && binding_code(b.kind) != binding_code(.External) && binding_code(b.kind)!=11)) { return .err(Problem { .code = 4, .start = e.start, .end = e.end }); }
-            if (expression_code(e.kind) == expression_code(.Call)) {
-                var bool attached=false;var usize owner_index=0;
-                while(owner_index<nf){let f=*v::at<Function>(ref functions,owner_index);if(f.start<=e.start && e.end<=f.end){attached=true;if((v::at<Binding>(ref bindings,f.binding-1).effects&b.effects)!=b.effects){return .err(Problem{.code=7102,.start=e.start,.end=e.end});}}owner_index+=1;}
-                if(!attached){return .err(Problem{.code=4,.start=e.start,.end=e.end});}
-                if (e.edge_count != b.signature_count) { return .err(Problem { .code = 4, .start = e.start, .end = e.end }); }
-                var usize j = 0;
-                while (j < e.edge_count) {
-                    let usize id = *v::at<usize>(ref edges,e.edge_start + j);
-                    if (id == 0 || id > i || type_code(v::at<Expression>(ref expressions,id - 1).type) != type_code(v::at<Signature>(ref signatures,b.signature_start + j).type)) { return .err(Problem { .code = 4, .start = e.start, .end = e.end }); } j += 1;
-                }
-            }
-        }
-        if(kind==30){let u32 code=storage_code(e.kind);let u32 element=storage_element(e.kind);let usize args=storage::arguments(code);
-            if(!shapes::valid_type(ref nominal,element,false) || storage::result(code,element)!=type || !e.boolean || e.block!=0 || e.binding!=0 || e.edge_count!=0 || e.edge_start!=0 || (if(args<3){e.alternative!=0}else{e.alternative==0 || type_code(v::at<Expression>(ref expressions,e.alternative-1).type)!=5}) || e.payload_start!=0 || e.payload_end!=0 || operator_code(e.operator)!=0
-                || !shapes::storage_rule(ref nominal,bytes::view(ref source),e.start,e.end,code)
-                || (if(args==0){e.left!=0}else{e.left==0 || !(if(code>=6){storage::owner(code,type_code(v::at<Expression>(ref expressions,e.left-1).type)) && shapes::storage_owner(ref nominal,type_code(v::at<Expression>(ref expressions,e.left-1).type))}else{type_code(v::at<Expression>(ref expressions,e.left-1).type)==storage::argument_type(code,element,0)})})
-                || (if(args<2){e.right!=0}else{e.right==0 || type_code(v::at<Expression>(ref expressions,e.right-1).type)!=storage::argument_type(code,element,1)})){return .err(Problem{.code=5102,.start=e.start,.end=e.end});}
-        }
-        if(kind==29){
-            if((type!=9 && type!=10 && type!=11 && type!=12) || !e.boolean || e.left==0 || e.right==0 || e.alternative==0 || e.block!=0 || e.binding!=0 || e.edge_count!=0 || e.payload_start!=0 || e.payload_end!=0 || operator_code(e.operator)!=0
-                || !raw::owner(type_code(v::at<Expression>(ref expressions,e.left-1).type),type) || !raw::data(type_code(v::at<Expression>(ref expressions,e.right-1).type),type) || type_code(v::at<Expression>(ref expressions,e.alternative-1).type)!=5){return .err(Problem{.code=4,.start=e.start,.end=e.end});}
-        }
-        if(kind==28){
-            if(e.left==0 || !pointers::cast_allowed(type_code(v::at<Expression>(ref expressions,e.left-1).type),type) || !e.boolean || e.right!=0 || e.alternative!=0 || e.block!=0 || e.binding!=0 || e.edge_count!=0 || e.edge_start!=0 || e.payload_start!=0 || e.payload_end!=0 || operator_code(e.operator)!=0){return .err(Problem{.code=4,.start=e.start,.end=e.end});}
-            if(pointers::inner(type)==7 || type==1048601){let child=*v::at<Expression>(ref expressions,e.left-1);if(expression_code(child.kind)!=3 && !(expression_code(child.kind)==16 && expression_code(v::at<Expression>(ref expressions,child.left-1).kind)==3)){return .err(Problem{.code=4,.start=e.start,.end=e.end});}}
-        }
-        if(kind==27 && (!pointers::valid(type) || e.left!=0 || e.right!=0 || e.alternative!=0 || e.block!=0 || e.binding!=0 || e.edge_count!=0 || e.edge_start!=0 || e.payload_start!=0 || e.payload_end!=0 || e.boolean || operator_code(e.operator)!=0)){return .err(Problem{.code=4,.start=e.start,.end=e.end});}
-        if(kind==26 && (e.left==0 || !casts::allowed(type_code(v::at<Expression>(ref expressions,e.left-1).type),type) || e.right!=0 || e.alternative!=0 || e.block!=0 || e.binding!=0 || e.edge_count!=0 || e.payload_start!=0 || e.payload_end!=0 || e.boolean || operator_code(e.operator)!=0)){return .err(Problem{.code=4,.start=e.start,.end=e.end});}
-        if(kind==25 && (e.left==0 || !refs::valid(type) || refs::mutable(type) || !refs::mutable(type_code(v::at<Expression>(ref expressions,e.left-1).type)) || refs::inner(type_code(v::at<Expression>(ref expressions,e.left-1).type))!=refs::inner(type) || e.right!=0 || e.alternative!=0 || e.binding!=0 || e.edge_count!=0)){return .err(Problem{.code=4,.start=e.start,.end=e.end});}
-        if(kind==24 && (!shapes::needs_drop(type) || binding_code(v::at<Binding>(ref bindings,e.binding-1).kind)==10 || e.left!=0 || e.right!=0 || e.alternative!=0 || e.block!=0 || e.edge_count!=0 || e.payload_start!=0 || e.payload_end!=0 || e.boolean)){return .err(Problem{.code=4,.start=e.start,.end=e.end});}
-        if (kind == 12) {
-            if (!arrays::valid(type) || e.edge_count != if (e.boolean) { 1 } else { arrays::length(type) } || e.left != 0 || e.right != 0 || e.binding != 0) { return .err(Problem { .code = 4, .start = e.start, .end = e.end }); }
-            var usize j = 0; while (j < e.edge_count) { let usize id = *v::at<usize>(ref edges,e.edge_start + j); if (id == 0 || id > i || type_code(v::at<Expression>(ref expressions,id - 1).type) != shapes::array_element(ref nominal,type)) { return .err(Problem { .code = 4, .start = e.start, .end = e.end }); } j += 1; }
-        }
-        if (kind == 16 && !refs::valid(type) && ((!views::valid(type)) || e.boolean != views::mutable(type) || e.left == 0 || (expression_code(v::at<Expression>(ref expressions,e.left - 1).kind) != 3 && expression_code(v::at<Expression>(ref expressions,e.left - 1).kind) != 10) || !arrays::valid(type_code(v::at<Expression>(ref expressions,e.left - 1).type)) || shapes::array_element(ref nominal,type_code(v::at<Expression>(ref expressions,e.left - 1).type)) != views::element(type) || e.right != 0 || e.alternative != 0 || e.edge_count != 0 || e.binding != 0)) { return .err(Problem { .code = 4, .start = e.start, .end = e.end }); }
-        if(kind==16 && refs::valid(type)){if(e.left==0 || (expression_code(v::at<Expression>(ref expressions,e.left-1).kind)!=3 && expression_code(v::at<Expression>(ref expressions,e.left-1).kind)!=10 && expression_code(v::at<Expression>(ref expressions,e.left-1).kind)!=13 && !(expression_code(v::at<Expression>(ref expressions,e.left-1).kind)==4 && operator_code(v::at<Expression>(ref expressions,e.left-1).operator)==5)) || type_code(v::at<Expression>(ref expressions,e.left-1).type)!=refs::inner(type) || e.boolean!=refs::mutable(type) || e.right!=0 || e.alternative!=0 || e.binding!=0 || e.edge_count!=0){return .err(Problem{.code=4,.start=e.start,.end=e.end});}}
-        if(kind==16 && refs::mutable(type)){var usize root=e.left;var usize steps=0;while(steps<64 && (expression_code(v::at<Expression>(ref expressions,root-1).kind)==10 || expression_code(v::at<Expression>(ref expressions,root-1).kind)==13 || expression_code(v::at<Expression>(ref expressions,root-1).kind)==4 && operator_code(v::at<Expression>(ref expressions,root-1).operator)==5)){root=v::at<Expression>(ref expressions,root-1).left;steps+=1;}let base=*v::at<Expression>(ref expressions,root-1);if(expression_code(base.kind)!=3 || binding_code(v::at<Binding>(ref bindings,base.binding-1).kind)!=4 && binding_code(v::at<Binding>(ref bindings,base.binding-1).kind)!=10 && !refs::mutable(type_code(base.type))){return .err(Problem{.code=4,.start=e.start,.end=e.end});}}
-        if(kind==16 && (views::valid(type))){var usize root=e.left;var usize steps=0;
-            while(steps<64 && expression_code(v::at<Expression>(ref expressions,root-1).kind)==10){root=v::at<Expression>(ref expressions,root-1).left;steps+=1;}
-            let base=*v::at<Expression>(ref expressions,root-1);
-            if(expression_code(base.kind)!=3 || views::mutable(type) && (binding_code(v::at<Binding>(ref bindings,base.binding-1).kind)!=4 || resources::valid(type_code(base.type)))){return .err(Problem{.code=4,.start=e.start,.end=e.end});}
-        }
-        if (kind == 17 && ((!views::valid(type)) || e.left == 0 || e.right == 0 || e.alternative == 0 || type_code(v::at<Expression>(ref expressions,e.left - 1).type) != type || type_code(v::at<Expression>(ref expressions,e.right - 1).type) != 5 || type_code(v::at<Expression>(ref expressions,e.alternative - 1).type) != 5 || e.binding != 0 || e.edge_count != 0)) { return .err(Problem { .code = 4, .start = e.start, .end = e.end }); }
-        if (kind == 15 && (!literals::valid(type) || type == 9 && !literals::text(bytes::view(ref payload)[e.payload_start..e.payload_end]) || type==12 && !literals::cstring(bytes::view(ref payload)[e.payload_start..e.payload_end]) || e.left != 0 || e.right != 0 || e.binding != 0 || e.edge_count != 0 || e.block != 0 || e.alternative != 0 || e.boolean || operator_code(e.operator) != 0)) { return .err(Problem { .code = 4, .start = e.start, .end = e.end }); }
-        if (kind == 13 || kind == 14) {
-            if (e.left == 0 || !(arrays::valid(type_code(v::at<Expression>(ref expressions,e.left - 1).type)) || literals::valid(type_code(v::at<Expression>(ref expressions,e.left - 1).type)) || views::valid(type_code(v::at<Expression>(ref expressions,e.left - 1).type))) || e.binding != 0 || e.edge_count != 0) { return .err(Problem { .code = 4, .start = e.start, .end = e.end }); }
-            let u32 owner = type_code(v::at<Expression>(ref expressions,e.left - 1).type);if(owner==12){return .err(Problem{.code=4,.start=e.start,.end=e.end});}
-            if (kind == 13 && (e.right == 0 || type_code(v::at<Expression>(ref expressions,e.right - 1).type) != 5 || type != if (views::valid(owner)) { views::element(owner) } else { shapes::array_element(ref nominal,owner) } || owner == 9 || e.boolean) || kind == 14 && (e.right != 0 || type != if (e.boolean) { 6 } else { 5 } || e.boolean && !literals::valid(owner) && !views::valid(owner))) { return .err(Problem { .code = 4, .start = e.start, .end = e.end }); }
-        }
-        if (kind == 10 || kind == 11) {
-            if (e.binding == 0 || e.binding > shapes::field_count(ref nominal) || e.left == 0) { return .err(Problem { .code = 4, .start = e.start, .end = e.end }); }
-            let shapes::Field f = shapes::field_at(ref nominal,e.binding);
-            let u32 left_type = type_code(v::at<Expression>(ref expressions,e.left - 1).type);
-            if (arrays::valid(f.owner) || type != f.type || (kind == 10 && (if(refs::valid(left_type)){refs::inner(left_type)}else{left_type}) != f.owner) || (kind == 11 && left_type != f.type)) { return .err(Problem { .code = 4, .start = e.start, .end = e.end }); }
-        }
-        if (kind == 9) {
-            let usize shape = shapes::find(ref nominal,type);
-            if (shape == 0 || arrays::valid(type) || e.binding == 0) { return .err(Problem { .code = 4, .start = e.start, .end = e.end }); }
-            let shapes::Shape s = shapes::at(ref nominal,shape - 1);
-            if (e.binding != s.binding || binding_code(v::at<Binding>(ref bindings,e.binding - 1).kind) != if(resources::valid(type)){8}else{6} || e.edge_count != s.field_count) { return .err(Problem { .code = 4, .start = e.start, .end = e.end }); }
-            var u8[1024] seen = [0;1024]; var usize j = 0;
-            while (j < e.edge_count) {
-                let usize id = *v::at<usize>(ref edges,e.edge_start + j);
-                if (id == 0 || id > i) { return .err(Problem { .code = 4, .start = e.start, .end = e.end }); }
-                let Expression f = *v::at<Expression>(ref expressions,id - 1);
-                if (expression_code(f.kind) != 11 || f.binding <= s.field_start || f.binding > s.field_start + s.field_count || seen[f.binding - 1] != 0) { return .err(Problem { .code = 4, .start = e.start, .end = e.end }); }
-                seen[f.binding - 1] = 1; j += 1;
-            }
-        }
-        if(!enum_expression(ref nominal,ref expressions,ref blocks,ref statements,ref bindings,ref edges,e,i)){return .err(Problem{.code=4,.start=e.start,.end=e.end});}
-        i += 1;
-    }
-    i = 0;
-    while (i < nt) {
-        let Statement s = *v::at<Statement>(ref statements,i);
-        if (s.start > s.end || s.end > ns || s.expression > ne || s.target > ne || s.binding > nb || s.body > nk || s.initial > nt || s.post > nt || s.loop_target > nt || s.scope == 0) { return .err(Problem { .code = 4, .start = s.start, .end = s.end }); }
-        if (statement_code(s.kind) == statement_code(.Break) || statement_code(s.kind) == statement_code(.Continue)) {
-            if (s.loop_target == 0 || s.loop_target > i) { return .err(Problem { .code = 4, .start = s.start, .end = s.end }); }
-            let Statement target = *v::at<Statement>(ref statements,s.loop_target - 1);
-            if (statement_code(target.kind) != statement_code(.While) && statement_code(target.kind) != statement_code(.For)) { return .err(Problem { .code = 4, .start = s.start, .end = s.end }); }
-        }
-        if (statement_code(s.kind) == statement_code(.Binding) && (s.binding == 0 || s.expression == 0)) { return .err(Problem { .code = 4, .start = s.start, .end = s.end }); }
-        if (statement_code(s.kind) == statement_code(.Assignment) && (s.target == 0 || s.expression == 0 || operator_code(s.operator) == operator_code(.None))) { return .err(Problem { .code = 4, .start = s.start, .end = s.end }); }
-        if ((statement_code(s.kind) == statement_code(.While) || statement_code(s.kind) == statement_code(.For)) && s.body == 0) { return .err(Problem { .code = 4, .start = s.start, .end = s.end }); }
-        if ((statement_code(s.kind) == statement_code(.Assert) || statement_code(s.kind) == statement_code(.While)) && (s.expression == 0 || type_code(v::at<Expression>(ref expressions,s.expression - 1).type) != type_code(.Bool))) { return .err(Problem { .code = 4, .start = s.start, .end = s.end }); }
-        if (statement_code(s.kind) == statement_code(.For) && s.expression != 0 && type_code(v::at<Expression>(ref expressions,s.expression - 1).type) != type_code(.Bool)) { return .err(Problem { .code = 4, .start = s.start, .end = s.end }); }
-        if (statement_code(s.kind) == statement_code(.Defer) && (s.expression == 0 || expression_code(v::at<Expression>(ref expressions,s.expression - 1).kind) != expression_code(.Call) || type_code(v::at<Expression>(ref expressions,s.expression - 1).type) != type_code(.Void))) { return .err(Problem { .code = 4, .start = s.start, .end = s.end }); }
-        i += 1;
-    }
-    i = 0;
-    while (i < nk) {
-        let Block k = *v::at<Block>(ref blocks,i);
-        if (k.start > k.end || k.end > ns || k.owner == 0 || k.owner > nb || k.scope == 0 || k.parent_scope == 0 || k.edge_start > na || k.edge_count > na - k.edge_start || k.tail > ne || !function_kind(v::at<Binding>(ref bindings,k.owner - 1).kind)) { return .err(Problem { .code = 4, .start = k.start, .end = k.end }); }
-        var usize j = 0; while (j < k.edge_count) { let usize id = *v::at<usize>(ref edges,k.edge_start + j); if (id == 0 || id > nt) { return .err(Problem { .code = 4, .start = k.start, .end = k.end }); } j += 1; } i += 1;
-    }
-    // Classification is owned data; never reconstruct a nonempty body from
-    // fields or silently turn a missing private callable into an empty drop.
-    var usize resources_count=0;i=0;
-    while(i<shapes::count(ref nominal)){if(resources::valid(shapes::at(ref nominal,i).type)){resources_count+=1;}i+=1;}
-    if(resources_count!=v::len<Drop>(ref drops)){return .err(Problem{.code=4,.start=0,.end=ns});}
-    var u8[1153] linked=[0;1153];i=0;
-    while(i<v::len<Drop>(ref drops)){
-        let Drop d=*v::at<Drop>(ref drops,i);
-        if(!resources::valid(d.type) || shapes::find(ref nominal,d.type)==0 || d.start>=d.end || d.end>ns || d.function>nb || d.receiver>nb){return .err(Problem{.code=4,.start=d.start,.end=d.end});}
-        var usize j=0;while(j<i){if(v::at<Drop>(ref drops,j).type==d.type){return .err(Problem{.code=4,.start=d.start,.end=d.end});}j+=1;}
-        if(!d.nonempty){if(v::at<Binding>(ref bindings,shapes::at(ref nominal,shapes::find(ref nominal,d.type)-1).binding-1).effects!=0){return .err(Problem{.code=4,.start=d.start,.end=d.end});}if(d.function!=0 || d.receiver!=0){return .err(Problem{.code=4,.start=d.start,.end=d.end});}}
-        else{
-            if(d.function==0 || d.receiver==0 || d.function==d.receiver || linked[d.function]!=0 || linked[d.receiver]!=0){return .err(Problem{.code=4,.start=d.start,.end=d.end});}
-            let Binding b=*v::at<Binding>(ref bindings,d.function-1);let Binding receiver=*v::at<Binding>(ref bindings,d.receiver-1);
-            let u32 authority=v::at<Binding>(ref bindings,shapes::at(ref nominal,shapes::find(ref nominal,d.type)-1).binding-1).effects;
-            if(b.effects!=authority || binding_code(b.kind)!=9 || type_code(b.type)!=7 || b.declaration!=(d.type-98303) as usize || b.signature_count!=1 || b.start!=d.start || b.end!=d.end || binding_code(receiver.kind)!=10 || receiver.owner!=d.function || type_code(receiver.type)!=d.type || receiver.declaration!=0){return .err(Problem{.code=4,.start=d.start,.end=d.end});}
-            var usize matches=0;j=0;while(j<nf){let Function f=*v::at<Function>(ref functions,j);if(f.binding==d.function){
-                if(f.public || f.parameter_count!=1 || *v::at<usize>(ref edges,f.parameter_start)!=d.receiver || f.start!=d.start || f.end!=d.end){return .err(Problem{.code=4,.start=d.start,.end=d.end});}matches+=1;
-            }j+=1;}if(matches!=1){return .err(Problem{.code=4,.start=d.start,.end=d.end});}
-            linked[d.function]=1;linked[d.receiver]=1;
-        }i+=1;
-    }
-    i=1;while(i<=nb){let u32 kind=binding_code(v::at<Binding>(ref bindings,i-1).kind);if((kind==9 || kind==10) && linked[i]!=1){return .err(Problem{.code=4,.start=0,.end=ns});}i+=1;}
+    let control_problem=control::check(ref source, ref bindings, ref expressions, ref statements, ref blocks, ref edges);if(control_problem.code!=0){return .err(control_problem);}
+    let drops_problem=drops::check(ref source, ref functions, ref bindings, ref edges, ref nominal, ref drops);if(drops_problem.code!=0){return .err(drops_problem);}
     let Program result=Program { .nominal, .drops, .source, .payload, .functions, .bindings, .expressions, .statements, .blocks, .edges, .signatures, .module_index, .success = true };
     let Problem unsafe_proof=unsafe_check(ref result);if(unsafe_proof.code!=0){return .err(unsafe_proof);}return .ok(result);
 }
 
 // Walk owned lexical structure rather than trusting the source-side permission
 // flag. Unsafe never grants effect authority or alters borrow/cleanup policy.
-struct UnsafeBudget { usize work; Problem problem; }
-fn bool unsafe_fail(ref mut UnsafeBudget c,u32 code,usize start,usize end){
-    if(c.problem.code==0){c.problem=Problem{.code,.start,.end};}return false;
-}
-fn bool unsafe_expression(ref Program p,usize id,bool allowed,usize depth,ref mut UnsafeBudget c,ref mut u8[] calls){
-    if(id==0){return true;}let e=expression_at(p,id);let u32 kind=expression_code(e.kind);
-    if(depth>=64 || c.work>=1048576){return unsafe_fail(c,2,e.start,e.end);}c.work+=1;
-    if(kind==28 || kind==29 || kind==30){if(!allowed || !e.boolean){return unsafe_fail(c,5101,e.start,e.end);}calls[id-1]=1;}
-    if(kind==6){let b=binding_at(p,e.binding);if(e.boolean!=b.unsafe_call || b.unsafe_call && !allowed){return unsafe_fail(c,5101,e.start,e.end);}calls[id-1]=1;}
-    if(!unsafe_expression(p,e.left,allowed,depth+1,c,calls) || !unsafe_expression(p,e.right,allowed,depth+1,c,calls) || !unsafe_expression(p,e.alternative,allowed,depth+1,c,calls)){return false;}
-    if(e.block!=0 && !unsafe_block(p,e.block,allowed,depth+1,c,calls)){return false;}
-    // Capture edges name bindings, all other expression edges name expressions.
-    var usize i=0;while(kind!=21 && i<e.edge_count){if(!unsafe_expression(p,edge_at(p,e.edge_start+i),allowed,depth+1,c,calls)){return false;}i+=1;}return true;
-}
-fn bool unsafe_statement(ref Program p,usize id,bool allowed,usize depth,ref mut UnsafeBudget c,ref mut u8[] calls){
-    if(id==0){return true;}let s=statement_at(p,id);
-    if(depth>=64 || c.work>=1048576){return unsafe_fail(c,2,s.start,s.end);}c.work+=1;
-    return unsafe_expression(p,s.expression,allowed,depth+1,c,calls) && unsafe_expression(p,s.target,allowed,depth+1,c,calls)
-        && (s.body==0 || unsafe_block(p,s.body,allowed,depth+1,c,calls))
-        && unsafe_statement(p,s.initial,allowed,depth+1,c,calls) && unsafe_statement(p,s.post,allowed,depth+1,c,calls);
-}
-fn bool unsafe_block(ref Program p,usize id,bool inherited,usize depth,ref mut UnsafeBudget c,ref mut u8[] calls){
-    let b=block_at(p,id);if(depth>=64 || c.work>=1048576){return unsafe_fail(c,2,b.start,b.end);}c.work+=1;
-    let bool allowed=inherited || b.unsafe_body;var usize i=0;
-    while(i<b.edge_count){if(!unsafe_statement(p,edge_at(p,b.edge_start+i),allowed,depth+1,c,calls)){return false;}i+=1;}
-    return unsafe_expression(p,b.tail,allowed,depth+1,c,calls);
-}
-pub fn Problem unsafe_check(ref Program p){
-    var UnsafeBudget c=UnsafeBudget{.work=0,.problem=Problem{.code=0,.start=0,.end=0}};var usize i=1;var bool needed=false;
-    while(i<=binding_count(p)){let b=binding_at(p,i);if(b.unsafe_call && binding_code(b.kind)!=1 && binding_code(b.kind)!=5 && binding_code(b.kind)!=11){discard unsafe_fail(ref mut c,4,b.start,b.end);return c.problem;}i+=1;}
-    i=1;while(i<=binding_count(p)){needed=needed || binding_at(p,i).unsafe_call;i+=1;}
-    i=1;while(i<=expression_count(p)){let e=expression_at(p,i);needed=needed || expression_code(e.kind)==28 || expression_code(e.kind)==29 || expression_code(e.kind)==30 || expression_code(e.kind)==6 && e.boolean;i+=1;}
-    if(!needed){return c.problem;}
-    var bytes::Buffer visited=bytes::empty();
-    if(!bytes::resize_zeroed(ref mut visited,expression_count(p)).is_ok){return Problem{.code=3,.start=0,.end=0};}
-    i=0;while(i<function_count(p)){let f=function_at(p,i);if(!unsafe_block(p,f.body,binding_at(p,f.binding).unsafe_call,0,ref mut c,bytes::view_mut(ref mut visited))){return c.problem;}i+=1;}
-    i=1;while(i<=expression_count(p)){let e=expression_at(p,i);if((expression_code(e.kind)==6 || (expression_code(e.kind)==28 || expression_code(e.kind)==29 || expression_code(e.kind)==30)) && bytes::view(ref visited)[i-1]==0){discard unsafe_fail(ref mut c,4,e.start,e.end);return c.problem;}i+=1;}return c.problem;
-}
+pub fn Problem unsafe_check(ref Program p){return unsafe_proof::unsafe_check(p);}

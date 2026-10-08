@@ -1,0 +1,104 @@
+{
+  "schema": "fairyc.candidate-hir-model-source-split/v1",
+  "passed": true,
+  "originalCommit": "ba089a52",
+  "guardRegionsIdentical": [
+    "symbols",
+    "control",
+    "drops",
+    "expr_basic",
+    "expr_unsafe",
+    "expr_values"
+  ],
+  "enumProofIdentical": true,
+  "unsafeProofIdentical": true,
+  "proofOrderRetained": [
+    "symbols::check(",
+    "expr_basic::check(",
+    "expr_unsafe::check(",
+    "expr_values::check(",
+    "control::check(",
+    "drops::check(",
+    "let Program result=Program",
+    "unsafe_check(ref result)"
+  ],
+  "limitsChanged": false,
+  "parseImage": {
+    "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-fs\\candidate-loader-dev.exe",
+    "sha256": "91bdd1118c66d3596fb12ebd8f1ddf2f30a4758dcb890ff1d812f3c5e5d08ac3"
+  },
+  "parseObservations": [
+    {
+      "path": "examples/lexer_candidate/src/hir_model.fy",
+      "bytes": 20360,
+      "sha256": "dc85cf5ae27292522ea97d2e4556a461915dd87a3df70f0810889210ca8558d3",
+      "exit": 0,
+      "stdoutBytes": 3252,
+      "stderr": ""
+    },
+    {
+      "path": "examples/lexer_candidate/src/hir_validate_control.fy",
+      "bytes": 3787,
+      "sha256": "be2879823365a044490ae72c7ecae4b4242a6eeaa416105fd4aced5d74d37560",
+      "exit": 0,
+      "stdoutBytes": 179,
+      "stderr": ""
+    },
+    {
+      "path": "examples/lexer_candidate/src/hir_validate_drops.fy",
+      "bytes": 3214,
+      "sha256": "94c809cc50805b2aac2defe15b02ed18f73c6963c48afe3f8f199337c7ad0000",
+      "exit": 0,
+      "stdoutBytes": 241,
+      "stderr": ""
+    },
+    {
+      "path": "examples/lexer_candidate/src/hir_validate_enums.fy",
+      "bytes": 6179,
+      "sha256": "e72856413d933c9cfa38df93ff0ebe319c17ff8118fbf56f27392d14bac04a70",
+      "exit": 0,
+      "stdoutBytes": 290,
+      "stderr": ""
+    },
+    {
+      "path": "examples/lexer_candidate/src/hir_validate_expr_basic.fy",
+      "bytes": 4841,
+      "sha256": "ac4763955920bacd62b883ffb9862c2342718e98a68343e86c14303098395738",
+      "exit": 0,
+      "stdoutBytes": 213,
+      "stderr": ""
+    },
+    {
+      "path": "examples/lexer_candidate/src/hir_validate_expr_unsafe.fy",
+      "bytes": 4495,
+      "sha256": "dc63bcdbaabfd331ec1022b7fe51cd3ec05759cb01d220c43842c4b391f84d8f",
+      "exit": 0,
+      "stdoutBytes": 361,
+      "stderr": ""
+    },
+    {
+      "path": "examples/lexer_candidate/src/hir_validate_expr_values.fy",
+      "bytes": 7925,
+      "sha256": "108436ac460ff92ccec8421ed7fe25754764a5306eebf55d6a097efc588251e5",
+      "exit": 0,
+      "stdoutBytes": 400,
+      "stderr": ""
+    },
+    {
+      "path": "examples/lexer_candidate/src/hir_validate_symbols.fy",
+      "bytes": 7645,
+      "sha256": "af13dcc18c4a36ab2d48df2b0d97750a9aa02ee094f2540dcf001b1a84af49fe",
+      "exit": 0,
+      "stdoutBytes": 418,
+      "stderr": ""
+    },
+    {
+      "path": "examples/lexer_candidate/src/hir_validate_unsafe.fy",
+      "bytes": 3974,
+      "sha256": "78dfb9b6c72807b2319c1ed76588ee7a94e0007fd322a63ff51aae1bc1cd912a",
+      "exit": 0,
+      "stdoutBytes": 367,
+      "stderr": ""
+    }
+  ]
+}

@@ -1,0 +1,80 @@
+{
+  "schema": "fairyc.candidate-hir-model-split-mutation/v1",
+  "passed": true,
+  "compiler": {
+    "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\compiler-build-240s.exe",
+    "sha256": "746fe10b022ed88cfbc0ae8ea13e3f867b842f3317ef5a2a4caa36d064a248dd"
+  },
+  "argv": [
+    "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\compiler-build-240s.exe",
+    "test",
+    "--native",
+    "--exact",
+    "tests::hir_cleanup::forged_drop_links_and_owning_receivers_are_rejected",
+    "--json",
+    "--locked"
+  ],
+  "exit": 0,
+  "report": {
+    "schemaVersion": "fairyc.test-report/v1",
+    "engine": "native",
+    "target": "x86_64-windows-msvc",
+    "profile": "development",
+    "tests": [
+      {
+        "identity": "tests::hir_cleanup::forged_drop_links_and_owning_receivers_are_rejected",
+        "outcome": "passed",
+        "trapCategory": null
+      }
+    ],
+    "count": 1,
+    "passed": 1,
+    "failed": 0,
+    "status": "ok",
+    "lock": "verified"
+  },
+  "stderr": "",
+  "mutationCases": 13,
+  "sources": [
+    {
+      "path": "examples/lexer_candidate/src/hir_model.fy",
+      "sha256": "dc85cf5ae27292522ea97d2e4556a461915dd87a3df70f0810889210ca8558d3"
+    },
+    {
+      "path": "examples/lexer_candidate/src/hir_validate_control.fy",
+      "sha256": "be2879823365a044490ae72c7ecae4b4242a6eeaa416105fd4aced5d74d37560"
+    },
+    {
+      "path": "examples/lexer_candidate/src/hir_validate_drops.fy",
+      "sha256": "94c809cc50805b2aac2defe15b02ed18f73c6963c48afe3f8f199337c7ad0000"
+    },
+    {
+      "path": "examples/lexer_candidate/src/hir_validate_enums.fy",
+      "sha256": "e72856413d933c9cfa38df93ff0ebe319c17ff8118fbf56f27392d14bac04a70"
+    },
+    {
+      "path": "examples/lexer_candidate/src/hir_validate_expr_basic.fy",
+      "sha256": "ac4763955920bacd62b883ffb9862c2342718e98a68343e86c14303098395738"
+    },
+    {
+      "path": "examples/lexer_candidate/src/hir_validate_expr_unsafe.fy",
+      "sha256": "dc63bcdbaabfd331ec1022b7fe51cd3ec05759cb01d220c43842c4b391f84d8f"
+    },
+    {
+      "path": "examples/lexer_candidate/src/hir_validate_expr_values.fy",
+      "sha256": "108436ac460ff92ccec8421ed7fe25754764a5306eebf55d6a097efc588251e5"
+    },
+    {
+      "path": "examples/lexer_candidate/src/hir_validate_symbols.fy",
+      "sha256": "af13dcc18c4a36ab2d48df2b0d97750a9aa02ee094f2540dcf001b1a84af49fe"
+    },
+    {
+      "path": "examples/lexer_candidate/src/hir_validate_unsafe.fy",
+      "sha256": "78dfb9b6c72807b2319c1ed76588ee7a94e0007fd322a63ff51aae1bc1cd912a"
+    },
+    {
+      "path": "examples/lexer_candidate/tests/hir_cleanup.fy",
+      "sha256": "cb43ff009efc077493136ccaff7146f536c6f772619464eefddfd4a19a6f7ca0"
+    }
+  ]
+}

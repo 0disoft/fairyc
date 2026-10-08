@@ -1248,3 +1248,29 @@ project commands and Linux execution remain pending.
   that rejection. Linux, whole CLI execution and new release-candidate rebuilding
   were not repeated for this body-equivalent split. SDK/runtime, DB, dependency,
   CI runner settings and all admission budgets are unchanged.
+
+## HIR owned-model self-source admission (2026-10-09)
+
+- `hir_model.fy` now keeps the owned types, queries, admission caps and final
+  factory. Symbol/function, expression shape, pointer/storage, value/view/enum,
+  control/drop and lexical unsafe proofs live in eight focused helpers. All
+  nine files parse under the unchanged limits; the model is 20360 bytes.
+- The six extracted guard regions and the enum/unsafe proof bodies match their
+  previous source after module qualification and ref-parameter normalization.
+  The coordinator preserves proof order and returns no successful owner until
+  the lexical unsafe proof also passes. Evidence:
+  `evidence/candidate-hir-model-source-split-20261009.json`.
+- Check and the rebuilt development driver pass. Existing native mutation
+  testing rejects all 13 forged drop/receiver links. Three focused programs
+  emit the same C as the pre-split release driver and pass twelve native
+  low/optimized MSVC executions; a conflicting argument borrow still rejects.
+  Evidence: `evidence/candidate-hir-model-split-mutation-20261009.json`,
+  `evidence/candidate-hir-model-split-cli-20261009.json` and
+  `evidence/candidate-sdk-module-driver-hir-split-dev-20261009.json`.
+- The full-dispatcher import input now has 150 files and 1047406 joined bytes,
+  still within the 1MiB source budget. It continues to reject at parsing:
+  `type_check.fy` and `hir_lower.fy` self-source work remains. Evidence:
+  `evidence/candidate-dispatcher-admission-after-hir-split-20261009.json`.
+  New release-candidate rebuilding, Linux and whole-CLI native execution were
+  not repeated for this proof-preserving split. Source/AST/work/depth limits,
+  public language, SDK/runtime ABI, DB, dependency and CI settings are unchanged.

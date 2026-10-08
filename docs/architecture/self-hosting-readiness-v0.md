@@ -170,6 +170,12 @@ function bodies and byte-identical generated C for the focused regression.
 The current 142-file input still rejects at parsing; HIR model, type checking
 and HIR lowering source splits remain. These observations retain the existing
 budgets and do not establish whole-compiler native execution or promotion.
+The owned HIR model has subsequently been split into a factory/query owner and
+eight proof helpers. Its nine files now parse with the same guard bodies and
+publication order. Existing thirteen drop-link mutations still reject; focused
+generated C remains identical and passes twelve native executions. Type checking
+and HIR lowering remain the two measured self-source parser blockers. The full
+150-file input remains below 1MiB (1047406 joined bytes) and still rejects.
 Project-driver and platform work remain. These scanner results do not establish
 the complete compiler's stage1/stage2 or promotion gates.
 
