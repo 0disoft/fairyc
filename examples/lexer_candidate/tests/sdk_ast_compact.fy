@@ -1,5 +1,6 @@
 module tests::sdk_ast_compact;
 import sdk_ast_compact as compact;
+import sdk_reachability as reach;
 import module_signatures as signatures;
 import module_ast_join as join;
 import module_bind as binding;
@@ -14,6 +15,21 @@ fn void snapshot(ref syntax::Parsed a,ref syntax::Parsed b){
     assert(bytes::equal(syntax::source_view(a),syntax::source_view(b)) && syntax::token_count(a)==syntax::token_count(b));
     var usize i=0;while(i<syntax::token_count(a)){let x=syntax::token_info(a,i);let y=syntax::token_info(b,i);assert(x.kind==y.kind && x.start==y.start && x.end==y.end && x.trivia==y.trivia);i+=1;}
     assert(syntax::field_count(a)==syntax::field_count(b) && syntax::attribute_count(a)==syntax::attribute_count(b) && syntax::attribute_argument_count(a)==syntax::attribute_argument_count(b));
+}
+
+@test fn void reachability_ranges_preserve_many_repeated_local_names(){
+    var v::Vec<syntax::Parsed> sources=v::empty<syntax::Parsed>();var usize module_index=0;
+    while(module_index<22){var bytes::Buffer text=bytes::empty();assert(bytes::append(ref mut text,b"module user").is_ok && bytes::append_usize(ref mut text,module_index).is_ok && bytes::append(ref mut text,b";fn void value(){let i32 n=0;").is_ok);
+        var usize i=0;while(i<800){assert(bytes::append(ref mut text,b"discard n;").is_ok);i+=1;}assert(bytes::append(ref mut text,b"}").is_ok);
+        assert(v::push<syntax::Parsed>(ref mut sources,support::text(bytes::view(ref text))).is_ok);module_index+=1;
+    }
+    let metadata=switch(signatures::build(ref sources)){case .ok(m):{m}case .err(_):{assert(false);return;}};
+    var usize work=0;let plan=switch(reach::build(ref sources,ref metadata,ref mut work)){case .ok(p):{p}case .err(_):{assert(false);return;}};
+    assert(work<1048576);module_index=0;while(module_index<22){assert(reach::needed(ref plan,module_index,1));module_index+=1;}
+    let retained=switch(compact::compact(ref sources,ref metadata)){case .ok(p):{p}case .err(_):{assert(false);return;}};
+    assert(v::len<syntax::Parsed>(ref retained)==22);module_index=0;while(module_index<22){let before=v::at<syntax::Parsed>(ref sources,module_index);let after=v::at<syntax::Parsed>(ref retained,module_index);
+        snapshot(before,after);assert(syntax::expression_count(before)==syntax::expression_count(after) && syntax::statement_count(before)==syntax::statement_count(after) && syntax::declaration_count(before)==syntax::declaration_count(after));module_index+=1;
+    }
 }
 @effects(filesystem) @test fn void compacted_sdk_keeps_source_and_user_validation(){
     let input=support::sdk_source();var v::Vec<syntax::Parsed> sources=v::empty<syntax::Parsed>();

@@ -222,6 +222,14 @@ The reference cap now reports limit code 10 separately from allocation code
 native SDK compaction regressions pass. Index reduction still remains before
 full-dispatcher compilation can advance. Evidence:
 `docs/ops/evidence/candidate-reachability-limit-classification-20261009.json`.
+Per-name reachability storage has subsequently been replaced by checked
+declaration expression ranges. A 17600-reference, 22-module native case retains
+all user AST/source facts; SDK diagnostics and the four real file-token cases
+remain exact with identical generated C. The full 160-file input (1046901
+joined bytes) passes the previous reference-index blocker and now reaches the
+phase-8 lookup-work cap in `numbers.fy`. Catalog lookup reduction remains open.
+Evidence: `docs/ops/evidence/candidate-reachability-ranges-20261009.json` and
+`docs/ops/evidence/candidate-dispatcher-admission-reach-ranges-20261009.json`.
 
 `stage0` is the current Go compiler built by the supported Go toolchain.
 

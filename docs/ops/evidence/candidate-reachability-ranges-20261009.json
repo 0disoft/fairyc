@@ -1,0 +1,54 @@
+{
+  "schema": "fairyc.candidate-reachability-ranges/v1",
+  "passed": true,
+  "referenceStorage": "One first/stop expression interval per declaration, validated against its source span when visited",
+  "nativeAPI": {
+    "schemaVersion": "fairyc.test-report/v1",
+    "engine": "native",
+    "target": "x86_64-windows-msvc",
+    "profile": "development",
+    "tests": [
+      {
+        "identity": "tests::sdk_ast_compact::compacted_private_reference_retains_original_diagnostic",
+        "outcome": "passed",
+        "trapCategory": null
+      },
+      {
+        "identity": "tests::sdk_ast_compact::compacted_sdk_keeps_source_and_user_validation",
+        "outcome": "passed",
+        "trapCategory": null
+      },
+      {
+        "identity": "tests::sdk_ast_compact::reachability_ranges_preserve_many_repeated_local_names",
+        "outcome": "passed",
+        "trapCategory": null
+      }
+    ],
+    "count": 3,
+    "passed": 3,
+    "failed": 0,
+    "status": "ok",
+    "lock": "verified"
+  },
+  "denseFixture": {
+    "modules": 22,
+    "localNameReferences": 17600,
+    "allUserBodiesAndExactSourceRetained": true
+  },
+  "generatedCIdentical": true,
+  "fileCases": 4,
+  "nativeFileExecutions": 4,
+  "sources": [
+    {
+      "path": "examples/lexer_candidate/src/sdk_reachability.fy",
+      "sha256": "b446aca1f6992ef694d951dab7ef0d8a92baac37ea8a013b8dbc1bc74062e5e0"
+    },
+    {
+      "path": "examples/lexer_candidate/tests/sdk_ast_compact.fy",
+      "sha256": "f8d89986b1daf5ce132745761cb74d97ce0a4b1e05c25b2255b096d342df1706"
+    }
+  ],
+  "limitsRaised": false,
+  "releaseCandidateRebuilt": false,
+  "linuxValidated": false
+}

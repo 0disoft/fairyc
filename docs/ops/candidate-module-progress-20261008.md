@@ -1418,3 +1418,28 @@ project commands and Linux execution remain pending.
   `evidence/candidate-dispatcher-admission-reach-limit-classified-20261009.json`.
 - Index reduction remains open. Release rebuilding, Linux and whole-dispatcher
   C/native execution were not repeated for this diagnostic-only change.
+
+## Reachability declaration ranges (2026-10-09)
+
+- The per-name linked `Use` list is replaced by a first/stop expression range
+  per declaration. Queued declarations visit every original name expression;
+  the interval is checked against the declaration's source span. No user or
+  SDK target is filtered out by spelling or call shape. This removes per-name
+  storage pressure while keeping the 4096-row/cache and 1MiB work bounds.
+- Development check/build and three exact native API tests pass. Twenty-two
+  real parsed modules with 17600 repeated local references retain every user
+  body, source byte and token span through compaction. Existing private-target
+  and unused-invalid-user compaction checks pass. The real file-token closure
+  emits byte-identical C before/after and retains its four exact file cases
+  across four native executions; three rejection cases are retained. Evidence:
+  `evidence/candidate-reachability-ranges-20261009.json` and
+  `evidence/candidate-file-tokens-reach-ranges-20261009.json`.
+- The 160-file full dispatcher is 1046901 joined bytes and passes the former
+  reference-list blocker. It now reaches the work bound during name lookup in
+  `numbers.fy`, phase 8 code 10. Catalog lookup still scans global tables and
+  reachability charges their whole sizes for each cache miss. Reducing those
+  lookup scans is next. Evidence:
+  `evidence/candidate-dispatcher-admission-reach-ranges-20261009.json`.
+- Release-candidate rebuilding, Linux and full-dispatcher native execution were
+  not repeated. Internal Row storage changed; language/SDK ABI, DB, dependency,
+  CI runner settings and all numeric admission bounds are unchanged.
