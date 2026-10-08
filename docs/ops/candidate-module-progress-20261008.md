@@ -548,3 +548,17 @@ project commands and Linux execution remain pending.
   Linux execution and stage1/stage2. Release mutation API remains deferred after
   the earlier bounded optimizer timeout. No SDK/runtime ABI, language contract,
   dependency version or CI change; item 47 is complete for scalar Vec execution.
+
+## Resource Vec AST preparation
+
+- Authenticated SDK templates accept a bound direct resource declaration as an
+  element argument. Concrete instances retain the joined declaration identity;
+  two distinct resource elements keep separate Vec and take-slot instances.
+  Original SDK bytes and cleanup bodies remain unchanged. Ordinary user generic
+  functions and nominal struct elements retain their earlier admission boundary.
+- Check and two development native API tests pass. The existing scalar expansion
+  observer now counts storage calls only inside executable declarations; removed
+  named SDK view bodies remain in the owned AST and are not instantiated calls.
+- Evidence: `evidence/candidate-sdk-vector-resource-expand-20261008.json`.
+  Resource storage execution, ownership transfers and cleanup are still pending.
+  This prerequisite alone does not complete item 48. No SDK, runtime or CI change.

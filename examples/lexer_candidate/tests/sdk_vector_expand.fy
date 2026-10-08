@@ -45,16 +45,27 @@ fn syntax::Parsed expanded(ref u8[] user,ref u8[] sdk){
         }
         if(d.kind==3 && d.generic_start!=0){functions+=1;}i+=1;
     }
-    i=1;while(i<=syntax::expression_count(ref p)){if(storage::call(ref p,i)!=0 && storage::element(ref p,i)!=0){assert(storage::allowed(ref p,i));storage_calls+=1;}i+=1;}
+    i=1;while(i<=syntax::expression_count(ref p)){let e=syntax::expression_at(ref p,i);var bool executable=false;var usize j=0;
+        while(j<syntax::declaration_count(ref p)){let d=syntax::declaration_at(ref p,j);executable=executable || (d.kind==3 || d.kind==6) && e.start>=d.start && e.end<=d.end;j+=1;}
+        if(executable && storage::call(ref p,i)!=0 && storage::element(ref p,i)!=0){assert(storage::allowed(ref p,i));storage_calls+=1;}i+=1;}
     assert(vectors==1 && functions==3 && storage_calls==3);
     let ref u8[] source=syntax::source_view(ref p);assert(bytes::equal(source[source.len-bytes::len(ref sdk)..],bytes::view(ref sdk)));
     rejected_elements_and_spoofing(bytes::view(ref sdk));
 }
 fn void rejected_elements_and_spoofing(ref u8[] sdk){
-    let p=expanded(b"module user;import std::vec as v;resource Token{i32 n;cleanup{}}fn v::Vec<Token> main(){return v::empty<Token>();}",sdk);
+    let p=expanded(b"module user;import std::vec as v;struct Token{i32 n;}fn v::Vec<Token> main(){return v::empty<Token>();}",sdk);
     assert(syntax::problem_count(ref p)==1 && syntax::problem_at(ref p,0).code==4502);
     let spoof=expand::expand(text(b"module std::vec;pub resource Vec<T>{cleanup{}}pub fn Vec<T> empty<T>(){}"));assert(syntax::problem_count(ref spoof)==1 && syntax::problem_at(ref spoof,0).code==6801);
     let shadow=expand::expand(text(b"module user;fn T id<T>(T x){return x;}fn i32 other(i32 id){return id;}fn i32 main(){return id<i32>(7);}"));assert(syntax::problem_count(ref shadow)==0);
     let blocked=expand::expand(text(b"module user;fn T id<T>(T x){return x;}fn i32 main(){let i32 id=7;return id<i32>(7);}"));assert(syntax::problem_count(ref blocked)==1 && syntax::problem_at(ref blocked,0).code==4501);
     let ordinary=expand::expand(text(b"module user;resource Vec<T>{cleanup{}}fn Vec<i32> main(){}"));assert(syntax::problem_count(ref ordinary)==1 && syntax::problem_at(ref ordinary,0).code==4501);
+}
+@effects(filesystem)
+@test fn void sdk_resource_elements_retain_declaration_identity(){
+    let sdk=sdk_source();let p=expanded(b"module user;import std::vec as v;resource Token{i32 n;cleanup{}}resource Diagnostic{Token token;cleanup{}}fn v::Vec<Token> tokens(){return v::empty<Token>();}fn v::Vec<Diagnostic> diagnostics(){return v::empty<Diagnostic>();}",bytes::view(ref sdk));
+    assert(syntax::problem_count(ref p)==0);var usize vectors=0;var usize i=0;var bool token=false;var bool diagnostic=false;
+    while(i<syntax::declaration_count(ref p)){let d=syntax::declaration_at(ref p,i);if(d.kind==6 && d.generic_start!=0){vectors+=1;assert(d.field_count==6 && d.cleanup_body!=0);}if(d.kind==3 && d.generic_start!=0){let u32 type=nominal::resolve(ref p,d.result_type);token=token || type==98306;diagnostic=diagnostic || type==98307;}i+=1;}
+    assert(vectors==2 && token && diagnostic);
+    let ref u8[] source=syntax::source_view(ref p);assert(bytes::equal(source[source.len-bytes::len(ref sdk)..],bytes::view(ref sdk)));
+    let ordinary=expand::expand(text(b"module user;resource Token{i32 n;cleanup{}}fn T id<T>(T x){return x;}fn Token main(){return id<Token>(Token{.n=7});}"));assert(syntax::problem_count(ref ordinary)==1 && syntax::problem_at(ref ordinary,0).code==4502);
 }
