@@ -89,6 +89,8 @@ evidence/candidate-result-handling-alignment-20261007.json에 새 검사·도구
 45. 완료: build-local 원 선언 ID + 순서 있는 scalar 타입 조합으로 중복 제거. 반복 소스 호출은 그대로 실행. 재귀·depth 32·선언당 16개·전체 64개·분석량 1048576 및 AST arena 상한을 유지. 독립 HIR API 검사 2개, planner 정상/오류 4개·native 4회. 패키지 정체성 연결은 63번. 근거: `evidence/candidate-resource-generic-plan-20261007.json`.
 46. 부분 완료: Fairy SHA-256과 bundled SDK 모듈별 원본 digest로 std namespace를 인증. 모듈 타입 그래프의 Vec 원소·공급자·별칭 정체성 및 6필드 storage 형식을 연결. 변조·SDK 사칭·bare Vec·직접/중첩 borrow 원소·위조 공급자를 거부하며 실패한 타입 interning을 되돌림. 근거: `evidence/candidate-sdk-authority-20261008.json`. SDK template의 구체화와 owned HIR/MIR/C 레이아웃 연결은 다음 단위.
 
+46번의 구체화 요청은 `sdk_vector_plan`이 원본 catalog·canonical graph와 함께 소유하며 모듈 시그니처에 연결했다. 별칭 공유·모듈별 원소 구분·중첩 Vec·파서 owner 종료 뒤 조회와 누락/추가/순서/원소/공급자 변조 거부를 dev/release native API에서 확인했다. 요청 상한은 64개다. 근거: `evidence/candidate-sdk-vector-plan-20261008.json`, `evidence/candidate-sdk-vector-plan-signatures-20261008.json`. 실행 가능한 SDK AST 구체화와 원소 레이아웃·HIR/MIR/C 연결은 남는다.
+
 44/45/61~64번의 imported scalar generic 함수는 provider 선언과 순서 있는 타입 인자로
 구체화하며 같은 공급자의 별칭 호출을 중복 제거한다. 같은 이름의 caller/provider 함수와
 provider-local helper 및 nominal 인자는 원래 선언 정체성을 보존한다. 일반 API 3개와

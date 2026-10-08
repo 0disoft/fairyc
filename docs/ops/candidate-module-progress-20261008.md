@@ -232,6 +232,19 @@ directories. The type graph does not yet instantiate SDK function/resource ASTs
 or publish executable Vec HIR/MIR/C layouts; those are subsequent work in 46/47.
 The existing ordinary module graph contract is included as the narrow regression.
 
+`sdk_vector_plan.fy` now owns the catalog, canonical type graph and ordered
+concrete Vec instance requests. Provider aliases share one request; differing
+module-owned elements and nested Vec edges retain their exact identity. Module
+signatures own this plan, with an empty request list for ordinary programs.
+Publication rejects missing, extra, reordered or forged requests and caps the
+list at 64. Duplicate canonical type nodes are rejected at graph publication.
+The plan records the six-field Windows AMD64 descriptor transport (48 bytes,
+alignment 8); element layout and executable template cloning remain subsequent
+work. Three native API tests pass in development and release, plus the existing
+module-signature contract test in development. Evidence:
+`evidence/candidate-sdk-vector-plan-20261008.json` and
+`evidence/candidate-sdk-vector-plan-signatures-20261008.json`.
+
 ## CStr storage and owner-based reconstruction
 
 The candidate carries `ref CStr` as a separate immutable descriptor with data

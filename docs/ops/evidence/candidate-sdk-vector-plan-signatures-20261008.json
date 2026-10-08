@@ -1,0 +1,828 @@
+{
+  "schema": "fairyc.candidate-sdk-native/v1",
+  "passed": true,
+  "compiler": {
+    "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\compiler-build-240s.exe",
+    "sha256": "746fe10b022ed88cfbc0ae8ea13e3f867b842f3317ef5a2a4caa36d064a248dd"
+  },
+  "executions": [
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\compiler-build-240s.exe",
+        "test",
+        "--native",
+        "--locked",
+        "--json",
+        "--exact",
+        "tests::module_signatures::owned_module_signatures_keep_nominal_and_contract_identity",
+        "--",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\internal\\sdkstdlib\\sources\\optional\\std\\vec.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "{\"schemaVersion\":\"fairyc.test-report/v1\",\"engine\":\"native\",\"target\":\"x86_64-windows-msvc\",\"profile\":\"development\",\"tests\":[{\"identity\":\"tests::module_signatures::owned_module_signatures_keep_nominal_and_contract_identity\",\"outcome\":\"passed\",\"trapCategory\":null}],\"count\":1,\"passed\":1,\"failed\":0,\"status\":\"ok\",\"lock\":\"verified\"}\n",
+      "stderr": ""
+    }
+  ],
+  "sources": [
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\array_identity.fy",
+      "sha256": "8b501b0f72bb2805c00abc59afb195b5ba2c199796982122b62958bab64966ee"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\array_types.fy",
+      "sha256": "661e57ec5f65ea1d0be93eef637ce5235fc6e3f84e4ddf5babd8a4afd89f6688"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\attributes.fy",
+      "sha256": "dafe2e1c020446224fa8784e701e522096a58776a1066920f934c0717667b5e6"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\binding_output.fy",
+      "sha256": "187b26aaeacda92630312c0ef2dc159d7d874e91dc052802cf1757e036790855"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\bodies.fy",
+      "sha256": "b1bc7304d778caee8659d3cbf77e0e38aa8b88a2489d631978d9d69abac2afbc"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\body_state.fy",
+      "sha256": "75c13fd685fc21f4710ac2fa2d89adc652b62a7c4ad943b275d73e887bf68ffa"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\borrow_shapes.fy",
+      "sha256": "9a38ab3c1697ca83ef5603d64fee77516088565ae4e271acb3f39bc4d06c79a2"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\budget.fy",
+      "sha256": "c2793aa302279b9d27f0af32edd71f70de4e93cb4f76f55facd3e757641cc494"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\c_abi_contract.fy",
+      "sha256": "97bb60bd4596599480901b2693ea7a147f9eb434003e9e4e9c7c89f6632e5852"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\c_abi_types.fy",
+      "sha256": "fdfb462bff12028ae1c8b805e21addd001bfdd152dd9cfd89cf7b9a1a8f7166a"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\c_arrays.fy",
+      "sha256": "e433681a2be034ece9cc871730f48c85c6a42411bada66c44c720bbcdcb94ba8"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\c_cli.fy",
+      "sha256": "3a9b5f1d71c4527cb6da16621ba44ab9e663dda291209cc373b36a51310a49f2"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\c_emit.fy",
+      "sha256": "5e93d56ad4a4780e36c1887fa422f9506fc3049c78ee91f57efb5447001af4ce"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\c_flow.fy",
+      "sha256": "e13817d9c26140f45b2a6ebf217dc9ad2f7c535431576e900535062b11ace313"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\c_guard.fy",
+      "sha256": "b021440f2f50ee11df4a2fa16036cea7191b83964a3e378b4d0e9aff7a8f75fd"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\c_guard_facts.fy",
+      "sha256": "4509588b0d4e3f850a6b7843452d461b8209719c5fa712145949c582b2d5a909"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\c_literals.fy",
+      "sha256": "1a3d868d5a4780465ef77202ed93e0fed3e81fdf9bc63e0f6c1e50d32d6bbc41"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\c_nominal.fy",
+      "sha256": "edb8282390633456fe6ccc4cd8102dee6e1be4b1cd69eace0ac0f9eff2072e7a"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\c_resource.fy",
+      "sha256": "d0e8475894669c7aa4f3438a06c3596c93197b85b6a5702b8e43c81a6548e68c"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\c_scalar.fy",
+      "sha256": "acb515a3f71cd91c69c7c70f2611bdf420baacca376021617a7ba15ee6d5e494"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\c_text.fy",
+      "sha256": "e5ea486263f617248cffc4a5243c403238ef863056cf381a9ad1d6287df4ee6f"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\c_views.fy",
+      "sha256": "0ac0418e4282d3ad331482be0904fcde25b375266877df29b44d1713ff713441"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\candidate_limits.fy",
+      "sha256": "b4bd06e427045f539bb5969baeae9b68171c697ba933fdcdfe88dbed288cf7b6"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\cleanup_syntax.fy",
+      "sha256": "1374cdcbfa6139a5e82e4e74606cc28ba46d9e81df62f7a0dd397f856fb0ad6f"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\declaration_output.fy",
+      "sha256": "2eb7859b28000386f9ca29510f3e3117e5907ec2e7f7fd5801a67bcf4051e5bd"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\diagnostics.fy",
+      "sha256": "ee95f81ed3b3224702196fceef2888434e9713341b81abf01e03945592c4de8b"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\effect_declarations.fy",
+      "sha256": "fd1670ba32fd1f94d7d8834b210b845afd797ff56d7c48819a872efa56d0c6ab"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\enum_types.fy",
+      "sha256": "d257e7cb599fd4f3bafc1f7d9ccf11d00d19f2719df063271186cf7c432f0a96"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\ffi_symbols.fy",
+      "sha256": "bf90ce5c6b76ad6d60fd499c5c168079520edbf5720ea757e705b99489b6cd29"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\file_cli.fy",
+      "sha256": "7db4dcab1c3d3a97acbf1ea4ccdd63c5371da36e694e0e89fd2ba1125804e5d6"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\file_syntax.fy",
+      "sha256": "0ae878df46a5d151449801481c9686b6ffa2099ce4f8d76c18e08d0405ed3ddc"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\foreign_declarations.fy",
+      "sha256": "3f332c5b4887a92cb14f3c4d4ea7a07abe1b29437f6dcf4c71ac254ef683fcaa"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\generic_expand.fy",
+      "sha256": "c37f04b2a17df259bd07d1abf86cbf84ec7b2fc171b421e509d41374b00e4116"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\hir_array_shapes.fy",
+      "sha256": "abbd6f86a748f3c1fd36f22c9ec6461c67f780f1f19a06165660941e4fc2b576"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\hir_borrow_paths.fy",
+      "sha256": "f1b7c03eee6f3fcb3b46e32e62b98edc2fc5324dcc89f8a6585d0a753ee1732a"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\hir_cli.fy",
+      "sha256": "b4961fab2735796a0aadd4a33374c66a1981b31369651841bd5e22700f3f8257"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\hir_lower.fy",
+      "sha256": "86ef2e7de859a0891215f7cc8ca313c35c421ff720d5df28b135637b32c91488"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\hir_model.fy",
+      "sha256": "0f814ca84425201c5c2c98b8f48009df0ef208d7ca73c28294fba870bc855fa6"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\hir_mutable_check.fy",
+      "sha256": "341ce62a863d1216615deb7cb5b93b2487ca59eff4674479383aa206a8bc7193"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\hir_origin_targets.fy",
+      "sha256": "f72fb54ce53116c8916d73684951b148284d6cd8aadd6ae1f07557d6dbdedf3c"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\hir_output.fy",
+      "sha256": "c507171c30c2fcb89d33e980665977b02d8bb94a6ee97df8b89a18d1fb6316bc"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\hir_shape_lower.fy",
+      "sha256": "72e4692af374095f0c46a60d940f87829366724875375b006170dec12536a04c"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\hir_shapes.fy",
+      "sha256": "a315406440bb1fbdb4635c9fee4e3d91c9da67cf3af902d98aa6c036e6dfd23d"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\hir_state.fy",
+      "sha256": "b11f899b8521b42d0a2f0e18675003137f28817dac0bf72fe0a49d92da7346df"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\hir_view_check.fy",
+      "sha256": "fa2dcc3c95ae1e035f97d798b415f15e3cf6696e0deda1309b5bdf2974dade91"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\integrity.fy",
+      "sha256": "be52239cc18af1ccc4894bf9099caff177448d843287eaffbe395dceab7fed83"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\literal_types.fy",
+      "sha256": "d6b224753a2a5a8ce1aab04d62429cdac832ba0358bfa8e2dcae091d8d8e258a"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\main.fy",
+      "sha256": "756a923bad8723216f4d9a8281aadad9eb4b90defba4a0f7f4a95d0731d980c0"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\mir_arrays.fy",
+      "sha256": "f57287d7cc073f8d2f5f9979a886620d90ded73c955b7f78bbdfbbe1c7bed30d"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\mir_cleanup.fy",
+      "sha256": "9c57f38e4ecb5ae058db4df65d6925533a653cd0dd2c78d7c45fa7723c3b3ed7"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\mir_cli.fy",
+      "sha256": "ccf158d7dac3d1413f867929a197d4a9da1148f31f7130e7944fec23eab23a06"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\mir_lower.fy",
+      "sha256": "0bb2e36e8f5421ccbd421b83b5c23fe6b1e20676f8a3275279ccd107596bf671"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\mir_math.fy",
+      "sha256": "0a0d922d39730c56841d4b5b3e256e022aaa6ebc792f48592cb296c090112086"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\mir_model.fy",
+      "sha256": "a5b36058bd2d174f9d79fdc5bf44b834acad734bbbc1bea480ffc51470c246ee"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\mir_nominal.fy",
+      "sha256": "0667cb62b0977e1bb6c1e97de26410eb9308296d905a9ce5d190cf3b8685aeab"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\mir_output.fy",
+      "sha256": "d12f1770be33cd25a9945eed89d2461912885db91b3ce5246f4a5361dfcb5e09"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\mir_places.fy",
+      "sha256": "7092dda7d9249ec69b872276286ac2c47e815e3d52e3ed4aae1588fd62e10e26"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\mir_propagation.fy",
+      "sha256": "3a891887a8892287ddc853fe7f5c30f352957d9e16cc496a5de203e03cb20e08"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\mir_reference.fy",
+      "sha256": "5d77f3e57797b5e65aa84d6d8a9a14c0736ff76f3b345e7c25e21790d3e164ea"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\mir_resource_lower.fy",
+      "sha256": "0d7026a2b08f1a4fba8989637e91c9c9aaaef6df74d954a9c642b3f61ce32448"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\mir_state.fy",
+      "sha256": "430e1c69ec68ea917309a394554b313b95826e82b546164564f53b0e50cc3e9a"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\mir_targets.fy",
+      "sha256": "07a5a72d23acea4a786768ef47322e7c3b00cdf1ac39674dc1a2dcc8ed829ebf"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\mir_verify.fy",
+      "sha256": "13726599bb623987eab8c6e90356ff649108ab004eb066d2dd2812e99ccae278"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\mir_verify_arrays.fy",
+      "sha256": "7efe23771653cf8c39c4bb9c800d6468ee418e6d845e9cb9f76cb6ce583ddbce"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\mir_verify_enums.fy",
+      "sha256": "bd73426a8482591274ca631ff1c0c1c28a8e5ad74a87d3f2c604a82889bebf95"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\mir_verify_flow.fy",
+      "sha256": "aa0e87f6b689d1466be0f4f894fe5e07b3e41aaf95c149d931b7277b16220b4f"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\mir_verify_literals.fy",
+      "sha256": "8ee290b3e71d523745d915df088676638c290cc9df7226794f8ffa9ca6b110de"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\mir_verify_nominal.fy",
+      "sha256": "938f60b94690c9e223d28b20c98ae12471ce89413194fbefd484524aa9ad7ad6"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\mir_verify_resources.fy",
+      "sha256": "c389bdd0a4517246f0ec9d886cd25ea0e59519475cd97a8121e55c38d70cdf05"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\mir_verify_shape.fy",
+      "sha256": "2e6a8e01cb2d262249db7f646111e2974211ee8e13951ac0711005ab25922db7"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\mir_verify_views.fy",
+      "sha256": "227f6f6c46f381a8d20a78168d6dc89baf45871b7d672e0b85b0349ee8197a0a"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\module_ast_join.fy",
+      "sha256": "5cdb1b9efd70eb9a0113bcd52bc68717ca3d67467b14ab86c2450ae4318a1dc2"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\module_bind.fy",
+      "sha256": "91e7b06b9f4be83ffdfa180532fec9d6008c89d37faf22c568c56d7921a5a568"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\module_catalog.fy",
+      "sha256": "742d799263d68a565ba4c9e779e0a054604917c6ebffac04b79cc93e853d4b09"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\module_check.fy",
+      "sha256": "5fa27606c3ab359a048053b4cf7348cf9327324f2dc864719523015634cc410a"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\module_cli.fy",
+      "sha256": "bbec4f98a1be6aa9b0ebc7be6df642753dfe13a3ac70f187b61eb15b0d410b20"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\module_program.fy",
+      "sha256": "67a81067f70e392606c9ccd7cd3fa1d6b0c1b3bc45b483df843c46a20dd276f1"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\module_registry.fy",
+      "sha256": "f8e92470432ab130868b957f3c8e84df1d81ff5184740b5a21f06ae1fbb9cf52"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\module_signatures.fy",
+      "sha256": "482a37fb05e3e165ca82468238985f75f110ca582b973ce6b2df5b9c161f7fba"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\module_types.fy",
+      "sha256": "f195e20e5a8bc68e73169849574c2f9b671b8f0c263568a351591f6ca186be01"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\must_use_flow.fy",
+      "sha256": "a02d930305cf42e5bb273992889a4682579f5f7711fd052749f4bf2c8527e57b"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\name_cli.fy",
+      "sha256": "4a9b342e7b01b34c199305395eccf19b41e7060a479a4e00ff23ec135b5d56df"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\name_resolution.fy",
+      "sha256": "8bebb9a936459dbf8b1c893f6180abe3c48fc371d896051b133201959df891c4"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\nominal_identity.fy",
+      "sha256": "634cba7ac0667481c0863953640668841216554d852e0e1b1b245c8bc1606958"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\nominal_types.fy",
+      "sha256": "67f08ae69f35b1bcdf1d53eb080b5a5fa043a244ab0c48de2a1af26d38a63072"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\numbers.fy",
+      "sha256": "ee8b40b5e8061317d70d3594c386c9e4c70d95132a7e4243ea6402947a4c3556"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\pages.fy",
+      "sha256": "4f4306b894510a83af7e892bb2c8d116a2107c1abf1f0820a5cd637e3eb32c87"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\parse_tokens.fy",
+      "sha256": "91984eb1086ff7faafa4a6c64a232fc2ddce365b8cd7c2ef23b143bb91d4c9a6"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\pointer_identity.fy",
+      "sha256": "393def50da86f039e1dcd9bf6d4bee3fb79e7f9ae834c216b89b50e42e39e626"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\pointer_types.fy",
+      "sha256": "8861c5447e344ba37617f62ad2d4634f3f577a1e1535c37278ab28d5cdee1775"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\raw_view_intrinsics.fy",
+      "sha256": "d01c264221b717c7344f8119a9e645794037b0ce7b589e4eac31228c2b4af0d5"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\records.fy",
+      "sha256": "e2d1d3540285509aded981b476d4b2340857d8c7370364f4b1410bfd6883f6dd"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\reference_types.fy",
+      "sha256": "4a8bf7a0e139e6cb47c5c2e0b6deb1593761b8455862759ad43cb63820373161"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\repr_c_declarations.fy",
+      "sha256": "9d161a374b4760acf3716e292831b8c1c2c5ae49fe80e1ae240ac5c7f26de9a5"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\resource_abilities.fy",
+      "sha256": "dc7130999289147aae266ff75ff88d1fb140673b1ce8330ff7a1720180eae318"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\resource_effects.fy",
+      "sha256": "eab0aa0401a11df79852fa215bd67eac0e59cb08bc79af14f4998976e00ce0bc"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\resource_flow.fy",
+      "sha256": "80aa7407ea3905d7f7655b3ee6de0d72d562e4b2e11c0379c7cf2261c50681cb"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\resource_identity.fy",
+      "sha256": "7d85c65df4d6cc02f004f854d5108ec3cc7ba8ddb4885ea54c634f88f93594aa"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\resource_properties.fy",
+      "sha256": "fe0372ce1c546422e8b09d5ae9c9aa16f1bc11682fdded971e0820e96d30bac2"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\resource_use.fy",
+      "sha256": "91a8fb9d3ea164360e8acbddc2f70d55e5a53ff50923a4a264f784cbef9c7a41"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\result_flow.fy",
+      "sha256": "544e73b45d2420926f2cf8498afc20300ce4ecfa0a6d4f34fb5bde5318332c32"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\result_flow_graph.fy",
+      "sha256": "ad7030a04316edd0b348b1fc87d29e41b7b8d75c6197987b6a1f82bfcad1732c"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\scalar_casts.fy",
+      "sha256": "4976894d09b88b1df8253b04d654626b99efeb64298acf8dfa0ca1b8947d235e"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\scanner.fy",
+      "sha256": "5909ac2ea0510260da7160627212fbf4d77f815c9ebce302d127752614874b5e"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\sdk_authority.fy",
+      "sha256": "ae0f2e21819a625a6bb5fe331173dd3366599486f3c203a523693680a0c4ee6c"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\sdk_scopes.fy",
+      "sha256": "524ecfceee6b188c9d730dbacd7fe850ab1951ba0be71ff9ab898e41b22de2d6"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\sdk_vector_plan.fy",
+      "sha256": "8e0bdc63147f42ed348c01906d8f3fd68b2d5a354f0211a99deb16e56bd2a34a"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\sha256.fy",
+      "sha256": "4558eb7b75c94a5cda08022f397ae4ae1a9afafdede24ae89ac03f6a6ad09793"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\strings.fy",
+      "sha256": "8f26db7c4d4039c8c8d9fbc6078097859c8f714ca5887957fdf0e69269dca521"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\syntax.fy",
+      "sha256": "8c2cca69e551770c9efde3a62528b107ec0678018dea855964a6f1aa7d9865c7"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\tagged_check.fy",
+      "sha256": "1692313a6569515619d3835a9e03946a41d328d99f6d593d1011b46164498186"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\tagged_encoding.fy",
+      "sha256": "74ed5cfc5293d96336d092dfcf8495e766ad21e549053c13a512c5e5c7b935c8"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\tagged_types.fy",
+      "sha256": "431f283e07d9dbea60c698d1f70f7e7009e1552314cf660688b10b09daad8338"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\token_output.fy",
+      "sha256": "1e08aded3f7efec90bb915b97011cdb46b63da5231a33231ea755552b648d11b"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\type_check.fy",
+      "sha256": "394aa688d8ecd71dd2dd4815ed55000cd32a107e2033a4d44af1be3e8d08889b"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\type_cli.fy",
+      "sha256": "4220f2241df3f2ad6a1ed16fadcec8ba06a7f7f61879d2ccc9961950bd65a5ca"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\type_control.fy",
+      "sha256": "2ebd9714228e5711657d496591b579fb9c13799ffa8729b1c40af7a244aac626"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\type_state.fy",
+      "sha256": "7dbbf7d50be1e9513dc8aafd99b11afda5d8e2d7ce87d96b6436c4752c2123a0"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\types.fy",
+      "sha256": "53a77948af92724f00de0609837fd1507899df8e2b59b6d2778ef1f3c344395a"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\unsafe_scopes.fy",
+      "sha256": "e655a51e391a5870fec2cc8ba1b2701da48914c6b229e4ba2225407d515a48eb"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\utf8.fy",
+      "sha256": "4a5425cea9efbfb1bff2c31a38c2bd8e392c6792af09f24e906c9a743621870d"
+    }
+  ],
+  "tests": [
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\tests\\bindings.fy",
+      "sha256": "0954f82fa11f16a26cf8ca247c5b042454726f26ac8655cdae1fcdbf5d7acfc4"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\tests\\c_emit.fy",
+      "sha256": "ef63307e14cee5c982224a6bdbbcab735e772a6eb2b5b76cd7030a6af146389f"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\tests\\effects.fy",
+      "sha256": "293438a0153eba5ef7d0dfb36bc6a0faa2a90f1603747dd14f817d8772ebf5db"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\tests\\effects_cleanup.fy",
+      "sha256": "c5f1062f055b4b1f6d26d0355476713480327e04ceeee0f031808e4187e07961"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\tests\\enum_tags.fy",
+      "sha256": "bc88537ec7c21b0dc4810b08fb8e1204ceb094c05121fbc2afc19ccf25c9a032"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\tests\\foreign_calls.fy",
+      "sha256": "a000cccfab4a015654cc75f880e75781da49b35dbf107ac180ac8a85cc579ae7"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\tests\\generic_expand.fy",
+      "sha256": "f294a05fddad9a34f309435a3dad2d66b0c34fb1759efb9a7692a539cdbe97f4"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\tests\\hir.fy",
+      "sha256": "918963770fe49de15dffd34cdbb66fe979a56b94e4e6e5807f19a2b641aa1fb9"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\tests\\hir_aggregate_arrays.fy",
+      "sha256": "7819dc6337f2e069d5294030c577cea2d1840f18a07f6edf8f545a3973c16ec9"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\tests\\hir_arrays.fy",
+      "sha256": "ec155c02a1a81dad21e6ccf7d50c218627ca2f7588bc2e852f3be911f169091b"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\tests\\hir_cleanup.fy",
+      "sha256": "cb43ff009efc077493136ccaff7146f536c6f772619464eefddfd4a19a6f7ca0"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\tests\\hir_enum_payloads.fy",
+      "sha256": "26d86ebdcb5b9ac35607fe1b6564d84204f89678926ba7161ec252ade680c292"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\tests\\hir_enums.fy",
+      "sha256": "0ea6c5cff7bc624faac878b61e74de3dbf46937b26ffc94534f6f534c3aa5181"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\tests\\hir_literals.fy",
+      "sha256": "4ef84c5a6512812d37621a4ca9bd8af7a94c37f2497a71a122233ed19154eced"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\tests\\hir_mutable.fy",
+      "sha256": "84b83023644d9d97b83aad2dd3c8f4cd16582e3117257510171f62bf9438f164"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\tests\\hir_nominal.fy",
+      "sha256": "b589462def6663484de9f5b636b3d5d3df501bea2aecbb28e50f9ff4977f0b9c"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\tests\\hir_options.fy",
+      "sha256": "e40a1c26aacb172198e54a9e2752bb03f1898aa5190ddd66ff8dc91d407c4a57"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\tests\\hir_results.fy",
+      "sha256": "240de3f2d0a0eb2b93d9207e3f78728063cd62c4dc20e0080db949f4903e1e49"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\tests\\hir_views.fy",
+      "sha256": "bb86807941543d9258ae4c3c610cbbd285f3d6c1dd2fae60b129e4371faae121"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\tests\\large_arrays.fy",
+      "sha256": "88df4df4be7b302d7fb50b163df81b98cd1ae65d761f411846423180d759b415"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\tests\\mir.fy",
+      "sha256": "96caee687b1fc05222e7c783e39b0260722f3bc7a11f6cbed59a5b682af7d308"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\tests\\mir_aggregate_arrays.fy",
+      "sha256": "4177f2438b54c2b6533b6b0e9510a8b15771940e99dd15ef465907950be0e42c"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\tests\\mir_arrays.fy",
+      "sha256": "4eab2f8301b2091a4a5e14bcc770776282a9fd4a6c1f2e431ed2517416785905"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\tests\\mir_enum_payloads.fy",
+      "sha256": "08a37c6daba49186595682b955836560a8b3d9f2f1e1bce33a8b464228e170f8"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\tests\\mir_enums.fy",
+      "sha256": "8a6d8e0362cd92c469014dcf3895b7c7b7957e7ca7ee64b392abad278812a5f7"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\tests\\mir_literals.fy",
+      "sha256": "f3416b8a42f81b7cd850486e6369fce15b3cfa6758defeb7d184979de6a16d92"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\tests\\mir_mutable.fy",
+      "sha256": "8d9df0f8c644a59af953300e36b5020046567b9883ec2c733eaa2d43b9a8c963"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\tests\\mir_nominal.fy",
+      "sha256": "81eaf2bf06a1ea2e37405b22d938a23e0b23a4338f62cbb7af16b7b41e631704"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\tests\\mir_option_flow.fy",
+      "sha256": "41563f1fcaf2dbbb4aae0c224a339a6cba45d43bb1691f7958391ee02c34022e"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\tests\\mir_options.fy",
+      "sha256": "8bc7b925714e2c466b1264db32f8c1755cdbbba6319bddd61f7c294ede4514aa"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\tests\\mir_propagation.fy",
+      "sha256": "ffba5c3c4232503128e86cc28982d6f3747c824f8c184b2d94dfa913d1809ddd"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\tests\\mir_resource_exit.fy",
+      "sha256": "7fe1776db483827a73aa297592123a98d7bb9958a059823198873ff1370225c3"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\tests\\mir_resource_verify.fy",
+      "sha256": "4f73e01d9a81c6f81b778f150ff0976e0f3724ab8547b690f0862fa52899686d"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\tests\\mir_results.fy",
+      "sha256": "3c2292cbefae2fac18a509b60d3e4b9bf0082460bed8d6551f6a9de4075d4a53"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\tests\\mir_verify.fy",
+      "sha256": "3e871aedec731679e378d3e418c4db153824cacae6439320f1988ef01cc4c526"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\tests\\mir_views.fy",
+      "sha256": "0efe30bb937cce864f41ba0a7003341ac88c5cafc77a36191182a1431365b04b"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\tests\\module_ast_join.fy",
+      "sha256": "40437640de839025f4100dc5142cfdc0e0d5ad4a8cfacd07b6af6d6fde47e569"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\tests\\module_contracts.fy",
+      "sha256": "f1cc30c6ef8a173592670ca6fae3e93e3482739846f2ee2c39286f6b40cce7fa"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\tests\\module_generics.fy",
+      "sha256": "7ce845121dde6168b5b01e22afc018f0545e64a94987077cc1790080cbe05b51"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\tests\\module_program.fy",
+      "sha256": "2e9d97c662f73fb476d74c87d209dc31e5ce62108ef92c1817938e8b75776fb7"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\tests\\module_signatures.fy",
+      "sha256": "4d10a830cb252cd5d1234fd5a09db750b73e77aee4e33cd80c42a3eed4009a9c"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\tests\\module_type_graph.fy",
+      "sha256": "f3749bd815385098c63f20b60bc19c48c801f4eef9ad2768e801b0ecb030c758"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\tests\\modules.fy",
+      "sha256": "bc3757efd892a77e55292e180c9b20e76a08ec00d0d106992e210064b46332ec"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\tests\\must_use.fy",
+      "sha256": "789bd52204e7213509c0b09a29325659a5385ef6589270f6611ddd6d5365cb84"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\tests\\name_control.fy",
+      "sha256": "fbd238d2ea93ffc524f7641ba3b2836164d941cdc9bad5fdbc3445167b0c0080"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\tests\\nested_tagged.fy",
+      "sha256": "43dd56ab6c81c16264240cc85c3a52ac6c7f0c230bbc84454e13f2c1c2570dfd"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\tests\\nominal_types.fy",
+      "sha256": "63354749890edb040d5a53453fa550a4af1dc125e9236554316373c4af38c53a"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\tests\\reference_places.fy",
+      "sha256": "dbadd2afb140a6563e3fc5ec1c87ad33c1884a12bbf3f6751afa3c4d62951c75"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\tests\\references.fy",
+      "sha256": "739c2363c32829b8f5ce40639c8e06169ada117c2d6f72d02bd78f440b64c0eb"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\tests\\repr_c_declarations.fy",
+      "sha256": "875337e963015cc237eab5fd64b4b989269cc7e435934129c9395423508c2f79"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\tests\\repr_c_shapes.fy",
+      "sha256": "bd312da576a7273ef506ca1283e0a0e1e95c44c9886e0441dc82120a92aca1cf"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\tests\\resource_abilities.fy",
+      "sha256": "852726f0fe76b5b67af669915db2f3a0c1b2285b89f85080af9f8308cb9ffae2"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\tests\\resource_branches.fy",
+      "sha256": "58127a155cc4bf99baef29d80cf46a274e32ffde5cfb6700d9a8ca0dcd601aae"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\tests\\resource_cleanup.fy",
+      "sha256": "f9e3239c4a697b130431197d74ddd164ddc4d3310eaa27ecd25f97113bd8c829"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\tests\\resource_dead.fy",
+      "sha256": "572c01fa787f7d9370f0da43188d4103d3cc49066cf5d0b9edc2f4f479005dd1"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\tests\\resource_factories.fy",
+      "sha256": "844d95a612b891dae3ebdbfbc1491308ad62d9dbb57fada330e8c0a3c3dabf52"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\tests\\resource_loops.fy",
+      "sha256": "740f8ffd1f3da12ecb96a02737947e6e26c99dbd09f1c2230f8b8f5cb8f95c2f"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\tests\\resource_moves.fy",
+      "sha256": "8908a4337e6c88cb049c2bdf6cde0cba9ebb05e413ef119f0976345f405b8dd7"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\tests\\resource_traps.fy",
+      "sha256": "d17d12ac797af2441c3fa223efb19b3d89c1fe14b6ff9508fbcf6fc91ed8e34b"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\tests\\resource_types.fy",
+      "sha256": "857f2ff3b8454c4d72ae31b64fbba045d2dbbde95e4cbae8a3ad47b87498dfff"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\tests\\result_handling.fy",
+      "sha256": "5fb90957a9f1c3f002992b19d0c517d40b12aab8afa501d391601fb6716083fa"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\tests\\result_patterns.fy",
+      "sha256": "c844fa350764e4713b814620def086c1ecf0044db64a85df294c19c9f986ace9"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\tests\\result_propagation_types.fy",
+      "sha256": "3525c0a6af862ab8d94c64031976506d570fd82af441449ae13adba94889b490"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\tests\\result_types.fy",
+      "sha256": "36d6fc386dc7256fadb36f17d980a11b4bf991fef29e1c9dbcb2f9e20045831b"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\tests\\scalar_casts.fy",
+      "sha256": "a4179c6dd7e51e0ae736694ea98aef0d51bc29d9cd0aaf5673469f043620edfe"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\tests\\sdk_authority.fy",
+      "sha256": "a3ffb73d080ed22500ae783d50fa426d86e1a01ff1688e782eb59dd7b8f1bbf8"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\tests\\sdk_foreign.fy",
+      "sha256": "a482fb467b5f319e313c1ac3a953ef7b9562e9e3da268f266ebacf5b363a6d68"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\tests\\sdk_vector_plan.fy",
+      "sha256": "92848ea5c5db43e475446251b31db1a42279f4bb4a0d6d7879c45376b1f88816"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\tests\\source_limits.fy",
+      "sha256": "cb71a2f809e6366ee23ab7f0c44c8d85c0012585959cf725b8ab925cc1750bb0"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\tests\\struct_payloads.fy",
+      "sha256": "017910c29f30003eee339453f3fa2ef4861f85d73d3bf24be7b230fe528f2a6b"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\tests\\tagged_arrays_hir.fy",
+      "sha256": "382c772f4de62f93e6b95098bd3a44aac5b96671a88a85be4536954109b4d5a6"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\tests\\tagged_arrays_native.fy",
+      "sha256": "3a77be4b19d926454baf7213a8d0c03b1ec6de6d29b85d0b4851bf584da2266a"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\tests\\tagged_fields.fy",
+      "sha256": "a4cf8cc263eacbad5944a128827caee79dd8a627973e35b73a452a001f4ad3b8"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\tests\\type_control.fy",
+      "sha256": "77762922c052df7fca588dac91d34e555f7290ba875e6c23a7004e0d771bc561"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\tests\\types.fy",
+      "sha256": "02788bc978da9f485a0254bef2ea4ffb5185edbddcea9abb1b634920c169c2be"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\tests\\unsafe_scopes.fy",
+      "sha256": "75d8fd733fc9424590d4a5b28b2720b45e9ba14cece28ab463e80034f3b3d2fa"
+    }
+  ],
+  "lock": {
+    "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\fairy.lock",
+    "sha256": "71202d5aea52a862d9a9aeffc7e1ecab313fef64af57fc81b44da778f6919550"
+  },
+  "observer": {
+    "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\verify_sdk.py",
+    "sha256": "5b4e6532a64b3803667d0ffb1e048b8679caf590e4e7afd0f1f26ea9ab64dee2"
+  },
+  "linuxValidated": false
+}

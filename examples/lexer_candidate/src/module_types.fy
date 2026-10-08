@@ -17,8 +17,10 @@ pub struct Type {u32 kind;u32 scalar;usize module_index;usize declaration;usize 
 pub struct Problem {u32 code;usize module_index;usize start;usize end;}
 pub struct Resolution {usize type;Problem problem;}
 pub resource Graph {v::Vec<Type> types;cleanup{}}
+fn bool same(Type a,Type b){return a.kind==b.kind && a.scalar==b.scalar && a.module_index==b.module_index && a.declaration==b.declaration && a.first==b.first && a.second==b.second;}
 pub fn u32 validate(ref catalog::Catalog c,ref v::Vec<Type> types){
     if(v::len<Type>(types)>4096){return 10;}var usize i=0;while(i<v::len<Type>(types)){let t=*v::at<Type>(types,i);
+        var usize previous=0;while(previous<i){if(same(*v::at<Type>(types,previous),t)){return 9;}previous+=1;}
         if(t.kind==13){if(t.scalar!=0 || t.first==0 || t.first>i || t.second!=0 || !catalog::sdk_vector(c,t.module_index,t.declaration) || !element(types,t.first,0)){return 9;}}
         else if(t.kind==2 || t.kind==3 || t.kind==4){let usize item=catalog::identity(c,t.module_index,t.declaration);if(item==0 || t.scalar!=0 || t.first!=0 || t.second!=0){return 9;}let d=catalog::declaration_at(c,item);if(d.kind!=if(t.kind==2){4}else if(t.kind==3){6}else{11} || t.kind==3 && catalog::sdk_vector(c,t.module_index,t.declaration)){return 9;}}
         else{if(t.module_index!=0 || t.declaration!=0){return 9;}
@@ -32,6 +34,7 @@ pub fn u32 validate(ref catalog::Catalog c,ref v::Vec<Type> types){
 }
 pub fn Result<Graph,u32> assemble(ref catalog::Catalog c,v::Vec<Type> types){let u32 code=validate(c,ref types);if(code!=0){return .err(code);}return .ok(Graph{.types});}
 pub fn usize graph_count(ref Graph graph){return v::len<Type>(ref graph.types);}
+pub fn u32 validate_graph(ref catalog::Catalog c,ref Graph graph){return validate(c,ref graph.types);}
 pub fn Type graph_at(ref Graph graph,usize id){assert(id>0 && id<=graph_count(graph));return *v::at<Type>(ref graph.types,id-1);}
 pub fn usize count(ref v::Vec<Type> graph){return v::len<Type>(graph);}
 pub fn Type at(ref v::Vec<Type> graph,usize id){assert(id>0 && id<=count(graph));return *v::at<Type>(graph,id-1);}
@@ -44,7 +47,7 @@ fn bool element(ref v::Vec<Type> graph,usize id,usize depth){
     return t.kind==1 && t.scalar>=1 && t.scalar<=6 || t.kind>=2 && t.kind<=4 || t.kind==12;
 }
 fn usize intern(ref mut v::Vec<Type> graph,Type value){
-    var usize i=1;while(i<=count(graph)){let old=at(graph,i);if(old.kind==value.kind && old.scalar==value.scalar && old.module_index==value.module_index && old.declaration==value.declaration && old.first==value.first && old.second==value.second){return i;}i+=1;}
+    var usize i=1;while(i<=count(graph)){if(same(at(graph,i),value)){return i;}i+=1;}
     if(count(graph)>=4096 || !v::push<Type>(graph,value).is_ok){return 0;}return count(graph);
 }
 fn Resolution accepted(ref mut v::Vec<Type> graph,Type value,usize module_index,usize start,usize end){let usize type=intern(graph,value);return if(type==0){fail(if(count(graph)>=4096){10}else{11},module_index,start,end)}else{Resolution{.type,.problem=Problem{.code=0,.module_index,.start=0,.end=0}}};}

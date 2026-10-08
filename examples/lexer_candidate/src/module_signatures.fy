@@ -1,6 +1,7 @@
 module module_signatures;
 import module_catalog as catalog;
 import module_types as types;
+import sdk_vector_plan as vectors;
 import syntax as syntax;
 import effect_declarations as effects;
 import foreign_declarations as foreign;
@@ -12,17 +13,19 @@ import std::vec as v;
 // type IDs used by the older module checker. That checker remains closed until
 // body typing and nominal layout ownership can consume this exact graph.
 pub struct Signature {usize module_index;usize declaration;bool public;usize result;usize parameter_start;usize parameter_count;u32 effects;bool must_use;bool unsafe_call;bool foreign;usize link_start;usize link_end;}
-pub resource Program {catalog::Catalog declarations;types::Graph graph;v::Vec<Signature> signatures;v::Vec<usize> parameters;bytes::Buffer links;cleanup{}}
-pub fn usize module_count(ref Program p){return catalog::module_count(ref p.declarations);}
-pub fn bool source_matches(ref Program p,usize module_index,ref syntax::Parsed source){return catalog::source_matches(ref p.declarations,module_index,source);}
-pub fn catalog::Lookup declaration_lookup(ref Program p,usize module_index,ref u8[] spelling){return catalog::lookup(ref p.declarations,module_index,spelling);}
-pub fn catalog::Declaration declaration_at(ref Program p,usize id){return catalog::declaration_at(ref p.declarations,id);}
+pub resource Program {vectors::Plan types;v::Vec<Signature> signatures;v::Vec<usize> parameters;bytes::Buffer links;cleanup{}}
+pub fn usize module_count(ref Program p){return vectors::module_count(ref p.types);}
+pub fn bool source_matches(ref Program p,usize module_index,ref syntax::Parsed source){return vectors::source_matches(ref p.types,module_index,source);}
+pub fn catalog::Lookup declaration_lookup(ref Program p,usize module_index,ref u8[] spelling){return vectors::declaration_lookup(ref p.types,module_index,spelling);}
+pub fn catalog::Declaration declaration_at(ref Program p,usize id){return vectors::declaration_at(ref p.types,id);}
+pub fn usize vector_count(ref Program p){return vectors::count(ref p.types);}
+pub fn vectors::Instance vector_at(ref Program p,usize index){return vectors::at(ref p.types,index);}
 pub fn usize count(ref Program p){return v::len<Signature>(ref p.signatures);}
 pub fn Signature at(ref Program p,usize id){assert(id>0 && id<=count(p));return *v::at<Signature>(ref p.signatures,id-1);}
 pub fn usize parameter_at(ref Program p,usize index){return *v::at<usize>(ref p.parameters,index);}
-pub fn types::Type type_at(ref Program p,usize id){return types::graph_at(ref p.graph,id);}
+pub fn types::Type type_at(ref Program p,usize id){return vectors::type_at(ref p.types,id);}
 pub fn ref u8[] linker_name(ref Program p,usize id){let s=at(p,id);return bytes::view(ref p.links)[s.link_start..s.link_end];}
-pub fn catalog::Lookup lookup(ref Program p,usize module_index,ref u8[] spelling){let found=catalog::lookup(ref p.declarations,module_index,spelling);if(found.code!=0){return found;}let d=catalog::declaration_at(ref p.declarations,found.item);var usize i=1;while(i<=count(p)){let s=at(p,i);if(s.module_index==d.module_index && s.declaration==d.declaration){return catalog::Lookup{.code=0,.item=i};}i+=1;}return catalog::Lookup{.code=9,.item=0};}
+pub fn catalog::Lookup lookup(ref Program p,usize module_index,ref u8[] spelling){let found=declaration_lookup(p,module_index,spelling);if(found.code!=0){return found;}let d=declaration_at(p,found.item);var usize i=1;while(i<=count(p)){let s=at(p,i);if(s.module_index==d.module_index && s.declaration==d.declaration){return catalog::Lookup{.code=0,.item=i};}i+=1;}return catalog::Lookup{.code=9,.item=0};}
 fn catalog::Problem fail(u32 code,usize module_index,usize start,usize end){return catalog::Problem{.code,.module_index,.start,.end};}
 pub fn Result<Program,catalog::Problem> build(ref v::Vec<syntax::Parsed> sources){
     let c=switch(catalog::build(sources)){case .ok(c):{c}case .err(p):{return .err(p);}};
@@ -47,5 +50,6 @@ pub fn Result<Program,catalog::Problem> build(ref v::Vec<syntax::Parsed> sources
         }index+=1;}module_index+=1;
     }
     let owned=switch(types::assemble(ref c,graph)){case .ok(g):{g}case .err(code):{return .err(fail(code,0,0,0));}};
-    return .ok(Program{.declarations=c,.graph=owned,.signatures,.parameters,.links});
+    let planned=switch(vectors::build(c,owned)){case .ok(p):{p}case .err(code):{return .err(fail(code,0,0,0));}};
+    return .ok(Program{.types=planned,.signatures,.parameters,.links});
 }
