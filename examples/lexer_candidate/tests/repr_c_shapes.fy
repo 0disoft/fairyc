@@ -50,6 +50,14 @@ fn shapes::Table forged(u32 field_type,usize marker_end){
     assert(v::push<shapes::Abi>(ref mut abi,shapes::Abi{.type=257,.declaration=2,.name_start=16,.name_end=17,.marker_start=0,.marker_end}).is_ok);
     return shapes::assemble_abi(records,fields,abi);
 }
+@test fn void struct_pointer_ffi_requires_owned_pointee_abi(){
+    let parameter=switch(lower::lower(owned(b"module main;@repr(C)struct Packet{i32 value;}unsafe extern C fn i32 fixture_read_packet(ptr Packet x);fn i32 main(){let Packet x=Packet{.value=7};return unsafe{fixture_read_packet(ref x as ptr Packet)};}"))){case .ok(p):{p}case .err(_):{assert(false);return;}};
+    assert(verify::check(ref parameter).code==0);let bad_parameter=without_abi(ref parameter);assert(verify::check(ref bad_parameter).code==5102);
+    var bytes::Buffer out=bytes::empty();assert(bytes::append(ref mut out,b"prefix").is_ok);assert(c::render(ref bad_parameter,ref mut out)!=0 && bytes::equal(bytes::view(ref out),b"prefix"));
+    let result=switch(lower::lower(owned(b"module main;@repr(C)struct Packet{i32 value;}unsafe extern C fn ptr Packet fixture_packet();fn i32 main(){let ptr Packet x=unsafe{fixture_packet()};return 7;}"))){case .ok(p):{p}case .err(_):{assert(false);return;}};
+    assert(verify::check(ref result).code==0);let bad_result=without_abi(ref result);assert(verify::check(ref bad_result).code==5106);
+    assert(c::render(ref bad_result,ref mut out)!=0 && bytes::equal(bytes::view(ref out),b"prefix"));
+}
 @test fn void owned_repr_c_layout_survives_hir_and_mir(){
     let p=owned(b"module main;@repr /*marker*/ (C) struct Packet{u32 code;u32 amount;}fn Packet make(){return Packet{.code=1,.amount=7};}fn i32 main(){return 7;}");
     assert(shapes::abi_count(h::nominal(ref p))==1 && shapes::abi_valid(h::nominal(ref p),h::source_view(ref p)));

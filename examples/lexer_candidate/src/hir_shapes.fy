@@ -45,7 +45,8 @@ pub fn usize abi_count(ref Table p){return v::len<Abi>(ref p.abi);}
 pub fn Abi abi_at(ref Table p,usize index){return *v::at<Abi>(ref p.abi,index);}
 pub fn usize abi_find(ref Table p,u32 type){var usize i=0;while(i<abi_count(p)){if(abi_at(p,i).type==type){return i+1;}i+=1;}return 0;}
 pub fn bool abi_field(u32 type){return type>=1 && type<=6 || c_types::valid(type) || pointers::valid(type);}
-pub fn bool foreign_result(ref Table p,u32 type){return ffi::scalar(type,true) || abi_find(p,type)!=0;}
+pub fn bool foreign_scalar(ref Table p,u32 type,bool result){return ffi::scalar(type,result) && (!pointers::valid(type) || !nominal::valid(pointers::inner(type)) || abi_find(p,pointers::inner(type))!=0);}
+pub fn bool foreign_result(ref Table p,u32 type){return foreign_scalar(p,type,true) || abi_find(p,type)!=0;}
 fn usize abi_trivia(ref u8[] input,usize index){var usize i=index;while(i<input.len){
     if(input[i]==9 || input[i]==10 || input[i]==13 || input[i]==32){i+=1;continue;}
     if(i+1<input.len && input[i]==47 && input[i+1]==47){i+=2;while(i<input.len && input[i]!=10){i+=1;}continue;}
@@ -105,7 +106,7 @@ pub fn u32 array_element(ref Table p,u32 type) {
     let usize id=find(p,type);return if(id==0){0}else{field_at(p,at(p,id-1).field_start+1).type};
 }
 pub fn bool has_owned_arrays(ref Table p) { var usize i=0;while(i<count(p)){if(arrays::owned(at(p,i).type)){return true;}i+=1;}return false; }
-pub fn bool valid_type(ref Table p, u32 type, bool allow_void) { if(c_types::valid(type) || pointers::valid(type)){return true;}if(refs::valid(type)){return valid_type(p,refs::inner(type),false);}return (type >= 1 && type <= if (allow_void) { 7 } else { 6 }) || literals::valid(type) || views::valid(type) || arrays::valid(type) && (!arrays::owned(type) || find(p,type)!=0) || ((nominal::valid(type) || resources::valid(type) || enums::valid(type)) && find(p,type) != 0); }
+pub fn bool valid_type(ref Table p, u32 type, bool allow_void) { if(c_types::valid(type)){return true;}if(pointers::valid(type)){return !nominal::valid(pointers::inner(type)) || find(p,pointers::inner(type))!=0;}if(refs::valid(type)){return valid_type(p,refs::inner(type),false);}return (type >= 1 && type <= if (allow_void) { 7 } else { 6 }) || literals::valid(type) || views::valid(type) || arrays::valid(type) && (!arrays::owned(type) || find(p,type)!=0) || ((nominal::valid(type) || resources::valid(type) || enums::valid(type)) && find(p,type) != 0); }
 fn bool visit(ref Table p, usize i, ref mut u8[] colors, usize depth) {
     if (colors[i] == 2) { return true; } if (colors[i] == 1 || depth >= 64) { return false; }
     colors[i] = 1; let Shape s = at(p,i); var usize j = 0;

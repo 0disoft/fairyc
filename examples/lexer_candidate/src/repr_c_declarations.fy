@@ -24,7 +24,7 @@ import std::bytes as bytes;
 //        generic struct.
 //   5102 well-formed @repr(C) whose value lane is not admitted here: an empty
 //        body, a field type outside fixed scalar / closed C scalar / raw pointer
-//        to scalar-or-void, or a non-value field kind.
+//        to scalar, void or an inert struct, or a non-value field kind.
 // read reports the exact @repr(C) attribute span when it approves, the
 // offending attribute/argument/name/type span when it rejects a field or name,
 // and otherwise the declaration span. layout is the marker-independent lane
@@ -36,7 +36,7 @@ import std::bytes as bytes;
 pub struct Info { bool repr_c; u32 code; usize start; usize end; }
 
 // Fixed scalar i32/i64/u8/u32/usize/bool, the closed C scalar set, or an
-// existing nullable raw pointer to a scalar-or-void element. Nested repr(C)
+// nullable raw pointer to a scalar, void or struct element. Nested by-value repr(C)
 // structs, arrays, borrows, resources, and tagged/generic types wait for later
 // units and are rejected here.
 fn bool value_type(ref syntax::Parsed p, usize root) {

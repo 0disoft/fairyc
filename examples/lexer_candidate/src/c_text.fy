@@ -43,6 +43,7 @@ pub fn bool unsigned_type(ref mut bytes::Buffer out, ref mut State s, u32 code) 
 // Only verified owned shape facts provide external C tag/field spellings.
 // Ordinary nominal names remain private IDs, including inside nested records.
 pub fn bool owned_type(ref shapes::Table table,ref u8[] source,ref mut bytes::Buffer out,ref mut State s,u32 code){
+    if(pointers::valid(code)){return owned_type(table,source,out,s,pointers::inner(code)) && text(out,s,if(pointers::mutable(code)){b" *"}else{b" const *"});}
     if(refs::valid(code)){return owned_type(table,source,out,s,refs::inner(code)) && text(out,s,if(refs::mutable(code)){b" *"}else{b" const *"});}
     let usize slot=shapes::abi_find(table,code);
     if(slot==0){return type(out,s,code);}let a=shapes::abi_at(table,slot-1);

@@ -27,7 +27,7 @@ pub fn u32 validate(ref catalog::Catalog c,ref v::Vec<Type> types){
         else{if(t.module_index!=0 || t.declaration!=0){return 9;}
             if(t.kind==1){if(t.scalar==0 || t.scalar>7 && !abi::valid(t.scalar) || t.first!=0 || t.second!=0){return 9;}}
             else if(t.kind==15){if(!views::extended(t.scalar) || t.first!=0 || t.second!=0){return 9;}}
-            else if(t.kind==12){if(!pointers::valid(t.scalar) || t.first!=0 || t.second!=0){return 9;}}
+            else if(t.kind==12){if(t.second!=0){return 9;}if(t.first==0){if(!pointers::valid(t.scalar) || pointers::inner(t.scalar)>=256 && pointers::inner(t.scalar)<=767){return 9;}}else if(t.scalar>1 || t.first>i || v::at<Type>(types,t.first-1).kind!=2){return 9;}}
             else if(t.kind>=9 && t.kind<=11 || t.kind==14){if(t.scalar!=0 || t.first!=0 || t.second!=0){return 9;}}
             else if(t.kind>=5 && t.kind<=8){if(t.scalar!=0 || t.first==0 || t.first>i || t.kind==6 && (t.second==0 || t.second>i) || t.kind!=6 && t.second!=0){return 9;}}
             else{return 9;}
@@ -67,7 +67,7 @@ fn Resolution walk(ref catalog::Catalog c,ref syntax::Parsed p,usize module_inde
         if(inner.kind!=2 && inner.kind!=3 && inner.kind!=13 && !(inner.kind==1 && inner.scalar>=1 && inner.scalar<=6) && !(inner.kind==12 && inner.scalar==1048591)){return fail(9,module_index,n.start,n.end);}
         return accepted(graph,node(if(n.kind==2){7}else{8},0,0,0,r.type,0),module_index,n.start,n.end);
     }
-    if(n.kind==11 || n.kind==12){let u32 pointer=pointers::resolve(p,root);return if(pointer==0){fail(9,module_index,n.start,n.end)}else{accepted(graph,node(12,pointer,0,0,0,0),module_index,n.start,n.end)};}
+    if(n.kind==11 || n.kind==12){let child=syntax::type_at(p,n.left);if(child.kind==1 && scalars::primitive(p,n.left)==7 && !bytes::equal(syntax::type_text(p,n.left),b"void")){let r=walk(c,p,module_index,n.left,graph,depth+1);if(r.problem.code!=0){return r;}if(at(graph,r.type).kind!=2){return fail(9,module_index,n.start,n.end);}return accepted(graph,node(12,if(n.kind==12){1}else{0},0,0,r.type,0),module_index,n.start,n.end);}let u32 pointer=pointers::resolve(p,root);return if(pointer==0){fail(9,module_index,n.start,n.end)}else{accepted(graph,node(12,pointer,0,0,0,0),module_index,n.start,n.end)};}
     if(n.kind==6){let name=syntax::type_text(p,n.left);let bool option=bytes::equal(name,b"Option");let usize args=syntax::type_argument_count(p,root);
         if(!option && !bytes::equal(name,b"Result")){
             let found=catalog::lookup(c,module_index,name);if(found.code!=0){return fail(if(found.code==5){9}else{found.code},module_index,n.start,n.end);}let d=catalog::declaration_at(c,found.item);

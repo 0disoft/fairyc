@@ -641,3 +641,30 @@ project commands and Linux execution remain pending.
   Token/cooked-buffer/diagnostic integration in item 48, release mutation API,
   Linux and self-hosting remain pending. No SDK/runtime ABI, public language,
   dependency, database or CI change.
+
+## Struct pointers for SDK text prerequisites
+
+- Raw pointers can retain an inert struct's exact declaration identity. The
+  source-set graph represents their pointee as a canonical child, preserving
+  provider module/declaration and mutable permission across imports and joins.
+  Nullable scalar/void pointers and the existing mutable void** output lane keep
+  their previous IDs. Resources and pointer dereferences remain outside this unit.
+- Foreign struct-pointer parameters/results require the pointee's owned repr(C)
+  proof in parsing, source-set admission, HIR and independent MIR verification.
+  C declarations use that proof's external tag through the pointer. Plain structs
+  cannot claim this ABI; unsafe and exact safe-reference cast rules still apply.
+- Check and development/release builds pass. Each candidate passes five programs
+  and five rejections, with twenty low/optimized native executions covering
+  imported shared/mutable pointers, foreign results, typed null, module forwarding
+  and the existing opaque output slot. Wrong pointees, stronger mutable permission,
+  missing unsafe, ordinary struct extern pointers and resource pointers reject.
+- Two development native API tests pass. Removing owned ABI proof from pointer
+  parameters/results fails verification and preserves an existing C prefix; the
+  existing pointer namespace regression passes. Current-development Buffer
+  regression passes four programs, five rejections and eight native executions.
+- Evidence: `evidence/candidate-nominal-pointer-api-20261008.json`,
+  `evidence/candidate-nominal-pointer-cli-20261008.json` and
+  `evidence/candidate-nominal-pointer-buffer-regression-20261008.json`.
+- This prerequisite does not execute String/CString SDK bodies yet. Item 49,
+  actual scanner integration, release mutation API, Linux and self-hosting remain
+  pending. No SDK/runtime ABI, public language, dependency, database or CI change.
