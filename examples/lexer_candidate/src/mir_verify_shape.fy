@@ -58,7 +58,7 @@ fn bool integer(ref u8[] text, u32 type) {
 }
 fn bool operation(ref m::Program p, usize id, m::Operation o) {
     if(o.kind==39){let usize args=storage::arguments(o.operator);
-        return storage::result(o.operator,o.owner_type)==o.type && o.boolean && (if(args==3){o.argument_count==1 && local(p,m::edge_at(p,o.argument_start),o.function,5) && o.result!=m::edge_at(p,o.argument_start)}else{o.argument_start==0 && o.argument_count==0}) && o.payload_start==0 && o.payload_end==0
+        return shapes::valid_type(m::nominal(p),o.owner_type,false) && storage::result(o.operator,o.owner_type)==o.type && o.boolean && (if(args==3){o.argument_count==1 && local(p,m::edge_at(p,o.argument_start),o.function,5) && o.result!=m::edge_at(p,o.argument_start)}else{o.argument_start==0 && o.argument_count==0}) && o.payload_start==0 && o.payload_end==0
             && shapes::storage_rule(m::nominal(p),m::source_view(p),o.start,o.end,o.operator)
             && (if(o.type==7){o.result==0}else{local(p,o.result,o.function,o.type) && o.result!=o.left && o.result!=o.right})
             && (if(args==0){o.left==0}else if(o.operator>=6){o.left>0 && o.left<=m::local_count(p) && m::local_at(p,o.left).function==o.function && storage::owner(o.operator,m::local_at(p,o.left).type) && shapes::storage_owner(m::nominal(p),m::local_at(p,o.left).type)}else{local(p,o.left,o.function,storage::argument_type(o.operator,o.owner_type,0))}) && (if(args<2){o.right==0}else{local(p,o.right,o.function,storage::argument_type(o.operator,o.owner_type,1))});

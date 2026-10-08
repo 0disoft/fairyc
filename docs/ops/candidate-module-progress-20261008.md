@@ -562,3 +562,32 @@ project commands and Linux execution remain pending.
 - Evidence: `evidence/candidate-sdk-vector-resource-expand-20261008.json`.
   Resource storage execution, ownership transfers and cleanup are still pending.
   This prerequisite alone does not complete item 48. No SDK, runtime or CI change.
+
+## Resource Vec storage and cleanup
+
+- Bound direct resource elements execute SDK size/alignment, take/put,
+  empty/reserve/push/pop/truncate/clear and ordinary Vec cleanup. Storage queries
+  require an owned HIR/MIR shape. Typed C memcpy relocates the representation;
+  put consumes its donor in both lowering and independent MIR ownership checks.
+  Take creates a new owned value using the existing temporary obligation path.
+- Native observations cover retained resource borrows and scalar field writes,
+  successful push/pop transfers, first-allocation and growth failure donor return,
+  unchanged failure length/capacity, reserve without destruction, reverse prefix
+  cleanup, nested resource fields and zero remaining allocator blocks.
+- Short-circuit RHS-only owned temporaries now drop before the skipped/executed
+  edges join. Their boolean result is frozen first. A failed push result on an
+  executed RHS destroys its donor exactly once; skipped RHS calls create none.
+- Validation: check and development/release candidate builds; five programs and
+  four rejections per candidate, with twenty MSVC low/optimized executions total.
+  Two development native API tests verify resource/scalar storage mutations and
+  preserve a preexisting C output prefix. Current-development scalar storage
+  regression runs four programs, six rejections and eight native executions.
+- Evidence: `evidence/candidate-sdk-vector-resource-api-20261008.json`,
+  `evidence/candidate-sdk-vector-resource-cli-dev-20261008.json`,
+  `evidence/candidate-sdk-vector-resource-cli-release-20261008.json` and
+  `evidence/candidate-sdk-vector-resource-scalar-regression-20261008.json`.
+- Item 48 still needs actual scanner/diagnostic integration: scanner Token is an
+  inert struct; cooked token tables and diagnostics own bytes::Buffer. Struct
+  element Vec and item 49 Buffer execution are prerequisites. Resource views,
+  release mutation API, Linux and self-hosting remain pending. No SDK source,
+  runtime ABI, dependency version or CI change.

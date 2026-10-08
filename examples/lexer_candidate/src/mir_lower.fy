@@ -343,7 +343,13 @@ fn usize logical_expression(ref h::Program input, ref mut v::Vec<m::Local> local
                 c.current = rhs; let usize right = expression(input,locals,blocks,operations,edges,payload,c,e.right,depth + 1);
                 if (c.problem.code != 0) { return 0; }
                 if (c.current != 0) {
-                    if (state::emit(operations,blocks,c,state::operation(2,result,6,6,0,right,0,e.start,e.end)) == 0 || !state::jump(blocks,c,join,e.start,e.end)) { return 0; }
+                    if (state::emit(operations,blocks,c,state::operation(2,result,6,6,0,right,0,e.start,e.end)) == 0) { return 0; }
+                    // RHS-only owned temporaries cannot cross the skipped edge.
+                    // Freeze the boolean, then discharge those values in reverse
+                    // creation order before both paths meet with identical states.
+                    var usize temporary=v::len<m::Local>(locals);
+                    while(temporary>c.base){if(state::pending(c,temporary)==1 && skipped_pending[temporary-c.base-1]==0){if(!lifetime::drop(input,locals,blocks,operations,edges,c,temporary,e.start,e.end)){return 0;}}temporary-=1;}
+                    if (!state::jump(blocks,c,join,e.start,e.end)) { return 0; }
                 }
                 c.live=skipped;c.pending=skipped_pending;c.current = join; return result;
 }

@@ -55,6 +55,7 @@ pub fn usize emit(ref mut v::Vec<m::Operation> operations, ref mut v::Vec<m::Blo
     let usize previous = v::at<m::Block>(blocks,c.current - 1).last;
     if (!v::push<m::Operation>(operations,m::Operation { .function = c.function, .block = c.current, .kind = value.kind, .result = value.result, .type = value.type, .owner_type = value.owner_type, .operator = value.operator, .left = value.left, .right = value.right, .next = 0, .payload_start = value.payload_start, .payload_end = value.payload_end, .boolean = value.boolean, .start = value.start, .end = value.end, .argument_start = value.argument_start, .argument_count = value.argument_count }).is_ok) { return fail(c,3,value.start,value.end); }
     if(value.kind==24 || value.kind==25 || value.kind==26){release(c,value.left);}
+    if(value.kind==39 && value.operator==4){release(c,value.right);}
     if(value.result!=0 && properties::needs_drop(value.type) && pending(c,value.result)!=2){hold(c,value.result);}
     let usize id = v::len<m::Operation>(operations);
     if (previous != 0) { let ref mut m::Operation p = v::at_mut<m::Operation>(operations,previous - 1); p.next = id; }
