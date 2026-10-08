@@ -1,9 +1,11 @@
 module c_literals;
+import scalar_views as views;
 import mir_model as m;
 import c_text as w;
 import std::bytes as bytes;
 
 pub fn bool definitions(ref m::Program p, ref mut bytes::Buffer out, ref mut w::State s) {
+    if(m::has_views(p)){var u32 code=18;while(code<=29){if(views::extended(code)){if(!w::text(out,s,b"struct fy_slice_") || !w::number(out,s,code as usize) || !w::text(out,s,b" { ") || !w::type(out,s,views::element(code)) || !w::text(out,s,if(views::mutable(code)){b" *fy_data; uintptr_t fy_length; };\n"}else{b" const *fy_data; uintptr_t fy_length; };\n"})){return false;}}code+=1;}}
     return !(m::has_literals(p) || m::has_views(p)) || w::text(out,s,b"struct fy_text { const uint8_t *fy_data; uintptr_t fy_length; };\nstruct fy_bytes { const uint8_t *fy_data; uintptr_t fy_length; };\nstruct fy_bytes_mut { uint8_t *fy_data; uintptr_t fy_length; };\nstruct fy_cstr { const uint8_t *fy_data; uintptr_t fy_storage_length; };\n");
 }
 pub fn bool operation(ref m::Program p, usize id, m::Operation o, ref mut bytes::Buffer out, ref mut w::State s) {

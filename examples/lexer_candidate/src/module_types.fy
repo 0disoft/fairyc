@@ -1,4 +1,5 @@
 module module_types;
+import scalar_views as views;
 import module_catalog as catalog;
 import syntax as syntax;
 import type_state as scalars;
@@ -25,6 +26,7 @@ pub fn u32 validate(ref catalog::Catalog c,ref v::Vec<Type> types){
         else if(t.kind==2 || t.kind==3 || t.kind==4){let usize item=catalog::identity(c,t.module_index,t.declaration);if(item==0 || t.scalar!=0 || t.first!=0 || t.second!=0){return 9;}let d=catalog::declaration_at(c,item);if(d.kind!=if(t.kind==2){4}else if(t.kind==3){6}else{11} || t.kind==3 && catalog::sdk_vector(c,t.module_index,t.declaration)){return 9;}}
         else{if(t.module_index!=0 || t.declaration!=0){return 9;}
             if(t.kind==1){if(t.scalar==0 || t.scalar>7 && !abi::valid(t.scalar) || t.first!=0 || t.second!=0){return 9;}}
+            else if(t.kind==15){if(!views::extended(t.scalar) || t.first!=0 || t.second!=0){return 9;}}
             else if(t.kind==12){if(!pointers::valid(t.scalar) || t.first!=0 || t.second!=0){return 9;}}
             else if(t.kind>=9 && t.kind<=11 || t.kind==14){if(t.scalar!=0 || t.first!=0 || t.second!=0){return 9;}}
             else if(t.kind>=5 && t.kind<=8){if(t.scalar!=0 || t.first==0 || t.first>i || t.kind==6 && (t.second==0 || t.second>i) || t.kind!=6 && t.second!=0){return 9;}}
@@ -60,7 +62,7 @@ fn Resolution walk(ref catalog::Catalog c,ref syntax::Parsed p,usize module_inde
         if(d.kind!=4 && d.kind!=6 && d.kind!=11 || catalog::sdk_vector(c,d.module_index,d.declaration)){return fail(9,module_index,n.start,n.end);}
         return accepted(graph,node(if(d.kind==4){2}else if(d.kind==6){3}else{4},0,d.module_index,d.declaration,0,0),module_index,n.start,n.end);
     }
-    if(n.kind==2 || n.kind==3){let u32 literal=literals::resolve(p,root);if(literal!=0){return accepted(graph,node(if(literal==9){9}else if(literal==10){10}else if(literal==12){14}else{11},0,0,0,0,0),module_index,n.start,n.end);}
+    if(n.kind==2 || n.kind==3){let u32 literal=literals::resolve(p,root);if(views::extended(literal)){return accepted(graph,node(15,literal,0,0,0,0),module_index,n.start,n.end);}if(literal!=0){return accepted(graph,node(if(literal==9){9}else if(literal==10){10}else if(literal==12){14}else{11},0,0,0,0,0),module_index,n.start,n.end);}
         let r=walk(c,p,module_index,n.left,graph,depth+1);if(r.problem.code!=0){return r;}let inner=at(graph,r.type);
         if(inner.kind!=2 && inner.kind!=3 && inner.kind!=13 && !(inner.kind==1 && inner.scalar>=1 && inner.scalar<=6) && !(inner.kind==12 && inner.scalar==1048591)){return fail(9,module_index,n.start,n.end);}
         return accepted(graph,node(if(n.kind==2){7}else{8},0,0,0,r.type,0),module_index,n.start,n.end);

@@ -1,4 +1,5 @@
 module storage_intrinsics;
+import scalar_views as views;
 import syntax as syntax;
 import type_state as scalar;
 import sdk_scopes as sdk;
@@ -24,7 +25,7 @@ pub fn u32 element(ref syntax::Parsed p,usize id){
     let u32 type=scalar::primitive(p,root);return if(type>=1 && type<=6){type}else{0};
 }
 pub fn bool scalar_element(u32 element){return element>=1 && element<=6;}
-pub fn u32 result(u32 code,u32 element){return if(!scalar_element(element) || code==0 || code>9){0}else if(code<=2){5}else if(code==3){element}else if(code==4){7}else if(code==5){pointers::make(7,true)}else if(code>=8){if(element==3){if(code==9){11}else{10}}else{0}}else{refs::make(element,code==7)};}
+pub fn u32 result(u32 code,u32 element){return if(!scalar_element(element) || code==0 || code>9){0}else if(code<=2){5}else if(code==3){element}else if(code==4){7}else if(code==5){pointers::make(7,true)}else if(code>=8){views::make(element,code==9)}else{refs::make(element,code==7)};}
 pub fn usize arguments(u32 code){return if(code<=2){0}else if(code==3){1}else if(code>=8){3}else{2};}
 pub fn bool owner(u32 code,u32 type){return code>=6 && code<=9 && refs::valid(type) && resources::valid(refs::inner(type)) && refs::mutable(type)==(code==7 || code==9);}
 pub fn u32 argument_type(u32 code,u32 element,usize index){return if(index==2){5}else if(index==0 || code>=6){pointers::make(7,true)}else if(code==5){5}else{element};}

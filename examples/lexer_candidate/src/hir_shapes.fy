@@ -1,4 +1,5 @@
 module hir_shapes;
+import scalar_views as views;
 import c_abi_types as c_types;
 import pointer_types as pointers;
 import borrow_shapes as borrows;
@@ -81,7 +82,7 @@ pub fn bool has_resources(ref Table p) { var usize i=0;while(i<count(p)){if(reso
 // cannot be forged as caller-supplied Copyable or NeedsDrop flags. Inert structs
 // and arrays are separately verified not to contain resource-bearing fields.
 pub fn bool needs_drop(u32 type) { return properties::needs_drop(type); }
-pub fn bool copyable(ref Table p,u32 type) { return valid_type(p,type,false) && type!=11 && !needs_drop(type); }
+pub fn bool copyable(ref Table p,u32 type) { return valid_type(p,type,false) && !views::mutable(type) && !needs_drop(type); }
 pub fn bool field_owns_resource(ref Table p,usize field) { return needs_drop(field_at(p,field).type); }
 pub fn usize member_count(ref Table p,u32 type) { let s=at(p,find(p,type)-1);var usize n=0;var usize i=0;while(i<s.field_count){if(field_at(p,s.field_start+i+1).type==0){n+=1;}i+=1;}return n; }
 pub fn usize member_at(ref Table p,u32 type,usize tag) {
@@ -104,7 +105,7 @@ pub fn u32 array_element(ref Table p,u32 type) {
     let usize id=find(p,type);return if(id==0){0}else{field_at(p,at(p,id-1).field_start+1).type};
 }
 pub fn bool has_owned_arrays(ref Table p) { var usize i=0;while(i<count(p)){if(arrays::owned(at(p,i).type)){return true;}i+=1;}return false; }
-pub fn bool valid_type(ref Table p, u32 type, bool allow_void) { if(c_types::valid(type) || pointers::valid(type)){return true;}if(refs::valid(type)){return valid_type(p,refs::inner(type),false);}return (type >= 1 && type <= if (allow_void) { 7 } else { 6 }) || literals::valid(type) || type == 11 || arrays::valid(type) && (!arrays::owned(type) || find(p,type)!=0) || ((nominal::valid(type) || resources::valid(type) || enums::valid(type)) && find(p,type) != 0); }
+pub fn bool valid_type(ref Table p, u32 type, bool allow_void) { if(c_types::valid(type) || pointers::valid(type)){return true;}if(refs::valid(type)){return valid_type(p,refs::inner(type),false);}return (type >= 1 && type <= if (allow_void) { 7 } else { 6 }) || literals::valid(type) || views::valid(type) || arrays::valid(type) && (!arrays::owned(type) || find(p,type)!=0) || ((nominal::valid(type) || resources::valid(type) || enums::valid(type)) && find(p,type) != 0); }
 fn bool visit(ref Table p, usize i, ref mut u8[] colors, usize depth) {
     if (colors[i] == 2) { return true; } if (colors[i] == 1 || depth >= 64) { return false; }
     colors[i] = 1; let Shape s = at(p,i); var usize j = 0;

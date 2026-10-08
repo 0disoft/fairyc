@@ -1,4 +1,5 @@
 module c_scalar;
+import scalar_views as slices;
 import mir_model as m;
 import c_text as w;
 import c_flow as flow;
@@ -36,7 +37,7 @@ pub fn bool operation(ref m::Program p, usize id, ref mut bytes::Buffer out, ref
         return w::text(out,s,b"    memcpy(") && w::local(out,s,o.left) && w::text(out,s,b",&") && w::local(out,s,o.right) && w::text(out,s,b",sizeof(") && w::local(out,s,o.right) && w::text(out,s,b"));\n");
     }
     if(o.kind==38){return w::text(out,s,b"    ") && w::local(out,s,o.result) && w::text(out,s,b"=(") && w::type(out,s,o.type) && w::text(out,s,b"){") && w::local(out,s,o.right) && w::text(out,s,b",") && w::local(out,s,m::edge_at(p,o.argument_start)) && w::text(out,s,b"};\n");}
-    if(o.kind==37){return w::text(out,s,b"    ") && w::local(out,s,o.result) && w::text(out,s,b"=(") && w::owned_type(m::nominal(p),m::source_view(p),out,s,o.type) && w::text(out,s,b")") && w::local(out,s,o.left) && (o.owner_type!=9 && o.owner_type!=10 && o.owner_type!=11 && o.owner_type!=12 || w::text(out,s,b".fy_data")) && w::text(out,s,b";\n");}
+    if(o.kind==37){return w::text(out,s,b"    ") && w::local(out,s,o.result) && w::text(out,s,b"=(") && w::owned_type(m::nominal(p),m::source_view(p),out,s,o.type) && w::text(out,s,b")") && w::local(out,s,o.left) && (o.owner_type!=9 && !slices::valid(o.owner_type) && o.owner_type!=12 || w::text(out,s,b".fy_data")) && w::text(out,s,b";\n");}
     if(o.kind==36){return w::text(out,s,b"    ") && w::local(out,s,o.result) && w::text(out,s,b"=0;\n");}
     if(o.kind==35){return w::text(out,s,b"    ") && w::local(out,s,o.result) && w::text(out,s,b"=(") && w::owned_type(m::nominal(p),m::source_view(p),out,s,o.type) && w::text(out,s,b")") && w::local(out,s,o.left) && w::text(out,s,b";\n");}
     if(o.kind==30){return w::text(out,s,b"    *") && w::local(out,s,o.left) && w::text(out,s,b" = ") && w::local(out,s,o.right) && w::text(out,s,b";\n");}

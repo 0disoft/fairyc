@@ -11,6 +11,7 @@ fn bool tab(ref mut bytes::Buffer out) { return put(out,b"\t"); }
 fn bool number(ref mut bytes::Buffer out, usize value) { return tab(out) && bytes::append_usize(out,value).is_ok; }
 fn bool type_name(ref mut bytes::Buffer out, h::Type type) {
     return tab(out) && switch(type) {
+        case .ScalarView{.id=id}:{put(out,b"scalar-slice:") && bytes::append_u32(out,id).is_ok}
         case .CScalar{.id=id}:{put(out,b"c-scalar:") && bytes::append_u32(out,id).is_ok}
         case .Pointer{.id=id}:{put(out,b"ptr:") && bytes::append_u32(out,id).is_ok}
         case .Borrowed { .id=id }: { put(out,b"ref:") && bytes::append_u32(out,id).is_ok }

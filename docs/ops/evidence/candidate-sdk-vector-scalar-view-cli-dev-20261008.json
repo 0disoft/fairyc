@@ -1,0 +1,2200 @@
+{
+  "schema": "fairyc.candidate-sdk-vector-native/v1",
+  "passed": true,
+  "images": [
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-view-dev.exe",
+      "sha256": "b7872ad860ad6f104a2615eded609e0039e5556ce1b2246030b4ffb829ebc25b"
+    }
+  ],
+  "runner": {
+    "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-native-runner.exe",
+    "sha256": "2b3105f8b6a1bd91289e8744839c5ba1ee1408c16a647a8b0960a2a640833b86"
+  },
+  "sdk": {
+    "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\internal\\sdkstdlib\\sources\\optional\\std\\vec.fy",
+    "sha256": "0ae4c395bf98c39079ad620bde035b3b590d51417864802e698edc069281db5b"
+  },
+  "runtime": [
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\internal\\cstdlib\\stage0_system_heap.c",
+      "sha256": "cae6664fa1ec70722b76025c3e2c3daadc133cd90d95fa9f02f2385915d3e55c"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\internal\\cstdlib\\stage0_vector_storage.c",
+      "sha256": "eb9686951b480a7c40d6bfe670206d683548c5293387c42a44670ad0b6e5ccca"
+    }
+  ],
+  "observer": {
+    "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\verify_sdk_vector.py",
+    "sha256": "a9303189dff996eb38f8a7df5ad4d280ba60b9fc1c95f6f8cacf4c2d1b538b7f"
+  },
+  "caseObserver": {
+    "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\verify_sdk_vector_views.py",
+    "sha256": "366d6141ffedd988bddbe29c0eb9e5ea0c03dc09cb129644eb1afeb92699fa4c"
+  },
+  "sources": [
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\array_identity.fy",
+      "sha256": "8b501b0f72bb2805c00abc59afb195b5ba2c199796982122b62958bab64966ee"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\array_types.fy",
+      "sha256": "661e57ec5f65ea1d0be93eef637ce5235fc6e3f84e4ddf5babd8a4afd89f6688"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\attributes.fy",
+      "sha256": "dafe2e1c020446224fa8784e701e522096a58776a1066920f934c0717667b5e6"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\binding_output.fy",
+      "sha256": "187b26aaeacda92630312c0ef2dc159d7d874e91dc052802cf1757e036790855"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\bodies.fy",
+      "sha256": "b1bc7304d778caee8659d3cbf77e0e38aa8b88a2489d631978d9d69abac2afbc"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\body_state.fy",
+      "sha256": "75c13fd685fc21f4710ac2fa2d89adc652b62a7c4ad943b275d73e887bf68ffa"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\borrow_shapes.fy",
+      "sha256": "36b2214d9530980d60b11956f3738c1959cf66d29fcb80ec2bc4bad853c421e3"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\budget.fy",
+      "sha256": "c2793aa302279b9d27f0af32edd71f70de4e93cb4f76f55facd3e757641cc494"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\c_abi_contract.fy",
+      "sha256": "97bb60bd4596599480901b2693ea7a147f9eb434003e9e4e9c7c89f6632e5852"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\c_abi_types.fy",
+      "sha256": "fdfb462bff12028ae1c8b805e21addd001bfdd152dd9cfd89cf7b9a1a8f7166a"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\c_arrays.fy",
+      "sha256": "e433681a2be034ece9cc871730f48c85c6a42411bada66c44c720bbcdcb94ba8"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\c_cli.fy",
+      "sha256": "3a9b5f1d71c4527cb6da16621ba44ab9e663dda291209cc373b36a51310a49f2"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\c_emit.fy",
+      "sha256": "a10debd4af9830e1a733771c17708f52cfac0aa17429594fc435c08df918a156"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\c_flow.fy",
+      "sha256": "e13817d9c26140f45b2a6ebf217dc9ad2f7c535431576e900535062b11ace313"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\c_guard.fy",
+      "sha256": "b021440f2f50ee11df4a2fa16036cea7191b83964a3e378b4d0e9aff7a8f75fd"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\c_guard_facts.fy",
+      "sha256": "4509588b0d4e3f850a6b7843452d461b8209719c5fa712145949c582b2d5a909"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\c_literals.fy",
+      "sha256": "c6266c9cf6a35b63ac5482429b87eab3751a71bc58d50422114ec50f6cd70e22"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\c_nominal.fy",
+      "sha256": "edb8282390633456fe6ccc4cd8102dee6e1be4b1cd69eace0ac0f9eff2072e7a"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\c_resource.fy",
+      "sha256": "d0e8475894669c7aa4f3438a06c3596c93197b85b6a5702b8e43c81a6548e68c"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\c_scalar.fy",
+      "sha256": "2b045f58b5ca4f786494ecfda2f4b4f73f420c3844341968b0097dc2bd8e614a"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\c_text.fy",
+      "sha256": "eef5466e74d32f5af53595c8e2e1951ed7d75d04713af09a92c8ea25eda72c9f"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\c_views.fy",
+      "sha256": "4e94f6fde6db20f7f9d6c582cab44a90664a7a1dbf481679bff5cb40e085722f"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\candidate_limits.fy",
+      "sha256": "b4bd06e427045f539bb5969baeae9b68171c697ba933fdcdfe88dbed288cf7b6"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\cleanup_syntax.fy",
+      "sha256": "1374cdcbfa6139a5e82e4e74606cc28ba46d9e81df62f7a0dd397f856fb0ad6f"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\declaration_output.fy",
+      "sha256": "2eb7859b28000386f9ca29510f3e3117e5907ec2e7f7fd5801a67bcf4051e5bd"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\diagnostics.fy",
+      "sha256": "ee95f81ed3b3224702196fceef2888434e9713341b81abf01e03945592c4de8b"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\effect_declarations.fy",
+      "sha256": "fd1670ba32fd1f94d7d8834b210b845afd797ff56d7c48819a872efa56d0c6ab"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\enum_types.fy",
+      "sha256": "d257e7cb599fd4f3bafc1f7d9ccf11d00d19f2719df063271186cf7c432f0a96"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\ffi_symbols.fy",
+      "sha256": "bf90ce5c6b76ad6d60fd499c5c168079520edbf5720ea757e705b99489b6cd29"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\file_cli.fy",
+      "sha256": "7db4dcab1c3d3a97acbf1ea4ccdd63c5371da36e694e0e89fd2ba1125804e5d6"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\file_syntax.fy",
+      "sha256": "0ae878df46a5d151449801481c9686b6ffa2099ce4f8d76c18e08d0405ed3ddc"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\foreign_declarations.fy",
+      "sha256": "3f332c5b4887a92cb14f3c4d4ea7a07abe1b29437f6dcf4c71ac254ef683fcaa"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\generic_expand.fy",
+      "sha256": "959652a589a62872ab0f1360ea215a7047afc1a0bfe68b9bd242ef42ae8ff49a"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\hir_array_shapes.fy",
+      "sha256": "abbd6f86a748f3c1fd36f22c9ec6461c67f780f1f19a06165660941e4fc2b576"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\hir_borrow_paths.fy",
+      "sha256": "f1b7c03eee6f3fcb3b46e32e62b98edc2fc5324dcc89f8a6585d0a753ee1732a"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\hir_cli.fy",
+      "sha256": "b4961fab2735796a0aadd4a33374c66a1981b31369651841bd5e22700f3f8257"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\hir_lower.fy",
+      "sha256": "2c2958ab0751063a99d13c7dff163a816c7c3e73a6e348cce695d658f8969c48"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\hir_model.fy",
+      "sha256": "a1b10f67bb9618f44d00a911955716f99038d4785fd16461a749e5ecbb220ee7"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\hir_mutable_check.fy",
+      "sha256": "bc4726228f8d20d939781e3ac8009675cb89d37c48e291a6dedf8ab160849b46"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\hir_origin_targets.fy",
+      "sha256": "f72fb54ce53116c8916d73684951b148284d6cd8aadd6ae1f07557d6dbdedf3c"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\hir_output.fy",
+      "sha256": "55a6948e167d912b006ed5435ac3f6c34c258ddcdbb7463cace9d81d0e823daf"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\hir_shape_lower.fy",
+      "sha256": "36987b925e89e33bd80d9e7df52a9a6b6909bca51fdca607004f722cac920880"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\hir_shapes.fy",
+      "sha256": "cbd670d6a1989fe760836e9a2c58d4ec6220138b1e428eee12e9506cea4487e8"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\hir_state.fy",
+      "sha256": "228dc2addaa882abcc9e8230500dc4d1f028425f5edf81e322b1ee42b5689079"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\hir_view_check.fy",
+      "sha256": "c7d90095a88aa18c1242bf829b62fd9affa12d30ab96d37be1ca8df937355ff9"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\integrity.fy",
+      "sha256": "be52239cc18af1ccc4894bf9099caff177448d843287eaffbe395dceab7fed83"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\literal_types.fy",
+      "sha256": "4714165effb90b0811e08215379d255fe19fa9206184c34e5f8b22cdf31354bd"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\main.fy",
+      "sha256": "756a923bad8723216f4d9a8281aadad9eb4b90defba4a0f7f4a95d0731d980c0"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\mir_arrays.fy",
+      "sha256": "f57287d7cc073f8d2f5f9979a886620d90ded73c955b7f78bbdfbbe1c7bed30d"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\mir_cleanup.fy",
+      "sha256": "9c57f38e4ecb5ae058db4df65d6925533a653cd0dd2c78d7c45fa7723c3b3ed7"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\mir_cli.fy",
+      "sha256": "ccf158d7dac3d1413f867929a197d4a9da1148f31f7130e7944fec23eab23a06"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\mir_lower.fy",
+      "sha256": "5574db2ade9440cc128cae5479cbb06f5316c81718b26fe0e51b7742f41b477a"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\mir_math.fy",
+      "sha256": "0a0d922d39730c56841d4b5b3e256e022aaa6ebc792f48592cb296c090112086"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\mir_model.fy",
+      "sha256": "cc5856a6f5ba9892a7a9a80690b1616af08bb3b4d0a0744bd6690a4844a4580b"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\mir_nominal.fy",
+      "sha256": "0667cb62b0977e1bb6c1e97de26410eb9308296d905a9ce5d190cf3b8685aeab"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\mir_output.fy",
+      "sha256": "d12f1770be33cd25a9945eed89d2461912885db91b3ce5246f4a5361dfcb5e09"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\mir_places.fy",
+      "sha256": "7092dda7d9249ec69b872276286ac2c47e815e3d52e3ed4aae1588fd62e10e26"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\mir_propagation.fy",
+      "sha256": "3a891887a8892287ddc853fe7f5c30f352957d9e16cc496a5de203e03cb20e08"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\mir_reference.fy",
+      "sha256": "5d77f3e57797b5e65aa84d6d8a9a14c0736ff76f3b345e7c25e21790d3e164ea"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\mir_resource_lower.fy",
+      "sha256": "0d7026a2b08f1a4fba8989637e91c9c9aaaef6df74d954a9c642b3f61ce32448"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\mir_state.fy",
+      "sha256": "d545f55c86583fd20f48ef0a66b1d03b5d428d0b716e2b7c85b2135aee950cd3"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\mir_targets.fy",
+      "sha256": "07a5a72d23acea4a786768ef47322e7c3b00cdf1ac39674dc1a2dcc8ed829ebf"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\mir_verify.fy",
+      "sha256": "13726599bb623987eab8c6e90356ff649108ab004eb066d2dd2812e99ccae278"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\mir_verify_arrays.fy",
+      "sha256": "7efe23771653cf8c39c4bb9c800d6468ee418e6d845e9cb9f76cb6ce583ddbce"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\mir_verify_enums.fy",
+      "sha256": "bd73426a8482591274ca631ff1c0c1c28a8e5ad74a87d3f2c604a82889bebf95"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\mir_verify_flow.fy",
+      "sha256": "9005bda3eb532945abe6240ea73fa5a80293226ccff88f1b5c7ccee89925db91"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\mir_verify_literals.fy",
+      "sha256": "f3529fb6ad2ce585388b31a15841430c002952cba187b6d980742a286213c6ba"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\mir_verify_nominal.fy",
+      "sha256": "938f60b94690c9e223d28b20c98ae12471ce89413194fbefd484524aa9ad7ad6"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\mir_verify_resources.fy",
+      "sha256": "c389bdd0a4517246f0ec9d886cd25ea0e59519475cd97a8121e55c38d70cdf05"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\mir_verify_shape.fy",
+      "sha256": "d4dbe0ba613b274fa0da9957358db8ae962dc9933c9487810490cb534b02d6c1"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\mir_verify_views.fy",
+      "sha256": "8c358a3177233aa1a5871c33e5e76e9b268350a5ef6e60601aff2c99cc46d613"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\module_ast_join.fy",
+      "sha256": "a872efa13157da6d60dfefa6c90fea0662cb42c5d67b499bd18d661301a20148"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\module_bind.fy",
+      "sha256": "a391ccdf2c8edd4e76a5e68e21291e2f5543bac6f57c69faae310deabea75c65"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\module_catalog.fy",
+      "sha256": "742d799263d68a565ba4c9e779e0a054604917c6ebffac04b79cc93e853d4b09"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\module_check.fy",
+      "sha256": "5fa27606c3ab359a048053b4cf7348cf9327324f2dc864719523015634cc410a"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\module_cli.fy",
+      "sha256": "bbec4f98a1be6aa9b0ebc7be6df642753dfe13a3ac70f187b61eb15b0d410b20"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\module_program.fy",
+      "sha256": "67a81067f70e392606c9ccd7cd3fa1d6b0c1b3bc45b483df843c46a20dd276f1"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\module_registry.fy",
+      "sha256": "f8e92470432ab130868b957f3c8e84df1d81ff5184740b5a21f06ae1fbb9cf52"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\module_signatures.fy",
+      "sha256": "3b6e219f09d370f64b669ff5f6c78bca552e9128cb6d70de36a161f0ce3abc54"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\module_types.fy",
+      "sha256": "0ecac8535254b7b565211181797fd2b6abce1cd24b78ea18528e6d0a06b03f82"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\must_use_flow.fy",
+      "sha256": "a02d930305cf42e5bb273992889a4682579f5f7711fd052749f4bf2c8527e57b"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\name_cli.fy",
+      "sha256": "4a9b342e7b01b34c199305395eccf19b41e7060a479a4e00ff23ec135b5d56df"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\name_resolution.fy",
+      "sha256": "067a9f2c3e54e45dd4a9b40db87d74d04d6480d7364021963db2744c7368d421"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\nominal_identity.fy",
+      "sha256": "634cba7ac0667481c0863953640668841216554d852e0e1b1b245c8bc1606958"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\nominal_types.fy",
+      "sha256": "67f08ae69f35b1bcdf1d53eb080b5a5fa043a244ab0c48de2a1af26d38a63072"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\numbers.fy",
+      "sha256": "ee8b40b5e8061317d70d3594c386c9e4c70d95132a7e4243ea6402947a4c3556"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\pages.fy",
+      "sha256": "4f4306b894510a83af7e892bb2c8d116a2107c1abf1f0820a5cd637e3eb32c87"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\parse_tokens.fy",
+      "sha256": "91984eb1086ff7faafa4a6c64a232fc2ddce365b8cd7c2ef23b143bb91d4c9a6"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\pointer_identity.fy",
+      "sha256": "393def50da86f039e1dcd9bf6d4bee3fb79e7f9ae834c216b89b50e42e39e626"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\pointer_types.fy",
+      "sha256": "8861c5447e344ba37617f62ad2d4634f3f577a1e1535c37278ab28d5cdee1775"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\raw_view_intrinsics.fy",
+      "sha256": "d01c264221b717c7344f8119a9e645794037b0ce7b589e4eac31228c2b4af0d5"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\records.fy",
+      "sha256": "e2d1d3540285509aded981b476d4b2340857d8c7370364f4b1410bfd6883f6dd"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\reference_types.fy",
+      "sha256": "4a8bf7a0e139e6cb47c5c2e0b6deb1593761b8455862759ad43cb63820373161"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\repr_c_declarations.fy",
+      "sha256": "9d161a374b4760acf3716e292831b8c1c2c5ae49fe80e1ae240ac5c7f26de9a5"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\resource_abilities.fy",
+      "sha256": "dc7130999289147aae266ff75ff88d1fb140673b1ce8330ff7a1720180eae318"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\resource_effects.fy",
+      "sha256": "eab0aa0401a11df79852fa215bd67eac0e59cb08bc79af14f4998976e00ce0bc"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\resource_flow.fy",
+      "sha256": "80aa7407ea3905d7f7655b3ee6de0d72d562e4b2e11c0379c7cf2261c50681cb"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\resource_identity.fy",
+      "sha256": "7d85c65df4d6cc02f004f854d5108ec3cc7ba8ddb4885ea54c634f88f93594aa"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\resource_properties.fy",
+      "sha256": "fe0372ce1c546422e8b09d5ae9c9aa16f1bc11682fdded971e0820e96d30bac2"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\resource_use.fy",
+      "sha256": "91a8fb9d3ea164360e8acbddc2f70d55e5a53ff50923a4a264f784cbef9c7a41"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\result_flow.fy",
+      "sha256": "544e73b45d2420926f2cf8498afc20300ce4ecfa0a6d4f34fb5bde5318332c32"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\result_flow_graph.fy",
+      "sha256": "ad7030a04316edd0b348b1fc87d29e41b7b8d75c6197987b6a1f82bfcad1732c"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\scalar_casts.fy",
+      "sha256": "4976894d09b88b1df8253b04d654626b99efeb64298acf8dfa0ca1b8947d235e"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\scalar_views.fy",
+      "sha256": "ab3044f3a36a81611a11a46fed80dd41546a9de3f953d4817b2d8e40bc6037bc"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\scanner.fy",
+      "sha256": "5909ac2ea0510260da7160627212fbf4d77f815c9ebce302d127752614874b5e"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\sdk_authority.fy",
+      "sha256": "ae0f2e21819a625a6bb5fe331173dd3366599486f3c203a523693680a0c4ee6c"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\sdk_scopes.fy",
+      "sha256": "b7792dabd0372694610f3c5d4889131683dec04dfa77335e59f264f06309b7c0"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\sdk_vector_plan.fy",
+      "sha256": "8e0bdc63147f42ed348c01906d8f3fd68b2d5a354f0211a99deb16e56bd2a34a"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\sha256.fy",
+      "sha256": "4558eb7b75c94a5cda08022f397ae4ae1a9afafdede24ae89ac03f6a6ad09793"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\storage_intrinsics.fy",
+      "sha256": "7163c4b1c309f6e25b17175aaa0823d5868ffd9b224104772b675b7d8cbd36dd"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\strings.fy",
+      "sha256": "8f26db7c4d4039c8c8d9fbc6078097859c8f714ca5887957fdf0e69269dca521"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\syntax.fy",
+      "sha256": "8c2cca69e551770c9efde3a62528b107ec0678018dea855964a6f1aa7d9865c7"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\tagged_check.fy",
+      "sha256": "1692313a6569515619d3835a9e03946a41d328d99f6d593d1011b46164498186"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\tagged_encoding.fy",
+      "sha256": "32162ce8257ae1da150463a99c5726abd384f3b360d93afa141db7812af9a2e1"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\tagged_types.fy",
+      "sha256": "431f283e07d9dbea60c698d1f70f7e7009e1552314cf660688b10b09daad8338"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\token_output.fy",
+      "sha256": "1e08aded3f7efec90bb915b97011cdb46b63da5231a33231ea755552b648d11b"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\type_check.fy",
+      "sha256": "129058ad60efb590e69c343d98c4a8b5f8a98c8bb7f87bd2b2293d11912ef628"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\type_cli.fy",
+      "sha256": "4220f2241df3f2ad6a1ed16fadcec8ba06a7f7f61879d2ccc9961950bd65a5ca"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\type_control.fy",
+      "sha256": "2ebd9714228e5711657d496591b579fb9c13799ffa8729b1c40af7a244aac626"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\type_state.fy",
+      "sha256": "7dbbf7d50be1e9513dc8aafd99b11afda5d8e2d7ce87d96b6436c4752c2123a0"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\types.fy",
+      "sha256": "53a77948af92724f00de0609837fd1507899df8e2b59b6d2778ef1f3c344395a"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\unsafe_scopes.fy",
+      "sha256": "e655a51e391a5870fec2cc8ba1b2701da48914c6b229e4ba2225407d515a48eb"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\utf8.fy",
+      "sha256": "4a5425cea9efbfb1bff2c31a38c2bd8e392c6792af09f24e906c9a743621870d"
+    }
+  ],
+  "lock": {
+    "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\fairy.lock",
+    "sha256": "31670d6b3444f3d8efa2a0cc562a43473c717880d31580ad908d3ea39d77c42d"
+  },
+  "executions": [
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-view-dev.exe",
+        "--c-modules-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\empty-prefix.txt"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "",
+      "generatedC": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\empty-prefix-0.c",
+        "sha256": "a4d528b001ea5462ac7dfbe2940da1f3c37fb2e3bc599f19e83d2855b9bc1ceb"
+      },
+      "stdoutBytes": 16451
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-view-dev.exe",
+        "--c-modules-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\shared-aliases.txt"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "",
+      "generatedC": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\shared-aliases-0.c",
+        "sha256": "cf10a259b18ccbad13403d8d4943aa6b35d99e0d906deebe1599a970a5ca15b4"
+      },
+      "stdoutBytes": 30946
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-view-dev.exe",
+        "--c-modules-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\mutable-subview.txt"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "",
+      "generatedC": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\mutable-subview-0.c",
+        "sha256": "4d090904df8a777c37176cf6edbdac5438bd4eae8bff8158d9b5133c15e809cf"
+      },
+      "stdoutBytes": 27105
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-view-dev.exe",
+        "--c-modules-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\named-sdk-exports.txt"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "",
+      "generatedC": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\named-sdk-exports-0.c",
+        "sha256": "c2e3ebce2be06424d043733c08d2ab0793df3106466ef51ccf5d5320983379a5"
+      },
+      "stdoutBytes": 26279
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-view-dev.exe",
+        "--c-modules-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\array-view-regression.txt"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "",
+      "generatedC": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\array-view-regression-0.c",
+        "sha256": "f67a2f99fb656c0ccd4d2a1639814bb2b27a0f084c4e254fdf27c3d3a17e8bc7"
+      },
+      "stdoutBytes": 7786
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-view-dev.exe",
+        "--c-modules-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\bounds-empty.txt"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "",
+      "generatedC": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\bounds-empty-0.c",
+        "sha256": "21e3b4d221588593353b38c232088dd1783489a63e253bd39e3f51394de29fab"
+      },
+      "stdoutBytes": 8827
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-view-dev.exe",
+        "--c-modules-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\bounds-prefix.txt"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "",
+      "generatedC": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\bounds-prefix-0.c",
+        "sha256": "d6501de810264ec9eccb82aae0c3391a94520003fa2db3f82b0c0cf818648adf"
+      },
+      "stdoutBytes": 17284
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-view-dev.exe",
+        "--c-modules-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\bounds-range.txt"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "",
+      "generatedC": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\bounds-range-0.c",
+        "sha256": "452f63aaca3f4155bcd2c06175e96bea29ec1955e01d2505e34099ea909c143f"
+      },
+      "stdoutBytes": 14406
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-view-dev.exe",
+        "--c-modules-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\scalar-i32.txt"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "",
+      "generatedC": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\scalar-i32-0.c",
+        "sha256": "8b7257bfdf1d50edf2afb210a872cc98fd81623b5d6e148b38121e1dd9e9a89d"
+      },
+      "stdoutBytes": 39025
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-view-dev.exe",
+        "--c-modules-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\bounds-i32.txt"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "",
+      "generatedC": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\bounds-i32-0.c",
+        "sha256": "6d52c3a4db7fe57c124d5b2eff965969813f41b03102e80be6d057d28ecccdd0"
+      },
+      "stdoutBytes": 14217
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-view-dev.exe",
+        "--c-modules-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\scalar-i64.txt"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "",
+      "generatedC": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\scalar-i64-0.c",
+        "sha256": "8b29bd10de8e8841f97398d214bf2b2187f5390bc79fbe2e711a664b1757db8b"
+      },
+      "stdoutBytes": 39097
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-view-dev.exe",
+        "--c-modules-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\bounds-i64.txt"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "",
+      "generatedC": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\bounds-i64-0.c",
+        "sha256": "c95cecbcc2107b714521cb3b50883df039a4be23f2b7c017f1f2ed5a56ef5821"
+      },
+      "stdoutBytes": 14217
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-view-dev.exe",
+        "--c-modules-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\scalar-u32.txt"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "",
+      "generatedC": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\scalar-u32-0.c",
+        "sha256": "5b09f8f4d7663a20d448b72227053c1af69c806cc59d2d25fc7386ce76b2f8ff"
+      },
+      "stdoutBytes": 38890
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-view-dev.exe",
+        "--c-modules-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\bounds-u32.txt"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "",
+      "generatedC": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\bounds-u32-0.c",
+        "sha256": "58730e0d8169a2213af77eac85fcde3f1cc83c099a97645c00750c339d33e0cb"
+      },
+      "stdoutBytes": 14036
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-view-dev.exe",
+        "--c-modules-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\scalar-usize.txt"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "",
+      "generatedC": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\scalar-usize-0.c",
+        "sha256": "5d1f91c6f740c5465c1e2eaf0cacfc5db23b9b6e51fe2e77e77ebb794135395e"
+      },
+      "stdoutBytes": 39436
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-view-dev.exe",
+        "--c-modules-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\bounds-usize.txt"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "",
+      "generatedC": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\bounds-usize-0.c",
+        "sha256": "2faa48ab2449ef3e80b58429a94da8e6360a152142cec98965517b726a71efe2"
+      },
+      "stdoutBytes": 14269
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-view-dev.exe",
+        "--c-modules-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\scalar-bool.txt"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "",
+      "generatedC": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\scalar-bool-0.c",
+        "sha256": "154808164a1e90adf2c2efa00f14ba7ed7780cddfb9ac1159cfc983e8cce9170"
+      },
+      "stdoutBytes": 38962
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-view-dev.exe",
+        "--c-modules-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\bounds-bool.txt"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "",
+      "generatedC": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\bounds-bool-0.c",
+        "sha256": "d89fc5adb5a9be93f52b12f53d07c0216c903bff09d8136360fd45f29b8e5d37"
+      },
+      "stdoutBytes": 14221
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-view-dev.exe",
+        "--c-modules-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\named-i32.txt"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "",
+      "generatedC": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\named-i32-0.c",
+        "sha256": "dba28631c29b995cb05e040575c1fe265d8918c9df6af0171915b7553327a8dd"
+      },
+      "stdoutBytes": 18079
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-view-dev.exe",
+        "--c-modules-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\named-i64.txt"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "",
+      "generatedC": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\named-i64-0.c",
+        "sha256": "739f85af50057acf4b1743122b20a2de28e82d21f4a2165aba50c4066f085564"
+      },
+      "stdoutBytes": 18079
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-view-dev.exe",
+        "--c-modules-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\named-u32.txt"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "",
+      "generatedC": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\named-u32-0.c",
+        "sha256": "478b024cd03711f56c8239bb02073529c35e5f9e7491bbe0ee80b13408a312ba"
+      },
+      "stdoutBytes": 17904
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-view-dev.exe",
+        "--c-modules-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\named-usize.txt"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "",
+      "generatedC": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\named-usize-0.c",
+        "sha256": "d6463445daba91807ce3f8d6365ea19be2b24b31a4243c6158cf3521ee486cc6"
+      },
+      "stdoutBytes": 18180
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-view-dev.exe",
+        "--c-modules-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\shared-push.txt"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "exit": 2,
+      "stdout": "",
+      "stderr": ".cache/candidate-tagged/vector-scalar-views/shared-push.fy:1:174: error: module program phase 6 code 2101 (bytes 173..182)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-view-dev.exe",
+        "--c-modules-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\shared-reserve.txt"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "exit": 2,
+      "stdout": "",
+      "stderr": ".cache/candidate-tagged/vector-scalar-views/shared-reserve.fy:1:177: error: module program phase 6 code 2101 (bytes 176..185)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-view-dev.exe",
+        "--c-modules-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\shared-pop.txt"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "exit": 2,
+      "stdout": "",
+      "stderr": ".cache/candidate-tagged/vector-scalar-views/shared-pop.fy:1:173: error: module program phase 6 code 2101 (bytes 172..181)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-view-dev.exe",
+        "--c-modules-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\shared-clear.txt"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "exit": 2,
+      "stdout": "",
+      "stderr": ".cache/candidate-tagged/vector-scalar-views/shared-clear.fy:1:175: error: module program phase 6 code 2101 (bytes 174..183)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-view-dev.exe",
+        "--c-modules-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\shared-move.txt"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "exit": 2,
+      "stdout": "",
+      "stderr": ".cache/candidate-tagged/vector-scalar-views/shared-move.fy:1:175: error: module program phase 6 code 2101 (bytes 174..175)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-view-dev.exe",
+        "--c-modules-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\shared-replace.txt"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "exit": 2,
+      "stdout": "",
+      "stderr": ".cache/candidate-tagged/vector-scalar-views/shared-replace.fy:1:154: error: module program phase 6 code 2101 (bytes 153..170)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-view-dev.exe",
+        "--c-modules-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\shared-exclusive-element.txt"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "exit": 2,
+      "stdout": "",
+      "stderr": ".cache/candidate-tagged/vector-scalar-views/shared-exclusive-element.fy:1:185: error: module program phase 6 code 2101 (bytes 184..193)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-view-dev.exe",
+        "--c-modules-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\retained-subview.txt"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "exit": 2,
+      "stdout": "",
+      "stderr": ".cache/candidate-tagged/vector-scalar-views/retained-subview.fy:1:242: error: module program phase 6 code 2101 (bytes 241..250)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-view-dev.exe",
+        "--c-modules-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\mutable-owner-read.txt"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "exit": 2,
+      "stdout": "",
+      "stderr": ".cache/candidate-tagged/vector-scalar-views/mutable-owner-read.fy:1:189: error: module program phase 6 code 2101 (bytes 188..189)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-view-dev.exe",
+        "--c-modules-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\mutable-sibling.txt"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "exit": 2,
+      "stdout": "",
+      "stderr": ".cache/candidate-tagged/vector-scalar-views/mutable-sibling.fy:1:210: error: module program phase 6 code 2101 (bytes 209..210)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-view-dev.exe",
+        "--c-modules-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\child-freezes-parent.txt"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "exit": 2,
+      "stdout": "",
+      "stderr": ".cache/candidate-tagged/vector-scalar-views/child-freezes-parent.fy:1:191: error: module program phase 6 code 2101 (bytes 190..191)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-view-dev.exe",
+        "--c-modules-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\later-argument.txt"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "exit": 2,
+      "stdout": "",
+      "stderr": ".cache/candidate-tagged/vector-scalar-views/later-argument.fy:1:215: error: module program phase 6 code 2101 (bytes 214..223)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-view-dev.exe",
+        "--c-modules-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\slice-bound.txt"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "exit": 2,
+      "stdout": "",
+      "stderr": ".cache/candidate-tagged/vector-scalar-views/slice-bound.fy:1:241: error: module program phase 6 code 2101 (bytes 240..249)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-view-dev.exe",
+        "--c-modules-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\local-escape.txt"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "exit": 2,
+      "stdout": "",
+      "stderr": ".cache/candidate-tagged/vector-scalar-views/local-escape.fy:1:34: error: module program phase 6 code 2102 (bytes 33..114)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-view-dev.exe",
+        "--c-modules-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\stolen-shared-storage.txt"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "exit": 2,
+      "stdout": "",
+      "stderr": ".cache/candidate-tagged/vector-scalar-views/stolen-shared-storage.fy:1:135: error: module program phase 5 code 5102 (bytes 134..168)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-view-dev.exe",
+        "--c-modules-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\stolen-mutable-storage.txt"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "exit": 2,
+      "stdout": "",
+      "stderr": ".cache/candidate-tagged/vector-scalar-views/stolen-mutable-storage.fy:1:135: error: module program phase 5 code 5102 (bytes 134..176)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-view-dev.exe",
+        "--c-modules-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\i32-retained-growth.txt"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "exit": 2,
+      "stdout": "",
+      "stderr": ".cache/candidate-tagged/vector-scalar-views/i32-retained-growth.fy:1:192: error: module program phase 6 code 2101 (bytes 191..200)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-view-dev.exe",
+        "--c-modules-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\i32-exclusive-owner.txt"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "exit": 2,
+      "stdout": "",
+      "stderr": ".cache/candidate-tagged/vector-scalar-views/i32-exclusive-owner.fy:1:204: error: module program phase 6 code 2101 (bytes 203..204)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-view-dev.exe",
+        "--c-modules-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\i32-child-parent.txt"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "exit": 2,
+      "stdout": "",
+      "stderr": ".cache/candidate-tagged/vector-scalar-views/i32-child-parent.fy:1:210: error: module program phase 6 code 2101 (bytes 209..210)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-view-dev.exe",
+        "--c-modules-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\i64-retained-growth.txt"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "exit": 2,
+      "stdout": "",
+      "stderr": ".cache/candidate-tagged/vector-scalar-views/i64-retained-growth.fy:1:201: error: module program phase 6 code 2101 (bytes 200..209)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-view-dev.exe",
+        "--c-modules-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\i64-exclusive-owner.txt"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "exit": 2,
+      "stdout": "",
+      "stderr": ".cache/candidate-tagged/vector-scalar-views/i64-exclusive-owner.fy:1:213: error: module program phase 6 code 2101 (bytes 212..213)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-view-dev.exe",
+        "--c-modules-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\i64-child-parent.txt"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "exit": 2,
+      "stdout": "",
+      "stderr": ".cache/candidate-tagged/vector-scalar-views/i64-child-parent.fy:1:219: error: module program phase 6 code 2101 (bytes 218..219)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-view-dev.exe",
+        "--c-modules-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\u32-retained-growth.txt"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "exit": 2,
+      "stdout": "",
+      "stderr": ".cache/candidate-tagged/vector-scalar-views/u32-retained-growth.fy:1:182: error: module program phase 6 code 2101 (bytes 181..190)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-view-dev.exe",
+        "--c-modules-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\u32-exclusive-owner.txt"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "exit": 2,
+      "stdout": "",
+      "stderr": ".cache/candidate-tagged/vector-scalar-views/u32-exclusive-owner.fy:1:194: error: module program phase 6 code 2101 (bytes 193..194)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-view-dev.exe",
+        "--c-modules-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\u32-child-parent.txt"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "exit": 2,
+      "stdout": "",
+      "stderr": ".cache/candidate-tagged/vector-scalar-views/u32-child-parent.fy:1:200: error: module program phase 6 code 2101 (bytes 199..200)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-view-dev.exe",
+        "--c-modules-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\usize-retained-growth.txt"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "exit": 2,
+      "stdout": "",
+      "stderr": ".cache/candidate-tagged/vector-scalar-views/usize-retained-growth.fy:1:194: error: module program phase 6 code 2101 (bytes 193..202)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-view-dev.exe",
+        "--c-modules-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\usize-exclusive-owner.txt"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "exit": 2,
+      "stdout": "",
+      "stderr": ".cache/candidate-tagged/vector-scalar-views/usize-exclusive-owner.fy:1:206: error: module program phase 6 code 2101 (bytes 205..206)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-view-dev.exe",
+        "--c-modules-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\usize-child-parent.txt"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "exit": 2,
+      "stdout": "",
+      "stderr": ".cache/candidate-tagged/vector-scalar-views/usize-child-parent.fy:1:212: error: module program phase 6 code 2101 (bytes 211..212)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-view-dev.exe",
+        "--c-modules-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\bool-retained-growth.txt"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "exit": 2,
+      "stdout": "",
+      "stderr": ".cache/candidate-tagged/vector-scalar-views/bool-retained-growth.fy:1:192: error: module program phase 6 code 2101 (bytes 191..200)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-view-dev.exe",
+        "--c-modules-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\bool-exclusive-owner.txt"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "exit": 2,
+      "stdout": "",
+      "stderr": ".cache/candidate-tagged/vector-scalar-views/bool-exclusive-owner.fy:1:204: error: module program phase 6 code 2101 (bytes 203..204)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-view-dev.exe",
+        "--c-modules-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\bool-child-parent.txt"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "exit": 2,
+      "stdout": "",
+      "stderr": ".cache/candidate-tagged/vector-scalar-views/bool-child-parent.fy:1:210: error: module program phase 6 code 2101 (bytes 209..210)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-view-dev.exe",
+        "--c-modules-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\bool-i32-view.txt"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "exit": 2,
+      "stdout": "",
+      "stderr": ".cache/candidate-tagged/vector-scalar-views/bool-i32-view.fy:1:100: error: module program phase 5 code 1 (bytes 99..119)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-view-dev.exe",
+        "--c-modules-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\i32-bool-view.txt"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "exit": 2,
+      "stdout": "",
+      "stderr": ".cache/candidate-tagged/vector-scalar-views/i32-bool-view.fy:1:99: error: module program phase 5 code 1 (bytes 98..117)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-view-dev.exe",
+        "--c-modules-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\shared-scalar-store.txt"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "exit": 2,
+      "stdout": "",
+      "stderr": ".cache/candidate-tagged/vector-scalar-views/shared-scalar-store.fy:1:118: error: module program phase 5 code 4 (bytes 117..121)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-native-runner.exe",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\native-request.json",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\native.json"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "exit": 0,
+      "stdout": "PASS: 44 native C executions\n",
+      "stderr": ""
+    }
+  ],
+  "native": [
+    {
+      "name": "empty-prefix-0",
+      "profile": "low",
+      "compiler": "msvc",
+      "compilerPath": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+      "compilerVersion": "14.51.36231",
+      "source": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\empty-prefix-0.c",
+      "sourceSHA256": "a4d528b001ea5462ac7dfbe2940da1f3c37fb2e3bc599f19e83d2855b9bc1ceb",
+      "runtimeSHA256": "d233e0cbcd5c1846121117d8a8dba7f72191d48b2c628aa1632eabcd8ea774f3",
+      "foreignSource": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\runtime.c",
+      "foreignSHA256": "e94210ee33be5e2af6d5199fc52f0ccd4833742c1ed2369faba9f7462bde5dd2",
+      "image": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\native\\empty-prefix-0-msvc-low.exe",
+      "imageSHA256": "7af57da44393ff9e04b860ffd98894e876ec656871321c244220db045c4b4aa1",
+      "exit": 7,
+      "stdout": "",
+      "stderr": "",
+      "stdoutBytes": "",
+      "stderrBytes": "",
+      "trap": 0,
+      "value": 7
+    },
+    {
+      "name": "empty-prefix-0",
+      "profile": "optimized",
+      "compiler": "msvc",
+      "compilerPath": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+      "compilerVersion": "14.51.36231",
+      "source": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\empty-prefix-0.c",
+      "sourceSHA256": "a4d528b001ea5462ac7dfbe2940da1f3c37fb2e3bc599f19e83d2855b9bc1ceb",
+      "runtimeSHA256": "d233e0cbcd5c1846121117d8a8dba7f72191d48b2c628aa1632eabcd8ea774f3",
+      "foreignSource": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\runtime.c",
+      "foreignSHA256": "e94210ee33be5e2af6d5199fc52f0ccd4833742c1ed2369faba9f7462bde5dd2",
+      "image": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\native\\empty-prefix-0-msvc-optimized.exe",
+      "imageSHA256": "9b9a55018cd3737297828574412c46961035b1763c30b7a649a379015b4286a4",
+      "exit": 7,
+      "stdout": "",
+      "stderr": "",
+      "stdoutBytes": "",
+      "stderrBytes": "",
+      "trap": 0,
+      "value": 7
+    },
+    {
+      "name": "shared-aliases-0",
+      "profile": "low",
+      "compiler": "msvc",
+      "compilerPath": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+      "compilerVersion": "14.51.36231",
+      "source": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\shared-aliases-0.c",
+      "sourceSHA256": "cf10a259b18ccbad13403d8d4943aa6b35d99e0d906deebe1599a970a5ca15b4",
+      "runtimeSHA256": "d233e0cbcd5c1846121117d8a8dba7f72191d48b2c628aa1632eabcd8ea774f3",
+      "foreignSource": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\runtime.c",
+      "foreignSHA256": "e94210ee33be5e2af6d5199fc52f0ccd4833742c1ed2369faba9f7462bde5dd2",
+      "image": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\native\\shared-aliases-0-msvc-low.exe",
+      "imageSHA256": "cc671db50a2f69cdeccb3dfc52be1b84e0438ecd86ba4294478a2f8b8666587a",
+      "exit": 7,
+      "stdout": "",
+      "stderr": "",
+      "stdoutBytes": "",
+      "stderrBytes": "",
+      "trap": 0,
+      "value": 7
+    },
+    {
+      "name": "shared-aliases-0",
+      "profile": "optimized",
+      "compiler": "msvc",
+      "compilerPath": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+      "compilerVersion": "14.51.36231",
+      "source": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\shared-aliases-0.c",
+      "sourceSHA256": "cf10a259b18ccbad13403d8d4943aa6b35d99e0d906deebe1599a970a5ca15b4",
+      "runtimeSHA256": "d233e0cbcd5c1846121117d8a8dba7f72191d48b2c628aa1632eabcd8ea774f3",
+      "foreignSource": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\runtime.c",
+      "foreignSHA256": "e94210ee33be5e2af6d5199fc52f0ccd4833742c1ed2369faba9f7462bde5dd2",
+      "image": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\native\\shared-aliases-0-msvc-optimized.exe",
+      "imageSHA256": "855b46eab9b5a07f0b4ac5fbadb13116e3bdd5738cafdc7028462789a4f0fbd3",
+      "exit": 7,
+      "stdout": "",
+      "stderr": "",
+      "stdoutBytes": "",
+      "stderrBytes": "",
+      "trap": 0,
+      "value": 7
+    },
+    {
+      "name": "mutable-subview-0",
+      "profile": "low",
+      "compiler": "msvc",
+      "compilerPath": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+      "compilerVersion": "14.51.36231",
+      "source": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\mutable-subview-0.c",
+      "sourceSHA256": "4d090904df8a777c37176cf6edbdac5438bd4eae8bff8158d9b5133c15e809cf",
+      "runtimeSHA256": "d233e0cbcd5c1846121117d8a8dba7f72191d48b2c628aa1632eabcd8ea774f3",
+      "foreignSource": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\runtime.c",
+      "foreignSHA256": "e94210ee33be5e2af6d5199fc52f0ccd4833742c1ed2369faba9f7462bde5dd2",
+      "image": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\native\\mutable-subview-0-msvc-low.exe",
+      "imageSHA256": "8c475eac8559c4a34b14569d8fda26f916b7ee34aacaa1897a8c450a0f3e2e14",
+      "exit": 7,
+      "stdout": "",
+      "stderr": "",
+      "stdoutBytes": "",
+      "stderrBytes": "",
+      "trap": 0,
+      "value": 7
+    },
+    {
+      "name": "mutable-subview-0",
+      "profile": "optimized",
+      "compiler": "msvc",
+      "compilerPath": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+      "compilerVersion": "14.51.36231",
+      "source": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\mutable-subview-0.c",
+      "sourceSHA256": "4d090904df8a777c37176cf6edbdac5438bd4eae8bff8158d9b5133c15e809cf",
+      "runtimeSHA256": "d233e0cbcd5c1846121117d8a8dba7f72191d48b2c628aa1632eabcd8ea774f3",
+      "foreignSource": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\runtime.c",
+      "foreignSHA256": "e94210ee33be5e2af6d5199fc52f0ccd4833742c1ed2369faba9f7462bde5dd2",
+      "image": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\native\\mutable-subview-0-msvc-optimized.exe",
+      "imageSHA256": "0dfd8fa7db78cde68f2bb541255f9864870b105e1bf82b1c7d2ea89472d75231",
+      "exit": 7,
+      "stdout": "",
+      "stderr": "",
+      "stdoutBytes": "",
+      "stderrBytes": "",
+      "trap": 0,
+      "value": 7
+    },
+    {
+      "name": "named-sdk-exports-0",
+      "profile": "low",
+      "compiler": "msvc",
+      "compilerPath": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+      "compilerVersion": "14.51.36231",
+      "source": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\named-sdk-exports-0.c",
+      "sourceSHA256": "c2e3ebce2be06424d043733c08d2ab0793df3106466ef51ccf5d5320983379a5",
+      "runtimeSHA256": "d233e0cbcd5c1846121117d8a8dba7f72191d48b2c628aa1632eabcd8ea774f3",
+      "foreignSource": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\runtime.c",
+      "foreignSHA256": "e94210ee33be5e2af6d5199fc52f0ccd4833742c1ed2369faba9f7462bde5dd2",
+      "image": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\native\\named-sdk-exports-0-msvc-low.exe",
+      "imageSHA256": "65b34f1225d77d821c6be6a52dafc1ba36762ce187a25e49f54eab867464fe67",
+      "exit": 7,
+      "stdout": "",
+      "stderr": "",
+      "stdoutBytes": "",
+      "stderrBytes": "",
+      "trap": 0,
+      "value": 7
+    },
+    {
+      "name": "named-sdk-exports-0",
+      "profile": "optimized",
+      "compiler": "msvc",
+      "compilerPath": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+      "compilerVersion": "14.51.36231",
+      "source": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\named-sdk-exports-0.c",
+      "sourceSHA256": "c2e3ebce2be06424d043733c08d2ab0793df3106466ef51ccf5d5320983379a5",
+      "runtimeSHA256": "d233e0cbcd5c1846121117d8a8dba7f72191d48b2c628aa1632eabcd8ea774f3",
+      "foreignSource": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\runtime.c",
+      "foreignSHA256": "e94210ee33be5e2af6d5199fc52f0ccd4833742c1ed2369faba9f7462bde5dd2",
+      "image": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\native\\named-sdk-exports-0-msvc-optimized.exe",
+      "imageSHA256": "b61359a1cd09fb35cb45c9e9b2109df76448bc8912dfd96a33dbb5c7a61a71c8",
+      "exit": 7,
+      "stdout": "",
+      "stderr": "",
+      "stdoutBytes": "",
+      "stderrBytes": "",
+      "trap": 0,
+      "value": 7
+    },
+    {
+      "name": "array-view-regression-0",
+      "profile": "low",
+      "compiler": "msvc",
+      "compilerPath": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+      "compilerVersion": "14.51.36231",
+      "source": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\array-view-regression-0.c",
+      "sourceSHA256": "f67a2f99fb656c0ccd4d2a1639814bb2b27a0f084c4e254fdf27c3d3a17e8bc7",
+      "runtimeSHA256": "d233e0cbcd5c1846121117d8a8dba7f72191d48b2c628aa1632eabcd8ea774f3",
+      "foreignSource": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\runtime.c",
+      "foreignSHA256": "e94210ee33be5e2af6d5199fc52f0ccd4833742c1ed2369faba9f7462bde5dd2",
+      "image": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\native\\array-view-regression-0-msvc-low.exe",
+      "imageSHA256": "cec3e4dedb611e2cc8b30e448c405b0f56106427fcc664fbd7a152cc7feb451d",
+      "exit": 7,
+      "stdout": "",
+      "stderr": "",
+      "stdoutBytes": "",
+      "stderrBytes": "",
+      "trap": 0,
+      "value": 7
+    },
+    {
+      "name": "array-view-regression-0",
+      "profile": "optimized",
+      "compiler": "msvc",
+      "compilerPath": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+      "compilerVersion": "14.51.36231",
+      "source": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\array-view-regression-0.c",
+      "sourceSHA256": "f67a2f99fb656c0ccd4d2a1639814bb2b27a0f084c4e254fdf27c3d3a17e8bc7",
+      "runtimeSHA256": "d233e0cbcd5c1846121117d8a8dba7f72191d48b2c628aa1632eabcd8ea774f3",
+      "foreignSource": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\runtime.c",
+      "foreignSHA256": "e94210ee33be5e2af6d5199fc52f0ccd4833742c1ed2369faba9f7462bde5dd2",
+      "image": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\native\\array-view-regression-0-msvc-optimized.exe",
+      "imageSHA256": "76804307a0b64355f3ff789b72821c239ec301ac3610fb29a875eb2a1c5ce4bd",
+      "exit": 7,
+      "stdout": "",
+      "stderr": "",
+      "stdoutBytes": "",
+      "stderrBytes": "",
+      "trap": 0,
+      "value": 7
+    },
+    {
+      "name": "bounds-empty-0",
+      "profile": "low",
+      "compiler": "msvc",
+      "compilerPath": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+      "compilerVersion": "14.51.36231",
+      "source": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\bounds-empty-0.c",
+      "sourceSHA256": "21e3b4d221588593353b38c232088dd1783489a63e253bd39e3f51394de29fab",
+      "runtimeSHA256": "d233e0cbcd5c1846121117d8a8dba7f72191d48b2c628aa1632eabcd8ea774f3",
+      "foreignSource": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\runtime.c",
+      "foreignSHA256": "e94210ee33be5e2af6d5199fc52f0ccd4833742c1ed2369faba9f7462bde5dd2",
+      "image": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\native\\bounds-empty-0-msvc-low.exe",
+      "imageSHA256": "284bb7e4e30f6f88402de6cc11a5658d97d15d9939c2aff15d4cf9bc7c980232",
+      "exit": 126,
+      "stdout": "",
+      "stderr": "",
+      "stdoutBytes": "",
+      "stderrBytes": "",
+      "trap": 6,
+      "value": 0
+    },
+    {
+      "name": "bounds-empty-0",
+      "profile": "optimized",
+      "compiler": "msvc",
+      "compilerPath": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+      "compilerVersion": "14.51.36231",
+      "source": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\bounds-empty-0.c",
+      "sourceSHA256": "21e3b4d221588593353b38c232088dd1783489a63e253bd39e3f51394de29fab",
+      "runtimeSHA256": "d233e0cbcd5c1846121117d8a8dba7f72191d48b2c628aa1632eabcd8ea774f3",
+      "foreignSource": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\runtime.c",
+      "foreignSHA256": "e94210ee33be5e2af6d5199fc52f0ccd4833742c1ed2369faba9f7462bde5dd2",
+      "image": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\native\\bounds-empty-0-msvc-optimized.exe",
+      "imageSHA256": "047873db71bce12bc9cbc715afca26f830741773fd779964b946e037e2afbf94",
+      "exit": 126,
+      "stdout": "",
+      "stderr": "",
+      "stdoutBytes": "",
+      "stderrBytes": "",
+      "trap": 6,
+      "value": 0
+    },
+    {
+      "name": "bounds-prefix-0",
+      "profile": "low",
+      "compiler": "msvc",
+      "compilerPath": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+      "compilerVersion": "14.51.36231",
+      "source": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\bounds-prefix-0.c",
+      "sourceSHA256": "d6501de810264ec9eccb82aae0c3391a94520003fa2db3f82b0c0cf818648adf",
+      "runtimeSHA256": "d233e0cbcd5c1846121117d8a8dba7f72191d48b2c628aa1632eabcd8ea774f3",
+      "foreignSource": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\runtime.c",
+      "foreignSHA256": "e94210ee33be5e2af6d5199fc52f0ccd4833742c1ed2369faba9f7462bde5dd2",
+      "image": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\native\\bounds-prefix-0-msvc-low.exe",
+      "imageSHA256": "6e8b1c4b7a0a5acffdede96088028925fe2091b3affedb6a993f54d644e951c1",
+      "exit": 126,
+      "stdout": "",
+      "stderr": "",
+      "stdoutBytes": "",
+      "stderrBytes": "",
+      "trap": 6,
+      "value": 0
+    },
+    {
+      "name": "bounds-prefix-0",
+      "profile": "optimized",
+      "compiler": "msvc",
+      "compilerPath": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+      "compilerVersion": "14.51.36231",
+      "source": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\bounds-prefix-0.c",
+      "sourceSHA256": "d6501de810264ec9eccb82aae0c3391a94520003fa2db3f82b0c0cf818648adf",
+      "runtimeSHA256": "d233e0cbcd5c1846121117d8a8dba7f72191d48b2c628aa1632eabcd8ea774f3",
+      "foreignSource": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\runtime.c",
+      "foreignSHA256": "e94210ee33be5e2af6d5199fc52f0ccd4833742c1ed2369faba9f7462bde5dd2",
+      "image": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\native\\bounds-prefix-0-msvc-optimized.exe",
+      "imageSHA256": "05960e820975b7696f1b8dd20a6ee989c709ea392371617906d9ef4f9d6a91a5",
+      "exit": 126,
+      "stdout": "",
+      "stderr": "",
+      "stdoutBytes": "",
+      "stderrBytes": "",
+      "trap": 6,
+      "value": 0
+    },
+    {
+      "name": "bounds-range-0",
+      "profile": "low",
+      "compiler": "msvc",
+      "compilerPath": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+      "compilerVersion": "14.51.36231",
+      "source": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\bounds-range-0.c",
+      "sourceSHA256": "452f63aaca3f4155bcd2c06175e96bea29ec1955e01d2505e34099ea909c143f",
+      "runtimeSHA256": "d233e0cbcd5c1846121117d8a8dba7f72191d48b2c628aa1632eabcd8ea774f3",
+      "foreignSource": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\runtime.c",
+      "foreignSHA256": "e94210ee33be5e2af6d5199fc52f0ccd4833742c1ed2369faba9f7462bde5dd2",
+      "image": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\native\\bounds-range-0-msvc-low.exe",
+      "imageSHA256": "3d75771a462de2d202530ec90dc54c44be59c273e0dba0f0fb64b150c0a38d24",
+      "exit": 126,
+      "stdout": "",
+      "stderr": "",
+      "stdoutBytes": "",
+      "stderrBytes": "",
+      "trap": 6,
+      "value": 0
+    },
+    {
+      "name": "bounds-range-0",
+      "profile": "optimized",
+      "compiler": "msvc",
+      "compilerPath": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+      "compilerVersion": "14.51.36231",
+      "source": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\bounds-range-0.c",
+      "sourceSHA256": "452f63aaca3f4155bcd2c06175e96bea29ec1955e01d2505e34099ea909c143f",
+      "runtimeSHA256": "d233e0cbcd5c1846121117d8a8dba7f72191d48b2c628aa1632eabcd8ea774f3",
+      "foreignSource": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\runtime.c",
+      "foreignSHA256": "e94210ee33be5e2af6d5199fc52f0ccd4833742c1ed2369faba9f7462bde5dd2",
+      "image": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\native\\bounds-range-0-msvc-optimized.exe",
+      "imageSHA256": "aa4d58c4ecf834cf695ec0fab1b1fae4cce278878af36e01e0237ff6a24c9a75",
+      "exit": 126,
+      "stdout": "",
+      "stderr": "",
+      "stdoutBytes": "",
+      "stderrBytes": "",
+      "trap": 6,
+      "value": 0
+    },
+    {
+      "name": "scalar-i32-0",
+      "profile": "low",
+      "compiler": "msvc",
+      "compilerPath": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+      "compilerVersion": "14.51.36231",
+      "source": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\scalar-i32-0.c",
+      "sourceSHA256": "8b7257bfdf1d50edf2afb210a872cc98fd81623b5d6e148b38121e1dd9e9a89d",
+      "runtimeSHA256": "d233e0cbcd5c1846121117d8a8dba7f72191d48b2c628aa1632eabcd8ea774f3",
+      "foreignSource": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\runtime.c",
+      "foreignSHA256": "e94210ee33be5e2af6d5199fc52f0ccd4833742c1ed2369faba9f7462bde5dd2",
+      "image": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\native\\scalar-i32-0-msvc-low.exe",
+      "imageSHA256": "d24b946f00633b199efae9c3166a1bf0b408398756562fee0ee55a870814cc7c",
+      "exit": 7,
+      "stdout": "",
+      "stderr": "",
+      "stdoutBytes": "",
+      "stderrBytes": "",
+      "trap": 0,
+      "value": 7
+    },
+    {
+      "name": "scalar-i32-0",
+      "profile": "optimized",
+      "compiler": "msvc",
+      "compilerPath": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+      "compilerVersion": "14.51.36231",
+      "source": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\scalar-i32-0.c",
+      "sourceSHA256": "8b7257bfdf1d50edf2afb210a872cc98fd81623b5d6e148b38121e1dd9e9a89d",
+      "runtimeSHA256": "d233e0cbcd5c1846121117d8a8dba7f72191d48b2c628aa1632eabcd8ea774f3",
+      "foreignSource": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\runtime.c",
+      "foreignSHA256": "e94210ee33be5e2af6d5199fc52f0ccd4833742c1ed2369faba9f7462bde5dd2",
+      "image": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\native\\scalar-i32-0-msvc-optimized.exe",
+      "imageSHA256": "b51eb5ced5c71eeebf17327743625cb7a26191245b20beb75efa1fb0fe6f6be0",
+      "exit": 7,
+      "stdout": "",
+      "stderr": "",
+      "stdoutBytes": "",
+      "stderrBytes": "",
+      "trap": 0,
+      "value": 7
+    },
+    {
+      "name": "bounds-i32-0",
+      "profile": "low",
+      "compiler": "msvc",
+      "compilerPath": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+      "compilerVersion": "14.51.36231",
+      "source": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\bounds-i32-0.c",
+      "sourceSHA256": "6d52c3a4db7fe57c124d5b2eff965969813f41b03102e80be6d057d28ecccdd0",
+      "runtimeSHA256": "d233e0cbcd5c1846121117d8a8dba7f72191d48b2c628aa1632eabcd8ea774f3",
+      "foreignSource": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\runtime.c",
+      "foreignSHA256": "e94210ee33be5e2af6d5199fc52f0ccd4833742c1ed2369faba9f7462bde5dd2",
+      "image": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\native\\bounds-i32-0-msvc-low.exe",
+      "imageSHA256": "dda9e740d2144b2deda477c6623f4a0422d2aeba7b59bfe16920bce6a12fd631",
+      "exit": 126,
+      "stdout": "",
+      "stderr": "",
+      "stdoutBytes": "",
+      "stderrBytes": "",
+      "trap": 6,
+      "value": 0
+    },
+    {
+      "name": "bounds-i32-0",
+      "profile": "optimized",
+      "compiler": "msvc",
+      "compilerPath": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+      "compilerVersion": "14.51.36231",
+      "source": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\bounds-i32-0.c",
+      "sourceSHA256": "6d52c3a4db7fe57c124d5b2eff965969813f41b03102e80be6d057d28ecccdd0",
+      "runtimeSHA256": "d233e0cbcd5c1846121117d8a8dba7f72191d48b2c628aa1632eabcd8ea774f3",
+      "foreignSource": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\runtime.c",
+      "foreignSHA256": "e94210ee33be5e2af6d5199fc52f0ccd4833742c1ed2369faba9f7462bde5dd2",
+      "image": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\native\\bounds-i32-0-msvc-optimized.exe",
+      "imageSHA256": "e132b12c29c470952bc1b330afe73efb30806883caced1a9b0faff1cd94a1690",
+      "exit": 126,
+      "stdout": "",
+      "stderr": "",
+      "stdoutBytes": "",
+      "stderrBytes": "",
+      "trap": 6,
+      "value": 0
+    },
+    {
+      "name": "scalar-i64-0",
+      "profile": "low",
+      "compiler": "msvc",
+      "compilerPath": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+      "compilerVersion": "14.51.36231",
+      "source": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\scalar-i64-0.c",
+      "sourceSHA256": "8b29bd10de8e8841f97398d214bf2b2187f5390bc79fbe2e711a664b1757db8b",
+      "runtimeSHA256": "d233e0cbcd5c1846121117d8a8dba7f72191d48b2c628aa1632eabcd8ea774f3",
+      "foreignSource": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\runtime.c",
+      "foreignSHA256": "e94210ee33be5e2af6d5199fc52f0ccd4833742c1ed2369faba9f7462bde5dd2",
+      "image": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\native\\scalar-i64-0-msvc-low.exe",
+      "imageSHA256": "2a331b805282eb4abbeac90cc70b2b7e58362e818cf5ac6f9d069d4d4a09ee1f",
+      "exit": 7,
+      "stdout": "",
+      "stderr": "",
+      "stdoutBytes": "",
+      "stderrBytes": "",
+      "trap": 0,
+      "value": 7
+    },
+    {
+      "name": "scalar-i64-0",
+      "profile": "optimized",
+      "compiler": "msvc",
+      "compilerPath": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+      "compilerVersion": "14.51.36231",
+      "source": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\scalar-i64-0.c",
+      "sourceSHA256": "8b29bd10de8e8841f97398d214bf2b2187f5390bc79fbe2e711a664b1757db8b",
+      "runtimeSHA256": "d233e0cbcd5c1846121117d8a8dba7f72191d48b2c628aa1632eabcd8ea774f3",
+      "foreignSource": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\runtime.c",
+      "foreignSHA256": "e94210ee33be5e2af6d5199fc52f0ccd4833742c1ed2369faba9f7462bde5dd2",
+      "image": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\native\\scalar-i64-0-msvc-optimized.exe",
+      "imageSHA256": "45019a77fd887174a171fd81f71c147e94308983a142cab3a53c27de40d63aeb",
+      "exit": 7,
+      "stdout": "",
+      "stderr": "",
+      "stdoutBytes": "",
+      "stderrBytes": "",
+      "trap": 0,
+      "value": 7
+    },
+    {
+      "name": "bounds-i64-0",
+      "profile": "low",
+      "compiler": "msvc",
+      "compilerPath": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+      "compilerVersion": "14.51.36231",
+      "source": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\bounds-i64-0.c",
+      "sourceSHA256": "c95cecbcc2107b714521cb3b50883df039a4be23f2b7c017f1f2ed5a56ef5821",
+      "runtimeSHA256": "d233e0cbcd5c1846121117d8a8dba7f72191d48b2c628aa1632eabcd8ea774f3",
+      "foreignSource": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\runtime.c",
+      "foreignSHA256": "e94210ee33be5e2af6d5199fc52f0ccd4833742c1ed2369faba9f7462bde5dd2",
+      "image": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\native\\bounds-i64-0-msvc-low.exe",
+      "imageSHA256": "8287fb2713d074dffe4a84b979589241d82298ff6bd21ccdafe1e236a7145518",
+      "exit": 126,
+      "stdout": "",
+      "stderr": "",
+      "stdoutBytes": "",
+      "stderrBytes": "",
+      "trap": 6,
+      "value": 0
+    },
+    {
+      "name": "bounds-i64-0",
+      "profile": "optimized",
+      "compiler": "msvc",
+      "compilerPath": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+      "compilerVersion": "14.51.36231",
+      "source": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\bounds-i64-0.c",
+      "sourceSHA256": "c95cecbcc2107b714521cb3b50883df039a4be23f2b7c017f1f2ed5a56ef5821",
+      "runtimeSHA256": "d233e0cbcd5c1846121117d8a8dba7f72191d48b2c628aa1632eabcd8ea774f3",
+      "foreignSource": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\runtime.c",
+      "foreignSHA256": "e94210ee33be5e2af6d5199fc52f0ccd4833742c1ed2369faba9f7462bde5dd2",
+      "image": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\native\\bounds-i64-0-msvc-optimized.exe",
+      "imageSHA256": "c443de454bdd9864754126d28908368eb9390c97890b55f5064d6ba4376a9b5c",
+      "exit": 126,
+      "stdout": "",
+      "stderr": "",
+      "stdoutBytes": "",
+      "stderrBytes": "",
+      "trap": 6,
+      "value": 0
+    },
+    {
+      "name": "scalar-u32-0",
+      "profile": "low",
+      "compiler": "msvc",
+      "compilerPath": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+      "compilerVersion": "14.51.36231",
+      "source": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\scalar-u32-0.c",
+      "sourceSHA256": "5b09f8f4d7663a20d448b72227053c1af69c806cc59d2d25fc7386ce76b2f8ff",
+      "runtimeSHA256": "d233e0cbcd5c1846121117d8a8dba7f72191d48b2c628aa1632eabcd8ea774f3",
+      "foreignSource": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\runtime.c",
+      "foreignSHA256": "e94210ee33be5e2af6d5199fc52f0ccd4833742c1ed2369faba9f7462bde5dd2",
+      "image": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\native\\scalar-u32-0-msvc-low.exe",
+      "imageSHA256": "369280f6a248da6897f6f5baf0dc9690603c8bbcf9871727220e7981f433b419",
+      "exit": 7,
+      "stdout": "",
+      "stderr": "",
+      "stdoutBytes": "",
+      "stderrBytes": "",
+      "trap": 0,
+      "value": 7
+    },
+    {
+      "name": "scalar-u32-0",
+      "profile": "optimized",
+      "compiler": "msvc",
+      "compilerPath": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+      "compilerVersion": "14.51.36231",
+      "source": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\scalar-u32-0.c",
+      "sourceSHA256": "5b09f8f4d7663a20d448b72227053c1af69c806cc59d2d25fc7386ce76b2f8ff",
+      "runtimeSHA256": "d233e0cbcd5c1846121117d8a8dba7f72191d48b2c628aa1632eabcd8ea774f3",
+      "foreignSource": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\runtime.c",
+      "foreignSHA256": "e94210ee33be5e2af6d5199fc52f0ccd4833742c1ed2369faba9f7462bde5dd2",
+      "image": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\native\\scalar-u32-0-msvc-optimized.exe",
+      "imageSHA256": "00a073d0c26cf96b38f03a0efefd36502ed85862e6589c69b2df649fc792e823",
+      "exit": 7,
+      "stdout": "",
+      "stderr": "",
+      "stdoutBytes": "",
+      "stderrBytes": "",
+      "trap": 0,
+      "value": 7
+    },
+    {
+      "name": "bounds-u32-0",
+      "profile": "low",
+      "compiler": "msvc",
+      "compilerPath": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+      "compilerVersion": "14.51.36231",
+      "source": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\bounds-u32-0.c",
+      "sourceSHA256": "58730e0d8169a2213af77eac85fcde3f1cc83c099a97645c00750c339d33e0cb",
+      "runtimeSHA256": "d233e0cbcd5c1846121117d8a8dba7f72191d48b2c628aa1632eabcd8ea774f3",
+      "foreignSource": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\runtime.c",
+      "foreignSHA256": "e94210ee33be5e2af6d5199fc52f0ccd4833742c1ed2369faba9f7462bde5dd2",
+      "image": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\native\\bounds-u32-0-msvc-low.exe",
+      "imageSHA256": "de27412b210d778f3a067f5308fb4f9c84fd0d7e7c8a95aaff6e49f93d6c5f3d",
+      "exit": 126,
+      "stdout": "",
+      "stderr": "",
+      "stdoutBytes": "",
+      "stderrBytes": "",
+      "trap": 6,
+      "value": 0
+    },
+    {
+      "name": "bounds-u32-0",
+      "profile": "optimized",
+      "compiler": "msvc",
+      "compilerPath": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+      "compilerVersion": "14.51.36231",
+      "source": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\bounds-u32-0.c",
+      "sourceSHA256": "58730e0d8169a2213af77eac85fcde3f1cc83c099a97645c00750c339d33e0cb",
+      "runtimeSHA256": "d233e0cbcd5c1846121117d8a8dba7f72191d48b2c628aa1632eabcd8ea774f3",
+      "foreignSource": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\runtime.c",
+      "foreignSHA256": "e94210ee33be5e2af6d5199fc52f0ccd4833742c1ed2369faba9f7462bde5dd2",
+      "image": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\native\\bounds-u32-0-msvc-optimized.exe",
+      "imageSHA256": "fc1d8117036119da86f1d90d561827a4cd99322d36d93cff806a034bc0f361dc",
+      "exit": 126,
+      "stdout": "",
+      "stderr": "",
+      "stdoutBytes": "",
+      "stderrBytes": "",
+      "trap": 6,
+      "value": 0
+    },
+    {
+      "name": "scalar-usize-0",
+      "profile": "low",
+      "compiler": "msvc",
+      "compilerPath": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+      "compilerVersion": "14.51.36231",
+      "source": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\scalar-usize-0.c",
+      "sourceSHA256": "5d1f91c6f740c5465c1e2eaf0cacfc5db23b9b6e51fe2e77e77ebb794135395e",
+      "runtimeSHA256": "d233e0cbcd5c1846121117d8a8dba7f72191d48b2c628aa1632eabcd8ea774f3",
+      "foreignSource": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\runtime.c",
+      "foreignSHA256": "e94210ee33be5e2af6d5199fc52f0ccd4833742c1ed2369faba9f7462bde5dd2",
+      "image": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\native\\scalar-usize-0-msvc-low.exe",
+      "imageSHA256": "30d6bce9533cc1749deeee0169fb1d5760896df1f9406b41564b15f33b0de052",
+      "exit": 7,
+      "stdout": "",
+      "stderr": "",
+      "stdoutBytes": "",
+      "stderrBytes": "",
+      "trap": 0,
+      "value": 7
+    },
+    {
+      "name": "scalar-usize-0",
+      "profile": "optimized",
+      "compiler": "msvc",
+      "compilerPath": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+      "compilerVersion": "14.51.36231",
+      "source": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\scalar-usize-0.c",
+      "sourceSHA256": "5d1f91c6f740c5465c1e2eaf0cacfc5db23b9b6e51fe2e77e77ebb794135395e",
+      "runtimeSHA256": "d233e0cbcd5c1846121117d8a8dba7f72191d48b2c628aa1632eabcd8ea774f3",
+      "foreignSource": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\runtime.c",
+      "foreignSHA256": "e94210ee33be5e2af6d5199fc52f0ccd4833742c1ed2369faba9f7462bde5dd2",
+      "image": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\native\\scalar-usize-0-msvc-optimized.exe",
+      "imageSHA256": "824704296e14d2c5bccbb775ee6f17bb14e455038d4841a177806eefa42192b7",
+      "exit": 7,
+      "stdout": "",
+      "stderr": "",
+      "stdoutBytes": "",
+      "stderrBytes": "",
+      "trap": 0,
+      "value": 7
+    },
+    {
+      "name": "bounds-usize-0",
+      "profile": "low",
+      "compiler": "msvc",
+      "compilerPath": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+      "compilerVersion": "14.51.36231",
+      "source": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\bounds-usize-0.c",
+      "sourceSHA256": "2faa48ab2449ef3e80b58429a94da8e6360a152142cec98965517b726a71efe2",
+      "runtimeSHA256": "d233e0cbcd5c1846121117d8a8dba7f72191d48b2c628aa1632eabcd8ea774f3",
+      "foreignSource": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\runtime.c",
+      "foreignSHA256": "e94210ee33be5e2af6d5199fc52f0ccd4833742c1ed2369faba9f7462bde5dd2",
+      "image": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\native\\bounds-usize-0-msvc-low.exe",
+      "imageSHA256": "c10e85a167016667daa2873a4feb6b773cd7c51db2b784e7c1c4f1fd96f661e5",
+      "exit": 126,
+      "stdout": "",
+      "stderr": "",
+      "stdoutBytes": "",
+      "stderrBytes": "",
+      "trap": 6,
+      "value": 0
+    },
+    {
+      "name": "bounds-usize-0",
+      "profile": "optimized",
+      "compiler": "msvc",
+      "compilerPath": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+      "compilerVersion": "14.51.36231",
+      "source": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\bounds-usize-0.c",
+      "sourceSHA256": "2faa48ab2449ef3e80b58429a94da8e6360a152142cec98965517b726a71efe2",
+      "runtimeSHA256": "d233e0cbcd5c1846121117d8a8dba7f72191d48b2c628aa1632eabcd8ea774f3",
+      "foreignSource": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\runtime.c",
+      "foreignSHA256": "e94210ee33be5e2af6d5199fc52f0ccd4833742c1ed2369faba9f7462bde5dd2",
+      "image": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\native\\bounds-usize-0-msvc-optimized.exe",
+      "imageSHA256": "2be309ca562a7618d4b7642f738e7f2b1a6316e864081f7e2ce9f4e176658cc8",
+      "exit": 126,
+      "stdout": "",
+      "stderr": "",
+      "stdoutBytes": "",
+      "stderrBytes": "",
+      "trap": 6,
+      "value": 0
+    },
+    {
+      "name": "scalar-bool-0",
+      "profile": "low",
+      "compiler": "msvc",
+      "compilerPath": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+      "compilerVersion": "14.51.36231",
+      "source": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\scalar-bool-0.c",
+      "sourceSHA256": "154808164a1e90adf2c2efa00f14ba7ed7780cddfb9ac1159cfc983e8cce9170",
+      "runtimeSHA256": "d233e0cbcd5c1846121117d8a8dba7f72191d48b2c628aa1632eabcd8ea774f3",
+      "foreignSource": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\runtime.c",
+      "foreignSHA256": "e94210ee33be5e2af6d5199fc52f0ccd4833742c1ed2369faba9f7462bde5dd2",
+      "image": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\native\\scalar-bool-0-msvc-low.exe",
+      "imageSHA256": "064eba3d6d1a517cbd7b2ef77c5c2507417caae5f622602aec6f3e9dc8958984",
+      "exit": 7,
+      "stdout": "",
+      "stderr": "",
+      "stdoutBytes": "",
+      "stderrBytes": "",
+      "trap": 0,
+      "value": 7
+    },
+    {
+      "name": "scalar-bool-0",
+      "profile": "optimized",
+      "compiler": "msvc",
+      "compilerPath": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+      "compilerVersion": "14.51.36231",
+      "source": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\scalar-bool-0.c",
+      "sourceSHA256": "154808164a1e90adf2c2efa00f14ba7ed7780cddfb9ac1159cfc983e8cce9170",
+      "runtimeSHA256": "d233e0cbcd5c1846121117d8a8dba7f72191d48b2c628aa1632eabcd8ea774f3",
+      "foreignSource": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\runtime.c",
+      "foreignSHA256": "e94210ee33be5e2af6d5199fc52f0ccd4833742c1ed2369faba9f7462bde5dd2",
+      "image": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\native\\scalar-bool-0-msvc-optimized.exe",
+      "imageSHA256": "6325c5cd0216c574ab87417f38a19d614077b11f0be97bfa959dded4e3a28bd7",
+      "exit": 7,
+      "stdout": "",
+      "stderr": "",
+      "stdoutBytes": "",
+      "stderrBytes": "",
+      "trap": 0,
+      "value": 7
+    },
+    {
+      "name": "bounds-bool-0",
+      "profile": "low",
+      "compiler": "msvc",
+      "compilerPath": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+      "compilerVersion": "14.51.36231",
+      "source": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\bounds-bool-0.c",
+      "sourceSHA256": "d89fc5adb5a9be93f52b12f53d07c0216c903bff09d8136360fd45f29b8e5d37",
+      "runtimeSHA256": "d233e0cbcd5c1846121117d8a8dba7f72191d48b2c628aa1632eabcd8ea774f3",
+      "foreignSource": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\runtime.c",
+      "foreignSHA256": "e94210ee33be5e2af6d5199fc52f0ccd4833742c1ed2369faba9f7462bde5dd2",
+      "image": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\native\\bounds-bool-0-msvc-low.exe",
+      "imageSHA256": "3c69d94d6b74bfb5c40aebc37af134bfda12b1cb0fb5d8f55654f9d1f9bf7f3c",
+      "exit": 126,
+      "stdout": "",
+      "stderr": "",
+      "stdoutBytes": "",
+      "stderrBytes": "",
+      "trap": 6,
+      "value": 0
+    },
+    {
+      "name": "bounds-bool-0",
+      "profile": "optimized",
+      "compiler": "msvc",
+      "compilerPath": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+      "compilerVersion": "14.51.36231",
+      "source": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\bounds-bool-0.c",
+      "sourceSHA256": "d89fc5adb5a9be93f52b12f53d07c0216c903bff09d8136360fd45f29b8e5d37",
+      "runtimeSHA256": "d233e0cbcd5c1846121117d8a8dba7f72191d48b2c628aa1632eabcd8ea774f3",
+      "foreignSource": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\runtime.c",
+      "foreignSHA256": "e94210ee33be5e2af6d5199fc52f0ccd4833742c1ed2369faba9f7462bde5dd2",
+      "image": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\native\\bounds-bool-0-msvc-optimized.exe",
+      "imageSHA256": "3a36107d38581143782cec66b51622266937a372c98c90a6f6e7b8ac7866c9b6",
+      "exit": 126,
+      "stdout": "",
+      "stderr": "",
+      "stdoutBytes": "",
+      "stderrBytes": "",
+      "trap": 6,
+      "value": 0
+    },
+    {
+      "name": "named-i32-0",
+      "profile": "low",
+      "compiler": "msvc",
+      "compilerPath": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+      "compilerVersion": "14.51.36231",
+      "source": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\named-i32-0.c",
+      "sourceSHA256": "dba28631c29b995cb05e040575c1fe265d8918c9df6af0171915b7553327a8dd",
+      "runtimeSHA256": "d233e0cbcd5c1846121117d8a8dba7f72191d48b2c628aa1632eabcd8ea774f3",
+      "foreignSource": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\runtime.c",
+      "foreignSHA256": "e94210ee33be5e2af6d5199fc52f0ccd4833742c1ed2369faba9f7462bde5dd2",
+      "image": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\native\\named-i32-0-msvc-low.exe",
+      "imageSHA256": "6fc7e511e975f3c5f9caeb12bbf0b1dff5bd9f3ccf3bf46f41a8cdf72b650d46",
+      "exit": 7,
+      "stdout": "",
+      "stderr": "",
+      "stdoutBytes": "",
+      "stderrBytes": "",
+      "trap": 0,
+      "value": 7
+    },
+    {
+      "name": "named-i32-0",
+      "profile": "optimized",
+      "compiler": "msvc",
+      "compilerPath": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+      "compilerVersion": "14.51.36231",
+      "source": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\named-i32-0.c",
+      "sourceSHA256": "dba28631c29b995cb05e040575c1fe265d8918c9df6af0171915b7553327a8dd",
+      "runtimeSHA256": "d233e0cbcd5c1846121117d8a8dba7f72191d48b2c628aa1632eabcd8ea774f3",
+      "foreignSource": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\runtime.c",
+      "foreignSHA256": "e94210ee33be5e2af6d5199fc52f0ccd4833742c1ed2369faba9f7462bde5dd2",
+      "image": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\native\\named-i32-0-msvc-optimized.exe",
+      "imageSHA256": "877c17ad9a66ff5c0f005cda7bf49c4887fba873478d1f520217bee756818f52",
+      "exit": 7,
+      "stdout": "",
+      "stderr": "",
+      "stdoutBytes": "",
+      "stderrBytes": "",
+      "trap": 0,
+      "value": 7
+    },
+    {
+      "name": "named-i64-0",
+      "profile": "low",
+      "compiler": "msvc",
+      "compilerPath": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+      "compilerVersion": "14.51.36231",
+      "source": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\named-i64-0.c",
+      "sourceSHA256": "739f85af50057acf4b1743122b20a2de28e82d21f4a2165aba50c4066f085564",
+      "runtimeSHA256": "d233e0cbcd5c1846121117d8a8dba7f72191d48b2c628aa1632eabcd8ea774f3",
+      "foreignSource": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\runtime.c",
+      "foreignSHA256": "e94210ee33be5e2af6d5199fc52f0ccd4833742c1ed2369faba9f7462bde5dd2",
+      "image": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\native\\named-i64-0-msvc-low.exe",
+      "imageSHA256": "50c58b27764ee0c5da837ca259a8c61e2d29440c2e1c6dce5fa47ea4e3b69289",
+      "exit": 7,
+      "stdout": "",
+      "stderr": "",
+      "stdoutBytes": "",
+      "stderrBytes": "",
+      "trap": 0,
+      "value": 7
+    },
+    {
+      "name": "named-i64-0",
+      "profile": "optimized",
+      "compiler": "msvc",
+      "compilerPath": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+      "compilerVersion": "14.51.36231",
+      "source": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\named-i64-0.c",
+      "sourceSHA256": "739f85af50057acf4b1743122b20a2de28e82d21f4a2165aba50c4066f085564",
+      "runtimeSHA256": "d233e0cbcd5c1846121117d8a8dba7f72191d48b2c628aa1632eabcd8ea774f3",
+      "foreignSource": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\runtime.c",
+      "foreignSHA256": "e94210ee33be5e2af6d5199fc52f0ccd4833742c1ed2369faba9f7462bde5dd2",
+      "image": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\native\\named-i64-0-msvc-optimized.exe",
+      "imageSHA256": "3d27296fb3406b534e19c15639491ae32a6fce5dd4d7b69d44469fd4a8972d54",
+      "exit": 7,
+      "stdout": "",
+      "stderr": "",
+      "stdoutBytes": "",
+      "stderrBytes": "",
+      "trap": 0,
+      "value": 7
+    },
+    {
+      "name": "named-u32-0",
+      "profile": "low",
+      "compiler": "msvc",
+      "compilerPath": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+      "compilerVersion": "14.51.36231",
+      "source": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\named-u32-0.c",
+      "sourceSHA256": "478b024cd03711f56c8239bb02073529c35e5f9e7491bbe0ee80b13408a312ba",
+      "runtimeSHA256": "d233e0cbcd5c1846121117d8a8dba7f72191d48b2c628aa1632eabcd8ea774f3",
+      "foreignSource": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\runtime.c",
+      "foreignSHA256": "e94210ee33be5e2af6d5199fc52f0ccd4833742c1ed2369faba9f7462bde5dd2",
+      "image": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\native\\named-u32-0-msvc-low.exe",
+      "imageSHA256": "49d640d0b29396ca6e0d1c3f93a5ce06445daa108b14f014150fedb70ba8767f",
+      "exit": 7,
+      "stdout": "",
+      "stderr": "",
+      "stdoutBytes": "",
+      "stderrBytes": "",
+      "trap": 0,
+      "value": 7
+    },
+    {
+      "name": "named-u32-0",
+      "profile": "optimized",
+      "compiler": "msvc",
+      "compilerPath": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+      "compilerVersion": "14.51.36231",
+      "source": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\named-u32-0.c",
+      "sourceSHA256": "478b024cd03711f56c8239bb02073529c35e5f9e7491bbe0ee80b13408a312ba",
+      "runtimeSHA256": "d233e0cbcd5c1846121117d8a8dba7f72191d48b2c628aa1632eabcd8ea774f3",
+      "foreignSource": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\runtime.c",
+      "foreignSHA256": "e94210ee33be5e2af6d5199fc52f0ccd4833742c1ed2369faba9f7462bde5dd2",
+      "image": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\native\\named-u32-0-msvc-optimized.exe",
+      "imageSHA256": "ffe847d38cea3684f52d036eb0239402c543f5c6684a7ebb8a08ad730e593268",
+      "exit": 7,
+      "stdout": "",
+      "stderr": "",
+      "stdoutBytes": "",
+      "stderrBytes": "",
+      "trap": 0,
+      "value": 7
+    },
+    {
+      "name": "named-usize-0",
+      "profile": "low",
+      "compiler": "msvc",
+      "compilerPath": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+      "compilerVersion": "14.51.36231",
+      "source": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\named-usize-0.c",
+      "sourceSHA256": "d6463445daba91807ce3f8d6365ea19be2b24b31a4243c6158cf3521ee486cc6",
+      "runtimeSHA256": "d233e0cbcd5c1846121117d8a8dba7f72191d48b2c628aa1632eabcd8ea774f3",
+      "foreignSource": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\runtime.c",
+      "foreignSHA256": "e94210ee33be5e2af6d5199fc52f0ccd4833742c1ed2369faba9f7462bde5dd2",
+      "image": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\native\\named-usize-0-msvc-low.exe",
+      "imageSHA256": "3c74508f5270502d1ad0630cfdf502c971409b313e69cce318dc7213d3efbe0b",
+      "exit": 7,
+      "stdout": "",
+      "stderr": "",
+      "stdoutBytes": "",
+      "stderrBytes": "",
+      "trap": 0,
+      "value": 7
+    },
+    {
+      "name": "named-usize-0",
+      "profile": "optimized",
+      "compiler": "msvc",
+      "compilerPath": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+      "compilerVersion": "14.51.36231",
+      "source": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\named-usize-0.c",
+      "sourceSHA256": "d6463445daba91807ce3f8d6365ea19be2b24b31a4243c6158cf3521ee486cc6",
+      "runtimeSHA256": "d233e0cbcd5c1846121117d8a8dba7f72191d48b2c628aa1632eabcd8ea774f3",
+      "foreignSource": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\runtime.c",
+      "foreignSHA256": "e94210ee33be5e2af6d5199fc52f0ccd4833742c1ed2369faba9f7462bde5dd2",
+      "image": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\vector-scalar-views\\native\\named-usize-0-msvc-optimized.exe",
+      "imageSHA256": "fa14e6339774377f9bc8b26de52b1d601beca63e0be273c5a1b77077e80c7546",
+      "exit": 7,
+      "stdout": "",
+      "stderr": "",
+      "stdoutBytes": "",
+      "stderrBytes": "",
+      "trap": 0,
+      "value": 7
+    }
+  ],
+  "linuxValidated": false
+}

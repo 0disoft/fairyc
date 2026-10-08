@@ -1,4 +1,5 @@
 module mir_verify_views;
+import scalar_views as views;
 import borrow_shapes as borrows;
 import reference_types as refs;
 import mir_model as m;
@@ -9,10 +10,10 @@ import std::vec as v;
 fn bool byte_view(u32 type){return borrows::count(type)!=0;}
 fn bool local(ref m::Program p, usize id, usize function, u32 type) { return id>0 && id<=m::local_count(p) && m::local_at(p,id).function==function && m::local_at(p,id).type==type; }
 pub fn bool operation(ref m::Program p, m::Operation o) {
-    if(o.kind==20){return o.result==0 && o.type==3 && o.owner_type==11 && local(p,o.left,o.function,11) && local(p,o.right,o.function,5) && o.argument_count==1 && local(p,m::edge_at(p,o.argument_start),o.function,3) && o.operator==0 && !o.boolean && o.payload_start==0 && o.payload_end==0;}
-    if((o.type!=10 && o.type!=11) || !local(p,o.result,o.function,o.type) || o.operator!=0 || o.boolean || o.payload_start!=0 || o.payload_end!=0){return false;}
-    if(o.kind==18 && refs::valid(o.owner_type)){return refs::byte_array(refs::inner(o.owner_type)) && local(p,o.left,o.function,o.owner_type) && (o.type!=11 || refs::mutable(o.owner_type)) && o.right==0 && o.argument_start==0 && o.argument_count==0;}
-    if(o.kind==18){return arrays::valid(o.owner_type) && shapes::array_element(m::nominal(p),o.owner_type)==3 && local(p,o.left,o.function,o.owner_type) && m::local_at(p,o.left).binding!=0 && (o.type!=11 || m::local_at(p,o.left).mutable) && o.right==0 && o.argument_start==0 && o.argument_count==0;}
+    if(o.kind==20){return o.result==0 && views::mutable(o.owner_type) && o.type==views::element(o.owner_type) && local(p,o.left,o.function,o.owner_type) && local(p,o.right,o.function,5) && o.argument_count==1 && local(p,m::edge_at(p,o.argument_start),o.function,o.type) && o.operator==0 && !o.boolean && o.payload_start==0 && o.payload_end==0;}
+    if(!views::valid(o.type) || !local(p,o.result,o.function,o.type) || o.operator!=0 || o.boolean || o.payload_start!=0 || o.payload_end!=0){return false;}
+    if(o.kind==18 && refs::valid(o.owner_type)){return arrays::valid(refs::inner(o.owner_type)) && shapes::array_element(m::nominal(p),refs::inner(o.owner_type))==views::element(o.type) && local(p,o.left,o.function,o.owner_type) && (!views::mutable(o.type) || refs::mutable(o.owner_type)) && o.right==0 && o.argument_start==0 && o.argument_count==0;}
+    if(o.kind==18){return arrays::valid(o.owner_type) && shapes::array_element(m::nominal(p),o.owner_type)==views::element(o.type) && local(p,o.left,o.function,o.owner_type) && m::local_at(p,o.left).binding!=0 && (!views::mutable(o.type) || m::local_at(p,o.left).mutable) && o.right==0 && o.argument_start==0 && o.argument_count==0;}
     return o.kind==19 && o.owner_type==o.type && local(p,o.left,o.function,o.type) && local(p,o.right,o.function,5) && o.argument_count==1 && local(p,m::edge_at(p,o.argument_start),o.function,5);
 }
 fn usize get(ref v::Vec<usize> values, usize id){return *v::at<usize>(values,id);}
@@ -59,7 +60,7 @@ pub fn m::Problem check(ref m::Program p) {
             }
             if(b.kind==1 && b.value!=0 && byte_view(m::local_at(p,b.value).type)){
                 let usize origin=get(ref values,b.value);
-                if((origin>0 && origin<65538) || origin==0 && m::local_at(p,b.value).type==11){return m::Problem{.code=2102,.start=b.start,.end=b.end};}
+                if((origin>0 && origin<65538) || origin==0 && views::mutable(m::local_at(p,b.value).type)){return m::Problem{.code=2102,.start=b.start,.end=b.end};}
                 if(!merge(ref mut summaries,m::function_at(p,b.function).target,origin,ref mut changed,ref mut problem,b.start,b.end)){return problem;}
             }i+=1;
         }

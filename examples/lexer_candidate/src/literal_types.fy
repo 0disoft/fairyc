@@ -1,4 +1,5 @@
 module literal_types;
+import scalar_views as views;
 import syntax as syntax;
 import std::bytes as bytes;
 import utf8 as utf8;
@@ -12,7 +13,7 @@ pub fn u32 resolve(ref syntax::Parsed p, usize root) {
     let child = syntax::type_at(p,n.left);
     if (n.kind == 2 && child.kind == 1 && bytes::equal(syntax::type_text(p,n.left),b"str")) { return 9; }
     if (n.kind == 2 && child.kind == 1 && bytes::equal(syntax::type_text(p,n.left),b"CStr")) { return 12; }
-    if (child.kind == 4 && syntax::type_at(p,child.left).kind == 1 && bytes::equal(syntax::type_text(p,child.left),b"u8")) { return if (n.kind == 3) { 11 } else { 10 }; }
+    if (child.kind == 4 && syntax::type_at(p,child.left).kind == 1) { let name=syntax::type_text(p,child.left);let u32 element=if(bytes::equal(name,b"i32")){1}else if(bytes::equal(name,b"i64")){2}else if(bytes::equal(name,b"u8")){3}else if(bytes::equal(name,b"u32")){4}else if(bytes::equal(name,b"usize")){5}else if(bytes::equal(name,b"bool")){6}else{0};return views::make(element,n.kind==3); }
     return 0;
 }
 pub fn bool text(ref u8[] cooked) {

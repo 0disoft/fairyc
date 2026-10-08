@@ -1,8 +1,8 @@
-"""Observe authenticated Vec<u8> views without replacing SDK product logic."""
+"""Observe authenticated scalar Vec views without replacing SDK product logic."""
 from pathlib import Path
 import verify_sdk_vector as observer
 
-observer.SUITE = "vector-byte-views"
+observer.SUITE = "vector-scalar-views"
 observer.CASE_OBSERVER = Path(__file__)
 observer.CASES = {
     "empty-prefix": observer.FOREIGN + """
@@ -80,8 +80,60 @@ observer.REJECT.update({
     "local-escape": ("fn ref u8[] escaped(){var v::Vec<u8> x=v::empty<u8>();return v::view<u8>(ref x);}fn i32 main(){return 7;}", "code 2102"),
     "stolen-shared-storage": (prefix + "discard unsafe{storage_borrow<u8[]>(ref x,null,0)};return 7;}", "code 5102"),
     "stolen-mutable-storage": (prefix + "discard unsafe{storage_borrow_mut<u8[]>(ref mut x,null,0)};return 7;}", "code 5102"),
-    "wrong-width": ("fn i32 main(){var v::Vec<i32> x=v::empty<i32>();discard v::view<i32>(ref x);return 7;}", "phase 4 code 3"),
 })
+
+for scalar, first, second in [("i32", "-2147483648", "2147483647"),
+                              ("i64", "-9223372036854775808", "9223372036854775807"),
+                              ("u32", "0", "4294967295"),
+                              ("usize", "0", "18446744073709551615"),
+                              ("bool", "false", "true")]:
+    body = """
+fn ref S[] shared_tail(ref S[] a){return a[1..];}
+fn ref mut S[] mutable_tail(ref mut S[] a){return a[1..];}
+fn Option<ref S[]> wrapped(ref S[] a){return .some(a);}
+fn i32 main(){
+    {
+        var v::Vec<S> x=v::empty<S>();
+        let ref S[] empty=v::view<S>(ref x);assert(empty[..].is_empty && empty.len==0);
+        assert(v::push<S>(ref mut x,FIRST).is_ok && v::push<S>(ref mut x,SECOND).is_ok);
+        let ref S[] a=v::view<S>(ref x);let ref S[] b=shared_tail(a);
+        assert(a.len==2 && a[0]==FIRST && b.len==1 && b[0]==SECOND);
+        assert(switch(wrapped(b)){case .some(c):{c[0]==SECOND}case .none:{false}});
+        let ref mut S[] m=v::view_mut<S>(ref mut x);let ref mut S[] child=mutable_tail(m);
+        child[0]=FIRST;assert(child[0]==FIRST);m[0]=SECOND;assert(m[0]==SECOND);
+        let ref S[] fresh=v::view<S>(ref x);assert(fresh[0]==SECOND && fresh[1]==FIRST);
+        let usize capacity=v::capacity<S>(ref x);assert(v::reserve<S>(ref mut x,capacity+1).is_ok);
+        assert(v::push<S>(ref mut x,SECOND).is_ok);
+        let ref S[] tail=v::view<S>(ref x)[3..];assert(tail.is_empty && tail.len==0);
+        var S[2] fixed=[FIRST,SECOND];let ref mut S[] slots=ref mut fixed;slots[1]=FIRST;assert(slots[0]==FIRST && slots[1]==FIRST);
+    }
+    assert(unsafe{fixture_live()}==0);return 7;
+}
+""".replace("FIRST", first).replace("SECOND", second).replace("S", scalar)
+    observer.CASES["scalar-" + scalar] = observer.FOREIGN + body
+    observer.CASES["bounds-" + scalar] = f"fn i32 main(){{var v::Vec<{scalar}> x=v::empty<{scalar}>();assert(v::push<{scalar}>(ref mut x,{first}).is_ok);let ref {scalar}[] a=v::view<{scalar}>(ref x);discard a[1];return 7;}}"
+    observer.TRAPS["bounds-" + scalar] = 6
+    for name, template in {
+        "retained-growth": "let ref S[] a=v::view<S>(ref x);discard v::reserve<S>(ref mut x,64);discard a[0];",
+        "exclusive-owner": "let ref mut S[] a=v::view_mut<S>(ref mut x);discard v::len<S>(ref x);discard a[0];",
+        "child-parent": "let ref mut S[] a=v::view_mut<S>(ref mut x);let ref mut S[] child=a[..];a[0]=FIRST;discard child[0];",
+    }.items():
+        change = template.replace("FIRST", first).replace("S", scalar)
+        observer.REJECT[scalar + "-" + name] = (f"fn i32 main(){{var v::Vec<{scalar}> x=v::empty<{scalar}>();assert(v::push<{scalar}>(ref mut x,{first}).is_ok);" + change + "return 7;}", "code 2101")
+
+observer.REJECT.update({
+    "bool-i32-view": ("fn i32 main(){var v::Vec<bool> x=v::empty<bool>();let ref i32[] a=v::view<bool>(ref x);return 7;}", "phase 5 code 1"),
+    "i32-bool-view": ("fn i32 main(){var v::Vec<i32> x=v::empty<i32>();let ref bool[] a=v::view<i32>(ref x);return 7;}", "phase 5 code 1"),
+    "shared-scalar-store": ("fn i32 main(){var v::Vec<i32> x=v::empty<i32>();let ref i32[] a=v::view<i32>(ref x);a[0]=7;return 7;}", "phase 5 code 4"),
+})
+
+for scalar in ["i32", "i64", "u32", "usize"]:
+    observer.CASES["named-" + scalar] = observer.FOREIGN + f"""
+fn i32 main(){{{{var v::Vec<{scalar}> x=v::empty<{scalar}>();assert(v::push<{scalar}>(ref mut x,7).is_ok);
+let ref {scalar}[] a=v::view_{scalar}(ref x);assert(a.len==1 && a[0]==7);
+let ref mut {scalar}[] b=v::view_mut_{scalar}(ref mut x);b[0]=19;assert(b[0]==19);}}
+assert(unsafe{{fixture_live()}}==0);return 7;}}
+"""
 
 if __name__ == "__main__":
     observer.main()

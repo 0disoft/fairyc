@@ -517,3 +517,34 @@ project commands and Linux execution remain pending.
   Current-development element and storage regressions execute fourteen and
   eight native runs respectively. Release mutation API validation is deferred,
   and Linux/self-hosting are outside this unit.
+
+## Scalar Vec views
+
+- Authenticated SDK `view<T>` and `view_mut<T>` now execute for i32, i64,
+  u32, usize and bool as well as u8. Requested named integer exports use the
+  original bound SDK declarations. All storage transfers retain the safe owner,
+  opaque data pointer and initialized-prefix element count.
+- Closed type identities keep bool distinct from i32 despite equal C storage
+  widths. Owned HIR, module signatures, MIR loads/stores/slices and C descriptor
+  pointers retain the exact scalar element and mutability. Byte IDs stay intact.
+  Non-byte Option/Result borrow leaves use a separate canonical encoding escape.
+- Returned shared/exclusive subviews and tagged shared views retain their owner
+  and generation. Structural mutation, exclusive owner observations and parent
+  writes while a child remains live are rejected. Final-use release permits
+  growth and new views. Empty null-backed slices avoid pointer arithmetic.
+- Validation: check, development/release candidate builds; 22 positive/bounds
+  programs and 34 rejected programs per candidate, with 88 MSVC low/optimized
+  executions total. The corpus includes existing byte views, all scalar extrema,
+  bool values, fixed-array views, named integer exports, initialized-prefix bounds,
+  empty end slices, tagged/returned origins and bool/i32 annotation mismatches.
+- One development native API test verifies ten altered storage-view facts,
+  including bool/i32 result relabeling, and preserves an existing C output
+  prefix on rejection. All ten non-byte view IDs round-trip through Option and
+  Result identities. The existing exhaustive HIR test recognizes ScalarView.
+- Evidence: `evidence/candidate-sdk-vector-scalar-view-api-20261008.json`,
+  `evidence/candidate-sdk-vector-scalar-view-cli-dev-20261008.json` and
+  `evidence/candidate-sdk-vector-scalar-view-cli-20261008.json`.
+- Remaining: resource/nominal Vec elements and views, release mutation API,
+  Linux execution and stage1/stage2. Release mutation API remains deferred after
+  the earlier bounded optimizer timeout. No SDK/runtime ABI, language contract,
+  dependency version or CI change; item 47 is complete for scalar Vec execution.

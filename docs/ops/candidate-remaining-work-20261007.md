@@ -100,7 +100,7 @@ provider-local helper 및 nominal 인자는 원래 선언 정체성을 보존한
 영속 package 정체성은 아직 남는다.
 46번의 스칼라 Vec AST 구체화까지 완료: 별칭은 하나의 resource 인스턴스를 공유하며 6필드와 비어 있지 않은 cleanup 본문을 함께 복제한다. 원본 SDK 바이트·공급자 위치를 보존하고, 관계없는 함수의 동명 매개변수 오탐을 수정했다. dev/release native API 근거: `evidence/candidate-sdk-vector-expand-20261008.json`. storage intrinsic의 타입 검사·owned HIR/MIR/C와 실제 Vec 실행은 아래 후속 근거에 기록했다.
 
-47. 부분 완료: 스칼라 Vec 할당·초기화된 prefix·push/pop·reserve/clear·cleanup과 `at/at_mut` 원소 대여 실행. `Vec<u8>`의 공유·가변 뷰도 실행하며, 다른 원소 타입의 뷰 연결은 남음.
+47. 완료: 스칼라 Vec 할당·초기화된 prefix·push/pop·reserve/clear·cleanup과 `at/at_mut` 원소 대여 실행. 여섯 스칼라 타입의 공유·가변 뷰와 이름 있는 정수 뷰도 연결했다.
 47번의 선행 연결로 Vec의 원본 extern 선언 6개와 정확한 linker/result/parameter 권한을 owned HIR/MIR 검사에 연결했다. cleanup의 선행 호출을 extern 선언으로 인정하지 않으며, dev/release native API에서 C prototype 6개와 권한·소스·시그니처·효과·선언 위치 변조 거부를 확인했다. 근거: `evidence/candidate-sdk-vector-foreign-20261008.json`, `evidence/candidate-sdk-vector-process-regression-20261008.json`. 스칼라 Vec의 storage 연산과 실제 실행은 아래 후속 근거에서 확인했다.
 47번 스칼라 실행 근거: dev/release 후보가 정상 프로그램 4개와 거부 사례 7개를 처리했고, 생성 C를 MSVC low/optimized에서 16회 실행했다. 스칼라 6타입, 첫 할당·growth 실패 후 donor/값/길이/용량 보존, 역순 prefix cleanup과 누수 0개를 확인했다. 프로필별 native API는 storage MIR 변조·SDK 변조와 출력 보존을 확인했다. 템플릿 제거 뒤 필드 ID를 다시 연결하고 concrete resource별 cleanup receiver를 구분했다. 근거: `evidence/candidate-sdk-vector-storage-api-20261008.json`, `evidence/candidate-sdk-vector-storage-cli-20261008.json`.
 
@@ -109,6 +109,8 @@ provider-local helper 및 nominal 인자는 원래 선언 정체성을 보존한
 47번 검증은 dev/release 후보 빌드, 정상 4개·경계 trap 3개·거부 16개와 C native 28회, 이전 저장 기능 native 16회가 완료됐다. 개발 native API 테스트 2개도 통과했다. 릴리스 API 파일 묶음은 C 최적화 중 관찰자 360초 제한으로 자식 프로세스까지 종료했으며 완료로 계산하지 않는다. 관련 변조 검사의 릴리스 실행은 후속 묶음에서 확인한다.
 
 47번 바이트 뷰: 원본 SDK `view<u8>/view_mut<u8>`와 요청된 `view_u8/view_mut_u8`를 연결했다. initialized prefix의 원소 복사·할당 없이 owner/data/length를 순서대로 평가하고 owned HIR/MIR에 보존한다. MIR의 길이 edge 소유·타입·초기화를 검사하며, 빈 Vec의 하위 뷰에서는 null 포인터 덧셈을 피한다. 공유 sibling·반환 alias·중첩/가변 하위 뷰·부모 접근 재개·경계 trap을 실행하고, 대여 중 구조 변경·덮어쓰기·이동·인자/범위 평가의 변경과 local escape를 거부한다. 근거: `evidence/candidate-sdk-vector-byte-view-api-20261008.json`, `evidence/candidate-sdk-vector-byte-view-cli-20261008.json`. 이전 원소 대여·저장 실행은 `evidence/candidate-sdk-vector-byte-view-element-regression-20261008.json`, `evidence/candidate-sdk-vector-byte-view-storage-regression-20261008.json`에서 현재 개발 후보로 확인했다. 비바이트 스칼라·nominal 뷰와 resource 원소, 릴리스 변조 API 실행은 남음.
+
+47번 비바이트 스칼라 뷰: 원본 SDK `view<T>/view_mut<T>`와 요청된 정수별 export를 i32·i64·u32·usize·bool에 연결했다. bool/i32를 구분하는 타입 ID와 정확한 C 원소 포인터를 쓰며, 길이는 원소 수다. 읽기·쓰기·반환/태그/부분 뷰·빈 뷰·대여 해제 후 growth와 고정 배열 뷰를 실행했다. 개발/릴리스 후보 각각 정상·경계 프로그램 22개, 거부 34개, MSVC low/optimized 실행 44회가 통과했다. 개발 native API는 저장 뷰 MIR 변조 10개와 출력 보존, Option/Result 타입 왕복을 확인했다. 근거: `evidence/candidate-sdk-vector-scalar-view-api-20261008.json`, `evidence/candidate-sdk-vector-scalar-view-cli-dev-20261008.json`, `evidence/candidate-sdk-vector-scalar-view-cli-20261008.json`. 릴리스 변조 API, resource/nominal 원소와 뷰, Linux·self-hosting은 후속 범위다.
 
 48. Vec의 resource 원소, 할당 실패 시 donor 반환, 토큰·진단의 중첩 자원 정리.
 49. Buffer/String 할당·크기 변경·바이트 접근·소유권 전달 연결.

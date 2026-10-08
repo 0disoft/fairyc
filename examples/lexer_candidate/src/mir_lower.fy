@@ -1,4 +1,5 @@
 module mir_lower;
+import scalar_views as slices;
 import pointer_types as pointers;
 import reference_types as refs;
 import array_types as arrays;
@@ -162,7 +163,7 @@ fn usize expression(ref h::Program input, ref mut v::Vec<m::Local> locals, ref m
         if (kind == 14) { let usize result = state::local(locals,c,type,0,false,false,e.start,e.end); var m::Operation o = state::operation(15,result,type,owner_type,0,owner,0,e.start,e.end); o.boolean = e.boolean; if (state::emit(operations,blocks,c,o) == 0) { return 0; } return result; }
         let usize raw = expression(input,locals,blocks,operations,edges,payload,c,e.right,depth+1); if (c.current == 0 || c.problem.code != 0) { return 0; }
         let usize index = state::local(locals,c,5,0,false,false,e.start,e.end); if (state::emit(operations,blocks,c,state::operation(16,index,5,owner_type,0,owner,raw,e.start,e.end)) == 0) { return 0; }
-        let usize result = state::local(locals,c,3,0,false,false,e.start,e.end); if (state::emit(operations,blocks,c,state::operation(17,result,3,owner_type,0,owner,index,e.start,e.end)) == 0) { return 0; } return result;
+        let usize result = state::local(locals,c,type,0,false,false,e.start,e.end); if (state::emit(operations,blocks,c,state::operation(17,result,type,owner_type,0,owner,index,e.start,e.end)) == 0) { return 0; } return result;
     }
     if (kind == 12) {
         var v::Vec<usize> values = v::empty<usize>(); var usize i = 0;
@@ -432,20 +433,20 @@ fn bool statement(ref h::Program input, ref mut v::Vec<m::Local> locals, ref mut
             return state::emit(operations,blocks,c,state::operation(30,0,type,owner_type,0,pointer,value,s.start,s.end))!=0;
         }
     }
-    if (kind == 3 && h::expression_code(h::expression_at(input,s.target).kind) == 13 && h::type_code(h::expression_at(input,h::expression_at(input,s.target).left).type) == 11) {
-        let target = h::expression_at(input,s.target); let u32 operator = h::operator_code(s.operator);
+    if (kind == 3 && h::expression_code(h::expression_at(input,s.target).kind) == 13 && slices::mutable(h::type_code(h::expression_at(input,h::expression_at(input,s.target).left).type))) {
+        let target = h::expression_at(input,s.target); let u32 operator = h::operator_code(s.operator);let u32 owner_type=h::type_code(h::expression_at(input,target.left).type);let u32 type=h::type_code(target.type);
         // Freeze the descriptor, then evaluate and check the index before RHS.
         let usize owner = expression(input,locals,blocks,operations,edges,payload,c,target.left,depth+1);
         let usize raw = expression(input,locals,blocks,operations,edges,payload,c,target.right,depth+1);
         if (c.current == 0 || c.problem.code != 0) { return c.problem.code == 0; }
         let usize index = state::local(locals,c,5,0,false,false,s.start,s.end);
-        if (state::emit(operations,blocks,c,state::operation(16,index,5,11,0,owner,raw,s.start,s.end)) == 0) { return false; }
+        if (state::emit(operations,blocks,c,state::operation(16,index,5,owner_type,0,owner,raw,s.start,s.end)) == 0) { return false; }
         var usize prior = 0;
-        if (operator != 21) { prior = state::local(locals,c,3,0,false,false,s.start,s.end); if (state::emit(operations,blocks,c,state::operation(17,prior,3,11,0,owner,index,s.start,s.end)) == 0) { return false; } }
+        if (operator != 21) { prior = state::local(locals,c,type,0,false,false,s.start,s.end); if (state::emit(operations,blocks,c,state::operation(17,prior,type,owner_type,0,owner,index,s.start,s.end)) == 0) { return false; } }
         var usize value = expression(input,locals,blocks,operations,edges,payload,c,s.expression,depth+1);
         if (c.current == 0 || c.problem.code != 0) { return c.problem.code == 0; }
-        if (operator != 21) { value = math::binary(locals,blocks,operations,c,3,3,operator,prior,value,s.start,s.end); }
-        var m::Operation o = state::operation(20,0,3,11,0,owner,index,s.start,s.end); o.argument_start=v::len<usize>(edges); o.argument_count=1;
+        if (operator != 21) { value = math::binary(locals,blocks,operations,c,type,type,operator,prior,value,s.start,s.end); }
+        var m::Operation o = state::operation(20,0,type,owner_type,0,owner,index,s.start,s.end); o.argument_start=v::len<usize>(edges); o.argument_count=1;
         return state::edge(edges,value,c) && state::emit(operations,blocks,c,o) != 0;
     }
     if (kind == 3 && h::expression_code(h::expression_at(input,s.target).kind) == 13) {

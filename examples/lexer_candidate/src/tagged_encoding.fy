@@ -1,4 +1,5 @@
 module tagged_encoding;
+import scalar_views as views;
 import reference_types as refs;
 
 // Canonical source-independent nested identities. Thirty payload bits encode
@@ -10,7 +11,7 @@ import reference_types as refs;
 // Scalar Option/Result keep their earlier IDs; the marker is nested-only.
 fn u32 size(u32 raw,usize depth) {
     if(depth>=16){return 0;}let u32 kind=raw&3;
-    if(kind==0){let u32 category=raw>>2&3;return if(category==0){if(raw&127==0){16}else if(raw&127==64){7}else if(raw&63==16 || raw&63==32 || raw&63==48){6}else{0}}else if(category==1 && (raw>>5&511)>5){0}else{14};}
+    if(kind==0){let u32 category=raw>>2&3;return if(category==0){if(raw&127==96){if(views::extended(18+(raw>>7&15))){11}else{0}}else if(raw&127==0){16}else if(raw&127==64){7}else if(raw&63==16 || raw&63==32 || raw&63==48){6}else{0}}else if(category==1 && (raw>>5&511)>5){0}else{14};}
     if(kind==1){return if((raw>>2&7)<=5){5}else{14};}
     if(kind==2){let u32 n=size(raw>>2,depth+1);return if(n!=0 && n<=28){n+2}else{0};}
     if(kind==3){let u32 left=size(raw>>2,depth+1);if(left==0 || left>23){return 0;}
@@ -27,7 +28,7 @@ pub fn bool valid(u32 code) {
 pub fn bool option(u32 code){return code>=196609 && code<=196614 || valid(code) && code&3==2;}
 pub fn bool result(u32 code){return code>=262145 && code<=262180 || valid(code) && code&3==3;}
 fn u32 bits(u32 code) {
-    if(code==12){return 64;}if(code==9){return 16;}if(code==10){return 32;}if(code==11){return 48;}
+    if(views::extended(code)){return 96|(code-18)<<7;}if(code==12){return 64;}if(code==9){return 16;}if(code==10){return 32;}if(code==11){return 48;}
     if(refs::valid(code)){let u32 t=refs::inner(code);if(t>98815){return 0;}let u32 category=if(t<=6){1}else if(t<98304){2}else{3};let u32 index=t-if(category==1){1}else if(category==2){256}else{98304};return category<<2|if(refs::mutable(code)){16}else{0}|index<<5;}
     if(code>=1 && code<=6){return (code-1)<<2|1;}
     if(code>=256 && code<=767){return 25|(code-256)<<5;}
@@ -39,7 +40,7 @@ fn u32 bits(u32 code) {
 }
 fn u32 decoded(u32 raw) {
     let u32 n=size(raw,0);assert(n!=0);let u32 cut=raw&((1<<n)-1);let u32 kind=cut&3;
-    if(kind==0){let u32 category=cut>>2&3;if(category==0){return if(cut&127==0){131072+(cut>>7&511)}else if(cut==16){9}else if(cut==32){10}else if(cut==64){12}else{11};}return refs::make((cut>>5&511)+if(category==1){1}else if(category==2){256}else{98304},cut&16!=0);}
+    if(kind==0){let u32 category=cut>>2&3;if(category==0){return if(cut&127==96){18+(cut>>7&15)}else if(cut&127==0){131072+(cut>>7&511)}else if(cut==16){9}else if(cut==32){10}else if(cut==64){12}else{11};}return refs::make((cut>>5&511)+if(category==1){1}else if(category==2){256}else{98304},cut&16!=0);}
     if(kind==1){return if((cut>>2&7)==7){98304+(cut>>5&511)}else if((cut>>2&7)==6){256+(cut>>5&511)}else{(cut>>2&7)+1};}
     if(kind==2){let u32 child=decoded(cut>>2);return if(child<=6){196608+child}else{1073741824|cut};}
     let u32 left_size=size(cut>>2,1);let u32 left=decoded(cut>>2);let u32 right=decoded(cut>>(left_size+2));

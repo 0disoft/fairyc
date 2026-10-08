@@ -1,4 +1,5 @@
 module c_emit;
+import scalar_views as views;
 import c_abi_contract as abi;
 import pointer_types as pointers;
 import mir_model as m;
@@ -33,7 +34,7 @@ fn bool function(ref m::Program p, ref flow::Plan plan, m::Function f, ref mut b
         if (!l.parameter) {
             let bool aggregate = l.type >= 256 && !pointers::valid(l.type);
             if (!w::text(out,s,b"    ") || !w::owned_type(m::nominal(p),m::source_view(p),out,s,l.type) || !w::text(out,s,b" ") || !w::local(out,s,id)
-                || !w::text(out,s,if(aggregate){b";\n"}else if(l.type == 9 || l.type == 10 || l.type == 11 || l.type==12){b"={0};\n"}else{b"=0;\n"})) { return false; }
+                || !w::text(out,s,if(aggregate){b";\n"}else if(l.type == 9 || views::valid(l.type) || l.type==12){b"={0};\n"}else{b"=0;\n"})) { return false; }
             // MSVC recursively expands aggregate zero initializers and reaches
             // C1054 before the admitted nested type depth. These layouts hold
             // integer/bool and inert pointer fields on the supported AMD64

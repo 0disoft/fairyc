@@ -1,4 +1,5 @@
 module c_text;
+import scalar_views as views;
 import c_abi_types as c_types;
 import pointer_types as pointers;
 import reference_types as refs;
@@ -24,6 +25,7 @@ pub fn bool type(ref mut bytes::Buffer out, ref mut State s, u32 code) {
     if(pointers::valid(code)){return type(out,s,pointers::inner(code)) && text(out,s,if(pointers::mutable(code)){b" *"}else{b" const *"});}
     if(refs::valid(code)){return type(out,s,refs::inner(code)) && text(out,s,if(refs::mutable(code)){b" *"}else{b" const *"});}
     if(code==12){return text(out,s,b"struct fy_cstr");}
+    if(views::extended(code)){return text(out,s,b"struct fy_slice_") && number(out,s,code as usize);}
     if (code == 11) { return text(out,s,b"struct fy_bytes_mut"); }
     if (code == 9 || code == 10) { return text(out,s,if (code == 9) { b"struct fy_text" } else { b"struct fy_bytes" }); }
     if (tagged::option(code)) { return text(out,s,b"struct fy_o_") && number(out,s,tagged::inner(code) as usize); }

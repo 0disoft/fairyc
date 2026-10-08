@@ -1,4 +1,5 @@
 module hir_view_check;
+import scalar_views as views;
 import hir_borrow_paths as paths;
 import borrow_shapes as borrows;
 import tagged_types as tagged;
@@ -170,7 +171,7 @@ pub fn h::Problem check(ref h::Program p) {
         if(h::statement_code(s.kind)==11){let call=h::expression_at(p,s.expression);var usize j=0;while(j<call.edge_count){let arg=h::expression_at(p,h::edge_at(p,call.edge_start+j));let u32 type=h::type_code(arg.type);if(type==9 || byte_view(type)){discard fail(ref mut c,4,arg.start,arg.end);}j+=1;}}
         if (h::statement_code(s.kind) == 3 && paths::reachable(p,s.start,s.end,ref mut c.work)) {
             let usize owner = root(p,s.target);
-            let bool through_mutable = owner != 0 && (h::type_code(h::binding_at(p,owner).type) == 11 || refs::mutable(h::type_code(h::binding_at(p,owner).type)));
+            let bool through_mutable = owner != 0 && (borrows::mutable(h::type_code(h::binding_at(p,owner).type)));
             if (origin(p,ref mut c,s.expression,0) != 0 && byte_view(h::type_code(h::expression_at(p,s.target).type))) { discard fail(ref mut c,2102,s.start,s.end); }
             var usize j = 1; while (!through_mutable && j <= h::expression_count(p) && c.problem.code == 0) {
                 let e = h::expression_at(p,j); let usize loan = origin(p,ref mut c,j,0);
