@@ -46,7 +46,8 @@ pub fn h::Operator operator(ref u8[] raw) {
     if (bytes::equal(raw,b"=")) { return .Assign; }
     return .None;
 }
-pub fn h::Expression expression(usize start, usize end) { return h::Expression { .kind = .Integer, .type = .Invalid, .operator = .None, .start, .end, .left = 0, .right = 0, .alternative = 0, .block = 0, .binding = 0, .edge_start = 0, .edge_count = 0, .payload_start = 0, .payload_end = 0, .boolean = false }; }
+pub fn h::Expression typed_expression(h::ExpressionKind kind,h::Type type,h::Operator operator,usize start,usize end) { return h::Expression { .kind, .type, .operator, .start, .end, .left = 0, .right = 0, .alternative = 0, .block = 0, .binding = 0, .edge_start = 0, .edge_count = 0, .payload_start = 0, .payload_end = 0, .boolean = false }; }
+pub fn h::Expression expression(usize start,usize end){return typed_expression(.Integer,.Invalid,.None,start,end);}
 pub fn h::Statement statement(usize start, usize end, usize scope) { return h::Statement { .kind = .Expression, .start, .end, .scope, .expression = 0, .target = 0, .binding = 0, .operator = .None, .body = 0, .initial = 0, .post = 0, .loop_target = 0 }; }
 pub fn usize push_expression(ref mut v::Vec<h::Expression> arena, h::Expression e, ref mut Context c) { if (c.problem.code != 0) { return 0; } if (v::len<h::Expression>(arena) >= limits::program_expressions()) { return fail(c,2,e.start,e.end); } if (!v::push<h::Expression>(arena,e).is_ok) { return fail(c,3,e.start,e.end); } return v::len<h::Expression>(arena); }
 pub fn usize push_statement(ref mut v::Vec<h::Statement> arena, h::Statement s, ref mut Context c) { if (c.problem.code != 0) { return 0; } if (v::len<h::Statement>(arena) >= 8192) { return fail(c,2,s.start,s.end); } if (!v::push<h::Statement>(arena,s).is_ok) { return fail(c,3,s.start,s.end); } return v::len<h::Statement>(arena); }

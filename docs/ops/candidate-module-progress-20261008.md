@@ -1332,3 +1332,36 @@ project commands and Linux execution remain pending.
   Release-candidate rebuilding, Linux and whole-dispatcher native execution were
   not repeated. Language, SDK/runtime, DB, dependency, runner and budget
   contracts are unchanged.
+
+## Dispatcher source budget and shared frontend stages (2026-10-09)
+
+- Declaration/name/type/HIR CLI stages now return their existing owned results
+  through shared `compile` helpers. MIR reuses those stages while preserving its
+  legacy HIR-error wording. Six output paths share the existing exact byte-write
+  count check. Help reuses the usage prefix followed by its unchanged suffix.
+  Unused imports and repeated module qualifications were reduced.
+- HIR initializer/capture/arm/borrow/slice/byte-loop nodes use one typed default
+  factory. Tagged kind/type fields are selected during construction rather than
+  assigned afterward. MIR publication copies the operation and overwrites only
+  function, block and next, preserving its existing link and ownership behavior.
+- Check, the authored development CLI build and SDK driver build pass. Forty-six
+  CLI cases retain exact stdout/stderr/status, including parser/name/type/HIR
+  errors. Eight type-error cases retain exact diagnostics. Five focused programs
+  (including payload captures and default slice bounds with byte loops) retain
+  byte-identical generated C and pass twenty native MSVC executions. Evidence:
+  `evidence/candidate-cli-source-dedup-20261009.json`,
+  `evidence/candidate-type-source-dedup-regression-20261009.json`,
+  `evidence/candidate-source-dedup-native-20261009.json`,
+  `evidence/candidate-source-dedup-c-parity-20261009.json` and
+  `evidence/candidate-sdk-module-driver-source-dedup-dev-20261009.json`.
+- The actual 160-file dispatcher input shrank by 6884 bytes to 1048516 joined
+  bytes, 60 bytes below 1MiB. It passes parsing and the source cap, then rejects
+  at module-program phase 1 code 9 on the by-value `usize[20]` parameter of
+  `mir_output::row`. Source-set signature type resolution currently has no
+  fixed-array branch. That is the next measured blocker; very little source
+  budget remains for further implementation. Evidence:
+  `evidence/candidate-dispatcher-admission-after-source-dedup-20261009.json`.
+- Public language and SDK/runtime ABI, DB, dependency and CI runner settings
+  are unchanged. Compiler-internal CLI/factory helper APIs changed. Release
+  candidate rebuilding, Linux and full-dispatcher native execution remain
+  unverified; the unchanged admission bounds still reject the complete program.

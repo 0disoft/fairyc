@@ -1,18 +1,13 @@
 module mir_cli;
 import scanner as scanner;
-import syntax as syntax;
-import name_resolution as names;
-import name_cli as name_output;
-import type_check as typing;
-import type_cli as type_output;
 import hir_model as h;
-import hir_lower as hir;
+import hir_cli as hir;
 import mir_model as m;
 import mir_lower as lower;
 import mir_output as output;
-import declaration_output as declarations;
 import std::bytes as bytes;
 import std::io as io;
+import token_output as console;
 
 @effects(console)
 fn void verification_error(u32 code) {
@@ -23,16 +18,7 @@ fn void verification_error(u32 code) {
 
 @effects(console)
 pub fn Result<m::Program,i32> compile(scanner::Stream stream, ref u8[] path) {
-    let syntax::Parsed parsed = switch(syntax::parse(stream,512)) {
-        case .ok(value): { value }
-        case .err(code): { discard io::write_stderr(if (code == 4) { "error: parser limit\n" } else if (code == 3) { "error: buffer allocation failed\n" } else { "error: parser failed\n" }); return .err(2); }
-    };
-    if (syntax::problem_count(ref parsed) != 0) { return .err(declarations::errors(ref parsed,path)); }
-    let names::Resolved resolved = names::resolve(parsed);
-    if (names::problem(ref resolved).code != 0) { return .err(name_output::errors(ref resolved,path)); }
-    let typing::Typed typed = typing::check(resolved);
-    if (typing::problem(ref typed).code != 0) { return .err(type_output::errors(ref typed,path)); }
-    let h::Program input = switch(hir::lower(typed,0)) { case .ok(value): { value } case .err(problem): { discard io::write_stderr("HIR bytes ");discard io::write_stderr_usize(problem.start);discard io::write_stderr("..");discard io::write_stderr_usize(problem.end);discard io::write_stderr("\n"); discard io::write_stderr(if(problem.code==5106){"error: HIR E5106 conflicting C linker signature\n"}else if(problem.code==5102){"error: HIR E5102 unsupported C ABI\n"}else if(problem.code==2101){"error: HIR E2101 active byte-view loan\n"}else if(problem.code==2102){"error: HIR E2102 local view escape or mutable descriptor\n"}else if(problem.code==2103){"error: HIR E2103 ambiguous or recursive borrow return origin\n"}else{"error: HIR lowering failed\n"}); return .err(2); } };
+    let h::Program input=switch(hir::compile(stream,path,true)){case .ok(p):{p}case .err(code):{return .err(code);}};
     let m::Program program = switch(lower::lower(input)) {
         case .ok(value): { value }
         case .err(problem): { verification_error(problem.code); return .err(2); }
@@ -46,5 +32,5 @@ pub fn i32 run(scanner::Stream stream, ref u8[] path) {
     var bytes::Buffer rendered = bytes::empty(); let u32 code = output::render(ref program,ref mut rendered);
     if (code != 0) { if (code == 4) { discard io::write_stderr("error: MIR output limit (2097152 bytes)\n"); } else { verification_error(code); } return 2; }
     let ref u8[] data = bytes::view(ref rendered);
-    return if (switch(io::write_bytes(data)) { case .ok(count): { count == data.len } case .err(_): { false } }) { 0 } else { discard io::write_stderr("error: stdout write failed\n"); 2 };
+    return console::write(data);
 }

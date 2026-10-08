@@ -67,16 +67,22 @@ pub fn i32 errors(ref syntax::Parsed parsed, ref u8[] path) {
 }
 
 @effects(console)
-pub fn i32 run(scanner::Stream stream, ref u8[] path) {
+pub fn Result<syntax::Parsed,i32> compile(scanner::Stream stream,ref u8[] path){
     let syntax::Parsed parsed = switch(syntax::parse(stream, 512)) {
         case .ok(value): { value }
         case .err(code): {
             discard io::write_stderr(if (code == 4) { "error: parser limit\n" }
                 else if (code == 3) { "error: buffer allocation failed\n" } else { "error: parser failed\n" });
-            return 2;
+            return .err(2);
         }
     };
-    if (syntax::problem_count(ref parsed) != 0) { return errors(ref parsed, path); }
+    if (syntax::problem_count(ref parsed) != 0) { return .err(errors(ref parsed, path)); }
+    return .ok(parsed);
+}
+
+@effects(console)
+pub fn i32 run(scanner::Stream stream, ref u8[] path) {
+    let syntax::Parsed parsed=switch(compile(stream,path)){case .ok(p):{p}case .err(code):{return code;}};
     var bytes::Buffer result = bytes::empty();
     let u32 status = declarations(ref parsed, ref mut result);
     if (status != 0) {
@@ -85,6 +91,5 @@ pub fn i32 run(scanner::Stream stream, ref u8[] path) {
         return 2;
     }
     let ref u8[] data = bytes::view(ref result);
-    return if (switch(io::write_bytes(data)) { case .ok(count): { count == data.len } case .err(_): { false } }) { 0 }
-        else { discard io::write_stderr("error: stdout write failed\n"); 2 };
+    return output::write(data);
 }

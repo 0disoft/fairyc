@@ -6,7 +6,6 @@ import type_state as ids;
 import mir_model as m;
 import mir_state as state;
 import mir_cleanup as finalize;
-import mir_resource_lower as lifetime;
 import std::vec as v;
 
 // The subject is an already frozen value. Error return cleanup uses the same

@@ -23,7 +23,7 @@ def identity(path):
 
 
 def normalized(text):
-    text = re.sub(r"\b(?:checking|statements|declarations)::", "", text)
+    text = re.sub(r"\b(?:checking|tc|statements|declarations)::", "", text)
     return text.replace("pub fn ", "fn ").strip()
 
 

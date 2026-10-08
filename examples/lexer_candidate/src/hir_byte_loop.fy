@@ -24,11 +24,13 @@ pub fn bool prepare(ref typing::Typed input,ref mut v::Vec<h::Binding> bindings,
     }i+=1;}return true;
 }
 fn usize node(ref mut v::Vec<h::Expression> expressions,ref mut state::Context c,syntax::Statement source,h::ExpressionKind kind,h::Type type,h::Operator operator,usize left,usize right,usize binding){
-    return state::push_expression(expressions,h::Expression{.kind,.type,.operator,.start=source.start,.end=source.end,.left,.right,.binding,.alternative=0,.block=0,.edge_start=0,.edge_count=0,.payload_start=0,.payload_end=0,.boolean=false},c);
+    var h::Expression e=state::typed_expression(kind,type,operator,source.start,source.end);e.left=left;e.right=right;e.binding=binding;
+    return state::push_expression(expressions,e,c);
 }
 fn usize integer(ref mut v::Vec<h::Expression> expressions,ref mut bytes::Buffer payload,ref mut state::Context c,syntax::Statement source,u8 value){
     let usize at=bytes::len(payload);if(!bytes::append_byte(payload,value).is_ok){return state::fail(c,3,source.start,source.end);}
-    return state::push_expression(expressions,h::Expression{.kind=.Integer,.type=.Usize,.operator=.None,.start=source.start,.end=source.end,.left=0,.right=0,.binding=0,.alternative=0,.block=0,.edge_start=0,.edge_count=0,.payload_start=at,.payload_end=at+1,.boolean=false},c);
+    var h::Expression e=state::typed_expression(.Integer,.Usize,.None,source.start,source.end);e.payload_start=at;e.payload_end=at+1;
+    return state::push_expression(expressions,e,c);
 }
 fn usize binding(ref mut v::Vec<h::Statement> statements,ref mut state::Context c,syntax::Statement source,usize scope,usize id,usize value){
     return state::push_statement(statements,h::Statement{.kind=.Binding,.start=source.start,.end=source.end,.scope,.binding=id,.expression=value,.target=0,.operator=.None,.body=0,.initial=0,.post=0,.loop_target=0},c);

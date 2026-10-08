@@ -5,6 +5,7 @@ import c_emit as emit;
 import scanner as scanner;
 import std::bytes as bytes;
 import std::io as io;
+import token_output as console;
 
 @effects(console)
 pub fn i32 run(scanner::Stream stream, ref u8[] path) {
@@ -15,6 +16,5 @@ pub fn i32 run(scanner::Stream stream, ref u8[] path) {
             else if (code == 3) { "error: buffer allocation failed\n" } else if (code == 2) { "error: C verification limit\n" } else { "error: invalid C input\n" }); return 2;
     }
     let ref u8[] data = bytes::view(ref out);
-    if (switch(io::write_bytes(data)) { case .ok(count): { count == data.len } case .err(_): { false } }) { return 0; }
-    discard io::write_stderr("error: stdout write failed\n"); return 2;
+    return console::write(data);
 }

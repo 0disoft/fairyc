@@ -1,0 +1,336 @@
+{
+  "schema": "fairyc.candidate-type-source-split/v1",
+  "passed": true,
+  "originalCommit": "823eaf6c",
+  "branchRegionsIdentical": [
+    "type_expr_tagged",
+    "type_expr_scalar",
+    "type_expr_call",
+    "type_expr_access",
+    "type_expr_record",
+    "type_statement",
+    "type_collect"
+  ],
+  "coordinatorHelpersIdentical": true,
+  "sourceDepthRetained": true,
+  "limitsChanged": false,
+  "parserImplementationUnchanged": true,
+  "observer": {
+    "path": "examples\\lexer_candidate\\verify_type_source_split.py",
+    "bytes": 6312,
+    "sha256": "bfa2f88ada1ba1f689b3b60f252943748dfe5bb26c16f9c38000da0d4fa89916"
+  },
+  "parser": {
+    "path": ".cache\\candidate-fs\\candidate-loader-dev.exe",
+    "bytes": 3339776,
+    "sha256": "91bdd1118c66d3596fb12ebd8f1ddf2f30a4758dcb890ff1d812f3c5e5d08ac3"
+  },
+  "parseObservations": [
+    {
+      "path": "examples\\lexer_candidate\\src\\type_check.fy",
+      "bytes": 5238,
+      "sha256": "513ca7b4c1109d3b2e57488e47deb3e6330dbd39153529192bee7252fec51286",
+      "exit": 0,
+      "stdoutBytes": 1063,
+      "stderr": ""
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\type_expr_tagged.fy",
+      "bytes": 9044,
+      "sha256": "c9936536758be8d9a61b0abd18d1b5f34914f6d4a129817da1367fdc0818b42f",
+      "exit": 0,
+      "stdoutBytes": 394,
+      "stderr": ""
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\type_expr_scalar.fy",
+      "bytes": 7500,
+      "sha256": "362a86db2692a7dfcb376f529798a4a04254164890a9f816336b2fac9dbb0758",
+      "exit": 0,
+      "stdoutBytes": 427,
+      "stderr": ""
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\type_expr_call.fy",
+      "bytes": 7582,
+      "sha256": "708af053b705858132abdea8e3654d075e61b2d5401c6b12964c111430b1946d",
+      "exit": 0,
+      "stdoutBytes": 424,
+      "stderr": ""
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\type_expr_access.fy",
+      "bytes": 8737,
+      "sha256": "cb16262e6842fe4e526835562c9f032904dab40e8894ad6ae57a0f64bd1d52ac",
+      "exit": 0,
+      "stdoutBytes": 451,
+      "stderr": ""
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\type_expr_record.fy",
+      "bytes": 6243,
+      "sha256": "ed82e6ca7d52bddaea0deaf9a2faf491471321c3a07e0adb99b52a92ded1bad3",
+      "exit": 0,
+      "stdoutBytes": 334,
+      "stderr": ""
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\type_statement.fy",
+      "bytes": 11111,
+      "sha256": "1da68d12ea7ac8cb047902f5d043fbe1c91f47e46ba9ae51a2fd0214b05af961",
+      "exit": 0,
+      "stdoutBytes": 420,
+      "stderr": ""
+    },
+    {
+      "path": "examples\\lexer_candidate\\src\\type_collect.fy",
+      "bytes": 5103,
+      "sha256": "68d47ce73b9ecd100a202247e370e518079e04ef396ad9183e5005b788e0ae16",
+      "exit": 0,
+      "stdoutBytes": 587,
+      "stderr": ""
+    }
+  ],
+  "exactRejections": [
+    {
+      "name": "binding-type",
+      "input": {
+        "path": ".cache\\candidate-tagged\\type-source-split\\binding-type.fy",
+        "bytes": 49,
+        "sha256": "a0c01ccdfb6d93056d74df5a092e0125ec99c657d67222b7e24438f991edab16"
+      },
+      "results": [
+        {
+          "image": {
+            "path": ".cache\\candidate-tagged\\source-dedup\\before-driver.exe",
+            "bytes": 3165696,
+            "sha256": "0c315ee408d50388e0cf9ac5ed1aed8907e3c556d15415a2191fcb3d03af7263"
+          },
+          "exit": 2,
+          "stdoutBytes": 0,
+          "stderr": ".cache/candidate-tagged/type-source-split/binding-type.fy:1:38: error: module program phase 5 code 1 (bytes 37..38)\n"
+        },
+        {
+          "image": {
+            "path": ".cache\\candidate-tagged\\sdk-module-driver\\driver-dev.exe",
+            "bytes": 3164160,
+            "sha256": "9ee54a60d7cc18d1f58891803e11961a8d008a08ca1e37289659caa7310debed"
+          },
+          "exit": 2,
+          "stdoutBytes": 0,
+          "stderr": ".cache/candidate-tagged/type-source-split/binding-type.fy:1:38: error: module program phase 5 code 1 (bytes 37..38)\n"
+        }
+      ]
+    },
+    {
+      "name": "return-type",
+      "input": {
+        "path": ".cache\\candidate-tagged\\type-source-split\\return-type.fy",
+        "bytes": 39,
+        "sha256": "67b4e678c87e07b4ed9978f8887ace75a6aa98af8cd72287f5e07f20e24da706"
+      },
+      "results": [
+        {
+          "image": {
+            "path": ".cache\\candidate-tagged\\source-dedup\\before-driver.exe",
+            "bytes": 3165696,
+            "sha256": "0c315ee408d50388e0cf9ac5ed1aed8907e3c556d15415a2191fcb3d03af7263"
+          },
+          "exit": 2,
+          "stdoutBytes": 0,
+          "stderr": ".cache/candidate-tagged/type-source-split/return-type.fy:1:34: error: module program phase 5 code 1 (bytes 33..37)\n"
+        },
+        {
+          "image": {
+            "path": ".cache\\candidate-tagged\\sdk-module-driver\\driver-dev.exe",
+            "bytes": 3164160,
+            "sha256": "9ee54a60d7cc18d1f58891803e11961a8d008a08ca1e37289659caa7310debed"
+          },
+          "exit": 2,
+          "stdoutBytes": 0,
+          "stderr": ".cache/candidate-tagged/type-source-split/return-type.fy:1:34: error: module program phase 5 code 1 (bytes 33..37)\n"
+        }
+      ]
+    },
+    {
+      "name": "condition-type",
+      "input": {
+        "path": ".cache\\candidate-tagged\\type-source-split\\condition-type.fy",
+        "bytes": 52,
+        "sha256": "b9573d2ba9d54334b5d6ea6b269a5b53f4048d110f9fdf159f2e09bbd6402a82"
+      },
+      "results": [
+        {
+          "image": {
+            "path": ".cache\\candidate-tagged\\source-dedup\\before-driver.exe",
+            "bytes": 3165696,
+            "sha256": "0c315ee408d50388e0cf9ac5ed1aed8907e3c556d15415a2191fcb3d03af7263"
+          },
+          "exit": 2,
+          "stdoutBytes": 0,
+          "stderr": ".cache/candidate-tagged/type-source-split/condition-type.fy:1:30: error: module program phase 5 code 3 (bytes 29..30)\n"
+        },
+        {
+          "image": {
+            "path": ".cache\\candidate-tagged\\sdk-module-driver\\driver-dev.exe",
+            "bytes": 3164160,
+            "sha256": "9ee54a60d7cc18d1f58891803e11961a8d008a08ca1e37289659caa7310debed"
+          },
+          "exit": 2,
+          "stdoutBytes": 0,
+          "stderr": ".cache/candidate-tagged/type-source-split/condition-type.fy:1:30: error: module program phase 5 code 3 (bytes 29..30)\n"
+        }
+      ]
+    },
+    {
+      "name": "immutable-target",
+      "input": {
+        "path": ".cache\\candidate-tagged\\type-source-split\\immutable-target.fy",
+        "bytes": 52,
+        "sha256": "817fbdffc0f7e96fa43161a68c202573201a79fc3c6cab9d453af46b74be86e3"
+      },
+      "results": [
+        {
+          "image": {
+            "path": ".cache\\candidate-tagged\\source-dedup\\before-driver.exe",
+            "bytes": 3165696,
+            "sha256": "0c315ee408d50388e0cf9ac5ed1aed8907e3c556d15415a2191fcb3d03af7263"
+          },
+          "exit": 2,
+          "stdoutBytes": 0,
+          "stderr": ".cache/candidate-tagged/type-source-split/immutable-target.fy:1:39: error: module program phase 5 code 4 (bytes 38..39)\n"
+        },
+        {
+          "image": {
+            "path": ".cache\\candidate-tagged\\sdk-module-driver\\driver-dev.exe",
+            "bytes": 3164160,
+            "sha256": "9ee54a60d7cc18d1f58891803e11961a8d008a08ca1e37289659caa7310debed"
+          },
+          "exit": 2,
+          "stdoutBytes": 0,
+          "stderr": ".cache/candidate-tagged/type-source-split/immutable-target.fy:1:39: error: module program phase 5 code 4 (bytes 38..39)\n"
+        }
+      ]
+    },
+    {
+      "name": "call-arity",
+      "input": {
+        "path": ".cache\\candidate-tagged\\type-source-split\\call-arity.fy",
+        "bytes": 64,
+        "sha256": "004d3b9fa302f64e19560f56a4688081401e94c730f097302a0d15b88d544a5d"
+      },
+      "results": [
+        {
+          "image": {
+            "path": ".cache\\candidate-tagged\\source-dedup\\before-driver.exe",
+            "bytes": 3165696,
+            "sha256": "0c315ee408d50388e0cf9ac5ed1aed8907e3c556d15415a2191fcb3d03af7263"
+          },
+          "exit": 2,
+          "stdoutBytes": 0,
+          "stderr": ".cache/candidate-tagged/type-source-split/call-arity.fy:1:60: error: module program phase 5 code 5 (bytes 59..62)\n"
+        },
+        {
+          "image": {
+            "path": ".cache\\candidate-tagged\\sdk-module-driver\\driver-dev.exe",
+            "bytes": 3164160,
+            "sha256": "9ee54a60d7cc18d1f58891803e11961a8d008a08ca1e37289659caa7310debed"
+          },
+          "exit": 2,
+          "stdoutBytes": 0,
+          "stderr": ".cache/candidate-tagged/type-source-split/call-arity.fy:1:60: error: module program phase 5 code 5 (bytes 59..62)\n"
+        }
+      ]
+    },
+    {
+      "name": "array-length",
+      "input": {
+        "path": ".cache\\candidate-tagged\\type-source-split\\array-length.fy",
+        "bytes": 56,
+        "sha256": "25aecade70fe9e462c9ae125f9f404f4198f4bd8f27d6d3546e097f728e35a91"
+      },
+      "results": [
+        {
+          "image": {
+            "path": ".cache\\candidate-tagged\\source-dedup\\before-driver.exe",
+            "bytes": 3165696,
+            "sha256": "0c315ee408d50388e0cf9ac5ed1aed8907e3c556d15415a2191fcb3d03af7263"
+          },
+          "exit": 2,
+          "stdoutBytes": 0,
+          "stderr": ".cache/candidate-tagged/type-source-split/array-length.fy:1:39: error: module program phase 5 code 1 (bytes 38..45)\n"
+        },
+        {
+          "image": {
+            "path": ".cache\\candidate-tagged\\sdk-module-driver\\driver-dev.exe",
+            "bytes": 3164160,
+            "sha256": "9ee54a60d7cc18d1f58891803e11961a8d008a08ca1e37289659caa7310debed"
+          },
+          "exit": 2,
+          "stdoutBytes": 0,
+          "stderr": ".cache/candidate-tagged/type-source-split/array-length.fy:1:39: error: module program phase 5 code 1 (bytes 38..45)\n"
+        }
+      ]
+    },
+    {
+      "name": "tagged-payload",
+      "input": {
+        "path": ".cache\\candidate-tagged\\type-source-split\\tagged-payload.fy",
+        "bytes": 66,
+        "sha256": "16d26ddb026900289755e7e9efa72eea0d72ab607d0868b8782c0d027a266934"
+      },
+      "results": [
+        {
+          "image": {
+            "path": ".cache\\candidate-tagged\\source-dedup\\before-driver.exe",
+            "bytes": 3165696,
+            "sha256": "0c315ee408d50388e0cf9ac5ed1aed8907e3c556d15415a2191fcb3d03af7263"
+          },
+          "exit": 2,
+          "stdoutBytes": 0,
+          "stderr": ".cache/candidate-tagged/type-source-split/tagged-payload.fy:1:51: error: module program phase 5 code 1 (bytes 50..54)\n"
+        },
+        {
+          "image": {
+            "path": ".cache\\candidate-tagged\\sdk-module-driver\\driver-dev.exe",
+            "bytes": 3164160,
+            "sha256": "9ee54a60d7cc18d1f58891803e11961a8d008a08ca1e37289659caa7310debed"
+          },
+          "exit": 2,
+          "stdoutBytes": 0,
+          "stderr": ".cache/candidate-tagged/type-source-split/tagged-payload.fy:1:51: error: module program phase 5 code 1 (bytes 50..54)\n"
+        }
+      ]
+    },
+    {
+      "name": "loop-control",
+      "input": {
+        "path": ".cache\\candidate-tagged\\type-source-split\\loop-control.fy",
+        "bytes": 42,
+        "sha256": "4dec3ab16fa82ead96a5eaf180fca2fd93d88f34eab0897bff07e55dd4fd4f74"
+      },
+      "results": [
+        {
+          "image": {
+            "path": ".cache\\candidate-tagged\\source-dedup\\before-driver.exe",
+            "bytes": 3165696,
+            "sha256": "0c315ee408d50388e0cf9ac5ed1aed8907e3c556d15415a2191fcb3d03af7263"
+          },
+          "exit": 2,
+          "stdoutBytes": 0,
+          "stderr": ".cache/candidate-tagged/type-source-split/loop-control.fy:1:27: error: module program phase 5 code 13 (bytes 26..32)\n"
+        },
+        {
+          "image": {
+            "path": ".cache\\candidate-tagged\\sdk-module-driver\\driver-dev.exe",
+            "bytes": 3164160,
+            "sha256": "9ee54a60d7cc18d1f58891803e11961a8d008a08ca1e37289659caa7310debed"
+          },
+          "exit": 2,
+          "stdoutBytes": 0,
+          "stderr": ".cache/candidate-tagged/type-source-split/loop-control.fy:1:27: error: module program phase 5 code 13 (bytes 26..32)\n"
+        }
+      ]
+    }
+  ]
+}

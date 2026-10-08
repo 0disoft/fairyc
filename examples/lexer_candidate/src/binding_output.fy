@@ -3,6 +3,7 @@ import name_resolution as names;
 import std::bytes as bytes;
 import std::text as text;
 import std::io as io;
+import token_output as console;
 
 fn bool number(ref mut bytes::Buffer buffer, usize value) {
     return bytes::append(buffer,b"\t").is_ok && bytes::append_usize(buffer,value).is_ok;
@@ -42,6 +43,5 @@ pub fn i32 run(ref names::Resolved resolved) {
         discard io::write_stderr("error: output limit (1048576 bytes)\n"); return 2;
     }
     let ref u8[] data = bytes::view(ref buffer);
-    return if (switch(io::write_bytes(data)) { case .ok(count): { count == data.len } case .err(_): { false } }) { 0 }
-        else { discard io::write_stderr("error: stdout write failed\n"); 2 };
+    return console::write(data);
 }

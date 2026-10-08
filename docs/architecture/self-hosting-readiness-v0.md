@@ -194,6 +194,17 @@ admission stages can be evaluated. Focused C is identical and twelve native
 runs pass. Evidence:
 `docs/ops/evidence/candidate-hir-lower-source-split-20261009.json` and
 `docs/ops/evidence/candidate-dispatcher-admission-after-hir-lower-split-20261009.json`.
+Shared CLI stages/output and typed HIR default factories subsequently reduced
+the full input to 1048516 joined bytes across 160 files, below the same 1MiB cap.
+The actual dispatcher now passes parsing and cumulative source admission but
+rejects at module-program phase 1 code 9 on `mir_output::row`'s by-value
+`usize[20]` signature. Source-set fixed-array type registration is still open.
+Forty-six CLI cases retain exact streams/status, five generated C outputs match
+the prior driver and twenty focused native runs pass. Only 60 source bytes of
+headroom remain; this does not establish full-dispatcher compilation or
+stage1/stage2. Evidence:
+`docs/ops/evidence/candidate-cli-source-dedup-20261009.json` and
+`docs/ops/evidence/candidate-dispatcher-admission-after-source-dedup-20261009.json`.
 
 `stage0` is the current Go compiler built by the supported Go toolchain.
 

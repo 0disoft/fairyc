@@ -1,11 +1,9 @@
 module hir_view_check;
-import scalar_views as views;
 import borrow_origins as owners;
 import hir_borrow_cache as cached;
 import hir_borrow_paths as paths;
 import borrow_shapes as borrows;
 import tagged_types as tagged;
-import reference_types as refs;
 import hir_model as h;
 import hir_origin_targets as targets;
 import hir_mutable_check as exclusive;

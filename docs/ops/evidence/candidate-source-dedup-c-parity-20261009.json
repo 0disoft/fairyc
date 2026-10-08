@@ -1,0 +1,62 @@
+{
+  "schema": "fairyc.candidate-source-dedup-c-parity/v1",
+  "passed": true,
+  "cases": 5,
+  "observations": [
+    {
+      "before": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\source-dedup\\array-view-and-short-circuit-0.c",
+        "sha256": "c9effe9f3061cc6df4d437b093f35e03382c26922aafada7ca9b12e9786206e2"
+      },
+      "after": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\source-dedup\\array-view-and-short-circuit-1.c",
+        "sha256": "c9effe9f3061cc6df4d437b093f35e03382c26922aafada7ca9b12e9786206e2"
+      },
+      "bytes": 5994
+    },
+    {
+      "before": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\source-dedup\\enum-result-and-nested-switch-0.c",
+        "sha256": "f8408a5b8deb628099b7823ebdbb1ad83091f53b875e0d7609af42a4bdad3f57"
+      },
+      "after": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\source-dedup\\enum-result-and-nested-switch-1.c",
+        "sha256": "f8408a5b8deb628099b7823ebdbb1ad83091f53b875e0d7609af42a4bdad3f57"
+      },
+      "bytes": 5663
+    },
+    {
+      "before": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\source-dedup\\factory-move-and-cleanup-0.c",
+        "sha256": "49301503ecf06969f6edc8c2636a835d4e92bb677b3c0bd2233ad3a1102ed266"
+      },
+      "after": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\source-dedup\\factory-move-and-cleanup-1.c",
+        "sha256": "49301503ecf06969f6edc8c2636a835d4e92bb677b3c0bd2233ad3a1102ed266"
+      },
+      "bytes": 3469
+    },
+    {
+      "before": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\source-dedup\\enum-payload-capture-0.c",
+        "sha256": "d2ef1371e81756eaaabccf866c9eef27aed3c76151aff8a40c857f75ef4fbe15"
+      },
+      "after": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\source-dedup\\enum-payload-capture-1.c",
+        "sha256": "d2ef1371e81756eaaabccf866c9eef27aed3c76151aff8a40c857f75ef4fbe15"
+      },
+      "bytes": 2725
+    },
+    {
+      "before": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\source-dedup\\slice-defaults-and-byte-loop-0.c",
+        "sha256": "3f47cbb7dd7c0c6317cd33d6d674e2e114f338baac3bcb7e351ca15289f970b2"
+      },
+      "after": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\source-dedup\\slice-defaults-and-byte-loop-1.c",
+        "sha256": "3f47cbb7dd7c0c6317cd33d6d674e2e114f338baac3bcb7e351ca15289f970b2"
+      },
+      "bytes": 8343
+    }
+  ]
+}

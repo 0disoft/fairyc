@@ -14,7 +14,7 @@ import resource_use as resource_use;
 import resource_flow as resource_flow;
 import std::bytes as bytes;
 import std::vec as v;
-import type_check as checking;
+import type_check as tc;
 
 pub fn state::Problem collect(ref names::Resolved resolved, ref mut v::Vec<state::Slot> tables) {
     let ref syntax::Parsed parsed = names::parsed(resolved);
@@ -48,14 +48,14 @@ pub fn state::Problem collect(ref names::Resolved resolved, ref mut v::Vec<state
         let syntax::Declaration function = syntax::declaration_at(parsed,index);
         if (function.kind == 3) {
             let u32 result_type = nominal::resolve(parsed,function.result_type);
-            let state::Value actual = checking::block(resolved,tables,ref mut problem,function.body,result_type,result_type,0,0);
+            let state::Value actual = tc::block(resolved,tables,ref mut problem,function.body,result_type,result_type,0,0);
             if (problem.code != 0) { return problem; }
             let syntax::Statement body = syntax::statement_at(parsed,function.body);
             if (body.expression != 0) {
                 if (actual.type != result_type) { let syntax::Expression tail = syntax::expression_at(parsed,body.expression); return state::fail(1,tail.start,tail.end,result_type,actual.type); }
             } else if (result_type != 7 && !control::block_terminates(parsed,function.body,0)) { return state::fail(7,body.start,body.end,result_type,7); }
         } else if(function.kind==6){
-            let state::Value actual=checking::block(resolved,tables,ref mut problem,function.cleanup_body,7,7,0,0);
+            let state::Value actual=tc::block(resolved,tables,ref mut problem,function.cleanup_body,7,7,0,0);
             if(problem.code!=0){return problem;}
             if(actual.type!=7){let body=syntax::statement_at(parsed,function.cleanup_body);let tail=syntax::expression_at(parsed,body.expression);return state::fail(1,tail.start,tail.end,7,actual.type);}
         }

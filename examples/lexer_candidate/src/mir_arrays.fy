@@ -1,7 +1,6 @@
 module mir_arrays;
 import mir_model as m;
 import mir_state as state;
-import array_types as arrays;
 import std::vec as v;
 
 // A checked index is an immutable temporary tied to one exact array type.

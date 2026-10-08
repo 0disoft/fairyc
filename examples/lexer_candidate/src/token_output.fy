@@ -4,6 +4,12 @@ import std::bytes as bytes;
 import std::text as text;
 import std::io as io;
 
+@effects(console)
+pub fn i32 write(ref u8[] data) {
+    return if (switch(io::write_bytes(data)) { case .ok(count): { count == data.len } case .err(_): { false } }) { 0 }
+        else { discard io::write_stderr("error: stdout write failed\n"); 2 };
+}
+
 fn bool kind(ref mut bytes::Buffer out, u32 value) {
     let ref str label = if (value == 0) { "invalid" } else if (value == 1) { "eof" }
         else if (value == 2) { "trivia" } else if (value == 3) { "identifier" }

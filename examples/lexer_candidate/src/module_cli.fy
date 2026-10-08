@@ -88,7 +88,7 @@ fn i32 execute(ref u8[] path,u32 program_mode) {
         var bytes::Buffer out=bytes::empty();let u32 code=c::render(ref program,ref mut out);
         if(code!=0){return error(if(code==1){"error: C entry requires exactly one fn i32 main()\n"}else if(code==4){"error: C output limit (2097152 bytes)\n"}else if(code==3){"error: buffer allocation failed\n"}else{"error: invalid module C input\n"});}
         let data=bytes::view(ref out);
-        return if(switch(io::write_bytes(data)){case .ok(n):{n==data.len}case .err(_):{false}}){0}else{error("error: stdout write failed\n")};
+        return output::write(data);
     }
     let modules::Registry registry = switch(modules::build(ref parsed_files)) {
         case .ok(value): { value }

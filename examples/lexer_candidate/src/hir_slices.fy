@@ -8,14 +8,16 @@ import std::vec as v;
 // Normalize a fixed-array borrow plus optional subrange without rewriting AST.
 // The address operation continues to select original named/field storage.
 pub fn usize borrow(syntax::Expression source,h::Type type,usize owner,bool exclusive,ref mut v::Vec<h::Expression> expressions,ref mut state::Context c){
-    return state::push_expression(expressions,h::Expression{.kind=.Borrow,.type,.operator=.None,.start=source.start,.end=source.end,.left=owner,.right=0,.alternative=0,.block=0,.binding=0,.edge_start=0,.edge_count=0,.payload_start=0,.payload_end=0,.boolean=exclusive},c);
+    var h::Expression e=state::typed_expression(.Borrow,type,.None,source.start,source.end);e.left=owner;e.boolean=exclusive;
+    return state::push_expression(expressions,e,c);
 }
 pub fn h::Expression bounds(syntax::Expression source,h::Type type,usize owner,usize low,usize high,ref mut v::Vec<h::Expression> expressions,ref mut bytes::Buffer payload,ref mut state::Context c){
-    var h::Expression e=h::Expression{.kind=.Slice,.type,.operator=.None,.start=source.start,.end=source.end,.left=owner,.right=low,.alternative=high,.block=0,.binding=0,.edge_start=0,.edge_count=0,.payload_start=0,.payload_end=0,.boolean=high==0};
+    var h::Expression e=state::typed_expression(.Slice,type,.None,source.start,source.end);e.left=owner;e.right=low;e.alternative=high;e.boolean=high==0;
     if(low==0){
         let usize start=bytes::len(payload);if(!bytes::append_byte(payload,48).is_ok){discard state::fail(c,3,source.start,source.end);return e;}
-        e.right=state::push_expression(expressions,h::Expression{.kind=.Integer,.type=.Usize,.operator=.None,.start=source.start,.end=source.end,.left=0,.right=0,.alternative=0,.block=0,.binding=0,.edge_start=0,.edge_count=0,.payload_start=start,.payload_end=start+1,.boolean=false},c);
+        var h::Expression zero=state::typed_expression(.Integer,.Usize,.None,source.start,source.end);zero.payload_start=start;zero.payload_end=start+1;
+        e.right=state::push_expression(expressions,zero,c);
     }
-    if(high==0){e.alternative=state::push_expression(expressions,h::Expression{.kind=.Length,.type=.Usize,.operator=.None,.start=source.start,.end=source.end,.left=owner,.right=0,.alternative=0,.block=0,.binding=0,.edge_start=0,.edge_count=0,.payload_start=0,.payload_end=0,.boolean=false},c);}
+    if(high==0){var h::Expression length=state::typed_expression(.Length,.Usize,.None,source.start,source.end);length.left=owner;e.alternative=state::push_expression(expressions,length,c);}
     return e;
 }

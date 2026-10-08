@@ -8,17 +8,16 @@ import binding_output as bindings;
 import std::io as io;
 
 @effects(console)
+pub fn Result<names::Resolved,i32> compile(scanner::Stream stream,ref u8[] path){
+    let syntax::Parsed parsed=switch(declarations::compile(stream,path)){case .ok(p):{p}case .err(code):{return .err(code);}};
+    let names::Resolved resolved=names::resolve(parsed);
+    if(names::problem(ref resolved).code!=0){return .err(errors(ref resolved,path));}
+    return .ok(resolved);
+}
+
+@effects(console)
 pub fn i32 run(scanner::Stream stream, ref u8[] path, bool dump) {
-    let syntax::Parsed parsed = switch(syntax::parse(stream,512)) {
-        case .ok(value): { value }
-        case .err(code): {
-            discard io::write_stderr(if (code == 4) { "error: parser limit\n" }
-                else if (code == 3) { "error: buffer allocation failed\n" } else { "error: parser failed\n" }); return 2;
-        }
-    };
-    if (syntax::problem_count(ref parsed) != 0) { return declarations::errors(ref parsed,path); }
-    let names::Resolved resolved = names::resolve(parsed);
-    if (names::problem(ref resolved).code != 0) { return errors(ref resolved,path); }
+    let names::Resolved resolved=switch(compile(stream,path)){case .ok(p):{p}case .err(code):{return code;}};
     if (dump) { return bindings::run(ref resolved); }
     return if (io::write("names ok\n").is_ok) { 0 } else { discard io::write_stderr("error: stdout write failed\n"); 2 };
 }

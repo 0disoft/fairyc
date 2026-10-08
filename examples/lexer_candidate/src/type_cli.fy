@@ -1,28 +1,23 @@
 module type_cli;
 import scanner as scanner;
-import syntax as syntax;
 import name_resolution as names;
 import name_cli as name_output;
 import type_check as typing;
 import type_state as state;
-import declaration_output as declarations;
 import token_output as output;
 import std::io as io;
 
 @effects(console)
+pub fn Result<typing::Typed,i32> compile(scanner::Stream stream,ref u8[] path){
+    let names::Resolved resolved=switch(name_output::compile(stream,path)){case .ok(p):{p}case .err(code):{return .err(code);}};
+    let typing::Typed typed=typing::check(resolved);
+    if(typing::problem(ref typed).code!=0){return .err(errors(ref typed,path));}
+    return .ok(typed);
+}
+
+@effects(console)
 pub fn i32 run(scanner::Stream stream, ref u8[] path) {
-    let syntax::Parsed parsed = switch(syntax::parse(stream,512)) {
-        case .ok(value): { value }
-        case .err(code): {
-            discard io::write_stderr(if (code == 4) { "error: parser limit\n" }
-                else if (code == 3) { "error: buffer allocation failed\n" } else { "error: parser failed\n" }); return 2;
-        }
-    };
-    if (syntax::problem_count(ref parsed) != 0) { return declarations::errors(ref parsed,path); }
-    let names::Resolved resolved = names::resolve(parsed);
-    if (names::problem(ref resolved).code != 0) { return name_output::errors(ref resolved,path); }
-    let typing::Typed typed = typing::check(resolved);
-    if (typing::problem(ref typed).code != 0) { return errors(ref typed,path); }
+    let typing::Typed typed=switch(compile(stream,path)){case .ok(p):{p}case .err(code):{return code;}};
     return if (io::write("types ok\n").is_ok) { 0 } else { discard io::write_stderr("error: stdout write failed\n"); 2 };
 }
 

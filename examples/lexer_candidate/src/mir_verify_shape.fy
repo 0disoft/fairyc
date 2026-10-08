@@ -13,7 +13,6 @@ import mir_verify_arrays as arrays;
 import mir_verify_literals as literals;
 import mir_verify_views as views;
 import mir_verify_enums as enums;
-import resource_identity as resources;
 import ffi_symbols as ffi;
 import sdk_scopes as sdk;
 

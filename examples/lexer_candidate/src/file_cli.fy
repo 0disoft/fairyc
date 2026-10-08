@@ -35,7 +35,7 @@ pub fn i32 run() {
     };
     let ref u8[] flag = bytes::view(ref argument)[..flag_length];
     if (argc == 2 && bytes::equal(flag, b"--help")) {
-        return if (io::write("usage: lexer-candidate --tokens-file <path>\n       lexer-candidate --declarations-file <path>\n       lexer-candidate --check-names-file <path>\n       lexer-candidate --bindings-file <path>\n       lexer-candidate --check-types-file <path>\n       lexer-candidate --check-modules-file <manifest>\n       lexer-candidate --c-modules-file <manifest>\n       lexer-candidate --hir-file <path>\n       lexer-candidate --mir-file <path>\n       lexer-candidate --c-file <path>\n       lexer-candidate --help\nNo arguments: private binary stdin protocol.\n").is_ok) { 0 }
+        return if (io::write(usage()).is_ok && io::write("       lexer-candidate --help\nNo arguments: private binary stdin protocol.\n").is_ok) { 0 }
             else { error("error: stdout write failed\n") };
     }
     let bool token_mode = bytes::equal(flag,b"--tokens-file");

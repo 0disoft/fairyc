@@ -1,7 +1,6 @@
 module mir_model;
 import candidate_limits as limits;
 import borrow_shapes as borrows;
-import reference_types as refs;
 import tagged_encoding as tagged;
 import array_types as arrays;
 import literal_types as literals;

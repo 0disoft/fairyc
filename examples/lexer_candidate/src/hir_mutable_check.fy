@@ -8,7 +8,6 @@ import reference_types as refs;
 import hir_model as h;
 import borrow_origins as owners;
 
-import array_types as arrays;
 import std::vec as v;
 
 // An immutable mutable descriptor keeps one exclusive generation. Aliases share
