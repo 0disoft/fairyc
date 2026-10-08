@@ -41,8 +41,18 @@ if __name__ == "__main__":
         observer.VALUES[key] = expected.returncode
         observer.CASE_CONTEXT["referenceCases"].append(dict(name=key, path=str(path), exit=expected.returncode,
                                                          stdout=expected.stdout, stderr=expected.stderr))
+    # One compiled Fairy program asserts each exact status and concatenates the
+    # four observed streams. The large scanner closure is compiled once/profile.
+    body = '@effects(filesystem,console) fn i32 main(){'
+    for case in observer.CASE_CONTEXT["referenceCases"]:
+        body += 'assert(tokens::run(b"' + Path(case["path"]).as_posix() + '")==' + str(case["exit"]) + ');'
+    body += 'return 7;}'
+    observer.CASES = {"token-file-cases": body}
+    observer.STREAMS = {"token-file-cases": ("", ''.join(c["stdout"] for c in observer.CASE_CONTEXT["referenceCases"]),
+                                              ''.join(c["stderr"] for c in observer.CASE_CONTEXT["referenceCases"]))}
+    observer.VALUES = {"token-file-cases": 7}
     observer.REJECT = {
-        "unused-invalid-user": (observer.CASES["valid"] + "fn i32 unused_invalid(){return true;}", "phase 5 code 1"),
+        "unused-invalid-user": (body + "fn i32 unused_invalid(){return true;}", "phase 5 code 1"),
         "private-sdk-target": ('import std::bytes as b;fn i32 main(){return b::signed_decimal_digit(1) as i32;}', "phase 3 code 6"),
         "missing-file-effect": ('fn i32 main(){return tokens::run(b"' + paths["정상.fy"].as_posix() + '");}', "code 7102"),
     }

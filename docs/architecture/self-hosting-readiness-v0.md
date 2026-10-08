@@ -151,6 +151,19 @@ remains a separate check. The actual bounded source/manifest loader is now
 a standalone Fairy leaf; both candidate/native profiles prove its byte limits,
 early errors and handle/allocation cleanup, and the prior CLI import cycle is
 removed.
+An opt-in SDK compaction pipeline now also compiles the authored file-token path
+with the original SDK source owners. Exact source/token spans and all user
+bodies survive compaction; existing join and work bounds are unchanged. Both
+candidate profiles emit identical C (769317 bytes for the observed program),
+and both native profiles reproduce the prior CLI's four file cases, including
+their exact streams and asserted statuses. Unused invalid user code, private SDK
+access and missing filesystem effects remain rejected. Byte-loop induction
+spans no longer incorrectly extend unrelated call loans; real later-argument
+conflicts still reject. Evidence:
+`docs/ops/evidence/candidate-file-tokens-fixed-dev-20261009.json`,
+`docs/ops/evidence/candidate-file-tokens-fixed-release-20261009.json` and
+`docs/ops/evidence/candidate-byte-loop-calls-release-20261009.json`.
+The complete command dispatcher and project-driver integration are still open.
 Project-driver and platform work remain. These scanner results do not establish
 the complete compiler's stage1/stage2 or promotion gates.
 

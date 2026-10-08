@@ -1183,3 +1183,37 @@ project commands and Linux execution remain pending.
   `evidence/candidate-sdk-module-driver-dev-fixed-20261009.json`.
 - Check passed. Release-driver and full token-route observations follow; no
   analysis budget, source bound, SDK ABI, database or CI workflow changed.
+
+## Authored file-token path execution (2026-10-09)
+
+- The opt-in driver now compiles `file_tokens::run`, its real scanner/output
+  dependencies and the complete original required SDK modules to owned MIR/C.
+  The former 1024-entry join rejection is removed through SDK arena compaction,
+  without changing that bound or the existing work/depth/stack limits.
+- Development and release candidates emit identical C (769317 bytes). One
+  authored Fairy program asserts the prior CLI's status for each of four input
+  cases and produces their exact concatenated stdout/stderr: Korean UTF-8 with
+  CRLF/documentation/cooked data, malformed string, 65537-byte input and missing
+  file. Both candidates' generated C runs in low/optimized MSVC profiles (4
+  executions, each covering all four cases).
+- Each candidate also rejects an unused invalid user function, a private SDK
+  call and missing filesystem effects. The byte-loop regression passes in both
+  candidate profiles (2 programs, 1 rejection, 8 native executions total).
+- Evidence: `evidence/candidate-file-tokens-fixed-dev-20261009.json`,
+  `evidence/candidate-file-tokens-fixed-release-20261009.json`,
+  `evidence/candidate-byte-loop-calls-release-20261009.json` and
+  `evidence/candidate-sdk-module-driver-release-fixed-20261009.json`.
+  The development receipt retains the initial older-runner failure and its
+  explicit correction: exact generated C and source digests were reused with
+  the existing runner that consumes expected stderr. No compiler pass was
+  repeated to repair that observation harness mismatch.
+- `build_sdk_module_driver.py --compiler <stage0> --profiles development release
+  --receipt <json>` builds the opt-in probe. Then run `verify_file_tokens.py
+  --images <driver-dev> <driver-release> --native-runner <console-aware-runner>
+  --receipt <json>`. The pre-fix driver build receipt remains at
+  `evidence/candidate-sdk-module-driver-build-20261009.json` for the regression
+  control's image identity.
+- Item 50 still contains the complete command-dispatcher integration. The
+  authored production CLI keeps its original full-AST route. Linux, whole-CLI
+  native execution and stage1/stage2 promotion have not been run. No public
+  language, SDK/runtime ABI, DB, dependency or CI workflow changed.
