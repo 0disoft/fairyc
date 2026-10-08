@@ -26,7 +26,7 @@ pub fn usize sdk_count(ref Table p){return v::len<sdk::Scope>(ref p.sdk_scopes);
 pub fn sdk::Scope sdk_at(ref Table p,usize index){return *v::at<sdk::Scope>(ref p.sdk_scopes,index);}
 pub fn usize sdk_rule(ref Table p,ref u8[] source,usize start,usize end,usize link_start,usize link_end){return sdk::foreign_owned(source,ref p.sdk_scopes,start,end,link_start,link_end);}
 pub fn bool sdk_result(ref Table p,ref u8[] source,usize rule,u32 type){
-    if(rule==1){return type==5;}if(rule!=2){return false;}let usize a=abi_find(p,type);let usize s=find(p,type);if(a==0 || s==0){return false;}
+    if(rule==1 || rule>=3 && rule<=8){return type==sdk::scalar_result(rule);}if(rule!=2){return false;}let usize a=abi_find(p,type);let usize s=find(p,type);if(a==0 || s==0){return false;}
     let abi=abi_at(p,a-1);if(!sdk::result_owned(source,ref p.sdk_scopes,abi.name_start,abi.name_end)){return false;}
     let shape=at(p,s-1);return shape.field_count==2 && field_at(p,shape.field_start+1).type==4 && field_at(p,shape.field_start+2).type==5;
 }

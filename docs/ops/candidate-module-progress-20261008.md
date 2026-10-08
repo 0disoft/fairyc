@@ -245,6 +245,19 @@ module-signature contract test in development. Evidence:
 `evidence/candidate-sdk-vector-plan-20261008.json` and
 `evidence/candidate-sdk-vector-plan-signatures-20261008.json`.
 
+The six authenticated Vec extern declarations now carry exact runtime linker
+names, scalar/pointer results and parameter types through the existing owned
+HIR/MIR permission checks. Declaration lookup uses the complete extern prefix:
+cleanup's earlier pop/release calls cannot supply declaration authority. A native
+API fixture in both profiles observes all six verified C prototypes and rejects
+missing/wrong scopes, changed source bytes, result/parameter/effect changes and
+a call-site substituted for the extern declaration. The process SDK permission
+regression passes in development. Evidence:
+`evidence/candidate-sdk-vector-foreign-20261008.json` and
+`evidence/candidate-sdk-vector-process-regression-20261008.json`.
+The fixture constructs owned MIR directly; executable Vec template ASTs,
+element storage operations and actual Vec runtime execution remain pending.
+
 ## CStr storage and owner-based reconstruction
 
 The candidate carries `ref CStr` as a separate immutable descriptor with data
