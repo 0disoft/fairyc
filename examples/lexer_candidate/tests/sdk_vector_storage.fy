@@ -12,6 +12,7 @@ import std::bytes as bytes;
 import scalar_views as views;
 import tagged_encoding as tags;
 import resource_identity as resources;
+import nominal_identity as nominal;
 
 fn m::Program retained(ref u8[] raw){
     var v::Vec<syntax::Parsed> sources=v::empty<syntax::Parsed>();
@@ -24,6 +25,22 @@ fn m::Program resource_retained(ref u8[] raw){
     assert(v::push<syntax::Parsed>(ref mut sources,support::text(b"module main;import std::vec as v;resource Item{i32 n;cleanup{}}fn i32 main(){var v::Vec<Item> x=v::empty<Item>();assert(v::push<Item>(ref mut x,Item{.n=17}).is_ok);assert(switch(v::pop<Item>(ref mut x)){case .some(n):{n.n==17}case .none:{false}});return 7;}")).is_ok);
     assert(v::push<syntax::Parsed>(ref mut sources,support::text(raw)).is_ok);
     return switch(program::compile(ref sources)){case .ok(p):{p}case .err(_):{assert(false);return resource_retained(raw);}};
+}
+fn m::Program struct_retained(ref u8[] raw){
+    var v::Vec<syntax::Parsed> sources=v::empty<syntax::Parsed>();
+    assert(v::push<syntax::Parsed>(ref mut sources,support::text(b"module main;import std::vec as v;struct Token{u32 kind;u32 trivia;usize start;usize end;usize cooked_index;}fn i32 main(){var v::Vec<Token> x=v::empty<Token>();let Token t=Token{.kind=1,.trivia=2,.start=3,.end=4,.cooked_index=5};assert(v::push<Token>(ref mut x,t).is_ok && t.kind==1);assert(switch(v::pop<Token>(ref mut x)){case .some(n):{n.start==3 && n.end==4}case .none:{false}});return 7;}")).is_ok);
+    assert(v::push<syntax::Parsed>(ref mut sources,support::text(raw)).is_ok);
+    return switch(program::compile(ref sources)){case .ok(p):{p}case .err(_):{assert(false);return struct_retained(raw);}};
+}
+@effects(filesystem)
+@test fn void struct_storage_retains_exact_layout_and_copy(){
+    let source=support::sdk_source();let p=struct_retained(bytes::view(ref source));assert(verify::check(ref p).code==0);
+    var bool[5] seen=[false;5];var usize i=1;while(i<=m::operation_count(ref p)){let o=m::operation_at(ref p,i);if(o.kind==39){assert(nominal::valid(o.owner_type) && o.operator>=1 && o.operator<=4);seen[o.operator as usize]=true;if(o.operator==3){assert(o.type==o.owner_type);}if(o.operator==4){assert(o.type==7 && o.result==0 && m::local_at(ref p,o.right).type==o.owner_type);}}i+=1;}
+    assert(seen[1] && seen[2] && seen[3] && seen[4]);var bytes::Buffer good=bytes::empty();assert(c::render(ref p,ref mut good)==0);
+    var u32 mode=1;while(mode<=7){switch(changed(ref p,mode)){
+        case .ok(bad):{assert(verify::check(ref bad).code!=0);var bytes::Buffer out=bytes::empty();assert(bytes::append(ref mut out,b"prefix").is_ok);assert(c::render(ref bad,ref mut out)!=0 && bytes::equal(bytes::view(ref out),b"prefix"));}
+        case .err(e):{assert(e.code!=0);}
+    };mode+=1;}
 }
 @effects(filesystem)
 @test fn void resource_storage_retains_owned_type_and_transfer(){

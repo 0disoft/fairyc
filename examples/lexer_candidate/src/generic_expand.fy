@@ -37,14 +37,14 @@ fn usize module_at(ref v::Vec<syntax::Declaration> declarations,usize start){
     }return owner;
 }
 fn bool vector_owned(ref Plan plan,syntax::Declaration d){return plan.sdk_end!=0 && d.start>=plan.sdk_start && d.end<=plan.sdk_end;}
-// Only authenticated SDK templates can specialize owned resource elements.
+// Only authenticated SDK templates can specialize resource/struct elements.
 // The joined type node retains an exact declaration, including imported aliases.
 fn u32 element_argument(ref u8[] source,ref v::Vec<syntax::Declaration> declarations,ref v::Vec<types::Node> types,ref Plan plan,syntax::Declaration template,usize root){
     let node=type_at(types,root);if(node.kind!=1){return 0;}
     let u32 scalar=scalar_type(source[node.start..node.end]);if(scalar!=7){return scalar;}
     if(!vector_owned(plan,template) || node.left==0 || node.left>v::len<syntax::Declaration>(declarations) || node.left>512){return 0;}
     let d=*v::at<syntax::Declaration>(declarations,node.left-1);
-    return if(d.kind==6 && d.generic_parameters==0){98303+scalar::small_id(node.left)}else{0};
+    return if(d.kind==6 && d.generic_parameters==0){98303+scalar::small_id(node.left)}else if(d.kind==4){255+scalar::small_id(node.left)}else{0};
 }
 fn bool vector_named_view(ref u8[] source,ref Plan plan,syntax::Declaration d){return vector_owned(plan,d) && (bytes::equal(source[d.name_start..d.name_end],b"view_u8") || bytes::equal(source[d.name_start..d.name_end],b"view_mut_u8") || bytes::equal(source[d.name_start..d.name_end],b"view_i32") || bytes::equal(source[d.name_start..d.name_end],b"view_mut_i32") || bytes::equal(source[d.name_start..d.name_end],b"view_i64") || bytes::equal(source[d.name_start..d.name_end],b"view_mut_i64") || bytes::equal(source[d.name_start..d.name_end],b"view_u32") || bytes::equal(source[d.name_start..d.name_end],b"view_mut_u32") || bytes::equal(source[d.name_start..d.name_end],b"view_usize") || bytes::equal(source[d.name_start..d.name_end],b"view_mut_usize"));}
 fn bool requested(ref v::Vec<ast::Node> expressions,usize declaration){var usize i=0;while(i<v::len<ast::Node>(expressions)){let node=*v::at<ast::Node>(expressions,i);if(node.kind==2 && node.right==declaration){return true;}i+=1;}return false;}

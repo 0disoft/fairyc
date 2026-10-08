@@ -591,3 +591,24 @@ project commands and Linux execution remain pending.
   element Vec and item 49 Buffer execution are prerequisites. Resource views,
   release mutation API, Linux and self-hosting remain pending. No SDK source,
   runtime ABI, dependency version or CI change.
+
+## Struct Vec storage
+
+- Authenticated SDK templates specialize direct bound struct elements as well as
+  resources. Generic identity, storage size/alignment, typed memcpy and element
+  references retain the exact nominal declaration. Struct fields still cannot
+  own resources; ordinary user generic functions and enum elements stay closed.
+- Development/release candidate builds pass. Three positive programs and one
+  SDK assertion bounds trap, plus four rejections, pass per candidate with
+  sixteen MSVC low/optimized executions. Programs cover a five-field Token-shaped
+  struct, copy-donor reuse, allocation failure preservation, growth, shared and
+  exclusive element references, and padded nested structs with tagged fields.
+- Two development native API tests pass, including seven storage/authority
+  mutations with output preservation and the existing scalar AST observer.
+  Evidence: `evidence/candidate-sdk-vector-struct-api-20261008.json`,
+  `evidence/candidate-sdk-vector-struct-cli-dev-20261008.json` and
+  `evidence/candidate-sdk-vector-struct-cli-release-20261008.json`.
+- The Token-shaped program verifies storage behavior; actual scanner execution
+  still needs Buffer support for cooked text and diagnostics. Item 48 remains
+  partial until that integration executes. Release mutation API, Linux and
+  self-hosting are pending. No SDK/runtime ABI, dependency or CI change.

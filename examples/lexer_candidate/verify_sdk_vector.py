@@ -94,7 +94,7 @@ fn i32 main(){
 """
 REJECT = {
     "private-field": ('fn i32 main(){var v::Vec<i32> x=v::empty<i32>();discard x.length;return 7;}', "phase 5 code 6201"),
-    "nominal-element": ('struct Item{i32 n;}fn i32 main(){var v::Vec<Item> x=v::empty<Item>();return 7;}', "code 4502"),
+    "enum-element": ('enum Item{A;B;}fn i32 main(){var v::Vec<Item> x=v::empty<Item>();return 7;}', "code 4502"),
     "stolen-storage": ('fn i32 main(){discard unsafe{storage_size<i32>()};return 7;}', "phase 5 code 5102"),
     "stolen-runtime": ('@link_name("fy_private_vector_initialize_v0")unsafe extern C fn u32 stolen(ptr mut void p,usize size,usize alignment);fn i32 main(){return 7;}', "phase 1 code 5106"),
     "wrong-element": ('fn i32 main(){var v::Vec<i32> x=v::empty<i32>();discard v::push<i32>(ref mut x,true);return 7;}', "phase 5 code 1"),

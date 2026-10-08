@@ -53,7 +53,7 @@ fn syntax::Parsed expanded(ref u8[] user,ref u8[] sdk){
     rejected_elements_and_spoofing(bytes::view(ref sdk));
 }
 fn void rejected_elements_and_spoofing(ref u8[] sdk){
-    let p=expanded(b"module user;import std::vec as v;struct Token{i32 n;}fn v::Vec<Token> main(){return v::empty<Token>();}",sdk);
+    let p=expanded(b"module user;import std::vec as v;enum Token{A;B;}fn v::Vec<Token> main(){return v::empty<Token>();}",sdk);
     assert(syntax::problem_count(ref p)==1 && syntax::problem_at(ref p,0).code==4502);
     let spoof=expand::expand(text(b"module std::vec;pub resource Vec<T>{cleanup{}}pub fn Vec<T> empty<T>(){}"));assert(syntax::problem_count(ref spoof)==1 && syntax::problem_at(ref spoof,0).code==6801);
     let shadow=expand::expand(text(b"module user;fn T id<T>(T x){return x;}fn i32 other(i32 id){return id;}fn i32 main(){return id<i32>(7);}"));assert(syntax::problem_count(ref shadow)==0);
