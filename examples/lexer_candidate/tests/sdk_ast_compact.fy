@@ -19,13 +19,13 @@ fn void snapshot(ref syntax::Parsed a,ref syntax::Parsed b){
 
 @test fn void reachability_ranges_preserve_many_repeated_local_names(){
     var v::Vec<syntax::Parsed> sources=v::empty<syntax::Parsed>();var usize module_index=0;
-    while(module_index<22){var bytes::Buffer text=bytes::empty();assert(bytes::append(ref mut text,b"module user").is_ok && bytes::append_usize(ref mut text,module_index).is_ok && bytes::append(ref mut text,b";fn void value(){let i32 n=0;").is_ok);
-        var usize i=0;while(i<800){assert(bytes::append(ref mut text,b"discard n;").is_ok);i+=1;}assert(bytes::append(ref mut text,b"}").is_ok);
+    while(module_index<22){var bytes::Buffer text=bytes::empty();assert(bytes::append(ref mut text,b"module user").is_ok && bytes::append_usize(ref mut text,module_index).is_ok && bytes::append(ref mut text,b";fn void value(){let i32 long_local_name_kept_without_lookup=0;").is_ok);
+        var usize i=0;while(i<800){assert(bytes::append(ref mut text,b"discard long_local_name_kept_without_lookup;").is_ok);i+=1;}assert(bytes::append(ref mut text,b"}").is_ok);
         assert(v::push<syntax::Parsed>(ref mut sources,support::text(bytes::view(ref text))).is_ok);module_index+=1;
     }
     let metadata=switch(signatures::build(ref sources)){case .ok(m):{m}case .err(_):{assert(false);return;}};
     var usize work=0;let plan=switch(reach::build(ref sources,ref metadata,ref mut work)){case .ok(p):{p}case .err(_):{assert(false);return;}};
-    assert(work<1048576);module_index=0;while(module_index<22){assert(reach::needed(ref plan,module_index,1));module_index+=1;}
+    assert(work<50000);module_index=0;while(module_index<22){assert(reach::needed(ref plan,module_index,1));module_index+=1;}
     let retained=switch(compact::compact(ref sources,ref metadata)){case .ok(p):{p}case .err(_):{assert(false);return;}};
     assert(v::len<syntax::Parsed>(ref retained)==22);module_index=0;while(module_index<22){let before=v::at<syntax::Parsed>(ref sources,module_index);let after=v::at<syntax::Parsed>(ref retained,module_index);
         snapshot(before,after);assert(syntax::expression_count(before)==syntax::expression_count(after) && syntax::statement_count(before)==syntax::statement_count(after) && syntax::declaration_count(before)==syntax::declaration_count(after));module_index+=1;
@@ -33,7 +33,7 @@ fn void snapshot(ref syntax::Parsed a,ref syntax::Parsed b){
 }
 @effects(filesystem) @test fn void compacted_sdk_keeps_source_and_user_validation(){
     let input=support::sdk_source();var v::Vec<syntax::Parsed> sources=v::empty<syntax::Parsed>();
-    assert(v::push<syntax::Parsed>(ref mut sources,support::text(b"module user;import std::bytes as b;struct Box{i32 value;}fn i32 main(){let b::Buffer x=b::empty();assert(b::len(ref x)==0);let ref u8[] cooked=b\"\\x41\";return 3;}fn i32 invalid_unused(){return true;}")).is_ok);
+    assert(v::push<syntax::Parsed>(ref mut sources,support::text(b"module user;import std::bytes as b;struct Box{i32 value;}fn i32 main(){let b::Buffer x=b /* qualification */ :: empty();assert(b::len(ref x)==0);let ref u8[] cooked=b\"\\x41\";return 3;}fn i32 invalid_unused(){return true;}")).is_ok);
     assert(v::push<syntax::Parsed>(ref mut sources,support::text(bytes::view(ref input))).is_ok);
     let metadata=switch(signatures::build(ref sources)){case .ok(m):{m}case .err(_):{assert(false);return;}};
     let output=switch(compact::compact(ref sources,ref metadata)){case .ok(p):{p}case .err(_):{assert(false);return;}};

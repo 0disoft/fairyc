@@ -1,0 +1,56 @@
+{
+  "schema": "fairyc.candidate-ast-owner-cache/v1",
+  "passed": true,
+  "nativeAPI": {
+    "schemaVersion": "fairyc.test-report/v1",
+    "engine": "native",
+    "target": "x86_64-windows-msvc",
+    "profile": "development",
+    "tests": [
+      {
+        "identity": "tests::sdk_ast_compact::compacted_private_reference_retains_original_diagnostic",
+        "outcome": "passed",
+        "trapCategory": null
+      },
+      {
+        "identity": "tests::sdk_ast_compact::compacted_sdk_keeps_source_and_user_validation",
+        "outcome": "passed",
+        "trapCategory": null
+      },
+      {
+        "identity": "tests::sdk_ast_compact::reachability_ranges_preserve_many_repeated_local_names",
+        "outcome": "passed",
+        "trapCategory": null
+      }
+    ],
+    "count": 3,
+    "passed": 3,
+    "failed": 0,
+    "status": "ok",
+    "lock": "verified"
+  },
+  "denseFixture": {
+    "modules": 22,
+    "longLocalReferences": 17600,
+    "reachabilityWorkBelow": 50000
+  },
+  "mapping": "User nodes kept without owner searches; SDK function owner cached within each arena",
+  "qualification": "Parsed name end compared with first token end; qualified-name trivia tested",
+  "sources": [
+    {
+      "path": "examples/lexer_candidate/src/sdk_reachability.fy",
+      "sha256": "e71608c5fbd0ee0f751d3792ded381bdd5e20204e99aefa959628dae984056f8"
+    },
+    {
+      "path": "examples/lexer_candidate/src/sdk_ast_compact.fy",
+      "sha256": "3ffc6d321b32e287c8cc548d9f6a3361f7ed140ab34848f5873ce94d39825495"
+    },
+    {
+      "path": "examples/lexer_candidate/tests/sdk_ast_compact.fy",
+      "sha256": "6b8c67cad809dc4a2f5a076e8105cc8a817f158df96ec33abc1803aba8cc6fae"
+    }
+  ],
+  "limitsRaised": false,
+  "releaseCandidateRebuilt": false,
+  "linuxValidated": false
+}

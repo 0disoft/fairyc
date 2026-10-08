@@ -237,6 +237,12 @@ blocker occurs during AST copying at `std/vec.fy:0..0`; full-dispatcher C/native
 execution and stage1/stage2 comparison remain open. Evidence:
 `docs/ops/evidence/candidate-catalog-ranges-20261009.json` and
 `docs/ops/evidence/candidate-dispatcher-admission-catalog-ranges-20261009.json`.
+Token-qualified local-name detection and cached SDK function ownership further
+advance the 1048534-byte dispatcher to AST copying at `bodies.fy:0..0`.
+Three development native regressions pass, including 17600 long local names
+under 50000 reachability work units. Moving unchanged user AST owners is next.
+Evidence: `docs/ops/evidence/candidate-ast-owner-cache-20261009.json` and
+`docs/ops/evidence/candidate-dispatcher-admission-owner-cache-20261009.json`.
 
 `stage0` is the current Go compiler built by the supported Go toolchain.
 

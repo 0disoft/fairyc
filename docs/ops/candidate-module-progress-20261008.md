@@ -1461,3 +1461,22 @@ project commands and Linux execution remain pending.
   `evidence/candidate-dispatcher-admission-catalog-ranges-20261009.json`.
 - Release rebuilding, Linux and full-dispatcher C/native execution remain open.
   Numeric bounds, language/SDK ABI, DB and CI settings are unchanged.
+
+## Cached AST ownership and token-qualified names (2026-10-09)
+
+- User-local names are identified by the parser's first token end instead of
+  rescanning spelling bytes. Qualified names with intervening trivia still use
+  catalog lookup. SDK arena mapping reuses a containing function row; the
+  enclosing module row is never cached as a function owner. User nodes retain
+  their identity mappings without declaration searches.
+- Three development native compaction tests pass. The dense fixture now uses
+  17600 long local names across 22 modules and requires reachability work below
+  50000. Exact sources/tokens/arenas, private-target diagnostics and invalid
+  unused-user checking remain covered, including qualified-name trivia.
+- The dispatcher remains within 1MiB at 1048534 joined bytes and advances to
+  `bodies.fy:0..0`, still phase 8 code 10 during copying. Moving unchanged user
+  AST owners through the CLI can eliminate their duplicate arena/scanner copy.
+  Evidence: `evidence/candidate-ast-owner-cache-20261009.json` and
+  `evidence/candidate-dispatcher-admission-owner-cache-20261009.json`.
+- Development check/build pass. Release/Linux and full-dispatcher C/native
+  execution remain open; no numeric limits, SDK ABI, DB or CI settings changed.

@@ -22,10 +22,10 @@ fn usize indexed(ref v::Vec<usize> map,usize start,usize count,ref mut u32 code)
 fn Result<v::Vec<usize>,u32> mapping(ref syntax::Parsed file,ref reach::Plan plan,usize module_index,u32 kind,ref mut usize work){
     var v::Vec<usize> map=v::empty<usize>();if(!v::push<usize>(ref mut map,0).is_ok){return .err(11);}var usize next=0;
     let usize count=if(kind==1){syntax::expression_count(file)}else if(kind==2){syntax::statement_count(file)}else if(kind==3){syntax::entry_count(file)}else{syntax::type_count(file)};
-    var usize i=1;while(i<=count){if(!reach::charge(work,1)){return .err(10);}var usize start=0;var usize end=0;
+    var usize previous=0;var usize i=1;while(i<=count){if(!reach::charge(work,1)){return .err(10);}var usize start=0;var usize end=0;
         if(kind==1){let n=syntax::expression_at(file,i);start=n.start;end=n.end;}else if(kind==2){let n=syntax::statement_at(file,i);start=n.start;end=n.end;}
         else if(kind==3){let n=syntax::entry_at(file,i-1);start=n.start;end=n.end;}else{let n=syntax::type_at(file,i);start=n.start;end=n.end;}
-        let bool keep=reach::keep(plan,module_index,start,end,work);if(*work>=1048576){return .err(10);}if(keep){next+=1;}
+        let bool keep=reach::keep(plan,module_index,start,end,ref mut previous,work);if(*work>=1048576){return .err(10);}if(keep){next+=1;}
         if(!v::push<usize>(ref mut map,if(keep){next}else{0}).is_ok){return .err(11);}i+=1;
     }return .ok(map);
 }
@@ -69,8 +69,7 @@ fn Result<syntax::Parsed,u32> copy_file(ref syntax::Parsed file,ref reach::Plan 
     i=0;while(i<syntax::attribute_argument_count(file)){if(!reach::charge(work,1)){return .err(10);}if(!v::push<attributes::Argument>(ref mut arguments,syntax::attribute_argument_at(file,i)).is_ok){return .err(11);}i+=1;}
     if(code!=0){return .err(code);}return .ok(syntax::assemble(source,declarations,problems,expressions,entries,statements,types,fields,attributes,arguments));
 }
-// Original metadata authenticates all SDK bytes and signatures before any body
-// is removed. All source owners survive; only indexed SDK function arenas shrink.
+// Authenticate first; retain source owners and compact SDK function arenas.
 pub fn Result<v::Vec<syntax::Parsed>,catalog::Problem> compact(ref v::Vec<syntax::Parsed> sources,ref signatures::Program metadata){
     var usize work=0;let plan=switch(reach::build(sources,metadata,ref mut work)){case .ok(p):{p}case .err(e):{return .err(e);}};
     var v::Vec<syntax::Parsed> output=v::empty<syntax::Parsed>();var usize i=0;while(i<v::len<syntax::Parsed>(sources)){

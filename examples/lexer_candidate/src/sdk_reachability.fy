@@ -22,11 +22,15 @@ fn usize owner_rows(ref v::Vec<Row> rows,ref v::Vec<usize> bases,usize module_in
     if(low==*v::at<usize>(bases,module_index)){return 0;}let r=v::at<Row>(rows,low-1);return if(r.start<=start && end<=r.end){low}else{0};
 }
 pub fn usize owner(ref Plan p,usize module_index,usize start,usize end,ref mut usize work){return owner_rows(ref p.rows,ref p.bases,module_index,start,end,work);}
-pub fn bool keep(ref Plan p,usize module_index,usize start,usize end,ref mut usize work){let usize id=owner(p,module_index,start,end,work);return id==0 || !v::at<Row>(ref p.rows,id-1).function || v::at<Row>(ref p.rows,id-1).needed;}
-// User-local declarations are retained; only qualified names can reach SDK code.
+pub fn bool keep(ref Plan p,usize module_index,usize start,usize end,ref mut usize previous,ref mut usize work){
+    if(!v::at<Row>(ref p.rows,base(p,module_index)).bundled){return true;}
+    if(*previous!=0){let r=v::at<Row>(ref p.rows,*previous-1);if(!r.function || start<r.start || end>r.end){*previous=0;}}
+    if(*previous==0){*previous=owner(p,module_index,start,end,work);}let usize id=*previous;
+    return id==0 || !v::at<Row>(ref p.rows,id-1).function || v::at<Row>(ref p.rows,id-1).needed;
+}
 fn usize lookup(ref v::Vec<syntax::Parsed> sources,ref signatures::Program metadata,ref v::Vec<Row> rows,ref v::Vec<usize> bases,ref mut v::Vec<Cached> cache,usize module_index,usize expression,bool bundled,ref mut usize work,ref mut u32 code){
     let file=v::at<syntax::Parsed>(sources,module_index);let name=syntax::expression_text(file,expression);
-    if(!bundled){var usize n=0;while(n<name.len && name[n]!=58){if(!charge(work,1)){*code=10;return 0;}n+=1;}if(n==name.len){return 0;}}
+    let e=syntax::expression_at(file,expression);if(!bundled && e.end==syntax::token_info(file,e.token).end){return 0;}
     var usize hash=module_index;var usize i=0;while(i<name.len){if(!charge(work,1)){*code=10;return 0;}hash=(hash*131+(name[i] as usize))%1048573;i+=1;}
     var usize slot=hash%4096;var usize probes=0;
     while(probes<4096){if(!charge(work,1)){*code=10;return 0;}let c=*v::at<Cached>(cache,slot);
