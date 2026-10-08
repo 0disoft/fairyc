@@ -987,3 +987,28 @@ project commands and Linux execution remain pending.
 - Only test harnesses, a test fixture and progress documentation changed. No
   public language/API, compiler/runtime implementation, dependency, DB or CI
   workflow change. Without an explicit C input the new native test skips.
+
+
+## File SDK extern authority (item 51, 2026-10-09)
+
+- The Fairy candidate admits the exact authenticated `std::fs` source's 37
+  extern declarations and nine C records. Owned MIR verifies the original
+  declaration/link spans, filesystem effect, result layout, scalar parameters
+  and nominal pointer parameters, including pointer mutability.
+- The native Fairy test releases its Parsed owner before verifying MIR and
+  rendering all prototypes. It rejects 14 authority/source/signature/effect/ABI
+  mutations, preserves an existing C output prefix on rejection, and rejects a
+  user declaration that claims the reserved file-open runtime symbol.
+- Development and release native API evidence:
+  `evidence/candidate-sdk-file-api-20261009.json`. The shared observer accepts
+  `--sdk-source` and records its digest, so the file test receives the absolute
+  bundled SDK path as its first program argument.
+- This completes the extern authority slice only. Compiling the entire original
+  file SDK still fails at its `Result<FileKind, FileError>` return annotation:
+  the current enum plus struct payload encoding needs 30 payload bits, beyond
+  the existing 28-bit Result operand bound. No source, stack, work or depth
+  bounds were raised. File body execution, candidate compilation of
+  `file_cli::load`, project command integration and Linux checks remain.
+- Candidate Fairy implementation, native API test, observer, lock and progress
+  documents changed. No public language/SDK/runtime implementation, dependency,
+  DB, CI workflow or release change.

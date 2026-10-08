@@ -140,6 +140,10 @@ helpers also remove the development scanner's default-stack overflow. The
 checked-in current/previous, malformed, mutation and budget corpora now match the
 Go lexer through candidate-emitted C in both native profiles (7670 cases per
 profile, plus malformed framing). This proves the scanner component scope.
+Authenticated file SDK extern declarations and C record authority now also
+pass development/release native API tests, including 14 rejected mutations.
+File SDK body execution remains open because the current tagged encoding
+cannot represent its enum plus struct Result payload.
 Project-driver and platform work remain. These scanner results do not establish
 the complete compiler's stage1/stage2 or promotion gates.
 

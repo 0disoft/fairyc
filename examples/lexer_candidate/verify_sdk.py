@@ -18,6 +18,7 @@ def main():
     ap.add_argument("--exact", action="append", required=True)
     ap.add_argument("--profile", choices=("both", "development", "release"), default="both")
     ap.add_argument("--append", action="store_true")
+    ap.add_argument("--sdk-source", type=Path, default=REPO / "internal/sdkstdlib/sources/optional/std/vec.fy")
     ap.add_argument("--input", action="append", type=Path, default=[])
     args = ap.parse_args()
     compiler = Path(args.compiler).resolve()
@@ -40,7 +41,8 @@ def main():
     def save():
         receipt.parent.mkdir(parents=True, exist_ok=True)
         receipt.write_text(json.dumps(dict(schema="fairyc.candidate-sdk-native/v1",
-            passed=passed, compiler=identity(compiler), executions=rows,
+            passed=passed, compiler=identity(compiler), sdk=identity(args.sdk_source.resolve()),
+            inputs=[identity(p.resolve()) for p in args.input], executions=rows,
             sources=[identity(p) for p in sorted((PROJECT / "src").glob("*.fy"))],
             tests=[identity(p) for p in sorted((PROJECT / "tests").glob("*.fy"))],
             lock=identity(PROJECT / "fairy.lock"), observer=identity(Path(__file__)),
@@ -54,7 +56,7 @@ def main():
                 argv.extend(["--exact", name])
             if release:
                 argv.append("--release")
-            argv.extend(["--", str(REPO / "internal/sdkstdlib/sources/optional/std/vec.fy")])
+            argv.extend(["--", str(args.sdk_source.resolve())])
             argv.extend(str(p.resolve()) for p in args.input)
             # Each exact test has its own C compilation. Bound the whole selection
             # separately and retain raw failure evidence before asserting success.

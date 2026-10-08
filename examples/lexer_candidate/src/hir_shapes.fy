@@ -15,6 +15,7 @@ import ffi_symbols as ffi;
 import std::bytes as bytes;
 import std::vec as v;
 import sdk_scopes as sdk;
+import sdk_file_rules as files;
 
 // Source-independent nominal layout facts. Field IDs are one-based; shape type
 // IDs preserve 256 + declaration index. Every name/span indexes owned HIR bytes.
@@ -39,12 +40,16 @@ pub fn usize sdk_rule(ref Table p,ref u8[] source,usize start,usize end,usize li
 fn bool sdk_record(ref Table p,ref u8[] source,u32 type,usize record){
     let usize a=abi_find(p,type);let usize s=find(p,type);if(a==0 || s==0){return false;}let abi=abi_at(p,a-1);
     if(!sdk::record_owned(source,ref p.sdk_scopes,abi.name_start,abi.name_end,record)){return false;}
-    let shape=at(p,s-1);return shape.field_count==2 && field_at(p,shape.field_start+1).type==if(record==3){pointers::make(3,false)}else{4} && field_at(p,shape.field_start+2).type==if(record==2){4}else{5};
+    let shape=at(p,s-1);
+    if(record>=6){if(shape.field_count!=files::field_count(record)){return false;}var usize i=0;while(i<shape.field_count){if(field_at(p,shape.field_start+i+1).type!=files::field_type(record,i)){return false;}i+=1;}return true;}
+    return shape.field_count==2 && field_at(p,shape.field_start+1).type==if(record==3){pointers::make(3,false)}else{4} && field_at(p,shape.field_start+2).type==if(record==2){4}else{5};
 }
 pub fn bool sdk_result(ref Table p,ref u8[] source,usize rule,u32 type){
+    if(files::valid(rule)){let usize record=files::result_record(rule);return if(record!=0){sdk_record(p,source,type,record)}else{type==sdk::scalar_result(rule)};}
     if(rule==2){return sdk_record(p,source,type,1);}if(rule>=16 && rule<=23 && rule!=17){return sdk_record(p,source,type,2);}if(rule>=24 && rule<=32){return sdk_record(p,source,type,if(rule==32){5}else{4});}return sdk::scalar_result(rule)!=0 && type==sdk::scalar_result(rule);
 }
 pub fn bool sdk_parameter(ref Table p,ref u8[] source,usize rule,usize index,u32 type){
+    if(files::valid(rule)){if(index>=files::parameter_count(rule)){return false;}let usize record=files::parameter_record(rule,index);return if(record!=0){pointers::valid(type) && pointers::mutable(type)==files::parameter_mutable(rule,index) && sdk_record(p,source,pointers::inner(type),record)}else{type==files::parameter(rule,index)};}
     if(index>=sdk::parameter_count(rule)){return false;}if(sdk::view_parameter(rule,index)){return pointers::valid(type) && !pointers::mutable(type) && sdk_record(p,source,pointers::inner(type),3);}return type==sdk::parameter(rule,index);
 }
 pub fn usize abi_count(ref Table p){return v::len<Abi>(ref p.abi);}
