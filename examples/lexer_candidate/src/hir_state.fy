@@ -1,4 +1,5 @@
 module hir_state;
+import candidate_limits as limits;
 import scalar_views as views;
 import c_abi_types as c_types;
 import pointer_types as pointers;
@@ -47,7 +48,7 @@ pub fn h::Operator operator(ref u8[] raw) {
 }
 pub fn h::Expression expression(usize start, usize end) { return h::Expression { .kind = .Integer, .type = .Invalid, .operator = .None, .start, .end, .left = 0, .right = 0, .alternative = 0, .block = 0, .binding = 0, .edge_start = 0, .edge_count = 0, .payload_start = 0, .payload_end = 0, .boolean = false }; }
 pub fn h::Statement statement(usize start, usize end, usize scope) { return h::Statement { .kind = .Expression, .start, .end, .scope, .expression = 0, .target = 0, .binding = 0, .operator = .None, .body = 0, .initial = 0, .post = 0, .loop_target = 0 }; }
-pub fn usize push_expression(ref mut v::Vec<h::Expression> arena, h::Expression e, ref mut Context c) { if (c.problem.code != 0) { return 0; } if (v::len<h::Expression>(arena) >= 4096) { return fail(c,2,e.start,e.end); } if (!v::push<h::Expression>(arena,e).is_ok) { return fail(c,3,e.start,e.end); } return v::len<h::Expression>(arena); }
+pub fn usize push_expression(ref mut v::Vec<h::Expression> arena, h::Expression e, ref mut Context c) { if (c.problem.code != 0) { return 0; } if (v::len<h::Expression>(arena) >= limits::program_expressions()) { return fail(c,2,e.start,e.end); } if (!v::push<h::Expression>(arena,e).is_ok) { return fail(c,3,e.start,e.end); } return v::len<h::Expression>(arena); }
 pub fn usize push_statement(ref mut v::Vec<h::Statement> arena, h::Statement s, ref mut Context c) { if (c.problem.code != 0) { return 0; } if (v::len<h::Statement>(arena) >= 8192) { return fail(c,2,s.start,s.end); } if (!v::push<h::Statement>(arena,s).is_ok) { return fail(c,3,s.start,s.end); } return v::len<h::Statement>(arena); }
 pub fn bool edge(ref mut v::Vec<usize> arena, usize id, ref mut Context c) { if (c.problem.code != 0) { return false; } if (id == 0) { discard fail(c,4,0,0); return false; } if (v::len<usize>(arena) >= 32768) { discard fail(c,2,0,0); return false; } if (!v::push<usize>(arena,id).is_ok) { discard fail(c,3,0,0); return false; } return true; }
 pub fn usize reserve_edges(ref mut v::Vec<usize> arena, usize count, ref mut Context c) { let usize start = v::len<usize>(arena); var usize i = 0; while (i < count) { if (!edge(arena,1,c)) { return 0; } i += 1; } return start; }
@@ -58,7 +59,7 @@ pub fn usize function(ref v::Vec<Link> links, usize id) { return if (id == 0 || 
 // Literal magnitudes never pass through a signed machine value. Exact canonical
 // decimal bytes therefore cover both i64 MIN and unsigned usize MAX on AMD64.
 pub fn bool integer(ref mut bytes::Buffer payload, ref u8[] raw, bool negative, ref mut Context c) {
-    if (bytes::len(payload) > 86016 - 21) { discard fail(c,2,0,0); return false; }
+    if (bytes::len(payload) > limits::program_expressions()*21 - 21) { discard fail(c,2,0,0); return false; }
     var usize base = 10; var usize i = 0;
     if (raw.len >= 2 && raw[0] == 48) { if (raw[1] == 120 || raw[1] == 88) { base = 16; i = 2; } else if (raw[1] == 98 || raw[1] == 66) { base = 2; i = 2; } }
     var usize magnitude = 0; var usize digits = 0;

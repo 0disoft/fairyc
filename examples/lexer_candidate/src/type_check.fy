@@ -1,4 +1,5 @@
 module type_check;
+import candidate_limits as limits;
 import scalar_views as views;
 import pointer_types as pointers;
 import reference_types as refs;
@@ -503,7 +504,7 @@ fn state::Value block(ref names::Resolved resolved, ref mut v::Vec<state::Slot> 
 }
 fn state::Problem collect(ref names::Resolved resolved, ref mut v::Vec<state::Slot> tables) {
     let ref syntax::Parsed parsed = names::parsed(resolved);
-    if (names::symbol_count(resolved) > 1152 || syntax::expression_count(parsed) > 4096 || syntax::entry_count(parsed) > 1024 || syntax::declaration_count(parsed) > 512) { return state::fail(10,0,syntax::source_view(parsed).len,0,0); }
+    if (names::symbol_count(resolved) > 1152 || syntax::expression_count(parsed) > limits::program_expressions() || syntax::entry_count(parsed) > 1024 || syntax::declaration_count(parsed) > 512) { return state::fail(10,0,syntax::source_view(parsed).len,0,0); }
     if(syntax::field_count(parsed)>1024 || tagged::field_slots(parsed)>1024-syntax::field_count(parsed)){return state::fail(10,0,syntax::source_view(parsed).len,0,0);}
     if (!state::initialize(tables,names::symbol_count(resolved),syntax::expression_count(parsed),syntax::entry_count(parsed))) { return state::fail(12,0,syntax::source_view(parsed).len,0,0); }
     let state::Problem ability=abilities::validate(parsed);if(ability.code!=0){return ability;}

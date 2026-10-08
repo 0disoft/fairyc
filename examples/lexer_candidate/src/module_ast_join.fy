@@ -127,7 +127,7 @@ fn Problem generic(ref syntax::Parsed file,usize module_index){
 }
 
 // Limits of the joined owner: 256 inputs, 1048576 joined bytes including separators,
-// 512 declarations, 4096 expressions, 8192 statements, 1024 entries, 4096 types,
+// 512 declarations, 16384 expressions, 8192 statements, 1024 entries, 4096 types,
 // 1024 fields and 4096 attributes and attribute arguments. The existing scanner
 // token, diagnostic and work budgets apply to the joined source.
 pub fn Result<syntax::Parsed,Problem> join(ref v::Vec<syntax::Parsed> sources){
@@ -220,7 +220,7 @@ pub fn Result<syntax::Parsed,Problem> join(ref v::Vec<syntax::Parsed> sources){
         while(at<syntax::attribute_argument_count(file)){
             if(!v::push<attributes::Argument>(ref mut arguments,argument(syntax::attribute_argument_at(file,at),offset,ref tokens)).is_ok){return .err(fail(11,index,0,0));}
             at+=1;}
-        if(v::len<syntax::Declaration>(ref declarations)>512 || v::len<body::Node>(ref expressions)>4096 || v::len<body::Statement>(ref statements)>8192){return .err(fail(10,index,0,0));}
+        if(v::len<syntax::Declaration>(ref declarations)>512 || v::len<body::Node>(ref expressions)>limits::program_expressions() || v::len<body::Statement>(ref statements)>8192){return .err(fail(10,index,0,0));}
         if(v::len<bodies::Entry>(ref entries)>1024 || v::len<types::Node>(ref types_arena)>4096 || v::len<records::Field>(ref fields)>1024){return .err(fail(10,index,0,0));}
         if(v::len<attributes::Attribute>(ref attributes_arena)>4096 || v::len<attributes::Argument>(ref arguments)>4096){return .err(fail(10,index,0,0));}
         offset+=syntax::source_view(file).len+1;

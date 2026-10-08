@@ -45,7 +45,7 @@ fn usize generation(ref h::Program p, ref mut Context c, ref mut v::Vec<Slot> sl
     else if (kind == 17) { parent = generation(p,c,slots,initial,summaries,e.left,depth+1); base = if (mutable) { id } else { parent }; fresh = mutable; receiver = e.left; start = e.end; }
     else if (kind == 3) {
         let b = h::binding_at(p,e.binding);
-        base = if (h::binding_code(b.kind) == 2) { 4096 + e.binding } else { generation(p,c,slots,initial,summaries,initial[e.binding],depth+1) };
+        base = if (h::binding_code(b.kind) == 2) { h::expression_count(p) + e.binding } else { generation(p,c,slots,initial,summaries,initial[e.binding],depth+1) };
     } else if ((kind == 7 || kind==20)) { receiver = h::block_at(p,e.block).tail; base = generation(p,c,slots,initial,summaries,receiver,depth+1); }
     else if (kind == 8) {
         let usize yes = generation(p,c,slots,initial,summaries,h::block_at(p,e.block).tail,depth+1);
@@ -117,7 +117,7 @@ pub fn h::Problem check(ref h::Program p, ref usize[] initial, ref usize[] last,
     if (!needed) { return h::Problem { .code=0,.start=0,.end=0 }; }
     var v::Vec<Slot> slots = v::empty<Slot>();
     var Context c = Context {.work=0,.problem=h::Problem { .code=0,.start=0,.end=0 } };
-    i = 0; while (i <= 4096 + h::binding_count(p)) {
+    i = 0; while (i <= h::expression_count(p) + h::binding_count(p)) {
         if (!v::push<Slot>(ref mut slots,Slot { .generation=0,.parent=0,.alternate=0,.start=0,.end=0,.receiver=0,.fresh=false,.argument=false,.mutable=false }).is_ok) { return h::Problem { .code=3,.start=0,.end=0 }; } i += 1;
     }
     // Exact mutable parameters create call-bounded reborrows even for void calls.

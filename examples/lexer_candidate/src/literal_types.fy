@@ -1,4 +1,5 @@
 module literal_types;
+import candidate_limits as limits;
 import scalar_views as views;
 import syntax as syntax;
 import std::bytes as bytes;
@@ -24,7 +25,7 @@ fn u8 nibble(u8 b) { return if (b >= 48 && b <= 57) { b - 48 } else if (b >= 97 
 // when the HIR takes ownership; semantic literal storage contains actual octets.
 pub fn u32 decode(ref mut bytes::Buffer payload, ref u8[] encoded) {
     if (encoded.len % 2 != 0) { return 4; }
-    if (bytes::len(payload) > 86016 || encoded.len / 2 > 86016 - bytes::len(payload)) { return 2; }
+    if (bytes::len(payload) > limits::program_expressions()*21 || encoded.len / 2 > limits::program_expressions()*21 - bytes::len(payload)) { return 2; }
     var usize i = 0; while (i < encoded.len) {
         let u8 hi = nibble(encoded[i]); let u8 lo = nibble(encoded[i+1]); if (hi > 15 || lo > 15) { return 4; }
         if (!bytes::append_byte(payload,hi * 16 + lo).is_ok) { return 3; } i += 2;

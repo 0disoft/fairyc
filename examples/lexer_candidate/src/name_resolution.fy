@@ -17,14 +17,14 @@ pub struct Symbol { u32 kind; usize start; usize end; usize scope; usize owner; 
 pub struct Reference { usize expression; usize start; usize end; usize symbol; }
 struct Name { usize start; usize end; usize scope; usize symbol; }
 struct Context {
-    Name[128] globals; usize global_count; Name[128] locals; usize local_count;
+    usize global_count; Name[128] locals; usize local_count;
     usize scope; usize next_scope; usize owner; usize receiver; bool modules;
 }
 pub resource Resolved { syntax::Parsed source; Context context; v::Vec<Symbol> symbols; v::Vec<Reference> references; v::Vec<modules::Item> external; v::Vec<u32> parameters; Problem problem; cleanup { } }
 fn Problem ok() { return Problem { .code = 0, .start = 0, .end = 0 }; }
 fn Problem fail(u32 code, usize start, usize end) { return Problem { .code, .start, .end }; }
 fn Context empty() {
-    return Context { .globals = [Name { .start = 0, .end = 0, .scope = 0, .symbol = 0 }; 128], .global_count = 0,
+    return Context { .global_count = 0,
         .locals = [Name { .start = 0, .end = 0, .scope = 0, .symbol = 0 }; 128], .local_count = 0, .scope = 0, .next_scope = 1, .owner = 0, .receiver = 0, .modules = false };
 }
 fn ref u8[] source_name(ref syntax::Parsed p,syntax::Declaration d){return syntax::source_view(p)[d.name_start..d.name_end];}
@@ -39,7 +39,8 @@ fn bool simple(ref u8[] name) {
 fn bool same(ref u8[] source, Name name, usize start, usize end) {
     return bytes::equal(source[name.start..name.end], source[start..end]);
 }
-fn usize known(ref syntax::Parsed parsed, ref Context context, usize start, usize end) {
+fn bool global_symbol(Symbol s){return s.scope==0 && s.owner==0 && (s.kind==1 || s.kind==6 || s.kind==7 || s.kind==9 || s.kind==11);}
+fn usize known(ref syntax::Parsed parsed, ref Context context,ref v::Vec<Symbol> symbols, usize start, usize end) {
     let ref u8[] source = syntax::source_view(parsed);
     var usize index = context.local_count;
     while (index > 0) { index -= 1;
@@ -49,8 +50,9 @@ fn usize known(ref syntax::Parsed parsed, ref Context context, usize start, usiz
         } else if (same(source,name,start,end)) { return name.symbol; }
     }
     index = 0;
-    while (index < context.global_count) {
-        if (syntax::module_index(parsed,context.globals[index].start)==syntax::module_index(parsed,start) && same(source, context.globals[index], start, end)) { return context.globals[index].symbol; } index += 1;
+    while (index < v::len<Symbol>(symbols)) {
+        let Symbol s=*v::at<Symbol>(symbols,index);
+        if(global_symbol(s) && syntax::module_index(parsed,s.start)==syntax::module_index(parsed,start) && bytes::equal(source[s.start..s.end],source[start..end])){return index+1;}index+=1;
     }
     return 0;
 }
@@ -97,7 +99,7 @@ fn Problem expression(ref syntax::Parsed parsed, ref mut Context context, usize 
         if (!simple(spelling) && node.right==0) { return fail(3,node.start,node.end); }
         var usize symbol=0;
         if(node.right!=0){var usize n=0;while(n<v::len<Symbol>(symbols)){if((v::at<Symbol>(symbols,n).kind==1 || v::at<Symbol>(symbols,n).kind==6 || v::at<Symbol>(symbols,n).kind==7 || v::at<Symbol>(symbols,n).kind==9 || v::at<Symbol>(symbols,n).kind==11) && v::at<Symbol>(symbols,n).declaration==node.right){symbol=n+1;}n+=1;}}
-        else{symbol=known(parsed,context,node.start,node.end);if(symbol==0 || v::at<Symbol>(symbols,symbol-1).kind==1){var usize n=0;while(n<syntax::declaration_count(parsed)){let d=syntax::declaration_at(parsed,n);if(d.kind==12 && bytes::equal(source_name(parsed,d),spelling)){return fail(4501,node.start,node.end);}n+=1;}}}
+        else{symbol=known(parsed,context,symbols,node.start,node.end);if(symbol==0 || v::at<Symbol>(symbols,symbol-1).kind==1){var usize n=0;while(n<syntax::declaration_count(parsed)){let d=syntax::declaration_at(parsed,n);if(d.kind==12 && bytes::equal(source_name(parsed,d),spelling)){return fail(4501,node.start,node.end);}n+=1;}}}
         if (symbol == 0) { return fail(1,node.start,node.end); }
         let Reference value = Reference { .expression = id, .start = node.start, .end = node.end, .symbol };
         if (!v::push<Reference>(references,value).is_ok) { return fail(5,node.start,node.end); }
@@ -257,18 +259,18 @@ fn Problem collect(ref syntax::Parsed parsed, ref mut Context context, ref mut v
             // Resource attributes stay closed except for existing abilities.
             if(item.kind==6 && (item.cleanup_body==0 || item.cleanup_attribute_count!=0)){return fail(3,item.start,item.end);}
             if (!simple(source[item.name_start..item.name_end])) { return fail(3,item.name_start,item.name_end); }
-            var usize previous = 0;
-            while (previous < context.global_count) {
-                if (syntax::module_index(parsed,context.globals[previous].start)==syntax::module_index(parsed,item.start) && same(source,context.globals[previous],item.name_start,item.name_end)) {let old=syntax::declaration_at(parsed,v::at<Symbol>(symbols,context.globals[previous].symbol-1).declaration-1);if(item.generic_start==0 || item.generic_start!=old.generic_start || item.generic_end==0 || old.generic_end==0){return fail(2,item.name_start,item.name_end);} }
-                previous += 1;
+            var usize previous=0;
+            while(previous<v::len<Symbol>(symbols)){
+                let Symbol found=*v::at<Symbol>(symbols,previous);
+                if(global_symbol(found) && syntax::module_index(parsed,found.start)==syntax::module_index(parsed,item.start) && bytes::equal(source[found.start..found.end],source[item.name_start..item.name_end])){
+                    let old=syntax::declaration_at(parsed,found.declaration-1);if(item.generic_start==0 || item.generic_start!=old.generic_start || item.generic_end==0 || old.generic_end==0){return fail(2,item.name_start,item.name_end);}
+                }previous+=1;
             }
-            if (context.global_count >= 128) { return fail(4,item.name_start,item.name_end); }
-            let usize slot = context.global_count;
+            if (context.global_count >= if(context.modules){512}else{128}) { return fail(4,item.name_start,item.name_end); }
             let Symbol value = Symbol { .kind = if (item.kind == 4) { 6 } else if (item.kind == 6) { 9 } else if (item.kind == 11) { 7 } else if(item.kind==9){11}else { 1 }, .start = item.name_start, .end = item.name_end, .scope = 0,
                 .owner = 0, .type_root = item.result_type, .entry = 0, .declaration = index + 1 };
             if (!v::push<Symbol>(symbols,value).is_ok) { return fail(5,item.name_start,item.name_end); }
-            let usize symbol = v::len<Symbol>(symbols);
-            context.globals[slot] = Name { .start = item.name_start, .end = item.name_end, .scope = 0, .symbol }; context.global_count += 1;
+            context.global_count += 1;
         }
         index += 1;
     }

@@ -82,8 +82,8 @@ pub resource Program {
     cleanup { }
 }
 // Hard caps: source 1048576 bytes, 512 functions/declarations, 1152 bindings,
-// 4096 expressions, 8192 statements, 8192 blocks, 32768 edges, 32768 signature
-// entries, 86016 canonical payload bytes (4096*21), recursion depth 64.
+// 16384 expressions, 8192 statements, 8192 blocks, 32768 edges, 32768 signature
+// entries, 344064 canonical payload bytes (16384*21), recursion depth 64.
 // Errors: 1 unsuccessful input, 2 budget, 3 allocation, 4 unsupported/malformed
 // semantic graph. Failure returns .err only, never a partially usable Program.
 pub fn usize function_count(ref Program p) { assert(p.success); return v::len<Function>(ref p.functions); }
@@ -198,7 +198,7 @@ pub fn Result<Program,Problem> assemble_resources(bytes::Buffer source, bytes::B
     let usize nf = v::len<Function>(ref functions); let usize nb = v::len<Binding>(ref bindings);
     let usize ne = v::len<Expression>(ref expressions); let usize nt = v::len<Statement>(ref statements);
     let usize nk = v::len<Block>(ref blocks); let usize na = v::len<usize>(ref edges); let usize ntypes = v::len<Signature>(ref signatures);
-    if (ns > limits::program_bytes() || np > 86016 || nf > 512 || nb > 1152 || ne > 4096 || nt > 8192 || nk > 8192 || na > 32768 || ntypes > 32768 || v::len<Drop>(ref drops)>512) { return .err(Problem { .code = 2, .start = 0, .end = ns }); }
+    if (ns > limits::program_bytes() || np > limits::program_expressions()*21 || nf > 512 || nb > 1152 || ne > limits::program_expressions() || nt > 8192 || nk > 8192 || na > 32768 || ntypes > 32768 || v::len<Drop>(ref drops)>512) { return .err(Problem { .code = 2, .start = 0, .end = ns }); }
     if (!shapes::valid(ref nominal,ns,nb)) { return .err(Problem { .code = 4, .start = 0, .end = ns }); }
     if(!shapes::abi_valid(ref nominal,bytes::view(ref source))){return .err(Problem{.code=5102,.start=0,.end=ns});}
     var usize shape_index = 0;
@@ -387,39 +387,41 @@ pub fn Result<Program,Problem> assemble_resources(bytes::Buffer source, bytes::B
 
 // Walk owned lexical structure rather than trusting the source-side permission
 // flag. Unsafe never grants effect authority or alters borrow/cleanup policy.
-struct UnsafeBudget { u8[4096] calls; usize work; Problem problem; }
+struct UnsafeBudget { usize work; Problem problem; }
 fn bool unsafe_fail(ref mut UnsafeBudget c,u32 code,usize start,usize end){
     if(c.problem.code==0){c.problem=Problem{.code,.start,.end};}return false;
 }
-fn bool unsafe_expression(ref Program p,usize id,bool allowed,usize depth,ref mut UnsafeBudget c){
+fn bool unsafe_expression(ref Program p,usize id,bool allowed,usize depth,ref mut UnsafeBudget c,ref mut u8[] calls){
     if(id==0){return true;}let e=expression_at(p,id);let u32 kind=expression_code(e.kind);
     if(depth>=64 || c.work>=1048576){return unsafe_fail(c,2,e.start,e.end);}c.work+=1;
-    if(kind==28 || kind==29 || kind==30){if(!allowed || !e.boolean){return unsafe_fail(c,5101,e.start,e.end);}c.calls[id-1]=1;}
-    if(kind==6){let b=binding_at(p,e.binding);if(e.boolean!=b.unsafe_call || b.unsafe_call && !allowed){return unsafe_fail(c,5101,e.start,e.end);}c.calls[id-1]=1;}
-    if(!unsafe_expression(p,e.left,allowed,depth+1,c) || !unsafe_expression(p,e.right,allowed,depth+1,c) || !unsafe_expression(p,e.alternative,allowed,depth+1,c)){return false;}
-    if(e.block!=0 && !unsafe_block(p,e.block,allowed,depth+1,c)){return false;}
+    if(kind==28 || kind==29 || kind==30){if(!allowed || !e.boolean){return unsafe_fail(c,5101,e.start,e.end);}calls[id-1]=1;}
+    if(kind==6){let b=binding_at(p,e.binding);if(e.boolean!=b.unsafe_call || b.unsafe_call && !allowed){return unsafe_fail(c,5101,e.start,e.end);}calls[id-1]=1;}
+    if(!unsafe_expression(p,e.left,allowed,depth+1,c,calls) || !unsafe_expression(p,e.right,allowed,depth+1,c,calls) || !unsafe_expression(p,e.alternative,allowed,depth+1,c,calls)){return false;}
+    if(e.block!=0 && !unsafe_block(p,e.block,allowed,depth+1,c,calls)){return false;}
     // Capture edges name bindings, all other expression edges name expressions.
-    var usize i=0;while(kind!=21 && i<e.edge_count){if(!unsafe_expression(p,edge_at(p,e.edge_start+i),allowed,depth+1,c)){return false;}i+=1;}return true;
+    var usize i=0;while(kind!=21 && i<e.edge_count){if(!unsafe_expression(p,edge_at(p,e.edge_start+i),allowed,depth+1,c,calls)){return false;}i+=1;}return true;
 }
-fn bool unsafe_statement(ref Program p,usize id,bool allowed,usize depth,ref mut UnsafeBudget c){
+fn bool unsafe_statement(ref Program p,usize id,bool allowed,usize depth,ref mut UnsafeBudget c,ref mut u8[] calls){
     if(id==0){return true;}let s=statement_at(p,id);
     if(depth>=64 || c.work>=1048576){return unsafe_fail(c,2,s.start,s.end);}c.work+=1;
-    return unsafe_expression(p,s.expression,allowed,depth+1,c) && unsafe_expression(p,s.target,allowed,depth+1,c)
-        && (s.body==0 || unsafe_block(p,s.body,allowed,depth+1,c))
-        && unsafe_statement(p,s.initial,allowed,depth+1,c) && unsafe_statement(p,s.post,allowed,depth+1,c);
+    return unsafe_expression(p,s.expression,allowed,depth+1,c,calls) && unsafe_expression(p,s.target,allowed,depth+1,c,calls)
+        && (s.body==0 || unsafe_block(p,s.body,allowed,depth+1,c,calls))
+        && unsafe_statement(p,s.initial,allowed,depth+1,c,calls) && unsafe_statement(p,s.post,allowed,depth+1,c,calls);
 }
-fn bool unsafe_block(ref Program p,usize id,bool inherited,usize depth,ref mut UnsafeBudget c){
+fn bool unsafe_block(ref Program p,usize id,bool inherited,usize depth,ref mut UnsafeBudget c,ref mut u8[] calls){
     let b=block_at(p,id);if(depth>=64 || c.work>=1048576){return unsafe_fail(c,2,b.start,b.end);}c.work+=1;
     let bool allowed=inherited || b.unsafe_body;var usize i=0;
-    while(i<b.edge_count){if(!unsafe_statement(p,edge_at(p,b.edge_start+i),allowed,depth+1,c)){return false;}i+=1;}
-    return unsafe_expression(p,b.tail,allowed,depth+1,c);
+    while(i<b.edge_count){if(!unsafe_statement(p,edge_at(p,b.edge_start+i),allowed,depth+1,c,calls)){return false;}i+=1;}
+    return unsafe_expression(p,b.tail,allowed,depth+1,c,calls);
 }
 pub fn Problem unsafe_check(ref Program p){
-    var UnsafeBudget c=UnsafeBudget{.calls=[0;4096],.work=0,.problem=Problem{.code=0,.start=0,.end=0}};var usize i=1;var bool needed=false;
+    var UnsafeBudget c=UnsafeBudget{.work=0,.problem=Problem{.code=0,.start=0,.end=0}};var usize i=1;var bool needed=false;
     while(i<=binding_count(p)){let b=binding_at(p,i);if(b.unsafe_call && binding_code(b.kind)!=1 && binding_code(b.kind)!=5 && binding_code(b.kind)!=11){discard unsafe_fail(ref mut c,4,b.start,b.end);return c.problem;}i+=1;}
     i=1;while(i<=binding_count(p)){needed=needed || binding_at(p,i).unsafe_call;i+=1;}
     i=1;while(i<=expression_count(p)){let e=expression_at(p,i);needed=needed || expression_code(e.kind)==28 || expression_code(e.kind)==29 || expression_code(e.kind)==30 || expression_code(e.kind)==6 && e.boolean;i+=1;}
     if(!needed){return c.problem;}
-    i=0;while(i<function_count(p)){let f=function_at(p,i);if(!unsafe_block(p,f.body,binding_at(p,f.binding).unsafe_call,0,ref mut c)){return c.problem;}i+=1;}
-    i=1;while(i<=expression_count(p)){let e=expression_at(p,i);if((expression_code(e.kind)==6 || (expression_code(e.kind)==28 || expression_code(e.kind)==29 || expression_code(e.kind)==30)) && c.calls[i-1]==0){discard unsafe_fail(ref mut c,4,e.start,e.end);return c.problem;}i+=1;}return c.problem;
+    var bytes::Buffer visited=bytes::empty();
+    if(!bytes::resize_zeroed(ref mut visited,expression_count(p)).is_ok){return Problem{.code=3,.start=0,.end=0};}
+    i=0;while(i<function_count(p)){let f=function_at(p,i);if(!unsafe_block(p,f.body,binding_at(p,f.binding).unsafe_call,0,ref mut c,bytes::view_mut(ref mut visited))){return c.problem;}i+=1;}
+    i=1;while(i<=expression_count(p)){let e=expression_at(p,i);if((expression_code(e.kind)==6 || (expression_code(e.kind)==28 || expression_code(e.kind)==29 || expression_code(e.kind)==30)) && bytes::view(ref visited)[i-1]==0){discard unsafe_fail(ref mut c,4,e.start,e.end);return c.problem;}i+=1;}return c.problem;
 }

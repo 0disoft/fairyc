@@ -67,9 +67,9 @@ tagged captures, switch and if bodies, for headers, cleanup receivers and enum
 payload fields. Empty, generic and over-count inputs fail before publication.
 Evidence: `evidence/candidate-module-join-20261008.json`.
 
-This arena is bounded to 32 files and 32768 combined source bytes, 512
-declarations, 4096 expressions/types/attributes/arguments, 8192 statements and
-1024 entries/fields. Generic expansion, source-set binding and program lowering
+The current arena is bounded to 256 files and 1048576 combined source bytes,
+512 declarations, 16384 expressions, 4096 types/attributes/arguments, 8192
+statements and 1024 entries/fields. Per-file parser limits remain separate. Generic expansion, source-set binding and program lowering
 are separate consumers; AST composition alone does not claim their completion.
 
 ## Nominal program consumers
@@ -729,4 +729,38 @@ project commands and Linux execution remain pending.
 - Item 50 still needs project CLI integration. Actual scanner Token/cooked-text/
   diagnostics integration, File SDK execution, broader release mutation API,
   Linux and self-hosting remain pending. No SDK/runtime ABI, public language,
+  dependency, database or CI change.
+
+## Joined body capacity for scanner integration (2026-10-09)
+
+- Original scanner/number/string/diagnostic modules plus authenticated bytes,
+  vector and console SDK bodies exceed the old 4096-expression joined AST cap.
+  `candidate_limits::program_expressions()` now bounds joined AST, generic
+  expansion, typing and owned HIR at 16384. Vector specialization's two-node
+  reservation shares that cap. HIR canonical integer/literal payload producers
+  and independent validation share the derived 344064-byte cap.
+- Unsafe lexical visitation uses an explicitly sized owned Buffer, rather than
+  indexing a fixed 4096-byte table with larger expression IDs. Allocation failure
+  returns a lowering problem. Mutable parameter generations start after the
+  actual expression arena, preserving disjoint parameter/expression identities.
+  Existing depth, work and other arena limits remain independent.
+- Program name resolution permits up to 512 globals, within its declaration cap.
+  Single-file resolution retains 128 globals. Global lookup/duplicate checks reuse
+  the existing owned Symbol table and exact module identity; local names retain
+  priority. This removes the duplicate global array whose enlarged by-value
+  context reproduced native stack exhaustion even for `fn i32 main(){return 7;}`.
+- Check and development build pass. A wide program with more than 4096 expression
+  nodes and 128 globals executes under both low/optimized MSVC C profiles. Foreign
+  unsafe calls and mutable-parameter reborrows occur after the old ID boundary.
+  Four rejections cover missing unsafe, a retained-child borrow conflict, joined
+  AST overflow and the unchanged single-file global limit. The current-development
+  text regression passes six programs, seven rejections and twelve native runs.
+- Evidence: `evidence/candidate-program-capacity-dev-20261009.json`,
+  `evidence/candidate-program-capacity-text-regression-20261009.json` and
+  `evidence/candidate-scanner-admission-20261009.json`.
+- The unchanged original scanner now passes composition but still rejects its
+  byte `for-in` statement during name analysis. Item 48's actual scanner execution
+  remains incomplete; item 59 owns that language prerequisite. Release candidate
+  validation is deferred to the next scanner/byte-loop unit to avoid rebuilding
+  the same compiler twice. Linux and self-hosting are pending. No SDK/runtime ABI,
   dependency, database or CI change.
