@@ -1,5 +1,6 @@
 module file_cli;
 import candidate_limits as limits;
+import file_source as files;
 import scanner as scanner;
 import declaration_output as declarations;
 import name_cli as names;
@@ -10,8 +11,6 @@ import mir_cli as mir;
 import c_cli as c;
 import token_output as output;
 import std::bytes as bytes;
-import std::text as text;
-import std::fs as fs;
 import std::io as io;
 import std::process as process;
 
@@ -20,26 +19,7 @@ fn i32 error(ref str message) { discard io::write_stderr(message); return 2; }
 
 @effects(filesystem)
 pub fn Result<bytes::Buffer, u32> load(ref u8[] path_bytes) {
-    let ref str path = switch(text::validate_utf8(path_bytes)) {
-        case .ok(value): { value } case .err(_): { return .err(1); }
-    };
-    var fs::File file = switch(fs::open_read_utf8(path)) {
-        case .ok(value): { value } case .err(_): { return .err(1); }
-    };
-    var bytes::Buffer input = bytes::empty();
-    if (!bytes::resize_zeroed(ref mut input, limits::source_bytes()+1).is_ok) { return .err(3); }
-    var usize used = 0;
-    while (true) {
-        let usize count = switch(fs::read(ref mut file, bytes::view_mut(ref mut input)[used..])) {
-            case .ok(value): { value } case .err(_): { return .err(1); }
-        };
-        used += count;
-        if (used > limits::source_bytes()) { return .err(4); }
-        if (count == 0) { break; }
-    }
-    if (!fs::close(file).is_ok) { return .err(1); }
-    if (!bytes::resize_zeroed(ref mut input, used).is_ok) { return .err(3); }
-    return .ok(input);
+    return files::load(path_bytes);
 }
 
 @effects(filesystem, console)

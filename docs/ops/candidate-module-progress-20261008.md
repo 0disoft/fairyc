@@ -1060,3 +1060,30 @@ project commands and Linux execution remain pending.
   Result-pair observer keeps generated C/native products in the cache.
 - Only observers, evidence and progress documents changed in this slice. No
   public SDK/runtime/API, dependency, DB or CI workflow change.
+
+
+## Candidate file loader integration (item 50, 2026-10-09)
+
+- Extracted the actual file reader into `file_source.fy`. Source and manifest
+  reads share the same bounded helper while retaining their distinct public
+  limits and manifest path gate. `file_cli::load` forwards to this leaf and
+  `module_cli` imports it directly, removing the prior CLI import cycle.
+- Both Fairy candidates compile this original loader with the authenticated
+  File/text/Buffer SDKs. Native low/optimized execution checks empty, Korean-path,
+  exact 65536-byte and oversized inputs, missing/invalid UTF-8 paths, injected
+  Buffer allocation failure and the manifest path limit. Original runtime
+  allocation and Windows handle hooks show no retained blocks or handles after
+  the success and early-error paths. Four native executions passed; candidate
+  profiles emitted identical C.
+- Evidence: `evidence/candidate-file-source-dev-20261009.json`,
+  `evidence/candidate-file-source-release-20261009.json`,
+  `evidence/candidate-file-source-cli-regression-20261009.json`.
+  Stage0 check and both candidate builds passed. The five existing file/help
+  command observations keep exact stdout/stderr/exit across prior development,
+  new development and new release images. The Go legacy CLI dependency test now
+  copies the actual authored source inventory rather than a stale manual list;
+  its workspace check passed.
+- This proves the actual loader component and Stage0 CLI compatibility. Entire
+  candidate-emitted CLI dispatch, broader project commands, Linux and stage1/2
+  remain. No source/work/depth/stack limits increased; no public language, SDK,
+  runtime, DB, dependency or CI workflow change.

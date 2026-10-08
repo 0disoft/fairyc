@@ -147,7 +147,10 @@ Option-record/record pairs without changing prior valid IDs or analysis bounds.
 Original File SDK open/read/write/sync/close/replace bodies now also execute
 with the Windows runtime in both candidate and native profiles, including
 UTF-8/NUL data, buffer preservation and failure/effect cases. Project integration
-remains a separate check.
+remains a separate check. The actual bounded source/manifest loader is now
+a standalone Fairy leaf; both candidate/native profiles prove its byte limits,
+early errors and handle/allocation cleanup, and the prior CLI import cycle is
+removed.
 Project-driver and platform work remain. These scanner results do not establish
 the complete compiler's stage1/stage2 or promotion gates.
 
