@@ -17,4 +17,7 @@ pub fn u32 element(ref syntax::Parsed p,usize id){
     if(arg.right!=0 || arg.left==0 || syntax::type_at(p,arg.left).kind!=1){return 0;}
     let u32 type=scalar::primitive(p,arg.left);return if(type>=1 && type<=6){type}else{0};
 }
+pub fn bool scalar_element(u32 element){return element>=1 && element<=6;}
+pub fn u32 result(u32 code,u32 element){return if(!scalar_element(element) || code==0 || code>4){0}else if(code<=2){5}else if(code==3){element}else{7};}
+pub fn usize arguments(u32 code){return if(code<=2){0}else if(code==3){1}else{2};}
 pub fn bool allowed(ref syntax::Parsed p,usize id){let e=syntax::expression_at(p,id);return sdk::parsed_storage(p,e.start,e.end,call(p,id));}

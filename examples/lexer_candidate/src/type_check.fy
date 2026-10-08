@@ -13,6 +13,7 @@ import effect_declarations as effects;
 import must_use_flow as must_use;
 import unsafe_scopes as unsafe_scopes;
 import raw_view_intrinsics as raw;
+import storage_intrinsics as storage;
 import type_state as state;
 import nominal_types as nominal;
 import resource_identity as resources;
@@ -185,6 +186,18 @@ fn state::Value expression(ref names::Resolved resolved, ref mut v::Vec<state::S
         return recorded(tables,id,value(if (compare) { 6 } else { left.type },left.terminates || right.terminates));
     }
     if (node.kind == 6) {
+        let u32 storage_code=storage::call(parsed,id);
+        if(storage_code!=0){
+            if(!storage::allowed(parsed,id)){return error(problem,5102,node.start,node.end,0,0);}
+            if(!unsafe_scopes::allowed(parsed,node.start,node.end)){return error(problem,5101,node.start,node.end,0,0);}
+            let u32 element=storage::element(parsed,id);let u32 type=storage::result(storage_code,element);
+            if(type==0){return error(problem,4502,node.start,node.end,0,0);}
+            let usize count=storage::arguments(storage_code);if(syntax::call_argument_count(parsed,id)!=count){return error(problem,5,node.start,node.end,0,0);}
+            var bool terminates=false;var usize arg=0;while(arg<count){let usize child=syntax::call_argument(parsed,id,arg);let u32 expected_argument=if(arg==0){pointers::make(7,true)}else{element};
+                let actual=expression(resolved,tables,problem,child,expected_argument,result_type,depth+1,loop_depth);if(problem.code!=0){return actual;}
+                if(actual.type!=expected_argument){let a=syntax::expression_at(parsed,child);return error(problem,1,a.start,a.end,expected_argument,actual.type);}terminates=terminates || actual.terminates;arg+=1;
+            }return recorded(tables,id,value(type,terminates));
+        }
         let u32 raw_type=raw::call(parsed,id);
         if(raw_type!=0){
             if(!unsafe_scopes::allowed(parsed,node.start,node.end)){return error(problem,5101,node.start,node.end,0,0);}
@@ -265,7 +278,7 @@ fn state::Value expression(ref names::Resolved resolved, ref mut v::Vec<state::S
         if (problem.code != 0) { return owner; }
         if(refs::referent(owner.type) && !arrays::valid(owner.type)){
             let u32 type=refs::make(owner.type,node.kind==22);if(expected!=0 && expected!=type){return error(problem,1,node.start,node.end,expected,type);}
-            if(node.kind==22 && (names::symbol_at(resolved,state::uses(tables,root-1)).kind!=4 && !refs::mutable(state::expressions(tables,root-1)) || node.left!=root && (resources::valid(state::expressions(tables,root-1)) || refs::valid(state::expressions(tables,root-1)) && (!refs::mutable(state::expressions(tables,root-1)) || resources::valid(refs::inner(state::expressions(tables,root-1))))))){return error(problem,4,node.start,node.end,0,owner.type);}return recorded(tables,id,value(type,owner.terminates));
+            if(node.kind==22 && (names::symbol_at(resolved,state::uses(tables,root-1)).kind!=4 && names::symbol_at(resolved,state::uses(tables,root-1)).kind!=10 && !refs::mutable(state::expressions(tables,root-1)) || node.left!=root && (resources::valid(state::expressions(tables,root-1)) || refs::valid(state::expressions(tables,root-1)) && (!refs::mutable(state::expressions(tables,root-1)) || resources::valid(refs::inner(state::expressions(tables,root-1))))))){return error(problem,4,node.start,node.end,0,owner.type);}return recorded(tables,id,value(type,owner.terminates));
         }
         if (expected!=view_type || !arrays::valid(owner.type) || arrays::source_element(parsed,owner.type) != 3) { return error(problem,16,node.start,node.end,10,owner.type); }
         if (view_type == 11 && (names::symbol_at(resolved,state::uses(tables,root - 1)).kind != 4 || resources::valid(state::expressions(tables,root-1)))) { return error(problem,4,node.start,node.end,11,owner.type); }

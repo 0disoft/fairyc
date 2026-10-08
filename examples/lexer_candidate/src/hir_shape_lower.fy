@@ -10,6 +10,15 @@ import repr_c_declarations as repr;
 import std::vec as v;
 import sdk_scopes as sdk;
 
+// Removed templates leave gaps in the parser field arena. Publish compact owned
+// field IDs and remap references rather than retaining uninstantiated layouts.
+pub fn usize field_id(ref syntax::Parsed p,usize source_id){
+    if(source_id==0){return 0;}var usize offset=0;var usize i=0;
+    while(i<syntax::declaration_count(p)){let d=syntax::declaration_at(p,i);if(d.kind==4 || d.kind==6 || d.kind==11){
+        if(source_id>d.field_start && source_id<=d.field_start+d.field_count){return offset+source_id-d.field_start;}offset+=d.field_count;
+    }i+=1;}
+    return if(source_id>syntax::field_count(p)){offset+source_id-syntax::field_count(p)}else{0};
+}
 pub fn Result<shapes::Table,u32> collect(ref typing::Typed input) {
     let ref names::Resolved resolved = typing::resolved(input);
     let ref syntax::Parsed parsed = names::parsed(resolved);
@@ -25,15 +34,15 @@ pub fn Result<shapes::Table,u32> collect(ref typing::Typed input) {
                 let names::Symbol s = names::symbol_at(resolved,id);
                 if ((s.kind == 6 || s.kind == 7 || s.kind==9) && s.declaration == index + 1) { binding = id; } id += 1;
             }
-            if (binding == 0 || d.field_start != v::len<shapes::Field>(ref fields)) { return .err(4); }
+            if (binding == 0) { return .err(4); }
             let u32 owner = typing::symbol_type(input,binding);
             let permission=repr::read(parsed,index);
             if(permission.repr_c && !v::push<shapes::Abi>(ref mut abi,shapes::Abi{.type=owner,.declaration=index+1,.name_start=d.name_start,.name_end=d.name_end,.marker_start=permission.start,.marker_end=permission.end}).is_ok){return .err(3);}
-            if (!v::push<shapes::Shape>(ref mut records,shapes::Shape { .type = owner, .binding, .field_start = d.field_start, .field_count = d.field_count, .public = d.public }).is_ok) { return .err(3); }
+            if (!v::push<shapes::Shape>(ref mut records,shapes::Shape { .type = owner, .binding, .field_start = v::len<shapes::Field>(ref fields), .field_count = d.field_count, .public = d.public }).is_ok) { return .err(3); }
             var usize j = 0;
             while (j < d.field_count) {
                 let f = syntax::field_at(parsed,d.field_start + j);
-                if (!v::push<shapes::Field>(ref mut fields,shapes::Field { .owner, .type = nominal::resolve(parsed,f.type_root), .start = f.name_start, .end = f.name_end, .payload_start = f.payload_start, .payload_count = f.payload_count }).is_ok) { return .err(3); } j += 1;
+                if (!v::push<shapes::Field>(ref mut fields,shapes::Field { .owner, .type = nominal::resolve(parsed,f.type_root), .start = f.name_start, .end = f.name_end, .payload_start = if(f.payload_count==0){0}else{field_id(parsed,f.payload_start+1)-1}, .payload_count = f.payload_count }).is_ok) { return .err(3); } j += 1;
             }
         } else if (d.kind != 12 && d.kind != 1 && d.kind != 2 && d.kind != 3 && d.kind!=9) { return .err(4); }
         index += 1;

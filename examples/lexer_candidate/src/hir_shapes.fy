@@ -24,6 +24,7 @@ pub resource Table { v::Vec<Shape> shapes; v::Vec<Field> fields;v::Vec<Abi> abi;
 pub fn Table empty() { return Table { .shapes = v::empty<Shape>(), .fields = v::empty<Field>(),.abi=v::empty<Abi>(),.sdk_scopes=v::empty<sdk::Scope>() }; }
 pub fn usize sdk_count(ref Table p){return v::len<sdk::Scope>(ref p.sdk_scopes);}
 pub fn sdk::Scope sdk_at(ref Table p,usize index){return *v::at<sdk::Scope>(ref p.sdk_scopes,index);}
+pub fn bool storage_rule(ref Table p,ref u8[] source,usize start,usize end,u32 code){return sdk::storage_owned(source,ref p.sdk_scopes,start,end,code);}
 pub fn usize sdk_rule(ref Table p,ref u8[] source,usize start,usize end,usize link_start,usize link_end){return sdk::foreign_owned(source,ref p.sdk_scopes,start,end,link_start,link_end);}
 pub fn bool sdk_result(ref Table p,ref u8[] source,usize rule,u32 type){
     if(rule==1 || rule>=3 && rule<=8){return type==sdk::scalar_result(rule);}if(rule!=2){return false;}let usize a=abi_find(p,type);let usize s=find(p,type);if(a==0 || s==0){return false;}

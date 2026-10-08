@@ -17,9 +17,9 @@ fn syntax::Parsed parsed(bytes::Buffer input){
     let s=switch(scanner::collect(input,false,65536,1048576,256,16777216)){case .ok(s):{s}case .err(_):{assert(false);return parsed(bytes::empty());}};
     let p=switch(syntax::parse(s,512)){case .ok(p):{p}case .err(_):{assert(false);return parsed(bytes::empty());}};assert(syntax::problem_count(ref p)==0);return p;
 }
-fn syntax::Parsed text(ref u8[] source){var bytes::Buffer b=bytes::empty();assert(bytes::append(ref mut b,source).is_ok);return parsed(b);}
+pub fn syntax::Parsed text(ref u8[] source){var bytes::Buffer b=bytes::empty();assert(bytes::append(ref mut b,source).is_ok);return parsed(b);}
 @effects(filesystem)
-fn bytes::Buffer sdk_source(){
+pub fn bytes::Buffer sdk_source(){
     var bytes::Buffer path=bytes::empty();assert(bytes::resize_zeroed(ref mut path,4096).is_ok);
     let usize n=switch(process::arg(1,bytes::view_mut(ref mut path))){case .ok(n):{n}case .err(_):{assert(false);return bytes::empty();}};
     let filename=switch(utf8::validate_utf8(bytes::view(ref path)[..n])){case .ok(s):{s}case .err(_):{assert(false);return bytes::empty();}};

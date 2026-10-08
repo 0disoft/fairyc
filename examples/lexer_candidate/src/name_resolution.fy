@@ -1,6 +1,7 @@
 module name_resolution;
 import syntax as syntax;
 import raw_view_intrinsics as raw;
+import storage_intrinsics as storage;
 import effect_declarations as effects;
 import foreign_declarations as foreign;
 import repr_c_declarations as repr;
@@ -96,7 +97,7 @@ fn Problem expression(ref syntax::Parsed parsed, ref mut Context context, usize 
         if (!simple(spelling) && node.right==0) { return fail(3,node.start,node.end); }
         var usize symbol=0;
         if(node.right!=0){var usize n=0;while(n<v::len<Symbol>(symbols)){if((v::at<Symbol>(symbols,n).kind==1 || v::at<Symbol>(symbols,n).kind==6 || v::at<Symbol>(symbols,n).kind==7 || v::at<Symbol>(symbols,n).kind==9 || v::at<Symbol>(symbols,n).kind==11) && v::at<Symbol>(symbols,n).declaration==node.right){symbol=n+1;}n+=1;}}
-        else{var usize n=0;while(n<syntax::declaration_count(parsed)){let d=syntax::declaration_at(parsed,n);if(d.kind==12 && bytes::equal(source_name(parsed,d),spelling)){return fail(4501,node.start,node.end);}n+=1;}symbol=known(parsed,context,node.start,node.end);}
+        else{symbol=known(parsed,context,node.start,node.end);if(symbol==0 || v::at<Symbol>(symbols,symbol-1).kind==1){var usize n=0;while(n<syntax::declaration_count(parsed)){let d=syntax::declaration_at(parsed,n);if(d.kind==12 && bytes::equal(source_name(parsed,d),spelling)){return fail(4501,node.start,node.end);}n+=1;}}}
         if (symbol == 0) { return fail(1,node.start,node.end); }
         let Reference value = Reference { .expression = id, .start = node.start, .end = node.end, .symbol };
         if (!v::push<Reference>(references,value).is_ok) { return fail(5,node.start,node.end); }
@@ -110,7 +111,7 @@ fn Problem expression(ref syntax::Parsed parsed, ref mut Context context, usize 
     }
     if (node.kind == 6) {
         let u32 callee_kind=syntax::expression_at(parsed,node.left).kind;
-        if (callee_kind != 2 && callee_kind != 28) { return fail(3,node.start,node.end); }
+        if (callee_kind != 2 && callee_kind != 28 && storage::call(parsed,id)==0) { return fail(3,node.start,node.end); }
         if(callee_kind==2 && raw::call(parsed,id)==0){let Problem callee = expression(parsed,context,node.left,depth + 1,symbols,references);if (callee.code != 0) { return callee; }}
         var usize index = 0;
         while (index < syntax::call_argument_count(parsed,id)) {
@@ -292,7 +293,7 @@ fn Problem collect(ref syntax::Parsed parsed, ref mut Context context, ref mut v
             if (result.code != 0) { return result; }
         } else if (item.kind == 6 && (syntax::block_statement_count(parsed,item.cleanup_body)!=0 || syntax::statement_at(parsed,item.cleanup_body).expression!=0)) {
             context.local_count=0;context.scope=context.next_scope;context.next_scope+=1;
-            context.owner=known(parsed,context,item.name_start,item.name_end);
+            context.owner=0;var usize n=0;while(n<v::len<Symbol>(symbols)){if(v::at<Symbol>(symbols,n).kind==9 && v::at<Symbol>(symbols,n).declaration==index+1){context.owner=n+1;}n+=1;}
             let usize start=item.cleanup_start;let usize end=start+7;
             // Kind 10 is a compiler-owned dropping receiver, never a second
             // ordinary by-value parameter or a source-visible callable.

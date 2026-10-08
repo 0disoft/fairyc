@@ -421,3 +421,33 @@ project commands and Linux execution remain pending.
 - A generic name is checked against locals in its caller's declaration. An
   unrelated function parameter no longer shadows a template; a local shadow at
   the bare call still fails E4501. Existing specialization budgets are retained.
+
+
+## Scalar Vec storage execution
+
+- Validation: `check`, development/release candidate builds, one mutation API
+  per profile, four positive and seven rejected programs per candidate image,
+  and sixteen MSVC low/optimized executions of emitted C.
+- Evidence: `evidence/candidate-sdk-vector-storage-api-20261008.json` and
+  `evidence/candidate-sdk-vector-storage-cli-20261008.json`.
+- Closed SDK storage operations retain scalar element/result/operand types and
+  authenticated source sites through owned HIR and independent MIR verification.
+  Scalar size/alignment use C layout; take/put use typed memcpy. A put has no
+  result local, and no other operation receives that void-result exception.
+- Native programs cover empty/len/capacity/reserve/push/pop/clear, all six scalar
+  layouts, first-allocation and growth failures, returned scalar donors,
+  unchanged failure length/capacity/data, reverse prefix cleanup and zero live
+  allocations. The observer compiles the original heap/vector runtime bytes;
+  allocator and tail-pop hooks provide only failure/trace observations.
+- Removed templates leave parser field gaps. Owned nominal, enum and builtin
+  tag fields are compacted and all HIR field references are remapped. The
+  provider-first native case covers struct and enum fields following the SDK.
+- A cleanup receiver can be mutably borrowed and is bound to its concrete
+  resource declaration, so distinct Vec scalar instances cannot share a receiver.
+  Ordinary immutable owners still reject mutable borrowing.
+- Mutations reject changed operation/result/element/unsafe/argument/source-site
+  facts and damaged SDK bytes before C publication, preserving an output prefix.
+- Resource/nominal elements, owner-bound element/view borrowing, Linux and
+  self-hosting remain pending. This does not promote the candidate SDK/API.
+- Test observer timeouts terminate the process tree. Receipts store C digests
+  and byte counts rather than duplicate generated C; no CI or dependency change.
