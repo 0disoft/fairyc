@@ -52,8 +52,11 @@ fn usize expression(ref h::Program input, ref mut v::Vec<m::Local> locals, ref m
     if(kind==30){
         let usize left=if(e.left==0){0}else{expression(input,locals,blocks,operations,edges,payload,c,e.left,depth+1)};if(c.current==0 || c.problem.code!=0){return 0;}
         let usize right=if(e.right==0){0}else{expression(input,locals,blocks,operations,edges,payload,c,e.right,depth+1)};if(c.current==0 || c.problem.code!=0){return 0;}
+        let usize length=if(e.alternative==0){0}else{expression(input,locals,blocks,operations,edges,payload,c,e.alternative,depth+1)};if(c.current==0 || c.problem.code!=0){return 0;}
+        let usize start=v::len<usize>(edges);if(length!=0 && !state::edge(edges,length,c)){return 0;}
         let usize result=if(type==7){0}else{state::local(locals,c,type,0,false,false,e.start,e.end)};
         var m::Operation o=state::operation(39,result,type,h::storage_element(e.kind),h::storage_code(e.kind),left,right,e.start,e.end);o.boolean=true;
+        if(length!=0){o.argument_start=start;o.argument_count=1;}
         return if(state::emit(operations,blocks,c,o)!=0){result}else{0};
     }
     if(kind==29){

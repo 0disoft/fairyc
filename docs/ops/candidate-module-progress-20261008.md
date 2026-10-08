@@ -482,5 +482,38 @@ project commands and Linux execution remain pending.
   The API receipt retains the timeout and has `passed: false`; release mutation
   API execution is not counted as a pass. Both release candidate generation and
   its low/optimized emitted-C executions above completed successfully.
-- Vec views, resource/nominal elements, Linux and stage1/stage2 remain pending.
+- Non-byte Vec views, resource/nominal elements, Linux and stage1/stage2 remain pending.
   No language/SDK/runtime contract, CI workflow or dependency version changed.
+
+## Vec byte views
+
+- Authenticated SDK `view<u8>`, `view_mut<u8>`, `view_u8` and `view_mut_u8`
+  retain the existing byte descriptors over the initialized prefix. Construction
+  neither copies elements nor allocates. The private SDK transfer records its
+  safe Vec owner, opaque data pointer and exact usize length in source order.
+- Owned HIR validates the owner layout, source authority, mutability, element
+  width and length. MIR independently checks all three operands, claims the
+  length edge and checks its definite initialization. Raw view operation 38
+  also reads its length edge during definite-initialization verification.
+- Named non-generic byte exports are retained only when requested by an exact
+  bound SDK declaration. Other SDK bodies stay closed, and unrequested byte
+  exports introduce no extra Vec instance into earlier scalar storage programs.
+- Existing origin and generation checks cover aliases, returned subviews,
+  suspended mutable parents, structural mutation, replacement, move and argument
+  evaluation. Byte metadata, loads, stores and slices use the existing path.
+  Empty slicing now selects a null pointer directly instead of adding zero to it.
+- Evidence: `evidence/candidate-sdk-vector-byte-view-api-20261008.json` and
+  `evidence/candidate-sdk-vector-byte-view-cli-20261008.json`. The development API
+  checks eight altered view/result/element/length/owner/unsafe/source facts and
+  preserves an existing output prefix on rejection. Prior element and storage
+  programs have separate current-development regression receipts.
+- Non-byte scalar and nominal views, resource elements, Linux and stage1/stage2
+  remain pending. Release mutation API execution remains deferred after the
+  previous bounded timeout; release candidate/native execution is separate.
+  No SDK/runtime ABI, language contract, dependency version or CI change.
+- Validation: development/release candidate builds; one development native API
+  test; five positive programs, three bounds traps and seventeen rejected
+  programs per candidate, with thirty-two MSVC low/optimized executions.
+  Current-development element and storage regressions execute fourteen and
+  eight native runs respectively. Release mutation API validation is deferred,
+  and Linux/self-hosting are outside this unit.

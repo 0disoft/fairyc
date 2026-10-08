@@ -13,16 +13,19 @@ pub fn u32 named(ref u8[] name){return if(bytes::equal(name,b"storage_size")){1}
 pub fn u32 call(ref syntax::Parsed p,usize id){
     if(id==0){return 0;}let e=syntax::expression_at(p,id);if(e.kind!=6){return 0;}
     let g=syntax::expression_at(p,e.left);if(g.kind!=20){return 0;}let base=syntax::expression_at(p,g.left);
-    return if(base.kind==2){named(syntax::expression_text(p,g.left))}else{0};
+    let u32 code=if(base.kind==2){named(syntax::expression_text(p,g.left))}else{0};
+    if((code==6 || code==7) && g.right!=0){let arg=syntax::type_at(p,g.right);if(arg.left!=0 && syntax::type_at(p,arg.left).kind==4){return code+2;}}
+    return code;
 }
 pub fn u32 element(ref syntax::Parsed p,usize id){
     let e=syntax::expression_at(p,id);let g=syntax::expression_at(p,e.left);if(g.right==0){return 0;}let arg=syntax::type_at(p,g.right);
-    if(arg.right!=0 || arg.left==0 || syntax::type_at(p,arg.left).kind!=1){return 0;}
-    let u32 type=scalar::primitive(p,arg.left);return if(type>=1 && type<=6){type}else{0};
+    if(arg.right!=0 || arg.left==0){return 0;}let item=syntax::type_at(p,arg.left);let usize root=if(call(p,id)>=8 && item.kind==4){item.left}else{arg.left};
+    if(root==0 || syntax::type_at(p,root).kind!=1){return 0;}
+    let u32 type=scalar::primitive(p,root);return if(type>=1 && type<=6){type}else{0};
 }
 pub fn bool scalar_element(u32 element){return element>=1 && element<=6;}
-pub fn u32 result(u32 code,u32 element){return if(!scalar_element(element) || code==0 || code>7){0}else if(code<=2){5}else if(code==3){element}else if(code==4){7}else if(code==5){pointers::make(7,true)}else{refs::make(element,code==7)};}
-pub fn usize arguments(u32 code){return if(code<=2){0}else if(code==3){1}else{2};}
-pub fn bool owner(u32 code,u32 type){return (code==6 || code==7) && refs::valid(type) && resources::valid(refs::inner(type)) && refs::mutable(type)==(code==7);}
-pub fn u32 argument_type(u32 code,u32 element,usize index){return if(index==0 || code>=6){pointers::make(7,true)}else if(code==5){5}else{element};}
+pub fn u32 result(u32 code,u32 element){return if(!scalar_element(element) || code==0 || code>9){0}else if(code<=2){5}else if(code==3){element}else if(code==4){7}else if(code==5){pointers::make(7,true)}else if(code>=8){if(element==3){if(code==9){11}else{10}}else{0}}else{refs::make(element,code==7)};}
+pub fn usize arguments(u32 code){return if(code<=2){0}else if(code==3){1}else if(code>=8){3}else{2};}
+pub fn bool owner(u32 code,u32 type){return code>=6 && code<=9 && refs::valid(type) && resources::valid(refs::inner(type)) && refs::mutable(type)==(code==7 || code==9);}
+pub fn u32 argument_type(u32 code,u32 element,usize index){return if(index==2){5}else if(index==0 || code>=6){pointers::make(7,true)}else if(code==5){5}else{element};}
 pub fn bool allowed(ref syntax::Parsed p,usize id){let e=syntax::expression_at(p,id);return sdk::parsed_storage(p,e.start,e.end,call(p,id));}

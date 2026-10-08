@@ -69,7 +69,7 @@ pub fn bool parsed_foreign(ref syntax::Parsed p,usize index,usize link_start,usi
     var usize count=0;i=d.entry_start;while(i<d.entry_start+d.entry_count){let e=syntax::entry_at(p,i);if(e.kind==1){let u32 type=if(syntax::type_at(p,e.type_root).kind==1){scalar::primitive(p,e.type_root)}else{pointers::resolve(p,e.type_root)};if(type!=parameter(code,count)){return false;}count+=1;}i+=1;}
     return count==parameter_count(code);
 }
-fn ref u8[] storage_name(u32 code){let ref u8[] pool=b"storage_size\0storage_alignment\0storage_take\0storage_put\0storage_element_address\0storage_borrow\0storage_borrow_mut\0";if(code==0 || code>7){return pool[..0];}var usize start=0;var u32 i=1;while(i<code){while(pool[start]!=0){start+=1;}start+=1;i+=1;}var usize end=start;while(pool[end]!=0){end+=1;}return pool[start..end];}
+fn ref u8[] storage_name(u32 code){let ref u8[] pool=b"storage_size\0storage_alignment\0storage_take\0storage_put\0storage_element_address\0storage_borrow\0storage_borrow_mut\0";let u32 name_code=if(code==8 || code==9){code-2}else{code};if(name_code==0 || name_code>7){return pool[..0];}var usize start=0;var u32 i=1;while(i<name_code){while(pool[start]!=0){start+=1;}start+=1;i+=1;}var usize end=start;while(pool[end]!=0){end+=1;}return pool[start..end];}
 fn bool storage_span(ref u8[] source,Scope s,usize start,usize end,u32 code){
     let name=storage_name(code);return name.len!=0 && s.sdk_id==8 && authentic(source,s) && start>=s.start && start<end && end<=s.end && name.len<end-start && bytes::equal(source[start..start+name.len],name) && source[start+name.len]==60;
 }

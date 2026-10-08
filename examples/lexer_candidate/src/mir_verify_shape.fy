@@ -58,7 +58,7 @@ fn bool integer(ref u8[] text, u32 type) {
 }
 fn bool operation(ref m::Program p, usize id, m::Operation o) {
     if(o.kind==39){let usize args=storage::arguments(o.operator);
-        return storage::result(o.operator,o.owner_type)==o.type && o.boolean && o.argument_start==0 && o.argument_count==0 && o.payload_start==0 && o.payload_end==0
+        return storage::result(o.operator,o.owner_type)==o.type && o.boolean && (if(args==3){o.argument_count==1 && local(p,m::edge_at(p,o.argument_start),o.function,5) && o.result!=m::edge_at(p,o.argument_start)}else{o.argument_start==0 && o.argument_count==0}) && o.payload_start==0 && o.payload_end==0
             && shapes::storage_rule(m::nominal(p),m::source_view(p),o.start,o.end,o.operator)
             && (if(o.type==7){o.result==0}else{local(p,o.result,o.function,o.type) && o.result!=o.left && o.result!=o.right})
             && (if(args==0){o.left==0}else if(o.operator>=6){o.left>0 && o.left<=m::local_count(p) && m::local_at(p,o.left).function==o.function && storage::owner(o.operator,m::local_at(p,o.left).type) && shapes::storage_owner(m::nominal(p),m::local_at(p,o.left).type)}else{local(p,o.left,o.function,storage::argument_type(o.operator,o.owner_type,0))}) && (if(args<2){o.right==0}else{local(p,o.right,o.function,storage::argument_type(o.operator,o.owner_type,1))});
@@ -167,7 +167,7 @@ pub fn m::Problem check(ref m::Program p) {
             let m::Operation o = m::operation_at(p,op);
             if (!mark(ref mut ops,op) || !operation(p,op,o) || o.kind == 5 && (op != b.last || b.kind != 4 || b.check != op)) { return problem(1001,o.start,o.end); }
             if(o.kind==26 || o.kind==25){let u32 required=m::required_drop_effects(p,o.type);if((m::target_at(p,f.target).effects&required)!=required){return problem(7102,o.start,o.end);}}
-            if (o.kind == 6 || o.kind == 21 || o.kind == 9 || o.kind == 11 || (o.kind == 19 || o.kind == 20 || o.kind==38)) { var usize j = 0; while (j < o.argument_count) { if (!mark(ref mut edges,o.argument_start + j)) { return problem(1001,o.start,o.end); } j += 1; } }
+            if (o.kind == 6 || o.kind == 21 || o.kind == 9 || o.kind == 11 || (o.kind == 19 || o.kind == 20 || o.kind==38 || o.kind==39)) { var usize j = 0; while (j < o.argument_count) { if (!mark(ref mut edges,o.argument_start + j)) { return problem(1001,o.start,o.end); } j += 1; } }
             if (o.result != 0) { let ref mut usize count = v::at_mut<usize>(ref mut definitions,o.result); *count += 1; }
             if (o.kind == 1 && o.type == 6 && !o.boolean) { let ref mut u8[] flags = bytes::view_mut(ref mut false_constants); flags[o.result] = 1; }
             op = o.next;

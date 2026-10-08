@@ -156,7 +156,8 @@ fn usize expression(ref typing::Typed input, ref v::Vec<h::Binding> bindings, re
         let u32 code=storage::call(parsed,id);kind=.Storage{.code,.element=storage::element(parsed,id)};e.boolean=true;
         let usize count=storage::arguments(code);
         if(count!=0){e.left=expression(input,bindings,links,c,expressions,statements,blocks,edges,payload,syntax::call_argument(parsed,id,0),depth+1);}
-        if(count==2){e.right=expression(input,bindings,links,c,expressions,statements,blocks,edges,payload,syntax::call_argument(parsed,id,1),depth+1);}
+        if(count>=2){e.right=expression(input,bindings,links,c,expressions,statements,blocks,edges,payload,syntax::call_argument(parsed,id,1),depth+1);}
+        if(count==3){e.alternative=expression(input,bindings,links,c,expressions,statements,blocks,edges,payload,syntax::call_argument(parsed,id,2),depth+1);}
     } else if (raw::call(parsed,id)!=0) {
         kind=.RawView;e.boolean=true;
         e.left=expression(input,bindings,links,c,expressions,statements,blocks,edges,payload,syntax::call_argument(parsed,id,0),depth+1);
