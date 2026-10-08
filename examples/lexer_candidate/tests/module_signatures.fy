@@ -1,6 +1,7 @@
 module tests::module_signatures;
 import module_signatures as signatures;
 import module_catalog as catalog;
+import module_types as types;
 import syntax as syntax;
 import scanner as scanner;
 import std::bytes as bytes;
@@ -29,4 +30,42 @@ fn catalog::Problem rejected(ref u8[] a,ref u8[] b){var v::Vec<syntax::Parsed> f
     let ffi=owned(b"module a;import b as lib;unsafe fn ptr mut void forward(ptr mut void p){}",b"module b;@link_name(\"host_slot\")pub unsafe extern C fn c::int foreign(ptr mut ptr mut void p);");let usize host_id=signatures::lookup(ref ffi,0,b"lib::foreign").item;let host=signatures::at(ref ffi,host_id);assert(host.foreign && host.unsafe_call && signatures::type_at(ref ffi,host.result).scalar==132 && signatures::type_at(ref ffi,signatures::parameter_at(ref ffi,host.parameter_start)).scalar==1048601 && bytes::equal(signatures::linker_name(ref ffi,host_id),b"host_slot"));
     assert(rejected(b"module a;@link_name(\"host_alias\")unsafe extern C fn i32 first(i32 n);",b"module b;@link_name(\"host_alias\")unsafe extern C fn i64 second(i32 n);").code==5106);
     let aliases=owned(b"module a;@link_name(\"host_alias\")unsafe extern C fn i32 first(i32 n);",b"module b;@link_name(\"host_alias\")unsafe extern C fn i32 second(i32 n);");assert(signatures::at(ref aliases,1).result==signatures::at(ref aliases,2).result);
+}
+
+@test fn void fixed_array_signatures_keep_canonical_elements_and_lengths(){
+    let p=owned(b"module a;import b as lib;struct Token{i32 n;}fn i32[20] same(i32[20] n){}fn usize[20] other(){}fn Token[2] local(){}fn lib::Token[2] imported(){}fn i32[3][4] matrix(){}fn usize[1153] large(){}",
+        b"module b;pub struct Token{i32 n;}pub fn i32[0x14] same(i32[0b10100] n){}pub fn Token[2] make(){}");
+    let same=signatures::at(ref p,1);let provider=signatures::at(ref p,signatures::lookup(ref p,0,b"lib::same").item);
+    assert(same.result==provider.result && signatures::parameter_at(ref p,same.parameter_start)==same.result && signatures::parameter_at(ref p,provider.parameter_start)==same.result);
+    let array=signatures::type_at(ref p,same.result);assert(array.kind==16 && array.second==20 && signatures::type_at(ref p,array.first).scalar==1);
+    assert(signatures::at(ref p,2).result!=same.result);
+    let local=signatures::type_at(ref p,signatures::at(ref p,3).result);let imported=signatures::type_at(ref p,signatures::at(ref p,4).result);
+    assert(local.first!=imported.first && local.second==2 && imported.second==2 && signatures::type_at(ref p,local.first).module_index==0 && signatures::type_at(ref p,imported.first).module_index==1);
+    assert(signatures::at(ref p,4).result==signatures::at(ref p,signatures::lookup(ref p,0,b"lib::make").item).result);
+    let outer=signatures::type_at(ref p,signatures::at(ref p,5).result);let inner=signatures::type_at(ref p,outer.first);assert(outer.kind==16 && outer.second==4 && inner.kind==16 && inner.second==3);
+    assert(signatures::type_at(ref p,signatures::at(ref p,6).result).second==1153);
+    assert(rejected(b"module a;fn i32[0] bad(){}",b"module b;").code==9);
+    assert(rejected(b"module a;fn i32[4097] bad(){}",b"module b;").code==9);
+    assert(rejected(b"module a;fn i32[999999999999999999999999999] bad(){}",b"module b;").code==9);
+    assert(rejected(b"module a;resource R{i32 n;cleanup{}}fn R[2] bad(){}",b"module b;").code==9);
+    assert(rejected(b"module a;fn Option<ref i32>[2] bad(){}",b"module b;").code==9);
+    assert(rejected(b"module a;fn i32[65][2] bad(){}",b"module b;").code==9);
+    assert(rejected(b"module a;fn i32[2][2][2] bad(){}",b"module b;").code==9);
+    assert(rejected(b"module a;unsafe extern C fn i32 host(i32[2] a);",b"module b;").code==5102);
+    let private=rejected(b"module a;import b as lib;fn lib::Hidden[2] leak(){}",b"module b;struct Hidden{i32 n;}");assert(private.code==6 && private.module_index==0 && private.end>private.start);
+}
+
+@test fn void fixed_array_graph_rejects_forged_edges_and_rolls_back_failed_resolution(){
+    var v::Vec<syntax::Parsed> files=v::empty<syntax::Parsed>();assert(v::push<syntax::Parsed>(ref mut files,parsed(b"module a;fn i32[20] ok(){}fn i32[2][2][2] bad(){}")).is_ok);
+    let c=switch(catalog::build(ref files)){case .ok(c):{c}case .err(_):{assert(false);return;}};
+    var v::Vec<types::Type> graph=v::empty<types::Type>();let file=v::at<syntax::Parsed>(ref files,0);
+    let good=types::resolve(ref c,file,0,syntax::declaration_at(file,1).result_type,ref mut graph);assert(good.problem.code==0 && types::count(ref graph)==2 && types::validate(ref c,ref graph)==0);
+    let before=types::count(ref graph);let bad=types::resolve(ref c,file,0,syntax::declaration_at(file,2).result_type,ref mut graph);assert(bad.problem.code==9 && types::count(ref graph)==before && types::validate(ref c,ref graph)==0);
+    {let slot=v::at_mut<types::Type>(ref mut graph,1);slot.second=0;}assert(types::validate(ref c,ref graph)==9);
+    {let slot=v::at_mut<types::Type>(ref mut graph,1);slot.second=4097;}assert(types::validate(ref c,ref graph)==9);
+    {let slot=v::at_mut<types::Type>(ref mut graph,1);slot.second=20;slot.first=2;}assert(types::validate(ref c,ref graph)==9);
+    {let slot=v::at_mut<types::Type>(ref mut graph,1);slot.first=0;}assert(types::validate(ref c,ref graph)==9);
+    {let slot=v::at_mut<types::Type>(ref mut graph,1);slot.first=1;slot.scalar=1;}assert(types::validate(ref c,ref graph)==9);
+    {let slot=v::at_mut<types::Type>(ref mut graph,1);slot.scalar=0;slot.module_index=1;}assert(types::validate(ref c,ref graph)==9);
+    {let slot=v::at_mut<types::Type>(ref mut graph,1);slot.module_index=0;}assert(types::validate(ref c,ref graph)==0);
 }

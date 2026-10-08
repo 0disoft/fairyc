@@ -1,0 +1,75 @@
+{
+  "schema": "fairyc.candidate-module-array-signatures-parity/v1",
+  "passed": true,
+  "programs": 5,
+  "rejectionsPerProfile": 10,
+  "nativeExecutions": 20,
+  "observations": [
+    {
+      "development": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\module-array-signatures\\array-parameter-return-0.c",
+        "sha256": "b30c0051fbb6ee4c49b13d3c10a82d59be2fbae2bbb31ab1831eaed2ca34a35f"
+      },
+      "release": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\module-array-signatures\\array-parameter-return-0.c",
+        "sha256": "b30c0051fbb6ee4c49b13d3c10a82d59be2fbae2bbb31ab1831eaed2ca34a35f"
+      },
+      "bytes": 7171
+    },
+    {
+      "development": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\module-array-signatures\\large-length-0.c",
+        "sha256": "0ce136d80f9b806f75a024ae172deea7fd774506cb8011983e8ac7743de79406"
+      },
+      "release": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\module-array-signatures\\large-length-0.c",
+        "sha256": "0ce136d80f9b806f75a024ae172deea7fd774506cb8011983e8ac7743de79406"
+      },
+      "bytes": 14444
+    },
+    {
+      "development": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\module-array-signatures\\qualified-nominal-alias-0.c",
+        "sha256": "968f24a1e1010594f5b0c87431cd86aafe235005a74cf266492d7361b286b860"
+      },
+      "release": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\module-array-signatures\\qualified-nominal-alias-0.c",
+        "sha256": "968f24a1e1010594f5b0c87431cd86aafe235005a74cf266492d7361b286b860"
+      },
+      "bytes": 7021
+    },
+    {
+      "development": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\module-array-signatures\\rank-two-0.c",
+        "sha256": "bf6efe418843d5120144580c81fc75f34ccbbdb68879ce94836052bbcca83e18"
+      },
+      "release": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\module-array-signatures\\rank-two-0.c",
+        "sha256": "bf6efe418843d5120144580c81fc75f34ccbbdb68879ce94836052bbcca83e18"
+      },
+      "bytes": 6745
+    },
+    {
+      "development": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\module-array-signatures\\enum-and-option-0.c",
+        "sha256": "4bc418b75d3081878a7459942a4cd84352ec989b6bfe72d1731d64a45e5cef4a"
+      },
+      "release": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\module-array-signatures\\enum-and-option-0.c",
+        "sha256": "4bc418b75d3081878a7459942a4cd84352ec989b6bfe72d1731d64a45e5cef4a"
+      },
+      "bytes": 7432
+    }
+  ],
+  "inputs": [
+    {
+      "path": "examples/lexer_candidate/src/module_types.fy",
+      "sha256": "7c2ce6214821ee0f8d1f3e96913ad88a6860312fb1edc9d1f009b94395946fd1"
+    },
+    {
+      "path": "examples/lexer_candidate/probes/module_array_provider.fy",
+      "sha256": "04790304b5df373e7fe4109cc2b43ceeb5b78fb068141b474039f0fefa16fcac"
+    }
+  ],
+  "limitsChanged": false
+}

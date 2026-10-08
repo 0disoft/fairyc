@@ -6,6 +6,7 @@ import type_state as scalars;
 import literal_types as literals;
 import pointer_types as pointers;
 import c_abi_types as abi;
+import array_types as arrays;
 import std::bytes as bytes;
 import std::vec as v;
 
@@ -14,6 +15,7 @@ import std::vec as v;
 // 1 scalar, 2 struct, 3 resource, 4 enum, 5 Option, 6 Result,
 // 7 shared borrow, 8 mutable borrow, 9 text, 10 bytes, 11 mutable bytes, 12 pointer.
 // 13 authenticated SDK Vec, whose first edge is its exact element identity.
+// 16 fixed array: first is the canonical element, second is the bounded length.
 pub struct Type {u32 kind;u32 scalar;usize module_index;usize declaration;usize first;usize second;}
 pub struct Problem {u32 code;usize module_index;usize start;usize end;}
 pub struct Resolution {usize type;Problem problem;}
@@ -27,6 +29,7 @@ pub fn u32 validate(ref catalog::Catalog c,ref v::Vec<Type> types){
         else{if(t.module_index!=0 || t.declaration!=0){return 9;}
             if(t.kind==1){if(t.scalar==0 || t.scalar>7 && !abi::valid(t.scalar) || t.first!=0 || t.second!=0){return 9;}}
             else if(t.kind==15){if(!views::extended(t.scalar) || t.first!=0 || t.second!=0){return 9;}}
+            else if(t.kind==16){if(t.scalar!=0 || t.first==0 || t.first>i || !array_element(types,t.first,t.second)){return 9;}}
             else if(t.kind==12){if(t.second!=0){return 9;}if(t.first==0){if(!pointers::valid(t.scalar) || pointers::inner(t.scalar)>=256 && pointers::inner(t.scalar)<=767){return 9;}}else if(t.scalar>1 || t.first>i || v::at<Type>(types,t.first-1).kind!=2){return 9;}}
             else if(t.kind>=9 && t.kind<=11 || t.kind==14){if(t.scalar!=0 || t.first!=0 || t.second!=0){return 9;}}
             else if(t.kind>=5 && t.kind<=8){if(t.scalar!=0 || t.first==0 || t.first>i || t.kind==6 && (t.second==0 || t.second>i) || t.kind!=6 && t.second!=0){return 9;}}
@@ -48,6 +51,16 @@ fn bool element(ref v::Vec<Type> graph,usize id,usize depth){
     if(t.kind==6){return t.first<id && t.second<id && element(graph,t.first,depth+1) && element(graph,t.second,depth+1);}
     return t.kind==1 && t.scalar>=1 && t.scalar<=6 || t.kind>=2 && t.kind<=4 || t.kind==12;
 }
+fn bool copy_element(ref v::Vec<Type> graph,usize id,usize depth){
+    if(id==0 || id>count(graph) || depth>=64){return false;}let t=at(graph,id);
+    if(t.kind==5 || t.kind==6){return t.first<id && copy_element(graph,t.first,depth+1) && (t.kind==5 || t.second<id && copy_element(graph,t.second,depth+1));}
+    return t.kind==1 && t.scalar>=1 && t.scalar<=6 || t.kind==2 || t.kind==4;
+}
+fn bool array_element(ref v::Vec<Type> graph,usize id,usize length){
+    if(length<1 || length>4096){return false;}let t=at(graph,id);
+    if(t.kind==16){return length<=64 && t.second<=64 && t.first!=0 && t.first<id && at(graph,t.first).kind!=16 && copy_element(graph,t.first,0);}
+    return copy_element(graph,id,0);
+}
 fn usize intern(ref mut v::Vec<Type> graph,Type value){
     var usize i=1;while(i<=count(graph)){if(same(at(graph,i),value)){return i;}i+=1;}
     if(count(graph)>=4096 || !v::push<Type>(graph,value).is_ok){return 0;}return count(graph);
@@ -61,6 +74,13 @@ fn Resolution walk(ref catalog::Catalog c,ref syntax::Parsed p,usize module_inde
         let found=catalog::lookup(c,module_index,name);if(found.code!=0){return fail(found.code,module_index,n.start,n.end);}let d=catalog::declaration_at(c,found.item);
         if(d.kind!=4 && d.kind!=6 && d.kind!=11 || catalog::sdk_vector(c,d.module_index,d.declaration)){return fail(9,module_index,n.start,n.end);}
         return accepted(graph,node(if(d.kind==4){2}else if(d.kind==6){3}else{4},0,d.module_index,d.declaration,0,0),module_index,n.start,n.end);
+    }
+    if(n.kind==8){
+        if(n.right==0 || syntax::type_at(p,n.right).kind!=9){return fail(9,module_index,n.start,n.end);}
+        let usize length=arrays::count(syntax::type_text(p,n.right));if(length==0){return fail(9,module_index,n.start,n.end);}
+        let child=walk(c,p,module_index,n.left,graph,depth+1);if(child.problem.code!=0){return child;}
+        if(!array_element(graph,child.type,length)){return fail(9,module_index,n.start,n.end);}
+        return accepted(graph,node(16,0,0,0,child.type,length),module_index,n.start,n.end);
     }
     if(n.kind==2 || n.kind==3){let u32 literal=literals::resolve(p,root);if(views::extended(literal)){return accepted(graph,node(15,literal,0,0,0,0),module_index,n.start,n.end);}if(literal!=0){return accepted(graph,node(if(literal==9){9}else if(literal==10){10}else if(literal==12){14}else{11},0,0,0,0,0),module_index,n.start,n.end);}
         let r=walk(c,p,module_index,n.left,graph,depth+1);if(r.problem.code!=0){return r;}let inner=at(graph,r.type);

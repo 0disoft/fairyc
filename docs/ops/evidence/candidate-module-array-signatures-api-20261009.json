@@ -1,0 +1,78 @@
+{
+  "schema": "fairyc.candidate-module-array-signatures-api/v1",
+  "passed": true,
+  "compiler": {
+    "path": ".cache/candidate-tagged/compiler-build-240s.exe",
+    "sha256": "746fe10b022ed88cfbc0ae8ea13e3f867b842f3317ef5a2a4caa36d064a248dd"
+  },
+  "source": {
+    "path": "examples/lexer_candidate/src/module_types.fy",
+    "sha256": "7c2ce6214821ee0f8d1f3e96913ad88a6860312fb1edc9d1f009b94395946fd1"
+  },
+  "testSource": {
+    "path": "examples/lexer_candidate/tests/module_signatures.fy",
+    "sha256": "cfc700853e95457d1f38ef2f17b81689d4502efa2ed1603984e4f1e698e1b10e"
+  },
+  "reports": [
+    {
+      "schemaVersion": "fairyc.test-report/v1",
+      "engine": "native",
+      "target": "x86_64-windows-msvc",
+      "profile": "development",
+      "tests": [
+        {
+          "identity": "tests::module_signatures::fixed_array_graph_rejects_forged_edges_and_rolls_back_failed_resolution",
+          "outcome": "passed",
+          "trapCategory": null
+        },
+        {
+          "identity": "tests::module_signatures::fixed_array_signatures_keep_canonical_elements_and_lengths",
+          "outcome": "passed",
+          "trapCategory": null
+        },
+        {
+          "identity": "tests::module_signatures::owned_module_signatures_keep_nominal_and_contract_identity",
+          "outcome": "passed",
+          "trapCategory": null
+        }
+      ],
+      "count": 3,
+      "passed": 3,
+      "failed": 0,
+      "status": "ok",
+      "lock": "verified"
+    },
+    {
+      "schemaVersion": "fairyc.test-report/v1",
+      "engine": "native",
+      "target": "x86_64-windows-msvc",
+      "profile": "release",
+      "tests": [
+        {
+          "identity": "tests::module_signatures::fixed_array_graph_rejects_forged_edges_and_rolls_back_failed_resolution",
+          "outcome": "passed",
+          "trapCategory": null
+        },
+        {
+          "identity": "tests::module_signatures::fixed_array_signatures_keep_canonical_elements_and_lengths",
+          "outcome": "passed",
+          "trapCategory": null
+        },
+        {
+          "identity": "tests::module_signatures::owned_module_signatures_keep_nominal_and_contract_identity",
+          "outcome": "passed",
+          "trapCategory": null
+        }
+      ],
+      "count": 3,
+      "passed": 3,
+      "failed": 0,
+      "status": "ok",
+      "lock": "verified"
+    }
+  ],
+  "developmentExecutionSession": 33994,
+  "releaseExecutionSession": 86952,
+  "scope": "Exact native tests cover canonical identity/lengths, rejected signatures, graph mutations/rollback and the prior nominal signature contract; unrelated native suites were not repeated",
+  "linuxValidated": false
+}

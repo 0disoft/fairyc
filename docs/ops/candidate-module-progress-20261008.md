@@ -1365,3 +1365,39 @@ project commands and Linux execution remain pending.
   are unchanged. Compiler-internal CLI/factory helper APIs changed. Release
   candidate rebuilding, Linux and full-dispatcher native execution remain
   unverified; the unchanged admission bounds still reject the complete program.
+
+## Source-set fixed-array signatures (2026-10-09)
+
+- Detailed AST remapping notes moved verbatim from `module_ast_join.fy` to
+  `docs/architecture/candidate-source-join-v0.md`. All non-comment source text
+  is unchanged; check passes. This provides source budget for implementation
+  without increasing a bound. Evidence:
+  `evidence/candidate-join-documentation-split-20261009.json`.
+- Source-set graph kind 16 owns a canonical element edge and exact array length.
+  Resolution accepts the existing rank-one 1..4096 and rank-two 1..64 shapes,
+  retaining module/declaration identity for nominal/enum leaves and rejecting
+  resource/borrow elements, larger rank-two and higher ranks. Graph validation
+  rejects malformed/forward/self edges, lengths and scalar/module payloads;
+  failed resolution rolls back speculative child interning.
+- Development/release SDK drivers build. Three exact API tests pass in each
+  native profile, including prior nominal signatures, canonical alias/length
+  identity, privacy/FFI rejection and forged graph/rollback cases. Five actual
+  source-set programs pass across both candidate profiles with byte-identical
+  C and twenty native MSVC executions: array arguments/results, usize[1153],
+  imported nominal arrays, rank two, enum and Option arrays. Ten rejection
+  inputs per candidate cover mismatched length/type/nominal owners and bounds,
+  resource/borrow elements and foreign arrays. Evidence:
+  `evidence/candidate-module-array-signatures-api-20261009.json`,
+  `evidence/candidate-module-array-signatures-dev-20261009.json`,
+  `evidence/candidate-module-array-signatures-release-20261009.json` and
+  `evidence/candidate-module-array-signatures-parity-20261009.json`.
+- The actual dispatcher passes signature registration, including
+  `mir_output::row`'s usize[20] argument. Its 160-file input is 1046965 joined
+  bytes. It now reaches SDK compaction phase 8 code 11 on the capped reference
+  index; `sdk_reachability` currently conflates 16384 indexed uses with an
+  allocation failure. That index/work representation is the next blocker.
+  Evidence: `evidence/candidate-dispatcher-admission-after-array-signatures-20261009.json`.
+- This extends the private source-set type graph, not the language or SDK ABI.
+  Source/AST/work/depth/stack budgets, DB, dependencies and CI settings are
+  unchanged. Linux and full-dispatcher C/native execution remain unverified;
+  stage1/stage2 and promotion remain open.

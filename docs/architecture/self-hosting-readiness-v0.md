@@ -205,6 +205,17 @@ headroom remain; this does not establish full-dispatcher compilation or
 stage1/stage2. Evidence:
 `docs/ops/evidence/candidate-cli-source-dedup-20261009.json` and
 `docs/ops/evidence/candidate-dispatcher-admission-after-source-dedup-20261009.json`.
+Source-set fixed-array signatures now retain canonical element identity and
+bounded rank-one/rank-two lengths, including imported nominal/enum and Option
+arrays. Three API tests pass in each native profile; five source-set programs
+produce identical C across candidate profiles and pass twenty native runs.
+The actual dispatcher now passes usize[20] signature registration and reaches
+SDK compaction phase 8 code 11 at its reference-index cap. Current input is
+160 files and 1046965 joined bytes, within 1MiB after moving AST-join notes out
+of compiler source. Reference-index/work reduction and accurate limit/error
+classification remain necessary. Evidence:
+`docs/ops/evidence/candidate-module-array-signatures-parity-20261009.json` and
+`docs/ops/evidence/candidate-dispatcher-admission-after-array-signatures-20261009.json`.
 
 `stage0` is the current Go compiler built by the supported Go toolchain.
 
