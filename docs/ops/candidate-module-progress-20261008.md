@@ -1133,3 +1133,19 @@ project commands and Linux execution remain pending.
 - This is the dependency/snapshot prerequisite only. AST arena compaction and
   pipeline integration remain the next unit; item 50 is still open. No language,
   SDK/runtime, DB, dependency, CI workflow or analysis bound changed.
+
+## SDK AST arena compaction (2026-10-09)
+
+- `sdk_ast_compact.fy` remaps expression, statement, entry and type IDs after
+  authenticated SDK function reachability. Missing or non-contiguous retained
+  links reject publication. Original source owners, token indices, spans,
+  fields, attributes and all user declarations remain intact.
+- `syntax::copy_source` copies the private scanner through its explicit snapshot
+  API. The implementation does not expose mutable private resource storage.
+- Development/release native API tests (2 per profile) passed: reduced SDK arenas can be joined and
+  rebound with rebuilt signatures, an unused invalid user function still fails
+  typing, and a private SDK call still fails at its original byte position.
+  Evidence: `evidence/candidate-sdk-ast-compact-api-20261009.json`.
+- The original CLI pipeline is unchanged in this unit. Item 50 remains open;
+  token-route integration follows through an opt-in compiler API. No language,
+  SDK/runtime, DB, dependency, CI workflow or analysis bound changed.

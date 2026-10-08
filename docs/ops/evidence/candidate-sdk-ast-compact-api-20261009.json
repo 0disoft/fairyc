@@ -1,0 +1,94 @@
+{
+  "schema": "fairyc.candidate-sdk-ast-compact-api/v1",
+  "passed": true,
+  "compiler": {
+    "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\compiler-build-240s.exe",
+    "sha256": "746fe10b022ed88cfbc0ae8ea13e3f867b842f3317ef5a2a4caa36d064a248dd"
+  },
+  "sdk": {
+    "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\internal\\sdkstdlib\\sources\\std\\bytes.fy",
+    "sha256": "4740a506e93349fb002c383967dcc44d182d20f09f2094b83b5464a4ab252982"
+  },
+  "sources": [
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\sdk_ast_compact.fy",
+      "sha256": "adb6cb540a5dd235cd4be148b662dbda59edc7e7e6ce48d1cafb9502625cb5ba"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\syntax.fy",
+      "sha256": "9d5daa610e90963c6920c186d0ad85ae92bb9a199a1f5c0eb2c8e9bac90c786e"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\sdk_reachability.fy",
+      "sha256": "15b69005b96702ecb2dcf1dd722f36b815e80c7d153484ff737a84a7487d2cab"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\scanner.fy",
+      "sha256": "de435293648d9cf277b75ec1d223c75ee02e0d6e50b6e763c08d843ea3369f60"
+    }
+  ],
+  "test": {
+    "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\tests\\sdk_ast_compact.fy",
+    "sha256": "193a25c250fa72bbf92c59c4adfecb2734ff82f8738a077efb7a7c7541dc7c4d"
+  },
+  "lock": {
+    "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\fairy.lock",
+    "sha256": "5d4ef693df204078f42d435307da0c0c2ad08a592476eee4dafd9792ecd97707"
+  },
+  "development": {
+    "passed": 2,
+    "failed": 0,
+    "command": "test --native --file tests/sdk_ast_compact.fy --json --locked -- <bundled bytes.fy>"
+  },
+  "release": {
+    "argv": [
+      "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\compiler-build-240s.exe",
+      "test",
+      "--native",
+      "--release",
+      "--file",
+      "tests/sdk_ast_compact.fy",
+      "--json",
+      "--locked",
+      "--",
+      "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\internal\\sdkstdlib\\sources\\std\\bytes.fy"
+    ],
+    "exit": 0,
+    "report": {
+      "schemaVersion": "fairyc.test-report/v1",
+      "engine": "native",
+      "target": "x86_64-windows-msvc",
+      "profile": "release",
+      "tests": [
+        {
+          "identity": "tests::sdk_ast_compact::compacted_private_reference_retains_original_diagnostic",
+          "outcome": "passed",
+          "trapCategory": null
+        },
+        {
+          "identity": "tests::sdk_ast_compact::compacted_sdk_keeps_source_and_user_validation",
+          "outcome": "passed",
+          "trapCategory": null
+        }
+      ],
+      "count": 2,
+      "passed": 2,
+      "failed": 0,
+      "status": "ok",
+      "lock": "verified"
+    },
+    "stderr": ""
+  },
+  "coverage": [
+    "Original SDK source and token spans retained; all fields and attributes preserved",
+    "SDK entry/expression/statement/type arenas reduced with checked links",
+    "Original user arenas unchanged, including unused invalid body",
+    "Rebuilt declaration metadata and joined binding remain valid",
+    "Private SDK target still rejects at original span; mismatched source set rejects"
+  ],
+  "limits": [
+    "1048576 shared planning/copy work budget unchanged",
+    "No original CLI pipeline integration in this unit",
+    "Linux and whole compiler stage1/stage2 not executed"
+  ]
+}

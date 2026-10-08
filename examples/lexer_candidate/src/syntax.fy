@@ -308,6 +308,8 @@ pub fn ref u8[] expected_text(u32 code) {
     return b"supported syntax";
 }
 pub fn ref u8[] source_view(ref Parsed parsed) { return scanner::source_view(ref parsed.source); }
+// Preserve scanner ownership, token indices and cooked bytes without rescanning.
+pub fn Result<scanner::Stream,u32> copy_source(ref Parsed parsed,ref mut usize work) { return scanner::copy(ref parsed.source,work); }
 pub fn usize expression_count(ref Parsed parsed) { return v::len<state::Node>(ref parsed.expressions); }
 pub fn usize entry_count(ref Parsed parsed) { return v::len<bodies::Entry>(ref parsed.entries); }
 pub fn usize statement_count(ref Parsed parsed) { return v::len<state::Statement>(ref parsed.statements); }
