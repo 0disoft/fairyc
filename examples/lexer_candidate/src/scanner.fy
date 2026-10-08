@@ -381,3 +381,27 @@ pub fn Storage storage(ref Stream stream) {
     return Storage { .source_bytes = bytes::view(ref stream.source).len, .cooked_bytes = cooked,
         .diagnostic_bytes = diagnostic, .tokens = v::len<Token>(ref stream.tokens), .diagnostics = v::len<diagnostics::Entry>(ref stream.errors) };
 }
+
+
+// Explicit owned snapshot for AST compaction: preserve revision-specific token
+// kinds, trivia, spans and private cooked bytes without rescanning the source.
+pub fn Result<Stream,u32> copy(ref Stream original,ref mut usize work) {
+    if(bytes::len(ref original.source)>limits::program_bytes() || v::len<Token>(ref original.tokens)>1048576 || v::len<diagnostics::Entry>(ref original.errors)>257){return .err(10);}
+    let source=switch(bytes::copy(bytes::view(ref original.source))){case .ok(b):{b}case .err(_):{return .err(11);}};
+    var v::Vec<Token> tokens=v::empty<Token>();var v::Vec<bytes::Buffer> cooked=v::empty<bytes::Buffer>();var v::Vec<diagnostics::Entry> errors=v::empty<diagnostics::Entry>();
+    var usize i=0;while(i<v::len<Token>(ref original.tokens)){
+        if(*work>=1048576){return .err(10);};*work=*work+1;
+        if(!v::push<Token>(ref mut tokens,*v::at<Token>(ref original.tokens,i)).is_ok){return .err(11);}i+=1;
+    }
+    i=0;while(i<v::len<bytes::Buffer>(ref original.cooked)){
+        if(*work>=1048576){return .err(10);};*work=*work+1;
+        let b=switch(bytes::copy(bytes::view(v::at<bytes::Buffer>(ref original.cooked,i)))){case .ok(b):{b}case .err(_):{return .err(11);}};
+        if(!v::push<bytes::Buffer>(ref mut cooked,b).is_ok){return .err(11);}i+=1;
+    }
+    i=0;while(i<v::len<diagnostics::Entry>(ref original.errors)){
+        if(*work>=1048576){return .err(10);};*work=*work+1;
+        let e=v::at<diagnostics::Entry>(ref original.errors,i);
+        let info=diagnostics::info(e);if(diagnostics::add(ref mut errors,info.code,info.start,info.end,info.exit_repair,diagnostics::token_view(e))!=0){return .err(11);}i+=1;
+    }
+    return .ok(Stream{.source,.tokens,.cooked,.errors});
+}

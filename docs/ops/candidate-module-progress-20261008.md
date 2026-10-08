@@ -1114,3 +1114,22 @@ project commands and Linux execution remain pending.
   stream/status expectations; it has no successful native token-route results
   yet. The budget probe uses native JSON capture and explicit manifest/root
   arguments, and is not a default corpus test.
+
+
+## Authenticated SDK dependency plan (2026-10-09)
+
+- Added a bounded source-matched SDK dependency plan. Every user declaration,
+  SDK non-function declaration and resource cleanup remains a root; authenticated
+  ordinary SDK functions are retained through direct/alias name references and
+  transitive dependencies. Private references retain their original target so
+  downstream privacy diagnostics remain available. Declaration ownership uses
+  binary search and a single queue, within the unchanged 1048576 work budget.
+- Added explicit scanner ownership snapshots that copy the original source,
+  token descriptors, cooked storage and diagnostics without rescanning. Current
+  and previous lexer revisions retain their exact token/trivia/span/cooked data.
+- Check and release native API tests (3) passed. The final development dependency
+  test also passed, including source-set mismatch and work exhaustion. Evidence:
+  `evidence/candidate-sdk-reachability-api-20261009.json`.
+- This is the dependency/snapshot prerequisite only. AST arena compaction and
+  pipeline integration remain the next unit; item 50 is still open. No language,
+  SDK/runtime, DB, dependency, CI workflow or analysis bound changed.

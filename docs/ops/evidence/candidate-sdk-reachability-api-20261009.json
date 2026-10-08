@@ -1,0 +1,59 @@
+{
+  "schema": "fairyc.candidate-sdk-reachability-api/v1",
+  "passed": true,
+  "checkPassed": true,
+  "compiler": {
+    "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\compiler-build-240s.exe",
+    "sha256": "746fe10b022ed88cfbc0ae8ea13e3f867b842f3317ef5a2a4caa36d064a248dd"
+  },
+  "sdk": {
+    "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\internal\\sdkstdlib\\sources\\std\\bytes.fy",
+    "sha256": "4740a506e93349fb002c383967dcc44d182d20f09f2094b83b5464a4ab252982"
+  },
+  "sources": [
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\sdk_reachability.fy",
+      "sha256": "15b69005b96702ecb2dcf1dd722f36b815e80c7d153484ff737a84a7487d2cab"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\scanner.fy",
+      "sha256": "de435293648d9cf277b75ec1d223c75ee02e0d6e50b6e763c08d843ea3369f60"
+    }
+  ],
+  "tests": [
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\tests\\sdk_reachability.fy",
+      "sha256": "ebfdd2ac588dea15e99c5805753e5841e24cb12b4a94c3b14fd3c3a70114c248"
+    }
+  ],
+  "lock": {
+    "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\fairy.lock",
+    "sha256": "367f97c5e9b8f78653c4762d359313f5b535d1b6427cba7de70afb070cab5560"
+  },
+  "validations": [
+    {
+      "profile": "release",
+      "command": "test --native --release --file tests/sdk_reachability.fy --json --locked -- <absolute bundled std/bytes.fy>",
+      "passed": 3,
+      "failed": 0
+    },
+    {
+      "profile": "development",
+      "command": "test --native --exact tests::sdk_reachability::sdk_dependencies_aliases_and_all_user_bodies_are_retained --json --locked -- <absolute bundled std/bytes.fy>",
+      "passed": 1,
+      "failed": 0
+    }
+  ],
+  "coverage": [
+    "Authenticated SDK dependency closure and duplicate aliases",
+    "All user functions retained, including an unused invalid body",
+    "Private SDK declaration retained for unchanged later privacy rejection",
+    "Original source/token/trivia/span/cooked/diagnostic snapshot for current and previous revisions",
+    "Shared work exhaustion and mismatched source-set signatures reject"
+  ],
+  "limits": [
+    "No AST rewriting or pipeline integration yet.",
+    "1048576 work budget unchanged; 4096 planned declaration rows and 16384 name uses are bounded.",
+    "Linux and whole CLI candidate execution remain pending."
+  ]
+}
