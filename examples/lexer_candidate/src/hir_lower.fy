@@ -12,6 +12,7 @@ import tagged_types as tagged;
 import hir_view_check as views;
 import hir_state as state;
 import hir_byte_loop as byte_loop;
+import hir_slices as slices;
 import hir_shapes as shapes;
 import hir_shape_lower as shape_lower;
 import type_check as typing;
@@ -187,19 +188,21 @@ fn usize expression(ref typing::Typed input, ref v::Vec<h::Binding> bindings, re
             let usize child = expression(input,bindings,links,c,expressions,statements,blocks,edges,payload,if (e.boolean) { node.left } else { syntax::array_element(parsed,id,i) },depth + 1);
             if (child == 0) { return 0; } state::set_edge(edges,e.edge_start + i,child); i += 1;
         }
-    } else if (node.kind == 21 || node.kind == 22) {
-        e.boolean = node.kind == 22;
-        kind = .Borrow; e.left = expression(input,bindings,links,c,expressions,statements,blocks,edges,payload,node.left,depth + 1);
-    } else if (node.kind == 26) {
-        kind = .Slice; e.left = expression(input,bindings,links,c,expressions,statements,blocks,edges,payload,node.left,depth + 1);
-        let syntax::Expression bounds = syntax::expression_at(parsed,node.right);
-        if (bounds.left != 0) { e.right = expression(input,bindings,links,c,expressions,statements,blocks,edges,payload,bounds.left,depth + 1); }
-        else {
-            let usize start = bytes::len(payload); if (!bytes::append_byte(payload,48).is_ok) { return state::fail(c,3,node.start,node.end); }
-            e.right = state::push_expression(expressions,h::Expression { .kind=.Integer,.type=.Usize,.operator=.None,.start=node.start,.end=node.end,.left=0,.right=0,.alternative=0,.block=0,.binding=0,.edge_start=0,.edge_count=0,.payload_start=start,.payload_end=start + 1,.boolean=false },c);
+    } else if (node.kind == 21 || node.kind == 22 || node.kind==26) {
+        let bool borrowed=node.kind!=26;
+        let selected=if(borrowed){syntax::expression_at(parsed,node.left)}else{node};
+        if(borrowed && selected.kind!=26){
+            kind=.Borrow;e.boolean=node.kind==22;e.left=expression(input,bindings,links,c,expressions,statements,blocks,edges,payload,node.left,depth+1);
+        }else{
+            kind=.Slice;
+            let usize owner=expression(input,bindings,links,c,expressions,statements,blocks,edges,payload,selected.left,depth+1);
+            var syntax::Expression address=node;address.end=syntax::expression_at(parsed,selected.left).end;
+            let usize view=if(borrowed){slices::borrow(address,type,owner,node.kind==22,expressions,c)}else{owner};
+            let bounds=syntax::expression_at(parsed,selected.right);
+            let usize low=expression(input,bindings,links,c,expressions,statements,blocks,edges,payload,bounds.left,depth+1);
+            let usize high=expression(input,bindings,links,c,expressions,statements,blocks,edges,payload,bounds.right,depth+1);
+            e=slices::bounds(node,type,view,low,high,expressions,payload,c);
         }
-        if (bounds.right != 0) { e.alternative = expression(input,bindings,links,c,expressions,statements,blocks,edges,payload,bounds.right,depth + 1); }
-        else { e.alternative = state::push_expression(expressions,h::Expression { .kind=.Length,.type=.Usize,.operator=.None,.start=node.start,.end=node.end,.left=e.left,.right=0,.alternative=0,.block=0,.binding=0,.edge_start=0,.edge_count=0,.payload_start=0,.payload_end=0,.boolean=false },c); e.boolean = true; }
     } else if (node.kind == 9) {
         kind = .Index; e.left = expression(input,bindings,links,c,expressions,statements,blocks,edges,payload,node.left,depth + 1);
         e.right = expression(input,bindings,links,c,expressions,statements,blocks,edges,payload,node.right,depth + 1);

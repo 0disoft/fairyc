@@ -129,8 +129,9 @@ exact effect authority and failure results independently verified. The
 [candidate progress](../ops/candidate-module-progress-20261008.md)
 records the exact native evidence. Copied byte iteration now also executes
 through existing owned HIR/MIR loops, including one-time slice bounds and
-resource exits. The unchanged scanner reaches type analysis; its fixed byte-array
-field borrow remains a prerequisite for scanner integration. Project-driver
+resource exits. Fixed byte-array field subranges also preserve original storage and
+execute in both candidate profiles. The unchanged scanner reaches HIR; its
+payload selector still needs mixed-origin tracking before scanner integration. Project-driver
 and platform work also remain. These prerequisite executions do not establish
 the differential acceptance or stage1/stage2 gate above.
 

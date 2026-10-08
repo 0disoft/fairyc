@@ -798,3 +798,40 @@ project commands and Linux execution remain pending.
   scanner execution remains incomplete; item 59 still owns region allocation.
   Other iteration forms, release mutation API, Linux and self-hosting are pending.
   No public syntax, SDK/runtime ABI, dependency, database or CI change.
+
+## Fixed byte-array field subranges for scanner integration (2026-10-09)
+
+- Type analysis now recognizes a fixed-array slice inside an explicit shared or
+  exclusive borrow, retaining the named place root, exact view element type and
+  checked usize bounds. The candidate supports the scanner's
+  `ref encoded.bytes[..encoded.length]` source directly. Original AST/source
+  bytes remain owned and unchanged; the existing whole-owner checks still reject
+  mutation during bound evaluation and retained-view use.
+- The new `hir_slices` helper normalizes a projected array borrow followed by the
+  existing Slice expression. MIR address projections select original field
+  storage, never a copied array field. Default bounds and ordinary descriptor
+  slices share the same helper. No new MIR operation or runtime symbol is added.
+- Development/release each pass six programs (including two bounds traps), seven
+  rejections and twenty-four total low/optimized C executions. Generated C is
+  identical across candidates. Evidence covers nested shared fields, a view
+  returned from its borrowed parameter, pointer identity between whole and ranged
+  field views, exclusive writes visible in original storage, one-time bound
+  effects, empty end slices and named u8/i64 array subranges. Local escape,
+  whole-owner/sibling mutation, competing bound effects, immutable exclusive
+  borrows, temporary roots and wrong bound types reject.
+- One development native API test verifies retained owned HIR after parser/type
+  owners are released, then checks nested address projections and array-to-view
+  operations in independently verified MIR and successful C rendering. The byte
+  loop regression passes both final profiles with sixteen native executions.
+  A first MSVC host launch failed with 0xc0000142; retrying unchanged sources
+  completed the suite. This is recorded in the API receipt.
+- Evidence: `evidence/candidate-array-field-views-dev-20261009.json`,
+  `evidence/candidate-array-field-views-release-20261009.json`,
+  `evidence/candidate-array-field-views-api-20261009.json` and
+  `evidence/candidate-array-field-byte-loop-regression-20261009.json`.
+- The unchanged scanner passes type analysis and reaches HIR. Its payload
+  selector combines views of the input parameter and local cooked-value storage,
+  which the candidate still rejects as mixed origin (E2103). Evidence:
+  `evidence/candidate-scanner-field-view-admission-20261009.json`. Item 48's
+  complete scanner execution remains pending. Release API, Linux and self-hosting
+  are also pending. No public language, SDK/runtime ABI, dependency, DB or CI change.
