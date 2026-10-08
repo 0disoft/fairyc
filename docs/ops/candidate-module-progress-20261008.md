@@ -908,3 +908,33 @@ project commands and Linux execution remain pending.
   `evidence/candidate-scanner-reach-limit-profile-20261009.json`. Production
   diagnostic codes remain unchanged; complete scanner execution is pending.
 - No public language/API, HIR/MIR schema, runtime ABI, dependency, DB or CI change.
+
+## Indexed exclusive accesses and scanner SDK execution (2026-10-09)
+
+- Exclusive checking indexes whole-place references and every descriptor owner.
+  Each loan merges only those owner lists, in ascending expression order with
+  duplicates removed. Mixed-owner parents, alias ancestry, overlapping holds,
+  path separation and the original first-error order remain checked. Generation
+  and access reachability reuse the owned cache. The work limit is unchanged;
+  index links are bounded at 32768 and all allocation failures remain explicit.
+- Heads and the reusable merge cursor use owned vectors rather than copying
+  large fixed arrays through candidate native frames. Development API tests
+  compare indexed candidates with exhaustive owner membership/order and verify
+  work exhaustion; independent mixed-origin MIR mutation rejection also passes.
+  Development/release each pass four mixed programs and ten rejections, with
+  sixteen native executions total. Evidence:
+  `evidence/candidate-borrow-access-api-20261009.json` and
+  `evidence/candidate-borrow-access-mixed-small-{dev,release}-20261009.json`.
+- The release candidate compiles the original scanner/diagnostic/numeric/string
+  sources plus Vec, Buffer and console SDK bodies. Its generated C runs in low
+  and optimized native profiles. Tests cover lossless raw spans and EOF, input
+  versus cooked-Vec payload origins, keyword and escaped string/byte payloads,
+  unterminated-comment repair, byte-budget E0010 and zero live heap blocks after
+  releasing nested storage. Cooked literal views retain their existing private
+  hex-text encoding. Evidence: `evidence/candidate-scanner-sdk-release-20261009.json`.
+- The default development candidate passes HIR budgets but exits with Windows
+  stack overflow (0xC00000FD) during scanner C compilation. A diagnostic copy
+  with a larger PE stack reserve completes that compilation; it is not an
+  accepted candidate or native-execution result. Development scanner execution,
+  full differential coverage, Linux and stage1/stage2 remain pending.
+- No public language/API, HIR/MIR schema, runtime ABI, dependency, DB or CI change.

@@ -1,0 +1,36 @@
+{
+  "schema": "fairyc.candidate-borrow-access-api/v1",
+  "compiler": ".cache/candidate-tagged/compiler-build-240s.exe",
+  "argv": [
+    "test",
+    "--native",
+    "--json",
+    "--file",
+    "tests/hir_borrow_access.fy",
+    "--file",
+    "tests/mixed_origins.fy",
+    "--locked"
+  ],
+  "exit": 0,
+  "profile": "development",
+  "tests": [
+    {
+      "identity": "tests::hir_borrow_access::owner_lists_preserve_exhaustive_order_and_mixed_membership",
+      "outcome": "passed"
+    },
+    {
+      "identity": "tests::mixed_origins::independent_mir_retains_union_and_rejects_forged_escape",
+      "outcome": "passed"
+    }
+  ],
+  "count": 2,
+  "passed": 2,
+  "failed": 0,
+  "sourceHashes": {
+    "examples\\lexer_candidate\\src\\hir_borrow_access.fy": "e28a20f14c295641c52a61ceb42a3959dc65faade58ed017a85f9d51a26d6611",
+    "examples\\lexer_candidate\\src\\hir_mutable_check.fy": "9173e372ffe689d636727bf97d61c3174673d968899ec8438179c9cb9a8b6106",
+    "examples\\lexer_candidate\\src\\hir_view_check.fy": "e5c06d5a0e9aeff66311b98668f08e60603a9d039f1c82abafc13545eea5483a"
+  },
+  "releaseApiValidated": false,
+  "linuxValidated": false
+}

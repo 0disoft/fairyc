@@ -131,10 +131,12 @@ records the exact native evidence. Copied byte iteration now also executes
 through existing owned HIR/MIR loops, including one-time slice bounds and
 resource exits. Fixed byte-array field subranges also preserve original storage and
 execute in both candidate profiles. Local mixed-origin payload selections now retain every possible owner
-in HIR and independently recomputed MIR. The unchanged scanner still reaches
-a HIR exclusive-access analysis-limit rejection before complete scanner execution.
-Indexed reachability and finalized-origin caching pass the prior initial-origin
-limit without raising the work budget. Project-driver
+in HIR and independently recomputed MIR. Indexed reachability, finalized-origin
+caching and owner-indexed exclusive access checks pass the scanner's prior HIR
+work limits without increasing the budget. The release candidate compiles original
+scanner and SDK bodies whose Token/cooked/diagnostic storage and cleanup run in
+both native C profiles. Development scanner compilation still overflows the default
+Windows stack; broader differential acceptance and project-driver
 and platform work also remain. These prerequisite executions do not establish
 the differential acceptance or stage1/stage2 gate above.
 

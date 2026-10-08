@@ -235,5 +235,5 @@ pub fn h::Problem check(ref h::Program p) {
     i=1;while(i<=h::expression_count(p) && c.problem.code==0){let moved=h::expression_at(p,i);if(h::expression_code(moved.kind)==24){var usize j=1;while(j<=h::expression_count(p)){let loan=h::expression_at(p,j);if(byte_view(h::type_code(loan.type)) && owners::contains(ref sets,ref members,*v::at<usize>(ref origins,j),moved.binding,ref mut c.work)){let usize begin=first(p,ref mut c,ref mut sets,ref mut members,ref mut cache,j,0);var usize end=held_end(p,j,loan,ref mut c);var usize local=1;while(local<=h::binding_count(p)){if(c.initial[local]==j && c.last[local]>end){end=c.last[local];}local+=1;}if(begin<moved.end && moved.start<end && cached::reachable(ref cache,i,false,ref mut c.work) && !paths::separate(p,begin,moved.start,moved.end,ref mut c.work) && !paths::separate(p,end-1,moved.start,moved.end,ref mut c.work)){discard fail(ref mut c,2101,moved.start,moved.end);}}j+=1;}}i+=1;}
     if(c.work>1048576){return h::Problem{.code=2,.start=0,.end=0};}
     if (c.problem.code != 0) { return c.problem; }
-    return exclusive::check(p,ref c.initial[..],ref c.last[..],ref c.summary[..],ref origins,ref sets,ref members);
+    return exclusive::check(p,ref c.initial[..],ref c.last[..],ref c.summary[..],ref origins,ref sets,ref members,ref cache);
 }

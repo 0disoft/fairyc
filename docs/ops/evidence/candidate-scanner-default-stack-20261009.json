@@ -1,0 +1,19 @@
+{
+  "exit": 3221225725,
+  "stderr": "",
+  "stdoutBytes": 0,
+  "seconds": 42.92,
+  "schema": "fairyc.candidate-scanner-default-stack/v1",
+  "image": {
+    "path": "examples\\lexer_candidate\\build\\borrow-access-small-dev.exe",
+    "sha256": "f216e8232a997376375f022e04b6f39d20194723bd6ebb914bc57fffa16a6b2d"
+  },
+  "argv": [
+    "examples\\lexer_candidate\\build\\borrow-access-small-dev.exe",
+    "--c-modules-file",
+    ".cache/candidate-scanner/sources.txt"
+  ],
+  "exception": "0xC00000FD",
+  "defaultStackReserveBytes": 1048576,
+  "developmentScannerValidated": false
+}

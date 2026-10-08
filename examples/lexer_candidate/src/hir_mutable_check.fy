@@ -1,5 +1,7 @@
 module hir_mutable_check;
 import hir_borrow_paths as paths;
+import hir_borrow_cache as cached;
+import hir_borrow_access as access;
 import borrow_shapes as borrows;
 import tagged_types as tagged;
 import reference_types as refs;
@@ -27,7 +29,7 @@ fn usize merge(ref mut Context c, ref mut v::Vec<Slot> slots, usize a, usize b, 
     if (!v::push<Slot>(slots,Slot { .generation=id,.parent=a,.alternate=b,.start,.end,.receiver=0,.fresh=true,.argument=false,.mutable }).is_ok) { return fail(c,3,start,end); }
     return id;
 }
-fn usize generation(ref h::Program p, ref mut Context c, ref mut v::Vec<Slot> slots, ref usize[] initial, ref usize[] summaries, usize id, usize depth) {
+fn usize generation(ref h::Program p, ref mut Context c, ref mut v::Vec<Slot> slots, ref v::Vec<cached::Slot> cache, ref usize[] initial, ref usize[] summaries, usize id, usize depth) {
     if (id == 0 || c.problem.code != 0) { return 0; }
     let e = h::expression_at(p,id); let u32 kind = h::expression_code(e.kind);
     let bool mutable = borrows::mutable(h::type_code(e.type));
@@ -36,21 +38,21 @@ fn usize generation(ref h::Program p, ref mut Context c, ref mut v::Vec<Slot> sl
     if(kind==18 && e.edge_count==0){return 0;}
     if (depth >= 64 || !charge(c)) { return fail(c,2,e.start,e.end); }
     let Slot old = *v::at<Slot>(slots,id); if (old.generation != 0) { return old.generation; }
-    if(!paths::reachable(p,e.start,e.end,ref mut c.work)){return 0;}
+    if(!cached::reachable(cache,id,false,ref mut c.work)){return 0;}
     var usize base = 0; var usize parent = 0; var usize alternate = 0; var usize receiver = old.receiver;
     var bool fresh = old.fresh; var usize start = e.start;
-    if(kind==18){receiver=h::edge_at(p,e.edge_start);base=generation(p,c,slots,initial,summaries,receiver,depth+1);if(base==0){return 0;}}
-    else if(kind==22 || kind==11){receiver=e.left;base=generation(p,c,slots,initial,summaries,receiver,depth+1);}
-    else if (kind == 16) { base = id; fresh = true; receiver = e.left;var usize root=e.left;var usize steps=0;while(steps<64 && (h::expression_code(h::expression_at(p,root).kind)==10 || h::expression_code(h::expression_at(p,root).kind)==13 || h::expression_code(h::expression_at(p,root).kind)==4 && h::operator_code(h::expression_at(p,root).operator)==5)){root=h::expression_at(p,root).left;steps+=1;}if(refs::valid(h::type_code(h::expression_at(p,root).type))){parent=generation(p,c,slots,initial,summaries,root,depth+1);} }
-    else if(kind==25 || kind==29 || kind==30){parent=generation(p,c,slots,initial,summaries,e.left,depth+1);base=id;fresh=true;receiver=e.left;start=e.end;}
-    else if (kind == 17) { parent = generation(p,c,slots,initial,summaries,e.left,depth+1); base = if (mutable) { id } else { parent }; fresh = mutable; receiver = e.left; start = e.end; }
+    if(kind==18){receiver=h::edge_at(p,e.edge_start);base=generation(p,c,slots,cache,initial,summaries,receiver,depth+1);if(base==0){return 0;}}
+    else if(kind==22 || kind==11){receiver=e.left;base=generation(p,c,slots,cache,initial,summaries,receiver,depth+1);}
+    else if (kind == 16) { base = id; fresh = true; receiver = e.left;var usize root=e.left;var usize steps=0;while(steps<64 && (h::expression_code(h::expression_at(p,root).kind)==10 || h::expression_code(h::expression_at(p,root).kind)==13 || h::expression_code(h::expression_at(p,root).kind)==4 && h::operator_code(h::expression_at(p,root).operator)==5)){root=h::expression_at(p,root).left;steps+=1;}if(refs::valid(h::type_code(h::expression_at(p,root).type))){parent=generation(p,c,slots,cache,initial,summaries,root,depth+1);} }
+    else if(kind==25 || kind==29 || kind==30){parent=generation(p,c,slots,cache,initial,summaries,e.left,depth+1);base=id;fresh=true;receiver=e.left;start=e.end;}
+    else if (kind == 17) { parent = generation(p,c,slots,cache,initial,summaries,e.left,depth+1); base = if (mutable) { id } else { parent }; fresh = mutable; receiver = e.left; start = e.end; }
     else if (kind == 3) {
         let b = h::binding_at(p,e.binding);
-        base = if (h::binding_code(b.kind) == 2) { h::expression_count(p) + e.binding } else { generation(p,c,slots,initial,summaries,initial[e.binding],depth+1) };
-    } else if ((kind == 7 || kind==20)) { receiver = h::block_at(p,e.block).tail; base = generation(p,c,slots,initial,summaries,receiver,depth+1); }
+        base = if (h::binding_code(b.kind) == 2) { h::expression_count(p) + e.binding } else { generation(p,c,slots,cache,initial,summaries,initial[e.binding],depth+1) };
+    } else if ((kind == 7 || kind==20)) { receiver = h::block_at(p,e.block).tail; base = generation(p,c,slots,cache,initial,summaries,receiver,depth+1); }
     else if (kind == 8) {
-        let usize yes = generation(p,c,slots,initial,summaries,h::block_at(p,e.block).tail,depth+1);
-        let usize no = generation(p,c,slots,initial,summaries,e.alternative,depth+1);
+        let usize yes = generation(p,c,slots,cache,initial,summaries,h::block_at(p,e.block).tail,depth+1);
+        let usize no = generation(p,c,slots,cache,initial,summaries,e.alternative,depth+1);
         if (yes == no || yes == 0 || no == 0) { base = if (yes != 0) { yes } else { no }; }
         else { base=id; parent=yes; alternate=no; fresh=true; receiver=0; start=e.end; }
     } else if (kind == 19) {
@@ -59,7 +61,7 @@ fn usize generation(ref h::Program p, ref mut Context c, ref mut v::Vec<Slot> sl
             let arm=h::expression_at(p,h::edge_at(p,e.edge_start+i));
             let usize tail=h::block_at(p,arm.block).tail;
             if (tail != 0) {
-                let usize value=generation(p,c,slots,initial,summaries,tail,depth+1);
+                let usize value=generation(p,c,slots,cache,initial,summaries,tail,depth+1);
                 base=merge(c,slots,base,value,e.start,e.end,mutable);
             }
             i+=1;
@@ -70,7 +72,7 @@ fn usize generation(ref h::Program p, ref mut Context c, ref mut v::Vec<Slot> sl
         while (i < h::function_count(p)) {
             let f = h::function_at(p,i);
             if (f.binding == e.binding) { var usize j = 0; while (j < f.parameter_count) {
-                if (h::edge_at(p,f.parameter_start+j) == returned) { receiver = h::edge_at(p,e.edge_start+j); parent = generation(p,c,slots,initial,summaries,receiver,depth+1); }
+                if (h::edge_at(p,f.parameter_start+j) == returned) { receiver = h::edge_at(p,e.edge_start+j); parent = generation(p,c,slots,cache,initial,summaries,receiver,depth+1); }
                 j += 1;
             } } i += 1;
         }
@@ -112,7 +114,7 @@ fn usize held_end(ref h::Program p, usize id) {
     } return end;
 }
 fn bool competing(ref h::Program p,usize id){let e=h::expression_at(p,id);var usize i=1;while(i<=h::statement_count(p)){let s=h::statement_at(p,i);if(h::statement_code(s.kind)==3){let t=h::expression_at(p,s.target);if(e.start>=t.start && e.end<=t.end){return true;}}i+=1;}i=1;while(i<=h::expression_count(p)){let x=h::expression_at(p,i);if(h::expression_code(x.kind)==6){var usize j=0;while(j<x.edge_count){let a=h::expression_at(p,h::edge_at(p,x.edge_start+j));if((borrows::mutable(h::type_code(a.type))) && e.start>=a.start && e.end<=a.end){return true;}j+=1;}}i+=1;}return false;}
-pub fn h::Problem check(ref h::Program p, ref usize[] initial, ref usize[] last, ref usize[] summaries, ref v::Vec<usize> origins,ref v::Vec<owners::Entry> sets,ref v::Vec<usize> members) {
+pub fn h::Problem check(ref h::Program p, ref usize[] initial, ref usize[] last, ref usize[] summaries, ref v::Vec<usize> origins,ref v::Vec<owners::Entry> sets,ref v::Vec<usize> members,ref v::Vec<cached::Slot> cache) {
     var bool needed = false; var usize i = 1;
     while (i <= h::expression_count(p)) { needed = needed || borrows::mutable(h::type_code(h::expression_at(p,i).type)); i += 1; }
     if (!needed) { return h::Problem { .code=0,.start=0,.end=0 }; }
@@ -131,7 +133,7 @@ pub fn h::Problem check(ref h::Program p, ref usize[] initial, ref usize[] last,
     }
     i = 1; while (i <= h::expression_count(p)) {
         let e = h::expression_at(p,i); let u32 type = h::type_code(e.type);
-if (borrows::count(type)!=0) { discard generation(p,ref mut c,ref mut slots,initial,summaries,i,0); }
+if (borrows::count(type)!=0) { discard generation(p,ref mut c,ref mut slots,cache,initial,summaries,i,0); }
         if (c.problem.code != 0) { return c.problem; } i += 1;
     }
     // Every alias and direct temporary consumer extends its actual generation.
@@ -142,7 +144,7 @@ if (borrows::count(type)!=0) { discard generation(p,ref mut c,ref mut slots,init
     }
     i = 1; while (i <= h::binding_count(p)) {
         if (initial[i] != 0 && (borrows::count(h::type_code(h::binding_at(p,i).type))!=0)) {
-            let usize gen = generation(p,ref mut c,ref mut slots,initial,summaries,initial[i],0);
+            let usize gen = generation(p,ref mut c,ref mut slots,cache,initial,summaries,initial[i],0);
             if (gen != 0) { let ref mut Slot g = v::at_mut<Slot>(ref mut slots,gen); if (last[i] > g.end) { g.end=last[i]; } }
         } i += 1;
     }
@@ -155,10 +157,13 @@ if (borrows::count(type)!=0) { discard generation(p,ref mut c,ref mut slots,init
         if (s.fresh && s.alternate != 0) { let ref mut Slot parent = v::at_mut<Slot>(ref mut slots,s.alternate); if (s.end > parent.end) { parent.end=s.end; changed=true; } }
         i += 1;
     } }
+    let index=switch(access::create(p,origins,sets,members,ref mut c.work)){case .ok(value):{value}case .err(code):{return h::Problem{.code,.start=0,.end=0};}};
+    var v::Vec<usize> cursor=v::empty<usize>();
     i = 1; while (i <= h::expression_count(p)) {
         let loan = *v::at<Slot>(ref slots,i); let usize owner = *v::at<usize>(origins,i);
         if (loan.fresh && owner != 0) {
-            var usize j = 1; while (j <= h::expression_count(p)) {
+            let u32 code=access::begin(ref index,sets,members,owner,ref mut cursor,ref mut c.work);if(code!=0){return h::Problem{.code,.start=0,.end=0};}var usize j=access::next(ref index,ref mut cursor,ref mut c.work);
+            while(j!=0){
                 if (!charge(ref mut c)) { return h::Problem { .code=2,.start=0,.end=0 }; }
                 let other = *v::at<Slot>(ref slots,j);
                 let e = h::expression_at(p,j);
@@ -169,11 +174,11 @@ if (borrows::count(type)!=0) { discard generation(p,ref mut c,ref mut slots,init
                     let bool creating = if (loan.receiver != 0) { let receiver = h::expression_at(p,loan.receiver); e.start >= receiver.start && e.end <= receiver.end } else { false };
                     let u32 type = h::type_code(e.type);
                     let bool access = owners::contains(sets,members,owner,e.binding,ref mut c.work) && loan.mutable || borrows::mutable(type) && owners::overlap(sets,members,*v::at<usize>(origins,j),owner,ref mut c.work) && !ancestor(ref slots,i,other.generation,0,ref mut c.work) && (loan.mutable || competing(p,j));
-                    if (!creating && access && paths::reachable(p,e.start,e.end,ref mut c.work) && !paths::separate(p,loan.start,e.start,e.end,ref mut c.work) && !paths::separate(p,loan.end-1,e.start,e.end,ref mut c.work)) {
+                    if (!creating && access && cached::reachable(cache,j,false,ref mut c.work) && !paths::separate(p,loan.start,e.start,e.end,ref mut c.work) && !paths::separate(p,loan.end-1,e.start,e.end,ref mut c.work)) {
                         return h::Problem { .code=2101,.start=e.start,.end=e.end };
                     }
                 }
-                j += 1;
+                j=access::next(ref index,ref mut cursor,ref mut c.work);
             }
         } i += 1;
     }
