@@ -1,6 +1,7 @@
 module file_cli;
 import candidate_limits as limits;
 import file_source as files;
+import file_tokens as tokens;
 import scanner as scanner;
 import declaration_output as declarations;
 import name_cli as names;
@@ -36,6 +37,7 @@ pub fn i32 run() {
         return if (io::write("usage: lexer-candidate --tokens-file <path>\n       lexer-candidate --declarations-file <path>\n       lexer-candidate --check-names-file <path>\n       lexer-candidate --bindings-file <path>\n       lexer-candidate --check-types-file <path>\n       lexer-candidate --check-modules-file <manifest>\n       lexer-candidate --c-modules-file <manifest>\n       lexer-candidate --hir-file <path>\n       lexer-candidate --mir-file <path>\n       lexer-candidate --c-file <path>\n       lexer-candidate --help\nNo arguments: private binary stdin protocol.\n").is_ok) { 0 }
             else { error("error: stdout write failed\n") };
     }
+    let bool token_mode = bytes::equal(flag,b"--tokens-file");
     let bool binding_mode = bytes::equal(flag,b"--bindings-file");
     let bool type_mode = bytes::equal(flag,b"--check-types-file");
     let bool module_mode = bytes::equal(flag,b"--check-modules-file");
@@ -51,6 +53,7 @@ pub fn i32 run() {
     };
     if (length > 4095) { return error("error: file path limit (4095 UTF-8 bytes)\n"); }
     let ref u8[] path = bytes::view(ref argument)[..length];
+    if (token_mode) { return tokens::run(path); }
     if (module_mode) { return modules::run(path); }
     if (program_mode) { return modules::emit(path); }
     let bytes::Buffer input = switch(load(path)) {
@@ -70,11 +73,5 @@ pub fn i32 run() {
     if (type_mode) { return typing::run(stream,path); }
     if (name_mode || binding_mode) { return names::run(stream, path, binding_mode); }
     if (declaration_mode) { return declarations::run(stream, path); }
-    var bytes::Buffer result = bytes::empty();
-    let u32 status = output::tokens(ref stream, ref mut result);
-    if (status != 0) { return error(if (status == 4) { "error: output limit (1048576 bytes)\n" }
-        else if (status == 5) { "error: invalid token coverage\n" } else { "error: buffer allocation failed\n" }); }
-    let ref u8[] data = bytes::view(ref result);
-    return if (switch(io::write_bytes(data)) { case .ok(count): { count == data.len } case .err(_): { false } }) { 0 }
-        else { error("error: stdout write failed\n") };
+    return error("error: invalid file mode\n");
 }

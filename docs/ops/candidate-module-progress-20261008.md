@@ -1087,3 +1087,30 @@ project commands and Linux execution remain pending.
   candidate-emitted CLI dispatch, broader project commands, Linux and stage1/2
   remain. No source/work/depth/stack limits increased; no public language, SDK,
   runtime, DB, dependency or CI workflow change.
+
+
+## File token route and measured admission blocker (item 50, 2026-10-09)
+
+- Factored the original token-file behavior into `file_tokens.fy`, independent
+  of parser/type/module command dispatch, and routed `file_cli::run` to it. The
+  token mode is captured before the argument buffer is reused for the path.
+  Stage0 check, both builds and the Go CLI dependency check passed. Fourteen
+  existing file/help/module command cases have identical stdout/stderr/exit
+  across prior development, new development and new release images. Evidence:
+  `evidence/candidate-file-token-route-regression-20261009.json`.
+- The authored route is ready for direct candidate-C observation, but compiling
+  it with all original required SDK modules rejects before producing any C:
+  module AST join phase 2 code 10. The failed probe is retained, with
+  `passed=false`, in `evidence/candidate-file-tokens-dev-20261009.json`.
+- An isolated native Fairy probe measured the exact original parser arenas:
+  1244 entries, 2720 types, 139 fields, 395 declarations and 10094 expressions.
+  It verified join rejection with the unchanged 1024-entry bound. The other
+  measured arenas remain within their existing limits. Evidence:
+  `evidence/candidate-file-token-join-budget-20261009.json`.
+- Item 50 remains open. The next prerequisite is authenticated-SDK AST
+  compaction/reachability, retaining original source bytes, spans, full user
+  validation and fail-closed budgets. Raising the AST or analysis limits is not
+  part of this unit. The opt-in token observer retains exact prior authored CLI
+  stream/status expectations; it has no successful native token-route results
+  yet. The budget probe uses native JSON capture and explicit manifest/root
+  arguments, and is not a default corpus test.

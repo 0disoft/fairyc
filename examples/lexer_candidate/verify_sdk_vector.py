@@ -12,6 +12,7 @@ SDK = REPO / "internal/sdkstdlib/sources/optional/std/vec.fy"
 DEPENDENCIES = ()
 SUITE = "vector-storage"
 TRAPS = {}
+VALUES = {}  # case -> exact standalone exit/result; default remains 7
 STREAMS = {}  # case -> (stdin, exact stdout, exact stderr)
 CASE_OBSERVER = Path(__file__)
 RUNTIME_NAMES = ("stage0_system_heap.c", "stage0_vector_storage.c")
@@ -223,7 +224,8 @@ def main():
         assert len(native) == 2 * len(jobs), native
         expected = {f"{name}-{index}": TRAPS.get(name, 0) for name in CASES for index in range(len(images))}
         streams = {f"{name}-{index}": STREAMS.get(name, ("", "", ""))[1:] for name in CASES for index in range(len(images))}
-        assert all(not r.get("error") and r["trap"] == expected[r["name"]] and (r["trap"] != 0 or r["value"] == 7) and (r["stdout"], r["stderr"]) == streams[r["name"]] for r in native), native
+        values = {f"{name}-{index}": VALUES.get(name, 7) for name in CASES for index in range(len(images))}
+        assert all(not r.get("error") and r["trap"] == expected[r["name"]] and (r["trap"] != 0 or r["value"] == values[r["name"]]) and (r["stdout"], r["stderr"]) == streams[r["name"]] for r in native), native
         passed = True
     finally:
         receipt.parent.mkdir(parents=True, exist_ok=True)
