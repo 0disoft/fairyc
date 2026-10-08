@@ -127,8 +127,11 @@ allocation failures and ownership cleanup. Authenticated `std::io` console
 output/input bodies also execute against the original Windows runtime, with
 exact effect authority and failure results independently verified. The
 [candidate progress](../ops/candidate-module-progress-20261008.md)
-records the exact native evidence and remaining scanner integration,
-project-driver and platform work. These prerequisite executions do not establish
+records the exact native evidence. Copied byte iteration now also executes
+through existing owned HIR/MIR loops, including one-time slice bounds and
+resource exits. The unchanged scanner reaches type analysis; its fixed byte-array
+field borrow remains a prerequisite for scanner integration. Project-driver
+and platform work also remain. These prerequisite executions do not establish
 the differential acceptance or stage1/stage2 gate above.
 
 `stage0` is the current Go compiler built by the supported Go toolchain.

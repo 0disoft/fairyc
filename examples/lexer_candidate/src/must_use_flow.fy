@@ -35,7 +35,7 @@ fn void expression(ref names::Resolved resolved,ref v::Vec<state::Slot> types,re
 fn void statement(ref names::Resolved resolved,ref v::Vec<state::Slot> types,ref mut Context c,usize id,usize depth){
     if(id==0 || c.problem.code!=0){return;}let p=names::parsed(resolved);let s=syntax::statement_at(p,id);
     if(depth>=64){fail(c,10,s.start,s.end);return;}
-    if(s.kind==8 || s.kind==14){if(s.kind==14){let header=syntax::statement_at(p,s.second);statement(resolved,types,c,header.first,depth+1);statement(resolved,types,c,header.second,depth+1);}expression(resolved,types,c,s.expression,true,depth+1);block(resolved,types,c,s.first,false,depth+1);return;}
+    if(s.kind==8 || s.kind==14 || s.kind==18){if(s.kind==14){let header=syntax::statement_at(p,s.second);statement(resolved,types,c,header.first,depth+1);statement(resolved,types,c,header.second,depth+1);}expression(resolved,types,c,s.expression,true,depth+1);block(resolved,types,c,s.first,false,depth+1);return;}
     if(s.kind==4){expression(resolved,types,c,s.target,true,depth+1);}
     expression(resolved,types,c,s.expression,s.kind!=6,depth+1);
 }

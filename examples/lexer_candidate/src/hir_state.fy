@@ -13,7 +13,7 @@ import std::bytes as bytes;
 import std::vec as v;
 
 // Temporary input-to-semantic links, discarded before publication.
-pub struct Link { usize use; usize entry; usize function; }
+pub struct Link { usize use; usize entry; usize function; usize iteration_view; usize iteration_index; }
 pub struct Context { h::Problem problem; usize owner; usize next_scope; usize loop_target; usize scope_count; usize[128] scopes; }
 pub fn Context empty() { return Context { .problem = h::Problem { .code = 0, .start = 0, .end = 0 }, .owner = 0, .next_scope = 1, .loop_target = 0, .scope_count = 0, .scopes = [0;128] }; }
 pub fn usize fail(ref mut Context c, u32 code, usize start, usize end) { if (c.problem.code == 0) { c.problem = h::Problem { .code, .start, .end }; } return 0; }
@@ -21,7 +21,7 @@ pub fn usize scope(ref Context c) { return if (c.scope_count == 0) { 0 } else { 
 pub fn bool enter(ref mut Context c) { if (c.scope_count >= 128) { discard fail(c,2,0,0); return false; } let usize slot = c.scope_count; let usize next = c.next_scope; c.scopes[slot] = next; c.scope_count += 1; c.next_scope += 1; return true; }
 pub fn bool visible(ref Context c, h::Binding b) { if (h::binding_code(b.kind) == h::binding_code(.Function) || h::binding_code(b.kind) == h::binding_code(.External) || h::binding_code(b.kind)==11) { return true; } if (b.owner != c.owner) { return false; } var usize i = 0; while (i < c.scope_count) { if (c.scopes[i] == b.scope) { return true; } i += 1; } return false; }
 pub fn h::Type type(u32 code) { return if (code == 1) { .I32 } else if (code == 2) { .I64 } else if (code == 3) { .U8 } else if (code == 4) { .U32 } else if (code == 5) { .Usize } else if (code == 6) { .Bool } else if (code == 7) { .Void } else if (code == 8) { .Callable } else if (code == 9) { .Text } else if (code == 10) { .Bytes } else if (code == 11) { .MutableBytes } else if(code==12){.CStr} else if(views::extended(code)){.ScalarView{.id=code}}else if(c_types::valid(code)){.CScalar{.id=code}}else if(pointers::valid(code)){.Pointer{.id=code}}else if(refs::valid(code)){.Borrowed{.id=code}}else if(resources::valid(code)){.Resource{.id=code}} else if (code >= 256 && code <= 767) { .Nominal { .id = code } } else if(tagged::option(code)){ .Option { .id = code } } else if(tagged::result(code)){ .Result { .id = code } } else if(enums::valid(code)){ .Enumeration { .id = code } } else if (arrays::valid(code)) { .Array { .id = code } } else { .Invalid }; }
-pub fn h::BindingKind binding_kind(u32 code) { return if (code == 1) { .Function } else if (code == 2) { .Parameter } else if (code == 3) { .Let } else if (code == 4) { .Var } else if (code == 6) { .Struct } else if (code == 7) { .Enum } else if(code==9){.Resource}else if(code==10){.DropReceiver} else if(code==11){.Foreign}else { .External }; }
+pub fn h::BindingKind binding_kind(u32 code) { return if (code == 1) { .Function } else if (code == 2) { .Parameter } else if (code == 3 || code==12) { .Let } else if (code == 4) { .Var } else if (code == 6) { .Struct } else if (code == 7) { .Enum } else if(code==9){.Resource}else if(code==10){.DropReceiver} else if(code==11){.Foreign}else { .External }; }
 pub fn h::Operator operator(ref u8[] raw) {
     if (bytes::equal(raw,b"+" ) || bytes::equal(raw,b"+=")) { return .Plus; }
     if (bytes::equal(raw,b"-" ) || bytes::equal(raw,b"-=")) { return .Minus; }

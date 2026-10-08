@@ -11,6 +11,7 @@ import effect_declarations as effects;
 import tagged_types as tagged;
 import hir_view_check as views;
 import hir_state as state;
+import hir_byte_loop as byte_loop;
 import hir_shapes as shapes;
 import hir_shape_lower as shape_lower;
 import type_check as typing;
@@ -34,12 +35,12 @@ fn bool prepare(ref typing::Typed input, usize module_index, ref mut v::Vec<h::B
     if(synthetic>1152){discard state::fail(c,2,0,syntax::source_view(parsed).len);return false;}
     let usize length = if (syntax::expression_count(parsed) > 1024) { syntax::expression_count(parsed) } else { 1024 };
     var usize i = 0;
-    while (i < length) { if (!v::push<state::Link>(links,state::Link { .use = 0, .entry = 0, .function = 0 }).is_ok) { discard state::fail(c,3,0,0); return false; } i += 1; }
+    while (i < length) { if (!v::push<state::Link>(links,state::Link { .use = 0, .entry = 0, .function = 0,.iteration_view=0,.iteration_index=0 }).is_ok) { discard state::fail(c,3,0,0); return false; } i += 1; }
     i = 1;
     while (i <= names::symbol_count(resolved)) {
         let names::Symbol s = names::symbol_at(resolved,i);
         let h::Type type = state::type(typing::symbol_type(input,i));
-        if (s.kind < 1 || s.kind > 11 || h::type_code(type) == h::type_code(.Invalid) || h::type_code(type) == h::type_code(.Callable) || s.start > s.end || s.end > syntax::source_view(parsed).len || s.owner > names::symbol_count(resolved)) { discard state::fail(c,4,s.start,s.end); return false; }
+        if (s.kind < 1 || s.kind > 12 || h::type_code(type) == h::type_code(.Invalid) || h::type_code(type) == h::type_code(.Callable) || s.start > s.end || s.end > syntax::source_view(parsed).len || s.owner > names::symbol_count(resolved)) { discard state::fail(c,4,s.start,s.end); return false; }
         var usize target_module = module_index; var usize declaration = s.declaration;
         if (s.kind == 5) { let signature = names::external_signature(resolved,i); target_module = signature.module_index; declaration = signature.declaration; }
         let usize owner=if(s.owner!=0 && names::symbol_at(resolved,s.owner).kind==9){dropping[names::symbol_at(resolved,s.owner).declaration]}else{s.owner};
@@ -51,6 +52,7 @@ fn bool prepare(ref typing::Typed input, usize module_index, ref mut v::Vec<h::B
             if (s.entry > length || state::entry(links,s.entry) != 0) { discard state::fail(c,4,s.start,s.end); return false; }
             let ref mut state::Link link = v::at_mut<state::Link>(links,s.entry - 1); link.entry = i;
         }
+        if(s.kind==12){if(s.declaration==0 || s.declaration>length || state::use(links,s.declaration)!=0){discard state::fail(c,4,s.start,s.end);return false;}let ref mut state::Link link=v::at_mut<state::Link>(links,s.declaration-1);link.use=i;}
         if (s.kind == 1) {
             if (s.declaration == 0 || s.declaration > syntax::declaration_count(parsed) || state::function(links,s.declaration) != 0 || s.owner != 0 || s.scope != 0) { discard state::fail(c,4,s.start,s.end); return false; }
             let ref mut state::Link link = v::at_mut<state::Link>(links,s.declaration - 1); link.function = i;
@@ -106,7 +108,7 @@ fn bool prepare(ref typing::Typed input, usize module_index, ref mut v::Vec<h::B
         if (use.expression == 0 || use.expression > syntax::expression_count(parsed) || use.symbol == 0 || use.symbol > v::len<h::Binding>(bindings) || state::use(links,use.expression) != 0) { discard state::fail(c,4,use.start,use.end); return false; }
         let ref mut state::Link link = v::at_mut<state::Link>(links,use.expression - 1); link.use = use.symbol; i += 1;
     }
-    return true;
+    return byte_loop::prepare(input,bindings,links,c);
 }
 
 fn usize expression(ref typing::Typed input, ref v::Vec<h::Binding> bindings, ref v::Vec<state::Link> links, ref mut state::Context c, ref mut v::Vec<h::Expression> expressions, ref mut v::Vec<h::Statement> statements, ref mut v::Vec<h::Block> blocks, ref mut v::Vec<usize> edges, ref mut bytes::Buffer payload, usize id, usize depth) {
@@ -264,7 +266,15 @@ fn usize statement(ref typing::Typed input, ref v::Vec<h::Binding> bindings, ref
     let h::Operator operator = if (source.kind == 4) { state::operator(syntax::assignment_operator(parsed,id)) } else { .None };
     var h::Statement s = h::Statement { .kind, .start = source.start, .end = source.end, .scope = state::scope(c), .expression = 0, .target = 0, .binding = 0, .operator, .body = 0, .initial = 0, .post = 0, .loop_target = 0 };
     let usize result = state::push_statement(statements,s,c); if (result == 0) { return 0; }
-    if (source.kind == 2) {
+    if(source.kind==18){
+        let usize parent_scope=state::scope(c);if(!state::enter(c)){return 0;}
+        let usize view=expression(input,bindings,links,c,expressions,statements,blocks,edges,payload,source.expression,depth+1);
+        let built=byte_loop::start(source,syntax::statement_at(parsed,source.first).start,view,links,c,expressions,statements,payload);if(built.loop==0){return 0;}
+        let usize old_loop=c.loop_target;c.loop_target=built.loop;
+        let usize body=block(input,bindings,links,c,expressions,statements,blocks,edges,payload,source.first,depth+1);c.loop_target=old_loop;
+        let usize wrapper=byte_loop::finish(source,built,body,parent_scope,links,c,expressions,statements,blocks,edges);
+        c.scope_count-=1;if(wrapper==0){return 0;}s.expression=wrapper;
+    }else if (source.kind == 2) {
          s.binding = state::entry(links,source.entry);
         if (s.binding == 0) { return state::fail(c,4,s.start,s.end); }
         let h::Binding b = *v::at<h::Binding>(bindings,s.binding - 1);

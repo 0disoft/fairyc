@@ -463,6 +463,16 @@ fn state::Value statement(ref names::Resolved resolved, ref mut v::Vec<state::Sl
         }
         return value(7,false);
     }
+    if(item.kind==18){
+        let u32 item_type=nominal::resolve(parsed,item.second);let view=expression(resolved,tables,problem,item.expression,0,result_type,depth+1,loop_depth);
+        if(problem.code!=0){return view;}if(item_type!=3 || view.type!=10){return error(problem,11,item.start,item.end,3,item_type);}
+        var usize root=item.expression;if(syntax::expression_at(parsed,root).kind==26){root=syntax::expression_at(parsed,root).left;}
+        var usize steps=0;while(syntax::expression_at(parsed,root).kind==3 && steps<64){root=syntax::expression_at(parsed,root).left;steps+=1;}
+        if(syntax::expression_at(parsed,root).kind!=2){return error(problem,11,item.start,item.end,10,view.type);}
+        let usize binding=state::uses(tables,root-1);if(binding==0 || (names::symbol_at(resolved,binding).kind!=2 && names::symbol_at(resolved,binding).kind!=3)){return error(problem,11,item.start,item.end,10,view.type);}
+        state::set_expressions(tables,item.target-1,3);
+        let body=block(resolved,tables,problem,item.first,7,result_type,depth+1,loop_depth+1);return if(problem.code!=0){body}else{value(7,false)};
+    }
     if (item.kind == 14) {
         let syntax::Statement header = syntax::statement_at(parsed,item.second);
         let state::Value initial = statement(resolved,tables,problem,header.first,result_type,depth + 1,loop_depth);

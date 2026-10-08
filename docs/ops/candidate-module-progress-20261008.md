@@ -764,3 +764,37 @@ project commands and Linux execution remain pending.
   validation is deferred to the next scanner/byte-loop unit to avoid rebuilding
   the same compiler twice. Linux and self-hosting are pending. No SDK/runtime ABI,
   dependency, database or CI change.
+
+## Copied byte iteration for scanner integration (2026-10-09)
+
+- The candidate admits existing copied `u8` for-in over a named immutable shared
+  byte descriptor or its direct checked slice. Name/type analysis gives the item
+  an immutable body binding, and generic specialization remaps its exact item
+  type. Owned HIR normalizes the capture, checked index, counter and loop into
+  existing block/For/Index facts. No SDK source or source identifier is synthesized.
+- The descriptor and slice bounds evaluate once before entering the loop. Hidden
+  repeated nodes start at the body, so a mutable borrow used to calculate a bound
+  ends with its call rather than being held on every backedge. Continue targets
+  the counter post; break and return retain existing cleanup and ownership checks.
+- Development/release builds each pass four programs (including a reversed-bound
+  trap) and seven rejections, with sixteen total low/optimized C executions. They
+  emit identical C. Cases cover empty/sliced/nested loops, item shadowing, scalar
+  generic specialization, one-time effectful bounds, resource cleanup and release
+  of the owner after exit. Mutation/move inside the loop, item assignment/escape,
+  wrong item types, computed roots and mutable descriptors reject.
+- One native API test verifies owned HIR after parser/type owners are released,
+  exact hidden scopes, immutable byte items and break/continue loop targets. The
+  resulting MIR also passes its independent verifier. The large joined-program
+  regression passes both compiler profiles and four generated C executions,
+  completing the capacity unit's deferred release coverage.
+- Evidence: `evidence/candidate-byte-loops-dev-20261009.json`,
+  `evidence/candidate-byte-loops-release-20261009.json`,
+  `evidence/candidate-byte-loops-api-20261009.json` and
+  `evidence/candidate-program-capacity-profiles-20261009.json`.
+- The unchanged scanner now passes byte-loop name analysis and reaches type
+  checking. Its next rejection is the shared view of the fixed byte-array field
+  `ref encoded.bytes[..encoded.length]` in `strings.fy`. Evidence:
+  `evidence/candidate-scanner-byte-loop-admission-20261009.json`. Item 48's actual
+  scanner execution remains incomplete; item 59 still owns region allocation.
+  Other iteration forms, release mutation API, Linux and self-hosting are pending.
+  No public syntax, SDK/runtime ABI, dependency, database or CI change.
