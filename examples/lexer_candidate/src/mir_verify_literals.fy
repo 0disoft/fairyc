@@ -6,9 +6,9 @@ import std::vec as v;
 fn bool local(ref m::Program p, usize id, usize function, u32 type) { return id > 0 && id <= m::local_count(p) && m::local_at(p,id).function == function && m::local_at(p,id).type == type; }
 pub fn bool operation(ref m::Program p, usize id, m::Operation o) {
     if (o.operator != 0 || o.argument_start != 0 || o.argument_count != 0 || !local(p,o.result,o.function,o.type)) { return false; }
-    if (o.kind == 14) { return literals::valid(o.type) && o.owner_type == o.type && !o.boolean && o.left == 0 && o.right == 0 && (o.type != 9 || literals::text(m::literal_text(p,id))); }
+    if (o.kind == 14) { return literals::valid(o.type) && o.owner_type == o.type && !o.boolean && o.left == 0 && o.right == 0 && (o.type != 9 || literals::text(m::literal_text(p,id))) && (o.type!=12 || literals::cstring(m::literal_text(p,id))); }
     if (o.payload_start != 0 || o.payload_end != 0 || (!literals::valid(o.owner_type) && o.owner_type != 11) || !local(p,o.left,o.function,o.owner_type)) { return false; }
-    if (o.kind == 15) { return o.type == if (o.boolean) { 6 } else { 5 } && o.right == 0; }
+    if (o.kind == 15) { return o.owner_type!=12 && o.type == if (o.boolean) { 6 } else { 5 } && o.right == 0; }
     if (o.boolean || (o.owner_type != 10 && o.owner_type != 11) || !local(p,o.right,o.function,5)) { return false; }
     return if (o.kind == 16) { o.type == 5 && o.result != o.right } else { o.kind == 17 && o.type == 3 };
 }

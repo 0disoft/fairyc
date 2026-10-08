@@ -164,11 +164,31 @@ REJECTIONS=[
  ('c-macro','@link_name("INT32_MAX")unsafe extern C fn i32 foreign();fn i32 main(){return 0;}','E5106'),
  ('conflicting-link','@link_name("fixture_add")unsafe extern C fn i32 a(i32 n);@link_name("fixture_add")unsafe extern C fn u32 b(u32 n);fn i32 main(){return 0;}','E5106'),
 ]
+CSTR_CASES=[
+ ('cstr-literal','unsafe extern C fn i32 fixture_cstr(ptr u8 p);fn i32 main(){let ref CStr s=c"AB";return unsafe{fixture_cstr(s as ptr u8)};}','',7),
+ ('cstr-empty','unsafe extern C fn i32 fixture_empty_cstr(ptr u8 p);fn i32 main(){return unsafe{fixture_empty_cstr(c"" as ptr u8)};}','',7),
+ ('cstr-utf8','unsafe extern C fn i32 fixture_utf8_cstr(ptr u8 p);fn i32 main(){let ref CStr s=c"한";return unsafe{fixture_utf8_cstr(s as ptr u8)};}','',7),
+ ('cstr-raw-owner','unsafe extern C fn i32 fixture_cstr(ptr u8 p);fn ref CStr wrap(ref u8[] owner,ptr u8 p){return unsafe{CStr::from_raw_parts(owner,p,3)};}fn i32 main(){let ref u8[] owner=b"AB\\0";let p=unsafe{owner as ptr u8};let ref CStr s=wrap(owner,p);return unsafe{fixture_cstr(s as ptr u8)};}','',7),
+ ('cstr-parameter','unsafe extern C fn i32 fixture_cstr(ptr u8 p);fn ref CStr identity(ref CStr p){return p;}fn i32 main(){let ref CStr s=identity(c"AB");return unsafe{fixture_cstr(s as ptr u8)};}','',7),
+ ('cstr-tagged','unsafe extern C fn i32 fixture_cstr(ptr u8 p);fn Option<ref CStr> wrap(ref CStr p){return .some(p);}fn i32 main(){return switch(wrap(c"AB")){case .some(p):{unsafe{fixture_cstr(p as ptr u8)}}case .none:{0}};}','',7),
+]
+CSTR_REJECTIONS=[
+ ('cstr-mutable','fn i32 main(){let ref mut CStr s=c"AB";return 0;}','unsupported name-check syntax'),
+ ('cstr-bare','fn i32 main(){let CStr s=c"AB";return 0;}','unsupported name-check syntax'),
+ ('cstr-length','fn i32 main(){let ref CStr s=c"AB";let n=s.len;return 0;}','unknown field'),
+ ('cstr-index','fn i32 main(){let ref CStr s=c"AB";let n=s[0];return 0;}','invalid nominal type'),
+ ('cstr-unsafe','fn i32 main(){let ref CStr s=c"AB";let p=s as ptr u8;return 0;}','E5101'),
+ ('cstr-mut-pointer','fn i32 main(){let ref CStr s=c"AB";let p=unsafe{s as ptr mut u8};return 0;}','unsupported explicit cast'),
+ ('cstr-pointer-owner','fn i32 main(){let ptr u8 p=null;let ref CStr s=unsafe{CStr::from_raw_parts(p,p,0)};return 0;}','invalid nominal type'),
+ ('cstr-local-escape','fn ref CStr wrong(){let u8[3] a=[65,66,0];let ref u8[] owner=ref a;return unsafe{CStr::from_raw_parts(owner,owner as ptr u8,3)};}fn i32 main(){return 0;}','E2102'),
+]
+PROVIDER += 'int32_t fixture_cstr(const uint8_t *p){return p[0]==65&&p[1]==66&&p[2]==0?7:0;}\nint32_t fixture_empty_cstr(const uint8_t *p){return p[0]==0?7:0;}\nint32_t fixture_utf8_cstr(const uint8_t *p){return p[0]==237&&p[1]==149&&p[2]==156&&p[3]==0?7:0;}\n'
+
 def sha(p):return hashlib.sha256(p.read_bytes()).hexdigest()
 def save(p,data):p.write_text(json.dumps(data,ensure_ascii=False,indent=2)+'\n',encoding='utf-8',newline='\n')
 def main():
- ap=argparse.ArgumentParser();ap.add_argument('--images',nargs='+',required=True);ap.add_argument('--native-runner',required=True);ap.add_argument('--receipt',required=True);ap.add_argument('--cli-only',action='store_true');ap.add_argument('--lane',choices=['scalar','pointer','cast','abi','slot','repr','raw'],default='scalar');args=ap.parse_args()
- cases=RAW_CASES if args.lane=='raw' else REPR_CASES if args.lane=='repr' else SLOT_CASES if args.lane=='slot' else ABI_CASES if args.lane=='abi' else CAST_CASES if args.lane=='cast' else POINTER_CASES if args.lane=='pointer' else CASES;rejections=RAW_REJECTIONS if args.lane=='raw' else REPR_REJECTIONS if args.lane=='repr' else SLOT_REJECTIONS if args.lane=='slot' else ABI_REJECTIONS if args.lane=='abi' else CAST_REJECTIONS if args.lane=='cast' else POINTER_REJECTIONS if args.lane=='pointer' else REJECTIONS
+ ap=argparse.ArgumentParser();ap.add_argument('--images',nargs='+',required=True);ap.add_argument('--native-runner',required=True);ap.add_argument('--receipt',required=True);ap.add_argument('--cli-only',action='store_true');ap.add_argument('--lane',choices=['scalar','pointer','cast','abi','slot','repr','raw','cstr'],default='scalar');args=ap.parse_args()
+ cases=CSTR_CASES if args.lane=='cstr' else RAW_CASES if args.lane=='raw' else REPR_CASES if args.lane=='repr' else SLOT_CASES if args.lane=='slot' else ABI_CASES if args.lane=='abi' else CAST_CASES if args.lane=='cast' else POINTER_CASES if args.lane=='pointer' else CASES;rejections=CSTR_REJECTIONS if args.lane=='cstr' else RAW_REJECTIONS if args.lane=='raw' else REPR_REJECTIONS if args.lane=='repr' else SLOT_REJECTIONS if args.lane=='slot' else ABI_REJECTIONS if args.lane=='abi' else CAST_REJECTIONS if args.lane=='cast' else POINTER_REJECTIONS if args.lane=='pointer' else REJECTIONS
  images=[Path(s).resolve() for s in args.images];runner=Path(args.native_runner).resolve();receipt=Path(args.receipt).resolve();receipt.parent.mkdir(parents=True,exist_ok=True);rows=[];fixtures=[];jobs=[];native=[];passed=False
  def run(argv,expected=0):
   q=subprocess.run(list(map(str,argv)),cwd=ROOT,capture_output=True,encoding='utf-8',timeout=360);row=dict(argv=list(map(str,argv)),cwd=str(ROOT),exit=q.returncode,stdout=q.stdout,stderr=q.stderr);rows.append(row);save(receipt.parent/'raw.json',rows);assert q.returncode==expected,row;return row

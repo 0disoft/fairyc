@@ -231,3 +231,29 @@ an explicit SDK source argument because isolated native tests run in temporary
 directories. The type graph does not yet instantiate SDK function/resource ASTs
 or publish executable Vec HIR/MIR/C layouts; those are subsequent work in 46/47.
 The existing ordinary module graph contract is included as the narrow regression.
+
+## CStr storage and owner-based reconstruction
+
+The candidate carries `ref CStr` as a separate immutable descriptor with data
+and private storage extent. C literals retain exactly one trailing NUL; owned HIR
+and MIR independently reject missing or interior NUL in literal payloads. The
+storage extent includes the terminator and has no public len/index/metadata lane.
+Bare CStr, mutable CStr and conversion to a mutable byte pointer remain rejected.
+
+Unsafe `CStr::from_raw_parts` retains the separate safe owner's origin and loans,
+not the raw pointer's address. Internal parameters/results, imported signatures
+and a restricted Option payload retain this type. Generated C uses the verified
+descriptor's data pointer for an explicit unsafe immutable pointer cast. Raw
+construction trusts the caller to establish accessible storage and the CStr
+terminator/lifetime invariants; it does not scan or allocate.
+
+Six programs and eight errors were checked through both candidate profiles;
+twelve native C executions inspect empty, ASCII and Korean literal bytes, raw
+owner wrappers, parameter returns and tagged captures using a separate provider
+translation unit. Imported CStr/raw-view programs add four native executions.
+One native API test in each profile rejects mutated literal terminators and
+removed unsafe/owner/length facts; failed C publication preserves a prefix.
+
+Evidence: `evidence/candidate-cstr-native-20261008.json`,
+`evidence/candidate-cstr-modules-20261008.json`, and
+`evidence/candidate-cstr-api-20261008.json`. SDK bodies and Linux are still pending.

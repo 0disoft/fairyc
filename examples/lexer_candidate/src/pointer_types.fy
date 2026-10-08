@@ -22,5 +22,5 @@ pub fn u32 resolve(ref syntax::Parsed p,usize root){
 pub fn bool cast_allowed(u32 source,u32 target){
     if(!valid(target)){return false;}
     if(refs::valid(source)){return (!mutable(target) || refs::mutable(source)) && (inner(target)==refs::inner(source) || inner(target)==7);}
-    return inner(target)==3 && (source==9 && !mutable(target) || source==10 && !mutable(target) || source==11);
+    return inner(target)==3 && (source==9 && !mutable(target) || source==10 && !mutable(target) || source==12 && !mutable(target) || source==11);
 }

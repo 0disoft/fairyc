@@ -119,7 +119,7 @@ fn usize expression(ref typing::Typed input, ref v::Vec<h::Binding> bindings, re
     var h::ExpressionKind kind = .Integer; var h::Operator operator = .None;
     if (h::type_code(type) == h::type_code(.Invalid)) { return state::fail(c,4,node.start,node.end); }
     if (node.kind == 1 || (node.kind == 4 && typing::signed_minimum(input,id))) {
-        if(pointers::valid(h::type_code(type))){kind=.Null;}else if (h::type_code(type) == 9 || h::type_code(type) == 10) {
+        if(pointers::valid(h::type_code(type))){kind=.Null;}else if (literals::valid(h::type_code(type))) {
             kind = .Literal; let ref u8[] cooked = syntax::literal_cooked(parsed,id);
             e.payload_start = bytes::len(payload); let u32 code = literals::decode(payload,cooked);
             if (code != 0) { return state::fail(c,code,node.start,node.end); } e.payload_end = bytes::len(payload);

@@ -28,7 +28,7 @@ fn bool constant(ref m::Program p, usize id, m::Operation o, ref mut bytes::Buff
 pub fn bool operation(ref m::Program p, usize id, ref mut bytes::Buffer out, ref mut w::State s) {
     let m::Operation o = m::operation_at(p,id);
     if(o.kind==38){return w::text(out,s,b"    ") && w::local(out,s,o.result) && w::text(out,s,b"=(") && w::type(out,s,o.type) && w::text(out,s,b"){") && w::local(out,s,o.right) && w::text(out,s,b",") && w::local(out,s,m::edge_at(p,o.argument_start)) && w::text(out,s,b"};\n");}
-    if(o.kind==37){return w::text(out,s,b"    ") && w::local(out,s,o.result) && w::text(out,s,b"=(") && w::owned_type(m::nominal(p),m::source_view(p),out,s,o.type) && w::text(out,s,b")") && w::local(out,s,o.left) && (o.owner_type!=9 && o.owner_type!=10 && o.owner_type!=11 || w::text(out,s,b".fy_data")) && w::text(out,s,b";\n");}
+    if(o.kind==37){return w::text(out,s,b"    ") && w::local(out,s,o.result) && w::text(out,s,b"=(") && w::owned_type(m::nominal(p),m::source_view(p),out,s,o.type) && w::text(out,s,b")") && w::local(out,s,o.left) && (o.owner_type!=9 && o.owner_type!=10 && o.owner_type!=11 && o.owner_type!=12 || w::text(out,s,b".fy_data")) && w::text(out,s,b";\n");}
     if(o.kind==36){return w::text(out,s,b"    ") && w::local(out,s,o.result) && w::text(out,s,b"=0;\n");}
     if(o.kind==35){return w::text(out,s,b"    ") && w::local(out,s,o.result) && w::text(out,s,b"=(") && w::owned_type(m::nominal(p),m::source_view(p),out,s,o.type) && w::text(out,s,b")") && w::local(out,s,o.left) && w::text(out,s,b";\n");}
     if(o.kind==30){return w::text(out,s,b"    *") && w::local(out,s,o.left) && w::text(out,s,b" = ") && w::local(out,s,o.right) && w::text(out,s,b";\n");}

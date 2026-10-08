@@ -69,7 +69,7 @@ fn state::Value expression(ref names::Resolved resolved, ref mut v::Vec<state::S
     if (node.kind == 1) {
         if(bytes::equal(op,b"null")){if(!pointers::valid(expected)){return error(problem,1,node.start,node.end,expected,0);}return recorded(tables,id,value(expected,false));}
         let u32 literal = syntax::literal_kind(parsed,id);
-        if (literal == 7 || literal == 8) { return recorded(tables,id,value(if (literal == 7) { 9 } else { 10 },false)); }
+        if (literal == 7 || literal == 8 || literal == 9) { return recorded(tables,id,value(if (literal == 7) { 9 } else if(literal==9){12}else{10},false)); }
         let u32 type = if (syntax::literal_kind(parsed,id) == 5) { if (state::integer(expected)) { expected } else { 1 } } else { 6 };
         if (state::integer(type) && !state::fits(op,type,false)) { return error(problem,2,node.start,node.end,type,0); }
         return recorded(tables,id,value(type,false));

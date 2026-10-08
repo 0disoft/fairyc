@@ -17,7 +17,7 @@ import std::vec as v;
 fn m::Program changed(ref m::Program p,u32 mutation){
     var bytes::Buffer source=bytes::empty();assert(bytes::append(ref mut source,m::source_view(p)).is_ok);
     var bytes::Buffer payload=bytes::empty();var v::Vec<m::Operation> ops=v::empty<m::Operation>();var usize i=1;
-    while(i<=m::operation_count(p)){var o=m::operation_at(p,i);if(o.kind==38){if(mutation==9){o.boolean=false;}else if(mutation==10){o.owner_type=1048582;o.left=o.right;}else if(mutation==11){o.argument_count=0;}}if(o.kind==37){if(mutation==7){o.boolean=false;}else if(mutation==8){o.operator=1;}}if(o.kind==36){if(mutation==5){o.boolean=true;}else if(mutation==6){o.left=o.result;}}if(o.payload_end>o.payload_start){assert(bytes::append(ref mut payload,m::literal_text(p,i)).is_ok);}assert(v::push<m::Operation>(ref mut ops,o).is_ok);i+=1;}
+    while(i<=m::operation_count(p)){var o=m::operation_at(p,i);if(o.kind==38){if(mutation==9){o.boolean=false;}else if(mutation==10){o.owner_type=1048582;o.left=o.right;}else if(mutation==11){o.argument_count=0;}}if(o.kind==37){if(mutation==7){o.boolean=false;}else if(mutation==8){o.operator=1;}}if(o.kind==36){if(mutation==5){o.boolean=true;}else if(mutation==6){o.left=o.result;}}if(o.payload_end>o.payload_start){let data=m::literal_text(p,i);if(mutation==12 && o.kind==14 && o.type==12){assert(bytes::append(ref mut payload,data[..data.len-1]).is_ok && bytes::append_byte(ref mut payload,1).is_ok);}else{assert(bytes::append(ref mut payload,data).is_ok);}}assert(v::push<m::Operation>(ref mut ops,o).is_ok);i+=1;}
     var v::Vec<m::Target> targets=v::empty<m::Target>();i=1;while(i<=m::target_count(p)){var t=m::target_at(p,i);if(t.foreign){if(mutation==1){t.link_start=7;t.link_end=11;}else if(mutation==2){t.result=6;}else if(mutation==3){t.foreign=false;}else if(mutation==4){t.unsafe_call=false;}}assert(v::push<m::Target>(ref mut targets,t).is_ok);i+=1;}
     var v::Vec<m::Signature> signatures=v::empty<m::Signature>();i=0;while(i<m::signature_count(p)){assert(v::push<m::Signature>(ref mut signatures,m::Signature{.type=m::signature_at(p,i)}).is_ok);i+=1;}
     var v::Vec<m::Function> functions=v::empty<m::Function>();i=1;while(i<=m::function_count(p)){assert(v::push<m::Function>(ref mut functions,m::function_at(p,i)).is_ok);i+=1;}
@@ -74,4 +74,11 @@ fn m::Program changed(ref m::Program p,u32 mutation){
     assert(refs::valid(borrowed) && refs::inner(borrowed)==pointer && refs::mutable(borrowed) && pointers::cast_allowed(borrowed,slot));
     assert(pointers::make(pointer,false)==0 && pointers::make(pointers::make(3,true),true)==0);
     assert(!pointers::cast_allowed(refs::make(pointer,false),slot) && tags::make_option(borrowed)==0);
+}
+
+@test fn void cstr_storage_and_raw_origin_are_independently_verified(){
+    let p=switch(lower::lower(fixture::retained(b"module main;fn i32 main(){let ref CStr s=c\"AB\";let ptr u8 p=unsafe{s as ptr u8};assert(p!=null);return 7;}"))){case .ok(p):{p}case .err(_):{assert(false);return;}};
+    assert(verify::check(ref p).code==0);let bad=changed(ref p,12);assert(verify::check(ref bad).code!=0);var bytes::Buffer out=bytes::empty();assert(bytes::append(ref mut out,b"prefix").is_ok);assert(c::render(ref bad,ref mut out)!=0 && bytes::equal(bytes::view(ref out),b"prefix"));
+    let raw=switch(lower::lower(fixture::retained(b"module main;fn i32 main(){let ref CStr owner=c\"AB\";let ptr u8 data=unsafe{owner as ptr u8};let ref CStr s=unsafe{CStr::from_raw_parts(owner,data,3)};let ptr u8 p=unsafe{s as ptr u8};assert(p!=null);return 7;}"))){case .ok(p):{p}case .err(_):{assert(false);return;}};
+    assert(verify::check(ref raw).code==0);var u32 mutation=9;while(mutation<=11){let invalid=changed(ref raw,mutation);assert(verify::check(ref invalid).code!=0);mutation+=1;}
 }

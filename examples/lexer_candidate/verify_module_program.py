@@ -10,6 +10,8 @@ PROJECT = Path(__file__).resolve().parent
 ROOT = PROJECT.parents[1]
 
 CLI_CASES = (
+    ("cstr-import", 'module main;import provider as p;fn i32 main(){let ref CStr s=p::identity(c"AB");let ptr u8 data=unsafe{s as ptr u8};assert(data!=null);return 7;}',
+     "module provider;pub fn ref CStr identity(ref CStr s){return s;}", "", 7),
     ("struct", "module main;import provider as p;struct Token{i32 n;}fn i32 main(){let p::Token t=p::make();return p::value(t);}",
      "module provider;pub struct Token{i32 n;}pub fn Token make(){return Token{.n=7};}pub fn i32 value(Token t){return t.n;}", "", 7),
     ("helpers", "module main;import provider as p;fn i32 helper(){return 9;}fn i32 main(){return p::value();}",
