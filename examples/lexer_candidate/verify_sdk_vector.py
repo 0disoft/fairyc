@@ -9,6 +9,7 @@ import subprocess
 
 REPO = Path(__file__).resolve().parents[2]
 SDK = REPO / "internal/sdkstdlib/sources/optional/std/vec.fy"
+DEPENDENCIES = ()
 SUITE = "vector-storage"
 TRAPS = {}
 CASE_OBSERVER = Path(__file__)
@@ -182,7 +183,7 @@ def main():
         source = output / (name + ".fy")
         source.write_text(PREAMBLE + body, encoding="utf-8")
         m = output / (name + ".txt")
-        paths = [source.relative_to(REPO).as_posix(), SDK.relative_to(REPO).as_posix()]
+        paths = [source.relative_to(REPO).as_posix(), SDK.relative_to(REPO).as_posix(), *[p.relative_to(REPO).as_posix() for p in DEPENDENCIES]]
         if name == "provider-first-fields":
             paths.reverse()
         m.write_text("\n".join(paths) + "\n", encoding="utf-8")
@@ -218,7 +219,7 @@ def main():
     finally:
         receipt.parent.mkdir(parents=True, exist_ok=True)
         receipt.write_text(json.dumps(dict(schema="fairyc.candidate-sdk-vector-native/v1", passed=passed,
-            images=[identity(p) for p in images], runner=identity(runner), sdk=identity(SDK),
+            images=[identity(p) for p in images], runner=identity(runner), sdk=identity(SDK), dependencies=[identity(p) for p in DEPENDENCIES],
             runtime=[identity(p) for p in runtime_paths], observer=identity(Path(__file__)), caseObserver=identity(CASE_OBSERVER),
             sources=[identity(p) for p in sorted((REPO / "examples/lexer_candidate/src").glob("*.fy"))],
             lock=identity(REPO / "examples/lexer_candidate/fairy.lock"), executions=rows,

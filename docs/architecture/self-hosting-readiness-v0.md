@@ -122,9 +122,10 @@ Native success alone is insufficient. The candidate must also prove failure beha
 ## Bootstrap stages
 
 The Fairy-written candidate now executes authenticated scalar/resource/struct
-Vec storage and `std::bytes::Buffer` bodies, including allocation failures and
-ownership cleanup. The [candidate progress](../ops/candidate-module-progress-20261008.md)
-records the exact native evidence and remaining String, scanner integration,
+Vec storage, `std::bytes::Buffer`, String/CString and UTF-8 bodies, including
+allocation failures and ownership cleanup. The
+[candidate progress](../ops/candidate-module-progress-20261008.md)
+records the exact native evidence and remaining scanner integration,
 project-driver and platform work. These prerequisite executions do not establish
 the differential acceptance or stage1/stage2 gate above.
 

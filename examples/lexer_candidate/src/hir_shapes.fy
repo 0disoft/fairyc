@@ -36,10 +36,16 @@ pub fn bool storage_owner(ref Table p,u32 type){
     }return true;
 }
 pub fn usize sdk_rule(ref Table p,ref u8[] source,usize start,usize end,usize link_start,usize link_end){return sdk::foreign_owned(source,ref p.sdk_scopes,start,end,link_start,link_end);}
+fn bool sdk_record(ref Table p,ref u8[] source,u32 type,usize record){
+    let usize a=abi_find(p,type);let usize s=find(p,type);if(a==0 || s==0){return false;}let abi=abi_at(p,a-1);
+    if(!sdk::record_owned(source,ref p.sdk_scopes,abi.name_start,abi.name_end,record)){return false;}
+    let shape=at(p,s-1);return shape.field_count==2 && field_at(p,shape.field_start+1).type==if(record==3){pointers::make(3,false)}else{4} && field_at(p,shape.field_start+2).type==if(record==2){4}else{5};
+}
 pub fn bool sdk_result(ref Table p,ref u8[] source,usize rule,u32 type){
-    if(rule==1 || rule>=3 && rule<=15){return type==sdk::scalar_result(rule);}if(rule!=2){return false;}let usize a=abi_find(p,type);let usize s=find(p,type);if(a==0 || s==0){return false;}
-    let abi=abi_at(p,a-1);if(!sdk::result_owned(source,ref p.sdk_scopes,abi.name_start,abi.name_end)){return false;}
-    let shape=at(p,s-1);return shape.field_count==2 && field_at(p,shape.field_start+1).type==4 && field_at(p,shape.field_start+2).type==5;
+    if(rule==2){return sdk_record(p,source,type,1);}if(rule>=16 && rule<=23 && rule!=17){return sdk_record(p,source,type,2);}return sdk::scalar_result(rule)!=0 && type==sdk::scalar_result(rule);
+}
+pub fn bool sdk_parameter(ref Table p,ref u8[] source,usize rule,usize index,u32 type){
+    if(index>=sdk::parameter_count(rule)){return false;}if(sdk::view_parameter(rule,index)){return pointers::valid(type) && !pointers::mutable(type) && sdk_record(p,source,pointers::inner(type),3);}return type==sdk::parameter(rule,index);
 }
 pub fn usize abi_count(ref Table p){return v::len<Abi>(ref p.abi);}
 pub fn Abi abi_at(ref Table p,usize index){return *v::at<Abi>(ref p.abi,index);}

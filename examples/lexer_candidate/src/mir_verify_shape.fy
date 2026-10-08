@@ -145,7 +145,7 @@ pub fn m::Problem check(ref m::Program p) {
             let usize rule=shapes::sdk_rule(m::nominal(p),m::source_view(p),t.start,t.end,t.link_start,t.link_end);
             if(!ffi::valid(m::foreign_text(p,i)) && rule==0){return problem(5106,t.start,t.end);}
             if(rule!=0 && (!shapes::sdk_result(m::nominal(p),m::source_view(p),rule,t.result) || t.effects!=0 || t.signature_count!=sdk::parameter_count(rule))){return problem(5102,t.start,t.end);}
-            var usize n=0;while(n<t.signature_count){if(!shapes::foreign_scalar(m::nominal(p),m::signature_at(p,t.signature_start+n),false) || rule!=0 && m::signature_at(p,t.signature_start+n)!=sdk::parameter(rule,n)){return problem(5102,t.start,t.end);}n+=1;}
+            var usize n=0;while(n<t.signature_count){if(!shapes::foreign_scalar(m::nominal(p),m::signature_at(p,t.signature_start+n),false) || rule!=0 && !shapes::sdk_parameter(m::nominal(p),m::source_view(p),rule,n,m::signature_at(p,t.signature_start+n))){return problem(5102,t.start,t.end);}n+=1;}
         }else if(t.link_start!=0 || t.link_end!=0){return problem(1001,t.start,t.end);}
         var usize j = 1; while (j < i) {
             let m::Target other = m::target_at(p,j);

@@ -103,7 +103,7 @@ fn state::Value expression(ref names::Resolved resolved, ref mut v::Vec<state::S
             }
             if(!some || !none){return error(problem,if(tagged::result(subject.type)){39}else{35},node.start,node.end,0,subject.type);}
             if(!known){if(tagged::result(subject.type)){join=7;}else{return error(problem,34,node.start,node.end,0,0);}}
-            link=node.right;while(link!=0){let usize aid=syntax::expression_at(parsed,link).left;let arm=syntax::expression_at(parsed,aid);if(tagged_check::no_value_arm(parsed,arm.right,subject.type)){state::set_expressions(tables,aid-1,join);}link=syntax::expression_at(parsed,link).right;}if(join==9 || views::valid(join)){return error(problem,if(tagged::result(subject.type)){38}else{34},node.start,node.end,0,join);}
+            link=node.right;while(link!=0){let usize aid=syntax::expression_at(parsed,link).left;let arm=syntax::expression_at(parsed,aid);if(tagged_check::no_value_arm(parsed,arm.right,subject.type)){state::set_expressions(tables,aid-1,join);}link=syntax::expression_at(parsed,link).right;}
             return recorded(tables,id,value(join,subject.terminates || terminates));
         }
         if(!enums::valid(subject.type)){return error(problem,24,node.start,node.end,0,subject.type);}

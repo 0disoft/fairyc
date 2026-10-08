@@ -668,3 +668,35 @@ project commands and Linux execution remain pending.
 - This prerequisite does not execute String/CString SDK bodies yet. Item 49,
   actual scanner integration, release mutation API, Linux and self-hosting remain
   pending. No SDK/runtime ABI, public language, dependency, database or CI change.
+
+## String/CString and UTF-8 execution (2026-10-09)
+
+- The candidate executes original authenticated `std::text` and `std::bytes`
+  bodies through eight exact text runtime extern declarations. Raw text results
+  and shared raw-view pointers require the exact owned SDK declaration, repr(C)
+  proof and field types in HIR and independent MIR checks. Source spelling or an
+  equally sized user struct cannot grant the runtime authority.
+- Development/release builds pass. Each candidate passes six programs and seven
+  rejections, with twenty-four MSVC low/optimized executions. Observations cover
+  Korean UTF-8, empty strings, append, copy/move, Buffer-to-String-to-Buffer pointer
+  preservation without allocation, invalid UTF-8 returning its intact donor,
+  String/CString allocation failures, append failure content preservation,
+  CString terminating/interior NUL rules, borrowed UTF-8 validation and no live
+  allocator blocks at scope exit. Both candidates produce identical C per case.
+- An old type-only guard rejected every Option/Result switch returning a byte
+  view or text borrow, before the existing HIR/MIR origin checks could run. It is
+  removed. The Go reference accepts the UTF-8 switch extraction. Mixed origins,
+  local view escape, retained-owner mutation and String-to-Buffer transfer still
+  reject through origin/lifetime checks. No public syntax or language addition.
+- Two development native API tests pass. Eleven text authority/signature/record
+  mutations reject; failed C rendering preserves a preexisting output prefix.
+  The struct-pointer ABI-proof regression passes, as does the current-development
+  Buffer suite (four programs, five rejections and eight native executions).
+- Evidence: `evidence/candidate-sdk-text-api-20261009.json`,
+  `evidence/candidate-sdk-text-cli-20261009.json`,
+  `evidence/candidate-sdk-text-reference-20261009.json` and
+  `evidence/candidate-sdk-text-buffer-regression-20261009.json`.
+- Item 49's Buffer/String/CString execution is complete for this candidate lane.
+  Item 50 still needs console SDK execution and project CLI integration. Actual
+  scanner storage/diagnostic integration, release mutation API, Linux and
+  self-hosting remain pending. No SDK/runtime ABI, dependency, database or CI change.
