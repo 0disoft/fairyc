@@ -25,6 +25,15 @@ pub fn Table empty() { return Table { .shapes = v::empty<Shape>(), .fields = v::
 pub fn usize sdk_count(ref Table p){return v::len<sdk::Scope>(ref p.sdk_scopes);}
 pub fn sdk::Scope sdk_at(ref Table p,usize index){return *v::at<sdk::Scope>(ref p.sdk_scopes,index);}
 pub fn bool storage_rule(ref Table p,ref u8[] source,usize start,usize end,u32 code){return sdk::storage_owned(source,ref p.sdk_scopes,start,end,code);}
+// A safe storage alias must be backed by the authenticated SDK Vec layout.
+// A user resource with the same field types cannot claim that ownership role.
+pub fn bool storage_owner(ref Table p,u32 type){
+    if(!refs::valid(type) || !resources::valid(refs::inner(type))){return false;}
+    let usize id=find(p,refs::inner(type));if(id==0){return false;}let s=at(p,id-1);if(s.field_count!=6){return false;}
+    var usize i=0;while(i<6){let f=field_at(p,s.field_start+i+1);if(f.type!=if(i==0){pointers::make(7,true)}else{5}){return false;}
+        var bool owned=false;var usize j=0;while(j<sdk_count(p)){let scope=sdk_at(p,j);owned=owned || scope.sdk_id==8 && f.start>=scope.start && f.end<=scope.end;j+=1;}if(!owned){return false;}i+=1;
+    }return true;
+}
 pub fn usize sdk_rule(ref Table p,ref u8[] source,usize start,usize end,usize link_start,usize link_end){return sdk::foreign_owned(source,ref p.sdk_scopes,start,end,link_start,link_end);}
 pub fn bool sdk_result(ref Table p,ref u8[] source,usize rule,u32 type){
     if(rule==1 || rule>=3 && rule<=8){return type==sdk::scalar_result(rule);}if(rule!=2){return false;}let usize a=abi_find(p,type);let usize s=find(p,type);if(a==0 || s==0){return false;}

@@ -447,7 +447,40 @@ project commands and Linux execution remain pending.
   Ordinary immutable owners still reject mutable borrowing.
 - Mutations reject changed operation/result/element/unsafe/argument/source-site
   facts and damaged SDK bytes before C publication, preserving an output prefix.
-- Resource/nominal elements, owner-bound element/view borrowing, Linux and
+- Resource/nominal elements, owner-bound view borrowing, Linux and
   self-hosting remain pending. This does not promote the candidate SDK/API.
 - Test observer timeouts terminate the process tree. Receipts store C digests
   and byte counts rather than duplicate generated C; no CI or dependency change.
+
+## Scalar Vec element borrows
+
+- The actual authenticated SDK `at<T>` and `at_mut<T>` ASTs execute for all six
+  scalar element types. The SDK checks the initialized-prefix bound before
+  scalar-size address calculation. Private storage aliases carry both the safe
+  Vec owner and raw slot through owned HIR/MIR; the raw pointer never supplies
+  the lifetime origin. Borrow owners must use the authenticated six-field Vec
+  layout, and unsafe/source-site/result/operand metadata is verified separately.
+- Shared aliases permit shared owner observations. Structural mutation,
+  replacement and moves wait for the last retained use. Exclusive aliases block
+  other owner access; shared child reborrows suspend their parent until last use.
+  Independent vectors retain separate owners. Ordinary SDK cleanup is unchanged.
+- Specializations share source spans but have distinct scopes. Return-origin
+  summaries now select return statements by scope, so `at` instances of different
+  scalar types cannot merge each other's parameter origins.
+- Evidence: `evidence/candidate-sdk-vector-element-api-20261008.json` and
+  `evidence/candidate-sdk-vector-element-cli-20261008.json`. The native API
+  rejects seven borrowed-operation mutations and preserves an existing C output
+  prefix on rejection, alongside the previous seven storage mutations.
+- Validation: development/release builds and two development native API tests;
+  four positive programs, three bounds traps and sixteen rejected programs per
+  candidate, with twenty-eight MSVC low/optimized executions. The previous four
+  storage programs and seven rejections run against both current candidates,
+  with sixteen native executions in
+  `evidence/candidate-sdk-vector-element-storage-regression-20261008.json`.
+- The release API file selection exceeded the observer's 360-second bound while
+  the native compiler was still optimizing. Its process tree was terminated.
+  The API receipt retains the timeout and has `passed: false`; release mutation
+  API execution is not counted as a pass. Both release candidate generation and
+  its low/optimized emitted-C executions above completed successfully.
+- Vec views, resource/nominal elements, Linux and stage1/stage2 remain pending.
+  No language/SDK/runtime contract, CI workflow or dependency version changed.

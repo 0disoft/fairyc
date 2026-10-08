@@ -61,7 +61,7 @@ fn bool operation(ref m::Program p, usize id, m::Operation o) {
         return storage::result(o.operator,o.owner_type)==o.type && o.boolean && o.argument_start==0 && o.argument_count==0 && o.payload_start==0 && o.payload_end==0
             && shapes::storage_rule(m::nominal(p),m::source_view(p),o.start,o.end,o.operator)
             && (if(o.type==7){o.result==0}else{local(p,o.result,o.function,o.type) && o.result!=o.left && o.result!=o.right})
-            && (if(args==0){o.left==0}else{local(p,o.left,o.function,pointers::make(7,true))}) && (if(args<2){o.right==0}else{local(p,o.right,o.function,o.owner_type)});
+            && (if(args==0){o.left==0}else if(o.operator>=6){o.left>0 && o.left<=m::local_count(p) && m::local_at(p,o.left).function==o.function && storage::owner(o.operator,m::local_at(p,o.left).type) && shapes::storage_owner(m::nominal(p),m::local_at(p,o.left).type)}else{local(p,o.left,o.function,storage::argument_type(o.operator,o.owner_type,0))}) && (if(args<2){o.right==0}else{local(p,o.right,o.function,storage::argument_type(o.operator,o.owner_type,1))});
     }
     if(o.kind==38){return (o.type==9 || o.type==10 || o.type==11 || o.type==12) && o.boolean && raw::owner(o.owner_type,o.type) && local(p,o.result,o.function,o.type) && local(p,o.left,o.function,o.owner_type)
         && o.right>0 && o.right<=m::local_count(p) && raw::data(m::local_at(p,o.right).type,o.type) && m::local_at(p,o.right).function==o.function && o.operator==0 && o.argument_count==1 && local(p,m::edge_at(p,o.argument_start),o.function,5) && o.payload_start==0 && o.payload_end==0;}

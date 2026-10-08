@@ -9,6 +9,9 @@ import subprocess
 
 REPO = Path(__file__).resolve().parents[2]
 SDK = REPO / "internal/sdkstdlib/sources/optional/std/vec.fy"
+SUITE = "vector-storage"
+TRAPS = {}
+CASE_OBSERVER = Path(__file__)
 FOREIGN = """
 unsafe extern C fn usize fixture_live();
 unsafe extern C fn void fixture_fail_next();
@@ -92,7 +95,7 @@ fn i32 main(){
 REJECT = {
     "private-field": ('fn i32 main(){var v::Vec<i32> x=v::empty<i32>();discard x.length;return 7;}', "phase 5 code 6201"),
     "resource-element": ('resource Item{i32 n;cleanup{}}fn i32 main(){var v::Vec<Item> x=v::empty<Item>();return 7;}', "code 4502"),
-    "borrow-access": ('fn i32 main(){var v::Vec<i32> x=v::empty<i32>();discard v::at<i32>(ref x,0);return 7;}', "code 4501"),
+    "view-access": ('fn i32 main(){var v::Vec<i32> x=v::empty<i32>();discard v::view<i32>(ref x);return 7;}', "phase 4 code 3"),
     "stolen-storage": ('fn i32 main(){discard unsafe{storage_size<i32>()};return 7;}', "phase 5 code 5102"),
     "stolen-runtime": ('@link_name("fy_private_vector_initialize_v0")unsafe extern C fn u32 stolen(ptr mut void p,usize size,usize alignment);fn i32 main(){return 7;}', "phase 1 code 5106"),
     "wrong-element": ('fn i32 main(){var v::Vec<i32> x=v::empty<i32>();discard v::push<i32>(ref mut x,true);return 7;}', "phase 5 code 1"),
@@ -147,7 +150,7 @@ def main():
     args = ap.parse_args()
     images = [p.resolve() for p in args.images]
     runner = args.native_runner.resolve()
-    output = REPO / ".cache/candidate-tagged/vector-storage"
+    output = REPO / ".cache/candidate-tagged" / SUITE
     output.mkdir(parents=True, exist_ok=True)
     receipt = args.receipt.resolve()
     rows, jobs = [], []
@@ -208,13 +211,14 @@ def main():
         assert r["exit"] == 0 and not r["stderr"], r
         native = json.loads(native_report.read_text(encoding="utf-8"))
         assert len(native) == 2 * len(jobs), native
-        assert all(not r.get("error") and r["trap"] == 0 and r["value"] == 7 and not r["stdout"] and not r["stderr"] for r in native), native
+        expected = {f"{name}-{index}": TRAPS.get(name, 0) for name in CASES for index in range(len(images))}
+        assert all(not r.get("error") and r["trap"] == expected[r["name"]] and (r["trap"] != 0 or r["value"] == 7) and not r["stdout"] and not r["stderr"] for r in native), native
         passed = True
     finally:
         receipt.parent.mkdir(parents=True, exist_ok=True)
         receipt.write_text(json.dumps(dict(schema="fairyc.candidate-sdk-vector-native/v1", passed=passed,
             images=[identity(p) for p in images], runner=identity(runner), sdk=identity(SDK),
-            runtime=[identity(p) for p in runtime_paths], observer=identity(Path(__file__)),
+            runtime=[identity(p) for p in runtime_paths], observer=identity(Path(__file__)), caseObserver=identity(CASE_OBSERVER),
             sources=[identity(p) for p in sorted((REPO / "examples/lexer_candidate/src").glob("*.fy"))],
             lock=identity(REPO / "examples/lexer_candidate/fairy.lock"), executions=rows,
             native=json.loads(native_report.read_text(encoding="utf-8")) if passed else [],

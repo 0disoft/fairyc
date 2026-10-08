@@ -46,7 +46,7 @@ pub fn m::Problem check(ref m::Program p) {
         changed=false;work+=m::operation_count(p)+m::block_count(p);if(work>1048576){return m::Problem{.code=2,.start=0,.end=0};}
         i=1;while(i<=m::operation_count(p)){
             let o=m::operation_at(p,i);if(byte_view(o.type)){
-                let usize origin=if(o.kind==21){if(o.argument_count==1 && byte_view(m::local_at(p,m::edge_at(p,o.argument_start)).type)){get(ref values,m::edge_at(p,o.argument_start))}else{0}}else if(o.kind==23){get(ref values,o.left)}else if(o.kind==14){0}else if(o.kind==18 && refs::valid(o.owner_type)){get(ref values,o.left)}else if(o.kind==18 || o.kind==28 || o.kind==33){o.left}else if(o.kind==2 || o.kind==19 || o.kind==32 || o.kind==34 || o.kind==38){get(ref values,o.left)}else{65538};
+                let usize origin=if(o.kind==21){if(o.argument_count==1 && byte_view(m::local_at(p,m::edge_at(p,o.argument_start)).type)){get(ref values,m::edge_at(p,o.argument_start))}else{0}}else if(o.kind==23){get(ref values,o.left)}else if(o.kind==14){0}else if(o.kind==18 && refs::valid(o.owner_type)){get(ref values,o.left)}else if(o.kind==18 || o.kind==28 || o.kind==33){o.left}else if(o.kind==2 || o.kind==19 || o.kind==32 || o.kind==34 || o.kind==38 || o.kind==39 && o.operator>=6){get(ref values,o.left)}else{65538};
                 if(!merge(ref mut values,o.result,origin,ref mut changed,ref mut problem,o.start,o.end)){return problem;}
             }i+=1;
         }

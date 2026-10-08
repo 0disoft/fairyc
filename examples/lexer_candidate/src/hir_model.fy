@@ -277,8 +277,8 @@ pub fn Result<Program,Problem> assemble_resources(bytes::Buffer source, bytes::B
         if(kind==30){let u32 code=storage_code(e.kind);let u32 element=storage_element(e.kind);let usize args=storage::arguments(code);
             if(storage::result(code,element)!=type || !e.boolean || e.block!=0 || e.binding!=0 || e.edge_count!=0 || e.edge_start!=0 || e.alternative!=0 || e.payload_start!=0 || e.payload_end!=0 || operator_code(e.operator)!=0
                 || !shapes::storage_rule(ref nominal,bytes::view(ref source),e.start,e.end,code)
-                || (if(args==0){e.left!=0}else{e.left==0 || type_code(v::at<Expression>(ref expressions,e.left-1).type)!=pointers::make(7,true)})
-                || (if(args<2){e.right!=0}else{e.right==0 || type_code(v::at<Expression>(ref expressions,e.right-1).type)!=element})){return .err(Problem{.code=5102,.start=e.start,.end=e.end});}
+                || (if(args==0){e.left!=0}else{e.left==0 || !(if(code>=6){storage::owner(code,type_code(v::at<Expression>(ref expressions,e.left-1).type)) && shapes::storage_owner(ref nominal,type_code(v::at<Expression>(ref expressions,e.left-1).type))}else{type_code(v::at<Expression>(ref expressions,e.left-1).type)==storage::argument_type(code,element,0)})})
+                || (if(args<2){e.right!=0}else{e.right==0 || type_code(v::at<Expression>(ref expressions,e.right-1).type)!=storage::argument_type(code,element,1)})){return .err(Problem{.code=5102,.start=e.start,.end=e.end});}
         }
         if(kind==29){
             if((type!=9 && type!=10 && type!=11 && type!=12) || !e.boolean || e.left==0 || e.right==0 || e.alternative==0 || e.block!=0 || e.binding!=0 || e.edge_count!=0 || e.payload_start!=0 || e.payload_end!=0 || operator_code(e.operator)!=0

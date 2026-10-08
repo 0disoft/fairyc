@@ -193,9 +193,9 @@ fn state::Value expression(ref names::Resolved resolved, ref mut v::Vec<state::S
             let u32 element=storage::element(parsed,id);let u32 type=storage::result(storage_code,element);
             if(type==0){return error(problem,4502,node.start,node.end,0,0);}
             let usize count=storage::arguments(storage_code);if(syntax::call_argument_count(parsed,id)!=count){return error(problem,5,node.start,node.end,0,0);}
-            var bool terminates=false;var usize arg=0;while(arg<count){let usize child=syntax::call_argument(parsed,id,arg);let u32 expected_argument=if(arg==0){pointers::make(7,true)}else{element};
+            var bool terminates=false;var usize arg=0;while(arg<count){let usize child=syntax::call_argument(parsed,id,arg);let u32 expected_argument=if(storage_code>=6 && arg==0){0}else{storage::argument_type(storage_code,element,arg)};
                 let actual=expression(resolved,tables,problem,child,expected_argument,result_type,depth+1,loop_depth);if(problem.code!=0){return actual;}
-                if(actual.type!=expected_argument){let a=syntax::expression_at(parsed,child);return error(problem,1,a.start,a.end,expected_argument,actual.type);}terminates=terminates || actual.terminates;arg+=1;
+                if(!(if(storage_code>=6 && arg==0){storage::owner(storage_code,actual.type)}else{actual.type==expected_argument})){let a=syntax::expression_at(parsed,child);return error(problem,1,a.start,a.end,expected_argument,actual.type);}terminates=terminates || actual.terminates;arg+=1;
             }return recorded(tables,id,value(type,terminates));
         }
         let u32 raw_type=raw::call(parsed,id);

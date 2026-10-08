@@ -212,3 +212,9 @@ allocate. Text bracket indexing stays closed. CStr representation and authentica
 SDK Vec/Buffer/String/File integration remain pending. See the
 [module progress](../../../docs/ops/candidate-module-progress-20261008.md) and
 [remaining work](../../../docs/ops/candidate-remaining-work-20261007.md).
+
+The authenticated scalar Vec lane now executes empty/len/capacity/reserve,
+push/pop/clear and owner-bound `at/at_mut` for all six scalar types. Safe aliases
+retain the vector through their last use, including aliases returned by ordinary
+functions. View APIs and resource/nominal element storage remain pending; current
+evidence and precise boundaries are in the module progress linked above.

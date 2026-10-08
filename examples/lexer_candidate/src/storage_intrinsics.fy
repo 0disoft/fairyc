@@ -2,11 +2,14 @@ module storage_intrinsics;
 import syntax as syntax;
 import type_state as scalar;
 import sdk_scopes as sdk;
+import reference_types as refs;
+import pointer_types as pointers;
+import resource_identity as resources;
 import std::bytes as bytes;
 
 // Private SDK storage operations. The first executable lane accepts copy
-// scalars; nominal/resource elements and owner-bound storage borrows stay closed.
-pub fn u32 named(ref u8[] name){return if(bytes::equal(name,b"storage_size")){1}else if(bytes::equal(name,b"storage_alignment")){2}else if(bytes::equal(name,b"storage_take")){3}else if(bytes::equal(name,b"storage_put")){4}else{0};}
+// scalars. Safe element borrows retain the owner independently of the raw slot.
+pub fn u32 named(ref u8[] name){return if(bytes::equal(name,b"storage_size")){1}else if(bytes::equal(name,b"storage_alignment")){2}else if(bytes::equal(name,b"storage_take")){3}else if(bytes::equal(name,b"storage_put")){4}else if(bytes::equal(name,b"storage_element_address")){5}else if(bytes::equal(name,b"storage_borrow")){6}else if(bytes::equal(name,b"storage_borrow_mut")){7}else{0};}
 pub fn u32 call(ref syntax::Parsed p,usize id){
     if(id==0){return 0;}let e=syntax::expression_at(p,id);if(e.kind!=6){return 0;}
     let g=syntax::expression_at(p,e.left);if(g.kind!=20){return 0;}let base=syntax::expression_at(p,g.left);
@@ -18,6 +21,8 @@ pub fn u32 element(ref syntax::Parsed p,usize id){
     let u32 type=scalar::primitive(p,arg.left);return if(type>=1 && type<=6){type}else{0};
 }
 pub fn bool scalar_element(u32 element){return element>=1 && element<=6;}
-pub fn u32 result(u32 code,u32 element){return if(!scalar_element(element) || code==0 || code>4){0}else if(code<=2){5}else if(code==3){element}else{7};}
+pub fn u32 result(u32 code,u32 element){return if(!scalar_element(element) || code==0 || code>7){0}else if(code<=2){5}else if(code==3){element}else if(code==4){7}else if(code==5){pointers::make(7,true)}else{refs::make(element,code==7)};}
 pub fn usize arguments(u32 code){return if(code<=2){0}else if(code==3){1}else{2};}
+pub fn bool owner(u32 code,u32 type){return (code==6 || code==7) && refs::valid(type) && resources::valid(refs::inner(type)) && refs::mutable(type)==(code==7);}
+pub fn u32 argument_type(u32 code,u32 element,usize index){return if(index==0 || code>=6){pointers::make(7,true)}else if(code==5){5}else{element};}
 pub fn bool allowed(ref syntax::Parsed p,usize id){let e=syntax::expression_at(p,id);return sdk::parsed_storage(p,e.start,e.end,call(p,id));}
