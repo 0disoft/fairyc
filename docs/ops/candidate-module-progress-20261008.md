@@ -1168,3 +1168,18 @@ project commands and Linux execution remain pending.
   consecutive mutable calls; the same calls outside that loop are admitted.
   The next unit corrects the byte-loop lifetime provenance. Item 50 is open;
   no token-route native success is claimed here.
+
+## Byte-loop induction provenance (2026-10-09)
+
+- The hidden byte-loop induction target now retains the one-byte body opener
+  span, rather than the entire repeated body. HIR/MIR assignment containment
+  therefore cannot extend every authored call argument's loan to loop exit.
+  The target remains nonempty for the independent MIR range verifier.
+- The original driver reproduces HIR 2101 for consecutive mutable calls in a
+  byte loop. The fixed development driver admits that program and explicit
+  reborrows; both execute in low/optimized MSVC profiles with exact mutation
+  counts. A later argument that mutates the held owner still rejects with 2101.
+  Evidence: `evidence/candidate-byte-loop-calls-dev-20261009.json` and
+  `evidence/candidate-sdk-module-driver-dev-fixed-20261009.json`.
+- Check passed. Release-driver and full token-route observations follow; no
+  analysis budget, source bound, SDK ABI, database or CI workflow changed.

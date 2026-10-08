@@ -40,7 +40,11 @@ pub fn Build start(syntax::Statement source,usize repeat_start,usize value,ref v
     // source-span lifetime checks cannot retain a bound-call loan on backedges.
     var syntax::Statement repeated=source;repeated.start=repeat_start;
     let usize zero=integer(expressions,payload,c,repeated,48);let usize initial=binding(statements,c,repeated,scope,link.iteration_index,zero);
-    let usize index=node(expressions,c,repeated,.Reference,.Usize,.None,0,0,link.iteration_index);
+    // The hidden induction target is a point at body entry. A body-wide target
+    // would contain every authored call argument and prolong its loan to the
+    // loop end when assignment lifetime checks examine target containment.
+    var syntax::Statement induction=repeated;induction.end=induction.start+1;
+    let usize index=node(expressions,c,induction,.Reference,.Usize,.None,0,0,link.iteration_index);
     let usize view=node(expressions,c,repeated,.Reference,.Bytes,.None,0,0,link.iteration_view);
     let usize length=node(expressions,c,repeated,.Length,.Usize,.None,view,0,0);
     let usize condition=node(expressions,c,repeated,.Binary,.Bool,.Less,index,length,0);
