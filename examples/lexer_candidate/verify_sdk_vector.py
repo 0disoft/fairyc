@@ -15,6 +15,7 @@ TRAPS = {}
 VALUES = {}  # case -> exact standalone exit/result; default remains 7
 STREAMS = {}  # case -> (stdin, exact stdout, exact stderr)
 CASE_OBSERVER = Path(__file__)
+CASE_CONTEXT = {}
 RUNTIME_NAMES = ("stage0_system_heap.c", "stage0_vector_storage.c")
 RUNTIME_INCLUDES = False
 PREAMBLE = "module main;import std::vec as v;"
@@ -231,7 +232,7 @@ def main():
         receipt.parent.mkdir(parents=True, exist_ok=True)
         receipt.write_text(json.dumps(dict(schema="fairyc.candidate-sdk-vector-native/v1", passed=passed,
             images=[identity(p) for p in images], runner=identity(runner), sdk=identity(SDK), dependencies=[identity(p) for p in DEPENDENCIES],
-            runtime=[identity(p) for p in runtime_paths], observer=identity(Path(__file__)), caseObserver=identity(CASE_OBSERVER),
+            runtime=[identity(p) for p in runtime_paths], observer=identity(Path(__file__)), caseObserver=identity(CASE_OBSERVER), caseContext=CASE_CONTEXT,
             sources=[identity(p) for p in sorted((REPO / "examples/lexer_candidate/src").glob("*.fy"))],
             lock=identity(REPO / "examples/lexer_candidate/fairy.lock"), executions=rows,
             native=json.loads(native_report.read_text(encoding="utf-8")) if passed else [],

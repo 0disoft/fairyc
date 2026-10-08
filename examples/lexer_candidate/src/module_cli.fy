@@ -45,7 +45,7 @@ pub fn u32 paths(ref u8[] source, ref mut v::Vec<Path> result) {
     return 0;
 }
 @effects(filesystem,console)
-fn i32 execute(ref u8[] path,bool program_mode) {
+fn i32 execute(ref u8[] path,u32 program_mode) {
     let bytes::Buffer manifest_source = switch(manifest(path)) {
         case .ok(value): { value }
         case .err(code): { return error(if (code == 4) { "error: manifest limit (65536 bytes)\n" } else if (code == 3) { "error: buffer allocation failed\n" } else { "error: manifest file read failed\n" }); }
@@ -74,8 +74,9 @@ fn i32 execute(ref u8[] path,bool program_mode) {
         if (!v::push<syntax::Parsed>(ref mut parsed_files,parsed).is_ok) { return error("error: buffer allocation failed\n"); }
         index += 1;
     }
-    if(program_mode){
-        let program=switch(programs::compile(ref parsed_files)){
+    if(program_mode!=0){
+        let result=if(program_mode==2){programs::compile_sdk(ref parsed_files)}else{programs::compile(ref parsed_files)};
+        let program=switch(result){
             case .ok(p):{p}
             case .err(p):{
                 let Path entry=*v::at<Path>(ref entries,p.module_index);
@@ -109,6 +110,8 @@ fn i32 execute(ref u8[] path,bool program_mode) {
 }
 
 @effects(filesystem,console)
-pub fn i32 run(ref u8[] path){return execute(path,false);}
+pub fn i32 run(ref u8[] path){return execute(path,0);}
 @effects(filesystem,console)
-pub fn i32 emit(ref u8[] path){return execute(path,true);}
+pub fn i32 emit(ref u8[] path){return execute(path,1);}
+@effects(filesystem,console)
+pub fn i32 emit_sdk(ref u8[] path){return execute(path,2);}

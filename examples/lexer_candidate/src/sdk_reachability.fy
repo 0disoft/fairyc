@@ -3,10 +3,12 @@ import syntax as syntax;
 import module_signatures as signatures;
 import module_catalog as catalog;
 import sdk_authority as sdk;
+import std::bytes as bytes;
 import std::vec as v;
 
 pub struct Row {usize module_index;usize declaration;usize start;usize end;bool function;bool needed;usize first;}
 struct Use {usize expression;usize next;}
+struct Cached {usize module_index;usize expression;usize target;}
 pub resource Plan {v::Vec<Row> rows;v::Vec<usize> bases;cleanup{}}
 fn catalog::Problem fail(u32 code,usize module_index,usize start,usize end){return catalog::Problem{.code,.module_index,.start,.end};}
 pub fn bool charge(ref mut usize work,usize amount){if(*work>1048576 || amount>1048576-*work){return false;};*work=*work+amount;return true;}
@@ -22,6 +24,28 @@ fn usize owner_rows(ref v::Vec<Row> rows,ref v::Vec<usize> bases,usize module_in
 }
 pub fn usize owner(ref Plan p,usize module_index,usize start,usize end,ref mut usize work){return owner_rows(ref p.rows,ref p.bases,module_index,start,end,work);}
 pub fn bool keep(ref Plan p,usize module_index,usize start,usize end,ref mut usize work){let usize id=owner(p,module_index,start,end,work);return id==0 || !v::at<Row>(ref p.rows,id-1).function || v::at<Row>(ref p.rows,id-1).needed;}
+// Cache both resolved declarations and misses by exact caller/module spelling.
+// Collisions compare original bytes; aliases never become declaration identity.
+fn usize lookup(ref v::Vec<syntax::Parsed> sources,ref signatures::Program metadata,ref v::Vec<Row> rows,ref v::Vec<usize> bases,ref mut v::Vec<Cached> cache,usize module_index,usize expression,ref mut usize work,ref mut u32 code){
+    let file=v::at<syntax::Parsed>(sources,module_index);let name=syntax::expression_text(file,expression);
+    var usize hash=module_index;var usize i=0;while(i<name.len){if(!charge(work,1)){*code=10;return 0;}hash=(hash*131+(name[i] as usize))%1048573;i+=1;}
+    var usize slot=hash%4096;var usize probes=0;
+    while(probes<4096){if(!charge(work,1)){*code=10;return 0;}let c=*v::at<Cached>(cache,slot);
+        if(c.expression==0){
+            if(!charge(work,v::len<Row>(rows)+v::len<syntax::Parsed>(sources)+1)){*code=10;return 0;}
+            let found=signatures::declaration_lookup(metadata,module_index,name);var usize target=0;
+            // Retain private targets; the ordinary binder owns privacy rejection.
+            if(found.item!=0 && (found.code==0 || found.code==6)){let d=signatures::declaration_at(metadata,found.item);if(d.kind==3){
+                if(d.module_index>=v::len<syntax::Parsed>(sources) || d.declaration==0 || d.declaration>syntax::declaration_count(v::at<syntax::Parsed>(sources,d.module_index))){*code=9;return 0;}
+                let usize at=*v::at<usize>(bases,d.module_index)+d.declaration-1;let r=v::at<Row>(rows,at);
+                if(!r.function || r.start!=d.source_start || r.end!=d.source_end){*code=9;return 0;}target=at+1;
+            }}
+            {let ref mut Cached c=v::at_mut<Cached>(cache,slot);c.module_index=module_index;c.expression=expression;c.target=target;}return target;
+        }
+        if(c.module_index==module_index){if(!charge(work,name.len+1)){*code=10;return 0;}if(bytes::equal(name,syntax::expression_text(file,c.expression))){return c.target;}}
+        slot=(slot+1)%4096;probes+=1;
+    }*code=10;return 0;
+}
 pub fn Result<Plan,catalog::Problem> build(ref v::Vec<syntax::Parsed> sources,ref signatures::Program metadata,ref mut usize work){
     if(signatures::module_count(metadata)!=v::len<syntax::Parsed>(sources)){return .err(fail(9,0,0,0));}
     var v::Vec<Row> rows=v::empty<Row>();var v::Vec<usize> bases=v::empty<usize>();var v::Vec<Use> uses=v::empty<Use>();var v::Vec<usize> queue=v::empty<usize>();
@@ -48,16 +72,15 @@ pub fn Result<Plan,catalog::Problem> build(ref v::Vec<syntax::Parsed> sources,re
             }i+=1;
         }module_index+=1;
     }
+    var v::Vec<Cached> cache=v::empty<Cached>();var usize slot=0;while(slot<4096){if(!charge(work,1)){return .err(fail(10,0,0,0));}if(!v::push<Cached>(ref mut cache,Cached{.module_index=0,.expression=0,.target=0}).is_ok){return .err(fail(11,0,0,0));}slot+=1;}
     var usize cursor=0;while(cursor<v::len<usize>(ref queue)){
         let row=*v::at<Row>(ref rows,*v::at<usize>(ref queue,cursor));let file=v::at<syntax::Parsed>(sources,row.module_index);var usize id=row.first;
-        while(id!=0){if(!charge(work,v::len<Row>(ref rows)+v::len<syntax::Parsed>(sources)+1)){return .err(fail(10,row.module_index,row.start,row.end));}
-            let use=*v::at<Use>(ref uses,id-1);let found=signatures::declaration_lookup(metadata,row.module_index,syntax::expression_text(file,use.expression));
-            // Private references also retain their declaration; the later binder
-            // must still produce its original privacy diagnostic.
-            if(found.item!=0 && (found.code==0 || found.code==6)){let d=signatures::declaration_at(metadata,found.item);if(d.kind==3){if(d.module_index>=v::len<syntax::Parsed>(sources) || d.declaration==0 || d.declaration>syntax::declaration_count(v::at<syntax::Parsed>(sources,d.module_index))){return .err(fail(9,row.module_index,row.start,row.end));}let usize at=*v::at<usize>(ref bases,d.module_index)+d.declaration-1;
-                let target=v::at<Row>(ref rows,at);if(!target.function || target.start!=d.source_start || target.end!=d.source_end){return .err(fail(9,row.module_index,row.start,row.end));}
+        while(id!=0){let use=*v::at<Use>(ref uses,id-1);var u32 code=0;
+            let usize target=lookup(sources,metadata,ref rows,ref bases,ref mut cache,row.module_index,use.expression,work,ref mut code);
+            if(code!=0){return .err(fail(code,row.module_index,row.start,row.end));}
+            if(target!=0){let usize at=target-1;
                 if(!v::at<Row>(ref rows,at).needed){{let ref mut Row target=v::at_mut<Row>(ref mut rows,at);target.needed=true;}if(!v::push<usize>(ref mut queue,at).is_ok){return .err(fail(11,row.module_index,row.start,row.end));}}
-            }}id=use.next;
+            }id=use.next;
         }cursor+=1;
     }
     return .ok(Plan{.rows,.bases});

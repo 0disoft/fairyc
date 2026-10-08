@@ -1149,3 +1149,22 @@ project commands and Linux execution remain pending.
 - The original CLI pipeline is unchanged in this unit. Item 50 remains open;
   token-route integration follows through an opt-in compiler API. No language,
   SDK/runtime, DB, dependency, CI workflow or analysis bound changed.
+
+## Opt-in SDK compilation pipeline (2026-10-09)
+
+- `module_program::compile_sdk` authenticates the complete input, compacts SDK
+  arenas and rebuilds signatures before the existing join/bind/HIR/MIR path.
+  `module_cli::emit_sdk` exposes it to the Fairy observation entry in
+  `probes/sdk_module_driver.fy`; the original CLI dispatcher still uses `emit`.
+- SDK dependency lookup caches exact caller/module spellings, including misses.
+  Collisions compare original source bytes. Its 4096 heap slots and the existing
+  1048576 shared work budget fail closed; no stack or analysis bound increased.
+- Check and the development observation-driver build passed. The token program
+  now passes compaction and join, then rejects at HIR phase 6 code 2101 in
+  `token_output::hex`. The failed observation is retained as `passed=false` in
+  `evidence/candidate-file-tokens-compact-dev-20261009.json`; driver inputs and
+  image identity are in `evidence/candidate-sdk-module-driver-dev-20261009.json`.
+- A small source probe reproduces the rejection with a byte loop and two
+  consecutive mutable calls; the same calls outside that loop are admitted.
+  The next unit corrects the byte-loop lifetime provenance. Item 50 is open;
+  no token-route native success is claimed here.

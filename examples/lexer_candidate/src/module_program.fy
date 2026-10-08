@@ -9,6 +9,7 @@ import mir_model as mir;
 import mir_lower as lower;
 import syntax as syntax;
 import std::vec as v;
+import sdk_ast_compact as compact;
 pub struct Problem {u32 phase;u32 code;usize module_index;usize start;usize end;}
 fn Problem location(ref v::Vec<syntax::Parsed> sources,u32 phase,u32 code,usize start,usize end){var usize base=0;var usize i=0;while(i<v::len<syntax::Parsed>(sources)){let usize stop=base+syntax::source_view(v::at<syntax::Parsed>(sources,i)).len;if(start<=stop){return Problem{.phase,.code,.module_index=i,.start=start-base,.end=if(end>stop){stop-base}else{end-base}};}base=stop+1;i+=1;}return Problem{.phase,.code,.module_index=0,.start=0,.end=0};}
 pub fn Result<mir::Program,Problem> compile(ref v::Vec<syntax::Parsed> sources){
@@ -19,4 +20,12 @@ pub fn Result<mir::Program,Problem> compile(ref v::Vec<syntax::Parsed> sources){
     let typed=typing::check(resolved);let type_problem=typing::problem(ref typed);if(type_problem.code!=0){return .err(location(sources,5,type_problem.code,type_problem.start,type_problem.end));}
     let owned=switch(hir::lower(typed,0)){case .ok(p):{p}case .err(p):{return .err(location(sources,6,p.code,p.start,p.end));}};
     return switch(lower::lower(owned)){case .ok(p):{.ok(p)}case .err(p):{.err(location(sources,7,p.code,p.start,p.end))}};
+}
+
+// Opt-in pipeline: authenticate the complete source set first, then rebuild
+// metadata for the retained declaration indices before the ordinary join/bind.
+pub fn Result<mir::Program,Problem> compile_sdk(ref v::Vec<syntax::Parsed> sources){
+    let metadata=switch(signatures::build(sources)){case .ok(m):{m}case .err(p):{return .err(Problem{.phase=1,.code=p.code,.module_index=p.module_index,.start=p.start,.end=p.end});}};
+    let retained=switch(compact::compact(sources,ref metadata)){case .ok(p):{p}case .err(p):{return .err(Problem{.phase=8,.code=p.code,.module_index=p.module_index,.start=p.start,.end=p.end});}};
+    return compile(ref retained);
 }
