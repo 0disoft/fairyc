@@ -178,6 +178,14 @@ and HIR lowering remain the two measured self-source parser blockers. The full
 150-file input remains below 1MiB (1047406 joined bytes) and still rejects.
 Project-driver and platform work remain. These scanner results do not establish
 the complete compiler's stage1/stage2 or promotion gates.
+Type checking now also parses as eight responsibility-based files. Extracted
+bodies and source-depth accounting are retained; focused C is byte-identical,
+twelve native runs pass and eight type-error diagnostics match the prior driver.
+The full input is now 157 files and 1054271 joined bytes, still rejected at
+parsing. HIR lowering partitioning and source deduplication below the unchanged
+1MiB budget remain prerequisites. Evidence:
+`docs/ops/evidence/candidate-type-source-split-20261009.json` and
+`docs/ops/evidence/candidate-dispatcher-admission-after-type-split-20261009.json`.
 
 `stage0` is the current Go compiler built by the supported Go toolchain.
 

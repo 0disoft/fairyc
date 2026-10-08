@@ -1287,3 +1287,27 @@ project commands and Linux execution remain pending.
 - This reduces full-dispatcher source bytes within the unchanged 1MiB bound,
   leaving room for the remaining type-check/HIR-lowering source partitions.
   It is source deduplication, not a whole-dispatcher candidate-C execution proof.
+
+## Type-check self-source admission (2026-10-09)
+
+- `type_check.fy` retains the owned result, value/error/table helpers, block
+  coordinator and kind dispatch. Tagged, scalar, call, access and record/control
+  expressions, statements and declaration collection now have seven helpers.
+  All eight files parse under the unchanged limits. Seven extracted regions and
+  the retained helper bodies match the previous source after qualification;
+  original source-depth accounting and contextual variant dispatch are retained.
+- Check and the rebuilt development SDK driver pass. Three focused programs
+  emit byte-identical C before/after the split and pass twelve native MSVC runs.
+  Eight type-error inputs preserve exact rejection status and diagnostics; the
+  existing later-argument borrow conflict also rejects. Evidence:
+  `evidence/candidate-type-source-split-20261009.json`,
+  `evidence/candidate-type-source-split-cli-20261009.json` and
+  `evidence/candidate-sdk-module-driver-type-split-dev-20261009.json`.
+- The full dispatcher inventory is now 157 files and 1054271 joined bytes.
+  It still reports `parser limit`; `hir_lower.fy` remains to be partitioned.
+  Import/helper overhead also puts the complete input above 1MiB, so source
+  deduplication must precede full admission. Evidence:
+  `evidence/candidate-dispatcher-admission-after-type-split-20261009.json`.
+  Release-candidate rebuilding, Linux and whole-dispatcher native execution were
+  not repeated. Public language, SDK/runtime ABI, DB, dependencies, CI runner
+  settings and all admission bounds are unchanged.
