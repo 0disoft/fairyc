@@ -22,7 +22,7 @@ fn bool qualified(ref u8[] name){var usize i=0;while(i<name.len){if(name[i]==58)
 fn bool generic_parameter(ref syntax::Parsed p,usize root){
     let n=syntax::type_at(p,root);if(n.kind!=1){return false;}
     var usize i=0;while(i<syntax::declaration_count(p)){let d=syntax::declaration_at(p,i);
-        if(d.kind==3 && d.generic_parameters!=0 && n.start>=d.start && n.end<=d.end){
+        if((d.kind==3 || d.kind==6) && d.generic_parameters!=0 && n.start>=d.start && n.end<=d.end){
             var usize j=0;while(j<syntax::generic_parameter_count(p,i)){let param=syntax::generic_parameter_at(p,i,j);
                 if(bytes::equal(syntax::source_view(p)[param.start..param.end],syntax::type_text(p,root))){return true;}j+=1;
             }

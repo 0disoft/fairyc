@@ -98,8 +98,10 @@ provider-local helper 및 nominal 인자는 원래 선언 정체성을 보존한
 `evidence/candidate-module-generics-api-20261008.json`,
 `evidence/candidate-module-generics-cli-20261008.json`. Vec/aggregate template와
 영속 package 정체성은 아직 남는다.
+46번의 스칼라 Vec AST 구체화까지 완료: 별칭은 하나의 resource 인스턴스를 공유하며 6필드와 비어 있지 않은 cleanup 본문을 함께 복제한다. 원본 SDK 바이트·공급자 위치를 보존하고, 관계없는 함수의 동명 매개변수 오탐을 수정했다. dev/release native API 근거: `evidence/candidate-sdk-vector-expand-20261008.json`. storage intrinsic의 타입 검사·owned HIR/MIR/C와 실제 Vec 실행은 남는다.
+
 47. Vec 할당·초기화된 prefix·push/pop·대여 접근·cleanup 연결.
-47번의 선행 연결로 Vec의 원본 extern 선언 6개와 정확한 linker/result/parameter 권한을 owned HIR/MIR 검사에 연결했다. cleanup의 선행 호출을 extern 선언으로 인정하지 않으며, dev/release native API에서 C prototype 6개와 권한·소스·시그니처·효과·선언 위치 변조 거부를 확인했다. 근거: `evidence/candidate-sdk-vector-foreign-20261008.json`, `evidence/candidate-sdk-vector-process-regression-20261008.json`. 실제 Vec 본문 구체화·storage 연산 실행은 아직 남음.
+47번의 선행 연결로 Vec의 원본 extern 선언 6개와 정확한 linker/result/parameter 권한을 owned HIR/MIR 검사에 연결했다. cleanup의 선행 호출을 extern 선언으로 인정하지 않으며, dev/release native API에서 C prototype 6개와 권한·소스·시그니처·효과·선언 위치 변조 거부를 확인했다. 근거: `evidence/candidate-sdk-vector-foreign-20261008.json`, `evidence/candidate-sdk-vector-process-regression-20261008.json`. 스칼라 Vec 본문 AST 구체화는 후속 근거에서 확인했으며, storage 연산과 실제 Vec 실행은 남음.
 48. Vec의 resource 원소, 할당 실패 시 donor 반환, 토큰·진단의 중첩 자원 정리.
 49. Buffer/String 할당·크기 변경·바이트 접근·소유권 전달 연결.
 50. 부분 완료: 인증된 std::process Fairy 본문과 원본 Windows 인자 runtime을 owned HIR/MIR/C에 연결. 인자 수·EXE 이름 복사·버퍼 부족의 정확한 needed·오류 시 버퍼 보존·범위 초과·한글/빈 인자를 두 후보·C 프로필과 Go 기준으로 실행. SDK 소스/심벌 사칭과 owned authority/result/layout 변조를 거부. 조합 검증에서 드러난 else 없는 if의 대여 검사 중단도 수정. 근거: evidence/candidate-sdk-foreign-api-20261008.json, evidence/candidate-sdk-process-cli-20261008.json, evidence/candidate-borrow-if-no-else-20261008.json. UTF-8 검사·콘솔 SDK 및 실제 프로젝트 CLI 통합은 남음.

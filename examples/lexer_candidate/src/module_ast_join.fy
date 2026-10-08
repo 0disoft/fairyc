@@ -9,6 +9,7 @@ import records as records;
 import attributes as attributes;
 import std::bytes as bytes;
 import std::vec as v;
+import sdk_authority as sdk;
 
 // Joins parser-accepted source owners into one exact AST arena. The published
 // source is the original bytes connected by one newline, and every declaration,
@@ -118,7 +119,8 @@ fn attributes::Argument argument(attributes::Argument a,usize offset,ref v::Vec<
 // specialization. Generic aggregate/receiver declarations remain closed here.
 fn Problem generic(ref syntax::Parsed file,usize module_index){
     var usize i=0;while(i<syntax::declaration_count(file)){let d=syntax::declaration_at(file,i);
-        if(d.generic_parameters!=0 && (d.kind!=3 || d.owner_end!=0)){return fail(4501,module_index,d.start,d.end);}
+        let bool vector=d.kind==6 && bytes::equal(syntax::source_view(file)[d.name_start..d.name_end],b"Vec") && sdk::authentic(b"std::vec",syntax::source_view(file));
+        if(d.generic_parameters!=0 && (d.kind!=3 && !vector || d.owner_end!=0)){return fail(4501,module_index,d.start,d.end);}
         i+=1;
     }
     return Problem{.code=0,.module_index=0,.start=0,.end=0};

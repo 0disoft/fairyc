@@ -405,3 +405,19 @@ before the subsequent no-else guard), `evidence/candidate-sdk-process-cli-202610
 `evidence/candidate-borrow-if-no-else-20261008.json` (before/after reproducer).
 These are bounded Windows results; Vec/storage, other SDK runtime components,
 project commands and Linux execution remain pending.
+
+
+## Authenticated scalar Vec AST specialization
+
+- Validation: `check`; one native API in development and release.
+- Evidence: `evidence/candidate-sdk-vector-expand-20261008.json`.
+- Shared aliases produce one concrete Vec resource with six cloned fields and its
+  original nonempty cleanup. Empty/len and the cleanup helper share scalar
+  specializations; original SDK bytes and module ownership are retained.
+- Closed storage operation names retain their substituted scalar arguments and
+  require authenticated SDK spans. Their HIR/MIR/C execution remains pending.
+- Resource elements, ordinary generic resources and forged SDK bytes remain
+  rejected. Uninstantiated SDK bodies are not published as executable functions.
+- A generic name is checked against locals in its caller's declaration. An
+  unrelated function parameter no longer shadows a template; a local shadow at
+  the bare call still fails E4501. Existing specialization budgets are retained.
