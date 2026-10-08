@@ -1,4 +1,5 @@
 module generic_expand;
+import candidate_limits as limits;
 import syntax as syntax;
 import scanner as scanner;
 import records as records;
@@ -83,7 +84,7 @@ let usize originals=v::len<syntax::Declaration>(declarations);let usize expressi
 pub fn syntax::Parsed expand(syntax::Parsed p){
     var bool needed=false;var usize i=0;while(i<syntax::declaration_count(ref p)){needed=needed || syntax::declaration_at(ref p,i).generic_parameters!=0;i+=1;}i=1;while(i<=syntax::expression_count(ref p)){needed=needed || syntax::expression_at(ref p,i).kind==20;i+=1;}if(!needed){return p;}
     var bytes::Buffer input=bytes::empty();assert(bytes::append(ref mut input,syntax::source_view(ref p)).is_ok);
-    let scanner::Stream stream=switch(scanner::collect(input,false,32768,1048576,256,16777216)){case .ok(s):{s}case .err(_):{return p;}};
+    let scanner::Stream stream=switch(scanner::collect(input,false,limits::program_bytes(),1048576,256,16777216)){case .ok(s):{s}case .err(_):{return p;}};
     var v::Vec<syntax::Declaration> declarations=v::empty<syntax::Declaration>();var v::Vec<ast::Node> expressions=v::empty<ast::Node>();var v::Vec<ast::Statement> statements=v::empty<ast::Statement>();var v::Vec<bodies::Entry> entries=v::empty<bodies::Entry>();var v::Vec<types::Node> types=v::empty<types::Node>();var v::Vec<syntax::Problem> problems=v::empty<syntax::Problem>();var v::Vec<records::Field> fields=v::empty<records::Field>();var v::Vec<attributes::Attribute> attributes=v::empty<attributes::Attribute>();var v::Vec<attributes::Argument> attribute_arguments=v::empty<attributes::Argument>();
     i=0;while(i<syntax::declaration_count(ref p)){assert(v::push<syntax::Declaration>(ref mut declarations,syntax::declaration_at(ref p,i)).is_ok);i+=1;}
     i=1;while(i<=syntax::expression_count(ref p)){let n=syntax::expression_at(ref p,i);assert(v::push<ast::Node>(ref mut expressions,ast::Node{.kind=n.kind,.start=n.start,.end=n.end,.token=n.token,.left=n.left,.right=n.right}).is_ok);i+=1;}

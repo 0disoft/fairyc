@@ -167,6 +167,6 @@ fn void require_spans(ref syntax::Parsed owner,ref syntax::Parsed original,usize
     assert(rejection(b"module g;fn i32 f(){return 0;}",b"module h;fn i32 g(){return f<i32>(0);}").code==9);
     var v::Vec<syntax::Parsed> many=v::empty<syntax::Parsed>();
     i=0;
-    while(i<33){assert(v::push<syntax::Parsed>(ref mut many,parsed(b"module m;")).is_ok);i+=1;}
+    while(i<257){assert(v::push<syntax::Parsed>(ref mut many,parsed(b"module m;")).is_ok);i+=1;}
     assert(switch(join::join(ref many)){case .ok(_):{let u32 zero=0;zero}case .err(p):{p.code}}==10);
 }

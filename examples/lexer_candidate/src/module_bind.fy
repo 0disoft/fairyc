@@ -1,4 +1,5 @@
 module module_bind;
+import candidate_limits as limits;
 import module_signatures as signatures;
 import module_catalog as catalog;
 import syntax as syntax;
@@ -40,6 +41,6 @@ pub fn Result<syntax::Parsed,Problem> bind(ref v::Vec<syntax::Parsed> sources,re
     i=0;while(i<syntax::field_count(ref p)){if(!v::push<records::Field>(ref mut fields,syntax::field_at(ref p,i)).is_ok){return .err(fail(11,0,0,0));}i+=1;}
     i=0;while(i<syntax::attribute_count(ref p)){if(!v::push<attributes::Attribute>(ref mut attributes,syntax::attribute_at(ref p,i)).is_ok){return .err(fail(11,0,0,0));}i+=1;}
     i=0;while(i<syntax::attribute_argument_count(ref p)){if(!v::push<attributes::Argument>(ref mut arguments,syntax::attribute_argument_at(ref p,i)).is_ok){return .err(fail(11,0,0,0));}i+=1;}
-    var bytes::Buffer input=bytes::empty();if(!bytes::append(ref mut input,syntax::source_view(ref p)).is_ok){return .err(fail(11,0,0,0));}let stream=switch(scanner::collect(input,false,32768,1048576,256,16777216)){case .ok(s):{s}case .err(_):{return .err(fail(11,0,0,0));}};
+    var bytes::Buffer input=bytes::empty();if(!bytes::append(ref mut input,syntax::source_view(ref p)).is_ok){return .err(fail(11,0,0,0));}let stream=switch(scanner::collect(input,false,limits::program_bytes(),1048576,256,16777216)){case .ok(s):{s}case .err(_):{return .err(fail(11,0,0,0));}};
     return .ok(syntax::assemble(stream,declarations,problems,expressions,entries,statements,types,fields,attributes,arguments));
 }

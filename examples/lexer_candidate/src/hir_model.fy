@@ -1,4 +1,5 @@
 module hir_model;
+import candidate_limits as limits;
 import c_abi_types as c_types;
 import pointer_types as pointers;
 import raw_view_intrinsics as raw;
@@ -75,7 +76,7 @@ pub resource Program {
     usize module_index; bool success;
     cleanup { }
 }
-// Hard caps: source 32768 bytes, 512 functions/declarations, 1152 bindings,
+// Hard caps: source 1048576 bytes, 512 functions/declarations, 1152 bindings,
 // 4096 expressions, 8192 statements, 8192 blocks, 32768 edges, 32768 signature
 // entries, 86016 canonical payload bytes (4096*21), recursion depth 64.
 // Errors: 1 unsuccessful input, 2 budget, 3 allocation, 4 unsupported/malformed
@@ -192,7 +193,7 @@ pub fn Result<Program,Problem> assemble_resources(bytes::Buffer source, bytes::B
     let usize nf = v::len<Function>(ref functions); let usize nb = v::len<Binding>(ref bindings);
     let usize ne = v::len<Expression>(ref expressions); let usize nt = v::len<Statement>(ref statements);
     let usize nk = v::len<Block>(ref blocks); let usize na = v::len<usize>(ref edges); let usize ntypes = v::len<Signature>(ref signatures);
-    if (ns > 32768 || np > 86016 || nf > 512 || nb > 1152 || ne > 4096 || nt > 8192 || nk > 8192 || na > 32768 || ntypes > 32768 || v::len<Drop>(ref drops)>512) { return .err(Problem { .code = 2, .start = 0, .end = ns }); }
+    if (ns > limits::program_bytes() || np > 86016 || nf > 512 || nb > 1152 || ne > 4096 || nt > 8192 || nk > 8192 || na > 32768 || ntypes > 32768 || v::len<Drop>(ref drops)>512) { return .err(Problem { .code = 2, .start = 0, .end = ns }); }
     if (!shapes::valid(ref nominal,ns,nb)) { return .err(Problem { .code = 4, .start = 0, .end = ns }); }
     if(!shapes::abi_valid(ref nominal,bytes::view(ref source))){return .err(Problem{.code=5102,.start=0,.end=ns});}
     var usize shape_index = 0;

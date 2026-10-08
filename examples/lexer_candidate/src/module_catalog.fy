@@ -1,4 +1,5 @@
 module module_catalog;
+import candidate_limits as limits;
 import syntax as syntax;
 import module_registry as scalar_modules;
 import std::bytes as bytes;
@@ -14,7 +15,7 @@ pub struct Import {usize module_index;usize start;usize end;usize path_start;usi
 pub struct Lookup {u32 code;usize item;}
 pub resource Catalog {bytes::Buffer names;bytes::Buffer sources;v::Vec<Module> modules;v::Vec<Declaration> declarations;v::Vec<Import> imports;cleanup{}}
 fn Problem fail(u32 code,usize module_index,usize start,usize end){return Problem{.code,.module_index,.start,.end};}
-fn bool append(ref mut bytes::Buffer out,ref u8[] value){return bytes::len(out)<=1048576 && value.len<=1048576-bytes::len(out) && bytes::append(out,value).is_ok;}
+fn bool append(ref mut bytes::Buffer out,ref u8[] value){return bytes::len(out)<=limits::program_bytes() && value.len<=limits::program_bytes()-bytes::len(out) && bytes::append(out,value).is_ok;}
 fn bool same(ref Catalog c,usize start,usize end,ref u8[] name){return bytes::equal(bytes::view(ref c.names)[start..end],name);}
 fn bool spelling_same(ref bytes::Buffer names,usize start,usize end,ref u8[] name){return bytes::equal(bytes::view(names)[start..end],name);}
 pub fn usize module_count(ref Catalog c){return v::len<Module>(ref c.modules);}
@@ -44,14 +45,15 @@ pub fn Lookup lookup(ref Catalog c,usize module_index,ref u8[] spelling){
 pub fn Result<Catalog,Problem> build(ref v::Vec<syntax::Parsed> sources){
     var bytes::Buffer names=bytes::empty();var bytes::Buffer source_bytes=bytes::empty();
     var v::Vec<Module> modules=v::empty<Module>();var v::Vec<Declaration> declarations=v::empty<Declaration>();var v::Vec<Import> imports=v::empty<Import>();
-    if(v::len<syntax::Parsed>(sources)==0 || v::len<syntax::Parsed>(sources)>32){return .err(fail(10,0,0,0));}
+    if(v::len<syntax::Parsed>(sources)==0 || v::len<syntax::Parsed>(sources)>limits::source_files()){return .err(fail(10,0,0,0));}
     var usize module_index=0;while(module_index<v::len<syntax::Parsed>(sources)){
         let p=v::at<syntax::Parsed>(sources,module_index);if(syntax::problem_count(p)!=0 || syntax::declaration_count(p)==0){return .err(fail(9,module_index,0,0));}
         let first=syntax::declaration_at(p,0);if(first.kind!=1){return .err(fail(9,module_index,first.start,first.end));}
         var bytes::Buffer path=bytes::empty();let u32 status=scalar_modules::normalize(syntax::source_view(p)[first.name_start..first.name_end],ref mut path);if(status!=0){return .err(fail(status,module_index,first.name_start,first.name_end));}
         if(sdk::reserved(bytes::view(ref path)) && !sdk::authentic(bytes::view(ref path),syntax::source_view(p))){return .err(fail(6801,module_index,first.name_start,first.name_end));}
         var usize n=0;while(n<v::len<Module>(ref modules)){let m=*v::at<Module>(ref modules,n);if(spelling_same(ref names,m.start,m.end,bytes::view(ref path))){return .err(fail(1,module_index,first.name_start,first.name_end));}n+=1;}
-        let usize start=bytes::len(ref names);let usize source_start=bytes::len(ref source_bytes);if(syntax::source_view(p).len>32768){return .err(fail(10,module_index,0,syntax::source_view(p).len));}
+        let usize start=bytes::len(ref names);let usize source_start=bytes::len(ref source_bytes);if(syntax::source_view(p).len>limits::source_bytes()){return .err(fail(10,module_index,0,syntax::source_view(p).len));}
+        if(syntax::source_view(p).len>limits::program_bytes()-source_start){return .err(fail(10,module_index,0,syntax::source_view(p).len));}
         if(!append(ref mut source_bytes,syntax::source_view(p)) || !append(ref mut names,bytes::view(ref path)) || !v::push<Module>(ref mut modules,Module{.start,.end=bytes::len(ref names),.source_start,.source_end=bytes::len(ref source_bytes)}).is_ok){return .err(fail(11,module_index,first.start,first.end));}
         var usize index=1;var usize count=0;while(index<syntax::declaration_count(p)){
             let d=syntax::declaration_at(p,index);if(d.kind!=2 && d.kind!=3 && d.kind!=4 && d.kind!=6 && d.kind!=7 && d.kind!=9 && d.kind!=11 || d.owner_end!=0){return .err(fail(9,module_index,d.start,d.end));}

@@ -91,7 +91,7 @@ def verify_modules(image, reference, directory, rows, run, sha, location):
         ('absolute-entry', str(source).encode('utf-8'), 'error: invalid module manifest\n'),
         ('parent-read', (relative(folder/'missing.fy')+'\n').encode('utf-8'), 'error: input file read failed\n'),
         ('path-over', b'a'*4096, 'error: file path limit (4095 UTF-8 bytes)\n'),
-        ('manifest-over', b'a'*8193, 'error: manifest limit (8192 bytes)\n'),
+        ('manifest-over', b'a'*65537, 'error: manifest limit (65536 bytes)\n'),
     ]
     manifest = folder / 'files.txt'
     for name, data, expected in cases:

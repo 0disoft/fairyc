@@ -1,4 +1,5 @@
 module mir_state;
+import candidate_limits as limits;
 import c_abi_types as c_types;
 import pointer_types as pointers;
 import reference_types as refs;
@@ -16,7 +17,7 @@ pub struct Context { m::Problem problem; usize function; usize current; usize[11
 pub fn Context empty() { return Context { .problem = m::Problem { .code = 0, .start = 0, .end = 0 }, .function = 0, .current = 0, .locals = [0;1153], .targets = [0;1153], .live=[0;1153], .pending=[0;4096], .pending_scopes=[0;4096], .pending_starts=[0;4096], .scope=0, .base=0, .keep=0, .loop_depth = 0, .loop_ids = [0;64], .breaks = [0;64], .continues = [0;64], .loop_defer_base = [0;64], .defer_count = 0, .capture_count = 0, .deferred_unsafe=[false;256], .deferred_targets = [0;256], .deferred_starts = [0;256], .deferred_ends = [0;256], .deferred_arg_starts = [0;256], .deferred_arg_counts = [0;256], .captures = [0;4096] }; }
 // Pending temporary state is indexed within one function (4096-local bound),
 // keeping branch snapshots off the 64K aggregate lane and within native stack.
-fn u32 compact(usize value){assert(value<=32768);var usize n=value;var u32 result=0;var u32 bit=1;while(n!=0){if(n%2!=0){result+=bit;}n/=2;if(n!=0){bit*=2;}}return result;}
+fn u32 compact(usize value){assert(value<=limits::program_bytes());var usize n=value;var u32 result=0;var u32 bit=1;while(n!=0){if(n%2!=0){result+=bit;}n/=2;if(n!=0){bit*=2;}}return result;}
 pub fn u8 pending(ref Context c,usize id){assert(id>c.base && id-c.base<=4096);return c.pending[id-c.base-1];}
 fn void set_pending(ref mut Context c,usize id,u8 value){assert(id>c.base && id-c.base<=4096);let usize index=id-c.base-1;c.pending[index]=value;if(value==1){let usize scope=c.scope;assert(scope<=16384);c.pending_scopes[index]=compact(scope);}}
 pub fn void release(ref mut Context c,usize id){if(id!=0 && pending(c,id)==1){set_pending(c,id,0);}}
@@ -35,7 +36,7 @@ pub fn usize local(ref mut v::Vec<m::Local> locals, ref mut Context c, u32 type,
     if (!(type >= 1 && type <= 6 || c_types::valid(type) || pointers::valid(type) || refs::valid(type) || resources::valid(type) || literals::valid(type) || type == 11 || type >= 256 && type <= 767 || arrays::valid(type) || enums::valid(type)) || c.function == 0 || start >= end) { return fail(c,4,start,end); }
     if (v::len<m::Local>(locals) >= 16384 || v::len<m::Local>(locals)-c.base>=4096) { return fail(c,2,start,end); }
     if (!v::push<m::Local>(locals,m::Local { .function = c.function, .binding, .type, .parameter, .mutable, .start, .end }).is_ok) { return fail(c,3,start,end); }
-    let usize id=v::len<m::Local>(locals);set_pending(c,id,if(binding==0){0}else{2});let usize at=id-c.base-1;assert(start<=32768);c.pending_starts[at]=compact(start);return id;
+    let usize id=v::len<m::Local>(locals);set_pending(c,id,if(binding==0){0}else{2});let usize at=id-c.base-1;assert(start<=limits::program_bytes());c.pending_starts[at]=compact(start);return id;
 }
 pub fn m::Block block(usize function, usize start, usize end) { return m::Block { .unsafe_call=false, .function, .first = 0, .last = 0, .kind = 0, .value = 0, .left = 0, .right = 0, .operator = 0, .type = 0, .target = 0, .alternative = 0, .check = 0, .callee = 0, .destination = 0, .argument_start = 0, .argument_count = 0, .trap_mask = 0, .start, .end }; }
 pub fn usize new_block(ref mut v::Vec<m::Block> blocks, ref mut Context c, usize start, usize end) {

@@ -1,4 +1,5 @@
 module module_ast_join;
+import candidate_limits as limits;
 import syntax as syntax;
 import scanner as scanner;
 import body_state as body;
@@ -127,13 +128,13 @@ fn Problem generic(ref syntax::Parsed file,usize module_index){
     return Problem{.code=0,.module_index=0,.start=0,.end=0};
 }
 
-// Limits of the joined owner: 32 inputs, 32768 joined bytes including separators,
+// Limits of the joined owner: 256 inputs, 1048576 joined bytes including separators,
 // 512 declarations, 4096 expressions, 8192 statements, 1024 entries, 4096 types,
 // 1024 fields and 4096 attributes and attribute arguments. The existing scanner
 // token, diagnostic and work budgets apply to the joined source.
 pub fn Result<syntax::Parsed,Problem> join(ref v::Vec<syntax::Parsed> sources){
     let usize count=v::len<syntax::Parsed>(sources);
-    if(count==0 || count>32){return .err(fail(10,0,0,0));}
+    if(count==0 || count>limits::source_files()){return .err(fail(10,0,0,0));}
     var bytes::Buffer joined=bytes::empty();
     var usize index=0;
     while(index<count){
@@ -142,12 +143,14 @@ pub fn Result<syntax::Parsed,Problem> join(ref v::Vec<syntax::Parsed> sources){
         if(syntax::declaration_count(file)==0 || syntax::declaration_at(file,0).kind!=1){return .err(fail(9,index,0,0));}
         let Problem rejected=generic(file,index);
         if(rejected.code!=0){return .err(rejected);}
+        let usize separator=if(index+1<count){1}else{0};
+        if(syntax::source_view(file).len>limits::source_bytes() || bytes::len(ref joined)>limits::program_bytes()-separator || syntax::source_view(file).len>limits::program_bytes()-separator-bytes::len(ref joined)){return .err(fail(10,index,0,syntax::source_view(file).len));}
         if(!bytes::append(ref mut joined,syntax::source_view(file)).is_ok){return .err(fail(11,index,0,0));}
         if(index+1<count && !bytes::append(ref mut joined,b"\n").is_ok){return .err(fail(11,index,0,0));}
-        if(bytes::len(ref joined)>32768){return .err(fail(10,index,0,syntax::source_view(file).len));}
+        if(bytes::len(ref joined)>limits::program_bytes()){return .err(fail(10,index,0,syntax::source_view(file).len));}
         index+=1;
     }
-    let scanner::Stream stream=switch(scanner::collect(joined,false,32768,1048576,256,16777216)){
+    let scanner::Stream stream=switch(scanner::collect(joined,false,limits::program_bytes(),1048576,256,16777216)){
         case .ok(value):{value}
         case .err(code):{return .err(fail(if(code==3){11}else if(code==4){10}else{9},0,0,0));}
     };

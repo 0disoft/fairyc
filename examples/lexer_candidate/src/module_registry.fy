@@ -1,4 +1,5 @@
 module module_registry;
+import candidate_limits as limits;
 import syntax as syntax;
 import effect_declarations as attributes;
 import scanner as scanner;
@@ -26,7 +27,7 @@ pub fn u32 parameter_at(ref Registry registry, usize index) { return *v::at<u32>
 pub fn u32 normalize(ref u8[] source, ref mut bytes::Buffer result) {
     var bytes::Buffer input = bytes::empty();
     if (!bytes::append(ref mut input,source).is_ok) { return 11; }
-    let scanner::Stream stream = switch(scanner::collect(input,false,32768,1048576,256,16777216)) {
+    let scanner::Stream stream = switch(scanner::collect(input,false,limits::source_bytes(),1048576,256,16777216)) {
         case .ok(value): { value } case .err(_): { return 11; }
     };
     if (scanner::diagnostic_count(ref stream) != 0) { return 9; }
@@ -64,7 +65,7 @@ pub fn Result<Registry,Problem> build(ref v::Vec<syntax::Parsed> sources) {
     var usize module_index = 0;
     while (module_index < v::len<syntax::Parsed>(sources)) {
     let ref syntax::Parsed parsed = v::at<syntax::Parsed>(sources,module_index);
-    if (module_index >= 32) { return .err(fail(10,module_index,0,0)); }
+    if (module_index >= limits::source_files()) { return .err(fail(10,module_index,0,0)); }
     if (syntax::problem_count(parsed) != 0 || syntax::declaration_count(parsed) == 0) { return .err(fail(9,module_index,0,0)); }
     let syntax::Declaration first = syntax::declaration_at(parsed,0);
     if (first.kind != 1) { return .err(fail(9,module_index,first.start,first.end)); }

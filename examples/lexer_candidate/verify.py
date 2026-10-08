@@ -228,8 +228,8 @@ def main():
                       ('empty-path', ['--tokens-file', ''], 'error: input file read failed\n'),
                       ('path-limit', ['--tokens-file', 'a' * 4096], 'error: file path limit (4095 UTF-8 bytes)\n')]
             over = directory / 'oversize.fy'
-            over.write_bytes(b'a' * 32769)
-            errors.append(('source-limit-exceeded', ['--tokens-file', str(over)], 'error: source limit (32768 bytes)\n'))
+            over.write_bytes(b'a' * 65537)
+            errors.append(('source-limit-exceeded', ['--tokens-file', str(over)], 'error: source limit (65536 bytes)\n'))
             for name, args, expected in errors:
                 before = sha(over)
                 row = run([image, *args], rows, name)

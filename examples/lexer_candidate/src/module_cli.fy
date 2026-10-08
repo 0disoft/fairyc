@@ -1,4 +1,5 @@
 module module_cli;
+import candidate_limits as limits;
 import module_registry as modules;
 import module_check as checking;
 import file_cli as files;
@@ -23,12 +24,12 @@ fn Result<bytes::Buffer,u32> manifest(ref u8[] path_bytes) {
     let ref str path = switch(text::validate_utf8(path_bytes)) { case .ok(value): { value } case .err(_): { return .err(1); } };
     var fs::File file = switch(fs::open_read_utf8(path)) { case .ok(value): { value } case .err(_): { return .err(1); } };
     var bytes::Buffer input = bytes::empty();
-    if (!bytes::resize_zeroed(ref mut input,8193).is_ok) { return .err(3); }
+    if (!bytes::resize_zeroed(ref mut input,limits::manifest_bytes()+1).is_ok) { return .err(3); }
     var usize used = 0;
     while (true) {
         let usize count = switch(fs::read(ref mut file,bytes::view_mut(ref mut input)[used..])) { case .ok(value): { value } case .err(_): { return .err(1); } };
         used += count;
-        if (used > 8192) { return .err(4); }
+        if (used > limits::manifest_bytes()) { return .err(4); }
         if (count == 0) { break; }
     }
     if (!fs::close(file).is_ok) { return .err(1); }
@@ -40,7 +41,7 @@ fn Result<bytes::Buffer,u32> manifest(ref u8[] path_bytes) {
 // Relative traversal is allowed: this is a cwd resolver, not a sandbox.
 // 1 invalid manifest, 3 allocation, 4 path bound, 5 module bound.
 pub fn u32 paths(ref u8[] source, ref mut v::Vec<Path> result) {
-    if (source.len == 0 || source.len > 8192 || !text::validate_utf8(source).is_ok) { return 1; }
+    if (source.len == 0 || source.len > limits::manifest_bytes() || !text::validate_utf8(source).is_ok) { return 1; }
     if (source.len >= 3 && source[0] == 239 && source[1] == 187 && source[2] == 191) { return 1; }
     var usize start = 0;
     while (start < source.len) {
@@ -52,7 +53,7 @@ pub fn u32 paths(ref u8[] source, ref mut v::Vec<Path> result) {
         if (stop - start > 4095) { return 4; }
         var usize byte = start;
         while (byte < stop) { if (source[byte] < 32 || source[byte] == 127 || source[byte] == 58) { return 1; } byte += 1; }
-        if (v::len<Path>(result) >= 32) { return 5; }
+        if (v::len<Path>(result) >= limits::source_files()) { return 5; }
         if (!v::push<Path>(result,Path { .start, .end = stop }).is_ok) { return 3; }
         start = if (end == source.len) { end } else { end + 1 };
     }
@@ -62,12 +63,12 @@ pub fn u32 paths(ref u8[] source, ref mut v::Vec<Path> result) {
 fn i32 execute(ref u8[] path,bool program_mode) {
     let bytes::Buffer manifest_source = switch(manifest(path)) {
         case .ok(value): { value }
-        case .err(code): { return error(if (code == 4) { "error: manifest limit (8192 bytes)\n" } else if (code == 3) { "error: buffer allocation failed\n" } else { "error: manifest file read failed\n" }); }
+        case .err(code): { return error(if (code == 4) { "error: manifest limit (65536 bytes)\n" } else if (code == 3) { "error: buffer allocation failed\n" } else { "error: manifest file read failed\n" }); }
     };
     let ref u8[] source = bytes::view(ref manifest_source);
     var v::Vec<Path> entries = v::empty<Path>();
     let u32 status = paths(source,ref mut entries);
-    if (status != 0) { return error(if (status == 3) { "error: buffer allocation failed\n" } else if (status == 4) { "error: file path limit (4095 UTF-8 bytes)\n" } else if (status == 5) { "error: module limit (32 files)\n" } else { "error: invalid module manifest\n" }); }
+    if (status != 0) { return error(if (status == 3) { "error: buffer allocation failed\n" } else if (status == 4) { "error: file path limit (4095 UTF-8 bytes)\n" } else if (status == 5) { "error: module limit (256 files)\n" } else { "error: invalid module manifest\n" }); }
     var v::Vec<syntax::Parsed> parsed_files = v::empty<syntax::Parsed>();
     var usize index = 0;
     while (index < v::len<Path>(ref entries)) {
@@ -75,9 +76,9 @@ fn i32 execute(ref u8[] path,bool program_mode) {
         let ref u8[] filename = source[entry.start..entry.end];
         let bytes::Buffer input = switch(files::load(filename)) {
             case .ok(value): { value }
-            case .err(code): { return error(if (code == 4) { "error: source limit (32768 bytes)\n" } else if (code == 3) { "error: buffer allocation failed\n" } else { "error: input file read failed\n" }); }
+            case .err(code): { return error(if (code == 4) { "error: source limit (65536 bytes)\n" } else if (code == 3) { "error: buffer allocation failed\n" } else { "error: input file read failed\n" }); }
         };
-        let scanner::Stream stream = switch(scanner::collect(input,false,32768,1048576,256,16777216)) {
+        let scanner::Stream stream = switch(scanner::collect(input,false,limits::source_bytes(),1048576,256,16777216)) {
             case .ok(value): { value } case .err(code): { return error(if (code == 4) { "error: lexer storage limit\n" } else if (code == 2) { "error: unsupported lexer input\n" } else { "error: buffer allocation failed\n" }); }
         };
         if (scanner::diagnostic_count(ref stream) > 0) { return output::errors(ref stream,filename); }

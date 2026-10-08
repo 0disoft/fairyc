@@ -1,4 +1,5 @@
 module scanner;
+import candidate_limits as limits;
 import std::vec as v;
 import std::io as io;
 import std::bytes as bytes;
@@ -114,7 +115,7 @@ fn usize symbol_width(ref u8[] input, usize start) {
 // 0 success; 2 not implemented input; 3 allocation failure; 4 candidate size limit.
 // No partial token stream escapes on any failure. Full Go budget parity is pending.
 fn i32 scan(ref u8[] input, ref mut v::Vec<Token> tokens, ref mut v::Vec<bytes::Buffer> cooked_values, ref mut v::Vec<diagnostics::Entry> errors, bool previous, usize max_bytes, usize max_tokens, usize max_diagnostics, usize max_work) {
-    if (input.len > 32768) { return 4; }
+    if (input.len > limits::program_bytes()) { return 4; }
     if (input.len > max_bytes) { return exhausted(input, 0, tokens, errors); }
     var usize token_count = 0;
     var usize diagnostic_count = 0;

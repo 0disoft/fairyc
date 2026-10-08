@@ -257,3 +257,23 @@ removed unsafe/owner/length facts; failed C publication preserves a prefix.
 Evidence: `evidence/candidate-cstr-native-20261008.json`,
 `evidence/candidate-cstr-modules-20261008.json`, and
 `evidence/candidate-cstr-api-20261008.json`. SDK bodies and Linux are still pending.
+
+## Consistent bounded source-set admission
+
+`candidate_limits.fy` owns the 64 KiB per-file, 1 MiB joined-program and 256-file
+bounds. The manifest has a separate 64 KiB bound. File loading, scanner storage,
+catalog ownership, AST joining/rebinding, generic source reconstruction and
+owned HIR/MIR use these bounds consistently. Separators count toward the joined
+limit before allocation. MIR pending-temporary source positions retain offsets
+past 64 KiB without weakening their independent local/scope bounds.
+
+Three selected native API tests pass in development and release: exact 256 and
+257 inputs, exact aggregate bytes and separator overflow, and a resource program
+located after a padded 64 KiB file. The scanner's former independent 32 KiB guard
+was exposed by these tests and replaced with the shared program bound. Evidence:
+`evidence/candidate-source-limits-20261008.json`. CLI/native transport evidence is
+in `evidence/candidate-source-limits-cli-20261008.json`.
+
+This change retains independent node, declaration, binding, depth and analysis
+budgets. It admits larger input; it does not establish complete SDK-body or
+self-source compilation. Runtime/cache source identity and Linux remain pending.

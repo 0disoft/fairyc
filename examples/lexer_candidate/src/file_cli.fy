@@ -1,4 +1,5 @@
 module file_cli;
+import candidate_limits as limits;
 import scanner as scanner;
 import declaration_output as declarations;
 import name_cli as names;
@@ -26,14 +27,14 @@ pub fn Result<bytes::Buffer, u32> load(ref u8[] path_bytes) {
         case .ok(value): { value } case .err(_): { return .err(1); }
     };
     var bytes::Buffer input = bytes::empty();
-    if (!bytes::resize_zeroed(ref mut input, 32769).is_ok) { return .err(3); }
+    if (!bytes::resize_zeroed(ref mut input, limits::source_bytes()+1).is_ok) { return .err(3); }
     var usize used = 0;
     while (true) {
         let usize count = switch(fs::read(ref mut file, bytes::view_mut(ref mut input)[used..])) {
             case .ok(value): { value } case .err(_): { return .err(1); }
         };
         used += count;
-        if (used > 32768) { return .err(4); }
+        if (used > limits::source_bytes()) { return .err(4); }
         if (count == 0) { break; }
     }
     if (!fs::close(file).is_ok) { return .err(1); }
@@ -74,10 +75,10 @@ pub fn i32 run() {
     if (program_mode) { return modules::emit(path); }
     let bytes::Buffer input = switch(load(path)) {
         case .ok(value): { value }
-        case .err(code): { return error(if (code == 4) { "error: source limit (32768 bytes)\n" }
+        case .err(code): { return error(if (code == 4) { "error: source limit (65536 bytes)\n" }
             else if (code == 3) { "error: buffer allocation failed\n" } else { "error: input file read failed\n" }); }
     };
-    let scanner::Stream stream = switch(scanner::collect(input, false, 32768, 1048576, 256, 16777216)) {
+    let scanner::Stream stream = switch(scanner::collect(input, false, limits::source_bytes(), 1048576, 256, 16777216)) {
         case .ok(value): { value }
         case .err(code): { return error(if (code == 4) { "error: lexer storage limit\n" }
             else if (code == 2) { "error: unsupported lexer input\n" } else { "error: buffer allocation failed\n" }); }

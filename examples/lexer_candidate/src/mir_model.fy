@@ -1,4 +1,5 @@
 module mir_model;
+import candidate_limits as limits;
 import borrow_shapes as borrows;
 import reference_types as refs;
 import tagged_encoding as tagged;
@@ -53,7 +54,7 @@ pub resource Program {
     usize module_index; bool success;
     cleanup { }
 }
-// Construction caps: 32768 source bytes, 512 functions/targets, 16384 locals,
+// Construction caps: 1048576 source bytes, 512 functions/targets, 16384 locals,
 // 16384 blocks, 32768 operations, 65536 edges/signatures, 688128 payload bytes.
 // 1 invalid input, 2 budget, 3 allocation, 4 malformed/unsupported graph.
 pub fn usize target_count(ref Program p) { assert(p.success); return v::len<Target>(ref p.targets); }
@@ -114,7 +115,7 @@ pub fn Result<Program,Problem> assemble_resources(bytes::Buffer source, bytes::B
     let usize ns = bytes::len(ref source); let usize np = bytes::len(ref payload);
     let usize nt = v::len<Target>(ref targets); let usize ng = v::len<Signature>(ref signatures); let usize nf = v::len<Function>(ref functions);
     let usize nl = v::len<Local>(ref locals); let usize nb = v::len<Block>(ref blocks); let usize no = v::len<Operation>(ref operations); let usize ne = v::len<usize>(ref edges);
-    if (ns > 32768 || np > 688128 || nt > 512 || nf > 512 || nl > 16384 || nb > 16384 || no > 32768 || ne > 65536 || ng > 65536) { return .err(Problem { .code = 2, .start = 0, .end = ns }); }
+    if (ns > limits::program_bytes() || np > 688128 || nt > 512 || nf > 512 || nl > 16384 || nb > 16384 || no > 32768 || ne > 65536 || ng > 65536) { return .err(Problem { .code = 2, .start = 0, .end = ns }); }
     if (!shapes::valid(ref nominal,ns,1152) || v::len<Drop>(ref drops)>512) { return .err(Problem { .code = 4, .start = 0, .end = ns }); }
     if(!shapes::abi_valid(ref nominal,bytes::view(ref source))){return .err(Problem{.code=5102,.start=0,.end=ns});}
     var usize resource_count=0;var usize shape_index=0;

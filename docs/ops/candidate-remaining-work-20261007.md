@@ -143,6 +143,14 @@ evidence/candidate-result-handling-alignment-20261007.json에 새 검사·도구
 86. 실제 누락에 직접 대응하는 회귀 추가. 전체 검사 반복과 구현을 베낀 테스트 줄이기.
 87. 진행표·readiness 문서를 실제로 유지되는 구현과 실행 결과에 맞춰 갱신. 현재 약 156KB인 후보 README는 기능별 문서와 짧은 진입 안내로 분리하고, 40KB를 넘은 `type_check.fy`는 타입·식·문장 책임을 기준으로 분리할 후보로 검토. 문서 정리는 구현 단위와 묶고 별도 전체 검사 반복은 피하기.
 
+2026-10-08: 65/85번의 입력 상한 연결은 파일당 64KiB·프로그램 1MiB·256파일로 구현했다.
+스캐너·catalog·AST 재결합·HIR/MIR의 상한과 소스 위치 표현을 맞췄다.
+API 3개를 두 native 프로필로, CLI 정상 2개·오류 5개와 C native 4회로 확인했다.
+근거: `evidence/candidate-source-limits-20261008.json`,
+`evidence/candidate-source-limits-cli-20261008.json`. 별도 노드/분석량 상한과
+큰 배열·SDK 본문 연결은 계속 남는다. 87번 README 분리는 기존 60개 절을
+7개 guide 문서로 옮겨 원문·상대 링크·기존 anchor를 확인했다.
+
 ### 실제 소스로 더 구체화한 선행 작업
 
 2026-10-07 점검에서 후보 `src/*.fy`는 84개다. 아래는 기존 60/61/65/78~85/88번의
