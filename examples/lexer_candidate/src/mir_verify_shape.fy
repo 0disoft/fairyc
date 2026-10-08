@@ -14,6 +14,7 @@ import mir_verify_views as views;
 import mir_verify_enums as enums;
 import resource_identity as resources;
 import ffi_symbols as ffi;
+import sdk_scopes as sdk;
 
 pub fn m::Problem problem(u32 code, usize start, usize end) { return m::Problem { .code, .start, .end }; }
 pub fn bool local(ref m::Program p, usize id, usize function, u32 type) {
@@ -133,7 +134,12 @@ pub fn m::Problem check(ref m::Program p) {
     i = 1; while (i <= m::target_count(p)) {
         let m::Target t = m::target_at(p,i);
         if (t.effects>4095 || t.external!=t.foreign || t.module_index != m::module_index(p) || (if(t.foreign){*v::at<usize>(ref bodies,i)!=0}else{*v::at<usize>(ref bodies,i)==0})) { return problem(1001,t.start,t.end); }
-        if(t.foreign){if(!t.unsafe_call || !shapes::foreign_result(m::nominal(p),t.result) || !ffi::valid(m::foreign_text(p,i))){return problem(5106,t.start,t.end);}var usize n=0;while(n<t.signature_count){if(!ffi::scalar(m::signature_at(p,t.signature_start+n),false)){return problem(5102,t.start,t.end);}n+=1;}}else if(t.link_start!=0 || t.link_end!=0){return problem(1001,t.start,t.end);}
+        if(t.foreign){if(!t.unsafe_call || !shapes::foreign_result(m::nominal(p),t.result)){return problem(5106,t.start,t.end);}
+            let usize rule=shapes::sdk_rule(m::nominal(p),m::source_view(p),t.start,t.end,t.link_start,t.link_end);
+            if(!ffi::valid(m::foreign_text(p,i)) && rule==0){return problem(5106,t.start,t.end);}
+            if(rule!=0 && (!shapes::sdk_result(m::nominal(p),m::source_view(p),rule,t.result) || t.effects!=0 || t.signature_count!=sdk::parameter_count(rule))){return problem(5102,t.start,t.end);}
+            var usize n=0;while(n<t.signature_count){if(!ffi::scalar(m::signature_at(p,t.signature_start+n),false) || rule!=0 && m::signature_at(p,t.signature_start+n)!=sdk::parameter(rule,n)){return problem(5102,t.start,t.end);}n+=1;}
+        }else if(t.link_start!=0 || t.link_end!=0){return problem(1001,t.start,t.end);}
         var usize j = 1; while (j < i) {
             let m::Target other = m::target_at(p,j);
             if(t.foreign && other.foreign && bytes::equal(m::foreign_text(p,i),m::foreign_text(p,j))){if(t.result!=other.result || t.signature_count!=other.signature_count){return problem(5106,t.start,t.end);}var usize n=0;while(n<t.signature_count){if(m::signature_at(p,t.signature_start+n)!=m::signature_at(p,other.signature_start+n)){return problem(5106,t.start,t.end);}n+=1;}}

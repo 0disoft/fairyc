@@ -70,7 +70,8 @@ pub fn bool separate(ref h::Program p, usize point, usize start, usize end, ref 
     while (i <= h::expression_count(p)) {
         if (!charge(work)) { return false; }
         let e = h::expression_at(p,i); let u32 kind = h::expression_code(e.kind);
-        if (kind == 8) {
+        // An if without else has no alternate expression or alternate span.
+        if (kind == 8 && e.alternative != 0) {
             let b = h::block_at(p,e.block); let other = h::expression_at(p,e.alternative);
             if (inside(point,point+1,b.start,b.end) && inside(start,end,other.start,other.end) ||
                 inside(start,end,b.start,b.end) && inside(point,point+1,other.start,other.end)) { return true; }

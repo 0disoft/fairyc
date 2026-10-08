@@ -99,7 +99,7 @@ provider-local helper 및 nominal 인자는 원래 선언 정체성을 보존한
 47. Vec 할당·초기화된 prefix·push/pop·대여 접근·cleanup 연결.
 48. Vec의 resource 원소, 할당 실패 시 donor 반환, 토큰·진단의 중첩 자원 정리.
 49. Buffer/String 할당·크기 변경·바이트 접근·소유권 전달 연결.
-50. CLI의 UTF-8 검사·프로세스 인자·콘솔 출력 연결.
+50. 부분 완료: 인증된 std::process Fairy 본문과 원본 Windows 인자 runtime을 owned HIR/MIR/C에 연결. 인자 수·EXE 이름 복사·버퍼 부족의 정확한 needed·오류 시 버퍼 보존·범위 초과·한글/빈 인자를 두 후보·C 프로필과 Go 기준으로 실행. SDK 소스/심벌 사칭과 owned authority/result/layout 변조를 거부. 조합 검증에서 드러난 else 없는 if의 대여 검사 중단도 수정. 근거: evidence/candidate-sdk-foreign-api-20261008.json, evidence/candidate-sdk-process-cli-20261008.json, evidence/candidate-borrow-if-no-else-20261008.json. UTF-8 검사·콘솔 SDK 및 실제 프로젝트 CLI 통합은 남음.
 51. File open/read/write/sync/close/replace 연결.
 52. 완료: SDK enum·오류 타입을 일반 import 경로에서 해석하고 Option/Result payload에 선언 정체성을 보존. HIR은 정확한 enum 레이아웃 보존을 요구하며 MIR도 payload 타입을 검증. 인증된 std::num 원본의 숫자 파서·변환 함수와 로컬 enum 저장·분기를 실제 실행. 일반/릴리스 API 3개, CLI 정상 3개·오류 3개, 생성 C 6회 및 Go 기준 native 6회가 근거: `evidence/candidate-enum-tags-api-20261008.json`, `evidence/candidate-sdk-num-cli-20261008.json`. 30비트 복합 타입 상한은 유지하며 enum leaf는 16비트다. 두 enum leaf 등 표현 상한을 넘는 조합은 계속 거부한다. 다른 SDK 본문의 runtime 연결은 46~51번에서 진행.
 53. 부분 완료: 닫힌 language/11 효과 집합과 일반·scalar generic 함수 선언, 직접 호출·forward/재귀·defer의 권한 포함 관계 연결. owned HIR binding/MIR target에 effect bitset을 보존하며 MIR call의 제거된 권한·미지 비트를 거부. 17개 정상/오류 fixture·두 후보 프로필·native 12회 및 MIR mutation API test 통과. 근거: `evidence/candidate-resource-effects-calls-20261007.json`. 자원 cleanup 효과도 연결: 정리 권한과 중첩·Option/Result union을 정상 종료/return/덮어쓰기/반복 및 부분 임시값의 실제 drop에 적용. 이동 sender·trap·no-drop burn은 정리 권한을 요구하지 않으며 abilities/effects의 순서는 무관. 19개 fixture·native 22회·tagged drop 권한 위조 API test 통과. Go 대표 6개 중 5개 일치, literal assert(false) 뒤 효과 요구 여부는 차이로 보존해 83번에서 검토. 근거: `evidence/candidate-resource-effects-cleanup-20261007.json`. imported scalar effects 전파는 63번 부분 단위에서 완료; nominal/resource의 모듈 전파는 61~64번에서 연결.
@@ -253,5 +253,5 @@ SDK 본문 연결과 나머지 분석량 제한은 계속 남는다.
 20번 완료 후 주요 작업 99개(21~119)와 선택 검토 8개(120~127)를 구분한다. 주요 작업 모두가
 셀프호스팅 전에 끝나야 한다는 뜻은 아니며, 자기 소스의 도달 가능한 기능이 단계 전환을 결정한다.
 
-즉시 다음 작업은 **46번 SDK 인증·Vec 제네릭 레이아웃과 41번 CStr 표현형 연결**이다. 61~64번 nominal source-set와 54~55번 inert repr(C) 반환값 연결은 완료했으며, SDK/영속 package 정체성 등 남은 범위는 각 항목에 유지했다.
+즉시 다음 작업은 **46~48번 인증된 Vec template 구체화·storage 연산·자원 원소 실행**이다. 41번 CStr 표현형과 50번 process runtime의 bounded 실행은 연결했으며, 다른 SDK 본문 및 프로젝트 driver는 남는다. 61~64번 nominal source-set와 54~55번 inert repr(C) 반환값 연결은 완료했으며, SDK/영속 package 정체성 등 남은 범위는 각 항목에 유지했다.
 선택 기능은 별도 도입 판단을 거친다. 이 목록은 push·PR·설치·release를 승인하지 않는다.

@@ -14,7 +14,9 @@ File input is bounded to 64 KiB, a joined program to 1 MiB (including separators
 and a source list to 256 files. AST, depth, binding and work limits remain separate.
 `--c-modules-file` emits verified C for admitted multi-file programs; authenticated
 `std::num` bodies execute from authenticated SDK source, including enum error
-payloads. Other SDK bodies and project build/run/test integration remain in progress.
+payloads. Authenticated `std::process` bodies call the original target argument
+runtime through independently checked SDK source and signature ownership.
+Other SDK bodies and project build/run/test integration remain in progress.
 
 ## Feature guide
 

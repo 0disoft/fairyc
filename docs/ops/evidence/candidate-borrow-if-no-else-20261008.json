@@ -1,0 +1,30 @@
+{
+  "source": "module main;fn void take(ref mut u8[] value){}fn i32 main(){var u8[1] a=[0];let ref mut u8[] parent=ref mut a;take(parent[..0]);if(true){var u8[1] c=[0];take(ref mut c);}return 7;}",
+  "sourceSHA256": "d4bb29da39fde995ceeb1bcf88065ae419caa2f957a830e5dae8878b04b0ec47",
+  "executions": [
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-sdk-foreign-release.exe",
+        "--c-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\sdk-process-debug\\minimal.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 134,
+      "stdout": "",
+      "stderr": "",
+      "imageSHA256": "23333f64453f0475ccf3a1c951673fecb86a44779f92a0f0366837027df2dd0a"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-sdk-foreign-development.exe",
+        "--c-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\sdk-process-debug\\minimal.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "exit": 0,
+      "stdout": "/* fairyc.candidate-view-c/v1; C11, 64-bit transport */\n#include <stdint.h>\n#include <limits.h>\n#include <string.h>\n_Static_assert(CHAR_BIT==8 && UINTPTR_MAX==UINT64_MAX,\"requires 64-bit byte-addressed target\");\n_Static_assert(INT32_MIN==(-INT32_MAX-1) && INT64_MIN==(-INT64_MAX-1),\"requires two's complement signed integers\");\n_Noreturn void fy_runtime_trap(uint32_t category);\nstruct fy_text { const uint8_t *fy_data; uintptr_t fy_length; };\nstruct fy_bytes { const uint8_t *fy_data; uintptr_t fy_length; };\nstruct fy_bytes_mut { uint8_t *fy_data; uintptr_t fy_length; };\nstruct fy_cstr { const uint8_t *fy_data; uintptr_t fy_storage_length; };\nstruct fy_a_1035{ uint8_t fy_items[1]; };\nvoid fy_fn_1(struct fy_bytes_mut fy_l_1);\nint32_t fy_fn_2(void);\nvoid fy_fn_1(struct fy_bytes_mut fy_l_1){\n    (void)fy_l_1;\n    goto fy_b_1;\nfy_b_1:;\n    return;\n}\nint32_t fy_fn_2(void){\n    struct fy_a_1035 fy_l_2;\n    memset(&fy_l_2,0,sizeof(fy_l_2));\n    (void)fy_l_2;\n    struct fy_bytes_mut fy_l_3={0};\n    (void)fy_l_3;\n    struct fy_a_1035 fy_l_4;\n    memset(&fy_l_4,0,sizeof(fy_l_4));\n    (void)fy_l_4;\n    uint8_t fy_l_5=0;\n    (void)fy_l_5;\n    struct fy_a_1035 fy_l_6;\n    memset(&fy_l_6,0,sizeof(fy_l_6));\n    (void)fy_l_6;\n    struct fy_bytes_mut fy_l_7={0};\n    (void)fy_l_7;\n    struct fy_bytes_mut fy_l_8={0};\n    (void)fy_l_8;\n    uintptr_t fy_l_9=0;\n    (void)fy_l_9;\n    uintptr_t fy_l_10=0;\n    (void)fy_l_10;\n    uintptr_t fy_l_11=0;\n    (void)fy_l_11;\n    struct fy_bytes_mut fy_l_12={0};\n    (void)fy_l_12;\n    int32_t fy_l_13=0;\n    (void)fy_l_13;\n    uint8_t fy_l_14=0;\n    (void)fy_l_14;\n    struct fy_a_1035 fy_l_15;\n    memset(&fy_l_15,0,sizeof(fy_l_15));\n    (void)fy_l_15;\n    struct fy_bytes_mut fy_l_16={0};\n    (void)fy_l_16;\n    int32_t fy_l_17=0;\n    (void)fy_l_17;\n    goto fy_b_2;\nfy_b_2:;\n    fy_l_5 = ((uint8_t)UINT32_C(0));\n    fy_l_6=(struct fy_a_1035){.fy_items={fy_l_5}};\n    fy_l_2 = fy_l_6;\n    fy_l_7=(struct fy_bytes_mut){fy_l_2.fy_items,((uintptr_t)1)};\n    fy_l_3 = fy_l_7;\n    fy_l_8 = fy_l_3;\n    fy_l_9 = ((uintptr_t)UINT64_C(0));\n    fy_l_10 = fy_l_9;\n    fy_l_11 = ((uintptr_t)UINT64_C(0));\n    volatile uintptr_t fy_start_12=fy_l_10,fy_end_12=fy_l_11;\n    if(fy_start_12>fy_end_12||fy_end_12>fy_l_8.fy_length)fy_runtime_trap(UINT32_C(6));\n    fy_l_12=(struct fy_bytes_mut){fy_l_8.fy_data+fy_start_12,fy_end_12-fy_start_12};\n    fy_fn_1(fy_l_12);\n    goto fy_b_3;\nfy_b_3:;\n    fy_l_13 = INT32_C(1);\n    goto fy_b_4;\nfy_b_4:;\n    fy_l_14 = ((uint8_t)UINT32_C(0));\n    fy_l_15=(struct fy_a_1035){.fy_items={fy_l_14}};\n    fy_l_4 = fy_l_15;\n    fy_l_16=(struct fy_bytes_mut){fy_l_4.fy_items,((uintptr_t)1)};\n    fy_fn_1(fy_l_16);\n    goto fy_b_6;\nfy_b_6:;\n    goto fy_b_7;\nfy_b_7:;\n    fy_l_17 = INT32_C(7);\n    return fy_l_17;\n}\nint32_t fy_candidate_entry(void){return fy_fn_2();}\n#ifndef FY_CANDIDATE_NO_MAIN\nint main(void){return (int)fy_candidate_entry();}\n#endif\n",
+      "stderr": "",
+      "imageSHA256": "ebb8008043c06b25da86d94352dfb53961f9c8373f5149a15401d8ae76df9e83"
+    }
+  ]
+}

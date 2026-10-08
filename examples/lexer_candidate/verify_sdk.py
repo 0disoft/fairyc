@@ -18,6 +18,7 @@ def main():
     ap.add_argument("--exact", action="append", required=True)
     ap.add_argument("--profile", choices=("both", "development", "release"), default="both")
     ap.add_argument("--append", action="store_true")
+    ap.add_argument("--input", action="append", type=Path, default=[])
     args = ap.parse_args()
     compiler = Path(args.compiler).resolve()
     receipt = Path(args.receipt).resolve()
@@ -54,6 +55,7 @@ def main():
             if release:
                 argv.append("--release")
             argv.extend(["--", str(REPO / "internal/sdkstdlib/sources/optional/std/vec.fy")])
+            argv.extend(str(p.resolve()) for p in args.input)
             # Each exact test has its own C compilation. Bound the whole selection
             # separately and retain raw failure evidence before asserting success.
             timeout = max(360, 240 * len(args.exact) + 90)

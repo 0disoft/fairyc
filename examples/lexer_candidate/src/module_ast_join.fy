@@ -185,7 +185,10 @@ pub fn Result<syntax::Parsed,Problem> join(ref v::Vec<syntax::Parsed> sources){
         let usize argument_base=v::len<attributes::Argument>(ref arguments);
         var usize at=0;
         while(at<syntax::declaration_count(file)){
-            if(!v::push<syntax::Declaration>(ref mut declarations,declaration(syntax::declaration_at(file,at),offset,expression_base,statement_base,type_base,entry_base,field_base,attribute_base)).is_ok){return .err(fail(11,index,0,0));}
+            var syntax::Declaration d=declaration(syntax::declaration_at(file,at),offset,expression_base,statement_base,type_base,entry_base,field_base,attribute_base);
+            // A joined module owns the complete original file, including trivia.
+            if(d.kind==1){d.start=offset;d.end=offset+syntax::source_view(file).len;}
+            if(!v::push<syntax::Declaration>(ref mut declarations,d).is_ok){return .err(fail(11,index,0,0));}
             at+=1;}
         at=1;
         while(at<=syntax::expression_count(file)){

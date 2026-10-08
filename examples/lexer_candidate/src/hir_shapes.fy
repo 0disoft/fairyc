@@ -13,14 +13,23 @@ import resource_properties as properties;
 import ffi_symbols as ffi;
 import std::bytes as bytes;
 import std::vec as v;
+import sdk_scopes as sdk;
 
 // Source-independent nominal layout facts. Field IDs are one-based; shape type
 // IDs preserve 256 + declaration index. Every name/span indexes owned HIR bytes.
 pub struct Shape { u32 type; usize binding; usize field_start; usize field_count; bool public; }
 pub struct Field { u32 owner; u32 type; usize start; usize end; usize payload_start; usize payload_count; }
 pub struct Abi {u32 type;usize declaration;usize name_start;usize name_end;usize marker_start;usize marker_end;}
-pub resource Table { v::Vec<Shape> shapes; v::Vec<Field> fields;v::Vec<Abi> abi; cleanup { } }
-pub fn Table empty() { return Table { .shapes = v::empty<Shape>(), .fields = v::empty<Field>(),.abi=v::empty<Abi>() }; }
+pub resource Table { v::Vec<Shape> shapes; v::Vec<Field> fields;v::Vec<Abi> abi;v::Vec<sdk::Scope> sdk_scopes; cleanup { } }
+pub fn Table empty() { return Table { .shapes = v::empty<Shape>(), .fields = v::empty<Field>(),.abi=v::empty<Abi>(),.sdk_scopes=v::empty<sdk::Scope>() }; }
+pub fn usize sdk_count(ref Table p){return v::len<sdk::Scope>(ref p.sdk_scopes);}
+pub fn sdk::Scope sdk_at(ref Table p,usize index){return *v::at<sdk::Scope>(ref p.sdk_scopes,index);}
+pub fn usize sdk_rule(ref Table p,ref u8[] source,usize start,usize end,usize link_start,usize link_end){return sdk::foreign_owned(source,ref p.sdk_scopes,start,end,link_start,link_end);}
+pub fn bool sdk_result(ref Table p,ref u8[] source,usize rule,u32 type){
+    if(rule==1){return type==5;}if(rule!=2){return false;}let usize a=abi_find(p,type);let usize s=find(p,type);if(a==0 || s==0){return false;}
+    let abi=abi_at(p,a-1);if(!sdk::result_owned(source,ref p.sdk_scopes,abi.name_start,abi.name_end)){return false;}
+    let shape=at(p,s-1);return shape.field_count==2 && field_at(p,shape.field_start+1).type==4 && field_at(p,shape.field_start+2).type==5;
+}
 pub fn usize abi_count(ref Table p){return v::len<Abi>(ref p.abi);}
 pub fn Abi abi_at(ref Table p,usize index){return *v::at<Abi>(ref p.abi,index);}
 pub fn usize abi_find(ref Table p,u32 type){var usize i=0;while(i<abi_count(p)){if(abi_at(p,i).type==type){return i+1;}i+=1;}return 0;}
@@ -39,6 +48,7 @@ fn bool abi_marker(ref u8[] input){var usize i=abi_trivia(input,0);var usize par
 // ABI permission is tied to owned declaration/name/attribute bytes and a
 // rechecked closed field layout, never a caller-supplied boolean by itself.
 pub fn bool abi_valid(ref Table p,ref u8[] source){
+    if(!sdk::valid(source,ref p.sdk_scopes)){return false;}
     if(abi_count(p)>count(p)){return false;}var usize i=0;
     while(i<abi_count(p)){let a=abi_at(p,i);let usize slot=find(p,a.type);
         if(!nominal::valid(a.type) || slot==0 || a.declaration!=(a.type-255) as usize || a.name_start>=a.name_end || a.name_end>source.len || a.marker_start>=a.marker_end || a.marker_end>a.name_start){return false;}
@@ -138,13 +148,15 @@ pub fn bool valid(ref Table p, usize source_bytes, usize bindings) {
     var u8[512] colors = [0;512]; i = 0;
     while (i < count(p)) { if (!visit(p,i,ref mut colors[..],0)) { return false; } i += 1; } return true;
 }
-pub fn Table assemble(v::Vec<Shape> shapes, v::Vec<Field> fields) { return Table { .shapes, .fields,.abi=v::empty<Abi>() }; }
-pub fn Table assemble_abi(v::Vec<Shape> shapes,v::Vec<Field> fields,v::Vec<Abi> abi){return Table{.shapes,.fields,.abi};}
+pub fn Table assemble(v::Vec<Shape> shapes, v::Vec<Field> fields) { return Table { .shapes, .fields,.abi=v::empty<Abi>(),.sdk_scopes=v::empty<sdk::Scope>() }; }
+pub fn Table assemble_abi(v::Vec<Shape> shapes,v::Vec<Field> fields,v::Vec<Abi> abi){return Table{.shapes,.fields,.abi,.sdk_scopes=v::empty<sdk::Scope>()};}
+pub fn Table assemble_sdk(v::Vec<Shape> shapes,v::Vec<Field> fields,v::Vec<Abi> abi,v::Vec<sdk::Scope> sdk_scopes){return Table{.shapes,.fields,.abi,.sdk_scopes};}
 pub fn Result<Table,u32> copy(ref Table p) {
     var v::Vec<Shape> records = v::empty<Shape>(); var v::Vec<Field> fields = v::empty<Field>();
     var usize i = 0;
     while (i < count(p)) { if (!v::push<Shape>(ref mut records,at(p,i)).is_ok) { return .err(3); } i += 1; }
     i = 1; while (i <= field_count(p)) { if (!v::push<Field>(ref mut fields,field_at(p,i)).is_ok) { return .err(3); } i += 1; }
     var v::Vec<Abi> abi=v::empty<Abi>();i=0;while(i<abi_count(p)){if(!v::push<Abi>(ref mut abi,abi_at(p,i)).is_ok){return .err(3);}i+=1;}
-    return .ok(assemble_abi(records,fields,abi));
+    var v::Vec<sdk::Scope> scopes=v::empty<sdk::Scope>();i=0;while(i<sdk_count(p)){if(!v::push<sdk::Scope>(ref mut scopes,sdk_at(p,i)).is_ok){return .err(3);}i+=1;}
+    return .ok(assemble_sdk(records,fields,abi,scopes));
 }

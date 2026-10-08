@@ -7,6 +7,7 @@ import ffi_symbols as symbols;
 import nominal_identity as nominal;
 import repr_c_declarations as repr;
 import std::bytes as bytes;
+import sdk_scopes as sdk;
 pub struct Info {u32 code;usize start;usize end;usize link_start;usize link_end;}
 fn u32 scalar_type(ref syntax::Parsed p,usize root){
     if(root==0){return 0;}let u32 c_type=c_types::resolve(p,root);if(c_types::valid(c_type)){return c_type;}if(syntax::type_at(p,root).kind==11 || syntax::type_at(p,root).kind==12){return pointers::resolve(p,root);}if(syntax::type_at(p,root).kind!=1){return 0;}let text=syntax::type_text(p,root);
@@ -33,5 +34,5 @@ pub fn Info read_result(ref syntax::Parsed p,usize index,bool admitted_result){
         if(raw.len<3 || raw[0]!=34 || raw[raw.len-1]!=34){info.code=5106;info.start=a.start;info.end=a.end;return info;}
         info.link_start=arg.start+1;info.link_end=arg.end-1;
     }i+=1;}
-    if(!symbols::valid(syntax::source_view(p)[info.link_start..info.link_end])){info.code=5106;info.start=info.link_start;info.end=info.link_end;}return info;
+    if(!symbols::valid(syntax::source_view(p)[info.link_start..info.link_end]) && !sdk::parsed_foreign(p,index,info.link_start,info.link_end)){info.code=5106;info.start=info.link_start;info.end=info.link_end;}return info;
 }

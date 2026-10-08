@@ -8,6 +8,7 @@ import name_resolution as names;
 import syntax as syntax;
 import repr_c_declarations as repr;
 import std::vec as v;
+import sdk_scopes as sdk;
 
 pub fn Result<shapes::Table,u32> collect(ref typing::Typed input) {
     let ref names::Resolved resolved = typing::resolved(input);
@@ -51,5 +52,6 @@ pub fn Result<shapes::Table,u32> collect(ref typing::Typed input) {
         index+=1;
     }
     let u32 array_code=arrays::collect(input,ref mut records,ref mut fields);if(array_code!=0){return .err(array_code);}
-    return .ok(shapes::assemble_abi(records,fields,abi));
+    let scopes=switch(sdk::collect(parsed)){case .ok(s):{s}case .err(code):{return .err(code);}};
+    return .ok(shapes::assemble_sdk(records,fields,abi,scopes));
 }

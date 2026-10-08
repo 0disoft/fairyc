@@ -346,3 +346,36 @@ outcomes. Evidence: `evidence/candidate-enum-tags-api-20261008.json` and
 SDK Vec specialization, storage intrinsics, allocation/file/console runtime
 symbols and the candidate project driver remain pending. This numeric-body unit
 does not establish complete SDK compilation or self-hosting.
+
+## Authenticated process argument runtime
+
+`sdk_scopes.fy` retains exact SDK file intervals in the owned shape table. Joined
+module intervals include original leading/trailing trivia; SDK authentication
+rehashes those unchanged bytes. HIR publication and independent MIR verification
+require the actual process declaration/linker positions, zero raw effects,
+exact parameter count/types, and the result's authenticated repr(C) field layout.
+An ordinary module cannot acquire a reserved runtime symbol merely by importing
+the real SDK. Scope records survive parser/typed owner removal and HIR/MIR copies.
+
+The original `std::process` Fairy bodies now execute through module binding,
+HIR/MIR and generated C against the original Windows argument runtime. Native
+programs check the argument count, executable-name copy, exact buffer-shortage
+length, unchanged failure buffer, out-of-range status, Korean bytes and an empty
+forwarded argument. Go-bootstrap reference runs exercise the same assertions.
+Modified SDK bytes, spoofed std modules and stolen linker names fail without C
+output. An API test in both native profiles rejects removed scope authority,
+changed result types/layouts and modified source bytes before C publication.
+
+The combined case exposed an existing borrow-analysis crash: `separate` queried
+the nonexistent alternate expression of an if without else. The guard now skips
+that nonexistent arm; it neither separates a live loan nor removes competing
+access checks. A 180-byte ordinary-source reproducer failed with status 134 in
+the previous candidate and emits/runs successfully after the guard. The same
+regression is included in the process CLI lane.
+
+Evidence: `evidence/candidate-sdk-foreign-api-20261008.json` (SDK authority tests
+before the subsequent no-else guard), `evidence/candidate-sdk-process-cli-20261008.json`
+(final candidate source and image identities), and
+`evidence/candidate-borrow-if-no-else-20261008.json` (before/after reproducer).
+These are bounded Windows results; Vec/storage, other SDK runtime components,
+project commands and Linux execution remain pending.

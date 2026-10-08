@@ -1,5 +1,6 @@
 module hir_model;
 import candidate_limits as limits;
+import sdk_scopes as sdk;
 import c_abi_types as c_types;
 import pointer_types as pointers;
 import raw_view_intrinsics as raw;
@@ -209,8 +210,11 @@ pub fn Result<Program,Problem> assemble_resources(bytes::Buffer source, bytes::B
     var usize i = 0;
     while (i < nb) {
         let Binding b = *v::at<Binding>(ref bindings,i);
-        if(binding_code(b.kind)==11){if(!b.unsafe_call || b.link_start>=b.link_end || b.link_end>ns || !ffi::valid(bytes::view(ref source)[b.link_start..b.link_end]) || !shapes::foreign_result(ref nominal,type_code(b.type))){return .err(Problem{.code=5106,.start=b.start,.end=b.end});}
-            var usize n=0;while(n<b.signature_count){if(b.signature_start+n>=ntypes || !ffi::scalar(type_code(v::at<Signature>(ref signatures,b.signature_start+n).type),false)){return .err(Problem{.code=5102,.start=b.start,.end=b.end});}n+=1;}
+        if(binding_code(b.kind)==11){if(!b.unsafe_call || b.link_start>=b.link_end || b.link_end>ns || !shapes::foreign_result(ref nominal,type_code(b.type))){return .err(Problem{.code=5106,.start=b.start,.end=b.end});}
+            let usize rule=shapes::sdk_rule(ref nominal,bytes::view(ref source),b.start,b.end,b.link_start,b.link_end);
+            if(!ffi::valid(bytes::view(ref source)[b.link_start..b.link_end]) && rule==0){return .err(Problem{.code=5106,.start=b.start,.end=b.end});}
+            if(rule!=0 && (!shapes::sdk_result(ref nominal,bytes::view(ref source),rule,type_code(b.type)) || b.effects!=0 || b.signature_count!=sdk::parameter_count(rule))){return .err(Problem{.code=5102,.start=b.start,.end=b.end});}
+            var usize n=0;while(n<b.signature_count){if(b.signature_start+n>=ntypes || !ffi::scalar(type_code(v::at<Signature>(ref signatures,b.signature_start+n).type),false) || rule!=0 && type_code(v::at<Signature>(ref signatures,b.signature_start+n).type)!=sdk::parameter(rule,n)){return .err(Problem{.code=5102,.start=b.start,.end=b.end});}n+=1;}
             var usize other=0;while(other<i){let old=*v::at<Binding>(ref bindings,other);if(binding_code(old.kind)==11 && old.link_end<=ns && bytes::equal(bytes::view(ref source)[old.link_start..old.link_end],bytes::view(ref source)[b.link_start..b.link_end])){if(type_code(old.type)!=type_code(b.type) || old.signature_count!=b.signature_count){return .err(Problem{.code=5106,.start=b.start,.end=b.end});}n=0;while(n<b.signature_count){if(type_code(v::at<Signature>(ref signatures,old.signature_start+n).type)!=type_code(v::at<Signature>(ref signatures,b.signature_start+n).type)){return .err(Problem{.code=5106,.start=b.start,.end=b.end});}n+=1;}}other+=1;}
         }else if(b.link_start!=0 || b.link_end!=0){return .err(Problem{.code=4,.start=b.start,.end=b.end});}
         if (b.must_use && (binding_code(b.kind)!=1 && binding_code(b.kind)!=5 && binding_code(b.kind)!=11 || !must_use::eligible(type_code(b.type))) || b.effects>4095 || (b.effects!=0 && !function_kind(b.kind) && binding_code(b.kind)!=5 && binding_code(b.kind)!=8 && binding_code(b.kind)!=11) || b.start > b.end || b.end > ns || b.owner > nb || type_code(b.type) == type_code(.Invalid) || type_code(b.type) == type_code(.Callable) || b.signature_start > ntypes || b.signature_count > ntypes - b.signature_start) { return .err(Problem { .code = 4, .start = b.start, .end = b.end }); }
