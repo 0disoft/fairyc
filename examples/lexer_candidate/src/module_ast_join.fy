@@ -11,37 +11,16 @@ import std::bytes as bytes;
 import std::vec as v;
 import sdk_authority as sdk;
 
-// Joins parser-accepted source owners into one exact AST arena. The published
-// source is the original bytes connected by one newline, and every declaration,
-// expression, statement, type, entry, field, attribute and argument is copied
-// from actual parser-owned syntax with its IDs and byte spans shifted by the
-// cumulative arena and source offsets. Names are never substituted, no input is
-// reparsed textually, and no syntax-derived spelling is synthesized.
-//
-// Scanner token IDs are remapped by the exact joined position of the original
-// token start. A separator newline can merge neighbouring trivia into one joined
-// trivia token, so a file token that does not start at its shifted position maps
-// to the joined token whose span contains it; significant tokens always start at
-// the shifted position and never move.
-//
-// Problem positions are original module-local byte offsets inside the failing
-// input; joined offsets exist only in the returned owner.
-// 9 unsupported or inconsistent input, 10 limit, 11 allocation.
+// Exact span/arena remapping and budgets: docs/architecture/candidate-source-join-v0.md.
 pub struct Problem { u32 code; usize module_index; usize start; usize end; }
 fn Problem fail(u32 code,usize module_index,usize start,usize end){return Problem{.code,.module_index,.start,.end};}
 
-// Always-present spans shift by the source offset. Optional spans and one-based
-// or zero-based arena references keep zero as absent, so only real values move.
 fn usize moved(usize value,usize offset){return value+offset;}
 fn usize present(usize value,usize offset){return if(value==0){0}else{value+offset};}
 fn usize linked(usize value,usize base){return if(value==0){0}else{value+base};}
 fn usize indexed(usize count,usize value,usize base){return if(count==0){0}else{value+base};}
 fn usize token_at(ref v::Vec<usize> tokens,usize id){assert(id<v::len<usize>(tokens));return *v::at<usize>(tokens,id);}
 
-// Declaration holds only spans and arena references: expression/body/result/generic
-// are one-based IDs, entry_start is a zero-based slot, and field_start and
-// attribute_start are zero-based arena slots. cleanup_attribute_* is the cleanup
-// attribute range. name_start is zero only for static_assert and state declarations.
 fn syntax::Declaration declaration(syntax::Declaration d,usize offset,usize expressions,usize statements,usize type_base,usize entries,usize fields,usize attributes_base){
     return syntax::Declaration{
         .cleanup_attribute_start=indexed(d.cleanup_attribute_count,d.cleanup_attribute_start,attributes_base),.cleanup_attribute_count=d.cleanup_attribute_count,
@@ -57,9 +36,6 @@ fn syntax::Declaration declaration(syntax::Declaration d,usize offset,usize expr
     };
 }
 
-// Kind 12/14/31 retain a block statement in left; kind 18 retains its arm body
-// statement in right; kind 20/23 retain a type root in right. Every other non-zero
-// left/right is an expression ID, and token is always a significant token index.
 fn body::Node expression(syntax::Expression n,usize offset,usize expressions,usize statements,usize type_base,ref v::Vec<usize> tokens){
     let usize left=if(n.kind==12 || n.kind==14 || n.kind==31){linked(n.left,statements)}else{linked(n.left,expressions)};
     var usize right=linked(n.right,expressions);
@@ -67,10 +43,6 @@ fn body::Node expression(syntax::Expression n,usize offset,usize expressions,usi
     return body::Node{.kind=n.kind,.start=moved(n.start,offset),.end=moved(n.end,offset),.token=token_at(tokens,n.token),.left,.right};
 }
 
-// Statement references: expression and target are expression IDs, first is a
-// statement ID, entry is an entry ID and operator is an assignment token. Only
-// second depends on kind: block count for 1, statement IDs for 7/14/15, statement
-// header/body links, and the item type for 18.
 fn body::Statement statement(syntax::Statement s,usize offset,usize expressions,usize statements,usize type_base,usize entries,ref v::Vec<usize> tokens){
     var usize second=s.second;
     if(s.kind==7 || s.kind==14 || s.kind==15){second=linked(s.second,statements);}else if(s.kind==18){second=linked(s.second,type_base);}
@@ -80,13 +52,10 @@ fn body::Statement statement(syntax::Statement s,usize offset,usize expressions,
         .second,.entry=linked(s.entry,entries),.operator};
 }
 
-// Every type node keeps left/right as type roots or argument links.
 fn types::Node type_node(types::Node n,usize offset,usize type_base){
     return types::Node{.kind=n.kind,.start=moved(n.start,offset),.end=moved(n.end,offset),.left=linked(n.left,type_base),.right=linked(n.right,type_base)};
 }
 
-// Entry name and type spans are zero for return and inferred bindings; id keeps the
-// one-based slot numbering that entry_start indexes.
 fn bodies::Entry entry(syntax::Entry e,usize id,usize offset,usize expressions,usize type_base){
     return bodies::Entry{.kind=e.kind,.start=moved(e.start,offset),.end=moved(e.end,offset),
         .name_start=present(e.name_start,offset),.name_end=present(e.name_end,offset),
@@ -94,8 +63,6 @@ fn bodies::Entry entry(syntax::Entry e,usize id,usize offset,usize expressions,u
         .type_root=linked(e.type_root,type_base),.expression=linked(e.expression,expressions),.id};
 }
 
-// Payload fields precede their enum member in the shared field arena, so the
-// member index payload_start+payload_count shifts with the same field base.
 fn records::Field field(records::Field f,usize offset,usize type_base,usize fields_base){
     return records::Field{.kind=f.kind,.start=moved(f.start,offset),.end=moved(f.end,offset),
         .name_start=moved(f.name_start,offset),.name_end=moved(f.name_end,offset),
@@ -115,8 +82,6 @@ fn attributes::Argument argument(attributes::Argument a,usize offset,ref v::Vec<
     return attributes::Argument{.kind=a.kind,.start=moved(a.start,offset),.end=moved(a.end,offset),.token=token_at(tokens,a.token)};
 }
 
-// Scalar function templates retain original source ownership until binding and
-// specialization. Generic aggregate/receiver declarations remain closed here.
 fn Problem generic(ref syntax::Parsed file,usize module_index){
     var usize i=0;while(i<syntax::declaration_count(file)){let d=syntax::declaration_at(file,i);
         let bool vector=d.kind==6 && bytes::equal(syntax::source_view(file)[d.name_start..d.name_end],b"Vec") && sdk::authentic(b"std::vec",syntax::source_view(file));
@@ -126,10 +91,6 @@ fn Problem generic(ref syntax::Parsed file,usize module_index){
     return Problem{.code=0,.module_index=0,.start=0,.end=0};
 }
 
-// Limits of the joined owner: 256 inputs, 1048576 joined bytes including separators,
-// 512 declarations, 16384 expressions, 8192 statements, 1024 entries, 4096 types,
-// 1024 fields and 4096 attributes and attribute arguments. The existing scanner
-// token, diagnostic and work budgets apply to the joined source.
 pub fn Result<syntax::Parsed,Problem> join(ref v::Vec<syntax::Parsed> sources){
     let usize count=v::len<syntax::Parsed>(sources);
     if(count==0 || count>limits::source_files()){return .err(fail(10,0,0,0));}

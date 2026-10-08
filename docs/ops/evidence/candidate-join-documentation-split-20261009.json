@@ -1,0 +1,18 @@
+{
+  "schema": "fairyc.candidate-join-documentation-split/v1",
+  "passed": true,
+  "codeIdentical": true,
+  "originalCommit": "12ee2b59cef04f3ff5db8e5d0ba338351feacfe8",
+  "movedParagraphs": 10,
+  "savedNormalizedSourceBytes": 2816,
+  "source": {
+    "path": "examples/lexer_candidate/src/module_ast_join.fy",
+    "bytes": 13477,
+    "sha256": "a670824b9496e2a0faf4c0fbd05d6bc39348b7e41a0a6550eea4fe6b780dea2a"
+  },
+  "documentation": {
+    "path": "docs/architecture/candidate-source-join-v0.md",
+    "sha256": "1499aef54bf4442dfb6fa3ba531683789efaf7fff5771992d6cc6eb4e0a680d1"
+  },
+  "limitsChanged": false
+}
