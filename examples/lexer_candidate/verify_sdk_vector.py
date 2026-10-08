@@ -12,6 +12,8 @@ SDK = REPO / "internal/sdkstdlib/sources/optional/std/vec.fy"
 SUITE = "vector-storage"
 TRAPS = {}
 CASE_OBSERVER = Path(__file__)
+RUNTIME_NAMES = ("stage0_system_heap.c", "stage0_vector_storage.c")
+PREAMBLE = "module main;import std::vec as v;"
 FOREIGN = """
 unsafe extern C fn usize fixture_live();
 unsafe extern C fn void fixture_fail_next();
@@ -154,7 +156,7 @@ def main():
     receipt = args.receipt.resolve()
     rows, jobs = [], []
     passed = False
-    runtime_paths = [REPO / "internal/cstdlib" / p for p in ("stage0_system_heap.c", "stage0_vector_storage.c")]
+    runtime_paths = [REPO / "internal/cstdlib" / p for p in RUNTIME_NAMES]
     foreign = output / "runtime.c"
     foreign.write_text(PREFIX + "\n".join(p.read_text(encoding="utf-8") for p in runtime_paths) + SUFFIX, encoding="utf-8")
 
@@ -171,14 +173,14 @@ def main():
             stdout, stderr = p.communicate(timeout=30)
             rows.append(dict(argv=[str(x) for x in argv], cwd=str(REPO), exit=p.returncode,
                              stdout=stdout, stderr=stderr, timedOut=True, timeoutSeconds=240))
-            raise RuntimeError("Vec observer timed out")
+            raise RuntimeError(f"{SUITE} observer timed out")
         row = dict(argv=[str(x) for x in argv], cwd=str(REPO), exit=p.returncode, stdout=stdout, stderr=stderr)
         rows.append(row)
         return row
 
     def manifest(name, body):
         source = output / (name + ".fy")
-        source.write_text("module main;import std::vec as v;" + body, encoding="utf-8")
+        source.write_text(PREAMBLE + body, encoding="utf-8")
         m = output / (name + ".txt")
         paths = [source.relative_to(REPO).as_posix(), SDK.relative_to(REPO).as_posix()]
         if name == "provider-first-fields":
@@ -222,7 +224,7 @@ def main():
             lock=identity(REPO / "examples/lexer_candidate/fairy.lock"), executions=rows,
             native=json.loads(native_report.read_text(encoding="utf-8")) if passed else [],
             linuxValidated=False), ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    print(f"PASS: {len(CASES)} Vec programs, {len(REJECT)} rejections, {len(native)} native runs")
+    print(f"PASS: {len(CASES)} {SUITE} programs, {len(REJECT)} rejections, {len(native)} native runs")
 
 
 if __name__ == "__main__":

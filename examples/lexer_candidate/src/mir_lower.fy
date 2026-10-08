@@ -11,6 +11,7 @@ import hir_view_check as views;
 import hir_shapes as shapes;
 import mir_model as m;
 import mir_state as state;
+import mir_ownership_snapshot as snapshots;
 import mir_targets as targets_lower;
 import mir_math as math;
 import mir_cleanup as finalize;
@@ -311,17 +312,17 @@ fn usize if_expression(ref h::Program input, ref mut v::Vec<m::Local> locals, re
         let usize consequent = state::new_block(blocks,c,e.start,e.end); let usize alternative = state::new_block(blocks,c,e.start,e.end);
         if (!state::branch(blocks,c,condition,consequent,alternative,e.start,e.end)) { return 0; }
         let usize result = if (type == 7) { 0 } else { state::local(locals,c,type,0,false,false,e.start,e.end) };
-        let u8[1153] incoming=c.live;let u8[4096] incoming_pending=c.pending;
+        let bytes::Buffer incoming=snapshots::capture(c,e.start,e.end);if(c.problem.code!=0){return 0;}
         c.current = consequent; let usize yes = block(input,locals,blocks,operations,edges,payload,c,e.block,depth + 1);
         if (c.problem.code != 0) { return 0; }
         if (c.current != 0 && result != 0 && state::emit(operations,blocks,c,state::operation(if(shapes::needs_drop(type)){24}else{2},result,type,type,0,yes,0,e.start,e.end)) == 0) { return 0; }
         let usize yes_end = c.current;
-        let u8[1153] yes_live=c.live;let u8[4096] yes_pending=c.pending;c.live=incoming;c.pending=incoming_pending;
+        let bytes::Buffer yes_state=snapshots::capture(c,e.start,e.end);if(c.problem.code!=0){return 0;}snapshots::restore(c,ref incoming);
         c.current = alternative; let usize no = expression(input,locals,blocks,operations,edges,payload,c,e.alternative,depth + 1);
         if (c.problem.code != 0) { return 0; }
         if (c.current != 0 && result != 0 && state::emit(operations,blocks,c,state::operation(if(shapes::needs_drop(type)){24}else{2},result,type,type,0,no,0,e.start,e.end)) == 0) { return 0; }
         let usize no_end = c.current;
-        if(yes_end!=0){c.live=yes_live;c.pending=yes_pending;}
+        if(yes_end!=0){snapshots::restore(c,ref yes_state);}
         // Allocate a join only for live fallthrough; both returning arms leave
         // no orphan unfinished block and suppress enclosing RHS/store/return.
         if (yes_end == 0 && no_end == 0) { c.current = 0; return 0; }

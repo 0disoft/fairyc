@@ -612,3 +612,32 @@ project commands and Linux execution remain pending.
   still needs Buffer support for cooked text and diagnostics. Item 48 remains
   partial until that integration executes. Release mutation API, Linux and
   self-hosting are pending. No SDK/runtime ABI, dependency or CI change.
+
+## Buffer execution
+
+- The candidate executes the original authenticated `std::bytes` bodies and
+  seven exact Buffer runtime extern declarations. Source coordinates, signatures,
+  unsafe permission and SDK authority survive parser-owner removal and are
+  rechecked before C publication. User declarations cannot claim these symbols.
+- Development/release candidates each pass four programs and five rejections;
+  sixteen MSVC low/optimized executions cover empty/reserved buffers, append,
+  zeroed growth, truncate/clear, nested mutable slices, copies containing NUL,
+  whole-resource moves, integer formatting at scalar limits, allocation failure
+  preservation and zero live allocator blocks. Retained views prevent mutation
+  or owner moves; shared stores and local-view escape remain rejected.
+- Borrow analysis reuses fixed origins and successful generations, and checks
+  competing owners before path traversal. Existing work/depth bounds remain.
+  Recursive `if` lowering keeps its two ownership snapshots in explicit owned
+  buffers; allocation failure aborts lowering. This removes the native stack
+  overflow reproduced by the SDK decimal-digit conditional chain.
+- Two development native API tests pass: seven Buffer authority/signature
+  mutations are rejected, failed C rendering preserves an existing prefix, and the existing mutable
+  parent/sibling/call-conflict test remains rejecting. The resource Vec regression
+  passes five programs, four rejections and ten native executions.
+- Evidence: `evidence/candidate-sdk-buffer-api-20261008.json`,
+  `evidence/candidate-sdk-buffer-cli-20261008.json` and
+  `evidence/candidate-sdk-buffer-resource-regression-20261008.json`.
+- Item 49 remains partial: String/text execution is pending. Actual scanner
+  Token/cooked-buffer/diagnostic integration in item 48, release mutation API,
+  Linux and self-hosting remain pending. No SDK/runtime ABI, public language,
+  dependency, database or CI change.

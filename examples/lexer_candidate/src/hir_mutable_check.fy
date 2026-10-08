@@ -29,13 +29,13 @@ fn usize merge(ref mut Context c, ref mut v::Vec<Slot> slots, usize a, usize b, 
 fn usize generation(ref h::Program p, ref mut Context c, ref mut v::Vec<Slot> slots, ref usize[] initial, ref usize[] summaries, usize id, usize depth) {
     if (id == 0 || c.problem.code != 0) { return 0; }
     let e = h::expression_at(p,id); let u32 kind = h::expression_code(e.kind);
-    if(!paths::reachable(p,e.start,e.end,ref mut c.work)){return 0;}
     let bool mutable = borrows::mutable(h::type_code(e.type));
     if (borrows::count(h::type_code(e.type))==0) { return 0; }
     if (kind == 15 || kind==21) { return 0; }
     if(kind==18 && e.edge_count==0){return 0;}
     if (depth >= 64 || !charge(c)) { return fail(c,2,e.start,e.end); }
     let Slot old = *v::at<Slot>(slots,id); if (old.generation != 0) { return old.generation; }
+    if(!paths::reachable(p,e.start,e.end,ref mut c.work)){return 0;}
     var usize base = 0; var usize parent = 0; var usize alternate = 0; var usize receiver = old.receiver;
     var bool fresh = old.fresh; var usize start = e.start;
     if(kind==18){receiver=h::edge_at(p,e.edge_start);base=generation(p,c,slots,initial,summaries,receiver,depth+1);if(base==0){return 0;}}
@@ -166,9 +166,10 @@ if (borrows::count(type)!=0) { discard generation(p,ref mut c,ref mut slots,init
                     // The occurrence creating this loan is allowed; bounds and
                     // later arguments are separate occurrences and stay checked.
                     let bool creating = if (loan.receiver != 0) { let receiver = h::expression_at(p,loan.receiver); e.start >= receiver.start && e.end <= receiver.end } else { false };
-                    if (!creating && paths::reachable(p,e.start,e.end,ref mut c.work) && !paths::separate(p,loan.start,e.start,e.end,ref mut c.work) && !paths::separate(p,loan.end-1,e.start,e.end,ref mut c.work)) {
-                        let u32 type = h::type_code(e.type);
-                        if (e.binding == owner && loan.mutable || (borrows::mutable(type)) && *v::at<usize>(origins,j) == owner && !ancestor(ref slots,i,other.generation,0,ref mut c.work) && (loan.mutable || competing(p,j))) { return h::Problem { .code=2101,.start=e.start,.end=e.end }; }
+                    let u32 type = h::type_code(e.type);
+                    let bool access = e.binding == owner && loan.mutable || borrows::mutable(type) && *v::at<usize>(origins,j) == owner && !ancestor(ref slots,i,other.generation,0,ref mut c.work) && (loan.mutable || competing(p,j));
+                    if (!creating && access && paths::reachable(p,e.start,e.end,ref mut c.work) && !paths::separate(p,loan.start,e.start,e.end,ref mut c.work) && !paths::separate(p,loan.end-1,e.start,e.end,ref mut c.work)) {
+                        return h::Problem { .code=2101,.start=e.start,.end=e.end };
                     }
                 }
                 j += 1;

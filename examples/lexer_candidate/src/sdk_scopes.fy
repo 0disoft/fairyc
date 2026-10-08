@@ -31,14 +31,14 @@ pub fn bool valid(ref u8[] source,ref v::Vec<Scope> scopes){
     }return true;
 }
 fn usize first(ref u8[] source,ref u8[] needle){var usize i=0;while(i<=source.len && needle.len<=source.len-i){if(bytes::equal(source[i..i+needle.len],needle)){return i+1;}i+=1;}return 0;}
-fn usize rule(ref u8[] symbol){return if(bytes::equal(symbol,b"fy_std_process_arg_count_v0")){1}else if(bytes::equal(symbol,b"fy_std_process_arg_v0")){2}else if(bytes::equal(symbol,b"fy_private_vector_initialize_v0")){3}else if(bytes::equal(symbol,b"fy_private_vector_release_empty_v0")){4}else if(bytes::equal(symbol,b"fy_private_vector_reserve_v0")){5}else if(bytes::equal(symbol,b"fy_private_vector_prepare_push_v0")){6}else if(bytes::equal(symbol,b"fy_private_vector_commit_push_v0")){7}else if(bytes::equal(symbol,b"fy_private_vector_pop_slot_v0")){8}else{0};}
-fn ref u8[] item(ref u8[] pool,usize index){if(index==0 || index>8){return pool[..0];}var usize start=0;var usize i=1;while(i<index){while(pool[start]!=0){start+=1;}start+=1;i+=1;}var usize end=start;while(pool[end]!=0){end+=1;}return pool[start..end];}
-fn ref u8[] function_name(usize code){return item(b"process_arg_count_raw\0process_arg_raw\0initialize_raw\0release_raw\0reserve_raw\0prepare_raw\0commit_raw\0pop_slot_raw\0",code);}
-fn ref u8[] declaration_prefix(usize code){return item(b"unsafe extern C fn usize process_arg_count_raw\0unsafe extern C fn raw_process_args_result process_arg_raw\0unsafe extern C fn u32 initialize_raw\0unsafe extern C fn u32 release_raw\0unsafe extern C fn u32 reserve_raw\0unsafe extern C fn u32 prepare_raw\0unsafe extern C fn u32 commit_raw\0unsafe extern C fn ptr mut void pop_slot_raw\0",code);}
+fn usize rule(ref u8[] symbol){return if(bytes::equal(symbol,b"fy_std_process_arg_count_v0")){1}else if(bytes::equal(symbol,b"fy_std_process_arg_v0")){2}else if(bytes::equal(symbol,b"fy_private_vector_initialize_v0")){3}else if(bytes::equal(symbol,b"fy_private_vector_release_empty_v0")){4}else if(bytes::equal(symbol,b"fy_private_vector_reserve_v0")){5}else if(bytes::equal(symbol,b"fy_private_vector_prepare_push_v0")){6}else if(bytes::equal(symbol,b"fy_private_vector_commit_push_v0")){7}else if(bytes::equal(symbol,b"fy_private_vector_pop_slot_v0")){8}else if(bytes::equal(symbol,b"fy_std_buffer_initialize_v0")){9}else if(bytes::equal(symbol,b"fy_std_buffer_reserve_v0")){10}else if(bytes::equal(symbol,b"fy_std_buffer_append_v0")){11}else if(bytes::equal(symbol,b"fy_std_buffer_resize_zeroed_v0")){12}else if(bytes::equal(symbol,b"fy_std_buffer_truncate_v0")){13}else if(bytes::equal(symbol,b"fy_std_buffer_clear_v0")){14}else if(bytes::equal(symbol,b"fy_std_buffer_drop_v0")){15}else{0};}
+fn ref u8[] item(ref u8[] pool,usize index){if(index==0 || index>15){return pool[..0];}var usize start=0;var usize i=1;while(i<index){while(pool[start]!=0){start+=1;}start+=1;i+=1;}var usize end=start;while(pool[end]!=0){end+=1;}return pool[start..end];}
+fn ref u8[] function_name(usize code){return item(b"process_arg_count_raw\0process_arg_raw\0initialize_raw\0release_raw\0reserve_raw\0prepare_raw\0commit_raw\0pop_slot_raw\0buffer_initialize_raw\0buffer_reserve_raw\0buffer_append_raw\0buffer_resize_zeroed_raw\0buffer_truncate_raw\0buffer_clear_raw\0buffer_drop_raw\0",code);}
+fn ref u8[] declaration_prefix(usize code){return item(b"unsafe extern C fn usize process_arg_count_raw\0unsafe extern C fn raw_process_args_result process_arg_raw\0unsafe extern C fn u32 initialize_raw\0unsafe extern C fn u32 release_raw\0unsafe extern C fn u32 reserve_raw\0unsafe extern C fn u32 prepare_raw\0unsafe extern C fn u32 commit_raw\0unsafe extern C fn ptr mut void pop_slot_raw\0unsafe extern C fn u32 buffer_initialize_raw\0unsafe extern C fn u32 buffer_reserve_raw\0unsafe extern C fn u32 buffer_append_raw\0unsafe extern C fn u32 buffer_resize_zeroed_raw\0unsafe extern C fn u32 buffer_truncate_raw\0unsafe extern C fn u32 buffer_clear_raw\0unsafe extern C fn u32 buffer_drop_raw\0",code);}
 pub fn usize foreign_rule(ref u8[] source,Scope s,usize start,usize end,usize link_start,usize link_end){
-    if((s.sdk_id!=6 && s.sdk_id!=8) || !authentic(source,s) || start<s.start || end> s.end || start>=end || link_start<s.start || link_end>s.end || link_start>=link_end){return 0;}
+    if((s.sdk_id!=2 && s.sdk_id!=6 && s.sdk_id!=8) || !authentic(source,s) || start<s.start || end> s.end || start>=end || link_start<s.start || link_end>s.end || link_start>=link_end){return 0;}
     let usize code=rule(source[link_start..link_end]);if(code==0){return 0;}let raw=source[s.start..s.end];
-    if(s.sdk_id!=if(code<=2){6}else{8}){return 0;}
+    if(s.sdk_id!=if(code<=2){6}else if(code<=8){8}else{2}){return 0;}
     // Vec cleanup calls pop/release before their declarations. A matching call
     // spelling cannot stand in for the exact authenticated extern declaration.
     let prefix=declaration_prefix(code);let usize declaration=first(raw,prefix);let usize link=first(raw,source[link_start..link_end]);
@@ -50,14 +50,16 @@ pub fn usize foreign_owned(ref u8[] source,ref v::Vec<Scope> scopes,usize start,
 pub fn bool result_owned(ref u8[] source,ref v::Vec<Scope> scopes,usize start,usize end){
     var usize i=0;while(i<v::len<Scope>(scopes)){let s=*v::at<Scope>(scopes,i);if(s.sdk_id==6 && authentic(source,s)){let usize at=first(source[s.start..s.end],b"raw_process_args_result");if(at!=0 && start==s.start+at-1 && end-start==b"raw_process_args_result".len){return true;}}i+=1;}return false;
 }
-pub fn usize parameter_count(usize code){return if(code==2 || code==3 || code==6 || code==7){3}else if(code==4){1}else if(code==5 || code==8){2}else{0};}
+pub fn usize parameter_count(usize code){return if(code==2 || code==3 || code==6 || code==7 || code==11){3}else if(code==4 || code==14 || code==15){1}else if(code==5 || code==8 || code==9 || code==10 || code==12 || code==13){2}else{0};}
 pub fn u32 parameter(usize code,usize index){
     if(index>=parameter_count(code)){return 0;}
     if(code==2){return if(index==1){pointers::make(3,true)}else{5};}
     if(code>=3 && code<=8){return if(index==0 || code==6 && index==2 || code==7 && index==1){pointers::make(7,true)}else{5};}
+    if(code==9){return if(index==0){5}else{pointers::make(7,true)};}
+    if(code>=10 && code<=15){return if(index==0){pointers::make(7,true)}else if(code==11 && index==1){pointers::make(3,false)}else{5};}
     return 0;
 }
-pub fn u32 scalar_result(usize code){return if(code==1){5}else if(code>=3 && code<=7){4}else if(code==8){pointers::make(7,true)}else{0};}
+pub fn u32 scalar_result(usize code){return if(code==1){5}else if(code>=3 && code<=7){4}else if(code==8){pointers::make(7,true)}else if(code>=9 && code<=15){4}else{0};}
 pub fn bool parsed_foreign(ref syntax::Parsed p,usize index,usize link_start,usize link_end){
     let d=syntax::declaration_at(p,index);var Scope owner=Scope{.sdk_id=0,.start=0,.end=0};var usize i=0;
     while(i<syntax::declaration_count(p)){let unit=syntax::declaration_at(p,i);if(unit.kind==1 && unit.start<=d.start){owner=scope(p,unit);}i+=1;}
