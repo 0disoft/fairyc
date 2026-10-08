@@ -17,6 +17,7 @@ import std::process as process;
 
 @effects(console)
 fn i32 error(ref str message) { discard io::write_stderr(message); return 2; }
+fn ref str usage() { return "usage: lexer-candidate --tokens-file <path>\n       lexer-candidate --declarations-file <path>\n       lexer-candidate --check-names-file <path>\n       lexer-candidate --bindings-file <path>\n       lexer-candidate --check-types-file <path>\n       lexer-candidate --check-modules-file <manifest>\n       lexer-candidate --c-modules-file <manifest>\n       lexer-candidate --hir-file <path>\n       lexer-candidate --mir-file <path>\n       lexer-candidate --c-file <path>\n"; }
 
 @effects(filesystem)
 pub fn Result<bytes::Buffer, u32> load(ref u8[] path_bytes) {
@@ -26,11 +27,11 @@ pub fn Result<bytes::Buffer, u32> load(ref u8[] path_bytes) {
 @effects(filesystem, console)
 pub fn i32 run() {
     let usize argc = process::arg_count();
-    if (argc != 2 && argc != 3) { return error("usage: lexer-candidate --tokens-file <path>\n       lexer-candidate --declarations-file <path>\n       lexer-candidate --check-names-file <path>\n       lexer-candidate --bindings-file <path>\n       lexer-candidate --check-types-file <path>\n       lexer-candidate --check-modules-file <manifest>\n       lexer-candidate --c-modules-file <manifest>\n       lexer-candidate --hir-file <path>\n       lexer-candidate --mir-file <path>\n       lexer-candidate --c-file <path>\n"); }
+    if (argc != 2 && argc != 3) { return error(usage()); }
     var bytes::Buffer argument = bytes::empty();
     if (!bytes::resize_zeroed(ref mut argument, 4096).is_ok) { return error("error: buffer allocation failed\n"); }
     let usize flag_length = switch(process::arg(1, bytes::view_mut(ref mut argument))) {
-        case .ok(value): { value } case .err(_): { return error("usage: lexer-candidate --tokens-file <path>\n       lexer-candidate --declarations-file <path>\n       lexer-candidate --check-names-file <path>\n       lexer-candidate --bindings-file <path>\n       lexer-candidate --check-types-file <path>\n       lexer-candidate --check-modules-file <manifest>\n       lexer-candidate --c-modules-file <manifest>\n       lexer-candidate --hir-file <path>\n       lexer-candidate --mir-file <path>\n       lexer-candidate --c-file <path>\n"); }
+        case .ok(value): { value } case .err(_): { return error(usage()); }
     };
     let ref u8[] flag = bytes::view(ref argument)[..flag_length];
     if (argc == 2 && bytes::equal(flag, b"--help")) {
@@ -47,7 +48,7 @@ pub fn i32 run() {
     let bool c_mode = bytes::equal(flag,b"--c-file");
     let bool name_mode = bytes::equal(flag, b"--check-names-file");
     let bool declaration_mode = bytes::equal(flag, b"--declarations-file");
-    if (argc != 3 || (!bytes::equal(flag, b"--tokens-file") && !declaration_mode && !name_mode && !binding_mode && !type_mode && !module_mode && !program_mode && !hir_mode && !mir_mode && !c_mode)) { return error("usage: lexer-candidate --tokens-file <path>\n       lexer-candidate --declarations-file <path>\n       lexer-candidate --check-names-file <path>\n       lexer-candidate --bindings-file <path>\n       lexer-candidate --check-types-file <path>\n       lexer-candidate --check-modules-file <manifest>\n       lexer-candidate --c-modules-file <manifest>\n       lexer-candidate --hir-file <path>\n       lexer-candidate --mir-file <path>\n       lexer-candidate --c-file <path>\n"); }
+    if (argc != 3 || (!bytes::equal(flag, b"--tokens-file") && !declaration_mode && !name_mode && !binding_mode && !type_mode && !module_mode && !program_mode && !hir_mode && !mir_mode && !c_mode)) { return error(usage()); }
     let usize length = switch(process::arg(2, bytes::view_mut(ref mut argument))) {
         case .ok(value): { value } case .err(_): { return error("error: file path limit (4095 UTF-8 bytes)\n"); }
     };

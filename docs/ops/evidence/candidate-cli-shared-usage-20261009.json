@@ -1,0 +1,383 @@
+{
+  "schema": "fairyc.candidate-cli-shared-usage/v1",
+  "passed": true,
+  "cases": 18,
+  "images": [
+    {
+      "path": ".cache/candidate-fs/candidate-loader-dev.exe",
+      "sha256": "91bdd1118c66d3596fb12ebd8f1ddf2f30a4758dcb890ff1d812f3c5e5d08ac3"
+    },
+    {
+      "path": "examples/lexer_candidate/build/lexer-candidate.exe",
+      "sha256": "3829c88d97b8a751e17048a1dd5116551c5023f5ed3b98513c5c419fd460fdd5"
+    }
+  ],
+  "source": {
+    "path": "examples/lexer_candidate/src/file_cli.fy",
+    "sha256": "60f437e56b97bc2393df12d2537eb427fcd43def50d8a28b2626463ad9f4f8fb"
+  },
+  "sourceBytes": 5022,
+  "observations": [
+    {
+      "image": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-fs\\candidate-loader-dev.exe",
+      "args": [
+        "--tokens-file",
+        ".cache\\candidate-file-source-regression\\정상.fy"
+      ],
+      "exit": 0,
+      "stdout": "kind\ttrivia\tstart\tend\traw_hex\tcooked_hex\nkeyword\tnone\t0\t6\t6d6f64756c65\t\ntrivia\twhitespace\t6\t7\t20\t\nidentifier\tnone\t7\t11\t6d61696e\t\nsymbol\tnone\t11\t12\t3b\t\nkeyword\tnone\t12\t14\t666e\t\ntrivia\twhitespace\t14\t15\t20\t\nidentifier\tnone\t15\t18\t693332\t\ntrivia\twhitespace\t18\t19\t20\t\nidentifier\tnone\t19\t23\t6d61696e\t\nsymbol\tnone\t23\t24\t28\t\nsymbol\tnone\t24\t25\t29\t\nsymbol\tnone\t25\t26\t7b\t\nkeyword\tnone\t26\t32\t72657475726e\t\ntrivia\twhitespace\t32\t33\t20\t\ninteger\tnone\t33\t34\t37\t37\nsymbol\tnone\t34\t35\t3b\t\nsymbol\tnone\t35\t36\t7d\t\neof\tnone\t36\t36\t\t\n",
+      "stderr": ""
+    },
+    {
+      "image": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\build\\lexer-candidate.exe",
+      "args": [
+        "--tokens-file",
+        ".cache\\candidate-file-source-regression\\정상.fy"
+      ],
+      "exit": 0,
+      "stdout": "kind\ttrivia\tstart\tend\traw_hex\tcooked_hex\nkeyword\tnone\t0\t6\t6d6f64756c65\t\ntrivia\twhitespace\t6\t7\t20\t\nidentifier\tnone\t7\t11\t6d61696e\t\nsymbol\tnone\t11\t12\t3b\t\nkeyword\tnone\t12\t14\t666e\t\ntrivia\twhitespace\t14\t15\t20\t\nidentifier\tnone\t15\t18\t693332\t\ntrivia\twhitespace\t18\t19\t20\t\nidentifier\tnone\t19\t23\t6d61696e\t\nsymbol\tnone\t23\t24\t28\t\nsymbol\tnone\t24\t25\t29\t\nsymbol\tnone\t25\t26\t7b\t\nkeyword\tnone\t26\t32\t72657475726e\t\ntrivia\twhitespace\t32\t33\t20\t\ninteger\tnone\t33\t34\t37\t37\nsymbol\tnone\t34\t35\t3b\t\nsymbol\tnone\t35\t36\t7d\t\neof\tnone\t36\t36\t\t\n",
+      "stderr": ""
+    },
+    {
+      "image": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-fs\\candidate-loader-dev.exe",
+      "args": [
+        "--declarations-file",
+        ".cache\\candidate-file-source-regression\\정상.fy"
+      ],
+      "exit": 0,
+      "stdout": "kind\tname\tstart\tend\tname_start\tname_end\nmodule\tmain\t0\t12\t7\t11\nfunction\tmain\t12\t36\t19\t23\n",
+      "stderr": ""
+    },
+    {
+      "image": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\build\\lexer-candidate.exe",
+      "args": [
+        "--declarations-file",
+        ".cache\\candidate-file-source-regression\\정상.fy"
+      ],
+      "exit": 0,
+      "stdout": "kind\tname\tstart\tend\tname_start\tname_end\nmodule\tmain\t0\t12\t7\t11\nfunction\tmain\t12\t36\t19\t23\n",
+      "stderr": ""
+    },
+    {
+      "image": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-fs\\candidate-loader-dev.exe",
+      "args": [
+        "--check-names-file",
+        ".cache\\candidate-file-source-regression\\정상.fy"
+      ],
+      "exit": 0,
+      "stdout": "names ok\n",
+      "stderr": ""
+    },
+    {
+      "image": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\build\\lexer-candidate.exe",
+      "args": [
+        "--check-names-file",
+        ".cache\\candidate-file-source-regression\\정상.fy"
+      ],
+      "exit": 0,
+      "stdout": "names ok\n",
+      "stderr": ""
+    },
+    {
+      "image": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-fs\\candidate-loader-dev.exe",
+      "args": [
+        "--bindings-file",
+        ".cache\\candidate-file-source-regression\\정상.fy"
+      ],
+      "exit": 0,
+      "stdout": "record\tid\tkind\tstart\tend\tscope\towner\ttarget\nsymbol\t1\tfunction\t19\t23\t0\t0\t0\n",
+      "stderr": ""
+    },
+    {
+      "image": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\build\\lexer-candidate.exe",
+      "args": [
+        "--bindings-file",
+        ".cache\\candidate-file-source-regression\\정상.fy"
+      ],
+      "exit": 0,
+      "stdout": "record\tid\tkind\tstart\tend\tscope\towner\ttarget\nsymbol\t1\tfunction\t19\t23\t0\t0\t0\n",
+      "stderr": ""
+    },
+    {
+      "image": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-fs\\candidate-loader-dev.exe",
+      "args": [
+        "--check-types-file",
+        ".cache\\candidate-file-source-regression\\정상.fy"
+      ],
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": ""
+    },
+    {
+      "image": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\build\\lexer-candidate.exe",
+      "args": [
+        "--check-types-file",
+        ".cache\\candidate-file-source-regression\\정상.fy"
+      ],
+      "exit": 0,
+      "stdout": "types ok\n",
+      "stderr": ""
+    },
+    {
+      "image": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-fs\\candidate-loader-dev.exe",
+      "args": [
+        "--hir-file",
+        ".cache\\candidate-file-source-regression\\정상.fy"
+      ],
+      "exit": 0,
+      "stdout": "fairyc.scalar-hir/v1\nP\t0\nF\t1\t1\t12\t36\t1\t1\t0\t0\t0\nB\t1\tfunction\ti32\t19\t23\t0\t0\t0\t2\t0\t0\nE\t1\tinteger\ti32\t-\t33\t34\t0\t0\t0\t0\t0\t0\t0\t0\t7\nS\t1\treturn\t26\t35\t2\t1\t0\t0\t-\t0\t0\t0\t0\nK\t1\t25\t36\t1\t2\t1\t0\t1\t0\nA\t0\t1\n",
+      "stderr": ""
+    },
+    {
+      "image": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\build\\lexer-candidate.exe",
+      "args": [
+        "--hir-file",
+        ".cache\\candidate-file-source-regression\\정상.fy"
+      ],
+      "exit": 0,
+      "stdout": "fairyc.scalar-hir/v1\nP\t0\nF\t1\t1\t12\t36\t1\t1\t0\t0\t0\nB\t1\tfunction\ti32\t19\t23\t0\t0\t0\t2\t0\t0\nE\t1\tinteger\ti32\t-\t33\t34\t0\t0\t0\t0\t0\t0\t0\t0\t7\nS\t1\treturn\t26\t35\t2\t1\t0\t0\t-\t0\t0\t0\t0\nK\t1\t25\t36\t1\t2\t1\t0\t1\t0\nA\t0\t1\n",
+      "stderr": ""
+    },
+    {
+      "image": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-fs\\candidate-loader-dev.exe",
+      "args": [
+        "--mir-file",
+        ".cache\\candidate-file-source-regression\\정상.fy"
+      ],
+      "exit": 0,
+      "stdout": "fairyc.scalar-mir/v1\nP\t0\nT\t1\t1\t0\t2\t1\t0\t0\t19\t23\t0\nF\t1\t1\t1\t0\t1\t0\t1\t0\t0\t12\t36\t0\nL\t1\t1\t0\t1\t0\t0\t33\t34\nB\t1\t1\t1\t1\t1\t1\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t26\t35\nO\t1\t1\t1\t1\t1\t1\t1\t0\t0\t0\t0\t0\t1\t0\t33\t34\t7\n",
+      "stderr": ""
+    },
+    {
+      "image": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\build\\lexer-candidate.exe",
+      "args": [
+        "--mir-file",
+        ".cache\\candidate-file-source-regression\\정상.fy"
+      ],
+      "exit": 0,
+      "stdout": "fairyc.scalar-mir/v1\nP\t0\nT\t1\t1\t0\t2\t1\t0\t0\t19\t23\t0\nF\t1\t1\t1\t0\t1\t0\t1\t0\t0\t12\t36\t0\nL\t1\t1\t0\t1\t0\t0\t33\t34\nB\t1\t1\t1\t1\t1\t1\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t26\t35\nO\t1\t1\t1\t1\t1\t1\t1\t0\t0\t0\t0\t0\t1\t0\t33\t34\t7\n",
+      "stderr": ""
+    },
+    {
+      "image": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-fs\\candidate-loader-dev.exe",
+      "args": [
+        "--c-file",
+        ".cache\\candidate-file-source-regression\\정상.fy"
+      ],
+      "exit": 0,
+      "stdout": "/* fairyc.candidate-scalar-c/v1; C11, 64-bit transport */\n#include <stdint.h>\n#include <limits.h>\n#include <string.h>\n_Static_assert(CHAR_BIT==8 && UINTPTR_MAX==UINT64_MAX,\"requires 64-bit byte-addressed target\");\n_Static_assert(INT32_MIN==(-INT32_MAX-1) && INT64_MIN==(-INT64_MAX-1),\"requires two's complement signed integers\");\n_Noreturn void fy_runtime_trap(uint32_t category);\nint32_t fy_fn_1(void);\nint32_t fy_fn_1(void){\n    int32_t fy_l_1=0;\n    (void)fy_l_1;\n    goto fy_b_1;\nfy_b_1:;\n    fy_l_1 = INT32_C(7);\n    return fy_l_1;\n}\nint32_t fy_candidate_entry(void){return fy_fn_1();}\n#ifndef FY_CANDIDATE_NO_MAIN\nint main(void){return (int)fy_candidate_entry();}\n#endif\n",
+      "stderr": ""
+    },
+    {
+      "image": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\build\\lexer-candidate.exe",
+      "args": [
+        "--c-file",
+        ".cache\\candidate-file-source-regression\\정상.fy"
+      ],
+      "exit": 0,
+      "stdout": "/* fairyc.candidate-scalar-c/v1; C11, 64-bit transport */\n#include <stdint.h>\n#include <limits.h>\n#include <string.h>\n_Static_assert(CHAR_BIT==8 && UINTPTR_MAX==UINT64_MAX,\"requires 64-bit byte-addressed target\");\n_Static_assert(INT32_MIN==(-INT32_MAX-1) && INT64_MIN==(-INT64_MAX-1),\"requires two's complement signed integers\");\n_Noreturn void fy_runtime_trap(uint32_t category);\nint32_t fy_fn_1(void);\nint32_t fy_fn_1(void){\n    int32_t fy_l_1=0;\n    (void)fy_l_1;\n    goto fy_b_1;\nfy_b_1:;\n    fy_l_1 = INT32_C(7);\n    return fy_l_1;\n}\nint32_t fy_candidate_entry(void){return fy_fn_1();}\n#ifndef FY_CANDIDATE_NO_MAIN\nint main(void){return (int)fy_candidate_entry();}\n#endif\n",
+      "stderr": ""
+    },
+    {
+      "image": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-fs\\candidate-loader-dev.exe",
+      "args": [
+        "--check-modules-file",
+        ".cache\\candidate-file-source-regression\\program.txt"
+      ],
+      "exit": 0,
+      "stdout": "modules ok\n",
+      "stderr": ""
+    },
+    {
+      "image": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\build\\lexer-candidate.exe",
+      "args": [
+        "--check-modules-file",
+        ".cache\\candidate-file-source-regression\\program.txt"
+      ],
+      "exit": 0,
+      "stdout": "modules ok\n",
+      "stderr": ""
+    },
+    {
+      "image": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-fs\\candidate-loader-dev.exe",
+      "args": [
+        "--c-modules-file",
+        ".cache\\candidate-file-source-regression\\program.txt"
+      ],
+      "exit": 0,
+      "stdout": "/* fairyc.candidate-scalar-c/v1; C11, 64-bit transport */\n#include <stdint.h>\n#include <limits.h>\n#include <string.h>\n_Static_assert(CHAR_BIT==8 && UINTPTR_MAX==UINT64_MAX,\"requires 64-bit byte-addressed target\");\n_Static_assert(INT32_MIN==(-INT32_MAX-1) && INT64_MIN==(-INT64_MAX-1),\"requires two's complement signed integers\");\n_Noreturn void fy_runtime_trap(uint32_t category);\nint32_t fy_fn_1(void);\nint32_t fy_fn_1(void){\n    int32_t fy_l_1=0;\n    (void)fy_l_1;\n    goto fy_b_1;\nfy_b_1:;\n    fy_l_1 = INT32_C(7);\n    return fy_l_1;\n}\nint32_t fy_candidate_entry(void){return fy_fn_1();}\n#ifndef FY_CANDIDATE_NO_MAIN\nint main(void){return (int)fy_candidate_entry();}\n#endif\n",
+      "stderr": ""
+    },
+    {
+      "image": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\build\\lexer-candidate.exe",
+      "args": [
+        "--c-modules-file",
+        ".cache\\candidate-file-source-regression\\program.txt"
+      ],
+      "exit": 0,
+      "stdout": "/* fairyc.candidate-scalar-c/v1; C11, 64-bit transport */\n#include <stdint.h>\n#include <limits.h>\n#include <string.h>\n_Static_assert(CHAR_BIT==8 && UINTPTR_MAX==UINT64_MAX,\"requires 64-bit byte-addressed target\");\n_Static_assert(INT32_MIN==(-INT32_MAX-1) && INT64_MIN==(-INT64_MAX-1),\"requires two's complement signed integers\");\n_Noreturn void fy_runtime_trap(uint32_t category);\nint32_t fy_fn_1(void);\nint32_t fy_fn_1(void){\n    int32_t fy_l_1=0;\n    (void)fy_l_1;\n    goto fy_b_1;\nfy_b_1:;\n    fy_l_1 = INT32_C(7);\n    return fy_l_1;\n}\nint32_t fy_candidate_entry(void){return fy_fn_1();}\n#ifndef FY_CANDIDATE_NO_MAIN\nint main(void){return (int)fy_candidate_entry();}\n#endif\n",
+      "stderr": ""
+    },
+    {
+      "image": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-fs\\candidate-loader-dev.exe",
+      "args": [
+        "--tokens-file",
+        ".cache\\candidate-file-source-regression\\bad.fy"
+      ],
+      "exit": 2,
+      "stdout": "",
+      "stderr": ".cache\\candidate-file-source-regression\\bad.fy:1:13: error: E0005 (bytes 12..25)\n"
+    },
+    {
+      "image": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\build\\lexer-candidate.exe",
+      "args": [
+        "--tokens-file",
+        ".cache\\candidate-file-source-regression\\bad.fy"
+      ],
+      "exit": 2,
+      "stdout": "",
+      "stderr": ".cache\\candidate-file-source-regression\\bad.fy:1:13: error: E0005 (bytes 12..25)\n"
+    },
+    {
+      "image": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-fs\\candidate-loader-dev.exe",
+      "args": [
+        "--tokens-file",
+        ".cache\\candidate-file-source-regression\\over.fy"
+      ],
+      "exit": 2,
+      "stdout": "",
+      "stderr": "error: source limit (65536 bytes)\n"
+    },
+    {
+      "image": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\build\\lexer-candidate.exe",
+      "args": [
+        "--tokens-file",
+        ".cache\\candidate-file-source-regression\\over.fy"
+      ],
+      "exit": 2,
+      "stdout": "",
+      "stderr": "error: source limit (65536 bytes)\n"
+    },
+    {
+      "image": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-fs\\candidate-loader-dev.exe",
+      "args": [
+        "--tokens-file",
+        ".cache\\candidate-file-source-regression\\missing.fy"
+      ],
+      "exit": 2,
+      "stdout": "",
+      "stderr": "error: input file read failed\n"
+    },
+    {
+      "image": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\build\\lexer-candidate.exe",
+      "args": [
+        "--tokens-file",
+        ".cache\\candidate-file-source-regression\\missing.fy"
+      ],
+      "exit": 2,
+      "stdout": "",
+      "stderr": "error: input file read failed\n"
+    },
+    {
+      "image": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-fs\\candidate-loader-dev.exe",
+      "args": [
+        "--help"
+      ],
+      "exit": 0,
+      "stdout": "usage: lexer-candidate --tokens-file <path>\n       lexer-candidate --declarations-file <path>\n       lexer-candidate --check-names-file <path>\n       lexer-candidate --bindings-file <path>\n       lexer-candidate --check-types-file <path>\n       lexer-candidate --check-modules-file <manifest>\n       lexer-candidate --c-modules-file <manifest>\n       lexer-candidate --hir-file <path>\n       lexer-candidate --mir-file <path>\n       lexer-candidate --c-file <path>\n       lexer-candidate --help\nNo arguments: private binary stdin protocol.\n",
+      "stderr": ""
+    },
+    {
+      "image": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\build\\lexer-candidate.exe",
+      "args": [
+        "--help"
+      ],
+      "exit": 0,
+      "stdout": "usage: lexer-candidate --tokens-file <path>\n       lexer-candidate --declarations-file <path>\n       lexer-candidate --check-names-file <path>\n       lexer-candidate --bindings-file <path>\n       lexer-candidate --check-types-file <path>\n       lexer-candidate --check-modules-file <manifest>\n       lexer-candidate --c-modules-file <manifest>\n       lexer-candidate --hir-file <path>\n       lexer-candidate --mir-file <path>\n       lexer-candidate --c-file <path>\n       lexer-candidate --help\nNo arguments: private binary stdin protocol.\n",
+      "stderr": ""
+    },
+    {
+      "image": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-fs\\candidate-loader-dev.exe",
+      "args": [
+        "--unknown"
+      ],
+      "exit": 2,
+      "stdout": "",
+      "stderr": "usage: lexer-candidate --tokens-file <path>\n       lexer-candidate --declarations-file <path>\n       lexer-candidate --check-names-file <path>\n       lexer-candidate --bindings-file <path>\n       lexer-candidate --check-types-file <path>\n       lexer-candidate --check-modules-file <manifest>\n       lexer-candidate --c-modules-file <manifest>\n       lexer-candidate --hir-file <path>\n       lexer-candidate --mir-file <path>\n       lexer-candidate --c-file <path>\n"
+    },
+    {
+      "image": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\build\\lexer-candidate.exe",
+      "args": [
+        "--unknown"
+      ],
+      "exit": 2,
+      "stdout": "",
+      "stderr": "usage: lexer-candidate --tokens-file <path>\n       lexer-candidate --declarations-file <path>\n       lexer-candidate --check-names-file <path>\n       lexer-candidate --bindings-file <path>\n       lexer-candidate --check-types-file <path>\n       lexer-candidate --check-modules-file <manifest>\n       lexer-candidate --c-modules-file <manifest>\n       lexer-candidate --hir-file <path>\n       lexer-candidate --mir-file <path>\n       lexer-candidate --c-file <path>\n"
+    },
+    {
+      "image": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-fs\\candidate-loader-dev.exe",
+      "args": [
+        "--tokens-file"
+      ],
+      "exit": 2,
+      "stdout": "",
+      "stderr": "usage: lexer-candidate --tokens-file <path>\n       lexer-candidate --declarations-file <path>\n       lexer-candidate --check-names-file <path>\n       lexer-candidate --bindings-file <path>\n       lexer-candidate --check-types-file <path>\n       lexer-candidate --check-modules-file <manifest>\n       lexer-candidate --c-modules-file <manifest>\n       lexer-candidate --hir-file <path>\n       lexer-candidate --mir-file <path>\n       lexer-candidate --c-file <path>\n"
+    },
+    {
+      "image": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\build\\lexer-candidate.exe",
+      "args": [
+        "--tokens-file"
+      ],
+      "exit": 2,
+      "stdout": "",
+      "stderr": "usage: lexer-candidate --tokens-file <path>\n       lexer-candidate --declarations-file <path>\n       lexer-candidate --check-names-file <path>\n       lexer-candidate --bindings-file <path>\n       lexer-candidate --check-types-file <path>\n       lexer-candidate --check-modules-file <manifest>\n       lexer-candidate --c-modules-file <manifest>\n       lexer-candidate --hir-file <path>\n       lexer-candidate --mir-file <path>\n       lexer-candidate --c-file <path>\n"
+    },
+    {
+      "image": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-fs\\candidate-loader-dev.exe",
+      "args": [
+        "--tokens-file",
+        "x",
+        "extra"
+      ],
+      "exit": 2,
+      "stdout": "",
+      "stderr": "usage: lexer-candidate --tokens-file <path>\n       lexer-candidate --declarations-file <path>\n       lexer-candidate --check-names-file <path>\n       lexer-candidate --bindings-file <path>\n       lexer-candidate --check-types-file <path>\n       lexer-candidate --check-modules-file <manifest>\n       lexer-candidate --c-modules-file <manifest>\n       lexer-candidate --hir-file <path>\n       lexer-candidate --mir-file <path>\n       lexer-candidate --c-file <path>\n"
+    },
+    {
+      "image": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\build\\lexer-candidate.exe",
+      "args": [
+        "--tokens-file",
+        "x",
+        "extra"
+      ],
+      "exit": 2,
+      "stdout": "",
+      "stderr": "usage: lexer-candidate --tokens-file <path>\n       lexer-candidate --declarations-file <path>\n       lexer-candidate --check-names-file <path>\n       lexer-candidate --bindings-file <path>\n       lexer-candidate --check-types-file <path>\n       lexer-candidate --check-modules-file <manifest>\n       lexer-candidate --c-modules-file <manifest>\n       lexer-candidate --hir-file <path>\n       lexer-candidate --mir-file <path>\n       lexer-candidate --c-file <path>\n"
+    },
+    {
+      "image": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-fs\\candidate-loader-dev.exe",
+      "args": [
+        "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+        "x"
+      ],
+      "exit": 2,
+      "stdout": "",
+      "stderr": "usage: lexer-candidate --tokens-file <path>\n       lexer-candidate --declarations-file <path>\n       lexer-candidate --check-names-file <path>\n       lexer-candidate --bindings-file <path>\n       lexer-candidate --check-types-file <path>\n       lexer-candidate --check-modules-file <manifest>\n       lexer-candidate --c-modules-file <manifest>\n       lexer-candidate --hir-file <path>\n       lexer-candidate --mir-file <path>\n       lexer-candidate --c-file <path>\n"
+    },
+    {
+      "image": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\build\\lexer-candidate.exe",
+      "args": [
+        "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+        "x"
+      ],
+      "exit": 2,
+      "stdout": "",
+      "stderr": "usage: lexer-candidate --tokens-file <path>\n       lexer-candidate --declarations-file <path>\n       lexer-candidate --check-names-file <path>\n       lexer-candidate --bindings-file <path>\n       lexer-candidate --check-types-file <path>\n       lexer-candidate --check-modules-file <manifest>\n       lexer-candidate --c-modules-file <manifest>\n       lexer-candidate --hir-file <path>\n       lexer-candidate --mir-file <path>\n       lexer-candidate --c-file <path>\n"
+    }
+  ],
+  "scope": "Exact stdout/stderr/status parity for existing CLI cases plus missing/extra/unknown/oversized arguments; no CLI mode added",
+  "previousSourceBytes": 5923,
+  "sourceBytesSaved": 901,
+  "joinedBytesAfterDedup": 1046505,
+  "priorInputReceipt": "candidate-dispatcher-admission-after-hir-split-20261009.json"
+}

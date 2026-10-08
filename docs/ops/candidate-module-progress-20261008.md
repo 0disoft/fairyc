@@ -1274,3 +1274,16 @@ project commands and Linux execution remain pending.
   New release-candidate rebuilding, Linux and whole-CLI native execution were
   not repeated for this proof-preserving split. Source/AST/work/depth limits,
   public language, SDK/runtime ABI, DB, dependency and CI settings are unchanged.
+
+## Dispatcher diagnostic source deduplication (2026-10-09)
+
+- `file_cli::usage` owns the identical usage text previously repeated in three
+  failure branches. It returns the same static borrowed literal; command modes,
+  argument bounds and console effects remain unchanged.
+- Check and the actual development CLI build pass. Eighteen existing and
+  missing/extra/unknown/oversized-argument cases retain exact stdout, stderr and
+  status against the prior authored CLI. Evidence:
+  `evidence/candidate-cli-shared-usage-20261009.json`.
+- This reduces full-dispatcher source bytes within the unchanged 1MiB bound,
+  leaving room for the remaining type-check/HIR-lowering source partitions.
+  It is source deduplication, not a whole-dispatcher candidate-C execution proof.
