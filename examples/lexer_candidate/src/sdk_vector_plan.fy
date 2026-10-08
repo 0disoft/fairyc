@@ -47,6 +47,7 @@ pub fn types::Type type_at(ref Plan p,usize id){return types::graph_at(ref p.gra
 pub fn usize module_count(ref Plan p){return catalog::module_count(ref p.declarations);}
 pub fn bool source_matches(ref Plan p,usize module_index,ref syntax::Parsed source){return catalog::source_matches(ref p.declarations,module_index,source);}
 pub fn catalog::Lookup declaration_lookup(ref Plan p,usize module_index,ref u8[] spelling){return catalog::lookup(ref p.declarations,module_index,spelling);}
+pub fn catalog::Lookup declaration_lookup_measured(ref Plan p,usize module_index,ref u8[] spelling,ref mut usize probes){return catalog::lookup_measured(ref p.declarations,module_index,spelling,probes);}
 pub fn catalog::Declaration declaration_at(ref Plan p,usize id){return catalog::declaration_at(ref p.declarations,id);}
 
 // Candidate Windows AMD64 storage transport: opaque data + five usize fields.

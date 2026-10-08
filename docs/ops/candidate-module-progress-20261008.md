@@ -1443,3 +1443,21 @@ project commands and Linux execution remain pending.
 - Release-candidate rebuilding, Linux and full-dispatcher native execution were
   not repeated. Internal Row storage changed; language/SDK ABI, DB, dependency,
   CI runner settings and all numeric admission bounds are unchanged.
+
+## Module-local catalog lookup (2026-10-09)
+
+- Lookup finds each module's ordered import/declaration range by binary search.
+  Reachability charges the rows actually visited, reuses declaration ownership
+  for adjacent expressions, and skips unqualified user names because every user
+  declaration survives. Qualified names, SDK-local dependencies and private
+  targets still enter the ordinary lookup and validation paths.
+- Two native catalog tests and three SDK compaction tests pass in development.
+  The ordered-table case checks 22 modules and 1364 declarations, including
+  aliases with trivia, missing names, private targets and both end modules.
+- The 160-file dispatcher (1048411 joined bytes) passes name reachability and
+  reaches phase 8 code 10 at `std/vec.fy:0..0` during AST compaction. Reducing
+  repeated ownership searches and retained-copy work is next. Evidence:
+  `evidence/candidate-catalog-ranges-20261009.json` and
+  `evidence/candidate-dispatcher-admission-catalog-ranges-20261009.json`.
+- Release rebuilding, Linux and full-dispatcher C/native execution remain open.
+  Numeric bounds, language/SDK ABI, DB and CI settings are unchanged.

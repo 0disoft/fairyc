@@ -1,0 +1,85 @@
+{
+  "schema": "fairyc.candidate-catalog-ranges/v1",
+  "passed": true,
+  "lookup": "Binary search into module-ordered imports and declarations, charging actual visited rows",
+  "reachability": "Reuse expression owner and skip unqualified user names; retain every user declaration",
+  "nativeCatalog": {
+    "schemaVersion": "fairyc.test-report/v1",
+    "engine": "native",
+    "target": "x86_64-windows-msvc",
+    "profile": "development",
+    "tests": [
+      {
+        "identity": "tests::module_type_graph::catalog_lookup_stays_inside_ordered_module_tables",
+        "outcome": "passed",
+        "trapCategory": null
+      },
+      {
+        "identity": "tests::module_type_graph::module_type_graph_native_contract",
+        "outcome": "passed",
+        "trapCategory": null
+      }
+    ],
+    "count": 2,
+    "passed": 2,
+    "failed": 0,
+    "status": "ok",
+    "lock": "verified"
+  },
+  "nativeSDK": {
+    "schemaVersion": "fairyc.test-report/v1",
+    "engine": "native",
+    "target": "x86_64-windows-msvc",
+    "profile": "development",
+    "tests": [
+      {
+        "identity": "tests::sdk_ast_compact::compacted_private_reference_retains_original_diagnostic",
+        "outcome": "passed",
+        "trapCategory": null
+      },
+      {
+        "identity": "tests::sdk_ast_compact::compacted_sdk_keeps_source_and_user_validation",
+        "outcome": "passed",
+        "trapCategory": null
+      },
+      {
+        "identity": "tests::sdk_ast_compact::reachability_ranges_preserve_many_repeated_local_names",
+        "outcome": "passed",
+        "trapCategory": null
+      }
+    ],
+    "count": 3,
+    "passed": 3,
+    "failed": 0,
+    "status": "ok",
+    "lock": "verified"
+  },
+  "orderedFixture": {
+    "modules": 22,
+    "declarations": 1364
+  },
+  "generatedCIdentical": true,
+  "fileCases": 4,
+  "nativeFileExecutions": 4,
+  "sources": [
+    {
+      "path": "examples/lexer_candidate/src/module_catalog.fy",
+      "sha256": "bf50fff80bcc18b065974dd7fe0e92e06b736e262b9fb3bc7d1b98eb0906182e"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_signatures.fy",
+      "sha256": "ba6fdee645e351303bdaaa0dbb47ae17b6084d8f7de9587fd5be3ae93a514541"
+    },
+    {
+      "path": "examples/lexer_candidate/src/sdk_vector_plan.fy",
+      "sha256": "6a9f0ac041b1c0b4d9dc1ce08535de30d7705ef1d8f2c858c158f1bd2203c2ec"
+    },
+    {
+      "path": "examples/lexer_candidate/src/sdk_reachability.fy",
+      "sha256": "975cc0322164dc254afb005d92d4be5a3fda7b3aa727841c21edb2cf23e3a038"
+    }
+  ],
+  "limitsRaised": false,
+  "releaseCandidateRebuilt": false,
+  "linuxValidated": false
+}

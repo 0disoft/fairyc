@@ -29,17 +29,23 @@ pub fn bool sdk_vector(ref Catalog c,usize module_index,usize declaration){
 pub fn Declaration declaration_at(ref Catalog c,usize id){assert(id>0 && id<=declaration_count(c));return *v::at<Declaration>(ref c.declarations,id-1);}
 pub fn usize identity(ref Catalog c,usize module_index,usize declaration){var usize i=1;while(i<=declaration_count(c)){let d=declaration_at(c,i);if(d.module_index==module_index && d.declaration==declaration){return i;}i+=1;}return 0;}
 pub fn bool same_declaration(Declaration a,Declaration b){return a.kind==b.kind && a.module_index==b.module_index && a.declaration==b.declaration;}
-fn usize destination(ref Catalog c,Import i){var usize n=0;while(n<module_count(c)){let m=*v::at<Module>(ref c.modules,n);if(same(c,m.start,m.end,bytes::view(ref c.names)[i.path_start..i.path_end])){return n+1;}n+=1;}return 0;}
-pub fn Lookup lookup(ref Catalog c,usize module_index,ref u8[] spelling){
+fn usize destination(ref Catalog c,Import i,ref mut usize probes){var usize n=0;while(n<module_count(c)){*probes=*probes+1;let m=*v::at<Module>(ref c.modules,n);if(same(c,m.start,m.end,bytes::view(ref c.names)[i.path_start..i.path_end])){return n+1;}n+=1;}return 0;}
+fn usize first(ref Catalog c,usize module_index,bool imports,ref mut usize probes){
+    var usize low=0;var usize high=if(imports){v::len<Import>(ref c.imports)}else{declaration_count(c)};
+    while(low<high){*probes=*probes+1;let usize mid=low+(high-low)/2;let usize owner=if(imports){v::at<Import>(ref c.imports,mid).module_index}else{declaration_at(c,mid+1).module_index};if(owner<module_index){low=mid+1;}else{high=mid;}}
+    return low;
+}
+pub fn Lookup lookup(ref Catalog c,usize module_index,ref u8[] spelling){var usize probes=0;return lookup_measured(c,module_index,spelling,ref mut probes);}
+pub fn Lookup lookup_measured(ref Catalog c,usize module_index,ref u8[] spelling,ref mut usize probes){
     if(module_index>=module_count(c)){return Lookup{.code=9,.item=0};}
     var bytes::Buffer canonical=bytes::empty();let u32 code=scalar_modules::normalize(spelling,ref mut canonical);if(code!=0){return Lookup{.code,.item=0};}
     let name=bytes::view(ref canonical);var usize split=0;while(split<name.len && name[split]!=58){split+=1;}
     var usize target=module_index;var usize start=0;
-    if(split<name.len){if(split+2>=name.len || name[split+1]!=58){return Lookup{.code=9,.item=0};}var usize found=0;var usize n=0;
-        while(n<v::len<Import>(ref c.imports)){let i=*v::at<Import>(ref c.imports,n);if(i.module_index==module_index && same(c,i.start,i.end,name[..split])){found=destination(c,i);break;}n+=1;}
+    if(split<name.len){if(split+2>=name.len || name[split+1]!=58){return Lookup{.code=9,.item=0};}var usize found=0;var usize n=first(c,module_index,true,probes);
+        while(n<v::len<Import>(ref c.imports)){*probes=*probes+1;let i=*v::at<Import>(ref c.imports,n);if(i.module_index!=module_index){break;}if(same(c,i.start,i.end,name[..split])){found=destination(c,i,probes);break;}n+=1;}
         if(found==0){return Lookup{.code=4,.item=0};}target=found-1;start=split+2;
     }
-    var usize n=1;while(n<=declaration_count(c)){let d=declaration_at(c,n);if(d.module_index==target && same(c,d.start,d.end,name[start..])){return Lookup{.code=if(split<name.len && !d.public){6}else{0},.item=n};}n+=1;}
+    var usize n=first(c,target,false,probes)+1;while(n<=declaration_count(c)){*probes=*probes+1;let d=declaration_at(c,n);if(d.module_index!=target){break;}if(same(c,d.start,d.end,name[start..])){return Lookup{.code=if(split<name.len && !d.public){6}else{0},.item=n};}n+=1;}
     return Lookup{.code=5,.item=0};
 }
 pub fn Result<Catalog,Problem> build(ref v::Vec<syntax::Parsed> sources){
@@ -68,6 +74,6 @@ pub fn Result<Catalog,Problem> build(ref v::Vec<syntax::Parsed> sources){
         }module_index+=1;
     }
     let Catalog c=Catalog{.names,.sources=source_bytes,.modules,.declarations,.imports};
-    var usize n=0;while(n<v::len<Import>(ref c.imports)){let i=*v::at<Import>(ref c.imports,n);if(destination(ref c,i)==0){return .err(fail(3,i.module_index,i.source_start,i.source_end));}n+=1;}
+    var usize n=0;var usize probes=0;while(n<v::len<Import>(ref c.imports)){let i=*v::at<Import>(ref c.imports,n);if(destination(ref c,i,ref mut probes)==0){return .err(fail(3,i.module_index,i.source_start,i.source_end));}n+=1;}
     return .ok(c);
 }

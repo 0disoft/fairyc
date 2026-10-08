@@ -19,6 +19,7 @@ pub resource Program {vectors::Plan types;v::Vec<Signature> signatures;v::Vec<us
 pub fn usize module_count(ref Program p){return vectors::module_count(ref p.types);}
 pub fn bool source_matches(ref Program p,usize module_index,ref syntax::Parsed source){return vectors::source_matches(ref p.types,module_index,source);}
 pub fn catalog::Lookup declaration_lookup(ref Program p,usize module_index,ref u8[] spelling){return vectors::declaration_lookup(ref p.types,module_index,spelling);}
+pub fn catalog::Lookup declaration_lookup_measured(ref Program p,usize module_index,ref u8[] spelling,ref mut usize probes){return vectors::declaration_lookup_measured(ref p.types,module_index,spelling,probes);}
 pub fn catalog::Declaration declaration_at(ref Program p,usize id){return vectors::declaration_at(ref p.types,id);}
 pub fn usize vector_count(ref Program p){return vectors::count(ref p.types);}
 pub fn vectors::Instance vector_at(ref Program p,usize index){return vectors::at(ref p.types,index);}

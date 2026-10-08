@@ -59,3 +59,18 @@ fn void catalog_rejects_duplicate_and_unresolved_coordinates(){
     catalog_rejects_duplicate_and_unresolved_coordinates();
     graph_publication_rejects_forged_nominal_or_child_identity();
 }
+
+@test fn void catalog_lookup_stays_inside_ordered_module_tables(){
+    var v::Vec<syntax::Parsed> files=v::empty<syntax::Parsed>();var usize module_index=0;
+    while(module_index<22){var bytes::Buffer source=bytes::empty();assert(bytes::append(ref mut source,b"module user").is_ok && bytes::append_usize(ref mut source,module_index).is_ok && bytes::append(ref mut source,b";import user0 as p;import user21 as q;pub fn void value(){}fn void hidden(){}").is_ok);
+        var usize n=0;while(n<60){assert(bytes::append(ref mut source,b"fn void filler").is_ok && bytes::append_usize(ref mut source,n).is_ok && bytes::append(ref mut source,b"(){}").is_ok);n+=1;}
+        assert(v::push<syntax::Parsed>(ref mut files,parsed(bytes::view(ref source))).is_ok);module_index+=1;
+    }
+    let c=switch(catalog::build(ref files)){case .ok(c):{c}case .err(_):{assert(false);return;}};assert(catalog::declaration_count(ref c)==1364);
+    var usize probes=0;let own=catalog::lookup_measured(ref c,21,b"value",ref mut probes);assert(own.code==0 && probes<30 && catalog::declaration_at(ref c,own.item).module_index==21);
+    probes=0;let alias=catalog::lookup_measured(ref c,0,b"q /* trivia */ :: value",ref mut probes);assert(alias.code==0 && alias.item==own.item && probes<60 && catalog::declaration_at(ref c,alias.item).declaration==4);
+    probes=0;let private=catalog::lookup_measured(ref c,0,b"q::hidden",ref mut probes);assert(private.code==6 && probes<60 && !catalog::declaration_at(ref c,private.item).public);
+    probes=0;assert(catalog::lookup_measured(ref c,0,b"q::absent",ref mut probes).code==5 && probes<120);
+    assert(catalog::lookup(ref c,0,b"missing::value").code==4 && catalog::lookup(ref c,21,b"hidden").code==0);
+    let first=catalog::lookup(ref c,21,b"p::value");assert(first.code==0 && first.item!=own.item && catalog::declaration_at(ref c,first.item).module_index==0);
+}

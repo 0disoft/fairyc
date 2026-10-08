@@ -230,6 +230,13 @@ joined bytes) passes the previous reference-index blocker and now reaches the
 phase-8 lookup-work cap in `numbers.fy`. Catalog lookup reduction remains open.
 Evidence: `docs/ops/evidence/candidate-reachability-ranges-20261009.json` and
 `docs/ops/evidence/candidate-dispatcher-admission-reach-ranges-20261009.json`.
+Module-local catalog ranges and actual probe accounting now pass name
+reachability on the 160-file, 1048411-byte dispatcher. Two native catalog and
+three SDK compaction regressions pass in development. The next phase-8 work
+blocker occurs during AST copying at `std/vec.fy:0..0`; full-dispatcher C/native
+execution and stage1/stage2 comparison remain open. Evidence:
+`docs/ops/evidence/candidate-catalog-ranges-20261009.json` and
+`docs/ops/evidence/candidate-dispatcher-admission-catalog-ranges-20261009.json`.
 
 `stage0` is the current Go compiler built by the supported Go toolchain.
 

@@ -6,7 +6,7 @@ import sdk_authority as sdk;
 import std::bytes as bytes;
 import std::vec as v;
 
-pub struct Row {usize module_index;usize declaration;usize start;usize end;bool function;bool needed;usize first;usize stop;}
+pub struct Row {usize module_index;usize declaration;usize start;usize end;bool function;bool needed;bool bundled;usize first;usize stop;}
 struct Cached {usize module_index;usize expression;usize target;}
 pub resource Plan {v::Vec<Row> rows;v::Vec<usize> bases;cleanup{}}
 fn catalog::Problem fail(u32 code,usize module_index,usize start,usize end){return catalog::Problem{.code,.module_index,.start,.end};}
@@ -23,16 +23,15 @@ fn usize owner_rows(ref v::Vec<Row> rows,ref v::Vec<usize> bases,usize module_in
 }
 pub fn usize owner(ref Plan p,usize module_index,usize start,usize end,ref mut usize work){return owner_rows(ref p.rows,ref p.bases,module_index,start,end,work);}
 pub fn bool keep(ref Plan p,usize module_index,usize start,usize end,ref mut usize work){let usize id=owner(p,module_index,start,end,work);return id==0 || !v::at<Row>(ref p.rows,id-1).function || v::at<Row>(ref p.rows,id-1).needed;}
-// Cache both resolved declarations and misses by exact caller/module spelling.
-// Collisions compare original bytes; aliases never become declaration identity.
-fn usize lookup(ref v::Vec<syntax::Parsed> sources,ref signatures::Program metadata,ref v::Vec<Row> rows,ref v::Vec<usize> bases,ref mut v::Vec<Cached> cache,usize module_index,usize expression,ref mut usize work,ref mut u32 code){
+// User-local declarations are retained; only qualified names can reach SDK code.
+fn usize lookup(ref v::Vec<syntax::Parsed> sources,ref signatures::Program metadata,ref v::Vec<Row> rows,ref v::Vec<usize> bases,ref mut v::Vec<Cached> cache,usize module_index,usize expression,bool bundled,ref mut usize work,ref mut u32 code){
     let file=v::at<syntax::Parsed>(sources,module_index);let name=syntax::expression_text(file,expression);
+    if(!bundled){var usize n=0;while(n<name.len && name[n]!=58){if(!charge(work,1)){*code=10;return 0;}n+=1;}if(n==name.len){return 0;}}
     var usize hash=module_index;var usize i=0;while(i<name.len){if(!charge(work,1)){*code=10;return 0;}hash=(hash*131+(name[i] as usize))%1048573;i+=1;}
     var usize slot=hash%4096;var usize probes=0;
     while(probes<4096){if(!charge(work,1)){*code=10;return 0;}let c=*v::at<Cached>(cache,slot);
         if(c.expression==0){
-            if(!charge(work,v::len<Row>(rows)+v::len<syntax::Parsed>(sources)+1)){*code=10;return 0;}
-            let found=signatures::declaration_lookup(metadata,module_index,name);var usize target=0;
+            var usize visited=0;let found=signatures::declaration_lookup_measured(metadata,module_index,name,ref mut visited);if(!charge(work,visited+1)){*code=10;return 0;}var usize target=0;
             // Retain private targets; the ordinary binder owns privacy rejection.
             if(found.item!=0 && (found.code==0 || found.code==6)){let d=signatures::declaration_at(metadata,found.item);if(d.kind==3){
                 if(d.module_index>=v::len<syntax::Parsed>(sources) || d.declaration==0 || d.declaration>syntax::declaration_count(v::at<syntax::Parsed>(sources,d.module_index))){*code=9;return 0;}
@@ -56,15 +55,16 @@ pub fn Result<Plan,catalog::Problem> build(ref v::Vec<syntax::Parsed> sources,re
         var usize d=0;while(d<syntax::declaration_count(file)){
             if(!charge(work,1) || v::len<Row>(ref rows)>=4096){return .err(fail(10,module_index,0,0));}let item=syntax::declaration_at(file,d);
             let bool needed=!bundled || item.kind!=3;let usize at=v::len<Row>(ref rows);
-            if(!v::push<Row>(ref mut rows,Row{.module_index,.declaration=d,.start=item.start,.end=item.end,.function=item.kind==3,.needed,.first=0,.stop=0}).is_ok){return .err(fail(11,module_index,0,0));}
+            if(!v::push<Row>(ref mut rows,Row{.module_index,.declaration=d,.start=item.start,.end=item.end,.function=item.kind==3,.needed,.bundled,.first=0,.stop=0}).is_ok){return .err(fail(11,module_index,0,0));}
             if(needed && item.kind!=1 && item.kind!=2 && !v::push<usize>(ref mut queue,at).is_ok){return .err(fail(11,module_index,0,0));}d+=1;
         }module_index+=1;
     }
     if(!v::push<usize>(ref mut bases,v::len<Row>(ref rows)).is_ok){return .err(fail(11,0,0,0));}
     module_index=0;while(module_index<v::len<syntax::Parsed>(sources)){
-        let file=v::at<syntax::Parsed>(sources,module_index);var usize i=1;while(i<=syntax::expression_count(file)){
+        let file=v::at<syntax::Parsed>(sources,module_index);var usize previous=0;var usize i=1;while(i<=syntax::expression_count(file)){
             if(!charge(work,1)){return .err(fail(10,module_index,0,0));}let e=syntax::expression_at(file,i);
-            if(e.kind==2){let usize id=owner_rows(ref rows,ref bases,module_index,e.start,e.end,work);if(*work>=1048576){return .err(fail(10,module_index,e.start,e.end));}
+            if(e.kind==2){if(previous!=0){let r=v::at<Row>(ref rows,previous-1);if(e.start<r.start || e.end>r.end){previous=0;}}
+                if(previous==0){previous=owner_rows(ref rows,ref bases,module_index,e.start,e.end,work);}let usize id=previous;if(*work>=1048576){return .err(fail(10,module_index,e.start,e.end));}
                 if(id!=0){let ref mut Row target=v::at_mut<Row>(ref mut rows,id-1);if(target.first==0){target.first=i;}target.stop=i+1;
                 }
             }i+=1;
@@ -76,7 +76,7 @@ pub fn Result<Plan,catalog::Problem> build(ref v::Vec<syntax::Parsed> sources,re
         while(id<row.stop){if(!charge(work,1)){return .err(fail(10,row.module_index,row.start,row.end));}let e=syntax::expression_at(file,id);
             if(e.start<row.start || e.end>row.end){return .err(fail(9,row.module_index,e.start,e.end));}
             if(e.kind==2){var u32 code=0;
-            let usize target=lookup(sources,metadata,ref rows,ref bases,ref mut cache,row.module_index,id,work,ref mut code);
+            let usize target=lookup(sources,metadata,ref rows,ref bases,ref mut cache,row.module_index,id,row.bundled,work,ref mut code);
             if(code!=0){return .err(fail(code,row.module_index,row.start,row.end));}
             if(target!=0){let usize at=target-1;
                 if(!v::at<Row>(ref rows,at).needed){{let ref mut Row target=v::at_mut<Row>(ref mut rows,at);target.needed=true;}if(!v::push<usize>(ref mut queue,at).is_ok){return .err(fail(11,row.module_index,row.start,row.end));}}
