@@ -835,3 +835,19 @@ project commands and Linux execution remain pending.
   `evidence/candidate-scanner-field-view-admission-20261009.json`. Item 48's
   complete scanner execution remains pending. Release API, Linux and self-hosting
   are also pending. No public language, SDK/runtime ABI, dependency, DB or CI change.
+
+## Mixed-origin analysis set prerequisite (2026-10-09)
+
+- `borrow_origins` implements analysis-local canonical sorted owner sets. Static
+  and Unknown retain their distinct existing identities. HIR binding IDs and MIR
+  local/parameter IDs remain leaves; set IDs use a disjoint namespace and are
+  never published in HIR/MIR. Equal unions intern to one ID for fixed-point
+  convergence. Membership/intersection retain every possible backing owner.
+- Check and one development native API test pass. The test covers commutative,
+  idempotent and associative unions, all owner membership, disjoint/intersecting
+  sets, Static/Unknown handling and work-exhaustion rejection. Evidence:
+  `evidence/candidate-borrow-origin-sets-20261009.json`.
+- Bounds are 4096 sets, 32768 retained members, 1152 members per set and the
+  shared 1048576 work budget. Allocation/work failures remain explicit. HIR and
+  independent MIR wiring, scanner execution and release validation are pending.
+  No public API/runtime/schema, dependency, DB or CI change.

@@ -1,0 +1,56 @@
+{
+  "schema": "fairyc.candidate-borrow-origin-sets/v1",
+  "passed": true,
+  "implementation": {
+    "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\borrow_origins.fy",
+    "sha256": "6b13228e830f918d8a6d685e822235fa308e04c2afa13912e10f048c06a3bbba"
+  },
+  "test": {
+    "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\tests\\borrow_origins.fy",
+    "sha256": "83de70cb75c1fb0cd3841b52b5736c69de90d9722e45837787a24f8d21c7598a"
+  },
+  "bootstrap": {
+    "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\compiler-build-240s.exe",
+    "sha256": "746fe10b022ed88cfbc0ae8ea13e3f867b842f3317ef5a2a4caa36d064a248dd"
+  },
+  "lock": {
+    "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\fairy.lock",
+    "sha256": "ce502d9df63ac6713f85a68c154968c30f77923c7b09d953a79d9e14f2a2f500"
+  },
+  "validation": [
+    {
+      "argv": [
+        "../../.cache/candidate-tagged/compiler-build-240s.exe",
+        "check"
+      ],
+      "exit": 0,
+      "stdout": "check ok: 2 instance(s), 135 source file(s), 1636 MIR function(s), lock updated\n"
+    },
+    {
+      "argv": [
+        "../../.cache/candidate-tagged/compiler-build-240s.exe",
+        "test",
+        "--native",
+        "--file",
+        "tests/borrow_origins.fy",
+        "--json",
+        "--locked"
+      ],
+      "exit": 0,
+      "identity": "tests::borrow_origins::unions_converge_without_dropping_any_owner",
+      "engine": "native",
+      "profile": "development",
+      "passed": 1,
+      "failed": 0
+    }
+  ],
+  "limits": {
+    "setCount": 4096,
+    "totalMembers": 32768,
+    "membersPerSet": 1152,
+    "work": 1048576
+  },
+  "compilerWiringValidated": false,
+  "releaseValidated": false,
+  "linuxValidated": false
+}
