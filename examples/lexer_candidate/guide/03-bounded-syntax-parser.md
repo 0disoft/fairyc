@@ -1,0 +1,426 @@
+[Candidate guide index](../README.md)
+
+## Bounded syntax parser
+
+`syntax::parse` consumes a Stream and an item limit no greater than 512. It returns
+an owned `Parsed` containing declarations, expressions, binding entries,
+statement trees, written types, struct/resource fields and item attributes, retaining the entire original Stream. This
+candidate recognizes `module path;`, `import path as alias;`, and functions with
+optional `pub` visibility (retained in `public`, `public_start`, `public_end`;
+private declarations use false and zero spans). The modifier is not discarded
+from unsupported declaration forms. Functions preserve written parameter and
+result types using ordinary Fairy spelling (`fn i32 f(i32 x) { return x; }`).
+Parameter lists allow a trailing comma. Bodies admit empty blocks,
+`let`/`var` bindings with optional type annotations and required initializers,
+and `return` with an optional expression. Statement-only nested blocks, expression
+statements, ordinary and compound assignments, and `if (...) { ... } else if (...)
+{ ... } else { ... }`, `while (...) { ... }`, `break;` and `continue;` are admitted.
+Classic `for` loops and other statements
+remain outside this subset.
+It does not resolve names or imports, validate types, module-to-file mapping or
+return obligations, admit the complete Stage 0 grammar, or produce executable MIR.
+
+Ordinary functions, structs and resources accept ordered attributes before optional `pub`.
+`attributes.fy` retains qualified names, source spans and ordered path, integer
+or string arguments (including empty argument lists and trailing commas).
+Declaration `attribute_start`/`attribute_count` selects the global attribute range.
+`attribute_at` exposes each attribute's name span and argument range;
+`attribute_argument_at` and `attribute_argument_text` expose argument kind
+(1 path, 2 integer, 3 string), span, token and original spelling.
+The parse shares limits of 256 attributes and 1024 arguments, checked before
+allocation; exhaustion returns 4 without a tree. Failed items roll both tables
+back, and recovery does not attach a rejected prefix to a later declaration.
+Attribute semantics, effect validation and permissions remain outside this parser.
+
+The private `types` module recognizes named/qualified types, `ref`, `ref mut`,
+grouping, unsized slices and fixed arrays. It preserves `ref u8[]` versus `(ref u8)[]` without
+resolving names. `Declaration.result_type` and `Entry.type_root` are one-based
+roots; an inferred binding uses zero. `type_at`, `type_count` and `type_text`
+expose postorder nodes and exact source slices. Node kinds are 1 path, 2 reference,
+3 mutable reference, 4 slice and 5 group; wrappers point to `left`, `right` is zero.
+All declarations share 4096 type nodes and a 32-active-call type-depth limit.
+Failed declarations roll back type nodes with the other tables.
+Raw pointer types use kind 11 (`ptr`) and 12 (`ptr mut`), with their child in
+`left` and zero in `right`. Their prefix binding distinguishes `ptr u8[16]`
+from `(ptr u8)[16]`. Foreign function types remain unsupported.
+
+Named types also accept nonempty generic argument lists, trailing commas and
+nesting. Kind 6 retains the base path in `left` and a reverse argument-link tail
+in `right`; kind 7 links an argument root in `left` to its predecessor in `right`.
+`type_argument_count` and `type_argument` expose source order. Generic nodes and
+links share the same type-node budget, and argument nesting shares type depth.
+The type cursor consumes each half of `>>` at its actual byte boundary without
+rewriting source tokens or changing expression shifts. Stray closing halves fail.
+Type applications do not perform specialization or type resolution.
+
+Ordinary `struct Name { ... }` declarations use declaration kind 4, with optional
+`pub` on the struct and individual fields. `field_start`/`field_count` select a
+zero-based source-ordered range in the separate `field_at`/`field_count` table.
+Each field preserves its full/name/public spans, visibility and `type_root`.
+Structs have no body or result-type root. All structs share a 1024-field limit;
+failed declarations roll back fields and types together. Duplicate-field legality,
+layout and ownership are not checked. Resources use declaration kind 6
+and share the same field/type arenas and 1024-field budget. Optional `cleanup`
+bodies reuse the statement parser and are retained by `cleanup_body` in the shared
+statement arena. `cleanup_start`/`cleanup_end` span the keyword through closing
+brace; all three zero means unwritten. Empty cleanup has a real empty block.
+Cleanup entries use the declaration's source-ordered entry range. Resources still
+have no function `body` or result type. Body nodes, entries and nesting share the
+same budgets as functions, and malformed cleanup rolls back the whole declaration.
+Declaration attributes and `pub` spans are preserved as for structs; imports
+cannot follow resources. Attributed cleanup remains unsupported. Generic
+declarations and record expressions preserve syntax only. No resource ownership or
+destruction behavior is implemented by the candidate. Malformed resources roll
+back fields, types and attributes before recovering to the next declaration.
+
+Expressions admit integers, `true`/`false`/`null`, strings, byte strings, qualified identifier paths, calls,
+nested parentheses, prefix
+`+ - ! ~ *`, and the grammar's binary operators from multiplicative through
+logical-or. C strings and other literals
+remain outside this subset. Precedence follows `spec/grammar/stage0.ebnf`;
+binary operators associate left, while unparenthesized comparison chains fail.
+The private postorder node kinds are 1 literal, 2 path, 3 group, 4 prefix,
+5 binary, 6 call, 7 argument link, 8 field, 9 index, 10 record and 11 record-field link. Field/index receivers are
+in `left`; index expressions are in `right`. Field text is the exact member token.
+Calls, fields, single indices and range slices form repeatable postfix chains.
+Kind 26 retains a slice receiver in `left` and a kind-27 bounds node in `right`.
+Bounds retain optional start/end expression IDs in `left`/`right`; zero means a
+written omission, not a synthesized numeric value. The bounds token is `..`;
+its span excludes brackets, while the slice spans the complete receiver and suffix.
+All four forms `a[x..y]`, `a[..y]`, `a[x..]`, `a[..]` share existing node/depth
+budgets. No bounds evaluation, range ordering or borrow validation occurs.
+One-based child IDs (zero absent), half-open source-byte spans and
+source token spelling preserve structure without evaluating or resolving names.
+Declaration `expression` is the last top-level return root, or zero if absent/empty.
+`expression_count`, `expression_at` and `expression_text` expose read-only views.
+The independent `bodies.fy` module owns recursive expression, statement and block parsing;
+`parse_tokens.fy` owns exact token spelling, trivia skipping and operator
+classification. Existing body helpers delegate to it; cursor mutation and mutual
+recursion remain in `bodies.fy`, without an import back from the token module.
+`syntax.fy` retains declaration rollback and the existing query facade.
+`literal_kind` exposes the source token kind. `literal_cooked` borrows the
+scanner's canonical cooked representation: string/byte-string values are lowercase
+hexadecimal bytes, not a newly decoded buffer. Raw spelling and byte spans remain
+unchanged. Keyword literals `true`, `false` and `null` use expression kind 1,
+token kind 4, and preserve their spelling in both raw and cooked views. `null`
+support is syntax-only; it does not add pointer evaluation or type checking.
+Lexical diagnostics still reject the entire parse with status 5.
+Path text is its exact source slice, including intervening trivia. Calls retain
+the callee in `left` and a reverse-linked argument tail in `right`; each argument
+link points to its expression in `left` and its predecessor in `right`.
+`call_argument_count` and `call_argument` expose the original argument order.
+Empty calls, trailing argument commas and repeated call suffixes are admitted.
+All call/argument nodes share the existing node limit, and argument recursion
+shares the expression-depth limit. Generic specialization execution remains unsupported.
+Records retain a path root (ordinary), kind-20 type application (generic), or
+kind-28 variant name (contextual) in
+`left`, and the reversed field-link tail in `right`. Field links retain the value in `left`, previous link in `right`,
+member token and full initializer span. `record_field_count` and `record_field`
+expose field-link IDs in source order; `expression_text` returns each field name.
+Empty records, nesting and trailing commas are admitted. Duplicate fields,
+field types and layout are not checked. Record and field-link nodes consume the
+same expression budget; no separate record arena or unbounded side table exists.
+Failed declarations roll back their nodes before recovery. A shared 4160-expression-node
+ceiling and 64-active-expression-call limit return status 4 without a result.
+
+Value-block expressions have kind 12: `left` selects a statement-block ID and
+`right` is absent. The block's `expression` field is its optional tail root,
+separate from its ordered statement links. A semicolon keeps an expression in
+the statement list; an unwritten tail remains zero. Function bodies still require
+statement terminators. Nested value blocks share the 32-block-depth and
+64-active-expression bounds instead of resetting them at the expression/body edge.
+Entry IDs are reserved before parsing an initializer, so nested entries cannot
+overtake their source owner or bypass the 1024-entry budget. Completed records
+may be stored in postorder; `entry_at` resolves the source-order ID with a bounded
+scan. Statement entry references use those same IDs.
+
+Conditional expressions use kind 13 (`left` condition, `right` branch record).
+Kind 14 retains the then statement-block ID in `left` and the optional else
+expression ID in `right` (kind 12 block or kind 13 nested conditional).
+Conditions, branch order, written tails and full byte spans are retained.
+An unwritten else stays zero; branch type agreement and value availability are
+semantic questions. Else-if recursion remains bounded by the expression limit.
+
+Switch expressions use kind 15 (`left` subject, `right` reversed case-link tail).
+Kind 16 is a shallow leading-dot variant pattern with an optional kind-17 binding
+in `left`; kind 17 retains an identifier or `_` spelling. Kind 18 is a case
+(`left` pattern, `right` statement-block ID), and kind 19 links cases in reverse.
+`switch_case_count` and `switch_case` expose case IDs in written order.
+Variant names and binding names retain their own tokens; pattern, case and switch
+spans remain distinct. Empty and duplicate cases are syntax-only observations:
+exhaustiveness, reachability and payload/type validity are not checked.
+Named record patterns such as `.Pair { .left = first, .right = second }` use
+kind 32, distinct from kind 16 even for explicit empty braces. Their `left` is
+zero and `right` is a reverse-linked kind-33 field tail. Each field retains its
+name token and full span, a kind-17 binding in `left`, and its predecessor in
+`right`. `pattern_field_count` and `pattern_field` expose field links in source
+order (sharing the record-field traversal). Name tokens retain exact spelling.
+Trailing commas, duplicate field names and `_` bindings are syntax-only; no
+binding resolution or exhaustiveness check is performed. Whole-value wildcards
+and multiple positional bindings remain unsupported. All pattern/case/link nodes
+use the same 4160-expression-node budget.
+Case bodies share block and expression depth limits with their enclosing tree.
+
+Contextual variant names such as `.ok`, `.err` and `.none` use kind 28, with no
+children. The full span includes the leading dot and intervening trivia; the
+token and `expression_text` retain the identifier. Existing call nodes wrap this
+callee for `.ok(value)`, preserving ordered arguments and shared budgets. Type
+inference and variant validity are not checked. Contextual record construction
+`.Variant { .field = value, ... }` reuses kind 10 with a kind-28 left child and
+the existing ordered field-link tail. Its full span includes the leading dot;
+the kind-28 child's token/text identifies the variant name. Empty initializers,
+nesting, trailing commas and subsequent postfix access use existing record rules.
+No type inference, variant resolution, layout or execution is introduced.
+
+Explicit type applications are recognized only after a path and when the closing angle
+list is followed by a call or record initializer, using read-only lookahead capped at 256 significant
+tokens. Trivia does not consume that token allowance. Kind 20 retains the path in
+`left` and a type-argument link tail in `right`; the ordinary kind-6 call owns
+this specialization node as its callee, or a kind-10 record owns it as its constructor.
+`specialization_argument_count` and
+`specialization_argument` expose written type roots in source order. Type
+arguments share the declaration type arena and its limits. Nested `>>` is split
+only by the existing type cursor; ordinary comparisons and shifts are unchanged.
+
+Reference expressions use kind 21 for `ref` and 22 for `ref mut`, with the
+operand root in `left` and absent `right`. Full spans retain intervening trivia
+and the mutable marker; the source token retains `ref`. Postfix operations bind
+inside the reference, while binary operators remain outside. These nodes consume
+the existing expression-node and active-depth budget. Borrow validity, operand
+mutability and lifetime rules are not checked by this syntax candidate.
+
+Kind 23 is a written `as` cast: `left` is the operand and `right` is the target
+type root. Casts associate left, below prefixes and above multiplication; their
+operator tokens and full spans remain available. Targets use the shared type
+parser and budget. No conversion, range check or target-type validation occurs.
+
+Array lists `[]`, `[value]` and `[a, b,]` use kind 24 with absent `left` and a
+kind-25 element-link tail in `right`. Each link retains its value in `left` and
+the previous link in `right`. `array_element_count` and `array_element` expose
+source-ordered values without flattening nested arrays. Array spans include both
+brackets; element spans exclude separators. Both kinds share the expression-node
+and depth budgets. Repetition `[value; count]` instead uses kind 29, retaining the
+single value expression in `left` and a written integer/path count in `right`.
+No element links, expansion, count evaluation or value duplication are performed.
+Qualified count paths are preserved; arithmetic, calls, casts and parenthesized
+count expressions remain outside this narrow subset. Element type compatibility,
+constant validity and array evaluation are not checked by the candidate.
+
+`entry_at` and `entry_count` expose source-ordered parameters and statements,
+bounded to 1024 entries across the entire parse. Declaration `entry_start` and
+`entry_count` select a zero-based range. Entry kinds are 1 parameter, 2 let,
+3 var and 4 return; each preserves complete, name and optional type byte spans
+plus its expression root. Zero name/type spans mean unwritten, not synthesized.
+Errors roll back entries and expression nodes together. Duplicate names, type
+compatibility, unreachable returns and binding resolution are semantic concerns
+and are not checked here.
+
+`Declaration.body` is a one-based root in a separate postorder statement tree;
+zero is reserved for module/import declarations. `statement_at` and
+`statement_count` expose nodes: 1 block, 2 binding, 3 return, 4 assignment,
+6 expression statement, 7 list link, 8 while, 9 break, 10 continue and 11 assert.
+Assert retains its condition in `expression` and its full keyword-through-semicolon
+span. It requires parentheses and a semicolon, including in value blocks; it is
+not a call or tail expression. Condition type and runtime assertion behavior are
+outside this syntax layer. Its nodes share existing expression/statement budgets.
+Kind 12 is a `discard` statement with a required operand in `expression` and a
+full keyword-through-semicolon span. It is neither a return entry nor a value
+block tail. No must-use, ownership transfer or destruction behavior is inferred.
+While preserves its condition in `expression` and its body in `first`; break and
+continue have no children. Loop-context legality remains a semantic concern.
+Binding/return `entry` is a one-based
+reference into the existing entry table. Assignment `target` and `expression`
+refer to distinct expression roots; `assignment_operator` returns its raw spelling.
+A block's `first` is a reverse-linked
+statement-list tail and `second` its direct child count; list links use `first`
+for the child and `second` for the previous link. `block_statement_count` and
+`block_statement` return direct children in source order, without flattening nested
+scopes. Block/if statements use a kind-6 expression-statement wrapper, including
+an optional written semicolon. Their expression roots use the same block/if
+representation as value positions, preserving branch tails and any following
+postfix or binary expression. The former standalone if statement kind 5 is no
+longer emitted. Assignment-place validity remains a semantic check.
+
+The statement tree has a shared 4096-node limit (including list links) and a
+32-frame block/conditional depth limit. Failures roll back statements, expressions
+and entries together. Assignment-target legality, shadowing, condition types and
+branch return obligations remain semantic checks, not parser acceptance criteria.
+
+Declarations preserve source order, complete spans and name/alias spans. Problems
+retain exact source-byte spans and private category codes (1 module, 2 import,
+3 function, 4 struct or unsupported source item, 6 resource). A failed declaration never becomes an
+ordinary declaration node. Recovery rescans its bounded token range with brace
+depth before resuming at a following import/function; nested functions cannot
+escape a malformed enclosing body. Original trivia and rejected source remain
+available through the retained Stream rather than being reconstructed from nodes.
+
+Problems additionally retain `expected` and the actual source `token` index.
+`problem_actual` borrows its exact raw spelling (empty at EOF); `expected_text`
+renders the private expectation code: 0 supported syntax, 1 identifier, 2 type,
+3 expression, 4 `(`, 5 `)`, 6 `{`, 7 `}`, 8 `;`, 9 `=`, 10 `as`, 11 `]`,
+12 `module`, 13 `>`, 14 `.`, 15 attribute argument, 16 array length,
+17 `:`, 18 `case`. Code 0 deliberately remains general for unsupported constructs;
+these are diagnostic hints, not inserted tokens, repairs or semantic acceptance.
+Expectations reset before each source item so recovery cannot leak an old hint.
+
+Allocation failure returns 3; item or 32-problem exhaustion returns 4; lexical
+diagnostics return 5. These failures consume the input and publish no Parsed value.
+Callers that need lexical diagnostics must inspect the Stream before passing it
+to the parser. A successful Result can contain syntax problems: clients must check
+`problem_count`, and must not treat this partial syntax tree as a compiler
+acceptance decision. `declaration_at`, `problem_at` and `source_view` are read-only.
+The scanner's source/work bounds plus monotone parsing and one bounded recovery
+rescan limit work; expression recursion is bounded separately as above.
+
+Native tests compare function/import spans, expression/call structure, ordered
+parameters and bindings, nested blocks, conditional branches and assignment
+operands with normalized Go ASTs. They also exercise missing headers/delimiters,
+declaration recovery, import order, nested malformed bodies and byte, depth, node,
+entry, diagnostic and work boundaries. Large repetitive inputs are constructed
+at runtime without reducing their tested sizes. Focused Mustflow lanes separate
+parser checks, Stream/self-lexing, corpus/budget checks and heap accounting;
+hosted Go tests still discover all tests normally.
+
+## Own-source syntax coverage
+
+Fixed-array type nodes preserve an element root and an unevaluated integer or
+qualified-path length root. Private kinds 8/9/10 represent array/integer length/path
+length; all consume the existing 4096-node type budget. Empty brackets remain
+slices. Length arithmetic, evaluation and size validity are not parser decisions.
+
+All sixteen current source files, including the filename adapter, integrity checker and token helpers, parse without
+syntax problems in both Windows profiles. The [package syntax report](../parser-package-items-2026-09-12.md)
+records the preceding fixture milestone; the [SDK syntax report](../parser-sdk-syntax-2026-09-12.md)
+records the current pointer/generic and SDK boundary. The [literal/item report](../parser-literal-items-2026-09-12.md)
+and [control syntax report](../parser-control-items-2026-09-12.md)
+retains the preceding milestone. The [preceding evidence report](../parser-evidence-2026-09-11.md)
+records the initial declaration comparison, integrity checks and fixture baseline.
+The [earlier coverage report](../parser-coverage-closure-2026-09-11.md)
+records the preceding thirteen-file milestone.
+The corpus test explicitly requires complete syntax for these
+named files and fails on diagnostics, budget exhaustion or file removal. New
+files remain observations until independently admitted to this regression gate.
+For admitted files, the native declaration list is also compared with the Go CST:
+kind, source order, complete byte span and declared name/alias span must match.
+This is a declaration-level comparison, not full expression-tree equivalence.
+The private `integrity::valid` checker additionally validates expression/type/
+statement kinds, required and optional arena references, backward same-arena
+links, token/source bounds, block link counts and declaration ranges. It runs on
+native corpus results, including incomplete results. It does not prove semantic
+validity, cross-arena graph acyclicity, unique ownership or full source coverage.
+Synthetic-node probes exercise missing, out-of-range, self-referential and
+wrong-kind links without mutating the published parse result.
+Private candidate helpers `valid_field(parsed, field, index)` and
+`valid_declaration_fields(parsed, declaration)` check detached copies through the
+same paths used by `valid`. Payload probes cover field/type/key categories,
+visibility metadata, member/brace/name bounds, backward payload ranges and orphaned
+or wrongly owned fields. Field-local checks and declaration-range checks are
+complementary; neither alone proves whole-tree validity. Payload fields must have
+zero visibility spans. No published parse-result mutation API is added.
+The fixture observation lane reads the checked-in parser manifest unchanged,
+with at most 32 cases and 32768 source bytes per case. It separates supported
+syntax, unsupported valid syntax and matching rejection using the filename-aware
+entry point. Unexpected false acceptance or budget exhaustion fails the lane rather
+than becoming a supported result. Both profiles must return identical observations.
+All 22 current cases are required: 12 successful inputs and 10 rejected inputs.
+An independent ID/status inventory rejects removal, outcome changes and duplicate
+IDs before native execution. Per-case removal/outcome-mutation controls run before
+the Windows platform guard; required native completion is also checked per profile.
+The fixture manifest and its expected diagnostics remain unchanged.
+The [statement/resource report](../parser-coverage-statements-2026-09-11.md) records
+the earlier eleven-file result; older baselines are retained as historical evidence.
+Full-file exhaustion and separate first-blocker prefix probes are distinguished.
+This must not be confused with the lexer's complete source-token comparison.
+
+Postfix propagation uses private expression kind 30 with one operand and the
+written question-mark token. Chains, grouping and prefix/infix precedence are
+compared with Go AST shapes. This preserves syntax only, not error propagation
+execution semantics.
+
+Private declaration kind 7 preserves a written `const` declaration: `result_type`
+is its declared type root and `expression` is its initializer. Visibility,
+attributes and declaration/name spans retain the existing declaration contract.
+Initializers are parsed, not evaluated.
+
+Private statement kind 13 preserves `defer expression;`, including its operand,
+source span and position in the enclosing block. Execution timing, call validity
+and cleanup order remain semantic/lowering responsibilities.
+
+Private statement kind 14 preserves a classic `for`: optional condition in
+`expression`, body in `first` and a kind-15 header in `second`. Header children
+are optional initialization (binding/assignment) and post assignment. Zero means
+unwritten, not a synthetic true expression. The initialization statement span
+includes its terminating semicolon; the header span includes both parentheses.
+The body is not desugared into a while loop. Arbitrary expression-only header
+clauses remain outside this grammar-bounded slice, even where Go syntax recovery
+accepts them for later semantic rejection.
+
+Private statement kind 18 retains `for (let u8 byte in view) { ... }` with the
+item name in `target`, iterable expression in `expression`, body in `first`, and
+item type in `second`. The parser keeps source spans and checks node references;
+the compiler's semantic pass enforces the exact immutable byte-view type. The
+expression arena admits at most 4160 nodes so the parser can parse its own
+updated `bodies.fy`; the type and statement arenas remain bounded at 4096.
+
+Floating tokens (kind 6) are preserved as literal expressions with their original
+token, byte span and lexer-normalized spelling. The parser performs no numeric
+conversion or floating-point evaluation.
+
+C-string tokens (kind 9) are also literal expressions. Their cooked view retains
+the lexer-produced terminal NUL in its hexadecimal representation; embedded NUL
+and invalid escapes remain lexical errors. No pointer or FFI behavior is added.
+
+Private declaration kind 8 preserves module-level `static_assert(expression);`.
+Its name spans and result type are zero because no name or type was written;
+`expression` is the required condition root. Attributes and public syntax retain
+the declaration contract. No constant evaluation occurs, and `static_assert`
+remains an ordinary identifier outside the module-item dispatch position.
+
+## Package syntax and file identity
+
+Private declaration kind 9 retains `unsafe extern C fn Type name(...);` as a
+foreign declaration, with a result type, ordered parameters and no body or value.
+Kind 31 is a distinct unsafe-block expression: its left child is a statement block
+and its right child is zero. It retains the `unsafe` keyword in the full byte span,
+uses the existing block/depth budget, and participates in postfix/infix syntax.
+These nodes do not grant unsafe execution or perform foreign calls.
+
+Private declaration kind 10 is a nameless `state` item. Its ordered fields use the
+existing shared 1024-field arena with explicit tags: 0 struct/resource, 1 cell,
+2 map, 3 enum member, 4 enum payload field. `type_root` is the field value type for tags
+0..2 and 4; enum members have zero type roots. Only maps have a nonzero `key_type`.
+Names, field spans and attribute/visibility syntax are retained. Storage validity,
+package ownership, duplicate names and persistence remain semantic concerns.
+
+Private declaration kind 11 preserves `enum Name { Member; Some { T value; }; ... }`, including
+empty enums, optional declaration attributes/`pub`, duplicate member spelling,
+source order and exact full/name byte spans. Members use tag 3 in the existing
+`field_start`/`field_count` range, with zero type/key roots and no member visibility.
+Payload fields use tag 4 and appear in source order immediately before their owner
+member (postorder) in that range. The member's `payload_start`/`payload_count`
+select those fields. `payload_open`/`payload_end` preserve the half-open brace
+span, distinguishing an explicit empty payload from no payload (all four values
+zero). Non-member records have all four payload values zero. The validator checks
+payload ownership, ordering, containment and field categories.
+They share the 1024-entry field arena with structs, resources and state fields;
+failed declarations roll back the whole member range and attribute prefix.
+Recovery recognizes enum boundaries without promoting nested declarations.
+Generic enum headers and explicit discriminant assignments remain
+unsupported. No enum value layout, type checking or execution is introduced.
+`fairyc_go_test_parser_enums` verifies this boundary and related field consumers.
+
+`file_syntax::parse(stream, max_items, relative_path)` is a separate private entry
+point; `syntax::parse` stays byte-only. It accepts a caller-supplied source-root
+relative filename, normalizes slash/backslash and lexical dot/parent segments,
+then checks ASCII identifiers and the `.fy` extension like the Go source model.
+It reads no files and never normalizes source bytes or ignores source comments.
+Path length is bounded at 32768 bytes and at most 1024 live path segments. Errors
+3/4/5 retain allocation/budget/lexical meaning; 6 means invalid identity and 7
+means module mismatch. Invalid paths fail first. For valid paths, syntax problems
+remain owned incomplete results and take precedence over a module mismatch.
+These private errors are not stable Go diagnostic IDs or diagnostic-span parity.
+
+The configured `fairyc_go_test_parser_package_items` lane verifies these additions
+in both native profiles. The filename-aware fixture driver uses a bounded path
+line followed by unchanged source bytes; it has no module-mismatch exception.
+
