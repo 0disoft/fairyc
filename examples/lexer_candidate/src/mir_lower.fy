@@ -51,6 +51,16 @@ fn usize expression(ref h::Program input, ref mut v::Vec<m::Local> locals, ref m
     if (id == 0 || c.current == 0 || c.problem.code != 0) { return 0; }
     let h::Expression e = h::expression_at(input,id); let u32 kind = h::expression_code(e.kind); let u32 type = h::type_code(e.type); let u32 operator = h::operator_code(e.operator);
     if (depth >= 64) { return state::fail(c,2,e.start,e.end); }
+    // Keep aggregate temporaries on the selected lane, not on every recursive
+    // expression frame. Helpers preserve the original source-depth accounting.
+    if(kind>=18 && kind!=25){return extended_expression(input,locals,blocks,operations,edges,payload,c,id,e,kind,type,operator,depth);}
+    if(kind<=3 || kind==15 || kind==16 || kind==17 || kind==25 ||
+       kind==4 && operator==5 && refs::valid(h::type_code(h::expression_at(input,e.left).type)) ||
+       (kind==13 || kind==14) && h::type_code(h::expression_at(input,e.left).type)<256){return view_expression(input,locals,blocks,operations,edges,payload,c,id,e,kind,type,operator,depth);}
+    if(kind==4 || kind==5 || kind==9 || kind==10 || kind==12 || kind==13 || kind==14){return aggregate_expression(input,locals,blocks,operations,edges,payload,c,id,e,kind,type,operator,depth);}
+    return call_expression(input,locals,blocks,operations,edges,payload,c,id,e,kind,type,operator,depth);
+}
+fn usize extended_expression(ref h::Program input, ref mut v::Vec<m::Local> locals, ref mut v::Vec<m::Block> blocks, ref mut v::Vec<m::Operation> operations, ref mut v::Vec<usize> edges, ref mut bytes::Buffer payload, ref mut state::Context c, usize id, h::Expression e, u32 kind, u32 type, u32 operator, usize depth) {
     if(kind==30){
         let usize left=if(e.left==0){0}else{expression(input,locals,blocks,operations,edges,payload,c,e.left,depth+1)};if(c.current==0 || c.problem.code!=0){return 0;}
         let usize right=if(e.right==0){0}else{expression(input,locals,blocks,operations,edges,payload,c,e.right,depth+1)};if(c.current==0 || c.problem.code!=0){return 0;}
@@ -107,6 +117,9 @@ fn usize expression(ref h::Program input, ref mut v::Vec<m::Local> locals, ref m
     }
     if (kind == 19) { return switch_expression(input,locals,blocks,operations,edges,payload,c,e,type,depth); }
     if(kind==27){let usize result=state::local(locals,c,type,0,false,false,e.start,e.end);return if(state::emit(operations,blocks,c,state::operation(36,result,type,type,0,0,0,e.start,e.end))!=0){result}else{0};}
+    return state::fail(c,4,e.start,e.end);
+}
+fn usize view_expression(ref h::Program input, ref mut v::Vec<m::Local> locals, ref mut v::Vec<m::Block> blocks, ref mut v::Vec<m::Operation> operations, ref mut v::Vec<usize> edges, ref mut bytes::Buffer payload, ref mut state::Context c, usize id, h::Expression e, u32 kind, u32 type, u32 operator, usize depth) {
     if (kind == 1 || kind == 2) {
         let usize result = state::local(locals,c,type,0,false,false,e.start,e.end);
         var m::Operation o = state::operation(1,result,type,type,0,0,0,e.start,e.end); o.boolean = e.boolean;
@@ -166,6 +179,9 @@ fn usize expression(ref h::Program input, ref mut v::Vec<m::Local> locals, ref m
         let usize index = state::local(locals,c,5,0,false,false,e.start,e.end); if (state::emit(operations,blocks,c,state::operation(16,index,5,owner_type,0,owner,raw,e.start,e.end)) == 0) { return 0; }
         let usize result = state::local(locals,c,type,0,false,false,e.start,e.end); if (state::emit(operations,blocks,c,state::operation(17,result,type,owner_type,0,owner,index,e.start,e.end)) == 0) { return 0; } return result;
     }
+    return state::fail(c,4,e.start,e.end);
+}
+fn usize aggregate_expression(ref h::Program input, ref mut v::Vec<m::Local> locals, ref mut v::Vec<m::Block> blocks, ref mut v::Vec<m::Operation> operations, ref mut v::Vec<usize> edges, ref mut bytes::Buffer payload, ref mut state::Context c, usize id, h::Expression e, u32 kind, u32 type, u32 operator, usize depth) {
     if (kind == 12) {
         var v::Vec<usize> values = v::empty<usize>(); var usize i = 0;
         while (i < e.edge_count) { let usize value = expression(input,locals,blocks,operations,edges,payload,c,h::edge_at(input,e.edge_start+i),depth+1); if (c.current == 0 || c.problem.code != 0) { return 0; } if (!v::push<usize>(ref mut values,value).is_ok) { return state::fail(c,3,e.start,e.end); } i += 1; }
@@ -233,6 +249,9 @@ fn usize expression(ref h::Program input, ref mut v::Vec<m::Local> locals, ref m
         let usize result = state::local(locals,c,type,0,false,false,e.start,e.end);
         if (state::emit(operations,blocks,c,state::operation(3,result,type,owner_type,operator,left,0,e.start,e.end)) == 0) { return 0; } return result;
     }
+    return state::fail(c,4,e.start,e.end);
+}
+fn usize call_expression(ref h::Program input, ref mut v::Vec<m::Local> locals, ref mut v::Vec<m::Block> blocks, ref mut v::Vec<m::Operation> operations, ref mut v::Vec<usize> edges, ref mut bytes::Buffer payload, ref mut state::Context c, usize id, h::Expression e, u32 kind, u32 type, u32 operator, usize depth) {
     if (kind == 6) {
         let usize callee = c.targets[e.binding]; if (callee == 0) { return state::fail(c,4,e.start,e.end); }
         // Materialize ordered arguments before publishing their contiguous

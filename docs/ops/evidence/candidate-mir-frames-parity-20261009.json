@@ -1,0 +1,82 @@
+{
+  "schema": "fairyc.candidate-mir-frame-parity/v1",
+  "passed": true,
+  "images": {
+    "development": {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\build\\mir-frames-dev.exe",
+      "sha256": "d3866c56aa6c23680fcd95a7ae883930dd88556452c0a702526c66c87e6c1665",
+      "stackReserveBytes": 1048576
+    },
+    "release": {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\build\\mir-frames-release.exe",
+      "sha256": "8481385d3b05dfefe0a886cf8ff06edd5c2f9c219aa20340e8e6cd78325af273",
+      "stackReserveBytes": 1048576
+    }
+  },
+  "comparisons": [
+    {
+      "suite": "scanner",
+      "development": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\scanner-sdk\\owned-tokens-cooked-diagnostics-and-limits-0.c",
+        "sha256": "427f63d7ce13da3f9abe24ae591c39abeb035a7af00e4e90815533a9c9017efd"
+      },
+      "release": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\scanner-sdk\\owned-tokens-cooked-diagnostics-and-limits-0.c",
+        "sha256": "427f63d7ce13da3f9abe24ae591c39abeb035a7af00e4e90815533a9c9017efd"
+      },
+      "identical": true
+    },
+    {
+      "suite": "mixed",
+      "development": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\mixed-origins\\input-or-cooked-vector-0.c",
+        "sha256": "e026428df105ce9f89f5713cc2c90dda73a0fc96a638821389037060af0a2809"
+      },
+      "release": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\mixed-origins\\input-or-cooked-vector-0.c",
+        "sha256": "e026428df105ce9f89f5713cc2c90dda73a0fc96a638821389037060af0a2809"
+      },
+      "identical": true
+    },
+    {
+      "suite": "mixed",
+      "development": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\mixed-origins\\tagged-and-static-0.c",
+        "sha256": "08bfa8c506b5e42dbbd383cb18c205f76f41694a6bed9e8b67eda7011098a413"
+      },
+      "release": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\mixed-origins\\tagged-and-static-0.c",
+        "sha256": "08bfa8c506b5e42dbbd383cb18c205f76f41694a6bed9e8b67eda7011098a413"
+      },
+      "identical": true
+    },
+    {
+      "suite": "mixed",
+      "development": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\mixed-origins\\exclusive-selection-0.c",
+        "sha256": "a2a24a0eb84a944bb59d247e15171f873782c7ba5741c10b0d43510c1855c365"
+      },
+      "release": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\mixed-origins\\exclusive-selection-0.c",
+        "sha256": "a2a24a0eb84a944bb59d247e15171f873782c7ba5741c10b0d43510c1855c365"
+      },
+      "identical": true
+    },
+    {
+      "suite": "mixed",
+      "development": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\mixed-origins\\nested-and-generic-0.c",
+        "sha256": "2f5515ff0c3568fcf97398d4aeda4783f4cee0a077b58899f5d8e91363dad0e7"
+      },
+      "release": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\mixed-origins\\nested-and-generic-0.c",
+        "sha256": "2f5515ff0c3568fcf97398d4aeda4783f4cee0a077b58899f5d8e91363dad0e7"
+      },
+      "identical": true
+    }
+  ],
+  "stackReserveRaised": false,
+  "workBudgetRaised": false,
+  "source": "examples/lexer_candidate/src/mir_lower.fy",
+  "sourceSHA256": "f2ad11f10d89c896bae4c92f9053a785319bffce53cb55bf17b0e2fb5c9ab26f"
+}

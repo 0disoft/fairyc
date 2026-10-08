@@ -133,10 +133,11 @@ resource exits. Fixed byte-array field subranges also preserve original storage 
 execute in both candidate profiles. Local mixed-origin payload selections now retain every possible owner
 in HIR and independently recomputed MIR. Indexed reachability, finalized-origin
 caching and owner-indexed exclusive access checks pass the scanner's prior HIR
-work limits without increasing the budget. The release candidate compiles original
-scanner and SDK bodies whose Token/cooked/diagnostic storage and cleanup run in
-both native C profiles. Development scanner compilation still overflows the default
-Windows stack; broader differential acceptance and project-driver
+work limits without increasing the budget. Development and release candidates
+compile original scanner and SDK bodies whose Token/cooked/diagnostic storage,
+byte-budget diagnostics and cleanup run in both native C profiles. MIR expression
+helpers also remove the development scanner's default-stack overflow. Broader
+differential acceptance and project-driver
 and platform work also remain. These prerequisite executions do not establish
 the differential acceptance or stage1/stage2 gate above.
 

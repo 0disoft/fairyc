@@ -938,3 +938,26 @@ project commands and Linux execution remain pending.
   accepted candidate or native-execution result. Development scanner execution,
   full differential coverage, Linux and stage1/stage2 remain pending.
 - No public language/API, HIR/MIR schema, runtime ABI, dependency, DB or CI change.
+
+## Default-stack scanner compilation (2026-10-09)
+
+- Diagnostic phase stops verify that default-stack HIR lowering completes, while
+  entering MIR lowering overflows the Windows stack before C rendering. Probe
+  source and lock bytes were restored exactly. Evidence:
+  `evidence/candidate-scanner-stack-phases-20261009.json`.
+- MIR expression dispatch now selects separate extended, view, aggregate/math
+  and call/block helpers. Existing operation bodies, child order, error spans and
+  depth accounting are retained. Aggregate temporaries for unrelated kinds no
+  longer share every recursive expression frame. No stack reserve, work budget
+  or recursion limit was increased.
+- The default development and release candidates both compile the original
+  scanner and SDK source set. Generated C executes Token/raw/cooked/diagnostic
+  storage, E0010 and nested resource cleanup in both native profiles. Development
+  and release produce byte-identical scanner C. Evidence:
+  `evidence/candidate-scanner-sdk-dev-20261009.json`,
+  `evidence/candidate-scanner-sdk-final-release-20261009.json` and
+  `evidence/candidate-mir-frames-parity-20261009.json`.
+- Mixed-origin and String/CString/UTF-8 regressions remain accepted/rejected as
+  before. Broader scanner differential coverage, project commands, Linux and
+  stage1/stage2 remain pending. No public language/API, HIR/MIR schema, runtime
+  ABI, dependency, DB or CI change.

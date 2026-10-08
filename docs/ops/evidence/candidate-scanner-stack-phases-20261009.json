@@ -1,0 +1,86 @@
+{
+  "schema": "fairyc.candidate-scanner-stack-phase-diagnostic/v1",
+  "executions": [
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\compiler-build-240s.exe",
+        "check"
+      ],
+      "exit": 0,
+      "stdout": "check ok: 2 instance(s), 137 source file(s), 1673 MIR function(s), lock updated\n",
+      "stderr": "",
+      "seconds": 6.68
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\compiler-build-240s.exe",
+        "experimental",
+        "build-workspace",
+        "--target",
+        "x86_64-windows-msvc",
+        "--profile",
+        "low",
+        "--output",
+        "build/stack-phase-66-dev.exe",
+        "--locked"
+      ],
+      "exit": 0,
+      "stdout": "built workspace: build/stack-phase-66-dev.exe (x86_64-windows-msvc, msvc 14.51.36231, low, lock verified)\n",
+      "stderr": "",
+      "seconds": 16.32
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\build\\stack-phase-66-dev.exe",
+        "--c-modules-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-scanner\\sources.txt"
+      ],
+      "exit": 2,
+      "stdout": "",
+      "stderr": ".cache/candidate-scanner/main.fy:1:1: error: module program phase 66 code 1 (bytes 0..0)\n",
+      "seconds": 29.47
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\compiler-build-240s.exe",
+        "check"
+      ],
+      "exit": 0,
+      "stdout": "check ok: 2 instance(s), 137 source file(s), 1673 MIR function(s), lock updated\n",
+      "stderr": "",
+      "seconds": 6.61
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\compiler-build-240s.exe",
+        "experimental",
+        "build-workspace",
+        "--target",
+        "x86_64-windows-msvc",
+        "--profile",
+        "low",
+        "--output",
+        "build/stack-phase-77-dev.exe",
+        "--locked"
+      ],
+      "exit": 0,
+      "stdout": "built workspace: build/stack-phase-77-dev.exe (x86_64-windows-msvc, msvc 14.51.36231, low, lock verified)\n",
+      "stderr": "",
+      "seconds": 14.11
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\build\\stack-phase-77-dev.exe",
+        "--c-modules-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-scanner\\sources.txt"
+      ],
+      "exit": 3221225725,
+      "stdout": "",
+      "stderr": "",
+      "seconds": 34.69
+    }
+  ],
+  "originalBytesRestored": true,
+  "productionSourceChanged": false,
+  "defaultStackReserveBytes": 1048576
+}
