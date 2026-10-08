@@ -22,10 +22,8 @@ pub fn Result<mir::Program,Problem> compile(ref v::Vec<syntax::Parsed> sources){
     return switch(lower::lower(owned)){case .ok(p):{.ok(p)}case .err(p):{.err(location(sources,7,p.code,p.start,p.end))}};
 }
 
-// Opt-in pipeline: authenticate the complete source set first, then rebuild
-// metadata for the retained declaration indices before the ordinary join/bind.
-pub fn Result<mir::Program,Problem> compile_sdk(ref v::Vec<syntax::Parsed> sources){
+pub fn Result<mir::Program,Problem> compile_sdk(ref mut v::Vec<syntax::Parsed> sources){
     let metadata=switch(signatures::build(sources)){case .ok(m):{m}case .err(p):{return .err(Problem{.phase=1,.code=p.code,.module_index=p.module_index,.start=p.start,.end=p.end});}};
-    let retained=switch(compact::compact(sources,ref metadata)){case .ok(p):{p}case .err(p):{return .err(Problem{.phase=8,.code=p.code,.module_index=p.module_index,.start=p.start,.end=p.end});}};
-    return compile(ref retained);
+    switch(compact::compact_in_place(sources,ref metadata)){case .ok(_):{}case .err(p):{return .err(Problem{.phase=8,.code=p.code,.module_index=p.module_index,.start=p.start,.end=p.end});}};
+    return compile(sources);
 }

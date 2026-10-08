@@ -21,10 +21,7 @@ fn i32 error(ref str message) { discard io::write_stderr(message); return 2; }
 fn Result<bytes::Buffer,u32> manifest(ref u8[] path_bytes) {
     return files::manifest(path_bytes);
 }
-// Exact, untrimmed UTF-8 relative path lines. LF/CRLF and no final newline;
-// no empty lines, BOM, control bytes, colon/ADS, or leading slash/backslash.
-// Relative traversal is allowed: this is a cwd resolver, not a sandbox.
-// 1 invalid manifest, 3 allocation, 4 path bound, 5 module bound.
+// Manifest paths: docs/architecture/candidate-source-join-v0.md.
 pub fn u32 paths(ref u8[] source, ref mut v::Vec<Path> result) {
     if (source.len == 0 || source.len > limits::manifest_bytes() || !text::validate_utf8(source).is_ok) { return 1; }
     if (source.len >= 3 && source[0] == 239 && source[1] == 187 && source[2] == 191) { return 1; }
@@ -75,7 +72,7 @@ fn i32 execute(ref u8[] path,u32 program_mode) {
         index += 1;
     }
     if(program_mode!=0){
-        let result=if(program_mode==2){programs::compile_sdk(ref parsed_files)}else{programs::compile(ref parsed_files)};
+        let result=if(program_mode==2){programs::compile_sdk(ref mut parsed_files)}else{programs::compile(ref parsed_files)};
         let program=switch(result){
             case .ok(p):{p}
             case .err(p):{

@@ -51,3 +51,40 @@ Limits of the joined owner: 256 inputs, 1048576 joined bytes including separator
 512 declarations, 16384 expressions, 8192 statements, 1024 entries, 4096 types,
 1024 fields and 4096 attributes and attribute arguments. The existing scanner
 token, diagnostic and work budgets apply to the joined source.
+
+## Parsed arena observations
+
+Private declarations: 1 module, 2 import, 3 function, 4 struct, 6 resource, 7 const,
+8 static_assert, 9 unsafe extern C function, 10 state, 11 user enum; problem 4 is
+outside the admitted subset. These are not public compiler diagnostic IDs.
+Function entries in source order: 1 parameter, 2 let, 3 var, 4 return.
+Zero name/type spans mean unwritten; expression zero means no initializer/value.
+One-based child IDs; zero means absent. Nodes are postorder, with byte spans
+and the source token index retaining exact literal/name/operator spelling.
+1 block, 2 binding, 3 return, 4 assignment, 6 expression, 7 list link.
+Standalone block/if expressions use kind 6; legacy statement kind 5 is not emitted.
+8 while (expression condition, first body), 9 break, 10 continue.
+11 assert, 12 discard and 13 defer retain their operands in expression.
+14 for: expression is optional condition, first body, second kind-15 header.
+15 header: first optional binding/assignment initializer, second optional assignment.
+16 burn retains its operand in expression; syntax does not consume resources.
+17 region: target is a kind-17 name node, expression the arena, first the body.
+18 byte for: target is the item name, expression the view, first the body, second the item type.
+
+## SDK compaction ownership
+
+The CLI compacts its source vector in place. It authenticates the complete
+source set and computes all SDK replacements before moving any source owner.
+Failure in validation, copying or reservation leaves the input vector intact.
+Unchanged user ASTs and scanners move through reserved Vec storage in manifest
+order. The original source vector retains capacity, so restoration performs no
+allocation. SDK replacements are copied in reverse module order and popped in
+forward order; all source bytes and scanner observations survive. The borrowed
+compact API remains available for snapshot comparison.
+
+## Manifest path observations
+
+Exact, untrimmed UTF-8 relative path lines. LF/CRLF and no final newline;
+no empty lines, BOM, control bytes, colon/ADS, or leading slash/backslash.
+Relative traversal is allowed: this is a cwd resolver, not a sandbox.
+1 invalid manifest, 3 allocation, 4 path bound, 5 module bound.

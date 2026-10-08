@@ -30,6 +30,9 @@ fn void snapshot(ref syntax::Parsed a,ref syntax::Parsed b){
     assert(v::len<syntax::Parsed>(ref retained)==22);module_index=0;while(module_index<22){let before=v::at<syntax::Parsed>(ref sources,module_index);let after=v::at<syntax::Parsed>(ref retained,module_index);
         snapshot(before,after);assert(syntax::expression_count(before)==syntax::expression_count(after) && syntax::statement_count(before)==syntax::statement_count(after) && syntax::declaration_count(before)==syntax::declaration_count(after));module_index+=1;
     }
+    let usize moved=switch(compact::compact_in_place(ref mut sources,ref metadata)){case .ok(w):{w}case .err(_):{assert(false);return;}};
+    assert(moved<50000 && v::len<syntax::Parsed>(ref sources)==22);module_index=0;
+    while(module_index<22){let a=v::at<syntax::Parsed>(ref retained,module_index);let b=v::at<syntax::Parsed>(ref sources,module_index);snapshot(a,b);assert(syntax::expression_count(a)==syntax::expression_count(b) && syntax::statement_count(a)==syntax::statement_count(b) && syntax::type_count(a)==syntax::type_count(b) && syntax::entry_count(a)==syntax::entry_count(b));module_index+=1;}
 }
 @effects(filesystem) @test fn void compacted_sdk_keeps_source_and_user_validation(){
     let input=support::sdk_source();var v::Vec<syntax::Parsed> sources=v::empty<syntax::Parsed>();
@@ -47,6 +50,12 @@ fn void snapshot(ref syntax::Parsed a,ref syntax::Parsed b){
     let bound=switch(binding::bind(ref output,ref meta,combined)){case .ok(p):{p}case .err(_):{assert(false);return;}};
     assert(syntax::entry_count(ref bound)==syntax::entry_count(after)+syntax::entry_count(sdk));
     switch(programs::compile(ref output)){case .ok(_):{assert(false);}case .err(e):{assert(e.phase==5 && e.code==1 && e.module_index==0 && e.start<syntax::source_view(before).len);}};
+    switch(compact::compact_in_place(ref mut sources,ref metadata)){case .ok(_):{}case .err(_):{assert(false);return;}};
+    snapshot(after,v::at<syntax::Parsed>(ref sources,0));snapshot(sdk,v::at<syntax::Parsed>(ref sources,1));
+    assert(syntax::declaration_count(sdk)==syntax::declaration_count(v::at<syntax::Parsed>(ref sources,1)));
+    switch(programs::compile_sdk(ref mut sources)){case .ok(_):{assert(false);}case .err(e):{assert(e.phase==5 && e.code==1 && e.module_index==0);}};
+    switch(compact::compact_in_place(ref mut sources,ref metadata)){case .ok(_):{assert(false);}case .err(e):{assert(e.code==9);}};
+    snapshot(after,v::at<syntax::Parsed>(ref sources,0));snapshot(sdk,v::at<syntax::Parsed>(ref sources,1));
     discard v::clear<syntax::Parsed>(ref mut sources);
     switch(compact::compact(ref sources,ref metadata)){case .ok(_):{assert(false);}case .err(e):{assert(e.code==9);}};
 }

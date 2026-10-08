@@ -8,26 +8,11 @@ import body_state as state;
 import attributes as attributes;
 import cleanup_syntax as cleanups;
 
-// Private declarations: 1 module, 2 import, 3 function, 4 struct, 6 resource, 7 const,
-// 8 static_assert, 9 unsafe extern C function, 10 state, 11 user enum; problem 4 is
-// outside the admitted subset. These are not public compiler diagnostic IDs.
+// Arena IDs: docs/architecture/candidate-source-join-v0.md.
 pub struct Declaration { usize cleanup_attribute_start; usize cleanup_attribute_count; usize unsafe_start; usize unsafe_end; usize owner_start; usize owner_end; u32 kind; usize start; usize end; usize name_start; usize name_end; usize expression; usize entry_start; usize entry_count; usize body; usize result_type; usize field_start; usize field_count; bool public; usize public_start; usize public_end; usize attribute_start; usize attribute_count; usize cleanup_start; usize cleanup_end; usize cleanup_body; usize generic_parameters; usize generic_start; usize generic_end; }
-// Function entries in source order: 1 parameter, 2 let, 3 var, 4 return.
-// Zero name/type spans mean unwritten; expression zero means no initializer/value.
 pub struct Entry { u32 kind; usize start; usize end; usize name_start; usize name_end; usize type_start; usize type_end; usize type_root; usize expression; }
-// One-based child IDs; zero means absent. Nodes are postorder, with byte spans
-// and the source token index retaining exact literal/name/operator spelling.
 pub struct Expression { u32 kind; usize start; usize end; usize token; usize left; usize right; }
 pub struct Problem { u32 code; usize start; usize end; u32 expected; usize token; }
-// 1 block, 2 binding, 3 return, 4 assignment, 6 expression, 7 list link.
-// Standalone block/if expressions use kind 6; legacy statement kind 5 is not emitted.
-// 8 while (expression condition, first body), 9 break, 10 continue.
-// 11 assert, 12 discard and 13 defer retain their operands in expression.
-// 14 for: expression is optional condition, first body, second kind-15 header.
-// 15 header: first optional binding/assignment initializer, second optional assignment.
-// 16 burn retains its operand in expression; syntax does not consume resources.
-// 17 region: target is a kind-17 name node, expression the arena, first the body.
-// 18 byte for: target is the item name, expression the view, first the body, second the item type.
 pub struct Statement { u32 kind; usize start; usize end; usize expression; usize target; usize first; usize second; usize entry; usize operator; }
 pub resource Parsed {
     scanner::Stream source;

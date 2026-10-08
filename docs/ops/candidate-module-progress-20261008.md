@@ -1480,3 +1480,33 @@ project commands and Linux execution remain pending.
   `evidence/candidate-dispatcher-admission-owner-cache-20261009.json`.
 - Development check/build pass. Release/Linux and full-dispatcher C/native
   execution remain open; no numeric limits, SDK ABI, DB or CI settings changed.
+
+## Moving unchanged user AST owners (2026-10-09)
+
+- `sdk_ast_compact::compact_in_place` validates original metadata and computes
+  every SDK replacement before touching the input vector. It reserves transfer
+  storage, moves user AST/scanner owners in manifest order, and replaces only
+  SDK owners. Copy or reserve failure leaves the original vector intact. The
+  borrowed compaction API remains available for exact snapshot comparison.
+- The opt-in `module_program::compile_sdk` now takes a mutable source vector;
+  its CLI caller retains exact source owners for diagnostics after compilation
+  fails. Signatures are rebuilt against the compacted declaration coordinates.
+- Three development native tests pass. Twenty-two modules with 17600 long
+  local references move and retain all source/token/arena observations under
+  50000 total work units. Tests also compare copied versus moved SDK snapshots,
+  reject stale original metadata without changing the input, and retain typing
+  rejection for invalid unused user code.
+- The actual dispatcher (160 files, 1048460 joined bytes) passes SDK compaction
+  and reaches phase 2 code 10 at the joined scanner. Its error span `0..0` maps
+  to `scanner::collect` storage rejection, rather than a per-module AST cap.
+  The scanner's fixed 65536-byte cooked pool is the next storage-reduction
+  candidate; no completed joined AST, C output or full-dispatcher native run is
+  claimed. Evidence: `evidence/candidate-ast-owner-transfer-20261009.json` and
+  `evidence/candidate-dispatcher-admission-in-place-20261009.json`.
+- The real file-token closure still emits byte-identical C to the saved catalog
+  baseline. Four exact file cases, three rejection cases and two native runs
+  pass. Evidence: `evidence/candidate-file-tokens-in-place-20261009.json`.
+- Private arena and manifest notes moved into
+  `docs/architecture/candidate-source-join-v0.md` to retain the 1MiB input bound.
+  Release rebuilding and Linux remain open. Only the candidate mutable-vector
+  API changed; numeric bounds, language/SDK ABI, DB and CI settings did not.

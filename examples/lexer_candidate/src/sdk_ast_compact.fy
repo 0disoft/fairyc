@@ -77,3 +77,19 @@ pub fn Result<v::Vec<syntax::Parsed>,catalog::Problem> compact(ref v::Vec<syntax
         if(!v::push<syntax::Parsed>(ref mut output,p).is_ok){return .err(fail(11,i));}i+=1;
     }return .ok(output);
 }
+
+fn syntax::Parsed take(ref mut v::Vec<syntax::Parsed> sources){return switch(v::pop<syntax::Parsed>(sources)){case .some(p):{p}case .none:{assert(false);take(sources)}};}
+pub fn Result<usize,catalog::Problem> compact_in_place(ref mut v::Vec<syntax::Parsed> sources,ref signatures::Program metadata){
+    var usize work=0;let plan=switch(reach::build(sources,metadata,ref mut work)){case .ok(p):{p}case .err(e):{return .err(e);}};
+    let usize count=v::len<syntax::Parsed>(sources);if(!reach::charge(ref mut work,count*2)){return .err(fail(10,0));}
+    var v::Vec<syntax::Parsed> replacements=v::empty<syntax::Parsed>();var usize i=count;
+    while(i>0){i-=1;if(reach::bundled(ref plan,i)){
+        let p=switch(copy_file(v::at<syntax::Parsed>(sources,i),ref plan,i,ref mut work)){case .ok(p):{p}case .err(c):{return .err(fail(c,i));}};
+        if(!v::push<syntax::Parsed>(ref mut replacements,p).is_ok){return .err(fail(11,i));}
+    }}
+    var v::Vec<syntax::Parsed> pending=v::empty<syntax::Parsed>();if(!v::reserve<syntax::Parsed>(ref mut pending,count).is_ok){return .err(fail(11,0));}
+    while(v::len<syntax::Parsed>(sources)>0){assert(v::push<syntax::Parsed>(ref mut pending,take(sources)).is_ok);}
+    i=0;while(i<count){let p=if(reach::bundled(ref plan,i)){let original=take(ref mut pending);take(ref mut replacements)}else{take(ref mut pending)};
+        assert(v::push<syntax::Parsed>(sources,p).is_ok);i+=1;
+    }return .ok(work);
+}

@@ -13,6 +13,7 @@ fn catalog::Problem fail(u32 code,usize module_index,usize start,usize end){retu
 pub fn bool charge(ref mut usize work,usize amount){if(*work>1048576 || amount>1048576-*work){return false;};*work=*work+amount;return true;}
 pub fn usize base(ref Plan p,usize module_index){return *v::at<usize>(ref p.bases,module_index);}
 pub fn usize stop(ref Plan p,usize module_index){return *v::at<usize>(ref p.bases,module_index+1);}
+pub fn bool bundled(ref Plan p,usize module_index){return v::at<Row>(ref p.rows,base(p,module_index)).bundled;}
 pub fn bool needed(ref Plan p,usize module_index,usize declaration){return v::at<Row>(ref p.rows,base(p,module_index)+declaration).needed;}
 // Source declarations are disjoint and ordered, except the enclosing module.
 // A binary search avoids scanning every declaration for each expression.

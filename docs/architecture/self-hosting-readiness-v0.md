@@ -243,6 +243,14 @@ Three development native regressions pass, including 17600 long local names
 under 50000 reachability work units. Moving unchanged user AST owners is next.
 Evidence: `docs/ops/evidence/candidate-ast-owner-cache-20261009.json` and
 `docs/ops/evidence/candidate-dispatcher-admission-owner-cache-20261009.json`.
+The opt-in CLI now moves unchanged user AST/scanner owners after all SDK
+replacement copies and transfer capacity are ready. Three development native
+tests retain exact observations and validation, including a 22-module move
+under 50000 work units. The 160-file dispatcher (1048460 joined bytes) passes
+phase 8 and reaches phase 2 code 10 at the joined scanner's storage rejection.
+Cooked-storage reduction is next; joined AST/HIR/MIR and stage1/stage2 remain
+open. Evidence: `docs/ops/evidence/candidate-ast-owner-transfer-20261009.json`
+and `docs/ops/evidence/candidate-dispatcher-admission-in-place-20261009.json`.
 
 `stage0` is the current Go compiler built by the supported Go toolchain.
 
