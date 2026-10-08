@@ -1,0 +1,125 @@
+{
+  "schema": "fairyc.candidate-scanner-corpus-parity/v1",
+  "passed": true,
+  "candidateProfiles": [
+    {
+      "receipt": {
+        "path": "docs\\ops\\evidence\\candidate-scanner-corpus-dev-20261009.json",
+        "sha256": "4666c3549705afefc332cc0c3ecfc6535bd6a0fee249d1821f9b9f7026e0c625"
+      },
+      "profile": {
+        "image": {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\build\\mir-frames-dev.exe",
+          "sha256": "d3866c56aa6c23680fcd95a7ae883930dd88556452c0a702526c66c87e6c1665"
+        },
+        "generatedC": {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-scanner-corpus\\scanner-0.c",
+          "sha256": "1718755eebeb28a836648263d39016d6bd98a7c4fa4b1a5c04634f8fdc761ab3"
+        },
+        "native": {
+          "schema": "fairyc.candidate-scanner-corpus-native/v1",
+          "passed": true,
+          "fixtureFiles": 303,
+          "projectFiles": 2,
+          "framedCases": 7670,
+          "inputsSHA256": "3378e47ec5d60da79943a47b180c2705c0967bb2da2348f9cab893492dae8507",
+          "expectedSHA256": "0c1bc1814e9d6742561f9d456513c7aa38d87470ed9b0426c03656ce25f2908a",
+          "builds": [
+            {
+              "profile": "low",
+              "compilerPath": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+              "compilerVersion": "14.51.36231",
+              "cSourceSHA256": "1718755eebeb28a836648263d39016d6bd98a7c4fa4b1a5c04634f8fdc761ab3",
+              "runtimeSHA256": "2b3eef2c430d9265e3ab6e4b6260063f988169f79752151ccd81594956061ab3",
+              "imageSHA256": "c39549f7ebcda4291f9f38fa870f9fa06a49d210300dda3b631328838e731e5c"
+            },
+            {
+              "profile": "optimized",
+              "compilerPath": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+              "compilerVersion": "14.51.36231",
+              "cSourceSHA256": "1718755eebeb28a836648263d39016d6bd98a7c4fa4b1a5c04634f8fdc761ab3",
+              "runtimeSHA256": "2b3eef2c430d9265e3ab6e4b6260063f988169f79752151ccd81594956061ab3",
+              "imageSHA256": "ae0e4e0a514306a596ae4307102487235b90abd8b6824192935bcbedb4791350"
+            }
+          ],
+          "profiles": [
+            {
+              "profile": "low",
+              "passed": true,
+              "batches": 112,
+              "malformedFrames": 23
+            },
+            {
+              "profile": "optimized",
+              "passed": true,
+              "batches": 112,
+              "malformedFrames": 23
+            }
+          ]
+        }
+      }
+    },
+    {
+      "receipt": {
+        "path": "docs\\ops\\evidence\\candidate-scanner-corpus-release-20261009.json",
+        "sha256": "b4a63030f201f31dd5a51fe851bae1bf7423b01c1d24f6261e31bdbaa918821b"
+      },
+      "profile": {
+        "image": {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\build\\mir-frames-release.exe",
+          "sha256": "8481385d3b05dfefe0a886cf8ff06edd5c2f9c219aa20340e8e6cd78325af273"
+        },
+        "generatedC": {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-scanner-corpus\\scanner-0.c",
+          "sha256": "1718755eebeb28a836648263d39016d6bd98a7c4fa4b1a5c04634f8fdc761ab3"
+        },
+        "native": {
+          "schema": "fairyc.candidate-scanner-corpus-native/v1",
+          "passed": true,
+          "fixtureFiles": 303,
+          "projectFiles": 2,
+          "framedCases": 7670,
+          "inputsSHA256": "3378e47ec5d60da79943a47b180c2705c0967bb2da2348f9cab893492dae8507",
+          "expectedSHA256": "0c1bc1814e9d6742561f9d456513c7aa38d87470ed9b0426c03656ce25f2908a",
+          "builds": [
+            {
+              "profile": "low",
+              "compilerPath": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+              "compilerVersion": "14.51.36231",
+              "cSourceSHA256": "1718755eebeb28a836648263d39016d6bd98a7c4fa4b1a5c04634f8fdc761ab3",
+              "runtimeSHA256": "2b3eef2c430d9265e3ab6e4b6260063f988169f79752151ccd81594956061ab3",
+              "imageSHA256": "0cd2bfc9c38707b97fd287e59da417b30d06cdeb4bf556f33fada8ba7120a045"
+            },
+            {
+              "profile": "optimized",
+              "compilerPath": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+              "compilerVersion": "14.51.36231",
+              "cSourceSHA256": "1718755eebeb28a836648263d39016d6bd98a7c4fa4b1a5c04634f8fdc761ab3",
+              "runtimeSHA256": "2b3eef2c430d9265e3ab6e4b6260063f988169f79752151ccd81594956061ab3",
+              "imageSHA256": "74341e3880a380d4387c6d6e73944884492c8963c5155f2bba49b84536c7ad81"
+            }
+          ],
+          "profiles": [
+            {
+              "profile": "low",
+              "passed": true,
+              "batches": 112,
+              "malformedFrames": 23
+            },
+            {
+              "profile": "optimized",
+              "passed": true,
+              "batches": 112,
+              "malformedFrames": 23
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "identicalC": true,
+  "observations": 30680,
+  "malformedFrameExecutions": 92,
+  "nativeBuilds": 4,
+  "linuxValidated": false
+}

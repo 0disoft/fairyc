@@ -1,0 +1,149 @@
+{
+  "schema": "fairyc.candidate-scanner-corpus/v1",
+  "passed": true,
+  "images": [
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\build\\mir-frames-release.exe",
+      "sha256": "8481385d3b05dfefe0a886cf8ff06edd5c2f9c219aa20340e8e6cd78325af273"
+    }
+  ],
+  "inputs": [
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\fixtures\\scanner_protocol.fy",
+      "sha256": "a2e9170b5a4da1c01b33c4b5e3b7e22a7b9cde9aec2a8421c6320ccc725bedd8"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\scanner.fy",
+      "sha256": "5909ac2ea0510260da7160627212fbf4d77f815c9ebce302d127752614874b5e"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\candidate_limits.fy",
+      "sha256": "5666b6a3ad8190630c8fe7b7bca969ede7264d95f97e3ed17e166bf88417fc9d"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\numbers.fy",
+      "sha256": "ee8b40b5e8061317d70d3594c386c9e4c70d95132a7e4243ea6402947a4c3556"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\diagnostics.fy",
+      "sha256": "ee95f81ed3b3224702196fceef2888434e9713341b81abf01e03945592c4de8b"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\utf8.fy",
+      "sha256": "4a5425cea9efbfb1bff2c31a38c2bd8e392c6792af09f24e906c9a743621870d"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\strings.fy",
+      "sha256": "8f26db7c4d4039c8c8d9fbc6078097859c8f714ca5887957fdf0e69269dca521"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\src\\budget.fy",
+      "sha256": "c2793aa302279b9d27f0af32edd71f70de4e93cb4f76f55facd3e757641cc494"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\internal\\sdkstdlib\\sources\\std\\bytes.fy",
+      "sha256": "4740a506e93349fb002c383967dcc44d182d20f09f2094b83b5464a4ab252982"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\internal\\sdkstdlib\\sources\\std\\io.fy",
+      "sha256": "4b89c3aeb8b4de4887395d29723095d364c5660c6b773c5696fb1f65f5365f48"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\internal\\sdkstdlib\\sources\\optional\\std\\vec.fy",
+      "sha256": "0ae4c395bf98c39079ad620bde035b3b590d51417864802e698edc069281db5b"
+    }
+  ],
+  "observer": {
+    "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\verify_scanner_corpus.py",
+    "sha256": "a0a1469cd6c17ae665757b6fd84ce745eae1c30812349d79d25ccb4477c76af0"
+  },
+  "profiles": [
+    {
+      "image": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\build\\mir-frames-release.exe",
+        "sha256": "8481385d3b05dfefe0a886cf8ff06edd5c2f9c219aa20340e8e6cd78325af273"
+      },
+      "generatedC": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-scanner-corpus\\scanner-0.c",
+        "sha256": "1718755eebeb28a836648263d39016d6bd98a7c4fa4b1a5c04634f8fdc761ab3"
+      },
+      "native": {
+        "schema": "fairyc.candidate-scanner-corpus-native/v1",
+        "passed": true,
+        "fixtureFiles": 303,
+        "projectFiles": 2,
+        "framedCases": 7670,
+        "inputsSHA256": "3378e47ec5d60da79943a47b180c2705c0967bb2da2348f9cab893492dae8507",
+        "expectedSHA256": "0c1bc1814e9d6742561f9d456513c7aa38d87470ed9b0426c03656ce25f2908a",
+        "builds": [
+          {
+            "profile": "low",
+            "compilerPath": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+            "compilerVersion": "14.51.36231",
+            "cSourceSHA256": "1718755eebeb28a836648263d39016d6bd98a7c4fa4b1a5c04634f8fdc761ab3",
+            "runtimeSHA256": "2b3eef2c430d9265e3ab6e4b6260063f988169f79752151ccd81594956061ab3",
+            "imageSHA256": "0cd2bfc9c38707b97fd287e59da417b30d06cdeb4bf556f33fada8ba7120a045"
+          },
+          {
+            "profile": "optimized",
+            "compilerPath": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+            "compilerVersion": "14.51.36231",
+            "cSourceSHA256": "1718755eebeb28a836648263d39016d6bd98a7c4fa4b1a5c04634f8fdc761ab3",
+            "runtimeSHA256": "2b3eef2c430d9265e3ab6e4b6260063f988169f79752151ccd81594956061ab3",
+            "imageSHA256": "74341e3880a380d4387c6d6e73944884492c8963c5155f2bba49b84536c7ad81"
+          }
+        ],
+        "profiles": [
+          {
+            "profile": "low",
+            "passed": true,
+            "batches": 112,
+            "malformedFrames": 23
+          },
+          {
+            "profile": "optimized",
+            "passed": true,
+            "batches": 112,
+            "malformedFrames": 23
+          }
+        ]
+      }
+    }
+  ],
+  "executions": [
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\build\\mir-frames-release.exe",
+        "--c-modules-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-scanner-corpus\\sources.txt"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "",
+      "seconds": 2.33,
+      "generatedC": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-scanner-corpus\\scanner-0.c",
+        "sha256": "1718755eebeb28a836648263d39016d6bd98a7c4fa4b1a5c04634f8fdc761ab3"
+      },
+      "stdoutBytes": 733576
+    },
+    {
+      "argv": [
+        "bun",
+        "tools/run-go.ts",
+        "test",
+        "./internal/cli",
+        "-run",
+        "^TestWindowsCandidateEmittedLexerCorpus$",
+        "-count=1",
+        "-v",
+        "-timeout=5m"
+      ],
+      "exit": 0,
+      "stdout": "=== RUN   TestWindowsCandidateEmittedLexerCorpus\n    fairy_lexer_emitted_corpus_test.go:76: compared 303 fixture files, 2 real project files and 7670 framed cases at both profiles\n--- PASS: TestWindowsCandidateEmittedLexerCorpus (38.20s)\nPASS\nok  \tgithub.com/0disoft/fairyc/internal/cli\t38.342s\n",
+      "stderr": "",
+      "seconds": 42.96
+    }
+  ],
+  "linuxValidated": false
+}

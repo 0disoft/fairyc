@@ -136,10 +136,12 @@ caching and owner-indexed exclusive access checks pass the scanner's prior HIR
 work limits without increasing the budget. Development and release candidates
 compile original scanner and SDK bodies whose Token/cooked/diagnostic storage,
 byte-budget diagnostics and cleanup run in both native C profiles. MIR expression
-helpers also remove the development scanner's default-stack overflow. Broader
-differential acceptance and project-driver
-and platform work also remain. These prerequisite executions do not establish
-the differential acceptance or stage1/stage2 gate above.
+helpers also remove the development scanner's default-stack overflow. The
+checked-in current/previous, malformed, mutation and budget corpora now match the
+Go lexer through candidate-emitted C in both native profiles (7670 cases per
+profile, plus malformed framing). This proves the scanner component scope.
+Project-driver and platform work remain. These scanner results do not establish
+the complete compiler's stage1/stage2 or promotion gates.
 
 `stage0` is the current Go compiler built by the supported Go toolchain.
 

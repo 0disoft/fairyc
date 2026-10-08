@@ -10,6 +10,21 @@ Version 0.61.0 adds `--c-modules-file <source-list>` for bounded multi-file nomi
 programs. See [module program progress](../../../docs/ops/candidate-module-progress-20261008.md)
 for the source-list rules, execution evidence and remaining SDK/package limits.
 
+The scanner can also be tested after the Fairy candidate emits its C transport:
+
+```sh
+python examples/lexer_candidate/verify_scanner_corpus.py --images /path/to/candidate-dev /path/to/candidate-release --receipt /path/to/corpus-receipt.json
+```
+
+Run from the repository root on Windows AMD64 with MSVC, Bun and Go. The observer
+compiles original scanner/SDK sources plus a test-only console framing fixture.
+It reuses the checked-in Go lexer corpus for current/previous recognition,
+malformed sources, mutations and four budget variations. Each C native profile
+builds once per candidate and reuses that image across bounded batches. The Go
+reference supplies no recognition results to the tested native process. This
+checks the scanner component; project commands and compiler promotion remain
+separate gates.
+
 Example version 0.19.0 adds C11 emission and native execution verification for
 same-file nominal structs (see [Owned nominal C](04-generic-declarations-and-sdk-observations.md#owned-nominal-c)). The candidate
 owns recognition, typing, HIR, MIR and C generation; the native C compiler and
@@ -480,4 +495,3 @@ controls check exact status/output and input preservation. Native `tests/modules
 checks retained import signatures and resolution/type facts. Evidence:
 `docs/ops/evidence/modules-file-cli-20261005.json`. Windows native execution is
 checked locally; Linux native execution remains deferred to the owner's batch.
-

@@ -19,6 +19,11 @@ import (
 )
 
 func TestWindowsFairyLexerCorpus(t *testing.T) {
+	runWindowsFairyLexerCorpus(t, "", &candidateScannerCorpusReport{})
+}
+
+func runWindowsFairyLexerCorpus(t *testing.T, emittedC string, report *candidateScannerCorpusReport) {
+	t.Helper()
 	if runtime.GOOS != "windows" || runtime.GOARCH != "amd64" {
 		t.Skip("requires Windows AMD64 MSVC")
 	}
@@ -157,17 +162,30 @@ func TestWindowsFairyLexerCorpus(t *testing.T) {
 	appendCase("long-comment", []byte("/*"+strings.Repeat("a", 12000)+"*/"), false)
 	appendCase("long-unterminated-comment", []byte("/*"+strings.Repeat("a", 12000)), false)
 	root := t.TempDir()
-	copyLexerFileCLIExample(t, root)
+	if emittedC == "" {
+		copyLexerFileCLIExample(t, root)
+	}
+	report.FixtureFiles = fixtureCount
+	report.ProjectFiles = len(paths) - fixtureCount
+	report.FramedCases = len(names)
+	candidateScannerCorpusIdentity(report, stdin.Bytes(), expected.String())
 	for _, release := range []bool{false, true} {
 		profile := cdriver.LowProfile
 		if release {
 			profile = cdriver.OptimizedProfile
 		}
-		var stderr strings.Builder
-		compiled, code := compileWindowsWorkspace(root, workspaceTargetOptions{targetID: target.X8664WindowsMSVC, profile: profile, locked: release}, workspaceCompilePolicy{stableDiagnostics: true, runTrapReceipt: true}, &stderr)
-		if code != ExitSuccess {
-			t.Fatalf("corpus build release=%v code=%d stderr=%s", release, code, stderr.String())
+		var artifact cdriver.WindowsHostArtifact
+		if emittedC == "" {
+			var stderr strings.Builder
+			compiled, code := compileWindowsWorkspace(root, workspaceTargetOptions{targetID: target.X8664WindowsMSVC, profile: profile, locked: release}, workspaceCompilePolicy{stableDiagnostics: true, runTrapReceipt: true}, &stderr)
+			if code != ExitSuccess {
+				t.Fatalf("corpus build release=%v code=%d stderr=%s", release, code, stderr.String())
+			}
+			artifact = compiled.artifact
+		} else {
+			artifact = buildCandidateScannerCorpus(t, emittedC, profile, report)
 		}
+		batches := 0
 		begin, inputStart, outputStart := 0, 0, 0
 		for begin < len(names) {
 			end := begin
@@ -178,7 +196,7 @@ func TestWindowsFairyLexerCorpus(t *testing.T) {
 				t.Fatalf("single observation exceeds execution output bound: %s", names[begin])
 			}
 			inputEnd, outputEnd := inputEnds[end-1], ends[end-1]
-			outcome, err := cdriver.ExecuteWindowsMSVCTargetWithInput(compiled.artifact, bytes.NewReader(stdin.Bytes()[inputStart:inputEnd]))
+			outcome, err := cdriver.ExecuteWindowsMSVCTargetWithInput(artifact, bytes.NewReader(stdin.Bytes()[inputStart:inputEnd]))
 			if err != nil {
 				t.Fatalf("corpus release=%v starting %s: %v", release, names[begin], err)
 			}
@@ -203,6 +221,7 @@ func TestWindowsFairyLexerCorpus(t *testing.T) {
 				t.Fatalf("corpus release=%v %s byte=%d got=%q want=%q", release, name, i, got[i:min(i+200, len(got))], want[i:min(i+200, len(want))])
 			}
 			begin, inputStart, outputStart = end, inputEnd, outputEnd
+			batches++
 		}
 		badFrames := []struct {
 			input []byte
@@ -216,11 +235,13 @@ func TestWindowsFairyLexerCorpus(t *testing.T) {
 			}{append([]byte{3, 1, 0}, make([]byte, length)...), 8})
 		}
 		for _, bad := range badFrames {
-			outcome, err := cdriver.ExecuteWindowsMSVCTargetWithInput(compiled.artifact, bytes.NewReader(bad.input))
+			outcome, err := cdriver.ExecuteWindowsMSVCTargetWithInput(artifact, bytes.NewReader(bad.input))
 			if err != nil || outcome.ExitCode != bad.exit || outcome.Stdout != "" || outcome.Stderr != "" || outcome.TrapControl != "" {
 				t.Fatalf("malformed frame %x: outcome=%+v err=%v", bad.input, outcome, err)
 			}
 		}
+		report.Profiles = append(report.Profiles, candidateScannerCorpusProfile{Profile: profile.Name, Passed: true, Batches: batches, MalformedFrames: len(badFrames)})
 	}
+	report.Passed = true
 	t.Logf("compared %d fixture files, %d real project files and %d framed cases at both profiles", fixtureCount, len(paths)-fixtureCount, len(names))
 }

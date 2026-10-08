@@ -961,3 +961,29 @@ project commands and Linux execution remain pending.
   before. Broader scanner differential coverage, project commands, Linux and
   stage1/stage2 remain pending. No public language/API, HIR/MIR schema, runtime
   ABI, dependency, DB or CI change.
+
+## Candidate-emitted scanner differential corpus (2026-10-09)
+
+- The existing Go-reference corpus runner now also accepts a candidate-emitted C
+  unit through an opt-in test. Go computes inputs and expected observations; the
+  tested native process recognizes bytes through the original Fairy scanner.
+  A small test-only console framing fixture preserves the binary protocol.
+- All 303 checked-in Fairy fixtures and two real project sources are compared
+  under current/previous recognition, insert-NUL/delete-first/invalid-byte
+  mutations, and byte/token/diagnostic/work budget variations. Long tokens,
+  strings and comments add boundary cases. The 7670 framed observations match
+  exact token kinds, trivia, cooked bytes, diagnostics, repair, source ranges and
+  process status for both candidate profiles and both native C profiles.
+- Four native builds are reused across 448 bounded corpus batches, rather than
+  building every fixture. The 23 malformed/truncated frames per native profile
+  preserve their exact exit/status behavior. Totals: 30680 observations and 92
+  malformed-frame executions. Both candidates emit identical C; complete input
+  and expected stream digests plus native/compiler/runtime identities are saved.
+- Evidence: `evidence/candidate-scanner-corpus-dev-20261009.json`,
+  `evidence/candidate-scanner-corpus-release-20261009.json` and
+  `evidence/candidate-scanner-corpus-parity-20261009.json`. Item 48's scanner
+  storage/integration scope is complete. File SDK/project commands, whole-source
+  compilation, stage1/stage2, promotion and Linux checks remain separate gates.
+- Only test harnesses, a test fixture and progress documentation changed. No
+  public language/API, compiler/runtime implementation, dependency, DB or CI
+  workflow change. Without an explicit C input the new native test skips.
