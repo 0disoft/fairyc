@@ -42,7 +42,7 @@ fn bool sdk_record(ref Table p,ref u8[] source,u32 type,usize record){
     let shape=at(p,s-1);return shape.field_count==2 && field_at(p,shape.field_start+1).type==if(record==3){pointers::make(3,false)}else{4} && field_at(p,shape.field_start+2).type==if(record==2){4}else{5};
 }
 pub fn bool sdk_result(ref Table p,ref u8[] source,usize rule,u32 type){
-    if(rule==2){return sdk_record(p,source,type,1);}if(rule>=16 && rule<=23 && rule!=17){return sdk_record(p,source,type,2);}return sdk::scalar_result(rule)!=0 && type==sdk::scalar_result(rule);
+    if(rule==2){return sdk_record(p,source,type,1);}if(rule>=16 && rule<=23 && rule!=17){return sdk_record(p,source,type,2);}if(rule>=24 && rule<=32){return sdk_record(p,source,type,if(rule==32){5}else{4});}return sdk::scalar_result(rule)!=0 && type==sdk::scalar_result(rule);
 }
 pub fn bool sdk_parameter(ref Table p,ref u8[] source,usize rule,usize index,u32 type){
     if(index>=sdk::parameter_count(rule)){return false;}if(sdk::view_parameter(rule,index)){return pointers::valid(type) && !pointers::mutable(type) && sdk_record(p,source,pointers::inner(type),3);}return type==sdk::parameter(rule,index);

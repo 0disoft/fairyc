@@ -12,6 +12,7 @@ SDK = REPO / "internal/sdkstdlib/sources/optional/std/vec.fy"
 DEPENDENCIES = ()
 SUITE = "vector-storage"
 TRAPS = {}
+STREAMS = {}  # case -> (stdin, exact stdout, exact stderr)
 CASE_OBSERVER = Path(__file__)
 RUNTIME_NAMES = ("stage0_system_heap.c", "stage0_vector_storage.c")
 PREAMBLE = "module main;import std::vec as v;"
@@ -201,7 +202,8 @@ def main():
                 r["generatedC"] = identity(source)
                 r["stdoutBytes"] = len(r["stdout"].encode("utf-8"))
                 r["stdout"] = ""
-                jobs.append(dict(name=f"{name}-{index}", source=str(source), observe=False, foreignSource=str(foreign)))
+                stdin, stdout, stderr = STREAMS.get(name, ("", "", ""))
+                jobs.append(dict(name=f"{name}-{index}", source=str(source), observe=False, foreignSource=str(foreign), stdin=stdin, expectedStderr=stderr))
         for name, (body, diagnostic) in REJECT.items():
             m = manifest(name, body)
             for exe in images:
@@ -214,7 +216,8 @@ def main():
         native = json.loads(native_report.read_text(encoding="utf-8"))
         assert len(native) == 2 * len(jobs), native
         expected = {f"{name}-{index}": TRAPS.get(name, 0) for name in CASES for index in range(len(images))}
-        assert all(not r.get("error") and r["trap"] == expected[r["name"]] and (r["trap"] != 0 or r["value"] == 7) and not r["stdout"] and not r["stderr"] for r in native), native
+        streams = {f"{name}-{index}": STREAMS.get(name, ("", "", ""))[1:] for name in CASES for index in range(len(images))}
+        assert all(not r.get("error") and r["trap"] == expected[r["name"]] and (r["trap"] != 0 or r["value"] == 7) and (r["stdout"], r["stderr"]) == streams[r["name"]] for r in native), native
         passed = True
     finally:
         receipt.parent.mkdir(parents=True, exist_ok=True)

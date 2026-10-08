@@ -123,7 +123,9 @@ Native success alone is insufficient. The candidate must also prove failure beha
 
 The Fairy-written candidate now executes authenticated scalar/resource/struct
 Vec storage, `std::bytes::Buffer`, String/CString and UTF-8 bodies, including
-allocation failures and ownership cleanup. The
+allocation failures and ownership cleanup. Authenticated `std::io` console
+output/input bodies also execute against the original Windows runtime, with
+exact effect authority and failure results independently verified. The
 [candidate progress](../ops/candidate-module-progress-20261008.md)
 records the exact native evidence and remaining scanner integration,
 project-driver and platform work. These prerequisite executions do not establish

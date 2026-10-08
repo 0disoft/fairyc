@@ -13,6 +13,7 @@ import (
 	"runtime"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/0disoft/fairyc/internal/cdriver"
 	"github.com/0disoft/fairyc/internal/cruntime"
@@ -24,6 +25,8 @@ type job struct {
 	Source        string `json:"source"`
 	Observe       bool   `json:"observe"`
 	ForeignSource string `json:"foreignSource,omitempty"`
+	Stdin         string `json:"stdin,omitempty"`
+	Stderr        string `json:"expectedStderr,omitempty"`
 }
 type request struct {
 	Schema string `json:"schema"`
@@ -179,7 +182,7 @@ func run() error {
 							artifact.TrapControl = true
 							image = artifact.Bytes
 							var outcome cdriver.WindowsHostOutcome
-							outcome, e = cdriver.ExecuteWindowsHost(artifact)
+							outcome, e = cdriver.ExecuteWindowsMSVCTargetWithInput(artifact, strings.NewReader(item.Stdin))
 							row.Exit = outcome.ExitCode
 							row.Stdout = outcome.Stdout
 							row.Stderr = outcome.Stderr
@@ -203,7 +206,7 @@ func run() error {
 						if e == nil {
 							image = artifact.Bytes
 							var outcome cdriver.LinuxHostOutcome
-							outcome, e = cdriver.ExecuteLinuxTarget(artifact)
+							outcome, e = cdriver.ExecuteLinuxTargetWithOptions(artifact, cdriver.LinuxExecutionOptions{Input: strings.NewReader(item.Stdin), Timeout: time.Minute})
 							row.Exit = outcome.ExitCode
 							row.Stdout = outcome.Stdout
 							row.Stderr = outcome.Stderr
@@ -235,7 +238,7 @@ func run() error {
 						}
 					} else {
 						row.Value = int64(row.Exit)
-						if row.Stderr != "" {
+						if row.Stderr != item.Stderr {
 							e = fmt.Errorf("unexpected standalone stderr")
 						}
 					}

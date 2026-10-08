@@ -700,3 +700,33 @@ project commands and Linux execution remain pending.
   Item 50 still needs console SDK execution and project CLI integration. Actual
   scanner storage/diagnostic integration, release mutation API, Linux and
   self-hosting remain pending. No SDK/runtime ABI, dependency, database or CI change.
+
+## Console SDK execution (2026-10-09)
+
+- The candidate admits nine exact authenticated `std::io` runtime declarations.
+  HIR and independent MIR checks require the original owned write/read result
+  records, exact scalar/pointer signatures and the `console` effect. Removing
+  that effect, authority, ABI proof or source identity rejects before C output.
+- Development and release native API tests each pass eleven mutations, including
+  result/parameter types, effect removal, wrong source module, declaration spans,
+  write/read record fields and missing repr(C) proof. Failed C rendering preserves
+  an existing output prefix after parser owners have been released.
+- Development/release console candidates each pass five programs and four
+  rejections through twenty total low/optimized MSVC executions. The two
+  candidates emit identical C for all five programs. Exact stdout/stderr include Korean UTF-8,
+  embedded NUL, i32/u32/usize limits, i64 minimum/maximum/zero and bool formatting.
+  Stdin covers zero-length reads, two-byte partial reads, embedded NUL and EOF;
+  invalid standard handles preserve the raw error status/count and input buffer.
+  Missing direct/transitive console effects, shared stdin and stolen symbols reject.
+- The test-only native consumer accepts caller input and exact expected stderr.
+  The current development text regression passes six programs, seven rejections
+  and twelve native executions with the same consumer.
+- Evidence: `evidence/candidate-sdk-io-api-20261009.json`,
+  `evidence/candidate-sdk-io-api-release-20261009.json`,
+  `evidence/candidate-sdk-io-cli-dev-20261009.json`,
+  `evidence/candidate-sdk-io-cli-release-20261009.json` and
+  `evidence/candidate-sdk-io-text-regression-20261009.json`.
+- Item 50 still needs project CLI integration. Actual scanner Token/cooked-text/
+  diagnostics integration, File SDK execution, broader release mutation API,
+  Linux and self-hosting remain pending. No SDK/runtime ABI, public language,
+  dependency, database or CI change.
