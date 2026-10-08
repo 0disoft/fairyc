@@ -1401,3 +1401,20 @@ project commands and Linux execution remain pending.
   Source/AST/work/depth/stack budgets, DB, dependencies and CI settings are
   unchanged. Linux and full-dispatcher C/native execution remain unverified;
   stage1/stage2 and promotion remain open.
+
+## Reachability reference-limit classification (2026-10-09)
+
+- The existing 16384-use cap now returns limit code 10 separately from a failed
+  Vec push's allocation code 11. All other source text and the index/work bounds
+  are unchanged. The rebuilt development driver confirms the full dispatcher
+  stops at phase 8 code 10 at the same source span, proving the capped index is
+  the measured cause. Current input: 160 files, 1047016 joined bytes.
+- Two existing native SDK compaction tests pass with the actual SDK fixture
+  path forwarded: private references retain their diagnostic, and exact source
+  spans/user validation survive compaction. The initial invocation omitted that
+  required path and failed; the receipt records that command error and the
+  corrected run. Evidence:
+  `evidence/candidate-reachability-limit-classification-20261009.json` and
+  `evidence/candidate-dispatcher-admission-reach-limit-classified-20261009.json`.
+- Index reduction remains open. Release rebuilding, Linux and whole-dispatcher
+  C/native execution were not repeated for this diagnostic-only change.

@@ -66,7 +66,7 @@ pub fn Result<Plan,catalog::Problem> build(ref v::Vec<syntax::Parsed> sources,re
         let file=v::at<syntax::Parsed>(sources,module_index);var usize i=1;while(i<=syntax::expression_count(file)){
             if(!charge(work,1)){return .err(fail(10,module_index,0,0));}let e=syntax::expression_at(file,i);
             if(e.kind==2){let usize id=owner_rows(ref rows,ref bases,module_index,e.start,e.end,work);if(*work>=1048576){return .err(fail(10,module_index,e.start,e.end));}
-                if(id!=0){if(v::len<Use>(ref uses)>=16384 || !v::push<Use>(ref mut uses,Use{.expression=i,.next=v::at<Row>(ref rows,id-1).first}).is_ok){return .err(fail(11,module_index,e.start,e.end));}
+                if(id!=0){if(v::len<Use>(ref uses)>=16384){return .err(fail(10,module_index,e.start,e.end));}if(!v::push<Use>(ref mut uses,Use{.expression=i,.next=v::at<Row>(ref rows,id-1).first}).is_ok){return .err(fail(11,module_index,e.start,e.end));}
                     let usize count=v::len<Use>(ref uses);{let ref mut Row target=v::at_mut<Row>(ref mut rows,id-1);target.first=count;}
                 }
             }i+=1;

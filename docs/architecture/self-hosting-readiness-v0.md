@@ -216,6 +216,12 @@ of compiler source. Reference-index/work reduction and accurate limit/error
 classification remain necessary. Evidence:
 `docs/ops/evidence/candidate-module-array-signatures-parity-20261009.json` and
 `docs/ops/evidence/candidate-dispatcher-admission-after-array-signatures-20261009.json`.
+The reference cap now reports limit code 10 separately from allocation code
+11. The development driver reproduces phase 8 code 10 at the same span on the
+160-file, 1047016-byte input, confirming the index-cap blocker. Two existing
+native SDK compaction regressions pass. Index reduction still remains before
+full-dispatcher compilation can advance. Evidence:
+`docs/ops/evidence/candidate-reachability-limit-classification-20261009.json`.
 
 `stage0` is the current Go compiler built by the supported Go toolchain.
 
