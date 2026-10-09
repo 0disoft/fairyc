@@ -589,3 +589,24 @@ unit HIR/MIR/C/CLI, full current-source dispatcher native and stage1/stage2 rema
 pending. Release, Linux and push were not run. Public language/SDK ABI, SDK source,
 DB, CI and runner contracts are unchanged.
 Evidence: `docs/ops/evidence/candidate-module-unit-places-corpus-20261009.json`.
+
+## Indexed array and scalar-view values (2026-10-09)
+
+module_unit_value_index는 알려진 스칼라 뷰와 허용된 고정 배열 인덱스 값을 정규 원소 타입으로 해석한다. 인덱스 피연산자는 usize를 요구한다. E1006은 피연산자 범위를 보존하고, 지원하지 않는 수신자는 수신자 범위에서 실험 코드2가 되며, 반환 불일치는 E1009로 유지된다. 인덱스 자리는 원래 소유자 루트와 범위, 식 투영을 그대로 두고, 뷰 가변성은 바인딩이 아니라 뷰 타입에서 나온다.
+
+이름 있는 배열과 뷰 원소 대여는 정규 공유 및 가변 참조, 캐스트, 추론된 지역 변수, 인자와 반환으로 이어진다. 임시, 호출, 원시 포인터 루트는 대여 주소 정체성을 얻지 않는다. 중첩 배열은 현재 언어 계약 밖에 있으며, 오래된 내부 그래프가 표현할 수 있더라도 값 소비자가 거부한다. 일반 제공자와 소유 정리 문맥이 이를 재사용한다. 기존 한도는 그대로이고 컴파일러 로직은 전부 Fairy다. 배열 리터럴, 뷰 생성, 슬라이스, 명목 뷰 인터페이스, 수명과 충돌과 이동, 안전하지 않은 코드와 포인터, HIR/MIR/C/CLI와 stage1/stage2는 아직 남아 있다.
+
+| Observation | Result |
+| --- | --- |
+| Development check | 190 source files; 2352 MIR functions; passed |
+| Selected development native cases | 5 passed; four identical cases reused and the corrected provider cleanup case rerun |
+| Reference acceptance / code / span | 12/12 matched |
+| Retained bounds | types 4096; expressions/calls/arguments 16384; entries 1024; active locals 128; depth/rounds 64; work 1048576 |
+
+This observation only covers known receiver types in initializer, argument and
+return consumers. Declaration/shape admission remains separate: resource array
+fields and nested array type annotations still need earlier interface rejection.
+No new full-corpus observation is claimed; it is bundled with array/view/slice
+construction. Release, Linux, full current dispatcher native, stage1/stage2 and
+push were not run. Public language/SDK ABI, SDK sources, DB, CI and runners are
+unchanged. Evidence: `docs/ops/evidence/candidate-module-unit-indexes-20261009.json`.

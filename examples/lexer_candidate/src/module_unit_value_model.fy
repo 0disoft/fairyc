@@ -6,7 +6,7 @@ import std::vec as v;
 pub struct Frame {u32 kind;usize context;usize module_index;usize declaration;usize result;}
 // state 0 unresolved value; 1 known value type; 2 non-value syntax/callee.
 pub struct Field {usize id;usize owner;usize module_index;usize declaration;usize source_index;}
-// Place kind 0 is a value/provenance only; 1 local, 2 field, 3 dereference.
+// Place kind 0 is a value/provenance only; 1 local, 2 field, 3 dereference, 4 index.
 pub struct Place {u32 kind;usize root;usize scope;usize projection;bool mutable;bool indirect;bool resource_field;bool borrowable;}
 pub fn Place no_place(){return Place{.kind=0,.root=0,.scope=0,.projection=0,.mutable=false,.indirect=false,.resource_field=false,.borrowable=false};}
 pub struct Expression {usize source_index;u32 kind;usize start;usize end;usize left;usize right;usize target;Field field;Place place;usize expected;usize type;u32 state;bool flexible;bool minimum;}

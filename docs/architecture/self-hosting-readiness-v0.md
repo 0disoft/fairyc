@@ -707,3 +707,24 @@ unit HIR/MIR/C/CLI, full current-source dispatcher native and stage1/stage2 rema
 pending. Release, Linux and push were not run. Public language/SDK ABI, SDK source,
 DB, CI and runner contracts are unchanged.
 Evidence: `docs/ops/evidence/candidate-module-unit-places-corpus-20261009.json`.
+
+## Indexed array and scalar-view values (2026-10-09)
+
+module_unit_value_index resolves known scalar views and admitted fixed-array indexed values with canonical element types. Index operands require usize; E1006 preserves the operand span, an unsupported receiver becomes experimental code2 at the receiver span, and a return mismatch stays E1009. An index place keeps its original owner root/scope and expression projection, and view mutability comes from the view type rather than the binding.
+
+Named array and view element borrows feed canonical shared/mutable references, casts, inferred locals, arguments and returns. Temporary, call and raw-pointer roots never gain borrow address identity. Nested arrays sit outside the current language contract and are rejected by the value consumer even when an older internal graph can represent them. The generic provider and owned cleanup contexts reuse it. Existing limits are unchanged, and the compiler logic is entirely Fairy. Array literal/view-construction/slice, nominal view interfaces, lifetime/conflict/move, unsafe/pointer, HIR/MIR/C/CLI and stage1/stage2 remain pending.
+
+| Observation | Result |
+| --- | --- |
+| Development check | 190 source files; 2352 MIR functions; passed |
+| Selected development native cases | 5 passed; four identical cases reused and the corrected provider cleanup case rerun |
+| Reference acceptance / code / span | 12/12 matched |
+| Retained bounds | types 4096; expressions/calls/arguments 16384; entries 1024; active locals 128; depth/rounds 64; work 1048576 |
+
+This observation only covers known receiver types in initializer, argument and
+return consumers. Declaration/shape admission remains separate: resource array
+fields and nested array type annotations still need earlier interface rejection.
+No new full-corpus observation is claimed; it is bundled with array/view/slice
+construction. Release, Linux, full current dispatcher native, stage1/stage2 and
+push were not run. Public language/SDK ABI, SDK sources, DB, CI and runners are
+unchanged. Evidence: `docs/ops/evidence/candidate-module-unit-indexes-20261009.json`.
