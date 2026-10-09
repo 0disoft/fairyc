@@ -14,7 +14,7 @@ import std::vec as v;
 // own value graph, and generic instance IDs are never compared across units.
 pub struct Frame {usize unit;usize context;m::Frame value;usize expression_start;usize expression_count;usize local_start;usize local_count;usize call_start;usize call_count;usize parameter_start;usize parameter_count;}
 pub struct Owner {usize frame;usize local;usize scope;u32 kind;bool borrowed;usize start;usize end;}
-pub resource Inputs {v::Vec<values::Plan> providers;v::Vec<usize> modules;v::Vec<Frame> frames;v::Vec<Owner> owners;v::Vec<usize> parameters;v::Vec<usize> targets;usize expressions;usize work;cleanup{}}
+pub resource Inputs {v::Vec<values::Plan> providers;v::Vec<usize> modules;v::Vec<Frame> frames;v::Vec<Owner> owners;v::Vec<usize> parameters;v::Vec<usize> targets;v::Vec<usize> statics;usize expressions;usize work;cleanup{}}
 fn m::Problem fail(m::Frame f,u32 code,usize start,usize end){return m::fail(f,code,start,end,0,0);}
 pub fn usize frame_count(ref Inputs p){return v::len<Frame>(ref p.frames);}
 pub fn Frame frame(ref Inputs p,usize id){return *v::at<Frame>(ref p.frames,id-1);}
@@ -27,14 +27,31 @@ pub fn ref m::Values body(ref Inputs p,ref values::Plan primary,usize id){let f=
 pub fn types::Type type_at(ref Inputs p,ref values::Plan primary,usize id,usize type){let f=frame(p,id);return if(f.unit==0){values::type_at(primary,type)}else{values::type_at(v::at<values::Plan>(ref p.providers,f.unit-1),type)};}
 pub fn usize parameter(ref Inputs p,usize id,usize ordinal){let f=frame(p,id);return *v::at<usize>(ref p.parameters,f.parameter_start+ordinal);}
 pub fn usize target(ref Inputs p,usize id,usize call){let f=frame(p,id);return *v::at<usize>(ref p.targets,f.call_start+call);}
+// Static owners use kind 11 and retain a real module-local expression span.
+// Equal source expressions across generic instances share one static owner.
+pub fn Result<usize,m::Problem> static_owner(ref Inputs p,ref values::Plan primary,usize id,usize original,ref mut usize work){
+    if(id==0 || id>frame_count(p)){return .err(m::Problem{.code=12,.module_index=0,.start=0,.end=0,.expected=0,.actual=0});}let f=frame(p,id);let b=body(p,primary,id);var usize low=0;var usize high=f.expression_count;
+    while(low<high){if(!m::charge(work,1)){return .err(fail(f.value,10,0,0));}let usize mid=low+(high-low)/2;if(m::expression_at(b,mid+1).source_index<original){low=mid+1;}else{high=mid;}}
+    if(low>=f.expression_count || m::expression_at(b,low+1).source_index!=original){return .err(fail(f.value,12,0,0));}let e=m::expression_at(b,low+1);let usize owner=*v::at<usize>(ref p.statics,f.expression_start+low);return if(owner==0){.err(fail(f.value,12,e.start,e.end))}else{.ok(owner)};
+}
 // Convert the stable lexical binding, never the projected/forwarded place root.
 pub fn Result<usize,m::Problem> binding_owner(ref Inputs p,usize id,m::Expression expression){
     if(id==0 || id>frame_count(p)){return .err(m::Problem{.code=12,.module_index=0,.start=expression.start,.end=expression.end,.expected=0,.actual=0});}let f=frame(p,id);
     if(expression.binding==0){return .ok(0);}if(expression.kind!=2 || expression.binding>f.local_count){return .err(fail(f.value,12,expression.start,expression.end));}return .ok(f.local_start+expression.binding);
 }
 struct Budget {usize expressions;usize work;}
+struct Static {usize module_index;usize expression;usize owner;}
 fn ref m::Values unit_body(ref v::Vec<values::Plan> providers,ref values::Plan primary,Frame f){if(f.unit==0){return values::at(primary,f.context);}return values::at(v::at<values::Plan>(providers,f.unit-1),f.context);}
 fn types::Type unit_type(ref v::Vec<values::Plan> providers,ref values::Plan primary,Frame f,usize type){return if(f.unit==0){values::type_at(primary,type)}else{values::type_at(v::at<values::Plan>(providers,f.unit-1),type)};}
+fn Result<v::Vec<usize>,m::Problem> static_inputs(ref v::Vec<values::Plan> providers,ref values::Plan primary,ref v::Vec<Frame> frames,ref mut v::Vec<Owner> owners,ref mut Budget budget){
+    var usize capacity=8;while(capacity<budget.expressions*2){capacity*=2;}var v::Vec<Static> cache=v::empty<Static>();var v::Vec<usize> statics=v::empty<usize>();var usize i=0;
+    while(i<capacity){if(!m::charge(ref mut budget.work,1)){return .err(m::Problem{.code=10,.module_index=0,.start=0,.end=0,.expected=0,.actual=0});}if(!v::push<Static>(ref mut cache,Static{.module_index=0,.expression=0,.owner=0}).is_ok){return .err(m::Problem{.code=11,.module_index=0,.start=0,.end=0,.expected=0,.actual=0});}i+=1;}
+    i=0;while(i<v::len<Frame>(frames)){let f=*v::at<Frame>(frames,i);var usize j=1;while(j<=f.expression_count){let e=m::expression_at(unit_body(providers,primary,f),j);if(!m::charge(ref mut budget.work,1)){return .err(fail(f.value,10,e.start,e.end));}var usize owner=0;
+            if(e.type!=0 && borrows::borrowed(unit_type(providers,primary,f,e.type)) && (e.kind==1 || e.kind==6 && e.builtin.kind==200)){var usize slot=(f.value.module_index*4161+e.source_index)%capacity;var bool found=false;
+                while(!found){if(!m::charge(ref mut budget.work,1)){return .err(fail(f.value,10,e.start,e.end));}let row=*v::at<Static>(ref cache,slot);if(row.owner==0){if(v::len<Owner>(owners)>=16384){return .err(fail(f.value,10,e.start,e.end));}if(!v::push<Owner>(owners,Owner{.frame=i+1,.local=0,.scope=0,.kind=11,.borrowed=true,.start=e.start,.end=e.end}).is_ok){return .err(fail(f.value,11,e.start,e.end));}owner=v::len<Owner>(owners);let cell=v::at_mut<Static>(ref mut cache,slot);*cell=Static{.module_index=f.value.module_index,.expression=e.source_index,.owner};found=true;}else if(row.module_index==f.value.module_index && row.expression==e.source_index){owner=row.owner;found=true;}else{slot=(slot+1)%capacity;}}
+            }if(!v::push<usize>(ref mut statics,owner).is_ok){return .err(fail(f.value,11,e.start,e.end));}j+=1;
+        }i+=1;}return .ok(statics);
+}
 fn m::Problem append(ref values::Plan unit,usize unit_id,ref mut v::Vec<Frame> frames,ref mut v::Vec<Owner> owners,ref mut v::Vec<usize> parameters,ref mut v::Vec<usize> targets,ref mut Budget budget){
     var usize i=0;while(i<values::count(unit)){let b=values::at(unit,i);let f=m::frame(b);let usize expressions=m::expression_count(b);let usize locals=m::local_count(b);let usize calls=m::call_count(b);
         if(!m::charge(ref mut budget.work,1) || v::len<Frame>(frames)>=1024 || expressions>16384-budget.expressions || locals>16384-v::len<Owner>(owners) || calls>16384-v::len<usize>(targets)){return fail(f,10,0,0);}let usize id=v::len<Frame>(frames)+1;let usize local_start=v::len<Owner>(owners);let usize parameter_start=v::len<usize>(parameters);var usize j=1;
@@ -62,5 +79,5 @@ pub fn Result<Inputs,m::Problem> build(ref v::Vec<syntax::Parsed> sources,ref si
                 }
             }else if(found==0 && call.kind==2){return .err(fail(f.value,12,call.start,call.end));}let slot=v::at_mut<usize>(ref mut targets,f.call_start+j);*slot=found;
         }j+=1;
-    }id+=1;}return .ok(Inputs{.providers,.modules,.frames,.owners,.parameters,.targets,.expressions=budget.expressions,.work=budget.work});
+    }id+=1;}let statics=switch(static_inputs(ref providers,primary,ref frames,ref mut owners,ref mut budget)){case .ok(p):{p}case .err(p):{return .err(p);}};return .ok(Inputs{.providers,.modules,.frames,.owners,.parameters,.targets,.statics,.expressions=budget.expressions,.work=budget.work});
 }

@@ -1416,3 +1416,39 @@ remain next. The 8192-site cap, 1048576 work and existing frame/depth/round
 bounds fail closed. No new fixed corpus, full dispatcher, stage1/stage2,
 release, Linux or push was performed; public language/SDK ABI, SDK sources,
 DB, CI and runner contracts are unchanged.
+
+## Located static sources through return summaries (2026-10-10)
+
+Reference probes showed that two distinct static literals must retain separate
+origin locations: returning their conditional join reports E2103, and
+forwarding a function summary preserves the callee literal locations.
+Collapsing both literals to the abstract Static handle would erase that
+distinction. Origin inputs now append kind-11 static owners with original
+expression spans and a bounded mapping for each frame expression. A charged
+open-addressed cache shares the same module/source-expression identity across
+generic instances without scanning every owner. Static owners have no lexical
+local/scope; frame-local ranges and parameter owner IDs remain unchanged.
+
+Return flow now uses these located static owners for borrowed literals and
+source_location calls. Call substitution preserves a static source unchanged
+instead of replacing it with the caller parameter or call location.
+Development check passed (211 sources, 2604 MIR functions), and all five
+native development tests passed, including the earlier four tests rerun
+against the implementation. The new test covers distinct literal coordinates,
+forwarding and shared static identity across two generic instances. Reference
+observations matched 24/24, including exact candidate-origin literal spans in
+the four new cases. The previous 20 cases were reused after compiler and
+embedded source-fixture identity checks. One initial native invocation refused
+a stale lock after a source change; the current check refreshed the lock
+before the successful run. Evidence:
+docs/ops/evidence/candidate-module-unit-origin-static-locations-20261010.json.
+
+The abstract set-algebra Static handle remains distinct from Unknown, but
+actual inferred static leaves now retain input owner coordinates. Combined
+lexical/static owners, expression mappings, hash slots, work, return sites and
+depth/round caps remain bounded. This is still origin inference and input
+preparation; E2102/E2103/unsupported diagnostic publication, tagged/region
+origins, loan/subview/lifetime/conflict/move, unsafe provenance and cross-unit
+execution remain. No new fixed corpus, full dispatcher, stage1/stage2,
+release, Linux or push was performed; public language/SDK ABI, SDK sources,
+DB, CI and runner contracts are unchanged.

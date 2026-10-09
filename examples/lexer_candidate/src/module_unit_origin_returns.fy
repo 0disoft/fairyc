@@ -16,7 +16,8 @@ pub resource Plan {inputs::Inputs input;v::Vec<sets::Entry> entries;v::Vec<usize
 pub fn usize count(ref Plan p){return v::len<usize>(ref p.summaries);}
 pub fn usize summary(ref Plan p,usize frame){return *v::at<usize>(ref p.summaries,frame-1);}
 pub fn usize source_count(ref Plan p,usize frame){return sets::count(ref p.entries,ref p.members,summary(p,frame));}
-// Source leaf 2 is Static; other known leaves name input owner leaf-2.
+// Real source leaves name input owner leaf-2; kind 11 is a located Static.
+// Leaf 2 remains the abstract static handle in the set algebra.
 pub fn usize source(ref Plan p,usize frame,usize ordinal){return sets::member(ref p.entries,ref p.members,summary(p,frame),ordinal);}
 pub fn ref inputs::Inputs owned_inputs(ref Plan p){return ref p.input;}
 pub fn usize rounds(ref Plan p){return p.rounds;}
