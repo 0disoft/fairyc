@@ -1919,3 +1919,36 @@ the next unit. Current compiler, SDK, source, test, lock and candidate hashes we
 Public Stage 0 CLI/SDK ABI, DB and CI are unchanged; no push was made. Linux,
 release and stage1/stage2 remain deferred. Evidence:
 docs/ops/evidence/candidate-module-region-sources-20261010.json.
+
+## Region escape and allocation provenance (2026-10-10)
+
+Region local origins are now kind-14 facts seeded only inside the statement-17
+block, with the capability identity kept distinct from a per-origin allocation
+map. `g::Value` transports the origin and allocation map through variables,
+assignments, match, `?`, arguments, branches and loops, and remaps generic and
+provider summaries; a mixed summary keeps each leaf's allocation because caller
+Region arguments may alias. A `RegionParam` uses its callee's allocation, while a
+borrowed parameter forwards the actual argument allocation, and local origin
+declarations for E2103 use the entire lexical Region statement. Provider
+cross-module origin analysis is implemented.
+
+E3101 reports the primary span at the return expression or `?` with the
+allocation as related role 3 (module and span), without an E2102 cascade, and the
+existing private `--check-return-origins-file` prints E3101 and the allocation.
+Allocation sites are capped at 16384 immutable entries, and the provenance ledger
+holds 4096 maps and 36864 rows inside the existing 1 MiB work budget.
+
+Development source checking passed (219 files, 2700 MIR functions), five selected
+native tests and all 21 exact API cases passed against the Go reference on code,
+module and primary and related roles and spans, including alias Region arguments
+(callee E2103 with the caller E3101 at the first callee site), direct and assigned
+second sites, a provider-index-2 related allocation, implicit borrow-failure `?`
+full-span reporting, a loop return and accepted known-empty Result/Option values,
+with recursion's unknown-2 summary preserved. A fresh locked dev build passed all
+128 CLI comparisons on status, code, file and primary and related roles and spans,
+and the current native and API inputs match their hashes. Split-unit HIR/MIR and
+runtime execution and the full dispatcher remain pending, together with runtime
+region enter/reset, loans, lifetimes, conflicts, moves, unsafe provenance,
+stage1/stage2, release and Linux. The public Stage 0 CLI and SDK ABI are
+unchanged. DB and CI are unchanged; no push was made. Evidence:
+docs/ops/evidence/candidate-module-region-escape-20261010.json.

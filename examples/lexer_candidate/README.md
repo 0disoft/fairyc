@@ -31,7 +31,9 @@ The manifest uses the same one-relative-path-per-line format as
 CRLF are accepted. The command checks direct, single-leaf tagged and
 single-safe-borrow-leaf Result `?` borrow return origins in one
 bounded primary unit and prints original file/byte locations for E2102,
-E2103 and their related origins. Status 3 means a semantic origin error;
+E2103 and their related origins. Local Region escapes emit E3101 with the
+original allocation location, including provider and generic allocation sites.
+Status 3 means a semantic origin error;
 status 2 means unknown/unsupported analysis, a phase/input failure or a limit.
 
 Single-borrow-leaf Option/Result payload construction, empty payloads, nested
@@ -49,7 +51,9 @@ receiver Region's provenance through the success payload. Resource-containing
 values are refused with code 3102; borrow-containing values remain unsupported.
 Lexical Region bindings and their exact authenticated `ref mut std::alloc::Arena`
 sources are typed, and the source expression is evaluated before its nested block.
-Local Region borrow returns remain unsupported pending E3101 escape checks.
+A returned local Region borrow is rejected with E3101 at the return or `?`
+expression and an `allocation` related location. Multiple allocations from one
+Region keep one origin; different Region origins still produce E2103.
 Region enter/reset and runtime execution, loan/subview/lifetime/conflict/move,
 unsafe pointer provenance, split-unit
 execution, the full project dispatcher, stage1/stage2, release and Linux are
