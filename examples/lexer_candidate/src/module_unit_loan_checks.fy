@@ -38,6 +38,9 @@ pub fn m::Problem moved(ref inputs::Inputs input,ref values::Plan primary,ref m:
         if(e.kind==3){id=e.left;depth+=1;continue;}if(e.kind!=2 || e.binding==0){return g::fail(c,0,0,0);}
         let owns=switch(owns_resource(input,primary,e.type,c,0)){case .ok(b):{b}case .err(p):{return p;}};if(!owns){return g::fail(c,0,0,0);}
         let owner=switch(inputs::storage_owner(input,c.frame,e)){case .ok(n):{n}case .err(p):{return p;}};
-        return check_kind(input,env,entries,members,statement,true,2105,owner,true,true,source.start,source.end,loan_records,held_loans,loan_conflicts,c);
+        // The statement map covers later statements; the expression map also
+        // covers borrowed values read by later arguments of this same call.
+        let after=check_kind(input,env,entries,members,statement,true,2105,owner,true,true,source.start,source.end,loan_records,held_loans,loan_conflicts,c);if(after.code!=0){return after;}
+        return check_kind(input,env,entries,members,expression,false,2105,owner,true,true,source.start,source.end,loan_records,held_loans,loan_conflicts,c);
     }return g::fail(c,12,0,0);
 }

@@ -1926,3 +1926,27 @@ next bounded step. Parent/subview generations, complete reference access/store
 conflicts, full owned loan-fact publication, borrow MIR/C/runtime, unsafe
 provenance, move-aware cleanup, full dispatcher, stage1/stage2, Linux and release
 remain pending. Stable CLI, SDK ABI, DB and CI are unchanged; no push.
+
+## Moves before later borrowed arguments (2026-10-10)
+
+E2105 now also consults the borrowed binding map after the moved expression,
+alongside the enclosing statement map. A stored reference used by a later
+argument stays live even when the call is its last use. This covers aliases,
+resource consumption inside nested calls and Option borrowed payloads. A later
+argument block that replaces the reference before using it releases the old
+root; borrowing another owner and consuming after an earlier call are accepted.
+
+Source checking and a fresh locked development build passed. Seven independent
+API and CLI source goldens passed: four rejected and three accepted. Go and the
+previous candidate accept all seven; the four rejections follow the normative
+local-loan rule. Three selected native tests passed, and the existing owner-move
+and owner-conflict native traces remain byte-identical. The previous 39 owner
+move, 38 owner conflict and 17 Region lifetime CLI results remain exact. Evidence:
+`docs/ops/evidence/candidate-module-owner-arguments-20261010.json`.
+
+This does not implement general moved-owner availability or move-aware cleanup.
+Parent/subview generations, complete reference access/store conflicts, full
+owned loan-fact publication, borrow MIR/C/runtime, unsafe provenance, full
+dispatcher, stage1/stage2, Linux and release remain pending. Release and Linux
+validation were outside these local borrow-analysis units. Stable CLI, SDK ABI,
+DB and CI are unchanged; no push.

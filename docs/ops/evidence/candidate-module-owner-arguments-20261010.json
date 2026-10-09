@@ -1,0 +1,253 @@
+{
+  "schema": "fairyc.candidate-module-owner-arguments/v1",
+  "passed": true,
+  "scope": "Resource moves consult both statement-after and expression-after borrowed-binding liveness. Later stored borrowed arguments, aliases, nested call results and Option borrowed payloads keep their roots live; reassignment before the later use releases the old root.",
+  "sourceTruth": [
+    "docs/language/0002-borrows-and-return-origins.md",
+    "internal/semantic/borrow_flow.go",
+    "examples/lexer_candidate/src/module_unit_loan_live_walk.fy"
+  ],
+  "identity": {
+    "compiler": {
+      "path": ".cache/candidate-tagged/compiler-origin-patterns.exe",
+      "sha256": "d36dae1b99751322e447880aaf4d28321bd6d53bdf776185308c6c4504889bb2"
+    },
+    "candidate": {
+      "path": "examples/lexer_candidate/build/lexer-candidate.exe",
+      "sha256": "f28a407aac3a9a2d91c5e7b26305ae39226c967a448f4c3b99345d21787c7c45"
+    },
+    "lock": {
+      "path": "examples/lexer_candidate/fairy.lock",
+      "sha256": "1c38dc87526d5e2a9c117fd9e4c4e3fc51376122a8ed0605e9ff7fe64d3f755b"
+    },
+    "files": [
+      {
+        "path": "examples/lexer_candidate/src/module_unit_loan_checks.fy",
+        "sha256": "6d554b28788f65000dae9f2c0f67defff370b0bc878644caed61bdaa4ab570f7"
+      },
+      {
+        "path": "examples/lexer_candidate/tests/module_unit_owner_arguments.fy",
+        "sha256": "02d6ed93899e2f6492bad276a0e574909dff95baa36c6d65a8be7275de49af57"
+      }
+    ]
+  },
+  "sourceCheck": {
+    "exit": 0,
+    "stdout": "check ok: 2 instance(s), 230 source file(s), 2880 MIR function(s), lock updated\n"
+  },
+  "lockedBuild": {
+    "exit": 0,
+    "stdout": "built: build/lexer-candidate.exe (x86_64-windows-msvc, development, lock verified)\n"
+  },
+  "comparisons": {
+    "apiGoldenExact": 7,
+    "cliGoldenExact": 7,
+    "accepted": 3,
+    "rejected": 4,
+    "cases": [
+      {
+        "index": 0,
+        "name": "later named argument",
+        "expected": 3,
+        "matched": true,
+        "goReferenceExit": 0,
+        "candidateBeforeExit": 0,
+        "golden": {
+          "file": "main.fy",
+          "code": 2105,
+          "start": 340,
+          "end": 345,
+          "related": [
+            {
+              "role": "owner",
+              "file": "main.fy",
+              "start": 283,
+              "end": 288
+            },
+            {
+              "role": "loan",
+              "file": "main.fy",
+              "start": 322,
+              "end": 331
+            },
+            {
+              "role": "last-use",
+              "file": "main.fy",
+              "start": 346,
+              "end": 347
+            }
+          ]
+        }
+      },
+      {
+        "index": 1,
+        "name": "later aliased argument",
+        "expected": 3,
+        "matched": true,
+        "goReferenceExit": 0,
+        "candidateBeforeExit": 0,
+        "golden": {
+          "file": "main.fy",
+          "code": 2105,
+          "start": 369,
+          "end": 374,
+          "related": [
+            {
+              "role": "owner",
+              "file": "main.fy",
+              "start": 283,
+              "end": 288
+            },
+            {
+              "role": "loan",
+              "file": "main.fy",
+              "start": 322,
+              "end": 331
+            },
+            {
+              "role": "last-use",
+              "file": "main.fy",
+              "start": 375,
+              "end": 376
+            }
+          ]
+        }
+      },
+      {
+        "index": 2,
+        "name": "later borrow across nested call",
+        "expected": 3,
+        "matched": true,
+        "goReferenceExit": 0,
+        "candidateBeforeExit": 0,
+        "golden": {
+          "file": "main.fy",
+          "code": 2105,
+          "start": 347,
+          "end": 352,
+          "related": [
+            {
+              "role": "owner",
+              "file": "main.fy",
+              "start": 283,
+              "end": 288
+            },
+            {
+              "role": "loan",
+              "file": "main.fy",
+              "start": 322,
+              "end": 331
+            },
+            {
+              "role": "last-use",
+              "file": "main.fy",
+              "start": 354,
+              "end": 355
+            }
+          ]
+        }
+      },
+      {
+        "index": 3,
+        "name": "later tagged argument",
+        "expected": 3,
+        "matched": true,
+        "goReferenceExit": 0,
+        "candidateBeforeExit": 0,
+        "golden": {
+          "file": "main.fy",
+          "code": 2105,
+          "start": 354,
+          "end": 359,
+          "related": [
+            {
+              "role": "owner",
+              "file": "main.fy",
+              "start": 283,
+              "end": 288
+            },
+            {
+              "role": "loan",
+              "file": "main.fy",
+              "start": 336,
+              "end": 345
+            },
+            {
+              "role": "last-use",
+              "file": "main.fy",
+              "start": 360,
+              "end": 361
+            }
+          ]
+        }
+      },
+      {
+        "index": 4,
+        "name": "unrelated later argument",
+        "expected": 0,
+        "matched": true,
+        "goReferenceExit": 0,
+        "candidateBeforeExit": 0,
+        "golden": null
+      },
+      {
+        "index": 5,
+        "name": "later argument overwrites old loan",
+        "expected": 0,
+        "matched": true,
+        "goReferenceExit": 0,
+        "candidateBeforeExit": 0,
+        "golden": null
+      },
+      {
+        "index": 6,
+        "name": "earlier argument last use still held",
+        "expected": 0,
+        "matched": true,
+        "goReferenceExit": 0,
+        "candidateBeforeExit": 0,
+        "golden": null
+      }
+    ]
+  },
+  "normativeDifference": "Go and the prior candidate accept all seven cases. Four later borrowed argument uses now reject E2105; their owner/loan/last-use coordinates are independently anchored in source.",
+  "native": {
+    "count": 3,
+    "passed": 3,
+    "tests": [
+      {
+        "identity": "tests::module_unit_loan_conflicts::owner_writes_and_borrow_creation_follow_live_loans",
+        "outcome": "passed"
+      },
+      {
+        "identity": "tests::module_unit_owner_arguments::owner_moves_preserve_later_argument_borrows",
+        "outcome": "passed"
+      },
+      {
+        "identity": "tests::module_unit_owner_moves::owner_moves_respect_retained_and_call_held_loans",
+        "outcome": "passed"
+      }
+    ]
+  },
+  "regression": {
+    "priorOwnerMoveCLIExact": 39,
+    "ownerConflictCLIExact": 38,
+    "regionLifetimeCLIExact": 17,
+    "priorNativeByteIdentical": [
+      "tests::module_unit_owner_moves::owner_moves_respect_retained_and_call_held_loans",
+      "tests::module_unit_loan_conflicts::owner_writes_and_borrow_creation_follow_live_loans"
+    ]
+  },
+  "limitations": [
+    "full moved-owner availability and cleanup state",
+    "parent/subview generations and complete reference access/store conflicts",
+    "full owned loan-fact publication, borrow MIR/C/runtime, unsafe provenance",
+    "full dispatcher, stage1/stage2, Linux and release"
+  ],
+  "publicCLIChanged": false,
+  "privateAPIChanged": false,
+  "sdkABIChanged": false,
+  "dbChanged": false,
+  "ciRunnerChanged": false,
+  "pushed": false
+}
