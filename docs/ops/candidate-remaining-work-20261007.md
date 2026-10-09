@@ -821,8 +821,16 @@ matched 19/19. Types 4096, work 1048576, entries 1024, active locals 128 and
 depth/rounds 64 remain unchanged. Evidence:
 `docs/ops/evidence/candidate-module-unit-matches-20261009.json`.
 
-The fixed 160-module corpus observation is running separately, with added
-switch/variant/payload metadata assertions; no new corpus pass is claimed here.
+The fixed 160-module corpus observation completed and passed with added
+switch/variant/payload metadata assertions: the 1048562-byte input was admitted
+as 26 bounded units covering 0..160 continuously through 39 admissions and 13
+splits, with verified source, compiler, test, lock and input hashes. Match totals
+are 109/109 checked, 811 variant values, 222 bound payloads and 38 pattern
+fields; corpus value totals are 186137 value expressions, 117985 known values,
+11442 value locals, 4783 value returns and 8500 unresolved values, with maximum
+value work 937515 of 1048576 and graph 427 of 4096. This is the existing fixed
+input, not a full current dispatcher pass.
+Evidence: `docs/ops/evidence/candidate-module-unit-matches-corpus-20261009.json`.
 Propagation/builtin, assignment/post, defer/burn, function tails/missing returns,
 earlier declaration/shape rejection, inferred-void-local admission, ownership,
 unsafe provenance, cross-unit HIR/MIR/C/CLI, full current dispatcher and
@@ -849,7 +857,7 @@ acceptance/span fixtures matched 2/2, and stage0 error/normal exit codes stayed
 3 and 0. Evidence:
 `docs/ops/evidence/candidate-module-unit-value-stack-20261009.json`.
 
-The full 160-module corpus re-run is still in progress, so no new corpus pass is
-claimed here. The full dispatcher, stage1/stage2, release, Linux and push paths
-were not run. Public language/SDK ABI, SDK sources, DB, CI and runner contracts
-are unchanged.
+The full 160-module corpus re-run completed and passed, recorded in the fixed
+corpus observation above. The full dispatcher, stage1/stage2, release, Linux and
+push paths were not run. Public language/SDK ABI, SDK sources, DB, CI and runner
+contracts are unchanged.
