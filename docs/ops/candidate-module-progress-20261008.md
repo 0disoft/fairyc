@@ -3314,3 +3314,42 @@ Region/loan/subview/lifetime/conflict/move and unsafe provenance remain
 pending, together with split-unit execution, the full project dispatcher,
 stage1/stage2, release and Linux. No push, public CLI/SDK ABI, DB or CI/runner
 change was made in this candidate slice.
+
+## Region capability type groundwork (2026-10-10)
+
+`Region` is now a canonical compiler-owned capability type: `module_types.fy`
+resolves the bare name to a single kind-19 node shared across modules with no
+scalar, first or second metadata. The graph validator rejects forged
+kind-19 records, and `module_bind.fy` recognizes the builtin type name.
+
+Admission covers ordinary, direct, provider and scalar-generic fixed `Region`
+input parameters, whose capability identity forwards across modules and calls.
+Struct, resource and enum payload Region fields, Region results in ordinary
+and specialized value contexts, and `let`/`var` copies including an inferred
+`let` are rejected with E3103. A lexical region construct is explicitly refused
+too: the unit value walker rejects a lexical region symbol (kind 6) with
+unsupported code 2 pending Arena/source/allocation/reset validation, so no
+incomplete local capability is published. Wrapper, reference and array Region
+shapes stay outside candidate admission; the Go reference admits them, which
+is an admission boundary rather than a proven contract bug.
+
+Reference discrepancy: the Go reference still accepts a direct Region return
+and `let`/`var` Region copies contrary to the Region language contract and the
+E3103 entry. No Go change was made in this unit; the discrepancy is kept for
+later alignment without a broad semantic-parity claim.
+
+Final validation passed on the lexical Region refusal gate: root source
+checking covered 215 files and 2654 MIR functions, four selected native tests
+passed (three new tests plus the tagged return-origin regression), and a
+fresh locked candidate build passed all 14 CLI observations. Current compiler,
+product source, test, candidate and lock hashes were verified. The CLI keeps
+phase failures at status 2; the Region refusals are not yet a complete
+structured semantic diagnostic interface.
+Earlier failed attempts and the fixed builtin Region binding are recorded in
+the receipt. Evidence:
+docs/ops/evidence/candidate-module-region-types-20261010.json.
+
+Region.place and lexical region enter/reset/origins remain pending, as do
+loans, lifetimes, conflicts, moves, unsafe provenance, cross-unit runtime, the
+dispatcher, stage1/stage2, release and Linux. No push, public CLI/SDK ABI, DB
+or CI/runner change was made in this candidate slice.

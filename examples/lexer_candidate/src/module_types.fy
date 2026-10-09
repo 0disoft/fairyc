@@ -12,6 +12,7 @@ import std::bytes as bytes;
 import std::vec as v;
 
 pub struct Type {u32 kind;u32 scalar;usize module_index;usize declaration;usize first;usize second;}
+// Kind 19 is the compiler-owned Region capability, never a nominal value.
 pub struct Problem {u32 code;usize module_index;usize start;usize end;}
 pub struct Resolution {usize type;Problem problem;}
 pub resource Graph {v::Vec<Type> types;cleanup{}}
@@ -27,8 +28,8 @@ pub fn u32 validate(ref catalog::Catalog c,ref v::Vec<Type> types){
             else if(t.kind==17 || t.kind==18){if(t.scalar!=0 || t.first==0 || t.first>i || t.second!=0 || at(types,t.first).kind!=2){return 9;}}
             else if(t.kind==16){if(t.scalar!=0 || t.first==0 || t.first>i || !array_element(types,t.first,t.second)){return 9;}}
             else if(t.kind==12){if(t.second!=0){return 9;}if(t.first==0){if(!pointers::valid(t.scalar) || pointers::inner(t.scalar)>=256 && pointers::inner(t.scalar)<=767){return 9;}}else if(t.scalar>1 || t.first>i || v::at<Type>(types,t.first-1).kind!=2){return 9;}}
-            else if(t.kind>=9 && t.kind<=11 || t.kind==14){if(t.scalar!=0 || t.first!=0 || t.second!=0){return 9;}}
-            else if(t.kind>=5 && t.kind<=8){if(t.scalar!=0 || t.first==0 || t.first>i || t.kind==6 && (t.second==0 || t.second>i) || t.kind!=6 && t.second!=0){return 9;}}
+            else if(t.kind>=9 && t.kind<=11 || t.kind==14 || t.kind==19){if(t.scalar!=0 || t.first!=0 || t.second!=0){return 9;}}
+            else if(t.kind>=5 && t.kind<=8){if(t.scalar!=0 || t.first==0 || t.first>i || t.kind==6 && (t.second==0 || t.second>i) || t.kind!=6 && t.second!=0){return 9;}if(at(types,t.first).kind==19 || t.second!=0 && at(types,t.second).kind==19){return 9;}}
             else{return 9;}
         }i+=1;
     }return 0;
@@ -66,6 +67,7 @@ fn Resolution accepted(ref mut v::Vec<Type> graph,Type value,usize module_index,
 fn Resolution walk(ref catalog::Catalog c,ref syntax::Parsed p,usize module_index,usize root,ref mut v::Vec<Type> graph,usize depth,usize declaration,ref v::Vec<usize> substitutions){
     if(root==0 || root>syntax::type_count(p)){return fail(9,module_index,0,0);}let n=syntax::type_at(p,root);if(depth>=64){return fail(10,module_index,n.start,n.end);}
     if(n.kind==1){let name=syntax::type_text(p,root);
+        if(bytes::equal(name,b"Region")){return accepted(graph,node(19,0,0,0,0,0),module_index,n.start,n.end);}
         if(declaration!=0){var usize i=0;while(i<v::len<usize>(substitutions)){let param=syntax::generic_parameter_at(p,declaration-1,i);if(bytes::equal(name,syntax::source_view(p)[param.start..param.end])){return Resolution{.type=*v::at<usize>(substitutions,i),.problem=Problem{.code=0,.module_index,.start=0,.end=0}};}i+=1;}}
         let u32 scalar=scalars::primitive(p,root);let u32 c_scalar=abi::resolve(p,root);
         if(scalar!=7 || bytes::equal(name,b"void")){return accepted(graph,node(1,scalar,0,0,0,0),module_index,n.start,n.end);}
@@ -101,7 +103,7 @@ fn Resolution walk(ref catalog::Catalog c,ref syntax::Parsed p,usize module_inde
         if(!option && !bytes::equal(name,b"Result") || args!=if(option){1}else{2}){return fail(9,module_index,n.start,n.end);}
         let first=walk(c,p,module_index,syntax::type_argument(p,root,0),graph,depth+1,declaration,substitutions);if(first.problem.code!=0){return first;}var usize second=0;
         if(!option){let last=walk(c,p,module_index,syntax::type_argument(p,root,1),graph,depth+1,declaration,substitutions);if(last.problem.code!=0){return last;}second=last.type;}
-        return accepted(graph,node(if(option){5}else{6},0,0,0,first.type,second),module_index,n.start,n.end);
+        if(at(graph,first.type).kind==19 || second!=0 && at(graph,second).kind==19){return fail(9,module_index,n.start,n.end);}return accepted(graph,node(if(option){5}else{6},0,0,0,first.type,second),module_index,n.start,n.end);
     }
     return fail(9,module_index,n.start,n.end);
 }

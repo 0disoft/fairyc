@@ -41,9 +41,12 @@ return at the full `?` expression when the failure carries a safe borrow.
 Borrowing a wrapper itself retains its storage origin. Multiple borrowed leaves
 remain unsupported. Match payload bindings preserve subject origins and lexical
 scope. Unsupported return/binding/assignment/match locations are all reported
-when no semantic origin error is present. Region/loan/subview/lifetime/
-conflict/move, unsafe pointer provenance, split-unit execution, the full
-project dispatcher, stage1/stage2, release and Linux are pending.
+when no semantic origin error is present. `Region` input parameters are
+admitted as a compiler-owned kind-19 capability and forward across modules,
+direct and provider calls and scalar-generic instantiations. Region/loan/
+subview/lifetime/conflict/move, unsafe pointer provenance, split-unit
+execution, the full project dispatcher, stage1/stage2, release and Linux are
+pending.
 
 ## Feature guide
 
