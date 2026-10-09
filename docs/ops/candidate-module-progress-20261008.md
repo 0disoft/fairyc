@@ -2840,3 +2840,34 @@ Existing type, work, entry, active-local and depth/round bounds are unchanged.
 No new fixed corpus, full dispatcher, stage1/stage2, release, Linux or push
 was run. Public language/SDK ABI, SDK sources, DB, CI and runner contracts are
 unchanged.
+
+## Unit nominal field contracts and bounded defer lookup (2026-10-10)
+
+module_unit_shape_contracts checks duplicate nominal fields, enum variants and
+payload names (E0102), safe-borrow fields (E1003), resource-bearing struct
+fields (E1002), invalid inline array field shapes (code2) and resource
+abilities (E1107). Selected unused nongeneric nominal declarations are
+retained and checked before body typing. The authenticated SDK Vec generic
+resource keeps its existing exception. Canonical field validation preserves
+original module coordinates and type spans. Other declaration attributes and
+general generic nominal admission remain separate.
+
+Defer invocation lookup uses binary search over the expression-ordered
+invocation table, and checked defer/burn consumers are not re-evaluated. A
+regression with 900 ordinary zero-argument calls and 900 defers stays within
+the original work budget. Development check passed (204 sources, 2459 MIR
+functions), reference diagnostic/token cases matched 14/14 and selected native
+development tests passed 6/6: three shape/budget tests plus SDK nominal array
+views, missing returns and imported generic/cleanup defer/burn regressions.
+The initial budget fixture exceeded the unchanged 4160 parser-expression
+bound. After correcting only that test body, it passed alone; byte-identical
+preamble, other test functions, implementation, compiler, SDK, inputs and lock
+justified reusing the five earlier passes. Evidence:
+docs/ops/evidence/candidate-module-unit-shape-contracts-20261010.json.
+
+Type 4096, work 1048576, entries 1024, active locals 128 and depth/rounds 64
+remain unchanged. Loans/lifetimes/conflicts/moves, ordinary-call origins,
+unsafe pointer provenance and cross-unit HIR/MIR/C/CLI remain. This slice does
+not claim a new fixed-corpus observation, full dispatcher, stage1/stage2,
+release or Linux validation. Public language/SDK ABI, SDK sources, DB, CI and
+runner contracts are unchanged; nothing was pushed.
