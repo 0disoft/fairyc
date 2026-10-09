@@ -6,6 +6,20 @@ import nominal_types as nominal;
 import type_state as state;
 import std::bytes as bytes;
 
+pub struct Info {u32 bits;u32 code;usize start;usize end;usize work;}
+// Declaration-local validation for canonical module-unit authority. Unknown
+// resource attributes remain with the declaration admission owner.
+pub fn Info read(ref syntax::Parsed p,usize declaration){
+    let d=syntax::declaration_at(p,declaration);var Info result=Info{.bits=1,.code=0,.start=d.start,.end=d.end,.work=1};var bool seen=false;var usize i=0;
+    while(i<d.attribute_count){let a=syntax::attribute_at(p,d.attribute_start+i);let name=syntax::source_view(p)[a.name_start..a.name_end];result.work+=name.len+1;
+        if(bytes::equal(name,b"abilities")){if(d.kind!=6 || seen || a.argument_count==0){result.code=1107;result.start=a.start;result.end=a.end;return result;}seen=true;result.bits=0;var usize key_start=0;var usize key_end=0;var usize j=0;
+            while(j<a.argument_count){let arg=syntax::attribute_argument_at(p,a.argument_start+j);let raw=syntax::attribute_argument_text(p,a.argument_start+j);result.work+=raw.len+1;let u32 bit=if(bytes::equal(raw,b"drop")){1}else if(bytes::equal(raw,b"store")){2}else if(bytes::equal(raw,b"key")){4}else{0};
+                if(arg.kind!=1 || bit==0 || (result.bits&bit)!=0){result.code=1107;result.start=arg.start;result.end=arg.end;return result;}result.bits|=bit;if(bit==4){key_start=arg.start;key_end=arg.end;}j+=1;
+            }if((result.bits&4)!=0 && (result.bits&2)==0){result.code=1107;result.start=key_start;result.end=key_end;return result;}
+        }i+=1;
+    }return result;
+}
+
 // Closed static metadata: drop=1, store=2, key=4. Unannotated resources drop.
 pub fn u32 mask(ref syntax::Parsed p,usize declaration){
     let d=syntax::declaration_at(p,declaration);var usize i=0;

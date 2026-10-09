@@ -1115,3 +1115,44 @@ HIR/MIR/C/CLI remain. Type, work, entry, active-local and depth/round bounds
 are unchanged. The completion logic is entirely Fairy. No new fixed corpus,
 full current dispatcher, stage1/stage2, release, Linux or push was run. Public
 language/SDK ABI, SDK sources, DB, CI and runner contracts are unchanged.
+
+## Defer, burn and validated resource abilities (2026-10-09)
+
+`module_unit_value_terminal` consumes defer and burn statements from the unit
+value walk. A defer is a direct checked invocation with a void result and
+deferrable scalar arguments (bool and the five integers). Ordinary callables
+must be non-foreign/non-template; a generic specialization must resolve a
+checked concrete instance with matching owner, result and arity. The consumer
+reuses invocation/argument tables and stays pending while a call or argument
+is unchecked. Invalid targets keep code2 at the original statement, and
+argument mismatches keep E1006 at the value span.
+
+A burn requires a bare named local/parameter place with a canonical resource
+declared by the current module, no drop ability and no resource-bearing
+fields. Mutability is not required. Droppable resources, projected/non-place
+operands, integers and foreign-module resources keep E1109 at the original
+operand. Non-value expressions are rejected; unknown types remain pending.
+Resource ability metadata is now validated declaration-locally by
+resource_abilities::read before shape/cleanup publication, retaining E1107
+spans for empty/repeated/malformed attributes, unknown/duplicate abilities and
+key without store. Attribute names and argument texts are charged to the
+existing work budget; other resource attributes remain with declaration
+admission.
+
+Development check passed (203 sources, 2453 MIR functions), reference fixtures
+matched 18/18 (16 single-file and two module inputs), and native coverage
+passed 5/5 (four terminal tests and one storage regression). The initial
+native selection passed four tests; the imported-burn fixture used an illegal
+direct provider constructor and was corrected to p::make, then passed alone.
+Exact implementation/SDK/compiler/lock hashes and unchanged
+test-file/preamble/function bytes were verified before reusing the four
+earlier individual passes. Evidence:
+docs/ops/evidence/candidate-module-unit-terminal-20261009.json.
+
+This slice checks types and admission, not deferred-call MIR scheduling or
+lifetime/loan/conflict/move validation. Earlier declaration/shape rejection,
+ownership, unsafe pointer provenance and cross-unit HIR/MIR/C/CLI remain.
+Existing type, work, entry, active-local and depth/round bounds are unchanged.
+No new fixed corpus, full dispatcher, stage1/stage2, release, Linux or push
+was run. Public language/SDK ABI, SDK sources, DB, CI and runner contracts are
+unchanged.
