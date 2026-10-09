@@ -994,3 +994,24 @@ accepted. Maximum value work was 974364/1048576 and maximum graph size was
 tests separately cover scalar and nominal T[] storage borrows. This is an
 observation of the fixed input archive, not a full current dispatcher or
 stage1/stage2 promotion. Release, Linux and push were not run.
+
+## Cached SDK annotation authority (2026-10-09)
+
+`module_signatures::Program` carries a per-module vector_sources bool cache,
+populated from the existing sdk::authentic result at metadata construction.
+After source_matches or validated source stamps, body type, owned-body and
+interface annotation consumers reuse that fact by O(1) lookup. Per-body and
+per-cleanup SHA rehashes in those annotation paths are removed, and each
+authority read is charged as one unit of analysis work. This does not change
+the existing generic-expansion or name-binding authentication paths.
+
+Development check passed (200 sources, 2435 MIR functions) and the five
+storage native tests passed 5/5 again. The fixture also checks ordinary
+caller=false, authentic SDK=true and out-of-range module=false;
+namespace/source spoof rejection is retained. Evidence:
+docs/ops/evidence/candidate-sdk-annotation-authority-cache-20261009.json. The
+complete fixed-corpus observation remains pinned to implementation commit
+3080ead6; it was not re-measured for this cache-only change. Type projection
+behavior is unchanged while some analysis work counters increase. Release,
+Linux and push were not run; public language/SDK ABI, SDK sources, DB, CI and
+runner contracts are unchanged.

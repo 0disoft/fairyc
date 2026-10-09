@@ -12,7 +12,8 @@ import std::bytes as bytes;
 import std::vec as v;
 
 pub struct Signature {usize module_index;usize declaration;bool public;usize result;usize parameter_start;usize parameter_count;u32 effects;bool must_use;bool unsafe_call;bool foreign;usize link_start;usize link_end;}
-pub resource Program {vectors::Plan types;v::Vec<Signature> signatures;v::Vec<usize> parameters;bytes::Buffer links;cleanup{}}
+pub resource Program {vectors::Plan types;v::Vec<Signature> signatures;v::Vec<usize> parameters;v::Vec<bool> vector_sources;bytes::Buffer links;cleanup{}}
+pub fn bool sdk_vector_source(ref Program p,usize module_index){return module_index<v::len<bool>(ref p.vector_sources) && *v::at<bool>(ref p.vector_sources,module_index);}
 pub fn usize module_count(ref Program p){return vectors::module_count(ref p.types);}
 pub fn usize declaration_count(ref Program p){return vectors::declaration_count(ref p.types);}
 pub fn bool source_matches(ref Program p,usize module_index,ref syntax::Parsed source){return vectors::source_matches(ref p.types,module_index,source);}
@@ -39,9 +40,9 @@ fn bool ffi_type(ref v::Vec<syntax::Parsed> sources,ref v::Vec<types::Type> grap
 }
 pub fn Result<Program,catalog::Problem> build(ref v::Vec<syntax::Parsed> sources){
     let c=switch(catalog::build(sources)){case .ok(c):{c}case .err(p):{return .err(p);}};
-    var v::Vec<types::Type> graph=v::empty<types::Type>();var v::Vec<Signature> signatures=v::empty<Signature>();var v::Vec<usize> parameters=v::empty<usize>();var bytes::Buffer links=bytes::empty();
+    var v::Vec<types::Type> graph=v::empty<types::Type>();var v::Vec<Signature> signatures=v::empty<Signature>();var v::Vec<usize> parameters=v::empty<usize>();var v::Vec<bool> vector_sources=v::empty<bool>();var bytes::Buffer links=bytes::empty();
     var usize module_index=0;while(module_index<v::len<syntax::Parsed>(sources)){let p=v::at<syntax::Parsed>(sources,module_index);var usize index=1;
-        let bool vector_sdk=sdk::authentic(b"std::vec",syntax::source_view(p));
+        let bool vector_sdk=sdk::authentic(b"std::vec",syntax::source_view(p));if(!v::push<bool>(ref mut vector_sources,vector_sdk).is_ok){return .err(fail(11,module_index,0,0));}
         while(index<syntax::declaration_count(p)){let d=syntax::declaration_at(p,index);if((d.kind==3 && !vector_sdk || d.kind==9) && d.generic_parameters==0){
             if(d.owner_end!=0 || d.generic_parameters!=0){return .err(fail(4501,module_index,d.start,d.end));}
             let contract=effects::read(p,index);if(contract.code!=0){return .err(fail(contract.code,module_index,contract.start,contract.end));}
@@ -63,7 +64,7 @@ pub fn Result<Program,catalog::Problem> build(ref v::Vec<syntax::Parsed> sources
     }
     let owned=switch(types::assemble(ref c,graph)){case .ok(g):{g}case .err(code):{return .err(fail(code,0,0,0));}};
     let planned=switch(vectors::build(c,owned)){case .ok(p):{p}case .err(code):{return .err(fail(code,0,0,0));}};
-    return .ok(Program{.types=planned,.signatures,.parameters,.links});
+    return .ok(Program{.types=planned,.signatures,.parameters,.vector_sources,.links});
 }
 
 pub fn types::Resolution specialize_type(ref Program p,ref syntax::Parsed source,usize module_index,usize declaration,usize root,ref v::Vec<usize> args,ref mut v::Vec<types::Type> graph){return vectors::specialize_type(ref p.types,source,module_index,declaration,root,args,graph);}
