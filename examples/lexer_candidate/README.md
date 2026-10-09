@@ -47,8 +47,11 @@ direct and provider calls and scalar-generic instantiations. `Region.place`
 checks fully inert values as `Result<ref T, AllocError>` and carries the
 receiver Region's provenance through the success payload. Resource-containing
 values are refused with code 3102; borrow-containing values remain unsupported.
-Lexical Region enter/reset and escape checks, Region runtime execution,
-loan/subview/lifetime/conflict/move, unsafe pointer provenance, split-unit
+Lexical Region bindings and their exact authenticated `ref mut std::alloc::Arena`
+sources are typed, and the source expression is evaluated before its nested block.
+Local Region borrow returns remain unsupported pending E3101 escape checks.
+Region enter/reset and runtime execution, loan/subview/lifetime/conflict/move,
+unsafe pointer provenance, split-unit
 execution, the full project dispatcher, stage1/stage2, release and Linux are
 pending.
 

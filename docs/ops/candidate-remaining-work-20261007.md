@@ -1709,3 +1709,25 @@ non-inert inputs, so no broad Region parity is claimed. Runtime Region execution
 and the lexical Region construct with E3101 region escape remain pending, as do
 release, Linux and stage1/stage2; no push or public Stage 0 CLI/SDK ABI, DB or CI
 change was made.
+
+## Lexical Region source typing (2026-10-10)
+
+The resolved lexical Region binding receives the canonical kind-19 capability
+type. Its source must be an exact `ref mut std::alloc::Arena` expression, with
+the Arena declaration owned by the authenticated SDK. The source expression is evaluated before
+entering the nested block, and invalid sources report code 2 with the primary span
+on the source expression rather than the binding name. The gate also refuses
+unchecked or unresolved source consumers after a bounded fixed point.
+
+Development source checking passed (218 files, 2664 MIR functions). Native 5/5
+selected tests and 14/14 exact API source comparisons passed, matching Go codes,
+module indices and source spans. A fresh locked CLI build passed all 14 exact comparisons on status and
+span, and a local region-escape boundary case reports candidate code 2/status 2
+for the unsupported borrow return against the reference E3101/status 3 with an
+allocation related span. This unit covers typing and block analysis only; E3101
+region escape, lifetime, loan and reset handling and runtime Region execution are
+excluded, and a local Region borrow-return stays explicitly unsupported pending
+the next unit. Current compiler, SDK, source, test, lock and candidate hashes were verified.
+Public Stage 0 CLI/SDK ABI, DB and CI are unchanged; no push was made. Linux,
+release and stage1/stage2 remain deferred. Evidence:
+docs/ops/evidence/candidate-module-region-sources-20261010.json.
