@@ -372,3 +372,23 @@ module_unit_ordinary_names는 검사할 모듈 범위 내의 모든 비제네릭
 | Maximum combined name work | 751853 / 1048576 |
 | Maximum combined entries / type nodes | 1015 / 1024; 2242 / 4096 |
 | Observation execution timeout | Initial 300s run timed out after 23 units; final 600s selection passed all 26 |
+
+## 일반 함수 호출 결과와 필드·cleanup 수요 (2026-10-09)
+
+fairy 컴파일러의 module_unit_calls는 선언된 호출의 canonical 반환 타입과 매개변수, 제공자 및 원래 식 좌표를 기록한다. 또한 이름 바인딩 이후의 효과, unsafe, foreign 플래그도 기록한다. module_unit_call_closure는 아직 수집하지 않은 일반 함수 시그니처를 기존 필드·cleanup 수집 경로에 반복해서 전달한다. cleanup helper 호출은 더 많은 결과 타입을 요청할 수 있다. 지역 변수로 함수 이름을 가린 호출와 오래된 입력은 거부된다. 제네릭 호출, 허용된 builtin, variant 생성식는 분리되어 유지된다. 기존 arena 상한는 변경되지 않으며, 반복 횟수는 64회, 호출 수집 작업량은 1048576로 제한한다. 완전한 식 및 인수 타입 대조, 추론된 지역 변수 타입, 소유권과 효과, unit HIR/MIR/C/CLI, 그리고 셀프호스팅은 모두 아직 보류 중이다.
+
+공개 언어/SDK ABI·SDK 소스·DB·CI·러너 변경 없음.
+근거: `evidence/candidate-module-unit-call-results-20261009.json`.
+
+| Observation | Value |
+| --- | --- |
+| Development native tests | 8/8 passed |
+| Dispatcher source corpus / units | 160 modules; 1048562 bytes; 26 units |
+| Per-unit declared / specialized call-site totals | 11189 / 2622 |
+| Per-unit variant / closed-builtin totals | 610 / 4 |
+| Maximum closure rounds / work | 2 / 64; 305763 / 1048576 |
+| Maximum combined entries / type nodes | 1015 / 1024; 2242 / 4096 |
+| Native closure-chain fixture | New call-result fields and cleanup-returned resources close after at least 3 rounds |
+| Array reference regression | Kind-24 element links use right; a declared call beneath a cast retains its callee binding |
+| Remaining expression consumers | Argument/operator matching, inferred-local symbol types, ownership and unsafe/inline checks |
+| Deferred checks | Release, Linux, full dispatcher native and stage1/stage2; no push |

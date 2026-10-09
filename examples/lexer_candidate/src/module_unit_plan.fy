@@ -6,6 +6,7 @@ import module_unit_bodies as bodies;
 import module_unit_drops as drops;
 import module_unit_names as names;
 import module_unit_ordinary_names as ordinary;
+import module_unit_call_closure as closure;
 import module_signatures as signatures;
 import module_ast_join as join;
 import syntax as syntax;
@@ -22,13 +23,9 @@ fn units::Usage measured(ref v::Vec<syntax::Parsed> sources,usize first,usize st
 fn join::Problem admit(ref v::Vec<syntax::Parsed> sources,ref signatures::Program metadata,usize first,usize stop,ref mut Budget budget){
     let bound=switch(binding::bind(sources,metadata,first,stop)){case .ok(b):{b}case .err(p):{return p;}};
     if(binding::work(ref bound)>budget.binding_work){budget.binding_work=binding::work(ref bound);}
-    let imported=switch(interfaces::build(sources,metadata,ref bound)){case .ok(p):{p}case .err(p):{return p;}};
-    if(interfaces::work(ref imported)>budget.interface_work){budget.interface_work=interfaces::work(ref imported);}
-    let drop_plan=switch(drops::build(ref imported)){case .ok(p):{p}case .err(p):{return p;}};if(drops::work(ref drop_plan)>budget.drop_work){budget.drop_work=drops::work(ref drop_plan);}
-    let owned=switch(bodies::build(sources,metadata,ref imported)){case .ok(p):{p}case .err(p):{return p;}};
-    let resolved=switch(names::build(sources,metadata,ref imported,ref owned)){case .ok(p):{p}case .err(p):{return p;}};let locals=switch(ordinary::build(sources,metadata,ref bound,ref imported)){case .ok(p):{p}case .err(p):{return p;}};
-    let usize name_work=names::work(ref resolved)+ordinary::work(ref locals);if(name_work>1048576 || names::symbol_count(ref resolved)>16384-ordinary::symbols(ref locals) || names::reference_count(ref resolved)>16384-ordinary::references(ref locals)){return fail(10,first);}if(name_work>budget.name_work){budget.name_work=name_work;}
-    if(bodies::work(ref owned)>budget.body_work){budget.body_work=bodies::work(ref owned);}if(!bodies::fits(ref owned,units::measured(binding::parsed(ref bound)))){return fail(10,first);}return fail(0,0);
+    let ready=switch(closure::build(sources,metadata,ref bound)){case .ok(p):{p}case .err(p):{return p;}};let imported=closure::imported(ref ready);let owned=closure::owned(ref ready);let resolved=closure::resolved_names(ref ready);let locals=closure::original_names(ref ready);let drop_plan=closure::drop_plan(ref ready);
+    if(interfaces::work(imported)>budget.interface_work){budget.interface_work=interfaces::work(imported);}if(drops::work(drop_plan)>budget.drop_work){budget.drop_work=drops::work(drop_plan);}let usize name_work=names::work(resolved)+ordinary::work(locals);if(name_work>budget.name_work){budget.name_work=name_work;}if(bodies::work(owned)>budget.body_work){budget.body_work=bodies::work(owned);}return fail(0,0);
+
 }
 fn join::Problem refine(ref v::Vec<syntax::Parsed> sources,ref signatures::Program metadata,usize first,usize stop,ref mut v::Vec<units::Unit> ranges,ref mut Budget budget,usize depth){
     if(depth>10 || !charge(budget,stop-first+1)){return fail(10,first);}budget.attempts+=1;let problem=admit(sources,metadata,first,stop,budget);

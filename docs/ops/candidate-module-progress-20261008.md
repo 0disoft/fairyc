@@ -1970,3 +1970,33 @@ Evidence: `docs/ops/evidence/candidate-module-unit-ordinary-names-20261009.json`
 | Maximum combined name work | 751853 / 1048576 |
 | Maximum combined entries / type nodes | 1015 / 1024; 2242 / 4096 |
 | Observation execution timeout | Initial 300s run timed out after 23 units; final 600s selection passed all 26 |
+
+### Declared call results and interface closure (2026-10-09)
+
+The fairy compiler's module_unit_calls records declared-call canonical results
+and parameters, along with provider and original expression coordinates. It
+also records effects, unsafe, and foreign flags after lexical binding.
+module_unit_call_closure repeatedly seeds unseen ordinary callable signatures
+into the existing bounded field and cleanup closure. Cleanup helper calls can
+request more result types. Local name shadows and stale input are rejected.
+Generic calls, closed builtins, and variant constructors stay separate.
+Existing arena bounds remain unchanged, with at most 64 rounds and 1048576
+units of call-projection work. Full expression and argument type matching,
+inferred local types, ownership and effects, unit HIR/MIR/C/CLI, and self-
+hosting all remain pending.
+
+Public language/SDK ABI, SDK sources, DB, CI and runners are unchanged.
+Evidence: `docs/ops/evidence/candidate-module-unit-call-results-20261009.json`.
+
+| Observation | Value |
+| --- | --- |
+| Development native tests | 8/8 passed |
+| Dispatcher source corpus / units | 160 modules; 1048562 bytes; 26 units |
+| Per-unit declared / specialized call-site totals | 11189 / 2622 |
+| Per-unit variant / closed-builtin totals | 610 / 4 |
+| Maximum closure rounds / work | 2 / 64; 305763 / 1048576 |
+| Maximum combined entries / type nodes | 1015 / 1024; 2242 / 4096 |
+| Native closure-chain fixture | New call-result fields and cleanup-returned resources close after at least 3 rounds |
+| Array reference regression | Kind-24 element links use right; a declared call beneath a cast retains its callee binding |
+| Remaining expression consumers | Argument/operator matching, inferred-local symbol types, ownership and unsafe/inline checks |
+| Deferred checks | Release, Linux, full dispatcher native and stage1/stage2; no push |

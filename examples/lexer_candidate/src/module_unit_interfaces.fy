@@ -45,7 +45,8 @@ fn Result<v::Vec<Annotation>,join::Problem> annotations(ref v::Vec<syntax::Parse
     }return .ok(table);
 }
 fn join::Problem callable(ref v::Vec<syntax::Parsed> sources,ref signatures::Program metadata,binding::Coordinate c,ref mut v::Vec<types::Type> graph,ref mut v::Vec<Callable> callables,ref mut v::Vec<usize> parameters,ref mut bytes::Buffer names,ref mut v::Vec<usize> pending,ref mut bytes::Buffer seen,ref mut Budget work){
-    if(!charge(work,1)){return fail(10,c.module_index,c.start,c.end);}var usize i=0;
+    if(!charge(work,1)){return fail(10,c.module_index,c.start,c.end);}var usize i=0;while(i<v::len<Callable>(callables)){if(!charge(work,1)){return fail(10,c.module_index,c.start,c.end);}let old=*v::at<Callable>(callables,i);if(old.module_index==c.module_index && old.declaration==c.declaration){return fail(0,0,0,0);}i+=1;}
+    i=0;
     let source=v::at<syntax::Parsed>(sources,c.module_index);let d=syntax::declaration_at(source,c.declaration-1);let usize id=signatures::identity(metadata,c.module_index,c.declaration);
     let usize start=v::len<usize>(parameters);var usize result=0;var u32 required=0;var bool must_use=false;var bool unsafe_call=false;var bool foreign=false;var usize link_start=0;var usize link_end=0;
     if(d.generic_parameters!=0){let contract=effects::read(source,c.declaration-1);if(contract.code!=0){return fail(contract.code,c.module_index,contract.start,contract.end);}required=contract.bits;must_use=contract.must_use;unsafe_call=d.unsafe_end!=0;}
@@ -75,7 +76,7 @@ fn join::Problem body_demands(ref v::Vec<syntax::Parsed> sources,ref signatures:
     let demands=switch(body_types::collect(v::at<syntax::Parsed>(sources,module_index),metadata,module_index,declaration,kind,id,ref arguments,graph)){case .ok(p):{p}case .err(p):{return p;}};
     if(!charge(work,body_types::work(ref demands))){return fail(10,module_index,0,0);}i=0;while(i<body_types::count(ref demands)){let r=body_types::at(ref demands,i);if(v::len<body_types::Request>(requests)>=16384){return fail(10,r.module_index,r.start,r.end);}let u32 code=mark(graph,pending,seen,work,r.type);if(code!=0){return fail(code,r.module_index,r.start,r.end);}if(!v::push<body_types::Request>(requests,r).is_ok){return fail(11,r.module_index,r.start,r.end);}i+=1;}return fail(0,0,0,0);
 }
-pub fn Result<Interfaces,join::Problem> build(ref v::Vec<syntax::Parsed> sources,ref signatures::Program metadata,ref binding::Bound bound){
+pub fn Result<Interfaces,join::Problem> build_seeded(ref v::Vec<syntax::Parsed> sources,ref signatures::Program metadata,ref binding::Bound bound,ref v::Vec<binding::Coordinate> seeds){
     if(v::len<syntax::Parsed>(sources)!=signatures::module_count(metadata)){return .err(fail(12,0,0,0));}var usize i=0;while(i<v::len<syntax::Parsed>(sources)){if(!signatures::source_matches(metadata,i,v::at<syntax::Parsed>(sources,i))){return .err(fail(12,i,0,0));}i+=1;}
     let binding_valid=binding::validate(bound,sources,metadata);if(binding_valid.code!=0){return .err(binding_valid);}
     var v::Vec<types::Type> graph=v::empty<types::Type>();var v::Vec<Shape> shapes=v::empty<Shape>();var v::Vec<Field> fields=v::empty<Field>();var v::Vec<Callable> callables=v::empty<Callable>();var v::Vec<usize> parameters=v::empty<usize>();var bytes::Buffer names=bytes::empty();var v::Vec<usize> pending=v::empty<usize>();var bytes::Buffer seen=bytes::empty();var Budget budget=Budget{.work=0};
@@ -87,6 +88,7 @@ pub fn Result<Interfaces,join::Problem> build(ref v::Vec<syntax::Parsed> sources
     i=1;while(i<=binding::target_count(bound)){let c=binding::target_at(bound,i);if(c.kind==3 || c.kind==9){let p=callable(sources,metadata,c,ref mut graph,ref mut callables,ref mut parameters,ref mut names,ref mut pending,ref mut seen,ref mut budget);if(p.code!=0){return .err(p);}}
         else if(c.kind==4 || c.kind==6 || c.kind==11){let d=syntax::declaration_at(v::at<syntax::Parsed>(sources,c.module_index),c.declaration-1);if(d.generic_parameters==0){let r=signatures::declaration_type(metadata,c.module_index,c.declaration,ref mut graph);if(r.problem.code!=0){return .err(fail(r.problem.code,c.module_index,r.problem.start,r.problem.end));}let u32 code=mark(ref mut graph,ref mut pending,ref mut seen,ref mut budget,r.type);if(code!=0){return .err(fail(code,c.module_index,c.start,c.end));}}}i+=1;
     }
+    i=0;while(i<v::len<binding::Coordinate>(seeds)){let c=*v::at<binding::Coordinate>(seeds,i);if(c.module_index>=v::len<syntax::Parsed>(sources) || c.declaration==0 || c.declaration>syntax::declaration_count(v::at<syntax::Parsed>(sources,c.module_index))){return .err(fail(12,c.module_index,c.start,c.end));}let d=syntax::declaration_at(v::at<syntax::Parsed>(sources,c.module_index),c.declaration-1);if(d.kind!=c.kind || d.start!=c.start || d.end!=c.end || (d.kind!=3 && d.kind!=9) || d.generic_parameters!=0){return .err(fail(12,c.module_index,c.start,c.end));}let p=callable(sources,metadata,c,ref mut graph,ref mut callables,ref mut parameters,ref mut names,ref mut pending,ref mut seen,ref mut budget);if(p.code!=0){return .err(p);}i+=1;}
     var v::Vec<body_types::Request> demanded=v::empty<body_types::Request>();var usize vectors=0;var usize cursor=0;var usize instance_cursor=0;var usize dependency_cursor=0;var usize cleanup_cursor=0;var usize cleanup_body_cursor=0;
     while(true){
         while(instance_cursor<generics::count(ref specializations)){let s=generics::at(ref specializations,instance_cursor+1);let u32 code=mark(ref mut graph,ref mut pending,ref mut seen,ref mut budget,s.result);if(code!=0){return .err(fail(code,s.module_index,0,0));}var usize j=0;while(j<s.parameter_count){let u32 code=mark(ref mut graph,ref mut pending,ref mut seen,ref mut budget,generics::parameter_at(ref specializations,s.parameter_start+j));if(code!=0){return .err(fail(code,s.module_index,0,0));}j+=1;}
@@ -129,3 +131,5 @@ pub fn body_types::Request body_type_at(ref Interfaces p,usize index){return *v:
 
 pub fn usize first(ref Interfaces p){return p.first;}
 pub fn usize stop(ref Interfaces p){return p.stop;}
+
+pub fn Result<Interfaces,join::Problem> build(ref v::Vec<syntax::Parsed> sources,ref signatures::Program metadata,ref binding::Bound bound){let seeds=v::empty<binding::Coordinate>();return build_seeded(sources,metadata,bound,ref seeds);}
