@@ -467,3 +467,48 @@ The private-constructor discovery path is exercised by native regressions;
 the dispatcher corpus has no such additional constructor requests. Release
 rebuilding, Linux, whole dispatcher native compilation and stage1/stage2 were
 not run in this unit.
+
+## Owned lexical binding for concrete bodies (2026-10-09)
+
+`module_unit_names`, `module_unit_name_model` and `module_unit_name_walk` resolve
+requested generic function and resource/SDK Vec cleanup ASTs. Current source
+stamps, canonical graphs, ordered arguments and provider streams are checked
+before publishing any result. Parameters, let/var declarations, payload patterns,
+byte iteration, regions and the dropping receiver have separate symbol kinds.
+Explicit annotation types remain canonical; inferred locals and payload types
+remain unresolved. Entry/pattern/use tables and provider module/declaration
+coordinates retain original expression IDs and spans.
+
+Initializers resolve before local registration. Nested scopes restore the active
+name stack; switch bindings stay in their arm, classic for post expressions are
+resolved before body locals, and byte iterable expressions precede iteration
+bindings. Statement lists are reversed once for linear source-order traversal.
+The existing 128-active-local, depth-64 and 1048576-work bounds are maintained;
+new aggregate symbol/reference tables use the existing 16384 arena bound.
+Capacity failures use existing unit refinement. Duplicate, missing, private,
+out-of-scope and stale references return their original provider locations.
+Resource fields remain private and immutable table accessors preserve the
+existing resource-field borrowing contract.
+
+Cleanup `this` is kind 10 with a resource type and no ordinary by-value parameter.
+References record lexical unsafe function/block context; SDK storage names are
+classified only in authenticated std::vec source. The safe `take_slot<T>` wrapper
+has an unsafe intrinsic in its body: its source call can have `unsafe_context`
+false while the separate request edge retains `inline_unsafe` provenance.
+Binding records these facts without granting unsafe authority or performing
+expression/flow checks. Ordinary unit bodies, expression typing, implicit drop
+ownership/effect checks, inline provenance consumption, structural links,
+layouts, HIR/MIR/C/CLI and full dispatcher native/stage1/stage2 remain pending.
+Public language/SDK ABI, SDK sources, DB, CI and runners are unchanged. Evidence:
+`docs/ops/evidence/candidate-module-unit-names-20261009.json`.
+
+| Observation | Value |
+| --- | --- |
+| Development native tests | 7/7 passed |
+| Dispatcher source corpus | 160 modules; 1048472 bytes |
+| Admitted units | 26; 39 attempts; 13 splits |
+| Per-unit function / cleanup totals | 625 / 763 |
+| Per-unit symbol / reference totals | 3963 / 10161 |
+| Maximum symbols / references | 260 / 648 |
+| Maximum resolved-unit name work | 10639 / 1048576 |
+| Maximum combined entries | 1015 / 1024 |

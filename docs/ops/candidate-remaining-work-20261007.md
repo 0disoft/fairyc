@@ -320,3 +320,37 @@ SDK 본문 연결과 나머지 분석량 제한은 계속 남는다.
 2026-10-09: `module_unit_drops`로 소유 인터페이스의 타입 수준 drop 그래프를 연결했다. 필드와 Vec 원소의 공급자 좌표를 유지하고, Option·Result·배열·Vec에 포함된 값의 cleanup effects와 no-drop 능력을 전파한다. 참조·포인터에는 drop 의존성이 없으며, 재귀 Vec 관계는 작업량 상한 안에서 고정점을 구한다. 아직 수집하지 않은 nominal 타입은 `complete=false`로 두고 `required()`가 code 9로 거부한다. Admission은 기존 code 10 분할 경로를 사용한다. 개발 check·probe check/build와 native 회귀 7개가 통과했다. 현재 dispatcher 160모듈·1048472바이트는 검사 39회·분할 13회·26유닛을 유지했다. 유닛별 drop 엣지 합계 9878개, 최대 그래프 노드 425개·엣지 660개·작업량 6036이며, 합산 entry 최대 1015개로 기존 상한을 유지한다. 다음은 cleanup 지역 변수·암시적 식 타입과 이동 여부를 본문 검사에 연결하고 새 지역 타입의 필드·cleanup 수요를 완성하는 것이다. 인라인 출처 소비, 묶음 간 중복 제거·layout·HIR/MIR/C/CLI·전체 dispatcher native·stage1/stage2는 남는다. 이번 단위의 Release·Linux·push는 미실행이며 아직 연결되지 않은 전체 컴파일 경로의 완료를 주장하지 않는다. 공개 언어/SDK ABI·SDK 소스·DB·CI·러너 변경 없음. 근거: `evidence/candidate-module-unit-drops-20261009.json`.
 
 2026-10-09: 요청된 generic 함수와 resource/SDK Vec cleanup의 지역 타입 수요를 본문 복제 전에 수집한다. 원래 provider AST의 명시적 타입 표기와 named record 생성식에서 canonical 타입을 찾고, 컨텍스트·module/declaration·원래 root/expression ID·span을 보존한다. 새 private 타입의 필드·cleanup과 그 cleanup이 요청하는 helper 본문까지 기존 pending queue에서 반복 수집한다. 호출하지 않은 template은 구체화하지 않으며, 잘못된 cleanup 지역 타입을 원래 위치로 보고하고 실패 시 graph 추가를 되돌린다. 개발 check·probe check/build와 native 회귀 8개가 통과했다. 실제 160모듈·1048472바이트는 39회 검사·13회 분할·26유닛을 유지했고, 함수 타입 수요 3289개·cleanup 수요 3624개로 합계 6913개를 연결했다. 유닛당 타입 수요 최대 443개·interface 작업량 최대 265344이며 기존 1MiB 작업량 상한을 유지한다. 모든 유닛에서 본문 복제 후 canonical graph 크기가 그대로임을 확인했다. Named constructor 발견은 native fixture에서 확인했고 이 dispatcher 입력에는 추가 constructor 수요가 없다. 다음은 일반 함수 호출 결과 추론과 본문 이름·식 타입 검사, 이동 여부를 반영한 cleanup 의무와 인라인 출처 소비다. 구조적 묶음 간 중복 제거·layout·HIR/MIR/C/CLI·전체 dispatcher native·stage1/stage2는 남는다. 이번 단위의 Release·Linux·push는 미실행. 설계·준비상태·진행표를 갱신했으며 공개 언어/SDK ABI·SDK 소스·DB·CI·러너 변경 없음. 근거: `evidence/candidate-module-unit-body-types-20261009.json`.
+
+## Owned lexical binding for concrete bodies (2026-10-09)
+
+`module_unit_names`, `module_unit_name_model` and `module_unit_name_walk` resolve
+requested generic function and resource/SDK Vec cleanup ASTs. Current source
+stamps, canonical graphs, ordered arguments and provider streams are checked
+before publishing any result. Parameters, let/var declarations, payload patterns,
+byte iteration, regions and the dropping receiver have separate symbol kinds.
+Explicit annotation types remain canonical; inferred locals and payload types
+remain unresolved. Entry/pattern/use tables and provider module/declaration
+coordinates retain original expression IDs and spans.
+
+Cleanup `this` is kind 10 with a resource type and no ordinary by-value parameter.
+References record lexical unsafe function/block context; SDK storage names are
+classified only in authenticated std::vec source. The safe `take_slot<T>` wrapper
+has an unsafe intrinsic in its body: its source call can have `unsafe_context`
+false while the separate request edge retains `inline_unsafe` provenance.
+Binding records these facts without granting unsafe authority or performing
+expression/flow checks. Ordinary unit bodies, expression typing, implicit drop
+ownership/effect checks, inline provenance consumption, structural links,
+layouts, HIR/MIR/C/CLI and full dispatcher native/stage1/stage2 remain pending.
+Public language/SDK ABI, SDK sources, DB, CI and runners are unchanged. Evidence:
+`docs/ops/evidence/candidate-module-unit-names-20261009.json`.
+
+| Observation | Value |
+| --- | --- |
+| Development native tests | 7/7 passed |
+| Dispatcher source corpus | 160 modules; 1048472 bytes |
+| Admitted units | 26; 39 attempts; 13 splits |
+| Per-unit function / cleanup totals | 625 / 763 |
+| Per-unit symbol / reference totals | 3963 / 10161 |
+| Maximum symbols / references | 260 / 648 |
+| Maximum resolved-unit name work | 10639 / 1048576 |
+| Maximum combined entries | 1015 / 1024 |
