@@ -292,6 +292,18 @@ Body name/type checking must still import provider layouts and signatures using
 these coordinates; HIR/MIR, C and CLI integration remain open. Evidence:
 `docs/ops/evidence/candidate-module-unit-bind-20261009.json`.
 
+Owned provider interfaces now retain canonical field shapes and callable
+signatures with their declaration flags, foreign link names, resource abilities
+and declared cleanup authority. Generic function interfaces remain deferred
+templates. Field queries enforce resource privacy, and fresh catalog lookups
+revalidate retained bindings. Six development native regressions pass, including
+queries after source/metadata removal and stale/private provider rejection.
+All 160 modules (1046575 bytes) import interfaces for thirteen groups; maxima
+are 131 shapes, 910 fields, 198 callables and 401 type nodes within existing
+bounds. Actual unit body typing must still consume these interfaces and resolve
+local annotations/templates before HIR/MIR/C/CLI integration. Evidence:
+`docs/ops/evidence/candidate-module-unit-interfaces-20261009.json`.
+
 `stage0` is the current Go compiler built by the supported Go toolchain.
 
 `stage1` is produced by `stage0` from the admitted Fairy compiler sources.

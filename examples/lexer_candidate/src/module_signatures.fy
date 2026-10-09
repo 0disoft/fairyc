@@ -28,6 +28,11 @@ pub fn usize count(ref Program p){return v::len<Signature>(ref p.signatures);}
 pub fn Signature at(ref Program p,usize id){assert(id>0 && id<=count(p));return *v::at<Signature>(ref p.signatures,id-1);}
 pub fn usize parameter_at(ref Program p,usize index){return *v::at<usize>(ref p.parameters,index);}
 pub fn types::Type type_at(ref Program p,usize id){return vectors::type_at(ref p.types,id);}
+pub fn usize type_count(ref Program p){return vectors::type_count(ref p.types);}
+pub fn types::Resolution resolve_type(ref Program p,ref syntax::Parsed source,usize module_index,usize root,ref mut v::Vec<types::Type> graph){return vectors::resolve_type(ref p.types,source,module_index,root,graph);}
+pub fn types::Resolution declaration_type(ref Program p,usize module_index,usize declaration,ref mut v::Vec<types::Type> graph){return vectors::declaration_type(ref p.types,module_index,declaration,graph);}
+pub fn Result<types::Graph,u32> own_types(ref Program p,v::Vec<types::Type> graph){return vectors::own_types(ref p.types,graph);}
+pub fn usize identity(ref Program p,usize module_index,usize declaration){var usize low=0;var usize high=count(p);while(low<high){let usize mid=low+(high-low)/2;let s=at(p,mid+1);if(s.module_index<module_index || s.module_index==module_index && s.declaration<declaration){low=mid+1;}else{high=mid;}}if(low<count(p)){let s=at(p,low+1);if(s.module_index==module_index && s.declaration==declaration){return low+1;}}return 0;}
 pub fn ref u8[] linker_name(ref Program p,usize id){let s=at(p,id);return bytes::view(ref p.links)[s.link_start..s.link_end];}
 pub fn catalog::Lookup lookup(ref Program p,usize module_index,ref u8[] spelling){let found=declaration_lookup(p,module_index,spelling);if(found.code!=0){return found;}let d=declaration_at(p,found.item);var usize i=1;while(i<=count(p)){let s=at(p,i);if(s.module_index==d.module_index && s.declaration==d.declaration){return catalog::Lookup{.code=0,.item=i};}i+=1;}return catalog::Lookup{.code=9,.item=0};}
 fn catalog::Problem fail(u32 code,usize module_index,usize start,usize end){return catalog::Problem{.code,.module_index,.start,.end};}

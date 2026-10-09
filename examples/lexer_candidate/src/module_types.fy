@@ -109,3 +109,8 @@ pub fn Resolution resolve(ref catalog::Catalog c,ref syntax::Parsed p,usize modu
     // branch cannot publish a valid prefix or consume the graph's type budget.
     let usize before=count(graph);let result=walk(c,p,module_index,root,graph,0);if(result.problem.code!=0){while(count(graph)>before){discard v::pop<Type>(graph);}}return result;
 }
+pub fn Resolution declaration(ref catalog::Catalog c,usize module_index,usize declaration,ref mut v::Vec<Type> graph){
+    let usize id=catalog::identity(c,module_index,declaration);if(id==0){return fail(9,module_index,0,0);}let d=catalog::declaration_at(c,id);
+    if(d.kind!=4 && d.kind!=6 && d.kind!=11 || catalog::sdk_vector(c,module_index,declaration)){return fail(9,module_index,d.source_start,d.source_end);}
+    return accepted(graph,node(if(d.kind==4){2}else if(d.kind==6){3}else{4},0,module_index,declaration,0,0),module_index,d.source_start,d.source_end);
+}

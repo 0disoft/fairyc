@@ -98,3 +98,58 @@ The next layer must consume these coordinates in local body name/type checking
 and import exact provider layouts/signatures without flattening all bodies.
 HIR/MIR and C/link identities must subsequently retain the same coordinates.
 The command dispatcher still uses the original single-owner compiler path.
+
+## Provider field shapes and callable interfaces
+
+`module_unit_interfaces` now owns the provider data required by a unit checker:
+the canonical type graph, selected struct/resource/enum/SDK-Vec field shapes,
+enum payload ranges, field names, callable argument/result types, effects,
+must-use and unsafe flags, foreign link names, repr(C) admission, resource
+abilities, and declared cleanup authority. Original parser, binding and signature
+owners can leave scope without invalidating the retained queries. Target byte
+offsets/alignment and required transitive drop effects remain checker/backend work.
+
+The global signature graph is copied as a stable prefix. Additional provider
+field types use the existing canonical resolver and its 4096-node/depth-64
+limits. A deduplicated queue follows only the selected unit's target types,
+callable signature types and their field/composite dependencies. It does not
+materialize a field table for every nominal node in the global prefix. Each
+result retains the existing 512-shape, 1024-field and 512-callable bounds;
+parameter storage is capped at 32768 and owned spelling storage at 65536 bytes.
+
+Generic function targets retain their coordinates and declaration flags with
+`template=true`, result zero and no concrete parameter list. They must be
+instantiated before call typing. An unspecialized SDK Vec declaration is not
+treated as an ordinary resource; concrete Vec graph nodes retain their exact
+element and provider identity and share the original authenticated physical fields.
+
+Binding validation compares the retained unit bytes to the current source range
+and repeats target lookup against the current catalog. This prevents an old
+binding from bypassing a newly private provider even when supplied with freshly
+rebuilt metadata. All full-source bytes must also match the supplied metadata.
+The implementation uses borrowed local builder containers and transfers them
+once into the result, keeping the existing resource field mutation restrictions.
+
+The projection work counter charges graph copying, queue visits, fields,
+parameters and owned spelling bytes within 1048576 units. Canonical resolution
+continues to use its existing node/depth bounds. `field` returns the canonical
+field type through a one-based field ID, unwraps safe record references, and
+enforces resource/Vec module privacy. Enum payload access still requires the
+dedicated active-variant path and is rejected by ordinary field lookup.
+
+Six development native regressions pass, including nested array/nominal fields,
+resource metadata, enum payload ranges, foreign signatures/link names, effects,
+must-use, generic-template deferral, detached-owner queries, field privacy,
+stale caller/provider rejection and original binding regressions. The actual
+160-module dispatcher occupies 1046575 bytes and imports interfaces for all
+thirteen AST groups. Group maxima are 131 shapes, 910 fields, 198 callables and
+401 canonical type nodes. Projection work peaks at 10629; name binding peaks
+at 146397. The probe compares retained shape/field coordinates and names to
+original provider syntax. Evidence:
+`docs/ops/evidence/candidate-module-unit-interfaces-20261009.json`.
+
+The unit body checker must now consume these field and callable interfaces,
+resolve local annotation roots and specialize templates. Existing single-owner
+type-check/HIR/MIR code still uses local numeric declaration tags; adapting that
+consumer is the next step. The command dispatcher, full C output and stage1/stage2
+are not yet connected to the unit pipeline.

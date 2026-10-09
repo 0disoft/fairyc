@@ -23,7 +23,7 @@ def main():
     ap.add_argument("--manifest", type=Path, required=True)
     ap.add_argument("--native-test-report", type=Path, required=True)
     ap.add_argument("--receipt", type=Path, required=True)
-    ap.add_argument("--probe", choices=("joined_scanner_storage", "partitioned_module_join", "partitioned_module_bind"), default="joined_scanner_storage")
+    ap.add_argument("--probe", choices=("joined_scanner_storage", "partitioned_module_join", "partitioned_module_bind", "partitioned_module_interfaces"), default="joined_scanner_storage")
     args = ap.parse_args()
     compiler, manifest = args.compiler.resolve(), args.manifest.resolve()
     probe = PROJECT / "probes" / (args.probe + ".fy")
@@ -68,7 +68,8 @@ def main():
     finally:
         schemas = {"joined_scanner_storage": "fairyc.candidate-cooked-storage/v1",
                    "partitioned_module_join": "fairyc.candidate-module-units/v1",
-                   "partitioned_module_bind": "fairyc.candidate-module-unit-bind/v1"}
+                   "partitioned_module_bind": "fairyc.candidate-module-unit-bind/v1",
+                   "partitioned_module_interfaces": "fairyc.candidate-module-unit-interfaces/v1"}
         receipt = dict(schema=schemas[args.probe], passed=passed,
                        compiler=identity(compiler), probe=identity(probe), observer=identity(Path(__file__)),
                        manifest=identity(manifest), sources=[identity(p) for p in sources],

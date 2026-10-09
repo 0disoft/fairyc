@@ -1599,3 +1599,31 @@ project commands and Linux execution remain pending.
   CI and runner implementations are unchanged. Evidence:
   `evidence/candidate-module-unit-bind-20261009.json`; architecture:
   `docs/architecture/candidate-compilation-units-v0.md`.
+
+## Owned provider interfaces for units (2026-10-09)
+
+- `module_unit_interfaces` follows selected target/signature types through a
+  deduplicated canonical graph queue. It owns needed provider field names/types,
+  enum payload ranges, callable arguments/results and declaration flags,
+  foreign link names, repr(C) admission, resource abilities and declared cleanup
+  authority. Generic function interfaces are explicitly deferred templates.
+- Retained bindings are checked against live caller bytes and fresh catalog
+  lookups, so rebuilding metadata cannot make a stale private target usable.
+  Canonical field queries preserve resource module privacy and reject ordinary
+  enum payload access. Containers stay local until the owned result is built.
+- Development check, probe build and six native regressions pass. Tests exercise
+  owner removal, nested nominal/array fields, payload ranges, callable/foreign
+  flags, field queries, templates, stale callers/providers and binding behavior.
+- All 160 dispatcher modules (1046575 bytes) now collect provider interfaces in
+  thirteen AST groups. Maxima are 131 shapes, 910 fields, 198 callables and 401
+  graph types. Projection work peaks at 10629 and binding work at 146397; the
+  existing numeric caps remain fixed. Original shape/field spans and names are
+  independently compared by the Fairy probe. Evidence:
+  `evidence/candidate-module-unit-interfaces-20261009.json`.
+- Repr(C) lane comments moved unchanged to
+  `docs/architecture/candidate-repr-c-model-v0.md` to keep input within 1MiB.
+  Next: local annotation resolution and actual body checking against these
+  interfaces, then HIR/MIR/C/CLI integration. Full dispatcher compilation,
+  stage1/stage2, release rebuilding and Linux remain open. Internal compiler
+  query APIs expanded; language/SDK ABI, DB, CI and runner implementations did
+  not change.

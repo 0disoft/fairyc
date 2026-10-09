@@ -35,6 +35,14 @@ pub fn Coordinate target_at(ref Bound p,usize id){assert(id>0 && id<=target_coun
 pub fn Coordinate definition_at(ref Bound p,usize id){assert(id>0 && id<=v::len<Coordinate>(ref p.definitions));return *v::at<Coordinate>(ref p.definitions,id-1);}
 pub fn usize type_target(ref Bound p,usize id){assert(id>0 && id<=v::len<usize>(ref p.type_targets));return *v::at<usize>(ref p.type_targets,id-1);}
 pub fn usize value_target(ref Bound p,usize id){assert(id>0 && id<=v::len<usize>(ref p.value_targets));return *v::at<usize>(ref p.value_targets,id-1);}
+pub fn join::Problem validate(ref Bound p,ref v::Vec<syntax::Parsed> sources,ref signatures::Program metadata){
+    let usize files=v::len<syntax::Parsed>(sources);if(files!=signatures::module_count(metadata) || p.first>=p.stop || p.stop>files){return fail(12,0,0,0);}let source=syntax::source_view(ref p.source);var usize offset=0;var usize i=p.first;
+    while(i<p.stop){let text=syntax::source_view(v::at<syntax::Parsed>(sources,i));if(offset>source.len || text.len>source.len-offset || !bytes::equal(source[offset..offset+text.len],text)){return fail(12,i,0,0);}offset+=text.len;if(i+1<p.stop){if(offset>=source.len || source[offset]!=10){return fail(12,i,0,0);}offset+=1;}i+=1;}if(offset!=source.len){return fail(12,p.first,0,0);}
+    var usize measured=0;var u32 kind=0;while(kind<2){let usize count=if(kind==0){v::len<usize>(ref p.type_targets)}else{v::len<usize>(ref p.value_targets)};i=1;
+        while(i<=count){let usize id=if(kind==0){type_target(p,i)}else{value_target(p,i)};if(id!=0){let usize start=if(kind==0){syntax::type_at(ref p.source,i).start}else{syntax::expression_at(ref p.source,i).start};let usize end=if(kind==0){syntax::type_at(ref p.source,i).end}else{syntax::expression_at(ref p.source,i).end};let spelling=if(kind==0){syntax::type_text(ref p.source,i)}else{syntax::expression_text(ref p.source,i)};let usize owner=p.first+syntax::module_index(ref p.source,start);let found=signatures::declaration_lookup_measured(metadata,owner,spelling,ref mut measured);if(measured>1048576){return location(ref p.source,p.first,10,start,end);}if(found.code!=0){return location(ref p.source,p.first,found.code,start,end);}let d=signatures::declaration_at(metadata,found.item);let old=target_at(p,id);if(old.kind!=d.kind || old.module_index!=d.module_index || old.declaration!=d.declaration || old.start!=d.source_start || old.end!=d.source_end){return location(ref p.source,p.first,12,start,end);}}i+=1;
+        }kind+=1;
+    }return fail(0,0,0,0);
+}
 
 pub fn Result<Bound,join::Problem> bind(ref v::Vec<syntax::Parsed> sources,ref signatures::Program metadata,usize first,usize stop){
     let usize files=v::len<syntax::Parsed>(sources);if(files!=signatures::module_count(metadata)){return .err(fail(12,0,0,0));}
