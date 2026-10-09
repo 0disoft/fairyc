@@ -1398,3 +1398,27 @@ loans/lifetimes/conflicts/moves, unsafe pointer provenance and cross-unit
 HIR/MIR/C/CLI remain. Full current dispatcher, stage1/stage2, release and
 Linux validation remain separate. Public language/SDK ABI, SDK sources, DB, CI
 and runner contracts are unchanged; nothing was pushed.
+
+## Restricted enum payload field rejection (2026-10-10)
+
+Follow-up review exposed four enum payload admission mismatches against the
+reference: safe borrow, resource, fixed array and an inert struct containing a
+fixed array. The preserved 93920dd4 development probe accepted all four; the
+reference rejected them. Nominal field contracts now reject direct enum
+payload arrays with code2 and recursively require inert-copyable payloads,
+including Option/Result and nested structs/enums. Resource, borrow, void,
+non-inert aggregate and cyclic payloads retain E1004 at the original field
+type span; scalars, C scalars and raw pointers follow the reference admission.
+Recursive traversal retains the shared work and depth bounds.
+
+Current development check passed (204 sources, 2460 MIR functions), reference
+acceptance/code/span cases matched 21/21, and two native development tests
+passed: the enum payload regression and the earlier 14 malformed-field cases.
+The positive payload case checks plain struct, Option<struct> and
+Result<struct,i32> together to exercise sibling traversal state. Evidence:
+docs/ops/evidence/candidate-module-unit-enum-payload-shapes-20261010.json. The
+preceding 160-module corpus observation remains evidence for commit 93920dd4;
+it was not rerun after this focused rejection fix. Ownership, unsafe
+provenance and unit execution integration remain. No language/SDK ABI, SDK
+source, DB, CI or runner contract changed; no release, Linux or stage1/stage2
+validation or push was performed.

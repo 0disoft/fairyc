@@ -39,3 +39,13 @@ fn Result<values::Plan,model::Problem> checked(ref u8[] text){var v::Vec<syntax:
 @test fn void many_deferred_calls_fit_the_original_work_budget(){
     var bytes::Buffer text=bytes::empty();assert(bytes::append(ref mut text,b"module main;fn void sink(){}fn void main(){").is_ok);var usize i=0;while(i<900){assert(bytes::append(ref mut text,b"sink();").is_ok);i+=1;}i=0;while(i<900){assert(bytes::append(ref mut text,b"defer sink();").is_ok);i+=1;}assert(bytes::append(ref mut text,b"}").is_ok);let p=switch(checked(bytes::view(ref text))){case .ok(p):{p}case .err(_):{assert(false);return;}};assert(values::checked_calls(ref p)==1800 && values::checked_arguments(ref p)==0 && values::unresolved(ref p)==0 && values::work(ref p)<1048576);let c=values::at(ref p,1);assert(model::checked_consumers(c)==1800);
 }
+
+@test @effects(console) fn void enum_payloads_require_inert_copyable_shapes(){
+    failure(b"module main;enum E{A{ref i32 n;};}fn void main(){}",1004,b"ref i32");
+    failure(b"module main;resource R{i32 n;cleanup{}}enum E{A{R r;};}fn void main(){}",1004,b"R");
+    failure(b"module main;resource R{i32 n;cleanup{}}enum E{A{Option<R> r;};}fn void main(){}",1004,b"Option<R>");
+    failure(b"module main;resource R{i32 n;cleanup{}}enum E{A{Result<i32,R> r;};}fn void main(){}",1004,b"Result<i32,R>");
+    failure(b"module main;enum E{A{i32[2] n;};}fn void main(){}",2,b"i32[2]");
+    failure(b"module main;struct S{i32[2] n;}enum E{A{S value;};}fn void main(){}",1004,b"S");
+    let p=switch(checked(b"module main;struct S{i32 n;}enum E{A{S direct;Option<S> maybe;Result<S,i32> result;};}fn void main(){}")){case .ok(p):{p}case .err(_):{assert(false);return;}};assert(values::unresolved(ref p)==0);
+}
