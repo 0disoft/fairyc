@@ -1349,3 +1349,39 @@ next consumers. Loan/lifetime/conflict/move, unsafe provenance, cross-unit
 execution and self-hosting remain. No new corpus, full dispatcher,
 stage1/stage2, release, Linux or push was performed; public language/SDK ABI,
 SDK sources, DB, CI and runner contracts are unchanged.
+
+## Bounded return-origin flow and call substitution (2026-10-10)
+
+module_unit_origin_returns now infers direct safe-reference/view return
+summaries from checked original and provider bodies. Its flow interpreter uses
+stable lexical bindings, evaluates assignments in source order, excludes
+terminated branch environments, preserves Static in mixed sets and substitutes
+unit-scoped callee parameter origins through argument values captured once in
+evaluation order. Loop header environments converge through
+fallthrough/continue backedges; exit environments include the zero-iteration
+path and break edges. Probe iterations suppress return facts, and nested loops
+retain independent edge depths. Scalar-for post execution follows live
+backedges; byte-view iteration evaluates its input once.
+
+Development check passed (211 sources, 2575 MIR functions), native development
+tests passed 3/3, and reference acceptance/diagnostic/span observations
+matched 17/17. Coverage includes static versus unknown, dead return suffixes,
+overwrite versus branch joins, terminated branches, argument side effects,
+recursive unknown summaries, retained local origins, five loop cases and
+colliding generic instance numbers across provider units. Exhausted prior work
+fails with code 10 and stale source metadata with code 12. Binary value lookup
+charges actual probes and source/node/binding coordinates are rechecked before
+analysis. Existing work/depth/round/storage bounds remain fail-closed.
+Evidence:
+docs/ops/evidence/candidate-module-unit-origin-returns-20261010.json.
+
+A function-wide summary is not a diagnostic for each return: distinct
+individually valid returns may join multiple parameter sources for a
+subsequent call. Individual return-expression records and diagnostic/lifetime
+consumers remain next. Invalid local origins remain identifiable in the
+summary; forwarding a nonparameter/local origin yields Unknown rather than
+inventing a caller owner. Tagged borrowed return payloads, region origins,
+loan/subview facts, lifetime/conflict/move and unsafe provenance are still
+pending. No new fixed corpus, full dispatcher, stage1/stage2, release, Linux
+or push was performed. Public language/SDK ABI, SDK sources, DB, CI and runner
+contracts are unchanged.
