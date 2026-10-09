@@ -959,3 +959,27 @@ unchanged. No new full corpus, full current dispatcher, stage1/stage2, release,
 Linux or push was run. Corpus observations are bundled with the next tagged
 consumer unit. Public language/SDK ABI, SDK sources, DB, CI and runners are
 unchanged. Next: switch/variant payload typing and assignment consumers.
+
+## Contextual variant construction (2026-10-09)
+
+`module_unit_value_variant` now checks contextual `.none`, `.some(value)`,
+`.ok(value)` and `.err(value)` against canonical Option/Result payload types.
+Nested tags and nominal/resource payload identities are retained. Enum values
+and named payload records retain canonical module/declaration identity and the
+original provider variant/field coordinates. Payload rows are checked in source
+order; wrappers and contextual callees remain nonvalues. Unsupported context,
+arity, member/field, duplicate/missing fields and payload mismatches retain their
+original spans; scalar overflow remains E1013 and argument labels remain E1014.
+
+Development check passed (196 sources, 2399 MIR functions), selected native
+cases passed 7/7 including SDK Vec and conditional regressions, and reference
+acceptance/code/span fixtures matched 19/19. Types 4096, work 1048576, entries
+1024, active locals 128 and depth/rounds 64 are unchanged. Evidence:
+`docs/ops/evidence/candidate-module-unit-variants-20261009.json`.
+
+Switch/payload binding, propagation/builtin, assignment/post, defer/burn,
+function-tail/missing-return validation, earlier declaration/shape rejection,
+inferred-void-local admission, ownership/unsafe provenance and unit HIR/MIR/C/CLI
+remain. No new corpus, full current dispatcher, stage1/stage2, release, Linux or
+push was run; corpus work is bundled with switch consumers. Public language/SDK
+ABI, SDK sources, DB, CI and runner contracts are unchanged.
