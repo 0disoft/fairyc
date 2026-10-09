@@ -21,8 +21,8 @@ pub struct Local {usize header_start;usize header_end;u32 kind;usize source_inde
 pub struct Consumer {u32 kind;usize source_index;usize expression;usize target;usize operator;u32 header;usize expected;usize actual;bool checked;usize start;usize end;}
 pub struct Return {usize expression;usize expected;usize actual;bool checked;usize start;usize end;}
 pub struct Problem {u32 code;usize module_index;usize start;usize end;usize expected;usize actual;}
-pub resource Values {Frame frame;v::Vec<Expression> expressions;v::Vec<Local> locals;v::Vec<Return> returns;v::Vec<Invocation> calls;v::Vec<Argument> arguments;v::Vec<Consumer> consumers;usize unresolved;usize inferred;usize checked_returns;usize work;cleanup{}}
-pub fn Values assemble(Frame frame,v::Vec<Expression> expressions,v::Vec<Local> locals,v::Vec<Return> returns,v::Vec<Invocation> calls,v::Vec<Argument> arguments,v::Vec<Consumer> consumers,usize unresolved,usize inferred,usize checked_returns,usize work){return Values{.frame,.expressions,.locals,.returns,.calls,.arguments,.consumers,.unresolved,.inferred,.checked_returns,.work};}
+pub resource Values {bool checked_completion;Frame frame;v::Vec<Expression> expressions;v::Vec<Local> locals;v::Vec<Return> returns;v::Vec<Invocation> calls;v::Vec<Argument> arguments;v::Vec<Consumer> consumers;usize unresolved;usize inferred;usize checked_returns;usize work;cleanup{}}
+pub fn Values assemble(Frame frame,v::Vec<Expression> expressions,v::Vec<Local> locals,v::Vec<Return> returns,v::Vec<Invocation> calls,v::Vec<Argument> arguments,v::Vec<Consumer> consumers,usize unresolved,usize inferred,usize checked_returns,usize work,bool checked_completion){return Values{.checked_completion,.frame,.expressions,.locals,.returns,.calls,.arguments,.consumers,.unresolved,.inferred,.checked_returns,.work};}
 pub fn Frame frame(ref Values p){return p.frame;}
 pub fn usize work(ref Values p){return p.work;}
 pub fn usize unresolved(ref Values p){return p.unresolved;}
@@ -62,3 +62,5 @@ pub fn usize checked_consumers(ref Values p){var usize count=0;var usize i=0;whi
 
 pub fn usize assignment_count(ref Values p){var usize n=0;var usize i=0;while(i<consumer_count(p)){if(consumer_at(p,i).kind==4){n+=1;}i+=1;}return n;}
 pub fn usize checked_assignments(ref Values p){var usize n=0;var usize i=0;while(i<consumer_count(p)){let c=consumer_at(p,i);if(c.kind==4 && c.checked){n+=1;}i+=1;}return n;}
+
+pub fn bool checked_completion(ref Values p){return p.checked_completion;}

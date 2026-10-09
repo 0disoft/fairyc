@@ -1077,3 +1077,41 @@ HIR/MIR/C/CLI remain. All consumer logic is Fairy. No new fixed corpus, full
 dispatcher, stage1/stage2, release, Linux or push was run; the corpus
 observation remains bundled after statement consumers. Public language/SDK
 ABI, SDK sources, DB, CI and runner contracts are unchanged.
+
+## Function and cleanup completion gate (2026-10-09)
+
+`module_unit_value_completion` applies the reference type checker's syntactic
+completion gate to each function and cleanup body. It resolves the original
+declaration body, requires a statement block without a top-level value tail,
+and admits void results. Non-void bodies must contain a direct return, literal
+assert(false), a completing unsafe/region body, or an if/else chain whose
+branches complete. The parser's reverse statement links are walked directly
+with charged work rather than repeatedly scanning indexed statements. Missing
+completion retains code2 at the original whole-body span; Values publishes
+checked_completion.
+
+This is the reference's syntactic gate, not a CFG proof. A loop, plain nested
+block or switch returning from every arm does not complete a non-void body. An
+if without an else also remains insufficient. A branch with a value tail
+follows the reference's semantic admission; actual return and termination
+validation still belongs to the subsequent HIR/MIR path. Function and cleanup
+bodies remain statement blocks, and top-level function value tails remain
+parser errors. No syntax was added.
+
+The walk now admits inferred canonical void locals and their aliases, removing
+the earlier unconditional void-local rejection. Declared-type mismatches
+retain E1006. Development check passed (202 sources, 2447 MIR functions),
+selected native tests passed 6/6 (four new completion tests plus header and
+provider/cleanup assignment regressions), and reference acceptance/code/span
+fixtures matched 12/12. The stable Go check also admitted the void-inference
+fixture. Native tests cover the syntactic boundaries, original error spans,
+canonical alias identity, parser rejection and fail-closed exhaustion of the
+unchanged 1048576 work budget. Evidence:
+docs/ops/evidence/candidate-module-unit-completion-20261009.json.
+
+Defer/burn, earlier declaration/shape rejection,
+loans/lifetimes/conflicts/moves, unsafe pointer provenance and cross-unit
+HIR/MIR/C/CLI remain. Type, work, entry, active-local and depth/round bounds
+are unchanged. The completion logic is entirely Fairy. No new fixed corpus,
+full current dispatcher, stage1/stage2, release, Linux or push was run. Public
+language/SDK ABI, SDK sources, DB, CI and runner contracts are unchanged.
