@@ -270,7 +270,7 @@ SDK 본문 연결과 나머지 분석량 제한은 계속 남는다.
 20번 완료 후 주요 작업 99개(21~119)와 선택 검토 8개(120~127)를 구분한다. 주요 작업 모두가
 셀프호스팅 전에 끝나야 한다는 뜻은 아니며, 자기 소스의 도달 가능한 기능이 단계 전환을 결정한다.
 
-즉시 다음 작업은 **51번 파일 SDK의 후보 실행과 50번 프로젝트 명령의 SDK 연결**이다. local 혼합 origin은 HIR/독립 MIR와 두 후보 실행에 연결했다. 구조체 배열 필드 subrange 대여는 두 프로필로 검증했다. 50번 콘솔 SDK와 59번 copied byte 반복은 실행 검증을 마쳤다. 47번 스칼라 Vec와 48번 resource/struct 원소 실행, 49번 Buffer/String/CString·UTF-8 실행은 연결했다. 41번 CStr 표현형과 50번 process runtime의 bounded 실행도 연결했으며, 다른 SDK 본문 및 프로젝트 driver는 남는다. 61~64번 nominal source-set와 54~55번 inert repr(C) 반환값 연결은 완료했으며, SDK/영속 package 정체성 등 남은 범위는 각 항목에 유지했다.
+이전 단계에서 다음 작업으로 정했던 항목은 **51번 파일 SDK의 후보 실행과 50번 프로젝트 명령의 SDK 연결**이었다. local 혼합 origin은 HIR/독립 MIR와 두 후보 실행에 연결했다. 구조체 배열 필드 subrange 대여는 두 프로필로 검증했다. 50번 콘솔 SDK와 59번 copied byte 반복은 실행 검증을 마쳤다. 47번 스칼라 Vec와 48번 resource/struct 원소 실행, 49번 Buffer/String/CString·UTF-8 실행은 연결했다. 41번 CStr 표현형과 50번 process runtime의 bounded 실행도 연결했으며, 다른 SDK 본문 및 프로젝트 driver는 남는다. 61~64번 nominal source-set와 54~55번 inert repr(C) 반환값 연결은 완료했으며, SDK/영속 package 정체성 등 남은 범위는 각 항목에 유지했다.
 선택 기능은 별도 도입 판단을 거친다. 이 목록은 push·PR·설치·release를 승인하지 않는다.
 
 2026-10-09: 85번 HIR 도달성 구간 인덱스와 반환 summary 확정 후 origin 캐시를 연결했다. 개발/릴리스 혼합 origin 정상 4개·거부 10개·native 합계 16회, String/CString/UTF-8 정상 6개·거부 7개·native 합계 24회와 개발 API 2개가 통과했다. 깊이 초과 alias와 미확정 recursive 반환은 계속 거부한다. Scanner는 초기 origin 상한을 지나 가변 대여의 전체 식 충돌 비교 상한에서 멈춘다. 분석량 상한은 올리지 않았다. 근거: `evidence/candidate-scanner-reach-limit-profile-20261009.json`, `evidence/candidate-borrow-index-mixed-dev-20261009.json`, `evidence/candidate-borrow-index-mixed-release-20261009.json`, `evidence/candidate-borrow-index-text-dev-20261009.json`, `evidence/candidate-borrow-index-text-release-20261009.json`.
@@ -667,8 +667,8 @@ bounded units with continuous coverage over 0..160, and the accepted source
 manifest hashes were re-verified against the receipt
 (`dispatcher-admission-cooked-intern-20261009.txt`, sha256
 8281ef6c4761a3d6627f81a0050b9f967e3d9ee3851e16a1c76aee73ab5dcd05). The accepted
-view families report 74 known array values (32 checked), 473 known indexes (135
-checked), 171 known slices (166 checked) and 10 recorded view origins, with
+view families report 74 array expressions (32 checked), 473 index expressions (135
+checked), 171 slice expressions (166 checked) and 10 recorded view origins, with
 original expression IDs, spans and whole-owner roots retained. The existing 9/9
 development native selection and 17/17 reference acceptance remain the
 implementation evidence.
@@ -676,9 +676,9 @@ implementation evidence.
 | Observation | Result |
 | --- | --- |
 | Input / units | 160 modules; 1048562 bytes; 26 units |
-| Arrays / checked arrays | 74 / 32 |
-| Indexes / checked indexes | 473 / 135 |
-| Slices / checked slices | 171 / 166 |
+| Array expressions / checked | 74 / 32 |
+| Index expressions / checked | 473 / 135 |
+| Slice expressions / checked | 171 / 166 |
 | View origins | 10 |
 | Maximum value work / graph | 825705 / 1048576; 427 / 4096 |
 | Retained bounds | work 1048576; types 4096; entries 1024; active locals 128; depth/rounds 64 |
@@ -690,3 +690,14 @@ and pointer provenance, cross-unit links/layouts and unit HIR/MIR/C/CLI. Full
 current dispatcher native, stage1/stage2, release, Linux and push were not run.
 Public language/SDK ABI, SDK source, DB, CI and runner contracts are unchanged.
 Evidence: `docs/ops/evidence/candidate-module-unit-views-corpus-20261009.json`.
+
+## Nominal view interfaces and array-field borrows (2026-10-09)
+
+module_types는 first 자리에 기존 명목 원소 타입을 두는 정규 공유(kind 17)와 가변(kind 18) 명목 뷰 인터페이스를 들고 있고, 정규 그래프로 검증한다. module_unit_interfaces는 각 서술자의 원소를 pending shape 큐로 따라간다. 명목 배열은 문맥 기대 타입이 맞는 공유/가변 뷰이거나 배열 범위를 명시적으로 대여할 때만 그런 뷰가 된다. 문맥 없는 그냥 `ref p.data`는 명목 필드에서 실험 code2로 거부하고, 문맥 없는 이름 있는 고정 배열은 뷰가 아니라 배열 참조를 그대로 둔다. 평범한 이름 있는 전체 소유자는 뿌리와 범위를 지키고, 원소는 제공자 모듈/선언 정체성을 유지한다.
+
+필드 소유자는 field_owner로 다시 검사하고 원소 선택은 element_borrow 검사를 거친다. 불변 저장소에 가변 대여를 하면 대상 범위에서 E1008이다. 평범하지 않은 소유자의 원소/하위 필드의 가변 대여는 선택 범위에서 E1008이고, 공유 대여는 전체 식에서 실험 code2다. 평범하지 않은 필드 범위는 배열 필드 소유자 범위에서 E1008이다. 인덱스와 내장 필드은 원소 해석과 len/is_empty를 공유/가변 서술자로 확장한다. 한도는 types 4096, work 1 MiB, entries 1024, active locals 128, depth/rounds 64 그대로다.
+
+이 항목은 타입과 출처 투영만 한다. 수명, 충돌, 이동, 세대 검사는 아직 미완이라 대여 충돌이나 소유권 완료를 주장하지 않는다. 선정 개발 native 사례는 12/12 통과, reference는 code/span fixture 19/19 일치, check는 소스 193개와 MIR 함수 2370개다. 처음 실패한 fixture 2개는 테스트 작성 오류로, 기대 선언 번호가 module 선언 1번을 반영하지 못한 것이며 receipt에 기록되어 있다. 새 전체 코퍼스 관찰은 다음 consumer와 묶는다. record/control/variant/builtin과 독립 표현식, 이전 선언 거부, unsafe/포인터 출처, cross-unit links/layouts, unit HIR/MIR/C/CLI가 남는다. 전체 현재 dispatcher native와 stage1/stage2, release/Linux/push는 실행하지 않았다. 공개 언어/SDK ABI, SDK 소스, DB, CI, 러너는 그대로다.
+근거: `docs/ops/evidence/candidate-module-unit-nominal-views-20261009.json`.
+
+현재 다음 작업은 **레코드·제어·variant·builtin 표현식의 타입 검사와 선언·형태 오류의 조기 거부**다. 독립 표현식·discard 검사도 이어서 연결한다.

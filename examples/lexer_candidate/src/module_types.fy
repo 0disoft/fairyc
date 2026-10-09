@@ -24,6 +24,7 @@ pub fn u32 validate(ref catalog::Catalog c,ref v::Vec<Type> types){
         else{if(t.module_index!=0 || t.declaration!=0){return 9;}
             if(t.kind==1){if(t.scalar==0 || t.scalar>7 && !abi::valid(t.scalar) || t.first!=0 || t.second!=0){return 9;}}
             else if(t.kind==15){if(!views::extended(t.scalar) || t.first!=0 || t.second!=0){return 9;}}
+            else if(t.kind==17 || t.kind==18){if(t.scalar!=0 || t.first==0 || t.first>i || t.second!=0 || at(types,t.first).kind!=2){return 9;}}
             else if(t.kind==16){if(t.scalar!=0 || t.first==0 || t.first>i || !array_element(types,t.first,t.second)){return 9;}}
             else if(t.kind==12){if(t.second!=0){return 9;}if(t.first==0){if(!pointers::valid(t.scalar) || pointers::inner(t.scalar)>=256 && pointers::inner(t.scalar)<=767){return 9;}}else if(t.scalar>1 || t.first>i || v::at<Type>(types,t.first-1).kind!=2){return 9;}}
             else if(t.kind>=9 && t.kind<=11 || t.kind==14){if(t.scalar!=0 || t.first!=0 || t.second!=0){return 9;}}
@@ -83,6 +84,7 @@ fn Resolution walk(ref catalog::Catalog c,ref syntax::Parsed p,usize module_inde
     if(n.kind==2 || n.kind==3){var u32 literal=literals::resolve(p,root);let child=syntax::type_at(p,n.left);
         if(literal==0 && declaration!=0 && child.kind==4){let r=walk(c,p,module_index,child.left,graph,depth+1,declaration,substitutions);if(r.problem.code!=0){return r;}let t=at(graph,r.type);if(t.kind==1){literal=views::make(t.scalar,n.kind==3);}}
         if(views::extended(literal)){return accepted(graph,node(15,literal,0,0,0,0),module_index,n.start,n.end);}if(literal!=0){return accepted(graph,node(if(literal==9){9}else if(literal==10){10}else if(literal==12){14}else{11},0,0,0,0,0),module_index,n.start,n.end);}
+        if(child.kind==4){let r=walk(c,p,module_index,child.left,graph,depth+1,declaration,substitutions);if(r.problem.code!=0){return r;}if(at(graph,r.type).kind!=2){return fail(9,module_index,n.start,n.end);}return accepted(graph,node(if(n.kind==2){17}else{18},0,0,0,r.type,0),module_index,n.start,n.end);}
         let r=walk(c,p,module_index,n.left,graph,depth+1,declaration,substitutions);if(r.problem.code!=0){return r;}let inner=at(graph,r.type);
         if(inner.kind!=2 && inner.kind!=3 && inner.kind!=13 && !(inner.kind==1 && inner.scalar>=1 && inner.scalar<=6) && !(inner.kind==12 && inner.scalar==1048591)){return fail(9,module_index,n.start,n.end);}
         return accepted(graph,node(if(n.kind==2){7}else{8},0,0,0,r.type,0),module_index,n.start,n.end);

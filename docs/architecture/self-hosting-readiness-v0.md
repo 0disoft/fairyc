@@ -785,8 +785,8 @@ bounded units with continuous coverage over 0..160, and the accepted source
 manifest hashes were re-verified against the receipt
 (`dispatcher-admission-cooked-intern-20261009.txt`, sha256
 8281ef6c4761a3d6627f81a0050b9f967e3d9ee3851e16a1c76aee73ab5dcd05). The accepted
-view families report 74 known array values (32 checked), 473 known indexes (135
-checked), 171 known slices (166 checked) and 10 recorded view origins, with
+view families report 74 array expressions (32 checked), 473 index expressions (135
+checked), 171 slice expressions (166 checked) and 10 recorded view origins, with
 original expression IDs, spans and whole-owner roots retained. The existing 9/9
 development native selection and 17/17 reference acceptance remain the
 implementation evidence.
@@ -794,9 +794,9 @@ implementation evidence.
 | Observation | Result |
 | --- | --- |
 | Input / units | 160 modules; 1048562 bytes; 26 units |
-| Arrays / checked arrays | 74 / 32 |
-| Indexes / checked indexes | 473 / 135 |
-| Slices / checked slices | 171 / 166 |
+| Array expressions / checked | 74 / 32 |
+| Index expressions / checked | 473 / 135 |
+| Slice expressions / checked | 171 / 166 |
 | View origins | 10 |
 | Maximum value work / graph | 825705 / 1048576; 427 / 4096 |
 | Retained bounds | work 1048576; types 4096; entries 1024; active locals 128; depth/rounds 64 |
@@ -808,3 +808,39 @@ and pointer provenance, cross-unit links/layouts and unit HIR/MIR/C/CLI. Full
 current dispatcher native, stage1/stage2, release, Linux and push were not run.
 Public language/SDK ABI, SDK source, DB, CI and runner contracts are unchanged.
 Evidence: `docs/ops/evidence/candidate-module-unit-views-corpus-20261009.json`.
+
+## Nominal view interfaces and array-field borrows (2026-10-09)
+
+module_types now carries canonical shared (kind 17) and mutable (kind 18) nominal
+view interfaces whose first slot is the existing nominal element type, validated
+against the canonical graph. module_unit_interfaces follows each descriptor's
+element into the pending shape queue. A nominal array becomes such a view only
+when the contextual expected type is a matching shared or mutable view, or when
+an array range is explicitly borrowed; a bare `ref p.data` without that context
+is rejected at the nominal field with experimental code2, and a named fixed
+array without context keeps an array reference instead of a view. The plain named
+whole owner keeps its root and scope, and the element keeps its provider module
+and declaration identity.
+
+Field owners are re-checked through field_owner and element selection runs the
+element_borrow gate. An immutable storage with a mutable borrow is E1008 at the
+target span. A nonplain owner with an indexed or leaf mutable borrow is E1008 at
+the selected span, while the shared borrow stays experimental code2 at the whole
+expression. A nonplain field range is E1008 at the array-field owner span. The
+index and field builtins extend element resolution and len/is_empty to the shared
+and mutable descriptors. Bounds stay at types 4096, work 1 MiB, entries 1024,
+active locals 128 and depth/rounds 64.
+
+This unit is type and provenance projection only: lifetime, conflict, move and
+generation checks remain unfinished, so no borrow-conflict or ownership claim is
+made. The selected development native cases pass 12/12, the reference acceptance
+matches 19/19 code/span fixtures, and check reports 193 source files and 2370 MIR
+functions. The two fixtures that first failed were a test-authoring error: the
+expected declaration number did not account for module declaration 1, which the
+receipt records. The new full corpus observation is bundled with the next
+consumer. Record/control/variant/builtin and standalone expressions, earlier
+declaration rejection, unsafe/pointer provenance, cross-unit links/layouts and
+unit HIR/MIR/C/CLI remain. Full current dispatcher native, stage1/stage2,
+release, Linux and push were not run. Public
+language/SDK ABI, SDK sources, DB, CI and runners are unchanged.
+Evidence: `docs/ops/evidence/candidate-module-unit-nominal-views-20261009.json`.
