@@ -1950,3 +1950,27 @@ owned loan-fact publication, borrow MIR/C/runtime, unsafe provenance, full
 dispatcher, stage1/stage2, Linux and release remain pending. Release and Linux
 validation were outside these local borrow-analysis units. Stable CLI, SDK ABI,
 DB and CI are unchanged; no push.
+
+## Retained shared-reference access conflicts (2026-10-10)
+
+Mutable call arguments and stores through named reference dereferences, fields
+or indices now reject E2101 when their origins overlap a live shared reference.
+The single borrowed leaf of Option/Result retains its mutability. This includes
+parameter origins without a local root loan, aliases, branch joins and
+provider/generic return substitution. Last-use, rebinding and known-empty tags
+release the restriction. Call-held owner-write diagnostics precede lexical
+last-use diagnostics, matching Go's attempted-store location; explanation
+suppression is restricted to the same frame and E2101 code.
+
+Source checking and a fresh locked development build passed. All 27 Go/API/CLI
+cases match exact primary and related spans; two selected native tests passed.
+The 38 owner-conflict, 39 owner-move, seven later-argument and 17 Region lifetime
+CLI observations remain exact, and the prior owner-conflict native trace remains
+byte-identical. Evidence:
+`docs/ops/evidence/candidate-module-reference-access-20261010.json`.
+
+Parent/subview generations and receiver holds through effectful bounds and
+store evaluation are next. General moved-owner state, move-aware cleanup, full
+owned loan facts, borrow MIR/C/runtime, unsafe provenance, full dispatcher,
+stage1/stage2, release and Linux remain pending. Stable CLI, SDK ABI, DB and CI
+are unchanged; no push.

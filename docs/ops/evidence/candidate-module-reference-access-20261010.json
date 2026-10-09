@@ -1,0 +1,285 @@
+{
+  "schema": "fairyc.candidate-module-reference-access/v1",
+  "passed": true,
+  "scope": "Origin-overlapping retained shared references block mutable call arguments and writes through named reference dereferences, fields and indices. Shared borrowing wrappers, provider/generic return substitution and parameter-only origins participate; last-use and overwrite release the restriction.",
+  "sourceTruth": [
+    "docs/language/0002-borrows-and-return-origins.md",
+    "internal/semantic/shared_reborrow.go",
+    "internal/semantic/borrow_creation.go"
+  ],
+  "identity": {
+    "compiler": {
+      "path": ".cache/candidate-tagged/compiler-origin-patterns.exe",
+      "sha256": "d36dae1b99751322e447880aaf4d28321bd6d53bdf776185308c6c4504889bb2"
+    },
+    "candidate": {
+      "path": "examples/lexer_candidate/build/lexer-candidate.exe",
+      "sha256": "4e9ddcc220e0e71bb146b509947464a50aa8e880323c917827ee47c5ed807c89"
+    },
+    "lock": {
+      "path": "examples/lexer_candidate/fairy.lock",
+      "sha256": "a3682c4a3f14d35787899d4cec3bdd99284a760cc2a1c600e7fae24a16e1cc2a"
+    },
+    "files": [
+      {
+        "path": "examples/lexer_candidate/src/module_unit_loan_reference.fy",
+        "sha256": "4ca1780878df52b4835462b983166c7bc9203d2e41b26192e718523ec68eb1dc"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_loan_checks.fy",
+        "sha256": "9fa554c8ec334a0cafec4ec8911545c8796d265742fcaffbab4fcca34ce0f999"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_origin_flow.fy",
+        "sha256": "178061e42753a8266dd81db90433f426bb25e61a2b06b738cf1b7aa19b5bf70d"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_origin_flow_control.fy",
+        "sha256": "aab264e0e3a15797d72858b04e27ba83b00124d600cf85585cbe0d5708b26e91"
+      },
+      {
+        "path": "examples/lexer_candidate/tests/module_unit_reference_access.fy",
+        "sha256": "2bc95c315bf05300f499a7032d7fad5dae581779ff54b8abc3bda5e8fd8f2169"
+      }
+    ]
+  },
+  "sourceCheck": {
+    "exit": 0,
+    "stdout": "check ok: 2 instance(s), 231 source file(s), 2885 MIR function(s), lock updated\n"
+  },
+  "lockedBuild": {
+    "exit": 0,
+    "stdout": "built: build/lexer-candidate.exe (x86_64-windows-msvc, development, lock verified)\n"
+  },
+  "comparisons": {
+    "goAPIAndCLIExact": 27,
+    "accepted": 10,
+    "rejected": 17,
+    "diagnostics": 17,
+    "cases": [
+      {
+        "index": 0,
+        "name": "call resumes",
+        "exit": 0,
+        "diagnostics": 0,
+        "matched": true
+      },
+      {
+        "index": 1,
+        "name": "shared pair",
+        "exit": 0,
+        "diagnostics": 0,
+        "matched": true
+      },
+      {
+        "index": 2,
+        "name": "group",
+        "exit": 0,
+        "diagnostics": 0,
+        "matched": true
+      },
+      {
+        "index": 3,
+        "name": "return expires",
+        "exit": 0,
+        "diagnostics": 0,
+        "matched": true
+      },
+      {
+        "index": 4,
+        "name": "alias expires",
+        "exit": 0,
+        "diagnostics": 0,
+        "matched": true
+      },
+      {
+        "index": 5,
+        "name": "shared then mutable argument",
+        "exit": 3,
+        "diagnostics": 1,
+        "matched": true
+      },
+      {
+        "index": 6,
+        "name": "mutable then shared argument",
+        "exit": 3,
+        "diagnostics": 1,
+        "matched": true
+      },
+      {
+        "index": 7,
+        "name": "copied mutable argument",
+        "exit": 3,
+        "diagnostics": 1,
+        "matched": true
+      },
+      {
+        "index": 8,
+        "name": "nested later mutation",
+        "exit": 3,
+        "diagnostics": 1,
+        "matched": true
+      },
+      {
+        "index": 9,
+        "name": "nested owner mutation",
+        "exit": 3,
+        "diagnostics": 1,
+        "matched": true
+      },
+      {
+        "index": 10,
+        "name": "retained shared return",
+        "exit": 3,
+        "diagnostics": 1,
+        "matched": true
+      },
+      {
+        "index": 11,
+        "name": "retained shared alias",
+        "exit": 3,
+        "diagnostics": 1,
+        "matched": true
+      },
+      {
+        "index": 12,
+        "name": "dereference store",
+        "exit": 3,
+        "diagnostics": 1,
+        "matched": true
+      },
+      {
+        "index": 13,
+        "name": "owner store",
+        "exit": 3,
+        "diagnostics": 1,
+        "matched": true
+      },
+      {
+        "index": 14,
+        "name": "tagged return",
+        "exit": 3,
+        "diagnostics": 1,
+        "matched": true
+      },
+      {
+        "index": 15,
+        "name": "dereference store after use",
+        "exit": 0,
+        "diagnostics": 0,
+        "matched": true
+      },
+      {
+        "index": 16,
+        "name": "tagged overwrite",
+        "exit": 0,
+        "diagnostics": 0,
+        "matched": true
+      },
+      {
+        "index": 17,
+        "name": "unrelated reference",
+        "exit": 0,
+        "diagnostics": 0,
+        "matched": true
+      },
+      {
+        "index": 18,
+        "name": "one branch retains child",
+        "exit": 3,
+        "diagnostics": 1,
+        "matched": true
+      },
+      {
+        "index": 19,
+        "name": "both branches release child",
+        "exit": 0,
+        "diagnostics": 0,
+        "matched": true
+      },
+      {
+        "index": 20,
+        "name": "parameter referent store",
+        "exit": 3,
+        "diagnostics": 1,
+        "matched": true
+      },
+      {
+        "index": 21,
+        "name": "parameter call mutation",
+        "exit": 3,
+        "diagnostics": 1,
+        "matched": true
+      },
+      {
+        "index": 22,
+        "name": "struct referent store",
+        "exit": 3,
+        "diagnostics": 1,
+        "matched": true
+      },
+      {
+        "index": 23,
+        "name": "byte view referent store",
+        "exit": 3,
+        "diagnostics": 1,
+        "matched": true
+      },
+      {
+        "index": 24,
+        "name": "byte view store after use",
+        "exit": 0,
+        "diagnostics": 0,
+        "matched": true
+      },
+      {
+        "index": 25,
+        "name": "provider shared return",
+        "exit": 3,
+        "diagnostics": 1,
+        "matched": true
+      },
+      {
+        "index": 26,
+        "name": "generic shared return",
+        "exit": 3,
+        "diagnostics": 1,
+        "matched": true
+      }
+    ]
+  },
+  "native": {
+    "count": 2,
+    "passed": 2,
+    "tests": [
+      {
+        "identity": "tests::module_unit_loan_conflicts::owner_writes_and_borrow_creation_follow_live_loans",
+        "outcome": "passed"
+      },
+      {
+        "identity": "tests::module_unit_reference_access::retained_shared_references_block_mutable_calls_and_stores",
+        "outcome": "passed"
+      }
+    ]
+  },
+  "regression": {
+    "ownerConflictCLIExact": 38,
+    "ownerMovesCLIExact": 39,
+    "laterOwnerArgumentCLIExact": 7,
+    "regionLifetimeCLIExact": 17,
+    "ownerConflictNativeTraceByteIdentical": true
+  },
+  "initialCorrection": "Call-held owner writes now report before later lexical uses, retaining the Go last-use span of the attempted store. Suppression is scoped by frame and E2101 code.",
+  "pending": [
+    "parent/subview generations and receiver holds across bounds/store evaluation",
+    "general moved-owner availability and move-aware cleanup",
+    "full owned loan-fact publication and borrow MIR/C/runtime",
+    "unsafe provenance, full dispatcher, stage1/stage2, release and Linux"
+  ],
+  "publicCLIChanged": false,
+  "privateAPIChanged": true,
+  "sdkABIChanged": false,
+  "dbChanged": false,
+  "ciRunnerChanged": false,
+  "pushed": false
+}
