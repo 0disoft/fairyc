@@ -1016,3 +1016,28 @@ earlier declaration/shape rejection, inferred-void-local admission, ownership,
 unsafe provenance, cross-unit HIR/MIR/C/CLI, full current dispatcher and
 stage1/stage2 remain. Release, Linux and push were not run. Public language/SDK
 ABI, SDK sources, DB, CI and runner contracts are unchanged.
+
+## Recursive value dispatcher stack repair (2026-10-09)
+
+The fixed 160-module corpus aborted on Windows with STATUS_STACK_OVERFLOW
+(3221225725). A diagnostic generated-C trace placed the failure in module17
+type_cli declaration11, near the depth-31 tail of the long else-if ladder.
+
+`module_unit_value_scalar`'s evaluate function now routes its group, field,
+index, safe-borrow and cast branches through separate Fairy functions while
+preserving dispatch results and depth increments. In the same debug workspace
+the MSVC `/Od` diagnostic scalar-evaluate frame measured 19384 bytes before and
+4808 bytes after. Types 4096, work 1048576, entries 1024, active locals 128 and
+depth/rounds 64 stay unchanged, as does the stack reserve.
+
+The new 56-branch else-if regression fixture covers normal i64 values plus the
+final bool type error E1006 with its original span. Development native cases
+passed 13/13 (6 conditional, 6 switch, 1 SDK Vec); the new reference
+acceptance/span fixtures matched 2/2, and stage0 error/normal exit codes stayed
+3 and 0. Evidence:
+`docs/ops/evidence/candidate-module-unit-value-stack-20261009.json`.
+
+The full 160-module corpus re-run is still in progress, so no new corpus pass is
+claimed here. The full dispatcher, stage1/stage2, release, Linux and push paths
+were not run. Public language/SDK ABI, SDK sources, DB, CI and runner contracts
+are unchanged.

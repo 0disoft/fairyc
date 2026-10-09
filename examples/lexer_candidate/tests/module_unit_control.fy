@@ -16,6 +16,17 @@ fn syntax::Parsed parsed(ref u8[] text){let input=switch(bytes::copy(text)){case
 fn Result<values::Plan,model::Problem> projected(ref v::Vec<syntax::Parsed> sources,usize first,usize stop){let metadata=switch(signatures::build(sources)){case .ok(m):{m}case .err(_):{assert(false);return checked(b"module empty;");}};let bound=switch(binding::bind(sources,ref metadata,first,stop)){case .ok(b):{b}case .err(_):{assert(false);return checked(b"module empty;");}};let ready=switch(closure::build(sources,ref metadata,ref bound)){case .ok(p):{p}case .err(_):{assert(false);return checked(b"module empty;");}};return values::build(sources,ref metadata,ref ready);}
 fn Result<values::Plan,model::Problem> checked(ref u8[] text){var v::Vec<syntax::Parsed> sources=v::empty<syntax::Parsed>();assert(v::push<syntax::Parsed>(ref mut sources,parsed(text)).is_ok);return projected(ref sources,0,1);}
 fn void failure(ref u8[] text,u32 code,ref u8[] at){switch(checked(text)){case .ok(_):{assert(false);}case .err(p):{assert(p.code==code && p.module_index==0 && bytes::equal(text[p.start..p.end],at));}};}
+@test fn void deep_else_if_values_fit_the_development_stack(){
+    var bytes::Buffer text=bytes::empty();assert(bytes::append(ref mut text,b"module main;fn i64 main(){return ").is_ok);
+    var usize i=0;while(i<56){assert(bytes::append(ref mut text,b"if(false){4000000000}else ").is_ok);i+=1;}
+    assert(bytes::append(ref mut text,b"{4000000001};}").is_ok);
+    let p=switch(checked(bytes::view(ref text))){case .ok(p):{p}case .err(_):{assert(false);return;}};
+    assert(values::checked_returns(ref p)==1 && values::unresolved(ref p)==0 && values::work(ref p)<=1048576);
+    let c=values::at(ref p,0);var usize count=0;i=1;while(i<=model::expression_count(c)){let e=model::expression_at(c,i);if(e.kind==13){assert(e.state==1 && values::type_at(ref p,e.type).scalar==2);count+=1;}i+=1;}assert(count==56);
+    var bytes::Buffer invalid=bytes::empty();assert(bytes::append(ref mut invalid,b"module main;fn i64 main(){return ").is_ok);i=0;
+    while(i<56){assert(bytes::append(ref mut invalid,b"if(false){4000000000}else ").is_ok);i+=1;}assert(bytes::append(ref mut invalid,b"{true};}").is_ok);
+    failure(bytes::view(ref invalid),1006,b"{true}");
+}
 @test fn void contextual_if_blocks_feed_inference_arguments_and_returns(){
     let p=switch(checked(b"module main;fn i64 take(i64 value){return value;}fn i64 main(){let bool b=true;let i64 n=if(b){4000000000}else if(false){4000000001}else{4000000002};let inferred=if(b){1}else{2};discard inferred;return take(if(b){n}else{4000000003});}")){case .ok(p):{p}case .err(_):{assert(false);return;}};assert(values::checked_returns(ref p)==2 && values::checked_arguments(ref p)==1 && values::unresolved(ref p)==0);let c=values::at(ref p,1);assert(model::checked_consumers(c)==1);var usize count=0;var usize i=1;while(i<=model::expression_count(c)){let e=model::expression_at(c,i);if(e.kind==13 || e.kind==12){assert(e.state==1 && e.type!=0 && e.place.root==0);count+=1;}if(e.kind==14){assert(e.state==2 && e.type==0);}i+=1;}assert(count==7);
 }
