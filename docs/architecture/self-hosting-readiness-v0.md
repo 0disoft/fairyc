@@ -1795,3 +1795,26 @@ Region/loan/subview/lifetime/conflict/move and unsafe provenance, split-unit
 execution, full project command integration, stage1/stage2, release and Linux
 remain pending. No push, public CLI/SDK ABI, DB or CI/runner change was made
 in this candidate slice.
+
+## Result propagation return origins (2026-10-10)
+
+The Fairy origin pipeline now admits a single safe-borrow leaf returned through
+Result `?`: the success payload keeps its owner provenance, and the implicit
+error return is recorded at the full `?` expression only when the failure
+carries a safe borrow. Empty payloads, Unknown, parameter/local/static owners,
+nested tagged wrappers, generic and provider calls, and loop bodies keep the
+existing bounded rules. Multiple borrowed leaves remain explicitly
+unsupported.
+
+Development source checking passed (215 files, 2654 MIR functions) and three
+selected native tests passed. Twenty exact API/reference comparisons matched
+diagnostic codes, module indices, primary spans and related role/spans; a
+fresh locked candidate build matched all 76 CLI/reference cases with the same
+code/module/primary/related spans, and the legacy pair, four malformed inputs,
+two tagged boundary checks and help also passed. Evidence:
+docs/ops/evidence/candidate-module-unit-origin-propagation-20261010.json.
+
+Region/loan/subview/lifetime/conflict/move and unsafe provenance remain
+pending, together with split-unit execution, the full project dispatcher,
+stage1/stage2, release and Linux. No push, public CLI/SDK ABI, DB or CI/runner
+change was made in this candidate slice.

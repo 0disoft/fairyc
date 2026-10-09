@@ -45,7 +45,6 @@ fn syntax::Parsed parsed(ref u8[] text){let input=switch(bytes::copy(text)){case
     let p23=checked(b"module main;fn Option<ref T> id<T>(ref T a){return .some(a);}fn Option<ref i32> f(ref i32 a){return id<i32>(a);}",b"");emit(23,ref p23);assert(diagnostics::exit_code(ref p23)==0);
 }
 fn void unsupported(ref u8[] source){var v::Vec<syntax::Parsed> sources=v::empty<syntax::Parsed>();assert(v::push<syntax::Parsed>(ref mut sources,parsed(source)).is_ok);switch(checker::check(ref sources)){case .ok(_):{assert(false);}case .err(p):{assert(p.phase==5 && p.code==2);}};}
-@test fn void multiple_borrow_leaves_and_pending_propagation_are_explicitly_unsupported(){
+@test fn void multiple_borrow_leaves_are_explicitly_unsupported(){
     unsupported(b"module main;fn Result<ref i32,ref i32> f(ref i32 a,ref i32 b){return .ok(a);}");
-    unsupported(b"module main;fn Result<ref i32,i32> f(Result<ref i32,i32> a){return .ok(a?);}");
 }

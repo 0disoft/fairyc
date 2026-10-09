@@ -28,18 +28,22 @@ After building the native candidate, run:
 
 The manifest uses the same one-relative-path-per-line format as
 `--check-modules-file`, relative to the command's working directory. LF and
-CRLF are accepted. The command checks direct and single-leaf tagged borrow return origins in one
+CRLF are accepted. The command checks direct, single-leaf tagged and
+single-safe-borrow-leaf Result `?` borrow return origins in one
 bounded primary unit and prints original file/byte locations for E2102,
 E2103 and their related origins. Status 3 means a semantic origin error;
 status 2 means unknown/unsupported analysis, a phase/input failure or a limit.
 
 Single-borrow-leaf Option/Result payload construction, empty payloads, nested
-wrappers and call forwarding are supported. Borrowing a wrapper itself retains
-its storage origin. Multiple borrowed leaves and Result `?` origin propagation
+wrappers and call forwarding are supported. Single-safe-borrow-leaf Result `?`
+propagation preserves the success payload origin and records the implicit error
+return at the full `?` expression when the failure carries a safe borrow.
+Borrowing a wrapper itself retains its storage origin. Multiple borrowed leaves
 remain unsupported. Match payload bindings preserve subject origins and lexical
 scope. Unsupported return/binding/assignment/match locations are all reported
-when no semantic origin error is present. Region/loan/lifetime/conflict/move,
-unsafe pointer provenance and split-unit execution are pending.
+when no semantic origin error is present. Region/loan/subview/lifetime/
+conflict/move, unsafe pointer provenance, split-unit execution, the full
+project dispatcher, stage1/stage2, release and Linux are pending.
 
 ## Feature guide
 
