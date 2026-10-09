@@ -3501,3 +3501,40 @@ general moved-owner state, move-aware cleanup, borrow MIR/C/runtime, unsafe
 provenance, full dispatcher and stage1/stage2 remain pending. Release and Linux
 checks were outside this local analysis unit. Only the private candidate API
 changed; public CLI, SDK ABI, DB and CI are unchanged. No push.
+
+## Owned retained-borrow last-use and escape facts (2026-10-10)
+
+The origin Plan now publishes a separate immutable table of retained safe
+borrow facts. Each fact carries its frame, first retaining lexical binding,
+source borrow coordinates, one origin leaf, shared/mutable kind, nullable last
+use and valid return escape flag. Historical evaluation-only records remain
+distinct: discarded call-bounded borrows never appear as retained facts.
+Aliases extend the original record's use. Descriptor replacement and empty
+tags stop extending the replaced loan; the last-use anchor describes its end.
+Final loop passes contribute uses while probes do not activate retained facts.
+
+Static literals/source locations and shared parent reborrows use fact-only
+records without freezing an owner or adding descendant generations. Return-only
+parameter facts are synthesized when no explicit loan site exists. Local or
+ambiguous returns do not gain valid-escape flags. Published origin leaves and
+function ranges remain owned after syntax and primary type owners drop. The
+converged round replaces earlier facts; copies, merges and publication use the
+existing work budget and 16,384 record/fact limits.
+
+Source checking and a fresh locked development build passed. One selected
+native test verifies frozen Go coordinates/kinds/last uses/escape flags for
+27 fixtures; its 34 complete fact rows, including origin names and original
+function/source coordinates, exactly match the current Go semantic API.
+Fixtures cover unused/temporary references, aliases, replacement, tagged
+payloads, mutable descendants, static and parameter returns, rejected local
+escape, branch/loop uses, shared call conversion and generic providers.
+All prior 158 CLI cases remain exact against their existing references;
+owner move/argument suites retain their documented Go differences. Evidence:
+`docs/ops/evidence/candidate-owned-borrow-facts-20261010.json`.
+
+Hidden iteration loans and Region/raw constructor fact coverage, complete
+ordinary owner-read/access/store checks, general moved-owner state, move-aware
+cleanup, borrow MIR/C/runtime, unsafe provenance, full dispatcher and stage1/
+stage2 remain pending. Release/Linux checks were outside this local analysis
+unit. The private candidate API changed; public CLI, SDK ABI, DB and CI are
+unchanged. No push.
