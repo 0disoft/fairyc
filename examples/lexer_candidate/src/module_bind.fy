@@ -17,8 +17,8 @@ import std::vec as v;
 pub struct Problem {u32 code;usize module_index;usize start;usize end;}
 fn Problem fail(u32 code,usize module_index,usize start,usize end){return Problem{.code,.module_index,.start,.end};}
 fn usize declaration(ref v::Vec<syntax::Parsed> sources,catalog::Declaration d){var usize base=0;var usize i=0;while(i<d.module_index){base+=syntax::declaration_count(v::at<syntax::Parsed>(sources,i));i+=1;}return base+d.declaration;}
-fn bool builtin(ref u8[] name){return bytes::equal(name,b"i32") || bytes::equal(name,b"i64") || bytes::equal(name,b"u8") || bytes::equal(name,b"u32") || bytes::equal(name,b"usize") || bytes::equal(name,b"bool") || bytes::equal(name,b"void") || bytes::equal(name,b"str") || bytes::equal(name,b"CStr") || bytes::equal(name,b"Option") || bytes::equal(name,b"Result") || c_types::valid(c_types::named(name));}
-fn bool qualified(ref u8[] name){var usize i=0;while(i<name.len){if(name[i]==58){return true;}i+=1;}return false;}
+pub fn bool builtin(ref u8[] name){return bytes::equal(name,b"i32") || bytes::equal(name,b"i64") || bytes::equal(name,b"u8") || bytes::equal(name,b"u32") || bytes::equal(name,b"usize") || bytes::equal(name,b"bool") || bytes::equal(name,b"void") || bytes::equal(name,b"str") || bytes::equal(name,b"CStr") || bytes::equal(name,b"Option") || bytes::equal(name,b"Result") || c_types::valid(c_types::named(name));}
+pub fn bool qualified(ref u8[] name){var usize i=0;while(i<name.len){if(name[i]==58){return true;}i+=1;}return false;}
 fn bool generic_parameter(ref syntax::Parsed p,usize root){
     let n=syntax::type_at(p,root);if(n.kind!=1){return false;}
     var usize i=0;while(i<syntax::declaration_count(p)){let d=syntax::declaration_at(p,i);

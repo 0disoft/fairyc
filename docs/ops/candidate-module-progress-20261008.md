@@ -1572,3 +1572,30 @@ project commands and Linux execution remain pending.
   `docs/architecture/candidate-compilation-units-v0.md`; evidence is
   `evidence/candidate-module-units-20261009.json`. Language/SDK ABI, DB, CI and
   runner implementations are unchanged.
+
+## Owned names across AST units (2026-10-09)
+
+- `module_unit_bind` validates the whole live source set against signatures,
+  creates one bounded range AST, and owns local definitions and imported named
+  type/value targets in original module/declaration coordinates. Repeated
+  provider aliases share a target; equal declaration numbers in other providers
+  remain distinct. Coordinates survive original parser/signature owner removal.
+- Private imported types/functions and stale providers outside the selected
+  range fail closed with original module-local spans. Generic parameters,
+  builtin types and raw compiler intrinsics keep their existing handling. This
+  layer records declarations; local body typing is not yet connected.
+- Development check and observation-probe build pass. Five native regressions
+  pass, including identity/alias/owner retention, privacy, stale provider bytes,
+  generic parameters, original errors, invalid ranges and partition behavior.
+- The actual dispatcher is 160 modules and 1046447 joined bytes. All twelve
+  groups bind successfully, retaining 152032 expressions and 11513 entries.
+  Per-group unique targets sum to 2146 (maximum 252); measured work peaks at
+  134589 within the existing 1048576 budget. The probe compares every retained
+  coordinate to its original parser declaration. No numeric cap was increased.
+- Next: consume these coordinates in unit body name/type checking, including
+  exact imported layouts/signatures, then HIR/MIR/C and CLI integration. Full
+  dispatcher compilation, stage1/stage2, release rebuilding and Linux remain
+  open. Internal candidate query/helper APIs expanded; language/SDK ABI, DB,
+  CI and runner implementations are unchanged. Evidence:
+  `evidence/candidate-module-unit-bind-20261009.json`; architecture:
+  `docs/architecture/candidate-compilation-units-v0.md`.

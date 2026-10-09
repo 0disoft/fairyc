@@ -17,6 +17,7 @@ import std::vec as v;
 pub struct Signature {usize module_index;usize declaration;bool public;usize result;usize parameter_start;usize parameter_count;u32 effects;bool must_use;bool unsafe_call;bool foreign;usize link_start;usize link_end;}
 pub resource Program {vectors::Plan types;v::Vec<Signature> signatures;v::Vec<usize> parameters;bytes::Buffer links;cleanup{}}
 pub fn usize module_count(ref Program p){return vectors::module_count(ref p.types);}
+pub fn usize declaration_count(ref Program p){return vectors::declaration_count(ref p.types);}
 pub fn bool source_matches(ref Program p,usize module_index,ref syntax::Parsed source){return vectors::source_matches(ref p.types,module_index,source);}
 pub fn catalog::Lookup declaration_lookup(ref Program p,usize module_index,ref u8[] spelling){return vectors::declaration_lookup(ref p.types,module_index,spelling);}
 pub fn catalog::Lookup declaration_lookup_measured(ref Program p,usize module_index,ref u8[] spelling,ref mut usize probes){return vectors::declaration_lookup_measured(ref p.types,module_index,spelling,probes);}

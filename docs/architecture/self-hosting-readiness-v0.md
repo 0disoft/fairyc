@@ -281,6 +281,17 @@ and promotion remain open. Architecture:
 `docs/architecture/candidate-compilation-units-v0.md`; evidence:
 `docs/ops/evidence/candidate-module-units-20261009.json`.
 
+Cross-unit declaration binding now retains original module/declaration/span
+coordinates in a separate owned target table, with alias sharing and private
+lookup enforcement. Stale provider bytes outside the selected unit are rejected.
+Five development native regressions pass, and the actual 160-module dispatcher
+(1046447 joined bytes) binds all twelve ranges while preserving 152032 expressions
+and 11513 entries. Measured work peaks at 134589 against the existing 1048576
+bound. Original parser/signature owners are not retained by the Bound result.
+Body name/type checking must still import provider layouts and signatures using
+these coordinates; HIR/MIR, C and CLI integration remain open. Evidence:
+`docs/ops/evidence/candidate-module-unit-bind-20261009.json`.
+
 `stage0` is the current Go compiler built by the supported Go toolchain.
 
 `stage1` is produced by `stage0` from the admitted Fairy compiler sources.
