@@ -772,7 +772,39 @@ Nominal view interfaces and nominal array-field borrowing remain pending, as do
 record/control/variant/builtin and standalone expressions, earlier declaration
 rejection, loan generations/lifetime/conflict/move, unsafe/pointer provenance,
 move-aware cleanup, cross-unit links/layouts and HIR/MIR/C/CLI. The separate full
-fixed-corpus observation is still running. Full current dispatcher native and
+fixed-corpus observation is documented below. Full current dispatcher native and
 stage1/stage2, release, Linux and push were not run. Public language/SDK ABI,
 SDK source, DB, CI and runner contracts are unchanged.
 Evidence: `docs/ops/evidence/candidate-module-unit-views-20261009.json`.
+
+## Scalar-view corpus observation (2026-10-09)
+
+The fixed dispatcher snapshot completed admission and all detailed assertions in
+one development execution. The 160-module, 1048562-byte input was admitted as 26
+bounded units with continuous coverage over 0..160, and the accepted source
+manifest hashes were re-verified against the receipt
+(`dispatcher-admission-cooked-intern-20261009.txt`, sha256
+8281ef6c4761a3d6627f81a0050b9f967e3d9ee3851e16a1c76aee73ab5dcd05). The accepted
+view families report 74 known array values (32 checked), 473 known indexes (135
+checked), 171 known slices (166 checked) and 10 recorded view origins, with
+original expression IDs, spans and whole-owner roots retained. The existing 9/9
+development native selection and 17/17 reference acceptance remain the
+implementation evidence.
+
+| Observation | Result |
+| --- | --- |
+| Input / units | 160 modules; 1048562 bytes; 26 units |
+| Arrays / checked arrays | 74 / 32 |
+| Indexes / checked indexes | 473 / 135 |
+| Slices / checked slices | 171 / 166 |
+| View origins | 10 |
+| Maximum value work / graph | 825705 / 1048576; 427 / 4096 |
+| Retained bounds | work 1048576; types 4096; entries 1024; active locals 128; depth/rounds 64 |
+| Detailed coverage | All ranges continuously cover 0..160; execution passed without timeout |
+
+Nominal view interfaces and nominal array-field borrowing remain pending, as do
+lifetime/conflict/move validation and the remaining expression families, unsafe
+and pointer provenance, cross-unit links/layouts and unit HIR/MIR/C/CLI. Full
+current dispatcher native, stage1/stage2, release, Linux and push were not run.
+Public language/SDK ABI, SDK source, DB, CI and runner contracts are unchanged.
+Evidence: `docs/ops/evidence/candidate-module-unit-views-corpus-20261009.json`.
