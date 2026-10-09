@@ -1,0 +1,31 @@
+module module_unit_body_types;
+import syntax as syntax;
+import module_signatures as signatures;
+import module_types as types;
+import module_ast_join as join;
+import std::vec as v;
+
+// Original provider IDs, with explicit types and constructor types kept apart.
+pub struct Request {u32 context_kind;usize context;usize module_index;usize declaration;u32 kind;usize source_index;usize type;usize start;usize end;}
+pub resource Demands {v::Vec<Request> requests;usize work;cleanup{}}
+fn join::Problem fail(u32 code,usize module_index,usize start,usize end){return join::Problem{.code,.module_index,.start,.end};}
+fn bool charge(ref mut usize work,usize amount){if(*work>1048576 || amount>1048576-*work){return false;};*work=*work+amount;return true;}
+fn void root(ref mut v::Vec<u8> needed,usize id){if(id!=0){let slot=v::at_mut<u8>(needed,id-1);*slot=1;}}
+fn bool inside(usize start,usize end,usize first,usize stop){return start>=first && end<=stop;}
+fn Result<Demands,join::Problem> scan(ref syntax::Parsed source,ref signatures::Program metadata,usize module_index,usize declaration,u32 context_kind,usize context,ref v::Vec<usize> arguments,ref mut v::Vec<types::Type> graph){
+    if(!signatures::source_matches(metadata,module_index,source)){return .err(fail(12,module_index,0,0));}if(declaration==0 || declaration>syntax::declaration_count(source) || (context_kind!=1 && context_kind!=2) || context==0){return .err(fail(9,module_index,0,0));}let d=syntax::declaration_at(source,declaration-1);if(context_kind==1 && d.kind!=3 || context_kind==2 && d.kind!=6){return .err(fail(9,module_index,d.start,d.end));}let usize first=if(context_kind==2){d.cleanup_start}else{d.start};let usize stop=if(context_kind==2){d.cleanup_end}else{d.end};var usize work=0;var v::Vec<u8> needed=v::empty<u8>();var v::Vec<Request> requests=v::empty<Request>();var usize i=0;
+    while(i<syntax::type_count(source)){if(!charge(ref mut work,1)){return .err(fail(10,module_index,first,stop));}if(!v::push<u8>(ref mut needed,0).is_ok){return .err(fail(11,module_index,first,stop));}i+=1;}
+    if(context_kind==1){root(ref mut needed,d.result_type);}i=0;while(i<syntax::entry_count(source)){if(!charge(ref mut work,1)){return .err(fail(10,module_index,first,stop));}let e=syntax::entry_at(source,i);if(inside(e.start,e.end,first,stop)){root(ref mut needed,e.type_root);}i+=1;}
+    i=1;while(i<=syntax::expression_count(source)){if(!charge(ref mut work,1)){return .err(fail(10,module_index,first,stop));}let e=syntax::expression_at(source,i);if(inside(e.start,e.end,first,stop)){if(e.kind==23){root(ref mut needed,e.right);}else if(e.kind==20){var usize link=e.right;while(link!=0){if(!charge(ref mut work,1)){return .err(fail(10,module_index,e.start,e.end));}let n=syntax::type_at(source,link);root(ref mut needed,n.left);link=n.right;}}}i+=1;}
+    i=1;while(i<=syntax::statement_count(source)){if(!charge(ref mut work,1)){return .err(fail(10,module_index,first,stop));}let s=syntax::statement_at(source,i);if(s.kind==18 && inside(s.start,s.end,first,stop)){root(ref mut needed,s.second);}i+=1;}
+    i=1;while(i<=syntax::type_count(source)){if(!charge(ref mut work,1)){return .err(fail(10,module_index,first,stop));}if(*v::at<u8>(ref needed,i-1)!=0){let n=syntax::type_at(source,i);let r=if(v::len<usize>(arguments)==0){signatures::resolve_type(metadata,source,module_index,i,graph)}else{signatures::specialize_type(metadata,source,module_index,declaration,i,arguments,graph)};if(r.problem.code!=0){return .err(fail(r.problem.code,module_index,r.problem.start,r.problem.end));}if(!v::push<Request>(ref mut requests,Request{.context_kind,.context,.module_index,.declaration,.kind=1,.source_index=i,.type=r.type,.start=n.start,.end=n.end}).is_ok){return .err(fail(11,module_index,n.start,n.end));}}i+=1;}
+    // A private named constructor can introduce a type without an annotation.
+    i=1;while(i<=syntax::expression_count(source)){if(!charge(ref mut work,1)){return .err(fail(10,module_index,first,stop));}let e=syntax::expression_at(source,i);if(e.kind==10 && inside(e.start,e.end,first,stop)){let target=syntax::expression_at(source,e.left);if(target.kind==2){var usize probes=0;let found=signatures::declaration_lookup_measured(metadata,module_index,syntax::expression_text(source,e.left),ref mut probes);if(!charge(ref mut work,probes)){return .err(fail(10,module_index,e.start,e.end));}if(found.code!=0){return .err(fail(found.code,module_index,target.start,target.end));}let named=signatures::declaration_at(metadata,found.item);if(named.kind!=4 && named.kind!=6){return .err(fail(9,module_index,target.start,target.end));}let r=signatures::declaration_type(metadata,named.module_index,named.declaration,graph);if(r.problem.code!=0){return .err(fail(r.problem.code,module_index,target.start,target.end));}if(!v::push<Request>(ref mut requests,Request{.context_kind,.context,.module_index,.declaration,.kind=2,.source_index=i,.type=r.type,.start=e.start,.end=e.end}).is_ok){return .err(fail(11,module_index,e.start,e.end));}}}i+=1;}
+    return .ok(Demands{.requests,.work});
+}
+pub fn Result<Demands,join::Problem> collect(ref syntax::Parsed source,ref signatures::Program metadata,usize module_index,usize declaration,u32 context_kind,usize context,ref v::Vec<usize> arguments,ref mut v::Vec<types::Type> graph){
+    let usize before=types::count(graph);return switch(scan(source,metadata,module_index,declaration,context_kind,context,arguments,graph)){case .ok(p):{.ok(p)}case .err(p):{while(types::count(graph)>before){discard v::pop<types::Type>(graph);}.err(p)}};
+}
+pub fn usize count(ref Demands p){return v::len<Request>(ref p.requests);}
+pub fn Request at(ref Demands p,usize index){return *v::at<Request>(ref p.requests,index);}
+pub fn usize work(ref Demands p){return p.work;}

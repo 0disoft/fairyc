@@ -1862,3 +1862,35 @@ generic-body local field expansion remain next. Full dispatcher native
 compilation, HIR/MIR/C/CLI, stage1/stage2, release rebuilding, Linux and push
 remain pending. Public language/SDK ABI, SDK sources, DB, CI and runners are
 unchanged.
+
+### Generic-body and cleanup type-demand closure (2026-10-09)
+
+`module_unit_body_types` scans the original provider AST for requested generic
+function instances and resource/SDK Vec cleanup contexts. It collects explicit
+local, parameter and return types, casts, explicit generic arguments, byte-loop
+types and named non-generic record constructor types. Each request records the
+context kind/ID, provider module/declaration, original type root or constructor
+expression ID, canonical type and source span.
+
+Interfaces add these types to the existing pending queue and collect their
+fields and cleanup contexts. Newly requested cleanup helpers are then scanned
+in the same closure, until no further types or cleanups remain. Each function
+instance and cleanup context is scanned once. Unrequested generic templates
+remain deferred. Failed collection rolls graph additions back. The existing
+source/hash/privacy and scalar-only user generic boundaries remain unchanged.
+New local field/cleanup discovery is implemented; expression type matching,
+name binding, inference from ordinary function-call results, move-aware cleanup
+obligations and inline provenance consumption remain open. Public language/SDK
+ABI, SDK sources, DB, CI and runners are unchanged. Evidence:
+`docs/ops/evidence/candidate-module-unit-body-types-20261009.json`.
+
+Development check/probe check/build and eight native regressions pass. The
+current 160-module, 1048472-byte dispatcher input retains 26 units after 39
+attempts and 13 splits. Per-unit demand counts sum to 6913 (3289 function and
+3624 cleanup annotations), with at most 443 demands per unit. Interface work
+peaks at 265344 within 1048576; combined original/body entries remain 1015/1024.
+Every admitted unit verifies unchanged canonical graph size after cloning.
+The private-constructor discovery path is exercised by native regressions;
+the dispatcher corpus has no such additional constructor requests. Release
+rebuilding, Linux, whole dispatcher native compilation and stage1/stage2 were
+not run in this unit.

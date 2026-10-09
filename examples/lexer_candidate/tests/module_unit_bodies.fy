@@ -54,6 +54,6 @@ fn bodies::Plan retained(){
 }
 @test fn void invalid_provider_local_annotation_preserves_original_span(){
     let text=b"module provider;pub fn T id<T>(T n){let Unknown x=n;return n;}";var v::Vec<syntax::Parsed> sources=v::empty<syntax::Parsed>();assert(v::push<syntax::Parsed>(ref mut sources,parsed(b"module main;import provider as p;fn i32 main(){return p::id<i32>(1);}")).is_ok);assert(v::push<syntax::Parsed>(ref mut sources,parsed(text)).is_ok);
-    let metadata=switch(signatures::build(ref sources)){case .ok(m):{m}case .err(_):{assert(false);return;}};let bound=switch(binding::bind(ref sources,ref metadata,0,1)){case .ok(b):{b}case .err(_):{assert(false);return;}};let imported=switch(interfaces::build(ref sources,ref metadata,ref bound)){case .ok(p):{p}case .err(_):{assert(false);return;}};
-    switch(bodies::build(ref sources,ref metadata,ref imported)){case .ok(_):{assert(false);}case .err(p):{assert(p.code==5 && p.module_index==1 && bytes::equal(text[p.start..p.end],b"Unknown"));}};
+    let metadata=switch(signatures::build(ref sources)){case .ok(m):{m}case .err(_):{assert(false);return;}};let bound=switch(binding::bind(ref sources,ref metadata,0,1)){case .ok(b):{b}case .err(_):{assert(false);return;}};
+    switch(interfaces::build(ref sources,ref metadata,ref bound)){case .ok(_):{assert(false);}case .err(p):{assert(p.code==5 && p.module_index==1 && bytes::equal(text[p.start..p.end],b"Unknown"));}};
 }

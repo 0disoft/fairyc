@@ -380,6 +380,16 @@ Development check/probe check/build and seven native tests pass; the current
 6036 within the unchanged 1048576 bound. This does not establish executable
 drop lowering or whole dispatcher native compilation.
 
+Requested generic functions and cleanup contexts now collect explicit annotation
+and named constructor type demands before body cloning. Newly discovered
+private types request provider field shapes and cleanup contexts; cleanup
+helpers feed back into the same bounded closure. Original context/type root/
+expression coordinates and diagnostic spans are retained. Development check
+and eight native regressions pass. Ordinary-call result inference, body symbol/
+expression typing, move-aware obligations and inline provenance consumption
+remain open, along with cross-unit links/layouts, HIR/MIR/C/CLI and stage1/stage2.
+Evidence: `docs/ops/evidence/candidate-module-unit-body-types-20261009.json`.
+
 `stage0` is the current Go compiler built by the supported Go toolchain.
 
 `stage1` is produced by `stage0` from the admitted Fairy compiler sources.
