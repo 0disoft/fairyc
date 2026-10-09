@@ -942,10 +942,11 @@ kind13 owned-aggregate seed, and the array-literal plain-shape gate is retained.
 An earlier run left unannotated ordinary constructors such as `B{...}` and
 `Empty{}` out of the frozen interface graph: 8 of the 10 selected native cases
 passed and 2 failed. module_unit_body_types::ordinary_records now registers
-those constructors before the graph freezes, with a private non-generic ordinary
-scan and transaction rollback, three-context constructor demand marks, no
-templates, and preserved original declaration IDs and spans. The failed-then-
-fixed run is kept in the receipt.
+those constructors before the graph freezes: it walks non-generic ordinary
+functions for constructors without filtering the function's public or private
+kind (only its ordinary_scan helper is private), with transaction rollback,
+three-context constructor demand marks, no templates, and preserved original
+declaration IDs and spans. The failed-then-fixed run is kept in the receipt.
 
 | Verification | Result |
 | --- | --- |
@@ -953,9 +954,9 @@ fixed run is kept in the receipt.
 | native | 11/11 selected development cases (10 previous + 1 body-types regression) |
 | reference | 15/15 code/span fixtures (9 negative, 3 positive, 3 multi-file) |
 
-The fixed 160-module corpus was restored hash-matched and re-measured under a
-new relative-path manifest; that observation is a separate run still in
-progress, so no corpus pass numbers are asserted here. Limits types 4096, work
+The fixed 160-module corpus was restored with matching prior manifest hashes
+and re-measured under a new relative-path manifest; that observation passed and
+is recorded below. Limits types 4096, work
 1 MiB, entries 1024, active locals 128 and depth/rounds 64 are unchanged, and
 the compiler logic is entirely Fairy. Control/variant/builtin/standalone and
 discard expressions, earlier declaration/shape rejection, loan
@@ -965,3 +966,33 @@ current dispatcher native and stage1/stage2. Release, Linux and push were not
 run. Public language/SDK ABI, SDK sources, DB, CI and runner contracts are
 unchanged.
 Evidence: `docs/ops/evidence/candidate-module-unit-records-20261009.json`.
+
+## Record construction corpus observation (2026-10-09)
+
+The fixed dispatcher snapshot completed admission and all detailed assertions in
+one development execution. The 160-module, 1048562-byte input was admitted as 26
+bounded units through 39 admissions and 13 splits, with continuous coverage over
+0..160. The accepted records report 450 checked of 570 record constructions,
+2420 provider fields, 457 ordinary constructor-only demands, and 7370 total type
+demands (3289 function, 3624 cleanup, 457 ordinary). The maximum value work was
+845545 of 1048576 with graph 427 of 4096, and the maximum interface size was
+295576 (previously 283813).
+
+The original manifest was not reproducible because the mutable module_types grew
+by 454 bytes to 1049016; the fixed snapshot was restored from the current other
+159 files plus the earlier bf28c16b module_types bytes, and every prior receipt
+160-file hash matched. This deleted no input bytes and relaxed no limit. It is the
+existing fixed snapshot only, not a full current dispatcher pass.
+
+| Observation | Result |
+| --- | --- |
+| Input / units | 160 modules; 1048562 bytes; 26 units |
+| Admission / splits | 39 admissions; 13 splits |
+| Records checked / total | 450 / 570 |
+| Provider fields | 2420 |
+| Ordinary constructor-only demands | 457 |
+| Total type demands | 7370 (function 3289; cleanup 3624; ordinary 457) |
+| Maximum value work / graph | 845545 / 1048576; 427 / 4096 |
+| Maximum interface | 295576 (previous 283813) |
+| Detailed coverage | All ranges continuously cover 0..160 |
+Evidence: `docs/ops/evidence/candidate-module-unit-records-corpus-20261009.json`.

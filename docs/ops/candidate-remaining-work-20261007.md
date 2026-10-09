@@ -708,7 +708,7 @@ module_unit_value_record가 이제 레코드 집합 생성자 식을 받는다. 
 
 알려진 레코드는 배열, 필드 접근, 인덱스, 호출, 반환, cleanup, 제네릭 소비자로 이어지고, 제공자 필드 좌표는 가져온 모듈과 제네릭 제공자 단위까지 남는다. 소유 SDK `Vec` 집합은 종류13 소유 집합 seed로 특수화를 기록하고, 배열 리터럴의 평범 모양 gate는 그대로다.
 
-앞선 실행에서 주석 없는 ordinary 생성자 `B{...}`와 `Empty{}`가 frozen 인터페이스 그래프에서 빠져, 선정 native 10개 중 8개가 정상 통과하고 2개가 오류였다. 이제 module_unit_body_types::ordinary_records가 그래프 freeze 전에 그 생성자를 등록한다. private 비제네릭 ordinary 스캔과 transaction rollback, 3 context 생성자 demand mark를 쓰고, 템플릿은 만들지 않으며 원래 선언 ID와 구간을 보존한다. 오류 뒤 수정한 실행은 receipt에 남긴다.
+앞선 실행에서 주석 없는 ordinary 생성자 `B{...}`와 `Empty{}`가 frozen 인터페이스 그래프에서 빠져, 선정 native 10개 중 8개가 정상 통과하고 2개가 오류였다. 이제 module_unit_body_types::ordinary_records가 그래프 freeze 전에 그 생성자를 등록한다. 비제네릭 일반 함수를 훑어 생성자를 찾으며 함수의 public/private 종류로 거르지 않는다(도우미 ordinary_scan 자체만 private). transaction rollback, 3 context 생성자 demand mark를 쓰고, 템플릿은 만들지 않으며 원래 선언 ID와 구간을 보존한다. 오류 뒤 수정한 실행은 receipt에 남긴다.
 
 | 검증 | 결과 |
 | --- | --- |
@@ -716,7 +716,26 @@ module_unit_value_record가 이제 레코드 집합 생성자 식을 받는다. 
 | native | 선정 개발 사례 11/11 (이전 10개 + body-types 회귀 1개) |
 | reference | code/span fixture 15/15 (오류 9, 정상 3, 다중 파일 3) |
 
-고정 160모듈 코퍼스는 해시가 맞게 복원되어 새 상대경로 manifest로 다시 측정 중이고, 그 관찰은 별도로 진행 중이라 여기서 코퍼스 통과 수치는 쓰지 않는다. 한도 types 4096, work 1 MiB, entries 1024, active locals 128, depth/rounds 64는 그대로이고 컴파일러 로직은 전부 Fairy다. 제어/variant/builtin/standalone과 discard·독립 표현식 검사, 선언·형태 오류의 조기 거부, loan 세대/수명/충돌/이동, unsafe/포인터 출처와 이동 인식 cleanup, cross-unit links/layouts, unit HIR/MIR/C/CLI가 남고, 전체 현재 dispatcher native와 stage1/stage2도 남는다. release/Linux/push는 실행하지 않았다. 공개 언어/SDK ABI, SDK 소스, DB, CI, 러너는 그대로다.
+고정 160모듈 코퍼스는 이전 manifest 해시가 모두 맞게 복원되어 새 상대경로 manifest로 다시 측정했고, 그 관찰은 통과했으며 아래에 기록한다. 한도 types 4096, work 1 MiB, entries 1024, active locals 128, depth/rounds 64는 그대로이고 컴파일러 로직은 전부 Fairy다. 제어/variant/builtin/standalone과 discard·독립 표현식 검사, 선언·형태 오류의 조기 거부, loan 세대/수명/충돌/이동, unsafe/포인터 출처와 이동 인식 cleanup, cross-unit links/layouts, unit HIR/MIR/C/CLI가 남고, 전체 현재 dispatcher native와 stage1/stage2도 남는다. release/Linux/push는 실행하지 않았다. 공개 언어/SDK ABI, SDK 소스, DB, CI, 러너는 그대로다.
 근거: `docs/ops/evidence/candidate-module-unit-records-20261009.json`.
+
+## Record construction corpus observation (2026-10-09)
+
+고정 dispatcher 스냅샷이 한 번의 개발 실행에서 admission과 모든 상세 단언을 끝냈다. 160모듈, 1048562바이트 입력이 39회 admission과 13회 split을 거쳐 26개 단위로 들어갔고 범위는 0..160을 연속으로 덮는다. 받아들인 레코드는 검사 450/전체 570, 제공자 필드 2420, ordinary 생성자 전용 demand 457, 전체 타입 demand 7370(함수 3289, cleanup 3624, ordinary 457)이다. 최대 value work는 1048576 중 845545, graph는 4096 중 427이고, 최대 interface는 295576(이전 283813)이다.
+
+원본 manifest는 가변 module_types가 454바이트 늘어 1049016이 되어 재현되지 않았다. 고정 스냅샷은 현재 나머지 159개 파일과 예전 bf28c16b의 module_types 바이트로 복원했고, 이전 receipt의 160파일 해시가 모두 일치했다. 입력 바이트를 지우거나 한도를 늘린 것이 아니다. 기존 고정 스냅샷일 뿐 전체 현재 dispatcher 통과는 아니다.
+
+| 관찰 | 결과 |
+| --- | --- |
+| 입력 / 단위 | 160모듈; 1048562바이트; 26단위 |
+| admission / split | 39회 admission; 13회 split |
+| 레코드 검사 / 전체 | 450 / 570 |
+| 제공자 필드 | 2420 |
+| ordinary 생성자 전용 demand | 457 |
+| 전체 타입 demand | 7370 (함수 3289; cleanup 3624; ordinary 457) |
+| 최대 value work / graph | 845545 / 1048576; 427 / 4096 |
+| 최대 interface | 295576 (이전 283813) |
+| 상세 범위 | 모든 범위가 0..160을 연속으로 덮음 |
+Evidence: `docs/ops/evidence/candidate-module-unit-records-corpus-20261009.json`.
 
 현재 다음 작업은 **control/variant/builtin/standalone과 discard·독립 표현식 검사, 그리고 선언·형태 오류의 조기 거부**다.
