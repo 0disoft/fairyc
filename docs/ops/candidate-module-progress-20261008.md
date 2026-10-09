@@ -1766,3 +1766,15 @@ IDs stay owner-local; structural cross-unit instance/link deduplication, target
 layouts, transitive cleanup effects, HIR/MIR/C/CLI integration and stage1/stage2
 remain open. Release rebuilding and Linux are deferred. Public language/SDK ABI,
 DB, CI and runner implementations are unchanged.
+
+## Source-stamped generic plan validation (2026-10-09)
+
+Generic plans retain original module byte lengths/SHA256 and their canonical
+graph prefix. Development native tests pass 11/11, including changed provider
+bodies with refreshed metadata, missing modules, shortened/altered prefixes and
+permitted suffix extension. The unchanged 160-module dispatcher corpus still
+admits 18 units after 23 attempts and 5 splits; binding/interface work peaks at
+146700/91081. Development probe check/build and source/tool identities pass.
+Bounds remain unchanged. Provider function and SDK Vec cleanup body ownership
+remain next; release, Linux and stage1/stage2 were not run in this unit.
+Evidence: `docs/ops/evidence/candidate-module-unit-source-stamps-20261009.json`.

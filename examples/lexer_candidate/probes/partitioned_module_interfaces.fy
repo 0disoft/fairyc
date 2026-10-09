@@ -4,6 +4,7 @@ import module_unit_bind as binding;
 import module_unit_interfaces as interfaces;
 import module_unit_generics as generics;
 import module_signatures as signatures;
+import module_types as types;
 import sdk_ast_compact as compact;
 import module_cli as cli;
 import file_source as files;
@@ -42,6 +43,7 @@ fn i32 main(){
         while(root<=interfaces::annotation_count(ref imported)){let a=interfaces::annotation_at(ref imported,root);if(a.required){if(a.deferred){assert(a.type==0);deferred_roots+=1;}else{assert(a.type>0 && a.type<=interfaces::type_count(ref imported));typed_roots+=1;}}else{assert(a.type==0 && !a.deferred);}root+=1;}
         number("typedAnnotations=",typed_roots);number(" deferredAnnotations=",deferred_roots);discard io::write("\n");
         let specialized=interfaces::specializations(ref imported);assert(generics::count(specialized)<=64 && generics::call_count(specialized)==syntax::expression_count(p));var usize concrete_calls=0;var usize deferred_calls=0;var usize intrinsic_calls=0;root=1;
+        var v::Vec<types::Type> retained_graph=v::empty<types::Type>();while(root<=interfaces::type_count(ref imported)){assert(v::push<types::Type>(ref mut retained_graph,interfaces::type_at(ref imported,root)).is_ok);root+=1;}assert(generics::validate(specialized,ref sources,ref bound_metadata,ref retained_graph).code==0);root=1;
         while(root<=generics::call_count(specialized)){let c=generics::call_at(specialized,root);if(c.instance!=0){assert(c.instance<=generics::count(specialized) && !c.deferred && c.intrinsic==0);concrete_calls+=1;}else if(c.deferred){deferred_calls+=1;}else if(c.intrinsic!=0){intrinsic_calls+=1;}root+=1;}
         root=1;while(root<=generics::count(specialized)){let s=generics::at(specialized,root);let original=syntax::declaration_at(v::at<syntax::Parsed>(ref sources,s.module_index),s.declaration-1);assert(original.generic_parameters!=0 && original.kind==3 && syntax::generic_parameter_count(v::at<syntax::Parsed>(ref sources,s.module_index),s.declaration-1)==s.argument_count && s.result>0 && s.result<=interfaces::type_count(ref imported));root+=1;}
         var usize nested_calls=0;var usize nested_intrinsics=0;var usize aggregate_requests=0;root=0;while(root<generics::dependency_count(specialized)){let edge=generics::dependency_at(specialized,root);assert(edge.owner>0 && edge.owner<=generics::count(specialized));let owner=generics::at(specialized,edge.owner);let source=v::at<syntax::Parsed>(ref sources,owner.module_index);let d=syntax::declaration_at(source,owner.declaration-1);let e=syntax::expression_at(source,edge.source_index);assert(e.kind==20 && e.start>=d.start && e.end<=d.end);if(edge.instance!=0){assert(edge.instance<=generics::count(specialized) && edge.intrinsic==0 && edge.intrinsic_type==0 && edge.aggregate_type==0);nested_calls+=1;}else if(edge.aggregate_type!=0){assert(edge.intrinsic==0 && edge.intrinsic_type==0 && interfaces::type_at(ref imported,edge.aggregate_type).kind==13);aggregate_requests+=1;}else{assert(edge.intrinsic!=0 && edge.intrinsic_type>0 && edge.intrinsic_type<=interfaces::type_count(ref imported));nested_intrinsics+=1;}root+=1;}

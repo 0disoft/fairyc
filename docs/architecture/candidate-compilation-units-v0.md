@@ -320,3 +320,15 @@ IDs stay owner-local; structural cross-unit instance/link deduplication, target
 layouts, transitive cleanup effects, HIR/MIR/C/CLI integration and stage1/stage2
 remain open. Release rebuilding and Linux are deferred. Public language/SDK ABI,
 DB, CI and runner implementations are unchanged.
+
+## Source-stamped generic plans (2026-10-09)
+
+`module_unit_generics::Plan` now owns a source byte length and SHA256 per
+original module together with an exact canonical type graph prefix. Its
+`validate` step rejects stale module sets, provider bytes that changed even
+after metadata was rebuilt, and graphs that were shortened or had prefix nodes
+altered, each reported with code 12. Appending new graph types is permitted,
+with downstream catalog graph validation still required. Existing capacity
+limits are unchanged. Provider body cloning, cleanup specialization, and unit
+HIR/MIR/C/CLI integration remain the next stages. Evidence:
+`docs/ops/evidence/candidate-module-unit-source-stamps-20261009.json`.

@@ -54,6 +54,32 @@ fn void join_problem(ref u8[] text,u32 expected){
     switch(generics::build(ref sources,ref metadata,ref bound,ref mut graph)){case .ok(_):{assert(false);}case .err(p):{assert(p.code==4502 && types::count(ref graph)==before);}};
 }
 fn void suffix(ref mut bytes::Buffer text,usize n){let digits=b"0123456789";if(n>=10){assert(bytes::append_byte(text,digits[n/10]).is_ok);}assert(bytes::append_byte(text,digits[n%10]).is_ok);}
+@test fn void retained_plan_rejects_changed_provider_bytes_and_graph_prefix(){
+    var v::Vec<syntax::Parsed> sources=v::empty<syntax::Parsed>();
+    assert(v::push<syntax::Parsed>(ref mut sources,parsed(b"module main;import provider as p;fn i32 main(){return p::id<i32>(1);}")).is_ok);
+    assert(v::push<syntax::Parsed>(ref mut sources,parsed(b"module provider;pub fn T id<T>(T n){return n;}")).is_ok);
+    let metadata=switch(signatures::build(ref sources)){case .ok(m):{m}case .err(_):{assert(false);return;}};
+    let bound=switch(binding::bind(ref sources,ref metadata,0,1)){case .ok(b):{b}case .err(_):{assert(false);return;}};
+    var v::Vec<types::Type> graph=v::empty<types::Type>();var usize i=1;
+    while(i<=signatures::type_count(ref metadata)){assert(v::push<types::Type>(ref mut graph,signatures::type_at(ref metadata,i)).is_ok);i+=1;}
+    let plan=switch(generics::build(ref sources,ref metadata,ref bound,ref mut graph)){case .ok(p):{p}case .err(_):{assert(false);return;}};
+    assert(generics::validate(ref plan,ref sources,ref metadata,ref graph).code==0);
+    let types::Type last=*v::at<types::Type>(ref graph,types::count(ref graph)-1);discard v::pop<types::Type>(ref mut graph);
+    assert(generics::validate(ref plan,ref sources,ref metadata,ref graph).code==12);
+    var changed=last;changed.scalar+=1;assert(v::push<types::Type>(ref mut graph,changed).is_ok);
+    assert(generics::validate(ref plan,ref sources,ref metadata,ref graph).code==12);
+    discard v::pop<types::Type>(ref mut graph);assert(v::push<types::Type>(ref mut graph,last).is_ok);
+    assert(v::push<types::Type>(ref mut graph,types::Type{.kind=1,.scalar=6,.module_index=0,.declaration=0,.first=0,.second=0}).is_ok);
+    assert(generics::validate(ref plan,ref sources,ref metadata,ref graph).code==0);
+    discard v::pop<syntax::Parsed>(ref mut sources);
+    assert(v::push<syntax::Parsed>(ref mut sources,parsed(b"module provider;pub fn T id<T>(T n){return 0;}")).is_ok);
+    let problem=generics::validate(ref plan,ref sources,ref metadata,ref graph);assert(problem.code==12 && problem.module_index==1);
+    let refreshed=switch(signatures::build(ref sources)){case .ok(m):{m}case .err(_):{assert(false);return;}};
+    assert(signatures::source_matches(ref refreshed,1,v::at<syntax::Parsed>(ref sources,1)));
+    let changed_body=generics::validate(ref plan,ref sources,ref refreshed,ref graph);assert(changed_body.code==12 && changed_body.module_index==1);
+    discard v::pop<syntax::Parsed>(ref mut sources);
+    assert(generics::validate(ref plan,ref sources,ref metadata,ref graph).code==12);
+}
 @test fn void total_specialization_limit_stays_at_sixty_four(){
     var bytes::Buffer text=bytes::empty();assert(bytes::append(ref mut text,b"module main;").is_ok);var usize i=0;
     while(i<65){assert(bytes::append(ref mut text,b"fn T f").is_ok);suffix(ref mut text,i);assert(bytes::append(ref mut text,b"<T>(T n){return n;}").is_ok);i+=1;}
