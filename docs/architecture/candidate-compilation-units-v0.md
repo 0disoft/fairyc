@@ -743,7 +743,36 @@ The module_unit_value_place project mainly targets scalar, nominal, and resource
 The unit only consumes initializer, call-argument and return expressions. Standalone
 expression/discard typing, lifetime/conflict/move checking, array/view/index/slice
 borrows, unsafe pointer consumers, cross-unit links/layouts and HIR/MIR/C/CLI remain
-pending. The full fixed 160-module corpus observation runs separately; this receipt
-claims no new corpus pass. Full current dispatcher native and stage1/stage2, release,
+pending. The standalone implementation receipt excludes corpus telemetry; the
+separate full fixed-corpus observation is documented below. Full current dispatcher native and stage1/stage2, release,
 Linux and push were not run. Public language/SDK ABI, SDK sources, DB, CI and runners
 are unchanged. Evidence: `docs/ops/evidence/candidate-module-unit-places-20261009.json`.
+
+
+## Safe-reference corpus observation (2026-10-09)
+
+The fixed dispatcher snapshot completed admission and all detailed assertions in
+one development execution. Original expression IDs/spans, nominal provider field
+coordinates, canonical borrow types and whole-owner root/scope metadata were
+checked. The input snapshot hashes are unchanged from the field-unit observation;
+new unit modules are compiled as implementation inputs outside this 1MiB snapshot.
+
+| Observation | Result |
+| --- | --- |
+| Input / units | 160 modules; 1048562 bytes; 26 units |
+| Admission attempts / splits | 39 / 13 |
+| Borrow expressions / typed borrows | 2891 / 1422 |
+| Dereferences / typed safe dereferences | 388 / 254 |
+| Expressions retaining owner root/scope | 51532 |
+| Checked arguments | 27324 / 29822; previous field-unit result 25740 |
+| Checked fields / nominal provider records | 6486 / 6416; previous checked fields 6085 |
+| Checked scalar casts | 52 / 1789 |
+| Maximum value work / graph | 823678 / 1048576; 427 / 4096 |
+| Detailed coverage | All ranges continuously cover 0..160; execution passed without timeout |
+
+Array/view/index/slice borrows, standalone expression/discard typing, lifetime,
+conflict and move checking, unsafe/pointer provenance, cross-unit links/layouts,
+unit HIR/MIR/C/CLI, full current-source dispatcher native and stage1/stage2 remain
+pending. Release, Linux and push were not run. Public language/SDK ABI, SDK source,
+DB, CI and runner contracts are unchanged.
+Evidence: `docs/ops/evidence/candidate-module-unit-places-corpus-20261009.json`.

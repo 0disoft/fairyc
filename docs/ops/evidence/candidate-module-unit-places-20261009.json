@@ -2929,7 +2929,7 @@
     "depth": 64,
     "rounds": 64
   },
-  "corpusStatus": "Full fixed 160-module observation running separately; no corpus success is claimed by this implementation receipt.",
+  "corpusStatus": "Corpus telemetry is stored separately in docs/ops/evidence/candidate-module-unit-places-corpus-20261009.json.",
   "remaining": [
     "Array/view/index/slice reference and other expression/control/variant/builtin consumers.",
     "Borrow lifetime/conflict/move validation, move-aware cleanup and unsafe/pointer provenance.",
