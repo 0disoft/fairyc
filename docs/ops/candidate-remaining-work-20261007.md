@@ -1790,3 +1790,38 @@ Evidence: `docs/ops/evidence/candidate-module-region-lifecycle-20261010.json`.
 Remaining work includes loans, lifetimes, conflicts, moves, unsafe provenance,
 executable Region runtime, split-unit/full dispatcher, stage1/stage2, release,
 and Linux. No public CLI, SDK ABI, DB, CI or remote changes were made.
+
+## Region borrow lifetime across lexical resets (2026-10-10)
+
+Immutable allocation provenance now carries `Row.expired` per leaf. Joins keep
+expiration from either path and select the expired branch's allocation site.
+Region exit expires the environment and captured break/continue edge copies,
+preserving origin identity. Re-entry into the same lexical Region does not revive
+an old alias. A fresh value or `.none` replaces it, and a direct assignment target
+does not read the old borrow. Origin Flow also evaluates void/scalar contexts
+with Regions or placements. Expired or off-scope LocalRegion reads report E3101
+with allocation role 3; identical return-expression diagnostics are deduplicated.
+The private CLI label now describes borrow escape rather than only return escape,
+and origin Flow handles empty `return;`.
+
+Source checking passed (223 files, 2760 MIR functions), native tests passed 5/5,
+and a fresh locked CLI build passed 17 lifetime cases (10 rejected, seven
+accepted). The additional native API guard accepts a known abstract Static leaf
+mixed with a live Region and still reports the expired Region. Unlocated Static
+return candidates now report unsupported code 2 rather than an internal error or
+a fabricated related span. API/CLI codes, module indices, primary spans and allocation roles/spans
+matched 17/17 and independently specified source anchors. The prior 17 Region
+input, 21 return and 16 lifecycle traces remain byte-identical. A failing positive
+loop fixture exposed its retained old alias on allocation failure: the valid case
+now clears the failure branch, and the original is retained as negative case 16.
+
+The Go semantic reference accepts all 17 cases, including ten post-reset uses
+forbidden by `docs/language/0003-regions-and-arenas.md`. These are intentional
+normative differences, not Go parity. Coverage includes inside-scope use, input
+Regions, overwrite before/after reset, nested Regions, break/continue, repeated
+entry, allocation failure, branch joins, dead trap paths, aliases, and provider
+and generic allocation coordinates. Evidence:
+`docs/ops/evidence/candidate-module-region-lifetime-20261010.json`.
+Ordinary owner loans/lifetimes, conflicts, moves, unsafe provenance, move-aware
+cleanup, executable MIR/C Region runtime, full dispatcher, stage1/stage2, Linux
+and release remain pending. Public CLI, SDK ABI, DB and CI are unchanged; no push.

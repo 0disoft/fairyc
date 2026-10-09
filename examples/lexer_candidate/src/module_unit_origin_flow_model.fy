@@ -6,7 +6,8 @@ import std::vec as v;
 import module_unit_origin_provenance as p;
 
 pub struct Context {usize frame;m::Frame value;bool borrower;bool tagged_return;usize sites;usize returned;usize allocation;bool seen;usize work;usize loop_depth;usize probes;}
-pub struct Unknown {u32 kind;usize after;usize frame;usize start;usize end;}
+// kind 4 is a Region lifetime violation; allocation is an input site ID.
+pub struct Unknown {u32 kind;usize after;usize frame;usize start;usize end;usize origin;usize allocation;}
 pub struct Value {usize origin;usize allocation;}
 pub fn Value value(Flow f){return Value{.origin=f.origin,.allocation=f.allocation};}
 pub struct Flow {usize origin;usize allocation;usize outcomes;}
@@ -16,7 +17,7 @@ pub fn usize edge_depth(ref Edge e){return e.depth;}
 pub fn u32 edge_kind(ref Edge e){return e.kind;}
 pub fn ref v::Vec<Value> edge_values(ref Edge e){return ref e.values;}
 pub fn m::Problem fail(ref Context c,u32 code,usize start,usize end){return m::fail(c.value,code,start,end,0,0);}
-pub fn m::Problem unknown(ref mut v::Vec<Unknown> unknowns,ref mut Context c,u32 kind,usize start,usize end){if(c.probes!=0){return fail(c,0,0,0);}if(!m::charge(ref mut c.work,1) || v::len<Unknown>(unknowns)>=8192){return fail(c,10,start,end);}return if(v::push<Unknown>(unknowns,Unknown{.kind,.after=c.sites,.frame=c.frame,.start,.end}).is_ok){fail(c,0,0,0)}else{fail(c,11,start,end)};}
+pub fn m::Problem unknown(ref mut v::Vec<Unknown> unknowns,ref mut Context c,u32 kind,usize start,usize end){if(c.probes!=0){return fail(c,0,0,0);}if(!m::charge(ref mut c.work,1) || v::len<Unknown>(unknowns)>=8192){return fail(c,10,start,end);}return if(v::push<Unknown>(unknowns,Unknown{.origin=0,.allocation=0,.kind,.after=c.sites,.frame=c.frame,.start,.end}).is_ok){fail(c,0,0,0)}else{fail(c,11,start,end)};}
 
 pub fn Result<usize,m::Problem> join(ref mut v::Vec<sets::Entry> entries,ref mut v::Vec<usize> members,ref mut Context c,usize a,usize b,usize start,usize end){return switch(sets::join(entries,members,a,b,ref mut c.work)){case .ok(n):{.ok(n)}case .err(code):{.err(fail(c,code,start,end))}};}
 pub fn Result<m::Expression,m::Problem> expression(ref m::Values body,usize original,ref mut Context c){
@@ -50,4 +51,18 @@ pub fn Result<Value,m::Problem> allocated(ref mut v::Vec<p::Row> allocations,ref
 }
 pub fn m::Problem returned(Value value,ref mut v::Vec<sets::Entry> entries,ref mut v::Vec<usize> members,ref mut v::Vec<p::Row> allocations,ref mut v::Vec<Returned> returns,ref mut Context c,usize start,usize end){
     if(!c.borrower || c.probes!=0){return fail(c,0,0,0);}if(!m::charge(ref mut c.work,1) || v::len<Returned>(returns)>=8192){return fail(c,10,start,end);}let actual=if(value.origin==0 || value.origin==sets::empty() && !c.tagged_return){Value{.origin=1,.allocation=0}}else{value};if(!v::push<Returned>(returns,Returned{.frame=c.frame,.origin=actual.origin,.allocation=actual.allocation,.start,.end}).is_ok){return fail(c,11,start,end);}c.sites+=1;c.seen=true;let result=switch(join_value(entries,members,allocations,c,Value{.origin=c.returned,.allocation=c.allocation},actual,start,end)){case .ok(n):{n}case .err(p):{return p;}};c.returned=result.origin;c.allocation=result.allocation;return fail(c,0,0,0);
+}
+
+pub fn m::Problem expire_values(ref mut v::Vec<Value> env,ref mut v::Vec<p::Row> allocations,usize leaf,ref mut Context c,usize start,usize end){
+    var usize i=0;while(i<v::len<Value>(env)){if(!m::charge(ref mut c.work,1)){return fail(c,10,start,end);}let old=*v::at<Value>(env,i);let map=switch(p::expire(allocations,old.allocation,leaf,ref mut c.work)){case .ok(n):{n}case .err(code):{return fail(c,code,start,end);}};let slot=v::at_mut<Value>(env,i);slot.allocation=map;i+=1;}return fail(c,0,0,0);
+}
+fn m::Problem expired_edge(ref Edge source,ref mut v::Vec<Edge> pending,ref mut v::Vec<p::Row> allocations,usize leaf,ref mut Context c,usize start,usize end){
+    var v::Vec<Value> values=v::empty<Value>();var usize i=0;while(i<v::len<Value>(ref source.values)){if(!m::charge(ref mut c.work,1)){return fail(c,10,start,end);}if(!v::push<Value>(ref mut values,*v::at<Value>(ref source.values,i)).is_ok){return fail(c,11,start,end);}i+=1;}let problem=expire_values(ref mut values,allocations,leaf,c,start,end);if(problem.code!=0){return problem;}return if(v::push<Edge>(pending,Edge{.depth=source.depth,.kind=source.kind,.values}).is_ok){fail(c,0,0,0)}else{fail(c,11,start,end)};
+}
+pub fn m::Problem expire_edges(ref mut v::Vec<Edge> edges,usize first,ref mut v::Vec<p::Row> allocations,usize leaf,ref mut Context c,usize start,usize end){
+    if(first>v::len<Edge>(edges)){return fail(c,12,start,end);}var v::Vec<Edge> pending=v::empty<Edge>();while(v::len<Edge>(edges)>first){if(!m::charge(ref mut c.work,1)){return fail(c,10,start,end);}let problem=switch(v::pop<Edge>(edges)){case .some(edge):{expired_edge(ref edge,ref mut pending,allocations,leaf,c,start,end)}case .none:{fail(c,12,start,end)}};if(problem.code!=0){return problem;}}
+    while(v::len<Edge>(ref pending)>0){if(!m::charge(ref mut c.work,1)){return fail(c,10,start,end);}let problem=switch(v::pop<Edge>(ref mut pending)){case .some(edge):{if(v::push<Edge>(edges,edge).is_ok){fail(c,0,0,0)}else{fail(c,11,start,end)}}case .none:{fail(c,12,start,end)}};if(problem.code!=0){return problem;}}return fail(c,0,0,0);
+}
+pub fn m::Problem check_lifetime(ref inputs::Inputs input,Value value,ref v::Vec<sets::Entry> entries,ref v::Vec<usize> members,ref v::Vec<p::Row> allocations,ref mut v::Vec<Unknown> unknowns,ref mut Context c,usize start,usize end){
+    if(c.probes!=0 || value.origin<=2 || value.origin==sets::empty()){return fail(c,0,0,0);}var usize i=0;while(i<sets::count(entries,members,value.origin)){if(!m::charge(ref mut c.work,1)){return fail(c,10,start,end);}let leaf=sets::member(entries,members,value.origin,i);if(leaf==2){i+=1;continue;}let owner=sets::owner_id(leaf);if(owner==0 || owner>inputs::owner_count(input)){return fail(c,12,start,end);}let source=inputs::owner(input,owner);if(source.kind==14){let expired=switch(p::expired(allocations,value.allocation,leaf,ref mut c.work)){case .ok(b):{b}case .err(code):{return fail(c,code,start,end);}};if(expired || source.frame!=c.frame || start<source.start || end>source.end){let allocation=switch(p::lookup(allocations,value.allocation,leaf,ref mut c.work)){case .ok(n):{n}case .err(code):{return fail(c,code,start,end);}};if(allocation==0 || allocation>inputs::allocation_count(input)){return fail(c,12,start,end);}if(v::len<Unknown>(unknowns)>=8192 || !m::charge(ref mut c.work,1)){return fail(c,10,start,end);}if(!v::push<Unknown>(unknowns,Unknown{.kind=4,.after=c.sites,.frame=c.frame,.start,.end,.origin=leaf,.allocation}).is_ok){return fail(c,11,start,end);}}}i+=1;}return fail(c,0,0,0);
 }
