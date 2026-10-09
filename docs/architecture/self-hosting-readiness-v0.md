@@ -1452,3 +1452,34 @@ followed by ownership, unsafe pointer provenance and cross-unit execution. No
 new fixed corpus, full dispatcher, stage1/stage2, release or Linux validation
 was run. Public language/SDK ABI, SDK sources, DB, CI and runner contracts are
 unchanged; nothing was pushed.
+
+## Bounded syntactic paths for origin consumers (2026-10-10)
+
+module_unit_origin_paths now provides bounded syntactic outcomes (fallthrough,
+return/trap, break and continue) for a checked provider frame. It removes
+definite dead statement/expression suffixes, joins if/switch arms, consumes
+nested loop jumps and excludes a for post when its body can only break or
+return. Loops retain a possible zero-iteration exit; no predicate correlation,
+value-based branch elimination or at-least-once loop proof is inferred. Cast
+and generic type-arena IDs are not traversed as expressions.
+
+Development check passed (206 sources, 2517 MIR functions). Three native
+development tests passed, covering return/trap and branch suffixes, loop/post
+reachability and work-exhaustion failures. Reference grammar acceptance passed
+for all 11 distinct marker fixtures; this is a syntax check, not semantic or
+return-origin equivalence. The first native run passed two tests and failed
+the loop test because its byte-view for fixture lacked let. Only that failed
+fixture was corrected and rerun; byte-identical passing functions, preamble,
+other tests, compiler, SDK, sources, inputs and lock hashes justify reusing
+the other two passes. Evidence:
+docs/ops/evidence/candidate-module-unit-origin-paths-20261010.json.
+
+Dead intervals are inserted in ascending start order. Each maximum stores the
+largest end in its sorted prefix, so binary search tests containment even when
+intervals nest or share a start. All traversal, insertion, prefix construction
+and lookup use the shared 1048576-work budget; depth, list and storage bounds
+fail with original source coordinates rather than declaring a path dead.
+Return-origin inference and ownership integration remain subsequent consumers.
+No new corpus, full dispatcher, stage1/stage2, release, Linux or push was
+performed; public language/SDK ABI, SDK sources, DB, CI and runner contracts
+are unchanged.
