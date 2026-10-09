@@ -1375,3 +1375,26 @@ unsafe pointer provenance and cross-unit HIR/MIR/C/CLI remain. This slice does
 not claim a new fixed-corpus observation, full dispatcher, stage1/stage2,
 release or Linux validation. Public language/SDK ABI, SDK sources, DB, CI and
 runner contracts are unchanged; nothing was pushed.
+
+## Fixed corpus after statement and field consumers (2026-10-10)
+
+The unchanged fixed 160-module corpus was freshly observed after SDK ordinary
+view signatures, assignment/post consumers, syntactic completion, defer/burn
+and nominal field contracts. The archived manifest, all source inputs and
+compiler hashes were verified. Development probe check/build and every unit
+observation passed across 26 continuous ranges covering 0..160, with 1048562
+joined bytes. The current native build gate is the six individually verified
+shape/budget, SDK view, completion and terminal regressions from commit
+93920dd4.
+
+The observation reports 2566 value contexts, 186158 expressions, 123386 known
+values and 3113 unresolved values; 4781/4783 returns are checked. Maximum
+value work is 987087 and maximum value graph is 427, within unchanged limits.
+Unresolved values remain unresolved; these counts do not establish full source
+compilation or ownership safety. Evidence:
+docs/ops/evidence/candidate-module-unit-statements-corpus-20261010.json. Other
+declaration attributes, ordinary-call origins,
+loans/lifetimes/conflicts/moves, unsafe pointer provenance and cross-unit
+HIR/MIR/C/CLI remain. Full current dispatcher, stage1/stage2, release and
+Linux validation remain separate. Public language/SDK ABI, SDK sources, DB, CI
+and runner contracts are unchanged; nothing was pushed.
