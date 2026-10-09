@@ -332,3 +332,35 @@ with downstream catalog graph validation still required. Existing capacity
 limits are unchanged. Provider body cloning, cleanup specialization, and unit
 HIR/MIR/C/CLI integration remain the next stages. Evidence:
 `docs/ops/evidence/candidate-module-unit-source-stamps-20261009.json`.
+
+## Owned generic function bodies (2026-10-09)
+
+`module_unit_bodies` owns requested concrete generic function AST bodies,
+using body-local remapped expression, statement, entry and type IDs. Each
+provider module's scanner stream is copied once, preserving original source
+spans, raw bytes and the existing hex cooked-literal representation. Ordered
+canonical type arguments, signatures and annotation overlays are owned; roots
+cover locals, casts, explicit type arguments and byte-loop annotations. Nested
+generic function, Vec aggregate and SDK storage intrinsic requests connect to
+remapped body expressions through per-instance edges. Stale plan sources and
+graph prefixes are validated first, and the final canonical graph is
+independently catalog-validated.
+
+Admission accounts for original plus cloned AST sizes and bisects capacity
+failures with existing bounds unchanged. Development native tests pass 7/7,
+including source-owner removal, ordered private forwarding, preserved literals,
+local type errors with original spans, stale sources, and body entry pressure
+requiring range refinement. The 160-module, 1048277-byte dispatcher corpus
+passes as 25 units after 37 attempts and 12 splits. Per-unit body counts sum to
+615 with 3249 resolved annotation roots and 838 request edges. Maxima are 57
+bodies and 93777 body work; combined original/body expressions reach 16293 and
+entries 951 within the unchanged 16384/1024 bounds. Evidence:
+`docs/ops/evidence/candidate-module-unit-bodies-20261009.json`.
+
+SDK Vec cleanup body ownership, resource cleanup contexts and implicit drop
+dependencies remain next. Body expression typing, field shape expansion for new
+local types, cross-unit structural instance/link deduplication, target layouts,
+cleanup effects and HIR/MIR/C/CLI consumers remain pending. Release rebuilding,
+Linux, whole dispatcher native compilation and stage1/stage2 were not run in
+this unit. Public language/SDK ABI, DB, CI and runner implementations are
+unchanged.

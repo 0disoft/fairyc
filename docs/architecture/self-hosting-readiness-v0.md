@@ -343,6 +343,17 @@ resource cleanup specialization, expression/body typing and all IR/backend/CLI
 consumers remain open. Evidence:
 `docs/ops/evidence/candidate-module-unit-generic-dependencies-20261009.json`.
 
+Requested generic function AST ownership now passes development native tests
+(7/7) and the full 160-module source corpus in 25 bounded units. Provider source
+streams, body-local node links, canonical annotation overlays, signatures and
+per-instance nested request edges are retained after original owners are
+released. The original plus cloned AST sizes remain inside existing admission
+bounds. SDK Vec cleanup AST ownership,
+resource cleanup contexts and implicit drop dependencies, local expression/body
+typing, structural cross-unit links, layouts/effects, HIR/MIR/C/CLI and actual
+stage1/stage2 remain open. Evidence:
+`docs/ops/evidence/candidate-module-unit-bodies-20261009.json`.
+
 `stage0` is the current Go compiler built by the supported Go toolchain.
 
 `stage1` is produced by `stage0` from the admitted Fairy compiler sources.

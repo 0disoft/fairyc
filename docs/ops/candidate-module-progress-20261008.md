@@ -1778,3 +1778,33 @@ admits 18 units after 23 attempts and 5 splits; binding/interface work peaks at
 Bounds remain unchanged. Provider function and SDK Vec cleanup body ownership
 remain next; release, Linux and stage1/stage2 were not run in this unit.
 Evidence: `docs/ops/evidence/candidate-module-unit-source-stamps-20261009.json`.
+
+## Owned generic function body arenas (2026-10-09)
+
+`module_unit_bodies` owns requested concrete function ASTs, ordered signature
+arguments/parameters, canonical annotation overlays and remapped dependency
+edges. `module_unit_body_ast` selects only the requested declaration's nodes and
+copies its attributes; source spans and token IDs still address a scanner stream
+owned once per provider module. Original sources, signatures and interfaces may
+be released without invalidating the retained body plan. The existing hex
+cooked-literal representation is preserved without decoding or textual type
+substitution.
+
+Admission counts original plus cloned nodes under existing byte, declaration,
+expression, statement, entry, type and attribute bounds. Capacity pressure
+refines ranges using the existing code 10/E4503 rule. Development check/probe
+build and seven native tests pass. The full 160-module corpus passes in 25 units
+after 37 attempts/12 splits; per-unit counts sum to 615 owned bodies, 3249
+resolved roots and 838 edges. Body work peaks at 93777; combined expressions
+peak at 16293 and entries at 951. The initial fixture assertions expected one
+storage intrinsic in SDK empty and decoded string bytes, but the existing source
+has two storage intrinsics and scanner cooked bytes are hex encoded. Corrected
+assertions pass. Evidence:
+`docs/ops/evidence/candidate-module-unit-bodies-20261009.json`.
+
+Next: SDK Vec cleanup AST ownership and resource cleanup specialization with
+nested/implicit drop dependencies. Local expression/body typing, new local type
+field projection, structural cross-unit deduplication, byte layouts and cleanup
+effects, HIR/MIR/C/CLI, whole dispatcher native compilation and stage1/stage2
+remain open. Release rebuilding, Linux and push are deferred. Public language
+and SDK ABI, DB, CI and runner implementations are unchanged.
