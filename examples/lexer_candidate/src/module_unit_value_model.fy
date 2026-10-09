@@ -16,10 +16,11 @@ pub struct Invocation {u32 kind;usize expression;usize source_index;usize target
 pub struct Argument {usize invocation;usize position;usize expression;usize source_index;usize expected;usize actual;usize start;usize end;usize label_start;usize label_end;bool checked;bool shared;}
 pub struct Scan {Problem problem;bool changed;}
 pub struct Local {u32 kind;usize source_index;usize initializer;usize expected;usize type;Place origin;usize start;usize end;}
+pub struct Consumer {u32 kind;usize source_index;usize expression;usize expected;usize actual;bool checked;usize start;usize end;}
 pub struct Return {usize expression;usize expected;usize actual;bool checked;usize start;usize end;}
 pub struct Problem {u32 code;usize module_index;usize start;usize end;usize expected;usize actual;}
-pub resource Values {Frame frame;v::Vec<Expression> expressions;v::Vec<Local> locals;v::Vec<Return> returns;v::Vec<Invocation> calls;v::Vec<Argument> arguments;usize unresolved;usize inferred;usize checked_returns;usize work;cleanup{}}
-pub fn Values assemble(Frame frame,v::Vec<Expression> expressions,v::Vec<Local> locals,v::Vec<Return> returns,v::Vec<Invocation> calls,v::Vec<Argument> arguments,usize unresolved,usize inferred,usize checked_returns,usize work){return Values{.frame,.expressions,.locals,.returns,.calls,.arguments,.unresolved,.inferred,.checked_returns,.work};}
+pub resource Values {Frame frame;v::Vec<Expression> expressions;v::Vec<Local> locals;v::Vec<Return> returns;v::Vec<Invocation> calls;v::Vec<Argument> arguments;v::Vec<Consumer> consumers;usize unresolved;usize inferred;usize checked_returns;usize work;cleanup{}}
+pub fn Values assemble(Frame frame,v::Vec<Expression> expressions,v::Vec<Local> locals,v::Vec<Return> returns,v::Vec<Invocation> calls,v::Vec<Argument> arguments,v::Vec<Consumer> consumers,usize unresolved,usize inferred,usize checked_returns,usize work){return Values{.frame,.expressions,.locals,.returns,.calls,.arguments,.consumers,.unresolved,.inferred,.checked_returns,.work};}
 pub fn Frame frame(ref Values p){return p.frame;}
 pub fn usize work(ref Values p){return p.work;}
 pub fn usize unresolved(ref Values p){return p.unresolved;}
@@ -52,3 +53,7 @@ pub fn usize checked_fields(ref Values p){var usize count=0;var usize i=1;while(
 pub fn usize record_count(ref Values p){var usize count=0;var usize i=1;while(i<=expression_count(p)){if(expression_at(p,i).kind==10){count+=1;}i+=1;}return count;}
 pub fn usize checked_records(ref Values p){var usize count=0;var usize i=1;while(i<=expression_count(p)){let e=expression_at(p,i);if(e.kind==10 && e.state==1 && e.target!=0 && e.type==e.target){count+=1;}i+=1;}return count;}
 pub fn usize record_fields(ref Values p){var usize count=0;var usize i=1;while(i<=expression_count(p)){let e=expression_at(p,i);if(e.kind==11 && e.field.id!=0){count+=1;}i+=1;}return count;}
+
+pub fn usize consumer_count(ref Values p){return v::len<Consumer>(ref p.consumers);}
+pub fn Consumer consumer_at(ref Values p,usize id){return *v::at<Consumer>(ref p.consumers,id);}
+pub fn usize checked_consumers(ref Values p){var usize count=0;var usize i=0;while(i<consumer_count(p)){if(consumer_at(p,i).checked){count+=1;}i+=1;}return count;}

@@ -738,4 +738,36 @@ module_unit_value_record가 이제 레코드 집합 생성자 식을 받는다. 
 | 상세 범위 | 모든 범위가 0..160을 연속으로 덮음 |
 Evidence: `docs/ops/evidence/candidate-module-unit-records-corpus-20261009.json`.
 
-현재 다음 작업은 **control/variant/builtin/standalone과 discard·독립 표현식 검사, 그리고 선언·형태 오류의 조기 거부**다.
+이 시점의 다음 작업은 control/variant/builtin/standalone과 discard·독립 표현식 검사, 선언·형태 오류의 조기 거부였다.
+
+## Conditional blocks and statement consumers (2026-10-09)
+
+`module_unit_value_control` projects ordinary and unsafe block tails and `if`
+results into canonical value types. Both branches receive the outer expected
+context; unequal results report E1006 at the alternative expression. A missing
+`else` yields void after its condition and consequent are known. Return and
+literal-final assert statements do not change ordinary if-branch joins. Derived
+values carry no storage place; borrow-origin merging remains pending.
+
+Owned statement consumers cover standalone expressions, discard, assert, while
+conditions and scalar for conditions in ordinary, generic and cleanup contexts.
+They preserve original expression IDs and spans. Bool contexts report E1007,
+and the structural ADR0213 for-header restriction is charged against the same
+1 MiB work budget. Assignment/post clauses, defer/burn, missing-return checks,
+function-body tails, switch/variant/builtin consumers and declaration/shape
+rejection remain pending. The existing inferred-void-local rejection also still
+differs from reference semantic admission.
+
+Verification: development check (195 sources, 2390 MIR functions); 19 reference
+acceptance/code/span fixtures; development native selection 7/7, followed by
+2/2 affected tests after the no-else deferred-tail gate correction, with the five
+unaffected tests reused. The initial 6/7 native attempt assumed an assignment
+post-clause was already typed; the fixture now exercises the admitted condition
+consumer. These runs and their exact source identities are retained in
+`docs/ops/evidence/candidate-module-unit-control-20261009.json`.
+
+Types 4096, work 1048576, entries 1024, active locals 128, depth/rounds 64 remain
+unchanged. No new full corpus, full current dispatcher, stage1/stage2, release,
+Linux or push was run. Corpus observations are bundled with the next tagged
+consumer unit. Public language/SDK ABI, SDK sources, DB, CI and runners are
+unchanged. Next: switch/variant payload typing and assignment consumers.
