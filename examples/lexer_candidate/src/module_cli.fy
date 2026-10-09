@@ -121,9 +121,9 @@ fn i32 return_origins(ref v::Vec<syntax::Parsed> sources,ref u8[] manifest,ref v
         }
     };
     var usize i=0;while(i<origin_diagnostics::count(ref report)){
-        let d=origin_diagnostics::at(ref report,i);let entry=*v::at<Path>(paths,d.module_index);
+        if(!origin_diagnostics::visible_at(ref report,i)){i+=1;continue;}let d=origin_diagnostics::at(ref report,i);let entry=*v::at<Path>(paths,d.module_index);
         output::prefix(syntax::source_view(v::at<syntax::Parsed>(sources,d.module_index)),manifest[entry.start..entry.end],d.start);
-        discard io::write_stderr(if(d.code==2102){"E2102 borrow return escapes local origin"}else if(d.code==2103){"E2103 borrow return has multiple origins"}else{"unsupported borrow return with unknown origin"});output::range(d.start,d.end);
+        discard io::write_stderr(if(d.code==2102){"E2102 borrow return escapes local origin"}else if(d.code==2103){"E2103 borrow return has multiple origins"}else if(d.feature==1){"unsupported borrow binding with unknown origin"}else if(d.feature==2){"unsupported borrow assignment with unknown origin"}else if(d.feature==3){"unsupported borrow match binding with unknown origin"}else{"unsupported borrow return with unknown origin"});output::range(d.start,d.end);
         var usize j=0;while(j<d.related_count){let r=origin_diagnostics::related_at(ref report,d,j);let path=*v::at<Path>(paths,r.module_index);
             discard io::write_stderr(if(r.role==1){"  origin: "}else{"  candidate-origin: "});discard io::write_stderr_bytes(manifest[path.start..path.end]);output::range(r.start,r.end);j+=1;
         }i+=1;

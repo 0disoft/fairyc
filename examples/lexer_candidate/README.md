@@ -36,8 +36,10 @@ status 2 means unknown/unsupported analysis, a phase/input failure or a limit.
 Single-borrow-leaf Option/Result payload construction, empty payloads, nested
 wrappers and call forwarding are supported. Borrowing a wrapper itself retains
 its storage origin. Multiple borrowed leaves and Result `?` origin propagation
-remain unsupported. Match payload binding origins, region/loan/lifetime/conflict/
-move and unsafe pointer provenance checking, and split-unit execution are pending.
+remain unsupported. Match payload bindings preserve subject origins and lexical
+scope. Unsupported return/binding/assignment/match locations are all reported
+when no semantic origin error is present. Region/loan/lifetime/conflict/move,
+unsafe pointer provenance and split-unit execution are pending.
 
 ## Feature guide
 

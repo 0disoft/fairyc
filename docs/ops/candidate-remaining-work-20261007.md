@@ -1572,3 +1572,38 @@ return origins, region origins, loans, lifetimes, conflicts, moves and unsafe
 provenance remain. Split-unit execution, the full project dispatcher,
 stage1/stage2, release and Linux remain deferred. No push, public Stage0
 language/SDK ABI change, DB change or CI/runner change was made.
+
+## Pattern payload origins and complete unsupported reports (2026-10-10)
+
+Option/Result switch arms now seed borrowed payload bindings by lexical symbol
+ID from the subject origin, and clear the binding at arm exit. Parameter,
+static, local, nested and forwarded origins retain their original owner
+coordinates. Taking the address of a by-value scalar pattern payload reports
+E2102 with the pattern declaration as its related origin. Inert and
+known-empty payloads remain distinct from Unknown.
+
+The origin flow now retains every bounded unsupported return, binding,
+assignment and match fact, ordered by frame and preceding return-site ordinal.
+Reports preserve their feature and source span, deduplicate equivalent source
+facts across instances, and publish semantic E2102/E2103 diagnostics when
+present; otherwise the CLI prints all unsupported facts. Facts remain limited
+to 8192 and the existing work budget. The Go reference was corrected
+separately so assert(false) ends a borrow-flow path and scalar match bindings
+have Local provenance (70dfc3c5); a stale bool-view premise was aligned with
+ADR 0465 (d3a1eaae). The semantic package passed.
+
+Development source checking passed (215 files, 2654 MIR functions), three
+selected native tests passed, and 21 exact API/reference comparisons matched
+codes, module indices, primary and related spans. A fresh locked candidate
+build matched all 56 CLI/reference cases, plus two existing checker modes,
+four malformed inputs, three tagged boundary checks and help. Compiler, SDK,
+sources, tests, fixtures, candidate and lock hashes were verified. The earlier
+incomplete unsupported projection is retained as a failed observation.
+Evidence:
+docs/ops/evidence/candidate-module-unit-origin-patterns-20261010.json.
+
+Result ? success and implicit error-return origins remain next.
+Region/loan/subview/lifetime/conflict/move and unsafe provenance, split-unit
+execution, full project command integration, stage1/stage2, release and Linux
+remain pending. No push, public CLI/SDK ABI, DB or CI/runner change was made
+in this candidate slice.
