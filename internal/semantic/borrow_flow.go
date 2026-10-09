@@ -376,7 +376,10 @@ func (f *borrowFlowAnalyzer) evaluateStatement(statement *ast.Statement, environ
 	default:
 		f.checkCallOwnerMoves(statement, statement.Expression, environment)
 		_, reachable := f.evaluateExpression(statement.Expression, environment)
-		return reachable
+		// Match and block joins must exclude an always-trapping assertion,
+		// just as the type checker excludes its noncontinuing path.
+		return reachable && !(statement.Kind == syntax.KindAssert && statement.Expression != nil &&
+			statement.Expression.Kind == syntax.KindLiteral && statement.Expression.Text == "false")
 	}
 }
 

@@ -214,7 +214,7 @@ func (a *analyzer) originForSymbol(value *symbol) flowOrigin {
 		return flowOrigin{}
 	}
 	switch value.kind {
-	case "parameter", "local":
+	case "parameter", "local", "match-binding":
 		// A direct `&place` borrows the storage occupied by that place in the
 		// current call frame. Even when the place is a by-value parameter, that
 		// storage is local to the callee and cannot be returned. Param(i) is

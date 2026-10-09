@@ -1,0 +1,81 @@
+{
+  "schema": "fairyc.borrow-false-assert-and-match-storage/v1",
+  "passed": true,
+  "scope": "Make literal assert(false) noncontinuing in borrow flow, and classify directly borrowed match-binding storage as Local. The candidate implementation remains Fairy source.",
+  "sources": [
+    {
+      "path": "internal/semantic/borrow_flow.go",
+      "sha256": "29b1d3d20d61fe5c035a79463d4e420db7e06aae6c5d7e6ef76cc2a97964f6b2"
+    },
+    {
+      "path": "internal/semantic/flow.go",
+      "sha256": "6ff72568911562884d157eab976bf98312d7a0d086a60d6e1d5a51056fb03928"
+    },
+    {
+      "path": "internal/semantic/borrow_false_assert_test.go",
+      "sha256": "9c2936a0659225e13a7a8ef94bf87e7a44c858e293ce396d674ed21b7e782e84"
+    }
+  ],
+  "focusedSubcases": 6,
+  "executions": [
+    {
+      "argv": [
+        "go",
+        "test",
+        "./internal/semantic",
+        "-run",
+        "^TestAnalyzeBorrowFlowFalseAssertTerminates$",
+        "-count=1"
+      ],
+      "exit": 0,
+      "stdout": "ok  \tgithub.com/0disoft/fairyc/internal/semantic\t0.034s\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "go",
+        "test",
+        "./internal/semantic"
+      ],
+      "exit": 1,
+      "stdout": "--- FAIL: TestBoolViewBoundary (0.00s)\n    --- FAIL: TestBoolViewBoundary/computed-root (0.00s)\n        bool_views_test.go:62: unadmitted bool view accepted\nFAIL\nFAIL\tgithub.com/0disoft/fairyc/internal/semantic\t0.517s\nFAIL\n",
+      "stderr": ""
+    }
+  ],
+  "wholeSemanticPackagePassed": false,
+  "baselineFailure": {
+    "argv": [
+      "go",
+      "test",
+      "-overlay",
+      "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\borrow-flow-before-false-assert-overlay.json",
+      "./internal/semantic",
+      "-run",
+      "^TestBoolViewBoundary$/^computed-root$",
+      "-count=1"
+    ],
+    "exit": 1,
+    "stdout": "--- FAIL: TestBoolViewBoundary (0.00s)\n    --- FAIL: TestBoolViewBoundary/computed-root (0.00s)\n        bool_views_test.go:62: unadmitted bool view accepted\nFAIL\nFAIL\tgithub.com/0disoft/fairyc/internal/semantic\t0.050s\nFAIL\n",
+    "stderr": "",
+    "scope": "The computed-root bool-view failure also occurs with the unchanged HEAD borrow-flow source. This patch did not introduce it."
+  },
+  "compiler": {
+    "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\compiler-origin-patterns.exe",
+    "sha256": "d36dae1b99751322e447880aaf4d28321bd6d53bdf776185308c6c4504889bb2"
+  },
+  "compilerBuild": {
+    "argv": [
+      "go",
+      "build",
+      "-o",
+      ".cache/candidate-tagged/compiler-origin-patterns.exe",
+      "./cmd/fairyc"
+    ],
+    "exit": 0,
+    "stdout": "",
+    "stderr": "",
+    "recordedFromObservedCommandOutput": true
+  },
+  "previousPinnedCompilerReplaced": false,
+  "pushed": false
+}
