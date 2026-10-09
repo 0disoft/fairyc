@@ -1,0 +1,18 @@
+module tests::module_unit_origin_sets;
+import module_unit_origin_sets as origins;
+import std::vec as v;
+fn usize joined(ref mut v::Vec<origins::Entry> entries,ref mut v::Vec<usize> members,usize a,usize b,ref mut usize work){return switch(origins::join(entries,members,a,b,work)){case .ok(n):{n}case .err(_):{assert(false);0}};}
+@test fn void static_unknown_and_unreachable_have_distinct_join_behavior(){
+    var v::Vec<origins::Entry> entries=v::empty<origins::Entry>();var v::Vec<usize> members=v::empty<usize>();var usize work=0;let a=switch(origins::owner(1)){case .ok(n):{n}case .err(_):{assert(false);return;}};
+    assert(joined(ref mut entries,ref mut members,0,a,ref mut work)==a && joined(ref mut entries,ref mut members,a,0,ref mut work)==a);assert(joined(ref mut entries,ref mut members,1,a,ref mut work)==1 && joined(ref mut entries,ref mut members,2,1,ref mut work)==1 && joined(ref mut entries,ref mut members,0,1,ref mut work)==1);
+    let mixed=joined(ref mut entries,ref mut members,2,a,ref mut work);assert(mixed>=32768 && origins::count(ref entries,ref members,mixed)==2 && origins::member(ref entries,ref members,mixed,0)==2 && origins::member(ref entries,ref members,mixed,1)==a);assert(joined(ref mut entries,ref mut members,mixed,1,ref mut work)==1);assert(origins::owner_id(2)==0 && origins::owner_id(a)==1 && origins::owner_id(mixed)==0);
+}
+@test fn void mixed_sets_are_sorted_deduplicated_and_canonical(){
+    var v::Vec<origins::Entry> entries=v::empty<origins::Entry>();var v::Vec<usize> members=v::empty<usize>();var usize work=0;let usize a=3;let usize b=6;let usize c=16386;let ab=joined(ref mut entries,ref mut members,a,b,ref mut work);assert(joined(ref mut entries,ref mut members,b,a,ref mut work)==ab && joined(ref mut entries,ref mut members,ab,a,ref mut work)==ab);let abc=joined(ref mut entries,ref mut members,ab,c,ref mut work);let bc=joined(ref mut entries,ref mut members,b,c,ref mut work);assert(joined(ref mut entries,ref mut members,a,bc,ref mut work)==abc);assert(origins::count(ref entries,ref members,abc)==3 && origins::member(ref entries,ref members,abc,0)==a && origins::member(ref entries,ref members,abc,1)==b && origins::member(ref entries,ref members,abc,2)==c);
+    assert(switch(origins::contains(ref entries,ref members,abc,b,ref mut work)){case .ok(b):{b}case .err(_):{false}});assert(!switch(origins::contains(ref entries,ref members,abc,4,ref mut work)){case .ok(b):{b}case .err(_):{assert(false);true}});assert(origins::set_count(ref entries,ref members)==3 && origins::stored_members(ref entries,ref members)==7 && work<1048576);
+}
+@test fn void malformed_handles_and_exhaustion_do_not_publish_known_origins(){
+    var v::Vec<origins::Entry> entries=v::empty<origins::Entry>();var v::Vec<usize> members=v::empty<usize>();var usize work=0;switch(origins::owner(0)){case .ok(_):{assert(false);}case .err(c):{assert(c==12);}};switch(origins::owner(16385)){case .ok(_):{assert(false);}case .err(c):{assert(c==12);}};
+    switch(origins::join(ref mut entries,ref mut members,2,32768,ref mut work)){case .ok(_):{assert(false);}case .err(c):{assert(c==12);}};switch(origins::join(ref mut entries,ref mut members,16387,2,ref mut work)){case .ok(_):{assert(false);}case .err(c):{assert(c==12);}};
+    work=1048576;switch(origins::join(ref mut entries,ref mut members,2,2,ref mut work)){case .ok(_):{assert(false);}case .err(c):{assert(c==10);}};switch(origins::contains(ref entries,ref members,2,2,ref mut work)){case .ok(_):{assert(false);}case .err(c):{assert(c==10);}};assert(origins::set_count(ref entries,ref members)==0 && origins::stored_members(ref entries,ref members)==0);
+}

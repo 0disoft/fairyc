@@ -1513,3 +1513,27 @@ module/declaration coordinates, type IDs and bounds are retained. No new
 corpus, full dispatcher, stage1/stage2, release, Linux or push was performed.
 The internal candidate value model/accessor changed; public language/SDK ABI,
 SDK sources, DB, CI and runner contracts are unchanged.
+
+## Distinct bounded origin sets (2026-10-10)
+
+module_unit_origin_sets provides canonical analysis-only origin sets.
+Unreachable/no-result, Unknown and Static have separate handles; Unknown
+absorbs a join, while Static remains a member when joined with a lexical
+owner. Owner leaves preserve the global frame/local identity supplied by
+origin inputs. Sorted merges deduplicate members and canonical interning makes
+equivalent sets share a handle. These handles are not published HIR/MIR type
+or origin IDs.
+
+Development check passed (207 sources, 2534 MIR functions), and three native
+development tests passed. They verify static/unknown/unreachable behavior,
+order-independent canonical unions, duplicates, membership lookup, boundary
+owner IDs, malformed handles and exhaustion even on a no-op join. Existing
+1048576-work, 16384-owner, 4096-set and 32768-member bounds fail closed.
+Evidence: docs/ops/evidence/candidate-module-unit-origin-sets-20261010.json.
+This abstract set algebra has no Go semantic-reference equivalence claim.
+
+Return-flow environments, branch/loop joins and argument substitution are the
+next consumers. Loan/lifetime/conflict/move, unsafe provenance, cross-unit
+execution and self-hosting remain. No new corpus, full dispatcher,
+stage1/stage2, release, Linux or push was performed; public language/SDK ABI,
+SDK sources, DB, CI and runner contracts are unchanged.
