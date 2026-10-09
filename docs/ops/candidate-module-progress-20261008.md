@@ -1839,3 +1839,26 @@ cross-unit structural deduplication, target layouts, HIR/MIR/C/CLI and
 stage1/stage2 remain open. Release rebuilding, Linux and push were not run.
 Public language/SDK ABI, SDK sources, DB, CI and runner implementations are
 unchanged.
+
+### Type-level nested drop graph (2026-10-09)
+
+`module_unit_drops` derives an immutable type-level graph from owned interfaces.
+Field and Vec edges retain provider coordinates; Option, Result and array edges
+are structural. Declared cleanup effects and no-drop abilities propagate through
+contained values. References and pointers have no drop obligations. Recursive
+Vec containment reaches a bounded monotone fixed point. Unprojected nominal
+metadata remains explicitly incomplete and `required()` rejects it with code 9.
+Admission includes drop planning; code 10 uses the existing range refinement.
+Type, dependency and work bounds remain unchanged. Evidence:
+`docs/ops/evidence/candidate-module-unit-drops-20261009.json`.
+
+Development check/probe check/build and seven native tests pass. The current
+160-module, 1048472-byte input retains 26 units after 39 attempts and 13 splits.
+Drop edge counts sum to 9878 across units, with maxima of 425 graph nodes,
+660 edges and 6036 work. Combined original/body entries remain 1015/1024.
+
+Cleanup-body locals, inferred expression types, move-aware obligations and
+generic-body local field expansion remain next. Full dispatcher native
+compilation, HIR/MIR/C/CLI, stage1/stage2, release rebuilding, Linux and push
+remain pending. Public language/SDK ABI, SDK sources, DB, CI and runners are
+unchanged.

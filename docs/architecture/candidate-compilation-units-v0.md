@@ -402,3 +402,36 @@ new local type field projection, structural cross-unit links, target layouts,
 HIR/MIR/C/CLI, whole dispatcher native compilation and stage1/stage2 remain
 pending. Release rebuilding, Linux and push were not run. Public language/SDK
 ABI, SDK source, DB, CI and runner implementations are unchanged.
+
+## Type-level nested drop requirements (2026-10-09)
+
+`module_unit_drops` derives an immutable drop graph from each unit's owned
+interfaces. Canonical type IDs remain owner-local. Field edges retain the
+original module, declaration, field index and span; Vec element edges retain the
+resource declaration span. Option, Result and fixed-array edges are structural
+and use no synthetic source positions. References and raw pointers have no
+outgoing drop edges. Nodes combine their declared cleanup authority with the
+transitive effects of contained values and propagate the absence of the drop
+ability through the same graph. Cleanup context IDs refer to the existing
+specialization plan.
+
+Recursive Vec containment uses a monotone fixed point under the unchanged
+4096-type, 16384-edge and 1048576-work bounds. Capacity failures return code 10
+and participate in existing range refinement. Unprojected nominal metadata is
+marked `complete=false`; `required()` returns code 9 for an incomplete node,
+rather than treating it as a proven zero-effect type. Required shapes must be
+complete before admission succeeds. These are type-level requirements;
+cleanup body locals, inferred expression types and obligations after moves
+still require body typing and ownership analysis. This unit does not validate
+call-site authority or emit executable drops. Generic-body local field
+expansion, cross-unit deduplication, layouts, HIR/MIR/C/CLI and stage1/stage2
+remain pending. Public language/SDK ABI, SDK sources, DB, CI and runners are
+unchanged. Evidence: `docs/ops/evidence/candidate-module-unit-drops-20261009.json`.
+
+Development check, probe check/build and seven native tests pass (five drop
+regressions and two existing range/error regressions). The exact-current
+160-module, 1048472-byte dispatcher corpus retains 26 units after 39 attempts
+and 13 splits. Per-unit drop edges sum to 9878; maxima are 425 graph nodes,
+660 edges and 6036 drop work. Combined original/body entries remain 1015 within
+the unchanged 1024 bound. This is metadata/admission evidence; full dispatcher
+native compilation, release rebuilding and Linux were not run.

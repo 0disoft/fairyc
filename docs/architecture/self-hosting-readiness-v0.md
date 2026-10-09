@@ -365,6 +365,21 @@ effects, body symbol/expression typing and inline provenance consumption,
 cross-unit links/layouts, HIR/MIR/C/CLI and actual stage1/stage2 remain open.
 Evidence: `docs/ops/evidence/candidate-module-unit-cleanups-20261009.json`.
 
+Type-level nested drop requirements now use an immutable graph of owned
+interfaces. Contained field/Option/Result/array/Vec effects and no-drop abilities
+propagate to a fixed point; references and pointers have no drop edges.
+Unprojected nominal metadata is explicitly incomplete and cannot be queried as
+a proven drop requirement. Unit admission includes this bounded graph without
+raising type, dependency or work limits. Cleanup-body locals, inferred types,
+move-aware obligations and new generic-body local field projection still need
+body typing/ownership consumers. Cross-unit links/layouts, HIR/MIR/C/CLI and
+actual stage1/stage2 remain open. Evidence:
+`docs/ops/evidence/candidate-module-unit-drops-20261009.json`.
+Development check/probe check/build and seven native tests pass; the current
+160-module, 1048472-byte corpus retains 26 bounded units, with drop work at most
+6036 within the unchanged 1048576 bound. This does not establish executable
+drop lowering or whole dispatcher native compilation.
+
 `stage0` is the current Go compiler built by the supported Go toolchain.
 
 `stage1` is produced by `stage0` from the admitted Fairy compiler sources.
