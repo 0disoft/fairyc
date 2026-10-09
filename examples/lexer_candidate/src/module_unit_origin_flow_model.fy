@@ -6,7 +6,7 @@ import std::vec as v;
 import module_unit_origin_provenance as p;
 import module_unit_loan_model as loan;
 
-pub struct Context {usize frame;m::Frame value;bool borrower;bool tagged_return;usize sites;usize returned;usize allocation;bool seen;usize work;usize loop_depth;usize probes;}
+pub struct Context {usize statement;usize frame;m::Frame value;bool borrower;bool tagged_return;usize sites;usize returned;usize allocation;bool seen;usize work;usize loop_depth;usize probes;}
 // kind 4 is a Region lifetime violation; allocation is an input site ID.
 pub struct Unknown {u32 kind;usize after;usize frame;usize start;usize end;usize origin;usize allocation;}
 pub struct Value {usize origin;usize allocation;usize loan;}
@@ -68,4 +68,4 @@ pub fn m::Problem check_lifetime(ref inputs::Inputs input,Value value,ref v::Vec
     if(c.probes!=0 || value.origin<=2 || value.origin==sets::empty()){return fail(c,0,0,0);}var usize i=0;while(i<sets::count(entries,members,value.origin)){if(!m::charge(ref mut c.work,1)){return fail(c,10,start,end);}let leaf=sets::member(entries,members,value.origin,i);if(leaf==2){i+=1;continue;}let owner=sets::owner_id(leaf);if(owner==0 || owner>inputs::owner_count(input)){return fail(c,12,start,end);}let source=inputs::owner(input,owner);if(source.kind==14){let expired=switch(p::expired(allocations,value.allocation,leaf,ref mut c.work)){case .ok(b):{b}case .err(code):{return fail(c,code,start,end);}};if(expired || source.frame!=c.frame || start<source.start || end>source.end){let allocation=switch(p::lookup(allocations,value.allocation,leaf,ref mut c.work)){case .ok(n):{n}case .err(code):{return fail(c,code,start,end);}};if(allocation==0 || allocation>inputs::allocation_count(input)){return fail(c,12,start,end);}if(v::len<Unknown>(unknowns)>=8192 || !m::charge(ref mut c.work,1)){return fail(c,10,start,end);}if(!v::push<Unknown>(unknowns,Unknown{.kind=4,.after=c.sites,.frame=c.frame,.start,.end,.origin=leaf,.allocation}).is_ok){return fail(c,11,start,end);}}}i+=1;}return fail(c,0,0,0);
 }
 
-pub fn Context context(usize frame,m::Frame value,bool borrower,bool tagged_return,usize work){return Context{.frame,.value,.borrower,.tagged_return,.sites=0,.returned=0,.allocation=0,.seen=false,.work,.loop_depth=0,.probes=0};}
+pub fn Context context(usize frame,m::Frame value,bool borrower,bool tagged_return,usize work){return Context{.statement=0,.frame,.value,.borrower,.tagged_return,.sites=0,.returned=0,.allocation=0,.seen=false,.work,.loop_depth=0,.probes=0};}

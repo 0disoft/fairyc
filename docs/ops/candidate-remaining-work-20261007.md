@@ -1897,3 +1897,32 @@ E2105 owner moves are next. Parent/subview generations, complete reference
 access/store conflicts, full owned loan-fact publication, borrow MIR/C/runtime,
 unsafe provenance, move-aware cleanup before Region reset, full dispatcher,
 stage1/stage2, Linux and release remain pending. No push was made.
+
+## Owner moves with retained loans (2026-10-10)
+
+Origin Flow rejects direct resource binding, assignment, return, call arguments
+and Option/Result constructor payload moves while their whole-root loans remain
+live. Resource-containing tagged types and SDK Vec types are classified in their
+own Values type graph. E2105 retains owner role 6, loan role 4 and last-use role
+5 after parsed and typed owners are released. Grouping preserves the full moved
+expression span. Aliases sharing one loan produce one diagnostic with the
+furthest future use. Nested argument statements restore the outer statement
+liveness context; fixed-point probes publish no diagnostics.
+
+Source checking and a fresh locked development build passed. All 39 exact API
+and CLI goldens passed: 16 accepted, 23 rejected, 24 diagnostics. Thirty-six
+cases match Go exactly. Go accepts two later-argument moves while an earlier
+shared argument is held; the candidate rejects them under the normative local
+loan rule. One alias case selects the furthest use instead of Go's arbitrary
+map iteration order. These three expectations use independent source anchors.
+Eight selected native tests passed, and the previous seven native traces remain
+byte-identical. E2101 CLI cases match 38/38, and Region lifetime CLI cases match
+17/17. An initial Region test invocation omitted its alloc.fy input argument;
+the affected five tests were rerun with the absolute source path. Evidence:
+`docs/ops/evidence/candidate-module-owner-moves-20261010.json`.
+
+Later borrowed arguments after an earlier move in the same expression are the
+next bounded step. Parent/subview generations, complete reference access/store
+conflicts, full owned loan-fact publication, borrow MIR/C/runtime, unsafe
+provenance, move-aware cleanup, full dispatcher, stage1/stage2, Linux and release
+remain pending. Stable CLI, SDK ABI, DB and CI are unchanged; no push.
