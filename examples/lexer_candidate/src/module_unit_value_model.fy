@@ -17,7 +17,7 @@ pub fn Seed seed(usize result,usize instance){return Seed{.result,.instance,.bui
 pub struct Invocation {u32 kind;usize expression;usize source_index;usize target_module;usize target_declaration;usize instance;usize argument_start;usize argument_count;usize start;usize end;bool checked;}
 pub struct Argument {usize invocation;usize position;usize expression;usize source_index;usize expected;usize actual;usize start;usize end;usize label_start;usize label_end;bool checked;bool shared;}
 pub struct Scan {Problem problem;bool changed;}
-pub struct Local {usize header_start;usize header_end;u32 kind;usize source_index;usize initializer;usize expected;usize type;Place origin;usize start;usize end;}
+pub struct Local {usize header_start;usize header_end;u32 kind;usize source_index;usize initializer;usize expected;usize type;usize scope;Place origin;usize start;usize end;}
 pub struct Consumer {u32 kind;usize source_index;usize expression;usize target;usize operator;u32 header;usize expected;usize actual;bool checked;usize start;usize end;}
 pub struct Return {usize expression;usize expected;usize actual;bool checked;usize start;usize end;}
 pub struct Problem {u32 code;usize module_index;usize start;usize end;usize expected;usize actual;}

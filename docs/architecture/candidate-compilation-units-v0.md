@@ -1491,3 +1491,33 @@ it was not rerun after this focused rejection fix. Ownership, unsafe
 provenance and unit execution integration remain. No language/SDK ABI, SDK
 source, DB, CI or runner contract changed; no release, Linux or stage1/stage2
 validation or push was performed.
+
+## Checked provider bodies for borrow-origin analysis (2026-10-10)
+
+module_unit_origin_inputs collects the checked value bodies required by
+borrowed-result calls. The primary plan stays caller-owned; an additional
+provider module is checked and owned once, including its private ordinary
+forwarding calls. It uses the existing bind, call-closure and value phases
+instead of guessing a return origin from the signature. Analysis frame/owner
+IDs preserve original declaration coordinates and local lexical scopes.
+Generic instance IDs are scoped to their owning unit, and canonical type IDs
+remain in each unit graph.
+
+Development check passed (205 sources, 2499 MIR functions), native tests
+passed 4/4 and reference cases matched 4/4. Coverage includes repeated
+provider-call caching and private forwarding, distinct generic parameter
+owners, E1009 at the provider return-expression span, and matching generic
+instance numbers that refer to different concrete types in two units. The
+fourth test was appended after three passes; byte-identical preamble/functions
+and compiler, SDK, implementation, input and lock hashes justified reusing
+those passes. Existing work, type, context, expression, owner, invocation and
+active-parameter bounds are retained. Evidence:
+docs/ops/evidence/candidate-module-unit-origin-inputs-20261010.json.
+
+This is the input prerequisite for return-origin inference; it does not
+publish guessed origins or validate lifetime/conflict/move safety.
+Static/unknown origins, branch joins and call substitution remain next,
+followed by ownership, unsafe pointer provenance and cross-unit execution. No
+new fixed corpus, full dispatcher, stage1/stage2, release or Linux validation
+was run. Public language/SDK ABI, SDK sources, DB, CI and runner contracts are
+unchanged; nothing was pushed.
