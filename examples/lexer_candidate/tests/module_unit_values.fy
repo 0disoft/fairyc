@@ -24,11 +24,11 @@ fn Result<values::Plan,model::Problem> checked(ref u8[] text){var v::Vec<syntax:
     let p=switch(checked(text)){case .ok(p):{p}case .err(_):{assert(false);return;}};assert(values::count(ref p)==7 && values::inferred(ref p)==5 && values::checked_returns(ref p)==7);var usize i=0;while(i<values::count(ref p)){let c=values::at(ref p,i);assert(model::return_count(c)==1 && model::return_at(c,0).checked);i+=1;}
 }
 @test fn void mismatches_and_literal_overflow_keep_provider_spans(){
-    let wrong=b"module main;fn u8 byte(){return true;}";switch(checked(wrong)){case .ok(_):{assert(false);}case .err(p):{assert(p.code==1006 && p.module_index==0 && bytes::equal(wrong[p.start..p.end],b"true") && p.expected!=p.actual);}};
+    let wrong=b"module main;fn u8 byte(){return true;}";switch(checked(wrong)){case .ok(_):{assert(false);}case .err(p):{assert(p.code==1009 && p.module_index==0 && bytes::equal(wrong[p.start..p.end],b"true") && p.expected!=p.actual);}};
     let local=b"module main;fn bool flag(){return true;}fn i32 main(){let i32 n=flag();return 0;}";switch(checked(local)){case .ok(_):{assert(false);}case .err(p):{assert(p.code==1006 && bytes::equal(local[p.start..p.end],b"flag()"));}};
-    let call=b"module main;fn bool flag(){return true;}fn i32 main(){return flag();}";switch(checked(call)){case .ok(_):{assert(false);}case .err(p):{assert(p.code==1006 && bytes::equal(call[p.start..p.end],b"flag()"));}};
+    let call=b"module main;fn bool flag(){return true;}fn i32 main(){return flag();}";switch(checked(call)){case .ok(_):{assert(false);}case .err(p):{assert(p.code==1009 && bytes::equal(call[p.start..p.end],b"flag()"));}};
     let overflow=b"module main;fn u8 byte(){return (256);}";switch(checked(overflow)){case .ok(_):{assert(false);}case .err(p):{assert(p.code==1013 && bytes::equal(overflow[p.start..p.end],b"256"));}};
-    let empty=b"module main;fn i32 main(){return;}";switch(checked(empty)){case .ok(_):{assert(false);}case .err(p):{assert(p.code==1006 && bytes::equal(empty[p.start..p.end],b"return;"));}};
+    let empty=b"module main;fn i32 main(){return;}";switch(checked(empty)){case .ok(_):{assert(false);}case .err(p):{assert(p.code==1009 && bytes::equal(empty[p.start..p.end],b"return;"));}};
     switch(checked(b"module main;fn i32 main(){return null;}")){case .ok(_):{assert(false);}case .err(p):{assert(p.code==1006);}};
 }
 @test fn void variants_remain_unchecked_after_argument_matching(){

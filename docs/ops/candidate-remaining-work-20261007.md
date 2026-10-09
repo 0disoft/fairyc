@@ -504,3 +504,40 @@ move-aware cleanup, structural cross-unit links/layouts and HIR/MIR/C/CLI remain
 pending. Release, Linux, full dispatcher native, stage1/stage2 and push were not
 run. Public language/SDK ABI, SDK sources, DB, CI and runners are unchanged.
 Evidence: `docs/ops/evidence/candidate-module-unit-casts-20261009.json`.
+
+## 제공자 좌표를 유지하는 필드 타입 검사 (2026-10-09)
+
+module_unit_value_field는 소유 인터페이스에서 알려진 nominal 필드를 해석하며, canonical owner/type, provider 모듈과 선언, 원래 필드 인덱스를 원래 식 ID와 span과 함께 불변 값 테이블에 보존한다. shared/mutable receiver borrow는 nominal 필드 조회를 위해 unwrap하고, provider 밖의 resource 필드는 E0103으로 거부하며, 내부 헬퍼 6201은 consumer에서만 정규화한다. 알 수 없는 operand는 pending으로 남고, missing/nonaggregate/지원되지 않는 member 사용은 전체 식 span에 실험적 code2를 사용한다. 닫힌 builtin 필드는 ref str, byte/scalar view의 len/is_empty, fixed-array len, Result is_ok를 포함하며, scalar peer context, cast, 추론된 local, argument, return과 통합된다. 측정된 shape/name 비교는 기존 work budget에 청구되고, 유효한 알려진 return 불일치는 이제 E1009이며 local과 argument는 E1006을 유지한다. borrow/place/ownership/unsafe와 pointer-cast consumer는 아직 pending이고, 기존 arena/depth64/round64/work1MiB 한도는 그대로이며 code10 range splitting은 유지된다.
+
+| Observation | Result |
+| --- | --- |
+| Development check | 188 source files; 2344 MIR functions; passed |
+| Selected development native cases | 11 passed; 9 unchanged cases reused and 2 corrected-coordinate cases rerun |
+| Reference acceptance/code/span | 9/9 matched, including imported field privacy |
+| Fixed dispatcher snapshot | 160 modules; 1048562 bytes |
+| Detailed observations | 24 units before the 900s process timeout; remaining 2 units passed separately |
+| Units / admission attempts / splits | 26 / 39 / 13 |
+| Field / checked field totals | 14031 / 6085 |
+| Nominal provider field records | 6015 |
+| Cast / checked scalar cast totals | 1789 / 52 |
+| Argument / checked argument totals | 29822 / 25740 |
+| Maximum value work / graph | 747467 / 1048576; 427 / 4096 |
+
+
+The native reuse receipt retains the original 9-pass/2-failure report and proves
+that the only test-file change corrected two expected declaration IDs from 1 to
+2. The parser counts the module declaration; compiler/implementation/SDK/lock
+identities and the other nine fixtures are unchanged. Both corrected cases were
+rerun natively. No failed execution is labeled as a passing execution.
+The first process admitted all 26 units, then completed detailed assertions for
+24 before its 900-second deadline. The final two ranges (145..152 and 152..160)
+passed with the same compiler/manifest/implementation. All ranges continuously
+cover modules 0..160; the initial timeout is retained as a failed execution.
+This combined observation uses the same bounded 160-module input snapshot; new unit
+modules are compiled as implementation code. Full current-source dispatcher
+native and stage1/stage2 remain pending. Borrow/dereference/index/slice and
+place/ownership/unsafe consumers, raw-pointer casts, move-aware cleanup,
+structural cross-unit links/layouts and HIR/MIR/C/CLI remain unfinished.
+Release, Linux and push were not run. Public language/SDK ABI, SDK sources,
+DB, CI and runners are unchanged.
+Evidence: `docs/ops/evidence/candidate-module-unit-fields-20261009.json`.

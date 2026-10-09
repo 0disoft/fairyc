@@ -25,6 +25,7 @@ def main():
     ap.add_argument("--receipt", type=Path, required=True)
     ap.add_argument("--probe", choices=("joined_scanner_storage", "partitioned_module_join", "partitioned_module_bind", "partitioned_module_interfaces"), default="joined_scanner_storage")
     ap.add_argument("--execution-timeout", type=int, default=300)
+    ap.add_argument("--probe-arg", action="append", default=[])
     args = ap.parse_args()
     if args.execution_timeout <= 0:
         ap.error("--execution-timeout must be positive")
@@ -67,7 +68,7 @@ def main():
         shutil.copyfile(PROJECT / "fairy.toml", workspace / "fairy.toml")
         run([compiler, "check"], workspace)
         run([compiler, "build", "--locked"], workspace)
-        run([workspace / "build/lexer-candidate.exe", manifest], REPO, args.execution_timeout)
+        run([workspace / "build/lexer-candidate.exe", manifest, *args.probe_arg], REPO, args.execution_timeout)
         passed = True
     finally:
         schemas = {"joined_scanner_storage": "fairyc.candidate-cooked-storage/v1",
@@ -77,6 +78,7 @@ def main():
         receipt = dict(schema=schemas[args.probe], passed=passed,
                        compiler=identity(compiler), probe=identity(probe), observer=identity(Path(__file__)),
                        manifest=identity(manifest), sources=[identity(p) for p in sources],
+                       probeArguments=args.probe_arg,
                        nativeTests=tests, commands=commands,
                        scope="Development storage and compacted arena observations; full dispatcher compilation remains incomplete")
         args.receipt.resolve().write_text(json.dumps(receipt, indent=2) + "\n", encoding="utf-8")

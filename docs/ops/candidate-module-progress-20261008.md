@@ -2118,3 +2118,40 @@ move-aware cleanup, structural cross-unit links/layouts and HIR/MIR/C/CLI remain
 pending. Release, Linux, full dispatcher native, stage1/stage2 and push were not
 run. Public language/SDK ABI, SDK sources, DB, CI and runners are unchanged.
 Evidence: `docs/ops/evidence/candidate-module-unit-casts-20261009.json`.
+
+### Owned nominal and builtin field types (2026-10-09)
+
+module_unit_value_field now resolves known nominal fields from owned interfaces, preserving the canonical owner and type, the provider module and declaration, and the original field index alongside the original expression ID and span in an immutable value table. Shared and mutable receiver borrows are unwrapped for nominal field lookup, while resource fields outside the provider are rejected as E0103, with the internal helper 6201 normalized only by the consumer. Unknown operands remain pending, and missing, nonaggregate, or otherwise unsupported member uses fall back to the experimental code2 over the full expression span. Closed builtin fields cover ref str, byte and scalar views' len and is_empty, fixed-array len, and Result is_ok, and the work integrates with scalar peer context, casts, inferred locals, arguments, and returns. Measured shape and name comparisons are charged to the existing work budget; valid known return mismatches are now E1009 while locals and arguments stay E1006. Borrow, place, ownership, and unsafe consumers as well as pointer-cast consumers remain pending, and the existing arena, depth64, round64, and work1MiB bounds are unchanged, with code10 range splitting retained.
+
+| Observation | Result |
+| --- | --- |
+| Development check | 188 source files; 2344 MIR functions; passed |
+| Selected development native cases | 11 passed; 9 unchanged cases reused and 2 corrected-coordinate cases rerun |
+| Reference acceptance/code/span | 9/9 matched, including imported field privacy |
+| Fixed dispatcher snapshot | 160 modules; 1048562 bytes |
+| Detailed observations | 24 units before the 900s process timeout; remaining 2 units passed separately |
+| Units / admission attempts / splits | 26 / 39 / 13 |
+| Field / checked field totals | 14031 / 6085 |
+| Nominal provider field records | 6015 |
+| Cast / checked scalar cast totals | 1789 / 52 |
+| Argument / checked argument totals | 29822 / 25740 |
+| Maximum value work / graph | 747467 / 1048576; 427 / 4096 |
+
+
+The native reuse receipt retains the original 9-pass/2-failure report and proves
+that the only test-file change corrected two expected declaration IDs from 1 to
+2. The parser counts the module declaration; compiler/implementation/SDK/lock
+identities and the other nine fixtures are unchanged. Both corrected cases were
+rerun natively. No failed execution is labeled as a passing execution.
+The first process admitted all 26 units, then completed detailed assertions for
+24 before its 900-second deadline. The final two ranges (145..152 and 152..160)
+passed with the same compiler/manifest/implementation. All ranges continuously
+cover modules 0..160; the initial timeout is retained as a failed execution.
+This combined observation uses the same bounded 160-module input snapshot; new unit
+modules are compiled as implementation code. Full current-source dispatcher
+native and stage1/stage2 remain pending. Borrow/dereference/index/slice and
+place/ownership/unsafe consumers, raw-pointer casts, move-aware cleanup,
+structural cross-unit links/layouts and HIR/MIR/C/CLI remain unfinished.
+Release, Linux and push were not run. Public language/SDK ABI, SDK sources,
+DB, CI and runners are unchanged.
+Evidence: `docs/ops/evidence/candidate-module-unit-fields-20261009.json`.

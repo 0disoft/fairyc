@@ -33,8 +33,8 @@ fn void failure(ref u8[] text,u32 code,ref u8[] at){switch(checked(text)){case .
     let p=switch(checked(b"module main;fn void read(ref i32 n){return;}fn void main(ref mut i32 n){read(n);return;}")){case .ok(p):{p}case .err(_):{assert(false);return;}};assert(values::checked_calls(ref p)==1 && values::checked_arguments(ref p)==1 && values::shared_arguments(ref p)==1);
     failure(b"module main;fn void write(ref mut i32 n){return;}fn void main(ref i32 n){write(n);return;}",1006,b"n");
 }
-@test fn void unresolved_fields_remain_pending_without_defaulting_literal_peers(){
-    let p=switch(checked(b"module main;struct S{i64 n;}fn i64 leaf(i64 n){return n;}fn i64 main(ref S s){return leaf(4000000000+s.n);}")){case .ok(p):{p}case .err(_):{assert(false);return;}};assert(values::invocation_count(ref p)==1 && values::checked_calls(ref p)==0 && values::checked_arguments(ref p)==0 && values::unresolved(ref p)>0);
+@test fn void unresolved_dereferences_remain_pending_without_defaulting_literal_peers(){
+    let p=switch(checked(b"module main;fn i64 leaf(i64 n){return n;}fn i64 main(ref i64 n){return leaf(4000000000+*n);}")){case .ok(p):{p}case .err(_):{assert(false);return;}};assert(values::invocation_count(ref p)==1 && values::checked_calls(ref p)==0 && values::checked_arguments(ref p)==0 && values::unresolved(ref p)>0);
 }
 @test fn void generic_and_cleanup_calls_use_concrete_provider_parameters(){
     var v::Vec<syntax::Parsed> sources=v::empty<syntax::Parsed>();assert(v::push<syntax::Parsed>(ref mut sources,parsed(b"module main;import provider as p;fn u8 main(){return p::go<u8>(255);}")).is_ok);assert(v::push<syntax::Parsed>(ref mut sources,parsed(b"module provider;resource Item{u8 n;cleanup{discard helper(2);return;}}fn u8 helper(u8 n){return n;}pub fn T go<T>(T n){let Item item=Item{.n=1};discard item;return helper(n);}")).is_ok);
