@@ -1781,3 +1781,51 @@ unsafe provenance, split-unit execution and the complete project dispatcher
 remain. Release, Linux and stage1/stage2 were deferred as planned. No push,
 public Stage0 CLI/language/SDK ABI change, DB change or CI/runner change was
 made.
+
+## Single-leaf tagged return origins and wrapper storage (2026-10-10)
+
+The Fairy origin pipeline now recognizes a single safe-borrow leaf through
+nested Option/Result types, matching the current Stage0 admission rule.
+Constructors preserve the selected payload origin, including success and
+failure payloads; .none and inert selected payloads use a known-empty handle
+distinct from Unknown and an out-of-scope binding. Empty payloads remain live
+through variables, assignments, branch/loop joins and call substitution,
+without inventing an owner or emitting an unknown-origin diagnostic. Multiple
+borrowed leaves remain explicitly unsupported.
+
+Origin inputs now distinguish a tagged wrapper storage owner from the owner of
+its contained borrow. Shared forwarding of an Option parameter retains its
+payload origin, while taking a reference to a local or by-value wrapper
+records kind-12 storage provenance and reports E2102 at the original
+expression, with the wrapper declaration as the related origin. All storage
+aliases share the existing owner/work bounds. The unit type resolver and
+borrow-place eligibility also admit refs to Option/Result so those storage
+cases reach origin analysis. Generic and provider calls retain original
+declaration and module coordinates.
+
+The manifest command now admits these single-leaf wrapped returns. Development
+check passed (214 sources, 2640 MIR functions); five selected native tests
+passed, including known-empty algebra, invalid handles/work exhaustion,
+direct-return regression and explicit refusal of multiple borrowed leaves and
+pending ? flow. Twenty-four API/reference comparisons matched exit status,
+diagnostic codes, module indices, primary spans and related role/spans. A
+fresh native candidate build then matched 35 CLI/reference cases and passed
+existing checker modes, malformed input, unsupported boundaries, inert tagged
+returns and help. Current compiler, candidate, SDK, source, test, lock and
+fixture hashes were checked. A source check refreshed the lock after the
+native observer snapshot; the native report itself passed 5/5 with lock
+verified. Only that snapshot differed, so unchanged compiler/SDK/source/test
+identities were verified and the successful native output was re-observed
+against the final lock without rebuilding those tests. The recovery and both
+lock digests are retained in the receipt. Evidence:
+docs/ops/evidence/candidate-module-unit-origin-tagged-20261010.json.
+
+Initial native failures are retained as failures: one test helper missed its
+statement terminator, a loop fixture included an unsupported empty statement,
+and container-ref cases initially reached the old unit type admission refusal.
+The corrected fixtures and the implemented type path were rerun; these earlier
+attempts are not counted as passes. Match payload bindings, implicit Result ?
+return origins, region origins, loans, lifetimes, conflicts, moves and unsafe
+provenance remain. Split-unit execution, the full project dispatcher,
+stage1/stage2, release and Linux remain deferred. No push, public Stage0
+language/SDK ABI change, DB change or CI/runner change was made.

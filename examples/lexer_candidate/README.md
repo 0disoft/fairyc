@@ -18,7 +18,7 @@ payloads. Authenticated `std::process` bodies call the original target argument
 runtime through independently checked SDK source and signature ownership.
 Other SDK bodies and project build/run/test integration remain in progress.
 
-## Direct return-origin checking
+## Return-origin checking
 
 After building the native candidate, run:
 
@@ -28,14 +28,16 @@ After building the native candidate, run:
 
 The manifest uses the same one-relative-path-per-line format as
 `--check-modules-file`, relative to the command's working directory. LF and
-CRLF are accepted. The command checks direct borrow return origins in one
+CRLF are accepted. The command checks direct and single-leaf tagged borrow return origins in one
 bounded primary unit and prints original file/byte locations for E2102,
 E2103 and their related origins. Status 3 means a semantic origin error;
 status 2 means unknown/unsupported analysis, a phase/input failure or a limit.
 
-Borrowed Option/Result payload returns are currently unsupported and return 2.
-Inert tagged returns remain admitted. Loan, lifetime, conflict, move and unsafe
-pointer provenance checking, and split-unit execution are still pending.
+Single-borrow-leaf Option/Result payload construction, empty payloads, nested
+wrappers and call forwarding are supported. Borrowing a wrapper itself retains
+its storage origin. Multiple borrowed leaves and Result `?` origin propagation
+remain unsupported. Match payload binding origins, region/loan/lifetime/conflict/
+move and unsafe pointer provenance checking, and split-unit execution are pending.
 
 ## Feature guide
 

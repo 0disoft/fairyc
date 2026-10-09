@@ -3,13 +3,15 @@ import module_unit_value_model as m;
 import std::vec as v;
 
 // Analysis-only handles: 0 unreachable/no result, 1 Unknown, 2 Static,
-// 3..16386 lexical owners 1..16384, 32768+ canonical mixed sets.
+// 3..16386 lexical owners 1..16384, 16387 known empty payload,
+// 32768+ canonical mixed sets. Empty payload keeps a binding live.
 // Unknown absorbs joins. Static remains a member when joined with an owner.
 pub struct Entry {usize start;usize count;}
-pub fn bool valid(ref v::Vec<Entry> entries,ref v::Vec<usize> members,usize origin){return origin<=16386 || origin>=32768 && origin-32768<v::len<Entry>(entries);}
+pub fn usize empty(){return 16387;}
+pub fn bool valid(ref v::Vec<Entry> entries,ref v::Vec<usize> members,usize origin){return origin<=16387 || origin>=32768 && origin-32768<v::len<Entry>(entries);}
 pub fn Result<usize,u32> owner(usize id){return if(id==0 || id>16384){.err(12)}else{.ok(id+2)};}
 pub fn usize owner_id(usize origin){return if(origin>=3 && origin<=16386){origin-2}else{0};}
-pub fn usize count(ref v::Vec<Entry> entries,ref v::Vec<usize> members,usize origin){assert(valid(entries,members,origin));return if(origin<=1){0}else if(origin>=32768){v::at<Entry>(entries,origin-32768).count}else{1};}
+pub fn usize count(ref v::Vec<Entry> entries,ref v::Vec<usize> members,usize origin){assert(valid(entries,members,origin));return if(origin<=1 || origin==empty()){0}else if(origin>=32768){v::at<Entry>(entries,origin-32768).count}else{1};}
 pub fn usize member(ref v::Vec<Entry> entries,ref v::Vec<usize> members,usize origin,usize index){assert(index<count(entries,members,origin));return if(origin>=32768){*v::at<usize>(members,v::at<Entry>(entries,origin-32768).start+index)}else{origin};}
 pub fn usize set_count(ref v::Vec<Entry> entries,ref v::Vec<usize> members){return v::len<Entry>(entries);}
 pub fn usize stored_members(ref v::Vec<Entry> entries,ref v::Vec<usize> members){return v::len<usize>(members);}
@@ -21,6 +23,7 @@ fn Result<usize,u32> intern(ref mut v::Vec<Entry> entries,ref mut v::Vec<usize> 
 }
 pub fn Result<usize,u32> join(ref mut v::Vec<Entry> entries,ref mut v::Vec<usize> members,usize a,usize b,ref mut usize work){
     if(!m::charge(work,1)){return .err(10);}if(!valid(entries,members,a) || !valid(entries,members,b)){return .err(12);}if(a==1 || b==1){return .ok(1);}if(a==b || b==0){return .ok(a);}if(a==0){return .ok(b);}
+    if(a==empty()){return .ok(b);}if(b==empty()){return .ok(a);}
     let usize na=count(entries,members,a);let usize nb=count(entries,members,b);var v::Vec<usize> merged=v::empty<usize>();var usize ia=0;var usize ib=0;
     while(ia<na || ib<nb){if(!m::charge(work,1) || v::len<usize>(ref merged)>=16385){return .err(10);}let usize left=if(ia<na){member(entries,members,a,ia)}else{0};let usize right=if(ib<nb){member(entries,members,b,ib)}else{0};let usize item=if(ia==na){right}else if(ib==nb || left<right){left}else{right};if(ia<na && left==item){ia+=1;}if(ib<nb && right==item){ib+=1;}if(!v::push<usize>(ref mut merged,item).is_ok){return .err(11);}}
     return intern(entries,members,ref merged,work);

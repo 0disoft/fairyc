@@ -1,6 +1,7 @@
 module module_unit_origin_diagnostics;
 import module_unit_origin_returns as origins;
 import module_unit_origin_inputs as inputs;
+import module_unit_origin_sets as sets;
 import module_unit_value_model as m;
 import std::vec as v;
 
@@ -34,8 +35,8 @@ pub fn Result<Report,m::Problem> collect_budgeted(ref origins::Plan p,usize prio
     while(i<capacity){if(!m::charge(ref mut work,1)){return .err(m::Problem{.code=10,.module_index=0,.start=0,.end=0,.expected=0,.actual=0});}if(!v::push<usize>(ref mut cache,0).is_ok){return .err(m::Problem{.code=11,.module_index=0,.start=0,.end=0,.expected=0,.actual=0});}i+=1;}
     var v::Vec<Diagnostic> diagnostics=v::empty<Diagnostic>();var v::Vec<Related> related=v::empty<Related>();var bool semantic=false;var bool unsupported=false;id=1;
     while(id<=origins::count(p)){let f=inputs::frame(input,id);i=0;while(i<origins::return_count(p,id)){let row=origins::return_at(p,id,i);if(!m::charge(ref mut work,1)){return .err(fail(f.value,10,row.start,row.end));}if(row.frame!=id || row.start>row.end){return .err(fail(f.value,12,row.start,row.end));}var u32 code=0;let usize count=origins::return_source_count(p,row);
-            if(row.origin==1){code=2;}else if(count>1){code=2103;}else if(count==0){return .err(fail(f.value,12,row.start,row.end));}
-            else{let leaf=origins::return_source(p,row,0);if(leaf==2){code=2;}else{if(leaf<3 || leaf-2>inputs::owner_count(input)){return .err(fail(f.value,12,row.start,row.end));}let owner=inputs::owner(input,leaf-2);if(owner.kind==11 || owner.kind==1 && owner.borrowed){code=0;}else if(owner.kind==1 || owner.kind==2 || owner.kind==3 || owner.kind==5){code=2102;}else{code=2;}}}
+            if(row.origin==1){code=2;}else if(count>1){code=2103;}else if(count==0){if(row.origin!=sets::empty() || !f.tagged_return){return .err(fail(f.value,12,row.start,row.end));}}
+            else{let leaf=origins::return_source(p,row,0);if(leaf==2){code=2;}else{if(leaf<3 || leaf-2>inputs::owner_count(input)){return .err(fail(f.value,12,row.start,row.end));}let owner=inputs::owner(input,leaf-2);if(owner.kind==11 || owner.kind==1 && owner.borrowed){code=0;}else if(owner.kind==1 || owner.kind==2 || owner.kind==3 || owner.kind==5 || owner.kind==12){code=2102;}else{code=2;}}}
             if(code!=0){var v::Vec<Related> candidates=v::empty<Related>();if(code==2102 || code==2103){var usize ordinal=0;while(ordinal<count){if(!m::charge(ref mut work,1)){return .err(fail(f.value,10,row.start,row.end));}let leaf=origins::return_source(p,row,ordinal);if(leaf<3 || leaf-2>inputs::owner_count(input)){return .err(fail(f.value,12,row.start,row.end));}let owner=inputs::owner(input,leaf-2);if(owner.frame==0 || owner.frame>inputs::frame_count(input)){return .err(fail(f.value,12,row.start,row.end));}let origin_frame=inputs::frame(input,owner.frame);let error=append_related(ref mut candidates,Related{.role=if(code==2102){1}else{2},.module_index=origin_frame.value.module_index,.start=owner.start,.end=owner.end,.owner=leaf-2},f.value,ref mut work);if(error.code!=0){return .err(error);}ordinal+=1;}}
                 let error=publish(Diagnostic{.code,.module_index=f.value.module_index,.start=row.start,.end=row.end,.related_start=0,.related_count=0},ref candidates,ref mut diagnostics,ref mut related,ref mut cache,f.value,ref mut work);if(error.code!=0){return .err(error);}semantic=semantic || code!=2;unsupported=unsupported || code==2;
             }i+=1;
