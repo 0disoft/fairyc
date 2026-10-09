@@ -1,0 +1,434 @@
+{
+  "schema": "fairyc.candidate-module-subview-generations/v1",
+  "passed": true,
+  "scope": "Frame-local mutable projection generations distinguish ancestors, descendants and descriptor aliases. Paths compare overlapping origins and inherited generation membership. View receivers remain borrowed through index/slice bounds; named reference stores retain targets through index and RHS evaluation. Caller generations are freshly materialized from an owned descendant return-summary flag.",
+  "sourceTruth": [
+    "docs/language/0002-borrows-and-return-origins.md",
+    "internal/semantic/exclusive_subview.go",
+    "internal/semantic/indexed_place.go",
+    "internal/semantic/shared_reborrow.go",
+    "internal/semantic/borrow_creation.go"
+  ],
+  "identity": {
+    "compiler": {
+      "path": ".cache/candidate-tagged/compiler-origin-patterns.exe",
+      "sha256": "d36dae1b99751322e447880aaf4d28321bd6d53bdf776185308c6c4504889bb2"
+    },
+    "candidate": {
+      "path": "examples/lexer_candidate/build/lexer-candidate.exe",
+      "sha256": "5605883ec7e89238605f51d32219ddec4d88212cdca8d4c0e21d16189c44f078"
+    },
+    "lock": {
+      "path": "examples/lexer_candidate/fairy.lock",
+      "sha256": "1411bdd7abdae6db92b071fb631b78e4ff5428edd6ecc090e8fff21b2db88645"
+    },
+    "files": [
+      {
+        "path": "examples/lexer_candidate/src/module_unit_loan_generations.fy",
+        "sha256": "73d5c30690905e3fb23531e7e699c34cfb735cef26c50455bb7e8bbc3c44c12c"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_loan_checks.fy",
+        "sha256": "1a032f9a2fa8670e60aeacaf5fe1f1d023726b66f389c761bdf4bbca0b91e7d8"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_loan_reference.fy",
+        "sha256": "7d52da7967395b1145483c04421b4eee66d2907544e064199a76ce9c73e992f7"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_loan_model.fy",
+        "sha256": "caf9760de0825c8623e213bd33d14445b21982ffd1715c592550ee5128b74d56"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_origin_flow.fy",
+        "sha256": "c5524e00aa01454eaf44dc8fd7b49670d3a620a73032411661e9b6e97b958ff3"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_origin_flow_control.fy",
+        "sha256": "253915c13d37388f8bc6e49dc99e24bd890875b19b8673834cc03964fdfbb8a4"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_origin_flow_model.fy",
+        "sha256": "b122c6685a53a11afc311002868bb8116f40c74cdc02e6c1b05385611f430fb6"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_origin_returns.fy",
+        "sha256": "efb5fedbd721d07d4f5db3917eaf42e206a763bee434d6b60fd50c62d3f9aa12"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_origin_match.fy",
+        "sha256": "34125cbf2c537ea660f3cd84669855aa981707333a4689e2237b5d474712d1e6"
+      },
+      {
+        "path": "examples/lexer_candidate/tests/module_unit_subviews.fy",
+        "sha256": "4b6d3585e6853f0714201e42af54739fabcb2a23bb6cb2b272bdbd0f9d264a4d"
+      },
+      {
+        "path": "examples/lexer_candidate/tests/module_unit_origin_region.fy",
+        "sha256": "38c04299637931369cad662159611fa673d479186f5ef96bfe6ea1b9ac30edde"
+      }
+    ]
+  },
+  "sourceCheck": {
+    "exit": 0,
+    "stdout": "check ok: 2 instance(s), 232 source file(s), 2892 MIR function(s), lock updated\n"
+  },
+  "lockedBuild": {
+    "exit": 0,
+    "stdout": "built: build/lexer-candidate.exe (x86_64-windows-msvc, development, lock verified)\n"
+  },
+  "comparisons": {
+    "goAPIAndCLIExact": 38,
+    "accepted": 13,
+    "rejected": 25,
+    "diagnostics": 26,
+    "cases": [
+      {
+        "index": 0,
+        "name": "last use",
+        "exit": 0,
+        "diagnostics": 0,
+        "matched": true
+      },
+      {
+        "index": 1,
+        "name": "omitted start",
+        "exit": 0,
+        "diagnostics": 0,
+        "matched": true
+      },
+      {
+        "index": 2,
+        "name": "omitted end",
+        "exit": 0,
+        "diagnostics": 0,
+        "matched": true
+      },
+      {
+        "index": 3,
+        "name": "full length bound",
+        "exit": 0,
+        "diagnostics": 0,
+        "matched": true
+      },
+      {
+        "index": 4,
+        "name": "nested",
+        "exit": 0,
+        "diagnostics": 0,
+        "matched": true
+      },
+      {
+        "index": 5,
+        "name": "returned",
+        "exit": 0,
+        "diagnostics": 0,
+        "matched": true
+      },
+      {
+        "index": 6,
+        "name": "shared reader",
+        "exit": 0,
+        "diagnostics": 0,
+        "matched": true
+      },
+      {
+        "index": 7,
+        "name": "loop",
+        "exit": 0,
+        "diagnostics": 0,
+        "matched": true
+      },
+      {
+        "index": 8,
+        "name": "parent write",
+        "exit": 3,
+        "diagnostics": 1,
+        "matched": true
+      },
+      {
+        "index": 9,
+        "name": "parent read",
+        "exit": 3,
+        "diagnostics": 1,
+        "matched": true
+      },
+      {
+        "index": 10,
+        "name": "owner read",
+        "exit": 3,
+        "diagnostics": 1,
+        "matched": true
+      },
+      {
+        "index": 11,
+        "name": "copied parent",
+        "exit": 3,
+        "diagnostics": 1,
+        "matched": true
+      },
+      {
+        "index": 12,
+        "name": "child alias",
+        "exit": 3,
+        "diagnostics": 1,
+        "matched": true
+      },
+      {
+        "index": 13,
+        "name": "sibling",
+        "exit": 3,
+        "diagnostics": 2,
+        "matched": true
+      },
+      {
+        "index": 14,
+        "name": "nested parent",
+        "exit": 3,
+        "diagnostics": 1,
+        "matched": true
+      },
+      {
+        "index": 15,
+        "name": "earlier argument",
+        "exit": 3,
+        "diagnostics": 1,
+        "matched": true
+      },
+      {
+        "index": 16,
+        "name": "later argument",
+        "exit": 3,
+        "diagnostics": 1,
+        "matched": true
+      },
+      {
+        "index": 17,
+        "name": "bounds mutation",
+        "exit": 3,
+        "diagnostics": 1,
+        "matched": true
+      },
+      {
+        "index": 18,
+        "name": "held target",
+        "exit": 3,
+        "diagnostics": 1,
+        "matched": true
+      },
+      {
+        "index": 19,
+        "name": "returned conflict",
+        "exit": 3,
+        "diagnostics": 1,
+        "matched": true
+      },
+      {
+        "index": 20,
+        "name": "tagged conflict",
+        "exit": 3,
+        "diagnostics": 1,
+        "matched": true
+      },
+      {
+        "index": 21,
+        "name": "shared slice bounds mutation",
+        "exit": 3,
+        "diagnostics": 1,
+        "matched": true
+      },
+      {
+        "index": 22,
+        "name": "index callback mutation",
+        "exit": 3,
+        "diagnostics": 1,
+        "matched": true
+      },
+      {
+        "index": 23,
+        "name": "store RHS owner read",
+        "exit": 3,
+        "diagnostics": 1,
+        "matched": true
+      },
+      {
+        "index": 24,
+        "name": "store RHS own reference read",
+        "exit": 0,
+        "diagnostics": 0,
+        "matched": true
+      },
+      {
+        "index": 25,
+        "name": "array mutable range owner read",
+        "exit": 3,
+        "diagnostics": 1,
+        "matched": true
+      },
+      {
+        "index": 26,
+        "name": "array mutable range after use",
+        "exit": 0,
+        "diagnostics": 0,
+        "matched": true
+      },
+      {
+        "index": 27,
+        "name": "array bounds write",
+        "exit": 3,
+        "diagnostics": 1,
+        "matched": true
+      },
+      {
+        "index": 28,
+        "name": "element borrower owner read",
+        "exit": 3,
+        "diagnostics": 1,
+        "matched": true
+      },
+      {
+        "index": 29,
+        "name": "parent rebind different root",
+        "exit": 0,
+        "diagnostics": 0,
+        "matched": true
+      },
+      {
+        "index": 30,
+        "name": "parameter descendant",
+        "exit": 3,
+        "diagnostics": 1,
+        "matched": true
+      },
+      {
+        "index": 31,
+        "name": "provider descendant",
+        "exit": 3,
+        "diagnostics": 1,
+        "matched": true
+      },
+      {
+        "index": 32,
+        "name": "tagged clear releases parent",
+        "exit": 0,
+        "diagnostics": 0,
+        "matched": true
+      },
+      {
+        "index": 33,
+        "name": "tagged branch retains parent",
+        "exit": 3,
+        "diagnostics": 1,
+        "matched": true
+      },
+      {
+        "index": 34,
+        "name": "temporary tagged pattern descendant",
+        "exit": 3,
+        "diagnostics": 1,
+        "matched": true
+      },
+      {
+        "index": 35,
+        "name": "shared child permits parent descriptor rebind",
+        "exit": 0,
+        "diagnostics": 0,
+        "matched": true
+      },
+      {
+        "index": 36,
+        "name": "generic provider descendant",
+        "exit": 3,
+        "diagnostics": 1,
+        "matched": true
+      },
+      {
+        "index": 37,
+        "name": "i64 descendant",
+        "exit": 3,
+        "diagnostics": 1,
+        "matched": true
+      }
+    ]
+  },
+  "ownedSummary": {
+    "afterSourceAndPrimaryDrop": true,
+    "frames": [
+      {
+        "frame": 1,
+        "declaration": 2,
+        "descendant": false
+      },
+      {
+        "frame": 2,
+        "declaration": 3,
+        "descendant": true
+      },
+      {
+        "frame": 3,
+        "declaration": 4,
+        "descendant": false
+      }
+    ]
+  },
+  "native": {
+    "count": 6,
+    "passed": 6,
+    "tests": [
+      {
+        "identity": "tests::module_unit_loan_conflicts::owner_writes_and_borrow_creation_follow_live_loans",
+        "outcome": "passed"
+      },
+      {
+        "identity": "tests::module_unit_origin_region::abstract_static_origin_does_not_hide_expired_region",
+        "outcome": "passed"
+      },
+      {
+        "identity": "tests::module_unit_origin_region::region_borrows_expire_across_control_flow_and_reentry",
+        "outcome": "passed"
+      },
+      {
+        "identity": "tests::module_unit_reference_access::retained_shared_references_block_mutable_calls_and_stores",
+        "outcome": "passed"
+      },
+      {
+        "identity": "tests::module_unit_subviews::descendant_generations_and_evaluation_holds_follow_last_use",
+        "outcome": "passed"
+      },
+      {
+        "identity": "tests::module_unit_subviews::owned_return_summaries_distinguish_descendants",
+        "outcome": "passed"
+      }
+    ]
+  },
+  "regression": {
+    "referenceCLIExact": 27,
+    "ownerConflictCLIExact": 38,
+    "ownerMovesCLIExact": 39,
+    "laterArgumentCLIExact": 7,
+    "regionLifetimeCLIExact": 17,
+    "nativeByteIdentical": [
+      "tests::module_unit_loan_conflicts::owner_writes_and_borrow_creation_follow_live_loans",
+      "tests::module_unit_origin_region::abstract_static_origin_does_not_hide_expired_region",
+      "tests::module_unit_origin_region::region_borrows_expire_across_control_flow_and_reentry",
+      "tests::module_unit_reference_access::retained_shared_references_block_mutable_calls_and_stores"
+    ]
+  },
+  "initialCorrections": [
+    "The last-use span of a receiver access is distinct from its enclosing slice/store primary span.",
+    "Descriptor rebinding is distinguished from a referent store.",
+    "The owned-summary test omitted the module declaration when predicting function declaration IDs; corrected to exact IDs 2,3,4."
+  ],
+  "pending": [
+    "SDK mutable storage-view generations and full ordinary owner-read/access/store coverage",
+    "full immutable loan-fact publication and MIR/C/runtime",
+    "general moved-owner state and move-aware cleanup before Region reset",
+    "unsafe provenance, full dispatcher, stage1/stage2, release and Linux"
+  ],
+  "publicCLIChanged": false,
+  "privateAPIChanged": true,
+  "sdkABIChanged": false,
+  "dbChanged": false,
+  "ciRunnerChanged": false,
+  "pushed": false
+}

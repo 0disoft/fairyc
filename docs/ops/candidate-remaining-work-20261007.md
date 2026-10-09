@@ -1974,3 +1974,41 @@ store evaluation are next. General moved-owner state, move-aware cleanup, full
 owned loan facts, borrow MIR/C/runtime, unsafe provenance, full dispatcher,
 stage1/stage2, release and Linux remain pending. Stable CLI, SDK ABI, DB and CI
 are unchanged; no push.
+
+## Mutable descendant generations and evaluation holds (2026-10-10)
+
+Mutable view slices and projected element/field borrows now retain frame-local
+generation records with their selected origins and lexical parent. Descendants
+inherit ancestor generations; copied parent descriptors do not acquire child
+generations. Paths reject access through an overlapping ancestor or sibling
+while that child is live. Alias, branch, loop and tagged payload flow preserves
+generation sets; known-empty tags and last-use release the restriction.
+
+Selected receivers remain borrowed through index and slice-bound evaluation.
+Explicit fixed-array range/element borrows establish the root loan before
+effectful selectors run. Named reference stores retain their receiver through
+target index and RHS evaluation, including the direct-owner-read check while
+allowing a read through the same reference. Descriptor replacement is distinct
+from writing its referent. Pure length bounds remain accepted.
+
+An owned descendant return-summary flag participates in the call fixed point.
+The caller materializes a fresh generation at its call site; callee-local loan
+IDs never cross frames. Provider and scalar-generic return paths retain this
+flag. The owned API test reads direct/descendant/empty flags after parsed source
+and primary typed owners drop, at function declaration IDs 2, 3 and 4 (the
+module declaration occupies ID 1).
+
+Source checking and a fresh locked development build passed. All 38 Go/API/CLI
+cases match exact source diagnostics, and six selected native tests passed.
+Previous CLI cases remain exact: shared-reference 27, owner-conflict 38,
+owner-move 39, later-argument seven and Region lifetime 17. Four selected prior
+native traces remain byte-identical. The initial owned-summary test assumed
+function declaration IDs excluded the module header; its expectation was
+corrected and that test alone was rerun. Evidence:
+`docs/ops/evidence/candidate-module-subview-generations-20261010.json`.
+
+SDK mutable storage-view generations, complete ordinary owner-read/access/store
+coverage, full immutable loan facts, general moved-owner state, move-aware
+cleanup, borrow MIR/C/runtime, unsafe provenance, full dispatcher, stage1/stage2,
+release and Linux remain pending. Release/Linux validation was outside these
+local analysis units. Stable CLI, SDK ABI, DB and CI are unchanged; no push.
