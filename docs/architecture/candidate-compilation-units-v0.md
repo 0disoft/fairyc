@@ -640,3 +640,34 @@ this unit makes no new full-corpus claim. Release, Linux, full dispatcher native
 stage1/stage2 and push were not run. Public language/SDK ABI, SDK sources, DB,
 CI and runners are unchanged.
 Evidence: `docs/ops/evidence/candidate-module-unit-operators-20261009.json`.
+
+## Bounded declared-call argument matching (2026-10-09)
+
+Fairy C's module_unit_argument_collect/types now adds immutable invocation and argument records across generic, cleanup, and ordinary contexts, preserving the provider module/declaration, specialization instance, ordered original expression IDs, and spans. Declared and explicit generic calls validate arity (E1010) and known argument types (E1006), along with contextual scalar literals/operators and range (E1013); positional labels are only allowed for same-module private non-generic ordinary functions per ADR0396, requiring the exact name at the same position or else E1014. Converting ref mut T to ref T records a shared reborrow, while ownership/place validation remains pending, and unknown field, cast, borrow, builtin, and variant types stay unresolved. Existing arena, work, depth, and round limits are unchanged, and code10 splits only oversized units.
+
+| Observation | Result |
+| --- | --- |
+| Development check | 187 source files; 2338 MIR functions; passed |
+| Selected development native tests | 9/9 passed |
+| Reference acceptance/code/span | 10 matching cases; one recorded callable-value difference |
+| Fixed dispatcher input snapshot | 160 modules; 1048562 bytes |
+| Units / attempts / splits | 26 / 39 / 13 |
+| Invocation / checked invocation totals | 12590 / 6167 |
+| Argument / checked argument totals | 29822 / 20527 |
+| Shared reborrow argument records | 402 |
+| Maximum calls / arguments | 919 / 2687; each bounded to 16384 |
+| Maximum value work / graph | 737134 / 1048576; 427 / 4096 |
+
+
+The observation reuses the fixed 160-module, 1MiB input snapshot; new analysis
+modules are compiled as implementation code. It does not establish full
+current-source dispatcher compilation. Arguments whose field/cast/borrow/variant
+or builtin types are unresolved stay pending, even when the call result is known.
+The reference compiler accepts the callable-name argument fixture; the candidate
+retains its existing non-value callable classification and reports E1006. That
+case is recorded as a difference, not counted among the matching fixtures.
+Move-aware cleanup, ownership/place and unsafe/inline validation, structural
+cross-unit deduplication/layouts and unit HIR/MIR/C/CLI remain pending.
+Release, Linux, full dispatcher native, stage1/stage2 and push were not run.
+Public language/SDK ABI, SDK sources, DB, CI and runners are unchanged.
+Evidence: `docs/ops/evidence/candidate-module-unit-arguments-20261009.json`.

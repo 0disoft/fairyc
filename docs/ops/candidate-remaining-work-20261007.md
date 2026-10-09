@@ -454,3 +454,33 @@ canonical ID, arena, 64회 반복 및 1MiB 작업량 상한을 유지한다.
 단위에서 새 전체 코퍼스 통과를 주장하지 않는다. Release·Linux·전체 dispatcher
 native·stage1/stage2·push는 미실행이다. 공개 언어/SDK ABI·SDK 소스·DB·CI·러너
 변경 없음. 근거: `evidence/candidate-module-unit-operators-20261009.json`.
+
+## 호출 인자의 개수와 알려진 타입 검사 (2026-10-09)
+
+Fairy C의 module_unit_argument_collect/types는 이제 제네릭, 정리, 일반 컨텍스트 전반에 걸쳐 불변 호출 및 인자 레코드를 추가하며, 제공자 모듈/선언, 구체 함수 인스턴스, 인자 순서와 원래 식 ID, 원래 소스 위치를 그대로 보존한다. 선언된 일반 호출과 명시적 제네릭 호출은 개수(E1010)와 알려진 인자 타입(E1006)을 검증하고, 컨텍스트에 따른 스칼라 리터럴/연산자와 범위(E1013)도 함께 확인한다. 인자 이름표는 ADR0396에 따라 같은 모듈의 공개되지 않은 일반 함수에만 허용되며, 같은 위치에 정확한 이름이 있어야 하고 그렇지 않으면 E1014가 발생한다. ref mut T를 ref T로 변환하면 공유 재대여가 기록되지만 소유권·저장 위치 검증은 아직 남아 있고, 알 수 없는 필드·캐스트·대여·내장 함수·variant 타입은 여전히 미해결 상태로 유지된다. 기존 arena·작업량·깊이·반복 횟수 상한은 변경되지 않으며, code 10일 때만 상한을 넘은 유닛을 분할한다.
+
+| Observation | Result |
+| --- | --- |
+| Development check | 187 source files; 2338 MIR functions; passed |
+| Selected development native tests | 9/9 passed |
+| Reference acceptance/code/span | 10 matching cases; one recorded callable-value difference |
+| Fixed dispatcher input snapshot | 160 modules; 1048562 bytes |
+| Units / attempts / splits | 26 / 39 / 13 |
+| Invocation / checked invocation totals | 12590 / 6167 |
+| Argument / checked argument totals | 29822 / 20527 |
+| Shared reborrow argument records | 402 |
+| Maximum calls / arguments | 919 / 2687; each bounded to 16384 |
+| Maximum value work / graph | 737134 / 1048576; 427 / 4096 |
+
+
+기존 160모듈·1MiB 입력 스냅샷을 재사용했다. 새 분석 모듈은 구현 코드로 빌드하며,
+최신 자기 소스 전체의 dispatcher 컴파일을 통과했다고 주장하지 않는다. 호출의
+반환 타입을 알아도 필드·캐스트·대여·variant·builtin 때문에 인자 타입이 아직
+정해지지 않으면 해당 인자를 보류한다. 함수 이름을 정수 인자로 넘기는 사례는
+기준 컴파일러가 허용하지만 후보는 기존의 값이 아닌 함수 이름 분류에 따라
+E1006으로 거부한다. 이 사례는 일치한 10개와 구분해 기록했다.
+다음은 나머지 식·제어·place 타입 검사와 이동 여부에 따른 cleanup 의무,
+unsafe·inline 출처 소비다. 묶음 간 구조적 중복 제거·layout·HIR/MIR/C/CLI,
+전체 dispatcher native·stage1/stage2도 남는다. Release·Linux·push는 미실행이다.
+공개 언어/SDK ABI·SDK 소스·DB·CI·러너 변경 없음.
+근거: `evidence/candidate-module-unit-arguments-20261009.json`.
