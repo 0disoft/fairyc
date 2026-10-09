@@ -6,13 +6,16 @@ import std::vec as v;
 pub struct Frame {u32 kind;usize context;usize module_index;usize declaration;usize result;}
 // state 0 unresolved value; 1 known value type; 2 non-value syntax/callee.
 pub struct Field {usize id;usize owner;usize module_index;usize declaration;usize source_index;}
-pub struct Expression {usize source_index;u32 kind;usize start;usize end;usize left;usize right;usize target;Field field;usize expected;usize type;u32 state;bool flexible;bool minimum;}
+// Place kind 0 is a value/provenance only; 1 local, 2 field, 3 dereference.
+pub struct Place {u32 kind;usize root;usize scope;usize projection;bool mutable;bool indirect;bool resource_field;bool borrowable;}
+pub fn Place no_place(){return Place{.kind=0,.root=0,.scope=0,.projection=0,.mutable=false,.indirect=false,.resource_field=false,.borrowable=false};}
+pub struct Expression {usize source_index;u32 kind;usize start;usize end;usize left;usize right;usize target;Field field;Place place;usize expected;usize type;u32 state;bool flexible;bool minimum;}
 pub struct Atoms {usize[8] scalar;usize text;usize bytes;usize cstr;}
 pub struct Seed {usize result;usize instance;}
 pub struct Invocation {u32 kind;usize expression;usize source_index;usize target_module;usize target_declaration;usize instance;usize argument_start;usize argument_count;usize start;usize end;bool checked;}
 pub struct Argument {usize invocation;usize position;usize expression;usize source_index;usize expected;usize actual;usize start;usize end;usize label_start;usize label_end;bool checked;bool shared;}
 pub struct Scan {Problem problem;bool changed;}
-pub struct Local {u32 kind;usize source_index;usize initializer;usize expected;usize type;usize start;usize end;}
+pub struct Local {u32 kind;usize source_index;usize initializer;usize expected;usize type;Place origin;usize start;usize end;}
 pub struct Return {usize expression;usize expected;usize actual;bool checked;usize start;usize end;}
 pub struct Problem {u32 code;usize module_index;usize start;usize end;usize expected;usize actual;}
 pub resource Values {Frame frame;v::Vec<Expression> expressions;v::Vec<Local> locals;v::Vec<Return> returns;v::Vec<Invocation> calls;v::Vec<Argument> arguments;usize unresolved;usize inferred;usize checked_returns;usize work;cleanup{}}

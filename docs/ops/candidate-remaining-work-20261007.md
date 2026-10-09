@@ -541,3 +541,22 @@ structural cross-unit links/layouts and HIR/MIR/C/CLI remain unfinished.
 Release, Linux and push were not run. Public language/SDK ABI, SDK sources,
 DB, CI and runners are unchanged.
 Evidence: `docs/ops/evidence/candidate-module-unit-fields-20261009.json`.
+
+## 이름 있는 참조와 역참조의 타입·소유자 추적 (2026-10-09)
+
+module_unit_value_place 프로젝트는 주로 scalar, nominal, resource 참조와 중첩 nominal 필드를 대상으로 합니다. 안전한 참조 borrow/dereference 타입은 추론된 로컬, 선언/제네릭 호출 인자, scalar 캐스트, 반환까지 도달하며, canonical shared/mutable 타입은 기존 4096 타입 그래프에 추가됩니다. place 메타데이터는 전체 로컬 owner root와 scope, expression projection ID, mutability, indirect access, resource-field 경계를 유지하고, 참조 alias는 bounded fixed-point 라운드에서 owner provenance를 전파합니다. immutable/nonplace mutable borrow와 mutable resource-field borrow는 대상 span에서 E1008을 사용하고, 지원되지 않는 shared nonplace borrow와 비참조 dereference는 전체 expression span에서 실험적 code2를 사용합니다. ref *r과 ref (x)는 참조 컴파일러에서 지원되지 않으므로 일반적인 reborrow 지원을 주장하지 않습니다. 필드 그룹화는 명명된 root를 유지하고, array/view/indexed borrow와 unsafe pointer dereference는 명시적으로 보류 상태입니다. 이는 lifetime/conflict/move 검증이 아니라 type/provenance projection입니다. 기존 program/work 1MiB, entries 1024, types 4096, activeLocals 128, depth 64, rounds 64는 변경되지 않았습니다.
+
+| Observation | Result |
+| --- | --- |
+| Development check | 189 source files; 2350 MIR functions; passed |
+| Selected development native cases | 11 passed; unchanged ten cases reused with a source/hash proof, corrected cleanup case rerun |
+| Reference acceptance/code/span | 14/14 matched, including generic and cleanup provider context |
+| Bounds | program/work 1048576; types 4096; entries 1024; active locals 128; depth/rounds 64 |
+
+The unit only consumes initializer, call-argument and return expressions. Standalone
+expression/discard typing, lifetime/conflict/move checking, array/view/index/slice
+borrows, unsafe pointer consumers, cross-unit links/layouts and HIR/MIR/C/CLI remain
+pending. The full fixed 160-module corpus observation runs separately; this receipt
+claims no new corpus pass. Full current dispatcher native and stage1/stage2, release,
+Linux and push were not run. Public language/SDK ABI, SDK sources, DB, CI and runners
+are unchanged. Evidence: `docs/ops/evidence/candidate-module-unit-places-20261009.json`.

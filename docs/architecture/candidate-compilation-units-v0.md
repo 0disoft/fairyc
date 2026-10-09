@@ -728,3 +728,22 @@ structural cross-unit links/layouts and HIR/MIR/C/CLI remain unfinished.
 Release, Linux and push were not run. Public language/SDK ABI, SDK sources,
 DB, CI and runners are unchanged.
 Evidence: `docs/ops/evidence/candidate-module-unit-fields-20261009.json`.
+
+## Named safe reference and place projection (2026-10-09)
+
+The module_unit_value_place project mainly targets scalar, nominal, and resource references plus nested nominal fields. Safe reference borrow and dereference types reach inferred locals, declared and generic call arguments, scalar casts, and returns, and canonical shared/mutable types are appended to the existing 4096-type graph. Place metadata keeps the whole local owner root and scope, the expression projection ID, mutability, indirect access, and the resource-field boundary, while reference aliases propagate owner provenance across bounded fixed-point rounds. Immutable and nonplace mutable borrows and mutable resource-field borrows emit E1008 at the target span, whereas unsupported shared nonplace borrows and non-reference dereferences use experimental code2 at the whole expression span; ref *r and ref (x) stay unsupported under the reference compiler, so general reborrow support is not claimed. Field grouping retains its named root, array/view/indexed borrows and unsafe pointer dereferences remain explicitly pending, and this is type/provenance projection rather than lifetime, conflict, or move verification; the existing program/work 1MiB, entries 1024, types 4096, activeLocals 128, depth 64, and rounds 64 are unchanged.
+
+| Observation | Result |
+| --- | --- |
+| Development check | 189 source files; 2350 MIR functions; passed |
+| Selected development native cases | 11 passed; unchanged ten cases reused with a source/hash proof, corrected cleanup case rerun |
+| Reference acceptance/code/span | 14/14 matched, including generic and cleanup provider context |
+| Bounds | program/work 1048576; types 4096; entries 1024; active locals 128; depth/rounds 64 |
+
+The unit only consumes initializer, call-argument and return expressions. Standalone
+expression/discard typing, lifetime/conflict/move checking, array/view/index/slice
+borrows, unsafe pointer consumers, cross-unit links/layouts and HIR/MIR/C/CLI remain
+pending. The full fixed 160-module corpus observation runs separately; this receipt
+claims no new corpus pass. Full current dispatcher native and stage1/stage2, release,
+Linux and push were not run. Public language/SDK ABI, SDK sources, DB, CI and runners
+are unchanged. Evidence: `docs/ops/evidence/candidate-module-unit-places-20261009.json`.
