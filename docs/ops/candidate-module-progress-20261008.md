@@ -1644,8 +1644,7 @@ Eight development native regressions pass. The actual dispatcher processes 160
 modules (1046575 bytes) in thirteen units, with 10289 concrete annotation roots
 and 69 deferred template roots. Group maxima are 409 canonical graph types, 131
 shapes, 910 fields and 198 callables; projection work peaks at 27474. Existing
-numeric limits remain fixed. Evidence: `evidence/candidate-module-unit-
-annotations-20261009.json`.
+numeric limits remain fixed. Evidence: `evidence/candidate-module-unit-annotations-20261009.json`.
 
 Next: specialize deferred templates and connect local symbol/expression/body
 typing to the owned annotations, provider fields and callable signatures.
@@ -1692,3 +1691,36 @@ drive template body cloning, nested specialization and recursion checks, local
 expression/body typing, and HIR/MIR/C/CLI consumers. Target layout, transitive
 cleanup effects, stage1/stage2, release rebuilding and Linux remain open. Public
 language/SDK ABI, DB, CI and runner implementations are unchanged.
+
+## Semantic pressure range refinement (2026-10-09)
+
+Fairy C's module_unit_plan starts from the existing AST arena grouping and, for
+each range, checks binding together with owned interfaces and signature
+specialization. It bisects only pressure failures code10 or E4503 while
+preserving ordered source module/declaration coordinates and every input
+declaration and body; ordinary semantic, privacy, and stale errors return
+immediately, and an irreducible single-module error stays rejected. Planning is
+bounded by 1048576 work and depth 10, and each admission retains the existing
+arena/type/field/shape, 64-total-instance, and 16-per-template bounds. The
+planner returns owned ranges and observed admission maxima, and the current
+observation independently reconstructs each admitted interface afterward.
+
+Development check, probe build and two new native planner regressions pass. The
+earlier thirteen generic/interface/type regressions remain valid after
+rechecking their original compiler, source, SDK fixture and test hashes. The
+complete 160-module dispatcher (1048186 bytes) now admits fifteen ranges after
+seventeen attempts and two splits. Planning work is 197; observed binding and
+admitted-interface work maxima are 146311 and 81469. All fifteen interfaces are
+reconstructed and checked against input syntax. Per-range maxima are 61
+specialization instances, 433 graph types, 131 shapes, 907 fields and 164
+callables. Per-range instance counts sum to 476, linking 1281 explicit requests;
+fourteen generic-body requests remain deferred. Annotation counts are 10327
+concrete and 69 deferred. Evidence: `docs/ops/evidence/candidate-module-unit-plan-20261009.json`.
+
+Next: clone owned template bodies using provider coordinates and the ordered
+type arguments, then process forwarded nested requests with recursion/depth
+checks. Graph IDs remain owner-local; cross-unit instance/link deduplication
+must compare structural type identities. Local expression/body typing, target
+layouts, transitive cleanup effects, HIR/MIR/C/CLI integration, stage1/stage2,
+release rebuilding and Linux remain open. Public language/SDK ABI, DB, CI and
+runner implementations are unchanged.

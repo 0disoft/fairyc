@@ -1,5 +1,5 @@
 module main;
-import module_units as units;
+import module_unit_plan as units;
 import module_unit_bind as binding;
 import module_unit_interfaces as interfaces;
 import module_unit_generics as generics;
@@ -31,8 +31,9 @@ fn i32 main(){
     let metadata=switch(signatures::build(ref sources)){case .ok(m):{m}case .err(_):{return 2;}};
     switch(compact::compact_in_place(ref mut sources,ref metadata)){case .ok(_):{}case .err(_):{return 2;}};
     let bound_metadata=switch(signatures::build(ref sources)){case .ok(m):{m}case .err(_):{return 2;}};
-    let plan=switch(units::build(ref sources)){case .ok(p):{p}case .err(p):{number("planError=",p.code as usize);number(" module=",p.module_index);discard io::write("\n");return 2;}};
+    let plan=switch(units::build(ref sources,ref bound_metadata)){case .ok(p):{p}case .err(p):{number("planError=",p.code as usize);number(" module=",p.module_index);number(" start=",p.start);number(" end=",p.end);discard io::write("\n");return 2;}};
     number("files=",units::file_count(ref plan));number(" joinedBytes=",units::source_bytes(ref plan));number(" units=",units::count(ref plan));discard io::write("\n");
+    number("admissionAttempts=",units::attempts(ref plan));number(" rangeSplits=",units::splits(ref plan));number(" planningWork=",units::work(ref plan));number(" maxAdmissionBindingWork=",units::binding_work(ref plan));number(" maxAdmissionInterfaceWork=",units::interface_work(ref plan));discard io::write("\n");
     var usize modules=0;var usize expressions=0;var usize entries=0;var usize joined_bytes=0;var usize targets=0;var usize max_work=0;i=0;
     while(i<units::count(ref plan)){let unit=units::at(ref plan,i);let bound=switch(binding::bind(ref sources,ref bound_metadata,unit.first,unit.stop)){case .ok(p):{p}case .err(p):{number("bindError=",p.code as usize);number(" module=",p.module_index);number(" start=",p.start);number(" end=",p.end);discard io::write("\n");return 2;}};let ref syntax::Parsed p=binding::parsed(ref bound);
         assert(syntax::module_count(p)==unit.stop-unit.first && syntax::source_view(p).len==unit.usage.bytes && syntax::declaration_count(p)==unit.usage.declarations && syntax::expression_count(p)==unit.usage.expressions && syntax::statement_count(p)==unit.usage.statements && syntax::entry_count(p)==unit.usage.entries && syntax::type_count(p)==unit.usage.types && syntax::field_count(p)==unit.usage.fields && syntax::attribute_count(p)==unit.usage.attributes && syntax::attribute_argument_count(p)==unit.usage.arguments);

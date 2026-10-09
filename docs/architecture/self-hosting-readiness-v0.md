@@ -311,17 +311,26 @@ remain explicitly deferred. Eight development native regressions and all
 thirteen dispatcher groups pass (10289 concrete roots, 69 deferred, maximum 409
 graph nodes). Actual expression/body typing and template specialization must
 consume this mapping next; remaining CLI/HIR/MIR/C integration and stage proofs
-stay open. Evidence: `docs/ops/evidence/candidate-module-unit-
-annotations-20261009.json`.
+stay open. Evidence: `docs/ops/evidence/candidate-module-unit-annotations-20261009.json`.
 
 Owned explicit generic signature instances now preserve provider coordinates,
 ordered canonical arguments, declaration flags and per-expression request
 identities. Thirteen native regressions pass, including SDK resource admission
-and failure rollback. Initial dispatcher groups exceed the unchanged
-specialization budget at module 37 (E4503); semantic range refinement is
-required before claiming full dispatcher interface planning. Body instantiation
+and failure rollback. Initial AST-only groups exposed specialization pressure at module 37
+(E4503); the semantic refinement below resolves that pressure. Body instantiation
 and all unit compiler consumers remain open. Evidence:
 `docs/ops/evidence/candidate-module-unit-generics-20261009.json`.
+
+Semantic range admission now resolves specialization pressure by splitting only
+code10/E4503 ranges. Two new native planner regressions pass, and the thirteen
+prior kernel regressions retain matching source hashes. All 160 dispatcher
+modules (1048186 bytes) now admit fifteen ranges after two splits; at most 61
+instances occur in one range under the existing 64 cap. Per-range instance
+counts sum to 476 for 1281 explicit requests; fourteen generic-body requests
+remain deferred. This completes current-input range/interface signature
+planning. Owned template body cloning, nested requests, structural cross-unit
+instance deduplication, expression/body typing, all IR/backend/CLI consumers and
+stage proofs remain open. Evidence: `docs/ops/evidence/candidate-module-unit-plan-20261009.json`.
 
 `stage0` is the current Go compiler built by the supported Go toolchain.
 
