@@ -907,9 +907,61 @@ matches 19/19 code/span fixtures, and check reports 193 source files and 2370 MI
 functions. The two fixtures that first failed were a test-authoring error: the
 expected declaration number did not account for module declaration 1, which the
 receipt records. The new full corpus observation is bundled with the next
-consumer. Record/control/variant/builtin and standalone expressions, earlier
+consumer. Control/variant/builtin/standalone and discard expressions, earlier
 declaration rejection, unsafe/pointer provenance, cross-unit links/layouts and
 unit HIR/MIR/C/CLI remain. Full current dispatcher native, stage1/stage2,
 release, Linux and push were not run. Public
 language/SDK ABI, SDK sources, DB, CI and runners are unchanged.
 Evidence: `docs/ops/evidence/candidate-module-unit-nominal-views-20261009.json`.
+
+## Canonical record construction (2026-10-09)
+
+module_unit_value_record now admits record-aggregate constructor expressions. A
+named constructor resolves its target through canonical module/declaration
+identity, so `S{...}` reuses the canonical struct or resource instead of a fresh
+type. A constructor whose raw name resolves to a local or function is not an
+aggregate, so it stays experimental code2 over the whole expression, and a
+cross-module resource or owned-aggregate constructor is E0103 at the declared
+name span. A missing interface shape is the internal invariant code12, and
+contextual enum records remain pending at code0 rather than supported.
+
+Field rows are collected by walking the record's right-linked chain once and are
+then checked in source order, independent of declaration order. Unknown,
+malformed and duplicate rows fail code2 at the row span, a missing field fails
+code2 at the whole constructor span, and a value mismatch is E1006 with scalar
+overflow E1013, both at the value span. Field wrappers keep state2/type0 and
+store the field origin (provider module/declaration and source index) plus the
+expected type; a complete record becomes state1 with its canonical target and an
+empty place, and zero-field aggregates are accepted.
+
+Known records feed arrays, fields, indexes, calls, returns, cleanup and generic
+consumers, and the provided field coordinates survive into imported and generic
+provider units. The owned SDK `Vec` aggregate records its specialization as a
+kind13 owned-aggregate seed, and the array-literal plain-shape gate is retained.
+
+An earlier run left unannotated ordinary constructors such as `B{...}` and
+`Empty{}` out of the frozen interface graph: 8 of the 10 selected native cases
+passed and 2 failed. module_unit_body_types::ordinary_records now registers
+those constructors before the graph freezes, with a private non-generic ordinary
+scan and transaction rollback, three-context constructor demand marks, no
+templates, and preserved original declaration IDs and spans. The failed-then-
+fixed run is kept in the receipt.
+
+| Verification | Result |
+| --- | --- |
+| check | 194 source files; 2376 MIR functions; pass |
+| native | 11/11 selected development cases (10 previous + 1 body-types regression) |
+| reference | 15/15 code/span fixtures (9 negative, 3 positive, 3 multi-file) |
+
+The fixed 160-module corpus was restored hash-matched and re-measured under a
+new relative-path manifest; that observation is a separate run still in
+progress, so no corpus pass numbers are asserted here. Limits types 4096, work
+1 MiB, entries 1024, active locals 128 and depth/rounds 64 are unchanged, and
+the compiler logic is entirely Fairy. Control/variant/builtin/standalone and
+discard expressions, earlier declaration/shape rejection, loan
+generations/lifetime/conflict/move, unsafe/pointer provenance and move-aware
+cleanup, cross-unit links/layouts and unit HIR/MIR/C/CLI remain, as do full
+current dispatcher native and stage1/stage2. Release, Linux and push were not
+run. Public language/SDK ABI, SDK sources, DB, CI and runner contracts are
+unchanged.
+Evidence: `docs/ops/evidence/candidate-module-unit-records-20261009.json`.

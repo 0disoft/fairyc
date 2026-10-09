@@ -695,9 +695,28 @@ Evidence: `docs/ops/evidence/candidate-module-unit-views-corpus-20261009.json`.
 
 module_types는 first 자리에 기존 명목 원소 타입을 두는 정규 공유(kind 17)와 가변(kind 18) 명목 뷰 인터페이스를 들고 있고, 정규 그래프로 검증한다. module_unit_interfaces는 각 서술자의 원소를 pending shape 큐로 따라간다. 명목 배열은 문맥 기대 타입이 맞는 공유/가변 뷰이거나 배열 범위를 명시적으로 대여할 때만 그런 뷰가 된다. 문맥 없는 그냥 `ref p.data`는 명목 필드에서 실험 code2로 거부하고, 문맥 없는 이름 있는 고정 배열은 뷰가 아니라 배열 참조를 그대로 둔다. 평범한 이름 있는 전체 소유자는 뿌리와 범위를 지키고, 원소는 제공자 모듈/선언 정체성을 유지한다.
 
-필드 소유자는 field_owner로 다시 검사하고 원소 선택은 element_borrow 검사를 거친다. 불변 저장소에 가변 대여를 하면 대상 범위에서 E1008이다. 평범하지 않은 소유자의 원소/하위 필드의 가변 대여는 선택 범위에서 E1008이고, 공유 대여는 전체 식에서 실험 code2다. 평범하지 않은 필드 범위는 배열 필드 소유자 범위에서 E1008이다. 인덱스와 내장 필드은 원소 해석과 len/is_empty를 공유/가변 서술자로 확장한다. 한도는 types 4096, work 1 MiB, entries 1024, active locals 128, depth/rounds 64 그대로다.
+필드 소유자는 field_owner로 다시 검사하고 원소 선택은 element_borrow 검사를 거친다. 불변 저장소에 가변 대여를 하면 대상 범위에서 E1008이다. 평범하지 않은 소유자의 원소/하위 필드의 가변 대여는 선택 범위에서 E1008이고, 공유 대여는 전체 식에서 실험 code2다. 평범하지 않은 필드 범위는 배열 필드 소유자 범위에서 E1008이다. 인덱스와 내장 필드는 원소 해석과 len/is_empty를 공유/가변 서술자로 확장한다. 한도는 types 4096, work 1 MiB, entries 1024, active locals 128, depth/rounds 64 그대로다.
 
-이 항목은 타입과 출처 투영만 한다. 수명, 충돌, 이동, 세대 검사는 아직 미완이라 대여 충돌이나 소유권 완료를 주장하지 않는다. 선정 개발 native 사례는 12/12 통과, reference는 code/span fixture 19/19 일치, check는 소스 193개와 MIR 함수 2370개다. 처음 실패한 fixture 2개는 테스트 작성 오류로, 기대 선언 번호가 module 선언 1번을 반영하지 못한 것이며 receipt에 기록되어 있다. 새 전체 코퍼스 관찰은 다음 consumer와 묶는다. record/control/variant/builtin과 독립 표현식, 이전 선언 거부, unsafe/포인터 출처, cross-unit links/layouts, unit HIR/MIR/C/CLI가 남는다. 전체 현재 dispatcher native와 stage1/stage2, release/Linux/push는 실행하지 않았다. 공개 언어/SDK ABI, SDK 소스, DB, CI, 러너는 그대로다.
+이 항목은 타입과 출처 투영만 한다. 수명, 충돌, 이동, 세대 검사는 아직 미완이라 대여 충돌이나 소유권 완료를 주장하지 않는다. 선정 개발 native 사례는 12/12 통과, reference는 code/span fixture 19/19 일치, check는 소스 193개와 MIR 함수 2370개다. 처음 실패한 fixture 2개는 테스트 작성 오류로, 기대 선언 번호가 module 선언 1번을 반영하지 못한 것이며 receipt에 기록되어 있다. 새 전체 코퍼스 관찰은 다음 consumer와 묶는다. control/variant/builtin/standalone과 discard·독립 표현식 검사, 이전 선언 거부, unsafe/포인터 출처, cross-unit links/layouts, unit HIR/MIR/C/CLI가 남는다. 전체 현재 dispatcher native와 stage1/stage2, release/Linux/push는 실행하지 않았다. 공개 언어/SDK ABI, SDK 소스, DB, CI, 러너는 그대로다.
 근거: `docs/ops/evidence/candidate-module-unit-nominal-views-20261009.json`.
 
-현재 다음 작업은 **레코드·제어·variant·builtin 표현식의 타입 검사와 선언·형태 오류의 조기 거부**다. 독립 표현식·discard 검사도 이어서 연결한다.
+## Canonical record construction (2026-10-09)
+
+module_unit_value_record가 이제 레코드 집합 생성자 식을 받는다. 이름 있는 생성자는 정규 모듈/선언 정체성으로 대상을 찾으므로 `S{...}`는 새 타입이 아니라 정규 구조체나 자원을 재사용한다. 원시 이름이 지역 변수나 함수로 해석되는 생성자는 집합이 아니라서 식 전체에서 실험 code2로 남고, 모듈이 다른 자원이나 소유 집합 생성자는 선언한 이름 구간에서 E0103이다. 모양이 없으면 내부 invariant code12이고, 문맥 열거 레코드는 아직 code0으로 대기하며 지원 완료가 아니다.
+
+필드 행은 레코드의 오른쪽 연결 목록을 한 번 훑어 모은 뒤 선언 순서와 무관한 소스 순서로 검사한다. 알 수 없거나 잘못된 행과 중복 행은 행 구간에서 code2, 빠진 필드는 생성자 전체 구간에서 code2, 값 불일치는 E1006, 스칼라 범위 초과는 E1013으로 값 구간에서 난다. 필드 wrapper는 state2/type0을 유지하고 필드 출처(제공자 모듈/선언, 소스 번호)와 기대 타입을 저장한다. 완성된 레코드는 정규 대상을 가진 state1이 되고 자리는 비며, 필드 없는 집합도 받는다.
+
+알려진 레코드는 배열, 필드 접근, 인덱스, 호출, 반환, cleanup, 제네릭 소비자로 이어지고, 제공자 필드 좌표는 가져온 모듈과 제네릭 제공자 단위까지 남는다. 소유 SDK `Vec` 집합은 종류13 소유 집합 seed로 특수화를 기록하고, 배열 리터럴의 평범 모양 gate는 그대로다.
+
+앞선 실행에서 주석 없는 ordinary 생성자 `B{...}`와 `Empty{}`가 frozen 인터페이스 그래프에서 빠져, 선정 native 10개 중 8개가 정상 통과하고 2개가 오류였다. 이제 module_unit_body_types::ordinary_records가 그래프 freeze 전에 그 생성자를 등록한다. private 비제네릭 ordinary 스캔과 transaction rollback, 3 context 생성자 demand mark를 쓰고, 템플릿은 만들지 않으며 원래 선언 ID와 구간을 보존한다. 오류 뒤 수정한 실행은 receipt에 남긴다.
+
+| 검증 | 결과 |
+| --- | --- |
+| check | 소스 194개; MIR 함수 2376개; 통과 |
+| native | 선정 개발 사례 11/11 (이전 10개 + body-types 회귀 1개) |
+| reference | code/span fixture 15/15 (오류 9, 정상 3, 다중 파일 3) |
+
+고정 160모듈 코퍼스는 해시가 맞게 복원되어 새 상대경로 manifest로 다시 측정 중이고, 그 관찰은 별도로 진행 중이라 여기서 코퍼스 통과 수치는 쓰지 않는다. 한도 types 4096, work 1 MiB, entries 1024, active locals 128, depth/rounds 64는 그대로이고 컴파일러 로직은 전부 Fairy다. 제어/variant/builtin/standalone과 discard·독립 표현식 검사, 선언·형태 오류의 조기 거부, loan 세대/수명/충돌/이동, unsafe/포인터 출처와 이동 인식 cleanup, cross-unit links/layouts, unit HIR/MIR/C/CLI가 남고, 전체 현재 dispatcher native와 stage1/stage2도 남는다. release/Linux/push는 실행하지 않았다. 공개 언어/SDK ABI, SDK 소스, DB, CI, 러너는 그대로다.
+근거: `docs/ops/evidence/candidate-module-unit-records-20261009.json`.
+
+현재 다음 작업은 **control/variant/builtin/standalone과 discard·독립 표현식 검사, 그리고 선언·형태 오류의 조기 거부**다.
