@@ -27,6 +27,11 @@ pub fn ref m::Values body(ref Inputs p,ref values::Plan primary,usize id){let f=
 pub fn types::Type type_at(ref Inputs p,ref values::Plan primary,usize id,usize type){let f=frame(p,id);return if(f.unit==0){values::type_at(primary,type)}else{values::type_at(v::at<values::Plan>(ref p.providers,f.unit-1),type)};}
 pub fn usize parameter(ref Inputs p,usize id,usize ordinal){let f=frame(p,id);return *v::at<usize>(ref p.parameters,f.parameter_start+ordinal);}
 pub fn usize target(ref Inputs p,usize id,usize call){let f=frame(p,id);return *v::at<usize>(ref p.targets,f.call_start+call);}
+// Convert the stable lexical binding, never the projected/forwarded place root.
+pub fn Result<usize,m::Problem> binding_owner(ref Inputs p,usize id,m::Expression expression){
+    if(id==0 || id>frame_count(p)){return .err(m::Problem{.code=12,.module_index=0,.start=expression.start,.end=expression.end,.expected=0,.actual=0});}let f=frame(p,id);
+    if(expression.binding==0){return .ok(0);}if(expression.kind!=2 || expression.binding>f.local_count){return .err(fail(f.value,12,expression.start,expression.end));}return .ok(f.local_start+expression.binding);
+}
 struct Budget {usize expressions;usize work;}
 fn ref m::Values unit_body(ref v::Vec<values::Plan> providers,ref values::Plan primary,Frame f){if(f.unit==0){return values::at(primary,f.context);}return values::at(v::at<values::Plan>(providers,f.unit-1),f.context);}
 fn types::Type unit_type(ref v::Vec<values::Plan> providers,ref values::Plan primary,Frame f,usize type){return if(f.unit==0){values::type_at(primary,type)}else{values::type_at(v::at<values::Plan>(providers,f.unit-1),type)};}

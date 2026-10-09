@@ -1295,3 +1295,33 @@ Return-origin inference and ownership integration remain subsequent consumers.
 No new corpus, full dispatcher, stage1/stage2, release, Linux or push was
 performed; public language/SDK ABI, SDK sources, DB, CI and runner contracts
 are unchanged.
+
+## Lexical binding identity for origin consumers (2026-10-10)
+
+module_unit_value_model.Expression now retains the original local binding ID
+separately from Place.root. The value walk may forward a reference alias to
+its initial owner, but that forwarded root cannot identify the alias being
+reassigned. module_unit_value_collect preserves the resolver-owned binding
+before projection, and module_unit_origin_inputs.binding_owner converts it to
+a frame-scoped owner with bounds and kind checks. Nonlocal syntax returns
+owner zero; invalid frame/binding IDs fail with code 12.
+
+Development check passed (206 sources, 2518 MIR functions). Three native
+development tests passed: reference reassignment retains the alias binding
+while its value-place root is forwarded; shadowed aliases retain distinct
+bindings and lexical scopes; and the earlier provider-unit generic-instance
+collision regression still passes. Reference observations matched 2/2: the
+reassigned return is rejected with E2103 at the original return r span, while
+the shadowed nonescaping aliases are accepted. The candidate value-only plan
+still retains the reassigned example for the subsequent ownership consumer;
+this is not semantic-admission equivalence. Evidence:
+docs/ops/evidence/candidate-module-unit-origin-bindings-20261010.json.
+
+This change supplies lexical identity for return-origin inference without
+guessing origin sets from current value-place roots. Static/unknown
+distinctions, branch and assignment joins, call substitution,
+loan/lifetime/conflict/move checks and unsafe provenance remain. Original
+module/declaration coordinates, type IDs and bounds are retained. No new
+corpus, full dispatcher, stage1/stage2, release, Linux or push was performed.
+The internal candidate value model/accessor changed; public language/SDK ABI,
+SDK sources, DB, CI and runner contracts are unchanged.

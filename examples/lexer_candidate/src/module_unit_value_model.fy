@@ -10,7 +10,8 @@ pub struct Field {usize id;usize owner;usize module_index;usize declaration;usiz
 pub struct Place {u32 kind;usize root;usize scope;usize projection;bool mutable;bool indirect;bool resource_field;bool borrowable;}
 pub fn Place no_place(){return Place{.kind=0,.root=0,.scope=0,.projection=0,.mutable=false,.indirect=false,.resource_field=false,.borrowable=false};}
 pub struct Builtin {u32 kind;usize element;bool slice;bool unsafe_context;}
-pub struct Expression {usize source_index;u32 kind;usize start;usize end;usize left;usize right;usize target;Field field;Place place;Builtin builtin;usize expected;usize type;u32 state;bool flexible;bool minimum;}
+// binding is the original lexical symbol, independent of forwarded place roots.
+pub struct Expression {usize source_index;usize binding;u32 kind;usize start;usize end;usize left;usize right;usize target;Field field;Place place;Builtin builtin;usize expected;usize type;u32 state;bool flexible;bool minimum;}
 pub struct Atoms {usize[8] scalar;usize text;usize bytes;usize cstr;}
 pub struct Seed {usize result;usize instance;Builtin builtin;}
 pub fn Seed seed(usize result,usize instance){return Seed{.result,.instance,.builtin=Builtin{.kind=0,.element=0,.slice=false,.unsafe_context=false}};}
