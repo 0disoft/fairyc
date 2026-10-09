@@ -1233,3 +1233,21 @@ loans/lifetimes/conflicts/moves, unsafe pointer provenance, cross-unit
 HIR/MIR/C/CLI, the full current dispatcher and stage1/stage2 remain. Release,
 Linux and push were not run. Public language/SDK ABI, SDK sources, DB, CI and
 runner contracts are unchanged.
+
+## Fixed corpus resumed observation (2026-10-09)
+
+The earlier 600-second observation completed 0..60 across 12 units before
+timing out. Source, input and compiler identities were re-verified, and
+from=60 resumed the 60..160 suffix with a 900-second allowance. The two
+observations cover the unchanged 160-module, 1048562-byte input continuously
+across 26 bounded units; the plan admitted 39 ranges with 13 splits. Evidence:
+docs/ops/evidence/candidate-module-unit-storage-corpus-20261009.json
+(implementation commit 3080ead6).
+
+All 1221 storage value calls were checked. Total builtin calls were 1225, with
+1223 checked; the two remaining raw-view values remain unresolved rather than
+accepted. Maximum value work was 974364/1048576 and maximum graph size was
+427/4096. The fixed input contains no storage slice calls; selected native
+tests separately cover scalar and nominal T[] storage borrows. This is an
+observation of the fixed input archive, not a full current dispatcher or
+stage1/stage2 promotion. Release, Linux and push were not run.
