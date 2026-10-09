@@ -930,3 +930,49 @@ no whole source_location CLI completion is claimed. Unsafe pointer allocation,
 generation, provenance and loan/move remain. Release, Linux, push, full current
 dispatcher and stage1/stage2 were not run. Public language/SDK ABI, SDK sources,
 DB, CI and runner contracts are unchanged.
+
+## SDK storage value consumer (2026-10-09)
+
+`module_unit_value_storage` projects builtins 101..107: storage_size and
+storage_alignment yield usize with no arguments, storage_take yields the exact
+canonical element from one argument, storage_put yields void,
+storage_element_address yields ptr mut void, and
+storage_borrow/storage_borrow_mut yield ref kinds 7/8 or the matching scalar
+and nominal slice descriptors for T[]. Arguments are checked in source order;
+arity and storage operand type failures keep code2 at the whole original call
+span, and a missing unsafe context reports E5101. Child expression diagnostics
+retain their own source spans.
+
+Only authenticated std::vec storage borrow slice arguments peel the element
+for annotation demands; unsized by-value types stay rejected. Canonical
+element IDs, slice flags and lexical unsafe facts survive generic dependencies
+and owned bodies. The cleanup inline of take_slot<T> retains inline_unsafe.
+Borrowed owner roots propagate through block tails and aliases; take, put and
+element addresses introduce no safe owner root. Nominal slice elements use the
+existing scalar-leaf struct graph including bounded inline arrays.
+
+Development check passed (200 sources, 2433 MIR functions), selected native
+tests passed 7/7 (5 storage tests plus raw alias and deep else-if
+regressions), and reference fixtures matched 5/5. Native storage tests cover
+scalar operations, nominal array-field views, moved resources and cleanup,
+five malformed-metadata/unsafe mutations, and user/SDK-spoof rejection.
+Candidate lookup code5 maps to reference E0101; candidate E6801 at the spoofed
+module name corresponds to the stable reference invalid-standard-library
+namespace failure. Evidence:
+docs/ops/evidence/candidate-module-unit-storage-20261009.json.
+
+The fixed 160-module observation planned 26 units and completed 0..60 across
+12 units before the 600-second observer timeout; this is not a complete corpus
+pass. The probe now accepts from=<module-index> at a planned unit boundary,
+and the 60..160 suffix is being observed with the prior 900-second allowance.
+Imported ordinary SDK view_u8/view_mut_u8 still fail closed because
+module_signatures::build excludes those SDK function signatures; generic
+view<T> storage value projection is covered.
+
+Limits 4096 types, 1048576 work, 1024 entries, 128 active locals and 64
+depth/rounds are unchanged. Assignment/post, defer/burn, function tails and
+missing returns, earlier declaration and shape rejection,
+loans/lifetimes/conflicts/moves, unsafe pointer provenance, cross-unit
+HIR/MIR/C/CLI, the full current dispatcher and stage1/stage2 remain. Release,
+Linux and push were not run. Public language/SDK ABI, SDK sources, DB, CI and
+runner contracts are unchanged.

@@ -18,7 +18,7 @@ pub resource Plan {v::Vec<m::Values> contexts;v::Vec<types::Type> graph;usize ex
 fn m::Problem failed(u32 code,usize module_index,usize start,usize end){return m::Problem{.code,.module_index,.start,.end,.expected=0,.actual=0};}
 fn Result<m::Values,m::Problem> original_body(ref v::Vec<syntax::Parsed> sources,ref syntax::Parsed source,ref signatures::Program metadata,ref closure::Ready ready,m::Frame frame,usize offset,usize type_offset,ref mut v::Vec<types::Type> graph,ref m::Atoms atoms,ref mut usize cursor,ref mut usize work){
     let a=switch(ast::build(source,frame.declaration,work)){case .ok(a):{a}case .err(code):{return .err(m::fail(frame,code,0,0,0,0));}};
-    var table=switch(collect::seeds(ref a,frame)){case .ok(t):{t}case .err(p):{return .err(p);}};let seeded=collect::ordinary_seeds(ref a,closure::imported(ready),frame,offset,type_offset,ref mut table,work);if(seeded.code!=0){return .err(seeded);}
+    var table=switch(collect::seeds(ref a,frame)){case .ok(t):{t}case .err(p):{return .err(p);}};let seeded=collect::ordinary_seeds(ref a,source,closure::imported(ready),frame,offset,type_offset,ref mut table,work);if(seeded.code!=0){return .err(seeded);}
     return collect::project(sources,metadata,closure::imported(ready),source,ref a,ordinary::resolved(ordinary::at(closure::original_names(ready),frame.context)),frame,closure::call_plan(ready),cursor,ref table,graph,atoms);
 }
 fn Result<m::Values,m::Problem> concrete_body(ref v::Vec<syntax::Parsed> sources,ref signatures::Program metadata,ref syntax::Parsed source,ref closure::Ready ready,m::Frame frame,ref mut v::Vec<types::Type> graph,ref m::Atoms atoms,ref mut usize cursor,ref mut usize work){

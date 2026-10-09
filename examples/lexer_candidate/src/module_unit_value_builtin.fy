@@ -2,6 +2,7 @@ module module_unit_value_builtin;
 import module_unit_value_model as m;
 import module_unit_value_scalar as scalar;
 import module_unit_value_view as views;
+import module_unit_value_storage as storage;
 import module_unit_interfaces as interfaces;
 import module_types as types;
 import pointer_types as pointers;
@@ -36,5 +37,5 @@ fn m::Problem raw(ref syntax::Parsed source,m::Frame frame,usize id,usize expect
 }
 pub fn m::Problem evaluate(ref syntax::Parsed source,m::Frame frame,usize id,usize expected,ref interfaces::Interfaces imported,ref mut v::Vec<types::Type> graph,ref m::Atoms atoms,ref mut v::Vec<m::Expression> expressions,ref mut usize work,usize depth){
     let e=*v::at<m::Expression>(expressions,id-1);if(e.builtin.kind==200){let rows=switch(arguments(source,frame,e,work)){case .ok(r):{r}case .err(p):{return p;}};if(v::len<usize>(ref rows)!=0){return m::fail(frame,1010,e.start,e.end,0,v::len<usize>(ref rows));}record(expressions,id,expected,atoms.text,m::no_place());return ok(frame);}
-    if(e.builtin.kind>=9 && e.builtin.kind<=12){return raw(source,frame,id,expected,imported,graph,atoms,expressions,work,depth);}return ok(frame);
+    if(e.builtin.kind>=9 && e.builtin.kind<=12){return raw(source,frame,id,expected,imported,graph,atoms,expressions,work,depth);}if(e.builtin.kind>=101 && e.builtin.kind<=107){return storage::evaluate(source,frame,id,expected,imported,graph,atoms,expressions,work,depth);}return ok(frame);
 }

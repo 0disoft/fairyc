@@ -12,7 +12,8 @@ pub fn Place no_place(){return Place{.kind=0,.root=0,.scope=0,.projection=0,.mut
 pub struct Builtin {u32 kind;usize element;bool slice;bool unsafe_context;}
 pub struct Expression {usize source_index;u32 kind;usize start;usize end;usize left;usize right;usize target;Field field;Place place;Builtin builtin;usize expected;usize type;u32 state;bool flexible;bool minimum;}
 pub struct Atoms {usize[8] scalar;usize text;usize bytes;usize cstr;}
-pub struct Seed {usize result;usize instance;}
+pub struct Seed {usize result;usize instance;Builtin builtin;}
+pub fn Seed seed(usize result,usize instance){return Seed{.result,.instance,.builtin=Builtin{.kind=0,.element=0,.slice=false,.unsafe_context=false}};}
 pub struct Invocation {u32 kind;usize expression;usize source_index;usize target_module;usize target_declaration;usize instance;usize argument_start;usize argument_count;usize start;usize end;bool checked;}
 pub struct Argument {usize invocation;usize position;usize expression;usize source_index;usize expected;usize actual;usize start;usize end;usize label_start;usize label_end;bool checked;bool shared;}
 pub struct Scan {Problem problem;bool changed;}

@@ -11,6 +11,8 @@ import repr_c_declarations as repr;
 import effect_declarations as effects;
 import std::bytes as bytes;
 import std::vec as v;
+import storage_intrinsics as storage;
+import sdk_authority as sdk;
 
 pub struct Shape {usize type;usize module_index;usize declaration;usize field_start;usize field_count;u32 abilities;bool repr_c;usize start;usize end;bool cleanup_nonempty;u32 cleanup_effects;}
 pub struct Field {u32 kind;usize type;usize module_index;usize declaration;usize source_index;usize start;usize end;usize name_start;usize name_end;usize payload_start;usize payload_count;}
@@ -28,12 +30,12 @@ fn u32 mark(ref mut v::Vec<types::Type> graph,ref mut v::Vec<usize> pending,ref 
 fn Result<usize,u32> append(ref mut bytes::Buffer names,ref mut Budget work,ref u8[] text){if(!charge(work,text.len)){return .err(10);}let usize start=bytes::len(names);if(text.len>65536-start){return .err(10);}return if(bytes::append(names,text).is_ok){.ok(start)}else{.err(11)};}
 fn void request(ref mut v::Vec<Annotation> table,usize root){if(root!=0){let ref mut Annotation slot=v::at_mut<Annotation>(table,root-1);slot.required=true;}}
 fn Result<v::Vec<Annotation>,join::Problem> annotations(ref v::Vec<syntax::Parsed> sources,ref signatures::Program metadata,ref binding::Bound bound,ref mut v::Vec<types::Type> graph,ref mut Budget work){
-    let p=binding::parsed(bound);var v::Vec<Annotation> table=v::empty<Annotation>();var usize i=0;
+    let p=binding::parsed(bound);var v::Vec<bool> vectors=v::empty<bool>();var usize source_index=binding::first(bound);while(source_index<binding::stop(bound)){if(!charge(work,1)){return .err(fail(10,source_index,0,0));}if(!v::push<bool>(ref mut vectors,sdk::authentic(b"std::vec",syntax::source_view(v::at<syntax::Parsed>(sources,source_index)))).is_ok){return .err(fail(11,source_index,0,0));}source_index+=1;}var v::Vec<Annotation> table=v::empty<Annotation>();var usize i=0;
     while(i<syntax::type_count(p)){if(!charge(work,1)){return .err(fail(10,binding::first(bound),0,0));}if(!v::push<Annotation>(ref mut table,Annotation{.type=0,.required=false,.deferred=false}).is_ok){return .err(fail(11,binding::first(bound),0,0));}i+=1;}
     i=0;while(i<syntax::declaration_count(p)){request(ref mut table,syntax::declaration_at(p,i).result_type);i+=1;}
     i=0;while(i<syntax::entry_count(p)){request(ref mut table,syntax::entry_at(p,i).type_root);i+=1;}
     i=0;while(i<syntax::field_count(p)){request(ref mut table,syntax::field_at(p,i).type_root);i+=1;}
-    i=1;while(i<=syntax::expression_count(p)){if(!charge(work,1)){return .err(fail(10,binding::first(bound),0,0));}let e=syntax::expression_at(p,i);if(e.kind==23){request(ref mut table,e.right);}else if(e.kind==20){var usize link=e.right;while(link!=0){let n=syntax::type_at(p,link);request(ref mut table,n.left);link=n.right;}}i+=1;}
+    i=1;while(i<=syntax::expression_count(p)){if(!charge(work,1)){return .err(fail(10,binding::first(bound),0,0));}let e=syntax::expression_at(p,i);if(e.kind==23){request(ref mut table,e.right);}else if(e.kind==20){var usize link=e.right;while(link!=0){let n=syntax::type_at(p,link);request(ref mut table,storage::annotation_root(p,i,n.left,*v::at<bool>(ref vectors,syntax::module_index(p,e.start))));link=n.right;}}i+=1;}
     i=1;while(i<=syntax::statement_count(p)){let s=syntax::statement_at(p,i);if(s.kind==18){request(ref mut table,s.second);}i+=1;}
     var usize base=0;var usize module_index=binding::first(bound);
     while(module_index<binding::stop(bound)){let original=v::at<syntax::Parsed>(sources,module_index);var usize owner=0;i=1;

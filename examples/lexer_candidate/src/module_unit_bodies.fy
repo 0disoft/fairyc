@@ -9,6 +9,8 @@ import module_units as units;
 import syntax as syntax;
 import scanner as scanner;
 import std::vec as v;
+import storage_intrinsics as storage;
+import sdk_authority as sdk;
 
 pub struct Edge {usize expression;generics::Dependency target;}
 resource Source {usize module_index;scanner::Stream stream;cleanup{}}
@@ -18,9 +20,9 @@ pub resource Plan {v::Vec<Source> sources;v::Vec<Body> bodies;v::Vec<Cleaning> c
 fn join::Problem fail(u32 code,usize module_index,usize start,usize end){return join::Problem{.code,.module_index,.start,.end};}
 fn void request(ref mut v::Vec<usize> table,usize root){if(root!=0){let slot=v::at_mut<usize>(table,root-1);*slot=1;}}
 fn Result<v::Vec<usize>,join::Problem> annotations(ref ast::Ast p,ref syntax::Parsed original,generics::Instance instance,ref signatures::Program metadata,ref v::Vec<usize> args,ref mut v::Vec<types::Type> graph,ref mut usize work){
-    var v::Vec<usize> table=v::empty<usize>();var usize i=0;while(i<ast::type_count(p)){if(!ast::charge(work,1)){return .err(fail(10,instance.module_index,0,0));}if(!v::push<usize>(ref mut table,0).is_ok){return .err(fail(11,instance.module_index,0,0));}i+=1;}
+    let bool vector=sdk::authentic(b"std::vec",syntax::source_view(original));var v::Vec<usize> table=v::empty<usize>();var usize i=0;while(i<ast::type_count(p)){if(!ast::charge(work,1)){return .err(fail(10,instance.module_index,0,0));}if(!v::push<usize>(ref mut table,0).is_ok){return .err(fail(11,instance.module_index,0,0));}i+=1;}
     request(ref mut table,ast::declaration(p).result_type);i=0;while(i<ast::entry_count(p)){request(ref mut table,ast::entry_at(p,i).type_root);i+=1;}
-    i=1;while(i<=ast::expression_count(p)){if(!ast::charge(work,1)){return .err(fail(10,instance.module_index,0,0));}let e=ast::expression_at(p,i);if(e.kind==23){request(ref mut table,e.right);}else if(e.kind==20){var usize root=e.right;while(root!=0){let n=ast::type_at(p,root);request(ref mut table,n.left);root=n.right;}}i+=1;}
+    i=1;while(i<=ast::expression_count(p)){if(!ast::charge(work,1)){return .err(fail(10,instance.module_index,0,0));}let e=ast::expression_at(p,i);if(e.kind==23){request(ref mut table,e.right);}else if(e.kind==20){var usize root=e.right;while(root!=0){let n=ast::type_at(p,root);let usize original_root=ast::type_origin(p,n.left);let usize selected=storage::annotation_root(original,ast::expression_origin(p,i),original_root,vector);request(ref mut table,if(selected!=original_root){ast::type_at(p,n.left).left}else{n.left});root=n.right;}}i+=1;}
     i=1;while(i<=ast::statement_count(p)){let s=ast::statement_at(p,i);if(s.kind==18){request(ref mut table,s.second);}i+=1;}
     i=1;while(i<=ast::type_count(p)){if(*v::at<usize>(ref table,i-1)!=0){if(!ast::charge(work,1)){return .err(fail(10,instance.module_index,0,0));}let r=if(v::len<usize>(args)==0){signatures::resolve_type(metadata,original,instance.module_index,ast::type_origin(p,i),graph)}else{signatures::specialize_type(metadata,original,instance.module_index,instance.declaration,ast::type_origin(p,i),args,graph)};if(r.problem.code!=0){return .err(fail(r.problem.code,instance.module_index,r.problem.start,r.problem.end));}let slot=v::at_mut<usize>(ref mut table,i-1);*slot=r.type;}i+=1;}return .ok(table);
 }

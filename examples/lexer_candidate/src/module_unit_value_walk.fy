@@ -10,6 +10,7 @@ import module_unit_value_place as places;
 import module_unit_value_view as views;
 import module_unit_value_control as control;
 import module_unit_value_builtin as builtins;
+import module_unit_value_storage as storage;
 import std::vec as v;
 
 pub fn Result<m::Values,m::Problem> resolve(ref syntax::Parsed source,ref names::Resolved resolved,m::Frame frame,ref interfaces::Interfaces imported,v::Vec<m::Expression> expressions_input,v::Vec<m::Local> locals_input,v::Vec<m::Return> returns_input,v::Vec<m::Invocation> calls_input,v::Vec<m::Argument> arguments_input,v::Vec<m::Consumer> consumers_input,ref mut v::Vec<types::Type> graph,ref m::Atoms atoms,usize initial_work){
@@ -20,6 +21,7 @@ pub fn Result<m::Values,m::Problem> resolve(ref syntax::Parsed source,ref names:
             var place=e.place;if(e.kind==2){let usize use=names::use_at(resolved,i);if(use!=0){let r=names::reference_at(resolved,use);if(r.kind==1){let local=*v::at<m::Local>(ref locals,r.symbol-1);type=local.type;if(type!=0 && (builtins::borrowed(types::at(graph,type))) && local.origin.root!=0){place.root=local.origin.root;place.scope=local.origin.scope;place.indirect=local.origin.indirect;place.resource_field=local.origin.resource_field;}}}}
             else if((e.kind==12 || e.kind==31) && e.state==1){place=control::block_origin(source,e.left,graph,ref expressions);}
             else if(e.kind==6 && e.state==1 && e.builtin.kind>=9 && e.builtin.kind<=12){let usize child=m::index(ref expressions,syntax::call_argument(source,e.source_index,0));if(child==0){return .err(m::fail(frame,12,e.start,e.end,0,0));}place=builtins::projected(e,v::at<m::Expression>(ref expressions,child-1).place);}
+            else if(e.kind==6 && e.state==1 && storage::borrow(e.builtin)){let usize child=m::index(ref expressions,syntax::call_argument(source,e.source_index,0));if(child==0){return .err(m::fail(frame,12,e.start,e.end,0,0));}place=storage::projected(e,v::at<m::Expression>(ref expressions,child-1).place);}
             else if(e.kind==3 || e.state==1 && (e.kind==8 || e.kind==9 || e.kind==26 || e.kind==21 || e.kind==22 || e.kind==4 && e.place.kind==3)){let usize child=m::index(ref expressions,e.left);if(child!=0){let c=*v::at<m::Expression>(ref expressions,child-1);if(e.kind==3){type=c.type;}if(c.type!=0){place=places::projected(graph,c,e);}}}
             if(e.type==0 && type!=0 || !places::same(e.place,place)){let slot=v::at_mut<m::Expression>(ref mut expressions,i-1);if(e.type==0 && type!=0){slot.type=type;slot.state=1;}slot.place=place;changed=true;}i+=1;
         }
