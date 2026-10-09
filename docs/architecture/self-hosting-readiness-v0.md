@@ -543,3 +543,31 @@ structural cross-unit links/layouts and unit HIR/MIR/C/CLI remain unfinished.
 Public language/SDK ABI, SDK sources, DB, CI and runners are unchanged.
 Release, Linux, full dispatcher native and stage1/stage2 remain deferred; no push.
 Evidence: `docs/ops/evidence/candidate-module-unit-values-20261009.json`.
+
+## Compilation-unit scalar operator typing (2026-10-09)
+
+`module_unit_value_scalar` types builtin integer arithmetic, bitwise/shift,
+comparisons, boolean logic/negation and signed unary operators within local
+initializer and return roots. Pure integer literal trees remain flexible; a
+typed peer anchors their scalar type while original source links retain
+execution order. Direct signed i32/i64 minimum operands retain a unary minimum
+marker. Unknown field/cast/builtin anchors keep literal peers unresolved, avoiding
+premature i32 range errors. A primitive descriptor cache per value plan replaces
+repeated graph scans. Existing canonical IDs, arenas, 64 rounds and 1MiB work
+remain bounded across ordinary, requested generic and cleanup contexts.
+
+| Observation | Result |
+| --- | --- |
+| Development check | 185 source files; 2298 MIR functions; passed |
+| Selected Fairy native tests | 8/8 passed |
+| Reference fixture acceptance / selected primary code and span | 8/8 matched; additional cascade output retained |
+| Unsupported reference case | Experimental exit 2 and span, distinct from an E diagnostic |
+| Integer range correction | E1013, replacing the earlier internal 1008 |
+
+Call arguments and other expression/control/place/ownership consumers, inline
+and unsafe provenance, unit HIR/MIR/C/CLI and self-hosting remain unfinished.
+Full dispatcher input observations are grouped with the next argument unit;
+this unit makes no new full-corpus claim. Release, Linux, full dispatcher native,
+stage1/stage2 and push were not run. Public language/SDK ABI, SDK sources, DB,
+CI and runners are unchanged.
+Evidence: `docs/ops/evidence/candidate-module-unit-operators-20261009.json`.

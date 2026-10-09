@@ -428,3 +428,29 @@ unsafe·inline 출처 소비, 묶음 간 구조적 중복 제거·layout·HIR/MI
 공개 언어/SDK ABI·SDK 소스·DB·CI·러너 변경 없음. Release·Linux·전체 dispatcher
 native·stage1/stage2·push는 실행하지 않았다.
 근거: `evidence/candidate-module-unit-values-20261009.json`.
+
+## 스칼라 연산의 타입 문맥과 진단 (2026-10-09)
+
+`module_unit_value_scalar`가 지역 변수 초기화와 반환값의 정수 산술·비트·시프트,
+비교·bool 논리·단항 연산 타입을 검사한다. 정수 리터럴 트리는 타입 문맥에 따라
+구체화하며, 타입이 정해진 상대 피연산자를 먼저 참조하더라도 원래 소스의 실행
+순서와 식 ID·위치를 보존한다. 직접적인 i32·i64 최솟값 단항식에는 별도 표식을
+남긴다. 필드·캐스트·builtin의 타입이 아직 정해지지 않았다면 상대 리터럴도
+보류하여 기본 i32 범위로 성급하게 거부하지 않는다. 값 계획마다 기본 타입 캐시를
+한 번 만들어 반복 그래프 검색을 제거한다. 일반·제네릭·cleanup 문맥에서 기존
+canonical ID, arena, 64회 반복 및 1MiB 작업량 상한을 유지한다.
+
+| Observation | Result |
+| --- | --- |
+| Development check | 185 source files; 2298 MIR functions; passed |
+| Selected Fairy native tests | 8/8 passed |
+| Reference fixture acceptance / selected primary code and span | 8/8 matched; additional cascade output retained |
+| Unsupported reference case | Experimental exit 2 and span, distinct from an E diagnostic |
+| Integer range correction | E1013, replacing the earlier internal 1008 |
+
+다음은 선언된 호출 및 제네릭 호출의 인수 타입·개수·이름표와 shared 재대여
+기록이다. 나머지 식·제어·place·소유권, unsafe·inline 출처와 HIR/MIR/C/CLI는
+미완료다. 전체 dispatcher 입력 관찰은 다음 인수 단위와 묶어 실행하며 이번
+단위에서 새 전체 코퍼스 통과를 주장하지 않는다. Release·Linux·전체 dispatcher
+native·stage1/stage2·push는 미실행이다. 공개 언어/SDK ABI·SDK 소스·DB·CI·러너
+변경 없음. 근거: `evidence/candidate-module-unit-operators-20261009.json`.
