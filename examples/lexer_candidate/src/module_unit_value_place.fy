@@ -10,7 +10,7 @@ pub fn m::Place field(ref v::Vec<types::Type> graph,m::Expression receiver,m::Ex
     if(p.kind==0 && t.kind!=7 && t.kind!=8){return m::no_place();}p.kind=2;p.projection=selected.source_index;p.indirect=p.indirect || t.kind==7 || t.kind==8;
     if(t.kind==7 || t.kind==8){p.mutable=t.kind==8;}let owner=types::at(graph,selected.field.owner);p.resource_field=p.resource_field || owner.kind==3 || owner.kind==13;return p;
 }
-pub fn bool referent(types::Type t){return t.kind==1 && t.scalar>=1 && t.scalar<=6 || t.kind==2 || t.kind==3 || t.kind==5 || t.kind==6 || t.kind==13 || t.kind==12 && t.first==0 && t.scalar==1048591;}
+pub fn bool referent(types::Type t){return t.kind==1 && t.scalar>=1 && t.scalar<=6 || t.kind==2 || t.kind==3 || t.kind==4 || t.kind==5 || t.kind==6 || t.kind==13 || t.kind==12 && t.first==0 && t.scalar==1048591;}
 pub fn Result<usize,m::Problem> borrow(m::Frame frame,m::Expression expression,m::Expression target,bool mutable,ref mut v::Vec<types::Type> graph,ref mut usize work){
     let bool named=target.kind==2 || target.place.kind==2 || target.place.kind==4;let bool addressable=named && target.place.borrowable && target.place.kind!=0;
     if(mutable && (!addressable || !target.place.mutable || target.place.resource_field)){return .err(m::fail(frame,1008,target.start,target.end,0,target.type));}

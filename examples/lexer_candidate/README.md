@@ -43,8 +43,12 @@ remain unsupported. Match payload bindings preserve subject origins and lexical
 scope. Unsupported return/binding/assignment/match locations are all reported
 when no semantic origin error is present. `Region` input parameters are
 admitted as a compiler-owned kind-19 capability and forward across modules,
-direct and provider calls and scalar-generic instantiations. Region/loan/
-subview/lifetime/conflict/move, unsafe pointer provenance, split-unit
+direct and provider calls and scalar-generic instantiations. `Region.place`
+checks fully inert values as `Result<ref T, AllocError>` and carries the
+receiver Region's provenance through the success payload. Resource-containing
+values are refused with code 3102; borrow-containing values remain unsupported.
+Lexical Region enter/reset and escape checks, Region runtime execution,
+loan/subview/lifetime/conflict/move, unsafe pointer provenance, split-unit
 execution, the full project dispatcher, stage1/stage2, release and Linux are
 pending.
 

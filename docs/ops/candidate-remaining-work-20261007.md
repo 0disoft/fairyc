@@ -1669,3 +1669,43 @@ Region.place and lexical region enter/reset/origins remain pending, as do
 loans, lifetimes, conflicts, moves, unsafe provenance, cross-unit runtime, the
 dispatcher, stage1/stage2, release and Linux. No push, public CLI/SDK ABI, DB
 or CI/runner change was made in this candidate slice.
+
+## Region.place and Region input origins (2026-10-10)
+
+`Region.place` resolves against an exact authenticated `std::alloc` public
+`AllocError` and a source-set match; `module_unit_interfaces.fy` owns the
+implicit error shape. Kind 300 typechecks one operand on an exact Region receiver
+and returns `Result<ref T, AllocError>`, rejecting `NeedsDrop`/resource
+transitively with code 3102; borrow-containing placements remain unsupported
+with code 2.
+
+Fully inert scalar, raw pointer, struct, enum, tagged and array placement is
+supported, and enum reference admission joined the owned type and borrow-place
+path; a regression placing the same nominal struct through direct and Option
+field traversal is fixed. `sdk_scopes` admits only the exact authenticated Arena
+initialize/drop declarations (rules 70/71, `u32(ptr mut void)`), with SDK
+bytes/ABI unchanged and unauthenticated or forged `fy_` symbols refused.
+
+Region parameters carry a kind-13 origin owner distinct from ordinary borrowed
+parameters and wrapper storage, and allocation derives Region provenance rather
+than the placed value's origin. Direct, generic and provider forwarding,
+argument reordering, `?`, match, nested wrappers and mixed-input E2103 keep their
+original coordinates.
+
+Validation: source check passed (217 files, 2658
+MIR functions), native 3/3 passed (tagged regression and exhaustion), 17/17
+API/reference comparisons matched codes, module indices, spans and related roles
+on the authentic Alloc SDK, and a fresh locked candidate build passed CLI/reference 17/17 with refusals 8/8;
+native and API hashes match the current sources and tests. A forged
+`fy_std_arena_drop_v0` alias is rejected with code 5106/exit 2 where the reference
+exits 0, holding the reserved SDK symbol authentication boundary; the retained
+E5106 initial failure was a missing SDK Arena foreign-symbol admission. Evidence:
+docs/ops/evidence/candidate-module-region-place-20261010.json.
+
+Go discrepancy: the reference rejects a direct resource placement (negative 3,
+exit 3) but accepts nested Option-resource (negative 4) and borrowed Option
+(negative 5) placement at exit 0 that the candidate rejects as normative
+non-inert inputs, so no broad Region parity is claimed. Runtime Region execution
+and the lexical Region construct with E3101 region escape remain pending, as do
+release, Linux and stage1/stage2; no push or public Stage 0 CLI/SDK ABI, DB or CI
+change was made.
