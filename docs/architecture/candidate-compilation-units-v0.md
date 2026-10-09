@@ -1052,3 +1052,36 @@ inferred-void-local admission, ownership/unsafe provenance and unit HIR/MIR/C/CL
 remain. No new corpus, full current dispatcher, stage1/stage2, release, Linux or
 push was run; corpus work is bundled with switch consumers. Public language/SDK
 ABI, SDK sources, DB, CI and runner contracts are unchanged.
+
+## Switch values and scoped payload bindings (2026-10-09)
+
+`module_unit_value_match` now projects exhaustive canonical Result/Option/enum
+switches in source order, with duplicate/missing variant and payload checks.
+Pattern nodes remain nonvalues; their payload type and existing scoped symbol
+root annotate every matching path and its local metadata. Unrelated same-name
+symbols remain separate. Enum pattern fields retain original provider module,
+declaration and field coordinates. Typed payloads feed inferred locals, fields,
+call arguments and returns in ordinary, generic and cleanup contexts.
+
+Result excludes no-tail final direct-return and literal-final assert(false)
+arms from value joins; Option excludes only literal-final assert(false), and
+user enums exclude neither. All-excluded built-in switches have void type.
+Other arm mismatches report E1006 at the arm block, overflow remains E1013,
+and unsupported scrutinee/arity/pattern/exhaustiveness retains original spans.
+A standalone non-void function with only switch-contained returns is still
+rejected by the reference's checked-return gate; the all-terminal native fixture
+uses a void function and does not claim that missing-return analysis is done.
+
+Development check passed (197 sources, 2404 MIR functions), selected native
+cases passed 7/7 including SDK Vec, and reference acceptance/code/span fixtures
+matched 19/19. Types 4096, work 1048576, entries 1024, active locals 128 and
+depth/rounds 64 remain unchanged. Evidence:
+`docs/ops/evidence/candidate-module-unit-matches-20261009.json`.
+
+The fixed 160-module corpus observation is running separately, with added
+switch/variant/payload metadata assertions; no new corpus pass is claimed here.
+Propagation/builtin, assignment/post, defer/burn, function tails/missing returns,
+earlier declaration/shape rejection, inferred-void-local admission, ownership,
+unsafe provenance, cross-unit HIR/MIR/C/CLI, full current dispatcher and
+stage1/stage2 remain. Release, Linux and push were not run. Public language/SDK
+ABI, SDK sources, DB, CI and runner contracts are unchanged.

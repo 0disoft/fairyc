@@ -11,6 +11,7 @@ import module_unit_value_array as arrays;
 import module_unit_value_record as records;
 import module_unit_value_control as control;
 import module_unit_value_variant as variants;
+import module_unit_value_match as matches;
 import module_unit_value_view as views;
 import syntax as syntax;
 import std::bytes as bytes;
@@ -52,6 +53,7 @@ pub fn m::Problem evaluate(ref syntax::Parsed source,m::Frame frame,usize id,usi
     if(e.kind==1){return literal(source,frame,id,expected,imported,graph,atoms,expressions,work);}if(e.state==1 && (!e.flexible || e.expected==expected)){return ok(frame);}
     if(e.kind==3){let usize child=m::index(expressions,e.left);if(child==0){return m::fail(frame,12,e.start,e.end,0,0);}let p=evaluate(source,frame,child,expected,imported,graph,atoms,expressions,work,depth+1);if(p.code!=0){return p;}let c=*v::at<m::Expression>(expressions,child-1);if(c.state==1){record(expressions,id,expected,c.type,false);let slot=v::at_mut<m::Expression>(expressions,id-1);slot.place=c.place;}else if(c.state==2){let slot=v::at_mut<m::Expression>(expressions,id-1);slot.state=2;}return ok(frame);}
     if(e.kind==8){let usize child=m::index(expressions,e.left);if(child==0){return m::fail(frame,12,e.start,e.end,0,0);}let p=evaluate(source,frame,child,0,imported,graph,atoms,expressions,work,depth+1);if(p.code!=0){return p;}let actual=*v::at<m::Expression>(expressions,child-1);if(actual.state==2){return m::fail(frame,1006,actual.start,actual.end,0,0);}if(actual.type==0){return ok(frame);}let selected=switch(fields::resolve(imported,graph,atoms,frame,e,actual.type,syntax::expression_text(source,e.source_index),work)){case .ok(s):{s}case .err(p):{return p;}};record(expressions,id,expected,selected.type,false);let slot=v::at_mut<m::Expression>(expressions,id-1);slot.field=selected.field;slot.place=places::field(graph,actual,*slot);return ok(frame);}
+    if(e.kind==15){return matches::evaluate(source,frame,id,expected,imported,graph,atoms,expressions,work,depth);}
     if(e.kind==12 || e.kind==13 || e.kind==31){return control::evaluate(source,frame,id,expected,imported,graph,atoms,expressions,work,depth);}
     if(e.kind==28 || (e.kind==6 || e.kind==10) && syntax::expression_at(source,e.left).kind==28){return variants::evaluate(source,frame,id,expected,imported,graph,atoms,expressions,work,depth);}
     if(e.kind==10){return records::evaluate(source,frame,id,expected,imported,graph,atoms,expressions,work,depth);}
