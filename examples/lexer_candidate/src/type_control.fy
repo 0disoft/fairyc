@@ -16,7 +16,7 @@ pub fn bool plain_header(ref syntax::Parsed parsed, usize id, usize depth) {
     if (id == 0 || depth >= 64) { return false; }
     let syntax::Expression node = syntax::expression_at(parsed,id);
     if (node.kind == 1 || node.kind == 2) { return true; }
-    if (node.kind == 3 || node.kind == 4) { return plain_header(parsed,node.left,depth + 1); }
+    if (node.kind == 3 || node.kind == 4 || node.kind == 23) { return plain_header(parsed,node.left,depth + 1); }
     if (node.kind == 5) { return plain_header(parsed,node.left,depth + 1) && plain_header(parsed,node.right,depth + 1); }
     return false;
 }

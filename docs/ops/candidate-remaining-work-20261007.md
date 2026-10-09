@@ -1039,3 +1039,41 @@ observation, full dispatcher, stage1/stage2, release, Linux or push was run
 for this slice; the next corpus observation is bundled after the statement
 consumers. Public language/SDK ABI, SDK sources, DB, CI and runners are
 unchanged.
+
+## Assignment and post-clause value consumer (2026-10-09)
+
+`module_unit_value_assignment` consumes assignment statements and post clauses
+from the unit value walk. It resolves the canonical target expression with
+zero context, then evaluates the right-hand side with the target's canonical
+type as its expected context. A non-value or type-mismatched right-hand side
+reports E1006 at the value span. The target must project a writable mutable
+local, field, checked index or named admitted reference dereference; immutable
+and non-place targets keep E1008 at the original span. Indexed struct
+array-field replacement and empty-struct dereference are rejected with E1008.
+Plain = accepts matching types, while the ten compound operators require one
+of the five integer scalar types. Other compound targets retain code2 over the
+statement.
+
+Header init/post markers 1/2 require a direct scalar local target and
+structurally scalar right-hand sides. Declaration initializers have the same
+scalar header restriction. Violations retain code2 over the original clause
+without its separator. Explicit allowed casts are admitted by both the unit
+header consumer and the existing type_control predicate. Checks record
+expected/actual canonical IDs, target and operator token coordinates, header
+flags and the checked flag.
+
+Development check passed (201 sources, 2443 MIR functions), selected native
+tests passed 6/6 and reference acceptance/code/span fixtures matched 18/18.
+Native cases check 31 assignments, ten compound operators across five integer
+scalar types, plain bool assignment, mutable field/array/view/named-reference
+paths, original provider generic and cleanup coordinates, and error and header
+restrictions. Evidence:
+docs/ops/evidence/candidate-module-unit-assignments-20261009.json.
+
+Defer/burn, function completion and missing returns, inferred-void-local
+admission, earlier declaration/shape rejection,
+loans/lifetimes/conflicts/moves, unsafe pointer provenance and cross-unit
+HIR/MIR/C/CLI remain. All consumer logic is Fairy. No new fixed corpus, full
+dispatcher, stage1/stage2, release, Linux or push was run; the corpus
+observation remains bundled after statement consumers. Public language/SDK
+ABI, SDK sources, DB, CI and runner contracts are unchanged.
