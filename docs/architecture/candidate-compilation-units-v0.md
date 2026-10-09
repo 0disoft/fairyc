@@ -1272,3 +1272,27 @@ complete fixed-corpus observation remains pinned to implementation commit
 behavior is unchanged while some analysis work counters increase. Release,
 Linux and push were not run; public language/SDK ABI, SDK sources, DB, CI and
 runner contracts are unchanged.
+
+## Ordinary SDK view signatures and unit storage bodies (2026-10-09)
+
+`module_signatures::build` now collects authenticated std::vec non-generic
+functions through the same canonical signature path as other ordinary
+functions. The ten shared/mutable byte, i64, i32, u32 and usize view functions
+retain their declaration coordinates, public visibility, parameter and result
+types, effects, must-use, unsafe and foreign flags. Five scalar Vec
+instantiations are retained in the metadata graph; ref/ref-mut parameters and
+matching slice results stay canonical.
+
+Development check passed (200 sources, 2435 MIR functions), selected native
+tests passed 4/4 and reference fixtures matched 4/4. Caller tests cover exact
+parameter/result IDs and E1006/E1010 caller spans, SDK unit tests check all
+ten ordinary storage-slice bodies and owner roots against original SDK
+coordinates, and the existing nominal array-field storage view remains
+covered. Evidence:
+docs/ops/evidence/candidate-module-unit-sdk-calls-20261009.json. Ordinary-call
+origin summaries, loans/lifetimes/moves, assignment/post, defer/burn, function
+tails/missing returns and cross-unit HIR/MIR/C/CLI remain. No new fixed-corpus
+observation, full dispatcher, stage1/stage2, release, Linux or push was run
+for this slice; the next corpus observation is bundled after the statement
+consumers. Public language/SDK ABI, SDK sources, DB, CI and runners are
+unchanged.
