@@ -392,3 +392,39 @@ fairy 컴파일러의 module_unit_calls는 선언된 호출의 canonical 반환 
 | Array reference regression | Kind-24 element links use right; a declared call beneath a cast retains its callee binding |
 | Remaining expression consumers | Argument/operator matching, inferred-local symbol types, ownership and unsafe/inline checks |
 | Deferred checks | Release, Linux, full dispatcher native and stage1/stage2; no push |
+
+## 알려진 값의 지역 타입 추론과 반환값 검사 (2026-10-09)
+
+`module_unit_values`는 일반 함수, 요청된 제네릭 함수와 cleanup 본문에
+불변 값·지역 변수·반환값 테이블을 연결한다. 제공자 모듈·선언, 원래 식·entry ID와
+소스 위치를 보존한다. 선언된 호출 및 명시적으로 특수화된 함수 결과를 받아 지역
+변수 타입을 추론하고, 지역 변수 참조와 괄호로 알려진 타입을 전달한다. 직접
+리터럴은 지역 변수·반환 타입을 문맥으로 사용하며 정수 범위 오류를 유지한다.
+타입이 정해진 반환값만 대조한다. 연산자·캐스트·필드·인수·variant·분기 합류와
+builtin 결과는 보류 상태로 남기며, enum의 payload 없는 값도 값이 아닌 구문으로
+잘못 거부하지 않는다. 기존 canonical ID를 보존하고 빠진 기본 타입만 별도 그래프에
+추가한다. 오래된 입력은 결과 반환 전에 거부하고, 기존 arena와 64회 고정점·1MiB
+작업량 상한을 유지한다. 상한 초과는 기존 유닛 분할 경로를 사용한다.
+
+| Observation | Value |
+| --- | --- |
+| Development native tests | 8/8 passed |
+| Dispatcher input snapshot | 160 modules; 1048562 bytes |
+| Admitted units / attempts / splits | 26 / 39 / 13 |
+| Per-unit context / expression totals | 2563 / 186137 |
+| Known / unresolved / non-value expression totals | 58300 / 68976 / 58861 |
+| Local / inferred local totals | 11442 / 539 |
+| Return / checked return totals | 4783 / 2876 |
+| Maximum value work / graph | 754886 / 1048576; 427 / 4096 |
+| Maximum combined entries / type syntax nodes | 1015 / 1024; 2242 / 4096 |
+| Preserved local / iteration bounds | 128 active locals; 64 fixed-point rounds |
+
+
+비교에는 기존 160모듈 입력 스냅샷을 사용했다. 새 값 분석 모듈은 개발 check와
+native 실행의 구현 코드로 검사했으며, 1MiB 입력 스냅샷에 추가하지 않았다.
+따라서 이번 관찰을 최신 자기 소스 전체의 dispatcher 컴파일로 취급하지 않는다.
+다음은 연산자·인수 및 나머지 식 타입 검사다. 이동 여부에 따른 cleanup 의무,
+unsafe·inline 출처 소비, 묶음 간 구조적 중복 제거·layout·HIR/MIR/C/CLI도 남는다.
+공개 언어/SDK ABI·SDK 소스·DB·CI·러너 변경 없음. Release·Linux·전체 dispatcher
+native·stage1/stage2·push는 실행하지 않았다.
+근거: `evidence/candidate-module-unit-values-20261009.json`.

@@ -504,3 +504,42 @@ If a prerequisite regresses, self-hosting promotion stops. Existing Go release a
 ## Non-goals
 
 This gate does not require replacing Go, implementing the full compiler in Fairy, stage-2 trust claims, trusting-trust mitigation, a second backend, LSP/SCIP, generic containers beyond the compiler's demonstrated needs, or freezing unstable syntax and ABI decisions.
+
+## Compilation-unit known value analysis (2026-10-09)
+
+`module_unit_values` collects generic, cleanup and ordinary contexts. Its
+immutable value, local and return tables retain provider module/declaration,
+original expression/entry IDs and source spans. Declared and explicitly
+specialized function results seed known values. Direct literals take local or
+return context through parentheses; integer range errors are retained.
+Unannotated locals infer from known initializer types, and local references and
+parentheses propagate those types. Only resolved returns are matched.
+Operators, casts, fields, arguments, variants, joins and builtin result typing
+remain deferred, along with ownership, effects and unsafe/inline validation.
+Existing canonical IDs are preserved; missing primitive/literal descriptors
+append to a separate bounded graph. Stale source stamps are rejected before
+publication. Existing arenas, 64 fixed-point rounds and 1048576 work remain
+bounded, with code-10 admission using the existing range-split planner.
+
+| Observation | Value |
+| --- | --- |
+| Development native tests | 8/8 passed |
+| Dispatcher input snapshot | 160 modules; 1048562 bytes |
+| Admitted units / attempts / splits | 26 / 39 / 13 |
+| Per-unit context / expression totals | 2563 / 186137 |
+| Known / unresolved / non-value expression totals | 58300 / 68976 / 58861 |
+| Local / inferred local totals | 11442 / 539 |
+| Return / checked return totals | 4783 / 2876 |
+| Maximum value work / graph | 754886 / 1048576; 427 / 4096 |
+| Maximum combined entries / type syntax nodes | 1015 / 1024; 2242 / 4096 |
+| Preserved local / iteration bounds | 128 active locals; 64 fixed-point rounds |
+
+
+The same dispatcher input snapshot is reused for comparison. The new value
+modules are tested as implementation code, but are not added to the 1MiB input
+snapshot. This observation is not full current-source dispatcher compilation.
+Argument/operator consumers and move-aware cleanup, unsafe/inline provenance,
+structural cross-unit links/layouts and unit HIR/MIR/C/CLI remain unfinished.
+Public language/SDK ABI, SDK sources, DB, CI and runners are unchanged.
+Release, Linux, full dispatcher native and stage1/stage2 remain deferred; no push.
+Evidence: `docs/ops/evidence/candidate-module-unit-values-20261009.json`.

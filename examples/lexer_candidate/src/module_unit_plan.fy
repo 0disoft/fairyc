@@ -7,13 +7,14 @@ import module_unit_drops as drops;
 import module_unit_names as names;
 import module_unit_ordinary_names as ordinary;
 import module_unit_call_closure as closure;
+import module_unit_values as values;
 import module_signatures as signatures;
 import module_ast_join as join;
 import syntax as syntax;
 import std::vec as v;
 
-pub resource Plan {v::Vec<units::Unit> units;usize files;usize bytes;usize attempts;usize splits;usize work;usize binding_work;usize interface_work;usize body_work;usize drop_work;usize name_work;cleanup{}}
-struct Budget {usize attempts;usize splits;usize work;usize binding_work;usize interface_work;usize body_work;usize drop_work;usize name_work;}
+pub resource Plan {v::Vec<units::Unit> units;usize files;usize bytes;usize attempts;usize splits;usize work;usize binding_work;usize interface_work;usize body_work;usize drop_work;usize name_work;usize value_work;cleanup{}}
+struct Budget {usize attempts;usize splits;usize work;usize binding_work;usize interface_work;usize body_work;usize drop_work;usize name_work;usize value_work;}
 fn join::Problem fail(u32 code,usize module_index){return join::Problem{.code,.module_index,.start=0,.end=0};}
 fn bool charge(ref mut Budget budget,usize amount){if(budget.work>1048576 || amount>1048576-budget.work){return false;}budget.work+=amount;return true;}
 fn units::Usage measured(ref v::Vec<syntax::Parsed> sources,usize first,usize stop){
@@ -24,6 +25,7 @@ fn join::Problem admit(ref v::Vec<syntax::Parsed> sources,ref signatures::Progra
     let bound=switch(binding::bind(sources,metadata,first,stop)){case .ok(b):{b}case .err(p):{return p;}};
     if(binding::work(ref bound)>budget.binding_work){budget.binding_work=binding::work(ref bound);}
     let ready=switch(closure::build(sources,metadata,ref bound)){case .ok(p):{p}case .err(p):{return p;}};let imported=closure::imported(ref ready);let owned=closure::owned(ref ready);let resolved=closure::resolved_names(ref ready);let locals=closure::original_names(ref ready);let drop_plan=closure::drop_plan(ref ready);
+    let typed=switch(values::build(sources,metadata,ref ready)){case .ok(p):{p}case .err(p):{return join::Problem{.code=p.code,.module_index=p.module_index,.start=p.start,.end=p.end};}};if(values::work(ref typed)>budget.value_work){budget.value_work=values::work(ref typed);}
     if(interfaces::work(imported)>budget.interface_work){budget.interface_work=interfaces::work(imported);}if(drops::work(drop_plan)>budget.drop_work){budget.drop_work=drops::work(drop_plan);}let usize name_work=names::work(resolved)+ordinary::work(locals);if(name_work>budget.name_work){budget.name_work=name_work;}if(bodies::work(owned)>budget.body_work){budget.body_work=bodies::work(owned);}return fail(0,0);
 
 }
@@ -36,9 +38,9 @@ fn join::Problem refine(ref v::Vec<syntax::Parsed> sources,ref signatures::Progr
 pub fn Result<Plan,join::Problem> build(ref v::Vec<syntax::Parsed> sources,ref signatures::Program metadata){
     if(v::len<syntax::Parsed>(sources)!=signatures::module_count(metadata)){return .err(fail(12,0));}var usize i=0;
     while(i<v::len<syntax::Parsed>(sources)){if(!signatures::source_matches(metadata,i,v::at<syntax::Parsed>(sources,i))){return .err(fail(12,i));}i+=1;}
-    let initial=switch(units::build(sources)){case .ok(p):{p}case .err(p):{return .err(p);}};var v::Vec<units::Unit> ranges=v::empty<units::Unit>();var Budget budget=Budget{.attempts=0,.splits=0,.work=0,.binding_work=0,.interface_work=0,.body_work=0,.drop_work=0,.name_work=0};i=0;
+    let initial=switch(units::build(sources)){case .ok(p):{p}case .err(p):{return .err(p);}};var v::Vec<units::Unit> ranges=v::empty<units::Unit>();var Budget budget=Budget{.attempts=0,.splits=0,.work=0,.binding_work=0,.interface_work=0,.body_work=0,.drop_work=0,.name_work=0,.value_work=0};i=0;
     while(i<units::count(ref initial)){let u=units::at(ref initial,i);let p=refine(sources,metadata,u.first,u.stop,ref mut ranges,ref mut budget,0);if(p.code!=0){return .err(p);}i+=1;}
-    return .ok(Plan{.units=ranges,.files=units::file_count(ref initial),.bytes=units::source_bytes(ref initial),.attempts=budget.attempts,.splits=budget.splits,.work=budget.work,.binding_work=budget.binding_work,.interface_work=budget.interface_work,.body_work=budget.body_work,.drop_work=budget.drop_work,.name_work=budget.name_work});
+    return .ok(Plan{.units=ranges,.files=units::file_count(ref initial),.bytes=units::source_bytes(ref initial),.attempts=budget.attempts,.splits=budget.splits,.work=budget.work,.binding_work=budget.binding_work,.interface_work=budget.interface_work,.body_work=budget.body_work,.drop_work=budget.drop_work,.name_work=budget.name_work,.value_work=budget.value_work});
 }
 pub fn usize count(ref Plan p){return v::len<units::Unit>(ref p.units);}
 pub fn units::Unit at(ref Plan p,usize index){return *v::at<units::Unit>(ref p.units,index);}
@@ -52,3 +54,4 @@ pub fn usize interface_work(ref Plan p){return p.interface_work;}
 pub fn usize body_work(ref Plan p){return p.body_work;}
 pub fn usize drop_work(ref Plan p){return p.drop_work;}
 pub fn usize name_work(ref Plan p){return p.name_work;}
+pub fn usize value_work(ref Plan p){return p.value_work;}
