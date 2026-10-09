@@ -6,6 +6,7 @@ import std::vec as v;
 
 pub struct Context {usize frame;m::Frame value;bool borrower;usize returned;bool seen;usize work;usize loop_depth;usize probes;}
 pub struct Flow {usize origin;usize outcomes;}
+pub struct Returned {usize frame;usize origin;usize start;usize end;}
 pub resource Edge {usize depth;u32 kind;v::Vec<usize> values;cleanup{}}
 pub fn usize edge_depth(ref Edge e){return e.depth;}
 pub fn u32 edge_kind(ref Edge e){return e.kind;}
@@ -35,6 +36,6 @@ pub fn m::Problem capture(ref v::Vec<usize> env,u32 kind,ref mut v::Vec<Edge> ed
 }
 pub fn void drop_edges(ref mut v::Vec<Edge> edges,usize base){while(v::len<Edge>(edges)>base){discard switch(v::pop<Edge>(edges)){case .some(_):{}case .none:{assert(false);}};}}
 pub fn Result<usize,m::Problem> leaf(ref inputs::Inputs input,m::Expression e,ref mut Context c){let id=switch(inputs::binding_owner(input,c.frame,e)){case .ok(n):{n}case .err(p):{return .err(p);}};return if(id==0){.ok(1)}else{switch(sets::owner(id)){case .ok(n):{.ok(n)}case .err(code):{.err(fail(c,code,e.start,e.end))}}};}
-pub fn m::Problem returned(usize origin,ref mut v::Vec<sets::Entry> entries,ref mut v::Vec<usize> members,ref mut Context c,usize start,usize end){
-    if(!c.borrower || c.probes!=0){return fail(c,0,0,0);}c.seen=true;c.returned=switch(join(entries,members,c,c.returned,if(origin==0){1}else{origin},start,end)){case .ok(n):{n}case .err(p):{return p;}};return fail(c,0,0,0);
+pub fn m::Problem returned(usize origin,ref mut v::Vec<sets::Entry> entries,ref mut v::Vec<usize> members,ref mut v::Vec<Returned> returns,ref mut Context c,usize start,usize end){
+    if(!c.borrower || c.probes!=0){return fail(c,0,0,0);}if(!m::charge(ref mut c.work,1) || v::len<Returned>(returns)>=8192){return fail(c,10,start,end);}let usize actual=if(origin==0){1}else{origin};if(!v::push<Returned>(returns,Returned{.frame=c.frame,.origin=actual,.start,.end}).is_ok){return fail(c,11,start,end);}c.seen=true;c.returned=switch(join(entries,members,c,c.returned,actual,start,end)){case .ok(n):{n}case .err(p):{return p;}};return fail(c,0,0,0);
 }

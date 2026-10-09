@@ -1642,3 +1642,34 @@ loan/subview facts, lifetime/conflict/move and unsafe provenance are still
 pending. No new fixed corpus, full dispatcher, stage1/stage2, release, Linux
 or push was performed. Public language/SDK ABI, SDK sources, DB, CI and runner
 contracts are unchanged.
+
+## Original return sites and stable origin records (2026-10-10)
+
+Return-origin plans now own individual return records in addition to
+function-wide summaries. Each record retains its analysis frame, inferred set
+and original return-expression byte span. Per-frame ranges provide bounded
+access without scanning unrelated returns. Summary-round records are discarded
+before the next round; loop probes never publish records. The final plan
+therefore contains only the stable round, live return sites and the original
+expression coordinates required by the next diagnostic consumer.
+
+Development check passed (211 sources, 2595 MIR functions), and four native
+development tests passed, including all three preceding inference tests rerun
+against the changed implementation. The new test verifies two individually
+valid alternative returns, a mixed returned call at its complete expression
+span, loop-return records without probe duplicates, and exclusion of a dead
+return suffix. Reference observations matched 20/20: the three new cases prove
+that alternative returns and loop returns are accepted while forwarding the
+mixed summary through a single returned call reports E2103. The preceding 17
+reference cases were reused only after compiler identity, original fixture
+hashes and byte-identical original test functions were verified. Evidence:
+docs/ops/evidence/candidate-module-unit-origin-return-sites-20261010.json.
+
+This distinction prevents a future validator from rejecting a whole function
+merely because its valid return paths use different parameters. Actual
+E2102/E2103/unsupported diagnostics, related owner locations, tagged/region
+origins, loan/subview/lifetime/conflict/move checks and unsafe provenance
+remain next. The 8192-site cap, 1048576 work and existing frame/depth/round
+bounds fail closed. No new fixed corpus, full dispatcher, stage1/stage2,
+release, Linux or push was performed; public language/SDK ABI, SDK sources,
+DB, CI and runner contracts are unchanged.
