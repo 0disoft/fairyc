@@ -610,3 +610,26 @@ No new full-corpus observation is claimed; it is bundled with array/view/slice
 construction. Release, Linux, full current dispatcher native, stage1/stage2 and
 push were not run. Public language/SDK ABI, SDK sources, DB, CI and runners are
 unchanged. Evidence: `docs/ops/evidence/candidate-module-unit-indexes-20261009.json`.
+
+## Canonical array literal projection (2026-10-09)
+
+새 `module_unit_value_array` 모듈은 목록 리터럴과 반복 배열 리터럴을 정규 그래프 타입에 대해 검사한다. 문맥이 없는 첫 원소가 타입을 정한다. 명시적 배열 기대는 각 원소에 문맥을 부여하되, 배열 길이 불일치는 기존 지역/인자 E1006 또는 반환 E1009 소비자가 보고한다. 개수는 1..4096 범위의 리터럴이어야 한다. 지원되지 않는 개수는 개수 구간에서 code2를 내고, 빈 원소 배열과 지원되지 않는 원소 배열은 리터럴 전체에서 code2를 내며, 원소 불일치는 E1006, 스칼라 오버플로는 E1013을 내고 둘 다 원소 구간을 유지한다. 목록 간선은 한 번 수집되어 소스 순서로 평가되고, 반복 초기화는 한 번 평가된다. `module_unit_value_shapes`는 비어 있지 않은 비순환 명목 필드 그래프를 검증하며 허용된 인라인 배열을 포함하고, 자원·원시 포인터·대여·태그·중첩 배열 원소를 거부한다. 64 깊이와 1 MiB 작업 한도는 유지된다. 비교는 청구되고 정규 그래프는 4096으로 유지된다. 알려진 배열은 추론된 지역 변수, 인덱싱, 선언 및 제네릭 호출 인자, 반환으로 흐르며 제공자 표현식 ID와 구간은 그대로다. 알 수 없는 레코드 초기화는 아직 남아 있고, 일반적인 독립 표현식·수명·이동 완성은 주장하지 않는다. 뷰 구성, 슬라이스, 명목 뷰 표현, 이전 선언 거부, unsafe·포인터, HIR/MIR/C/CLI, stage1/stage2는 남아 있다. 새로운 전체 코퍼스 통과, 릴리스, Linux 빌드, 푸시는 없다.
+
+| Observation | Result |
+| --- | --- |
+| Development check | 192 source files; 2355 MIR functions; passed |
+| Selected development native cases | 5 passed; four identical cases reused and the corrected shape-rejection case rerun |
+| Reference acceptance / code / span | 15/15 matched |
+| Literal order / identity | Source-order list edges, one repeated initializer, canonical element and length retained |
+| Bounds | graph 4096; literal elements 1..4096; work 1048576; active shape depth 64 |
+
+The original resource-bearing struct negative fixture was rejected earlier by
+reference declaration analysis with E1002. It was replaced with a legal
+pointer-bearing struct whose array literal is rejected by the value-shape gate.
+General declaration rejection, record construction, standalone expression,
+loan lifetime/conflict/move, view construction/slices, nominal view interfaces,
+unsafe/pointers and downstream HIR/MIR/C/CLI remain incomplete. Full corpus
+observation is bundled with the next view/slice unit. Release, Linux, full current
+dispatcher native, stage1/stage2 and push were not run. Public language/SDK ABI,
+SDK sources, DB, CI and runners are unchanged.
+Evidence: `docs/ops/evidence/candidate-module-unit-arrays-20261009.json`.

@@ -2224,3 +2224,26 @@ No new full-corpus observation is claimed; it is bundled with array/view/slice
 construction. Release, Linux, full current dispatcher native, stage1/stage2 and
 push were not run. Public language/SDK ABI, SDK sources, DB, CI and runners are
 unchanged. Evidence: `docs/ops/evidence/candidate-module-unit-indexes-20261009.json`.
+
+## Canonical array literal projection (2026-10-09)
+
+A new `module_unit_value_array` module checks list and repeat array literals against canonical graph types. The first uncontextualized element anchors the type; explicit array expectations contextualize each element, while an array length mismatch is reported by the existing local/argument E1006 or return E1009 consumer. The count must be a literal in 1..4096; an unsupported count produces code2 at the count span, empty and unsupported element arrays produce code2 at the whole literal, and a mismatched element produces E1006 with scalar overflow producing E1013, both preserving the element span. List edges are collected once and evaluated in source order, with the repeated initializer evaluated once. `module_unit_value_shapes` validates nonempty acyclic nominal field graphs, including permitted inline arrays, and rejects resources, raw pointers, borrows, tags, and nested array elements. The 64-depth and 1 MiB work limit are retained; comparisons are charged and the canonical graph stays at 4096. Known arrays feed inferred locals, indexing, declared and generic call arguments, and returns, with provider expression IDs and spans unchanged. The unknown record initializer remains pending, and no general standalone expression, lifetime, or move completion is claimed. View construction, slices, nominal-view representation, earlier declaration rejection, unsafe and pointer handling, HIR/MIR/C/CLI, and stage1/stage2 remain. There is no new full corpus pass, release, Linux build, or push.
+
+| Observation | Result |
+| --- | --- |
+| Development check | 192 source files; 2355 MIR functions; passed |
+| Selected development native cases | 5 passed; four identical cases reused and the corrected shape-rejection case rerun |
+| Reference acceptance / code / span | 15/15 matched |
+| Literal order / identity | Source-order list edges, one repeated initializer, canonical element and length retained |
+| Bounds | graph 4096; literal elements 1..4096; work 1048576; active shape depth 64 |
+
+The original resource-bearing struct negative fixture was rejected earlier by
+reference declaration analysis with E1002. It was replaced with a legal
+pointer-bearing struct whose array literal is rejected by the value-shape gate.
+General declaration rejection, record construction, standalone expression,
+loan lifetime/conflict/move, view construction/slices, nominal view interfaces,
+unsafe/pointers and downstream HIR/MIR/C/CLI remain incomplete. Full corpus
+observation is bundled with the next view/slice unit. Release, Linux, full current
+dispatcher native, stage1/stage2 and push were not run. Public language/SDK ABI,
+SDK sources, DB, CI and runners are unchanged.
+Evidence: `docs/ops/evidence/candidate-module-unit-arrays-20261009.json`.
