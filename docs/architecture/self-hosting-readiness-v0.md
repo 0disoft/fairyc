@@ -304,6 +304,16 @@ bounds. Actual unit body typing must still consume these interfaces and resolve
 local annotations/templates before HIR/MIR/C/CLI integration. Evidence:
 `docs/ops/evidence/candidate-module-unit-interfaces-20261009.json`.
 
+Unit interfaces now own canonical annotation roots for local entries,
+declaration results, fields, casts, explicit type arguments and byte-loop
+binders. Resolution uses original module coordinates; generic declaration roots
+remain explicitly deferred. Eight development native regressions and all
+thirteen dispatcher groups pass (10289 concrete roots, 69 deferred, maximum 409
+graph nodes). Actual expression/body typing and template specialization must
+consume this mapping next; remaining CLI/HIR/MIR/C integration and stage proofs
+stay open. Evidence: `docs/ops/evidence/candidate-module-unit-
+annotations-20261009.json`.
+
 `stage0` is the current Go compiler built by the supported Go toolchain.
 
 `stage1` is produced by `stage0` from the admitted Fairy compiler sources.

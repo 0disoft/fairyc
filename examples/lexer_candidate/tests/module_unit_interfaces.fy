@@ -50,3 +50,28 @@ fn interfaces::Interfaces retained(){
     }else if(t.kind==2){switch(interfaces::field(ref p,s.type,0,b"wide")){case .ok(id):{let f=interfaces::field_at(ref p,id-1);assert(interfaces::type_at(ref p,f.type).scalar==2);found+=1;}case .err(code):{assert(code==18);}};}else if(t.kind==4){switch(interfaces::field(ref p,s.type,1,b"Pair")){case .ok(_):{assert(false);}case .err(code):{assert(code==18);}};}i+=1;}
     assert(found==2);switch(interfaces::field(ref p,0,0,b"missing")){case .ok(_):{assert(false);}case .err(code):{assert(code==18);}};
 }
+
+@test fn void local_annotation_roots_keep_distinct_provider_identity_and_template_deferral(){
+    var v::Vec<syntax::Parsed> sources=v::empty<syntax::Parsed>();
+    assert(v::push<syntax::Parsed>(ref mut sources,parsed(b"module prefix;fn i32 zero(){return 0;}")).is_ok);
+    assert(v::push<syntax::Parsed>(ref mut sources,parsed(b"module main;import left as a;import right as b;fn i32 main(){let a::Record[2] x=[a::Record{.n=1};2];let b::Record y=b::Record{.n=2};let u8 n=7 as u8;let i32 z=echo<i32>(1);for(let u8 byte in b\"x\"){discard byte;}return z;}fn T echo<T>(T value){let T copy=value;return copy;}")).is_ok);
+    assert(v::push<syntax::Parsed>(ref mut sources,parsed(b"module left;pub struct Record{i32 n;}")).is_ok);
+    assert(v::push<syntax::Parsed>(ref mut sources,parsed(b"module right;pub struct Record{i64 n;}")).is_ok);
+    let metadata=switch(signatures::build(ref sources)){case .ok(m):{m}case .err(_):{assert(false);return;}};
+    let bound=switch(binding::bind(ref sources,ref metadata,1,3)){case .ok(b):{b}case .err(_):{assert(false);return;}};
+    let p=switch(interfaces::build(ref sources,ref metadata,ref bound)){case .ok(p):{p}case .err(_):{assert(false);return;}};
+    let syntax=binding::parsed(ref bound);assert(interfaces::annotation_count(ref p)==syntax::type_count(syntax));
+    var usize deferred=0;var usize casts=0;var usize arguments=0;var usize loops=0;var usize arrays=0;var usize records=0;var usize i=1;
+    while(i<=interfaces::annotation_count(ref p)){let a=interfaces::annotation_at(ref p,i);if(a.deferred){assert(a.required && a.type==0);deferred+=1;}else if(a.required){assert(a.type!=0);let t=interfaces::type_at(ref p,a.type);if(t.kind==16){assert(t.second==2 && interfaces::type_at(ref p,t.first).module_index==2);arrays+=1;}if(t.kind==2){assert(t.module_index==3);records+=1;}}i+=1;}
+    i=1;while(i<=syntax::expression_count(syntax)){let e=syntax::expression_at(syntax,i);if(e.kind==23){let a=interfaces::annotation_at(ref p,e.right);assert(a.required && interfaces::type_at(ref p,a.type).scalar==3);casts+=1;}if(e.kind==20){let a=interfaces::annotation_at(ref p,syntax::specialization_argument(syntax,i,0));assert(a.required && interfaces::type_at(ref p,a.type).scalar==1);arguments+=1;}i+=1;}
+    i=1;while(i<=syntax::statement_count(syntax)){let s=syntax::statement_at(syntax,i);if(s.kind==18){let a=interfaces::annotation_at(ref p,s.second);assert(a.required && interfaces::type_at(ref p,a.type).scalar==3);loops+=1;}i+=1;}
+    assert(deferred==3 && arrays==1 && records==1 && casts==1 && arguments==1 && loops==1);
+    var usize left=0;var usize right=0;i=0;while(i<interfaces::shape_count(ref p)){let s=interfaces::shape_at(ref p,i);if(s.module_index==2){left=s.type;assert(interfaces::type_at(ref p,interfaces::field_at(ref p,s.field_start).type).scalar==1);}if(s.module_index==3){right=s.type;assert(interfaces::type_at(ref p,interfaces::field_at(ref p,s.field_start).type).scalar==2);}i+=1;}assert(left!=0 && right!=0 && left!=right);
+}
+
+@test fn void invalid_local_annotation_reports_original_module_span(){
+    var v::Vec<syntax::Parsed> sources=v::empty<syntax::Parsed>();assert(v::push<syntax::Parsed>(ref mut sources,parsed(b"module prefix;fn i32 zero(){return 0;}")).is_ok);
+    let text=b"module main;fn i32 main(){let i32[0] invalid=[1;1];return 0;}";assert(v::push<syntax::Parsed>(ref mut sources,parsed(text)).is_ok);
+    let metadata=switch(signatures::build(ref sources)){case .ok(m):{m}case .err(_):{assert(false);return;}};let bound=switch(binding::bind(ref sources,ref metadata,0,2)){case .ok(b):{b}case .err(_):{assert(false);return;}};
+    switch(interfaces::build(ref sources,ref metadata,ref bound)){case .ok(_):{assert(false);}case .err(p):{assert(p.code==9 && p.module_index==1 && bytes::equal(text[p.start..p.end],b"i32[0]"));}};
+}

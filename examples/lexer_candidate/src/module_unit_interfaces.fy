@@ -13,7 +13,8 @@ import std::vec as v;
 pub struct Shape {usize type;usize module_index;usize declaration;usize field_start;usize field_count;u32 abilities;bool repr_c;usize start;usize end;bool cleanup_nonempty;u32 cleanup_effects;}
 pub struct Field {u32 kind;usize type;usize module_index;usize declaration;usize source_index;usize start;usize end;usize name_start;usize name_end;usize payload_start;usize payload_count;}
 pub struct Callable {usize module_index;usize declaration;bool template;usize result;usize parameter_start;usize parameter_count;u32 effects;bool must_use;bool unsafe_call;bool foreign;usize link_start;usize link_end;}
-pub resource Interfaces {types::Graph graph;v::Vec<Shape> shapes;v::Vec<Field> fields;v::Vec<Callable> callables;v::Vec<usize> parameters;bytes::Buffer names;usize work;cleanup{}}
+pub struct Annotation {usize type;bool required;bool deferred;}
+pub resource Interfaces {types::Graph graph;v::Vec<Shape> shapes;v::Vec<Field> fields;v::Vec<Callable> callables;v::Vec<usize> parameters;v::Vec<Annotation> annotations;bytes::Buffer names;usize work;cleanup{}}
 struct Budget {usize work;}
 fn join::Problem fail(u32 code,usize module_index,usize start,usize end){return join::Problem{.code,.module_index,.start,.end};}
 fn bool charge(ref mut Budget work,usize amount){if(work.work>1048576 || amount>1048576-work.work){return false;}work.work+=amount;return true;}
@@ -23,6 +24,24 @@ fn u32 mark(ref mut v::Vec<types::Type> graph,ref mut v::Vec<usize> pending,ref 
     if(bytes::view(seen)[id]!=0){return 0;}bytes::view_mut(seen)[id]=1;return if(v::push<usize>(pending,id).is_ok){0}else{11};
 }
 fn Result<usize,u32> append(ref mut bytes::Buffer names,ref mut Budget work,ref u8[] text){if(!charge(work,text.len)){return .err(10);}let usize start=bytes::len(names);if(text.len>65536-start){return .err(10);}return if(bytes::append(names,text).is_ok){.ok(start)}else{.err(11)};}
+fn void request(ref mut v::Vec<Annotation> table,usize root){if(root!=0){let ref mut Annotation slot=v::at_mut<Annotation>(table,root-1);slot.required=true;}}
+fn Result<v::Vec<Annotation>,join::Problem> annotations(ref v::Vec<syntax::Parsed> sources,ref signatures::Program metadata,ref binding::Bound bound,ref mut v::Vec<types::Type> graph,ref mut Budget work){
+    let p=binding::parsed(bound);var v::Vec<Annotation> table=v::empty<Annotation>();var usize i=0;
+    while(i<syntax::type_count(p)){if(!charge(work,1)){return .err(fail(10,binding::first(bound),0,0));}if(!v::push<Annotation>(ref mut table,Annotation{.type=0,.required=false,.deferred=false}).is_ok){return .err(fail(11,binding::first(bound),0,0));}i+=1;}
+    i=0;while(i<syntax::declaration_count(p)){request(ref mut table,syntax::declaration_at(p,i).result_type);i+=1;}
+    i=0;while(i<syntax::entry_count(p)){request(ref mut table,syntax::entry_at(p,i).type_root);i+=1;}
+    i=0;while(i<syntax::field_count(p)){request(ref mut table,syntax::field_at(p,i).type_root);i+=1;}
+    i=1;while(i<=syntax::expression_count(p)){if(!charge(work,1)){return .err(fail(10,binding::first(bound),0,0));}let e=syntax::expression_at(p,i);if(e.kind==23){request(ref mut table,e.right);}else if(e.kind==20){var usize link=e.right;while(link!=0){let n=syntax::type_at(p,link);request(ref mut table,n.left);link=n.right;}}i+=1;}
+    i=1;while(i<=syntax::statement_count(p)){let s=syntax::statement_at(p,i);if(s.kind==18){request(ref mut table,s.second);}i+=1;}
+    var usize base=0;var usize module_index=binding::first(bound);
+    while(module_index<binding::stop(bound)){let original=v::at<syntax::Parsed>(sources,module_index);var usize owner=0;i=1;
+        while(i<=syntax::type_count(original)){let n=syntax::type_at(original,i);while(owner+1<syntax::declaration_count(original) && n.start>=syntax::declaration_at(original,owner).end){owner+=1;}
+            if(v::at<Annotation>(ref table,base+i-1).required){let d=syntax::declaration_at(original,owner);if(d.generic_parameters!=0){let ref mut Annotation slot=v::at_mut<Annotation>(ref mut table,base+i-1);slot.deferred=true;}
+                else{let r=signatures::resolve_type(metadata,original,module_index,i,graph);if(r.problem.code!=0){return .err(fail(r.problem.code,module_index,r.problem.start,r.problem.end));}let ref mut Annotation slot=v::at_mut<Annotation>(ref mut table,base+i-1);slot.type=r.type;}}
+            i+=1;
+        }base+=syntax::type_count(original);module_index+=1;
+    }return .ok(table);
+}
 fn join::Problem callable(ref v::Vec<syntax::Parsed> sources,ref signatures::Program metadata,binding::Coordinate c,ref mut v::Vec<types::Type> graph,ref mut v::Vec<Callable> callables,ref mut v::Vec<usize> parameters,ref mut bytes::Buffer names,ref mut v::Vec<usize> pending,ref mut bytes::Buffer seen,ref mut Budget work){
     if(!charge(work,1)){return fail(10,c.module_index,c.start,c.end);}var usize i=0;
     let source=v::at<syntax::Parsed>(sources,c.module_index);let d=syntax::declaration_at(source,c.declaration-1);let usize id=signatures::identity(metadata,c.module_index,c.declaration);
@@ -51,6 +70,8 @@ pub fn Result<Interfaces,join::Problem> build(ref v::Vec<syntax::Parsed> sources
     let binding_valid=binding::validate(bound,sources,metadata);if(binding_valid.code!=0){return .err(binding_valid);}
     var v::Vec<types::Type> graph=v::empty<types::Type>();var v::Vec<Shape> shapes=v::empty<Shape>();var v::Vec<Field> fields=v::empty<Field>();var v::Vec<Callable> callables=v::empty<Callable>();var v::Vec<usize> parameters=v::empty<usize>();var bytes::Buffer names=bytes::empty();var v::Vec<usize> pending=v::empty<usize>();var bytes::Buffer seen=bytes::empty();var Budget budget=Budget{.work=0};
     i=1;while(i<=signatures::type_count(metadata)){if(!charge(ref mut budget,1)){return .err(fail(10,0,0,0));}if(!v::push<types::Type>(ref mut graph,signatures::type_at(metadata,i)).is_ok){return .err(fail(11,0,0,0));}i+=1;}
+    let roots=switch(annotations(sources,metadata,bound,ref mut graph,ref mut budget)){case .ok(t):{t}case .err(p):{return .err(p);}};
+    i=0;while(i<v::len<Annotation>(ref roots)){let a=*v::at<Annotation>(ref roots,i);if(a.type!=0){let u32 code=mark(ref mut graph,ref mut pending,ref mut seen,ref mut budget,a.type);if(code!=0){return .err(fail(code,binding::first(bound),0,0));}}i+=1;}
     i=1;while(i<=binding::target_count(bound)){let c=binding::target_at(bound,i);if(c.kind==3 || c.kind==9){let p=callable(sources,metadata,c,ref mut graph,ref mut callables,ref mut parameters,ref mut names,ref mut pending,ref mut seen,ref mut budget);if(p.code!=0){return .err(p);}}
         else if(c.kind==4 || c.kind==6 || c.kind==11){let d=syntax::declaration_at(v::at<syntax::Parsed>(sources,c.module_index),c.declaration-1);if(d.generic_parameters==0){let r=signatures::declaration_type(metadata,c.module_index,c.declaration,ref mut graph);if(r.problem.code!=0){return .err(fail(r.problem.code,c.module_index,r.problem.start,r.problem.end));}let u32 code=mark(ref mut graph,ref mut pending,ref mut seen,ref mut budget,r.type);if(code!=0){return .err(fail(code,c.module_index,c.start,c.end));}}}i+=1;
     }
@@ -59,7 +80,7 @@ pub fn Result<Interfaces,join::Problem> build(ref v::Vec<syntax::Parsed> sources
         if(t.kind>=5 && t.kind<=8 || t.kind==13 || t.kind==16 || t.kind==12 && t.first!=0){let u32 code=mark(ref mut graph,ref mut pending,ref mut seen,ref mut budget,t.first);if(code!=0){return .err(fail(code,0,0,0));}if(t.kind==6){let u32 code=mark(ref mut graph,ref mut pending,ref mut seen,ref mut budget,t.second);if(code!=0){return .err(fail(code,0,0,0));}}}cursor+=1;
     }
     let owned=switch(signatures::own_types(metadata,graph)){case .ok(g):{g}case .err(code):{return .err(fail(code,0,0,0));}};
-    return .ok(Interfaces{.graph=owned,.shapes,.fields,.callables,.parameters,.names,.work=budget.work});
+    return .ok(Interfaces{.graph=owned,.shapes,.fields,.callables,.parameters,.annotations=roots,.names,.work=budget.work});
 }
 pub fn usize type_count(ref Interfaces p){return types::graph_count(ref p.graph);}
 pub fn types::Type type_at(ref Interfaces p,usize id){return types::graph_at(ref p.graph,id);}
@@ -73,6 +94,8 @@ pub fn Callable callable_at(ref Interfaces p,usize index){return *v::at<Callable
 pub fn usize parameter_at(ref Interfaces p,usize index){return *v::at<usize>(ref p.parameters,index);}
 pub fn ref u8[] linker_name(ref Interfaces p,usize index){let c=callable_at(p,index);return bytes::view(ref p.names)[c.link_start..c.link_end];}
 pub fn usize work(ref Interfaces p){return p.work;}
+pub fn usize annotation_count(ref Interfaces p){return v::len<Annotation>(ref p.annotations);}
+pub fn Annotation annotation_at(ref Interfaces p,usize root){assert(root>0 && root<=annotation_count(p));return *v::at<Annotation>(ref p.annotations,root-1);}
 pub fn Result<usize,u32> field(ref Interfaces p,usize type,usize caller,ref u8[] name){
     if(type==0 || type>type_count(p)){return .err(18);}var usize owner=type;let t=type_at(p,owner);if(t.kind==7 || t.kind==8){owner=t.first;}
     var usize i=0;while(i<shape_count(p)){let s=shape_at(p,i);if(s.type==owner){let inner=type_at(p,owner);if(inner.kind!=2 && inner.kind!=3 && inner.kind!=13){return .err(18);}if((inner.kind==3 || inner.kind==13) && caller!=s.module_index){return .err(6201);}var usize f=0;while(f<s.field_count){if(bytes::equal(field_name(p,s.field_start+f),name)){return .ok(s.field_start+f+1);}f+=1;}return .err(18);}i+=1;}return .err(18);

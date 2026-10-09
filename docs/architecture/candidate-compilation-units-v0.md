@@ -153,3 +153,29 @@ resolve local annotation roots and specialize templates. Existing single-owner
 type-check/HIR/MIR code still uses local numeric declaration tags; adapting that
 consumer is the next step. The command dispatcher, full C output and stage1/stage2
 are not yet connected to the unit pipeline.
+
+## Canonical local annotation roots
+
+Fairy C's module_unit_interfaces now maps declaration results, parameter and
+local entries, field types, cast targets, explicit specialization arguments, and
+byte-loop binder types from joined AST root IDs to canonical graph IDs.
+Resolution runs against the original Parsed owners and original module
+coordinates while preserving original error spans, and local annotation types
+seed provider field projection. Generic declaration roots carry required=true,
+deferred=true, and type=0 until specialization, whereas all unrequested child
+and list nodes carry required=false. Interfaces owns this mapping, so no
+borrowed owner survives.
+
+Eight development native regressions pass. The actual dispatcher processes 160
+modules (1046575 bytes) in thirteen units, with 10289 concrete annotation roots
+and 69 deferred template roots. Group maxima are 409 canonical graph types, 131
+shapes, 910 fields and 198 callables; projection work peaks at 27474. Existing
+numeric limits remain fixed. Evidence: `docs/ops/evidence/candidate-module-unit-
+annotations-20261009.json`.
+
+Next: specialize deferred templates and connect local symbol/expression/body
+typing to the owned annotations, provider fields and callable signatures.
+Annotation collection does not validate initializer, argument or return
+expression compatibility. CLI/HIR/MIR/C unit integration, target layouts,
+transitive cleanup effects, stage1/stage2, release rebuilding and Linux remain
+open.
