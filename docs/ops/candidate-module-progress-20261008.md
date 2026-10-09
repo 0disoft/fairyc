@@ -3448,3 +3448,23 @@ region enter/reset, loans, lifetimes, conflicts, moves, unsafe provenance,
 stage1/stage2, release and Linux. The public Stage 0 CLI and SDK ABI are
 unchanged. DB and CI are unchanged; no push was made. Evidence:
 docs/ops/evidence/candidate-module-region-escape-20261010.json.
+
+## SDK mutable storage-view generations (2026-10-10)
+
+Authenticated SDK mutable indexed storage borrows now create descendant
+generations at their builtin source site. Their owned return summaries carry
+the descendant flag to callers. Vec byte, i64 and plain nominal views retain
+the parent restriction through aliases and Option payloads. Shared views remain
+accepted; last use and known-empty tag replacement release the restriction.
+
+Source checking and the locked development build passed. Nine SDK Go/API/CLI
+cases match exact primary and related diagnostic spans; the selected native
+test passed all nine cases. Existing subview 38 and shared-reference 27 CLI
+cases remain exact against the same candidate image. Evidence:
+`docs/ops/evidence/candidate-sdk-storage-generations-20261010.json`.
+
+Complete ordinary owner-read/access/store coverage, full immutable loan facts,
+general moved-owner state, move-aware cleanup, borrow MIR/C/runtime, unsafe
+provenance, full dispatcher and stage1/stage2 remain pending. Release and Linux
+checks were outside this local analysis unit. Public CLI, SDK ABI, DB and CI
+are unchanged; no push.

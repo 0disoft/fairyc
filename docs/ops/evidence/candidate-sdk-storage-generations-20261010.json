@@ -1,0 +1,430 @@
+{
+  "schema": "fairyc.candidate-sdk-storage-generations/v1",
+  "passed": true,
+  "scope": "Authenticated SDK mutable indexed storage borrows create descendant generations and propagate through owned return summaries. Parent references, aliases and tagged payloads retain restrictions until last use or known-empty replacement.",
+  "sourceTruth": [
+    "internal/semantic/borrow_flow.go",
+    "docs/language/0002-borrows-and-return-origins.md"
+  ],
+  "identity": {
+    "compiler": {
+      "path": ".cache/candidate-tagged/compiler-origin-patterns.exe",
+      "sha256": "d36dae1b99751322e447880aaf4d28321bd6d53bdf776185308c6c4504889bb2"
+    },
+    "candidate": {
+      "path": "examples/lexer_candidate/build/lexer-candidate.exe",
+      "sha256": "05b547d35f8826420fb72d496081bd091a55358075ad543d89b5bf5557277174"
+    },
+    "lock": {
+      "path": "examples/lexer_candidate/fairy.lock",
+      "sha256": "6941f044da06495e11a819f43cf07c491d0f6ea57e960a7dd2a3e5d38d93c7b9"
+    },
+    "sdk": {
+      "path": "internal/sdkstdlib/sources/optional/std/vec.fy",
+      "sha256": "0ae4c395bf98c39079ad620bde035b3b590d51417864802e698edc069281db5b"
+    },
+    "files": [
+      {
+        "path": "examples/lexer_candidate/src/module_unit_origin_flow.fy",
+        "sha256": "54f199fa6104e2de322f747c0ab465b2c1ea6c984cc985aa8abc19f82a0865d4"
+      },
+      {
+        "path": "examples/lexer_candidate/tests/module_unit_storage_generations.fy",
+        "sha256": "d82d7d45a228cba253fbd3705ee895ccdff4a5eb76a34497a90c49af08cb6d9f"
+      }
+    ]
+  },
+  "sourceCheck": {
+    "exit": 0,
+    "stdout": "check ok: 2 instance(s), 232 source file(s), 2892 MIR function(s), lock unchanged\n"
+  },
+  "lockedDevelopmentBuild": {
+    "exit": 0,
+    "recordedFromPriorObservedCommand": true
+  },
+  "cli": {
+    "passed": true,
+    "matched": 9,
+    "count": 9,
+    "candidateSHA256": "05b547d35f8826420fb72d496081bd091a55358075ad543d89b5bf5557277174",
+    "cases": [
+      {
+        "index": 0,
+        "name": "mutable view freezes parameter",
+        "exit": 3,
+        "matched": true,
+        "reference": [
+          {
+            "file": "main.fy",
+            "code": 2101,
+            "start": 133,
+            "end": 138,
+            "related": [
+              {
+                "role": "last-use",
+                "file": "main.fy",
+                "start": 148,
+                "end": 153
+              },
+              {
+                "role": "loan",
+                "file": "main.fy",
+                "start": 92,
+                "end": 113
+              }
+            ]
+          }
+        ],
+        "diagnostics": [
+          {
+            "file": "main.fy",
+            "code": 2101,
+            "start": 133,
+            "end": 138,
+            "related": [
+              {
+                "role": "last-use",
+                "file": "main.fy",
+                "start": 148,
+                "end": 153
+              },
+              {
+                "role": "loan",
+                "file": "main.fy",
+                "start": 92,
+                "end": 113
+              }
+            ]
+          }
+        ],
+        "stdout": "",
+        "stderr": "src/main.fy:1:134: error: E2101 borrow conflicts with live loan (bytes 133..138)\n  loan: src/main.fy (bytes 92..113)\n  last-use: src/main.fy (bytes 148..153)\n"
+      },
+      {
+        "index": 1,
+        "name": "mutable view ends",
+        "exit": 0,
+        "matched": true,
+        "reference": [],
+        "diagnostics": [],
+        "stdout": "return origins ok\n",
+        "stderr": ""
+      },
+      {
+        "index": 2,
+        "name": "mutable view alias",
+        "exit": 3,
+        "matched": true,
+        "reference": [
+          {
+            "file": "main.fy",
+            "code": 2101,
+            "start": 162,
+            "end": 167,
+            "related": [
+              {
+                "role": "last-use",
+                "file": "main.fy",
+                "start": 177,
+                "end": 182
+              },
+              {
+                "role": "loan",
+                "file": "main.fy",
+                "start": 92,
+                "end": 113
+              }
+            ]
+          }
+        ],
+        "diagnostics": [
+          {
+            "file": "main.fy",
+            "code": 2101,
+            "start": 162,
+            "end": 167,
+            "related": [
+              {
+                "role": "last-use",
+                "file": "main.fy",
+                "start": 177,
+                "end": 182
+              },
+              {
+                "role": "loan",
+                "file": "main.fy",
+                "start": 92,
+                "end": 113
+              }
+            ]
+          }
+        ],
+        "stdout": "",
+        "stderr": "src/main.fy:1:163: error: E2101 borrow conflicts with live loan (bytes 162..167)\n  loan: src/main.fy (bytes 92..113)\n  last-use: src/main.fy (bytes 177..182)\n"
+      },
+      {
+        "index": 3,
+        "name": "shared view allows shared access",
+        "exit": 0,
+        "matched": true,
+        "reference": [],
+        "diagnostics": [],
+        "stdout": "return origins ok\n",
+        "stderr": ""
+      },
+      {
+        "index": 4,
+        "name": "generic byte descendant",
+        "exit": 3,
+        "matched": true,
+        "reference": [
+          {
+            "file": "main.fy",
+            "code": 2101,
+            "start": 134,
+            "end": 139,
+            "related": [
+              {
+                "role": "last-use",
+                "file": "main.fy",
+                "start": 149,
+                "end": 154
+              },
+              {
+                "role": "loan",
+                "file": "main.fy",
+                "start": 92,
+                "end": 114
+              }
+            ]
+          }
+        ],
+        "diagnostics": [
+          {
+            "file": "main.fy",
+            "code": 2101,
+            "start": 134,
+            "end": 139,
+            "related": [
+              {
+                "role": "last-use",
+                "file": "main.fy",
+                "start": 149,
+                "end": 154
+              },
+              {
+                "role": "loan",
+                "file": "main.fy",
+                "start": 92,
+                "end": 114
+              }
+            ]
+          }
+        ],
+        "stdout": "",
+        "stderr": "src/main.fy:1:135: error: E2101 borrow conflicts with live loan (bytes 134..139)\n  loan: src/main.fy (bytes 92..114)\n  last-use: src/main.fy (bytes 149..154)\n"
+      },
+      {
+        "index": 5,
+        "name": "generic i64 descendant",
+        "exit": 3,
+        "matched": true,
+        "reference": [
+          {
+            "file": "main.fy",
+            "code": 2101,
+            "start": 138,
+            "end": 143,
+            "related": [
+              {
+                "role": "last-use",
+                "file": "main.fy",
+                "start": 153,
+                "end": 158
+              },
+              {
+                "role": "loan",
+                "file": "main.fy",
+                "start": 94,
+                "end": 117
+              }
+            ]
+          }
+        ],
+        "diagnostics": [
+          {
+            "file": "main.fy",
+            "code": 2101,
+            "start": 138,
+            "end": 143,
+            "related": [
+              {
+                "role": "last-use",
+                "file": "main.fy",
+                "start": 153,
+                "end": 158
+              },
+              {
+                "role": "loan",
+                "file": "main.fy",
+                "start": 94,
+                "end": 117
+              }
+            ]
+          }
+        ],
+        "stdout": "",
+        "stderr": "src/main.fy:1:139: error: E2101 borrow conflicts with live loan (bytes 138..143)\n  loan: src/main.fy (bytes 94..117)\n  last-use: src/main.fy (bytes 153..158)\n"
+      },
+      {
+        "index": 6,
+        "name": "nominal descendant",
+        "exit": 3,
+        "matched": true,
+        "reference": [
+          {
+            "file": "main.fy",
+            "code": 2101,
+            "start": 166,
+            "end": 171,
+            "related": [
+              {
+                "role": "last-use",
+                "file": "main.fy",
+                "start": 181,
+                "end": 186
+              },
+              {
+                "role": "loan",
+                "file": "main.fy",
+                "start": 120,
+                "end": 144
+              }
+            ]
+          }
+        ],
+        "diagnostics": [
+          {
+            "file": "main.fy",
+            "code": 2101,
+            "start": 166,
+            "end": 171,
+            "related": [
+              {
+                "role": "last-use",
+                "file": "main.fy",
+                "start": 181,
+                "end": 186
+              },
+              {
+                "role": "loan",
+                "file": "main.fy",
+                "start": 120,
+                "end": 144
+              }
+            ]
+          }
+        ],
+        "stdout": "",
+        "stderr": "src/main.fy:1:167: error: E2101 borrow conflicts with live loan (bytes 166..171)\n  loan: src/main.fy (bytes 120..144)\n  last-use: src/main.fy (bytes 181..186)\n"
+      },
+      {
+        "index": 7,
+        "name": "tagged descendant",
+        "exit": 3,
+        "matched": true,
+        "reference": [
+          {
+            "file": "main.fy",
+            "code": 2101,
+            "start": 148,
+            "end": 153,
+            "related": [
+              {
+                "role": "last-use",
+                "file": "main.fy",
+                "start": 162,
+                "end": 167
+              },
+              {
+                "role": "loan",
+                "file": "main.fy",
+                "start": 106,
+                "end": 127
+              }
+            ]
+          }
+        ],
+        "diagnostics": [
+          {
+            "file": "main.fy",
+            "code": 2101,
+            "start": 148,
+            "end": 153,
+            "related": [
+              {
+                "role": "last-use",
+                "file": "main.fy",
+                "start": 162,
+                "end": 167
+              },
+              {
+                "role": "loan",
+                "file": "main.fy",
+                "start": 106,
+                "end": 127
+              }
+            ]
+          }
+        ],
+        "stdout": "",
+        "stderr": "src/main.fy:1:149: error: E2101 borrow conflicts with live loan (bytes 148..153)\n  loan: src/main.fy (bytes 106..127)\n  last-use: src/main.fy (bytes 162..167)\n"
+      },
+      {
+        "index": 8,
+        "name": "tagged clear",
+        "exit": 0,
+        "matched": true,
+        "reference": [],
+        "diagnostics": [],
+        "stdout": "return origins ok\n",
+        "stderr": ""
+      }
+    ]
+  },
+  "native": {
+    "schemaVersion": "fairyc.test-report/v4",
+    "engine": "native",
+    "target": "x86_64-windows-msvc",
+    "profile": "development",
+    "tests": [
+      {
+        "identity": "tests::module_unit_storage_generations::sdk_mutable_storage_views_freeze_original_parents",
+        "outcome": "passed",
+        "trapCategory": null,
+        "stdoutBase64": "Y2FzZSAwIDMgMQpkaWFnbm9zdGljIDIxMDEgMCAxMzMgMTM4IDIKcmVsYXRlZCA0IDAgOTIgMTEzCnJlbGF0ZWQgNSAwIDE0OCAxNTMKY2FzZSAxIDAgMApjYXNlIDIgMyAxCmRpYWdub3N0aWMgMjEwMSAwIDE2MiAxNjcgMgpyZWxhdGVkIDQgMCA5MiAxMTMKcmVsYXRlZCA1IDAgMTc3IDE4MgpjYXNlIDMgMCAwCmNhc2UgNCAzIDEKZGlhZ25vc3RpYyAyMTAxIDAgMTM0IDEzOSAyCnJlbGF0ZWQgNCAwIDkyIDExNApyZWxhdGVkIDUgMCAxNDkgMTU0CmNhc2UgNSAzIDEKZGlhZ25vc3RpYyAyMTAxIDAgMTM4IDE0MyAyCnJlbGF0ZWQgNCAwIDk0IDExNwpyZWxhdGVkIDUgMCAxNTMgMTU4CmNhc2UgNiAzIDEKZGlhZ25vc3RpYyAyMTAxIDAgMTY2IDE3MSAyCnJlbGF0ZWQgNCAwIDEyMCAxNDQKcmVsYXRlZCA1IDAgMTgxIDE4NgpjYXNlIDcgMyAxCmRpYWdub3N0aWMgMjEwMSAwIDE0OCAxNTMgMgpyZWxhdGVkIDQgMCAxMDYgMTI3CnJlbGF0ZWQgNSAwIDE2MiAxNjcKY2FzZSA4IDAgMAo=",
+        "stderrBase64": ""
+      }
+    ],
+    "count": 1,
+    "passed": 1,
+    "failed": 0,
+    "status": "ok",
+    "lock": "verified"
+  },
+  "regression": {
+    "subview-unit": 38,
+    "reference-access-unit": 27
+  },
+  "pending": [
+    "Complete ordinary owner-read/access/store coverage",
+    "Full immutable loan facts",
+    "General moved-owner state and move-aware cleanup",
+    "Borrow MIR/C/runtime, unsafe provenance, full dispatcher, stage1/stage2, release and Linux"
+  ],
+  "publicCLIChanged": false,
+  "sdkABIChanged": false,
+  "dbChanged": false,
+  "ciRunnerChanged": false,
+  "pushed": false
+}
