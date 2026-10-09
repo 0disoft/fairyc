@@ -512,3 +512,34 @@ Public language/SDK ABI, SDK sources, DB, CI and runners are unchanged. Evidence
 | Maximum symbols / references | 260 / 648 |
 | Maximum resolved-unit name work | 10639 / 1048576 |
 | Maximum combined entries | 1015 / 1024 |
+
+## Lexical binding for ordinary unit bodies (2026-10-09)
+
+module_unit_ordinary_names binds every non-generic function body within an
+admitted original module range, reusing module_unit_body_ast and
+module_unit_name_walk with borrowed original scanner streams. The temporary
+body AST is discarded, while immutable resolved name tables retain the
+original module and declaration, expression, and entry IDs and spans. Explicit
+canonical annotation roots are read from the exact same bounded interface
+range, and interface range mismatches and stale source stamps are rejected
+before publication. Generic templates stay deferred, and requested generic and
+cleanup binding stays in module_unit_names. Unit admission accounts for
+combined ordinary, generic, and cleanup symbols, references, and name work
+under the existing 16384, 16384, and 1048576 bounds, with the existing 128
+active locals and depth 64 unchanged. Expression type checking, ordinary-call
+result inference, move-aware drop obligations, unsafe and inline provenance
+consumption, cross-unit structural dedup and layout, HIR, MIR, C, and CLI, and
+the full dispatcher native, stage1, and stage2 remain unfinished. The public
+language and SDK ABI, SDK sources, DB, CI, and runners are unchanged.
+
+Evidence: `docs/ops/evidence/candidate-module-unit-ordinary-names-20261009.json`.
+
+| Observation | Value |
+| --- | --- |
+| Development native tests | 7/7 passed |
+| Dispatcher source corpus / units | 160 modules; 1048562 bytes; 26 units |
+| Ordinary functions / symbols / references | 1175 / 7479 / 48136 |
+| Maximum combined symbols / references | 723 / 4094 (each <= 16384) |
+| Maximum combined name work | 751853 / 1048576 |
+| Maximum combined entries / type nodes | 1015 / 1024; 2242 / 4096 |
+| Observation execution timeout | Initial 300s run timed out after 23 units; final 600s selection passed all 26 |

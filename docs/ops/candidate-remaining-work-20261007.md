@@ -354,3 +354,21 @@ Public language/SDK ABI, SDK sources, DB, CI and runners are unchanged. Evidence
 | Maximum symbols / references | 260 / 648 |
 | Maximum resolved-unit name work | 10639 / 1048576 |
 | Maximum combined entries | 1015 / 1024 |
+
+## 일반 함수 본문의 이름 바인딩 (2026-10-09)
+
+module_unit_ordinary_names는 검사할 모듈 범위 내의 모든 비제네릭 함수 본문을 바인딩한다. 참조한 원본 스캐너 스트림과 함께 module_unit_body_ast와 module_unit_name_walk를 재사용한다. 임시 본문 AST는 폐기하지만, 불변의 해석된 이름 테이블은 원본 모듈 및 선언, 표현식, 매개변수·지역 변수 ID와 스팬을 유지한다. 명시적 정규 타입 표기 루트는 정확히 동일한 상한이 지정된 인터페이스 범위에서 읽으며, 인터페이스 범위 불일치와 오래된 소스 해시는 결과 반환 전에 거부한다. 제네릭 템플릿은 계속 보류하고, 요청된 제네릭 및 정리 바인딩은 module_unit_names에 남긴다.
+
+단위 승인은 기존 16384, 16384, 1048576 상한 아래에서 결합된 일반, 제네릭, 정리 심볼, 참조, 이름 작업을 고려하며, 기존 128개의 활성 로컬과 깊이 64는 변경하지 않는다. 표현식 타입 검사, 일반 호출 결과 추론, 이동 인식 드롭 의무, unsafe 및 inline 출처 소비, 단위 간 구조적 중복 제거 및 레이아웃, HIR, MIR, C, CLI, 그리고 전체 디스패처 네이티브, stage1, stage2는 미완료 상태로 남는다. 공개 언어 및 SDK ABI, SDK 소스, DB, CI, 러너는 변경하지 않는다.
+
+근거: `evidence/candidate-module-unit-ordinary-names-20261009.json`.
+
+| Observation | Value |
+| --- | --- |
+| Development native tests | 7/7 passed |
+| Dispatcher source corpus / units | 160 modules; 1048562 bytes; 26 units |
+| Ordinary functions / symbols / references | 1175 / 7479 / 48136 |
+| Maximum combined symbols / references | 723 / 4094 (each <= 16384) |
+| Maximum combined name work | 751853 / 1048576 |
+| Maximum combined entries / type nodes | 1015 / 1024; 2242 / 4096 |
+| Observation execution timeout | Initial 300s run timed out after 23 units; final 600s selection passed all 26 |

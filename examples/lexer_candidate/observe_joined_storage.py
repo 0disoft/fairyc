@@ -24,7 +24,10 @@ def main():
     ap.add_argument("--native-test-report", type=Path, required=True)
     ap.add_argument("--receipt", type=Path, required=True)
     ap.add_argument("--probe", choices=("joined_scanner_storage", "partitioned_module_join", "partitioned_module_bind", "partitioned_module_interfaces"), default="joined_scanner_storage")
+    ap.add_argument("--execution-timeout", type=int, default=300)
     args = ap.parse_args()
+    if args.execution_timeout <= 0:
+        ap.error("--execution-timeout must be positive")
     compiler, manifest = args.compiler.resolve(), args.manifest.resolve()
     probe = PROJECT / "probes" / (args.probe + ".fy")
     output = REPO / ".cache/candidate-tagged/scanner-storage-observation"
@@ -36,13 +39,13 @@ def main():
     assert tests["failed"] == 0 and tests["status"] == "ok"
     sources = sorted(PROJECT.joinpath("src").glob("*.fy"))
 
-    def run(argv, cwd):
+    def run(argv, cwd, timeout=300):
         p = subprocess.Popen([str(x) for x in argv], cwd=cwd, stdout=subprocess.PIPE,
                              stderr=subprocess.PIPE, encoding="utf-8",
                              start_new_session=os.name != "nt")
         timed_out = False
         try:
-            stdout, stderr = p.communicate(timeout=300)
+            stdout, stderr = p.communicate(timeout=timeout)
         except subprocess.TimeoutExpired:
             timed_out = True
             if os.name == "nt":
@@ -51,7 +54,8 @@ def main():
                 os.killpg(p.pid, signal.SIGKILL)
             stdout, stderr = p.communicate(timeout=30)
         commands.append(dict(argv=[str(x) for x in argv], exit=p.returncode,
-                             stdout=stdout, stderr=stderr, timedOut=timed_out))
+                             stdout=stdout, stderr=stderr, timedOut=timed_out,
+                             timeoutSeconds=timeout))
         print(stdout + stderr, end="", flush=True)
         assert not timed_out and p.returncode == 0 and not stderr, commands[-1]
 
@@ -63,7 +67,7 @@ def main():
         shutil.copyfile(PROJECT / "fairy.toml", workspace / "fairy.toml")
         run([compiler, "check"], workspace)
         run([compiler, "build", "--locked"], workspace)
-        run([workspace / "build/lexer-candidate.exe", manifest], REPO)
+        run([workspace / "build/lexer-candidate.exe", manifest], REPO, args.execution_timeout)
         passed = True
     finally:
         schemas = {"joined_scanner_storage": "fairyc.candidate-cooked-storage/v1",

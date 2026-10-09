@@ -5,6 +5,7 @@ import module_unit_interfaces as interfaces;
 import module_unit_bodies as bodies;
 import module_unit_drops as drops;
 import module_unit_names as names;
+import module_unit_ordinary_names as ordinary;
 import module_signatures as signatures;
 import module_ast_join as join;
 import syntax as syntax;
@@ -25,7 +26,8 @@ fn join::Problem admit(ref v::Vec<syntax::Parsed> sources,ref signatures::Progra
     if(interfaces::work(ref imported)>budget.interface_work){budget.interface_work=interfaces::work(ref imported);}
     let drop_plan=switch(drops::build(ref imported)){case .ok(p):{p}case .err(p):{return p;}};if(drops::work(ref drop_plan)>budget.drop_work){budget.drop_work=drops::work(ref drop_plan);}
     let owned=switch(bodies::build(sources,metadata,ref imported)){case .ok(p):{p}case .err(p):{return p;}};
-    let resolved=switch(names::build(sources,metadata,ref imported,ref owned)){case .ok(p):{p}case .err(p):{return p;}};if(names::work(ref resolved)>budget.name_work){budget.name_work=names::work(ref resolved);}
+    let resolved=switch(names::build(sources,metadata,ref imported,ref owned)){case .ok(p):{p}case .err(p):{return p;}};let locals=switch(ordinary::build(sources,metadata,ref bound,ref imported)){case .ok(p):{p}case .err(p):{return p;}};
+    let usize name_work=names::work(ref resolved)+ordinary::work(ref locals);if(name_work>1048576 || names::symbol_count(ref resolved)>16384-ordinary::symbols(ref locals) || names::reference_count(ref resolved)>16384-ordinary::references(ref locals)){return fail(10,first);}if(name_work>budget.name_work){budget.name_work=name_work;}
     if(bodies::work(ref owned)>budget.body_work){budget.body_work=bodies::work(ref owned);}if(!bodies::fits(ref owned,units::measured(binding::parsed(ref bound)))){return fail(10,first);}return fail(0,0);
 }
 fn join::Problem refine(ref v::Vec<syntax::Parsed> sources,ref signatures::Program metadata,usize first,usize stop,ref mut v::Vec<units::Unit> ranges,ref mut Budget budget,usize depth){

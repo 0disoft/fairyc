@@ -16,7 +16,7 @@ pub struct Shape {usize type;usize module_index;usize declaration;usize field_st
 pub struct Field {u32 kind;usize type;usize module_index;usize declaration;usize source_index;usize start;usize end;usize name_start;usize name_end;usize payload_start;usize payload_count;}
 pub struct Callable {usize module_index;usize declaration;bool template;usize result;usize parameter_start;usize parameter_count;u32 effects;bool must_use;bool unsafe_call;bool foreign;usize link_start;usize link_end;}
 pub struct Annotation {usize type;bool required;bool deferred;}
-pub resource Interfaces {types::Graph graph;v::Vec<Shape> shapes;v::Vec<Field> fields;v::Vec<Callable> callables;v::Vec<usize> parameters;v::Vec<Annotation> annotations;generics::Plan specializations;v::Vec<body_types::Request> body_types;bytes::Buffer names;usize work;cleanup{}}
+pub resource Interfaces {types::Graph graph;v::Vec<Shape> shapes;v::Vec<Field> fields;v::Vec<Callable> callables;v::Vec<usize> parameters;v::Vec<Annotation> annotations;generics::Plan specializations;v::Vec<body_types::Request> body_types;bytes::Buffer names;usize work;usize first;usize stop;cleanup{}}
 struct Budget {usize work;}
 fn join::Problem fail(u32 code,usize module_index,usize start,usize end){return join::Problem{.code,.module_index,.start,.end};}
 fn bool charge(ref mut Budget work,usize amount){if(work.work>1048576 || amount>1048576-work.work){return false;}work.work+=amount;return true;}
@@ -103,7 +103,7 @@ pub fn Result<Interfaces,join::Problem> build(ref v::Vec<syntax::Parsed> sources
         if(v::len<usize>(ref cleanup_seeds)==0){break;}let usize old_work=generics::work(ref specializations);specializations=switch(generics::extend_cleanups(sources,metadata,specializations,ref mut graph,ref cleanup_seeds)){case .ok(p):{p}case .err(p):{return .err(p);}};if(!charge(ref mut budget,generics::work(ref specializations)-old_work)){return .err(fail(4503,binding::first(bound),0,0));}
     }
     let owned=switch(signatures::own_types(metadata,graph)){case .ok(g):{g}case .err(code):{return .err(fail(code,0,0,0));}};
-    return .ok(Interfaces{.graph=owned,.shapes,.fields,.callables,.parameters,.annotations=roots,.specializations,.body_types=demanded,.names,.work=budget.work});
+    return .ok(Interfaces{.graph=owned,.shapes,.fields,.callables,.parameters,.annotations=roots,.specializations,.body_types=demanded,.names,.work=budget.work,.first=binding::first(bound),.stop=binding::stop(bound)});
 }
 pub fn usize type_count(ref Interfaces p){return types::graph_count(ref p.graph);}
 pub fn types::Type type_at(ref Interfaces p,usize id){return types::graph_at(ref p.graph,id);}
@@ -126,3 +126,6 @@ pub fn Result<usize,u32> field(ref Interfaces p,usize type,usize caller,ref u8[]
 }
 pub fn usize body_type_count(ref Interfaces p){return v::len<body_types::Request>(ref p.body_types);}
 pub fn body_types::Request body_type_at(ref Interfaces p,usize index){return *v::at<body_types::Request>(ref p.body_types,index);}
+
+pub fn usize first(ref Interfaces p){return p.first;}
+pub fn usize stop(ref Interfaces p){return p.stop;}
