@@ -1764,3 +1764,29 @@ region enter/reset, loans, lifetimes, conflicts, moves, unsafe provenance,
 stage1/stage2, release and Linux. The public Stage 0 CLI and SDK ABI are
 unchanged. DB and CI are unchanged; no push was made. Evidence:
 docs/ops/evidence/candidate-module-region-escape-20261010.json.
+
+## Owned Region lifecycle facts (2026-10-10)
+
+The Region lifecycle is immutable per Values frame, and the Plan owns its Scope,
+Placement, and Exit records. Each scope stores an authenticated Arena and source
+type with the source expression, local owner, and source mode (1 = direct `&mut`
+Arena local, 2 = named reference, 3 = evaluated expression). Type, source, and
+statement IDs retain their context; the records survive disposal of parsed
+sources and specializations. Placements retain owner, shared-borrow, Result, and
+AllocError type IDs, and allow a RegionParam region ID of 0. Exit kinds are
+fallthrough, return, propagate, break, and continue. Nested exits are grouped
+inner first; loop exits record resets only for regions entered inside the loop,
+and a trap records no reset. Cleanup boundaries are spans only; move-aware drops
+and executable MIR or C enter/reset remain pending.
+
+Source checking passed (223 files, 2754 MIR functions), and three selected native
+tests passed, covering 16 lifecycle cases, 14 Region source cases and 21 escape
+cases. Exact Go MIR region, placement, and reset kind/span comparisons passed
+13/13; source and escape regression output also matched the retained reference
+observations. Empty `return;` uses the statement span. Metadata is inspected
+after parsed source owners are dropped. Three semantic-only forms remain outside
+Go MIR execution: named sources, call sources, and RegionParam placement.
+Evidence: `docs/ops/evidence/candidate-module-region-lifecycle-20261010.json`.
+Remaining work includes loans, lifetimes, conflicts, moves, unsafe provenance,
+executable Region runtime, split-unit/full dispatcher, stage1/stage2, release,
+and Linux. No public CLI, SDK ABI, DB, CI or remote changes were made.

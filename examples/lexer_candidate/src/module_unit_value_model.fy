@@ -2,6 +2,7 @@ module module_unit_value_model;
 import module_types as types;
 import module_unit_body_ast as ast;
 import std::vec as v;
+import module_unit_region_model as regions;
 
 pub struct Frame {u32 kind;usize context;usize module_index;usize declaration;usize result;}
 // state 0 unresolved value; 1 known value type; 2 non-value syntax/callee.
@@ -22,8 +23,8 @@ pub struct Local {usize header_start;usize header_end;u32 kind;usize source_inde
 pub struct Consumer {u32 kind;usize source_index;usize expression;usize target;usize operator;u32 header;usize expected;usize actual;bool checked;usize start;usize end;}
 pub struct Return {usize expression;usize expected;usize actual;bool checked;usize start;usize end;}
 pub struct Problem {u32 code;usize module_index;usize start;usize end;usize expected;usize actual;}
-pub resource Values {bool checked_completion;Frame frame;v::Vec<Expression> expressions;v::Vec<Local> locals;v::Vec<Return> returns;v::Vec<Invocation> calls;v::Vec<Argument> arguments;v::Vec<Consumer> consumers;usize unresolved;usize inferred;usize checked_returns;usize work;cleanup{}}
-pub fn Values assemble(Frame frame,v::Vec<Expression> expressions,v::Vec<Local> locals,v::Vec<Return> returns,v::Vec<Invocation> calls,v::Vec<Argument> arguments,v::Vec<Consumer> consumers,usize unresolved,usize inferred,usize checked_returns,usize work,bool checked_completion){return Values{.checked_completion,.frame,.expressions,.locals,.returns,.calls,.arguments,.consumers,.unresolved,.inferred,.checked_returns,.work};}
+pub resource Values {regions::Plan lifecycle;bool checked_completion;Frame frame;v::Vec<Expression> expressions;v::Vec<Local> locals;v::Vec<Return> returns;v::Vec<Invocation> calls;v::Vec<Argument> arguments;v::Vec<Consumer> consumers;usize unresolved;usize inferred;usize checked_returns;usize work;cleanup{}}
+pub fn Values assemble(regions::Plan lifecycle,Frame frame,v::Vec<Expression> expressions,v::Vec<Local> locals,v::Vec<Return> returns,v::Vec<Invocation> calls,v::Vec<Argument> arguments,v::Vec<Consumer> consumers,usize unresolved,usize inferred,usize checked_returns,usize work,bool checked_completion){return Values{.lifecycle,.checked_completion,.frame,.expressions,.locals,.returns,.calls,.arguments,.consumers,.unresolved,.inferred,.checked_returns,.work};}
 pub fn Frame frame(ref Values p){return p.frame;}
 pub fn usize work(ref Values p){return p.work;}
 pub fn usize unresolved(ref Values p){return p.unresolved;}
@@ -65,3 +66,10 @@ pub fn usize assignment_count(ref Values p){var usize n=0;var usize i=0;while(i<
 pub fn usize checked_assignments(ref Values p){var usize n=0;var usize i=0;while(i<consumer_count(p)){let c=consumer_at(p,i);if(c.kind==4 && c.checked){n+=1;}i+=1;}return n;}
 
 pub fn bool checked_completion(ref Values p){return p.checked_completion;}
+
+pub fn usize region_count(ref Values p){return regions::region_count(ref p.lifecycle);}
+pub fn regions::Scope region_at(ref Values p,usize index){return regions::region_at(ref p.lifecycle,index);}
+pub fn usize placement_count(ref Values p){return regions::placement_count(ref p.lifecycle);}
+pub fn regions::Placement placement_at(ref Values p,usize index){return regions::placement_at(ref p.lifecycle,index);}
+pub fn usize region_exit_count(ref Values p){return regions::exit_count(ref p.lifecycle);}
+pub fn regions::Exit region_exit_at(ref Values p,usize index){return regions::exit_at(ref p.lifecycle,index);}
