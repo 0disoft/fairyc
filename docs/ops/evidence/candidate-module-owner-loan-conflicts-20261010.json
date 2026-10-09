@@ -1,0 +1,465 @@
+{
+  "schema": "fairyc.candidate-module-owner-loan-conflicts/v1",
+  "passed": true,
+  "scope": "E2101 for live whole-root owner writes, explicit shared/mutable borrow creation, call-held borrow overlap, and written view-loop owner lifetime. Aliases, tagged payloads, branches, loop edges and parameter-selected provider/generic return values carry loan sets. Not full parent/subview generations, reference access/store rules, owner moves, or executable borrow MIR/runtime.",
+  "sourceTruth": [
+    "docs/language/0002-borrows-and-return-origins.md",
+    "internal/semantic/borrow_flow.go",
+    "internal/semantic/borrow_creation.go",
+    "internal/semantic/shared_reborrow.go",
+    "internal/semantic/byte_for.go"
+  ],
+  "identity": {
+    "compiler": {
+      "path": ".cache/candidate-tagged/compiler-origin-patterns.exe",
+      "sha256": "d36dae1b99751322e447880aaf4d28321bd6d53bdf776185308c6c4504889bb2"
+    },
+    "candidate": {
+      "path": "examples/lexer_candidate/build/lexer-candidate.exe",
+      "sha256": "1799d7f6d37a56f89cf5b794c96f2963571b99e56e0da59f2ec73112b095a045"
+    },
+    "lock": {
+      "path": "examples/lexer_candidate/fairy.lock",
+      "sha256": "44bd3d44d84e6df90b17104e7887502738ae2a663104709fa59be67fcd68818a"
+    },
+    "sourceCount": 222,
+    "sourceDigest": "b6569dde0ac5662fc73d1100f6d62a0866e0180aecd00a6180ecead78ff5628e",
+    "files": [
+      {
+        "path": "examples/lexer_candidate/src/module_unit_loan_model.fy",
+        "sha256": "b4e9fcbddcbf83b26cc36136983d44fddb1df519ca8b74f194e40bddf2954b18"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_loan_checks.fy",
+        "sha256": "6e7add21f280bf8cdf9a649ddb55112ddda755643f1864a48fde9950b78f0851"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_loan_live_control.fy",
+        "sha256": "520a1f29ed788b306faf4766a9aaccda44b937c6733ab44da9d901674f335a87"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_loan_liveness.fy",
+        "sha256": "407bf16f04a8ee62c69f2ef46ab36f6fc04d98de3e4c5520678920fa95000777"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_origin_flow_model.fy",
+        "sha256": "e976570473f55437e5e651d0caf253a13745c90ce9c3a5d4a525cbbcebcdb315"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_origin_flow.fy",
+        "sha256": "a950f741676f9cd6704ccd60c415fd400aaaec3fd1f9561fcf6e349f4785bded"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_origin_flow_control.fy",
+        "sha256": "229f1b8b3aeaf51306de6cf89dbc63813f3914620d517d435d31930111341f10"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_origin_match.fy",
+        "sha256": "f2a2b1485a60ec6fd9479e297617b3e625c804f0363fe2d375f7921a814d79c3"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_origin_returns.fy",
+        "sha256": "be589455be423cfe6deb83f0cbd99b99a41b9393afbb402d59822729c359d9ea"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_origin_diagnostics.fy",
+        "sha256": "39d58d9a0a92b0a3e77fa7d5f91ce58c721391aba48a549e391a8556d4c5aa4a"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_cli.fy",
+        "sha256": "8eb9b237bf75e87051ef3748581ff7fd80a270dc1da862813525bdabdaca369f"
+      },
+      {
+        "path": "examples/lexer_candidate/tests/module_unit_loan_conflicts.fy",
+        "sha256": "c0287c9305d73071c4700b67dbc5a72c97640ca391d7ce857f68a9cbc1350f66"
+      },
+      {
+        "path": "examples/lexer_candidate/tests/module_unit_origin_region.fy",
+        "sha256": "aeef17b3cad6167f32c72b4f3b17c7909ab49ce9cd58e25cdaf97c577897a438"
+      }
+    ]
+  },
+  "sourceCheck": {
+    "exit": 0,
+    "stdout": "check ok: 2 instance(s), 230 source file(s), 2875 MIR function(s), lock updated\n"
+  },
+  "lockedBuild": {
+    "exit": 0,
+    "stdout": "built: build/lexer-candidate.exe (x86_64-windows-msvc, development, lock verified)\n"
+  },
+  "native": {
+    "passed": 7,
+    "count": 7,
+    "executions": [
+      {
+        "file": "loan-native.json",
+        "exit": 0,
+        "count": 1
+      },
+      {
+        "file": "regression-native.json",
+        "exit": 0,
+        "count": 6
+      }
+    ],
+    "tests": [
+      {
+        "identity": "tests::module_unit_loan_conflicts::owner_writes_and_borrow_creation_follow_live_loans",
+        "outcome": "passed"
+      },
+      {
+        "identity": "tests::module_unit_loan_liveness::last_uses_follow_bindings_branches_and_loop_control",
+        "outcome": "passed"
+      },
+      {
+        "identity": "tests::module_unit_origin_region::abstract_static_origin_does_not_hide_expired_region",
+        "outcome": "passed"
+      },
+      {
+        "identity": "tests::module_unit_origin_region::allocated_returns_follow_region_inputs",
+        "outcome": "passed"
+      },
+      {
+        "identity": "tests::module_unit_origin_region::local_region_escapes_keep_allocation_sites",
+        "outcome": "passed"
+      },
+      {
+        "identity": "tests::module_unit_origin_region::region_borrows_expire_across_control_flow_and_reentry",
+        "outcome": "passed"
+      },
+      {
+        "identity": "tests::module_unit_regions::lexical_region_lifecycle_preserves_exit_order_and_types",
+        "outcome": "passed"
+      }
+    ]
+  },
+  "comparisons": {
+    "goCLIExact": 38,
+    "nativeAPIExact": 38,
+    "candidateCLIExact": 38,
+    "accepted": 15,
+    "rejected": 23,
+    "diagnostics": 25,
+    "cases": [
+      {
+        "index": 0,
+        "name": "retained shared",
+        "expected": 3,
+        "diagnostics": 1,
+        "matched": true
+      },
+      {
+        "index": 1,
+        "name": "retained mutable",
+        "expected": 3,
+        "diagnostics": 1,
+        "matched": true
+      },
+      {
+        "index": 2,
+        "name": "earlier argument",
+        "expected": 3,
+        "diagnostics": 1,
+        "matched": true
+      },
+      {
+        "index": 3,
+        "name": "later argument",
+        "expected": 3,
+        "diagnostics": 1,
+        "matched": true
+      },
+      {
+        "index": 4,
+        "name": "two temporaries",
+        "expected": 3,
+        "diagnostics": 1,
+        "matched": true
+      },
+      {
+        "index": 5,
+        "name": "two exclusive temporaries",
+        "expected": 3,
+        "diagnostics": 1,
+        "matched": true
+      },
+      {
+        "index": 6,
+        "name": "after last use",
+        "expected": 0,
+        "diagnostics": 0,
+        "matched": true
+      },
+      {
+        "index": 7,
+        "name": "separate calls",
+        "expected": 0,
+        "diagnostics": 0,
+        "matched": true
+      },
+      {
+        "index": 8,
+        "name": "compatible shared",
+        "expected": 0,
+        "diagnostics": 0,
+        "matched": true
+      },
+      {
+        "index": 9,
+        "name": "two shared temporaries",
+        "expected": 0,
+        "diagnostics": 0,
+        "matched": true
+      },
+      {
+        "index": 10,
+        "name": "indexed owner write",
+        "expected": 3,
+        "diagnostics": 1,
+        "matched": true
+      },
+      {
+        "index": 11,
+        "name": "indexed owner write after last use",
+        "expected": 0,
+        "diagnostics": 0,
+        "matched": true
+      },
+      {
+        "index": 12,
+        "name": "call-held owner write",
+        "expected": 3,
+        "diagnostics": 3,
+        "matched": true
+      },
+      {
+        "index": 13,
+        "name": "scalar owner write",
+        "expected": 3,
+        "diagnostics": 1,
+        "matched": true
+      },
+      {
+        "index": 14,
+        "name": "scalar owner write after last use",
+        "expected": 0,
+        "diagnostics": 0,
+        "matched": true
+      },
+      {
+        "index": 15,
+        "name": "alias keeps loan alive",
+        "expected": 3,
+        "diagnostics": 1,
+        "matched": true
+      },
+      {
+        "index": 16,
+        "name": "alias last use ends loan",
+        "expected": 0,
+        "diagnostics": 0,
+        "matched": true
+      },
+      {
+        "index": 17,
+        "name": "overwrite removes old loan",
+        "expected": 0,
+        "diagnostics": 0,
+        "matched": true
+      },
+      {
+        "index": 18,
+        "name": "overwritten alias keeps old loan",
+        "expected": 3,
+        "diagnostics": 1,
+        "matched": true
+      },
+      {
+        "index": 19,
+        "name": "branch one arm keeps loan",
+        "expected": 3,
+        "diagnostics": 1,
+        "matched": true
+      },
+      {
+        "index": 20,
+        "name": "branch both arms replace loan",
+        "expected": 0,
+        "diagnostics": 0,
+        "matched": true
+      },
+      {
+        "index": 21,
+        "name": "return kills dead suffix",
+        "expected": 0,
+        "diagnostics": 0,
+        "matched": true
+      },
+      {
+        "index": 22,
+        "name": "loop backedge keeps loan",
+        "expected": 3,
+        "diagnostics": 1,
+        "matched": true
+      },
+      {
+        "index": 23,
+        "name": "break ends backedge",
+        "expected": 0,
+        "diagnostics": 0,
+        "matched": true
+      },
+      {
+        "index": 24,
+        "name": "continue keeps backedge",
+        "expected": 3,
+        "diagnostics": 1,
+        "matched": true
+      },
+      {
+        "index": 25,
+        "name": "tagged payload keeps loan",
+        "expected": 3,
+        "diagnostics": 1,
+        "matched": true
+      },
+      {
+        "index": 26,
+        "name": "tagged overwrite removes loan",
+        "expected": 0,
+        "diagnostics": 0,
+        "matched": true
+      },
+      {
+        "index": 27,
+        "name": "identity call keeps loan",
+        "expected": 3,
+        "diagnostics": 1,
+        "matched": true
+      },
+      {
+        "index": 28,
+        "name": "selected return parameter",
+        "expected": 0,
+        "diagnostics": 0,
+        "matched": true
+      },
+      {
+        "index": 29,
+        "name": "selected return parameter conflict",
+        "expected": 3,
+        "diagnostics": 1,
+        "matched": true
+      },
+      {
+        "index": 30,
+        "name": "provider return keeps loan",
+        "expected": 3,
+        "diagnostics": 1,
+        "matched": true
+      },
+      {
+        "index": 31,
+        "name": "generic provider return keeps loan",
+        "expected": 3,
+        "diagnostics": 1,
+        "matched": true
+      },
+      {
+        "index": 32,
+        "name": "owned array loop holds owner until break",
+        "expected": 3,
+        "diagnostics": 1,
+        "matched": true
+      },
+      {
+        "index": 33,
+        "name": "view loop holds owner until break",
+        "expected": 3,
+        "diagnostics": 1,
+        "matched": true
+      },
+      {
+        "index": 34,
+        "name": "view loop releases owner after exit",
+        "expected": 0,
+        "diagnostics": 0,
+        "matched": true
+      },
+      {
+        "index": 35,
+        "name": "view loop carries other reference across backedge",
+        "expected": 3,
+        "diagnostics": 1,
+        "matched": true
+      },
+      {
+        "index": 36,
+        "name": "field loan protects whole root",
+        "expected": 3,
+        "diagnostics": 1,
+        "matched": true
+      },
+      {
+        "index": 37,
+        "name": "field loan releases whole root after last use",
+        "expected": 0,
+        "diagnostics": 0,
+        "matched": true
+      }
+    ]
+  },
+  "regression": {
+    "priorNativeByteIdentical": [
+      "tests::module_unit_origin_region::abstract_static_origin_does_not_hide_expired_region",
+      "tests::module_unit_origin_region::allocated_returns_follow_region_inputs",
+      "tests::module_unit_origin_region::local_region_escapes_keep_allocation_sites",
+      "tests::module_unit_origin_region::region_borrows_expire_across_control_flow_and_reentry",
+      "tests::module_unit_regions::lexical_region_lifecycle_preserves_exit_order_and_types"
+    ],
+    "livenessCases": 16,
+    "livenessPoints": 171,
+    "livenessTraceByteIdentical": true,
+    "regionLifetimeCLIExact": 17,
+    "regionInputsExact": 17,
+    "regionReturnsExact": 21,
+    "regionLifecycleExact": 16
+  },
+  "internalRules": {
+    "loanLeaves": "Frame-local loan IDs reuse the canonical set algebra, independently from origin IDs.",
+    "contexts": "Scalar Context remains inert; mutable loan/held/conflict vectors are explicit analysis arguments.",
+    "calleeSummary": "Caller loan sets follow selected return parameters; callee-local loan IDs never escape.",
+    "ownerWrite": "One E2101 per owner-write source site.",
+    "loops": "Fixed-point probes do not emit diagnostics; held iterator loans release at written exits.",
+    "namedPattern": "Every kind33 named payload binding is killed at the pattern boundary.",
+    "rootGuard": "Root statement IDs are validated before indexing; Values frame kinds1/2/3 are concrete/cleanup/ordinary."
+  },
+  "initialFailures": [
+    {
+      "reason": "Initial call-held access did not publish the outer argument-block conflict; borrowed byte-view mutability now uses the existing borrowed/mutable predicates.",
+      "matched": 31,
+      "count": 32
+    },
+    {
+      "reason": "A mechanical constructor update touched a Value enum fixture literal; the literal was restored before final verification."
+    },
+    {
+      "reason": "An added root guard omitted ordinary frame kind3 and rejected all CLI fixtures; corrected to allow authenticated frame kinds1 through3."
+    }
+  ],
+  "pending": [
+    "E2105 owner moves with retained/held loans",
+    "parent/subview generation and complete reference access/store conflicts",
+    "full owned loan-fact publication and borrow MIR/C/runtime",
+    "unsafe provenance",
+    "move-aware cleanup before Region reset",
+    "full dispatcher and stage1/stage2",
+    "Linux and release"
+  ],
+  "publicCLIChanged": false,
+  "privateCLIChanged": true,
+  "sdkABIChanged": false,
+  "dbChanged": false,
+  "ciRunnerChanged": false,
+  "pushed": false
+}

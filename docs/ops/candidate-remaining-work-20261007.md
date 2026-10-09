@@ -1858,3 +1858,42 @@ This unit retains liveness facts only. Ordinary owner loans, borrow conflicts an
 owner-move diagnostics are the next step. Unsafe provenance, move-aware cleanup,
 executable MIR/C Region runtime, full dispatcher, stage1/stage2, Linux and release
 remain pending. Public CLI, SDK ABI, DB and CI are unchanged; no push.
+
+## Whole-root owner loan conflicts (2026-10-10)
+
+Origin Flow now carries frame-local loan sets alongside origins and allocation
+provenance. Aliases, Option/Result payloads, branch joins and loop edges preserve
+these sets; direct rebinding replaces them. Calls retain earlier arguments until
+the call finishes, and borrowed return summaries select the caller's loan sets
+by parameter. Callee-local loan IDs are excluded from published summaries.
+Written view/array loops hold the iterator owner through break/continue/return
+and release it at the written exit. Fixed-point probes emit no diagnostics.
+
+Owner writes and incompatible explicit shared/mutable borrow creation report
+E2101 with loan role 4 and last-use role 5. Field and element loans protect the
+whole root. Owner writes publish one diagnostic per source site. Call argument
+overlap also retains origin, mutability and source spans; the existing borrowed
+type predicates cover scalar and struct views as well as ordinary references.
+Conflict records remain owned after parsed sources and typed inputs are dropped.
+The private return-origin CLI renders these new diagnostics. The stable Stage 0
+CLI, SDK ABI, DB and CI are unchanged.
+
+Source checking passed (230 files, 2875 MIR functions), and a fresh locked
+development build passed. The Go reference, candidate API and candidate CLI
+agree on 38/38 cases, including exact primary and related byte spans: 15 accepted,
+23 rejected, 25 diagnostics. These source anchors are frozen in the native test.
+Seven selected native tests passed. The five previous Region traces and the
+16-case/171-point liveness trace remain byte-identical; the previous 17 Region
+lifetime CLI observations also match exactly. Evidence:
+`docs/ops/evidence/candidate-module-owner-loan-conflicts-20261010.json`.
+
+Liveness now kills all named payload bindings and checks the root statement ID
+before indexing. The guard accepts Values frame kinds 1 (concrete), 2 (cleanup)
+and 3 (ordinary). Initial validation caught an omitted outer argument-block
+conflict, an accidentally rewritten enum fixture literal, and a guard that
+excluded ordinary frames; all were corrected before the final checks.
+
+E2105 owner moves are next. Parent/subview generations, complete reference
+access/store conflicts, full owned loan-fact publication, borrow MIR/C/runtime,
+unsafe provenance, move-aware cleanup before Region reset, full dispatcher,
+stage1/stage2, Linux and release remain pending. No push was made.
