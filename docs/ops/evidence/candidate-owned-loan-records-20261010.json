@@ -1,0 +1,124 @@
+{
+  "schema": "fairyc.candidate-owned-loan-records/v1",
+  "passed": true,
+  "scope": "Own the converged round of historical root/subview generation records with per-frame ranges, mutability, lexical parent and exact borrow source anchors. Expose selected origin leaves through immutable accessors after parser and primary type owners drop.",
+  "identity": {
+    "compiler": {
+      "path": ".cache/candidate-tagged/compiler-origin-patterns.exe",
+      "sha256": "d36dae1b99751322e447880aaf4d28321bd6d53bdf776185308c6c4504889bb2"
+    },
+    "candidate": {
+      "path": "examples/lexer_candidate/build/lexer-candidate.exe",
+      "sha256": "37ce02cc651afe85265662c110af5f4c909acf97ba1f5db7becbde806fc3b022"
+    },
+    "lock": {
+      "path": "examples/lexer_candidate/fairy.lock",
+      "sha256": "563d5066219be55a919b5155df2e2aa58095f613ca2b750decd2ad01382606f7"
+    },
+    "files": [
+      {
+        "path": "examples/lexer_candidate/src/module_unit_origin_returns.fy",
+        "sha256": "9883a817ee5b548c3278723efc3270ea7265f3cd486846adde7f970c07a57cee"
+      },
+      {
+        "path": "examples/lexer_candidate/tests/module_unit_loan_records.fy",
+        "sha256": "8ea6e2fa8cc5d5553e68e22f13558afb6b703823f5d8a9892cc35cef18a1b8cb"
+      }
+    ]
+  },
+  "sourceCheck": {
+    "exit": 0,
+    "stdout": "check ok: 2 instance(s), 232 source file(s), 2898 MIR function(s), lock updated\n"
+  },
+  "lockedDevelopmentBuild": {
+    "exit": 0,
+    "stdout": "built: build/lexer-candidate.exe (x86_64-windows-msvc, development, lock verified)\n"
+  },
+  "native": {
+    "count": 4,
+    "passed": 4,
+    "tests": [
+      {
+        "identity": "tests::module_unit_loan_records::converged_parameter_generation_is_not_duplicated",
+        "outcome": "passed",
+        "trace": "frame 1 1\nloan 0 1 0 1 53 59\n",
+        "exactSourceSpans": true
+      },
+      {
+        "identity": "tests::module_unit_loan_records::mixed_origins_remain_readable_after_branch_join",
+        "outcome": "passed",
+        "trace": "frame 1 1\nloan 0 1 0 4 126 137\n",
+        "exactSourceSpans": true
+      },
+      {
+        "identity": "tests::module_unit_loan_records::root_and_child_records_survive_source_drop",
+        "outcome": "passed",
+        "trace": "frame 1 0\nframe 2 2\nloan 0 0 1 0 86 98\nloan 1 1 0 2 122 133\n",
+        "exactSourceSpans": true
+      },
+      {
+        "identity": "tests::module_unit_loan_records::provider_and_generic_records_keep_separate_frames",
+        "outcome": "passed",
+        "trace": "frame 1 1\nloan 0 1 0 1 65 71\nframe 2 1\nloan 0 1 0 0 83 98\n",
+        "exactSourceSpans": true
+      }
+    ],
+    "initialFixtureCorrection": "The generic provider frame precedes the caller; the test now locates frames by module index. Its selected rerun passed."
+  },
+  "regression": [
+    {
+      "suite": "storage-generations-unit",
+      "count": 9,
+      "matched": 9,
+      "comparison": "exact Go CLI diagnostics"
+    },
+    {
+      "suite": "subview-unit",
+      "count": 38,
+      "matched": 38,
+      "comparison": "exact Go CLI diagnostics"
+    },
+    {
+      "suite": "reference-access-unit",
+      "count": 27,
+      "matched": 27,
+      "comparison": "exact Go CLI diagnostics"
+    },
+    {
+      "suite": "loan-conflicts-unit",
+      "count": 38,
+      "matched": 38,
+      "comparison": "exact Go CLI diagnostics"
+    },
+    {
+      "suite": "owner-moves-unit",
+      "count": 39,
+      "matched": 39,
+      "comparison": "frozen contract goldens including previously documented Go differences"
+    },
+    {
+      "suite": "owner-arguments-unit",
+      "count": 7,
+      "matched": 7,
+      "comparison": "frozen contract goldens including previously documented Go differences"
+    }
+  ],
+  "limits": {
+    "totalHistoricalRecords": 16384,
+    "workBudget": 1048576,
+    "clearedBetweenRounds": true,
+    "copyAndClearWorkCharged": true
+  },
+  "pending": [
+    "Retained-binding uses, releases and live-environment publication for complete loan facts",
+    "Complete ordinary owner-read/access/store coverage",
+    "General moved-owner state and move-aware cleanup",
+    "Borrow MIR/C/runtime, unsafe provenance, full dispatcher, stage1/stage2, release and Linux"
+  ],
+  "privateAPIChanged": true,
+  "publicCLIChanged": false,
+  "sdkABIChanged": false,
+  "dbChanged": false,
+  "ciRunnerChanged": false,
+  "pushed": false
+}

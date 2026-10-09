@@ -2032,3 +2032,36 @@ general moved-owner state, move-aware cleanup, borrow MIR/C/runtime, unsafe
 provenance, full dispatcher and stage1/stage2 remain pending. Release and Linux
 checks were outside this local analysis unit. Public CLI, SDK ABI, DB and CI
 are unchanged; no push.
+
+## Owned historical loan records (2026-10-10)
+
+The origin Plan now owns the converged round's root and descendant generation
+records, including empty ranges for skipped frames. Private immutable accessors
+publish each frame's records, mutability, lexical parent, borrow span and
+selected origin leaves after parsed source and primary type owners drop.
+Generic/provider frames retain their own ranges; frame-local loan IDs never
+become cross-function identities. Root origins resolve through their owned
+lexical owner; joined descendant origins use the owned canonical set table.
+
+Each fixed-point round replaces the previous snapshot. Copies and clears are
+charged to the existing work budget; total historical records are capped at
+16,384. These historical analysis records include temporary/probe sites.
+Retained-binding use/release histories and live environments remain required
+for complete loan-fact publication.
+
+Source checking and a fresh locked development build passed. Four native API
+tests passed: source-owner drop, converged-round deduplication, branch-joined
+origins and provider/generic frame separation. Their source spans match
+independently selected source tokens. The initial generic test assumed caller
+order; it now finds frames by module index and its selected rerun passed.
+All 158 CLI cases match their existing references: SDK 9, subview 38, shared
+reference 27, owner conflict 38, owner move 39 and later argument 7. The owner
+suites use frozen contract goldens with the previously documented Go-reference
+differences; they are not all direct Go equivalence claims. Evidence:
+`docs/ops/evidence/candidate-owned-loan-records-20261010.json`.
+
+Complete loan-use/release facts, ordinary owner-read/access/store coverage,
+general moved-owner state, move-aware cleanup, borrow MIR/C/runtime, unsafe
+provenance, full dispatcher and stage1/stage2 remain pending. Release and Linux
+checks were outside this local analysis unit. Only the private candidate API
+changed; public CLI, SDK ABI, DB and CI are unchanged. No push.
