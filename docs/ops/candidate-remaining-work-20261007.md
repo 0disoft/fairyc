@@ -633,3 +633,28 @@ observation is bundled with the next view/slice unit. Release, Linux, full curre
 dispatcher native, stage1/stage2 and push were not run. Public language/SDK ABI,
 SDK sources, DB, CI and runners are unchanged.
 Evidence: `docs/ops/evidence/candidate-module-unit-arrays-20261009.json`.
+
+## Scalar array views and slices (2026-10-09)
+
+module_unit_value_view는 이제 있는 바이트, 논리값, 정수 보기 갈래를 모두 다룬다. 이름 붙은 스칼라 배열을 그대로 ref 또는 ref mut 하면 문맥에 맞는 정확한 보기 형을 쓰고, 맞는 보기 문맥이 없으면 배열을 가리키는 기본 참조를 그대로 둔다. 묶인 이름 배열이나 평범한 구조체 배열 칸 범위를 명시적으로 ref 하면 보기 조각이 된다. 이미 있는 보기의 보통 조각은 공유/배타 형과 별칭을 거친 전체 소유자 뿌리와 범위를 그대로 지킨다. 생략한 경계는 0번 원천 번호로 남고, 적은 경계는 받는값, 시작, 끝 차례로 usize이며, 반열린 경계는 나중 실행 때 확인하고 정적 E를 지어내지 않는다. ref view[..]는 지원하지 않는다. 컴파일러가 임시 서술자를 빌리지 않기 때문이다. 가변에서 공유로 줄이기는 호출 인자에서만 되고 지역 선언에서는 안 된다.
+
+E1008은 고칠 수 없는 가변 빌림과 평범하지 않은 칸 하위보기의 대상 구간을, E1006은 경계/인자/지역 구간을 가리키며, code2는 받는값 또는 전체 빌림 구간을 그대로 둔다. 평범한 모양의 칸 소유자는 배열 칸 보기에 대해 검사한다. 경계 싸개는 값이 아닌 문법이고 원래 식 번호와 구간은 그대로 남는다. 한도 graph4096, work1MiB, locals128, depth/round64는 그대로다. 형과 출처만 다룬다: 수명, 충돌, 이동, 자식 세대는 아직 미완이고, 이름 보기 인터페이스 형 표현도 아직 남아 있으며 완료를 주장하지 않는다. 관측하지 않은 코퍼스 수치, 배포/리눅스/푸시, HIR/MIR/C/CLI나 stage1/stage2는 없다.
+
+| Observation | Result |
+| --- | --- |
+| Development check | 193 source files; 2366 MIR functions; passed |
+| Selected development native cases | 9/9 passed |
+| Reference acceptance / code / span | 17/17 matched |
+| Aliases / bounds | Whole-owner root/scope retained; omitted bounds keep zero IDs; explicit usize bounds typed in order |
+| Call shortening | Mutable scalar views can shorten to shared call arguments; local declarations remain exact |
+| Bounds | types 4096; work 1048576; active locals 128; depth/rounds 64 |
+
+The implementation receipt covers scalar view families and contextual consumers.
+Nominal view interfaces and nominal array-field borrowing remain pending, as do
+record/control/variant/builtin and standalone expressions, earlier declaration
+rejection, loan generations/lifetime/conflict/move, unsafe/pointer provenance,
+move-aware cleanup, cross-unit links/layouts and HIR/MIR/C/CLI. The separate full
+fixed-corpus observation is still running. Full current dispatcher native and
+stage1/stage2, release, Linux and push were not run. Public language/SDK ABI,
+SDK source, DB, CI and runner contracts are unchanged.
+Evidence: `docs/ops/evidence/candidate-module-unit-views-20261009.json`.

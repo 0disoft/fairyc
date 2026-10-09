@@ -751,3 +751,28 @@ observation is bundled with the next view/slice unit. Release, Linux, full curre
 dispatcher native, stage1/stage2 and push were not run. Public language/SDK ABI,
 SDK sources, DB, CI and runners are unchanged.
 Evidence: `docs/ops/evidence/candidate-module-unit-arrays-20261009.json`.
+
+## Scalar array views and slices (2026-10-09)
+
+module_unit_value_view now covers all existing byte, bool, and integer view families. Direct ref or ref mut of a named scalar array takes the exact contextual view type; without a matching view context it keeps a canonical reference to the array. An explicit ref over a grouped named array or a plain struct array-field range yields a view slice. Ordinary slices of existing views keep their shared or exclusive type and the whole owner root and scope across aliases. Omitted bounds stay as zero source IDs; explicit bounds are usize in receiver, start, end order; half-open bounds are checked at later runtime and no static E is invented. ref view[..] is unsupported because the compiler does not borrow temporary descriptors. Mutable-to-shared shortening applies only to call arguments, not local declarations.
+
+E1008 points at the target span for the immutable mutable-borrow and the nonplain field subview; E1006 points at the bound, argument, or local span; code2 keeps the receiver or whole-borrow span. Field owners with plain shapes are validated for array-field views. The bounds wrapper is non-value syntax and original expression IDs and spans are preserved. Limits graph4096, work1MiB, locals128, depth/round64 are unchanged. This is type and provenance work only: lifetimes, conflicts, moves, and child generations remain incomplete, and nominal view interface type representation is still pending with no claim of completion. No unobserved corpus numbers, no release, Linux, or push, and no HIR, MIR, C, CLI, stage1, or stage2.
+
+| Observation | Result |
+| --- | --- |
+| Development check | 193 source files; 2366 MIR functions; passed |
+| Selected development native cases | 9/9 passed |
+| Reference acceptance / code / span | 17/17 matched |
+| Aliases / bounds | Whole-owner root/scope retained; omitted bounds keep zero IDs; explicit usize bounds typed in order |
+| Call shortening | Mutable scalar views can shorten to shared call arguments; local declarations remain exact |
+| Bounds | types 4096; work 1048576; active locals 128; depth/rounds 64 |
+
+The implementation receipt covers scalar view families and contextual consumers.
+Nominal view interfaces and nominal array-field borrowing remain pending, as do
+record/control/variant/builtin and standalone expressions, earlier declaration
+rejection, loan generations/lifetime/conflict/move, unsafe/pointer provenance,
+move-aware cleanup, cross-unit links/layouts and HIR/MIR/C/CLI. The separate full
+fixed-corpus observation is still running. Full current dispatcher native and
+stage1/stage2, release, Linux and push were not run. Public language/SDK ABI,
+SDK source, DB, CI and runner contracts are unchanged.
+Evidence: `docs/ops/evidence/candidate-module-unit-views-20261009.json`.

@@ -3,6 +3,7 @@ import module_unit_value_model as m;
 import module_types as types;
 import std::vec as v;
 import module_unit_value_index as indexes;
+import module_unit_value_view as views;
 
 pub fn m::Place field(ref v::Vec<types::Type> graph,m::Expression receiver,m::Expression selected){
     if(selected.field.id==0 || receiver.type==0){return m::no_place();}let t=types::at(graph,receiver.type);var p=receiver.place;
@@ -19,6 +20,7 @@ pub fn Result<usize,m::Problem> borrow(m::Frame frame,m::Expression expression,m
 pub fn bool same(m::Place a,m::Place b){return a.kind==b.kind && a.root==b.root && a.scope==b.scope && a.projection==b.projection && a.mutable==b.mutable && a.indirect==b.indirect && a.resource_field==b.resource_field && a.borrowable==b.borrowable;}
 pub fn m::Place projected(ref v::Vec<types::Type> graph,m::Expression child,m::Expression expression){
     if(expression.kind==9){return indexes::place(graph,child,expression);}if(expression.kind==3){return child.place;}if(expression.kind==8){return field(graph,child,expression);}var p=child.place;
-    if(expression.kind==21 || expression.kind==22){p.kind=0;p.mutable=expression.kind==22;p.borrowable=false;return p;}
+    if(expression.kind==26){p.kind=0;p.projection=expression.source_index;p.mutable=views::mutable(types::at(graph,expression.type));p.indirect=true;p.borrowable=false;return p;}
+    if(expression.kind==21 || expression.kind==22){p.kind=0;p.mutable=expression.kind==22;p.indirect=p.indirect || views::view(types::at(graph,expression.type));p.borrowable=false;return p;}
     if(expression.kind==4 && expression.place.kind==3){p.kind=3;p.projection=expression.source_index;p.mutable=types::at(graph,child.type).kind==8;p.indirect=true;p.borrowable=false;return p;}return expression.place;
 }
