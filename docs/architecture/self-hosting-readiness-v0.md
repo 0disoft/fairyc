@@ -332,6 +332,17 @@ planning. Owned template body cloning, nested requests, structural cross-unit
 instance deduplication, expression/body typing, all IR/backend/CLI consumers and
 stage proofs remain open. Evidence: `docs/ops/evidence/candidate-module-unit-plan-20261009.json`.
 
+Transitive generic function request graphs now resolve forwarded arguments and
+private provider targets, reject specialization recursion/depth exhaustion, and
+own SDK intrinsic and Vec aggregate records at original expression coordinates.
+Ten native regressions and all eighteen dispatcher units pass (160 modules,
+1048277 bytes, maximum 57 function instances per unit). Per-unit counts sum to
+592 function instances, with 116 nested function edges, 594 intrinsic records
+and 100 aggregate records. Provider function and SDK Vec cleanup AST ownership,
+resource cleanup specialization, expression/body typing and all IR/backend/CLI
+consumers remain open. Evidence:
+`docs/ops/evidence/candidate-module-unit-generic-dependencies-20261009.json`.
+
 `stage0` is the current Go compiler built by the supported Go toolchain.
 
 `stage1` is produced by `stage0` from the admitted Fairy compiler sources.

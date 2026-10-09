@@ -60,6 +60,7 @@ fn usize intern(ref mut v::Vec<Type> graph,Type value){
     var usize i=1;while(i<=count(graph)){if(same(at(graph,i),value)){return i;}i+=1;}
     if(count(graph)>=4096 || !v::push<Type>(graph,value).is_ok){return 0;}return count(graph);
 }
+pub fn usize canonical(ref mut v::Vec<Type> graph,Type value){return intern(graph,value);}
 fn Resolution accepted(ref mut v::Vec<Type> graph,Type value,usize module_index,usize start,usize end){let usize type=intern(graph,value);return if(type==0){fail(if(count(graph)>=4096){10}else{11},module_index,start,end)}else{Resolution{.type,.problem=Problem{.code=0,.module_index,.start=0,.end=0}}};}
 fn Resolution walk(ref catalog::Catalog c,ref syntax::Parsed p,usize module_index,usize root,ref mut v::Vec<Type> graph,usize depth,usize declaration,ref v::Vec<usize> substitutions){
     if(root==0 || root>syntax::type_count(p)){return fail(9,module_index,0,0);}let n=syntax::type_at(p,root);if(depth>=64){return fail(10,module_index,n.start,n.end);}

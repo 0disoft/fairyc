@@ -1724,3 +1724,45 @@ must compare structural type identities. Local expression/body typing, target
 layouts, transitive cleanup effects, HIR/MIR/C/CLI integration, stage1/stage2,
 release rebuilding and Linux remain open. Public language/SDK ABI, DB, CI and
 runner implementations are unchanged.
+
+## Transitive generic function request graphs (2026-10-09)
+
+This stage expands the generic function request graph from each owned signature
+instance, reading the original provider AST without modifying source or copying
+bodies yet. Forwarded parameter arguments are substituted in provider
+coordinates, and private same-provider calls plus imported visibility are
+resolved against fresh metadata. Function instances are deduplicated by provider
+module/declaration together with ordered graph IDs. DFS active/completed states
+reject direct, indirect, and changing-argument specialization recursion, with
+the existing depth-32 bound also applying to a previously completed leaf at that
+call depth. Owned dependency records are keyed by caller instance and original
+provider expression ID. The design differentiates function edges, authenticated
+SDK storage intrinsic element/slice facts, and authenticated Vec<T> aggregate
+construction; the aggregate branch fixed an initial assertion failure in the SDK
+resource-element native case. Constructor typing uses canonical graph interning
+with final catalog graph verification, while interface projection follows
+dependency type seeds and keeps materialized Vec shapes capped at the existing
+64. Other existing bounds hold: 64 function instances, 16 per template, 8 args,
+graph 4096, dependency records 16384, and work 1048576.
+
+Development check, probe build and ten native regressions pass. They cover
+direct/indirect/changing-argument recursion, a depth-32 request to an already
+completed leaf, ordered argument forwarding through a private provider helper,
+alias reuse, rollback, quota and semantic-error preservation, and exact SDK
+resource admission. The complete dispatcher is 160 modules and 1048277 bytes,
+admitted as eighteen units after five splits and twenty-three attempts. Per-unit
+maxima are 57 function instances, 433 canonical graph types, 124 shapes, 888
+fields and 164 callables; binding/interface work peaks at 146700/90658. Per-unit
+function instance counts sum to 592 for 1281 initial calls, with 116 nested
+function edges, 594 private storage intrinsic records and 100 Vec aggregate
+records. Original template syntax still carries fourteen deferred request slots;
+instance-specific dependency records resolve those sites separately. Evidence:
+`docs/ops/evidence/candidate-module-unit-generic-dependencies-20261009.json`.
+
+Next: own the provider function AST bodies and authenticated SDK Vec cleanup
+bodies, specialize resource cleanup contexts and their nested/implicit drop
+dependencies, and connect local symbol/expression/body typing. Canonical graph
+IDs stay owner-local; structural cross-unit instance/link deduplication, target
+layouts, transitive cleanup effects, HIR/MIR/C/CLI integration and stage1/stage2
+remain open. Release rebuilding and Linux are deferred. Public language/SDK ABI,
+DB, CI and runner implementations are unchanged.

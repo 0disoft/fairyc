@@ -12,7 +12,8 @@ import std::vec as v;
 
 pub struct Instance {usize module_index;usize declaration;usize argument_start;usize argument_count;usize result;usize parameter_start;usize parameter_count;u32 effects;bool must_use;bool unsafe_call;}
 pub struct Call {usize instance;u32 intrinsic;bool deferred;}
-pub resource Plan {v::Vec<Instance> instances;v::Vec<usize> arguments;v::Vec<usize> parameters;v::Vec<Call> calls;usize work;cleanup{}}
+pub struct Dependency {usize owner;usize source_index;usize instance;usize aggregate_type;u32 intrinsic;usize intrinsic_type;bool slice;}
+pub resource Plan {v::Vec<Instance> instances;v::Vec<usize> arguments;v::Vec<usize> parameters;v::Vec<Call> calls;v::Vec<Dependency> dependencies;usize work;cleanup{}}
 struct Budget {usize work;}
 fn join::Problem fail(u32 code,usize module_index,usize start,usize end){return join::Problem{.code,.module_index,.start,.end};}
 fn bool charge(ref mut Budget work,usize amount){if(work.work>1048576 || amount>1048576-work.work){return false;}work.work+=amount;return true;}
@@ -32,6 +33,25 @@ fn Result<usize,join::Problem> instantiate(ref v::Vec<syntax::Parsed> sources,re
     let usize argument_start=v::len<usize>(arguments);i=0;while(i<count){if(!v::push<usize>(arguments,*v::at<usize>(args,i)).is_ok){return .err(fail(11,caller,start,end));}i+=1;}
     if(!v::push<Instance>(instances,Instance{.module_index,.declaration,.argument_start,.argument_count=count,.result=result.type,.parameter_start,.parameter_count=v::len<usize>(parameters)-parameter_start,.effects=contract.bits,.must_use=contract.must_use,.unsafe_call=d.unsafe_end!=0}).is_ok){return .err(fail(11,caller,start,end));}return .ok(v::len<Instance>(instances));
 }
+fn join::Problem forward(ref v::Vec<syntax::Parsed> sources,ref signatures::Program metadata,ref mut v::Vec<types::Type> graph,ref mut v::Vec<Instance> instances,ref mut v::Vec<usize> arguments,ref mut v::Vec<usize> parameters,ref mut v::Vec<Dependency> dependencies,ref mut v::Vec<u8> states,ref mut Budget work,usize id,usize depth){
+    let item=*v::at<Instance>(instances,id-1);let source=v::at<syntax::Parsed>(sources,item.module_index);let d=syntax::declaration_at(source,item.declaration-1);
+    if(depth>=32){return fail(4503,item.module_index,d.start,d.end);}if(*v::at<u8>(states,id-1)==2){return fail(0,0,0,0);}if(*v::at<u8>(states,id-1)==1){return fail(4503,item.module_index,d.start,d.end);}{let slot=v::at_mut<u8>(states,id-1);*slot=1;}
+    var v::Vec<usize> parent=v::empty<usize>();var usize i=0;while(i<item.argument_count){if(!v::push<usize>(ref mut parent,*v::at<usize>(arguments,item.argument_start+i)).is_ok){return fail(11,item.module_index,d.start,d.end);}i+=1;}
+    let bool vector=sdk::authentic(b"std::vec",syntax::source_view(source));i=1;
+    while(i<=syntax::expression_count(source)){if(!charge(work,1)){return fail(4503,item.module_index,d.start,d.end);}let e=syntax::expression_at(source,i);
+        if(e.kind==20 && e.start>=d.start && e.end<=d.end){let base=syntax::expression_at(source,e.left);if(base.kind!=2){return fail(4501,item.module_index,e.start,e.end);}let name=syntax::expression_text(source,e.left);let u32 intrinsic=if(vector){storage::named(name)}else{0};var usize target=0;var usize aggregate_type=0;var usize intrinsic_type=0;var bool slice=false;
+            if(intrinsic!=0){if(syntax::specialization_argument_count(source,i)!=1){return fail(4501,item.module_index,e.start,e.end);}var usize root=syntax::specialization_argument(source,i,0);let n=syntax::type_at(source,root);if(n.kind==4){slice=true;root=n.left;}let r=signatures::specialize_type(metadata,source,item.module_index,item.declaration,root,ref parent,graph);if(r.problem.code!=0){return fail(r.problem.code,item.module_index,r.problem.start,r.problem.end);}intrinsic_type=r.type;}
+            else{if(shadow(source,item.declaration,name,work)){return fail(if(work.work>=1048576){4503}else{4501},item.module_index,base.start,base.end);}let found=signatures::declaration_lookup(metadata,item.module_index,name);if(found.code!=0){return fail(found.code,item.module_index,base.start,base.end);}let callee=signatures::declaration_at(metadata,found.item);var v::Vec<usize> args=v::empty<usize>();var usize j=0;
+                while(j<syntax::specialization_argument_count(source,i)){let r=signatures::specialize_type(metadata,source,item.module_index,item.declaration,syntax::specialization_argument(source,i,j),ref parent,graph);if(r.problem.code!=0){return fail(r.problem.code,item.module_index,r.problem.start,r.problem.end);}if(!v::push<usize>(ref mut args,r.type).is_ok){return fail(11,item.module_index,e.start,e.end);}j+=1;}
+                if(vector && callee.kind==6 && callee.module_index==item.module_index && bytes::equal(name,b"Vec")){if(v::len<usize>(ref args)!=1){return fail(4501,item.module_index,e.start,e.end);}aggregate_type=types::canonical(graph,types::Type{.kind=13,.scalar=0,.module_index=callee.module_index,.declaration=callee.declaration,.first=*v::at<usize>(ref args,0),.second=0});if(aggregate_type==0){return fail(if(types::count(graph)>=4096){4503}else{11},item.module_index,e.start,e.end);}}
+                else{target=switch(instantiate(sources,metadata,callee.module_index,callee.declaration,ref args,graph,instances,arguments,parameters,work,item.module_index,e.start,e.end)){case .ok(n):{n}case .err(p):{return p;}};
+                    if(*v::at<u8>(states,target-1)==1){return fail(4503,item.module_index,e.start,e.end);}let p=forward(sources,metadata,graph,instances,arguments,parameters,dependencies,states,work,target,depth+1);if(p.code!=0){return p;}
+                }
+            }
+            if(v::len<Dependency>(dependencies)>=16384 || !v::push<Dependency>(dependencies,Dependency{.owner=id,.source_index=i,.instance=target,.aggregate_type,.intrinsic,.intrinsic_type,.slice}).is_ok){return fail(if(v::len<Dependency>(dependencies)>=16384){4503}else{11},item.module_index,e.start,e.end);}
+        }i+=1;
+    }{let slot=v::at_mut<u8>(states,id-1);*slot=2;}return fail(0,0,0,0);
+}
 fn Result<Plan,join::Problem> collect(ref v::Vec<syntax::Parsed> sources,ref signatures::Program metadata,ref binding::Bound bound,ref mut v::Vec<types::Type> graph){
     let valid=binding::validate(bound,sources,metadata);if(valid.code!=0){return .err(valid);}var v::Vec<Instance> instances=v::empty<Instance>();var v::Vec<usize> arguments=v::empty<usize>();var v::Vec<usize> parameters=v::empty<usize>();var v::Vec<Call> calls=v::empty<Call>();var Budget budget=Budget{.work=0};var usize module_index=binding::first(bound);
     while(module_index<binding::stop(bound)){let source=v::at<syntax::Parsed>(sources,module_index);var usize i=1;while(i<=syntax::expression_count(source)){let e=syntax::expression_at(source,i);var Call call=Call{.instance=0,.intrinsic=0,.deferred=false};if(!charge(ref mut budget,1)){return .err(fail(4503,module_index,e.start,e.end));}
@@ -46,7 +66,9 @@ fn Result<Plan,join::Problem> collect(ref v::Vec<syntax::Parsed> sources,ref sig
             }
         }if(!v::push<Call>(ref mut calls,call).is_ok){return .err(fail(11,module_index,e.start,e.end));}i+=1;
     }module_index+=1;}
-    return .ok(Plan{.instances,.arguments,.parameters,.calls,.work=budget.work});
+    var v::Vec<u8> states=v::empty<u8>();var v::Vec<Dependency> dependencies=v::empty<Dependency>();var usize i=0;while(i<64){if(!v::push<u8>(ref mut states,0).is_ok){return .err(fail(11,0,0,0));}i+=1;}i=1;
+    while(i<=v::len<Instance>(ref instances)){let p=forward(sources,metadata,graph,ref mut instances,ref mut arguments,ref mut parameters,ref mut dependencies,ref mut states,ref mut budget,i,0);if(p.code!=0){return .err(p);}i+=1;}
+    return .ok(Plan{.instances,.arguments,.parameters,.calls,.dependencies,.work=budget.work});
 }
 pub fn usize count(ref Plan p){return v::len<Instance>(ref p.instances);}
 pub fn Instance at(ref Plan p,usize id){assert(id>0 && id<=count(p));return *v::at<Instance>(ref p.instances,id-1);}
@@ -55,6 +77,8 @@ pub fn usize parameter_at(ref Plan p,usize index){return *v::at<usize>(ref p.par
 pub fn usize call_count(ref Plan p){return v::len<Call>(ref p.calls);}
 pub fn Call call_at(ref Plan p,usize id){assert(id>0 && id<=call_count(p));return *v::at<Call>(ref p.calls,id-1);}
 pub fn usize work(ref Plan p){return p.work;}
+pub fn usize dependency_count(ref Plan p){return v::len<Dependency>(ref p.dependencies);}
+pub fn Dependency dependency_at(ref Plan p,usize index){return *v::at<Dependency>(ref p.dependencies,index);}
 pub fn Result<Plan,join::Problem> build(ref v::Vec<syntax::Parsed> sources,ref signatures::Program metadata,ref binding::Bound bound,ref mut v::Vec<types::Type> graph){
     var usize i=0;while(i<v::len<syntax::Parsed>(sources)){if(!signatures::source_matches(metadata,i,v::at<syntax::Parsed>(sources,i))){return .err(fail(12,i,0,0));}i+=1;}
     let usize before=types::count(graph);return switch(collect(sources,metadata,bound,graph)){case .ok(p):{.ok(p)}case .err(p):{while(types::count(graph)>before){discard v::pop<types::Type>(graph);}.err(p)}};

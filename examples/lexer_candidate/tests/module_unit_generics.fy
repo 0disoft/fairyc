@@ -59,6 +59,19 @@ fn void suffix(ref mut bytes::Buffer text,usize n){let digits=b"0123456789";if(n
     while(i<65){assert(bytes::append(ref mut text,b"fn T f").is_ok);suffix(ref mut text,i);assert(bytes::append(ref mut text,b"<T>(T n){return n;}").is_ok);i+=1;}
     assert(bytes::append(ref mut text,b"fn i32 main(){").is_ok);i=0;while(i<65){assert(bytes::append(ref mut text,b"discard f").is_ok);suffix(ref mut text,i);assert(bytes::append(ref mut text,b"<i32>(1);").is_ok);i+=1;}assert(bytes::append(ref mut text,b"return 0;}").is_ok);join_problem(bytes::view(ref text),4503);
 }
+@test fn void forwarded_private_templates_share_ordered_children_after_owner_removal(){
+    var v::Vec<syntax::Parsed> sources=v::empty<syntax::Parsed>();assert(v::push<syntax::Parsed>(ref mut sources,parsed(b"module main;import provider as p;import provider as q;fn bool main(){assert(p::flip<i32,bool>(1,true));return q::flip<i32,bool>(2,false);}")).is_ok);assert(v::push<syntax::Parsed>(ref mut sources,parsed(b"module provider;pub fn B flip<A,B>(A a,B b){return choose<B,A>(b,a);}fn A choose<A,B>(A a,B b){return a;}")).is_ok);
+    let metadata=switch(signatures::build(ref sources)){case .ok(m):{m}case .err(_):{assert(false);return;}};let bound=switch(binding::bind(ref sources,ref metadata,0,1)){case .ok(b):{b}case .err(_):{assert(false);return;}};let p=switch(interfaces::build(ref sources,ref metadata,ref bound)){case .ok(p):{p}case .err(_):{assert(false);return;}};
+    let plan=interfaces::specializations(ref p);assert(generics::count(plan)==2 && generics::dependency_count(plan)==1);let parent=generics::at(plan,1);let child=generics::at(plan,2);let edge=generics::dependency_at(plan,0);assert(parent.module_index==1 && child.module_index==1 && parent.declaration!=child.declaration && edge.owner==1 && edge.instance==2 && edge.source_index!=0 && edge.intrinsic==0);assert(parent.result==child.result && generics::argument_at(plan,parent.argument_start)==generics::argument_at(plan,child.argument_start+1) && generics::argument_at(plan,parent.argument_start+1)==generics::argument_at(plan,child.argument_start));
+}
+@test fn void direct_indirect_and_changing_argument_recursion_fail_closed(){
+    join_problem(b"module main;fn T id<T>(T n){return id<T>(n);}fn i32 main(){return id<i32>(1);}",4503);
+    join_problem(b"module main;fn T first<T>(T n){return second<T>(n);}fn T second<T>(T n){return first<T>(n);}fn i32 main(){return first<i32>(1);}",4503);
+    join_problem(b"module main;fn i64 id<T>(T n){return id<i64>(1);}fn i32 main(){discard id<i32>(1);return 0;}",4503);
+}
+@test fn void forwarded_depth_limit_applies_even_to_a_completed_leaf(){
+    var bytes::Buffer text=bytes::empty();assert(bytes::append(ref mut text,b"module main;").is_ok);var usize i=0;while(i<33){assert(bytes::append(ref mut text,b"fn T f").is_ok);suffix(ref mut text,i);assert(bytes::append(ref mut text,b"<T>(T n){return ").is_ok);if(i==32){assert(bytes::append(ref mut text,b"n;").is_ok);}else{assert(bytes::append(ref mut text,b"f").is_ok);suffix(ref mut text,i+1);assert(bytes::append(ref mut text,b"<T>(n);").is_ok);}assert(bytes::append(ref mut text,b"}").is_ok);i+=1;}assert(bytes::append(ref mut text,b"fn i32 main(){discard f32<i32>(1);return f0<i32>(1);}").is_ok);join_problem(bytes::view(ref text),4503);
+}
 @effects(filesystem)
 @test fn void exact_sdk_templates_specialize_named_resource_elements(){
     var bytes::Buffer path=bytes::empty();assert(bytes::resize_zeroed(ref mut path,4096).is_ok);let usize n=switch(process::arg(1,bytes::view_mut(ref mut path))){case .ok(n):{n}case .err(_):{assert(false);return;}};let source=switch(files::load(bytes::view(ref path)[..n])){case .ok(b):{b}case .err(_):{assert(false);return;}};
