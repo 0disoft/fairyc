@@ -9,6 +9,8 @@ import module_signatures as signatures;
 import module_types as types;
 import syntax as syntax;
 import std::vec as v;
+import module_unit_loan_live_model as live;
+import module_unit_loan_liveness as live_builder;
 
 // Unit 0 is the caller-owned primary plan; provider unit IDs are one-based.
 // Frame/owner IDs are analysis-local. Provider canonical type IDs stay in their
@@ -16,7 +18,7 @@ import std::vec as v;
 pub struct Frame {bool tagged_return;usize unit;usize context;m::Frame value;usize expression_start;usize expression_count;usize local_start;usize local_count;usize call_start;usize call_count;usize parameter_start;usize parameter_count;}
 pub struct Owner {usize frame;usize local;usize scope;u32 kind;bool borrowed;usize start;usize end;}
 pub struct Allocation {usize frame;usize module_index;usize start;usize end;}
-pub resource Inputs {v::Vec<Allocation> allocations;v::Vec<usize> placements;v::Vec<values::Plan> providers;v::Vec<usize> modules;v::Vec<Frame> frames;v::Vec<Owner> owners;v::Vec<usize> storage;v::Vec<usize> parameters;v::Vec<usize> targets;v::Vec<usize> statics;usize expressions;usize work;cleanup{}}
+pub resource Inputs {v::Vec<live::Plan> liveness;v::Vec<Allocation> allocations;v::Vec<usize> placements;v::Vec<values::Plan> providers;v::Vec<usize> modules;v::Vec<Frame> frames;v::Vec<Owner> owners;v::Vec<usize> storage;v::Vec<usize> parameters;v::Vec<usize> targets;v::Vec<usize> statics;usize expressions;usize work;cleanup{}}
 fn m::Problem fail(m::Frame f,u32 code,usize start,usize end){return m::fail(f,code,start,end,0,0);}
 pub fn usize frame_count(ref Inputs p){return v::len<Frame>(ref p.frames);}
 pub fn Frame frame(ref Inputs p,usize id){return *v::at<Frame>(ref p.frames,id-1);}
@@ -90,7 +92,7 @@ pub fn Result<Inputs,m::Problem> build(ref v::Vec<syntax::Parsed> sources,ref si
                 }
             }else if(found==0 && call.kind==2){return .err(fail(f.value,12,call.start,call.end));}let slot=v::at_mut<usize>(ref mut targets,f.call_start+j);*slot=found;
         }j+=1;
-    }id+=1;}let storage=switch(storage_inputs(ref providers,primary,ref frames,ref mut owners,ref mut budget)){case .ok(p):{p}case .err(p):{return .err(p);}};let statics=switch(static_inputs(ref providers,primary,ref frames,ref mut owners,ref mut budget)){case .ok(p):{p}case .err(p):{return .err(p);}};var v::Vec<Allocation> allocations=v::empty<Allocation>();var v::Vec<usize> placements=v::empty<usize>();id=0;while(id<v::len<Frame>(ref frames)){let f=*v::at<Frame>(ref frames,id);let b=unit_body(ref providers,primary,f);var usize j=1;while(j<=f.expression_count){let e=m::expression_at(b,j);if(!m::charge(ref mut budget.work,1)){return .err(fail(f.value,10,e.start,e.end));}var usize site=0;if(e.kind==6 && e.builtin.kind==300){if(v::len<Allocation>(ref allocations)>=16384){return .err(fail(f.value,10,e.start,e.end));}if(!v::push<Allocation>(ref mut allocations,Allocation{.frame=id+1,.module_index=f.value.module_index,.start=e.start,.end=e.end}).is_ok){return .err(fail(f.value,11,e.start,e.end));}site=v::len<Allocation>(ref allocations);}if(!v::push<usize>(ref mut placements,site).is_ok){return .err(fail(f.value,11,e.start,e.end));}j+=1;}id+=1;}return .ok(Inputs{.allocations,.placements,.providers,.modules,.frames,.owners,.storage,.parameters,.targets,.statics,.expressions=budget.expressions,.work=budget.work});
+    }id+=1;}let storage=switch(storage_inputs(ref providers,primary,ref frames,ref mut owners,ref mut budget)){case .ok(p):{p}case .err(p):{return .err(p);}};let statics=switch(static_inputs(ref providers,primary,ref frames,ref mut owners,ref mut budget)){case .ok(p):{p}case .err(p):{return .err(p);}};var v::Vec<Allocation> allocations=v::empty<Allocation>();var v::Vec<usize> placements=v::empty<usize>();id=0;while(id<v::len<Frame>(ref frames)){let f=*v::at<Frame>(ref frames,id);let b=unit_body(ref providers,primary,f);var usize j=1;while(j<=f.expression_count){let e=m::expression_at(b,j);if(!m::charge(ref mut budget.work,1)){return .err(fail(f.value,10,e.start,e.end));}var usize site=0;if(e.kind==6 && e.builtin.kind==300){if(v::len<Allocation>(ref allocations)>=16384){return .err(fail(f.value,10,e.start,e.end));}if(!v::push<Allocation>(ref mut allocations,Allocation{.frame=id+1,.module_index=f.value.module_index,.start=e.start,.end=e.end}).is_ok){return .err(fail(f.value,11,e.start,e.end));}site=v::len<Allocation>(ref allocations);}if(!v::push<usize>(ref mut placements,site).is_ok){return .err(fail(f.value,11,e.start,e.end));}j+=1;}id+=1;}var v::Vec<live::Plan> live_frames=v::empty<live::Plan>();id=0;while(id<v::len<Frame>(ref frames)){let f=*v::at<Frame>(ref frames,id);var v::Vec<bool> flags=v::empty<bool>();var usize local=1;while(local<=f.local_count){if(!m::charge(ref mut budget.work,1)){return .err(fail(f.value,10,0,0));}let owner=*v::at<Owner>(ref owners,f.local_start+local-1);if(!v::push<bool>(ref mut flags,owner.borrowed && owner.kind!=13 && owner.kind!=14).is_ok){return .err(fail(f.value,11,owner.start,owner.end));}local+=1;}let data=switch(live_builder::build(v::at<syntax::Parsed>(sources,f.value.module_index),unit_body(ref providers,primary,f),ref flags,ref mut budget.work)){case .ok(p):{p}case .err(p):{return .err(p);}};if(!v::push<live::Plan>(ref mut live_frames,data).is_ok){return .err(fail(f.value,11,0,0));}id+=1;}return .ok(Inputs{.liveness=live_frames,.allocations,.placements,.providers,.modules,.frames,.owners,.storage,.parameters,.targets,.statics,.expressions=budget.expressions,.work=budget.work});
 }
 
 pub fn usize allocation_count(ref Inputs p){return v::len<Allocation>(ref p.allocations);}
@@ -98,3 +100,5 @@ pub fn Allocation allocation(ref Inputs p,usize id){return *v::at<Allocation>(re
 pub fn Result<usize,m::Problem> placement(ref Inputs p,ref values::Plan primary,usize id,usize original,ref mut usize work){
     let f=frame(p,id);let b=body(p,primary,id);var usize low=0;var usize high=f.expression_count;while(low<high){if(!m::charge(work,1)){return .err(fail(f.value,10,0,0));}let mid=low+(high-low)/2;if(m::expression_at(b,mid+1).source_index<original){low=mid+1;}else{high=mid;}}if(low>=f.expression_count || m::expression_at(b,low+1).source_index!=original){return .err(fail(f.value,12,0,0));}let e=m::expression_at(b,low+1);let site=*v::at<usize>(ref p.placements,f.expression_start+low);return if(site==0 || site>allocation_count(p)){.err(fail(f.value,12,e.start,e.end))}else{.ok(site)};
 }
+
+pub fn ref live::Plan liveness(ref Inputs p,usize frame){return v::at<live::Plan>(ref p.liveness,frame-1);}

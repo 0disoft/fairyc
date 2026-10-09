@@ -1825,3 +1825,36 @@ and generic allocation coordinates. Evidence:
 Ordinary owner loans/lifetimes, conflicts, moves, unsafe provenance, move-aware
 cleanup, executable MIR/C Region runtime, full dispatcher, stage1/stage2, Linux
 and release remain pending. Public CLI, SDK ABI, DB and CI are unchanged; no push.
+
+## Owned borrowed binding liveness (2026-10-10)
+
+Origin Inputs now owns a liveness plan for each Values frame. It retains borrowed
+binding declaration spans, statement/expression source points, canonical sparse
+maps, and the furthest future use for each binding. These records remain readable
+after parsed sources and the primary typed plan are released. Frame indices keep
+provider and generic specialization contexts separate; Arena/Region capabilities
+are excluded from ordinary borrow liveness.
+
+The reverse walk kills a previous reference at binding or direct overwrite,
+clears outgoing liveness at return, replaces branch state with the union of its
+arms, and removes switch payload bindings at the pattern boundary. Loops solve a
+bounded fixed point with the nearest break/continue targets. Classic-for post
+clauses stay outside borrow flow, following the existing scalar-only header rule
+in `internal/semantic/for_loop.go`. Depth, work and sparse-map storage limits fail
+closed. The checked flag distinguishes an analyzed empty map from an untouched
+point.
+
+Source checking and a locked development build passed. Six selected native tests
+passed, including 16 liveness cases and the existing Region lifetime/escape/
+lifecycle checks. All 171 shared source points match the Go liveness reference,
+including binding and last-use byte spans; these exact expectations are retained
+in the Fairy native test. The five prior native traces remain byte-identical, and
+17 Region lifetime CLI cases match the prior exit/stdout/stderr observations.
+The first regression invocation supplied a relative SDK path to isolated test
+processes; the affected five tests were rerun with an absolute path. Evidence:
+`docs/ops/evidence/candidate-module-loan-liveness-20261010.json`.
+
+This unit retains liveness facts only. Ordinary owner loans, borrow conflicts and
+owner-move diagnostics are the next step. Unsafe provenance, move-aware cleanup,
+executable MIR/C Region runtime, full dispatcher, stage1/stage2, Linux and release
+remain pending. Public CLI, SDK ABI, DB and CI are unchanged; no push.

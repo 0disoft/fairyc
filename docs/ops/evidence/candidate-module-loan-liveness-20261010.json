@@ -1,0 +1,259 @@
+{
+  "schema": "fairyc.candidate-module-loan-liveness/v1",
+  "passed": true,
+  "scope": "Owned per-frame safe-borrow binding liveness at statement/expression points; foundation only, no ordinary borrow conflict or owner-move diagnostics admitted.",
+  "sourceTruth": [
+    "internal/semantic/borrow_flow.go",
+    "internal/semantic/for_loop.go"
+  ],
+  "identity": {
+    "compiler": {
+      "path": ".cache/candidate-tagged/compiler-origin-patterns.exe",
+      "sha256": "d36dae1b99751322e447880aaf4d28321bd6d53bdf776185308c6c4504889bb2"
+    },
+    "candidate": {
+      "path": "examples/lexer_candidate/build/lexer-candidate.exe",
+      "sha256": "4a31d7d2f41c8467b9064889c7c48dd14d22083fa3e5605e3e3543fa643192a7"
+    },
+    "sourceDigest": "24fa36addc73730d87e3ab1b7d126ae840130822f74d86cef4748fbcff8a0cac",
+    "sourceCount": 220,
+    "files": [
+      {
+        "path": "examples/lexer_candidate/fairy.lock",
+        "sha256": "2e5f4f0019ea7d314b9304a275138ac078ee9f0611cde52ee407d8049b768a3b"
+      },
+      {
+        "path": "examples/lexer_candidate/tests/module_unit_loan_liveness.fy",
+        "sha256": "d873bda06a17fa87081c1b6453aee85b84908a067c554a1dea6c507584dd8e62"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_loan_live_control.fy",
+        "sha256": "52ba44840327cad795b2caeb8e1927f00655d1d6565d54838041cb3d5bae3faa"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_loan_live_maps.fy",
+        "sha256": "0bce4c4c42c017cddee9a2657df6372a8890e56bd224e6b9443b4e7ad62064b7"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_loan_live_model.fy",
+        "sha256": "760094ba2904a31f86589f84bedf4ee47f9f2400013d88e69e07955294faa907"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_loan_live_walk.fy",
+        "sha256": "7576333930c31ee31373cc919298d831c3e098583da6a80383d3f73ac8c627df"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_loan_liveness.fy",
+        "sha256": "9c2d02fc02b030be6925eb8e7beeb987c34446c936e0bfc98aed4cd842d6c6e0"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_loan_liveness.fy",
+        "sha256": "9c2d02fc02b030be6925eb8e7beeb987c34446c936e0bfc98aed4cd842d6c6e0"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_origin_inputs.fy",
+        "sha256": "223549f35d5920bcf32fb63b987207fc4f524d83cb6ea2c45baedc733070031e"
+      }
+    ]
+  },
+  "sourceCheck": {
+    "exit": 0,
+    "stdout": "check ok: 2 instance(s), 228 source file(s), 2837 MIR function(s), lock unchanged\n"
+  },
+  "lockedBuild": {
+    "exit": 0,
+    "stdout": "built: build/lexer-candidate.exe (x86_64-windows-msvc, development, lock verified)\n"
+  },
+  "native": {
+    "count": 6,
+    "passed": 6,
+    "tests": [
+      {
+        "identity": "tests::module_unit_loan_liveness::last_uses_follow_bindings_branches_and_loop_control",
+        "outcome": "passed"
+      },
+      {
+        "identity": "tests::module_unit_origin_region::abstract_static_origin_does_not_hide_expired_region",
+        "outcome": "passed"
+      },
+      {
+        "identity": "tests::module_unit_origin_region::allocated_returns_follow_region_inputs",
+        "outcome": "passed"
+      },
+      {
+        "identity": "tests::module_unit_origin_region::local_region_escapes_keep_allocation_sites",
+        "outcome": "passed"
+      },
+      {
+        "identity": "tests::module_unit_origin_region::region_borrows_expire_across_control_flow_and_reentry",
+        "outcome": "passed"
+      },
+      {
+        "identity": "tests::module_unit_regions::lexical_region_lifecycle_preserves_exit_order_and_types",
+        "outcome": "passed"
+      }
+    ],
+    "initialRun": {
+      "status": "failed",
+      "exit": 1,
+      "passed": 1,
+      "failed": 5,
+      "reason": "Observer passed SDK path relative to isolated native-test cwd. The five SDK-loading Region tests failed before analysis; rerun with absolute SDK path."
+    },
+    "regionRerun": {
+      "status": "ok",
+      "exit": 0,
+      "passed": 5,
+      "sdkPath": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\internal\\sdkstdlib\\sources\\std\\alloc.fy"
+    }
+  },
+  "oracle": {
+    "command": "go test -overlay .cache/candidate-tagged/loan-liveness-unit/overlay.json ./internal/semantic -run ^TestCandidateLiveOracle$ -count=1",
+    "exit": 0,
+    "fixtureCases": 16,
+    "comparedPoints": 171,
+    "cases": [
+      {
+        "index": 0,
+        "name": "later use",
+        "comparedPoints": 8
+      },
+      {
+        "index": 1,
+        "name": "after last use",
+        "comparedPoints": 8
+      },
+      {
+        "index": 2,
+        "name": "shared creation with later alias",
+        "comparedPoints": 13
+      },
+      {
+        "index": 3,
+        "name": "direct overwrite kills old reference",
+        "comparedPoints": 11
+      },
+      {
+        "index": 4,
+        "name": "if one arm uses",
+        "comparedPoints": 10
+      },
+      {
+        "index": 5,
+        "name": "if returns kill dead suffix",
+        "comparedPoints": 11
+      },
+      {
+        "index": 6,
+        "name": "if both replace",
+        "comparedPoints": 16
+      },
+      {
+        "index": 7,
+        "name": "loop backedge",
+        "comparedPoints": 10
+      },
+      {
+        "index": 8,
+        "name": "break bypasses remainder",
+        "comparedPoints": 14
+      },
+      {
+        "index": 9,
+        "name": "continue carries next iteration",
+        "comparedPoints": 11
+      },
+      {
+        "index": 10,
+        "name": "nested nearest control target",
+        "comparedPoints": 14
+      },
+      {
+        "index": 11,
+        "name": "classic for",
+        "comparedPoints": 10
+      },
+      {
+        "index": 12,
+        "name": "match binding kill",
+        "comparedPoints": 10
+      },
+      {
+        "index": 13,
+        "name": "call argument reverse order",
+        "comparedPoints": 9
+      },
+      {
+        "index": 14,
+        "name": "return before dead use",
+        "comparedPoints": 8
+      },
+      {
+        "index": 15,
+        "name": "unsafe block",
+        "comparedPoints": 8
+      }
+    ],
+    "oracleSHA256": "06d9a58d48a3d873602f5977fb6b97da2e6fa72adeabe4cf20201f2cf96544b1",
+    "harness": {
+      "path": ".cache/candidate-tagged/loan-liveness-unit/oracle_test.go",
+      "sha256": "60d1d01245033098d2c9c5973ce17aac625600219b767c2be9940eefffa7f2f0"
+    },
+    "note": "Uses syntax resolution and type checking, then the existing Go liveBlock; borrow-conflict acceptance is intentionally not exercised in the liveness oracle."
+  },
+  "regression": {
+    "nativeOutput": [
+      {
+        "identity": "tests::module_unit_origin_region::abstract_static_origin_does_not_hide_expired_region",
+        "outcome": "passed",
+        "outputByteIdentical": true
+      },
+      {
+        "identity": "tests::module_unit_origin_region::allocated_returns_follow_region_inputs",
+        "outcome": "passed",
+        "outputByteIdentical": true
+      },
+      {
+        "identity": "tests::module_unit_origin_region::local_region_escapes_keep_allocation_sites",
+        "outcome": "passed",
+        "outputByteIdentical": true
+      },
+      {
+        "identity": "tests::module_unit_origin_region::region_borrows_expire_across_control_flow_and_reentry",
+        "outcome": "passed",
+        "outputByteIdentical": true
+      },
+      {
+        "identity": "tests::module_unit_regions::lexical_region_lifecycle_preserves_exit_order_and_types",
+        "outcome": "passed",
+        "outputByteIdentical": true
+      }
+    ],
+    "regionLifetimeCLIExact": 17,
+    "regionInputsExact": 17,
+    "regionReturnsExact": 21,
+    "regionLifecycleExact": 16
+  },
+  "ownership": "Inputs owns liveness locals, points, canonical sparse maps and uses after parsed sources and typed plans are dropped. Frame indices retain specialization/module ownership.",
+  "bounds": {
+    "depth": 64,
+    "mapsPerFrame": 4096,
+    "rowsPerFrame": 32768,
+    "work": 1048576,
+    "loopIterations": "typed expression count plus one"
+  },
+  "pending": [
+    "ordinary owner loans, borrow conflicts and owner-move diagnostics",
+    "unsafe provenance",
+    "move-aware cleanup before Region reset",
+    "executable MIR/C Region runtime and full dispatcher",
+    "stage1/stage2",
+    "Linux",
+    "release"
+  ],
+  "publicCLIChanged": false,
+  "sdkABIChanged": false,
+  "dbChanged": false,
+  "ciRunnerChanged": false,
+  "pushed": false
+}

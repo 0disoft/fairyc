@@ -1,0 +1,13 @@
+module module_unit_loan_liveness;
+import module_unit_loan_live_model as l;
+import module_unit_loan_live_control as control;
+import module_unit_value_model as m;
+import syntax as syntax;
+import std::vec as v;
+
+pub fn Result<l::Plan,m::Problem> build(ref syntax::Parsed source,ref m::Values body,ref v::Vec<bool> flags,ref mut usize work){
+    let frame=m::frame(body);if(v::len<bool>(flags)!=m::local_count(body) || frame.declaration==0 || frame.declaration>syntax::declaration_count(source)){return .err(m::fail(frame,12,0,0,0,0));}var l::Context c=l::Context{.frame,.work=*work,.rounds=0};let d=syntax::declaration_at(source,frame.declaration-1);let root=syntax::statement_at(source,if(frame.kind==2){d.cleanup_body}else{d.body});var v::Vec<l::Local> locals=v::empty<l::Local>();var v::Vec<l::Point> expressions=v::empty<l::Point>();var v::Vec<l::Point> statements=v::empty<l::Point>();var v::Vec<l::Header> maps=v::empty<l::Header>();var v::Vec<l::Row> rows=v::empty<l::Row>();var usize i=1;var bool needed=false;
+    while(i<=m::local_count(body)){if(!m::charge(ref mut c.work,1)){return .err(l::fail(ref c,10,root.start,root.end));}let local=m::local_at(body,i);let borrowed=*v::at<bool>(flags,i-1);needed=needed || borrowed;if(!v::push<l::Local>(ref mut locals,l::Local{.start=local.start,.end=local.end,.borrowed}).is_ok){return .err(l::fail(ref c,11,local.start,local.end));}i+=1;}
+    if(needed){i=1;while(i<=m::expression_count(body)){if(!m::charge(ref mut c.work,1)){return .err(l::fail(ref c,10,root.start,root.end));}let e=m::expression_at(body,i);if(!v::push<l::Point>(ref mut expressions,l::Point{.source_index=e.source_index,.start=e.start,.end=e.end,.map=0,.checked=false}).is_ok){return .err(l::fail(ref c,11,e.start,e.end));}i+=1;}i=1;while(i<=syntax::statement_count(source)){if(!m::charge(ref mut c.work,1)){return .err(l::fail(ref c,10,root.start,root.end));}let s=syntax::statement_at(source,i);if(s.start>=root.start && s.end<=root.end){if(!v::push<l::Point>(ref mut statements,l::Point{.source_index=i,.start=s.start,.end=s.end,.map=0,.checked=false}).is_ok){return .err(l::fail(ref c,11,s.start,s.end));}}i+=1;}var env=switch(l::empty(v::len<l::Local>(ref locals),ref mut c)){case .ok(v):{v}case .err(p):{return .err(p);}};let p=control::block(if(frame.kind==2){d.cleanup_body}else{d.body},source,body,ref locals,l::Loop{.break_live=0,.continue_live=0},0,ref mut env,ref mut expressions,ref mut statements,ref mut maps,ref mut rows,ref mut c);if(p.code!=0){return .err(p);}};
+    *work=c.work;return .ok(l::assemble(locals,expressions,statements,maps,rows,d.start,d.end,c.work,c.rounds));
+}
