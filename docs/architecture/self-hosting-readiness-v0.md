@@ -1676,3 +1676,39 @@ loan/subview/lifetime/conflict/move, unsafe provenance and cross-unit
 HIR/MIR/C/CLI integration remain. No new fixed corpus, stage1/stage2, release,
 Linux or push was performed; public language/SDK ABI, SDK sources, DB, CI and
 runner contracts are unchanged.
+
+## Manifest return-origin checking entry point (2026-10-10)
+
+The private candidate CLI now exposes --check-return-origins-file <manifest>.
+It reuses the existing bounded manifest loader and parses every file once,
+then runs signatures, binding, call closure, value typing, return-origin
+inference and report collection against those exact source owners. Errors and
+related origins print the original manifest filename and byte coordinates.
+Direct semantic origin errors return 3; unknown origins, unsupported forms,
+phase failures and loader/analysis limits return 2; a successful direct
+return-origin report prints return origins ok.
+
+An initial CLI probe reproduced a false success for a local borrow returned
+inside Option. The coordinator now scans nested result types and imported
+aggregate/payload shapes with a depth/work bound, refusing borrowed payload
+returns until their origin flow is implemented. Valid borrowed Option and
+nested Result payloads are also deliberately unsupported. Inert Option results
+remain admitted. This boundary is recorded separately from semantic
+equivalence; it does not count as matching the reference compiler for tagged
+borrowed returns.
+
+Development check passed (213 sources, 2635 MIR functions) and a fresh native
+candidate build passed. Eleven CLI/reference comparisons matched exit status,
+diagnostic codes, original files, primary spans and related role/spans,
+including CRLF manifests, provider-first source order and a local aggregate
+borrow. Two existing checker modes, four malformed-input refusals, four tagged
+boundary cases and command help passed. Current compiler, candidate, SDK,
+source, test, lock and fixture identities were verified. Evidence:
+docs/ops/evidence/candidate-module-unit-origin-cli-20261010.json.
+
+The command currently uses one bounded primary unit and checks direct return
+origins. Tagged/region origin inference, loans, lifetimes, conflicts, moves,
+unsafe provenance, split-unit execution and the complete project dispatcher
+remain. Release, Linux and stage1/stage2 were deferred as planned. No push,
+public Stage0 CLI/language/SDK ABI change, DB change or CI/runner change was
+made.

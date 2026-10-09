@@ -8,6 +8,8 @@ import syntax as syntax;
 import token_output as output;
 import declaration_output as declarations;
 import module_program as programs;
+import module_unit_origin_check as origin_check;
+import module_unit_origin_diagnostics as origin_diagnostics;
 import c_emit as c;
 import std::bytes as bytes;
 import std::text as text;
@@ -71,6 +73,7 @@ fn i32 execute(ref u8[] path,u32 program_mode) {
         if (!v::push<syntax::Parsed>(ref mut parsed_files,parsed).is_ok) { return error("error: buffer allocation failed\n"); }
         index += 1;
     }
+    if(program_mode==3){return return_origins(ref parsed_files,source,ref entries);}
     if(program_mode!=0){
         let result=if(program_mode==2){programs::compile_sdk(ref mut parsed_files)}else{programs::compile(ref parsed_files)};
         let program=switch(result){
@@ -106,8 +109,33 @@ fn i32 execute(ref u8[] path,u32 program_mode) {
     return if (io::write("modules ok\n").is_ok) { 0 } else { error("error: stdout write failed\n") };
 }
 
+@effects(console)
+fn i32 return_origins(ref v::Vec<syntax::Parsed> sources,ref u8[] manifest,ref v::Vec<Path> paths){
+    let report=switch(origin_check::check(sources)){
+        case .ok(p):{p}
+        case .err(p):{
+            if(p.module_index>=v::len<Path>(paths)){return error("error: invalid return-origin module\n");}
+            let entry=*v::at<Path>(paths,p.module_index);
+            output::prefix(syntax::source_view(v::at<syntax::Parsed>(sources,p.module_index)),manifest[entry.start..entry.end],p.start);
+            discard io::write_stderr("return-origin phase ");discard io::write_stderr_u32(p.phase);discard io::write_stderr(" code ");discard io::write_stderr_u32(p.code);output::range(p.start,p.end);return 2;
+        }
+    };
+    var usize i=0;while(i<origin_diagnostics::count(ref report)){
+        let d=origin_diagnostics::at(ref report,i);let entry=*v::at<Path>(paths,d.module_index);
+        output::prefix(syntax::source_view(v::at<syntax::Parsed>(sources,d.module_index)),manifest[entry.start..entry.end],d.start);
+        discard io::write_stderr(if(d.code==2102){"E2102 borrow return escapes local origin"}else if(d.code==2103){"E2103 borrow return has multiple origins"}else{"unsupported borrow return with unknown origin"});output::range(d.start,d.end);
+        var usize j=0;while(j<d.related_count){let r=origin_diagnostics::related_at(ref report,d,j);let path=*v::at<Path>(paths,r.module_index);
+            discard io::write_stderr(if(r.role==1){"  origin: "}else{"  candidate-origin: "});discard io::write_stderr_bytes(manifest[path.start..path.end]);output::range(r.start,r.end);j+=1;
+        }i+=1;
+    }
+    let u32 status=origin_diagnostics::exit_code(ref report);if(status!=0){return if(status==3){3}else{2};}
+    return if(io::write("return origins ok\n").is_ok){0}else{error("error: stdout write failed\n")};
+}
+
 @effects(filesystem,console)
 pub fn i32 run(ref u8[] path){return execute(path,0);}
+@effects(filesystem,console)
+pub fn i32 check_return_origins(ref u8[] path){return execute(path,3);}
 @effects(filesystem,console)
 pub fn i32 emit(ref u8[] path){return execute(path,1);}
 @effects(filesystem,console)
