@@ -8,6 +8,7 @@ import (
 func TestBoolViewFlow(t *testing.T) {
 	for _, tc := range []struct{ name, source, code string }{
 		{"shared-return", `fn ref bool first(ref bool[] flags){for(let ref bool item in flags){return item;}return ref flags[0];}`, ""},
+		{"direct-named-slice", `fn void visit(ref bool[] flags){for(let bool flag in flags[..]){assert(flag);}}`, ""},
 		{"reborrow", `fn void edit(ref mut bool[] flags){ {let ref mut bool[] child=flags[..];child[0]=true;}flags[0]=false;}`, ""},
 		{"nested-shared", `fn void visit(){let bool[1] flags=[true];for(let ref bool a in flags){for(let ref bool b in flags){assert(*a==*b);}}}`, ""},
 		{"shared-store", `fn void bad(ref bool[] flags){flags[0]=true;}`, "E1008"},
@@ -50,7 +51,7 @@ func TestBoolViewBoundary(t *testing.T) {
 	for name, source := range map[string]string{
 		"owned-slice":        `fn void bad(bool[] flags){}`,
 		"mutable-descriptor": `fn void bad(ref bool[] flags){var ref bool[] alias=flags;for(let bool flag in alias){}}`,
-		"computed-root":      `fn void bad(ref bool[] flags){for(let bool flag in flags[..]){}}`,
+		"computed-root":      `fn ref bool[] same(ref bool[] flags){return flags;}fn void bad(ref bool[] flags){for(let bool flag in same(flags)[..]){}}`,
 		"immutable-array":    `fn void bad(){let bool[1] flags=[true];for(let ref mut bool flag in flags){*flag=false;}}`,
 		"zero-array":         `fn void bad(){var bool[0] flags=[false;0];}`,
 		"oversized-array":    `fn void bad(){var bool[4097] flags=[false;4097];}`,

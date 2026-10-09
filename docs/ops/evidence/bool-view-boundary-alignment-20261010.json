@@ -1,0 +1,30 @@
+{
+  "schema": "fairyc.bool-view-boundary-alignment/v1",
+  "passed": true,
+  "scope": "Replace the stale rejection of a direct slice over a named bool view with rejection of a call-rooted slice, and retain positive semantic plus MIR verification coverage for the admitted direct named slice.",
+  "contract": {
+    "path": "docs/adr/0465-direct-slice-subview-iteration.md",
+    "sha256": "e06cb51cfdb7c3c4577686ad652ac065fe8ef06e4b9fe1da4d19e98a91055f82"
+  },
+  "testSource": {
+    "path": "internal/semantic/bool_views_test.go",
+    "sha256": "3dc0fc6758c630b7194100ae0875597eb97e6a684ad50d5e4b1458fe5d8c758b"
+  },
+  "executions": [
+    {
+      "argv": [
+        "go",
+        "test",
+        "./internal/semantic"
+      ],
+      "exit": 0,
+      "stdout": "ok  \tgithub.com/0disoft/fairyc/internal/semantic\t0.486s\n",
+      "stderr": "",
+      "recordedFromObservedCommandOutput": true
+    }
+  ],
+  "baselineEvidence": "docs/ops/evidence/borrow-false-assert-and-match-storage-20261010.json",
+  "runtimeChanged": false,
+  "contractChanged": false,
+  "pushed": false
+}
