@@ -2545,3 +2545,34 @@ The full 160-module corpus re-run completed and passed, recorded in the fixed
 corpus observation above. The full dispatcher, stage1/stage2, release, Linux and
 push paths were not run. Public language/SDK ABI, SDK sources, DB, CI and runner
 contracts are unchanged.
+
+## Result propagation value consumer (2026-10-09)
+
+A new `module_unit_value_result` module projects the canonical Result operand's
+success type. The operand is evaluated with zero context, so the enclosing
+success type never manufactures a Result for it; the operand and the enclosing
+kinds must both be 6 with equal second (error) canonical IDs, while an enclosing
+success type may differ. A non-Result operand reports E4102, a non-Result or
+error-mismatched enclosing type reports E4103, and both point at a 1-byte span
+at the operand's original end. An unsupported construction whose fallback is
+code2 is promoted to E4102 to match the reference diagnostic priority, and other
+diagnostics and budget errors pass through unchanged.
+
+Ordinary and generic providers, nested Results and nominal or resource success
+payloads feed inferred locals, fields, call arguments and returns, and no new
+place root is created.
+
+Development check passed (198 sources, 2410 MIR functions), selected native cases
+passed 6/6 (4 new propagation cases, deep else-if, SDK Vec), and reference
+acceptance/code/span fixtures matched 13/13 (10 errors, 2 single-file positives,
+1 provider generic). Limits types 4096, work 1048576, entries 1024, active locals
+128 and depth/rounds 64 remain unchanged. Evidence:
+`docs/ops/evidence/candidate-module-unit-propagation-20261009.json`.
+
+Result must-use, flow, move and loan/cleanup ownership remain separate follow-up
+work. Builtin, assignment/post, defer/burn, function tails and missing returns,
+earlier declarations, provenance, unit HIR/MIR/C/CLI, full current dispatcher and
+stage1/stage2 remain. The full fixed corpus re-run is bundled with the next
+builtin unit, so no new corpus pass is claimed here. Release, Linux and push were
+not run. Public language/SDK ABI, SDK sources, DB, CI and runner contracts are
+unchanged.
