@@ -354,6 +354,17 @@ typing, structural cross-unit links, layouts/effects, HIR/MIR/C/CLI and actual
 stage1/stage2 remain open. Evidence:
 `docs/ops/evidence/candidate-module-unit-bodies-20261009.json`.
 
+Required resource and SDK Vec cleanup AST contexts now pass development native
+tests (7/7) and the 160-module, 1048472-byte corpus as 26 bounded units. Declared
+effects/abilities and compiler-owned dropping receiver facts are retained;
+cleanup annotations and explicit generic request edges are owned separately.
+The authenticated SDK take-slot leaf is folded only in cleanup contexts with
+checked signature/body structure and retained unsafe provenance to preserve the
+16-per-template quota. Implicit/nested drop dependencies, transitive cleanup
+effects, body symbol/expression typing and inline provenance consumption,
+cross-unit links/layouts, HIR/MIR/C/CLI and actual stage1/stage2 remain open.
+Evidence: `docs/ops/evidence/candidate-module-unit-cleanups-20261009.json`.
+
 `stage0` is the current Go compiler built by the supported Go toolchain.
 
 `stage1` is produced by `stage0` from the admitted Fairy compiler sources.

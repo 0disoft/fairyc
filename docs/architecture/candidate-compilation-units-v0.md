@@ -364,3 +364,41 @@ cleanup effects and HIR/MIR/C/CLI consumers remain pending. Release rebuilding,
 Linux, whole dispatcher native compilation and stage1/stage2 were not run in
 this unit. Public language/SDK ABI, DB, CI and runner implementations are
 unchanged.
+
+## Owned resource cleanup contexts (2026-10-09)
+
+Required canonical resource and SDK Vec shapes now request cleanup contexts.
+Contexts retain the resource type, declared effects, abilities, compiler-owned
+dropping receiver kind 10, original cleanup spans and ordered Vec element
+argument. Cleanup generic requests have a separate owner/dependency table;
+private helpers expand under the existing scalar/SDK restrictions, recursion,
+depth and function quotas. Requested cleanup ASTs and attributes are copied with
+body-local IDs and owned provider streams. Local annotation roots resolve in the
+cleanup context. Original-plus-clone admission includes cleanup nodes. Immutable
+plan builders use local vectors to preserve the existing resource-field borrow
+contract; failed expansion rolls graph additions back.
+
+The first full-corpus attempt reached the 16-per-template `take_slot<T>` quota in
+a single module. Cleanup calls to the exact authenticated SDK leaf are folded
+to `storage_take<T>` after structurally verifying the pointer parameter, sole
+return of one unsafe intrinsic call and unchanged forwarded argument. Edges
+retain `inline_declaration` and `inline_unsafe` provenance. Ordinary helper calls
+remain function requests; quotas and SDK source bytes are unchanged.
+
+Development check/probe build and seven native tests pass. They cover scalar and
+named-resource Vec contexts, deduplication, declared authority/abilities,
+private helper calls, shadowing/recursion rejection, source-owner removal,
+original positions and local annotation types. The 160-module, 1048472-byte
+dispatcher corpus passes as 26 units after 39 attempts and 13 splits. Per-unit
+counts sum to 625 function bodies and 763 cleanup contexts, with 3624 cleanup
+annotation roots and 595 cleanup request edges. Maxima are 57 function bodies,
+59 cleanup contexts and 495691 body work; combined entries reach 1015 within
+the unchanged 1024 bound. Evidence:
+`docs/ops/evidence/candidate-module-unit-cleanups-20261009.json`.
+
+Implicit/nested drop dependencies and transitive cleanup effects remain next.
+Body symbol/expression typing must consume the verified inline provenance;
+new local type field projection, structural cross-unit links, target layouts,
+HIR/MIR/C/CLI, whole dispatcher native compilation and stage1/stage2 remain
+pending. Release rebuilding, Linux and push were not run. Public language/SDK
+ABI, SDK source, DB, CI and runner implementations are unchanged.

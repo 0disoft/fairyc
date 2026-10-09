@@ -1808,3 +1808,34 @@ field projection, structural cross-unit deduplication, byte layouts and cleanup
 effects, HIR/MIR/C/CLI, whole dispatcher native compilation and stage1/stage2
 remain open. Release rebuilding, Linux and push are deferred. Public language
 and SDK ABI, DB, CI and runner implementations are unchanged.
+
+## Owned cleanup contexts and SDK leaf inlining (2026-10-09)
+
+Required resource/Vec shapes request concrete cleanup contexts and owned AST
+arenas, retaining dropping receiver kind 10, original positions, declared
+effects/abilities, ordered element arguments and per-context annotation roots.
+Cleanup request edges use their own owner table; normal function instance IDs
+and scalar/SDK argument restrictions remain unchanged. Immutable local-vector
+builders avoid mutable resource-field projection. Original plus cloned node
+admission includes cleanup arenas, and expansion failures roll added types back.
+
+The initial full-corpus attempt failed at module 7, bytes 451..463, with E4503:
+cleanup specialization exceeded the existing `take_slot<T>` per-template quota.
+Only the exact authenticated SDK leaf is folded in cleanup contexts after its
+single unsafe forwarding expression and signature are structurally checked.
+The edge retains helper declaration and unsafe provenance for later typing and
+lowering. General calls and all capacity limits remain unchanged.
+
+Seven development native tests, development check/probe build and source/tool
+hashes pass. The 160-module, 1048472-byte corpus passes as 26 units after 39
+attempts/13 splits. Per-unit totals: 625 function bodies, 763 cleanup contexts,
+3624 cleanup annotation roots and 595 cleanup request edges. Body work peaks at
+495691; combined entries at 1015 within the 1024 cap. Evidence:
+`docs/ops/evidence/candidate-module-unit-cleanups-20261009.json`.
+
+Next: implicit/nested drop dependencies and transitive cleanup effects. Body
+symbol/expression typing with inline provenance, new local type field projection,
+cross-unit structural deduplication, target layouts, HIR/MIR/C/CLI and
+stage1/stage2 remain open. Release rebuilding, Linux and push were not run.
+Public language/SDK ABI, SDK sources, DB, CI and runner implementations are
+unchanged.
