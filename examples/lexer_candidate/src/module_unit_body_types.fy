@@ -29,3 +29,12 @@ pub fn Result<Demands,join::Problem> collect(ref syntax::Parsed source,ref signa
 pub fn usize count(ref Demands p){return v::len<Request>(ref p.requests);}
 pub fn Request at(ref Demands p,usize index){return *v::at<Request>(ref p.requests,index);}
 pub fn usize work(ref Demands p){return p.work;}
+
+// Ordinary constructor-only types must be owned before the interface graph freezes.
+fn Result<Demands,join::Problem> ordinary_scan(ref syntax::Parsed source,ref signatures::Program metadata,usize module_index,ref mut v::Vec<types::Type> graph){
+    if(!signatures::source_matches(metadata,module_index,source)){return .err(fail(12,module_index,0,0));}let usize before=types::count(graph);var usize work=0;var usize owner=0;var v::Vec<Request> requests=v::empty<Request>();var usize i=1;while(i<=syntax::expression_count(source)){let e=syntax::expression_at(source,i);if(!charge(ref mut work,1)){return .err(fail(10,module_index,e.start,e.end));}while(owner+1<syntax::declaration_count(source) && e.start>=syntax::declaration_at(source,owner).end){owner+=1;}let d=syntax::declaration_at(source,owner);
+        if(e.kind==10 && d.kind==3 && d.generic_parameters==0 && d.body!=0 && inside(e.start,e.end,d.start,d.end)){let target=syntax::expression_at(source,e.left);if(target.kind==2){var usize probes=0;let found=signatures::declaration_lookup_measured(metadata,module_index,syntax::expression_text(source,e.left),ref mut probes);if(!charge(ref mut work,probes)){return .err(fail(10,module_index,e.start,e.end));}if(found.code==0){let named=signatures::declaration_at(metadata,found.item);if(named.kind==4 || named.kind==6){let r=signatures::declaration_type(metadata,named.module_index,named.declaration,graph);if(r.problem.code!=0){while(types::count(graph)>before){discard v::pop<types::Type>(graph);}return .err(fail(r.problem.code,module_index,target.start,target.end));}if(!v::push<Request>(ref mut requests,Request{.context_kind=3,.context=owner+1,.module_index,.declaration=owner+1,.kind=2,.source_index=i,.type=r.type,.start=e.start,.end=e.end}).is_ok){return .err(fail(11,module_index,e.start,e.end));}}}}}i+=1;
+    }return .ok(Demands{.requests,.work});
+}
+
+pub fn Result<Demands,join::Problem> ordinary_records(ref syntax::Parsed source,ref signatures::Program metadata,usize module_index,ref mut v::Vec<types::Type> graph){let usize before=types::count(graph);return switch(ordinary_scan(source,metadata,module_index,graph)){case .ok(p):{.ok(p)}case .err(p):{while(types::count(graph)>before){discard v::pop<types::Type>(graph);}.err(p)}};}

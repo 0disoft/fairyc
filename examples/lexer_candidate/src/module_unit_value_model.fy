@@ -48,3 +48,7 @@ pub fn usize cast_count(ref Values p){var usize count=0;var usize i=1;while(i<=e
 pub fn usize checked_casts(ref Values p){var usize count=0;var usize i=1;while(i<=expression_count(p)){let e=expression_at(p,i);if(e.kind==23 && e.state==1 && e.type==e.target){count+=1;}i+=1;}return count;}
 pub fn usize field_count(ref Values p){var usize count=0;var usize i=1;while(i<=expression_count(p)){if(expression_at(p,i).kind==8){count+=1;}i+=1;}return count;}
 pub fn usize checked_fields(ref Values p){var usize count=0;var usize i=1;while(i<=expression_count(p)){let e=expression_at(p,i);if(e.kind==8 && e.state==1 && e.field.owner!=0){count+=1;}i+=1;}return count;}
+
+pub fn usize record_count(ref Values p){var usize count=0;var usize i=1;while(i<=expression_count(p)){if(expression_at(p,i).kind==10){count+=1;}i+=1;}return count;}
+pub fn usize checked_records(ref Values p){var usize count=0;var usize i=1;while(i<=expression_count(p)){let e=expression_at(p,i);if(e.kind==10 && e.state==1 && e.target!=0 && e.type==e.target){count+=1;}i+=1;}return count;}
+pub fn usize record_fields(ref Values p){var usize count=0;var usize i=1;while(i<=expression_count(p)){let e=expression_at(p,i);if(e.kind==11 && e.field.id!=0){count+=1;}i+=1;}return count;}
