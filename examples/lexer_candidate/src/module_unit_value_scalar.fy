@@ -13,6 +13,7 @@ import module_unit_value_control as control;
 import module_unit_value_variant as variants;
 import module_unit_value_match as matches;
 import module_unit_value_result as results;
+import module_unit_value_builtin as builtins;
 import module_unit_value_view as views;
 import syntax as syntax;
 import std::bytes as bytes;
@@ -75,6 +76,7 @@ pub fn m::Problem evaluate(ref syntax::Parsed source,m::Frame frame,usize id,usi
     if(e.kind==3){return group(source,frame,id,expected,imported,graph,atoms,expressions,work,depth);}
     if(e.kind==8){return field(source,frame,id,expected,imported,graph,atoms,expressions,work,depth);}
     if(e.kind==15){return matches::evaluate(source,frame,id,expected,imported,graph,atoms,expressions,work,depth);}
+    if(e.kind==6 && e.builtin.kind!=0){return builtins::evaluate(source,frame,id,expected,imported,graph,atoms,expressions,work,depth);}
     if(e.kind==30){return results::evaluate(source,frame,id,expected,imported,graph,atoms,expressions,work,depth);}
     if(e.kind==12 || e.kind==13 || e.kind==31){return control::evaluate(source,frame,id,expected,imported,graph,atoms,expressions,work,depth);}
     if(e.kind==28 || (e.kind==6 || e.kind==10) && syntax::expression_at(source,e.left).kind==28){return variants::evaluate(source,frame,id,expected,imported,graph,atoms,expressions,work,depth);}

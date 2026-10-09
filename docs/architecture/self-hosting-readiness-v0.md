@@ -1080,3 +1080,41 @@ stage1/stage2 remain. The full fixed corpus re-run is bundled with the next
 builtin unit, so no new corpus pass is claimed here. Release, Linux and push were
 not run. Public language/SDK ABI, SDK sources, DB, CI and runner contracts are
 unchanged.
+
+## Raw-view and source-location builtin value consumers (2026-10-09)
+
+`module_unit_value_builtin` preserves the closed builtin kind from name binding
+and the exact lexical unsafe flag in the Values Expression builtin metadata.
+
+Raw view builtins 9..12 and CStr kind 14 project their result types from three
+arguments in source order: the owner must be a safe shared or exclusive borrow
+whose mutability exactly matches the builtin, the data carries a byte or opaque
+raw pointer with matching mutability, and the length is usize. Arity reports
+E1010, a non-usize length reports E1006, a missing unsafe context reports E5101,
+and an unsupported owner or data keeps code2 at the original span.
+
+The source_location builtin 200 takes exactly zero arguments, yields refstr and
+leaves the root at 0; E4401 covers reserved declarations, parameters, locals and
+non-call use, and E1014 covers labels. Only the borrowed tail origin inside a
+single normal or unsafe block is preserved; scalar and owned tails create no
+place, and multi-branch origin joins and lifetimes remain pending. An inferred
+raw text alias root updates to the original parameter root by fixed point, and
+generic providers and cleanup keep source_location's original coordinates.
+
+Development check passed (199 sources, 2420 MIR functions), and selected native
+cases passed 7/7 (5 new builtin cases, deep else-if, SDK Vec) after two initial
+failures: one fixture bug that expected raw builtin 12 where the canonical CStr
+kind is 14, and one real bug where an unsafe block dropped the borrow origin.
+Reference acceptance/code/span fixtures matched 19/19 (15 errors, 3 single-file
+positives, 1 provider-generic-cleanup). Limits types 4096, work 1048576, entries
+1024, active locals 128 and depth/rounds 64 are intact. Evidence:
+`docs/ops/evidence/candidate-module-unit-builtins-20261009.json`.
+
+The SDK storage consumer is a separate follow-up implementation and is not
+claimed complete, and the full corpus re-run is bundled after the next SDK
+builtin. Source_location string and MIR emission stay under unit values and
+follow the full unit HIR/MIR/C/CLI, so only its type projection is complete and
+no whole source_location CLI completion is claimed. Unsafe pointer allocation,
+generation, provenance and loan/move remain. Release, Linux, push, full current
+dispatcher and stage1/stage2 were not run. Public language/SDK ABI, SDK sources,
+DB, CI and runner contracts are unchanged.

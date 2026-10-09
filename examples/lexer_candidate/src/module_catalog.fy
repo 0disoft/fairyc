@@ -63,7 +63,7 @@ pub fn Result<Catalog,Problem> build(ref v::Vec<syntax::Parsed> sources){
         if(!append(ref mut source_bytes,syntax::source_view(p)) || !append(ref mut names,bytes::view(ref path)) || !v::push<Module>(ref mut modules,Module{.start,.end=bytes::len(ref names),.source_start,.source_end=bytes::len(ref source_bytes)}).is_ok){return .err(fail(11,module_index,first.start,first.end));}
         var usize index=1;var usize count=0;while(index<syntax::declaration_count(p)){
             let d=syntax::declaration_at(p,index);if(d.kind!=2 && d.kind!=3 && d.kind!=4 && d.kind!=6 && d.kind!=7 && d.kind!=9 && d.kind!=11 || d.owner_end!=0){return .err(fail(9,module_index,d.start,d.end));}
-            let name=syntax::source_view(p)[d.name_start..d.name_end];if(bytes::equal(name,b"source_location")){return .err(fail(9,module_index,d.name_start,d.name_end));}
+            let name=syntax::source_view(p)[d.name_start..d.name_end];if(bytes::equal(name,b"source_location")){return .err(fail(4401,module_index,d.name_start,d.name_end));}
             n=0;while(n<v::len<Declaration>(ref declarations)){let old=*v::at<Declaration>(ref declarations,n);if(old.module_index==module_index && spelling_same(ref names,old.start,old.end,name)){return .err(fail(2,module_index,d.name_start,d.name_end));}n+=1;}
             n=0;while(n<v::len<Import>(ref imports)){let old=*v::at<Import>(ref imports,n);if(old.module_index==module_index && spelling_same(ref names,old.start,old.end,name)){return .err(fail(if(d.kind==2){7}else{2},module_index,d.name_start,d.name_end));}n+=1;}
             count+=1;if(count>128 || v::len<Declaration>(ref declarations)>=4096 || v::len<Import>(ref imports)>=4096){return .err(fail(10,module_index,d.start,d.end));}
