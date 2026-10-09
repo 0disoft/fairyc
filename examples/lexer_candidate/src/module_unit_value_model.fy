@@ -5,7 +5,7 @@ import std::vec as v;
 
 pub struct Frame {u32 kind;usize context;usize module_index;usize declaration;usize result;}
 // state 0 unresolved value; 1 known value type; 2 non-value syntax/callee.
-pub struct Expression {usize source_index;u32 kind;usize start;usize end;usize left;usize right;usize expected;usize type;u32 state;bool flexible;bool minimum;}
+pub struct Expression {usize source_index;u32 kind;usize start;usize end;usize left;usize right;usize target;usize expected;usize type;u32 state;bool flexible;bool minimum;}
 pub struct Atoms {usize[8] scalar;usize text;usize bytes;usize cstr;}
 pub struct Seed {usize result;usize instance;}
 pub struct Invocation {u32 kind;usize expression;usize source_index;usize target_module;usize target_declaration;usize instance;usize argument_start;usize argument_count;usize start;usize end;bool checked;}
@@ -40,3 +40,5 @@ pub fn Argument argument_at(ref Values p,usize index){return *v::at<Argument>(re
 pub fn usize checked_calls(ref Values p){var usize count=0;var usize i=0;while(i<call_count(p)){if(call_at(p,i).checked){count+=1;}i+=1;}return count;}
 pub fn usize checked_arguments(ref Values p){var usize count=0;var usize i=0;while(i<argument_count(p)){if(argument_at(p,i).checked){count+=1;}i+=1;}return count;}
 pub fn usize shared_arguments(ref Values p){var usize count=0;var usize i=0;while(i<argument_count(p)){if(argument_at(p,i).shared){count+=1;}i+=1;}return count;}
+pub fn usize cast_count(ref Values p){var usize count=0;var usize i=1;while(i<=expression_count(p)){if(expression_at(p,i).kind==23){count+=1;}i+=1;}return count;}
+pub fn usize checked_casts(ref Values p){var usize count=0;var usize i=1;while(i<=expression_count(p)){let e=expression_at(p,i);if(e.kind==23 && e.state==1 && e.type==e.target){count+=1;}i+=1;}return count;}

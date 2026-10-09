@@ -602,3 +602,23 @@ cross-unit deduplication/layouts and unit HIR/MIR/C/CLI remain pending.
 Release, Linux, full dispatcher native, stage1/stage2 and push were not run.
 Public language/SDK ABI, SDK sources, DB, CI and runners are unchanged.
 Evidence: `docs/ops/evidence/candidate-module-unit-arguments-20261009.json`.
+
+## Compilation-unit scalar casts (2026-10-09)
+
+module_unit_value_model.Expression now keeps the canonical cast target separate from the contextual expected/result type. module_unit_value_collect seeds these targets from owned generic/cleanup annotations or the original ordinary source type offsets, while retaining provider original expression/type IDs and spans and leaving stale input checks unchanged. module_unit_value_scalar applies the existing scalar_casts::allowed rules, including widening to i64 and the exact i32 / c::int bridge. Operands are checked without target context, so oversized unsuffixed literals still fail E1013. Unsupported cast pairs keep the experimental code2 and the full cast span rather than an invented E1052. Known casts propagate to inferred locals, scalar peer operators, call arguments, and returns. Unknown operands and raw-pointer conversions remain pending until the field/place/unsafe work. The existing graph/arena/depth64/round64/work1MiB bounds are unchanged. Full dispatcher observation is deferred to the next field/place unit; this does not claim a new corpus pass, stage1/stage2, or Release/Linux/push.
+
+| Observation | Result |
+| --- | --- |
+| Development check | 187 source files; 2340 MIR functions; passed |
+| Selected development Fairy native tests | 8/8 passed |
+| Reference acceptance/code/span | 7/7 matched |
+| Unsupported conversion | Experimental code 2 and full cast span; no invented E1052 |
+| Retained bounds | 4096 types; 16384 expressions; depth/rounds 64; work 1048576 |
+
+
+Full dispatcher observation is bundled with the next field/place unit; this unit
+claims no new corpus pass. Field/place, raw-pointer casts and unsafe provenance,
+move-aware cleanup, structural cross-unit links/layouts and HIR/MIR/C/CLI remain
+pending. Release, Linux, full dispatcher native, stage1/stage2 and push were not
+run. Public language/SDK ABI, SDK sources, DB, CI and runners are unchanged.
+Evidence: `docs/ops/evidence/candidate-module-unit-casts-20261009.json`.

@@ -484,3 +484,23 @@ unsafe·inline 출처 소비다. 묶음 간 구조적 중복 제거·layout·HIR
 전체 dispatcher native·stage1/stage2도 남는다. Release·Linux·push는 미실행이다.
 공개 언어/SDK ABI·SDK 소스·DB·CI·러너 변경 없음.
 근거: `evidence/candidate-module-unit-arguments-20261009.json`.
+
+## 원래 피연산자 타입을 유지하는 스칼라 변환 (2026-10-09)
+
+module_unit_value_model.Expression는 이제 정규 캐스트 대상과 문맥상의 기대/결과 타입을 분리해 보관합니다. module_unit_value_collect는 소유한 제네릭/정리 주석이나 원래의 일반 소스 타입 오프셋에서 대상을 초기화하며, 프로바이더의 원래 표현식/타입 ID와 스팬은 유지하고 오래된 입력 검사는 그대로 둡니다. module_unit_value_scalar는 기존 scalar_casts::allowed 규칙을 사용하며, i64로의 확장과 정확한 i32 / c::int 연결을 포함합니다. 피연산자는 대상 문맥 없이 검사되므로, 접미사 없는 과대 리터럴은 여전히 E1013으로 실패합니다. 지원되지 않는 캐스트 쌍은 새로 만들어낸 E1052 대신 실험적 code2와 전체 캐스트 스팬을 유지합니다. 알려진 캐스트는 추론된 지역 변수, 스칼라 동료 연산자, 호출 인자, 반환값으로 전파됩니다. 알 수 없는 피연산자와 원시 포인터 변환은 필드/플레이스/unsafe 작업 전까지 보류됩니다. 기존 graph/arena/depth64/round64/work1MiB 경계는 변경되지 않았습니다. 전체 디스패처 관찰은 다음 필드/플레이스 단위로 미루며, 새로운 코퍼스 통과나 stage1/stage2, Release/Linux/push를 주장하지 않습니다.
+
+| Observation | Result |
+| --- | --- |
+| Development check | 187 source files; 2340 MIR functions; passed |
+| Selected development Fairy native tests | 8/8 passed |
+| Reference acceptance/code/span | 7/7 matched |
+| Unsupported conversion | Experimental code 2 and full cast span; no invented E1052 |
+| Retained bounds | 4096 types; 16384 expressions; depth/rounds 64; work 1048576 |
+
+
+Full dispatcher observation is bundled with the next field/place unit; this unit
+claims no new corpus pass. Field/place, raw-pointer casts and unsafe provenance,
+move-aware cleanup, structural cross-unit links/layouts and HIR/MIR/C/CLI remain
+pending. Release, Linux, full dispatcher native, stage1/stage2 and push were not
+run. Public language/SDK ABI, SDK sources, DB, CI and runners are unchanged.
+Evidence: `docs/ops/evidence/candidate-module-unit-casts-20261009.json`.

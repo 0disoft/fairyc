@@ -22,7 +22,7 @@ fn void failure(ref u8[] text,u32 code,ref u8[] at){switch(checked(text)){case .
 }
 @test fn void unresolved_anchors_do_not_default_wide_literal_peers(){
     let p=switch(checked(b"module main;struct S{i64 n;}fn bool field(ref S s){return 4000000000<s.n;}fn i64 cast(){return 1+(2 as i64);}fn i64 leaf(i64 n){return n;}fn i64 argument(){return leaf(4000000000+1);}")){case .ok(p):{p}case .err(_):{assert(false);return;}};
-    assert(values::count(ref p)==4 && values::checked_returns(ref p)==2 && values::unresolved(ref p)>0);let c=values::at(ref p,0);let r=model::return_at(c,0);assert(!r.checked);var usize i=1;var bool pending=false;while(i<=model::expression_count(c)){let e=model::expression_at(c,i);if(e.kind==1){assert(e.type==0 && e.state==0);pending=true;}i+=1;}assert(pending);
+    assert(values::count(ref p)==4 && values::checked_returns(ref p)==3 && values::unresolved(ref p)>0);let c=values::at(ref p,0);let r=model::return_at(c,0);assert(!r.checked);var usize i=1;var bool pending=false;while(i<=model::expression_count(c)){let e=model::expression_at(c,i);if(e.kind==1){assert(e.type==0 && e.state==0);pending=true;}i+=1;}assert(pending);
 }
 @test fn void scalar_operators_share_generic_cleanup_and_ordinary_contexts(){
     var v::Vec<syntax::Parsed> sources=v::empty<syntax::Parsed>();assert(v::push<syntax::Parsed>(ref mut sources,parsed(b"module main;import provider as p;fn u8 main(){return p::go<u8>(1)+1;}")).is_ok);assert(v::push<syntax::Parsed>(ref mut sources,parsed(b"module provider;resource Item{u8 n;cleanup{let inferred=helper()+1;discard inferred;return;}}fn u8 helper(){return 2;}pub fn T go<T>(T n){let Item item=Item{.n=1};let inferred=1+n;discard item;return inferred;}")).is_ok);

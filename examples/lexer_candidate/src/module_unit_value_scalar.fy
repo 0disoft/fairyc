@@ -2,6 +2,7 @@ module module_unit_value_scalar;
 import module_unit_value_model as m;
 import module_types as types;
 import type_state as scalars;
+import scalar_casts as casts;
 import syntax as syntax;
 import std::bytes as bytes;
 import std::vec as v;
@@ -41,5 +42,10 @@ pub fn m::Problem evaluate(ref syntax::Parsed source,m::Frame frame,usize id,usi
     if(id==0){return ok(frame);}let e=*v::at<m::Expression>(expressions,id-1);if(depth>=64 || !m::charge(work,1)){return m::fail(frame,10,e.start,e.end,0,0);}if(expected>types::count(graph)){return m::fail(frame,12,e.start,e.end,0,expected);}if(e.state==2){return ok(frame);}
     if(e.kind==1){return literal(source,frame,id,expected,graph,atoms,expressions,work);}if(e.state==1 && (!e.flexible || e.expected==expected)){return ok(frame);}
     if(e.kind==3){let usize child=m::index(expressions,e.left);if(child==0){return m::fail(frame,12,e.start,e.end,0,0);}let p=evaluate(source,frame,child,expected,graph,atoms,expressions,work,depth+1);if(p.code!=0){return p;}let c=*v::at<m::Expression>(expressions,child-1);if(c.state==1){record(expressions,id,expected,c.type,false);}else if(c.state==2){let slot=v::at_mut<m::Expression>(expressions,id-1);slot.state=2;}return ok(frame);}
+    if(e.kind==23){
+        if(e.target==0 || e.target>types::count(graph)){return m::fail(frame,12,e.start,e.end,0,e.target);}let target=types::at(graph,e.target);
+        // Raw-pointer conversions wait for the unsafe and place consumers.
+        if(target.kind==12){return ok(frame);}let usize child=m::index(expressions,e.left);if(child==0){return m::fail(frame,12,e.start,e.end,0,0);}let p=evaluate(source,frame,child,0,graph,atoms,expressions,work,depth+1);if(p.code!=0){return p;}let actual=*v::at<m::Expression>(expressions,child-1);if(actual.state==2){return m::fail(frame,1006,actual.start,actual.end,0,0);}if(actual.type==0){return ok(frame);}let source_type=types::at(graph,actual.type);if(source_type.kind!=1 || target.kind!=1 || !casts::allowed(source_type.scalar,target.scalar)){return m::fail(frame,2,e.start,e.end,e.target,actual.type);}record(expressions,id,expected,e.target,false);return ok(frame);
+    }
     if(e.kind==4){return unary(source,frame,id,expected,graph,atoms,expressions,work,depth);}if(e.kind==5){return binary(source,frame,id,expected,graph,atoms,expressions,work,depth);}return ok(frame);
 }
