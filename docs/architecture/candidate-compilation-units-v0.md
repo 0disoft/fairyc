@@ -1709,3 +1709,39 @@ origins, loan/subview/lifetime/conflict/move, unsafe provenance and cross-unit
 execution remain. No new fixed corpus, full dispatcher, stage1/stage2,
 release, Linux or push was performed; public language/SDK ABI, SDK sources,
 DB, CI and runner contracts are unchanged.
+
+## Direct return-origin diagnostic reports (2026-10-10)
+
+An internal Fairy report collector now consumes the stable individual return
+records. Returning a local/by-value parameter owner reports E2102, multiple
+origins report E2103, and an unknown origin records unsupported analysis with
+exit status 2. Valid alternative returns are checked separately instead of
+rejecting their function-wide summary. Diagnostic records retain original
+module indices and return-expression spans; related records retain origin or
+candidate-origin roles and original owner spans, including provider-module
+static literals.
+
+Related locations are sorted and identical source diagnostics are deduplicated
+across generic instances using a bounded open-addressed cache. The collector
+carries forward the inference work count even when a caller passes a smaller
+prior-work value. Exhausted work, allocation failures and inconsistent records
+return a Problem rather than a successful report. Bounds cover 8192 return
+sites/diagnostics, 16384 related rows per diagnostic, 32768 total related rows
+and 16384 cache slots within the existing 1048576-work budget.
+
+Development check passed (212 sources, 2631 MIR functions). Four selected
+native development tests passed, covering local escapes, by-value parameters,
+branch unions, distinct static literals, recursion, live/dead alternative
+returns, provider coordinates, generic duplicate diagnostics and work
+exhaustion/no-reset. Eight fresh reference comparisons matched exit status,
+diagnostic code, module index, primary byte span and every related role/span
+against the Go Stage0 compiler. Compiler, SDK, source, test, lock and embedded
+fixture hashes were checked before accepting the result. Evidence:
+docs/ops/evidence/candidate-module-unit-origin-diagnostics-20261010.json.
+
+This completes direct return-origin diagnostic collection, not CLI publication
+or the full dispatcher. Tagged/region origins,
+loan/subview/lifetime/conflict/move, unsafe provenance and cross-unit
+HIR/MIR/C/CLI integration remain. No new fixed corpus, stage1/stage2, release,
+Linux or push was performed; public language/SDK ABI, SDK sources, DB, CI and
+runner contracts are unchanged.

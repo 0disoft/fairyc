@@ -1,0 +1,44 @@
+module module_unit_origin_diagnostics;
+import module_unit_origin_returns as origins;
+import module_unit_origin_inputs as inputs;
+import module_unit_value_model as m;
+import std::vec as v;
+
+// code 2 is unsupported origin analysis, never an E0002 diagnostic.
+// Related role 1 is origin; role 2 is candidate-origin.
+pub struct Related {u32 role;usize module_index;usize start;usize end;usize owner;}
+pub struct Diagnostic {u32 code;usize module_index;usize start;usize end;usize related_start;usize related_count;}
+pub resource Report {v::Vec<Diagnostic> diagnostics;v::Vec<Related> related;usize work;bool semantic;bool unsupported;cleanup{}}
+pub fn usize count(ref Report p){return v::len<Diagnostic>(ref p.diagnostics);}
+pub fn Diagnostic at(ref Report p,usize index){return *v::at<Diagnostic>(ref p.diagnostics,index);}
+pub fn Related related_at(ref Report p,Diagnostic d,usize index){assert(index<d.related_count);return *v::at<Related>(ref p.related,d.related_start+index);}
+pub fn usize work(ref Report p){return p.work;}
+pub fn u32 exit_code(ref Report p){return if(p.semantic){3}else if(p.unsupported){2}else{0};}
+fn bool before(Related a,Related b){return a.module_index<b.module_index || a.module_index==b.module_index && (a.start<b.start || a.start==b.start && (a.end<b.end || a.end==b.end && a.role<b.role));}
+fn bool same(Related a,Related b){return a.role==b.role && a.module_index==b.module_index && a.start==b.start && a.end==b.end;}
+fn m::Problem fail(m::Frame f,u32 code,usize start,usize end){return m::fail(f,code,start,end,0,0);}
+fn m::Problem append_related(ref mut v::Vec<Related> related,Related next,m::Frame f,ref mut usize work){
+    if(!m::charge(work,1) || v::len<Related>(related)>=16384){return fail(f,10,next.start,next.end);}if(!v::push<Related>(related,next).is_ok){return fail(f,11,next.start,next.end);}var usize i=v::len<Related>(related)-1;while(i>0 && before(next,*v::at<Related>(related,i-1))){if(!m::charge(work,1)){return fail(f,10,next.start,next.end);}let old=*v::at<Related>(related,i-1);let slot=v::at_mut<Related>(related,i);*slot=old;i-=1;}let slot=v::at_mut<Related>(related,i);*slot=next;return fail(f,0,0,0);
+}
+// Deduplicate only identical source diagnostics and related locations. Frame-
+// local owner IDs may differ between generic instances of one declaration.
+fn m::Problem publish(Diagnostic next,ref v::Vec<Related> candidates,ref mut v::Vec<Diagnostic> diagnostics,ref mut v::Vec<Related> related,ref mut v::Vec<usize> cache,m::Frame f,ref mut usize work){
+    let usize capacity=v::len<usize>(cache);var usize slot=((next.module_index%capacity)*8192+next.start%capacity+(next.code as usize))%capacity;var bool found=false;
+    while(!found){if(!m::charge(work,1)){return fail(f,10,next.start,next.end);}let usize known=*v::at<usize>(cache,slot);if(known==0){found=true;}else{let old=*v::at<Diagnostic>(diagnostics,known-1);if(old.code==next.code && old.module_index==next.module_index && old.start==next.start && old.end==next.end && old.related_count==v::len<Related>(candidates)){var usize i=0;var bool equal=true;while(i<old.related_count && equal){if(!m::charge(work,1)){return fail(f,10,next.start,next.end);}equal=same(*v::at<Related>(related,old.related_start+i),*v::at<Related>(candidates,i));i+=1;}if(equal){return fail(f,0,0,0);}}slot=(slot+1)%capacity;}}
+    if(v::len<Diagnostic>(diagnostics)>=8192 || v::len<Related>(candidates)>32768-v::len<Related>(related)){return fail(f,10,next.start,next.end);}if(!m::charge(work,v::len<Related>(candidates)+1)){return fail(f,10,next.start,next.end);}var d=next;d.related_start=v::len<Related>(related);d.related_count=v::len<Related>(candidates);var usize i=0;while(i<d.related_count){if(!v::push<Related>(related,*v::at<Related>(candidates,i)).is_ok){return fail(f,11,next.start,next.end);}i+=1;}if(!v::push<Diagnostic>(diagnostics,d).is_ok){return fail(f,11,next.start,next.end);}let cell=v::at_mut<usize>(cache,slot);*cell=v::len<Diagnostic>(diagnostics);return fail(f,0,0,0);
+}
+pub fn Result<Report,m::Problem> collect(ref origins::Plan p){return collect_budgeted(p,origins::work(p));}
+pub fn Result<Report,m::Problem> collect_budgeted(ref origins::Plan p,usize prior_work){
+    let input=origins::owned_inputs(p);var usize work=if(prior_work>origins::work(p)){prior_work}else{origins::work(p)};var usize sites=0;var usize id=1;if(origins::count(p)!=inputs::frame_count(input)){return .err(m::Problem{.code=12,.module_index=0,.start=0,.end=0,.expected=0,.actual=0});}
+    while(id<=origins::count(p)){let f=inputs::frame(input,id);if(!m::charge(ref mut work,1) || origins::return_count(p,id)>8192-sites){return .err(fail(f.value,10,0,0));}sites+=origins::return_count(p,id);id+=1;}var usize capacity=8;while(capacity<sites*2){capacity*=2;}var v::Vec<usize> cache=v::empty<usize>();var usize i=0;
+    while(i<capacity){if(!m::charge(ref mut work,1)){return .err(m::Problem{.code=10,.module_index=0,.start=0,.end=0,.expected=0,.actual=0});}if(!v::push<usize>(ref mut cache,0).is_ok){return .err(m::Problem{.code=11,.module_index=0,.start=0,.end=0,.expected=0,.actual=0});}i+=1;}
+    var v::Vec<Diagnostic> diagnostics=v::empty<Diagnostic>();var v::Vec<Related> related=v::empty<Related>();var bool semantic=false;var bool unsupported=false;id=1;
+    while(id<=origins::count(p)){let f=inputs::frame(input,id);i=0;while(i<origins::return_count(p,id)){let row=origins::return_at(p,id,i);if(!m::charge(ref mut work,1)){return .err(fail(f.value,10,row.start,row.end));}if(row.frame!=id || row.start>row.end){return .err(fail(f.value,12,row.start,row.end));}var u32 code=0;let usize count=origins::return_source_count(p,row);
+            if(row.origin==1){code=2;}else if(count>1){code=2103;}else if(count==0){return .err(fail(f.value,12,row.start,row.end));}
+            else{let leaf=origins::return_source(p,row,0);if(leaf==2){code=2;}else{if(leaf<3 || leaf-2>inputs::owner_count(input)){return .err(fail(f.value,12,row.start,row.end));}let owner=inputs::owner(input,leaf-2);if(owner.kind==11 || owner.kind==1 && owner.borrowed){code=0;}else if(owner.kind==1 || owner.kind==2 || owner.kind==3 || owner.kind==5){code=2102;}else{code=2;}}}
+            if(code!=0){var v::Vec<Related> candidates=v::empty<Related>();if(code==2102 || code==2103){var usize ordinal=0;while(ordinal<count){if(!m::charge(ref mut work,1)){return .err(fail(f.value,10,row.start,row.end));}let leaf=origins::return_source(p,row,ordinal);if(leaf<3 || leaf-2>inputs::owner_count(input)){return .err(fail(f.value,12,row.start,row.end));}let owner=inputs::owner(input,leaf-2);if(owner.frame==0 || owner.frame>inputs::frame_count(input)){return .err(fail(f.value,12,row.start,row.end));}let origin_frame=inputs::frame(input,owner.frame);let error=append_related(ref mut candidates,Related{.role=if(code==2102){1}else{2},.module_index=origin_frame.value.module_index,.start=owner.start,.end=owner.end,.owner=leaf-2},f.value,ref mut work);if(error.code!=0){return .err(error);}ordinal+=1;}}
+                let error=publish(Diagnostic{.code,.module_index=f.value.module_index,.start=row.start,.end=row.end,.related_start=0,.related_count=0},ref candidates,ref mut diagnostics,ref mut related,ref mut cache,f.value,ref mut work);if(error.code!=0){return .err(error);}semantic=semantic || code!=2;unsupported=unsupported || code==2;
+            }i+=1;
+        }id+=1;
+    }return .ok(Report{.diagnostics,.related,.work,.semantic,.unsupported});
+}
