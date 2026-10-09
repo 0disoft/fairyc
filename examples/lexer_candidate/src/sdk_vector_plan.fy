@@ -5,10 +5,6 @@ import sdk_authority as sdk;
 import syntax as syntax;
 import std::vec as v;
 
-// A concrete SDK template instance is identified by its canonical graph node,
-// exact provider declaration and element node. Aliases never create instances.
-// This owner retains the catalog's original bytes and the type graph after all
-// parser owners leave scope. It does not yet instantiate SDK executable bodies.
 pub struct Instance {usize type;usize element;usize module_index;usize declaration;}
 pub resource Plan {catalog::Catalog declarations;types::Graph graph;v::Vec<Instance> instances;cleanup{}}
 pub fn usize limit(){return 64;}
@@ -55,10 +51,10 @@ pub fn catalog::Lookup declaration_lookup(ref Plan p,usize module_index,ref u8[]
 pub fn catalog::Lookup declaration_lookup_measured(ref Plan p,usize module_index,ref u8[] spelling,ref mut usize probes){return catalog::lookup_measured(ref p.declarations,module_index,spelling,probes);}
 pub fn catalog::Declaration declaration_at(ref Plan p,usize id){return catalog::declaration_at(ref p.declarations,id);}
 
-// Candidate Windows AMD64 storage transport: opaque data + five usize fields.
-// These are descriptor facts, not element sizeof/alignment or a public C ABI.
 pub fn usize field_count(){return 6;}
 pub fn u32 field_type(usize index){return sdk::vector_field(index);}
 pub fn usize field_offset(usize index){assert(index<field_count());return index*8;}
 pub fn usize storage_size(){return 48;}
 pub fn usize storage_alignment(){return 8;}
+
+pub fn types::Resolution specialize_type(ref Plan p,ref syntax::Parsed source,usize module_index,usize declaration,usize root,ref v::Vec<usize> args,ref mut v::Vec<types::Type> graph){return types::specialize(ref p.declarations,source,module_index,declaration,root,args,graph);}

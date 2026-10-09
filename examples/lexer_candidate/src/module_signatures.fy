@@ -11,9 +11,6 @@ import sdk_authority as sdk;
 import std::bytes as bytes;
 import std::vec as v;
 
-// Owned source-set signatures; table indices are never the single-file scalar
-// type IDs used by the older module checker. That checker remains closed until
-// body typing and nominal layout ownership can consume this exact graph.
 pub struct Signature {usize module_index;usize declaration;bool public;usize result;usize parameter_start;usize parameter_count;u32 effects;bool must_use;bool unsafe_call;bool foreign;usize link_start;usize link_end;}
 pub resource Program {vectors::Plan types;v::Vec<Signature> signatures;v::Vec<usize> parameters;bytes::Buffer links;cleanup{}}
 pub fn usize module_count(ref Program p){return vectors::module_count(ref p.types);}
@@ -68,3 +65,5 @@ pub fn Result<Program,catalog::Problem> build(ref v::Vec<syntax::Parsed> sources
     let planned=switch(vectors::build(c,owned)){case .ok(p):{p}case .err(code):{return .err(fail(code,0,0,0));}};
     return .ok(Program{.types=planned,.signatures,.parameters,.links});
 }
+
+pub fn types::Resolution specialize_type(ref Program p,ref syntax::Parsed source,usize module_index,usize declaration,usize root,ref v::Vec<usize> args,ref mut v::Vec<types::Type> graph){return vectors::specialize_type(ref p.types,source,module_index,declaration,root,args,graph);}

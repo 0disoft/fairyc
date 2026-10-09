@@ -179,3 +179,70 @@ Annotation collection does not validate initializer, argument or return
 expression compatibility. CLI/HIR/MIR/C unit integration, target layouts,
 transitive cleanup effects, stage1/stage2, release rebuilding and Linux remain
 open.
+
+## Retained type and signature implementation notes
+
+### module_types.fy
+
+IDs belong to one owned graph. Composite identity refers to canonical child
+IDs; nominal leaves retain module+declaration, never file-local numeric tags.
+1 scalar, 2 struct, 3 resource, 4 enum, 5 Option, 6 Result,
+7 shared borrow, 8 mutable borrow, 9 text, 10 bytes, 11 mutable bytes, 12 pointer.
+13 authenticated SDK Vec, whose first edge is its exact element identity.
+16 fixed array: first is the canonical element, second is the bounded length.
+Roll back all speculative interning after a failed resolution. A rejected
+branch cannot publish a valid prefix or consume the graph's type budget.
+
+### module_signatures.fy
+
+Owned source-set signatures; table indices are never the single-file scalar
+type IDs used by the older module checker. That checker remains closed until
+body typing and nominal layout ownership can consume this exact graph.
+
+### sdk_vector_plan.fy
+
+A concrete SDK template instance is identified by its canonical graph node,
+exact provider declaration and element node. Aliases never create instances.
+This owner retains the catalog's original bytes and the type graph after all
+parser owners leave scope. It does not yet instantiate SDK executable bodies.
+Candidate Windows AMD64 storage transport: opaque data + five usize fields.
+These are descriptor facts, not element sizeof/alignment or a public C ABI.
+
+## Owned generic signature instances (2026-10-09)
+
+`module_unit_generics` builds an owned per-unit plan of explicit generic-call
+signature instances. Requests are keyed by the original provider module and
+declaration together with the ordered canonical type arguments, so alias and
+repeated requests share one entry while distinct providers and argument order
+stay separate. Each instance owns its result and parameter graph IDs, effects,
+must-use and unsafe flags, and per-expression request identities. Canonical type
+resolution substitutes generic names without touching the original AST or source
+bytes, which keeps provider error spans intact, and admits a defined set of
+generic wrappers: safe borrows, scalar slices, pointers, fixed arrays,
+Option/Result, and the authenticated SDK Vec.
+
+Admission stays narrow. Ordinary user functions accept only the six existing
+builtin scalars, and exact authenticated `std::vec` sources additionally accept
+named non-generic structs and resources; unrequested generic-body calls remain
+explicitly deferred, and exact SDK storage intrinsics are flagged separately.
+The existing caps are retained: 8 type args, 16 instances per template, 64 per
+unit, canonical graph 4096, parameters 32768, and work 1048576. Failed plan
+collection rolls graph appends back, and the interface builder follows the
+resulting signature types for provider fields.
+
+Development check and probe build pass, along with thirteen native regressions
+covering alias reuse, provider/argument-order identity, owned signature queries,
+pointer/slice/array substitution, rejected argument/contract/shadow cases,
+atomic graph rollback, the 64-instance cap and exact SDK resource admission. The
+actual 160-module dispatcher remains within 1MiB at 1048186 bytes. The initial
+thirteen AST groups pass interface specialization for the first two groups (12
+and 61 instances), then reject module 37 at 4953..4970 with E4503. AST-only
+packing must now refine its ranges under the existing specialization limits.
+Full dispatcher interface planning is incomplete. Evidence:
+`docs/ops/evidence/candidate-module-unit-generics-20261009.json`.
+
+After range refinement, the owned instance keys and canonical signatures must
+drive template body cloning, nested specialization and recursion checks, local
+expression/body typing, and HIR/MIR/C/CLI consumers. Target layout, transitive
+cleanup effects, stage1/stage2, release rebuilding and Linux remain open. Public
+language/SDK ABI, DB, CI and runner implementations are unchanged.

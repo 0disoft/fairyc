@@ -2,6 +2,7 @@ module main;
 import module_units as units;
 import module_unit_bind as binding;
 import module_unit_interfaces as interfaces;
+import module_unit_generics as generics;
 import module_signatures as signatures;
 import sdk_ast_compact as compact;
 import module_cli as cli;
@@ -39,6 +40,10 @@ fn i32 main(){
         assert(interfaces::annotation_count(ref imported)==syntax::type_count(p));var usize typed_roots=0;var usize deferred_roots=0;var usize root=1;
         while(root<=interfaces::annotation_count(ref imported)){let a=interfaces::annotation_at(ref imported,root);if(a.required){if(a.deferred){assert(a.type==0);deferred_roots+=1;}else{assert(a.type>0 && a.type<=interfaces::type_count(ref imported));typed_roots+=1;}}else{assert(a.type==0 && !a.deferred);}root+=1;}
         number("typedAnnotations=",typed_roots);number(" deferredAnnotations=",deferred_roots);discard io::write("\n");
+        let specialized=interfaces::specializations(ref imported);assert(generics::count(specialized)<=64 && generics::call_count(specialized)==syntax::expression_count(p));var usize concrete_calls=0;var usize deferred_calls=0;var usize intrinsic_calls=0;root=1;
+        while(root<=generics::call_count(specialized)){let c=generics::call_at(specialized,root);if(c.instance!=0){assert(c.instance<=generics::count(specialized) && !c.deferred && c.intrinsic==0);concrete_calls+=1;}else if(c.deferred){deferred_calls+=1;}else if(c.intrinsic!=0){intrinsic_calls+=1;}root+=1;}
+        root=1;while(root<=generics::count(specialized)){let s=generics::at(specialized,root);let original=syntax::declaration_at(v::at<syntax::Parsed>(ref sources,s.module_index),s.declaration-1);assert(original.generic_parameters!=0 && original.kind==3 && syntax::generic_parameter_count(v::at<syntax::Parsed>(ref sources,s.module_index),s.declaration-1)==s.argument_count && s.result>0 && s.result<=interfaces::type_count(ref imported));root+=1;}
+        number("specializations=",generics::count(specialized));number(" specializedCalls=",concrete_calls);number(" deferredCalls=",deferred_calls);number(" intrinsicCalls=",intrinsic_calls);number(" genericWork=",generics::work(specialized));discard io::write("\n");
         var usize sh=0;while(sh<interfaces::shape_count(ref imported)){let shape=interfaces::shape_at(ref imported,sh);let original=syntax::declaration_at(v::at<syntax::Parsed>(ref sources,shape.module_index),shape.declaration-1);assert(shape.start==original.start && shape.end==original.end && shape.field_count==original.field_count);sh+=1;}
         sh=0;while(sh<interfaces::field_count(ref imported)){let field=interfaces::field_at(ref imported,sh);let source=v::at<syntax::Parsed>(ref sources,field.module_index);let original=syntax::field_at(source,field.source_index);assert(field.kind==original.kind && field.start==original.start && field.end==original.end && bytes::equal(interfaces::field_name(ref imported,sh),syntax::source_view(source)[original.name_start..original.name_end]));sh+=1;}
         var usize d=1;while(d<=syntax::declaration_count(p)){let c=binding::definition_at(ref bound,d);let original=syntax::declaration_at(v::at<syntax::Parsed>(ref sources,c.module_index),c.declaration-1);assert(c.kind==original.kind && c.start==original.start && c.end==original.end);d+=1;}

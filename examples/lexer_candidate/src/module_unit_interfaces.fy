@@ -2,6 +2,7 @@ module module_unit_interfaces;
 import module_unit_bind as binding;
 import module_signatures as signatures;
 import module_types as types;
+import module_unit_generics as generics;
 import syntax as syntax;
 import module_ast_join as join;
 import resource_abilities as abilities;
@@ -14,7 +15,7 @@ pub struct Shape {usize type;usize module_index;usize declaration;usize field_st
 pub struct Field {u32 kind;usize type;usize module_index;usize declaration;usize source_index;usize start;usize end;usize name_start;usize name_end;usize payload_start;usize payload_count;}
 pub struct Callable {usize module_index;usize declaration;bool template;usize result;usize parameter_start;usize parameter_count;u32 effects;bool must_use;bool unsafe_call;bool foreign;usize link_start;usize link_end;}
 pub struct Annotation {usize type;bool required;bool deferred;}
-pub resource Interfaces {types::Graph graph;v::Vec<Shape> shapes;v::Vec<Field> fields;v::Vec<Callable> callables;v::Vec<usize> parameters;v::Vec<Annotation> annotations;bytes::Buffer names;usize work;cleanup{}}
+pub resource Interfaces {types::Graph graph;v::Vec<Shape> shapes;v::Vec<Field> fields;v::Vec<Callable> callables;v::Vec<usize> parameters;v::Vec<Annotation> annotations;generics::Plan specializations;bytes::Buffer names;usize work;cleanup{}}
 struct Budget {usize work;}
 fn join::Problem fail(u32 code,usize module_index,usize start,usize end){return join::Problem{.code,.module_index,.start,.end};}
 fn bool charge(ref mut Budget work,usize amount){if(work.work>1048576 || amount>1048576-work.work){return false;}work.work+=amount;return true;}
@@ -72,6 +73,9 @@ pub fn Result<Interfaces,join::Problem> build(ref v::Vec<syntax::Parsed> sources
     i=1;while(i<=signatures::type_count(metadata)){if(!charge(ref mut budget,1)){return .err(fail(10,0,0,0));}if(!v::push<types::Type>(ref mut graph,signatures::type_at(metadata,i)).is_ok){return .err(fail(11,0,0,0));}i+=1;}
     let roots=switch(annotations(sources,metadata,bound,ref mut graph,ref mut budget)){case .ok(t):{t}case .err(p):{return .err(p);}};
     i=0;while(i<v::len<Annotation>(ref roots)){let a=*v::at<Annotation>(ref roots,i);if(a.type!=0){let u32 code=mark(ref mut graph,ref mut pending,ref mut seen,ref mut budget,a.type);if(code!=0){return .err(fail(code,binding::first(bound),0,0));}}i+=1;}
+    let specializations=switch(generics::build(sources,metadata,bound,ref mut graph)){case .ok(p):{p}case .err(p):{return .err(p);}};
+    if(!charge(ref mut budget,generics::work(ref specializations))){return .err(fail(4503,binding::first(bound),0,0));}
+    i=1;while(i<=generics::count(ref specializations)){let s=generics::at(ref specializations,i);let u32 code=mark(ref mut graph,ref mut pending,ref mut seen,ref mut budget,s.result);if(code!=0){return .err(fail(code,s.module_index,0,0));}var usize j=0;while(j<s.parameter_count){let u32 code=mark(ref mut graph,ref mut pending,ref mut seen,ref mut budget,generics::parameter_at(ref specializations,s.parameter_start+j));if(code!=0){return .err(fail(code,s.module_index,0,0));}j+=1;}i+=1;}
     i=1;while(i<=binding::target_count(bound)){let c=binding::target_at(bound,i);if(c.kind==3 || c.kind==9){let p=callable(sources,metadata,c,ref mut graph,ref mut callables,ref mut parameters,ref mut names,ref mut pending,ref mut seen,ref mut budget);if(p.code!=0){return .err(p);}}
         else if(c.kind==4 || c.kind==6 || c.kind==11){let d=syntax::declaration_at(v::at<syntax::Parsed>(sources,c.module_index),c.declaration-1);if(d.generic_parameters==0){let r=signatures::declaration_type(metadata,c.module_index,c.declaration,ref mut graph);if(r.problem.code!=0){return .err(fail(r.problem.code,c.module_index,r.problem.start,r.problem.end));}let u32 code=mark(ref mut graph,ref mut pending,ref mut seen,ref mut budget,r.type);if(code!=0){return .err(fail(code,c.module_index,c.start,c.end));}}}i+=1;
     }
@@ -80,7 +84,7 @@ pub fn Result<Interfaces,join::Problem> build(ref v::Vec<syntax::Parsed> sources
         if(t.kind>=5 && t.kind<=8 || t.kind==13 || t.kind==16 || t.kind==12 && t.first!=0){let u32 code=mark(ref mut graph,ref mut pending,ref mut seen,ref mut budget,t.first);if(code!=0){return .err(fail(code,0,0,0));}if(t.kind==6){let u32 code=mark(ref mut graph,ref mut pending,ref mut seen,ref mut budget,t.second);if(code!=0){return .err(fail(code,0,0,0));}}}cursor+=1;
     }
     let owned=switch(signatures::own_types(metadata,graph)){case .ok(g):{g}case .err(code):{return .err(fail(code,0,0,0));}};
-    return .ok(Interfaces{.graph=owned,.shapes,.fields,.callables,.parameters,.annotations=roots,.names,.work=budget.work});
+    return .ok(Interfaces{.graph=owned,.shapes,.fields,.callables,.parameters,.annotations=roots,.specializations,.names,.work=budget.work});
 }
 pub fn usize type_count(ref Interfaces p){return types::graph_count(ref p.graph);}
 pub fn types::Type type_at(ref Interfaces p,usize id){return types::graph_at(ref p.graph,id);}
@@ -96,6 +100,7 @@ pub fn ref u8[] linker_name(ref Interfaces p,usize index){let c=callable_at(p,in
 pub fn usize work(ref Interfaces p){return p.work;}
 pub fn usize annotation_count(ref Interfaces p){return v::len<Annotation>(ref p.annotations);}
 pub fn Annotation annotation_at(ref Interfaces p,usize root){assert(root>0 && root<=annotation_count(p));return *v::at<Annotation>(ref p.annotations,root-1);}
+pub fn ref generics::Plan specializations(ref Interfaces p){return ref p.specializations;}
 pub fn Result<usize,u32> field(ref Interfaces p,usize type,usize caller,ref u8[] name){
     if(type==0 || type>type_count(p)){return .err(18);}var usize owner=type;let t=type_at(p,owner);if(t.kind==7 || t.kind==8){owner=t.first;}
     var usize i=0;while(i<shape_count(p)){let s=shape_at(p,i);if(s.type==owner){let inner=type_at(p,owner);if(inner.kind!=2 && inner.kind!=3 && inner.kind!=13){return .err(18);}if((inner.kind==3 || inner.kind==13) && caller!=s.module_index){return .err(6201);}var usize f=0;while(f<s.field_count){if(bytes::equal(field_name(p,s.field_start+f),name)){return .ok(s.field_start+f+1);}f+=1;}return .err(18);}i+=1;}return .err(18);
