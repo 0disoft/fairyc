@@ -2736,3 +2736,9 @@ Receipt: `docs/ops/evidence/candidate-owned-enum-proof-20261010.json`. This is t
 - Private API: read-only retained-name byte view and canonical enum metadata helpers. No changes to normative contracts, stable CLI, SDK ABI, Go, DB, CI or hygiene; no push.
 - Deferred: candidate build, Release, Linux, full suite and generated enum C execution.
 - Remaining: Enum private C tag/union construction and transport; Enum/Option/Result switch CFG and payload binding execution; Owned exhaustive-pattern tables and active-payload proof; Complete enum-helper analysis-budget/allocation diagnostic propagation; Source/unsafe authentication and full path/dominance/initialization proofs; Authenticated SDK, whole dispatcher and stage1/stage2.
+
+## Candidate owned enum diagnostic propagation (2026-10-10)
+
+Receipt: `docs/ops/evidence/candidate-owned-enum-budget-20261010.json`. Analysis-budget failure now retains 1002 even when a multi-unit charge fails below the maximum; structural failures retain 1001 and helper allocation failures retain 1003. The private layout helper carries a diagnostic slot. This completes the diagnostic propagation follow-up in the preceding enum unit.
+
+Final 2/2 focused native identities pass: every incomplete measured-work prefix reports 1002, ten structural mutations report 1001, and the provider/empty/nested inert and copy-tagged cases pass. Locked source check passes 258 sources and 3295 MIR functions. Allocation injection and a synthetic depth fixture were not run; those mappings were inspected. Candidate build, Release, Linux and the full suite remain deferred. Stable CLI, SDK ABI, normative contracts, Go, DB, CI and hygiene are unchanged; no push. Enum C transport, switch execution, SDK, the full dispatcher and stage1/stage2 remain pending.

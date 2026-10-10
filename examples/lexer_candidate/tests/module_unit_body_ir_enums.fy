@@ -3,6 +3,7 @@ import module_unit_body_ir_model as ir;
 import module_unit_body_ir_lower as lower;
 import module_unit_body_ir_lookup as lookup;
 import module_unit_body_ir_verify as proof;
+import module_unit_body_ir_enums as enums;
 import module_unit_cleanup_mir_model as clean_ir;
 import module_unit_moves as moves;
 import module_unit_values as values;
@@ -53,5 +54,5 @@ fn u32 mutated(ref ir::Program p,u32 mode){
     return switch(ir::assemble(copied_cleanup(ir::cleanup_ir(p)),bodies,layouts,fields,callables,parameters,names,ir::work(p))){case .ok(_):{0}case .err(e):{e.code}};
 }
 @test @effects(console) fn void owned_enums_reject_forged_ranges_cycles_names_and_constructor_fields(){
-    let p=retained(b"module main;enum E{Empty;Data{i32 a;bool b;};}fn i32 main(){let E empty=.Empty;let E value=.Data{.a=7,.b=true};discard empty;discard value;return 0;}",b"");assert(mutated(ref p,0)==0);var u32 mode=1;while(mode<=10){assert(mutated(ref p,mode)==1001);mode+=1;}
+    let p=retained(b"module main;enum E{Empty;Data{i32 a;bool b;};}fn i32 main(){let E empty=.Empty;let E value=.Data{.a=7,.b=true};discard empty;discard value;return 0;}",b"");var usize total=0;assert(enums::check(ref p,ref mut total).code==0 && total>0 && total<1048576);var usize remaining=0;while(remaining<total){var usize work=1048576-remaining;assert(enums::check(ref p,ref mut work).code==1002);remaining+=1;}assert(mutated(ref p,0)==0);var u32 mode=1;while(mode<=10){assert(mutated(ref p,mode)==1001);mode+=1;}
 }

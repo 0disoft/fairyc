@@ -1,0 +1,75 @@
+{
+  "schema": "fairyc.candidate-owned-enum-budget/v1",
+  "passed": true,
+  "identity": {
+    "compiler": {
+      "path": ".cache/candidate-tagged/compiler-origin-patterns.exe",
+      "sha256": "d36dae1b99751322e447880aaf4d28321bd6d53bdf776185308c6c4504889bb2"
+    },
+    "sources": [
+      {
+        "path": "examples/lexer_candidate/src/module_unit_body_ir_enums.fy",
+        "sha256": "ab01bd0e9a0759d434aab437e8fd5f8b7d308241282c36480d0cf5a5336a0458"
+      },
+      {
+        "path": "examples/lexer_candidate/tests/module_unit_body_ir_enums.fy",
+        "sha256": "54082effad17b91b0787f0ae9feb7b23c3b14f2188859871247e4feb804ff005"
+      },
+      {
+        "path": "examples/lexer_candidate/fairy.lock",
+        "sha256": "e26400cba8a40bd03ef9169cd1c87779b3d94c0bc070e1a75b71a083597349d1"
+      }
+    ]
+  },
+  "sourceCheck": {
+    "argv": [
+      "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\compiler-origin-patterns.exe",
+      "check",
+      "--locked"
+    ],
+    "exit": 0,
+    "stdout": "check ok: 2 instance(s), 258 source file(s), 3295 MIR function(s), lock verified\n",
+    "stderr": ""
+  },
+  "native": {
+    "report": {
+      "path": ".cache/candidate-tagged/module-enum-budget/native.json",
+      "sha256": "276e608b3d26495b9e305879c3cd10becef08c2a8475ae3069fdad17e38576ab"
+    },
+    "count": 2,
+    "passed": 2,
+    "failed": 0,
+    "identities": [
+      "tests::module_unit_body_ir_enums::owned_enums_keep_nested_inert_payloads_provider_coordinates_and_tagged_fields",
+      "tests::module_unit_body_ir_enums::owned_enums_reject_forged_ranges_cycles_names_and_constructor_fields"
+    ]
+  },
+  "behavior": {
+    "status": "Enum helper failures retain 1001 structural rejection, 1002 analysis/depth exhaustion and 1003 allocation failure; failed multi-unit charges do not rely on work already equaling its maximum",
+    "boundary": "Measure complete work on a valid enum program, then check every smaller available-work prefix reports 1002; ten structural mutations retain 1001; nested/provider/empty/copy-tagged enum proof still passes",
+    "contract": "Private layout helper accepts an explicit diagnostic slot, avoiding loss of failed-work information"
+  },
+  "privateAPIChanged": true,
+  "stableCLIChanged": false,
+  "sdkABIChanged": false,
+  "GoChanged": false,
+  "dbChanged": false,
+  "ciChanged": false,
+  "hygieneChanged": false,
+  "normativeContractsChanged": false,
+  "pushed": false,
+  "skipped": {
+    "allocationInjection": "Allocation propagation inspected; no synthetic allocator failure",
+    "depthFixture": "Depth failure mapped explicitly; work prefixes exercised",
+    "candidateBuild": "Deferred to C-execution unit",
+    "release": "Separate batch",
+    "Linux": "Windows unit",
+    "fullSuite": "Two owned-enum identities only"
+  },
+  "pending": [
+    "Enum tag/union C representation and execution",
+    "Enum/Option/Result switch CFG and active payload proof",
+    "Authenticated SDK and whole dispatcher",
+    "Original source/unsafe proof and stage1/stage2"
+  ]
+}
