@@ -1,0 +1,84 @@
+{
+  "schema": "fairyc.candidate-project-type-rebinding/v1",
+  "passed": true,
+  "parentCommit": "db58b9c67065322798753196f08ceabf826e9923",
+  "sources": [
+    {
+      "path": "examples/lexer_candidate/src/module_project_types.fy",
+      "bytes": 5184,
+      "sha256": "fccd8c241ae28cc54bca5e38cafca3056ce9d845dfa2d51e849d323b37bd98c9"
+    },
+    {
+      "path": "examples/lexer_candidate/tests/module_project_types.fy",
+      "bytes": 9607,
+      "sha256": "ee0de0104586977aab701a48cf2b06906d8b1c04370a980796088c6808b4dc58"
+    }
+  ],
+  "receiptTool": {
+    "path": "tools/verify-candidate-project-types.py",
+    "bytes": 4086,
+    "sha256": "efabc34fde9695e814f64627f471d1c637fec1ba3f2b7c042fd3c75ac481f073"
+  },
+  "native": {
+    "report": {
+      "path": ".cache/candidate-tagged/sdk-c-execution/native-project-types.json",
+      "bytes": 764,
+      "sha256": "deb0aa2458d18cc2c3e40f05cc9b04505b5be3c88fcfe4cad6d1c27ace949deb"
+    },
+    "passed": 3,
+    "stdout": {
+      "tests::module_project_types::independently_lowered_units_share_project_types": "independent IR units 2 canonical types 11\n",
+      "tests::module_project_types::project_type_and_unit_limits_and_signature_prefix_reject": "",
+      "tests::module_project_types::reordered_wrappers_rebind_edges_and_preserve_array_lengths": ""
+    },
+    "independentUnits": 2,
+    "canonicalTypes": 11,
+    "coverage": [
+      "Independently bound, typed, moved and lowered caller/provider IR graphs share project canonical types",
+      "Differently numbered array, Option, Result and nominal pointer descriptors rebind to identical types",
+      "Array length and pointer mutability/ABI flags remain numeric payloads",
+      "256 units accepted, 257 rejected; 4096 project types accepted, the 4097th rejected",
+      "Mismatched signature prefixes and invalid map lookups fail closed"
+    ]
+  },
+  "limits": {
+    "projectTypes": 4096,
+    "sourceUnits": 256,
+    "hashSlots": 8192,
+    "work": 1048576
+  },
+  "sourceCheck": {
+    "check": {
+      "path": ".cache/candidate-tagged/sdk-c-execution/check-project-types.txt",
+      "bytes": 81,
+      "sha256": "80c6138e93683a32f731f9ea2c286c1b58f71152fdc885d0da0ae2ae7400d3a3"
+    },
+    "locked": {
+      "path": ".cache/candidate-tagged/sdk-c-execution/check-project-types-locked.txt",
+      "bytes": 82,
+      "sha256": "da373ba1a2b1396b7afcb45967835a233dc578cee48489ec467a342bc2e79a2b"
+    },
+    "sourceFiles": 276,
+    "mirFunctions": 3439
+  },
+  "bootstrap": {
+    "image": {
+      "path": ".cache/candidate-tagged/compiler-file-tokens-120s.exe",
+      "bytes": 17467904,
+      "sha256": "a07e7bb81d919e605d35c6f538cdd601e408f8dc2c87ddfca47216190974f606"
+    },
+    "hostCompileTimeoutSeconds": 120,
+    "nativeExecutionTimeoutSeconds": 60
+  },
+  "deferred": [
+    "Project function/cleanup body rebinding and linking",
+    "Whole-dispatcher C generation/execution",
+    "Native driver integration",
+    "Default compilation timeout/performance",
+    "Standalone candidate development/Release",
+    "Linux",
+    "Full suite",
+    "Stage1/Stage2"
+  ],
+  "pushed": false
+}
