@@ -2511,3 +2511,49 @@ Source-independent cleanup MIR publication and the C handoff remain pending, as 
 executable split-unit functions and control flow; this is not full compiler semantics.
 Release, Linux and the full compiler suite stay deferred. The stable CLI, SDK ABI, DB and
 CI runner are unchanged; the private candidate Fact API was expanded. No push.
+
+## Candidate source-independent cleanup MIR fragment (2026-10-10)
+
+A private, source-independent cleanup MIR fragment now lowers the checked values into
+owned canonical tables. `module_unit_cleanup_mir_model.fy` defines the `Program`
+resource with its `Frame`, `Glue`, `Field`, `Operand`, `Drop` and `Problem` records;
+`module_unit_cleanup_mir_lower.fy` builds them from the move and cleanup-policy output;
+and `module_unit_cleanup_mir_verify.fy` revalidates them independently. The fragment owns
+the complete canonical type table, frames with module/declaration/context, authority
+bits and cleanup receiver, per-type recursive glues, ordered fields, unique
+frame-qualified operands with their original spans, and drop sites with bounded exit
+reasons. After lowering it needs no original `Parsed`, `Values` or provider
+`Interfaces`. A hash index rejects duplicate canonical type descriptors and duplicate
+operands.
+
+`lower` rejects outstanding move diagnostics, runs the cleanup-policy gate, then
+resolves each pending expression ID or binding ID against its frame before the typed
+context is released. `check` confirms canonical descriptor uniqueness, void cleanup
+signatures, a nonempty resource bound to exactly one matching cleanup receiver, the
+owned nested and tagged effect union with recursive drop-ability checks and cycle detection,
+and operands and drop sites that stay owned, droppable, inside the frame authority and
+off the cleanup receiver. The contract is
+`docs/architecture/candidate-module-cleanup-mir-v0.md`.
+
+The new native test holds 4/4: provider type identity with ordered fields and distinct
+frames, distinct partial operand values, a cleanup receiver exempt while a same-type
+local is not, and thirteen negative mutations: out-of-range drop operand, out-of-range
+operand type, removed caller authority, removed nonempty cleanup frame, changed provider
+module, reordered field ordinal, removed nested drop ability, duplicate qualified
+operand, recursive field cycle, invalid Result alternative, exceeded work budget,
+non-void cleanup result and duplicate canonical descriptor. Twelve are rejected with
+1001, the exceeded work budget with 1002, and the accepted copy returns 0. The
+current-source check passed 245 files and 3076 MIR functions with the lock updated, and
+the locked development build passed. Receipt
+`docs/ops/evidence/candidate-module-cleanup-mir-20261010.json` records the four native
+tests and thirteen reject guards; native report
+`.cache/candidate-tagged/cleanup-operands-unit/mir-native-final.json`.
+
+The fragment keeps semantic request order and does not attach drop sites to CFG blocks
+or fix runtime instruction order; CFG attachment and the reverse-lexical, defer and
+Region ordering are required before the C handoff. The model holds no ordinary function
+bodies, CFG or local-execution definitions, so it does not yet carry all source
+provenance, and this is not executable whole MIR or a new C pipeline. The existing
+`module_program` C path still joins and is unchanged. The existing 105 CLI fixtures are
+valid from the stage1 sources and code, unchanged, and no CLI route exercises the new
+fragment. No Go, source SDK, DB or CI change; the private IR API is new. No push.

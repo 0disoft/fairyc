@@ -1,0 +1,198 @@
+{
+  "schema": "fairyc.candidate-module-cleanup-mir/v1",
+  "passed": true,
+  "sourceTruth": [
+    "docs/language/0001-values-and-resources.md",
+    "docs/language/0008-effects-and-capabilities-v0.md",
+    "docs/language/0009-resource-abilities-v0.md",
+    "docs/architecture/candidate-module-cleanup-mir-v0.md"
+  ],
+  "identity": {
+    "compilerSHA256": "18c75e6c281cca5199fff0f4064871182ba2f0fda5c552bd44bcf9e0fa88e0a1",
+    "candidateSHA256": "66c53642e4157a84ebb1f90d9cee9b0db51ce33aff109d676545d9265d884a74",
+    "sources": {
+      "examples/lexer_candidate/src/module_unit_cleanup_mir_model.fy": "8cd61811abad699237a647215bd04cd3ec01df12188eb3a2d3620bcea8bd745d",
+      "examples/lexer_candidate/src/module_unit_cleanup_mir_types.fy": "3fadfad6f6b50a9139e895a648df6e3ff507ffd5f2921e6915e8fa8aed54be4d",
+      "examples/lexer_candidate/src/module_unit_cleanup_mir_verify.fy": "bd4057012905da5f6417bf3de2cc89da4f31c0725e3b01779724e29cfe89be99",
+      "examples/lexer_candidate/src/module_unit_cleanup_mir_lower.fy": "6dcb5a6f1cb5f85a875d6c7f4c062fccff4316878db228ab157e9792ee866255",
+      "examples/lexer_candidate/tests/module_unit_cleanup_mir.fy": "82a8a9bfdd5fef29cfe943a679304966d47fe370c11f3e7f926cac789aa72901",
+      "examples/lexer_candidate/fairy.lock": "41331bab111479ff6770608d0684394357bf229774c167b9cdc070f40bda2d7c"
+    }
+  },
+  "native": {
+    "schemaVersion": "fairyc.test-report/v4",
+    "engine": "native",
+    "target": "x86_64-windows-msvc",
+    "profile": "development",
+    "tests": [
+      {
+        "identity": "tests::module_unit_cleanup_mir::cleanup_mir_owns_distinct_partial_operand_values",
+        "outcome": "passed",
+        "trapCategory": null,
+        "stdoutBase64": "",
+        "stderrBase64": ""
+      },
+      {
+        "identity": "tests::module_unit_cleanup_mir::cleanup_mir_owns_provider_identity_and_ordered_fields",
+        "outcome": "passed",
+        "trapCategory": null,
+        "stdoutBase64": "",
+        "stderrBase64": ""
+      },
+      {
+        "identity": "tests::module_unit_cleanup_mir::cleanup_mir_rejects_invalid_handoffs_and_missing_authority",
+        "outcome": "passed",
+        "trapCategory": null,
+        "stdoutBase64": "",
+        "stderrBase64": ""
+      },
+      {
+        "identity": "tests::module_unit_cleanup_mir::cleanup_receiver_exemption_does_not_exempt_same_type_locals",
+        "outcome": "passed",
+        "trapCategory": null,
+        "stdoutBase64": "",
+        "stderrBase64": ""
+      }
+    ],
+    "count": 4,
+    "passed": 4,
+    "failed": 0,
+    "status": "ok",
+    "lock": "verified"
+  },
+  "mutations": [
+    {
+      "mode": 1,
+      "scope": "Out-of-range drop operand",
+      "expectedCode": 1001,
+      "passed": true
+    },
+    {
+      "mode": 2,
+      "scope": "Out-of-range operand type",
+      "expectedCode": 1001,
+      "passed": true
+    },
+    {
+      "mode": 3,
+      "scope": "Caller cleanup authority removed",
+      "expectedCode": 1001,
+      "passed": true
+    },
+    {
+      "mode": 4,
+      "scope": "Nonempty cleanup frame removed",
+      "expectedCode": 1001,
+      "passed": true
+    },
+    {
+      "mode": 5,
+      "scope": "Provider cleanup frame module changed",
+      "expectedCode": 1001,
+      "passed": true
+    },
+    {
+      "mode": 6,
+      "scope": "Ordered field ordinal changed",
+      "expectedCode": 1001,
+      "passed": true
+    },
+    {
+      "mode": 7,
+      "scope": "Nested resource drop ability removed",
+      "expectedCode": 1001,
+      "passed": true
+    },
+    {
+      "mode": 8,
+      "scope": "Duplicate qualified operand",
+      "expectedCode": 1001,
+      "passed": true
+    },
+    {
+      "mode": 9,
+      "scope": "Recursive resource field cycle",
+      "expectedCode": 1001,
+      "passed": true
+    },
+    {
+      "mode": 10,
+      "scope": "Invalid Result alternative type",
+      "expectedCode": 1001,
+      "passed": true
+    },
+    {
+      "mode": 11,
+      "scope": "Exceeded work budget",
+      "expectedCode": 1002,
+      "passed": true
+    },
+    {
+      "mode": 12,
+      "scope": "Cleanup frame returns a non-void scalar",
+      "expectedCode": 1001,
+      "passed": true
+    },
+    {
+      "mode": 13,
+      "scope": "Duplicate canonical type descriptor",
+      "expectedCode": 1001,
+      "passed": true
+    }
+  ],
+  "accepted": [
+    "Retained provider and caller resource declarations with the same spelling remain distinct after all Parsed, signature, interface and Values owners are destroyed.",
+    "Resource field declaration order and tagged payload IDs are preserved.",
+    "Two partial values of the same type retain distinct qualified operand IDs and source spans.",
+    "A cleanup receiver is exempt but a newly created local of the same type still owns a drop.",
+    "Unmodified owned handoff reassembles successfully."
+  ],
+  "representation": {
+    "canonicalTypes": "Copied complete type graph; no joined declaration renumbering",
+    "frames": "Original module/declaration/context, authority and exact cleanup receiver",
+    "glues": "Per-canonical-type resource/Option/Result recipes, nonempty cleanup frame and ordered fields",
+    "operands": "Frame-qualified lexical binding or source expression, canonical type and original span",
+    "drops": "Typed operand reference, semantic exit kind and exit span; not yet a CFG instruction sequence"
+  },
+  "sourceCheck": {
+    "exit": 0,
+    "stdout": "check ok: 2 instance(s), 245 source file(s), 3076 MIR function(s), lock updated"
+  },
+  "lockedDevelopmentBuild": {
+    "exit": 0,
+    "stdout": "built: build/lexer-candidate.exe (x86_64-windows-msvc, development, lock verified)"
+  },
+  "budgets": {
+    "types": 4096,
+    "frames": 1024,
+    "fields": 1024,
+    "operands": 16384,
+    "drops": 16384,
+    "work": 1048576,
+    "depth": 64,
+    "canonicalIndexSlots": 8192,
+    "operandIndexSlots": 32768
+  },
+  "pending": [
+    "Attach typed drop sites to executable CFG blocks and ordinary lowered values.",
+    "Derive reverse lexical cleanup order and defer/resource/Region sequencing.",
+    "Generate and execute C cleanup helpers and source cleanup bodies.",
+    "Complete split-unit function/control-flow lowering, borrow and unsafe provenance, full dispatcher, stage1/stage2."
+  ],
+  "skipped": {
+    "oldCLI": "The new private fragment has no CLI entry point and changes no existing CLI source; stage-one 105 CLI comparisons reused.",
+    "GoPackages": "No Go source changes; earlier valid semantic and selected compiler checks reused.",
+    "release": "Deferred consolidated batch",
+    "Linux": "Deferred consolidated batch",
+    "fullCompiler": "Deferred consolidated batch"
+  },
+  "sourceTruthDocumentsChanged": [
+    "docs/architecture/candidate-module-cleanup-mir-v0.md"
+  ],
+  "stableCLIChanged": false,
+  "sdkABIChanged": false,
+  "dbChanged": false,
+  "ciRunnerChanged": false,
+  "privateAPIChanged": true,
+  "pushed": false
+}
