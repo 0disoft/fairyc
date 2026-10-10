@@ -149,6 +149,11 @@ Project callable prototypes have a separate 4096-entry cap and an 8192-slot
 index keyed by original module/declaration coordinates. The owned-IR verifier
 uses the same callable cap. Cross-unit call verification indexes contracts,
 ordinary targets and specialized contexts in separate 8192-slot tables.
+Owned-IR revalidation builds its callable coordinate index once. Each body
+collects its lexical unsafe-block node IDs once and resolves its original
+function permission once. Cast, raw-parts and SDK storage validation reuse
+that permission and block list, retaining the same span, mutability and owner
+checks. Cross-unit unsafe calls reuse their existing caller contract index.
 Per-unit body and specialization admission limits
 remain separate.
 
