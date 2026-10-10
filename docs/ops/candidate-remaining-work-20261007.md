@@ -2575,3 +2575,28 @@ A private source-independent control-flow graph now lowers from the owned typed 
 The drop chain orders a temporary's materialized operands in construction order so execution reverses them before lexical owners on an abrupt exit, keeps a replacement's right-hand side before the old owner is dropped with no target-root load, and normalizes a revisited loop condition's identical cleanup requests to one runtime drop site. if, the `&&`/`||` short-circuit skip branch, `while`, and the classic `for` backedge and its post clause are formed, and break/continue and scope exits attach their reason-matched drops before jumping. Normal records are supported; only the named-construct syntax (node kinds 32/33) is rejected with 1004, along with switch, foreach, slices, defer and Region; the source admission origin and unsafe preadmission checks remain separate.
 The new `tests/module_unit_cfg.fy` holds the graph path tests (graph topology and block order, not generated C execution or a self-hosting graph interpreter) and passes 7/7 native tests; its ninth mutation mode is accepted as a copy while modes 1-7 and 9 reject with 1001 and mode 8 with 1002. Evidence: `docs/ops/evidence/candidate-module-cfg-20261010.json`.
 Generated C, the whole language, defer/Region, the remaining source admission origins and unsafe preadmission, and the drop dominance-path proof remain pending. The existing `module_program` C path still joins and is unchanged, the stable CLI, SDK ABI, DB and CI runner are unchanged, Release, Linux and the full compiler suite stay deferred, and no push.
+
+## Candidate bounded lexical defer stage (2026-10-10)
+
+`defer call;` now lowers into the source-independent CFG. Explicit arguments evaluate
+immediately left to right and freeze into capture slots over the closed scalar set
+(kinds 1..6, now including `i64`), and the target must be a resolved internal call
+returning `void` whose callable or instance frame passes the authority, result,
+argument-count and effect-subset checks; foreign, template and value-returning targets
+are rejected. Registered calls invoke in reverse registration order (LIFO) on
+fallthrough, `return`, Result `?` propagation, `break` and `continue`, with the return
+value frozen before the deferred calls and both before implicit drops, and
+`break`/`continue` invoke only the defer suffix registered inside the loop while the
+outer registrations wait for the enclosing exit. Defer site IDs are assigned in
+per-block preparation order and are not a registration-order contract, so the nested
+case asserts the captured literal values in execution order `3,2,4,1` rather than site
+IDs. The stage is validated by five `tests/module_unit_cfg_defer.fy` tests (four
+behavior paths plus one mutation case that accepts a valid clone and rejects nine
+malformed defer modes with 1001) and the unchanged seven `tests/module_unit_cfg.fy`
+graph tests, twelve unique native passes in all; the source check passed 252 files and
+3205 MIR functions and the locked development build passed, with the receipt
+`docs/ops/evidence/candidate-module-cfg-defer-20261010.json` recording the twelve passes
+and the nine new defer rejections. `Region` is pending for the next commit, and
+`switch`, `foreach`, slices, the named-construct syntax, the C-graph evaluator and
+executable C remain unimplemented; this section supersedes the earlier defer-pending
+statements above.

@@ -1,0 +1,156 @@
+{
+  "schema": "fairyc.candidate-module-cfg-defer/v1",
+  "passed": true,
+  "identity": {
+    "compilerSHA256": "18c75e6c281cca5199fff0f4064871182ba2f0fda5c552bd44bcf9e0fa88e0a1",
+    "candidateSHA256": "09d95776c5992a2f9b4d36f3d8711da117930eb90b90802da0d68672b7867f9e",
+    "sources": {
+      "examples/lexer_candidate/src/module_unit_cfg_lower.fy": "53504873c1c8cfc27c063c272c9df1ae93099a5e2d23033059c864fc627a5ace",
+      "examples/lexer_candidate/src/module_unit_cfg_model.fy": "a93ab595fbc5af4ac846aae89c3ee0cb24383fda5ffb8f1476d905a331ab2f8e",
+      "examples/lexer_candidate/src/module_unit_cfg_defer.fy": "d34d9d96d716b78bf834ac8dc72deb8059f0a3568a917ed0d8d713486a91767c",
+      "examples/lexer_candidate/tests/module_unit_cfg_defer.fy": "950f5f31635d5d721c92ec1d77b104c0f2b84b2fc47ff220d0b21f62d30739c0",
+      "examples/lexer_candidate/tests/module_unit_cfg.fy": "4bd4ea27b6c18c4a9411bdda0402c896cb52489e7b0058f21930f9d1cbb40914",
+      "examples/lexer_candidate/fairy.lock": "8bc01076acf23333e67998a8592deacb650b65466d3489dfa3b27ccc175e01d8"
+    }
+  },
+  "native": {
+    "count": 12,
+    "passed": 12,
+    "failed": 0,
+    "tests": [
+      {
+        "identity": "tests::module_unit_cfg::cfg_has_loop_back_edges_and_break_continue_cleanup",
+        "outcome": "passed",
+        "trapCategory": null,
+        "stdoutBase64": "",
+        "stderrBase64": ""
+      },
+      {
+        "identity": "tests::module_unit_cfg::cfg_loop_condition_revisits_share_one_runtime_drop_site",
+        "outcome": "passed",
+        "trapCategory": null,
+        "stdoutBase64": "",
+        "stderrBase64": ""
+      },
+      {
+        "identity": "tests::module_unit_cfg::cfg_places_reverse_lexical_drops_after_return_value",
+        "outcome": "passed",
+        "trapCategory": null,
+        "stdoutBase64": "",
+        "stderrBase64": ""
+      },
+      {
+        "identity": "tests::module_unit_cfg::cfg_propagation_error_drops_only_completed_values_in_reverse_order",
+        "outcome": "passed",
+        "trapCategory": null,
+        "stdoutBase64": "",
+        "stderrBase64": ""
+      },
+      {
+        "identity": "tests::module_unit_cfg::cfg_rejects_invalid_successors_values_and_cleanup_coverage",
+        "outcome": "passed",
+        "trapCategory": null,
+        "stdoutBase64": "",
+        "stderrBase64": ""
+      },
+      {
+        "identity": "tests::module_unit_cfg::cfg_resource_replacement_evaluates_rhs_before_old_drop_without_loading_target",
+        "outcome": "passed",
+        "trapCategory": null,
+        "stdoutBase64": "",
+        "stderrBase64": ""
+      },
+      {
+        "identity": "tests::module_unit_cfg::cfg_short_circuit_skips_right_call_and_accepts_defer",
+        "outcome": "passed",
+        "trapCategory": null,
+        "stdoutBase64": "",
+        "stderrBase64": ""
+      },
+      {
+        "identity": "tests::module_unit_cfg_defer::deferred_capture_precedes_mutation_and_invocation_precedes_owner_drop",
+        "outcome": "passed",
+        "trapCategory": null,
+        "stdoutBase64": "",
+        "stderrBase64": ""
+      },
+      {
+        "identity": "tests::module_unit_cfg_defer::deferred_loop_exit_runs_loop_suffix_and_preserves_outer_registration",
+        "outcome": "passed",
+        "trapCategory": null,
+        "stdoutBase64": "",
+        "stderrBase64": ""
+      },
+      {
+        "identity": "tests::module_unit_cfg_defer::deferred_nested_fallthrough_uses_reverse_lexical_registration",
+        "outcome": "passed",
+        "trapCategory": null,
+        "stdoutBase64": "",
+        "stderrBase64": ""
+      },
+      {
+        "identity": "tests::module_unit_cfg_defer::deferred_propagation_during_registration_excludes_unregistered_call",
+        "outcome": "passed",
+        "trapCategory": null,
+        "stdoutBase64": "",
+        "stderrBase64": ""
+      },
+      {
+        "identity": "tests::module_unit_cfg_defer::deferred_handoff_rejects_invalid_targets_captures_and_missing_freezes",
+        "outcome": "passed",
+        "trapCategory": null,
+        "stdoutBase64": "",
+        "stderrBase64": ""
+      }
+    ],
+    "profile": "development",
+    "target": "x86_64-windows-msvc",
+    "scope": "Compiler graph lowering and path/metadata checks, not generated program C execution"
+  },
+  "reports": [
+    "defer-native.json (10 unchanged passed outcomes reused)",
+    "defer-nested-final.json (corrected test uses captured values rather than unspecified site IDs)",
+    "defer-mutations.json (new exact mutation test)"
+  ],
+  "deferMutations": {
+    "acceptedCopy": 0,
+    "modes1Through9": 1001
+  },
+  "sourceCheck": {
+    "locked": true,
+    "exit": 0,
+    "sources": 252,
+    "mirFunctions": 3205
+  },
+  "developmentBuild": {
+    "locked": true,
+    "exit": 0
+  },
+  "representation": {
+    "registration": "Immediate left-to-right evaluation into one frozen scalar slot per argument; no invocation at registration",
+    "exit": "Reverse registered lexical suffix on scope, return, propagation, break and continue; evaluate return before invocation; invoke before resource drops",
+    "registrationFailure": "Propagation in a new registration invokes only the already registered prefix",
+    "calls": "Internal void target, canonical checked scalar arguments 1 through 6 including i64, caller authority",
+    "proof": "Metadata ranges, descriptor/source/target agreement, capture slot identity and exactly one freeze operation per captured slot; no dominance proof"
+  },
+  "pending": [
+    "Region markers and reset/drop interleaving",
+    "Remaining syntax and source admission/unsafe provenance",
+    "Dominance and initialization proof",
+    "Generate and execute C for the split-unit graph",
+    "Full dispatcher and stage1/stage2"
+  ],
+  "skipped": {
+    "Go": "No Go changes",
+    "oldCLI": "No CLI route for this private graph; production CLI source unchanged",
+    "release": "Deferred batch",
+    "Linux": "Deferred batch",
+    "fullCompiler": "Scoped graph change"
+  },
+  "privateAPIChanged": true,
+  "stableCLIChanged": false,
+  "sdkABIChanged": false,
+  "dbChanged": false,
+  "ciChanged": false,
+  "pushed": false
+}

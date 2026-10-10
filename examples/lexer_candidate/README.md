@@ -247,3 +247,25 @@ revalidates them independently; it keeps semantic request order and is not execu
 whole MIR. Split-unit cleanup event MIR, C and runtime elaboration, remaining borrow and
 access edges, unsafe provenance, and the full dispatcher and stage1/stage2 remain
 pending; Release, Linux and the full compiler suite are deferred.
+
+## Bounded lexical defer
+
+The CFG stage now lowers `defer call;` into immediate left-to-right scalar capture
+slots (closed scalar set 1..6, including `i64`) with the target checked as a resolved
+internal call returning `void` whose callable or instance frame passes the authority,
+result, argument-count and effect-subset rules; foreign, template and value-returning
+targets are rejected. Registered calls invoke in reverse registration order (LIFO) on
+fallthrough, `return`, Result `?`, `break` and `continue`, with the return value frozen
+before the deferred calls and both before implicit drops, and `break`/`continue` invoke
+only the defer suffix registered inside the loop while the outer registrations wait for
+the enclosing exit. Defer site IDs follow per-block preparation order and are not a
+registration-order contract, so the nested case asserts the captured literal values in
+execution order `3,2,4,1`. The five `tests/module_unit_cfg_defer.fy` tests (four
+behavior paths plus one mutation case that accepts a valid clone and rejects nine
+malformed defer modes with 1001) join the unchanged seven `tests/module_unit_cfg.fy`
+graph tests for twelve unique native passes; the source check passed 252 files and 3205
+MIR functions and the locked development build passed, with the receipt
+`docs/ops/evidence/candidate-module-cfg-defer-20261010.json` recording the twelve passes
+and nine new defer rejections. `Region` is pending for the next commit, and `switch`,
+the C-graph evaluator and any generated or executed C remain unimplemented; this
+supersedes the earlier defer-pending notes above.

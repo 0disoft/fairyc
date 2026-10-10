@@ -48,9 +48,9 @@ fn usize containing(ref ir::Program p,u32 kind){var usize f=1;while(f<=ir::count
     let p=retained(b"module main;resource R{i32 n;cleanup{}}fn R make(){return R{.n=1};}fn void f(){while(true){let R inner=make();if(true){continue;}else{break;}}}",b"");let frame=declared(ref p,4);let g=lowered(ref p,frame);var usize i=1;var bool jump=false;var bool broken=false;var bool continued=false;while(i<=cfg::count(ref g)){let n=cfg::at(ref g,i);if(n.kind==7){jump=true;assert(n.first!=i);}if(n.kind==5){let d=clean_ir::drop_at(ir::cleanup_ir(ref p),n.drop-1);if(d.exit==3){broken=true;}if(d.exit==4){continued=true;}}i+=1;}assert(jump && broken && continued && cfg::check(ref p,ref g).code==0);
     let q=retained(b"module main;fn i32 f(){var i32 n=0;for(var i32 i=0;i<3;i+=1){n+=i;}return n;}",b"");let h=lowered(ref q,1);assert(cfg::check(ref q,ref h).code==0);i=1;var usize stores=0;while(i<=cfg::count(ref h)){if(cfg::at(ref h,i).kind==2){stores+=1;}i+=1;}assert(stores==4);
 }
-@test @effects(console) fn void cfg_short_circuit_skips_right_call_and_declines_defer(){
+@test @effects(console) fn void cfg_short_circuit_skips_right_call_and_accepts_defer(){
     let p=retained(b"module main;fn bool side(){return true;}fn bool f(){return false && side();}",b"");let g=lowered(ref p,2);var usize id=cfg::entry(ref g);var usize calls=0;var bool skipped=false;var usize steps=0;while(id!=0){assert(steps<128);steps+=1;let n=cfg::at(ref g,id);if(n.kind==1 && ir::node_at(ir::at(ref p,2),n.source-1).value.kind==6){calls+=1;}if(n.kind==10){skipped=true;}id=if(n.kind==3){n.second}else{n.first};}assert(skipped && calls==0);
-    let q=retained(b"module main;fn void done(){}fn void f(){defer done();}",b"");switch(flow::lower(ref q,2)){case .ok(_):{assert(false);}case .err(e):{assert(e.code==1004);}};
+    let q=retained(b"module main;fn void done(){}fn void f(){defer done();}",b"");let h=lowered(ref q,2);assert(cfg::deferred_count(ref h)==1 && cfg::capture_count(ref h)==0 && cfg::check(ref q,ref h).code==0);
 }
 
 fn u32 mutated(ref ir::Program p,ref cfg::Graph g,u32 mode){

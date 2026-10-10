@@ -3,20 +3,27 @@ import module_unit_body_ir_model as bodies;
 import module_unit_cleanup_mir_model as clean_ir;
 import module_unit_value_model as budget;
 import module_unit_body_ir_lookup as lookup;
+import module_unit_cfg_defer as deferred;
 import std::bytes as bytes;
 import std::vec as v;
 
 // One operation per block. source/target are body-table IDs, never parser tokens.
 // 1 eval, 2 store, 3 bool branch, 4 Result branch, 5 drop, 6 return,
 // 7 jump, 8 assert, 9 propagate error, 10 short-circuit copy, 11 branch/block copy,
-// 12 unreachable completion trap.
+// 12 unreachable completion trap, 13 frozen scalar capture, 14 deferred invocation.
 pub struct Block {u32 kind;usize source;usize target;usize first;usize second;usize drop;usize start;usize end;}
-pub resource Graph {usize frame;usize entry;v::Vec<Block> blocks;usize work;cleanup{}}
+pub struct Deferred {usize statement;usize invocation;usize capture_start;usize capture_count;}
+pub struct Capture {usize deferred;usize position;usize source;usize type;}
+pub resource Graph {usize frame;usize entry;v::Vec<Block> blocks;v::Vec<Deferred> deferred;v::Vec<Capture> captures;usize work;cleanup{}}
 pub fn usize count(ref Graph p){return v::len<Block>(ref p.blocks);}
 pub fn Block at(ref Graph p,usize id){assert(id!=0 && id<=count(p));return *v::at<Block>(ref p.blocks,id-1);}
 pub fn usize frame(ref Graph p){return p.frame;}
 pub fn usize entry(ref Graph p){return p.entry;}
 pub fn usize work(ref Graph p){return p.work;}
+pub fn usize deferred_count(ref Graph p){return v::len<Deferred>(ref p.deferred);}
+pub fn Deferred deferred_at(ref Graph p,usize id){return *v::at<Deferred>(ref p.deferred,id-1);}
+pub fn usize capture_count(ref Graph p){return v::len<Capture>(ref p.captures);}
+pub fn Capture capture_at(ref Graph p,usize id){return *v::at<Capture>(ref p.captures,id-1);}
 fn clean_ir::Problem fail(u32 code,usize module_index,usize start,usize end){return clean_ir::Problem{.code,.module_index,.start,.end};}
 pub fn clean_ir::Problem check(ref bodies::Program p,ref Graph g){
     if(frame(g)==0 || frame(g)>bodies::count(p) || entry(g)==0 || entry(g)>count(g)){return fail(1001,0,0,0);}
@@ -25,9 +32,10 @@ pub fn clean_ir::Problem check(ref bodies::Program p,ref Graph g){
     var v::Vec<u8> seen=v::empty<u8>();var usize i=0;while(i<clean_ir::drop_count(cleaned)){if(!budget::charge(ref mut used,1)){return fail(1002,f.module_index,0,0);}if(!v::push<u8>(ref mut seen,0).is_ok){return fail(1003,f.module_index,0,0);}i+=1;}
     i=1;while(i<=count(g)){
         if(!budget::charge(ref mut used,1)){return fail(1002,f.module_index,0,0);}let n=at(g,i);
-        if(n.kind==0 || n.kind>12 || n.start>n.end || n.end>bodies::source_bytes(b) || n.source>bodies::node_count(b) || (n.kind==2 && (n.target==0 || n.target>bodies::statement_count(b))) || n.kind!=2 && n.target>bodies::node_count(b) || n.first>count(g) || n.second>count(g)){return fail(1001,f.module_index,n.start,n.end);}
+        let target_limit=if(n.kind==2){bodies::statement_count(b)}else if(n.kind==13){capture_count(g)}else if(n.kind==14){deferred_count(g)}else{bodies::node_count(b)};
+        if(n.kind==0 || n.kind>14 || n.start>n.end || n.end>bodies::source_bytes(b) || n.source>bodies::node_count(b) || n.target>target_limit || (n.kind==2 || n.kind==13 || n.kind==14) && n.target==0 || n.first>count(g) || n.second>count(g)){return fail(1001,f.module_index,n.start,n.end);}
         let branch=n.kind==3 || n.kind==4;let terminal=n.kind==6 || n.kind==9 || n.kind==12;
-        if(branch && (n.first==0 || n.second==0 || n.source==0) || !branch && n.second!=0 || terminal && n.first!=0 || !terminal && n.first==0 || (n.kind==1 || n.kind==2 || n.kind==8 || n.kind==10 || n.kind==11) && n.source==0){return fail(1001,f.module_index,n.start,n.end);}
+        if(branch && (n.first==0 || n.second==0 || n.source==0) || !branch && n.second!=0 || terminal && n.first!=0 || !terminal && n.first==0 || (n.kind==1 || n.kind==2 || n.kind==8 || n.kind==10 || n.kind==11 || n.kind==13 || n.kind==14) && n.source==0){return fail(1001,f.module_index,n.start,n.end);}
         if((n.kind==5 || n.kind==7 || n.kind==12) && (n.source!=0 || n.target!=0)){return fail(1001,f.module_index,n.start,n.end);}
         if(n.source!=0){let e=bodies::node_at(b,n.source-1).value;if(e.state!=1 || e.type==0){return fail(1001,f.module_index,n.start,n.end);}let t=clean_ir::type_at(cleaned,e.type);
             if((n.kind==3 || n.kind==8) && (t.kind!=1 || t.scalar!=6)){return fail(1001,f.module_index,n.start,n.end);}
@@ -42,6 +50,7 @@ pub fn clean_ir::Problem check(ref bodies::Program p,ref Graph g){
             var usize alias=0;while(alias<clean_ir::drop_count(cleaned)){if(!budget::charge(ref mut used,1)){return fail(1002,f.module_index,n.start,n.end);}let other=clean_ir::drop_at(cleaned,alias);if(other.operand==d.operand && other.exit==d.exit && other.start==d.start && other.end==d.end){if(*v::at<u8>(ref seen,alias)!=0){return fail(1001,f.module_index,n.start,n.end);}let slot=v::at_mut<u8>(ref mut seen,alias);*slot=1;}alias+=1;}}else if(n.drop!=0){return fail(1001,f.module_index,n.start,n.end);}i+=1;
     }
     i=0;while(i<clean_ir::drop_count(cleaned)){if(!budget::charge(ref mut used,1)){return fail(1002,f.module_index,0,0);}if(clean_ir::operand_at(cleaned,clean_ir::drop_at(cleaned,i).operand).frame==frame(g) && *v::at<u8>(ref seen,i)==0){return fail(1001,f.module_index,0,0);}i+=1;}
-    return fail(0,0,0,0);
+    return deferred::check(p,g,ref mut used);
 }
-pub fn Result<Graph,clean_ir::Problem> assemble(ref bodies::Program p,usize frame,usize entry,v::Vec<Block> blocks,usize work){let g=Graph{.frame,.entry,.blocks,.work};let checked=check(p,ref g);if(checked.code!=0){return .err(checked);}return .ok(g);}
+pub fn Result<Graph,clean_ir::Problem> assemble_deferred(ref bodies::Program p,usize frame,usize entry,v::Vec<Block> blocks,v::Vec<Deferred> deferred,v::Vec<Capture> captures,usize work){let g=Graph{.frame,.entry,.blocks,.deferred,.captures,.work};let checked=check(p,ref g);if(checked.code!=0){return .err(checked);}return .ok(g);}
+pub fn Result<Graph,clean_ir::Problem> assemble(ref bodies::Program p,usize frame,usize entry,v::Vec<Block> blocks,usize work){return assemble_deferred(p,frame,entry,blocks,v::empty<Deferred>(),v::empty<Capture>(),work);}
