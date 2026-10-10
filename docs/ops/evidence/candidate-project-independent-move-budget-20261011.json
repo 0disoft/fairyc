@@ -1,0 +1,68 @@
+{
+  "schema": "fairyc.candidate-project-independent-move-budget/v1",
+  "passed": true,
+  "parentCommit": "2c6227e35d4dd8611fbef06e0c4aee68eaf58fb4",
+  "implementation": {
+    "path": "examples/lexer_candidate/src/module_project_compile.fy",
+    "bytes": 4887,
+    "sha256": "55631ce4375696fae4a284daac1e6adec7204c1ca1d98b8ec295be3f6e8e5cc6"
+  },
+  "receiptTool": {
+    "path": "tools/verify-candidate-project-move-budget.py",
+    "bytes": 4264,
+    "sha256": "39298dadacde800bf4afa2d30336347ab9e5abcd662f7b7174f72eaa27927000"
+  },
+  "policy": {
+    "valuesWorkCap": 1048576,
+    "ownershipWorkCap": 1048576,
+    "ownershipInitialWork": 0,
+    "note": "Project coordination bounds the completed value and ownership traversals independently; direct moves::build prior-work behavior is unchanged"
+  },
+  "check": {
+    "path": ".cache/candidate-tagged/sdk-c-execution/check-project-move-budget.txt",
+    "bytes": 80,
+    "sha256": "2cd38bf1d080b8a1937d8b8084b6102b17c606fa964fa32f540d486a894f6275"
+  },
+  "nativeRegression": {
+    "path": ".cache/candidate-tagged/sdk-c-execution/native-project-move-budget-regression.json",
+    "bytes": 534,
+    "sha256": "8b21d48634bfb67be533faaeb1a60b8001e859c9ccf3717cd7ac7232ae5d5676"
+  },
+  "passedCases": 2,
+  "coverage": [
+    "Type errors still propagate before lowering",
+    "Move diagnostics still reject before returning owned IR"
+  ],
+  "before": {
+    "path": "docs/ops/evidence/candidate-reference-call-field-reborrows-20261011.json",
+    "bytes": 50206,
+    "sha256": "33ffa3037302a8ff22a13d555129b147c535cbd54bc0532e15c032b6966d0a27"
+  },
+  "originalCompilationPassed": false,
+  "original": {
+    "report": {
+      "path": ".cache/candidate-tagged/sdk-c-execution/native-main-project-move-budget.json",
+      "bytes": 429,
+      "sha256": "82ce40f849019686e40a712150a8fb700a2cb1fe1226ed467cd5846f40f96662"
+    },
+    "stdout": "stage 3 code 4503 module 213 at 0..0 range 136..137\n",
+    "observation": {
+      "stage": 3,
+      "code": 4503,
+      "moduleIndex": 213,
+      "start": 0,
+      "end": 0,
+      "first": 136,
+      "stop": 137,
+      "attributedSource": "internal/sdkstdlib/sources/optional/std/vec.fy"
+    },
+    "files": 235,
+    "sourceSetReuse": "All original source hashes match the previous receipt"
+  },
+  "deferred": [
+    "Remaining original compilation failures",
+    "Original dispatcher C execution",
+    "Linux and Stage1/Stage2"
+  ],
+  "pushed": false
+}

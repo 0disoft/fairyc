@@ -19,7 +19,9 @@ pub fn Result<ir::Program,Problem> range(ref v::Vec<syntax::Parsed> sources,ref 
     let bound=switch(binding::bind(sources,metadata,first,stop)){case .ok(p):{p}case .err(e):{return .err(failed(2,e.code,e.module_index,e.start,e.end,first,stop,0,0));}};
     let ready=switch(closure::build_unit(sources,metadata,ref bound)){case .ok(p):{p}case .err(e):{return .err(failed(3,e.code,e.module_index,e.start,e.end,first,stop,0,0));}};
     let typed=switch(values::build(sources,metadata,ref ready)){case .ok(p):{p}case .err(e):{return .err(failed(4,e.code,e.module_index,e.start,e.end,first,stop,e.expected,e.actual));}};
-    let moved=switch(moves::build(sources,ref typed,values::work(ref typed))){case .ok(p):{p}case .err(e):{return .err(failed(5,e.code,e.module_index,e.start,e.end,first,stop,e.expected,e.actual));}};
+    // Values and ownership are separately checked phases. A completed type
+    // pass must not consume the ownership pass's traversal allowance.
+    let moved=switch(moves::build(sources,ref typed,0)){case .ok(p):{p}case .err(e):{return .err(failed(5,e.code,e.module_index,e.start,e.end,first,stop,e.expected,e.actual));}};
     if(moves::count(ref moved)!=0){let e=moves::at(ref moved,0);return .err(failed(5,e.code,e.module_index,e.start,e.end,first,stop,0,0));}
     return switch(lower::lower(sources,ref typed,closure::imported(ref ready),ref moved)){case .ok(p):{.ok(p)}case .err(e):{.err(failed(6,e.code,e.module_index,e.start,e.end,first,stop,0,0))}};
 }
