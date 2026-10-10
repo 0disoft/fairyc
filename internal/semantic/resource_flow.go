@@ -776,16 +776,34 @@ func (a *analyzer) checkResourceValueEffectsOnce(value *symbol, at hir.Span, see
 }
 
 func (a *analyzer) requiredDropEffects(value hir.Type) []dropEffectRequirement {
-	if info := a.resourceTypes[value]; info != nil && info.symbol != nil {
-		return []dropEffectRequirement{{owner: info.symbol, effects: slices.Clone(info.symbol.effects)}}
+	var result []dropEffectRequirement
+	seen := make(map[hir.Type]struct{})
+	var visit func(hir.Type)
+	visit = func(current hir.Type) {
+		if _, duplicate := seen[current]; duplicate {
+			return
+		}
+		seen[current] = struct{}{}
+		if info := a.resourceTypes[current]; info != nil && info.symbol != nil {
+			result = append(result, dropEffectRequirement{owner: info.symbol, effects: slices.Clone(info.symbol.effects)})
+			// Implicit field destruction follows the owner's user cleanup.
+			// Moving the complete root transfers both obligations together.
+			for _, field := range info.orderedFields {
+				visit(field.typ)
+			}
+			return
+		}
+		if element, option := hir.OptionElement(current); option {
+			visit(element)
+			return
+		}
+		if success, failure, tagged := hir.ResultElements(current); tagged {
+			visit(success)
+			visit(failure)
+		}
 	}
-	if element, option := hir.OptionElement(value); option {
-		return a.requiredDropEffects(element)
-	}
-	if success, failure, result := hir.ResultElements(value); result {
-		return append(a.requiredDropEffects(success), a.requiredDropEffects(failure)...)
-	}
-	return nil
+	visit(value)
+	return result
 }
 
 func cloneResourceEnvironment(source resourceEnvironment) resourceEnvironment {
