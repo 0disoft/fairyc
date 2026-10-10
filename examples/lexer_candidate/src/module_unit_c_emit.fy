@@ -69,7 +69,7 @@ fn bool function(ref ir::Program p,ref cfg::Graph g,ref mut bytes::Buffer out,re
     while(i<=cfg::count(g)){if(!budget::charge(work,1)){s.code=1002;return false;}let n=cfg::at(g,i);if(!w::text(out,s,b"fy_b_") || !w::number(out,s,i) || !w::text(out,s,b":;\n")){return false;}
         if(n.kind==1){let e=ir::node_at(b,n.source-1).value;let left=lookup::node(b,e.left);let variant=e.kind==6 && left!=0 && ir::node_at(b,left-1).value.kind==28;
             if(e.kind==6 && !variant){if(e.builtin.kind!=0){s.code=1004;return false;}if(!call(p,g,n.source,0,out,s,work)){return false;}}
-            else if(e.kind==2 || e.kind==3 || e.kind==8 || e.kind==10 || e.kind==21 || e.kind==22 || e.kind==28 || e.kind==30 || e.kind==4 && bytes::equal(ir::node_text(b,n.source-1),b"*") || variant){if(!aggregate::expression(p,b,n.source,out,s,work)){return false;}}
+            else if(e.kind==2 || e.kind==3 || e.kind==8 || e.kind==9 || e.kind==10 || e.kind==21 || e.kind==22 || e.kind==24 || e.kind==28 || e.kind==29 || e.kind==30 || e.kind==4 && bytes::equal(ir::node_text(b,n.source-1),b"*") || variant){if(!aggregate::expression(p,b,n.source,out,s,work)){return false;}}
             else if(!scalar::expression(p,b,n.source,out,s)){return false;}}
         else if(n.kind==2){if(!store(p,b,n,out,s)){return false;}}
         else if(n.kind==3){if(!w::text(out,s,b"if(") || !scalar::value(out,s,n.source) || !w::text(out,s,b"){") || !w::jump(out,s,n.first) || !w::text(out,s,b"}else{") || !w::jump(out,s,n.second) || !w::text(out,s,b"}\n")){return false;}}

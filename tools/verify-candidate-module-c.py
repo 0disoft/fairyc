@@ -1,10 +1,13 @@
 """Compile and execute C captured by the private owned-body emitter tests.
 
-The input must be the JSON output of fairyc test --native --capture-output
---file tests/module_unit_c_emit.fy, tests/module_unit_c_owned.fy and/or
-tests/module_unit_c_references.fy.
+The input must be the JSON output of fairyc test --native --json --capture-output,
+selecting the matching C emitter tests. The arrays suite selects the five tests
+in module_unit_c_arrays.fy plus the scalar and owned unsupported-type rejections;
+use --exact identities to include those two tests without their full suites.
 Select the matching --suite. This checks generated C, not stage1/stage2.
 It does not authenticate when that report's compiler sources were built.
+Repeat --report in execution order for focused reruns. The latest outcome for
+each test must pass; callers must verify unchanged compiler inputs across reports.
 """
 
 import argparse
@@ -31,7 +34,7 @@ OWNED = {
     "owned_c_invokes_loop_defer_suffix_before_drops_and_keeps_outer_owner": "20,10,0,21,11,1,100,",
     "owned_c_keeps_provider_nominal_identity_and_shared_foreign_linkage": "30,10,",
 }
-OWNED_REJECTION = "owned_c_rejects_pending_array_transport_without_partial_output"
+OWNED_REJECTION = "owned_c_rejects_pending_view_transport_without_partial_output"
 REFERENCES = {
     "reference_c_snapshots_root_and_projected_values_before_rhs_mutation": "3,6,",
     "reference_c_mutates_borrowed_resource_without_dropping_the_reference": "10,3,",
@@ -40,6 +43,13 @@ REFERENCES = {
     "reference_c_allows_sequential_mutable_and_shared_scopes": "8,",
 }
 REFERENCE_PROOF = "reference_c_rejects_missing_duplicate_and_malformed_compound_snapshots"
+ARRAYS = {
+    "array_c_copies_values_across_calls_and_returns": (0, "1,9,3,6,"),
+    "array_c_evaluates_repeated_values_once_and_orders_literal_effects": (0, "4,1,3,4,9,1,"),
+    "array_c_preserves_indexed_storage_and_old_values_before_rhs": (0, "77,5,8,8,"),
+    "array_c_traps_read_at_extent": (106, ""),
+    "array_c_checks_target_bounds_before_rhs_effects": (106, "1,"),
+}
 
 
 def run(argv, cwd, env=None, timeout=60):
@@ -59,31 +69,51 @@ def run(argv, cwd, env=None, timeout=60):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--report", required=True, type=Path)
+    parser.add_argument("--report", required=True, type=Path, action="append")
     parser.add_argument("--output", required=True, type=Path)
     parser.add_argument("--vcvars", required=True, type=Path)
-    parser.add_argument("--suite", choices=("scalar", "owned", "references", "all"), default="scalar")
+    parser.add_argument("--suite", choices=("scalar", "owned", "references", "arrays", "all"), default="scalar")
     args = parser.parse_args()
-    report_bytes = args.report.read_bytes()
-    report = json.loads(report_bytes)
     scalar_cases = {name: (exit_code, "") for name, exit_code in EXPECTED.items()}
     owned_cases = {name: (0, trace) for name, trace in OWNED.items()}
     reference_cases = {name: (0, trace) for name, trace in REFERENCES.items()}
     suites = {"scalar": (scalar_cases, {REJECTION}),
               "owned": (owned_cases, {OWNED_REJECTION}),
               "references": (reference_cases, {REFERENCE_PROOF}),
-              "all": (scalar_cases | owned_cases | reference_cases,
+              "arrays": (ARRAYS, {REJECTION, OWNED_REJECTION}),
+              "all": (scalar_cases | owned_cases | reference_cases | ARRAYS,
                       {REJECTION, OWNED_REJECTION, REFERENCE_PROOF})}
     expected_cases, rejections = suites[args.suite]
     count = len(expected_cases) + len(rejections)
-    assert report["engine"] == "native" and report["count"] == count
-    assert report["passed"] == count and report["failed"] == 0
+    reports = []
+    outcomes = {}
+    configuration = None
+    for path in args.report:
+        raw = path.read_bytes()
+        report = json.loads(raw)
+        assert report["engine"] == "native"
+        assert report["count"] == len(report["tests"])
+        assert report["count"] == report["passed"] + report["failed"]
+        observed_passes = sum(test["outcome"] == "passed" for test in report["tests"])
+        assert observed_passes == report["passed"]
+        current = (report["target"], report["profile"])
+        assert configuration is None or current == configuration
+        configuration = current
+        identities = set()
+        for test in report["tests"]:
+            assert test["identity"] not in identities
+            identities.add(test["identity"])
+            outcomes[test["identity"]] = test
+        reports.append(dict(path=str(path.resolve()), sha256=hashlib.sha256(raw).hexdigest(),
+                            count=report["count"], passed=report["passed"], failed=report["failed"]))
+    assert len(outcomes) == count
     cases = {}
-    for test in report["tests"]:
+    for test in outcomes.values():
         assert test["outcome"] == "passed" and not test["stderrBase64"]
         identity = test["identity"]
         prefix = next((prefix for prefix in ("tests::module_unit_c_emit::",
-                       "tests::module_unit_c_owned::", "tests::module_unit_c_references::")
+                       "tests::module_unit_c_owned::", "tests::module_unit_c_references::",
+                       "tests::module_unit_c_arrays::")
                        if identity.startswith(prefix)), None)
         assert prefix is not None
         name = identity.removeprefix(prefix)
@@ -132,8 +162,7 @@ def main():
                                    build=build, run=result))
             print(f"PASS {profile}: {name} (exit {expected})", flush=True)
     receipt = dict(schema="fairyc.candidate-module-c-execution/v1", passed=True, suite=args.suite,
-                   nativeReport=dict(path=str(args.report.resolve()),
-                                     sha256=hashlib.sha256(report_bytes).hexdigest()),
+                   nativeReport=reports[0], nativeReruns=reports[1:],
                    compiler=str(compiler), executions=executions,
                    trapShim="Standalone test shim maps runtime category to exit 100+category",
                    limitation="Report source/compiler provenance must be supplied by the caller")

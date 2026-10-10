@@ -47,6 +47,6 @@ fn usize entry(ref ir::Program p){var usize found=0;var usize i=1;while(i<=ir::c
 @test @effects(console) fn void owned_c_keeps_provider_nominal_identity_and_shared_foreign_linkage(){
     let p=retained(b"module main;import helper as h;@link_name(\"observe_cleanup\")@effects(console)unsafe extern C fn void trace(i32 n);@effects(console)resource R{i32 value;cleanup{unsafe{trace(this.value);}}}@effects(console)fn i32 main(){let R local=R{.value=10};let h::R imported=h::make();return 0;}",b"module helper;@link_name(\"observe_cleanup\")@effects(console)unsafe extern C fn void trace(i32 n);@effects(console)pub resource R{i32 value;cleanup{unsafe{trace(this.value);}}}pub fn R make(){return R{.value=30};}");output(ref p,entry(ref p));
 }
-@test @effects(console) fn void owned_c_rejects_pending_array_transport_without_partial_output(){
-    let p=retained(b"module main;fn i32 main(){let i32[2] values=[1,2];return values[0];}",b"");var bytes::Buffer c=switch(bytes::copy(b"sentinel")){case .ok(b):{b}case .err(_):{assert(false);return;}};assert(emit::render(ref p,entry(ref p),ref mut c).code==1004);assert(bytes::equal(bytes::view(ref c),b"sentinel"));
+@test @effects(console) fn void owned_c_rejects_pending_view_transport_without_partial_output(){
+    let p=retained(b"module main;fn i32 main(){let ref str value=\"pending\";return 0;}",b"");var bytes::Buffer c=switch(bytes::copy(b"sentinel")){case .ok(b):{b}case .err(_):{assert(false);return;}};assert(emit::render(ref p,entry(ref p),ref mut c).code==1004);assert(bytes::equal(bytes::view(ref c),b"sentinel"));
 }

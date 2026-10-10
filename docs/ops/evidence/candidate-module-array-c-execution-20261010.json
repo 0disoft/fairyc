@@ -1,0 +1,376 @@
+{
+  "schema": "fairyc.candidate-module-array-c-execution/v1",
+  "passed": true,
+  "identity": {
+    "nativeCompiler": {
+      "path": ".cache/candidate-tagged/compiler-origin-patterns.exe",
+      "sha256": "d36dae1b99751322e447880aaf4d28321bd6d53bdf776185308c6c4504889bb2"
+    },
+    "buildCompiler": {
+      "path": ".cache/candidate-tagged/compiler-build-240s.exe",
+      "sha256": "746fe10b022ed88cfbc0ae8ea13e3f867b842f3317ef5a2a4caa36d064a248dd"
+    },
+    "candidate": {
+      "path": "examples/lexer_candidate/build/lexer-candidate.exe",
+      "sha256": "64d71c161e16c36a2647bf7876d8f0887dc7d27918fbc7025a5357aed6f3d36d"
+    },
+    "sources": [
+      {
+        "path": "examples/lexer_candidate/src/module_unit_c_emit.fy",
+        "sha256": "e2054c8adb6e0a795f9c7b13ad606d944e0c4f8fecfd04b27821a1adb6b6f3b3"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_c_aggregate.fy",
+        "sha256": "6279f2645efb19038bd6fb41d3b677ea50763864fd227b782b32a0afa1f2f02b"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_c_scalar.fy",
+        "sha256": "77e2587c6580c0a7957751a8bb8028bc472831d5b6baa22786940736e6de679a"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_cfg_lower.fy",
+        "sha256": "b4c643586b76eaf2081234913fa3decc1f3044658507a236a9fb6c39464007f7"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_cfg_model.fy",
+        "sha256": "b6f7fdbb96e6d4d49d781920ad0e986b429f6a0068f28240670bfeecee7a9457"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_cfg_defer.fy",
+        "sha256": "d34d9d96d716b78bf834ac8dc72deb8059f0a3568a917ed0d8d713486a91767c"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_body_ir_model.fy",
+        "sha256": "9b9a5f4655e595cbeb0cdb19e4833c6280f26d93c04aa39ba8cb4cfe4056ec68"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_body_ir_verify.fy",
+        "sha256": "9ca01cf3ebaf2215e43e5ad1c2d7ba41dcbda39e5b300d85eec5d0c80c0c628c"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_cleanup_mir_model.fy",
+        "sha256": "8cd61811abad699237a647215bd04cd3ec01df12188eb3a2d3620bcea8bd745d"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_cleanup_mir_verify.fy",
+        "sha256": "bd4057012905da5f6417bf3de2cc89da4f31c0725e3b01779724e29cfe89be99"
+      },
+      {
+        "path": "examples/lexer_candidate/tests/module_unit_c_emit.fy",
+        "sha256": "dbe67a4b41a99c0f8c2b85de5a7c873446ed6d21d5f408e8665d75fd7208266e"
+      },
+      {
+        "path": "examples/lexer_candidate/tests/module_unit_c_owned.fy",
+        "sha256": "649a50244ed9fa6ed81dcfa4b6c56bfd2d92b3b96d5bf9496185d6bf471aaa58"
+      },
+      {
+        "path": "examples/lexer_candidate/tests/module_unit_c_references.fy",
+        "sha256": "b6010ccc47f86c2947c9c7994e983f6f199556f08e319b166ad7412900de7922"
+      },
+      {
+        "path": "examples/lexer_candidate/tests/module_unit_c_arrays.fy",
+        "sha256": "258f565802f01d605d323101469f378c197db7bf1fed263fe5ef36a580234c15"
+      },
+      {
+        "path": "examples/lexer_candidate/src/array_types.fy",
+        "sha256": "661e57ec5f65ea1d0be93eef637ce5235fc6e3f84e4ddf5babd8a4afd89f6688"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_value_array.fy",
+        "sha256": "1a8d9bd945da466fb61e7e6a5df57e013a4be4f0479baae862d876d437c37b5b"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_value_shapes.fy",
+        "sha256": "f1af2d4f0b0e8054301abb35a3e0bc33d4b300adf0899a5cf8eb2c5460ba0f59"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_value_view.fy",
+        "sha256": "c19b8710ddf31ec537d51f3d78b5463c33e2bb0e5941f0b9b317c400045f1621"
+      },
+      {
+        "path": "examples/lexer_candidate/fairy.lock",
+        "sha256": "6c1932b2c22106bcaa79fb17685445d57972e9f31af35dbd8dd6531889a73c7f"
+      },
+      {
+        "path": "tools/verify-candidate-module-c.py",
+        "sha256": "5e1f0bcd7f9cc2ed611f27b2be3d246359a9917b30d084db71fa449e3c18fca2"
+      }
+    ]
+  },
+  "native": {
+    "count": 7,
+    "passed": 7,
+    "failed": 0,
+    "newArrayPrograms": 5,
+    "updatedRejectionCases": 2,
+    "profile": "development",
+    "target": "x86_64-windows-msvc",
+    "report": {
+      "path": ".cache/candidate-tagged/cleanup-operands-unit/module-c-array-native-verified.json",
+      "sha256": "dbf7c1d6d7be2751aa242c93dc5f2a71cce4066f6258cedfa5e00069f0b4b18b"
+    },
+    "tests": [
+      {
+        "identity": "tests::module_unit_c_arrays::array_c_checks_target_bounds_before_rhs_effects",
+        "outcome": "passed",
+        "emittedCBytes": 5131,
+        "emittedCSHA256": "8934527e06ea12ec83c53cc263096cbfeaf74c855f78f2ec8f89b574115e66f1"
+      },
+      {
+        "identity": "tests::module_unit_c_arrays::array_c_copies_values_across_calls_and_returns",
+        "outcome": "passed",
+        "emittedCBytes": 9001,
+        "emittedCSHA256": "36a917b34b07f2fd859a08c3c9c85bab960c29a12eecdc6a41232d92a3d5fec7"
+      },
+      {
+        "identity": "tests::module_unit_c_arrays::array_c_evaluates_repeated_values_once_and_orders_literal_effects",
+        "outcome": "passed",
+        "emittedCBytes": 50088,
+        "emittedCSHA256": "42ee6fbc28dfd380efc2176b45654118161e77fa5efa09874ffb116db3e677c3"
+      },
+      {
+        "identity": "tests::module_unit_c_arrays::array_c_preserves_indexed_storage_and_old_values_before_rhs",
+        "outcome": "passed",
+        "emittedCBytes": 12329,
+        "emittedCSHA256": "c86afd55f4040e72c64d797b626fea736b04e66ee61d40c1ebe4e0d07cccebac"
+      },
+      {
+        "identity": "tests::module_unit_c_arrays::array_c_traps_read_at_extent",
+        "outcome": "passed",
+        "emittedCBytes": 3007,
+        "emittedCSHA256": "974cf69b1b842aa5d87be09f887025d9e73fb2f4384cd887814b1537721bc7fc"
+      },
+      {
+        "identity": "tests::module_unit_c_emit::module_c_rejects_unsupported_types_and_bad_entry_without_partial_output",
+        "outcome": "passed",
+        "emittedCBytes": 0,
+        "emittedCSHA256": null
+      },
+      {
+        "identity": "tests::module_unit_c_owned::owned_c_rejects_pending_view_transport_without_partial_output",
+        "outcome": "passed",
+        "emittedCBytes": 0,
+        "emittedCSHA256": null
+      }
+    ],
+    "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+    "exit": 0,
+    "command": [
+      "compiler-origin-patterns.exe",
+      "test",
+      "--native",
+      "--json",
+      "--capture-output",
+      "--exact",
+      "tests::module_unit_c_arrays::array_c_checks_target_bounds_before_rhs_effects",
+      "--exact",
+      "tests::module_unit_c_arrays::array_c_copies_values_across_calls_and_returns",
+      "--exact",
+      "tests::module_unit_c_arrays::array_c_evaluates_repeated_values_once_and_orders_literal_effects",
+      "--exact",
+      "tests::module_unit_c_arrays::array_c_preserves_indexed_storage_and_old_values_before_rhs",
+      "--exact",
+      "tests::module_unit_c_arrays::array_c_traps_read_at_extent",
+      "--exact",
+      "tests::module_unit_c_emit::module_c_rejects_unsupported_types_and_bad_entry_without_partial_output",
+      "--exact",
+      "tests::module_unit_c_owned::owned_c_rejects_pending_view_transport_without_partial_output"
+    ]
+  },
+  "generatedC": {
+    "count": 10,
+    "passed": 10,
+    "profiles": [
+      "/Od",
+      "/O2"
+    ],
+    "report": {
+      "path": ".cache/candidate-tagged/module-c-array-unit/verified-c/execution.json",
+      "sha256": "1ae848239da9cccdddc733dba5113dfae8f7f1a4809d9753517abe0d9ef0751d"
+    },
+    "compiler": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+    "observations": [
+      {
+        "name": "array_c_copies_values_across_calls_and_returns",
+        "profile": "low",
+        "sourceSHA256": "36a917b34b07f2fd859a08c3c9c85bab960c29a12eecdc6a41232d92a3d5fec7",
+        "buildExit": 0,
+        "expectedExit": 0,
+        "actualExit": 0,
+        "expectedStdout": "1,9,3,6,",
+        "actualStdout": "1,9,3,6,"
+      },
+      {
+        "name": "array_c_copies_values_across_calls_and_returns",
+        "profile": "optimized",
+        "sourceSHA256": "36a917b34b07f2fd859a08c3c9c85bab960c29a12eecdc6a41232d92a3d5fec7",
+        "buildExit": 0,
+        "expectedExit": 0,
+        "actualExit": 0,
+        "expectedStdout": "1,9,3,6,",
+        "actualStdout": "1,9,3,6,"
+      },
+      {
+        "name": "array_c_evaluates_repeated_values_once_and_orders_literal_effects",
+        "profile": "low",
+        "sourceSHA256": "42ee6fbc28dfd380efc2176b45654118161e77fa5efa09874ffb116db3e677c3",
+        "buildExit": 0,
+        "expectedExit": 0,
+        "actualExit": 0,
+        "expectedStdout": "4,1,3,4,9,1,",
+        "actualStdout": "4,1,3,4,9,1,"
+      },
+      {
+        "name": "array_c_evaluates_repeated_values_once_and_orders_literal_effects",
+        "profile": "optimized",
+        "sourceSHA256": "42ee6fbc28dfd380efc2176b45654118161e77fa5efa09874ffb116db3e677c3",
+        "buildExit": 0,
+        "expectedExit": 0,
+        "actualExit": 0,
+        "expectedStdout": "4,1,3,4,9,1,",
+        "actualStdout": "4,1,3,4,9,1,"
+      },
+      {
+        "name": "array_c_preserves_indexed_storage_and_old_values_before_rhs",
+        "profile": "low",
+        "sourceSHA256": "c86afd55f4040e72c64d797b626fea736b04e66ee61d40c1ebe4e0d07cccebac",
+        "buildExit": 0,
+        "expectedExit": 0,
+        "actualExit": 0,
+        "expectedStdout": "77,5,8,8,",
+        "actualStdout": "77,5,8,8,"
+      },
+      {
+        "name": "array_c_preserves_indexed_storage_and_old_values_before_rhs",
+        "profile": "optimized",
+        "sourceSHA256": "c86afd55f4040e72c64d797b626fea736b04e66ee61d40c1ebe4e0d07cccebac",
+        "buildExit": 0,
+        "expectedExit": 0,
+        "actualExit": 0,
+        "expectedStdout": "77,5,8,8,",
+        "actualStdout": "77,5,8,8,"
+      },
+      {
+        "name": "array_c_traps_read_at_extent",
+        "profile": "low",
+        "sourceSHA256": "974cf69b1b842aa5d87be09f887025d9e73fb2f4384cd887814b1537721bc7fc",
+        "buildExit": 0,
+        "expectedExit": 106,
+        "actualExit": 106,
+        "expectedStdout": "",
+        "actualStdout": ""
+      },
+      {
+        "name": "array_c_traps_read_at_extent",
+        "profile": "optimized",
+        "sourceSHA256": "974cf69b1b842aa5d87be09f887025d9e73fb2f4384cd887814b1537721bc7fc",
+        "buildExit": 0,
+        "expectedExit": 106,
+        "actualExit": 106,
+        "expectedStdout": "",
+        "actualStdout": ""
+      },
+      {
+        "name": "array_c_checks_target_bounds_before_rhs_effects",
+        "profile": "low",
+        "sourceSHA256": "8934527e06ea12ec83c53cc263096cbfeaf74c855f78f2ec8f89b574115e66f1",
+        "buildExit": 0,
+        "expectedExit": 106,
+        "actualExit": 106,
+        "expectedStdout": "1,",
+        "actualStdout": "1,"
+      },
+      {
+        "name": "array_c_checks_target_bounds_before_rhs_effects",
+        "profile": "optimized",
+        "sourceSHA256": "8934527e06ea12ec83c53cc263096cbfeaf74c855f78f2ec8f89b574115e66f1",
+        "buildExit": 0,
+        "expectedExit": 106,
+        "actualExit": 106,
+        "expectedStdout": "1,",
+        "actualStdout": "1,"
+      }
+    ],
+    "runtime": "Standalone C shim traces i32 and maps traps to exit 100+category"
+  },
+  "sourceCheck": {
+    "exit": 0,
+    "locked": true,
+    "stdout": "check ok: 2 instance(s), 256 source file(s), 3253 MIR function(s), lock verified"
+  },
+  "developmentBuild": {
+    "exit": 0,
+    "locked": true,
+    "stdout": "built: build/lexer-candidate.exe (x86_64-windows-msvc, development, lock verified)"
+  },
+  "behavior": {
+    "arrays": "Canonical rank-one scalar1..6/inert-struct arrays use numerical wrappers with fy_items[N]",
+    "length": "Bounds 1..4096; repeated literal count matches retained canonical extent",
+    "literals": "List operands evaluate left to right; repeat operand evaluates once; aggregate initializer repeats only the frozen value",
+    "copy": "Argument, return and assignment copies preserve independent by-value array elements",
+    "places": "Index evaluation/check precedes RHS; stores and element references preserve original owner storage",
+    "compound": "CFG kind17 saves old scalar target value before RHS mutation",
+    "bounds": "Category6 trap precedes read and precedes RHS effects; traps remain non-unwinding",
+    "transaction": "Unsupported text view and invalid entry leave sentinel output unchanged"
+  },
+  "traceContracts": {
+    "copy": "1,9,3,6,",
+    "repeatAndOrder": "4,1,3,4,9,1,",
+    "indexAndCleanup": "77,5,8,8,",
+    "readBounds": "",
+    "targetBoundsBeforeRHS": "1,"
+  },
+  "correctedFirstAttempt": {
+    "count": 7,
+    "passed": 2,
+    "failed": 5,
+    "report": {
+      "path": ".cache/candidate-tagged/cleanup-operands-unit/module-c-array-native.json",
+      "sha256": "f83b3f69c85849daa219d024ab14241d4b6c6f3055504108dfca644c73c54f1f"
+    },
+    "reason": "Fixtures used an unknown text type spelling, array generic argument outside scalar-only contract, a disallowed resource array field, and an ambiguous zero-parameter i32 helper entry"
+  },
+  "optimizedRepeatCorrection": {
+    "originalGeneratedC": {
+      "path": ".cache/candidate-tagged/module-c-array-unit/final-c/array_c_evaluates_repeated_values_once_and_orders_literal_effects.c",
+      "sha256": "7e5da297993bb0cebb85ca524020151b51be7f4926c83fb2b9770a70ea18c8ee"
+    },
+    "originalOptimizedBinary": {
+      "path": ".cache/candidate-tagged/module-c-array-unit/final-c/array_c_evaluates_repeated_values_once_and_orders_literal_effects-optimized.exe",
+      "sha256": "0573a51df3449c715364bf30e00c9a41da9ad0ace0de8df711d64f08985e2680"
+    },
+    "originalExit": 105,
+    "originalStdout": "",
+    "lowPassed": true,
+    "diagnostic": "4096 i64-max repeat: frozen literal retained max, owner copy read -1 under /O2",
+    "confirmedAlternative": {
+      "path": ".cache/candidate-tagged/module-c-array-unit/final-c/repeat-unrolled.c",
+      "sha256": "376df1bff5275b7b79e657665566ad9dffdd22bab4a9c35d8771a05515e48da4"
+    },
+    "alternativeProfile": "/O2",
+    "alternativeExit": 0,
+    "alternativeStdout": "4,1,3,4,9,1,",
+    "correction": "Use aggregate repeated initialization like existing c_arrays backend; keep /O2 enabled"
+  },
+  "pending": [
+    "Direct nested-array element C transport; enum/tagged element admission",
+    "Whole-array borrowed views and raw pointer/view/cast/enum C transport",
+    "Foreign pointer/aggregate/C-scalar ABI and authenticated SDK runtime calls",
+    "Region checkpoint/place/reset execution",
+    "Dominance, initialization, whole-path cleanup and full source/unsafe provenance proofs",
+    "Whole dispatcher and stage1/stage2"
+  ],
+  "skipped": {
+    "releaseCandidate": "Separate release batch; generated C /O2 is not candidate Release",
+    "Linux": "Windows native scope",
+    "fullSuite": "Focused five array programs and two updated admission rejections; unchanged C suites not rerun",
+    "Go": "No Go changes"
+  },
+  "privateAPIExpanded": true,
+  "stableCLIChanged": false,
+  "sdkABIChanged": false,
+  "dbChanged": false,
+  "ciChanged": false,
+  "hygieneChanged": false,
+  "pushed": false
+}
