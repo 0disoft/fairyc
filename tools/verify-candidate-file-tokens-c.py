@@ -1,4 +1,4 @@
-"""Run the unchanged file-token path through owned C and the Go reference image."""
+"""Run original file tokens or scanner budgets through owned C and a Go-built reference."""
 import argparse
 import base64
 import hashlib
@@ -47,16 +47,102 @@ def binary_run(binary, argv, cwd, environment):
                 stdout=run.stdout.decode("utf-8"), stderr=run.stderr.decode("utf-8"))
 
 
+def budget_cases(folder, reference, environment):
+    data = {"valid.fy": b"let n=1;", "errors.fy": b"###", "revision.fy": b"defer",
+            "empty.fy": b"", "bom.fy": b"\xef\xbb\xbflet n=1;",
+            "string.fy": b'let s="\\u{03bb}";', "comment.fy": b"/* outer /* inner */ end */",
+            "source-한글-λ.fy": 'let s="한글";'.encode()}
+    for name, raw in data.items():
+        (folder / name).write_bytes(raw)
+    defaults = [0, 65536, 1048576, 256, 16777216]
+    cases = []
+
+    def add(name, filename="valid.fy", **limits):
+        values = defaults.copy()
+        for key, value in limits.items():
+            values[("previous", "bytes", "tokens", "diagnostics", "work").index(key)] = value
+        cases.append((name, [filename, *map(str, values)]))
+
+    for name in data:
+        add("baseline-" + name, name)
+    add("bytes-zero", bytes=0)
+    add("bytes-below", bytes=7)
+    add("bytes-exact", bytes=8)
+    add("tokens-zero", tokens=0)
+    add("tokens-one", tokens=1)
+    add("tokens-below", tokens=5)
+    add("tokens-exact", tokens=6)
+    for limit in (0, 1, 2, 3):
+        add("diagnostics-" + str(limit), "errors.fy", diagnostics=limit)
+    add("previous-revision", "revision.fy", previous=1)
+    add("empty-zero", "empty.fy", bytes=0, tokens=0, diagnostics=0, work=0)
+    add("bom-work-zero", "bom.fy", work=0)
+    # Discover the exact completion threshold from the authored-source reference.
+    # The C runs below and at it must match, including lossless recovery records.
+    thresholds = {}
+    for filename in ("valid.fy", "string.fy", "comment.fy"):
+        baseline = binary_run(reference, [filename, *map(str, defaults)], folder, environment)
+        assert baseline["exit"] == 0 and not baseline["stderr"]
+        lo, hi = 0, 1024
+        while lo < hi:
+            mid = (lo + hi) // 2
+            values = defaults[:-1] + [mid]
+            observed = binary_run(reference, [filename, *map(str, values)], folder, environment)
+            if observed["stdout"] == baseline["stdout"] and observed["exit"] == 0:
+                hi = mid
+            else:
+                lo = mid + 1
+        assert 0 < lo < 1024
+        thresholds[filename] = lo
+        for name, limit in (("zero", 0), ("below", lo - 1), ("exact", lo), ("above", lo + 1)):
+            add("work-" + filename + "-" + name, filename, work=limit)
+    cases.extend([("missing", ["missing.fy", *map(str, defaults)]), ("no-argument", []),
+                  ("bad-number", ["valid.fy", "0", "4294967296", "6", "256", "100"]),
+                  ("bad-revision", ["valid.fy", "2", "8", "6", "256", "100"])])
+    return data, cases, thresholds
+
+
+def scanner_observation(output, source_size):
+    words = iter(map(int, output.split()))
+    position = 0
+    tokens = []
+    while True:
+        kind, trivia, start, end, length = (next(words) for _ in range(5))
+        assert start == position and start <= end <= source_size
+        payload = bytes(next(words) for _ in range(length))
+        tokens.append(dict(kind=kind, trivia=trivia, start=start, end=end, cooked=payload.hex()))
+        position = end
+        if kind == 1:
+            assert start == end == source_size and not payload
+            break
+
+    def text():
+        return bytes(next(words) for _ in range(next(words))).decode("ascii")
+
+    diagnostics = []
+    for _ in range(next(words)):
+        code, repair, token = text(), text(), text()
+        start, end = next(words), next(words)
+        assert 0 <= start <= end <= source_size
+        diagnostics.append(dict(code=code, repair=repair, token=token, start=start, end=end))
+    assert next(words, None) is None
+    return dict(tokens=tokens, diagnostics=diagnostics)
+
+
 def main():
     parser = argparse.ArgumentParser()
     for name in ("report", "source", "reference", "output", "vcvars"):
         parser.add_argument("--" + name, type=Path, required=True)
+    parser.add_argument("--mode", choices=("file-tokens", "scanner-budgets"), default="file-tokens")
     args = parser.parse_args()
+    budgets = args.mode == "scanner-budgets"
     native = json.loads(args.report.read_bytes())
     assert native["count"] == native["passed"] == 1 and native["failed"] == 0
     assert native["engine"] == "native" and native["target"] == "x86_64-windows-msvc"
     test = native["tests"][0]
-    assert test["identity"] == "tests::module_unit_c_file_tokens::sdk_c_executes_original_file_tokens"
+    identity = ("tests::module_unit_c_scanner_budget::sdk_c_executes_original_scanner_budgets" if budgets
+                else "tests::module_unit_c_file_tokens::sdk_c_executes_original_file_tokens")
+    assert test["identity"] == identity
     assert not base64.b64decode(test["stderrBase64"], validate=True)
     proof = re.fullmatch(r"retained instances (\d+)\nC bytes (\d+) SHA256 words((?: \d+){8})\n",
                          base64.b64decode(test["stdoutBase64"], validate=True).decode())
@@ -132,17 +218,44 @@ int main(void){int32_t status=fy_candidate_entry();const char *path=getenv("FY_T
     reference_runs = []
     with tempfile.TemporaryDirectory(prefix="file-token-inputs-", dir=output) as temporary:
         folder = Path(temporary)
-        data = fixtures(folder)
+        thresholds = {}
+        if budgets:
+            data, cases, thresholds = budget_cases(folder, args.reference.resolve(), environment)
+        else:
+            data = fixtures(folder)
+            cases = [(name, [name]) for name in data] + [("missing", ["missing.fy"]), ("no-argument", []), ("extra-argument", ["empty.fy", "extra"])]
         fixture_hashes = {name: hashlib.sha256(raw).hexdigest() for name, raw in data.items()}
-        cases = [(name, [name]) for name in data] + [("missing", ["missing.fy"]), ("no-argument", []), ("extra-argument", ["empty.fy", "extra"])]
         expected = {}
         for name, argv in cases:
             run = binary_run(args.reference.resolve(), argv, folder, environment)
             reference_runs.append(dict(name=name, run=run))
             expected[name] = run
-        assert all(expected[name]["exit"] == 0 for name in ("empty.fy", "source-한글-λ.fy", "literals.fy", "comments.fy", "exact.fy"))
-        assert expected["overflow.fy"]["exit"] == expected["missing"]["exit"] == 2
-        assert expected["no-argument"]["exit"] == expected["extra-argument"]["exit"] == 8
+        if budgets:
+            assert all(run["exit"] == 0 and not run["stderr"] for name, run in expected.items()
+                       if name not in ("missing", "no-argument", "bad-number", "bad-revision"))
+            assert expected["missing"]["exit"] == 1
+            assert all(expected[name]["exit"] == 8 for name in ("no-argument", "bad-number", "bad-revision"))
+            baseline = expected["baseline-valid.fy"]["stdout"]
+            assert expected["bytes-exact"]["stdout"] == expected["tokens-exact"]["stdout"] == baseline
+            assert all(expected[name]["stdout"] != baseline for name in
+                       ("bytes-zero", "bytes-below", "tokens-zero", "tokens-one", "tokens-below"))
+            assert expected["previous-revision"]["stdout"] != expected["baseline-revision.fy"]["stdout"]
+            assert len({expected["diagnostics-" + str(n)]["stdout"] for n in range(4)}) == 4
+            observations = {name: scanner_observation(expected[name]["stdout"], len(data[argv[0]]))
+                            for name, argv in cases if expected[name]["exit"] == 0}
+            for name in ("bytes-zero", "bytes-below", "tokens-zero", "tokens-one", "tokens-below",
+                         "diagnostics-0", "diagnostics-1", "diagnostics-2", "bom-work-zero"):
+                assert "E0010" in [entry["code"] for entry in observations[name]["diagnostics"]]
+            for filename in thresholds:
+                prefix = "work-" + filename + "-"
+                assert expected[prefix + "exact"]["stdout"] == expected[prefix + "above"]["stdout"] == expected["baseline-" + filename]["stdout"]
+                for bound in ("zero", "below"):
+                    assert "E0010" in [entry["code"] for entry in observations[prefix + bound]["diagnostics"]]
+            assert [entry["code"] for entry in observations["diagnostics-3"]["diagnostics"]] == ["E0001"] * 3
+        else:
+            assert all(expected[name]["exit"] == 0 for name in ("empty.fy", "source-한글-λ.fy", "literals.fy", "comments.fy", "exact.fy"))
+            assert expected["overflow.fy"]["exit"] == expected["missing"]["exit"] == 2
+            assert expected["no-argument"]["exit"] == expected["extra-argument"]["exit"] == 8
         counts_by_profile = {}
         for profile, flag in (("low", "/Od"), ("optimized", "/O2")):
             binary = output / f"file-tokens-{profile}.exe"
@@ -164,30 +277,39 @@ int main(void){int32_t status=fy_candidate_entry();const char *path=getenv("FY_T
                 assert oracle["fileOpened"] == oracle["fileClosed"] + oracle["fileAutomaticClose"], (name, oracle)
                 counts_by_profile[profile][name] = oracle
                 executions.append(dict(name=name, profile=profile, heapFailureAt=None, counts=oracle, run=run))
-            attempts = counts_by_profile[profile]["literals.fy"]["heapAttempts"]
+            failure_case = "baseline-string.fy" if budgets else "literals.fy"
+            failure_argv = next(argv for name, argv in cases if name == failure_case)
+            attempts = counts_by_profile[profile][failure_case]["heapAttempts"]
             assert attempts > 3
             for failure in range(1, attempts + 1):
                 receipt_path = output / "oracle.json"
                 receipt_path.unlink(missing_ok=True)
                 env = dict(environment, FY_TEST_RECEIPT=str(receipt_path), FY_TEST_HEAP_FAIL_AT=str(failure))
-                run = binary_run(binary, ["literals.fy"], folder, env)
+                run = binary_run(binary, failure_argv, folder, env)
                 oracle = json.loads(receipt_path.read_bytes())
-                assert run["exit"] == 2 and run["stdout"] == "" and run["stderr"] == "error: buffer allocation failed\n", (failure, run)
+                if budgets:
+                    assert run["exit"] == 3 and run["stdout"] == run["stderr"] == "", (failure, run)
+                else:
+                    assert run["exit"] == 2 and run["stdout"] == "" and run["stderr"] == "error: buffer allocation failed\n", (failure, run)
                 assert oracle["heapAttempts"] == failure and oracle["heapLive"] == oracle["cleanupErrors"] == 0, (failure, oracle)
                 assert oracle["fileOpened"] == oracle["fileClosed"] + oracle["fileAutomaticClose"]
                 executions.append(dict(name="allocation-failure", profile=profile, heapFailureAt=failure, counts=oracle, run=run))
             observed = {path.name: hashlib.sha256(path.read_bytes()).hexdigest() for path in folder.iterdir()}
             assert observed == fixture_hashes, observed
         assert counts_by_profile["low"] == counts_by_profile["optimized"]
-    receipt = dict(schema="fairyc.candidate-original-file-tokens-c-execution/v1", passed=True,
+    receipt = dict(schema=("fairyc.candidate-scanner-budgets-c-execution/v1" if budgets else
+                           "fairyc.candidate-original-file-tokens-c-execution/v1"), passed=True,
                    retainedInstances=int(proof[1]), sourceBytes=len(source), sourceSHA256=digest,
                    nativeReportSHA256=hashlib.sha256(args.report.read_bytes()).hexdigest(),
                    referenceSHA256=hashlib.sha256(args.reference.read_bytes()).hexdigest(),
                    builds=builds, executions=executions, referenceRuns=reference_runs,
                    fixtureSHA256=fixture_hashes, fixtureBytes={name:len(raw) for name,raw in data.items()},
                    runtimeInputs=[dict(path=p.relative_to(ROOT).as_posix(), sha256=hashlib.sha256(p.read_bytes()).hexdigest()) for p in components])
+    if budgets:
+        receipt["workCompletionThresholds"] = thresholds
+        receipt["scannerObservations"] = observations
     (output / "receipt.json").write_text(json.dumps(receipt, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    print(f"Original file tokens C passed: {len(reference_runs)} reference cases, {len(executions)} C runs")
+    print(f"Original {args.mode} C passed: {len(reference_runs)} reference cases, {len(executions)} C runs")
 
 
 if __name__ == "__main__":

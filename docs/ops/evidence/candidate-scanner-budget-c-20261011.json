@@ -1,0 +1,1502 @@
+{
+  "schema": "fairyc.candidate-scanner-budget-c/v1",
+  "passed": true,
+  "parentCommit": "cc94719929621ac8b12942a92ef3d6006e1a25a7",
+  "identity": [
+    {
+      "path": "examples/lexer_candidate/src/scanner.fy",
+      "sha256": "1bd27d59bc093341d351547b7945f2864ae43219cbe35543283675eddaf82d84"
+    },
+    {
+      "path": "examples/lexer_candidate/src/file_source.fy",
+      "sha256": "1a7ac7f6c69ef27e78e734aa74dab90b895742a5500a32931baaed19379b938f"
+    },
+    {
+      "path": "examples/lexer_candidate/src/candidate_limits.fy",
+      "sha256": "5666b6a3ad8190630c8fe7b7bca969ede7264d95f97e3ed17e166bf88417fc9d"
+    },
+    {
+      "path": "examples/lexer_candidate/src/numbers.fy",
+      "sha256": "ee8b40b5e8061317d70d3594c386c9e4c70d95132a7e4243ea6402947a4c3556"
+    },
+    {
+      "path": "examples/lexer_candidate/src/diagnostics.fy",
+      "sha256": "ee95f81ed3b3224702196fceef2888434e9713341b81abf01e03945592c4de8b"
+    },
+    {
+      "path": "examples/lexer_candidate/src/utf8.fy",
+      "sha256": "4a5425cea9efbfb1bff2c31a38c2bd8e392c6792af09f24e906c9a743621870d"
+    },
+    {
+      "path": "examples/lexer_candidate/src/strings.fy",
+      "sha256": "8f26db7c4d4039c8c8d9fbc6078097859c8f714ca5887957fdf0e69269dca521"
+    },
+    {
+      "path": "examples/lexer_candidate/src/budget.fy",
+      "sha256": "c2793aa302279b9d27f0af32edd71f70de4e93cb4f76f55facd3e757641cc494"
+    },
+    {
+      "path": "internal/sdkstdlib/sources/optional/std/vec.fy",
+      "sha256": "0ae4c395bf98c39079ad620bde035b3b590d51417864802e698edc069281db5b"
+    },
+    {
+      "path": "internal/sdkstdlib/sources/std/bytes.fy",
+      "sha256": "4740a506e93349fb002c383967dcc44d182d20f09f2094b83b5464a4ab252982"
+    },
+    {
+      "path": "internal/sdkstdlib/sources/std/io.fy",
+      "sha256": "4b89c3aeb8b4de4887395d29723095d364c5660c6b773c5696fb1f65f5365f48"
+    },
+    {
+      "path": "internal/sdkstdlib/sources/std/fs.fy",
+      "sha256": "fd7ddfa9f0deed98304cecf94911644087d1e2a46e8be8995c35acbcb183b335"
+    },
+    {
+      "path": "internal/sdkstdlib/sources/std/text.fy",
+      "sha256": "cccd47e090fda11c9da063ffb321489dd8753fe9996855fc432833e05a79e695"
+    },
+    {
+      "path": "internal/sdkstdlib/sources/std/process.fy",
+      "sha256": "9680a1481df4f761f481d5a039af7bdbefeb312d1091961194f8e7bc0681ae24"
+    },
+    {
+      "path": "examples/lexer_candidate/tests/module_unit_c_scanner_budget.fy",
+      "sha256": "d0bffce3eb67e2418a6fc420e0a4be35fa93bb5bf469ee129ab3ee8871e417c3"
+    },
+    {
+      "path": "tools/verify-candidate-file-tokens-c.py",
+      "sha256": "8b15d0ba0bc9d8da4364f2973c80491e764467bbfb4331f7c0696f2bf381e006"
+    },
+    {
+      "path": ".cache/candidate-tagged/sdk-c-execution/scanner-budget-reference/src/main.fy",
+      "sha256": "f17211efe0d95f8b353fa333742f2a0286425d736ba91e6f1b48267f8e4925aa"
+    },
+    {
+      "path": ".cache/candidate-tagged/sdk-c-execution/scanner-budget-reference/build/original-scanner-budgets.exe",
+      "sha256": "df01bb99d4edd70df1632a15b79828fb424f0a5b8573cc70f13db0f6d0a4f104"
+    }
+  ],
+  "reference": {
+    "exactRootLiteral": true,
+    "exactPrivateSources": true,
+    "checkLocked": true,
+    "sourceFiles": 17,
+    "mirFunctions": 264,
+    "note": "Reference is the identical Fairy scanner and harness built with the Go Stage0 compiler, not an independent Go lexer."
+  },
+  "sourceCheck": {
+    "reusedFrom": "docs/ops/evidence/candidate-original-file-tokens-c-20261011.json",
+    "sourceFiles": 274,
+    "mirFunctions": 3406,
+    "trackedCompilerTreeUnchanged": true,
+    "sourceLockAndBootstrapHashesVerified": true
+  },
+  "native": {
+    "report": {
+      "path": ".cache/candidate-tagged/sdk-c-execution/native-scanner-budget.json",
+      "sha256": "735037fc0a492964f1e6ad59bdd49987ac255108b9fd2ed03bcdb622afdc5c04"
+    },
+    "profile": "release",
+    "count": 1,
+    "passed": 1,
+    "processTimeoutSeconds": 60,
+    "bootstrap": {
+      "path": ".cache/candidate-tagged/compiler-file-tokens-120s.exe",
+      "sha256": "a07e7bb81d919e605d35c6f538cdd601e408f8dc2c87ddfca47216190974f606"
+    },
+    "hostCompileTimeoutSeconds": 120,
+    "validationOnlyOverlay": true,
+    "overlayReceipt": "docs/ops/evidence/candidate-original-file-tokens-c-20261011.json",
+    "stdout": "retained instances 88\nC bytes 551981 SHA256 words 1343834456 2202878470 3925405925 2284239186 4014606407 479726463 345247271 2245394882\n"
+  },
+  "generatedC": {
+    "retainedInstances": 88,
+    "bytes": 551981,
+    "sha256": "50194958834d4206e9f8f0e58826b952ef4a08471c980b7f14940e2785d601c2"
+  },
+  "runtimeInputs": [
+    {
+      "path": "internal/cstdlib/stage0_system_heap.c",
+      "sha256": "cae6664fa1ec70722b76025c3e2c3daadc133cd90d95fa9f02f2385915d3e55c"
+    },
+    {
+      "path": "internal/cstdlib/stage0_buffer.c",
+      "sha256": "41c7a26acb8b9f22fd5e0f82c976f4b59964df2e2e73e7ddb5fa8bee70e8390c"
+    },
+    {
+      "path": "internal/cstdlib/stage0_vector_storage.c",
+      "sha256": "eb9686951b480a7c40d6bfe670206d683548c5293387c42a44670ad0b6e5ccca"
+    },
+    {
+      "path": "internal/cstdlib/stage0_windows_console.c",
+      "sha256": "076bc219ff0ff8ab6945ef0838230c77a254de8cefc460dfd05a842549bab306"
+    },
+    {
+      "path": "internal/cstdlib/stage0_text_view.c",
+      "sha256": "2e03c032878bedc7081b6cd9a465e5eff2d3a4ffda88d2449f5ce181a3f71aaf"
+    },
+    {
+      "path": "internal/cstdlib/stage0_windows_file.c",
+      "sha256": "0b70e682e2d09f76b2565075ac99e08674d4c80e92a74f46d88cde52c94626d6"
+    },
+    {
+      "path": "internal/cstdlib/stage0_windows_file_portable.c",
+      "sha256": "d965ef1295434c6cbb2873f2f4934c63c6b13c128cf49992bd0e048104cd5faf"
+    },
+    {
+      "path": "internal/cstdlib/stage0_windows_process_args.c",
+      "sha256": "8def696dd31522223fa626123ae6703967e2d0aca19c65a076b22f204c9c10d4"
+    }
+  ],
+  "workCompletionThresholds": {
+    "valid.fy": 8,
+    "string.fy": 17,
+    "comment.fy": 27
+  },
+  "referenceCases": [
+    {
+      "name": "baseline-valid.fy",
+      "argv": [
+        "valid.fy",
+        "0",
+        "65536",
+        "1048576",
+        "256",
+        "16777216"
+      ],
+      "exit": 0,
+      "stdout": "4 0 0 3 0 2 2 3 4 0 3 0 4 5 0 10 0 5 6 0 5 0 6 7 1 49 10 0 7 8 0 1 0 8 8 0 0 ",
+      "stderr": ""
+    },
+    {
+      "name": "baseline-errors.fy",
+      "argv": [
+        "errors.fy",
+        "0",
+        "65536",
+        "1048576",
+        "256",
+        "16777216"
+      ],
+      "exit": 0,
+      "stdout": "0 0 0 1 0 0 0 1 2 0 0 0 2 3 0 1 0 3 3 0 3 5 69 48 48 48 49 4 110 111 110 101 0 0 1 5 69 48 48 48 49 4 110 111 110 101 0 1 2 5 69 48 48 48 49 4 110 111 110 101 0 2 3 ",
+      "stderr": ""
+    },
+    {
+      "name": "baseline-revision.fy",
+      "argv": [
+        "revision.fy",
+        "0",
+        "65536",
+        "1048576",
+        "256",
+        "16777216"
+      ],
+      "exit": 0,
+      "stdout": "4 0 0 5 0 1 0 5 5 0 0 ",
+      "stderr": ""
+    },
+    {
+      "name": "baseline-empty.fy",
+      "argv": [
+        "empty.fy",
+        "0",
+        "65536",
+        "1048576",
+        "256",
+        "16777216"
+      ],
+      "exit": 0,
+      "stdout": "1 0 0 0 0 0 ",
+      "stderr": ""
+    },
+    {
+      "name": "baseline-bom.fy",
+      "argv": [
+        "bom.fy",
+        "0",
+        "65536",
+        "1048576",
+        "256",
+        "16777216"
+      ],
+      "exit": 0,
+      "stdout": "2 1 0 3 0 4 0 3 6 0 2 2 6 7 0 3 0 7 8 0 10 0 8 9 0 5 0 9 10 1 49 10 0 10 11 0 1 0 11 11 0 0 ",
+      "stderr": ""
+    },
+    {
+      "name": "baseline-string.fy",
+      "argv": [
+        "string.fy",
+        "0",
+        "65536",
+        "1048576",
+        "256",
+        "16777216"
+      ],
+      "exit": 0,
+      "stdout": "4 0 0 3 0 2 2 3 4 0 3 0 4 5 0 10 0 5 6 0 7 0 6 16 4 99 101 98 98 10 0 16 17 0 1 0 17 17 0 0 ",
+      "stderr": ""
+    },
+    {
+      "name": "baseline-comment.fy",
+      "argv": [
+        "comment.fy",
+        "0",
+        "65536",
+        "1048576",
+        "256",
+        "16777216"
+      ],
+      "exit": 0,
+      "stdout": "2 4 0 27 0 1 0 27 27 0 0 ",
+      "stderr": ""
+    },
+    {
+      "name": "baseline-source-한글-λ.fy",
+      "argv": [
+        "source-한글-λ.fy",
+        "0",
+        "65536",
+        "1048576",
+        "256",
+        "16777216"
+      ],
+      "exit": 0,
+      "stdout": "4 0 0 3 0 2 2 3 4 0 3 0 4 5 0 10 0 5 6 0 7 0 6 14 12 101 100 57 53 57 99 101 97 98 56 56 48 10 0 14 15 0 1 0 15 15 0 0 ",
+      "stderr": ""
+    },
+    {
+      "name": "bytes-zero",
+      "argv": [
+        "valid.fy",
+        "0",
+        "0",
+        "1048576",
+        "256",
+        "16777216"
+      ],
+      "exit": 0,
+      "stdout": "0 0 0 8 0 1 0 8 8 0 1 5 69 48 48 49 48 4 110 111 110 101 0 0 0 ",
+      "stderr": ""
+    },
+    {
+      "name": "bytes-below",
+      "argv": [
+        "valid.fy",
+        "0",
+        "7",
+        "1048576",
+        "256",
+        "16777216"
+      ],
+      "exit": 0,
+      "stdout": "0 0 0 8 0 1 0 8 8 0 1 5 69 48 48 49 48 4 110 111 110 101 0 0 0 ",
+      "stderr": ""
+    },
+    {
+      "name": "bytes-exact",
+      "argv": [
+        "valid.fy",
+        "0",
+        "8",
+        "1048576",
+        "256",
+        "16777216"
+      ],
+      "exit": 0,
+      "stdout": "4 0 0 3 0 2 2 3 4 0 3 0 4 5 0 10 0 5 6 0 5 0 6 7 1 49 10 0 7 8 0 1 0 8 8 0 0 ",
+      "stderr": ""
+    },
+    {
+      "name": "tokens-zero",
+      "argv": [
+        "valid.fy",
+        "0",
+        "65536",
+        "0",
+        "256",
+        "16777216"
+      ],
+      "exit": 0,
+      "stdout": "0 0 0 3 0 0 0 3 8 0 1 0 8 8 0 1 5 69 48 48 49 48 4 110 111 110 101 0 3 3 ",
+      "stderr": ""
+    },
+    {
+      "name": "tokens-one",
+      "argv": [
+        "valid.fy",
+        "0",
+        "65536",
+        "1",
+        "256",
+        "16777216"
+      ],
+      "exit": 0,
+      "stdout": "4 0 0 3 0 0 0 3 4 0 0 0 4 8 0 1 0 8 8 0 1 5 69 48 48 49 48 4 110 111 110 101 0 4 4 ",
+      "stderr": ""
+    },
+    {
+      "name": "tokens-below",
+      "argv": [
+        "valid.fy",
+        "0",
+        "65536",
+        "5",
+        "256",
+        "16777216"
+      ],
+      "exit": 0,
+      "stdout": "4 0 0 3 0 2 2 3 4 0 3 0 4 5 0 10 0 5 6 0 5 0 6 7 1 49 0 0 7 8 0 1 0 8 8 0 1 5 69 48 48 49 48 4 110 111 110 101 0 8 8 ",
+      "stderr": ""
+    },
+    {
+      "name": "tokens-exact",
+      "argv": [
+        "valid.fy",
+        "0",
+        "65536",
+        "6",
+        "256",
+        "16777216"
+      ],
+      "exit": 0,
+      "stdout": "4 0 0 3 0 2 2 3 4 0 3 0 4 5 0 10 0 5 6 0 5 0 6 7 1 49 10 0 7 8 0 1 0 8 8 0 0 ",
+      "stderr": ""
+    },
+    {
+      "name": "diagnostics-0",
+      "argv": [
+        "errors.fy",
+        "0",
+        "65536",
+        "1048576",
+        "0",
+        "16777216"
+      ],
+      "exit": 0,
+      "stdout": "0 0 0 1 0 0 0 1 3 0 1 0 3 3 0 1 5 69 48 48 49 48 4 110 111 110 101 0 1 1 ",
+      "stderr": ""
+    },
+    {
+      "name": "diagnostics-1",
+      "argv": [
+        "errors.fy",
+        "0",
+        "65536",
+        "1048576",
+        "1",
+        "16777216"
+      ],
+      "exit": 0,
+      "stdout": "0 0 0 1 0 0 0 1 2 0 0 0 2 3 0 1 0 3 3 0 2 5 69 48 48 48 49 4 110 111 110 101 0 0 1 5 69 48 48 49 48 4 110 111 110 101 0 2 2 ",
+      "stderr": ""
+    },
+    {
+      "name": "diagnostics-2",
+      "argv": [
+        "errors.fy",
+        "0",
+        "65536",
+        "1048576",
+        "2",
+        "16777216"
+      ],
+      "exit": 0,
+      "stdout": "0 0 0 1 0 0 0 1 2 0 0 0 2 3 0 1 0 3 3 0 3 5 69 48 48 48 49 4 110 111 110 101 0 0 1 5 69 48 48 48 49 4 110 111 110 101 0 1 2 5 69 48 48 49 48 4 110 111 110 101 0 3 3 ",
+      "stderr": ""
+    },
+    {
+      "name": "diagnostics-3",
+      "argv": [
+        "errors.fy",
+        "0",
+        "65536",
+        "1048576",
+        "3",
+        "16777216"
+      ],
+      "exit": 0,
+      "stdout": "0 0 0 1 0 0 0 1 2 0 0 0 2 3 0 1 0 3 3 0 3 5 69 48 48 48 49 4 110 111 110 101 0 0 1 5 69 48 48 48 49 4 110 111 110 101 0 1 2 5 69 48 48 48 49 4 110 111 110 101 0 2 3 ",
+      "stderr": ""
+    },
+    {
+      "name": "previous-revision",
+      "argv": [
+        "revision.fy",
+        "1",
+        "65536",
+        "1048576",
+        "256",
+        "16777216"
+      ],
+      "exit": 0,
+      "stdout": "3 0 0 5 0 1 0 5 5 0 0 ",
+      "stderr": ""
+    },
+    {
+      "name": "empty-zero",
+      "argv": [
+        "empty.fy",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0"
+      ],
+      "exit": 0,
+      "stdout": "1 0 0 0 0 0 ",
+      "stderr": ""
+    },
+    {
+      "name": "bom-work-zero",
+      "argv": [
+        "bom.fy",
+        "0",
+        "65536",
+        "1048576",
+        "256",
+        "0"
+      ],
+      "exit": 0,
+      "stdout": "0 0 0 11 0 1 0 11 11 0 1 5 69 48 48 49 48 4 110 111 110 101 0 0 0 ",
+      "stderr": ""
+    },
+    {
+      "name": "work-valid.fy-zero",
+      "argv": [
+        "valid.fy",
+        "0",
+        "65536",
+        "1048576",
+        "256",
+        "0"
+      ],
+      "exit": 0,
+      "stdout": "0 0 0 8 0 1 0 8 8 0 1 5 69 48 48 49 48 4 110 111 110 101 0 0 0 ",
+      "stderr": ""
+    },
+    {
+      "name": "work-valid.fy-below",
+      "argv": [
+        "valid.fy",
+        "0",
+        "65536",
+        "1048576",
+        "256",
+        "7"
+      ],
+      "exit": 0,
+      "stdout": "4 0 0 3 0 2 2 3 4 0 3 0 4 5 0 10 0 5 6 0 5 0 6 7 1 49 0 0 7 8 0 1 0 8 8 0 1 5 69 48 48 49 48 4 110 111 110 101 0 7 7 ",
+      "stderr": ""
+    },
+    {
+      "name": "work-valid.fy-exact",
+      "argv": [
+        "valid.fy",
+        "0",
+        "65536",
+        "1048576",
+        "256",
+        "8"
+      ],
+      "exit": 0,
+      "stdout": "4 0 0 3 0 2 2 3 4 0 3 0 4 5 0 10 0 5 6 0 5 0 6 7 1 49 10 0 7 8 0 1 0 8 8 0 0 ",
+      "stderr": ""
+    },
+    {
+      "name": "work-valid.fy-above",
+      "argv": [
+        "valid.fy",
+        "0",
+        "65536",
+        "1048576",
+        "256",
+        "9"
+      ],
+      "exit": 0,
+      "stdout": "4 0 0 3 0 2 2 3 4 0 3 0 4 5 0 10 0 5 6 0 5 0 6 7 1 49 10 0 7 8 0 1 0 8 8 0 0 ",
+      "stderr": ""
+    },
+    {
+      "name": "work-string.fy-zero",
+      "argv": [
+        "string.fy",
+        "0",
+        "65536",
+        "1048576",
+        "256",
+        "0"
+      ],
+      "exit": 0,
+      "stdout": "0 0 0 17 0 1 0 17 17 0 1 5 69 48 48 49 48 4 110 111 110 101 0 0 0 ",
+      "stderr": ""
+    },
+    {
+      "name": "work-string.fy-below",
+      "argv": [
+        "string.fy",
+        "0",
+        "65536",
+        "1048576",
+        "256",
+        "16"
+      ],
+      "exit": 0,
+      "stdout": "4 0 0 3 0 2 2 3 4 0 3 0 4 5 0 10 0 5 6 0 7 0 6 16 4 99 101 98 98 0 0 16 17 0 1 0 17 17 0 1 5 69 48 48 49 48 4 110 111 110 101 0 16 16 ",
+      "stderr": ""
+    },
+    {
+      "name": "work-string.fy-exact",
+      "argv": [
+        "string.fy",
+        "0",
+        "65536",
+        "1048576",
+        "256",
+        "17"
+      ],
+      "exit": 0,
+      "stdout": "4 0 0 3 0 2 2 3 4 0 3 0 4 5 0 10 0 5 6 0 7 0 6 16 4 99 101 98 98 10 0 16 17 0 1 0 17 17 0 0 ",
+      "stderr": ""
+    },
+    {
+      "name": "work-string.fy-above",
+      "argv": [
+        "string.fy",
+        "0",
+        "65536",
+        "1048576",
+        "256",
+        "18"
+      ],
+      "exit": 0,
+      "stdout": "4 0 0 3 0 2 2 3 4 0 3 0 4 5 0 10 0 5 6 0 7 0 6 16 4 99 101 98 98 10 0 16 17 0 1 0 17 17 0 0 ",
+      "stderr": ""
+    },
+    {
+      "name": "work-comment.fy-zero",
+      "argv": [
+        "comment.fy",
+        "0",
+        "65536",
+        "1048576",
+        "256",
+        "0"
+      ],
+      "exit": 0,
+      "stdout": "0 0 0 27 0 1 0 27 27 0 1 5 69 48 48 49 48 4 110 111 110 101 0 0 0 ",
+      "stderr": ""
+    },
+    {
+      "name": "work-comment.fy-below",
+      "argv": [
+        "comment.fy",
+        "0",
+        "65536",
+        "1048576",
+        "256",
+        "26"
+      ],
+      "exit": 0,
+      "stdout": "0 0 0 25 0 0 0 25 27 0 1 0 27 27 0 1 5 69 48 48 49 48 4 110 111 110 101 0 25 25 ",
+      "stderr": ""
+    },
+    {
+      "name": "work-comment.fy-exact",
+      "argv": [
+        "comment.fy",
+        "0",
+        "65536",
+        "1048576",
+        "256",
+        "27"
+      ],
+      "exit": 0,
+      "stdout": "2 4 0 27 0 1 0 27 27 0 0 ",
+      "stderr": ""
+    },
+    {
+      "name": "work-comment.fy-above",
+      "argv": [
+        "comment.fy",
+        "0",
+        "65536",
+        "1048576",
+        "256",
+        "28"
+      ],
+      "exit": 0,
+      "stdout": "2 4 0 27 0 1 0 27 27 0 0 ",
+      "stderr": ""
+    },
+    {
+      "name": "missing",
+      "argv": [
+        "missing.fy",
+        "0",
+        "65536",
+        "1048576",
+        "256",
+        "16777216"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "name": "no-argument",
+      "argv": [],
+      "exit": 8,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "name": "bad-number",
+      "argv": [
+        "valid.fy",
+        "0",
+        "4294967296",
+        "6",
+        "256",
+        "100"
+      ],
+      "exit": 8,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "name": "bad-revision",
+      "argv": [
+        "valid.fy",
+        "2",
+        "8",
+        "6",
+        "256",
+        "100"
+      ],
+      "exit": 8,
+      "stdout": "",
+      "stderr": ""
+    }
+  ],
+  "executionSummary": {
+    "total": 86,
+    "profiles": [
+      "low /Od",
+      "optimized /O2"
+    ],
+    "identicalObservationsAndCounts": true,
+    "canonicalProfile": "low"
+  },
+  "executions": [
+    {
+      "name": "baseline-valid.fy",
+      "heapFailureAt": null,
+      "exit": 0,
+      "stdoutSHA256": "1fbd731eb43e871d57249b53bd283a55fb794184822a4b0fcec57f003c81ec35",
+      "stderrEmpty": true,
+      "counts": {
+        "heapAttempts": 4,
+        "heapLive": 0,
+        "bufferDrops": 2,
+        "vectorReleases": 3,
+        "cleanupErrors": 0,
+        "fileOpened": 1,
+        "fileClosed": 1,
+        "fileDrops": 1,
+        "fileAutomaticClose": 0
+      }
+    },
+    {
+      "name": "baseline-errors.fy",
+      "heapFailureAt": null,
+      "exit": 0,
+      "stdoutSHA256": "c74787a4624dedab6df332e32aa3ef8f4fa413aeb623b577b1750a7dde3bc155",
+      "stderrEmpty": true,
+      "counts": {
+        "heapAttempts": 3,
+        "heapLive": 0,
+        "bufferDrops": 4,
+        "vectorReleases": 3,
+        "cleanupErrors": 0,
+        "fileOpened": 1,
+        "fileClosed": 1,
+        "fileDrops": 1,
+        "fileAutomaticClose": 0
+      }
+    },
+    {
+      "name": "baseline-revision.fy",
+      "heapFailureAt": null,
+      "exit": 0,
+      "stdoutSHA256": "1227158a762a00f08eb1f9c356ae6e53f1f4d18f31492b07a31233018efba417",
+      "stderrEmpty": true,
+      "counts": {
+        "heapAttempts": 2,
+        "heapLive": 0,
+        "bufferDrops": 1,
+        "vectorReleases": 3,
+        "cleanupErrors": 0,
+        "fileOpened": 1,
+        "fileClosed": 1,
+        "fileDrops": 1,
+        "fileAutomaticClose": 0
+      }
+    },
+    {
+      "name": "baseline-empty.fy",
+      "heapFailureAt": null,
+      "exit": 0,
+      "stdoutSHA256": "0ded0473e614cea0acb07eb3c0d6c7bb5eb92a951f4cb9cc54d9c2d3893c9efc",
+      "stderrEmpty": true,
+      "counts": {
+        "heapAttempts": 2,
+        "heapLive": 0,
+        "bufferDrops": 1,
+        "vectorReleases": 3,
+        "cleanupErrors": 0,
+        "fileOpened": 1,
+        "fileClosed": 1,
+        "fileDrops": 1,
+        "fileAutomaticClose": 0
+      }
+    },
+    {
+      "name": "baseline-bom.fy",
+      "heapFailureAt": null,
+      "exit": 0,
+      "stdoutSHA256": "b4834d2fc055a97b4872e04c6af555e837bb28010fb78de58236bf607d6177c8",
+      "stderrEmpty": true,
+      "counts": {
+        "heapAttempts": 4,
+        "heapLive": 0,
+        "bufferDrops": 2,
+        "vectorReleases": 3,
+        "cleanupErrors": 0,
+        "fileOpened": 1,
+        "fileClosed": 1,
+        "fileDrops": 1,
+        "fileAutomaticClose": 0
+      }
+    },
+    {
+      "name": "baseline-string.fy",
+      "heapFailureAt": null,
+      "exit": 0,
+      "stdoutSHA256": "95e46c3e03bac7552901e6f571fc3206420acec019adfb37e897460a03b00783",
+      "stderrEmpty": true,
+      "counts": {
+        "heapAttempts": 5,
+        "heapLive": 0,
+        "bufferDrops": 3,
+        "vectorReleases": 3,
+        "cleanupErrors": 0,
+        "fileOpened": 1,
+        "fileClosed": 1,
+        "fileDrops": 1,
+        "fileAutomaticClose": 0
+      }
+    },
+    {
+      "name": "baseline-comment.fy",
+      "heapFailureAt": null,
+      "exit": 0,
+      "stdoutSHA256": "35f55d2ce494e787775677aa994ce9d7a4abc54995e78f18094e22d8d1b8f1bd",
+      "stderrEmpty": true,
+      "counts": {
+        "heapAttempts": 2,
+        "heapLive": 0,
+        "bufferDrops": 1,
+        "vectorReleases": 3,
+        "cleanupErrors": 0,
+        "fileOpened": 1,
+        "fileClosed": 1,
+        "fileDrops": 1,
+        "fileAutomaticClose": 0
+      }
+    },
+    {
+      "name": "baseline-source-한글-λ.fy",
+      "heapFailureAt": null,
+      "exit": 0,
+      "stdoutSHA256": "f9b238cf9297d1be290c7695c3394677aa0c88ae7fb9ec0397f7f32445176d0b",
+      "stderrEmpty": true,
+      "counts": {
+        "heapAttempts": 5,
+        "heapLive": 0,
+        "bufferDrops": 3,
+        "vectorReleases": 3,
+        "cleanupErrors": 0,
+        "fileOpened": 1,
+        "fileClosed": 1,
+        "fileDrops": 1,
+        "fileAutomaticClose": 0
+      }
+    },
+    {
+      "name": "bytes-zero",
+      "heapFailureAt": null,
+      "exit": 0,
+      "stdoutSHA256": "94e461c031d85fbe9496abc0b3c7f384274c6b3ee9889ecb18d35d6252cc2787",
+      "stderrEmpty": true,
+      "counts": {
+        "heapAttempts": 3,
+        "heapLive": 0,
+        "bufferDrops": 2,
+        "vectorReleases": 3,
+        "cleanupErrors": 0,
+        "fileOpened": 1,
+        "fileClosed": 1,
+        "fileDrops": 1,
+        "fileAutomaticClose": 0
+      }
+    },
+    {
+      "name": "bytes-below",
+      "heapFailureAt": null,
+      "exit": 0,
+      "stdoutSHA256": "94e461c031d85fbe9496abc0b3c7f384274c6b3ee9889ecb18d35d6252cc2787",
+      "stderrEmpty": true,
+      "counts": {
+        "heapAttempts": 3,
+        "heapLive": 0,
+        "bufferDrops": 2,
+        "vectorReleases": 3,
+        "cleanupErrors": 0,
+        "fileOpened": 1,
+        "fileClosed": 1,
+        "fileDrops": 1,
+        "fileAutomaticClose": 0
+      }
+    },
+    {
+      "name": "bytes-exact",
+      "heapFailureAt": null,
+      "exit": 0,
+      "stdoutSHA256": "1fbd731eb43e871d57249b53bd283a55fb794184822a4b0fcec57f003c81ec35",
+      "stderrEmpty": true,
+      "counts": {
+        "heapAttempts": 4,
+        "heapLive": 0,
+        "bufferDrops": 2,
+        "vectorReleases": 3,
+        "cleanupErrors": 0,
+        "fileOpened": 1,
+        "fileClosed": 1,
+        "fileDrops": 1,
+        "fileAutomaticClose": 0
+      }
+    },
+    {
+      "name": "tokens-zero",
+      "heapFailureAt": null,
+      "exit": 0,
+      "stdoutSHA256": "4a4d503a6b18de2a735c987d72edb5e5da0557345f08a5303cbb1e637b2ed3e2",
+      "stderrEmpty": true,
+      "counts": {
+        "heapAttempts": 3,
+        "heapLive": 0,
+        "bufferDrops": 2,
+        "vectorReleases": 3,
+        "cleanupErrors": 0,
+        "fileOpened": 1,
+        "fileClosed": 1,
+        "fileDrops": 1,
+        "fileAutomaticClose": 0
+      }
+    },
+    {
+      "name": "tokens-one",
+      "heapFailureAt": null,
+      "exit": 0,
+      "stdoutSHA256": "d56e4e3aa2ad741f4787931b919ee3492302884461a7395b8778bd08cd984ebf",
+      "stderrEmpty": true,
+      "counts": {
+        "heapAttempts": 3,
+        "heapLive": 0,
+        "bufferDrops": 2,
+        "vectorReleases": 3,
+        "cleanupErrors": 0,
+        "fileOpened": 1,
+        "fileClosed": 1,
+        "fileDrops": 1,
+        "fileAutomaticClose": 0
+      }
+    },
+    {
+      "name": "tokens-below",
+      "heapFailureAt": null,
+      "exit": 0,
+      "stdoutSHA256": "5a9b039fd5198faf6efb653640ee6a3361d4585c5de292562d33f2988ad6f90e",
+      "stderrEmpty": true,
+      "counts": {
+        "heapAttempts": 5,
+        "heapLive": 0,
+        "bufferDrops": 3,
+        "vectorReleases": 3,
+        "cleanupErrors": 0,
+        "fileOpened": 1,
+        "fileClosed": 1,
+        "fileDrops": 1,
+        "fileAutomaticClose": 0
+      }
+    },
+    {
+      "name": "tokens-exact",
+      "heapFailureAt": null,
+      "exit": 0,
+      "stdoutSHA256": "1fbd731eb43e871d57249b53bd283a55fb794184822a4b0fcec57f003c81ec35",
+      "stderrEmpty": true,
+      "counts": {
+        "heapAttempts": 4,
+        "heapLive": 0,
+        "bufferDrops": 2,
+        "vectorReleases": 3,
+        "cleanupErrors": 0,
+        "fileOpened": 1,
+        "fileClosed": 1,
+        "fileDrops": 1,
+        "fileAutomaticClose": 0
+      }
+    },
+    {
+      "name": "diagnostics-0",
+      "heapFailureAt": null,
+      "exit": 0,
+      "stdoutSHA256": "69e22ca70b4b14394b72ba323f5a847751097472d0fea667c9793a83f543de66",
+      "stderrEmpty": true,
+      "counts": {
+        "heapAttempts": 3,
+        "heapLive": 0,
+        "bufferDrops": 2,
+        "vectorReleases": 3,
+        "cleanupErrors": 0,
+        "fileOpened": 1,
+        "fileClosed": 1,
+        "fileDrops": 1,
+        "fileAutomaticClose": 0
+      }
+    },
+    {
+      "name": "diagnostics-1",
+      "heapFailureAt": null,
+      "exit": 0,
+      "stdoutSHA256": "f0b0db054c175857c22193f4f5aac521fa441e4d76b72a8eeb8eceff7ccf3ca7",
+      "stderrEmpty": true,
+      "counts": {
+        "heapAttempts": 3,
+        "heapLive": 0,
+        "bufferDrops": 3,
+        "vectorReleases": 3,
+        "cleanupErrors": 0,
+        "fileOpened": 1,
+        "fileClosed": 1,
+        "fileDrops": 1,
+        "fileAutomaticClose": 0
+      }
+    },
+    {
+      "name": "diagnostics-2",
+      "heapFailureAt": null,
+      "exit": 0,
+      "stdoutSHA256": "181bfd6fc9f3163af25d27eef2ff905ce0ca4dca218f47bbb0e33cb417397f85",
+      "stderrEmpty": true,
+      "counts": {
+        "heapAttempts": 3,
+        "heapLive": 0,
+        "bufferDrops": 4,
+        "vectorReleases": 3,
+        "cleanupErrors": 0,
+        "fileOpened": 1,
+        "fileClosed": 1,
+        "fileDrops": 1,
+        "fileAutomaticClose": 0
+      }
+    },
+    {
+      "name": "diagnostics-3",
+      "heapFailureAt": null,
+      "exit": 0,
+      "stdoutSHA256": "c74787a4624dedab6df332e32aa3ef8f4fa413aeb623b577b1750a7dde3bc155",
+      "stderrEmpty": true,
+      "counts": {
+        "heapAttempts": 3,
+        "heapLive": 0,
+        "bufferDrops": 4,
+        "vectorReleases": 3,
+        "cleanupErrors": 0,
+        "fileOpened": 1,
+        "fileClosed": 1,
+        "fileDrops": 1,
+        "fileAutomaticClose": 0
+      }
+    },
+    {
+      "name": "previous-revision",
+      "heapFailureAt": null,
+      "exit": 0,
+      "stdoutSHA256": "58356cf96140f1f7a6858d1ee4e894e7117615c7882c995aac96fbc1d8d5d71b",
+      "stderrEmpty": true,
+      "counts": {
+        "heapAttempts": 2,
+        "heapLive": 0,
+        "bufferDrops": 1,
+        "vectorReleases": 3,
+        "cleanupErrors": 0,
+        "fileOpened": 1,
+        "fileClosed": 1,
+        "fileDrops": 1,
+        "fileAutomaticClose": 0
+      }
+    },
+    {
+      "name": "empty-zero",
+      "heapFailureAt": null,
+      "exit": 0,
+      "stdoutSHA256": "0ded0473e614cea0acb07eb3c0d6c7bb5eb92a951f4cb9cc54d9c2d3893c9efc",
+      "stderrEmpty": true,
+      "counts": {
+        "heapAttempts": 2,
+        "heapLive": 0,
+        "bufferDrops": 1,
+        "vectorReleases": 3,
+        "cleanupErrors": 0,
+        "fileOpened": 1,
+        "fileClosed": 1,
+        "fileDrops": 1,
+        "fileAutomaticClose": 0
+      }
+    },
+    {
+      "name": "bom-work-zero",
+      "heapFailureAt": null,
+      "exit": 0,
+      "stdoutSHA256": "b9c93e88d7a4158d9a5f0374d7021a8eca5efb5d4070f83c3939da407d50a0fa",
+      "stderrEmpty": true,
+      "counts": {
+        "heapAttempts": 3,
+        "heapLive": 0,
+        "bufferDrops": 2,
+        "vectorReleases": 3,
+        "cleanupErrors": 0,
+        "fileOpened": 1,
+        "fileClosed": 1,
+        "fileDrops": 1,
+        "fileAutomaticClose": 0
+      }
+    },
+    {
+      "name": "work-valid.fy-zero",
+      "heapFailureAt": null,
+      "exit": 0,
+      "stdoutSHA256": "94e461c031d85fbe9496abc0b3c7f384274c6b3ee9889ecb18d35d6252cc2787",
+      "stderrEmpty": true,
+      "counts": {
+        "heapAttempts": 3,
+        "heapLive": 0,
+        "bufferDrops": 2,
+        "vectorReleases": 3,
+        "cleanupErrors": 0,
+        "fileOpened": 1,
+        "fileClosed": 1,
+        "fileDrops": 1,
+        "fileAutomaticClose": 0
+      }
+    },
+    {
+      "name": "work-valid.fy-below",
+      "heapFailureAt": null,
+      "exit": 0,
+      "stdoutSHA256": "67c1d557c9aa2e8dd1be29a8ccc083a6d9796aec074bf2caa8157fa6a922c748",
+      "stderrEmpty": true,
+      "counts": {
+        "heapAttempts": 5,
+        "heapLive": 0,
+        "bufferDrops": 3,
+        "vectorReleases": 3,
+        "cleanupErrors": 0,
+        "fileOpened": 1,
+        "fileClosed": 1,
+        "fileDrops": 1,
+        "fileAutomaticClose": 0
+      }
+    },
+    {
+      "name": "work-valid.fy-exact",
+      "heapFailureAt": null,
+      "exit": 0,
+      "stdoutSHA256": "1fbd731eb43e871d57249b53bd283a55fb794184822a4b0fcec57f003c81ec35",
+      "stderrEmpty": true,
+      "counts": {
+        "heapAttempts": 4,
+        "heapLive": 0,
+        "bufferDrops": 2,
+        "vectorReleases": 3,
+        "cleanupErrors": 0,
+        "fileOpened": 1,
+        "fileClosed": 1,
+        "fileDrops": 1,
+        "fileAutomaticClose": 0
+      }
+    },
+    {
+      "name": "work-valid.fy-above",
+      "heapFailureAt": null,
+      "exit": 0,
+      "stdoutSHA256": "1fbd731eb43e871d57249b53bd283a55fb794184822a4b0fcec57f003c81ec35",
+      "stderrEmpty": true,
+      "counts": {
+        "heapAttempts": 4,
+        "heapLive": 0,
+        "bufferDrops": 2,
+        "vectorReleases": 3,
+        "cleanupErrors": 0,
+        "fileOpened": 1,
+        "fileClosed": 1,
+        "fileDrops": 1,
+        "fileAutomaticClose": 0
+      }
+    },
+    {
+      "name": "work-string.fy-zero",
+      "heapFailureAt": null,
+      "exit": 0,
+      "stdoutSHA256": "ac477878a951b7d70edf36109be42b5fc8c2e8130b108f0caacf7b8039d402b8",
+      "stderrEmpty": true,
+      "counts": {
+        "heapAttempts": 3,
+        "heapLive": 0,
+        "bufferDrops": 2,
+        "vectorReleases": 3,
+        "cleanupErrors": 0,
+        "fileOpened": 1,
+        "fileClosed": 1,
+        "fileDrops": 1,
+        "fileAutomaticClose": 0
+      }
+    },
+    {
+      "name": "work-string.fy-below",
+      "heapFailureAt": null,
+      "exit": 0,
+      "stdoutSHA256": "8937ba31360f7f5bd95f168e2db8cc8b8cd63a1b397698414a37f85cefb02676",
+      "stderrEmpty": true,
+      "counts": {
+        "heapAttempts": 6,
+        "heapLive": 0,
+        "bufferDrops": 4,
+        "vectorReleases": 3,
+        "cleanupErrors": 0,
+        "fileOpened": 1,
+        "fileClosed": 1,
+        "fileDrops": 1,
+        "fileAutomaticClose": 0
+      }
+    },
+    {
+      "name": "work-string.fy-exact",
+      "heapFailureAt": null,
+      "exit": 0,
+      "stdoutSHA256": "95e46c3e03bac7552901e6f571fc3206420acec019adfb37e897460a03b00783",
+      "stderrEmpty": true,
+      "counts": {
+        "heapAttempts": 5,
+        "heapLive": 0,
+        "bufferDrops": 3,
+        "vectorReleases": 3,
+        "cleanupErrors": 0,
+        "fileOpened": 1,
+        "fileClosed": 1,
+        "fileDrops": 1,
+        "fileAutomaticClose": 0
+      }
+    },
+    {
+      "name": "work-string.fy-above",
+      "heapFailureAt": null,
+      "exit": 0,
+      "stdoutSHA256": "95e46c3e03bac7552901e6f571fc3206420acec019adfb37e897460a03b00783",
+      "stderrEmpty": true,
+      "counts": {
+        "heapAttempts": 5,
+        "heapLive": 0,
+        "bufferDrops": 3,
+        "vectorReleases": 3,
+        "cleanupErrors": 0,
+        "fileOpened": 1,
+        "fileClosed": 1,
+        "fileDrops": 1,
+        "fileAutomaticClose": 0
+      }
+    },
+    {
+      "name": "work-comment.fy-zero",
+      "heapFailureAt": null,
+      "exit": 0,
+      "stdoutSHA256": "b3aa4b098b16a5ec5c8da0b9ab669667cb1b8e332cb5b3f39417cd724a0915bb",
+      "stderrEmpty": true,
+      "counts": {
+        "heapAttempts": 3,
+        "heapLive": 0,
+        "bufferDrops": 2,
+        "vectorReleases": 3,
+        "cleanupErrors": 0,
+        "fileOpened": 1,
+        "fileClosed": 1,
+        "fileDrops": 1,
+        "fileAutomaticClose": 0
+      }
+    },
+    {
+      "name": "work-comment.fy-below",
+      "heapFailureAt": null,
+      "exit": 0,
+      "stdoutSHA256": "fb319aca222f41e8c39ff4df3c9b8bf2869e2975fbfa8dd3038dbbc9b0be0dcb",
+      "stderrEmpty": true,
+      "counts": {
+        "heapAttempts": 3,
+        "heapLive": 0,
+        "bufferDrops": 2,
+        "vectorReleases": 3,
+        "cleanupErrors": 0,
+        "fileOpened": 1,
+        "fileClosed": 1,
+        "fileDrops": 1,
+        "fileAutomaticClose": 0
+      }
+    },
+    {
+      "name": "work-comment.fy-exact",
+      "heapFailureAt": null,
+      "exit": 0,
+      "stdoutSHA256": "35f55d2ce494e787775677aa994ce9d7a4abc54995e78f18094e22d8d1b8f1bd",
+      "stderrEmpty": true,
+      "counts": {
+        "heapAttempts": 2,
+        "heapLive": 0,
+        "bufferDrops": 1,
+        "vectorReleases": 3,
+        "cleanupErrors": 0,
+        "fileOpened": 1,
+        "fileClosed": 1,
+        "fileDrops": 1,
+        "fileAutomaticClose": 0
+      }
+    },
+    {
+      "name": "work-comment.fy-above",
+      "heapFailureAt": null,
+      "exit": 0,
+      "stdoutSHA256": "35f55d2ce494e787775677aa994ce9d7a4abc54995e78f18094e22d8d1b8f1bd",
+      "stderrEmpty": true,
+      "counts": {
+        "heapAttempts": 2,
+        "heapLive": 0,
+        "bufferDrops": 1,
+        "vectorReleases": 3,
+        "cleanupErrors": 0,
+        "fileOpened": 1,
+        "fileClosed": 1,
+        "fileDrops": 1,
+        "fileAutomaticClose": 0
+      }
+    },
+    {
+      "name": "missing",
+      "heapFailureAt": null,
+      "exit": 1,
+      "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrEmpty": true,
+      "counts": {
+        "heapAttempts": 0,
+        "heapLive": 0,
+        "bufferDrops": 0,
+        "vectorReleases": 0,
+        "cleanupErrors": 0,
+        "fileOpened": 0,
+        "fileClosed": 0,
+        "fileDrops": 1,
+        "fileAutomaticClose": 0
+      }
+    },
+    {
+      "name": "no-argument",
+      "heapFailureAt": null,
+      "exit": 8,
+      "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrEmpty": true,
+      "counts": {
+        "heapAttempts": 0,
+        "heapLive": 0,
+        "bufferDrops": 0,
+        "vectorReleases": 0,
+        "cleanupErrors": 0,
+        "fileOpened": 0,
+        "fileClosed": 0,
+        "fileDrops": 0,
+        "fileAutomaticClose": 0
+      }
+    },
+    {
+      "name": "bad-number",
+      "heapFailureAt": null,
+      "exit": 8,
+      "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrEmpty": true,
+      "counts": {
+        "heapAttempts": 0,
+        "heapLive": 0,
+        "bufferDrops": 0,
+        "vectorReleases": 0,
+        "cleanupErrors": 0,
+        "fileOpened": 0,
+        "fileClosed": 0,
+        "fileDrops": 0,
+        "fileAutomaticClose": 0
+      }
+    },
+    {
+      "name": "bad-revision",
+      "heapFailureAt": null,
+      "exit": 8,
+      "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrEmpty": true,
+      "counts": {
+        "heapAttempts": 0,
+        "heapLive": 0,
+        "bufferDrops": 0,
+        "vectorReleases": 0,
+        "cleanupErrors": 0,
+        "fileOpened": 0,
+        "fileClosed": 0,
+        "fileDrops": 0,
+        "fileAutomaticClose": 0
+      }
+    },
+    {
+      "name": "allocation-failure",
+      "heapFailureAt": 1,
+      "exit": 3,
+      "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrEmpty": true,
+      "counts": {
+        "heapAttempts": 1,
+        "heapLive": 0,
+        "bufferDrops": 1,
+        "vectorReleases": 0,
+        "cleanupErrors": 0,
+        "fileOpened": 1,
+        "fileClosed": 0,
+        "fileDrops": 1,
+        "fileAutomaticClose": 1
+      }
+    },
+    {
+      "name": "allocation-failure",
+      "heapFailureAt": 2,
+      "exit": 3,
+      "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrEmpty": true,
+      "counts": {
+        "heapAttempts": 2,
+        "heapLive": 0,
+        "bufferDrops": 1,
+        "vectorReleases": 3,
+        "cleanupErrors": 0,
+        "fileOpened": 1,
+        "fileClosed": 1,
+        "fileDrops": 1,
+        "fileAutomaticClose": 0
+      }
+    },
+    {
+      "name": "allocation-failure",
+      "heapFailureAt": 3,
+      "exit": 3,
+      "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrEmpty": true,
+      "counts": {
+        "heapAttempts": 3,
+        "heapLive": 0,
+        "bufferDrops": 3,
+        "vectorReleases": 3,
+        "cleanupErrors": 0,
+        "fileOpened": 1,
+        "fileClosed": 1,
+        "fileDrops": 1,
+        "fileAutomaticClose": 0
+      }
+    },
+    {
+      "name": "allocation-failure",
+      "heapFailureAt": 4,
+      "exit": 3,
+      "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrEmpty": true,
+      "counts": {
+        "heapAttempts": 4,
+        "heapLive": 0,
+        "bufferDrops": 3,
+        "vectorReleases": 3,
+        "cleanupErrors": 0,
+        "fileOpened": 1,
+        "fileClosed": 1,
+        "fileDrops": 1,
+        "fileAutomaticClose": 0
+      }
+    },
+    {
+      "name": "allocation-failure",
+      "heapFailureAt": 5,
+      "exit": 3,
+      "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrEmpty": true,
+      "counts": {
+        "heapAttempts": 5,
+        "heapLive": 0,
+        "bufferDrops": 3,
+        "vectorReleases": 3,
+        "cleanupErrors": 0,
+        "fileOpened": 1,
+        "fileClosed": 1,
+        "fileDrops": 1,
+        "fileAutomaticClose": 0
+      }
+    }
+  ],
+  "guarantees": {
+    "exactReferenceExitStdoutStderr": true,
+    "losslessContiguousTokensAndEOF": true,
+    "budgetDiagnosticE0010": true,
+    "zeroHeapLive": true,
+    "zeroCleanupErrors": true,
+    "fileClosuresBalanced": true,
+    "profileCountsEqual": true,
+    "fixtureBytesUnchanged": true
+  },
+  "verifierDefaultRegression": {
+    "referenceCases": 16,
+    "cExecutions": 80,
+    "passed": true
+  },
+  "changes": {
+    "compiler": false,
+    "normativeContracts": false,
+    "stableCLI": false,
+    "sdkABI": false,
+    "go": false,
+    "db": false,
+    "ci": false,
+    "repositoryHygiene": false,
+    "pushed": false
+  },
+  "deferred": [
+    "Full original CLI dispatcher and driver integration",
+    "Standalone candidate development/release",
+    "Default host compilation timeout/performance",
+    "Linux",
+    "Full repository suite",
+    "Stage1/Stage2"
+  ]
+}
