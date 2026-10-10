@@ -361,6 +361,7 @@ func verifyFunction(function *Function, structTypes map[hir.Type]*StructType, en
 	}
 	var failures []VerificationError
 	resources := make(map[hir.SymbolID]ResourceLocal, len(function.Resources))
+	dropEffects := make(map[hir.Type][]hir.Effect)
 	initial := verificationState{
 		live:    make(map[hir.SymbolID]bool, len(function.Resources)),
 		flags:   make(map[string]flagState, len(function.DropFlags)),
@@ -467,6 +468,16 @@ func verifyFunction(function *Function, structTypes map[hir.Type]*StructType, en
 				state.flags[operation.DropFlagEntity] = flag
 			case OperationDrop:
 				resource, found := resources[operation.Symbol]
+				if found {
+					required, known := dropEffects[resource.Type]
+					if !known {
+						required = resourceCleanupEffects(resource.Type, resourceTypes)
+						dropEffects[resource.Type] = required
+					}
+					if len(hir.MissingEffects(function.Effects, required)) != 0 {
+						failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "resource cleanup exceeds function effect authority"})
+					}
+				}
 				if found && !state.live[operation.Symbol] {
 					failures = append(failures, VerificationError{Code: "V1101", Entity: resourceEntity(resource, entity), Detail: "resource dropped after discharge"})
 				}
