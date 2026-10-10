@@ -136,6 +136,8 @@ and cleanup recipes share a separate 4096-field project cap. Imported unit
 interfaces remain capped at 2048 fields. Ordinary bodies are
 indexed by original module/declaration coordinates; cleanup aliases are indexed
 by their canonical receiver type. Generic frames retain their unit namespace.
+The per-type source recipe choice also indexes its merged layout. Repeated unit
+layouts use this ID directly, retaining exact shape, name and field comparison.
 Project callable prototypes have a separate 4096-entry cap and an 8192-slot
 index keyed by original module/declaration coordinates. The owned-IR verifier
 uses the same callable cap. Cross-unit call verification indexes contracts,
