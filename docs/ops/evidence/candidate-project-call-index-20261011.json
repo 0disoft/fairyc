@@ -1,0 +1,115 @@
+{
+  "schema": "fairyc.candidate-project-call-index/v1",
+  "passed": true,
+  "parentCommit": "c9a58cf4f0aff06599053598e8a607567e566688",
+  "implementation": [
+    {
+      "path": "examples/lexer_candidate/src/candidate_limits.fy",
+      "bytes": 1044,
+      "sha256": "ec663a34aa930ade08ecd48b442c700943e0645cbbe04957115dc0d8e45393fb"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_project_metadata.fy",
+      "bytes": 9446,
+      "sha256": "8ff2c712d7ad73c96214d2c0cfc5f61379101037155d8aa00537316bb97fb02f"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_project_calls.fy",
+      "bytes": 6029,
+      "sha256": "934a642088590b27286344b075e342bdde8f0c90f4c97bbcc5590fe8f7ce613b"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_unit_body_ir_verify.fy",
+      "bytes": 21526,
+      "sha256": "37fdbbc6a665941ef4d83738045ea7f6f063b8620be1348336b800a1438dc21e"
+    }
+  ],
+  "test": {
+    "path": "examples/lexer_candidate/tests/module_project_frames_capacity.fy",
+    "bytes": 4221,
+    "sha256": "a06ff5ab1a289371cbe4f530c94051fece6f5ad5ea6b484c56652ff2b124803b"
+  },
+  "contract": {
+    "path": "docs/architecture/candidate-compilation-units-v0.md",
+    "bytes": 134219,
+    "sha256": "3333bfa965f88eb8849b17a3490bcd048f19ad6ffbd1e34e099be00eac10773c"
+  },
+  "receiptTool": {
+    "path": "tools/verify-candidate-project-call-index.py",
+    "bytes": 5152,
+    "sha256": "8a5b281e7526db5aee53ac12040212b0818e8bde433bcc62f5af7991175a402c"
+  },
+  "initialFailure": {
+    "report": {
+      "path": ".cache/candidate-tagged/sdk-c-execution/run-link-field-diagnostic.json",
+      "bytes": 159,
+      "sha256": "2302c38fd757b76eb5f588ca120834edd9c62cb6a6fe255db14f31a029de5dc0"
+    },
+    "temporaryCode": 409203,
+    "callableCount": 1024,
+    "parameters": 2895,
+    "meaning": "The original project reached the callable table cap, independently distinguished from field and work guards"
+  },
+  "policy": {
+    "projectCallables": 4096,
+    "perUnitCallables": 512,
+    "indexSlots": 8192,
+    "work": 1048576,
+    "keys": [
+      "contract: module/declaration",
+      "ordinary target: module/declaration",
+      "specialized target: module/declaration/context"
+    ],
+    "duplicateKeysRejected": true,
+    "argumentResultEffectAndUnsafeChecksRetained": true
+  },
+  "native": {
+    "report": {
+      "path": ".cache/candidate-tagged/sdk-c-execution/native-project-call-index.json",
+      "bytes": 6757,
+      "sha256": "724074de66708393e94d0f7a867a1b6787ef46f5fda6d6ca855d6d6ed5e75713"
+    },
+    "passedCases": 3,
+    "frames": 1089,
+    "callables": 1080,
+    "calls": 1080,
+    "frameWork": 9571,
+    "fixtureCorrections": [
+      "Provider-only functions produced no imported callable contracts; added nine caller units referencing all 1080 providers",
+      "The resulting full-link case exposed the old repeated contract/frame scans exceeding the work budget; both lookups are now indexed"
+    ],
+    "coverage": [
+      "18 independently compiled modules preserve every original and rebound coordinate",
+      "Full link and owned IR revalidation with 1080 callable contracts and calls",
+      "Distinct generic unit contexts retain their targets",
+      "Missing and duplicate ordinary bodies reject"
+    ]
+  },
+  "reusedCExecution": {
+    "report": {
+      "path": ".cache/candidate-tagged/sdk-c-execution/project-link-c/execution.json",
+      "bytes": 11568,
+      "sha256": "8e67566e0b2f2678b6f6b8b8986f4460f11dade4f3ba1d53dce45a95e14d97c6"
+    },
+    "sourceSHA256": "0c673f7d2807fe1a9eeac8a4307a88309fa509f39dc09a3c1521cd6cc1927acd",
+    "runs": 2,
+    "justification": "Freshly generated generic namespace C is byte-identical to previously executed low/optimized C"
+  },
+  "check": {
+    "path": ".cache/candidate-tagged/sdk-c-execution/check-project-call-index.json",
+    "bytes": 80,
+    "sha256": "c1bed9d59e74cb2020d82b20ee728a45299fd99f30e9fcb3f5da89330feee308"
+  },
+  "fullOriginalLinkPassed": false,
+  "deferred": [
+    "Remaining original linking/C generation",
+    "Original dispatcher execution",
+    "Default compilation timeout/performance",
+    "Native driver",
+    "Linux",
+    "Standalone compiler profiles",
+    "Full suite",
+    "Stage1/Stage2"
+  ],
+  "pushed": false
+}

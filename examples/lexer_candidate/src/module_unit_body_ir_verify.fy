@@ -87,7 +87,7 @@ pub fn clean_ir::Problem check_body(ref ir::Body b,ref clean_ir::Program cleaned
 }
 pub fn clean_ir::Problem check(ref ir::Program p){
     let cleaned=cleaning::check(ir::cleanup_ir(p));if(cleaned.code!=0){return cleaned;}
-    if(ir::count(p)!=clean_ir::frame_count(ir::cleanup_ir(p))){return fail(1001,0,0,0);}if(ir::work(p)>1048576 || ir::name_bytes(p)>1048576 || ir::layout_count(p)>1024 || ir::field_count(p)>limits::metadata_fields() || ir::callable_count(p)>1024){return fail(1002,0,0,0);}
+    if(ir::count(p)!=clean_ir::frame_count(ir::cleanup_ir(p))){return fail(1001,0,0,0);}if(ir::work(p)>1048576 || ir::name_bytes(p)>1048576 || ir::layout_count(p)>1024 || ir::field_count(p)>limits::metadata_fields() || ir::callable_count(p)>limits::project_callables()){return fail(1002,0,0,0);}
     // Producer work remains capped above. Revalidation has its own bounded
     // traversal, so its capacity does not depend on the producer's history.
     var usize work=0;var usize i=1;let nt=clean_ir::type_count(ir::cleanup_ir(p));

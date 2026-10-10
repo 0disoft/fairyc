@@ -135,7 +135,12 @@ work cap. The cleanup-MIR verifier uses the same frame cap. Project metadata
 and cleanup recipes share the 2048-field cap. Ordinary bodies are
 indexed by original module/declaration coordinates; cleanup aliases are indexed
 by their canonical receiver type. Generic frames retain their unit namespace.
-Per-unit body and specialization admission limits remain separate.
+Project callable prototypes have a separate 4096-entry cap and an 8192-slot
+index keyed by original module/declaration coordinates. The owned-IR verifier
+uses the same callable cap. Cross-unit call verification indexes contracts,
+ordinary targets and specialized contexts in separate 8192-slot tables.
+Per-unit body and specialization admission limits
+remain separate.
 
 Generic function targets retain their coordinates and declaration flags with
 `template=true`, result zero and no concrete parameter list. They must be

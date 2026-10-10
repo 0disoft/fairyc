@@ -18,3 +18,6 @@ pub fn usize program_expressions(){return 16384;}
 
 // Rebound project functions span many independently bounded source units.
 pub fn usize project_frames(){return 4096;}
+
+// Callable prototypes combine separately bounded unit interfaces.
+pub fn usize project_callables(){return 4096;}
