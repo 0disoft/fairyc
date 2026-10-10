@@ -1,0 +1,223 @@
+{
+  "schema": "fairyc.candidate-module-pointer-typing/v1",
+  "passed": true,
+  "identity": {
+    "nativeCompiler": {
+      "path": ".cache/candidate-tagged/compiler-origin-patterns.exe",
+      "sha256": "d36dae1b99751322e447880aaf4d28321bd6d53bdf776185308c6c4504889bb2"
+    },
+    "buildCompiler": {
+      "path": ".cache/candidate-tagged/compiler-build-240s.exe",
+      "sha256": "746fe10b022ed88cfbc0ae8ea13e3f867b842f3317ef5a2a4caa36d064a248dd"
+    },
+    "candidate": {
+      "path": "examples/lexer_candidate/build/lexer-candidate.exe",
+      "sha256": "6104897e45c4196abf86694ebb303cd60eebaa49b39de3415ab4c72e02ad3eee"
+    },
+    "sources": [
+      {
+        "path": "examples/lexer_candidate/src/module_unit_name_model.fy",
+        "sha256": "67b6a9fd5dbac5577fe47dfa330c5c3ee484c7804d79157950ed7bdfbe813187"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_name_walk.fy",
+        "sha256": "7a496e3f6e68f28c22192dc85f0d8447df5048061b31feaaf9025f1319b80f90"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_value_collect.fy",
+        "sha256": "779abfd5227086cca083c70884384febc1eb02dabe06c1249c6a10c1283c838d"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_value_place.fy",
+        "sha256": "9a88f910903248fc970b4813ac8bd9e9d4d28d66a95ed013b4cf0a41167c1b75"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_value_scalar.fy",
+        "sha256": "e60edcea8a6fbfb9c38b264720deb8a78058ebb21d6fe84745ac2639054a22cf"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_value_view.fy",
+        "sha256": "c19b8710ddf31ec537d51f3d78b5463c33e2bb0e5941f0b9b317c400045f1621"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_value_model.fy",
+        "sha256": "097ed4d5931c9cbb574c00a1802699fa318cf9365f17989db0d05f66d8ea9aa3"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_types.fy",
+        "sha256": "744e0b47886070b9dd163ad53f69fed416d361b7b54703cf2f0e29e8dcde5ce0"
+      },
+      {
+        "path": "examples/lexer_candidate/src/pointer_types.fy",
+        "sha256": "7cca6293336feedbf785912759ee6c50a17010ad9d966acb81877ad32cd55297"
+      },
+      {
+        "path": "examples/lexer_candidate/src/pointer_identity.fy",
+        "sha256": "31458fda72821f98d8383339f8b272f3aa1c78385fb23504cbe9f1aaa021ae3d"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_origin_flow.fy",
+        "sha256": "8e6f18867b738eccb88d7fdcde7cc1098640aefaa13fbc3669b241ac5cca029a"
+      },
+      {
+        "path": "examples/lexer_candidate/tests/module_unit_casts.fy",
+        "sha256": "1c37746a4ae450d36f6b00f512276694c9a453c224fe13fbef4988e675a8ef57"
+      },
+      {
+        "path": "examples/lexer_candidate/tests/module_unit_owner_reads.fy",
+        "sha256": "7042ebd6d418d8f4f85c87df24e5bdb58a64f0b5c7ecabe411d9ebc53929a74f"
+      },
+      {
+        "path": "examples/lexer_candidate/fairy.lock",
+        "sha256": "e98e5a8e31ac5fdda367e1da19a74cf489989c3ceed558fb795375098c46684d"
+      }
+    ],
+    "inputsBefore": {
+      "path": ".cache/candidate-tagged/module-pointer-type-unit/inputs-before.json",
+      "sha256": "4d2b08fa6ed484cc33ee1b0164bcd9b5df40a16aa14923e0fbf230c745f7610d"
+    },
+    "unchangedProductionAndCastInputs": 249
+  },
+  "observations": {
+    "check": {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\compiler-origin-patterns.exe",
+        "check",
+        "--locked"
+      ],
+      "exit": 0,
+      "stdout": "check ok: 2 instance(s), 256 source file(s), 3268 MIR function(s), lock verified\n",
+      "stderr": ""
+    },
+    "native": {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\compiler-origin-patterns.exe",
+        "test",
+        "--native",
+        "--json",
+        "--capture-output",
+        "--exact",
+        "tests::module_unit_casts::scalar_casts_reach_locals_operators_and_arguments",
+        "--exact",
+        "tests::module_unit_casts::cast_targets_do_not_contextualize_source_literals",
+        "--exact",
+        "tests::module_unit_casts::field_operands_and_unsafe_pointer_casts_resolve_exactly",
+        "--exact",
+        "tests::module_unit_casts::specialized_cleanup_and_multi_module_ordinary_targets_stay_exact",
+        "--exact",
+        "tests::module_unit_casts::pointer_casts_preserve_exact_nominal_and_scalar_referents",
+        "--exact",
+        "tests::module_unit_casts::pointer_casts_extract_borrowed_data_and_opaque_array_storage",
+        "--exact",
+        "tests::module_unit_casts::pointer_casts_require_the_casts_own_unsafe_boundary",
+        "--exact",
+        "tests::module_unit_casts::pointer_casts_reject_strengthening_reinterpretation_and_opaque_temporaries",
+        "--exact",
+        "tests::module_unit_owner_reads::competing_owner_reads_follow_live_loans"
+      ],
+      "exit": 0,
+      "stdout": "{\"schemaVersion\":\"fairyc.test-report/v4\",\"engine\":\"native\",\"target\":\"x86_64-windows-msvc\",\"profile\":\"development\",\"tests\":[{\"identity\":\"tests::module_unit_casts::cast_targets_do_not_contextualize_source_literals\",\"outcome\":\"passed\",\"trapCategory\":null,\"stdoutBase64\":\"\",\"stderrBase64\":\"\"},{\"identity\":\"tests::module_unit_casts::field_operands_and_unsafe_pointer_casts_resolve_exactly\",\"outcome\":\"passed\",\"trapCategory\":null,\"stdoutBase64\":\"\",\"stderrBase64\":\"\"},{\"identity\":\"tests::module_unit_casts::pointer_casts_extract_borrowed_data_and_opaque_array_storage\",\"outcome\":\"passed\",\"trapCategory\":null,\"stdoutBase64\":\"\",\"stderrBase64\":\"\"},{\"identity\":\"tests::module_unit_casts::pointer_casts_preserve_exact_nominal_and_scalar_referents\",\"outcome\":\"passed\",\"trapCategory\":null,\"stdoutBase64\":\"\",\"stderrBase64\":\"\"},{\"identity\":\"tests::module_unit_casts::pointer_casts_reject_strengthening_reinterpretation_and_opaque_temporaries\",\"outcome\":\"passed\",\"trapCategory\":null,\"stdoutBase64\":\"\",\"stderrBase64\":\"\"},{\"identity\":\"tests::module_unit_casts::pointer_casts_require_the_casts_own_unsafe_boundary\",\"outcome\":\"passed\",\"trapCategory\":null,\"stdoutBase64\":\"\",\"stderrBase64\":\"\"},{\"identity\":\"tests::module_unit_casts::scalar_casts_reach_locals_operators_and_arguments\",\"outcome\":\"passed\",\"trapCategory\":null,\"stdoutBase64\":\"\",\"stderrBase64\":\"\"},{\"identity\":\"tests::module_unit_casts::specialized_cleanup_and_multi_module_ordinary_targets_stay_exact\",\"outcome\":\"passed\",\"trapCategory\":null,\"stdoutBase64\":\"\",\"stderrBase64\":\"\"},{\"identity\":\"tests::module_unit_owner_reads::competing_owner_reads_follow_live_loans\",\"outcome\":\"passed\",\"trapCategory\":null,\"stdoutBase64\":\"Y2FzZSAwIDMgMQpkaWFnbm9zdGljIDIxMDEgMCA3MiA3MyAyCnJlbGF0ZWQgNCAwIDU0IDYzCnJlbGF0ZWQgNSAwIDgzIDg0CmNhc2UgMSAwIDAKY2FzZSAyIDAgMApjYXNlIDMgMCAwCmNhc2UgNCAzIDEKZGlhZ25vc3RpYyAyMTAxIDAgOTIgOTMgMgpyZWxhdGVkIDQgMCA1NCA2MwpyZWxhdGVkIDUgMCAxMDMgMTA0CmNhc2UgNSAwIDAKY2FzZSA2IDMgMQpkaWFnbm9zdGljIDIxMDEgMCA4NyA4OCAyCnJlbGF0ZWQgNCAwIDY4IDc3CnJlbGF0ZWQgNSAwIDk2IDk3CmNhc2UgNyAzIDEKZGlhZ25vc3RpYyAyMTAxIDAgODYgODcgMgpyZWxhdGVkIDQgMCA3NiA4NQpyZWxhdGVkIDUgMCA4NiA4NwpjYXNlIDggMCAwCmNhc2UgOSAzIDEKZGlhZ25vc3RpYyAyMTAxIDAgNzkgODAgMgpyZWxhdGVkIDQgMCA2MSA3MApyZWxhdGVkIDUgMCA5MiA5MwpjYXNlIDEwIDMgMQpkaWFnbm9zdGljIDIxMDEgMCA5MCA5MSAyCnJlbGF0ZWQgNCAwIDcyIDgxCnJlbGF0ZWQgNSAwIDEwMiAxMDMKY2FzZSAxMSAzIDEKZGlhZ25vc3RpYyAyMTAxIDAgMTAxIDEwMiAyCnJlbGF0ZWQgNCAwIDgzIDkyCnJlbGF0ZWQgNSAwIDExMyAxMTQKY2FzZSAxMiAzIDEKZGlhZ25vc3RpYyAyMTA1IDAgOTkgMTAwIDMKcmVsYXRlZCA2IDAgNzAgNzEKcmVsYXRlZCA0IDAgODggOTMKcmVsYXRlZCA1IDAgMTEwIDExMQpjYXNlIDEzIDMgMQpkaWFnbm9zdGljIDIxMDUgMCAxMDcgMTA4IDMKcmVsYXRlZCA2IDAgNzAgNzEKcmVsYXRlZCA0IDAgOTIgMTAxCnJlbGF0ZWQgNSAwIDExOCAxMTkKY2FzZSAxNCAzIDEKZGlhZ25vc3RpYyAyMTAxIDAgODIgODUgMgpyZWxhdGVkIDQgMCA3MiA4MQpyZWxhdGVkIDUgMCA5NiA5NwpjYXNlIDE1IDMgMQpkaWFnbm9zdGljIDIxMDEgMCA3MSA3NSAyCnJlbGF0ZWQgNCAwIDYxIDcwCnJlbGF0ZWQgNSAwIDg2IDg3CmNhc2UgMTYgMyAxCmRpYWdub3N0aWMgMjEwMSAwIDk0IDk5IDIKcmVsYXRlZCA0IDAgNzkgODgKcmVsYXRlZCA1IDAgMTEwIDExMQpjYXNlIDE3IDAgMApjYXNlIDE4IDMgMQpkaWFnbm9zdGljIDIxMDEgMCA4NiA5NiAyCnJlbGF0ZWQgNCAwIDYxIDcwCnJlbGF0ZWQgNSAwIDEwNSAxMDYKY2FzZSAxOSAzIDEKZGlhZ25vc3RpYyAyMTAxIDAgODEgODIgMgpyZWxhdGVkIDQgMCA2MiA4OQpyZWxhdGVkIDUgMCA4MSA4MgpjYXNlIDIwIDAgMApjYXNlIDIxIDAgMApjYXNlIDIyIDMgMQpkaWFnbm9zdGljIDIxMDEgMCAxNzggMTc5IDIKcmVsYXRlZCA0IDAgMTUyIDE2MQpyZWxhdGVkIDUgMCAxNzggMTc5CmNhc2UgMjMgMCAwCmNhc2UgMjQgMyAxCmRpYWdub3N0aWMgMjEwMSAwIDE3OSAxODggMgpyZWxhdGVkIDQgMCAxNTIgMTU3CnJlbGF0ZWQgNSAwIDIyNCAyMjUKY2FzZSAyNSAzIDEKZGlhZ25vc3RpYyAyMTAxIDAgMTA2IDEwNyAyCnJlbGF0ZWQgNCAwIDgyIDkxCnJlbGF0ZWQgNSAwIDExOSAxMjAKY2FzZSAyNiAwIDAKY2FzZSAyNyAzIDEKZGlhZ25vc3RpYyAyMTAxIDAgMTA5IDExMCAyCnJlbGF0ZWQgNCAwIDgyIDkxCnJlbGF0ZWQgNSAwIDEyMCAxMjEKY2FzZSAyOCAwIDAKY2FzZSAyOSAzIDEKZGlhZ25vc3RpYyAyMTAxIDAgMTIwIDEyMSAyCnJlbGF0ZWQgNCAwIDgyIDkxCnJlbGF0ZWQgNSAwIDExMCAxMTEKY2FzZSAzMCAzIDEKZGlhZ25vc3RpYyAyMTAxIDAgMTA3IDEwOCAyCnJlbGF0ZWQgNCAwIDg4IDk3CnJlbGF0ZWQgNSAwIDExOCAxMTkK\",\"stderrBase64\":\"\"}],\"count\":9,\"passed\":9,\"failed\":0,\"status\":\"ok\",\"lock\":\"unchanged\"}\n",
+      "stderr": ""
+    },
+    "build": {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\compiler-build-240s.exe",
+        "build",
+        "--locked"
+      ],
+      "exit": 0,
+      "stdout": "built: build/lexer-candidate.exe (x86_64-windows-msvc, development, lock verified)\n",
+      "stderr": ""
+    }
+  },
+  "native": {
+    "count": 9,
+    "passed": 9,
+    "failed": 0,
+    "newPointerTests": 4,
+    "updatedPointerAndFieldTest": 1,
+    "scalarRegressions": 3,
+    "ownerReadRegression": 1,
+    "profile": "development",
+    "target": "x86_64-windows-msvc",
+    "report": {
+      "path": ".cache/candidate-tagged/module-pointer-type-unit/native.json",
+      "sha256": "f410f8a2107df667a8b8732ab05faae03379df1b20ae465d73c5280f5cfaa22d"
+    },
+    "tests": [
+      {
+        "identity": "tests::module_unit_casts::cast_targets_do_not_contextualize_source_literals",
+        "outcome": "passed",
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "identity": "tests::module_unit_casts::field_operands_and_unsafe_pointer_casts_resolve_exactly",
+        "outcome": "passed",
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "identity": "tests::module_unit_casts::pointer_casts_extract_borrowed_data_and_opaque_array_storage",
+        "outcome": "passed",
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "identity": "tests::module_unit_casts::pointer_casts_preserve_exact_nominal_and_scalar_referents",
+        "outcome": "passed",
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "identity": "tests::module_unit_casts::pointer_casts_reject_strengthening_reinterpretation_and_opaque_temporaries",
+        "outcome": "passed",
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "identity": "tests::module_unit_casts::pointer_casts_require_the_casts_own_unsafe_boundary",
+        "outcome": "passed",
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "identity": "tests::module_unit_casts::scalar_casts_reach_locals_operators_and_arguments",
+        "outcome": "passed",
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "identity": "tests::module_unit_casts::specialized_cleanup_and_multi_module_ordinary_targets_stay_exact",
+        "outcome": "passed",
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "identity": "tests::module_unit_owner_reads::competing_owner_reads_follow_live_loans",
+        "outcome": "passed",
+        "stdoutSHA256": "9b6326aef5878bda39ed4b8da0ef72792262be6332ae64a22de9e4ccfbf0e387"
+      }
+    ]
+  },
+  "behavior": {
+    "provenance": "Cast operation gets its own lexical unsafe Reference kind4 with exact source expression and span; collector retains flag before operand evaluation",
+    "pairs": "Exact scalar/nominal reference pointers, no mutable strengthening, borrowed byte/text/CStr data pointers and direct local void erasure",
+    "sourceTyping": "Every admitted pointer cast gets canonical target/result and state1; integer table unchanged",
+    "guards": "Supported cast outside its own unsafe scope returns5101; unsupported pointee/mutability/raw/integer cast and opaque temporary returns2",
+    "ownerReads": "Existing complete-coordinate loan diagnostic regression passes, including raw cast creation and non-holding raw arguments"
+  },
+  "privateAPIExpanded": true,
+  "stableCLIChanged": false,
+  "sdkABIChanged": false,
+  "GoChanged": false,
+  "dbChanged": false,
+  "ciChanged": false,
+  "normativeContractsChanged": false,
+  "pushed": false,
+  "cEmitted": false,
+  "pending": [
+    "Owned-body pointer C transport and void** output slot (next unit)",
+    "Byte/text/CStr literal C transport",
+    "Authenticated SDK, Region, enum and whole dispatcher execution",
+    "Whole source/unsafe provenance, path/dominance/initialization proofs and stage1/stage2"
+  ],
+  "skipped": {
+    "releaseCandidate": "Separate release batch",
+    "Linux": "Deferred Windows-focused unit",
+    "fullSuite": "Eight focused cast tests and one existing owner-read regression",
+    "generatedC": "Typing-only unit; C transport remains next"
+  }
+}

@@ -4,6 +4,7 @@ import module_types as types;
 import std::vec as v;
 import module_unit_value_index as indexes;
 import module_unit_value_view as views;
+import pointer_types as pointers;
 
 pub fn m::Place field(ref v::Vec<types::Type> graph,m::Expression receiver,m::Expression selected){
     if(selected.field.id==0 || receiver.type==0){return m::no_place();}let t=types::at(graph,receiver.type);var p=receiver.place;
@@ -11,6 +12,16 @@ pub fn m::Place field(ref v::Vec<types::Type> graph,m::Expression receiver,m::Ex
     if(t.kind==7 || t.kind==8){p.mutable=t.kind==8;}let owner=types::at(graph,selected.field.owner);p.resource_field=p.resource_field || owner.kind==3 || owner.kind==13;return p;
 }
 pub fn bool referent(types::Type t){return t.kind==1 && t.scalar>=1 && t.scalar<=6 || t.kind==2 || t.kind==3 || t.kind==4 || t.kind==5 || t.kind==6 || t.kind==13 || t.kind==12 && t.first==0 && t.scalar==1048591;}
+pub fn bool raw_mutable(types::Type t){return t.kind==12 && if(t.first==0){pointers::mutable(t.scalar)}else{t.scalar==1};}
+pub fn bool opaque(types::Type t){return t.kind==12 && t.first==0 && pointers::valid(t.scalar) && pointers::inner(t.scalar)==7;}
+// The caller also checks lexical unsafe provenance and direct local syntax for
+// void erasure. A safe view yields its data address, never its carrier address.
+pub fn bool raw_cast(types::Type source,types::Type target,types::Type referent){
+    if(target.kind!=12){return false;}let exclusive=raw_mutable(target);
+    if(source.kind==7 || source.kind==8){if(exclusive && source.kind!=8){return false;}if(opaque(target)){return true;}return if(target.first!=0){source.first==target.first && referent.kind==2}else{pointers::valid(target.scalar) && referent.kind==1 && referent.scalar==pointers::inner(target.scalar)};}
+    if(!views::view(source) && source.kind!=9 && source.kind!=14){return false;}if(exclusive && !views::mutable(source)){return false;}
+    return opaque(target) || target.first==0 && pointers::valid(target.scalar) && pointers::inner(target.scalar)==3 && (source.kind==9 || source.kind==10 || source.kind==11 || source.kind==14);
+}
 pub fn Result<usize,m::Problem> borrow(m::Frame frame,m::Expression expression,m::Expression target,bool mutable,ref mut v::Vec<types::Type> graph,ref mut usize work){
     let bool named=target.kind==2 || target.place.kind==2 || target.place.kind==4;let bool addressable=named && target.place.borrowable && target.place.kind!=0;
     if(mutable && (!addressable || !target.place.mutable || target.place.resource_field)){return .err(m::fail(frame,1008,target.start,target.end,0,target.type));}

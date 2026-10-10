@@ -11,7 +11,8 @@ import std::vec as v;
 pub struct Frame {u32 kind;usize id;usize module_index;usize declaration;usize receiver_type;bool unsafe_function;bool sdk_vector;}
 // Parameters, let, var, payload patterns, byte iteration, region and receiver.
 pub struct Symbol {u32 kind;usize type;usize entry;usize pattern;usize scope;usize start;usize end;}
-// kind 1 local; 2 canonical provider declaration; 3 closed builtin.
+// kind 1 local; 2 canonical provider declaration; 3 closed builtin;
+// 4 operation with its own lexical unsafe context (not its operand's context).
 pub struct Reference {usize expression;usize source_index;u32 kind;usize symbol;usize module_index;usize declaration;u32 declaration_kind;u32 builtin;usize start;usize end;bool unsafe_context;}
 pub struct Context {Frame frame;usize[128] locals;usize active;usize scope;usize next_scope;usize unsafe_depth;usize work;}
 pub resource Resolved {Frame frame;v::Vec<Symbol> symbols;v::Vec<Reference> references;v::Vec<usize> uses;v::Vec<usize> entries;v::Vec<usize> patterns;usize work;cleanup{}}
@@ -36,6 +37,11 @@ pub fn join::Problem reference(ref ast::Ast a,ref scanner::Stream source,ref sig
     if(v::len<Reference>(references)>=16384){return fail(c,10,n.start,n.end);}if(!v::push<Reference>(references,r).is_ok){return fail(c,11,n.start,n.end);}let slot=v::at_mut<usize>(uses,expression-1);*slot=v::len<Reference>(references);return fail(c,0,0,0);
 }
 pub fn Resolved assemble(Frame frame,v::Vec<Symbol> symbols,v::Vec<Reference> references,v::Vec<usize> uses,v::Vec<usize> entries,v::Vec<usize> patterns,usize work){return Resolved{.frame,.symbols,.references,.uses,.entries,.patterns,.work};}
+pub fn join::Problem operation(ref ast::Ast a,usize expression,ref mut Context c,ref mut v::Vec<Reference> references,ref mut v::Vec<usize> uses){
+    let n=ast::expression_at(a,expression);if(n.kind!=23 || !charge(c,1) || v::len<Reference>(references)>=16384){return fail(c,10,n.start,n.end);}
+    if(!v::push<Reference>(references,Reference{.expression,.source_index=ast::expression_origin(a,expression),.kind=4,.symbol=0,.module_index=0,.declaration=0,.declaration_kind=0,.builtin=0,.start=n.start,.end=n.end,.unsafe_context=c.unsafe_depth!=0}).is_ok){return fail(c,11,n.start,n.end);}
+    let slot=v::at_mut<usize>(uses,expression-1);*slot=v::len<Reference>(references);return fail(c,0,0,0);
+}
 pub fn usize local_count(ref Resolved p){return v::len<Symbol>(ref p.symbols);}
 pub fn usize reference_count(ref Resolved p){return v::len<Reference>(ref p.references);}
 pub fn usize work(ref Resolved p){return p.work;}
