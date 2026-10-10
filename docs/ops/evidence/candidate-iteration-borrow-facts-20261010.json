@@ -1,0 +1,2247 @@
+{
+  "schema": "fairyc.candidate-iteration-borrow-facts/v1",
+  "passed": true,
+  "scope": "Retain hidden array iteration loans and per-item shared/mutable provenance. Preserve lexical origins through borrowed array fields and direct slices, kill per-item backedge liveness, and hold parent storage until loop exit. Publish owned borrow sites, last uses and valid return escapes.",
+  "sourceTruth": [
+    "docs/language/0002-borrows-and-return-origins.md",
+    "internal/semantic/array_for.go",
+    "internal/semantic/byte_for.go",
+    "internal/semantic/borrow_flow.go",
+    "internal/semantic/model.go"
+  ],
+  "identity": {
+    "candidate": {
+      "path": "examples/lexer_candidate/build/lexer-candidate.exe",
+      "sha256": "df753d8a9d91ff1453fd9266f3919a23bc628bfc4c8fd06190a4ba2fce592b93"
+    },
+    "compiler": {
+      "path": ".cache/candidate-tagged/compiler-origin-patterns.exe",
+      "sha256": "d36dae1b99751322e447880aaf4d28321bd6d53bdf776185308c6c4504889bb2"
+    },
+    "lock": {
+      "path": "examples/lexer_candidate/fairy.lock",
+      "sha256": "10b001d8d59bc27f3c15de45ceed81d67c3249703cde457fa06d86dd21b707ba"
+    },
+    "sources": [
+      {
+        "path": "examples/lexer_candidate/src/module_unit_loan_iteration.fy",
+        "sha256": "018e9dca19d96f107f1f7c5722b2adf74f55d921187f25a151e018abd1fadde7"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_origin_flow_control.fy",
+        "sha256": "3b5b551b2f4adf5decfa117f3e9f68cb7e5b9c735202f64dcfc3316cc29d4e05"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_loan_live_control.fy",
+        "sha256": "d653f317b5e330095989e0078d41ea70c4f1de1c992a4742bb609d061361b04d"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_loan_model.fy",
+        "sha256": "7d5b3cf3c691e3f27eea95fe283fbd280bbd72a8ce5dc7a9929431cd1c9f480f"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_loan_checks.fy",
+        "sha256": "0b537d0903fdc7d039b36c46831c1da5ce71695542ff40cb402a88f1d537d708"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_loan_generations.fy",
+        "sha256": "f9c1435a8fa5eb1d823217754954715586e41d6e9dd8d3358efd807f45c01059"
+      }
+    ],
+    "test": {
+      "path": "examples/lexer_candidate/tests/module_unit_iteration_facts.fy",
+      "sha256": "5b9e77038557979afdbc253f787d6f2c7679ede92635d7c74d432f1249cba28f"
+    },
+    "oracle": {
+      "path": ".cache/candidate-tagged/iteration-facts-unit/oracle.go",
+      "sha256": "e35437aec0b61c0957b48257a8a50329b60fea7ea2f5050ef6561af8513e97a1"
+    },
+    "referenceSources": [
+      {
+        "path": "internal/semantic/array_for.go",
+        "sha256": "bf97b1015c1ed7cbdffd30e7b578b04e29082fc329f0b2b45b9e10d48c5e1d67"
+      },
+      {
+        "path": "internal/semantic/byte_for.go",
+        "sha256": "7d4339f9263083a82175f00aca456e5713b704517eef7dec9ae9649718ceb019"
+      },
+      {
+        "path": "internal/semantic/borrow_flow.go",
+        "sha256": "29b1d3d20d61fe5c035a79463d4e420db7e06aae6c5d7e6ef76cc2a97964f6b2"
+      },
+      {
+        "path": "internal/semantic/model.go",
+        "sha256": "c29d7e71e47fd20dd64c58bffd3625b2582378df48917015a5c9a83fe8551de4"
+      }
+    ]
+  },
+  "sourceCheck": {
+    "exit": 0,
+    "stdout": "check ok: 2 instance(s), 235 source file(s), 2919 MIR function(s), lock verified\n"
+  },
+  "lockedDevelopmentBuild": {
+    "exit": 0,
+    "stdout": "built: build/lexer-candidate.exe (x86_64-windows-msvc, development, lock verified)\n"
+  },
+  "fixtures": [
+    {
+      "index": 0,
+      "name": "owned scalar array",
+      "source": "module main;fn void f(){var u8[2] data=[1,2];for(let u8 item in data){discard item;}}",
+      "provider": ""
+    },
+    {
+      "index": 1,
+      "name": "owned array break",
+      "source": "module main;fn void f(){var u8[2] data=[1,2];for(let u8 item in data){break;}}",
+      "provider": ""
+    },
+    {
+      "index": 2,
+      "name": "borrowed shared view",
+      "source": "module main;fn void f(){var u8[2] data=[1,2];let ref u8[] p=ref data;for(let u8 item in p){discard item;}}",
+      "provider": ""
+    },
+    {
+      "index": 3,
+      "name": "parameter shared view",
+      "source": "module main;fn void f(ref u8[] p){for(let u8 item in p){discard item;}}",
+      "provider": ""
+    },
+    {
+      "index": 4,
+      "name": "mutable array item",
+      "source": "module main;fn void f(){var u8[2] data=[1,2];for(let ref mut u8 item in data){*item=9;}}",
+      "provider": ""
+    },
+    {
+      "index": 5,
+      "name": "mutable view item",
+      "source": "module main;fn void f(ref mut u8[] p){for(let ref mut u8 item in p){*item=9;}}",
+      "provider": ""
+    },
+    {
+      "index": 6,
+      "name": "direct mutable subview item",
+      "source": "module main;fn void f(ref mut u8[] p){for(let ref mut u8 item in p[..1]){*item=9;}}",
+      "provider": ""
+    },
+    {
+      "index": 7,
+      "name": "shared array item",
+      "source": "module main;fn void f(){var u8[2] data=[1,2];for(let ref u8 item in data){discard *item;}}",
+      "provider": ""
+    },
+    {
+      "index": 8,
+      "name": "loop borrowing local",
+      "source": "module main;fn void f(bool c){var i32 x=1;while(c){let ref i32 p=ref x;discard *p;break;}}",
+      "provider": ""
+    },
+    {
+      "index": 9,
+      "name": "classic post use",
+      "source": "module main;fn void f(){var i32 x=1;let ref i32 p=ref x;for(var i32 i=0;i<2;i+=1){discard *p;continue;}}",
+      "provider": ""
+    },
+    {
+      "index": 10,
+      "name": "nested copied loop",
+      "source": "module main;fn void f(){var u8[2] x=[1,2];for(let u8 a in x){for(let u8 b in x){discard a;discard b;}}}",
+      "provider": ""
+    },
+    {
+      "index": 11,
+      "name": "array loop returns",
+      "source": "module main;fn void f(){var u8[2] x=[1,2];for(let u8 a in x){return;}}",
+      "provider": ""
+    },
+    {
+      "index": 12,
+      "name": "unused reference item",
+      "source": "module main;fn void f(){var u8[2] data=[1,2];for(let ref mut u8 item in data){break;}}",
+      "provider": ""
+    },
+    {
+      "index": 13,
+      "name": "mutable i64 item",
+      "source": "module main;fn void f(){var i64[2] data=[1,2];for(let ref mut i64 item in data){*item=9;}}",
+      "provider": ""
+    },
+    {
+      "index": 14,
+      "name": "return parameter item",
+      "source": "module main;fn ref mut u8 f(ref mut u8[] p){for(let ref mut u8 item in p){return item;}assert(false);}",
+      "provider": ""
+    },
+    {
+      "index": 15,
+      "name": "owned array field",
+      "source": "module main;struct Bag{u8[2] data;}fn void f(){var Bag bag=Bag{.data=[1,2]};for(let u8 item in bag.data){discard item;}}",
+      "provider": ""
+    },
+    {
+      "index": 16,
+      "name": "shared aggregate array field",
+      "source": "module main;struct Bag{u8[2] data;}fn void f(ref Bag bag){for(let u8 item in bag.data){discard item;}}",
+      "provider": ""
+    },
+    {
+      "index": 17,
+      "name": "mutable aggregate array field",
+      "source": "module main;struct Bag{u8[2] data;}fn void f(ref mut Bag bag){for(let ref mut u8 item in bag.data){*item=9;}}",
+      "provider": ""
+    }
+  ],
+  "native": {
+    "schemaVersion": "fairyc.test-report/v4",
+    "engine": "native",
+    "target": "x86_64-windows-msvc",
+    "profile": "development",
+    "tests": [
+      {
+        "identity": "tests::module_unit_iteration_facts::implicit_iteration_loans_have_owned_facts",
+        "outcome": "passed",
+        "trapCategory": null,
+        "stdoutBase64": "Y2FzZSAwCmZhY3QgMCAxMiAwIDY0IDY4IDY0IDY4IDAgTG9jYWwoZGF0YSkKY2FzZSAxCmZhY3QgMCAxMiAwIDY0IDY4IDY0IDY4IDAgTG9jYWwoZGF0YSkKY2FzZSAyCmZhY3QgMCAxMiAwIDYwIDY4IDg4IDg5IDAgTG9jYWwoZGF0YSkKY2FzZSAzCmNhc2UgNApmYWN0IDAgMTIgMSA3MiA3NiA3OSA4MyAwIExvY2FsKGRhdGEpCmZhY3QgMCAxMiAxIDcyIDc2IDc5IDgzIDAgTG9jYWwoZGF0YSkKY2FzZSA1CmZhY3QgMCAxMiAxIDY1IDY2IDY5IDczIDAgUGFyYW0oMCkKY2FzZSA2CmZhY3QgMCAxMiAxIDY1IDcxIDc0IDc4IDAgUGFyYW0oMCkKZmFjdCAwIDEyIDEgNjUgNzEgNzQgNzggMCBQYXJhbSgwKQpjYXNlIDcKZmFjdCAwIDEyIDAgNjggNzIgODMgODcgMCBMb2NhbChkYXRhKQpmYWN0IDAgMTIgMCA2OCA3MiA4MyA4NyAwIExvY2FsKGRhdGEpCmNhc2UgOApmYWN0IDAgMTIgMCA2NSA3MCA4MCA4MSAwIExvY2FsKHgpCmNhc2UgOQpmYWN0IDAgMTIgMCA1MCA1NSA5MSA5MiAwIExvY2FsKHgpCmNhc2UgMTAKZmFjdCAwIDEyIDAgNTggNTkgNTggNTkgMCBMb2NhbCh4KQpmYWN0IDAgMTIgMCA3NyA3OCA3NyA3OCAwIExvY2FsKHgpCmNhc2UgMTEKZmFjdCAwIDEyIDAgNTggNTkgNTggNTkgMCBMb2NhbCh4KQpjYXNlIDEyCmZhY3QgMCAxMiAxIDcyIDc2IDcyIDc2IDAgTG9jYWwoZGF0YSkKZmFjdCAwIDEyIDEgNzIgNzYgMCAwIDAgTG9jYWwoZGF0YSkKY2FzZSAxMwpmYWN0IDAgMTIgMSA3NCA3OCA4MSA4NSAwIExvY2FsKGRhdGEpCmZhY3QgMCAxMiAxIDc0IDc4IDgxIDg1IDAgTG9jYWwoZGF0YSkKY2FzZSAxNApmYWN0IDAgMTIgMSA3MSA3MiA4MSA4NSAxIFBhcmFtKDApCmNhc2UgMTUKZmFjdCAwIDM1IDAgOTUgMTAzIDk1IDEwMyAwIExvY2FsKGJhZykKY2FzZSAxNgpjYXNlIDE3CmZhY3QgMCAzNSAxIDg5IDk3IDEwMCAxMDQgMCBQYXJhbSgwKQpmYWN0IDAgMzUgMSA4OSA5NyAxMDAgMTA0IDAgUGFyYW0oMCkK",
+        "stderrBase64": ""
+      }
+    ],
+    "count": 1,
+    "passed": 1,
+    "failed": 0,
+    "status": "ok",
+    "lock": "verified"
+  },
+  "referenceComparison": {
+    "passed": true,
+    "matched": 18,
+    "count": 18,
+    "facts": 23,
+    "cases": [
+      {
+        "index": 0,
+        "name": "owned scalar array",
+        "matched": true,
+        "reference": [
+          {
+            "module": 0,
+            "function": 12,
+            "mutable": 0,
+            "start": 64,
+            "end": 68,
+            "lastStart": 64,
+            "lastEnd": 68,
+            "escapes": 0,
+            "origin": "Local(data)"
+          }
+        ],
+        "actual": [
+          {
+            "module": 0,
+            "function": 12,
+            "mutable": 0,
+            "start": 64,
+            "end": 68,
+            "lastStart": 64,
+            "lastEnd": 68,
+            "escapes": 0,
+            "origin": "Local(data)"
+          }
+        ]
+      },
+      {
+        "index": 1,
+        "name": "owned array break",
+        "matched": true,
+        "reference": [
+          {
+            "module": 0,
+            "function": 12,
+            "mutable": 0,
+            "start": 64,
+            "end": 68,
+            "lastStart": 64,
+            "lastEnd": 68,
+            "escapes": 0,
+            "origin": "Local(data)"
+          }
+        ],
+        "actual": [
+          {
+            "module": 0,
+            "function": 12,
+            "mutable": 0,
+            "start": 64,
+            "end": 68,
+            "lastStart": 64,
+            "lastEnd": 68,
+            "escapes": 0,
+            "origin": "Local(data)"
+          }
+        ]
+      },
+      {
+        "index": 2,
+        "name": "borrowed shared view",
+        "matched": true,
+        "reference": [
+          {
+            "module": 0,
+            "function": 12,
+            "mutable": 0,
+            "start": 60,
+            "end": 68,
+            "lastStart": 88,
+            "lastEnd": 89,
+            "escapes": 0,
+            "origin": "Local(data)"
+          }
+        ],
+        "actual": [
+          {
+            "module": 0,
+            "function": 12,
+            "mutable": 0,
+            "start": 60,
+            "end": 68,
+            "lastStart": 88,
+            "lastEnd": 89,
+            "escapes": 0,
+            "origin": "Local(data)"
+          }
+        ]
+      },
+      {
+        "index": 3,
+        "name": "parameter shared view",
+        "matched": true,
+        "reference": [],
+        "actual": []
+      },
+      {
+        "index": 4,
+        "name": "mutable array item",
+        "matched": true,
+        "reference": [
+          {
+            "module": 0,
+            "function": 12,
+            "mutable": 1,
+            "start": 72,
+            "end": 76,
+            "lastStart": 79,
+            "lastEnd": 83,
+            "escapes": 0,
+            "origin": "Local(data)"
+          },
+          {
+            "module": 0,
+            "function": 12,
+            "mutable": 1,
+            "start": 72,
+            "end": 76,
+            "lastStart": 79,
+            "lastEnd": 83,
+            "escapes": 0,
+            "origin": "Local(data)"
+          }
+        ],
+        "actual": [
+          {
+            "module": 0,
+            "function": 12,
+            "mutable": 1,
+            "start": 72,
+            "end": 76,
+            "lastStart": 79,
+            "lastEnd": 83,
+            "escapes": 0,
+            "origin": "Local(data)"
+          },
+          {
+            "module": 0,
+            "function": 12,
+            "mutable": 1,
+            "start": 72,
+            "end": 76,
+            "lastStart": 79,
+            "lastEnd": 83,
+            "escapes": 0,
+            "origin": "Local(data)"
+          }
+        ]
+      },
+      {
+        "index": 5,
+        "name": "mutable view item",
+        "matched": true,
+        "reference": [
+          {
+            "module": 0,
+            "function": 12,
+            "mutable": 1,
+            "start": 65,
+            "end": 66,
+            "lastStart": 69,
+            "lastEnd": 73,
+            "escapes": 0,
+            "origin": "Param(0)"
+          }
+        ],
+        "actual": [
+          {
+            "module": 0,
+            "function": 12,
+            "mutable": 1,
+            "start": 65,
+            "end": 66,
+            "lastStart": 69,
+            "lastEnd": 73,
+            "escapes": 0,
+            "origin": "Param(0)"
+          }
+        ]
+      },
+      {
+        "index": 6,
+        "name": "direct mutable subview item",
+        "matched": true,
+        "reference": [
+          {
+            "module": 0,
+            "function": 12,
+            "mutable": 1,
+            "start": 65,
+            "end": 71,
+            "lastStart": 74,
+            "lastEnd": 78,
+            "escapes": 0,
+            "origin": "Param(0)"
+          },
+          {
+            "module": 0,
+            "function": 12,
+            "mutable": 1,
+            "start": 65,
+            "end": 71,
+            "lastStart": 74,
+            "lastEnd": 78,
+            "escapes": 0,
+            "origin": "Param(0)"
+          }
+        ],
+        "actual": [
+          {
+            "module": 0,
+            "function": 12,
+            "mutable": 1,
+            "start": 65,
+            "end": 71,
+            "lastStart": 74,
+            "lastEnd": 78,
+            "escapes": 0,
+            "origin": "Param(0)"
+          },
+          {
+            "module": 0,
+            "function": 12,
+            "mutable": 1,
+            "start": 65,
+            "end": 71,
+            "lastStart": 74,
+            "lastEnd": 78,
+            "escapes": 0,
+            "origin": "Param(0)"
+          }
+        ]
+      },
+      {
+        "index": 7,
+        "name": "shared array item",
+        "matched": true,
+        "reference": [
+          {
+            "module": 0,
+            "function": 12,
+            "mutable": 0,
+            "start": 68,
+            "end": 72,
+            "lastStart": 83,
+            "lastEnd": 87,
+            "escapes": 0,
+            "origin": "Local(data)"
+          },
+          {
+            "module": 0,
+            "function": 12,
+            "mutable": 0,
+            "start": 68,
+            "end": 72,
+            "lastStart": 83,
+            "lastEnd": 87,
+            "escapes": 0,
+            "origin": "Local(data)"
+          }
+        ],
+        "actual": [
+          {
+            "module": 0,
+            "function": 12,
+            "mutable": 0,
+            "start": 68,
+            "end": 72,
+            "lastStart": 83,
+            "lastEnd": 87,
+            "escapes": 0,
+            "origin": "Local(data)"
+          },
+          {
+            "module": 0,
+            "function": 12,
+            "mutable": 0,
+            "start": 68,
+            "end": 72,
+            "lastStart": 83,
+            "lastEnd": 87,
+            "escapes": 0,
+            "origin": "Local(data)"
+          }
+        ]
+      },
+      {
+        "index": 8,
+        "name": "loop borrowing local",
+        "matched": true,
+        "reference": [
+          {
+            "module": 0,
+            "function": 12,
+            "mutable": 0,
+            "start": 65,
+            "end": 70,
+            "lastStart": 80,
+            "lastEnd": 81,
+            "escapes": 0,
+            "origin": "Local(x)"
+          }
+        ],
+        "actual": [
+          {
+            "module": 0,
+            "function": 12,
+            "mutable": 0,
+            "start": 65,
+            "end": 70,
+            "lastStart": 80,
+            "lastEnd": 81,
+            "escapes": 0,
+            "origin": "Local(x)"
+          }
+        ]
+      },
+      {
+        "index": 9,
+        "name": "classic post use",
+        "matched": true,
+        "reference": [
+          {
+            "module": 0,
+            "function": 12,
+            "mutable": 0,
+            "start": 50,
+            "end": 55,
+            "lastStart": 91,
+            "lastEnd": 92,
+            "escapes": 0,
+            "origin": "Local(x)"
+          }
+        ],
+        "actual": [
+          {
+            "module": 0,
+            "function": 12,
+            "mutable": 0,
+            "start": 50,
+            "end": 55,
+            "lastStart": 91,
+            "lastEnd": 92,
+            "escapes": 0,
+            "origin": "Local(x)"
+          }
+        ]
+      },
+      {
+        "index": 10,
+        "name": "nested copied loop",
+        "matched": true,
+        "reference": [
+          {
+            "module": 0,
+            "function": 12,
+            "mutable": 0,
+            "start": 58,
+            "end": 59,
+            "lastStart": 58,
+            "lastEnd": 59,
+            "escapes": 0,
+            "origin": "Local(x)"
+          },
+          {
+            "module": 0,
+            "function": 12,
+            "mutable": 0,
+            "start": 77,
+            "end": 78,
+            "lastStart": 77,
+            "lastEnd": 78,
+            "escapes": 0,
+            "origin": "Local(x)"
+          }
+        ],
+        "actual": [
+          {
+            "module": 0,
+            "function": 12,
+            "mutable": 0,
+            "start": 58,
+            "end": 59,
+            "lastStart": 58,
+            "lastEnd": 59,
+            "escapes": 0,
+            "origin": "Local(x)"
+          },
+          {
+            "module": 0,
+            "function": 12,
+            "mutable": 0,
+            "start": 77,
+            "end": 78,
+            "lastStart": 77,
+            "lastEnd": 78,
+            "escapes": 0,
+            "origin": "Local(x)"
+          }
+        ]
+      },
+      {
+        "index": 11,
+        "name": "array loop returns",
+        "matched": true,
+        "reference": [
+          {
+            "module": 0,
+            "function": 12,
+            "mutable": 0,
+            "start": 58,
+            "end": 59,
+            "lastStart": 58,
+            "lastEnd": 59,
+            "escapes": 0,
+            "origin": "Local(x)"
+          }
+        ],
+        "actual": [
+          {
+            "module": 0,
+            "function": 12,
+            "mutable": 0,
+            "start": 58,
+            "end": 59,
+            "lastStart": 58,
+            "lastEnd": 59,
+            "escapes": 0,
+            "origin": "Local(x)"
+          }
+        ]
+      },
+      {
+        "index": 12,
+        "name": "unused reference item",
+        "matched": true,
+        "reference": [
+          {
+            "module": 0,
+            "function": 12,
+            "mutable": 1,
+            "start": 72,
+            "end": 76,
+            "lastStart": 0,
+            "lastEnd": 0,
+            "escapes": 0,
+            "origin": "Local(data)"
+          },
+          {
+            "module": 0,
+            "function": 12,
+            "mutable": 1,
+            "start": 72,
+            "end": 76,
+            "lastStart": 72,
+            "lastEnd": 76,
+            "escapes": 0,
+            "origin": "Local(data)"
+          }
+        ],
+        "actual": [
+          {
+            "module": 0,
+            "function": 12,
+            "mutable": 1,
+            "start": 72,
+            "end": 76,
+            "lastStart": 0,
+            "lastEnd": 0,
+            "escapes": 0,
+            "origin": "Local(data)"
+          },
+          {
+            "module": 0,
+            "function": 12,
+            "mutable": 1,
+            "start": 72,
+            "end": 76,
+            "lastStart": 72,
+            "lastEnd": 76,
+            "escapes": 0,
+            "origin": "Local(data)"
+          }
+        ]
+      },
+      {
+        "index": 13,
+        "name": "mutable i64 item",
+        "matched": true,
+        "reference": [
+          {
+            "module": 0,
+            "function": 12,
+            "mutable": 1,
+            "start": 74,
+            "end": 78,
+            "lastStart": 81,
+            "lastEnd": 85,
+            "escapes": 0,
+            "origin": "Local(data)"
+          },
+          {
+            "module": 0,
+            "function": 12,
+            "mutable": 1,
+            "start": 74,
+            "end": 78,
+            "lastStart": 81,
+            "lastEnd": 85,
+            "escapes": 0,
+            "origin": "Local(data)"
+          }
+        ],
+        "actual": [
+          {
+            "module": 0,
+            "function": 12,
+            "mutable": 1,
+            "start": 74,
+            "end": 78,
+            "lastStart": 81,
+            "lastEnd": 85,
+            "escapes": 0,
+            "origin": "Local(data)"
+          },
+          {
+            "module": 0,
+            "function": 12,
+            "mutable": 1,
+            "start": 74,
+            "end": 78,
+            "lastStart": 81,
+            "lastEnd": 85,
+            "escapes": 0,
+            "origin": "Local(data)"
+          }
+        ]
+      },
+      {
+        "index": 14,
+        "name": "return parameter item",
+        "matched": true,
+        "reference": [
+          {
+            "module": 0,
+            "function": 12,
+            "mutable": 1,
+            "start": 71,
+            "end": 72,
+            "lastStart": 81,
+            "lastEnd": 85,
+            "escapes": 1,
+            "origin": "Param(0)"
+          }
+        ],
+        "actual": [
+          {
+            "module": 0,
+            "function": 12,
+            "mutable": 1,
+            "start": 71,
+            "end": 72,
+            "lastStart": 81,
+            "lastEnd": 85,
+            "escapes": 1,
+            "origin": "Param(0)"
+          }
+        ]
+      },
+      {
+        "index": 15,
+        "name": "owned array field",
+        "matched": true,
+        "reference": [
+          {
+            "module": 0,
+            "function": 35,
+            "mutable": 0,
+            "start": 95,
+            "end": 103,
+            "lastStart": 95,
+            "lastEnd": 103,
+            "escapes": 0,
+            "origin": "Local(bag)"
+          }
+        ],
+        "actual": [
+          {
+            "module": 0,
+            "function": 35,
+            "mutable": 0,
+            "start": 95,
+            "end": 103,
+            "lastStart": 95,
+            "lastEnd": 103,
+            "escapes": 0,
+            "origin": "Local(bag)"
+          }
+        ]
+      },
+      {
+        "index": 16,
+        "name": "shared aggregate array field",
+        "matched": true,
+        "reference": [],
+        "actual": []
+      },
+      {
+        "index": 17,
+        "name": "mutable aggregate array field",
+        "matched": true,
+        "reference": [
+          {
+            "module": 0,
+            "function": 35,
+            "mutable": 1,
+            "start": 89,
+            "end": 97,
+            "lastStart": 100,
+            "lastEnd": 104,
+            "escapes": 0,
+            "origin": "Param(0)"
+          },
+          {
+            "module": 0,
+            "function": 35,
+            "mutable": 1,
+            "start": 89,
+            "end": 97,
+            "lastStart": 100,
+            "lastEnd": 104,
+            "escapes": 0,
+            "origin": "Param(0)"
+          }
+        ],
+        "actual": [
+          {
+            "module": 0,
+            "function": 35,
+            "mutable": 1,
+            "start": 89,
+            "end": 97,
+            "lastStart": 100,
+            "lastEnd": 104,
+            "escapes": 0,
+            "origin": "Param(0)"
+          },
+          {
+            "module": 0,
+            "function": 35,
+            "mutable": 1,
+            "start": 89,
+            "end": 97,
+            "lastStart": 100,
+            "lastEnd": 104,
+            "escapes": 0,
+            "origin": "Param(0)"
+          }
+        ]
+      }
+    ]
+  },
+  "conflictFixtures": [
+    {
+      "index": 0,
+      "name": "mutable array freezes owner",
+      "source": "module main;fn void f(){var u8[2] data=[1,2];for(let ref mut u8 item in data){*item=9;discard data[0];}}",
+      "expected": 3,
+      "reference": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:1:95: E2101: Access conflicts with an active shared or mutable loan. [bytes 94..98]\n  last-use: main.fy:1:73 [bytes 72..76]\n  loan: main.fy:1:73 [bytes 72..76]\n"
+      }
+    },
+    {
+      "index": 1,
+      "name": "mutable array releases owner",
+      "source": "module main;fn void f(){var u8[2] data=[1,2];for(let ref mut u8 item in data){*item=9;}data[0]=7;}",
+      "expected": 0,
+      "reference": {
+        "exit": 0,
+        "stdout": "semantics ok: main.fy (typed HIR: 1 function(s))\n",
+        "stderr": ""
+      }
+    },
+    {
+      "index": 2,
+      "name": "mutable item freezes parameter",
+      "source": "module main;fn void f(ref mut u8[] p){for(let ref mut u8 item in p){discard p[0];discard *item;}}",
+      "expected": 3,
+      "reference": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:1:77: E2101: Access conflicts with an active shared or mutable loan. [bytes 76..77]\n  last-use: main.fy:1:91 [bytes 90..94]\n  loan: main.fy:1:66 [bytes 65..66]\n"
+      }
+    },
+    {
+      "index": 3,
+      "name": "shared item freezes mutable parent",
+      "source": "module main;fn void edit(ref mut u8[] p){}fn void f(ref mut u8[] p){for(let ref u8 item in p){edit(p);discard *item;}}",
+      "expected": 3,
+      "reference": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:1:100: E2101: Access conflicts with an active shared or mutable loan. [bytes 99..100]\n  last-use: main.fy:1:100 [bytes 99..100]\n  loan: main.fy:1:92 [bytes 91..92]\n"
+      }
+    },
+    {
+      "index": 4,
+      "name": "local item cannot escape",
+      "source": "module main;fn ref mut u8 f(){var u8[2] data=[1,2];for(let ref mut u8 item in data){return item;}assert(false);}",
+      "expected": 3,
+      "reference": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:1:92: E2102: Returned borrow originates from a local value. [bytes 91..95]\n  origin: main.fy:1:41 [bytes 40..44]\n"
+      }
+    },
+    {
+      "index": 5,
+      "name": "parameter item can escape",
+      "source": "module main;fn ref mut u8 f(ref mut u8[] p){for(let ref mut u8 item in p){return item;}assert(false);}",
+      "expected": 0,
+      "reference": {
+        "exit": 0,
+        "stdout": "semantics ok: main.fy (typed HIR: 1 function(s))\n",
+        "stderr": ""
+      }
+    }
+  ],
+  "conflictComparison": {
+    "passed": true,
+    "matched": 6,
+    "count": 6,
+    "candidateSHA256": "df753d8a9d91ff1453fd9266f3919a23bc628bfc4c8fd06190a4ba2fce592b93",
+    "cases": [
+      {
+        "index": 0,
+        "name": "mutable array freezes owner",
+        "exit": 3,
+        "matched": true,
+        "reference": [
+          {
+            "file": "main.fy",
+            "code": 2101,
+            "start": 94,
+            "end": 98,
+            "related": [
+              {
+                "role": "last-use",
+                "file": "main.fy",
+                "start": 72,
+                "end": 76
+              },
+              {
+                "role": "loan",
+                "file": "main.fy",
+                "start": 72,
+                "end": 76
+              }
+            ]
+          }
+        ],
+        "diagnostics": [
+          {
+            "file": "main.fy",
+            "code": 2101,
+            "start": 94,
+            "end": 98,
+            "related": [
+              {
+                "role": "last-use",
+                "file": "main.fy",
+                "start": 72,
+                "end": 76
+              },
+              {
+                "role": "loan",
+                "file": "main.fy",
+                "start": 72,
+                "end": 76
+              }
+            ]
+          }
+        ],
+        "stdout": "",
+        "stderr": "main.fy:1:95: error: E2101 borrow conflicts with live loan (bytes 94..98)\n  loan: main.fy (bytes 72..76)\n  last-use: main.fy (bytes 72..76)\n"
+      },
+      {
+        "index": 1,
+        "name": "mutable array releases owner",
+        "exit": 0,
+        "matched": true,
+        "reference": [],
+        "diagnostics": [],
+        "stdout": "return origins ok\n",
+        "stderr": ""
+      },
+      {
+        "index": 2,
+        "name": "mutable item freezes parameter",
+        "exit": 3,
+        "matched": true,
+        "reference": [
+          {
+            "file": "main.fy",
+            "code": 2101,
+            "start": 76,
+            "end": 77,
+            "related": [
+              {
+                "role": "last-use",
+                "file": "main.fy",
+                "start": 90,
+                "end": 94
+              },
+              {
+                "role": "loan",
+                "file": "main.fy",
+                "start": 65,
+                "end": 66
+              }
+            ]
+          }
+        ],
+        "diagnostics": [
+          {
+            "file": "main.fy",
+            "code": 2101,
+            "start": 76,
+            "end": 77,
+            "related": [
+              {
+                "role": "last-use",
+                "file": "main.fy",
+                "start": 90,
+                "end": 94
+              },
+              {
+                "role": "loan",
+                "file": "main.fy",
+                "start": 65,
+                "end": 66
+              }
+            ]
+          }
+        ],
+        "stdout": "",
+        "stderr": "main.fy:1:77: error: E2101 borrow conflicts with live loan (bytes 76..77)\n  loan: main.fy (bytes 65..66)\n  last-use: main.fy (bytes 90..94)\n"
+      },
+      {
+        "index": 3,
+        "name": "shared item freezes mutable parent",
+        "exit": 3,
+        "matched": true,
+        "reference": [
+          {
+            "file": "main.fy",
+            "code": 2101,
+            "start": 99,
+            "end": 100,
+            "related": [
+              {
+                "role": "last-use",
+                "file": "main.fy",
+                "start": 99,
+                "end": 100
+              },
+              {
+                "role": "loan",
+                "file": "main.fy",
+                "start": 91,
+                "end": 92
+              }
+            ]
+          }
+        ],
+        "diagnostics": [
+          {
+            "file": "main.fy",
+            "code": 2101,
+            "start": 99,
+            "end": 100,
+            "related": [
+              {
+                "role": "last-use",
+                "file": "main.fy",
+                "start": 99,
+                "end": 100
+              },
+              {
+                "role": "loan",
+                "file": "main.fy",
+                "start": 91,
+                "end": 92
+              }
+            ]
+          }
+        ],
+        "stdout": "",
+        "stderr": "main.fy:1:100: error: E2101 borrow conflicts with live loan (bytes 99..100)\n  loan: main.fy (bytes 91..92)\n  last-use: main.fy (bytes 99..100)\n"
+      },
+      {
+        "index": 4,
+        "name": "local item cannot escape",
+        "exit": 3,
+        "matched": true,
+        "reference": [
+          {
+            "file": "main.fy",
+            "code": 2102,
+            "start": 91,
+            "end": 95,
+            "related": [
+              {
+                "role": "origin",
+                "file": "main.fy",
+                "start": 40,
+                "end": 44
+              }
+            ]
+          }
+        ],
+        "diagnostics": [
+          {
+            "file": "main.fy",
+            "code": 2102,
+            "start": 91,
+            "end": 95,
+            "related": [
+              {
+                "role": "origin",
+                "file": "main.fy",
+                "start": 40,
+                "end": 44
+              }
+            ]
+          }
+        ],
+        "stdout": "",
+        "stderr": "main.fy:1:92: error: E2102 borrow return escapes local origin (bytes 91..95)\n  origin: main.fy (bytes 40..44)\n"
+      },
+      {
+        "index": 5,
+        "name": "parameter item can escape",
+        "exit": 0,
+        "matched": true,
+        "reference": [],
+        "diagnostics": [],
+        "stdout": "return origins ok\n",
+        "stderr": ""
+      }
+    ]
+  },
+  "priorBorrowNative": {
+    "schemaVersion": "fairyc.test-report/v4",
+    "engine": "native",
+    "target": "x86_64-windows-msvc",
+    "profile": "development",
+    "tests": [
+      {
+        "identity": "tests::module_unit_borrow_facts::owned_retained_borrow_facts_report_last_use_and_escape",
+        "outcome": "passed",
+        "trapCategory": null,
+        "stdoutBase64": "Y2FzZSAwCmZhY3QgMCAxMiAwIDUwIDU1IDY1IDY2IDAgTG9jYWwoeCkKY2FzZSAxCmZhY3QgMCAxMiAwIDUwIDU1IDAgMCAwIExvY2FsKHgpCmNhc2UgMgpjYXNlIDMKZmFjdCAwIDEyIDAgNTAgNTUgODEgODIgMCBMb2NhbCh4KQpjYXNlIDQKZmFjdCAwIDEyIDAgNjIgNjcgNzcgNzggMCBMb2NhbCh4KQpmYWN0IDAgMTIgMCA4MSA4NiA5NiA5NyAwIExvY2FsKHkpCmNhc2UgNQpmYWN0IDAgMTIgMCA2NCA2OSAwIDAgMCBMb2NhbCh4KQpjYXNlIDYKZmFjdCAwIDEyIDAgNjQgNjkgMTA1IDEwNiAwIExvY2FsKHgpCmNhc2UgNwpmYWN0IDAgMTIgMCA1NCA2MiA1NCA2MiAxIFBhcmFtKDApCmZhY3QgMCA2NCAwIDEwMCAxMDUgMTMyIDEzMyAwIExvY2FsKHgpCmNhc2UgOApmYWN0IDAgMTIgMSA1NCA2MyA3OCA3OSAwIExvY2FsKHgpCmNhc2UgOQpmYWN0IDAgMTIgMSA2MSA3MCAxMDUgMTA2IDAgTG9jYWwoeCkKZmFjdCAwIDEyIDEgOTAgOTYgMTA1IDEwNiAwIExvY2FsKHgpCmNhc2UgMTAKZmFjdCAwIDEyIDEgNjEgNzUgODQgODUgMCBMb2NhbCh4KQpjYXNlIDExCmZhY3QgMCAxMiAwIDQzIDQ0IDQzIDQ0IDEgUGFyYW0oMCkKY2FzZSAxMgpmYWN0IDAgMTIgMSA1MSA1MiA1MSA1MiAxIFBhcmFtKDApCmNhc2UgMTMKZmFjdCAwIDEyIDAgNTEgNTkgNTEgNTkgMSBQYXJhbSgwKQpjYXNlIDE0CmNhc2UgMTUKZmFjdCAwIDEyIDEgNTMgNTkgNTMgNTkgMSBQYXJhbSgwKQpjYXNlIDE2CmZhY3QgMCAxMiAxIDY1IDcxIDc5IDgwIDEgUGFyYW0oMCkKY2FzZSAxNwpmYWN0IDAgMTIgMCAzOSA0NSA1NCA1NSAwIFN0YXRpYwpjYXNlIDE4CmZhY3QgMCAxMiAwIDM1IDQxIDM1IDQxIDEgU3RhdGljCmNhc2UgMTkKZmFjdCAwIDEyIDAgNDMgNDkgNTcgNTggMSBTdGF0aWMKY2FzZSAyMApmYWN0IDAgMTIgMCA1MyA1OCA2NiA2NyAwIExvY2FsKHgpCmNhc2UgMjEKZmFjdCAwIDEyIDAgNjggNzMgOTkgMTAwIDAgTG9jYWwoeCkKZmFjdCAwIDEyIDAgODIgODcgOTkgMTAwIDAgTG9jYWwoeSkKY2FzZSAyMgpmYWN0IDAgMTIgMCA1NiA2MSA4MCA4MSAwIExvY2FsKHgpCmNhc2UgMjMKZmFjdCAwIDEyIDAgNDQgNDUgNDQgNDUgMSBQYXJhbSgwKQpmYWN0IDAgNDcgMCA4OCA5MyAxMDQgMTA1IDAgTG9jYWwoeCkKY2FzZSAyNApmYWN0IDAgMTIgMCA0NCA0NSA0NCA0NSAxIFBhcmFtKDApCmZhY3QgMCA0NyAxIDg5IDk4IDEyOCAxMjkgMCBMb2NhbCh4KQpmYWN0IDAgNDcgMCAxMTYgMTE3IDEyOCAxMjkgMCBMb2NhbCh4KQpjYXNlIDI1CmZhY3QgMCAzMCAxIDgwIDg5IDEyMSAxMjIgMCBMb2NhbChiKQpmYWN0IDAgMzAgMCAxMDQgMTExIDEyMSAxMjIgMCBMb2NhbChiKQpjYXNlIDI2CmZhY3QgMSAxNiAxIDY1IDcxIDY1IDcxIDEgUGFyYW0oMCkKZmFjdCAwIDM0IDEgNzkgOTQgMTAzIDEwNCAwIFBhcmFtKDApCg==",
+        "stderrBase64": ""
+      }
+    ],
+    "count": 1,
+    "passed": 1,
+    "failed": 0,
+    "status": "ok",
+    "lock": "verified"
+  },
+  "priorBorrowComparison": {
+    "passed": true,
+    "matched": 27,
+    "count": 27,
+    "facts": 34,
+    "cases": [
+      {
+        "index": 0,
+        "name": "shared retained",
+        "matched": true,
+        "reference": [
+          {
+            "module": 0,
+            "function": 12,
+            "mutable": 0,
+            "start": 50,
+            "end": 55,
+            "lastStart": 65,
+            "lastEnd": 66,
+            "escapes": 0,
+            "origin": "Local(x)"
+          }
+        ],
+        "actual": [
+          {
+            "module": 0,
+            "function": 12,
+            "mutable": 0,
+            "start": 50,
+            "end": 55,
+            "lastStart": 65,
+            "lastEnd": 66,
+            "escapes": 0,
+            "origin": "Local(x)"
+          }
+        ]
+      },
+      {
+        "index": 1,
+        "name": "unused retained",
+        "matched": true,
+        "reference": [
+          {
+            "module": 0,
+            "function": 12,
+            "mutable": 0,
+            "start": 50,
+            "end": 55,
+            "lastStart": 0,
+            "lastEnd": 0,
+            "escapes": 0,
+            "origin": "Local(x)"
+          }
+        ],
+        "actual": [
+          {
+            "module": 0,
+            "function": 12,
+            "mutable": 0,
+            "start": 50,
+            "end": 55,
+            "lastStart": 0,
+            "lastEnd": 0,
+            "escapes": 0,
+            "origin": "Local(x)"
+          }
+        ]
+      },
+      {
+        "index": 2,
+        "name": "temporary excluded",
+        "matched": true,
+        "reference": [],
+        "actual": []
+      },
+      {
+        "index": 3,
+        "name": "alias extends use",
+        "matched": true,
+        "reference": [
+          {
+            "module": 0,
+            "function": 12,
+            "mutable": 0,
+            "start": 50,
+            "end": 55,
+            "lastStart": 81,
+            "lastEnd": 82,
+            "escapes": 0,
+            "origin": "Local(x)"
+          }
+        ],
+        "actual": [
+          {
+            "module": 0,
+            "function": 12,
+            "mutable": 0,
+            "start": 50,
+            "end": 55,
+            "lastStart": 81,
+            "lastEnd": 82,
+            "escapes": 0,
+            "origin": "Local(x)"
+          }
+        ]
+      },
+      {
+        "index": 4,
+        "name": "overwrite releases old",
+        "matched": true,
+        "reference": [
+          {
+            "module": 0,
+            "function": 12,
+            "mutable": 0,
+            "start": 62,
+            "end": 67,
+            "lastStart": 77,
+            "lastEnd": 78,
+            "escapes": 0,
+            "origin": "Local(x)"
+          },
+          {
+            "module": 0,
+            "function": 12,
+            "mutable": 0,
+            "start": 81,
+            "end": 86,
+            "lastStart": 96,
+            "lastEnd": 97,
+            "escapes": 0,
+            "origin": "Local(y)"
+          }
+        ],
+        "actual": [
+          {
+            "module": 0,
+            "function": 12,
+            "mutable": 0,
+            "start": 62,
+            "end": 67,
+            "lastStart": 77,
+            "lastEnd": 78,
+            "escapes": 0,
+            "origin": "Local(x)"
+          },
+          {
+            "module": 0,
+            "function": 12,
+            "mutable": 0,
+            "start": 81,
+            "end": 86,
+            "lastStart": 96,
+            "lastEnd": 97,
+            "escapes": 0,
+            "origin": "Local(y)"
+          }
+        ]
+      },
+      {
+        "index": 5,
+        "name": "known empty releases",
+        "matched": true,
+        "reference": [
+          {
+            "module": 0,
+            "function": 12,
+            "mutable": 0,
+            "start": 64,
+            "end": 69,
+            "lastStart": 0,
+            "lastEnd": 0,
+            "escapes": 0,
+            "origin": "Local(x)"
+          }
+        ],
+        "actual": [
+          {
+            "module": 0,
+            "function": 12,
+            "mutable": 0,
+            "start": 64,
+            "end": 69,
+            "lastStart": 0,
+            "lastEnd": 0,
+            "escapes": 0,
+            "origin": "Local(x)"
+          }
+        ]
+      },
+      {
+        "index": 6,
+        "name": "tagged payload use",
+        "matched": true,
+        "reference": [
+          {
+            "module": 0,
+            "function": 12,
+            "mutable": 0,
+            "start": 64,
+            "end": 69,
+            "lastStart": 105,
+            "lastEnd": 106,
+            "escapes": 0,
+            "origin": "Local(x)"
+          }
+        ],
+        "actual": [
+          {
+            "module": 0,
+            "function": 12,
+            "mutable": 0,
+            "start": 64,
+            "end": 69,
+            "lastStart": 105,
+            "lastEnd": 106,
+            "escapes": 0,
+            "origin": "Local(x)"
+          }
+        ]
+      },
+      {
+        "index": 7,
+        "name": "temporary tagged pattern",
+        "matched": true,
+        "reference": [
+          {
+            "module": 0,
+            "function": 64,
+            "mutable": 0,
+            "start": 100,
+            "end": 105,
+            "lastStart": 132,
+            "lastEnd": 133,
+            "escapes": 0,
+            "origin": "Local(x)"
+          },
+          {
+            "module": 0,
+            "function": 12,
+            "mutable": 0,
+            "start": 54,
+            "end": 62,
+            "lastStart": 54,
+            "lastEnd": 62,
+            "escapes": 1,
+            "origin": "Param(0)"
+          }
+        ],
+        "actual": [
+          {
+            "module": 0,
+            "function": 64,
+            "mutable": 0,
+            "start": 100,
+            "end": 105,
+            "lastStart": 132,
+            "lastEnd": 133,
+            "escapes": 0,
+            "origin": "Local(x)"
+          },
+          {
+            "module": 0,
+            "function": 12,
+            "mutable": 0,
+            "start": 54,
+            "end": 62,
+            "lastStart": 54,
+            "lastEnd": 62,
+            "escapes": 1,
+            "origin": "Param(0)"
+          }
+        ]
+      },
+      {
+        "index": 8,
+        "name": "mutable use",
+        "matched": true,
+        "reference": [
+          {
+            "module": 0,
+            "function": 12,
+            "mutable": 1,
+            "start": 54,
+            "end": 63,
+            "lastStart": 78,
+            "lastEnd": 79,
+            "escapes": 0,
+            "origin": "Local(x)"
+          }
+        ],
+        "actual": [
+          {
+            "module": 0,
+            "function": 12,
+            "mutable": 1,
+            "start": 54,
+            "end": 63,
+            "lastStart": 78,
+            "lastEnd": 79,
+            "escapes": 0,
+            "origin": "Local(x)"
+          }
+        ]
+      },
+      {
+        "index": 9,
+        "name": "array descendant",
+        "matched": true,
+        "reference": [
+          {
+            "module": 0,
+            "function": 12,
+            "mutable": 1,
+            "start": 61,
+            "end": 70,
+            "lastStart": 105,
+            "lastEnd": 106,
+            "escapes": 0,
+            "origin": "Local(x)"
+          },
+          {
+            "module": 0,
+            "function": 12,
+            "mutable": 1,
+            "start": 90,
+            "end": 96,
+            "lastStart": 105,
+            "lastEnd": 106,
+            "escapes": 0,
+            "origin": "Local(x)"
+          }
+        ],
+        "actual": [
+          {
+            "module": 0,
+            "function": 12,
+            "mutable": 1,
+            "start": 61,
+            "end": 70,
+            "lastStart": 105,
+            "lastEnd": 106,
+            "escapes": 0,
+            "origin": "Local(x)"
+          },
+          {
+            "module": 0,
+            "function": 12,
+            "mutable": 1,
+            "start": 90,
+            "end": 96,
+            "lastStart": 105,
+            "lastEnd": 106,
+            "escapes": 0,
+            "origin": "Local(x)"
+          }
+        ]
+      },
+      {
+        "index": 10,
+        "name": "array direct range",
+        "matched": true,
+        "reference": [
+          {
+            "module": 0,
+            "function": 12,
+            "mutable": 1,
+            "start": 61,
+            "end": 75,
+            "lastStart": 84,
+            "lastEnd": 85,
+            "escapes": 0,
+            "origin": "Local(x)"
+          }
+        ],
+        "actual": [
+          {
+            "module": 0,
+            "function": 12,
+            "mutable": 1,
+            "start": 61,
+            "end": 75,
+            "lastStart": 84,
+            "lastEnd": 85,
+            "escapes": 0,
+            "origin": "Local(x)"
+          }
+        ]
+      },
+      {
+        "index": 11,
+        "name": "parameter return",
+        "matched": true,
+        "reference": [
+          {
+            "module": 0,
+            "function": 12,
+            "mutable": 0,
+            "start": 43,
+            "end": 44,
+            "lastStart": 43,
+            "lastEnd": 44,
+            "escapes": 1,
+            "origin": "Param(0)"
+          }
+        ],
+        "actual": [
+          {
+            "module": 0,
+            "function": 12,
+            "mutable": 0,
+            "start": 43,
+            "end": 44,
+            "lastStart": 43,
+            "lastEnd": 44,
+            "escapes": 1,
+            "origin": "Param(0)"
+          }
+        ]
+      },
+      {
+        "index": 12,
+        "name": "mutable parameter return",
+        "matched": true,
+        "reference": [
+          {
+            "module": 0,
+            "function": 12,
+            "mutable": 1,
+            "start": 51,
+            "end": 52,
+            "lastStart": 51,
+            "lastEnd": 52,
+            "escapes": 1,
+            "origin": "Param(0)"
+          }
+        ],
+        "actual": [
+          {
+            "module": 0,
+            "function": 12,
+            "mutable": 1,
+            "start": 51,
+            "end": 52,
+            "lastStart": 51,
+            "lastEnd": 52,
+            "escapes": 1,
+            "origin": "Param(0)"
+          }
+        ]
+      },
+      {
+        "index": 13,
+        "name": "tagged parameter return",
+        "matched": true,
+        "reference": [
+          {
+            "module": 0,
+            "function": 12,
+            "mutable": 0,
+            "start": 51,
+            "end": 59,
+            "lastStart": 51,
+            "lastEnd": 59,
+            "escapes": 1,
+            "origin": "Param(0)"
+          }
+        ],
+        "actual": [
+          {
+            "module": 0,
+            "function": 12,
+            "mutable": 0,
+            "start": 51,
+            "end": 59,
+            "lastStart": 51,
+            "lastEnd": 59,
+            "escapes": 1,
+            "origin": "Param(0)"
+          }
+        ]
+      },
+      {
+        "index": 14,
+        "name": "empty return",
+        "matched": true,
+        "reference": [],
+        "actual": []
+      },
+      {
+        "index": 15,
+        "name": "returned descendant",
+        "matched": true,
+        "reference": [
+          {
+            "module": 0,
+            "function": 12,
+            "mutable": 1,
+            "start": 53,
+            "end": 59,
+            "lastStart": 53,
+            "lastEnd": 59,
+            "escapes": 1,
+            "origin": "Param(0)"
+          }
+        ],
+        "actual": [
+          {
+            "module": 0,
+            "function": 12,
+            "mutable": 1,
+            "start": 53,
+            "end": 59,
+            "lastStart": 53,
+            "lastEnd": 59,
+            "escapes": 1,
+            "origin": "Param(0)"
+          }
+        ]
+      },
+      {
+        "index": 16,
+        "name": "bound returned descendant",
+        "matched": true,
+        "reference": [
+          {
+            "module": 0,
+            "function": 12,
+            "mutable": 1,
+            "start": 65,
+            "end": 71,
+            "lastStart": 79,
+            "lastEnd": 80,
+            "escapes": 1,
+            "origin": "Param(0)"
+          }
+        ],
+        "actual": [
+          {
+            "module": 0,
+            "function": 12,
+            "mutable": 1,
+            "start": 65,
+            "end": 71,
+            "lastStart": 79,
+            "lastEnd": 80,
+            "escapes": 1,
+            "origin": "Param(0)"
+          }
+        ]
+      },
+      {
+        "index": 17,
+        "name": "static retained",
+        "matched": true,
+        "reference": [
+          {
+            "module": 0,
+            "function": 12,
+            "mutable": 0,
+            "start": 39,
+            "end": 45,
+            "lastStart": 54,
+            "lastEnd": 55,
+            "escapes": 0,
+            "origin": "Static"
+          }
+        ],
+        "actual": [
+          {
+            "module": 0,
+            "function": 12,
+            "mutable": 0,
+            "start": 39,
+            "end": 45,
+            "lastStart": 54,
+            "lastEnd": 55,
+            "escapes": 0,
+            "origin": "Static"
+          }
+        ]
+      },
+      {
+        "index": 18,
+        "name": "static return",
+        "matched": true,
+        "reference": [
+          {
+            "module": 0,
+            "function": 12,
+            "mutable": 0,
+            "start": 35,
+            "end": 41,
+            "lastStart": 35,
+            "lastEnd": 41,
+            "escapes": 1,
+            "origin": "Static"
+          }
+        ],
+        "actual": [
+          {
+            "module": 0,
+            "function": 12,
+            "mutable": 0,
+            "start": 35,
+            "end": 41,
+            "lastStart": 35,
+            "lastEnd": 41,
+            "escapes": 1,
+            "origin": "Static"
+          }
+        ]
+      },
+      {
+        "index": 19,
+        "name": "static alias return",
+        "matched": true,
+        "reference": [
+          {
+            "module": 0,
+            "function": 12,
+            "mutable": 0,
+            "start": 43,
+            "end": 49,
+            "lastStart": 57,
+            "lastEnd": 58,
+            "escapes": 1,
+            "origin": "Static"
+          }
+        ],
+        "actual": [
+          {
+            "module": 0,
+            "function": 12,
+            "mutable": 0,
+            "start": 43,
+            "end": 49,
+            "lastStart": 57,
+            "lastEnd": 58,
+            "escapes": 1,
+            "origin": "Static"
+          }
+        ]
+      },
+      {
+        "index": 20,
+        "name": "local escape rejected",
+        "matched": true,
+        "reference": [
+          {
+            "module": 0,
+            "function": 12,
+            "mutable": 0,
+            "start": 53,
+            "end": 58,
+            "lastStart": 66,
+            "lastEnd": 67,
+            "escapes": 0,
+            "origin": "Local(x)"
+          }
+        ],
+        "actual": [
+          {
+            "module": 0,
+            "function": 12,
+            "mutable": 0,
+            "start": 53,
+            "end": 58,
+            "lastStart": 66,
+            "lastEnd": 67,
+            "escapes": 0,
+            "origin": "Local(x)"
+          }
+        ]
+      },
+      {
+        "index": 21,
+        "name": "branch joins loans",
+        "matched": true,
+        "reference": [
+          {
+            "module": 0,
+            "function": 12,
+            "mutable": 0,
+            "start": 68,
+            "end": 73,
+            "lastStart": 99,
+            "lastEnd": 100,
+            "escapes": 0,
+            "origin": "Local(x)"
+          },
+          {
+            "module": 0,
+            "function": 12,
+            "mutable": 0,
+            "start": 82,
+            "end": 87,
+            "lastStart": 99,
+            "lastEnd": 100,
+            "escapes": 0,
+            "origin": "Local(y)"
+          }
+        ],
+        "actual": [
+          {
+            "module": 0,
+            "function": 12,
+            "mutable": 0,
+            "start": 68,
+            "end": 73,
+            "lastStart": 99,
+            "lastEnd": 100,
+            "escapes": 0,
+            "origin": "Local(x)"
+          },
+          {
+            "module": 0,
+            "function": 12,
+            "mutable": 0,
+            "start": 82,
+            "end": 87,
+            "lastStart": 99,
+            "lastEnd": 100,
+            "escapes": 0,
+            "origin": "Local(y)"
+          }
+        ]
+      },
+      {
+        "index": 22,
+        "name": "loop use",
+        "matched": true,
+        "reference": [
+          {
+            "module": 0,
+            "function": 12,
+            "mutable": 0,
+            "start": 56,
+            "end": 61,
+            "lastStart": 80,
+            "lastEnd": 81,
+            "escapes": 0,
+            "origin": "Local(x)"
+          }
+        ],
+        "actual": [
+          {
+            "module": 0,
+            "function": 12,
+            "mutable": 0,
+            "start": 56,
+            "end": 61,
+            "lastStart": 80,
+            "lastEnd": 81,
+            "escapes": 0,
+            "origin": "Local(x)"
+          }
+        ]
+      },
+      {
+        "index": 23,
+        "name": "forwarded shared call",
+        "matched": true,
+        "reference": [
+          {
+            "module": 0,
+            "function": 12,
+            "mutable": 0,
+            "start": 44,
+            "end": 45,
+            "lastStart": 44,
+            "lastEnd": 45,
+            "escapes": 1,
+            "origin": "Param(0)"
+          },
+          {
+            "module": 0,
+            "function": 47,
+            "mutable": 0,
+            "start": 88,
+            "end": 93,
+            "lastStart": 104,
+            "lastEnd": 105,
+            "escapes": 0,
+            "origin": "Local(x)"
+          }
+        ],
+        "actual": [
+          {
+            "module": 0,
+            "function": 12,
+            "mutable": 0,
+            "start": 44,
+            "end": 45,
+            "lastStart": 44,
+            "lastEnd": 45,
+            "escapes": 1,
+            "origin": "Param(0)"
+          },
+          {
+            "module": 0,
+            "function": 47,
+            "mutable": 0,
+            "start": 88,
+            "end": 93,
+            "lastStart": 104,
+            "lastEnd": 105,
+            "escapes": 0,
+            "origin": "Local(x)"
+          }
+        ]
+      },
+      {
+        "index": 24,
+        "name": "shared call from mutable",
+        "matched": true,
+        "reference": [
+          {
+            "module": 0,
+            "function": 47,
+            "mutable": 0,
+            "start": 116,
+            "end": 117,
+            "lastStart": 128,
+            "lastEnd": 129,
+            "escapes": 0,
+            "origin": "Local(x)"
+          },
+          {
+            "module": 0,
+            "function": 12,
+            "mutable": 0,
+            "start": 44,
+            "end": 45,
+            "lastStart": 44,
+            "lastEnd": 45,
+            "escapes": 1,
+            "origin": "Param(0)"
+          },
+          {
+            "module": 0,
+            "function": 47,
+            "mutable": 1,
+            "start": 89,
+            "end": 98,
+            "lastStart": 128,
+            "lastEnd": 129,
+            "escapes": 0,
+            "origin": "Local(x)"
+          }
+        ],
+        "actual": [
+          {
+            "module": 0,
+            "function": 47,
+            "mutable": 0,
+            "start": 116,
+            "end": 117,
+            "lastStart": 128,
+            "lastEnd": 129,
+            "escapes": 0,
+            "origin": "Local(x)"
+          },
+          {
+            "module": 0,
+            "function": 12,
+            "mutable": 0,
+            "start": 44,
+            "end": 45,
+            "lastStart": 44,
+            "lastEnd": 45,
+            "escapes": 1,
+            "origin": "Param(0)"
+          },
+          {
+            "module": 0,
+            "function": 47,
+            "mutable": 1,
+            "start": 89,
+            "end": 98,
+            "lastStart": 128,
+            "lastEnd": 129,
+            "escapes": 0,
+            "origin": "Local(x)"
+          }
+        ]
+      },
+      {
+        "index": 25,
+        "name": "mutable field and shared child",
+        "matched": true,
+        "reference": [
+          {
+            "module": 0,
+            "function": 30,
+            "mutable": 0,
+            "start": 104,
+            "end": 111,
+            "lastStart": 121,
+            "lastEnd": 122,
+            "escapes": 0,
+            "origin": "Local(b)"
+          },
+          {
+            "module": 0,
+            "function": 30,
+            "mutable": 1,
+            "start": 80,
+            "end": 89,
+            "lastStart": 121,
+            "lastEnd": 122,
+            "escapes": 0,
+            "origin": "Local(b)"
+          }
+        ],
+        "actual": [
+          {
+            "module": 0,
+            "function": 30,
+            "mutable": 0,
+            "start": 104,
+            "end": 111,
+            "lastStart": 121,
+            "lastEnd": 122,
+            "escapes": 0,
+            "origin": "Local(b)"
+          },
+          {
+            "module": 0,
+            "function": 30,
+            "mutable": 1,
+            "start": 80,
+            "end": 89,
+            "lastStart": 121,
+            "lastEnd": 122,
+            "escapes": 0,
+            "origin": "Local(b)"
+          }
+        ]
+      },
+      {
+        "index": 26,
+        "name": "generic provider descendant",
+        "matched": true,
+        "reference": [
+          {
+            "module": 1,
+            "function": 16,
+            "mutable": 1,
+            "start": 65,
+            "end": 71,
+            "lastStart": 65,
+            "lastEnd": 71,
+            "escapes": 1,
+            "origin": "Param(0)"
+          },
+          {
+            "module": 0,
+            "function": 34,
+            "mutable": 1,
+            "start": 79,
+            "end": 94,
+            "lastStart": 103,
+            "lastEnd": 104,
+            "escapes": 0,
+            "origin": "Param(0)"
+          }
+        ],
+        "actual": [
+          {
+            "module": 1,
+            "function": 16,
+            "mutable": 1,
+            "start": 65,
+            "end": 71,
+            "lastStart": 65,
+            "lastEnd": 71,
+            "escapes": 1,
+            "origin": "Param(0)"
+          },
+          {
+            "module": 0,
+            "function": 34,
+            "mutable": 1,
+            "start": 79,
+            "end": 94,
+            "lastStart": 103,
+            "lastEnd": 104,
+            "escapes": 0,
+            "origin": "Param(0)"
+          }
+        ]
+      }
+    ]
+  },
+  "regression": [
+    {
+      "suite": "storage-generations-unit",
+      "count": 9,
+      "matched": 9,
+      "comparison": "exact Go CLI"
+    },
+    {
+      "suite": "subview-unit",
+      "count": 38,
+      "matched": 38,
+      "comparison": "exact Go CLI"
+    },
+    {
+      "suite": "reference-access-unit",
+      "count": 27,
+      "matched": 27,
+      "comparison": "exact Go CLI"
+    },
+    {
+      "suite": "loan-conflicts-unit",
+      "count": 38,
+      "matched": 38,
+      "comparison": "exact Go CLI"
+    },
+    {
+      "suite": "owner-moves-unit",
+      "count": 39,
+      "matched": 39,
+      "comparison": "frozen contract goldens with previously documented Go differences"
+    },
+    {
+      "suite": "owner-arguments-unit",
+      "count": 7,
+      "matched": 7,
+      "comparison": "frozen contract goldens with previously documented Go differences"
+    }
+  ],
+  "pending": [
+    "Region/raw constructor fact coverage",
+    "Complete ordinary owner-read/access/store coverage",
+    "General moved-owner state and move-aware cleanup",
+    "Borrow MIR/C/runtime, unsafe provenance, full dispatcher, stage1/stage2, release and Linux"
+  ],
+  "privateAPIChanged": false,
+  "publicCLIChanged": false,
+  "sdkABIChanged": false,
+  "dbChanged": false,
+  "ciRunnerChanged": false,
+  "pushed": false,
+  "releaseValidated": false,
+  "linuxValidated": false
+}

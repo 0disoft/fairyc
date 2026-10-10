@@ -2120,3 +2120,28 @@ The 38 owner-conflict and 38 subview CLI cases remain exact. Evidence:
 Hidden iteration provenance/facts and Region/raw facts remain next. Release and
 Linux checks were outside this local frontend fix. Public CLI, SDK ABI, DB and
 CI are unchanged; no push.
+
+## Hidden iteration loans and retained item facts (2026-10-10)
+
+Fixed-array iteration now retains a hidden descriptor loan, and reference
+items carry shared/mutable child provenance. Borrowed aggregate array fields
+preserve their parameter origin; direct slices retain their own descriptor.
+An unused reference item has no last-use anchor. Valid returned parameter
+items escape; local items do not. Per-item liveness ends at each backedge,
+while the descriptor remains held until loop exit. Shared items freeze a
+mutable parent. Iteration conflict diagnostics use the held header span.
+
+Locked source checking and a fresh locked development build passed. One
+selected native test checks 18 iteration fixtures; all 23 complete fact rows
+match the Go semantic API, including origins, borrow/use spans and escapes.
+Six CLI cases match Go diagnostics and related locations, covering owner and
+parent conflicts, release after exit and local/parameter return behavior.
+The previous 27 borrow-fact fixtures still match all 34 complete rows. All
+158 earlier CLI cases match their existing references; the owner suites
+retain their previously documented Go differences. Evidence:
+`docs/ops/evidence/candidate-iteration-borrow-facts-20261010.json`.
+
+Region/raw constructor facts, complete owner access coverage, general move
+state, cleanup, borrow MIR/C/runtime, unsafe provenance, full dispatcher and
+stage1/stage2 remain pending. Release/Linux checks were outside this local
+analysis unit. Public CLI, SDK ABI, DB and CI are unchanged; no push.
