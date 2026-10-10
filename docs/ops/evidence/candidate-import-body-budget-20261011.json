@@ -1,0 +1,103 @@
+{
+  "schema": "fairyc.candidate-import-body-budget/v1",
+  "passed": true,
+  "parentCommit": "f97fe8c1f20e2c90ecdec6e6ef56782c11f3cf48",
+  "identity": [
+    {
+      "path": "examples/lexer_candidate/src/module_unit_generics.fy",
+      "sha256": "c2ad319121912c77cf20dae3eded2bc0c5a34070a59e1c0ac6e6efbf3aa1cefb"
+    },
+    {
+      "path": "examples/lexer_candidate/tests/module_unit_c_import_budget.fy",
+      "sha256": "4725058ece14c329c3a4c0e81c8f4fdbb45ff9adeca1d817657d2028bb70dc69"
+    },
+    {
+      "path": "examples/lexer_candidate/fairy.lock",
+      "sha256": "18c1601c7ebc228caff927790754459d39f7d02bf964cfe0e09a7b35432297ae"
+    },
+    {
+      "path": ".cache/candidate-tagged/compiler-text-current.exe",
+      "sha256": "7accbaf3c65e6debd2f391c9de92889f908667f4738607fa8cd2d12e275d1a87"
+    }
+  ],
+  "sourceCheck": {
+    "report": {
+      "path": ".cache/candidate-tagged/sdk-c-execution/check-import-budget-final.txt",
+      "sha256": "59f1df7a55e6a247a07a48b03bb03cc83146f9435585203772396e00808d96c5"
+    },
+    "stdout": "check ok: 2 instance(s), 274 source file(s), 3406 MIR function(s), lock verified\n"
+  },
+  "native": {
+    "report": {
+      "path": ".cache/candidate-tagged/sdk-c-execution/native-import-budget-final.json",
+      "sha256": "bf59c09ce4cc2d130eb5f015f9365998a811aa0fa1370232abdf855fd9ed2b3f"
+    },
+    "count": 1,
+    "passed": 1,
+    "stdout": "ordinary begin\n0 ordinary 256 generic 0\n4503 excess\n0 generic 64\n4503 overflow\n"
+  },
+  "limits": {
+    "retainedBodies": 256,
+    "genericSpecializations": 64,
+    "perGenericDeclaration": 16,
+    "work": 1048576,
+    "depth": 32
+  },
+  "boundaries": [
+    {
+      "lane": "ordinary",
+      "count": 256,
+      "code": 0
+    },
+    {
+      "lane": "ordinary",
+      "count": 257,
+      "code": 4503
+    },
+    {
+      "lane": "generic",
+      "count": 64,
+      "code": 0
+    },
+    {
+      "lane": "generic",
+      "count": 65,
+      "code": 4503
+    }
+  ],
+  "reproduction": {
+    "report": {
+      "path": ".cache/candidate-tagged/sdk-c-execution/native-scanner.json",
+      "sha256": "e39905418568a328fe57435a31933b3fc58f9edb5e4784f052870009b9200ee5"
+    },
+    "code": 4503,
+    "module": "diagnostics",
+    "span": [
+      2986,
+      2998
+    ],
+    "isolatedLimitReport": {
+      "path": ".cache/candidate-tagged/sdk-c-execution/native-scanner-limit-debug.json",
+      "sha256": "50816594af8ec6ebde0d1d562a9d5fbe82c8164369ee6a4ba16b28e9a9e03e78"
+    },
+    "reason": "The shared 64-instance table counted imported ordinary bodies against generic specialization admission",
+    "followup": "Original scanner now retains 73 bodies and emits C; execution evidence is in the next integration unit"
+  },
+  "fixtureCorrection": "The first boundary provider exceeded the unchanged 128-declaration per-file cap. Final ordinary fixtures use three original provider files, each with at most 100 functions.",
+  "normativeContractsChanged": false,
+  "stableCLIChanged": false,
+  "sdkABIChanged": false,
+  "dbChanged": false,
+  "ciChanged": false,
+  "hygieneChanged": false,
+  "pushed": false,
+  "skipped": {
+    "candidateRelease": "Standalone candidate Release deferred",
+    "Linux": "Later batch",
+    "fullSuite": "Focused boundary cases and locked source check"
+  },
+  "pending": [
+    "Complete original scanner integration receipt",
+    "Full CLI dispatcher/driver and Stage1/Stage2"
+  ]
+}
