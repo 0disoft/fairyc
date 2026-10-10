@@ -59,6 +59,13 @@ VIEWS = {
     "view_c_traps_upper_bound_beyond_view_extent": (106, "2,"),
     "view_c_traps_index_into_empty_end_view": (106, ""),
 }
+CASTS = {
+    "cast_c_preserves_all_admitted_integer_ranges": (0, ""),
+    "cast_c_roundtrips_signed32_through_separate_c_functions": (0, "-2147483648,2147483647,42,"),
+    "cast_c_projects_operands_and_evaluates_calls_once": (0, "1,7,9,"),
+    "cast_c_widened_arithmetic_keeps_checked_overflow": (101, ""),
+}
+CAST_REJECTION = "cast_c_rejects_other_c_scalars_and_malformed_casts_transactionally"
 
 
 def run(argv, cwd, env=None, timeout=60):
@@ -81,7 +88,7 @@ def main():
     parser.add_argument("--report", required=True, type=Path, action="append")
     parser.add_argument("--output", required=True, type=Path)
     parser.add_argument("--vcvars", required=True, type=Path)
-    parser.add_argument("--suite", choices=("scalar", "owned", "references", "arrays", "views", "all"), default="scalar")
+    parser.add_argument("--suite", choices=("scalar", "owned", "references", "arrays", "views", "casts", "all"), default="scalar")
     args = parser.parse_args()
     scalar_cases = {name: (exit_code, "") for name, exit_code in EXPECTED.items()}
     owned_cases = {name: (0, trace) for name, trace in OWNED.items()}
@@ -93,8 +100,10 @@ def main():
               "views": (VIEWS | {"array_c_evaluates_repeated_values_once_and_orders_literal_effects": ARRAYS["array_c_evaluates_repeated_values_once_and_orders_literal_effects"],
                                 "owned_c_drops_active_tagged_payloads_and_nested_fields_in_reverse_order": owned_cases["owned_c_drops_active_tagged_payloads_and_nested_fields_in_reverse_order"]},
                         {REJECTION, OWNED_REJECTION}),
-              "all": (scalar_cases | owned_cases | reference_cases | ARRAYS | VIEWS,
-                      {REJECTION, OWNED_REJECTION, REFERENCE_PROOF})}
+              "casts": (CASTS | {"module_c_emits_closed_integer_widths_and_normalized_literals": scalar_cases["module_c_emits_closed_integer_widths_and_normalized_literals"],
+                                 "view_c_mutates_owner_and_shares_call_arguments": VIEWS["view_c_mutates_owner_and_shares_call_arguments"]}, {CAST_REJECTION}),
+              "all": (scalar_cases | owned_cases | reference_cases | ARRAYS | VIEWS | CASTS,
+                      {REJECTION, OWNED_REJECTION, REFERENCE_PROOF, CAST_REJECTION})}
     expected_cases, rejections = suites[args.suite]
     count = len(expected_cases) + len(rejections)
     reports = []
@@ -125,7 +134,8 @@ def main():
         identity = test["identity"]
         prefix = next((prefix for prefix in ("tests::module_unit_c_emit::",
                        "tests::module_unit_c_owned::", "tests::module_unit_c_references::",
-                       "tests::module_unit_c_arrays::", "tests::module_unit_c_views::")
+                       "tests::module_unit_c_arrays::", "tests::module_unit_c_views::",
+                       "tests::module_unit_c_casts::")
                        if identity.startswith(prefix)), None)
         assert prefix is not None
         name = identity.removeprefix(prefix)
@@ -153,6 +163,8 @@ def main():
     shim = output / "trap.c"
     shim.write_text("#include <stdint.h>\n#include <stdlib.h>\n#include <stdio.h>\n"
                     "void observe_cleanup(int32_t n){printf(\"%d,\",(int)n);}\n"
+                    "int produce_c_int(int32_t n){return (int)n;}\n"
+                    "int consume_c_int(int n){printf(\"%d,\",n);return n;}\n"
                     "_Noreturn void fy_runtime_trap(uint32_t category)"
                     "{exit(100+(int)category);}\n", encoding="utf-8")
     executions = []

@@ -35,14 +35,17 @@ fn bool slice(ref ir::Program p,ref ir::Body b,usize id,ref mut bytes::Buffer ou
 }
 pub fn bool type(ref ir::Program p,usize id,ref mut bytes::Buffer out,ref mut w::State s){
     if(id==0 || id>clean::type_count(ir::cleanup_ir(p))){s.code=1001;return false;}let t=clean::type_at(ir::cleanup_ir(p),id);
-    if(t.kind==1 && t.scalar<=7){return w::type(out,s,t.scalar);}if(t.kind==7 || t.kind==8){return type(p,t.first,out,s) && w::text(out,s,if(t.kind==7){b" const *"}else{b" *"});}if(t.kind!=2 && t.kind!=3 && t.kind!=5 && t.kind!=6 && t.kind!=16 && !view(t)){s.code=1004;return false;}
+    if(t.kind==1 && (t.scalar<=7 || t.scalar==132)){return w::type(out,s,t.scalar);}if(t.kind==7 || t.kind==8){return type(p,t.first,out,s) && w::text(out,s,if(t.kind==7){b" const *"}else{b" *"});}if(t.kind!=2 && t.kind!=3 && t.kind!=5 && t.kind!=6 && t.kind!=16 && !view(t)){s.code=1004;return false;}
     return w::text(out,s,b"struct fy_unit_t_") && w::number(out,s,id);
 }
 fn usize layout(ref ir::Program p,usize id,ref mut usize work){var usize i=0;while(i<ir::layout_count(p)){if(!budget::charge(work,1)){return 0;}if(ir::layout_at(p,i).value.type==id){return i+1;}i+=1;}return 0;}
 pub fn bool field(ref mut bytes::Buffer out,ref mut w::State s,usize id){return w::text(out,s,b"fy_f_") && w::number(out,s,id);}
 fn bool define(ref ir::Program p,usize id,ref mut v::Vec<u8> marks,ref mut bytes::Buffer out,ref mut w::State s,ref mut usize work,usize depth){
     if(id==0 || id>v::len<u8>(marks)){s.code=1001;return false;}if(depth>=64 || !budget::charge(work,1)){s.code=1002;return false;}let mark=*v::at<u8>(marks,id-1);if(mark==2){return true;}if(mark==1){s.code=1001;return false;}{let slot=v::at_mut<u8>(marks,id-1);*slot=1;}let t=clean::type_at(ir::cleanup_ir(p),id);
-    if(t.kind==1){if(t.scalar>7){s.code=1004;return false;}}
+    if(t.kind==1){if(t.scalar>7 && t.scalar!=132){s.code=1004;return false;}
+        // ADR 0286: keep c::int nominally distinct and prove the target ABI
+        // before any explicit i32 crossing. Other C scalars stay closed.
+        if(t.scalar==132 && !w::text(out,s,b"_Static_assert(sizeof(int)==4 && _Alignof(int)==4 && INT_MIN==INT32_MIN && INT_MAX==INT32_MAX,\"requires signed-32 c.int ABI\");\n")){return false;}}
     else if(t.kind==7 || t.kind==8){if(*v::at<u8>(marks,t.first-1)!=1 && !define(p,t.first,marks,out,s,work,depth+1)){return false;}}
     else if(view(t)){if((t.kind==17 || t.kind==18) && !define(p,t.first,marks,out,s,work,depth+1)){return false;}if(!type(p,id,out,s) || !w::text(out,s,b"{") || !item_type(p,t,out,s) || !w::text(out,s,if(mutable(t)){b" *fy_data;uintptr_t fy_length;};\n"}else{b" const *fy_data;uintptr_t fy_length;};\n"})){return false;}}
     else if(t.kind==16){let element=clean::type_at(ir::cleanup_ir(p),t.first);if(t.second==0 || t.second>4096 || !(element.kind==1 && element.scalar>=1 && element.scalar<=6 || element.kind==2) || clean::glue_at(ir::cleanup_ir(p),t.first).kind!=0){s.code=1004;return false;}if(!define(p,t.first,marks,out,s,work,depth+1) || !type(p,id,out,s) || !w::text(out,s,b"{") || !type(p,t.first,out,s) || !w::text(out,s,b" fy_items[") || !w::number(out,s,t.second) || !w::text(out,s,b"];};\n")){return false;}}

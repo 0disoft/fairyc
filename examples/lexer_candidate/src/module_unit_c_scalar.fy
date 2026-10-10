@@ -3,6 +3,7 @@ import module_unit_body_ir_model as ir;
 import module_unit_body_ir_lookup as lookup;
 import module_unit_cleanup_mir_model as clean;
 import c_text as w;
+import scalar_casts as casts;
 import std::bytes as bytes;
 
 pub fn u32 scalar(ref ir::Program p,usize type){if(type==0 || type>clean::type_count(ir::cleanup_ir(p))){return 0;}let t=clean::type_at(ir::cleanup_ir(p),type);return if(t.kind==1){t.scalar}else{0};}
@@ -23,7 +24,12 @@ fn bool literal(ref ir::Body b,usize id,u32 type,ref mut bytes::Buffer out,ref m
 }
 pub fn bool expression(ref ir::Program p,ref ir::Body b,usize id,ref mut bytes::Buffer out,ref mut w::State s){
     let e=ir::node_at(b,id-1).value;let type=scalar(p,e.type);let left=lookup::node(b,e.left);let right=lookup::node(b,e.right);let op=operator(ir::node_text(b,id-1));
-    if(type==0 || type==7){s.code=1004;return false;}
+    if(type==0 || type==7 || type>6 && e.kind!=23){s.code=1004;return false;}
+    if(e.kind==23){
+        if(left==0 || e.target!=e.type || !bytes::equal(ir::node_text(b,id-1),b"as")){s.code=1001;return false;}
+        let source=scalar(p,ir::node_at(b,left-1).value.type);
+        if(!casts::allowed(source,type)){s.code=1004;return false;}
+    }
     if(!value(out,s,id) || !w::text(out,s,b"=")){return false;}
     if(e.kind==1){if(!literal(b,id,type,out,s)){return false;}}
     else if(e.kind==2){if(e.binding==0 || e.binding>ir::local_count(b) || ir::local_at(b,e.binding).type!=e.type){s.code=1001;return false;}if(!w::local(out,s,e.binding)){return false;}}
@@ -43,6 +49,7 @@ pub fn bool expression(ref ir::Program p,ref ir::Body b,usize id,ref mut bytes::
         else if(op>=13){if(!value(out,s,left) || !w::operator(out,s,op) || !value(out,s,right)){return false;}}
         else if(op==0 || op==3 || op==4 || operand==0 || operand==6 || operand==7){s.code=1004;return false;}
         else if(!math_start(out,s,operand,op) || !value(out,s,left) || !w::text(out,s,b",") || !value(out,s,right) || !math_end(out,s,operand)){return false;}
-    }else{s.code=1004;return false;}
+    }else if(e.kind==23){if(!w::text(out,s,b"(") || !w::type(out,s,type) || !w::text(out,s,b")") || !value(out,s,left)){return false;}}
+    else{s.code=1004;return false;}
     return w::text(out,s,b";\n");
 }
