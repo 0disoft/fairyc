@@ -15,6 +15,16 @@ driver = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(driver)
 
 CASES = {
+    "sdk_c_executes_vector_storage_and_views":
+        (["stage0_system_heap.c", "stage0_vector_storage.c"], [], ""),
+    "sdk_c_executes_vector_resource_cleanup":
+        (["stage0_system_heap.c", "stage0_vector_storage.c"], [], "3,2,1,"),
+    "sdk_c_executes_vector_failed_push_returns_donor":
+        (["stage0_system_heap.c", "stage0_vector_storage.c"], [], "7,"),
+    "sdk_c_executes_vector_growth_failure_preserves_prefix":
+        (["stage0_system_heap.c", "stage0_vector_storage.c"], [], "9,8,7,6,5,4,3,2,1,"),
+    "sdk_c_executes_vector_struct_slices":
+        (["stage0_system_heap.c", "stage0_vector_storage.c"], [], ""),
     "sdk_c_executes_buffer_owned_views_and_cleanup":
         (["stage0_system_heap.c", "stage0_buffer.c"], [], ""),
     "sdk_c_executes_buffer_initial_allocation_failure":
@@ -40,7 +50,7 @@ CASES = {
     "sdk_c_executes_region_storage_or_tracking_failure_as_result":
         (["stage0_system_heap.c", "stage0_arena.c"], [], "B,7,S,"),
 }
-PROOFS = {"pointer_c_rejects_forged_raw_view_metadata","rejected_import_expansion_rolls_back_borrow_types","sdk_c_plan_respects_work_budget_before_authority_or_output",
+PROOFS = {"sdk_c_rejects_forged_storage_metadata","pointer_c_rejects_forged_raw_view_metadata","rejected_import_expansion_rolls_back_borrow_types","sdk_c_plan_respects_work_budget_before_authority_or_output",
           "sdk_c_region_plan_respects_placement_budget_before_output"}
 
 
@@ -64,9 +74,10 @@ def main():
                 if name in CASES or name in PROOFS:
                     outcomes[name] = test
         reports.append(dict(path=str(path), sha256=hashlib.sha256(raw).hexdigest()))
-    assert set(outcomes) == set(CASES) | PROOFS
+    required = set(args.case) if args.case else set(CASES) | PROOFS
+    assert required <= set(outcomes), required - set(outcomes)
     assert all(test["outcome"] == "passed" for test in outcomes.values()), outcomes
-    assert all(not base64.b64decode(outcomes[name]["stdoutBase64"], validate=True) for name in PROOFS)
+    assert all(not base64.b64decode(outcomes[name]["stdoutBase64"], validate=True) for name in PROOFS & set(outcomes))
     vcvars = str(args.vcvars.resolve())
     assert args.vcvars.is_file() and not any(c in vcvars for c in '\r\n"&|<>^%!')
     setup = driver.run(f'cmd.exe /d /s /c ""{vcvars}" x64 >nul && set"', ROOT)
@@ -98,7 +109,8 @@ def main():
         runtime = output / f"{name}-runtime.c"
         arena = "stage0_arena.c" in components
         buffered = "stage0_buffer.c" in components
-        heap_checked = buffered or name in {"sdk_c_executes_region_placement_and_param_origin", "sdk_c_executes_region_storage_or_tracking_failure_as_result"}
+        vector = "stage0_vector_storage.c" in components
+        heap_checked = buffered or vector or name in {"sdk_c_executes_region_placement_and_param_origin", "sdk_c_executes_region_storage_or_tracking_failure_as_result"}
         placing = name in {"sdk_c_executes_region_placement_and_param_origin",
                            "sdk_c_executes_region_storage_or_tracking_failure_as_result"}
         regions = name == "sdk_c_executes_region_lifecycle_and_cleanup_edges" or placing
@@ -161,7 +173,22 @@ def main():
                 b"if(status)++buffer_drop_errors;return status;}\n"
                 b"extern int32_t fy_candidate_entry(void);\nint main(void){int32_t result=fy_candidate_entry();"
                 + f"return result?result:(buffer_dropped=={buffer_drops}&&!buffer_drop_errors&&heap_live==0&&heap_attempts=={buffer_failure or 3}?0:90);}}\n".encode())
+        vector_failure = (1 if name == "sdk_c_executes_vector_failed_push_returns_donor" else
+                          2 if name == "sdk_c_executes_vector_growth_failure_preserves_prefix" else None)
+        vector_attempts = 2 if name in {"sdk_c_executes_vector_storage_and_views",
+                                       "sdk_c_executes_vector_growth_failure_preserves_prefix"} else 1
+        if vector:
+            instrumentation = (
+                b"#undef fy_private_vector_release_empty_v0\n#include <stdio.h>\n"
+                b"static unsigned vector_releases,vector_release_errors;\n"
+                b"void test_report(int32_t n){printf(\"%d,\",(int)n);}\n"
+                b"uint32_t fy_private_vector_release_empty_v0(void *owner){"
+                b"uint32_t status=fy_test_actual_vector_release_empty_v0(owner);++vector_releases;"
+                b"if(status)++vector_release_errors;return status;}\n"
+                b"extern int32_t fy_candidate_entry(void);\nint main(void){int32_t result=fy_candidate_entry();"
+                + f"return result?result:(vector_releases==1&&!vector_release_errors&&heap_live==0&&heap_attempts=={vector_attempts}?0:90);}}\n".encode())
         runtime.write_bytes(heap + b"#define FY_STD_SYSTEM_HEAP_MAX_ALIGNMENT_V0 ((size_t)16)\n" +
+                            (b"#define fy_private_vector_release_empty_v0 fy_test_actual_vector_release_empty_v0\n" if vector else b"") +
                             (b"#define fy_std_buffer_drop_v0 fy_test_actual_buffer_drop_v0\n" if buffered else b"") +
                             (b"#define fy_std_arena_initialize_v0 fy_test_actual_arena_initialize_v0\n"
                              b"#define fy_std_arena_drop_v0 fy_test_actual_arena_drop_v0\n" if arena else b"") +
@@ -171,14 +198,14 @@ def main():
         for profile, flag in (("low", "/Od"), ("optimized", "/O2")):
             binary = output / f"{name}-{profile}.exe"
             build = driver.run([str(compiler), "/nologo", "/std:c11", "/TC", flag,
-                                *(["/DFY_CANDIDATE_NO_MAIN"] if arena or buffered else []),
+                                *(["/DFY_CANDIDATE_NO_MAIN"] if arena or buffered or vector else []),
                                 str(generated), str(runtime), str(trap), f"/Fe:{binary}",
                                 "/link", "/INCREMENTAL:NO"], output, environment)
             assert build["exit"] == 0, build
             reading = name == "sdk_c_executes_stdin_and_stderr_byte_results"
             stdin = b"A\0\xce\xbbZ" if reading else None
             expected_stderr = "42|-7|9|-9223372036854775808|true|λ\n" if reading else ""
-            failures = (1, 2) if name == "sdk_c_executes_region_storage_or_tracking_failure_as_result" else (buffer_failure,) if buffered else (None,)
+            failures = (1, 2) if name == "sdk_c_executes_region_storage_or_tracking_failure_as_result" else (buffer_failure,) if buffered else (vector_failure,) if vector else (None,)
             for failure in failures:
                 run_environment = dict(os.environ)
                 run_environment.pop("FY_TEST_HEAP_FAIL_AT", None)
@@ -189,7 +216,8 @@ def main():
                 executions.append(dict(name=name, profile=profile, sourceSHA256=hashlib.sha256(source).hexdigest(),
                                    stdinBase64=base64.b64encode(stdin).decode('ascii') if stdin is not None else None,
                                    heapFailureAt=failure, heapBalanceVerified=heap_checked,
-                                   heapCounts={"attempts": failure or (3 if buffered else 10), "liveAfter": 0} if heap_checked else None,
+                                   heapCounts={"attempts": failure or (vector_attempts if vector else 3 if buffered else 10), "liveAfter": 0} if heap_checked else None,
+                                   vectorCounts={"release": 1, "releaseStatusErrors": 0} if vector else None,
                                    bufferCounts={"drop": buffer_drops, "dropStatusErrors": 0} if buffered else None,
                                    arenaCounts={"initialize": arena_count, "drop": arena_count, "nonzeroStatus": 0} if arena else None,
                                    regionCounts={"begin": region_count, "reset": region_count, "nonzeroStatus": 0} if regions else None,

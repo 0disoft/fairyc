@@ -1,0 +1,805 @@
+{
+  "schema": "fairyc.candidate-vector-c-execution/v1",
+  "passed": true,
+  "parentCommit": "87c53cd237687a7553d2b18edf1349bce4410a2f",
+  "identity": [
+    {
+      "path": "examples/lexer_candidate/src/module_unit_body_ir_storage.fy",
+      "sha256": "492c380b9276fe4a4b38248c67f84e2eb083a432ca92608c970aaa8e3b7d684f"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_unit_c_storage.fy",
+      "sha256": "27ea45c265e4dbf81673d73aea38d3bb5c1d964232d1941d6db7961695467cfb"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_unit_body_ir_verify.fy",
+      "sha256": "8d59b531329170aa57ff92afe2f49b4ba1f47bf22454fd825b8c8f002f8e4a02"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_unit_c_aggregate.fy",
+      "sha256": "a7dd2225849a17bc8f5006c3160f500cc0b48963ee601a0b185efa3cdcd51a71"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_unit_c_emit.fy",
+      "sha256": "64da189182f0885a6b3c911b3f23b04302c01159973cd48b06ba69b576843975"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_unit_c_sdk.fy",
+      "sha256": "14504e951f7ebc9b6b28294ef0df32e2f953dbd33333c67135d4dd38418182ae"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_unit_cleanup_mir_lower.fy",
+      "sha256": "9c23084f774e9d6cb56ba3808d2a8e80ccdccd6b7a4db7b5f252c5c58bde5dd7"
+    },
+    {
+      "path": "examples/lexer_candidate/tests/module_unit_c_sdk.fy",
+      "sha256": "e8e6eb7705221f2141df68780610b59f12af809952346d60b0f6c21bf273aa4d"
+    },
+    {
+      "path": "examples/lexer_candidate/fairy.lock",
+      "sha256": "7cac6c08963defd882d90728a438552d9f832ea75ffa34eba3909a2ee9907d07"
+    },
+    {
+      "path": "tools/verify-candidate-sdk-c.py",
+      "sha256": "83aaac4ea47aa17320ffd191eba8287bbb37d9c9d4e12af635f585118c96324c"
+    },
+    {
+      "path": ".cache/candidate-tagged/compiler-vector-current.exe",
+      "sha256": "e6da14fc9ca88106e8405e42eaa1b84a620079a5f13f05689ad38d5acb12eac2"
+    },
+    {
+      "path": "internal/sdkstdlib/sources/optional/std/vec.fy",
+      "sha256": "0ae4c395bf98c39079ad620bde035b3b590d51417864802e698edc069281db5b"
+    },
+    {
+      "path": "internal/cstdlib/stage0_system_heap.c",
+      "sha256": "cae6664fa1ec70722b76025c3e2c3daadc133cd90d95fa9f02f2385915d3e55c"
+    },
+    {
+      "path": "internal/cstdlib/stage0_vector_storage.c",
+      "sha256": "eb9686951b480a7c40d6bfe670206d683548c5293387c42a44670ad0b6e5ccca"
+    }
+  ],
+  "sourceCheck": {
+    "argv": [
+      "compiler-vector-current.exe",
+      "check",
+      "--locked"
+    ],
+    "exit": 0,
+    "stdout": "check ok: 2 instance(s), 270 source file(s), 3389 MIR function(s), lock verified\n",
+    "stderr": ""
+  },
+  "native": {
+    "report": {
+      "path": ".cache/candidate-tagged/sdk-c-execution/native-vector.json",
+      "sha256": "c9bcb39877b78d151caa67a78e0547319115fd87710aae2d9e5ea3ac0a24011e"
+    },
+    "count": 6,
+    "passed": 6,
+    "failed": 0,
+    "tests": [
+      {
+        "identity": "tests::module_unit_c_sdk::sdk_c_executes_vector_failed_push_returns_donor",
+        "outcome": "passed",
+        "outputSHA256": "1cc5c8ee4f7272da56485b913e8ae684d890d33177ce1eced057d31cbf51de1c"
+      },
+      {
+        "identity": "tests::module_unit_c_sdk::sdk_c_executes_vector_growth_failure_preserves_prefix",
+        "outcome": "passed",
+        "outputSHA256": "05c34e38789de9b8f7e96d211607e46a2c60b67003edaf3ac07e8764a8b18673"
+      },
+      {
+        "identity": "tests::module_unit_c_sdk::sdk_c_executes_vector_resource_cleanup",
+        "outcome": "passed",
+        "outputSHA256": "ee4688092419f89ef81432082aea993287a1dea95e32e3bb88042dae2692c528"
+      },
+      {
+        "identity": "tests::module_unit_c_sdk::sdk_c_executes_vector_storage_and_views",
+        "outcome": "passed",
+        "outputSHA256": "0cf40aa5f6029a4abb656c7c73b99645068522cc305e2bc4e0ed0f96714dcf04"
+      },
+      {
+        "identity": "tests::module_unit_c_sdk::sdk_c_executes_vector_struct_slices",
+        "outcome": "passed",
+        "outputSHA256": "e3b5db5d66a49342779fadf08ac3c0d192c536ee27a6c65aabde4cc5d3b3308e"
+      },
+      {
+        "identity": "tests::module_unit_c_sdk::sdk_c_rejects_forged_storage_metadata",
+        "outcome": "passed",
+        "outputSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    ]
+  },
+  "CExecution": {
+    "schema": "fairyc.candidate-sdk-c-execution/v1",
+    "passed": true,
+    "reports": [
+      {
+        "path": ".cache\\candidate-tagged\\sdk-c-execution\\native-vector.json",
+        "sha256": "c9bcb39877b78d151caa67a78e0547319115fd87710aae2d9e5ea3ac0a24011e"
+      }
+    ],
+    "executions": [
+      {
+        "name": "sdk_c_executes_vector_storage_and_views",
+        "profile": "low",
+        "sourceSHA256": "0cf40aa5f6029a4abb656c7c73b99645068522cc305e2bc4e0ed0f96714dcf04",
+        "stdinBase64": null,
+        "heapFailureAt": null,
+        "heapBalanceVerified": true,
+        "heapCounts": {
+          "attempts": 2,
+          "liveAfter": 0
+        },
+        "vectorCounts": {
+          "release": 1,
+          "releaseStatusErrors": 0
+        },
+        "bufferCounts": null,
+        "arenaCounts": null,
+        "regionCounts": null,
+        "runtimeInputs": [
+          {
+            "path": "internal\\cstdlib\\stage0_system_heap.c",
+            "sha256": "cae6664fa1ec70722b76025c3e2c3daadc133cd90d95fa9f02f2385915d3e55c"
+          },
+          {
+            "path": "internal\\cstdlib\\stage0_vector_storage.c",
+            "sha256": "eb9686951b480a7c40d6bfe670206d683548c5293387c42a44670ad0b6e5ccca"
+          }
+        ],
+        "build": {
+          "argv": [
+            "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+            "/nologo",
+            "/std:c11",
+            "/TC",
+            "/Od",
+            "/DFY_CANDIDATE_NO_MAIN",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\vector-c\\sdk_c_executes_vector_storage_and_views.c",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\vector-c\\sdk_c_executes_vector_storage_and_views-runtime.c",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\vector-c\\trap.c",
+            "/Fe:C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\vector-c\\sdk_c_executes_vector_storage_and_views-low.exe",
+            "/link",
+            "/INCREMENTAL:NO"
+          ],
+          "exit": 0,
+          "stdout": "sdk_c_executes_vector_storage_and_views.c\r\nsdk_c_executes_vector_storage_and_views-runtime.c\r\ntrap.c\r\nGenerating Code...\r\n",
+          "stderr": ""
+        },
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\vector-c\\sdk_c_executes_vector_storage_and_views-low.exe"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      },
+      {
+        "name": "sdk_c_executes_vector_storage_and_views",
+        "profile": "optimized",
+        "sourceSHA256": "0cf40aa5f6029a4abb656c7c73b99645068522cc305e2bc4e0ed0f96714dcf04",
+        "stdinBase64": null,
+        "heapFailureAt": null,
+        "heapBalanceVerified": true,
+        "heapCounts": {
+          "attempts": 2,
+          "liveAfter": 0
+        },
+        "vectorCounts": {
+          "release": 1,
+          "releaseStatusErrors": 0
+        },
+        "bufferCounts": null,
+        "arenaCounts": null,
+        "regionCounts": null,
+        "runtimeInputs": [
+          {
+            "path": "internal\\cstdlib\\stage0_system_heap.c",
+            "sha256": "cae6664fa1ec70722b76025c3e2c3daadc133cd90d95fa9f02f2385915d3e55c"
+          },
+          {
+            "path": "internal\\cstdlib\\stage0_vector_storage.c",
+            "sha256": "eb9686951b480a7c40d6bfe670206d683548c5293387c42a44670ad0b6e5ccca"
+          }
+        ],
+        "build": {
+          "argv": [
+            "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+            "/nologo",
+            "/std:c11",
+            "/TC",
+            "/O2",
+            "/DFY_CANDIDATE_NO_MAIN",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\vector-c\\sdk_c_executes_vector_storage_and_views.c",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\vector-c\\sdk_c_executes_vector_storage_and_views-runtime.c",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\vector-c\\trap.c",
+            "/Fe:C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\vector-c\\sdk_c_executes_vector_storage_and_views-optimized.exe",
+            "/link",
+            "/INCREMENTAL:NO"
+          ],
+          "exit": 0,
+          "stdout": "sdk_c_executes_vector_storage_and_views.c\r\nsdk_c_executes_vector_storage_and_views-runtime.c\r\ntrap.c\r\nGenerating Code...\r\n",
+          "stderr": ""
+        },
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\vector-c\\sdk_c_executes_vector_storage_and_views-optimized.exe"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      },
+      {
+        "name": "sdk_c_executes_vector_resource_cleanup",
+        "profile": "low",
+        "sourceSHA256": "ee4688092419f89ef81432082aea993287a1dea95e32e3bb88042dae2692c528",
+        "stdinBase64": null,
+        "heapFailureAt": null,
+        "heapBalanceVerified": true,
+        "heapCounts": {
+          "attempts": 1,
+          "liveAfter": 0
+        },
+        "vectorCounts": {
+          "release": 1,
+          "releaseStatusErrors": 0
+        },
+        "bufferCounts": null,
+        "arenaCounts": null,
+        "regionCounts": null,
+        "runtimeInputs": [
+          {
+            "path": "internal\\cstdlib\\stage0_system_heap.c",
+            "sha256": "cae6664fa1ec70722b76025c3e2c3daadc133cd90d95fa9f02f2385915d3e55c"
+          },
+          {
+            "path": "internal\\cstdlib\\stage0_vector_storage.c",
+            "sha256": "eb9686951b480a7c40d6bfe670206d683548c5293387c42a44670ad0b6e5ccca"
+          }
+        ],
+        "build": {
+          "argv": [
+            "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+            "/nologo",
+            "/std:c11",
+            "/TC",
+            "/Od",
+            "/DFY_CANDIDATE_NO_MAIN",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\vector-c\\sdk_c_executes_vector_resource_cleanup.c",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\vector-c\\sdk_c_executes_vector_resource_cleanup-runtime.c",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\vector-c\\trap.c",
+            "/Fe:C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\vector-c\\sdk_c_executes_vector_resource_cleanup-low.exe",
+            "/link",
+            "/INCREMENTAL:NO"
+          ],
+          "exit": 0,
+          "stdout": "sdk_c_executes_vector_resource_cleanup.c\r\nsdk_c_executes_vector_resource_cleanup-runtime.c\r\ntrap.c\r\nGenerating Code...\r\n",
+          "stderr": ""
+        },
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\vector-c\\sdk_c_executes_vector_resource_cleanup-low.exe"
+          ],
+          "exit": 0,
+          "stdout": "3,2,1,",
+          "stderr": ""
+        }
+      },
+      {
+        "name": "sdk_c_executes_vector_resource_cleanup",
+        "profile": "optimized",
+        "sourceSHA256": "ee4688092419f89ef81432082aea993287a1dea95e32e3bb88042dae2692c528",
+        "stdinBase64": null,
+        "heapFailureAt": null,
+        "heapBalanceVerified": true,
+        "heapCounts": {
+          "attempts": 1,
+          "liveAfter": 0
+        },
+        "vectorCounts": {
+          "release": 1,
+          "releaseStatusErrors": 0
+        },
+        "bufferCounts": null,
+        "arenaCounts": null,
+        "regionCounts": null,
+        "runtimeInputs": [
+          {
+            "path": "internal\\cstdlib\\stage0_system_heap.c",
+            "sha256": "cae6664fa1ec70722b76025c3e2c3daadc133cd90d95fa9f02f2385915d3e55c"
+          },
+          {
+            "path": "internal\\cstdlib\\stage0_vector_storage.c",
+            "sha256": "eb9686951b480a7c40d6bfe670206d683548c5293387c42a44670ad0b6e5ccca"
+          }
+        ],
+        "build": {
+          "argv": [
+            "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+            "/nologo",
+            "/std:c11",
+            "/TC",
+            "/O2",
+            "/DFY_CANDIDATE_NO_MAIN",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\vector-c\\sdk_c_executes_vector_resource_cleanup.c",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\vector-c\\sdk_c_executes_vector_resource_cleanup-runtime.c",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\vector-c\\trap.c",
+            "/Fe:C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\vector-c\\sdk_c_executes_vector_resource_cleanup-optimized.exe",
+            "/link",
+            "/INCREMENTAL:NO"
+          ],
+          "exit": 0,
+          "stdout": "sdk_c_executes_vector_resource_cleanup.c\r\nsdk_c_executes_vector_resource_cleanup-runtime.c\r\ntrap.c\r\nGenerating Code...\r\n",
+          "stderr": ""
+        },
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\vector-c\\sdk_c_executes_vector_resource_cleanup-optimized.exe"
+          ],
+          "exit": 0,
+          "stdout": "3,2,1,",
+          "stderr": ""
+        }
+      },
+      {
+        "name": "sdk_c_executes_vector_failed_push_returns_donor",
+        "profile": "low",
+        "sourceSHA256": "1cc5c8ee4f7272da56485b913e8ae684d890d33177ce1eced057d31cbf51de1c",
+        "stdinBase64": null,
+        "heapFailureAt": 1,
+        "heapBalanceVerified": true,
+        "heapCounts": {
+          "attempts": 1,
+          "liveAfter": 0
+        },
+        "vectorCounts": {
+          "release": 1,
+          "releaseStatusErrors": 0
+        },
+        "bufferCounts": null,
+        "arenaCounts": null,
+        "regionCounts": null,
+        "runtimeInputs": [
+          {
+            "path": "internal\\cstdlib\\stage0_system_heap.c",
+            "sha256": "cae6664fa1ec70722b76025c3e2c3daadc133cd90d95fa9f02f2385915d3e55c"
+          },
+          {
+            "path": "internal\\cstdlib\\stage0_vector_storage.c",
+            "sha256": "eb9686951b480a7c40d6bfe670206d683548c5293387c42a44670ad0b6e5ccca"
+          }
+        ],
+        "build": {
+          "argv": [
+            "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+            "/nologo",
+            "/std:c11",
+            "/TC",
+            "/Od",
+            "/DFY_CANDIDATE_NO_MAIN",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\vector-c\\sdk_c_executes_vector_failed_push_returns_donor.c",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\vector-c\\sdk_c_executes_vector_failed_push_returns_donor-runtime.c",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\vector-c\\trap.c",
+            "/Fe:C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\vector-c\\sdk_c_executes_vector_failed_push_returns_donor-low.exe",
+            "/link",
+            "/INCREMENTAL:NO"
+          ],
+          "exit": 0,
+          "stdout": "sdk_c_executes_vector_failed_push_returns_donor.c\r\nsdk_c_executes_vector_failed_push_returns_donor-runtime.c\r\ntrap.c\r\nGenerating Code...\r\n",
+          "stderr": ""
+        },
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\vector-c\\sdk_c_executes_vector_failed_push_returns_donor-low.exe"
+          ],
+          "exit": 0,
+          "stdout": "7,",
+          "stderr": ""
+        }
+      },
+      {
+        "name": "sdk_c_executes_vector_failed_push_returns_donor",
+        "profile": "optimized",
+        "sourceSHA256": "1cc5c8ee4f7272da56485b913e8ae684d890d33177ce1eced057d31cbf51de1c",
+        "stdinBase64": null,
+        "heapFailureAt": 1,
+        "heapBalanceVerified": true,
+        "heapCounts": {
+          "attempts": 1,
+          "liveAfter": 0
+        },
+        "vectorCounts": {
+          "release": 1,
+          "releaseStatusErrors": 0
+        },
+        "bufferCounts": null,
+        "arenaCounts": null,
+        "regionCounts": null,
+        "runtimeInputs": [
+          {
+            "path": "internal\\cstdlib\\stage0_system_heap.c",
+            "sha256": "cae6664fa1ec70722b76025c3e2c3daadc133cd90d95fa9f02f2385915d3e55c"
+          },
+          {
+            "path": "internal\\cstdlib\\stage0_vector_storage.c",
+            "sha256": "eb9686951b480a7c40d6bfe670206d683548c5293387c42a44670ad0b6e5ccca"
+          }
+        ],
+        "build": {
+          "argv": [
+            "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+            "/nologo",
+            "/std:c11",
+            "/TC",
+            "/O2",
+            "/DFY_CANDIDATE_NO_MAIN",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\vector-c\\sdk_c_executes_vector_failed_push_returns_donor.c",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\vector-c\\sdk_c_executes_vector_failed_push_returns_donor-runtime.c",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\vector-c\\trap.c",
+            "/Fe:C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\vector-c\\sdk_c_executes_vector_failed_push_returns_donor-optimized.exe",
+            "/link",
+            "/INCREMENTAL:NO"
+          ],
+          "exit": 0,
+          "stdout": "sdk_c_executes_vector_failed_push_returns_donor.c\r\nsdk_c_executes_vector_failed_push_returns_donor-runtime.c\r\ntrap.c\r\nGenerating Code...\r\n",
+          "stderr": ""
+        },
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\vector-c\\sdk_c_executes_vector_failed_push_returns_donor-optimized.exe"
+          ],
+          "exit": 0,
+          "stdout": "7,",
+          "stderr": ""
+        }
+      },
+      {
+        "name": "sdk_c_executes_vector_growth_failure_preserves_prefix",
+        "profile": "low",
+        "sourceSHA256": "05c34e38789de9b8f7e96d211607e46a2c60b67003edaf3ac07e8764a8b18673",
+        "stdinBase64": null,
+        "heapFailureAt": 2,
+        "heapBalanceVerified": true,
+        "heapCounts": {
+          "attempts": 2,
+          "liveAfter": 0
+        },
+        "vectorCounts": {
+          "release": 1,
+          "releaseStatusErrors": 0
+        },
+        "bufferCounts": null,
+        "arenaCounts": null,
+        "regionCounts": null,
+        "runtimeInputs": [
+          {
+            "path": "internal\\cstdlib\\stage0_system_heap.c",
+            "sha256": "cae6664fa1ec70722b76025c3e2c3daadc133cd90d95fa9f02f2385915d3e55c"
+          },
+          {
+            "path": "internal\\cstdlib\\stage0_vector_storage.c",
+            "sha256": "eb9686951b480a7c40d6bfe670206d683548c5293387c42a44670ad0b6e5ccca"
+          }
+        ],
+        "build": {
+          "argv": [
+            "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+            "/nologo",
+            "/std:c11",
+            "/TC",
+            "/Od",
+            "/DFY_CANDIDATE_NO_MAIN",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\vector-c\\sdk_c_executes_vector_growth_failure_preserves_prefix.c",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\vector-c\\sdk_c_executes_vector_growth_failure_preserves_prefix-runtime.c",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\vector-c\\trap.c",
+            "/Fe:C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\vector-c\\sdk_c_executes_vector_growth_failure_preserves_prefix-low.exe",
+            "/link",
+            "/INCREMENTAL:NO"
+          ],
+          "exit": 0,
+          "stdout": "sdk_c_executes_vector_growth_failure_preserves_prefix.c\r\nsdk_c_executes_vector_growth_failure_preserves_prefix-runtime.c\r\ntrap.c\r\nGenerating Code...\r\n",
+          "stderr": ""
+        },
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\vector-c\\sdk_c_executes_vector_growth_failure_preserves_prefix-low.exe"
+          ],
+          "exit": 0,
+          "stdout": "9,8,7,6,5,4,3,2,1,",
+          "stderr": ""
+        }
+      },
+      {
+        "name": "sdk_c_executes_vector_growth_failure_preserves_prefix",
+        "profile": "optimized",
+        "sourceSHA256": "05c34e38789de9b8f7e96d211607e46a2c60b67003edaf3ac07e8764a8b18673",
+        "stdinBase64": null,
+        "heapFailureAt": 2,
+        "heapBalanceVerified": true,
+        "heapCounts": {
+          "attempts": 2,
+          "liveAfter": 0
+        },
+        "vectorCounts": {
+          "release": 1,
+          "releaseStatusErrors": 0
+        },
+        "bufferCounts": null,
+        "arenaCounts": null,
+        "regionCounts": null,
+        "runtimeInputs": [
+          {
+            "path": "internal\\cstdlib\\stage0_system_heap.c",
+            "sha256": "cae6664fa1ec70722b76025c3e2c3daadc133cd90d95fa9f02f2385915d3e55c"
+          },
+          {
+            "path": "internal\\cstdlib\\stage0_vector_storage.c",
+            "sha256": "eb9686951b480a7c40d6bfe670206d683548c5293387c42a44670ad0b6e5ccca"
+          }
+        ],
+        "build": {
+          "argv": [
+            "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+            "/nologo",
+            "/std:c11",
+            "/TC",
+            "/O2",
+            "/DFY_CANDIDATE_NO_MAIN",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\vector-c\\sdk_c_executes_vector_growth_failure_preserves_prefix.c",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\vector-c\\sdk_c_executes_vector_growth_failure_preserves_prefix-runtime.c",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\vector-c\\trap.c",
+            "/Fe:C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\vector-c\\sdk_c_executes_vector_growth_failure_preserves_prefix-optimized.exe",
+            "/link",
+            "/INCREMENTAL:NO"
+          ],
+          "exit": 0,
+          "stdout": "sdk_c_executes_vector_growth_failure_preserves_prefix.c\r\nsdk_c_executes_vector_growth_failure_preserves_prefix-runtime.c\r\ntrap.c\r\nGenerating Code...\r\n",
+          "stderr": ""
+        },
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\vector-c\\sdk_c_executes_vector_growth_failure_preserves_prefix-optimized.exe"
+          ],
+          "exit": 0,
+          "stdout": "9,8,7,6,5,4,3,2,1,",
+          "stderr": ""
+        }
+      },
+      {
+        "name": "sdk_c_executes_vector_struct_slices",
+        "profile": "low",
+        "sourceSHA256": "e3b5db5d66a49342779fadf08ac3c0d192c536ee27a6c65aabde4cc5d3b3308e",
+        "stdinBase64": null,
+        "heapFailureAt": null,
+        "heapBalanceVerified": true,
+        "heapCounts": {
+          "attempts": 1,
+          "liveAfter": 0
+        },
+        "vectorCounts": {
+          "release": 1,
+          "releaseStatusErrors": 0
+        },
+        "bufferCounts": null,
+        "arenaCounts": null,
+        "regionCounts": null,
+        "runtimeInputs": [
+          {
+            "path": "internal\\cstdlib\\stage0_system_heap.c",
+            "sha256": "cae6664fa1ec70722b76025c3e2c3daadc133cd90d95fa9f02f2385915d3e55c"
+          },
+          {
+            "path": "internal\\cstdlib\\stage0_vector_storage.c",
+            "sha256": "eb9686951b480a7c40d6bfe670206d683548c5293387c42a44670ad0b6e5ccca"
+          }
+        ],
+        "build": {
+          "argv": [
+            "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+            "/nologo",
+            "/std:c11",
+            "/TC",
+            "/Od",
+            "/DFY_CANDIDATE_NO_MAIN",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\vector-c\\sdk_c_executes_vector_struct_slices.c",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\vector-c\\sdk_c_executes_vector_struct_slices-runtime.c",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\vector-c\\trap.c",
+            "/Fe:C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\vector-c\\sdk_c_executes_vector_struct_slices-low.exe",
+            "/link",
+            "/INCREMENTAL:NO"
+          ],
+          "exit": 0,
+          "stdout": "sdk_c_executes_vector_struct_slices.c\r\nsdk_c_executes_vector_struct_slices-runtime.c\r\ntrap.c\r\nGenerating Code...\r\n",
+          "stderr": ""
+        },
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\vector-c\\sdk_c_executes_vector_struct_slices-low.exe"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      },
+      {
+        "name": "sdk_c_executes_vector_struct_slices",
+        "profile": "optimized",
+        "sourceSHA256": "e3b5db5d66a49342779fadf08ac3c0d192c536ee27a6c65aabde4cc5d3b3308e",
+        "stdinBase64": null,
+        "heapFailureAt": null,
+        "heapBalanceVerified": true,
+        "heapCounts": {
+          "attempts": 1,
+          "liveAfter": 0
+        },
+        "vectorCounts": {
+          "release": 1,
+          "releaseStatusErrors": 0
+        },
+        "bufferCounts": null,
+        "arenaCounts": null,
+        "regionCounts": null,
+        "runtimeInputs": [
+          {
+            "path": "internal\\cstdlib\\stage0_system_heap.c",
+            "sha256": "cae6664fa1ec70722b76025c3e2c3daadc133cd90d95fa9f02f2385915d3e55c"
+          },
+          {
+            "path": "internal\\cstdlib\\stage0_vector_storage.c",
+            "sha256": "eb9686951b480a7c40d6bfe670206d683548c5293387c42a44670ad0b6e5ccca"
+          }
+        ],
+        "build": {
+          "argv": [
+            "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+            "/nologo",
+            "/std:c11",
+            "/TC",
+            "/O2",
+            "/DFY_CANDIDATE_NO_MAIN",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\vector-c\\sdk_c_executes_vector_struct_slices.c",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\vector-c\\sdk_c_executes_vector_struct_slices-runtime.c",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\vector-c\\trap.c",
+            "/Fe:C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\vector-c\\sdk_c_executes_vector_struct_slices-optimized.exe",
+            "/link",
+            "/INCREMENTAL:NO"
+          ],
+          "exit": 0,
+          "stdout": "sdk_c_executes_vector_struct_slices.c\r\nsdk_c_executes_vector_struct_slices-runtime.c\r\ntrap.c\r\nGenerating Code...\r\n",
+          "stderr": ""
+        },
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\vector-c\\sdk_c_executes_vector_struct_slices-optimized.exe"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      }
+    ],
+    "compiler": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+    "source": "Private Fairy emitter; actual repository C runtime components, no SDK stand-ins"
+  },
+  "reference": {
+    "passed": true,
+    "runs": [
+      {
+        "name": "sdk_c_executes_vector_storage_and_views",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\compiler-vector-current.exe",
+          "check"
+        ],
+        "exit": 0,
+        "stdout": "check ok: 2 instance(s), 9 source file(s), 183 MIR function(s), lock updated\n",
+        "stderr": "",
+        "sourceSHA256": "733c3bd974ca88255500b851892be87da02f7ee3bc8577fea6ffed3812444ca7"
+      },
+      {
+        "name": "sdk_c_executes_vector_resource_cleanup",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\compiler-vector-current.exe",
+          "check"
+        ],
+        "exit": 0,
+        "stdout": "check ok: 2 instance(s), 9 source file(s), 182 MIR function(s), lock updated\n",
+        "stderr": "",
+        "sourceSHA256": "9c3b43f175dc15296eab9e843fd32073575a012b29f4dd9459137770dc7696fe"
+      },
+      {
+        "name": "sdk_c_executes_vector_failed_push_returns_donor",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\compiler-vector-current.exe",
+          "check"
+        ],
+        "exit": 0,
+        "stdout": "check ok: 2 instance(s), 9 source file(s), 180 MIR function(s), lock updated\n",
+        "stderr": "",
+        "sourceSHA256": "7738e58b162730df6b32765dc3e4abd04ddce615da17839db9d9ec6a8a3b2394"
+      },
+      {
+        "name": "sdk_c_executes_vector_growth_failure_preserves_prefix",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\compiler-vector-current.exe",
+          "check"
+        ],
+        "exit": 0,
+        "stdout": "check ok: 2 instance(s), 9 source file(s), 182 MIR function(s), lock updated\n",
+        "stderr": "",
+        "sourceSHA256": "3a74259adb149d974b843b8cc31eb0dbfb13d332837577d7242c26ad7e9ca571"
+      },
+      {
+        "name": "sdk_c_executes_vector_struct_slices",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\compiler-vector-current.exe",
+          "check"
+        ],
+        "exit": 0,
+        "stdout": "check ok: 2 instance(s), 9 source file(s), 181 MIR function(s), lock updated\n",
+        "stderr": "",
+        "sourceSHA256": "4cd254362b9c79f67d0343673856eb30fbddeea8d1ca024743b76358506236ff"
+      }
+    ]
+  },
+  "storage": {
+    "layoutSize": 48,
+    "layoutAlignment": 8,
+    "fieldOffsets": [
+      0,
+      8,
+      16,
+      24,
+      32,
+      40
+    ],
+    "intrinsicCodes": [
+      101,
+      102,
+      103,
+      104,
+      105,
+      106,
+      107
+    ],
+    "foreignCodes": [
+      3,
+      4,
+      5,
+      6,
+      7,
+      8
+    ],
+    "cleanupLeaf": "Authenticated Vec destructor folds take_slot<T> into storage_take<T>; receiver element identity and inherited unsafe flag are rechecked",
+    "inactiveTypes": "SDK-only unused Vec signature instantiations have no materialized storage; retained-body uses still require a layout"
+  },
+  "mutations": {
+    "metadataRejected": 6,
+    "workBudgetRejected": true
+  },
+  "privateAPIExpanded": true,
+  "normativeContractsChanged": false,
+  "stableCLIChanged": false,
+  "sdkABIChanged": false,
+  "GoChanged": false,
+  "dbChanged": false,
+  "ciChanged": false,
+  "pushed": false,
+  "skipped": {
+    "candidateRelease": "Generated C /O2 covered; standalone candidate Release deferred",
+    "Linux": "Windows runtime slice",
+    "fullSuite": "Focused Vec storage, ownership, views, failure and metadata checks",
+    "stage1Stage2": "Remaining SDK storage and dispatcher pending"
+  },
+  "pending": [
+    "Nested resource Vec execution coverage",
+    "String/File storage",
+    "Whole SDK coverage",
+    "Complete provenance/path/dominance/initialization proofs",
+    "Foreign ABI expansion",
+    "Dispatcher and stage1/stage2 promotion"
+  ]
+}

@@ -6,6 +6,7 @@ import module_unit_body_ir_switches as switches;
 import module_unit_sdk_sources as sdk_sources;
 import module_unit_sdk_authority as sdk_authority;
 import module_unit_body_ir_lookup as lookup;
+import module_unit_body_ir_storage as storage;
 import module_unit_cleanup_mir_model as clean_ir;
 import module_unit_cleanup_mir_verify as cleaning;
 import module_unit_value_model as budget;
@@ -20,7 +21,7 @@ fn clean_ir::Problem fail(u32 code,usize module_index,usize start,usize end){ret
 fn bool span(usize start,usize end,usize limit){return start<=end && end<=limit;}
 fn bool expression(ref ir::Body b,usize id){return id==0 || lookup::node(b,id)!=0;}
 fn bool statement(ref ir::Body b,usize id){return id==0 || lookup::statement(b,id)!=0;}
-fn bool unsafe_scope(ref ir::Program p,ref ir::Body b,usize frame,budget::Expression e,ref mut usize work){
+pub fn bool unsafe_scope(ref ir::Program p,ref ir::Body b,usize frame,budget::Expression e,ref mut usize work){
     let f=clean_ir::frame_at(ir::cleanup_ir(p),frame);var usize i=0;
     if(f.kind!=2){while(i<ir::callable_count(p)){if(!budget::charge(work,1)){return false;}let c=ir::callable_at(p,i);if(c.module_index==f.module_index && c.declaration==f.declaration && !c.foreign && c.unsafe_call){return true;}i+=1;}}
     i=0;while(i<ir::node_count(b)){if(!budget::charge(work,1)){return false;}let owner=ir::node_at(b,i).value;if(owner.kind==31 && owner.start<=e.start && e.end<=owner.end){return true;}i+=1;}return false;
@@ -96,7 +97,7 @@ pub fn clean_ir::Problem check(ref ir::Program p){
         i=0;while(i<ir::field_count(p)){if(!budget::charge(ref mut work,1)){return fail(1002,0,0,0);}if(ir::field_at(p,i).module_index>=modules){return fail(1001,0,0,0);}i+=1;}
         i=0;while(i<ir::callable_count(p)){if(!budget::charge(ref mut work,1)){return fail(1002,0,0,0);}if(ir::callable_at(p,i).module_index>=modules){return fail(1001,0,0,0);}i+=1;}
     }i=1;
-    while(i<=ir::count(p)){let result=check_body(ir::at(p,i),ir::cleanup_ir(p),i,ref mut work);if(result.code!=0){return result;}let casts=check_casts(p,ir::at(p,i),i,ref mut work);if(casts.code!=0){return casts;}let raw=check_raw_parts(p,ir::at(p,i),i,ref mut work);if(raw.code!=0){return raw;}i+=1;}
+    while(i<=ir::count(p)){let result=check_body(ir::at(p,i),ir::cleanup_ir(p),i,ref mut work);if(result.code!=0){return result;}let casts=check_casts(p,ir::at(p,i),i,ref mut work);if(casts.code!=0){return casts;}let raw=check_raw_parts(p,ir::at(p,i),i,ref mut work);if(raw.code!=0){return raw;}let stored=storage::check(p,ir::at(p,i),i,ref mut work);if(stored.code!=0){return stored;}i+=1;}
     i=0;while(i<ir::layout_count(p)){if(!budget::charge(ref mut work,1)){return fail(1002,0,0,0);}let row=ir::layout_at(p,i);let s=row.value;if(s.type==0 || s.type>nt || s.field_start>ir::field_count(p) || s.field_count>ir::field_count(p)-s.field_start || !span(row.name_start,row.name_end,ir::name_bytes(p))){return fail(1001,s.module_index,s.start,s.end);}let t=clean_ir::type_at(ir::cleanup_ir(p),s.type);if(t.module_index!=s.module_index || t.declaration!=s.declaration){return fail(1001,s.module_index,s.start,s.end);}i+=1;}
     i=0;while(i<ir::field_count(p)){if(!budget::charge(ref mut work,1)){return fail(1002,0,0,0);}let f=ir::field_at(p,i);if(f.type>nt || f.payload_start>ir::field_count(p) || f.payload_count>ir::field_count(p)-f.payload_start || !span(f.name_start,f.name_end,ir::name_bytes(p))){return fail(1001,f.module_index,f.start,f.end);}i+=1;}
     i=0;while(i<ir::callable_count(p)){if(!budget::charge(ref mut work,1)){return fail(1002,0,0,0);}let c=ir::callable_at(p,i);if(c.result>nt || c.parameter_start>ir::parameter_count(p) || c.parameter_count>ir::parameter_count(p)-c.parameter_start || !span(c.link_start,c.link_end,ir::name_bytes(p))){return fail(1001,c.module_index,0,0);}var usize j=0;while(j<c.parameter_count){if(!budget::charge(ref mut work,1)){return fail(1002,c.module_index,0,0);}if(ir::parameter_at(p,c.parameter_start+j)>nt){return fail(1001,c.module_index,0,0);}j+=1;}i+=1;}
