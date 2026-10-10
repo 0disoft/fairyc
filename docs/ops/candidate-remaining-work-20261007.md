@@ -3102,3 +3102,53 @@ candidate dev/Release, Linux, the full suite and Stage1/Stage2 remain pending.
 Only the candidate unit contract/progress and local observers change; language
 semantics in the Go reference, stable CLI/API, SDK ABI, DB, CI and repository
 hygiene are unchanged. No push.
+
+
+## Scoped CFG cleanup and checked batch lowering (2026-10-11)
+
+Receipt: `evidence/candidate-cfg-drop-index-20261011.json`.
+
+The previous exact original input control labels the first CFG failure as
+617005: scanning the whole cleanup drop table for each expression exit. A
+private ascending list now selects the current frame's original drop IDs once.
+Scope, expression, return, propagation, break/continue and Region exits reuse
+that list. CFG revalidation independently builds its own list, preserves alias
+coverage and rejects missing or duplicated cleanup. The public individual and
+batch lowering entries both validate the entire IR; only a private helper skips
+repeating that proof per frame. Each graph retains all structural, cleanup,
+Region, defer, switch and iteration checks. Existing budgets are unchanged.
+
+Five Release native cases pass. A 1453-frame project with 1440 unrelated drops
+lowers a 500-expression root to 503 blocks with work 3447. Batch graphs match
+individual graphs exactly; missing cleanup and the existing nine CFG mutations
+reject. The nested Region return/propagation case preserves defer/drop/reset
+ordering. Shared cleanup C is byte-identical to the previously executed /Od and
+/O2 artifacts, so those two executions are reused. Locked source checking passes
+with 287 files and 3596 MIR functions.
+
+The current original main import graph is exactly 236 files. An initial observer
+mistakenly added its own CFG helper as a target input, producing missing-import
+code 3; that harness input is preserved and excluded from passes. The actual
+closure was checked transitively and rerun. All 48 units and 25 retries still
+link 3558 frames. Of 6392 global drops, main has four; its CFG now passes with
+247 blocks and work 7650. The complete C pipeline gets past CFG batch lowering
+and aggregate definitions, then rejects inside literal definitions. Cache-only
+stage code 721007 identifies `module_unit_c_literals::definitions`; its current
+1002 error still has no source span and output remains transactional at zero.
+The next task is to distinguish literal-pool lookup work from C output capacity
+and remove the remaining repeated literal lookup if that is the exhausted work.
+
+The Region observation initially omitted its required allocator SDK source
+argument, and an old-code control omitted it too. Both invalid harness attempts
+are retained as failures. The unchanged fixture passes with the correct exact
+SDK file argument; no Region product regression is claimed from those attempts.
+Two early selections used nonexistent test names and ran no tests. All final
+identities were taken from the authored test declarations.
+
+Host compilation uses the existing validation-only 120-second bootstrap overlay;
+original full-link/C observation has an explicit 120-second process deadline.
+Stable native test process limits, CLI/API, SDK ABI, Go reference behavior, DB,
+CI and repository hygiene are unchanged. The candidate unit contract and local
+observation tools change. No push. Full original C execution, native driver,
+default timeout/performance, standalone candidate profiles, Linux, full suite
+and Stage1/Stage2 remain pending.

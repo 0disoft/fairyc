@@ -2102,3 +2102,34 @@ the full ADR 0220 feature set is not claimed complete by this slice.
 Evidence is recorded in `docs/ops/evidence/candidate-literal-constants-20261011.json`.
 Stable CLI/API, SDK ABI, Go reference semantics, language revision, DB, CI and
 runner policy are unchanged.
+
+
+## Scoped CFG cleanup lookup and checked batch lowering (2026-10-11)
+
+CFG preparation builds a private ascending list of original drop IDs belonging
+to its frame. Expression exits, scope exits, loop exits, propagation and Region
+reset ordering reuse that list. Exit kind, exact source span, operand identity,
+reverse lexical order and duplicate alias rules remain unchanged. Each indexed
+operation checks frame/table extent and referenced operand ownership. The CFG
+verifier builds its own list from the current IR and checks every local drop;
+it does not accept the producer's list as a coverage proof. Its seen flags and
+alias traversal cover the frame's drops rather than unrelated project drops.
+
+The public single-frame lowering entry still validates the entire owned IR.
+A new batch lowering entry validates that immutable IR once, then invokes a
+private body-lowering function for each frame. The body-lowering function is not
+exported. Every produced graph still passes the same graph, cleanup coverage,
+defer, Region, switch and iteration checks. The C emitter consumes the checked
+batch. Per-body work stays 1048576, CFG blocks stay 32768 per body, and aggregate
+CFG block admission stays under the existing 1048576 C phase work bound.
+No capacity, work limit or C output bound is raised.
+
+The standalone Region-exit helper retains its interface and prepares a fresh
+frame list. The indexed helper is internal candidate transport, not a proof that
+an arbitrary other IR has been checked. Independent graph coverage validation
+remains the authority for omitted or duplicated cleanup requests. There is no
+public lowering entry that skips owned IR validation.
+
+Evidence: `docs/ops/evidence/candidate-cfg-drop-index-20261011.json`.
+Stable CLI/API, SDK ABI, language revision, Go reference behavior, DB, CI and
+native runner policy are unchanged.

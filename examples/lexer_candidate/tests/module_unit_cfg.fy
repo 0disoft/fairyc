@@ -2,6 +2,9 @@ module tests::module_unit_cfg;
 import module_unit_body_ir_model as ir;
 import module_unit_cfg_model as cfg;
 import module_unit_cfg_lower as flow;
+import module_unit_cfg_drops as drop_index;
+import module_project_compile as compile;
+import module_project_link as link;
 import module_unit_body_ir_lower as lower;
 import module_unit_body_ir_lookup as lookup;
 import module_unit_body_ir_verify as proof;
@@ -90,4 +93,19 @@ fn u32 switch_mutated(ref ir::Program p,ref cfg::Graph g,u32 mode){
     let p=retained(b"module main;resource R{i32 n;cleanup{}}fn Result<i32,i32> bad(){return .err(7);}fn void fall(Result<R,R> value){switch(value){case .ok(_):{let R inner=R{.n=3};}case .err(_):{}};}fn i32 early(Result<R,i32> value){return switch(value){case .ok(_):{return 4;}case .err(_):{0}};}fn Result<i32,i32> propagate(Result<R,i32> value){let i32 n=switch(value){case .ok(_):{bad()?}case .err(_):{0}};return .ok(n);}fn void leave(){while(true){let Result<R,i32> value=.ok(R{.n=5});switch(value){case .ok(_):{break;}case .err(_):{break;}};}}enum E{Data{i32 a;i32 b;};}fn i32 fields(E value){return switch(value){case .Data{.a=_,.b=_}:{0}};}",b"");
     var usize frame=1;var usize anonymous=0;var usize scoped=0;var usize returned=0;var usize propagated=0;var usize broken=0;while(frame<=ir::count(ref p)){let b=ir::at(ref p,frame);let g=lowered(ref p,frame);var usize i=1;while(i<=ir::local_count(b)){let local=ir::local_at(b,i);if(local.kind==4){let n=ir::node_at(b,lookup::node(b,local.source_index)-1);assert(bytes::equal(ir::node_text(b,lookup::node(b,local.source_index)-1),b"_") && n.value.place.root==i);anonymous+=1;}i+=1;}i=1;while(i<=cfg::count(ref g)){let n=cfg::at(ref g,i);if(n.kind==5){let d=clean_ir::drop_at(ir::cleanup_ir(ref p),n.drop-1);let o=clean_ir::operand_at(ir::cleanup_ir(ref p),d.operand);if(o.kind==1 && ir::local_at(b,o.id).kind==4){if(d.exit==9){scoped+=1;}if(d.exit==2){returned+=1;}if(d.exit==6){propagated+=1;}if(d.exit==3){broken+=1;}}}i+=1;}frame+=1;}
     assert(anonymous==10 && scoped==3 && returned==1 && propagated==1 && broken==1);
+}
+
+
+@test @effects(console) fn void cfg_scopes_drop_queries_to_one_body_in_a_large_project(){
+    var v::Vec<syntax::Parsed> sources=v::empty<syntax::Parsed>();var bytes::Buffer root=bytes::empty();assert(bytes::append(ref mut root,b"module main;fn i32 main(){").is_ok);var usize i=0;while(i<500){assert(bytes::append(ref mut root,b"discard 1;").is_ok);i+=1;}assert(bytes::append(ref mut root,b"return 0;}").is_ok);assert(v::push<syntax::Parsed>(ref mut sources,parsed(bytes::view(ref root))).is_ok);
+    var usize module_index=0;while(module_index<12){var bytes::Buffer source=bytes::empty();assert(bytes::append(ref mut source,b"module p").is_ok);assert(bytes::append_usize(ref mut source,module_index).is_ok);assert(bytes::append(ref mut source,b";resource R{i32 n;cleanup{}}").is_ok);i=0;while(i<120){assert(bytes::append(ref mut source,b"pub fn void f").is_ok);assert(bytes::append_usize(ref mut source,i).is_ok);assert(bytes::append(ref mut source,b"(){let R r=R{.n=1};discard r;}").is_ok);i+=1;}assert(v::push<syntax::Parsed>(ref mut sources,parsed(bytes::view(ref source))).is_ok);module_index+=1;}
+    let metadata=switch(signatures::build(ref sources)){case .ok(p):{p}case .err(_):{assert(false);return;}};var v::Vec<ir::Program> units=v::empty<ir::Program>();module_index=0;while(module_index<v::len<syntax::Parsed>(ref sources)){let unit=switch(compile::range(ref sources,ref metadata,module_index,module_index+1)){case .ok(p):{p}case .err(e):{discard io::write_u32(e.code);assert(false);return;}};assert(v::push<ir::Program>(ref mut units,unit).is_ok);module_index+=1;}let p=switch(link::build(ref metadata,ref units)){case .ok(p):{p}case .err(e):{discard io::write_u32(e.code);assert(false);return;}};
+    assert(ir::count(ref p)==1453 && clean_ir::drop_count(ir::cleanup_ir(ref p))==1440);var usize work=0;let table=switch(drop_index::build(ref p,1,ref mut work)){case .ok(t):{t}case .err(_):{assert(false);return;}};assert(drop_index::count(ref table)==0 && work==1440);let g=lowered(ref p,1);assert(cfg::check(ref p,ref g).code==0 && cfg::work(ref g)<10000);
+    discard io::write("drops ");discard io::write_usize(clean_ir::drop_count(ir::cleanup_ir(ref p)));discard io::write(" blocks ");discard io::write_usize(cfg::count(ref g));discard io::write(" work ");discard io::write_usize(cfg::work(ref g));discard io::write("\n");
+}
+@test @effects(console) fn void cfg_batch_matches_individual_graphs_and_rejects_missing_cleanup(){
+    let p=retained(b"module main;resource R{i32 n;cleanup{}}fn Result<R,i32> probe(){return .err(1);}fn void f(){while(probe().is_ok){}}fn void replace(){var R r=R{.n=1};r=R{.n=2};}",b"");
+    let batch=switch(flow::lower_all(ref p)){case .ok(p):{p}case .err(e):{discard io::write_u32(e.code);assert(false);return;}};assert(v::len<cfg::Graph>(ref batch)==ir::count(ref p));var usize f=1;
+    while(f<=ir::count(ref p)){let single=lowered(ref p,f);let g=v::at<cfg::Graph>(ref batch,f-1);assert(cfg::entry(g)==cfg::entry(ref single) && cfg::count(g)==cfg::count(ref single) && cfg::work(g)==cfg::work(ref single));var usize i=1;while(i<=cfg::count(g)){let a=cfg::at(g,i);let b=cfg::at(ref single,i);assert(a.kind==b.kind && a.source==b.source && a.target==b.target && a.first==b.first && a.second==b.second && a.drop==b.drop && a.start==b.start && a.end==b.end);i+=1;}assert(cfg::check(ref p,g).code==0);f+=1;}
+    let g=v::at<cfg::Graph>(ref batch,declared(ref p,4)-1);var v::Vec<cfg::Block> blocks=v::empty<cfg::Block>();var usize i=1;var bool removed=false;while(i<=cfg::count(g)){var n=cfg::at(g,i);if(n.kind==5){n.kind=7;n.drop=0;removed=true;}assert(v::push<cfg::Block>(ref mut blocks,n).is_ok);i+=1;}assert(removed);switch(cfg::assemble(ref p,cfg::frame(g),cfg::entry(g),blocks,cfg::work(g))){case .ok(_):{assert(false);}case .err(e):{assert(e.code==1001);}};
 }

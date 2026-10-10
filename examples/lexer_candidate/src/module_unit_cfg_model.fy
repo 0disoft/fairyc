@@ -9,6 +9,7 @@ import module_unit_cfg_switches as switches;
 import module_unit_cfg_iteration as iteration;
 import std::bytes as bytes;
 import std::vec as v;
+import module_unit_cfg_drops as drops;
 
 // One operation per block. source/target are body-table IDs, never parser tokens.
 // 1 eval, 2 store, 3 bool branch, 4 Result branch, 5 drop, 6 return,
@@ -35,7 +36,7 @@ pub fn clean_ir::Problem check(ref bodies::Program p,ref Graph g){
     if(frame(g)==0 || frame(g)>bodies::count(p) || entry(g)==0 || entry(g)>count(g)){return fail(1001,0,0,0);}
     let b=bodies::at(p,frame(g));let cleaned=bodies::cleanup_ir(p);let f=clean_ir::frame_at(cleaned,frame(g));
     if(count(g)>32768 || work(g)>1048576){return fail(1002,f.module_index,0,0);}var usize used=work(g);
-    var v::Vec<u8> seen=v::empty<u8>();var usize i=0;while(i<clean_ir::drop_count(cleaned)){if(!budget::charge(ref mut used,1)){return fail(1002,f.module_index,0,0);}if(!v::push<u8>(ref mut seen,0).is_ok){return fail(1003,f.module_index,0,0);}i+=1;}
+    let table=switch(drops::build(p,frame(g),ref mut used)){case .ok(t):{t}case .err(e):{return e;}};var v::Vec<u8> seen=v::empty<u8>();var usize i=0;while(i<drops::count(ref table)){if(!budget::charge(ref mut used,1)){return fail(1002,f.module_index,0,0);}if(!v::push<u8>(ref mut seen,0).is_ok){return fail(1003,f.module_index,0,0);}i+=1;}
     var v::Vec<u8> snapshots=v::empty<u8>();i=0;while(i<bodies::statement_count(b)){if(!budget::charge(ref mut used,1)){return fail(1002,f.module_index,0,0);}if(!v::push<u8>(ref mut snapshots,0).is_ok){return fail(1003,f.module_index,0,0);}i+=1;}
     i=1;while(i<=count(g)){
         if(!budget::charge(ref mut used,1)){return fail(1002,f.module_index,0,0);}let n=at(g,i);
@@ -53,12 +54,12 @@ pub fn clean_ir::Problem check(ref bodies::Program p,ref Graph g){
             if(n.kind==10){let op=bodies::node_text(b,n.source-1);if(e.kind!=5 || (!bytes::equal(op,b"&&") && !bytes::equal(op,b"||")) || lookup::node(b,e.left)!=n.target){return fail(1001,f.module_index,n.start,n.end);}}
             if(n.kind==11){if(e.kind!=12 && e.kind!=13 && e.kind!=15 && e.kind!=31){return fail(1001,f.module_index,n.start,n.end);}if(n.target!=0 && bodies::node_at(b,n.target-1).value.type!=e.type){return fail(1001,f.module_index,n.start,n.end);}}
         }else if(n.kind==6){let result=clean_ir::type_at(cleaned,f.result);if(result.kind!=1 || result.scalar!=7){return fail(1001,f.module_index,n.start,n.end);}}
-        if(n.kind==5){if(n.drop==0 || n.drop>clean_ir::drop_count(cleaned)){return fail(1001,f.module_index,n.start,n.end);}let d=clean_ir::drop_at(cleaned,n.drop-1);let o=clean_ir::operand_at(cleaned,d.operand);if(o.frame!=frame(g) || n.start!=d.start || n.end!=d.end || *v::at<u8>(ref seen,n.drop-1)!=0){return fail(1001,f.module_index,n.start,n.end);}// The ownership walk may revisit a loop condition while validating its
+        if(n.kind==5){if(n.drop==0 || n.drop>clean_ir::drop_count(cleaned)){return fail(1001,f.module_index,n.start,n.end);}let d=clean_ir::drop_at(cleaned,n.drop-1);let o=clean_ir::operand_at(cleaned,d.operand);let row=drops::row(ref table,n.drop,ref mut used);if(row==0){return fail(if(used>=1048576){1002}else{1001},f.module_index,n.start,n.end);}if(o.frame!=frame(g) || n.start!=d.start || n.end!=d.end || *v::at<u8>(ref seen,row-1)!=0){return fail(1001,f.module_index,n.start,n.end);}// The ownership walk may revisit a loop condition while validating its
             // back edge. Those identical requests describe one runtime site.
-            var usize alias=0;while(alias<clean_ir::drop_count(cleaned)){if(!budget::charge(ref mut used,1)){return fail(1002,f.module_index,n.start,n.end);}let other=clean_ir::drop_at(cleaned,alias);if(other.operand==d.operand && other.exit==d.exit && other.start==d.start && other.end==d.end){if(*v::at<u8>(ref seen,alias)!=0){return fail(1001,f.module_index,n.start,n.end);}let slot=v::at_mut<u8>(ref mut seen,alias);*slot=1;}alias+=1;}}else if(n.drop!=0){return fail(1001,f.module_index,n.start,n.end);}i+=1;
+            var usize alias=0;while(alias<drops::count(ref table)){if(!budget::charge(ref mut used,1)){return fail(1002,f.module_index,n.start,n.end);}let other=clean_ir::drop_at(cleaned,drops::at(ref table,alias)-1);if(other.operand==d.operand && other.exit==d.exit && other.start==d.start && other.end==d.end){if(*v::at<u8>(ref seen,alias)!=0){return fail(1001,f.module_index,n.start,n.end);}let slot=v::at_mut<u8>(ref mut seen,alias);*slot=1;}alias+=1;}}else if(n.drop!=0){return fail(1001,f.module_index,n.start,n.end);}i+=1;
     }
     i=0;while(i<bodies::statement_count(b)){if(!budget::charge(ref mut used,1)){return fail(1002,f.module_index,0,0);}let stmt=bodies::statement_at(b,i).value;if(stmt.kind==4 && !bytes::equal(bodies::assignment_operator(b,i),b"=") && *v::at<u8>(ref snapshots,i)!=1){return fail(1001,f.module_index,stmt.start,stmt.end);}i+=1;}
-    i=0;while(i<clean_ir::drop_count(cleaned)){if(!budget::charge(ref mut used,1)){return fail(1002,f.module_index,0,0);}if(clean_ir::operand_at(cleaned,clean_ir::drop_at(cleaned,i).operand).frame==frame(g) && *v::at<u8>(ref seen,i)==0){return fail(1001,f.module_index,0,0);}i+=1;}
+    i=0;while(i<drops::count(ref table)){if(!budget::charge(ref mut used,1)){return fail(1002,f.module_index,0,0);}if(*v::at<u8>(ref seen,i)==0){return fail(1001,f.module_index,0,0);}i+=1;}
     let repeated=iteration::check(p,g,ref mut used);if(repeated.code!=0){return repeated;}let selected=switches::check(p,g,ref mut used);if(selected.code!=0){return selected;}let checked=deferred::check(p,g,ref mut used);if(checked.code!=0){return checked;}return lifecycle::check(p,g,ref mut used);
 }
 pub fn Result<Graph,clean_ir::Problem> assemble_deferred(ref bodies::Program p,usize frame,usize entry,v::Vec<Block> blocks,v::Vec<Deferred> deferred,v::Vec<Capture> captures,usize work){let g=Graph{.frame,.entry,.blocks,.deferred,.captures,.work};let checked=check(p,ref g);if(checked.code!=0){return .err(checked);}return .ok(g);}
