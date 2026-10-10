@@ -67,9 +67,16 @@ func (f *borrowFlowAnalyzer) checkSubviewPathAccess(expression *ast.Expression, 
 		access = borrowValueState{known: true, origins: []flowOrigin{f.analyzer.originForSymbol(owner)}}
 	}
 	primary := span(f.module.file.Path, expression.Span)
+	ordinaryRead := expression != f.ownerReadPlace && !isSafeBorrowSymbol(owner)
 	report := func(loan, lastUse hir.Span) {
 		for _, diagnostic := range f.analyzer.diagnostics {
 			if diagnostic.Code == "E2101" && diagnostic.Primary == primary {
+				return
+			}
+			// Consuming resource expressions already have the more specific move
+			// diagnostic. Do not also diagnose the root read inside that move.
+			if diagnostic.Code == "E2105" && diagnostic.Primary.Source == primary.Source &&
+				diagnostic.Primary.StartByte <= primary.StartByte && diagnostic.Primary.EndByte >= primary.EndByte {
 				return
 			}
 		}
@@ -80,12 +87,15 @@ func (f *borrowFlowAnalyzer) checkSubviewPathAccess(expression *ast.Expression, 
 			return
 		}
 		for _, id := range retained.loans {
-			if id >= 0 && id < len(f.loans) && f.loans[id].subview && !slices.Contains(access.loans, id) {
-				report(f.loans[id].fact.Borrow, lastUse)
+			if id >= 0 && id < len(f.loans) && !slices.Contains(access.loans, id) {
+				loan := f.loans[id]
+				if loan.subview || ordinaryRead && loan.owner == owner && loan.fact.Kind == "mutable" {
+					report(loan.fact.Borrow, lastUse)
+				}
 			}
 		}
 		for _, pending := range retained.pending {
-			if pending.subview && !slices.ContainsFunc(access.pending, func(candidate pendingBorrowLoan) bool {
+			if (pending.subview || ordinaryRead && pending.owner == owner && pending.kind == "mutable") && !slices.ContainsFunc(access.pending, func(candidate pendingBorrowLoan) bool {
 				return candidate.subview && candidate.borrow == pending.borrow && sameFlowOrigin(candidate.origin, pending.origin)
 			}) {
 				report(pending.borrow, lastUse)
@@ -102,6 +112,30 @@ func (f *borrowFlowAnalyzer) checkSubviewPathAccess(expression *ast.Expression, 
 	}
 }
 
+// Only the selected root node is exempt. An index callback that reads the
+// same variable has a different source node and still checks its live loans.
+func (f *borrowFlowAnalyzer) evaluateOwnerPlace(expression *ast.Expression, environment borrowEnvironment) (borrowValueState, bool) {
+	prior := f.ownerReadPlace
+	f.ownerReadPlace = fieldAssignmentRoot(expression)
+	defer func() { f.ownerReadPlace = prior }()
+	return f.evaluateExpression(expression, environment)
+}
+
+// Closed storage constructors obtain data/length metadata from the selected
+// owner during the same acquisition. Exempt only a direct field projection
+// of that owner; effectful metadata expressions and other owners remain reads.
+func (f *borrowFlowAnalyzer) evaluateConstructorMetadata(expression, ownerExpression *ast.Expression, environment borrowEnvironment) (borrowValueState, bool) {
+	if isBorrowExpression(ownerExpression) {
+		ownerExpression = ownerExpression.Children[0]
+	}
+	owner := fieldAssignmentRoot(ownerExpression)
+	root := fieldAssignmentRoot(expression)
+	if owner != nil && root != nil && root != assignmentRootPath(expression) && f.analyzer.resolved[owner] == f.analyzer.resolved[root] {
+		return f.evaluateOwnerPlace(expression, environment)
+	}
+	return f.evaluateExpression(expression, environment)
+}
+
 func (f *borrowFlowAnalyzer) evaluateSubviewIndexStore(statement *ast.Statement, environment borrowEnvironment) bool {
 	target := statement.Target
 	if len(target.Children) != 2 {
@@ -110,7 +144,7 @@ func (f *borrowFlowAnalyzer) evaluateSubviewIndexStore(statement *ast.Statement,
 	if arrayFieldRoot(target.Children[0]) != nil && f.analyzer.inlineArrayField(f.analyzer.expressionTypes[target.Children[0]]) {
 		return f.evaluateArrayFieldStore(statement, environment)
 	}
-	receiver, reachable := f.evaluateExpression(target.Children[0], environment)
+	receiver, reachable := f.evaluateOwnerPlace(target.Children[0], environment)
 	if !reachable {
 		return false
 	}

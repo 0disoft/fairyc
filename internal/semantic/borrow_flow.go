@@ -93,6 +93,9 @@ type borrowReturnTarget struct {
 }
 
 type borrowFlowAnalyzer struct {
+	// Selecting a storage place does not read the named root's value. Other
+	// expressions inside its selectors remain ordinary reads.
+	ownerReadPlace      *ast.Expression
 	analyzer            *analyzer
 	module              *moduleScope
 	function            *ast.Function
@@ -423,7 +426,7 @@ func (f *borrowFlowAnalyzer) evaluateExpression(expression *ast.Expression, envi
 		f.callBorrows = append(f.callBorrows, owner)
 		defer func() { f.callBorrows = f.callBorrows[:base] }()
 		for _, argument := range expression.Children[1:] {
-			if _, reachable := f.evaluateExpression(argument, environment); !reachable {
+			if _, reachable := f.evaluateConstructorMetadata(argument, expression.Children[0], environment); !reachable {
 				return borrowValueState{}, false
 			}
 		}
@@ -449,6 +452,15 @@ func (f *borrowFlowAnalyzer) evaluateExpression(expression *ast.Expression, envi
 			}, true
 		}
 		return borrowValueState{}, true
+	case syntax.KindFieldExpr:
+		// Fixed-array length is type metadata, including while an exclusive
+		// element borrow evaluates its index. It does not read array storage.
+		if expression.Text == "len" && len(expression.Children) == 1 {
+			if _, _, array := hir.FixedArrayParts(f.analyzer.expressionTypes[expression.Children[0]]); array {
+				return f.evaluateOwnerPlace(expression.Children[0], environment)
+			}
+		}
+		return f.evaluateChildren(expression.Children, environment)
 	case syntax.KindPath:
 		if variant, ok := optionVariantPath(expression.Text); ok && variant == optionVariantNone {
 			if _, option := hir.OptionElement(f.analyzer.expressionTypes[expression]); option {
@@ -507,6 +519,14 @@ func (f *borrowFlowAnalyzer) evaluateExpression(expression *ast.Expression, envi
 			return f.evaluateExpression(expression.Children[0], environment)
 		}
 		return f.evaluateChildren(expression.Children, environment)
+	case syntax.KindCast:
+		value, reachable := f.evaluateChildren(expression.Children, environment)
+		if !f.expressionReturnsBorrow(expression) {
+			// Taking the address still checks safe borrow creation, but a raw
+			// pointer result is not a retained safe reference or call loan.
+			return borrowValueState{}, reachable
+		}
+		return value, reachable
 	case syntax.KindSlice:
 		return f.evaluateSubview(expression, environment)
 	case syntax.KindIndex:
@@ -545,8 +565,14 @@ func (f *borrowFlowAnalyzer) evaluateExpression(expression *ast.Expression, envi
 				return borrowValueState{known: false}, true
 			}
 			argumentValues := make([]borrowValueState, 0, 3)
-			for _, argument := range expression.Children[1:] {
-				value, reachable := f.evaluateExpression(argument, environment)
+			for index, argument := range expression.Children[1:] {
+				var value borrowValueState
+				var reachable bool
+				if index == 0 {
+					value, reachable = f.evaluateExpression(argument, environment)
+				} else {
+					value, reachable = f.evaluateConstructorMetadata(argument, expression.Children[1], environment)
+				}
 				if !reachable {
 					return borrowValueState{}, false
 				}

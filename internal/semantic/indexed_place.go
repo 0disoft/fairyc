@@ -166,7 +166,7 @@ func (f *borrowFlowAnalyzer) evaluateArrayPlace(expression, selected *ast.Expres
 	if owner == nil {
 		return borrowValueState{known: false}, true
 	}
-	if _, reachable := f.evaluateExpression(parent, environment); !reachable {
+	if _, reachable := f.evaluateOwnerPlace(parent, environment); !reachable {
 		return borrowValueState{}, false
 	}
 	kind := "shared"

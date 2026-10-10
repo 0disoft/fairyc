@@ -35,7 +35,7 @@ func (f *borrowFlowAnalyzer) evaluateFieldAssignment(statement *ast.Statement, e
 	}
 	root := fieldAssignmentRoot(statement.Target)
 	binding := f.analyzer.resolved[root]
-	if _, reachable := f.evaluateExpression(statement.Target, environment); !reachable {
+	if _, reachable := f.evaluateOwnerPlace(statement.Target, environment); !reachable {
 		return false
 	}
 	// A selected reference receiver still owns its loan until the final store,

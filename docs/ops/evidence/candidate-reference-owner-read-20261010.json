@@ -1,0 +1,899 @@
+{
+  "schema": "fairyc.reference-ordinary-owner-read/v1",
+  "passed": true,
+  "scope": "Correct Go Stage 0 ordinary owner read checking before candidate parity: live exclusive root loans reject direct scalar, array and aggregate-field reads, aliases, tagged retention and call-held selector reads. Shared and expired loans, reads through the same reference and fixed-array length metadata remain admitted. Storage-place selection does not produce duplicate read/write errors; resource moves preserve E2105.",
+  "sourceTruth": [
+    "docs/language/0002-borrows-and-return-origins.md"
+  ],
+  "identity": {
+    "compiler": {
+      "path": ".cache/candidate-tagged/owner-access-unit/compiler.exe",
+      "sha256": "d20f890fe58b487988d69acf2ecde153f10fc89a95efa4100dff91b21cb4e4c7"
+    },
+    "candidate": {
+      "path": "examples/lexer_candidate/build/lexer-candidate.exe",
+      "sha256": "df753d8a9d91ff1453fd9266f3919a23bc628bfc4c8fd06190a4ba2fce592b93"
+    },
+    "sources": [
+      {
+        "path": "internal/semantic/borrow_flow.go",
+        "sha256": "0ca1c9ffbaf5ac9fc29f34e8bc543deac546abfb9f0092eb0fdebde2892f7bed"
+      },
+      {
+        "path": "internal/semantic/exclusive_subview.go",
+        "sha256": "6feb5af4e231b686885f0f26635f6bc847f1eaab5767de90799e3588e99a4e53"
+      },
+      {
+        "path": "internal/semantic/field_store_flow.go",
+        "sha256": "83aa9649071a7e858fcdd035786df7911f0a80acdb3aa396f508b9c577724712"
+      },
+      {
+        "path": "internal/semantic/indexed_place.go",
+        "sha256": "33093f880a63c1ac7fe46395c450f38b2fdd763d830a456df32ac656a10a2e1c"
+      },
+      {
+        "path": "internal/semantic/array_field_views.go",
+        "sha256": "1d4dda159d7e5dabbfe766d6f937871f3eb3e4e69841167fb78b27657ac337c8"
+      },
+      {
+        "path": "internal/semantic/ordinary_owner_read_test.go",
+        "sha256": "7b9fe479c1865da4edb0a0fddf81e0ce3c62bb8a5f3f27155a46c055f0b84ccd"
+      }
+    ],
+    "integrationTest": {
+      "path": "internal/compiler/nested_field_store_test.go",
+      "sha256": "eed07dcb42086de7a95a8f03b13f90154d904e4a00acd73348199f2bf85116f2"
+    }
+  },
+  "baselineGo": {
+    "cases": 18,
+    "missingReadRejections": 7,
+    "output": "--- FAIL: TestOrdinaryOwnerReadBorrowLifetime (0.00s)\n    --- FAIL: TestOrdinaryOwnerReadBorrowLifetime/scalar_live (0.00s)\n        ordinary_owner_read_test.go:39: diagnostics=[] unsupported=[]\n    --- FAIL: TestOrdinaryOwnerReadBorrowLifetime/alias_retained (0.00s)\n        ordinary_owner_read_test.go:39: diagnostics=[] unsupported=[]\n    --- FAIL: TestOrdinaryOwnerReadBorrowLifetime/tagged_loan (0.00s)\n        ordinary_owner_read_test.go:39: diagnostics=[] unsupported=[]\n    --- FAIL: TestOrdinaryOwnerReadBorrowLifetime/call_held (0.00s)\n        ordinary_owner_read_test.go:39: diagnostics=[] unsupported=[]\n    --- FAIL: TestOrdinaryOwnerReadBorrowLifetime/array_index (0.00s)\n        ordinary_owner_read_test.go:39: diagnostics=[] unsupported=[]\n    --- FAIL: TestOrdinaryOwnerReadBorrowLifetime/struct_field (0.00s)\n        ordinary_owner_read_test.go:39: diagnostics=[] unsupported=[]\n    --- FAIL: TestOrdinaryOwnerReadBorrowLifetime/resource_field (0.00s)\n        ordinary_owner_read_test.go:39: diagnostics=[] unsupported=[]\nFAIL\nFAIL\tgithub.com/0disoft/fairyc/internal/semantic\t0.036s\nFAIL\n"
+  },
+  "selectedSemanticTests": {
+    "exit": 0,
+    "cases": 25,
+    "sourceSpanAssertions": true
+  },
+  "fullSemanticTests": {
+    "exit": 0,
+    "command": "bun tools/run-go.ts test ./internal/semantic -count=1"
+  },
+  "freshCompilerBuild": {
+    "exit": 0,
+    "command": "bun tools/run-go.ts build -o .cache/candidate-tagged/owner-access-unit/compiler.exe ./cmd/fairyc"
+  },
+  "freshGoCLI": {
+    "cases": 25,
+    "allExpectedExitAndSingleCode": true
+  },
+  "fixtures": [
+    {
+      "index": 0,
+      "name": "scalar live",
+      "source": "module main;fn void f(){var i32 x=1;let ref mut i32 p=ref mut x;discard x;discard *p;}",
+      "provider": "",
+      "expected": 3,
+      "code": "E2101",
+      "reference": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:1:73: E2101: Access conflicts with an active shared or mutable loan. [bytes 72..73]\n  last-use: main.fy:1:84 [bytes 83..84]\n  loan: main.fy:1:55 [bytes 54..63]\n"
+      }
+    },
+    {
+      "index": 1,
+      "name": "last use",
+      "source": "module main;fn void f(){var i32 x=1;let ref mut i32 p=ref mut x;discard *p;discard x;}",
+      "provider": "",
+      "expected": 0,
+      "code": "",
+      "reference": {
+        "exit": 0,
+        "stdout": "semantics ok: main.fy (typed HIR: 1 function(s))\n",
+        "stderr": ""
+      }
+    },
+    {
+      "index": 2,
+      "name": "shared read",
+      "source": "module main;fn void f(){var i32 x=1;let ref i32 p=ref x;discard x;discard *p;}",
+      "provider": "",
+      "expected": 0,
+      "code": "",
+      "reference": {
+        "exit": 0,
+        "stdout": "semantics ok: main.fy (typed HIR: 1 function(s))\n",
+        "stderr": ""
+      }
+    },
+    {
+      "index": 3,
+      "name": "own reference read",
+      "source": "module main;fn void f(){var i32 x=1;let ref mut i32 p=ref mut x;discard *p;}",
+      "provider": "",
+      "expected": 0,
+      "code": "",
+      "reference": {
+        "exit": 0,
+        "stdout": "semantics ok: main.fy (typed HIR: 1 function(s))\n",
+        "stderr": ""
+      }
+    },
+    {
+      "index": 4,
+      "name": "alias retained",
+      "source": "module main;fn void f(){var i32 x=1;let ref mut i32 p=ref mut x;let ref mut i32 q=p;discard x;discard *q;}",
+      "provider": "",
+      "expected": 3,
+      "code": "E2101",
+      "reference": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:1:93: E2101: Access conflicts with an active shared or mutable loan. [bytes 92..93]\n  last-use: main.fy:1:104 [bytes 103..104]\n  loan: main.fy:1:55 [bytes 54..63]\n"
+      }
+    },
+    {
+      "index": 5,
+      "name": "unrelated root",
+      "source": "module main;fn void f(){var i32 x=1;var i32 y=2;let ref mut i32 p=ref mut x;discard y;discard *p;}",
+      "provider": "",
+      "expected": 0,
+      "code": "",
+      "reference": {
+        "exit": 0,
+        "stdout": "semantics ok: main.fy (typed HIR: 1 function(s))\n",
+        "stderr": ""
+      }
+    },
+    {
+      "index": 6,
+      "name": "tagged loan",
+      "source": "module main;fn void f(){var i32 x=1;let Option<ref mut i32> p=.some(ref mut x);discard x;switch(p){case .some(q):{discard *q;}case .none:{}};}",
+      "provider": "",
+      "expected": 3,
+      "code": "E2101",
+      "reference": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:1:88: E2101: Access conflicts with an active shared or mutable loan. [bytes 87..88]\n  last-use: main.fy:1:97 [bytes 96..97]\n  loan: main.fy:1:69 [bytes 68..77]\n"
+      }
+    },
+    {
+      "index": 7,
+      "name": "call held",
+      "source": "module main;fn void both(ref mut i32 p,i32 n){}fn void f(){var i32 x=1;both(ref mut x,x);}",
+      "provider": "",
+      "expected": 3,
+      "code": "E2101",
+      "reference": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:1:87: E2101: Access conflicts with an active shared or mutable loan. [bytes 86..87]\n  last-use: main.fy:1:87 [bytes 86..87]\n  loan: main.fy:1:77 [bytes 76..85]\n"
+      }
+    },
+    {
+      "index": 8,
+      "name": "shared call held",
+      "source": "module main;fn void both(ref i32 p,i32 n){}fn void f(){var i32 x=1;both(ref x,x);}",
+      "provider": "",
+      "expected": 0,
+      "code": "",
+      "reference": {
+        "exit": 0,
+        "stdout": "semantics ok: main.fy (typed HIR: 2 function(s))\n",
+        "stderr": ""
+      }
+    },
+    {
+      "index": 9,
+      "name": "array index",
+      "source": "module main;fn void f(){var u8[2] x=[1,2];let ref mut u8[] p=ref mut x;discard x[0];discard p[0];}",
+      "provider": "",
+      "expected": 3,
+      "code": "E2101",
+      "reference": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:1:80: E2101: Access conflicts with an active shared or mutable loan. [bytes 79..80]\n  last-use: main.fy:1:93 [bytes 92..93]\n  loan: main.fy:1:62 [bytes 61..70]\n"
+      }
+    },
+    {
+      "index": 10,
+      "name": "struct field",
+      "source": "module main;struct S{i32 n;}fn void f(){var S x=S{.n=1};let ref mut S p=ref mut x;discard x.n;discard p.n;}",
+      "provider": "",
+      "expected": 3,
+      "code": "E2101",
+      "reference": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:1:91: E2101: Access conflicts with an active shared or mutable loan. [bytes 90..91]\n  last-use: main.fy:1:103 [bytes 102..103]\n  loan: main.fy:1:73 [bytes 72..81]\n"
+      }
+    },
+    {
+      "index": 11,
+      "name": "resource field",
+      "source": "module main;resource R{i32 n;cleanup{}}fn void f(){var R x=R{.n=1};let ref mut R p=ref mut x;discard x.n;discard p.n;}",
+      "provider": "",
+      "expected": 3,
+      "code": "E2101",
+      "reference": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:1:102: E2101: Access conflicts with an active shared or mutable loan. [bytes 101..102]\n  last-use: main.fy:1:114 [bytes 113..114]\n  loan: main.fy:1:84 [bytes 83..92]\n"
+      }
+    },
+    {
+      "index": 12,
+      "name": "move uses move diagnostic",
+      "source": "module main;resource R{cleanup{}}fn void take(R r){}fn void f(){let R x=R{};let ref R p=ref x;take(x);discard p;}",
+      "provider": "",
+      "expected": 3,
+      "code": "E2105",
+      "reference": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:1:100: E2105: Borrow outlives or moves its owner. [bytes 99..100]\n  last-use: main.fy:1:111 [bytes 110..111]\n  loan: main.fy:1:89 [bytes 88..93]\n  owner: main.fy:1:71 [bytes 70..71]\n"
+      }
+    },
+    {
+      "index": 13,
+      "name": "mutable move uses move diagnostic",
+      "source": "module main;resource R{cleanup{}}fn void take(R r){}fn void f(){var R x=R{};let ref mut R p=ref mut x;take(x);discard p;}",
+      "provider": "",
+      "expected": 3,
+      "code": "E2105",
+      "reference": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:1:108: E2105: Borrow outlives or moves its owner. [bytes 107..108]\n  last-use: main.fy:1:119 [bytes 118..119]\n  loan: main.fy:1:93 [bytes 92..101]\n  owner: main.fy:1:71 [bytes 70..71]\n"
+      }
+    },
+    {
+      "index": 14,
+      "name": "field store single diagnostic",
+      "source": "module main;struct S{i32 n;}fn void f(){var S x=S{.n=1};let ref mut S p=ref mut x;x.n=2;discard p.n;}",
+      "provider": "",
+      "expected": 3,
+      "code": "E2101",
+      "reference": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:1:83: E2101: Access conflicts with an active shared or mutable loan. [bytes 82..85]\n  last-use: main.fy:1:97 [bytes 96..97]\n  loan: main.fy:1:73 [bytes 72..81]\n"
+      }
+    },
+    {
+      "index": 15,
+      "name": "array store single diagnostic",
+      "source": "module main;fn void f(){var u8[2] x=[1,2];let ref mut u8[] p=ref mut x;x[0]=3;discard p[0];}",
+      "provider": "",
+      "expected": 3,
+      "code": "E2101",
+      "reference": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:1:72: E2101: Access conflicts with an active shared or mutable loan. [bytes 71..75]\n  last-use: main.fy:1:87 [bytes 86..87]\n  loan: main.fy:1:62 [bytes 61..70]\n"
+      }
+    },
+    {
+      "index": 16,
+      "name": "new borrow single diagnostic",
+      "source": "module main;fn void read(ref i32 p){}fn void f(){var i32 x=1;let ref mut i32 p=ref mut x;read(ref x);discard *p;}",
+      "provider": "",
+      "expected": 3,
+      "code": "E2101",
+      "reference": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:1:95: E2101: Access conflicts with an active shared or mutable loan. [bytes 94..99]\n  last-use: main.fy:1:111 [bytes 110..111]\n  loan: main.fy:1:80 [bytes 79..88]\n"
+      }
+    },
+    {
+      "index": 17,
+      "name": "store own reference",
+      "source": "module main;fn void f(){var i32 x=1;let ref mut i32 p=ref mut x;*p=*p+1;}",
+      "provider": "",
+      "expected": 0,
+      "code": "",
+      "reference": {
+        "exit": 0,
+        "stdout": "semantics ok: main.fy (typed HIR: 1 function(s))\n",
+        "stderr": ""
+      }
+    },
+    {
+      "index": 18,
+      "name": "new array range borrow single diagnostic",
+      "source": "module main;fn void f(){var u8[2] x=[1,2];let ref mut u8[] p=ref mut x;let ref u8[] q=ref x[..1];discard p[0];discard q[0];}",
+      "provider": "",
+      "expected": 3,
+      "code": "E2101",
+      "reference": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:1:87: E2101: Access conflicts with an active shared or mutable loan. [bytes 86..96]\n  last-use: main.fy:1:106 [bytes 105..106]\n  loan: main.fy:1:62 [bytes 61..70]\n"
+      }
+    },
+    {
+      "index": 19,
+      "name": "selector reads held root",
+      "source": "module main;fn void f(){var u8[2] x=[1,2];let ref mut u8 item=ref mut x[{discard x[0];0}];discard *item;}",
+      "provider": "",
+      "expected": 3,
+      "code": "E2101",
+      "reference": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:1:82: E2101: Access conflicts with an active shared or mutable loan. [bytes 81..82]\n  last-use: main.fy:1:82 [bytes 81..82]\n  loan: main.fy:1:63 [bytes 62..89]\n"
+      }
+    },
+    {
+      "index": 20,
+      "name": "array length metadata",
+      "source": "module main;fn void f(){var u8[2] x=[1,2];let ref mut u8 item=ref mut x[x.len-1];discard *item;}",
+      "provider": "",
+      "expected": 0,
+      "code": "",
+      "reference": {
+        "exit": 0,
+        "stdout": "semantics ok: main.fy (typed HIR: 1 function(s))\n",
+        "stderr": ""
+      }
+    },
+    {
+      "index": 21,
+      "name": "constructor owner metadata",
+      "source": "module main;resource R{ptr mut void data;usize length;cleanup{}}fn void f(){var R x=R{.data=null,.length=0};let p=unsafe{byte_slice::from_raw_parts_mut(ref mut x,x.data,x.length)};discard p;}",
+      "provider": "",
+      "expected": 0,
+      "code": "",
+      "reference": {
+        "exit": 0,
+        "stdout": "semantics ok: main.fy (typed HIR: 1 function(s))\n",
+        "stderr": ""
+      }
+    },
+    {
+      "index": 22,
+      "name": "constructor effectful read",
+      "source": "module main;resource R{ptr mut void data;usize length;cleanup{}}fn void f(){var R x=R{.data=null,.length=0};let p=unsafe{byte_slice::from_raw_parts_mut(ref mut x,x.data,{discard x.length;0})};discard p;}",
+      "provider": "",
+      "expected": 3,
+      "code": "E2101",
+      "reference": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:1:179: E2101: Access conflicts with an active shared or mutable loan. [bytes 178..179]\n  last-use: main.fy:1:179 [bytes 178..179]\n  loan: main.fy:1:153 [bytes 152..161]\n"
+      }
+    },
+    {
+      "index": 23,
+      "name": "raw cast is not a safe call loan",
+      "source": "module main;resource R{usize length;cleanup{}}unsafe extern C fn u32 probe(ptr mut void data,usize length);fn void f(){var R x=R{.length=0};discard unsafe{probe(ref mut x as ptr mut void,x.length)};}",
+      "provider": "",
+      "expected": 0,
+      "code": "",
+      "reference": {
+        "exit": 0,
+        "stdout": "semantics ok: main.fy (typed HIR: 1 function(s))\n",
+        "stderr": ""
+      }
+    },
+    {
+      "index": 24,
+      "name": "raw cast checks borrow creation",
+      "source": "module main;resource R{usize length;cleanup{}}unsafe extern C fn u32 probe(ptr mut void data,usize length);fn void f(){var R x=R{.length=0};let ref R p=ref x;discard unsafe{probe(ref mut x as ptr mut void,x.length)};discard p;}",
+      "provider": "",
+      "expected": 3,
+      "code": "E2101",
+      "reference": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:1:180: E2101: Access conflicts with an active shared or mutable loan. [bytes 179..188]\n  last-use: main.fy:1:225 [bytes 224..225]\n  loan: main.fy:1:153 [bytes 152..157]\n"
+      }
+    }
+  ],
+  "candidateBaseline": {
+    "compilerSHA256": "d20f890fe58b487988d69acf2ecde153f10fc89a95efa4100dff91b21cb4e4c7",
+    "candidateSHA256": "df753d8a9d91ff1453fd9266f3919a23bc628bfc4c8fd06190a4ba2fce592b93",
+    "count": 25,
+    "matchedExit": 16,
+    "cases": [
+      {
+        "index": 0,
+        "name": "scalar live",
+        "go": {
+          "exit": 3,
+          "stdout": "",
+          "stderr": "main.fy:1:73: E2101: Access conflicts with an active shared or mutable loan. [bytes 72..73]\n  last-use: main.fy:1:84 [bytes 83..84]\n  loan: main.fy:1:55 [bytes 54..63]\n"
+        },
+        "candidate": {
+          "exit": 0,
+          "stdout": "return origins ok\n",
+          "stderr": ""
+        },
+        "sameExit": false
+      },
+      {
+        "index": 1,
+        "name": "last use",
+        "go": {
+          "exit": 0,
+          "stdout": "semantics ok: main.fy (typed HIR: 1 function(s))\n",
+          "stderr": ""
+        },
+        "candidate": {
+          "exit": 0,
+          "stdout": "return origins ok\n",
+          "stderr": ""
+        },
+        "sameExit": true
+      },
+      {
+        "index": 2,
+        "name": "shared read",
+        "go": {
+          "exit": 0,
+          "stdout": "semantics ok: main.fy (typed HIR: 1 function(s))\n",
+          "stderr": ""
+        },
+        "candidate": {
+          "exit": 0,
+          "stdout": "return origins ok\n",
+          "stderr": ""
+        },
+        "sameExit": true
+      },
+      {
+        "index": 3,
+        "name": "own reference read",
+        "go": {
+          "exit": 0,
+          "stdout": "semantics ok: main.fy (typed HIR: 1 function(s))\n",
+          "stderr": ""
+        },
+        "candidate": {
+          "exit": 0,
+          "stdout": "return origins ok\n",
+          "stderr": ""
+        },
+        "sameExit": true
+      },
+      {
+        "index": 4,
+        "name": "alias retained",
+        "go": {
+          "exit": 3,
+          "stdout": "",
+          "stderr": "main.fy:1:93: E2101: Access conflicts with an active shared or mutable loan. [bytes 92..93]\n  last-use: main.fy:1:104 [bytes 103..104]\n  loan: main.fy:1:55 [bytes 54..63]\n"
+        },
+        "candidate": {
+          "exit": 0,
+          "stdout": "return origins ok\n",
+          "stderr": ""
+        },
+        "sameExit": false
+      },
+      {
+        "index": 5,
+        "name": "unrelated root",
+        "go": {
+          "exit": 0,
+          "stdout": "semantics ok: main.fy (typed HIR: 1 function(s))\n",
+          "stderr": ""
+        },
+        "candidate": {
+          "exit": 0,
+          "stdout": "return origins ok\n",
+          "stderr": ""
+        },
+        "sameExit": true
+      },
+      {
+        "index": 6,
+        "name": "tagged loan",
+        "go": {
+          "exit": 3,
+          "stdout": "",
+          "stderr": "main.fy:1:88: E2101: Access conflicts with an active shared or mutable loan. [bytes 87..88]\n  last-use: main.fy:1:97 [bytes 96..97]\n  loan: main.fy:1:69 [bytes 68..77]\n"
+        },
+        "candidate": {
+          "exit": 0,
+          "stdout": "return origins ok\n",
+          "stderr": ""
+        },
+        "sameExit": false
+      },
+      {
+        "index": 7,
+        "name": "call held",
+        "go": {
+          "exit": 3,
+          "stdout": "",
+          "stderr": "main.fy:1:87: E2101: Access conflicts with an active shared or mutable loan. [bytes 86..87]\n  last-use: main.fy:1:87 [bytes 86..87]\n  loan: main.fy:1:77 [bytes 76..85]\n"
+        },
+        "candidate": {
+          "exit": 0,
+          "stdout": "return origins ok\n",
+          "stderr": ""
+        },
+        "sameExit": false
+      },
+      {
+        "index": 8,
+        "name": "shared call held",
+        "go": {
+          "exit": 0,
+          "stdout": "semantics ok: main.fy (typed HIR: 2 function(s))\n",
+          "stderr": ""
+        },
+        "candidate": {
+          "exit": 0,
+          "stdout": "return origins ok\n",
+          "stderr": ""
+        },
+        "sameExit": true
+      },
+      {
+        "index": 9,
+        "name": "array index",
+        "go": {
+          "exit": 3,
+          "stdout": "",
+          "stderr": "main.fy:1:80: E2101: Access conflicts with an active shared or mutable loan. [bytes 79..80]\n  last-use: main.fy:1:93 [bytes 92..93]\n  loan: main.fy:1:62 [bytes 61..70]\n"
+        },
+        "candidate": {
+          "exit": 0,
+          "stdout": "return origins ok\n",
+          "stderr": ""
+        },
+        "sameExit": false
+      },
+      {
+        "index": 10,
+        "name": "struct field",
+        "go": {
+          "exit": 3,
+          "stdout": "",
+          "stderr": "main.fy:1:91: E2101: Access conflicts with an active shared or mutable loan. [bytes 90..91]\n  last-use: main.fy:1:103 [bytes 102..103]\n  loan: main.fy:1:73 [bytes 72..81]\n"
+        },
+        "candidate": {
+          "exit": 0,
+          "stdout": "return origins ok\n",
+          "stderr": ""
+        },
+        "sameExit": false
+      },
+      {
+        "index": 11,
+        "name": "resource field",
+        "go": {
+          "exit": 3,
+          "stdout": "",
+          "stderr": "main.fy:1:102: E2101: Access conflicts with an active shared or mutable loan. [bytes 101..102]\n  last-use: main.fy:1:114 [bytes 113..114]\n  loan: main.fy:1:84 [bytes 83..92]\n"
+        },
+        "candidate": {
+          "exit": 0,
+          "stdout": "return origins ok\n",
+          "stderr": ""
+        },
+        "sameExit": false
+      },
+      {
+        "index": 12,
+        "name": "move uses move diagnostic",
+        "go": {
+          "exit": 3,
+          "stdout": "",
+          "stderr": "main.fy:1:100: E2105: Borrow outlives or moves its owner. [bytes 99..100]\n  last-use: main.fy:1:111 [bytes 110..111]\n  loan: main.fy:1:89 [bytes 88..93]\n  owner: main.fy:1:71 [bytes 70..71]\n"
+        },
+        "candidate": {
+          "exit": 3,
+          "stdout": "",
+          "stderr": "main.fy:1:100: error: E2105 owner moved while borrowed (bytes 99..100)\n  owner: main.fy (bytes 70..71)\n  loan: main.fy (bytes 88..93)\n  last-use: main.fy (bytes 110..111)\n"
+        },
+        "sameExit": true
+      },
+      {
+        "index": 13,
+        "name": "mutable move uses move diagnostic",
+        "go": {
+          "exit": 3,
+          "stdout": "",
+          "stderr": "main.fy:1:108: E2105: Borrow outlives or moves its owner. [bytes 107..108]\n  last-use: main.fy:1:119 [bytes 118..119]\n  loan: main.fy:1:93 [bytes 92..101]\n  owner: main.fy:1:71 [bytes 70..71]\n"
+        },
+        "candidate": {
+          "exit": 3,
+          "stdout": "",
+          "stderr": "main.fy:1:108: error: E2105 owner moved while borrowed (bytes 107..108)\n  owner: main.fy (bytes 70..71)\n  loan: main.fy (bytes 92..101)\n  last-use: main.fy (bytes 118..119)\n"
+        },
+        "sameExit": true
+      },
+      {
+        "index": 14,
+        "name": "field store single diagnostic",
+        "go": {
+          "exit": 3,
+          "stdout": "",
+          "stderr": "main.fy:1:83: E2101: Access conflicts with an active shared or mutable loan. [bytes 82..85]\n  last-use: main.fy:1:97 [bytes 96..97]\n  loan: main.fy:1:73 [bytes 72..81]\n"
+        },
+        "candidate": {
+          "exit": 3,
+          "stdout": "",
+          "stderr": "main.fy:1:83: error: E2101 borrow conflicts with live loan (bytes 82..85)\n  loan: main.fy (bytes 72..81)\n  last-use: main.fy (bytes 96..97)\n"
+        },
+        "sameExit": true
+      },
+      {
+        "index": 15,
+        "name": "array store single diagnostic",
+        "go": {
+          "exit": 3,
+          "stdout": "",
+          "stderr": "main.fy:1:72: E2101: Access conflicts with an active shared or mutable loan. [bytes 71..75]\n  last-use: main.fy:1:87 [bytes 86..87]\n  loan: main.fy:1:62 [bytes 61..70]\n"
+        },
+        "candidate": {
+          "exit": 3,
+          "stdout": "",
+          "stderr": "main.fy:1:72: error: E2101 borrow conflicts with live loan (bytes 71..75)\n  loan: main.fy (bytes 61..70)\n  last-use: main.fy (bytes 86..87)\n"
+        },
+        "sameExit": true
+      },
+      {
+        "index": 16,
+        "name": "new borrow single diagnostic",
+        "go": {
+          "exit": 3,
+          "stdout": "",
+          "stderr": "main.fy:1:95: E2101: Access conflicts with an active shared or mutable loan. [bytes 94..99]\n  last-use: main.fy:1:111 [bytes 110..111]\n  loan: main.fy:1:80 [bytes 79..88]\n"
+        },
+        "candidate": {
+          "exit": 3,
+          "stdout": "",
+          "stderr": "main.fy:1:95: error: E2101 borrow conflicts with live loan (bytes 94..99)\n  loan: main.fy (bytes 79..88)\n  last-use: main.fy (bytes 110..111)\n"
+        },
+        "sameExit": true
+      },
+      {
+        "index": 17,
+        "name": "store own reference",
+        "go": {
+          "exit": 0,
+          "stdout": "semantics ok: main.fy (typed HIR: 1 function(s))\n",
+          "stderr": ""
+        },
+        "candidate": {
+          "exit": 0,
+          "stdout": "return origins ok\n",
+          "stderr": ""
+        },
+        "sameExit": true
+      },
+      {
+        "index": 18,
+        "name": "new array range borrow single diagnostic",
+        "go": {
+          "exit": 3,
+          "stdout": "",
+          "stderr": "main.fy:1:87: E2101: Access conflicts with an active shared or mutable loan. [bytes 86..96]\n  last-use: main.fy:1:106 [bytes 105..106]\n  loan: main.fy:1:62 [bytes 61..70]\n"
+        },
+        "candidate": {
+          "exit": 3,
+          "stdout": "",
+          "stderr": "main.fy:1:87: error: E2101 borrow conflicts with live loan (bytes 86..96)\n  loan: main.fy (bytes 61..70)\n  last-use: main.fy (bytes 105..106)\n"
+        },
+        "sameExit": true
+      },
+      {
+        "index": 19,
+        "name": "selector reads held root",
+        "go": {
+          "exit": 3,
+          "stdout": "",
+          "stderr": "main.fy:1:82: E2101: Access conflicts with an active shared or mutable loan. [bytes 81..82]\n  last-use: main.fy:1:82 [bytes 81..82]\n  loan: main.fy:1:63 [bytes 62..89]\n"
+        },
+        "candidate": {
+          "exit": 0,
+          "stdout": "return origins ok\n",
+          "stderr": ""
+        },
+        "sameExit": false
+      },
+      {
+        "index": 20,
+        "name": "array length metadata",
+        "go": {
+          "exit": 0,
+          "stdout": "semantics ok: main.fy (typed HIR: 1 function(s))\n",
+          "stderr": ""
+        },
+        "candidate": {
+          "exit": 0,
+          "stdout": "return origins ok\n",
+          "stderr": ""
+        },
+        "sameExit": true
+      },
+      {
+        "index": 21,
+        "name": "constructor owner metadata",
+        "go": {
+          "exit": 0,
+          "stdout": "semantics ok: main.fy (typed HIR: 1 function(s))\n",
+          "stderr": ""
+        },
+        "candidate": {
+          "exit": 0,
+          "stdout": "return origins ok\n",
+          "stderr": ""
+        },
+        "sameExit": true
+      },
+      {
+        "index": 22,
+        "name": "constructor effectful read",
+        "go": {
+          "exit": 3,
+          "stdout": "",
+          "stderr": "main.fy:1:179: E2101: Access conflicts with an active shared or mutable loan. [bytes 178..179]\n  last-use: main.fy:1:179 [bytes 178..179]\n  loan: main.fy:1:153 [bytes 152..161]\n"
+        },
+        "candidate": {
+          "exit": 0,
+          "stdout": "return origins ok\n",
+          "stderr": ""
+        },
+        "sameExit": false
+      },
+      {
+        "index": 23,
+        "name": "raw cast is not a safe call loan",
+        "go": {
+          "exit": 0,
+          "stdout": "semantics ok: main.fy (typed HIR: 1 function(s))\n",
+          "stderr": ""
+        },
+        "candidate": {
+          "exit": 0,
+          "stdout": "return origins ok\n",
+          "stderr": ""
+        },
+        "sameExit": true
+      },
+      {
+        "index": 24,
+        "name": "raw cast checks borrow creation",
+        "go": {
+          "exit": 3,
+          "stdout": "",
+          "stderr": "main.fy:1:180: E2101: Access conflicts with an active shared or mutable loan. [bytes 179..188]\n  last-use: main.fy:1:225 [bytes 224..225]\n  loan: main.fy:1:153 [bytes 152..157]\n"
+        },
+        "candidate": {
+          "exit": 3,
+          "stdout": "",
+          "stderr": "main.fy:1:180: error: E2101 borrow conflicts with live loan (bytes 179..188)\n  loan: main.fy (bytes 152..157)\n  last-use: main.fy (bytes 224..225)\n"
+        },
+        "sameExit": true
+      }
+    ]
+  },
+  "selectedCompilerTest": {
+    "exit": 0,
+    "roots": [
+      "TestNestedFieldStoreReferenceSelection",
+      "TestCopiedMutableStructForMIR",
+      "TestPrivateVectorWorkspaceCachePartialHits"
+    ],
+    "receipt": {
+      "path": ".cache/candidate-tagged/owner-access-unit/compiler-selected-final.jsonl",
+      "sha256": "449b576cb41f0f338d33003cbd1322d02103e26434cfac23fae01ea01cab264e"
+    }
+  },
+  "broaderCompilerTest": {
+    "exit": 1,
+    "command": "bun tools/run-go.ts test ./internal/compiler -count=1 -json",
+    "receipt": {
+      "path": ".cache/candidate-tagged/owner-access-unit/compiler-full-final.jsonl",
+      "sha256": "cee1c33a096e869af39884dd5ede704dc025bcb444a27a5fc123c9cf9293e1bd"
+    },
+    "passedTestEvents": 1625,
+    "failedRoots": [
+      "TestFieldStoreAdmissionBoundaries",
+      "TestNestedFieldStoreReferenceSelection",
+      "TestPrivateVectorSDKCandidateBudgetReporterCorpus",
+      "TestPrivateVectorSDKCandidateBudgetReporterLimits",
+      "TestPrivateVectorSDKCandidateCBOMWorkLimit",
+      "TestPrivateVectorSDKCandidateCCombinedLimits",
+      "TestPrivateVectorSDKCandidateCLexemeWorkLimit",
+      "TestPrivateVectorSDKCandidateCNumberWorkLimit",
+      "TestPrivateVectorSDKCandidateCPreviousRevisionKeywordParity",
+      "TestPrivateVectorSDKCandidateCScannerLexicalParity",
+      "TestPrivateVectorSDKCandidateCSourceLimit",
+      "TestPrivateVectorSDKCandidateCStringWorkLimit",
+      "TestPrivateVectorSDKCandidateCTriviaWorkLimit",
+      "TestPrivateVectorSDKCandidateConfiguredCByteLimitParity",
+      "TestPrivateVectorSDKCandidateConfiguredCDiagnosticLimitParity",
+      "TestPrivateVectorSDKCandidateDecimalLimitCParity",
+      "TestPrivateVectorSDKCandidateDualScannerNativeParity",
+      "TestPrivateVectorSDKCandidateFairyCookedTokenFailure",
+      "TestPrivateVectorSDKCandidateFairyDiagnosticAllocationFailure",
+      "TestPrivateVectorSDKCandidateFairyDiagnosticGrowthFailure",
+      "TestPrivateVectorSDKCandidateFairyFirstAllocationFailure",
+      "TestPrivateVectorSDKCandidateFairyScannerAllocationSweep",
+      "TestPrivateVectorSDKCandidateFairyTokenGrowthFailure",
+      "TestPrivateVectorSDKCandidateIndependentCScannerGeometricDiagnostics",
+      "TestPrivateVectorSDKCandidateIndependentCScannerGeometricTokens",
+      "TestPrivateVectorSDKCandidateRealScannerNativeParity",
+      "TestPrivateVectorSDKCandidateScannerCanonicalCallParity",
+      "TestPrivateVectorSDKCandidateScannerDebugMapLayout",
+      "TestPrivateVectorSDKCandidateScannerLibraryMembers",
+      "TestPrivateVectorSDKCandidateUnusedNativeFootprint",
+      "TestPrivateVectorSDKCandidateUnusedSourceProducesSameMIRAndC"
+    ]
+  },
+  "existingFailures": {
+    "roots": [
+      "TestFieldStoreAdmissionBoundaries",
+      "TestPrivateVectorSDKCandidateBudgetReporterCorpus",
+      "TestPrivateVectorSDKCandidateBudgetReporterLimits",
+      "TestPrivateVectorSDKCandidateCBOMWorkLimit",
+      "TestPrivateVectorSDKCandidateCCombinedLimits",
+      "TestPrivateVectorSDKCandidateCLexemeWorkLimit",
+      "TestPrivateVectorSDKCandidateCNumberWorkLimit",
+      "TestPrivateVectorSDKCandidateCPreviousRevisionKeywordParity",
+      "TestPrivateVectorSDKCandidateCScannerLexicalParity",
+      "TestPrivateVectorSDKCandidateCSourceLimit",
+      "TestPrivateVectorSDKCandidateCStringWorkLimit",
+      "TestPrivateVectorSDKCandidateCTriviaWorkLimit",
+      "TestPrivateVectorSDKCandidateConfiguredCByteLimitParity",
+      "TestPrivateVectorSDKCandidateConfiguredCDiagnosticLimitParity",
+      "TestPrivateVectorSDKCandidateDecimalLimitCParity",
+      "TestPrivateVectorSDKCandidateDualScannerNativeParity",
+      "TestPrivateVectorSDKCandidateFairyCookedTokenFailure",
+      "TestPrivateVectorSDKCandidateFairyDiagnosticAllocationFailure",
+      "TestPrivateVectorSDKCandidateFairyDiagnosticGrowthFailure",
+      "TestPrivateVectorSDKCandidateFairyFirstAllocationFailure",
+      "TestPrivateVectorSDKCandidateFairyScannerAllocationSweep",
+      "TestPrivateVectorSDKCandidateFairyTokenGrowthFailure",
+      "TestPrivateVectorSDKCandidateIndependentCScannerGeometricDiagnostics",
+      "TestPrivateVectorSDKCandidateIndependentCScannerGeometricTokens",
+      "TestPrivateVectorSDKCandidateRealScannerNativeParity",
+      "TestPrivateVectorSDKCandidateScannerCanonicalCallParity",
+      "TestPrivateVectorSDKCandidateScannerDebugMapLayout",
+      "TestPrivateVectorSDKCandidateScannerLibraryMembers",
+      "TestPrivateVectorSDKCandidateUnusedNativeFootprint",
+      "TestPrivateVectorSDKCandidateUnusedSourceProducesSameMIRAndC"
+    ],
+    "count": 30,
+    "baselineReceipt": {
+      "path": ".cache/candidate-tagged/owner-access-unit/compiler-baseline.jsonl",
+      "sha256": "a1d3787dab6246b8a0ec8c4b218bead3a059dd9b04288fce490822e1e7557599"
+    },
+    "baselineSource": "HEAD semantic implementation; exact working bytes restored afterward",
+    "causes": [
+      "Obsolete nonplain-owner field-store rejection: existing implementation already admits an inline array sibling.",
+      "Candidate SDK fixture module graph is missing a visible module; related native/scanner checks fail as well."
+    ]
+  },
+  "initialIntegrationFailure": {
+    "observed": true,
+    "causes": [
+      "New owner reads rejected direct data/length metadata during closed storage construction.",
+      "Raw pointer cast results incorrectly propagated temporary safe loans into ordinary extern-C call arguments."
+    ],
+    "resolution": "Scope metadata selection to direct projections of the same owner; cast evaluation still checks borrow creation but only safe-borrow results carry safe-loan state."
+  },
+  "candidatePending": [
+    "Nine corpus cases still accept competing owner reads; wire equivalent guarded checks and reobserve exact diagnostic/related spans."
+  ],
+  "skipped": {
+    "release": "Deferred batch validation",
+    "linux": "Deferred batch validation"
+  },
+  "publicCLIBehaviorChanged": true,
+  "publicAPIChanged": false,
+  "sdkABIChanged": false,
+  "dbChanged": false,
+  "ciRunnerChanged": false,
+  "pushed": false
+}

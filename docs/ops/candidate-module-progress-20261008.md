@@ -3612,3 +3612,39 @@ Linux validation remain deferred. Complete ordinary owner access, general
 move state, cleanup, borrow MIR/C/runtime, unsafe provenance, full dispatcher
 and stage1/stage2 remain pending. Public CLI, private API, SDK ABI, DB and CI
 are unchanged; no push.
+
+## Go reference ordinary owner-read correction (2026-10-10)
+
+The borrow language contract rejects competing access while an exclusive
+loan is live. The Go reference was missing ordinary root reads: seven new
+baseline cases accepted scalar, aliased/tagged, call-held, array and aggregate
+field reads. The reference now checks retained and pending mutable owner
+loans in its path-access analysis. Storage-place roots are selected without
+being treated as value reads, while selector callbacks still check reads.
+Fixed-array length is type metadata. Existing descendant checks and E2105
+resource-move diagnostics retain their behavior without duplicate errors.
+
+All 25 selected boundary cases and the complete semantic package passed.
+Exact source spans are asserted for scalar read, borrow and last use. A fresh
+Go CLI build checks all 25 fixtures with their expected exit and sole error
+code. Selected compiler checks pass for reference-selection execution, copied
+mutable struct MIR and memory/disk partial-cache fallback.
+Initial integration failures exposed direct owner metadata projections during
+closed storage construction and raw pointer casts carrying safe call loans.
+Metadata selection is now limited to direct fields of the same owner; blocks
+and effectful arguments still check reads. Address casts check borrow creation
+but raw results do not carry safe-loan state into later arguments. The reference
+selection test now reads the live second owner through its selected reference.
+The broader compiler run has 1,625 passed test events and 31 failed roots.
+Thirty failed roots also reproduce with unchanged HEAD semantic sources:
+the obsolete nonplain-owner rejection and SDK module-graph/native fixtures.
+The remaining root was the reference-selection test and its corrected rerun
+passes. These existing failures remain pending; the full suite is not green.
+Evidence:
+`docs/ops/evidence/candidate-reference-owner-read-20261010.json`.
+
+This corrects Go first. The unchanged Fairy candidate still accepts nine
+competing-read cases, including held selectors and effectful raw metadata.
+Candidate guard wiring and exact diagnostic parity are next. Public CLI
+acceptance changes for invalid competing reads; public API, SDK ABI, DB and
+CI are unchanged. Release/Linux remain deferred; no push.

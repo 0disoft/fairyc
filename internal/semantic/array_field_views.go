@@ -71,7 +71,7 @@ func (f *borrowFlowAnalyzer) evaluateArrayFieldPlace(expression, selected *ast.E
 		}
 		value, reachable = f.evaluateFieldBorrowRoot(&borrow, root, environment)
 	} else {
-		_, reachable = f.evaluateExpression(root, environment)
+		_, reachable = f.evaluateOwnerPlace(root, environment)
 		kind := "shared"
 		if mutable {
 			kind = "mutable"

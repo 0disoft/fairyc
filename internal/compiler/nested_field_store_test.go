@@ -97,7 +97,7 @@ func TestNestedFieldStoreReferenceSelection(t *testing.T) {
 	const source = `module main;struct Span{i64 start;}struct Token{Span position;}
  fn i32 main(){var Token first=Token{.position=Span{.start=3}};var Token second=Token{.position=Span{.start=7}};var ref mut Token selected=ref mut first;
  selected.position.start+={selected=ref mut second;2};
- assert(first.position.start==5 && second.position.start==7);selected.position.start=9;assert(second.position.start==9);return 42;}`
+ assert(first.position.start==5 && selected.position.start==7);selected.position.start=9;assert(second.position.start==9);return 42;}`
 	result, err := compiler.Check([]semantic.File{parseCompilerFile(t, hir.DefaultPackage, "main.fy", source)})
 	if err != nil || !result.Verified {
 		t.Fatalf("compile: %v %+v", err, result.Semantic)
