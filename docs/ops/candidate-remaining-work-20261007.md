@@ -2314,3 +2314,43 @@ Remaining access edges, general move state, cleanup, borrow MIR/C/runtime,
 unsafe provenance, the full dispatcher and stage1/stage2 remain pending.
 Full candidate release and Linux stay deferred. The private parser append
 signature changed; stable CLI, SDK ABI, DB and CI are unchanged. No push.
+
+## Candidate module move-state checking (2026-10-10)
+
+The Fairy candidate now tracks per-lexical-local move state instead of relying on
+the Go owner flow. New Fairy-only modules `module_unit_move_model`,
+`module_unit_move_walk`, `module_unit_move_control` and `module_unit_moves` mark
+each local Live, Dead or MaybeLive and walk consuming arguments, returns, record
+constructors, Option/Result `switch` arms and `?`, short-circuit operands,
+reachable branch joins, classic scalar `for`/`while` and iteration backedges with
+`break`/`continue`, reassignment restoration and scope transitions.
+
+`--check-return-origins-file` merges these checks into its existing diagnostics as
+E1101 use after move, E1102 second cleanup obligation, E1103 field move out of a
+resource, E1104 inconsistent states at a branch join and E1105 inconsistent states
+at a loop edge. E1103 keeps its field and owner anchors across provider modules;
+E1102 keeps the cleanup receiver declaration anchor. `discard` counts as a read.
+A classic `for` header fixes the loop-header coordinates its E1105 anchor reports,
+and cast type syntax is not traversed as a value.
+
+Non-indexed field assignment now reads its right-hand side before the store
+target, matching Go, so a move in the right-hand side rejects the target read
+with E1101; indexed targets read the receiver and index before the right-hand
+side. The private fact API returns an immutable owned plan validated after the
+source and values are released, under work 1048576, depth 64, facts 16384,
+diagnostics 8192 and 1024 loop edges.
+
+Source checking passed 240 files and 2987 MIR functions and a fresh locked
+Windows development build succeeded. The new 58 CLI fixtures match complete Go
+primary and related spans, two native tests pass (one 58-fixture diagnostics
+check plus one six-owned-fact and exhausted-budget check), and the previous 227
+CLI comparisons pass (195 prior plus 32 held reads); the owner suites keep their
+documented Go differences. Evidence:
+`docs/ops/evidence/candidate-module-move-state-20261010.json`.
+
+Cleanup drop obligations and their effects with MIR/C/runtime wiring, outstanding
+borrow and access edges, unsafe provenance, the full dispatcher and stage1/stage2
+self-hosting, and general move semantics beyond this unit remain pending. Release,
+Linux and the full compiler suite stay deferred; no Go source changed. The stable
+CLI, SDK ABI, DB and CI runner are unchanged; a private candidate API was added.
+No push.

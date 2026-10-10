@@ -191,3 +191,25 @@ pending.
 [Resource loop edges](guide/06-scalar-result-handling-obligations.md#resource-loop-edges)
 <a id="cleanup-body-ownership-checks-unit-21"></a>
 [Cleanup body ownership checks (unit 21)](guide/07-cleanup-body-ownership-checks-unit-21.md#cleanup-body-ownership-checks-unit-21)
+
+## Move-state checking
+
+`--check-return-origins-file` also tracks per-lexical-local move state. Each
+analysis local is Live, Dead or MaybeLive across consuming arguments, returns,
+record constructors, Option/Result `switch` arms and `?`, short-circuit operands,
+reachable branch joins, classic scalar `for`/`while` and iteration backedges with
+`break`/`continue`, reassignment and scope transitions. It reports E1101 use after
+move, E1102 second cleanup obligation, E1103 field move out of a resource, E1104
+inconsistent states at a branch join and E1105 inconsistent states at a loop edge
+beside its origin diagnostics. E1103 carries field and owner anchors across
+provider modules and E1102 keeps the cleanup receiver declaration anchor.
+Non-indexed field assignment reads its right-hand side before the store target, so
+a move there rejects the target read with E1101, while indexed targets read the
+receiver and index first. `discard` counts as a read, a classic `for` header fixes
+the loop-header coordinates for E1105, and cast type syntax is not traversed as a
+value. The private fact API returns an immutable owned plan validated after the
+source and values are released.
+
+Cleanup drop obligations and effects, MIR/C/runtime wiring, outstanding borrow and
+access edges, unsafe provenance, the full dispatcher and stage1/stage2 remain
+pending; Release, Linux and the full compiler suite are deferred.

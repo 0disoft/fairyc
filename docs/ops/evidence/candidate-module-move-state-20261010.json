@@ -1,0 +1,3332 @@
+{
+  "schema": "fairyc.candidate-module-move-state/v1",
+  "passed": true,
+  "sourceTruth": [
+    "docs/language/0001-values-and-resources.md",
+    "internal/semantic/resource_flow.go"
+  ],
+  "identity": {
+    "candidate": {
+      "path": "examples/lexer_candidate/build/lexer-candidate.exe",
+      "sha256": "ceb5390378fcdcd65be038504ab3f54dcb7856d1373d79e2f6d7f1fb02c650d8",
+      "bytes": 5566976
+    },
+    "compiler": {
+      "path": ".cache/candidate-tagged/referent-read-unit/compiler.exe",
+      "sha256": "603959e5839a11b8443be98ef89463f09faf8fb4d2e5169f38a5b2e851257192",
+      "bytes": 17450496
+    },
+    "lock": {
+      "path": "examples/lexer_candidate/fairy.lock",
+      "sha256": "7a951c953e40475fe6e02516cc5b5160f4d6c96465a1d08aecd5beb139afa4b4",
+      "bytes": 1698
+    },
+    "sources": [
+      {
+        "path": "examples/lexer_candidate/src/module_unit_move_model.fy",
+        "sha256": "5c30765f2470d888b40040a894a853c96ac7ef46a993ec5b129e01daf1a82457",
+        "bytes": 7352
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_move_walk.fy",
+        "sha256": "910b6beeaf75485c74742f7d8b1759739932feda9d9bcbd746b492cd7c3675ca",
+        "bytes": 5932
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_move_control.fy",
+        "sha256": "ac2d3827db262658181b6492b21bc12d9d2499d94662486d724b4ebc51daf799",
+        "bytes": 11295
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_moves.fy",
+        "sha256": "da133f971700f7c85db903dc6d425b8df520b1dd765feb3d062a559957f0d4a3",
+        "bytes": 3199
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_origin_check.fy",
+        "sha256": "01c641e25f296fd7abf78729163916045eb2e945e0cd01e60dd069f069890bfe",
+        "bytes": 4851
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_origin_diagnostics.fy",
+        "sha256": "dcd0449ebefe8ce119e85639a303974897f1a3c738b98295aebfc66bfb8f641c",
+        "bytes": 16124
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_cli.fy",
+        "sha256": "317e56de0eb78bfa827655ab338d6a3632866d5a64babf082cb812f23711c33d",
+        "bytes": 10290
+      }
+    ],
+    "test": {
+      "path": "examples/lexer_candidate/tests/module_unit_moves.fy",
+      "sha256": "d0baffae6788b4250b6ebe48462d534a1d0d91d5de22f29d6ebc266b6e20a8e4",
+      "bytes": 31249
+    }
+  },
+  "fixtures": [
+    {
+      "index": 0,
+      "name": "live",
+      "source": "module main;resource Owner{i32 value;cleanup{}}fn Owner make(){return Owner{.value=1};}fn void take(Owner p){}fn void observe(ref Owner p){}fn bool consumed(Owner p){return false;}fn Result<Owner,i32> fallible(){return .ok(make());}fn void f(bool c){var Owner owner=make();observe(ref owner);}",
+      "provider": "",
+      "expected": 0,
+      "reference": {
+        "exit": 0,
+        "stdout": "semantics ok: main.fy (typed HIR: 6 function(s))\n",
+        "stderr": ""
+      }
+    },
+    {
+      "index": 1,
+      "name": "binding transfer",
+      "source": "module main;resource Owner{i32 value;cleanup{}}fn Owner make(){return Owner{.value=1};}fn void take(Owner p){}fn void observe(ref Owner p){}fn bool consumed(Owner p){return false;}fn Result<Owner,i32> fallible(){return .ok(make());}fn void f(bool c){let Owner owner=make();let Owner next=owner;observe(ref owner);}",
+      "provider": "",
+      "expected": 3,
+      "reference": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:1:307: E1101: resource is used after ownership was moved [bytes 306..311]\n  declaration: main.fy:1:261 [bytes 260..265]\n  move: main.fy:1:289 [bytes 288..293]\n"
+      }
+    },
+    {
+      "index": 2,
+      "name": "double call",
+      "source": "module main;resource Owner{i32 value;cleanup{}}fn Owner make(){return Owner{.value=1};}fn void take(Owner p){}fn void observe(ref Owner p){}fn bool consumed(Owner p){return false;}fn Result<Owner,i32> fallible(){return .ok(make());}fn void f(bool c){let Owner owner=make();take(owner);take(owner);}",
+      "provider": "",
+      "expected": 3,
+      "reference": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:1:291: E1101: resource is used after ownership was moved [bytes 290..295]\n  declaration: main.fy:1:261 [bytes 260..265]\n  move: main.fy:1:279 [bytes 278..283]\n"
+      }
+    },
+    {
+      "index": 3,
+      "name": "restore",
+      "source": "module main;resource Owner{i32 value;cleanup{}}fn Owner make(){return Owner{.value=1};}fn void take(Owner p){}fn void observe(ref Owner p){}fn bool consumed(Owner p){return false;}fn Result<Owner,i32> fallible(){return .ok(make());}fn void f(bool c){var Owner owner=make();take(owner);owner=make();observe(ref owner);}",
+      "provider": "",
+      "expected": 0,
+      "reference": {
+        "exit": 0,
+        "stdout": "semantics ok: main.fy (typed HIR: 6 function(s))\n",
+        "stderr": ""
+      }
+    },
+    {
+      "index": 4,
+      "name": "self move",
+      "source": "module main;resource Owner{i32 value;cleanup{}}fn Owner make(){return Owner{.value=1};}fn void take(Owner p){}fn void observe(ref Owner p){}fn bool consumed(Owner p){return false;}fn Result<Owner,i32> fallible(){return .ok(make());}fn void f(bool c){var Owner owner=make();owner=owner;observe(ref owner);}",
+      "provider": "",
+      "expected": 0,
+      "reference": {
+        "exit": 0,
+        "stdout": "semantics ok: main.fy (typed HIR: 6 function(s))\n",
+        "stderr": ""
+      }
+    },
+    {
+      "index": 5,
+      "name": "grouped transfer",
+      "source": "module main;resource Owner{i32 value;cleanup{}}fn Owner make(){return Owner{.value=1};}fn void take(Owner p){}fn void observe(ref Owner p){}fn bool consumed(Owner p){return false;}fn Result<Owner,i32> fallible(){return .ok(make());}fn void f(bool c){let Owner owner=make();let Owner next=(owner);observe(ref owner);}",
+      "provider": "",
+      "expected": 3,
+      "reference": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:1:309: E1101: resource is used after ownership was moved [bytes 308..313]\n  declaration: main.fy:1:261 [bytes 260..265]\n  move: main.fy:1:290 [bytes 289..294]\n"
+      }
+    },
+    {
+      "index": 6,
+      "name": "dead field read",
+      "source": "module main;resource Owner{i32 value;cleanup{}}fn Owner make(){return Owner{.value=1};}fn void take(Owner p){}fn void observe(ref Owner p){}fn bool consumed(Owner p){return false;}fn Result<Owner,i32> fallible(){return .ok(make());}fn void f(bool c){let Owner owner=make();take(owner);discard owner.value;}",
+      "provider": "",
+      "expected": 3,
+      "reference": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:1:294: E1101: resource is used after ownership was moved [bytes 293..298]\n  declaration: main.fy:1:261 [bytes 260..265]\n  move: main.fy:1:279 [bytes 278..283]\n"
+      }
+    },
+    {
+      "index": 7,
+      "name": "branch mismatch",
+      "source": "module main;resource Owner{i32 value;cleanup{}}fn Owner make(){return Owner{.value=1};}fn void take(Owner p){}fn void observe(ref Owner p){}fn bool consumed(Owner p){return false;}fn Result<Owner,i32> fallible(){return .ok(make());}fn void f(bool c){let Owner owner=make();if(c){take(owner);};}",
+      "provider": "",
+      "expected": 3,
+      "reference": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:1:274: E1104: branch join leaves resource ownership path-dependent [bytes 273..292]\n  declaration: main.fy:1:261 [bytes 260..265]\n  move: main.fy:1:285 [bytes 284..289]\n"
+      }
+    },
+    {
+      "index": 8,
+      "name": "both arms consume",
+      "source": "module main;resource Owner{i32 value;cleanup{}}fn Owner make(){return Owner{.value=1};}fn void take(Owner p){}fn void observe(ref Owner p){}fn bool consumed(Owner p){return false;}fn Result<Owner,i32> fallible(){return .ok(make());}fn void f(bool c){let Owner owner=make();if(c){take(owner);}else{take(owner);};}",
+      "provider": "",
+      "expected": 0,
+      "reference": {
+        "exit": 0,
+        "stdout": "semantics ok: main.fy (typed HIR: 6 function(s))\n",
+        "stderr": ""
+      }
+    },
+    {
+      "index": 9,
+      "name": "exited arm",
+      "source": "module main;resource Owner{i32 value;cleanup{}}fn Owner make(){return Owner{.value=1};}fn void take(Owner p){}fn void observe(ref Owner p){}fn bool consumed(Owner p){return false;}fn Result<Owner,i32> fallible(){return .ok(make());}fn void f(bool c){let Owner owner=make();if(c){take(owner);return;};observe(ref owner);}",
+      "provider": "",
+      "expected": 0,
+      "reference": {
+        "exit": 0,
+        "stdout": "semantics ok: main.fy (typed HIR: 6 function(s))\n",
+        "stderr": ""
+      }
+    },
+    {
+      "index": 10,
+      "name": "shadow root",
+      "source": "module main;resource Owner{i32 value;cleanup{}}fn Owner make(){return Owner{.value=1};}fn void take(Owner p){}fn void observe(ref Owner p){}fn bool consumed(Owner p){return false;}fn Result<Owner,i32> fallible(){return .ok(make());}fn void f(bool c){let Owner owner=make();if(c){let Owner owner=make();take(owner);};observe(ref owner);}",
+      "provider": "",
+      "expected": 0,
+      "reference": {
+        "exit": 0,
+        "stdout": "semantics ok: main.fy (typed HIR: 6 function(s))\n",
+        "stderr": ""
+      }
+    },
+    {
+      "index": 11,
+      "name": "existing MaybeLive",
+      "source": "module main;resource Owner{i32 value;cleanup{}}fn Owner make(){return Owner{.value=1};}fn void take(Owner p){}fn void observe(ref Owner p){}fn bool consumed(Owner p){return false;}fn Result<Owner,i32> fallible(){return .ok(make());}fn void f(bool c){let Owner owner=make();if(c){take(owner);};if(c){discard owner.value;};}",
+      "provider": "",
+      "expected": 3,
+      "reference": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:1:274: E1104: branch join leaves resource ownership path-dependent [bytes 273..292]\n  declaration: main.fy:1:261 [bytes 260..265]\n  move: main.fy:1:285 [bytes 284..289]\n"
+      }
+    },
+    {
+      "index": 12,
+      "name": "loop mismatch",
+      "source": "module main;resource Owner{i32 value;cleanup{}}fn Owner make(){return Owner{.value=1};}fn void take(Owner p){}fn void observe(ref Owner p){}fn bool consumed(Owner p){return false;}fn Result<Owner,i32> fallible(){return .ok(make());}fn void f(bool c){var Owner owner=make();while(c){take(owner);}}",
+      "provider": "",
+      "expected": 3,
+      "reference": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:1:274: E1105: loop body changes the resource state required by the next iteration [bytes 273..295]\n  declaration: main.fy:1:261 [bytes 260..265]\n  loop-header: main.fy:1:274 [bytes 273..280]\n  move: main.fy:1:288 [bytes 287..292]\n"
+      }
+    },
+    {
+      "index": 13,
+      "name": "loop restore",
+      "source": "module main;resource Owner{i32 value;cleanup{}}fn Owner make(){return Owner{.value=1};}fn void take(Owner p){}fn void observe(ref Owner p){}fn bool consumed(Owner p){return false;}fn Result<Owner,i32> fallible(){return .ok(make());}fn void f(bool c){var Owner owner=make();while(c){take(owner);owner=make();}}",
+      "provider": "",
+      "expected": 0,
+      "reference": {
+        "exit": 0,
+        "stdout": "semantics ok: main.fy (typed HIR: 6 function(s))\n",
+        "stderr": ""
+      }
+    },
+    {
+      "index": 14,
+      "name": "break mismatch",
+      "source": "module main;resource Owner{i32 value;cleanup{}}fn Owner make(){return Owner{.value=1};}fn void take(Owner p){}fn void observe(ref Owner p){}fn bool consumed(Owner p){return false;}fn Result<Owner,i32> fallible(){return .ok(make());}fn void f(bool c){let Owner owner=make();while(c){take(owner);break;}}",
+      "provider": "",
+      "expected": 3,
+      "reference": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:1:274: E1105: loop body changes the resource state required by the next iteration [bytes 273..301]\n  declaration: main.fy:1:261 [bytes 260..265]\n  loop-header: main.fy:1:274 [bytes 273..280]\n  move: main.fy:1:288 [bytes 287..292]\n"
+      }
+    },
+    {
+      "index": 15,
+      "name": "break restore",
+      "source": "module main;resource Owner{i32 value;cleanup{}}fn Owner make(){return Owner{.value=1};}fn void take(Owner p){}fn void observe(ref Owner p){}fn bool consumed(Owner p){return false;}fn Result<Owner,i32> fallible(){return .ok(make());}fn void f(bool c){var Owner owner=make();while(c){take(owner);owner=make();break;}}",
+      "provider": "",
+      "expected": 0,
+      "reference": {
+        "exit": 0,
+        "stdout": "semantics ok: main.fy (typed HIR: 6 function(s))\n",
+        "stderr": ""
+      }
+    },
+    {
+      "index": 16,
+      "name": "condition recheck",
+      "source": "module main;resource Owner{i32 value;cleanup{}}fn Owner make(){return Owner{.value=1};}fn void take(Owner p){}fn void observe(ref Owner p){}fn bool consumed(Owner p){return false;}fn Result<Owner,i32> fallible(){return .ok(make());}fn void f(bool c){let Owner owner=make();while(consumed(owner)){continue;}}",
+      "provider": "",
+      "expected": 3,
+      "reference": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:1:289: E1101: resource is used after ownership was moved [bytes 288..293]\n  declaration: main.fy:1:261 [bytes 260..265]\n  move: main.fy:1:289 [bytes 288..293]\n"
+      }
+    },
+    {
+      "index": 17,
+      "name": "terminal suffix",
+      "source": "module main;resource Owner{i32 value;cleanup{}}fn Owner make(){return Owner{.value=1};}fn void take(Owner p){}fn void observe(ref Owner p){}fn bool consumed(Owner p){return false;}fn Result<Owner,i32> fallible(){return .ok(make());}fn void f(bool c){let Owner owner=make();take(owner);return;observe(ref owner);}",
+      "provider": "",
+      "expected": 0,
+      "reference": {
+        "exit": 0,
+        "stdout": "semantics ok: main.fy (typed HIR: 6 function(s))\n",
+        "stderr": ""
+      }
+    },
+    {
+      "index": 18,
+      "name": "Option transfer",
+      "source": "module main;resource Owner{i32 value;cleanup{}}fn Owner make(){return Owner{.value=1};}fn void take(Owner p){}fn void observe(ref Owner p){}fn bool consumed(Owner p){return false;}fn Result<Owner,i32> fallible(){return .ok(make());}fn void f(bool c){let Owner owner=make();let Option<Owner> item=.some(owner);observe(ref owner);}",
+      "provider": "",
+      "expected": 3,
+      "reference": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:1:322: E1101: resource is used after ownership was moved [bytes 321..326]\n  declaration: main.fy:1:261 [bytes 260..265]\n  move: main.fy:1:303 [bytes 302..307]\n"
+      }
+    },
+    {
+      "index": 19,
+      "name": "Option capture",
+      "source": "module main;resource Owner{i32 value;cleanup{}}fn Owner make(){return Owner{.value=1};}fn void take(Owner p){}fn void observe(ref Owner p){}fn bool consumed(Owner p){return false;}fn Result<Owner,i32> fallible(){return .ok(make());}fn void f(bool c){let Option<Owner> item=.some(make());switch(item){case .some(r):{take(r);}case .none:{}};discard item;}",
+      "provider": "",
+      "expected": 3,
+      "reference": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:1:348: E1101: resource is used after ownership was moved [bytes 347..351]\n  declaration: main.fy:1:269 [bytes 268..272]\n  move: main.fy:1:295 [bytes 294..298]\n"
+      }
+    },
+    {
+      "index": 20,
+      "name": "Result propagation",
+      "source": "module main;resource Owner{i32 value;cleanup{}}fn Owner make(){return Owner{.value=1};}fn void take(Owner p){}fn void observe(ref Owner p){}fn bool consumed(Owner p){return false;}fn Result<Owner,i32> fallible(){return .ok(make());}fn Result<Owner,i32> f(){let Result<Owner,i32> item=fallible();let Owner r=item?;discard item;return .ok(r);}",
+      "provider": "",
+      "expected": 3,
+      "reference": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:1:322: E1101: resource is used after ownership was moved [bytes 321..325]\n  declaration: main.fy:1:280 [bytes 279..283]\n  move: main.fy:1:308 [bytes 307..311]\n"
+      }
+    },
+    {
+      "index": 21,
+      "name": "borrowed parameter",
+      "source": "module main;resource Owner{i32 value;cleanup{}}fn Owner make(){return Owner{.value=1};}fn void take(Owner p){}fn void observe(ref Owner p){}fn bool consumed(Owner p){return false;}fn Result<Owner,i32> fallible(){return .ok(make());}fn void f(ref Owner owner){observe(owner);}",
+      "provider": "",
+      "expected": 0,
+      "reference": {
+        "exit": 0,
+        "stdout": "semantics ok: main.fy (typed HIR: 6 function(s))\n",
+        "stderr": ""
+      }
+    },
+    {
+      "index": 22,
+      "name": "consuming parameter",
+      "source": "module main;resource Owner{i32 value;cleanup{}}fn Owner make(){return Owner{.value=1};}fn void take(Owner p){}fn void observe(ref Owner p){}fn bool consumed(Owner p){return false;}fn Result<Owner,i32> fallible(){return .ok(make());}fn void f(Owner owner){take(owner);observe(ref owner);}",
+      "provider": "",
+      "expected": 3,
+      "reference": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:1:280: E1101: resource is used after ownership was moved [bytes 279..284]\n  declaration: main.fy:1:249 [bytes 248..253]\n  move: main.fy:1:261 [bytes 260..265]\n"
+      }
+    },
+    {
+      "index": 23,
+      "name": "provider transfer",
+      "source": "module main;import provider as pr;fn void f(){let pr::Owner owner=pr::make();pr::take(owner);pr::take(owner);}",
+      "provider": "module provider;pub resource Owner{cleanup{}}pub fn Owner make(){return Owner{};}pub fn void take(Owner p){}",
+      "expected": 3,
+      "reference": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:1:103: E1101: resource is used after ownership was moved [bytes 102..107]\n  declaration: main.fy:1:61 [bytes 60..65]\n  move: main.fy:1:87 [bytes 86..91]\n"
+      }
+    },
+    {
+      "index": 24,
+      "name": "short circuit mismatch",
+      "source": "module main;resource Owner{i32 value;cleanup{}}fn Owner make(){return Owner{.value=1};}fn void take(Owner p){}fn void observe(ref Owner p){}fn bool consumed(Owner p){return false;}fn Result<Owner,i32> fallible(){return .ok(make());}fn void f(bool c){let Owner owner=make();discard c && consumed(owner);observe(ref owner);}",
+      "provider": "",
+      "expected": 3,
+      "reference": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:1:282: E1104: branch join leaves resource ownership path-dependent [bytes 281..301]\n  declaration: main.fy:1:261 [bytes 260..265]\n  move: main.fy:1:296 [bytes 295..300]\n"
+      }
+    },
+    {
+      "index": 25,
+      "name": "short circuit exited",
+      "source": "module main;resource Owner{i32 value;cleanup{}}fn Owner make(){return Owner{.value=1};}fn void take(Owner p){}fn void observe(ref Owner p){}fn bool consumed(Owner p){return false;}fn Result<Owner,i32> fallible(){return .ok(make());}fn void f(bool c){let Owner owner=make();discard c && {take(owner);return;false};observe(ref owner);}",
+      "provider": "",
+      "expected": 0,
+      "reference": {
+        "exit": 0,
+        "stdout": "semantics ok: main.fy (typed HIR: 6 function(s))\n",
+        "stderr": ""
+      }
+    },
+    {
+      "index": 26,
+      "name": "conditional transfer",
+      "source": "module main;resource Owner{i32 value;cleanup{}}fn Owner make(){return Owner{.value=1};}fn void take(Owner p){}fn void observe(ref Owner p){}fn bool consumed(Owner p){return false;}fn Result<Owner,i32> fallible(){return .ok(make());}fn void f(bool c){let Owner owner=make();let Owner next=if(c){owner}else{owner};observe(ref owner);}",
+      "provider": "",
+      "expected": 3,
+      "reference": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:1:325: E1101: resource is used after ownership was moved [bytes 324..329]\n  declaration: main.fy:1:261 [bytes 260..265]\n  move: main.fy:1:295 [bytes 294..299]\n"
+      }
+    },
+    {
+      "index": 27,
+      "name": "tail transfer",
+      "source": "module main;resource Owner{i32 value;cleanup{}}fn Owner make(){return Owner{.value=1};}fn void take(Owner p){}fn void observe(ref Owner p){}fn bool consumed(Owner p){return false;}fn Result<Owner,i32> fallible(){return .ok(make());}fn Owner f(){let Owner owner=make();return owner;}",
+      "provider": "",
+      "expected": 0,
+      "reference": {
+        "exit": 0,
+        "stdout": "semantics ok: main.fy (typed HIR: 6 function(s))\n",
+        "stderr": ""
+      }
+    },
+    {
+      "index": 28,
+      "name": "tail transfer double",
+      "source": "module main;resource Owner{i32 value;cleanup{}}fn Owner make(){return Owner{.value=1};}fn void take(Owner p){}fn void observe(ref Owner p){}fn bool consumed(Owner p){return false;}fn Result<Owner,i32> fallible(){return .ok(make());}fn Owner f(){let Owner owner=make();take(owner);return owner;}",
+      "provider": "",
+      "expected": 3,
+      "reference": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:1:288: E1101: resource is used after ownership was moved [bytes 287..292]\n  declaration: main.fy:1:256 [bytes 255..260]\n  move: main.fy:1:274 [bytes 273..278]\n"
+      }
+    },
+    {
+      "index": 29,
+      "name": "nested loop break",
+      "source": "module main;resource Owner{i32 value;cleanup{}}fn Owner make(){return Owner{.value=1};}fn void take(Owner p){}fn void observe(ref Owner p){}fn bool consumed(Owner p){return false;}fn Result<Owner,i32> fallible(){return .ok(make());}fn void f(bool c){var Owner owner=make();while(c){while(c){take(owner);owner=make();break;}continue;}observe(ref owner);}",
+      "provider": "",
+      "expected": 0,
+      "reference": {
+        "exit": 0,
+        "stdout": "semantics ok: main.fy (typed HIR: 6 function(s))\n",
+        "stderr": ""
+      }
+    },
+    {
+      "index": 30,
+      "name": "nested loop mismatch",
+      "source": "module main;resource Owner{i32 value;cleanup{}}fn Owner make(){return Owner{.value=1};}fn void take(Owner p){}fn void observe(ref Owner p){}fn bool consumed(Owner p){return false;}fn Result<Owner,i32> fallible(){return .ok(make());}fn void f(bool c){var Owner owner=make();while(c){while(c){take(owner);break;}continue;}observe(ref owner);}",
+      "provider": "",
+      "expected": 3,
+      "reference": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:1:283: E1105: loop body changes the resource state required by the next iteration [bytes 282..310]\n  declaration: main.fy:1:261 [bytes 260..265]\n  loop-header: main.fy:1:283 [bytes 282..289]\n  move: main.fy:1:297 [bytes 296..301]\n"
+      }
+    },
+    {
+      "index": 31,
+      "name": "continue restore",
+      "source": "module main;resource Owner{i32 value;cleanup{}}fn Owner make(){return Owner{.value=1};}fn void take(Owner p){}fn void observe(ref Owner p){}fn bool consumed(Owner p){return false;}fn Result<Owner,i32> fallible(){return .ok(make());}fn void f(bool c){var Owner owner=make();while(c){take(owner);owner=make();continue;}observe(ref owner);}",
+      "provider": "",
+      "expected": 0,
+      "reference": {
+        "exit": 0,
+        "stdout": "semantics ok: main.fy (typed HIR: 6 function(s))\n",
+        "stderr": ""
+      }
+    },
+    {
+      "index": 32,
+      "name": "continue mismatch",
+      "source": "module main;resource Owner{i32 value;cleanup{}}fn Owner make(){return Owner{.value=1};}fn void take(Owner p){}fn void observe(ref Owner p){}fn bool consumed(Owner p){return false;}fn Result<Owner,i32> fallible(){return .ok(make());}fn void f(bool c){var Owner owner=make();while(c){take(owner);continue;}observe(ref owner);}",
+      "provider": "",
+      "expected": 3,
+      "reference": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:1:274: E1105: loop body changes the resource state required by the next iteration [bytes 273..304]\n  declaration: main.fy:1:261 [bytes 260..265]\n  loop-header: main.fy:1:274 [bytes 273..280]\n  move: main.fy:1:288 [bytes 287..292]\n"
+      }
+    },
+    {
+      "index": 33,
+      "name": "for mismatch",
+      "source": "module main;resource Owner{i32 value;cleanup{}}fn Owner make(){return Owner{.value=1};}fn void take(Owner p){}fn void observe(ref Owner p){}fn bool consumed(Owner p){return false;}fn Result<Owner,i32> fallible(){return .ok(make());}fn void f(bool c){var Owner owner=make();for(var i32 i=0;i<2;i+=1){take(owner);}}",
+      "provider": "",
+      "expected": 3,
+      "reference": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:1:274: E1105: loop body changes the resource state required by the next iteration [bytes 273..312]\n  declaration: main.fy:1:261 [bytes 260..265]\n  loop-header: main.fy:1:274 [bytes 273..292]\n  move: main.fy:1:305 [bytes 304..309]\n"
+      }
+    },
+    {
+      "index": 34,
+      "name": "for restore",
+      "source": "module main;resource Owner{i32 value;cleanup{}}fn Owner make(){return Owner{.value=1};}fn void take(Owner p){}fn void observe(ref Owner p){}fn bool consumed(Owner p){return false;}fn Result<Owner,i32> fallible(){return .ok(make());}fn void f(bool c){var Owner owner=make();for(var i32 i=0;i<2;i+=1){take(owner);owner=make();continue;}observe(ref owner);}",
+      "provider": "",
+      "expected": 0,
+      "reference": {
+        "exit": 0,
+        "stdout": "semantics ok: main.fy (typed HIR: 6 function(s))\n",
+        "stderr": ""
+      }
+    },
+    {
+      "index": 35,
+      "name": "branch return move",
+      "source": "module main;resource Owner{i32 value;cleanup{}}fn Owner make(){return Owner{.value=1};}fn void take(Owner p){}fn void observe(ref Owner p){}fn bool consumed(Owner p){return false;}fn Result<Owner,i32> fallible(){return .ok(make());}fn Owner f(bool c){let Owner owner=make();if(c){return owner;}else{};return owner;}",
+      "provider": "",
+      "expected": 0,
+      "reference": {
+        "exit": 0,
+        "stdout": "semantics ok: main.fy (typed HIR: 6 function(s))\n",
+        "stderr": ""
+      }
+    },
+    {
+      "index": 36,
+      "name": "result capture",
+      "source": "module main;resource Owner{i32 value;cleanup{}}fn Owner make(){return Owner{.value=1};}fn void take(Owner p){}fn void observe(ref Owner p){}fn bool consumed(Owner p){return false;}fn Result<Owner,i32> fallible(){return .ok(make());}fn void f(bool c){let Result<Owner,i32> item=fallible();switch(item){case .ok(r):{take(r);take(r);}case .err(e):{}};}",
+      "provider": "",
+      "expected": 3,
+      "reference": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:1:328: E1101: resource is used after ownership was moved [bytes 327..328]\n  declaration: main.fy:1:311 [bytes 310..311]\n  move: main.fy:1:320 [bytes 319..320]\n"
+      }
+    },
+    {
+      "index": 37,
+      "name": "option scope shadow",
+      "source": "module main;resource Owner{i32 value;cleanup{}}fn Owner make(){return Owner{.value=1};}fn void take(Owner p){}fn void observe(ref Owner p){}fn bool consumed(Owner p){return false;}fn Result<Owner,i32> fallible(){return .ok(make());}fn void f(bool c){let Owner r=make();let Option<Owner> item=.some(make());switch(item){case .some(r):{take(r);}case .none:{}};observe(ref r);}",
+      "provider": "",
+      "expected": 0,
+      "reference": {
+        "exit": 0,
+        "stdout": "semantics ok: main.fy (typed HIR: 6 function(s))\n",
+        "stderr": ""
+      }
+    },
+    {
+      "index": 38,
+      "name": "discard read",
+      "source": "module main;resource Owner{i32 value;cleanup{}}fn Owner make(){return Owner{.value=1};}fn void take(Owner p){}fn void observe(ref Owner p){}fn bool consumed(Owner p){return false;}fn Result<Owner,i32> fallible(){return .ok(make());}fn void f(bool c){let Owner owner=make();discard owner;observe(ref owner);}",
+      "provider": "",
+      "expected": 0,
+      "reference": {
+        "exit": 0,
+        "stdout": "semantics ok: main.fy (typed HIR: 6 function(s))\n",
+        "stderr": ""
+      }
+    },
+    {
+      "index": 39,
+      "name": "burn transfer",
+      "source": "module main;@abilities(store)resource Owner{i32 value;cleanup{}}fn void f(){let Owner owner=Owner{.value=1};burn owner;discard owner;}",
+      "provider": "",
+      "expected": 3,
+      "reference": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:1:128: E1101: resource is used after ownership was moved [bytes 127..132]\n  declaration: main.fy:1:87 [bytes 86..91]\n  move: main.fy:1:114 [bytes 113..118]\n"
+      }
+    },
+    {
+      "index": 40,
+      "name": "record transfer",
+      "source": "module main;resource Owner{i32 value;cleanup{}}fn Owner make(){return Owner{.value=1};}fn void take(Owner p){}fn void observe(ref Owner p){}fn bool consumed(Owner p){return false;}fn Result<Owner,i32> fallible(){return .ok(make());}resource Pair{Owner a;cleanup{}}fn void f(bool c){let Owner owner=make();let Pair pair=Pair{.a=owner};observe(ref owner);}",
+      "provider": "",
+      "expected": 3,
+      "reference": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:1:347: E1101: resource is used after ownership was moved [bytes 346..351]\n  declaration: main.fy:1:293 [bytes 292..297]\n  move: main.fy:1:328 [bytes 327..332]\n"
+      }
+    },
+    {
+      "index": 41,
+      "name": "partial field move",
+      "source": "module main;resource Owner{i32 value;cleanup{}}fn Owner make(){return Owner{.value=1};}fn void take(Owner p){}fn void observe(ref Owner p){}fn bool consumed(Owner p){return false;}fn Result<Owner,i32> fallible(){return .ok(make());}resource Pair{Owner a;cleanup{}}fn void f(bool c){let Pair pair=Pair{.a=make()};take(pair.a);}",
+      "provider": "",
+      "expected": 3,
+      "reference": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:1:318: E1103: moving a field out of a resource is not supported [bytes 317..323]\n  field: main.fy:1:253 [bytes 252..253]\n  owner: main.fy:1:292 [bytes 291..295]\n"
+      }
+    },
+    {
+      "index": 42,
+      "name": "cleanup consumes",
+      "source": "module main;resource Owner{i32 value;cleanup{take(this);}}fn void take(Owner p){}",
+      "provider": "",
+      "expected": 3,
+      "reference": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:1:51: E1102: Operation would create or execute a second cleanup obligation. [bytes 50..54]\n  declaration: main.fy:1:38 [bytes 37..57]\n  move: main.fy:1:51 [bytes 50..54]\n"
+      }
+    },
+    {
+      "index": 43,
+      "name": "cleanup consumes branch",
+      "source": "module main;resource Owner{i32 value;cleanup{if(true){take(this);}else{};}}fn void take(Owner p){}",
+      "provider": "",
+      "expected": 3,
+      "reference": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:1:46: E1104: branch join leaves resource ownership path-dependent [bytes 45..72]\n  declaration: main.fy:1:38 [bytes 37..74]\n  move: main.fy:1:60 [bytes 59..63]\nmain.fy:1:60: E1102: Operation would create or execute a second cleanup obligation. [bytes 59..63]\n  declaration: main.fy:1:38 [bytes 37..74]\n  move: main.fy:1:60 [bytes 59..63]\n"
+      }
+    },
+    {
+      "index": 44,
+      "name": "dead borrow",
+      "source": "module main;resource Owner{i32 value;cleanup{}}fn Owner make(){return Owner{.value=1};}fn void take(Owner p){}fn void observe(ref Owner p){}fn bool consumed(Owner p){return false;}fn Result<Owner,i32> fallible(){return .ok(make());}fn void f(bool c){let Owner owner=make();take(owner);let ref Owner r=ref owner;}",
+      "provider": "",
+      "expected": 3,
+      "reference": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:1:306: E1101: resource is used after ownership was moved [bytes 305..310]\n  declaration: main.fy:1:261 [bytes 260..265]\n  move: main.fy:1:279 [bytes 278..283]\n"
+      }
+    },
+    {
+      "index": 45,
+      "name": "dead field write",
+      "source": "module main;resource Owner{i32 value;cleanup{}}fn Owner make(){return Owner{.value=1};}fn void take(Owner p){}fn void observe(ref Owner p){}fn bool consumed(Owner p){return false;}fn Result<Owner,i32> fallible(){return .ok(make());}fn void f(bool c){var Owner owner=make();take(owner);owner.value=3;}",
+      "provider": "",
+      "expected": 3,
+      "reference": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:1:286: E1101: resource is used after ownership was moved [bytes 285..290]\n  declaration: main.fy:1:261 [bytes 260..265]\n  move: main.fy:1:279 [bytes 278..283]\n"
+      }
+    },
+    {
+      "index": 46,
+      "name": "dead repeat restore",
+      "source": "module main;resource Owner{i32 value;cleanup{}}fn Owner make(){return Owner{.value=1};}fn void take(Owner p){}fn void observe(ref Owner p){}fn bool consumed(Owner p){return false;}fn Result<Owner,i32> fallible(){return .ok(make());}fn void f(bool c){var Owner owner=make();take(owner);while(c){owner=make();}observe(ref owner);}",
+      "provider": "",
+      "expected": 3,
+      "reference": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:1:286: E1105: loop body changes the resource state required by the next iteration [bytes 285..308]\n  declaration: main.fy:1:261 [bytes 260..265]\n  loop-header: main.fy:1:286 [bytes 285..292]\nmain.fy:1:321: E1101: resource is used after ownership was moved [bytes 320..325]\n  declaration: main.fy:1:261 [bytes 260..265]\n  move: main.fy:1:279 [bytes 278..283]\n"
+      }
+    },
+    {
+      "index": 47,
+      "name": "borrowed partial field",
+      "source": "module main;resource Owner{i32 value;cleanup{}}fn Owner make(){return Owner{.value=1};}fn void take(Owner p){}fn void observe(ref Owner p){}fn bool consumed(Owner p){return false;}fn Result<Owner,i32> fallible(){return .ok(make());}resource Pair{Owner a;cleanup{}}fn void f(ref Pair pair){take(pair.a);}",
+      "provider": "",
+      "expected": 3,
+      "reference": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:1:295: E1103: moving a field out of a resource is not supported [bytes 294..300]\n  field: main.fy:1:253 [bytes 252..253]\n  owner: main.fy:1:284 [bytes 283..287]\n"
+      }
+    },
+    {
+      "index": 48,
+      "name": "provider partial field",
+      "source": "module main;import provider as p;fn void f(){p::probe();}",
+      "provider": "module provider;resource Owner{i32 n;cleanup{}}resource Pair{Owner a;cleanup{}}fn void take(Owner p){}pub fn void probe(){let Pair pair=Pair{.a=Owner{.n=1}};take(pair.a);}",
+      "expected": 3,
+      "reference": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "provider.fy:1:163: E1103: moving a field out of a resource is not supported [bytes 162..168]\n  field: provider.fy:1:68 [bytes 67..68]\n  owner: provider.fy:1:132 [bytes 131..135]\n"
+      }
+    },
+    {
+      "index": 49,
+      "name": "generic transfer",
+      "source": "module main;resource Owner{i32 value;cleanup{}}fn Owner make(){return Owner{.value=1};}fn void take(Owner p){}fn void observe(ref Owner p){}fn bool consumed(Owner p){return false;}fn Result<Owner,i32> fallible(){return .ok(make());}fn void take_generic<T>(T n,Owner owner){}fn void f(){let Owner owner=make();take_generic<i32>(1,owner);observe(ref owner);}",
+      "provider": "",
+      "expected": 3,
+      "reference": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:1:349: E1101: resource is used after ownership was moved [bytes 348..353]\n  declaration: main.fy:1:297 [bytes 296..301]\n  move: main.fy:1:330 [bytes 329..334]\n"
+      }
+    },
+    {
+      "index": 50,
+      "name": "empty for mismatch",
+      "source": "module main;resource Owner{i32 value;cleanup{}}fn Owner make(){return Owner{.value=1};}fn void take(Owner p){}fn void observe(ref Owner p){}fn bool consumed(Owner p){return false;}fn Result<Owner,i32> fallible(){return .ok(make());}fn void f(){let Owner owner=make();for(;;){take(owner);}}",
+      "provider": "",
+      "expected": 3,
+      "reference": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:1:268: E1105: loop body changes the resource state required by the next iteration [bytes 267..288]\n  declaration: main.fy:1:255 [bytes 254..259]\n  loop-header: main.fy:1:268 [bytes 267..288]\n  move: main.fy:1:281 [bytes 280..285]\n"
+      }
+    },
+    {
+      "index": 51,
+      "name": "iteration mismatch",
+      "source": "module main;resource Owner{i32 value;cleanup{}}fn Owner make(){return Owner{.value=1};}fn void take(Owner p){}fn void observe(ref Owner p){}fn bool consumed(Owner p){return false;}fn Result<Owner,i32> fallible(){return .ok(make());}fn void f(){let Owner owner=make();let i32[2] x=[1,2];let ref i32[] xs=ref x;for(let i32 n in xs){take(owner);}}",
+      "provider": "",
+      "expected": 3,
+      "reference": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:1:310: E1105: loop body changes the resource state required by the next iteration [bytes 309..343]\n  declaration: main.fy:1:255 [bytes 254..259]\n  loop-header: main.fy:1:310 [bytes 309..328]\n  move: main.fy:1:336 [bytes 335..340]\n"
+      }
+    },
+    {
+      "index": 52,
+      "name": "branch local moved",
+      "source": "module main;resource Owner{i32 value;cleanup{}}fn Owner make(){return Owner{.value=1};}fn void take(Owner p){}fn void observe(ref Owner p){}fn bool consumed(Owner p){return false;}fn Result<Owner,i32> fallible(){return .ok(make());}fn void f(bool c){if(c){let Owner owner=make();take(owner);take(owner);}else{};}",
+      "provider": "",
+      "expected": 3,
+      "reference": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:1:297: E1101: resource is used after ownership was moved [bytes 296..301]\n  declaration: main.fy:1:267 [bytes 266..271]\n  move: main.fy:1:285 [bytes 284..289]\n"
+      }
+    },
+    {
+      "index": 53,
+      "name": "two dead owners",
+      "source": "module main;resource Owner{i32 value;cleanup{}}fn Owner make(){return Owner{.value=1};}fn void take(Owner p){}fn void observe(ref Owner p){}fn bool consumed(Owner p){return false;}fn Result<Owner,i32> fallible(){return .ok(make());}fn void f(){let Owner a=make();let Owner b=make();take(a);take(b);observe(ref a);observe(ref b);}",
+      "provider": "",
+      "expected": 3,
+      "reference": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:1:311: E1101: resource is used after ownership was moved [bytes 310..311]\n  declaration: main.fy:1:255 [bytes 254..255]\n  move: main.fy:1:288 [bytes 287..288]\nmain.fy:1:326: E1101: resource is used after ownership was moved [bytes 325..326]\n  declaration: main.fy:1:274 [bytes 273..274]\n  move: main.fy:1:296 [bytes 295..296]\n"
+      }
+    },
+    {
+      "index": 54,
+      "name": "cast boundary: raw cast is not a safe call loan",
+      "source": "module main;resource R{usize length;cleanup{}}unsafe extern C fn u32 probe(ptr mut void data,usize length);fn void f(){var R x=R{.length=0};discard unsafe{probe(ref mut x as ptr mut void,x.length)};}",
+      "provider": "",
+      "expected": 0,
+      "code": "",
+      "reference": {
+        "exit": 0,
+        "stdout": "semantics ok: main.fy (typed HIR: 1 function(s))\n",
+        "stderr": ""
+      }
+    },
+    {
+      "index": 55,
+      "name": "cast boundary: raw cast checks borrow creation",
+      "source": "module main;resource R{usize length;cleanup{}}unsafe extern C fn u32 probe(ptr mut void data,usize length);fn void f(){var R x=R{.length=0};let ref R p=ref x;discard unsafe{probe(ref mut x as ptr mut void,x.length)};discard p;}",
+      "provider": "",
+      "expected": 3,
+      "code": "E2101",
+      "reference": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:1:180: E2101: Access conflicts with an active shared or mutable loan. [bytes 179..188]\n  last-use: main.fy:1:225 [bytes 224..225]\n  loan: main.fy:1:153 [bytes 152..157]\n"
+      }
+    },
+    {
+      "index": 56,
+      "name": "field target after RHS transfer owner",
+      "source": "module main;resource R{i32 n;cleanup{}}fn i32 consume(R value){return 1;}fn void f(){var R owner=R{.n=0};owner.n=consume(owner);}",
+      "provider": "",
+      "expected": 3,
+      "reference": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:1:106: E1101: resource is used after ownership was moved [bytes 105..110]\n  declaration: main.fy:1:92 [bytes 91..96]\n  move: main.fy:1:122 [bytes 121..126]\n"
+      }
+    },
+    {
+      "index": 57,
+      "name": "field target after RHS transfer (owner)",
+      "source": "module main;resource R{i32 n;cleanup{}}fn i32 consume(R value){return 1;}fn void f(){var R owner=R{.n=0};(owner).n=consume(owner);}",
+      "provider": "",
+      "expected": 3,
+      "reference": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:1:107: E1101: resource is used after ownership was moved [bytes 106..111]\n  declaration: main.fy:1:92 [bytes 91..96]\n  move: main.fy:1:124 [bytes 123..128]\n"
+      }
+    }
+  ],
+  "cli": {
+    "passed": true,
+    "matched": 58,
+    "count": 58,
+    "candidateSHA256": "ceb5390378fcdcd65be038504ab3f54dcb7856d1373d79e2f6d7f1fb02c650d8",
+    "cases": [
+      {
+        "index": 0,
+        "name": "live",
+        "exit": 0,
+        "matched": true,
+        "reference": [],
+        "diagnostics": [],
+        "stdout": "return origins ok\n",
+        "stderr": ""
+      },
+      {
+        "index": 1,
+        "name": "binding transfer",
+        "exit": 3,
+        "matched": true,
+        "reference": [
+          {
+            "file": "main.fy",
+            "code": 1101,
+            "start": 306,
+            "end": 311,
+            "related": [
+              {
+                "role": "declaration",
+                "file": "main.fy",
+                "start": 260,
+                "end": 265
+              },
+              {
+                "role": "move",
+                "file": "main.fy",
+                "start": 288,
+                "end": 293
+              }
+            ]
+          }
+        ],
+        "diagnostics": [
+          {
+            "file": "main.fy",
+            "code": 1101,
+            "start": 306,
+            "end": 311,
+            "related": [
+              {
+                "role": "declaration",
+                "file": "main.fy",
+                "start": 260,
+                "end": 265
+              },
+              {
+                "role": "move",
+                "file": "main.fy",
+                "start": 288,
+                "end": 293
+              }
+            ]
+          }
+        ],
+        "stdout": "",
+        "stderr": "main.fy:1:307: error: E1101 resource used after move (bytes 306..311)\n  declaration: main.fy (bytes 260..265)\n  move: main.fy (bytes 288..293)\n"
+      },
+      {
+        "index": 2,
+        "name": "double call",
+        "exit": 3,
+        "matched": true,
+        "reference": [
+          {
+            "file": "main.fy",
+            "code": 1101,
+            "start": 290,
+            "end": 295,
+            "related": [
+              {
+                "role": "declaration",
+                "file": "main.fy",
+                "start": 260,
+                "end": 265
+              },
+              {
+                "role": "move",
+                "file": "main.fy",
+                "start": 278,
+                "end": 283
+              }
+            ]
+          }
+        ],
+        "diagnostics": [
+          {
+            "file": "main.fy",
+            "code": 1101,
+            "start": 290,
+            "end": 295,
+            "related": [
+              {
+                "role": "declaration",
+                "file": "main.fy",
+                "start": 260,
+                "end": 265
+              },
+              {
+                "role": "move",
+                "file": "main.fy",
+                "start": 278,
+                "end": 283
+              }
+            ]
+          }
+        ],
+        "stdout": "",
+        "stderr": "main.fy:1:291: error: E1101 resource used after move (bytes 290..295)\n  declaration: main.fy (bytes 260..265)\n  move: main.fy (bytes 278..283)\n"
+      },
+      {
+        "index": 3,
+        "name": "restore",
+        "exit": 0,
+        "matched": true,
+        "reference": [],
+        "diagnostics": [],
+        "stdout": "return origins ok\n",
+        "stderr": ""
+      },
+      {
+        "index": 4,
+        "name": "self move",
+        "exit": 0,
+        "matched": true,
+        "reference": [],
+        "diagnostics": [],
+        "stdout": "return origins ok\n",
+        "stderr": ""
+      },
+      {
+        "index": 5,
+        "name": "grouped transfer",
+        "exit": 3,
+        "matched": true,
+        "reference": [
+          {
+            "file": "main.fy",
+            "code": 1101,
+            "start": 308,
+            "end": 313,
+            "related": [
+              {
+                "role": "declaration",
+                "file": "main.fy",
+                "start": 260,
+                "end": 265
+              },
+              {
+                "role": "move",
+                "file": "main.fy",
+                "start": 289,
+                "end": 294
+              }
+            ]
+          }
+        ],
+        "diagnostics": [
+          {
+            "file": "main.fy",
+            "code": 1101,
+            "start": 308,
+            "end": 313,
+            "related": [
+              {
+                "role": "declaration",
+                "file": "main.fy",
+                "start": 260,
+                "end": 265
+              },
+              {
+                "role": "move",
+                "file": "main.fy",
+                "start": 289,
+                "end": 294
+              }
+            ]
+          }
+        ],
+        "stdout": "",
+        "stderr": "main.fy:1:309: error: E1101 resource used after move (bytes 308..313)\n  declaration: main.fy (bytes 260..265)\n  move: main.fy (bytes 289..294)\n"
+      },
+      {
+        "index": 6,
+        "name": "dead field read",
+        "exit": 3,
+        "matched": true,
+        "reference": [
+          {
+            "file": "main.fy",
+            "code": 1101,
+            "start": 293,
+            "end": 298,
+            "related": [
+              {
+                "role": "declaration",
+                "file": "main.fy",
+                "start": 260,
+                "end": 265
+              },
+              {
+                "role": "move",
+                "file": "main.fy",
+                "start": 278,
+                "end": 283
+              }
+            ]
+          }
+        ],
+        "diagnostics": [
+          {
+            "file": "main.fy",
+            "code": 1101,
+            "start": 293,
+            "end": 298,
+            "related": [
+              {
+                "role": "declaration",
+                "file": "main.fy",
+                "start": 260,
+                "end": 265
+              },
+              {
+                "role": "move",
+                "file": "main.fy",
+                "start": 278,
+                "end": 283
+              }
+            ]
+          }
+        ],
+        "stdout": "",
+        "stderr": "main.fy:1:294: error: E1101 resource used after move (bytes 293..298)\n  declaration: main.fy (bytes 260..265)\n  move: main.fy (bytes 278..283)\n"
+      },
+      {
+        "index": 7,
+        "name": "branch mismatch",
+        "exit": 3,
+        "matched": true,
+        "reference": [
+          {
+            "file": "main.fy",
+            "code": 1104,
+            "start": 273,
+            "end": 292,
+            "related": [
+              {
+                "role": "declaration",
+                "file": "main.fy",
+                "start": 260,
+                "end": 265
+              },
+              {
+                "role": "move",
+                "file": "main.fy",
+                "start": 284,
+                "end": 289
+              }
+            ]
+          }
+        ],
+        "diagnostics": [
+          {
+            "file": "main.fy",
+            "code": 1104,
+            "start": 273,
+            "end": 292,
+            "related": [
+              {
+                "role": "declaration",
+                "file": "main.fy",
+                "start": 260,
+                "end": 265
+              },
+              {
+                "role": "move",
+                "file": "main.fy",
+                "start": 284,
+                "end": 289
+              }
+            ]
+          }
+        ],
+        "stdout": "",
+        "stderr": "main.fy:1:274: error: E1104 inconsistent resource states at join (bytes 273..292)\n  declaration: main.fy (bytes 260..265)\n  move: main.fy (bytes 284..289)\n"
+      },
+      {
+        "index": 8,
+        "name": "both arms consume",
+        "exit": 0,
+        "matched": true,
+        "reference": [],
+        "diagnostics": [],
+        "stdout": "return origins ok\n",
+        "stderr": ""
+      },
+      {
+        "index": 9,
+        "name": "exited arm",
+        "exit": 0,
+        "matched": true,
+        "reference": [],
+        "diagnostics": [],
+        "stdout": "return origins ok\n",
+        "stderr": ""
+      },
+      {
+        "index": 10,
+        "name": "shadow root",
+        "exit": 0,
+        "matched": true,
+        "reference": [],
+        "diagnostics": [],
+        "stdout": "return origins ok\n",
+        "stderr": ""
+      },
+      {
+        "index": 11,
+        "name": "existing MaybeLive",
+        "exit": 3,
+        "matched": true,
+        "reference": [
+          {
+            "file": "main.fy",
+            "code": 1104,
+            "start": 273,
+            "end": 292,
+            "related": [
+              {
+                "role": "declaration",
+                "file": "main.fy",
+                "start": 260,
+                "end": 265
+              },
+              {
+                "role": "move",
+                "file": "main.fy",
+                "start": 284,
+                "end": 289
+              }
+            ]
+          }
+        ],
+        "diagnostics": [
+          {
+            "file": "main.fy",
+            "code": 1104,
+            "start": 273,
+            "end": 292,
+            "related": [
+              {
+                "role": "declaration",
+                "file": "main.fy",
+                "start": 260,
+                "end": 265
+              },
+              {
+                "role": "move",
+                "file": "main.fy",
+                "start": 284,
+                "end": 289
+              }
+            ]
+          }
+        ],
+        "stdout": "",
+        "stderr": "main.fy:1:274: error: E1104 inconsistent resource states at join (bytes 273..292)\n  declaration: main.fy (bytes 260..265)\n  move: main.fy (bytes 284..289)\n"
+      },
+      {
+        "index": 12,
+        "name": "loop mismatch",
+        "exit": 3,
+        "matched": true,
+        "reference": [
+          {
+            "file": "main.fy",
+            "code": 1105,
+            "start": 273,
+            "end": 295,
+            "related": [
+              {
+                "role": "declaration",
+                "file": "main.fy",
+                "start": 260,
+                "end": 265
+              },
+              {
+                "role": "loop-header",
+                "file": "main.fy",
+                "start": 273,
+                "end": 280
+              },
+              {
+                "role": "move",
+                "file": "main.fy",
+                "start": 287,
+                "end": 292
+              }
+            ]
+          }
+        ],
+        "diagnostics": [
+          {
+            "file": "main.fy",
+            "code": 1105,
+            "start": 273,
+            "end": 295,
+            "related": [
+              {
+                "role": "declaration",
+                "file": "main.fy",
+                "start": 260,
+                "end": 265
+              },
+              {
+                "role": "loop-header",
+                "file": "main.fy",
+                "start": 273,
+                "end": 280
+              },
+              {
+                "role": "move",
+                "file": "main.fy",
+                "start": 287,
+                "end": 292
+              }
+            ]
+          }
+        ],
+        "stdout": "",
+        "stderr": "main.fy:1:274: error: E1105 inconsistent resource states at loop edge (bytes 273..295)\n  declaration: main.fy (bytes 260..265)\n  loop-header: main.fy (bytes 273..280)\n  move: main.fy (bytes 287..292)\n"
+      },
+      {
+        "index": 13,
+        "name": "loop restore",
+        "exit": 0,
+        "matched": true,
+        "reference": [],
+        "diagnostics": [],
+        "stdout": "return origins ok\n",
+        "stderr": ""
+      },
+      {
+        "index": 14,
+        "name": "break mismatch",
+        "exit": 3,
+        "matched": true,
+        "reference": [
+          {
+            "file": "main.fy",
+            "code": 1105,
+            "start": 273,
+            "end": 301,
+            "related": [
+              {
+                "role": "declaration",
+                "file": "main.fy",
+                "start": 260,
+                "end": 265
+              },
+              {
+                "role": "loop-header",
+                "file": "main.fy",
+                "start": 273,
+                "end": 280
+              },
+              {
+                "role": "move",
+                "file": "main.fy",
+                "start": 287,
+                "end": 292
+              }
+            ]
+          }
+        ],
+        "diagnostics": [
+          {
+            "file": "main.fy",
+            "code": 1105,
+            "start": 273,
+            "end": 301,
+            "related": [
+              {
+                "role": "declaration",
+                "file": "main.fy",
+                "start": 260,
+                "end": 265
+              },
+              {
+                "role": "loop-header",
+                "file": "main.fy",
+                "start": 273,
+                "end": 280
+              },
+              {
+                "role": "move",
+                "file": "main.fy",
+                "start": 287,
+                "end": 292
+              }
+            ]
+          }
+        ],
+        "stdout": "",
+        "stderr": "main.fy:1:274: error: E1105 inconsistent resource states at loop edge (bytes 273..301)\n  declaration: main.fy (bytes 260..265)\n  loop-header: main.fy (bytes 273..280)\n  move: main.fy (bytes 287..292)\n"
+      },
+      {
+        "index": 15,
+        "name": "break restore",
+        "exit": 0,
+        "matched": true,
+        "reference": [],
+        "diagnostics": [],
+        "stdout": "return origins ok\n",
+        "stderr": ""
+      },
+      {
+        "index": 16,
+        "name": "condition recheck",
+        "exit": 3,
+        "matched": true,
+        "reference": [
+          {
+            "file": "main.fy",
+            "code": 1101,
+            "start": 288,
+            "end": 293,
+            "related": [
+              {
+                "role": "declaration",
+                "file": "main.fy",
+                "start": 260,
+                "end": 265
+              },
+              {
+                "role": "move",
+                "file": "main.fy",
+                "start": 288,
+                "end": 293
+              }
+            ]
+          }
+        ],
+        "diagnostics": [
+          {
+            "file": "main.fy",
+            "code": 1101,
+            "start": 288,
+            "end": 293,
+            "related": [
+              {
+                "role": "declaration",
+                "file": "main.fy",
+                "start": 260,
+                "end": 265
+              },
+              {
+                "role": "move",
+                "file": "main.fy",
+                "start": 288,
+                "end": 293
+              }
+            ]
+          }
+        ],
+        "stdout": "",
+        "stderr": "main.fy:1:289: error: E1101 resource used after move (bytes 288..293)\n  declaration: main.fy (bytes 260..265)\n  move: main.fy (bytes 288..293)\n"
+      },
+      {
+        "index": 17,
+        "name": "terminal suffix",
+        "exit": 0,
+        "matched": true,
+        "reference": [],
+        "diagnostics": [],
+        "stdout": "return origins ok\n",
+        "stderr": ""
+      },
+      {
+        "index": 18,
+        "name": "Option transfer",
+        "exit": 3,
+        "matched": true,
+        "reference": [
+          {
+            "file": "main.fy",
+            "code": 1101,
+            "start": 321,
+            "end": 326,
+            "related": [
+              {
+                "role": "declaration",
+                "file": "main.fy",
+                "start": 260,
+                "end": 265
+              },
+              {
+                "role": "move",
+                "file": "main.fy",
+                "start": 302,
+                "end": 307
+              }
+            ]
+          }
+        ],
+        "diagnostics": [
+          {
+            "file": "main.fy",
+            "code": 1101,
+            "start": 321,
+            "end": 326,
+            "related": [
+              {
+                "role": "declaration",
+                "file": "main.fy",
+                "start": 260,
+                "end": 265
+              },
+              {
+                "role": "move",
+                "file": "main.fy",
+                "start": 302,
+                "end": 307
+              }
+            ]
+          }
+        ],
+        "stdout": "",
+        "stderr": "main.fy:1:322: error: E1101 resource used after move (bytes 321..326)\n  declaration: main.fy (bytes 260..265)\n  move: main.fy (bytes 302..307)\n"
+      },
+      {
+        "index": 19,
+        "name": "Option capture",
+        "exit": 3,
+        "matched": true,
+        "reference": [
+          {
+            "file": "main.fy",
+            "code": 1101,
+            "start": 347,
+            "end": 351,
+            "related": [
+              {
+                "role": "declaration",
+                "file": "main.fy",
+                "start": 268,
+                "end": 272
+              },
+              {
+                "role": "move",
+                "file": "main.fy",
+                "start": 294,
+                "end": 298
+              }
+            ]
+          }
+        ],
+        "diagnostics": [
+          {
+            "file": "main.fy",
+            "code": 1101,
+            "start": 347,
+            "end": 351,
+            "related": [
+              {
+                "role": "declaration",
+                "file": "main.fy",
+                "start": 268,
+                "end": 272
+              },
+              {
+                "role": "move",
+                "file": "main.fy",
+                "start": 294,
+                "end": 298
+              }
+            ]
+          }
+        ],
+        "stdout": "",
+        "stderr": "main.fy:1:348: error: E1101 resource used after move (bytes 347..351)\n  declaration: main.fy (bytes 268..272)\n  move: main.fy (bytes 294..298)\n"
+      },
+      {
+        "index": 20,
+        "name": "Result propagation",
+        "exit": 3,
+        "matched": true,
+        "reference": [
+          {
+            "file": "main.fy",
+            "code": 1101,
+            "start": 321,
+            "end": 325,
+            "related": [
+              {
+                "role": "declaration",
+                "file": "main.fy",
+                "start": 279,
+                "end": 283
+              },
+              {
+                "role": "move",
+                "file": "main.fy",
+                "start": 307,
+                "end": 311
+              }
+            ]
+          }
+        ],
+        "diagnostics": [
+          {
+            "file": "main.fy",
+            "code": 1101,
+            "start": 321,
+            "end": 325,
+            "related": [
+              {
+                "role": "declaration",
+                "file": "main.fy",
+                "start": 279,
+                "end": 283
+              },
+              {
+                "role": "move",
+                "file": "main.fy",
+                "start": 307,
+                "end": 311
+              }
+            ]
+          }
+        ],
+        "stdout": "",
+        "stderr": "main.fy:1:322: error: E1101 resource used after move (bytes 321..325)\n  declaration: main.fy (bytes 279..283)\n  move: main.fy (bytes 307..311)\n"
+      },
+      {
+        "index": 21,
+        "name": "borrowed parameter",
+        "exit": 0,
+        "matched": true,
+        "reference": [],
+        "diagnostics": [],
+        "stdout": "return origins ok\n",
+        "stderr": ""
+      },
+      {
+        "index": 22,
+        "name": "consuming parameter",
+        "exit": 3,
+        "matched": true,
+        "reference": [
+          {
+            "file": "main.fy",
+            "code": 1101,
+            "start": 279,
+            "end": 284,
+            "related": [
+              {
+                "role": "declaration",
+                "file": "main.fy",
+                "start": 248,
+                "end": 253
+              },
+              {
+                "role": "move",
+                "file": "main.fy",
+                "start": 260,
+                "end": 265
+              }
+            ]
+          }
+        ],
+        "diagnostics": [
+          {
+            "file": "main.fy",
+            "code": 1101,
+            "start": 279,
+            "end": 284,
+            "related": [
+              {
+                "role": "declaration",
+                "file": "main.fy",
+                "start": 248,
+                "end": 253
+              },
+              {
+                "role": "move",
+                "file": "main.fy",
+                "start": 260,
+                "end": 265
+              }
+            ]
+          }
+        ],
+        "stdout": "",
+        "stderr": "main.fy:1:280: error: E1101 resource used after move (bytes 279..284)\n  declaration: main.fy (bytes 248..253)\n  move: main.fy (bytes 260..265)\n"
+      },
+      {
+        "index": 23,
+        "name": "provider transfer",
+        "exit": 3,
+        "matched": true,
+        "reference": [
+          {
+            "file": "main.fy",
+            "code": 1101,
+            "start": 102,
+            "end": 107,
+            "related": [
+              {
+                "role": "declaration",
+                "file": "main.fy",
+                "start": 60,
+                "end": 65
+              },
+              {
+                "role": "move",
+                "file": "main.fy",
+                "start": 86,
+                "end": 91
+              }
+            ]
+          }
+        ],
+        "diagnostics": [
+          {
+            "file": "main.fy",
+            "code": 1101,
+            "start": 102,
+            "end": 107,
+            "related": [
+              {
+                "role": "declaration",
+                "file": "main.fy",
+                "start": 60,
+                "end": 65
+              },
+              {
+                "role": "move",
+                "file": "main.fy",
+                "start": 86,
+                "end": 91
+              }
+            ]
+          }
+        ],
+        "stdout": "",
+        "stderr": "main.fy:1:103: error: E1101 resource used after move (bytes 102..107)\n  declaration: main.fy (bytes 60..65)\n  move: main.fy (bytes 86..91)\n"
+      },
+      {
+        "index": 24,
+        "name": "short circuit mismatch",
+        "exit": 3,
+        "matched": true,
+        "reference": [
+          {
+            "file": "main.fy",
+            "code": 1104,
+            "start": 281,
+            "end": 301,
+            "related": [
+              {
+                "role": "declaration",
+                "file": "main.fy",
+                "start": 260,
+                "end": 265
+              },
+              {
+                "role": "move",
+                "file": "main.fy",
+                "start": 295,
+                "end": 300
+              }
+            ]
+          }
+        ],
+        "diagnostics": [
+          {
+            "file": "main.fy",
+            "code": 1104,
+            "start": 281,
+            "end": 301,
+            "related": [
+              {
+                "role": "declaration",
+                "file": "main.fy",
+                "start": 260,
+                "end": 265
+              },
+              {
+                "role": "move",
+                "file": "main.fy",
+                "start": 295,
+                "end": 300
+              }
+            ]
+          }
+        ],
+        "stdout": "",
+        "stderr": "main.fy:1:282: error: E1104 inconsistent resource states at join (bytes 281..301)\n  declaration: main.fy (bytes 260..265)\n  move: main.fy (bytes 295..300)\n"
+      },
+      {
+        "index": 25,
+        "name": "short circuit exited",
+        "exit": 0,
+        "matched": true,
+        "reference": [],
+        "diagnostics": [],
+        "stdout": "return origins ok\n",
+        "stderr": ""
+      },
+      {
+        "index": 26,
+        "name": "conditional transfer",
+        "exit": 3,
+        "matched": true,
+        "reference": [
+          {
+            "file": "main.fy",
+            "code": 1101,
+            "start": 324,
+            "end": 329,
+            "related": [
+              {
+                "role": "declaration",
+                "file": "main.fy",
+                "start": 260,
+                "end": 265
+              },
+              {
+                "role": "move",
+                "file": "main.fy",
+                "start": 294,
+                "end": 299
+              }
+            ]
+          }
+        ],
+        "diagnostics": [
+          {
+            "file": "main.fy",
+            "code": 1101,
+            "start": 324,
+            "end": 329,
+            "related": [
+              {
+                "role": "declaration",
+                "file": "main.fy",
+                "start": 260,
+                "end": 265
+              },
+              {
+                "role": "move",
+                "file": "main.fy",
+                "start": 294,
+                "end": 299
+              }
+            ]
+          }
+        ],
+        "stdout": "",
+        "stderr": "main.fy:1:325: error: E1101 resource used after move (bytes 324..329)\n  declaration: main.fy (bytes 260..265)\n  move: main.fy (bytes 294..299)\n"
+      },
+      {
+        "index": 27,
+        "name": "tail transfer",
+        "exit": 0,
+        "matched": true,
+        "reference": [],
+        "diagnostics": [],
+        "stdout": "return origins ok\n",
+        "stderr": ""
+      },
+      {
+        "index": 28,
+        "name": "tail transfer double",
+        "exit": 3,
+        "matched": true,
+        "reference": [
+          {
+            "file": "main.fy",
+            "code": 1101,
+            "start": 287,
+            "end": 292,
+            "related": [
+              {
+                "role": "declaration",
+                "file": "main.fy",
+                "start": 255,
+                "end": 260
+              },
+              {
+                "role": "move",
+                "file": "main.fy",
+                "start": 273,
+                "end": 278
+              }
+            ]
+          }
+        ],
+        "diagnostics": [
+          {
+            "file": "main.fy",
+            "code": 1101,
+            "start": 287,
+            "end": 292,
+            "related": [
+              {
+                "role": "declaration",
+                "file": "main.fy",
+                "start": 255,
+                "end": 260
+              },
+              {
+                "role": "move",
+                "file": "main.fy",
+                "start": 273,
+                "end": 278
+              }
+            ]
+          }
+        ],
+        "stdout": "",
+        "stderr": "main.fy:1:288: error: E1101 resource used after move (bytes 287..292)\n  declaration: main.fy (bytes 255..260)\n  move: main.fy (bytes 273..278)\n"
+      },
+      {
+        "index": 29,
+        "name": "nested loop break",
+        "exit": 0,
+        "matched": true,
+        "reference": [],
+        "diagnostics": [],
+        "stdout": "return origins ok\n",
+        "stderr": ""
+      },
+      {
+        "index": 30,
+        "name": "nested loop mismatch",
+        "exit": 3,
+        "matched": true,
+        "reference": [
+          {
+            "file": "main.fy",
+            "code": 1105,
+            "start": 282,
+            "end": 310,
+            "related": [
+              {
+                "role": "declaration",
+                "file": "main.fy",
+                "start": 260,
+                "end": 265
+              },
+              {
+                "role": "loop-header",
+                "file": "main.fy",
+                "start": 282,
+                "end": 289
+              },
+              {
+                "role": "move",
+                "file": "main.fy",
+                "start": 296,
+                "end": 301
+              }
+            ]
+          }
+        ],
+        "diagnostics": [
+          {
+            "file": "main.fy",
+            "code": 1105,
+            "start": 282,
+            "end": 310,
+            "related": [
+              {
+                "role": "declaration",
+                "file": "main.fy",
+                "start": 260,
+                "end": 265
+              },
+              {
+                "role": "loop-header",
+                "file": "main.fy",
+                "start": 282,
+                "end": 289
+              },
+              {
+                "role": "move",
+                "file": "main.fy",
+                "start": 296,
+                "end": 301
+              }
+            ]
+          }
+        ],
+        "stdout": "",
+        "stderr": "main.fy:1:283: error: E1105 inconsistent resource states at loop edge (bytes 282..310)\n  declaration: main.fy (bytes 260..265)\n  loop-header: main.fy (bytes 282..289)\n  move: main.fy (bytes 296..301)\n"
+      },
+      {
+        "index": 31,
+        "name": "continue restore",
+        "exit": 0,
+        "matched": true,
+        "reference": [],
+        "diagnostics": [],
+        "stdout": "return origins ok\n",
+        "stderr": ""
+      },
+      {
+        "index": 32,
+        "name": "continue mismatch",
+        "exit": 3,
+        "matched": true,
+        "reference": [
+          {
+            "file": "main.fy",
+            "code": 1105,
+            "start": 273,
+            "end": 304,
+            "related": [
+              {
+                "role": "declaration",
+                "file": "main.fy",
+                "start": 260,
+                "end": 265
+              },
+              {
+                "role": "loop-header",
+                "file": "main.fy",
+                "start": 273,
+                "end": 280
+              },
+              {
+                "role": "move",
+                "file": "main.fy",
+                "start": 287,
+                "end": 292
+              }
+            ]
+          }
+        ],
+        "diagnostics": [
+          {
+            "file": "main.fy",
+            "code": 1105,
+            "start": 273,
+            "end": 304,
+            "related": [
+              {
+                "role": "declaration",
+                "file": "main.fy",
+                "start": 260,
+                "end": 265
+              },
+              {
+                "role": "loop-header",
+                "file": "main.fy",
+                "start": 273,
+                "end": 280
+              },
+              {
+                "role": "move",
+                "file": "main.fy",
+                "start": 287,
+                "end": 292
+              }
+            ]
+          }
+        ],
+        "stdout": "",
+        "stderr": "main.fy:1:274: error: E1105 inconsistent resource states at loop edge (bytes 273..304)\n  declaration: main.fy (bytes 260..265)\n  loop-header: main.fy (bytes 273..280)\n  move: main.fy (bytes 287..292)\n"
+      },
+      {
+        "index": 33,
+        "name": "for mismatch",
+        "exit": 3,
+        "matched": true,
+        "reference": [
+          {
+            "file": "main.fy",
+            "code": 1105,
+            "start": 273,
+            "end": 312,
+            "related": [
+              {
+                "role": "declaration",
+                "file": "main.fy",
+                "start": 260,
+                "end": 265
+              },
+              {
+                "role": "loop-header",
+                "file": "main.fy",
+                "start": 273,
+                "end": 292
+              },
+              {
+                "role": "move",
+                "file": "main.fy",
+                "start": 304,
+                "end": 309
+              }
+            ]
+          }
+        ],
+        "diagnostics": [
+          {
+            "file": "main.fy",
+            "code": 1105,
+            "start": 273,
+            "end": 312,
+            "related": [
+              {
+                "role": "declaration",
+                "file": "main.fy",
+                "start": 260,
+                "end": 265
+              },
+              {
+                "role": "loop-header",
+                "file": "main.fy",
+                "start": 273,
+                "end": 292
+              },
+              {
+                "role": "move",
+                "file": "main.fy",
+                "start": 304,
+                "end": 309
+              }
+            ]
+          }
+        ],
+        "stdout": "",
+        "stderr": "main.fy:1:274: error: E1105 inconsistent resource states at loop edge (bytes 273..312)\n  declaration: main.fy (bytes 260..265)\n  loop-header: main.fy (bytes 273..292)\n  move: main.fy (bytes 304..309)\n"
+      },
+      {
+        "index": 34,
+        "name": "for restore",
+        "exit": 0,
+        "matched": true,
+        "reference": [],
+        "diagnostics": [],
+        "stdout": "return origins ok\n",
+        "stderr": ""
+      },
+      {
+        "index": 35,
+        "name": "branch return move",
+        "exit": 0,
+        "matched": true,
+        "reference": [],
+        "diagnostics": [],
+        "stdout": "return origins ok\n",
+        "stderr": ""
+      },
+      {
+        "index": 36,
+        "name": "result capture",
+        "exit": 3,
+        "matched": true,
+        "reference": [
+          {
+            "file": "main.fy",
+            "code": 1101,
+            "start": 327,
+            "end": 328,
+            "related": [
+              {
+                "role": "declaration",
+                "file": "main.fy",
+                "start": 310,
+                "end": 311
+              },
+              {
+                "role": "move",
+                "file": "main.fy",
+                "start": 319,
+                "end": 320
+              }
+            ]
+          }
+        ],
+        "diagnostics": [
+          {
+            "file": "main.fy",
+            "code": 1101,
+            "start": 327,
+            "end": 328,
+            "related": [
+              {
+                "role": "declaration",
+                "file": "main.fy",
+                "start": 310,
+                "end": 311
+              },
+              {
+                "role": "move",
+                "file": "main.fy",
+                "start": 319,
+                "end": 320
+              }
+            ]
+          }
+        ],
+        "stdout": "",
+        "stderr": "main.fy:1:328: error: E1101 resource used after move (bytes 327..328)\n  declaration: main.fy (bytes 310..311)\n  move: main.fy (bytes 319..320)\n"
+      },
+      {
+        "index": 37,
+        "name": "option scope shadow",
+        "exit": 0,
+        "matched": true,
+        "reference": [],
+        "diagnostics": [],
+        "stdout": "return origins ok\n",
+        "stderr": ""
+      },
+      {
+        "index": 38,
+        "name": "discard read",
+        "exit": 0,
+        "matched": true,
+        "reference": [],
+        "diagnostics": [],
+        "stdout": "return origins ok\n",
+        "stderr": ""
+      },
+      {
+        "index": 39,
+        "name": "burn transfer",
+        "exit": 3,
+        "matched": true,
+        "reference": [
+          {
+            "file": "main.fy",
+            "code": 1101,
+            "start": 127,
+            "end": 132,
+            "related": [
+              {
+                "role": "declaration",
+                "file": "main.fy",
+                "start": 86,
+                "end": 91
+              },
+              {
+                "role": "move",
+                "file": "main.fy",
+                "start": 113,
+                "end": 118
+              }
+            ]
+          }
+        ],
+        "diagnostics": [
+          {
+            "file": "main.fy",
+            "code": 1101,
+            "start": 127,
+            "end": 132,
+            "related": [
+              {
+                "role": "declaration",
+                "file": "main.fy",
+                "start": 86,
+                "end": 91
+              },
+              {
+                "role": "move",
+                "file": "main.fy",
+                "start": 113,
+                "end": 118
+              }
+            ]
+          }
+        ],
+        "stdout": "",
+        "stderr": "main.fy:1:128: error: E1101 resource used after move (bytes 127..132)\n  declaration: main.fy (bytes 86..91)\n  move: main.fy (bytes 113..118)\n"
+      },
+      {
+        "index": 40,
+        "name": "record transfer",
+        "exit": 3,
+        "matched": true,
+        "reference": [
+          {
+            "file": "main.fy",
+            "code": 1101,
+            "start": 346,
+            "end": 351,
+            "related": [
+              {
+                "role": "declaration",
+                "file": "main.fy",
+                "start": 292,
+                "end": 297
+              },
+              {
+                "role": "move",
+                "file": "main.fy",
+                "start": 327,
+                "end": 332
+              }
+            ]
+          }
+        ],
+        "diagnostics": [
+          {
+            "file": "main.fy",
+            "code": 1101,
+            "start": 346,
+            "end": 351,
+            "related": [
+              {
+                "role": "declaration",
+                "file": "main.fy",
+                "start": 292,
+                "end": 297
+              },
+              {
+                "role": "move",
+                "file": "main.fy",
+                "start": 327,
+                "end": 332
+              }
+            ]
+          }
+        ],
+        "stdout": "",
+        "stderr": "main.fy:1:347: error: E1101 resource used after move (bytes 346..351)\n  declaration: main.fy (bytes 292..297)\n  move: main.fy (bytes 327..332)\n"
+      },
+      {
+        "index": 41,
+        "name": "partial field move",
+        "exit": 3,
+        "matched": true,
+        "reference": [
+          {
+            "file": "main.fy",
+            "code": 1103,
+            "start": 317,
+            "end": 323,
+            "related": [
+              {
+                "role": "field",
+                "file": "main.fy",
+                "start": 252,
+                "end": 253
+              },
+              {
+                "role": "owner",
+                "file": "main.fy",
+                "start": 291,
+                "end": 295
+              }
+            ]
+          }
+        ],
+        "diagnostics": [
+          {
+            "file": "main.fy",
+            "code": 1103,
+            "start": 317,
+            "end": 323,
+            "related": [
+              {
+                "role": "field",
+                "file": "main.fy",
+                "start": 252,
+                "end": 253
+              },
+              {
+                "role": "owner",
+                "file": "main.fy",
+                "start": 291,
+                "end": 295
+              }
+            ]
+          }
+        ],
+        "stdout": "",
+        "stderr": "main.fy:1:318: error: E1103 partial resource field move (bytes 317..323)\n  field: main.fy (bytes 252..253)\n  owner: main.fy (bytes 291..295)\n"
+      },
+      {
+        "index": 42,
+        "name": "cleanup consumes",
+        "exit": 3,
+        "matched": true,
+        "reference": [
+          {
+            "file": "main.fy",
+            "code": 1102,
+            "start": 50,
+            "end": 54,
+            "related": [
+              {
+                "role": "declaration",
+                "file": "main.fy",
+                "start": 37,
+                "end": 57
+              },
+              {
+                "role": "move",
+                "file": "main.fy",
+                "start": 50,
+                "end": 54
+              }
+            ]
+          }
+        ],
+        "diagnostics": [
+          {
+            "file": "main.fy",
+            "code": 1102,
+            "start": 50,
+            "end": 54,
+            "related": [
+              {
+                "role": "declaration",
+                "file": "main.fy",
+                "start": 37,
+                "end": 57
+              },
+              {
+                "role": "move",
+                "file": "main.fy",
+                "start": 50,
+                "end": 54
+              }
+            ]
+          }
+        ],
+        "stdout": "",
+        "stderr": "main.fy:1:51: error: E1102 cleanup receiver consumed (bytes 50..54)\n  declaration: main.fy (bytes 37..57)\n  move: main.fy (bytes 50..54)\n"
+      },
+      {
+        "index": 43,
+        "name": "cleanup consumes branch",
+        "exit": 3,
+        "matched": true,
+        "reference": [
+          {
+            "file": "main.fy",
+            "code": 1104,
+            "start": 45,
+            "end": 72,
+            "related": [
+              {
+                "role": "declaration",
+                "file": "main.fy",
+                "start": 37,
+                "end": 74
+              },
+              {
+                "role": "move",
+                "file": "main.fy",
+                "start": 59,
+                "end": 63
+              }
+            ]
+          },
+          {
+            "file": "main.fy",
+            "code": 1102,
+            "start": 59,
+            "end": 63,
+            "related": [
+              {
+                "role": "declaration",
+                "file": "main.fy",
+                "start": 37,
+                "end": 74
+              },
+              {
+                "role": "move",
+                "file": "main.fy",
+                "start": 59,
+                "end": 63
+              }
+            ]
+          }
+        ],
+        "diagnostics": [
+          {
+            "file": "main.fy",
+            "code": 1104,
+            "start": 45,
+            "end": 72,
+            "related": [
+              {
+                "role": "declaration",
+                "file": "main.fy",
+                "start": 37,
+                "end": 74
+              },
+              {
+                "role": "move",
+                "file": "main.fy",
+                "start": 59,
+                "end": 63
+              }
+            ]
+          },
+          {
+            "file": "main.fy",
+            "code": 1102,
+            "start": 59,
+            "end": 63,
+            "related": [
+              {
+                "role": "declaration",
+                "file": "main.fy",
+                "start": 37,
+                "end": 74
+              },
+              {
+                "role": "move",
+                "file": "main.fy",
+                "start": 59,
+                "end": 63
+              }
+            ]
+          }
+        ],
+        "stdout": "",
+        "stderr": "main.fy:1:46: error: E1104 inconsistent resource states at join (bytes 45..72)\n  declaration: main.fy (bytes 37..74)\n  move: main.fy (bytes 59..63)\nmain.fy:1:60: error: E1102 cleanup receiver consumed (bytes 59..63)\n  declaration: main.fy (bytes 37..74)\n  move: main.fy (bytes 59..63)\n"
+      },
+      {
+        "index": 44,
+        "name": "dead borrow",
+        "exit": 3,
+        "matched": true,
+        "reference": [
+          {
+            "file": "main.fy",
+            "code": 1101,
+            "start": 305,
+            "end": 310,
+            "related": [
+              {
+                "role": "declaration",
+                "file": "main.fy",
+                "start": 260,
+                "end": 265
+              },
+              {
+                "role": "move",
+                "file": "main.fy",
+                "start": 278,
+                "end": 283
+              }
+            ]
+          }
+        ],
+        "diagnostics": [
+          {
+            "file": "main.fy",
+            "code": 1101,
+            "start": 305,
+            "end": 310,
+            "related": [
+              {
+                "role": "declaration",
+                "file": "main.fy",
+                "start": 260,
+                "end": 265
+              },
+              {
+                "role": "move",
+                "file": "main.fy",
+                "start": 278,
+                "end": 283
+              }
+            ]
+          }
+        ],
+        "stdout": "",
+        "stderr": "main.fy:1:306: error: E1101 resource used after move (bytes 305..310)\n  declaration: main.fy (bytes 260..265)\n  move: main.fy (bytes 278..283)\n"
+      },
+      {
+        "index": 45,
+        "name": "dead field write",
+        "exit": 3,
+        "matched": true,
+        "reference": [
+          {
+            "file": "main.fy",
+            "code": 1101,
+            "start": 285,
+            "end": 290,
+            "related": [
+              {
+                "role": "declaration",
+                "file": "main.fy",
+                "start": 260,
+                "end": 265
+              },
+              {
+                "role": "move",
+                "file": "main.fy",
+                "start": 278,
+                "end": 283
+              }
+            ]
+          }
+        ],
+        "diagnostics": [
+          {
+            "file": "main.fy",
+            "code": 1101,
+            "start": 285,
+            "end": 290,
+            "related": [
+              {
+                "role": "declaration",
+                "file": "main.fy",
+                "start": 260,
+                "end": 265
+              },
+              {
+                "role": "move",
+                "file": "main.fy",
+                "start": 278,
+                "end": 283
+              }
+            ]
+          }
+        ],
+        "stdout": "",
+        "stderr": "main.fy:1:286: error: E1101 resource used after move (bytes 285..290)\n  declaration: main.fy (bytes 260..265)\n  move: main.fy (bytes 278..283)\n"
+      },
+      {
+        "index": 46,
+        "name": "dead repeat restore",
+        "exit": 3,
+        "matched": true,
+        "reference": [
+          {
+            "file": "main.fy",
+            "code": 1105,
+            "start": 285,
+            "end": 308,
+            "related": [
+              {
+                "role": "declaration",
+                "file": "main.fy",
+                "start": 260,
+                "end": 265
+              },
+              {
+                "role": "loop-header",
+                "file": "main.fy",
+                "start": 285,
+                "end": 292
+              }
+            ]
+          },
+          {
+            "file": "main.fy",
+            "code": 1101,
+            "start": 320,
+            "end": 325,
+            "related": [
+              {
+                "role": "declaration",
+                "file": "main.fy",
+                "start": 260,
+                "end": 265
+              },
+              {
+                "role": "move",
+                "file": "main.fy",
+                "start": 278,
+                "end": 283
+              }
+            ]
+          }
+        ],
+        "diagnostics": [
+          {
+            "file": "main.fy",
+            "code": 1105,
+            "start": 285,
+            "end": 308,
+            "related": [
+              {
+                "role": "declaration",
+                "file": "main.fy",
+                "start": 260,
+                "end": 265
+              },
+              {
+                "role": "loop-header",
+                "file": "main.fy",
+                "start": 285,
+                "end": 292
+              }
+            ]
+          },
+          {
+            "file": "main.fy",
+            "code": 1101,
+            "start": 320,
+            "end": 325,
+            "related": [
+              {
+                "role": "declaration",
+                "file": "main.fy",
+                "start": 260,
+                "end": 265
+              },
+              {
+                "role": "move",
+                "file": "main.fy",
+                "start": 278,
+                "end": 283
+              }
+            ]
+          }
+        ],
+        "stdout": "",
+        "stderr": "main.fy:1:286: error: E1105 inconsistent resource states at loop edge (bytes 285..308)\n  declaration: main.fy (bytes 260..265)\n  loop-header: main.fy (bytes 285..292)\nmain.fy:1:321: error: E1101 resource used after move (bytes 320..325)\n  declaration: main.fy (bytes 260..265)\n  move: main.fy (bytes 278..283)\n"
+      },
+      {
+        "index": 47,
+        "name": "borrowed partial field",
+        "exit": 3,
+        "matched": true,
+        "reference": [
+          {
+            "file": "main.fy",
+            "code": 1103,
+            "start": 294,
+            "end": 300,
+            "related": [
+              {
+                "role": "field",
+                "file": "main.fy",
+                "start": 252,
+                "end": 253
+              },
+              {
+                "role": "owner",
+                "file": "main.fy",
+                "start": 283,
+                "end": 287
+              }
+            ]
+          }
+        ],
+        "diagnostics": [
+          {
+            "file": "main.fy",
+            "code": 1103,
+            "start": 294,
+            "end": 300,
+            "related": [
+              {
+                "role": "field",
+                "file": "main.fy",
+                "start": 252,
+                "end": 253
+              },
+              {
+                "role": "owner",
+                "file": "main.fy",
+                "start": 283,
+                "end": 287
+              }
+            ]
+          }
+        ],
+        "stdout": "",
+        "stderr": "main.fy:1:295: error: E1103 partial resource field move (bytes 294..300)\n  field: main.fy (bytes 252..253)\n  owner: main.fy (bytes 283..287)\n"
+      },
+      {
+        "index": 48,
+        "name": "provider partial field",
+        "exit": 3,
+        "matched": true,
+        "reference": [
+          {
+            "file": "provider.fy",
+            "code": 1103,
+            "start": 162,
+            "end": 168,
+            "related": [
+              {
+                "role": "field",
+                "file": "provider.fy",
+                "start": 67,
+                "end": 68
+              },
+              {
+                "role": "owner",
+                "file": "provider.fy",
+                "start": 131,
+                "end": 135
+              }
+            ]
+          }
+        ],
+        "diagnostics": [
+          {
+            "file": "provider.fy",
+            "code": 1103,
+            "start": 162,
+            "end": 168,
+            "related": [
+              {
+                "role": "field",
+                "file": "provider.fy",
+                "start": 67,
+                "end": 68
+              },
+              {
+                "role": "owner",
+                "file": "provider.fy",
+                "start": 131,
+                "end": 135
+              }
+            ]
+          }
+        ],
+        "stdout": "",
+        "stderr": "provider.fy:1:163: error: E1103 partial resource field move (bytes 162..168)\n  field: provider.fy (bytes 67..68)\n  owner: provider.fy (bytes 131..135)\n"
+      },
+      {
+        "index": 49,
+        "name": "generic transfer",
+        "exit": 3,
+        "matched": true,
+        "reference": [
+          {
+            "file": "main.fy",
+            "code": 1101,
+            "start": 348,
+            "end": 353,
+            "related": [
+              {
+                "role": "declaration",
+                "file": "main.fy",
+                "start": 296,
+                "end": 301
+              },
+              {
+                "role": "move",
+                "file": "main.fy",
+                "start": 329,
+                "end": 334
+              }
+            ]
+          }
+        ],
+        "diagnostics": [
+          {
+            "file": "main.fy",
+            "code": 1101,
+            "start": 348,
+            "end": 353,
+            "related": [
+              {
+                "role": "declaration",
+                "file": "main.fy",
+                "start": 296,
+                "end": 301
+              },
+              {
+                "role": "move",
+                "file": "main.fy",
+                "start": 329,
+                "end": 334
+              }
+            ]
+          }
+        ],
+        "stdout": "",
+        "stderr": "main.fy:1:349: error: E1101 resource used after move (bytes 348..353)\n  declaration: main.fy (bytes 296..301)\n  move: main.fy (bytes 329..334)\n"
+      },
+      {
+        "index": 50,
+        "name": "empty for mismatch",
+        "exit": 3,
+        "matched": true,
+        "reference": [
+          {
+            "file": "main.fy",
+            "code": 1105,
+            "start": 267,
+            "end": 288,
+            "related": [
+              {
+                "role": "declaration",
+                "file": "main.fy",
+                "start": 254,
+                "end": 259
+              },
+              {
+                "role": "loop-header",
+                "file": "main.fy",
+                "start": 267,
+                "end": 288
+              },
+              {
+                "role": "move",
+                "file": "main.fy",
+                "start": 280,
+                "end": 285
+              }
+            ]
+          }
+        ],
+        "diagnostics": [
+          {
+            "file": "main.fy",
+            "code": 1105,
+            "start": 267,
+            "end": 288,
+            "related": [
+              {
+                "role": "declaration",
+                "file": "main.fy",
+                "start": 254,
+                "end": 259
+              },
+              {
+                "role": "loop-header",
+                "file": "main.fy",
+                "start": 267,
+                "end": 288
+              },
+              {
+                "role": "move",
+                "file": "main.fy",
+                "start": 280,
+                "end": 285
+              }
+            ]
+          }
+        ],
+        "stdout": "",
+        "stderr": "main.fy:1:268: error: E1105 inconsistent resource states at loop edge (bytes 267..288)\n  declaration: main.fy (bytes 254..259)\n  loop-header: main.fy (bytes 267..288)\n  move: main.fy (bytes 280..285)\n"
+      },
+      {
+        "index": 51,
+        "name": "iteration mismatch",
+        "exit": 3,
+        "matched": true,
+        "reference": [
+          {
+            "file": "main.fy",
+            "code": 1105,
+            "start": 309,
+            "end": 343,
+            "related": [
+              {
+                "role": "declaration",
+                "file": "main.fy",
+                "start": 254,
+                "end": 259
+              },
+              {
+                "role": "loop-header",
+                "file": "main.fy",
+                "start": 309,
+                "end": 328
+              },
+              {
+                "role": "move",
+                "file": "main.fy",
+                "start": 335,
+                "end": 340
+              }
+            ]
+          }
+        ],
+        "diagnostics": [
+          {
+            "file": "main.fy",
+            "code": 1105,
+            "start": 309,
+            "end": 343,
+            "related": [
+              {
+                "role": "declaration",
+                "file": "main.fy",
+                "start": 254,
+                "end": 259
+              },
+              {
+                "role": "loop-header",
+                "file": "main.fy",
+                "start": 309,
+                "end": 328
+              },
+              {
+                "role": "move",
+                "file": "main.fy",
+                "start": 335,
+                "end": 340
+              }
+            ]
+          }
+        ],
+        "stdout": "",
+        "stderr": "main.fy:1:310: error: E1105 inconsistent resource states at loop edge (bytes 309..343)\n  declaration: main.fy (bytes 254..259)\n  loop-header: main.fy (bytes 309..328)\n  move: main.fy (bytes 335..340)\n"
+      },
+      {
+        "index": 52,
+        "name": "branch local moved",
+        "exit": 3,
+        "matched": true,
+        "reference": [
+          {
+            "file": "main.fy",
+            "code": 1101,
+            "start": 296,
+            "end": 301,
+            "related": [
+              {
+                "role": "declaration",
+                "file": "main.fy",
+                "start": 266,
+                "end": 271
+              },
+              {
+                "role": "move",
+                "file": "main.fy",
+                "start": 284,
+                "end": 289
+              }
+            ]
+          }
+        ],
+        "diagnostics": [
+          {
+            "file": "main.fy",
+            "code": 1101,
+            "start": 296,
+            "end": 301,
+            "related": [
+              {
+                "role": "declaration",
+                "file": "main.fy",
+                "start": 266,
+                "end": 271
+              },
+              {
+                "role": "move",
+                "file": "main.fy",
+                "start": 284,
+                "end": 289
+              }
+            ]
+          }
+        ],
+        "stdout": "",
+        "stderr": "main.fy:1:297: error: E1101 resource used after move (bytes 296..301)\n  declaration: main.fy (bytes 266..271)\n  move: main.fy (bytes 284..289)\n"
+      },
+      {
+        "index": 53,
+        "name": "two dead owners",
+        "exit": 3,
+        "matched": true,
+        "reference": [
+          {
+            "file": "main.fy",
+            "code": 1101,
+            "start": 310,
+            "end": 311,
+            "related": [
+              {
+                "role": "declaration",
+                "file": "main.fy",
+                "start": 254,
+                "end": 255
+              },
+              {
+                "role": "move",
+                "file": "main.fy",
+                "start": 287,
+                "end": 288
+              }
+            ]
+          },
+          {
+            "file": "main.fy",
+            "code": 1101,
+            "start": 325,
+            "end": 326,
+            "related": [
+              {
+                "role": "declaration",
+                "file": "main.fy",
+                "start": 273,
+                "end": 274
+              },
+              {
+                "role": "move",
+                "file": "main.fy",
+                "start": 295,
+                "end": 296
+              }
+            ]
+          }
+        ],
+        "diagnostics": [
+          {
+            "file": "main.fy",
+            "code": 1101,
+            "start": 310,
+            "end": 311,
+            "related": [
+              {
+                "role": "declaration",
+                "file": "main.fy",
+                "start": 254,
+                "end": 255
+              },
+              {
+                "role": "move",
+                "file": "main.fy",
+                "start": 287,
+                "end": 288
+              }
+            ]
+          },
+          {
+            "file": "main.fy",
+            "code": 1101,
+            "start": 325,
+            "end": 326,
+            "related": [
+              {
+                "role": "declaration",
+                "file": "main.fy",
+                "start": 273,
+                "end": 274
+              },
+              {
+                "role": "move",
+                "file": "main.fy",
+                "start": 295,
+                "end": 296
+              }
+            ]
+          }
+        ],
+        "stdout": "",
+        "stderr": "main.fy:1:311: error: E1101 resource used after move (bytes 310..311)\n  declaration: main.fy (bytes 254..255)\n  move: main.fy (bytes 287..288)\nmain.fy:1:326: error: E1101 resource used after move (bytes 325..326)\n  declaration: main.fy (bytes 273..274)\n  move: main.fy (bytes 295..296)\n"
+      },
+      {
+        "index": 54,
+        "name": "cast boundary: raw cast is not a safe call loan",
+        "exit": 0,
+        "matched": true,
+        "reference": [],
+        "diagnostics": [],
+        "stdout": "return origins ok\n",
+        "stderr": ""
+      },
+      {
+        "index": 55,
+        "name": "cast boundary: raw cast checks borrow creation",
+        "exit": 3,
+        "matched": true,
+        "reference": [
+          {
+            "file": "main.fy",
+            "code": 2101,
+            "start": 179,
+            "end": 188,
+            "related": [
+              {
+                "role": "last-use",
+                "file": "main.fy",
+                "start": 224,
+                "end": 225
+              },
+              {
+                "role": "loan",
+                "file": "main.fy",
+                "start": 152,
+                "end": 157
+              }
+            ]
+          }
+        ],
+        "diagnostics": [
+          {
+            "file": "main.fy",
+            "code": 2101,
+            "start": 179,
+            "end": 188,
+            "related": [
+              {
+                "role": "last-use",
+                "file": "main.fy",
+                "start": 224,
+                "end": 225
+              },
+              {
+                "role": "loan",
+                "file": "main.fy",
+                "start": 152,
+                "end": 157
+              }
+            ]
+          }
+        ],
+        "stdout": "",
+        "stderr": "main.fy:1:180: error: E2101 borrow conflicts with live loan (bytes 179..188)\n  loan: main.fy (bytes 152..157)\n  last-use: main.fy (bytes 224..225)\n"
+      },
+      {
+        "index": 56,
+        "name": "field target after RHS transfer owner",
+        "exit": 3,
+        "matched": true,
+        "reference": [
+          {
+            "file": "main.fy",
+            "code": 1101,
+            "start": 105,
+            "end": 110,
+            "related": [
+              {
+                "role": "declaration",
+                "file": "main.fy",
+                "start": 91,
+                "end": 96
+              },
+              {
+                "role": "move",
+                "file": "main.fy",
+                "start": 121,
+                "end": 126
+              }
+            ]
+          }
+        ],
+        "diagnostics": [
+          {
+            "file": "main.fy",
+            "code": 1101,
+            "start": 105,
+            "end": 110,
+            "related": [
+              {
+                "role": "declaration",
+                "file": "main.fy",
+                "start": 91,
+                "end": 96
+              },
+              {
+                "role": "move",
+                "file": "main.fy",
+                "start": 121,
+                "end": 126
+              }
+            ]
+          }
+        ],
+        "stdout": "",
+        "stderr": "main.fy:1:106: error: E1101 resource used after move (bytes 105..110)\n  declaration: main.fy (bytes 91..96)\n  move: main.fy (bytes 121..126)\n"
+      },
+      {
+        "index": 57,
+        "name": "field target after RHS transfer (owner)",
+        "exit": 3,
+        "matched": true,
+        "reference": [
+          {
+            "file": "main.fy",
+            "code": 1101,
+            "start": 106,
+            "end": 111,
+            "related": [
+              {
+                "role": "declaration",
+                "file": "main.fy",
+                "start": 91,
+                "end": 96
+              },
+              {
+                "role": "move",
+                "file": "main.fy",
+                "start": 123,
+                "end": 128
+              }
+            ]
+          }
+        ],
+        "diagnostics": [
+          {
+            "file": "main.fy",
+            "code": 1101,
+            "start": 106,
+            "end": 111,
+            "related": [
+              {
+                "role": "declaration",
+                "file": "main.fy",
+                "start": 91,
+                "end": 96
+              },
+              {
+                "role": "move",
+                "file": "main.fy",
+                "start": 123,
+                "end": 128
+              }
+            ]
+          }
+        ],
+        "stdout": "",
+        "stderr": "main.fy:1:107: error: E1101 resource used after move (bytes 106..111)\n  declaration: main.fy (bytes 91..96)\n  move: main.fy (bytes 123..128)\n"
+      }
+    ]
+  },
+  "native": {
+    "schemaVersion": "fairyc.test-report/v4",
+    "engine": "native",
+    "target": "x86_64-windows-msvc",
+    "profile": "development",
+    "tests": [
+      {
+        "identity": "tests::module_unit_moves::move_facts_own_binding_identity_and_scope_transitions",
+        "outcome": "passed",
+        "trapCategory": null,
+        "stdoutBase64": "",
+        "stderrBase64": ""
+      },
+      {
+        "identity": "tests::module_unit_moves::resource_transfers_follow_reachable_branches_and_loop_edges",
+        "outcome": "passed",
+        "trapCategory": null,
+        "stdoutBase64": "Y2FzZSAwIDAgMApjYXNlIDEgMyAxCmRpYWdub3N0aWMgMTEwMSAwIDMwNiAzMTEgMgpyZWxhdGVkIDcgMCAyNjAgMjY1CnJlbGF0ZWQgOCAwIDI4OCAyOTMKY2FzZSAyIDMgMQpkaWFnbm9zdGljIDExMDEgMCAyOTAgMjk1IDIKcmVsYXRlZCA3IDAgMjYwIDI2NQpyZWxhdGVkIDggMCAyNzggMjgzCmNhc2UgMyAwIDAKY2FzZSA0IDAgMApjYXNlIDUgMyAxCmRpYWdub3N0aWMgMTEwMSAwIDMwOCAzMTMgMgpyZWxhdGVkIDcgMCAyNjAgMjY1CnJlbGF0ZWQgOCAwIDI4OSAyOTQKY2FzZSA2IDMgMQpkaWFnbm9zdGljIDExMDEgMCAyOTMgMjk4IDIKcmVsYXRlZCA3IDAgMjYwIDI2NQpyZWxhdGVkIDggMCAyNzggMjgzCmNhc2UgNyAzIDEKZGlhZ25vc3RpYyAxMTA0IDAgMjczIDI5MiAyCnJlbGF0ZWQgNyAwIDI2MCAyNjUKcmVsYXRlZCA4IDAgMjg0IDI4OQpjYXNlIDggMCAwCmNhc2UgOSAwIDAKY2FzZSAxMCAwIDAKY2FzZSAxMSAzIDEKZGlhZ25vc3RpYyAxMTA0IDAgMjczIDI5MiAyCnJlbGF0ZWQgNyAwIDI2MCAyNjUKcmVsYXRlZCA4IDAgMjg0IDI4OQpjYXNlIDEyIDMgMQpkaWFnbm9zdGljIDExMDUgMCAyNzMgMjk1IDMKcmVsYXRlZCA3IDAgMjYwIDI2NQpyZWxhdGVkIDkgMCAyNzMgMjgwCnJlbGF0ZWQgOCAwIDI4NyAyOTIKY2FzZSAxMyAwIDAKY2FzZSAxNCAzIDEKZGlhZ25vc3RpYyAxMTA1IDAgMjczIDMwMSAzCnJlbGF0ZWQgNyAwIDI2MCAyNjUKcmVsYXRlZCA5IDAgMjczIDI4MApyZWxhdGVkIDggMCAyODcgMjkyCmNhc2UgMTUgMCAwCmNhc2UgMTYgMyAxCmRpYWdub3N0aWMgMTEwMSAwIDI4OCAyOTMgMgpyZWxhdGVkIDcgMCAyNjAgMjY1CnJlbGF0ZWQgOCAwIDI4OCAyOTMKY2FzZSAxNyAwIDAKY2FzZSAxOCAzIDEKZGlhZ25vc3RpYyAxMTAxIDAgMzIxIDMyNiAyCnJlbGF0ZWQgNyAwIDI2MCAyNjUKcmVsYXRlZCA4IDAgMzAyIDMwNwpjYXNlIDE5IDMgMQpkaWFnbm9zdGljIDExMDEgMCAzNDcgMzUxIDIKcmVsYXRlZCA3IDAgMjY4IDI3MgpyZWxhdGVkIDggMCAyOTQgMjk4CmNhc2UgMjAgMyAxCmRpYWdub3N0aWMgMTEwMSAwIDMyMSAzMjUgMgpyZWxhdGVkIDcgMCAyNzkgMjgzCnJlbGF0ZWQgOCAwIDMwNyAzMTEKY2FzZSAyMSAwIDAKY2FzZSAyMiAzIDEKZGlhZ25vc3RpYyAxMTAxIDAgMjc5IDI4NCAyCnJlbGF0ZWQgNyAwIDI0OCAyNTMKcmVsYXRlZCA4IDAgMjYwIDI2NQpjYXNlIDIzIDMgMQpkaWFnbm9zdGljIDExMDEgMCAxMDIgMTA3IDIKcmVsYXRlZCA3IDAgNjAgNjUKcmVsYXRlZCA4IDAgODYgOTEKY2FzZSAyNCAzIDEKZGlhZ25vc3RpYyAxMTA0IDAgMjgxIDMwMSAyCnJlbGF0ZWQgNyAwIDI2MCAyNjUKcmVsYXRlZCA4IDAgMjk1IDMwMApjYXNlIDI1IDAgMApjYXNlIDI2IDMgMQpkaWFnbm9zdGljIDExMDEgMCAzMjQgMzI5IDIKcmVsYXRlZCA3IDAgMjYwIDI2NQpyZWxhdGVkIDggMCAyOTQgMjk5CmNhc2UgMjcgMCAwCmNhc2UgMjggMyAxCmRpYWdub3N0aWMgMTEwMSAwIDI4NyAyOTIgMgpyZWxhdGVkIDcgMCAyNTUgMjYwCnJlbGF0ZWQgOCAwIDI3MyAyNzgKY2FzZSAyOSAwIDAKY2FzZSAzMCAzIDEKZGlhZ25vc3RpYyAxMTA1IDAgMjgyIDMxMCAzCnJlbGF0ZWQgNyAwIDI2MCAyNjUKcmVsYXRlZCA5IDAgMjgyIDI4OQpyZWxhdGVkIDggMCAyOTYgMzAxCmNhc2UgMzEgMCAwCmNhc2UgMzIgMyAxCmRpYWdub3N0aWMgMTEwNSAwIDI3MyAzMDQgMwpyZWxhdGVkIDcgMCAyNjAgMjY1CnJlbGF0ZWQgOSAwIDI3MyAyODAKcmVsYXRlZCA4IDAgMjg3IDI5MgpjYXNlIDMzIDMgMQpkaWFnbm9zdGljIDExMDUgMCAyNzMgMzEyIDMKcmVsYXRlZCA3IDAgMjYwIDI2NQpyZWxhdGVkIDkgMCAyNzMgMjkyCnJlbGF0ZWQgOCAwIDMwNCAzMDkKY2FzZSAzNCAwIDAKY2FzZSAzNSAwIDAKY2FzZSAzNiAzIDEKZGlhZ25vc3RpYyAxMTAxIDAgMzI3IDMyOCAyCnJlbGF0ZWQgNyAwIDMxMCAzMTEKcmVsYXRlZCA4IDAgMzE5IDMyMApjYXNlIDM3IDAgMApjYXNlIDM4IDAgMApjYXNlIDM5IDMgMQpkaWFnbm9zdGljIDExMDEgMCAxMjcgMTMyIDIKcmVsYXRlZCA3IDAgODYgOTEKcmVsYXRlZCA4IDAgMTEzIDExOApjYXNlIDQwIDMgMQpkaWFnbm9zdGljIDExMDEgMCAzNDYgMzUxIDIKcmVsYXRlZCA3IDAgMjkyIDI5NwpyZWxhdGVkIDggMCAzMjcgMzMyCmNhc2UgNDEgMyAxCmRpYWdub3N0aWMgMTEwMyAwIDMxNyAzMjMgMgpyZWxhdGVkIDEwIDAgMjUyIDI1MwpyZWxhdGVkIDYgMCAyOTEgMjk1CmNhc2UgNDIgMyAxCmRpYWdub3N0aWMgMTEwMiAwIDUwIDU0IDIKcmVsYXRlZCA3IDAgMzcgNTcKcmVsYXRlZCA4IDAgNTAgNTQKY2FzZSA0MyAzIDIKZGlhZ25vc3RpYyAxMTA0IDAgNDUgNzIgMgpyZWxhdGVkIDcgMCAzNyA3NApyZWxhdGVkIDggMCA1OSA2MwpkaWFnbm9zdGljIDExMDIgMCA1OSA2MyAyCnJlbGF0ZWQgNyAwIDM3IDc0CnJlbGF0ZWQgOCAwIDU5IDYzCmNhc2UgNDQgMyAxCmRpYWdub3N0aWMgMTEwMSAwIDMwNSAzMTAgMgpyZWxhdGVkIDcgMCAyNjAgMjY1CnJlbGF0ZWQgOCAwIDI3OCAyODMKY2FzZSA0NSAzIDEKZGlhZ25vc3RpYyAxMTAxIDAgMjg1IDI5MCAyCnJlbGF0ZWQgNyAwIDI2MCAyNjUKcmVsYXRlZCA4IDAgMjc4IDI4MwpjYXNlIDQ2IDMgMgpkaWFnbm9zdGljIDExMDUgMCAyODUgMzA4IDIKcmVsYXRlZCA3IDAgMjYwIDI2NQpyZWxhdGVkIDkgMCAyODUgMjkyCmRpYWdub3N0aWMgMTEwMSAwIDMyMCAzMjUgMgpyZWxhdGVkIDcgMCAyNjAgMjY1CnJlbGF0ZWQgOCAwIDI3OCAyODMKY2FzZSA0NyAzIDEKZGlhZ25vc3RpYyAxMTAzIDAgMjk0IDMwMCAyCnJlbGF0ZWQgMTAgMCAyNTIgMjUzCnJlbGF0ZWQgNiAwIDI4MyAyODcKY2FzZSA0OCAzIDEKZGlhZ25vc3RpYyAxMTAzIDEgMTYyIDE2OCAyCnJlbGF0ZWQgMTAgMSA2NyA2OApyZWxhdGVkIDYgMSAxMzEgMTM1CmNhc2UgNDkgMyAxCmRpYWdub3N0aWMgMTEwMSAwIDM0OCAzNTMgMgpyZWxhdGVkIDcgMCAyOTYgMzAxCnJlbGF0ZWQgOCAwIDMyOSAzMzQKY2FzZSA1MCAzIDEKZGlhZ25vc3RpYyAxMTA1IDAgMjY3IDI4OCAzCnJlbGF0ZWQgNyAwIDI1NCAyNTkKcmVsYXRlZCA5IDAgMjY3IDI4OApyZWxhdGVkIDggMCAyODAgMjg1CmNhc2UgNTEgMyAxCmRpYWdub3N0aWMgMTEwNSAwIDMwOSAzNDMgMwpyZWxhdGVkIDcgMCAyNTQgMjU5CnJlbGF0ZWQgOSAwIDMwOSAzMjgKcmVsYXRlZCA4IDAgMzM1IDM0MApjYXNlIDUyIDMgMQpkaWFnbm9zdGljIDExMDEgMCAyOTYgMzAxIDIKcmVsYXRlZCA3IDAgMjY2IDI3MQpyZWxhdGVkIDggMCAyODQgMjg5CmNhc2UgNTMgMyAyCmRpYWdub3N0aWMgMTEwMSAwIDMxMCAzMTEgMgpyZWxhdGVkIDcgMCAyNTQgMjU1CnJlbGF0ZWQgOCAwIDI4NyAyODgKZGlhZ25vc3RpYyAxMTAxIDAgMzI1IDMyNiAyCnJlbGF0ZWQgNyAwIDI3MyAyNzQKcmVsYXRlZCA4IDAgMjk1IDI5NgpjYXNlIDU0IDAgMApjYXNlIDU1IDMgMQpkaWFnbm9zdGljIDIxMDEgMCAxNzkgMTg4IDIKcmVsYXRlZCA0IDAgMTUyIDE1NwpyZWxhdGVkIDUgMCAyMjQgMjI1CmNhc2UgNTYgMyAxCmRpYWdub3N0aWMgMTEwMSAwIDEwNSAxMTAgMgpyZWxhdGVkIDcgMCA5MSA5NgpyZWxhdGVkIDggMCAxMjEgMTI2CmNhc2UgNTcgMyAxCmRpYWdub3N0aWMgMTEwMSAwIDEwNiAxMTEgMgpyZWxhdGVkIDcgMCA5MSA5NgpyZWxhdGVkIDggMCAxMjMgMTI4Cg==",
+        "stderrBase64": ""
+      }
+    ],
+    "count": 2,
+    "passed": 2,
+    "failed": 0,
+    "status": "ok",
+    "lock": "verified"
+  },
+  "nativeComparison": {
+    "passed": true,
+    "matched": 58,
+    "count": 58,
+    "completePrimaryAndRelatedSpans": true
+  },
+  "ownedFacts": {
+    "count": 6,
+    "bindingIdentity": true,
+    "afterSourceAndValuesRelease": true,
+    "exhaustedBudgetRejected": true
+  },
+  "cliRegression": [
+    {
+      "suite": "held reads",
+      "passed": true,
+      "matched": 32,
+      "count": 32,
+      "candidateSHA256": "ceb5390378fcdcd65be038504ab3f54dcb7856d1373d79e2f6d7f1fb02c650d8"
+    },
+    {
+      "suite": "owner accesses",
+      "passed": true,
+      "matched": 31,
+      "count": 31,
+      "candidateSHA256": "ceb5390378fcdcd65be038504ab3f54dcb7856d1373d79e2f6d7f1fb02c650d8"
+    },
+    {
+      "suite": "storage generations",
+      "passed": true,
+      "matched": 9,
+      "count": 9,
+      "candidateSHA256": "ceb5390378fcdcd65be038504ab3f54dcb7856d1373d79e2f6d7f1fb02c650d8"
+    },
+    {
+      "suite": "subviews",
+      "passed": true,
+      "matched": 38,
+      "count": 38,
+      "candidateSHA256": "ceb5390378fcdcd65be038504ab3f54dcb7856d1373d79e2f6d7f1fb02c650d8"
+    },
+    {
+      "suite": "reference access",
+      "passed": true,
+      "matched": 27,
+      "count": 27,
+      "candidateSHA256": "ceb5390378fcdcd65be038504ab3f54dcb7856d1373d79e2f6d7f1fb02c650d8"
+    },
+    {
+      "suite": "loan conflicts",
+      "passed": true,
+      "matched": 38,
+      "count": 38,
+      "candidateSHA256": "ceb5390378fcdcd65be038504ab3f54dcb7856d1373d79e2f6d7f1fb02c650d8"
+    },
+    {
+      "suite": "owner moves",
+      "passed": true,
+      "matched": 39,
+      "count": 39,
+      "candidateSHA256": "ceb5390378fcdcd65be038504ab3f54dcb7856d1373d79e2f6d7f1fb02c650d8"
+    },
+    {
+      "suite": "owner arguments",
+      "passed": true,
+      "matched": 7,
+      "count": 7,
+      "candidateSHA256": "ceb5390378fcdcd65be038504ab3f54dcb7856d1373d79e2f6d7f1fb02c650d8"
+    },
+    {
+      "suite": "iteration conflicts",
+      "passed": true,
+      "matched": 6,
+      "count": 6,
+      "candidateSHA256": "ceb5390378fcdcd65be038504ab3f54dcb7856d1373d79e2f6d7f1fb02c650d8"
+    }
+  ],
+  "sourceCheck": {
+    "exit": 0,
+    "stdout": "check ok: 2 instance(s), 240 source file(s), 2987 MIR function(s), lock updated"
+  },
+  "lockedDevelopmentBuild": {
+    "exit": 0,
+    "stdout": "built: build/lexer-candidate.exe (x86_64-windows-msvc, development, lock verified)"
+  },
+  "budgets": {
+    "work": 1048576,
+    "depth": 64,
+    "diagnostics": 8192,
+    "facts": 16384,
+    "loopEdges": 1024
+  },
+  "skipped": {
+    "fullCompiler": "No Go source changes; source check, targeted native API tests and candidate CLI regression selected.",
+    "fullCandidateRelease": "Deferred consolidated batch",
+    "Linux": "Deferred consolidated batch"
+  },
+  "pending": [
+    "Cleanup drop obligations, abilities and effects, and MIR/C/runtime wiring",
+    "Outstanding borrow/access edges and unsafe provenance",
+    "Full dispatcher and stage1/stage2 self-hosting"
+  ],
+  "stableCLIChanged": false,
+  "sdkABIChanged": false,
+  "dbChanged": false,
+  "ciRunnerChanged": false,
+  "privateAPIChanged": true,
+  "pushed": false
+}
