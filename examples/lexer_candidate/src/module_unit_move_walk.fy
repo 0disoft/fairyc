@@ -31,6 +31,8 @@ pub fn Result<bool,m::Problem> expression(ref v::Vec<syntax::Parsed> sources,ref
         if(moves && receiver.kind==2 && receiver.binding!=0){let defining=v::at<syntax::Parsed>(sources,e.field.module_index);let field=syntax::field_at(defining,e.field.source_index);let p=g::partial(body,e,receiver.binding,e.field.module_index,field.name_start,field.name_end,diagnostics,c);if(p.code!=0){return .err(p);}}
     }
     let left=switch(expression(sources,primary,body,owners,env,edges,diagnostics,facts,e.left,child_mode,depth+1,c)){case .ok(b):{b}case .err(p):{return .err(p);}};if(!left){return .ok(false);}
+    if(e.kind==30){let dropped=g::cleanup_live(body,env,6,e.start,e.end,facts,c);if(dropped.code!=0){return .err(dropped);}}
+    if(e.kind==8 && child_mode){let operand=switch(g::expression(body,e.left,c)){case .ok(e):{e}case .err(p):{return .err(p);}};let dropped=g::schedule(0,operand.type,7,e.start,e.end,facts,c);if(dropped.code!=0){return .err(dropped);}}
     if(e.kind==26){let bounds=syntax::expression_at(source,e.right);let first=switch(expression(sources,primary,body,owners,env,edges,diagnostics,facts,bounds.left,false,depth+1,c)){case .ok(b):{b}case .err(p):{return .err(p);}};if(!first){return .ok(false);}return expression(sources,primary,body,owners,env,edges,diagnostics,facts,bounds.right,false,depth+1,c);}
     return expression(sources,primary,body,owners,env,edges,diagnostics,facts,e.right,false,depth+1,c);
 }
