@@ -1,0 +1,78 @@
+{
+  "schema": "fairyc.candidate-owned-ir-verifier-budget/v1",
+  "passed": true,
+  "parentCommit": "57e98851bd391ceb7aa17d860ce68e87849ff5a3",
+  "implementation": {
+    "path": "examples/lexer_candidate/src/module_unit_body_ir_verify.fy",
+    "bytes": 21533,
+    "sha256": "792273c5379f3f85f3da020e61387c6036dc563a930439b3d552eb3595027419"
+  },
+  "test": {
+    "path": "examples/lexer_candidate/tests/module_unit_ir_budgets.fy",
+    "bytes": 3296,
+    "sha256": "3b7caeaae53e2bc103e41e2f94a373371ceb2ef63c853fc7ff2af7b47b6ba781"
+  },
+  "receiptTool": {
+    "path": "tools/verify-candidate-ir-budgets.py",
+    "bytes": 4214,
+    "sha256": "5b4ee2b18f3bc3128b665567c0bbc3a33263ae6f93aee3b745ada29fc44ad0c6"
+  },
+  "policy": {
+    "producerWorkCap": 1048576,
+    "verifierWorkCap": 1048576,
+    "sdkAuthenticationRetained": true,
+    "cleanupVerifierUnchanged": true,
+    "traversalAndTableCapsUnchanged": true
+  },
+  "native": {
+    "reports": [
+      {
+        "path": ".cache/candidate-tagged/sdk-c-execution/native-ir-budgets.json",
+        "bytes": 527,
+        "sha256": "82631112877de6d5831a5b96e317f92f8acfac647d02cd93e078008e6b3b9aa8"
+      },
+      {
+        "path": ".cache/candidate-tagged/sdk-c-execution/native-original-bodies-ir-budget.json",
+        "bytes": 422,
+        "sha256": "802e6d0d83760df0ed356619f404ce175906f669cbd31ec68af789dc1dc733fe"
+      }
+    ],
+    "passedCases": 3,
+    "originalBodiesFrames": 23,
+    "originalBodiesProducerWork": 1017159,
+    "coverage": [
+      "Producer work at the cap can be independently revalidated",
+      "Producer work one over the cap rejects",
+      "Malformed body tables still reject",
+      "Original bodies.fy unit compiles and revalidates with all 235 original main sources"
+    ],
+    "reusedCases": "Boundary/mutation report predates only the added original-file regression; production verifier is identical"
+  },
+  "check": {
+    "path": ".cache/candidate-tagged/sdk-c-execution/check-ir-budgets.txt",
+    "bytes": 82,
+    "sha256": "0de153bdedb4cddb48ba30ad4ca85b18bcca448c0d1ed82ee0ea84c46fb81a49"
+  },
+  "originalCompilationPassed": false,
+  "original": {
+    "previousReceipt": "docs/ops/evidence/candidate-project-unit-coordination-20261011.json",
+    "releaseReport": {
+      "path": ".cache/candidate-tagged/sdk-c-execution/native-main-project-compile-budget-release.json",
+      "bytes": 425,
+      "sha256": "73b918b3a031affa8456f3cd3e4ffa35cb75f9134b317afca712fdbf8dd9c9ef"
+    },
+    "nextFailure": "stage 6 code 1002 module 213 at 0..0 range 35..36\n",
+    "nextSource": "examples/lexer_candidate/src/generic_expand.fy",
+    "developmentTimeout": {
+      "path": ".cache/candidate-tagged/sdk-c-execution/native-main-project-compile-budget.stderr",
+      "bytes": 143,
+      "sha256": "7b744424f4fc39e7342ab04e8925208769ef9d6c695f117478df4429007b5691"
+    }
+  },
+  "deferred": [
+    "Next measured cleanup-lowering budget failure",
+    "Remaining original units",
+    "Original dispatcher linking and C execution"
+  ],
+  "pushed": false
+}
