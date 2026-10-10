@@ -1,0 +1,999 @@
+{
+  "schema": "fairyc.candidate-file-c/v1",
+  "passed": true,
+  "parentCommit": "1505122b7f4463113214871f35fc73c9f80839c4",
+  "identity": [
+    {
+      "path": "examples/lexer_candidate/src/module_unit_c_file.fy",
+      "sha256": "4f9f664b5e531b8033a879be66de12bb056bb301477182b164143c5276fdaeb2"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_unit_c_sdk.fy",
+      "sha256": "474ced1b77e2d8282d797e5daeec07410da487346ce3f1be0e2eb5c06c6c7710"
+    },
+    {
+      "path": "examples/lexer_candidate/tests/module_unit_c_fs.fy",
+      "sha256": "e91c2a41db5102d43963e712c551250b41d12e80ab073c1c1f6d6f5a20dcc423"
+    },
+    {
+      "path": "examples/lexer_candidate/fairy.lock",
+      "sha256": "0405759dfe9a939c5f008d76b9b3462002d3c15c4dd00dc3ecb4e2da9efebb11"
+    },
+    {
+      "path": "tools/verify-candidate-sdk-c.py",
+      "sha256": "ad73fca917371763588ce34693727ad0fd3070d8abf5800ca4bb2daff5192533"
+    },
+    {
+      "path": "internal/sdkstdlib/sources/std/fs.fy",
+      "sha256": "fd7ddfa9f0deed98304cecf94911644087d1e2a46e8be8995c35acbcb183b335"
+    },
+    {
+      "path": "internal/sdkstdlib/sources/std/bytes.fy",
+      "sha256": "4740a506e93349fb002c383967dcc44d182d20f09f2094b83b5464a4ab252982"
+    },
+    {
+      "path": ".cache/candidate-tagged/compiler-text-current.exe",
+      "sha256": "7accbaf3c65e6debd2f391c9de92889f908667f4738607fa8cd2d12e275d1a87"
+    }
+  ],
+  "sourceCheck": {
+    "argv": [
+      "compiler-text-current.exe",
+      "check",
+      "--locked"
+    ],
+    "exit": 0,
+    "stdout": "check ok: 2 instance(s), 272 source file(s), 3397 MIR function(s), lock verified\n",
+    "stderr": "",
+    "reuseReason": "Implementation and source lock unchanged after this successful locked check; only test fixtures and local verification/evidence tools subsequently changed"
+  },
+  "native": {
+    "report": {
+      "path": ".cache/candidate-tagged/sdk-c-execution/native-file-final.json",
+      "sha256": "d3ce089e3371a933afd7bb6b39db633d8d86501a77284d19578c232de8a5d0f4"
+    },
+    "inputs": [
+      {
+        "path": ".cache/candidate-tagged/sdk-c-execution/native-file.json",
+        "sha256": "6d5b5569dea3da6f1b78f66bb8f5dbe71ffd1ea3c82b042b5b3712129fde79f5"
+      },
+      {
+        "path": ".cache/candidate-tagged/sdk-c-execution/native-file-eof.json",
+        "sha256": "ce323105ca8f250faada990581e9b7c8402a74ef89768d31d5bf55a14c2150a6"
+      },
+      {
+        "path": ".cache/candidate-tagged/sdk-c-execution/native-file-unicode.json",
+        "sha256": "ceb33ae8ed5e0bc593acb186c4487513341e46b6fa22c86b2324aefeb15d160e"
+      }
+    ],
+    "count": 6,
+    "passed": 6,
+    "lock": "unchanged"
+  },
+  "CExecution": {
+    "schema": "fairyc.candidate-sdk-c-execution/v1",
+    "passed": true,
+    "reports": [
+      {
+        "path": ".cache\\candidate-tagged\\sdk-c-execution\\native-file.json",
+        "sha256": "6d5b5569dea3da6f1b78f66bb8f5dbe71ffd1ea3c82b042b5b3712129fde79f5"
+      },
+      {
+        "path": ".cache\\candidate-tagged\\sdk-c-execution\\native-file-eof.json",
+        "sha256": "ce323105ca8f250faada990581e9b7c8402a74ef89768d31d5bf55a14c2150a6"
+      },
+      {
+        "path": ".cache\\candidate-tagged\\sdk-c-execution\\native-file-unicode.json",
+        "sha256": "ceb33ae8ed5e0bc593acb186c4487513341e46b6fa22c86b2324aefeb15d160e"
+      }
+    ],
+    "executions": [
+      {
+        "name": "sdk_c_executes_file_partial_eof_and_scope_cleanup",
+        "profile": "low",
+        "sourceSHA256": "85dfa8221d1369073e97c966f7cad936fea36292d0c06d74ab21d96edca11e89",
+        "stdinBase64": null,
+        "heapFailureAt": null,
+        "heapBalanceVerified": false,
+        "heapCounts": null,
+        "textCounts": null,
+        "fileCounts": {
+          "open": 2,
+          "close": 0,
+          "drop": 2,
+          "automaticClose": 2,
+          "dropStatusErrors": 0,
+          "closedHandleVerified": true
+        },
+        "vectorCounts": null,
+        "bufferCounts": null,
+        "arenaCounts": null,
+        "regionCounts": null,
+        "runtimeInputs": [
+          {
+            "path": "internal\\cstdlib\\stage0_windows_file.c",
+            "sha256": "0b70e682e2d09f76b2565075ac99e08674d4c80e92a74f46d88cde52c94626d6"
+          },
+          {
+            "path": "internal\\cstdlib\\stage0_windows_file_portable.c",
+            "sha256": "d965ef1295434c6cbb2873f2f4934c63c6b13c128cf49992bd0e048104cd5faf"
+          }
+        ],
+        "build": {
+          "argv": [
+            "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+            "/nologo",
+            "/std:c11",
+            "/TC",
+            "/Od",
+            "/DFY_CANDIDATE_NO_MAIN",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-stable-c\\sdk_c_executes_file_partial_eof_and_scope_cleanup.c",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-stable-c\\sdk_c_executes_file_partial_eof_and_scope_cleanup-runtime.c",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-stable-c\\trap.c",
+            "/Fe:C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-stable-c\\sdk_c_executes_file_partial_eof_and_scope_cleanup-low.exe",
+            "/link",
+            "/INCREMENTAL:NO"
+          ],
+          "exit": 0,
+          "stdout": "sdk_c_executes_file_partial_eof_and_scope_cleanup.c\r\nsdk_c_executes_file_partial_eof_and_scope_cleanup-runtime.c\r\ntrap.c\r\nGenerating Code...\r\n",
+          "stderr": ""
+        },
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-stable-c\\sdk_c_executes_file_partial_eof_and_scope_cleanup-low.exe"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      },
+      {
+        "name": "sdk_c_executes_file_partial_eof_and_scope_cleanup",
+        "profile": "optimized",
+        "sourceSHA256": "85dfa8221d1369073e97c966f7cad936fea36292d0c06d74ab21d96edca11e89",
+        "stdinBase64": null,
+        "heapFailureAt": null,
+        "heapBalanceVerified": false,
+        "heapCounts": null,
+        "textCounts": null,
+        "fileCounts": {
+          "open": 2,
+          "close": 0,
+          "drop": 2,
+          "automaticClose": 2,
+          "dropStatusErrors": 0,
+          "closedHandleVerified": true
+        },
+        "vectorCounts": null,
+        "bufferCounts": null,
+        "arenaCounts": null,
+        "regionCounts": null,
+        "runtimeInputs": [
+          {
+            "path": "internal\\cstdlib\\stage0_windows_file.c",
+            "sha256": "0b70e682e2d09f76b2565075ac99e08674d4c80e92a74f46d88cde52c94626d6"
+          },
+          {
+            "path": "internal\\cstdlib\\stage0_windows_file_portable.c",
+            "sha256": "d965ef1295434c6cbb2873f2f4934c63c6b13c128cf49992bd0e048104cd5faf"
+          }
+        ],
+        "build": {
+          "argv": [
+            "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+            "/nologo",
+            "/std:c11",
+            "/TC",
+            "/O2",
+            "/DFY_CANDIDATE_NO_MAIN",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-stable-c\\sdk_c_executes_file_partial_eof_and_scope_cleanup.c",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-stable-c\\sdk_c_executes_file_partial_eof_and_scope_cleanup-runtime.c",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-stable-c\\trap.c",
+            "/Fe:C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-stable-c\\sdk_c_executes_file_partial_eof_and_scope_cleanup-optimized.exe",
+            "/link",
+            "/INCREMENTAL:NO"
+          ],
+          "exit": 0,
+          "stdout": "sdk_c_executes_file_partial_eof_and_scope_cleanup.c\r\nsdk_c_executes_file_partial_eof_and_scope_cleanup-runtime.c\r\ntrap.c\r\nGenerating Code...\r\n",
+          "stderr": ""
+        },
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-stable-c\\sdk_c_executes_file_partial_eof_and_scope_cleanup-optimized.exe"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      },
+      {
+        "name": "sdk_c_executes_file_open_error_and_exclusive_preservation",
+        "profile": "low",
+        "sourceSHA256": "5a7d1d09438d4ee78ab8ed1a738c0f14efcf519567ad662261fcdf3eb39ea317",
+        "stdinBase64": null,
+        "heapFailureAt": null,
+        "heapBalanceVerified": false,
+        "heapCounts": null,
+        "textCounts": null,
+        "fileCounts": {
+          "open": 2,
+          "close": 2,
+          "drop": 5,
+          "automaticClose": 0,
+          "dropStatusErrors": 0,
+          "closedHandleVerified": false
+        },
+        "vectorCounts": null,
+        "bufferCounts": null,
+        "arenaCounts": null,
+        "regionCounts": null,
+        "runtimeInputs": [
+          {
+            "path": "internal\\cstdlib\\stage0_windows_file.c",
+            "sha256": "0b70e682e2d09f76b2565075ac99e08674d4c80e92a74f46d88cde52c94626d6"
+          },
+          {
+            "path": "internal\\cstdlib\\stage0_windows_file_portable.c",
+            "sha256": "d965ef1295434c6cbb2873f2f4934c63c6b13c128cf49992bd0e048104cd5faf"
+          }
+        ],
+        "build": {
+          "argv": [
+            "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+            "/nologo",
+            "/std:c11",
+            "/TC",
+            "/Od",
+            "/DFY_CANDIDATE_NO_MAIN",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-stable-c\\sdk_c_executes_file_open_error_and_exclusive_preservation.c",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-stable-c\\sdk_c_executes_file_open_error_and_exclusive_preservation-runtime.c",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-stable-c\\trap.c",
+            "/Fe:C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-stable-c\\sdk_c_executes_file_open_error_and_exclusive_preservation-low.exe",
+            "/link",
+            "/INCREMENTAL:NO"
+          ],
+          "exit": 0,
+          "stdout": "sdk_c_executes_file_open_error_and_exclusive_preservation.c\r\nsdk_c_executes_file_open_error_and_exclusive_preservation-runtime.c\r\ntrap.c\r\nGenerating Code...\r\n",
+          "stderr": ""
+        },
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-stable-c\\sdk_c_executes_file_open_error_and_exclusive_preservation-low.exe"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      },
+      {
+        "name": "sdk_c_executes_file_open_error_and_exclusive_preservation",
+        "profile": "optimized",
+        "sourceSHA256": "5a7d1d09438d4ee78ab8ed1a738c0f14efcf519567ad662261fcdf3eb39ea317",
+        "stdinBase64": null,
+        "heapFailureAt": null,
+        "heapBalanceVerified": false,
+        "heapCounts": null,
+        "textCounts": null,
+        "fileCounts": {
+          "open": 2,
+          "close": 2,
+          "drop": 5,
+          "automaticClose": 0,
+          "dropStatusErrors": 0,
+          "closedHandleVerified": false
+        },
+        "vectorCounts": null,
+        "bufferCounts": null,
+        "arenaCounts": null,
+        "regionCounts": null,
+        "runtimeInputs": [
+          {
+            "path": "internal\\cstdlib\\stage0_windows_file.c",
+            "sha256": "0b70e682e2d09f76b2565075ac99e08674d4c80e92a74f46d88cde52c94626d6"
+          },
+          {
+            "path": "internal\\cstdlib\\stage0_windows_file_portable.c",
+            "sha256": "d965ef1295434c6cbb2873f2f4934c63c6b13c128cf49992bd0e048104cd5faf"
+          }
+        ],
+        "build": {
+          "argv": [
+            "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+            "/nologo",
+            "/std:c11",
+            "/TC",
+            "/O2",
+            "/DFY_CANDIDATE_NO_MAIN",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-stable-c\\sdk_c_executes_file_open_error_and_exclusive_preservation.c",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-stable-c\\sdk_c_executes_file_open_error_and_exclusive_preservation-runtime.c",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-stable-c\\trap.c",
+            "/Fe:C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-stable-c\\sdk_c_executes_file_open_error_and_exclusive_preservation-optimized.exe",
+            "/link",
+            "/INCREMENTAL:NO"
+          ],
+          "exit": 0,
+          "stdout": "sdk_c_executes_file_open_error_and_exclusive_preservation.c\r\nsdk_c_executes_file_open_error_and_exclusive_preservation-runtime.c\r\ntrap.c\r\nGenerating Code...\r\n",
+          "stderr": ""
+        },
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-stable-c\\sdk_c_executes_file_open_error_and_exclusive_preservation-optimized.exe"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      },
+      {
+        "name": "sdk_c_executes_file_replace_and_append",
+        "profile": "low",
+        "sourceSHA256": "012144171136c530ee0f02a0a2a2afa7407634ff23820b3849a1e481c9908b63",
+        "stdinBase64": null,
+        "heapFailureAt": null,
+        "heapBalanceVerified": false,
+        "heapCounts": null,
+        "textCounts": null,
+        "fileCounts": {
+          "open": 4,
+          "close": 4,
+          "drop": 5,
+          "automaticClose": 0,
+          "dropStatusErrors": 0,
+          "closedHandleVerified": false
+        },
+        "vectorCounts": null,
+        "bufferCounts": null,
+        "arenaCounts": null,
+        "regionCounts": null,
+        "runtimeInputs": [
+          {
+            "path": "internal\\cstdlib\\stage0_windows_file.c",
+            "sha256": "0b70e682e2d09f76b2565075ac99e08674d4c80e92a74f46d88cde52c94626d6"
+          },
+          {
+            "path": "internal\\cstdlib\\stage0_windows_file_portable.c",
+            "sha256": "d965ef1295434c6cbb2873f2f4934c63c6b13c128cf49992bd0e048104cd5faf"
+          }
+        ],
+        "build": {
+          "argv": [
+            "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+            "/nologo",
+            "/std:c11",
+            "/TC",
+            "/Od",
+            "/DFY_CANDIDATE_NO_MAIN",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-stable-c\\sdk_c_executes_file_replace_and_append.c",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-stable-c\\sdk_c_executes_file_replace_and_append-runtime.c",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-stable-c\\trap.c",
+            "/Fe:C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-stable-c\\sdk_c_executes_file_replace_and_append-low.exe",
+            "/link",
+            "/INCREMENTAL:NO"
+          ],
+          "exit": 0,
+          "stdout": "sdk_c_executes_file_replace_and_append.c\r\nsdk_c_executes_file_replace_and_append-runtime.c\r\ntrap.c\r\nGenerating Code...\r\n",
+          "stderr": ""
+        },
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-stable-c\\sdk_c_executes_file_replace_and_append-low.exe"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      },
+      {
+        "name": "sdk_c_executes_file_replace_and_append",
+        "profile": "optimized",
+        "sourceSHA256": "012144171136c530ee0f02a0a2a2afa7407634ff23820b3849a1e481c9908b63",
+        "stdinBase64": null,
+        "heapFailureAt": null,
+        "heapBalanceVerified": false,
+        "heapCounts": null,
+        "textCounts": null,
+        "fileCounts": {
+          "open": 4,
+          "close": 4,
+          "drop": 5,
+          "automaticClose": 0,
+          "dropStatusErrors": 0,
+          "closedHandleVerified": false
+        },
+        "vectorCounts": null,
+        "bufferCounts": null,
+        "arenaCounts": null,
+        "regionCounts": null,
+        "runtimeInputs": [
+          {
+            "path": "internal\\cstdlib\\stage0_windows_file.c",
+            "sha256": "0b70e682e2d09f76b2565075ac99e08674d4c80e92a74f46d88cde52c94626d6"
+          },
+          {
+            "path": "internal\\cstdlib\\stage0_windows_file_portable.c",
+            "sha256": "d965ef1295434c6cbb2873f2f4934c63c6b13c128cf49992bd0e048104cd5faf"
+          }
+        ],
+        "build": {
+          "argv": [
+            "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+            "/nologo",
+            "/std:c11",
+            "/TC",
+            "/O2",
+            "/DFY_CANDIDATE_NO_MAIN",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-stable-c\\sdk_c_executes_file_replace_and_append.c",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-stable-c\\sdk_c_executes_file_replace_and_append-runtime.c",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-stable-c\\trap.c",
+            "/Fe:C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-stable-c\\sdk_c_executes_file_replace_and_append-optimized.exe",
+            "/link",
+            "/INCREMENTAL:NO"
+          ],
+          "exit": 0,
+          "stdout": "sdk_c_executes_file_replace_and_append.c\r\nsdk_c_executes_file_replace_and_append-runtime.c\r\ntrap.c\r\nGenerating Code...\r\n",
+          "stderr": ""
+        },
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-stable-c\\sdk_c_executes_file_replace_and_append-optimized.exe"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      },
+      {
+        "name": "sdk_c_executes_file_buffer_failure_preserves_cursor",
+        "profile": "low",
+        "sourceSHA256": "ac5679b2428b5da2a157b925bad6f54e1fc2a9771e19b14c1ad212ae61de62a1",
+        "stdinBase64": null,
+        "heapFailureAt": 2,
+        "heapBalanceVerified": true,
+        "heapCounts": {
+          "attempts": 2,
+          "liveAfter": 0
+        },
+        "textCounts": null,
+        "fileCounts": {
+          "open": 2,
+          "close": 2,
+          "drop": 2,
+          "automaticClose": 0,
+          "dropStatusErrors": 0,
+          "closedHandleVerified": false
+        },
+        "vectorCounts": null,
+        "bufferCounts": {
+          "drop": 1,
+          "dropStatusErrors": 0
+        },
+        "arenaCounts": null,
+        "regionCounts": null,
+        "runtimeInputs": [
+          {
+            "path": "internal\\cstdlib\\stage0_system_heap.c",
+            "sha256": "cae6664fa1ec70722b76025c3e2c3daadc133cd90d95fa9f02f2385915d3e55c"
+          },
+          {
+            "path": "internal\\cstdlib\\stage0_buffer.c",
+            "sha256": "41c7a26acb8b9f22fd5e0f82c976f4b59964df2e2e73e7ddb5fa8bee70e8390c"
+          },
+          {
+            "path": "internal\\cstdlib\\stage0_windows_file.c",
+            "sha256": "0b70e682e2d09f76b2565075ac99e08674d4c80e92a74f46d88cde52c94626d6"
+          },
+          {
+            "path": "internal\\cstdlib\\stage0_windows_file_portable.c",
+            "sha256": "d965ef1295434c6cbb2873f2f4934c63c6b13c128cf49992bd0e048104cd5faf"
+          },
+          {
+            "path": "internal\\cstdlib\\stage0_windows_file_buffer.c",
+            "sha256": "211ff5c6023230b6ca1bfcea6dbc995bf4c5009669bb7d7e4519a36e78e05d59"
+          }
+        ],
+        "build": {
+          "argv": [
+            "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+            "/nologo",
+            "/std:c11",
+            "/TC",
+            "/Od",
+            "/DFY_CANDIDATE_NO_MAIN",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-stable-c\\sdk_c_executes_file_buffer_failure_preserves_cursor.c",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-stable-c\\sdk_c_executes_file_buffer_failure_preserves_cursor-runtime.c",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-stable-c\\trap.c",
+            "/Fe:C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-stable-c\\sdk_c_executes_file_buffer_failure_preserves_cursor-low.exe",
+            "/link",
+            "/INCREMENTAL:NO"
+          ],
+          "exit": 0,
+          "stdout": "sdk_c_executes_file_buffer_failure_preserves_cursor.c\r\nsdk_c_executes_file_buffer_failure_preserves_cursor-runtime.c\r\ntrap.c\r\nGenerating Code...\r\n",
+          "stderr": ""
+        },
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-stable-c\\sdk_c_executes_file_buffer_failure_preserves_cursor-low.exe"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      },
+      {
+        "name": "sdk_c_executes_file_buffer_failure_preserves_cursor",
+        "profile": "optimized",
+        "sourceSHA256": "ac5679b2428b5da2a157b925bad6f54e1fc2a9771e19b14c1ad212ae61de62a1",
+        "stdinBase64": null,
+        "heapFailureAt": 2,
+        "heapBalanceVerified": true,
+        "heapCounts": {
+          "attempts": 2,
+          "liveAfter": 0
+        },
+        "textCounts": null,
+        "fileCounts": {
+          "open": 2,
+          "close": 2,
+          "drop": 2,
+          "automaticClose": 0,
+          "dropStatusErrors": 0,
+          "closedHandleVerified": false
+        },
+        "vectorCounts": null,
+        "bufferCounts": {
+          "drop": 1,
+          "dropStatusErrors": 0
+        },
+        "arenaCounts": null,
+        "regionCounts": null,
+        "runtimeInputs": [
+          {
+            "path": "internal\\cstdlib\\stage0_system_heap.c",
+            "sha256": "cae6664fa1ec70722b76025c3e2c3daadc133cd90d95fa9f02f2385915d3e55c"
+          },
+          {
+            "path": "internal\\cstdlib\\stage0_buffer.c",
+            "sha256": "41c7a26acb8b9f22fd5e0f82c976f4b59964df2e2e73e7ddb5fa8bee70e8390c"
+          },
+          {
+            "path": "internal\\cstdlib\\stage0_windows_file.c",
+            "sha256": "0b70e682e2d09f76b2565075ac99e08674d4c80e92a74f46d88cde52c94626d6"
+          },
+          {
+            "path": "internal\\cstdlib\\stage0_windows_file_portable.c",
+            "sha256": "d965ef1295434c6cbb2873f2f4934c63c6b13c128cf49992bd0e048104cd5faf"
+          },
+          {
+            "path": "internal\\cstdlib\\stage0_windows_file_buffer.c",
+            "sha256": "211ff5c6023230b6ca1bfcea6dbc995bf4c5009669bb7d7e4519a36e78e05d59"
+          }
+        ],
+        "build": {
+          "argv": [
+            "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+            "/nologo",
+            "/std:c11",
+            "/TC",
+            "/O2",
+            "/DFY_CANDIDATE_NO_MAIN",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-stable-c\\sdk_c_executes_file_buffer_failure_preserves_cursor.c",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-stable-c\\sdk_c_executes_file_buffer_failure_preserves_cursor-runtime.c",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-stable-c\\trap.c",
+            "/Fe:C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-stable-c\\sdk_c_executes_file_buffer_failure_preserves_cursor-optimized.exe",
+            "/link",
+            "/INCREMENTAL:NO"
+          ],
+          "exit": 0,
+          "stdout": "sdk_c_executes_file_buffer_failure_preserves_cursor.c\r\nsdk_c_executes_file_buffer_failure_preserves_cursor-runtime.c\r\ntrap.c\r\nGenerating Code...\r\n",
+          "stderr": ""
+        },
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-stable-c\\sdk_c_executes_file_buffer_failure_preserves_cursor-optimized.exe"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      },
+      {
+        "name": "sdk_c_executes_file_utf8_roundtrip_seek_and_close",
+        "profile": "low",
+        "sourceSHA256": "dcf3f92081b28f902c3dcd7e4d80ce6548fd1ad6977abd5679c7ee15b8af2e55",
+        "stdinBase64": null,
+        "heapFailureAt": null,
+        "heapBalanceVerified": false,
+        "heapCounts": null,
+        "textCounts": null,
+        "fileCounts": {
+          "open": 2,
+          "close": 2,
+          "drop": 2,
+          "automaticClose": 0,
+          "dropStatusErrors": 0,
+          "closedHandleVerified": false
+        },
+        "vectorCounts": null,
+        "bufferCounts": null,
+        "arenaCounts": null,
+        "regionCounts": null,
+        "runtimeInputs": [
+          {
+            "path": "internal\\cstdlib\\stage0_windows_file.c",
+            "sha256": "0b70e682e2d09f76b2565075ac99e08674d4c80e92a74f46d88cde52c94626d6"
+          },
+          {
+            "path": "internal\\cstdlib\\stage0_windows_file_portable.c",
+            "sha256": "d965ef1295434c6cbb2873f2f4934c63c6b13c128cf49992bd0e048104cd5faf"
+          }
+        ],
+        "build": {
+          "argv": [
+            "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+            "/nologo",
+            "/std:c11",
+            "/TC",
+            "/Od",
+            "/DFY_CANDIDATE_NO_MAIN",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-unicode-c\\sdk_c_executes_file_utf8_roundtrip_seek_and_close.c",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-unicode-c\\sdk_c_executes_file_utf8_roundtrip_seek_and_close-runtime.c",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-unicode-c\\trap.c",
+            "/Fe:C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-unicode-c\\sdk_c_executes_file_utf8_roundtrip_seek_and_close-low.exe",
+            "/link",
+            "/INCREMENTAL:NO"
+          ],
+          "exit": 0,
+          "stdout": "sdk_c_executes_file_utf8_roundtrip_seek_and_close.c\r\nsdk_c_executes_file_utf8_roundtrip_seek_and_close-runtime.c\r\ntrap.c\r\nGenerating Code...\r\n",
+          "stderr": ""
+        },
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-unicode-c\\sdk_c_executes_file_utf8_roundtrip_seek_and_close-low.exe"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      },
+      {
+        "name": "sdk_c_executes_file_utf8_roundtrip_seek_and_close",
+        "profile": "optimized",
+        "sourceSHA256": "dcf3f92081b28f902c3dcd7e4d80ce6548fd1ad6977abd5679c7ee15b8af2e55",
+        "stdinBase64": null,
+        "heapFailureAt": null,
+        "heapBalanceVerified": false,
+        "heapCounts": null,
+        "textCounts": null,
+        "fileCounts": {
+          "open": 2,
+          "close": 2,
+          "drop": 2,
+          "automaticClose": 0,
+          "dropStatusErrors": 0,
+          "closedHandleVerified": false
+        },
+        "vectorCounts": null,
+        "bufferCounts": null,
+        "arenaCounts": null,
+        "regionCounts": null,
+        "runtimeInputs": [
+          {
+            "path": "internal\\cstdlib\\stage0_windows_file.c",
+            "sha256": "0b70e682e2d09f76b2565075ac99e08674d4c80e92a74f46d88cde52c94626d6"
+          },
+          {
+            "path": "internal\\cstdlib\\stage0_windows_file_portable.c",
+            "sha256": "d965ef1295434c6cbb2873f2f4934c63c6b13c128cf49992bd0e048104cd5faf"
+          }
+        ],
+        "build": {
+          "argv": [
+            "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+            "/nologo",
+            "/std:c11",
+            "/TC",
+            "/O2",
+            "/DFY_CANDIDATE_NO_MAIN",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-unicode-c\\sdk_c_executes_file_utf8_roundtrip_seek_and_close.c",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-unicode-c\\sdk_c_executes_file_utf8_roundtrip_seek_and_close-runtime.c",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-unicode-c\\trap.c",
+            "/Fe:C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-unicode-c\\sdk_c_executes_file_utf8_roundtrip_seek_and_close-optimized.exe",
+            "/link",
+            "/INCREMENTAL:NO"
+          ],
+          "exit": 0,
+          "stdout": "sdk_c_executes_file_utf8_roundtrip_seek_and_close.c\r\nsdk_c_executes_file_utf8_roundtrip_seek_and_close-runtime.c\r\ntrap.c\r\nGenerating Code...\r\n",
+          "stderr": ""
+        },
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-unicode-c\\sdk_c_executes_file_utf8_roundtrip_seek_and_close-optimized.exe"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      },
+      {
+        "name": "sdk_c_executes_file_buffer_read_to_end",
+        "profile": "low",
+        "sourceSHA256": "d5fb9d5f6917325f6f5846b6ea57feac27c339bf90aff661a72234b12e318746",
+        "stdinBase64": null,
+        "heapFailureAt": null,
+        "heapBalanceVerified": true,
+        "heapCounts": {
+          "attempts": 3,
+          "liveAfter": 0
+        },
+        "textCounts": null,
+        "fileCounts": {
+          "open": 2,
+          "close": 2,
+          "drop": 2,
+          "automaticClose": 0,
+          "dropStatusErrors": 0,
+          "closedHandleVerified": false
+        },
+        "vectorCounts": null,
+        "bufferCounts": {
+          "drop": 1,
+          "dropStatusErrors": 0
+        },
+        "arenaCounts": null,
+        "regionCounts": null,
+        "runtimeInputs": [
+          {
+            "path": "internal\\cstdlib\\stage0_system_heap.c",
+            "sha256": "cae6664fa1ec70722b76025c3e2c3daadc133cd90d95fa9f02f2385915d3e55c"
+          },
+          {
+            "path": "internal\\cstdlib\\stage0_buffer.c",
+            "sha256": "41c7a26acb8b9f22fd5e0f82c976f4b59964df2e2e73e7ddb5fa8bee70e8390c"
+          },
+          {
+            "path": "internal\\cstdlib\\stage0_windows_file.c",
+            "sha256": "0b70e682e2d09f76b2565075ac99e08674d4c80e92a74f46d88cde52c94626d6"
+          },
+          {
+            "path": "internal\\cstdlib\\stage0_windows_file_portable.c",
+            "sha256": "d965ef1295434c6cbb2873f2f4934c63c6b13c128cf49992bd0e048104cd5faf"
+          },
+          {
+            "path": "internal\\cstdlib\\stage0_windows_file_buffer.c",
+            "sha256": "211ff5c6023230b6ca1bfcea6dbc995bf4c5009669bb7d7e4519a36e78e05d59"
+          }
+        ],
+        "build": {
+          "argv": [
+            "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+            "/nologo",
+            "/std:c11",
+            "/TC",
+            "/Od",
+            "/DFY_CANDIDATE_NO_MAIN",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-unicode-c\\sdk_c_executes_file_buffer_read_to_end.c",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-unicode-c\\sdk_c_executes_file_buffer_read_to_end-runtime.c",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-unicode-c\\trap.c",
+            "/Fe:C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-unicode-c\\sdk_c_executes_file_buffer_read_to_end-low.exe",
+            "/link",
+            "/INCREMENTAL:NO"
+          ],
+          "exit": 0,
+          "stdout": "sdk_c_executes_file_buffer_read_to_end.c\r\nsdk_c_executes_file_buffer_read_to_end-runtime.c\r\ntrap.c\r\nGenerating Code...\r\n",
+          "stderr": ""
+        },
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-unicode-c\\sdk_c_executes_file_buffer_read_to_end-low.exe"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      },
+      {
+        "name": "sdk_c_executes_file_buffer_read_to_end",
+        "profile": "optimized",
+        "sourceSHA256": "d5fb9d5f6917325f6f5846b6ea57feac27c339bf90aff661a72234b12e318746",
+        "stdinBase64": null,
+        "heapFailureAt": null,
+        "heapBalanceVerified": true,
+        "heapCounts": {
+          "attempts": 3,
+          "liveAfter": 0
+        },
+        "textCounts": null,
+        "fileCounts": {
+          "open": 2,
+          "close": 2,
+          "drop": 2,
+          "automaticClose": 0,
+          "dropStatusErrors": 0,
+          "closedHandleVerified": false
+        },
+        "vectorCounts": null,
+        "bufferCounts": {
+          "drop": 1,
+          "dropStatusErrors": 0
+        },
+        "arenaCounts": null,
+        "regionCounts": null,
+        "runtimeInputs": [
+          {
+            "path": "internal\\cstdlib\\stage0_system_heap.c",
+            "sha256": "cae6664fa1ec70722b76025c3e2c3daadc133cd90d95fa9f02f2385915d3e55c"
+          },
+          {
+            "path": "internal\\cstdlib\\stage0_buffer.c",
+            "sha256": "41c7a26acb8b9f22fd5e0f82c976f4b59964df2e2e73e7ddb5fa8bee70e8390c"
+          },
+          {
+            "path": "internal\\cstdlib\\stage0_windows_file.c",
+            "sha256": "0b70e682e2d09f76b2565075ac99e08674d4c80e92a74f46d88cde52c94626d6"
+          },
+          {
+            "path": "internal\\cstdlib\\stage0_windows_file_portable.c",
+            "sha256": "d965ef1295434c6cbb2873f2f4934c63c6b13c128cf49992bd0e048104cd5faf"
+          },
+          {
+            "path": "internal\\cstdlib\\stage0_windows_file_buffer.c",
+            "sha256": "211ff5c6023230b6ca1bfcea6dbc995bf4c5009669bb7d7e4519a36e78e05d59"
+          }
+        ],
+        "build": {
+          "argv": [
+            "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+            "/nologo",
+            "/std:c11",
+            "/TC",
+            "/O2",
+            "/DFY_CANDIDATE_NO_MAIN",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-unicode-c\\sdk_c_executes_file_buffer_read_to_end.c",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-unicode-c\\sdk_c_executes_file_buffer_read_to_end-runtime.c",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-unicode-c\\trap.c",
+            "/Fe:C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-unicode-c\\sdk_c_executes_file_buffer_read_to_end-optimized.exe",
+            "/link",
+            "/INCREMENTAL:NO"
+          ],
+          "exit": 0,
+          "stdout": "sdk_c_executes_file_buffer_read_to_end.c\r\nsdk_c_executes_file_buffer_read_to_end-runtime.c\r\ntrap.c\r\nGenerating Code...\r\n",
+          "stderr": ""
+        },
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-unicode-c\\sdk_c_executes_file_buffer_read_to_end-optimized.exe"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      }
+    ],
+    "compiler": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+    "source": "Private Fairy emitter; actual repository C runtime components, no SDK stand-ins"
+  },
+  "reference": {
+    "passed": true,
+    "runs": [
+      {
+        "name": "sdk_c_executes_file_utf8_roundtrip_seek_and_close",
+        "exit": 0,
+        "stdout": "check ok: 2 instance(s), 8 source file(s), 153 MIR function(s), lock updated\n",
+        "stderr": "",
+        "sourceSHA256": "107acad78c4fb1d3451aa6985c9b07b1a18ef3e813209d6a1d851ab68353acbc"
+      },
+      {
+        "name": "sdk_c_executes_file_partial_eof_and_scope_cleanup",
+        "exit": 0,
+        "stdout": "check ok: 2 instance(s), 8 source file(s), 155 MIR function(s), lock updated\n",
+        "stderr": "",
+        "sourceSHA256": "def8a7a3f8ebda880cbe1dda67c83b97269c5672be986e95d3ed0c357e7e09e5"
+      },
+      {
+        "name": "sdk_c_executes_file_open_error_and_exclusive_preservation",
+        "exit": 0,
+        "stdout": "check ok: 2 instance(s), 8 source file(s), 153 MIR function(s), lock updated\n",
+        "stderr": "",
+        "sourceSHA256": "8a76f1018dba5e5e243d3c9106c6d1d8d3e65d08406e6875c877322888a41d7e"
+      },
+      {
+        "name": "sdk_c_executes_file_replace_and_append",
+        "exit": 0,
+        "stdout": "check ok: 2 instance(s), 8 source file(s), 154 MIR function(s), lock updated\n",
+        "stderr": "",
+        "sourceSHA256": "c3f39f96e0db0f4628cfa49a6a370ebe129b2263baea38b0a5a5ea738d62eb84"
+      },
+      {
+        "name": "sdk_c_executes_file_buffer_read_to_end",
+        "exit": 0,
+        "stdout": "check ok: 2 instance(s), 8 source file(s), 153 MIR function(s), lock updated\n",
+        "stderr": "",
+        "sourceSHA256": "aa63b109a4a75166a5b66d6bb1f49c9dc7f0032ce3284a59a252f65af3ec8971"
+      },
+      {
+        "name": "sdk_c_executes_file_buffer_failure_preserves_cursor",
+        "exit": 0,
+        "stdout": "check ok: 2 instance(s), 8 source file(s), 153 MIR function(s), lock updated\n",
+        "stderr": "",
+        "sourceSHA256": "eaa70ae529ec000ce58c096ec87c04692cdfde8551b59904968b060c7bee47a8"
+      }
+    ]
+  },
+  "storage": {
+    "type": "File",
+    "size": 16,
+    "alignment": 8,
+    "offsets": [
+      0,
+      8
+    ],
+    "foreignCodes": [
+      33,
+      34,
+      35,
+      42,
+      45,
+      46,
+      47,
+      48,
+      49,
+      57,
+      58,
+      59,
+      60,
+      61,
+      62,
+      63,
+      64,
+      65
+    ],
+    "records": [
+      6,
+      7,
+      8,
+      11,
+      13
+    ],
+    "fileTransport": "Existing runtime memcpy of opaque descriptor",
+    "bufferTransport": "read_append local real Buffer wire object copied back after the synchronous call"
+  },
+  "observations": [
+    "UTF-8 pathname and exact A NUL lambda Z write/read",
+    "seek start/current/end, position, size, EOF and partial read_exact status7/completed2",
+    "automatic cleanup closes real handles exactly once, confirmed with GetHandleInformation",
+    "open OS errors, embedded-NUL UTF8 path rejection, exclusive-create keeps original bytes",
+    "sync/close/replace followed by append and replacement path consumption",
+    "read_append plus read_to_end preserve the initialized Buffer prefix",
+    "malloc failure at attempt2 preserves prefix and file cursor; subsequent read gets original bytes",
+    "all fixtures remove created paths and all buffered runs finish with no live allocations"
+  ],
+  "privateAPIExpanded": true,
+  "normativeContractsChanged": false,
+  "stableCLICommandsChanged": false,
+  "sdkABIChanged": false,
+  "GoChanged": false,
+  "dbChanged": false,
+  "ciChanged": false,
+  "pushed": false,
+  "skipped": {
+    "candidateRelease": "Generated C /O2 covered; standalone candidate Release deferred",
+    "Linux": "Windows runtime slice",
+    "fullSuite": "Focused File runtime programs; other SDK runtime suites deferred",
+    "stage1Stage2": "Dispatcher and complete proof coverage remain"
+  },
+  "pending": [
+    "Other filesystem operations and directory iteration",
+    "Whole SDK coverage",
+    "Complete provenance/path/dominance/initialization proofs",
+    "Foreign ABI expansion",
+    "Dispatcher and stage1/stage2 promotion"
+  ],
+  "fixtureCorrections": [
+    "Go E1104 rejected short-circuit RHS close consuming a resource; close assertions were made unconditional",
+    "Emitter test entry selector requires one parameterless i32 function; auxiliary functions gained parameters",
+    "Temporary editing script initially read UTF-8 with Windows cp949; lambda literals restored with explicit UTF-8 before final reruns"
+  ],
+  "notIndividuallyExecutedForeignCodes": [
+    57
+  ]
+}

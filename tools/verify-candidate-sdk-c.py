@@ -6,6 +6,7 @@ import importlib.util
 import json
 import os
 import sys
+import tempfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -22,6 +23,17 @@ TEXT_CASES = {
     "sdk_c_executes_string_buffer_transfers_without_copy": (2, 2, 0, 3, None),
     "sdk_c_executes_cstring_termination_and_interior_nul": (2, 0, 3, 0, None),
     "sdk_c_executes_cstring_initial_allocation_failure": (1, 0, 1, 0, 1),
+}
+
+# Successful opens, explicit closes, cleanup calls, cleanup of open owners,
+# heap attempts and injected failure. Programs run in isolated scratch folders.
+FILE_CASES = {
+    "sdk_c_executes_file_utf8_roundtrip_seek_and_close": (2, 2, 2, 0, 0, None),
+    "sdk_c_executes_file_partial_eof_and_scope_cleanup": (2, 0, 2, 2, 0, None),
+    "sdk_c_executes_file_open_error_and_exclusive_preservation": (2, 2, 5, 0, 0, None),
+    "sdk_c_executes_file_replace_and_append": (4, 4, 5, 0, 0, None),
+    "sdk_c_executes_file_buffer_read_to_end": (2, 2, 2, 0, 3, None),
+    "sdk_c_executes_file_buffer_failure_preserves_cursor": (2, 2, 2, 0, 2, 2),
 }
 
 CASES = {
@@ -66,6 +78,10 @@ CASES = {
 }
 CASES.update({name: (["stage0_system_heap.c", "stage0_buffer.c", "stage0_text_view.c", "stage0_owned_text.c"], [], "")
               for name in TEXT_CASES})
+CASES.update({name: ((["stage0_system_heap.c", "stage0_buffer.c"] if "file_buffer_" in name else []) +
+                    ["stage0_windows_file.c", "stage0_windows_file_portable.c"] +
+                    (["stage0_windows_file_buffer.c"] if "file_buffer_" in name else []), [], "")
+              for name in FILE_CASES})
 PROOFS = {"sdk_c_rejects_forged_cstring_view_authority","sdk_c_rejects_forged_storage_metadata","pointer_c_rejects_forged_raw_view_metadata","rejected_import_expansion_rolls_back_borrow_types","sdk_c_plan_respects_work_budget_before_authority_or_output",
           "sdk_c_region_plan_respects_placement_budget_before_output"}
 
@@ -84,7 +100,7 @@ def main():
         report = json.loads(raw)
         assert report["engine"] == "native" and report["target"] == "x86_64-windows-msvc"
         for test in report["tests"]:
-            prefix = next((prefix for prefix in ("tests::module_unit_imports::", "tests::module_unit_c_pointers::", "tests::module_unit_c_sdk::", "tests::module_unit_c_text::") if test["identity"].startswith(prefix)), "")
+            prefix = next((prefix for prefix in ("tests::module_unit_imports::", "tests::module_unit_c_pointers::", "tests::module_unit_c_sdk::", "tests::module_unit_c_text::", "tests::module_unit_c_fs::") if test["identity"].startswith(prefix)), "")
             if prefix:
                 name = test["identity"].removeprefix(prefix)
                 if name in CASES or name in PROOFS:
@@ -92,7 +108,9 @@ def main():
         reports.append(dict(path=str(path), sha256=hashlib.sha256(raw).hexdigest()))
     required = set(args.case) if args.case else set(CASES) | PROOFS
     assert required <= set(outcomes), required - set(outcomes)
-    assert all(test["outcome"] == "passed" for test in outcomes.values()), outcomes
+    failed = [(name, test["outcome"], test.get("trapCategory"))
+              for name, test in outcomes.items() if name in required and test["outcome"] != "passed"]
+    assert not failed, failed
     assert all(not base64.b64decode(outcomes[name]["stdoutBase64"], validate=True) for name in PROOFS & set(outcomes))
     vcvars = str(args.vcvars.resolve())
     assert args.vcvars.is_file() and not any(c in vcvars for c in '\r\n"&|<>^%!')
@@ -127,6 +145,7 @@ def main():
         buffered = "stage0_buffer.c" in components
         vector = "stage0_vector_storage.c" in components
         textual = name in TEXT_CASES
+        filing = name in FILE_CASES
         heap_checked = buffered or vector or name in {"sdk_c_executes_region_placement_and_param_origin", "sdk_c_executes_region_storage_or_tracking_failure_as_result"}
         placing = name in {"sdk_c_executes_region_placement_and_param_origin",
                            "sdk_c_executes_region_storage_or_tracking_failure_as_result"}
@@ -224,7 +243,42 @@ def main():
                 b"_Static_assert(sizeof(struct fy_std_cstring_v0)==32&&_Alignof(struct fy_std_cstring_v0)==8,\"runtime CString storage\");\n"
                 b"extern int32_t fy_candidate_entry(void);\nint main(void){int32_t result=fy_candidate_entry();"
                 + f"return result?result:(string_dropped=={string_drops}&&cstring_dropped=={cstring_drops}&&buffer_dropped=={buffer_drops}&&!text_drop_errors&&heap_live==0&&heap_attempts=={attempts}?0:90);}}\n".encode())
+        if filing:
+            opened, closed, drops, auto_closed, attempts, file_failure = FILE_CASES[name]
+            file_rename = (
+                b"#define fy_std_file_open_v0 fy_test_actual_file_open_v0\n"
+                b"#define fy_std_file_open_utf8_v0 fy_test_actual_file_open_utf8_v0\n"
+                b"#define fy_std_file_close_v0 fy_test_actual_file_close_v0\n"
+                b"#define fy_std_file_drop_v0 fy_test_actual_file_drop_v0\n")
+            instrumentation = (
+                b"#undef fy_std_file_open_v0\n#undef fy_std_file_open_utf8_v0\n"
+                b"#undef fy_std_file_close_v0\n#undef fy_std_file_drop_v0\n"
+                b"static unsigned file_opened,file_closed,file_dropped,file_auto_closed,file_drop_errors;\n"
+                b"struct fy_std_windows_file_result_v0 fy_std_file_open_v0(const uint8_t *p,const struct fy_std_windows_open_options_v0 *o,void *s){"
+                b"struct fy_std_windows_file_result_v0 r=fy_test_actual_file_open_v0(p,o,s);if(!r.status)++file_opened;return r;}\n"
+                b"struct fy_std_windows_file_result_v0 fy_std_file_open_utf8_v0(const uint8_t *p,size_t n,const struct fy_std_windows_open_options_v0 *o,void *s){"
+                b"struct fy_std_windows_file_result_v0 r=fy_test_actual_file_open_utf8_v0(p,n,o,s);if(!r.status)++file_opened;return r;}\n"
+                b"struct fy_std_windows_file_result_v0 fy_std_file_close_v0(void *s){"
+                b"struct fy_std_windows_file_result_v0 r=fy_test_actual_file_close_v0(s);if(!r.status)++file_closed;return r;}\n"
+                b"uint32_t fy_std_file_drop_v0(void *s){struct fy_std_windows_file_v0 before,after;"
+                b"int valid=fy_std_windows_file_load_v0(s,&before);uint32_t status=fy_test_actual_file_drop_v0(s);++file_dropped;"
+                b"if(status)++file_drop_errors;if(valid&&before.open){++file_auto_closed;"
+                b"if(!fy_std_windows_file_load_v0(s,&after)||after.open||after.handle)++file_drop_errors;"
+                b"if(GetHandleInformation((HANDLE)before.handle,&(DWORD){0})||GetLastError()!=ERROR_INVALID_HANDLE)++file_drop_errors;}return status;}\n"
+                b"_Static_assert(sizeof(struct fy_std_windows_file_v0)==16&&_Alignof(struct fy_std_windows_file_v0)==8&&offsetof(struct fy_std_windows_file_v0,open)==8,\"runtime File layout\");\n")
+            if buffered:
+                buffer_drops = 1
+                instrumentation += (
+                    b"#undef fy_std_buffer_drop_v0\nstatic unsigned buffer_dropped,buffer_drop_errors;\n"
+                    b"uint32_t fy_std_buffer_drop_v0(struct fy_std_buffer_v0 *b){uint32_t r=fy_test_actual_buffer_drop_v0(b);"
+                    b"++buffer_dropped;if(r)++buffer_drop_errors;return r;}\n")
+            checks = f"file_opened=={opened}&&file_closed=={closed}&&file_dropped=={drops}&&file_auto_closed=={auto_closed}&&!file_drop_errors"
+            if buffered:
+                checks += f"&&heap_live==0&&heap_attempts=={attempts}&&buffer_dropped==1&&!buffer_drop_errors"
+            instrumentation += ("extern int32_t fy_candidate_entry(void);\nint main(void){int32_t result=fy_candidate_entry();"
+                                f"return result?result:({checks}?0:90);}}\n").encode()
         runtime.write_bytes(heap + b"#define FY_STD_SYSTEM_HEAP_MAX_ALIGNMENT_V0 ((size_t)16)\n" +
+                            (file_rename if filing else b"") +
                             (b"#define fy_std_string_drop_storage_v0 fy_test_actual_string_drop_storage_v0\n"
                              b"#define fy_std_cstring_drop_storage_v0 fy_test_actual_cstring_drop_storage_v0\n" if textual else b"") +
                             (b"#define fy_private_vector_release_empty_v0 fy_test_actual_vector_release_empty_v0\n" if vector else b"") +
@@ -237,26 +291,34 @@ def main():
         for profile, flag in (("low", "/Od"), ("optimized", "/O2")):
             binary = output / f"{name}-{profile}.exe"
             build = driver.run([str(compiler), "/nologo", "/std:c11", "/TC", flag,
-                                *(["/DFY_CANDIDATE_NO_MAIN"] if arena or buffered or vector else []),
+                                *(["/DFY_CANDIDATE_NO_MAIN"] if arena or buffered or vector or filing else []),
                                 str(generated), str(runtime), str(trap), f"/Fe:{binary}",
                                 "/link", "/INCREMENTAL:NO"], output, environment)
             assert build["exit"] == 0, build
             reading = name == "sdk_c_executes_stdin_and_stderr_byte_results"
             stdin = b"A\0\xce\xbbZ" if reading else None
             expected_stderr = "42|-7|9|-9223372036854775808|true|λ\n" if reading else ""
-            failures = (text_failure,) if textual else (1, 2) if name == "sdk_c_executes_region_storage_or_tracking_failure_as_result" else (buffer_failure,) if buffered else (vector_failure,) if vector else (None,)
+            failures = (file_failure,) if filing else (text_failure,) if textual else (1, 2) if name == "sdk_c_executes_region_storage_or_tracking_failure_as_result" else (buffer_failure,) if buffered else (vector_failure,) if vector else (None,)
             for failure in failures:
                 run_environment = dict(os.environ)
                 run_environment.pop("FY_TEST_HEAP_FAIL_AT", None)
                 if failure is not None:
                     run_environment["FY_TEST_HEAP_FAIL_AT"] = str(failure)
-                run = driver.run([str(binary)] + argv, output, run_environment, stdin=stdin)
+                if filing:
+                    with tempfile.TemporaryDirectory(prefix="candidate-file-", dir=output) as scratch:
+                        run = driver.run([str(binary)] + argv, Path(scratch), run_environment, stdin=stdin)
+                        assert run["exit"] == 0 and run["stdout"] == expected and run["stderr"] == expected_stderr, run
+                        assert not list(Path(scratch).iterdir()), f"File fixture left files behind: {name}"
+                else:
+                    run = driver.run([str(binary)] + argv, output, run_environment, stdin=stdin)
                 assert run["exit"] == 0 and run["stdout"] == expected and run["stderr"] == expected_stderr, run
                 executions.append(dict(name=name, profile=profile, sourceSHA256=hashlib.sha256(source).hexdigest(),
                                    stdinBase64=base64.b64encode(stdin).decode('ascii') if stdin is not None else None,
                                    heapFailureAt=failure, heapBalanceVerified=heap_checked,
-                                   heapCounts={"attempts": failure or (attempts if textual else vector_attempts if vector else 3 if buffered else 10), "liveAfter": 0} if heap_checked else None,
+                                   heapCounts={"attempts": failure or (attempts if textual or filing else vector_attempts if vector else 3 if buffered else 10), "liveAfter": 0} if heap_checked else None,
                                    textCounts={"stringDrop": string_drops, "cstringDrop": cstring_drops, "dropStatusErrors": 0} if textual else None,
+                                   fileCounts={"open": opened, "close": closed, "drop": drops, "automaticClose": auto_closed,
+                                               "dropStatusErrors": 0, "closedHandleVerified": auto_closed > 0} if filing else None,
                                    vectorCounts={"release": 1, "releaseStatusErrors": 0} if vector else None,
                                    bufferCounts={"drop": buffer_drops, "dropStatusErrors": 0} if buffered else None,
                                    arenaCounts={"initialize": arena_count, "drop": arena_count, "nonzeroStatus": 0} if arena else None,
