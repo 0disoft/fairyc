@@ -4,6 +4,7 @@ import literal_types as literals;
 import module_unit_body_ir_enums as enums;
 import module_unit_body_ir_switches as switches;
 import module_unit_sdk_sources as sdk_sources;
+import module_unit_sdk_authority as sdk_authority;
 import module_unit_body_ir_lookup as lookup;
 import module_unit_cleanup_mir_model as clean_ir;
 import module_unit_cleanup_mir_verify as cleaning;
@@ -87,6 +88,7 @@ pub fn clean_ir::Problem check(ref ir::Program p){
     i=0;while(i<ir::layout_count(p)){if(!budget::charge(ref mut work,1)){return fail(1002,0,0,0);}let row=ir::layout_at(p,i);let s=row.value;if(s.type==0 || s.type>nt || s.field_start>ir::field_count(p) || s.field_count>ir::field_count(p)-s.field_start || !span(row.name_start,row.name_end,ir::name_bytes(p))){return fail(1001,s.module_index,s.start,s.end);}let t=clean_ir::type_at(ir::cleanup_ir(p),s.type);if(t.module_index!=s.module_index || t.declaration!=s.declaration){return fail(1001,s.module_index,s.start,s.end);}i+=1;}
     i=0;while(i<ir::field_count(p)){if(!budget::charge(ref mut work,1)){return fail(1002,0,0,0);}let f=ir::field_at(p,i);if(f.type>nt || f.payload_start>ir::field_count(p) || f.payload_count>ir::field_count(p)-f.payload_start || !span(f.name_start,f.name_end,ir::name_bytes(p))){return fail(1001,f.module_index,f.start,f.end);}i+=1;}
     i=0;while(i<ir::callable_count(p)){if(!budget::charge(ref mut work,1)){return fail(1002,0,0,0);}let c=ir::callable_at(p,i);if(c.result>nt || c.parameter_start>ir::parameter_count(p) || c.parameter_count>ir::parameter_count(p)-c.parameter_start || !span(c.link_start,c.link_end,ir::name_bytes(p))){return fail(1001,c.module_index,0,0);}var usize j=0;while(j<c.parameter_count){if(!budget::charge(ref mut work,1)){return fail(1002,c.module_index,0,0);}if(ir::parameter_at(p,c.parameter_start+j)>nt){return fail(1001,c.module_index,0,0);}j+=1;}i+=1;}
+    let authenticated=sdk_authority::check(p,ref mut work);if(authenticated.code!=0){return authenticated;}
     let enum_proof=enums::check(p,ref mut work);if(enum_proof.code!=0){return enum_proof;}
     i=1;while(i<=ir::count(p)){let matched=switches::check_body(p,ir::at(p,i),i,ref mut work);if(matched.code!=0){return matched;}i+=1;}
     i=1;while(i<=clean_ir::operand_count(ir::cleanup_ir(p))){if(!budget::charge(ref mut work,1)){return fail(1002,0,0,0);}let o=clean_ir::operand_at(ir::cleanup_ir(p),i);let b=ir::at(p,o.frame);if(o.kind==1){if(o.id>ir::local_count(b) || ir::local_at(b,o.id).type!=o.type){return fail(1001,0,o.start,o.end);}}else{let n=lookup::node(b,o.id);if(n==0 || ir::node_at(b,n-1).value.type!=o.type){return fail(1001,0,o.start,o.end);}}i+=1;}

@@ -2820,3 +2820,15 @@ Receipt: `docs/ops/evidence/candidate-sdk-owned-sources-20261010.json`. Exact au
 - Unchanged: public CLI, SDK ABI, normative specs, Go, DB, CI and hygiene; no push.
 - Deferred: candidate Release, Linux, full suite and standalone candidate build; this is a bounded source-retention and regression unit.
 - Remaining: SDK call binding/signature authentication and C execution; Region C, full dispatcher, full source/unsafe provenance, path/dominance/initialization proofs, foreign aggregate ABI layout, stage1/stage2 and promotion.
+
+## Candidate SDK foreign declaration authority (2026-10-10)
+
+Receipt: `docs/ops/evidence/candidate-sdk-call-authority-20261010.json`. New private module `module_unit_sdk_authority.fy` reparses retained authentic SDK bytes, preserving original-file declaration IDs.
+
+- Checks: SDK raw extern module/declaration, linker spelling, unsafe/foreign/template flags, exact effects/must_use, canonical result/ordered parameter signatures (primitive, raw pointer, shared/mutable reference, local nominal identity); hooks into the owned-program verifier.
+- Rule API returns the closed existing `sdk_scopes` runtime rule ID only after reauthentication. Reconstructed `Parsed` is temporary; no caller-provided authority Boolean is accepted.
+- Validation: locked source check passes 264 sources and 3342 MIR functions. Final process/alloc/io native identities pass 3/3. Fourteen metadata/budget mutations, altered pinned process bytes, an alloc pointer parameter mismatch and an io nominal result mismatch reject.
+- Scope: root-only projection retained SDK public signatures but omitted SDK ordinary bodies and raw callables; initial tests selecting 0..1 failed lookup. Final authority tests explicitly select root and SDK 0..2. Root-only SDK body materialization remains an execution follow-up.
+- Declaration/signature authentication only: no SDK C call, raw record layout/ABI or full unsafe provenance admission.
+- Unchanged: normative contracts, stable CLI, SDK ABI, Go, DB, CI and hygiene; no push. Candidate Release, Linux, full suite, allocation injection and standalone build were skipped for this focused validator unit.
+- Remaining: authenticated SDK C calls and raw-record bridges; SDK ordinary body materialization, Region C and whole dispatcher; full source/unsafe/path/dominance/initialization proof, foreign aggregate ABI layout, stage1/stage2 and promotion.

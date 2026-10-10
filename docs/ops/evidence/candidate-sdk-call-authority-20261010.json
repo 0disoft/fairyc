@@ -1,0 +1,165 @@
+{
+  "schema": "fairyc.candidate-sdk-call-authority/v1",
+  "passed": true,
+  "parentCommit": "4886fe1a3d74601f34496a198978c4dcf076f22b",
+  "identity": {
+    "sources": [
+      {
+        "path": "examples/lexer_candidate/src/module_unit_sdk_authority.fy",
+        "sha256": "49e7da38b49080c6a014c4e63ae861c3a963fbd603724da71192ac2d96c98114"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_body_ir_verify.fy",
+        "sha256": "ec24e4d7c6d6676db016dbdba895081b13693daf64056e0de136902ee5da6f28"
+      },
+      {
+        "path": "examples/lexer_candidate/tests/module_unit_sdk_authority.fy",
+        "sha256": "902e31f7d80665e2767feabad89ba23d737027f15db924ff454a5a9c172e3ce1"
+      },
+      {
+        "path": "examples/lexer_candidate/fairy.lock",
+        "sha256": "790814bd7ab6b30e7e7007d913b97ec3d3d44f27bf6b1703d996a72bd45634dc"
+      }
+    ],
+    "sdkInputs": [
+      {
+        "path": "internal/sdkstdlib/sources/std/process.fy",
+        "sha256": "9680a1481df4f761f481d5a039af7bdbefeb312d1091961194f8e7bc0681ae24"
+      },
+      {
+        "path": "internal/sdkstdlib/sources/std/alloc.fy",
+        "sha256": "61f50fa03239eee7b669c315659e8c9d07982117857cf50fe7f5a2b6f35a82c2"
+      },
+      {
+        "path": "internal/sdkstdlib/sources/std/io.fy",
+        "sha256": "4b89c3aeb8b4de4887395d29723095d364c5660c6b773c5696fb1f65f5365f48"
+      }
+    ],
+    "compiler": {
+      "path": ".cache/candidate-tagged/compiler-origin-patterns.exe",
+      "sha256": "d36dae1b99751322e447880aaf4d28321bd6d53bdf776185308c6c4504889bb2"
+    }
+  },
+  "sourceCheck": {
+    "sourceCount": 264,
+    "stdout": "check ok: 2 instance(s), 264 source file(s), 3342 MIR function(s), lock verified\r\n",
+    "mirFunctionCount": 3342,
+    "argv": [
+      "compiler-origin-patterns.exe",
+      "check",
+      "--locked"
+    ],
+    "exit": 0
+  },
+  "native": {
+    "path": ".cache/candidate-tagged/sdk-call-authority/native-final.json",
+    "sha256": "fafb468a4441857e61e04c207ba4484b7e352470d96e9c13fda82071f2b16520",
+    "report": {
+      "schemaVersion": "fairyc.test-report/v4",
+      "engine": "native",
+      "target": "x86_64-windows-msvc",
+      "profile": "development",
+      "tests": [
+        {
+          "identity": "tests::module_unit_sdk_authority::arena_pointer_sdk_declarations_are_reauthenticated_after_parser_release",
+          "outcome": "passed",
+          "trapCategory": null,
+          "stdoutBase64": "",
+          "stderrBase64": ""
+        },
+        {
+          "identity": "tests::module_unit_sdk_authority::console_record_result_sdk_signature_keeps_exact_nominal_identity",
+          "outcome": "passed",
+          "trapCategory": null,
+          "stdoutBase64": "",
+          "stderrBase64": ""
+        },
+        {
+          "identity": "tests::module_unit_sdk_authority::process_scalar_sdk_declaration_and_signature_are_reauthenticated",
+          "outcome": "passed",
+          "trapCategory": null,
+          "stdoutBase64": "",
+          "stderrBase64": ""
+        }
+      ],
+      "count": 3,
+      "passed": 3,
+      "failed": 0,
+      "status": "ok",
+      "lock": "verified"
+    }
+  },
+  "behavior": {
+    "program": "Owned verifier invokes reauthentication for every SDK foreign callable, including flags relabelled as ordinary",
+    "rule": "Existing closed sdk_scopes rule ID returned only after source and full signature validation",
+    "types": "Closed SDK extern signature forms: primitive, raw pointer, shared/mutable reference and exact local nominal identity. No struct layout or ABI admission inferred",
+    "C": "No SDK C admission added in this commit",
+    "mutations": "Fourteen process metadata/work-budget mutations plus whitespace-tampered official bytes; Arena wrong pointer parameter, arity and console wrong nominal result rejected",
+    "foreign": "Original module/declaration, exact linker spelling, foreign/unsafe/template metadata, effect bits and must_use, result and ordered parameter canonical types rechecked against the pinned SDK source",
+    "source": "Reparse exact retained SDK bytes; original-file declaration IDs are preserved; Parsed is temporary in the validator"
+  },
+  "correctedAttempt": {
+    "initialReport": {
+      "schemaVersion": "fairyc.test-report/v4",
+      "engine": "native",
+      "target": "x86_64-windows-msvc",
+      "profile": "development",
+      "tests": [
+        {
+          "identity": "tests::module_unit_sdk_authority::arena_pointer_sdk_declarations_are_reauthenticated_after_parser_release",
+          "outcome": "failed",
+          "trapCategory": "assertion-failed",
+          "stdoutBase64": "",
+          "stderrBase64": ""
+        },
+        {
+          "identity": "tests::module_unit_sdk_authority::console_record_result_sdk_signature_keeps_exact_nominal_identity",
+          "outcome": "failed",
+          "trapCategory": "assertion-failed",
+          "stdoutBase64": "",
+          "stderrBase64": ""
+        },
+        {
+          "identity": "tests::module_unit_sdk_authority::process_scalar_sdk_declaration_and_signature_are_reauthenticated",
+          "outcome": "failed",
+          "trapCategory": "assertion-failed",
+          "stdoutBase64": "",
+          "stderrBase64": ""
+        }
+      ],
+      "count": 3,
+      "passed": 0,
+      "failed": 3,
+      "status": "failed",
+      "lock": "verified"
+    },
+    "correction": "Authority tests explicitly project root and SDK source together (0..2), exposing real raw SDK declarations to owned verification",
+    "cause": "Root-only projection imported SDK public callable signatures, but did not materialize the ordinary SDK bodies or raw foreign callable metadata",
+    "remaining": "Root-only SDK body materialization remains an execution follow-up; this test projection does not claim it is fixed"
+  },
+  "privateAPIExpanded": true,
+  "normativeContractsChanged": false,
+  "stableCLIChanged": false,
+  "sdkABIChanged": false,
+  "GoChanged": false,
+  "dbChanged": false,
+  "ciChanged": false,
+  "hygieneChanged": false,
+  "pushed": false,
+  "skipped": {
+    "fullSuite": "Three targeted identities",
+    "Linux": "Windows native unit",
+    "allocationInjection": "Not injected",
+    "candidateRelease": "Separate release batch",
+    "SDKC": "Next execution unit",
+    "standaloneCandidateBuild": "Native source compilation covers this validator unit"
+  },
+  "pending": [
+    "Authenticated SDK C call and raw-record ABI bridges",
+    "SDK ordinary body materialization under root-only projection",
+    "Region C and whole dispatcher",
+    "Full original-source/unsafe/path/dominance/initialization proof",
+    "Foreign aggregate ABI layout",
+    "Stage1/stage2 and promotion"
+  ]
+}
