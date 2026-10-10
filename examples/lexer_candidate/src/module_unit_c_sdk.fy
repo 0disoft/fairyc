@@ -24,6 +24,7 @@ fn usize record_id(ref u8[] name,usize sdk_id){var usize i=1;while(i<=5){if(sdk_
 fn ref u8[] field_name(usize record,usize index){let pool=b"status\0needed\0allocation_status\0data\0length\0written\0read\0";let usize at=if(record==3){if(index==0){4}else{5}}else if(index==0){1}else if(record==1){2}else if(record==2){3}else if(record==4){6}else{7};return slot(pool,at,7);}
 fn u32 field_type(usize record,usize index){return if(record==3 && index==0){pointers::make(3,false)}else if(index==0 || record==2){4}else{5};}
 pub fn usize rule(ref Plan p,usize callable){assert(callable<v::len<usize>(ref p.rules));return *v::at<usize>(ref p.rules,callable);}
+pub fn usize arena_type(ref Plan p){return p.arena;}
 // Other authenticated SDK components still need their storage/record bridges.
 pub fn bool admitted(usize code){return code==1 || code==2 || code>=24 && code<=32 || code==70 || code==71;}
 pub fn usize record(ref Plan p,usize type){return if(type==0 || type>v::len<usize>(ref p.records)){0}else{*v::at<usize>(ref p.records,type-1)};}

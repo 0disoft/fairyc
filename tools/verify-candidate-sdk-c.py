@@ -23,8 +23,11 @@ CASES = {
         (["stage0_windows_console.c"], [], "42|-7|9|-9223372036854775808|λ\n"),
     "sdk_c_executes_stdin_and_stderr_byte_results":
         (["stage0_windows_console.c"], [], "A\0λZ"),
+    "sdk_c_executes_region_lifecycle_and_cleanup_edges":
+        (["stage0_system_heap.c", "stage0_arena.c"], [], "B,2,1,S,B,4,3,S,B,B,6,S,5,S,B,11,S,B,12,S,"),
 }
-PROOF = "sdk_c_plan_respects_work_budget_before_authority_or_output"
+PROOFS = {"sdk_c_plan_respects_work_budget_before_authority_or_output",
+          "sdk_c_keeps_region_placement_closed_without_partial_output"}
 
 
 def main():
@@ -45,9 +48,9 @@ def main():
             if test["identity"].startswith(prefix):
                 outcomes[test["identity"].removeprefix(prefix)] = test
         reports.append(dict(path=str(path), sha256=hashlib.sha256(raw).hexdigest()))
-    assert set(outcomes) == set(CASES) | {PROOF}
+    assert set(outcomes) == set(CASES) | PROOFS
     assert all(test["outcome"] == "passed" for test in outcomes.values()), outcomes
-    assert not base64.b64decode(outcomes[PROOF]["stdoutBase64"], validate=True)
+    assert all(not base64.b64decode(outcomes[name]["stdoutBase64"], validate=True) for name in PROOFS)
     vcvars = str(args.vcvars.resolve())
     assert args.vcvars.is_file() and not any(c in vcvars for c in '\r\n"&|<>^%!')
     setup = driver.run(f'cmd.exe /d /s /c ""{vcvars}" x64 >nul && set"', ROOT)
@@ -78,6 +81,7 @@ def main():
         # definitions in one translation unit, as the normal runtime builder does.
         runtime = output / f"{name}-runtime.c"
         arena = "stage0_arena.c" in components
+        regions = name == "sdk_c_executes_region_lifecycle_and_cleanup_edges"
         instrumentation = b""
         if arena:
             instrumentation = (
@@ -92,9 +96,25 @@ def main():
                 b"extern int32_t fy_candidate_entry(void);\n"
                 b"int main(void){int32_t result=fy_candidate_entry();"
                 b"return result?result:(initialized==2&&dropped==2&&!invalid_status?0:90);}\n")
+            if regions:
+                instrumentation = instrumentation.replace(
+                    b"extern int32_t fy_candidate_entry(void);", (
+                        b"#undef fy_std_region_begin_v0\n#undef fy_std_region_reset_v0\n"
+                        b"#include <stdio.h>\nstatic unsigned begun,resets;\n"
+                        b"void test_report(int32_t n){printf(\"%d,\",(int)n);}\n"
+                        b"uint32_t fy_std_region_begin_v0(struct fy_std_arena_v0 *a,struct fy_std_region_v0 *r){"
+                        b"uint32_t status=fy_test_actual_region_begin_v0(a,r);++begun;"
+                        b"if(status)++invalid_status;printf(\"B,\");return status;}\n"
+                        b"uint32_t fy_std_region_reset_v0(struct fy_std_region_v0 *r){"
+                        b"uint32_t status=fy_test_actual_region_reset_v0(r);++resets;"
+                        b"if(status)++invalid_status;printf(\"S,\");return status;}\n"
+                        b"extern int32_t fy_candidate_entry(void);"))
+                instrumentation = instrumentation.replace(b"&&!invalid_status?", b"&&begun==6&&resets==6&&!invalid_status?")
         runtime.write_bytes(b"#define FY_STD_SYSTEM_HEAP_MAX_ALIGNMENT_V0 ((size_t)16)\n" +
                             (b"#define fy_std_arena_initialize_v0 fy_test_actual_arena_initialize_v0\n"
                              b"#define fy_std_arena_drop_v0 fy_test_actual_arena_drop_v0\n" if arena else b"") +
+                            (b"#define fy_std_region_begin_v0 fy_test_actual_region_begin_v0\n"
+                             b"#define fy_std_region_reset_v0 fy_test_actual_region_reset_v0\n" if regions else b"") +
                             b"\n".join(path.read_bytes() for path in inputs) + b"\n" + instrumentation)
         for profile, flag in (("low", "/Od"), ("optimized", "/O2")):
             binary = output / f"{name}-{profile}.exe"
@@ -111,6 +131,7 @@ def main():
             executions.append(dict(name=name, profile=profile, sourceSHA256=hashlib.sha256(source).hexdigest(),
                                    stdinBase64=base64.b64encode(stdin).decode('ascii') if stdin is not None else None,
                                    arenaCounts={"initialize": 2, "drop": 2, "nonzeroStatus": 0} if arena else None,
+                                   regionCounts={"begin": 6, "reset": 6, "nonzeroStatus": 0} if regions else None,
                                    runtimeInputs=[dict(path=str(path.relative_to(ROOT)),
                                                       sha256=hashlib.sha256(path.read_bytes()).hexdigest())
                                                   for path in inputs], build=build, run=run))

@@ -2862,3 +2862,17 @@ Receipt: `docs/ops/evidence/candidate-sdk-streams-c-20261010.json`. Authenticate
 - Verifier: `tools/verify-candidate-module-c.py` now takes an optional stdin bytes parameter and pipes input only when supplied, with timeout cleanup kept; the SDK helper forwards byte records as base64 and checks stderr.
 - Unchanged: no emitter, lock, API, runtime, Go or CI changes; the helper and test are the only edits; no push.
 - Remaining: root-only SDK bodies, Region C, other SDK storage, provenance and stage1/stage2.
+
+## Candidate Region C lifecycle (2026-10-10)
+
+Receipt: `docs/ops/evidence/candidate-region-c-lifecycle-20261010.json`. New Fairy module `module_unit_c_region.fy` emits real Region begin/reset runtime calls through typed pointers.
+
+- Lifetime: Arena bridge storage resides in the lexical caller slot because Region retains its pointer through reset; the owner is copied back after successful reset.
+- Admission: the authentic SDK Arena type is guarded. Region capabilities remain compiler-only (`localkind6`), outside general C values; Region place still rejects 1004 transactionally.
+- Source check: latest locked candidate check passes 266 source files and 3365 MIR functions.
+- Native: final outcomes for three identities pass; the corrected lifecycle identity was rerun (1/1), while the unchanged passing Arena regression and placement rejection outcomes were reused (2/2).
+- Generated C: lifecycle and Arena programs use actual `stage0_system_heap.c` plus `stage0_arena.c` under MSVC `/Od` and `/O2` (4/4 runs). Instrumented actual runtime counters confirm exactly 2 initialize and 2 drop calls per program; the lifecycle program records 6 begin and 6 reset calls with no nonzero status.
+- Trace: exact `B,2,1,S,B,4,3,S,B,B,6,S,5,S,B,11,S,B,12,S,` proves defer before owner drop followed by reset, nested inner-first cleanup, early return, continue and break.
+- Harness correction: the initial helper chose the first root ordinary function (`report`, returning void) as entry, producing C 1001 at 0..0. Entry selection now requires a unique zero-argument i32 candidate; temporary debug code was removed. No reference language bug is claimed.
+- Changes: private C API, helper, tests and source lock changed. Normative specs, stable CLI, SDK ABI, Go, DB, CI and hygiene are unchanged; no push.
+- Remaining: full Region place is next; root-only SDK/import bodies, other SDK storage, source proof, stage1/stage2 and promotion remain pending.

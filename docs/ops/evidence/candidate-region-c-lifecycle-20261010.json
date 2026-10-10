@@ -1,0 +1,394 @@
+{
+  "schema": "fairyc.candidate-region-c-lifecycle/v1",
+  "passed": true,
+  "parentCommit": "06b471479bb86508d35b81f56d6ca9ae1c58e0a7",
+  "identity": [
+    {
+      "path": "examples/lexer_candidate/src/module_unit_c_region.fy",
+      "sha256": "ffe5db34b94f11d3aae8ee214242d5e3698c7ee6624fb87ee024794fe4c7d0ce"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_unit_c_sdk.fy",
+      "sha256": "a58744e57951397713b43a3e47cea8fdef4170af5e62189a13599ddb135020c7"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_unit_c_emit.fy",
+      "sha256": "6175d657611dbcf11417a0f9f0c00263759e921f9ac201a558ef6923fe031a7a"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_unit_c_aggregate.fy",
+      "sha256": "de25245344a34242f5e5186907d196c7f93839b9ccd4fe6e9f3baec74d86e538"
+    },
+    {
+      "path": "examples/lexer_candidate/tests/module_unit_c_sdk.fy",
+      "sha256": "5c68adfcde27eb6e792eb90ee7fd79259f0aab232bf0a95af91f875a94064a9d"
+    },
+    {
+      "path": "examples/lexer_candidate/fairy.lock",
+      "sha256": "5045964b2224a57b491736a9be7c0d050f22524f396c55f09099b66351ec006d"
+    },
+    {
+      "path": "tools/verify-candidate-sdk-c.py",
+      "sha256": "817c0f506e0004e34a029b84803bb4af9d5894eef2adb26d478fc61a7627594e"
+    },
+    {
+      "path": ".cache/candidate-tagged/compiler-origin-patterns.exe",
+      "sha256": "d36dae1b99751322e447880aaf4d28321bd6d53bdf776185308c6c4504889bb2"
+    },
+    {
+      "path": "internal/sdkstdlib/sources/std/alloc.fy",
+      "sha256": "61f50fa03239eee7b669c315659e8c9d07982117857cf50fe7f5a2b6f35a82c2"
+    }
+  ],
+  "sourceCheck": {
+    "exit": 0,
+    "argv": [
+      "compiler-origin-patterns.exe",
+      "check",
+      "--locked"
+    ],
+    "stdout": "check ok: 2 instance(s), 266 source file(s), 3365 MIR function(s), lock verified"
+  },
+  "native": {
+    "reports": [
+      {
+        "identity": {
+          "path": ".cache/candidate-tagged/sdk-c-execution/native-region.json",
+          "sha256": "050989c653abfaad5fa439cf59f43d6b24b0e60993c4ba1218bcf758eda48c7a"
+        },
+        "summary": {
+          "schemaVersion": "fairyc.test-report/v4",
+          "engine": "native",
+          "target": "x86_64-windows-msvc",
+          "profile": "development",
+          "tests": [
+            {
+              "identity": "tests::module_unit_c_sdk::sdk_c_executes_arena_factory_switch_and_owned_cleanup",
+              "outcome": "passed",
+              "trapCategory": null,
+              "stdoutBase64SHA256": "58d191ed46941229d1a3f4d190fb1b282457b871a4c81ac6859624b3fe59d49a",
+              "stderrBase64SHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            {
+              "identity": "tests::module_unit_c_sdk::sdk_c_executes_region_lifecycle_and_cleanup_edges",
+              "outcome": "failed",
+              "trapCategory": "assertion-failed",
+              "stdoutBase64SHA256": "3a0b0fbc6684a810cda7f8348b877dc3b628c0a9c623b70921511e25969f8288",
+              "stderrBase64SHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            {
+              "identity": "tests::module_unit_c_sdk::sdk_c_keeps_region_placement_closed_without_partial_output",
+              "outcome": "passed",
+              "trapCategory": null,
+              "stdoutBase64SHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "stderrBase64SHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            }
+          ],
+          "count": 3,
+          "passed": 2,
+          "failed": 1,
+          "status": "failed",
+          "lock": "verified"
+        }
+      },
+      {
+        "identity": {
+          "path": ".cache/candidate-tagged/sdk-c-execution/native-region-fixed.json",
+          "sha256": "f68a2b7f907af2f49cc2d32e1782eac7c2128b9bd45dad211e7a6caa5011fb9e"
+        },
+        "summary": {
+          "schemaVersion": "fairyc.test-report/v4",
+          "engine": "native",
+          "target": "x86_64-windows-msvc",
+          "profile": "development",
+          "tests": [
+            {
+              "identity": "tests::module_unit_c_sdk::sdk_c_executes_region_lifecycle_and_cleanup_edges",
+              "outcome": "passed",
+              "trapCategory": null,
+              "stdoutBase64SHA256": "74790d7ea27654ccabc4ea0da4d76cce127ac79f842c39c2f85ba01561a7a2b3",
+              "stderrBase64SHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            }
+          ],
+          "count": 1,
+          "passed": 1,
+          "failed": 0,
+          "status": "ok",
+          "lock": "verified"
+        }
+      }
+    ],
+    "finalOutcomes": {
+      "tests::module_unit_c_sdk::sdk_c_executes_arena_factory_switch_and_owned_cleanup": "passed",
+      "tests::module_unit_c_sdk::sdk_c_executes_region_lifecycle_and_cleanup_edges": "passed",
+      "tests::module_unit_c_sdk::sdk_c_keeps_region_placement_closed_without_partial_output": "passed"
+    },
+    "reuse": "Emitter and lock unchanged between reports. Only fixture entry lookup corrected; prior Arena/rejection bodies unchanged."
+  },
+  "CExecution": {
+    "schema": "fairyc.candidate-sdk-c-execution/v1",
+    "passed": true,
+    "reports": [
+      {
+        "path": ".cache\\candidate-tagged\\sdk-c-execution\\native-final.json",
+        "sha256": "c5cba31bab881ba8cceb9cee8b65d0c48726e709a00d22c3bc8b1a124ef62468"
+      },
+      {
+        "path": ".cache\\candidate-tagged\\sdk-c-execution\\native-streams.json",
+        "sha256": "44b8ff37a3215c6c23b87ed4203c6f608e23ec92dbfc73123e21327855cf0901"
+      },
+      {
+        "path": ".cache\\candidate-tagged\\sdk-c-execution\\native-region.json",
+        "sha256": "050989c653abfaad5fa439cf59f43d6b24b0e60993c4ba1218bcf758eda48c7a"
+      },
+      {
+        "path": ".cache\\candidate-tagged\\sdk-c-execution\\native-region-fixed.json",
+        "sha256": "f68a2b7f907af2f49cc2d32e1782eac7c2128b9bd45dad211e7a6caa5011fb9e"
+      }
+    ],
+    "executions": [
+      {
+        "name": "sdk_c_executes_region_lifecycle_and_cleanup_edges",
+        "profile": "low",
+        "sourceSHA256": "153b24be7369b09ff3c338f86b529d6a77cff7c8ee8d65fa08dcf27c5bca7173",
+        "stdinBase64": null,
+        "arenaCounts": {
+          "initialize": 2,
+          "drop": 2,
+          "nonzeroStatus": 0
+        },
+        "regionCounts": {
+          "begin": 6,
+          "reset": 6,
+          "nonzeroStatus": 0
+        },
+        "runtimeInputs": [
+          {
+            "path": "internal\\cstdlib\\stage0_system_heap.c",
+            "sha256": "cae6664fa1ec70722b76025c3e2c3daadc133cd90d95fa9f02f2385915d3e55c"
+          },
+          {
+            "path": "internal\\cstdlib\\stage0_arena.c",
+            "sha256": "e0bf426ef0b27238463ec598426cf764ae08f476f814cb9bdbff5ce946372ecb"
+          }
+        ],
+        "build": {
+          "argv": [
+            "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+            "/nologo",
+            "/std:c11",
+            "/TC",
+            "/Od",
+            "/DFY_CANDIDATE_NO_MAIN",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\region-c\\sdk_c_executes_region_lifecycle_and_cleanup_edges.c",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\region-c\\sdk_c_executes_region_lifecycle_and_cleanup_edges-runtime.c",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\region-c\\trap.c",
+            "/Fe:C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\region-c\\sdk_c_executes_region_lifecycle_and_cleanup_edges-low.exe",
+            "/link",
+            "/INCREMENTAL:NO"
+          ],
+          "exit": 0,
+          "stdout": "sdk_c_executes_region_lifecycle_and_cleanup_edges.c\r\nsdk_c_executes_region_lifecycle_and_cleanup_edges-runtime.c\r\ntrap.c\r\nGenerating Code...\r\n",
+          "stderr": ""
+        },
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\region-c\\sdk_c_executes_region_lifecycle_and_cleanup_edges-low.exe"
+          ],
+          "exit": 0,
+          "stdout": "B,2,1,S,B,4,3,S,B,B,6,S,5,S,B,11,S,B,12,S,",
+          "stderr": ""
+        }
+      },
+      {
+        "name": "sdk_c_executes_region_lifecycle_and_cleanup_edges",
+        "profile": "optimized",
+        "sourceSHA256": "153b24be7369b09ff3c338f86b529d6a77cff7c8ee8d65fa08dcf27c5bca7173",
+        "stdinBase64": null,
+        "arenaCounts": {
+          "initialize": 2,
+          "drop": 2,
+          "nonzeroStatus": 0
+        },
+        "regionCounts": {
+          "begin": 6,
+          "reset": 6,
+          "nonzeroStatus": 0
+        },
+        "runtimeInputs": [
+          {
+            "path": "internal\\cstdlib\\stage0_system_heap.c",
+            "sha256": "cae6664fa1ec70722b76025c3e2c3daadc133cd90d95fa9f02f2385915d3e55c"
+          },
+          {
+            "path": "internal\\cstdlib\\stage0_arena.c",
+            "sha256": "e0bf426ef0b27238463ec598426cf764ae08f476f814cb9bdbff5ce946372ecb"
+          }
+        ],
+        "build": {
+          "argv": [
+            "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+            "/nologo",
+            "/std:c11",
+            "/TC",
+            "/O2",
+            "/DFY_CANDIDATE_NO_MAIN",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\region-c\\sdk_c_executes_region_lifecycle_and_cleanup_edges.c",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\region-c\\sdk_c_executes_region_lifecycle_and_cleanup_edges-runtime.c",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\region-c\\trap.c",
+            "/Fe:C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\region-c\\sdk_c_executes_region_lifecycle_and_cleanup_edges-optimized.exe",
+            "/link",
+            "/INCREMENTAL:NO"
+          ],
+          "exit": 0,
+          "stdout": "sdk_c_executes_region_lifecycle_and_cleanup_edges.c\r\nsdk_c_executes_region_lifecycle_and_cleanup_edges-runtime.c\r\ntrap.c\r\nGenerating Code...\r\n",
+          "stderr": ""
+        },
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\region-c\\sdk_c_executes_region_lifecycle_and_cleanup_edges-optimized.exe"
+          ],
+          "exit": 0,
+          "stdout": "B,2,1,S,B,4,3,S,B,B,6,S,5,S,B,11,S,B,12,S,",
+          "stderr": ""
+        }
+      },
+      {
+        "name": "sdk_c_executes_arena_factory_switch_and_owned_cleanup",
+        "profile": "low",
+        "sourceSHA256": "760b01f42236c9fb887e5284d141f738f00605bab7fa0b9c2d6d066cadb7a3aa",
+        "stdinBase64": null,
+        "arenaCounts": {
+          "initialize": 2,
+          "drop": 2,
+          "nonzeroStatus": 0
+        },
+        "regionCounts": null,
+        "runtimeInputs": [
+          {
+            "path": "internal\\cstdlib\\stage0_system_heap.c",
+            "sha256": "cae6664fa1ec70722b76025c3e2c3daadc133cd90d95fa9f02f2385915d3e55c"
+          },
+          {
+            "path": "internal\\cstdlib\\stage0_arena.c",
+            "sha256": "e0bf426ef0b27238463ec598426cf764ae08f476f814cb9bdbff5ce946372ecb"
+          }
+        ],
+        "build": {
+          "argv": [
+            "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+            "/nologo",
+            "/std:c11",
+            "/TC",
+            "/Od",
+            "/DFY_CANDIDATE_NO_MAIN",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\region-c\\sdk_c_executes_arena_factory_switch_and_owned_cleanup.c",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\region-c\\sdk_c_executes_arena_factory_switch_and_owned_cleanup-runtime.c",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\region-c\\trap.c",
+            "/Fe:C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\region-c\\sdk_c_executes_arena_factory_switch_and_owned_cleanup-low.exe",
+            "/link",
+            "/INCREMENTAL:NO"
+          ],
+          "exit": 0,
+          "stdout": "sdk_c_executes_arena_factory_switch_and_owned_cleanup.c\r\nsdk_c_executes_arena_factory_switch_and_owned_cleanup-runtime.c\r\ntrap.c\r\nGenerating Code...\r\n",
+          "stderr": ""
+        },
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\region-c\\sdk_c_executes_arena_factory_switch_and_owned_cleanup-low.exe"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      },
+      {
+        "name": "sdk_c_executes_arena_factory_switch_and_owned_cleanup",
+        "profile": "optimized",
+        "sourceSHA256": "760b01f42236c9fb887e5284d141f738f00605bab7fa0b9c2d6d066cadb7a3aa",
+        "stdinBase64": null,
+        "arenaCounts": {
+          "initialize": 2,
+          "drop": 2,
+          "nonzeroStatus": 0
+        },
+        "regionCounts": null,
+        "runtimeInputs": [
+          {
+            "path": "internal\\cstdlib\\stage0_system_heap.c",
+            "sha256": "cae6664fa1ec70722b76025c3e2c3daadc133cd90d95fa9f02f2385915d3e55c"
+          },
+          {
+            "path": "internal\\cstdlib\\stage0_arena.c",
+            "sha256": "e0bf426ef0b27238463ec598426cf764ae08f476f814cb9bdbff5ce946372ecb"
+          }
+        ],
+        "build": {
+          "argv": [
+            "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+            "/nologo",
+            "/std:c11",
+            "/TC",
+            "/O2",
+            "/DFY_CANDIDATE_NO_MAIN",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\region-c\\sdk_c_executes_arena_factory_switch_and_owned_cleanup.c",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\region-c\\sdk_c_executes_arena_factory_switch_and_owned_cleanup-runtime.c",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\region-c\\trap.c",
+            "/Fe:C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\region-c\\sdk_c_executes_arena_factory_switch_and_owned_cleanup-optimized.exe",
+            "/link",
+            "/INCREMENTAL:NO"
+          ],
+          "exit": 0,
+          "stdout": "sdk_c_executes_arena_factory_switch_and_owned_cleanup.c\r\nsdk_c_executes_arena_factory_switch_and_owned_cleanup-runtime.c\r\ntrap.c\r\nGenerating Code...\r\n",
+          "stderr": ""
+        },
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\region-c\\sdk_c_executes_arena_factory_switch_and_owned_cleanup-optimized.exe"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      }
+    ],
+    "compiler": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+    "source": "Private Fairy emitter; actual repository C runtime components, no SDK stand-ins"
+  },
+  "bridge": {
+    "lexicalWireStorage": true,
+    "arenaAddressLivesThroughReset": true,
+    "ownerCopyBackAfterSuccessfulReset": true,
+    "authenticatedArenaTypeRequired": true,
+    "capabilityGeneralValueABI": false
+  },
+  "placement": {
+    "admitted": false,
+    "diagnostic": 1004,
+    "transactionalRejectionPassed": true
+  },
+  "fixtureCorrection": "The initial fixture selected first ordinary function report(void) as entry. Unique zero-argument i32 entry selection now reaches main; no language defect claimed.",
+  "privateAPIExpanded": true,
+  "normativeContractsChanged": false,
+  "stableCLIChanged": false,
+  "sdkABIChanged": false,
+  "GoChanged": false,
+  "dbChanged": false,
+  "ciChanged": false,
+  "hygieneChanged": false,
+  "pushed": false,
+  "skipped": {
+    "candidateRelease": "Source engine development; generated C /O2 covered",
+    "Linux": "Windows runtime slice",
+    "fullSuite": "Lifecycle, rejection and Arena regression only"
+  },
+  "pending": [
+    "Region placement",
+    "Root-only SDK ordinary bodies",
+    "Other SDK storage bridges",
+    "Full source/unsafe/path/dominance/initialization proof",
+    "Foreign aggregate ABI",
+    "Whole dispatcher",
+    "Stage1/stage2 promotion"
+  ]
+}
