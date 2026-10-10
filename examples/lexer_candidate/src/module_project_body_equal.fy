@@ -1,4 +1,5 @@
 module module_project_body_equal;
+import candidate_limits as limits;
 import module_unit_body_ir_model as ir;
 import module_unit_value_model as m;
 import module_unit_region_model as regions;
@@ -22,15 +23,15 @@ fn bool exit_same(regions::Exit a,regions::Exit b){return a.region_id==b.region_
 // local to the original declaration. No digest substitutes for equality.
 pub fn bool same(ref ir::Body a,ref ir::Body b,ref mut usize work){
     if(ir::body(a)!=ir::body(b) || ir::source_bytes(a)!=ir::source_bytes(b) || ir::start(a)!=ir::start(b) || ir::end(a)!=ir::end(b) || ir::node_count(a)!=ir::node_count(b) || ir::statement_count(a)!=ir::statement_count(b) || ir::local_count(a)!=ir::local_count(b) || ir::call_count(a)!=ir::call_count(b) || ir::argument_count(a)!=ir::argument_count(b) || ir::region_count(a)!=ir::region_count(b) || ir::placement_count(a)!=ir::placement_count(b) || ir::reset_count(a)!=ir::reset_count(b)){return false;}
-    if(!m::charge(work,ir::text_bytes(a)+1) || !bytes::equal(ir::text_view(a),ir::text_view(b))){return false;}
+    if(!limits::project_charge(work,ir::text_bytes(a)+1) || !bytes::equal(ir::text_view(a),ir::text_view(b))){return false;}
     var usize i=0;
-    i=0;while(i<ir::node_count(a)){if(!m::charge(work,1) || !node_same(ir::node_at(a,i),ir::node_at(b,i))){return false;}i+=1;}
-    i=0;while(i<ir::statement_count(a)){if(!m::charge(work,1) || !statement_same(ir::statement_at(a,i),ir::statement_at(b,i))){return false;}i+=1;}
-    i=1;while(i<=ir::local_count(a)){if(!m::charge(work,1) || !local_same(ir::local_at(a,i),ir::local_at(b,i))){return false;}i+=1;}
-    i=0;while(i<ir::call_count(a)){if(!m::charge(work,1) || !call_same(ir::call_at(a,i),ir::call_at(b,i))){return false;}i+=1;}
-    i=0;while(i<ir::argument_count(a)){if(!m::charge(work,1) || !argument_same(ir::argument_at(a,i),ir::argument_at(b,i))){return false;}i+=1;}
-    i=0;while(i<ir::region_count(a)){if(!m::charge(work,1) || !scope_same(ir::region_at(a,i),ir::region_at(b,i))){return false;}i+=1;}
-    i=0;while(i<ir::placement_count(a)){if(!m::charge(work,1) || !placement_same(ir::placement_at(a,i),ir::placement_at(b,i))){return false;}i+=1;}
-    i=0;while(i<ir::reset_count(a)){if(!m::charge(work,1) || !exit_same(ir::reset_at(a,i),ir::reset_at(b,i))){return false;}i+=1;}
+    i=0;while(i<ir::node_count(a)){if(!limits::project_charge(work,1) || !node_same(ir::node_at(a,i),ir::node_at(b,i))){return false;}i+=1;}
+    i=0;while(i<ir::statement_count(a)){if(!limits::project_charge(work,1) || !statement_same(ir::statement_at(a,i),ir::statement_at(b,i))){return false;}i+=1;}
+    i=1;while(i<=ir::local_count(a)){if(!limits::project_charge(work,1) || !local_same(ir::local_at(a,i),ir::local_at(b,i))){return false;}i+=1;}
+    i=0;while(i<ir::call_count(a)){if(!limits::project_charge(work,1) || !call_same(ir::call_at(a,i),ir::call_at(b,i))){return false;}i+=1;}
+    i=0;while(i<ir::argument_count(a)){if(!limits::project_charge(work,1) || !argument_same(ir::argument_at(a,i),ir::argument_at(b,i))){return false;}i+=1;}
+    i=0;while(i<ir::region_count(a)){if(!limits::project_charge(work,1) || !scope_same(ir::region_at(a,i),ir::region_at(b,i))){return false;}i+=1;}
+    i=0;while(i<ir::placement_count(a)){if(!limits::project_charge(work,1) || !placement_same(ir::placement_at(a,i),ir::placement_at(b,i))){return false;}i+=1;}
+    i=0;while(i<ir::reset_count(a)){if(!limits::project_charge(work,1) || !exit_same(ir::reset_at(a,i),ir::reset_at(b,i))){return false;}i+=1;}
     return true;
 }

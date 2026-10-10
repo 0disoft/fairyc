@@ -130,8 +130,15 @@ materialize a field table for every nominal node in the global prefix. Each
 result retains the 512-shape, 2048-field and 512-callable bounds;
 parameter storage is capped at 32768 and owned spelling storage at 65536 bytes.
 
-Project linking admits at most 4096 rebound frames under the existing 1048576
-work cap. The cleanup-MIR verifier uses the same frame cap. Project metadata
+Project linking admits at most 4096 rebound frames. Type, frame and metadata
+plans each retain their 1048576 work cap. Whole-project rebinding and call
+validation have a separate 4194304 work cap, recorded by an explicit project
+scope in cleanup MIR. Unit constructors retain the 1048576 producer cap;
+project constructors admit the larger cumulative history. Cleanup revalidation
+has an independent 1048576 traversal budget. Owned body revalidation retains
+1048576 per body/metadata phase and also accounts every project checkpoint
+against a 4194304 aggregate budget. Unit revalidation keeps its original
+1048576 aggregate cap. The cleanup-MIR verifier uses the same frame cap. Project metadata
 and cleanup recipes share a separate 4096-field project cap. Imported unit
 interfaces remain capped at 2048 fields. Ordinary bodies are
 indexed by original module/declaration coordinates; cleanup aliases are indexed

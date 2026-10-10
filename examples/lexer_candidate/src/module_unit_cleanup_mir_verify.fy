@@ -16,8 +16,9 @@ fn Result<Requirement,m::Problem> requirement(ref m::Program p,usize type,ref mu
     let memo=v::at_mut<Requirement>(cache,type-1);*memo=result;let done=v::at_mut<u8>(state,type-1);*done=2;return .ok(result);
 }
 pub fn m::Problem check(ref m::Program p){
-    let nt=m::type_count(p);let nf=m::frame_count(p);let no=m::operand_count(p);if(nt==0 || nt>4096 || nf>limits::project_frames() || no>16384 || m::drop_count(p)>16384 || m::field_count(p)>limits::project_fields() || m::work(p)>1048576){return fail(1002,0,0,0);}
-    var usize work=m::work(p);var v::Vec<u8> state=v::empty<u8>();var v::Vec<Requirement> cache=v::empty<Requirement>();var v::Vec<usize> canonical=v::empty<usize>();var usize i=0;
+    let nt=m::type_count(p);let nf=m::frame_count(p);let no=m::operand_count(p);if(nt==0 || nt>4096 || nf>limits::project_frames() || no>16384 || m::drop_count(p)>16384 || m::field_count(p)>limits::project_fields() || m::work(p)>m::work_limit(p)){return fail(1002,0,0,0);}
+    // Stored producer work and the verifier's own traversal are independent.
+    var usize work=0;var v::Vec<u8> state=v::empty<u8>();var v::Vec<Requirement> cache=v::empty<Requirement>();var v::Vec<usize> canonical=v::empty<usize>();var usize i=0;
     while(i<8192){if(!v::push<usize>(ref mut canonical,0).is_ok){return fail(1003,0,0,0);}i+=1;}if(!budget::charge(ref mut work,8192)){return fail(1002,0,0,0);}i=1;
     while(i<=nt){if(!budget::charge(ref mut work,1)){return fail(1002,0,0,0);}let t=m::type_at(p,i);let g=m::glue_at(p,i);let u32 kind=if(t.kind==3 || t.kind==13){1}else if(t.kind==5){2}else if(t.kind==6){3}else{0};
         if(!type_proof::valid(p,i) || g.kind!=kind || g.effects>4095 || g.abilities>7 || (g.abilities&4)!=0 && (g.abilities&2)==0 || g.field_start>m::field_count(p) || g.field_count>m::field_count(p)-g.field_start){return fail(1001,t.module_index,0,0);}

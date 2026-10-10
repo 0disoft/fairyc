@@ -1,5 +1,6 @@
 module module_unit_cleanup_mir_model;
 import module_types as types;
+import candidate_limits as limits;
 import module_unit_cleanup_mir_verify as proof;
 import std::vec as v;
 
@@ -14,7 +15,7 @@ pub struct Field {usize owner;usize ordinal;usize type;}
 pub struct Operand {usize frame;u32 kind;usize id;usize type;usize start;usize end;}
 pub struct Drop {usize operand;u32 exit;usize start;usize end;}
 pub struct Problem {u32 code;usize module_index;usize start;usize end;}
-pub resource Program {v::Vec<types::Type> types;v::Vec<Frame> frames;v::Vec<Glue> glues;v::Vec<Field> fields;v::Vec<Operand> operands;v::Vec<Drop> drops;usize work;cleanup{}}
+pub resource Program {v::Vec<types::Type> types;v::Vec<Frame> frames;v::Vec<Glue> glues;v::Vec<Field> fields;v::Vec<Operand> operands;v::Vec<Drop> drops;usize work;bool project;cleanup{}}
 pub fn usize type_count(ref Program p){return v::len<types::Type>(ref p.types);}
 pub fn types::Type type_at(ref Program p,usize id){assert(id!=0 && id<=type_count(p));return *v::at<types::Type>(ref p.types,id-1);}
 pub fn Glue glue_at(ref Program p,usize type){assert(type!=0 && type<=type_count(p));return *v::at<Glue>(ref p.glues,type-1);}
@@ -27,6 +28,14 @@ pub fn Operand operand_at(ref Program p,usize id){assert(id!=0 && id<=operand_co
 pub fn usize drop_count(ref Program p){return v::len<Drop>(ref p.drops);}
 pub fn Drop drop_at(ref Program p,usize index){return *v::at<Drop>(ref p.drops,index);}
 pub fn usize work(ref Program p){return p.work;}
+pub fn bool project(ref Program p){return p.project;}
+pub fn usize work_limit(ref Program p){return if(p.project){limits::project_work()}else{1048576};}
+fn Result<Program,Problem> assemble_scoped(v::Vec<types::Type> types,v::Vec<Frame> frames,v::Vec<Glue> glues,v::Vec<Field> fields,v::Vec<Operand> operands,v::Vec<Drop> drops,usize work,bool project){
+    let p=Program{.types,.frames,.glues,.fields,.operands,.drops,.work,.project};let checked=proof::check(ref p);if(checked.code!=0){return .err(checked);}return .ok(p);
+}
 pub fn Result<Program,Problem> assemble(v::Vec<types::Type> types,v::Vec<Frame> frames,v::Vec<Glue> glues,v::Vec<Field> fields,v::Vec<Operand> operands,v::Vec<Drop> drops,usize work){
-    let p=Program{.types,.frames,.glues,.fields,.operands,.drops,.work};let checked=proof::check(ref p);if(checked.code!=0){return .err(checked);}return .ok(p);
+    return assemble_scoped(types,frames,glues,fields,operands,drops,work,false);
+}
+pub fn Result<Program,Problem> assemble_project(v::Vec<types::Type> types,v::Vec<Frame> frames,v::Vec<Glue> glues,v::Vec<Field> fields,v::Vec<Operand> operands,v::Vec<Drop> drops,usize work){
+    return assemble_scoped(types,frames,glues,fields,operands,drops,work,true);
 }

@@ -24,3 +24,7 @@ pub fn usize project_frames(){return 4096;}
 
 // Callable prototypes combine separately bounded unit interfaces.
 pub fn usize project_callables(){return 4096;}
+
+// Whole-project rebinding combines independently capped producer histories.
+pub fn usize project_work(){return 4194304;}
+pub fn bool project_charge(ref mut usize work,usize amount){if(*work>project_work() || amount>project_work()-*work){return false;};*work+=amount;return true;}
