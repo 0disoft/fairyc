@@ -1,0 +1,494 @@
+{
+  "schema": "fairyc.candidate-module-view-c-execution/v1",
+  "passed": true,
+  "identity": {
+    "nativeCompiler": {
+      "path": ".cache/candidate-tagged/compiler-origin-patterns.exe",
+      "sha256": "d36dae1b99751322e447880aaf4d28321bd6d53bdf776185308c6c4504889bb2"
+    },
+    "buildCompiler": {
+      "path": ".cache/candidate-tagged/compiler-build-240s.exe",
+      "sha256": "746fe10b022ed88cfbc0ae8ea13e3f867b842f3317ef5a2a4caa36d064a248dd"
+    },
+    "candidate": {
+      "path": "examples/lexer_candidate/build/lexer-candidate.exe",
+      "sha256": "4bc965bfb4214636488a8b86ac2f9f6cdf3cd0cb65d5efb11d2c3f2db04ce428"
+    },
+    "sources": [
+      {
+        "path": "examples/lexer_candidate/src/module_unit_c_emit.fy",
+        "sha256": "db97aea7bd6df12d341dba913385b821e201c5b29a077afb763ebe6c32579c58"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_c_aggregate.fy",
+        "sha256": "c0afb853fac042d3aea8f2e89af4aa176043d67dd759fd3c86a4ff9b180c0dc2"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_c_scalar.fy",
+        "sha256": "77e2587c6580c0a7957751a8bb8028bc472831d5b6baa22786940736e6de679a"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_cfg_lower.fy",
+        "sha256": "836299f64e5aec36d973c67f3dc753d270fbff318a6afa3d86233d743ca76d60"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_cfg_model.fy",
+        "sha256": "b6f7fdbb96e6d4d49d781920ad0e986b429f6a0068f28240670bfeecee7a9457"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_cfg_defer.fy",
+        "sha256": "d34d9d96d716b78bf834ac8dc72deb8059f0a3568a917ed0d8d713486a91767c"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_body_ir_model.fy",
+        "sha256": "9b9a5f4655e595cbeb0cdb19e4833c6280f26d93c04aa39ba8cb4cfe4056ec68"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_body_ir_verify.fy",
+        "sha256": "9ca01cf3ebaf2215e43e5ad1c2d7ba41dcbda39e5b300d85eec5d0c80c0c628c"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_cleanup_mir_model.fy",
+        "sha256": "8cd61811abad699237a647215bd04cd3ec01df12188eb3a2d3620bcea8bd745d"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_cleanup_mir_verify.fy",
+        "sha256": "bd4057012905da5f6417bf3de2cc89da4f31c0725e3b01779724e29cfe89be99"
+      },
+      {
+        "path": "examples/lexer_candidate/tests/module_unit_c_emit.fy",
+        "sha256": "dbe67a4b41a99c0f8c2b85de5a7c873446ed6d21d5f408e8665d75fd7208266e"
+      },
+      {
+        "path": "examples/lexer_candidate/tests/module_unit_c_owned.fy",
+        "sha256": "649a50244ed9fa6ed81dcfa4b6c56bfd2d92b3b96d5bf9496185d6bf471aaa58"
+      },
+      {
+        "path": "examples/lexer_candidate/tests/module_unit_c_references.fy",
+        "sha256": "b6010ccc47f86c2947c9c7994e983f6f199556f08e319b166ad7412900de7922"
+      },
+      {
+        "path": "examples/lexer_candidate/tests/module_unit_c_arrays.fy",
+        "sha256": "258f565802f01d605d323101469f378c197db7bf1fed263fe5ef36a580234c15"
+      },
+      {
+        "path": "examples/lexer_candidate/tests/module_unit_c_views.fy",
+        "sha256": "a57af8e7dfb288b90ffa3bc916592a4a69aeaa4d75b54bf94362c72d6928dcae"
+      },
+      {
+        "path": "examples/lexer_candidate/src/scalar_views.fy",
+        "sha256": "ab3044f3a36a81611a11a46fed80dd41546a9de3f953d4817b2d8e40bc6037bc"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_value_view.fy",
+        "sha256": "c19b8710ddf31ec537d51f3d78b5463c33e2bb0e5941f0b9b317c400045f1621"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_types.fy",
+        "sha256": "744e0b47886070b9dd163ad53f69fed416d361b7b54703cf2f0e29e8dcde5ce0"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_argument_types.fy",
+        "sha256": "d4ef49012e23ba8262ad0cd2cc39ab5548bc13f51a5e35425cf2f84e5ee6c73a"
+      },
+      {
+        "path": "examples/lexer_candidate/fairy.lock",
+        "sha256": "3160ceac3b1cdc209b89fbb5d26f58a00a43366f6093c56d0af7a6c16b5b7c8b"
+      },
+      {
+        "path": "tools/verify-candidate-module-c.py",
+        "sha256": "f628565730edb65db6ab68d3440ed87302f1d2d44db169b46b97302e7029ec88"
+      }
+    ]
+  },
+  "native": {
+    "count": 11,
+    "passed": 11,
+    "failed": 0,
+    "newViewPrograms": 7,
+    "aggregateRegressionPrograms": 2,
+    "textRejectionGuards": 2,
+    "profile": "development",
+    "target": "x86_64-windows-msvc",
+    "report": {
+      "path": ".cache/candidate-tagged/cleanup-operands-unit/module-c-view-native-final.json",
+      "sha256": "19c983e98bb1e23be012ac035d04b58848653c999413f8a3639cc1773c6e14ce"
+    },
+    "tests": [
+      {
+        "identity": "tests::module_unit_c_arrays::array_c_evaluates_repeated_values_once_and_orders_literal_effects",
+        "outcome": "passed",
+        "emittedCBytes": 51012,
+        "emittedCSHA256": "1f773bcab8843a72505c741171babef1b26b597636bf65e38815c5b8907da4c3"
+      },
+      {
+        "identity": "tests::module_unit_c_emit::module_c_rejects_unsupported_types_and_bad_entry_without_partial_output",
+        "outcome": "passed",
+        "emittedCBytes": 0,
+        "emittedCSHA256": null
+      },
+      {
+        "identity": "tests::module_unit_c_owned::owned_c_drops_active_tagged_payloads_and_nested_fields_in_reverse_order",
+        "outcome": "passed",
+        "emittedCBytes": 6487,
+        "emittedCSHA256": "e8fbf5e6f05b3878b6cd40c49237de4cfaa4026f63660cd7988d80345e541842"
+      },
+      {
+        "identity": "tests::module_unit_c_owned::owned_c_rejects_pending_view_transport_without_partial_output",
+        "outcome": "passed",
+        "emittedCBytes": 0,
+        "emittedCSHA256": null
+      },
+      {
+        "identity": "tests::module_unit_c_views::view_c_executes_generic_scalar_view_specializations",
+        "outcome": "passed",
+        "emittedCBytes": 16883,
+        "emittedCSHA256": "ac816964a56c1470f680db2b3f7cc1b61f39e0f719173a74f9ad9b0ab8a7b43a"
+      },
+      {
+        "identity": "tests::module_unit_c_views::view_c_mutates_owner_and_shares_call_arguments",
+        "outcome": "passed",
+        "emittedCBytes": 10653,
+        "emittedCSHA256": "5b29a4e13a1f156a2dfdbced44c6c2b7dc3e3c14e40d1b669fdacbb8d828436c"
+      },
+      {
+        "identity": "tests::module_unit_c_views::view_c_orders_bounds_and_retains_nested_empty_ranges",
+        "outcome": "passed",
+        "emittedCBytes": 12641,
+        "emittedCSHA256": "228b529a5f691abdada0e006d45db0287ac68511380693a61fad029a2c9faf0b"
+      },
+      {
+        "identity": "tests::module_unit_c_views::view_c_selects_original_plain_struct_field_storage",
+        "outcome": "passed",
+        "emittedCBytes": 12067,
+        "emittedCSHA256": "7adb2520fa3dfa76c678285103575109f35d60639956d5af4a7007855c796b26"
+      },
+      {
+        "identity": "tests::module_unit_c_views::view_c_traps_index_into_empty_end_view",
+        "outcome": "passed",
+        "emittedCBytes": 4330,
+        "emittedCSHA256": "6caf87b8aa2f42fa6538153c28b363df648f8a5fef439430286329ead1751923"
+      },
+      {
+        "identity": "tests::module_unit_c_views::view_c_traps_reversed_slice_without_unwinding",
+        "outcome": "passed",
+        "emittedCBytes": 4915,
+        "emittedCSHA256": "7df0804ef62317e82ffd20a6950c38a41074b48cdc22b97132c633f443cdc30d"
+      },
+      {
+        "identity": "tests::module_unit_c_views::view_c_traps_upper_bound_beyond_view_extent",
+        "outcome": "passed",
+        "emittedCBytes": 3972,
+        "emittedCSHA256": "5f000b166b0033bf39843a763ff2c6ce5290ac01817267efc69063d5a3e0687c"
+      }
+    ],
+    "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+    "exit": 0,
+    "command": [
+      "compiler-origin-patterns.exe",
+      "test",
+      "--native",
+      "--json",
+      "--capture-output",
+      "--exact",
+      "tests::module_unit_c_arrays::array_c_evaluates_repeated_values_once_and_orders_literal_effects",
+      "--exact",
+      "tests::module_unit_c_emit::module_c_rejects_unsupported_types_and_bad_entry_without_partial_output",
+      "--exact",
+      "tests::module_unit_c_owned::owned_c_drops_active_tagged_payloads_and_nested_fields_in_reverse_order",
+      "--exact",
+      "tests::module_unit_c_owned::owned_c_rejects_pending_view_transport_without_partial_output",
+      "--exact",
+      "tests::module_unit_c_views::view_c_executes_generic_scalar_view_specializations",
+      "--exact",
+      "tests::module_unit_c_views::view_c_mutates_owner_and_shares_call_arguments",
+      "--exact",
+      "tests::module_unit_c_views::view_c_orders_bounds_and_retains_nested_empty_ranges",
+      "--exact",
+      "tests::module_unit_c_views::view_c_selects_original_plain_struct_field_storage",
+      "--exact",
+      "tests::module_unit_c_views::view_c_traps_index_into_empty_end_view",
+      "--exact",
+      "tests::module_unit_c_views::view_c_traps_reversed_slice_without_unwinding",
+      "--exact",
+      "tests::module_unit_c_views::view_c_traps_upper_bound_beyond_view_extent"
+    ]
+  },
+  "generatedC": {
+    "count": 18,
+    "passed": 18,
+    "profiles": [
+      "/Od",
+      "/O2"
+    ],
+    "newViewExecutions": 14,
+    "aggregateRegressionExecutions": 4,
+    "report": {
+      "path": ".cache/candidate-tagged/module-c-view-unit/verified-c/execution.json",
+      "sha256": "cee04e9c4bcd760d6dbf3724f24962ac37916336318bf3457a7072e677b55e50"
+    },
+    "compiler": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+    "observations": [
+      {
+        "name": "view_c_mutates_owner_and_shares_call_arguments",
+        "profile": "low",
+        "sourceSHA256": "5b29a4e13a1f156a2dfdbced44c6c2b7dc3e3c14e40d1b669fdacbb8d828436c",
+        "buildExit": 0,
+        "expectedExit": 0,
+        "actualExit": 0,
+        "expectedStdout": "7,4,5,",
+        "actualStdout": "7,4,5,"
+      },
+      {
+        "name": "view_c_mutates_owner_and_shares_call_arguments",
+        "profile": "optimized",
+        "sourceSHA256": "5b29a4e13a1f156a2dfdbced44c6c2b7dc3e3c14e40d1b669fdacbb8d828436c",
+        "buildExit": 0,
+        "expectedExit": 0,
+        "actualExit": 0,
+        "expectedStdout": "7,4,5,",
+        "actualStdout": "7,4,5,"
+      },
+      {
+        "name": "view_c_selects_original_plain_struct_field_storage",
+        "profile": "low",
+        "sourceSHA256": "7adb2520fa3dfa76c678285103575109f35d60639956d5af4a7007855c796b26",
+        "buildExit": 0,
+        "expectedExit": 0,
+        "actualExit": 0,
+        "expectedStdout": "6,7,",
+        "actualStdout": "6,7,"
+      },
+      {
+        "name": "view_c_selects_original_plain_struct_field_storage",
+        "profile": "optimized",
+        "sourceSHA256": "7adb2520fa3dfa76c678285103575109f35d60639956d5af4a7007855c796b26",
+        "buildExit": 0,
+        "expectedExit": 0,
+        "actualExit": 0,
+        "expectedStdout": "6,7,",
+        "actualStdout": "6,7,"
+      },
+      {
+        "name": "view_c_executes_generic_scalar_view_specializations",
+        "profile": "low",
+        "sourceSHA256": "ac816964a56c1470f680db2b3f7cc1b61f39e0f719173a74f9ad9b0ab8a7b43a",
+        "buildExit": 0,
+        "expectedExit": 0,
+        "actualExit": 0,
+        "expectedStdout": "",
+        "actualStdout": ""
+      },
+      {
+        "name": "view_c_executes_generic_scalar_view_specializations",
+        "profile": "optimized",
+        "sourceSHA256": "ac816964a56c1470f680db2b3f7cc1b61f39e0f719173a74f9ad9b0ab8a7b43a",
+        "buildExit": 0,
+        "expectedExit": 0,
+        "actualExit": 0,
+        "expectedStdout": "",
+        "actualStdout": ""
+      },
+      {
+        "name": "view_c_orders_bounds_and_retains_nested_empty_ranges",
+        "profile": "low",
+        "sourceSHA256": "228b529a5f691abdada0e006d45db0287ac68511380693a61fad029a2c9faf0b",
+        "buildExit": 0,
+        "expectedExit": 0,
+        "actualExit": 0,
+        "expectedStdout": "11,22,2,33,",
+        "actualStdout": "11,22,2,33,"
+      },
+      {
+        "name": "view_c_orders_bounds_and_retains_nested_empty_ranges",
+        "profile": "optimized",
+        "sourceSHA256": "228b529a5f691abdada0e006d45db0287ac68511380693a61fad029a2c9faf0b",
+        "buildExit": 0,
+        "expectedExit": 0,
+        "actualExit": 0,
+        "expectedStdout": "11,22,2,33,",
+        "actualStdout": "11,22,2,33,"
+      },
+      {
+        "name": "view_c_traps_reversed_slice_without_unwinding",
+        "profile": "low",
+        "sourceSHA256": "7df0804ef62317e82ffd20a6950c38a41074b48cdc22b97132c633f443cdc30d",
+        "buildExit": 0,
+        "expectedExit": 106,
+        "actualExit": 106,
+        "expectedStdout": "1,",
+        "actualStdout": "1,"
+      },
+      {
+        "name": "view_c_traps_reversed_slice_without_unwinding",
+        "profile": "optimized",
+        "sourceSHA256": "7df0804ef62317e82ffd20a6950c38a41074b48cdc22b97132c633f443cdc30d",
+        "buildExit": 0,
+        "expectedExit": 106,
+        "actualExit": 106,
+        "expectedStdout": "1,",
+        "actualStdout": "1,"
+      },
+      {
+        "name": "view_c_traps_upper_bound_beyond_view_extent",
+        "profile": "low",
+        "sourceSHA256": "5f000b166b0033bf39843a763ff2c6ce5290ac01817267efc69063d5a3e0687c",
+        "buildExit": 0,
+        "expectedExit": 106,
+        "actualExit": 106,
+        "expectedStdout": "2,",
+        "actualStdout": "2,"
+      },
+      {
+        "name": "view_c_traps_upper_bound_beyond_view_extent",
+        "profile": "optimized",
+        "sourceSHA256": "5f000b166b0033bf39843a763ff2c6ce5290ac01817267efc69063d5a3e0687c",
+        "buildExit": 0,
+        "expectedExit": 106,
+        "actualExit": 106,
+        "expectedStdout": "2,",
+        "actualStdout": "2,"
+      },
+      {
+        "name": "view_c_traps_index_into_empty_end_view",
+        "profile": "low",
+        "sourceSHA256": "6caf87b8aa2f42fa6538153c28b363df648f8a5fef439430286329ead1751923",
+        "buildExit": 0,
+        "expectedExit": 106,
+        "actualExit": 106,
+        "expectedStdout": "",
+        "actualStdout": ""
+      },
+      {
+        "name": "view_c_traps_index_into_empty_end_view",
+        "profile": "optimized",
+        "sourceSHA256": "6caf87b8aa2f42fa6538153c28b363df648f8a5fef439430286329ead1751923",
+        "buildExit": 0,
+        "expectedExit": 106,
+        "actualExit": 106,
+        "expectedStdout": "",
+        "actualStdout": ""
+      },
+      {
+        "name": "array_c_evaluates_repeated_values_once_and_orders_literal_effects",
+        "profile": "low",
+        "sourceSHA256": "1f773bcab8843a72505c741171babef1b26b597636bf65e38815c5b8907da4c3",
+        "buildExit": 0,
+        "expectedExit": 0,
+        "actualExit": 0,
+        "expectedStdout": "4,1,3,4,9,1,",
+        "actualStdout": "4,1,3,4,9,1,"
+      },
+      {
+        "name": "array_c_evaluates_repeated_values_once_and_orders_literal_effects",
+        "profile": "optimized",
+        "sourceSHA256": "1f773bcab8843a72505c741171babef1b26b597636bf65e38815c5b8907da4c3",
+        "buildExit": 0,
+        "expectedExit": 0,
+        "actualExit": 0,
+        "expectedStdout": "4,1,3,4,9,1,",
+        "actualStdout": "4,1,3,4,9,1,"
+      },
+      {
+        "name": "owned_c_drops_active_tagged_payloads_and_nested_fields_in_reverse_order",
+        "profile": "low",
+        "sourceSHA256": "e8fbf5e6f05b3878b6cd40c49237de4cfaa4026f63660cd7988d80345e541842",
+        "buildExit": 0,
+        "expectedExit": 0,
+        "actualExit": 0,
+        "expectedStdout": "5,4,3,100,2,1,",
+        "actualStdout": "5,4,3,100,2,1,"
+      },
+      {
+        "name": "owned_c_drops_active_tagged_payloads_and_nested_fields_in_reverse_order",
+        "profile": "optimized",
+        "sourceSHA256": "e8fbf5e6f05b3878b6cd40c49237de4cfaa4026f63660cd7988d80345e541842",
+        "buildExit": 0,
+        "expectedExit": 0,
+        "actualExit": 0,
+        "expectedStdout": "5,4,3,100,2,1,",
+        "actualStdout": "5,4,3,100,2,1,"
+      }
+    ],
+    "runtime": "Standalone C shim traces i32 and maps traps to exit 100+category"
+  },
+  "sourceCheck": {
+    "exit": 0,
+    "locked": true,
+    "stdout": "check ok: 2 instance(s), 256 source file(s), 3264 MIR function(s), lock verified"
+  },
+  "developmentBuild": {
+    "exit": 0,
+    "locked": true,
+    "stdout": "built: build/lexer-candidate.exe (x86_64-windows-msvc, development, lock verified)"
+  },
+  "behavior": {
+    "views": "Canonical byte/scalar/plain-struct descriptors use numerical types with data pointer and uintptr length; shared element pointee is const",
+    "origin": "Array/view slices and element stores target original named owner storage; materialized array value slots may still copy arrays",
+    "slicing": "CFG evaluates owner then lower then upper; missing lower defaults0 and upper defaults extent",
+    "bounds": "Category6 guards reversed/too-large slices and out-of-range indexing before pointer arithmetic/load",
+    "empty": "Empty end ranges retain valid one-past owner pointer and zero extent",
+    "sharedArguments": "Retained flags, actual node state/type, expected parameter and same element relation revalidated; mutable descriptors convert with explicit shared compound literal",
+    "aggregateReads": "Live non-scalar/non-reference owner reads use fy_unit_copy; MSVC noinline helper forces CRT memcpy then restores scalar intrinsic behavior",
+    "transaction": "Text literal descriptors remain unsupported; sentinel survives unsupported type and invalid entry"
+  },
+  "traceContracts": {
+    "mutation": "7,4,5,",
+    "nominalField": "6,7,",
+    "boundsOrder": "11,22,2,33,",
+    "reversed": "1,",
+    "upper": "2,",
+    "emptyIndex": "",
+    "aggregateArray": "4,1,3,4,9,1,",
+    "aggregateCleanup": "5,4,3,100,2,1,"
+  },
+  "optimizedOwnerReadCorrection": {
+    "initialNative": {
+      "path": ".cache/candidate-tagged/cleanup-operands-unit/module-c-view-native.json",
+      "sha256": "5951844c7281c6670dae2bddf3e52ffeeb9d6ae0f57e45a9cddc494bf4c46fa7"
+    },
+    "initialNativePassed": 9,
+    "originalGeneratedC": {
+      "path": ".cache/candidate-tagged/module-c-view-unit/final-c/view_c_mutates_owner_and_shares_call_arguments.c",
+      "sha256": "3aa314a31428894f33d575262e84b7eb762f06c29aba41f68e108e45ebde1f59"
+    },
+    "originalOptimizedBinary": {
+      "path": ".cache/candidate-tagged/module-c-view-unit/final-c/view_c_mutates_owner_and_shares_call_arguments-optimized.exe",
+      "sha256": "840cf385857070f5351dbd4bdf5ef86854f42443de5c99cbd7462f86b4c0640b"
+    },
+    "originalExit": 105,
+    "originalStdout": "",
+    "lowPassed": true,
+    "observation": "Owner elements changed to4/5 and array copy contained5, optimized scalar load reused3",
+    "intrinsicCopy": "Also failed exit105",
+    "confirmedAlternative": {
+      "path": ".cache/candidate-tagged/module-c-view-unit/final-c/view-copy-helper.c",
+      "sha256": "ab0450f6f49776755d8f7173ba55a5339625caaa2cdd610900bdf69769478d76"
+    },
+    "alternativeProfile": "/O2",
+    "alternativeExit": 0,
+    "alternativeStdout": "7,4,5,",
+    "correction": "Opaque CRT owner reads on MSVC only; /O2 and scalar memcpy intrinsics remain enabled"
+  },
+  "pending": [
+    "Byte/text/CStr literal and raw-pointer-backed view emission",
+    "Raw pointer, cast, enum and direct nested-array C transport",
+    "Foreign pointer/aggregate/C-scalar ABI and authenticated SDK runtime calls",
+    "Region checkpoint/place/reset execution",
+    "Dominance, initialization, whole-path cleanup and full source/unsafe provenance proofs",
+    "Whole dispatcher and stage1/stage2"
+  ],
+  "skipped": {
+    "releaseCandidate": "Separate release batch; generated C /O2 is not candidate Release",
+    "Linux": "Windows native scope",
+    "fullSuite": "Focused seven view programs, two aggregate regressions and two text rejection guards; all30/native54C not run",
+    "Go": "No Go changes"
+  },
+  "privateAPIExpanded": true,
+  "stableCLIChanged": false,
+  "sdkABIChanged": false,
+  "dbChanged": false,
+  "ciChanged": false,
+  "hygieneChanged": false,
+  "pushed": false
+}

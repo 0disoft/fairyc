@@ -29,7 +29,7 @@ fn usize target(ref ir::Program p,ref ir::Body b,usize caller,usize invocation,r
     let e=ir::node_at(b,c.expression-1).value;let f=clean::frame_at(ir::cleanup_ir(p),caller);var usize found=0;var usize i=1;
     while(i<=ir::count(p)){if(!budget::charge(work,1)){return 0;}let t=clean::frame_at(ir::cleanup_ir(p),i);if(t.module_index==c.target_module && t.declaration==c.target_declaration && (c.kind==1 && t.kind==3 || c.kind==2 && t.kind==1 && t.context==c.instance)){if(found!=0 || t.result!=e.type || (f.effects&t.effects)!=t.effects){return 0;}found=i;}i+=1;}
     if(found==0){return 0;}let body=ir::at(p,found);if(parameters(body)!=c.argument_count){return 0;}var usize position=0;i=1;
-    while(i<=ir::local_count(body)){if(!budget::charge(work,1)){return 0;}let l=ir::local_at(body,i);if(l.kind==1){let a=ir::argument_at(b,c.argument_start+position);if(!a.checked || a.expected!=l.type || a.actual!=l.type || ir::node_at(b,a.expression-1).value.type!=l.type){return 0;}position+=1;}i+=1;}return found;
+    while(i<=ir::local_count(body)){if(!budget::charge(work,1)){return 0;}let l=ir::local_at(body,i);if(l.kind==1){let a=ir::argument_at(b,c.argument_start+position);if(!a.checked || a.expected!=l.type || ir::node_at(b,a.expression-1).value.state!=1 || a.actual!=ir::node_at(b,a.expression-1).value.type || a.actual!=l.type && (!a.shared || !aggregate::shared(p,l.type,a.actual)) || a.actual==l.type && a.shared){return 0;}position+=1;}i+=1;}return found;
 }
 fn usize foreign(ref ir::Program p,ref ir::Body b,usize caller,usize invocation,ref mut usize work){
     if(invocation==0){return 0;}let call=ir::call_at(b,invocation-1);if(call.kind!=1 || !call.checked){return 0;}let e=ir::node_at(b,call.expression-1).value;let frame=clean::frame_at(ir::cleanup_ir(p),caller);var usize i=0;
@@ -45,7 +45,7 @@ fn bool call(ref ir::Program p,ref cfg::Graph g,usize expression,usize site,ref 
     let usize external=if(callee==0){foreign(p,b,cfg::frame(g),index,work)}else{0};
     if(callee==0 && external==0){s.code=if(*work>=1048576){1002}else{1004};return false;}let c=ir::call_at(b,index-1);let type=scalar::scalar(p,ir::node_at(b,expression-1).value.type);
     if(site==0 && type!=7 && (!scalar::value(out,s,expression) || !w::text(out,s,b"="))){return false;}
-    if(!(if(external==0){w::function(out,s,callee)}else{w::text(out,s,ir::linker_name(p,external-1))}) || !w::text(out,s,b"(")){return false;}var usize i=0;while(i<c.argument_count){if(i!=0 && !w::text(out,s,b",")){return false;}if(site==0){if(!scalar::value(out,s,ir::argument_at(b,c.argument_start+i).expression)){return false;}}else{if(!scalar::capture(out,s,cfg::deferred_at(g,site).capture_start+i+1)){return false;}}i+=1;}
+    if(!(if(external==0){w::function(out,s,callee)}else{w::text(out,s,ir::linker_name(p,external-1))}) || !w::text(out,s,b"(")){return false;}var usize i=0;while(i<c.argument_count){if(i!=0 && !w::text(out,s,b",")){return false;}if(site==0){if(!aggregate::argument(p,ir::argument_at(b,c.argument_start+i),out,s)){return false;}}else{if(!scalar::capture(out,s,cfg::deferred_at(g,site).capture_start+i+1)){return false;}}i+=1;}
     return w::text(out,s,b");\n");
 }
 fn bool store(ref ir::Program p,ref ir::Body b,cfg::Block n,ref mut bytes::Buffer out,ref mut w::State s){
@@ -69,7 +69,7 @@ fn bool function(ref ir::Program p,ref cfg::Graph g,ref mut bytes::Buffer out,re
     while(i<=cfg::count(g)){if(!budget::charge(work,1)){s.code=1002;return false;}let n=cfg::at(g,i);if(!w::text(out,s,b"fy_b_") || !w::number(out,s,i) || !w::text(out,s,b":;\n")){return false;}
         if(n.kind==1){let e=ir::node_at(b,n.source-1).value;let left=lookup::node(b,e.left);let variant=e.kind==6 && left!=0 && ir::node_at(b,left-1).value.kind==28;
             if(e.kind==6 && !variant){if(e.builtin.kind!=0){s.code=1004;return false;}if(!call(p,g,n.source,0,out,s,work)){return false;}}
-            else if(e.kind==2 || e.kind==3 || e.kind==8 || e.kind==9 || e.kind==10 || e.kind==21 || e.kind==22 || e.kind==24 || e.kind==28 || e.kind==29 || e.kind==30 || e.kind==4 && bytes::equal(ir::node_text(b,n.source-1),b"*") || variant){if(!aggregate::expression(p,b,n.source,out,s,work)){return false;}}
+            else if(e.kind==2 || e.kind==3 || e.kind==8 || e.kind==9 || e.kind==10 || e.kind==21 || e.kind==22 || e.kind==24 || e.kind==26 || e.kind==28 || e.kind==29 || e.kind==30 || e.kind==4 && bytes::equal(ir::node_text(b,n.source-1),b"*") || variant){if(!aggregate::expression(p,b,n.source,out,s,work)){return false;}}
             else if(!scalar::expression(p,b,n.source,out,s)){return false;}}
         else if(n.kind==2){if(!store(p,b,n,out,s)){return false;}}
         else if(n.kind==3){if(!w::text(out,s,b"if(") || !scalar::value(out,s,n.source) || !w::text(out,s,b"){") || !w::jump(out,s,n.first) || !w::text(out,s,b"}else{") || !w::jump(out,s,n.second) || !w::text(out,s,b"}\n")){return false;}}
@@ -94,6 +94,10 @@ pub fn clean::Problem render(ref ir::Program p,usize entry,ref mut bytes::Buffer
     var v::Vec<cfg::Graph> graphs=v::empty<cfg::Graph>();var usize work=0;var usize i=1;while(i<=ir::count(p)){let g=switch(flow::lower(p,i)){case .ok(g):{g}case .err(e):{return e;}};if(!budget::charge(ref mut work,cfg::count(ref g))){return fail(1002,0,0,0);}if(!v::push<cfg::Graph>(ref mut graphs,g).is_ok){return fail(1003,0,0,0);}i+=1;}
     var bytes::Buffer text=bytes::empty();var w::State s=w::State{.code=0};
     if(!w::text(ref mut text,ref mut s,b"/* fairyc.candidate-module-owned-c/v1 */\n#include <stdint.h>\n#include <limits.h>\n#include <string.h>\n_Static_assert(CHAR_BIT==8 && UINTPTR_MAX==UINT64_MAX,\"requires 64-bit target\");\n_Static_assert(INT32_MIN==(-INT32_MAX-1) && INT64_MIN==(-INT64_MAX-1),\"requires two's complement\");\n_Noreturn void fy_runtime_trap(uint32_t category);\n") || !scalar::helpers(ref mut text,ref mut s)){return fail(if(s.code==3){1003}else{1002},0,0,0);}
+    // Keep aggregate reads from live owner storage behind an opaque CRT copy
+    // on MSVC. Inline aggregate copies cached a pre-view-write array element
+    // under /O2; the scalar helpers keep their normal intrinsic behavior.
+    if(!w::text(ref mut text,ref mut s,b"#ifdef _MSC_VER\n#pragma function(memcpy)\n__declspec(noinline)\n#endif\nstatic void fy_unit_copy(void *destination,const void *source,uintptr_t count){memcpy(destination,source,count);}\n#ifdef _MSC_VER\n#pragma intrinsic(memcpy)\n#endif\n")){return fail(if(s.code==3){1003}else{1002},0,0,0);}
     let marks=switch(aggregate::definitions(p,ref mut text,ref mut s,ref mut work)){case .ok(m):{m}case .err(e):{return fail(if(e<1000){if(e==3){1003}else{1002}}else{e},0,0,0);}};
     if(!foreign_signatures(p,ref mut text,ref mut s,ref mut work)){return fail(if(s.code<1000){if(s.code==3){1003}else{1002}}else{s.code},0,0,0);}
     i=1;while(i<=ir::count(p)){if(!signature(p,i,ref mut text,ref mut s) || !w::text(ref mut text,ref mut s,b";\n")){return fail(if(s.code<1000){if(s.code==3){1003}else{1002}}else{s.code},clean::frame_at(ir::cleanup_ir(p),i).module_index,ir::start(ir::at(p,i)),ir::end(ir::at(p,i)));}i+=1;}

@@ -25,7 +25,7 @@ fn Result<usize,clean_ir::Problem> invoke(ref ir::Program p,usize from,usize nex
 }
 fn Result<usize,clean_ir::Problem> expression(ref ir::Program p,usize original,usize next,Loop loop,usize depth,ref mut v::Vec<cfg::Block> blocks,ref mut v::Vec<cfg::Deferred> sites,ref mut v::Vec<cfg::Capture> captures,ref mut Context c){
     if(original==0){return .ok(next);}if(depth>=64 || !m::charge(ref mut c.work,1)){return .err(fail(c,1002,0,0));}let b=ir::at(p,c.frame);let id=lookup::node(b,original);if(id==0){return .err(fail(c,1001,0,0));}let e=ir::node_at(b,id-1).value;
-    if(e.kind==15 || e.kind==26 || e.kind==32 || e.kind==33){return .err(fail(c,1004,e.start,e.end));}
+    if(e.kind==15 || e.kind==32 || e.kind==33){return .err(fail(c,1004,e.start,e.end));}
     if(e.state==2 && e.kind==8){return expression(p,e.left,next,loop,depth+1,blocks,sites,captures,c);}
     if(e.state==2 && (e.kind==2 || e.kind==17 || e.kind==20 || e.kind==16 || e.kind==28)){return .ok(next);}
     if(e.kind==12 || e.kind==31){let root=ir::statement_at(b,lookup::statement(b,e.left)-1).value;let copied=switch(emit(blocks,sites,captures,11,id,lookup::node(b,root.expression),next,0,0,e.start,e.end,c)){case .ok(n):{n}case .err(p):{return .err(p);}};return block(p,e.left,copied,loop,depth+1,blocks,sites,captures,c);}
@@ -38,6 +38,7 @@ fn Result<usize,clean_ir::Problem> expression(ref ir::Program p,usize original,u
     }
     var usize after=switch(drops(p,7,e.start,e.end,next,blocks,sites,captures,c)){case .ok(n):{n}case .err(p):{return .err(p);}};
     let evaluated=switch(emit(blocks,sites,captures,1,id,0,after,0,0,e.start,e.end,c)){case .ok(n):{n}case .err(p):{return .err(p);}};
+    if(e.kind==26){let bound_id=lookup::node(b,e.right);if(bound_id==0){return .err(fail(c,1001,e.start,e.end));}let pair=ir::node_at(b,bound_id-1).value;if(pair.kind!=27){return .err(fail(c,1001,e.start,e.end));}after=switch(expression(p,pair.right,evaluated,loop,depth+1,blocks,sites,captures,c)){case .ok(n):{n}case .err(p):{return .err(p);}};after=switch(expression(p,pair.left,after,loop,depth+1,blocks,sites,captures,c)){case .ok(n):{n}case .err(p):{return .err(p);}};return expression(p,e.left,after,loop,depth+1,blocks,sites,captures,c);}
     if(e.kind==30){let returned=switch(emit(blocks,sites,captures,9,lookup::node(b,e.left),id,0,0,0,e.start,e.end,c)){case .ok(n):{n}case .err(p):{return .err(p);}};
         let dropped=switch(lifecycle::exit(p,c.frame,6,e.start,e.end,3,e.start,e.end,returned,blocks,ref mut c.work)){case .ok(n):{n}case .err(p):{return .err(p);}};
         let error=switch(invoke(p,0,dropped,blocks,sites,captures,c)){case .ok(n):{n}case .err(p):{return .err(p);}};let branch=switch(emit(blocks,sites,captures,4,lookup::node(b,e.left),id,evaluated,error,0,e.start,e.end,c)){case .ok(n):{n}case .err(p):{return .err(p);}};return expression(p,e.left,branch,loop,depth+1,blocks,sites,captures,c);}

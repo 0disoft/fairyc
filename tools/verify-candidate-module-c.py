@@ -50,6 +50,15 @@ ARRAYS = {
     "array_c_traps_read_at_extent": (106, ""),
     "array_c_checks_target_bounds_before_rhs_effects": (106, "1,"),
 }
+VIEWS = {
+    "view_c_mutates_owner_and_shares_call_arguments": (0, "7,4,5,"),
+    "view_c_selects_original_plain_struct_field_storage": (0, "6,7,"),
+    "view_c_executes_generic_scalar_view_specializations": (0, ""),
+    "view_c_orders_bounds_and_retains_nested_empty_ranges": (0, "11,22,2,33,"),
+    "view_c_traps_reversed_slice_without_unwinding": (106, "1,"),
+    "view_c_traps_upper_bound_beyond_view_extent": (106, "2,"),
+    "view_c_traps_index_into_empty_end_view": (106, ""),
+}
 
 
 def run(argv, cwd, env=None, timeout=60):
@@ -72,7 +81,7 @@ def main():
     parser.add_argument("--report", required=True, type=Path, action="append")
     parser.add_argument("--output", required=True, type=Path)
     parser.add_argument("--vcvars", required=True, type=Path)
-    parser.add_argument("--suite", choices=("scalar", "owned", "references", "arrays", "all"), default="scalar")
+    parser.add_argument("--suite", choices=("scalar", "owned", "references", "arrays", "views", "all"), default="scalar")
     args = parser.parse_args()
     scalar_cases = {name: (exit_code, "") for name, exit_code in EXPECTED.items()}
     owned_cases = {name: (0, trace) for name, trace in OWNED.items()}
@@ -81,7 +90,10 @@ def main():
               "owned": (owned_cases, {OWNED_REJECTION}),
               "references": (reference_cases, {REFERENCE_PROOF}),
               "arrays": (ARRAYS, {REJECTION, OWNED_REJECTION}),
-              "all": (scalar_cases | owned_cases | reference_cases | ARRAYS,
+              "views": (VIEWS | {"array_c_evaluates_repeated_values_once_and_orders_literal_effects": ARRAYS["array_c_evaluates_repeated_values_once_and_orders_literal_effects"],
+                                "owned_c_drops_active_tagged_payloads_and_nested_fields_in_reverse_order": owned_cases["owned_c_drops_active_tagged_payloads_and_nested_fields_in_reverse_order"]},
+                        {REJECTION, OWNED_REJECTION}),
+              "all": (scalar_cases | owned_cases | reference_cases | ARRAYS | VIEWS,
                       {REJECTION, OWNED_REJECTION, REFERENCE_PROOF})}
     expected_cases, rejections = suites[args.suite]
     count = len(expected_cases) + len(rejections)
@@ -113,7 +125,7 @@ def main():
         identity = test["identity"]
         prefix = next((prefix for prefix in ("tests::module_unit_c_emit::",
                        "tests::module_unit_c_owned::", "tests::module_unit_c_references::",
-                       "tests::module_unit_c_arrays::")
+                       "tests::module_unit_c_arrays::", "tests::module_unit_c_views::")
                        if identity.startswith(prefix)), None)
         assert prefix is not None
         name = identity.removeprefix(prefix)
