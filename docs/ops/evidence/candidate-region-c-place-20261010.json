@@ -1,0 +1,861 @@
+{
+  "schema": "fairyc.candidate-region-c-place/v1",
+  "passed": true,
+  "parentCommit": "161e134e5b43dfa9aac0c51421ff0ad5117d2029",
+  "identity": [
+    {
+      "path": "examples/lexer_candidate/src/module_unit_c_region.fy",
+      "sha256": "dc2c0a369caf625ac197d900c5f204f7322256d847febb6616a93e4ec81ac491"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_unit_c_sdk.fy",
+      "sha256": "a3401f3ce43c0e03a7ac06595adeec7dc889c0fee147606ab9a6cd9518de609b"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_unit_c_aggregate.fy",
+      "sha256": "104dcd91a1d10f3896ad421a3282da022fcf22c0c6d08b72384d36b69f998960"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_unit_c_emit.fy",
+      "sha256": "9839831221cab2f0cb97b1de743f7a4a680f53399d003f7db12cc7a655fd7d5d"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_unit_value_match.fy",
+      "sha256": "5e46ab5a172f17f2e788953a9494493c241d86e47b52b014e0316ded8b511632"
+    },
+    {
+      "path": "examples/lexer_candidate/tests/module_unit_c_sdk.fy",
+      "sha256": "60fc3472b5a08a8f359761dc5ff1b1966d0857dc9e87ca4b9468331a8670bcd4"
+    },
+    {
+      "path": "examples/lexer_candidate/fairy.lock",
+      "sha256": "fea1ffd249ffdf1929f1f56177835e90b43998fccc789c59571b9b1f50c03460"
+    },
+    {
+      "path": "tools/verify-candidate-sdk-c.py",
+      "sha256": "cf029e60c4ebac92b893db15eef6d0f2642a4fe5ad4722f5119309fd56248280"
+    },
+    {
+      "path": ".cache/candidate-tagged/compiler-origin-patterns.exe",
+      "sha256": "d36dae1b99751322e447880aaf4d28321bd6d53bdf776185308c6c4504889bb2"
+    },
+    {
+      "path": "internal/sdkstdlib/sources/std/alloc.fy",
+      "sha256": "61f50fa03239eee7b669c315659e8c9d07982117857cf50fe7f5a2b6f35a82c2"
+    },
+    {
+      "path": "internal/cstdlib/stage0_arena.c",
+      "sha256": "e0bf426ef0b27238463ec598426cf764ae08f476f814cb9bdbff5ce946372ecb"
+    },
+    {
+      "path": "internal/cstdlib/stage0_system_heap.c",
+      "sha256": "cae6664fa1ec70722b76025c3e2c3daadc133cd90d95fa9f02f2385915d3e55c"
+    }
+  ],
+  "sourceCheck": {
+    "exit": 0,
+    "argv": [
+      "compiler-origin-patterns.exe",
+      "check",
+      "--locked"
+    ],
+    "stdout": "check ok: 2 instance(s), 266 source file(s), 3370 MIR function(s), lock verified"
+  },
+  "native": {
+    "reports": [
+      {
+        "identity": {
+          "path": ".cache/candidate-tagged/sdk-c-execution/native-place-final.json",
+          "sha256": "7c1bca1d36f0a5ae1f6e4b6c5c4bbc262bd4ca3c3f8df5cb5d6e7346df5a6cd1"
+        },
+        "summary": {
+          "schemaVersion": "fairyc.test-report/v4",
+          "engine": "native",
+          "target": "x86_64-windows-msvc",
+          "profile": "development",
+          "tests": [
+            {
+              "identity": "tests::module_unit_c_sdk::sdk_c_executes_region_lifecycle_and_cleanup_edges",
+              "outcome": "passed",
+              "trapCategory": null,
+              "stdoutBase64SHA256": "bbe0280573b3977a644562512f0007d9787adf125495afb0d3c3cb1d9ee74400",
+              "stderrBase64SHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            {
+              "identity": "tests::module_unit_c_sdk::sdk_c_executes_region_placement_and_param_origin",
+              "outcome": "failed",
+              "trapCategory": "assertion-failed",
+              "stdoutBase64SHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "stderrBase64SHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            {
+              "identity": "tests::module_unit_c_sdk::sdk_c_executes_region_storage_or_tracking_failure_as_result",
+              "outcome": "failed",
+              "trapCategory": "assertion-failed",
+              "stdoutBase64SHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "stderrBase64SHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            {
+              "identity": "tests::module_unit_c_sdk::sdk_c_region_plan_respects_placement_budget_before_output",
+              "outcome": "passed",
+              "trapCategory": null,
+              "stdoutBase64SHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "stderrBase64SHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            }
+          ],
+          "count": 4,
+          "passed": 2,
+          "failed": 2,
+          "status": "failed",
+          "lock": "verified"
+        }
+      },
+      {
+        "identity": {
+          "path": ".cache/candidate-tagged/sdk-c-execution/native-place-corrected.json",
+          "sha256": "da5e521e35ac47f808af75314cbd8e8be3b3f47d48572bdf6b7faade01d35494"
+        },
+        "summary": {
+          "schemaVersion": "fairyc.test-report/v4",
+          "engine": "native",
+          "target": "x86_64-windows-msvc",
+          "profile": "development",
+          "tests": [
+            {
+              "identity": "tests::module_unit_c_sdk::sdk_c_executes_region_placement_and_param_origin",
+              "outcome": "passed",
+              "trapCategory": null,
+              "stdoutBase64SHA256": "1c1ea6b13f0a5195ad5db31247417f36a870665baa9cabd94da72eb8796b7e8f",
+              "stderrBase64SHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            {
+              "identity": "tests::module_unit_c_sdk::sdk_c_executes_region_storage_or_tracking_failure_as_result",
+              "outcome": "passed",
+              "trapCategory": null,
+              "stdoutBase64SHA256": "8bcb562b966f655349f6c0ad41352945475bbbfdcbfe1da70fb8e60dc385a533",
+              "stderrBase64SHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            }
+          ],
+          "count": 2,
+          "passed": 2,
+          "failed": 0,
+          "status": "ok",
+          "lock": "verified"
+        }
+      },
+      {
+        "identity": {
+          "path": ".cache/candidate-tagged/sdk-c-execution/native-place-switch-regression.json",
+          "sha256": "f4c728683f6c243cb1199d68b9c2699a3f8deaf6e7714ca19d19e86da45366b1"
+        },
+        "summary": {
+          "schemaVersion": "fairyc.test-report/v4",
+          "engine": "native",
+          "target": "x86_64-windows-msvc",
+          "profile": "development",
+          "tests": [
+            {
+              "identity": "tests::module_unit_body_ir_enums::owned_switches_recheck_exhaustive_provider_and_builtin_patterns",
+              "outcome": "passed",
+              "trapCategory": null,
+              "stdoutBase64SHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "stderrBase64SHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            }
+          ],
+          "count": 1,
+          "passed": 1,
+          "failed": 0,
+          "status": "ok",
+          "lock": "verified"
+        }
+      },
+      {
+        "identity": {
+          "path": ".cache/candidate-tagged/sdk-c-execution/native-place-complete.json",
+          "sha256": "06acf0482bf0c549fba6fd81fe74ec78a35a16095ae01cd63ced1dabde28d380"
+        },
+        "summary": {
+          "schemaVersion": "fairyc.test-report/v4",
+          "engine": "native",
+          "target": "x86_64-windows-msvc",
+          "profile": "development",
+          "tests": [
+            {
+              "identity": "tests::module_unit_c_sdk::sdk_c_executes_arena_factory_switch_and_owned_cleanup",
+              "outcome": "passed",
+              "trapCategory": null,
+              "stdoutBase64SHA256": "54ea477f18c63a4ff434cb6533fd96790610a6729e2912e3b3d159d4ee9c294f",
+              "stderrBase64SHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            {
+              "identity": "tests::module_unit_c_sdk::sdk_c_executes_console_numbers_bytes_and_record_result_bridges",
+              "outcome": "passed",
+              "trapCategory": null,
+              "stdoutBase64SHA256": "3563d1b602baa42e5e44cd2d7febe16732da1b1630100a37c58d5a3f6f681720",
+              "stderrBase64SHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            {
+              "identity": "tests::module_unit_c_sdk::sdk_c_executes_process_arguments_through_exact_result_bridge",
+              "outcome": "passed",
+              "trapCategory": null,
+              "stdoutBase64SHA256": "cd93771757d5523c6c9c938ee73cdd598ccfe2d5cd54d9c0074b8053e48a4449",
+              "stderrBase64SHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            {
+              "identity": "tests::module_unit_c_sdk::sdk_c_executes_region_lifecycle_and_cleanup_edges",
+              "outcome": "passed",
+              "trapCategory": null,
+              "stdoutBase64SHA256": "bbe0280573b3977a644562512f0007d9787adf125495afb0d3c3cb1d9ee74400",
+              "stderrBase64SHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            {
+              "identity": "tests::module_unit_c_sdk::sdk_c_executes_region_placement_and_param_origin",
+              "outcome": "passed",
+              "trapCategory": null,
+              "stdoutBase64SHA256": "1c1ea6b13f0a5195ad5db31247417f36a870665baa9cabd94da72eb8796b7e8f",
+              "stderrBase64SHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            {
+              "identity": "tests::module_unit_c_sdk::sdk_c_executes_region_storage_or_tracking_failure_as_result",
+              "outcome": "passed",
+              "trapCategory": null,
+              "stdoutBase64SHA256": "8bcb562b966f655349f6c0ad41352945475bbbfdcbfe1da70fb8e60dc385a533",
+              "stderrBase64SHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            {
+              "identity": "tests::module_unit_c_sdk::sdk_c_executes_stdin_and_stderr_byte_results",
+              "outcome": "passed",
+              "trapCategory": null,
+              "stdoutBase64SHA256": "8859f7894a0c482bbe19aff33aa03d3b8244dc2614c9bb4e92b909ce86c3f81e",
+              "stderrBase64SHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            {
+              "identity": "tests::module_unit_c_sdk::sdk_c_plan_respects_work_budget_before_authority_or_output",
+              "outcome": "passed",
+              "trapCategory": null,
+              "stdoutBase64SHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "stderrBase64SHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            {
+              "identity": "tests::module_unit_c_sdk::sdk_c_region_plan_respects_placement_budget_before_output",
+              "outcome": "passed",
+              "trapCategory": null,
+              "stdoutBase64SHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "stderrBase64SHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            }
+          ],
+          "count": 9,
+          "passed": 9,
+          "failed": 0,
+          "status": "ok",
+          "lock": "verified"
+        }
+      }
+    ],
+    "finalOutcomes": {
+      "tests::module_unit_c_sdk::sdk_c_executes_region_lifecycle_and_cleanup_edges": "passed",
+      "tests::module_unit_c_sdk::sdk_c_executes_region_placement_and_param_origin": "passed",
+      "tests::module_unit_c_sdk::sdk_c_executes_region_storage_or_tracking_failure_as_result": "passed",
+      "tests::module_unit_c_sdk::sdk_c_region_plan_respects_placement_budget_before_output": "passed",
+      "tests::module_unit_body_ir_enums::owned_switches_recheck_exhaustive_provider_and_builtin_patterns": "passed",
+      "tests::module_unit_c_sdk::sdk_c_executes_arena_factory_switch_and_owned_cleanup": "passed",
+      "tests::module_unit_c_sdk::sdk_c_executes_console_numbers_bytes_and_record_result_bridges": "passed",
+      "tests::module_unit_c_sdk::sdk_c_executes_process_arguments_through_exact_result_bridge": "passed",
+      "tests::module_unit_c_sdk::sdk_c_executes_stdin_and_stderr_byte_results": "passed",
+      "tests::module_unit_c_sdk::sdk_c_plan_respects_work_budget_before_authority_or_output": "passed"
+    },
+    "generatedCMatchesFinalFullSDKReport": true,
+    "finalSDKPassed": 9,
+    "switchRegressionPassed": 1
+  },
+  "CExecution": {
+    "schema": "fairyc.candidate-sdk-c-execution/v1",
+    "passed": true,
+    "reports": [
+      {
+        "path": ".cache\\candidate-tagged\\sdk-c-execution\\native-final.json",
+        "sha256": "c5cba31bab881ba8cceb9cee8b65d0c48726e709a00d22c3bc8b1a124ef62468"
+      },
+      {
+        "path": ".cache\\candidate-tagged\\sdk-c-execution\\native-streams.json",
+        "sha256": "44b8ff37a3215c6c23b87ed4203c6f608e23ec92dbfc73123e21327855cf0901"
+      },
+      {
+        "path": ".cache\\candidate-tagged\\sdk-c-execution\\native-place-final.json",
+        "sha256": "7c1bca1d36f0a5ae1f6e4b6c5c4bbc262bd4ca3c3f8df5cb5d6e7346df5a6cd1"
+      },
+      {
+        "path": ".cache\\candidate-tagged\\sdk-c-execution\\native-place-corrected.json",
+        "sha256": "da5e521e35ac47f808af75314cbd8e8be3b3f47d48572bdf6b7faade01d35494"
+      }
+    ],
+    "executions": [
+      {
+        "name": "sdk_c_executes_region_placement_and_param_origin",
+        "profile": "low",
+        "sourceSHA256": "7c4b256d34b1304b84fcac710df502a1e19500780d7de41b5aa75ce582d96b71",
+        "stdinBase64": null,
+        "heapFailureAt": null,
+        "heapBalanceVerified": true,
+        "heapCounts": {
+          "attempts": 10,
+          "liveAfter": 0
+        },
+        "arenaCounts": {
+          "initialize": 1,
+          "drop": 1,
+          "nonzeroStatus": 0
+        },
+        "regionCounts": {
+          "begin": 1,
+          "reset": 1,
+          "nonzeroStatus": 0
+        },
+        "runtimeInputs": [
+          {
+            "path": "internal\\cstdlib\\stage0_system_heap.c",
+            "sha256": "cae6664fa1ec70722b76025c3e2c3daadc133cd90d95fa9f02f2385915d3e55c"
+          },
+          {
+            "path": "internal\\cstdlib\\stage0_arena.c",
+            "sha256": "e0bf426ef0b27238463ec598426cf764ae08f476f814cb9bdbff5ce946372ecb"
+          }
+        ],
+        "build": {
+          "argv": [
+            "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+            "/nologo",
+            "/std:c11",
+            "/TC",
+            "/Od",
+            "/DFY_CANDIDATE_NO_MAIN",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\place-c-final\\sdk_c_executes_region_placement_and_param_origin.c",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\place-c-final\\sdk_c_executes_region_placement_and_param_origin-runtime.c",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\place-c-final\\trap.c",
+            "/Fe:C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\place-c-final\\sdk_c_executes_region_placement_and_param_origin-low.exe",
+            "/link",
+            "/INCREMENTAL:NO"
+          ],
+          "exit": 0,
+          "stdout": "sdk_c_executes_region_placement_and_param_origin.c\r\nsdk_c_executes_region_placement_and_param_origin-runtime.c\r\ntrap.c\r\nGenerating Code...\r\n",
+          "stderr": ""
+        },
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\place-c-final\\sdk_c_executes_region_placement_and_param_origin-low.exe"
+          ],
+          "exit": 0,
+          "stdout": "B,7,S,",
+          "stderr": ""
+        }
+      },
+      {
+        "name": "sdk_c_executes_region_placement_and_param_origin",
+        "profile": "optimized",
+        "sourceSHA256": "7c4b256d34b1304b84fcac710df502a1e19500780d7de41b5aa75ce582d96b71",
+        "stdinBase64": null,
+        "heapFailureAt": null,
+        "heapBalanceVerified": true,
+        "heapCounts": {
+          "attempts": 10,
+          "liveAfter": 0
+        },
+        "arenaCounts": {
+          "initialize": 1,
+          "drop": 1,
+          "nonzeroStatus": 0
+        },
+        "regionCounts": {
+          "begin": 1,
+          "reset": 1,
+          "nonzeroStatus": 0
+        },
+        "runtimeInputs": [
+          {
+            "path": "internal\\cstdlib\\stage0_system_heap.c",
+            "sha256": "cae6664fa1ec70722b76025c3e2c3daadc133cd90d95fa9f02f2385915d3e55c"
+          },
+          {
+            "path": "internal\\cstdlib\\stage0_arena.c",
+            "sha256": "e0bf426ef0b27238463ec598426cf764ae08f476f814cb9bdbff5ce946372ecb"
+          }
+        ],
+        "build": {
+          "argv": [
+            "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+            "/nologo",
+            "/std:c11",
+            "/TC",
+            "/O2",
+            "/DFY_CANDIDATE_NO_MAIN",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\place-c-final\\sdk_c_executes_region_placement_and_param_origin.c",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\place-c-final\\sdk_c_executes_region_placement_and_param_origin-runtime.c",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\place-c-final\\trap.c",
+            "/Fe:C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\place-c-final\\sdk_c_executes_region_placement_and_param_origin-optimized.exe",
+            "/link",
+            "/INCREMENTAL:NO"
+          ],
+          "exit": 0,
+          "stdout": "sdk_c_executes_region_placement_and_param_origin.c\r\nsdk_c_executes_region_placement_and_param_origin-runtime.c\r\ntrap.c\r\nGenerating Code...\r\n",
+          "stderr": ""
+        },
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\place-c-final\\sdk_c_executes_region_placement_and_param_origin-optimized.exe"
+          ],
+          "exit": 0,
+          "stdout": "B,7,S,",
+          "stderr": ""
+        }
+      },
+      {
+        "name": "sdk_c_executes_region_storage_or_tracking_failure_as_result",
+        "profile": "low",
+        "sourceSHA256": "c56172c65072e31feafabf7b9005fc2fb12d3455ef59725953c9aaf19eeed306",
+        "stdinBase64": null,
+        "heapFailureAt": 1,
+        "heapBalanceVerified": true,
+        "heapCounts": {
+          "attempts": 1,
+          "liveAfter": 0
+        },
+        "arenaCounts": {
+          "initialize": 1,
+          "drop": 1,
+          "nonzeroStatus": 0
+        },
+        "regionCounts": {
+          "begin": 1,
+          "reset": 1,
+          "nonzeroStatus": 0
+        },
+        "runtimeInputs": [
+          {
+            "path": "internal\\cstdlib\\stage0_system_heap.c",
+            "sha256": "cae6664fa1ec70722b76025c3e2c3daadc133cd90d95fa9f02f2385915d3e55c"
+          },
+          {
+            "path": "internal\\cstdlib\\stage0_arena.c",
+            "sha256": "e0bf426ef0b27238463ec598426cf764ae08f476f814cb9bdbff5ce946372ecb"
+          }
+        ],
+        "build": {
+          "argv": [
+            "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+            "/nologo",
+            "/std:c11",
+            "/TC",
+            "/Od",
+            "/DFY_CANDIDATE_NO_MAIN",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\place-c-final\\sdk_c_executes_region_storage_or_tracking_failure_as_result.c",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\place-c-final\\sdk_c_executes_region_storage_or_tracking_failure_as_result-runtime.c",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\place-c-final\\trap.c",
+            "/Fe:C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\place-c-final\\sdk_c_executes_region_storage_or_tracking_failure_as_result-low.exe",
+            "/link",
+            "/INCREMENTAL:NO"
+          ],
+          "exit": 0,
+          "stdout": "sdk_c_executes_region_storage_or_tracking_failure_as_result.c\r\nsdk_c_executes_region_storage_or_tracking_failure_as_result-runtime.c\r\ntrap.c\r\nGenerating Code...\r\n",
+          "stderr": ""
+        },
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\place-c-final\\sdk_c_executes_region_storage_or_tracking_failure_as_result-low.exe"
+          ],
+          "exit": 0,
+          "stdout": "B,7,S,",
+          "stderr": ""
+        }
+      },
+      {
+        "name": "sdk_c_executes_region_storage_or_tracking_failure_as_result",
+        "profile": "low",
+        "sourceSHA256": "c56172c65072e31feafabf7b9005fc2fb12d3455ef59725953c9aaf19eeed306",
+        "stdinBase64": null,
+        "heapFailureAt": 2,
+        "heapBalanceVerified": true,
+        "heapCounts": {
+          "attempts": 2,
+          "liveAfter": 0
+        },
+        "arenaCounts": {
+          "initialize": 1,
+          "drop": 1,
+          "nonzeroStatus": 0
+        },
+        "regionCounts": {
+          "begin": 1,
+          "reset": 1,
+          "nonzeroStatus": 0
+        },
+        "runtimeInputs": [
+          {
+            "path": "internal\\cstdlib\\stage0_system_heap.c",
+            "sha256": "cae6664fa1ec70722b76025c3e2c3daadc133cd90d95fa9f02f2385915d3e55c"
+          },
+          {
+            "path": "internal\\cstdlib\\stage0_arena.c",
+            "sha256": "e0bf426ef0b27238463ec598426cf764ae08f476f814cb9bdbff5ce946372ecb"
+          }
+        ],
+        "build": {
+          "argv": [
+            "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+            "/nologo",
+            "/std:c11",
+            "/TC",
+            "/Od",
+            "/DFY_CANDIDATE_NO_MAIN",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\place-c-final\\sdk_c_executes_region_storage_or_tracking_failure_as_result.c",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\place-c-final\\sdk_c_executes_region_storage_or_tracking_failure_as_result-runtime.c",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\place-c-final\\trap.c",
+            "/Fe:C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\place-c-final\\sdk_c_executes_region_storage_or_tracking_failure_as_result-low.exe",
+            "/link",
+            "/INCREMENTAL:NO"
+          ],
+          "exit": 0,
+          "stdout": "sdk_c_executes_region_storage_or_tracking_failure_as_result.c\r\nsdk_c_executes_region_storage_or_tracking_failure_as_result-runtime.c\r\ntrap.c\r\nGenerating Code...\r\n",
+          "stderr": ""
+        },
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\place-c-final\\sdk_c_executes_region_storage_or_tracking_failure_as_result-low.exe"
+          ],
+          "exit": 0,
+          "stdout": "B,7,S,",
+          "stderr": ""
+        }
+      },
+      {
+        "name": "sdk_c_executes_region_storage_or_tracking_failure_as_result",
+        "profile": "optimized",
+        "sourceSHA256": "c56172c65072e31feafabf7b9005fc2fb12d3455ef59725953c9aaf19eeed306",
+        "stdinBase64": null,
+        "heapFailureAt": 1,
+        "heapBalanceVerified": true,
+        "heapCounts": {
+          "attempts": 1,
+          "liveAfter": 0
+        },
+        "arenaCounts": {
+          "initialize": 1,
+          "drop": 1,
+          "nonzeroStatus": 0
+        },
+        "regionCounts": {
+          "begin": 1,
+          "reset": 1,
+          "nonzeroStatus": 0
+        },
+        "runtimeInputs": [
+          {
+            "path": "internal\\cstdlib\\stage0_system_heap.c",
+            "sha256": "cae6664fa1ec70722b76025c3e2c3daadc133cd90d95fa9f02f2385915d3e55c"
+          },
+          {
+            "path": "internal\\cstdlib\\stage0_arena.c",
+            "sha256": "e0bf426ef0b27238463ec598426cf764ae08f476f814cb9bdbff5ce946372ecb"
+          }
+        ],
+        "build": {
+          "argv": [
+            "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+            "/nologo",
+            "/std:c11",
+            "/TC",
+            "/O2",
+            "/DFY_CANDIDATE_NO_MAIN",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\place-c-final\\sdk_c_executes_region_storage_or_tracking_failure_as_result.c",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\place-c-final\\sdk_c_executes_region_storage_or_tracking_failure_as_result-runtime.c",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\place-c-final\\trap.c",
+            "/Fe:C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\place-c-final\\sdk_c_executes_region_storage_or_tracking_failure_as_result-optimized.exe",
+            "/link",
+            "/INCREMENTAL:NO"
+          ],
+          "exit": 0,
+          "stdout": "sdk_c_executes_region_storage_or_tracking_failure_as_result.c\r\nsdk_c_executes_region_storage_or_tracking_failure_as_result-runtime.c\r\ntrap.c\r\nGenerating Code...\r\n",
+          "stderr": ""
+        },
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\place-c-final\\sdk_c_executes_region_storage_or_tracking_failure_as_result-optimized.exe"
+          ],
+          "exit": 0,
+          "stdout": "B,7,S,",
+          "stderr": ""
+        }
+      },
+      {
+        "name": "sdk_c_executes_region_storage_or_tracking_failure_as_result",
+        "profile": "optimized",
+        "sourceSHA256": "c56172c65072e31feafabf7b9005fc2fb12d3455ef59725953c9aaf19eeed306",
+        "stdinBase64": null,
+        "heapFailureAt": 2,
+        "heapBalanceVerified": true,
+        "heapCounts": {
+          "attempts": 2,
+          "liveAfter": 0
+        },
+        "arenaCounts": {
+          "initialize": 1,
+          "drop": 1,
+          "nonzeroStatus": 0
+        },
+        "regionCounts": {
+          "begin": 1,
+          "reset": 1,
+          "nonzeroStatus": 0
+        },
+        "runtimeInputs": [
+          {
+            "path": "internal\\cstdlib\\stage0_system_heap.c",
+            "sha256": "cae6664fa1ec70722b76025c3e2c3daadc133cd90d95fa9f02f2385915d3e55c"
+          },
+          {
+            "path": "internal\\cstdlib\\stage0_arena.c",
+            "sha256": "e0bf426ef0b27238463ec598426cf764ae08f476f814cb9bdbff5ce946372ecb"
+          }
+        ],
+        "build": {
+          "argv": [
+            "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+            "/nologo",
+            "/std:c11",
+            "/TC",
+            "/O2",
+            "/DFY_CANDIDATE_NO_MAIN",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\place-c-final\\sdk_c_executes_region_storage_or_tracking_failure_as_result.c",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\place-c-final\\sdk_c_executes_region_storage_or_tracking_failure_as_result-runtime.c",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\place-c-final\\trap.c",
+            "/Fe:C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\place-c-final\\sdk_c_executes_region_storage_or_tracking_failure_as_result-optimized.exe",
+            "/link",
+            "/INCREMENTAL:NO"
+          ],
+          "exit": 0,
+          "stdout": "sdk_c_executes_region_storage_or_tracking_failure_as_result.c\r\nsdk_c_executes_region_storage_or_tracking_failure_as_result-runtime.c\r\ntrap.c\r\nGenerating Code...\r\n",
+          "stderr": ""
+        },
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\place-c-final\\sdk_c_executes_region_storage_or_tracking_failure_as_result-optimized.exe"
+          ],
+          "exit": 0,
+          "stdout": "B,7,S,",
+          "stderr": ""
+        }
+      },
+      {
+        "name": "sdk_c_executes_region_lifecycle_and_cleanup_edges",
+        "profile": "low",
+        "sourceSHA256": "eeeb3b009dc38d8167cd1f5f0b26c66f1ff7ab87bafe555317cb2035b1d16a48",
+        "stdinBase64": null,
+        "heapFailureAt": null,
+        "heapBalanceVerified": false,
+        "heapCounts": null,
+        "arenaCounts": {
+          "initialize": 2,
+          "drop": 2,
+          "nonzeroStatus": 0
+        },
+        "regionCounts": {
+          "begin": 6,
+          "reset": 6,
+          "nonzeroStatus": 0
+        },
+        "runtimeInputs": [
+          {
+            "path": "internal\\cstdlib\\stage0_system_heap.c",
+            "sha256": "cae6664fa1ec70722b76025c3e2c3daadc133cd90d95fa9f02f2385915d3e55c"
+          },
+          {
+            "path": "internal\\cstdlib\\stage0_arena.c",
+            "sha256": "e0bf426ef0b27238463ec598426cf764ae08f476f814cb9bdbff5ce946372ecb"
+          }
+        ],
+        "build": {
+          "argv": [
+            "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+            "/nologo",
+            "/std:c11",
+            "/TC",
+            "/Od",
+            "/DFY_CANDIDATE_NO_MAIN",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\place-c-final\\sdk_c_executes_region_lifecycle_and_cleanup_edges.c",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\place-c-final\\sdk_c_executes_region_lifecycle_and_cleanup_edges-runtime.c",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\place-c-final\\trap.c",
+            "/Fe:C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\place-c-final\\sdk_c_executes_region_lifecycle_and_cleanup_edges-low.exe",
+            "/link",
+            "/INCREMENTAL:NO"
+          ],
+          "exit": 0,
+          "stdout": "sdk_c_executes_region_lifecycle_and_cleanup_edges.c\r\nsdk_c_executes_region_lifecycle_and_cleanup_edges-runtime.c\r\ntrap.c\r\nGenerating Code...\r\n",
+          "stderr": ""
+        },
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\place-c-final\\sdk_c_executes_region_lifecycle_and_cleanup_edges-low.exe"
+          ],
+          "exit": 0,
+          "stdout": "B,2,1,S,B,4,3,S,B,B,6,S,5,S,B,11,S,B,12,S,",
+          "stderr": ""
+        }
+      },
+      {
+        "name": "sdk_c_executes_region_lifecycle_and_cleanup_edges",
+        "profile": "optimized",
+        "sourceSHA256": "eeeb3b009dc38d8167cd1f5f0b26c66f1ff7ab87bafe555317cb2035b1d16a48",
+        "stdinBase64": null,
+        "heapFailureAt": null,
+        "heapBalanceVerified": false,
+        "heapCounts": null,
+        "arenaCounts": {
+          "initialize": 2,
+          "drop": 2,
+          "nonzeroStatus": 0
+        },
+        "regionCounts": {
+          "begin": 6,
+          "reset": 6,
+          "nonzeroStatus": 0
+        },
+        "runtimeInputs": [
+          {
+            "path": "internal\\cstdlib\\stage0_system_heap.c",
+            "sha256": "cae6664fa1ec70722b76025c3e2c3daadc133cd90d95fa9f02f2385915d3e55c"
+          },
+          {
+            "path": "internal\\cstdlib\\stage0_arena.c",
+            "sha256": "e0bf426ef0b27238463ec598426cf764ae08f476f814cb9bdbff5ce946372ecb"
+          }
+        ],
+        "build": {
+          "argv": [
+            "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+            "/nologo",
+            "/std:c11",
+            "/TC",
+            "/O2",
+            "/DFY_CANDIDATE_NO_MAIN",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\place-c-final\\sdk_c_executes_region_lifecycle_and_cleanup_edges.c",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\place-c-final\\sdk_c_executes_region_lifecycle_and_cleanup_edges-runtime.c",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\place-c-final\\trap.c",
+            "/Fe:C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\place-c-final\\sdk_c_executes_region_lifecycle_and_cleanup_edges-optimized.exe",
+            "/link",
+            "/INCREMENTAL:NO"
+          ],
+          "exit": 0,
+          "stdout": "sdk_c_executes_region_lifecycle_and_cleanup_edges.c\r\nsdk_c_executes_region_lifecycle_and_cleanup_edges-runtime.c\r\ntrap.c\r\nGenerating Code...\r\n",
+          "stderr": ""
+        },
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\place-c-final\\sdk_c_executes_region_lifecycle_and_cleanup_edges-optimized.exe"
+          ],
+          "exit": 0,
+          "stdout": "B,2,1,S,B,4,3,S,B,B,6,S,5,S,B,11,S,B,12,S,",
+          "stderr": ""
+        }
+      }
+    ],
+    "compiler": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+    "source": "Private Fairy emitter; actual repository C runtime components, no SDK stand-ins"
+  },
+  "reference": {
+    "passed": true,
+    "runs": [
+      {
+        "name": "sdk_c_executes_region_placement_and_param_origin",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\compiler-origin-patterns.exe",
+          "experimental",
+          "check",
+          "main.fy",
+          "--source",
+          "std/alloc.fy"
+        ],
+        "exit": 2,
+        "stdout": "",
+        "stderr": "fairyc: requested program is outside the experimental verified-MIR check subset: lower main::store: Region.place uses inactive region 22\n",
+        "sourceSHA256": "350118fe03ed86bf48d93068a112c24c08fef712e68be53f1153fce3d103068d"
+      },
+      {
+        "name": "sdk_c_executes_region_storage_or_tracking_failure_as_result",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\compiler-origin-patterns.exe",
+          "experimental",
+          "check",
+          "main.fy",
+          "--source",
+          "std/alloc.fy"
+        ],
+        "exit": 0,
+        "stdout": "check ok: 2 file(s) (verified MIR: 10 function(s), 3 foreign declaration(s))\n",
+        "stderr": "",
+        "sourceSHA256": "1be8380296b339fed00d0fe3f588bc37d99dc6552f80149cccd7b0e143145f5e"
+      }
+    ],
+    "semanticRegionParameter": {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\compiler-origin-patterns.exe",
+        "experimental",
+        "check-semantics",
+        "main.fy",
+        "std/alloc.fy"
+      ],
+      "exit": 0,
+      "stdout": "semantics ok: 2 file(s), 2 module(s) (typed HIR: 11 function(s))\n",
+      "stderr": ""
+    },
+    "verifiedMIRRegionParameterAdmitted": false,
+    "note": "Reference semantic typing admits Region parameter; experimental verified-MIR lowering rejects parameter as inactive Region. Candidate typed IR and real runtime execution independently verified."
+  },
+  "placement": {
+    "expressionEvaluatedOnce": true,
+    "ownedStorageCopy": true,
+    "fullyInitializedNoDropNoSafeBorrowOnly": true,
+    "privateRegionParameterBridge": true,
+    "authenticatedAllocErrorStatusU32": true,
+    "allocationFailures": [
+      {
+        "slot": 1,
+        "purpose": "value storage",
+        "status": 1
+      },
+      {
+        "slot": 2,
+        "purpose": "tracking node",
+        "status": 1
+      }
+    ],
+    "noLiveAllocationsAfterExecution": true
+  },
+  "switchFix": "Freeze all arm expectations after result inference, including leading terminal arms before continuing arms.",
+  "fixtureCorrections": [
+    "Restricted enum payload with fixed array replaced by Leaf payload; fixed array remains separately placed inside Pair.",
+    "Unique zero-argument i32 entry contract respected by value(i32 n) helper.",
+    "Failure fixture uses direct local Arena per reference verified-MIR lexical Region subset."
+  ],
+  "privateAPIExpanded": true,
+  "normativeContractsChanged": false,
+  "stableCLIChanged": false,
+  "sdkABIChanged": false,
+  "GoChanged": false,
+  "dbChanged": false,
+  "ciChanged": false,
+  "hygieneChanged": false,
+  "pushed": false,
+  "skipped": {
+    "candidateRelease": "Generated C /O2 covered; separate candidate profile deferred",
+    "Linux": "Windows runtime slice",
+    "fullSuite": "Focused SDK and switch identities",
+    "stage1Stage2": "Whole pipeline pending"
+  },
+  "pending": [
+    "Root-only SDK ordinary body materialization",
+    "Other SDK storage bridges",
+    "Full source/unsafe/path/dominance/initialization proof",
+    "Foreign aggregate ABI",
+    "Whole dispatcher",
+    "Stage1/stage2 promotion"
+  ]
+}

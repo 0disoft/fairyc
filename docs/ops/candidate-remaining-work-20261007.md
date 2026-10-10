@@ -2875,4 +2875,18 @@ Receipt: `docs/ops/evidence/candidate-region-c-lifecycle-20261010.json`. New Fai
 - Trace: exact `B,2,1,S,B,4,3,S,B,B,6,S,5,S,B,11,S,B,12,S,` proves defer before owner drop followed by reset, nested inner-first cleanup, early return, continue and break.
 - Harness correction: the initial helper chose the first root ordinary function (`report`, returning void) as entry, producing C 1001 at 0..0. Entry selection now requires a unique zero-argument i32 candidate; temporary debug code was removed. No reference language bug is claimed.
 - Changes: private C API, helper, tests and source lock changed. Normative specs, stable CLI, SDK ABI, Go, DB, CI and hygiene are unchanged; no push.
-- Remaining: full Region place is next; root-only SDK/import bodies, other SDK storage, source proof, stage1/stage2 and promotion remain pending.
+- Next: root-only SDK ordinary body materialization; other SDK storage, full provenance/path/dominance/initialization proofs, foreign ABI, the dispatcher, self-hosting, stage1/stage2 and promotion remain pending. Region place execution is recorded below.
+
+## Candidate Region C place (2026-10-10)
+
+Receipt: `docs/ops/evidence/candidate-region-c-place-20261010.json`. This supersedes the earlier place-rejects-1004 status within the supported scope below; earlier validation records remain historical.
+
+- Supported operands: plain, fully initialized no-drop/no-safe-borrow scalars, raw pointers, structs, enums, Option/Result and fixed arrays.
+- Internal transport: Region parameters use a private bridge pointer; authenticated Arena and `AllocError.status:u32` are verified. Other SDK storage and foreign Region remain closed.
+- Placement: the expression is evaluated once and its value copied into allocated storage. Storage and tracking malloc failures return `.err` status 1; `?` runs Region reset and Arena cleanup.
+- Generated C: actual `stage0_system_heap.c` plus `stage0_arena.c` pass MSVC `/Od` and `/O2` (8/8 executions: placement success 2, malloc failures at calls 1/2 4, lifecycle regression 2). Live allocations end at 0; success records exactly 10 malloc calls, and failure cases exactly 1 or 2.
+- Switch correction: a terminal early arm's expected type was set before the switch result was known. Every arm is now frozen after result inference.
+- Validation: final locked check passes 266 source files and 3370 MIR functions. The complete selected SDK file native rerun passes 9/9 with zero failures and lock verified (`native-place-complete.json`, exit 0); together with the passing switch regression 1/1, final native outcomes total 10/10, superseding the earlier five focused merged outcomes.
+- Reference boundary: the corrected success fixture passes Go `check-semantics` (2 files, 2 modules, 11 functions), but experimental verified-MIR rejects its Region parameter with `place uses inactive region22`; this reference limitation leaves success-fixture MIR parity unverified. The failure fixture passes experimental verified-MIR check (2 files, 10 functions, 3 foreign functions).
+- Changes: private emitter and local harness expanded; normative specs, stable CLI, SDK ABI, Go, DB, CI and hygiene unchanged; no push. Candidate Release, Linux, the full suite and stage1/stage2 remain deferred; generated C `/O2` is separate from candidate Release validation.
+- Next: root-only SDK ordinary body materialization. Other SDK storage, full provenance/path/dominance/initialization proofs, foreign ABI, the dispatcher, self-hosting and stage1/stage2 promotion remain.

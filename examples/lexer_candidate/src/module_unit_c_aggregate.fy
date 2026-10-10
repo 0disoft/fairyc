@@ -39,6 +39,7 @@ fn bool slice(ref ir::Program p,ref ir::Body b,usize id,ref mut bytes::Buffer ou
 }
 pub fn bool type(ref ir::Program p,usize id,ref mut bytes::Buffer out,ref mut w::State s){
     if(id==0 || id>clean::type_count(ir::cleanup_ir(p))){s.code=1001;return false;}let t=clean::type_at(ir::cleanup_ir(p),id);
+    if(t.kind==19){return w::text(out,s,b"struct fy_unit_region_bridge *");}
     if(t.kind==12){return if(t.first==0){w::type(out,s,t.scalar)}else{type(p,t.first,out,s) && w::text(out,s,if(places::raw_mutable(t)){b" *"}else{b" const *"})};}
     if(t.kind==1 && (t.scalar<=7 || t.scalar==132)){return w::type(out,s,t.scalar);}if(t.kind==7 || t.kind==8){return type(p,t.first,out,s) && w::text(out,s,if(t.kind==7){b" const *"}else{b" *"});}if(t.kind!=2 && t.kind!=3 && t.kind!=4 && t.kind!=5 && t.kind!=6 && t.kind!=16 && !view(t) && !literals::descriptor(t)){s.code=1004;return false;}
     return w::text(out,s,b"struct fy_unit_t_") && w::number(out,s,id);
@@ -53,7 +54,7 @@ fn bool define(ref ir::Program p,usize id,ref mut v::Vec<u8> marks,ref mut bytes
         if(t.scalar==132 && !w::text(out,s,b"_Static_assert(sizeof(int)==4 && _Alignof(int)==4 && INT_MIN==INT32_MIN && INT_MAX==INT32_MAX,\"requires signed-32 c.int ABI\");\n")){return false;}}
     // A nominal raw pointee needs a forward declaration here, not its size.
     // Complete marked pointees after by-value layouts, allowing E -> ptr S -> E.
-    else if(t.kind==12){}
+    else if(t.kind==12 || t.kind==19){}
     else if(t.kind==7 || t.kind==8){if(*v::at<u8>(marks,t.first-1)!=1 && !define(p,t.first,marks,out,s,work,depth+1)){return false;}}
     else if(t.kind==4){let index=enum_proof::layout(p,id,work,ref mut s.code);if(index==0){if(s.code==0){s.code=1001;}return false;}let shape=ir::layout_at(p,index-1).value;var usize i=0;
         while(i<shape.field_count){let f=ir::field_at(p,shape.field_start+i);if(!budget::charge(work,1)){s.code=1002;return false;}if(f.kind==4 && !define(p,f.type,marks,out,s,work,depth+1)){return false;}i+=1;}
@@ -69,6 +70,7 @@ fn bool define(ref ir::Program p,usize id,ref mut v::Vec<u8> marks,ref mut bytes
     }else{s.code=1004;return false;}{let slot=v::at_mut<u8>(marks,id-1);*slot=2;}return true;
 }
 pub fn Result<v::Vec<u8>,u32> definitions(ref ir::Program p,ref mut bytes::Buffer out,ref mut w::State s,ref mut usize work){
+    if(!w::text(out,s,b"struct fy_unit_region_bridge;\n")){return .err(s.code);}
     var v::Vec<u8> marks=v::empty<u8>();var usize i=0;while(i<clean::type_count(ir::cleanup_ir(p))){if(!v::push<u8>(ref mut marks,0).is_ok){return .err(1003);}let t=clean::type_at(ir::cleanup_ir(p),i+1);if((t.kind==2 || t.kind==3 || t.kind==4 || t.kind==5 || t.kind==6 || t.kind==16 || view(t) || literals::descriptor(t)) && (!type(p,i+1,out,s) || !w::text(out,s,b";\n"))){return .err(s.code);}i+=1;}i=1;
     while(i<=ir::count(p)){let b=ir::at(p,i);let f=clean::frame_at(ir::cleanup_ir(p),i);if(!define(p,f.result,ref mut marks,out,s,work,0)){return .err(s.code);}var usize j=1;while(j<=ir::local_count(b)){let local=ir::local_at(b,j);if(local.kind!=6 && !define(p,local.type,ref mut marks,out,s,work,0)){return .err(s.code);}j+=1;}j=0;while(j<ir::node_count(b)){let e=ir::node_at(b,j).value;if(e.state==1 && !define(p,e.type,ref mut marks,out,s,work,0)){return .err(s.code);}j+=1;}i+=1;}
     var bool changed=true;while(changed){changed=false;i=1;while(i<=clean::type_count(ir::cleanup_ir(p))){if(!budget::charge(work,1)){return .err(1002);}let t=clean::type_at(ir::cleanup_ir(p),i);if(t.kind==12 && t.first!=0 && *v::at<u8>(ref marks,i-1)==2 && *v::at<u8>(ref marks,t.first-1)==0){if(!define(p,t.first,ref mut marks,out,s,work,0)){return .err(s.code);}changed=true;}i+=1;}}

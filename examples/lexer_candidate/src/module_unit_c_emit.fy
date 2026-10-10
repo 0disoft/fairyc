@@ -74,7 +74,9 @@ fn bool function(ref ir::Program p,ref sdk::Plan plan,ref cfg::Graph g,ref mut b
     if(!w::jump(out,s,cfg::entry(g))){return false;}i=1;
     while(i<=cfg::count(g)){if(!budget::charge(work,1)){s.code=1002;return false;}let n=cfg::at(g,i);*failed_start=n.start;*failed_end=n.end;if(!w::text(out,s,b"fy_b_") || !w::number(out,s,i) || !w::text(out,s,b":;\n")){return false;}
         if(n.kind==1){let e=ir::node_at(b,n.source-1).value;let left=lookup::node(b,e.left);let variant=e.kind==6 && left!=0 && ir::node_at(b,left-1).value.kind==28;
-            if(e.kind==6 && !variant){if(e.builtin.kind!=0){s.code=1004;return false;}if(!call(p,plan,g,n.source,0,out,s,work)){return false;}}
+            if(e.kind==6 && e.builtin.kind==300){if(!lifecycle::placement(p,plan,b,n.source,out,s,work)){return false;}}
+            else if(clean::type_at(ir::cleanup_ir(p),e.type).kind==19){if(!lifecycle::value(b,n.source,out,s,work)){return false;}}
+            else if(e.kind==6 && !variant){if(e.builtin.kind!=0){s.code=1004;return false;}if(!call(p,plan,g,n.source,0,out,s,work)){return false;}}
             else if(e.kind==1 && literals::descriptor(clean::type_at(ir::cleanup_ir(p),e.type))){if(!literals::expression(p,b,n.source,out,s,work)){return false;}}
             else if((e.kind==1 || e.kind==23) && clean::type_at(ir::cleanup_ir(p),e.type).kind==12 || e.kind==2 || e.kind==3 || e.kind==8 || e.kind==9 || e.kind==10 || e.kind==21 || e.kind==22 || e.kind==24 || e.kind==26 || e.kind==28 || e.kind==29 || e.kind==30 || e.kind==4 && bytes::equal(ir::node_text(b,n.source-1),b"*") || variant){if(!aggregate::expression(p,b,n.source,out,s,work)){return false;}}
             else if(!scalar::expression(p,b,n.source,out,s)){return false;}}
