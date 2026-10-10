@@ -11,11 +11,13 @@
 #include <io.h>
 #endif
 
-enum { FC_MAX_SOURCE = 32768, FC_MAX_COOKED = 16 << 20,
-       FC_UNSUPPORTED = 7, FC_BAD_INPUT = 8 };
 #ifdef FC_CANDIDATE_SOURCE_LIMIT
-enum { FC_CANDIDATE_SOURCE_SIZE = 4 };
+// Match candidate_limits::program_bytes for owned/joined scanner input.
+enum { FC_MAX_SOURCE = 1 << 20, FC_CANDIDATE_SOURCE_SIZE = 4 };
+#else
+enum { FC_MAX_SOURCE = 32768 };
 #endif
+enum { FC_MAX_COOKED = 16 << 20, FC_UNSUPPORTED = 7, FC_BAD_INPUT = 8 };
 #ifdef FC_CANDIDATE_DECIMAL_LIMIT
 // The Fairy-written scanner materializes at most 16,384 decimal bytes.
 // Keep the broader Go-oracle reference available without this build switch.

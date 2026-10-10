@@ -41,7 +41,7 @@ func dualScannerCheckedProgramWithSources(t *testing.T, mainSource, indexedSourc
 	}
 	root := t.TempDir()
 	example := filepath.Join("..", "..", "examples", "lexer_candidate")
-	for _, name := range []string{"fairy.toml", "src/numbers.fy", "src/diagnostics.fy", "src/utf8.fy", "src/strings.fy", "src/budget.fy"} {
+	for _, name := range realScannerSupportFiles() {
 		data, err := os.ReadFile(filepath.Join(example, filepath.FromSlash(name)))
 		if err != nil {
 			t.Fatal(err)

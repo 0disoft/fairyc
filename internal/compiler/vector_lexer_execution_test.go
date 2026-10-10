@@ -82,7 +82,7 @@ func TestPrivateVectorSDKCandidateRealScannerExecution(t *testing.T) {
 	if perRound*rounds >= 1<<32 {
 		t.Fatal("checksum no longer fits u32")
 	}
-	files := []string{"fairy.toml", "src/numbers.fy", "src/diagnostics.fy", "src/utf8.fy", "src/strings.fy", "src/budget.fy"}
+	files := realScannerSupportFiles()
 	type image struct {
 		name     string
 		artifact cdriver.WindowsHostArtifact

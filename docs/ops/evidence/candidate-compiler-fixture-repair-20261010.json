@@ -1,0 +1,271 @@
+{
+  "schema": "fairyc.candidate-compiler-fixture-repair/v1",
+  "passed": true,
+  "scope": "Restore SDK scanner fixture imports and current admission expectations. Update candidate C source storage bound and PDB folded-procedure accounting. Compiler and candidate implementations are unchanged.",
+  "sources": [
+    {
+      "path": "internal/compiler/field_store_test.go",
+      "sha256": "4306d65de110cc003f59314f8012c34c3cb8d3209b037aebd2da4afa44cb9edd"
+    },
+    {
+      "path": "internal/compiler/vector_lexer_c_budget_test.go",
+      "sha256": "7fd2927ee106c9420545d54692d05520bd9351a99b1ab444fbc34516e85d63d5"
+    },
+    {
+      "path": "internal/compiler/vector_lexer_c_source_limit_test.go",
+      "sha256": "3d84c2bc21784f3816c7a3b50bf7c4746f3349d847b5910b7903db80c7863662"
+    },
+    {
+      "path": "internal/compiler/vector_lexer_candidate_test.go",
+      "sha256": "5ebdcef20dc8d48de3d9de18f5b0db4ff17c1f267c3d452a81055824d8bc6e8a"
+    },
+    {
+      "path": "internal/compiler/vector_lexer_debug_map_test.go",
+      "sha256": "61d79759aa4c6eb602b255b561ab4c5ffe0704a513713e9ce2cfd0f44b45d5c6"
+    },
+    {
+      "path": "internal/compiler/vector_lexer_dual_test.go",
+      "sha256": "c1af363713f571d4fdc60fa5153afb7022af53ff8a72bf08953313c59cde5862"
+    },
+    {
+      "path": "internal/compiler/vector_lexer_execution_test.go",
+      "sha256": "fe8c9968219db4b9a6df9a55bed9eb743d7d1592054a337005230a8f792fd187"
+    },
+    {
+      "path": "internal/compiler/vector_lexer_unused_test.go",
+      "sha256": "3942f7850e074194df7315e01c59ead41725e0d33b432e827f896b51275c2b27"
+    },
+    {
+      "path": "tools/benchmarks/c-budget/scanner_reference.c",
+      "sha256": "011ff7eb2b6808f8bcf5d6fd0b9b663cd1ebdf76ce6a819e617b87dd03795fbf"
+    },
+    {
+      "path": "examples/lexer_candidate/src/candidate_limits.fy",
+      "sha256": "5666b6a3ad8190630c8fe7b7bca969ede7264d95f97e3ed17e166bf88417fc9d"
+    },
+    {
+      "path": "examples/lexer_candidate/src/scanner.fy",
+      "sha256": "1bd27d59bc093341d351547b7945f2864ae43219cbe35543283675eddaf82d84"
+    }
+  ],
+  "validation": {
+    "selectedRoots": 31,
+    "initialPassed": 29,
+    "initialFailed": 2,
+    "resolvedRoots": [
+      {
+        "test": "TestFieldStoreAdmissionBoundaries",
+        "initial": "pass",
+        "final": "pass"
+      },
+      {
+        "test": "TestFieldStoreWithInlineArraySibling",
+        "initial": "pass",
+        "final": "pass"
+      },
+      {
+        "test": "TestPrivateVectorSDKCandidateCBOMWorkLimit",
+        "initial": "pass",
+        "final": "pass"
+      },
+      {
+        "test": "TestPrivateVectorSDKCandidateConfiguredCByteLimitParity",
+        "initial": "pass",
+        "final": "pass"
+      },
+      {
+        "test": "TestPrivateVectorSDKCandidateCCombinedLimits",
+        "initial": "pass",
+        "final": "pass"
+      },
+      {
+        "test": "TestPrivateVectorSDKCandidateConfiguredCDiagnosticLimitParity",
+        "initial": "pass",
+        "final": "pass"
+      },
+      {
+        "test": "TestPrivateVectorSDKCandidateFairyDiagnosticAllocationFailure",
+        "initial": "pass",
+        "final": "pass"
+      },
+      {
+        "test": "TestPrivateVectorSDKCandidateFairyDiagnosticGrowthFailure",
+        "initial": "pass",
+        "final": "pass"
+      },
+      {
+        "test": "TestPrivateVectorSDKCandidateCLexemeWorkLimit",
+        "initial": "pass",
+        "final": "pass"
+      },
+      {
+        "test": "TestPrivateVectorSDKCandidateCScannerLexicalParity",
+        "initial": "pass",
+        "final": "pass"
+      },
+      {
+        "test": "TestPrivateVectorSDKCandidateCNumberWorkLimit",
+        "initial": "pass",
+        "final": "pass"
+      },
+      {
+        "test": "TestPrivateVectorSDKCandidateCPreviousRevisionKeywordParity",
+        "initial": "pass",
+        "final": "pass"
+      },
+      {
+        "test": "TestPrivateVectorSDKCandidateIndependentCScannerGeometricTokens",
+        "initial": "pass",
+        "final": "pass"
+      },
+      {
+        "test": "TestPrivateVectorSDKCandidateIndependentCScannerGeometricDiagnostics",
+        "initial": "pass",
+        "final": "pass"
+      },
+      {
+        "test": "TestPrivateVectorSDKCandidateBudgetReporterCorpus",
+        "initial": "pass",
+        "final": "pass"
+      },
+      {
+        "test": "TestPrivateVectorSDKCandidateBudgetReporterLimits",
+        "initial": "pass",
+        "final": "pass"
+      },
+      {
+        "test": "TestPrivateVectorSDKCandidateCSourceLimit",
+        "initial": "fail",
+        "final": "pass"
+      },
+      {
+        "test": "TestPrivateVectorSDKCandidateCStringWorkLimit",
+        "initial": "pass",
+        "final": "pass"
+      },
+      {
+        "test": "TestPrivateVectorSDKCandidateFairyFirstAllocationFailure",
+        "initial": "pass",
+        "final": "pass"
+      },
+      {
+        "test": "TestPrivateVectorSDKCandidateFairyTokenGrowthFailure",
+        "initial": "pass",
+        "final": "pass"
+      },
+      {
+        "test": "TestPrivateVectorSDKCandidateFairyCookedTokenFailure",
+        "initial": "pass",
+        "final": "pass"
+      },
+      {
+        "test": "TestPrivateVectorSDKCandidateCTriviaWorkLimit",
+        "initial": "pass",
+        "final": "pass"
+      },
+      {
+        "test": "TestPrivateVectorSDKCandidateDecimalLimitCParity",
+        "initial": "pass",
+        "final": "pass"
+      },
+      {
+        "test": "TestPrivateVectorSDKCandidateRealScannerNativeParity",
+        "initial": "pass",
+        "final": "pass"
+      },
+      {
+        "test": "TestPrivateVectorSDKCandidateScannerDebugMapLayout",
+        "initial": "fail",
+        "final": "pass"
+      },
+      {
+        "test": "TestPrivateVectorSDKCandidateDualScannerNativeParity",
+        "initial": "pass",
+        "final": "pass"
+      },
+      {
+        "test": "TestPrivateVectorSDKCandidateFairyScannerAllocationSweep",
+        "initial": "pass",
+        "final": "pass"
+      },
+      {
+        "test": "TestPrivateVectorSDKCandidateScannerLibraryMembers",
+        "initial": "pass",
+        "final": "pass"
+      },
+      {
+        "test": "TestPrivateVectorSDKCandidateScannerCanonicalCallParity",
+        "initial": "pass",
+        "final": "pass"
+      },
+      {
+        "test": "TestPrivateVectorSDKCandidateUnusedNativeFootprint",
+        "initial": "pass",
+        "final": "pass"
+      },
+      {
+        "test": "TestPrivateVectorSDKCandidateUnusedSourceProducesSameMIRAndC",
+        "initial": "pass",
+        "final": "pass"
+      }
+    ],
+    "cRegression": {
+      "TestPrivateVectorSDKCandidateConfiguredCByteLimitParity": "pass",
+      "TestPrivateVectorSDKCandidateCCombinedLimits": "pass",
+      "TestPrivateVectorSDKCandidateCScannerLexicalParity": "pass"
+    },
+    "finalSourceLimitProfiles": [
+      "low",
+      "optimized"
+    ],
+    "sourceLimits": {
+      "candidateJoinedBytes": 1048576,
+      "broadCOracleBytes": 32768,
+      "exactAndOneByteOver": true,
+      "CStandaloneAndLibrary": true,
+      "FairyIndexedAndVectorLoops": true
+    },
+    "PDBFoldedRecords": [
+      "vector_lexer_debug_map_test.go:188: PDB module unit.obj folded procedure fy_fn_74 at section=1 offset=23504 size=197",
+      "vector_lexer_debug_map_test.go:188: PDB module unit.obj folded procedure fy_fn_80 at section=1 offset=24400 size=197"
+    ],
+    "receipts": [
+      {
+        "path": ".cache/candidate-tagged/owner-access-unit/fixture-repair-affected.jsonl",
+        "sha256": "d8c379b989d6e193b0d00bf56814f98ed356844e481a06f752116f1819a69adb"
+      },
+      {
+        "path": ".cache/candidate-tagged/owner-access-unit/fixture-repair-final.jsonl",
+        "sha256": "79348a80bc2be664cfc8488b4e02d0c4ddfad4fd3dfcb5f6004269f17c93c878"
+      },
+      {
+        "path": ".cache/candidate-tagged/owner-access-unit/fixture-repair-c-regression.jsonl",
+        "sha256": "aedec3e0171eb95fbe2c72a99bfc599cd86c79c6fa544aba53c9e4591ad25061"
+      }
+    ],
+    "fullCompilerSuiteRerun": false,
+    "reuse": "The 29 passing initial roots remain valid for the shared import/test changes. Only the two newly exposed failures were repeated after their repair; three related C lexical/byte/combined-limit roots were also checked after the C storage cap changed."
+  },
+  "repairs": [
+    "Share the current scanner import copy list, including candidate_limits, across five test workspaces.",
+    "Replace obsolete nonplain-owner rejection with execution checking that field replacement preserves an inline-array sibling.",
+    "Distinguish the 1 MiB joined scanner storage cap from configurable lexical byte-work exhaustion; preserve the broad C reference input cap.",
+    "Count folded PDB aliases as matched records while charging their exact owned code range once; retain overlap, byte partition and RVA checks."
+  ],
+  "skipped": {
+    "fullCompiler": "Focused repair of the 30 recorded baseline failing roots plus one positive execution regression. Previously passing compiler tests were not repeated.",
+    "fullCandidateRelease": "Deferred consolidated batch; relevant generated-native source-boundary and PDB tests did run low/optimized profiles.",
+    "Linux": "Deferred consolidated batch."
+  },
+  "pending": [
+    "Remaining referent/call access edges and general moved-owner state",
+    "Move-aware cleanup and borrow MIR/C/runtime",
+    "Unsafe provenance, full dispatcher and stage1/stage2"
+  ],
+  "stableCLIChanged": false,
+  "publicAPIChanged": false,
+  "sdkABIChanged": false,
+  "dbChanged": false,
+  "ciRunnerChanged": false,
+  "pushed": false
+}

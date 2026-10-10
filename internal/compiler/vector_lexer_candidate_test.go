@@ -30,6 +30,12 @@ type realScannerVectorVariant struct {
 	scanner   string
 }
 
+// Every scanner fixture uses the same current local import set. A new scanner
+// dependency must be copied into budget, execution and footprint workspaces.
+func realScannerSupportFiles() []string {
+	return []string{"fairy.toml", "src/candidate_limits.fy", "src/numbers.fy", "src/diagnostics.fy", "src/utf8.fy", "src/strings.fy", "src/budget.fy"}
+}
+
 // Keep the checked-in scanner edits in one place for parity and cost probes.
 func realScannerVectorVariants(t *testing.T) []realScannerVectorVariant {
 	t.Helper()
@@ -106,7 +112,7 @@ func TestPrivateVectorSDKCandidateRealScannerNativeParity(t *testing.T) {
 	for _, variant := range variants {
 		t.Run(variant.name, func(t *testing.T) {
 			root := t.TempDir()
-			for _, name := range []string{"fairy.toml", "src/numbers.fy", "src/diagnostics.fy", "src/utf8.fy", "src/strings.fy", "src/budget.fy"} {
+			for _, name := range realScannerSupportFiles() {
 				data, err := os.ReadFile(filepath.Join(example, filepath.FromSlash(name)))
 				if err != nil {
 					t.Fatal(err)

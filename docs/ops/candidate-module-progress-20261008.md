@@ -3682,3 +3682,28 @@ pending. The known SDK fixture module graph and obsolete nonplain-owner test
 expectation also require repair. The full compiler suite was not rerun after
 this candidate source change; release/Linux remain deferred. The private
 Context shape changed; stable CLI, SDK ABI, DB and CI are unchanged. No push.
+
+## Compiler scanner fixture closure (2026-10-10)
+
+The 30 previously recorded baseline failing compiler roots are repaired.
+Five scanner test workspaces now share the complete local import list,
+including candidate_limits. Field replacement beside an inline array is
+verified by execution instead of retaining an obsolete rejection expectation.
+The C candidate storage cap follows the joined scanner's 1 MiB budget;
+configurable byte-work exhaustion remains a separate diagnostic contract.
+PDB folded procedure records count as aliases of one owned code range.
+Exact byte partition, nonoverlap and release/debug RVA checks still pass.
+
+The 31 affected roots (including the new sibling-storage case) pass across
+focused runs: 29 passed initially and the two exposed boundary/PDB failures
+passed after repair. Three additional C lexical/byte/combined-limit roots
+also pass. Source-cap tests cover exact and one-byte-over input in both
+native profiles, indexed/vector Fairy, standalone C and C-library paths.
+The full compiler suite was not repeated. Evidence:
+`docs/ops/evidence/candidate-compiler-fixture-repair-20261010.json`.
+
+These fixture failures no longer block the next unit. Remaining access edges,
+general move state, cleanup, borrow MIR/C/runtime, unsafe provenance, full
+dispatcher and stage1/stage2 still require implementation. Full candidate
+release and Linux remain deferred. No normative language documents, public
+CLI/API, SDK ABI, DB or CI runner configuration changed; no push.

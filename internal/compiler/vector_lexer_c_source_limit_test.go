@@ -58,28 +58,26 @@ import std::bytes as bytes;
 fn i32 main() {
     var bytes::Buffer input = bytes::empty();
     var usize index = 0;
-    while (index < 32768) {
+    while (index < 1048576) {
         if (!switch (bytes::append_byte(ref mut input, 97)) {
             case .ok(_): { true }
             case .err(_): { false }
         }) { return 1; }
         index += 1;
     }
-    if (scanner::report_work(bytes::view(ref input), false, 32768, 1048576, 256, 16777216) != 0) {
+    if (scanner::report_work(bytes::view(ref input), false, 1048576, 1048576, 256, 16777216) != 0) {
         return 2;
     }
     if (!switch (bytes::append_byte(ref mut input, 97)) {
         case .ok(_): { true }
         case .err(_): { false }
     }) { return 3; }
-    if (scanner::report_work(bytes::view(ref input), false, 32768, 1048576, 256, 16777216) != 4) {
+    if (scanner::report_work(bytes::view(ref input), false, 1048576, 1048576, 256, 16777216) != 4) {
         return 4;
     }
     return 0;
 }
 `
-	exact := []byte(strings.Repeat("a", 32768))
-	over := []byte(strings.Repeat("a", 32769))
 	variants := realScannerVectorVariants(t)
 	if len(variants) != 5 || variants[0].name != "explicit index" || variants[4].name != "all vector for" {
 		t.Fatal("real scanner variants changed")
@@ -90,11 +88,14 @@ fn i32 main() {
 			for _, lane := range []struct {
 				name, prefix string
 				overStatus   int32
+				sourceLimit  int
 			}{
-				{"candidate", define, 4},
-				{"Go oracle", "", 8},
+				{"candidate", define, 4, 1048576},
+				{"Go oracle", "", 8, 32768},
 			} {
 				t.Run(lane.name, func(t *testing.T) {
+					exact := []byte(strings.Repeat("a", lane.sourceLimit))
+					over := append(append([]byte(nil), exact...), 'a')
 					image, err := cdriver.BuildWindowsMSVCProbe(toolchain, profile, lane.prefix+string(core))
 					if err != nil {
 						t.Fatal(err)

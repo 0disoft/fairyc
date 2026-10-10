@@ -175,16 +175,20 @@ func checkScannerDebugPair(t *testing.T, name string, release, debug cdriver.Win
 			seen := make(map[[3]uint32]struct{})
 			linked := make([]pecoff.PDBProcedureRecord, 0, len(procedures))
 			for _, procedure := range procedures {
-				if int(procedure.Section) > len(debugPE.Sections) ||
+				if procedure.Section == 0 || int(procedure.Section) > len(debugPE.Sections) ||
 					debugPE.Sections[procedure.Section-1].Name != ".text" {
 					unmatched++
 					continue
 				}
 				key := [3]uint32{uint32(procedure.Section), procedure.Offset, procedure.Size}
 				if _, duplicate := seen[key]; duplicate {
+					// MSVC may fold identical functions into one owned code range.
+					// Count the record, but account for its bytes only once.
+					matched++
+					t.Logf("PDB module %s folded procedure %s at section=%d offset=%d size=%d",
+						module.Name, procedure.Name, procedure.Section, procedure.Offset, procedure.Size)
 					continue
 				}
-				seen[key] = struct{}{}
 				owned := false
 				for _, contribution := range contributions.Contributions {
 					if contribution.ModuleIndex == module.Index && contribution.Section == procedure.Section &&
@@ -192,6 +196,7 @@ func checkScannerDebugPair(t *testing.T, name string, release, debug cdriver.Win
 						uint64(procedure.Offset)+uint64(procedure.Size) <= uint64(contribution.Offset)+uint64(contribution.Size) {
 						matched++
 						owned = true
+						seen[key] = struct{}{}
 						codeBytes += uint64(procedure.Size)
 						linked = append(linked, procedure)
 						break

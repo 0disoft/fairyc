@@ -129,7 +129,6 @@ func TestFieldStoreAdmissionBoundaries(t *testing.T) {
 		"immutable owner":      `struct S { i32 x; } fn void edit() { let S s = S { .x = 0 }; s.x = 1; }`,
 		"moved owner":          `resource R { i32 x; cleanup {} } fn void consume(R r) {} fn void edit() { var R r = R { .x = 0 }; consume(r); r.x = 1; }`,
 		"resource replacement": `resource R { i32 x; cleanup {} } resource H { R r; cleanup {} } fn void edit() { var H h = H { .r = R { .x = 0 } }; h.r = R { .x = 1 }; }`,
-		"nonplain owner":       `struct S { i32 x; } struct H { S s; i32[2] extra; } fn void edit() { var H h = H { .s = S { .x = 0 }, .extra = [0; 2] }; h.s = S { .x = 1 }; }`,
 		"boolean compound":     `struct S { bool x; } fn void edit(ref mut S s) { s.x += true; }`,
 		"u8 overflow":          `struct S { u8 x; } fn void edit(ref mut S s) { s.x = 256; }`,
 		"u32 overflow":         `struct S { u32 x; } fn void edit(ref mut S s) { s.x = 4294967296; }`,
@@ -141,6 +140,19 @@ func TestFieldStoreAdmissionBoundaries(t *testing.T) {
 				t.Fatalf("invalid field store: %+v %v", result, err)
 			}
 		})
+	}
+}
+
+func TestFieldStoreWithInlineArraySibling(t *testing.T) {
+	const source = `module main;struct S{i32 x;}struct H{S s;i32[2] extra;}
+fn i32 main(){var H h=H{.s=S{.x=0},.extra=[1,2]};h.s=S{.x=42};assert(h.extra[0]==1 && h.extra[1]==2);return h.s.x;}`
+	result, err := compiler.Check([]semantic.File{parseCompilerFile(t, hir.DefaultPackage, "main.fy", source)})
+	if err != nil || !result.Verified {
+		t.Fatalf("inline array sibling: %v %+v", err, result.Semantic)
+	}
+	outcome, err := interpreter.Execute(result.MIR, "main::main")
+	if err != nil || outcome.Kind != interpreter.OutcomeReturn || outcome.Value != 42 {
+		t.Fatalf("field replacement changed sibling storage: %+v %v", outcome, err)
 	}
 }
 
