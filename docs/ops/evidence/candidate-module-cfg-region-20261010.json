@@ -1,0 +1,131 @@
+{
+  "schema": "fairyc.candidate-module-cfg-region/v1",
+  "passed": true,
+  "identity": {
+    "compilerSHA256": "18c75e6c281cca5199fff0f4064871182ba2f0fda5c552bd44bcf9e0fa88e0a1",
+    "candidateSHA256": "bfc123fca6bc29265bed71a93065967c3b1e54c8b74cf8c2a8a7e3892af951e8",
+    "sources": {
+      "examples/lexer_candidate/src/module_unit_cfg_region.fy": "488171ce73cba45e667b34270d274dc04320ef2a2769bee991dd0b047cb27866",
+      "examples/lexer_candidate/src/module_unit_cfg_lower.fy": "00c961dbfc5638471e38292b7babb6a1e1de347a4e2145efa377b6ee1196e738",
+      "examples/lexer_candidate/src/module_unit_cfg_model.fy": "28a206229aeb1d05e0e7823fecbc0f3ceeafe7d6b1b66fac7bcb94d914507194",
+      "examples/lexer_candidate/src/module_unit_body_ir_lower.fy": "e87827727e1423676ca833476278f8d9a4a5e680e30ef21e6e69c928f162f229",
+      "examples/lexer_candidate/src/module_unit_body_ir_model.fy": "9b9a5f4655e595cbeb0cdb19e4833c6280f26d93c04aa39ba8cb4cfe4056ec68",
+      "examples/lexer_candidate/src/module_unit_body_ir_verify.fy": "9ca01cf3ebaf2215e43e5ad1c2d7ba41dcbda39e5b300d85eec5d0c80c0c628c",
+      "examples/lexer_candidate/tests/module_unit_cfg_region.fy": "5e393a6680af676c89108f258dcf5183113407ee5066dd467cbae5b9c09ad1c7",
+      "examples/lexer_candidate/fairy.lock": "545d95a5fc1c52ad7ec5797e6996ed4e29ac03a1105ad4fc35a546acf6d62e0c"
+    },
+    "sdkAllocPath": "internal/sdkstdlib/sources/std/alloc.fy",
+    "sdkAllocSHA256": "61f50fa03239eee7b669c315659e8c9d07982117857cf50fe7f5a2b6f35a82c2"
+  },
+  "native": {
+    "count": 8,
+    "passed": 8,
+    "failed": 0,
+    "newRegionTests": 5,
+    "selectedRegressions": 3,
+    "tests": [
+      {
+        "identity": "tests::module_unit_cfg_region::region_fallthrough_defers_and_drops_inside_before_reset_and_outer_cleanup",
+        "outcome": "passed",
+        "trapCategory": null,
+        "stdoutBase64": "",
+        "stderrBase64": ""
+      },
+      {
+        "identity": "tests::module_unit_cfg_region::region_handoff_rejects_missing_duplicate_and_wrong_checkpoint_reset_operations",
+        "outcome": "passed",
+        "trapCategory": null,
+        "stdoutBase64": "",
+        "stderrBase64": ""
+      },
+      {
+        "identity": "tests::module_unit_cfg_region::region_loop_exit_resets_only_crossed_region_and_preserves_outer_scope",
+        "outcome": "passed",
+        "trapCategory": null,
+        "stdoutBase64": "",
+        "stderrBase64": ""
+      },
+      {
+        "identity": "tests::module_unit_cfg_region::region_return_and_propagation_interleave_owner_drops_with_inner_first_resets",
+        "outcome": "passed",
+        "trapCategory": null,
+        "stdoutBase64": "",
+        "stderrBase64": ""
+      },
+      {
+        "identity": "tests::module_unit_body_ir::body_ir_rejects_malformed_owned_body_tables",
+        "outcome": "passed",
+        "trapCategory": null,
+        "stdoutBase64": "",
+        "stderrBase64": ""
+      },
+      {
+        "identity": "tests::module_unit_cfg::cfg_propagation_error_drops_only_completed_values_in_reverse_order",
+        "outcome": "passed",
+        "trapCategory": null,
+        "stdoutBase64": "",
+        "stderrBase64": ""
+      },
+      {
+        "identity": "tests::module_unit_cfg_defer::deferred_nested_fallthrough_uses_reverse_lexical_registration",
+        "outcome": "passed",
+        "trapCategory": null,
+        "stdoutBase64": "",
+        "stderrBase64": ""
+      },
+      {
+        "identity": "tests::module_unit_cfg_region::region_body_snapshot_rejects_missing_placement_and_invalid_scope_reset_ledgers",
+        "outcome": "passed",
+        "trapCategory": null,
+        "stdoutBase64": "",
+        "stderrBase64": ""
+      }
+    ],
+    "target": "x86_64-windows-msvc",
+    "profile": "development",
+    "scope": "Execute the .fy graph compiler and inspect graph paths, not execution of generated program C or runtime Arena reset"
+  },
+  "mutations": {
+    "checkpointAndResetModes1Through8": 1001,
+    "placementScopeAndResetLedgerModes1Through11": 1001,
+    "acceptedCopies": 0
+  },
+  "sourceCheck": {
+    "exit": 0,
+    "locked": true,
+    "sources": 253,
+    "mirFunctions": 3215
+  },
+  "developmentBuild": {
+    "exit": 0,
+    "locked": true
+  },
+  "representation": {
+    "placement": "Owned source/type/capability/region ledger with a unique checked entry for every Region.place call",
+    "checkpoint": "Explicit operation 15 binds a canonical ref-mut Arena expression to its lexical Region",
+    "reset": "Operation 16 refers to an exact retained exit fact; equivalent facts share an operation",
+    "cleanup": "Invoke the exiting defer suffix first, then reverse construction/lexical drops inside the innermost exiting Region, reset it, continue to outer scopes",
+    "spanJoin": "Return drop facts use statement spans; Region resets use the evaluated return expression span; both map to the same exit",
+    "loops": "Break/continue reset only Regions crossed by their loop edge",
+    "scopeProof": "Capability/type/source/statement/body agreement, containing parents, contiguous reset groups and parent-chain reset order"
+  },
+  "pending": [
+    "Dominance, initialization and whole-path cleanup proof for arbitrary externally assembled graphs",
+    "Remaining source admission/unsafe provenance and control/value lanes",
+    "Generate and execute C for the split-unit graph",
+    "Whole dispatcher and stage1/stage2"
+  ],
+  "skipped": {
+    "Go": "No Go changes",
+    "oldCLI": "CLI source unchanged; no CLI route uses this private graph",
+    "release": "Deferred batch",
+    "Linux": "Deferred batch",
+    "fullCompiler": "Scoped graph change"
+  },
+  "privateAPIChanged": true,
+  "stableCLIChanged": false,
+  "sdkABIChanged": false,
+  "dbChanged": false,
+  "ciChanged": false,
+  "pushed": false
+}

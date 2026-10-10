@@ -2600,3 +2600,33 @@ and the nine new defer rejections. `Region` is pending for the next commit, and
 `switch`, `foreach`, slices, the named-construct syntax, the C-graph evaluator and
 executable C remain unimplemented; this section supersedes the earlier defer-pending
 statements above.
+
+## Candidate Region placement and reset staging (2026-10-10)
+
+The owned body IR now also retains Region structure: `regions::Scope` (parent, capability,
+scope, statement, body, source mode, arena owner/type and spans) and
+`regions::Placement` (region, capability, the `place` call and argument, owner/borrow/
+result/error types and spans) are copied at lowering and revalidated independently,
+pairing every builtin `place` call one-to-one, requiring the kind-19 capability local and
+the canonical `ref mut std::alloc::Arena` source, and checking that a nested Region stays
+inside its parent body. `module_unit_cfg_region.fy` lowers a Region checkpoint (block kind
+15) and Region resets (kind 16): on an exiting edge it emits all active defers first, then
+for each crossed Region its drops followed by its reset innermost-first, then the remaining
+outer drops, with reset group/order chaining to the parent and the reset and drop spans
+checked against the source; the verification stays at these ledger and span facts and does
+not claim dominance, liveness or runtime ordering.
+
+Eight `tests/module_unit_cfg_region.fy` outcomes now pass - five new Region cases
+(fallthrough, return with `?` interleaving inner-first resets, break/continue resetting
+only the crossed Region, eight invalid graph modes rejected with 1001, and an eleven-mode
+invalid body-ledger mutation rejected with 1001) plus three existing regression tests, split
+across `region-native-final.json` and `region-mutations-regression.json` - giving nineteen
+new rejections in all (eight graph and eleven body modes). The case reads the real
+`internal/sdkstdlib/sources/std/alloc.fy` by byte identity, recorded in the receipt
+`docs/ops/evidence/candidate-module-cfg-region-20261010.json`, with no SDK ABI change and
+no production source change after the first four-pass run. The locked source check passed
+253 files and 3215 MIR functions and the locked development build passed, changing the
+private IR API while the stable CLI, SDK ABI, DB and CI stay unchanged with no push.
+Generated C, the whole language, the drop dominance-path proof, the whole source admission
+and pipeline and any Arena runtime checkpoint execution remain pending, the tests
+exercising the `.fy` compiler graph lowering and paths only, with no C emitted from or executed for this new CFG.

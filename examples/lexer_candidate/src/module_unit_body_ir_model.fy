@@ -15,7 +15,7 @@ pub resource Body {
     usize body;usize source_bytes;usize start;usize end;
     v::Vec<Node> nodes;v::Vec<Statement> statements;v::Vec<values::Local> locals;
     v::Vec<values::Invocation> calls;v::Vec<values::Argument> arguments;
-    v::Vec<regions::Scope> regions;v::Vec<regions::Exit> resets;bytes::Buffer text;
+    v::Vec<regions::Scope> regions;v::Vec<regions::Placement> placements;v::Vec<regions::Exit> resets;bytes::Buffer text;
     cleanup{}
 }
 pub resource Program {
@@ -48,6 +48,8 @@ pub fn usize argument_count(ref Body p){return v::len<values::Argument>(ref p.ar
 pub fn values::Argument argument_at(ref Body p,usize index){return *v::at<values::Argument>(ref p.arguments,index);}
 pub fn usize region_count(ref Body p){return v::len<regions::Scope>(ref p.regions);}
 pub fn regions::Scope region_at(ref Body p,usize index){return *v::at<regions::Scope>(ref p.regions,index);}
+pub fn usize placement_count(ref Body p){return v::len<regions::Placement>(ref p.placements);}
+pub fn regions::Placement placement_at(ref Body p,usize index){return *v::at<regions::Placement>(ref p.placements,index);}
 pub fn usize reset_count(ref Body p){return v::len<regions::Exit>(ref p.resets);}
 pub fn regions::Exit reset_at(ref Body p,usize index){return *v::at<regions::Exit>(ref p.resets,index);}
 pub fn usize layout_count(ref Program p){return v::len<Layout>(ref p.layouts);}
@@ -62,7 +64,8 @@ pub fn ref u8[] linker_name(ref Program p,usize index){let s=callable_at(p,index
 pub fn usize parameter_count(ref Program p){return v::len<usize>(ref p.parameters);}
 pub fn usize parameter_at(ref Program p,usize index){return *v::at<usize>(ref p.parameters,index);}
 pub fn usize work(ref Program p){return p.work;}
-pub fn Body assemble_body(usize body,usize source_bytes,usize start,usize end,v::Vec<Node> nodes,v::Vec<Statement> statements,v::Vec<values::Local> locals,v::Vec<values::Invocation> calls,v::Vec<values::Argument> arguments,v::Vec<regions::Scope> regions,v::Vec<regions::Exit> resets,bytes::Buffer text){return Body{.body,.source_bytes,.start,.end,.nodes,.statements,.locals,.calls,.arguments,.regions,.resets,.text};}
+pub fn Body assemble_body_regions(usize body,usize source_bytes,usize start,usize end,v::Vec<Node> nodes,v::Vec<Statement> statements,v::Vec<values::Local> locals,v::Vec<values::Invocation> calls,v::Vec<values::Argument> arguments,v::Vec<regions::Scope> regions,v::Vec<regions::Placement> placements,v::Vec<regions::Exit> resets,bytes::Buffer text){return Body{.body,.source_bytes,.start,.end,.nodes,.statements,.locals,.calls,.arguments,.regions,.placements,.resets,.text};}
+pub fn Body assemble_body(usize body,usize source_bytes,usize start,usize end,v::Vec<Node> nodes,v::Vec<Statement> statements,v::Vec<values::Local> locals,v::Vec<values::Invocation> calls,v::Vec<values::Argument> arguments,v::Vec<regions::Scope> regions,v::Vec<regions::Exit> resets,bytes::Buffer text){return assemble_body_regions(body,source_bytes,start,end,nodes,statements,locals,calls,arguments,regions,v::empty<regions::Placement>(),resets,text);}
 pub fn Result<Program,clean_ir::Problem> assemble(clean_ir::Program cleanup_ir,v::Vec<Body> bodies,v::Vec<Layout> layouts,v::Vec<interfaces::Field> fields,v::Vec<interfaces::Callable> callables,v::Vec<usize> parameters,bytes::Buffer names,usize work){
     let p=Program{.cleanup_ir,.bodies,.layouts,.fields,.callables,.parameters,.names,.work};let checked=proof::check(ref p);if(checked.code!=0){return .err(checked);}return .ok(p);
 }

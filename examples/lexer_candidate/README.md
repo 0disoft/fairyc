@@ -269,3 +269,25 @@ MIR functions and the locked development build passed, with the receipt
 and nine new defer rejections. `Region` is pending for the next commit, and `switch`,
 the C-graph evaluator and any generated or executed C remain unimplemented; this
 supersedes the earlier defer-pending notes above.
+
+## Region placement and reset staging
+
+`module_unit_body_ir_lower.fy` copies and `module_unit_body_ir_verify.fy` revalidates a
+`regions::Scope`/`regions::Placement` ledger that pairs every builtin `place` call
+one-to-one, carries the canonical `ref mut std::alloc::Arena` source with its kind-19
+capability local, and requires a nested Region to stay inside its parent body;
+`module_unit_cfg_region.fy` lowers a Region checkpoint (block kind 15) and resets
+(kind 16), emitting on an exiting edge all active defers first, then per crossed Region
+its drops and reset innermost-first, then the outer drops, with the checks limited to
+ledger and span facts rather than dominance, liveness or runtime ordering. Eight
+`tests/module_unit_cfg_region.fy` outcomes pass (five new Region cases plus three reused
+regressions) and nineteen new rejections are covered - eight invalid graph modes and
+eleven invalid body-ledger modes, all 1001 - with the receipt at
+`docs/ops/evidence/candidate-module-cfg-region-20261010.json`, reading the real
+`internal/sdkstdlib/sources/std/alloc.fy` by byte identity and leaving the SDK ABI
+unchanged; the locked source check passed 253 files and 3215 MIR functions and the locked
+development build passed. The Region code is unchanged since the first four-pass run, and
+this changes the private IR API while the stable CLI, SDK ABI, DB and CI stay unchanged
+with no push; generated C, the whole language, the drop dominance-path proof and the
+whole source admission and pipeline remain pending, and the tests exercise the `.fy`
+compiler graph lowering only, so no Arena checkpoint runs and no C is emitted from or executed for this new CFG.
