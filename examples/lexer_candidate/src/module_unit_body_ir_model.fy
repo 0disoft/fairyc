@@ -37,6 +37,7 @@ pub fn ref u8[] node_cooked(ref Body p,usize index){let n=node_at(p,index);retur
 pub fn usize text_bytes(ref Body p){return bytes::len(ref p.text);}
 pub fn ref u8[] text_view(ref Body p){return bytes::view(ref p.text);}
 pub fn usize name_bytes(ref Program p){return bytes::len(ref p.names);}
+pub fn ref u8[] names_view(ref Program p){return bytes::view(ref p.names);}
 pub fn usize statement_count(ref Body p){return v::len<Statement>(ref p.statements);}
 pub fn Statement statement_at(ref Body p,usize index){return *v::at<Statement>(ref p.statements,index);}
 pub fn ref u8[] assignment_operator(ref Body p,usize index){let s=statement_at(p,index);return bytes::view(ref p.text)[s.operator_start..s.operator_end];}

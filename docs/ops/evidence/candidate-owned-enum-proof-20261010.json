@@ -1,0 +1,149 @@
+{
+  "schema": "fairyc.candidate-owned-enum-proof/v1",
+  "passed": true,
+  "identity": {
+    "nativeCompiler": {
+      "path": ".cache/candidate-tagged/compiler-origin-patterns.exe",
+      "sha256": "d36dae1b99751322e447880aaf4d28321bd6d53bdf776185308c6c4504889bb2"
+    },
+    "sources": [
+      {
+        "path": "examples/lexer_candidate/src/module_unit_body_ir_enums.fy",
+        "sha256": "4aeb6cd9151fad88f1ae8343b25454f81d4079e4ecb184e539e0364e91b59cf8"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_body_ir_verify.fy",
+        "sha256": "18feb08219cc307cc755a2cef55228ffd722ae08b00040e4ddc8008c2c076984"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_body_ir_model.fy",
+        "sha256": "73af564b6dd770c843ab48ee46fa85965a972c6f81493c32bdc91fa001b41903"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_interfaces.fy",
+        "sha256": "a5447bcc5b8b4ce9e96a6546492a23ec75ec025e7de77a540a498e9d6ce83dd9"
+      },
+      {
+        "path": "examples/lexer_candidate/src/records.fy",
+        "sha256": "e2d1d3540285509aded981b476d4b2340857d8c7370364f4b1410bfd6883f6dd"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_shape_contracts.fy",
+        "sha256": "4ab7900ef6afd684016bf12fc72fe07d309c18ba321034b549dad01b45d1515f"
+      },
+      {
+        "path": "examples/lexer_candidate/tests/module_unit_body_ir_enums.fy",
+        "sha256": "cd721462aa272e9b80bf38e77f37137bd5539a3f8aeda1c0c1a0f2b49c222fb6"
+      },
+      {
+        "path": "examples/lexer_candidate/tests/module_unit_body_ir.fy",
+        "sha256": "4985eadc6f3b463e9814ffad323712ed5175a1ec5a0a793fcd01febfcdcfb4ab"
+      },
+      {
+        "path": "examples/lexer_candidate/fairy.lock",
+        "sha256": "6bc13ef6d6796647b345ad0592a8245ebb067ec2f01258505ff2d67f9ab88f8f"
+      }
+    ]
+  },
+  "sourceCheck": {
+    "argv": [
+      "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\compiler-origin-patterns.exe",
+      "check",
+      "--locked"
+    ],
+    "exit": 0,
+    "stdout": "check ok: 2 instance(s), 258 source file(s), 3294 MIR function(s), lock verified\n",
+    "stderr": ""
+  },
+  "native": {
+    "report": {
+      "path": ".cache/candidate-tagged/module-enum-proof/native.json",
+      "sha256": "e51b1f8684d5402caaf4dedfb3b27eed76b637c78e942bb6dd84cdb0d5e3b946"
+    },
+    "count": 3,
+    "passed": 3,
+    "failed": 0,
+    "tests": [
+      {
+        "identity": "tests::module_unit_body_ir::body_ir_revalidates_utf8_cstr_termination_and_literal_types",
+        "outcome": "passed"
+      },
+      {
+        "identity": "tests::module_unit_body_ir_enums::owned_enums_keep_nested_inert_payloads_provider_coordinates_and_tagged_fields",
+        "outcome": "passed"
+      },
+      {
+        "identity": "tests::module_unit_body_ir_enums::owned_enums_reject_forged_ranges_cycles_names_and_constructor_fields",
+        "outcome": "passed"
+      }
+    ]
+  },
+  "previousAttempts": [
+    {
+      "observation": {
+        "path": ".cache/candidate-tagged/module-enum-proof/initial-compile-observation.json",
+        "sha256": "aa7f89427dab0cce664c3bae8a098ce53cb3609383f34b39ae47e926c7180b74"
+      },
+      "exit": 3,
+      "result": "No native tests ran: fixture attempted direct private field mutation; changed to immutable accessors and public owned assemblers"
+    },
+    {
+      "observation": {
+        "path": ".cache/candidate-tagged/module-enum-proof/initial-layout-observation.json",
+        "sha256": "8ba12ff6a02673495096bfba3f56a1c4b57fef1a19b0cb47ada5d8201c04eb3c"
+      },
+      "exit": 5,
+      "result": "1/3 native passed: verifier assumed payload-after-marker ordering; records.fy actually stores payload fields before the owning marker; corrected the verifier and added admitted empty enum coverage"
+    }
+  ],
+  "behavior": {
+    "layout": "Unique canonical layout; module/declaration/source-field coordinates; retained variant source order; contiguous payload-before-marker ranges; unique variant/payload names; no enum cleanup/abilities/reprC metadata",
+    "payload": "Acyclic inert scalars/raw pointers/structs/user enums and recursively inert Option/Result; safe borrows/resources/Vec/Region/void excluded; Option/Result cleanup classification is not confused with ownership",
+    "construction": "Retained bare/aggregate constructor matches canonical enum/variant/field provenance and names; every payload field supplied exactly once at its canonical value type",
+    "emptyEnum": "Baseline compiler experimental check accepts an empty enum declaration; owned IR preserves that admission while constructors still require a declared variant",
+    "privateAccessor": "Read-only names_view exposes retained name bytes for reconstructing owned IR; private mutation remains unavailable",
+    "mutationCount": 10,
+    "mutations": [
+      "shifted payload start",
+      "oversized payload count",
+      "wrong payload marker kind",
+      "recursive by-value payload",
+      "void payload",
+      "duplicate payload name",
+      "wrong constructor owner",
+      "wrong source field provenance",
+      "wrong payload value type",
+      "duplicate canonical layout"
+    ]
+  },
+  "sourceOfTruth": [
+    "docs/adr/0050-restricted-inert-enum-execution.md",
+    "docs/adr/0323-nested-inert-enum-c-transport.md",
+    "docs/adr/0330-acyclic-copy-tagged-dependency-graph.md",
+    "examples/lexer_candidate/src/records.fy"
+  ],
+  "privateAPIExpanded": true,
+  "normativeContractsChanged": false,
+  "stableCLIChanged": false,
+  "sdkABIChanged": false,
+  "GoChanged": false,
+  "dbChanged": false,
+  "ciChanged": false,
+  "hygieneChanged": false,
+  "pushed": false,
+  "pending": [
+    "Enum private C tag/union construction and transport",
+    "Enum/Option/Result switch CFG and payload binding execution",
+    "Owned exhaustive-pattern tables and active-payload proof",
+    "Complete enum-helper analysis-budget/allocation diagnostic propagation",
+    "Source/unsafe authentication and full path/dominance/initialization proofs",
+    "Authenticated SDK, whole dispatcher and stage1/stage2"
+  ],
+  "skipped": {
+    "candidateBuild": "Verification-only unit validated by source check and three compiled native identities; build deferred to next C-execution unit",
+    "Linux": "Windows-focused unit",
+    "release": "Separate release batch",
+    "fullSuite": "Three focused owned-IR identities only",
+    "enumC": "No C emitter or CFG changes in this prerequisite unit"
+  }
+}

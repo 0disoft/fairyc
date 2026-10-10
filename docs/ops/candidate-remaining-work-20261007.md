@@ -2723,3 +2723,16 @@ Receipt: `docs/ops/evidence/candidate-module-literal-c-execution-20261010.json`.
 - Changes: private API and local C verifier expanded; normative contracts, stable CLI, SDK ABI, Go, DB, CI and hygiene unchanged; no push.
 - Deferred: Linux, candidate Release and the full suite. Generated C `/O2` does not establish candidate Release.
 - Remaining: Enums/Region/authenticated SDK and full dispatcher C execution; Raw views from authenticated SDK constructors; Foreign nominal pointer/aggregate ABI layout assertions; Original source/unsafe authentication, path/dominance/initialization proof and stage1/stage2; Resolve/test differential against baseline direct-call address subset.
+
+## Candidate owned enum metadata proof (2026-10-10)
+
+Receipt: `docs/ops/evidence/candidate-owned-enum-proof-20261010.json`. This is the prerequisite metadata proof for enum C transport; enum/switch execution remains pending.
+
+- Layout: Unique canonical layout; module/declaration/source-field coordinates; retained variant source order; contiguous payload-before-marker ranges; unique variant/payload names; no enum cleanup/abilities/reprC metadata.
+- Payload: Acyclic inert scalars/raw pointers/structs/user enums and recursively inert Option/Result; safe borrows/resources/Vec/Region/void excluded; Option/Result cleanup classification is not confused with ownership.
+- Construction: Retained bare/aggregate constructor matches canonical enum/variant/field provenance and names; every payload field supplied exactly once at its canonical value type.
+- Validation: final 3/3 native identities passed (provider/empty/nested inert and copy-tagged shapes, ten owned-IR mutations, existing UTF-8/CStr proof regression); locked check passes 258 sources and 3294 MIR functions.
+- Corrected attempts: private fixture mutation was refused at compilation; payload-before-marker arena order then required a verifier correction. All three final tests reran on unchanged final inputs.
+- Private API: read-only retained-name byte view and canonical enum metadata helpers. No changes to normative contracts, stable CLI, SDK ABI, Go, DB, CI or hygiene; no push.
+- Deferred: candidate build, Release, Linux, full suite and generated enum C execution.
+- Remaining: Enum private C tag/union construction and transport; Enum/Option/Result switch CFG and payload binding execution; Owned exhaustive-pattern tables and active-payload proof; Complete enum-helper analysis-budget/allocation diagnostic propagation; Source/unsafe authentication and full path/dominance/initialization proofs; Authenticated SDK, whole dispatcher and stage1/stage2.
