@@ -1,0 +1,138 @@
+{
+  "schema": "fairyc.candidate-cleanup-operand-identity/v1",
+  "passed": true,
+  "sourceTruth": [
+    "docs/language/0001-values-and-resources.md",
+    "docs/language/0008-effects-and-capabilities-v0.md"
+  ],
+  "identity": {
+    "compilerSHA256": "18c75e6c281cca5199fff0f4064871182ba2f0fda5c552bd44bcf9e0fa88e0a1",
+    "candidateSHA256": "e6d59c6374128180c134a8dc0e47b4d1f36c8f0bf75d86e7dc9398a3dbf78e90",
+    "sources": {
+      "examples/lexer_candidate/src/module_unit_move_model.fy": "caf36b7dc54f7833a7947ae765f38e102621a5f5f491c2a1a9d622d2abfcfdd1",
+      "examples/lexer_candidate/src/module_unit_move_walk.fy": "85444fe20f556265993e26b8737ccac7de4d996b320400894c591c2bcecb44d6",
+      "examples/lexer_candidate/src/module_unit_move_control.fy": "6d6426d3f58573ba8bfa2b98272dfcfa987a18118575dd81b06a42b8d3422b67",
+      "examples/lexer_candidate/src/module_unit_moves.fy": "d110530108077026863d029645a139614d1f5c0c1dca31214a86dc4181935ca3",
+      "examples/lexer_candidate/tests/module_unit_cleanup_operands.fy": "31d4e58cc065f1eb4e1ce58ba2f1a92d16ce117a33a1b49f7824cefe771aa3cd",
+      "examples/lexer_candidate/fairy.lock": "3a01b0d2a71e0b5ec8edfb1e40b8e3bdc123cc53cd985aca06c677b8b2425a2c"
+    }
+  },
+  "operandContract": {
+    "root": "frame + nonzero binding; expression is zero",
+    "temporary": "frame + nonzero source expression ID; binding is zero",
+    "exclusivityCheckedBeforePublication": true,
+    "genericClones": "Same source expression IDs remain distinct through different concrete frame IDs"
+  },
+  "native": {
+    "schemaVersion": "fairyc.test-report/v4",
+    "engine": "native",
+    "target": "x86_64-windows-msvc",
+    "profile": "development",
+    "tests": [
+      {
+        "identity": "tests::module_unit_cleanup_events::cleanup_requests_follow_live_owners_and_exit_paths",
+        "outcome": "passed",
+        "trapCategory": null,
+        "stdoutBase64": "Y2FzZSAwIDEKY2xlYW51cCAxIDE0MCAxNjEgMSAxCmNhc2UgMSAwCmNhc2UgMiAxCmNsZWFudXAgMSAxNDcgMTQ5IDEgMQpjYXNlIDMgMApjYXNlIDQgMQpjbGVhbnVwIDEgMTQ5IDE3MSAxIDEKY2FzZSA1IDEKY2xlYW51cCAyIDE2MCAxNjcgMSAxCmNhc2UgNiAxCmNsZWFudXAgMyAxNzUgMTgxIDIgMQpjYXNlIDcgMQpjbGVhbnVwIDQgMTc1IDE4NCAyIDEKY2FzZSA4IDEKY2xlYW51cCAxIDE0NiAxODMgMiAxCmNhc2UgOSAyCmNsZWFudXAgNSAxNjAgMTY1IDEgMQpjbGVhbnVwIDEgMTQwIDE3NCAxIDEKY2FzZSAxMCAxCmNsZWFudXAgMiAxODggMjAxIDEgMQpjYXNlIDExIDIKY2xlYW51cCA2IDE4MSAxOTIgMSAxCmNsZWFudXAgMiAxOTMgMjA3IDEgMQpjYXNlIDEyIDEKY2xlYW51cCA3IDE4NCAxOTQgMCA1CmNhc2UgMTMgMQpjbGVhbnVwIDggMTQ5IDE1NSAwIDEKY2FzZSAxNCAxCmNsZWFudXAgMSAxNDAgMTc1IDEgMQpjYXNlIDE1IDEKY2xlYW51cCA5IDE4NyAyMTMgMiAxCmNhc2UgMTYgMQpjbGVhbnVwIDIgMTkwIDIwNCAyIDEKY2FzZSAxNyAxCmNsZWFudXAgMyAyMTcgMjIzIDMgMQo=",
+        "stderrBase64": ""
+      },
+      {
+        "identity": "tests::module_unit_partial_cleanup::partial_fields_and_arguments_keep_cleanup_obligations",
+        "outcome": "passed",
+        "trapCategory": null,
+        "stdoutBase64": "Y2FzZSAwIDMgMQpkaWFnbm9zdGljIDcxMDIgMCAyMzAgMjM5IDEKcmVsYXRlZCAxMiAwIDEyIDI5CmNhc2UgMSAwIDAKY2FzZSAyIDMgMQpkaWFnbm9zdGljIDcxMDIgMCAyNDggMjU3IDEKcmVsYXRlZCAxMiAwIDEyIDI5CmNhc2UgMyAzIDEKZGlhZ25vc3RpYyA3MTAyIDAgMjc5IDI4OCAxCnJlbGF0ZWQgMTIgMCAxMiAyOQpjYXNlIDQgMCAwCmNhc2UgNSAwIDAKY2FzZSA2IDAgMApjYXNlIDcgMCAwCmNhc2UgOCAzIDEKZGlhZ25vc3RpYyA3MTAyIDAgMjMxIDI0NiAxCnJlbGF0ZWQgMTIgMCAxMiAyOQpjYXNlIDkgMyAxCmRpYWdub3N0aWMgNzEwMiAwIDIzMiAyNDcgMQpyZWxhdGVkIDEyIDAgMTIgMjkKY2FzZSAxMCAzIDEKZGlhZ25vc3RpYyA3MTAyIDAgMjQ3IDI1MyAxCnJlbGF0ZWQgMTIgMCAxMiAyOQpjYXNlIDExIDMgMQpkaWFnbm9zdGljIDcxMDIgMCAyNDcgMjU2IDEKcmVsYXRlZCAxMiAwIDEyIDI5CmNhc2UgMTIgMCAwCmNhc2UgMTMgMyAxCmRpYWdub3N0aWMgNzEwMiAwIDMxOCAzMjcgMQpyZWxhdGVkIDEyIDAgMTIgMjkKY2FzZSAxNCAzIDIKZGlhZ25vc3RpYyA3MTAyIDAgMjQ5IDI1OCAxCnJlbGF0ZWQgMTIgMCAxMiAyOQpkaWFnbm9zdGljIDcxMDIgMCAyMTcgMjYxIDEKcmVsYXRlZCAxMiAwIDEyIDI5CmNhc2UgMTUgMyAxCmRpYWdub3N0aWMgNzEwMiAwIDI3NiAyODUgMQpyZWxhdGVkIDEyIDAgMTIgMjkKY2FzZSAxNiAzIDEKZGlhZ25vc3RpYyA3MTAyIDAgMjkxIDMwMCAxCnJlbGF0ZWQgMTIgMCAxMiAyOQpjYXNlIDE3IDMgMQpkaWFnbm9zdGljIDcxMDIgMCAzMjkgMzM4IDEKcmVsYXRlZCAxMiAwIDEyIDI5CmNhc2UgMTggMyAxCmRpYWdub3N0aWMgNzEwMiAwIDI0MiAyNTEgMQpyZWxhdGVkIDEyIDAgMTIgMjkKY2FzZSAxOSAzIDEKZGlhZ25vc3RpYyAxMTA4IDAgMzY2IDM3NSAxCnJlbGF0ZWQgMTEgMCAxNzUgMTkyCmNhc2UgMjAgMyAxCmRpYWdub3N0aWMgNzEwMiAwIDI2MiAyNjQgMQpyZWxhdGVkIDEyIDAgMTIgMjkKY2FzZSAyMSAwIDAKY2FzZSAyMiAwIDAKY2FzZSAyMyAzIDEKZGlhZ25vc3RpYyA3MTAyIDAgMjMzIDI0MiAxCnJlbGF0ZWQgMTIgMCAxMiAyOQo=",
+        "stderrBase64": ""
+      },
+      {
+        "identity": "tests::module_unit_cleanup_operands::generic_clones_qualify_same_expression_ids_by_frame",
+        "outcome": "passed",
+        "trapCategory": null,
+        "stdoutBase64": "",
+        "stderrBase64": ""
+      },
+      {
+        "identity": "tests::module_unit_cleanup_operands::repeated_partial_operands_keep_distinct_expression_identity",
+        "outcome": "passed",
+        "trapCategory": null,
+        "stdoutBase64": "",
+        "stderrBase64": ""
+      },
+      {
+        "identity": "tests::module_unit_cleanup_operands::roots_and_consumed_temporary_operands_are_unambiguous",
+        "outcome": "passed",
+        "trapCategory": null,
+        "stdoutBase64": "",
+        "stderrBase64": ""
+      }
+    ],
+    "count": 5,
+    "passed": 5,
+    "failed": 0,
+    "status": "ok",
+    "lock": "verified"
+  },
+  "nativeReuse": {
+    "reusedTests": 2,
+    "reason": "The initial current-source native run passed the cleanup-request and partial-owner tests. Only the new operand test file changed when a malformed untyped .ok(make()).is_ok fixture was replaced with an explicitly typed Result factory. All three corrected operand tests passed."
+  },
+  "initialAttempt": {
+    "count": 5,
+    "passed": 4,
+    "failed": 1,
+    "failedTests": [
+      {
+        "identity": "tests::module_unit_cleanup_operands::roots_and_consumed_temporary_operands_are_unambiguous",
+        "outcome": "failed",
+        "trapCategory": "assertion-failed"
+      }
+    ]
+  },
+  "cliRegression": [
+    {
+      "suite": "cleanup policy",
+      "passed": true,
+      "count": 58,
+      "matched": 58,
+      "candidateSHA256": "e6d59c6374128180c134a8dc0e47b4d1f36c8f0bf75d86e7dc9398a3dbf78e90"
+    },
+    {
+      "suite": "recursive effects",
+      "passed": true,
+      "count": 23,
+      "matched": 23,
+      "candidateSHA256": "e6d59c6374128180c134a8dc0e47b4d1f36c8f0bf75d86e7dc9398a3dbf78e90"
+    },
+    {
+      "suite": "partial owners",
+      "passed": true,
+      "count": 24,
+      "matched": 24,
+      "candidateSHA256": "e6d59c6374128180c134a8dc0e47b4d1f36c8f0bf75d86e7dc9398a3dbf78e90"
+    }
+  ],
+  "sourceCheck": {
+    "exit": 0,
+    "stdout": "check ok: 2 instance(s), 241 source file(s), 3012 MIR function(s), lock unchanged"
+  },
+  "lockedDevelopmentBuild": {
+    "exit": 0,
+    "stdout": "built: build/lexer-candidate.exe (x86_64-windows-msvc, development, lock verified)"
+  },
+  "pending": [
+    "Source-independent cleanup MIR publication and C handoff.",
+    "Executable split-unit functions, control flow, borrow/unsafe provenance and full dispatcher/stage1/stage2."
+  ],
+  "skipped": {
+    "GoPackages": "No Go source changes; earlier valid semantic and selected compiler checks reused.",
+    "release": "Deferred consolidated batch",
+    "Linux": "Deferred consolidated batch",
+    "fullCompiler": "Deferred consolidated batch"
+  },
+  "stableCLIChanged": false,
+  "sdkABIChanged": false,
+  "dbChanged": false,
+  "ciRunnerChanged": false,
+  "privateAPIChanged": true,
+  "sourceTruthDocumentsChanged": [],
+  "pushed": false
+}

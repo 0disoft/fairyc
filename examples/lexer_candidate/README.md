@@ -234,7 +234,10 @@ an outer resource whose field cleanup declares an effect the caller does not hol
 rejected with E7102 anchored at that field's `effect-declaration`. A later field or call
 initializer's abrupt exit now charges cleanup effects for the owners already evaluated
 before it. A completed construction or invocation releases its pending frame;
-`break`/`continue` charge only owners captured inside the target loop. Split-unit cleanup event MIR, C and runtime
-elaboration, remaining borrow and access edges, unsafe provenance, and the full
+`break`/`continue` charge only owners captured inside the target loop. Each cleanup
+request keeps a source-qualified operand identity: an owned lexical root is identified
+by its binding, a temporary by its original source expression ID, and generic clones
+stay distinct through their evaluation frames. Split-unit cleanup event MIR, C and
+runtime elaboration, remaining borrow and access edges, unsafe provenance, and the full
 dispatcher and stage1/stage2 remain pending; Release, Linux and the full compiler suite
 are deferred.

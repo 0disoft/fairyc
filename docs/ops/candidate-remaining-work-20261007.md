@@ -2480,3 +2480,34 @@ provenance, and the full dispatcher and stage1/stage2 self-hosting remain pendin
 is not full compiler semantics. Release, Linux and the full compiler suite stay deferred.
 No new public or private API was added; the internal move context and Fact requests keep
 the existing private API unchanged. No push.
+
+## Candidate cleanup operand identity (2026-10-10)
+
+Cleanup requests now carry a source-qualified operand identity. An operand is an
+expression qualified by the evaluation frame it belongs to: an owned lexical root keeps
+its nonzero binding with a zero expression, and a temporary keeps its nonzero original
+source expression ID with a zero binding. The two identifiers are mutually exclusive and
+a request that sets both is rejected before publication. The pending context stack
+stores expression IDs, and the consumed `is_ok` and discarded-temporary paths retain the
+operand's original source index. Generic clones keep the same source expression IDs
+distinct through different concrete frame IDs.
+
+The new `tests/module_unit_cleanup_operands.fy` native test passes 3/3: distinct repeated
+partial operands, unambiguous roots and a consumed temporary, and generic clones
+qualified by different frames. The earlier cleanup-request and partial-owner tests are
+valid reuse on unchanged core code, so the five-test native run holds 18 cleanup-request,
+24 partial-owner and 3 operand tests. The initial run failed 1/5 because an untyped
+`.ok(make()).is_ok` fixture was malformed; replacing it with an explicitly typed boxed
+Result factory made all three operand tests pass.
+
+The 105 existing CLI fixtures (58 cleanup policy, 23 recursive effects, 24 partial
+owners) were rerun on the current candidate and match the corrected Go primary and
+related spans exactly. The current-source check passed 241 files and 3012 MIR functions
+with the lock unchanged, and the locked development build passed. No Go source changed
+this unit, so the earlier valid semantic and selected compiler checks are reused.
+Evidence: `docs/ops/evidence/candidate-cleanup-operand-identity-20261010.json`.
+
+Source-independent cleanup MIR publication and the C handoff remain pending, as do
+executable split-unit functions and control flow; this is not full compiler semantics.
+Release, Linux and the full compiler suite stay deferred. The stable CLI, SDK ABI, DB and
+CI runner are unchanged; the private candidate Fact API was expanded. No push.
