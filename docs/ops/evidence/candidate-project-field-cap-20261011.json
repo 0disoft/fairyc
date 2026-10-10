@@ -1,0 +1,124 @@
+{
+  "schema": "fairyc.candidate-project-field-cap/v1",
+  "passed": true,
+  "parentCommit": "8870279e74a61087d4bf02e19c30a64c7e25dba4",
+  "implementation": [
+    {
+      "path": "examples/lexer_candidate/src/module_project_metadata.fy",
+      "bytes": 8958,
+      "sha256": "5c5cbca75bd471cc382908dfcaff8f5eb4685d0cd5ca7695fd214240c0a49f5f"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_project_cleanup.fy",
+      "bytes": 5699,
+      "sha256": "85e23c028d79c3d9fd94cd007c97435d6c2e2256e87113d5bc76c403cc84956d"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_unit_cleanup_mir_verify.fy",
+      "bytes": 7022,
+      "sha256": "6c7dad2c433555ce644cdb3bad5519ee34c6c1ebd3a23507128f23371658eda5"
+    }
+  ],
+  "test": {
+    "path": "examples/lexer_candidate/tests/module_project_fields_capacity.fy",
+    "bytes": 3010,
+    "sha256": "304aaa36f97a70b966764da2f9e35f97c1b2eefe4c2b12863f622aa346cca2b8"
+  },
+  "contract": {
+    "path": "docs/architecture/candidate-compilation-units-v0.md",
+    "bytes": 133917,
+    "sha256": "2c2dd8a407129e11d212377dfa2fe5c34b83faf8a38ccf0d1bcc5789f4920f15"
+  },
+  "receiptTool": {
+    "path": "tools/verify-candidate-project-field-cap.py",
+    "bytes": 5901,
+    "sha256": "9beba4a79174b3f56040689be3f8a3b7311922edf3ae82fefba5ffbfda74451c"
+  },
+  "initialFailure": {
+    "report": {
+      "path": ".cache/candidate-tagged/sdk-c-execution/run-main-link-next-diagnostic.json",
+      "bytes": 153,
+      "sha256": "e5995bb12e5a4349246edbec8e539d4909e2d71114a25e68b23cd0b21290a1a7"
+    },
+    "temporaryCode": 409102,
+    "meaning": "Metadata layout/field-cap guard 9102 plus linker metadata-stage tag 400000"
+  },
+  "policy": {
+    "projectMetadataAndCleanupFields": 2048,
+    "sourceAndJoinedASTFields": 1024,
+    "layoutCap": 1024,
+    "callableCap": 1024,
+    "work": 1048576
+  },
+  "native": {
+    "initial": {
+      "path": ".cache/candidate-tagged/sdk-c-execution/native-project-field-cap.json",
+      "bytes": 6347,
+      "sha256": "62a1cc0f32578c21e7b66e504dd715447aad7c535eaac81218d2a0ed10503f57"
+    },
+    "finalCapacity": {
+      "path": ".cache/candidate-tagged/sdk-c-execution/native-project-field-cap-final.json",
+      "bytes": 443,
+      "sha256": "097d7bdd5a1a4b00841ed0703e7b715d014b731e885cbf98a957aea8eb742ed3"
+    },
+    "passedCases": 2,
+    "fields": 1105,
+    "cleanupFields": 1105,
+    "fixtureFinalization": "Generated resource visibility was made explicit; the finalized capacity fixture was selectively rerun with unchanged source bytes. Unchanged cleanup case is reused.",
+    "coverage": [
+      "Two source owners keep their separate field arenas below 1024",
+      "1105 aggregate layout and cleanup fields link and owned IR independently revalidates"
+    ]
+  },
+  "reusedCExecution": {
+    "report": {
+      "path": ".cache/candidate-tagged/sdk-c-execution/project-link-c/execution.json",
+      "bytes": 11568,
+      "sha256": "8e67566e0b2f2678b6f6b8b8986f4460f11dade4f3ba1d53dce45a95e14d97c6"
+    },
+    "sourceSHA256": "41269b76713838e36b21729b18e504d2d92e4de5f955f47d2c78cbe08fc3e1a1",
+    "runs": 2,
+    "justification": "Fresh cleanup C is byte-identical to previously executed low/optimized C"
+  },
+  "check": {
+    "path": ".cache/candidate-tagged/sdk-c-execution/check-project-field-cap.json",
+    "bytes": 80,
+    "sha256": "94b232fbe06f363150d25a574988be63b5e174850ad4b1c1c051666619cdd663"
+  },
+  "fullOriginalLinkPassed": false,
+  "originalAttempt": {
+    "report": {
+      "path": ".cache/candidate-tagged/sdk-c-execution/run-main-link-field-cap-probe.json",
+      "bytes": 151,
+      "sha256": "aa8136a07247f78f4f47a5e67dff9390edab26f78e7bd8625cae536ca8b3923e"
+    },
+    "stdout": "compiled units 51 retries 28\nlink code 1002 module 113 at 0..0\n",
+    "seconds": 60.39073120000103,
+    "wrapper": {
+      "path": ".cache/candidate-tagged/sdk-c-execution/main-link-field-cap-probe/src/main.fy",
+      "bytes": 3287,
+      "sha256": "db5fb792f52cc9193f7b88724245b698ea11b0a9d4d8c4839d37cad85e6d7607"
+    },
+    "image": {
+      "path": ".cache/candidate-tagged/sdk-c-execution/main-link-field-cap-probe/build/main-link-field-cap-probe.exe",
+      "bytes": 1737216,
+      "sha256": "ffdaa020bfcf69ee414835f6bb52d1a959b386a9c51b17a5d5b87c662172bba8"
+    },
+    "originalCompilationPassed": true,
+    "units": 51,
+    "retries": 28,
+    "nextModule": "examples/lexer_candidate/src/module_unit_drops.fy",
+    "interpretation": "The metadata guard at module 98 is passed; a later capacity failure still needs phase attribution before further changes"
+  },
+  "deferred": [
+    "Remaining original link capacities",
+    "Original dispatcher C execution",
+    "Default compilation timeout/performance",
+    "Native driver",
+    "Linux",
+    "Standalone compiler profiles",
+    "Full suite",
+    "Stage1/Stage2"
+  ],
+  "pushed": false
+}
