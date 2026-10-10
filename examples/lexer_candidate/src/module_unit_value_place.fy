@@ -18,7 +18,7 @@ pub fn bool opaque(types::Type t){return t.kind==12 && t.first==0 && pointers::v
 // void erasure. A safe view yields its data address, never its carrier address.
 pub fn bool raw_cast(types::Type source,types::Type target,types::Type referent){
     if(target.kind!=12){return false;}let exclusive=raw_mutable(target);
-    if(source.kind==7 || source.kind==8){if(exclusive && source.kind!=8){return false;}if(opaque(target)){return true;}return if(target.first!=0){source.first==target.first && referent.kind==2}else{pointers::valid(target.scalar) && referent.kind==1 && referent.scalar==pointers::inner(target.scalar)};}
+    if(source.kind==7 || source.kind==8){if(exclusive && source.kind!=8){return false;}if(opaque(target)){return true;}return if(target.first!=0){source.first==target.first && referent.kind==2}else{pointers::valid(target.scalar) && (referent.kind==1 && referent.scalar==pointers::inner(target.scalar) || referent.kind==12 && referent.first==0 && referent.scalar==1048591 && target.scalar==1048601)};}
     if(!views::view(source) && source.kind!=9 && source.kind!=14){return false;}if(exclusive && !views::mutable(source)){return false;}
     return opaque(target) || target.first==0 && pointers::valid(target.scalar) && pointers::inner(target.scalar)==3 && (source.kind==9 || source.kind==10 || source.kind==11 || source.kind==14);
 }

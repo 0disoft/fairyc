@@ -8,6 +8,7 @@ import c_text as w;
 import array_types as arrays;
 import scalar_views as views;
 import module_types as types;
+import module_unit_value_place as places;
 import std::bytes as bytes;
 import std::vec as v;
 
@@ -35,6 +36,7 @@ fn bool slice(ref ir::Program p,ref ir::Body b,usize id,ref mut bytes::Buffer ou
 }
 pub fn bool type(ref ir::Program p,usize id,ref mut bytes::Buffer out,ref mut w::State s){
     if(id==0 || id>clean::type_count(ir::cleanup_ir(p))){s.code=1001;return false;}let t=clean::type_at(ir::cleanup_ir(p),id);
+    if(t.kind==12){return if(t.first==0){w::type(out,s,t.scalar)}else{type(p,t.first,out,s) && w::text(out,s,if(places::raw_mutable(t)){b" *"}else{b" const *"})};}
     if(t.kind==1 && (t.scalar<=7 || t.scalar==132)){return w::type(out,s,t.scalar);}if(t.kind==7 || t.kind==8){return type(p,t.first,out,s) && w::text(out,s,if(t.kind==7){b" const *"}else{b" *"});}if(t.kind!=2 && t.kind!=3 && t.kind!=5 && t.kind!=6 && t.kind!=16 && !view(t)){s.code=1004;return false;}
     return w::text(out,s,b"struct fy_unit_t_") && w::number(out,s,id);
 }
@@ -46,6 +48,7 @@ fn bool define(ref ir::Program p,usize id,ref mut v::Vec<u8> marks,ref mut bytes
         // ADR 0286: keep c::int nominally distinct and prove the target ABI
         // before any explicit i32 crossing. Other C scalars stay closed.
         if(t.scalar==132 && !w::text(out,s,b"_Static_assert(sizeof(int)==4 && _Alignof(int)==4 && INT_MIN==INT32_MIN && INT_MAX==INT32_MAX,\"requires signed-32 c.int ABI\");\n")){return false;}}
+    else if(t.kind==12){if(t.first!=0 && *v::at<u8>(marks,t.first-1)!=1 && !define(p,t.first,marks,out,s,work,depth+1)){return false;}}
     else if(t.kind==7 || t.kind==8){if(*v::at<u8>(marks,t.first-1)!=1 && !define(p,t.first,marks,out,s,work,depth+1)){return false;}}
     else if(view(t)){if((t.kind==17 || t.kind==18) && !define(p,t.first,marks,out,s,work,depth+1)){return false;}if(!type(p,id,out,s) || !w::text(out,s,b"{") || !item_type(p,t,out,s) || !w::text(out,s,if(mutable(t)){b" *fy_data;uintptr_t fy_length;};\n"}else{b" const *fy_data;uintptr_t fy_length;};\n"})){return false;}}
     else if(t.kind==16){let element=clean::type_at(ir::cleanup_ir(p),t.first);if(t.second==0 || t.second>4096 || !(element.kind==1 && element.scalar>=1 && element.scalar<=6 || element.kind==2) || clean::glue_at(ir::cleanup_ir(p),t.first).kind!=0){s.code=1004;return false;}if(!define(p,t.first,marks,out,s,work,depth+1) || !type(p,id,out,s) || !w::text(out,s,b"{") || !type(p,t.first,out,s) || !w::text(out,s,b" fy_items[") || !w::number(out,s,t.second) || !w::text(out,s,b"];};\n")){return false;}}
@@ -82,7 +85,9 @@ pub fn bool place(ref ir::Program p,ref ir::Body b,usize id,ref mut bytes::Buffe
 }
 pub fn bool expression(ref ir::Program p,ref ir::Body b,usize id,ref mut bytes::Buffer out,ref mut w::State s,ref mut usize work){
     let e=ir::node_at(b,id-1).value;let t=clean::type_at(ir::cleanup_ir(p),e.type);let left=lookup::node(b,e.left);let right=lookup::node(b,e.right);
-    if(e.kind==2 && t.kind!=1 && t.kind!=7 && t.kind!=8){if(e.binding==0 || ir::local_at(b,e.binding).type!=e.type){s.code=1001;return false;}return w::text(out,s,b"fy_unit_copy(&") && scalar::value(out,s,id) && w::text(out,s,b",&(") && place(p,b,id,out,s,0) && w::text(out,s,b"),sizeof ") && scalar::value(out,s,id) && w::text(out,s,b");\n");}
+    if(e.kind==1 && t.kind==12){if(!bytes::equal(ir::node_text(b,id-1),b"null")){s.code=1001;return false;}return scalar::value(out,s,id) && w::text(out,s,b"=(") && type(p,e.type,out,s) && w::text(out,s,b")0;\n");}
+    if(e.kind==23 && t.kind==12){if(left==0 || e.target!=e.type || !e.builtin.unsafe_context || !bytes::equal(ir::node_text(b,id-1),b"as")){s.code=1001;return false;}let source=ir::node_at(b,left-1).value;let st=clean::type_at(ir::cleanup_ir(p),source.type);let referent=clean::type_at(ir::cleanup_ir(p),if(st.kind==7 || st.kind==8){st.first}else{source.type});if(!places::raw_cast(st,t,referent)){s.code=1001;return false;}if(st.kind!=7 && st.kind!=8 && !view(st)){s.code=1004;return false;}return scalar::value(out,s,id) && w::text(out,s,b"=(") && type(p,e.type,out,s) && w::text(out,s,b")") && scalar::value(out,s,left) && (st.kind==7 || st.kind==8 || w::text(out,s,b".fy_data")) && w::text(out,s,b";\n");}
+    if(e.kind==2 && t.kind!=1 && t.kind!=7 && t.kind!=8 && t.kind!=12){if(e.binding==0 || ir::local_at(b,e.binding).type!=e.type){s.code=1001;return false;}return w::text(out,s,b"fy_unit_copy(&") && scalar::value(out,s,id) && w::text(out,s,b",&(") && place(p,b,id,out,s,0) && w::text(out,s,b"),sizeof ") && scalar::value(out,s,id) && w::text(out,s,b");\n");}
     if(e.kind==26){return slice(p,b,id,out,s);}
     if(e.kind==9){if(left==0 || right==0){s.code=1001;return false;}let rt=clean::type_at(ir::cleanup_ir(p),ir::node_at(b,left-1).value.type);if(rt.kind!=16 && !view(rt)){s.code=1004;return false;}if(!(if(rt.kind==16){rt.first==e.type}else{item(p,rt,e.type)}) || scalar::scalar(p,ir::node_at(b,right-1).value.type)!=5){s.code=1001;return false;}if(!w::text(out,s,b"if(") || !scalar::value(out,s,right) || !w::text(out,s,b">=") || !length(rt,left,out,s) || !w::text(out,s,b")fy_runtime_trap(6);\n")){return false;}}
     if(!scalar::value(out,s,id) || !w::text(out,s,b"=")){return false;}

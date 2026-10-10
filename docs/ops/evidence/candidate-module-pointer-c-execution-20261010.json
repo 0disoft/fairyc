@@ -1,0 +1,399 @@
+{
+  "schema": "fairyc.candidate-module-pointer-c-execution/v1",
+  "passed": true,
+  "identity": {
+    "nativeCompiler": {
+      "path": ".cache/candidate-tagged/compiler-origin-patterns.exe",
+      "sha256": "d36dae1b99751322e447880aaf4d28321bd6d53bdf776185308c6c4504889bb2"
+    },
+    "buildCompiler": {
+      "path": ".cache/candidate-tagged/compiler-build-240s.exe",
+      "sha256": "746fe10b022ed88cfbc0ae8ea13e3f867b842f3317ef5a2a4caa36d064a248dd"
+    },
+    "candidate": {
+      "path": "examples/lexer_candidate/build/lexer-candidate.exe",
+      "sha256": "c71897bb404003d3c381764964a56ac38604c756e735b368d2be7376fe35dcbb"
+    },
+    "sources": [
+      {
+        "path": "examples/lexer_candidate/src/module_unit_body_ir_verify.fy",
+        "sha256": "e3109f354f14d7932fbb096e22dfb7153fa0ae9b8f16c48fa13564fd8c66babc"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_body_ir_model.fy",
+        "sha256": "9b9a5f4655e595cbeb0cdb19e4833c6280f26d93c04aa39ba8cb4cfe4056ec68"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_c_aggregate.fy",
+        "sha256": "1100db90cb14fd70bb1f2dd603e8c45dc05d99e303e0490bd29941ede5eff32a"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_c_emit.fy",
+        "sha256": "839b78d000bd1911c876b42c8e5e59cf35d75c5d70d155f5cb7754775b538421"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_c_scalar.fy",
+        "sha256": "1b0ea06ee2ea41fc6b8818227c6f5a624c533642fd85529a5382e6ea7671af60"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_value_place.fy",
+        "sha256": "27cdac56a0b365498f3af79987ade1a5fe063bfc92ee4cb7907664294b707189"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_value_scalar.fy",
+        "sha256": "e60edcea8a6fbfb9c38b264720deb8a78058ebb21d6fe84745ac2639054a22cf"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_value_collect.fy",
+        "sha256": "779abfd5227086cca083c70884384febc1eb02dabe06c1249c6a10c1283c838d"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_name_model.fy",
+        "sha256": "67b6a9fd5dbac5577fe47dfa330c5c3ee484c7804d79157950ed7bdfbe813187"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_name_walk.fy",
+        "sha256": "7a496e3f6e68f28c22192dc85f0d8447df5048061b31feaaf9025f1319b80f90"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_value_view.fy",
+        "sha256": "c19b8710ddf31ec537d51f3d78b5463c33e2bb0e5941f0b9b317c400045f1621"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_types.fy",
+        "sha256": "744e0b47886070b9dd163ad53f69fed416d361b7b54703cf2f0e29e8dcde5ce0"
+      },
+      {
+        "path": "examples/lexer_candidate/src/pointer_types.fy",
+        "sha256": "7cca6293336feedbf785912759ee6c50a17010ad9d966acb81877ad32cd55297"
+      },
+      {
+        "path": "examples/lexer_candidate/src/pointer_identity.fy",
+        "sha256": "31458fda72821f98d8383339f8b272f3aa1c78385fb23504cbe9f1aaa021ae3d"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_cleanup_mir_types.fy",
+        "sha256": "3fadfad6f6b50a9139e895a648df6e3ff507ffd5f2921e6915e8fa8aed54be4d"
+      },
+      {
+        "path": "examples/lexer_candidate/src/ffi_symbols.fy",
+        "sha256": "bf90ce5c6b76ad6d60fd499c5c168079520edbf5720ea757e705b99489b6cd29"
+      },
+      {
+        "path": "examples/lexer_candidate/tests/module_unit_c_pointers.fy",
+        "sha256": "c930210a9353e0977025acf4904dc748ff02f3823c748f7e7f5bfb0c3395a454"
+      },
+      {
+        "path": "examples/lexer_candidate/tests/module_unit_casts.fy",
+        "sha256": "6de78e10b3777fed8a98a53070df2b4fbd1a573a58bbe687b350077cc072d9c2"
+      },
+      {
+        "path": "examples/lexer_candidate/tests/module_unit_c_casts.fy",
+        "sha256": "13c85266451ca86d2f783e87688f9ba364b719d287431a9ec68b2efd46c3875a"
+      },
+      {
+        "path": "examples/lexer_candidate/tests/module_unit_c_views.fy",
+        "sha256": "a57af8e7dfb288b90ffa3bc916592a4a69aeaa4d75b54bf94362c72d6928dcae"
+      },
+      {
+        "path": "examples/lexer_candidate/fairy.lock",
+        "sha256": "bb36093f8ee9f7847a3d060ff6bdfd8909674a202c066af34d90c30f09ab55d0"
+      },
+      {
+        "path": "tools/verify-candidate-module-c.py",
+        "sha256": "b6672ae3b2fee2c81d4acceb3cafebba4c16738c59e10a4ac6f9e8e25290fb00"
+      }
+    ],
+    "inputsBefore": {
+      "path": ".cache/candidate-tagged/module-c-pointer-unit/inputs-before.json",
+      "sha256": "1e71849143d112ca627f3d48ec522d0b2cc23f2a2123cf1a9f1ea50e1177363c"
+    },
+    "unchangedProductionAndVerifierInputs": 252
+  },
+  "native": {
+    "count": 8,
+    "passed": 8,
+    "failed": 0,
+    "newPointerPrograms": 4,
+    "pointerGuard": 1,
+    "outputSlotTypingCase": 1,
+    "regressionPrograms": 2,
+    "profile": "development",
+    "target": "x86_64-windows-msvc",
+    "reports": [
+      {
+        "path": ".cache/candidate-tagged/module-c-pointer-unit/native.json",
+        "sha256": "36abab480f2e9b47fb992fcac068026b9ca29c0cea49dfe50eb34b6af69f3149"
+      },
+      {
+        "path": ".cache/candidate-tagged/module-c-pointer-unit/native-correction.json",
+        "sha256": "2a651c4be0e63607137cd9f4fa6fc175da569498e5b7ffa7a1612c6441bc58a1"
+      }
+    ],
+    "initialCount": 8,
+    "initialPassed": 7,
+    "initialFailed": 1,
+    "rerunCount": 1,
+    "latestOutcomes": [
+      {
+        "identity": "tests::module_unit_c_casts::cast_c_roundtrips_signed32_through_separate_c_functions",
+        "outcome": "passed",
+        "emittedBytes": 6323,
+        "stdoutSHA256": "cf7ca922be743bd2d5ea7ad48798ac410fe5db08de1f7adcc24edfe37601a696"
+      },
+      {
+        "identity": "tests::module_unit_c_pointers::pointer_c_forwards_mutable_and_shared_scalar_storage",
+        "outcome": "passed",
+        "emittedBytes": 4595,
+        "stdoutSHA256": "f10534f4265d816f508cd95d2da5627a59a05da03260678f1a19bfd8dccefd43"
+      },
+      {
+        "identity": "tests::module_unit_c_pointers::pointer_c_preserves_nominal_identity_across_internal_calls",
+        "outcome": "passed",
+        "emittedBytes": 6563,
+        "stdoutSHA256": "c237356cbcfa1a48b3b4f6da23e22bb0e11389e801bcb2a00516068cab4efe2c"
+      },
+      {
+        "identity": "tests::module_unit_c_pointers::pointer_c_rejects_unverified_nominal_abi_and_forged_unsafe_casts",
+        "outcome": "passed",
+        "emittedBytes": 0,
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "identity": "tests::module_unit_c_pointers::pointer_c_transports_null_foreign_results_and_void_output_slots",
+        "outcome": "passed",
+        "emittedBytes": 5779,
+        "stdoutSHA256": "d85cc920dc7bd4a949c622ccb7e9e8b3a9dd3cb285f0d9f16c784971f36138f3"
+      },
+      {
+        "identity": "tests::module_unit_c_pointers::pointer_c_uses_owner_and_view_data_for_opaque_crossings",
+        "outcome": "passed",
+        "emittedBytes": 8583,
+        "stdoutSHA256": "1f81998cafbd4202141afda38773c275ebe1a347e941ef765547ab4d1668cdb3"
+      },
+      {
+        "identity": "tests::module_unit_c_views::view_c_mutates_owner_and_shares_call_arguments",
+        "outcome": "passed",
+        "emittedBytes": 10653,
+        "stdoutSHA256": "5b29a4e13a1f156a2dfdbced44c6c2b7dc3e3c14e40d1b669fdacbb8d828436c"
+      },
+      {
+        "identity": "tests::module_unit_casts::pointer_casts_preserve_the_single_opaque_void_output_slot",
+        "outcome": "passed",
+        "emittedBytes": 0,
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    ],
+    "limitation": "Latest outcome for each identity passes; seven unchanged cases reuse the initial report after exact helper/test-byte reconstruction and production input hashes"
+  },
+  "generatedC": {
+    "count": 12,
+    "passed": 12,
+    "newPointerExecutions": 8,
+    "regressionExecutions": 4,
+    "profiles": [
+      "/Od",
+      "/O2"
+    ],
+    "compiler": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+    "report": {
+      "path": ".cache/candidate-tagged/module-c-pointer-unit/verified-c/execution.json",
+      "sha256": "f119a5125bc4368db40f630cfbea63e555810189a71da5a0444132c4fc8b7f20"
+    },
+    "shim": {
+      "path": ".cache/candidate-tagged/module-c-pointer-unit/verified-c/trap.c",
+      "sha256": "19b79d7b766afd10f6cd4adeeb168ebeeec0fc146aac4625447fc91b646d04fb"
+    },
+    "observations": [
+      {
+        "name": "pointer_c_transports_null_foreign_results_and_void_output_slots",
+        "profile": "low",
+        "sourceSHA256": "d85cc920dc7bd4a949c622ccb7e9e8b3a9dd3cb285f0d9f16c784971f36138f3",
+        "buildExit": 0,
+        "expectedExit": 0,
+        "actualExit": 0,
+        "expectedStdout": "42,77,",
+        "actualStdout": "42,77,"
+      },
+      {
+        "name": "pointer_c_transports_null_foreign_results_and_void_output_slots",
+        "profile": "optimized",
+        "sourceSHA256": "d85cc920dc7bd4a949c622ccb7e9e8b3a9dd3cb285f0d9f16c784971f36138f3",
+        "buildExit": 0,
+        "expectedExit": 0,
+        "actualExit": 0,
+        "expectedStdout": "42,77,",
+        "actualStdout": "42,77,"
+      },
+      {
+        "name": "pointer_c_forwards_mutable_and_shared_scalar_storage",
+        "profile": "low",
+        "sourceSHA256": "f10534f4265d816f508cd95d2da5627a59a05da03260678f1a19bfd8dccefd43",
+        "buildExit": 0,
+        "expectedExit": 0,
+        "actualExit": 0,
+        "expectedStdout": "9,6,",
+        "actualStdout": "9,6,"
+      },
+      {
+        "name": "pointer_c_forwards_mutable_and_shared_scalar_storage",
+        "profile": "optimized",
+        "sourceSHA256": "f10534f4265d816f508cd95d2da5627a59a05da03260678f1a19bfd8dccefd43",
+        "buildExit": 0,
+        "expectedExit": 0,
+        "actualExit": 0,
+        "expectedStdout": "9,6,",
+        "actualStdout": "9,6,"
+      },
+      {
+        "name": "pointer_c_uses_owner_and_view_data_for_opaque_crossings",
+        "profile": "low",
+        "sourceSHA256": "1f81998cafbd4202141afda38773c275ebe1a347e941ef765547ab4d1668cdb3",
+        "buildExit": 0,
+        "expectedExit": 0,
+        "actualExit": 0,
+        "expectedStdout": "8,5,9,9,",
+        "actualStdout": "8,5,9,9,"
+      },
+      {
+        "name": "pointer_c_uses_owner_and_view_data_for_opaque_crossings",
+        "profile": "optimized",
+        "sourceSHA256": "1f81998cafbd4202141afda38773c275ebe1a347e941ef765547ab4d1668cdb3",
+        "buildExit": 0,
+        "expectedExit": 0,
+        "actualExit": 0,
+        "expectedStdout": "8,5,9,9,",
+        "actualStdout": "8,5,9,9,"
+      },
+      {
+        "name": "pointer_c_preserves_nominal_identity_across_internal_calls",
+        "profile": "low",
+        "sourceSHA256": "c237356cbcfa1a48b3b4f6da23e22bb0e11389e801bcb2a00516068cab4efe2c",
+        "buildExit": 0,
+        "expectedExit": 0,
+        "actualExit": 0,
+        "expectedStdout": "",
+        "actualStdout": ""
+      },
+      {
+        "name": "pointer_c_preserves_nominal_identity_across_internal_calls",
+        "profile": "optimized",
+        "sourceSHA256": "c237356cbcfa1a48b3b4f6da23e22bb0e11389e801bcb2a00516068cab4efe2c",
+        "buildExit": 0,
+        "expectedExit": 0,
+        "actualExit": 0,
+        "expectedStdout": "",
+        "actualStdout": ""
+      },
+      {
+        "name": "cast_c_roundtrips_signed32_through_separate_c_functions",
+        "profile": "low",
+        "sourceSHA256": "cf7ca922be743bd2d5ea7ad48798ac410fe5db08de1f7adcc24edfe37601a696",
+        "buildExit": 0,
+        "expectedExit": 0,
+        "actualExit": 0,
+        "expectedStdout": "-2147483648,2147483647,42,",
+        "actualStdout": "-2147483648,2147483647,42,"
+      },
+      {
+        "name": "cast_c_roundtrips_signed32_through_separate_c_functions",
+        "profile": "optimized",
+        "sourceSHA256": "cf7ca922be743bd2d5ea7ad48798ac410fe5db08de1f7adcc24edfe37601a696",
+        "buildExit": 0,
+        "expectedExit": 0,
+        "actualExit": 0,
+        "expectedStdout": "-2147483648,2147483647,42,",
+        "actualStdout": "-2147483648,2147483647,42,"
+      },
+      {
+        "name": "view_c_mutates_owner_and_shares_call_arguments",
+        "profile": "low",
+        "sourceSHA256": "5b29a4e13a1f156a2dfdbced44c6c2b7dc3e3c14e40d1b669fdacbb8d828436c",
+        "buildExit": 0,
+        "expectedExit": 0,
+        "actualExit": 0,
+        "expectedStdout": "7,4,5,",
+        "actualStdout": "7,4,5,"
+      },
+      {
+        "name": "view_c_mutates_owner_and_shares_call_arguments",
+        "profile": "optimized",
+        "sourceSHA256": "5b29a4e13a1f156a2dfdbced44c6c2b7dc3e3c14e40d1b669fdacbb8d828436c",
+        "buildExit": 0,
+        "expectedExit": 0,
+        "actualExit": 0,
+        "expectedStdout": "7,4,5,",
+        "actualStdout": "7,4,5,"
+      }
+    ]
+  },
+  "fixtureCorrection": {
+    "changed": [
+      "examples/lexer_candidate/tests/module_unit_c_pointers.fy"
+    ],
+    "originalFixtureSHA256": "995b477f91f33d754c0fdcbdb387e5b5a7d3802392678e57d99f226fa28ec3f0",
+    "finalFixtureSHA256": "c930210a9353e0977025acf4904dc748ff02f3823c748f7e7f5bfb0c3395a454",
+    "sourceAndVerifierInputsUnchanged": true,
+    "cause": "Direct fixed-array borrow to u8 pointer is rejected by the existing type contract; explicit mutable/shared byte-view locals select the admitted data-pointer conversion",
+    "goBoundary": "compiler-origin-patterns.exe experimental check main.fy rejected cast from &mut [u8;2] to *mut u8",
+    "allOtherFixtureAndHelperBytesUnchanged": true,
+    "reconstructedOriginalFixtureSHA256": "995b477f91f33d754c0fdcbdb387e5b5a7d3802392678e57d99f226fa28ec3f0"
+  },
+  "sourceCheck": {
+    "argv": [
+      "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\compiler-origin-patterns.exe",
+      "check",
+      "--locked"
+    ],
+    "exit": 0,
+    "stdout": "check ok: 2 instance(s), 256 source file(s), 3271 MIR function(s), lock verified\n",
+    "stderr": ""
+  },
+  "developmentBuild": {
+    "argv": [
+      "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\compiler-build-240s.exe",
+      "build",
+      "--locked"
+    ],
+    "exit": 0,
+    "stdout": "built: build/lexer-candidate.exe (x86_64-windows-msvc, development, lock verified)\n",
+    "stderr": ""
+  },
+  "behavior": {
+    "types": "Canonical kind12 scalar/void/void** and nominal pointer transport, typed null, inert copies, internal args/returns, pointer equality",
+    "casts": "References forward referent addresses including array wrappers; views extract fy_data; no mutability strengthening or pointer/integer reinterpretation",
+    "unsafe": "Retained operation flag must match an enclosing unsafe expression or original non-foreign unsafe callable; exact type/as/source state and direct opaque-local syntax revalidated",
+    "guards": "Three cast-proof mutations (missing flag, removed enclosing scope, wrong pointee) reject1001; nominal foreign pointer ABI rejects1004 transactionally",
+    "ffi": "Encoded scalar/void/void** pointers only; no nominal/aggregate foreign ABI claim",
+    "outputSlot": "Only ref mut ptr mut void to ptr mut ptr mut void admitted under ADR0059"
+  },
+  "traceContracts": {
+    "nullAndOutputSlot": "42,77,",
+    "scalarMutation": "9,6,",
+    "opaqueOwnersAndViews": "8,5,9,9,",
+    "nominalIdentity": "",
+    "cIntRegression": "-2147483648,2147483647,42,",
+    "viewRegression": "7,4,5,"
+  },
+  "privateAPIExpanded": true,
+  "stableCLIChanged": false,
+  "sdkABIChanged": false,
+  "GoChanged": false,
+  "dbChanged": false,
+  "ciChanged": false,
+  "hygieneChanged": false,
+  "normativeContractsChanged": false,
+  "pushed": false,
+  "pending": [
+    "Byte/text/CStr literal and text/CStr parameter C transport",
+    "Foreign nominal pointer/aggregate ABI layout assertions",
+    "Enum, Region, authenticated SDK and whole dispatcher execution",
+    "Full source/unsafe authentication, path/dominance/initialization proofs and stage1/stage2"
+  ],
+  "skipped": {
+    "Linux": "Windows-focused unit",
+    "releaseCandidate": "Separate release batch; generated C /O2 is not candidate Release",
+    "fullSuite": "Four pointer programs, guard, output-slot typing and two C regressions only",
+    "Go": "No Go source changes; pinned compiler boundary inspected for direct-array cast"
+  }
+}

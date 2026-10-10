@@ -66,6 +66,13 @@ CASTS = {
     "cast_c_widened_arithmetic_keeps_checked_overflow": (101, ""),
 }
 CAST_REJECTION = "cast_c_rejects_other_c_scalars_and_malformed_casts_transactionally"
+POINTERS = {
+    "pointer_c_transports_null_foreign_results_and_void_output_slots": (0, "42,77,"),
+    "pointer_c_forwards_mutable_and_shared_scalar_storage": (0, "9,6,"),
+    "pointer_c_uses_owner_and_view_data_for_opaque_crossings": (0, "8,5,9,9,"),
+    "pointer_c_preserves_nominal_identity_across_internal_calls": (0, ""),
+}
+POINTER_REJECTION = "pointer_c_rejects_unverified_nominal_abi_and_forged_unsafe_casts"
 
 
 def run(argv, cwd, env=None, timeout=60):
@@ -88,7 +95,7 @@ def main():
     parser.add_argument("--report", required=True, type=Path, action="append")
     parser.add_argument("--output", required=True, type=Path)
     parser.add_argument("--vcvars", required=True, type=Path)
-    parser.add_argument("--suite", choices=("scalar", "owned", "references", "arrays", "views", "casts", "all"), default="scalar")
+    parser.add_argument("--suite", choices=("scalar", "owned", "references", "arrays", "views", "casts", "pointers", "all"), default="scalar")
     args = parser.parse_args()
     scalar_cases = {name: (exit_code, "") for name, exit_code in EXPECTED.items()}
     owned_cases = {name: (0, trace) for name, trace in OWNED.items()}
@@ -102,8 +109,11 @@ def main():
                         {REJECTION, OWNED_REJECTION}),
               "casts": (CASTS | {"module_c_emits_closed_integer_widths_and_normalized_literals": scalar_cases["module_c_emits_closed_integer_widths_and_normalized_literals"],
                                  "view_c_mutates_owner_and_shares_call_arguments": VIEWS["view_c_mutates_owner_and_shares_call_arguments"]}, {CAST_REJECTION}),
-              "all": (scalar_cases | owned_cases | reference_cases | ARRAYS | VIEWS | CASTS,
-                      {REJECTION, OWNED_REJECTION, REFERENCE_PROOF, CAST_REJECTION})}
+              "pointers": (POINTERS | {"cast_c_roundtrips_signed32_through_separate_c_functions": CASTS["cast_c_roundtrips_signed32_through_separate_c_functions"],
+                                       "view_c_mutates_owner_and_shares_call_arguments": VIEWS["view_c_mutates_owner_and_shares_call_arguments"]},
+                           {POINTER_REJECTION, "pointer_casts_preserve_the_single_opaque_void_output_slot"}),
+              "all": (scalar_cases | owned_cases | reference_cases | ARRAYS | VIEWS | CASTS | POINTERS,
+                      {REJECTION, OWNED_REJECTION, REFERENCE_PROOF, CAST_REJECTION, POINTER_REJECTION})}
     expected_cases, rejections = suites[args.suite]
     count = len(expected_cases) + len(rejections)
     reports = []
@@ -135,7 +145,8 @@ def main():
         prefix = next((prefix for prefix in ("tests::module_unit_c_emit::",
                        "tests::module_unit_c_owned::", "tests::module_unit_c_references::",
                        "tests::module_unit_c_arrays::", "tests::module_unit_c_views::",
-                       "tests::module_unit_c_casts::")
+                       "tests::module_unit_c_casts::", "tests::module_unit_c_pointers::",
+                       "tests::module_unit_casts::")
                        if identity.startswith(prefix)), None)
         assert prefix is not None
         name = identity.removeprefix(prefix)
@@ -165,6 +176,13 @@ def main():
                     "void observe_cleanup(int32_t n){printf(\"%d,\",(int)n);}\n"
                     "int produce_c_int(int32_t n){return (int)n;}\n"
                     "int consume_c_int(int n){printf(\"%d,\",n);return n;}\n"
+                    "const int32_t *provide_i32(void){static const int32_t n=42;return &n;}\n"
+                    "int32_t read_i32(const int32_t *n){return *n;}\n"
+                    "void write_i32(int32_t *n,int32_t value){*n=value;}\n"
+                    "void write_opaque_i32(void *n,int32_t value){*(int32_t *)n=value;}\n"
+                    "void write_u8(uint8_t *n,uint8_t value){*n=value;}\n"
+                    "int32_t read_u8(const uint8_t *n){return *n;}\n"
+                    "void fill_void_slot(void **out){static int32_t n=42;*out=&n;}\n"
                     "_Noreturn void fy_runtime_trap(uint32_t category)"
                     "{exit(100+(int)category);}\n", encoding="utf-8")
     executions = []

@@ -55,3 +55,8 @@ fn void complete(ref u8[] text,usize expected_casts){let p=switch(checked(text))
     failure(b"module main;struct S{i32 n;}unsafe fn ptr void f(ref S s){return ref s.n as ptr void;}",2,b"ref s.n as ptr void");
     failure(b"module main;unsafe fn ptr mut u8 f(ref u8[] n){return n as ptr mut u8;}",2,b"n as ptr mut u8");
 }
+
+@test fn void pointer_casts_preserve_the_single_opaque_void_output_slot(){
+    complete(b"module main;unsafe extern C fn void fill(ptr mut ptr mut void out);fn ptr mut void f(){var ptr mut void out=null;unsafe{fill(ref mut out as ptr mut ptr mut void);}return out;}",1);
+    failure(b"module main;unsafe fn ptr mut ptr mut void f(ref ptr mut void out){return out as ptr mut ptr mut void;}",2,b"out as ptr mut ptr mut void");
+}
