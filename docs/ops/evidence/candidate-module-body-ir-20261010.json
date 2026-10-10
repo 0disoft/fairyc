@@ -1,0 +1,83 @@
+{
+  "schema": "fairyc.candidate-module-body-ir/v1",
+  "passed": true,
+  "sources": {
+    "examples/lexer_candidate/src/module_unit_body_ir_lookup.fy": "a28ff7603d4d0b1b25b546826589a2f628d47ad73e1376ad8894ba1deeb3d232",
+    "examples/lexer_candidate/src/module_unit_body_ir_lower.fy": "b496bd3b4e68b23398c69630250cfa40cf943b61f6ddf6f9650587e9811bdb8d",
+    "examples/lexer_candidate/src/module_unit_body_ir_model.fy": "d99548eebad206f5a24b3dd669ba6f6bf1fcf161e92bb21db62035b58ced191c",
+    "examples/lexer_candidate/src/module_unit_body_ir_verify.fy": "1094a634358023927c950c1af5bf6979af41e3d77b1fc34f4c2212531782e9c6",
+    "examples/lexer_candidate/tests/module_unit_body_ir.fy": "4847ef98699df5b667a58c7213c0776745956fd0ba85dd312e78b0d07ab99b1e",
+    "examples/lexer_candidate/fairy.lock": "0894b4faeb87afc6c4c63de7399228d96c33907e4adf37c675ca4c5be029d7da"
+  },
+  "native": {
+    "schemaVersion": "fairyc.test-report/v4",
+    "engine": "native",
+    "target": "x86_64-windows-msvc",
+    "profile": "development",
+    "tests": [
+      {
+        "identity": "tests::module_unit_body_ir::body_ir_preserves_literal_cooking_assignment_and_for_links",
+        "outcome": "passed",
+        "trapCategory": null,
+        "stdoutBase64": "",
+        "stderrBase64": ""
+      },
+      {
+        "identity": "tests::module_unit_body_ir::body_ir_rejects_malformed_owned_body_tables",
+        "outcome": "passed",
+        "trapCategory": null,
+        "stdoutBase64": "",
+        "stderrBase64": ""
+      },
+      {
+        "identity": "tests::module_unit_body_ir::body_ir_retains_original_blocks_calls_and_cleanup_frames",
+        "outcome": "passed",
+        "trapCategory": null,
+        "stdoutBase64": "",
+        "stderrBase64": ""
+      },
+      {
+        "identity": "tests::module_unit_body_ir::body_ir_retains_specialized_cleanup_and_partial_values",
+        "outcome": "passed",
+        "trapCategory": null,
+        "stdoutBase64": "",
+        "stderrBase64": ""
+      }
+    ],
+    "count": 4,
+    "passed": 4,
+    "failed": 0,
+    "status": "ok",
+    "lock": "updated"
+  },
+  "mutationCodes": {
+    "acceptedCopy": 0,
+    "invalidTables1Through10": 1001,
+    "workBudget11": 1002
+  },
+  "check": {
+    "exit": 0,
+    "result": "2 instances, 249 source files, 3157 MIR functions, lock unchanged"
+  },
+  "developmentBuild": {
+    "exit": 0,
+    "locked": true
+  },
+  "pending": [
+    "Executable CFG and drop sequencing",
+    "Defer and Region sequencing",
+    "C generation and native execution of the split-unit program"
+  ],
+  "skipped": {
+    "oldCLI": "Private module has no CLI route; existing CLI source unchanged",
+    "release": "Deferred consolidated verification",
+    "Linux": "Deferred consolidated verification",
+    "fullCompiler": "Scoped private IR change"
+  },
+  "privateAPIChanged": true,
+  "stableCLIChanged": false,
+  "sdkABIChanged": false,
+  "dbChanged": false,
+  "ciChanged": false,
+  "pushed": false
+}
