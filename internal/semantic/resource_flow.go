@@ -158,6 +158,9 @@ func (a *analyzer) resourceBlock(module *moduleScope, block *ast.Block, environm
 			reachable = false
 		default:
 			a.resourceExpression(module, statement.Expression, environment, resourceRead)
+			if statement.Kind == syntax.KindExprStmt || statement.Kind == syntax.KindDiscard {
+				a.checkDiscardedResourceCleanup(module, statement.Expression)
+			}
 		}
 	}
 	if reachable && block.Tail != nil {
@@ -799,4 +802,24 @@ func joinResourceState(left, right resourceValueState) resourceValueState {
 		result.move = right.move
 	}
 	return result
+}
+
+// Unbound expression values still execute cleanup. The must-use companion
+// owns linear temporary diagnostics in ordinary functions; cleanup bodies do
+// not run that pass, so their linear temporaries are checked here as well.
+func (a *analyzer) checkDiscardedResourceCleanup(module *moduleScope, expression *ast.Expression) {
+	if expression == nil || resourcePlaceExpression(expression) {
+		return
+	}
+	value := a.expressionTypes[expression]
+	if !a.isResource(value) {
+		return
+	}
+	if len(a.nonDroppableResourceOwners(value, make(map[hir.Type]struct{}))) != 0 {
+		if a.resourceCleanupExempt != nil {
+			a.rejectDiscardedLinearResource(module, expression)
+		}
+		return
+	}
+	a.checkResourceValueEffects(&symbol{typ: value}, span(module.file.Path, expression.Span))
 }
