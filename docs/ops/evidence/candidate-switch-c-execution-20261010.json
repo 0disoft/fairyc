@@ -1,0 +1,412 @@
+{
+  "schema": "fairyc.candidate-switch-c-execution/v1",
+  "passed": true,
+  "parentCommit": "b82b92ed6c1a746fd7f70edbcb556f8eddb23506",
+  "identity": {
+    "nativeCompiler": {
+      "path": ".cache/candidate-tagged/compiler-origin-patterns.exe",
+      "sha256": "d36dae1b99751322e447880aaf4d28321bd6d53bdf776185308c6c4504889bb2"
+    },
+    "buildCompiler": {
+      "path": ".cache/candidate-tagged/compiler-build-240s.exe",
+      "sha256": "746fe10b022ed88cfbc0ae8ea13e3f867b842f3317ef5a2a4caa36d064a248dd"
+    },
+    "candidate": {
+      "path": "examples/lexer_candidate/build/lexer-candidate.exe",
+      "sha256": "bc90928d241e370d79727b6e8995a71582cfe1c68ba5b5597098c1ec0e3e14d4"
+    },
+    "sources": [
+      {
+        "path": "examples/lexer_candidate/src/module_unit_c_switches.fy",
+        "sha256": "ad3a85a12d2f3c202e835781bfa9be21ecbfa11aacf989e72eaa53131bec9202"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_c_emit.fy",
+        "sha256": "fe9b2cd8153aa6e1ae9753a4525ab4ec09c8ade0f25364b39702f8e3fa244741"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_c_enums.fy",
+        "sha256": "934b0c58318a997eae56597b069ea686aba623870e65e144e694a60760db3492"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_c_aggregate.fy",
+        "sha256": "4439bc562995dad5d0ed6c8273a1d245d24623e7e1c4e4acaac7b0877298875a"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_cfg_lower.fy",
+        "sha256": "a0b09be12e419cf81984a3a201b82d9857f8110d87e6c13a0ba1d19eb449ffb9"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_cfg_model.fy",
+        "sha256": "089402ff3a36d0a0490527cab77790e54f4a2fe63ae967e051a4a3a01af3a346"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_cfg_switches.fy",
+        "sha256": "bcee5d4f0b2c2c26d5facf5555f69576ded6ccfae54fe3872fa1067bb505da99"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_body_ir_verify.fy",
+        "sha256": "71068cd57c77a204b4bc65ff18e59940ff336aac776243b64389cf84ced51ea1"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_body_ir_switches.fy",
+        "sha256": "2e6059287dc3c755933eebddb21caee2d90c060224c67bd71fea7aa4e0cb9c5d"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_name_walk.fy",
+        "sha256": "1fc7c36aa6452cf3907d97b1520a3155c0a0e6baa7a0b38d5a45a8118dd52bac"
+      },
+      {
+        "path": "examples/lexer_candidate/tests/module_unit_c_enums.fy",
+        "sha256": "08b37754f519c54b03dfa9a6f6fad65cebae09fda3aa6c0901b32d396d50dc83"
+      },
+      {
+        "path": "examples/lexer_candidate/fairy.lock",
+        "sha256": "669df240f552f5c03a971c5280912f0833b0df09aadd41809c677e9de5ce09ec"
+      },
+      {
+        "path": "tools/verify-candidate-module-c.py",
+        "sha256": "769c857c04cad6ae5538125e97c5520a99e985181962528539e60dcdf20ec118"
+      }
+    ]
+  },
+  "sourceCheck": {
+    "argv": [
+      "compiler-origin-patterns.exe",
+      "check",
+      "--locked"
+    ],
+    "exit": 0,
+    "stdout": "check ok: 2 instance(s), 262 source file(s), 3315 MIR function(s), lock verified\n"
+  },
+  "developmentBuild": {
+    "argv": [
+      "compiler-build-240s.exe",
+      "build",
+      "--locked"
+    ],
+    "exit": 0,
+    "stdout": "built: build/lexer-candidate.exe (x86_64-windows-msvc, development, lock verified)\n",
+    "reuse": "Only test fixtures and private test companions changed afterwards; final compiler sources and source lock were unchanged"
+  },
+  "native": {
+    "reports": [
+      {
+        "path": ".cache/candidate-tagged/switch-c/native.json",
+        "sha256": "23481e727525ab315666c12dcf1fdc5171b0c2c129feb5c53a2b0c8b0e6db793"
+      },
+      {
+        "path": ".cache/candidate-tagged/switch-c/native-corrected.json",
+        "sha256": "d45c959172daf727a1e3d7683f6a06ea9e7ae085debae07b0451b24fbd4dd935"
+      }
+    ],
+    "count": 9,
+    "passed": 9,
+    "failed": 0,
+    "identities": [
+      "tests::module_unit_c_enums::enum_c_keeps_foreign_enum_abi_closed",
+      "tests::module_unit_c_enums::enum_c_orders_payload_effects_copies_values_and_defers_pointer_cycles",
+      "tests::module_unit_c_enums::enum_c_transports_provider_nested_and_copy_tagged_payloads",
+      "tests::module_unit_c_enums::switch_c_executes_provider_nested_enums_and_copy_tagged_payloads",
+      "tests::module_unit_c_enums::switch_c_freezes_subject_once_and_skips_unselected_effects",
+      "tests::module_unit_c_enums::switch_c_preserves_named_and_anonymous_owned_cleanup_and_transfers",
+      "tests::module_unit_c_enums::switch_c_traps_invalid_enum_tag_before_payload_effects",
+      "tests::module_unit_c_enums::switch_c_traps_invalid_option_tag_before_payload_effects",
+      "tests::module_unit_c_enums::switch_c_traps_invalid_result_tag_before_payload_effects"
+    ],
+    "reuse": "Six unchanged passing identities retained; three corrected fixtures rerun on unchanged final compiler sources. C verifier merges latest identity outcomes"
+  },
+  "C": {
+    "report": {
+      "path": ".cache/candidate-tagged/switch-c/execution/execution.json",
+      "sha256": "6339841ed2d812dd567705d6fd98bb5f127f3cf64f41a0db50780ec35f5b145c"
+    },
+    "compiler": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+    "executions": [
+      {
+        "name": "switch_c_executes_provider_nested_enums_and_copy_tagged_payloads",
+        "profile": "low",
+        "sourceSHA256": "9603f5dfd3012f9adda13c63779db1d7db8cf3fad10e046d1b98de07bb4846d7",
+        "buildExit": 0,
+        "expectedExit": 0,
+        "actualExit": 0,
+        "expectedStdout": "1,1,",
+        "actualStdout": "1,1,"
+      },
+      {
+        "name": "switch_c_executes_provider_nested_enums_and_copy_tagged_payloads",
+        "profile": "optimized",
+        "sourceSHA256": "9603f5dfd3012f9adda13c63779db1d7db8cf3fad10e046d1b98de07bb4846d7",
+        "buildExit": 0,
+        "expectedExit": 0,
+        "actualExit": 0,
+        "expectedStdout": "1,1,",
+        "actualStdout": "1,1,"
+      },
+      {
+        "name": "switch_c_preserves_named_and_anonymous_owned_cleanup_and_transfers",
+        "profile": "low",
+        "sourceSHA256": "b51471e7c48b571fbed0090ce1ab55b9a057732db13fe34a8de58e2d52e95695",
+        "buildExit": 0,
+        "expectedExit": 0,
+        "actualExit": 0,
+        "expectedStdout": "30,3,1,40,2,4,99,50,5,60,6,70,7,80,8,80,9,",
+        "actualStdout": "30,3,1,40,2,4,99,50,5,60,6,70,7,80,8,80,9,"
+      },
+      {
+        "name": "switch_c_preserves_named_and_anonymous_owned_cleanup_and_transfers",
+        "profile": "optimized",
+        "sourceSHA256": "b51471e7c48b571fbed0090ce1ab55b9a057732db13fe34a8de58e2d52e95695",
+        "buildExit": 0,
+        "expectedExit": 0,
+        "actualExit": 0,
+        "expectedStdout": "30,3,1,40,2,4,99,50,5,60,6,70,7,80,8,80,9,",
+        "actualStdout": "30,3,1,40,2,4,99,50,5,60,6,70,7,80,8,80,9,"
+      },
+      {
+        "name": "switch_c_freezes_subject_once_and_skips_unselected_effects",
+        "profile": "low",
+        "sourceSHA256": "10425b36fd4a70e7e42e7266847200ece844574a3f940a2235709334bb1bc9c3",
+        "buildExit": 0,
+        "expectedExit": 0,
+        "actualExit": 0,
+        "expectedStdout": "1,7,",
+        "actualStdout": "1,7,"
+      },
+      {
+        "name": "switch_c_freezes_subject_once_and_skips_unselected_effects",
+        "profile": "optimized",
+        "sourceSHA256": "10425b36fd4a70e7e42e7266847200ece844574a3f940a2235709334bb1bc9c3",
+        "buildExit": 0,
+        "expectedExit": 0,
+        "actualExit": 0,
+        "expectedStdout": "1,7,",
+        "actualStdout": "1,7,"
+      },
+      {
+        "name": "switch_c_traps_invalid_enum_tag_before_payload_effects",
+        "profile": "low",
+        "sourceSHA256": "c43a9bb18fab24da3246a5392200e65265a5f35df7cfd550afa5334f41da9885",
+        "buildExit": 0,
+        "expectedExit": 107,
+        "actualExit": 107,
+        "expectedStdout": "",
+        "actualStdout": ""
+      },
+      {
+        "name": "switch_c_traps_invalid_enum_tag_before_payload_effects",
+        "profile": "optimized",
+        "sourceSHA256": "c43a9bb18fab24da3246a5392200e65265a5f35df7cfd550afa5334f41da9885",
+        "buildExit": 0,
+        "expectedExit": 107,
+        "actualExit": 107,
+        "expectedStdout": "",
+        "actualStdout": ""
+      },
+      {
+        "name": "switch_c_traps_invalid_option_tag_before_payload_effects",
+        "profile": "low",
+        "sourceSHA256": "8956a056c6a563972b413a7ecfd2eaa5a1de38cd11157572f4c9dd68a7aec0bb",
+        "buildExit": 0,
+        "expectedExit": 107,
+        "actualExit": 107,
+        "expectedStdout": "",
+        "actualStdout": ""
+      },
+      {
+        "name": "switch_c_traps_invalid_option_tag_before_payload_effects",
+        "profile": "optimized",
+        "sourceSHA256": "8956a056c6a563972b413a7ecfd2eaa5a1de38cd11157572f4c9dd68a7aec0bb",
+        "buildExit": 0,
+        "expectedExit": 107,
+        "actualExit": 107,
+        "expectedStdout": "",
+        "actualStdout": ""
+      },
+      {
+        "name": "switch_c_traps_invalid_result_tag_before_payload_effects",
+        "profile": "low",
+        "sourceSHA256": "716fe677533a2f6e343b61d17088a4465b47024918e2353ccbab23c2424b0c50",
+        "buildExit": 0,
+        "expectedExit": 107,
+        "actualExit": 107,
+        "expectedStdout": "",
+        "actualStdout": ""
+      },
+      {
+        "name": "switch_c_traps_invalid_result_tag_before_payload_effects",
+        "profile": "optimized",
+        "sourceSHA256": "716fe677533a2f6e343b61d17088a4465b47024918e2353ccbab23c2424b0c50",
+        "buildExit": 0,
+        "expectedExit": 107,
+        "actualExit": 107,
+        "expectedStdout": "",
+        "actualStdout": ""
+      },
+      {
+        "name": "enum_c_transports_provider_nested_and_copy_tagged_payloads",
+        "profile": "low",
+        "sourceSHA256": "b03cddb729d11b502a2351393e97f99c986330e7540bbd6a2af7ebbe6ecc9f39",
+        "buildExit": 0,
+        "expectedExit": 0,
+        "actualExit": 0,
+        "expectedStdout": "",
+        "actualStdout": ""
+      },
+      {
+        "name": "enum_c_transports_provider_nested_and_copy_tagged_payloads",
+        "profile": "optimized",
+        "sourceSHA256": "b03cddb729d11b502a2351393e97f99c986330e7540bbd6a2af7ebbe6ecc9f39",
+        "buildExit": 0,
+        "expectedExit": 0,
+        "actualExit": 0,
+        "expectedStdout": "",
+        "actualStdout": ""
+      },
+      {
+        "name": "enum_c_orders_payload_effects_copies_values_and_defers_pointer_cycles",
+        "profile": "low",
+        "sourceSHA256": "c84c5bae3b766ac6a584888acd07f81c07d0b4f4425c4317ef55a8b9ca3b8cb7",
+        "buildExit": 0,
+        "expectedExit": 0,
+        "actualExit": 0,
+        "expectedStdout": "1,2,2,",
+        "actualStdout": "1,2,2,"
+      },
+      {
+        "name": "enum_c_orders_payload_effects_copies_values_and_defers_pointer_cycles",
+        "profile": "optimized",
+        "sourceSHA256": "c84c5bae3b766ac6a584888acd07f81c07d0b4f4425c4317ef55a8b9ca3b8cb7",
+        "buildExit": 0,
+        "expectedExit": 0,
+        "actualExit": 0,
+        "expectedStdout": "1,2,2,",
+        "actualStdout": "1,2,2,"
+      }
+    ],
+    "oracle": "Six source programs execute product switch CFG/C lowering. Private same-unit test companions corrupt enum/Option tags or supply an invalid Result carrier; they do not implement switches or establish a public ABI"
+  },
+  "goBoundary": [
+    {
+      "name": "switch_c_executes_provider_nested_enums_and_copy_tagged_payloads",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\compiler-origin-patterns.exe",
+        "experimental",
+        "check",
+        "main.fy",
+        "--source",
+        "provider.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\switch-c\\switch_c_executes_provider_nested_enums_and_copy_tagged_payloads",
+      "exit": 0,
+      "stdout": "check ok: 2 file(s) (verified MIR: 5 function(s), 1 foreign declaration(s))\n",
+      "stderr": ""
+    },
+    {
+      "name": "switch_c_preserves_named_and_anonymous_owned_cleanup_and_transfers",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\compiler-origin-patterns.exe",
+        "experimental",
+        "check",
+        "main.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\switch-c\\switch_c_preserves_named_and_anonymous_owned_cleanup_and_transfers",
+      "exit": 0,
+      "stdout": "check ok: 1 file(s) (verified MIR: 10 function(s), 1 foreign declaration(s))\n",
+      "stderr": ""
+    },
+    {
+      "name": "switch_c_freezes_subject_once_and_skips_unselected_effects",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\compiler-origin-patterns.exe",
+        "experimental",
+        "check",
+        "main.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\switch-c\\switch_c_freezes_subject_once_and_skips_unselected_effects",
+      "exit": 0,
+      "stdout": "check ok: 1 file(s) (verified MIR: 7 function(s), 1 foreign declaration(s))\n",
+      "stderr": ""
+    },
+    {
+      "name": "switch_c_traps_invalid_enum_tag_before_payload_effects",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\compiler-origin-patterns.exe",
+        "experimental",
+        "check",
+        "main.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\switch-c\\switch_c_traps_invalid_enum_tag_before_payload_effects",
+      "exit": 0,
+      "stdout": "check ok: 1 file(s) (verified MIR: 1 function(s), 2 foreign declaration(s))\n",
+      "stderr": ""
+    },
+    {
+      "name": "switch_c_traps_invalid_option_tag_before_payload_effects",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\compiler-origin-patterns.exe",
+        "experimental",
+        "check",
+        "main.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\switch-c\\switch_c_traps_invalid_option_tag_before_payload_effects",
+      "exit": 0,
+      "stdout": "check ok: 1 file(s) (verified MIR: 1 function(s), 2 foreign declaration(s))\n",
+      "stderr": ""
+    },
+    {
+      "name": "switch_c_traps_invalid_result_tag_before_payload_effects",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\compiler-origin-patterns.exe",
+        "experimental",
+        "check",
+        "main.fy"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\switch-c\\switch_c_traps_invalid_result_tag_before_payload_effects",
+      "exit": 0,
+      "stdout": "check ok: 1 file(s) (verified MIR: 2 function(s), 2 foreign declaration(s))\n",
+      "stderr": ""
+    }
+  ],
+  "behavior": {
+    "dispatch": "Strict declaration-order enum tags and closed Option/Result 1/0 tags; unmatched tag traps before inactive payload reads",
+    "bindings": "Canonical active enum fields and builtin payloads copied to named or anonymous physical slots only after case success",
+    "values": "Provider/reordered fields, nested enum/copy-tags, bool/i64 generics, lazy arms, one frozen scrutinee and typed tails including narrow terminal no-tail arms",
+    "cleanup": "Named return transfer, Option none construction, anonymous success/error payload cleanup, lexical defers and nested locals; early return, propagation, break and continue match exact trace",
+    "invalidTags": "Enum, Option and Result tag 41 each exit 107 with no stdout under /Od and /O2",
+    "guards": "Direct foreign enum ABI stays rejected as 5102; switch removed from former pending guard"
+  },
+  "correctedAttempts": [
+    "Second parameterless i32 helper made the test entry selector ambiguous; add an unused helper argument",
+    "Place cleanup effects on the resource declaration, matching supported candidate metadata placement",
+    "Explicitly discard reassigned inert Result to satisfy reference Result-use contract",
+    "Invalid Result test uses private same-unit input rather than a reference-rejected address exposure"
+  ],
+  "sourceOfTruth": [
+    "docs/adr/0050-restricted-inert-enum-execution.md",
+    "docs/adr/0323-nested-inert-enum-c-transport.md",
+    "docs/adr/0330-acyclic-copy-tagged-dependency-graph.md",
+    "examples/lexer_candidate/src/module_unit_value_match.fy"
+  ],
+  "privateAPIExpanded": true,
+  "normativeContractsChanged": false,
+  "stableCLIChanged": false,
+  "sdkABIChanged": false,
+  "GoChanged": false,
+  "dbChanged": false,
+  "ciChanged": false,
+  "hygieneChanged": false,
+  "pushed": false,
+  "pending": [
+    "Authenticated SDK/Region and whole dispatcher execution",
+    "Full original-source/unsafe/path/dominance/initialization proof",
+    "Foreign aggregate ABI layout proof",
+    "Stage1/stage2 and promotion"
+  ],
+  "skipped": {
+    "Linux": "Windows-focused unit",
+    "releaseCandidate": "Development build only; generated C /O2 is separate",
+    "fullSuite": "Nine native identities, eight C programs and six reference source checks",
+    "publicEnumABI": "No direct foreign enum ABI admitted"
+  }
+}

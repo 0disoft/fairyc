@@ -2792,3 +2792,17 @@ Receipt: `docs/ops/evidence/candidate-anonymous-switch-payload-20261010.json`. E
 - This proves retained ownership and cleanup CFG requests, not generated switch C execution or runtime drop traces. Those remain the next execution step.
 - Private resolver/body-proof API and lock updated. Normative contracts, stable CLI, SDK ABI, Go, DB, CI and hygiene unchanged; no push. Standalone candidate rebuild, Release, Linux, allocator injection and full suite remain deferred.
 - Remaining: C variant tests, active payload extraction and runtime drop traces; authenticated SDK/Region and whole dispatcher; full source/unsafe/path/dominance/initialization proof; stage1/stage2 and promotion.
+
+## Candidate guarded switch C execution (2026-10-10)
+
+Receipt: `docs/ops/evidence/candidate-switch-c-execution-20261010.json`. Enum/Option/Result switch CFGs now execute through private C variant tests and active payload extraction. This closes the C execution and runtime drop-trace follow-ups in the preceding two units.
+
+- Strict declaration-order numeric enum tags and closed Option/Result tags select the retained arm. Named and anonymous payload locals are assigned only after its successful case edge; invalid tags reach trap 7 before payload effects.
+- Provider enums with reordered fields, three variants, nested enum/copy-tagged payloads, generic bool/i64 specializations, nested Option/Result and terminal no-tail arms execute. Scrutinee effects run once, unselected effects stay skipped, and replacing the original inert scrutinee preserves the frozen payload value.
+- Named owned return transfer, Option none construction, anonymous Result success/error payloads, nested local cleanup and lexical arm defers execute. Early return, propagation, break and continue match `30,3,1,40,2,4,99,50,5,60,6,70,7,80,8,80,9,` exactly under both profiles.
+- Final 9/9 native outcomes pass, with six unchanged passing identities reused and three corrected fixtures rerun. Eight generated-C programs pass MSVC `/Od` and `/O2` (16/16 runs); enum, Option and Result tag 41 cases each exit 107 with no payload output. The two earlier enum transport programs remain covered.
+- All six new source programs pass the pinned Go compiler experimental verified-MIR check. Locked candidate check passes 262 sources and 3315 MIR functions; locked development build passes. Compiler sources and source lock were unchanged when the corrected test fixtures were rerun.
+- Invalid-tag C companions operate on the private same-translation-unit carrier. Product switch implementation remains in the Fairy emitter; no public enum ABI is inferred. Direct foreign enum ABI remains rejected as 5102.
+- Fixture corrections: remove a second zero-argument i32 entry candidate, use the supported resource-level cleanup-effect metadata placement, explicitly discard a reassigned inert Result, and inject invalid Result data through a private C test input rather than a reference-rejected address exposure.
+- Private C API, local C verifier and source lock expanded. Normative contracts, stable CLI, SDK ABI, Go, DB, CI and hygiene unchanged; no push. Linux, candidate Release and full suite were not run; generated C `/O2` is not candidate Release evidence.
+- Remaining: authenticated SDK/Region and whole dispatcher execution; full original-source/unsafe/path/dominance/initialization proof; foreign aggregate ABI layout proof; stage1/stage2 and promotion.

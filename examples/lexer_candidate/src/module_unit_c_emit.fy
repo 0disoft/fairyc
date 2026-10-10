@@ -9,6 +9,7 @@ import module_unit_value_model as budget;
 import module_unit_c_scalar as scalar;
 import module_unit_c_aggregate as aggregate;
 import module_unit_c_literals as literals;
+import module_unit_c_switches as switches;
 import ffi_symbols as ffi;
 import c_text as w;
 import std::bytes as bytes;
@@ -86,8 +87,10 @@ fn bool function(ref ir::Program p,ref cfg::Graph g,ref mut bytes::Buffer out,re
         else if(n.kind==13){if(!scalar::capture(out,s,n.target) || !w::text(out,s,b"=") || !scalar::value(out,s,n.source) || !w::text(out,s,b";\n")){return false;}}
         else if(n.kind==14){if(!call(p,g,n.source,n.target,out,s,work)){return false;}}
         else if(n.kind==17){if(!snapshot(out,s,n.target) || !w::text(out,s,b"=") || !aggregate::place(p,b,n.source,out,s,0) || !w::text(out,s,b";\n")){return false;}}
+        else if(n.kind==18){if(!switches::branch(p,b,n,out,s,work)){return false;}}
+        else if(n.kind==19){if(!switches::seed(p,b,n,out,s,work)){return false;}}
         else if(n.kind!=7){s.code=1004;return false;}
-        if(n.kind!=3 && n.kind!=4 && n.kind!=6 && n.kind!=9 && n.kind!=12 && !w::jump(out,s,n.first)){return false;}i+=1;
+        if(n.kind!=3 && n.kind!=4 && n.kind!=6 && n.kind!=9 && n.kind!=12 && n.kind!=18 && !w::jump(out,s,n.first)){return false;}i+=1;
     }return w::text(out,s,b"}\n");
 }
 // A private transport from owned bodies through freshly lowered
