@@ -210,8 +210,9 @@ the loop-header coordinates for E1105, and cast type syntax is not traversed as 
 value. The private fact API returns an immutable owned plan validated after the
 source and values are released.
 
-Cleanup drop obligations and effects, MIR/C/runtime wiring, outstanding borrow and
-access edges, unsafe provenance, the full dispatcher and stage1/stage2 remain
+Cleanup drop obligations and effects now propagate through owned resource fields;
+MIR/C/runtime wiring, field initializer error-edge cleanup effects, outstanding borrow
+and access edges, unsafe provenance, the full dispatcher and stage1/stage2 remain
 pending; Release, Linux and the full compiler suite are deferred.
 
 ## Cleanup and drop-effect checking
@@ -227,9 +228,11 @@ inner effects, and rejects a nominal owner whose cleanup effect mask exceeds the
 caller with E7102. Both diagnostics carry the offending `ability-declaration` or
 `effect-declaration` as a related location.
 
-Recursive non-drop blocking is checked, but cleanup effects are not yet propagated
-through nested resource fields, so an outer resource is admitted even when a field's
-cleanup declares effects the caller does not hold. Cleanup event MIR, C and runtime
-elaboration, remaining borrow and access edges, unsafe provenance, and the full
-dispatcher and stage1/stage2 remain pending; Release, Linux and the full compiler
-suite are deferred.
+The command walks each owner's ordered fields, follows `Option` and `Result` payloads
+and deduplicates canonical types, so cleanup effects propagate through nested fields:
+an outer resource whose field cleanup declares an effect the caller does not hold is
+rejected with E7102 anchored at that field's `effect-declaration`. The error edge of a
+later field initializer does not yet charge cleanup effects for previously evaluated
+resource fields. Cleanup event MIR, C and runtime elaboration, remaining borrow and
+access edges, unsafe provenance, and the full dispatcher and stage1/stage2 remain
+pending; Release, Linux and the full compiler suite are deferred.

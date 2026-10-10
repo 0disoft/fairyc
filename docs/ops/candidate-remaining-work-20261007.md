@@ -2406,3 +2406,44 @@ edges, unsafe provenance, and the full dispatcher and stage1/stage2 self-hosting
 remain pending; this is not full compiler semantics. Release, Linux and the full
 compiler suite stay deferred. The stable CLI, SDK ABI, DB and CI runner are unchanged;
 a private candidate API was added. No push.
+
+## Candidate recursive cleanup field effects (2026-10-10)
+
+The candidate cleanup policy now propagates cleanup effects through owned resource
+fields. `module_unit_cleanup_policy` `required` walks each nominal owner's ordered
+fields in declaration order, following `Option` and `Result` payloads and
+deduplicating canonical types through the shared seen set, so an outer resource whose
+field cleanup declares an effect the caller does not hold is rejected with E7102
+anchored at that field's `effect-declaration`. The earlier 58-fixture policy receipt
+`docs/ops/evidence/candidate-cleanup-policy-20261010.json` covered the root-only mask
+and is retained as the old receipt for that behavior.
+
+Go gained the matching reference work: commit ad7c5d35 propagates cleanup effects
+through owned resource fields, and commit 697e5da7 independently verifies transitive
+cleanup authority at MIR `OperationDrop` sites. The complete Go semantic package
+passes in 0.508s, the full MIR package in 0.051s, and the selected compiler tests
+(`TestPrivateVectorNestedResourceDrops`, `TestPrivateVectorNestedResourceDropTrace`
+and `TestBlockResultPrecedesLexicalCleanup`) in 1.588s.
+
+The new recursive cleanup CLI holds 23 fixtures that match complete corrected-Go
+primary and related spans, and the new native test matches 1/1. The eleven earlier CLI
+suites were rerun on this candidate: 343 fixtures across cleanup policy, move state,
+held reads, owner accesses, storage generations, subviews, reference access, loan
+conflicts, owner moves, owner arguments and iteration conflicts, all matching, for 366
+total. Five selected native tests pass: 157 fixture comparisons (18 cleanup request, 58
+cleanup policy, 58 move and 23 recursive) plus a separate six-owned-fact and
+exhausted-budget check. The current-source check passed 241 files and 3007 MIR
+functions under `--locked`, and the locked development build passed. Evidence:
+`docs/ops/evidence/candidate-cleanup-recursive-effects-20261010.json`.
+
+Partial construction on the propagation error edge remains the open nested case: a
+probe of `.ok(Box { .first = make(), .n = number()? })` whose `R.cleanup` declares
+`@effects(console)` is accepted by both the corrected Go reference and the candidate.
+When `number()?` returns an error before the `Box` is complete, the already evaluated
+`R` temporary is not charged its cleanup effects; charging those effects on that error
+edge is the next field-effect fix to consider. Normal and abrupt cleanup event MIR, C
+and runtime elaboration, outstanding borrow and access edges, unsafe provenance, and
+the full dispatcher and stage1/stage2 self-hosting remain pending; this is not full
+compiler semantics. Release, Linux and the full compiler suite stay deferred. The
+stable CLI, SDK ABI, DB and CI runner are unchanged; the private candidate API is
+unchanged. No push.
