@@ -1,0 +1,62 @@
+{
+  "schema": "fairyc.candidate-owned-literal-proof/v1",
+  "passed": true,
+  "identity": {
+    "examples/lexer_candidate/src/module_unit_body_ir_verify.fy": "b78bbdf95a6bd6208a36139e103823a33390540fe623a0ca00f1906a4065cbc3",
+    "examples/lexer_candidate/tests/module_unit_body_ir.fy": "4985eadc6f3b463e9814ffad323712ed5175a1ec5a0a793fcd01febfcdcfb4ab",
+    "examples/lexer_candidate/fairy.lock": "940af1ed1f5cd710426a22da12a2cf9b5b320ce50d3fa61182c809982728a235",
+    ".cache/candidate-tagged/compiler-origin-patterns.exe": "d36dae1b99751322e447880aaf4d28321bd6d53bdf776185308c6c4504889bb2"
+  },
+  "checks": [
+    {
+      "label": "check",
+      "observation": {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\compiler-origin-patterns.exe",
+          "check",
+          "--locked"
+        ],
+        "exit": 0,
+        "stdout": "check ok: 2 instance(s), 256 source file(s), 3271 MIR function(s), lock verified\n",
+        "stderr": ""
+      }
+    },
+    {
+      "label": "native",
+      "observation": {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\compiler-origin-patterns.exe",
+          "test",
+          "--native",
+          "--json",
+          "--capture-output",
+          "--exact",
+          "tests::module_unit_body_ir::body_ir_preserves_literal_cooking_assignment_and_for_links",
+          "--exact",
+          "tests::module_unit_body_ir::body_ir_rejects_malformed_owned_body_tables",
+          "--exact",
+          "tests::module_unit_body_ir::body_ir_revalidates_utf8_cstr_termination_and_literal_types"
+        ],
+        "exit": 0,
+        "stdout": "{\"schemaVersion\":\"fairyc.test-report/v4\",\"engine\":\"native\",\"target\":\"x86_64-windows-msvc\",\"profile\":\"development\",\"tests\":[{\"identity\":\"tests::module_unit_body_ir::body_ir_preserves_literal_cooking_assignment_and_for_links\",\"outcome\":\"passed\",\"trapCategory\":null,\"stdoutBase64\":\"\",\"stderrBase64\":\"\"},{\"identity\":\"tests::module_unit_body_ir::body_ir_rejects_malformed_owned_body_tables\",\"outcome\":\"passed\",\"trapCategory\":null,\"stdoutBase64\":\"\",\"stderrBase64\":\"\"},{\"identity\":\"tests::module_unit_body_ir::body_ir_revalidates_utf8_cstr_termination_and_literal_types\",\"outcome\":\"passed\",\"trapCategory\":null,\"stdoutBase64\":\"\",\"stderrBase64\":\"\"}],\"count\":3,\"passed\":3,\"failed\":0,\"status\":\"ok\",\"lock\":\"unchanged\"}\n",
+        "stderr": ""
+      }
+    }
+  ],
+  "behavior": "Owned literal kind/type alignment, complete decoded UTF-8, exactly one trailing CStr NUL independently revalidated; arbitrary byte/empty text preserved",
+  "privateAPIExpanded": false,
+  "normativeContractsChanged": false,
+  "GoChanged": false,
+  "dbChanged": false,
+  "ciChanged": false,
+  "pushed": false,
+  "skipped": {
+    "Linux": "Windows focused unit",
+    "release": "Separate release batch",
+    "fullSuite": "Three owned-body identities only"
+  },
+  "pending": [
+    "Static storage C execution",
+    "Original source authentication and stage1/stage2"
+  ]
+}

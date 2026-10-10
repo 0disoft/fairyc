@@ -1,5 +1,6 @@
 module module_unit_body_ir_verify;
 import module_unit_body_ir_model as ir;
+import literal_types as literals;
 import module_unit_body_ir_lookup as lookup;
 import module_unit_cleanup_mir_model as clean_ir;
 import module_unit_cleanup_mir_verify as cleaning;
@@ -42,6 +43,7 @@ pub fn clean_ir::Problem check_body(ref ir::Body b,ref clean_ir::Program cleaned
         if(e.source_index<=previous || e.kind==0 || e.kind>33 || e.state>2 || e.type>nt || e.expected>nt || e.binding>ir::local_count(b) || e.place.root>ir::local_count(b) || !span(e.start,e.end,ir::source_bytes(b)) || e.start<ir::start(b) || e.end>ir::end(b) || !span(n.text_start,n.text_end,ir::text_bytes(b)) || !span(n.cooked_start,n.cooked_end,ir::text_bytes(b)) || e.kind!=tree.kind || e.start!=tree.start || e.end!=tree.end || e.left!=tree.left || e.right!=tree.right){return fail(1001,f.module_index,e.start,e.end);}
         if((e.kind==10 || e.kind==23) && (e.target==0 || e.target>nt)){return fail(1001,f.module_index,e.start,e.end);}
         if(e.kind==1 && (n.literal_kind==0 || n.literal_kind>9)){return fail(1001,f.module_index,e.start,e.end);}if(e.state==1 && e.type==0){return fail(1001,f.module_index,e.start,e.end);}if(e.kind!=1 && (n.literal_kind!=0 || n.cooked_start!=n.cooked_end)){return fail(1001,f.module_index,e.start,e.end);}
+        if(e.kind==1 && n.literal_kind>=7){let data=ir::node_cooked(b,i);if(!budget::charge(work,data.len+1)){return fail(1002,f.module_index,e.start,e.end);}if(n.literal_kind==7 && !literals::text(data) || n.literal_kind==9 && !literals::cstring(data)){return fail(1001,f.module_index,e.start,e.end);}if(e.state==1 && clean_ir::type_at(cleaned,e.type).kind!=if(n.literal_kind==7){9}else if(n.literal_kind==8){10}else{14}){return fail(1001,f.module_index,e.start,e.end);}}
         let left_statement=e.kind==12 || e.kind==14 || e.kind==31;let right_statement=e.kind==18;let right_type=e.kind==20 || e.kind==23;
         if(!(if(left_statement){statement(b,e.left)}else{expression(b,e.left)}) || !right_type && !(if(right_statement){statement(b,e.right)}else{expression(b,e.right)})){return fail(1001,f.module_index,e.start,e.end);}
         if(!left_statement && e.left!=0 && e.left>=e.source_index || !right_statement && !right_type && e.right!=0 && e.right>=e.source_index){return fail(1001,f.module_index,e.start,e.end);}previous=e.source_index;i+=1;
