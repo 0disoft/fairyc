@@ -7,7 +7,9 @@ import std::vec as v;
 
 pub struct Instance {usize type;usize element;usize module_index;usize declaration;}
 pub resource Plan {catalog::Catalog declarations;types::Graph graph;v::Vec<Instance> instances;cleanup{}}
-pub fn usize limit(){return 64;}
+// Source-wide nominal descriptors are separate from per-unit executable
+// generic specialization and layout admission budgets.
+pub fn usize limit(){return 256;}
 
 pub fn u32 validate(ref catalog::Catalog c,ref types::Graph graph,ref v::Vec<Instance> instances){
     let u32 invalid=types::validate_graph(c,graph);if(invalid!=0){return invalid;}

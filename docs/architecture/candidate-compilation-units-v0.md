@@ -219,6 +219,16 @@ parser owners leave scope. It does not yet instantiate SDK executable bodies.
 Candidate Windows AMD64 storage transport: opaque data + five usize fields.
 These are descriptor facts, not element sizeof/alignment or a public C ABI.
 
+The source-wide nominal descriptor pool now admits 256 concrete Vec types,
+independently of per-unit executable specialization and layout budgets. The
+complete original CLI signature graph requires 107 descriptors across 234
+source modules. The canonical graph remains bounded at 4096 nodes; executable
+generic admission remains 64 per unit and 16 per declaration, and each unit's
+vector layout admission remains 64. All aliases and repeated element types
+continue to share canonical descriptors. Boundary validation measures the SDK's
+five scalar-view Vec descriptors before constructing 256 accepted and 257
+rejected descriptors.
+
 ## Owned generic signature instances (2026-10-09)
 
 `module_unit_generics` builds an owned per-unit plan of explicit generic-call

@@ -2,6 +2,8 @@ module tests::module_source_set;
 import candidate_limits as limits;
 import module_units as units;
 import module_catalog as catalog;
+import module_signatures as signatures;
+import module_unit_bind as binding;
 import syntax as syntax;
 import scanner as scanner;
 import file_source as files;
@@ -44,4 +46,20 @@ import std::io as io;
     }
     assert(next==count && grouped_bytes+units::count(ref plan)-1==units::source_bytes(ref plan));
     discard io::write("units ");discard io::write_usize(units::count(ref plan));discard io::write(" joined bytes ");discard io::write_usize(units::source_bytes(ref plan));discard io::write("\n");
+}
+
+@test @effects(filesystem,console) fn void original_main_has_complete_signatures_and_root_binding(){
+    let count=process::arg_count()-1;assert(count>200 && count<=limits::source_files());
+    var v::Vec<syntax::Parsed> sources=v::empty<syntax::Parsed>();var usize i=0;
+    while(i<count){assert(v::push<syntax::Parsed>(ref mut sources,input(i+1)).is_ok);i+=1;}
+    let metadata=switch(signatures::build(ref sources)){case .ok(p):{p}case .err(e):{failed("signatures",e.code,e.module_index);return;}};
+    assert(signatures::module_count(ref metadata)==count && signatures::count(ref metadata)>1000);i=0;
+    while(i<count){assert(signatures::source_matches(ref metadata,i,v::at<syntax::Parsed>(ref sources,i)));i+=1;}
+    discard io::write("signatures ");discard io::write_usize(signatures::count(ref metadata));
+    discard io::write(" types ");discard io::write_usize(signatures::type_count(ref metadata));
+    discard io::write(" vector instances ");discard io::write_usize(signatures::vector_count(ref metadata));discard io::write("\n");
+    let bound=switch(binding::bind(ref sources,ref metadata,0,1)){case .ok(p):{p}case .err(e):{failed("binding",e.code,e.module_index);return;}};
+    assert(binding::first(ref bound)==0 && binding::stop(ref bound)==1 && binding::work(ref bound)<=1048576);
+    let verified=binding::validate(ref bound,ref sources,ref metadata);assert(verified.code==0);
+    discard io::write("root binding work ");discard io::write_usize(binding::work(ref bound));discard io::write("\n");
 }
