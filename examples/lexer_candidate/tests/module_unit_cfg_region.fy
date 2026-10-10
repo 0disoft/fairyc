@@ -5,6 +5,7 @@ import module_unit_cfg_lower as flow;
 import module_unit_body_ir_lower as lower;
 import module_unit_body_ir_lookup as lookup;
 import module_unit_body_ir_verify as proof;
+import module_unit_sdk_sources as sdk_sources;
 import module_unit_cleanup_mir_model as clean_ir;
 import module_unit_moves as moves;
 import module_unit_values as values;
@@ -66,3 +67,10 @@ fn u32 altered_body(ref ir::Program p,u32 mode){let frame=selected(p);let b=ir::
     let text=switch(bytes::copy(ir::text_view(b))){case .ok(p):{p}case .err(_):{assert(false);return 0;}};let changed=ir::assemble_body_regions(ir::body(b),ir::source_bytes(b),ir::start(b),ir::end(b),nodes,statements,locals,calls,arguments,scopes,placements,resets,text);var usize work=0;return proof::check_body(ref changed,ir::cleanup_ir(p),frame,ref mut work).code;
 }
 @test @effects(console,filesystem) fn void region_body_snapshot_rejects_missing_placement_and_invalid_scope_reset_ledgers(){let p=retained(b"module main;import std::alloc as alloc;fn void f(ref mut alloc::Arena a){region r in a{discard r.place(1);}}",b"");assert(altered_body(ref p,0)==0);var u32 mode=1;while(mode<=11){assert(altered_body(ref p,mode)==1001);mode+=1;}}
+
+@test @effects(console,filesystem) fn void owned_region_program_retains_sdk_bytes_after_parser_release(){
+    let p=retained(b"module main;import std::alloc as alloc;fn void f(ref mut alloc::Arena a){region r in a{discard r.place(1);}}",b"");
+    let original=allocator();assert(sdk_sources::module_count(ir::sdk_units(ref p))==2 && sdk_sources::count(ir::sdk_units(ref p))==1);
+    assert(sdk_sources::find(ir::sdk_units(ref p),1)==1 && bytes::equal(sdk_sources::source_at(ir::sdk_units(ref p),0),syntax::source_view(ref original)));
+    assert(proof::check(ref p).code==0);
+}

@@ -1,0 +1,219 @@
+{
+  "schema": "fairyc.candidate-sdk-owned-sources/v1",
+  "passed": true,
+  "parentCommit": "0c069f25f1959f19162eaad9d4eac2e0dcb07c14",
+  "identity": {
+    "sdkInputs": [
+      {
+        "path": "internal/sdkstdlib/sources/std/alloc.fy",
+        "sha256": "61f50fa03239eee7b669c315659e8c9d07982117857cf50fe7f5a2b6f35a82c2"
+      },
+      {
+        "path": "internal/sdkstdlib/sources/std/io.fy",
+        "sha256": "4b89c3aeb8b4de4887395d29723095d364c5660c6b773c5696fb1f65f5365f48"
+      }
+    ],
+    "compiler": {
+      "path": ".cache/candidate-tagged/compiler-origin-patterns.exe",
+      "sha256": "d36dae1b99751322e447880aaf4d28321bd6d53bdf776185308c6c4504889bb2"
+    },
+    "sources": [
+      {
+        "path": "examples/lexer_candidate/src/module_unit_sdk_sources.fy",
+        "sha256": "080608933f7b4390301216e2a0d8d7275a5e21127929ea26c0dae6a4f2ccf709"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_body_ir_model.fy",
+        "sha256": "4880038d8f70b3a226fef7e129f8cacb851b1e69c404b57eccd469cd1a814ddd"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_body_ir_lower.fy",
+        "sha256": "40959b79624ae5deac0a98a5f70700dba9ceaca07967ab2d66a8bef9b26b6142"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_body_ir_verify.fy",
+        "sha256": "6c4e505757c88f8b428e1e4c0361c3a426c55350103e19ff51534609db4a7b60"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_body_ir_switches.fy",
+        "sha256": "668bbf4f2ad6f1a0be32b21591be560030ae510e602fe7cca9d176743f3b2aa7"
+      },
+      {
+        "path": "examples/lexer_candidate/tests/module_unit_sdk_sources.fy",
+        "sha256": "caaa8ad9534d1ad4316cd6b5eb1a688f6c75e24c36c32974531a3ebf688c2e8c"
+      },
+      {
+        "path": "examples/lexer_candidate/tests/module_unit_cfg_region.fy",
+        "sha256": "2d814848c636d7f09a2011a5b3e3ecbe7250b0bc90379312595d42e3355e8c08"
+      },
+      {
+        "path": "examples/lexer_candidate/fairy.lock",
+        "sha256": "a0ac23f8f22bd9b751a5e416b5bffad43dbfe0f134a8de479c7c09fb249d16aa"
+      }
+    ]
+  },
+  "sourceCheck": {
+    "argv": [
+      "compiler-origin-patterns.exe",
+      "check",
+      "--locked"
+    ],
+    "stdout": "check ok: 2 instance(s), 263 source file(s), 3336 MIR function(s), lock verified\r\n",
+    "sourceCount": 263,
+    "mirFunctionCount": 3336,
+    "exit": 0
+  },
+  "native": {
+    "argv": [
+      "compiler-origin-patterns.exe",
+      "test",
+      "--native",
+      "--json",
+      "--capture-output",
+      "--exact <seven identities>",
+      "--locked",
+      "--",
+      "<absolute alloc.fy>",
+      "<absolute io.fy>"
+    ],
+    "report": {
+      "schemaVersion": "fairyc.test-report/v4",
+      "engine": "native",
+      "target": "x86_64-windows-msvc",
+      "profile": "development",
+      "tests": [
+        {
+          "identity": "tests::module_unit_body_ir_enums::owned_switches_recheck_exhaustive_provider_and_builtin_patterns",
+          "outcome": "passed",
+          "trapCategory": null,
+          "stdoutBase64": "",
+          "stderrBase64": ""
+        },
+        {
+          "identity": "tests::module_unit_cfg_region::owned_region_program_retains_sdk_bytes_after_parser_release",
+          "outcome": "passed",
+          "trapCategory": null,
+          "stdoutBase64": "",
+          "stderrBase64": ""
+        },
+        {
+          "identity": "tests::module_unit_cfg_region::region_fallthrough_defers_and_drops_inside_before_reset_and_outer_cleanup",
+          "outcome": "passed",
+          "trapCategory": null,
+          "stdoutBase64": "",
+          "stderrBase64": ""
+        },
+        {
+          "identity": "tests::module_unit_cfg_region::region_handoff_rejects_missing_duplicate_and_wrong_checkpoint_reset_operations",
+          "outcome": "passed",
+          "trapCategory": null,
+          "stdoutBase64": "",
+          "stderrBase64": ""
+        },
+        {
+          "identity": "tests::module_unit_sdk_sources::exact_sdk_bytes_survive_parser_release_with_original_module_indices",
+          "outcome": "passed",
+          "trapCategory": null,
+          "stdoutBase64": "",
+          "stderrBase64": ""
+        },
+        {
+          "identity": "tests::module_unit_sdk_sources::reserved_names_and_empty_authority_are_checked",
+          "outcome": "passed",
+          "trapCategory": null,
+          "stdoutBase64": "",
+          "stderrBase64": ""
+        },
+        {
+          "identity": "tests::module_unit_sdk_sources::retained_sdk_source_mutations_cannot_forge_authentication",
+          "outcome": "passed",
+          "trapCategory": null,
+          "stdoutBase64": "",
+          "stderrBase64": ""
+        }
+      ],
+      "count": 7,
+      "passed": 7,
+      "failed": 0,
+      "status": "ok",
+      "lock": "verified"
+    },
+    "reportSHA256": "399f90c3d97452a4390c0752afeac29c0cb96d03742ec0da1939e83eff3d92c1",
+    "reportPath": ".cache/candidate-tagged/sdk-owned-sources/native-final.json",
+    "reuse": "All seven identities rerun on final compiler sources. Only a trailing blank line was removed from a test file during execution; test bodies are unchanged."
+  },
+  "behavior": {
+    "admission": "Storage and structural proof only. SDK declaration/signature-to-source binding and execution remain pending",
+    "limits": "At most eight unique SDK sources, individually and cumulatively byte-bounded; duplicate identities checked before copying; source and verifier work capped",
+    "program": "Owned constructor rechecks retained SDK sources, canonical nominal/frame/layout/field/callable module bounds and SDK-frame source byte length",
+    "region": "Region kind17 lexical binding nodes are structurally linked to their statement/local and existing Region records rather than treated as switch payloads",
+    "storage": "Exact bundled source bytes with original module positions and user module gaps, independent of Parsed lifetime; no authority digest/boolean substitute",
+    "legacy": "Empty legacy constructor retains no SDK authority",
+    "proof": "Pinned source hash, valid SDK identity, sorted in-range original module positions, contiguous exact source ranges with no tail, and unique identities"
+  },
+  "initialRegionFailures": [
+    {
+      "identity": "tests::module_unit_cfg_region::region_fallthrough_defers_and_drops_inside_before_reset_and_outer_cleanup",
+      "outcome": "failed",
+      "trapCategory": "assertion-failed",
+      "stdoutBase64": "MTAwMSBhdCAxOTEuLiAxOTIgbG93ZXIK",
+      "stderrBase64": ""
+    },
+    {
+      "identity": "tests::module_unit_cfg_region::region_handoff_rejects_missing_duplicate_and_wrong_checkpoint_reset_operations",
+      "outcome": "failed",
+      "trapCategory": "assertion-failed",
+      "stdoutBase64": "MTAwMSBhdCA4MC4uIDgxIGxvd2VyCg==",
+      "stderrBase64": ""
+    }
+  ],
+  "correction": "Switch ownership proof had rejected Region binding syntax kind17. Existing retained Region proof and lexical statement/local linkage now establish its owner; final Region and switch identities pass",
+  "exploratoryIteration": {
+    "disposition": "Owned IR foreach rejected 1001 before admission. Exploratory test and unused iteration branch removed; no general iteration admission added. Follow-up retained in remaining work.",
+    "report": {
+      "schemaVersion": "fairyc.test-report/v4",
+      "engine": "native",
+      "target": "x86_64-windows-msvc",
+      "profile": "development",
+      "tests": [
+        {
+          "identity": "tests::module_unit_cfg_region::owned_iteration_binding_is_owned_by_its_lexical_statement",
+          "outcome": "failed",
+          "trapCategory": "assertion-failed",
+          "stdoutBase64": "MTAwMSBhdCAwLi4gMCBsb3dlcgo=",
+          "stderrBase64": ""
+        }
+      ],
+      "count": 1,
+      "passed": 0,
+      "failed": 1,
+      "status": "failed",
+      "lock": "verified"
+    }
+  },
+  "privateAPIExpanded": true,
+  "normativeContractsChanged": false,
+  "stableCLIChanged": false,
+  "sdkABIChanged": false,
+  "GoChanged": false,
+  "dbChanged": false,
+  "ciChanged": false,
+  "hygieneChanged": false,
+  "pushed": false,
+  "skipped": {
+    "standaloneCandidateBuild": "Native source compilation and execution covers bounded slice",
+    "Linux": "Windows native slice",
+    "SDKandRegionC": "Declaration/signature and runtime integration pending",
+    "candidateRelease": "Separate release batch",
+    "allocationInjection": "Not injected",
+    "fullSuite": "Seven related identities only"
+  },
+  "pending": [
+    "Authenticated SDK declaration/signature binding and C calls",
+    "Region C execution and whole dispatcher",
+    "Owned foreach admission",
+    "Full original-source/unsafe/path/dominance/initialization proof",
+    "Foreign aggregate ABI layout proof",
+    "Stage1/stage2 and promotion"
+  ]
+}

@@ -67,6 +67,14 @@ pub fn clean::Problem check_body(ref ir::Program p,ref ir::Body b,usize frame,re
             if(!valid || count!=required || required==0){return clean::Problem{.code=if(code!=0){code}else{1001},.module_index,.start=e.start,.end=e.end};}
         }i+=1;
     }
+    // Region bindings share syntax kind 17 with switch payloads.
+    // Their owner is the retained lexical statement, rather than a switch arm.
+    i=0;while(i<ir::statement_count(b)){if(!charge(work,1,ref mut code)){return clean::Problem{.code,.module_index,.start=0,.end=0};}let s=ir::statement_at(b,i).value;
+        if(s.kind==17){let id=lookup::node(b,s.target);if(id==0){return clean::Problem{.code=1001,.module_index,.start=s.start,.end=s.end};}let e=ir::node_at(b,id-1).value;let root=e.place.root;
+            if(e.kind!=17 || e.state!=2 || root==0 || root>ir::local_count(b) || !mark(ref mut owners,id,ir::node_count(b)+i+1)){return clean::Problem{.code=1001,.module_index,.start=e.start,.end=e.end};}let local=ir::local_at(b,root);
+            if(local.kind!=6 || local.source_index!=s.target || local.scope!=e.place.scope || local.start!=e.start || local.end!=e.end || local.initializer!=0){return clean::Problem{.code=1001,.module_index,.start=e.start,.end=e.end};}
+        }i+=1;
+    }
     i=0;while(i<ir::node_count(b)){if(!charge(work,1,ref mut code)){return clean::Problem{.code,.module_index,.start=0,.end=0};}let e=ir::node_at(b,i).value;
         if((e.kind==16 || e.kind==17 || e.kind==18 || e.kind==19 || e.kind==32 || e.kind==33) && *v::at<usize>(ref owners,i)==0){return clean::Problem{.code=1001,.module_index,.start=e.start,.end=e.end};}
         if(e.kind==2 && e.binding!=0 && ir::local_at(b,e.binding).kind==4){let arm=*v::at<usize>(ref locals,e.binding-1);if(arm==0){return clean::Problem{.code=1001,.module_index,.start=e.start,.end=e.end};}let a=ir::node_at(b,arm-1).value;let body=ir::statement_at(b,lookup::statement(b,a.right)-1).value;if(e.type!=ir::local_at(b,e.binding).type || e.start<body.start || e.end>body.end){return clean::Problem{.code=1001,.module_index,.start=e.start,.end=e.end};}}

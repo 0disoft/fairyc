@@ -7,6 +7,7 @@ import module_unit_value_model as m;
 import module_unit_interfaces as interfaces;
 import module_unit_region_model as regions;
 import module_unit_moves as moves;
+import module_unit_sdk_sources as sdk_sources;
 import syntax as syntax;
 import literal_types as literals;
 import std::bytes as bytes;
@@ -33,5 +34,5 @@ pub fn Result<ir::Program,clean_ir::Problem> lower(ref v::Vec<syntax::Parsed> so
     i=0;while(i<interfaces::field_count(imported)){var f=interfaces::field_at(imported,i);let name=interfaces::field_name(imported,i);f.name_start=bytes::len(ref names);if(!m::charge(ref mut work,name.len+1)){return .err(fail(1002,f.module_index,f.start,f.end));}if(!bytes::append(ref mut names,name).is_ok){return .err(fail(1003,f.module_index,f.start,f.end));}f.name_end=bytes::len(ref names);if(!v::push<interfaces::Field>(ref mut fields,f).is_ok){return .err(fail(1003,f.module_index,f.start,f.end));}i+=1;}
     i=0;while(i<interfaces::callable_count(imported)){var c=interfaces::callable_at(imported,i);let link=interfaces::linker_name(imported,i);c.link_start=bytes::len(ref names);let parameter_start=v::len<usize>(ref parameters);var usize j=0;while(j<c.parameter_count){if(!m::charge(ref mut work,1)){return .err(fail(1002,c.module_index,0,0));}if(!v::push<usize>(ref mut parameters,interfaces::parameter_at(imported,c.parameter_start+j)).is_ok){return .err(fail(1003,c.module_index,0,0));}j+=1;}c.parameter_start=parameter_start;
         if(!m::charge(ref mut work,link.len+1)){return .err(fail(1002,c.module_index,0,0));}if(!bytes::append(ref mut names,link).is_ok){return .err(fail(1003,c.module_index,0,0));}c.link_end=bytes::len(ref names);if(!v::push<interfaces::Callable>(ref mut callables,c).is_ok){return .err(fail(1003,c.module_index,0,0));}i+=1;
-    }return ir::assemble(cleaned,bodies,layouts,fields,callables,parameters,names,work);
+    }let sdk=switch(sdk_sources::collect(sources,ref mut work)){case .ok(s):{s}case .err(e):{return .err(e);}};return ir::assemble_sdk(sdk,cleaned,bodies,layouts,fields,callables,parameters,names,work);
 }

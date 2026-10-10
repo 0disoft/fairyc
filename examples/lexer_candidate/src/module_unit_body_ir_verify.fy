@@ -3,6 +3,7 @@ import module_unit_body_ir_model as ir;
 import literal_types as literals;
 import module_unit_body_ir_enums as enums;
 import module_unit_body_ir_switches as switches;
+import module_unit_sdk_sources as sdk_sources;
 import module_unit_body_ir_lookup as lookup;
 import module_unit_cleanup_mir_model as clean_ir;
 import module_unit_cleanup_mir_verify as cleaning;
@@ -73,6 +74,15 @@ pub fn clean_ir::Problem check(ref ir::Program p){
     let cleaned=cleaning::check(ir::cleanup_ir(p));if(cleaned.code!=0){return cleaned;}
     if(ir::count(p)!=clean_ir::frame_count(ir::cleanup_ir(p))){return fail(1001,0,0,0);}if(ir::work(p)>1048576 || ir::name_bytes(p)>1048576 || ir::layout_count(p)>1024 || ir::field_count(p)>1024 || ir::callable_count(p)>1024){return fail(1002,0,0,0);}
     var usize work=ir::work(p);var usize i=1;let nt=clean_ir::type_count(ir::cleanup_ir(p));
+    let sdk=sdk_sources::check(ir::sdk_units(p),ref mut work);if(sdk.code!=0){return sdk;}
+    let modules=sdk_sources::module_count(ir::sdk_units(p));
+    if(modules!=0){
+        while(i<=ir::count(p)){if(!budget::charge(ref mut work,1)){return fail(1002,0,0,0);}let f=clean_ir::frame_at(ir::cleanup_ir(p),i);if(f.module_index>=modules){return fail(1001,f.module_index,0,0);}let unit=sdk_sources::find(ir::sdk_units(p),f.module_index);if(unit!=0 && ir::source_bytes(ir::at(p,i))!=sdk_sources::source_at(ir::sdk_units(p),unit-1).len){return fail(1001,f.module_index,0,0);}i+=1;}
+        i=1;while(i<=nt){if(!budget::charge(ref mut work,1)){return fail(1002,0,0,0);}let t=clean_ir::type_at(ir::cleanup_ir(p),i);if((t.kind==2 || t.kind==3 || t.kind==4 || t.kind==13) && t.module_index>=modules){return fail(1001,t.module_index,0,0);}i+=1;}
+        i=0;while(i<ir::layout_count(p)){if(!budget::charge(ref mut work,1)){return fail(1002,0,0,0);}if(ir::layout_at(p,i).value.module_index>=modules){return fail(1001,0,0,0);}i+=1;}
+        i=0;while(i<ir::field_count(p)){if(!budget::charge(ref mut work,1)){return fail(1002,0,0,0);}if(ir::field_at(p,i).module_index>=modules){return fail(1001,0,0,0);}i+=1;}
+        i=0;while(i<ir::callable_count(p)){if(!budget::charge(ref mut work,1)){return fail(1002,0,0,0);}if(ir::callable_at(p,i).module_index>=modules){return fail(1001,0,0,0);}i+=1;}
+    }i=1;
     while(i<=ir::count(p)){let result=check_body(ir::at(p,i),ir::cleanup_ir(p),i,ref mut work);if(result.code!=0){return result;}let casts=check_casts(p,ir::at(p,i),i,ref mut work);if(casts.code!=0){return casts;}i+=1;}
     i=0;while(i<ir::layout_count(p)){if(!budget::charge(ref mut work,1)){return fail(1002,0,0,0);}let row=ir::layout_at(p,i);let s=row.value;if(s.type==0 || s.type>nt || s.field_start>ir::field_count(p) || s.field_count>ir::field_count(p)-s.field_start || !span(row.name_start,row.name_end,ir::name_bytes(p))){return fail(1001,s.module_index,s.start,s.end);}let t=clean_ir::type_at(ir::cleanup_ir(p),s.type);if(t.module_index!=s.module_index || t.declaration!=s.declaration){return fail(1001,s.module_index,s.start,s.end);}i+=1;}
     i=0;while(i<ir::field_count(p)){if(!budget::charge(ref mut work,1)){return fail(1002,0,0,0);}let f=ir::field_at(p,i);if(f.type>nt || f.payload_start>ir::field_count(p) || f.payload_count>ir::field_count(p)-f.payload_start || !span(f.name_start,f.name_end,ir::name_bytes(p))){return fail(1001,f.module_index,f.start,f.end);}i+=1;}

@@ -2806,3 +2806,17 @@ Receipt: `docs/ops/evidence/candidate-switch-c-execution-20261010.json`. Enum/Op
 - Fixture corrections: remove a second zero-argument i32 entry candidate, use the supported resource-level cleanup-effect metadata placement, explicitly discard a reassigned inert Result, and inject invalid Result data through a private C test input rather than a reference-rejected address exposure.
 - Private C API, local C verifier and source lock expanded. Normative contracts, stable CLI, SDK ABI, Go, DB, CI and hygiene unchanged; no push. Linux, candidate Release and full suite were not run; generated C `/O2` is not candidate Release evidence.
 - Remaining: authenticated SDK/Region and whole dispatcher execution; full original-source/unsafe/path/dominance/initialization proof; foreign aggregate ABI layout proof; stage1/stage2 and promotion.
+
+## Candidate owned SDK sources (2026-10-10)
+
+Receipt: `docs/ops/evidence/candidate-sdk-owned-sources-20261010.json`. Exact authenticated SDK bytes survive the `syntax::Parsed` lifetime, grouped by original module index including user module gaps.
+
+- Identities: up to eight unique SDK identities, each source bounded; reserved names require pinned SHA-256. Duplicate SDK identities reject before copying another source.
+- Verifier: retained-source checks reject byte/identity changes, out-of-range or reordered module indexes, invalid ranges, duplicate identities, unclaimed trailing bytes and exhausted work budgets.
+- Constructor: the program owns these bytes and checks source-module bounds and SDK body byte lengths; a legacy empty source set grants no SDK authority. Declaration and signature binding to these sources remains pending.
+- Region regression: the switch verifier rejected Region syntax kind 17 bindings as unowned switch patterns. It now checks lexical statement/local linkage alongside the existing retained Region proof.
+- Validation: locked source check passes 263 sources and 3336 MIR functions. Final 7/7 selected native identities pass: exact alloc/io source survival, ten retained-source mutations, duplicate/tampered/reserved inputs, empty authority/work budgets, Region source retention, Region cleanup/reset regressions and exhaustive provider/builtin switches. Two initial Region failures were corrected; all seven final identities were rerun on the final compiler sources.
+- Foreach: an exploratory owned-IR probe rejected 1001 before admission and remains pending. This unit adds no iteration admission.
+- Unchanged: public CLI, SDK ABI, normative specs, Go, DB, CI and hygiene; no push.
+- Deferred: candidate Release, Linux, full suite and standalone candidate build; this is a bounded source-retention and regression unit.
+- Remaining: SDK call binding/signature authentication and C execution; Region C, full dispatcher, full source/unsafe provenance, path/dominance/initialization proofs, foreign aggregate ABI layout, stage1/stage2 and promotion.
