@@ -90,7 +90,10 @@ func (a *analyzer) resourceFlowDropFunction(module *moduleScope, function *ast.F
 	}
 	a.beginResourceEffects(a.functions[function], receiver)
 	defer a.endResourceEffects()
-	a.resourceBlock(module, function.Body, environment, false, resourceRead)
+	reachable := a.resourceBlock(module, function.Body, environment, false, resourceRead)
+	if reachable {
+		a.checkResourceEnvironmentEffects(environment, span(module.file.Path, function.Body.Span), nil)
+	}
 	state := environment[receiver]
 	if state.state == ResourceLive {
 		return
