@@ -2447,3 +2447,36 @@ the full dispatcher and stage1/stage2 self-hosting remain pending; this is not f
 compiler semantics. Release, Linux and the full compiler suite stay deferred. The
 stable CLI, SDK ABI, DB and CI runner are unchanged; the private candidate API is
 unchanged. No push.
+
+## Candidate partial-owner cleanup effects (2026-10-10)
+
+The candidate now retains cleanup effects for partially evaluated owners. The move
+context carries a bounded 1024-entry pending-owner stack plus loop markers: a completed
+record construction or call invocation truncates its pending frame, `?` and explicit `return` charge
+every pending owner, and `break`/`continue` capture only the current loop's pending
+owners, so an inner-loop `break` retains the outer pending owners. Go gained the matching
+reference work in commit 52a424b4, retaining pending field and argument owners and
+checking the actual abrupt exits; the complete Go semantic package passes in 0.542s and
+the selected compiler tests (`TestByteForCleanupOnResultPropagation`,
+`TestPrivateVectorSDKCandidateLoopPropagationCleanup` and
+`TestBlockResultPrecedesLexicalCleanup`) in 2.766s.
+
+The new partial-owner CLI holds 24 fixtures that match complete corrected-Go primary and
+related spans: a no-drop `@abilities(store)` pending owner rejected with E1108, an
+authority-correct case admitted, an earlier evaluated field versus a later owner not yet
+constructed, repeated-owner dedup, and nested, tagged and generic cases. The old 366 CLI
+fixtures were rerun on this candidate and all match, for 390 total. Four selected native
+tests hold 123 fixtures (18 cleanup request, 58 cleanup policy, 23 recursive and 24
+partial); the three earlier tests are valid reuse, and only the partial test was rerun
+after its fixture was corrected from an invalid `@abilities(move)` (rejected with E1107,
+which aborted the initial run) to `@abilities(store)`, passing all 24. The current-source
+check passed 241 files and 3010 MIR functions with the lock unchanged, and the locked
+development build passed. Evidence:
+`docs/ops/evidence/candidate-cleanup-partial-owners-20261010.json`.
+
+The partial field and call early-exit cleanup effect fix is complete. Split-unit cleanup
+event MIR, C and runtime elaboration, outstanding borrow and access edges, unsafe
+provenance, and the full dispatcher and stage1/stage2 self-hosting remain pending; this
+is not full compiler semantics. Release, Linux and the full compiler suite stay deferred.
+No new public or private API was added; the internal move context and Fact requests keep
+the existing private API unchanged. No push.

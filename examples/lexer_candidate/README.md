@@ -210,10 +210,10 @@ the loop-header coordinates for E1105, and cast type syntax is not traversed as 
 value. The private fact API returns an immutable owned plan validated after the
 source and values are released.
 
-Cleanup drop obligations and effects now propagate through owned resource fields;
-MIR/C/runtime wiring, field initializer error-edge cleanup effects, outstanding borrow
-and access edges, unsafe provenance, the full dispatcher and stage1/stage2 remain
-pending; Release, Linux and the full compiler suite are deferred.
+Cleanup drop obligations and effects now propagate through owned resource fields and
+their partially evaluated owners; MIR/C/runtime wiring, outstanding borrow and access
+edges, unsafe provenance, the full dispatcher and stage1/stage2 remain pending; Release,
+Linux and the full compiler suite are deferred.
 
 ## Cleanup and drop-effect checking
 
@@ -231,8 +231,10 @@ caller with E7102. Both diagnostics carry the offending `ability-declaration` or
 The command walks each owner's ordered fields, follows `Option` and `Result` payloads
 and deduplicates canonical types, so cleanup effects propagate through nested fields:
 an outer resource whose field cleanup declares an effect the caller does not hold is
-rejected with E7102 anchored at that field's `effect-declaration`. The error edge of a
-later field initializer does not yet charge cleanup effects for previously evaluated
-resource fields. Cleanup event MIR, C and runtime elaboration, remaining borrow and
-access edges, unsafe provenance, and the full dispatcher and stage1/stage2 remain
-pending; Release, Linux and the full compiler suite are deferred.
+rejected with E7102 anchored at that field's `effect-declaration`. A later field or call
+initializer's abrupt exit now charges cleanup effects for the owners already evaluated
+before it. A completed construction or invocation releases its pending frame;
+`break`/`continue` charge only owners captured inside the target loop. Split-unit cleanup event MIR, C and runtime
+elaboration, remaining borrow and access edges, unsafe provenance, and the full
+dispatcher and stage1/stage2 remain pending; Release, Linux and the full compiler suite
+are deferred.

@@ -8,7 +8,7 @@ import std::vec as v;
 pub struct Cell {u32 state;usize move_start;usize move_end;}
 pub struct Diagnostic {u32 code;usize frame;usize module_index;usize start;usize end;usize declaration_start;usize declaration_end;usize move_start;usize move_end;usize header_start;usize header_end;usize field_module;usize field_start;usize field_end;}
 pub struct Fact {usize frame;usize binding;u32 kind;u32 before;u32 after;usize start;usize end;usize move_start;usize move_end;usize type;u32 exit;}
-pub struct Context {m::Frame value;usize frame;usize work;usize loop;usize cleanup_end;}
+pub struct Context {m::Frame value;usize frame;usize work;usize loop;usize cleanup_end;usize pending_count;usize[1024] pending_types;usize[1024] pending_loops;}
 pub resource Edge {usize loop;bool back;usize start;usize end;v::Vec<Cell> cells;cleanup{}}
 pub fn Edge edge(usize loop,bool back,usize start,usize end,v::Vec<Cell> cells){return Edge{.loop,.back,.start,.end,.cells};}
 pub fn usize edge_loop(ref Edge p){return p.loop;}
@@ -48,5 +48,9 @@ pub fn m::Problem schedule(usize binding,usize type,u32 exit,usize start,usize e
     if(start>=end || type==0 || exit==0 || exit>9){return fail(c,12,start,end);}if(v::len<Fact>(facts)>=16384 || !m::charge(ref mut c.work,1)){return fail(c,10,start,end);}
     return if(v::push<Fact>(facts,Fact{.frame=c.frame,.binding,.kind=5,.before=1,.after=1,.start,.end,.move_start=0,.move_end=0,.type,.exit}).is_ok){fail(c,0,0,0)}else{fail(c,11,start,end)};
 }
-pub fn m::Problem cleanup_live(ref m::Values body,ref v::Vec<Cell> env,u32 exit,usize start,usize end,ref mut v::Vec<Fact> facts,ref mut Context c){var usize i=0;while(i<v::len<Cell>(env)){if(!m::charge(ref mut c.work,1)){return fail(c,10,start,end);}let n=m::local_at(body,i+1);if(v::at<Cell>(env,i).state==1 && n.kind!=10){let p=schedule(i+1,n.type,exit,start,end,facts,c);if(p.code!=0){return p;}}i+=1;}return fail(c,0,0,0);}
+pub fn m::Problem retain_pending(usize type,ref mut Context c){if(c.pending_count>=1024 || !m::charge(ref mut c.work,1)){return fail(c,10,0,0);}let index=c.pending_count;let loop=c.loop;c.pending_types[index]=type;c.pending_loops[index]=loop;c.pending_count=index+1;return fail(c,0,0,0);}
+// Partially evaluated fields/arguments are still owned by their surrounding
+// expression. Only function exit, propagation failure or an exiting loop drops them.
+pub fn m::Problem cleanup_pending(u32 exit,usize start,usize end,ref mut v::Vec<Fact> facts,ref mut Context c){var usize i=0;while(i<c.pending_count){if(!m::charge(ref mut c.work,1)){return fail(c,10,start,end);}if(exit==2 || exit==6 || (exit==3 || exit==4) && c.pending_loops[i]>=c.loop){let p=schedule(0,c.pending_types[i],exit,start,end,facts,c);if(p.code!=0){return p;}}i+=1;}return fail(c,0,0,0);}
+pub fn m::Problem cleanup_live(ref m::Values body,ref v::Vec<Cell> env,u32 exit,usize start,usize end,ref mut v::Vec<Fact> facts,ref mut Context c){var usize i=0;while(i<v::len<Cell>(env)){if(!m::charge(ref mut c.work,1)){return fail(c,10,start,end);}let n=m::local_at(body,i+1);if(v::at<Cell>(env,i).state==1 && n.kind!=10){let p=schedule(i+1,n.type,exit,start,end,facts,c);if(p.code!=0){return p;}}i+=1;}return cleanup_pending(exit,start,end,facts,c);}
 pub fn m::Problem cleanup_new(ref m::Values body,ref v::Vec<Cell> before,ref v::Vec<Cell> env,u32 exit,usize start,usize end,ref mut v::Vec<Fact> facts,ref mut Context c){var usize i=0;while(i<v::len<Cell>(env)){if(!m::charge(ref mut c.work,1)){return fail(c,10,start,end);}let n=m::local_at(body,i+1);if(v::at<Cell>(before,i).state==0 && v::at<Cell>(env,i).state==1 && n.kind!=10){let p=schedule(i+1,n.type,exit,start,end,facts,c);if(p.code!=0){return p;}}i+=1;}return fail(c,0,0,0);}

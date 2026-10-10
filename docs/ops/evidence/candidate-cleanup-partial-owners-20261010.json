@@ -1,0 +1,1338 @@
+{
+  "schema": "fairyc.candidate-cleanup-partial-owners/v1",
+  "passed": true,
+  "sourceTruth": [
+    "docs/language/0001-values-and-resources.md",
+    "docs/language/0008-effects-and-capabilities-v0.md",
+    "docs/language/0009-resource-abilities-v0.md"
+  ],
+  "referenceFix": {
+    "commit": "52a424b4",
+    "scope": "Retain consumed fields/arguments until construction or invocation completes; charge abrupt-exit cleanup authority and stop installing aborted bindings."
+  },
+  "identity": {
+    "compilerSHA256": "ee2303dad4f1367b5a87ac056a225436afea2017abd935fe4d3bc719cab1ff7c",
+    "candidateSHA256": "479bfddfde7850c97a5caa32f3ca4c6f2e40630080e572bf0de8cbfcc07da9f3",
+    "sources": {
+      "examples/lexer_candidate/src/module_unit_move_model.fy": "cd00117420047182cc1994116b63be583eae1595794689fc6d8ce8f65b0652ec",
+      "examples/lexer_candidate/src/module_unit_move_control.fy": "a3e35acc19916a3d87ebc5ebf9cbc94396a9e9bbdc7dbcc1d232e572fbf278f1",
+      "examples/lexer_candidate/src/module_unit_move_walk.fy": "e373e84e0aa72d7e4b98dd7950ce72dbed7587464752bd337e44c81de0889788",
+      "examples/lexer_candidate/src/module_unit_moves.fy": "09edeb98897abfa0888d2c6c7426aa7b47b52c70f38166a733501d56ecc91b2c",
+      "examples/lexer_candidate/tests/module_unit_partial_cleanup.fy": "fceaa277550b09db65c72095cd352c33c45424a02d826288b26b6526044bc4d9",
+      "examples/lexer_candidate/fairy.lock": "978985e04941515f36b1b72267086d7477536ef0fb01df0a9b418f978026b0bd",
+      "internal/semantic/resource_pending.go": "a01c153f02bdc9e7d70e2845e97f94d3d78d1beb077d29c933506c981e3b6d70",
+      "internal/semantic/resource_flow.go": "a4c3b1ed500f33fb09b70eca151b6c1431fd7a4b1794e61d5a199752ce96affd",
+      "internal/semantic/resolve.go": "39d59d950d790dfb83229389584da3152e77c06ecbf022cb4983f249ca8c58af",
+      "internal/semantic/resource_pending_test.go": "9c15eeaf68185d468512684bdad252e8c3b80c13fe0aab8a4118ca59a65c7b3b"
+    }
+  },
+  "fixtures": [
+    {
+      "index": 0,
+      "name": "field propagation",
+      "source": "module main;@effects(console)resource R{i32 n;cleanup{discard 1;}}resource Box{R first;i32 n;cleanup{}}fn R make(){return R{.n=1};}fn Result<i32,i32> number(){return .err(1);}fn Result<Box,i32> f(){return .ok(Box{.first=make(),.n=number()?});}",
+      "provider": "",
+      "expected": 3,
+      "reference": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:1:231: E7102: A call or compiler-scheduled resource cleanup requires one or more effects not declared by the enclosing function. [bytes 230..239]\n  effect-declaration: main.fy:1:13 [bytes 12..29]\n"
+      }
+    },
+    {
+      "index": 1,
+      "name": "field authority",
+      "source": "module main;@effects(console)resource R{i32 n;cleanup{discard 1;}}resource Box{R first;i32 n;cleanup{}}fn R make(){return R{.n=1};}fn Result<i32,i32> number(){return .err(1);}@effects(console)fn Result<Box,i32> f(){return .ok(Box{.first=make(),.n=number()?});}",
+      "provider": "",
+      "expected": 0,
+      "reference": {
+        "exit": 0,
+        "stdout": "semantics ok: main.fy (typed HIR: 4 function(s))\n",
+        "stderr": ""
+      }
+    },
+    {
+      "index": 2,
+      "name": "field transferred local",
+      "source": "module main;@effects(console)resource R{i32 n;cleanup{discard 1;}}resource Box{R first;i32 n;cleanup{}}fn R make(){return R{.n=1};}fn Result<i32,i32> number(){return .err(1);}fn Result<Box,i32> f(){let R value=make();return .ok(Box{.first=value,.n=number()?});}",
+      "provider": "",
+      "expected": 3,
+      "reference": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:1:249: E7102: A call or compiler-scheduled resource cleanup requires one or more effects not declared by the enclosing function. [bytes 248..257]\n  effect-declaration: main.fy:1:13 [bytes 12..29]\n"
+      }
+    },
+    {
+      "index": 3,
+      "name": "argument propagation",
+      "source": "module main;@effects(console)resource R{i32 n;cleanup{discard 1;}}resource Box{R first;i32 n;cleanup{}}fn R make(){return R{.n=1};}fn Result<i32,i32> number(){return .err(1);}fn Box take(R value,i32 n){return Box{.first=value,.n=n};}fn Result<Box,i32> f(){return .ok(take(make(),number()?));}",
+      "provider": "",
+      "expected": 3,
+      "reference": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:1:280: E7102: A call or compiler-scheduled resource cleanup requires one or more effects not declared by the enclosing function. [bytes 279..288]\n  effect-declaration: main.fy:1:13 [bytes 12..29]\n"
+      }
+    },
+    {
+      "index": 4,
+      "name": "argument authority",
+      "source": "module main;@effects(console)resource R{i32 n;cleanup{discard 1;}}resource Box{R first;i32 n;cleanup{}}fn R make(){return R{.n=1};}fn Result<i32,i32> number(){return .err(1);}fn Box take(R value,i32 n){return Box{.first=value,.n=n};}@effects(console)fn Result<Box,i32> f(){return .ok(take(make(),number()?));}",
+      "provider": "",
+      "expected": 0,
+      "reference": {
+        "exit": 0,
+        "stdout": "semantics ok: main.fy (typed HIR: 5 function(s))\n",
+        "stderr": ""
+      }
+    },
+    {
+      "index": 5,
+      "name": "completed transfer",
+      "source": "module main;@effects(console)resource R{i32 n;cleanup{discard 1;}}resource Box{R first;i32 n;cleanup{}}fn R make(){return R{.n=1};}fn Result<i32,i32> number(){return .err(1);}fn Result<Box,i32> f(){return .ok(Box{.first=make(),.n=1});}",
+      "provider": "",
+      "expected": 0,
+      "reference": {
+        "exit": 0,
+        "stdout": "semantics ok: main.fy (typed HIR: 4 function(s))\n",
+        "stderr": ""
+      }
+    },
+    {
+      "index": 6,
+      "name": "later owner after propagation",
+      "source": "module main;@effects(console)resource R{i32 n;cleanup{discard 1;}}resource Box{R first;i32 n;cleanup{}}fn R make(){return R{.n=1};}fn Result<i32,i32> number(){return .err(1);}fn Result<Box,i32> f(){return .ok(Box{.n=number()?,.first=make()});}",
+      "provider": "",
+      "expected": 0,
+      "reference": {
+        "exit": 0,
+        "stdout": "semantics ok: main.fy (typed HIR: 4 function(s))\n",
+        "stderr": ""
+      }
+    },
+    {
+      "index": 7,
+      "name": "completed nested call",
+      "source": "module main;@effects(console)resource R{i32 n;cleanup{discard 1;}}resource Box{R first;i32 n;cleanup{}}fn R make(){return R{.n=1};}fn Result<i32,i32> number(){return .err(1);}fn R pass(R value){return value;}fn Result<Box,i32> f(){return .ok(Box{.n=number()?,.first=pass(make())});}",
+      "provider": "",
+      "expected": 0,
+      "reference": {
+        "exit": 0,
+        "stdout": "semantics ok: main.fy (typed HIR: 5 function(s))\n",
+        "stderr": ""
+      }
+    },
+    {
+      "index": 8,
+      "name": "field explicit return",
+      "source": "module main;@effects(console)resource R{i32 n;cleanup{discard 1;}}resource Box{R first;i32 n;cleanup{}}fn R make(){return R{.n=1};}fn Result<i32,i32> number(){return .err(1);}fn Result<Box,i32> f(){return .ok(Box{.first=make(),.n={return .err(1);0}});}",
+      "provider": "",
+      "expected": 3,
+      "reference": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:1:232: E7102: A call or compiler-scheduled resource cleanup requires one or more effects not declared by the enclosing function. [bytes 231..246]\n  effect-declaration: main.fy:1:13 [bytes 12..29]\n"
+      }
+    },
+    {
+      "index": 9,
+      "name": "aborted binding",
+      "source": "module main;@effects(console)resource R{i32 n;cleanup{discard 1;}}resource Box{R first;i32 n;cleanup{}}fn R make(){return R{.n=1};}fn Result<i32,i32> number(){return .err(1);}fn Result<Box,i32> f(){let Box box=Box{.first=make(),.n={return .err(1);0}};return .ok(box);}",
+      "provider": "",
+      "expected": 3,
+      "reference": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:1:233: E7102: A call or compiler-scheduled resource cleanup requires one or more effects not declared by the enclosing function. [bytes 232..247]\n  effect-declaration: main.fy:1:13 [bytes 12..29]\n"
+      }
+    },
+    {
+      "index": 10,
+      "name": "loop break",
+      "source": "module main;@effects(console)resource R{i32 n;cleanup{discard 1;}}resource Box{R first;i32 n;cleanup{}}fn R make(){return R{.n=1};}fn Result<i32,i32> number(){return .err(1);}fn Result<Box,i32> f(bool c){while(c){let Box box=Box{.first=make(),.n={break;0}};}return .err(1);}",
+      "provider": "",
+      "expected": 3,
+      "reference": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:1:248: E7102: A call or compiler-scheduled resource cleanup requires one or more effects not declared by the enclosing function. [bytes 247..253]\n  effect-declaration: main.fy:1:13 [bytes 12..29]\n"
+      }
+    },
+    {
+      "index": 11,
+      "name": "loop continue",
+      "source": "module main;@effects(console)resource R{i32 n;cleanup{discard 1;}}resource Box{R first;i32 n;cleanup{}}fn R make(){return R{.n=1};}fn Result<i32,i32> number(){return .err(1);}fn Result<Box,i32> f(bool c){while(c){let Box box=Box{.first=make(),.n={continue;0}};}return .err(1);}",
+      "provider": "",
+      "expected": 3,
+      "reference": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:1:248: E7102: A call or compiler-scheduled resource cleanup requires one or more effects not declared by the enclosing function. [bytes 247..256]\n  effect-declaration: main.fy:1:13 [bytes 12..29]\n"
+      }
+    },
+    {
+      "index": 12,
+      "name": "inner loop preserves outer partial",
+      "source": "module main;@effects(console)resource R{i32 n;cleanup{discard 1;}}resource Box{R first;i32 n;cleanup{}}fn R make(){return R{.n=1};}fn Result<i32,i32> number(){return .err(1);}fn Result<Box,i32> f(){return .ok(Box{.first=make(),.n={while(true){break;}0}});}",
+      "provider": "",
+      "expected": 0,
+      "reference": {
+        "exit": 0,
+        "stdout": "semantics ok: main.fy (typed HIR: 4 function(s))\n",
+        "stderr": ""
+      }
+    },
+    {
+      "index": 13,
+      "name": "nested pending call",
+      "source": "module main;@effects(console)resource R{i32 n;cleanup{discard 1;}}resource Box{R first;i32 n;cleanup{}}fn R make(){return R{.n=1};}fn Result<i32,i32> number(){return .err(1);}fn R pass(R value){return value;}fn Box take(R value,i32 n){return Box{.first=value,.n=n};}fn Result<Box,i32> f(){return .ok(take(pass(make()),number()?));}",
+      "provider": "",
+      "expected": 3,
+      "reference": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:1:319: E7102: A call or compiler-scheduled resource cleanup requires one or more effects not declared by the enclosing function. [bytes 318..327]\n  effect-declaration: main.fy:1:13 [bytes 12..29]\n"
+      }
+    },
+    {
+      "index": 14,
+      "name": "partial and live dedup",
+      "source": "module main;@effects(console)resource R{i32 n;cleanup{discard 1;}}resource Box{R first;i32 n;cleanup{}}fn R make(){return R{.n=1};}fn Result<i32,i32> number(){return .err(1);}fn Result<Box,i32> f(){let R older=make();return .ok(Box{.first=make(),.n=number()?});}",
+      "provider": "",
+      "expected": 3,
+      "reference": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:1:218: E7102: A call or compiler-scheduled resource cleanup requires one or more effects not declared by the enclosing function. [bytes 217..261]\n  effect-declaration: main.fy:1:13 [bytes 12..29]\nmain.fy:1:250: E7102: A call or compiler-scheduled resource cleanup requires one or more effects not declared by the enclosing function. [bytes 249..258]\n  effect-declaration: main.fy:1:13 [bytes 12..29]\n"
+      }
+    },
+    {
+      "index": 15,
+      "name": "two partial values dedup",
+      "source": "module main;@effects(console)resource R{i32 n;cleanup{discard 1;}}resource Box{R first;i32 n;cleanup{}}fn R make(){return R{.n=1};}fn Result<i32,i32> number(){return .err(1);}resource Pair{R a;R b;i32 n;cleanup{}}fn Result<Pair,i32> f(){return .ok(Pair{.a=make(),.b=make(),.n=number()?});}",
+      "provider": "",
+      "expected": 3,
+      "reference": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:1:277: E7102: A call or compiler-scheduled resource cleanup requires one or more effects not declared by the enclosing function. [bytes 276..285]\n  effect-declaration: main.fy:1:13 [bytes 12..29]\n"
+      }
+    },
+    {
+      "index": 16,
+      "name": "tagged partial",
+      "source": "module main;@effects(console)resource R{i32 n;cleanup{discard 1;}}resource Box{R first;i32 n;cleanup{}}fn R make(){return R{.n=1};}fn Result<i32,i32> number(){return .err(1);}resource Tagged{Option<R> value;i32 n;cleanup{}}fn Result<Tagged,i32> f(){return .ok(Tagged{.value=.some(make()),.n=number()?});}",
+      "provider": "",
+      "expected": 3,
+      "reference": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:1:292: E7102: A call or compiler-scheduled resource cleanup requires one or more effects not declared by the enclosing function. [bytes 291..300]\n  effect-declaration: main.fy:1:13 [bytes 12..29]\n"
+      }
+    },
+    {
+      "index": 17,
+      "name": "nested root partial",
+      "source": "module main;@effects(console)resource R{i32 n;cleanup{discard 1;}}resource Box{R first;i32 n;cleanup{}}fn R make(){return R{.n=1};}fn Result<i32,i32> number(){return .err(1);}fn Box make_box(){return Box{.first=make(),.n=1};}resource Outer{Box value;i32 n;cleanup{}}fn Result<Outer,i32> f(){return .ok(Outer{.value=make_box(),.n=number()?});}",
+      "provider": "",
+      "expected": 3,
+      "reference": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:1:330: E7102: A call or compiler-scheduled resource cleanup requires one or more effects not declared by the enclosing function. [bytes 329..338]\n  effect-declaration: main.fy:1:13 [bytes 12..29]\n"
+      }
+    },
+    {
+      "index": 18,
+      "name": "branch partial propagation",
+      "source": "module main;@effects(console)resource R{i32 n;cleanup{discard 1;}}resource Box{R first;i32 n;cleanup{}}fn R make(){return R{.n=1};}fn Result<i32,i32> number(){return .err(1);}fn Result<Box,i32> f(bool c){return .ok(Box{.first=make(),.n=if(c){number()?}else{1}});}",
+      "provider": "",
+      "expected": 3,
+      "reference": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:1:243: E7102: A call or compiler-scheduled resource cleanup requires one or more effects not declared by the enclosing function. [bytes 242..251]\n  effect-declaration: main.fy:1:13 [bytes 12..29]\n"
+      }
+    },
+    {
+      "index": 19,
+      "name": "no drop partial",
+      "source": "module main;@effects(console)resource R{i32 n;cleanup{discard 1;}}resource Box{R first;i32 n;cleanup{}}fn R make(){return R{.n=1};}fn Result<i32,i32> number(){return .err(1);}@abilities(store)resource Linear{i32 n;cleanup{}}fn Linear linear(){return Linear{.n=1};}resource Pair{Linear first;i32 n;cleanup{}}fn Result<Pair,i32> f(){return .ok(Pair{.first=linear(),.n=number()?});}",
+      "provider": "",
+      "expected": 3,
+      "reference": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:1:367: E1108: Compiler-scheduled implicit destruction reaches a resource whose explicit ability set omits `drop`. [bytes 366..375]\n  ability-declaration: main.fy:1:176 [bytes 175..192]\n"
+      }
+    },
+    {
+      "index": 20,
+      "name": "pending survives scalar declaration",
+      "source": "module main;@effects(console)resource R{i32 n;cleanup{discard 1;}}resource Box{R first;i32 n;cleanup{}}fn R make(){return R{.n=1};}fn Result<i32,i32> number(){return .err(1);}fn Result<Box,i32> f(){return .ok(Box{.first=make(),.n={let Result<i32,i32> r=number();r?}});}",
+      "provider": "",
+      "expected": 3,
+      "reference": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:1:263: E7102: A call or compiler-scheduled resource cleanup requires one or more effects not declared by the enclosing function. [bytes 262..264]\n  effect-declaration: main.fy:1:13 [bytes 12..29]\n"
+      }
+    },
+    {
+      "index": 21,
+      "name": "loop authority",
+      "source": "module main;@effects(console)resource R{i32 n;cleanup{discard 1;}}resource Box{R first;i32 n;cleanup{}}fn R make(){return R{.n=1};}fn Result<i32,i32> number(){return .err(1);}@effects(console)fn Result<Box,i32> f(bool c){while(c){let Box box=Box{.first=make(),.n={break;0}};}return .err(1);}",
+      "provider": "",
+      "expected": 0,
+      "reference": {
+        "exit": 0,
+        "stdout": "semantics ok: main.fy (typed HIR: 4 function(s))\n",
+        "stderr": ""
+      }
+    },
+    {
+      "index": 22,
+      "name": "pending survives successful block",
+      "source": "module main;@effects(console)resource R{i32 n;cleanup{discard 1;}}resource Box{R first;i32 n;cleanup{}}fn R make(){return R{.n=1};}fn Result<i32,i32> number(){return .err(1);}fn Result<Box,i32> f(){return .ok(Box{.first=make(),.n={let i32 n=1;n}});}",
+      "provider": "",
+      "expected": 0,
+      "reference": {
+        "exit": 0,
+        "stdout": "semantics ok: main.fy (typed HIR: 4 function(s))\n",
+        "stderr": ""
+      }
+    },
+    {
+      "index": 23,
+      "name": "generic partial",
+      "source": "module main;@effects(console)resource R{i32 n;cleanup{discard 1;}}resource Box{R first;i32 n;cleanup{}}fn R make(){return R{.n=1};}fn Result<i32,i32> number(){return .err(1);}fn Result<Box,i32> f<T>(){return .ok(Box{.first=make(),.n=number()?});}fn Result<Box,i32> use(){return f<i32>();}",
+      "provider": "",
+      "expected": 3,
+      "reference": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:1:234: E7102: A call or compiler-scheduled resource cleanup requires one or more effects not declared by the enclosing function. [bytes 233..242]\n  effect-declaration: main.fy:1:13 [bytes 12..29]\n"
+      }
+    }
+  ],
+  "cli": {
+    "passed": true,
+    "matched": 24,
+    "count": 24,
+    "candidateSHA256": "479bfddfde7850c97a5caa32f3ca4c6f2e40630080e572bf0de8cbfcc07da9f3",
+    "cases": [
+      {
+        "index": 0,
+        "name": "field propagation",
+        "exit": 3,
+        "matched": true,
+        "reference": [
+          {
+            "file": "main.fy",
+            "code": 7102,
+            "start": 230,
+            "end": 239,
+            "related": [
+              {
+                "role": "effect-declaration",
+                "file": "main.fy",
+                "start": 12,
+                "end": 29
+              }
+            ]
+          }
+        ],
+        "diagnostics": [
+          {
+            "file": "main.fy",
+            "code": 7102,
+            "start": 230,
+            "end": 239,
+            "related": [
+              {
+                "role": "effect-declaration",
+                "file": "main.fy",
+                "start": 12,
+                "end": 29
+              }
+            ]
+          }
+        ],
+        "stdout": "",
+        "stderr": "main.fy:1:231: error: E7102 cleanup effect exceeds caller authority (bytes 230..239)\n  effect-declaration: main.fy (bytes 12..29)\n"
+      },
+      {
+        "index": 1,
+        "name": "field authority",
+        "exit": 0,
+        "matched": true,
+        "reference": [],
+        "diagnostics": [],
+        "stdout": "return origins ok\n",
+        "stderr": ""
+      },
+      {
+        "index": 2,
+        "name": "field transferred local",
+        "exit": 3,
+        "matched": true,
+        "reference": [
+          {
+            "file": "main.fy",
+            "code": 7102,
+            "start": 248,
+            "end": 257,
+            "related": [
+              {
+                "role": "effect-declaration",
+                "file": "main.fy",
+                "start": 12,
+                "end": 29
+              }
+            ]
+          }
+        ],
+        "diagnostics": [
+          {
+            "file": "main.fy",
+            "code": 7102,
+            "start": 248,
+            "end": 257,
+            "related": [
+              {
+                "role": "effect-declaration",
+                "file": "main.fy",
+                "start": 12,
+                "end": 29
+              }
+            ]
+          }
+        ],
+        "stdout": "",
+        "stderr": "main.fy:1:249: error: E7102 cleanup effect exceeds caller authority (bytes 248..257)\n  effect-declaration: main.fy (bytes 12..29)\n"
+      },
+      {
+        "index": 3,
+        "name": "argument propagation",
+        "exit": 3,
+        "matched": true,
+        "reference": [
+          {
+            "file": "main.fy",
+            "code": 7102,
+            "start": 279,
+            "end": 288,
+            "related": [
+              {
+                "role": "effect-declaration",
+                "file": "main.fy",
+                "start": 12,
+                "end": 29
+              }
+            ]
+          }
+        ],
+        "diagnostics": [
+          {
+            "file": "main.fy",
+            "code": 7102,
+            "start": 279,
+            "end": 288,
+            "related": [
+              {
+                "role": "effect-declaration",
+                "file": "main.fy",
+                "start": 12,
+                "end": 29
+              }
+            ]
+          }
+        ],
+        "stdout": "",
+        "stderr": "main.fy:1:280: error: E7102 cleanup effect exceeds caller authority (bytes 279..288)\n  effect-declaration: main.fy (bytes 12..29)\n"
+      },
+      {
+        "index": 4,
+        "name": "argument authority",
+        "exit": 0,
+        "matched": true,
+        "reference": [],
+        "diagnostics": [],
+        "stdout": "return origins ok\n",
+        "stderr": ""
+      },
+      {
+        "index": 5,
+        "name": "completed transfer",
+        "exit": 0,
+        "matched": true,
+        "reference": [],
+        "diagnostics": [],
+        "stdout": "return origins ok\n",
+        "stderr": ""
+      },
+      {
+        "index": 6,
+        "name": "later owner after propagation",
+        "exit": 0,
+        "matched": true,
+        "reference": [],
+        "diagnostics": [],
+        "stdout": "return origins ok\n",
+        "stderr": ""
+      },
+      {
+        "index": 7,
+        "name": "completed nested call",
+        "exit": 0,
+        "matched": true,
+        "reference": [],
+        "diagnostics": [],
+        "stdout": "return origins ok\n",
+        "stderr": ""
+      },
+      {
+        "index": 8,
+        "name": "field explicit return",
+        "exit": 3,
+        "matched": true,
+        "reference": [
+          {
+            "file": "main.fy",
+            "code": 7102,
+            "start": 231,
+            "end": 246,
+            "related": [
+              {
+                "role": "effect-declaration",
+                "file": "main.fy",
+                "start": 12,
+                "end": 29
+              }
+            ]
+          }
+        ],
+        "diagnostics": [
+          {
+            "file": "main.fy",
+            "code": 7102,
+            "start": 231,
+            "end": 246,
+            "related": [
+              {
+                "role": "effect-declaration",
+                "file": "main.fy",
+                "start": 12,
+                "end": 29
+              }
+            ]
+          }
+        ],
+        "stdout": "",
+        "stderr": "main.fy:1:232: error: E7102 cleanup effect exceeds caller authority (bytes 231..246)\n  effect-declaration: main.fy (bytes 12..29)\n"
+      },
+      {
+        "index": 9,
+        "name": "aborted binding",
+        "exit": 3,
+        "matched": true,
+        "reference": [
+          {
+            "file": "main.fy",
+            "code": 7102,
+            "start": 232,
+            "end": 247,
+            "related": [
+              {
+                "role": "effect-declaration",
+                "file": "main.fy",
+                "start": 12,
+                "end": 29
+              }
+            ]
+          }
+        ],
+        "diagnostics": [
+          {
+            "file": "main.fy",
+            "code": 7102,
+            "start": 232,
+            "end": 247,
+            "related": [
+              {
+                "role": "effect-declaration",
+                "file": "main.fy",
+                "start": 12,
+                "end": 29
+              }
+            ]
+          }
+        ],
+        "stdout": "",
+        "stderr": "main.fy:1:233: error: E7102 cleanup effect exceeds caller authority (bytes 232..247)\n  effect-declaration: main.fy (bytes 12..29)\n"
+      },
+      {
+        "index": 10,
+        "name": "loop break",
+        "exit": 3,
+        "matched": true,
+        "reference": [
+          {
+            "file": "main.fy",
+            "code": 7102,
+            "start": 247,
+            "end": 253,
+            "related": [
+              {
+                "role": "effect-declaration",
+                "file": "main.fy",
+                "start": 12,
+                "end": 29
+              }
+            ]
+          }
+        ],
+        "diagnostics": [
+          {
+            "file": "main.fy",
+            "code": 7102,
+            "start": 247,
+            "end": 253,
+            "related": [
+              {
+                "role": "effect-declaration",
+                "file": "main.fy",
+                "start": 12,
+                "end": 29
+              }
+            ]
+          }
+        ],
+        "stdout": "",
+        "stderr": "main.fy:1:248: error: E7102 cleanup effect exceeds caller authority (bytes 247..253)\n  effect-declaration: main.fy (bytes 12..29)\n"
+      },
+      {
+        "index": 11,
+        "name": "loop continue",
+        "exit": 3,
+        "matched": true,
+        "reference": [
+          {
+            "file": "main.fy",
+            "code": 7102,
+            "start": 247,
+            "end": 256,
+            "related": [
+              {
+                "role": "effect-declaration",
+                "file": "main.fy",
+                "start": 12,
+                "end": 29
+              }
+            ]
+          }
+        ],
+        "diagnostics": [
+          {
+            "file": "main.fy",
+            "code": 7102,
+            "start": 247,
+            "end": 256,
+            "related": [
+              {
+                "role": "effect-declaration",
+                "file": "main.fy",
+                "start": 12,
+                "end": 29
+              }
+            ]
+          }
+        ],
+        "stdout": "",
+        "stderr": "main.fy:1:248: error: E7102 cleanup effect exceeds caller authority (bytes 247..256)\n  effect-declaration: main.fy (bytes 12..29)\n"
+      },
+      {
+        "index": 12,
+        "name": "inner loop preserves outer partial",
+        "exit": 0,
+        "matched": true,
+        "reference": [],
+        "diagnostics": [],
+        "stdout": "return origins ok\n",
+        "stderr": ""
+      },
+      {
+        "index": 13,
+        "name": "nested pending call",
+        "exit": 3,
+        "matched": true,
+        "reference": [
+          {
+            "file": "main.fy",
+            "code": 7102,
+            "start": 318,
+            "end": 327,
+            "related": [
+              {
+                "role": "effect-declaration",
+                "file": "main.fy",
+                "start": 12,
+                "end": 29
+              }
+            ]
+          }
+        ],
+        "diagnostics": [
+          {
+            "file": "main.fy",
+            "code": 7102,
+            "start": 318,
+            "end": 327,
+            "related": [
+              {
+                "role": "effect-declaration",
+                "file": "main.fy",
+                "start": 12,
+                "end": 29
+              }
+            ]
+          }
+        ],
+        "stdout": "",
+        "stderr": "main.fy:1:319: error: E7102 cleanup effect exceeds caller authority (bytes 318..327)\n  effect-declaration: main.fy (bytes 12..29)\n"
+      },
+      {
+        "index": 14,
+        "name": "partial and live dedup",
+        "exit": 3,
+        "matched": true,
+        "reference": [
+          {
+            "file": "main.fy",
+            "code": 7102,
+            "start": 217,
+            "end": 261,
+            "related": [
+              {
+                "role": "effect-declaration",
+                "file": "main.fy",
+                "start": 12,
+                "end": 29
+              }
+            ]
+          },
+          {
+            "file": "main.fy",
+            "code": 7102,
+            "start": 249,
+            "end": 258,
+            "related": [
+              {
+                "role": "effect-declaration",
+                "file": "main.fy",
+                "start": 12,
+                "end": 29
+              }
+            ]
+          }
+        ],
+        "diagnostics": [
+          {
+            "file": "main.fy",
+            "code": 7102,
+            "start": 217,
+            "end": 261,
+            "related": [
+              {
+                "role": "effect-declaration",
+                "file": "main.fy",
+                "start": 12,
+                "end": 29
+              }
+            ]
+          },
+          {
+            "file": "main.fy",
+            "code": 7102,
+            "start": 249,
+            "end": 258,
+            "related": [
+              {
+                "role": "effect-declaration",
+                "file": "main.fy",
+                "start": 12,
+                "end": 29
+              }
+            ]
+          }
+        ],
+        "stdout": "",
+        "stderr": "main.fy:1:250: error: E7102 cleanup effect exceeds caller authority (bytes 249..258)\n  effect-declaration: main.fy (bytes 12..29)\nmain.fy:1:218: error: E7102 cleanup effect exceeds caller authority (bytes 217..261)\n  effect-declaration: main.fy (bytes 12..29)\n"
+      },
+      {
+        "index": 15,
+        "name": "two partial values dedup",
+        "exit": 3,
+        "matched": true,
+        "reference": [
+          {
+            "file": "main.fy",
+            "code": 7102,
+            "start": 276,
+            "end": 285,
+            "related": [
+              {
+                "role": "effect-declaration",
+                "file": "main.fy",
+                "start": 12,
+                "end": 29
+              }
+            ]
+          }
+        ],
+        "diagnostics": [
+          {
+            "file": "main.fy",
+            "code": 7102,
+            "start": 276,
+            "end": 285,
+            "related": [
+              {
+                "role": "effect-declaration",
+                "file": "main.fy",
+                "start": 12,
+                "end": 29
+              }
+            ]
+          }
+        ],
+        "stdout": "",
+        "stderr": "main.fy:1:277: error: E7102 cleanup effect exceeds caller authority (bytes 276..285)\n  effect-declaration: main.fy (bytes 12..29)\n"
+      },
+      {
+        "index": 16,
+        "name": "tagged partial",
+        "exit": 3,
+        "matched": true,
+        "reference": [
+          {
+            "file": "main.fy",
+            "code": 7102,
+            "start": 291,
+            "end": 300,
+            "related": [
+              {
+                "role": "effect-declaration",
+                "file": "main.fy",
+                "start": 12,
+                "end": 29
+              }
+            ]
+          }
+        ],
+        "diagnostics": [
+          {
+            "file": "main.fy",
+            "code": 7102,
+            "start": 291,
+            "end": 300,
+            "related": [
+              {
+                "role": "effect-declaration",
+                "file": "main.fy",
+                "start": 12,
+                "end": 29
+              }
+            ]
+          }
+        ],
+        "stdout": "",
+        "stderr": "main.fy:1:292: error: E7102 cleanup effect exceeds caller authority (bytes 291..300)\n  effect-declaration: main.fy (bytes 12..29)\n"
+      },
+      {
+        "index": 17,
+        "name": "nested root partial",
+        "exit": 3,
+        "matched": true,
+        "reference": [
+          {
+            "file": "main.fy",
+            "code": 7102,
+            "start": 329,
+            "end": 338,
+            "related": [
+              {
+                "role": "effect-declaration",
+                "file": "main.fy",
+                "start": 12,
+                "end": 29
+              }
+            ]
+          }
+        ],
+        "diagnostics": [
+          {
+            "file": "main.fy",
+            "code": 7102,
+            "start": 329,
+            "end": 338,
+            "related": [
+              {
+                "role": "effect-declaration",
+                "file": "main.fy",
+                "start": 12,
+                "end": 29
+              }
+            ]
+          }
+        ],
+        "stdout": "",
+        "stderr": "main.fy:1:330: error: E7102 cleanup effect exceeds caller authority (bytes 329..338)\n  effect-declaration: main.fy (bytes 12..29)\n"
+      },
+      {
+        "index": 18,
+        "name": "branch partial propagation",
+        "exit": 3,
+        "matched": true,
+        "reference": [
+          {
+            "file": "main.fy",
+            "code": 7102,
+            "start": 242,
+            "end": 251,
+            "related": [
+              {
+                "role": "effect-declaration",
+                "file": "main.fy",
+                "start": 12,
+                "end": 29
+              }
+            ]
+          }
+        ],
+        "diagnostics": [
+          {
+            "file": "main.fy",
+            "code": 7102,
+            "start": 242,
+            "end": 251,
+            "related": [
+              {
+                "role": "effect-declaration",
+                "file": "main.fy",
+                "start": 12,
+                "end": 29
+              }
+            ]
+          }
+        ],
+        "stdout": "",
+        "stderr": "main.fy:1:243: error: E7102 cleanup effect exceeds caller authority (bytes 242..251)\n  effect-declaration: main.fy (bytes 12..29)\n"
+      },
+      {
+        "index": 19,
+        "name": "no drop partial",
+        "exit": 3,
+        "matched": true,
+        "reference": [
+          {
+            "file": "main.fy",
+            "code": 1108,
+            "start": 366,
+            "end": 375,
+            "related": [
+              {
+                "role": "ability-declaration",
+                "file": "main.fy",
+                "start": 175,
+                "end": 192
+              }
+            ]
+          }
+        ],
+        "diagnostics": [
+          {
+            "file": "main.fy",
+            "code": 1108,
+            "start": 366,
+            "end": 375,
+            "related": [
+              {
+                "role": "ability-declaration",
+                "file": "main.fy",
+                "start": 175,
+                "end": 192
+              }
+            ]
+          }
+        ],
+        "stdout": "",
+        "stderr": "main.fy:1:367: error: E1108 resource does not permit implicit cleanup (bytes 366..375)\n  ability-declaration: main.fy (bytes 175..192)\n"
+      },
+      {
+        "index": 20,
+        "name": "pending survives scalar declaration",
+        "exit": 3,
+        "matched": true,
+        "reference": [
+          {
+            "file": "main.fy",
+            "code": 7102,
+            "start": 262,
+            "end": 264,
+            "related": [
+              {
+                "role": "effect-declaration",
+                "file": "main.fy",
+                "start": 12,
+                "end": 29
+              }
+            ]
+          }
+        ],
+        "diagnostics": [
+          {
+            "file": "main.fy",
+            "code": 7102,
+            "start": 262,
+            "end": 264,
+            "related": [
+              {
+                "role": "effect-declaration",
+                "file": "main.fy",
+                "start": 12,
+                "end": 29
+              }
+            ]
+          }
+        ],
+        "stdout": "",
+        "stderr": "main.fy:1:263: error: E7102 cleanup effect exceeds caller authority (bytes 262..264)\n  effect-declaration: main.fy (bytes 12..29)\n"
+      },
+      {
+        "index": 21,
+        "name": "loop authority",
+        "exit": 0,
+        "matched": true,
+        "reference": [],
+        "diagnostics": [],
+        "stdout": "return origins ok\n",
+        "stderr": ""
+      },
+      {
+        "index": 22,
+        "name": "pending survives successful block",
+        "exit": 0,
+        "matched": true,
+        "reference": [],
+        "diagnostics": [],
+        "stdout": "return origins ok\n",
+        "stderr": ""
+      },
+      {
+        "index": 23,
+        "name": "generic partial",
+        "exit": 3,
+        "matched": true,
+        "reference": [
+          {
+            "file": "main.fy",
+            "code": 7102,
+            "start": 233,
+            "end": 242,
+            "related": [
+              {
+                "role": "effect-declaration",
+                "file": "main.fy",
+                "start": 12,
+                "end": 29
+              }
+            ]
+          }
+        ],
+        "diagnostics": [
+          {
+            "file": "main.fy",
+            "code": 7102,
+            "start": 233,
+            "end": 242,
+            "related": [
+              {
+                "role": "effect-declaration",
+                "file": "main.fy",
+                "start": 12,
+                "end": 29
+              }
+            ]
+          }
+        ],
+        "stdout": "",
+        "stderr": "main.fy:1:234: error: E7102 cleanup effect exceeds caller authority (bytes 233..242)\n  effect-declaration: main.fy (bytes 12..29)\n"
+      }
+    ]
+  },
+  "native": {
+    "schemaVersion": "fairyc.test-report/v4",
+    "engine": "native",
+    "target": "x86_64-windows-msvc",
+    "profile": "development",
+    "tests": [
+      {
+        "identity": "tests::module_unit_cleanup_events::cleanup_requests_follow_live_owners_and_exit_paths",
+        "outcome": "passed",
+        "trapCategory": null,
+        "stdoutBase64": "Y2FzZSAwIDEKY2xlYW51cCAxIDE0MCAxNjEgMSAxCmNhc2UgMSAwCmNhc2UgMiAxCmNsZWFudXAgMSAxNDcgMTQ5IDEgMQpjYXNlIDMgMApjYXNlIDQgMQpjbGVhbnVwIDEgMTQ5IDE3MSAxIDEKY2FzZSA1IDEKY2xlYW51cCAyIDE2MCAxNjcgMSAxCmNhc2UgNiAxCmNsZWFudXAgMyAxNzUgMTgxIDIgMQpjYXNlIDcgMQpjbGVhbnVwIDQgMTc1IDE4NCAyIDEKY2FzZSA4IDEKY2xlYW51cCAxIDE0NiAxODMgMiAxCmNhc2UgOSAyCmNsZWFudXAgNSAxNjAgMTY1IDEgMQpjbGVhbnVwIDEgMTQwIDE3NCAxIDEKY2FzZSAxMCAxCmNsZWFudXAgMiAxODggMjAxIDEgMQpjYXNlIDExIDIKY2xlYW51cCA2IDE4MSAxOTIgMSAxCmNsZWFudXAgMiAxOTMgMjA3IDEgMQpjYXNlIDEyIDEKY2xlYW51cCA3IDE4NCAxOTQgMCA1CmNhc2UgMTMgMQpjbGVhbnVwIDggMTQ5IDE1NSAwIDEKY2FzZSAxNCAxCmNsZWFudXAgMSAxNDAgMTc1IDEgMQpjYXNlIDE1IDEKY2xlYW51cCA5IDE4NyAyMTMgMiAxCmNhc2UgMTYgMQpjbGVhbnVwIDIgMTkwIDIwNCAyIDEKY2FzZSAxNyAxCmNsZWFudXAgMyAyMTcgMjIzIDMgMQo=",
+        "stderrBase64": ""
+      },
+      {
+        "identity": "tests::module_unit_cleanup_policy::cleanup_policy_enforces_abilities_and_effect_authority",
+        "outcome": "passed",
+        "trapCategory": null,
+        "stdoutBase64": "Y2FzZSAwIDMgMQpkaWFnbm9zdGljIDExMDggMCAxNDAgMTYxIDEKcmVsYXRlZCAxMSAwIDEyIDI5CmNhc2UgMSAwIDAKY2FzZSAyIDMgMQpkaWFnbm9zdGljIDExMDggMCAxNDcgMTQ5IDEKcmVsYXRlZCAxMSAwIDEyIDI5CmNhc2UgMyAwIDAKY2FzZSA0IDMgMQpkaWFnbm9zdGljIDExMDggMCAxNDkgMTcxIDEKcmVsYXRlZCAxMSAwIDEyIDI5CmNhc2UgNSAzIDEKZGlhZ25vc3RpYyAxMTA4IDAgMTYwIDE2NyAxCnJlbGF0ZWQgMTEgMCAxMiAyOQpjYXNlIDYgMyAxCmRpYWdub3N0aWMgMTEwOCAwIDE3NSAxODEgMQpyZWxhdGVkIDExIDAgMTIgMjkKY2FzZSA3IDMgMQpkaWFnbm9zdGljIDExMDggMCAxNzUgMTg0IDEKcmVsYXRlZCAxMSAwIDEyIDI5CmNhc2UgOCAzIDEKZGlhZ25vc3RpYyAxMTA4IDAgMTQ2IDE4MyAxCnJlbGF0ZWQgMTEgMCAxMiAyOQpjYXNlIDkgMyAyCmRpYWdub3N0aWMgMTEwOCAwIDE2MCAxNjUgMQpyZWxhdGVkIDExIDAgMTIgMjkKZGlhZ25vc3RpYyAxMTA4IDAgMTQwIDE3NCAxCnJlbGF0ZWQgMTEgMCAxMiAyOQpjYXNlIDEwIDMgMQpkaWFnbm9zdGljIDExMDggMCAxODggMjAxIDEKcmVsYXRlZCAxMSAwIDEyIDI5CmNhc2UgMTEgMyAyCmRpYWdub3N0aWMgMTEwOCAwIDE4MSAxOTIgMQpyZWxhdGVkIDExIDAgMTIgMjkKZGlhZ25vc3RpYyAxMTA4IDAgMTkzIDIwNyAxCnJlbGF0ZWQgMTEgMCAxMiAyOQpjYXNlIDEyIDMgMQpkaWFnbm9zdGljIDExMDggMCAxODQgMTk0IDEKcmVsYXRlZCAxMSAwIDEyIDI5CmNhc2UgMTMgMyAxCmRpYWdub3N0aWMgMTEwOCAwIDE0OSAxNTUgMQpyZWxhdGVkIDExIDAgMTIgMjkKY2FzZSAxNCAzIDEKZGlhZ25vc3RpYyAxMTA4IDAgMTQwIDE3NSAxCnJlbGF0ZWQgMTEgMCAxMiAyOQpjYXNlIDE1IDMgMQpkaWFnbm9zdGljIDExMDggMCAxODcgMjEzIDEKcmVsYXRlZCAxMSAwIDEyIDI5CmNhc2UgMTYgMyAxCmRpYWdub3N0aWMgMTEwOCAwIDE5MCAyMDQgMQpyZWxhdGVkIDExIDAgMTIgMjkKY2FzZSAxNyAzIDEKZGlhZ25vc3RpYyAxMTA4IDAgMjE3IDIyMyAxCnJlbGF0ZWQgMTEgMCAxMiAyOQpjYXNlIDE4IDMgMQpkaWFnbm9zdGljIDcxMDIgMCAxNTAgMTcxIDEKcmVsYXRlZCAxMiAwIDEyIDI5CmNhc2UgMTkgMCAwCmNhc2UgMjAgMyAxCmRpYWdub3N0aWMgNzEwMiAwIDE1NyAxNTkgMQpyZWxhdGVkIDEyIDAgMTIgMjkKY2FzZSAyMSAwIDAKY2FzZSAyMiAzIDEKZGlhZ25vc3RpYyA3MTAyIDAgMTU5IDE4MSAxCnJlbGF0ZWQgMTIgMCAxMiAyOQpjYXNlIDIzIDMgMQpkaWFnbm9zdGljIDcxMDIgMCAxNzAgMTc3IDEKcmVsYXRlZCAxMiAwIDEyIDI5CmNhc2UgMjQgMyAxCmRpYWdub3N0aWMgNzEwMiAwIDE4NSAxOTEgMQpyZWxhdGVkIDEyIDAgMTIgMjkKY2FzZSAyNSAzIDEKZGlhZ25vc3RpYyA3MTAyIDAgMTg1IDE5NCAxCnJlbGF0ZWQgMTIgMCAxMiAyOQpjYXNlIDI2IDMgMQpkaWFnbm9zdGljIDcxMDIgMCAxNTYgMTkzIDEKcmVsYXRlZCAxMiAwIDEyIDI5CmNhc2UgMjcgMyAyCmRpYWdub3N0aWMgNzEwMiAwIDE3MCAxNzUgMQpyZWxhdGVkIDEyIDAgMTIgMjkKZGlhZ25vc3RpYyA3MTAyIDAgMTUwIDE4NCAxCnJlbGF0ZWQgMTIgMCAxMiAyOQpjYXNlIDI4IDMgMQpkaWFnbm9zdGljIDcxMDIgMCAxOTggMjExIDEKcmVsYXRlZCAxMiAwIDEyIDI5CmNhc2UgMjkgMyAyCmRpYWdub3N0aWMgNzEwMiAwIDE5MSAyMDIgMQpyZWxhdGVkIDEyIDAgMTIgMjkKZGlhZ25vc3RpYyA3MTAyIDAgMjAzIDIxNyAxCnJlbGF0ZWQgMTIgMCAxMiAyOQpjYXNlIDMwIDMgMQpkaWFnbm9zdGljIDcxMDIgMCAxOTQgMjA0IDEKcmVsYXRlZCAxMiAwIDEyIDI5CmNhc2UgMzEgMyAxCmRpYWdub3N0aWMgNzEwMiAwIDE1OSAxNjUgMQpyZWxhdGVkIDEyIDAgMTIgMjkKY2FzZSAzMiAzIDEKZGlhZ25vc3RpYyA3MTAyIDAgMTUwIDE4NSAxCnJlbGF0ZWQgMTIgMCAxMiAyOQpjYXNlIDMzIDMgMQpkaWFnbm9zdGljIDcxMDIgMCAxOTcgMjIzIDEKcmVsYXRlZCAxMiAwIDEyIDI5CmNhc2UgMzQgMyAxCmRpYWdub3N0aWMgNzEwMiAwIDIwMCAyMTQgMQpyZWxhdGVkIDEyIDAgMTIgMjkKY2FzZSAzNSAzIDEKZGlhZ25vc3RpYyA3MTAyIDAgMjI3IDIzMyAxCnJlbGF0ZWQgMTIgMCAxMiAyOQpjYXNlIDM2IDAgMApjYXNlIDM3IDAgMApjYXNlIDM4IDAgMApjYXNlIDM5IDAgMApjYXNlIDQwIDAgMApjYXNlIDQxIDAgMApjYXNlIDQyIDAgMApjYXNlIDQzIDAgMApjYXNlIDQ0IDAgMApjYXNlIDQ1IDMgMQpkaWFnbm9zdGljIDExMDggMCAxMjYgMTU5IDEKcmVsYXRlZCAxMSAwIDEyIDI5CmNhc2UgNDYgMyAxCmRpYWdub3N0aWMgMTEwOCAwIDEyNiAxNjUgMQpyZWxhdGVkIDExIDAgMTIgMjkKY2FzZSA0NyAzIDEKZGlhZ25vc3RpYyAxMTA4IDAgOTUgMTI3IDEKcmVsYXRlZCAxMSAwIDEyIDI5CmNhc2UgNDggMyAxCmRpYWdub3N0aWMgMTEwOCAwIDk1IDE0NSAxCnJlbGF0ZWQgMTEgMCAxMiAyOQpjYXNlIDQ5IDMgMQpkaWFnbm9zdGljIDExMDggMCAxMzcgMTQ3IDEKcmVsYXRlZCAxMSAwIDEyIDI5CmNhc2UgNTAgMyAxCmRpYWdub3N0aWMgNzEwMiAwIDEyMiAxMzkgMQpyZWxhdGVkIDEyIDAgMTIgMjkKY2FzZSA1MSAzIDEKZGlhZ25vc3RpYyA3MTAyIDAgMTMxIDEzNyAxCnJlbGF0ZWQgMTIgMCAxMiAyOQpjYXNlIDUyIDMgMQpkaWFnbm9zdGljIDExMDggMCAxMjEgMTI3IDEKcmVsYXRlZCAxMSAwIDEyIDI5CmNhc2UgNTMgMyAxCmRpYWdub3N0aWMgNzEwMiAwIDQ0IDY3IDEKcmVsYXRlZCAxMiAxIDE2IDMzCmNhc2UgNTQgMyAxCmRpYWdub3N0aWMgMTEwOCAwIDQ0IDY3IDEKcmVsYXRlZCAxMSAxIDE2IDMzCmNhc2UgNTUgMCAwCmNhc2UgNTYgMyAxCmRpYWdub3N0aWMgNzEwMiAwIDEyNSAxMjcgMQpyZWxhdGVkIDEyIDAgMTIgMjkKY2FzZSA1NyAwIDAK",
+        "stderrBase64": ""
+      },
+      {
+        "identity": "tests::module_unit_recursive_cleanup::nested_fields_retain_cleanup_effect_authority",
+        "outcome": "passed",
+        "trapCategory": null,
+        "stdoutBase64": "Y2FzZSAwIDMgMQpkaWFnbm9zdGljIDcxMDIgMCAxNTAgMTczIDEKcmVsYXRlZCAxMiAwIDEyIDI5CmNhc2UgMSAwIDAKY2FzZSAyIDAgMApjYXNlIDMgMyAxCmRpYWdub3N0aWMgNzEwMiAwIDE4NSAyMjQgMQpyZWxhdGVkIDEyIDAgMTIgMjkKY2FzZSA0IDMgMQpkaWFnbm9zdGljIDcxMDIgMCAxODYgMjI5IDEKcmVsYXRlZCAxMiAwIDEyIDI5CmNhc2UgNSAzIDEKZGlhZ25vc3RpYyA3MTAyIDAgMTUwIDE4NiAxCnJlbGF0ZWQgMTIgMCAxMiAyOQpjYXNlIDYgMyAxCmRpYWdub3N0aWMgNzEwMiAwIDE1MCAxODggMQpyZWxhdGVkIDEyIDAgMTIgMjkKY2FzZSA3IDMgMQpkaWFnbm9zdGljIDcxMDIgMCAxOTcgMjA4IDEKcmVsYXRlZCAxMiAwIDEyIDI5CmNhc2UgOCAzIDEKZGlhZ25vc3RpYyA3MTAyIDAgMTcxIDE3NiAxCnJlbGF0ZWQgMTIgMCAxMiAyOQpjYXNlIDkgMyAxCmRpYWdub3N0aWMgNzEwMiAwIDE2OCAxOTEgMQpyZWxhdGVkIDEyIDAgMTIgMjkKY2FzZSAxMCAwIDAKY2FzZSAxMSAzIDIKZGlhZ25vc3RpYyA3MTAyIDAgMjM4IDI0OSAxCnJlbGF0ZWQgMTIgMCAxMiAyOQpkaWFnbm9zdGljIDcxMDIgMCAyNTAgMjY0IDEKcmVsYXRlZCAxMiAwIDEyIDI5CmNhc2UgMTIgMyAxCmRpYWdub3N0aWMgNzEwMiAwIDE4NyAxOTMgMQpyZWxhdGVkIDEyIDAgMTIgMjkKY2FzZSAxMyAzIDEKZGlhZ25vc3RpYyA3MTAyIDAgMTg3IDE5NiAxCnJlbGF0ZWQgMTIgMCAxMiAyOQpjYXNlIDE0IDMgMQpkaWFnbm9zdGljIDcxMDIgMCAxOTkgMjI5IDEKcmVsYXRlZCAxMiAwIDEyIDI5CmNhc2UgMTUgMyAxCmRpYWdub3N0aWMgNzEwMiAwIDE1OSAxNjUgMQpyZWxhdGVkIDEyIDAgMTIgMjkKY2FzZSAxNiAzIDIKZGlhZ25vc3RpYyA3MTAyIDAgMTgwIDIwMyAxCnJlbGF0ZWQgMTIgMCA2NiA4NgpkaWFnbm9zdGljIDcxMDIgMCAxODAgMjAzIDEKcmVsYXRlZCAxMiAwIDEyIDI5CmNhc2UgMTcgMyAxCmRpYWdub3N0aWMgNzEwMiAwIDIwMCAyMjMgMQpyZWxhdGVkIDEyIDAgMTIgMjkKY2FzZSAxOCAwIDAKY2FzZSAxOSAzIDEKZGlhZ25vc3RpYyAxMTA4IDAgMTY3IDE5MCAxCnJlbGF0ZWQgMTEgMCA2NiA4MwpjYXNlIDIwIDMgMQpkaWFnbm9zdGljIDcxMDIgMCA0NCA3MyAxCnJlbGF0ZWQgMTIgMSAxNiAzMwpjYXNlIDIxIDMgMQpkaWFnbm9zdGljIDcxMDIgMCAxNzIgMTc0IDEKcmVsYXRlZCAxMiAwIDEyIDI5CmNhc2UgMjIgMCAwCg==",
+        "stderrBase64": ""
+      },
+      {
+        "identity": "tests::module_unit_partial_cleanup::partial_fields_and_arguments_keep_cleanup_obligations",
+        "outcome": "passed",
+        "trapCategory": null,
+        "stdoutBase64": "Y2FzZSAwIDMgMQpkaWFnbm9zdGljIDcxMDIgMCAyMzAgMjM5IDEKcmVsYXRlZCAxMiAwIDEyIDI5CmNhc2UgMSAwIDAKY2FzZSAyIDMgMQpkaWFnbm9zdGljIDcxMDIgMCAyNDggMjU3IDEKcmVsYXRlZCAxMiAwIDEyIDI5CmNhc2UgMyAzIDEKZGlhZ25vc3RpYyA3MTAyIDAgMjc5IDI4OCAxCnJlbGF0ZWQgMTIgMCAxMiAyOQpjYXNlIDQgMCAwCmNhc2UgNSAwIDAKY2FzZSA2IDAgMApjYXNlIDcgMCAwCmNhc2UgOCAzIDEKZGlhZ25vc3RpYyA3MTAyIDAgMjMxIDI0NiAxCnJlbGF0ZWQgMTIgMCAxMiAyOQpjYXNlIDkgMyAxCmRpYWdub3N0aWMgNzEwMiAwIDIzMiAyNDcgMQpyZWxhdGVkIDEyIDAgMTIgMjkKY2FzZSAxMCAzIDEKZGlhZ25vc3RpYyA3MTAyIDAgMjQ3IDI1MyAxCnJlbGF0ZWQgMTIgMCAxMiAyOQpjYXNlIDExIDMgMQpkaWFnbm9zdGljIDcxMDIgMCAyNDcgMjU2IDEKcmVsYXRlZCAxMiAwIDEyIDI5CmNhc2UgMTIgMCAwCmNhc2UgMTMgMyAxCmRpYWdub3N0aWMgNzEwMiAwIDMxOCAzMjcgMQpyZWxhdGVkIDEyIDAgMTIgMjkKY2FzZSAxNCAzIDIKZGlhZ25vc3RpYyA3MTAyIDAgMjQ5IDI1OCAxCnJlbGF0ZWQgMTIgMCAxMiAyOQpkaWFnbm9zdGljIDcxMDIgMCAyMTcgMjYxIDEKcmVsYXRlZCAxMiAwIDEyIDI5CmNhc2UgMTUgMyAxCmRpYWdub3N0aWMgNzEwMiAwIDI3NiAyODUgMQpyZWxhdGVkIDEyIDAgMTIgMjkKY2FzZSAxNiAzIDEKZGlhZ25vc3RpYyA3MTAyIDAgMjkxIDMwMCAxCnJlbGF0ZWQgMTIgMCAxMiAyOQpjYXNlIDE3IDMgMQpkaWFnbm9zdGljIDcxMDIgMCAzMjkgMzM4IDEKcmVsYXRlZCAxMiAwIDEyIDI5CmNhc2UgMTggMyAxCmRpYWdub3N0aWMgNzEwMiAwIDI0MiAyNTEgMQpyZWxhdGVkIDEyIDAgMTIgMjkKY2FzZSAxOSAzIDEKZGlhZ25vc3RpYyAxMTA4IDAgMzY2IDM3NSAxCnJlbGF0ZWQgMTEgMCAxNzUgMTkyCmNhc2UgMjAgMyAxCmRpYWdub3N0aWMgNzEwMiAwIDI2MiAyNjQgMQpyZWxhdGVkIDEyIDAgMTIgMjkKY2FzZSAyMSAwIDAKY2FzZSAyMiAwIDAKY2FzZSAyMyAzIDEKZGlhZ25vc3RpYyA3MTAyIDAgMjMzIDI0MiAxCnJlbGF0ZWQgMTIgMCAxMiAyOQo=",
+        "stderrBase64": ""
+      }
+    ],
+    "count": 4,
+    "passed": 4,
+    "failed": 0,
+    "status": "ok",
+    "lock": "verified"
+  },
+  "nativeFixtureCounts": {
+    "cleanupRequests": 18,
+    "cleanupPolicy": 58,
+    "recursiveEffects": 23,
+    "partialOwners": 24,
+    "total": 123
+  },
+  "nativeRetry": {
+    "initialReport": {
+      "schemaVersion": "fairyc.test-report/v4",
+      "engine": "native",
+      "target": "x86_64-windows-msvc",
+      "profile": "development",
+      "tests": [
+        {
+          "identity": "tests::module_unit_cleanup_events::cleanup_requests_follow_live_owners_and_exit_paths",
+          "outcome": "passed",
+          "trapCategory": null,
+          "stdoutBase64": "Y2FzZSAwIDEKY2xlYW51cCAxIDE0MCAxNjEgMSAxCmNhc2UgMSAwCmNhc2UgMiAxCmNsZWFudXAgMSAxNDcgMTQ5IDEgMQpjYXNlIDMgMApjYXNlIDQgMQpjbGVhbnVwIDEgMTQ5IDE3MSAxIDEKY2FzZSA1IDEKY2xlYW51cCAyIDE2MCAxNjcgMSAxCmNhc2UgNiAxCmNsZWFudXAgMyAxNzUgMTgxIDIgMQpjYXNlIDcgMQpjbGVhbnVwIDQgMTc1IDE4NCAyIDEKY2FzZSA4IDEKY2xlYW51cCAxIDE0NiAxODMgMiAxCmNhc2UgOSAyCmNsZWFudXAgNSAxNjAgMTY1IDEgMQpjbGVhbnVwIDEgMTQwIDE3NCAxIDEKY2FzZSAxMCAxCmNsZWFudXAgMiAxODggMjAxIDEgMQpjYXNlIDExIDIKY2xlYW51cCA2IDE4MSAxOTIgMSAxCmNsZWFudXAgMiAxOTMgMjA3IDEgMQpjYXNlIDEyIDEKY2xlYW51cCA3IDE4NCAxOTQgMCA1CmNhc2UgMTMgMQpjbGVhbnVwIDggMTQ5IDE1NSAwIDEKY2FzZSAxNCAxCmNsZWFudXAgMSAxNDAgMTc1IDEgMQpjYXNlIDE1IDEKY2xlYW51cCA5IDE4NyAyMTMgMiAxCmNhc2UgMTYgMQpjbGVhbnVwIDIgMTkwIDIwNCAyIDEKY2FzZSAxNyAxCmNsZWFudXAgMyAyMTcgMjIzIDMgMQo=",
+          "stderrBase64": ""
+        },
+        {
+          "identity": "tests::module_unit_cleanup_policy::cleanup_policy_enforces_abilities_and_effect_authority",
+          "outcome": "passed",
+          "trapCategory": null,
+          "stdoutBase64": "Y2FzZSAwIDMgMQpkaWFnbm9zdGljIDExMDggMCAxNDAgMTYxIDEKcmVsYXRlZCAxMSAwIDEyIDI5CmNhc2UgMSAwIDAKY2FzZSAyIDMgMQpkaWFnbm9zdGljIDExMDggMCAxNDcgMTQ5IDEKcmVsYXRlZCAxMSAwIDEyIDI5CmNhc2UgMyAwIDAKY2FzZSA0IDMgMQpkaWFnbm9zdGljIDExMDggMCAxNDkgMTcxIDEKcmVsYXRlZCAxMSAwIDEyIDI5CmNhc2UgNSAzIDEKZGlhZ25vc3RpYyAxMTA4IDAgMTYwIDE2NyAxCnJlbGF0ZWQgMTEgMCAxMiAyOQpjYXNlIDYgMyAxCmRpYWdub3N0aWMgMTEwOCAwIDE3NSAxODEgMQpyZWxhdGVkIDExIDAgMTIgMjkKY2FzZSA3IDMgMQpkaWFnbm9zdGljIDExMDggMCAxNzUgMTg0IDEKcmVsYXRlZCAxMSAwIDEyIDI5CmNhc2UgOCAzIDEKZGlhZ25vc3RpYyAxMTA4IDAgMTQ2IDE4MyAxCnJlbGF0ZWQgMTEgMCAxMiAyOQpjYXNlIDkgMyAyCmRpYWdub3N0aWMgMTEwOCAwIDE2MCAxNjUgMQpyZWxhdGVkIDExIDAgMTIgMjkKZGlhZ25vc3RpYyAxMTA4IDAgMTQwIDE3NCAxCnJlbGF0ZWQgMTEgMCAxMiAyOQpjYXNlIDEwIDMgMQpkaWFnbm9zdGljIDExMDggMCAxODggMjAxIDEKcmVsYXRlZCAxMSAwIDEyIDI5CmNhc2UgMTEgMyAyCmRpYWdub3N0aWMgMTEwOCAwIDE4MSAxOTIgMQpyZWxhdGVkIDExIDAgMTIgMjkKZGlhZ25vc3RpYyAxMTA4IDAgMTkzIDIwNyAxCnJlbGF0ZWQgMTEgMCAxMiAyOQpjYXNlIDEyIDMgMQpkaWFnbm9zdGljIDExMDggMCAxODQgMTk0IDEKcmVsYXRlZCAxMSAwIDEyIDI5CmNhc2UgMTMgMyAxCmRpYWdub3N0aWMgMTEwOCAwIDE0OSAxNTUgMQpyZWxhdGVkIDExIDAgMTIgMjkKY2FzZSAxNCAzIDEKZGlhZ25vc3RpYyAxMTA4IDAgMTQwIDE3NSAxCnJlbGF0ZWQgMTEgMCAxMiAyOQpjYXNlIDE1IDMgMQpkaWFnbm9zdGljIDExMDggMCAxODcgMjEzIDEKcmVsYXRlZCAxMSAwIDEyIDI5CmNhc2UgMTYgMyAxCmRpYWdub3N0aWMgMTEwOCAwIDE5MCAyMDQgMQpyZWxhdGVkIDExIDAgMTIgMjkKY2FzZSAxNyAzIDEKZGlhZ25vc3RpYyAxMTA4IDAgMjE3IDIyMyAxCnJlbGF0ZWQgMTEgMCAxMiAyOQpjYXNlIDE4IDMgMQpkaWFnbm9zdGljIDcxMDIgMCAxNTAgMTcxIDEKcmVsYXRlZCAxMiAwIDEyIDI5CmNhc2UgMTkgMCAwCmNhc2UgMjAgMyAxCmRpYWdub3N0aWMgNzEwMiAwIDE1NyAxNTkgMQpyZWxhdGVkIDEyIDAgMTIgMjkKY2FzZSAyMSAwIDAKY2FzZSAyMiAzIDEKZGlhZ25vc3RpYyA3MTAyIDAgMTU5IDE4MSAxCnJlbGF0ZWQgMTIgMCAxMiAyOQpjYXNlIDIzIDMgMQpkaWFnbm9zdGljIDcxMDIgMCAxNzAgMTc3IDEKcmVsYXRlZCAxMiAwIDEyIDI5CmNhc2UgMjQgMyAxCmRpYWdub3N0aWMgNzEwMiAwIDE4NSAxOTEgMQpyZWxhdGVkIDEyIDAgMTIgMjkKY2FzZSAyNSAzIDEKZGlhZ25vc3RpYyA3MTAyIDAgMTg1IDE5NCAxCnJlbGF0ZWQgMTIgMCAxMiAyOQpjYXNlIDI2IDMgMQpkaWFnbm9zdGljIDcxMDIgMCAxNTYgMTkzIDEKcmVsYXRlZCAxMiAwIDEyIDI5CmNhc2UgMjcgMyAyCmRpYWdub3N0aWMgNzEwMiAwIDE3MCAxNzUgMQpyZWxhdGVkIDEyIDAgMTIgMjkKZGlhZ25vc3RpYyA3MTAyIDAgMTUwIDE4NCAxCnJlbGF0ZWQgMTIgMCAxMiAyOQpjYXNlIDI4IDMgMQpkaWFnbm9zdGljIDcxMDIgMCAxOTggMjExIDEKcmVsYXRlZCAxMiAwIDEyIDI5CmNhc2UgMjkgMyAyCmRpYWdub3N0aWMgNzEwMiAwIDE5MSAyMDIgMQpyZWxhdGVkIDEyIDAgMTIgMjkKZGlhZ25vc3RpYyA3MTAyIDAgMjAzIDIxNyAxCnJlbGF0ZWQgMTIgMCAxMiAyOQpjYXNlIDMwIDMgMQpkaWFnbm9zdGljIDcxMDIgMCAxOTQgMjA0IDEKcmVsYXRlZCAxMiAwIDEyIDI5CmNhc2UgMzEgMyAxCmRpYWdub3N0aWMgNzEwMiAwIDE1OSAxNjUgMQpyZWxhdGVkIDEyIDAgMTIgMjkKY2FzZSAzMiAzIDEKZGlhZ25vc3RpYyA3MTAyIDAgMTUwIDE4NSAxCnJlbGF0ZWQgMTIgMCAxMiAyOQpjYXNlIDMzIDMgMQpkaWFnbm9zdGljIDcxMDIgMCAxOTcgMjIzIDEKcmVsYXRlZCAxMiAwIDEyIDI5CmNhc2UgMzQgMyAxCmRpYWdub3N0aWMgNzEwMiAwIDIwMCAyMTQgMQpyZWxhdGVkIDEyIDAgMTIgMjkKY2FzZSAzNSAzIDEKZGlhZ25vc3RpYyA3MTAyIDAgMjI3IDIzMyAxCnJlbGF0ZWQgMTIgMCAxMiAyOQpjYXNlIDM2IDAgMApjYXNlIDM3IDAgMApjYXNlIDM4IDAgMApjYXNlIDM5IDAgMApjYXNlIDQwIDAgMApjYXNlIDQxIDAgMApjYXNlIDQyIDAgMApjYXNlIDQzIDAgMApjYXNlIDQ0IDAgMApjYXNlIDQ1IDMgMQpkaWFnbm9zdGljIDExMDggMCAxMjYgMTU5IDEKcmVsYXRlZCAxMSAwIDEyIDI5CmNhc2UgNDYgMyAxCmRpYWdub3N0aWMgMTEwOCAwIDEyNiAxNjUgMQpyZWxhdGVkIDExIDAgMTIgMjkKY2FzZSA0NyAzIDEKZGlhZ25vc3RpYyAxMTA4IDAgOTUgMTI3IDEKcmVsYXRlZCAxMSAwIDEyIDI5CmNhc2UgNDggMyAxCmRpYWdub3N0aWMgMTEwOCAwIDk1IDE0NSAxCnJlbGF0ZWQgMTEgMCAxMiAyOQpjYXNlIDQ5IDMgMQpkaWFnbm9zdGljIDExMDggMCAxMzcgMTQ3IDEKcmVsYXRlZCAxMSAwIDEyIDI5CmNhc2UgNTAgMyAxCmRpYWdub3N0aWMgNzEwMiAwIDEyMiAxMzkgMQpyZWxhdGVkIDEyIDAgMTIgMjkKY2FzZSA1MSAzIDEKZGlhZ25vc3RpYyA3MTAyIDAgMTMxIDEzNyAxCnJlbGF0ZWQgMTIgMCAxMiAyOQpjYXNlIDUyIDMgMQpkaWFnbm9zdGljIDExMDggMCAxMjEgMTI3IDEKcmVsYXRlZCAxMSAwIDEyIDI5CmNhc2UgNTMgMyAxCmRpYWdub3N0aWMgNzEwMiAwIDQ0IDY3IDEKcmVsYXRlZCAxMiAxIDE2IDMzCmNhc2UgNTQgMyAxCmRpYWdub3N0aWMgMTEwOCAwIDQ0IDY3IDEKcmVsYXRlZCAxMSAxIDE2IDMzCmNhc2UgNTUgMCAwCmNhc2UgNTYgMyAxCmRpYWdub3N0aWMgNzEwMiAwIDEyNSAxMjcgMQpyZWxhdGVkIDEyIDAgMTIgMjkKY2FzZSA1NyAwIDAK",
+          "stderrBase64": ""
+        },
+        {
+          "identity": "tests::module_unit_partial_cleanup::partial_fields_and_arguments_keep_cleanup_obligations",
+          "outcome": "failed",
+          "trapCategory": "assertion-failed",
+          "stdoutBase64": "Y2FzZSAwIDMgMQpkaWFnbm9zdGljIDcxMDIgMCAyMzAgMjM5IDEKcmVsYXRlZCAxMiAwIDEyIDI5CmNhc2UgMSAwIDAKY2FzZSAyIDMgMQpkaWFnbm9zdGljIDcxMDIgMCAyNDggMjU3IDEKcmVsYXRlZCAxMiAwIDEyIDI5CmNhc2UgMyAzIDEKZGlhZ25vc3RpYyA3MTAyIDAgMjc5IDI4OCAxCnJlbGF0ZWQgMTIgMCAxMiAyOQpjYXNlIDQgMCAwCmNhc2UgNSAwIDAKY2FzZSA2IDAgMApjYXNlIDcgMCAwCmNhc2UgOCAzIDEKZGlhZ25vc3RpYyA3MTAyIDAgMjMxIDI0NiAxCnJlbGF0ZWQgMTIgMCAxMiAyOQpjYXNlIDkgMyAxCmRpYWdub3N0aWMgNzEwMiAwIDIzMiAyNDcgMQpyZWxhdGVkIDEyIDAgMTIgMjkKY2FzZSAxMCAzIDEKZGlhZ25vc3RpYyA3MTAyIDAgMjQ3IDI1MyAxCnJlbGF0ZWQgMTIgMCAxMiAyOQpjYXNlIDExIDMgMQpkaWFnbm9zdGljIDcxMDIgMCAyNDcgMjU2IDEKcmVsYXRlZCAxMiAwIDEyIDI5CmNhc2UgMTIgMCAwCmNhc2UgMTMgMyAxCmRpYWdub3N0aWMgNzEwMiAwIDMxOCAzMjcgMQpyZWxhdGVkIDEyIDAgMTIgMjkKY2FzZSAxNCAzIDIKZGlhZ25vc3RpYyA3MTAyIDAgMjQ5IDI1OCAxCnJlbGF0ZWQgMTIgMCAxMiAyOQpkaWFnbm9zdGljIDcxMDIgMCAyMTcgMjYxIDEKcmVsYXRlZCAxMiAwIDEyIDI5CmNhc2UgMTUgMyAxCmRpYWdub3N0aWMgNzEwMiAwIDI3NiAyODUgMQpyZWxhdGVkIDEyIDAgMTIgMjkKY2FzZSAxNiAzIDEKZGlhZ25vc3RpYyA3MTAyIDAgMjkxIDMwMCAxCnJlbGF0ZWQgMTIgMCAxMiAyOQpjYXNlIDE3IDMgMQpkaWFnbm9zdGljIDcxMDIgMCAzMjkgMzM4IDEKcmVsYXRlZCAxMiAwIDEyIDI5CmNhc2UgMTggMyAxCmRpYWdub3N0aWMgNzEwMiAwIDI0MiAyNTEgMQpyZWxhdGVkIDEyIDAgMTIgMjkKYW5hbHlzaXMgcHJvYmxlbSAxMTA3",
+          "stderrBase64": ""
+        },
+        {
+          "identity": "tests::module_unit_recursive_cleanup::nested_fields_retain_cleanup_effect_authority",
+          "outcome": "passed",
+          "trapCategory": null,
+          "stdoutBase64": "Y2FzZSAwIDMgMQpkaWFnbm9zdGljIDcxMDIgMCAxNTAgMTczIDEKcmVsYXRlZCAxMiAwIDEyIDI5CmNhc2UgMSAwIDAKY2FzZSAyIDAgMApjYXNlIDMgMyAxCmRpYWdub3N0aWMgNzEwMiAwIDE4NSAyMjQgMQpyZWxhdGVkIDEyIDAgMTIgMjkKY2FzZSA0IDMgMQpkaWFnbm9zdGljIDcxMDIgMCAxODYgMjI5IDEKcmVsYXRlZCAxMiAwIDEyIDI5CmNhc2UgNSAzIDEKZGlhZ25vc3RpYyA3MTAyIDAgMTUwIDE4NiAxCnJlbGF0ZWQgMTIgMCAxMiAyOQpjYXNlIDYgMyAxCmRpYWdub3N0aWMgNzEwMiAwIDE1MCAxODggMQpyZWxhdGVkIDEyIDAgMTIgMjkKY2FzZSA3IDMgMQpkaWFnbm9zdGljIDcxMDIgMCAxOTcgMjA4IDEKcmVsYXRlZCAxMiAwIDEyIDI5CmNhc2UgOCAzIDEKZGlhZ25vc3RpYyA3MTAyIDAgMTcxIDE3NiAxCnJlbGF0ZWQgMTIgMCAxMiAyOQpjYXNlIDkgMyAxCmRpYWdub3N0aWMgNzEwMiAwIDE2OCAxOTEgMQpyZWxhdGVkIDEyIDAgMTIgMjkKY2FzZSAxMCAwIDAKY2FzZSAxMSAzIDIKZGlhZ25vc3RpYyA3MTAyIDAgMjM4IDI0OSAxCnJlbGF0ZWQgMTIgMCAxMiAyOQpkaWFnbm9zdGljIDcxMDIgMCAyNTAgMjY0IDEKcmVsYXRlZCAxMiAwIDEyIDI5CmNhc2UgMTIgMyAxCmRpYWdub3N0aWMgNzEwMiAwIDE4NyAxOTMgMQpyZWxhdGVkIDEyIDAgMTIgMjkKY2FzZSAxMyAzIDEKZGlhZ25vc3RpYyA3MTAyIDAgMTg3IDE5NiAxCnJlbGF0ZWQgMTIgMCAxMiAyOQpjYXNlIDE0IDMgMQpkaWFnbm9zdGljIDcxMDIgMCAxOTkgMjI5IDEKcmVsYXRlZCAxMiAwIDEyIDI5CmNhc2UgMTUgMyAxCmRpYWdub3N0aWMgNzEwMiAwIDE1OSAxNjUgMQpyZWxhdGVkIDEyIDAgMTIgMjkKY2FzZSAxNiAzIDIKZGlhZ25vc3RpYyA3MTAyIDAgMTgwIDIwMyAxCnJlbGF0ZWQgMTIgMCA2NiA4NgpkaWFnbm9zdGljIDcxMDIgMCAxODAgMjAzIDEKcmVsYXRlZCAxMiAwIDEyIDI5CmNhc2UgMTcgMyAxCmRpYWdub3N0aWMgNzEwMiAwIDIwMCAyMjMgMQpyZWxhdGVkIDEyIDAgMTIgMjkKY2FzZSAxOCAwIDAKY2FzZSAxOSAzIDEKZGlhZ25vc3RpYyAxMTA4IDAgMTY3IDE5MCAxCnJlbGF0ZWQgMTEgMCA2NiA4MwpjYXNlIDIwIDMgMQpkaWFnbm9zdGljIDcxMDIgMCA0NCA3MyAxCnJlbGF0ZWQgMTIgMSAxNiAzMwpjYXNlIDIxIDMgMQpkaWFnbm9zdGljIDcxMDIgMCAxNzIgMTc0IDEKcmVsYXRlZCAxMiAwIDEyIDI5CmNhc2UgMjIgMCAwCg==",
+          "stderrBase64": ""
+        }
+      ],
+      "count": 4,
+      "passed": 3,
+      "failed": 1,
+      "status": "failed",
+      "lock": "verified"
+    },
+    "reason": "The original no-drop fixture incorrectly spelled the closed abilities vocabulary as move; this raised E1107 before cleanup checking. Replaced with store and replaced a redundant fixture with scalar-block propagation. The corrected partial-owner test passed all 24 fixtures.",
+    "finalReport": {
+      "schemaVersion": "fairyc.test-report/v4",
+      "engine": "native",
+      "target": "x86_64-windows-msvc",
+      "profile": "development",
+      "tests": [
+        {
+          "identity": "tests::module_unit_partial_cleanup::partial_fields_and_arguments_keep_cleanup_obligations",
+          "outcome": "passed",
+          "trapCategory": null,
+          "stdoutBase64": "Y2FzZSAwIDMgMQpkaWFnbm9zdGljIDcxMDIgMCAyMzAgMjM5IDEKcmVsYXRlZCAxMiAwIDEyIDI5CmNhc2UgMSAwIDAKY2FzZSAyIDMgMQpkaWFnbm9zdGljIDcxMDIgMCAyNDggMjU3IDEKcmVsYXRlZCAxMiAwIDEyIDI5CmNhc2UgMyAzIDEKZGlhZ25vc3RpYyA3MTAyIDAgMjc5IDI4OCAxCnJlbGF0ZWQgMTIgMCAxMiAyOQpjYXNlIDQgMCAwCmNhc2UgNSAwIDAKY2FzZSA2IDAgMApjYXNlIDcgMCAwCmNhc2UgOCAzIDEKZGlhZ25vc3RpYyA3MTAyIDAgMjMxIDI0NiAxCnJlbGF0ZWQgMTIgMCAxMiAyOQpjYXNlIDkgMyAxCmRpYWdub3N0aWMgNzEwMiAwIDIzMiAyNDcgMQpyZWxhdGVkIDEyIDAgMTIgMjkKY2FzZSAxMCAzIDEKZGlhZ25vc3RpYyA3MTAyIDAgMjQ3IDI1MyAxCnJlbGF0ZWQgMTIgMCAxMiAyOQpjYXNlIDExIDMgMQpkaWFnbm9zdGljIDcxMDIgMCAyNDcgMjU2IDEKcmVsYXRlZCAxMiAwIDEyIDI5CmNhc2UgMTIgMCAwCmNhc2UgMTMgMyAxCmRpYWdub3N0aWMgNzEwMiAwIDMxOCAzMjcgMQpyZWxhdGVkIDEyIDAgMTIgMjkKY2FzZSAxNCAzIDIKZGlhZ25vc3RpYyA3MTAyIDAgMjQ5IDI1OCAxCnJlbGF0ZWQgMTIgMCAxMiAyOQpkaWFnbm9zdGljIDcxMDIgMCAyMTcgMjYxIDEKcmVsYXRlZCAxMiAwIDEyIDI5CmNhc2UgMTUgMyAxCmRpYWdub3N0aWMgNzEwMiAwIDI3NiAyODUgMQpyZWxhdGVkIDEyIDAgMTIgMjkKY2FzZSAxNiAzIDEKZGlhZ25vc3RpYyA3MTAyIDAgMjkxIDMwMCAxCnJlbGF0ZWQgMTIgMCAxMiAyOQpjYXNlIDE3IDMgMQpkaWFnbm9zdGljIDcxMDIgMCAzMjkgMzM4IDEKcmVsYXRlZCAxMiAwIDEyIDI5CmNhc2UgMTggMyAxCmRpYWdub3N0aWMgNzEwMiAwIDI0MiAyNTEgMQpyZWxhdGVkIDEyIDAgMTIgMjkKY2FzZSAxOSAzIDEKZGlhZ25vc3RpYyAxMTA4IDAgMzY2IDM3NSAxCnJlbGF0ZWQgMTEgMCAxNzUgMTkyCmNhc2UgMjAgMyAxCmRpYWdub3N0aWMgNzEwMiAwIDI2MiAyNjQgMQpyZWxhdGVkIDEyIDAgMTIgMjkKY2FzZSAyMSAwIDAKY2FzZSAyMiAwIDAKY2FzZSAyMyAzIDEKZGlhZ25vc3RpYyA3MTAyIDAgMjMzIDI0MiAxCnJlbGF0ZWQgMTIgMCAxMiAyOQo=",
+          "stderrBase64": ""
+        }
+      ],
+      "count": 1,
+      "passed": 1,
+      "failed": 0,
+      "status": "ok",
+      "lock": "verified"
+    },
+    "reusedUnchangedTests": 3,
+    "reasonForReuse": "Candidate compiler, bootstrap, core source and other test inputs stayed unchanged; only the partial-owner test data changed."
+  },
+  "cliRegression": [
+    {
+      "suite": "cleanup policy",
+      "exit": 0,
+      "passed": true,
+      "count": 58,
+      "matched": 58,
+      "candidateSHA256": "479bfddfde7850c97a5caa32f3ca4c6f2e40630080e572bf0de8cbfcc07da9f3"
+    },
+    {
+      "suite": "move state",
+      "exit": 0,
+      "passed": true,
+      "count": 58,
+      "matched": 58,
+      "candidateSHA256": "479bfddfde7850c97a5caa32f3ca4c6f2e40630080e572bf0de8cbfcc07da9f3"
+    },
+    {
+      "suite": "held reads",
+      "exit": 0,
+      "passed": true,
+      "count": 32,
+      "matched": 32,
+      "candidateSHA256": "479bfddfde7850c97a5caa32f3ca4c6f2e40630080e572bf0de8cbfcc07da9f3"
+    },
+    {
+      "suite": "owner accesses",
+      "exit": 0,
+      "passed": true,
+      "count": 31,
+      "matched": 31,
+      "candidateSHA256": "479bfddfde7850c97a5caa32f3ca4c6f2e40630080e572bf0de8cbfcc07da9f3"
+    },
+    {
+      "suite": "storage generations",
+      "exit": 0,
+      "passed": true,
+      "count": 9,
+      "matched": 9,
+      "candidateSHA256": "479bfddfde7850c97a5caa32f3ca4c6f2e40630080e572bf0de8cbfcc07da9f3"
+    },
+    {
+      "suite": "subviews",
+      "exit": 0,
+      "passed": true,
+      "count": 38,
+      "matched": 38,
+      "candidateSHA256": "479bfddfde7850c97a5caa32f3ca4c6f2e40630080e572bf0de8cbfcc07da9f3"
+    },
+    {
+      "suite": "reference access",
+      "exit": 0,
+      "passed": true,
+      "count": 27,
+      "matched": 27,
+      "candidateSHA256": "479bfddfde7850c97a5caa32f3ca4c6f2e40630080e572bf0de8cbfcc07da9f3"
+    },
+    {
+      "suite": "loan conflicts",
+      "exit": 0,
+      "passed": true,
+      "count": 38,
+      "matched": 38,
+      "candidateSHA256": "479bfddfde7850c97a5caa32f3ca4c6f2e40630080e572bf0de8cbfcc07da9f3"
+    },
+    {
+      "suite": "owner moves",
+      "exit": 0,
+      "passed": true,
+      "count": 39,
+      "matched": 39,
+      "candidateSHA256": "479bfddfde7850c97a5caa32f3ca4c6f2e40630080e572bf0de8cbfcc07da9f3"
+    },
+    {
+      "suite": "owner arguments",
+      "exit": 0,
+      "passed": true,
+      "count": 7,
+      "matched": 7,
+      "candidateSHA256": "479bfddfde7850c97a5caa32f3ca4c6f2e40630080e572bf0de8cbfcc07da9f3"
+    },
+    {
+      "suite": "iteration conflicts",
+      "exit": 0,
+      "passed": true,
+      "count": 6,
+      "matched": 6,
+      "candidateSHA256": "479bfddfde7850c97a5caa32f3ca4c6f2e40630080e572bf0de8cbfcc07da9f3"
+    },
+    {
+      "suite": "recursive cleanup",
+      "exit": 0,
+      "passed": true,
+      "count": 23,
+      "matched": 23,
+      "candidateSHA256": "479bfddfde7850c97a5caa32f3ca4c6f2e40630080e572bf0de8cbfcc07da9f3"
+    }
+  ],
+  "sourceCheck": {
+    "exit": 0,
+    "stdout": "check ok: 2 instance(s), 241 source file(s), 3010 MIR function(s), lock unchanged"
+  },
+  "lockedDevelopmentBuild": {
+    "exit": 0,
+    "stdout": "built: build/lexer-candidate.exe (x86_64-windows-msvc, development, lock verified)"
+  },
+  "goValidation": {
+    "semantic": {
+      "exit": 0,
+      "stdout": "ok github.com/0disoft/fairyc/internal/semantic 0.542s"
+    },
+    "compilerSelected": {
+      "exit": 0,
+      "tests": [
+        "TestByteForCleanupOnResultPropagation",
+        "TestPrivateVectorSDKCandidateLoopPropagationCleanup",
+        "TestBlockResultPrecedesLexicalCleanup"
+      ],
+      "stdout": "ok github.com/0disoft/fairyc/internal/compiler 2.766s"
+    }
+  },
+  "closedGap": {
+    "previousEvidence": "docs/ops/evidence/candidate-cleanup-recursive-effects-20261010.json",
+    "case": 0,
+    "code": 7102,
+    "relatedRole": "effect-declaration",
+    "pending": false
+  },
+  "budgets": {
+    "pendingOwners": 1024,
+    "work": 1048576,
+    "depth": 64
+  },
+  "pending": [
+    "Split-unit cleanup event MIR/C/runtime elaboration, including mapping partial temporaries to executable locals.",
+    "Outstanding borrow/access edges, unsafe provenance, full dispatcher and stage1/stage2 self-hosting."
+  ],
+  "skipped": {
+    "release": "Deferred consolidated batch",
+    "Linux": "Deferred consolidated batch",
+    "fullCompiler": "Full semantic and selected compiler tests passed; broader compiler suite deferred."
+  },
+  "sourceTruthDocumentsChanged": [],
+  "stableCLIChanged": false,
+  "sdkABIChanged": false,
+  "dbChanged": false,
+  "ciRunnerChanged": false,
+  "privateAPIChanged": false,
+  "pushed": false
+}
