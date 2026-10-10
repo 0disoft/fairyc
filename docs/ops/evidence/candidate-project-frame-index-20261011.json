@@ -1,0 +1,102 @@
+{
+  "schema": "fairyc.candidate-project-frame-index/v1",
+  "passed": true,
+  "parentCommit": "14f2125f52fa313359a1cedb0e577c5bfc2ca7a5",
+  "implementation": [
+    {
+      "path": "examples/lexer_candidate/src/module_project_frames.fy",
+      "bytes": 5264,
+      "sha256": "1780d7d5978a7918eaeac757b2faedb15cf735537dcda428985b26e18ff66b0a"
+    },
+    {
+      "path": "examples/lexer_candidate/src/candidate_limits.fy",
+      "bytes": 929,
+      "sha256": "afea16dac8b940db5e693acd33d681596066851521eac9253e30e4e8d8b35586"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_unit_cleanup_mir_verify.fy",
+      "bytes": 7001,
+      "sha256": "01ad9d1ad4321098ea1ecfc4d81548aa28f90a5548e2c9a336db92c443e6ea72"
+    }
+  ],
+  "test": {
+    "path": "examples/lexer_candidate/tests/module_project_frames_capacity.fy",
+    "bytes": 3047,
+    "sha256": "26f7b257764de28b4247aa3a5d364eeceb894ff7eba5e723a39d6da281d1489b"
+  },
+  "contract": {
+    "path": "docs/architecture/candidate-compilation-units-v0.md",
+    "bytes": 133854,
+    "sha256": "68491737f7858f460a35fcc727144b6aa9255ef49360ee0bd02f3d79684c149b"
+  },
+  "receiptTool": {
+    "path": "tools/verify-candidate-project-frame-index.py",
+    "bytes": 4757,
+    "sha256": "f88763ac97b45fdd809bf21694c8e001f4893b57da692b603c742be33aeb7ff0"
+  },
+  "initialFailure": {
+    "report": {
+      "path": ".cache/candidate-tagged/sdk-c-execution/run-main-link-frame-diagnostic.json",
+      "bytes": 154,
+      "sha256": "09ff72116b9e0e6633d3d3f8f5a7aed8af10cb28182e7903ff37b327f8180ad8"
+    },
+    "temporaryCode": 309002,
+    "meaning": "Cache-only frame-cap guard 9002 plus linker frame-stage tag 300000 distinguishes the 1024-frame admission cap from work exhaustion"
+  },
+  "policy": {
+    "projectFrames": 4096,
+    "ordinaryHashSlots": 8192,
+    "cleanupReceiverSlots": "canonical type count + 1",
+    "work": 1048576,
+    "ordinaryDuplicatesRejected": true,
+    "cleanupAliasesReused": true,
+    "genericUnitNamespacesPreserved": true,
+    "perUnitAdmissionUnchanged": true
+  },
+  "native": {
+    "report": {
+      "path": ".cache/candidate-tagged/sdk-c-execution/native-project-frame-index.json",
+      "bytes": 6500,
+      "sha256": "06c0364b047e7cd54f337fa18010357cf8a9a527643c7548a04cd223d5f5890d"
+    },
+    "passedCases": 3,
+    "ordinaryFrames": 1080,
+    "frameWork": 9561,
+    "coverage": [
+      "1080 functions in nine source modules preserve all global and original coordinates",
+      "Missing and duplicate ordinary bodies reject",
+      "Shared cleanup bodies preserve generated C"
+    ]
+  },
+  "reusedCExecution": {
+    "report": {
+      "path": ".cache/candidate-tagged/sdk-c-execution/project-link-c/execution.json",
+      "bytes": 11568,
+      "sha256": "8e67566e0b2f2678b6f6b8b8986f4460f11dade4f3ba1d53dce45a95e14d97c6"
+    },
+    "sourceSHA256": "41269b76713838e36b21729b18e504d2d92e4de5f955f47d2c78cbe08fc3e1a1",
+    "profiles": [
+      "low",
+      "optimized"
+    ],
+    "runs": 2,
+    "justification": "Freshly generated cleanup C is byte-identical to the already executed C; existing successful profile executions remain applicable"
+  },
+  "check": {
+    "path": ".cache/candidate-tagged/sdk-c-execution/check-project-frame-index.json",
+    "bytes": 80,
+    "sha256": "94b232fbe06f363150d25a574988be63b5e174850ad4b1c1c051666619cdd663"
+  },
+  "fullOriginalLinkPassed": false,
+  "deferred": [
+    "Remaining original project link capacities",
+    "Original dispatcher C execution",
+    "Default compilation timeout/performance",
+    "Native driver",
+    "Linux",
+    "Standalone compiler profiles",
+    "Full suite",
+    "Stage1/Stage2"
+  ],
+  "pushed": false
+}

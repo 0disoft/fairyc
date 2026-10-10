@@ -15,3 +15,6 @@ pub fn usize metadata_fields(){return 2048;}
 // Joined bodies include original modules plus authenticated SDK specializations.
 // Per-file parser limits remain separate; all downstream consumers share this cap.
 pub fn usize program_expressions(){return 16384;}
+
+// Rebound project functions span many independently bounded source units.
+pub fn usize project_frames(){return 4096;}

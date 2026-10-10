@@ -130,6 +130,12 @@ materialize a field table for every nominal node in the global prefix. Each
 result retains the 512-shape, 2048-field and 512-callable bounds;
 parameter storage is capped at 32768 and owned spelling storage at 65536 bytes.
 
+Project linking admits at most 4096 rebound frames under the existing 1048576
+work cap. The cleanup-MIR verifier uses the same frame cap. Ordinary bodies are
+indexed by original module/declaration coordinates; cleanup aliases are indexed
+by their canonical receiver type. Generic frames retain their unit namespace.
+Per-unit body and specialization admission limits remain separate.
+
 Generic function targets retain their coordinates and declaration flags with
 `template=true`, result zero and no concrete parameter list. They must be
 instantiated before call typing. An unspecialized SDK Vec declaration is not
