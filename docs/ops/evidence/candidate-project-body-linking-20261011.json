@@ -1,0 +1,171 @@
+{
+  "schema": "fairyc.candidate-project-body-linking/v1",
+  "passed": true,
+  "parentCommit": "695307f67219fb8c5689c6fe506b3934827607cb",
+  "sources": [
+    {
+      "path": "examples/lexer_candidate/src/module_project_link.fy",
+      "bytes": 6104,
+      "sha256": "1f95cc1be3803eca58442db2158fecf17983c3a22ba73940ec6528e5ee06fa86"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_project_frames.fy",
+      "bytes": 4047,
+      "sha256": "3708386998db08f84acc74b39c04c6571f2bd9b8fb50cad6ec4257c8b1b319b1"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_project_metadata.fy",
+      "bytes": 8902,
+      "sha256": "eab6d9d4da8efec89cb685eef0e8369b8a7e97ea6e2364975831d605ce431858"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_project_body.fy",
+      "bytes": 4832,
+      "sha256": "ff153389206617bde1ccae10335416bef36fa45d56ceb816a76306ca952444d0"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_project_body_equal.fy",
+      "bytes": 6220,
+      "sha256": "3df2dd74cf68aff915b84e167d891ee4004e52d67f0028ce45046039a29d9e54"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_project_cleanup.fy",
+      "bytes": 5643,
+      "sha256": "b940648ad5bd8306981b0f73f8f1b3495d2778c93c179838e82278001373b82c"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_project_calls.fy",
+      "bytes": 3388,
+      "sha256": "dd22747a1ad92abd6da636843345e4cc8fb83ac774a6e5c430749fcdad15fcc7"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_project_types.fy",
+      "bytes": 5184,
+      "sha256": "fccd8c241ae28cc54bca5e38cafca3056ce9d845dfa2d51e849d323b37bd98c9"
+    }
+  ],
+  "test": {
+    "path": "examples/lexer_candidate/tests/module_project_link.fy",
+    "bytes": 6551,
+    "sha256": "a8b9765924b56b826571d14040d25cb949c627308dcae7b6414a0c502f2b200f"
+  },
+  "receiptTool": {
+    "path": "tools/verify-candidate-project-link.py",
+    "bytes": 6005,
+    "sha256": "266956fde251aa8e365df31689a4f0363ffbf80f9ae1140b1b24f10fb2c9576a"
+  },
+  "executionTool": {
+    "path": "tools/verify-candidate-module-c.py",
+    "bytes": 17303,
+    "sha256": "28ee5979d847372b6885ddb24f19756944e84d0a0b8345a9ca6c84e747d45a81"
+  },
+  "native": {
+    "report": {
+      "path": ".cache/candidate-tagged/sdk-c-execution/native-project-link.json",
+      "bytes": 17723,
+      "sha256": "73a2753916d5cc636ba169c544a42088dc48277970332779b09731b86a92c45d"
+    },
+    "uniquePassed": 4,
+    "sharedCleanupFieldRebinding": {
+      "path": ".cache/candidate-tagged/sdk-c-execution/native-project-shared-cleanup.json",
+      "bytes": 6095,
+      "sha256": "98ef018da08e41bb59805197479b3aa712ef726413896247d5184756c39ccede"
+    },
+    "coverage": [
+      "Three separately bound/typed/moved/lowered units execute ordinary cross-unit calls",
+      "Generic instances with unit-local ID 1 receive separate global frame identities",
+      "Shared resource cleanup bodies coalesce only after exact normalized body equality",
+      "Different field-table positions rebind to the same owner field; cleanup runs exactly once",
+      "Missing peer bodies and duplicate ordinary bodies reject before C output"
+    ]
+  },
+  "generatedC": {
+    "receipt": {
+      "path": ".cache/candidate-tagged/sdk-c-execution/project-link-c/execution.json",
+      "bytes": 11568,
+      "sha256": "8e67566e0b2f2678b6f6b8b8986f4460f11dade4f3ba1d53dce45a95e14d97c6"
+    },
+    "executions": 6,
+    "profiles": [
+      "/Od",
+      "/O2"
+    ],
+    "binaries": [
+      {
+        "path": ".cache/candidate-tagged/sdk-c-execution/project-link-c/project_c_links_three_ordinary_units_with_different_type_graphs-low.exe",
+        "bytes": 143360,
+        "sha256": "b14f0ff44f43ee924751f7f3c6f1d9a2162e87d27af5fc63658b9752d641450f"
+      },
+      {
+        "path": ".cache/candidate-tagged/sdk-c-execution/project-link-c/project_c_links_three_ordinary_units_with_different_type_graphs-optimized.exe",
+        "bytes": 107520,
+        "sha256": "6e601f19e56b6f1ab3fda792d62b2bf5377faacffbfd4060476c9e78d5d85c84"
+      },
+      {
+        "path": ".cache/candidate-tagged/sdk-c-execution/project-link-c/project_c_namespaces_generic_instances_from_distinct_units-low.exe",
+        "bytes": 142336,
+        "sha256": "be4888218b9f1ade0469470f1e8814098ac5dc7a52073d79e9e6b84661cd2642"
+      },
+      {
+        "path": ".cache/candidate-tagged/sdk-c-execution/project-link-c/project_c_namespaces_generic_instances_from_distinct_units-optimized.exe",
+        "bytes": 107520,
+        "sha256": "a3c6d7ab8edc55d4b381d1ad20df6e8b6c5b4880f2195fd05e7201c7eaafc89a"
+      },
+      {
+        "path": ".cache/candidate-tagged/sdk-c-execution/project-link-c/project_c_coalesces_shared_cleanup_bodies_and_preserves_drops-low.exe",
+        "bytes": 142336,
+        "sha256": "aa605abd1df55d72572116858219210468ba2c6ba7627383026e1aae89fbdd12"
+      },
+      {
+        "path": ".cache/candidate-tagged/sdk-c-execution/project-link-c/project_c_coalesces_shared_cleanup_bodies_and_preserves_drops-optimized.exe",
+        "bytes": 140800,
+        "sha256": "eaca8a331deeca87ee6a7333cf64ac884f6365e0df87d6f5f909e5caa4c2fa2d"
+      }
+    ],
+    "expectedCleanupStdout": "7,"
+  },
+  "sourceCheck": {
+    "check": {
+      "path": ".cache/candidate-tagged/sdk-c-execution/check-project-link.txt",
+      "bytes": 81,
+      "sha256": "afd884a544999ce32cbc37c4089bb97b5b90ed3c51cfc1e6cbb1f2c41ae168fc"
+    },
+    "locked": {
+      "path": ".cache/candidate-tagged/sdk-c-execution/check-project-link-locked.txt",
+      "bytes": 82,
+      "sha256": "a4016024834d147f4bd573ca8d717da0a15c36f9b4f48b25420505ed651b209b"
+    },
+    "sourceFiles": 283,
+    "mirFunctions": 3529
+  },
+  "limits": {
+    "sourceUnits": 256,
+    "canonicalTypes": 4096,
+    "frames": 1024,
+    "layouts": 1024,
+    "fields": 1024,
+    "callables": 1024,
+    "work": 1048576,
+    "note": "Existing owned-IR budgets remain; complete original dispatcher admission is not proven here"
+  },
+  "bootstrap": {
+    "image": {
+      "path": ".cache/candidate-tagged/compiler-file-tokens-120s.exe",
+      "bytes": 17467904,
+      "sha256": "a07e7bb81d919e605d35c6f538cdd601e408f8dc2c87ddfca47216190974f606"
+    },
+    "hostCompileTimeoutSeconds": 120,
+    "nativeExecutionTimeoutSeconds": 60
+  },
+  "deferred": [
+    "Compile and link all original dispatcher units; adjust project budgets from exact failures",
+    "Whole-dispatcher C generation/execution",
+    "Native driver integration",
+    "Default compilation timeout/performance",
+    "Standalone candidate development/Release",
+    "Linux",
+    "Full suite",
+    "Stage1/Stage2"
+  ],
+  "pushed": false
+}

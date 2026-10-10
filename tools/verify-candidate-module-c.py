@@ -85,6 +85,12 @@ ENUM_TRANSPORT = {
     "enum_c_orders_payload_effects_copies_values_and_defers_pointer_cycles": (0, "1,2,2,"),
 }
 ENUM_TRANSPORT_REJECTION = "enum_c_keeps_foreign_enum_abi_closed"
+PROJECT = {
+    "project_c_links_three_ordinary_units_with_different_type_graphs": (0, ""),
+    "project_c_namespaces_generic_instances_from_distinct_units": (0, ""),
+    "project_c_coalesces_shared_cleanup_bodies_and_preserves_drops": (0, "7,"),
+}
+PROJECT_REJECTION = "project_link_rejects_missing_and_duplicate_ordinary_bodies"
 SWITCHES = {
     "switch_c_executes_provider_nested_enums_and_copy_tagged_payloads": (0, "1,1,"),
     "switch_c_preserves_named_and_anonymous_owned_cleanup_and_transfers": (0, "30,3,1,40,2,4,99,50,5,60,6,70,7,80,8,80,9,"),
@@ -115,7 +121,7 @@ def main():
     parser.add_argument("--report", required=True, type=Path, action="append")
     parser.add_argument("--output", required=True, type=Path)
     parser.add_argument("--vcvars", required=True, type=Path)
-    parser.add_argument("--suite", choices=("scalar", "owned", "references", "arrays", "views", "casts", "pointers", "literals", "enum-transport", "switches", "all"), default="scalar")
+    parser.add_argument("--suite", choices=("scalar", "owned", "references", "arrays", "views", "casts", "pointers", "literals", "enum-transport", "switches", "project", "all"), default="scalar")
     args = parser.parse_args()
     scalar_cases = {name: (exit_code, "") for name, exit_code in EXPECTED.items()}
     owned_cases = {name: (0, trace) for name, trace in OWNED.items()}
@@ -138,6 +144,7 @@ def main():
               "enum-transport": (ENUM_TRANSPORT | {"owned_c_drops_active_tagged_payloads_and_nested_fields_in_reverse_order": owned_cases["owned_c_drops_active_tagged_payloads_and_nested_fields_in_reverse_order"],
                                                    "literal_c_preserves_exact_bytes_empty_views_and_cstr_storage": LITERALS["literal_c_preserves_exact_bytes_empty_views_and_cstr_storage"]}, {ENUM_TRANSPORT_REJECTION}),
               "switches": (SWITCHES | ENUM_TRANSPORT, {ENUM_TRANSPORT_REJECTION}),
+              "project": (PROJECT, {PROJECT_REJECTION}),
               "all": (scalar_cases | owned_cases | reference_cases | ARRAYS | VIEWS | CASTS | POINTERS | LITERALS | ENUM_TRANSPORT | SWITCHES,
                       {REJECTION, OWNED_REJECTION, REFERENCE_PROOF, CAST_REJECTION, POINTER_REJECTION, LITERAL_REJECTION, ENUM_TRANSPORT_REJECTION})}
     expected_cases, rejections = suites[args.suite]
@@ -172,7 +179,7 @@ def main():
                        "tests::module_unit_c_owned::", "tests::module_unit_c_references::",
                        "tests::module_unit_c_arrays::", "tests::module_unit_c_views::",
                        "tests::module_unit_c_casts::", "tests::module_unit_c_pointers::",
-                       "tests::module_unit_casts::", "tests::module_unit_c_literals::", "tests::module_unit_c_enums::")
+                       "tests::module_unit_casts::", "tests::module_unit_c_literals::", "tests::module_unit_c_enums::", "tests::module_project_link::")
                        if identity.startswith(prefix)), None)
         assert prefix is not None
         name = identity.removeprefix(prefix)
