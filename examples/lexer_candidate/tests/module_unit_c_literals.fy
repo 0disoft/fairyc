@@ -1,5 +1,8 @@
 module tests::module_unit_c_literals;
 import module_unit_c_emit as emit;
+import module_unit_c_literals as literals;
+import c_text as w;
+import sha256 as sha;
 import module_unit_body_ir_model as ir;
 import module_unit_cfg_model as cfg;
 import module_unit_cfg_lower as flow;
@@ -47,4 +50,11 @@ fn usize entry(ref ir::Program p){var usize found=0;var usize i=1;while(i<=ir::c
 @test @effects(console) fn void literal_c_traps_byte_index_at_literal_length(){let p=retained(b"module main;fn i32 main(){let ref u8[] bytes=b\"\\x01\";return bytes[1] as i32;}",b"");output(ref p,entry(ref p));}
 @test @effects(console) fn void literal_c_rejects_foreign_descriptor_abi_transactionally(){
     var v::Vec<syntax::Parsed> sources=v::empty<syntax::Parsed>();assert(v::push<syntax::Parsed>(ref mut sources,parsed(b"module main;@link_name(\"pending_descriptor_abi\")unsafe extern C fn void use(ref CStr n);")).is_ok);let rejected=switch(signatures::build(ref sources)){case .ok(_):{false}case .err(e):{e.code==5102}};assert(rejected);let p=retained(b"module main;fn i32 main(){let text=\"owned\";assert(text.len==5);return 0;}",b"");var bytes::Buffer c=switch(bytes::copy(b"sentinel")){case .ok(b):{b}case .err(_):{assert(false);return;}};assert(emit::render(ref p,0,ref mut c).code==1001);assert(bytes::equal(bytes::view(ref c),b"sentinel"));
+}
+
+
+@test @effects(console) fn void literal_pool_indexes_duplicates_and_sorts_large_unique_sets(){
+    var bytes::Buffer source=bytes::empty();assert(bytes::append(ref mut source,b"module main;fn i32 main(){").is_ok);var usize i=0;while(i<800){assert(bytes::append(ref mut source,b"discard \"literal_").is_ok);assert(bytes::append_usize(ref mut source,i).is_ok);assert(bytes::append(ref mut source,b"\";discard b\"literal_").is_ok);assert(bytes::append_usize(ref mut source,i).is_ok);assert(bytes::append(ref mut source,b"\";").is_ok);i+=1;}assert(bytes::append(ref mut source,b"return 0;}").is_ok);
+    let p=retained(bytes::view(ref source),b"");var bytes::Buffer out=bytes::empty();var w::State state=w::State{.code=0};var usize work=0;assert(literals::definitions(ref p,ref mut out,ref mut state,ref mut work));assert(state.code==0 && work<150000);discard io::write("work ");discard io::write_usize(work);discard io::write(" bytes ");discard io::write_usize(bytes::len(ref out));discard io::write("\n");let observed=sha::digest(bytes::view(ref out));let u32[8] expected=[0x865a689f,0x953e2a39,0xbad216b2,0xf9863d4f,0x80058be0,0x3c5e0399,0x4834396e,0xd3f0df48];var usize word=0;while(word<8){assert(observed[word]==expected[word]);word+=1;}discard io::write("sha256 865a689f953e2a39bad216b2f9863d4f80058be03c5e03994834396ed3f0df48\n");
+    var bytes::Buffer rejected=bytes::empty();var w::State stopped=w::State{.code=0};var usize exhausted=1048576;assert(!literals::definitions(ref p,ref mut rejected,ref mut stopped,ref mut exhausted));assert(stopped.code==1002 && bytes::len(ref rejected)==0);
 }

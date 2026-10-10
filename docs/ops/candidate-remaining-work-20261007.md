@@ -3152,3 +3152,36 @@ CI and repository hygiene are unchanged. The candidate unit contract and local
 observation tools change. No push. Full original C execution, native driver,
 default timeout/performance, standalone candidate profiles, Linux, full suite
 and Stage1/Stage2 remain pending.
+
+
+## Indexed C literal pool (2026-10-11)
+
+Receipt: `evidence/candidate-literal-pool-index-20261011.json`.
+
+Literal collection now uses a growing hash-slot index for duplicate lookup and
+heapsorts unique record IDs once. Full SHA-256 symbol identity, exact-byte
+collision rejection, first-owner retention and deterministic storage order
+remain. All index growth, probes, digest comparisons and sorting consume the
+existing work budget; neither work nor output limits increase.
+
+Three Release native cases pass. The stress case repeats 800 unique payloads as
+text and byte literals, uses 75396 work, and produces 116470 storage bytes. Its
+full output SHA matches an independently reconstructed Python blob. Existing
+empty/NUL/Unicode/CStr and cross-function deduplication cases also pass; their
+generated C builds and runs under MSVC /Od and /O2 (four executions). The locked
+source check passes with 287 files and 3601 MIR functions. An initial harness
+attempt printed the full stress blob and exceeded the native 65536-byte capture
+limit; the corrected test checks SHA internally and prints only the result.
+
+The exact 236-file original main closure still links 3558 frames across 48 units
+with 25 retries. Standalone literal definitions pass with work 386674 and 154845
+output bytes. Full C emission still fails within literal definitions: preceding
+C stages already consume 729542 work, leaving 319034. A cache-only observation
+reaches the unchanged 1048576 work cap with 106977 temporary bytes, below the
+2097152 output cap; public output stays empty. The next task is to reduce work
+in preceding C stages and repeated whole-program scans. Full original C
+generation/execution, native driver, default timeout/performance, standalone
+candidate profiles, Linux, full suite and Stage1/Stage2 remain pending.
+
+The candidate unit contract and local evidence tool change. Stable CLI/API, SDK
+ABI, Go reference behavior, DB, CI and native runner limits are unchanged. No push.

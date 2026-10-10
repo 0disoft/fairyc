@@ -2133,3 +2133,26 @@ public lowering entry that skips owned IR validation.
 Evidence: `docs/ops/evidence/candidate-cfg-drop-index-20261011.json`.
 Stable CLI/API, SDK ABI, language revision, Go reference behavior, DB, CI and
 native runner policy are unchanged.
+
+
+## Indexed literal storage collection (2026-10-11)
+
+Owned-unit C literal collection uses an explicit hash-slot vector for duplicate
+lookup. It starts with 64 slots and grows at half occupancy; growth, rehashing,
+probes and examined full SHA-256 words all consume the existing work budget.
+Growth is charged before reservation, so exhausted work cannot open an unbounded
+index allocation. Literal records retain the first original frame/node owner.
+The full eight-word digest remains the symbol identity. Equal digests still
+require exact-byte equality, and a mismatched payload rejects with 1001.
+
+Collection appends unique records rather than shifting a sorted array for each
+insertion. A final in-place heapsort orders record IDs by the full digest, using
+one bounded ID vector. Numeric byte storage, empty payload sentinels, cooked
+Unicode/NUL data, CStr terminators and sharing across equal text/byte values are
+unchanged. Expression emission retains its full-digest symbol spelling. Output
+order therefore remains deterministic and byte-identical for unchanged inputs.
+The work cap stays 1048576 and the C output cap stays 2097152 bytes.
+
+Evidence: `docs/ops/evidence/candidate-literal-pool-index-20261011.json`.
+Stable CLI/API, SDK ABI, language revision, Go reference semantics, DB, CI and
+native runner policy are unchanged.
