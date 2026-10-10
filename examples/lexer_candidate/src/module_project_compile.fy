@@ -23,7 +23,9 @@ pub fn Result<ir::Program,Problem> range(ref v::Vec<syntax::Parsed> sources,ref 
     if(moves::count(ref moved)!=0){let e=moves::at(ref moved,0);return .err(failed(5,e.code,e.module_index,e.start,e.end,first,stop,0,0));}
     return switch(lower::lower(sources,ref typed,closure::imported(ref ready),ref moved)){case .ok(p):{.ok(p)}case .err(e):{.err(failed(6,e.code,e.module_index,e.start,e.end,first,stop,0,0))}};
 }
-fn bool budget(Problem p){return (p.stage>=2 && p.stage<=5 && p.code==10) || p.stage==3 && p.code==4503 || p.stage==6 && p.code==1002;}
+// Cleanup policy retains raw code 10 through the owned-IR lowerer; later
+// IR construction and verification use 1002 for the same capacity class.
+fn bool budget(Problem p){return (p.stage>=2 && p.stage<=6 && p.code==10) || p.stage==3 && p.code==4503 || p.stage==6 && p.code==1002;}
 fn Problem append_range(ref v::Vec<syntax::Parsed> sources,ref signatures::Program metadata,usize first,usize stop,usize depth,ref mut v::Vec<ir::Program> programs,ref mut v::Vec<Range> ranges,ref mut usize retries){
     switch(range(sources,metadata,first,stop)){
         case .ok(p):{

@@ -1,0 +1,54 @@
+{
+  "schema": "fairyc.candidate-project-cleanup-policy-retry/v1",
+  "retryValidated": true,
+  "parentCommit": "3dc55c11e2f7b37a5b175a4e48b9786e85e2e68e",
+  "implementation": {
+    "path": "examples/lexer_candidate/src/module_project_compile.fy",
+    "bytes": 4762,
+    "sha256": "f411e70c6b8d16efe8e742a01714a51ed33f6c6bce67d607f0d7e0b87c62b84e"
+  },
+  "receiptTool": {
+    "path": "tools/verify-candidate-project-policy-retry.py",
+    "bytes": 3499,
+    "sha256": "6fca902c6e3171950d763ea5454546b91cb855e6407101dafa41e56ddf596f17"
+  },
+  "before": {
+    "path": "docs/ops/evidence/candidate-cleanup-type-liveness-20261011.json",
+    "bytes": 49725,
+    "sha256": "b32e393605c957b271903b601a1738f752382aee8370f1e4e90239ecefd64879"
+  },
+  "sourceSetReuse": "All 236 original-file hashes match the previous receipt",
+  "native": {
+    "path": ".cache/candidate-tagged/sdk-c-execution/native-main-project-policy-retry.json",
+    "bytes": 433,
+    "sha256": "7d24705e378a1a517211dc7da28a08767f578bc53305e5c99327e45ade965c63"
+  },
+  "stdout": "stage 4 code 2 module 106 at 12641..12692 range 103..107\n",
+  "originalCompilationPassed": false,
+  "observation": {
+    "stage": 4,
+    "code": 2,
+    "moduleIndex": 106,
+    "start": 12641,
+    "end": 12692,
+    "first": 103,
+    "stop": 107,
+    "source": "examples/lexer_candidate/src/module_unit_argument_collect.fy"
+  },
+  "check": {
+    "path": ".cache/candidate-tagged/sdk-c-execution/check-project-policy-retry.txt",
+    "bytes": 80,
+    "sha256": "2cd38bf1d080b8a1937d8b8084b6102b17c606fa964fa32f540d486a894f6275"
+  },
+  "unchanged": [
+    "Non-capacity errors still propagate",
+    "Single-source failures retain their stage and location",
+    "All per-unit capacity limits"
+  ],
+  "deferred": [
+    "Remaining original compilation failures",
+    "Original dispatcher C execution",
+    "Linux and Stage1/Stage2"
+  ],
+  "pushed": false
+}
