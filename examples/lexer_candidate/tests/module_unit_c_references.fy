@@ -41,6 +41,9 @@ fn usize entry(ref ir::Program p){var usize found=0;var usize i=1;while(i<=ir::c
 @test @effects(console) fn void reference_c_retains_shared_projection_and_generic_reference_returns(){
     let p=retained(b"module main;struct Box{i32 value;}fn ref i32 select(ref Box n){return ref n.value;}fn ref T identity<T>(ref T n){return n;}fn i32 main(){let Box b=Box{.value=7};let ref i32 chosen=select(ref b);assert(*chosen==7);let i32 n=9;let ref i32 value=identity<i32>(ref n);assert(*value==9);return 0;}",b"");output(ref p,entry(ref p));
 }
+@test @effects(console) fn void reference_c_reborrows_fields_from_shared_and_mutable_call_results(){
+    let p=retained(b"module main;struct Item{i32 n;}fn ref Item alias(ref Item p){return p;}fn ref mut Item exclusive(ref mut Item p){return p;}fn ref i32 shared(ref Item p){return ref alias(p).n;}fn ref mut i32 mutable(ref mut Item p){return ref mut exclusive(p).n;}fn i32 main(){var Item value=Item{.n=7};let ref i32 first=shared(ref value);assert(*first==7);let ref mut i32 second=mutable(ref mut value);*second=9;assert(*second==9);assert(value.n==9);let ref i32 third=ref alias(ref value).n;assert(*third==9);return 0;}",b"");output(ref p,entry(ref p));
+}
 @test @effects(console) fn void reference_c_snapshots_indirect_compound_target_before_aliasing_rhs(){
     let p=retained(b"module main;fn i32 mutate(ref mut i32 n){*n=20;return 4;}fn i32 compound(ref mut i32 n){*n+=mutate(n);return *n;}@link_name(\"observe_cleanup\")@effects(console)unsafe extern C fn void trace(i32 n);@effects(console)fn i32 main(){var i32 n=1;assert(compound(ref mut n)==5);assert(n==5);unsafe{trace(n);}return 0;}",b"");output(ref p,entry(ref p));
 }

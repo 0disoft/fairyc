@@ -36,6 +36,7 @@ OWNED = {
 }
 OWNED_REJECTION = "owned_c_rejects_foreign_text_abi_without_partial_output"
 REFERENCES = {
+    "reference_c_reborrows_fields_from_shared_and_mutable_call_results": "",
     "reference_c_snapshots_root_and_projected_values_before_rhs_mutation": "3,6,",
     "reference_c_mutates_borrowed_resource_without_dropping_the_reference": "10,3,",
     "reference_c_retains_shared_projection_and_generic_reference_returns": "",
@@ -121,7 +122,7 @@ def main():
     parser.add_argument("--report", required=True, type=Path, action="append")
     parser.add_argument("--output", required=True, type=Path)
     parser.add_argument("--vcvars", required=True, type=Path)
-    parser.add_argument("--suite", choices=("scalar", "owned", "references", "arrays", "views", "casts", "pointers", "literals", "enum-transport", "switches", "project", "all"), default="scalar")
+    parser.add_argument("--suite", choices=("scalar", "owned", "references", "reference-call-fields", "arrays", "views", "casts", "pointers", "literals", "enum-transport", "switches", "project", "all"), default="scalar")
     args = parser.parse_args()
     scalar_cases = {name: (exit_code, "") for name, exit_code in EXPECTED.items()}
     owned_cases = {name: (0, trace) for name, trace in OWNED.items()}
@@ -129,6 +130,7 @@ def main():
     suites = {"scalar": (scalar_cases, {REJECTION}),
               "owned": (owned_cases, {OWNED_REJECTION}),
               "references": (reference_cases, {REFERENCE_PROOF}),
+              "reference-call-fields": ({"reference_c_reborrows_fields_from_shared_and_mutable_call_results": (0, "")}, set()),
               "arrays": (ARRAYS, {REJECTION, OWNED_REJECTION}),
               "views": (VIEWS | {"array_c_evaluates_repeated_values_once_and_orders_literal_effects": ARRAYS["array_c_evaluates_repeated_values_once_and_orders_literal_effects"],
                                 "owned_c_drops_active_tagged_payloads_and_nested_fields_in_reverse_order": owned_cases["owned_c_drops_active_tagged_payloads_and_nested_fields_in_reverse_order"]},

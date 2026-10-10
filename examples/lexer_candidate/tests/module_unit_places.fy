@@ -21,6 +21,15 @@ fn void failure(ref u8[] text,u32 code,ref u8[] at){switch(checked(text)){case .
 @test fn void nested_fields_keep_whole_owner_and_reference_mutability(){
     let p=switch(checked(b"module main;struct Inner{i64 n;}struct Outer{Inner inner;}fn i64 main(ref mut Outer owner){let alias=owner;let shared=ref alias.inner.n;let got=*shared;let mutable=ref mut owner.inner.n;return got+*mutable;}")){case .ok(p):{p}case .err(_):{assert(false);return;}};assert(values::checked_returns(ref p)==1 && values::unresolved(ref p)==0);let c=values::at(ref p,0);var usize fields=0;var usize i=1;while(i<=model::expression_count(c)){let e=model::expression_at(c,i);if(e.kind==8){assert(e.place.kind==2 && e.place.root==1 && e.place.scope==1 && e.place.indirect && e.place.mutable && e.place.borrowable && e.field.id>0 && !e.place.resource_field);fields+=1;}i+=1;}assert(fields==4);
 }
+@test fn void reference_call_results_allow_field_reborrows_without_inventing_owner_roots(){
+    let p=switch(checked(b"module main;struct Item{i32 n;}fn ref Item alias(ref Item p){return p;}fn ref mut Item exclusive(ref mut Item p){return p;}fn ref i32 shared(ref Item p){return ref alias(p).n;}fn ref mut i32 mutable(ref mut Item p){return ref mut exclusive(p).n;}")){case .ok(p):{p}case .err(_):{assert(false);return;}};
+    assert(values::checked_returns(ref p)==4 && values::unresolved(ref p)==0);var usize frame=2;var usize fields=0;while(frame<4){let body=values::at(ref p,frame);var usize i=1;while(i<=model::expression_count(body)){let e=model::expression_at(body,i);if(e.kind==8){assert(e.place.kind==2 && e.place.indirect && e.place.borrowable && e.place.root==0 && !e.place.resource_field && e.place.mutable==(frame==3));fields+=1;}i+=1;}frame+=1;}assert(fields==2);
+}
+@test fn void reference_call_field_reborrows_keep_temporary_mutability_and_resource_rejections(){
+    failure(b"module main;struct Item{i32 n;}fn Item make(){return Item{.n=1};}fn ref i32 bad(){return ref make().n;}",2,b"ref make().n");
+    failure(b"module main;struct Item{i32 n;}fn ref Item alias(ref Item p){return p;}fn ref mut i32 bad(ref Item p){return ref mut alias(p).n;}",1008,b"alias(p).n");
+    failure(b"module main;resource Item{i32 n;cleanup{}}fn ref mut Item alias(ref mut Item p){return p;}fn ref mut i32 bad(ref mut Item p){return ref mut alias(p).n;}",1008,b"alias(p).n");
+}
 @test fn void immutable_and_nonplace_borrows_keep_reference_diagnostics(){
     failure(b"module main;fn i32 main(){let i32 n=1;let r=ref mut n;return *r;}",1008,b"n");
     failure(b"module main;fn i32 main(){let r=ref (1+2);return *r;}",2,b"ref (1+2)");
