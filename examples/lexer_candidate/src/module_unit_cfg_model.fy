@@ -1,0 +1,47 @@
+module module_unit_cfg_model;
+import module_unit_body_ir_model as bodies;
+import module_unit_cleanup_mir_model as clean_ir;
+import module_unit_value_model as budget;
+import module_unit_body_ir_lookup as lookup;
+import std::bytes as bytes;
+import std::vec as v;
+
+// One operation per block. source/target are body-table IDs, never parser tokens.
+// 1 eval, 2 store, 3 bool branch, 4 Result branch, 5 drop, 6 return,
+// 7 jump, 8 assert, 9 propagate error, 10 short-circuit copy, 11 branch/block copy,
+// 12 unreachable completion trap.
+pub struct Block {u32 kind;usize source;usize target;usize first;usize second;usize drop;usize start;usize end;}
+pub resource Graph {usize frame;usize entry;v::Vec<Block> blocks;usize work;cleanup{}}
+pub fn usize count(ref Graph p){return v::len<Block>(ref p.blocks);}
+pub fn Block at(ref Graph p,usize id){assert(id!=0 && id<=count(p));return *v::at<Block>(ref p.blocks,id-1);}
+pub fn usize frame(ref Graph p){return p.frame;}
+pub fn usize entry(ref Graph p){return p.entry;}
+pub fn usize work(ref Graph p){return p.work;}
+fn clean_ir::Problem fail(u32 code,usize module_index,usize start,usize end){return clean_ir::Problem{.code,.module_index,.start,.end};}
+pub fn clean_ir::Problem check(ref bodies::Program p,ref Graph g){
+    if(frame(g)==0 || frame(g)>bodies::count(p) || entry(g)==0 || entry(g)>count(g)){return fail(1001,0,0,0);}
+    let b=bodies::at(p,frame(g));let cleaned=bodies::cleanup_ir(p);let f=clean_ir::frame_at(cleaned,frame(g));
+    if(count(g)>32768 || work(g)>1048576){return fail(1002,f.module_index,0,0);}var usize used=work(g);
+    var v::Vec<u8> seen=v::empty<u8>();var usize i=0;while(i<clean_ir::drop_count(cleaned)){if(!budget::charge(ref mut used,1)){return fail(1002,f.module_index,0,0);}if(!v::push<u8>(ref mut seen,0).is_ok){return fail(1003,f.module_index,0,0);}i+=1;}
+    i=1;while(i<=count(g)){
+        if(!budget::charge(ref mut used,1)){return fail(1002,f.module_index,0,0);}let n=at(g,i);
+        if(n.kind==0 || n.kind>12 || n.start>n.end || n.end>bodies::source_bytes(b) || n.source>bodies::node_count(b) || (n.kind==2 && (n.target==0 || n.target>bodies::statement_count(b))) || n.kind!=2 && n.target>bodies::node_count(b) || n.first>count(g) || n.second>count(g)){return fail(1001,f.module_index,n.start,n.end);}
+        let branch=n.kind==3 || n.kind==4;let terminal=n.kind==6 || n.kind==9 || n.kind==12;
+        if(branch && (n.first==0 || n.second==0 || n.source==0) || !branch && n.second!=0 || terminal && n.first!=0 || !terminal && n.first==0 || (n.kind==1 || n.kind==2 || n.kind==8 || n.kind==10 || n.kind==11) && n.source==0){return fail(1001,f.module_index,n.start,n.end);}
+        if((n.kind==5 || n.kind==7 || n.kind==12) && (n.source!=0 || n.target!=0)){return fail(1001,f.module_index,n.start,n.end);}
+        if(n.source!=0){let e=bodies::node_at(b,n.source-1).value;if(e.state!=1 || e.type==0){return fail(1001,f.module_index,n.start,n.end);}let t=clean_ir::type_at(cleaned,e.type);
+            if((n.kind==3 || n.kind==8) && (t.kind!=1 || t.scalar!=6)){return fail(1001,f.module_index,n.start,n.end);}
+            if(n.kind==2){let s=bodies::statement_at(b,n.target-1).value;if((s.kind!=2 && s.kind!=4) || lookup::node(b,s.expression)!=n.source){return fail(1001,f.module_index,n.start,n.end);}}
+            if(n.kind==4 || n.kind==9){if(t.kind!=6 || n.target==0){return fail(1001,f.module_index,n.start,n.end);}let target=bodies::node_at(b,n.target-1).value;if(target.kind!=30 || lookup::node(b,target.left)!=n.source || target.type!=t.first){return fail(1001,f.module_index,n.start,n.end);}if(n.kind==9){let result=clean_ir::type_at(cleaned,f.result);if(result.kind!=6 || result.second!=t.second){return fail(1001,f.module_index,n.start,n.end);}}}
+            if(n.kind==6 && e.type!=f.result){return fail(1001,f.module_index,n.start,n.end);}
+            if(n.kind==10){let op=bodies::node_text(b,n.source-1);if(e.kind!=5 || (!bytes::equal(op,b"&&") && !bytes::equal(op,b"||")) || lookup::node(b,e.left)!=n.target){return fail(1001,f.module_index,n.start,n.end);}}
+            if(n.kind==11){if(e.kind!=12 && e.kind!=13 && e.kind!=31){return fail(1001,f.module_index,n.start,n.end);}if(n.target!=0 && bodies::node_at(b,n.target-1).value.type!=e.type){return fail(1001,f.module_index,n.start,n.end);}}
+        }else if(n.kind==6){let result=clean_ir::type_at(cleaned,f.result);if(result.kind!=1 || result.scalar!=7){return fail(1001,f.module_index,n.start,n.end);}}
+        if(n.kind==5){if(n.drop==0 || n.drop>clean_ir::drop_count(cleaned)){return fail(1001,f.module_index,n.start,n.end);}let d=clean_ir::drop_at(cleaned,n.drop-1);let o=clean_ir::operand_at(cleaned,d.operand);if(o.frame!=frame(g) || n.start!=d.start || n.end!=d.end || *v::at<u8>(ref seen,n.drop-1)!=0){return fail(1001,f.module_index,n.start,n.end);}// The ownership walk may revisit a loop condition while validating its
+            // back edge. Those identical requests describe one runtime site.
+            var usize alias=0;while(alias<clean_ir::drop_count(cleaned)){if(!budget::charge(ref mut used,1)){return fail(1002,f.module_index,n.start,n.end);}let other=clean_ir::drop_at(cleaned,alias);if(other.operand==d.operand && other.exit==d.exit && other.start==d.start && other.end==d.end){if(*v::at<u8>(ref seen,alias)!=0){return fail(1001,f.module_index,n.start,n.end);}let slot=v::at_mut<u8>(ref mut seen,alias);*slot=1;}alias+=1;}}else if(n.drop!=0){return fail(1001,f.module_index,n.start,n.end);}i+=1;
+    }
+    i=0;while(i<clean_ir::drop_count(cleaned)){if(!budget::charge(ref mut used,1)){return fail(1002,f.module_index,0,0);}if(clean_ir::operand_at(cleaned,clean_ir::drop_at(cleaned,i).operand).frame==frame(g) && *v::at<u8>(ref seen,i)==0){return fail(1001,f.module_index,0,0);}i+=1;}
+    return fail(0,0,0,0);
+}
+pub fn Result<Graph,clean_ir::Problem> assemble(ref bodies::Program p,usize frame,usize entry,v::Vec<Block> blocks,usize work){let g=Graph{.frame,.entry,.blocks,.work};let checked=check(p,ref g);if(checked.code!=0){return .err(checked);}return .ok(g);}

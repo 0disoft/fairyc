@@ -1,0 +1,139 @@
+{
+  "schema": "fairyc.candidate-module-cfg/v1",
+  "passed": true,
+  "identity": {
+    "compilerSHA256": "18c75e6c281cca5199fff0f4064871182ba2f0fda5c552bd44bcf9e0fa88e0a1",
+    "candidateSHA256": "9dcddefc179a215ab500d4abfeb11f5717afb87f17751f18d3210fcc5e6d95f7",
+    "sources": {
+      "examples/lexer_candidate/src/module_unit_cfg_model.fy": "fc9f0012b3150512f339b01290cec448ed4503c539ebb98dddccaf99458a1023",
+      "examples/lexer_candidate/src/module_unit_cfg_lower.fy": "e83435b79d370821dfcd5a599824a303efc909ca0b90aaaf018b96e6844381c7",
+      "examples/lexer_candidate/tests/module_unit_cfg.fy": "95655cf4c3f656248177eff72f2f1ad421d6d36f682fa065396da00a3a510739",
+      "examples/lexer_candidate/fairy.lock": "b026594ec75a691ad605f0c877697fd215d8a5f1c2ef63e1180a54e34cb8eced"
+    },
+    "bodyIRSources": {
+      "examples/lexer_candidate/src/module_unit_body_ir_lookup.fy": "a28ff7603d4d0b1b25b546826589a2f628d47ad73e1376ad8894ba1deeb3d232",
+      "examples/lexer_candidate/src/module_unit_body_ir_lower.fy": "b496bd3b4e68b23398c69630250cfa40cf943b61f6ddf6f9650587e9811bdb8d",
+      "examples/lexer_candidate/src/module_unit_body_ir_model.fy": "d99548eebad206f5a24b3dd669ba6f6bf1fcf161e92bb21db62035b58ced191c",
+      "examples/lexer_candidate/src/module_unit_body_ir_verify.fy": "1094a634358023927c950c1af5bf6979af41e3d77b1fc34f4c2212531782e9c6"
+    }
+  },
+  "native": {
+    "schemaVersion": "fairyc.test-report/v4",
+    "engine": "native",
+    "target": "x86_64-windows-msvc",
+    "profile": "development",
+    "tests": [
+      {
+        "identity": "tests::module_unit_cfg::cfg_has_loop_back_edges_and_break_continue_cleanup",
+        "outcome": "passed",
+        "trapCategory": null,
+        "stdoutBase64": "",
+        "stderrBase64": ""
+      },
+      {
+        "identity": "tests::module_unit_cfg::cfg_loop_condition_revisits_share_one_runtime_drop_site",
+        "outcome": "passed",
+        "trapCategory": null,
+        "stdoutBase64": "",
+        "stderrBase64": ""
+      },
+      {
+        "identity": "tests::module_unit_cfg::cfg_places_reverse_lexical_drops_after_return_value",
+        "outcome": "passed",
+        "trapCategory": null,
+        "stdoutBase64": "",
+        "stderrBase64": ""
+      },
+      {
+        "identity": "tests::module_unit_cfg::cfg_propagation_error_drops_only_completed_values_in_reverse_order",
+        "outcome": "passed",
+        "trapCategory": null,
+        "stdoutBase64": "",
+        "stderrBase64": ""
+      },
+      {
+        "identity": "tests::module_unit_cfg::cfg_rejects_invalid_successors_values_and_cleanup_coverage",
+        "outcome": "passed",
+        "trapCategory": null,
+        "stdoutBase64": "",
+        "stderrBase64": ""
+      },
+      {
+        "identity": "tests::module_unit_cfg::cfg_resource_replacement_evaluates_rhs_before_old_drop_without_loading_target",
+        "outcome": "passed",
+        "trapCategory": null,
+        "stdoutBase64": "",
+        "stderrBase64": ""
+      },
+      {
+        "identity": "tests::module_unit_cfg::cfg_short_circuit_skips_right_call_and_declines_defer",
+        "outcome": "passed",
+        "trapCategory": null,
+        "stdoutBase64": "",
+        "stderrBase64": ""
+      }
+    ],
+    "count": 7,
+    "passed": 7,
+    "failed": 0,
+    "status": "ok",
+    "lock": "unchanged"
+  },
+  "mutationCodes": {
+    "acceptedCopy": 0,
+    "invalidModes1Through7And9": 1001,
+    "exceededWorkMode8": 1002
+  },
+  "checks": {
+    "lockedSource": {
+      "exit": 0,
+      "instances": 2,
+      "sources": 251,
+      "mirFunctions": 3180,
+      "lock": "verified"
+    },
+    "lockedDevelopmentBuild": {
+      "exit": 0,
+      "target": "x86_64-windows-msvc"
+    }
+  },
+  "representation": {
+    "block": "One typed operation per block, with body-table source/target IDs and explicit successor IDs",
+    "supportedControl": "if, bool short circuit, while, classic for, return, Result propagation, break and continue",
+    "cleanup": "Reason/span/frame-qualified sites; reverse construction temporaries before reverse lexical owners; equivalent loop-revisit facts share one runtime operation",
+    "replacement": "RHS evaluation, old value drop, store; local assignment target is not loaded",
+    "verified": "Bounds, typed operation shapes, successor forms and coverage of every in-frame cleanup request; not a dominance or initialization proof"
+  },
+  "scope": "Native tests execute the compiler graph lowering and inspect its paths; generated C and a program evaluator for this graph are not implemented. No CLI dispatch uses it.",
+  "unsupportedCode": 1004,
+  "unsupported": [
+    "switch",
+    "foreach",
+    "slice",
+    "named constructor node kinds 32/33",
+    "defer",
+    "Region"
+  ],
+  "pending": [
+    "Defer and Region ordering",
+    "Remaining control and value lanes",
+    "Source admission and unsafe provenance completion",
+    "Drop dominance and initialization proof",
+    "Generate and execute C for this graph",
+    "Full dispatcher and stage1/stage2"
+  ],
+  "skipped": {
+    "oldCLI": "CLI implementation unchanged; this private graph has no CLI route",
+    "GoTests": "No Go source changes",
+    "release": "Deferred consolidated verification",
+    "Linux": "Deferred consolidated verification",
+    "fullCompiler": "Scoped private graph change"
+  },
+  "privateAPIChanged": true,
+  "stableCLIChanged": false,
+  "sdkABIChanged": false,
+  "dbChanged": false,
+  "ciChanged": false,
+  "pushed": false,
+  "bodyIRCommit": "61fab76c"
+}
