@@ -1,0 +1,502 @@
+{
+  "schema": "fairyc.candidate-module-c-execution/v1",
+  "passed": true,
+  "identity": {
+    "nativeCompiler": {
+      "path": ".cache/candidate-tagged/compiler-origin-patterns.exe",
+      "sha256": "d36dae1b99751322e447880aaf4d28321bd6d53bdf776185308c6c4504889bb2"
+    },
+    "buildCompiler": {
+      "path": ".cache/candidate-tagged/compiler-build-240s.exe",
+      "sha256": "746fe10b022ed88cfbc0ae8ea13e3f867b842f3317ef5a2a4caa36d064a248dd"
+    },
+    "candidate": {
+      "path": "examples/lexer_candidate/build/lexer-candidate.exe",
+      "sha256": "f3a0a30fe3c165862066ce8b53decc840039820d1968a532e73778106433ce05"
+    },
+    "sources": [
+      {
+        "path": "examples/lexer_candidate/src/module_unit_c_emit.fy",
+        "sha256": "cc1856080a5643682324e691a440e3228cec39ab8ed53df38d3f692d5a5ecfe9"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_c_scalar.fy",
+        "sha256": "77e2587c6580c0a7957751a8bb8028bc472831d5b6baa22786940736e6de679a"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_cfg_lower.fy",
+        "sha256": "00c961dbfc5638471e38292b7babb6a1e1de347a4e2145efa377b6ee1196e738"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_cfg_model.fy",
+        "sha256": "28a206229aeb1d05e0e7823fecbc0f3ceeafe7d6b1b66fac7bcb94d914507194"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_body_ir_model.fy",
+        "sha256": "9b9a5f4655e595cbeb0cdb19e4833c6280f26d93c04aa39ba8cb4cfe4056ec68"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_body_ir_verify.fy",
+        "sha256": "9ca01cf3ebaf2215e43e5ad1c2d7ba41dcbda39e5b300d85eec5d0c80c0c628c"
+      },
+      {
+        "path": "examples/lexer_candidate/tests/module_unit_c_emit.fy",
+        "sha256": "408f7c0ddf903c49d1533df302b2799a182de317fd04a79673639556f74eb1d1"
+      },
+      {
+        "path": "examples/lexer_candidate/fairy.lock",
+        "sha256": "e4512a55a48f68d3e0ff4d1a651d7968164ef6f110f2f59f96ae857378f83837"
+      },
+      {
+        "path": "tools/verify-candidate-module-c.py",
+        "sha256": "c016c2c21e45584408105133ae98ed7378ea11058344489fd4942c92a1e55362"
+      }
+    ]
+  },
+  "native": {
+    "count": 6,
+    "passed": 6,
+    "failed": 0,
+    "profile": "development",
+    "target": "x86_64-windows-msvc",
+    "command": [
+      "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\compiler-origin-patterns.exe",
+      "test",
+      "--native",
+      "--file",
+      "tests/module_unit_c_emit.fy",
+      "--json",
+      "--capture-output"
+    ],
+    "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+    "exit": 0,
+    "report": {
+      "path": ".cache/candidate-tagged/cleanup-operands-unit/module-c-native-final.json",
+      "sha256": "f69226fd2651265f73421d3e6e7689f08e8d74c14551c6b0eef4f8476ef05324"
+    },
+    "tests": [
+      {
+        "identity": "tests::module_unit_c_emit::module_c_emits_closed_integer_widths_and_normalized_literals",
+        "outcome": "passed",
+        "emittedCBytes": 6980,
+        "emittedCSHA256": "063000202b5204338f5211ebfde31d50492c79f794656ffc8144dc29c69837f3",
+        "stderrBase64": "",
+        "trapCategory": null
+      },
+      {
+        "identity": "tests::module_unit_c_emit::module_c_emits_divide_by_zero_trap",
+        "outcome": "passed",
+        "emittedCBytes": 2554,
+        "emittedCSHA256": "53b1695d3e514516f993cd059a29d752462bf62e942de8f90731a69428523143",
+        "stderrBase64": "",
+        "trapCategory": null
+      },
+      {
+        "identity": "tests::module_unit_c_emit::module_c_emits_overflow_trap",
+        "outcome": "passed",
+        "emittedCBytes": 2563,
+        "emittedCSHA256": "943e6bf944f4eb9b2a284dba81d847acc53e8e3d1e934e1c84c0f03552d289db",
+        "stderrBase64": "",
+        "trapCategory": null
+      },
+      {
+        "identity": "tests::module_unit_c_emit::module_c_executes_calls_loops_and_lazy_branch_values",
+        "outcome": "passed",
+        "emittedCBytes": 9413,
+        "emittedCSHA256": "74cfc5c769d5985177464c53eef48c1e9bb121979a5aff886e9d07daf271b8af",
+        "stderrBase64": "",
+        "trapCategory": null
+      },
+      {
+        "identity": "tests::module_unit_c_emit::module_c_freezes_defer_arguments_before_reassignment_and_return",
+        "outcome": "passed",
+        "emittedCBytes": 4335,
+        "emittedCSHA256": "f06f0d7bd4f5b4f924e288d3e4fa8ff08b63453cb8cdaf34cf5bb2a0c06f8aa3",
+        "stderrBase64": "",
+        "trapCategory": null
+      },
+      {
+        "identity": "tests::module_unit_c_emit::module_c_rejects_unsupported_types_and_bad_entry_without_partial_output",
+        "outcome": "passed",
+        "emittedCBytes": 0,
+        "emittedCSHA256": null,
+        "stderrBase64": "",
+        "trapCategory": null
+      }
+    ]
+  },
+  "generatedC": {
+    "count": 10,
+    "passed": 10,
+    "profiles": [
+      "/Od",
+      "/O2"
+    ],
+    "report": {
+      "path": ".cache/candidate-tagged/module-c-unit/native-c-final/execution.json",
+      "sha256": "851498a824e8d499c808d4032e423007bc7f5847ddf623869f90509e70e882b3"
+    },
+    "executions": [
+      {
+        "name": "module_c_executes_calls_loops_and_lazy_branch_values",
+        "profile": "low",
+        "expectedExit": 0,
+        "sourceSHA256": "74cfc5c769d5985177464c53eef48c1e9bb121979a5aff886e9d07daf271b8af",
+        "build": {
+          "argv": [
+            "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+            "/nologo",
+            "/std:c11",
+            "/TC",
+            "/Od",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\module-c-unit\\native-c-final\\module_c_executes_calls_loops_and_lazy_branch_values.c",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\module-c-unit\\native-c-final\\trap.c",
+            "/Fe:C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\module-c-unit\\native-c-final\\module_c_executes_calls_loops_and_lazy_branch_values-low.exe",
+            "/link",
+            "/INCREMENTAL:NO"
+          ],
+          "exit": 0,
+          "stdout": "module_c_executes_calls_loops_and_lazy_branch_values.c\r\ntrap.c\r\nGenerating Code...\r\n",
+          "stderr": ""
+        },
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\module-c-unit\\native-c-final\\module_c_executes_calls_loops_and_lazy_branch_values-low.exe"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      },
+      {
+        "name": "module_c_executes_calls_loops_and_lazy_branch_values",
+        "profile": "optimized",
+        "expectedExit": 0,
+        "sourceSHA256": "74cfc5c769d5985177464c53eef48c1e9bb121979a5aff886e9d07daf271b8af",
+        "build": {
+          "argv": [
+            "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+            "/nologo",
+            "/std:c11",
+            "/TC",
+            "/O2",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\module-c-unit\\native-c-final\\module_c_executes_calls_loops_and_lazy_branch_values.c",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\module-c-unit\\native-c-final\\trap.c",
+            "/Fe:C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\module-c-unit\\native-c-final\\module_c_executes_calls_loops_and_lazy_branch_values-optimized.exe",
+            "/link",
+            "/INCREMENTAL:NO"
+          ],
+          "exit": 0,
+          "stdout": "module_c_executes_calls_loops_and_lazy_branch_values.c\r\ntrap.c\r\nGenerating Code...\r\n",
+          "stderr": ""
+        },
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\module-c-unit\\native-c-final\\module_c_executes_calls_loops_and_lazy_branch_values-optimized.exe"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      },
+      {
+        "name": "module_c_freezes_defer_arguments_before_reassignment_and_return",
+        "profile": "low",
+        "expectedExit": 0,
+        "sourceSHA256": "f06f0d7bd4f5b4f924e288d3e4fa8ff08b63453cb8cdaf34cf5bb2a0c06f8aa3",
+        "build": {
+          "argv": [
+            "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+            "/nologo",
+            "/std:c11",
+            "/TC",
+            "/Od",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\module-c-unit\\native-c-final\\module_c_freezes_defer_arguments_before_reassignment_and_return.c",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\module-c-unit\\native-c-final\\trap.c",
+            "/Fe:C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\module-c-unit\\native-c-final\\module_c_freezes_defer_arguments_before_reassignment_and_return-low.exe",
+            "/link",
+            "/INCREMENTAL:NO"
+          ],
+          "exit": 0,
+          "stdout": "module_c_freezes_defer_arguments_before_reassignment_and_return.c\r\ntrap.c\r\nGenerating Code...\r\n",
+          "stderr": ""
+        },
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\module-c-unit\\native-c-final\\module_c_freezes_defer_arguments_before_reassignment_and_return-low.exe"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      },
+      {
+        "name": "module_c_freezes_defer_arguments_before_reassignment_and_return",
+        "profile": "optimized",
+        "expectedExit": 0,
+        "sourceSHA256": "f06f0d7bd4f5b4f924e288d3e4fa8ff08b63453cb8cdaf34cf5bb2a0c06f8aa3",
+        "build": {
+          "argv": [
+            "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+            "/nologo",
+            "/std:c11",
+            "/TC",
+            "/O2",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\module-c-unit\\native-c-final\\module_c_freezes_defer_arguments_before_reassignment_and_return.c",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\module-c-unit\\native-c-final\\trap.c",
+            "/Fe:C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\module-c-unit\\native-c-final\\module_c_freezes_defer_arguments_before_reassignment_and_return-optimized.exe",
+            "/link",
+            "/INCREMENTAL:NO"
+          ],
+          "exit": 0,
+          "stdout": "module_c_freezes_defer_arguments_before_reassignment_and_return.c\r\ntrap.c\r\nGenerating Code...\r\n",
+          "stderr": ""
+        },
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\module-c-unit\\native-c-final\\module_c_freezes_defer_arguments_before_reassignment_and_return-optimized.exe"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      },
+      {
+        "name": "module_c_emits_closed_integer_widths_and_normalized_literals",
+        "profile": "low",
+        "expectedExit": 0,
+        "sourceSHA256": "063000202b5204338f5211ebfde31d50492c79f794656ffc8144dc29c69837f3",
+        "build": {
+          "argv": [
+            "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+            "/nologo",
+            "/std:c11",
+            "/TC",
+            "/Od",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\module-c-unit\\native-c-final\\module_c_emits_closed_integer_widths_and_normalized_literals.c",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\module-c-unit\\native-c-final\\trap.c",
+            "/Fe:C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\module-c-unit\\native-c-final\\module_c_emits_closed_integer_widths_and_normalized_literals-low.exe",
+            "/link",
+            "/INCREMENTAL:NO"
+          ],
+          "exit": 0,
+          "stdout": "module_c_emits_closed_integer_widths_and_normalized_literals.c\r\ntrap.c\r\nGenerating Code...\r\n",
+          "stderr": ""
+        },
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\module-c-unit\\native-c-final\\module_c_emits_closed_integer_widths_and_normalized_literals-low.exe"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      },
+      {
+        "name": "module_c_emits_closed_integer_widths_and_normalized_literals",
+        "profile": "optimized",
+        "expectedExit": 0,
+        "sourceSHA256": "063000202b5204338f5211ebfde31d50492c79f794656ffc8144dc29c69837f3",
+        "build": {
+          "argv": [
+            "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+            "/nologo",
+            "/std:c11",
+            "/TC",
+            "/O2",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\module-c-unit\\native-c-final\\module_c_emits_closed_integer_widths_and_normalized_literals.c",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\module-c-unit\\native-c-final\\trap.c",
+            "/Fe:C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\module-c-unit\\native-c-final\\module_c_emits_closed_integer_widths_and_normalized_literals-optimized.exe",
+            "/link",
+            "/INCREMENTAL:NO"
+          ],
+          "exit": 0,
+          "stdout": "module_c_emits_closed_integer_widths_and_normalized_literals.c\r\ntrap.c\r\nGenerating Code...\r\n",
+          "stderr": ""
+        },
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\module-c-unit\\native-c-final\\module_c_emits_closed_integer_widths_and_normalized_literals-optimized.exe"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      },
+      {
+        "name": "module_c_emits_overflow_trap",
+        "profile": "low",
+        "expectedExit": 101,
+        "sourceSHA256": "943e6bf944f4eb9b2a284dba81d847acc53e8e3d1e934e1c84c0f03552d289db",
+        "build": {
+          "argv": [
+            "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+            "/nologo",
+            "/std:c11",
+            "/TC",
+            "/Od",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\module-c-unit\\native-c-final\\module_c_emits_overflow_trap.c",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\module-c-unit\\native-c-final\\trap.c",
+            "/Fe:C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\module-c-unit\\native-c-final\\module_c_emits_overflow_trap-low.exe",
+            "/link",
+            "/INCREMENTAL:NO"
+          ],
+          "exit": 0,
+          "stdout": "module_c_emits_overflow_trap.c\r\ntrap.c\r\nGenerating Code...\r\n",
+          "stderr": ""
+        },
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\module-c-unit\\native-c-final\\module_c_emits_overflow_trap-low.exe"
+          ],
+          "exit": 101,
+          "stdout": "",
+          "stderr": ""
+        }
+      },
+      {
+        "name": "module_c_emits_overflow_trap",
+        "profile": "optimized",
+        "expectedExit": 101,
+        "sourceSHA256": "943e6bf944f4eb9b2a284dba81d847acc53e8e3d1e934e1c84c0f03552d289db",
+        "build": {
+          "argv": [
+            "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+            "/nologo",
+            "/std:c11",
+            "/TC",
+            "/O2",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\module-c-unit\\native-c-final\\module_c_emits_overflow_trap.c",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\module-c-unit\\native-c-final\\trap.c",
+            "/Fe:C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\module-c-unit\\native-c-final\\module_c_emits_overflow_trap-optimized.exe",
+            "/link",
+            "/INCREMENTAL:NO"
+          ],
+          "exit": 0,
+          "stdout": "module_c_emits_overflow_trap.c\r\ntrap.c\r\nGenerating Code...\r\n",
+          "stderr": ""
+        },
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\module-c-unit\\native-c-final\\module_c_emits_overflow_trap-optimized.exe"
+          ],
+          "exit": 101,
+          "stdout": "",
+          "stderr": ""
+        }
+      },
+      {
+        "name": "module_c_emits_divide_by_zero_trap",
+        "profile": "low",
+        "expectedExit": 102,
+        "sourceSHA256": "53b1695d3e514516f993cd059a29d752462bf62e942de8f90731a69428523143",
+        "build": {
+          "argv": [
+            "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+            "/nologo",
+            "/std:c11",
+            "/TC",
+            "/Od",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\module-c-unit\\native-c-final\\module_c_emits_divide_by_zero_trap.c",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\module-c-unit\\native-c-final\\trap.c",
+            "/Fe:C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\module-c-unit\\native-c-final\\module_c_emits_divide_by_zero_trap-low.exe",
+            "/link",
+            "/INCREMENTAL:NO"
+          ],
+          "exit": 0,
+          "stdout": "module_c_emits_divide_by_zero_trap.c\r\ntrap.c\r\nGenerating Code...\r\n",
+          "stderr": ""
+        },
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\module-c-unit\\native-c-final\\module_c_emits_divide_by_zero_trap-low.exe"
+          ],
+          "exit": 102,
+          "stdout": "",
+          "stderr": ""
+        }
+      },
+      {
+        "name": "module_c_emits_divide_by_zero_trap",
+        "profile": "optimized",
+        "expectedExit": 102,
+        "sourceSHA256": "53b1695d3e514516f993cd059a29d752462bf62e942de8f90731a69428523143",
+        "build": {
+          "argv": [
+            "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+            "/nologo",
+            "/std:c11",
+            "/TC",
+            "/O2",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\module-c-unit\\native-c-final\\module_c_emits_divide_by_zero_trap.c",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\module-c-unit\\native-c-final\\trap.c",
+            "/Fe:C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\module-c-unit\\native-c-final\\module_c_emits_divide_by_zero_trap-optimized.exe",
+            "/link",
+            "/INCREMENTAL:NO"
+          ],
+          "exit": 0,
+          "stdout": "module_c_emits_divide_by_zero_trap.c\r\ntrap.c\r\nGenerating Code...\r\n",
+          "stderr": ""
+        },
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\module-c-unit\\native-c-final\\module_c_emits_divide_by_zero_trap-optimized.exe"
+          ],
+          "exit": 102,
+          "stdout": "",
+          "stderr": ""
+        }
+      }
+    ],
+    "runtime": "Standalone test shim exits with 100+category; not the stable runtime trap reporter"
+  },
+  "sourceCheck": {
+    "exit": 0,
+    "locked": true,
+    "stdout": "check ok: 2 instance(s), 255 source file(s), 3239 MIR function(s), lock verified"
+  },
+  "developmentBuild": {
+    "exit": 0,
+    "locked": true,
+    "stdout": "built: build/lexer-candidate.exe (x86_64-windows-msvc, development, lock verified)"
+  },
+  "representation": {
+    "owner": "Own body IR and freshly lowered CFG, without Parsed/source joins",
+    "calls": "Frame-qualified ordinary and concrete generic targets, signatures and effect subsets rechecked",
+    "values": "Numeric C local and expression slots, checked integer arithmetic, lazy branches, loops, frozen defer slots",
+    "output": "Transactional 2MiB bounded C output; rejection preserves prior output"
+  },
+  "observations": [
+    "Cross-module two-argument call order, generic identity and recursive factorial",
+    "For/while, break/continue, compound assignment, lazy bool and if value",
+    "Frozen scalar defer arguments after mutation and nested fallthrough",
+    "i64 minimum/maximum, u8/u32/usize boundaries, hex/underscore normalization and arithmetic right shift",
+    "Overflow category1 and zero divisor category2 in both generated-C profiles",
+    "Unsupported resource lane1004 and invalid entry1001 preserve sentinel output"
+  ],
+  "unsupported": [
+    "Resources and implicit drops",
+    "Result/Option values and propagation",
+    "References, views, arrays, casts and foreign calls",
+    "Region checkpoint/place/reset runtime"
+  ],
+  "pending": [
+    "Aggregate/resource/runtime C lowering",
+    "Remaining scalar/aggregate syntax and source/unsafe admission",
+    "Dominance, initialization and cleanup path proof",
+    "Whole dispatcher and stage1/stage2"
+  ],
+  "skipped": {
+    "releaseCandidate": "Deferred batch; /O2 here is generated C only",
+    "Linux": "Windows transport scope",
+    "fullSuite": "Scoped private emitter change; existing CFG regressions reused on unchanged sources",
+    "Go": "No Go source change",
+    "oldCLI": "No private emitter CLI route"
+  },
+  "privateAPIChanged": true,
+  "stableCLIChanged": false,
+  "sdkABIChanged": false,
+  "dbChanged": false,
+  "ciChanged": false,
+  "pushed": false
+}
