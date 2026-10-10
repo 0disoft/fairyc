@@ -1,0 +1,705 @@
+{
+  "schema": "fairyc.candidate-constructor-borrow-facts/v1",
+  "passed": true,
+  "scope": "Verify that raw constructors preserve owner loans without introducing synthetic constructor sites, while Region allocation introduces origins and allocation provenance without retained borrow loans. Valid return-only facts, explicit owner borrow retention, descendant last uses and rejected local escapes remain exact.",
+  "sourceTruth": [
+    "docs/language/0002-borrows-and-return-origins.md",
+    "internal/semantic/borrow_flow.go",
+    "internal/semantic/model.go"
+  ],
+  "identity": {
+    "candidate": {
+      "path": "examples/lexer_candidate/build/lexer-candidate.exe",
+      "sha256": "df753d8a9d91ff1453fd9266f3919a23bc628bfc4c8fd06190a4ba2fce592b93"
+    },
+    "compiler": {
+      "path": ".cache/candidate-tagged/compiler-origin-patterns.exe",
+      "sha256": "d36dae1b99751322e447880aaf4d28321bd6d53bdf776185308c6c4504889bb2"
+    },
+    "lock": {
+      "path": "examples/lexer_candidate/fairy.lock",
+      "sha256": "10b001d8d59bc27f3c15de45ceed81d67c3249703cde457fa06d86dd21b707ba"
+    },
+    "test": {
+      "path": "examples/lexer_candidate/tests/module_unit_constructor_facts.fy",
+      "sha256": "1149aa79067e5e009e0240b905d45ff776cf8cd378530bf10ce1566e6b0184cb"
+    },
+    "oracle": {
+      "path": ".cache/candidate-tagged/constructor-facts-unit/oracle.go",
+      "sha256": "f2bf1cde6c88b9e4a9d26b5f89289e55ae659fb6b67770f860a3b091bd5cfe8c"
+    },
+    "allocator": {
+      "path": "internal/sdkstdlib/sources/std/alloc.fy",
+      "sha256": "61f50fa03239eee7b669c315659e8c9d07982117857cf50fe7f5a2b6f35a82c2"
+    },
+    "implementation": [
+      {
+        "path": "examples/lexer_candidate/src/module_unit_origin_flow.fy",
+        "sha256": "439e0bd1a1cb65e492bdbdb1537edbd07e82646c3e38f6ec668ea9f20e139f41"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_origin_flow_model.fy",
+        "sha256": "3f5d2c4dce7733f397e3f725526a69a15da88165e622082c3d2dd64637d74637"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_loan_facts.fy",
+        "sha256": "307f0a820e5439aeee4c77a10094dd71f635ccad94a8b5c50d2bc93eb7ea3f05"
+      }
+    ]
+  },
+  "fixtures": [
+    {
+      "index": 0,
+      "name": "raw text retained",
+      "source": "module main;resource Buffer{ptr mut void data;usize length;cleanup{}}fn void f(ref Buffer b){let x=unsafe{str::from_raw_parts(b,b.data,b.length)};discard x;}",
+      "provider": ""
+    },
+    {
+      "index": 1,
+      "name": "raw text returned",
+      "source": "module main;resource Buffer{ptr mut void data;usize length;cleanup{}}fn ref str f(ref Buffer b){return unsafe{str::from_raw_parts(b,b.data,b.length)};}",
+      "provider": ""
+    },
+    {
+      "index": 2,
+      "name": "raw bytes bound return",
+      "source": "module main;resource Buffer{ptr mut void data;usize length;cleanup{}}fn ref u8[] f(ref Buffer b){let x=unsafe{byte_slice::from_raw_parts(b,b.data,b.length)};return x;}",
+      "provider": ""
+    },
+    {
+      "index": 3,
+      "name": "raw mutable bytes returned",
+      "source": "module main;resource Buffer{ptr mut void data;usize length;cleanup{}}fn ref mut u8[] f(ref mut Buffer b){return unsafe{byte_slice::from_raw_parts_mut(b,b.data,b.length)};}",
+      "provider": ""
+    },
+    {
+      "index": 4,
+      "name": "raw CStr returned",
+      "source": "module main;resource Buffer{ptr mut void data;usize length;cleanup{}}fn ref CStr f(ref Buffer b){return unsafe{CStr::from_raw_parts(b,b.data,b.length)};}",
+      "provider": ""
+    },
+    {
+      "index": 5,
+      "name": "raw explicit owner retained",
+      "source": "module main;resource Buffer{ptr mut void data;usize length;cleanup{}}fn void f(){let Buffer b=Buffer{.data=null,.length=0};let x=unsafe{str::from_raw_parts(ref b,b.data,b.length)};discard x;}",
+      "provider": ""
+    },
+    {
+      "index": 6,
+      "name": "raw explicit mutable owner",
+      "source": "module main;resource Buffer{ptr mut void data;usize length;cleanup{}}fn void f(){var Buffer b=Buffer{.data=null,.length=0};let x=unsafe{byte_slice::from_raw_parts_mut(ref mut b,b.data,b.length)};discard x;}",
+      "provider": ""
+    },
+    {
+      "index": 7,
+      "name": "raw owner alias",
+      "source": "module main;resource Buffer{ptr mut void data;usize length;cleanup{}}fn void f(){let Buffer b=Buffer{.data=null,.length=0};let owner=ref b;let x=unsafe{byte_slice::from_raw_parts(owner,b.data,b.length)};discard x;}",
+      "provider": ""
+    },
+    {
+      "index": 8,
+      "name": "raw mutable descendant",
+      "source": "module main;resource Buffer{ptr mut void data;usize length;cleanup{}}fn void f(ref mut Buffer b){let x=unsafe{byte_slice::from_raw_parts_mut(b,b.data,b.length)};let ref mut u8[] y=x[..1];discard y;}",
+      "provider": ""
+    },
+    {
+      "index": 9,
+      "name": "raw local return rejected",
+      "source": "module main;resource Buffer{ptr mut void data;usize length;cleanup{}}fn ref str f(){let Buffer b=Buffer{.data=null,.length=0};return unsafe{str::from_raw_parts(ref b,b.data,b.length)};}",
+      "provider": ""
+    },
+    {
+      "index": 10,
+      "name": "raw temporary excluded",
+      "source": "module main;resource Buffer{ptr mut void data;usize length;cleanup{}}fn void f(ref Buffer b){discard unsafe{str::from_raw_parts(b,b.data,b.length)};}",
+      "provider": ""
+    },
+    {
+      "index": 11,
+      "name": "Region discarded allocation",
+      "source": "module main;import std::alloc as a;fn void f(Region r){discard r.place(1);}",
+      "provider": ""
+    },
+    {
+      "index": 12,
+      "name": "Region allocation used",
+      "source": "module main;import std::alloc as a;fn void f(Region r){let x=r.place(1);discard x;}",
+      "provider": ""
+    },
+    {
+      "index": 13,
+      "name": "Region direct return",
+      "source": "module main;import std::alloc as a;fn Result<ref i32,a::AllocError> f(Region r){return r.place(1);}",
+      "provider": ""
+    },
+    {
+      "index": 14,
+      "name": "Region bound return",
+      "source": "module main;import std::alloc as a;fn Result<ref i32,a::AllocError> f(Region r){let x=r.place(1);return x;}",
+      "provider": ""
+    },
+    {
+      "index": 15,
+      "name": "Region payload return",
+      "source": "module main;import std::alloc as a;fn Result<ref i32,a::AllocError> f(Region r){let x=r.place(1)?;return .ok(x);}",
+      "provider": ""
+    },
+    {
+      "index": 16,
+      "name": "Region local escape rejected",
+      "source": "module main;import std::alloc as a;fn Result<ref i32,a::AllocError> f(ref mut a::Arena arena){region r in arena{let x=r.place(1);return x;}}",
+      "provider": ""
+    },
+    {
+      "index": 17,
+      "name": "Region branch return",
+      "source": "module main;import std::alloc as a;fn Result<ref i32,a::AllocError> f(Region r,bool c){return if(c){r.place(1)}else{r.place(2)};}",
+      "provider": ""
+    },
+    {
+      "index": 18,
+      "name": "Region provider return",
+      "source": "module main;import std::alloc as a;import provider as p;fn Result<ref i32,a::AllocError> f(Region r){return p::store(r,3);}",
+      "provider": "module provider;import std::alloc as a;pub fn Result<ref i32,a::AllocError> store(Region r,i32 n){return r.place(n);}"
+    }
+  ],
+  "native": {
+    "schemaVersion": "fairyc.test-report/v4",
+    "engine": "native",
+    "target": "x86_64-windows-msvc",
+    "profile": "development",
+    "tests": [
+      {
+        "identity": "tests::module_unit_constructor_facts::constructor_facts_preserve_the_owner",
+        "outcome": "passed",
+        "trapCategory": null,
+        "stdoutBase64": "Y2FzZSAwCmNhc2UgMQpmYWN0IDAgNjkgMCAxMDMgMTQ5IDEwMyAxNDkgMSBQYXJhbSgwKQpjYXNlIDIKZmFjdCAwIDY5IDAgMTY0IDE2NSAxNjQgMTY1IDEgUGFyYW0oMCkKY2FzZSAzCmZhY3QgMCA2OSAxIDExMiAxNjkgMTEyIDE2OSAxIFBhcmFtKDApCmNhc2UgNApmYWN0IDAgNjkgMCAxMDQgMTUxIDEwNCAxNTEgMSBQYXJhbSgwKQpjYXNlIDUKZmFjdCAwIDY5IDAgMTU2IDE2MSAxODggMTg5IDAgTG9jYWwoYikKY2FzZSA2CmZhY3QgMCA2OSAxIDE2NyAxNzYgMjAzIDIwNCAwIExvY2FsKGIpCmNhc2UgNwpmYWN0IDAgNjkgMCAxMzMgMTM4IDIxMSAyMTIgMCBMb2NhbChiKQpjYXNlIDgKZmFjdCAwIDY5IDEgMTgwIDE4NiAxOTUgMTk2IDAgUGFyYW0oMCkKY2FzZSA5CmNhc2UgMTAKY2FzZSAxMQpjYXNlIDEyCmNhc2UgMTMKZmFjdCAwIDM1IDAgODcgOTcgODcgOTcgMSBSZWdpb25QYXJhbSgwKQpjYXNlIDE0CmZhY3QgMCAzNSAwIDEwNCAxMDUgMTA0IDEwNSAxIFJlZ2lvblBhcmFtKDApCmNhc2UgMTUKZmFjdCAwIDM1IDAgMTA1IDExMSAxMDUgMTExIDEgUmVnaW9uUGFyYW0oMCkKY2FzZSAxNgpjYXNlIDE3CmZhY3QgMCAzNSAwIDk0IDEyNyA5NCAxMjcgMSBSZWdpb25QYXJhbSgwKQpjYXNlIDE4CmZhY3QgMCA1NiAwIDEwOCAxMjEgMTA4IDEyMSAxIFJlZ2lvblBhcmFtKDApCmZhY3QgMiAzOSAwIDEwNSAxMTUgMTA1IDExNSAxIFJlZ2lvblBhcmFtKDApCg==",
+        "stderrBase64": ""
+      }
+    ],
+    "count": 1,
+    "passed": 1,
+    "failed": 0,
+    "status": "ok",
+    "lock": "verified"
+  },
+  "referenceComparison": {
+    "passed": true,
+    "matched": 19,
+    "count": 19,
+    "facts": 14,
+    "cases": [
+      {
+        "index": 0,
+        "name": "raw text retained",
+        "matched": true,
+        "reference": [],
+        "actual": []
+      },
+      {
+        "index": 1,
+        "name": "raw text returned",
+        "matched": true,
+        "reference": [
+          {
+            "module": 0,
+            "function": 69,
+            "mutable": 0,
+            "start": 103,
+            "end": 149,
+            "lastStart": 103,
+            "lastEnd": 149,
+            "escapes": 1,
+            "origin": "Param(0)"
+          }
+        ],
+        "actual": [
+          {
+            "module": 0,
+            "function": 69,
+            "mutable": 0,
+            "start": 103,
+            "end": 149,
+            "lastStart": 103,
+            "lastEnd": 149,
+            "escapes": 1,
+            "origin": "Param(0)"
+          }
+        ]
+      },
+      {
+        "index": 2,
+        "name": "raw bytes bound return",
+        "matched": true,
+        "reference": [
+          {
+            "module": 0,
+            "function": 69,
+            "mutable": 0,
+            "start": 164,
+            "end": 165,
+            "lastStart": 164,
+            "lastEnd": 165,
+            "escapes": 1,
+            "origin": "Param(0)"
+          }
+        ],
+        "actual": [
+          {
+            "module": 0,
+            "function": 69,
+            "mutable": 0,
+            "start": 164,
+            "end": 165,
+            "lastStart": 164,
+            "lastEnd": 165,
+            "escapes": 1,
+            "origin": "Param(0)"
+          }
+        ]
+      },
+      {
+        "index": 3,
+        "name": "raw mutable bytes returned",
+        "matched": true,
+        "reference": [
+          {
+            "module": 0,
+            "function": 69,
+            "mutable": 1,
+            "start": 112,
+            "end": 169,
+            "lastStart": 112,
+            "lastEnd": 169,
+            "escapes": 1,
+            "origin": "Param(0)"
+          }
+        ],
+        "actual": [
+          {
+            "module": 0,
+            "function": 69,
+            "mutable": 1,
+            "start": 112,
+            "end": 169,
+            "lastStart": 112,
+            "lastEnd": 169,
+            "escapes": 1,
+            "origin": "Param(0)"
+          }
+        ]
+      },
+      {
+        "index": 4,
+        "name": "raw CStr returned",
+        "matched": true,
+        "reference": [
+          {
+            "module": 0,
+            "function": 69,
+            "mutable": 0,
+            "start": 104,
+            "end": 151,
+            "lastStart": 104,
+            "lastEnd": 151,
+            "escapes": 1,
+            "origin": "Param(0)"
+          }
+        ],
+        "actual": [
+          {
+            "module": 0,
+            "function": 69,
+            "mutable": 0,
+            "start": 104,
+            "end": 151,
+            "lastStart": 104,
+            "lastEnd": 151,
+            "escapes": 1,
+            "origin": "Param(0)"
+          }
+        ]
+      },
+      {
+        "index": 5,
+        "name": "raw explicit owner retained",
+        "matched": true,
+        "reference": [
+          {
+            "module": 0,
+            "function": 69,
+            "mutable": 0,
+            "start": 156,
+            "end": 161,
+            "lastStart": 188,
+            "lastEnd": 189,
+            "escapes": 0,
+            "origin": "Local(b)"
+          }
+        ],
+        "actual": [
+          {
+            "module": 0,
+            "function": 69,
+            "mutable": 0,
+            "start": 156,
+            "end": 161,
+            "lastStart": 188,
+            "lastEnd": 189,
+            "escapes": 0,
+            "origin": "Local(b)"
+          }
+        ]
+      },
+      {
+        "index": 6,
+        "name": "raw explicit mutable owner",
+        "matched": true,
+        "reference": [
+          {
+            "module": 0,
+            "function": 69,
+            "mutable": 1,
+            "start": 167,
+            "end": 176,
+            "lastStart": 203,
+            "lastEnd": 204,
+            "escapes": 0,
+            "origin": "Local(b)"
+          }
+        ],
+        "actual": [
+          {
+            "module": 0,
+            "function": 69,
+            "mutable": 1,
+            "start": 167,
+            "end": 176,
+            "lastStart": 203,
+            "lastEnd": 204,
+            "escapes": 0,
+            "origin": "Local(b)"
+          }
+        ]
+      },
+      {
+        "index": 7,
+        "name": "raw owner alias",
+        "matched": true,
+        "reference": [
+          {
+            "module": 0,
+            "function": 69,
+            "mutable": 0,
+            "start": 133,
+            "end": 138,
+            "lastStart": 211,
+            "lastEnd": 212,
+            "escapes": 0,
+            "origin": "Local(b)"
+          }
+        ],
+        "actual": [
+          {
+            "module": 0,
+            "function": 69,
+            "mutable": 0,
+            "start": 133,
+            "end": 138,
+            "lastStart": 211,
+            "lastEnd": 212,
+            "escapes": 0,
+            "origin": "Local(b)"
+          }
+        ]
+      },
+      {
+        "index": 8,
+        "name": "raw mutable descendant",
+        "matched": true,
+        "reference": [
+          {
+            "module": 0,
+            "function": 69,
+            "mutable": 1,
+            "start": 180,
+            "end": 186,
+            "lastStart": 195,
+            "lastEnd": 196,
+            "escapes": 0,
+            "origin": "Param(0)"
+          }
+        ],
+        "actual": [
+          {
+            "module": 0,
+            "function": 69,
+            "mutable": 1,
+            "start": 180,
+            "end": 186,
+            "lastStart": 195,
+            "lastEnd": 196,
+            "escapes": 0,
+            "origin": "Param(0)"
+          }
+        ]
+      },
+      {
+        "index": 9,
+        "name": "raw local return rejected",
+        "matched": true,
+        "reference": [],
+        "actual": []
+      },
+      {
+        "index": 10,
+        "name": "raw temporary excluded",
+        "matched": true,
+        "reference": [],
+        "actual": []
+      },
+      {
+        "index": 11,
+        "name": "Region discarded allocation",
+        "matched": true,
+        "reference": [],
+        "actual": []
+      },
+      {
+        "index": 12,
+        "name": "Region allocation used",
+        "matched": true,
+        "reference": [],
+        "actual": []
+      },
+      {
+        "index": 13,
+        "name": "Region direct return",
+        "matched": true,
+        "reference": [
+          {
+            "module": 0,
+            "function": 35,
+            "mutable": 0,
+            "start": 87,
+            "end": 97,
+            "lastStart": 87,
+            "lastEnd": 97,
+            "escapes": 1,
+            "origin": "RegionParam(0)"
+          }
+        ],
+        "actual": [
+          {
+            "module": 0,
+            "function": 35,
+            "mutable": 0,
+            "start": 87,
+            "end": 97,
+            "lastStart": 87,
+            "lastEnd": 97,
+            "escapes": 1,
+            "origin": "RegionParam(0)"
+          }
+        ]
+      },
+      {
+        "index": 14,
+        "name": "Region bound return",
+        "matched": true,
+        "reference": [
+          {
+            "module": 0,
+            "function": 35,
+            "mutable": 0,
+            "start": 104,
+            "end": 105,
+            "lastStart": 104,
+            "lastEnd": 105,
+            "escapes": 1,
+            "origin": "RegionParam(0)"
+          }
+        ],
+        "actual": [
+          {
+            "module": 0,
+            "function": 35,
+            "mutable": 0,
+            "start": 104,
+            "end": 105,
+            "lastStart": 104,
+            "lastEnd": 105,
+            "escapes": 1,
+            "origin": "RegionParam(0)"
+          }
+        ]
+      },
+      {
+        "index": 15,
+        "name": "Region payload return",
+        "matched": true,
+        "reference": [
+          {
+            "module": 0,
+            "function": 35,
+            "mutable": 0,
+            "start": 105,
+            "end": 111,
+            "lastStart": 105,
+            "lastEnd": 111,
+            "escapes": 1,
+            "origin": "RegionParam(0)"
+          }
+        ],
+        "actual": [
+          {
+            "module": 0,
+            "function": 35,
+            "mutable": 0,
+            "start": 105,
+            "end": 111,
+            "lastStart": 105,
+            "lastEnd": 111,
+            "escapes": 1,
+            "origin": "RegionParam(0)"
+          }
+        ]
+      },
+      {
+        "index": 16,
+        "name": "Region local escape rejected",
+        "matched": true,
+        "reference": [],
+        "actual": []
+      },
+      {
+        "index": 17,
+        "name": "Region branch return",
+        "matched": true,
+        "reference": [
+          {
+            "module": 0,
+            "function": 35,
+            "mutable": 0,
+            "start": 94,
+            "end": 127,
+            "lastStart": 94,
+            "lastEnd": 127,
+            "escapes": 1,
+            "origin": "RegionParam(0)"
+          }
+        ],
+        "actual": [
+          {
+            "module": 0,
+            "function": 35,
+            "mutable": 0,
+            "start": 94,
+            "end": 127,
+            "lastStart": 94,
+            "lastEnd": 127,
+            "escapes": 1,
+            "origin": "RegionParam(0)"
+          }
+        ]
+      },
+      {
+        "index": 18,
+        "name": "Region provider return",
+        "matched": true,
+        "reference": [
+          {
+            "module": 2,
+            "function": 39,
+            "mutable": 0,
+            "start": 105,
+            "end": 115,
+            "lastStart": 105,
+            "lastEnd": 115,
+            "escapes": 1,
+            "origin": "RegionParam(0)"
+          },
+          {
+            "module": 0,
+            "function": 56,
+            "mutable": 0,
+            "start": 108,
+            "end": 121,
+            "lastStart": 108,
+            "lastEnd": 121,
+            "escapes": 1,
+            "origin": "RegionParam(0)"
+          }
+        ],
+        "actual": [
+          {
+            "module": 2,
+            "function": 39,
+            "mutable": 0,
+            "start": 105,
+            "end": 115,
+            "lastStart": 105,
+            "lastEnd": 115,
+            "escapes": 1,
+            "origin": "RegionParam(0)"
+          },
+          {
+            "module": 0,
+            "function": 56,
+            "mutable": 0,
+            "start": 108,
+            "end": 121,
+            "lastStart": 108,
+            "lastEnd": 121,
+            "escapes": 1,
+            "origin": "RegionParam(0)"
+          }
+        ]
+      }
+    ]
+  },
+  "referenceEntryPoint": "compiler.AnalyzeExplicitFiles: semantic borrow facts only; no MIR/native equivalence claim",
+  "selectedTestArguments": [
+    "C:/Users/cherr/Documents/workspace/zerodi-wd1/projects/hobby/opensource/fairyc/internal/sdkstdlib/sources/std/alloc.fy"
+  ],
+  "localEscapeRejections": [
+    {
+      "index": 9,
+      "codes": [
+        "E2102"
+      ]
+    },
+    {
+      "index": 16,
+      "codes": [
+        "E3101"
+      ]
+    }
+  ],
+  "goMIRLimitation": {
+    "index": 8,
+    "source": "module main;resource Buffer{ptr mut void data;usize length;cleanup{}}fn void f(ref mut Buffer b){let x=unsafe{byte_slice::from_raw_parts_mut(b,b.data,b.length)};let ref mut u8[] y=x[..1];discard y;}",
+    "entryPoint": "compiler.CheckExplicitFiles",
+    "error": "mir-verify: V1001 at block:1.operation:0: immutable byte-view slice shape is invalid",
+    "semanticFactsCompared": true,
+    "mirValidated": false
+  },
+  "implementationChanged": false,
+  "sourceCheck": "Unchanged implementation and lock reuse the preceding successful locked check; the new selected native test compiles and runs against the verified lock.",
+  "skipped": {
+    "fullRegression": "Implementation and lock unchanged; previous 158-case results remain valid.",
+    "release": "Deferred batch validation; this unit adds only a selected analysis test.",
+    "linux": "Deferred batch validation."
+  },
+  "pending": [
+    "Complete ordinary owner-read/access/store coverage",
+    "General moved-owner state and move-aware cleanup",
+    "Borrow MIR/C/runtime, unsafe provenance, full dispatcher, stage1/stage2"
+  ],
+  "privateAPIChanged": false,
+  "publicCLIChanged": false,
+  "sdkABIChanged": false,
+  "dbChanged": false,
+  "ciRunnerChanged": false,
+  "pushed": false
+}

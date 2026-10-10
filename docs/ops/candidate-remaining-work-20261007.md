@@ -2145,3 +2145,34 @@ Region/raw constructor facts, complete owner access coverage, general move
 state, cleanup, borrow MIR/C/runtime, unsafe provenance, full dispatcher and
 stage1/stage2 remain pending. Release/Linux checks were outside this local
 analysis unit. Public CLI, SDK ABI, DB and CI are unchanged; no push.
+
+## Region and raw constructor retained-fact coverage (2026-10-10)
+
+The existing constructor flow already matches the Go semantic borrow facts.
+Raw str, byte-slice, mutable byte-slice and CStr constructors forward their
+owner's records without creating a constructor-site loan. Explicit owner
+borrows retain their original sites and aliases extend their uses. Region
+placement records allocation provenance, but allocation itself is not a
+retained loan. Valid returned RegionParam values gain return-only facts;
+local Region and local raw-owner escapes remain rejected.
+
+A selected native test now freezes 19 constructor fixtures and origin
+rejection codes. All 14 complete fact rows match the Go semantic API,
+including source/function identity, origins, kind, borrow/last-use spans and
+escape flags. The source and primary owners drop before the immutable Plan
+is queried. The test loads the real alloc SDK source as its first argument;
+SDK-internal records are excluded from this root/provider comparison.
+
+The reference uses AnalyzeExplicitFiles for the semantic analysis under test.
+CheckExplicitFiles additionally fails its existing MIR verification for the
+raw mutable descendant fixture with V1001, immutable byte-view slice shape
+is invalid. That downstream behavior is recorded as a limitation; MIR/native
+equivalence is not claimed. Evidence:
+`docs/ops/evidence/candidate-constructor-borrow-facts-20261010.json`.
+
+Implementation and lock are unchanged, so the preceding source check/build
+and 158-case CLI regression remain valid without rerunning them. Release and
+Linux validation remain deferred. Complete ordinary owner access, general
+move state, cleanup, borrow MIR/C/runtime, unsafe provenance, full dispatcher
+and stage1/stage2 remain pending. Public CLI, private API, SDK ABI, DB and CI
+are unchanged; no push.
