@@ -1,0 +1,2823 @@
+{
+  "schema": "fairyc.candidate-original-file-tokens-c/v1",
+  "passed": true,
+  "parentCommit": "c02299dc817b95b412b84ffacc69ff960a952bec",
+  "identity": [
+    {
+      "path": "examples/lexer_candidate/src/file_tokens.fy",
+      "sha256": "1819f4b6b0537a4780294dbdc91a1eefe5d49ed1a95b7b7243e33414826e5e11"
+    },
+    {
+      "path": "examples/lexer_candidate/src/file_source.fy",
+      "sha256": "1a7ac7f6c69ef27e78e734aa74dab90b895742a5500a32931baaed19379b938f"
+    },
+    {
+      "path": "examples/lexer_candidate/src/scanner.fy",
+      "sha256": "1bd27d59bc093341d351547b7945f2864ae43219cbe35543283675eddaf82d84"
+    },
+    {
+      "path": "examples/lexer_candidate/src/candidate_limits.fy",
+      "sha256": "5666b6a3ad8190630c8fe7b7bca969ede7264d95f97e3ed17e166bf88417fc9d"
+    },
+    {
+      "path": "examples/lexer_candidate/src/numbers.fy",
+      "sha256": "ee8b40b5e8061317d70d3594c386c9e4c70d95132a7e4243ea6402947a4c3556"
+    },
+    {
+      "path": "examples/lexer_candidate/src/diagnostics.fy",
+      "sha256": "ee95f81ed3b3224702196fceef2888434e9713341b81abf01e03945592c4de8b"
+    },
+    {
+      "path": "examples/lexer_candidate/src/utf8.fy",
+      "sha256": "4a5425cea9efbfb1bff2c31a38c2bd8e392c6792af09f24e906c9a743621870d"
+    },
+    {
+      "path": "examples/lexer_candidate/src/strings.fy",
+      "sha256": "8f26db7c4d4039c8c8d9fbc6078097859c8f714ca5887957fdf0e69269dca521"
+    },
+    {
+      "path": "examples/lexer_candidate/src/budget.fy",
+      "sha256": "c2793aa302279b9d27f0af32edd71f70de4e93cb4f76f55facd3e757641cc494"
+    },
+    {
+      "path": "examples/lexer_candidate/src/token_output.fy",
+      "sha256": "5397f109de250238e498bc6fd4424cadcc9f854b982518f1daf11d44cbe3b8cc"
+    },
+    {
+      "path": "internal/sdkstdlib/sources/optional/std/vec.fy",
+      "sha256": "0ae4c395bf98c39079ad620bde035b3b590d51417864802e698edc069281db5b"
+    },
+    {
+      "path": "internal/sdkstdlib/sources/std/bytes.fy",
+      "sha256": "4740a506e93349fb002c383967dcc44d182d20f09f2094b83b5464a4ab252982"
+    },
+    {
+      "path": "internal/sdkstdlib/sources/std/io.fy",
+      "sha256": "4b89c3aeb8b4de4887395d29723095d364c5660c6b773c5696fb1f65f5365f48"
+    },
+    {
+      "path": "internal/sdkstdlib/sources/std/fs.fy",
+      "sha256": "fd7ddfa9f0deed98304cecf94911644087d1e2a46e8be8995c35acbcb183b335"
+    },
+    {
+      "path": "internal/sdkstdlib/sources/std/text.fy",
+      "sha256": "cccd47e090fda11c9da063ffb321489dd8753fe9996855fc432833e05a79e695"
+    },
+    {
+      "path": "internal/sdkstdlib/sources/std/process.fy",
+      "sha256": "9680a1481df4f761f481d5a039af7bdbefeb312d1091961194f8e7bc0681ae24"
+    },
+    {
+      "path": "examples/lexer_candidate/tests/module_unit_c_file_tokens.fy",
+      "sha256": "333f0a095305798699a0d9b96afe8705d30c6968fb31e01a92fe0568d5d15230"
+    },
+    {
+      "path": "tools/verify-candidate-file-tokens-c.py",
+      "sha256": "4db50c07bb50e724f9c427a3f4139a8452329c8cc600bcbc1d8f59ff157453da"
+    },
+    {
+      "path": "examples/lexer_candidate/fairy.lock",
+      "sha256": "18c1601c7ebc228caff927790754459d39f7d02bf964cfe0e09a7b35432297ae"
+    },
+    {
+      "path": ".cache/candidate-tagged/compiler-text-current.exe",
+      "sha256": "7accbaf3c65e6debd2f391c9de92889f908667f4738607fa8cd2d12e275d1a87"
+    },
+    {
+      "path": ".cache/candidate-tagged/compiler-file-tokens-120s.exe",
+      "sha256": "a07e7bb81d919e605d35c6f538cdd601e408f8dc2c87ddfca47216190974f606"
+    },
+    {
+      "path": ".cache/candidate-tagged/sdk-c-execution/file-tokens-reference/build/original-file-tokens.exe",
+      "sha256": "34f8af3b4b1b99d0f38f691e9ebddb39ca05090bde51aaa37f16fb1144de0d13"
+    }
+  ],
+  "sourceCheck": {
+    "reusedFrom": "docs/ops/evidence/candidate-original-scanner-c-20261011.json",
+    "locked": true,
+    "sourceFiles": 274,
+    "mirFunctions": 3406,
+    "trackedCompilerTreeUnchanged": true,
+    "reason": "Compiler/SDK/runtime sources and lock are unchanged; only a new integration fixture and local C observer were added"
+  },
+  "native": {
+    "report": {
+      "path": ".cache/candidate-tagged/sdk-c-execution/native-file-tokens-release-120s.json",
+      "sha256": "3dcf3b0f3b0c85ffda4a81c18940c3f071e6394c0124fe2f3cb770be7a4fe0b9"
+    },
+    "profile": "release",
+    "count": 1,
+    "passed": 1,
+    "stdout": "retained instances 105\nC bytes 584990 SHA256 words 4160359387 3550888719 4238259762 219114226 2631619845 813728528 2429245473 997376581\n",
+    "sourceArguments": [
+      "examples/lexer_candidate/src/file_tokens.fy",
+      "examples/lexer_candidate/src/file_source.fy",
+      "examples/lexer_candidate/src/scanner.fy",
+      "examples/lexer_candidate/src/candidate_limits.fy",
+      "examples/lexer_candidate/src/numbers.fy",
+      "examples/lexer_candidate/src/diagnostics.fy",
+      "examples/lexer_candidate/src/utf8.fy",
+      "examples/lexer_candidate/src/strings.fy",
+      "examples/lexer_candidate/src/budget.fy",
+      "examples/lexer_candidate/src/token_output.fy",
+      "internal/sdkstdlib/sources/optional/std/vec.fy",
+      "internal/sdkstdlib/sources/std/bytes.fy",
+      "internal/sdkstdlib/sources/std/io.fy",
+      "internal/sdkstdlib/sources/std/fs.fy",
+      "internal/sdkstdlib/sources/std/text.fy",
+      "internal/sdkstdlib/sources/std/process.fy"
+    ],
+    "artifactArgument": ".cache/candidate-tagged/sdk-c-execution/file-tokens-generated.c"
+  },
+  "bootstrap": {
+    "schema": "fairyc.validation-bootstrap-timeout/v1",
+    "reason": "Focused optimized native artifact build exceeded the original 60-second tool timeout; development test execution separately exceeded its unchanged 60-second runtime limit.",
+    "timeoutSeconds": 120,
+    "argv": [
+      "bun",
+      "tools/run-go.ts",
+      "build",
+      "-overlay=C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-tokens-build-overlay.json",
+      "-o",
+      "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\compiler-file-tokens-120s.exe",
+      "./cmd/fairyc"
+    ],
+    "exit": 0,
+    "stdout": "",
+    "stderr": "",
+    "originalPath": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\internal\\cdriver\\driver.go",
+    "originalSHA256": "f0d7aa82ac0db1720cebb1d548a1d4d10d3dcb66d80d572d84b32df198d131ac",
+    "overlayPath": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\driver-build-120s.go",
+    "overlaySHA256": "d2af53ab5c5e85c9d5c21159aa88b34a5a498523f79e4d62f5ae3ac896bc6d31",
+    "gitCommit": "c02299dc817b95b412b84ffacc69ff960a952bec",
+    "trackedGoTreeUnchanged": true,
+    "image": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\compiler-file-tokens-120s.exe",
+    "imageSHA256": "a07e7bb81d919e605d35c6f538cdd601e408f8dc2c87ddfca47216190974f606",
+    "version": "Fairy C Stage 0\ncompiler: v0.0.0-20261010160740-c02299dc817b+dirty\nsdk: fairyc-sdk-stdlib/0 0.0.0-stage0.86\nlanguage: fairyc-language/20\nruntime: fairyc-runtime/0\nrevision: c02299dc817b95b412b84ffacc69ff960a952bec\nmodified: true\n"
+  },
+  "initialFailures": [
+    {
+      "profile": "development",
+      "phase": "native test execution",
+      "timeoutSeconds": 60,
+      "message": "MSVC target executable exceeded 1m0s"
+    },
+    {
+      "profile": "release",
+      "phase": "MSVC bootstrap build",
+      "timeoutSeconds": 60,
+      "message": "MSVC host command exceeded 1m0s"
+    }
+  ],
+  "CExecutionReceipt": {
+    "path": ".cache/candidate-tagged/sdk-c-execution/file-tokens-c/receipt.json",
+    "sha256": "e3f12c45c3f2a9fffe2bfb3f713a62aeade6b7d801af6879b97e1c6ade1a44d3"
+  },
+  "CExecution": {
+    "schema": "fairyc.candidate-original-file-tokens-c-execution/v1",
+    "passed": true,
+    "retainedInstances": 105,
+    "sourceBytes": 584990,
+    "sourceSHA256": "f7fa0bdbd3a6430ffc9eb6320d0f6af29cdb55053080831090cb58213b72c245",
+    "nativeReportSHA256": "3dcf3b0f3b0c85ffda4a81c18940c3f071e6394c0124fe2f3cb770be7a4fe0b9",
+    "referenceSHA256": "34f8af3b4b1b99d0f38f691e9ebddb39ca05090bde51aaa37f16fb1144de0d13",
+    "builds": [
+      {
+        "profile": "low",
+        "build": {
+          "argv": [
+            "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+            "/nologo",
+            "/std:c11",
+            "/TC",
+            "/Od",
+            "/DFY_CANDIDATE_NO_MAIN",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-tokens-c\\file-tokens.c",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-tokens-c\\runtime.c",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-tokens-c\\trap.c",
+            "/Fe:C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-tokens-c\\file-tokens-low.exe",
+            "/link",
+            "/INCREMENTAL:NO"
+          ],
+          "exit": 0,
+          "stdout": "file-tokens.c\r\nruntime.c\r\ntrap.c\r\nGenerating Code...\r\n",
+          "stderr": ""
+        }
+      },
+      {
+        "profile": "optimized",
+        "build": {
+          "argv": [
+            "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+            "/nologo",
+            "/std:c11",
+            "/TC",
+            "/O2",
+            "/DFY_CANDIDATE_NO_MAIN",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-tokens-c\\file-tokens.c",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-tokens-c\\runtime.c",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-tokens-c\\trap.c",
+            "/Fe:C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-tokens-c\\file-tokens-optimized.exe",
+            "/link",
+            "/INCREMENTAL:NO"
+          ],
+          "exit": 0,
+          "stdout": "file-tokens.c\r\nruntime.c\r\ntrap.c\r\nGenerating Code...\r\n",
+          "stderr": ""
+        }
+      }
+    ],
+    "executions": [
+      {
+        "name": "empty.fy",
+        "profile": "low",
+        "heapFailureAt": null,
+        "counts": {
+          "heapAttempts": 3,
+          "heapLive": 0,
+          "bufferDrops": 2,
+          "vectorReleases": 3,
+          "cleanupErrors": 0,
+          "fileOpened": 1,
+          "fileClosed": 1,
+          "fileDrops": 1,
+          "fileAutomaticClose": 0
+        },
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-tokens-c\\file-tokens-low.exe",
+            "empty.fy"
+          ],
+          "exit": 0,
+          "stdoutBytes": 56,
+          "stdoutSHA256": "2085fa1aaab64a9aba1520640a3dfce4e68af70a1d13e7c2b9e9b8da6dbbf318",
+          "stderrBytes": 0,
+          "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderr": ""
+        }
+      },
+      {
+        "name": "source-한글-λ.fy",
+        "profile": "low",
+        "heapFailureAt": null,
+        "counts": {
+          "heapAttempts": 13,
+          "heapLive": 0,
+          "bufferDrops": 5,
+          "vectorReleases": 3,
+          "cleanupErrors": 0,
+          "fileOpened": 1,
+          "fileClosed": 1,
+          "fileDrops": 1,
+          "fileAutomaticClose": 0
+        },
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-tokens-c\\file-tokens-low.exe",
+            "source-한글-λ.fy"
+          ],
+          "exit": 0,
+          "stdoutBytes": 931,
+          "stdoutSHA256": "14e903db00bf5d452456596ba0292b64f42752fb1f3ddaaed9a085cc1814bc43",
+          "stderrBytes": 0,
+          "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderr": ""
+        }
+      },
+      {
+        "name": "literals.fy",
+        "profile": "low",
+        "heapFailureAt": null,
+        "counts": {
+          "heapAttempts": 24,
+          "heapLive": 0,
+          "bufferDrops": 14,
+          "vectorReleases": 3,
+          "cleanupErrors": 0,
+          "fileOpened": 1,
+          "fileClosed": 1,
+          "fileDrops": 1,
+          "fileAutomaticClose": 0
+        },
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-tokens-c\\file-tokens-low.exe",
+            "literals.fy"
+          ],
+          "exit": 0,
+          "stdoutBytes": 1390,
+          "stdoutSHA256": "55df09c46a779019d2446797a75de001d3f0798a25f8f380e772d7dd13e73cdd",
+          "stderrBytes": 0,
+          "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderr": ""
+        }
+      },
+      {
+        "name": "comments.fy",
+        "profile": "low",
+        "heapFailureAt": null,
+        "counts": {
+          "heapAttempts": 9,
+          "heapLive": 0,
+          "bufferDrops": 3,
+          "vectorReleases": 3,
+          "cleanupErrors": 0,
+          "fileOpened": 1,
+          "fileClosed": 1,
+          "fileDrops": 1,
+          "fileAutomaticClose": 0
+        },
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-tokens-c\\file-tokens-low.exe",
+            "comments.fy"
+          ],
+          "exit": 0,
+          "stdoutBytes": 418,
+          "stdoutSHA256": "9937850e2aabadda8952d64b7de4b8ad8a6428cdf0586b792630f1cb21d71272",
+          "stderrBytes": 0,
+          "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderr": ""
+        }
+      },
+      {
+        "name": "invalid-byte.fy",
+        "profile": "low",
+        "heapFailureAt": null,
+        "counts": {
+          "heapAttempts": 5,
+          "heapLive": 0,
+          "bufferDrops": 3,
+          "vectorReleases": 3,
+          "cleanupErrors": 0,
+          "fileOpened": 1,
+          "fileClosed": 1,
+          "fileDrops": 1,
+          "fileAutomaticClose": 0
+        },
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-tokens-c\\file-tokens-low.exe",
+            "invalid-byte.fy"
+          ],
+          "exit": 2,
+          "stdoutBytes": 0,
+          "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderrBytes": 47,
+          "stderrSHA256": "7460b7483f32ff1f5161f95749dfb0392f527f81a7070aebcf80e60b1cb2f671",
+          "stderr": "invalid-byte.fy:1:9: error: E0001 (bytes 8..9)\n"
+        }
+      },
+      {
+        "name": "bad-utf8-string.fy",
+        "profile": "low",
+        "heapFailureAt": null,
+        "counts": {
+          "heapAttempts": 3,
+          "heapLive": 0,
+          "bufferDrops": 4,
+          "vectorReleases": 3,
+          "cleanupErrors": 0,
+          "fileOpened": 1,
+          "fileClosed": 1,
+          "fileDrops": 1,
+          "fileAutomaticClose": 0
+        },
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-tokens-c\\file-tokens-low.exe",
+            "bad-utf8-string.fy"
+          ],
+          "exit": 2,
+          "stdoutBytes": 0,
+          "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderrBytes": 50,
+          "stderrSHA256": "cc2baf4680d8c6068f56d4833a0a781238f8744b7ba13bb6b883e5fa5284eba4",
+          "stderr": "bad-utf8-string.fy:1:8: error: E0001 (bytes 7..8)\n"
+        }
+      },
+      {
+        "name": "bad-number.fy",
+        "profile": "low",
+        "heapFailureAt": null,
+        "counts": {
+          "heapAttempts": 3,
+          "heapLive": 0,
+          "bufferDrops": 3,
+          "vectorReleases": 3,
+          "cleanupErrors": 0,
+          "fileOpened": 1,
+          "fileClosed": 1,
+          "fileDrops": 1,
+          "fileAutomaticClose": 0
+        },
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-tokens-c\\file-tokens-low.exe",
+            "bad-number.fy"
+          ],
+          "exit": 2,
+          "stdoutBytes": 0,
+          "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderrBytes": 46,
+          "stderrSHA256": "657a0a86265982048b1ab549dd7783b29466c26f5d271bacefb9433cf52ffe32",
+          "stderr": "bad-number.fy:1:7: error: E0004 (bytes 6..10)\n"
+        }
+      },
+      {
+        "name": "unclosed-string.fy",
+        "profile": "low",
+        "heapFailureAt": null,
+        "counts": {
+          "heapAttempts": 8,
+          "heapLive": 0,
+          "bufferDrops": 4,
+          "vectorReleases": 3,
+          "cleanupErrors": 0,
+          "fileOpened": 1,
+          "fileClosed": 1,
+          "fileDrops": 1,
+          "fileAutomaticClose": 0
+        },
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-tokens-c\\file-tokens-low.exe",
+            "unclosed-string.fy"
+          ],
+          "exit": 2,
+          "stdoutBytes": 0,
+          "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderrBytes": 53,
+          "stderrSHA256": "26c2a873c36280c7ae6aab887fafbf279b48931e609e87f200f5e3109e77c3fa",
+          "stderr": "unclosed-string.fy:1:13: error: E0005 (bytes 12..25)\n"
+        }
+      },
+      {
+        "name": "unclosed-comment.fy",
+        "profile": "low",
+        "heapFailureAt": null,
+        "counts": {
+          "heapAttempts": 6,
+          "heapLive": 0,
+          "bufferDrops": 3,
+          "vectorReleases": 3,
+          "cleanupErrors": 0,
+          "fileOpened": 1,
+          "fileClosed": 1,
+          "fileDrops": 1,
+          "fileAutomaticClose": 0
+        },
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-tokens-c\\file-tokens-low.exe",
+            "unclosed-comment.fy"
+          ],
+          "exit": 2,
+          "stdoutBytes": 0,
+          "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderrBytes": 52,
+          "stderrSHA256": "fcca6dc340e069ade78bc12e46a53cb11215fc7dac0c1bf67cdba5abad15458d",
+          "stderr": "unclosed-comment.fy:1:9: error: E0001 (bytes 8..14)\n"
+        }
+      },
+      {
+        "name": "bad-cstring.fy",
+        "profile": "low",
+        "heapFailureAt": null,
+        "counts": {
+          "heapAttempts": 6,
+          "heapLive": 0,
+          "bufferDrops": 4,
+          "vectorReleases": 3,
+          "cleanupErrors": 0,
+          "fileOpened": 1,
+          "fileClosed": 1,
+          "fileDrops": 1,
+          "fileAutomaticClose": 0
+        },
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-tokens-c\\file-tokens-low.exe",
+            "bad-cstring.fy"
+          ],
+          "exit": 2,
+          "stdoutBytes": 0,
+          "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderrBytes": 48,
+          "stderrSHA256": "275e92fdda9c853c063d90d38c22a54c8cd2f08aa0ba83cee2371ac22be784d7",
+          "stderr": "bad-cstring.fy:1:10: error: E0006 (bytes 9..11)\n"
+        }
+      },
+      {
+        "name": "newline-diagnostics.fy",
+        "profile": "low",
+        "heapFailureAt": null,
+        "counts": {
+          "heapAttempts": 6,
+          "heapLive": 0,
+          "bufferDrops": 4,
+          "vectorReleases": 3,
+          "cleanupErrors": 0,
+          "fileOpened": 1,
+          "fileClosed": 1,
+          "fileDrops": 1,
+          "fileAutomaticClose": 0
+        },
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-tokens-c\\file-tokens-low.exe",
+            "newline-diagnostics.fy"
+          ],
+          "exit": 2,
+          "stdoutBytes": 0,
+          "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderrBytes": 112,
+          "stderrSHA256": "88b235e5b7429f4b059052683da39fe8cbbb2d842d5962ddd9831fbb63577b5b",
+          "stderr": "newline-diagnostics.fy:2:3: error: E0001 (bytes 12..13)\nnewline-diagnostics.fy:3:1: error: E0001 (bytes 13..14)\n"
+        }
+      },
+      {
+        "name": "exact.fy",
+        "profile": "low",
+        "heapFailureAt": null,
+        "counts": {
+          "heapAttempts": 15,
+          "heapLive": 0,
+          "bufferDrops": 2,
+          "vectorReleases": 3,
+          "cleanupErrors": 0,
+          "fileOpened": 1,
+          "fileClosed": 1,
+          "fileDrops": 1,
+          "fileAutomaticClose": 0
+        },
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-tokens-c\\file-tokens-low.exe",
+            "exact.fy"
+          ],
+          "exit": 0,
+          "stdoutBytes": 131164,
+          "stdoutSHA256": "d1f326b0b44f7ae15e38a9e0e218c2b3146905467b09b560acc9aae099a02257",
+          "stderrBytes": 0,
+          "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderr": ""
+        }
+      },
+      {
+        "name": "overflow.fy",
+        "profile": "low",
+        "heapFailureAt": null,
+        "counts": {
+          "heapAttempts": 1,
+          "heapLive": 0,
+          "bufferDrops": 1,
+          "vectorReleases": 0,
+          "cleanupErrors": 0,
+          "fileOpened": 1,
+          "fileClosed": 0,
+          "fileDrops": 1,
+          "fileAutomaticClose": 1
+        },
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-tokens-c\\file-tokens-low.exe",
+            "overflow.fy"
+          ],
+          "exit": 2,
+          "stdoutBytes": 0,
+          "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderrBytes": 34,
+          "stderrSHA256": "571965cdf3d1d0c3619220895782a2471c990d50382d12364d2d080f501532ef",
+          "stderr": "error: source limit (65536 bytes)\n"
+        }
+      },
+      {
+        "name": "missing",
+        "profile": "low",
+        "heapFailureAt": null,
+        "counts": {
+          "heapAttempts": 0,
+          "heapLive": 0,
+          "bufferDrops": 0,
+          "vectorReleases": 0,
+          "cleanupErrors": 0,
+          "fileOpened": 0,
+          "fileClosed": 0,
+          "fileDrops": 1,
+          "fileAutomaticClose": 0
+        },
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-tokens-c\\file-tokens-low.exe",
+            "missing.fy"
+          ],
+          "exit": 2,
+          "stdoutBytes": 0,
+          "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderrBytes": 30,
+          "stderrSHA256": "cbcd3d71627cf6ba234ad7d8797524dda6f27a1c6cbbeb14f52689a233502cb7",
+          "stderr": "error: input file read failed\n"
+        }
+      },
+      {
+        "name": "no-argument",
+        "profile": "low",
+        "heapFailureAt": null,
+        "counts": {
+          "heapAttempts": 0,
+          "heapLive": 0,
+          "bufferDrops": 0,
+          "vectorReleases": 0,
+          "cleanupErrors": 0,
+          "fileOpened": 0,
+          "fileClosed": 0,
+          "fileDrops": 0,
+          "fileAutomaticClose": 0
+        },
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-tokens-c\\file-tokens-low.exe"
+          ],
+          "exit": 8,
+          "stdoutBytes": 0,
+          "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderrBytes": 0,
+          "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderr": ""
+        }
+      },
+      {
+        "name": "extra-argument",
+        "profile": "low",
+        "heapFailureAt": null,
+        "counts": {
+          "heapAttempts": 0,
+          "heapLive": 0,
+          "bufferDrops": 0,
+          "vectorReleases": 0,
+          "cleanupErrors": 0,
+          "fileOpened": 0,
+          "fileClosed": 0,
+          "fileDrops": 0,
+          "fileAutomaticClose": 0
+        },
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-tokens-c\\file-tokens-low.exe",
+            "empty.fy",
+            "extra"
+          ],
+          "exit": 8,
+          "stdoutBytes": 0,
+          "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderrBytes": 0,
+          "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderr": ""
+        }
+      },
+      {
+        "name": "allocation-failure",
+        "profile": "low",
+        "heapFailureAt": 1,
+        "counts": {
+          "heapAttempts": 1,
+          "heapLive": 0,
+          "bufferDrops": 1,
+          "vectorReleases": 0,
+          "cleanupErrors": 0,
+          "fileOpened": 1,
+          "fileClosed": 0,
+          "fileDrops": 1,
+          "fileAutomaticClose": 1
+        },
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-tokens-c\\file-tokens-low.exe",
+            "literals.fy"
+          ],
+          "exit": 2,
+          "stdoutBytes": 0,
+          "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderrBytes": 32,
+          "stderrSHA256": "9618efe28bcc6f6f99c36167f420bdc1fcfce93217101fd07c6bee30a730aaba",
+          "stderr": "error: buffer allocation failed\n"
+        }
+      },
+      {
+        "name": "allocation-failure",
+        "profile": "low",
+        "heapFailureAt": 2,
+        "counts": {
+          "heapAttempts": 2,
+          "heapLive": 0,
+          "bufferDrops": 1,
+          "vectorReleases": 3,
+          "cleanupErrors": 0,
+          "fileOpened": 1,
+          "fileClosed": 1,
+          "fileDrops": 1,
+          "fileAutomaticClose": 0
+        },
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-tokens-c\\file-tokens-low.exe",
+            "literals.fy"
+          ],
+          "exit": 2,
+          "stdoutBytes": 0,
+          "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderrBytes": 32,
+          "stderrSHA256": "9618efe28bcc6f6f99c36167f420bdc1fcfce93217101fd07c6bee30a730aaba",
+          "stderr": "error: buffer allocation failed\n"
+        }
+      },
+      {
+        "name": "allocation-failure",
+        "profile": "low",
+        "heapFailureAt": 3,
+        "counts": {
+          "heapAttempts": 3,
+          "heapLive": 0,
+          "bufferDrops": 3,
+          "vectorReleases": 3,
+          "cleanupErrors": 0,
+          "fileOpened": 1,
+          "fileClosed": 1,
+          "fileDrops": 1,
+          "fileAutomaticClose": 0
+        },
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-tokens-c\\file-tokens-low.exe",
+            "literals.fy"
+          ],
+          "exit": 2,
+          "stdoutBytes": 0,
+          "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderrBytes": 32,
+          "stderrSHA256": "9618efe28bcc6f6f99c36167f420bdc1fcfce93217101fd07c6bee30a730aaba",
+          "stderr": "error: buffer allocation failed\n"
+        }
+      },
+      {
+        "name": "allocation-failure",
+        "profile": "low",
+        "heapFailureAt": 4,
+        "counts": {
+          "heapAttempts": 4,
+          "heapLive": 0,
+          "bufferDrops": 3,
+          "vectorReleases": 3,
+          "cleanupErrors": 0,
+          "fileOpened": 1,
+          "fileClosed": 1,
+          "fileDrops": 1,
+          "fileAutomaticClose": 0
+        },
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-tokens-c\\file-tokens-low.exe",
+            "literals.fy"
+          ],
+          "exit": 2,
+          "stdoutBytes": 0,
+          "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderrBytes": 32,
+          "stderrSHA256": "9618efe28bcc6f6f99c36167f420bdc1fcfce93217101fd07c6bee30a730aaba",
+          "stderr": "error: buffer allocation failed\n"
+        }
+      },
+      {
+        "name": "allocation-failure",
+        "profile": "low",
+        "heapFailureAt": 5,
+        "counts": {
+          "heapAttempts": 5,
+          "heapLive": 0,
+          "bufferDrops": 3,
+          "vectorReleases": 3,
+          "cleanupErrors": 0,
+          "fileOpened": 1,
+          "fileClosed": 1,
+          "fileDrops": 1,
+          "fileAutomaticClose": 0
+        },
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-tokens-c\\file-tokens-low.exe",
+            "literals.fy"
+          ],
+          "exit": 2,
+          "stdoutBytes": 0,
+          "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderrBytes": 32,
+          "stderrSHA256": "9618efe28bcc6f6f99c36167f420bdc1fcfce93217101fd07c6bee30a730aaba",
+          "stderr": "error: buffer allocation failed\n"
+        }
+      },
+      {
+        "name": "allocation-failure",
+        "profile": "low",
+        "heapFailureAt": 6,
+        "counts": {
+          "heapAttempts": 6,
+          "heapLive": 0,
+          "bufferDrops": 3,
+          "vectorReleases": 3,
+          "cleanupErrors": 0,
+          "fileOpened": 1,
+          "fileClosed": 1,
+          "fileDrops": 1,
+          "fileAutomaticClose": 0
+        },
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-tokens-c\\file-tokens-low.exe",
+            "literals.fy"
+          ],
+          "exit": 2,
+          "stdoutBytes": 0,
+          "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderrBytes": 32,
+          "stderrSHA256": "9618efe28bcc6f6f99c36167f420bdc1fcfce93217101fd07c6bee30a730aaba",
+          "stderr": "error: buffer allocation failed\n"
+        }
+      },
+      {
+        "name": "allocation-failure",
+        "profile": "low",
+        "heapFailureAt": 7,
+        "counts": {
+          "heapAttempts": 7,
+          "heapLive": 0,
+          "bufferDrops": 5,
+          "vectorReleases": 3,
+          "cleanupErrors": 0,
+          "fileOpened": 1,
+          "fileClosed": 1,
+          "fileDrops": 1,
+          "fileAutomaticClose": 0
+        },
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-tokens-c\\file-tokens-low.exe",
+            "literals.fy"
+          ],
+          "exit": 2,
+          "stdoutBytes": 0,
+          "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderrBytes": 32,
+          "stderrSHA256": "9618efe28bcc6f6f99c36167f420bdc1fcfce93217101fd07c6bee30a730aaba",
+          "stderr": "error: buffer allocation failed\n"
+        }
+      },
+      {
+        "name": "allocation-failure",
+        "profile": "low",
+        "heapFailureAt": 8,
+        "counts": {
+          "heapAttempts": 8,
+          "heapLive": 0,
+          "bufferDrops": 5,
+          "vectorReleases": 3,
+          "cleanupErrors": 0,
+          "fileOpened": 1,
+          "fileClosed": 1,
+          "fileDrops": 1,
+          "fileAutomaticClose": 0
+        },
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-tokens-c\\file-tokens-low.exe",
+            "literals.fy"
+          ],
+          "exit": 2,
+          "stdoutBytes": 0,
+          "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderrBytes": 32,
+          "stderrSHA256": "9618efe28bcc6f6f99c36167f420bdc1fcfce93217101fd07c6bee30a730aaba",
+          "stderr": "error: buffer allocation failed\n"
+        }
+      },
+      {
+        "name": "allocation-failure",
+        "profile": "low",
+        "heapFailureAt": 9,
+        "counts": {
+          "heapAttempts": 9,
+          "heapLive": 0,
+          "bufferDrops": 7,
+          "vectorReleases": 3,
+          "cleanupErrors": 0,
+          "fileOpened": 1,
+          "fileClosed": 1,
+          "fileDrops": 1,
+          "fileAutomaticClose": 0
+        },
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-tokens-c\\file-tokens-low.exe",
+            "literals.fy"
+          ],
+          "exit": 2,
+          "stdoutBytes": 0,
+          "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderrBytes": 32,
+          "stderrSHA256": "9618efe28bcc6f6f99c36167f420bdc1fcfce93217101fd07c6bee30a730aaba",
+          "stderr": "error: buffer allocation failed\n"
+        }
+      },
+      {
+        "name": "allocation-failure",
+        "profile": "low",
+        "heapFailureAt": 10,
+        "counts": {
+          "heapAttempts": 10,
+          "heapLive": 0,
+          "bufferDrops": 7,
+          "vectorReleases": 3,
+          "cleanupErrors": 0,
+          "fileOpened": 1,
+          "fileClosed": 1,
+          "fileDrops": 1,
+          "fileAutomaticClose": 0
+        },
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-tokens-c\\file-tokens-low.exe",
+            "literals.fy"
+          ],
+          "exit": 2,
+          "stdoutBytes": 0,
+          "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderrBytes": 32,
+          "stderrSHA256": "9618efe28bcc6f6f99c36167f420bdc1fcfce93217101fd07c6bee30a730aaba",
+          "stderr": "error: buffer allocation failed\n"
+        }
+      },
+      {
+        "name": "allocation-failure",
+        "profile": "low",
+        "heapFailureAt": 11,
+        "counts": {
+          "heapAttempts": 11,
+          "heapLive": 0,
+          "bufferDrops": 7,
+          "vectorReleases": 3,
+          "cleanupErrors": 0,
+          "fileOpened": 1,
+          "fileClosed": 1,
+          "fileDrops": 1,
+          "fileAutomaticClose": 0
+        },
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-tokens-c\\file-tokens-low.exe",
+            "literals.fy"
+          ],
+          "exit": 2,
+          "stdoutBytes": 0,
+          "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderrBytes": 32,
+          "stderrSHA256": "9618efe28bcc6f6f99c36167f420bdc1fcfce93217101fd07c6bee30a730aaba",
+          "stderr": "error: buffer allocation failed\n"
+        }
+      },
+      {
+        "name": "allocation-failure",
+        "profile": "low",
+        "heapFailureAt": 12,
+        "counts": {
+          "heapAttempts": 12,
+          "heapLive": 0,
+          "bufferDrops": 7,
+          "vectorReleases": 3,
+          "cleanupErrors": 0,
+          "fileOpened": 1,
+          "fileClosed": 1,
+          "fileDrops": 1,
+          "fileAutomaticClose": 0
+        },
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-tokens-c\\file-tokens-low.exe",
+            "literals.fy"
+          ],
+          "exit": 2,
+          "stdoutBytes": 0,
+          "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderrBytes": 32,
+          "stderrSHA256": "9618efe28bcc6f6f99c36167f420bdc1fcfce93217101fd07c6bee30a730aaba",
+          "stderr": "error: buffer allocation failed\n"
+        }
+      },
+      {
+        "name": "allocation-failure",
+        "profile": "low",
+        "heapFailureAt": 13,
+        "counts": {
+          "heapAttempts": 13,
+          "heapLive": 0,
+          "bufferDrops": 9,
+          "vectorReleases": 3,
+          "cleanupErrors": 0,
+          "fileOpened": 1,
+          "fileClosed": 1,
+          "fileDrops": 1,
+          "fileAutomaticClose": 0
+        },
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-tokens-c\\file-tokens-low.exe",
+            "literals.fy"
+          ],
+          "exit": 2,
+          "stdoutBytes": 0,
+          "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderrBytes": 32,
+          "stderrSHA256": "9618efe28bcc6f6f99c36167f420bdc1fcfce93217101fd07c6bee30a730aaba",
+          "stderr": "error: buffer allocation failed\n"
+        }
+      },
+      {
+        "name": "allocation-failure",
+        "profile": "low",
+        "heapFailureAt": 14,
+        "counts": {
+          "heapAttempts": 14,
+          "heapLive": 0,
+          "bufferDrops": 9,
+          "vectorReleases": 3,
+          "cleanupErrors": 0,
+          "fileOpened": 1,
+          "fileClosed": 1,
+          "fileDrops": 1,
+          "fileAutomaticClose": 0
+        },
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-tokens-c\\file-tokens-low.exe",
+            "literals.fy"
+          ],
+          "exit": 2,
+          "stdoutBytes": 0,
+          "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderrBytes": 32,
+          "stderrSHA256": "9618efe28bcc6f6f99c36167f420bdc1fcfce93217101fd07c6bee30a730aaba",
+          "stderr": "error: buffer allocation failed\n"
+        }
+      },
+      {
+        "name": "allocation-failure",
+        "profile": "low",
+        "heapFailureAt": 15,
+        "counts": {
+          "heapAttempts": 15,
+          "heapLive": 0,
+          "bufferDrops": 11,
+          "vectorReleases": 3,
+          "cleanupErrors": 0,
+          "fileOpened": 1,
+          "fileClosed": 1,
+          "fileDrops": 1,
+          "fileAutomaticClose": 0
+        },
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-tokens-c\\file-tokens-low.exe",
+            "literals.fy"
+          ],
+          "exit": 2,
+          "stdoutBytes": 0,
+          "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderrBytes": 32,
+          "stderrSHA256": "9618efe28bcc6f6f99c36167f420bdc1fcfce93217101fd07c6bee30a730aaba",
+          "stderr": "error: buffer allocation failed\n"
+        }
+      },
+      {
+        "name": "allocation-failure",
+        "profile": "low",
+        "heapFailureAt": 16,
+        "counts": {
+          "heapAttempts": 16,
+          "heapLive": 0,
+          "bufferDrops": 11,
+          "vectorReleases": 3,
+          "cleanupErrors": 0,
+          "fileOpened": 1,
+          "fileClosed": 1,
+          "fileDrops": 1,
+          "fileAutomaticClose": 0
+        },
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-tokens-c\\file-tokens-low.exe",
+            "literals.fy"
+          ],
+          "exit": 2,
+          "stdoutBytes": 0,
+          "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderrBytes": 32,
+          "stderrSHA256": "9618efe28bcc6f6f99c36167f420bdc1fcfce93217101fd07c6bee30a730aaba",
+          "stderr": "error: buffer allocation failed\n"
+        }
+      },
+      {
+        "name": "allocation-failure",
+        "profile": "low",
+        "heapFailureAt": 17,
+        "counts": {
+          "heapAttempts": 17,
+          "heapLive": 0,
+          "bufferDrops": 13,
+          "vectorReleases": 3,
+          "cleanupErrors": 0,
+          "fileOpened": 1,
+          "fileClosed": 1,
+          "fileDrops": 1,
+          "fileAutomaticClose": 0
+        },
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-tokens-c\\file-tokens-low.exe",
+            "literals.fy"
+          ],
+          "exit": 2,
+          "stdoutBytes": 0,
+          "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderrBytes": 32,
+          "stderrSHA256": "9618efe28bcc6f6f99c36167f420bdc1fcfce93217101fd07c6bee30a730aaba",
+          "stderr": "error: buffer allocation failed\n"
+        }
+      },
+      {
+        "name": "allocation-failure",
+        "profile": "low",
+        "heapFailureAt": 18,
+        "counts": {
+          "heapAttempts": 18,
+          "heapLive": 0,
+          "bufferDrops": 13,
+          "vectorReleases": 3,
+          "cleanupErrors": 0,
+          "fileOpened": 1,
+          "fileClosed": 1,
+          "fileDrops": 1,
+          "fileAutomaticClose": 0
+        },
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-tokens-c\\file-tokens-low.exe",
+            "literals.fy"
+          ],
+          "exit": 2,
+          "stdoutBytes": 0,
+          "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderrBytes": 32,
+          "stderrSHA256": "9618efe28bcc6f6f99c36167f420bdc1fcfce93217101fd07c6bee30a730aaba",
+          "stderr": "error: buffer allocation failed\n"
+        }
+      },
+      {
+        "name": "allocation-failure",
+        "profile": "low",
+        "heapFailureAt": 19,
+        "counts": {
+          "heapAttempts": 19,
+          "heapLive": 0,
+          "bufferDrops": 14,
+          "vectorReleases": 3,
+          "cleanupErrors": 0,
+          "fileOpened": 1,
+          "fileClosed": 1,
+          "fileDrops": 1,
+          "fileAutomaticClose": 0
+        },
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-tokens-c\\file-tokens-low.exe",
+            "literals.fy"
+          ],
+          "exit": 2,
+          "stdoutBytes": 0,
+          "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderrBytes": 32,
+          "stderrSHA256": "9618efe28bcc6f6f99c36167f420bdc1fcfce93217101fd07c6bee30a730aaba",
+          "stderr": "error: buffer allocation failed\n"
+        }
+      },
+      {
+        "name": "allocation-failure",
+        "profile": "low",
+        "heapFailureAt": 20,
+        "counts": {
+          "heapAttempts": 20,
+          "heapLive": 0,
+          "bufferDrops": 14,
+          "vectorReleases": 3,
+          "cleanupErrors": 0,
+          "fileOpened": 1,
+          "fileClosed": 1,
+          "fileDrops": 1,
+          "fileAutomaticClose": 0
+        },
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-tokens-c\\file-tokens-low.exe",
+            "literals.fy"
+          ],
+          "exit": 2,
+          "stdoutBytes": 0,
+          "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderrBytes": 32,
+          "stderrSHA256": "9618efe28bcc6f6f99c36167f420bdc1fcfce93217101fd07c6bee30a730aaba",
+          "stderr": "error: buffer allocation failed\n"
+        }
+      },
+      {
+        "name": "allocation-failure",
+        "profile": "low",
+        "heapFailureAt": 21,
+        "counts": {
+          "heapAttempts": 21,
+          "heapLive": 0,
+          "bufferDrops": 14,
+          "vectorReleases": 3,
+          "cleanupErrors": 0,
+          "fileOpened": 1,
+          "fileClosed": 1,
+          "fileDrops": 1,
+          "fileAutomaticClose": 0
+        },
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-tokens-c\\file-tokens-low.exe",
+            "literals.fy"
+          ],
+          "exit": 2,
+          "stdoutBytes": 0,
+          "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderrBytes": 32,
+          "stderrSHA256": "9618efe28bcc6f6f99c36167f420bdc1fcfce93217101fd07c6bee30a730aaba",
+          "stderr": "error: buffer allocation failed\n"
+        }
+      },
+      {
+        "name": "allocation-failure",
+        "profile": "low",
+        "heapFailureAt": 22,
+        "counts": {
+          "heapAttempts": 22,
+          "heapLive": 0,
+          "bufferDrops": 14,
+          "vectorReleases": 3,
+          "cleanupErrors": 0,
+          "fileOpened": 1,
+          "fileClosed": 1,
+          "fileDrops": 1,
+          "fileAutomaticClose": 0
+        },
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-tokens-c\\file-tokens-low.exe",
+            "literals.fy"
+          ],
+          "exit": 2,
+          "stdoutBytes": 0,
+          "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderrBytes": 32,
+          "stderrSHA256": "9618efe28bcc6f6f99c36167f420bdc1fcfce93217101fd07c6bee30a730aaba",
+          "stderr": "error: buffer allocation failed\n"
+        }
+      },
+      {
+        "name": "allocation-failure",
+        "profile": "low",
+        "heapFailureAt": 23,
+        "counts": {
+          "heapAttempts": 23,
+          "heapLive": 0,
+          "bufferDrops": 14,
+          "vectorReleases": 3,
+          "cleanupErrors": 0,
+          "fileOpened": 1,
+          "fileClosed": 1,
+          "fileDrops": 1,
+          "fileAutomaticClose": 0
+        },
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-tokens-c\\file-tokens-low.exe",
+            "literals.fy"
+          ],
+          "exit": 2,
+          "stdoutBytes": 0,
+          "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderrBytes": 32,
+          "stderrSHA256": "9618efe28bcc6f6f99c36167f420bdc1fcfce93217101fd07c6bee30a730aaba",
+          "stderr": "error: buffer allocation failed\n"
+        }
+      },
+      {
+        "name": "allocation-failure",
+        "profile": "low",
+        "heapFailureAt": 24,
+        "counts": {
+          "heapAttempts": 24,
+          "heapLive": 0,
+          "bufferDrops": 14,
+          "vectorReleases": 3,
+          "cleanupErrors": 0,
+          "fileOpened": 1,
+          "fileClosed": 1,
+          "fileDrops": 1,
+          "fileAutomaticClose": 0
+        },
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-tokens-c\\file-tokens-low.exe",
+            "literals.fy"
+          ],
+          "exit": 2,
+          "stdoutBytes": 0,
+          "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderrBytes": 32,
+          "stderrSHA256": "9618efe28bcc6f6f99c36167f420bdc1fcfce93217101fd07c6bee30a730aaba",
+          "stderr": "error: buffer allocation failed\n"
+        }
+      },
+      {
+        "name": "empty.fy",
+        "profile": "optimized",
+        "heapFailureAt": null,
+        "counts": {
+          "heapAttempts": 3,
+          "heapLive": 0,
+          "bufferDrops": 2,
+          "vectorReleases": 3,
+          "cleanupErrors": 0,
+          "fileOpened": 1,
+          "fileClosed": 1,
+          "fileDrops": 1,
+          "fileAutomaticClose": 0
+        },
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-tokens-c\\file-tokens-optimized.exe",
+            "empty.fy"
+          ],
+          "exit": 0,
+          "stdoutBytes": 56,
+          "stdoutSHA256": "2085fa1aaab64a9aba1520640a3dfce4e68af70a1d13e7c2b9e9b8da6dbbf318",
+          "stderrBytes": 0,
+          "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderr": ""
+        }
+      },
+      {
+        "name": "source-한글-λ.fy",
+        "profile": "optimized",
+        "heapFailureAt": null,
+        "counts": {
+          "heapAttempts": 13,
+          "heapLive": 0,
+          "bufferDrops": 5,
+          "vectorReleases": 3,
+          "cleanupErrors": 0,
+          "fileOpened": 1,
+          "fileClosed": 1,
+          "fileDrops": 1,
+          "fileAutomaticClose": 0
+        },
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-tokens-c\\file-tokens-optimized.exe",
+            "source-한글-λ.fy"
+          ],
+          "exit": 0,
+          "stdoutBytes": 931,
+          "stdoutSHA256": "14e903db00bf5d452456596ba0292b64f42752fb1f3ddaaed9a085cc1814bc43",
+          "stderrBytes": 0,
+          "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderr": ""
+        }
+      },
+      {
+        "name": "literals.fy",
+        "profile": "optimized",
+        "heapFailureAt": null,
+        "counts": {
+          "heapAttempts": 24,
+          "heapLive": 0,
+          "bufferDrops": 14,
+          "vectorReleases": 3,
+          "cleanupErrors": 0,
+          "fileOpened": 1,
+          "fileClosed": 1,
+          "fileDrops": 1,
+          "fileAutomaticClose": 0
+        },
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-tokens-c\\file-tokens-optimized.exe",
+            "literals.fy"
+          ],
+          "exit": 0,
+          "stdoutBytes": 1390,
+          "stdoutSHA256": "55df09c46a779019d2446797a75de001d3f0798a25f8f380e772d7dd13e73cdd",
+          "stderrBytes": 0,
+          "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderr": ""
+        }
+      },
+      {
+        "name": "comments.fy",
+        "profile": "optimized",
+        "heapFailureAt": null,
+        "counts": {
+          "heapAttempts": 9,
+          "heapLive": 0,
+          "bufferDrops": 3,
+          "vectorReleases": 3,
+          "cleanupErrors": 0,
+          "fileOpened": 1,
+          "fileClosed": 1,
+          "fileDrops": 1,
+          "fileAutomaticClose": 0
+        },
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-tokens-c\\file-tokens-optimized.exe",
+            "comments.fy"
+          ],
+          "exit": 0,
+          "stdoutBytes": 418,
+          "stdoutSHA256": "9937850e2aabadda8952d64b7de4b8ad8a6428cdf0586b792630f1cb21d71272",
+          "stderrBytes": 0,
+          "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderr": ""
+        }
+      },
+      {
+        "name": "invalid-byte.fy",
+        "profile": "optimized",
+        "heapFailureAt": null,
+        "counts": {
+          "heapAttempts": 5,
+          "heapLive": 0,
+          "bufferDrops": 3,
+          "vectorReleases": 3,
+          "cleanupErrors": 0,
+          "fileOpened": 1,
+          "fileClosed": 1,
+          "fileDrops": 1,
+          "fileAutomaticClose": 0
+        },
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-tokens-c\\file-tokens-optimized.exe",
+            "invalid-byte.fy"
+          ],
+          "exit": 2,
+          "stdoutBytes": 0,
+          "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderrBytes": 47,
+          "stderrSHA256": "7460b7483f32ff1f5161f95749dfb0392f527f81a7070aebcf80e60b1cb2f671",
+          "stderr": "invalid-byte.fy:1:9: error: E0001 (bytes 8..9)\n"
+        }
+      },
+      {
+        "name": "bad-utf8-string.fy",
+        "profile": "optimized",
+        "heapFailureAt": null,
+        "counts": {
+          "heapAttempts": 3,
+          "heapLive": 0,
+          "bufferDrops": 4,
+          "vectorReleases": 3,
+          "cleanupErrors": 0,
+          "fileOpened": 1,
+          "fileClosed": 1,
+          "fileDrops": 1,
+          "fileAutomaticClose": 0
+        },
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-tokens-c\\file-tokens-optimized.exe",
+            "bad-utf8-string.fy"
+          ],
+          "exit": 2,
+          "stdoutBytes": 0,
+          "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderrBytes": 50,
+          "stderrSHA256": "cc2baf4680d8c6068f56d4833a0a781238f8744b7ba13bb6b883e5fa5284eba4",
+          "stderr": "bad-utf8-string.fy:1:8: error: E0001 (bytes 7..8)\n"
+        }
+      },
+      {
+        "name": "bad-number.fy",
+        "profile": "optimized",
+        "heapFailureAt": null,
+        "counts": {
+          "heapAttempts": 3,
+          "heapLive": 0,
+          "bufferDrops": 3,
+          "vectorReleases": 3,
+          "cleanupErrors": 0,
+          "fileOpened": 1,
+          "fileClosed": 1,
+          "fileDrops": 1,
+          "fileAutomaticClose": 0
+        },
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-tokens-c\\file-tokens-optimized.exe",
+            "bad-number.fy"
+          ],
+          "exit": 2,
+          "stdoutBytes": 0,
+          "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderrBytes": 46,
+          "stderrSHA256": "657a0a86265982048b1ab549dd7783b29466c26f5d271bacefb9433cf52ffe32",
+          "stderr": "bad-number.fy:1:7: error: E0004 (bytes 6..10)\n"
+        }
+      },
+      {
+        "name": "unclosed-string.fy",
+        "profile": "optimized",
+        "heapFailureAt": null,
+        "counts": {
+          "heapAttempts": 8,
+          "heapLive": 0,
+          "bufferDrops": 4,
+          "vectorReleases": 3,
+          "cleanupErrors": 0,
+          "fileOpened": 1,
+          "fileClosed": 1,
+          "fileDrops": 1,
+          "fileAutomaticClose": 0
+        },
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-tokens-c\\file-tokens-optimized.exe",
+            "unclosed-string.fy"
+          ],
+          "exit": 2,
+          "stdoutBytes": 0,
+          "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderrBytes": 53,
+          "stderrSHA256": "26c2a873c36280c7ae6aab887fafbf279b48931e609e87f200f5e3109e77c3fa",
+          "stderr": "unclosed-string.fy:1:13: error: E0005 (bytes 12..25)\n"
+        }
+      },
+      {
+        "name": "unclosed-comment.fy",
+        "profile": "optimized",
+        "heapFailureAt": null,
+        "counts": {
+          "heapAttempts": 6,
+          "heapLive": 0,
+          "bufferDrops": 3,
+          "vectorReleases": 3,
+          "cleanupErrors": 0,
+          "fileOpened": 1,
+          "fileClosed": 1,
+          "fileDrops": 1,
+          "fileAutomaticClose": 0
+        },
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-tokens-c\\file-tokens-optimized.exe",
+            "unclosed-comment.fy"
+          ],
+          "exit": 2,
+          "stdoutBytes": 0,
+          "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderrBytes": 52,
+          "stderrSHA256": "fcca6dc340e069ade78bc12e46a53cb11215fc7dac0c1bf67cdba5abad15458d",
+          "stderr": "unclosed-comment.fy:1:9: error: E0001 (bytes 8..14)\n"
+        }
+      },
+      {
+        "name": "bad-cstring.fy",
+        "profile": "optimized",
+        "heapFailureAt": null,
+        "counts": {
+          "heapAttempts": 6,
+          "heapLive": 0,
+          "bufferDrops": 4,
+          "vectorReleases": 3,
+          "cleanupErrors": 0,
+          "fileOpened": 1,
+          "fileClosed": 1,
+          "fileDrops": 1,
+          "fileAutomaticClose": 0
+        },
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-tokens-c\\file-tokens-optimized.exe",
+            "bad-cstring.fy"
+          ],
+          "exit": 2,
+          "stdoutBytes": 0,
+          "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderrBytes": 48,
+          "stderrSHA256": "275e92fdda9c853c063d90d38c22a54c8cd2f08aa0ba83cee2371ac22be784d7",
+          "stderr": "bad-cstring.fy:1:10: error: E0006 (bytes 9..11)\n"
+        }
+      },
+      {
+        "name": "newline-diagnostics.fy",
+        "profile": "optimized",
+        "heapFailureAt": null,
+        "counts": {
+          "heapAttempts": 6,
+          "heapLive": 0,
+          "bufferDrops": 4,
+          "vectorReleases": 3,
+          "cleanupErrors": 0,
+          "fileOpened": 1,
+          "fileClosed": 1,
+          "fileDrops": 1,
+          "fileAutomaticClose": 0
+        },
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-tokens-c\\file-tokens-optimized.exe",
+            "newline-diagnostics.fy"
+          ],
+          "exit": 2,
+          "stdoutBytes": 0,
+          "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderrBytes": 112,
+          "stderrSHA256": "88b235e5b7429f4b059052683da39fe8cbbb2d842d5962ddd9831fbb63577b5b",
+          "stderr": "newline-diagnostics.fy:2:3: error: E0001 (bytes 12..13)\nnewline-diagnostics.fy:3:1: error: E0001 (bytes 13..14)\n"
+        }
+      },
+      {
+        "name": "exact.fy",
+        "profile": "optimized",
+        "heapFailureAt": null,
+        "counts": {
+          "heapAttempts": 15,
+          "heapLive": 0,
+          "bufferDrops": 2,
+          "vectorReleases": 3,
+          "cleanupErrors": 0,
+          "fileOpened": 1,
+          "fileClosed": 1,
+          "fileDrops": 1,
+          "fileAutomaticClose": 0
+        },
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-tokens-c\\file-tokens-optimized.exe",
+            "exact.fy"
+          ],
+          "exit": 0,
+          "stdoutBytes": 131164,
+          "stdoutSHA256": "d1f326b0b44f7ae15e38a9e0e218c2b3146905467b09b560acc9aae099a02257",
+          "stderrBytes": 0,
+          "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderr": ""
+        }
+      },
+      {
+        "name": "overflow.fy",
+        "profile": "optimized",
+        "heapFailureAt": null,
+        "counts": {
+          "heapAttempts": 1,
+          "heapLive": 0,
+          "bufferDrops": 1,
+          "vectorReleases": 0,
+          "cleanupErrors": 0,
+          "fileOpened": 1,
+          "fileClosed": 0,
+          "fileDrops": 1,
+          "fileAutomaticClose": 1
+        },
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-tokens-c\\file-tokens-optimized.exe",
+            "overflow.fy"
+          ],
+          "exit": 2,
+          "stdoutBytes": 0,
+          "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderrBytes": 34,
+          "stderrSHA256": "571965cdf3d1d0c3619220895782a2471c990d50382d12364d2d080f501532ef",
+          "stderr": "error: source limit (65536 bytes)\n"
+        }
+      },
+      {
+        "name": "missing",
+        "profile": "optimized",
+        "heapFailureAt": null,
+        "counts": {
+          "heapAttempts": 0,
+          "heapLive": 0,
+          "bufferDrops": 0,
+          "vectorReleases": 0,
+          "cleanupErrors": 0,
+          "fileOpened": 0,
+          "fileClosed": 0,
+          "fileDrops": 1,
+          "fileAutomaticClose": 0
+        },
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-tokens-c\\file-tokens-optimized.exe",
+            "missing.fy"
+          ],
+          "exit": 2,
+          "stdoutBytes": 0,
+          "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderrBytes": 30,
+          "stderrSHA256": "cbcd3d71627cf6ba234ad7d8797524dda6f27a1c6cbbeb14f52689a233502cb7",
+          "stderr": "error: input file read failed\n"
+        }
+      },
+      {
+        "name": "no-argument",
+        "profile": "optimized",
+        "heapFailureAt": null,
+        "counts": {
+          "heapAttempts": 0,
+          "heapLive": 0,
+          "bufferDrops": 0,
+          "vectorReleases": 0,
+          "cleanupErrors": 0,
+          "fileOpened": 0,
+          "fileClosed": 0,
+          "fileDrops": 0,
+          "fileAutomaticClose": 0
+        },
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-tokens-c\\file-tokens-optimized.exe"
+          ],
+          "exit": 8,
+          "stdoutBytes": 0,
+          "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderrBytes": 0,
+          "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderr": ""
+        }
+      },
+      {
+        "name": "extra-argument",
+        "profile": "optimized",
+        "heapFailureAt": null,
+        "counts": {
+          "heapAttempts": 0,
+          "heapLive": 0,
+          "bufferDrops": 0,
+          "vectorReleases": 0,
+          "cleanupErrors": 0,
+          "fileOpened": 0,
+          "fileClosed": 0,
+          "fileDrops": 0,
+          "fileAutomaticClose": 0
+        },
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-tokens-c\\file-tokens-optimized.exe",
+            "empty.fy",
+            "extra"
+          ],
+          "exit": 8,
+          "stdoutBytes": 0,
+          "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderrBytes": 0,
+          "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderr": ""
+        }
+      },
+      {
+        "name": "allocation-failure",
+        "profile": "optimized",
+        "heapFailureAt": 1,
+        "counts": {
+          "heapAttempts": 1,
+          "heapLive": 0,
+          "bufferDrops": 1,
+          "vectorReleases": 0,
+          "cleanupErrors": 0,
+          "fileOpened": 1,
+          "fileClosed": 0,
+          "fileDrops": 1,
+          "fileAutomaticClose": 1
+        },
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-tokens-c\\file-tokens-optimized.exe",
+            "literals.fy"
+          ],
+          "exit": 2,
+          "stdoutBytes": 0,
+          "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderrBytes": 32,
+          "stderrSHA256": "9618efe28bcc6f6f99c36167f420bdc1fcfce93217101fd07c6bee30a730aaba",
+          "stderr": "error: buffer allocation failed\n"
+        }
+      },
+      {
+        "name": "allocation-failure",
+        "profile": "optimized",
+        "heapFailureAt": 2,
+        "counts": {
+          "heapAttempts": 2,
+          "heapLive": 0,
+          "bufferDrops": 1,
+          "vectorReleases": 3,
+          "cleanupErrors": 0,
+          "fileOpened": 1,
+          "fileClosed": 1,
+          "fileDrops": 1,
+          "fileAutomaticClose": 0
+        },
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-tokens-c\\file-tokens-optimized.exe",
+            "literals.fy"
+          ],
+          "exit": 2,
+          "stdoutBytes": 0,
+          "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderrBytes": 32,
+          "stderrSHA256": "9618efe28bcc6f6f99c36167f420bdc1fcfce93217101fd07c6bee30a730aaba",
+          "stderr": "error: buffer allocation failed\n"
+        }
+      },
+      {
+        "name": "allocation-failure",
+        "profile": "optimized",
+        "heapFailureAt": 3,
+        "counts": {
+          "heapAttempts": 3,
+          "heapLive": 0,
+          "bufferDrops": 3,
+          "vectorReleases": 3,
+          "cleanupErrors": 0,
+          "fileOpened": 1,
+          "fileClosed": 1,
+          "fileDrops": 1,
+          "fileAutomaticClose": 0
+        },
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-tokens-c\\file-tokens-optimized.exe",
+            "literals.fy"
+          ],
+          "exit": 2,
+          "stdoutBytes": 0,
+          "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderrBytes": 32,
+          "stderrSHA256": "9618efe28bcc6f6f99c36167f420bdc1fcfce93217101fd07c6bee30a730aaba",
+          "stderr": "error: buffer allocation failed\n"
+        }
+      },
+      {
+        "name": "allocation-failure",
+        "profile": "optimized",
+        "heapFailureAt": 4,
+        "counts": {
+          "heapAttempts": 4,
+          "heapLive": 0,
+          "bufferDrops": 3,
+          "vectorReleases": 3,
+          "cleanupErrors": 0,
+          "fileOpened": 1,
+          "fileClosed": 1,
+          "fileDrops": 1,
+          "fileAutomaticClose": 0
+        },
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-tokens-c\\file-tokens-optimized.exe",
+            "literals.fy"
+          ],
+          "exit": 2,
+          "stdoutBytes": 0,
+          "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderrBytes": 32,
+          "stderrSHA256": "9618efe28bcc6f6f99c36167f420bdc1fcfce93217101fd07c6bee30a730aaba",
+          "stderr": "error: buffer allocation failed\n"
+        }
+      },
+      {
+        "name": "allocation-failure",
+        "profile": "optimized",
+        "heapFailureAt": 5,
+        "counts": {
+          "heapAttempts": 5,
+          "heapLive": 0,
+          "bufferDrops": 3,
+          "vectorReleases": 3,
+          "cleanupErrors": 0,
+          "fileOpened": 1,
+          "fileClosed": 1,
+          "fileDrops": 1,
+          "fileAutomaticClose": 0
+        },
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-tokens-c\\file-tokens-optimized.exe",
+            "literals.fy"
+          ],
+          "exit": 2,
+          "stdoutBytes": 0,
+          "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderrBytes": 32,
+          "stderrSHA256": "9618efe28bcc6f6f99c36167f420bdc1fcfce93217101fd07c6bee30a730aaba",
+          "stderr": "error: buffer allocation failed\n"
+        }
+      },
+      {
+        "name": "allocation-failure",
+        "profile": "optimized",
+        "heapFailureAt": 6,
+        "counts": {
+          "heapAttempts": 6,
+          "heapLive": 0,
+          "bufferDrops": 3,
+          "vectorReleases": 3,
+          "cleanupErrors": 0,
+          "fileOpened": 1,
+          "fileClosed": 1,
+          "fileDrops": 1,
+          "fileAutomaticClose": 0
+        },
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-tokens-c\\file-tokens-optimized.exe",
+            "literals.fy"
+          ],
+          "exit": 2,
+          "stdoutBytes": 0,
+          "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderrBytes": 32,
+          "stderrSHA256": "9618efe28bcc6f6f99c36167f420bdc1fcfce93217101fd07c6bee30a730aaba",
+          "stderr": "error: buffer allocation failed\n"
+        }
+      },
+      {
+        "name": "allocation-failure",
+        "profile": "optimized",
+        "heapFailureAt": 7,
+        "counts": {
+          "heapAttempts": 7,
+          "heapLive": 0,
+          "bufferDrops": 5,
+          "vectorReleases": 3,
+          "cleanupErrors": 0,
+          "fileOpened": 1,
+          "fileClosed": 1,
+          "fileDrops": 1,
+          "fileAutomaticClose": 0
+        },
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-tokens-c\\file-tokens-optimized.exe",
+            "literals.fy"
+          ],
+          "exit": 2,
+          "stdoutBytes": 0,
+          "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderrBytes": 32,
+          "stderrSHA256": "9618efe28bcc6f6f99c36167f420bdc1fcfce93217101fd07c6bee30a730aaba",
+          "stderr": "error: buffer allocation failed\n"
+        }
+      },
+      {
+        "name": "allocation-failure",
+        "profile": "optimized",
+        "heapFailureAt": 8,
+        "counts": {
+          "heapAttempts": 8,
+          "heapLive": 0,
+          "bufferDrops": 5,
+          "vectorReleases": 3,
+          "cleanupErrors": 0,
+          "fileOpened": 1,
+          "fileClosed": 1,
+          "fileDrops": 1,
+          "fileAutomaticClose": 0
+        },
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-tokens-c\\file-tokens-optimized.exe",
+            "literals.fy"
+          ],
+          "exit": 2,
+          "stdoutBytes": 0,
+          "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderrBytes": 32,
+          "stderrSHA256": "9618efe28bcc6f6f99c36167f420bdc1fcfce93217101fd07c6bee30a730aaba",
+          "stderr": "error: buffer allocation failed\n"
+        }
+      },
+      {
+        "name": "allocation-failure",
+        "profile": "optimized",
+        "heapFailureAt": 9,
+        "counts": {
+          "heapAttempts": 9,
+          "heapLive": 0,
+          "bufferDrops": 7,
+          "vectorReleases": 3,
+          "cleanupErrors": 0,
+          "fileOpened": 1,
+          "fileClosed": 1,
+          "fileDrops": 1,
+          "fileAutomaticClose": 0
+        },
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-tokens-c\\file-tokens-optimized.exe",
+            "literals.fy"
+          ],
+          "exit": 2,
+          "stdoutBytes": 0,
+          "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderrBytes": 32,
+          "stderrSHA256": "9618efe28bcc6f6f99c36167f420bdc1fcfce93217101fd07c6bee30a730aaba",
+          "stderr": "error: buffer allocation failed\n"
+        }
+      },
+      {
+        "name": "allocation-failure",
+        "profile": "optimized",
+        "heapFailureAt": 10,
+        "counts": {
+          "heapAttempts": 10,
+          "heapLive": 0,
+          "bufferDrops": 7,
+          "vectorReleases": 3,
+          "cleanupErrors": 0,
+          "fileOpened": 1,
+          "fileClosed": 1,
+          "fileDrops": 1,
+          "fileAutomaticClose": 0
+        },
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-tokens-c\\file-tokens-optimized.exe",
+            "literals.fy"
+          ],
+          "exit": 2,
+          "stdoutBytes": 0,
+          "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderrBytes": 32,
+          "stderrSHA256": "9618efe28bcc6f6f99c36167f420bdc1fcfce93217101fd07c6bee30a730aaba",
+          "stderr": "error: buffer allocation failed\n"
+        }
+      },
+      {
+        "name": "allocation-failure",
+        "profile": "optimized",
+        "heapFailureAt": 11,
+        "counts": {
+          "heapAttempts": 11,
+          "heapLive": 0,
+          "bufferDrops": 7,
+          "vectorReleases": 3,
+          "cleanupErrors": 0,
+          "fileOpened": 1,
+          "fileClosed": 1,
+          "fileDrops": 1,
+          "fileAutomaticClose": 0
+        },
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-tokens-c\\file-tokens-optimized.exe",
+            "literals.fy"
+          ],
+          "exit": 2,
+          "stdoutBytes": 0,
+          "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderrBytes": 32,
+          "stderrSHA256": "9618efe28bcc6f6f99c36167f420bdc1fcfce93217101fd07c6bee30a730aaba",
+          "stderr": "error: buffer allocation failed\n"
+        }
+      },
+      {
+        "name": "allocation-failure",
+        "profile": "optimized",
+        "heapFailureAt": 12,
+        "counts": {
+          "heapAttempts": 12,
+          "heapLive": 0,
+          "bufferDrops": 7,
+          "vectorReleases": 3,
+          "cleanupErrors": 0,
+          "fileOpened": 1,
+          "fileClosed": 1,
+          "fileDrops": 1,
+          "fileAutomaticClose": 0
+        },
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-tokens-c\\file-tokens-optimized.exe",
+            "literals.fy"
+          ],
+          "exit": 2,
+          "stdoutBytes": 0,
+          "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderrBytes": 32,
+          "stderrSHA256": "9618efe28bcc6f6f99c36167f420bdc1fcfce93217101fd07c6bee30a730aaba",
+          "stderr": "error: buffer allocation failed\n"
+        }
+      },
+      {
+        "name": "allocation-failure",
+        "profile": "optimized",
+        "heapFailureAt": 13,
+        "counts": {
+          "heapAttempts": 13,
+          "heapLive": 0,
+          "bufferDrops": 9,
+          "vectorReleases": 3,
+          "cleanupErrors": 0,
+          "fileOpened": 1,
+          "fileClosed": 1,
+          "fileDrops": 1,
+          "fileAutomaticClose": 0
+        },
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-tokens-c\\file-tokens-optimized.exe",
+            "literals.fy"
+          ],
+          "exit": 2,
+          "stdoutBytes": 0,
+          "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderrBytes": 32,
+          "stderrSHA256": "9618efe28bcc6f6f99c36167f420bdc1fcfce93217101fd07c6bee30a730aaba",
+          "stderr": "error: buffer allocation failed\n"
+        }
+      },
+      {
+        "name": "allocation-failure",
+        "profile": "optimized",
+        "heapFailureAt": 14,
+        "counts": {
+          "heapAttempts": 14,
+          "heapLive": 0,
+          "bufferDrops": 9,
+          "vectorReleases": 3,
+          "cleanupErrors": 0,
+          "fileOpened": 1,
+          "fileClosed": 1,
+          "fileDrops": 1,
+          "fileAutomaticClose": 0
+        },
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-tokens-c\\file-tokens-optimized.exe",
+            "literals.fy"
+          ],
+          "exit": 2,
+          "stdoutBytes": 0,
+          "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderrBytes": 32,
+          "stderrSHA256": "9618efe28bcc6f6f99c36167f420bdc1fcfce93217101fd07c6bee30a730aaba",
+          "stderr": "error: buffer allocation failed\n"
+        }
+      },
+      {
+        "name": "allocation-failure",
+        "profile": "optimized",
+        "heapFailureAt": 15,
+        "counts": {
+          "heapAttempts": 15,
+          "heapLive": 0,
+          "bufferDrops": 11,
+          "vectorReleases": 3,
+          "cleanupErrors": 0,
+          "fileOpened": 1,
+          "fileClosed": 1,
+          "fileDrops": 1,
+          "fileAutomaticClose": 0
+        },
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-tokens-c\\file-tokens-optimized.exe",
+            "literals.fy"
+          ],
+          "exit": 2,
+          "stdoutBytes": 0,
+          "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderrBytes": 32,
+          "stderrSHA256": "9618efe28bcc6f6f99c36167f420bdc1fcfce93217101fd07c6bee30a730aaba",
+          "stderr": "error: buffer allocation failed\n"
+        }
+      },
+      {
+        "name": "allocation-failure",
+        "profile": "optimized",
+        "heapFailureAt": 16,
+        "counts": {
+          "heapAttempts": 16,
+          "heapLive": 0,
+          "bufferDrops": 11,
+          "vectorReleases": 3,
+          "cleanupErrors": 0,
+          "fileOpened": 1,
+          "fileClosed": 1,
+          "fileDrops": 1,
+          "fileAutomaticClose": 0
+        },
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-tokens-c\\file-tokens-optimized.exe",
+            "literals.fy"
+          ],
+          "exit": 2,
+          "stdoutBytes": 0,
+          "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderrBytes": 32,
+          "stderrSHA256": "9618efe28bcc6f6f99c36167f420bdc1fcfce93217101fd07c6bee30a730aaba",
+          "stderr": "error: buffer allocation failed\n"
+        }
+      },
+      {
+        "name": "allocation-failure",
+        "profile": "optimized",
+        "heapFailureAt": 17,
+        "counts": {
+          "heapAttempts": 17,
+          "heapLive": 0,
+          "bufferDrops": 13,
+          "vectorReleases": 3,
+          "cleanupErrors": 0,
+          "fileOpened": 1,
+          "fileClosed": 1,
+          "fileDrops": 1,
+          "fileAutomaticClose": 0
+        },
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-tokens-c\\file-tokens-optimized.exe",
+            "literals.fy"
+          ],
+          "exit": 2,
+          "stdoutBytes": 0,
+          "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderrBytes": 32,
+          "stderrSHA256": "9618efe28bcc6f6f99c36167f420bdc1fcfce93217101fd07c6bee30a730aaba",
+          "stderr": "error: buffer allocation failed\n"
+        }
+      },
+      {
+        "name": "allocation-failure",
+        "profile": "optimized",
+        "heapFailureAt": 18,
+        "counts": {
+          "heapAttempts": 18,
+          "heapLive": 0,
+          "bufferDrops": 13,
+          "vectorReleases": 3,
+          "cleanupErrors": 0,
+          "fileOpened": 1,
+          "fileClosed": 1,
+          "fileDrops": 1,
+          "fileAutomaticClose": 0
+        },
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-tokens-c\\file-tokens-optimized.exe",
+            "literals.fy"
+          ],
+          "exit": 2,
+          "stdoutBytes": 0,
+          "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderrBytes": 32,
+          "stderrSHA256": "9618efe28bcc6f6f99c36167f420bdc1fcfce93217101fd07c6bee30a730aaba",
+          "stderr": "error: buffer allocation failed\n"
+        }
+      },
+      {
+        "name": "allocation-failure",
+        "profile": "optimized",
+        "heapFailureAt": 19,
+        "counts": {
+          "heapAttempts": 19,
+          "heapLive": 0,
+          "bufferDrops": 14,
+          "vectorReleases": 3,
+          "cleanupErrors": 0,
+          "fileOpened": 1,
+          "fileClosed": 1,
+          "fileDrops": 1,
+          "fileAutomaticClose": 0
+        },
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-tokens-c\\file-tokens-optimized.exe",
+            "literals.fy"
+          ],
+          "exit": 2,
+          "stdoutBytes": 0,
+          "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderrBytes": 32,
+          "stderrSHA256": "9618efe28bcc6f6f99c36167f420bdc1fcfce93217101fd07c6bee30a730aaba",
+          "stderr": "error: buffer allocation failed\n"
+        }
+      },
+      {
+        "name": "allocation-failure",
+        "profile": "optimized",
+        "heapFailureAt": 20,
+        "counts": {
+          "heapAttempts": 20,
+          "heapLive": 0,
+          "bufferDrops": 14,
+          "vectorReleases": 3,
+          "cleanupErrors": 0,
+          "fileOpened": 1,
+          "fileClosed": 1,
+          "fileDrops": 1,
+          "fileAutomaticClose": 0
+        },
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-tokens-c\\file-tokens-optimized.exe",
+            "literals.fy"
+          ],
+          "exit": 2,
+          "stdoutBytes": 0,
+          "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderrBytes": 32,
+          "stderrSHA256": "9618efe28bcc6f6f99c36167f420bdc1fcfce93217101fd07c6bee30a730aaba",
+          "stderr": "error: buffer allocation failed\n"
+        }
+      },
+      {
+        "name": "allocation-failure",
+        "profile": "optimized",
+        "heapFailureAt": 21,
+        "counts": {
+          "heapAttempts": 21,
+          "heapLive": 0,
+          "bufferDrops": 14,
+          "vectorReleases": 3,
+          "cleanupErrors": 0,
+          "fileOpened": 1,
+          "fileClosed": 1,
+          "fileDrops": 1,
+          "fileAutomaticClose": 0
+        },
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-tokens-c\\file-tokens-optimized.exe",
+            "literals.fy"
+          ],
+          "exit": 2,
+          "stdoutBytes": 0,
+          "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderrBytes": 32,
+          "stderrSHA256": "9618efe28bcc6f6f99c36167f420bdc1fcfce93217101fd07c6bee30a730aaba",
+          "stderr": "error: buffer allocation failed\n"
+        }
+      },
+      {
+        "name": "allocation-failure",
+        "profile": "optimized",
+        "heapFailureAt": 22,
+        "counts": {
+          "heapAttempts": 22,
+          "heapLive": 0,
+          "bufferDrops": 14,
+          "vectorReleases": 3,
+          "cleanupErrors": 0,
+          "fileOpened": 1,
+          "fileClosed": 1,
+          "fileDrops": 1,
+          "fileAutomaticClose": 0
+        },
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-tokens-c\\file-tokens-optimized.exe",
+            "literals.fy"
+          ],
+          "exit": 2,
+          "stdoutBytes": 0,
+          "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderrBytes": 32,
+          "stderrSHA256": "9618efe28bcc6f6f99c36167f420bdc1fcfce93217101fd07c6bee30a730aaba",
+          "stderr": "error: buffer allocation failed\n"
+        }
+      },
+      {
+        "name": "allocation-failure",
+        "profile": "optimized",
+        "heapFailureAt": 23,
+        "counts": {
+          "heapAttempts": 23,
+          "heapLive": 0,
+          "bufferDrops": 14,
+          "vectorReleases": 3,
+          "cleanupErrors": 0,
+          "fileOpened": 1,
+          "fileClosed": 1,
+          "fileDrops": 1,
+          "fileAutomaticClose": 0
+        },
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-tokens-c\\file-tokens-optimized.exe",
+            "literals.fy"
+          ],
+          "exit": 2,
+          "stdoutBytes": 0,
+          "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderrBytes": 32,
+          "stderrSHA256": "9618efe28bcc6f6f99c36167f420bdc1fcfce93217101fd07c6bee30a730aaba",
+          "stderr": "error: buffer allocation failed\n"
+        }
+      },
+      {
+        "name": "allocation-failure",
+        "profile": "optimized",
+        "heapFailureAt": 24,
+        "counts": {
+          "heapAttempts": 24,
+          "heapLive": 0,
+          "bufferDrops": 14,
+          "vectorReleases": 3,
+          "cleanupErrors": 0,
+          "fileOpened": 1,
+          "fileClosed": 1,
+          "fileDrops": 1,
+          "fileAutomaticClose": 0
+        },
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-tokens-c\\file-tokens-optimized.exe",
+            "literals.fy"
+          ],
+          "exit": 2,
+          "stdoutBytes": 0,
+          "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderrBytes": 32,
+          "stderrSHA256": "9618efe28bcc6f6f99c36167f420bdc1fcfce93217101fd07c6bee30a730aaba",
+          "stderr": "error: buffer allocation failed\n"
+        }
+      }
+    ],
+    "referenceRuns": [
+      {
+        "name": "empty.fy",
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-tokens-reference\\build\\original-file-tokens.exe",
+            "empty.fy"
+          ],
+          "exit": 0,
+          "stdoutBytes": 56,
+          "stdoutSHA256": "2085fa1aaab64a9aba1520640a3dfce4e68af70a1d13e7c2b9e9b8da6dbbf318",
+          "stderrBytes": 0,
+          "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderr": ""
+        }
+      },
+      {
+        "name": "source-한글-λ.fy",
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-tokens-reference\\build\\original-file-tokens.exe",
+            "source-한글-λ.fy"
+          ],
+          "exit": 0,
+          "stdoutBytes": 931,
+          "stdoutSHA256": "14e903db00bf5d452456596ba0292b64f42752fb1f3ddaaed9a085cc1814bc43",
+          "stderrBytes": 0,
+          "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderr": ""
+        }
+      },
+      {
+        "name": "literals.fy",
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-tokens-reference\\build\\original-file-tokens.exe",
+            "literals.fy"
+          ],
+          "exit": 0,
+          "stdoutBytes": 1390,
+          "stdoutSHA256": "55df09c46a779019d2446797a75de001d3f0798a25f8f380e772d7dd13e73cdd",
+          "stderrBytes": 0,
+          "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderr": ""
+        }
+      },
+      {
+        "name": "comments.fy",
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-tokens-reference\\build\\original-file-tokens.exe",
+            "comments.fy"
+          ],
+          "exit": 0,
+          "stdoutBytes": 418,
+          "stdoutSHA256": "9937850e2aabadda8952d64b7de4b8ad8a6428cdf0586b792630f1cb21d71272",
+          "stderrBytes": 0,
+          "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderr": ""
+        }
+      },
+      {
+        "name": "invalid-byte.fy",
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-tokens-reference\\build\\original-file-tokens.exe",
+            "invalid-byte.fy"
+          ],
+          "exit": 2,
+          "stdoutBytes": 0,
+          "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderrBytes": 47,
+          "stderrSHA256": "7460b7483f32ff1f5161f95749dfb0392f527f81a7070aebcf80e60b1cb2f671",
+          "stderr": "invalid-byte.fy:1:9: error: E0001 (bytes 8..9)\n"
+        }
+      },
+      {
+        "name": "bad-utf8-string.fy",
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-tokens-reference\\build\\original-file-tokens.exe",
+            "bad-utf8-string.fy"
+          ],
+          "exit": 2,
+          "stdoutBytes": 0,
+          "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderrBytes": 50,
+          "stderrSHA256": "cc2baf4680d8c6068f56d4833a0a781238f8744b7ba13bb6b883e5fa5284eba4",
+          "stderr": "bad-utf8-string.fy:1:8: error: E0001 (bytes 7..8)\n"
+        }
+      },
+      {
+        "name": "bad-number.fy",
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-tokens-reference\\build\\original-file-tokens.exe",
+            "bad-number.fy"
+          ],
+          "exit": 2,
+          "stdoutBytes": 0,
+          "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderrBytes": 46,
+          "stderrSHA256": "657a0a86265982048b1ab549dd7783b29466c26f5d271bacefb9433cf52ffe32",
+          "stderr": "bad-number.fy:1:7: error: E0004 (bytes 6..10)\n"
+        }
+      },
+      {
+        "name": "unclosed-string.fy",
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-tokens-reference\\build\\original-file-tokens.exe",
+            "unclosed-string.fy"
+          ],
+          "exit": 2,
+          "stdoutBytes": 0,
+          "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderrBytes": 53,
+          "stderrSHA256": "26c2a873c36280c7ae6aab887fafbf279b48931e609e87f200f5e3109e77c3fa",
+          "stderr": "unclosed-string.fy:1:13: error: E0005 (bytes 12..25)\n"
+        }
+      },
+      {
+        "name": "unclosed-comment.fy",
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-tokens-reference\\build\\original-file-tokens.exe",
+            "unclosed-comment.fy"
+          ],
+          "exit": 2,
+          "stdoutBytes": 0,
+          "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderrBytes": 52,
+          "stderrSHA256": "fcca6dc340e069ade78bc12e46a53cb11215fc7dac0c1bf67cdba5abad15458d",
+          "stderr": "unclosed-comment.fy:1:9: error: E0001 (bytes 8..14)\n"
+        }
+      },
+      {
+        "name": "bad-cstring.fy",
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-tokens-reference\\build\\original-file-tokens.exe",
+            "bad-cstring.fy"
+          ],
+          "exit": 2,
+          "stdoutBytes": 0,
+          "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderrBytes": 48,
+          "stderrSHA256": "275e92fdda9c853c063d90d38c22a54c8cd2f08aa0ba83cee2371ac22be784d7",
+          "stderr": "bad-cstring.fy:1:10: error: E0006 (bytes 9..11)\n"
+        }
+      },
+      {
+        "name": "newline-diagnostics.fy",
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-tokens-reference\\build\\original-file-tokens.exe",
+            "newline-diagnostics.fy"
+          ],
+          "exit": 2,
+          "stdoutBytes": 0,
+          "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderrBytes": 112,
+          "stderrSHA256": "88b235e5b7429f4b059052683da39fe8cbbb2d842d5962ddd9831fbb63577b5b",
+          "stderr": "newline-diagnostics.fy:2:3: error: E0001 (bytes 12..13)\nnewline-diagnostics.fy:3:1: error: E0001 (bytes 13..14)\n"
+        }
+      },
+      {
+        "name": "exact.fy",
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-tokens-reference\\build\\original-file-tokens.exe",
+            "exact.fy"
+          ],
+          "exit": 0,
+          "stdoutBytes": 131164,
+          "stdoutSHA256": "d1f326b0b44f7ae15e38a9e0e218c2b3146905467b09b560acc9aae099a02257",
+          "stderrBytes": 0,
+          "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderr": ""
+        }
+      },
+      {
+        "name": "overflow.fy",
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-tokens-reference\\build\\original-file-tokens.exe",
+            "overflow.fy"
+          ],
+          "exit": 2,
+          "stdoutBytes": 0,
+          "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderrBytes": 34,
+          "stderrSHA256": "571965cdf3d1d0c3619220895782a2471c990d50382d12364d2d080f501532ef",
+          "stderr": "error: source limit (65536 bytes)\n"
+        }
+      },
+      {
+        "name": "missing",
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-tokens-reference\\build\\original-file-tokens.exe",
+            "missing.fy"
+          ],
+          "exit": 2,
+          "stdoutBytes": 0,
+          "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderrBytes": 30,
+          "stderrSHA256": "cbcd3d71627cf6ba234ad7d8797524dda6f27a1c6cbbeb14f52689a233502cb7",
+          "stderr": "error: input file read failed\n"
+        }
+      },
+      {
+        "name": "no-argument",
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-tokens-reference\\build\\original-file-tokens.exe"
+          ],
+          "exit": 8,
+          "stdoutBytes": 0,
+          "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderrBytes": 0,
+          "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderr": ""
+        }
+      },
+      {
+        "name": "extra-argument",
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\file-tokens-reference\\build\\original-file-tokens.exe",
+            "empty.fy",
+            "extra"
+          ],
+          "exit": 8,
+          "stdoutBytes": 0,
+          "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderrBytes": 0,
+          "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderr": ""
+        }
+      }
+    ],
+    "fixtureSHA256": {
+      "empty.fy": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source-한글-λ.fy": "687ae2fff81e925da2b64015986677657d85908e92e769ded81d4eeca081e8be",
+      "literals.fy": "fd1b8726ea44cad97f4eb09d73c647d5fae1129243e2cd31d48f9c878178c480",
+      "comments.fy": "89a9d20ab1ec873bfbee590ca4e80878a9b522593c4e19746b474218939c759d",
+      "invalid-byte.fy": "9f48fd05e2c222abd701a89c8ccdf6b33cf8c397fa8a14a0fa38d347a86d3876",
+      "bad-utf8-string.fy": "444780aa5db2758e2037c2de84e9448e3575f1c87dc0e1518ea3450385ea9f88",
+      "bad-number.fy": "d76ce160649eb6d1fc8a527b85055f0f88d3aa2e2bc6269682589c9a5b318400",
+      "unclosed-string.fy": "94cd45dc2d9d8d062744226c2a0a543a1fe35da6e0cc649c487024abd1c09957",
+      "unclosed-comment.fy": "db9ad4c9376427186347762cf8b35e158e5ca68dd87c124c72760cfda621535d",
+      "bad-cstring.fy": "a4a19841c8c59791abea9f7257dfe267e702feb242da486a26ff57a900e0d592",
+      "newline-diagnostics.fy": "fc481c364d45fb8a2611b65ba34f9243f5e09998ae8936ef924a8b380aff0ae5",
+      "exact.fy": "0beca823b527427c6f6abccba22309ee6137100421b0037578e4521d5f2b7302",
+      "overflow.fy": "ac72112c832fa4683b15ebff51a8f5f2ca08226c0d59bdb9ac739c2cdc28a05c"
+    },
+    "fixtureBytes": {
+      "empty.fy": 0,
+      "source-한글-λ.fy": 70,
+      "literals.fy": 105,
+      "comments.fy": 48,
+      "invalid-byte.fy": 9,
+      "bad-utf8-string.fy": 10,
+      "bad-number.fy": 11,
+      "unclosed-string.fy": 25,
+      "unclosed-comment.fy": 14,
+      "bad-cstring.fy": 14,
+      "newline-diagnostics.fy": 14,
+      "exact.fy": 65536,
+      "overflow.fy": 65537
+    },
+    "runtimeInputs": [
+      {
+        "path": "internal/cstdlib/stage0_system_heap.c",
+        "sha256": "cae6664fa1ec70722b76025c3e2c3daadc133cd90d95fa9f02f2385915d3e55c"
+      },
+      {
+        "path": "internal/cstdlib/stage0_buffer.c",
+        "sha256": "41c7a26acb8b9f22fd5e0f82c976f4b59964df2e2e73e7ddb5fa8bee70e8390c"
+      },
+      {
+        "path": "internal/cstdlib/stage0_vector_storage.c",
+        "sha256": "eb9686951b480a7c40d6bfe670206d683548c5293387c42a44670ad0b6e5ccca"
+      },
+      {
+        "path": "internal/cstdlib/stage0_windows_console.c",
+        "sha256": "076bc219ff0ff8ab6945ef0838230c77a254de8cefc460dfd05a842549bab306"
+      },
+      {
+        "path": "internal/cstdlib/stage0_text_view.c",
+        "sha256": "2e03c032878bedc7081b6cd9a465e5eff2d3a4ffda88d2449f5ce181a3f71aaf"
+      },
+      {
+        "path": "internal/cstdlib/stage0_windows_file.c",
+        "sha256": "0b70e682e2d09f76b2565075ac99e08674d4c80e92a74f46d88cde52c94626d6"
+      },
+      {
+        "path": "internal/cstdlib/stage0_windows_file_portable.c",
+        "sha256": "d965ef1295434c6cbb2873f2f4934c63c6b13c128cf49992bd0e048104cd5faf"
+      },
+      {
+        "path": "internal/cstdlib/stage0_windows_process_args.c",
+        "sha256": "8def696dd31522223fa626123ae6703967e2d0aca19c65a076b22f204c9c10d4"
+      }
+    ]
+  },
+  "reference": {
+    "sourceSHA256": "5466304cc2f4be0a13b9bf301d75eb0d9c1a431e63010c23f5b1eeb0fbbdec82",
+    "checkStdout": "check ok: 2 instance(s), 19 source file(s), 274 MIR function(s), lock updated\n",
+    "buildStdout": "built: build/original-file-tokens.exe (x86_64-windows-msvc, development, lock verified)\n",
+    "sourceCopiesVerified": [
+      "examples/lexer_candidate/src/file_tokens.fy",
+      "examples/lexer_candidate/src/file_source.fy",
+      "examples/lexer_candidate/src/scanner.fy",
+      "examples/lexer_candidate/src/candidate_limits.fy",
+      "examples/lexer_candidate/src/numbers.fy",
+      "examples/lexer_candidate/src/diagnostics.fy",
+      "examples/lexer_candidate/src/utf8.fy",
+      "examples/lexer_candidate/src/strings.fy",
+      "examples/lexer_candidate/src/budget.fy",
+      "examples/lexer_candidate/src/token_output.fy"
+    ]
+  },
+  "observations": [
+    "The unchanged file_tokens::run path executes original file_source::load, scanner::collect and token_output TSV/diagnostics through module-unit C.",
+    "16 baseline cases match exact Go-reference exit/stdout/stderr under both /Od and /O2, including empty files, Korean/lambda paths, string/byte/cstring/float/integer literals, BOM/comments, lexical errors and CR/LF diagnostics.",
+    "65536-byte source executes; 65537-byte source and missing files fail with the original messages.",
+    "All 24 actual SDK heap allocation positions in the literal fixture are failed independently on each profile; each returns status2, empty stdout and the original allocation-failure error.",
+    "80 C runs verify zero live allocations, zero cleanup errors, balanced explicit/automatic File closure, and unchanged fixture names/content SHA256. Automatic cleanup verifies the real handle is invalid afterward."
+  ],
+  "normativeContractsChanged": false,
+  "stableCLIChanged": false,
+  "sdkABIChanged": false,
+  "implementationChanged": false,
+  "dbChanged": false,
+  "ciChanged": false,
+  "hygieneChanged": false,
+  "runnerChanged": "Local C matrix verifier, filesystem artifact export and validation-only build-timeout overlay",
+  "pushed": false,
+  "skipped": {
+    "developmentNative": "API generation exceeded its default 60s process limit; it is not reported as a pass",
+    "candidateRelease": "Focused native test Release passed; standalone compiler candidate Release was not rebuilt",
+    "Linux": "Later batch",
+    "fullSuite": "Focused integration plus unchanged input verification"
+  },
+  "pending": [
+    "Public/main dispatcher and project/native driver integration.",
+    "Explicit scanner token/diagnostic/work-budget matrices beyond fixed file-token defaults.",
+    "Compiler build/runtime timeout/performance work, full source self-hosting and Stage1/Stage2 promotion."
+  ]
+}
