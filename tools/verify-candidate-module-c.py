@@ -1,7 +1,8 @@
 """Compile and execute C captured by the private owned-body emitter tests.
 
 The input must be the JSON output of fairyc test --native --capture-output
---file tests/module_unit_c_emit.fy and/or tests/module_unit_c_owned.fy.
+--file tests/module_unit_c_emit.fy, tests/module_unit_c_owned.fy and/or
+tests/module_unit_c_references.fy.
 Select the matching --suite. This checks generated C, not stage1/stage2.
 It does not authenticate when that report's compiler sources were built.
 """
@@ -31,6 +32,14 @@ OWNED = {
     "owned_c_keeps_provider_nominal_identity_and_shared_foreign_linkage": "30,10,",
 }
 OWNED_REJECTION = "owned_c_rejects_pending_array_transport_without_partial_output"
+REFERENCES = {
+    "reference_c_snapshots_root_and_projected_values_before_rhs_mutation": "3,6,",
+    "reference_c_mutates_borrowed_resource_without_dropping_the_reference": "10,3,",
+    "reference_c_retains_shared_projection_and_generic_reference_returns": "",
+    "reference_c_snapshots_indirect_compound_target_before_aliasing_rhs": "5,",
+    "reference_c_allows_sequential_mutable_and_shared_scopes": "8,",
+}
+REFERENCE_PROOF = "reference_c_rejects_missing_duplicate_and_malformed_compound_snapshots"
 
 
 def run(argv, cwd, env=None, timeout=60):
@@ -53,14 +62,19 @@ def main():
     parser.add_argument("--report", required=True, type=Path)
     parser.add_argument("--output", required=True, type=Path)
     parser.add_argument("--vcvars", required=True, type=Path)
-    parser.add_argument("--suite", choices=("scalar", "owned", "all"), default="scalar")
+    parser.add_argument("--suite", choices=("scalar", "owned", "references", "all"), default="scalar")
     args = parser.parse_args()
     report_bytes = args.report.read_bytes()
     report = json.loads(report_bytes)
     scalar_cases = {name: (exit_code, "") for name, exit_code in EXPECTED.items()}
     owned_cases = {name: (0, trace) for name, trace in OWNED.items()}
-    expected_cases = scalar_cases if args.suite == "scalar" else owned_cases if args.suite == "owned" else scalar_cases | owned_cases
-    rejections = {REJECTION} if args.suite == "scalar" else {OWNED_REJECTION} if args.suite == "owned" else {REJECTION, OWNED_REJECTION}
+    reference_cases = {name: (0, trace) for name, trace in REFERENCES.items()}
+    suites = {"scalar": (scalar_cases, {REJECTION}),
+              "owned": (owned_cases, {OWNED_REJECTION}),
+              "references": (reference_cases, {REFERENCE_PROOF}),
+              "all": (scalar_cases | owned_cases | reference_cases,
+                      {REJECTION, OWNED_REJECTION, REFERENCE_PROOF})}
+    expected_cases, rejections = suites[args.suite]
     count = len(expected_cases) + len(rejections)
     assert report["engine"] == "native" and report["count"] == count
     assert report["passed"] == count and report["failed"] == 0
@@ -68,8 +82,10 @@ def main():
     for test in report["tests"]:
         assert test["outcome"] == "passed" and not test["stderrBase64"]
         identity = test["identity"]
-        prefix = "tests::module_unit_c_emit::" if identity.startswith("tests::module_unit_c_emit::") else "tests::module_unit_c_owned::"
-        assert identity.startswith(prefix)
+        prefix = next((prefix for prefix in ("tests::module_unit_c_emit::",
+                       "tests::module_unit_c_owned::", "tests::module_unit_c_references::")
+                       if identity.startswith(prefix)), None)
+        assert prefix is not None
         name = identity.removeprefix(prefix)
         assert name not in cases
         cases[name] = base64.b64decode(test["stdoutBase64"], validate=True)

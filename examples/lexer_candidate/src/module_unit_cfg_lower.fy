@@ -71,7 +71,8 @@ fn Result<usize,clean_ir::Problem> statement(ref ir::Program p,usize original,us
     else if(s.kind==11){after=switch(emit(blocks,sites,captures,8,lookup::node(b,s.expression),0,next,0,0,s.start,s.end,c)){case .ok(n):{n}case .err(p):{return .err(p);}};}
     else if(s.kind!=6 && s.kind!=12 && s.kind!=16){return .err(fail(c,1004,s.start,s.end));}
     if(s.kind==12 && s.expression!=0){let e=ir::node_at(b,lookup::node(b,s.expression)-1).value;after=switch(drops(p,8,e.start,e.end,after,blocks,sites,captures,c)){case .ok(n):{n}case .err(p):{return .err(p);}};}
-    let entry=switch(expression(p,s.expression,after,loop,depth+1,blocks,sites,captures,c)){case .ok(n):{n}case .err(p):{return .err(p);}};
+    var usize entry=switch(expression(p,s.expression,after,loop,depth+1,blocks,sites,captures,c)){case .ok(n):{n}case .err(p):{return .err(p);}};
+    if(s.kind==4 && !bytes::equal(ir::assignment_operator(b,id-1),b"=")){entry=switch(emit(blocks,sites,captures,17,lookup::node(b,s.target),id,entry,0,0,s.start,s.end,c)){case .ok(n):{n}case .err(p):{return .err(p);}};}
     // A root assignment selects a storage slot; it must not load a moved-out
     // owner before evaluating its replacement. Indexed/projected targets keep
     // their checked receiver/index evaluation before the RHS.

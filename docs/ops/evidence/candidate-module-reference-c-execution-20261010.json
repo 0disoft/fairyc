@@ -1,0 +1,580 @@
+{
+  "schema": "fairyc.candidate-module-reference-c-execution/v1",
+  "passed": true,
+  "identity": {
+    "nativeCompiler": {
+      "path": ".cache/candidate-tagged/compiler-origin-patterns.exe",
+      "sha256": "d36dae1b99751322e447880aaf4d28321bd6d53bdf776185308c6c4504889bb2"
+    },
+    "buildCompiler": {
+      "path": ".cache/candidate-tagged/compiler-build-240s.exe",
+      "sha256": "746fe10b022ed88cfbc0ae8ea13e3f867b842f3317ef5a2a4caa36d064a248dd"
+    },
+    "candidate": {
+      "path": "examples/lexer_candidate/build/lexer-candidate.exe",
+      "sha256": "eed9040ffb31f3fb9fc1826394bcef1ed1bc8708ba3714cbb51644bc6637daac"
+    },
+    "sources": [
+      {
+        "path": "examples/lexer_candidate/src/module_unit_c_emit.fy",
+        "sha256": "353821a97810f3be4c9cc6814fc0dda95c014ffe4bee4395a902c15ce53987e6"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_c_aggregate.fy",
+        "sha256": "7bbd1ef93f3cf270c5307347a1b500bfda93c33a8c1d93106ac4b06ad79e8787"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_c_scalar.fy",
+        "sha256": "77e2587c6580c0a7957751a8bb8028bc472831d5b6baa22786940736e6de679a"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_cfg_lower.fy",
+        "sha256": "b4c643586b76eaf2081234913fa3decc1f3044658507a236a9fb6c39464007f7"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_cfg_model.fy",
+        "sha256": "b6f7fdbb96e6d4d49d781920ad0e986b429f6a0068f28240670bfeecee7a9457"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_cfg_defer.fy",
+        "sha256": "d34d9d96d716b78bf834ac8dc72deb8059f0a3568a917ed0d8d713486a91767c"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_body_ir_model.fy",
+        "sha256": "9b9a5f4655e595cbeb0cdb19e4833c6280f26d93c04aa39ba8cb4cfe4056ec68"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_body_ir_verify.fy",
+        "sha256": "9ca01cf3ebaf2215e43e5ad1c2d7ba41dcbda39e5b300d85eec5d0c80c0c628c"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_cleanup_mir_model.fy",
+        "sha256": "8cd61811abad699237a647215bd04cd3ec01df12188eb3a2d3620bcea8bd745d"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_cleanup_mir_verify.fy",
+        "sha256": "bd4057012905da5f6417bf3de2cc89da4f31c0725e3b01779724e29cfe89be99"
+      },
+      {
+        "path": "examples/lexer_candidate/tests/module_unit_c_emit.fy",
+        "sha256": "d89f77dcb5d8dc4af79424e1000c3971afd1dac3279473b24acbbfc1e13e5098"
+      },
+      {
+        "path": "examples/lexer_candidate/tests/module_unit_c_owned.fy",
+        "sha256": "1ada44e26123542dc88318760a3be00e5f1cac2579a2e34622423fe152ff5fa1"
+      },
+      {
+        "path": "examples/lexer_candidate/tests/module_unit_c_references.fy",
+        "sha256": "b6010ccc47f86c2947c9c7994e983f6f199556f08e319b166ad7412900de7922"
+      },
+      {
+        "path": "examples/lexer_candidate/fairy.lock",
+        "sha256": "2093597177a86ca0892bb6a59397c25e04fb7bb75e193c15ae371c00e8853d55"
+      },
+      {
+        "path": "tools/verify-candidate-module-c.py",
+        "sha256": "554a6fde466e95b31294e746a9d3bee26f169e71c8cb077ff928e34fc05b85df"
+      }
+    ]
+  },
+  "native": {
+    "count": 18,
+    "passed": 18,
+    "failed": 0,
+    "newReferenceCases": 6,
+    "regressionCases": 12,
+    "profile": "development",
+    "target": "x86_64-windows-msvc",
+    "report": {
+      "path": ".cache/candidate-tagged/cleanup-operands-unit/module-c-reference-all-native.json",
+      "sha256": "d0ab728b20e3fc658768858a06c2ce79d8047e16451dac6e8d31bfcf8c7b40bc"
+    },
+    "tests": [
+      {
+        "identity": "tests::module_unit_c_emit::module_c_emits_closed_integer_widths_and_normalized_literals",
+        "outcome": "passed",
+        "emittedCBytes": 6979,
+        "emittedCSHA256": "244ea7a6aad46782d9b91ea83b8f89b150cfe39bdb75d87bb15a0429ad272323"
+      },
+      {
+        "identity": "tests::module_unit_c_emit::module_c_emits_divide_by_zero_trap",
+        "outcome": "passed",
+        "emittedCBytes": 2553,
+        "emittedCSHA256": "afa81f381282beb26e9d82269f967889ac38783411dfa2ccab580e2f78cf2031"
+      },
+      {
+        "identity": "tests::module_unit_c_emit::module_c_emits_overflow_trap",
+        "outcome": "passed",
+        "emittedCBytes": 2562,
+        "emittedCSHA256": "cc26e3dc6be2dee38312b5072adf2877cd60985d296ab1ad9af44943017dc611"
+      },
+      {
+        "identity": "tests::module_unit_c_emit::module_c_executes_calls_loops_and_lazy_branch_values",
+        "outcome": "passed",
+        "emittedCBytes": 9646,
+        "emittedCSHA256": "58f37b76636debcbcd946cfc78621bfda0f35355f242b76d210ea69e6f69a042"
+      },
+      {
+        "identity": "tests::module_unit_c_emit::module_c_freezes_defer_arguments_before_reassignment_and_return",
+        "outcome": "passed",
+        "emittedCBytes": 4410,
+        "emittedCSHA256": "e7ef9ff64b2e900257ffa0d0f399776bf18e98641280c7291bb2e61ecae3579a"
+      },
+      {
+        "identity": "tests::module_unit_c_emit::module_c_rejects_unsupported_types_and_bad_entry_without_partial_output",
+        "outcome": "passed",
+        "emittedCBytes": 0,
+        "emittedCSHA256": null
+      },
+      {
+        "identity": "tests::module_unit_c_owned::owned_c_drops_active_tagged_payloads_and_nested_fields_in_reverse_order",
+        "outcome": "passed",
+        "emittedCBytes": 6202,
+        "emittedCSHA256": "11418de5cef4e5c706b892d7b7a4796f56e0bb8edcb3eff8003914e572e4e0fa"
+      },
+      {
+        "identity": "tests::module_unit_c_owned::owned_c_invokes_loop_defer_suffix_before_drops_and_keeps_outer_owner",
+        "outcome": "passed",
+        "emittedCBytes": 5562,
+        "emittedCSHA256": "b3c817db4973c65d7f3d0d071845751f2811330f35d31b4747d0b787a4eea975"
+      },
+      {
+        "identity": "tests::module_unit_c_owned::owned_c_keeps_provider_nominal_identity_and_shared_foreign_linkage",
+        "outcome": "passed",
+        "emittedCBytes": 4148,
+        "emittedCSHA256": "8d2535f18cf6baf80ae8b439f3bf31af936329b47bf7b293ef2b51d7b3727efc"
+      },
+      {
+        "identity": "tests::module_unit_c_owned::owned_c_moves_returns_and_unwinds_completed_partial_values_on_propagation",
+        "outcome": "passed",
+        "emittedCBytes": 7857,
+        "emittedCSHA256": "9a78091c4695beef642d00f49d9723b01459136bff3265185f8b3bf50a7e471a"
+      },
+      {
+        "identity": "tests::module_unit_c_owned::owned_c_rejects_pending_array_transport_without_partial_output",
+        "outcome": "passed",
+        "emittedCBytes": 0,
+        "emittedCSHA256": null
+      },
+      {
+        "identity": "tests::module_unit_c_owned::owned_c_replaces_owners_after_rhs_and_mutates_cleanup_receiver",
+        "outcome": "passed",
+        "emittedCBytes": 4057,
+        "emittedCSHA256": "c0fc079f2e953f3b263345eb2126b394c6a271558071d506b074ce5b5fa7b1b1"
+      },
+      {
+        "identity": "tests::module_unit_c_references::reference_c_allows_sequential_mutable_and_shared_scopes",
+        "outcome": "passed",
+        "emittedCBytes": 4193,
+        "emittedCSHA256": "744c1ecfb2ac71e8c5163d664ec94ec3725ee81b1292d33370e20b59f1136231"
+      },
+      {
+        "identity": "tests::module_unit_c_references::reference_c_mutates_borrowed_resource_without_dropping_the_reference",
+        "outcome": "passed",
+        "emittedCBytes": 4524,
+        "emittedCSHA256": "40bc7510ccfd41afaf3e6ceb3b6f732138c1bd535cf56a32ea74c67daabf2cbf"
+      },
+      {
+        "identity": "tests::module_unit_c_references::reference_c_rejects_missing_duplicate_and_malformed_compound_snapshots",
+        "outcome": "passed",
+        "emittedCBytes": 0,
+        "emittedCSHA256": null
+      },
+      {
+        "identity": "tests::module_unit_c_references::reference_c_retains_shared_projection_and_generic_reference_returns",
+        "outcome": "passed",
+        "emittedCBytes": 4548,
+        "emittedCSHA256": "2e5db905b8f1286b9ec316f89ddae57b87783f58509e5442dc63d6bf40cc05dd"
+      },
+      {
+        "identity": "tests::module_unit_c_references::reference_c_snapshots_indirect_compound_target_before_aliasing_rhs",
+        "outcome": "passed",
+        "emittedCBytes": 4305,
+        "emittedCSHA256": "83841e84b09052bd385273ee628815ddbc027adb2c2fec33fe5b573f7f729cb7"
+      },
+      {
+        "identity": "tests::module_unit_c_references::reference_c_snapshots_root_and_projected_values_before_rhs_mutation",
+        "outcome": "passed",
+        "emittedCBytes": 5474,
+        "emittedCSHA256": "e79a5b3ec776ae1b87e536b96c057c76c30e4ad191d562e3745d2ebe8807e9f3"
+      }
+    ],
+    "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+    "exit": 0,
+    "command": [
+      "compiler-origin-patterns.exe",
+      "test",
+      "--native",
+      "--file",
+      "tests/module_unit_c_emit.fy",
+      "--file",
+      "tests/module_unit_c_owned.fy",
+      "--file",
+      "tests/module_unit_c_references.fy",
+      "--json",
+      "--capture-output"
+    ]
+  },
+  "generatedC": {
+    "count": 30,
+    "passed": 30,
+    "profiles": [
+      "/Od",
+      "/O2"
+    ],
+    "newReferenceExecutions": 10,
+    "regressionExecutions": 20,
+    "report": {
+      "path": ".cache/candidate-tagged/module-c-reference-unit/all-c-final/execution.json",
+      "sha256": "cdbe72de240aba5cc9c7519f71b2834e3369a5aed90770f5ff463484e084d98b"
+    },
+    "compiler": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+    "observations": [
+      {
+        "name": "module_c_executes_calls_loops_and_lazy_branch_values",
+        "profile": "low",
+        "sourceSHA256": "58f37b76636debcbcd946cfc78621bfda0f35355f242b76d210ea69e6f69a042",
+        "buildExit": 0,
+        "expectedExit": 0,
+        "actualExit": 0,
+        "expectedStdout": "",
+        "actualStdout": ""
+      },
+      {
+        "name": "module_c_executes_calls_loops_and_lazy_branch_values",
+        "profile": "optimized",
+        "sourceSHA256": "58f37b76636debcbcd946cfc78621bfda0f35355f242b76d210ea69e6f69a042",
+        "buildExit": 0,
+        "expectedExit": 0,
+        "actualExit": 0,
+        "expectedStdout": "",
+        "actualStdout": ""
+      },
+      {
+        "name": "module_c_freezes_defer_arguments_before_reassignment_and_return",
+        "profile": "low",
+        "sourceSHA256": "e7ef9ff64b2e900257ffa0d0f399776bf18e98641280c7291bb2e61ecae3579a",
+        "buildExit": 0,
+        "expectedExit": 0,
+        "actualExit": 0,
+        "expectedStdout": "",
+        "actualStdout": ""
+      },
+      {
+        "name": "module_c_freezes_defer_arguments_before_reassignment_and_return",
+        "profile": "optimized",
+        "sourceSHA256": "e7ef9ff64b2e900257ffa0d0f399776bf18e98641280c7291bb2e61ecae3579a",
+        "buildExit": 0,
+        "expectedExit": 0,
+        "actualExit": 0,
+        "expectedStdout": "",
+        "actualStdout": ""
+      },
+      {
+        "name": "module_c_emits_closed_integer_widths_and_normalized_literals",
+        "profile": "low",
+        "sourceSHA256": "244ea7a6aad46782d9b91ea83b8f89b150cfe39bdb75d87bb15a0429ad272323",
+        "buildExit": 0,
+        "expectedExit": 0,
+        "actualExit": 0,
+        "expectedStdout": "",
+        "actualStdout": ""
+      },
+      {
+        "name": "module_c_emits_closed_integer_widths_and_normalized_literals",
+        "profile": "optimized",
+        "sourceSHA256": "244ea7a6aad46782d9b91ea83b8f89b150cfe39bdb75d87bb15a0429ad272323",
+        "buildExit": 0,
+        "expectedExit": 0,
+        "actualExit": 0,
+        "expectedStdout": "",
+        "actualStdout": ""
+      },
+      {
+        "name": "module_c_emits_overflow_trap",
+        "profile": "low",
+        "sourceSHA256": "cc26e3dc6be2dee38312b5072adf2877cd60985d296ab1ad9af44943017dc611",
+        "buildExit": 0,
+        "expectedExit": 101,
+        "actualExit": 101,
+        "expectedStdout": "",
+        "actualStdout": ""
+      },
+      {
+        "name": "module_c_emits_overflow_trap",
+        "profile": "optimized",
+        "sourceSHA256": "cc26e3dc6be2dee38312b5072adf2877cd60985d296ab1ad9af44943017dc611",
+        "buildExit": 0,
+        "expectedExit": 101,
+        "actualExit": 101,
+        "expectedStdout": "",
+        "actualStdout": ""
+      },
+      {
+        "name": "module_c_emits_divide_by_zero_trap",
+        "profile": "low",
+        "sourceSHA256": "afa81f381282beb26e9d82269f967889ac38783411dfa2ccab580e2f78cf2031",
+        "buildExit": 0,
+        "expectedExit": 102,
+        "actualExit": 102,
+        "expectedStdout": "",
+        "actualStdout": ""
+      },
+      {
+        "name": "module_c_emits_divide_by_zero_trap",
+        "profile": "optimized",
+        "sourceSHA256": "afa81f381282beb26e9d82269f967889ac38783411dfa2ccab580e2f78cf2031",
+        "buildExit": 0,
+        "expectedExit": 102,
+        "actualExit": 102,
+        "expectedStdout": "",
+        "actualStdout": ""
+      },
+      {
+        "name": "owned_c_replaces_owners_after_rhs_and_mutates_cleanup_receiver",
+        "profile": "low",
+        "sourceSHA256": "c0fc079f2e953f3b263345eb2126b394c6a271558071d506b074ce5b5fa7b1b1",
+        "buildExit": 0,
+        "expectedExit": 0,
+        "actualExit": 0,
+        "expectedStdout": "102,103,",
+        "actualStdout": "102,103,"
+      },
+      {
+        "name": "owned_c_replaces_owners_after_rhs_and_mutates_cleanup_receiver",
+        "profile": "optimized",
+        "sourceSHA256": "c0fc079f2e953f3b263345eb2126b394c6a271558071d506b074ce5b5fa7b1b1",
+        "buildExit": 0,
+        "expectedExit": 0,
+        "actualExit": 0,
+        "expectedStdout": "102,103,",
+        "actualStdout": "102,103,"
+      },
+      {
+        "name": "owned_c_drops_active_tagged_payloads_and_nested_fields_in_reverse_order",
+        "profile": "low",
+        "sourceSHA256": "11418de5cef4e5c706b892d7b7a4796f56e0bb8edcb3eff8003914e572e4e0fa",
+        "buildExit": 0,
+        "expectedExit": 0,
+        "actualExit": 0,
+        "expectedStdout": "5,4,3,100,2,1,",
+        "actualStdout": "5,4,3,100,2,1,"
+      },
+      {
+        "name": "owned_c_drops_active_tagged_payloads_and_nested_fields_in_reverse_order",
+        "profile": "optimized",
+        "sourceSHA256": "11418de5cef4e5c706b892d7b7a4796f56e0bb8edcb3eff8003914e572e4e0fa",
+        "buildExit": 0,
+        "expectedExit": 0,
+        "actualExit": 0,
+        "expectedStdout": "5,4,3,100,2,1,",
+        "actualStdout": "5,4,3,100,2,1,"
+      },
+      {
+        "name": "owned_c_moves_returns_and_unwinds_completed_partial_values_on_propagation",
+        "profile": "low",
+        "sourceSHA256": "9a78091c4695beef642d00f49d9723b01459136bff3265185f8b3bf50a7e471a",
+        "buildExit": 0,
+        "expectedExit": 0,
+        "actualExit": 0,
+        "expectedStdout": "20,1,2,3,9,4,",
+        "actualStdout": "20,1,2,3,9,4,"
+      },
+      {
+        "name": "owned_c_moves_returns_and_unwinds_completed_partial_values_on_propagation",
+        "profile": "optimized",
+        "sourceSHA256": "9a78091c4695beef642d00f49d9723b01459136bff3265185f8b3bf50a7e471a",
+        "buildExit": 0,
+        "expectedExit": 0,
+        "actualExit": 0,
+        "expectedStdout": "20,1,2,3,9,4,",
+        "actualStdout": "20,1,2,3,9,4,"
+      },
+      {
+        "name": "owned_c_invokes_loop_defer_suffix_before_drops_and_keeps_outer_owner",
+        "profile": "low",
+        "sourceSHA256": "b3c817db4973c65d7f3d0d071845751f2811330f35d31b4747d0b787a4eea975",
+        "buildExit": 0,
+        "expectedExit": 0,
+        "actualExit": 0,
+        "expectedStdout": "20,10,0,21,11,1,100,",
+        "actualStdout": "20,10,0,21,11,1,100,"
+      },
+      {
+        "name": "owned_c_invokes_loop_defer_suffix_before_drops_and_keeps_outer_owner",
+        "profile": "optimized",
+        "sourceSHA256": "b3c817db4973c65d7f3d0d071845751f2811330f35d31b4747d0b787a4eea975",
+        "buildExit": 0,
+        "expectedExit": 0,
+        "actualExit": 0,
+        "expectedStdout": "20,10,0,21,11,1,100,",
+        "actualStdout": "20,10,0,21,11,1,100,"
+      },
+      {
+        "name": "owned_c_keeps_provider_nominal_identity_and_shared_foreign_linkage",
+        "profile": "low",
+        "sourceSHA256": "8d2535f18cf6baf80ae8b439f3bf31af936329b47bf7b293ef2b51d7b3727efc",
+        "buildExit": 0,
+        "expectedExit": 0,
+        "actualExit": 0,
+        "expectedStdout": "30,10,",
+        "actualStdout": "30,10,"
+      },
+      {
+        "name": "owned_c_keeps_provider_nominal_identity_and_shared_foreign_linkage",
+        "profile": "optimized",
+        "sourceSHA256": "8d2535f18cf6baf80ae8b439f3bf31af936329b47bf7b293ef2b51d7b3727efc",
+        "buildExit": 0,
+        "expectedExit": 0,
+        "actualExit": 0,
+        "expectedStdout": "30,10,",
+        "actualStdout": "30,10,"
+      },
+      {
+        "name": "reference_c_snapshots_root_and_projected_values_before_rhs_mutation",
+        "profile": "low",
+        "sourceSHA256": "e79a5b3ec776ae1b87e536b96c057c76c30e4ad191d562e3745d2ebe8807e9f3",
+        "buildExit": 0,
+        "expectedExit": 0,
+        "actualExit": 0,
+        "expectedStdout": "3,6,",
+        "actualStdout": "3,6,"
+      },
+      {
+        "name": "reference_c_snapshots_root_and_projected_values_before_rhs_mutation",
+        "profile": "optimized",
+        "sourceSHA256": "e79a5b3ec776ae1b87e536b96c057c76c30e4ad191d562e3745d2ebe8807e9f3",
+        "buildExit": 0,
+        "expectedExit": 0,
+        "actualExit": 0,
+        "expectedStdout": "3,6,",
+        "actualStdout": "3,6,"
+      },
+      {
+        "name": "reference_c_mutates_borrowed_resource_without_dropping_the_reference",
+        "profile": "low",
+        "sourceSHA256": "40bc7510ccfd41afaf3e6ceb3b6f732138c1bd535cf56a32ea74c67daabf2cbf",
+        "buildExit": 0,
+        "expectedExit": 0,
+        "actualExit": 0,
+        "expectedStdout": "10,3,",
+        "actualStdout": "10,3,"
+      },
+      {
+        "name": "reference_c_mutates_borrowed_resource_without_dropping_the_reference",
+        "profile": "optimized",
+        "sourceSHA256": "40bc7510ccfd41afaf3e6ceb3b6f732138c1bd535cf56a32ea74c67daabf2cbf",
+        "buildExit": 0,
+        "expectedExit": 0,
+        "actualExit": 0,
+        "expectedStdout": "10,3,",
+        "actualStdout": "10,3,"
+      },
+      {
+        "name": "reference_c_retains_shared_projection_and_generic_reference_returns",
+        "profile": "low",
+        "sourceSHA256": "2e5db905b8f1286b9ec316f89ddae57b87783f58509e5442dc63d6bf40cc05dd",
+        "buildExit": 0,
+        "expectedExit": 0,
+        "actualExit": 0,
+        "expectedStdout": "",
+        "actualStdout": ""
+      },
+      {
+        "name": "reference_c_retains_shared_projection_and_generic_reference_returns",
+        "profile": "optimized",
+        "sourceSHA256": "2e5db905b8f1286b9ec316f89ddae57b87783f58509e5442dc63d6bf40cc05dd",
+        "buildExit": 0,
+        "expectedExit": 0,
+        "actualExit": 0,
+        "expectedStdout": "",
+        "actualStdout": ""
+      },
+      {
+        "name": "reference_c_snapshots_indirect_compound_target_before_aliasing_rhs",
+        "profile": "low",
+        "sourceSHA256": "83841e84b09052bd385273ee628815ddbc027adb2c2fec33fe5b573f7f729cb7",
+        "buildExit": 0,
+        "expectedExit": 0,
+        "actualExit": 0,
+        "expectedStdout": "5,",
+        "actualStdout": "5,"
+      },
+      {
+        "name": "reference_c_snapshots_indirect_compound_target_before_aliasing_rhs",
+        "profile": "optimized",
+        "sourceSHA256": "83841e84b09052bd385273ee628815ddbc027adb2c2fec33fe5b573f7f729cb7",
+        "buildExit": 0,
+        "expectedExit": 0,
+        "actualExit": 0,
+        "expectedStdout": "5,",
+        "actualStdout": "5,"
+      },
+      {
+        "name": "reference_c_allows_sequential_mutable_and_shared_scopes",
+        "profile": "low",
+        "sourceSHA256": "744c1ecfb2ac71e8c5163d664ec94ec3725ee81b1292d33370e20b59f1136231",
+        "buildExit": 0,
+        "expectedExit": 0,
+        "actualExit": 0,
+        "expectedStdout": "8,",
+        "actualStdout": "8,"
+      },
+      {
+        "name": "reference_c_allows_sequential_mutable_and_shared_scopes",
+        "profile": "optimized",
+        "sourceSHA256": "744c1ecfb2ac71e8c5163d664ec94ec3725ee81b1292d33370e20b59f1136231",
+        "buildExit": 0,
+        "expectedExit": 0,
+        "actualExit": 0,
+        "expectedStdout": "8,",
+        "actualStdout": "8,"
+      }
+    ],
+    "runtime": "Standalone C shim traces i32 and maps traps to exit 100+category"
+  },
+  "sourceCheck": {
+    "exit": 0,
+    "locked": true,
+    "stdout": "check ok: 2 instance(s), 256 source file(s), 3253 MIR function(s), lock verified"
+  },
+  "developmentBuild": {
+    "exit": 0,
+    "locked": true,
+    "stdout": "built: build/lexer-candidate.exe (x86_64-windows-msvc, development, lock verified)"
+  },
+  "behavior": {
+    "references": "Canonical ref/ref mut types use C pointers with shared pointee const",
+    "places": "Address formation, dereference and projected fields use retained owner storage",
+    "cleanup": "Borrowed resource reference has no owner drop; original resource drops once",
+    "compound": "CFG kind17 freezes old scalar target value before RHS; checked store uses snapshot",
+    "snapshotVerifier": "Rejects zero source, zero target, wrong span, missing and duplicate records",
+    "generic": "Generic shared-reference return preserves caller storage"
+  },
+  "traceContracts": {
+    "rootAndProjected": "3,6,",
+    "borrowedResource": "10,3,",
+    "indirectTarget": "5,",
+    "sequentialBorrow": "8,"
+  },
+  "pending": [
+    "Raw pointer, fixed array, view, cast and enum C transport",
+    "Foreign pointer/aggregate/C-scalar ABI and authenticated SDK runtime calls",
+    "Region checkpoint/place/reset execution",
+    "Dominance, initialization, whole-path cleanup and full source/unsafe provenance proofs",
+    "Whole dispatcher and stage1/stage2"
+  ],
+  "skipped": {
+    "releaseCandidate": "Separate release batch; generated C /O2 is not candidate Release",
+    "Linux": "Windows native scope",
+    "fullSuite": "Focused C suites and existing scalar/owned regressions",
+    "Go": "No Go changes"
+  },
+  "privateAPIExpanded": true,
+  "stableCLIChanged": false,
+  "sdkABIChanged": false,
+  "dbChanged": false,
+  "ciChanged": false,
+  "hygieneChanged": false,
+  "pushed": false
+}
