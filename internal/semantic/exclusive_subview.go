@@ -12,6 +12,7 @@ func (f *borrowFlowAnalyzer) evaluateBorrowedIndex(expression *ast.Expression, e
 	if !reachable {
 		return receiver, false
 	}
+	f.checkHeldReferentRead(expression, expression.Children[0], receiver)
 	base, accessBase := len(f.callBorrows), len(f.callAccesses)
 	f.callBorrows = append(f.callBorrows, receiver)
 	f.callAccesses = append(f.callAccesses, borrowCallAccess{value: receiver, mutable: false, span: span(f.module.file.Path, expression.Span)})

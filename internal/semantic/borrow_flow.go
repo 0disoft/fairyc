@@ -460,7 +460,12 @@ func (f *borrowFlowAnalyzer) evaluateExpression(expression *ast.Expression, envi
 				return f.evaluateOwnerPlace(expression.Children[0], environment)
 			}
 		}
-		return f.evaluateChildren(expression.Children, environment)
+		if expression.Text == "len" && len(expression.Children) == 1 {
+			if _, indexed := hir.IndexedViewElement(f.analyzer.expressionTypes[expression.Children[0]]); indexed {
+				return f.evaluateChildren(expression.Children, environment)
+			}
+		}
+		return f.evaluateReferentRead(expression, environment)
 	case syntax.KindPath:
 		if variant, ok := optionVariantPath(expression.Text); ok && variant == optionVariantNone {
 			if _, option := hir.OptionElement(f.analyzer.expressionTypes[expression]); option {
@@ -512,6 +517,9 @@ func (f *borrowFlowAnalyzer) evaluateExpression(expression *ast.Expression, envi
 					kind: borrowKind(expression.Text), origin: origin,
 				}},
 			}, true
+		}
+		if expression.Text == "*" {
+			return f.evaluateReferentRead(expression, environment)
 		}
 		return f.evaluateChildren(expression.Children, environment)
 	case syntax.KindGroup, syntax.KindUnsafe:

@@ -23,6 +23,7 @@ func (c *typeChecker) sharedCallArgument(source **ast.Expression, child *hir.Exp
 type borrowCallAccess struct {
 	value   borrowValueState
 	mutable bool
+	store   bool
 	span    hir.Span
 }
 

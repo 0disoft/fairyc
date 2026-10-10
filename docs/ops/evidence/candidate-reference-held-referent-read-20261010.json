@@ -1,0 +1,757 @@
+{
+  "schema": "fairyc.reference-held-referent-read/v1",
+  "passed": true,
+  "scope": "Go reference rejects competing referent reads during earlier exclusive call-argument or view-selector holds. Descriptor copying, indexed-view length metadata and selected-store RHS reads retain existing admission.",
+  "sourceTruth": [
+    "docs/language/0002-borrows-and-return-origins.md"
+  ],
+  "identity": {
+    "compiler": {
+      "path": ".cache/candidate-tagged/referent-read-unit/compiler.exe",
+      "sha256": "603959e5839a11b8443be98ef89463f09faf8fb4d2e5169f38a5b2e851257192"
+    },
+    "sources": [
+      {
+        "path": "internal/semantic/held_referent_read.go",
+        "sha256": "3fd08d75655368bd2dd0a5558626db8436e1a9d80c834239370452c721b56a14"
+      },
+      {
+        "path": "internal/semantic/held_referent_read_test.go",
+        "sha256": "bcd4075290442136927c1113d3524b0b3050a0e455cf93ed31245abbba25ed11"
+      },
+      {
+        "path": "internal/semantic/borrow_flow.go",
+        "sha256": "68572786f44c8fa044f0e9cff85fd0ed10ed6a5d5cb5dfc39aa243a835ffa236"
+      },
+      {
+        "path": "internal/semantic/shared_reborrow.go",
+        "sha256": "2241546909e6ebeefe27bc51265dc2e73058c27147adb00f07e8ae41ac09cd6b"
+      },
+      {
+        "path": "internal/semantic/exclusive_subview.go",
+        "sha256": "606fdde8053be0ff9868bb5f85ba2cb8c1f69612fdc06baec94099d16b56defa"
+      },
+      {
+        "path": "internal/semantic/field_store_flow.go",
+        "sha256": "ee5591c885e940a3c9c6d954a68f2c247d8bb244811ea5fd59bebfb1e4c21daa"
+      },
+      {
+        "path": "internal/semantic/array_field_views.go",
+        "sha256": "e6483e79565e5afbb1e5c6fed8cf9e4f6dd0f6b71e6a41c2a56ee25db59a91a5"
+      }
+    ]
+  },
+  "baseline": {
+    "compilerSHA256": "d20f890fe58b487988d69acf2ecde153f10fc89a95efa4100dff91b21cb4e4c7",
+    "candidateSHA256": "c24f03f8577a0a6103e9479494e54dabe64ac069bf6520b9830656bb658d866c",
+    "cases": [
+      {
+        "name": "scalar local",
+        "index": 0,
+        "go": {
+          "exit": 0,
+          "stdout": "semantics ok: main.fy (typed HIR: 5 function(s))\n",
+          "stderr": ""
+        },
+        "candidate": {
+          "exit": 0,
+          "stdout": "return origins ok\n",
+          "stderr": ""
+        },
+        "target": 3
+      },
+      {
+        "name": "scalar parameter",
+        "index": 1,
+        "go": {
+          "exit": 0,
+          "stdout": "semantics ok: main.fy (typed HIR: 5 function(s))\n",
+          "stderr": ""
+        },
+        "candidate": {
+          "exit": 0,
+          "stdout": "return origins ok\n",
+          "stderr": ""
+        },
+        "target": 3
+      },
+      {
+        "name": "shared scalar",
+        "index": 2,
+        "go": {
+          "exit": 0,
+          "stdout": "semantics ok: main.fy (typed HIR: 5 function(s))\n",
+          "stderr": ""
+        },
+        "candidate": {
+          "exit": 0,
+          "stdout": "return origins ok\n",
+          "stderr": ""
+        },
+        "target": 0
+      },
+      {
+        "name": "nested argument write",
+        "index": 3,
+        "go": {
+          "exit": 3,
+          "stdout": "",
+          "stderr": "main.fy:1:181: E2101: Access conflicts with an active shared or mutable loan. [bytes 180..182]\n  last-use: main.fy:1:182 [bytes 181..182]\n  loan: main.fy:1:178 [bytes 177..178]\n"
+        },
+        "candidate": {
+          "exit": 3,
+          "stdout": "",
+          "stderr": "main.fy:1:181: error: E2101 borrow conflicts with live loan (bytes 180..182)\n  loan: main.fy (bytes 177..178)\n  last-use: main.fy (bytes 181..182)\n"
+        },
+        "target": 3
+      },
+      {
+        "name": "nested shared write",
+        "index": 4,
+        "go": {
+          "exit": 3,
+          "stdout": "",
+          "stderr": "main.fy:1:182: E2101: Access conflicts with an active shared or mutable loan. [bytes 181..183]\n  last-use: main.fy:1:183 [bytes 182..183]\n  loan: main.fy:1:179 [bytes 178..179]\n"
+        },
+        "candidate": {
+          "exit": 3,
+          "stdout": "",
+          "stderr": "main.fy:1:182: error: E2101 borrow conflicts with live loan (bytes 181..183)\n  loan: main.fy (bytes 178..179)\n  last-use: main.fy (bytes 182..183)\n"
+        },
+        "target": 3
+      },
+      {
+        "name": "scalar ends",
+        "index": 5,
+        "go": {
+          "exit": 0,
+          "stdout": "semantics ok: main.fy (typed HIR: 5 function(s))\n",
+          "stderr": ""
+        },
+        "candidate": {
+          "exit": 0,
+          "stdout": "return origins ok\n",
+          "stderr": ""
+        },
+        "target": 0
+      },
+      {
+        "name": "store RHS read",
+        "index": 6,
+        "go": {
+          "exit": 0,
+          "stdout": "semantics ok: main.fy (typed HIR: 5 function(s))\n",
+          "stderr": ""
+        },
+        "candidate": {
+          "exit": 0,
+          "stdout": "return origins ok\n",
+          "stderr": ""
+        },
+        "target": 0
+      },
+      {
+        "name": "shared store RHS",
+        "index": 7,
+        "go": {
+          "exit": 0,
+          "stdout": "semantics ok: main.fy (typed HIR: 5 function(s))\n",
+          "stderr": ""
+        },
+        "candidate": {
+          "exit": 0,
+          "stdout": "return origins ok\n",
+          "stderr": ""
+        },
+        "target": 0
+      },
+      {
+        "name": "struct local",
+        "index": 8,
+        "go": {
+          "exit": 0,
+          "stdout": "semantics ok: main.fy (typed HIR: 4 function(s))\n",
+          "stderr": ""
+        },
+        "candidate": {
+          "exit": 0,
+          "stdout": "return origins ok\n",
+          "stderr": ""
+        },
+        "target": 3
+      },
+      {
+        "name": "struct parameter",
+        "index": 9,
+        "go": {
+          "exit": 0,
+          "stdout": "semantics ok: main.fy (typed HIR: 4 function(s))\n",
+          "stderr": ""
+        },
+        "candidate": {
+          "exit": 0,
+          "stdout": "return origins ok\n",
+          "stderr": ""
+        },
+        "target": 3
+      },
+      {
+        "name": "struct shared",
+        "index": 10,
+        "go": {
+          "exit": 0,
+          "stdout": "semantics ok: main.fy (typed HIR: 4 function(s))\n",
+          "stderr": ""
+        },
+        "candidate": {
+          "exit": 0,
+          "stdout": "return origins ok\n",
+          "stderr": ""
+        },
+        "target": 0
+      },
+      {
+        "name": "index local",
+        "index": 11,
+        "go": {
+          "exit": 0,
+          "stdout": "semantics ok: main.fy (typed HIR: 5 function(s))\n",
+          "stderr": ""
+        },
+        "candidate": {
+          "exit": 0,
+          "stdout": "return origins ok\n",
+          "stderr": ""
+        },
+        "target": 3
+      },
+      {
+        "name": "index parameter",
+        "index": 12,
+        "go": {
+          "exit": 0,
+          "stdout": "semantics ok: main.fy (typed HIR: 5 function(s))\n",
+          "stderr": ""
+        },
+        "candidate": {
+          "exit": 0,
+          "stdout": "return origins ok\n",
+          "stderr": ""
+        },
+        "target": 3
+      },
+      {
+        "name": "index shared",
+        "index": 13,
+        "go": {
+          "exit": 0,
+          "stdout": "semantics ok: main.fy (typed HIR: 5 function(s))\n",
+          "stderr": ""
+        },
+        "candidate": {
+          "exit": 0,
+          "stdout": "return origins ok\n",
+          "stderr": ""
+        },
+        "target": 0
+      },
+      {
+        "name": "len metadata",
+        "index": 14,
+        "go": {
+          "exit": 0,
+          "stdout": "semantics ok: main.fy (typed HIR: 5 function(s))\n",
+          "stderr": ""
+        },
+        "candidate": {
+          "exit": 0,
+          "stdout": "return origins ok\n",
+          "stderr": ""
+        },
+        "target": 0
+      },
+      {
+        "name": "index receiver mutation",
+        "index": 15,
+        "go": {
+          "exit": 3,
+          "stdout": "",
+          "stderr": "main.fy:1:197: E2101: Access conflicts with an active shared or mutable loan. [bytes 196..197]\n  last-use: main.fy:1:197 [bytes 196..197]\n  loan: main.fy:1:189 [bytes 188..202]\n"
+        },
+        "candidate": {
+          "exit": 3,
+          "stdout": "",
+          "stderr": "main.fy:1:197: error: E2101 borrow conflicts with live loan (bytes 196..197)\n  loan: main.fy (bytes 188..202)\n  last-use: main.fy (bytes 196..197)\n"
+        },
+        "target": 3
+      },
+      {
+        "name": "index RHS read",
+        "index": 16,
+        "go": {
+          "exit": 0,
+          "stdout": "semantics ok: main.fy (typed HIR: 5 function(s))\n",
+          "stderr": ""
+        },
+        "candidate": {
+          "exit": 0,
+          "stdout": "return origins ok\n",
+          "stderr": ""
+        },
+        "target": 0
+      },
+      {
+        "name": "parameter borrowed field",
+        "index": 17,
+        "go": {
+          "exit": 0,
+          "stdout": "semantics ok: main.fy (typed HIR: 4 function(s))\n",
+          "stderr": ""
+        },
+        "candidate": {
+          "exit": 0,
+          "stdout": "return origins ok\n",
+          "stderr": ""
+        },
+        "target": 0
+      },
+      {
+        "name": "scalar alias",
+        "index": 18,
+        "go": {
+          "exit": 0,
+          "stdout": "semantics ok: main.fy (typed HIR: 5 function(s))\n",
+          "stderr": ""
+        },
+        "candidate": {
+          "exit": 0,
+          "stdout": "return origins ok\n",
+          "stderr": ""
+        },
+        "target": 3
+      },
+      {
+        "name": "scalar groups",
+        "index": 19,
+        "go": {
+          "exit": 0,
+          "stdout": "semantics ok: main.fy (typed HIR: 5 function(s))\n",
+          "stderr": ""
+        },
+        "candidate": {
+          "exit": 0,
+          "stdout": "return origins ok\n",
+          "stderr": ""
+        },
+        "target": 3
+      },
+      {
+        "name": "field named len",
+        "index": 20,
+        "go": {
+          "exit": 0,
+          "stdout": "semantics ok: main.fy (typed HIR: 2 function(s))\n",
+          "stderr": ""
+        },
+        "candidate": {
+          "exit": 0,
+          "stdout": "return origins ok\n",
+          "stderr": ""
+        },
+        "target": 3
+      },
+      {
+        "name": "earlier scalar read",
+        "index": 21,
+        "go": {
+          "exit": 0,
+          "stdout": "semantics ok: main.fy (typed HIR: 6 function(s))\n",
+          "stderr": ""
+        },
+        "candidate": {
+          "exit": 0,
+          "stdout": "return origins ok\n",
+          "stderr": ""
+        },
+        "target": 0
+      },
+      {
+        "name": "unrelated scalar",
+        "index": 22,
+        "go": {
+          "exit": 0,
+          "stdout": "semantics ok: main.fy (typed HIR: 5 function(s))\n",
+          "stderr": ""
+        },
+        "candidate": {
+          "exit": 0,
+          "stdout": "return origins ok\n",
+          "stderr": ""
+        },
+        "target": 0
+      },
+      {
+        "name": "descriptor copy",
+        "index": 23,
+        "go": {
+          "exit": 0,
+          "stdout": "semantics ok: main.fy (typed HIR: 5 function(s))\n",
+          "stderr": ""
+        },
+        "candidate": {
+          "exit": 0,
+          "stdout": "return origins ok\n",
+          "stderr": ""
+        },
+        "target": 0
+      }
+    ]
+  },
+  "fixtures": [
+    {
+      "index": 0,
+      "name": "scalar local",
+      "source": "module main;fn void take(ref mut i32 p,i32 n){}fn void share(ref i32 p,i32 n){}fn void edit(ref mut i32 p){*p=2;}fn i32 read(ref i32 p){return *p;}fn void f(){var i32 x=1;let ref mut i32 p=ref mut x;take(p,*p);}",
+      "provider": "",
+      "expected": 3,
+      "reference": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:1:207: E2101: Access conflicts with an active shared or mutable loan. [bytes 206..208]\n  last-use: main.fy:1:208 [bytes 207..208]\n  loan: main.fy:1:205 [bytes 204..205]\n"
+      }
+    },
+    {
+      "index": 1,
+      "name": "scalar parameter",
+      "source": "module main;fn void take(ref mut i32 p,i32 n){}fn void share(ref i32 p,i32 n){}fn void edit(ref mut i32 p){*p=2;}fn i32 read(ref i32 p){return *p;}fn void f(ref mut i32 p){take(p,*p);}",
+      "provider": "",
+      "expected": 3,
+      "reference": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:1:180: E2101: Access conflicts with an active shared or mutable loan. [bytes 179..181]\n  last-use: main.fy:1:181 [bytes 180..181]\n  loan: main.fy:1:178 [bytes 177..178]\n"
+      }
+    },
+    {
+      "index": 2,
+      "name": "shared scalar",
+      "source": "module main;fn void take(ref mut i32 p,i32 n){}fn void share(ref i32 p,i32 n){}fn void edit(ref mut i32 p){*p=2;}fn i32 read(ref i32 p){return *p;}fn void f(ref mut i32 p){share(p,*p);}",
+      "provider": "",
+      "expected": 0,
+      "reference": {
+        "exit": 0,
+        "stdout": "semantics ok: main.fy (typed HIR: 5 function(s))\n",
+        "stderr": ""
+      }
+    },
+    {
+      "index": 3,
+      "name": "nested argument write",
+      "source": "module main;fn void take(ref mut i32 p,i32 n){}fn void share(ref i32 p,i32 n){}fn void edit(ref mut i32 p){*p=2;}fn i32 read(ref i32 p){return *p;}fn void f(ref mut i32 p){take(p,{*p=2;0});}",
+      "provider": "",
+      "expected": 3,
+      "reference": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:1:181: E2101: Access conflicts with an active shared or mutable loan. [bytes 180..182]\n  last-use: main.fy:1:182 [bytes 181..182]\n  loan: main.fy:1:178 [bytes 177..178]\n"
+      }
+    },
+    {
+      "index": 4,
+      "name": "nested shared write",
+      "source": "module main;fn void take(ref mut i32 p,i32 n){}fn void share(ref i32 p,i32 n){}fn void edit(ref mut i32 p){*p=2;}fn i32 read(ref i32 p){return *p;}fn void f(ref mut i32 p){share(p,{*p=2;0});}",
+      "provider": "",
+      "expected": 3,
+      "reference": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:1:182: E2101: Access conflicts with an active shared or mutable loan. [bytes 181..183]\n  last-use: main.fy:1:183 [bytes 182..183]\n  loan: main.fy:1:179 [bytes 178..179]\n"
+      }
+    },
+    {
+      "index": 5,
+      "name": "scalar ends",
+      "source": "module main;fn void take(ref mut i32 p,i32 n){}fn void share(ref i32 p,i32 n){}fn void edit(ref mut i32 p){*p=2;}fn i32 read(ref i32 p){return *p;}fn void f(ref mut i32 p){take(p,0);discard *p;}",
+      "provider": "",
+      "expected": 0,
+      "reference": {
+        "exit": 0,
+        "stdout": "semantics ok: main.fy (typed HIR: 5 function(s))\n",
+        "stderr": ""
+      }
+    },
+    {
+      "index": 6,
+      "name": "store RHS read",
+      "source": "module main;fn void take(ref mut i32 p,i32 n){}fn void share(ref i32 p,i32 n){}fn void edit(ref mut i32 p){*p=2;}fn i32 read(ref i32 p){return *p;}fn void f(ref mut i32 p){*p=*p+1;}",
+      "provider": "",
+      "expected": 0,
+      "reference": {
+        "exit": 0,
+        "stdout": "semantics ok: main.fy (typed HIR: 5 function(s))\n",
+        "stderr": ""
+      }
+    },
+    {
+      "index": 7,
+      "name": "shared store RHS",
+      "source": "module main;fn void take(ref mut i32 p,i32 n){}fn void share(ref i32 p,i32 n){}fn void edit(ref mut i32 p){*p=2;}fn i32 read(ref i32 p){return *p;}fn void f(ref mut i32 p){*p=read(p);}",
+      "provider": "",
+      "expected": 0,
+      "reference": {
+        "exit": 0,
+        "stdout": "semantics ok: main.fy (typed HIR: 5 function(s))\n",
+        "stderr": ""
+      }
+    },
+    {
+      "index": 8,
+      "name": "struct local",
+      "source": "module main;struct S{i32 x;}fn void take(ref mut S p,i32 n){}fn void share(ref S p,i32 n){}fn void edit(ref mut S p){p.x=2;}fn void f(){var S x=S{.x=1};let ref mut S p=ref mut x;take(p,p.x);}",
+      "provider": "",
+      "expected": 3,
+      "reference": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:1:186: E2101: Access conflicts with an active shared or mutable loan. [bytes 185..188]\n  last-use: main.fy:1:186 [bytes 185..186]\n  loan: main.fy:1:184 [bytes 183..184]\n"
+      }
+    },
+    {
+      "index": 9,
+      "name": "struct parameter",
+      "source": "module main;struct S{i32 x;}fn void take(ref mut S p,i32 n){}fn void share(ref S p,i32 n){}fn void edit(ref mut S p){p.x=2;}fn void f(ref mut S p){take(p,p.x);}",
+      "provider": "",
+      "expected": 3,
+      "reference": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:1:155: E2101: Access conflicts with an active shared or mutable loan. [bytes 154..157]\n  last-use: main.fy:1:155 [bytes 154..155]\n  loan: main.fy:1:153 [bytes 152..153]\n"
+      }
+    },
+    {
+      "index": 10,
+      "name": "struct shared",
+      "source": "module main;struct S{i32 x;}fn void take(ref mut S p,i32 n){}fn void share(ref S p,i32 n){}fn void edit(ref mut S p){p.x=2;}fn void f(ref mut S p){share(p,p.x);}",
+      "provider": "",
+      "expected": 0,
+      "reference": {
+        "exit": 0,
+        "stdout": "semantics ok: main.fy (typed HIR: 4 function(s))\n",
+        "stderr": ""
+      }
+    },
+    {
+      "index": 11,
+      "name": "index local",
+      "source": "module main;fn void take(ref mut u8[] p,u8 n){}fn void share(ref u8[] p,u8 n){}fn void edit(ref mut u8[] p){p[0]=2;}fn void size(ref mut u8[] p,usize n){}fn void f(){var u8[2] x=[1,2];let ref mut u8[] p=ref mut x;take(p,p[0]);}",
+      "provider": "",
+      "expected": 3,
+      "reference": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:1:221: E2101: Access conflicts with an active shared or mutable loan. [bytes 220..224]\n  last-use: main.fy:1:221 [bytes 220..221]\n  loan: main.fy:1:219 [bytes 218..219]\n"
+      }
+    },
+    {
+      "index": 12,
+      "name": "index parameter",
+      "source": "module main;fn void take(ref mut u8[] p,u8 n){}fn void share(ref u8[] p,u8 n){}fn void edit(ref mut u8[] p){p[0]=2;}fn void size(ref mut u8[] p,usize n){}fn void f(ref mut u8[] p){take(p,p[0]);}",
+      "provider": "",
+      "expected": 3,
+      "reference": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:1:188: E2101: Access conflicts with an active shared or mutable loan. [bytes 187..191]\n  last-use: main.fy:1:188 [bytes 187..188]\n  loan: main.fy:1:186 [bytes 185..186]\n"
+      }
+    },
+    {
+      "index": 13,
+      "name": "index shared",
+      "source": "module main;fn void take(ref mut u8[] p,u8 n){}fn void share(ref u8[] p,u8 n){}fn void edit(ref mut u8[] p){p[0]=2;}fn void size(ref mut u8[] p,usize n){}fn void f(ref mut u8[] p){share(p,p[0]);}",
+      "provider": "",
+      "expected": 0,
+      "reference": {
+        "exit": 0,
+        "stdout": "semantics ok: main.fy (typed HIR: 5 function(s))\n",
+        "stderr": ""
+      }
+    },
+    {
+      "index": 14,
+      "name": "len metadata",
+      "source": "module main;fn void take(ref mut u8[] p,u8 n){}fn void share(ref u8[] p,u8 n){}fn void edit(ref mut u8[] p){p[0]=2;}fn void size(ref mut u8[] p,usize n){}fn void f(ref mut u8[] p){size(p,p.len);}",
+      "provider": "",
+      "expected": 0,
+      "reference": {
+        "exit": 0,
+        "stdout": "semantics ok: main.fy (typed HIR: 5 function(s))\n",
+        "stderr": ""
+      }
+    },
+    {
+      "index": 15,
+      "name": "index receiver mutation",
+      "source": "module main;fn void take(ref mut u8[] p,u8 n){}fn void share(ref u8[] p,u8 n){}fn void edit(ref mut u8[] p){p[0]=2;}fn void size(ref mut u8[] p,usize n){}fn void f(ref mut u8[] p){discard p[{edit(p);0}];}",
+      "provider": "",
+      "expected": 3,
+      "reference": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:1:197: E2101: Access conflicts with an active shared or mutable loan. [bytes 196..197]\n  last-use: main.fy:1:197 [bytes 196..197]\n  loan: main.fy:1:189 [bytes 188..202]\n"
+      }
+    },
+    {
+      "index": 16,
+      "name": "index RHS read",
+      "source": "module main;fn void take(ref mut u8[] p,u8 n){}fn void share(ref u8[] p,u8 n){}fn void edit(ref mut u8[] p){p[0]=2;}fn void size(ref mut u8[] p,usize n){}fn void f(ref mut u8[] p){p[0]=p[1];}",
+      "provider": "",
+      "expected": 0,
+      "reference": {
+        "exit": 0,
+        "stdout": "semantics ok: main.fy (typed HIR: 5 function(s))\n",
+        "stderr": ""
+      }
+    },
+    {
+      "index": 17,
+      "name": "parameter borrowed field",
+      "source": "module main;struct S{i32 x;}fn void take(ref mut S p,i32 n){}fn void share(ref S p,i32 n){}fn void edit(ref mut S p){p.x=2;}fn void f(ref mut S p){let ref i32 q=ref p.x;discard p.x;discard *q;}",
+      "provider": "",
+      "expected": 0,
+      "reference": {
+        "exit": 0,
+        "stdout": "semantics ok: main.fy (typed HIR: 4 function(s))\n",
+        "stderr": ""
+      }
+    },
+    {
+      "index": 18,
+      "name": "scalar alias",
+      "source": "module main;fn void take(ref mut i32 p,i32 n){}fn void share(ref i32 p,i32 n){}fn void edit(ref mut i32 p){*p=2;}fn i32 read(ref i32 p){return *p;}fn void f(ref mut i32 p){let ref mut i32 q=p;take(p,*q);}",
+      "provider": "",
+      "expected": 3,
+      "reference": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:1:200: E2101: Access conflicts with an active shared or mutable loan. [bytes 199..201]\n  last-use: main.fy:1:201 [bytes 200..201]\n  loan: main.fy:1:198 [bytes 197..198]\n"
+      }
+    },
+    {
+      "index": 19,
+      "name": "scalar groups",
+      "source": "module main;fn void take(ref mut i32 p,i32 n){}fn void share(ref i32 p,i32 n){}fn void edit(ref mut i32 p){*p=2;}fn i32 read(ref i32 p){return *p;}fn void f(ref mut i32 p){take((p),*((p)));}",
+      "provider": "",
+      "expected": 3,
+      "reference": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:1:182: E2101: Access conflicts with an active shared or mutable loan. [bytes 181..187]\n  last-use: main.fy:1:183 [bytes 182..187]\n  loan: main.fy:1:178 [bytes 177..180]\n"
+      }
+    },
+    {
+      "index": 20,
+      "name": "field named len",
+      "source": "module main;struct S{usize len;}fn void take(ref mut S p,usize n){}fn void f(ref mut S p){take(p,p.len);}",
+      "provider": "",
+      "expected": 3,
+      "reference": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:1:98: E2101: Access conflicts with an active shared or mutable loan. [bytes 97..102]\n  last-use: main.fy:1:98 [bytes 97..98]\n  loan: main.fy:1:96 [bytes 95..96]\n"
+      }
+    },
+    {
+      "index": 21,
+      "name": "earlier scalar read",
+      "source": "module main;fn void take(ref mut i32 p,i32 n){}fn void share(ref i32 p,i32 n){}fn void edit(ref mut i32 p){*p=2;}fn i32 read(ref i32 p){return *p;}fn void reversed(i32 n,ref mut i32 p){}fn void f(ref mut i32 p){reversed(*p,p);}",
+      "provider": "",
+      "expected": 0,
+      "reference": {
+        "exit": 0,
+        "stdout": "semantics ok: main.fy (typed HIR: 6 function(s))\n",
+        "stderr": ""
+      }
+    },
+    {
+      "index": 22,
+      "name": "unrelated scalar",
+      "source": "module main;fn void take(ref mut i32 p,i32 n){}fn void share(ref i32 p,i32 n){}fn void edit(ref mut i32 p){*p=2;}fn i32 read(ref i32 p){return *p;}fn void f(ref mut i32 p,ref i32 q){take(p,*q);}",
+      "provider": "",
+      "expected": 0,
+      "reference": {
+        "exit": 0,
+        "stdout": "semantics ok: main.fy (typed HIR: 5 function(s))\n",
+        "stderr": ""
+      }
+    },
+    {
+      "index": 23,
+      "name": "descriptor copy",
+      "source": "module main;fn void take(ref mut i32 p,i32 n){}fn void share(ref i32 p,i32 n){}fn void edit(ref mut i32 p){*p=2;}fn i32 read(ref i32 p){return *p;}fn void f(ref mut i32 p){take(p,{let ref mut i32 q=p;0});}",
+      "provider": "",
+      "expected": 0,
+      "reference": {
+        "exit": 0,
+        "stdout": "semantics ok: main.fy (typed HIR: 5 function(s))\n",
+        "stderr": ""
+      }
+    }
+  ],
+  "validation": {
+    "semanticPackage": {
+      "passed": true,
+      "selectedCases": 21,
+      "receipt": {
+        "path": ".cache/candidate-tagged/referent-read-unit/reference-full.jsonl",
+        "sha256": "52a06664d0410bbd45fe78ac6f2341f60a565ab501288ffb43e96002ee9ec689"
+      }
+    },
+    "compilerRoots": [
+      "TestArrayElementBorrowRoundTrip",
+      "TestExclusiveSubviewArtifactAndInterpreter",
+      "TestFieldStoreScalarDerefLowersWithoutTargetRead",
+      "TestNestedFieldStoreReferenceSelection",
+      "TestSharedMutableFieldBorrowRoundTrip"
+    ],
+    "compilerReceipt": {
+      "path": ".cache/candidate-tagged/referent-read-unit/compiler-selected.jsonl",
+      "sha256": "994387ce216cb5195ec3eeefe29c78365dd7c18b486f5b5f7fec4237ad0c8695"
+    },
+    "freshCLI": {
+      "cases": 24,
+      "newReadRejections": 9,
+      "existingWriteRejections": 3
+    }
+  },
+  "candidateSourceRejections": {
+    "count": 39,
+    "files": [
+      "bodies.fy",
+      "body_state.fy",
+      "module_unit_name_walk.fy",
+      "module_unit_origin_flow_model.fy",
+      "result_flow_graph.fy"
+    ],
+    "reason": "Existing calls borrow a mutable reference argument before reading that referent in a later argument. Prepare value snapshots before the exclusive argument, or place pure value arguments before mutable descriptor arguments.",
+    "receipt": {
+      "path": ".cache/candidate-tagged/referent-read-unit/candidate-source-check.txt",
+      "sha256": "b545d12108277d2c378b92a57c09d3fa918cf836ee9d443ef801f42fd90b259e"
+    }
+  },
+  "pending": [
+    "Correct the 39 existing candidate-source calls before rebuilding.",
+    "Port the referent-read checks into Fairy and prove complete diagnostic parity.",
+    "General move state, cleanup, borrow MIR/C/runtime, unsafe provenance and full dispatcher self-hosting."
+  ],
+  "skipped": {
+    "fullCompiler": "Five relevant MIR/interpreter integration roots selected; full compiler suite not repeated.",
+    "candidateBuild": "Current Fairy source has the recorded new invalid calls; corrective source unit follows.",
+    "Linux": "Deferred consolidated batch."
+  },
+  "stableCLIAcceptanceChanged": true,
+  "publicAPIChanged": false,
+  "sdkABIChanged": false,
+  "dbChanged": false,
+  "ciRunnerChanged": false,
+  "pushed": false
+}

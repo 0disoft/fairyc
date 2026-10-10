@@ -3707,3 +3707,21 @@ general move state, cleanup, borrow MIR/C/runtime, unsafe provenance, full
 dispatcher and stage1/stage2 still require implementation. Full candidate
 release and Linux remain deferred. No normative language documents, public
 CLI/API, SDK ABI, DB or CI runner configuration changed; no push.
+
+## Go held referent-read correction (2026-10-10)
+
+Earlier exclusive call arguments now forbid later scalar dereference, record
+field and borrowed-index reads through the same referent or its aliases.
+Previously Go and Fairy both accepted nine invalid cases. Descriptor copies,
+view length metadata, reads evaluated before the exclusive argument and ordinary
+selected-store RHS reads remain admitted. Pure place selection stays separate.
+
+The complete Go semantic package passes, including 21 selected read boundaries
+and exact primary/loan/last-use coordinates. Five selected MIR/interpreter
+integration roots and 24 fresh reference CLI fixtures pass. Evidence:
+`docs/ops/evidence/candidate-reference-held-referent-read-20261010.json`.
+The corrected compiler exposes 39 existing candidate-source argument reads in
+five files. Preparing values before passing mutable descriptors is the next
+source correction; candidate guard wiring follows. The candidate was not
+rebuilt with these invalid calls. General moved-owner state, cleanup, borrow
+MIR/C/runtime and dispatcher self-hosting remain pending. No push.

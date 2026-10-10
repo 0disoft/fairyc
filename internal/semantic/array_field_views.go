@@ -104,7 +104,7 @@ func (f *borrowFlowAnalyzer) evaluateArrayFieldStore(statement *ast.Statement, e
 	base, accessBase := len(f.callBorrows), len(f.callAccesses)
 	priorBorrow, priorLastUse := f.assignmentBorrow, f.assignmentLastUse
 	f.callBorrows = append(f.callBorrows, held)
-	f.callAccesses = append(f.callAccesses, borrowCallAccess{value: held, mutable: true, span: span(f.module.file.Path, statement.Target.Span)})
+	f.callAccesses = append(f.callAccesses, borrowCallAccess{value: held, mutable: true, store: true, span: span(f.module.file.Path, statement.Target.Span)})
 	f.assignmentBorrow = &held
 	f.assignmentLastUse = span(f.module.file.Path, statement.Target.Span)
 	defer func() {
