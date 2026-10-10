@@ -15,6 +15,8 @@ driver = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(driver)
 
 CASES = {
+    "root_only_transitive_imports_keep_owned_identity":
+        ([], [], ""),
     "sdk_c_executes_process_arguments_through_exact_result_bridge":
         (["stage0_windows_process_args.c"], ["abc", "λ"], ""),
     "sdk_c_executes_arena_factory_switch_and_owned_cleanup":
@@ -30,7 +32,7 @@ CASES = {
     "sdk_c_executes_region_storage_or_tracking_failure_as_result":
         (["stage0_system_heap.c", "stage0_arena.c"], [], "B,7,S,"),
 }
-PROOFS = {"sdk_c_plan_respects_work_budget_before_authority_or_output",
+PROOFS = {"rejected_import_expansion_rolls_back_borrow_types","sdk_c_plan_respects_work_budget_before_authority_or_output",
           "sdk_c_region_plan_respects_placement_budget_before_output"}
 
 
@@ -48,7 +50,7 @@ def main():
         report = json.loads(raw)
         assert report["engine"] == "native" and report["target"] == "x86_64-windows-msvc"
         for test in report["tests"]:
-            prefix = "tests::module_unit_c_sdk::"
+            prefix = "tests::module_unit_imports::" if test["identity"].startswith("tests::module_unit_imports::") else "tests::module_unit_c_sdk::"
             if test["identity"].startswith(prefix):
                 name = test["identity"].removeprefix(prefix)
                 if name in CASES or name in PROOFS:

@@ -24,7 +24,7 @@ fn syntax::Parsed parsed(ref u8[] text){let b=switch(bytes::copy(text)){case .ok
 @effects(console) fn void error(u32 code,usize start,usize end){discard io::write_u32(code);discard io::write(" at ");discard io::write_usize(start);discard io::write("..");discard io::write_usize(end);discard io::write("\n");assert(false);}
 @effects(console) fn ir::Program retained(ref u8[] root,ref u8[] provider){var v::Vec<syntax::Parsed> sources=v::empty<syntax::Parsed>();assert(v::push<syntax::Parsed>(ref mut sources,parsed(root)).is_ok && v::push<syntax::Parsed>(ref mut sources,parsed(provider)).is_ok);
     let metadata=switch(signatures::build(ref sources)){case .ok(p):{p}case .err(e):{error(e.code,e.start,e.end);return retained(root,provider);}};
-    let bound=switch(binding::bind(ref sources,ref metadata,0,2)){case .ok(p):{p}case .err(e):{error(e.code,e.start,e.end);return retained(root,provider);}};
+    let bound=switch(binding::bind(ref sources,ref metadata,0,1)){case .ok(p):{p}case .err(e):{error(e.code,e.start,e.end);return retained(root,provider);}};
     let ready=switch(closure::build(ref sources,ref metadata,ref bound)){case .ok(p):{p}case .err(e):{error(e.code,e.start,e.end);return retained(root,provider);}};
     let typed=switch(values::build(ref sources,ref metadata,ref ready)){case .ok(p):{p}case .err(e):{discard io::write("values ");error(e.code,e.start,e.end);return retained(root,provider);}};
     let moved=switch(moves::build(ref sources,ref typed,values::work(ref typed))){case .ok(p):{p}case .err(e):{error(e.code,e.start,e.end);return retained(root,provider);}};

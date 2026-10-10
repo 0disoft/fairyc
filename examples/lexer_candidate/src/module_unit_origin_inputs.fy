@@ -75,7 +75,9 @@ fn m::Problem append(ref values::Plan unit,usize unit_id,ref mut v::Vec<Frame> f
 }
 fn Result<usize,m::Problem> find(ref v::Vec<Frame> frames,Frame caller,m::Invocation call,ref mut usize work){
     var usize i=0;while(i<v::len<Frame>(frames)){if(!m::charge(work,1)){return .err(fail(caller.value,10,call.start,call.end));}let f=*v::at<Frame>(frames,i);if(call.kind==2){if(f.unit==caller.unit && f.value.kind==1 && f.value.context==call.instance && f.value.module_index==call.target_module && f.value.declaration==call.target_declaration){return .ok(i+1);}}
-        else if(call.kind==1 && f.value.kind==3 && f.value.module_index==call.target_module && f.value.declaration==call.target_declaration){return .ok(i+1);}i+=1;
+        // Imported ordinary bodies share the concrete owned lane; call kind 1
+        // still names an exact non-template source declaration.
+        else if(call.kind==1 && (f.value.kind==3 || f.value.kind==1) && f.value.module_index==call.target_module && f.value.declaration==call.target_declaration){return .ok(i+1);}i+=1;
     }return .ok(0);
 }
 fn Result<values::Plan,m::Problem> provider(ref v::Vec<syntax::Parsed> sources,ref signatures::Program metadata,usize module_index){
