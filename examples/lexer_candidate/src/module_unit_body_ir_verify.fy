@@ -10,6 +10,9 @@ import module_unit_cleanup_mir_model as clean_ir;
 import module_unit_cleanup_mir_verify as cleaning;
 import module_unit_value_model as budget;
 import module_unit_value_place as places;
+import module_unit_value_builtin as builtins;
+import pointer_types as pointers;
+import raw_view_intrinsics as raw;
 import std::bytes as bytes;
 import std::vec as v;
 
@@ -34,6 +37,15 @@ pub fn clean_ir::Problem check_casts(ref ir::Program p,ref ir::Body b,usize fram
             if(places::opaque(target)){var usize root=left;var usize depth=0;while(ir::node_at(b,root-1).value.kind==3){if(depth>=64 || !budget::charge(work,1)){return fail(1002,f.module_index,e.start,e.end);}root=lookup::node(b,ir::node_at(b,root-1).value.left);if(root==0){return fail(1001,f.module_index,e.start,e.end);}depth+=1;}let operand=ir::node_at(b,root-1).value;let owner=lookup::node(b,operand.left);if(!(operand.kind==2 && operand.binding!=0 || (operand.kind==21 || operand.kind==22) && owner!=0 && ir::node_at(b,owner-1).value.kind==2 && ir::node_at(b,owner-1).value.binding!=0)){return fail(1001,f.module_index,e.start,e.end);}}
         }i+=1;
     }return fail(0,0,0,0);
+}
+pub struct RawParts {bool valid;usize owner;usize data;usize length;}
+pub fn RawParts raw_arguments(ref ir::Body b,budget::Expression e,ref mut usize work){var RawParts args=RawParts{.valid=false,.owner=0,.data=0,.length=0};var usize link=e.right;var usize count=0;while(link!=0){if(count>=3 || !budget::charge(work,1)){return args;}let row=lookup::node(b,link);if(row==0){return args;}let pair=ir::node_at(b,row-1).value;let child=lookup::node(b,pair.left);if(pair.kind!=7 || child==0){return args;}if(count==0){args.length=child;}else if(count==1){args.data=child;}else{args.owner=child;}count+=1;link=pair.right;}args.valid=count==3;return args;}
+pub fn clean_ir::Problem check_raw_parts(ref ir::Program p,ref ir::Body b,usize frame,ref mut usize work){let f=clean_ir::frame_at(ir::cleanup_ir(p),frame);var usize i=0;while(i<ir::node_count(b)){if(!budget::charge(work,1)){return fail(1002,f.module_index,0,0);}let e=ir::node_at(b,i).value;
+    if(e.kind==6 && e.builtin.kind>=9 && e.builtin.kind<=12){let callee=lookup::node(b,e.left);let args=raw_arguments(b,e,work);if(e.state!=1 || callee==0 || !e.builtin.unsafe_context || !unsafe_scope(p,b,frame,e,work) || !args.valid){return fail(if(*work>=1048576){1002}else{1001},f.module_index,e.start,e.end);}let target=ir::node_at(b,callee-1).value;
+        if(target.kind!=2 || raw::named(ir::node_text(b,callee-1))!=e.builtin.kind || target.builtin.kind!=e.builtin.kind){return fail(1001,f.module_index,e.start,e.end);}if(ir::node_at(b,args.owner-1).value.state!=1 || ir::node_at(b,args.data-1).value.state!=1 || ir::node_at(b,args.length-1).value.state!=1){return fail(1001,f.module_index,e.start,e.end);}
+        let owner=ir::node_at(b,args.owner-1).value;let data=ir::node_at(b,args.data-1).value;let length=ir::node_at(b,args.length-1).value;let ot=clean_ir::type_at(ir::cleanup_ir(p),owner.type);let dt=clean_ir::type_at(ir::cleanup_ir(p),data.type);let lt=clean_ir::type_at(ir::cleanup_ir(p),length.type);let rt=clean_ir::type_at(ir::cleanup_ir(p),e.type);
+        if(!builtins::borrowed(ot) || builtins::mutable(ot)!=(e.builtin.kind==11) || dt.kind!=12 || dt.first!=0 || (pointers::inner(dt.scalar)!=3 && pointers::inner(dt.scalar)!=7) || e.builtin.kind==11 && !pointers::mutable(dt.scalar) || lt.kind!=1 || lt.scalar!=5 || rt.kind!=if(e.builtin.kind==9){9}else if(e.builtin.kind==10){10}else if(e.builtin.kind==11){11}else{14} || !places::same(e.place,builtins::projected(e,owner.place))){return fail(1001,f.module_index,e.start,e.end);}
+    }i+=1;}return fail(0,0,0,0);
 }
 pub fn clean_ir::Problem check_body(ref ir::Body b,ref clean_ir::Program cleaned,usize frame,ref mut usize work){
     if(frame==0 || frame>clean_ir::frame_count(cleaned)){return fail(1001,0,0,0);}let f=clean_ir::frame_at(cleaned,frame);let nt=clean_ir::type_count(cleaned);
@@ -84,7 +96,7 @@ pub fn clean_ir::Problem check(ref ir::Program p){
         i=0;while(i<ir::field_count(p)){if(!budget::charge(ref mut work,1)){return fail(1002,0,0,0);}if(ir::field_at(p,i).module_index>=modules){return fail(1001,0,0,0);}i+=1;}
         i=0;while(i<ir::callable_count(p)){if(!budget::charge(ref mut work,1)){return fail(1002,0,0,0);}if(ir::callable_at(p,i).module_index>=modules){return fail(1001,0,0,0);}i+=1;}
     }i=1;
-    while(i<=ir::count(p)){let result=check_body(ir::at(p,i),ir::cleanup_ir(p),i,ref mut work);if(result.code!=0){return result;}let casts=check_casts(p,ir::at(p,i),i,ref mut work);if(casts.code!=0){return casts;}i+=1;}
+    while(i<=ir::count(p)){let result=check_body(ir::at(p,i),ir::cleanup_ir(p),i,ref mut work);if(result.code!=0){return result;}let casts=check_casts(p,ir::at(p,i),i,ref mut work);if(casts.code!=0){return casts;}let raw=check_raw_parts(p,ir::at(p,i),i,ref mut work);if(raw.code!=0){return raw;}i+=1;}
     i=0;while(i<ir::layout_count(p)){if(!budget::charge(ref mut work,1)){return fail(1002,0,0,0);}let row=ir::layout_at(p,i);let s=row.value;if(s.type==0 || s.type>nt || s.field_start>ir::field_count(p) || s.field_count>ir::field_count(p)-s.field_start || !span(row.name_start,row.name_end,ir::name_bytes(p))){return fail(1001,s.module_index,s.start,s.end);}let t=clean_ir::type_at(ir::cleanup_ir(p),s.type);if(t.module_index!=s.module_index || t.declaration!=s.declaration){return fail(1001,s.module_index,s.start,s.end);}i+=1;}
     i=0;while(i<ir::field_count(p)){if(!budget::charge(ref mut work,1)){return fail(1002,0,0,0);}let f=ir::field_at(p,i);if(f.type>nt || f.payload_start>ir::field_count(p) || f.payload_count>ir::field_count(p)-f.payload_start || !span(f.name_start,f.name_end,ir::name_bytes(p))){return fail(1001,f.module_index,f.start,f.end);}i+=1;}
     i=0;while(i<ir::callable_count(p)){if(!budget::charge(ref mut work,1)){return fail(1002,0,0,0);}let c=ir::callable_at(p,i);if(c.result>nt || c.parameter_start>ir::parameter_count(p) || c.parameter_count>ir::parameter_count(p)-c.parameter_start || !span(c.link_start,c.link_end,ir::name_bytes(p))){return fail(1001,c.module_index,0,0);}var usize j=0;while(j<c.parameter_count){if(!budget::charge(ref mut work,1)){return fail(1002,c.module_index,0,0);}if(ir::parameter_at(p,c.parameter_start+j)>nt){return fail(1001,c.module_index,0,0);}j+=1;}i+=1;}

@@ -1,0 +1,901 @@
+{
+  "schema": "fairyc.candidate-buffer-c-execution/v1",
+  "passed": true,
+  "parentCommit": "466d0864a08414dd6cfcb78d07c290a6ef623122",
+  "identity": [
+    {
+      "path": "examples/lexer_candidate/src/module_unit_c_buffer.fy",
+      "sha256": "7ff00a330dd6c09544a395b934c6008033378f37771f25d1dc2466000187f4cc"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_unit_c_raw_views.fy",
+      "sha256": "26c806c54c052626c7d8c6b2010a5503b927abb4fdb66a1c4dcd419c848d2b9b"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_unit_body_ir_verify.fy",
+      "sha256": "feb7a24d0021a1f2cb17ad561fe2ae7313c31b1931d9aca0fde9009efd59029c"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_unit_c_sdk.fy",
+      "sha256": "7b5d44064a36361e0b94b17dfc0865864d416a78b60f532b54e101581dc315c5"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_unit_c_emit.fy",
+      "sha256": "3cc29bf4299e727d95b83be7b34f953b1d98f553f774a3b13baefd67ead6e53b"
+    },
+    {
+      "path": "examples/lexer_candidate/tests/module_unit_c_pointers.fy",
+      "sha256": "3bf2933c5013845500284c98772d81f22dee9762f773e031f5d4947503236fe0"
+    },
+    {
+      "path": "examples/lexer_candidate/tests/module_unit_c_sdk.fy",
+      "sha256": "bc9ea1e2cda0b546501f9dbd70845ed9f161e942304871b3abdc30b2dc170dcc"
+    },
+    {
+      "path": "examples/lexer_candidate/fairy.lock",
+      "sha256": "df8ded2a06e6157151e4e498ac8d0b188925d2468abda874ae503389c29a173e"
+    },
+    {
+      "path": "tools/verify-candidate-sdk-c.py",
+      "sha256": "cee2ad75b1a87cf1747b2f3c12a77b9a4e627f4d5c81e35bf2a83bd900823dae"
+    },
+    {
+      "path": ".cache/candidate-tagged/compiler-origin-patterns.exe",
+      "sha256": "d36dae1b99751322e447880aaf4d28321bd6d53bdf776185308c6c4504889bb2"
+    },
+    {
+      "path": "internal/sdkstdlib/sources/std/bytes.fy",
+      "sha256": "4740a506e93349fb002c383967dcc44d182d20f09f2094b83b5464a4ab252982"
+    },
+    {
+      "path": "internal/cstdlib/stage0_system_heap.c",
+      "sha256": "cae6664fa1ec70722b76025c3e2c3daadc133cd90d95fa9f02f2385915d3e55c"
+    },
+    {
+      "path": "internal/cstdlib/stage0_buffer.c",
+      "sha256": "41c7a26acb8b9f22fd5e0f82c976f4b59964df2e2e73e7ddb5fa8bee70e8390c"
+    }
+  ],
+  "sourceCheck": {
+    "argv": [
+      "compiler-origin-patterns.exe",
+      "check",
+      "--locked"
+    ],
+    "exit": 0,
+    "stdout": "check ok: 2 instance(s), 268 source file(s), 3380 MIR function(s), lock verified"
+  },
+  "native": {
+    "reports": [
+      {
+        "identity": {
+          "path": ".cache/candidate-tagged/sdk-c-execution/native-buffer.json",
+          "sha256": "e98b4ec2dcc29c396ecaaacf064c0bee54713fc2b16c4cb3b1f22282447aa4a5"
+        },
+        "summary": {
+          "schemaVersion": "fairyc.test-report/v4",
+          "engine": "native",
+          "target": "x86_64-windows-msvc",
+          "profile": "development",
+          "tests": [
+            {
+              "identity": "tests::module_unit_c_sdk::sdk_c_executes_buffer_growth_failure_preserves_bytes",
+              "outcome": "passed",
+              "trapCategory": null,
+              "stdoutBase64SHA256": "4d28cf125830c28a2dfb0b48463a5cee00362c1b6a096038d192ce0a230ea690",
+              "stderrBase64SHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            {
+              "identity": "tests::module_unit_c_sdk::sdk_c_executes_buffer_initial_allocation_failure",
+              "outcome": "passed",
+              "trapCategory": null,
+              "stdoutBase64SHA256": "0fa84ce80cefda888139074d8701cac55b0bb1faff8d29919f81fcecfbbfd15f",
+              "stderrBase64SHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            {
+              "identity": "tests::module_unit_c_sdk::sdk_c_executes_buffer_owned_views_and_cleanup",
+              "outcome": "passed",
+              "trapCategory": null,
+              "stdoutBase64SHA256": "d4f765d451d42bfae961e583a34fe5f49cadf6408badd9bb8f375a057244a276",
+              "stderrBase64SHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            }
+          ],
+          "count": 3,
+          "passed": 3,
+          "failed": 0,
+          "status": "ok",
+          "lock": "verified"
+        }
+      },
+      {
+        "identity": {
+          "path": ".cache/candidate-tagged/sdk-c-execution/native-buffer-views.json",
+          "sha256": "cf18602ce254c439f4b515da21b61cb99b10c36f7c317e76ea0352c40143468b"
+        },
+        "summary": {
+          "schemaVersion": "fairyc.test-report/v4",
+          "engine": "native",
+          "target": "x86_64-windows-msvc",
+          "profile": "development",
+          "tests": [
+            {
+              "identity": "tests::module_unit_c_pointers::pointer_c_executes_owned_raw_parts_and_zero_extent",
+              "outcome": "passed",
+              "trapCategory": null,
+              "stdoutBase64SHA256": "dbb7a01c8adda2713c5cfd807bf6f832b500ccbf0f739f809675b45e3df73320",
+              "stderrBase64SHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            {
+              "identity": "tests::module_unit_c_pointers::pointer_c_rejects_forged_raw_view_metadata",
+              "outcome": "passed",
+              "trapCategory": null,
+              "stdoutBase64SHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "stderrBase64SHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            {
+              "identity": "tests::module_unit_c_pointers::pointer_c_rejects_unverified_nominal_abi_and_forged_unsafe_casts",
+              "outcome": "passed",
+              "trapCategory": null,
+              "stdoutBase64SHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "stderrBase64SHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            }
+          ],
+          "count": 3,
+          "passed": 3,
+          "failed": 0,
+          "status": "ok",
+          "lock": "verified"
+        }
+      },
+      {
+        "identity": {
+          "path": ".cache/candidate-tagged/sdk-c-execution/native-buffer-regressions.json",
+          "sha256": "6f91578cf2691dd4322d882837ed5bdea0b3f2d5019f1aea16fc525d0284d23c"
+        },
+        "summary": {
+          "schemaVersion": "fairyc.test-report/v4",
+          "engine": "native",
+          "target": "x86_64-windows-msvc",
+          "profile": "development",
+          "tests": [
+            {
+              "identity": "tests::module_unit_c_sdk::sdk_c_executes_arena_factory_switch_and_owned_cleanup",
+              "outcome": "passed",
+              "trapCategory": null,
+              "stdoutBase64SHA256": "3659a0091c1ca60630079684ac05ae7dcaa598508526ffcd17cc7ff7785ad1b0",
+              "stderrBase64SHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            {
+              "identity": "tests::module_unit_c_sdk::sdk_c_plan_respects_work_budget_before_authority_or_output",
+              "outcome": "passed",
+              "trapCategory": null,
+              "stdoutBase64SHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "stderrBase64SHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            {
+              "identity": "tests::module_unit_c_sdk::sdk_c_region_plan_respects_placement_budget_before_output",
+              "outcome": "passed",
+              "trapCategory": null,
+              "stdoutBase64SHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "stderrBase64SHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            }
+          ],
+          "count": 3,
+          "passed": 3,
+          "failed": 0,
+          "status": "ok",
+          "lock": "verified"
+        }
+      }
+    ],
+    "finalOutcomes": {
+      "tests::module_unit_c_sdk::sdk_c_executes_buffer_growth_failure_preserves_bytes": "passed",
+      "tests::module_unit_c_sdk::sdk_c_executes_buffer_initial_allocation_failure": "passed",
+      "tests::module_unit_c_sdk::sdk_c_executes_buffer_owned_views_and_cleanup": "passed",
+      "tests::module_unit_c_pointers::pointer_c_executes_owned_raw_parts_and_zero_extent": "passed",
+      "tests::module_unit_c_pointers::pointer_c_rejects_forged_raw_view_metadata": "passed",
+      "tests::module_unit_c_pointers::pointer_c_rejects_unverified_nominal_abi_and_forged_unsafe_casts": "passed",
+      "tests::module_unit_c_sdk::sdk_c_executes_arena_factory_switch_and_owned_cleanup": "passed",
+      "tests::module_unit_c_sdk::sdk_c_plan_respects_work_budget_before_authority_or_output": "passed",
+      "tests::module_unit_c_sdk::sdk_c_region_plan_respects_placement_budget_before_output": "passed"
+    }
+  },
+  "CExecution": [
+    {
+      "schema": "fairyc.candidate-sdk-c-execution/v1",
+      "passed": true,
+      "reports": [
+        {
+          "path": ".cache\\candidate-tagged\\sdk-c-execution\\native-imports-final.json",
+          "sha256": "d808fa6677f514abcf709360fb602a895cdb0f4c7ec75c96e7a7f6ecadc199cc"
+        },
+        {
+          "path": ".cache\\candidate-tagged\\sdk-c-execution\\native-import-rollback.json",
+          "sha256": "6f87d8bb991fdfdd58e25ef2d54b86a4455591e4b9e6c6839a70417c1b0f1747"
+        },
+        {
+          "path": ".cache\\candidate-tagged\\sdk-c-execution\\native-buffer.json",
+          "sha256": "e98b4ec2dcc29c396ecaaacf064c0bee54713fc2b16c4cb3b1f22282447aa4a5"
+        },
+        {
+          "path": ".cache\\candidate-tagged\\sdk-c-execution\\native-buffer-views.json",
+          "sha256": "cf18602ce254c439f4b515da21b61cb99b10c36f7c317e76ea0352c40143468b"
+        }
+      ],
+      "executions": [
+        {
+          "name": "sdk_c_executes_buffer_owned_views_and_cleanup",
+          "profile": "low",
+          "sourceSHA256": "d4f765d451d42bfae961e583a34fe5f49cadf6408badd9bb8f375a057244a276",
+          "stdinBase64": null,
+          "heapFailureAt": null,
+          "heapBalanceVerified": true,
+          "heapCounts": {
+            "attempts": 3,
+            "liveAfter": 0
+          },
+          "bufferCounts": {
+            "drop": 2,
+            "dropStatusErrors": 0
+          },
+          "arenaCounts": null,
+          "regionCounts": null,
+          "runtimeInputs": [
+            {
+              "path": "internal\\cstdlib\\stage0_system_heap.c",
+              "sha256": "cae6664fa1ec70722b76025c3e2c3daadc133cd90d95fa9f02f2385915d3e55c"
+            },
+            {
+              "path": "internal\\cstdlib\\stage0_buffer.c",
+              "sha256": "41c7a26acb8b9f22fd5e0f82c976f4b59964df2e2e73e7ddb5fa8bee70e8390c"
+            }
+          ],
+          "build": {
+            "argv": [
+              "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+              "/nologo",
+              "/std:c11",
+              "/TC",
+              "/Od",
+              "/DFY_CANDIDATE_NO_MAIN",
+              "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\buffer-c\\sdk_c_executes_buffer_owned_views_and_cleanup.c",
+              "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\buffer-c\\sdk_c_executes_buffer_owned_views_and_cleanup-runtime.c",
+              "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\buffer-c\\trap.c",
+              "/Fe:C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\buffer-c\\sdk_c_executes_buffer_owned_views_and_cleanup-low.exe",
+              "/link",
+              "/INCREMENTAL:NO"
+            ],
+            "exit": 0,
+            "stdout": "sdk_c_executes_buffer_owned_views_and_cleanup.c\r\nsdk_c_executes_buffer_owned_views_and_cleanup-runtime.c\r\ntrap.c\r\nGenerating Code...\r\n",
+            "stderr": ""
+          },
+          "run": {
+            "argv": [
+              "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\buffer-c\\sdk_c_executes_buffer_owned_views_and_cleanup-low.exe"
+            ],
+            "exit": 0,
+            "stdout": "",
+            "stderr": ""
+          }
+        },
+        {
+          "name": "sdk_c_executes_buffer_owned_views_and_cleanup",
+          "profile": "optimized",
+          "sourceSHA256": "d4f765d451d42bfae961e583a34fe5f49cadf6408badd9bb8f375a057244a276",
+          "stdinBase64": null,
+          "heapFailureAt": null,
+          "heapBalanceVerified": true,
+          "heapCounts": {
+            "attempts": 3,
+            "liveAfter": 0
+          },
+          "bufferCounts": {
+            "drop": 2,
+            "dropStatusErrors": 0
+          },
+          "arenaCounts": null,
+          "regionCounts": null,
+          "runtimeInputs": [
+            {
+              "path": "internal\\cstdlib\\stage0_system_heap.c",
+              "sha256": "cae6664fa1ec70722b76025c3e2c3daadc133cd90d95fa9f02f2385915d3e55c"
+            },
+            {
+              "path": "internal\\cstdlib\\stage0_buffer.c",
+              "sha256": "41c7a26acb8b9f22fd5e0f82c976f4b59964df2e2e73e7ddb5fa8bee70e8390c"
+            }
+          ],
+          "build": {
+            "argv": [
+              "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+              "/nologo",
+              "/std:c11",
+              "/TC",
+              "/O2",
+              "/DFY_CANDIDATE_NO_MAIN",
+              "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\buffer-c\\sdk_c_executes_buffer_owned_views_and_cleanup.c",
+              "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\buffer-c\\sdk_c_executes_buffer_owned_views_and_cleanup-runtime.c",
+              "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\buffer-c\\trap.c",
+              "/Fe:C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\buffer-c\\sdk_c_executes_buffer_owned_views_and_cleanup-optimized.exe",
+              "/link",
+              "/INCREMENTAL:NO"
+            ],
+            "exit": 0,
+            "stdout": "sdk_c_executes_buffer_owned_views_and_cleanup.c\r\nsdk_c_executes_buffer_owned_views_and_cleanup-runtime.c\r\ntrap.c\r\nGenerating Code...\r\n",
+            "stderr": ""
+          },
+          "run": {
+            "argv": [
+              "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\buffer-c\\sdk_c_executes_buffer_owned_views_and_cleanup-optimized.exe"
+            ],
+            "exit": 0,
+            "stdout": "",
+            "stderr": ""
+          }
+        },
+        {
+          "name": "sdk_c_executes_buffer_initial_allocation_failure",
+          "profile": "low",
+          "sourceSHA256": "0fa84ce80cefda888139074d8701cac55b0bb1faff8d29919f81fcecfbbfd15f",
+          "stdinBase64": null,
+          "heapFailureAt": 1,
+          "heapBalanceVerified": true,
+          "heapCounts": {
+            "attempts": 1,
+            "liveAfter": 0
+          },
+          "bufferCounts": {
+            "drop": 1,
+            "dropStatusErrors": 0
+          },
+          "arenaCounts": null,
+          "regionCounts": null,
+          "runtimeInputs": [
+            {
+              "path": "internal\\cstdlib\\stage0_system_heap.c",
+              "sha256": "cae6664fa1ec70722b76025c3e2c3daadc133cd90d95fa9f02f2385915d3e55c"
+            },
+            {
+              "path": "internal\\cstdlib\\stage0_buffer.c",
+              "sha256": "41c7a26acb8b9f22fd5e0f82c976f4b59964df2e2e73e7ddb5fa8bee70e8390c"
+            }
+          ],
+          "build": {
+            "argv": [
+              "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+              "/nologo",
+              "/std:c11",
+              "/TC",
+              "/Od",
+              "/DFY_CANDIDATE_NO_MAIN",
+              "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\buffer-c\\sdk_c_executes_buffer_initial_allocation_failure.c",
+              "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\buffer-c\\sdk_c_executes_buffer_initial_allocation_failure-runtime.c",
+              "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\buffer-c\\trap.c",
+              "/Fe:C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\buffer-c\\sdk_c_executes_buffer_initial_allocation_failure-low.exe",
+              "/link",
+              "/INCREMENTAL:NO"
+            ],
+            "exit": 0,
+            "stdout": "sdk_c_executes_buffer_initial_allocation_failure.c\r\nsdk_c_executes_buffer_initial_allocation_failure-runtime.c\r\ntrap.c\r\nGenerating Code...\r\n",
+            "stderr": ""
+          },
+          "run": {
+            "argv": [
+              "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\buffer-c\\sdk_c_executes_buffer_initial_allocation_failure-low.exe"
+            ],
+            "exit": 0,
+            "stdout": "",
+            "stderr": ""
+          }
+        },
+        {
+          "name": "sdk_c_executes_buffer_initial_allocation_failure",
+          "profile": "optimized",
+          "sourceSHA256": "0fa84ce80cefda888139074d8701cac55b0bb1faff8d29919f81fcecfbbfd15f",
+          "stdinBase64": null,
+          "heapFailureAt": 1,
+          "heapBalanceVerified": true,
+          "heapCounts": {
+            "attempts": 1,
+            "liveAfter": 0
+          },
+          "bufferCounts": {
+            "drop": 1,
+            "dropStatusErrors": 0
+          },
+          "arenaCounts": null,
+          "regionCounts": null,
+          "runtimeInputs": [
+            {
+              "path": "internal\\cstdlib\\stage0_system_heap.c",
+              "sha256": "cae6664fa1ec70722b76025c3e2c3daadc133cd90d95fa9f02f2385915d3e55c"
+            },
+            {
+              "path": "internal\\cstdlib\\stage0_buffer.c",
+              "sha256": "41c7a26acb8b9f22fd5e0f82c976f4b59964df2e2e73e7ddb5fa8bee70e8390c"
+            }
+          ],
+          "build": {
+            "argv": [
+              "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+              "/nologo",
+              "/std:c11",
+              "/TC",
+              "/O2",
+              "/DFY_CANDIDATE_NO_MAIN",
+              "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\buffer-c\\sdk_c_executes_buffer_initial_allocation_failure.c",
+              "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\buffer-c\\sdk_c_executes_buffer_initial_allocation_failure-runtime.c",
+              "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\buffer-c\\trap.c",
+              "/Fe:C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\buffer-c\\sdk_c_executes_buffer_initial_allocation_failure-optimized.exe",
+              "/link",
+              "/INCREMENTAL:NO"
+            ],
+            "exit": 0,
+            "stdout": "sdk_c_executes_buffer_initial_allocation_failure.c\r\nsdk_c_executes_buffer_initial_allocation_failure-runtime.c\r\ntrap.c\r\nGenerating Code...\r\n",
+            "stderr": ""
+          },
+          "run": {
+            "argv": [
+              "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\buffer-c\\sdk_c_executes_buffer_initial_allocation_failure-optimized.exe"
+            ],
+            "exit": 0,
+            "stdout": "",
+            "stderr": ""
+          }
+        },
+        {
+          "name": "sdk_c_executes_buffer_growth_failure_preserves_bytes",
+          "profile": "low",
+          "sourceSHA256": "4d28cf125830c28a2dfb0b48463a5cee00362c1b6a096038d192ce0a230ea690",
+          "stdinBase64": null,
+          "heapFailureAt": 2,
+          "heapBalanceVerified": true,
+          "heapCounts": {
+            "attempts": 2,
+            "liveAfter": 0
+          },
+          "bufferCounts": {
+            "drop": 1,
+            "dropStatusErrors": 0
+          },
+          "arenaCounts": null,
+          "regionCounts": null,
+          "runtimeInputs": [
+            {
+              "path": "internal\\cstdlib\\stage0_system_heap.c",
+              "sha256": "cae6664fa1ec70722b76025c3e2c3daadc133cd90d95fa9f02f2385915d3e55c"
+            },
+            {
+              "path": "internal\\cstdlib\\stage0_buffer.c",
+              "sha256": "41c7a26acb8b9f22fd5e0f82c976f4b59964df2e2e73e7ddb5fa8bee70e8390c"
+            }
+          ],
+          "build": {
+            "argv": [
+              "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+              "/nologo",
+              "/std:c11",
+              "/TC",
+              "/Od",
+              "/DFY_CANDIDATE_NO_MAIN",
+              "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\buffer-c\\sdk_c_executes_buffer_growth_failure_preserves_bytes.c",
+              "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\buffer-c\\sdk_c_executes_buffer_growth_failure_preserves_bytes-runtime.c",
+              "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\buffer-c\\trap.c",
+              "/Fe:C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\buffer-c\\sdk_c_executes_buffer_growth_failure_preserves_bytes-low.exe",
+              "/link",
+              "/INCREMENTAL:NO"
+            ],
+            "exit": 0,
+            "stdout": "sdk_c_executes_buffer_growth_failure_preserves_bytes.c\r\nsdk_c_executes_buffer_growth_failure_preserves_bytes-runtime.c\r\ntrap.c\r\nGenerating Code...\r\n",
+            "stderr": ""
+          },
+          "run": {
+            "argv": [
+              "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\buffer-c\\sdk_c_executes_buffer_growth_failure_preserves_bytes-low.exe"
+            ],
+            "exit": 0,
+            "stdout": "",
+            "stderr": ""
+          }
+        },
+        {
+          "name": "sdk_c_executes_buffer_growth_failure_preserves_bytes",
+          "profile": "optimized",
+          "sourceSHA256": "4d28cf125830c28a2dfb0b48463a5cee00362c1b6a096038d192ce0a230ea690",
+          "stdinBase64": null,
+          "heapFailureAt": 2,
+          "heapBalanceVerified": true,
+          "heapCounts": {
+            "attempts": 2,
+            "liveAfter": 0
+          },
+          "bufferCounts": {
+            "drop": 1,
+            "dropStatusErrors": 0
+          },
+          "arenaCounts": null,
+          "regionCounts": null,
+          "runtimeInputs": [
+            {
+              "path": "internal\\cstdlib\\stage0_system_heap.c",
+              "sha256": "cae6664fa1ec70722b76025c3e2c3daadc133cd90d95fa9f02f2385915d3e55c"
+            },
+            {
+              "path": "internal\\cstdlib\\stage0_buffer.c",
+              "sha256": "41c7a26acb8b9f22fd5e0f82c976f4b59964df2e2e73e7ddb5fa8bee70e8390c"
+            }
+          ],
+          "build": {
+            "argv": [
+              "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+              "/nologo",
+              "/std:c11",
+              "/TC",
+              "/O2",
+              "/DFY_CANDIDATE_NO_MAIN",
+              "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\buffer-c\\sdk_c_executes_buffer_growth_failure_preserves_bytes.c",
+              "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\buffer-c\\sdk_c_executes_buffer_growth_failure_preserves_bytes-runtime.c",
+              "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\buffer-c\\trap.c",
+              "/Fe:C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\buffer-c\\sdk_c_executes_buffer_growth_failure_preserves_bytes-optimized.exe",
+              "/link",
+              "/INCREMENTAL:NO"
+            ],
+            "exit": 0,
+            "stdout": "sdk_c_executes_buffer_growth_failure_preserves_bytes.c\r\nsdk_c_executes_buffer_growth_failure_preserves_bytes-runtime.c\r\ntrap.c\r\nGenerating Code...\r\n",
+            "stderr": ""
+          },
+          "run": {
+            "argv": [
+              "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\buffer-c\\sdk_c_executes_buffer_growth_failure_preserves_bytes-optimized.exe"
+            ],
+            "exit": 0,
+            "stdout": "",
+            "stderr": ""
+          }
+        },
+        {
+          "name": "pointer_c_executes_owned_raw_parts_and_zero_extent",
+          "profile": "low",
+          "sourceSHA256": "dbb7a01c8adda2713c5cfd807bf6f832b500ccbf0f739f809675b45e3df73320",
+          "stdinBase64": null,
+          "heapFailureAt": null,
+          "heapBalanceVerified": false,
+          "heapCounts": null,
+          "bufferCounts": null,
+          "arenaCounts": null,
+          "regionCounts": null,
+          "runtimeInputs": [],
+          "build": {
+            "argv": [
+              "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+              "/nologo",
+              "/std:c11",
+              "/TC",
+              "/Od",
+              "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\buffer-c\\pointer_c_executes_owned_raw_parts_and_zero_extent.c",
+              "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\buffer-c\\pointer_c_executes_owned_raw_parts_and_zero_extent-runtime.c",
+              "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\buffer-c\\trap.c",
+              "/Fe:C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\buffer-c\\pointer_c_executes_owned_raw_parts_and_zero_extent-low.exe",
+              "/link",
+              "/INCREMENTAL:NO"
+            ],
+            "exit": 0,
+            "stdout": "pointer_c_executes_owned_raw_parts_and_zero_extent.c\r\npointer_c_executes_owned_raw_parts_and_zero_extent-runtime.c\r\ntrap.c\r\nGenerating Code...\r\n",
+            "stderr": ""
+          },
+          "run": {
+            "argv": [
+              "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\buffer-c\\pointer_c_executes_owned_raw_parts_and_zero_extent-low.exe"
+            ],
+            "exit": 0,
+            "stdout": "",
+            "stderr": ""
+          }
+        },
+        {
+          "name": "pointer_c_executes_owned_raw_parts_and_zero_extent",
+          "profile": "optimized",
+          "sourceSHA256": "dbb7a01c8adda2713c5cfd807bf6f832b500ccbf0f739f809675b45e3df73320",
+          "stdinBase64": null,
+          "heapFailureAt": null,
+          "heapBalanceVerified": false,
+          "heapCounts": null,
+          "bufferCounts": null,
+          "arenaCounts": null,
+          "regionCounts": null,
+          "runtimeInputs": [],
+          "build": {
+            "argv": [
+              "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+              "/nologo",
+              "/std:c11",
+              "/TC",
+              "/O2",
+              "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\buffer-c\\pointer_c_executes_owned_raw_parts_and_zero_extent.c",
+              "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\buffer-c\\pointer_c_executes_owned_raw_parts_and_zero_extent-runtime.c",
+              "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\buffer-c\\trap.c",
+              "/Fe:C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\buffer-c\\pointer_c_executes_owned_raw_parts_and_zero_extent-optimized.exe",
+              "/link",
+              "/INCREMENTAL:NO"
+            ],
+            "exit": 0,
+            "stdout": "pointer_c_executes_owned_raw_parts_and_zero_extent.c\r\npointer_c_executes_owned_raw_parts_and_zero_extent-runtime.c\r\ntrap.c\r\nGenerating Code...\r\n",
+            "stderr": ""
+          },
+          "run": {
+            "argv": [
+              "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\buffer-c\\pointer_c_executes_owned_raw_parts_and_zero_extent-optimized.exe"
+            ],
+            "exit": 0,
+            "stdout": "",
+            "stderr": ""
+          }
+        }
+      ],
+      "compiler": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+      "source": "Private Fairy emitter; actual repository C runtime components, no SDK stand-ins"
+    },
+    {
+      "schema": "fairyc.candidate-sdk-c-execution/v1",
+      "passed": true,
+      "reports": [
+        {
+          "path": ".cache\\candidate-tagged\\sdk-c-execution\\native-imports-final.json",
+          "sha256": "d808fa6677f514abcf709360fb602a895cdb0f4c7ec75c96e7a7f6ecadc199cc"
+        },
+        {
+          "path": ".cache\\candidate-tagged\\sdk-c-execution\\native-import-rollback.json",
+          "sha256": "6f87d8bb991fdfdd58e25ef2d54b86a4455591e4b9e6c6839a70417c1b0f1747"
+        },
+        {
+          "path": ".cache\\candidate-tagged\\sdk-c-execution\\native-buffer.json",
+          "sha256": "e98b4ec2dcc29c396ecaaacf064c0bee54713fc2b16c4cb3b1f22282447aa4a5"
+        },
+        {
+          "path": ".cache\\candidate-tagged\\sdk-c-execution\\native-buffer-views.json",
+          "sha256": "cf18602ce254c439f4b515da21b61cb99b10c36f7c317e76ea0352c40143468b"
+        },
+        {
+          "path": ".cache\\candidate-tagged\\sdk-c-execution\\native-buffer-regressions.json",
+          "sha256": "6f91578cf2691dd4322d882837ed5bdea0b3f2d5019f1aea16fc525d0284d23c"
+        }
+      ],
+      "executions": [
+        {
+          "name": "sdk_c_executes_arena_factory_switch_and_owned_cleanup",
+          "profile": "low",
+          "sourceSHA256": "3659a0091c1ca60630079684ac05ae7dcaa598508526ffcd17cc7ff7785ad1b0",
+          "stdinBase64": null,
+          "heapFailureAt": null,
+          "heapBalanceVerified": false,
+          "heapCounts": null,
+          "bufferCounts": null,
+          "arenaCounts": {
+            "initialize": 2,
+            "drop": 2,
+            "nonzeroStatus": 0
+          },
+          "regionCounts": null,
+          "runtimeInputs": [
+            {
+              "path": "internal\\cstdlib\\stage0_system_heap.c",
+              "sha256": "cae6664fa1ec70722b76025c3e2c3daadc133cd90d95fa9f02f2385915d3e55c"
+            },
+            {
+              "path": "internal\\cstdlib\\stage0_arena.c",
+              "sha256": "e0bf426ef0b27238463ec598426cf764ae08f476f814cb9bdbff5ce946372ecb"
+            }
+          ],
+          "build": {
+            "argv": [
+              "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+              "/nologo",
+              "/std:c11",
+              "/TC",
+              "/Od",
+              "/DFY_CANDIDATE_NO_MAIN",
+              "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\buffer-arena-c\\sdk_c_executes_arena_factory_switch_and_owned_cleanup.c",
+              "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\buffer-arena-c\\sdk_c_executes_arena_factory_switch_and_owned_cleanup-runtime.c",
+              "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\buffer-arena-c\\trap.c",
+              "/Fe:C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\buffer-arena-c\\sdk_c_executes_arena_factory_switch_and_owned_cleanup-low.exe",
+              "/link",
+              "/INCREMENTAL:NO"
+            ],
+            "exit": 0,
+            "stdout": "sdk_c_executes_arena_factory_switch_and_owned_cleanup.c\r\nsdk_c_executes_arena_factory_switch_and_owned_cleanup-runtime.c\r\ntrap.c\r\nGenerating Code...\r\n",
+            "stderr": ""
+          },
+          "run": {
+            "argv": [
+              "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\buffer-arena-c\\sdk_c_executes_arena_factory_switch_and_owned_cleanup-low.exe"
+            ],
+            "exit": 0,
+            "stdout": "",
+            "stderr": ""
+          }
+        },
+        {
+          "name": "sdk_c_executes_arena_factory_switch_and_owned_cleanup",
+          "profile": "optimized",
+          "sourceSHA256": "3659a0091c1ca60630079684ac05ae7dcaa598508526ffcd17cc7ff7785ad1b0",
+          "stdinBase64": null,
+          "heapFailureAt": null,
+          "heapBalanceVerified": false,
+          "heapCounts": null,
+          "bufferCounts": null,
+          "arenaCounts": {
+            "initialize": 2,
+            "drop": 2,
+            "nonzeroStatus": 0
+          },
+          "regionCounts": null,
+          "runtimeInputs": [
+            {
+              "path": "internal\\cstdlib\\stage0_system_heap.c",
+              "sha256": "cae6664fa1ec70722b76025c3e2c3daadc133cd90d95fa9f02f2385915d3e55c"
+            },
+            {
+              "path": "internal\\cstdlib\\stage0_arena.c",
+              "sha256": "e0bf426ef0b27238463ec598426cf764ae08f476f814cb9bdbff5ce946372ecb"
+            }
+          ],
+          "build": {
+            "argv": [
+              "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+              "/nologo",
+              "/std:c11",
+              "/TC",
+              "/O2",
+              "/DFY_CANDIDATE_NO_MAIN",
+              "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\buffer-arena-c\\sdk_c_executes_arena_factory_switch_and_owned_cleanup.c",
+              "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\buffer-arena-c\\sdk_c_executes_arena_factory_switch_and_owned_cleanup-runtime.c",
+              "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\buffer-arena-c\\trap.c",
+              "/Fe:C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\buffer-arena-c\\sdk_c_executes_arena_factory_switch_and_owned_cleanup-optimized.exe",
+              "/link",
+              "/INCREMENTAL:NO"
+            ],
+            "exit": 0,
+            "stdout": "sdk_c_executes_arena_factory_switch_and_owned_cleanup.c\r\nsdk_c_executes_arena_factory_switch_and_owned_cleanup-runtime.c\r\ntrap.c\r\nGenerating Code...\r\n",
+            "stderr": ""
+          },
+          "run": {
+            "argv": [
+              "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\buffer-arena-c\\sdk_c_executes_arena_factory_switch_and_owned_cleanup-optimized.exe"
+            ],
+            "exit": 0,
+            "stdout": "",
+            "stderr": ""
+          }
+        }
+      ],
+      "compiler": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+      "source": "Private Fairy emitter; actual repository C runtime components, no SDK stand-ins"
+    }
+  ],
+  "reference": {
+    "passed": true,
+    "runs": [
+      {
+        "name": "sdk_c_executes_buffer_owned_views_and_cleanup",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\compiler-origin-patterns.exe",
+          "experimental",
+          "check",
+          "main.fy",
+          "--source",
+          "std/bytes.fy"
+        ],
+        "exit": 0,
+        "stdout": "check ok: 2 file(s) (verified MIR: 28 function(s), 7 foreign declaration(s))\n",
+        "stderr": "",
+        "sourceSHA256": "8032b13b69e93f2435ed68f351633c520ad58c740636692e402ceb979acebd53"
+      },
+      {
+        "name": "sdk_c_executes_buffer_initial_allocation_failure",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\compiler-origin-patterns.exe",
+          "experimental",
+          "check",
+          "main.fy",
+          "--source",
+          "std/bytes.fy"
+        ],
+        "exit": 0,
+        "stdout": "check ok: 2 file(s) (verified MIR: 28 function(s), 7 foreign declaration(s))\n",
+        "stderr": "",
+        "sourceSHA256": "653a8696b1cf6d27521e4bd2a87fa965988a61cfe2730aa915be600a64eaff4d"
+      },
+      {
+        "name": "sdk_c_executes_buffer_growth_failure_preserves_bytes",
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\compiler-origin-patterns.exe",
+          "experimental",
+          "check",
+          "main.fy",
+          "--source",
+          "std/bytes.fy"
+        ],
+        "exit": 0,
+        "stdout": "check ok: 2 file(s) (verified MIR: 28 function(s), 7 foreign declaration(s))\n",
+        "stderr": "",
+        "sourceSHA256": "ab558eed0d8ba5bdaca6c12d9a3c3208fda7002b903d40bb7ba7295800529848"
+      }
+    ]
+  },
+  "bridge": {
+    "authenticatedBufferSource": true,
+    "rawSDKCodes": [
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15
+    ],
+    "storageSize": 32,
+    "storageAlignment": 8,
+    "fieldOffsets": [
+      0,
+      8,
+      16,
+      24
+    ],
+    "typedRuntimePrototype": true,
+    "copyBackInitializeOnlyOnSuccess": true
+  },
+  "rawViews": {
+    "unsafeLexicalScopeChecked": true,
+    "exactBuiltinSpelling": true,
+    "safeOwnerAndMutableBorrowRequired": true,
+    "pointerU8OrOpaqueVoid": true,
+    "extentIsUsize": true,
+    "resultAndProjectedOriginRevalidated": true,
+    "argumentsEvaluatedOnce": true,
+    "zeroExtentNullPreserved": true,
+    "CStrAdmitted": false,
+    "fullSourceProvenance": false
+  },
+  "failures": {
+    "initialMallocAt": 1,
+    "growthMallocAt": 2,
+    "status": 1,
+    "preservedOriginalBytesAndLengthAndCapacity": true,
+    "liveAllocationsAfter": 0
+  },
+  "mutations": {
+    "cases": 5,
+    "guards": [
+      "unsafe flag",
+      "unsafe lexical scope",
+      "shared/mutable builtin identity",
+      "arity",
+      "owner origin"
+    ],
+    "exhaustedWorkRejects": 1002
+  },
+  "privateAPIExpanded": true,
+  "normativeContractsChanged": false,
+  "stableCLIChanged": false,
+  "sdkABIChanged": false,
+  "GoChanged": false,
+  "dbChanged": false,
+  "ciChanged": false,
+  "hygieneChanged": false,
+  "pushed": false,
+  "skipped": {
+    "candidateRelease": "Generated C /O2 covered; standalone candidate Release deferred",
+    "Linux": "Windows runtime slice",
+    "fullSuite": "Focused Buffer/raw-parts and Arena/budget regressions",
+    "stage1Stage2": "Whole dispatcher and remaining SDK storage pending"
+  },
+  "pending": [
+    "Owned Vec storage intrinsics and runtime bridge",
+    "String/File storage bridge",
+    "CStr C transport",
+    "Full source/unsafe/path/dominance/initialization proof",
+    "Foreign aggregate ABI",
+    "Whole dispatcher",
+    "Stage1/stage2 promotion"
+  ]
+}

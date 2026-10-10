@@ -15,6 +15,14 @@ driver = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(driver)
 
 CASES = {
+    "sdk_c_executes_buffer_owned_views_and_cleanup":
+        (["stage0_system_heap.c", "stage0_buffer.c"], [], ""),
+    "sdk_c_executes_buffer_initial_allocation_failure":
+        (["stage0_system_heap.c", "stage0_buffer.c"], [], ""),
+    "sdk_c_executes_buffer_growth_failure_preserves_bytes":
+        (["stage0_system_heap.c", "stage0_buffer.c"], [], ""),
+    "pointer_c_executes_owned_raw_parts_and_zero_extent":
+        ([], [], ""),
     "root_only_transitive_imports_keep_owned_identity":
         ([], [], ""),
     "sdk_c_executes_process_arguments_through_exact_result_bridge":
@@ -32,7 +40,7 @@ CASES = {
     "sdk_c_executes_region_storage_or_tracking_failure_as_result":
         (["stage0_system_heap.c", "stage0_arena.c"], [], "B,7,S,"),
 }
-PROOFS = {"rejected_import_expansion_rolls_back_borrow_types","sdk_c_plan_respects_work_budget_before_authority_or_output",
+PROOFS = {"pointer_c_rejects_forged_raw_view_metadata","rejected_import_expansion_rolls_back_borrow_types","sdk_c_plan_respects_work_budget_before_authority_or_output",
           "sdk_c_region_plan_respects_placement_budget_before_output"}
 
 
@@ -50,8 +58,8 @@ def main():
         report = json.loads(raw)
         assert report["engine"] == "native" and report["target"] == "x86_64-windows-msvc"
         for test in report["tests"]:
-            prefix = "tests::module_unit_imports::" if test["identity"].startswith("tests::module_unit_imports::") else "tests::module_unit_c_sdk::"
-            if test["identity"].startswith(prefix):
+            prefix = next((prefix for prefix in ("tests::module_unit_imports::", "tests::module_unit_c_pointers::", "tests::module_unit_c_sdk::") if test["identity"].startswith(prefix)), "")
+            if prefix:
                 name = test["identity"].removeprefix(prefix)
                 if name in CASES or name in PROOFS:
                     outcomes[name] = test
@@ -89,13 +97,15 @@ def main():
         # definitions in one translation unit, as the normal runtime builder does.
         runtime = output / f"{name}-runtime.c"
         arena = "stage0_arena.c" in components
+        buffered = "stage0_buffer.c" in components
+        heap_checked = buffered or name in {"sdk_c_executes_region_placement_and_param_origin", "sdk_c_executes_region_storage_or_tracking_failure_as_result"}
         placing = name in {"sdk_c_executes_region_placement_and_param_origin",
                            "sdk_c_executes_region_storage_or_tracking_failure_as_result"}
         regions = name == "sdk_c_executes_region_lifecycle_and_cleanup_edges" or placing
         arena_count = 1 if placing else 2
         region_count = 1 if placing else 6
         heap = b""
-        if placing:
+        if heap_checked:
             heap = (
                 b"#include <stddef.h>\n#include <stdlib.h>\n"
                 b"static size_t heap_attempts,heap_live;\n"
@@ -139,7 +149,20 @@ def main():
                 attempts = (b'strtoul(getenv("FY_TEST_HEAP_FAIL_AT"),NULL,10)'
                             if name == "sdk_c_executes_region_storage_or_tracking_failure_as_result" else b"10")
                 instrumentation = instrumentation.replace(b"&&!invalid_status?", b"&&heap_live==0&&heap_attempts==" + attempts + b"&&!invalid_status?")
+        buffer_drops = 2 if name == "sdk_c_executes_buffer_owned_views_and_cleanup" else 1
+        buffer_failure = (1 if name == "sdk_c_executes_buffer_initial_allocation_failure" else
+                          2 if name == "sdk_c_executes_buffer_growth_failure_preserves_bytes" else None)
+        if buffered:
+            instrumentation = (
+                b"#undef fy_std_buffer_drop_v0\n#include <stdint.h>\n"
+                b"static unsigned buffer_dropped,buffer_drop_errors;\n"
+                b"uint32_t fy_std_buffer_drop_v0(struct fy_std_buffer_v0 *b){"
+                b"uint32_t status=fy_test_actual_buffer_drop_v0(b);++buffer_dropped;"
+                b"if(status)++buffer_drop_errors;return status;}\n"
+                b"extern int32_t fy_candidate_entry(void);\nint main(void){int32_t result=fy_candidate_entry();"
+                + f"return result?result:(buffer_dropped=={buffer_drops}&&!buffer_drop_errors&&heap_live==0&&heap_attempts=={buffer_failure or 3}?0:90);}}\n".encode())
         runtime.write_bytes(heap + b"#define FY_STD_SYSTEM_HEAP_MAX_ALIGNMENT_V0 ((size_t)16)\n" +
+                            (b"#define fy_std_buffer_drop_v0 fy_test_actual_buffer_drop_v0\n" if buffered else b"") +
                             (b"#define fy_std_arena_initialize_v0 fy_test_actual_arena_initialize_v0\n"
                              b"#define fy_std_arena_drop_v0 fy_test_actual_arena_drop_v0\n" if arena else b"") +
                             (b"#define fy_std_region_begin_v0 fy_test_actual_region_begin_v0\n"
@@ -148,14 +171,14 @@ def main():
         for profile, flag in (("low", "/Od"), ("optimized", "/O2")):
             binary = output / f"{name}-{profile}.exe"
             build = driver.run([str(compiler), "/nologo", "/std:c11", "/TC", flag,
-                                *(["/DFY_CANDIDATE_NO_MAIN"] if arena else []),
+                                *(["/DFY_CANDIDATE_NO_MAIN"] if arena or buffered else []),
                                 str(generated), str(runtime), str(trap), f"/Fe:{binary}",
                                 "/link", "/INCREMENTAL:NO"], output, environment)
             assert build["exit"] == 0, build
             reading = name == "sdk_c_executes_stdin_and_stderr_byte_results"
             stdin = b"A\0\xce\xbbZ" if reading else None
             expected_stderr = "42|-7|9|-9223372036854775808|true|λ\n" if reading else ""
-            failures = (1, 2) if name == "sdk_c_executes_region_storage_or_tracking_failure_as_result" else (None,)
+            failures = (1, 2) if name == "sdk_c_executes_region_storage_or_tracking_failure_as_result" else (buffer_failure,) if buffered else (None,)
             for failure in failures:
                 run_environment = dict(os.environ)
                 run_environment.pop("FY_TEST_HEAP_FAIL_AT", None)
@@ -165,8 +188,9 @@ def main():
                 assert run["exit"] == 0 and run["stdout"] == expected and run["stderr"] == expected_stderr, run
                 executions.append(dict(name=name, profile=profile, sourceSHA256=hashlib.sha256(source).hexdigest(),
                                    stdinBase64=base64.b64encode(stdin).decode('ascii') if stdin is not None else None,
-                                   heapFailureAt=failure, heapBalanceVerified=placing,
-                                   heapCounts={"attempts": failure or 10, "liveAfter": 0} if placing else None,
+                                   heapFailureAt=failure, heapBalanceVerified=heap_checked,
+                                   heapCounts={"attempts": failure or (3 if buffered else 10), "liveAfter": 0} if heap_checked else None,
+                                   bufferCounts={"drop": buffer_drops, "dropStatusErrors": 0} if buffered else None,
                                    arenaCounts={"initialize": arena_count, "drop": arena_count, "nonzeroStatus": 0} if arena else None,
                                    regionCounts={"begin": region_count, "reset": region_count, "nonzeroStatus": 0} if regions else None,
                                    runtimeInputs=[dict(path=str(path.relative_to(ROOT)),
