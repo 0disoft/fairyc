@@ -15,6 +15,10 @@ driver = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(driver)
 
 CASES = {
+    "sdk_c_executes_nested_vector_move_and_cleanup":
+        (["stage0_system_heap.c", "stage0_vector_storage.c"], [], "102,22,21,900,101,12,11,"),
+    "sdk_c_executes_nested_vector_failed_push_donor":
+        (["stage0_system_heap.c", "stage0_vector_storage.c"], [], "107,72,71,900,"),
     "sdk_c_executes_vector_storage_and_views":
         (["stage0_system_heap.c", "stage0_vector_storage.c"], [], ""),
     "sdk_c_executes_vector_resource_cleanup":
@@ -173,7 +177,8 @@ def main():
                 b"if(status)++buffer_drop_errors;return status;}\n"
                 b"extern int32_t fy_candidate_entry(void);\nint main(void){int32_t result=fy_candidate_entry();"
                 + f"return result?result:(buffer_dropped=={buffer_drops}&&!buffer_drop_errors&&heap_live==0&&heap_attempts=={buffer_failure or 3}?0:90);}}\n".encode())
-        vector_failure = (1 if name == "sdk_c_executes_vector_failed_push_returns_donor" else
+        vector_failure = (1 if name in {"sdk_c_executes_vector_failed_push_returns_donor",
+                                       "sdk_c_executes_nested_vector_failed_push_donor"} else
                           2 if name == "sdk_c_executes_vector_growth_failure_preserves_prefix" else None)
         vector_attempts = 2 if name in {"sdk_c_executes_vector_storage_and_views",
                                        "sdk_c_executes_vector_growth_failure_preserves_prefix"} else 1

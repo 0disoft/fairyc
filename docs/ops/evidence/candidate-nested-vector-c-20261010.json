@@ -1,0 +1,326 @@
+{
+  "schema": "fairyc.candidate-nested-vector-c/v1",
+  "passed": true,
+  "parentCommit": "192210c39d92d8f848add30875389dad04206f44",
+  "identity": [
+    {
+      "path": "examples/lexer_candidate/tests/module_unit_c_sdk.fy",
+      "sha256": "a5d35d08256435389518f628bc7688df3cc93fc8e9932b9d0b68cfed64ce7435"
+    },
+    {
+      "path": "tools/verify-candidate-sdk-c.py",
+      "sha256": "295980cfc2c54efcad27f7fd1921de992f3b1cf5b54bc6ebfb517eaf77ce9397"
+    },
+    {
+      "path": "internal/sdkstdlib/sources/optional/std/vec.fy",
+      "sha256": "0ae4c395bf98c39079ad620bde035b3b590d51417864802e698edc069281db5b"
+    }
+  ],
+  "native": {
+    "report": {
+      "path": ".cache/candidate-tagged/sdk-c-execution/native-nested-vector.json",
+      "sha256": "52c1ebef2ca2a78dc13f76a49e6cb41200ab15ff4f750681ae9d555a87ccd6df"
+    },
+    "count": 2,
+    "passed": 2,
+    "lock": "verified"
+  },
+  "CExecution": {
+    "schema": "fairyc.candidate-sdk-c-execution/v1",
+    "passed": true,
+    "reports": [
+      {
+        "path": ".cache\\candidate-tagged\\sdk-c-execution\\native-nested-vector.json",
+        "sha256": "52c1ebef2ca2a78dc13f76a49e6cb41200ab15ff4f750681ae9d555a87ccd6df"
+      }
+    ],
+    "executions": [
+      {
+        "name": "sdk_c_executes_nested_vector_move_and_cleanup",
+        "profile": "low",
+        "sourceSHA256": "0928b37a8dff54796c689961b226a30db534ac9ffa77bcb2e67a2abcd508a2c3",
+        "stdinBase64": null,
+        "heapFailureAt": null,
+        "heapBalanceVerified": true,
+        "heapCounts": {
+          "attempts": 1,
+          "liveAfter": 0
+        },
+        "vectorCounts": {
+          "release": 1,
+          "releaseStatusErrors": 0
+        },
+        "bufferCounts": null,
+        "arenaCounts": null,
+        "regionCounts": null,
+        "runtimeInputs": [
+          {
+            "path": "internal\\cstdlib\\stage0_system_heap.c",
+            "sha256": "cae6664fa1ec70722b76025c3e2c3daadc133cd90d95fa9f02f2385915d3e55c"
+          },
+          {
+            "path": "internal\\cstdlib\\stage0_vector_storage.c",
+            "sha256": "eb9686951b480a7c40d6bfe670206d683548c5293387c42a44670ad0b6e5ccca"
+          }
+        ],
+        "build": {
+          "argv": [
+            "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+            "/nologo",
+            "/std:c11",
+            "/TC",
+            "/Od",
+            "/DFY_CANDIDATE_NO_MAIN",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\nested-vector-c\\sdk_c_executes_nested_vector_move_and_cleanup.c",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\nested-vector-c\\sdk_c_executes_nested_vector_move_and_cleanup-runtime.c",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\nested-vector-c\\trap.c",
+            "/Fe:C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\nested-vector-c\\sdk_c_executes_nested_vector_move_and_cleanup-low.exe",
+            "/link",
+            "/INCREMENTAL:NO"
+          ],
+          "exit": 0,
+          "stdout": "sdk_c_executes_nested_vector_move_and_cleanup.c\r\nsdk_c_executes_nested_vector_move_and_cleanup-runtime.c\r\ntrap.c\r\nGenerating Code...\r\n",
+          "stderr": ""
+        },
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\nested-vector-c\\sdk_c_executes_nested_vector_move_and_cleanup-low.exe"
+          ],
+          "exit": 0,
+          "stdout": "102,22,21,900,101,12,11,",
+          "stderr": ""
+        }
+      },
+      {
+        "name": "sdk_c_executes_nested_vector_move_and_cleanup",
+        "profile": "optimized",
+        "sourceSHA256": "0928b37a8dff54796c689961b226a30db534ac9ffa77bcb2e67a2abcd508a2c3",
+        "stdinBase64": null,
+        "heapFailureAt": null,
+        "heapBalanceVerified": true,
+        "heapCounts": {
+          "attempts": 1,
+          "liveAfter": 0
+        },
+        "vectorCounts": {
+          "release": 1,
+          "releaseStatusErrors": 0
+        },
+        "bufferCounts": null,
+        "arenaCounts": null,
+        "regionCounts": null,
+        "runtimeInputs": [
+          {
+            "path": "internal\\cstdlib\\stage0_system_heap.c",
+            "sha256": "cae6664fa1ec70722b76025c3e2c3daadc133cd90d95fa9f02f2385915d3e55c"
+          },
+          {
+            "path": "internal\\cstdlib\\stage0_vector_storage.c",
+            "sha256": "eb9686951b480a7c40d6bfe670206d683548c5293387c42a44670ad0b6e5ccca"
+          }
+        ],
+        "build": {
+          "argv": [
+            "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+            "/nologo",
+            "/std:c11",
+            "/TC",
+            "/O2",
+            "/DFY_CANDIDATE_NO_MAIN",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\nested-vector-c\\sdk_c_executes_nested_vector_move_and_cleanup.c",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\nested-vector-c\\sdk_c_executes_nested_vector_move_and_cleanup-runtime.c",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\nested-vector-c\\trap.c",
+            "/Fe:C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\nested-vector-c\\sdk_c_executes_nested_vector_move_and_cleanup-optimized.exe",
+            "/link",
+            "/INCREMENTAL:NO"
+          ],
+          "exit": 0,
+          "stdout": "sdk_c_executes_nested_vector_move_and_cleanup.c\r\nsdk_c_executes_nested_vector_move_and_cleanup-runtime.c\r\ntrap.c\r\nGenerating Code...\r\n",
+          "stderr": ""
+        },
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\nested-vector-c\\sdk_c_executes_nested_vector_move_and_cleanup-optimized.exe"
+          ],
+          "exit": 0,
+          "stdout": "102,22,21,900,101,12,11,",
+          "stderr": ""
+        }
+      },
+      {
+        "name": "sdk_c_executes_nested_vector_failed_push_donor",
+        "profile": "low",
+        "sourceSHA256": "f5445595244289bf79c163d5959f40e9cdbfebdeb0b9b81f5db5cd32dfae9ffb",
+        "stdinBase64": null,
+        "heapFailureAt": 1,
+        "heapBalanceVerified": true,
+        "heapCounts": {
+          "attempts": 1,
+          "liveAfter": 0
+        },
+        "vectorCounts": {
+          "release": 1,
+          "releaseStatusErrors": 0
+        },
+        "bufferCounts": null,
+        "arenaCounts": null,
+        "regionCounts": null,
+        "runtimeInputs": [
+          {
+            "path": "internal\\cstdlib\\stage0_system_heap.c",
+            "sha256": "cae6664fa1ec70722b76025c3e2c3daadc133cd90d95fa9f02f2385915d3e55c"
+          },
+          {
+            "path": "internal\\cstdlib\\stage0_vector_storage.c",
+            "sha256": "eb9686951b480a7c40d6bfe670206d683548c5293387c42a44670ad0b6e5ccca"
+          }
+        ],
+        "build": {
+          "argv": [
+            "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+            "/nologo",
+            "/std:c11",
+            "/TC",
+            "/Od",
+            "/DFY_CANDIDATE_NO_MAIN",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\nested-vector-c\\sdk_c_executes_nested_vector_failed_push_donor.c",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\nested-vector-c\\sdk_c_executes_nested_vector_failed_push_donor-runtime.c",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\nested-vector-c\\trap.c",
+            "/Fe:C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\nested-vector-c\\sdk_c_executes_nested_vector_failed_push_donor-low.exe",
+            "/link",
+            "/INCREMENTAL:NO"
+          ],
+          "exit": 0,
+          "stdout": "sdk_c_executes_nested_vector_failed_push_donor.c\r\nsdk_c_executes_nested_vector_failed_push_donor-runtime.c\r\ntrap.c\r\nGenerating Code...\r\n",
+          "stderr": ""
+        },
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\nested-vector-c\\sdk_c_executes_nested_vector_failed_push_donor-low.exe"
+          ],
+          "exit": 0,
+          "stdout": "107,72,71,900,",
+          "stderr": ""
+        }
+      },
+      {
+        "name": "sdk_c_executes_nested_vector_failed_push_donor",
+        "profile": "optimized",
+        "sourceSHA256": "f5445595244289bf79c163d5959f40e9cdbfebdeb0b9b81f5db5cd32dfae9ffb",
+        "stdinBase64": null,
+        "heapFailureAt": 1,
+        "heapBalanceVerified": true,
+        "heapCounts": {
+          "attempts": 1,
+          "liveAfter": 0
+        },
+        "vectorCounts": {
+          "release": 1,
+          "releaseStatusErrors": 0
+        },
+        "bufferCounts": null,
+        "arenaCounts": null,
+        "regionCounts": null,
+        "runtimeInputs": [
+          {
+            "path": "internal\\cstdlib\\stage0_system_heap.c",
+            "sha256": "cae6664fa1ec70722b76025c3e2c3daadc133cd90d95fa9f02f2385915d3e55c"
+          },
+          {
+            "path": "internal\\cstdlib\\stage0_vector_storage.c",
+            "sha256": "eb9686951b480a7c40d6bfe670206d683548c5293387c42a44670ad0b6e5ccca"
+          }
+        ],
+        "build": {
+          "argv": [
+            "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+            "/nologo",
+            "/std:c11",
+            "/TC",
+            "/O2",
+            "/DFY_CANDIDATE_NO_MAIN",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\nested-vector-c\\sdk_c_executes_nested_vector_failed_push_donor.c",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\nested-vector-c\\sdk_c_executes_nested_vector_failed_push_donor-runtime.c",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\nested-vector-c\\trap.c",
+            "/Fe:C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\nested-vector-c\\sdk_c_executes_nested_vector_failed_push_donor-optimized.exe",
+            "/link",
+            "/INCREMENTAL:NO"
+          ],
+          "exit": 0,
+          "stdout": "sdk_c_executes_nested_vector_failed_push_donor.c\r\nsdk_c_executes_nested_vector_failed_push_donor-runtime.c\r\ntrap.c\r\nGenerating Code...\r\n",
+          "stderr": ""
+        },
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\nested-vector-c\\sdk_c_executes_nested_vector_failed_push_donor-optimized.exe"
+          ],
+          "exit": 0,
+          "stdout": "107,72,71,900,",
+          "stderr": ""
+        }
+      }
+    ],
+    "compiler": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+    "source": "Private Fairy emitter; actual repository C runtime components, no SDK stand-ins"
+  },
+  "reference": {
+    "passed": true,
+    "runs": [
+      {
+        "name": "sdk_c_executes_nested_vector_move_and_cleanup",
+        "exit": 0,
+        "stdout": "check ok: 2 instance(s), 9 source file(s), 185 MIR function(s), lock updated\n",
+        "stderr": "",
+        "sourceSHA256": "2f2ba95b258d271d0095e894b0b28ab12d03aac3973e72f6c0e974d907382753"
+      },
+      {
+        "name": "sdk_c_executes_nested_vector_failed_push_donor",
+        "exit": 0,
+        "stdout": "check ok: 2 instance(s), 9 source file(s), 182 MIR function(s), lock updated\n",
+        "stderr": "",
+        "sourceSHA256": "7eaeeecf1f935954a48713f139d283bb269c39afec85d04eb88fc8c407fbc424"
+      }
+    ]
+  },
+  "reusedSourceCheck": {
+    "receipt": "docs/ops/evidence/candidate-vector-c-execution-20261010.json",
+    "reason": "Implementation sources and lock hashes match that passing source check; only tests/verifier/docs changed"
+  },
+  "fieldBorrowBoundary": {
+    "passed": false,
+    "runs": [
+      {
+        "name": "sdk_c_executes_nested_vector_move_and_cleanup",
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:1:675: E1008: assignment target is not mutable [bytes 674..687]\n",
+        "sourceSHA256": "eac574f81f9162811ff02eabee222c32e51fc83d9e06b8916e72ec7d22f01804"
+      },
+      {
+        "name": "sdk_c_executes_nested_vector_failed_push_donor",
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:1:454: E1008: assignment target is not mutable [bytes 453..466]\n",
+        "sourceSHA256": "868d222a9aa926e7099c038897ba7116d5b01e8c8b24576d9abff6865235a856"
+      }
+    ]
+  },
+  "observations": [
+    "Nested Item cleanup precedes right-to-left Leaf drops",
+    "Vec transfers through a function return into a Holder resource field without duplicate destruction",
+    "Failed push returns both nested Leaf fields unchanged",
+    "Release exactly once, allocation attempts exactly once, zero live allocations"
+  ],
+  "normativeContractsChanged": false,
+  "privateAPIChanged": false,
+  "GoChanged": false,
+  "CIChanged": false,
+  "pushed": false,
+  "pending": [
+    "String/File storage",
+    "Whole SDK coverage",
+    "Complete provenance/path/dominance/initialization proofs",
+    "Dispatcher and stage1/stage2",
+    "Linux and candidate Release"
+  ]
+}
