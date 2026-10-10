@@ -8,6 +8,10 @@ pub fn usize source_set_bytes(){return 2097152;}
 pub fn usize source_files(){return 256;}
 pub fn usize manifest_bytes(){return 65536;}
 
+// Imported layouts combine fields from multiple original source owners.
+// The source parser and joined AST retain their separate 1024-field caps.
+pub fn usize metadata_fields(){return 2048;}
+
 // Joined bodies include original modules plus authenticated SDK specializations.
 // Per-file parser limits remain separate; all downstream consumers share this cap.
 pub fn usize program_expressions(){return 16384;}

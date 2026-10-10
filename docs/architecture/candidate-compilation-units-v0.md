@@ -126,7 +126,7 @@ field types use the existing canonical resolver and its 4096-node/depth-64
 limits. A deduplicated queue follows only the selected unit's target types,
 callable signature types and their field/composite dependencies. It does not
 materialize a field table for every nominal node in the global prefix. Each
-result retains the existing 512-shape, 1024-field and 512-callable bounds;
+result retains the 512-shape, 2048-field and 512-callable bounds;
 parameter storage is capped at 32768 and owned spelling storage at 65536 bytes.
 
 Generic function targets retain their coordinates and declaration flags with

@@ -15,6 +15,7 @@ import storage_intrinsics as storage;
 import module_unit_shape_contracts as contracts;
 import module_region_types as regions;
 import sdk_vector_plan as vector_plan;
+import candidate_limits as limits;
 
 pub struct Shape {usize type;usize module_index;usize declaration;usize field_start;usize field_count;u32 abilities;bool repr_c;usize start;usize end;bool cleanup_nonempty;u32 cleanup_effects;}
 pub struct Field {u32 kind;usize type;usize module_index;usize declaration;usize source_index;usize start;usize end;usize name_start;usize name_end;usize payload_start;usize payload_count;}
@@ -63,7 +64,7 @@ fn join::Problem callable(ref v::Vec<syntax::Parsed> sources,ref signatures::Pro
 fn join::Problem shape(ref v::Vec<syntax::Parsed> sources,ref signatures::Program metadata,usize id,ref mut v::Vec<types::Type> graph,ref mut v::Vec<Shape> shapes,ref mut v::Vec<Field> fields,ref mut bytes::Buffer names,ref mut v::Vec<usize> pending,ref mut bytes::Buffer seen,usize first,usize stop,ref mut Budget work){
     let t=types::at(graph,id);let source=v::at<syntax::Parsed>(sources,t.module_index);let d=syntax::declaration_at(source,t.declaration-1);let usize field_start=v::len<Field>(fields);
     if(t.module_index<first || t.module_index>=stop){let checked=contracts::declaration(source,t.module_index,t.declaration-1,signatures::sdk_vector_source(metadata,t.module_index),ref mut work.work);if(checked.code!=0){return checked;}}
-    if(v::len<Shape>(shapes)>=512 || d.field_count>1024-field_start){return fail(10,t.module_index,d.start,d.end);}var usize i=0;
+    if(v::len<Shape>(shapes)>=512 || d.field_count>limits::metadata_fields()-field_start){return fail(10,t.module_index,d.start,d.end);}var usize i=0;
     while(i<d.field_count){if(!charge(work,1)){return fail(10,t.module_index,d.start,d.end);}let f=syntax::field_at(source,d.field_start+i);var usize type=0;
         if(f.type_root!=0){let resolved=signatures::resolve_type(metadata,source,t.module_index,f.type_root,graph);if(resolved.problem.code!=0){return fail(resolved.problem.code,t.module_index,resolved.problem.start,resolved.problem.end);}type=resolved.type;let u32 code=mark(graph,pending,seen,work,type);if(code!=0){return fail(code,t.module_index,f.start,f.end);}}
         let usize name_start=switch(append(names,work,syntax::source_view(source)[f.name_start..f.name_end])){case .ok(n):{n}case .err(code):{return fail(code,t.module_index,f.start,f.end);}};
