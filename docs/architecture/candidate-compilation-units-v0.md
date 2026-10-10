@@ -2071,3 +2071,34 @@ region enter/reset, loans, lifetimes, conflicts, moves, unsafe provenance,
 stage1/stage2, release and Linux. The public Stage 0 CLI and SDK ABI are
 unchanged. DB and CI are unchanged; no push was made. Evidence:
 docs/ops/evidence/candidate-module-region-escape-20261010.json.
+
+
+## Private scalar literal constants in owned units (2026-10-11)
+
+The first owned-unit constant slice retains private `bool`, `u8`, `i32` and
+`u32` declarations as typed values, with declaration identity, source span and
+canonical fixed-width bits. Runtime name uses retain their original use spans
+and declared types. They are values without a local binding or addressable
+place. Ordinary consumer checks reject an incompatible parameter type.
+Before owned IR assembly they become ordinary scalar literal nodes; evaluator
+identity and bits are cleared. Owned IR revalidation rejects surviving constant
+metadata. Project linking and C emission therefore use their existing literal
+transport rather than treating a constant as a variable or adding evaluator
+metadata to C.
+
+This is a partial candidate implementation of ADR 0220. Literal initializers,
+groups and scalar prefixes are admitted; negation requires a literal operand
+through groups. Every module declaration is checked,
+including unused constants. Public/attributed declarations and excluded types
+reject with E4301, unsupported expressions and `@const_eval` reject with E4302,
+and literal type/range errors retain ordinary diagnostics. Literal boolean
+`static_assert` is checked and produces no body node; false rejects with E4305.
+Expression evaluation has a 65,536-node aggregate budget and candidate
+64-level expression traversal bound, in addition to the unit work budget.
+Constants are private to their declaring module. General dependency expressions,
+cycle checks, conditional/cast evaluation and const-eval calls remain pending;
+the full ADR 0220 feature set is not claimed complete by this slice.
+
+Evidence is recorded in `docs/ops/evidence/candidate-literal-constants-20261011.json`.
+Stable CLI/API, SDK ABI, Go reference semantics, language revision, DB, CI and
+runner policy are unchanged.

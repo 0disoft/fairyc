@@ -122,7 +122,7 @@ def main():
     parser.add_argument("--report", required=True, type=Path, action="append")
     parser.add_argument("--output", required=True, type=Path)
     parser.add_argument("--vcvars", required=True, type=Path)
-    parser.add_argument("--suite", choices=("scalar", "owned", "references", "reference-call-fields", "arrays", "views", "casts", "pointers", "literals", "enum-transport", "switches", "project", "all"), default="scalar")
+    parser.add_argument("--suite", choices=("scalar", "owned", "references", "reference-call-fields", "arrays", "views", "casts", "pointers", "literals", "enum-transport", "switches", "project", "constants", "all"), default="scalar")
     args = parser.parse_args()
     scalar_cases = {name: (exit_code, "") for name, exit_code in EXPECTED.items()}
     owned_cases = {name: (0, trace) for name, trace in OWNED.items()}
@@ -147,6 +147,7 @@ def main():
                                                    "literal_c_preserves_exact_bytes_empty_views_and_cstr_storage": LITERALS["literal_c_preserves_exact_bytes_empty_views_and_cstr_storage"]}, {ENUM_TRANSPORT_REJECTION}),
               "switches": (SWITCHES | ENUM_TRANSPORT, {ENUM_TRANSPORT_REJECTION}),
               "project": (PROJECT, {PROJECT_REJECTION}),
+              "constants": ({"folded_literals_link_and_execute_as_scalar_operands": (0, "")}, {"private_literals_keep_declared_type_value_and_reject_unused_invalid_items", "constant_argument_type_mismatch_is_rejected"}),
               "all": (scalar_cases | owned_cases | reference_cases | ARRAYS | VIEWS | CASTS | POINTERS | LITERALS | ENUM_TRANSPORT | SWITCHES,
                       {REJECTION, OWNED_REJECTION, REFERENCE_PROOF, CAST_REJECTION, POINTER_REJECTION, LITERAL_REJECTION, ENUM_TRANSPORT_REJECTION})}
     expected_cases, rejections = suites[args.suite]
@@ -181,7 +182,7 @@ def main():
                        "tests::module_unit_c_owned::", "tests::module_unit_c_references::",
                        "tests::module_unit_c_arrays::", "tests::module_unit_c_views::",
                        "tests::module_unit_c_casts::", "tests::module_unit_c_pointers::",
-                       "tests::module_unit_casts::", "tests::module_unit_c_literals::", "tests::module_unit_c_enums::", "tests::module_project_link::")
+                       "tests::module_unit_casts::", "tests::module_unit_c_literals::", "tests::module_unit_c_enums::", "tests::module_project_link::", "tests::module_unit_constants::")
                        if identity.startswith(prefix)), None)
         assert prefix is not None
         name = identity.removeprefix(prefix)

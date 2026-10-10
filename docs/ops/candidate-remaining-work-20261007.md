@@ -123,7 +123,7 @@ provider-local helper 및 nominal 인자는 원래 선언 정체성을 보존한
 54~55번 추가 선행 연결: inert struct 원시 포인터의 선언 정체성·모듈 전달·safe-ref cast와 repr(C) pointee의 외부 함수 인자/반환을 연결했다. 개발/릴리스 각각 정상 5개·거부 5개와 생성 C 20회, ABI 증거 제거·포인터 namespace API 2개, Buffer 회귀 8회가 통과했다. 근거: `evidence/candidate-nominal-pointer-api-20261008.json`, `evidence/candidate-nominal-pointer-cli-20261008.json`, `evidence/candidate-nominal-pointer-buffer-regression-20261008.json`. 이 선행 구현만으로 String SDK 실행이나 resource 포인터를 완료 처리하지 않는다.
 
 56. 부분 완료: @must_use의 단일 무인자 선언·inert 반환 eligibility·명시 discard와 소비 문맥 연결. 괄호/블록/if/switch 끝값으로 숨긴 무시 호출은 E4202, resource/Result/borrow/void·중복·인자·잘못된 대상은 E4201. scalar generic와 effects 조합을 지원하며 HIR에 marker를 보존하고 MIR에서는 기존 계약대로 제거. 21개 fixture·native 18회·HIR marker API test·Go 대표 6개 일치. 근거: `evidence/candidate-resource-must-use-20261007.json`. 외부 scalar 함수 marker 전파는 63번에서, extern-C marker는 55번에서 연결. @test/@const_eval 조합은 후속 단위.
-57. 모듈 상수·제한된 스칼라 컴파일 타임 계산·static_assert 연결.
+57. 부분 완료: private bool/u8/i32/u32 리터럴 상수를 선언 타입·canonical bits·사용 위치와 함께 값 검사에 연결하고 owned IR/C에서는 일반 리터럴로 내림. 그룹·스칼라 prefix·리터럴 bool static_assert만 허용하며 미지원 식·@const_eval·제외 타입과 사용되지 않는 오류 선언도 거부. native 3개 및 중첩 음수 guard 추가 재검증 1개, 생성 C low/optimized 실행 2회 통과. 근거: `evidence/candidate-literal-constants-20261011.json`. 일반 상수식·의존성/순환·조건/cast·const_eval 함수와 전체 static_assert 연결은 남음.
 58. 정확한 source_location 전개와 선언 문서 주석 연결.
 59. 부분 완료: named immutable shared byte descriptor와 직접 슬라이스의 copied u8 반복을 owned HIR의 capture/For/Index에 연결했다. 경계 한 번 평가, nested/generic 반복, shadowing, continue/break/return과 cleanup을 개발/릴리스 각각 프로그램 4개·거부 7개·native 합계 16회 및 개발 owned API 1개로 확인했다. 근거: `evidence/candidate-byte-loops-dev-20261009.json`, `evidence/candidate-byte-loops-release-20261009.json`, `evidence/candidate-byte-loops-api-20261009.json`. 다른 반복 형태와 region 할당은 도달 소스의 요구에 따라 남는다.
 60. 부분 완료: 값 보존 scalar `as` 캐스트를 이름·타입·owned HIR·MIR 검증·C 실행까지 연결. u8→i32/i64/u32/usize, i32→i64, u32→i64/usize만 허용. narrowing·부호 변경·bool/enum/raw-pointer·동일 타입은 기존 계약에 따라 거부. 12개 fixture·두 후보 프로필·native 12회 및 위조 MIR 거부 1개 API test 통과. 근거: `evidence/candidate-resource-scalar-casts-20261007.json`. 전체 자기 소스 inventory·모듈·unsafe/포인터 연결은 후속 단위에서 마무리하며 스크립트 대체 컴파일로 우회하지 않음.
@@ -3063,3 +3063,42 @@ Receipt: `evidence/candidate-ir-permission-index-20261011.json`. The owned-IR ve
 Four initial Release native cases pass: 1089 frames and 1080 cross-unit calls, including 1000 casts in one body; stripped/changed cast authority; forged raw owner/argument/unsafe metadata; and shared cleanup output. After adding cached SDK storage handling, a fifth native case checks the authentic Vec view body and seven mutations through both standalone and cached paths, plus exhausted work in both paths. The four initial cases have no SDK storage operations, so their unchanged relevant results are reused. Shared cleanup C still matches two previously executed low/optimized artifacts. Current source checking passes (285 files, 3573 MIR functions).
 
 All 235 original inputs compile into 48 units with 25 retries. The complete rebound owned IR now assembles and passes revalidation under the existing project budget. Full linking then rejects at `records.fy`, bytes 4211..4256. Cache-only diagnostic 430003 identifies the cross-unit invocation guard: the call is unchecked or has neither ordinary nor specialized kind. A follow-up invocation-state probe confirms kind 1, unchecked, with five arguments. The first four arguments have matching expected/actual types and are checked. Argument 4 is the `PAYLOAD_BODY` reference: expected type 5, actual type 0, state 0 and unchecked. Typed module constant references are not yet connected to owned value/IR/C lowering; that is the next task. Original C generation/execution, native driver, default timeout/performance, standalone candidate profiles, Linux, full suite and Stage1/Stage2 remain. Go, stable CLI/API, SDK ABI, DB, CI and repository hygiene are unchanged; no push.
+
+
+## Private scalar literals and first complete original link (2026-10-11)
+
+Receipt: `evidence/candidate-literal-constants-20261011.json`.
+
+`PAYLOAD_BODY` now retains its declared u32 type and zero bits through call
+argument checking. Private bool/u8/i32/u32 literal constants are values without
+local storage; use spans and declaration identities survive value checking.
+Owned IR lowers them to ordinary literals and rejects leftover evaluator fields.
+Unused invalid declarations and unsupported constant forms reject explicitly.
+This is a partial item 57 implementation; the full ADR 0220 evaluator remains
+pending. Negation requires a literal operand through groups, so nested negation
+is rejected rather than allowing a signed-minimum trap to pass.
+
+Three focused Release native tests pass, with a fourth observation selectively
+rerunning literal/error coverage after the nested-negation guard. The unchanged
+C and mismatch fixtures have no nested negation and reuse their initial results.
+Generated C executes successfully under MSVC /Od and /O2. The final locked source
+check passes: 286 source files, 3586 MIR functions. The general C observer gains
+a constants suite; stable native runner policy is unchanged.
+
+The current exact original closure adds the new constant helper to the previous
+235 inputs, making 236 files. All 48 compilation units and 25 retries succeed;
+the complete owned IR revalidates and links 3558 frames with work 3321980.
+A fresh final probe verifies the current source bytes. Original full C generation
+then rejects with code 1002, module 0, bytes 1425..1435, and transactional output
+remains empty. The next task is to locate the exact CFG/C work-budget failure.
+The original full-link/C observer uses an explicit 120-second process deadline;
+the earlier link-only control took 62.4 seconds, beyond the stable native test's
+unchanged default 60-second process deadline. Native compilation uses the existing
+validation-only 120-second bootstrap build deadline. Neither observation proves
+production timeout readiness.
+
+Original full C execution, native driver, default timeout/performance, standalone
+candidate dev/Release, Linux, the full suite and Stage1/Stage2 remain pending.
+Only the candidate unit contract/progress and local observers change; language
+semantics in the Go reference, stable CLI/API, SDK ABI, DB, CI and repository
+hygiene are unchanged. No push.
