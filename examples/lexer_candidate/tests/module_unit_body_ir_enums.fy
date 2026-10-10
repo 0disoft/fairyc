@@ -4,6 +4,7 @@ import module_unit_body_ir_lower as lower;
 import module_unit_body_ir_lookup as lookup;
 import module_unit_body_ir_verify as proof;
 import module_unit_body_ir_enums as enums;
+import module_unit_body_ir_switches as switches;
 import module_unit_cleanup_mir_model as clean_ir;
 import module_unit_moves as moves;
 import module_unit_values as values;
@@ -42,7 +43,17 @@ fn clean_ir::Program copied_cleanup(ref clean_ir::Program p){
 }
 fn ir::Body copied_body(ref ir::Body b,u32 mode,usize enum_type,usize scalar){
     var v::Vec<ir::Node> nodes=v::empty<ir::Node>();var v::Vec<ir::Statement> statements=v::empty<ir::Statement>();var v::Vec<m::Local> locals=v::empty<m::Local>();var usize i=0;
-    while(i<ir::node_count(b)){var n=ir::node_at(b,i);if(mode==7 && n.value.kind==10 && n.value.type==enum_type){n.value.field.owner=scalar;}if(mode==8 && n.value.kind==11 && n.value.field.id!=0){n.value.field.source_index+=1;}if(mode==9 && n.value.kind==1 && n.literal_kind==5){n.value.type=scalar;}assert(v::push<ir::Node>(ref mut nodes,n).is_ok);i+=1;}i=0;while(i<ir::statement_count(b)){assert(v::push<ir::Statement>(ref mut statements,ir::statement_at(b,i)).is_ok);i+=1;}i=1;while(i<=ir::local_count(b)){assert(v::push<m::Local>(ref mut locals,ir::local_at(b,i)).is_ok);i+=1;}
+    var usize first_arm=0;while(i<ir::node_count(b)){if(ir::node_at(b,i).value.kind==18 && first_arm==0){first_arm=ir::node_at(b,i).value.source_index;}i+=1;}i=0;
+    while(i<ir::node_count(b)){var n=ir::node_at(b,i);if(mode==7 && n.value.kind==10 && n.value.type==enum_type){n.value.field.owner=scalar;}if(mode==8 && n.value.kind==11 && n.value.field.id!=0){n.value.field.source_index+=1;}if(mode==9 && n.value.kind==1 && n.literal_kind==5){n.value.type=scalar;}
+        if(mode==11 && n.value.kind==15){n.value.target=scalar;}if(mode==12 && n.value.kind==15){n.value.right=0;n.syntax.right=0;}
+        if(mode==13 && n.value.kind==18){n.value.expected=scalar;}if(mode==14 && n.value.kind==18){n.value.target=scalar;}
+        if(mode==15 && (n.value.kind==16 || n.value.kind==32)){n.value.field.owner=scalar;}if(mode==16 && (n.value.kind==16 || n.value.kind==32)){n.value.expected=scalar;}
+        if(mode==17 && n.value.kind==33){n.value.field.source_index+=1;}if(mode==18 && n.value.kind==17){n.value.target=scalar;}
+        if(mode==19 && n.value.kind==17){n.value.field.owner=scalar;}if(mode==20 && n.value.kind==17){n.value.place.root=0;}
+        if(mode==21 && n.value.kind==2 && n.value.binding>1){n.value.start=ir::start(b);n.syntax.start=n.value.start;}
+        if(mode==22 && n.value.kind==33){n.value.expected=scalar;}if(mode==23 && n.value.kind==17){n.value.state=1;n.value.type=scalar;}
+        if(mode==26 && n.value.kind==19){n.value.left=first_arm;n.syntax.left=first_arm;}if(mode==27 && n.value.kind==33){n.value.right=0;n.syntax.right=0;}
+        assert(v::push<ir::Node>(ref mut nodes,n).is_ok);i+=1;}i=0;while(i<ir::statement_count(b)){var stmt=ir::statement_at(b,i);if(mode==28 && stmt.value.kind==1){stmt.value.expression=0;}assert(v::push<ir::Statement>(ref mut statements,stmt).is_ok);i+=1;}i=1;while(i<=ir::local_count(b)){var local=ir::local_at(b,i);if(mode==24 && local.kind==4){local.kind=1;}if(mode==25 && local.kind==4){local.scope+=1;}if(mode==29 && local.kind==4){local.expected=scalar;}assert(v::push<m::Local>(ref mut locals,local).is_ok);i+=1;}
     assert(ir::call_count(b)==0 && ir::region_count(b)==0 && ir::reset_count(b)==0 && ir::placement_count(b)==0);let text=switch(bytes::copy(ir::text_view(b))){case .ok(t):{t}case .err(_):{assert(false);return copied_body(b,mode,enum_type,scalar);}};
     return ir::assemble_body(ir::body(b),ir::source_bytes(b),ir::start(b),ir::end(b),nodes,statements,locals,v::empty<m::Invocation>(),v::empty<m::Argument>(),v::empty<regions::Scope>(),v::empty<regions::Exit>(),text);
 }
@@ -55,4 +66,14 @@ fn u32 mutated(ref ir::Program p,u32 mode){
 }
 @test @effects(console) fn void owned_enums_reject_forged_ranges_cycles_names_and_constructor_fields(){
     let p=retained(b"module main;enum E{Empty;Data{i32 a;bool b;};}fn i32 main(){let E empty=.Empty;let E value=.Data{.a=7,.b=true};discard empty;discard value;return 0;}",b"");var usize total=0;assert(enums::check(ref p,ref mut total).code==0 && total>0 && total<1048576);var usize remaining=0;while(remaining<total){var usize work=1048576-remaining;assert(enums::check(ref p,ref mut work).code==1002);remaining+=1;}assert(mutated(ref p,0)==0);var u32 mode=1;while(mode<=10){assert(mutated(ref p,mode)==1001);mode+=1;}
+}
+
+@test @effects(console) fn void owned_switches_recheck_exhaustive_provider_and_builtin_patterns(){
+    let p=retained(b"module main;import provider as p;fn i32 f(p::E value){return switch(value){case .Data{.flag=flag,.n=n}:{if(flag){n}else{0}}case .Empty:{1}};}fn i32 option(Option<i32> value){return switch(value){case .none:{assert(false);}case .some(n):{n}};}fn i32 result(Result<i32,bool> value){return switch(value){case .err(_):{return 2;}case .ok(n):{n}};}fn i32 nested(Option<Result<i32,bool>> value){return switch(value){case .some(value):{switch(value){case .ok(value):{value}case .err(_):{3}}}case .none:{0}};}",b"module provider;pub enum E{Empty;Data{i32 n;bool flag;};}");
+    assert(proof::check(ref p).code==0);var usize frame=1;while(frame<=ir::count(ref p)){var usize total=0;assert(switches::check_body(ref p,ir::at(ref p,frame),frame,ref mut total).code==0 && total>0);var usize remaining=0;while(remaining<total){var usize work=1048576-remaining;assert(switches::check_body(ref p,ir::at(ref p,frame),frame,ref mut work).code==1002);remaining+=1;}frame+=1;}
+}
+
+@test @effects(console) fn void owned_switches_reject_missing_arms_forged_payloads_and_escaped_symbols(){
+    let p=retained(b"module main;enum E{Empty;Data{i32 n;bool flag;};}fn i32 f(E value){return switch(value){case .Data{.flag=flag,.n=n}:{if(flag){n}else{0}}case .Empty:{1}};}",b"");let b=ir::at(ref p,1);var usize scalar=0;var usize i=1;while(i<=clean_ir::type_count(ir::cleanup_ir(ref p))){let t=clean_ir::type_at(ir::cleanup_ir(ref p),i);if(t.kind==1 && t.scalar==5){scalar=i;}i+=1;}assert(scalar!=0);
+    var u32 mode=11;while(mode<=29){let altered=copied_body(b,mode,0,scalar);var usize work=0;let result=switches::check_body(ref p,ref altered,1,ref mut work);if(result.code!=1001){discard io::write_u32(mode);discard io::write(" switch mutation\n");}assert(result.code==1001);mode+=1;}
 }

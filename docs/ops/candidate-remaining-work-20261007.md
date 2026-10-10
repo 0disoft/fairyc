@@ -2757,3 +2757,16 @@ Receipt: `docs/ops/evidence/candidate-module-enum-c-transport-20261010.json`. Th
 - Changes: private C API and local C verifier expanded; normative contracts, stable CLI, SDK ABI, Go, DB, CI and hygiene unchanged; no push.
 - Deferred: Linux, candidate Release, full suite, source switch execution and public enum ABI. Generated C `/O2` is not candidate Release evidence.
 - Remaining: Enum/Option/Result switch CFG and active payload binding execution; Owned exhaustive-pattern table and active-payload proof; Authenticated SDK/Region and full dispatcher execution; Foreign aggregate ABI layout proof and complete source/unsafe/path proof; Stage1/stage2 and promotion.
+
+## Candidate owned switch pattern proof (2026-10-10)
+
+Receipt: `docs/ops/evidence/candidate-owned-switch-proof-20261010.json`. Owned Enum/Option/Result switch tables and lexical payload bindings now receive a source-independent structural proof before CFG lowering. CFG and generated-C switch execution remain pending.
+
+- Tables: concrete scrutinee/result types; every arm and reverse-list record has one owning switch; every canonical variant appears exactly once, with no missing or duplicate arm.
+- Payloads: every named enum payload field appears once at its canonical owner/field/type coordinates; reordered fields and arms retain their identities; builtin named and wildcard payloads retain their expected types.
+- Symbols: one owning arm per pattern, field wrapper and lexical binding; original symbol, type and scope agree; retained identifier uses remain inside that arm body, including nested switches and shadowed names.
+- Results: continuing tail types match the switch result; the reference's narrow direct-final-return Result and assert(false) Option/Result no-tail exceptions remain intact. This is not full path/dominance proof.
+- Validation: final 4/4 focused native identities pass, including provider/nested/empty enum regressions, nineteen switch/body/local mutations and the existing ten layout/construction mutations. Every incomplete measured-work prefix of four representative switch frames reports 1002. Locked source check passes 260 sources and 3307 MIR functions.
+- Changes: private verifier API and source lock updated. Normative contracts, stable CLI, SDK ABI, Go, DB, CI and hygiene unchanged; no push.
+- Deferred: allocation injection, standalone candidate rebuild, candidate Release, Linux, full suite and generated switch C execution.
+- Remaining: switch CFG and active-variant payload binding C execution; authenticated SDK/Region and whole dispatcher; source/unsafe authentication, full path/dominance/initialization proof; stage1/stage2 and promotion.

@@ -1,0 +1,123 @@
+{
+  "schema": "fairyc.candidate-owned-switch-proof/v1",
+  "passed": true,
+  "parentCommit": "386eed3feee93572d4de99b30672a7320ad8ef15",
+  "identity": {
+    "sources": [
+      {
+        "sha256": "06f6138105059300f8471dedfe96755391ed972a18a4bebb835e9211d6792577",
+        "path": "examples/lexer_candidate/src/module_unit_body_ir_switches.fy"
+      },
+      {
+        "sha256": "71068cd57c77a204b4bc65ff18e59940ff336aac776243b64389cf84ced51ea1",
+        "path": "examples/lexer_candidate/src/module_unit_body_ir_verify.fy"
+      },
+      {
+        "sha256": "3631837ea8ec694f376efa721486910f891b01ed95b8f02d88732a3105c448eb",
+        "path": "examples/lexer_candidate/tests/module_unit_body_ir_enums.fy"
+      },
+      {
+        "sha256": "a9e912bf6620773ef9ab57b9b7b7034b5841b2cb78b120269a49d892d94a10a3",
+        "path": "examples/lexer_candidate/fairy.lock"
+      }
+    ],
+    "nativeCompiler": {
+      "sha256": "d36dae1b99751322e447880aaf4d28321bd6d53bdf776185308c6c4504889bb2",
+      "path": ".cache/candidate-tagged/compiler-origin-patterns.exe"
+    }
+  },
+  "sourceCheck": {
+    "argv": [
+      "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\compiler-origin-patterns.exe",
+      "check",
+      "--locked"
+    ],
+    "stdout": "check ok: 2 instance(s), 260 source file(s), 3307 MIR function(s), lock verified\r\n",
+    "stderr": "",
+    "exit": 0
+  },
+  "native": {
+    "tests": [
+      {
+        "identity": "tests::module_unit_body_ir_enums::owned_enums_keep_nested_inert_payloads_provider_coordinates_and_tagged_fields",
+        "outcome": "passed",
+        "trapCategory": null,
+        "stdoutBase64": "",
+        "stderrBase64": ""
+      },
+      {
+        "identity": "tests::module_unit_body_ir_enums::owned_enums_reject_forged_ranges_cycles_names_and_constructor_fields",
+        "outcome": "passed",
+        "trapCategory": null,
+        "stdoutBase64": "",
+        "stderrBase64": ""
+      },
+      {
+        "identity": "tests::module_unit_body_ir_enums::owned_switches_recheck_exhaustive_provider_and_builtin_patterns",
+        "outcome": "passed",
+        "trapCategory": null,
+        "stdoutBase64": "",
+        "stderrBase64": ""
+      },
+      {
+        "identity": "tests::module_unit_body_ir_enums::owned_switches_reject_missing_arms_forged_payloads_and_escaped_symbols",
+        "outcome": "passed",
+        "trapCategory": null,
+        "stdoutBase64": "",
+        "stderrBase64": ""
+      }
+    ],
+    "argv": [
+      "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\compiler-origin-patterns.exe",
+      "test",
+      "--native",
+      "--json",
+      "--capture-output",
+      "--file",
+      "tests/module_unit_body_ir_enums.fy",
+      "--locked"
+    ],
+    "report": {
+      "sha256": "2d257b384a7c87fbdd5ac89915a05d8ada3c16ea232a88b2ecd12f36a56e5100",
+      "path": ".cache/candidate-tagged/owned-switch-proof/native-final.json"
+    },
+    "failed": 0,
+    "count": 4,
+    "exit": 0,
+    "passed": 4
+  },
+  "behavior": {
+    "tests": "Provider enum with reordered fields and arms; nested Option<Result> and shadowed symbols; nineteen switch/body/local mutations rejected as 1001; every incomplete measured-work prefix in four representative frames reports 1002; existing enum proof cases and ten layout/construction mutations remain covered",
+    "results": "Arm tail type matches switch result; narrow direct-final-return Result and assert(false) Option/Result no-tail exceptions retained",
+    "symbols": "One owning arm per pattern, field wrapper and lexical symbol; symbol source/type/scope and every retained identifier use confined to that arm body",
+    "payloads": "Complete exactly-once named payload fields at canonical enum/field/type coordinates; named and wildcard builtin payload types",
+    "tables": "Enum/Option/Result concrete scrutinee and result types; one owning switch per arm/list record; canonical declaration ranges, exactly-once coverage of every variant"
+  },
+  "sourceOfTruth": [
+    "docs/adr/0050-restricted-inert-enum-execution.md",
+    "examples/lexer_candidate/src/module_unit_value_match.fy"
+  ],
+  "privateAPIExpanded": true,
+  "normativeContractsChanged": false,
+  "stableCLIChanged": false,
+  "sdkABIChanged": false,
+  "GoChanged": false,
+  "dbChanged": false,
+  "ciChanged": false,
+  "hygieneChanged": false,
+  "pushed": false,
+  "pending": [
+    "Switch CFG and active-variant payload binding C execution",
+    "Authenticated SDK/Region and whole dispatcher execution",
+    "Original source/unsafe authentication and full path/dominance/initialization proof",
+    "Stage1/stage2 and promotion"
+  ],
+  "skipped": {
+    "developmentBuild": "Focused native tests compile and execute final Fairy implementation; standalone candidate rebuild deferred",
+    "Linux": "Windows-focused verification unit",
+    "releaseCandidate": "Separate release batch",
+    "fullSuite": "Four focused native identities only",
+    "allocationInjection": "Allocation error propagation inspected; no injected allocator",
+    "generatedSwitchC": "No CFG or C switch execution admitted in this proof unit"
+  }
+}
