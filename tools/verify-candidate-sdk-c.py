@@ -35,6 +35,23 @@ FILE_CASES = {
     "sdk_c_executes_file_buffer_read_to_end": (2, 2, 2, 0, 3, None),
     "sdk_c_executes_file_buffer_failure_preserves_cursor": (2, 2, 2, 0, 2, 2),
 }
+FILE_SOURCE_CASES = {
+    "sdk_c_executes_original_file_loader_limits_and_errors": (4, 3, 6, 1, 4, None),
+    "sdk_c_executes_original_file_loader_allocation_failure": (1, 0, 1, 1, 1, 1),
+}
+FILE_CASES.update(FILE_SOURCE_CASES)
+
+
+def loader_fixtures(folder):
+    data = {
+        "small-λ.bin": b"A\0\xce\xbbZ",
+        "empty.bin": b"",
+        "exact.bin": bytes(index % 251 for index in range(65536)),
+        "too-big.bin": bytes(index % 251 for index in range(65537)),
+    }
+    for name, raw in data.items():
+        (folder / name).write_bytes(raw)
+    return {name: hashlib.sha256(raw).hexdigest() for name, raw in data.items()}
 
 CASES = {
     "sdk_c_executes_nested_vector_move_and_cleanup":
@@ -82,6 +99,9 @@ CASES.update({name: ((["stage0_system_heap.c", "stage0_buffer.c"] if "file_buffe
                     ["stage0_windows_file.c", "stage0_windows_file_portable.c"] +
                     (["stage0_windows_file_buffer.c"] if "file_buffer_" in name else []), [], "")
               for name in FILE_CASES})
+CASES.update({name: (["stage0_system_heap.c", "stage0_buffer.c", "stage0_text_view.c",
+                     "stage0_windows_file.c", "stage0_windows_file_portable.c"], [], "")
+              for name in FILE_SOURCE_CASES})
 PROOFS = {"sdk_c_rejects_forged_cstring_view_authority","sdk_c_rejects_forged_storage_metadata","pointer_c_rejects_forged_raw_view_metadata","rejected_import_expansion_rolls_back_borrow_types","sdk_c_plan_respects_work_budget_before_authority_or_output",
           "sdk_c_region_plan_respects_placement_budget_before_output"}
 
@@ -100,7 +120,7 @@ def main():
         report = json.loads(raw)
         assert report["engine"] == "native" and report["target"] == "x86_64-windows-msvc"
         for test in report["tests"]:
-            prefix = next((prefix for prefix in ("tests::module_unit_imports::", "tests::module_unit_c_pointers::", "tests::module_unit_c_sdk::", "tests::module_unit_c_text::", "tests::module_unit_c_fs::") if test["identity"].startswith(prefix)), "")
+            prefix = next((prefix for prefix in ("tests::module_unit_imports::", "tests::module_unit_c_pointers::", "tests::module_unit_c_sdk::", "tests::module_unit_c_text::", "tests::module_unit_c_fs::", "tests::module_unit_c_file_source::") if test["identity"].startswith(prefix)), "")
             if prefix:
                 name = test["identity"].removeprefix(prefix)
                 if name in CASES or name in PROOFS:
@@ -146,6 +166,7 @@ def main():
         vector = "stage0_vector_storage.c" in components
         textual = name in TEXT_CASES
         filing = name in FILE_CASES
+        loading = name in FILE_SOURCE_CASES
         heap_checked = buffered or vector or name in {"sdk_c_executes_region_placement_and_param_origin", "sdk_c_executes_region_storage_or_tracking_failure_as_result"}
         placing = name in {"sdk_c_executes_region_placement_and_param_origin",
                            "sdk_c_executes_region_storage_or_tracking_failure_as_result"}
@@ -267,14 +288,14 @@ def main():
                 b"if(GetHandleInformation((HANDLE)before.handle,&(DWORD){0})||GetLastError()!=ERROR_INVALID_HANDLE)++file_drop_errors;}return status;}\n"
                 b"_Static_assert(sizeof(struct fy_std_windows_file_v0)==16&&_Alignof(struct fy_std_windows_file_v0)==8&&offsetof(struct fy_std_windows_file_v0,open)==8,\"runtime File layout\");\n")
             if buffered:
-                buffer_drops = 1
+                buffer_drops = 4 if name == "sdk_c_executes_original_file_loader_limits_and_errors" else 1
                 instrumentation += (
                     b"#undef fy_std_buffer_drop_v0\nstatic unsigned buffer_dropped,buffer_drop_errors;\n"
                     b"uint32_t fy_std_buffer_drop_v0(struct fy_std_buffer_v0 *b){uint32_t r=fy_test_actual_buffer_drop_v0(b);"
                     b"++buffer_dropped;if(r)++buffer_drop_errors;return r;}\n")
             checks = f"file_opened=={opened}&&file_closed=={closed}&&file_dropped=={drops}&&file_auto_closed=={auto_closed}&&!file_drop_errors"
             if buffered:
-                checks += f"&&heap_live==0&&heap_attempts=={attempts}&&buffer_dropped==1&&!buffer_drop_errors"
+                checks += f"&&heap_live==0&&heap_attempts=={attempts}&&buffer_dropped=={buffer_drops}&&!buffer_drop_errors"
             instrumentation += ("extern int32_t fy_candidate_entry(void);\nint main(void){int32_t result=fy_candidate_entry();"
                                 f"return result?result:({checks}?0:90);}}\n").encode()
         runtime.write_bytes(heap + b"#define FY_STD_SYSTEM_HEAP_MAX_ALIGNMENT_V0 ((size_t)16)\n" +
@@ -306,9 +327,15 @@ def main():
                     run_environment["FY_TEST_HEAP_FAIL_AT"] = str(failure)
                 if filing:
                     with tempfile.TemporaryDirectory(prefix="candidate-file-", dir=output) as scratch:
+                        fixture_hashes = loader_fixtures(Path(scratch)) if loading else None
                         run = driver.run([str(binary)] + argv, Path(scratch), run_environment, stdin=stdin)
                         assert run["exit"] == 0 and run["stdout"] == expected and run["stderr"] == expected_stderr, run
-                        assert not list(Path(scratch).iterdir()), f"File fixture left files behind: {name}"
+                        if loading:
+                            observed = {path.name: hashlib.sha256(path.read_bytes()).hexdigest()
+                                        for path in Path(scratch).iterdir()}
+                            assert observed == fixture_hashes, (name, observed)
+                        else:
+                            assert not list(Path(scratch).iterdir()), f"File fixture left files behind: {name}"
                 else:
                     run = driver.run([str(binary)] + argv, output, run_environment, stdin=stdin)
                 assert run["exit"] == 0 and run["stdout"] == expected and run["stderr"] == expected_stderr, run
@@ -319,6 +346,7 @@ def main():
                                    textCounts={"stringDrop": string_drops, "cstringDrop": cstring_drops, "dropStatusErrors": 0} if textual else None,
                                    fileCounts={"open": opened, "close": closed, "drop": drops, "automaticClose": auto_closed,
                                                "dropStatusErrors": 0, "closedHandleVerified": auto_closed > 0} if filing else None,
+                                   loaderFixtures=fixture_hashes if loading else None,
                                    vectorCounts={"release": 1, "releaseStatusErrors": 0} if vector else None,
                                    bufferCounts={"drop": buffer_drops, "dropStatusErrors": 0} if buffered else None,
                                    arenaCounts={"initialize": arena_count, "drop": arena_count, "nonzeroStatus": 0} if arena else None,
