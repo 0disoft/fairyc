@@ -1,0 +1,137 @@
+{
+  "schema": "fairyc.candidate-anonymous-switch-payload/v1",
+  "passed": true,
+  "parentCommit": "0d21e1b2c7718fd95d3406b2aec3ac547810fb4d",
+  "identity": {
+    "compiler": {
+      "path": ".cache/candidate-tagged/compiler-origin-patterns.exe",
+      "sha256": "d36dae1b99751322e447880aaf4d28321bd6d53bdf776185308c6c4504889bb2"
+    },
+    "sources": [
+      {
+        "path": "examples/lexer_candidate/src/module_unit_name_walk.fy",
+        "sha256": "1fc7c36aa6452cf3907d97b1520a3155c0a0e6baa7a0b38d5a45a8118dd52bac"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_body_ir_switches.fy",
+        "sha256": "2e6059287dc3c755933eebddb21caee2d90c060224c67bd71fea7aa4e0cb9c5d"
+      },
+      {
+        "path": "examples/lexer_candidate/tests/module_unit_cfg.fy",
+        "sha256": "f645db5493a32c44c046145c56ce9204841c8dea89c73ab8b0c957fb660ef86f"
+      },
+      {
+        "path": "examples/lexer_candidate/tests/module_unit_matches.fy",
+        "sha256": "edfae591175f96f5cad373b5772608b2e18267fbf7ceebbd348f5f6339188d93"
+      },
+      {
+        "path": "examples/lexer_candidate/tests/module_unit_names.fy",
+        "sha256": "551616264acd53ac08ac75e327eac61396911b15916e98f115bf1fd0adf76aca"
+      },
+      {
+        "path": "examples/lexer_candidate/fairy.lock",
+        "sha256": "55ed40ff8ef068dfbb81f45eb52b619eea848c93438fdcddc95976b2fdd138e4"
+      }
+    ]
+  },
+  "sourceCheck": {
+    "argv": [
+      "compiler-origin-patterns.exe",
+      "check",
+      "--locked"
+    ],
+    "exit": 0,
+    "stdout": "check ok: 2 instance(s), 261 source file(s), 3310 MIR function(s), lock verified\r\n",
+    "note": "Final compiler sources and lock unchanged after this check; only the rejected loop fixture in a test body was corrected"
+  },
+  "native": {
+    "failed": 0,
+    "passed": 5,
+    "reports": [
+      {
+        "path": ".cache/candidate-tagged/anonymous-switch-payload/native.json",
+        "sha256": "91b0b9678d686ff2bf09bca1d76c8757e20bc52da3a5d0be72dafa85e1f32468"
+      },
+      {
+        "path": ".cache/candidate-tagged/anonymous-switch-payload/native-corrected.json",
+        "sha256": "dadf4608aec364d08a002bad931b6a78b07ab73b121dcb0bd22b1ff93235fc17"
+      }
+    ],
+    "reuse": "Four identities passed on final unchanged compiler inputs and unchanged test bodies. Only the failed anonymous-cleanup fixture was corrected and rerun; final outcomes are merged by identity in report order",
+    "tests": [
+      {
+        "identity": "tests::module_unit_body_ir_enums::owned_switches_recheck_exhaustive_provider_and_builtin_patterns",
+        "outcome": "passed",
+        "trapCategory": null,
+        "stdoutBase64": "",
+        "stderrBase64": ""
+      },
+      {
+        "identity": "tests::module_unit_cfg::cfg_anonymous_payloads_keep_distinct_slots_and_all_owned_exit_cleanup",
+        "outcome": "passed",
+        "trapCategory": null,
+        "stdoutBase64": "",
+        "stderrBase64": ""
+      },
+      {
+        "identity": "tests::module_unit_matches::builtin_switches_bind_payloads_and_contextualize_arm_values",
+        "outcome": "passed",
+        "trapCategory": null,
+        "stdoutBase64": "",
+        "stderrBase64": ""
+      },
+      {
+        "identity": "tests::module_unit_matches::nominal_payload_bindings_feed_fields_calls_and_inferred_locals",
+        "outcome": "passed",
+        "trapCategory": null,
+        "stdoutBase64": "",
+        "stderrBase64": ""
+      },
+      {
+        "identity": "tests::module_unit_names::use_before_definition_duplicates_and_escaped_patterns_are_rejected",
+        "outcome": "passed",
+        "trapCategory": null,
+        "stdoutBase64": "",
+        "stderrBase64": ""
+      }
+    ],
+    "count": 5
+  },
+  "behavior": {
+    "bodyProof": "Every retained payload binding, including a wildcard, must own a real matching local slot",
+    "tests": "Ten anonymous slots across Result<R,R>, Result<R,i32> and an enum with two wildcard fields; three match-arm, one return, one propagation and one break payload drop; wildcard identifier lookup rejects; named/inferred/nested switch regressions pass",
+    "cleanup": "Existing ownership analysis and CFG produce anonymous payload drops at normal match-arm completion, early return, propagation error and break",
+    "oracle": "Reference builtin MIR retains an anonymous payload binding and schedules its cleanup; no generated candidate switch C execution yet",
+    "resolver": "Each switch wildcard payload has a distinct kind4 anonymous symbol; not registered in active lookup or duplicate-name checks; other wildcard iteration behavior is unchanged"
+  },
+  "correctedAttempt": {
+    "initialOutcome": "failed",
+    "correction": "Create the tagged owner inside the loop, exercising supported break cleanup without reusing a moved loop-carried owner",
+    "initialDiagnostic": "1105 at 437..507 lower",
+    "identity": "tests::module_unit_cfg::cfg_anonymous_payloads_keep_distinct_slots_and_all_owned_exit_cleanup",
+    "cause": "Fixture consumed a resource parameter from a repeated loop"
+  },
+  "privateAPIExpanded": true,
+  "normativeContractsChanged": false,
+  "stableCLIChanged": false,
+  "sdkABIChanged": false,
+  "GoChanged": false,
+  "dbChanged": false,
+  "ciChanged": false,
+  "hygieneChanged": false,
+  "pushed": false,
+  "pending": [
+    "C variant tests, active payload extraction and runtime drop traces",
+    "Authenticated SDK/Region and whole dispatcher",
+    "Full source/unsafe/path/dominance/initialization proof",
+    "Stage1/stage2 and promotion"
+  ],
+  "skipped": {
+    "generatedSwitchC": "C switch emitter remains pending",
+    "releaseCandidate": "Separate release batch",
+    "Linux": "Windows-focused slice",
+    "developmentBuild": "Focused native compile and execution only",
+    "fullSuite": "Five related identities; unchanged passing tests reused",
+    "allocationInjection": "Not injected"
+  }
+}

@@ -15,7 +15,7 @@ fn bool name(ref ir::Body b,usize id,ref u8[] expected,ref mut usize work,ref mu
 fn bool binding(ref ir::Body b,usize original,usize type,m::Field field,usize arm,ref mut v::Vec<usize> owners,ref mut v::Vec<usize> locals,ref mut usize work,ref mut u32 code){
     let id=lookup::node(b,original);if(!mark(owners,id,arm) || !charge(work,1,code)){return false;}let e=ir::node_at(b,id-1).value;
     if(e.kind!=17 || e.state!=2 || e.type!=0 || e.target!=type || e.expected!=type || !same(e.field,field) || e.left!=0 || e.right!=0){return false;}
-    let root=e.place.root;if(root==0){return name(b,id,b"_",work,code);}if(root>ir::local_count(b) || *v::at<usize>(locals,root-1)!=0){return false;}let local=ir::local_at(b,root);
+    let root=e.place.root;if(root==0 || root>ir::local_count(b) || *v::at<usize>(locals,root-1)!=0){return false;}let local=ir::local_at(b,root);
     if(local.kind!=4 || local.source_index!=original || local.type!=type || local.expected!=type || local.initializer!=0 || local.scope!=e.place.scope || e.place.mutable || e.place.indirect){return false;}
     let slot=v::at_mut<usize>(locals,root-1);*slot=arm;return true;
 }

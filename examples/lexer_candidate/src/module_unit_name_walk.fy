@@ -11,7 +11,14 @@ fn join::Problem local(ref ast::Ast a,ref scanner::Stream source,usize entry,ref
     let e=ast::entry_at(a,entry-1);let usize type=if(e.type_root==0){0}else{*v::at<usize>(annotations,e.type_root-1)};let bound_symbol=m::Symbol{.kind=if(e.kind==1){1}else if(e.kind==2){2}else{3},.type,.entry,.pattern=0,.scope=c.scope,.start=e.name_start,.end=e.name_end};let id=switch(m::add(source,c,symbols,bound_symbol)){case .ok(id):{id}case .err(p):{return p;}};let slot=v::at_mut<usize>(entries,entry-1);*slot=id;return m::fail(c,0,0,0);
 }
 fn join::Problem pattern(ref ast::Ast a,ref scanner::Stream source,usize id,u32 kind,usize type,ref mut m::Context c,ref mut v::Vec<m::Symbol> symbols,ref mut v::Vec<usize> patterns){
-    let n=ast::expression_at(a,id);let name=m::spelling(a,source,id);if(bytes::equal(name,b"_")){return m::fail(c,0,0,0);}let bound_symbol=m::Symbol{.kind,.type,.entry=0,.pattern=id,.scope=c.scope,.start=n.start,.end=n.end};let symbol=switch(m::add(source,c,symbols,bound_symbol)){case .ok(id):{id}case .err(p):{return p;}};let slot=v::at_mut<usize>(patterns,id-1);*slot=symbol;return m::fail(c,0,0,0);
+    let n=ast::expression_at(a,id);let name=m::spelling(a,source,id);let bound_symbol=m::Symbol{.kind,.type,.entry=0,.pattern=id,.scope=c.scope,.start=n.start,.end=n.end};var usize symbol=0;
+    if(bytes::equal(name,b"_")){
+        if(kind!=4){return m::fail(c,0,0,0);}if(v::len<m::Symbol>(symbols)>=16384 || !m::charge(c,1)){return m::fail(c,10,n.start,n.end);}
+        // Keep an anonymous payload slot for ownership and cleanup, without
+        // adding it to the active name lookup or the duplicate-name set.
+        if(!v::push<m::Symbol>(symbols,bound_symbol).is_ok){return m::fail(c,11,n.start,n.end);}symbol=v::len<m::Symbol>(symbols);
+    }else{symbol=switch(m::add(source,c,symbols,bound_symbol)){case .ok(id):{id}case .err(p):{return p;}};}
+    let slot=v::at_mut<usize>(patterns,id-1);*slot=symbol;return m::fail(c,0,0,0);
 }
 fn join::Problem bind_pattern(ref ast::Ast a,ref scanner::Stream source,usize id,u32 kind,usize type,ref mut m::Context c,ref mut v::Vec<m::Symbol> symbols,ref mut v::Vec<usize> patterns){
     if(id==0){return m::fail(c,0,0,0);}let p=ast::expression_at(a,id);if(p.kind==17){return pattern(a,source,id,kind,type,c,symbols,patterns);}if(p.kind==16){return if(p.left==0){m::fail(c,0,0,0)}else{pattern(a,source,p.left,kind,type,c,symbols,patterns)};}

@@ -2781,3 +2781,14 @@ Receipt: `docs/ops/evidence/candidate-switch-cfg-20261010.json`. Enum/Option/Res
 - Inspection found the candidate resolver omits wildcard payload symbols while reference MIR retains anonymous bindings. Owned wildcard cleanup needs verification and repair before C switch admission; no runtime leak is claimed by this receipt.
 - Private CFG API and lock updated. Normative contracts, stable CLI, SDK ABI, Go, DB, CI and hygiene unchanged; no push. Generated switch C, standalone build, Release, Linux, allocator injection and the full suite were not run in this CFG unit.
 - Remaining: anonymous owned wildcard cleanup; C variant tests and active payload extraction; authenticated SDK/Region and whole dispatcher; full source/unsafe/path/dominance/initialization proof; stage1/stage2 and promotion.
+
+## Candidate anonymous switch payload ownership (2026-10-10)
+
+Receipt: `docs/ops/evidence/candidate-anonymous-switch-payload-20261010.json`. Every wildcard switch payload now retains a distinct anonymous local slot, allowing existing ownership analysis and cleanup lowering to process ignored owned payloads. The resolver does not expose these slots to name lookup or duplicate-name checking, so multiple enum fields may use `_` and referring to `_` still fails.
+
+- Owned-body proof requires a matching physical slot for every payload binding, including wildcards. Inert wildcard payloads retain their canonical types; named and inferred locals remain unaffected by anonymous symbol numbering.
+- Final merged 5/5 native outcomes pass. Ten anonymous slots exercise Result resource payloads, two wildcard enum fields, and distinct match-arm/return/propagation/break cleanup requests. The initial loop fixture was rejected with 1105 because it consumed a loop-carried resource parameter; the corrected fixture constructs the owner inside the loop and passes. Four unchanged passing identities were reused; the corrected identity alone was rerun.
+- Locked check passes 261 sources and 3310 MIR functions. Compiler sources and lock were unchanged after that check; the only later change was the rejected test fixture.
+- This proves retained ownership and cleanup CFG requests, not generated switch C execution or runtime drop traces. Those remain the next execution step.
+- Private resolver/body-proof API and lock updated. Normative contracts, stable CLI, SDK ABI, Go, DB, CI and hygiene unchanged; no push. Standalone candidate rebuild, Release, Linux, allocator injection and full suite remain deferred.
+- Remaining: C variant tests, active payload extraction and runtime drop traces; authenticated SDK/Region and whole dispatcher; full source/unsafe/path/dominance/initialization proof; stage1/stage2 and promotion.

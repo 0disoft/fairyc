@@ -22,6 +22,7 @@ fn bodies::Plan cloned(ref v::Vec<syntax::Parsed> sources,ref signatures::Progra
 }
 fn void denied(ref u8[] provider,u32 code,ref u8[] token){var v::Vec<syntax::Parsed> sources=v::empty<syntax::Parsed>();assert(v::push<syntax::Parsed>(ref mut sources,parsed(b"module main;import provider as p;fn i32 main(){return p::go<i32>(1);}")).is_ok);assert(v::push<syntax::Parsed>(ref mut sources,parsed(provider)).is_ok);let metadata=switch(signatures::build(ref sources)){case .ok(m):{m}case .err(_):{assert(false);return;}};let imported=imported(ref sources,ref metadata);let owned=cloned(ref sources,ref metadata,ref imported);switch(names::build(ref sources,ref metadata,ref imported,ref owned)){case .ok(p):{assert(code==0 && names::symbol_count(ref p)==128);}case .err(p):{assert(p.code==code && p.module_index==1 && bytes::equal(provider[p.start..p.end],token));}};}
 @test fn void use_before_definition_duplicates_and_escaped_patterns_are_rejected(){
+    denied(b"module provider;pub fn T go<T>(T value){let Option<T> input=.some(value);switch(input){case .some(_):{discard _;}case .none:{}};return value;}",1,b"_");
     denied(b"module provider;pub fn T go<T>(T n){discard later;let i32 later=0;return n;}",1,b"later");
     denied(b"module provider;pub fn T go<T>(T n){let T value=n;let T value=n;return value;}",2,b"value");
     denied(b"module provider;pub fn T go<T>(T n){let Option<i32> subject=.none;let i32 value=switch(subject){case .some(local):{local}case .none:{0}};discard local;return n;}",1,b"local");
