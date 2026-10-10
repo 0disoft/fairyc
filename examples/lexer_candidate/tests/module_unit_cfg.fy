@@ -65,3 +65,23 @@ fn u32 mutated(ref ir::Program p,ref cfg::Graph g,u32 mode){
 }
 
 @test @effects(console) fn void cfg_loop_condition_revisits_share_one_runtime_drop_site(){let p=retained(b"module main;resource R{i32 n;cleanup{}}fn Result<R,i32> probe(){return .err(1);}fn void f(){while(probe().is_ok){}}",b"");let g=lowered(ref p,declared(ref p,4));var usize i=1;var usize drops=0;while(i<=cfg::count(ref g)){let n=cfg::at(ref g,i);if(n.kind==5){assert(clean_ir::drop_at(ir::cleanup_ir(ref p),n.drop-1).exit==7);drops+=1;}i+=1;}assert(drops==1 && cfg::check(ref p,ref g).code==0);}
+
+@test @effects(console) fn void cfg_switches_freeze_one_subject_and_guard_all_provider_and_nested_payloads(){
+    let p=retained(b"module main;import provider as p;fn p::E choose(){return .Data{.n=7,.flag=true};}fn i32 f(){return switch(choose()){case .Data{.flag=flag,.n=n}:{if(flag){n}else{0}}case .Empty:{1}};}fn i32 nested(Option<Result<i32,bool>> value){return switch(value){case .some(value):{switch(value){case .err(_):{3}case .ok(value):{value}}}case .none:{0}};}",b"module provider;pub enum E{Empty;Data{i32 n;bool flag;};}");
+    var usize frame=1;var usize cases=0;var usize seeds=0;while(frame<=ir::count(ref p)){let g=lowered(ref p,frame);let b=ir::at(ref p,frame);var usize i=1;var usize calls=0;while(i<=cfg::count(ref g)){let n=cfg::at(ref g,i);if(n.kind==1 && ir::node_at(b,n.source-1).value.kind==6){calls+=1;}if(n.kind==18){cases+=1;let seed=cfg::at(ref g,n.first);assert(seed.kind==19 && seed.source==n.source && seed.target==n.target);}if(n.kind==19){seeds+=1;}i+=1;}if(frame==2){assert(calls==1);}frame+=1;}assert(cases==6 && seeds==6);
+}
+
+@test @effects(console) fn void cfg_switches_keep_active_owned_payload_cleanup_and_arm_defer_suffix(){
+    let p=retained(b"module main;resource R{i32 n;cleanup{}}fn void done(i32 n){}fn void f(Result<R,i32> value){switch(value){case .ok(r):{defer done(1);discard r;}case .err(_):{defer done(2);}};}fn R take(Result<R,i32> value){return switch(value){case .ok(r):{r}case .err(_):{R{.n=3}}};}fn i32 terminal(Result<i32,bool> value){return switch(value){case .ok(n):{n}case .err(_):{return 4;}};}",b"");
+    let g=lowered(ref p,declared(ref p,4));assert(cfg::deferred_count(ref g)==2);var usize i=1;var usize drops=0;var usize invokes=0;while(i<=cfg::count(ref g)){let n=cfg::at(ref g,i);if(n.kind==5){assert(clean_ir::drop_at(ir::cleanup_ir(ref p),n.drop-1).exit==9);drops+=1;}if(n.kind==14){invokes+=1;}i+=1;}assert(drops==1 && invokes==2);let moved=lowered(ref p,declared(ref p,5));i=1;drops=0;while(i<=cfg::count(ref moved)){if(cfg::at(ref moved,i).kind==5){drops+=1;}i+=1;}assert(drops==0);let returned=lowered(ref p,declared(ref p,6));assert(cfg::check(ref p,ref returned).code==0);
+}
+
+fn u32 switch_mutated(ref ir::Program p,ref cfg::Graph g,u32 mode){
+    var v::Vec<cfg::Block> blocks=v::empty<cfg::Block>();var usize i=1;var usize branch=0;var usize seed=0;while(i<=cfg::count(g)){if(cfg::at(g,i).kind==18 && branch==0){branch=i;seed=cfg::at(g,i).first;}i+=1;}assert(branch!=0 && seed!=0);i=1;
+    while(i<=cfg::count(g)){var n=cfg::at(g,i);if(i==branch){if(mode==1){n.target=0;}if(mode==2){n.source=lookup::node(ir::at(p,cfg::frame(g)),ir::node_at(ir::at(p,cfg::frame(g)),n.source-1).value.left);}if(mode==3){n.first=cfg::at(g,seed).first;}if(mode==4){n.second=n.first;}if(mode==5){n.start+=1;}if(mode==8){n.first=n.second;}if(mode==9){n.second=branch;}}
+        if(i==seed && mode==6){n.kind=7;n.source=0;n.target=0;}if(i==seed && mode==7){n.target=cfg::at(g,branch).source;}assert(v::push<cfg::Block>(ref mut blocks,n).is_ok);i+=1;}
+    if(mode==10){assert(v::push<cfg::Block>(ref mut blocks,cfg::at(g,branch)).is_ok);}return switch(cfg::assemble(p,cfg::frame(g),if(mode==11){seed}else if(mode==12){branch}else{cfg::entry(g)},blocks,cfg::work(g))){case .ok(_):{0}case .err(e):{e.code}};
+}
+@test @effects(console) fn void cfg_switches_reject_missing_duplicate_relabelled_and_unguarded_case_edges(){
+    let p=retained(b"module main;enum E{A;B{i32 n;};}fn i32 f(E value){return switch(value){case .B{.n=n}:{n}case .A:{1}};}",b"");let g=lowered(ref p,1);assert(switch_mutated(ref p,ref g,0)==0);var u32 mode=1;while(mode<=12){assert(switch_mutated(ref p,ref g,mode)==1001);mode+=1;}
+}

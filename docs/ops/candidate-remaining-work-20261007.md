@@ -2770,3 +2770,14 @@ Receipt: `docs/ops/evidence/candidate-owned-switch-proof-20261010.json`. Owned E
 - Changes: private verifier API and source lock updated. Normative contracts, stable CLI, SDK ABI, Go, DB, CI and hygiene unchanged; no push.
 - Deferred: allocation injection, standalone candidate rebuild, candidate Release, Linux, full suite and generated switch C execution.
 - Remaining: switch CFG and active-variant payload binding C execution; authenticated SDK/Region and whole dispatcher; source/unsafe authentication, full path/dominance/initialization proof; stage1/stage2 and promotion.
+
+## Candidate switch CFG and payload gates (2026-10-10)
+
+Receipt: `docs/ops/evidence/candidate-switch-cfg-20261010.json`. Enum/Option/Result switches now lower to frozen-subject case tests and guarded active payload seeds. C rendering still rejects the new block kinds until their emitter is implemented.
+
+- Each case retains its source switch and arm IDs, has one successful payload-seed edge, and follows the retained source-order failure chain. Unknown tags end at a trap. Missing, duplicate, relabelled or bypassed case/seed edges and graph entry into a payload seed or middle case reject 1001.
+- Arm result copies, terminal no-tail arms, returns, lexical arm defer suffixes and named owned payload match-arm drops now lower through the existing cleanup graph. This is not complete CFG dominance/initialization proof.
+- Final 5/5 focused native identities pass: provider and nested Option/Result arms, one scrutinee call, named owned cleanup and return transfer, arm defers, twelve CFG mutations, and loop/short-circuit regressions. Locked check passes 261 sources and 3310 MIR functions.
+- Inspection found the candidate resolver omits wildcard payload symbols while reference MIR retains anonymous bindings. Owned wildcard cleanup needs verification and repair before C switch admission; no runtime leak is claimed by this receipt.
+- Private CFG API and lock updated. Normative contracts, stable CLI, SDK ABI, Go, DB, CI and hygiene unchanged; no push. Generated switch C, standalone build, Release, Linux, allocator injection and the full suite were not run in this CFG unit.
+- Remaining: anonymous owned wildcard cleanup; C variant tests and active payload extraction; authenticated SDK/Region and whole dispatcher; full source/unsafe/path/dominance/initialization proof; stage1/stage2 and promotion.

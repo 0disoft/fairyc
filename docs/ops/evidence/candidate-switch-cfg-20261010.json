@@ -1,0 +1,120 @@
+{
+  "schema": "fairyc.candidate-switch-cfg/v1",
+  "passed": true,
+  "parentCommit": "aceeaca3b165d884f7e3591c10dd8d3b8cc83b77",
+  "identity": {
+    "nativeCompiler": {
+      "sha256": "d36dae1b99751322e447880aaf4d28321bd6d53bdf776185308c6c4504889bb2",
+      "path": ".cache/candidate-tagged/compiler-origin-patterns.exe"
+    },
+    "sources": [
+      {
+        "sha256": "a0b09be12e419cf81984a3a201b82d9857f8110d87e6c13a0ba1d19eb449ffb9",
+        "path": "examples/lexer_candidate/src/module_unit_cfg_lower.fy"
+      },
+      {
+        "sha256": "089402ff3a36d0a0490527cab77790e54f4a2fe63ae967e051a4a3a01af3a346",
+        "path": "examples/lexer_candidate/src/module_unit_cfg_model.fy"
+      },
+      {
+        "sha256": "bcee5d4f0b2c2c26d5facf5555f69576ded6ccfae54fe3872fa1067bb505da99",
+        "path": "examples/lexer_candidate/src/module_unit_cfg_switches.fy"
+      },
+      {
+        "sha256": "20dbf19c818ca1e54d574fb088c8141e9652e4c3be73d711e3e63762d46ecbad",
+        "path": "examples/lexer_candidate/tests/module_unit_cfg.fy"
+      },
+      {
+        "sha256": "693075b75ed9e6377d0ab517150d2fb0351a9ff2dae6db063ac6cb960e793ed2",
+        "path": "examples/lexer_candidate/fairy.lock"
+      }
+    ]
+  },
+  "sourceCheck": {
+    "exit": 0,
+    "argv": [
+      "compiler-origin-patterns.exe",
+      "check",
+      "--locked"
+    ],
+    "stdout": "check ok: 2 instance(s), 261 source file(s), 3310 MIR function(s), lock verified\r\n"
+  },
+  "native": {
+    "failed": 0,
+    "passed": 5,
+    "report": {
+      "sha256": "8bccbcbf726ed00a4cda9a68a435fe0b6a1812f7d2c9a13ed06f9ecda190847c",
+      "path": ".cache/candidate-tagged/switch-cfg/native.json"
+    },
+    "exit": 0,
+    "count": 5,
+    "tests": [
+      {
+        "identity": "tests::module_unit_cfg::cfg_has_loop_back_edges_and_break_continue_cleanup",
+        "outcome": "passed",
+        "trapCategory": null,
+        "stdoutBase64": "",
+        "stderrBase64": ""
+      },
+      {
+        "identity": "tests::module_unit_cfg::cfg_short_circuit_skips_right_call_and_accepts_defer",
+        "outcome": "passed",
+        "trapCategory": null,
+        "stdoutBase64": "",
+        "stderrBase64": ""
+      },
+      {
+        "identity": "tests::module_unit_cfg::cfg_switches_freeze_one_subject_and_guard_all_provider_and_nested_payloads",
+        "outcome": "passed",
+        "trapCategory": null,
+        "stdoutBase64": "",
+        "stderrBase64": ""
+      },
+      {
+        "identity": "tests::module_unit_cfg::cfg_switches_keep_active_owned_payload_cleanup_and_arm_defer_suffix",
+        "outcome": "passed",
+        "trapCategory": null,
+        "stdoutBase64": "",
+        "stderrBase64": ""
+      },
+      {
+        "identity": "tests::module_unit_cfg::cfg_switches_reject_missing_duplicate_relabelled_and_unguarded_case_edges",
+        "outcome": "passed",
+        "trapCategory": null,
+        "stdoutBase64": "",
+        "stderrBase64": ""
+      }
+    ]
+  },
+  "behavior": {
+    "lowering": "One frozen scrutinee followed by source-order variant tests; each successful test enters its own payload seed; unmatched tag enters an unreachable-completion trap",
+    "completion": "Typed arm result copies; no-tail non-void terminal arms end in trap if unexpectedly continuing; direct returns, lexical arm defers and match-arm owned payload drops",
+    "proof": "Switch and arm body IDs retained; one case and seed per exhaustive source arm; unique matching edges; preserved source-order failure chain; no graph entry into payload seeds or middle case tests",
+    "tests": "Provider enum and nested Option<Result> preserve six guarded arms; subject call appears once; named resource payload cleanup and transferred return; arm defer suffix; twelve graph mutations reject 1001; loop and short-circuit/defer regressions pass"
+  },
+  "privateAPIExpanded": true,
+  "normativeContractsChanged": false,
+  "stableCLIChanged": false,
+  "sdkABIChanged": false,
+  "GoChanged": false,
+  "dbChanged": false,
+  "ciChanged": false,
+  "hygieneChanged": false,
+  "pushed": false,
+  "pending": [
+    "C variant tests and active payload extraction",
+    "Anonymous owned builtin payload cleanup: name resolver currently omits wildcard symbols, unlike reference MIR; static finding requires runtime verification and repair",
+    "Authenticated SDK/Region and whole dispatcher execution",
+    "Full source/unsafe/path/dominance/initialization proof",
+    "Stage1/stage2 and promotion"
+  ],
+  "skipped": {
+    "releaseCandidate": "Separate release batch",
+    "allocationInjection": "Not injected",
+    "fullDominance": "Case-to-seed and middle-case ingress checks only; complete CFG path/initialization proof remains pending",
+    "fullSuite": "Five relevant native identities",
+    "developmentBuild": "Focused native execution only",
+    "generatedSwitchC": "New CFG block kinds still reject 1004 in C emitter",
+    "Linux": "Windows unit"
+  }
+}
