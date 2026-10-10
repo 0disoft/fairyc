@@ -3538,3 +3538,21 @@ cleanup, borrow MIR/C/runtime, unsafe provenance, full dispatcher and stage1/
 stage2 remain pending. Release/Linux checks were outside this local analysis
 unit. The private candidate API changed; public CLI, SDK ABI, DB and CI are
 unchanged. No push.
+
+## Iteration source typing before borrow analysis (2026-10-10)
+
+For-in source expressions now participate in the value fixed point even though
+the item has no written initializer. The origin pass receives a canonical
+source type for direct slices. Exact element types and mutable item eligibility
+are validated for fixed arrays and indexed views. Previously, mutable iteration
+over `p[..1]` terminated the candidate with status 134; it now checks normally.
+
+Source checking and a fresh locked development build passed. Twelve Go-accepted
+iteration CLI cases pass. The selected native test passed five cases, including
+shared/mutable slices, i64 items, wrong item width and immutable array rejection.
+The 38 owner-conflict and 38 subview CLI cases remain exact. Evidence:
+`docs/ops/evidence/candidate-iteration-source-types-20261010.json`.
+
+Hidden iteration provenance/facts and Region/raw facts remain next. Release and
+Linux checks were outside this local frontend fix. Public CLI, SDK ABI, DB and
+CI are unchanged; no push.

@@ -1,0 +1,165 @@
+{
+  "schema": "fairyc.candidate-iteration-source-types/v1",
+  "passed": true,
+  "scope": "Evaluate for-in source expressions during the value fixed point before origin analysis. Validate exact item element type and exclusive item eligibility for arrays and indexed views.",
+  "identity": {
+    "compiler": {
+      "path": ".cache/candidate-tagged/compiler-origin-patterns.exe",
+      "sha256": "d36dae1b99751322e447880aaf4d28321bd6d53bdf776185308c6c4504889bb2"
+    },
+    "candidate": {
+      "path": "examples/lexer_candidate/build/lexer-candidate.exe",
+      "sha256": "efed0b73871895f596d86ea34c0823632dd8754e26082ac57c80e4925023467b"
+    },
+    "lock": {
+      "path": "examples/lexer_candidate/fairy.lock",
+      "sha256": "b8543af2d3218ee2017db66ab36e50b6f65949e5fd68d0eef9e8503880ce2b42"
+    },
+    "files": [
+      {
+        "path": "examples/lexer_candidate/src/module_unit_value_iteration.fy",
+        "sha256": "8fe7889081575792ad5414303884b0e21d4b06925e9eea878ec225bbcb90f316"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_value_walk.fy",
+        "sha256": "d8805604440ec58b584ed3d5beee61b053719479efd9b2ca58d26245a8fb8456"
+      },
+      {
+        "path": "examples/lexer_candidate/tests/module_unit_iteration_types.fy",
+        "sha256": "fe7aeaca18d797843fe04a25e1caea22c559c66b1979e28d7e33f6869918e4ea"
+      }
+    ]
+  },
+  "sourceCheck": {
+    "exit": 0,
+    "files": 234,
+    "mirFunctions": 2917
+  },
+  "lockedDevelopmentBuild": {
+    "exit": 0
+  },
+  "before": {
+    "index": 6,
+    "source": "module main;fn void f(ref mut u8[] p){for(let ref mut u8 item in p[..1]){*item=9;}}",
+    "exit": 134
+  },
+  "after": [
+    {
+      "index": 0,
+      "exit": 0,
+      "stdout": "return origins ok\n",
+      "stderr": ""
+    },
+    {
+      "index": 1,
+      "exit": 0,
+      "stdout": "return origins ok\n",
+      "stderr": ""
+    },
+    {
+      "index": 2,
+      "exit": 0,
+      "stdout": "return origins ok\n",
+      "stderr": ""
+    },
+    {
+      "index": 3,
+      "exit": 0,
+      "stdout": "return origins ok\n",
+      "stderr": ""
+    },
+    {
+      "index": 4,
+      "exit": 0,
+      "stdout": "return origins ok\n",
+      "stderr": ""
+    },
+    {
+      "index": 5,
+      "exit": 0,
+      "stdout": "return origins ok\n",
+      "stderr": ""
+    },
+    {
+      "index": 6,
+      "exit": 0,
+      "stdout": "return origins ok\n",
+      "stderr": ""
+    },
+    {
+      "index": 7,
+      "exit": 0,
+      "stdout": "return origins ok\n",
+      "stderr": ""
+    },
+    {
+      "index": 8,
+      "exit": 0,
+      "stdout": "return origins ok\n",
+      "stderr": ""
+    },
+    {
+      "index": 9,
+      "exit": 0,
+      "stdout": "return origins ok\n",
+      "stderr": ""
+    },
+    {
+      "index": 10,
+      "exit": 0,
+      "stdout": "return origins ok\n",
+      "stderr": ""
+    },
+    {
+      "index": 11,
+      "exit": 0,
+      "stdout": "return origins ok\n",
+      "stderr": ""
+    }
+  ],
+  "native": {
+    "schemaVersion": "fairyc.test-report/v4",
+    "engine": "native",
+    "target": "x86_64-windows-msvc",
+    "profile": "development",
+    "tests": [
+      {
+        "identity": "tests::module_unit_iteration_types::loop_slice_sources_are_typed_before_origin_analysis",
+        "outcome": "passed",
+        "trapCategory": null,
+        "stdoutBase64": "",
+        "stderrBase64": ""
+      }
+    ],
+    "count": 1,
+    "passed": 1,
+    "failed": 0,
+    "status": "ok",
+    "lock": "verified"
+  },
+  "checkedNativeCases": 5,
+  "goAccepted": 12,
+  "regression": [
+    {
+      "suite": "loan-conflicts-unit",
+      "matched": 38
+    },
+    {
+      "suite": "subview-unit",
+      "matched": 38
+    }
+  ],
+  "pending": [
+    "Hidden iteration loan and item provenance/facts",
+    "Region/raw constructor facts",
+    "Complete owner reads, moved-owner state, cleanup, borrow MIR/C/runtime, full dispatcher and stage1/stage2"
+  ],
+  "privateAPIChanged": true,
+  "publicCLIChanged": false,
+  "sdkABIChanged": false,
+  "dbChanged": false,
+  "ciRunnerChanged": false,
+  "pushed": false,
+  "releaseValidated": false,
+  "linuxValidated": false
+}

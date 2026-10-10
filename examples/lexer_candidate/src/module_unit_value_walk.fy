@@ -14,6 +14,7 @@ import module_unit_value_storage as storage;
 import module_unit_value_assignment as assignments;
 import module_unit_value_completion as completion;
 import module_unit_value_terminal as terminals;
+import module_unit_value_iteration as iteration;
 import module_unit_region_sources as lexical;
 import module_unit_region_lifecycle as regions;
 import std::vec as v;
@@ -33,7 +34,7 @@ pub fn Result<m::Values,m::Problem> resolve(ref syntax::Parsed source,ref names:
             else if(e.kind==3 || e.state==1 && (e.kind==8 || e.kind==9 || e.kind==26 || e.kind==21 || e.kind==22 || e.kind==4 && e.place.kind==3)){let usize child=m::index(ref expressions,e.left);if(child!=0){let c=*v::at<m::Expression>(ref expressions,child-1);if(e.kind==3){type=c.type;}if(c.type!=0){place=places::projected(graph,c,e);}}}
             if(e.type==0 && type!=0 || !places::same(e.place,place)){let slot=v::at_mut<m::Expression>(ref mut expressions,i-1);if(e.type==0 && type!=0){slot.type=type;slot.state=1;}slot.place=place;changed=true;}i+=1;
         }
-        let checked=args::resolve(source,frame,imported,graph,atoms,ref mut expressions,ref mut calls,ref mut arguments,ref mut work);if(checked.problem.code!=0){return .err(checked.problem);}changed=changed || checked.changed;
+        let iterated=iteration::resolve(source,frame,imported,graph,atoms,ref locals,ref mut expressions,ref mut work);if(iterated.code!=0){return .err(iterated);}let checked=args::resolve(source,frame,imported,graph,atoms,ref mut expressions,ref mut calls,ref mut arguments,ref mut work);if(checked.problem.code!=0){return .err(checked.problem);}changed=changed || checked.changed;
         i=0;while(i<v::len<m::Return>(ref returns)){let r=*v::at<m::Return>(ref returns,i);if(!m::charge(ref mut work,1)){return .err(m::fail(frame,10,r.start,r.end,0,0));}let usize id=m::index(ref expressions,r.expression);var usize actual=0;
             if(r.expression==0){actual=m::atom(atoms,7);}else if(id!=0){let p=scalar::evaluate(source,frame,id,r.expected,imported,graph,atoms,ref mut expressions,ref mut work,0);if(p.code!=0){return .err(p);}let e=*v::at<m::Expression>(ref expressions,id-1);if(e.state==2){return .err(m::fail(frame,1006,e.start,e.end,r.expected,0));}actual=e.type;}
             if(actual!=0){if(actual!=r.expected){let usize start=if(id==0){r.start}else{v::at<m::Expression>(ref expressions,id-1).start};let usize end=if(id==0){r.end}else{v::at<m::Expression>(ref expressions,id-1).end};return .err(m::fail(frame,1009,start,end,r.expected,actual));}let slot=v::at_mut<m::Return>(ref mut returns,i);slot.actual=actual;slot.checked=true;}i+=1;
