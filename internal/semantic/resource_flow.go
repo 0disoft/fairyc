@@ -425,8 +425,17 @@ func (a *analyzer) resourceMatch(module *moduleScope, expression *ast.Expression
 					}
 				}
 			}
+			// A match payload lives until its arm exits. Loop exits inside the
+			// arm must include it, while exits from a nested loop retain it.
+			patternScope := len(a.resourceScopes) - 1
+			if binding != nil && a.isResource(binding.typ) && patternScope >= 0 {
+				a.resourceScopes[patternScope][binding] = struct{}{}
+			}
 			reachable := a.resourceExpression(module, arm.Children[1], branch, mode)
 			if binding != nil {
+				if patternScope >= 0 {
+					delete(a.resourceScopes[patternScope], binding)
+				}
 				if reachable {
 					a.checkResourceEnvironmentEffects(branch, span(module.file.Path, arm.Span), map[*symbol]struct{}{binding: {}})
 				}
