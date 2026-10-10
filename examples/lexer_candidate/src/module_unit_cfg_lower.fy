@@ -7,6 +7,7 @@ import module_unit_cleanup_mir_model as clean_ir;
 import module_unit_value_model as m;
 import module_unit_cfg_defer as deferred;
 import module_unit_cfg_region as lifecycle;
+import module_unit_cfg_iteration as iteration;
 import std::bytes as bytes;
 import std::vec as v;
 
@@ -64,7 +65,12 @@ fn Result<usize,clean_ir::Problem> expression(ref ir::Program p,usize original,u
 }
 fn Result<usize,clean_ir::Problem> statement(ref ir::Program p,usize original,usize next,Loop loop,usize depth,ref mut v::Vec<cfg::Block> blocks,ref mut v::Vec<cfg::Deferred> sites,ref mut v::Vec<cfg::Capture> captures,ref mut Context c){
     if(original==0){return .ok(next);}if(depth>=64 || !m::charge(ref mut c.work,1)){return .err(fail(c,1002,0,0));}let b=ir::at(p,c.frame);let id=lookup::statement(b,original);if(id==0){return .err(fail(c,1001,0,0));}let s=ir::statement_at(b,id-1).value;
-    if(s.kind==1){return block(p,original,next,loop,depth+1,blocks,sites,captures,c);}if(s.kind==18){return .err(fail(c,1004,s.start,s.end));}
+    if(s.kind==1){return block(p,original,next,loop,depth+1,blocks,sites,captures,c);}if(s.kind==18){let binding=switch(iteration::binding(p,b,c.frame,id,ref mut c.work)){case .ok(n):{n}case .err(e):{return .err(e);}};if(binding==0){return .err(fail(c,1001,s.start,s.end));}
+        let anchor=switch(emit(blocks,sites,captures,7,0,0,next,0,0,s.start,s.end,c)){case .ok(n):{n}case .err(e):{return .err(e);}};
+        let inside=switch(block(p,s.first,anchor,Loop{.break_to=next,.continue_to=anchor,.defer_base=c.active_count},depth+1,blocks,sites,captures,c)){case .ok(n):{n}case .err(e):{return .err(e);}};
+        let step=switch(emit(blocks,sites,captures,21,lookup::node(b,s.expression),id,inside,next,0,s.start,s.end,c)){case .ok(n):{n}case .err(e):{return .err(e);}};{let slot=v::at_mut<cfg::Block>(blocks,anchor-1);slot.first=step;}
+        let capture=switch(emit(blocks,sites,captures,20,lookup::node(b,s.expression),id,step,0,0,s.start,s.end,c)){case .ok(n):{n}case .err(e):{return .err(e);}};return expression(p,s.expression,capture,loop,depth+1,blocks,sites,captures,c);
+    }
     if(s.kind==17){let region_id=lifecycle::find_region(b,original);if(region_id==0){return .err(fail(c,1001,s.start,s.end));}let reset=switch(lifecycle::exit(p,c.frame,0,0,0,1,s.start,s.end,next,blocks,ref mut c.work)){case .ok(n):{n}case .err(p):{return .err(p);}};let inside=switch(block(p,s.first,reset,loop,depth+1,blocks,sites,captures,c)){case .ok(n):{n}case .err(p):{return .err(p);}};let mark=switch(emit(blocks,sites,captures,15,lookup::node(b,s.expression),region_id,inside,0,0,s.start,s.end,c)){case .ok(n):{n}case .err(p):{return .err(p);}};return expression(p,s.expression,mark,loop,depth+1,blocks,sites,captures,c);}
     if(s.kind==9 || s.kind==10){let to=if(s.kind==9){loop.break_to}else{loop.continue_to};if(to==0){return .err(fail(c,1001,s.start,s.end));}let dropped=switch(lifecycle::exit(p,c.frame,if(s.kind==9){3}else{4},s.start,s.end,if(s.kind==9){4}else{5},s.start,s.end,to,blocks,ref mut c.work)){case .ok(n):{n}case .err(e):{return .err(e);}};return invoke(p,loop.defer_base,dropped,blocks,sites,captures,c);}
     if(s.kind==8 || s.kind==14){

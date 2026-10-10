@@ -54,6 +54,8 @@ def loader_fixtures(folder):
     return {name: hashlib.sha256(raw).hexdigest() for name, raw in data.items()}
 
 CASES = {
+    "byte_loop_c_evaluates_view_once_empty_and_nested_control": ([], [], ""),
+    "byte_loop_c_preserves_iteration_defer_and_owner_cleanup": ([], [], "101,1,102,2,103,3,9,"),
     "sdk_c_executes_nested_vector_move_and_cleanup":
         (["stage0_system_heap.c", "stage0_vector_storage.c"], [], "102,22,21,900,101,12,11,"),
     "sdk_c_executes_nested_vector_failed_push_donor":
@@ -102,7 +104,7 @@ CASES.update({name: ((["stage0_system_heap.c", "stage0_buffer.c"] if "file_buffe
 CASES.update({name: (["stage0_system_heap.c", "stage0_buffer.c", "stage0_text_view.c",
                      "stage0_windows_file.c", "stage0_windows_file_portable.c"], [], "")
               for name in FILE_SOURCE_CASES})
-PROOFS = {"sdk_c_rejects_forged_cstring_view_authority","sdk_c_rejects_forged_storage_metadata","pointer_c_rejects_forged_raw_view_metadata","rejected_import_expansion_rolls_back_borrow_types","sdk_c_plan_respects_work_budget_before_authority_or_output",
+PROOFS = {"byte_loop_c_rejects_forged_iteration_cfg","sdk_c_rejects_forged_cstring_view_authority","sdk_c_rejects_forged_storage_metadata","pointer_c_rejects_forged_raw_view_metadata","rejected_import_expansion_rolls_back_borrow_types","sdk_c_plan_respects_work_budget_before_authority_or_output",
           "sdk_c_region_plan_respects_placement_budget_before_output"}
 
 
@@ -120,7 +122,7 @@ def main():
         report = json.loads(raw)
         assert report["engine"] == "native" and report["target"] == "x86_64-windows-msvc"
         for test in report["tests"]:
-            prefix = next((prefix for prefix in ("tests::module_unit_imports::", "tests::module_unit_c_pointers::", "tests::module_unit_c_sdk::", "tests::module_unit_c_text::", "tests::module_unit_c_fs::", "tests::module_unit_c_file_source::") if test["identity"].startswith(prefix)), "")
+            prefix = next((prefix for prefix in ("tests::module_unit_imports::", "tests::module_unit_c_pointers::", "tests::module_unit_c_sdk::", "tests::module_unit_c_text::", "tests::module_unit_c_fs::", "tests::module_unit_c_file_source::", "tests::module_unit_c_iteration::") if test["identity"].startswith(prefix)), "")
             if prefix:
                 name = test["identity"].removeprefix(prefix)
                 if name in CASES or name in PROOFS:
@@ -186,6 +188,9 @@ def main():
                 b"#define FY_STD_SYSTEM_HEAP_MALLOC_V0(size) test_heap_malloc(size)\n"
                 b"#define FY_STD_SYSTEM_HEAP_FREE_V0(raw) test_heap_free(raw)\n")
         instrumentation = b""
+        if name == "byte_loop_c_preserves_iteration_defer_and_owner_cleanup":
+            instrumentation = (b"#include <stdint.h>\n#include <stdio.h>\n"
+                               b"void test_iteration_report(int32_t n){printf(\"%d,\",(int)n);}\n")
         if arena:
             instrumentation = (
                 b"#undef fy_std_arena_initialize_v0\n#undef fy_std_arena_drop_v0\n"

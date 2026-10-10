@@ -14,6 +14,7 @@ import module_unit_c_sdk as sdk;
 import module_unit_c_region as lifecycle;
 import module_unit_c_raw_views as raw_views;
 import module_unit_c_storage as storage;
+import module_unit_c_iteration as iteration;
 import ffi_symbols as ffi;
 import c_text as w;
 import std::bytes as bytes;
@@ -70,7 +71,7 @@ fn bool store(ref ir::Program p,ref ir::Body b,cfg::Block n,ref mut bytes::Buffe
 fn bool function(ref ir::Program p,ref sdk::Plan plan,ref cfg::Graph g,ref mut bytes::Buffer out,ref mut w::State s,ref mut usize work,ref mut usize failed_start,ref mut usize failed_end){
     let b=ir::at(p,cfg::frame(g));if(!signature(p,cfg::frame(g),out,s) || !w::text(out,s,b"{\n")){return false;}var usize i=1;
     while(i<=ir::local_count(b)){if(!budget::charge(work,1)){s.code=1002;return false;}let l=ir::local_at(b,i);if(scalar::scalar(p,l.type)==7){s.code=1004;return false;}if(l.kind!=1 && l.kind!=10 && l.kind!=6 && (!aggregate::type(p,l.type,out,s) || !w::text(out,s,b" ") || !w::local(out,s,i) || !w::text(out,s,b";\n"))){return false;}i+=1;}
-    if(!lifecycle::locals(b,out,s,work)){return false;}
+    if(!iteration::locals(g,out,s,work) || !lifecycle::locals(b,out,s,work)){return false;}
     i=1;while(i<=ir::node_count(b)){if(!budget::charge(work,1)){s.code=1002;return false;}let e=ir::node_at(b,i-1).value;if(e.state==1){let type=scalar::scalar(p,e.type);if(type!=7 && (!aggregate::type(p,e.type,out,s) || !w::text(out,s,b" ") || !scalar::value(out,s,i) || !w::text(out,s,b";\n"))){return false;}}i+=1;}
     i=1;while(i<=cfg::capture_count(g)){let c=cfg::capture_at(g,i);if(!w::type(out,s,scalar::scalar(p,c.type)) || !w::text(out,s,b" ") || !scalar::capture(out,s,i) || !w::text(out,s,b";\n")){return false;}i+=1;}
     i=1;while(i<=cfg::count(g)){let n=cfg::at(g,i);if(n.kind==17 && (!aggregate::type(p,ir::node_at(b,n.source-1).value.type,out,s) || !w::text(out,s,b" ") || !snapshot(out,s,n.target) || !w::text(out,s,b";\n"))){return false;}i+=1;}
@@ -100,8 +101,9 @@ fn bool function(ref ir::Program p,ref sdk::Plan plan,ref cfg::Graph g,ref mut b
         else if(n.kind==17){if(!snapshot(out,s,n.target) || !w::text(out,s,b"=") || !aggregate::place(p,b,n.source,out,s,0) || !w::text(out,s,b";\n")){return false;}}
         else if(n.kind==18){if(!switches::branch(p,b,n,out,s,work)){return false;}}
         else if(n.kind==19){if(!switches::seed(p,b,n,out,s,work)){return false;}}
+        else if(n.kind==20 || n.kind==21){if(!iteration::block(p,g,n,out,s,work)){return false;}}
         else if(n.kind!=7){s.code=1004;return false;}
-        if(n.kind!=3 && n.kind!=4 && n.kind!=6 && n.kind!=9 && n.kind!=12 && n.kind!=18 && !w::jump(out,s,n.first)){return false;}i+=1;
+        if(n.kind!=3 && n.kind!=4 && n.kind!=6 && n.kind!=9 && n.kind!=12 && n.kind!=18 && n.kind!=21 && !w::jump(out,s,n.first)){return false;}i+=1;
     }return w::text(out,s,b"}\n");
 }
 // A private transport from owned bodies through freshly lowered

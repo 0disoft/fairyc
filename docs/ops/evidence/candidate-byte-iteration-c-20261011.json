@@ -1,0 +1,314 @@
+{
+  "schema": "fairyc.candidate-byte-iteration-c/v1",
+  "passed": true,
+  "parentCommit": "839d7d306695fb2f4ced6f089c3bf4263f124c0c",
+  "identity": [
+    {
+      "path": "examples/lexer_candidate/src/module_unit_body_ir_switches.fy",
+      "sha256": "741c2c93776953943b1b9d515fe7549963cc08d43862bf8f2c18df049e65faee"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_unit_c_emit.fy",
+      "sha256": "c1137bad1036dac2982d0b066737f819c5a6342a06e28a5cc949d6715aadce61"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_unit_cfg_lower.fy",
+      "sha256": "29ed1e621009bbdad611a15f2db4b1edc7d66cc61203f204c6bd4d6d85c87ff3"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_unit_cfg_model.fy",
+      "sha256": "03930d26ab5d82ea7e02db71aeaca32f7c61c5acc9bc94f8f8836fa7d54b5653"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_unit_c_iteration.fy",
+      "sha256": "a6428f16a9cbb4f03608308955089e052ed78a87a19c0045a3327b871deb8110"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_unit_cfg_iteration.fy",
+      "sha256": "e4750781eef0997a9e8d2727f689014b62497ec75aad52d78507486e4612c562"
+    },
+    {
+      "path": "examples/lexer_candidate/tests/module_unit_c_iteration.fy",
+      "sha256": "a3aea5673ef63c8f3e552fe24ab8e59256b333cf7afed8065339cb7429266107"
+    },
+    {
+      "path": "examples/lexer_candidate/fairy.lock",
+      "sha256": "98c05bfbc404d48361085f3788c961637ab375194e14c28457c8b5a04cb89682"
+    },
+    {
+      "path": "tools/verify-candidate-sdk-c.py",
+      "sha256": "dcd25d283a502eb1edb1df1f017b600b85ce174fb16d8aa9cf174b5f8a9d6bd7"
+    },
+    {
+      "path": ".cache/candidate-tagged/compiler-text-current.exe",
+      "sha256": "7accbaf3c65e6debd2f391c9de92889f908667f4738607fa8cd2d12e275d1a87"
+    }
+  ],
+  "sourceTreeSHA256": "7f0f1e069e354ba7fdc88d4a1b27d5c38fc5952f82bd25ed7f75efa8e36787b1",
+  "sourceCheck": {
+    "report": {
+      "path": ".cache/candidate-tagged/sdk-c-execution/check-byte-loop-final.txt",
+      "sha256": "e019d47c82033074d49d8a1e8bf7ecd4dd0fe078c6397613e6dcc984d64798f8"
+    },
+    "stdout": "check ok: 2 instance(s), 274 source file(s), 3405 MIR function(s), lock unchanged\ncheck ok: 2 instance(s), 274 source file(s), 3405 MIR function(s), lock verified\n",
+    "files": 274,
+    "mirFunctions": 3405,
+    "locked": true
+  },
+  "native": {
+    "report": {
+      "path": ".cache/candidate-tagged/sdk-c-execution/native-byte-loop.json",
+      "sha256": "e68fa9501a9fac55e4e3e25425f4798cbceb7f0f403bc1edc34cbbc86fd00bb5"
+    },
+    "count": 3,
+    "passed": 3,
+    "tests": [
+      {
+        "identity": "tests::module_unit_c_iteration::byte_loop_c_evaluates_view_once_empty_and_nested_control",
+        "outcome": "passed",
+        "stdoutSHA256": "882987b68293df11a2295c02b43f80eb54991ee471b103af53f843ae964d6a87"
+      },
+      {
+        "identity": "tests::module_unit_c_iteration::byte_loop_c_preserves_iteration_defer_and_owner_cleanup",
+        "outcome": "passed",
+        "stdoutSHA256": "28a2075c5be2951a46302d02e312dfe7a2fea260a2c631337a52c7fee53f244a"
+      },
+      {
+        "identity": "tests::module_unit_c_iteration::byte_loop_c_rejects_forged_iteration_cfg",
+        "outcome": "passed",
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    ]
+  },
+  "CExecution": {
+    "schema": "fairyc.candidate-sdk-c-execution/v1",
+    "passed": true,
+    "reports": [
+      {
+        "path": ".cache\\candidate-tagged\\sdk-c-execution\\native-byte-loop.json",
+        "sha256": "e68fa9501a9fac55e4e3e25425f4798cbceb7f0f403bc1edc34cbbc86fd00bb5"
+      }
+    ],
+    "executions": [
+      {
+        "name": "byte_loop_c_evaluates_view_once_empty_and_nested_control",
+        "profile": "low",
+        "sourceSHA256": "882987b68293df11a2295c02b43f80eb54991ee471b103af53f843ae964d6a87",
+        "stdinBase64": null,
+        "heapFailureAt": null,
+        "heapBalanceVerified": false,
+        "heapCounts": null,
+        "textCounts": null,
+        "fileCounts": null,
+        "loaderFixtures": null,
+        "vectorCounts": null,
+        "bufferCounts": null,
+        "arenaCounts": null,
+        "regionCounts": null,
+        "runtimeInputs": [],
+        "build": {
+          "argv": [
+            "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+            "/nologo",
+            "/std:c11",
+            "/TC",
+            "/Od",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\byte-loop-c\\byte_loop_c_evaluates_view_once_empty_and_nested_control.c",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\byte-loop-c\\byte_loop_c_evaluates_view_once_empty_and_nested_control-runtime.c",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\byte-loop-c\\trap.c",
+            "/Fe:C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\byte-loop-c\\byte_loop_c_evaluates_view_once_empty_and_nested_control-low.exe",
+            "/link",
+            "/INCREMENTAL:NO"
+          ],
+          "exit": 0,
+          "stdout": "byte_loop_c_evaluates_view_once_empty_and_nested_control.c\r\nbyte_loop_c_evaluates_view_once_empty_and_nested_control-runtime.c\r\ntrap.c\r\nGenerating Code...\r\n",
+          "stderr": ""
+        },
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\byte-loop-c\\byte_loop_c_evaluates_view_once_empty_and_nested_control-low.exe"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      },
+      {
+        "name": "byte_loop_c_evaluates_view_once_empty_and_nested_control",
+        "profile": "optimized",
+        "sourceSHA256": "882987b68293df11a2295c02b43f80eb54991ee471b103af53f843ae964d6a87",
+        "stdinBase64": null,
+        "heapFailureAt": null,
+        "heapBalanceVerified": false,
+        "heapCounts": null,
+        "textCounts": null,
+        "fileCounts": null,
+        "loaderFixtures": null,
+        "vectorCounts": null,
+        "bufferCounts": null,
+        "arenaCounts": null,
+        "regionCounts": null,
+        "runtimeInputs": [],
+        "build": {
+          "argv": [
+            "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+            "/nologo",
+            "/std:c11",
+            "/TC",
+            "/O2",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\byte-loop-c\\byte_loop_c_evaluates_view_once_empty_and_nested_control.c",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\byte-loop-c\\byte_loop_c_evaluates_view_once_empty_and_nested_control-runtime.c",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\byte-loop-c\\trap.c",
+            "/Fe:C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\byte-loop-c\\byte_loop_c_evaluates_view_once_empty_and_nested_control-optimized.exe",
+            "/link",
+            "/INCREMENTAL:NO"
+          ],
+          "exit": 0,
+          "stdout": "byte_loop_c_evaluates_view_once_empty_and_nested_control.c\r\nbyte_loop_c_evaluates_view_once_empty_and_nested_control-runtime.c\r\ntrap.c\r\nGenerating Code...\r\n",
+          "stderr": ""
+        },
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\byte-loop-c\\byte_loop_c_evaluates_view_once_empty_and_nested_control-optimized.exe"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      },
+      {
+        "name": "byte_loop_c_preserves_iteration_defer_and_owner_cleanup",
+        "profile": "low",
+        "sourceSHA256": "28a2075c5be2951a46302d02e312dfe7a2fea260a2c631337a52c7fee53f244a",
+        "stdinBase64": null,
+        "heapFailureAt": null,
+        "heapBalanceVerified": false,
+        "heapCounts": null,
+        "textCounts": null,
+        "fileCounts": null,
+        "loaderFixtures": null,
+        "vectorCounts": null,
+        "bufferCounts": null,
+        "arenaCounts": null,
+        "regionCounts": null,
+        "runtimeInputs": [],
+        "build": {
+          "argv": [
+            "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+            "/nologo",
+            "/std:c11",
+            "/TC",
+            "/Od",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\byte-loop-c\\byte_loop_c_preserves_iteration_defer_and_owner_cleanup.c",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\byte-loop-c\\byte_loop_c_preserves_iteration_defer_and_owner_cleanup-runtime.c",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\byte-loop-c\\trap.c",
+            "/Fe:C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\byte-loop-c\\byte_loop_c_preserves_iteration_defer_and_owner_cleanup-low.exe",
+            "/link",
+            "/INCREMENTAL:NO"
+          ],
+          "exit": 0,
+          "stdout": "byte_loop_c_preserves_iteration_defer_and_owner_cleanup.c\r\nbyte_loop_c_preserves_iteration_defer_and_owner_cleanup-runtime.c\r\ntrap.c\r\nGenerating Code...\r\n",
+          "stderr": ""
+        },
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\byte-loop-c\\byte_loop_c_preserves_iteration_defer_and_owner_cleanup-low.exe"
+          ],
+          "exit": 0,
+          "stdout": "101,1,102,2,103,3,9,",
+          "stderr": ""
+        }
+      },
+      {
+        "name": "byte_loop_c_preserves_iteration_defer_and_owner_cleanup",
+        "profile": "optimized",
+        "sourceSHA256": "28a2075c5be2951a46302d02e312dfe7a2fea260a2c631337a52c7fee53f244a",
+        "stdinBase64": null,
+        "heapFailureAt": null,
+        "heapBalanceVerified": false,
+        "heapCounts": null,
+        "textCounts": null,
+        "fileCounts": null,
+        "loaderFixtures": null,
+        "vectorCounts": null,
+        "bufferCounts": null,
+        "arenaCounts": null,
+        "regionCounts": null,
+        "runtimeInputs": [],
+        "build": {
+          "argv": [
+            "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+            "/nologo",
+            "/std:c11",
+            "/TC",
+            "/O2",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\byte-loop-c\\byte_loop_c_preserves_iteration_defer_and_owner_cleanup.c",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\byte-loop-c\\byte_loop_c_preserves_iteration_defer_and_owner_cleanup-runtime.c",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\byte-loop-c\\trap.c",
+            "/Fe:C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\byte-loop-c\\byte_loop_c_preserves_iteration_defer_and_owner_cleanup-optimized.exe",
+            "/link",
+            "/INCREMENTAL:NO"
+          ],
+          "exit": 0,
+          "stdout": "byte_loop_c_preserves_iteration_defer_and_owner_cleanup.c\r\nbyte_loop_c_preserves_iteration_defer_and_owner_cleanup-runtime.c\r\ntrap.c\r\nGenerating Code...\r\n",
+          "stderr": ""
+        },
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\byte-loop-c\\byte_loop_c_preserves_iteration_defer_and_owner_cleanup-optimized.exe"
+          ],
+          "exit": 0,
+          "stdout": "101,1,102,2,103,3,9,",
+          "stderr": ""
+        }
+      }
+    ],
+    "compiler": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+    "source": "Private Fairy emitter; actual repository C runtime components, no SDK stand-ins"
+  },
+  "reference": {
+    "passed": true,
+    "runs": [
+      {
+        "name": "byte_loop_c_evaluates_view_once_empty_and_nested_control",
+        "exit": 0,
+        "stdout": "check ok: 1 instance(s), 1 source file(s), 4 MIR function(s), lock updated\n",
+        "stderr": "",
+        "sourceSHA256": "f1adf49b7f1fb63355a3c833af6c3bf6aa24c9159514ccbb9223453cf7fdd2a8"
+      },
+      {
+        "name": "byte_loop_c_preserves_iteration_defer_and_owner_cleanup",
+        "exit": 0,
+        "stdout": "check ok: 1 instance(s), 1 source file(s), 3 MIR function(s), lock updated\n",
+        "stderr": "",
+        "sourceSHA256": "05b45a198c2adb7b5d08635490cdd5f3be45c6c1afccf049cd2fdff0d162e172"
+      }
+    ]
+  },
+  "observations": [
+    "Named immutable shared byte views and direct slices execute copied u8 iteration through owned body IR, CFG and private C emission.",
+    "The view and slice extents evaluate once; bounds are checked before copying a byte. Empty input, nested loops, continue, break and return execute.",
+    "Each iteration runs its frozen defer then local resource cleanup. Both C profiles produce 101,1,102,2,103,3,9,.",
+    "Loop header patterns are owned by their statement; retained iteration local uses are checked against the body scope.",
+    "CFG verification rejects missing capture/source/target, duplicate capture, entry before capture and incorrect capture successor; exhausted work returns 1002."
+  ],
+  "normativeContractsChanged": false,
+  "stableCLIChanged": false,
+  "sdkABIChanged": false,
+  "implementationChanged": true,
+  "dbChanged": false,
+  "ciChanged": false,
+  "hygieneChanged": false,
+  "pushed": false,
+  "skipped": {
+    "candidateRelease": "Standalone candidate Release deferred; emitted C /O2 independently executed",
+    "Linux": "Requested later batch",
+    "fullSuite": "Focused byte-loop cases and source check only",
+    "stage1Stage2": "Original scanner/token path, dispatcher and driver integration remain"
+  },
+  "pending": [
+    "Other iteration carriers and shared/exclusive item references remain closed in this module-unit C slice.",
+    "Original scanner/token path, full CLI dispatcher and native driver integration.",
+    "Stage1/Stage2 promotion evidence."
+  ]
+}
