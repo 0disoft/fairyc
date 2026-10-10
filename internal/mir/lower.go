@@ -1125,7 +1125,7 @@ func (l *functionLowerer) lowerRawAddressCast(expression *hir.Expression) (Opera
 		return Operand{}, fmt.Errorf("malformed raw-address cast")
 	}
 	borrow := &expression.Children[0]
-	if (borrow.Kind == "literal" || borrow.Kind == "path") && borrow.Type == hir.SharedBorrow(hir.TypeStr) && expression.Type == hir.RawPointer(hir.TypeU8, false) {
+	if borrow.Type == hir.SharedBorrow(hir.TypeStr) && expression.Type == hir.RawPointer(hir.TypeU8, false) {
 		value, err := l.lowerExpression(borrow)
 		if err != nil {
 			return Operand{}, err
@@ -1153,7 +1153,7 @@ func (l *functionLowerer) lowerRawAddressCast(expression *hir.Expression) (Opera
 	}
 	byteSliceElement, byteSliceMutable, byteSliceBorrow := hir.BorrowElement(borrow.Type)
 	bytePointerElement, bytePointerMutable, bytePointer := hir.RawPointerElement(expression.Type)
-	if (borrow.Kind == "literal" || borrow.Kind == "path") && byteSliceBorrow && byteSliceElement == hir.TypeByteSlice &&
+	if byteSliceBorrow && byteSliceElement == hir.TypeByteSlice &&
 		bytePointer && bytePointerElement == hir.TypeU8 && (byteSliceMutable || !bytePointerMutable) {
 		value, err := l.lowerExpression(borrow)
 		if err != nil {
@@ -1180,7 +1180,7 @@ func (l *functionLowerer) lowerRawAddressCast(expression *hir.Expression) (Opera
 		})
 		return Operand{Kind: OperandLocal, Local: destination}, nil
 	}
-	if (borrow.Kind == "literal" || borrow.Kind == "path") && borrow.Type == hir.SharedBorrow(hir.TypeCStr) && expression.Type == hir.RawPointer(hir.TypeU8, false) {
+	if borrow.Type == hir.SharedBorrow(hir.TypeCStr) && expression.Type == hir.RawPointer(hir.TypeU8, false) {
 		value, err := l.lowerExpression(borrow)
 		if err != nil {
 			return Operand{}, err
