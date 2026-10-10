@@ -1,0 +1,2978 @@
+{
+  "schema": "fairyc.candidate-cleanup-policy/v1",
+  "passed": true,
+  "sourceTruth": [
+    "docs/language/0001-values-and-resources.md",
+    "docs/language/0009-resource-abilities-v0.md",
+    "internal/semantic/resource_flow.go",
+    "internal/semantic/resource_abilities.go"
+  ],
+  "referenceFixes": [
+    {
+      "commit": "c32e1775",
+      "scope": "Match payload cleanup on break and continue; nested loop preserves payload."
+    },
+    {
+      "commit": "0e171d70",
+      "scope": "Discarded temporary cleanup effects and linear temporaries in cleanup bodies."
+    },
+    {
+      "commit": "6e3d269c",
+      "scope": "Live locals remaining at cleanup body fallthrough."
+    }
+  ],
+  "semanticPackage": {
+    "exit": 0,
+    "stdout": "ok github.com/0disoft/fairyc/internal/semantic 0.477s"
+  },
+  "identity": {
+    "compiler": {
+      "path": ".cache/candidate-tagged/cleanup-events-unit/compiler.exe",
+      "sha256": "9adbab4075c12aa6849721013dc638f6b8cc8211e678d66884e316daf4356029",
+      "bytes": 17453568
+    },
+    "candidate": {
+      "path": "examples/lexer_candidate/build/lexer-candidate.exe",
+      "sha256": "18381cca50280e657d1ae503d050858a7c63b79c6c7931b59b3bbbb00dcc2471",
+      "bytes": 5620736
+    },
+    "lock": {
+      "path": "examples/lexer_candidate/fairy.lock",
+      "sha256": "54a7281eb288e466f26478394a9fbd118870c28fcfbc101df68e497aecfd79e2",
+      "bytes": 1698
+    },
+    "sources": [
+      {
+        "path": "examples/lexer_candidate/src/module_unit_cleanup_policy.fy",
+        "sha256": "9243f9f9d36a819ee7daf0299cc94e73c3a200263aa061cf2ce934da6e3223a1",
+        "bytes": 8126
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_origin_check.fy",
+        "sha256": "8fd4a359cc018bb954abb6b1051181cd2254104fa782cfac038fc8ac11eabf73",
+        "bytes": 5170
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_origin_diagnostics.fy",
+        "sha256": "98d4ddd2b05b0c3b9e5788fc32465b27a4f073d6dc4e555dd86aeef82b5e1ab7",
+        "bytes": 18005
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_cli.fy",
+        "sha256": "894c553013bae7abbc991c875d0ffae5fa905a1009bbe163dbdb1449d935025d",
+        "bytes": 10523
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_moves.fy",
+        "sha256": "a6068df50141d65f1f22571b5828fffe6a7b9d18c62a2a29c4a75648003354f9",
+        "bytes": 4368
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_move_model.fy",
+        "sha256": "014cd0dead19490c757bbf613c927df2b051e1200807e374b8884871365c4eaa",
+        "bytes": 9172
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_move_control.fy",
+        "sha256": "118b33d437321df4eb72757e3378eaa78c6d83182aa264f2486160b16db7b532",
+        "bytes": 13161
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_move_walk.fy",
+        "sha256": "7c991787813a58e12f9d7b569df4e2a38a04a71fd1ebd704b2206b5159081811",
+        "bytes": 6293
+      }
+    ],
+    "tests": [
+      {
+        "path": "examples/lexer_candidate/tests/module_unit_cleanup_policy.fy",
+        "sha256": "8769d3f16160a57cb13603f92457ce1b3c29d8efd132ec353ae3c6796233a0bf",
+        "bytes": 23588
+      },
+      {
+        "path": "examples/lexer_candidate/tests/module_unit_cleanup_events.fy",
+        "sha256": "5b336afb26a1dabb86b4f6d5e7e2ef93cd520db61b80918274ba694df5a2408b",
+        "bytes": 8870
+      },
+      {
+        "path": "examples/lexer_candidate/tests/module_unit_moves.fy",
+        "sha256": "d0baffae6788b4250b6ebe48462d534a1d0d91d5de22f29d6ebc266b6e20a8e4",
+        "bytes": 31249
+      }
+    ]
+  },
+  "fixtures": [
+    {
+      "index": 0,
+      "name": "local scope no drop",
+      "source": "module main;@abilities(store)resource R{i32 n;cleanup{}}fn R make(){return R{.n=1};}fn Result<i32,i32> fallible(){return .ok(1);}fn void f(){let R owner=make();}",
+      "provider": "",
+      "expected": 3,
+      "reference": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:1:141: E1108: Compiler-scheduled implicit destruction reaches a resource whose explicit ability set omits `drop`. [bytes 140..161]\n  ability-declaration: main.fy:1:13 [bytes 12..29]\n"
+      }
+    },
+    {
+      "index": 1,
+      "name": "moved return no drop",
+      "source": "module main;@abilities(store)resource R{i32 n;cleanup{}}fn R make(){return R{.n=1};}fn Result<i32,i32> fallible(){return .ok(1);}fn R f(){let R owner=make();return owner;}",
+      "provider": "",
+      "expected": 0,
+      "reference": {
+        "exit": 0,
+        "stdout": "semantics ok: main.fy (typed HIR: 3 function(s))\n",
+        "stderr": ""
+      }
+    },
+    {
+      "index": 2,
+      "name": "parameter scope no drop",
+      "source": "module main;@abilities(store)resource R{i32 n;cleanup{}}fn R make(){return R{.n=1};}fn Result<i32,i32> fallible(){return .ok(1);}fn void f(R owner){}",
+      "provider": "",
+      "expected": 3,
+      "reference": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:1:148: E1108: Compiler-scheduled implicit destruction reaches a resource whose explicit ability set omits `drop`. [bytes 147..149]\n  ability-declaration: main.fy:1:13 [bytes 12..29]\n"
+      }
+    },
+    {
+      "index": 3,
+      "name": "parameter move no drop",
+      "source": "module main;@abilities(store)resource R{i32 n;cleanup{}}fn R make(){return R{.n=1};}fn Result<i32,i32> fallible(){return .ok(1);}fn R f(R owner){return owner;}",
+      "provider": "",
+      "expected": 0,
+      "reference": {
+        "exit": 0,
+        "stdout": "semantics ok: main.fy (typed HIR: 3 function(s))\n",
+        "stderr": ""
+      }
+    },
+    {
+      "index": 4,
+      "name": "nested scope no drop",
+      "source": "module main;@abilities(store)resource R{i32 n;cleanup{}}fn R make(){return R{.n=1};}fn Result<i32,i32> fallible(){return .ok(1);}fn void f(){discard {let R owner=make();0};}",
+      "provider": "",
+      "expected": 3,
+      "reference": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:1:150: E1108: Compiler-scheduled implicit destruction reaches a resource whose explicit ability set omits `drop`. [bytes 149..171]\n  ability-declaration: main.fy:1:13 [bytes 12..29]\n"
+      }
+    },
+    {
+      "index": 5,
+      "name": "early return no drop",
+      "source": "module main;@abilities(store)resource R{i32 n;cleanup{}}fn R make(){return R{.n=1};}fn Result<i32,i32> fallible(){return .ok(1);}fn void f(){let R owner=make();return;}",
+      "provider": "",
+      "expected": 3,
+      "reference": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:1:161: E1108: Compiler-scheduled implicit destruction reaches a resource whose explicit ability set omits `drop`. [bytes 160..167]\n  ability-declaration: main.fy:1:13 [bytes 12..29]\n"
+      }
+    },
+    {
+      "index": 6,
+      "name": "break local no drop",
+      "source": "module main;@abilities(store)resource R{i32 n;cleanup{}}fn R make(){return R{.n=1};}fn Result<i32,i32> fallible(){return .ok(1);}fn void f(bool c){while(c){let R owner=make();break;}}",
+      "provider": "",
+      "expected": 3,
+      "reference": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:1:176: E1108: Compiler-scheduled implicit destruction reaches a resource whose explicit ability set omits `drop`. [bytes 175..181]\n  ability-declaration: main.fy:1:13 [bytes 12..29]\n"
+      }
+    },
+    {
+      "index": 7,
+      "name": "continue local no drop",
+      "source": "module main;@abilities(store)resource R{i32 n;cleanup{}}fn R make(){return R{.n=1};}fn Result<i32,i32> fallible(){return .ok(1);}fn void f(bool c){while(c){let R owner=make();continue;}}",
+      "provider": "",
+      "expected": 3,
+      "reference": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:1:176: E1108: Compiler-scheduled implicit destruction reaches a resource whose explicit ability set omits `drop`. [bytes 175..184]\n  ability-declaration: main.fy:1:13 [bytes 12..29]\n"
+      }
+    },
+    {
+      "index": 8,
+      "name": "outer owner survives break no drop",
+      "source": "module main;@abilities(store)resource R{i32 n;cleanup{}}fn R make(){return R{.n=1};}fn Result<i32,i32> fallible(){return .ok(1);}fn void f(bool c){let R owner=make();while(c){break;}}",
+      "provider": "",
+      "expected": 3,
+      "reference": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:1:147: E1108: Compiler-scheduled implicit destruction reaches a resource whose explicit ability set omits `drop`. [bytes 146..183]\n  ability-declaration: main.fy:1:13 [bytes 12..29]\n"
+      }
+    },
+    {
+      "index": 9,
+      "name": "live replacement no drop",
+      "source": "module main;@abilities(store)resource R{i32 n;cleanup{}}fn R make(){return R{.n=1};}fn Result<i32,i32> fallible(){return .ok(1);}fn void f(){var R owner=make();owner=make();}",
+      "provider": "",
+      "expected": 3,
+      "reference": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:1:141: E1108: Compiler-scheduled implicit destruction reaches a resource whose explicit ability set omits `drop`. [bytes 140..174]\n  ability-declaration: main.fy:1:13 [bytes 12..29]\nmain.fy:1:161: E1108: Compiler-scheduled implicit destruction reaches a resource whose explicit ability set omits `drop`. [bytes 160..165]\n  ability-declaration: main.fy:1:13 [bytes 12..29]\n"
+      }
+    },
+    {
+      "index": 10,
+      "name": "dead replacement no drop",
+      "source": "module main;@abilities(store)resource R{i32 n;cleanup{}}fn R make(){return R{.n=1};}fn Result<i32,i32> fallible(){return .ok(1);}fn R f(){var R owner=make();let R saved=owner;owner=make();return saved;}",
+      "provider": "",
+      "expected": 3,
+      "reference": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:1:189: E1108: Compiler-scheduled implicit destruction reaches a resource whose explicit ability set omits `drop`. [bytes 188..201]\n  ability-declaration: main.fy:1:13 [bytes 12..29]\n"
+      }
+    },
+    {
+      "index": 11,
+      "name": "propagation error edge no drop",
+      "source": "module main;@abilities(store)resource R{i32 n;cleanup{}}fn R make(){return R{.n=1};}fn Result<i32,i32> fallible(){return .ok(1);}fn Result<i32,i32> f(){let R owner=make();let i32 n=fallible()?;return .ok(n);}",
+      "provider": "",
+      "expected": 3,
+      "reference": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:1:182: E1108: Compiler-scheduled implicit destruction reaches a resource whose explicit ability set omits `drop`. [bytes 181..192]\n  ability-declaration: main.fy:1:13 [bytes 12..29]\nmain.fy:1:194: E1108: Compiler-scheduled implicit destruction reaches a resource whose explicit ability set omits `drop`. [bytes 193..207]\n  ability-declaration: main.fy:1:13 [bytes 12..29]\n"
+      }
+    },
+    {
+      "index": 12,
+      "name": "consumed is_ok no drop",
+      "source": "module main;@abilities(store)resource R{i32 n;cleanup{}}fn R make(){return R{.n=1};}fn Result<i32,i32> fallible(){return .ok(1);}fn void f(){let Result<R,i32> item=.ok(make());discard item.is_ok;}",
+      "provider": "",
+      "expected": 3,
+      "reference": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:1:185: E1108: Compiler-scheduled implicit destruction reaches a resource whose explicit ability set omits `drop`. [bytes 184..194]\n  ability-declaration: main.fy:1:13 [bytes 12..29]\n"
+      }
+    },
+    {
+      "index": 13,
+      "name": "discarded temporary no drop",
+      "source": "module main;@abilities(store)resource R{i32 n;cleanup{}}fn R make(){return R{.n=1};}fn Result<i32,i32> fallible(){return .ok(1);}fn void f(){discard make();}",
+      "provider": "",
+      "expected": 3,
+      "reference": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:1:150: E1108: Compiler-scheduled implicit destruction reaches a resource whose explicit ability set omits `drop`. [bytes 149..155]\n  ability-declaration: main.fy:1:13 [bytes 12..29]\n"
+      }
+    },
+    {
+      "index": 14,
+      "name": "discard local read no drop",
+      "source": "module main;@abilities(store)resource R{i32 n;cleanup{}}fn R make(){return R{.n=1};}fn Result<i32,i32> fallible(){return .ok(1);}fn void f(){let R owner=make();discard owner;}",
+      "provider": "",
+      "expected": 3,
+      "reference": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:1:141: E1108: Compiler-scheduled implicit destruction reaches a resource whose explicit ability set omits `drop`. [bytes 140..175]\n  ability-declaration: main.fy:1:13 [bytes 12..29]\n"
+      }
+    },
+    {
+      "index": 15,
+      "name": "match arm capture no drop",
+      "source": "module main;@abilities(store)resource R{i32 n;cleanup{}}fn R make(){return R{.n=1};}fn Result<i32,i32> fallible(){return .ok(1);}fn void f(){let Option<R> item=.some(make());switch(item){case .some(r):{discard r;}case .none:{}};}",
+      "provider": "",
+      "expected": 3,
+      "reference": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:1:188: E1108: Compiler-scheduled implicit destruction reaches a resource whose explicit ability set omits `drop`. [bytes 187..213]\n  ability-declaration: main.fy:1:13 [bytes 12..29]\n"
+      }
+    },
+    {
+      "index": 16,
+      "name": "returned branch owner no drop",
+      "source": "module main;@abilities(store)resource R{i32 n;cleanup{}}fn R make(){return R{.n=1};}fn Result<i32,i32> fallible(){return .ok(1);}fn R f(bool c){let R owner=make();if(c){return owner;}else{};return make();}",
+      "provider": "",
+      "expected": 3,
+      "reference": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:1:191: E1108: Compiler-scheduled implicit destruction reaches a resource whose explicit ability set omits `drop`. [bytes 190..204]\n  ability-declaration: main.fy:1:13 [bytes 12..29]\n"
+      }
+    },
+    {
+      "index": 17,
+      "name": "match break capture no drop",
+      "source": "module main;@abilities(store)resource R{i32 n;cleanup{}}fn R make(){return R{.n=1};}fn Result<i32,i32> fallible(){return .ok(1);}fn void f(bool c){while(c){let Option<R> item=.some(make());switch(item){case .some(r):{break;}case .none:{break;}};}}",
+      "provider": "",
+      "expected": 3,
+      "reference": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:1:218: E1108: Compiler-scheduled implicit destruction reaches a resource whose explicit ability set omits `drop`. [bytes 217..223]\n  ability-declaration: main.fy:1:13 [bytes 12..29]\n"
+      }
+    },
+    {
+      "index": 18,
+      "name": "local scope missing effect",
+      "source": "module main;@effects(console)resource R{i32 n;cleanup{discard 1;}}fn R make(){return R{.n=1};}fn Result<i32,i32> fallible(){return .ok(1);}fn void f(){let R owner=make();}",
+      "provider": "",
+      "expected": 3,
+      "reference": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:1:151: E7102: A call or compiler-scheduled resource cleanup requires one or more effects not declared by the enclosing function. [bytes 150..171]\n  effect-declaration: main.fy:1:13 [bytes 12..29]\n"
+      }
+    },
+    {
+      "index": 19,
+      "name": "moved return missing effect",
+      "source": "module main;@effects(console)resource R{i32 n;cleanup{discard 1;}}fn R make(){return R{.n=1};}fn Result<i32,i32> fallible(){return .ok(1);}fn R f(){let R owner=make();return owner;}",
+      "provider": "",
+      "expected": 0,
+      "reference": {
+        "exit": 0,
+        "stdout": "semantics ok: main.fy (typed HIR: 4 function(s))\n",
+        "stderr": ""
+      }
+    },
+    {
+      "index": 20,
+      "name": "parameter scope missing effect",
+      "source": "module main;@effects(console)resource R{i32 n;cleanup{discard 1;}}fn R make(){return R{.n=1};}fn Result<i32,i32> fallible(){return .ok(1);}fn void f(R owner){}",
+      "provider": "",
+      "expected": 3,
+      "reference": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:1:158: E7102: A call or compiler-scheduled resource cleanup requires one or more effects not declared by the enclosing function. [bytes 157..159]\n  effect-declaration: main.fy:1:13 [bytes 12..29]\n"
+      }
+    },
+    {
+      "index": 21,
+      "name": "parameter move missing effect",
+      "source": "module main;@effects(console)resource R{i32 n;cleanup{discard 1;}}fn R make(){return R{.n=1};}fn Result<i32,i32> fallible(){return .ok(1);}fn R f(R owner){return owner;}",
+      "provider": "",
+      "expected": 0,
+      "reference": {
+        "exit": 0,
+        "stdout": "semantics ok: main.fy (typed HIR: 4 function(s))\n",
+        "stderr": ""
+      }
+    },
+    {
+      "index": 22,
+      "name": "nested scope missing effect",
+      "source": "module main;@effects(console)resource R{i32 n;cleanup{discard 1;}}fn R make(){return R{.n=1};}fn Result<i32,i32> fallible(){return .ok(1);}fn void f(){discard {let R owner=make();0};}",
+      "provider": "",
+      "expected": 3,
+      "reference": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:1:160: E7102: A call or compiler-scheduled resource cleanup requires one or more effects not declared by the enclosing function. [bytes 159..181]\n  effect-declaration: main.fy:1:13 [bytes 12..29]\n"
+      }
+    },
+    {
+      "index": 23,
+      "name": "early return missing effect",
+      "source": "module main;@effects(console)resource R{i32 n;cleanup{discard 1;}}fn R make(){return R{.n=1};}fn Result<i32,i32> fallible(){return .ok(1);}fn void f(){let R owner=make();return;}",
+      "provider": "",
+      "expected": 3,
+      "reference": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:1:171: E7102: A call or compiler-scheduled resource cleanup requires one or more effects not declared by the enclosing function. [bytes 170..177]\n  effect-declaration: main.fy:1:13 [bytes 12..29]\n"
+      }
+    },
+    {
+      "index": 24,
+      "name": "break local missing effect",
+      "source": "module main;@effects(console)resource R{i32 n;cleanup{discard 1;}}fn R make(){return R{.n=1};}fn Result<i32,i32> fallible(){return .ok(1);}fn void f(bool c){while(c){let R owner=make();break;}}",
+      "provider": "",
+      "expected": 3,
+      "reference": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:1:186: E7102: A call or compiler-scheduled resource cleanup requires one or more effects not declared by the enclosing function. [bytes 185..191]\n  effect-declaration: main.fy:1:13 [bytes 12..29]\n"
+      }
+    },
+    {
+      "index": 25,
+      "name": "continue local missing effect",
+      "source": "module main;@effects(console)resource R{i32 n;cleanup{discard 1;}}fn R make(){return R{.n=1};}fn Result<i32,i32> fallible(){return .ok(1);}fn void f(bool c){while(c){let R owner=make();continue;}}",
+      "provider": "",
+      "expected": 3,
+      "reference": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:1:186: E7102: A call or compiler-scheduled resource cleanup requires one or more effects not declared by the enclosing function. [bytes 185..194]\n  effect-declaration: main.fy:1:13 [bytes 12..29]\n"
+      }
+    },
+    {
+      "index": 26,
+      "name": "outer owner survives break missing effect",
+      "source": "module main;@effects(console)resource R{i32 n;cleanup{discard 1;}}fn R make(){return R{.n=1};}fn Result<i32,i32> fallible(){return .ok(1);}fn void f(bool c){let R owner=make();while(c){break;}}",
+      "provider": "",
+      "expected": 3,
+      "reference": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:1:157: E7102: A call or compiler-scheduled resource cleanup requires one or more effects not declared by the enclosing function. [bytes 156..193]\n  effect-declaration: main.fy:1:13 [bytes 12..29]\n"
+      }
+    },
+    {
+      "index": 27,
+      "name": "live replacement missing effect",
+      "source": "module main;@effects(console)resource R{i32 n;cleanup{discard 1;}}fn R make(){return R{.n=1};}fn Result<i32,i32> fallible(){return .ok(1);}fn void f(){var R owner=make();owner=make();}",
+      "provider": "",
+      "expected": 3,
+      "reference": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:1:151: E7102: A call or compiler-scheduled resource cleanup requires one or more effects not declared by the enclosing function. [bytes 150..184]\n  effect-declaration: main.fy:1:13 [bytes 12..29]\nmain.fy:1:171: E7102: A call or compiler-scheduled resource cleanup requires one or more effects not declared by the enclosing function. [bytes 170..175]\n  effect-declaration: main.fy:1:13 [bytes 12..29]\n"
+      }
+    },
+    {
+      "index": 28,
+      "name": "dead replacement missing effect",
+      "source": "module main;@effects(console)resource R{i32 n;cleanup{discard 1;}}fn R make(){return R{.n=1};}fn Result<i32,i32> fallible(){return .ok(1);}fn R f(){var R owner=make();let R saved=owner;owner=make();return saved;}",
+      "provider": "",
+      "expected": 3,
+      "reference": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:1:199: E7102: A call or compiler-scheduled resource cleanup requires one or more effects not declared by the enclosing function. [bytes 198..211]\n  effect-declaration: main.fy:1:13 [bytes 12..29]\n"
+      }
+    },
+    {
+      "index": 29,
+      "name": "propagation error edge missing effect",
+      "source": "module main;@effects(console)resource R{i32 n;cleanup{discard 1;}}fn R make(){return R{.n=1};}fn Result<i32,i32> fallible(){return .ok(1);}fn Result<i32,i32> f(){let R owner=make();let i32 n=fallible()?;return .ok(n);}",
+      "provider": "",
+      "expected": 3,
+      "reference": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:1:192: E7102: A call or compiler-scheduled resource cleanup requires one or more effects not declared by the enclosing function. [bytes 191..202]\n  effect-declaration: main.fy:1:13 [bytes 12..29]\nmain.fy:1:204: E7102: A call or compiler-scheduled resource cleanup requires one or more effects not declared by the enclosing function. [bytes 203..217]\n  effect-declaration: main.fy:1:13 [bytes 12..29]\n"
+      }
+    },
+    {
+      "index": 30,
+      "name": "consumed is_ok missing effect",
+      "source": "module main;@effects(console)resource R{i32 n;cleanup{discard 1;}}fn R make(){return R{.n=1};}fn Result<i32,i32> fallible(){return .ok(1);}fn void f(){let Result<R,i32> item=.ok(make());discard item.is_ok;}",
+      "provider": "",
+      "expected": 3,
+      "reference": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:1:195: E7102: A call or compiler-scheduled resource cleanup requires one or more effects not declared by the enclosing function. [bytes 194..204]\n  effect-declaration: main.fy:1:13 [bytes 12..29]\n"
+      }
+    },
+    {
+      "index": 31,
+      "name": "discarded temporary missing effect",
+      "source": "module main;@effects(console)resource R{i32 n;cleanup{discard 1;}}fn R make(){return R{.n=1};}fn Result<i32,i32> fallible(){return .ok(1);}fn void f(){discard make();}",
+      "provider": "",
+      "expected": 3,
+      "reference": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:1:160: E7102: A call or compiler-scheduled resource cleanup requires one or more effects not declared by the enclosing function. [bytes 159..165]\n  effect-declaration: main.fy:1:13 [bytes 12..29]\n"
+      }
+    },
+    {
+      "index": 32,
+      "name": "discard local read missing effect",
+      "source": "module main;@effects(console)resource R{i32 n;cleanup{discard 1;}}fn R make(){return R{.n=1};}fn Result<i32,i32> fallible(){return .ok(1);}fn void f(){let R owner=make();discard owner;}",
+      "provider": "",
+      "expected": 3,
+      "reference": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:1:151: E7102: A call or compiler-scheduled resource cleanup requires one or more effects not declared by the enclosing function. [bytes 150..185]\n  effect-declaration: main.fy:1:13 [bytes 12..29]\n"
+      }
+    },
+    {
+      "index": 33,
+      "name": "match arm capture missing effect",
+      "source": "module main;@effects(console)resource R{i32 n;cleanup{discard 1;}}fn R make(){return R{.n=1};}fn Result<i32,i32> fallible(){return .ok(1);}fn void f(){let Option<R> item=.some(make());switch(item){case .some(r):{discard r;}case .none:{}};}",
+      "provider": "",
+      "expected": 3,
+      "reference": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:1:198: E7102: A call or compiler-scheduled resource cleanup requires one or more effects not declared by the enclosing function. [bytes 197..223]\n  effect-declaration: main.fy:1:13 [bytes 12..29]\n"
+      }
+    },
+    {
+      "index": 34,
+      "name": "returned branch owner missing effect",
+      "source": "module main;@effects(console)resource R{i32 n;cleanup{discard 1;}}fn R make(){return R{.n=1};}fn Result<i32,i32> fallible(){return .ok(1);}fn R f(bool c){let R owner=make();if(c){return owner;}else{};return make();}",
+      "provider": "",
+      "expected": 3,
+      "reference": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:1:201: E7102: A call or compiler-scheduled resource cleanup requires one or more effects not declared by the enclosing function. [bytes 200..214]\n  effect-declaration: main.fy:1:13 [bytes 12..29]\n"
+      }
+    },
+    {
+      "index": 35,
+      "name": "match break capture missing effect",
+      "source": "module main;@effects(console)resource R{i32 n;cleanup{discard 1;}}fn R make(){return R{.n=1};}fn Result<i32,i32> fallible(){return .ok(1);}fn void f(bool c){while(c){let Option<R> item=.some(make());switch(item){case .some(r):{break;}case .none:{break;}};}}",
+      "provider": "",
+      "expected": 3,
+      "reference": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:1:228: E7102: A call or compiler-scheduled resource cleanup requires one or more effects not declared by the enclosing function. [bytes 227..233]\n  effect-declaration: main.fy:1:13 [bytes 12..29]\n"
+      }
+    },
+    {
+      "index": 36,
+      "name": "local scope authorized",
+      "source": "module main;@effects(console)resource R{i32 n;cleanup{discard 1;}}fn R make(){return R{.n=1};}fn Result<i32,i32> fallible(){return .ok(1);}@effects(console)fn void f(){let R owner=make();}",
+      "provider": "",
+      "expected": 0,
+      "reference": {
+        "exit": 0,
+        "stdout": "semantics ok: main.fy (typed HIR: 4 function(s))\n",
+        "stderr": ""
+      }
+    },
+    {
+      "index": 37,
+      "name": "early return authorized",
+      "source": "module main;@effects(console)resource R{i32 n;cleanup{discard 1;}}fn R make(){return R{.n=1};}fn Result<i32,i32> fallible(){return .ok(1);}@effects(console)fn void f(){let R owner=make();return;}",
+      "provider": "",
+      "expected": 0,
+      "reference": {
+        "exit": 0,
+        "stdout": "semantics ok: main.fy (typed HIR: 4 function(s))\n",
+        "stderr": ""
+      }
+    },
+    {
+      "index": 38,
+      "name": "break local authorized",
+      "source": "module main;@effects(console)resource R{i32 n;cleanup{discard 1;}}fn R make(){return R{.n=1};}fn Result<i32,i32> fallible(){return .ok(1);}@effects(console)fn void f(bool c){while(c){let R owner=make();break;}}",
+      "provider": "",
+      "expected": 0,
+      "reference": {
+        "exit": 0,
+        "stdout": "semantics ok: main.fy (typed HIR: 4 function(s))\n",
+        "stderr": ""
+      }
+    },
+    {
+      "index": 39,
+      "name": "live replacement authorized",
+      "source": "module main;@effects(console)resource R{i32 n;cleanup{discard 1;}}fn R make(){return R{.n=1};}fn Result<i32,i32> fallible(){return .ok(1);}@effects(console)fn void f(){var R owner=make();owner=make();}",
+      "provider": "",
+      "expected": 0,
+      "reference": {
+        "exit": 0,
+        "stdout": "semantics ok: main.fy (typed HIR: 4 function(s))\n",
+        "stderr": ""
+      }
+    },
+    {
+      "index": 40,
+      "name": "propagation error edge authorized",
+      "source": "module main;@effects(console)resource R{i32 n;cleanup{discard 1;}}fn R make(){return R{.n=1};}fn Result<i32,i32> fallible(){return .ok(1);}@effects(console)fn Result<i32,i32> f(){let R owner=make();let i32 n=fallible()?;return .ok(n);}",
+      "provider": "",
+      "expected": 0,
+      "reference": {
+        "exit": 0,
+        "stdout": "semantics ok: main.fy (typed HIR: 4 function(s))\n",
+        "stderr": ""
+      }
+    },
+    {
+      "index": 41,
+      "name": "consumed is_ok authorized",
+      "source": "module main;@effects(console)resource R{i32 n;cleanup{discard 1;}}fn R make(){return R{.n=1};}fn Result<i32,i32> fallible(){return .ok(1);}@effects(console)fn void f(){let Result<R,i32> item=.ok(make());discard item.is_ok;}",
+      "provider": "",
+      "expected": 0,
+      "reference": {
+        "exit": 0,
+        "stdout": "semantics ok: main.fy (typed HIR: 4 function(s))\n",
+        "stderr": ""
+      }
+    },
+    {
+      "index": 42,
+      "name": "discarded temporary authorized",
+      "source": "module main;@effects(console)resource R{i32 n;cleanup{discard 1;}}fn R make(){return R{.n=1};}fn Result<i32,i32> fallible(){return .ok(1);}@effects(console)fn void f(){discard make();}",
+      "provider": "",
+      "expected": 0,
+      "reference": {
+        "exit": 0,
+        "stdout": "semantics ok: main.fy (typed HIR: 4 function(s))\n",
+        "stderr": ""
+      }
+    },
+    {
+      "index": 43,
+      "name": "match arm capture authorized",
+      "source": "module main;@effects(console)resource R{i32 n;cleanup{discard 1;}}fn R make(){return R{.n=1};}fn Result<i32,i32> fallible(){return .ok(1);}@effects(console)fn void f(){let Option<R> item=.some(make());switch(item){case .some(r):{discard r;}case .none:{}};}",
+      "provider": "",
+      "expected": 0,
+      "reference": {
+        "exit": 0,
+        "stdout": "semantics ok: main.fy (typed HIR: 4 function(s))\n",
+        "stderr": ""
+      }
+    },
+    {
+      "index": 44,
+      "name": "match break capture authorized",
+      "source": "module main;@effects(console)resource R{i32 n;cleanup{discard 1;}}fn R make(){return R{.n=1};}fn Result<i32,i32> fallible(){return .ok(1);}@effects(console)fn void f(bool c){while(c){let Option<R> item=.some(make());switch(item){case .some(r):{break;}case .none:{break;}};}}",
+      "provider": "",
+      "expected": 0,
+      "reference": {
+        "exit": 0,
+        "stdout": "semantics ok: main.fy (typed HIR: 4 function(s))\n",
+        "stderr": ""
+      }
+    },
+    {
+      "index": 45,
+      "name": "nested resource blocker",
+      "source": "module main;@abilities(store)resource R{i32 n;cleanup{}}fn R make(){return R{.n=1};}resource Box{R inner;cleanup{}}fn void f(){let Box box=Box{.inner=make()};}",
+      "provider": "",
+      "expected": 3,
+      "reference": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:1:127: E1108: Compiler-scheduled implicit destruction reaches a resource whose explicit ability set omits `drop`. [bytes 126..159]\n  ability-declaration: main.fy:1:13 [bytes 12..29]\n"
+      }
+    },
+    {
+      "index": 46,
+      "name": "repeated field blocker",
+      "source": "module main;@abilities(store)resource R{i32 n;cleanup{}}fn R make(){return R{.n=1};}resource Box{R a;R b;cleanup{}}fn void f(){let Box box=Box{.a=make(),.b=make()};}",
+      "provider": "",
+      "expected": 3,
+      "reference": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:1:127: E1108: Compiler-scheduled implicit destruction reaches a resource whose explicit ability set omits `drop`. [bytes 126..165]\n  ability-declaration: main.fy:1:13 [bytes 12..29]\n"
+      }
+    },
+    {
+      "index": 47,
+      "name": "repeated local blocker",
+      "source": "module main;@abilities(store)resource R{i32 n;cleanup{}}fn R make(){return R{.n=1};}fn void f(){let R a=make();let R b=make();}",
+      "provider": "",
+      "expected": 3,
+      "reference": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:1:96: E1108: Compiler-scheduled implicit destruction reaches a resource whose explicit ability set omits `drop`. [bytes 95..127]\n  ability-declaration: main.fy:1:13 [bytes 12..29]\n"
+      }
+    },
+    {
+      "index": 48,
+      "name": "nested Option blocker",
+      "source": "module main;@abilities(store)resource R{i32 n;cleanup{}}fn R make(){return R{.n=1};}fn void f(){let Option<Option<R>> item=.some(.some(make()));}",
+      "provider": "",
+      "expected": 3,
+      "reference": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:1:96: E1108: Compiler-scheduled implicit destruction reaches a resource whose explicit ability set omits `drop`. [bytes 95..145]\n  ability-declaration: main.fy:1:13 [bytes 12..29]\n"
+      }
+    },
+    {
+      "index": 49,
+      "name": "repeated Result blocker",
+      "source": "module main;@abilities(store)resource R{i32 n;cleanup{}}fn R make(){return R{.n=1};}fn void f(){let Result<R,R> item=.ok(make());discard item.is_ok;}",
+      "provider": "",
+      "expected": 3,
+      "reference": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:1:138: E1108: Compiler-scheduled implicit destruction reaches a resource whose explicit ability set omits `drop`. [bytes 137..147]\n  ability-declaration: main.fy:1:13 [bytes 12..29]\n"
+      }
+    },
+    {
+      "index": 50,
+      "name": "cleanup local missing effect",
+      "source": "module main;@effects(console)resource R{i32 n;cleanup{discard 1;}}fn R make(){return R{.n=1};}resource Outer{i32 n;cleanup{let R r=make();}}",
+      "provider": "",
+      "expected": 3,
+      "reference": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:1:123: E7102: A call or compiler-scheduled resource cleanup requires one or more effects not declared by the enclosing function. [bytes 122..139]\n  effect-declaration: main.fy:1:13 [bytes 12..29]\n"
+      }
+    },
+    {
+      "index": 51,
+      "name": "cleanup temporary missing effect",
+      "source": "module main;@effects(console)resource R{i32 n;cleanup{discard 1;}}fn R make(){return R{.n=1};}resource Outer{i32 n;cleanup{discard make();}}",
+      "provider": "",
+      "expected": 3,
+      "reference": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:1:132: E7102: A call or compiler-scheduled resource cleanup requires one or more effects not declared by the enclosing function. [bytes 131..137]\n  effect-declaration: main.fy:1:13 [bytes 12..29]\n"
+      }
+    },
+    {
+      "index": 52,
+      "name": "cleanup temporary no drop",
+      "source": "module main;@abilities(store)resource R{i32 n;cleanup{}}fn R make(){return R{.n=1};}resource Outer{i32 n;cleanup{discard make();}}",
+      "provider": "",
+      "expected": 3,
+      "reference": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:1:122: E1108: Compiler-scheduled implicit destruction reaches a resource whose explicit ability set omits `drop`. [bytes 121..127]\n  ability-declaration: main.fy:1:13 [bytes 12..29]\n"
+      }
+    },
+    {
+      "index": 53,
+      "name": "provider missing effect",
+      "source": "module main;import provider as p;fn void f(){let p::R r=p::make();}",
+      "provider": "module provider;@effects(console)pub resource R{i32 n;cleanup{discard 1;}}pub fn R make(){return R{.n=1};}",
+      "expected": 3,
+      "reference": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:1:45: E7102: A call or compiler-scheduled resource cleanup requires one or more effects not declared by the enclosing function. [bytes 44..67]\n  effect-declaration: provider.fy:1:17 [bytes 16..33]\n"
+      }
+    },
+    {
+      "index": 54,
+      "name": "provider no drop",
+      "source": "module main;import provider as p;fn void f(){let p::R r=p::make();}",
+      "provider": "module provider;@abilities(store)pub resource R{i32 n;cleanup{}}pub fn R make(){return R{.n=1};}",
+      "expected": 3,
+      "reference": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:1:45: E1108: Compiler-scheduled implicit destruction reaches a resource whose explicit ability set omits `drop`. [bytes 44..67]\n  ability-declaration: provider.fy:1:17 [bytes 16..33]\n"
+      }
+    },
+    {
+      "index": 55,
+      "name": "nested loop retains captured no drop",
+      "source": "module main;@abilities(store)resource R{i32 n;cleanup{}}fn R make(){return R{.n=1};}fn R f(bool c){while(c){let Option<R> item=.some(make());switch(item){case .some(r):{while(c){break;}return r;}case .none:{break;}};}return make();}",
+      "provider": "",
+      "expected": 0,
+      "reference": {
+        "exit": 0,
+        "stdout": "semantics ok: main.fy (typed HIR: 2 function(s))\n",
+        "stderr": ""
+      }
+    },
+    {
+      "index": 56,
+      "name": "generic cleanup requires effects",
+      "source": "module main;@effects(console)resource R{i32 n;cleanup{discard 1;}}fn R make(){return R{.n=1};}fn void dispose<T>(T n,R owner){}fn void f(){dispose<i32>(1,make());}",
+      "provider": "",
+      "expected": 3,
+      "reference": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:1:126: E7102: A call or compiler-scheduled resource cleanup requires one or more effects not declared by the enclosing function. [bytes 125..127]\n  effect-declaration: main.fy:1:13 [bytes 12..29]\n"
+      }
+    },
+    {
+      "index": 57,
+      "name": "generic cleanup with authority",
+      "source": "module main;@effects(console)resource R{i32 n;cleanup{discard 1;}}fn R make(){return R{.n=1};}@effects(console)fn void dispose<T>(T n,R owner){}@effects(console)fn void f(){dispose<i32>(1,make());}",
+      "provider": "",
+      "expected": 0,
+      "reference": {
+        "exit": 0,
+        "stdout": "semantics ok: main.fy (typed HIR: 4 function(s))\n",
+        "stderr": ""
+      }
+    }
+  ],
+  "cli": {
+    "passed": true,
+    "matched": 58,
+    "count": 58,
+    "candidateSHA256": "18381cca50280e657d1ae503d050858a7c63b79c6c7931b59b3bbbb00dcc2471",
+    "cases": [
+      {
+        "index": 0,
+        "name": "local scope no drop",
+        "exit": 3,
+        "matched": true,
+        "reference": [
+          {
+            "file": "main.fy",
+            "code": 1108,
+            "start": 140,
+            "end": 161,
+            "related": [
+              {
+                "role": "ability-declaration",
+                "file": "main.fy",
+                "start": 12,
+                "end": 29
+              }
+            ]
+          }
+        ],
+        "diagnostics": [
+          {
+            "file": "main.fy",
+            "code": 1108,
+            "start": 140,
+            "end": 161,
+            "related": [
+              {
+                "role": "ability-declaration",
+                "file": "main.fy",
+                "start": 12,
+                "end": 29
+              }
+            ]
+          }
+        ],
+        "stdout": "",
+        "stderr": "main.fy:1:141: error: E1108 resource does not permit implicit cleanup (bytes 140..161)\n  ability-declaration: main.fy (bytes 12..29)\n"
+      },
+      {
+        "index": 1,
+        "name": "moved return no drop",
+        "exit": 0,
+        "matched": true,
+        "reference": [],
+        "diagnostics": [],
+        "stdout": "return origins ok\n",
+        "stderr": ""
+      },
+      {
+        "index": 2,
+        "name": "parameter scope no drop",
+        "exit": 3,
+        "matched": true,
+        "reference": [
+          {
+            "file": "main.fy",
+            "code": 1108,
+            "start": 147,
+            "end": 149,
+            "related": [
+              {
+                "role": "ability-declaration",
+                "file": "main.fy",
+                "start": 12,
+                "end": 29
+              }
+            ]
+          }
+        ],
+        "diagnostics": [
+          {
+            "file": "main.fy",
+            "code": 1108,
+            "start": 147,
+            "end": 149,
+            "related": [
+              {
+                "role": "ability-declaration",
+                "file": "main.fy",
+                "start": 12,
+                "end": 29
+              }
+            ]
+          }
+        ],
+        "stdout": "",
+        "stderr": "main.fy:1:148: error: E1108 resource does not permit implicit cleanup (bytes 147..149)\n  ability-declaration: main.fy (bytes 12..29)\n"
+      },
+      {
+        "index": 3,
+        "name": "parameter move no drop",
+        "exit": 0,
+        "matched": true,
+        "reference": [],
+        "diagnostics": [],
+        "stdout": "return origins ok\n",
+        "stderr": ""
+      },
+      {
+        "index": 4,
+        "name": "nested scope no drop",
+        "exit": 3,
+        "matched": true,
+        "reference": [
+          {
+            "file": "main.fy",
+            "code": 1108,
+            "start": 149,
+            "end": 171,
+            "related": [
+              {
+                "role": "ability-declaration",
+                "file": "main.fy",
+                "start": 12,
+                "end": 29
+              }
+            ]
+          }
+        ],
+        "diagnostics": [
+          {
+            "file": "main.fy",
+            "code": 1108,
+            "start": 149,
+            "end": 171,
+            "related": [
+              {
+                "role": "ability-declaration",
+                "file": "main.fy",
+                "start": 12,
+                "end": 29
+              }
+            ]
+          }
+        ],
+        "stdout": "",
+        "stderr": "main.fy:1:150: error: E1108 resource does not permit implicit cleanup (bytes 149..171)\n  ability-declaration: main.fy (bytes 12..29)\n"
+      },
+      {
+        "index": 5,
+        "name": "early return no drop",
+        "exit": 3,
+        "matched": true,
+        "reference": [
+          {
+            "file": "main.fy",
+            "code": 1108,
+            "start": 160,
+            "end": 167,
+            "related": [
+              {
+                "role": "ability-declaration",
+                "file": "main.fy",
+                "start": 12,
+                "end": 29
+              }
+            ]
+          }
+        ],
+        "diagnostics": [
+          {
+            "file": "main.fy",
+            "code": 1108,
+            "start": 160,
+            "end": 167,
+            "related": [
+              {
+                "role": "ability-declaration",
+                "file": "main.fy",
+                "start": 12,
+                "end": 29
+              }
+            ]
+          }
+        ],
+        "stdout": "",
+        "stderr": "main.fy:1:161: error: E1108 resource does not permit implicit cleanup (bytes 160..167)\n  ability-declaration: main.fy (bytes 12..29)\n"
+      },
+      {
+        "index": 6,
+        "name": "break local no drop",
+        "exit": 3,
+        "matched": true,
+        "reference": [
+          {
+            "file": "main.fy",
+            "code": 1108,
+            "start": 175,
+            "end": 181,
+            "related": [
+              {
+                "role": "ability-declaration",
+                "file": "main.fy",
+                "start": 12,
+                "end": 29
+              }
+            ]
+          }
+        ],
+        "diagnostics": [
+          {
+            "file": "main.fy",
+            "code": 1108,
+            "start": 175,
+            "end": 181,
+            "related": [
+              {
+                "role": "ability-declaration",
+                "file": "main.fy",
+                "start": 12,
+                "end": 29
+              }
+            ]
+          }
+        ],
+        "stdout": "",
+        "stderr": "main.fy:1:176: error: E1108 resource does not permit implicit cleanup (bytes 175..181)\n  ability-declaration: main.fy (bytes 12..29)\n"
+      },
+      {
+        "index": 7,
+        "name": "continue local no drop",
+        "exit": 3,
+        "matched": true,
+        "reference": [
+          {
+            "file": "main.fy",
+            "code": 1108,
+            "start": 175,
+            "end": 184,
+            "related": [
+              {
+                "role": "ability-declaration",
+                "file": "main.fy",
+                "start": 12,
+                "end": 29
+              }
+            ]
+          }
+        ],
+        "diagnostics": [
+          {
+            "file": "main.fy",
+            "code": 1108,
+            "start": 175,
+            "end": 184,
+            "related": [
+              {
+                "role": "ability-declaration",
+                "file": "main.fy",
+                "start": 12,
+                "end": 29
+              }
+            ]
+          }
+        ],
+        "stdout": "",
+        "stderr": "main.fy:1:176: error: E1108 resource does not permit implicit cleanup (bytes 175..184)\n  ability-declaration: main.fy (bytes 12..29)\n"
+      },
+      {
+        "index": 8,
+        "name": "outer owner survives break no drop",
+        "exit": 3,
+        "matched": true,
+        "reference": [
+          {
+            "file": "main.fy",
+            "code": 1108,
+            "start": 146,
+            "end": 183,
+            "related": [
+              {
+                "role": "ability-declaration",
+                "file": "main.fy",
+                "start": 12,
+                "end": 29
+              }
+            ]
+          }
+        ],
+        "diagnostics": [
+          {
+            "file": "main.fy",
+            "code": 1108,
+            "start": 146,
+            "end": 183,
+            "related": [
+              {
+                "role": "ability-declaration",
+                "file": "main.fy",
+                "start": 12,
+                "end": 29
+              }
+            ]
+          }
+        ],
+        "stdout": "",
+        "stderr": "main.fy:1:147: error: E1108 resource does not permit implicit cleanup (bytes 146..183)\n  ability-declaration: main.fy (bytes 12..29)\n"
+      },
+      {
+        "index": 9,
+        "name": "live replacement no drop",
+        "exit": 3,
+        "matched": true,
+        "reference": [
+          {
+            "file": "main.fy",
+            "code": 1108,
+            "start": 140,
+            "end": 174,
+            "related": [
+              {
+                "role": "ability-declaration",
+                "file": "main.fy",
+                "start": 12,
+                "end": 29
+              }
+            ]
+          },
+          {
+            "file": "main.fy",
+            "code": 1108,
+            "start": 160,
+            "end": 165,
+            "related": [
+              {
+                "role": "ability-declaration",
+                "file": "main.fy",
+                "start": 12,
+                "end": 29
+              }
+            ]
+          }
+        ],
+        "diagnostics": [
+          {
+            "file": "main.fy",
+            "code": 1108,
+            "start": 140,
+            "end": 174,
+            "related": [
+              {
+                "role": "ability-declaration",
+                "file": "main.fy",
+                "start": 12,
+                "end": 29
+              }
+            ]
+          },
+          {
+            "file": "main.fy",
+            "code": 1108,
+            "start": 160,
+            "end": 165,
+            "related": [
+              {
+                "role": "ability-declaration",
+                "file": "main.fy",
+                "start": 12,
+                "end": 29
+              }
+            ]
+          }
+        ],
+        "stdout": "",
+        "stderr": "main.fy:1:161: error: E1108 resource does not permit implicit cleanup (bytes 160..165)\n  ability-declaration: main.fy (bytes 12..29)\nmain.fy:1:141: error: E1108 resource does not permit implicit cleanup (bytes 140..174)\n  ability-declaration: main.fy (bytes 12..29)\n"
+      },
+      {
+        "index": 10,
+        "name": "dead replacement no drop",
+        "exit": 3,
+        "matched": true,
+        "reference": [
+          {
+            "file": "main.fy",
+            "code": 1108,
+            "start": 188,
+            "end": 201,
+            "related": [
+              {
+                "role": "ability-declaration",
+                "file": "main.fy",
+                "start": 12,
+                "end": 29
+              }
+            ]
+          }
+        ],
+        "diagnostics": [
+          {
+            "file": "main.fy",
+            "code": 1108,
+            "start": 188,
+            "end": 201,
+            "related": [
+              {
+                "role": "ability-declaration",
+                "file": "main.fy",
+                "start": 12,
+                "end": 29
+              }
+            ]
+          }
+        ],
+        "stdout": "",
+        "stderr": "main.fy:1:189: error: E1108 resource does not permit implicit cleanup (bytes 188..201)\n  ability-declaration: main.fy (bytes 12..29)\n"
+      },
+      {
+        "index": 11,
+        "name": "propagation error edge no drop",
+        "exit": 3,
+        "matched": true,
+        "reference": [
+          {
+            "file": "main.fy",
+            "code": 1108,
+            "start": 181,
+            "end": 192,
+            "related": [
+              {
+                "role": "ability-declaration",
+                "file": "main.fy",
+                "start": 12,
+                "end": 29
+              }
+            ]
+          },
+          {
+            "file": "main.fy",
+            "code": 1108,
+            "start": 193,
+            "end": 207,
+            "related": [
+              {
+                "role": "ability-declaration",
+                "file": "main.fy",
+                "start": 12,
+                "end": 29
+              }
+            ]
+          }
+        ],
+        "diagnostics": [
+          {
+            "file": "main.fy",
+            "code": 1108,
+            "start": 181,
+            "end": 192,
+            "related": [
+              {
+                "role": "ability-declaration",
+                "file": "main.fy",
+                "start": 12,
+                "end": 29
+              }
+            ]
+          },
+          {
+            "file": "main.fy",
+            "code": 1108,
+            "start": 193,
+            "end": 207,
+            "related": [
+              {
+                "role": "ability-declaration",
+                "file": "main.fy",
+                "start": 12,
+                "end": 29
+              }
+            ]
+          }
+        ],
+        "stdout": "",
+        "stderr": "main.fy:1:182: error: E1108 resource does not permit implicit cleanup (bytes 181..192)\n  ability-declaration: main.fy (bytes 12..29)\nmain.fy:1:194: error: E1108 resource does not permit implicit cleanup (bytes 193..207)\n  ability-declaration: main.fy (bytes 12..29)\n"
+      },
+      {
+        "index": 12,
+        "name": "consumed is_ok no drop",
+        "exit": 3,
+        "matched": true,
+        "reference": [
+          {
+            "file": "main.fy",
+            "code": 1108,
+            "start": 184,
+            "end": 194,
+            "related": [
+              {
+                "role": "ability-declaration",
+                "file": "main.fy",
+                "start": 12,
+                "end": 29
+              }
+            ]
+          }
+        ],
+        "diagnostics": [
+          {
+            "file": "main.fy",
+            "code": 1108,
+            "start": 184,
+            "end": 194,
+            "related": [
+              {
+                "role": "ability-declaration",
+                "file": "main.fy",
+                "start": 12,
+                "end": 29
+              }
+            ]
+          }
+        ],
+        "stdout": "",
+        "stderr": "main.fy:1:185: error: E1108 resource does not permit implicit cleanup (bytes 184..194)\n  ability-declaration: main.fy (bytes 12..29)\n"
+      },
+      {
+        "index": 13,
+        "name": "discarded temporary no drop",
+        "exit": 3,
+        "matched": true,
+        "reference": [
+          {
+            "file": "main.fy",
+            "code": 1108,
+            "start": 149,
+            "end": 155,
+            "related": [
+              {
+                "role": "ability-declaration",
+                "file": "main.fy",
+                "start": 12,
+                "end": 29
+              }
+            ]
+          }
+        ],
+        "diagnostics": [
+          {
+            "file": "main.fy",
+            "code": 1108,
+            "start": 149,
+            "end": 155,
+            "related": [
+              {
+                "role": "ability-declaration",
+                "file": "main.fy",
+                "start": 12,
+                "end": 29
+              }
+            ]
+          }
+        ],
+        "stdout": "",
+        "stderr": "main.fy:1:150: error: E1108 resource does not permit implicit cleanup (bytes 149..155)\n  ability-declaration: main.fy (bytes 12..29)\n"
+      },
+      {
+        "index": 14,
+        "name": "discard local read no drop",
+        "exit": 3,
+        "matched": true,
+        "reference": [
+          {
+            "file": "main.fy",
+            "code": 1108,
+            "start": 140,
+            "end": 175,
+            "related": [
+              {
+                "role": "ability-declaration",
+                "file": "main.fy",
+                "start": 12,
+                "end": 29
+              }
+            ]
+          }
+        ],
+        "diagnostics": [
+          {
+            "file": "main.fy",
+            "code": 1108,
+            "start": 140,
+            "end": 175,
+            "related": [
+              {
+                "role": "ability-declaration",
+                "file": "main.fy",
+                "start": 12,
+                "end": 29
+              }
+            ]
+          }
+        ],
+        "stdout": "",
+        "stderr": "main.fy:1:141: error: E1108 resource does not permit implicit cleanup (bytes 140..175)\n  ability-declaration: main.fy (bytes 12..29)\n"
+      },
+      {
+        "index": 15,
+        "name": "match arm capture no drop",
+        "exit": 3,
+        "matched": true,
+        "reference": [
+          {
+            "file": "main.fy",
+            "code": 1108,
+            "start": 187,
+            "end": 213,
+            "related": [
+              {
+                "role": "ability-declaration",
+                "file": "main.fy",
+                "start": 12,
+                "end": 29
+              }
+            ]
+          }
+        ],
+        "diagnostics": [
+          {
+            "file": "main.fy",
+            "code": 1108,
+            "start": 187,
+            "end": 213,
+            "related": [
+              {
+                "role": "ability-declaration",
+                "file": "main.fy",
+                "start": 12,
+                "end": 29
+              }
+            ]
+          }
+        ],
+        "stdout": "",
+        "stderr": "main.fy:1:188: error: E1108 resource does not permit implicit cleanup (bytes 187..213)\n  ability-declaration: main.fy (bytes 12..29)\n"
+      },
+      {
+        "index": 16,
+        "name": "returned branch owner no drop",
+        "exit": 3,
+        "matched": true,
+        "reference": [
+          {
+            "file": "main.fy",
+            "code": 1108,
+            "start": 190,
+            "end": 204,
+            "related": [
+              {
+                "role": "ability-declaration",
+                "file": "main.fy",
+                "start": 12,
+                "end": 29
+              }
+            ]
+          }
+        ],
+        "diagnostics": [
+          {
+            "file": "main.fy",
+            "code": 1108,
+            "start": 190,
+            "end": 204,
+            "related": [
+              {
+                "role": "ability-declaration",
+                "file": "main.fy",
+                "start": 12,
+                "end": 29
+              }
+            ]
+          }
+        ],
+        "stdout": "",
+        "stderr": "main.fy:1:191: error: E1108 resource does not permit implicit cleanup (bytes 190..204)\n  ability-declaration: main.fy (bytes 12..29)\n"
+      },
+      {
+        "index": 17,
+        "name": "match break capture no drop",
+        "exit": 3,
+        "matched": true,
+        "reference": [
+          {
+            "file": "main.fy",
+            "code": 1108,
+            "start": 217,
+            "end": 223,
+            "related": [
+              {
+                "role": "ability-declaration",
+                "file": "main.fy",
+                "start": 12,
+                "end": 29
+              }
+            ]
+          }
+        ],
+        "diagnostics": [
+          {
+            "file": "main.fy",
+            "code": 1108,
+            "start": 217,
+            "end": 223,
+            "related": [
+              {
+                "role": "ability-declaration",
+                "file": "main.fy",
+                "start": 12,
+                "end": 29
+              }
+            ]
+          }
+        ],
+        "stdout": "",
+        "stderr": "main.fy:1:218: error: E1108 resource does not permit implicit cleanup (bytes 217..223)\n  ability-declaration: main.fy (bytes 12..29)\n"
+      },
+      {
+        "index": 18,
+        "name": "local scope missing effect",
+        "exit": 3,
+        "matched": true,
+        "reference": [
+          {
+            "file": "main.fy",
+            "code": 7102,
+            "start": 150,
+            "end": 171,
+            "related": [
+              {
+                "role": "effect-declaration",
+                "file": "main.fy",
+                "start": 12,
+                "end": 29
+              }
+            ]
+          }
+        ],
+        "diagnostics": [
+          {
+            "file": "main.fy",
+            "code": 7102,
+            "start": 150,
+            "end": 171,
+            "related": [
+              {
+                "role": "effect-declaration",
+                "file": "main.fy",
+                "start": 12,
+                "end": 29
+              }
+            ]
+          }
+        ],
+        "stdout": "",
+        "stderr": "main.fy:1:151: error: E7102 cleanup effect exceeds caller authority (bytes 150..171)\n  effect-declaration: main.fy (bytes 12..29)\n"
+      },
+      {
+        "index": 19,
+        "name": "moved return missing effect",
+        "exit": 0,
+        "matched": true,
+        "reference": [],
+        "diagnostics": [],
+        "stdout": "return origins ok\n",
+        "stderr": ""
+      },
+      {
+        "index": 20,
+        "name": "parameter scope missing effect",
+        "exit": 3,
+        "matched": true,
+        "reference": [
+          {
+            "file": "main.fy",
+            "code": 7102,
+            "start": 157,
+            "end": 159,
+            "related": [
+              {
+                "role": "effect-declaration",
+                "file": "main.fy",
+                "start": 12,
+                "end": 29
+              }
+            ]
+          }
+        ],
+        "diagnostics": [
+          {
+            "file": "main.fy",
+            "code": 7102,
+            "start": 157,
+            "end": 159,
+            "related": [
+              {
+                "role": "effect-declaration",
+                "file": "main.fy",
+                "start": 12,
+                "end": 29
+              }
+            ]
+          }
+        ],
+        "stdout": "",
+        "stderr": "main.fy:1:158: error: E7102 cleanup effect exceeds caller authority (bytes 157..159)\n  effect-declaration: main.fy (bytes 12..29)\n"
+      },
+      {
+        "index": 21,
+        "name": "parameter move missing effect",
+        "exit": 0,
+        "matched": true,
+        "reference": [],
+        "diagnostics": [],
+        "stdout": "return origins ok\n",
+        "stderr": ""
+      },
+      {
+        "index": 22,
+        "name": "nested scope missing effect",
+        "exit": 3,
+        "matched": true,
+        "reference": [
+          {
+            "file": "main.fy",
+            "code": 7102,
+            "start": 159,
+            "end": 181,
+            "related": [
+              {
+                "role": "effect-declaration",
+                "file": "main.fy",
+                "start": 12,
+                "end": 29
+              }
+            ]
+          }
+        ],
+        "diagnostics": [
+          {
+            "file": "main.fy",
+            "code": 7102,
+            "start": 159,
+            "end": 181,
+            "related": [
+              {
+                "role": "effect-declaration",
+                "file": "main.fy",
+                "start": 12,
+                "end": 29
+              }
+            ]
+          }
+        ],
+        "stdout": "",
+        "stderr": "main.fy:1:160: error: E7102 cleanup effect exceeds caller authority (bytes 159..181)\n  effect-declaration: main.fy (bytes 12..29)\n"
+      },
+      {
+        "index": 23,
+        "name": "early return missing effect",
+        "exit": 3,
+        "matched": true,
+        "reference": [
+          {
+            "file": "main.fy",
+            "code": 7102,
+            "start": 170,
+            "end": 177,
+            "related": [
+              {
+                "role": "effect-declaration",
+                "file": "main.fy",
+                "start": 12,
+                "end": 29
+              }
+            ]
+          }
+        ],
+        "diagnostics": [
+          {
+            "file": "main.fy",
+            "code": 7102,
+            "start": 170,
+            "end": 177,
+            "related": [
+              {
+                "role": "effect-declaration",
+                "file": "main.fy",
+                "start": 12,
+                "end": 29
+              }
+            ]
+          }
+        ],
+        "stdout": "",
+        "stderr": "main.fy:1:171: error: E7102 cleanup effect exceeds caller authority (bytes 170..177)\n  effect-declaration: main.fy (bytes 12..29)\n"
+      },
+      {
+        "index": 24,
+        "name": "break local missing effect",
+        "exit": 3,
+        "matched": true,
+        "reference": [
+          {
+            "file": "main.fy",
+            "code": 7102,
+            "start": 185,
+            "end": 191,
+            "related": [
+              {
+                "role": "effect-declaration",
+                "file": "main.fy",
+                "start": 12,
+                "end": 29
+              }
+            ]
+          }
+        ],
+        "diagnostics": [
+          {
+            "file": "main.fy",
+            "code": 7102,
+            "start": 185,
+            "end": 191,
+            "related": [
+              {
+                "role": "effect-declaration",
+                "file": "main.fy",
+                "start": 12,
+                "end": 29
+              }
+            ]
+          }
+        ],
+        "stdout": "",
+        "stderr": "main.fy:1:186: error: E7102 cleanup effect exceeds caller authority (bytes 185..191)\n  effect-declaration: main.fy (bytes 12..29)\n"
+      },
+      {
+        "index": 25,
+        "name": "continue local missing effect",
+        "exit": 3,
+        "matched": true,
+        "reference": [
+          {
+            "file": "main.fy",
+            "code": 7102,
+            "start": 185,
+            "end": 194,
+            "related": [
+              {
+                "role": "effect-declaration",
+                "file": "main.fy",
+                "start": 12,
+                "end": 29
+              }
+            ]
+          }
+        ],
+        "diagnostics": [
+          {
+            "file": "main.fy",
+            "code": 7102,
+            "start": 185,
+            "end": 194,
+            "related": [
+              {
+                "role": "effect-declaration",
+                "file": "main.fy",
+                "start": 12,
+                "end": 29
+              }
+            ]
+          }
+        ],
+        "stdout": "",
+        "stderr": "main.fy:1:186: error: E7102 cleanup effect exceeds caller authority (bytes 185..194)\n  effect-declaration: main.fy (bytes 12..29)\n"
+      },
+      {
+        "index": 26,
+        "name": "outer owner survives break missing effect",
+        "exit": 3,
+        "matched": true,
+        "reference": [
+          {
+            "file": "main.fy",
+            "code": 7102,
+            "start": 156,
+            "end": 193,
+            "related": [
+              {
+                "role": "effect-declaration",
+                "file": "main.fy",
+                "start": 12,
+                "end": 29
+              }
+            ]
+          }
+        ],
+        "diagnostics": [
+          {
+            "file": "main.fy",
+            "code": 7102,
+            "start": 156,
+            "end": 193,
+            "related": [
+              {
+                "role": "effect-declaration",
+                "file": "main.fy",
+                "start": 12,
+                "end": 29
+              }
+            ]
+          }
+        ],
+        "stdout": "",
+        "stderr": "main.fy:1:157: error: E7102 cleanup effect exceeds caller authority (bytes 156..193)\n  effect-declaration: main.fy (bytes 12..29)\n"
+      },
+      {
+        "index": 27,
+        "name": "live replacement missing effect",
+        "exit": 3,
+        "matched": true,
+        "reference": [
+          {
+            "file": "main.fy",
+            "code": 7102,
+            "start": 150,
+            "end": 184,
+            "related": [
+              {
+                "role": "effect-declaration",
+                "file": "main.fy",
+                "start": 12,
+                "end": 29
+              }
+            ]
+          },
+          {
+            "file": "main.fy",
+            "code": 7102,
+            "start": 170,
+            "end": 175,
+            "related": [
+              {
+                "role": "effect-declaration",
+                "file": "main.fy",
+                "start": 12,
+                "end": 29
+              }
+            ]
+          }
+        ],
+        "diagnostics": [
+          {
+            "file": "main.fy",
+            "code": 7102,
+            "start": 150,
+            "end": 184,
+            "related": [
+              {
+                "role": "effect-declaration",
+                "file": "main.fy",
+                "start": 12,
+                "end": 29
+              }
+            ]
+          },
+          {
+            "file": "main.fy",
+            "code": 7102,
+            "start": 170,
+            "end": 175,
+            "related": [
+              {
+                "role": "effect-declaration",
+                "file": "main.fy",
+                "start": 12,
+                "end": 29
+              }
+            ]
+          }
+        ],
+        "stdout": "",
+        "stderr": "main.fy:1:171: error: E7102 cleanup effect exceeds caller authority (bytes 170..175)\n  effect-declaration: main.fy (bytes 12..29)\nmain.fy:1:151: error: E7102 cleanup effect exceeds caller authority (bytes 150..184)\n  effect-declaration: main.fy (bytes 12..29)\n"
+      },
+      {
+        "index": 28,
+        "name": "dead replacement missing effect",
+        "exit": 3,
+        "matched": true,
+        "reference": [
+          {
+            "file": "main.fy",
+            "code": 7102,
+            "start": 198,
+            "end": 211,
+            "related": [
+              {
+                "role": "effect-declaration",
+                "file": "main.fy",
+                "start": 12,
+                "end": 29
+              }
+            ]
+          }
+        ],
+        "diagnostics": [
+          {
+            "file": "main.fy",
+            "code": 7102,
+            "start": 198,
+            "end": 211,
+            "related": [
+              {
+                "role": "effect-declaration",
+                "file": "main.fy",
+                "start": 12,
+                "end": 29
+              }
+            ]
+          }
+        ],
+        "stdout": "",
+        "stderr": "main.fy:1:199: error: E7102 cleanup effect exceeds caller authority (bytes 198..211)\n  effect-declaration: main.fy (bytes 12..29)\n"
+      },
+      {
+        "index": 29,
+        "name": "propagation error edge missing effect",
+        "exit": 3,
+        "matched": true,
+        "reference": [
+          {
+            "file": "main.fy",
+            "code": 7102,
+            "start": 191,
+            "end": 202,
+            "related": [
+              {
+                "role": "effect-declaration",
+                "file": "main.fy",
+                "start": 12,
+                "end": 29
+              }
+            ]
+          },
+          {
+            "file": "main.fy",
+            "code": 7102,
+            "start": 203,
+            "end": 217,
+            "related": [
+              {
+                "role": "effect-declaration",
+                "file": "main.fy",
+                "start": 12,
+                "end": 29
+              }
+            ]
+          }
+        ],
+        "diagnostics": [
+          {
+            "file": "main.fy",
+            "code": 7102,
+            "start": 191,
+            "end": 202,
+            "related": [
+              {
+                "role": "effect-declaration",
+                "file": "main.fy",
+                "start": 12,
+                "end": 29
+              }
+            ]
+          },
+          {
+            "file": "main.fy",
+            "code": 7102,
+            "start": 203,
+            "end": 217,
+            "related": [
+              {
+                "role": "effect-declaration",
+                "file": "main.fy",
+                "start": 12,
+                "end": 29
+              }
+            ]
+          }
+        ],
+        "stdout": "",
+        "stderr": "main.fy:1:192: error: E7102 cleanup effect exceeds caller authority (bytes 191..202)\n  effect-declaration: main.fy (bytes 12..29)\nmain.fy:1:204: error: E7102 cleanup effect exceeds caller authority (bytes 203..217)\n  effect-declaration: main.fy (bytes 12..29)\n"
+      },
+      {
+        "index": 30,
+        "name": "consumed is_ok missing effect",
+        "exit": 3,
+        "matched": true,
+        "reference": [
+          {
+            "file": "main.fy",
+            "code": 7102,
+            "start": 194,
+            "end": 204,
+            "related": [
+              {
+                "role": "effect-declaration",
+                "file": "main.fy",
+                "start": 12,
+                "end": 29
+              }
+            ]
+          }
+        ],
+        "diagnostics": [
+          {
+            "file": "main.fy",
+            "code": 7102,
+            "start": 194,
+            "end": 204,
+            "related": [
+              {
+                "role": "effect-declaration",
+                "file": "main.fy",
+                "start": 12,
+                "end": 29
+              }
+            ]
+          }
+        ],
+        "stdout": "",
+        "stderr": "main.fy:1:195: error: E7102 cleanup effect exceeds caller authority (bytes 194..204)\n  effect-declaration: main.fy (bytes 12..29)\n"
+      },
+      {
+        "index": 31,
+        "name": "discarded temporary missing effect",
+        "exit": 3,
+        "matched": true,
+        "reference": [
+          {
+            "file": "main.fy",
+            "code": 7102,
+            "start": 159,
+            "end": 165,
+            "related": [
+              {
+                "role": "effect-declaration",
+                "file": "main.fy",
+                "start": 12,
+                "end": 29
+              }
+            ]
+          }
+        ],
+        "diagnostics": [
+          {
+            "file": "main.fy",
+            "code": 7102,
+            "start": 159,
+            "end": 165,
+            "related": [
+              {
+                "role": "effect-declaration",
+                "file": "main.fy",
+                "start": 12,
+                "end": 29
+              }
+            ]
+          }
+        ],
+        "stdout": "",
+        "stderr": "main.fy:1:160: error: E7102 cleanup effect exceeds caller authority (bytes 159..165)\n  effect-declaration: main.fy (bytes 12..29)\n"
+      },
+      {
+        "index": 32,
+        "name": "discard local read missing effect",
+        "exit": 3,
+        "matched": true,
+        "reference": [
+          {
+            "file": "main.fy",
+            "code": 7102,
+            "start": 150,
+            "end": 185,
+            "related": [
+              {
+                "role": "effect-declaration",
+                "file": "main.fy",
+                "start": 12,
+                "end": 29
+              }
+            ]
+          }
+        ],
+        "diagnostics": [
+          {
+            "file": "main.fy",
+            "code": 7102,
+            "start": 150,
+            "end": 185,
+            "related": [
+              {
+                "role": "effect-declaration",
+                "file": "main.fy",
+                "start": 12,
+                "end": 29
+              }
+            ]
+          }
+        ],
+        "stdout": "",
+        "stderr": "main.fy:1:151: error: E7102 cleanup effect exceeds caller authority (bytes 150..185)\n  effect-declaration: main.fy (bytes 12..29)\n"
+      },
+      {
+        "index": 33,
+        "name": "match arm capture missing effect",
+        "exit": 3,
+        "matched": true,
+        "reference": [
+          {
+            "file": "main.fy",
+            "code": 7102,
+            "start": 197,
+            "end": 223,
+            "related": [
+              {
+                "role": "effect-declaration",
+                "file": "main.fy",
+                "start": 12,
+                "end": 29
+              }
+            ]
+          }
+        ],
+        "diagnostics": [
+          {
+            "file": "main.fy",
+            "code": 7102,
+            "start": 197,
+            "end": 223,
+            "related": [
+              {
+                "role": "effect-declaration",
+                "file": "main.fy",
+                "start": 12,
+                "end": 29
+              }
+            ]
+          }
+        ],
+        "stdout": "",
+        "stderr": "main.fy:1:198: error: E7102 cleanup effect exceeds caller authority (bytes 197..223)\n  effect-declaration: main.fy (bytes 12..29)\n"
+      },
+      {
+        "index": 34,
+        "name": "returned branch owner missing effect",
+        "exit": 3,
+        "matched": true,
+        "reference": [
+          {
+            "file": "main.fy",
+            "code": 7102,
+            "start": 200,
+            "end": 214,
+            "related": [
+              {
+                "role": "effect-declaration",
+                "file": "main.fy",
+                "start": 12,
+                "end": 29
+              }
+            ]
+          }
+        ],
+        "diagnostics": [
+          {
+            "file": "main.fy",
+            "code": 7102,
+            "start": 200,
+            "end": 214,
+            "related": [
+              {
+                "role": "effect-declaration",
+                "file": "main.fy",
+                "start": 12,
+                "end": 29
+              }
+            ]
+          }
+        ],
+        "stdout": "",
+        "stderr": "main.fy:1:201: error: E7102 cleanup effect exceeds caller authority (bytes 200..214)\n  effect-declaration: main.fy (bytes 12..29)\n"
+      },
+      {
+        "index": 35,
+        "name": "match break capture missing effect",
+        "exit": 3,
+        "matched": true,
+        "reference": [
+          {
+            "file": "main.fy",
+            "code": 7102,
+            "start": 227,
+            "end": 233,
+            "related": [
+              {
+                "role": "effect-declaration",
+                "file": "main.fy",
+                "start": 12,
+                "end": 29
+              }
+            ]
+          }
+        ],
+        "diagnostics": [
+          {
+            "file": "main.fy",
+            "code": 7102,
+            "start": 227,
+            "end": 233,
+            "related": [
+              {
+                "role": "effect-declaration",
+                "file": "main.fy",
+                "start": 12,
+                "end": 29
+              }
+            ]
+          }
+        ],
+        "stdout": "",
+        "stderr": "main.fy:1:228: error: E7102 cleanup effect exceeds caller authority (bytes 227..233)\n  effect-declaration: main.fy (bytes 12..29)\n"
+      },
+      {
+        "index": 36,
+        "name": "local scope authorized",
+        "exit": 0,
+        "matched": true,
+        "reference": [],
+        "diagnostics": [],
+        "stdout": "return origins ok\n",
+        "stderr": ""
+      },
+      {
+        "index": 37,
+        "name": "early return authorized",
+        "exit": 0,
+        "matched": true,
+        "reference": [],
+        "diagnostics": [],
+        "stdout": "return origins ok\n",
+        "stderr": ""
+      },
+      {
+        "index": 38,
+        "name": "break local authorized",
+        "exit": 0,
+        "matched": true,
+        "reference": [],
+        "diagnostics": [],
+        "stdout": "return origins ok\n",
+        "stderr": ""
+      },
+      {
+        "index": 39,
+        "name": "live replacement authorized",
+        "exit": 0,
+        "matched": true,
+        "reference": [],
+        "diagnostics": [],
+        "stdout": "return origins ok\n",
+        "stderr": ""
+      },
+      {
+        "index": 40,
+        "name": "propagation error edge authorized",
+        "exit": 0,
+        "matched": true,
+        "reference": [],
+        "diagnostics": [],
+        "stdout": "return origins ok\n",
+        "stderr": ""
+      },
+      {
+        "index": 41,
+        "name": "consumed is_ok authorized",
+        "exit": 0,
+        "matched": true,
+        "reference": [],
+        "diagnostics": [],
+        "stdout": "return origins ok\n",
+        "stderr": ""
+      },
+      {
+        "index": 42,
+        "name": "discarded temporary authorized",
+        "exit": 0,
+        "matched": true,
+        "reference": [],
+        "diagnostics": [],
+        "stdout": "return origins ok\n",
+        "stderr": ""
+      },
+      {
+        "index": 43,
+        "name": "match arm capture authorized",
+        "exit": 0,
+        "matched": true,
+        "reference": [],
+        "diagnostics": [],
+        "stdout": "return origins ok\n",
+        "stderr": ""
+      },
+      {
+        "index": 44,
+        "name": "match break capture authorized",
+        "exit": 0,
+        "matched": true,
+        "reference": [],
+        "diagnostics": [],
+        "stdout": "return origins ok\n",
+        "stderr": ""
+      },
+      {
+        "index": 45,
+        "name": "nested resource blocker",
+        "exit": 3,
+        "matched": true,
+        "reference": [
+          {
+            "file": "main.fy",
+            "code": 1108,
+            "start": 126,
+            "end": 159,
+            "related": [
+              {
+                "role": "ability-declaration",
+                "file": "main.fy",
+                "start": 12,
+                "end": 29
+              }
+            ]
+          }
+        ],
+        "diagnostics": [
+          {
+            "file": "main.fy",
+            "code": 1108,
+            "start": 126,
+            "end": 159,
+            "related": [
+              {
+                "role": "ability-declaration",
+                "file": "main.fy",
+                "start": 12,
+                "end": 29
+              }
+            ]
+          }
+        ],
+        "stdout": "",
+        "stderr": "main.fy:1:127: error: E1108 resource does not permit implicit cleanup (bytes 126..159)\n  ability-declaration: main.fy (bytes 12..29)\n"
+      },
+      {
+        "index": 46,
+        "name": "repeated field blocker",
+        "exit": 3,
+        "matched": true,
+        "reference": [
+          {
+            "file": "main.fy",
+            "code": 1108,
+            "start": 126,
+            "end": 165,
+            "related": [
+              {
+                "role": "ability-declaration",
+                "file": "main.fy",
+                "start": 12,
+                "end": 29
+              }
+            ]
+          }
+        ],
+        "diagnostics": [
+          {
+            "file": "main.fy",
+            "code": 1108,
+            "start": 126,
+            "end": 165,
+            "related": [
+              {
+                "role": "ability-declaration",
+                "file": "main.fy",
+                "start": 12,
+                "end": 29
+              }
+            ]
+          }
+        ],
+        "stdout": "",
+        "stderr": "main.fy:1:127: error: E1108 resource does not permit implicit cleanup (bytes 126..165)\n  ability-declaration: main.fy (bytes 12..29)\n"
+      },
+      {
+        "index": 47,
+        "name": "repeated local blocker",
+        "exit": 3,
+        "matched": true,
+        "reference": [
+          {
+            "file": "main.fy",
+            "code": 1108,
+            "start": 95,
+            "end": 127,
+            "related": [
+              {
+                "role": "ability-declaration",
+                "file": "main.fy",
+                "start": 12,
+                "end": 29
+              }
+            ]
+          }
+        ],
+        "diagnostics": [
+          {
+            "file": "main.fy",
+            "code": 1108,
+            "start": 95,
+            "end": 127,
+            "related": [
+              {
+                "role": "ability-declaration",
+                "file": "main.fy",
+                "start": 12,
+                "end": 29
+              }
+            ]
+          }
+        ],
+        "stdout": "",
+        "stderr": "main.fy:1:96: error: E1108 resource does not permit implicit cleanup (bytes 95..127)\n  ability-declaration: main.fy (bytes 12..29)\n"
+      },
+      {
+        "index": 48,
+        "name": "nested Option blocker",
+        "exit": 3,
+        "matched": true,
+        "reference": [
+          {
+            "file": "main.fy",
+            "code": 1108,
+            "start": 95,
+            "end": 145,
+            "related": [
+              {
+                "role": "ability-declaration",
+                "file": "main.fy",
+                "start": 12,
+                "end": 29
+              }
+            ]
+          }
+        ],
+        "diagnostics": [
+          {
+            "file": "main.fy",
+            "code": 1108,
+            "start": 95,
+            "end": 145,
+            "related": [
+              {
+                "role": "ability-declaration",
+                "file": "main.fy",
+                "start": 12,
+                "end": 29
+              }
+            ]
+          }
+        ],
+        "stdout": "",
+        "stderr": "main.fy:1:96: error: E1108 resource does not permit implicit cleanup (bytes 95..145)\n  ability-declaration: main.fy (bytes 12..29)\n"
+      },
+      {
+        "index": 49,
+        "name": "repeated Result blocker",
+        "exit": 3,
+        "matched": true,
+        "reference": [
+          {
+            "file": "main.fy",
+            "code": 1108,
+            "start": 137,
+            "end": 147,
+            "related": [
+              {
+                "role": "ability-declaration",
+                "file": "main.fy",
+                "start": 12,
+                "end": 29
+              }
+            ]
+          }
+        ],
+        "diagnostics": [
+          {
+            "file": "main.fy",
+            "code": 1108,
+            "start": 137,
+            "end": 147,
+            "related": [
+              {
+                "role": "ability-declaration",
+                "file": "main.fy",
+                "start": 12,
+                "end": 29
+              }
+            ]
+          }
+        ],
+        "stdout": "",
+        "stderr": "main.fy:1:138: error: E1108 resource does not permit implicit cleanup (bytes 137..147)\n  ability-declaration: main.fy (bytes 12..29)\n"
+      },
+      {
+        "index": 50,
+        "name": "cleanup local missing effect",
+        "exit": 3,
+        "matched": true,
+        "reference": [
+          {
+            "file": "main.fy",
+            "code": 7102,
+            "start": 122,
+            "end": 139,
+            "related": [
+              {
+                "role": "effect-declaration",
+                "file": "main.fy",
+                "start": 12,
+                "end": 29
+              }
+            ]
+          }
+        ],
+        "diagnostics": [
+          {
+            "file": "main.fy",
+            "code": 7102,
+            "start": 122,
+            "end": 139,
+            "related": [
+              {
+                "role": "effect-declaration",
+                "file": "main.fy",
+                "start": 12,
+                "end": 29
+              }
+            ]
+          }
+        ],
+        "stdout": "",
+        "stderr": "main.fy:1:123: error: E7102 cleanup effect exceeds caller authority (bytes 122..139)\n  effect-declaration: main.fy (bytes 12..29)\n"
+      },
+      {
+        "index": 51,
+        "name": "cleanup temporary missing effect",
+        "exit": 3,
+        "matched": true,
+        "reference": [
+          {
+            "file": "main.fy",
+            "code": 7102,
+            "start": 131,
+            "end": 137,
+            "related": [
+              {
+                "role": "effect-declaration",
+                "file": "main.fy",
+                "start": 12,
+                "end": 29
+              }
+            ]
+          }
+        ],
+        "diagnostics": [
+          {
+            "file": "main.fy",
+            "code": 7102,
+            "start": 131,
+            "end": 137,
+            "related": [
+              {
+                "role": "effect-declaration",
+                "file": "main.fy",
+                "start": 12,
+                "end": 29
+              }
+            ]
+          }
+        ],
+        "stdout": "",
+        "stderr": "main.fy:1:132: error: E7102 cleanup effect exceeds caller authority (bytes 131..137)\n  effect-declaration: main.fy (bytes 12..29)\n"
+      },
+      {
+        "index": 52,
+        "name": "cleanup temporary no drop",
+        "exit": 3,
+        "matched": true,
+        "reference": [
+          {
+            "file": "main.fy",
+            "code": 1108,
+            "start": 121,
+            "end": 127,
+            "related": [
+              {
+                "role": "ability-declaration",
+                "file": "main.fy",
+                "start": 12,
+                "end": 29
+              }
+            ]
+          }
+        ],
+        "diagnostics": [
+          {
+            "file": "main.fy",
+            "code": 1108,
+            "start": 121,
+            "end": 127,
+            "related": [
+              {
+                "role": "ability-declaration",
+                "file": "main.fy",
+                "start": 12,
+                "end": 29
+              }
+            ]
+          }
+        ],
+        "stdout": "",
+        "stderr": "main.fy:1:122: error: E1108 resource does not permit implicit cleanup (bytes 121..127)\n  ability-declaration: main.fy (bytes 12..29)\n"
+      },
+      {
+        "index": 53,
+        "name": "provider missing effect",
+        "exit": 3,
+        "matched": true,
+        "reference": [
+          {
+            "file": "main.fy",
+            "code": 7102,
+            "start": 44,
+            "end": 67,
+            "related": [
+              {
+                "role": "effect-declaration",
+                "file": "provider.fy",
+                "start": 16,
+                "end": 33
+              }
+            ]
+          }
+        ],
+        "diagnostics": [
+          {
+            "file": "main.fy",
+            "code": 7102,
+            "start": 44,
+            "end": 67,
+            "related": [
+              {
+                "role": "effect-declaration",
+                "file": "provider.fy",
+                "start": 16,
+                "end": 33
+              }
+            ]
+          }
+        ],
+        "stdout": "",
+        "stderr": "main.fy:1:45: error: E7102 cleanup effect exceeds caller authority (bytes 44..67)\n  effect-declaration: provider.fy (bytes 16..33)\n"
+      },
+      {
+        "index": 54,
+        "name": "provider no drop",
+        "exit": 3,
+        "matched": true,
+        "reference": [
+          {
+            "file": "main.fy",
+            "code": 1108,
+            "start": 44,
+            "end": 67,
+            "related": [
+              {
+                "role": "ability-declaration",
+                "file": "provider.fy",
+                "start": 16,
+                "end": 33
+              }
+            ]
+          }
+        ],
+        "diagnostics": [
+          {
+            "file": "main.fy",
+            "code": 1108,
+            "start": 44,
+            "end": 67,
+            "related": [
+              {
+                "role": "ability-declaration",
+                "file": "provider.fy",
+                "start": 16,
+                "end": 33
+              }
+            ]
+          }
+        ],
+        "stdout": "",
+        "stderr": "main.fy:1:45: error: E1108 resource does not permit implicit cleanup (bytes 44..67)\n  ability-declaration: provider.fy (bytes 16..33)\n"
+      },
+      {
+        "index": 55,
+        "name": "nested loop retains captured no drop",
+        "exit": 0,
+        "matched": true,
+        "reference": [],
+        "diagnostics": [],
+        "stdout": "return origins ok\n",
+        "stderr": ""
+      },
+      {
+        "index": 56,
+        "name": "generic cleanup requires effects",
+        "exit": 3,
+        "matched": true,
+        "reference": [
+          {
+            "file": "main.fy",
+            "code": 7102,
+            "start": 125,
+            "end": 127,
+            "related": [
+              {
+                "role": "effect-declaration",
+                "file": "main.fy",
+                "start": 12,
+                "end": 29
+              }
+            ]
+          }
+        ],
+        "diagnostics": [
+          {
+            "file": "main.fy",
+            "code": 7102,
+            "start": 125,
+            "end": 127,
+            "related": [
+              {
+                "role": "effect-declaration",
+                "file": "main.fy",
+                "start": 12,
+                "end": 29
+              }
+            ]
+          }
+        ],
+        "stdout": "",
+        "stderr": "main.fy:1:126: error: E7102 cleanup effect exceeds caller authority (bytes 125..127)\n  effect-declaration: main.fy (bytes 12..29)\n"
+      },
+      {
+        "index": 57,
+        "name": "generic cleanup with authority",
+        "exit": 0,
+        "matched": true,
+        "reference": [],
+        "diagnostics": [],
+        "stdout": "return origins ok\n",
+        "stderr": ""
+      }
+    ]
+  },
+  "native": {
+    "schemaVersion": "fairyc.test-report/v4",
+    "engine": "native",
+    "target": "x86_64-windows-msvc",
+    "profile": "development",
+    "tests": [
+      {
+        "identity": "tests::module_unit_cleanup_events::cleanup_requests_follow_live_owners_and_exit_paths",
+        "outcome": "passed",
+        "trapCategory": null,
+        "stdoutBase64": "Y2FzZSAwIDEKY2xlYW51cCAxIDE0MCAxNjEgMSAxCmNhc2UgMSAwCmNhc2UgMiAxCmNsZWFudXAgMSAxNDcgMTQ5IDEgMQpjYXNlIDMgMApjYXNlIDQgMQpjbGVhbnVwIDEgMTQ5IDE3MSAxIDEKY2FzZSA1IDEKY2xlYW51cCAyIDE2MCAxNjcgMSAxCmNhc2UgNiAxCmNsZWFudXAgMyAxNzUgMTgxIDIgMQpjYXNlIDcgMQpjbGVhbnVwIDQgMTc1IDE4NCAyIDEKY2FzZSA4IDEKY2xlYW51cCAxIDE0NiAxODMgMiAxCmNhc2UgOSAyCmNsZWFudXAgNSAxNjAgMTY1IDEgMQpjbGVhbnVwIDEgMTQwIDE3NCAxIDEKY2FzZSAxMCAxCmNsZWFudXAgMiAxODggMjAxIDEgMQpjYXNlIDExIDIKY2xlYW51cCA2IDE4MSAxOTIgMSAxCmNsZWFudXAgMiAxOTMgMjA3IDEgMQpjYXNlIDEyIDEKY2xlYW51cCA3IDE4NCAxOTQgMCA1CmNhc2UgMTMgMQpjbGVhbnVwIDggMTQ5IDE1NSAwIDEKY2FzZSAxNCAxCmNsZWFudXAgMSAxNDAgMTc1IDEgMQpjYXNlIDE1IDEKY2xlYW51cCA5IDE4NyAyMTMgMiAxCmNhc2UgMTYgMQpjbGVhbnVwIDIgMTkwIDIwNCAyIDEKY2FzZSAxNyAxCmNsZWFudXAgMyAyMTcgMjIzIDMgMQo=",
+        "stderrBase64": ""
+      },
+      {
+        "identity": "tests::module_unit_cleanup_policy::cleanup_policy_enforces_abilities_and_effect_authority",
+        "outcome": "passed",
+        "trapCategory": null,
+        "stdoutBase64": "Y2FzZSAwIDMgMQpkaWFnbm9zdGljIDExMDggMCAxNDAgMTYxIDEKcmVsYXRlZCAxMSAwIDEyIDI5CmNhc2UgMSAwIDAKY2FzZSAyIDMgMQpkaWFnbm9zdGljIDExMDggMCAxNDcgMTQ5IDEKcmVsYXRlZCAxMSAwIDEyIDI5CmNhc2UgMyAwIDAKY2FzZSA0IDMgMQpkaWFnbm9zdGljIDExMDggMCAxNDkgMTcxIDEKcmVsYXRlZCAxMSAwIDEyIDI5CmNhc2UgNSAzIDEKZGlhZ25vc3RpYyAxMTA4IDAgMTYwIDE2NyAxCnJlbGF0ZWQgMTEgMCAxMiAyOQpjYXNlIDYgMyAxCmRpYWdub3N0aWMgMTEwOCAwIDE3NSAxODEgMQpyZWxhdGVkIDExIDAgMTIgMjkKY2FzZSA3IDMgMQpkaWFnbm9zdGljIDExMDggMCAxNzUgMTg0IDEKcmVsYXRlZCAxMSAwIDEyIDI5CmNhc2UgOCAzIDEKZGlhZ25vc3RpYyAxMTA4IDAgMTQ2IDE4MyAxCnJlbGF0ZWQgMTEgMCAxMiAyOQpjYXNlIDkgMyAyCmRpYWdub3N0aWMgMTEwOCAwIDE2MCAxNjUgMQpyZWxhdGVkIDExIDAgMTIgMjkKZGlhZ25vc3RpYyAxMTA4IDAgMTQwIDE3NCAxCnJlbGF0ZWQgMTEgMCAxMiAyOQpjYXNlIDEwIDMgMQpkaWFnbm9zdGljIDExMDggMCAxODggMjAxIDEKcmVsYXRlZCAxMSAwIDEyIDI5CmNhc2UgMTEgMyAyCmRpYWdub3N0aWMgMTEwOCAwIDE4MSAxOTIgMQpyZWxhdGVkIDExIDAgMTIgMjkKZGlhZ25vc3RpYyAxMTA4IDAgMTkzIDIwNyAxCnJlbGF0ZWQgMTEgMCAxMiAyOQpjYXNlIDEyIDMgMQpkaWFnbm9zdGljIDExMDggMCAxODQgMTk0IDEKcmVsYXRlZCAxMSAwIDEyIDI5CmNhc2UgMTMgMyAxCmRpYWdub3N0aWMgMTEwOCAwIDE0OSAxNTUgMQpyZWxhdGVkIDExIDAgMTIgMjkKY2FzZSAxNCAzIDEKZGlhZ25vc3RpYyAxMTA4IDAgMTQwIDE3NSAxCnJlbGF0ZWQgMTEgMCAxMiAyOQpjYXNlIDE1IDMgMQpkaWFnbm9zdGljIDExMDggMCAxODcgMjEzIDEKcmVsYXRlZCAxMSAwIDEyIDI5CmNhc2UgMTYgMyAxCmRpYWdub3N0aWMgMTEwOCAwIDE5MCAyMDQgMQpyZWxhdGVkIDExIDAgMTIgMjkKY2FzZSAxNyAzIDEKZGlhZ25vc3RpYyAxMTA4IDAgMjE3IDIyMyAxCnJlbGF0ZWQgMTEgMCAxMiAyOQpjYXNlIDE4IDMgMQpkaWFnbm9zdGljIDcxMDIgMCAxNTAgMTcxIDEKcmVsYXRlZCAxMiAwIDEyIDI5CmNhc2UgMTkgMCAwCmNhc2UgMjAgMyAxCmRpYWdub3N0aWMgNzEwMiAwIDE1NyAxNTkgMQpyZWxhdGVkIDEyIDAgMTIgMjkKY2FzZSAyMSAwIDAKY2FzZSAyMiAzIDEKZGlhZ25vc3RpYyA3MTAyIDAgMTU5IDE4MSAxCnJlbGF0ZWQgMTIgMCAxMiAyOQpjYXNlIDIzIDMgMQpkaWFnbm9zdGljIDcxMDIgMCAxNzAgMTc3IDEKcmVsYXRlZCAxMiAwIDEyIDI5CmNhc2UgMjQgMyAxCmRpYWdub3N0aWMgNzEwMiAwIDE4NSAxOTEgMQpyZWxhdGVkIDEyIDAgMTIgMjkKY2FzZSAyNSAzIDEKZGlhZ25vc3RpYyA3MTAyIDAgMTg1IDE5NCAxCnJlbGF0ZWQgMTIgMCAxMiAyOQpjYXNlIDI2IDMgMQpkaWFnbm9zdGljIDcxMDIgMCAxNTYgMTkzIDEKcmVsYXRlZCAxMiAwIDEyIDI5CmNhc2UgMjcgMyAyCmRpYWdub3N0aWMgNzEwMiAwIDE3MCAxNzUgMQpyZWxhdGVkIDEyIDAgMTIgMjkKZGlhZ25vc3RpYyA3MTAyIDAgMTUwIDE4NCAxCnJlbGF0ZWQgMTIgMCAxMiAyOQpjYXNlIDI4IDMgMQpkaWFnbm9zdGljIDcxMDIgMCAxOTggMjExIDEKcmVsYXRlZCAxMiAwIDEyIDI5CmNhc2UgMjkgMyAyCmRpYWdub3N0aWMgNzEwMiAwIDE5MSAyMDIgMQpyZWxhdGVkIDEyIDAgMTIgMjkKZGlhZ25vc3RpYyA3MTAyIDAgMjAzIDIxNyAxCnJlbGF0ZWQgMTIgMCAxMiAyOQpjYXNlIDMwIDMgMQpkaWFnbm9zdGljIDcxMDIgMCAxOTQgMjA0IDEKcmVsYXRlZCAxMiAwIDEyIDI5CmNhc2UgMzEgMyAxCmRpYWdub3N0aWMgNzEwMiAwIDE1OSAxNjUgMQpyZWxhdGVkIDEyIDAgMTIgMjkKY2FzZSAzMiAzIDEKZGlhZ25vc3RpYyA3MTAyIDAgMTUwIDE4NSAxCnJlbGF0ZWQgMTIgMCAxMiAyOQpjYXNlIDMzIDMgMQpkaWFnbm9zdGljIDcxMDIgMCAxOTcgMjIzIDEKcmVsYXRlZCAxMiAwIDEyIDI5CmNhc2UgMzQgMyAxCmRpYWdub3N0aWMgNzEwMiAwIDIwMCAyMTQgMQpyZWxhdGVkIDEyIDAgMTIgMjkKY2FzZSAzNSAzIDEKZGlhZ25vc3RpYyA3MTAyIDAgMjI3IDIzMyAxCnJlbGF0ZWQgMTIgMCAxMiAyOQpjYXNlIDM2IDAgMApjYXNlIDM3IDAgMApjYXNlIDM4IDAgMApjYXNlIDM5IDAgMApjYXNlIDQwIDAgMApjYXNlIDQxIDAgMApjYXNlIDQyIDAgMApjYXNlIDQzIDAgMApjYXNlIDQ0IDAgMApjYXNlIDQ1IDMgMQpkaWFnbm9zdGljIDExMDggMCAxMjYgMTU5IDEKcmVsYXRlZCAxMSAwIDEyIDI5CmNhc2UgNDYgMyAxCmRpYWdub3N0aWMgMTEwOCAwIDEyNiAxNjUgMQpyZWxhdGVkIDExIDAgMTIgMjkKY2FzZSA0NyAzIDEKZGlhZ25vc3RpYyAxMTA4IDAgOTUgMTI3IDEKcmVsYXRlZCAxMSAwIDEyIDI5CmNhc2UgNDggMyAxCmRpYWdub3N0aWMgMTEwOCAwIDk1IDE0NSAxCnJlbGF0ZWQgMTEgMCAxMiAyOQpjYXNlIDQ5IDMgMQpkaWFnbm9zdGljIDExMDggMCAxMzcgMTQ3IDEKcmVsYXRlZCAxMSAwIDEyIDI5CmNhc2UgNTAgMyAxCmRpYWdub3N0aWMgNzEwMiAwIDEyMiAxMzkgMQpyZWxhdGVkIDEyIDAgMTIgMjkKY2FzZSA1MSAzIDEKZGlhZ25vc3RpYyA3MTAyIDAgMTMxIDEzNyAxCnJlbGF0ZWQgMTIgMCAxMiAyOQpjYXNlIDUyIDMgMQpkaWFnbm9zdGljIDExMDggMCAxMjEgMTI3IDEKcmVsYXRlZCAxMSAwIDEyIDI5CmNhc2UgNTMgMyAxCmRpYWdub3N0aWMgNzEwMiAwIDQ0IDY3IDEKcmVsYXRlZCAxMiAxIDE2IDMzCmNhc2UgNTQgMyAxCmRpYWdub3N0aWMgMTEwOCAwIDQ0IDY3IDEKcmVsYXRlZCAxMSAxIDE2IDMzCmNhc2UgNTUgMCAwCmNhc2UgNTYgMyAxCmRpYWdub3N0aWMgNzEwMiAwIDEyNSAxMjcgMQpyZWxhdGVkIDEyIDAgMTIgMjkKY2FzZSA1NyAwIDAK",
+        "stderrBase64": ""
+      },
+      {
+        "identity": "tests::module_unit_moves::move_facts_own_binding_identity_and_scope_transitions",
+        "outcome": "passed",
+        "trapCategory": null,
+        "stdoutBase64": "",
+        "stderrBase64": ""
+      },
+      {
+        "identity": "tests::module_unit_moves::resource_transfers_follow_reachable_branches_and_loop_edges",
+        "outcome": "passed",
+        "trapCategory": null,
+        "stdoutBase64": "Y2FzZSAwIDAgMApjYXNlIDEgMyAxCmRpYWdub3N0aWMgMTEwMSAwIDMwNiAzMTEgMgpyZWxhdGVkIDcgMCAyNjAgMjY1CnJlbGF0ZWQgOCAwIDI4OCAyOTMKY2FzZSAyIDMgMQpkaWFnbm9zdGljIDExMDEgMCAyOTAgMjk1IDIKcmVsYXRlZCA3IDAgMjYwIDI2NQpyZWxhdGVkIDggMCAyNzggMjgzCmNhc2UgMyAwIDAKY2FzZSA0IDAgMApjYXNlIDUgMyAxCmRpYWdub3N0aWMgMTEwMSAwIDMwOCAzMTMgMgpyZWxhdGVkIDcgMCAyNjAgMjY1CnJlbGF0ZWQgOCAwIDI4OSAyOTQKY2FzZSA2IDMgMQpkaWFnbm9zdGljIDExMDEgMCAyOTMgMjk4IDIKcmVsYXRlZCA3IDAgMjYwIDI2NQpyZWxhdGVkIDggMCAyNzggMjgzCmNhc2UgNyAzIDEKZGlhZ25vc3RpYyAxMTA0IDAgMjczIDI5MiAyCnJlbGF0ZWQgNyAwIDI2MCAyNjUKcmVsYXRlZCA4IDAgMjg0IDI4OQpjYXNlIDggMCAwCmNhc2UgOSAwIDAKY2FzZSAxMCAwIDAKY2FzZSAxMSAzIDEKZGlhZ25vc3RpYyAxMTA0IDAgMjczIDI5MiAyCnJlbGF0ZWQgNyAwIDI2MCAyNjUKcmVsYXRlZCA4IDAgMjg0IDI4OQpjYXNlIDEyIDMgMQpkaWFnbm9zdGljIDExMDUgMCAyNzMgMjk1IDMKcmVsYXRlZCA3IDAgMjYwIDI2NQpyZWxhdGVkIDkgMCAyNzMgMjgwCnJlbGF0ZWQgOCAwIDI4NyAyOTIKY2FzZSAxMyAwIDAKY2FzZSAxNCAzIDEKZGlhZ25vc3RpYyAxMTA1IDAgMjczIDMwMSAzCnJlbGF0ZWQgNyAwIDI2MCAyNjUKcmVsYXRlZCA5IDAgMjczIDI4MApyZWxhdGVkIDggMCAyODcgMjkyCmNhc2UgMTUgMCAwCmNhc2UgMTYgMyAxCmRpYWdub3N0aWMgMTEwMSAwIDI4OCAyOTMgMgpyZWxhdGVkIDcgMCAyNjAgMjY1CnJlbGF0ZWQgOCAwIDI4OCAyOTMKY2FzZSAxNyAwIDAKY2FzZSAxOCAzIDEKZGlhZ25vc3RpYyAxMTAxIDAgMzIxIDMyNiAyCnJlbGF0ZWQgNyAwIDI2MCAyNjUKcmVsYXRlZCA4IDAgMzAyIDMwNwpjYXNlIDE5IDMgMQpkaWFnbm9zdGljIDExMDEgMCAzNDcgMzUxIDIKcmVsYXRlZCA3IDAgMjY4IDI3MgpyZWxhdGVkIDggMCAyOTQgMjk4CmNhc2UgMjAgMyAxCmRpYWdub3N0aWMgMTEwMSAwIDMyMSAzMjUgMgpyZWxhdGVkIDcgMCAyNzkgMjgzCnJlbGF0ZWQgOCAwIDMwNyAzMTEKY2FzZSAyMSAwIDAKY2FzZSAyMiAzIDEKZGlhZ25vc3RpYyAxMTAxIDAgMjc5IDI4NCAyCnJlbGF0ZWQgNyAwIDI0OCAyNTMKcmVsYXRlZCA4IDAgMjYwIDI2NQpjYXNlIDIzIDMgMQpkaWFnbm9zdGljIDExMDEgMCAxMDIgMTA3IDIKcmVsYXRlZCA3IDAgNjAgNjUKcmVsYXRlZCA4IDAgODYgOTEKY2FzZSAyNCAzIDEKZGlhZ25vc3RpYyAxMTA0IDAgMjgxIDMwMSAyCnJlbGF0ZWQgNyAwIDI2MCAyNjUKcmVsYXRlZCA4IDAgMjk1IDMwMApjYXNlIDI1IDAgMApjYXNlIDI2IDMgMQpkaWFnbm9zdGljIDExMDEgMCAzMjQgMzI5IDIKcmVsYXRlZCA3IDAgMjYwIDI2NQpyZWxhdGVkIDggMCAyOTQgMjk5CmNhc2UgMjcgMCAwCmNhc2UgMjggMyAxCmRpYWdub3N0aWMgMTEwMSAwIDI4NyAyOTIgMgpyZWxhdGVkIDcgMCAyNTUgMjYwCnJlbGF0ZWQgOCAwIDI3MyAyNzgKY2FzZSAyOSAwIDAKY2FzZSAzMCAzIDEKZGlhZ25vc3RpYyAxMTA1IDAgMjgyIDMxMCAzCnJlbGF0ZWQgNyAwIDI2MCAyNjUKcmVsYXRlZCA5IDAgMjgyIDI4OQpyZWxhdGVkIDggMCAyOTYgMzAxCmNhc2UgMzEgMCAwCmNhc2UgMzIgMyAxCmRpYWdub3N0aWMgMTEwNSAwIDI3MyAzMDQgMwpyZWxhdGVkIDcgMCAyNjAgMjY1CnJlbGF0ZWQgOSAwIDI3MyAyODAKcmVsYXRlZCA4IDAgMjg3IDI5MgpjYXNlIDMzIDMgMQpkaWFnbm9zdGljIDExMDUgMCAyNzMgMzEyIDMKcmVsYXRlZCA3IDAgMjYwIDI2NQpyZWxhdGVkIDkgMCAyNzMgMjkyCnJlbGF0ZWQgOCAwIDMwNCAzMDkKY2FzZSAzNCAwIDAKY2FzZSAzNSAwIDAKY2FzZSAzNiAzIDEKZGlhZ25vc3RpYyAxMTAxIDAgMzI3IDMyOCAyCnJlbGF0ZWQgNyAwIDMxMCAzMTEKcmVsYXRlZCA4IDAgMzE5IDMyMApjYXNlIDM3IDAgMApjYXNlIDM4IDAgMApjYXNlIDM5IDMgMQpkaWFnbm9zdGljIDExMDEgMCAxMjcgMTMyIDIKcmVsYXRlZCA3IDAgODYgOTEKcmVsYXRlZCA4IDAgMTEzIDExOApjYXNlIDQwIDMgMQpkaWFnbm9zdGljIDExMDEgMCAzNDYgMzUxIDIKcmVsYXRlZCA3IDAgMjkyIDI5NwpyZWxhdGVkIDggMCAzMjcgMzMyCmNhc2UgNDEgMyAxCmRpYWdub3N0aWMgMTEwMyAwIDMxNyAzMjMgMgpyZWxhdGVkIDEwIDAgMjUyIDI1MwpyZWxhdGVkIDYgMCAyOTEgMjk1CmNhc2UgNDIgMyAxCmRpYWdub3N0aWMgMTEwMiAwIDUwIDU0IDIKcmVsYXRlZCA3IDAgMzcgNTcKcmVsYXRlZCA4IDAgNTAgNTQKY2FzZSA0MyAzIDIKZGlhZ25vc3RpYyAxMTA0IDAgNDUgNzIgMgpyZWxhdGVkIDcgMCAzNyA3NApyZWxhdGVkIDggMCA1OSA2MwpkaWFnbm9zdGljIDExMDIgMCA1OSA2MyAyCnJlbGF0ZWQgNyAwIDM3IDc0CnJlbGF0ZWQgOCAwIDU5IDYzCmNhc2UgNDQgMyAxCmRpYWdub3N0aWMgMTEwMSAwIDMwNSAzMTAgMgpyZWxhdGVkIDcgMCAyNjAgMjY1CnJlbGF0ZWQgOCAwIDI3OCAyODMKY2FzZSA0NSAzIDEKZGlhZ25vc3RpYyAxMTAxIDAgMjg1IDI5MCAyCnJlbGF0ZWQgNyAwIDI2MCAyNjUKcmVsYXRlZCA4IDAgMjc4IDI4MwpjYXNlIDQ2IDMgMgpkaWFnbm9zdGljIDExMDUgMCAyODUgMzA4IDIKcmVsYXRlZCA3IDAgMjYwIDI2NQpyZWxhdGVkIDkgMCAyODUgMjkyCmRpYWdub3N0aWMgMTEwMSAwIDMyMCAzMjUgMgpyZWxhdGVkIDcgMCAyNjAgMjY1CnJlbGF0ZWQgOCAwIDI3OCAyODMKY2FzZSA0NyAzIDEKZGlhZ25vc3RpYyAxMTAzIDAgMjk0IDMwMCAyCnJlbGF0ZWQgMTAgMCAyNTIgMjUzCnJlbGF0ZWQgNiAwIDI4MyAyODcKY2FzZSA0OCAzIDEKZGlhZ25vc3RpYyAxMTAzIDEgMTYyIDE2OCAyCnJlbGF0ZWQgMTAgMSA2NyA2OApyZWxhdGVkIDYgMSAxMzEgMTM1CmNhc2UgNDkgMyAxCmRpYWdub3N0aWMgMTEwMSAwIDM0OCAzNTMgMgpyZWxhdGVkIDcgMCAyOTYgMzAxCnJlbGF0ZWQgOCAwIDMyOSAzMzQKY2FzZSA1MCAzIDEKZGlhZ25vc3RpYyAxMTA1IDAgMjY3IDI4OCAzCnJlbGF0ZWQgNyAwIDI1NCAyNTkKcmVsYXRlZCA5IDAgMjY3IDI4OApyZWxhdGVkIDggMCAyODAgMjg1CmNhc2UgNTEgMyAxCmRpYWdub3N0aWMgMTEwNSAwIDMwOSAzNDMgMwpyZWxhdGVkIDcgMCAyNTQgMjU5CnJlbGF0ZWQgOSAwIDMwOSAzMjgKcmVsYXRlZCA4IDAgMzM1IDM0MApjYXNlIDUyIDMgMQpkaWFnbm9zdGljIDExMDEgMCAyOTYgMzAxIDIKcmVsYXRlZCA3IDAgMjY2IDI3MQpyZWxhdGVkIDggMCAyODQgMjg5CmNhc2UgNTMgMyAyCmRpYWdub3N0aWMgMTEwMSAwIDMxMCAzMTEgMgpyZWxhdGVkIDcgMCAyNTQgMjU1CnJlbGF0ZWQgOCAwIDI4NyAyODgKZGlhZ25vc3RpYyAxMTAxIDAgMzI1IDMyNiAyCnJlbGF0ZWQgNyAwIDI3MyAyNzQKcmVsYXRlZCA4IDAgMjk1IDI5NgpjYXNlIDU0IDAgMApjYXNlIDU1IDMgMQpkaWFnbm9zdGljIDIxMDEgMCAxNzkgMTg4IDIKcmVsYXRlZCA0IDAgMTUyIDE1NwpyZWxhdGVkIDUgMCAyMjQgMjI1CmNhc2UgNTYgMyAxCmRpYWdub3N0aWMgMTEwMSAwIDEwNSAxMTAgMgpyZWxhdGVkIDcgMCA5MSA5NgpyZWxhdGVkIDggMCAxMjEgMTI2CmNhc2UgNTcgMyAxCmRpYWdub3N0aWMgMTEwMSAwIDEwNiAxMTEgMgpyZWxhdGVkIDcgMCA5MSA5NgpyZWxhdGVkIDggMCAxMjMgMTI4Cg==",
+        "stderrBase64": ""
+      }
+    ],
+    "count": 4,
+    "passed": 4,
+    "failed": 0,
+    "status": "ok",
+    "lock": "verified"
+  },
+  "nativeComparison": {
+    "passed": true,
+    "matched": 58,
+    "count": 58,
+    "completePrimaryAndRelatedSpans": true
+  },
+  "nativeReuse": {
+    "originalPassedTests": 4,
+    "originalPolicyFixtures": 56,
+    "refreshedPolicyFixtures": 58,
+    "refreshedPolicyTestsPassed": 1,
+    "reusedUnchangedTests": 3,
+    "reason": "Only the policy test input changed to add two generic authority fixtures; compiler, candidate sources, other test sources and lock stayed unchanged."
+  },
+  "cliRegression": [
+    {
+      "suite": "move state",
+      "passed": true,
+      "matched": 58,
+      "count": 58,
+      "candidateSHA256": "18381cca50280e657d1ae503d050858a7c63b79c6c7931b59b3bbbb00dcc2471"
+    },
+    {
+      "suite": "held reads",
+      "passed": true,
+      "matched": 32,
+      "count": 32,
+      "candidateSHA256": "18381cca50280e657d1ae503d050858a7c63b79c6c7931b59b3bbbb00dcc2471"
+    },
+    {
+      "suite": "owner accesses",
+      "passed": true,
+      "matched": 31,
+      "count": 31,
+      "candidateSHA256": "18381cca50280e657d1ae503d050858a7c63b79c6c7931b59b3bbbb00dcc2471"
+    },
+    {
+      "suite": "storage generations",
+      "passed": true,
+      "matched": 9,
+      "count": 9,
+      "candidateSHA256": "18381cca50280e657d1ae503d050858a7c63b79c6c7931b59b3bbbb00dcc2471"
+    },
+    {
+      "suite": "subviews",
+      "passed": true,
+      "matched": 38,
+      "count": 38,
+      "candidateSHA256": "18381cca50280e657d1ae503d050858a7c63b79c6c7931b59b3bbbb00dcc2471"
+    },
+    {
+      "suite": "reference access",
+      "passed": true,
+      "matched": 27,
+      "count": 27,
+      "candidateSHA256": "18381cca50280e657d1ae503d050858a7c63b79c6c7931b59b3bbbb00dcc2471"
+    },
+    {
+      "suite": "loan conflicts",
+      "passed": true,
+      "matched": 38,
+      "count": 38,
+      "candidateSHA256": "18381cca50280e657d1ae503d050858a7c63b79c6c7931b59b3bbbb00dcc2471"
+    },
+    {
+      "suite": "owner moves",
+      "passed": true,
+      "matched": 39,
+      "count": 39,
+      "candidateSHA256": "18381cca50280e657d1ae503d050858a7c63b79c6c7931b59b3bbbb00dcc2471"
+    },
+    {
+      "suite": "owner arguments",
+      "passed": true,
+      "matched": 7,
+      "count": 7,
+      "candidateSHA256": "18381cca50280e657d1ae503d050858a7c63b79c6c7931b59b3bbbb00dcc2471"
+    },
+    {
+      "suite": "iteration conflicts",
+      "passed": true,
+      "matched": 6,
+      "count": 6,
+      "candidateSHA256": "18381cca50280e657d1ae503d050858a7c63b79c6c7931b59b3bbbb00dcc2471"
+    }
+  ],
+  "cleanupRequests": {
+    "evidence": "docs/ops/evidence/candidate-cleanup-exit-requests-20261010.json",
+    "cases": 18,
+    "requests": 18
+  },
+  "sourceCheck": {
+    "exit": 0,
+    "stdout": "check ok: 2 instance(s), 241 source file(s), 3007 MIR function(s), lock verified"
+  },
+  "lockedDevelopmentBuild": {
+    "exit": 0,
+    "stdout": "built: build/lexer-candidate.exe (x86_64-windows-msvc, development, lock verified)",
+    "currentBootstrap": true
+  },
+  "budgets": {
+    "work": 1048576,
+    "depth": 64,
+    "diagnostics": 8192,
+    "canonicalTypes": 4096
+  },
+  "remainingGaps": [
+    {
+      "source": "module main;@effects(console)resource R{i32 n;cleanup{discard 1;}}resource Box{R inner;cleanup{}}fn Box make(){return Box{.inner=R{.n=1}};}fn void f(){let Box box=make();}",
+      "runs": [
+        {
+          "executable": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\cleanup-events-unit\\compiler.exe",
+          "exit": 0,
+          "stdout": "semantics ok: main.fy (typed HIR: 3 function(s))\n",
+          "stderr": ""
+        },
+        {
+          "executable": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate\\build\\lexer-candidate.exe",
+          "exit": 0,
+          "stdout": "return origins ok\n",
+          "stderr": ""
+        }
+      ],
+      "expectedCode": 7102,
+      "expectedRelatedRole": "effect-declaration",
+      "pending": true
+    }
+  ],
+  "pending": [
+    "Propagate implicit cleanup effects through nested resource fields in Go and candidate before MIR/C wiring.",
+    "Normal and abrupt cleanup MIR/C/runtime elaboration, including partial construction.",
+    "Outstanding borrow/access edges, unsafe provenance, full dispatcher and stage1/stage2 self-hosting."
+  ],
+  "skipped": {
+    "fullCompiler": "Complete semantic package and selected native APIs passed; full compiler suite remains a consolidated batch.",
+    "release": "Deferred consolidated batch",
+    "Linux": "Deferred consolidated batch"
+  },
+  "sourceTruthDocumentsChanged": [],
+  "stableCLIChanged": false,
+  "sdkABIChanged": false,
+  "dbChanged": false,
+  "ciRunnerChanged": false,
+  "privateAPIChanged": true,
+  "pushed": false
+}

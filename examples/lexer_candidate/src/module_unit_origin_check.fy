@@ -7,6 +7,7 @@ import module_unit_origin_returns as origins;
 import module_unit_origin_diagnostics as diagnostics;
 import module_unit_origin_shape as shape;
 import module_unit_moves as moves;
+import module_unit_cleanup_policy as cleanup_policy;
 import module_unit_value_model as m;
 import module_unit_value_builtin as borrows;
 import module_unit_interfaces as interfaces;
@@ -31,5 +32,6 @@ pub fn Result<diagnostics::Report,Problem> check(ref v::Vec<syntax::Parsed> sour
     var usize work=values::work(ref typed);var usize i=0;while(i<values::count(ref typed)){let body=values::at(ref typed,i);let f=m::frame(body);let leaves=switch(shape::leaves(ref typed,f.result,f,ref mut work,0)){case .ok(n):{n}case .err(p):{return .err(Problem{.phase=5,.code=p.code,.module_index=p.module_index,.start=p.start,.end=p.end});}};if(leaves>1){let d=syntax::declaration_at(v::at<syntax::Parsed>(sources,f.module_index),f.declaration-1);return .err(Problem{.phase=5,.code=2,.module_index=f.module_index,.start=d.start,.end=d.end});}if(f.result!=0 && leaves==0){let borrowed=switch(contains_borrow(ref typed,closure::imported(ref ready),f.result,f,ref mut work,0)){case .ok(b):{b}case .err(p):{return .err(Problem{.phase=5,.code=p.code,.module_index=p.module_index,.start=p.start,.end=p.end});}};if(borrowed){let d=syntax::declaration_at(v::at<syntax::Parsed>(sources,f.module_index),f.declaration-1);return .err(Problem{.phase=5,.code=2,.module_index=f.module_index,.start=d.start,.end=d.end});}}i+=1;}
     let inferred=switch(origins::build_budgeted(sources,ref metadata,ref typed,work)){case .ok(p):{p}case .err(p):{return .err(Problem{.phase=5,.code=p.code,.module_index=p.module_index,.start=p.start,.end=p.end});}};
     let moved=switch(moves::build(sources,ref typed,origins::work(ref inferred))){case .ok(p):{p}case .err(p):{return .err(Problem{.phase=7,.code=p.code,.module_index=p.module_index,.start=p.start,.end=p.end});}};
-    return switch(diagnostics::collect_with_moves(ref inferred,ref moved)){case .ok(p):{.ok(p)}case .err(p):{.err(Problem{.phase=8,.code=p.code,.module_index=p.module_index,.start=p.start,.end=p.end})}};
+    let checked_cleanup=switch(cleanup_policy::build(sources,ref typed,closure::imported(ref ready),ref moved)){case .ok(p):{p}case .err(p):{return .err(Problem{.phase=9,.code=p.code,.module_index=p.module_index,.start=p.start,.end=p.end});}};
+    return switch(diagnostics::collect_with_cleanup(ref inferred,ref moved,ref checked_cleanup)){case .ok(p):{.ok(p)}case .err(p):{.err(Problem{.phase=8,.code=p.code,.module_index=p.module_index,.start=p.start,.end=p.end})}};
 }

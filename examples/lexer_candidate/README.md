@@ -213,3 +213,23 @@ source and values are released.
 Cleanup drop obligations and effects, MIR/C/runtime wiring, outstanding borrow and
 access edges, unsafe provenance, the full dispatcher and stage1/stage2 remain
 pending; Release, Linux and the full compiler suite are deferred.
+
+## Cleanup and drop-effect checking
+
+`--check-return-origins-file` also derives the cleanup obligations of live locals
+from the same move state. A local that reaches a scope exit, `return`, `break`,
+`continue`, reassignment of a live owner, a `?` error edge, a consumed `is_ok`, a
+discarded temporary or a match arm raises one cleanup request; moved and MaybeLive
+locals raise none, and the cleanup receiver `this` is exempt. The command rejects an
+outer resource whose ability set omits `drop` with E1108, inspecting its ordered
+fields only when the outer resource is droppable so an outer rejection supersedes
+inner effects, and rejects a nominal owner whose cleanup effect mask exceeds the
+caller with E7102. Both diagnostics carry the offending `ability-declaration` or
+`effect-declaration` as a related location.
+
+Recursive non-drop blocking is checked, but cleanup effects are not yet propagated
+through nested resource fields, so an outer resource is admitted even when a field's
+cleanup declares effects the caller does not hold. Cleanup event MIR, C and runtime
+elaboration, remaining borrow and access edges, unsafe provenance, and the full
+dispatcher and stage1/stage2 remain pending; Release, Linux and the full compiler
+suite are deferred.

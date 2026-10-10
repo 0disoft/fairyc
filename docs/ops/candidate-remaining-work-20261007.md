@@ -2354,3 +2354,55 @@ self-hosting, and general move semantics beyond this unit remain pending. Releas
 Linux and the full compiler suite stay deferred; no Go source changed. The stable
 CLI, SDK ABI, DB and CI runner are unchanged; a private candidate API was added.
 No push.
+
+## Candidate cleanup requests and drop-effect policy (2026-10-10)
+
+The candidate now derives its cleanup requests from its own move state rather than
+the Go owner flow. Each live local that reaches a scope exit, `return`, `break`,
+`continue`, reassignment of a live owner, a `?` error edge, a consumed `is_ok`, a
+discarded temporary or a match arm produces one request; moved and MaybeLive locals
+produce none, and the cleanup receiver `this` is exempt. `module_unit_moves` exposes
+these requests through a separate API that leaves the earlier move-fact API
+unchanged. All 18 request fixtures match the Go error primary span, and the corrected
+Go reference now handles the previously omitted match payload cleanup on
+`break`/`continue`, retaining the payload when only a nested loop is left (commit
+c32e1775).
+
+A new Fairy-only `module_unit_cleanup_policy` walks canonical resource, Option and
+Result types. It rejects an outer resource whose ability set omits `drop` before
+inspecting its ordered fields, so an outer rejection supersedes inner effects; it
+deduplicates the recursive non-drop blockers it visits; and it checks every nominal
+owner's cleanup effect mask against the caller, including generic clones and provider
+sources. `--check-return-origins-file` merges the result into its existing report as
+E1108 (resource does not permit implicit cleanup) and E7102 (cleanup effect exceeds
+caller authority), each carrying an `ability-declaration` or `effect-declaration`
+related span under roles 11 and 12.
+
+Go also gained the matching fixes for discarded temporaries and cleanup-body linear
+temporaries (commit 0e171d70) and for cleanup-body fallthrough live locals (commit
+6e3d269c), and the complete Go semantic package passes in 0.477s. The current-source
+check passed 241 files and 3007 MIR functions under `--locked`, and the final
+current-bootstrap locked development build passed.
+
+The cleanup-policy CLI holds 58 fixtures that match complete corrected-Go primary and
+related spans after adding two generic caller-authority fixtures (a missing-authority
+rejection and an admitted case). All 285 previous CLI comparisons (58 move plus 227
+prior) pass on the final candidate. Four native tests pass: 134 fixtures total (18
+cleanup-request, 58 cleanup-policy and 58 move) plus a separate six-owned-fact and
+exhausted-budget check, with the policy test confirmed at 58 fixtures and the three
+unchanged tests reused. Evidence:
+`docs/ops/evidence/candidate-cleanup-exit-requests-20261010.json` and
+`docs/ops/evidence/candidate-cleanup-policy-20261010.json`.
+
+Cleanup requests and the root/tagged cleanup declaration checks are connected.
+Propagating cleanup effects through nested resource fields remains pending: a probe of
+`resource Box { R inner; cleanup {} }` whose `R.cleanup` declares `@effects(console)`
+is still admitted at the caller's implicit `Box` drop, the same omission the Go
+reference shows, so the 58-fixture policy covers the root nominal effect mask rather
+than a full recursive effect policy. Recursive non-drop blockers are done; implicit
+field cleanup effect propagation remains before MIR/C/runtime elaboration. Normal and
+abrupt cleanup event MIR, C and runtime elaboration, outstanding borrow and access
+edges, unsafe provenance, and the full dispatcher and stage1/stage2 self-hosting
+remain pending; this is not full compiler semantics. Release, Linux and the full
+compiler suite stay deferred. The stable CLI, SDK ABI, DB and CI runner are unchanged;
+a private candidate API was added. No push.
