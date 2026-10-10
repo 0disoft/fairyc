@@ -2742,3 +2742,18 @@ Receipt: `docs/ops/evidence/candidate-owned-enum-proof-20261010.json`. This is t
 Receipt: `docs/ops/evidence/candidate-owned-enum-budget-20261010.json`. Analysis-budget failure now retains 1002 even when a multi-unit charge fails below the maximum; structural failures retain 1001 and helper allocation failures retain 1003. The private layout helper carries a diagnostic slot. This completes the diagnostic propagation follow-up in the preceding enum unit.
 
 Final 2/2 focused native identities pass: every incomplete measured-work prefix reports 1002, ten structural mutations report 1001, and the provider/empty/nested inert and copy-tagged cases pass. Locked source check passes 258 sources and 3295 MIR functions. Allocation injection and a synthetic depth fixture were not run; those mappings were inspected. Candidate build, Release, Linux and the full suite remain deferred. Stable CLI, SDK ABI, normative contracts, Go, DB, CI and hygiene are unchanged; no push. Enum C transport, switch execution, SDK, the full dispatcher and stage1/stage2 remain pending.
+
+## Candidate owned enum C value transport (2026-10-10)
+
+Receipt: `docs/ops/evidence/candidate-module-enum-c-transport-20261010.json`. This completes owned enum C representation, construction and by-value transport; source switch execution remains pending.
+
+- Layout: Canonical kind4 enum carriers; private signed-32 declaration-order tag, named union variants and declaration-order typed fields; empty variants and uninhabited enum declarations retained.
+- Dependency order: Complete by-value scalar/struct/nested enum/copy-tagged payloads before their containing enum; raw nominal pointees only forward declared during traversal and completed afterwards, allowing an acyclic E -> ptr S -> by-value E relation.
+- Values: Fresh carrier initialization then field writes from frozen typed expression values; payloadless and payload-bearing constructors retain canonical field IDs; Inert by-value copies, internal parameters/returns, shared borrowed carrier addresses and Option/Result wrappers over enums.
+- Validation: final 5/5 native identities pass; four generated-C programs pass MSVC `/Od` and `/O2` (8/8 executions). Two enum programs, a nested-resource/tag drop regression and the exact-byte literal regression all match exit/stdout. Ordered enum initialization and the final copied-value trace are `1,2,2,`.
+- Oracle: private same-translation-unit test companions inspect actual tags and scalar/struct/raw-pointer/nested enum/copy-tagged payloads. They are test readers, not source-level switch lowering or a public enum ABI.
+- Reference: both new source programs pass the pinned Go compiler experimental verified-MIR check (the provider source is supplied explicitly). Locked candidate check passes 259 sources and 3298 MIR functions; locked development build passes.
+- Guards: foreign enum arguments reject 5102 during signature admission; source switch C rendering rejects 1004 transactionally.
+- Changes: private C API and local C verifier expanded; normative contracts, stable CLI, SDK ABI, Go, DB, CI and hygiene unchanged; no push.
+- Deferred: Linux, candidate Release, full suite, source switch execution and public enum ABI. Generated C `/O2` is not candidate Release evidence.
+- Remaining: Enum/Option/Result switch CFG and active payload binding execution; Owned exhaustive-pattern table and active-payload proof; Authenticated SDK/Region and full dispatcher execution; Foreign aggregate ABI layout proof and complete source/unsafe/path proof; Stage1/stage2 and promotion.

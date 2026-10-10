@@ -80,6 +80,11 @@ LITERALS = {
     "literal_c_traps_byte_index_at_literal_length": (106, ""),
 }
 LITERAL_REJECTION = "literal_c_rejects_foreign_descriptor_abi_transactionally"
+ENUM_TRANSPORT = {
+    "enum_c_transports_provider_nested_and_copy_tagged_payloads": (0, ""),
+    "enum_c_orders_payload_effects_copies_values_and_defers_pointer_cycles": (0, "1,2,2,"),
+}
+ENUM_TRANSPORT_REJECTION = "enum_c_keeps_foreign_enum_abi_and_switch_execution_pending"
 
 
 def run(argv, cwd, env=None, timeout=60):
@@ -102,7 +107,7 @@ def main():
     parser.add_argument("--report", required=True, type=Path, action="append")
     parser.add_argument("--output", required=True, type=Path)
     parser.add_argument("--vcvars", required=True, type=Path)
-    parser.add_argument("--suite", choices=("scalar", "owned", "references", "arrays", "views", "casts", "pointers", "literals", "all"), default="scalar")
+    parser.add_argument("--suite", choices=("scalar", "owned", "references", "arrays", "views", "casts", "pointers", "literals", "enum-transport", "all"), default="scalar")
     args = parser.parse_args()
     scalar_cases = {name: (exit_code, "") for name, exit_code in EXPECTED.items()}
     owned_cases = {name: (0, trace) for name, trace in OWNED.items()}
@@ -122,8 +127,10 @@ def main():
               "literals": (LITERALS | {"pointer_c_transports_null_foreign_results_and_void_output_slots": POINTERS["pointer_c_transports_null_foreign_results_and_void_output_slots"],
                                        "view_c_mutates_owner_and_shares_call_arguments": VIEWS["view_c_mutates_owner_and_shares_call_arguments"]},
                            {LITERAL_REJECTION, REJECTION, OWNED_REJECTION}),
-              "all": (scalar_cases | owned_cases | reference_cases | ARRAYS | VIEWS | CASTS | POINTERS | LITERALS,
-                      {REJECTION, OWNED_REJECTION, REFERENCE_PROOF, CAST_REJECTION, POINTER_REJECTION, LITERAL_REJECTION})}
+              "enum-transport": (ENUM_TRANSPORT | {"owned_c_drops_active_tagged_payloads_and_nested_fields_in_reverse_order": owned_cases["owned_c_drops_active_tagged_payloads_and_nested_fields_in_reverse_order"],
+                                                   "literal_c_preserves_exact_bytes_empty_views_and_cstr_storage": LITERALS["literal_c_preserves_exact_bytes_empty_views_and_cstr_storage"]}, {ENUM_TRANSPORT_REJECTION}),
+              "all": (scalar_cases | owned_cases | reference_cases | ARRAYS | VIEWS | CASTS | POINTERS | LITERALS | ENUM_TRANSPORT,
+                      {REJECTION, OWNED_REJECTION, REFERENCE_PROOF, CAST_REJECTION, POINTER_REJECTION, LITERAL_REJECTION, ENUM_TRANSPORT_REJECTION})}
     expected_cases, rejections = suites[args.suite]
     count = len(expected_cases) + len(rejections)
     reports = []
@@ -156,7 +163,7 @@ def main():
                        "tests::module_unit_c_owned::", "tests::module_unit_c_references::",
                        "tests::module_unit_c_arrays::", "tests::module_unit_c_views::",
                        "tests::module_unit_c_casts::", "tests::module_unit_c_pointers::",
-                       "tests::module_unit_casts::", "tests::module_unit_c_literals::")
+                       "tests::module_unit_casts::", "tests::module_unit_c_literals::", "tests::module_unit_c_enums::")
                        if identity.startswith(prefix)), None)
         assert prefix is not None
         name = identity.removeprefix(prefix)

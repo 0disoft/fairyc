@@ -1,0 +1,233 @@
+{
+  "schema": "fairyc.candidate-module-enum-c-transport/v1",
+  "passed": true,
+  "identity": {
+    "nativeCompiler": {
+      "path": ".cache/candidate-tagged/compiler-origin-patterns.exe",
+      "sha256": "d36dae1b99751322e447880aaf4d28321bd6d53bdf776185308c6c4504889bb2"
+    },
+    "buildCompiler": {
+      "path": ".cache/candidate-tagged/compiler-build-240s.exe",
+      "sha256": "746fe10b022ed88cfbc0ae8ea13e3f867b842f3317ef5a2a4caa36d064a248dd"
+    },
+    "candidate": {
+      "path": "examples/lexer_candidate/build/lexer-candidate.exe",
+      "sha256": "b258894699600b57d5278ee83ae1c8f8d35128116aa12daa2758cd9e2188a006"
+    },
+    "sources": [
+      {
+        "path": "examples/lexer_candidate/src/module_unit_c_enums.fy",
+        "sha256": "934b0c58318a997eae56597b069ea686aba623870e65e144e694a60760db3492"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_c_aggregate.fy",
+        "sha256": "4439bc562995dad5d0ed6c8273a1d245d24623e7e1c4e4acaac7b0877298875a"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_c_emit.fy",
+        "sha256": "f530eb907292e4549c02b8c956eb2925a45a09b790a6a12fb78a3e9675774830"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_body_ir_enums.fy",
+        "sha256": "ab01bd0e9a0759d434aab437e8fd5f8b7d308241282c36480d0cf5a5336a0458"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_body_ir_verify.fy",
+        "sha256": "18feb08219cc307cc755a2cef55228ffd722ae08b00040e4ddc8008c2c076984"
+      },
+      {
+        "path": "examples/lexer_candidate/tests/module_unit_c_enums.fy",
+        "sha256": "465d14477f261b7507489c7af64fbe7a886cf451a8d8c6e28e15504cce7b8649"
+      },
+      {
+        "path": "examples/lexer_candidate/tests/module_unit_c_owned.fy",
+        "sha256": "e2ae717d85e721adc6821bc99ed1bc5a46bfee7bd05194df918ea93e26f5c331"
+      },
+      {
+        "path": "examples/lexer_candidate/tests/module_unit_c_literals.fy",
+        "sha256": "0c049ddfe09425d6b61d3b1eab2f7c47b63afbbf6df258990ccd9ea5e82c6721"
+      },
+      {
+        "path": "examples/lexer_candidate/fairy.lock",
+        "sha256": "6937d89c1101173de978a45f692a08af745ab21cff6b51062aa27dbf82aa57ef"
+      },
+      {
+        "path": "tools/verify-candidate-module-c.py",
+        "sha256": "fcd9131f1860c46af552e23f1985b214a05da32d3325a449c737433396776a53"
+      }
+    ]
+  },
+  "sourceCheck": {
+    "argv": [
+      "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\compiler-origin-patterns.exe",
+      "check",
+      "--locked"
+    ],
+    "exit": 0,
+    "stdout": "check ok: 2 instance(s), 259 source file(s), 3298 MIR function(s), lock verified\n",
+    "stderr": ""
+  },
+  "developmentBuild": {
+    "argv": [
+      "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\compiler-build-240s.exe",
+      "build",
+      "--locked"
+    ],
+    "exit": 0,
+    "stdout": "built: build/lexer-candidate.exe (x86_64-windows-msvc, development, lock verified)\n",
+    "stderr": ""
+  },
+  "native": {
+    "report": {
+      "path": ".cache/candidate-tagged/module-enum-c/native.json",
+      "sha256": "f1ee4964a3bfbb28d72d6ccf258207e02972b36c4425cea92f872ebf52dd7408"
+    },
+    "count": 5,
+    "passed": 5,
+    "failed": 0,
+    "identities": [
+      "tests::module_unit_c_enums::enum_c_keeps_foreign_enum_abi_and_switch_execution_pending",
+      "tests::module_unit_c_enums::enum_c_orders_payload_effects_copies_values_and_defers_pointer_cycles",
+      "tests::module_unit_c_enums::enum_c_transports_provider_nested_and_copy_tagged_payloads",
+      "tests::module_unit_c_literals::literal_c_preserves_exact_bytes_empty_views_and_cstr_storage",
+      "tests::module_unit_c_owned::owned_c_drops_active_tagged_payloads_and_nested_fields_in_reverse_order"
+    ]
+  },
+  "C": {
+    "compiler": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+    "executions": [
+      {
+        "name": "enum_c_transports_provider_nested_and_copy_tagged_payloads",
+        "profile": "low",
+        "sourceSHA256": "b03cddb729d11b502a2351393e97f99c986330e7540bbd6a2af7ebbe6ecc9f39",
+        "buildExit": 0,
+        "expectedExit": 0,
+        "actualExit": 0,
+        "expectedStdout": "",
+        "actualStdout": ""
+      },
+      {
+        "name": "enum_c_transports_provider_nested_and_copy_tagged_payloads",
+        "profile": "optimized",
+        "sourceSHA256": "b03cddb729d11b502a2351393e97f99c986330e7540bbd6a2af7ebbe6ecc9f39",
+        "buildExit": 0,
+        "expectedExit": 0,
+        "actualExit": 0,
+        "expectedStdout": "",
+        "actualStdout": ""
+      },
+      {
+        "name": "enum_c_orders_payload_effects_copies_values_and_defers_pointer_cycles",
+        "profile": "low",
+        "sourceSHA256": "c84c5bae3b766ac6a584888acd07f81c07d0b4f4425c4317ef55a8b9ca3b8cb7",
+        "buildExit": 0,
+        "expectedExit": 0,
+        "actualExit": 0,
+        "expectedStdout": "1,2,2,",
+        "actualStdout": "1,2,2,"
+      },
+      {
+        "name": "enum_c_orders_payload_effects_copies_values_and_defers_pointer_cycles",
+        "profile": "optimized",
+        "sourceSHA256": "c84c5bae3b766ac6a584888acd07f81c07d0b4f4425c4317ef55a8b9ca3b8cb7",
+        "buildExit": 0,
+        "expectedExit": 0,
+        "actualExit": 0,
+        "expectedStdout": "1,2,2,",
+        "actualStdout": "1,2,2,"
+      },
+      {
+        "name": "owned_c_drops_active_tagged_payloads_and_nested_fields_in_reverse_order",
+        "profile": "low",
+        "sourceSHA256": "f02ae3e27d944c4cb0d11d6e748308b37c0fe8e8eb08736e526a206a858a2853",
+        "buildExit": 0,
+        "expectedExit": 0,
+        "actualExit": 0,
+        "expectedStdout": "5,4,3,100,2,1,",
+        "actualStdout": "5,4,3,100,2,1,"
+      },
+      {
+        "name": "owned_c_drops_active_tagged_payloads_and_nested_fields_in_reverse_order",
+        "profile": "optimized",
+        "sourceSHA256": "f02ae3e27d944c4cb0d11d6e748308b37c0fe8e8eb08736e526a206a858a2853",
+        "buildExit": 0,
+        "expectedExit": 0,
+        "actualExit": 0,
+        "expectedStdout": "5,4,3,100,2,1,",
+        "actualStdout": "5,4,3,100,2,1,"
+      },
+      {
+        "name": "literal_c_preserves_exact_bytes_empty_views_and_cstr_storage",
+        "profile": "low",
+        "sourceSHA256": "e3f1937706bac79a358f971717cf31fd87cabf0dc5f6fe3e5b28e14cbcb7c9d6",
+        "buildExit": 0,
+        "expectedExit": 0,
+        "actualExit": 0,
+        "expectedStdout": "",
+        "actualStdout": ""
+      },
+      {
+        "name": "literal_c_preserves_exact_bytes_empty_views_and_cstr_storage",
+        "profile": "optimized",
+        "sourceSHA256": "e3f1937706bac79a358f971717cf31fd87cabf0dc5f6fe3e5b28e14cbcb7c9d6",
+        "buildExit": 0,
+        "expectedExit": 0,
+        "actualExit": 0,
+        "expectedStdout": "",
+        "actualStdout": ""
+      }
+    ],
+    "oracle": "Private, same-translation-unit C test companions appended by the Fairy tests inspect retained enum/field IDs. Product enum construction, copying, argument/return transport and ordered values are emitted by the .fy compiler, with no Go or C substitute for those operations. The companion is not a public enum ABI or source-level switch implementation."
+  },
+  "goBoundary": [
+    {
+      "fixture": 0,
+      "exit": 0,
+      "stdout": "check ok: 2 file(s) (verified MIR: 3 function(s), 1 foreign declaration(s))\n",
+      "stderr": ""
+    },
+    {
+      "fixture": 1,
+      "exit": 0,
+      "stdout": "check ok: 1 file(s) (verified MIR: 3 function(s), 2 foreign declaration(s))\n",
+      "stderr": ""
+    }
+  ],
+  "behavior": {
+    "layout": "Canonical kind4 enum carriers; private signed-32 declaration-order tag, named union variants and declaration-order typed fields; empty variants and uninhabited enum declarations retained",
+    "dependencies": "Complete by-value scalar/struct/nested enum/copy-tagged payloads before their containing enum; raw nominal pointees only forward declared during traversal and completed afterwards, allowing an acyclic E -> ptr S -> by-value E relation",
+    "construction": "Fresh carrier initialization then field writes from frozen typed expression values; payloadless and payload-bearing constructors retain canonical field IDs",
+    "transport": "Inert by-value copies, internal parameters/returns, shared borrowed carrier addresses and Option/Result wrappers over enums",
+    "execution": "Provider/nested enum/copy-tagged payload and flat struct/raw pointer fields inspected exactly; payload source order emits 1,2, then copied value survives replacing its original and final trace emits 2",
+    "guards": "Foreign enum arguments reject 5102 during signature admission; source switch still rejects 1004 before private C publication, preserving sentinel buffer"
+  },
+  "sourceOfTruth": [
+    "docs/adr/0050-restricted-inert-enum-execution.md",
+    "docs/adr/0323-nested-inert-enum-c-transport.md",
+    "docs/adr/0330-acyclic-copy-tagged-dependency-graph.md"
+  ],
+  "privateAPIExpanded": true,
+  "normativeContractsChanged": false,
+  "stableCLIChanged": false,
+  "sdkABIChanged": false,
+  "GoChanged": false,
+  "dbChanged": false,
+  "ciChanged": false,
+  "verifierChanged": true,
+  "hygieneChanged": false,
+  "pushed": false,
+  "pending": [
+    "Enum/Option/Result switch CFG and active payload binding execution",
+    "Owned exhaustive-pattern table and active-payload proof",
+    "Authenticated SDK/Region and full dispatcher execution",
+    "Foreign aggregate ABI layout proof and complete source/unsafe/path proof",
+    "Stage1/stage2 and promotion"
+  ],
+  "skipped": {
+    "Linux": "Windows-focused unit",
+    "releaseCandidate": "Separate release batch; generated C /O2 is not candidate Release",
+    "fullSuite": "Five native identities and four generated-C programs only",
+    "switch": "No source switch execution in this value-transport unit",
+    "publicEnumABI": "No direct foreign enum ABI admitted"
+  }
+}

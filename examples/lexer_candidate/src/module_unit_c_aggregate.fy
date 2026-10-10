@@ -10,6 +10,8 @@ import scalar_views as views;
 import module_types as types;
 import module_unit_value_place as places;
 import module_unit_c_literals as literals;
+import module_unit_c_enums as enums;
+import module_unit_body_ir_enums as enum_proof;
 import std::bytes as bytes;
 import std::vec as v;
 
@@ -38,7 +40,7 @@ fn bool slice(ref ir::Program p,ref ir::Body b,usize id,ref mut bytes::Buffer ou
 pub fn bool type(ref ir::Program p,usize id,ref mut bytes::Buffer out,ref mut w::State s){
     if(id==0 || id>clean::type_count(ir::cleanup_ir(p))){s.code=1001;return false;}let t=clean::type_at(ir::cleanup_ir(p),id);
     if(t.kind==12){return if(t.first==0){w::type(out,s,t.scalar)}else{type(p,t.first,out,s) && w::text(out,s,if(places::raw_mutable(t)){b" *"}else{b" const *"})};}
-    if(t.kind==1 && (t.scalar<=7 || t.scalar==132)){return w::type(out,s,t.scalar);}if(t.kind==7 || t.kind==8){return type(p,t.first,out,s) && w::text(out,s,if(t.kind==7){b" const *"}else{b" *"});}if(t.kind!=2 && t.kind!=3 && t.kind!=5 && t.kind!=6 && t.kind!=16 && !view(t) && !literals::descriptor(t)){s.code=1004;return false;}
+    if(t.kind==1 && (t.scalar<=7 || t.scalar==132)){return w::type(out,s,t.scalar);}if(t.kind==7 || t.kind==8){return type(p,t.first,out,s) && w::text(out,s,if(t.kind==7){b" const *"}else{b" *"});}if(t.kind!=2 && t.kind!=3 && t.kind!=4 && t.kind!=5 && t.kind!=6 && t.kind!=16 && !view(t) && !literals::descriptor(t)){s.code=1004;return false;}
     return w::text(out,s,b"struct fy_unit_t_") && w::number(out,s,id);
 }
 fn usize layout(ref ir::Program p,usize id,ref mut usize work){var usize i=0;while(i<ir::layout_count(p)){if(!budget::charge(work,1)){return 0;}if(ir::layout_at(p,i).value.type==id){return i+1;}i+=1;}return 0;}
@@ -49,8 +51,13 @@ fn bool define(ref ir::Program p,usize id,ref mut v::Vec<u8> marks,ref mut bytes
         // ADR 0286: keep c::int nominally distinct and prove the target ABI
         // before any explicit i32 crossing. Other C scalars stay closed.
         if(t.scalar==132 && !w::text(out,s,b"_Static_assert(sizeof(int)==4 && _Alignof(int)==4 && INT_MIN==INT32_MIN && INT_MAX==INT32_MAX,\"requires signed-32 c.int ABI\");\n")){return false;}}
-    else if(t.kind==12){if(t.first!=0 && *v::at<u8>(marks,t.first-1)!=1 && !define(p,t.first,marks,out,s,work,depth+1)){return false;}}
+    // A nominal raw pointee needs a forward declaration here, not its size.
+    // Complete marked pointees after by-value layouts, allowing E -> ptr S -> E.
+    else if(t.kind==12){}
     else if(t.kind==7 || t.kind==8){if(*v::at<u8>(marks,t.first-1)!=1 && !define(p,t.first,marks,out,s,work,depth+1)){return false;}}
+    else if(t.kind==4){let index=enum_proof::layout(p,id,work,ref mut s.code);if(index==0){if(s.code==0){s.code=1001;}return false;}let shape=ir::layout_at(p,index-1).value;var usize i=0;
+        while(i<shape.field_count){let f=ir::field_at(p,shape.field_start+i);if(!budget::charge(work,1)){s.code=1002;return false;}if(f.kind==4 && !define(p,f.type,marks,out,s,work,depth+1)){return false;}i+=1;}
+        if(!enums::definition(p,id,index,out,s,work)){return false;}}
     else if(literals::descriptor(t)){if(!type(p,id,out,s) || !w::text(out,s,if(t.kind==14){b"{uint8_t const *fy_data;uintptr_t fy_storage_length;};\n"}else{b"{uint8_t const *fy_data;uintptr_t fy_length;};\n"})){return false;}}
     else if(view(t)){if((t.kind==17 || t.kind==18) && !define(p,t.first,marks,out,s,work,depth+1)){return false;}if(!type(p,id,out,s) || !w::text(out,s,b"{") || !item_type(p,t,out,s) || !w::text(out,s,if(mutable(t)){b" *fy_data;uintptr_t fy_length;};\n"}else{b" const *fy_data;uintptr_t fy_length;};\n"})){return false;}}
     else if(t.kind==16){let element=clean::type_at(ir::cleanup_ir(p),t.first);if(t.second==0 || t.second>4096 || !(element.kind==1 && element.scalar>=1 && element.scalar<=6 || element.kind==2) || clean::glue_at(ir::cleanup_ir(p),t.first).kind!=0){s.code=1004;return false;}if(!define(p,t.first,marks,out,s,work,depth+1) || !type(p,id,out,s) || !w::text(out,s,b"{") || !type(p,t.first,out,s) || !w::text(out,s,b" fy_items[") || !w::number(out,s,t.second) || !w::text(out,s,b"];};\n")){return false;}}
@@ -62,8 +69,10 @@ fn bool define(ref ir::Program p,usize id,ref mut v::Vec<u8> marks,ref mut bytes
     }else{s.code=1004;return false;}{let slot=v::at_mut<u8>(marks,id-1);*slot=2;}return true;
 }
 pub fn Result<v::Vec<u8>,u32> definitions(ref ir::Program p,ref mut bytes::Buffer out,ref mut w::State s,ref mut usize work){
-    var v::Vec<u8> marks=v::empty<u8>();var usize i=0;while(i<clean::type_count(ir::cleanup_ir(p))){if(!v::push<u8>(ref mut marks,0).is_ok){return .err(1003);}let t=clean::type_at(ir::cleanup_ir(p),i+1);if((t.kind==2 || t.kind==3 || t.kind==5 || t.kind==6 || t.kind==16 || view(t) || literals::descriptor(t)) && (!type(p,i+1,out,s) || !w::text(out,s,b";\n"))){return .err(s.code);}i+=1;}i=1;
-    while(i<=ir::count(p)){let b=ir::at(p,i);let f=clean::frame_at(ir::cleanup_ir(p),i);if(!define(p,f.result,ref mut marks,out,s,work,0)){return .err(s.code);}var usize j=1;while(j<=ir::local_count(b)){if(!define(p,ir::local_at(b,j).type,ref mut marks,out,s,work,0)){return .err(s.code);}j+=1;}j=0;while(j<ir::node_count(b)){let e=ir::node_at(b,j).value;if(e.state==1 && !define(p,e.type,ref mut marks,out,s,work,0)){return .err(s.code);}j+=1;}i+=1;}return .ok(marks);
+    var v::Vec<u8> marks=v::empty<u8>();var usize i=0;while(i<clean::type_count(ir::cleanup_ir(p))){if(!v::push<u8>(ref mut marks,0).is_ok){return .err(1003);}let t=clean::type_at(ir::cleanup_ir(p),i+1);if((t.kind==2 || t.kind==3 || t.kind==4 || t.kind==5 || t.kind==6 || t.kind==16 || view(t) || literals::descriptor(t)) && (!type(p,i+1,out,s) || !w::text(out,s,b";\n"))){return .err(s.code);}i+=1;}i=1;
+    while(i<=ir::count(p)){let b=ir::at(p,i);let f=clean::frame_at(ir::cleanup_ir(p),i);if(!define(p,f.result,ref mut marks,out,s,work,0)){return .err(s.code);}var usize j=1;while(j<=ir::local_count(b)){if(!define(p,ir::local_at(b,j).type,ref mut marks,out,s,work,0)){return .err(s.code);}j+=1;}j=0;while(j<ir::node_count(b)){let e=ir::node_at(b,j).value;if(e.state==1 && !define(p,e.type,ref mut marks,out,s,work,0)){return .err(s.code);}j+=1;}i+=1;}
+    var bool changed=true;while(changed){changed=false;i=1;while(i<=clean::type_count(ir::cleanup_ir(p))){if(!budget::charge(work,1)){return .err(1002);}let t=clean::type_at(ir::cleanup_ir(p),i);if(t.kind==12 && t.first!=0 && *v::at<u8>(ref marks,i-1)==2 && *v::at<u8>(ref marks,t.first-1)==0){if(!define(p,t.first,ref mut marks,out,s,work,0)){return .err(s.code);}changed=true;}i+=1;}}
+    return .ok(marks);
 }
 fn bool drop_name(ref mut bytes::Buffer out,ref mut w::State s,usize id){return w::text(out,s,b"fy_unit_drop_") && w::number(out,s,id);}
 pub fn bool drop_call(ref ir::Program p,usize id,ref mut bytes::Buffer out,ref mut w::State s){return drop_name(out,s,id) && w::text(out,s,b"(");}
@@ -87,6 +96,7 @@ pub fn bool place(ref ir::Program p,ref ir::Body b,usize id,ref mut bytes::Buffe
 }
 pub fn bool expression(ref ir::Program p,ref ir::Body b,usize id,ref mut bytes::Buffer out,ref mut w::State s,ref mut usize work){
     let e=ir::node_at(b,id-1).value;let t=clean::type_at(ir::cleanup_ir(p),e.type);let left=lookup::node(b,e.left);let right=lookup::node(b,e.right);
+    if(t.kind==4 && (e.kind==28 || e.kind==10)){return enums::expression(p,b,id,out,s,work);}
     if(e.kind==1 && t.kind==12){if(!bytes::equal(ir::node_text(b,id-1),b"null")){s.code=1001;return false;}return scalar::value(out,s,id) && w::text(out,s,b"=(") && type(p,e.type,out,s) && w::text(out,s,b")0;\n");}
     if(e.kind==23 && t.kind==12){if(left==0 || e.target!=e.type || !e.builtin.unsafe_context || !bytes::equal(ir::node_text(b,id-1),b"as")){s.code=1001;return false;}let source=ir::node_at(b,left-1).value;let st=clean::type_at(ir::cleanup_ir(p),source.type);let referent=clean::type_at(ir::cleanup_ir(p),if(st.kind==7 || st.kind==8){st.first}else{source.type});if(!places::raw_cast(st,t,referent)){s.code=1001;return false;}if(st.kind!=7 && st.kind!=8 && !view(st) && !literals::descriptor(st)){s.code=1004;return false;}return scalar::value(out,s,id) && w::text(out,s,b"=(") && type(p,e.type,out,s) && w::text(out,s,b")") && scalar::value(out,s,left) && (st.kind==7 || st.kind==8 || w::text(out,s,b".fy_data")) && w::text(out,s,b";\n");}
     if(e.kind==2 && t.kind!=1 && t.kind!=7 && t.kind!=8 && t.kind!=12){if(e.binding==0 || ir::local_at(b,e.binding).type!=e.type){s.code=1001;return false;}return w::text(out,s,b"fy_unit_copy(&") && scalar::value(out,s,id) && w::text(out,s,b",&(") && place(p,b,id,out,s,0) && w::text(out,s,b"),sizeof ") && scalar::value(out,s,id) && w::text(out,s,b");\n");}
