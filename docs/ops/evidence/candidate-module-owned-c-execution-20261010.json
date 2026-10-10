@@ -1,0 +1,480 @@
+{
+  "schema": "fairyc.candidate-module-owned-c-execution/v1",
+  "passed": true,
+  "identity": {
+    "nativeCompiler": {
+      "path": ".cache/candidate-tagged/compiler-origin-patterns.exe",
+      "sha256": "d36dae1b99751322e447880aaf4d28321bd6d53bdf776185308c6c4504889bb2"
+    },
+    "buildCompiler": {
+      "path": ".cache/candidate-tagged/compiler-build-240s.exe",
+      "sha256": "746fe10b022ed88cfbc0ae8ea13e3f867b842f3317ef5a2a4caa36d064a248dd"
+    },
+    "candidate": {
+      "path": "examples/lexer_candidate/build/lexer-candidate.exe",
+      "sha256": "b86cdc44e49a467fd5dff188df6c40b939cae075c7764e05fc80113ee692d37a"
+    },
+    "sources": [
+      {
+        "path": "examples/lexer_candidate/src/module_unit_c_emit.fy",
+        "sha256": "e7ec34725a8a0920369d102babe807e27eeafd2dd5c59ddbcfa453c082ed8d4f"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_c_aggregate.fy",
+        "sha256": "25b877031360aaf4e9f2da7f4e1e3cda4d32d42b7b7e78dfbb3efd3567103e96"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_c_scalar.fy",
+        "sha256": "77e2587c6580c0a7957751a8bb8028bc472831d5b6baa22786940736e6de679a"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_cfg_lower.fy",
+        "sha256": "00c961dbfc5638471e38292b7babb6a1e1de347a4e2145efa377b6ee1196e738"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_cfg_model.fy",
+        "sha256": "28a206229aeb1d05e0e7823fecbc0f3ceeafe7d6b1b66fac7bcb94d914507194"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_cfg_defer.fy",
+        "sha256": "d34d9d96d716b78bf834ac8dc72deb8059f0a3568a917ed0d8d713486a91767c"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_body_ir_model.fy",
+        "sha256": "9b9a5f4655e595cbeb0cdb19e4833c6280f26d93c04aa39ba8cb4cfe4056ec68"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_body_ir_verify.fy",
+        "sha256": "9ca01cf3ebaf2215e43e5ad1c2d7ba41dcbda39e5b300d85eec5d0c80c0c628c"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_cleanup_mir_model.fy",
+        "sha256": "8cd61811abad699237a647215bd04cd3ec01df12188eb3a2d3620bcea8bd745d"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_cleanup_mir_verify.fy",
+        "sha256": "bd4057012905da5f6417bf3de2cc89da4f31c0725e3b01779724e29cfe89be99"
+      },
+      {
+        "path": "examples/lexer_candidate/tests/module_unit_c_emit.fy",
+        "sha256": "d89f77dcb5d8dc4af79424e1000c3971afd1dac3279473b24acbbfc1e13e5098"
+      },
+      {
+        "path": "examples/lexer_candidate/tests/module_unit_c_owned.fy",
+        "sha256": "1ada44e26123542dc88318760a3be00e5f1cac2579a2e34622423fe152ff5fa1"
+      },
+      {
+        "path": "examples/lexer_candidate/fairy.lock",
+        "sha256": "86860dccdc7988adff7bbaff4487e128251bbc42442666e7d7cf8b230672a049"
+      },
+      {
+        "path": "tools/verify-candidate-module-c.py",
+        "sha256": "835212dd2f3e7366f0e1556a4b31da83fe69027c5b3793e8456b8001e69e726d"
+      }
+    ]
+  },
+  "native": {
+    "count": 12,
+    "passed": 12,
+    "failed": 0,
+    "newOwnedCases": 6,
+    "scalarRegressions": 6,
+    "profile": "development",
+    "target": "x86_64-windows-msvc",
+    "report": {
+      "path": ".cache/candidate-tagged/cleanup-operands-unit/module-c-all-native-final.json",
+      "sha256": "10d774c394c45a1fd28203de5f2df846275701759e38aa175b7ed6fbcf68d72e"
+    },
+    "tests": [
+      {
+        "identity": "tests::module_unit_c_emit::module_c_emits_closed_integer_widths_and_normalized_literals",
+        "outcome": "passed",
+        "emittedCBytes": 6979,
+        "emittedCSHA256": "244ea7a6aad46782d9b91ea83b8f89b150cfe39bdb75d87bb15a0429ad272323",
+        "trapCategory": null,
+        "stderrBase64": ""
+      },
+      {
+        "identity": "tests::module_unit_c_emit::module_c_emits_divide_by_zero_trap",
+        "outcome": "passed",
+        "emittedCBytes": 2553,
+        "emittedCSHA256": "afa81f381282beb26e9d82269f967889ac38783411dfa2ccab580e2f78cf2031",
+        "trapCategory": null,
+        "stderrBase64": ""
+      },
+      {
+        "identity": "tests::module_unit_c_emit::module_c_emits_overflow_trap",
+        "outcome": "passed",
+        "emittedCBytes": 2562,
+        "emittedCSHA256": "cc26e3dc6be2dee38312b5072adf2877cd60985d296ab1ad9af44943017dc611",
+        "trapCategory": null,
+        "stderrBase64": ""
+      },
+      {
+        "identity": "tests::module_unit_c_emit::module_c_executes_calls_loops_and_lazy_branch_values",
+        "outcome": "passed",
+        "emittedCBytes": 9412,
+        "emittedCSHA256": "4f39baa1f0cff73f6e6754bd6098b8c095e837b0546e42f03ea97c7598d669c5",
+        "trapCategory": null,
+        "stderrBase64": ""
+      },
+      {
+        "identity": "tests::module_unit_c_emit::module_c_freezes_defer_arguments_before_reassignment_and_return",
+        "outcome": "passed",
+        "emittedCBytes": 4334,
+        "emittedCSHA256": "39d75080413624491eb33736597318ec3d367ee9e0b488f144dcbe39ed422805",
+        "trapCategory": null,
+        "stderrBase64": ""
+      },
+      {
+        "identity": "tests::module_unit_c_emit::module_c_rejects_unsupported_types_and_bad_entry_without_partial_output",
+        "outcome": "passed",
+        "emittedCBytes": 0,
+        "emittedCSHA256": null,
+        "trapCategory": null,
+        "stderrBase64": ""
+      },
+      {
+        "identity": "tests::module_unit_c_owned::owned_c_drops_active_tagged_payloads_and_nested_fields_in_reverse_order",
+        "outcome": "passed",
+        "emittedCBytes": 6122,
+        "emittedCSHA256": "6d4be1f39282e25e73080c9f42ae15e3073cddbccf268303b181278496a7bfd8",
+        "trapCategory": null,
+        "stderrBase64": ""
+      },
+      {
+        "identity": "tests::module_unit_c_owned::owned_c_invokes_loop_defer_suffix_before_drops_and_keeps_outer_owner",
+        "outcome": "passed",
+        "emittedCBytes": 5463,
+        "emittedCSHA256": "23ddab166d2939f8eb91fef75d1f5834eacbc82001841451486e9c160dcc13db",
+        "trapCategory": null,
+        "stderrBase64": ""
+      },
+      {
+        "identity": "tests::module_unit_c_owned::owned_c_keeps_provider_nominal_identity_and_shared_foreign_linkage",
+        "outcome": "passed",
+        "emittedCBytes": 4108,
+        "emittedCSHA256": "683f6787b13c12be2f1878a437ae2cbbefcd02d833b4c75342a8ff36d75c3d8c",
+        "trapCategory": null,
+        "stderrBase64": ""
+      },
+      {
+        "identity": "tests::module_unit_c_owned::owned_c_moves_returns_and_unwinds_completed_partial_values_on_propagation",
+        "outcome": "passed",
+        "emittedCBytes": 7757,
+        "emittedCSHA256": "6505eb23508c913b63cb096ceb93e082d6a46f9f729c096bb6e0f0fa54ff2a98",
+        "trapCategory": null,
+        "stderrBase64": ""
+      },
+      {
+        "identity": "tests::module_unit_c_owned::owned_c_rejects_pending_array_transport_without_partial_output",
+        "outcome": "passed",
+        "emittedCBytes": 0,
+        "emittedCSHA256": null,
+        "trapCategory": null,
+        "stderrBase64": ""
+      },
+      {
+        "identity": "tests::module_unit_c_owned::owned_c_replaces_owners_after_rhs_and_mutates_cleanup_receiver",
+        "outcome": "passed",
+        "emittedCBytes": 3961,
+        "emittedCSHA256": "71e82ad758143415f6e12849a29ad2ce6dca0f21f97f16f748c2fec2c37fcd07",
+        "trapCategory": null,
+        "stderrBase64": ""
+      }
+    ],
+    "command": [
+      "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\compiler-origin-patterns.exe",
+      "test",
+      "--native",
+      "--file",
+      "tests/module_unit_c_emit.fy",
+      "--file",
+      "tests/module_unit_c_owned.fy",
+      "--json",
+      "--capture-output"
+    ],
+    "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+    "exit": 0
+  },
+  "generatedC": {
+    "count": 20,
+    "passed": 20,
+    "profiles": [
+      "/Od",
+      "/O2"
+    ],
+    "newOwnedExecutions": 10,
+    "scalarRegressions": 10,
+    "report": {
+      "path": ".cache/candidate-tagged/module-c-owned-unit/all-c-final/execution.json",
+      "sha256": "e38272a48b86c8a963c53b55b56f655fb6a00ea255240679b9439a9f85f0254b"
+    },
+    "compiler": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+    "observations": [
+      {
+        "name": "module_c_executes_calls_loops_and_lazy_branch_values",
+        "profile": "low",
+        "sourceSHA256": "4f39baa1f0cff73f6e6754bd6098b8c095e837b0546e42f03ea97c7598d669c5",
+        "buildExit": 0,
+        "expectedExit": 0,
+        "actualExit": 0,
+        "expectedStdout": "",
+        "actualStdout": ""
+      },
+      {
+        "name": "module_c_executes_calls_loops_and_lazy_branch_values",
+        "profile": "optimized",
+        "sourceSHA256": "4f39baa1f0cff73f6e6754bd6098b8c095e837b0546e42f03ea97c7598d669c5",
+        "buildExit": 0,
+        "expectedExit": 0,
+        "actualExit": 0,
+        "expectedStdout": "",
+        "actualStdout": ""
+      },
+      {
+        "name": "module_c_freezes_defer_arguments_before_reassignment_and_return",
+        "profile": "low",
+        "sourceSHA256": "39d75080413624491eb33736597318ec3d367ee9e0b488f144dcbe39ed422805",
+        "buildExit": 0,
+        "expectedExit": 0,
+        "actualExit": 0,
+        "expectedStdout": "",
+        "actualStdout": ""
+      },
+      {
+        "name": "module_c_freezes_defer_arguments_before_reassignment_and_return",
+        "profile": "optimized",
+        "sourceSHA256": "39d75080413624491eb33736597318ec3d367ee9e0b488f144dcbe39ed422805",
+        "buildExit": 0,
+        "expectedExit": 0,
+        "actualExit": 0,
+        "expectedStdout": "",
+        "actualStdout": ""
+      },
+      {
+        "name": "module_c_emits_closed_integer_widths_and_normalized_literals",
+        "profile": "low",
+        "sourceSHA256": "244ea7a6aad46782d9b91ea83b8f89b150cfe39bdb75d87bb15a0429ad272323",
+        "buildExit": 0,
+        "expectedExit": 0,
+        "actualExit": 0,
+        "expectedStdout": "",
+        "actualStdout": ""
+      },
+      {
+        "name": "module_c_emits_closed_integer_widths_and_normalized_literals",
+        "profile": "optimized",
+        "sourceSHA256": "244ea7a6aad46782d9b91ea83b8f89b150cfe39bdb75d87bb15a0429ad272323",
+        "buildExit": 0,
+        "expectedExit": 0,
+        "actualExit": 0,
+        "expectedStdout": "",
+        "actualStdout": ""
+      },
+      {
+        "name": "module_c_emits_overflow_trap",
+        "profile": "low",
+        "sourceSHA256": "cc26e3dc6be2dee38312b5072adf2877cd60985d296ab1ad9af44943017dc611",
+        "buildExit": 0,
+        "expectedExit": 101,
+        "actualExit": 101,
+        "expectedStdout": "",
+        "actualStdout": ""
+      },
+      {
+        "name": "module_c_emits_overflow_trap",
+        "profile": "optimized",
+        "sourceSHA256": "cc26e3dc6be2dee38312b5072adf2877cd60985d296ab1ad9af44943017dc611",
+        "buildExit": 0,
+        "expectedExit": 101,
+        "actualExit": 101,
+        "expectedStdout": "",
+        "actualStdout": ""
+      },
+      {
+        "name": "module_c_emits_divide_by_zero_trap",
+        "profile": "low",
+        "sourceSHA256": "afa81f381282beb26e9d82269f967889ac38783411dfa2ccab580e2f78cf2031",
+        "buildExit": 0,
+        "expectedExit": 102,
+        "actualExit": 102,
+        "expectedStdout": "",
+        "actualStdout": ""
+      },
+      {
+        "name": "module_c_emits_divide_by_zero_trap",
+        "profile": "optimized",
+        "sourceSHA256": "afa81f381282beb26e9d82269f967889ac38783411dfa2ccab580e2f78cf2031",
+        "buildExit": 0,
+        "expectedExit": 102,
+        "actualExit": 102,
+        "expectedStdout": "",
+        "actualStdout": ""
+      },
+      {
+        "name": "owned_c_replaces_owners_after_rhs_and_mutates_cleanup_receiver",
+        "profile": "low",
+        "sourceSHA256": "71e82ad758143415f6e12849a29ad2ce6dca0f21f97f16f748c2fec2c37fcd07",
+        "buildExit": 0,
+        "expectedExit": 0,
+        "actualExit": 0,
+        "expectedStdout": "102,103,",
+        "actualStdout": "102,103,"
+      },
+      {
+        "name": "owned_c_replaces_owners_after_rhs_and_mutates_cleanup_receiver",
+        "profile": "optimized",
+        "sourceSHA256": "71e82ad758143415f6e12849a29ad2ce6dca0f21f97f16f748c2fec2c37fcd07",
+        "buildExit": 0,
+        "expectedExit": 0,
+        "actualExit": 0,
+        "expectedStdout": "102,103,",
+        "actualStdout": "102,103,"
+      },
+      {
+        "name": "owned_c_drops_active_tagged_payloads_and_nested_fields_in_reverse_order",
+        "profile": "low",
+        "sourceSHA256": "6d4be1f39282e25e73080c9f42ae15e3073cddbccf268303b181278496a7bfd8",
+        "buildExit": 0,
+        "expectedExit": 0,
+        "actualExit": 0,
+        "expectedStdout": "5,4,3,100,2,1,",
+        "actualStdout": "5,4,3,100,2,1,"
+      },
+      {
+        "name": "owned_c_drops_active_tagged_payloads_and_nested_fields_in_reverse_order",
+        "profile": "optimized",
+        "sourceSHA256": "6d4be1f39282e25e73080c9f42ae15e3073cddbccf268303b181278496a7bfd8",
+        "buildExit": 0,
+        "expectedExit": 0,
+        "actualExit": 0,
+        "expectedStdout": "5,4,3,100,2,1,",
+        "actualStdout": "5,4,3,100,2,1,"
+      },
+      {
+        "name": "owned_c_moves_returns_and_unwinds_completed_partial_values_on_propagation",
+        "profile": "low",
+        "sourceSHA256": "6505eb23508c913b63cb096ceb93e082d6a46f9f729c096bb6e0f0fa54ff2a98",
+        "buildExit": 0,
+        "expectedExit": 0,
+        "actualExit": 0,
+        "expectedStdout": "20,1,2,3,9,4,",
+        "actualStdout": "20,1,2,3,9,4,"
+      },
+      {
+        "name": "owned_c_moves_returns_and_unwinds_completed_partial_values_on_propagation",
+        "profile": "optimized",
+        "sourceSHA256": "6505eb23508c913b63cb096ceb93e082d6a46f9f729c096bb6e0f0fa54ff2a98",
+        "buildExit": 0,
+        "expectedExit": 0,
+        "actualExit": 0,
+        "expectedStdout": "20,1,2,3,9,4,",
+        "actualStdout": "20,1,2,3,9,4,"
+      },
+      {
+        "name": "owned_c_invokes_loop_defer_suffix_before_drops_and_keeps_outer_owner",
+        "profile": "low",
+        "sourceSHA256": "23ddab166d2939f8eb91fef75d1f5834eacbc82001841451486e9c160dcc13db",
+        "buildExit": 0,
+        "expectedExit": 0,
+        "actualExit": 0,
+        "expectedStdout": "20,10,0,21,11,1,100,",
+        "actualStdout": "20,10,0,21,11,1,100,"
+      },
+      {
+        "name": "owned_c_invokes_loop_defer_suffix_before_drops_and_keeps_outer_owner",
+        "profile": "optimized",
+        "sourceSHA256": "23ddab166d2939f8eb91fef75d1f5834eacbc82001841451486e9c160dcc13db",
+        "buildExit": 0,
+        "expectedExit": 0,
+        "actualExit": 0,
+        "expectedStdout": "20,10,0,21,11,1,100,",
+        "actualStdout": "20,10,0,21,11,1,100,"
+      },
+      {
+        "name": "owned_c_keeps_provider_nominal_identity_and_shared_foreign_linkage",
+        "profile": "low",
+        "sourceSHA256": "683f6787b13c12be2f1878a437ae2cbbefcd02d833b4c75342a8ff36d75c3d8c",
+        "buildExit": 0,
+        "expectedExit": 0,
+        "actualExit": 0,
+        "expectedStdout": "30,10,",
+        "actualStdout": "30,10,"
+      },
+      {
+        "name": "owned_c_keeps_provider_nominal_identity_and_shared_foreign_linkage",
+        "profile": "optimized",
+        "sourceSHA256": "683f6787b13c12be2f1878a437ae2cbbefcd02d833b4c75342a8ff36d75c3d8c",
+        "buildExit": 0,
+        "expectedExit": 0,
+        "actualExit": 0,
+        "expectedStdout": "30,10,",
+        "actualStdout": "30,10,"
+      }
+    ],
+    "runtime": "Standalone C shim implements observe_cleanup(i32) and maps trap category to exit100+category"
+  },
+  "sourceCheck": {
+    "exit": 0,
+    "locked": true,
+    "stdout": "check ok: 2 instance(s), 256 source file(s), 3252 MIR function(s), lock verified"
+  },
+  "developmentBuild": {
+    "exit": 0,
+    "locked": true,
+    "stdout": "built: build/lexer-candidate.exe (x86_64-windows-msvc, development, lock verified)"
+  },
+  "behavior": {
+    "representation": "Used canonical structs/resources/Option/Result with dependency-ordered numerical C definitions",
+    "fields": "Field ID, canonical owner/type, module/declaration and original field index rechecked",
+    "receiver": "Cleanup receives pointer to live owner storage; scalar field mutation persists within cleanup",
+    "cleanup": "Body first, resource fields in reverse declaration order, active tagged alternative only",
+    "operands": "Graph drop facts map to exact frame-local binding or materialized expression slot",
+    "propagation": "Success projects payload; error executes existing defer/drop exit chain before typed error return",
+    "foreign": "Ordinary scalar extern C calls validate owned callable/linker/signature/effect facts; matching linker prototypes deduplicated",
+    "transaction": "Unsupported array and invalid-entry guards preserve sentinel destination"
+  },
+  "traceContracts": {
+    "replacement": "102,103,",
+    "nestedTagged": "5,4,3,100,2,1,",
+    "movedAndPartial": "20,1,2,3,9,4,",
+    "loopDefer": "20,10,0,21,11,1,100,",
+    "provider": "30,10,"
+  },
+  "correctedFirstAttempt": {
+    "count": 6,
+    "passed": 1,
+    "failed": 5,
+    "reason": "Normal struct/resource fields are parser kind0; initial emitter incorrectly expected kind1",
+    "report": {
+      "path": ".cache/candidate-tagged/cleanup-operands-unit/module-c-owned-native.json",
+      "sha256": "1ec616618edd0bbd1373266efa1ba212826431bf33152d2bef93eaf2a778085c"
+    }
+  },
+  "pending": [
+    "Reference, pointer, array, view, cast and enum C transport",
+    "Aggregate/pointer/C-scalar foreign ABI and authenticated SDK runtime calls",
+    "Region checkpoint/place/reset execution",
+    "Dominance, initialization, whole-path cleanup and full source/unsafe provenance proofs",
+    "Whole dispatcher and stage1/stage2"
+  ],
+  "sourceSetBudget": {
+    "currentSources": 256,
+    "limit": 256,
+    "changed": false
+  },
+  "skipped": {
+    "releaseCandidate": "Deferred batch; /O2 here describes generated C only",
+    "Linux": "Windows native scope",
+    "fullSuite": "Focused C handoff, rerun scalar suite plus owned runtime traces",
+    "Go": "No Go source changes",
+    "stableCLI": "No private render CLI route"
+  },
+  "privateAPIExpanded": true,
+  "stableCLIChanged": false,
+  "sdkABIChanged": false,
+  "dbChanged": false,
+  "ciChanged": false,
+  "pushed": false
+}

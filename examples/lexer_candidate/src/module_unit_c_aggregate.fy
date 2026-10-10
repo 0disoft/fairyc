@@ -1,0 +1,62 @@
+module module_unit_c_aggregate;
+import module_unit_body_ir_model as ir;
+import module_unit_body_ir_lookup as lookup;
+import module_unit_cleanup_mir_model as clean;
+import module_unit_value_model as budget;
+import module_unit_c_scalar as scalar;
+import c_text as w;
+import std::bytes as bytes;
+import std::vec as v;
+
+pub fn bool type(ref ir::Program p,usize id,ref mut bytes::Buffer out,ref mut w::State s){
+    if(id==0 || id>clean::type_count(ir::cleanup_ir(p))){s.code=1001;return false;}let t=clean::type_at(ir::cleanup_ir(p),id);
+    if(t.kind==1 && t.scalar<=7){return w::type(out,s,t.scalar);}if(t.kind!=2 && t.kind!=3 && t.kind!=5 && t.kind!=6){s.code=1004;return false;}
+    return w::text(out,s,b"struct fy_unit_t_") && w::number(out,s,id);
+}
+fn usize layout(ref ir::Program p,usize id,ref mut usize work){var usize i=0;while(i<ir::layout_count(p)){if(!budget::charge(work,1)){return 0;}if(ir::layout_at(p,i).value.type==id){return i+1;}i+=1;}return 0;}
+pub fn bool field(ref mut bytes::Buffer out,ref mut w::State s,usize id){return w::text(out,s,b"fy_f_") && w::number(out,s,id);}
+fn bool define(ref ir::Program p,usize id,ref mut v::Vec<u8> marks,ref mut bytes::Buffer out,ref mut w::State s,ref mut usize work,usize depth){
+    if(id==0 || id>v::len<u8>(marks)){s.code=1001;return false;}if(depth>=64 || !budget::charge(work,1)){s.code=1002;return false;}let mark=*v::at<u8>(marks,id-1);if(mark==2){return true;}if(mark==1){s.code=1001;return false;}{let slot=v::at_mut<u8>(marks,id-1);*slot=1;}let t=clean::type_at(ir::cleanup_ir(p),id);
+    if(t.kind==1){if(t.scalar>7){s.code=1004;return false;}}
+    else if(t.kind==5 || t.kind==6){if(!define(p,t.first,marks,out,s,work,depth+1) || t.kind==6 && !define(p,t.second,marks,out,s,work,depth+1)){return false;}if(scalar::scalar(p,t.first)==7 || t.kind==6 && scalar::scalar(p,t.second)==7){s.code=1004;return false;}
+        if(!type(p,id,out,s) || !w::text(out,s,b"{int32_t fy_tag;union{") || !type(p,t.first,out,s) || !w::text(out,s,b" fy_ok;") || t.kind==6 && (!type(p,t.second,out,s) || !w::text(out,s,b" fy_err;")) || !w::text(out,s,b"}fy_payload;};\n")){return false;}
+    }else if(t.kind==2 || t.kind==3){let index=layout(p,id,work);if(index==0){s.code=1001;return false;}let shape=ir::layout_at(p,index-1).value;var usize i=0;let glue=clean::glue_at(ir::cleanup_ir(p),id);
+        if(t.kind==3 && glue.field_count!=shape.field_count){s.code=1001;return false;}while(i<shape.field_count){if(!budget::charge(work,1)){s.code=1002;return false;}let f=ir::field_at(p,shape.field_start+i);if(f.kind!=0 || scalar::scalar(p,f.type)==7 || t.kind==3 && clean::field_at(ir::cleanup_ir(p),glue.field_start+i).type!=f.type){s.code=1001;return false;}if(!define(p,f.type,marks,out,s,work,depth+1)){return false;}i+=1;}
+        if(!type(p,id,out,s) || !w::text(out,s,b"{")){return false;}if(shape.field_count==0 && !w::text(out,s,b"uint8_t fy_empty;")){return false;}i=0;while(i<shape.field_count){let f=ir::field_at(p,shape.field_start+i);if(!type(p,f.type,out,s) || !w::text(out,s,b" ") || !field(out,s,shape.field_start+i+1) || !w::text(out,s,b";")){return false;}i+=1;}if(!w::text(out,s,b"};\n")){return false;}
+    }else{s.code=1004;return false;}{let slot=v::at_mut<u8>(marks,id-1);*slot=2;}return true;
+}
+pub fn Result<v::Vec<u8>,u32> definitions(ref ir::Program p,ref mut bytes::Buffer out,ref mut w::State s,ref mut usize work){
+    var v::Vec<u8> marks=v::empty<u8>();var usize i=0;while(i<clean::type_count(ir::cleanup_ir(p))){if(!v::push<u8>(ref mut marks,0).is_ok){return .err(1003);}i+=1;}i=1;
+    while(i<=ir::count(p)){let b=ir::at(p,i);let f=clean::frame_at(ir::cleanup_ir(p),i);if(!define(p,f.result,ref mut marks,out,s,work,0)){return .err(s.code);}var usize j=1;while(j<=ir::local_count(b)){if(!define(p,ir::local_at(b,j).type,ref mut marks,out,s,work,0)){return .err(s.code);}j+=1;}j=0;while(j<ir::node_count(b)){let e=ir::node_at(b,j).value;if(e.state==1 && !define(p,e.type,ref mut marks,out,s,work,0)){return .err(s.code);}j+=1;}i+=1;}return .ok(marks);
+}
+fn bool drop_name(ref mut bytes::Buffer out,ref mut w::State s,usize id){return w::text(out,s,b"fy_unit_drop_") && w::number(out,s,id);}
+pub fn bool drop_call(ref ir::Program p,usize id,ref mut bytes::Buffer out,ref mut w::State s){return drop_name(out,s,id) && w::text(out,s,b"(");}
+pub fn bool drops(ref ir::Program p,ref v::Vec<u8> marks,ref mut bytes::Buffer out,ref mut w::State s,ref mut usize work){
+    let c=ir::cleanup_ir(p);var usize i=1;while(i<=clean::type_count(c)){if(*v::at<u8>(marks,i-1)==2 && clean::glue_at(c,i).kind!=0){if(!w::text(out,s,b"static void ") || !drop_name(out,s,i) || !w::text(out,s,b"(") || !type(p,i,out,s) || !w::text(out,s,b" *fy_owner);\n")){return false;}}i+=1;}
+    i=1;while(i<=clean::type_count(c)){let g=clean::glue_at(c,i);if(*v::at<u8>(marks,i-1)==2 && g.kind!=0){if(!budget::charge(work,1)){s.code=1002;return false;}let t=clean::type_at(c,i);if(!w::text(out,s,b"static void ") || !drop_name(out,s,i) || !w::text(out,s,b"(") || !type(p,i,out,s) || !w::text(out,s,b" *fy_owner){\n")){return false;}
+            if(g.kind==1){if(g.frame!=0 && (!w::function(out,s,g.frame) || !w::text(out,s,b"(fy_owner);\n"))){return false;}let index=layout(p,i,work);if(index==0){s.code=1001;return false;}let shape=ir::layout_at(p,index-1).value;var usize j=g.field_count;while(j>0){j-=1;if(!budget::charge(work,1)){s.code=1002;return false;}let f=clean::field_at(c,g.field_start+j);if(clean::glue_at(c,f.type).kind!=0 && (!drop_call(p,f.type,out,s) || !w::text(out,s,b"&fy_owner->") || !field(out,s,shape.field_start+j+1) || !w::text(out,s,b");\n"))){return false;}}}
+            else{if(clean::glue_at(c,t.first).kind!=0 && (!w::text(out,s,b"if(fy_owner->fy_tag){") || !drop_call(p,t.first,out,s) || !w::text(out,s,b"&fy_owner->fy_payload.fy_ok);}\n"))){return false;}if(g.kind==3 && clean::glue_at(c,t.second).kind!=0 && (!w::text(out,s,b"if(!fy_owner->fy_tag){") || !drop_call(p,t.second,out,s) || !w::text(out,s,b"&fy_owner->fy_payload.fy_err);}\n"))){return false;}}
+            if(!w::text(out,s,b"}\n")){return false;}}i+=1;}return true;
+}
+fn bool member(ref ir::Program p,budget::Field field,usize expected){
+    if(field.id==0 || field.id>ir::field_count(p) || field.owner==0 || field.owner>clean::type_count(ir::cleanup_ir(p))){return false;}let f=ir::field_at(p,field.id-1);let t=clean::type_at(ir::cleanup_ir(p),field.owner);return f.kind==0 && f.type==expected && f.module_index==t.module_index && f.declaration==t.declaration && field.module_index==f.module_index && field.declaration==f.declaration && field.source_index==f.source_index;
+}
+pub fn bool place(ref ir::Program p,ref ir::Body b,usize id,ref mut bytes::Buffer out,ref mut w::State s,usize depth){
+    if(id==0 || depth>=64){s.code=1001;return false;}let e=ir::node_at(b,id-1).value;
+    if(e.kind==2 && e.binding!=0){let local=ir::local_at(b,e.binding);return (local.kind!=10 || w::text(out,s,b"(*")) && w::local(out,s,e.binding) && (local.kind!=10 || w::text(out,s,b")"));}
+    if(e.kind==8 && e.field.id!=0){let left=lookup::node(b,e.left);if(left==0 || !member(p,e.field,e.type) || e.field.owner!=ir::node_at(b,left-1).value.type){s.code=1001;return false;}if(!place(p,b,left,out,s,depth+1) || !w::text(out,s,b".")){return false;}return field(out,s,e.field.id);}s.code=1004;return false;
+}
+pub fn bool expression(ref ir::Program p,ref ir::Body b,usize id,ref mut bytes::Buffer out,ref mut w::State s,ref mut usize work){
+    let e=ir::node_at(b,id-1).value;let t=clean::type_at(ir::cleanup_ir(p),e.type);let left=lookup::node(b,e.left);let right=lookup::node(b,e.right);
+    if(!scalar::value(out,s,id) || !w::text(out,s,b"=")){return false;}
+    if(e.kind==2){if(e.binding==0 || ir::local_at(b,e.binding).type!=e.type){s.code=1001;return false;}if(!place(p,b,id,out,s,0)){return false;}}
+    else if(e.kind==3){if(left==0 || ir::node_at(b,left-1).value.type!=e.type){s.code=1001;return false;}if(!scalar::value(out,s,left)){return false;}}
+    else if(e.kind==8){if(left==0){s.code=1001;return false;}let receiver=ir::node_at(b,left-1).value;let rt=clean::type_at(ir::cleanup_ir(p),receiver.type);
+        if(e.field.id==0){if(rt.kind!=6 || !bytes::equal(ir::node_text(b,id-1),b"is_ok")){s.code=1004;return false;}if(!scalar::value(out,s,left) || !w::text(out,s,b".fy_tag")){return false;}}
+        else{if(!member(p,e.field,e.type) || e.field.owner!=receiver.type){s.code=1001;return false;}if(!scalar::value(out,s,left) || !w::text(out,s,b".") || !field(out,s,e.field.id)){return false;}}
+    }else if(e.kind==10){if(t.kind!=2 && t.kind!=3 || e.target!=e.type){s.code=1004;return false;}if(!w::text(out,s,b"(") || !type(p,e.type,out,s) || !w::text(out,s,b"){0};\n")){return false;}var usize link=e.right;while(link!=0){if(!budget::charge(work,1)){s.code=1002;return false;}let pair=ir::node_at(b,lookup::node(b,link)-1).value;let child=lookup::node(b,pair.left);if(child==0 || pair.field.owner!=e.type || !member(p,pair.field,ir::node_at(b,child-1).value.type)){s.code=1001;return false;}if(!scalar::value(out,s,id) || !w::text(out,s,b".") || !field(out,s,pair.field.id) || !w::text(out,s,b"=") || !scalar::value(out,s,child) || !w::text(out,s,b";\n")){return false;}link=pair.right;}return true;
+    }else if(e.kind==28 || e.kind==6){if(t.kind!=5 && t.kind!=6 || left==0 && e.kind==6){s.code=1004;return false;}let name=ir::node_text(b,if(e.kind==28){id-1}else{left-1});let none=bytes::equal(name,b"none");let ok=bytes::equal(name,b"ok") || bytes::equal(name,b"some");let err=bytes::equal(name,b"err");if(t.kind==5 && !none && !bytes::equal(name,b"some") || t.kind==6 && !bytes::equal(name,b"ok") && !err){s.code=1001;return false;}
+        if(!w::text(out,s,b"(") || !type(p,e.type,out,s) || !w::text(out,s,b"){0};\n")){return false;}if(!none){if(right==0){s.code=1001;return false;}let pair=ir::node_at(b,right-1).value;let child=lookup::node(b,pair.left);if(pair.right!=0 || child==0 || ir::node_at(b,child-1).value.type!=if(ok){t.first}else{t.second}){s.code=1001;return false;}if(!scalar::value(out,s,id) || !w::text(out,s,if(ok){b".fy_tag=1;\n"}else{b".fy_tag=0;\n"}) || !scalar::value(out,s,id) || !w::text(out,s,if(ok){b".fy_payload.fy_ok="}else{b".fy_payload.fy_err="}) || !scalar::value(out,s,child) || !w::text(out,s,b";\n")){return false;}}return true;
+    }else if(e.kind==30){if(left==0 || clean::type_at(ir::cleanup_ir(p),ir::node_at(b,left-1).value.type).first!=e.type){s.code=1001;return false;}if(!scalar::value(out,s,left) || !w::text(out,s,b".fy_payload.fy_ok")){return false;}}
+    else{s.code=1004;return false;}return w::text(out,s,b";\n");
+}
