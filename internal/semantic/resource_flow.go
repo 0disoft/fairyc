@@ -135,7 +135,10 @@ func (a *analyzer) resourceBlock(module *moduleScope, block *ast.Block, environm
 			if value != nil && a.isResource(value.typ) {
 				mode = resourceMove
 			}
-			a.resourceExpression(module, binding.Expression, environment, mode)
+			reachable = a.resourceExpression(module, binding.Expression, environment, mode)
+			if !reachable {
+				continue
+			}
 			if value != nil && a.isResource(value.typ) {
 				environment[value] = resourceValueState{
 					state:       ResourceLive,
@@ -150,8 +153,9 @@ func (a *analyzer) resourceBlock(module *moduleScope, block *ast.Block, environm
 		case statement.Kind == syntax.KindFor:
 			a.resourceFor(module, statement.For, environment)
 		case statement.Kind == syntax.KindReturn:
-			a.resourceExpression(module, statement.Expression, environment, resourceMove)
-			a.checkResourceEnvironmentEffects(environment, span(module.file.Path, statement.Span), nil)
+			if a.resourceExpression(module, statement.Expression, environment, resourceMove) {
+				a.checkResourceEnvironmentEffects(environment, span(module.file.Path, statement.Span), nil)
+			}
 			reachable = false
 		case statement.Kind == syntax.KindBurn:
 			a.resourceExpression(module, statement.Expression, environment, resourceMove)
@@ -160,14 +164,14 @@ func (a *analyzer) resourceBlock(module *moduleScope, block *ast.Block, environm
 			a.captureResourceLoopEdge(environment, statement.Kind == syntax.KindContinue)
 			reachable = false
 		default:
-			a.resourceExpression(module, statement.Expression, environment, resourceRead)
-			if statement.Kind == syntax.KindExprStmt || statement.Kind == syntax.KindDiscard {
+			reachable = a.resourceExpression(module, statement.Expression, environment, resourceRead)
+			if reachable && (statement.Kind == syntax.KindExprStmt || statement.Kind == syntax.KindDiscard) {
 				a.checkDiscardedResourceCleanup(module, statement.Expression)
 			}
 		}
 	}
 	if reachable && block.Tail != nil {
-		a.resourceExpression(module, block.Tail, environment, tailMode)
+		reachable = a.resourceExpression(module, block.Tail, environment, tailMode)
 	}
 	if scoped {
 		if reachable {
@@ -276,7 +280,7 @@ func (a *analyzer) resourceExpression(module *moduleScope, expression *ast.Expre
 			a.resourceExpression(module, expression.Children[0], environment, childMode)
 		}
 	case syntax.KindCall:
-		a.resourceCall(module, expression, environment)
+		reachable = a.resourceCall(module, expression, environment)
 	case syntax.KindPropagate:
 		if len(expression.Children) == 1 {
 			reachable = a.resourceExpression(module, expression.Children[0], environment, resourceMove)
@@ -292,7 +296,7 @@ func (a *analyzer) resourceExpression(module *moduleScope, expression *ast.Expre
 			a.resourceExpression(module, expression.Children[1], environment, resourceMove)
 		}
 	case syntax.KindRecord:
-		a.resourceRecord(module, expression, environment)
+		reachable = a.resourceRecord(module, expression, environment)
 	case syntax.KindFieldExpr:
 		if expression.Text == "is_ok" && len(expression.Children) == 1 && isResultType(a.expressionTypes[expression.Children[0]]) {
 			scrutinee := expression.Children[0]
@@ -370,10 +374,12 @@ func (a *analyzer) resourcePath(expression *ast.Expression, environment resource
 	environment[value] = state
 }
 
-func (a *analyzer) resourceCall(module *moduleScope, expression *ast.Expression, environment resourceEnvironment) {
+func (a *analyzer) resourceCall(module *moduleScope, expression *ast.Expression, environment resourceEnvironment) bool {
 	if len(expression.Children) == 0 {
-		return
+		return true
 	}
+	base := len(a.resourcePending)
+	defer func() { a.resourcePending = a.resourcePending[:base] }()
 	callee := a.resolved[expression.Children[0]]
 	parameterOffset := 0
 	if method := a.methodCalls[expression]; method != nil {
@@ -387,7 +393,10 @@ func (a *analyzer) resourceCall(module *moduleScope, expression *ast.Expression,
 					mode = resourceMove
 				}
 			}
-			a.resourceExpression(module, field.Children[0], environment, mode)
+			if !a.resourceExpression(module, field.Children[0], environment, mode) {
+				return false
+			}
+			a.retainResourcePending(a.expressionTypes[field.Children[0]], mode)
 		}
 	}
 	for index, argument := range expression.Children[1:] {
@@ -401,8 +410,12 @@ func (a *analyzer) resourceCall(module *moduleScope, expression *ast.Expression,
 		} else if isBuiltinVariantPath(expression.Children[0].Text) && a.isResource(a.expressionTypes[argument]) {
 			mode = resourceMove
 		}
-		a.resourceExpression(module, argument, environment, mode)
+		if !a.resourceExpression(module, argument, environment, mode) {
+			return false
+		}
+		a.retainResourcePending(a.expressionTypes[argument], mode)
 	}
+	return true
 }
 
 func (a *analyzer) resourceMatch(module *moduleScope, expression *ast.Expression, environment resourceEnvironment, mode resourceUse) bool {
@@ -458,25 +471,29 @@ func (a *analyzer) resourceMatch(module *moduleScope, expression *ast.Expression
 	return a.mergeResourceBranches(span(module.file.Path, expression.Span), environment, baseline, branches)
 }
 
-func (a *analyzer) resourceRecord(module *moduleScope, expression *ast.Expression, environment resourceEnvironment) {
+func (a *analyzer) resourceRecord(module *moduleScope, expression *ast.Expression, environment resourceEnvironment) bool {
 	if len(expression.Children) == 0 {
-		return
+		return true
 	}
 	constructor := a.resolved[expression.Children[0]]
 	if constructor == nil {
-		return
+		return true
 	}
 	info := a.resourceTypes[constructor.typ]
 	if info == nil {
 		if structure := a.structTypes[constructor.typ]; structure != nil {
 			for _, fieldExpression := range expression.Children[1:] {
 				if len(fieldExpression.Children) == 1 {
-					a.resourceExpression(module, fieldExpression.Children[0], environment, resourceRead)
+					if !a.resourceExpression(module, fieldExpression.Children[0], environment, resourceRead) {
+						return false
+					}
 				}
 			}
 		}
-		return
+		return true
 	}
+	base := len(a.resourcePending)
+	defer func() { a.resourcePending = a.resourcePending[:base] }()
 	for _, fieldExpression := range expression.Children[1:] {
 		if len(fieldExpression.Children) != 1 {
 			continue
@@ -485,8 +502,12 @@ func (a *analyzer) resourceRecord(module *moduleScope, expression *ast.Expressio
 		if field, found := info.fields[fieldExpression.Text]; found && a.isResource(field.typ) {
 			mode = resourceMove
 		}
-		a.resourceExpression(module, fieldExpression.Children[0], environment, mode)
+		if !a.resourceExpression(module, fieldExpression.Children[0], environment, mode) {
+			return false
+		}
+		a.retainResourcePending(a.expressionTypes[fieldExpression.Children[0]], mode)
 	}
+	return true
 }
 
 func (a *analyzer) resourceField(module *moduleScope, expression *ast.Expression, environment resourceEnvironment, mode resourceUse) {
@@ -682,12 +703,14 @@ func (a *analyzer) beginResourceEffects(caller, exempt *symbol) {
 	a.resourceCaller = caller
 	a.resourceCleanupExempt = exempt
 	a.resourceScopes = nil
+	a.resourcePending = nil
 }
 
 func (a *analyzer) endResourceEffects() {
 	a.resourceCaller = nil
 	a.resourceCleanupExempt = nil
 	a.resourceScopes = nil
+	a.resourcePending = nil
 }
 
 func (a *analyzer) checkResourceLoopExitEffects(environment resourceEnvironment, at hir.Span) {
@@ -701,10 +724,18 @@ func (a *analyzer) checkResourceLoopExitEffects(environment resourceEnvironment,
 			values[value] = struct{}{}
 		}
 	}
-	a.checkResourceEnvironmentEffects(environment, at, values)
+	a.checkResourceCleanupEffects(environment, at, values, frame.scopeDepth+1)
 }
 
 func (a *analyzer) checkResourceEnvironmentEffects(environment resourceEnvironment, at hir.Span, only map[*symbol]struct{}) {
+	pendingScope := -1
+	if only == nil {
+		pendingScope = 0
+	}
+	a.checkResourceCleanupEffects(environment, at, only, pendingScope)
+}
+
+func (a *analyzer) checkResourceCleanupEffects(environment resourceEnvironment, at hir.Span, only map[*symbol]struct{}, pendingScope int) {
 	values := make([]*symbol, 0, len(environment))
 	for value, state := range environment {
 		if state.state != ResourceLive || value == a.resourceCleanupExempt {
@@ -724,6 +755,7 @@ func (a *analyzer) checkResourceEnvironmentEffects(environment resourceEnvironme
 	for _, value := range values {
 		a.checkResourceValueEffectsOnce(value, at, seen)
 	}
+	a.checkResourcePendingEffects(at, pendingScope, seen)
 }
 
 func (a *analyzer) checkResourceValueEffects(value *symbol, at hir.Span) {

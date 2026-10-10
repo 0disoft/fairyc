@@ -98,6 +98,7 @@ type analyzer struct {
 	resourceScopes        []map[*symbol]struct{}
 	resourceCaller        *symbol
 	resourceCleanupExempt *symbol
+	resourcePending       []resourcePendingValue
 	resultLoops           []resultLoopFrame
 	resultNeutralScalars  map[*ast.Expression]bool
 	borrowReturns         map[*symbol]borrowReturnSummary
