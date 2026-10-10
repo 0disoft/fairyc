@@ -8,6 +8,9 @@ import module_unit_loan_checks as loans;
 import module_unit_value_model as m;
 import module_unit_values as values;
 import module_unit_value_builtin as borrows;
+import module_unit_value_view as views;
+import syntax as syntax;
+import std::bytes as bytes;
 import std::vec as v;
 
 // Tagged values may retain exactly one borrowed leaf, with its mutability.
@@ -18,6 +21,15 @@ fn Result<u32,m::Problem> leaf(ref inputs::Inputs input,ref values::Plan primary
 }
 pub fn Result<m::Expression,m::Problem> root(ref m::Values body,usize original,ref mut g::Context c){
     var usize id=original;var usize depth=0;while(id!=0){if(depth>=64 || !m::charge(ref mut c.work,1)){return .err(g::fail(c,10,0,0));}let e=switch(g::expression(body,id,c)){case .ok(e):{e}case .err(p):{return .err(p);}};if(e.kind!=3 && e.kind!=8 && e.kind!=9 && e.kind!=26 && !(e.kind==4 && e.place.kind==3)){return .ok(e);}id=e.left;depth+=1;}return .err(g::fail(c,12,0,0));
+}
+// Descriptor copies and length metadata do not read referent storage. Ordinary
+// field/dereference/index reads compete with earlier exclusive argument holds.
+pub fn m::Problem read(ref inputs::Inputs input,ref values::Plan primary,ref syntax::Parsed source,ref m::Values body,m::Expression e,g::Value value,ref v::Vec<sets::Entry> entries,ref v::Vec<usize> members,ref mut v::Vec<loan::Loan> records,ref mut v::Vec<loan::Held> held,ref mut v::Vec<loan::Conflict> conflicts,ref mut g::Context c){
+    if(c.probes!=0 || value.origin<=1 || v::len<loan::Held>(held)==0){return g::fail(c,0,0,0);}
+    let receiver=switch(g::expression(body,e.left,c)){case .ok(e):{e}case .err(p):{return p;}};if(receiver.type==0){return g::fail(c,0,0,0);}let t=inputs::type_at(input,primary,c.frame,receiver.type);if(!borrows::borrowed(t)){return g::fail(c,0,0,0);}
+    if(e.kind==8 && views::view(t) && bytes::equal(syntax::expression_text(source,e.source_index),b"len")){return g::fail(c,0,0,0);}
+    let selected=switch(root(body,e.left,c)){case .ok(e):{e}case .err(p):{return p;}};if(selected.source_index==c.place_root){return g::fail(c,0,0,0);}
+    return loans::access(value,false,e.start,e.end,receiver.start,receiver.end,entries,members,records,held,conflicts,c);
 }
 pub fn m::Problem access(ref inputs::Inputs input,ref values::Plan primary,ref m::Values body,ref v::Vec<g::Value> env,usize original,g::Value value,bool mutable,usize start,usize end,ref v::Vec<sets::Entry> entries,ref v::Vec<usize> members,ref mut v::Vec<loan::Loan> loan_records,ref mut v::Vec<loan::Held> held_loans,ref mut v::Vec<loan::Conflict> loan_conflicts,ref mut g::Context c){
     let source=switch(g::expression(body,original,c)){case .ok(e):{e}case .err(p):{return p;}};let held=loans::access(value,mutable,start,end,source.start,source.end,entries,members,loan_records,held_loans,loan_conflicts,c);if(held.code!=0){return held;}if(!mutable || c.probes!=0 || value.origin<=1){return g::fail(c,0,0,0);}

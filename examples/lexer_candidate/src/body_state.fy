@@ -31,7 +31,7 @@ pub fn bool expect(ref scanner::Stream stream, ref mut Cursor cursor, ref u8[] t
     return false;
 }
 
-pub fn usize append(ref mut v::Vec<Node> nodes, ref mut Cursor cursor, Node node) {
+pub fn usize append(Node node, ref mut v::Vec<Node> nodes, ref mut Cursor cursor) {
     if (cursor.nodes >= 4160) { cursor.status = 4; return 0; }
     if (!v::push<Node>(nodes, node).is_ok) { cursor.status = 3; return 0; }
     cursor.nodes = cursor.nodes + 1;
@@ -67,14 +67,14 @@ pub fn usize pattern(ref scanner::Stream stream, ref mut Cursor cursor, ref mut 
         let tokens::PatternBinding item = tokens::pattern_binding(stream,cursor.index,named);
         cursor.index=item.next; cursor.previous_end=item.end; cursor.expected=item.expected;
         if (!item.ok) { return 0; }
-        let usize value = append(nodes,cursor,node_value(17,scanner::token_info(stream,item.name).start,item.end,item.name,0,0));
+        let usize value = append(node_value(17,scanner::token_info(stream,item.name).start,item.end,item.name,0,0),nodes,cursor);
         if (value == 0) { return 0; }
-        binding = if (named) { append(nodes,cursor,node_value(33,item.start,item.end,item.field,value,binding)) } else { value };
+        binding = if (named) { append(node_value(33,item.start,item.end,item.field,value,binding),nodes,cursor) } else { value };
         if (binding == 0) { return 0; }
         if (!named || !take(stream,cursor,b",")) { break; }
       }
       if (named && word(stream,cursor.index,b":")) { cursor.expected = 25; return 0; }
       if (!expect(stream,cursor,if (named) { b"}" } else { b")" },if (named) { 7 } else { 5 })) { return 0; }
     }
-    return append(nodes,cursor,node_value(if (named) { 32 } else { 16 },start,cursor.previous_end,token,if (named) { 0 } else { binding },if (named) { binding } else { 0 }));
+    return append(node_value(if (named) { 32 } else { 16 },start,cursor.previous_end,token,if (named) { 0 } else { binding },if (named) { binding } else { 0 }),nodes,cursor);
 }

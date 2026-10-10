@@ -85,14 +85,14 @@ fn void expression(ref syntax::Parsed p,ref v::Vec<state::Slot> types,ref v::Vec
     if(e.kind==13){
         expression(p,types,columns,nodes,c,e.left,0,depth+1);let u32 child_use=if(tagged::result(state::expressions(types,id-1))){2}else{use};
         let usize split=emit(nodes,c,0,0,e.start,e.end);let usize yes=fresh(nodes,c,0,0,e.start,e.end);
-        let usize no=fresh(nodes,c,0,0,e.start,e.end);let usize join=fresh(nodes,c,if(c.ownership){8}else{0},0,e.start,e.end);fork(nodes,split,yes,no);
+        let usize no=fresh(nodes,c,0,0,e.start,e.end);let u32 join_kind=if(c.ownership){8}else{0};let usize join=fresh(nodes,c,join_kind,0,e.start,e.end);fork(nodes,split,yes,no);
         let branches=syntax::expression_at(p,e.right);
         c.current=yes;block(p,types,columns,nodes,c,branches.left,child_use,0,depth+1);jump(nodes,c,join);
         c.current=no;expression(p,types,columns,nodes,c,branches.right,child_use,depth+1);jump(nodes,c,join);c.current=join;discard take(p,types,columns,nodes,c,id,use);return;
     }
     if(e.kind==15){
         expression(p,types,columns,nodes,c,e.left,4,depth+1);let u32 child_use=if(tagged::result(state::expressions(types,id-1))){2}else{use};
-        let usize join=fresh(nodes,c,if(c.ownership){8}else{0},0,e.start,e.end);var usize split=emit(nodes,c,0,0,e.start,e.end);var usize link=e.right;
+        let u32 join_kind=if(c.ownership){8}else{0};let usize join=fresh(nodes,c,join_kind,0,e.start,e.end);var usize split=emit(nodes,c,0,0,e.start,e.end);var usize link=e.right;
         while(link!=0 && c.problem.code==0){
             let pair=syntax::expression_at(p,link);let arm=syntax::expression_at(p,pair.left);
             let usize body=fresh(nodes,c,0,0,arm.start,arm.end);let usize next=if(pair.right==0){0}else{fresh(nodes,c,0,0,arm.start,arm.end)};
@@ -106,7 +106,7 @@ fn void expression(ref syntax::Parsed p,ref v::Vec<state::Slot> types,ref v::Vec
     }
     if(e.kind==5 && (bytes::equal(syntax::expression_text(p,id),b"&&") || bytes::equal(syntax::expression_text(p,id),b"||"))){
         expression(p,types,columns,nodes,c,e.left,0,depth+1);
-        let usize split=emit(nodes,c,0,0,e.start,e.end);let usize rhs=fresh(nodes,c,0,0,e.start,e.end);let usize join=fresh(nodes,c,if(c.ownership){8}else{0},0,e.start,e.end);
+        let usize split=emit(nodes,c,0,0,e.start,e.end);let usize rhs=fresh(nodes,c,0,0,e.start,e.end);let u32 join_kind=if(c.ownership){8}else{0};let usize join=fresh(nodes,c,join_kind,0,e.start,e.end);
         fork(nodes,split,rhs,join);c.current=rhs;expression(p,types,columns,nodes,c,e.right,0,depth+1);jump(nodes,c,join);c.current=join;return;
     }
     if(e.kind==6){var usize i=0;while(i<syntax::call_argument_count(p,id)){expression(p,types,columns,nodes,c,syntax::call_argument(p,id,i),2,depth+1);i+=1;}}

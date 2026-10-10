@@ -21,26 +21,27 @@ fn usize expression_inner(ref scanner::Stream stream, ref mut state::Cursor curs
                 state::advance(stream, cursor);
             }
         }
-        left = state::append(nodes, cursor, state::node_value(if (token.kind == 3) { 2 } else { 1 },token.start,cursor.previous_end,token_index,0,0));
+        left = state::append(state::node_value(if (token.kind == 3) { 2 } else { 1 },token.start,cursor.previous_end,token_index,0,0),nodes,cursor);
         if (left == 0) { return 0; }
     } else if (state::take(stream,cursor,b".")) {
         let usize name = cursor.index;
         if (state::current(stream,cursor).kind != 3) { cursor.expected = 1; return 0; }
         state::advance(stream,cursor);
-        left = state::append(nodes,cursor,state::node_value(28,token.start,cursor.previous_end,name,0,0));
+        left = state::append(state::node_value(28,token.start,cursor.previous_end,name,0,0),nodes,cursor);
     } else if (word(stream,cursor.index,b"if")) {
         left = conditional(stream,cursor,nodes,entries,statements,type_nodes,depth);
     } else if (word(stream,cursor.index,b"switch")) {
         left = switch_value(stream,cursor,nodes,entries,statements,type_nodes,depth);
     } else if (tokens::block_start(stream,cursor.index)) {
         let bool unsafe_block = state::take(stream,cursor,b"unsafe");
-        let usize body = block(stream,cursor,nodes,entries,statements,type_nodes,cursor.block_depth,true);
+        let usize block_depth = cursor.block_depth;
+        let usize body = block(stream,cursor,nodes,entries,statements,type_nodes,block_depth,true);
         if (body == 0) { return 0; }
-        left = state::append(nodes,cursor,state::node_value(if (unsafe_block) { 31 } else { 12 },token.start,cursor.previous_end,token_index,body,0));
+        left = state::append(state::node_value(if (unsafe_block) { 31 } else { 12 },token.start,cursor.previous_end,token_index,body,0),nodes,cursor);
     } else if (state::take(stream, cursor, b"(")) {
         let usize child = expression(stream, cursor, nodes, entries, statements, type_nodes, 1, depth + 1,true);
         if (child == 0 || !state::expect(stream, cursor, b")", 5)) { return 0; }
-        left = state::append(nodes, cursor, state::node_value(3,token.start,cursor.previous_end,token_index,child,0));
+        left = state::append(state::node_value(3,token.start,cursor.previous_end,token_index,child,0),nodes,cursor);
     } else if (state::take(stream,cursor,b"[")) {
         var usize elements = 0;
         var usize repeated = 0; var usize repeat_count = 0;
@@ -61,26 +62,26 @@ fn usize expression_inner(ref scanner::Stream stream, ref mut state::Cursor curs
                         state::advance(stream,cursor);
                     }
                 }
-                repeat_count = state::append(nodes,cursor,state::node_value(if (count.kind == 5) { 1 } else { 2 },count.start,cursor.previous_end,count_token,0,0));
+                repeat_count = state::append(state::node_value(if (count.kind == 5) { 1 } else { 2 },count.start,cursor.previous_end,count_token,0,0),nodes,cursor);
                 if (repeat_count == 0) { return 0; }
                 repeated = value; break;
             }
-            elements = state::append(nodes,cursor,state::node_value(25,element_start,cursor.previous_end,element_token,value,elements));
+            elements = state::append(state::node_value(25,element_start,cursor.previous_end,element_token,value,elements),nodes,cursor);
             if (elements == 0) { return 0; }
             if (!state::take(stream,cursor,b",")) { break; }
         }
         if (!state::expect(stream,cursor,b"]",11)) { return 0; }
-        left = state::append(nodes,cursor,state::node_value(if (repeated == 0) { 24 } else { 29 },token.start,cursor.previous_end,token_index,repeated,if (repeated == 0) { elements } else { repeat_count }));
+        left = state::append(state::node_value(if (repeated == 0) { 24 } else { 29 },token.start,cursor.previous_end,token_index,repeated,if (repeated == 0) { elements } else { repeat_count }),nodes,cursor);
     } else if (state::take(stream,cursor,b"ref")) {
         let bool mutable = state::take(stream,cursor,b"mut");
         let usize child = expression(stream,cursor,nodes,entries,statements,type_nodes,11,depth + 1,allow_record);
         if (child == 0) { return 0; }
-        left = state::append(nodes,cursor,state::node_value(if (mutable) { 22 } else { 21 },token.start,cursor.previous_end,token_index,child,0));
+        left = state::append(state::node_value(if (mutable) { 22 } else { 21 },token.start,cursor.previous_end,token_index,child,0),nodes,cursor);
     } else if (tokens::prefix(stream,cursor.index)) {
         state::advance(stream, cursor);
         let usize child = expression(stream, cursor, nodes, entries, statements, type_nodes, 11, depth + 1,allow_record);
         if (child == 0) { return 0; }
-        left = state::append(nodes, cursor, state::node_value(4,token.start,cursor.previous_end,token_index,child,0));
+        left = state::append(state::node_value(4,token.start,cursor.previous_end,token_index,child,0),nodes,cursor);
     } else { cursor.expected = 3; return 0; }
     var bool comparison = false;
     while (left != 0) {
@@ -97,22 +98,22 @@ fn usize expression_inner(ref scanner::Stream stream, ref mut state::Cursor curs
                 var usize value = 0;
                 if (word(stream,cursor.index,b",") || word(stream,cursor.index,b"}")) {
                     let scanner::TokenInfo identifier = scanner::token_info(stream,name);
-                    value = state::append(nodes,cursor,state::node_value(2,identifier.start,identifier.end,name,0,0));
+                    value = state::append(state::node_value(2,identifier.start,identifier.end,name,0,0),nodes,cursor);
                 } else {
                     if (!state::expect(stream, cursor, b"=", 9)) { return 0; }
                     value = expression(stream, cursor, nodes, entries, statements, type_nodes, 1, depth + 1,true);
                 }
                 if (value == 0) { return 0; }
-                fields = state::append(nodes, cursor, state::node_value(11,start,cursor.previous_end,name,value,fields));
+                fields = state::append(state::node_value(11,start,cursor.previous_end,name,value,fields),nodes,cursor);
                 if (fields == 0) { return 0; }
                 if (!state::take(stream, cursor, b",")) { break; }
             }
             if (!state::expect(stream, cursor, b"}", 7)) { return 0; }
-            left = state::append(nodes, cursor, state::node_value(10,token.start,cursor.previous_end,token_index,left,fields));
+            left = state::append(state::node_value(10,token.start,cursor.previous_end,token_index,left,fields),nodes,cursor);
             continue;
         }
         if (state::take(stream,cursor,b"?")) {
-            left = state::append(nodes,cursor,state::node_value(30,token.start,cursor.previous_end,opener,left,0));
+            left = state::append(state::node_value(30,token.start,cursor.previous_end,opener,left,0),nodes,cursor);
             continue;
         }
         if (word(stream,cursor.index,b"as")) {
@@ -120,7 +121,7 @@ fn usize expression_inner(ref scanner::Stream stream, ref mut state::Cursor curs
             state::advance(stream,cursor);
             let usize target = read_type(stream,cursor,type_nodes);
             if (target == 0) { return 0; }
-            left = state::append(nodes,cursor,state::node_value(23,token.start,cursor.previous_end,opener,left,target));
+            left = state::append(state::node_value(23,token.start,cursor.previous_end,opener,left,target),nodes,cursor);
             continue;
         }
         if (cursor.expression_kind == 2 && word(stream,cursor.index,b"<") && types::call_ahead(stream,cursor.index)) {
@@ -128,7 +129,7 @@ fn usize expression_inner(ref scanner::Stream stream, ref mut state::Cursor curs
             cursor.index = result.next; cursor.previous_end = result.end; cursor.types = result.count;
             cursor.status = result.status; cursor.expected = result.expected;
             if (result.root == 0) { return 0; }
-            left = state::append(nodes,cursor,state::node_value(20,token.start,cursor.previous_end,opener,left,result.root));
+            left = state::append(state::node_value(20,token.start,cursor.previous_end,opener,left,result.root),nodes,cursor);
             if (left == 0) { return 0; }
             continue;
         }
@@ -136,7 +137,7 @@ fn usize expression_inner(ref scanner::Stream stream, ref mut state::Cursor curs
             let usize member = cursor.index;
             if (state::current(stream, cursor).kind != 3) { cursor.expected = 1; return 0; }
             state::advance(stream, cursor);
-            left = state::append(nodes, cursor, state::node_value(8,token.start,cursor.previous_end,member,left,0));
+            left = state::append(state::node_value(8,token.start,cursor.previous_end,member,left,0),nodes,cursor);
             continue;
         }
         if (state::take(stream, cursor, b"[")) {
@@ -153,12 +154,12 @@ fn usize expression_inner(ref scanner::Stream stream, ref mut state::Cursor curs
                     end = expression(stream,cursor,nodes,entries,statements,type_nodes,1,depth + 1,true);
                     if (end == 0) { return 0; }
                 }
-                let usize bounds = state::append(nodes,cursor,state::node_value(27,bounds_start,cursor.previous_end,range_token,index,end));
+                let usize bounds = state::append(state::node_value(27,bounds_start,cursor.previous_end,range_token,index,end),nodes,cursor);
                 if (bounds == 0 || !state::expect(stream,cursor,b"]",11)) { return 0; }
-                left = state::append(nodes,cursor,state::node_value(26,token.start,cursor.previous_end,opener,left,bounds));
+                left = state::append(state::node_value(26,token.start,cursor.previous_end,opener,left,bounds),nodes,cursor);
             } else {
                 if (!state::expect(stream, cursor, b"]", 11)) { return 0; }
-                left = state::append(nodes, cursor, state::node_value(9,token.start,cursor.previous_end,opener,left,index));
+                left = state::append(state::node_value(9,token.start,cursor.previous_end,opener,left,index),nodes,cursor);
             }
             continue;
         }
@@ -180,12 +181,12 @@ fn usize expression_inner(ref scanner::Stream stream, ref mut state::Cursor curs
                 }
                 let usize value = expression(stream, cursor, nodes, entries, statements, type_nodes, 1, depth + 1,true);
                 if (value == 0) { return 0; }
-                arguments = state::append(nodes, cursor, state::node_value(7,argument_start,cursor.previous_end,argument_token,value,arguments));
+                arguments = state::append(state::node_value(7,argument_start,cursor.previous_end,argument_token,value,arguments),nodes,cursor);
                 if (arguments == 0) { return 0; }
                 if (!state::take(stream, cursor, b",")) { break; }
             }
             if (!state::expect(stream, cursor, b")", 5)) { return 0; }
-            left = state::append(nodes, cursor, state::node_value(6,token.start,cursor.previous_end,opener,left,arguments));
+            left = state::append(state::node_value(6,token.start,cursor.previous_end,opener,left,arguments),nodes,cursor);
             continue;
         }
         let usize power = tokens::precedence(stream, cursor.index);
@@ -196,7 +197,7 @@ fn usize expression_inner(ref scanner::Stream stream, ref mut state::Cursor curs
         state::advance(stream, cursor);
         let usize right = expression(stream, cursor, nodes, entries, statements, type_nodes, power + 1, depth + 1,allow_record);
         if (right == 0) { return 0; }
-        left = state::append(nodes, cursor, state::node_value(5,token.start,cursor.previous_end,operator,left,right));
+        left = state::append(state::node_value(5,token.start,cursor.previous_end,operator,left,right),nodes,cursor);
     }
     return 0;
 }
@@ -288,7 +289,7 @@ fn usize statement(ref scanner::Stream stream, ref mut state::Cursor cursor, ref
         let usize name_token = cursor.index; let scanner::TokenInfo name = state::current(stream,cursor);
         if (name.kind != 3) { cursor.expected = 1; return 0; }
         state::advance(stream,cursor);
-        value.target = state::append(nodes,cursor,state::node_value(17,name.start,name.end,name_token,0,0));
+        value.target = state::append(state::node_value(17,name.start,name.end,name_token,0,0),nodes,cursor);
         if (value.target == 0 || !state::take(stream,cursor,b"in")) { cursor.expected = 23; return 0; }
         value.expression = expression(stream,cursor,nodes,entries,statements,type_nodes,.minimum = 1,.depth = 0,.allow_record = false);
         if (value.expression == 0) { return 0; }
@@ -306,7 +307,7 @@ fn usize statement(ref scanner::Stream stream, ref mut state::Cursor cursor, ref
             let scanner::TokenInfo name = state::current(stream,cursor);
             if (name.kind != 3) { cursor.expected = 1; return 0; }
             state::advance(stream,cursor);
-            value.target = state::append(nodes,cursor,state::node_value(17,name.start,name.end,name_token,0,0));
+            value.target = state::append(state::node_value(17,name.start,name.end,name_token,0,0),nodes,cursor);
             if (value.target == 0 || !state::expect(stream,cursor,b"in",23)) { return 0; }
             value.expression = expression(stream,cursor,nodes,entries,statements,type_nodes,.minimum = 1,.depth = 0,.allow_record = true);
             if (value.expression == 0 || !state::expect(stream,cursor,b")",5)) { return 0; }
@@ -406,7 +407,8 @@ fn usize conditional(ref scanner::Stream stream, ref mut state::Cursor cursor, r
     let usize condition = expression(stream,cursor,nodes,entries,statements,type_nodes,1,depth + 1,true);
     if (condition == 0 || !state::expect(stream,cursor,b")",5)) { return 0; }
     let usize branch_start = state::current(stream,cursor).start;
-    let usize consequent = block(stream,cursor,nodes,entries,statements,type_nodes,cursor.block_depth,true);
+    let usize block_depth = cursor.block_depth;
+    let usize consequent = block(stream,cursor,nodes,entries,statements,type_nodes,block_depth,true);
     if (consequent == 0) { return 0; }
     var usize alternative = 0;
     if (state::take(stream,cursor,b"else")) {
@@ -417,15 +419,16 @@ fn usize conditional(ref scanner::Stream stream, ref mut state::Cursor cursor, r
             cursor.active_expressions = cursor.active_expressions - 1;
         } else {
             let usize opener = cursor.index; let usize body_start = state::current(stream,cursor).start;
-            let usize body = block(stream,cursor,nodes,entries,statements,type_nodes,cursor.block_depth,true);
+            let usize block_depth = cursor.block_depth;
+        let usize body = block(stream,cursor,nodes,entries,statements,type_nodes,block_depth,true);
             if (body == 0) { return 0; }
-            alternative = state::append(nodes,cursor,state::node_value(12,body_start,cursor.previous_end,opener,body,0));
+            alternative = state::append(state::node_value(12,body_start,cursor.previous_end,opener,body,0),nodes,cursor);
         }
         if (alternative == 0) { return 0; }
     }
-    let usize branches = state::append(nodes,cursor,state::node_value(14,branch_start,cursor.previous_end,token,consequent,alternative));
+    let usize branches = state::append(state::node_value(14,branch_start,cursor.previous_end,token,consequent,alternative),nodes,cursor);
     if (branches == 0) { return 0; }
-    return state::append(nodes,cursor,state::node_value(13,start,cursor.previous_end,token,condition,branches));
+    return state::append(state::node_value(13,start,cursor.previous_end,token,condition,branches),nodes,cursor);
 }
 
 fn usize switch_value(ref scanner::Stream stream, ref mut state::Cursor cursor, ref mut v::Vec<state::Node> nodes, ref mut v::Vec<Entry> entries, ref mut v::Vec<state::Statement> statements, ref mut v::Vec<types::Node> type_nodes, usize depth) {
@@ -440,13 +443,14 @@ fn usize switch_value(ref scanner::Stream stream, ref mut state::Cursor cursor, 
         if (!state::expect(stream,cursor,b"case",18)) { return 0; }
         let usize match = state::pattern(stream,cursor,nodes);
         if (match == 0 || !state::expect(stream,cursor,b":",17)) { return 0; }
-        let usize body = block(stream,cursor,nodes,entries,statements,type_nodes,cursor.block_depth,true);
+        let usize block_depth = cursor.block_depth;
+        let usize body = block(stream,cursor,nodes,entries,statements,type_nodes,block_depth,true);
         if (body == 0) { return 0; }
-        let usize arm = state::append(nodes,cursor,state::node_value(18,case_start,cursor.previous_end,case_token,match,body));
+        let usize arm = state::append(state::node_value(18,case_start,cursor.previous_end,case_token,match,body),nodes,cursor);
         if (arm == 0) { return 0; }
-        cases = state::append(nodes,cursor,state::node_value(19,case_start,cursor.previous_end,case_token,arm,cases));
+        cases = state::append(state::node_value(19,case_start,cursor.previous_end,case_token,arm,cases),nodes,cursor);
         if (cases == 0) { return 0; }
     }
     state::advance(stream,cursor);
-    return state::append(nodes,cursor,state::node_value(15,start,cursor.previous_end,token,subject,cases));
+    return state::append(state::node_value(15,start,cursor.previous_end,token,subject,cases),nodes,cursor);
 }

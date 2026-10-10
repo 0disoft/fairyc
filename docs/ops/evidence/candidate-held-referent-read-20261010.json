@@ -1,0 +1,5215 @@
+{
+  "schema": "fairyc.candidate-held-referent-read/v1",
+  "passed": true,
+  "scope": "Reject field, scalar dereference and borrowed-index referent reads while an earlier exclusive call argument or selected mutable view holds the same origin. Preserve descriptor copying, view length metadata, selected-store RHS reads, shared holds and later access after release.",
+  "sourceTruth": [
+    "docs/language/0002-borrows-and-return-origins.md",
+    "internal/semantic/held_referent_read.go"
+  ],
+  "identity": {
+    "candidate": {
+      "path": "examples/lexer_candidate/build/lexer-candidate.exe",
+      "sha256": "2cfee9c6db0c64078f563258e1e56e936002d70325ad8652db8f012d0c6270e5"
+    },
+    "compiler": {
+      "path": ".cache/candidate-tagged/referent-read-unit/compiler.exe",
+      "sha256": "603959e5839a11b8443be98ef89463f09faf8fb4d2e5169f38a5b2e851257192"
+    },
+    "lock": {
+      "path": "examples/lexer_candidate/fairy.lock",
+      "sha256": "5efb3586bf05b14de71bfa55c8fe9598e95becb43f8bff17800c887077283237"
+    },
+    "sources": [
+      {
+        "path": "examples/lexer_candidate/src/bodies.fy",
+        "sha256": "ea9bfd6dc1b3bce9dc407970b82d871185db33e7daadad35d348de84ab6ba294"
+      },
+      {
+        "path": "examples/lexer_candidate/src/body_state.fy",
+        "sha256": "7a9bc76c461c022dd5f3bfcc26b2022cb32b7eb65833b3912660d133c0cc7b2d"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_loan_reference.fy",
+        "sha256": "8cfe4aee4f356b168ab6d42dcc76d240845b1067c20c4a3accd03bb219669650"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_name_walk.fy",
+        "sha256": "f3c780f94c36f049bca743f0d9b8d2a22d78bae41f6f81c0ae2f0344fc02a0c7"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_origin_flow.fy",
+        "sha256": "8e6f18867b738eccb88d7fdcde7cc1098640aefaa13fbc3669b241ac5cca029a"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_origin_flow_model.fy",
+        "sha256": "059361d0884404e11fce0463d15f4a71d9688731d37ccfe3843f4a48bb3f262d"
+      },
+      {
+        "path": "examples/lexer_candidate/src/result_flow_graph.fy",
+        "sha256": "a1ff88d4b8db5b529f9e666f1f27d2982b67b8badd80ffb6cec15303e0b2a33c"
+      }
+    ],
+    "test": {
+      "path": "examples/lexer_candidate/tests/module_unit_held_reads.fy",
+      "sha256": "879c4860d7e90e94e637ef5a1edb70907e47812ec638bba2bef5ad7f8d097758"
+    }
+  },
+  "baseline": {
+    "compilerSHA256": "d20f890fe58b487988d69acf2ecde153f10fc89a95efa4100dff91b21cb4e4c7",
+    "candidateSHA256": "c24f03f8577a0a6103e9479494e54dabe64ac069bf6520b9830656bb658d866c",
+    "cases": [
+      {
+        "name": "scalar local",
+        "index": 0,
+        "go": {
+          "exit": 0,
+          "stdout": "semantics ok: main.fy (typed HIR: 5 function(s))\n",
+          "stderr": ""
+        },
+        "candidate": {
+          "exit": 0,
+          "stdout": "return origins ok\n",
+          "stderr": ""
+        },
+        "target": 3
+      },
+      {
+        "name": "scalar parameter",
+        "index": 1,
+        "go": {
+          "exit": 0,
+          "stdout": "semantics ok: main.fy (typed HIR: 5 function(s))\n",
+          "stderr": ""
+        },
+        "candidate": {
+          "exit": 0,
+          "stdout": "return origins ok\n",
+          "stderr": ""
+        },
+        "target": 3
+      },
+      {
+        "name": "shared scalar",
+        "index": 2,
+        "go": {
+          "exit": 0,
+          "stdout": "semantics ok: main.fy (typed HIR: 5 function(s))\n",
+          "stderr": ""
+        },
+        "candidate": {
+          "exit": 0,
+          "stdout": "return origins ok\n",
+          "stderr": ""
+        },
+        "target": 0
+      },
+      {
+        "name": "nested argument write",
+        "index": 3,
+        "go": {
+          "exit": 3,
+          "stdout": "",
+          "stderr": "main.fy:1:181: E2101: Access conflicts with an active shared or mutable loan. [bytes 180..182]\n  last-use: main.fy:1:182 [bytes 181..182]\n  loan: main.fy:1:178 [bytes 177..178]\n"
+        },
+        "candidate": {
+          "exit": 3,
+          "stdout": "",
+          "stderr": "main.fy:1:181: error: E2101 borrow conflicts with live loan (bytes 180..182)\n  loan: main.fy (bytes 177..178)\n  last-use: main.fy (bytes 181..182)\n"
+        },
+        "target": 3
+      },
+      {
+        "name": "nested shared write",
+        "index": 4,
+        "go": {
+          "exit": 3,
+          "stdout": "",
+          "stderr": "main.fy:1:182: E2101: Access conflicts with an active shared or mutable loan. [bytes 181..183]\n  last-use: main.fy:1:183 [bytes 182..183]\n  loan: main.fy:1:179 [bytes 178..179]\n"
+        },
+        "candidate": {
+          "exit": 3,
+          "stdout": "",
+          "stderr": "main.fy:1:182: error: E2101 borrow conflicts with live loan (bytes 181..183)\n  loan: main.fy (bytes 178..179)\n  last-use: main.fy (bytes 182..183)\n"
+        },
+        "target": 3
+      },
+      {
+        "name": "scalar ends",
+        "index": 5,
+        "go": {
+          "exit": 0,
+          "stdout": "semantics ok: main.fy (typed HIR: 5 function(s))\n",
+          "stderr": ""
+        },
+        "candidate": {
+          "exit": 0,
+          "stdout": "return origins ok\n",
+          "stderr": ""
+        },
+        "target": 0
+      },
+      {
+        "name": "store RHS read",
+        "index": 6,
+        "go": {
+          "exit": 0,
+          "stdout": "semantics ok: main.fy (typed HIR: 5 function(s))\n",
+          "stderr": ""
+        },
+        "candidate": {
+          "exit": 0,
+          "stdout": "return origins ok\n",
+          "stderr": ""
+        },
+        "target": 0
+      },
+      {
+        "name": "shared store RHS",
+        "index": 7,
+        "go": {
+          "exit": 0,
+          "stdout": "semantics ok: main.fy (typed HIR: 5 function(s))\n",
+          "stderr": ""
+        },
+        "candidate": {
+          "exit": 0,
+          "stdout": "return origins ok\n",
+          "stderr": ""
+        },
+        "target": 0
+      },
+      {
+        "name": "struct local",
+        "index": 8,
+        "go": {
+          "exit": 0,
+          "stdout": "semantics ok: main.fy (typed HIR: 4 function(s))\n",
+          "stderr": ""
+        },
+        "candidate": {
+          "exit": 0,
+          "stdout": "return origins ok\n",
+          "stderr": ""
+        },
+        "target": 3
+      },
+      {
+        "name": "struct parameter",
+        "index": 9,
+        "go": {
+          "exit": 0,
+          "stdout": "semantics ok: main.fy (typed HIR: 4 function(s))\n",
+          "stderr": ""
+        },
+        "candidate": {
+          "exit": 0,
+          "stdout": "return origins ok\n",
+          "stderr": ""
+        },
+        "target": 3
+      },
+      {
+        "name": "struct shared",
+        "index": 10,
+        "go": {
+          "exit": 0,
+          "stdout": "semantics ok: main.fy (typed HIR: 4 function(s))\n",
+          "stderr": ""
+        },
+        "candidate": {
+          "exit": 0,
+          "stdout": "return origins ok\n",
+          "stderr": ""
+        },
+        "target": 0
+      },
+      {
+        "name": "index local",
+        "index": 11,
+        "go": {
+          "exit": 0,
+          "stdout": "semantics ok: main.fy (typed HIR: 5 function(s))\n",
+          "stderr": ""
+        },
+        "candidate": {
+          "exit": 0,
+          "stdout": "return origins ok\n",
+          "stderr": ""
+        },
+        "target": 3
+      },
+      {
+        "name": "index parameter",
+        "index": 12,
+        "go": {
+          "exit": 0,
+          "stdout": "semantics ok: main.fy (typed HIR: 5 function(s))\n",
+          "stderr": ""
+        },
+        "candidate": {
+          "exit": 0,
+          "stdout": "return origins ok\n",
+          "stderr": ""
+        },
+        "target": 3
+      },
+      {
+        "name": "index shared",
+        "index": 13,
+        "go": {
+          "exit": 0,
+          "stdout": "semantics ok: main.fy (typed HIR: 5 function(s))\n",
+          "stderr": ""
+        },
+        "candidate": {
+          "exit": 0,
+          "stdout": "return origins ok\n",
+          "stderr": ""
+        },
+        "target": 0
+      },
+      {
+        "name": "len metadata",
+        "index": 14,
+        "go": {
+          "exit": 0,
+          "stdout": "semantics ok: main.fy (typed HIR: 5 function(s))\n",
+          "stderr": ""
+        },
+        "candidate": {
+          "exit": 0,
+          "stdout": "return origins ok\n",
+          "stderr": ""
+        },
+        "target": 0
+      },
+      {
+        "name": "index receiver mutation",
+        "index": 15,
+        "go": {
+          "exit": 3,
+          "stdout": "",
+          "stderr": "main.fy:1:197: E2101: Access conflicts with an active shared or mutable loan. [bytes 196..197]\n  last-use: main.fy:1:197 [bytes 196..197]\n  loan: main.fy:1:189 [bytes 188..202]\n"
+        },
+        "candidate": {
+          "exit": 3,
+          "stdout": "",
+          "stderr": "main.fy:1:197: error: E2101 borrow conflicts with live loan (bytes 196..197)\n  loan: main.fy (bytes 188..202)\n  last-use: main.fy (bytes 196..197)\n"
+        },
+        "target": 3
+      },
+      {
+        "name": "index RHS read",
+        "index": 16,
+        "go": {
+          "exit": 0,
+          "stdout": "semantics ok: main.fy (typed HIR: 5 function(s))\n",
+          "stderr": ""
+        },
+        "candidate": {
+          "exit": 0,
+          "stdout": "return origins ok\n",
+          "stderr": ""
+        },
+        "target": 0
+      },
+      {
+        "name": "parameter borrowed field",
+        "index": 17,
+        "go": {
+          "exit": 0,
+          "stdout": "semantics ok: main.fy (typed HIR: 4 function(s))\n",
+          "stderr": ""
+        },
+        "candidate": {
+          "exit": 0,
+          "stdout": "return origins ok\n",
+          "stderr": ""
+        },
+        "target": 0
+      },
+      {
+        "name": "scalar alias",
+        "index": 18,
+        "go": {
+          "exit": 0,
+          "stdout": "semantics ok: main.fy (typed HIR: 5 function(s))\n",
+          "stderr": ""
+        },
+        "candidate": {
+          "exit": 0,
+          "stdout": "return origins ok\n",
+          "stderr": ""
+        },
+        "target": 3
+      },
+      {
+        "name": "scalar groups",
+        "index": 19,
+        "go": {
+          "exit": 0,
+          "stdout": "semantics ok: main.fy (typed HIR: 5 function(s))\n",
+          "stderr": ""
+        },
+        "candidate": {
+          "exit": 0,
+          "stdout": "return origins ok\n",
+          "stderr": ""
+        },
+        "target": 3
+      },
+      {
+        "name": "field named len",
+        "index": 20,
+        "go": {
+          "exit": 0,
+          "stdout": "semantics ok: main.fy (typed HIR: 2 function(s))\n",
+          "stderr": ""
+        },
+        "candidate": {
+          "exit": 0,
+          "stdout": "return origins ok\n",
+          "stderr": ""
+        },
+        "target": 3
+      },
+      {
+        "name": "earlier scalar read",
+        "index": 21,
+        "go": {
+          "exit": 0,
+          "stdout": "semantics ok: main.fy (typed HIR: 6 function(s))\n",
+          "stderr": ""
+        },
+        "candidate": {
+          "exit": 0,
+          "stdout": "return origins ok\n",
+          "stderr": ""
+        },
+        "target": 0
+      },
+      {
+        "name": "unrelated scalar",
+        "index": 22,
+        "go": {
+          "exit": 0,
+          "stdout": "semantics ok: main.fy (typed HIR: 5 function(s))\n",
+          "stderr": ""
+        },
+        "candidate": {
+          "exit": 0,
+          "stdout": "return origins ok\n",
+          "stderr": ""
+        },
+        "target": 0
+      },
+      {
+        "name": "descriptor copy",
+        "index": 23,
+        "go": {
+          "exit": 0,
+          "stdout": "semantics ok: main.fy (typed HIR: 5 function(s))\n",
+          "stderr": ""
+        },
+        "candidate": {
+          "exit": 0,
+          "stdout": "return origins ok\n",
+          "stderr": ""
+        },
+        "target": 0
+      }
+    ]
+  },
+  "fixtures": [
+    {
+      "index": 0,
+      "name": "scalar local",
+      "source": "module main;fn void take(ref mut i32 p,i32 n){}fn void share(ref i32 p,i32 n){}fn void edit(ref mut i32 p){*p=2;}fn i32 read(ref i32 p){return *p;}fn void f(){var i32 x=1;let ref mut i32 p=ref mut x;take(p,*p);}",
+      "provider": "",
+      "expected": 3,
+      "reference": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:1:207: E2101: Access conflicts with an active shared or mutable loan. [bytes 206..208]\n  last-use: main.fy:1:208 [bytes 207..208]\n  loan: main.fy:1:205 [bytes 204..205]\n"
+      }
+    },
+    {
+      "index": 1,
+      "name": "scalar parameter",
+      "source": "module main;fn void take(ref mut i32 p,i32 n){}fn void share(ref i32 p,i32 n){}fn void edit(ref mut i32 p){*p=2;}fn i32 read(ref i32 p){return *p;}fn void f(ref mut i32 p){take(p,*p);}",
+      "provider": "",
+      "expected": 3,
+      "reference": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:1:180: E2101: Access conflicts with an active shared or mutable loan. [bytes 179..181]\n  last-use: main.fy:1:181 [bytes 180..181]\n  loan: main.fy:1:178 [bytes 177..178]\n"
+      }
+    },
+    {
+      "index": 2,
+      "name": "shared scalar",
+      "source": "module main;fn void take(ref mut i32 p,i32 n){}fn void share(ref i32 p,i32 n){}fn void edit(ref mut i32 p){*p=2;}fn i32 read(ref i32 p){return *p;}fn void f(ref mut i32 p){share(p,*p);}",
+      "provider": "",
+      "expected": 0,
+      "reference": {
+        "exit": 0,
+        "stdout": "semantics ok: main.fy (typed HIR: 5 function(s))\n",
+        "stderr": ""
+      }
+    },
+    {
+      "index": 3,
+      "name": "nested argument write",
+      "source": "module main;fn void take(ref mut i32 p,i32 n){}fn void share(ref i32 p,i32 n){}fn void edit(ref mut i32 p){*p=2;}fn i32 read(ref i32 p){return *p;}fn void f(ref mut i32 p){take(p,{*p=2;0});}",
+      "provider": "",
+      "expected": 3,
+      "reference": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:1:181: E2101: Access conflicts with an active shared or mutable loan. [bytes 180..182]\n  last-use: main.fy:1:182 [bytes 181..182]\n  loan: main.fy:1:178 [bytes 177..178]\n"
+      }
+    },
+    {
+      "index": 4,
+      "name": "nested shared write",
+      "source": "module main;fn void take(ref mut i32 p,i32 n){}fn void share(ref i32 p,i32 n){}fn void edit(ref mut i32 p){*p=2;}fn i32 read(ref i32 p){return *p;}fn void f(ref mut i32 p){share(p,{*p=2;0});}",
+      "provider": "",
+      "expected": 3,
+      "reference": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:1:182: E2101: Access conflicts with an active shared or mutable loan. [bytes 181..183]\n  last-use: main.fy:1:183 [bytes 182..183]\n  loan: main.fy:1:179 [bytes 178..179]\n"
+      }
+    },
+    {
+      "index": 5,
+      "name": "scalar ends",
+      "source": "module main;fn void take(ref mut i32 p,i32 n){}fn void share(ref i32 p,i32 n){}fn void edit(ref mut i32 p){*p=2;}fn i32 read(ref i32 p){return *p;}fn void f(ref mut i32 p){take(p,0);discard *p;}",
+      "provider": "",
+      "expected": 0,
+      "reference": {
+        "exit": 0,
+        "stdout": "semantics ok: main.fy (typed HIR: 5 function(s))\n",
+        "stderr": ""
+      }
+    },
+    {
+      "index": 6,
+      "name": "store RHS read",
+      "source": "module main;fn void take(ref mut i32 p,i32 n){}fn void share(ref i32 p,i32 n){}fn void edit(ref mut i32 p){*p=2;}fn i32 read(ref i32 p){return *p;}fn void f(ref mut i32 p){*p=*p+1;}",
+      "provider": "",
+      "expected": 0,
+      "reference": {
+        "exit": 0,
+        "stdout": "semantics ok: main.fy (typed HIR: 5 function(s))\n",
+        "stderr": ""
+      }
+    },
+    {
+      "index": 7,
+      "name": "shared store RHS",
+      "source": "module main;fn void take(ref mut i32 p,i32 n){}fn void share(ref i32 p,i32 n){}fn void edit(ref mut i32 p){*p=2;}fn i32 read(ref i32 p){return *p;}fn void f(ref mut i32 p){*p=read(p);}",
+      "provider": "",
+      "expected": 0,
+      "reference": {
+        "exit": 0,
+        "stdout": "semantics ok: main.fy (typed HIR: 5 function(s))\n",
+        "stderr": ""
+      }
+    },
+    {
+      "index": 8,
+      "name": "struct local",
+      "source": "module main;struct S{i32 x;}fn void take(ref mut S p,i32 n){}fn void share(ref S p,i32 n){}fn void edit(ref mut S p){p.x=2;}fn void f(){var S x=S{.x=1};let ref mut S p=ref mut x;take(p,p.x);}",
+      "provider": "",
+      "expected": 3,
+      "reference": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:1:186: E2101: Access conflicts with an active shared or mutable loan. [bytes 185..188]\n  last-use: main.fy:1:186 [bytes 185..186]\n  loan: main.fy:1:184 [bytes 183..184]\n"
+      }
+    },
+    {
+      "index": 9,
+      "name": "struct parameter",
+      "source": "module main;struct S{i32 x;}fn void take(ref mut S p,i32 n){}fn void share(ref S p,i32 n){}fn void edit(ref mut S p){p.x=2;}fn void f(ref mut S p){take(p,p.x);}",
+      "provider": "",
+      "expected": 3,
+      "reference": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:1:155: E2101: Access conflicts with an active shared or mutable loan. [bytes 154..157]\n  last-use: main.fy:1:155 [bytes 154..155]\n  loan: main.fy:1:153 [bytes 152..153]\n"
+      }
+    },
+    {
+      "index": 10,
+      "name": "struct shared",
+      "source": "module main;struct S{i32 x;}fn void take(ref mut S p,i32 n){}fn void share(ref S p,i32 n){}fn void edit(ref mut S p){p.x=2;}fn void f(ref mut S p){share(p,p.x);}",
+      "provider": "",
+      "expected": 0,
+      "reference": {
+        "exit": 0,
+        "stdout": "semantics ok: main.fy (typed HIR: 4 function(s))\n",
+        "stderr": ""
+      }
+    },
+    {
+      "index": 11,
+      "name": "index local",
+      "source": "module main;fn void take(ref mut u8[] p,u8 n){}fn void share(ref u8[] p,u8 n){}fn void edit(ref mut u8[] p){p[0]=2;}fn void size(ref mut u8[] p,usize n){}fn void f(){var u8[2] x=[1,2];let ref mut u8[] p=ref mut x;take(p,p[0]);}",
+      "provider": "",
+      "expected": 3,
+      "reference": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:1:221: E2101: Access conflicts with an active shared or mutable loan. [bytes 220..224]\n  last-use: main.fy:1:221 [bytes 220..221]\n  loan: main.fy:1:219 [bytes 218..219]\n"
+      }
+    },
+    {
+      "index": 12,
+      "name": "index parameter",
+      "source": "module main;fn void take(ref mut u8[] p,u8 n){}fn void share(ref u8[] p,u8 n){}fn void edit(ref mut u8[] p){p[0]=2;}fn void size(ref mut u8[] p,usize n){}fn void f(ref mut u8[] p){take(p,p[0]);}",
+      "provider": "",
+      "expected": 3,
+      "reference": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:1:188: E2101: Access conflicts with an active shared or mutable loan. [bytes 187..191]\n  last-use: main.fy:1:188 [bytes 187..188]\n  loan: main.fy:1:186 [bytes 185..186]\n"
+      }
+    },
+    {
+      "index": 13,
+      "name": "index shared",
+      "source": "module main;fn void take(ref mut u8[] p,u8 n){}fn void share(ref u8[] p,u8 n){}fn void edit(ref mut u8[] p){p[0]=2;}fn void size(ref mut u8[] p,usize n){}fn void f(ref mut u8[] p){share(p,p[0]);}",
+      "provider": "",
+      "expected": 0,
+      "reference": {
+        "exit": 0,
+        "stdout": "semantics ok: main.fy (typed HIR: 5 function(s))\n",
+        "stderr": ""
+      }
+    },
+    {
+      "index": 14,
+      "name": "len metadata",
+      "source": "module main;fn void take(ref mut u8[] p,u8 n){}fn void share(ref u8[] p,u8 n){}fn void edit(ref mut u8[] p){p[0]=2;}fn void size(ref mut u8[] p,usize n){}fn void f(ref mut u8[] p){size(p,p.len);}",
+      "provider": "",
+      "expected": 0,
+      "reference": {
+        "exit": 0,
+        "stdout": "semantics ok: main.fy (typed HIR: 5 function(s))\n",
+        "stderr": ""
+      }
+    },
+    {
+      "index": 15,
+      "name": "index receiver mutation",
+      "source": "module main;fn void take(ref mut u8[] p,u8 n){}fn void share(ref u8[] p,u8 n){}fn void edit(ref mut u8[] p){p[0]=2;}fn void size(ref mut u8[] p,usize n){}fn void f(ref mut u8[] p){discard p[{edit(p);0}];}",
+      "provider": "",
+      "expected": 3,
+      "reference": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:1:197: E2101: Access conflicts with an active shared or mutable loan. [bytes 196..197]\n  last-use: main.fy:1:197 [bytes 196..197]\n  loan: main.fy:1:189 [bytes 188..202]\n"
+      }
+    },
+    {
+      "index": 16,
+      "name": "index RHS read",
+      "source": "module main;fn void take(ref mut u8[] p,u8 n){}fn void share(ref u8[] p,u8 n){}fn void edit(ref mut u8[] p){p[0]=2;}fn void size(ref mut u8[] p,usize n){}fn void f(ref mut u8[] p){p[0]=p[1];}",
+      "provider": "",
+      "expected": 0,
+      "reference": {
+        "exit": 0,
+        "stdout": "semantics ok: main.fy (typed HIR: 5 function(s))\n",
+        "stderr": ""
+      }
+    },
+    {
+      "index": 17,
+      "name": "parameter borrowed field",
+      "source": "module main;struct S{i32 x;}fn void take(ref mut S p,i32 n){}fn void share(ref S p,i32 n){}fn void edit(ref mut S p){p.x=2;}fn void f(ref mut S p){let ref i32 q=ref p.x;discard p.x;discard *q;}",
+      "provider": "",
+      "expected": 0,
+      "reference": {
+        "exit": 0,
+        "stdout": "semantics ok: main.fy (typed HIR: 4 function(s))\n",
+        "stderr": ""
+      }
+    },
+    {
+      "index": 18,
+      "name": "scalar alias",
+      "source": "module main;fn void take(ref mut i32 p,i32 n){}fn void share(ref i32 p,i32 n){}fn void edit(ref mut i32 p){*p=2;}fn i32 read(ref i32 p){return *p;}fn void f(ref mut i32 p){let ref mut i32 q=p;take(p,*q);}",
+      "provider": "",
+      "expected": 3,
+      "reference": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:1:200: E2101: Access conflicts with an active shared or mutable loan. [bytes 199..201]\n  last-use: main.fy:1:201 [bytes 200..201]\n  loan: main.fy:1:198 [bytes 197..198]\n"
+      }
+    },
+    {
+      "index": 19,
+      "name": "scalar groups",
+      "source": "module main;fn void take(ref mut i32 p,i32 n){}fn void share(ref i32 p,i32 n){}fn void edit(ref mut i32 p){*p=2;}fn i32 read(ref i32 p){return *p;}fn void f(ref mut i32 p){take((p),*((p)));}",
+      "provider": "",
+      "expected": 3,
+      "reference": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:1:182: E2101: Access conflicts with an active shared or mutable loan. [bytes 181..187]\n  last-use: main.fy:1:183 [bytes 182..187]\n  loan: main.fy:1:178 [bytes 177..180]\n"
+      }
+    },
+    {
+      "index": 20,
+      "name": "field named len",
+      "source": "module main;struct S{usize len;}fn void take(ref mut S p,usize n){}fn void f(ref mut S p){take(p,p.len);}",
+      "provider": "",
+      "expected": 3,
+      "reference": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:1:98: E2101: Access conflicts with an active shared or mutable loan. [bytes 97..102]\n  last-use: main.fy:1:98 [bytes 97..98]\n  loan: main.fy:1:96 [bytes 95..96]\n"
+      }
+    },
+    {
+      "index": 21,
+      "name": "earlier scalar read",
+      "source": "module main;fn void take(ref mut i32 p,i32 n){}fn void share(ref i32 p,i32 n){}fn void edit(ref mut i32 p){*p=2;}fn i32 read(ref i32 p){return *p;}fn void reversed(i32 n,ref mut i32 p){}fn void f(ref mut i32 p){reversed(*p,p);}",
+      "provider": "",
+      "expected": 0,
+      "reference": {
+        "exit": 0,
+        "stdout": "semantics ok: main.fy (typed HIR: 6 function(s))\n",
+        "stderr": ""
+      }
+    },
+    {
+      "index": 22,
+      "name": "unrelated scalar",
+      "source": "module main;fn void take(ref mut i32 p,i32 n){}fn void share(ref i32 p,i32 n){}fn void edit(ref mut i32 p){*p=2;}fn i32 read(ref i32 p){return *p;}fn void f(ref mut i32 p,ref i32 q){take(p,*q);}",
+      "provider": "",
+      "expected": 0,
+      "reference": {
+        "exit": 0,
+        "stdout": "semantics ok: main.fy (typed HIR: 5 function(s))\n",
+        "stderr": ""
+      }
+    },
+    {
+      "index": 23,
+      "name": "descriptor copy",
+      "source": "module main;fn void take(ref mut i32 p,i32 n){}fn void share(ref i32 p,i32 n){}fn void edit(ref mut i32 p){*p=2;}fn i32 read(ref i32 p){return *p;}fn void f(ref mut i32 p){take(p,{let ref mut i32 q=p;0});}",
+      "provider": "",
+      "expected": 0,
+      "reference": {
+        "exit": 0,
+        "stdout": "semantics ok: main.fy (typed HIR: 5 function(s))\n",
+        "stderr": ""
+      }
+    },
+    {
+      "index": 24,
+      "name": "branch referent read",
+      "source": "module main;fn void take(ref mut i32 p,i32 n){}fn void share(ref i32 p,i32 n){}fn void edit(ref mut i32 p){*p=2;}fn i32 read(ref i32 p){return *p;}fn void f(ref mut i32 p,bool c){take(p,if(c){*p}else{0});}",
+      "provider": "",
+      "expected": 3,
+      "reference": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:1:193: E2101: Access conflicts with an active shared or mutable loan. [bytes 192..194]\n  last-use: main.fy:1:194 [bytes 193..194]\n  loan: main.fy:1:185 [bytes 184..185]\n"
+      }
+    },
+    {
+      "index": 25,
+      "name": "loop referent read",
+      "source": "module main;fn void take(ref mut i32 p,i32 n){}fn void share(ref i32 p,i32 n){}fn void edit(ref mut i32 p){*p=2;}fn i32 read(ref i32 p){return *p;}fn void f(ref mut i32 p,bool c){take(p,{while(c){discard *p;break;}0});}",
+      "provider": "",
+      "expected": 3,
+      "reference": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:1:205: E2101: Access conflicts with an active shared or mutable loan. [bytes 204..206]\n  last-use: main.fy:1:206 [bytes 205..206]\n  loan: main.fy:1:185 [bytes 184..185]\n"
+      }
+    },
+    {
+      "index": 26,
+      "name": "returned alias",
+      "source": "module main;fn void take(ref mut i32 p,i32 n){}fn void share(ref i32 p,i32 n){}fn void edit(ref mut i32 p){*p=2;}fn i32 read(ref i32 p){return *p;}fn ref mut i32 id(ref mut i32 p){return p;}fn void f(ref mut i32 q){let ref mut i32 p=id(q);take(p,*q);}",
+      "provider": "",
+      "expected": 3,
+      "reference": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:1:247: E2101: Access conflicts with an active shared or mutable loan. [bytes 246..248]\n  last-use: main.fy:1:248 [bytes 247..248]\n  loan: main.fy:1:245 [bytes 244..245]\n"
+      }
+    },
+    {
+      "index": 27,
+      "name": "generic provider exclusive",
+      "source": "module main;import provider as pr;fn void f(ref mut i32 p){pr::take<i32>(p,*p);}",
+      "provider": "module provider;pub fn void take<T>(ref mut T p,i32 n){}",
+      "expected": 3,
+      "reference": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:1:76: E2101: Access conflicts with an active shared or mutable loan. [bytes 75..77]\n  last-use: main.fy:1:77 [bytes 76..77]\n  loan: main.fy:1:74 [bytes 73..74]\n"
+      }
+    },
+    {
+      "index": 28,
+      "name": "generic provider shared",
+      "source": "module main;import provider as pr;fn void f(ref mut i32 p){pr::take<i32>(p,*p);}",
+      "provider": "module provider;pub fn void take<T>(ref T p,i32 n){}",
+      "expected": 0,
+      "reference": {
+        "exit": 0,
+        "stdout": "semantics ok: 2 file(s), 2 module(s) (typed HIR: 2 function(s))\n",
+        "stderr": ""
+      }
+    },
+    {
+      "index": 29,
+      "name": "mutable view bound read",
+      "source": "module main;fn void take(ref mut u8[] p,u8 n){}fn void share(ref u8[] p,u8 n){}fn void edit(ref mut u8[] p){p[0]=2;}fn void size(ref mut u8[] p,usize n){}fn void f(ref mut u8[] p){let ref mut u8[] child=p[..{discard p[0];1}];discard child[0];}",
+      "provider": "",
+      "expected": 3,
+      "reference": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:1:217: E2101: Access conflicts with an active shared or mutable loan. [bytes 216..220]\n  last-use: main.fy:1:217 [bytes 216..217]\n  loan: main.fy:1:204 [bytes 203..224]\n"
+      }
+    },
+    {
+      "index": 30,
+      "name": "mutable view bound metadata",
+      "source": "module main;fn void take(ref mut u8[] p,u8 n){}fn void share(ref u8[] p,u8 n){}fn void edit(ref mut u8[] p){p[0]=2;}fn void size(ref mut u8[] p,usize n){}fn void f(ref mut u8[] p){let ref mut u8[] child=p[..p.len];discard child[0];}",
+      "provider": "",
+      "expected": 0,
+      "reference": {
+        "exit": 0,
+        "stdout": "semantics ok: main.fy (typed HIR: 5 function(s))\n",
+        "stderr": ""
+      }
+    },
+    {
+      "index": 31,
+      "name": "selected index read",
+      "source": "module main;fn void take(ref mut u8[] p,u8 n){}fn void share(ref u8[] p,u8 n){}fn void edit(ref mut u8[] p){p[0]=2;}fn void size(ref mut u8[] p,usize n){}fn void f(ref mut u8[] p){p[p[1] as usize]=2;}",
+      "provider": "",
+      "expected": 0,
+      "reference": {
+        "exit": 0,
+        "stdout": "semantics ok: main.fy (typed HIR: 5 function(s))\n",
+        "stderr": ""
+      }
+    }
+  ],
+  "cli": {
+    "passed": true,
+    "matched": 32,
+    "count": 32,
+    "candidateSHA256": "2cfee9c6db0c64078f563258e1e56e936002d70325ad8652db8f012d0c6270e5",
+    "cases": [
+      {
+        "index": 0,
+        "name": "scalar local",
+        "exit": 3,
+        "matched": true,
+        "reference": [
+          {
+            "file": "main.fy",
+            "code": 2101,
+            "start": 206,
+            "end": 208,
+            "related": [
+              {
+                "role": "last-use",
+                "file": "main.fy",
+                "start": 207,
+                "end": 208
+              },
+              {
+                "role": "loan",
+                "file": "main.fy",
+                "start": 204,
+                "end": 205
+              }
+            ]
+          }
+        ],
+        "diagnostics": [
+          {
+            "file": "main.fy",
+            "code": 2101,
+            "start": 206,
+            "end": 208,
+            "related": [
+              {
+                "role": "last-use",
+                "file": "main.fy",
+                "start": 207,
+                "end": 208
+              },
+              {
+                "role": "loan",
+                "file": "main.fy",
+                "start": 204,
+                "end": 205
+              }
+            ]
+          }
+        ],
+        "stdout": "",
+        "stderr": "main.fy:1:207: error: E2101 borrow conflicts with live loan (bytes 206..208)\n  loan: main.fy (bytes 204..205)\n  last-use: main.fy (bytes 207..208)\n"
+      },
+      {
+        "index": 1,
+        "name": "scalar parameter",
+        "exit": 3,
+        "matched": true,
+        "reference": [
+          {
+            "file": "main.fy",
+            "code": 2101,
+            "start": 179,
+            "end": 181,
+            "related": [
+              {
+                "role": "last-use",
+                "file": "main.fy",
+                "start": 180,
+                "end": 181
+              },
+              {
+                "role": "loan",
+                "file": "main.fy",
+                "start": 177,
+                "end": 178
+              }
+            ]
+          }
+        ],
+        "diagnostics": [
+          {
+            "file": "main.fy",
+            "code": 2101,
+            "start": 179,
+            "end": 181,
+            "related": [
+              {
+                "role": "last-use",
+                "file": "main.fy",
+                "start": 180,
+                "end": 181
+              },
+              {
+                "role": "loan",
+                "file": "main.fy",
+                "start": 177,
+                "end": 178
+              }
+            ]
+          }
+        ],
+        "stdout": "",
+        "stderr": "main.fy:1:180: error: E2101 borrow conflicts with live loan (bytes 179..181)\n  loan: main.fy (bytes 177..178)\n  last-use: main.fy (bytes 180..181)\n"
+      },
+      {
+        "index": 2,
+        "name": "shared scalar",
+        "exit": 0,
+        "matched": true,
+        "reference": [],
+        "diagnostics": [],
+        "stdout": "return origins ok\n",
+        "stderr": ""
+      },
+      {
+        "index": 3,
+        "name": "nested argument write",
+        "exit": 3,
+        "matched": true,
+        "reference": [
+          {
+            "file": "main.fy",
+            "code": 2101,
+            "start": 180,
+            "end": 182,
+            "related": [
+              {
+                "role": "last-use",
+                "file": "main.fy",
+                "start": 181,
+                "end": 182
+              },
+              {
+                "role": "loan",
+                "file": "main.fy",
+                "start": 177,
+                "end": 178
+              }
+            ]
+          }
+        ],
+        "diagnostics": [
+          {
+            "file": "main.fy",
+            "code": 2101,
+            "start": 180,
+            "end": 182,
+            "related": [
+              {
+                "role": "last-use",
+                "file": "main.fy",
+                "start": 181,
+                "end": 182
+              },
+              {
+                "role": "loan",
+                "file": "main.fy",
+                "start": 177,
+                "end": 178
+              }
+            ]
+          }
+        ],
+        "stdout": "",
+        "stderr": "main.fy:1:181: error: E2101 borrow conflicts with live loan (bytes 180..182)\n  loan: main.fy (bytes 177..178)\n  last-use: main.fy (bytes 181..182)\n"
+      },
+      {
+        "index": 4,
+        "name": "nested shared write",
+        "exit": 3,
+        "matched": true,
+        "reference": [
+          {
+            "file": "main.fy",
+            "code": 2101,
+            "start": 181,
+            "end": 183,
+            "related": [
+              {
+                "role": "last-use",
+                "file": "main.fy",
+                "start": 182,
+                "end": 183
+              },
+              {
+                "role": "loan",
+                "file": "main.fy",
+                "start": 178,
+                "end": 179
+              }
+            ]
+          }
+        ],
+        "diagnostics": [
+          {
+            "file": "main.fy",
+            "code": 2101,
+            "start": 181,
+            "end": 183,
+            "related": [
+              {
+                "role": "last-use",
+                "file": "main.fy",
+                "start": 182,
+                "end": 183
+              },
+              {
+                "role": "loan",
+                "file": "main.fy",
+                "start": 178,
+                "end": 179
+              }
+            ]
+          }
+        ],
+        "stdout": "",
+        "stderr": "main.fy:1:182: error: E2101 borrow conflicts with live loan (bytes 181..183)\n  loan: main.fy (bytes 178..179)\n  last-use: main.fy (bytes 182..183)\n"
+      },
+      {
+        "index": 5,
+        "name": "scalar ends",
+        "exit": 0,
+        "matched": true,
+        "reference": [],
+        "diagnostics": [],
+        "stdout": "return origins ok\n",
+        "stderr": ""
+      },
+      {
+        "index": 6,
+        "name": "store RHS read",
+        "exit": 0,
+        "matched": true,
+        "reference": [],
+        "diagnostics": [],
+        "stdout": "return origins ok\n",
+        "stderr": ""
+      },
+      {
+        "index": 7,
+        "name": "shared store RHS",
+        "exit": 0,
+        "matched": true,
+        "reference": [],
+        "diagnostics": [],
+        "stdout": "return origins ok\n",
+        "stderr": ""
+      },
+      {
+        "index": 8,
+        "name": "struct local",
+        "exit": 3,
+        "matched": true,
+        "reference": [
+          {
+            "file": "main.fy",
+            "code": 2101,
+            "start": 185,
+            "end": 188,
+            "related": [
+              {
+                "role": "last-use",
+                "file": "main.fy",
+                "start": 185,
+                "end": 186
+              },
+              {
+                "role": "loan",
+                "file": "main.fy",
+                "start": 183,
+                "end": 184
+              }
+            ]
+          }
+        ],
+        "diagnostics": [
+          {
+            "file": "main.fy",
+            "code": 2101,
+            "start": 185,
+            "end": 188,
+            "related": [
+              {
+                "role": "last-use",
+                "file": "main.fy",
+                "start": 185,
+                "end": 186
+              },
+              {
+                "role": "loan",
+                "file": "main.fy",
+                "start": 183,
+                "end": 184
+              }
+            ]
+          }
+        ],
+        "stdout": "",
+        "stderr": "main.fy:1:186: error: E2101 borrow conflicts with live loan (bytes 185..188)\n  loan: main.fy (bytes 183..184)\n  last-use: main.fy (bytes 185..186)\n"
+      },
+      {
+        "index": 9,
+        "name": "struct parameter",
+        "exit": 3,
+        "matched": true,
+        "reference": [
+          {
+            "file": "main.fy",
+            "code": 2101,
+            "start": 154,
+            "end": 157,
+            "related": [
+              {
+                "role": "last-use",
+                "file": "main.fy",
+                "start": 154,
+                "end": 155
+              },
+              {
+                "role": "loan",
+                "file": "main.fy",
+                "start": 152,
+                "end": 153
+              }
+            ]
+          }
+        ],
+        "diagnostics": [
+          {
+            "file": "main.fy",
+            "code": 2101,
+            "start": 154,
+            "end": 157,
+            "related": [
+              {
+                "role": "last-use",
+                "file": "main.fy",
+                "start": 154,
+                "end": 155
+              },
+              {
+                "role": "loan",
+                "file": "main.fy",
+                "start": 152,
+                "end": 153
+              }
+            ]
+          }
+        ],
+        "stdout": "",
+        "stderr": "main.fy:1:155: error: E2101 borrow conflicts with live loan (bytes 154..157)\n  loan: main.fy (bytes 152..153)\n  last-use: main.fy (bytes 154..155)\n"
+      },
+      {
+        "index": 10,
+        "name": "struct shared",
+        "exit": 0,
+        "matched": true,
+        "reference": [],
+        "diagnostics": [],
+        "stdout": "return origins ok\n",
+        "stderr": ""
+      },
+      {
+        "index": 11,
+        "name": "index local",
+        "exit": 3,
+        "matched": true,
+        "reference": [
+          {
+            "file": "main.fy",
+            "code": 2101,
+            "start": 220,
+            "end": 224,
+            "related": [
+              {
+                "role": "last-use",
+                "file": "main.fy",
+                "start": 220,
+                "end": 221
+              },
+              {
+                "role": "loan",
+                "file": "main.fy",
+                "start": 218,
+                "end": 219
+              }
+            ]
+          }
+        ],
+        "diagnostics": [
+          {
+            "file": "main.fy",
+            "code": 2101,
+            "start": 220,
+            "end": 224,
+            "related": [
+              {
+                "role": "last-use",
+                "file": "main.fy",
+                "start": 220,
+                "end": 221
+              },
+              {
+                "role": "loan",
+                "file": "main.fy",
+                "start": 218,
+                "end": 219
+              }
+            ]
+          }
+        ],
+        "stdout": "",
+        "stderr": "main.fy:1:221: error: E2101 borrow conflicts with live loan (bytes 220..224)\n  loan: main.fy (bytes 218..219)\n  last-use: main.fy (bytes 220..221)\n"
+      },
+      {
+        "index": 12,
+        "name": "index parameter",
+        "exit": 3,
+        "matched": true,
+        "reference": [
+          {
+            "file": "main.fy",
+            "code": 2101,
+            "start": 187,
+            "end": 191,
+            "related": [
+              {
+                "role": "last-use",
+                "file": "main.fy",
+                "start": 187,
+                "end": 188
+              },
+              {
+                "role": "loan",
+                "file": "main.fy",
+                "start": 185,
+                "end": 186
+              }
+            ]
+          }
+        ],
+        "diagnostics": [
+          {
+            "file": "main.fy",
+            "code": 2101,
+            "start": 187,
+            "end": 191,
+            "related": [
+              {
+                "role": "last-use",
+                "file": "main.fy",
+                "start": 187,
+                "end": 188
+              },
+              {
+                "role": "loan",
+                "file": "main.fy",
+                "start": 185,
+                "end": 186
+              }
+            ]
+          }
+        ],
+        "stdout": "",
+        "stderr": "main.fy:1:188: error: E2101 borrow conflicts with live loan (bytes 187..191)\n  loan: main.fy (bytes 185..186)\n  last-use: main.fy (bytes 187..188)\n"
+      },
+      {
+        "index": 13,
+        "name": "index shared",
+        "exit": 0,
+        "matched": true,
+        "reference": [],
+        "diagnostics": [],
+        "stdout": "return origins ok\n",
+        "stderr": ""
+      },
+      {
+        "index": 14,
+        "name": "len metadata",
+        "exit": 0,
+        "matched": true,
+        "reference": [],
+        "diagnostics": [],
+        "stdout": "return origins ok\n",
+        "stderr": ""
+      },
+      {
+        "index": 15,
+        "name": "index receiver mutation",
+        "exit": 3,
+        "matched": true,
+        "reference": [
+          {
+            "file": "main.fy",
+            "code": 2101,
+            "start": 196,
+            "end": 197,
+            "related": [
+              {
+                "role": "last-use",
+                "file": "main.fy",
+                "start": 196,
+                "end": 197
+              },
+              {
+                "role": "loan",
+                "file": "main.fy",
+                "start": 188,
+                "end": 202
+              }
+            ]
+          }
+        ],
+        "diagnostics": [
+          {
+            "file": "main.fy",
+            "code": 2101,
+            "start": 196,
+            "end": 197,
+            "related": [
+              {
+                "role": "last-use",
+                "file": "main.fy",
+                "start": 196,
+                "end": 197
+              },
+              {
+                "role": "loan",
+                "file": "main.fy",
+                "start": 188,
+                "end": 202
+              }
+            ]
+          }
+        ],
+        "stdout": "",
+        "stderr": "main.fy:1:197: error: E2101 borrow conflicts with live loan (bytes 196..197)\n  loan: main.fy (bytes 188..202)\n  last-use: main.fy (bytes 196..197)\n"
+      },
+      {
+        "index": 16,
+        "name": "index RHS read",
+        "exit": 0,
+        "matched": true,
+        "reference": [],
+        "diagnostics": [],
+        "stdout": "return origins ok\n",
+        "stderr": ""
+      },
+      {
+        "index": 17,
+        "name": "parameter borrowed field",
+        "exit": 0,
+        "matched": true,
+        "reference": [],
+        "diagnostics": [],
+        "stdout": "return origins ok\n",
+        "stderr": ""
+      },
+      {
+        "index": 18,
+        "name": "scalar alias",
+        "exit": 3,
+        "matched": true,
+        "reference": [
+          {
+            "file": "main.fy",
+            "code": 2101,
+            "start": 199,
+            "end": 201,
+            "related": [
+              {
+                "role": "last-use",
+                "file": "main.fy",
+                "start": 200,
+                "end": 201
+              },
+              {
+                "role": "loan",
+                "file": "main.fy",
+                "start": 197,
+                "end": 198
+              }
+            ]
+          }
+        ],
+        "diagnostics": [
+          {
+            "file": "main.fy",
+            "code": 2101,
+            "start": 199,
+            "end": 201,
+            "related": [
+              {
+                "role": "last-use",
+                "file": "main.fy",
+                "start": 200,
+                "end": 201
+              },
+              {
+                "role": "loan",
+                "file": "main.fy",
+                "start": 197,
+                "end": 198
+              }
+            ]
+          }
+        ],
+        "stdout": "",
+        "stderr": "main.fy:1:200: error: E2101 borrow conflicts with live loan (bytes 199..201)\n  loan: main.fy (bytes 197..198)\n  last-use: main.fy (bytes 200..201)\n"
+      },
+      {
+        "index": 19,
+        "name": "scalar groups",
+        "exit": 3,
+        "matched": true,
+        "reference": [
+          {
+            "file": "main.fy",
+            "code": 2101,
+            "start": 181,
+            "end": 187,
+            "related": [
+              {
+                "role": "last-use",
+                "file": "main.fy",
+                "start": 182,
+                "end": 187
+              },
+              {
+                "role": "loan",
+                "file": "main.fy",
+                "start": 177,
+                "end": 180
+              }
+            ]
+          }
+        ],
+        "diagnostics": [
+          {
+            "file": "main.fy",
+            "code": 2101,
+            "start": 181,
+            "end": 187,
+            "related": [
+              {
+                "role": "last-use",
+                "file": "main.fy",
+                "start": 182,
+                "end": 187
+              },
+              {
+                "role": "loan",
+                "file": "main.fy",
+                "start": 177,
+                "end": 180
+              }
+            ]
+          }
+        ],
+        "stdout": "",
+        "stderr": "main.fy:1:182: error: E2101 borrow conflicts with live loan (bytes 181..187)\n  loan: main.fy (bytes 177..180)\n  last-use: main.fy (bytes 182..187)\n"
+      },
+      {
+        "index": 20,
+        "name": "field named len",
+        "exit": 3,
+        "matched": true,
+        "reference": [
+          {
+            "file": "main.fy",
+            "code": 2101,
+            "start": 97,
+            "end": 102,
+            "related": [
+              {
+                "role": "last-use",
+                "file": "main.fy",
+                "start": 97,
+                "end": 98
+              },
+              {
+                "role": "loan",
+                "file": "main.fy",
+                "start": 95,
+                "end": 96
+              }
+            ]
+          }
+        ],
+        "diagnostics": [
+          {
+            "file": "main.fy",
+            "code": 2101,
+            "start": 97,
+            "end": 102,
+            "related": [
+              {
+                "role": "last-use",
+                "file": "main.fy",
+                "start": 97,
+                "end": 98
+              },
+              {
+                "role": "loan",
+                "file": "main.fy",
+                "start": 95,
+                "end": 96
+              }
+            ]
+          }
+        ],
+        "stdout": "",
+        "stderr": "main.fy:1:98: error: E2101 borrow conflicts with live loan (bytes 97..102)\n  loan: main.fy (bytes 95..96)\n  last-use: main.fy (bytes 97..98)\n"
+      },
+      {
+        "index": 21,
+        "name": "earlier scalar read",
+        "exit": 0,
+        "matched": true,
+        "reference": [],
+        "diagnostics": [],
+        "stdout": "return origins ok\n",
+        "stderr": ""
+      },
+      {
+        "index": 22,
+        "name": "unrelated scalar",
+        "exit": 0,
+        "matched": true,
+        "reference": [],
+        "diagnostics": [],
+        "stdout": "return origins ok\n",
+        "stderr": ""
+      },
+      {
+        "index": 23,
+        "name": "descriptor copy",
+        "exit": 0,
+        "matched": true,
+        "reference": [],
+        "diagnostics": [],
+        "stdout": "return origins ok\n",
+        "stderr": ""
+      },
+      {
+        "index": 24,
+        "name": "branch referent read",
+        "exit": 3,
+        "matched": true,
+        "reference": [
+          {
+            "file": "main.fy",
+            "code": 2101,
+            "start": 192,
+            "end": 194,
+            "related": [
+              {
+                "role": "last-use",
+                "file": "main.fy",
+                "start": 193,
+                "end": 194
+              },
+              {
+                "role": "loan",
+                "file": "main.fy",
+                "start": 184,
+                "end": 185
+              }
+            ]
+          }
+        ],
+        "diagnostics": [
+          {
+            "file": "main.fy",
+            "code": 2101,
+            "start": 192,
+            "end": 194,
+            "related": [
+              {
+                "role": "last-use",
+                "file": "main.fy",
+                "start": 193,
+                "end": 194
+              },
+              {
+                "role": "loan",
+                "file": "main.fy",
+                "start": 184,
+                "end": 185
+              }
+            ]
+          }
+        ],
+        "stdout": "",
+        "stderr": "main.fy:1:193: error: E2101 borrow conflicts with live loan (bytes 192..194)\n  loan: main.fy (bytes 184..185)\n  last-use: main.fy (bytes 193..194)\n"
+      },
+      {
+        "index": 25,
+        "name": "loop referent read",
+        "exit": 3,
+        "matched": true,
+        "reference": [
+          {
+            "file": "main.fy",
+            "code": 2101,
+            "start": 204,
+            "end": 206,
+            "related": [
+              {
+                "role": "last-use",
+                "file": "main.fy",
+                "start": 205,
+                "end": 206
+              },
+              {
+                "role": "loan",
+                "file": "main.fy",
+                "start": 184,
+                "end": 185
+              }
+            ]
+          }
+        ],
+        "diagnostics": [
+          {
+            "file": "main.fy",
+            "code": 2101,
+            "start": 204,
+            "end": 206,
+            "related": [
+              {
+                "role": "last-use",
+                "file": "main.fy",
+                "start": 205,
+                "end": 206
+              },
+              {
+                "role": "loan",
+                "file": "main.fy",
+                "start": 184,
+                "end": 185
+              }
+            ]
+          }
+        ],
+        "stdout": "",
+        "stderr": "main.fy:1:205: error: E2101 borrow conflicts with live loan (bytes 204..206)\n  loan: main.fy (bytes 184..185)\n  last-use: main.fy (bytes 205..206)\n"
+      },
+      {
+        "index": 26,
+        "name": "returned alias",
+        "exit": 3,
+        "matched": true,
+        "reference": [
+          {
+            "file": "main.fy",
+            "code": 2101,
+            "start": 246,
+            "end": 248,
+            "related": [
+              {
+                "role": "last-use",
+                "file": "main.fy",
+                "start": 247,
+                "end": 248
+              },
+              {
+                "role": "loan",
+                "file": "main.fy",
+                "start": 244,
+                "end": 245
+              }
+            ]
+          }
+        ],
+        "diagnostics": [
+          {
+            "file": "main.fy",
+            "code": 2101,
+            "start": 246,
+            "end": 248,
+            "related": [
+              {
+                "role": "last-use",
+                "file": "main.fy",
+                "start": 247,
+                "end": 248
+              },
+              {
+                "role": "loan",
+                "file": "main.fy",
+                "start": 244,
+                "end": 245
+              }
+            ]
+          }
+        ],
+        "stdout": "",
+        "stderr": "main.fy:1:247: error: E2101 borrow conflicts with live loan (bytes 246..248)\n  loan: main.fy (bytes 244..245)\n  last-use: main.fy (bytes 247..248)\n"
+      },
+      {
+        "index": 27,
+        "name": "generic provider exclusive",
+        "exit": 3,
+        "matched": true,
+        "reference": [
+          {
+            "file": "main.fy",
+            "code": 2101,
+            "start": 75,
+            "end": 77,
+            "related": [
+              {
+                "role": "last-use",
+                "file": "main.fy",
+                "start": 76,
+                "end": 77
+              },
+              {
+                "role": "loan",
+                "file": "main.fy",
+                "start": 73,
+                "end": 74
+              }
+            ]
+          }
+        ],
+        "diagnostics": [
+          {
+            "file": "main.fy",
+            "code": 2101,
+            "start": 75,
+            "end": 77,
+            "related": [
+              {
+                "role": "last-use",
+                "file": "main.fy",
+                "start": 76,
+                "end": 77
+              },
+              {
+                "role": "loan",
+                "file": "main.fy",
+                "start": 73,
+                "end": 74
+              }
+            ]
+          }
+        ],
+        "stdout": "",
+        "stderr": "main.fy:1:76: error: E2101 borrow conflicts with live loan (bytes 75..77)\n  loan: main.fy (bytes 73..74)\n  last-use: main.fy (bytes 76..77)\n"
+      },
+      {
+        "index": 28,
+        "name": "generic provider shared",
+        "exit": 0,
+        "matched": true,
+        "reference": [],
+        "diagnostics": [],
+        "stdout": "return origins ok\n",
+        "stderr": ""
+      },
+      {
+        "index": 29,
+        "name": "mutable view bound read",
+        "exit": 3,
+        "matched": true,
+        "reference": [
+          {
+            "file": "main.fy",
+            "code": 2101,
+            "start": 216,
+            "end": 220,
+            "related": [
+              {
+                "role": "last-use",
+                "file": "main.fy",
+                "start": 216,
+                "end": 217
+              },
+              {
+                "role": "loan",
+                "file": "main.fy",
+                "start": 203,
+                "end": 224
+              }
+            ]
+          }
+        ],
+        "diagnostics": [
+          {
+            "file": "main.fy",
+            "code": 2101,
+            "start": 216,
+            "end": 220,
+            "related": [
+              {
+                "role": "last-use",
+                "file": "main.fy",
+                "start": 216,
+                "end": 217
+              },
+              {
+                "role": "loan",
+                "file": "main.fy",
+                "start": 203,
+                "end": 224
+              }
+            ]
+          }
+        ],
+        "stdout": "",
+        "stderr": "main.fy:1:217: error: E2101 borrow conflicts with live loan (bytes 216..220)\n  loan: main.fy (bytes 203..224)\n  last-use: main.fy (bytes 216..217)\n"
+      },
+      {
+        "index": 30,
+        "name": "mutable view bound metadata",
+        "exit": 0,
+        "matched": true,
+        "reference": [],
+        "diagnostics": [],
+        "stdout": "return origins ok\n",
+        "stderr": ""
+      },
+      {
+        "index": 31,
+        "name": "selected index read",
+        "exit": 0,
+        "matched": true,
+        "reference": [],
+        "diagnostics": [],
+        "stdout": "return origins ok\n",
+        "stderr": ""
+      }
+    ]
+  },
+  "native": {
+    "schemaVersion": "fairyc.test-report/v4",
+    "engine": "native",
+    "target": "x86_64-windows-msvc",
+    "profile": "development",
+    "tests": [
+      {
+        "identity": "tests::module_unit_held_reads::exclusive_arguments_guard_referent_reads",
+        "outcome": "passed",
+        "trapCategory": null,
+        "stdoutBase64": "Y2FzZSAwIDMgMQpkaWFnbm9zdGljIDIxMDEgMCAyMDYgMjA4IDIKcmVsYXRlZCA0IDAgMjA0IDIwNQpyZWxhdGVkIDUgMCAyMDcgMjA4CmNhc2UgMSAzIDEKZGlhZ25vc3RpYyAyMTAxIDAgMTc5IDE4MSAyCnJlbGF0ZWQgNCAwIDE3NyAxNzgKcmVsYXRlZCA1IDAgMTgwIDE4MQpjYXNlIDIgMCAwCmNhc2UgMyAzIDEKZGlhZ25vc3RpYyAyMTAxIDAgMTgwIDE4MiAyCnJlbGF0ZWQgNCAwIDE3NyAxNzgKcmVsYXRlZCA1IDAgMTgxIDE4MgpjYXNlIDQgMyAxCmRpYWdub3N0aWMgMjEwMSAwIDE4MSAxODMgMgpyZWxhdGVkIDQgMCAxNzggMTc5CnJlbGF0ZWQgNSAwIDE4MiAxODMKY2FzZSA1IDAgMApjYXNlIDYgMCAwCmNhc2UgNyAwIDAKY2FzZSA4IDMgMQpkaWFnbm9zdGljIDIxMDEgMCAxODUgMTg4IDIKcmVsYXRlZCA0IDAgMTgzIDE4NApyZWxhdGVkIDUgMCAxODUgMTg2CmNhc2UgOSAzIDEKZGlhZ25vc3RpYyAyMTAxIDAgMTU0IDE1NyAyCnJlbGF0ZWQgNCAwIDE1MiAxNTMKcmVsYXRlZCA1IDAgMTU0IDE1NQpjYXNlIDEwIDAgMApjYXNlIDExIDMgMQpkaWFnbm9zdGljIDIxMDEgMCAyMjAgMjI0IDIKcmVsYXRlZCA0IDAgMjE4IDIxOQpyZWxhdGVkIDUgMCAyMjAgMjIxCmNhc2UgMTIgMyAxCmRpYWdub3N0aWMgMjEwMSAwIDE4NyAxOTEgMgpyZWxhdGVkIDQgMCAxODUgMTg2CnJlbGF0ZWQgNSAwIDE4NyAxODgKY2FzZSAxMyAwIDAKY2FzZSAxNCAwIDAKY2FzZSAxNSAzIDEKZGlhZ25vc3RpYyAyMTAxIDAgMTk2IDE5NyAyCnJlbGF0ZWQgNCAwIDE4OCAyMDIKcmVsYXRlZCA1IDAgMTk2IDE5NwpjYXNlIDE2IDAgMApjYXNlIDE3IDAgMApjYXNlIDE4IDMgMQpkaWFnbm9zdGljIDIxMDEgMCAxOTkgMjAxIDIKcmVsYXRlZCA0IDAgMTk3IDE5OApyZWxhdGVkIDUgMCAyMDAgMjAxCmNhc2UgMTkgMyAxCmRpYWdub3N0aWMgMjEwMSAwIDE4MSAxODcgMgpyZWxhdGVkIDQgMCAxNzcgMTgwCnJlbGF0ZWQgNSAwIDE4MiAxODcKY2FzZSAyMCAzIDEKZGlhZ25vc3RpYyAyMTAxIDAgOTcgMTAyIDIKcmVsYXRlZCA0IDAgOTUgOTYKcmVsYXRlZCA1IDAgOTcgOTgKY2FzZSAyMSAwIDAKY2FzZSAyMiAwIDAKY2FzZSAyMyAwIDAKY2FzZSAyNCAzIDEKZGlhZ25vc3RpYyAyMTAxIDAgMTkyIDE5NCAyCnJlbGF0ZWQgNCAwIDE4NCAxODUKcmVsYXRlZCA1IDAgMTkzIDE5NApjYXNlIDI1IDMgMQpkaWFnbm9zdGljIDIxMDEgMCAyMDQgMjA2IDIKcmVsYXRlZCA0IDAgMTg0IDE4NQpyZWxhdGVkIDUgMCAyMDUgMjA2CmNhc2UgMjYgMyAxCmRpYWdub3N0aWMgMjEwMSAwIDI0NiAyNDggMgpyZWxhdGVkIDQgMCAyNDQgMjQ1CnJlbGF0ZWQgNSAwIDI0NyAyNDgKY2FzZSAyNyAzIDEKZGlhZ25vc3RpYyAyMTAxIDAgNzUgNzcgMgpyZWxhdGVkIDQgMCA3MyA3NApyZWxhdGVkIDUgMCA3NiA3NwpjYXNlIDI4IDAgMApjYXNlIDI5IDMgMQpkaWFnbm9zdGljIDIxMDEgMCAyMTYgMjIwIDIKcmVsYXRlZCA0IDAgMjAzIDIyNApyZWxhdGVkIDUgMCAyMTYgMjE3CmNhc2UgMzAgMCAwCmNhc2UgMzEgMCAwCg==",
+        "stderrBase64": ""
+      }
+    ],
+    "count": 1,
+    "passed": 1,
+    "failed": 0,
+    "status": "ok",
+    "lock": "verified"
+  },
+  "nativeComparison": {
+    "passed": true,
+    "matched": 32,
+    "count": 32,
+    "cases": [
+      {
+        "index": 0,
+        "name": "scalar local",
+        "matched": true,
+        "reference": [
+          {
+            "file": "main.fy",
+            "code": 2101,
+            "start": 206,
+            "end": 208,
+            "related": [
+              {
+                "role": "last-use",
+                "file": "main.fy",
+                "start": 207,
+                "end": 208
+              },
+              {
+                "role": "loan",
+                "file": "main.fy",
+                "start": 204,
+                "end": 205
+              }
+            ]
+          }
+        ],
+        "actual": {
+          "exit": 3,
+          "count": 1,
+          "diagnostics": [
+            {
+              "file": "main.fy",
+              "code": 2101,
+              "start": 206,
+              "end": 208,
+              "related": [
+                {
+                  "role": "last-use",
+                  "file": "main.fy",
+                  "start": 207,
+                  "end": 208
+                },
+                {
+                  "role": "loan",
+                  "file": "main.fy",
+                  "start": 204,
+                  "end": 205
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "index": 1,
+        "name": "scalar parameter",
+        "matched": true,
+        "reference": [
+          {
+            "file": "main.fy",
+            "code": 2101,
+            "start": 179,
+            "end": 181,
+            "related": [
+              {
+                "role": "last-use",
+                "file": "main.fy",
+                "start": 180,
+                "end": 181
+              },
+              {
+                "role": "loan",
+                "file": "main.fy",
+                "start": 177,
+                "end": 178
+              }
+            ]
+          }
+        ],
+        "actual": {
+          "exit": 3,
+          "count": 1,
+          "diagnostics": [
+            {
+              "file": "main.fy",
+              "code": 2101,
+              "start": 179,
+              "end": 181,
+              "related": [
+                {
+                  "role": "last-use",
+                  "file": "main.fy",
+                  "start": 180,
+                  "end": 181
+                },
+                {
+                  "role": "loan",
+                  "file": "main.fy",
+                  "start": 177,
+                  "end": 178
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "index": 2,
+        "name": "shared scalar",
+        "matched": true,
+        "reference": [],
+        "actual": {
+          "exit": 0,
+          "count": 0,
+          "diagnostics": []
+        }
+      },
+      {
+        "index": 3,
+        "name": "nested argument write",
+        "matched": true,
+        "reference": [
+          {
+            "file": "main.fy",
+            "code": 2101,
+            "start": 180,
+            "end": 182,
+            "related": [
+              {
+                "role": "last-use",
+                "file": "main.fy",
+                "start": 181,
+                "end": 182
+              },
+              {
+                "role": "loan",
+                "file": "main.fy",
+                "start": 177,
+                "end": 178
+              }
+            ]
+          }
+        ],
+        "actual": {
+          "exit": 3,
+          "count": 1,
+          "diagnostics": [
+            {
+              "file": "main.fy",
+              "code": 2101,
+              "start": 180,
+              "end": 182,
+              "related": [
+                {
+                  "role": "last-use",
+                  "file": "main.fy",
+                  "start": 181,
+                  "end": 182
+                },
+                {
+                  "role": "loan",
+                  "file": "main.fy",
+                  "start": 177,
+                  "end": 178
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "index": 4,
+        "name": "nested shared write",
+        "matched": true,
+        "reference": [
+          {
+            "file": "main.fy",
+            "code": 2101,
+            "start": 181,
+            "end": 183,
+            "related": [
+              {
+                "role": "last-use",
+                "file": "main.fy",
+                "start": 182,
+                "end": 183
+              },
+              {
+                "role": "loan",
+                "file": "main.fy",
+                "start": 178,
+                "end": 179
+              }
+            ]
+          }
+        ],
+        "actual": {
+          "exit": 3,
+          "count": 1,
+          "diagnostics": [
+            {
+              "file": "main.fy",
+              "code": 2101,
+              "start": 181,
+              "end": 183,
+              "related": [
+                {
+                  "role": "last-use",
+                  "file": "main.fy",
+                  "start": 182,
+                  "end": 183
+                },
+                {
+                  "role": "loan",
+                  "file": "main.fy",
+                  "start": 178,
+                  "end": 179
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "index": 5,
+        "name": "scalar ends",
+        "matched": true,
+        "reference": [],
+        "actual": {
+          "exit": 0,
+          "count": 0,
+          "diagnostics": []
+        }
+      },
+      {
+        "index": 6,
+        "name": "store RHS read",
+        "matched": true,
+        "reference": [],
+        "actual": {
+          "exit": 0,
+          "count": 0,
+          "diagnostics": []
+        }
+      },
+      {
+        "index": 7,
+        "name": "shared store RHS",
+        "matched": true,
+        "reference": [],
+        "actual": {
+          "exit": 0,
+          "count": 0,
+          "diagnostics": []
+        }
+      },
+      {
+        "index": 8,
+        "name": "struct local",
+        "matched": true,
+        "reference": [
+          {
+            "file": "main.fy",
+            "code": 2101,
+            "start": 185,
+            "end": 188,
+            "related": [
+              {
+                "role": "last-use",
+                "file": "main.fy",
+                "start": 185,
+                "end": 186
+              },
+              {
+                "role": "loan",
+                "file": "main.fy",
+                "start": 183,
+                "end": 184
+              }
+            ]
+          }
+        ],
+        "actual": {
+          "exit": 3,
+          "count": 1,
+          "diagnostics": [
+            {
+              "file": "main.fy",
+              "code": 2101,
+              "start": 185,
+              "end": 188,
+              "related": [
+                {
+                  "role": "last-use",
+                  "file": "main.fy",
+                  "start": 185,
+                  "end": 186
+                },
+                {
+                  "role": "loan",
+                  "file": "main.fy",
+                  "start": 183,
+                  "end": 184
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "index": 9,
+        "name": "struct parameter",
+        "matched": true,
+        "reference": [
+          {
+            "file": "main.fy",
+            "code": 2101,
+            "start": 154,
+            "end": 157,
+            "related": [
+              {
+                "role": "last-use",
+                "file": "main.fy",
+                "start": 154,
+                "end": 155
+              },
+              {
+                "role": "loan",
+                "file": "main.fy",
+                "start": 152,
+                "end": 153
+              }
+            ]
+          }
+        ],
+        "actual": {
+          "exit": 3,
+          "count": 1,
+          "diagnostics": [
+            {
+              "file": "main.fy",
+              "code": 2101,
+              "start": 154,
+              "end": 157,
+              "related": [
+                {
+                  "role": "last-use",
+                  "file": "main.fy",
+                  "start": 154,
+                  "end": 155
+                },
+                {
+                  "role": "loan",
+                  "file": "main.fy",
+                  "start": 152,
+                  "end": 153
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "index": 10,
+        "name": "struct shared",
+        "matched": true,
+        "reference": [],
+        "actual": {
+          "exit": 0,
+          "count": 0,
+          "diagnostics": []
+        }
+      },
+      {
+        "index": 11,
+        "name": "index local",
+        "matched": true,
+        "reference": [
+          {
+            "file": "main.fy",
+            "code": 2101,
+            "start": 220,
+            "end": 224,
+            "related": [
+              {
+                "role": "last-use",
+                "file": "main.fy",
+                "start": 220,
+                "end": 221
+              },
+              {
+                "role": "loan",
+                "file": "main.fy",
+                "start": 218,
+                "end": 219
+              }
+            ]
+          }
+        ],
+        "actual": {
+          "exit": 3,
+          "count": 1,
+          "diagnostics": [
+            {
+              "file": "main.fy",
+              "code": 2101,
+              "start": 220,
+              "end": 224,
+              "related": [
+                {
+                  "role": "last-use",
+                  "file": "main.fy",
+                  "start": 220,
+                  "end": 221
+                },
+                {
+                  "role": "loan",
+                  "file": "main.fy",
+                  "start": 218,
+                  "end": 219
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "index": 12,
+        "name": "index parameter",
+        "matched": true,
+        "reference": [
+          {
+            "file": "main.fy",
+            "code": 2101,
+            "start": 187,
+            "end": 191,
+            "related": [
+              {
+                "role": "last-use",
+                "file": "main.fy",
+                "start": 187,
+                "end": 188
+              },
+              {
+                "role": "loan",
+                "file": "main.fy",
+                "start": 185,
+                "end": 186
+              }
+            ]
+          }
+        ],
+        "actual": {
+          "exit": 3,
+          "count": 1,
+          "diagnostics": [
+            {
+              "file": "main.fy",
+              "code": 2101,
+              "start": 187,
+              "end": 191,
+              "related": [
+                {
+                  "role": "last-use",
+                  "file": "main.fy",
+                  "start": 187,
+                  "end": 188
+                },
+                {
+                  "role": "loan",
+                  "file": "main.fy",
+                  "start": 185,
+                  "end": 186
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "index": 13,
+        "name": "index shared",
+        "matched": true,
+        "reference": [],
+        "actual": {
+          "exit": 0,
+          "count": 0,
+          "diagnostics": []
+        }
+      },
+      {
+        "index": 14,
+        "name": "len metadata",
+        "matched": true,
+        "reference": [],
+        "actual": {
+          "exit": 0,
+          "count": 0,
+          "diagnostics": []
+        }
+      },
+      {
+        "index": 15,
+        "name": "index receiver mutation",
+        "matched": true,
+        "reference": [
+          {
+            "file": "main.fy",
+            "code": 2101,
+            "start": 196,
+            "end": 197,
+            "related": [
+              {
+                "role": "last-use",
+                "file": "main.fy",
+                "start": 196,
+                "end": 197
+              },
+              {
+                "role": "loan",
+                "file": "main.fy",
+                "start": 188,
+                "end": 202
+              }
+            ]
+          }
+        ],
+        "actual": {
+          "exit": 3,
+          "count": 1,
+          "diagnostics": [
+            {
+              "file": "main.fy",
+              "code": 2101,
+              "start": 196,
+              "end": 197,
+              "related": [
+                {
+                  "role": "last-use",
+                  "file": "main.fy",
+                  "start": 196,
+                  "end": 197
+                },
+                {
+                  "role": "loan",
+                  "file": "main.fy",
+                  "start": 188,
+                  "end": 202
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "index": 16,
+        "name": "index RHS read",
+        "matched": true,
+        "reference": [],
+        "actual": {
+          "exit": 0,
+          "count": 0,
+          "diagnostics": []
+        }
+      },
+      {
+        "index": 17,
+        "name": "parameter borrowed field",
+        "matched": true,
+        "reference": [],
+        "actual": {
+          "exit": 0,
+          "count": 0,
+          "diagnostics": []
+        }
+      },
+      {
+        "index": 18,
+        "name": "scalar alias",
+        "matched": true,
+        "reference": [
+          {
+            "file": "main.fy",
+            "code": 2101,
+            "start": 199,
+            "end": 201,
+            "related": [
+              {
+                "role": "last-use",
+                "file": "main.fy",
+                "start": 200,
+                "end": 201
+              },
+              {
+                "role": "loan",
+                "file": "main.fy",
+                "start": 197,
+                "end": 198
+              }
+            ]
+          }
+        ],
+        "actual": {
+          "exit": 3,
+          "count": 1,
+          "diagnostics": [
+            {
+              "file": "main.fy",
+              "code": 2101,
+              "start": 199,
+              "end": 201,
+              "related": [
+                {
+                  "role": "last-use",
+                  "file": "main.fy",
+                  "start": 200,
+                  "end": 201
+                },
+                {
+                  "role": "loan",
+                  "file": "main.fy",
+                  "start": 197,
+                  "end": 198
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "index": 19,
+        "name": "scalar groups",
+        "matched": true,
+        "reference": [
+          {
+            "file": "main.fy",
+            "code": 2101,
+            "start": 181,
+            "end": 187,
+            "related": [
+              {
+                "role": "last-use",
+                "file": "main.fy",
+                "start": 182,
+                "end": 187
+              },
+              {
+                "role": "loan",
+                "file": "main.fy",
+                "start": 177,
+                "end": 180
+              }
+            ]
+          }
+        ],
+        "actual": {
+          "exit": 3,
+          "count": 1,
+          "diagnostics": [
+            {
+              "file": "main.fy",
+              "code": 2101,
+              "start": 181,
+              "end": 187,
+              "related": [
+                {
+                  "role": "last-use",
+                  "file": "main.fy",
+                  "start": 182,
+                  "end": 187
+                },
+                {
+                  "role": "loan",
+                  "file": "main.fy",
+                  "start": 177,
+                  "end": 180
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "index": 20,
+        "name": "field named len",
+        "matched": true,
+        "reference": [
+          {
+            "file": "main.fy",
+            "code": 2101,
+            "start": 97,
+            "end": 102,
+            "related": [
+              {
+                "role": "last-use",
+                "file": "main.fy",
+                "start": 97,
+                "end": 98
+              },
+              {
+                "role": "loan",
+                "file": "main.fy",
+                "start": 95,
+                "end": 96
+              }
+            ]
+          }
+        ],
+        "actual": {
+          "exit": 3,
+          "count": 1,
+          "diagnostics": [
+            {
+              "file": "main.fy",
+              "code": 2101,
+              "start": 97,
+              "end": 102,
+              "related": [
+                {
+                  "role": "last-use",
+                  "file": "main.fy",
+                  "start": 97,
+                  "end": 98
+                },
+                {
+                  "role": "loan",
+                  "file": "main.fy",
+                  "start": 95,
+                  "end": 96
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "index": 21,
+        "name": "earlier scalar read",
+        "matched": true,
+        "reference": [],
+        "actual": {
+          "exit": 0,
+          "count": 0,
+          "diagnostics": []
+        }
+      },
+      {
+        "index": 22,
+        "name": "unrelated scalar",
+        "matched": true,
+        "reference": [],
+        "actual": {
+          "exit": 0,
+          "count": 0,
+          "diagnostics": []
+        }
+      },
+      {
+        "index": 23,
+        "name": "descriptor copy",
+        "matched": true,
+        "reference": [],
+        "actual": {
+          "exit": 0,
+          "count": 0,
+          "diagnostics": []
+        }
+      },
+      {
+        "index": 24,
+        "name": "branch referent read",
+        "matched": true,
+        "reference": [
+          {
+            "file": "main.fy",
+            "code": 2101,
+            "start": 192,
+            "end": 194,
+            "related": [
+              {
+                "role": "last-use",
+                "file": "main.fy",
+                "start": 193,
+                "end": 194
+              },
+              {
+                "role": "loan",
+                "file": "main.fy",
+                "start": 184,
+                "end": 185
+              }
+            ]
+          }
+        ],
+        "actual": {
+          "exit": 3,
+          "count": 1,
+          "diagnostics": [
+            {
+              "file": "main.fy",
+              "code": 2101,
+              "start": 192,
+              "end": 194,
+              "related": [
+                {
+                  "role": "last-use",
+                  "file": "main.fy",
+                  "start": 193,
+                  "end": 194
+                },
+                {
+                  "role": "loan",
+                  "file": "main.fy",
+                  "start": 184,
+                  "end": 185
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "index": 25,
+        "name": "loop referent read",
+        "matched": true,
+        "reference": [
+          {
+            "file": "main.fy",
+            "code": 2101,
+            "start": 204,
+            "end": 206,
+            "related": [
+              {
+                "role": "last-use",
+                "file": "main.fy",
+                "start": 205,
+                "end": 206
+              },
+              {
+                "role": "loan",
+                "file": "main.fy",
+                "start": 184,
+                "end": 185
+              }
+            ]
+          }
+        ],
+        "actual": {
+          "exit": 3,
+          "count": 1,
+          "diagnostics": [
+            {
+              "file": "main.fy",
+              "code": 2101,
+              "start": 204,
+              "end": 206,
+              "related": [
+                {
+                  "role": "last-use",
+                  "file": "main.fy",
+                  "start": 205,
+                  "end": 206
+                },
+                {
+                  "role": "loan",
+                  "file": "main.fy",
+                  "start": 184,
+                  "end": 185
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "index": 26,
+        "name": "returned alias",
+        "matched": true,
+        "reference": [
+          {
+            "file": "main.fy",
+            "code": 2101,
+            "start": 246,
+            "end": 248,
+            "related": [
+              {
+                "role": "last-use",
+                "file": "main.fy",
+                "start": 247,
+                "end": 248
+              },
+              {
+                "role": "loan",
+                "file": "main.fy",
+                "start": 244,
+                "end": 245
+              }
+            ]
+          }
+        ],
+        "actual": {
+          "exit": 3,
+          "count": 1,
+          "diagnostics": [
+            {
+              "file": "main.fy",
+              "code": 2101,
+              "start": 246,
+              "end": 248,
+              "related": [
+                {
+                  "role": "last-use",
+                  "file": "main.fy",
+                  "start": 247,
+                  "end": 248
+                },
+                {
+                  "role": "loan",
+                  "file": "main.fy",
+                  "start": 244,
+                  "end": 245
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "index": 27,
+        "name": "generic provider exclusive",
+        "matched": true,
+        "reference": [
+          {
+            "file": "main.fy",
+            "code": 2101,
+            "start": 75,
+            "end": 77,
+            "related": [
+              {
+                "role": "last-use",
+                "file": "main.fy",
+                "start": 76,
+                "end": 77
+              },
+              {
+                "role": "loan",
+                "file": "main.fy",
+                "start": 73,
+                "end": 74
+              }
+            ]
+          }
+        ],
+        "actual": {
+          "exit": 3,
+          "count": 1,
+          "diagnostics": [
+            {
+              "file": "main.fy",
+              "code": 2101,
+              "start": 75,
+              "end": 77,
+              "related": [
+                {
+                  "role": "last-use",
+                  "file": "main.fy",
+                  "start": 76,
+                  "end": 77
+                },
+                {
+                  "role": "loan",
+                  "file": "main.fy",
+                  "start": 73,
+                  "end": 74
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "index": 28,
+        "name": "generic provider shared",
+        "matched": true,
+        "reference": [],
+        "actual": {
+          "exit": 0,
+          "count": 0,
+          "diagnostics": []
+        }
+      },
+      {
+        "index": 29,
+        "name": "mutable view bound read",
+        "matched": true,
+        "reference": [
+          {
+            "file": "main.fy",
+            "code": 2101,
+            "start": 216,
+            "end": 220,
+            "related": [
+              {
+                "role": "last-use",
+                "file": "main.fy",
+                "start": 216,
+                "end": 217
+              },
+              {
+                "role": "loan",
+                "file": "main.fy",
+                "start": 203,
+                "end": 224
+              }
+            ]
+          }
+        ],
+        "actual": {
+          "exit": 3,
+          "count": 1,
+          "diagnostics": [
+            {
+              "file": "main.fy",
+              "code": 2101,
+              "start": 216,
+              "end": 220,
+              "related": [
+                {
+                  "role": "last-use",
+                  "file": "main.fy",
+                  "start": 216,
+                  "end": 217
+                },
+                {
+                  "role": "loan",
+                  "file": "main.fy",
+                  "start": 203,
+                  "end": 224
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "index": 30,
+        "name": "mutable view bound metadata",
+        "matched": true,
+        "reference": [],
+        "actual": {
+          "exit": 0,
+          "count": 0,
+          "diagnostics": []
+        }
+      },
+      {
+        "index": 31,
+        "name": "selected index read",
+        "matched": true,
+        "reference": [],
+        "actual": {
+          "exit": 0,
+          "count": 0,
+          "diagnostics": []
+        }
+      }
+    ]
+  },
+  "apiNative": {
+    "schemaVersion": "fairyc.test-report/v4",
+    "engine": "native",
+    "target": "x86_64-windows-msvc",
+    "profile": "development",
+    "tests": [
+      {
+        "identity": "tests::module_unit_borrow_facts::owned_retained_borrow_facts_report_last_use_and_escape",
+        "outcome": "passed",
+        "trapCategory": null,
+        "stdoutBase64": "Y2FzZSAwCmZhY3QgMCAxMiAwIDUwIDU1IDY1IDY2IDAgTG9jYWwoeCkKY2FzZSAxCmZhY3QgMCAxMiAwIDUwIDU1IDAgMCAwIExvY2FsKHgpCmNhc2UgMgpjYXNlIDMKZmFjdCAwIDEyIDAgNTAgNTUgODEgODIgMCBMb2NhbCh4KQpjYXNlIDQKZmFjdCAwIDEyIDAgNjIgNjcgNzcgNzggMCBMb2NhbCh4KQpmYWN0IDAgMTIgMCA4MSA4NiA5NiA5NyAwIExvY2FsKHkpCmNhc2UgNQpmYWN0IDAgMTIgMCA2NCA2OSAwIDAgMCBMb2NhbCh4KQpjYXNlIDYKZmFjdCAwIDEyIDAgNjQgNjkgMTA1IDEwNiAwIExvY2FsKHgpCmNhc2UgNwpmYWN0IDAgMTIgMCA1NCA2MiA1NCA2MiAxIFBhcmFtKDApCmZhY3QgMCA2NCAwIDEwMCAxMDUgMTMyIDEzMyAwIExvY2FsKHgpCmNhc2UgOApmYWN0IDAgMTIgMSA1NCA2MyA3OCA3OSAwIExvY2FsKHgpCmNhc2UgOQpmYWN0IDAgMTIgMSA2MSA3MCAxMDUgMTA2IDAgTG9jYWwoeCkKZmFjdCAwIDEyIDEgOTAgOTYgMTA1IDEwNiAwIExvY2FsKHgpCmNhc2UgMTAKZmFjdCAwIDEyIDEgNjEgNzUgODQgODUgMCBMb2NhbCh4KQpjYXNlIDExCmZhY3QgMCAxMiAwIDQzIDQ0IDQzIDQ0IDEgUGFyYW0oMCkKY2FzZSAxMgpmYWN0IDAgMTIgMSA1MSA1MiA1MSA1MiAxIFBhcmFtKDApCmNhc2UgMTMKZmFjdCAwIDEyIDAgNTEgNTkgNTEgNTkgMSBQYXJhbSgwKQpjYXNlIDE0CmNhc2UgMTUKZmFjdCAwIDEyIDEgNTMgNTkgNTMgNTkgMSBQYXJhbSgwKQpjYXNlIDE2CmZhY3QgMCAxMiAxIDY1IDcxIDc5IDgwIDEgUGFyYW0oMCkKY2FzZSAxNwpmYWN0IDAgMTIgMCAzOSA0NSA1NCA1NSAwIFN0YXRpYwpjYXNlIDE4CmZhY3QgMCAxMiAwIDM1IDQxIDM1IDQxIDEgU3RhdGljCmNhc2UgMTkKZmFjdCAwIDEyIDAgNDMgNDkgNTcgNTggMSBTdGF0aWMKY2FzZSAyMApmYWN0IDAgMTIgMCA1MyA1OCA2NiA2NyAwIExvY2FsKHgpCmNhc2UgMjEKZmFjdCAwIDEyIDAgNjggNzMgOTkgMTAwIDAgTG9jYWwoeCkKZmFjdCAwIDEyIDAgODIgODcgOTkgMTAwIDAgTG9jYWwoeSkKY2FzZSAyMgpmYWN0IDAgMTIgMCA1NiA2MSA4MCA4MSAwIExvY2FsKHgpCmNhc2UgMjMKZmFjdCAwIDEyIDAgNDQgNDUgNDQgNDUgMSBQYXJhbSgwKQpmYWN0IDAgNDcgMCA4OCA5MyAxMDQgMTA1IDAgTG9jYWwoeCkKY2FzZSAyNApmYWN0IDAgMTIgMCA0NCA0NSA0NCA0NSAxIFBhcmFtKDApCmZhY3QgMCA0NyAxIDg5IDk4IDEyOCAxMjkgMCBMb2NhbCh4KQpmYWN0IDAgNDcgMCAxMTYgMTE3IDEyOCAxMjkgMCBMb2NhbCh4KQpjYXNlIDI1CmZhY3QgMCAzMCAxIDgwIDg5IDEyMSAxMjIgMCBMb2NhbChiKQpmYWN0IDAgMzAgMCAxMDQgMTExIDEyMSAxMjIgMCBMb2NhbChiKQpjYXNlIDI2CmZhY3QgMSAxNiAxIDY1IDcxIDY1IDcxIDEgUGFyYW0oMCkKZmFjdCAwIDM0IDEgNzkgOTQgMTAzIDEwNCAwIFBhcmFtKDApCg==",
+        "stderrBase64": ""
+      },
+      {
+        "identity": "tests::module_unit_constructor_facts::constructor_facts_preserve_the_owner",
+        "outcome": "passed",
+        "trapCategory": null,
+        "stdoutBase64": "Y2FzZSAwCmNhc2UgMQpmYWN0IDAgNjkgMCAxMDMgMTQ5IDEwMyAxNDkgMSBQYXJhbSgwKQpjYXNlIDIKZmFjdCAwIDY5IDAgMTY0IDE2NSAxNjQgMTY1IDEgUGFyYW0oMCkKY2FzZSAzCmZhY3QgMCA2OSAxIDExMiAxNjkgMTEyIDE2OSAxIFBhcmFtKDApCmNhc2UgNApmYWN0IDAgNjkgMCAxMDQgMTUxIDEwNCAxNTEgMSBQYXJhbSgwKQpjYXNlIDUKZmFjdCAwIDY5IDAgMTU2IDE2MSAxODggMTg5IDAgTG9jYWwoYikKY2FzZSA2CmZhY3QgMCA2OSAxIDE2NyAxNzYgMjAzIDIwNCAwIExvY2FsKGIpCmNhc2UgNwpmYWN0IDAgNjkgMCAxMzMgMTM4IDIxMSAyMTIgMCBMb2NhbChiKQpjYXNlIDgKZmFjdCAwIDY5IDEgMTgwIDE4NiAxOTUgMTk2IDAgUGFyYW0oMCkKY2FzZSA5CmNhc2UgMTAKY2FzZSAxMQpjYXNlIDEyCmNhc2UgMTMKZmFjdCAwIDM1IDAgODcgOTcgODcgOTcgMSBSZWdpb25QYXJhbSgwKQpjYXNlIDE0CmZhY3QgMCAzNSAwIDEwNCAxMDUgMTA0IDEwNSAxIFJlZ2lvblBhcmFtKDApCmNhc2UgMTUKZmFjdCAwIDM1IDAgMTA1IDExMSAxMDUgMTExIDEgUmVnaW9uUGFyYW0oMCkKY2FzZSAxNgpjYXNlIDE3CmZhY3QgMCAzNSAwIDk0IDEyNyA5NCAxMjcgMSBSZWdpb25QYXJhbSgwKQpjYXNlIDE4CmZhY3QgMCA1NiAwIDEwOCAxMjEgMTA4IDEyMSAxIFJlZ2lvblBhcmFtKDApCmZhY3QgMiAzOSAwIDEwNSAxMTUgMTA1IDExNSAxIFJlZ2lvblBhcmFtKDApCg==",
+        "stderrBase64": ""
+      },
+      {
+        "identity": "tests::module_unit_iteration_facts::implicit_iteration_loans_have_owned_facts",
+        "outcome": "passed",
+        "trapCategory": null,
+        "stdoutBase64": "Y2FzZSAwCmZhY3QgMCAxMiAwIDY0IDY4IDY0IDY4IDAgTG9jYWwoZGF0YSkKY2FzZSAxCmZhY3QgMCAxMiAwIDY0IDY4IDY0IDY4IDAgTG9jYWwoZGF0YSkKY2FzZSAyCmZhY3QgMCAxMiAwIDYwIDY4IDg4IDg5IDAgTG9jYWwoZGF0YSkKY2FzZSAzCmNhc2UgNApmYWN0IDAgMTIgMSA3MiA3NiA3OSA4MyAwIExvY2FsKGRhdGEpCmZhY3QgMCAxMiAxIDcyIDc2IDc5IDgzIDAgTG9jYWwoZGF0YSkKY2FzZSA1CmZhY3QgMCAxMiAxIDY1IDY2IDY5IDczIDAgUGFyYW0oMCkKY2FzZSA2CmZhY3QgMCAxMiAxIDY1IDcxIDc0IDc4IDAgUGFyYW0oMCkKZmFjdCAwIDEyIDEgNjUgNzEgNzQgNzggMCBQYXJhbSgwKQpjYXNlIDcKZmFjdCAwIDEyIDAgNjggNzIgODMgODcgMCBMb2NhbChkYXRhKQpmYWN0IDAgMTIgMCA2OCA3MiA4MyA4NyAwIExvY2FsKGRhdGEpCmNhc2UgOApmYWN0IDAgMTIgMCA2NSA3MCA4MCA4MSAwIExvY2FsKHgpCmNhc2UgOQpmYWN0IDAgMTIgMCA1MCA1NSA5MSA5MiAwIExvY2FsKHgpCmNhc2UgMTAKZmFjdCAwIDEyIDAgNTggNTkgNTggNTkgMCBMb2NhbCh4KQpmYWN0IDAgMTIgMCA3NyA3OCA3NyA3OCAwIExvY2FsKHgpCmNhc2UgMTEKZmFjdCAwIDEyIDAgNTggNTkgNTggNTkgMCBMb2NhbCh4KQpjYXNlIDEyCmZhY3QgMCAxMiAxIDcyIDc2IDcyIDc2IDAgTG9jYWwoZGF0YSkKZmFjdCAwIDEyIDEgNzIgNzYgMCAwIDAgTG9jYWwoZGF0YSkKY2FzZSAxMwpmYWN0IDAgMTIgMSA3NCA3OCA4MSA4NSAwIExvY2FsKGRhdGEpCmZhY3QgMCAxMiAxIDc0IDc4IDgxIDg1IDAgTG9jYWwoZGF0YSkKY2FzZSAxNApmYWN0IDAgMTIgMSA3MSA3MiA4MSA4NSAxIFBhcmFtKDApCmNhc2UgMTUKZmFjdCAwIDM1IDAgOTUgMTAzIDk1IDEwMyAwIExvY2FsKGJhZykKY2FzZSAxNgpjYXNlIDE3CmZhY3QgMCAzNSAxIDg5IDk3IDEwMCAxMDQgMCBQYXJhbSgwKQpmYWN0IDAgMzUgMSA4OSA5NyAxMDAgMTA0IDAgUGFyYW0oMCkK",
+        "stderrBase64": ""
+      }
+    ],
+    "count": 3,
+    "passed": 3,
+    "failed": 0,
+    "status": "ok",
+    "lock": "verified"
+  },
+  "apiComparison": [
+    {
+      "suite": "borrow-facts-native",
+      "comparison": {
+        "passed": true,
+        "matched": 27,
+        "count": 27,
+        "facts": 34,
+        "cases": [
+          {
+            "index": 0,
+            "name": "shared retained",
+            "matched": true,
+            "reference": [
+              {
+                "module": 0,
+                "function": 12,
+                "mutable": 0,
+                "start": 50,
+                "end": 55,
+                "lastStart": 65,
+                "lastEnd": 66,
+                "escapes": 0,
+                "origin": "Local(x)"
+              }
+            ],
+            "actual": [
+              {
+                "module": 0,
+                "function": 12,
+                "mutable": 0,
+                "start": 50,
+                "end": 55,
+                "lastStart": 65,
+                "lastEnd": 66,
+                "escapes": 0,
+                "origin": "Local(x)"
+              }
+            ]
+          },
+          {
+            "index": 1,
+            "name": "unused retained",
+            "matched": true,
+            "reference": [
+              {
+                "module": 0,
+                "function": 12,
+                "mutable": 0,
+                "start": 50,
+                "end": 55,
+                "lastStart": 0,
+                "lastEnd": 0,
+                "escapes": 0,
+                "origin": "Local(x)"
+              }
+            ],
+            "actual": [
+              {
+                "module": 0,
+                "function": 12,
+                "mutable": 0,
+                "start": 50,
+                "end": 55,
+                "lastStart": 0,
+                "lastEnd": 0,
+                "escapes": 0,
+                "origin": "Local(x)"
+              }
+            ]
+          },
+          {
+            "index": 2,
+            "name": "temporary excluded",
+            "matched": true,
+            "reference": [],
+            "actual": []
+          },
+          {
+            "index": 3,
+            "name": "alias extends use",
+            "matched": true,
+            "reference": [
+              {
+                "module": 0,
+                "function": 12,
+                "mutable": 0,
+                "start": 50,
+                "end": 55,
+                "lastStart": 81,
+                "lastEnd": 82,
+                "escapes": 0,
+                "origin": "Local(x)"
+              }
+            ],
+            "actual": [
+              {
+                "module": 0,
+                "function": 12,
+                "mutable": 0,
+                "start": 50,
+                "end": 55,
+                "lastStart": 81,
+                "lastEnd": 82,
+                "escapes": 0,
+                "origin": "Local(x)"
+              }
+            ]
+          },
+          {
+            "index": 4,
+            "name": "overwrite releases old",
+            "matched": true,
+            "reference": [
+              {
+                "module": 0,
+                "function": 12,
+                "mutable": 0,
+                "start": 62,
+                "end": 67,
+                "lastStart": 77,
+                "lastEnd": 78,
+                "escapes": 0,
+                "origin": "Local(x)"
+              },
+              {
+                "module": 0,
+                "function": 12,
+                "mutable": 0,
+                "start": 81,
+                "end": 86,
+                "lastStart": 96,
+                "lastEnd": 97,
+                "escapes": 0,
+                "origin": "Local(y)"
+              }
+            ],
+            "actual": [
+              {
+                "module": 0,
+                "function": 12,
+                "mutable": 0,
+                "start": 62,
+                "end": 67,
+                "lastStart": 77,
+                "lastEnd": 78,
+                "escapes": 0,
+                "origin": "Local(x)"
+              },
+              {
+                "module": 0,
+                "function": 12,
+                "mutable": 0,
+                "start": 81,
+                "end": 86,
+                "lastStart": 96,
+                "lastEnd": 97,
+                "escapes": 0,
+                "origin": "Local(y)"
+              }
+            ]
+          },
+          {
+            "index": 5,
+            "name": "known empty releases",
+            "matched": true,
+            "reference": [
+              {
+                "module": 0,
+                "function": 12,
+                "mutable": 0,
+                "start": 64,
+                "end": 69,
+                "lastStart": 0,
+                "lastEnd": 0,
+                "escapes": 0,
+                "origin": "Local(x)"
+              }
+            ],
+            "actual": [
+              {
+                "module": 0,
+                "function": 12,
+                "mutable": 0,
+                "start": 64,
+                "end": 69,
+                "lastStart": 0,
+                "lastEnd": 0,
+                "escapes": 0,
+                "origin": "Local(x)"
+              }
+            ]
+          },
+          {
+            "index": 6,
+            "name": "tagged payload use",
+            "matched": true,
+            "reference": [
+              {
+                "module": 0,
+                "function": 12,
+                "mutable": 0,
+                "start": 64,
+                "end": 69,
+                "lastStart": 105,
+                "lastEnd": 106,
+                "escapes": 0,
+                "origin": "Local(x)"
+              }
+            ],
+            "actual": [
+              {
+                "module": 0,
+                "function": 12,
+                "mutable": 0,
+                "start": 64,
+                "end": 69,
+                "lastStart": 105,
+                "lastEnd": 106,
+                "escapes": 0,
+                "origin": "Local(x)"
+              }
+            ]
+          },
+          {
+            "index": 7,
+            "name": "temporary tagged pattern",
+            "matched": true,
+            "reference": [
+              {
+                "module": 0,
+                "function": 64,
+                "mutable": 0,
+                "start": 100,
+                "end": 105,
+                "lastStart": 132,
+                "lastEnd": 133,
+                "escapes": 0,
+                "origin": "Local(x)"
+              },
+              {
+                "module": 0,
+                "function": 12,
+                "mutable": 0,
+                "start": 54,
+                "end": 62,
+                "lastStart": 54,
+                "lastEnd": 62,
+                "escapes": 1,
+                "origin": "Param(0)"
+              }
+            ],
+            "actual": [
+              {
+                "module": 0,
+                "function": 64,
+                "mutable": 0,
+                "start": 100,
+                "end": 105,
+                "lastStart": 132,
+                "lastEnd": 133,
+                "escapes": 0,
+                "origin": "Local(x)"
+              },
+              {
+                "module": 0,
+                "function": 12,
+                "mutable": 0,
+                "start": 54,
+                "end": 62,
+                "lastStart": 54,
+                "lastEnd": 62,
+                "escapes": 1,
+                "origin": "Param(0)"
+              }
+            ]
+          },
+          {
+            "index": 8,
+            "name": "mutable use",
+            "matched": true,
+            "reference": [
+              {
+                "module": 0,
+                "function": 12,
+                "mutable": 1,
+                "start": 54,
+                "end": 63,
+                "lastStart": 78,
+                "lastEnd": 79,
+                "escapes": 0,
+                "origin": "Local(x)"
+              }
+            ],
+            "actual": [
+              {
+                "module": 0,
+                "function": 12,
+                "mutable": 1,
+                "start": 54,
+                "end": 63,
+                "lastStart": 78,
+                "lastEnd": 79,
+                "escapes": 0,
+                "origin": "Local(x)"
+              }
+            ]
+          },
+          {
+            "index": 9,
+            "name": "array descendant",
+            "matched": true,
+            "reference": [
+              {
+                "module": 0,
+                "function": 12,
+                "mutable": 1,
+                "start": 61,
+                "end": 70,
+                "lastStart": 105,
+                "lastEnd": 106,
+                "escapes": 0,
+                "origin": "Local(x)"
+              },
+              {
+                "module": 0,
+                "function": 12,
+                "mutable": 1,
+                "start": 90,
+                "end": 96,
+                "lastStart": 105,
+                "lastEnd": 106,
+                "escapes": 0,
+                "origin": "Local(x)"
+              }
+            ],
+            "actual": [
+              {
+                "module": 0,
+                "function": 12,
+                "mutable": 1,
+                "start": 61,
+                "end": 70,
+                "lastStart": 105,
+                "lastEnd": 106,
+                "escapes": 0,
+                "origin": "Local(x)"
+              },
+              {
+                "module": 0,
+                "function": 12,
+                "mutable": 1,
+                "start": 90,
+                "end": 96,
+                "lastStart": 105,
+                "lastEnd": 106,
+                "escapes": 0,
+                "origin": "Local(x)"
+              }
+            ]
+          },
+          {
+            "index": 10,
+            "name": "array direct range",
+            "matched": true,
+            "reference": [
+              {
+                "module": 0,
+                "function": 12,
+                "mutable": 1,
+                "start": 61,
+                "end": 75,
+                "lastStart": 84,
+                "lastEnd": 85,
+                "escapes": 0,
+                "origin": "Local(x)"
+              }
+            ],
+            "actual": [
+              {
+                "module": 0,
+                "function": 12,
+                "mutable": 1,
+                "start": 61,
+                "end": 75,
+                "lastStart": 84,
+                "lastEnd": 85,
+                "escapes": 0,
+                "origin": "Local(x)"
+              }
+            ]
+          },
+          {
+            "index": 11,
+            "name": "parameter return",
+            "matched": true,
+            "reference": [
+              {
+                "module": 0,
+                "function": 12,
+                "mutable": 0,
+                "start": 43,
+                "end": 44,
+                "lastStart": 43,
+                "lastEnd": 44,
+                "escapes": 1,
+                "origin": "Param(0)"
+              }
+            ],
+            "actual": [
+              {
+                "module": 0,
+                "function": 12,
+                "mutable": 0,
+                "start": 43,
+                "end": 44,
+                "lastStart": 43,
+                "lastEnd": 44,
+                "escapes": 1,
+                "origin": "Param(0)"
+              }
+            ]
+          },
+          {
+            "index": 12,
+            "name": "mutable parameter return",
+            "matched": true,
+            "reference": [
+              {
+                "module": 0,
+                "function": 12,
+                "mutable": 1,
+                "start": 51,
+                "end": 52,
+                "lastStart": 51,
+                "lastEnd": 52,
+                "escapes": 1,
+                "origin": "Param(0)"
+              }
+            ],
+            "actual": [
+              {
+                "module": 0,
+                "function": 12,
+                "mutable": 1,
+                "start": 51,
+                "end": 52,
+                "lastStart": 51,
+                "lastEnd": 52,
+                "escapes": 1,
+                "origin": "Param(0)"
+              }
+            ]
+          },
+          {
+            "index": 13,
+            "name": "tagged parameter return",
+            "matched": true,
+            "reference": [
+              {
+                "module": 0,
+                "function": 12,
+                "mutable": 0,
+                "start": 51,
+                "end": 59,
+                "lastStart": 51,
+                "lastEnd": 59,
+                "escapes": 1,
+                "origin": "Param(0)"
+              }
+            ],
+            "actual": [
+              {
+                "module": 0,
+                "function": 12,
+                "mutable": 0,
+                "start": 51,
+                "end": 59,
+                "lastStart": 51,
+                "lastEnd": 59,
+                "escapes": 1,
+                "origin": "Param(0)"
+              }
+            ]
+          },
+          {
+            "index": 14,
+            "name": "empty return",
+            "matched": true,
+            "reference": [],
+            "actual": []
+          },
+          {
+            "index": 15,
+            "name": "returned descendant",
+            "matched": true,
+            "reference": [
+              {
+                "module": 0,
+                "function": 12,
+                "mutable": 1,
+                "start": 53,
+                "end": 59,
+                "lastStart": 53,
+                "lastEnd": 59,
+                "escapes": 1,
+                "origin": "Param(0)"
+              }
+            ],
+            "actual": [
+              {
+                "module": 0,
+                "function": 12,
+                "mutable": 1,
+                "start": 53,
+                "end": 59,
+                "lastStart": 53,
+                "lastEnd": 59,
+                "escapes": 1,
+                "origin": "Param(0)"
+              }
+            ]
+          },
+          {
+            "index": 16,
+            "name": "bound returned descendant",
+            "matched": true,
+            "reference": [
+              {
+                "module": 0,
+                "function": 12,
+                "mutable": 1,
+                "start": 65,
+                "end": 71,
+                "lastStart": 79,
+                "lastEnd": 80,
+                "escapes": 1,
+                "origin": "Param(0)"
+              }
+            ],
+            "actual": [
+              {
+                "module": 0,
+                "function": 12,
+                "mutable": 1,
+                "start": 65,
+                "end": 71,
+                "lastStart": 79,
+                "lastEnd": 80,
+                "escapes": 1,
+                "origin": "Param(0)"
+              }
+            ]
+          },
+          {
+            "index": 17,
+            "name": "static retained",
+            "matched": true,
+            "reference": [
+              {
+                "module": 0,
+                "function": 12,
+                "mutable": 0,
+                "start": 39,
+                "end": 45,
+                "lastStart": 54,
+                "lastEnd": 55,
+                "escapes": 0,
+                "origin": "Static"
+              }
+            ],
+            "actual": [
+              {
+                "module": 0,
+                "function": 12,
+                "mutable": 0,
+                "start": 39,
+                "end": 45,
+                "lastStart": 54,
+                "lastEnd": 55,
+                "escapes": 0,
+                "origin": "Static"
+              }
+            ]
+          },
+          {
+            "index": 18,
+            "name": "static return",
+            "matched": true,
+            "reference": [
+              {
+                "module": 0,
+                "function": 12,
+                "mutable": 0,
+                "start": 35,
+                "end": 41,
+                "lastStart": 35,
+                "lastEnd": 41,
+                "escapes": 1,
+                "origin": "Static"
+              }
+            ],
+            "actual": [
+              {
+                "module": 0,
+                "function": 12,
+                "mutable": 0,
+                "start": 35,
+                "end": 41,
+                "lastStart": 35,
+                "lastEnd": 41,
+                "escapes": 1,
+                "origin": "Static"
+              }
+            ]
+          },
+          {
+            "index": 19,
+            "name": "static alias return",
+            "matched": true,
+            "reference": [
+              {
+                "module": 0,
+                "function": 12,
+                "mutable": 0,
+                "start": 43,
+                "end": 49,
+                "lastStart": 57,
+                "lastEnd": 58,
+                "escapes": 1,
+                "origin": "Static"
+              }
+            ],
+            "actual": [
+              {
+                "module": 0,
+                "function": 12,
+                "mutable": 0,
+                "start": 43,
+                "end": 49,
+                "lastStart": 57,
+                "lastEnd": 58,
+                "escapes": 1,
+                "origin": "Static"
+              }
+            ]
+          },
+          {
+            "index": 20,
+            "name": "local escape rejected",
+            "matched": true,
+            "reference": [
+              {
+                "module": 0,
+                "function": 12,
+                "mutable": 0,
+                "start": 53,
+                "end": 58,
+                "lastStart": 66,
+                "lastEnd": 67,
+                "escapes": 0,
+                "origin": "Local(x)"
+              }
+            ],
+            "actual": [
+              {
+                "module": 0,
+                "function": 12,
+                "mutable": 0,
+                "start": 53,
+                "end": 58,
+                "lastStart": 66,
+                "lastEnd": 67,
+                "escapes": 0,
+                "origin": "Local(x)"
+              }
+            ]
+          },
+          {
+            "index": 21,
+            "name": "branch joins loans",
+            "matched": true,
+            "reference": [
+              {
+                "module": 0,
+                "function": 12,
+                "mutable": 0,
+                "start": 68,
+                "end": 73,
+                "lastStart": 99,
+                "lastEnd": 100,
+                "escapes": 0,
+                "origin": "Local(x)"
+              },
+              {
+                "module": 0,
+                "function": 12,
+                "mutable": 0,
+                "start": 82,
+                "end": 87,
+                "lastStart": 99,
+                "lastEnd": 100,
+                "escapes": 0,
+                "origin": "Local(y)"
+              }
+            ],
+            "actual": [
+              {
+                "module": 0,
+                "function": 12,
+                "mutable": 0,
+                "start": 68,
+                "end": 73,
+                "lastStart": 99,
+                "lastEnd": 100,
+                "escapes": 0,
+                "origin": "Local(x)"
+              },
+              {
+                "module": 0,
+                "function": 12,
+                "mutable": 0,
+                "start": 82,
+                "end": 87,
+                "lastStart": 99,
+                "lastEnd": 100,
+                "escapes": 0,
+                "origin": "Local(y)"
+              }
+            ]
+          },
+          {
+            "index": 22,
+            "name": "loop use",
+            "matched": true,
+            "reference": [
+              {
+                "module": 0,
+                "function": 12,
+                "mutable": 0,
+                "start": 56,
+                "end": 61,
+                "lastStart": 80,
+                "lastEnd": 81,
+                "escapes": 0,
+                "origin": "Local(x)"
+              }
+            ],
+            "actual": [
+              {
+                "module": 0,
+                "function": 12,
+                "mutable": 0,
+                "start": 56,
+                "end": 61,
+                "lastStart": 80,
+                "lastEnd": 81,
+                "escapes": 0,
+                "origin": "Local(x)"
+              }
+            ]
+          },
+          {
+            "index": 23,
+            "name": "forwarded shared call",
+            "matched": true,
+            "reference": [
+              {
+                "module": 0,
+                "function": 12,
+                "mutable": 0,
+                "start": 44,
+                "end": 45,
+                "lastStart": 44,
+                "lastEnd": 45,
+                "escapes": 1,
+                "origin": "Param(0)"
+              },
+              {
+                "module": 0,
+                "function": 47,
+                "mutable": 0,
+                "start": 88,
+                "end": 93,
+                "lastStart": 104,
+                "lastEnd": 105,
+                "escapes": 0,
+                "origin": "Local(x)"
+              }
+            ],
+            "actual": [
+              {
+                "module": 0,
+                "function": 12,
+                "mutable": 0,
+                "start": 44,
+                "end": 45,
+                "lastStart": 44,
+                "lastEnd": 45,
+                "escapes": 1,
+                "origin": "Param(0)"
+              },
+              {
+                "module": 0,
+                "function": 47,
+                "mutable": 0,
+                "start": 88,
+                "end": 93,
+                "lastStart": 104,
+                "lastEnd": 105,
+                "escapes": 0,
+                "origin": "Local(x)"
+              }
+            ]
+          },
+          {
+            "index": 24,
+            "name": "shared call from mutable",
+            "matched": true,
+            "reference": [
+              {
+                "module": 0,
+                "function": 47,
+                "mutable": 0,
+                "start": 116,
+                "end": 117,
+                "lastStart": 128,
+                "lastEnd": 129,
+                "escapes": 0,
+                "origin": "Local(x)"
+              },
+              {
+                "module": 0,
+                "function": 12,
+                "mutable": 0,
+                "start": 44,
+                "end": 45,
+                "lastStart": 44,
+                "lastEnd": 45,
+                "escapes": 1,
+                "origin": "Param(0)"
+              },
+              {
+                "module": 0,
+                "function": 47,
+                "mutable": 1,
+                "start": 89,
+                "end": 98,
+                "lastStart": 128,
+                "lastEnd": 129,
+                "escapes": 0,
+                "origin": "Local(x)"
+              }
+            ],
+            "actual": [
+              {
+                "module": 0,
+                "function": 47,
+                "mutable": 0,
+                "start": 116,
+                "end": 117,
+                "lastStart": 128,
+                "lastEnd": 129,
+                "escapes": 0,
+                "origin": "Local(x)"
+              },
+              {
+                "module": 0,
+                "function": 12,
+                "mutable": 0,
+                "start": 44,
+                "end": 45,
+                "lastStart": 44,
+                "lastEnd": 45,
+                "escapes": 1,
+                "origin": "Param(0)"
+              },
+              {
+                "module": 0,
+                "function": 47,
+                "mutable": 1,
+                "start": 89,
+                "end": 98,
+                "lastStart": 128,
+                "lastEnd": 129,
+                "escapes": 0,
+                "origin": "Local(x)"
+              }
+            ]
+          },
+          {
+            "index": 25,
+            "name": "mutable field and shared child",
+            "matched": true,
+            "reference": [
+              {
+                "module": 0,
+                "function": 30,
+                "mutable": 0,
+                "start": 104,
+                "end": 111,
+                "lastStart": 121,
+                "lastEnd": 122,
+                "escapes": 0,
+                "origin": "Local(b)"
+              },
+              {
+                "module": 0,
+                "function": 30,
+                "mutable": 1,
+                "start": 80,
+                "end": 89,
+                "lastStart": 121,
+                "lastEnd": 122,
+                "escapes": 0,
+                "origin": "Local(b)"
+              }
+            ],
+            "actual": [
+              {
+                "module": 0,
+                "function": 30,
+                "mutable": 0,
+                "start": 104,
+                "end": 111,
+                "lastStart": 121,
+                "lastEnd": 122,
+                "escapes": 0,
+                "origin": "Local(b)"
+              },
+              {
+                "module": 0,
+                "function": 30,
+                "mutable": 1,
+                "start": 80,
+                "end": 89,
+                "lastStart": 121,
+                "lastEnd": 122,
+                "escapes": 0,
+                "origin": "Local(b)"
+              }
+            ]
+          },
+          {
+            "index": 26,
+            "name": "generic provider descendant",
+            "matched": true,
+            "reference": [
+              {
+                "module": 1,
+                "function": 16,
+                "mutable": 1,
+                "start": 65,
+                "end": 71,
+                "lastStart": 65,
+                "lastEnd": 71,
+                "escapes": 1,
+                "origin": "Param(0)"
+              },
+              {
+                "module": 0,
+                "function": 34,
+                "mutable": 1,
+                "start": 79,
+                "end": 94,
+                "lastStart": 103,
+                "lastEnd": 104,
+                "escapes": 0,
+                "origin": "Param(0)"
+              }
+            ],
+            "actual": [
+              {
+                "module": 1,
+                "function": 16,
+                "mutable": 1,
+                "start": 65,
+                "end": 71,
+                "lastStart": 65,
+                "lastEnd": 71,
+                "escapes": 1,
+                "origin": "Param(0)"
+              },
+              {
+                "module": 0,
+                "function": 34,
+                "mutable": 1,
+                "start": 79,
+                "end": 94,
+                "lastStart": 103,
+                "lastEnd": 104,
+                "escapes": 0,
+                "origin": "Param(0)"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "suite": "iteration-facts-native",
+      "comparison": {
+        "passed": true,
+        "matched": 18,
+        "count": 18,
+        "facts": 23,
+        "cases": [
+          {
+            "index": 0,
+            "name": "owned scalar array",
+            "matched": true,
+            "reference": [
+              {
+                "module": 0,
+                "function": 12,
+                "mutable": 0,
+                "start": 64,
+                "end": 68,
+                "lastStart": 64,
+                "lastEnd": 68,
+                "escapes": 0,
+                "origin": "Local(data)"
+              }
+            ],
+            "actual": [
+              {
+                "module": 0,
+                "function": 12,
+                "mutable": 0,
+                "start": 64,
+                "end": 68,
+                "lastStart": 64,
+                "lastEnd": 68,
+                "escapes": 0,
+                "origin": "Local(data)"
+              }
+            ]
+          },
+          {
+            "index": 1,
+            "name": "owned array break",
+            "matched": true,
+            "reference": [
+              {
+                "module": 0,
+                "function": 12,
+                "mutable": 0,
+                "start": 64,
+                "end": 68,
+                "lastStart": 64,
+                "lastEnd": 68,
+                "escapes": 0,
+                "origin": "Local(data)"
+              }
+            ],
+            "actual": [
+              {
+                "module": 0,
+                "function": 12,
+                "mutable": 0,
+                "start": 64,
+                "end": 68,
+                "lastStart": 64,
+                "lastEnd": 68,
+                "escapes": 0,
+                "origin": "Local(data)"
+              }
+            ]
+          },
+          {
+            "index": 2,
+            "name": "borrowed shared view",
+            "matched": true,
+            "reference": [
+              {
+                "module": 0,
+                "function": 12,
+                "mutable": 0,
+                "start": 60,
+                "end": 68,
+                "lastStart": 88,
+                "lastEnd": 89,
+                "escapes": 0,
+                "origin": "Local(data)"
+              }
+            ],
+            "actual": [
+              {
+                "module": 0,
+                "function": 12,
+                "mutable": 0,
+                "start": 60,
+                "end": 68,
+                "lastStart": 88,
+                "lastEnd": 89,
+                "escapes": 0,
+                "origin": "Local(data)"
+              }
+            ]
+          },
+          {
+            "index": 3,
+            "name": "parameter shared view",
+            "matched": true,
+            "reference": [],
+            "actual": []
+          },
+          {
+            "index": 4,
+            "name": "mutable array item",
+            "matched": true,
+            "reference": [
+              {
+                "module": 0,
+                "function": 12,
+                "mutable": 1,
+                "start": 72,
+                "end": 76,
+                "lastStart": 79,
+                "lastEnd": 83,
+                "escapes": 0,
+                "origin": "Local(data)"
+              },
+              {
+                "module": 0,
+                "function": 12,
+                "mutable": 1,
+                "start": 72,
+                "end": 76,
+                "lastStart": 79,
+                "lastEnd": 83,
+                "escapes": 0,
+                "origin": "Local(data)"
+              }
+            ],
+            "actual": [
+              {
+                "module": 0,
+                "function": 12,
+                "mutable": 1,
+                "start": 72,
+                "end": 76,
+                "lastStart": 79,
+                "lastEnd": 83,
+                "escapes": 0,
+                "origin": "Local(data)"
+              },
+              {
+                "module": 0,
+                "function": 12,
+                "mutable": 1,
+                "start": 72,
+                "end": 76,
+                "lastStart": 79,
+                "lastEnd": 83,
+                "escapes": 0,
+                "origin": "Local(data)"
+              }
+            ]
+          },
+          {
+            "index": 5,
+            "name": "mutable view item",
+            "matched": true,
+            "reference": [
+              {
+                "module": 0,
+                "function": 12,
+                "mutable": 1,
+                "start": 65,
+                "end": 66,
+                "lastStart": 69,
+                "lastEnd": 73,
+                "escapes": 0,
+                "origin": "Param(0)"
+              }
+            ],
+            "actual": [
+              {
+                "module": 0,
+                "function": 12,
+                "mutable": 1,
+                "start": 65,
+                "end": 66,
+                "lastStart": 69,
+                "lastEnd": 73,
+                "escapes": 0,
+                "origin": "Param(0)"
+              }
+            ]
+          },
+          {
+            "index": 6,
+            "name": "direct mutable subview item",
+            "matched": true,
+            "reference": [
+              {
+                "module": 0,
+                "function": 12,
+                "mutable": 1,
+                "start": 65,
+                "end": 71,
+                "lastStart": 74,
+                "lastEnd": 78,
+                "escapes": 0,
+                "origin": "Param(0)"
+              },
+              {
+                "module": 0,
+                "function": 12,
+                "mutable": 1,
+                "start": 65,
+                "end": 71,
+                "lastStart": 74,
+                "lastEnd": 78,
+                "escapes": 0,
+                "origin": "Param(0)"
+              }
+            ],
+            "actual": [
+              {
+                "module": 0,
+                "function": 12,
+                "mutable": 1,
+                "start": 65,
+                "end": 71,
+                "lastStart": 74,
+                "lastEnd": 78,
+                "escapes": 0,
+                "origin": "Param(0)"
+              },
+              {
+                "module": 0,
+                "function": 12,
+                "mutable": 1,
+                "start": 65,
+                "end": 71,
+                "lastStart": 74,
+                "lastEnd": 78,
+                "escapes": 0,
+                "origin": "Param(0)"
+              }
+            ]
+          },
+          {
+            "index": 7,
+            "name": "shared array item",
+            "matched": true,
+            "reference": [
+              {
+                "module": 0,
+                "function": 12,
+                "mutable": 0,
+                "start": 68,
+                "end": 72,
+                "lastStart": 83,
+                "lastEnd": 87,
+                "escapes": 0,
+                "origin": "Local(data)"
+              },
+              {
+                "module": 0,
+                "function": 12,
+                "mutable": 0,
+                "start": 68,
+                "end": 72,
+                "lastStart": 83,
+                "lastEnd": 87,
+                "escapes": 0,
+                "origin": "Local(data)"
+              }
+            ],
+            "actual": [
+              {
+                "module": 0,
+                "function": 12,
+                "mutable": 0,
+                "start": 68,
+                "end": 72,
+                "lastStart": 83,
+                "lastEnd": 87,
+                "escapes": 0,
+                "origin": "Local(data)"
+              },
+              {
+                "module": 0,
+                "function": 12,
+                "mutable": 0,
+                "start": 68,
+                "end": 72,
+                "lastStart": 83,
+                "lastEnd": 87,
+                "escapes": 0,
+                "origin": "Local(data)"
+              }
+            ]
+          },
+          {
+            "index": 8,
+            "name": "loop borrowing local",
+            "matched": true,
+            "reference": [
+              {
+                "module": 0,
+                "function": 12,
+                "mutable": 0,
+                "start": 65,
+                "end": 70,
+                "lastStart": 80,
+                "lastEnd": 81,
+                "escapes": 0,
+                "origin": "Local(x)"
+              }
+            ],
+            "actual": [
+              {
+                "module": 0,
+                "function": 12,
+                "mutable": 0,
+                "start": 65,
+                "end": 70,
+                "lastStart": 80,
+                "lastEnd": 81,
+                "escapes": 0,
+                "origin": "Local(x)"
+              }
+            ]
+          },
+          {
+            "index": 9,
+            "name": "classic post use",
+            "matched": true,
+            "reference": [
+              {
+                "module": 0,
+                "function": 12,
+                "mutable": 0,
+                "start": 50,
+                "end": 55,
+                "lastStart": 91,
+                "lastEnd": 92,
+                "escapes": 0,
+                "origin": "Local(x)"
+              }
+            ],
+            "actual": [
+              {
+                "module": 0,
+                "function": 12,
+                "mutable": 0,
+                "start": 50,
+                "end": 55,
+                "lastStart": 91,
+                "lastEnd": 92,
+                "escapes": 0,
+                "origin": "Local(x)"
+              }
+            ]
+          },
+          {
+            "index": 10,
+            "name": "nested copied loop",
+            "matched": true,
+            "reference": [
+              {
+                "module": 0,
+                "function": 12,
+                "mutable": 0,
+                "start": 58,
+                "end": 59,
+                "lastStart": 58,
+                "lastEnd": 59,
+                "escapes": 0,
+                "origin": "Local(x)"
+              },
+              {
+                "module": 0,
+                "function": 12,
+                "mutable": 0,
+                "start": 77,
+                "end": 78,
+                "lastStart": 77,
+                "lastEnd": 78,
+                "escapes": 0,
+                "origin": "Local(x)"
+              }
+            ],
+            "actual": [
+              {
+                "module": 0,
+                "function": 12,
+                "mutable": 0,
+                "start": 58,
+                "end": 59,
+                "lastStart": 58,
+                "lastEnd": 59,
+                "escapes": 0,
+                "origin": "Local(x)"
+              },
+              {
+                "module": 0,
+                "function": 12,
+                "mutable": 0,
+                "start": 77,
+                "end": 78,
+                "lastStart": 77,
+                "lastEnd": 78,
+                "escapes": 0,
+                "origin": "Local(x)"
+              }
+            ]
+          },
+          {
+            "index": 11,
+            "name": "array loop returns",
+            "matched": true,
+            "reference": [
+              {
+                "module": 0,
+                "function": 12,
+                "mutable": 0,
+                "start": 58,
+                "end": 59,
+                "lastStart": 58,
+                "lastEnd": 59,
+                "escapes": 0,
+                "origin": "Local(x)"
+              }
+            ],
+            "actual": [
+              {
+                "module": 0,
+                "function": 12,
+                "mutable": 0,
+                "start": 58,
+                "end": 59,
+                "lastStart": 58,
+                "lastEnd": 59,
+                "escapes": 0,
+                "origin": "Local(x)"
+              }
+            ]
+          },
+          {
+            "index": 12,
+            "name": "unused reference item",
+            "matched": true,
+            "reference": [
+              {
+                "module": 0,
+                "function": 12,
+                "mutable": 1,
+                "start": 72,
+                "end": 76,
+                "lastStart": 0,
+                "lastEnd": 0,
+                "escapes": 0,
+                "origin": "Local(data)"
+              },
+              {
+                "module": 0,
+                "function": 12,
+                "mutable": 1,
+                "start": 72,
+                "end": 76,
+                "lastStart": 72,
+                "lastEnd": 76,
+                "escapes": 0,
+                "origin": "Local(data)"
+              }
+            ],
+            "actual": [
+              {
+                "module": 0,
+                "function": 12,
+                "mutable": 1,
+                "start": 72,
+                "end": 76,
+                "lastStart": 0,
+                "lastEnd": 0,
+                "escapes": 0,
+                "origin": "Local(data)"
+              },
+              {
+                "module": 0,
+                "function": 12,
+                "mutable": 1,
+                "start": 72,
+                "end": 76,
+                "lastStart": 72,
+                "lastEnd": 76,
+                "escapes": 0,
+                "origin": "Local(data)"
+              }
+            ]
+          },
+          {
+            "index": 13,
+            "name": "mutable i64 item",
+            "matched": true,
+            "reference": [
+              {
+                "module": 0,
+                "function": 12,
+                "mutable": 1,
+                "start": 74,
+                "end": 78,
+                "lastStart": 81,
+                "lastEnd": 85,
+                "escapes": 0,
+                "origin": "Local(data)"
+              },
+              {
+                "module": 0,
+                "function": 12,
+                "mutable": 1,
+                "start": 74,
+                "end": 78,
+                "lastStart": 81,
+                "lastEnd": 85,
+                "escapes": 0,
+                "origin": "Local(data)"
+              }
+            ],
+            "actual": [
+              {
+                "module": 0,
+                "function": 12,
+                "mutable": 1,
+                "start": 74,
+                "end": 78,
+                "lastStart": 81,
+                "lastEnd": 85,
+                "escapes": 0,
+                "origin": "Local(data)"
+              },
+              {
+                "module": 0,
+                "function": 12,
+                "mutable": 1,
+                "start": 74,
+                "end": 78,
+                "lastStart": 81,
+                "lastEnd": 85,
+                "escapes": 0,
+                "origin": "Local(data)"
+              }
+            ]
+          },
+          {
+            "index": 14,
+            "name": "return parameter item",
+            "matched": true,
+            "reference": [
+              {
+                "module": 0,
+                "function": 12,
+                "mutable": 1,
+                "start": 71,
+                "end": 72,
+                "lastStart": 81,
+                "lastEnd": 85,
+                "escapes": 1,
+                "origin": "Param(0)"
+              }
+            ],
+            "actual": [
+              {
+                "module": 0,
+                "function": 12,
+                "mutable": 1,
+                "start": 71,
+                "end": 72,
+                "lastStart": 81,
+                "lastEnd": 85,
+                "escapes": 1,
+                "origin": "Param(0)"
+              }
+            ]
+          },
+          {
+            "index": 15,
+            "name": "owned array field",
+            "matched": true,
+            "reference": [
+              {
+                "module": 0,
+                "function": 35,
+                "mutable": 0,
+                "start": 95,
+                "end": 103,
+                "lastStart": 95,
+                "lastEnd": 103,
+                "escapes": 0,
+                "origin": "Local(bag)"
+              }
+            ],
+            "actual": [
+              {
+                "module": 0,
+                "function": 35,
+                "mutable": 0,
+                "start": 95,
+                "end": 103,
+                "lastStart": 95,
+                "lastEnd": 103,
+                "escapes": 0,
+                "origin": "Local(bag)"
+              }
+            ]
+          },
+          {
+            "index": 16,
+            "name": "shared aggregate array field",
+            "matched": true,
+            "reference": [],
+            "actual": []
+          },
+          {
+            "index": 17,
+            "name": "mutable aggregate array field",
+            "matched": true,
+            "reference": [
+              {
+                "module": 0,
+                "function": 35,
+                "mutable": 1,
+                "start": 89,
+                "end": 97,
+                "lastStart": 100,
+                "lastEnd": 104,
+                "escapes": 0,
+                "origin": "Param(0)"
+              },
+              {
+                "module": 0,
+                "function": 35,
+                "mutable": 1,
+                "start": 89,
+                "end": 97,
+                "lastStart": 100,
+                "lastEnd": 104,
+                "escapes": 0,
+                "origin": "Param(0)"
+              }
+            ],
+            "actual": [
+              {
+                "module": 0,
+                "function": 35,
+                "mutable": 1,
+                "start": 89,
+                "end": 97,
+                "lastStart": 100,
+                "lastEnd": 104,
+                "escapes": 0,
+                "origin": "Param(0)"
+              },
+              {
+                "module": 0,
+                "function": 35,
+                "mutable": 1,
+                "start": 89,
+                "end": 97,
+                "lastStart": 100,
+                "lastEnd": 104,
+                "escapes": 0,
+                "origin": "Param(0)"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "suite": "constructor-facts-native",
+      "comparison": {
+        "passed": true,
+        "matched": 19,
+        "count": 19,
+        "facts": 14,
+        "cases": [
+          {
+            "index": 0,
+            "name": "raw text retained",
+            "matched": true,
+            "reference": [],
+            "actual": []
+          },
+          {
+            "index": 1,
+            "name": "raw text returned",
+            "matched": true,
+            "reference": [
+              {
+                "module": 0,
+                "function": 69,
+                "mutable": 0,
+                "start": 103,
+                "end": 149,
+                "lastStart": 103,
+                "lastEnd": 149,
+                "escapes": 1,
+                "origin": "Param(0)"
+              }
+            ],
+            "actual": [
+              {
+                "module": 0,
+                "function": 69,
+                "mutable": 0,
+                "start": 103,
+                "end": 149,
+                "lastStart": 103,
+                "lastEnd": 149,
+                "escapes": 1,
+                "origin": "Param(0)"
+              }
+            ]
+          },
+          {
+            "index": 2,
+            "name": "raw bytes bound return",
+            "matched": true,
+            "reference": [
+              {
+                "module": 0,
+                "function": 69,
+                "mutable": 0,
+                "start": 164,
+                "end": 165,
+                "lastStart": 164,
+                "lastEnd": 165,
+                "escapes": 1,
+                "origin": "Param(0)"
+              }
+            ],
+            "actual": [
+              {
+                "module": 0,
+                "function": 69,
+                "mutable": 0,
+                "start": 164,
+                "end": 165,
+                "lastStart": 164,
+                "lastEnd": 165,
+                "escapes": 1,
+                "origin": "Param(0)"
+              }
+            ]
+          },
+          {
+            "index": 3,
+            "name": "raw mutable bytes returned",
+            "matched": true,
+            "reference": [
+              {
+                "module": 0,
+                "function": 69,
+                "mutable": 1,
+                "start": 112,
+                "end": 169,
+                "lastStart": 112,
+                "lastEnd": 169,
+                "escapes": 1,
+                "origin": "Param(0)"
+              }
+            ],
+            "actual": [
+              {
+                "module": 0,
+                "function": 69,
+                "mutable": 1,
+                "start": 112,
+                "end": 169,
+                "lastStart": 112,
+                "lastEnd": 169,
+                "escapes": 1,
+                "origin": "Param(0)"
+              }
+            ]
+          },
+          {
+            "index": 4,
+            "name": "raw CStr returned",
+            "matched": true,
+            "reference": [
+              {
+                "module": 0,
+                "function": 69,
+                "mutable": 0,
+                "start": 104,
+                "end": 151,
+                "lastStart": 104,
+                "lastEnd": 151,
+                "escapes": 1,
+                "origin": "Param(0)"
+              }
+            ],
+            "actual": [
+              {
+                "module": 0,
+                "function": 69,
+                "mutable": 0,
+                "start": 104,
+                "end": 151,
+                "lastStart": 104,
+                "lastEnd": 151,
+                "escapes": 1,
+                "origin": "Param(0)"
+              }
+            ]
+          },
+          {
+            "index": 5,
+            "name": "raw explicit owner retained",
+            "matched": true,
+            "reference": [
+              {
+                "module": 0,
+                "function": 69,
+                "mutable": 0,
+                "start": 156,
+                "end": 161,
+                "lastStart": 188,
+                "lastEnd": 189,
+                "escapes": 0,
+                "origin": "Local(b)"
+              }
+            ],
+            "actual": [
+              {
+                "module": 0,
+                "function": 69,
+                "mutable": 0,
+                "start": 156,
+                "end": 161,
+                "lastStart": 188,
+                "lastEnd": 189,
+                "escapes": 0,
+                "origin": "Local(b)"
+              }
+            ]
+          },
+          {
+            "index": 6,
+            "name": "raw explicit mutable owner",
+            "matched": true,
+            "reference": [
+              {
+                "module": 0,
+                "function": 69,
+                "mutable": 1,
+                "start": 167,
+                "end": 176,
+                "lastStart": 203,
+                "lastEnd": 204,
+                "escapes": 0,
+                "origin": "Local(b)"
+              }
+            ],
+            "actual": [
+              {
+                "module": 0,
+                "function": 69,
+                "mutable": 1,
+                "start": 167,
+                "end": 176,
+                "lastStart": 203,
+                "lastEnd": 204,
+                "escapes": 0,
+                "origin": "Local(b)"
+              }
+            ]
+          },
+          {
+            "index": 7,
+            "name": "raw owner alias",
+            "matched": true,
+            "reference": [
+              {
+                "module": 0,
+                "function": 69,
+                "mutable": 0,
+                "start": 133,
+                "end": 138,
+                "lastStart": 211,
+                "lastEnd": 212,
+                "escapes": 0,
+                "origin": "Local(b)"
+              }
+            ],
+            "actual": [
+              {
+                "module": 0,
+                "function": 69,
+                "mutable": 0,
+                "start": 133,
+                "end": 138,
+                "lastStart": 211,
+                "lastEnd": 212,
+                "escapes": 0,
+                "origin": "Local(b)"
+              }
+            ]
+          },
+          {
+            "index": 8,
+            "name": "raw mutable descendant",
+            "matched": true,
+            "reference": [
+              {
+                "module": 0,
+                "function": 69,
+                "mutable": 1,
+                "start": 180,
+                "end": 186,
+                "lastStart": 195,
+                "lastEnd": 196,
+                "escapes": 0,
+                "origin": "Param(0)"
+              }
+            ],
+            "actual": [
+              {
+                "module": 0,
+                "function": 69,
+                "mutable": 1,
+                "start": 180,
+                "end": 186,
+                "lastStart": 195,
+                "lastEnd": 196,
+                "escapes": 0,
+                "origin": "Param(0)"
+              }
+            ]
+          },
+          {
+            "index": 9,
+            "name": "raw local return rejected",
+            "matched": true,
+            "reference": [],
+            "actual": []
+          },
+          {
+            "index": 10,
+            "name": "raw temporary excluded",
+            "matched": true,
+            "reference": [],
+            "actual": []
+          },
+          {
+            "index": 11,
+            "name": "Region discarded allocation",
+            "matched": true,
+            "reference": [],
+            "actual": []
+          },
+          {
+            "index": 12,
+            "name": "Region allocation used",
+            "matched": true,
+            "reference": [],
+            "actual": []
+          },
+          {
+            "index": 13,
+            "name": "Region direct return",
+            "matched": true,
+            "reference": [
+              {
+                "module": 0,
+                "function": 35,
+                "mutable": 0,
+                "start": 87,
+                "end": 97,
+                "lastStart": 87,
+                "lastEnd": 97,
+                "escapes": 1,
+                "origin": "RegionParam(0)"
+              }
+            ],
+            "actual": [
+              {
+                "module": 0,
+                "function": 35,
+                "mutable": 0,
+                "start": 87,
+                "end": 97,
+                "lastStart": 87,
+                "lastEnd": 97,
+                "escapes": 1,
+                "origin": "RegionParam(0)"
+              }
+            ]
+          },
+          {
+            "index": 14,
+            "name": "Region bound return",
+            "matched": true,
+            "reference": [
+              {
+                "module": 0,
+                "function": 35,
+                "mutable": 0,
+                "start": 104,
+                "end": 105,
+                "lastStart": 104,
+                "lastEnd": 105,
+                "escapes": 1,
+                "origin": "RegionParam(0)"
+              }
+            ],
+            "actual": [
+              {
+                "module": 0,
+                "function": 35,
+                "mutable": 0,
+                "start": 104,
+                "end": 105,
+                "lastStart": 104,
+                "lastEnd": 105,
+                "escapes": 1,
+                "origin": "RegionParam(0)"
+              }
+            ]
+          },
+          {
+            "index": 15,
+            "name": "Region payload return",
+            "matched": true,
+            "reference": [
+              {
+                "module": 0,
+                "function": 35,
+                "mutable": 0,
+                "start": 105,
+                "end": 111,
+                "lastStart": 105,
+                "lastEnd": 111,
+                "escapes": 1,
+                "origin": "RegionParam(0)"
+              }
+            ],
+            "actual": [
+              {
+                "module": 0,
+                "function": 35,
+                "mutable": 0,
+                "start": 105,
+                "end": 111,
+                "lastStart": 105,
+                "lastEnd": 111,
+                "escapes": 1,
+                "origin": "RegionParam(0)"
+              }
+            ]
+          },
+          {
+            "index": 16,
+            "name": "Region local escape rejected",
+            "matched": true,
+            "reference": [],
+            "actual": []
+          },
+          {
+            "index": 17,
+            "name": "Region branch return",
+            "matched": true,
+            "reference": [
+              {
+                "module": 0,
+                "function": 35,
+                "mutable": 0,
+                "start": 94,
+                "end": 127,
+                "lastStart": 94,
+                "lastEnd": 127,
+                "escapes": 1,
+                "origin": "RegionParam(0)"
+              }
+            ],
+            "actual": [
+              {
+                "module": 0,
+                "function": 35,
+                "mutable": 0,
+                "start": 94,
+                "end": 127,
+                "lastStart": 94,
+                "lastEnd": 127,
+                "escapes": 1,
+                "origin": "RegionParam(0)"
+              }
+            ]
+          },
+          {
+            "index": 18,
+            "name": "Region provider return",
+            "matched": true,
+            "reference": [
+              {
+                "module": 2,
+                "function": 39,
+                "mutable": 0,
+                "start": 105,
+                "end": 115,
+                "lastStart": 105,
+                "lastEnd": 115,
+                "escapes": 1,
+                "origin": "RegionParam(0)"
+              },
+              {
+                "module": 0,
+                "function": 56,
+                "mutable": 0,
+                "start": 108,
+                "end": 121,
+                "lastStart": 108,
+                "lastEnd": 121,
+                "escapes": 1,
+                "origin": "RegionParam(0)"
+              }
+            ],
+            "actual": [
+              {
+                "module": 2,
+                "function": 39,
+                "mutable": 0,
+                "start": 105,
+                "end": 115,
+                "lastStart": 105,
+                "lastEnd": 115,
+                "escapes": 1,
+                "origin": "RegionParam(0)"
+              },
+              {
+                "module": 0,
+                "function": 56,
+                "mutable": 0,
+                "start": 108,
+                "end": 121,
+                "lastStart": 108,
+                "lastEnd": 121,
+                "escapes": 1,
+                "origin": "RegionParam(0)"
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "cliRegression": [
+    {
+      "suite": "owner-access-unit",
+      "matched": 31,
+      "comparison": "exact Go diagnostics"
+    },
+    {
+      "suite": "storage-generations-unit",
+      "matched": 9,
+      "comparison": "exact Go diagnostics"
+    },
+    {
+      "suite": "subview-unit",
+      "matched": 38,
+      "comparison": "exact Go diagnostics"
+    },
+    {
+      "suite": "reference-access-unit",
+      "matched": 27,
+      "comparison": "exact Go diagnostics"
+    },
+    {
+      "suite": "loan-conflicts-unit",
+      "matched": 38,
+      "comparison": "exact Go diagnostics"
+    },
+    {
+      "suite": "owner-moves-unit",
+      "matched": 39,
+      "comparison": "frozen contract goldens with previously recorded Go differences"
+    },
+    {
+      "suite": "owner-arguments-unit",
+      "matched": 7,
+      "comparison": "frozen contract goldens with previously recorded Go differences"
+    },
+    {
+      "suite": "iteration-facts-unit/conflicts",
+      "matched": 6,
+      "comparison": "exact Go diagnostics"
+    }
+  ],
+  "sourceCorrections": {
+    "rejectedAccesses": 39,
+    "files": 5,
+    "privateAppendCallsReordered": 33,
+    "snapshots": [
+      "two parser block-depth reads",
+      "two bound Symbol initializers",
+      "three result-flow join-kind reads",
+      "one returned-origin Value snapshot carrying two fields"
+    ],
+    "evaluationOrder": "Pure node construction and reference descriptor selection are reordered so referent metadata is read before mutable arguments are passed. Side effects and parser state updates remain inside the same append/block calls.",
+    "privateAPI": "body_state::append now receives Node before its mutable descriptor arguments."
+  },
+  "sourceCheck": {
+    "exit": 0,
+    "stdout": "check ok: 2 instance(s), 236 source file(s), 2924 MIR function(s), lock unchanged\n"
+  },
+  "lockedDevelopmentBuild": {
+    "exit": 0,
+    "stdout": "built: build/lexer-candidate.exe (x86_64-windows-msvc, development, lock verified)\n"
+  },
+  "budgets": {
+    "work": 1048576,
+    "historicalLoans": 16384,
+    "newUnboundedAllocation": false
+  },
+  "skipped": {
+    "fullCompiler": "Complete semantic package and five relevant compiler execution roots passed in reference unit 8f6fb5d8; full compiler suite not repeated for candidate source-only wiring.",
+    "fullCandidateRelease": "Deferred consolidated batch",
+    "Linux": "Deferred consolidated batch"
+  },
+  "pending": [
+    "Remaining access edges and general moved-owner state",
+    "Move-aware cleanup and borrow MIR/C/runtime",
+    "Unsafe provenance, full dispatcher and stage1/stage2"
+  ],
+  "stableCLIChanged": false,
+  "sdkABIChanged": false,
+  "dbChanged": false,
+  "ciRunnerChanged": false,
+  "privateAPIChanged": true,
+  "pushed": false
+}

@@ -2289,3 +2289,28 @@ five files. Preparing values before passing mutable descriptors is the next
 source correction; candidate guard wiring follows. The candidate was not
 rebuilt with these invalid calls. General moved-owner state, cleanup, borrow
 MIR/C/runtime and dispatcher self-hosting remain pending. No push.
+
+## Candidate held referent-read parity (2026-10-10)
+
+Fairy now rejects competing field, dereference and borrowed-index reads during
+earlier exclusive argument and mutable view-selector holds. Branches, loop
+bodies, aliases, returned references and generic providers retain the selected
+origin. Descriptor copying and view length metadata remain separate from reads;
+shared holds, selected-store RHS reads and access after release remain admitted.
+
+The corrected reference exposed 39 invalid argument reads in five candidate
+files. The private parser append receives its pure Node value before mutable
+descriptor arguments; 33 callers follow that order. Block depth, bound Symbols,
+join kinds and returned origin state are prepared before exclusive acquisition.
+Full source checking and a fresh locked development build pass.
+
+All 32 new CLI fixtures and the selected native diagnostic test match complete
+Go primary, loan and last-use coordinates. Existing 195 CLI comparisons pass;
+owner suites retain their previously documented Go differences. Three selected
+native APIs match 64 fixtures and all 71 owned borrow-fact rows. Evidence:
+`docs/ops/evidence/candidate-held-referent-read-20261010.json`.
+
+Remaining access edges, general move state, cleanup, borrow MIR/C/runtime,
+unsafe provenance, the full dispatcher and stage1/stage2 remain pending.
+Full candidate release and Linux stay deferred. The private parser append
+signature changed; stable CLI, SDK ABI, DB and CI are unchanged. No push.

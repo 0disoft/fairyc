@@ -8,10 +8,10 @@ import std::bytes as bytes;
 import std::vec as v;
 
 fn join::Problem local(ref ast::Ast a,ref scanner::Stream source,usize entry,ref v::Vec<usize> annotations,ref mut m::Context c,ref mut v::Vec<m::Symbol> symbols,ref mut v::Vec<usize> entries){
-    let e=ast::entry_at(a,entry-1);let usize type=if(e.type_root==0){0}else{*v::at<usize>(annotations,e.type_root-1)};let id=switch(m::add(source,c,symbols,m::Symbol{.kind=if(e.kind==1){1}else if(e.kind==2){2}else{3},.type,.entry,.pattern=0,.scope=c.scope,.start=e.name_start,.end=e.name_end})){case .ok(id):{id}case .err(p):{return p;}};let slot=v::at_mut<usize>(entries,entry-1);*slot=id;return m::fail(c,0,0,0);
+    let e=ast::entry_at(a,entry-1);let usize type=if(e.type_root==0){0}else{*v::at<usize>(annotations,e.type_root-1)};let bound_symbol=m::Symbol{.kind=if(e.kind==1){1}else if(e.kind==2){2}else{3},.type,.entry,.pattern=0,.scope=c.scope,.start=e.name_start,.end=e.name_end};let id=switch(m::add(source,c,symbols,bound_symbol)){case .ok(id):{id}case .err(p):{return p;}};let slot=v::at_mut<usize>(entries,entry-1);*slot=id;return m::fail(c,0,0,0);
 }
 fn join::Problem pattern(ref ast::Ast a,ref scanner::Stream source,usize id,u32 kind,usize type,ref mut m::Context c,ref mut v::Vec<m::Symbol> symbols,ref mut v::Vec<usize> patterns){
-    let n=ast::expression_at(a,id);let name=m::spelling(a,source,id);if(bytes::equal(name,b"_")){return m::fail(c,0,0,0);}let symbol=switch(m::add(source,c,symbols,m::Symbol{.kind,.type,.entry=0,.pattern=id,.scope=c.scope,.start=n.start,.end=n.end})){case .ok(id):{id}case .err(p):{return p;}};let slot=v::at_mut<usize>(patterns,id-1);*slot=symbol;return m::fail(c,0,0,0);
+    let n=ast::expression_at(a,id);let name=m::spelling(a,source,id);if(bytes::equal(name,b"_")){return m::fail(c,0,0,0);}let bound_symbol=m::Symbol{.kind,.type,.entry=0,.pattern=id,.scope=c.scope,.start=n.start,.end=n.end};let symbol=switch(m::add(source,c,symbols,bound_symbol)){case .ok(id):{id}case .err(p):{return p;}};let slot=v::at_mut<usize>(patterns,id-1);*slot=symbol;return m::fail(c,0,0,0);
 }
 fn join::Problem bind_pattern(ref ast::Ast a,ref scanner::Stream source,usize id,u32 kind,usize type,ref mut m::Context c,ref mut v::Vec<m::Symbol> symbols,ref mut v::Vec<usize> patterns){
     if(id==0){return m::fail(c,0,0,0);}let p=ast::expression_at(a,id);if(p.kind==17){return pattern(a,source,id,kind,type,c,symbols,patterns);}if(p.kind==16){return if(p.left==0){m::fail(c,0,0,0)}else{pattern(a,source,p.left,kind,type,c,symbols,patterns)};}
