@@ -2,6 +2,7 @@ module tests::module_project_compile;
 import module_project_compile as compile;
 import module_project_link as link;
 import module_unit_body_ir_model as ir;
+import module_unit_body_ir_verify as proof;
 import module_signatures as signatures;
 import candidate_limits as limits;
 import syntax as syntax;
@@ -27,4 +28,12 @@ fn syntax::Parsed text(ref u8[] source){let b=switch(bytes::copy(source)){case .
     while(i<count){var u8[4096] path=[0;4096];let n=switch(process::arg(i+1,ref mut path)){case .ok(n):{n}case .err(_):{assert(false);return;}};let b=switch(files::load(ref path[..n])){case .ok(b):{b}case .err(_):{assert(false);return;}};assert(v::push<syntax::Parsed>(ref mut sources,parsed(b)).is_ok);i+=1;}
     let metadata=switch(signatures::build(ref sources)){case .ok(p):{p}case .err(e):{discard io::write("signatures ");discard io::write_u32(e.code);discard io::write("\n");assert(false);return;}};
     let units=switch(compile::build(ref sources,ref metadata)){case .ok(p):{p}case .err(e):{failed(e);assert(false);return;}};discard io::write("compiled units ");discard io::write_usize(compile::count(ref units));discard io::write(" retries ");discard io::write_usize(compile::retries(ref units));discard io::write("\n");var usize next=0;i=0;while(i<compile::count(ref units)){let range=compile::at(ref units,i);assert(range.first==next && range.first<range.stop);next=range.stop;i+=1;}assert(next==count);
+}
+
+@test @effects(filesystem,console) fn void original_origin_flow_unit_compile(){
+    let count=process::arg_count()-1;assert(count>200 && count<=limits::source_files());var v::Vec<syntax::Parsed> sources=v::empty<syntax::Parsed>();var usize i=0;
+    while(i<count){var u8[4096] path=[0;4096];let n=switch(process::arg(i+1,ref mut path)){case .ok(n):{n}case .err(_):{assert(false);return;}};let b=switch(files::load(ref path[..n])){case .ok(b):{b}case .err(_):{assert(false);return;}};assert(v::push<syntax::Parsed>(ref mut sources,parsed(b)).is_ok);i+=1;}
+    let metadata=switch(signatures::build(ref sources)){case .ok(p):{p}case .err(e):{discard io::write("signatures ");discard io::write_u32(e.code);discard io::write("\n");assert(false);return;}};
+    let declaration=syntax::declaration_at(v::at<syntax::Parsed>(ref sources,138),0);assert(bytes::equal(syntax::source_view(v::at<syntax::Parsed>(ref sources,138))[declaration.name_start..declaration.name_end],b"module_unit_origin_flow"));
+    let unit=switch(compile::range(ref sources,ref metadata,138,139)){case .ok(p):{p}case .err(e):{failed(e);assert(false);return;}};assert(proof::check(ref unit).code==0);var usize maximum=0;i=1;while(i<=ir::count(ref unit)){let count=ir::node_count(ir::at(ref unit,i));if(count>maximum){maximum=count;}i+=1;}assert(maximum>4160 && maximum<=limits::program_expressions());discard io::write("maximum nodes ");discard io::write_usize(maximum);discard io::write(" owned frames ");discard io::write_usize(ir::count(ref unit));discard io::write(" work ");discard io::write_usize(ir::work(ref unit));discard io::write("\n");
 }

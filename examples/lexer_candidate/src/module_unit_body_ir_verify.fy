@@ -51,7 +51,7 @@ pub fn clean_ir::Problem check_raw_parts(ref ir::Program p,ref ir::Body b,usize 
 }
 pub fn clean_ir::Problem check_body(ref ir::Body b,ref clean_ir::Program cleaned,usize frame,ref mut usize work){
     if(frame==0 || frame>clean_ir::frame_count(cleaned)){return fail(1001,0,0,0);}let f=clean_ir::frame_at(cleaned,frame);let nt=clean_ir::type_count(cleaned);
-    if(ir::node_count(b)>4160 || ir::statement_count(b)>4096 || ir::text_bytes(b)>1048576 || ir::region_count(b)>4096 || ir::reset_count(b)>16384 || ir::placement_count(b)>16384){return fail(1002,f.module_index,0,0);}
+    if(ir::node_count(b)>limits::program_expressions() || ir::statement_count(b)>4096 || ir::text_bytes(b)>1048576 || ir::region_count(b)>4096 || ir::reset_count(b)>16384 || ir::placement_count(b)>16384){return fail(1002,f.module_index,0,0);}
     if(!span(ir::start(b),ir::end(b),ir::source_bytes(b)) || ir::body(b)==0 || lookup::statement(b,ir::body(b))==0){return fail(1001,f.module_index,0,0);}
     let root=ir::statement_at(b,lookup::statement(b,ir::body(b))-1).value;
     if(root.kind!=1 || root.start<ir::start(b) || root.end>ir::end(b)){return fail(1001,f.module_index,root.start,root.end);}

@@ -29,7 +29,8 @@ The original CLI entrypoint's current private/SDK import closure has 234 modules
 and exceeds 1 MiB. Native source-set admission parses every exact file, verifies
 the catalog's original source snapshots and partitions them into 23 units.
 The parser's expression arena now uses the existing 16384-expression unit cap
-instead of 4160, admitting the original `module_unit_generics.fy`. Statement,
+instead of 4160, admitting the original `module_unit_generics.fy`. Owned body IR
+revalidation uses the same 16384-node expression cap. Statement,
 entry, type, field, declaration and depth limits retain their prior values.
 This proves source-set admission, not whole-dispatcher C generation or execution.
 
