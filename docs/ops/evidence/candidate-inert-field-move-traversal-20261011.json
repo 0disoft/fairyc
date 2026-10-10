@@ -1,0 +1,111 @@
+{
+  "schema": "fairyc.candidate-inert-field-move-traversal/v1",
+  "passed": true,
+  "parentCommit": "cc261a29001fa82be0ce923e5dfef63d2cb42c25",
+  "implementation": {
+    "path": "examples/lexer_candidate/src/module_unit_moves.fy",
+    "bytes": 4727,
+    "sha256": "2d42a7d09386e88d3fbdf1be5a1a3ffa650a6f60c5091c4a58e00d093c464ff0"
+  },
+  "tests": [
+    {
+      "path": "examples/lexer_candidate/tests/module_project_compile.fy",
+      "bytes": 7312,
+      "sha256": "7d2e89be52f12e5245f141478815b76b56a786559785b644366da8b28442f825"
+    },
+    {
+      "path": "examples/lexer_candidate/tests/module_unit_moves.fy",
+      "bytes": 31249,
+      "sha256": "d0baffae6788b4250b6ebe48462d534a1d0d91d5de22f29d6ebc266b6e20a8e4"
+    }
+  ],
+  "originalSource": {
+    "path": "examples/lexer_candidate/src/type_cli.fy",
+    "bytes": 6487,
+    "sha256": "10903a2009889628b0d01ca7287651c73430f8246ff5636b2a895cc2fbad607d"
+  },
+  "receiptTool": {
+    "path": "tools/verify-candidate-inert-field-move-traversal.py",
+    "bytes": 5614,
+    "sha256": "4cbd068782260fafa29268a35d2b77494593bd9ea2e418a2cb2836b4b050df0d"
+  },
+  "diagnostic": {
+    "report": {
+      "path": ".cache/candidate-tagged/sdk-c-execution/run-type-cli-depth-diagnostic.json",
+      "bytes": 146,
+      "sha256": "d4eade8c3ef8458c40a095732afce404ba06f06c9d973896db9d0b2ecd414967"
+    },
+    "temporaryCode": 9001,
+    "meaning": "Move expression recursion reached depth 64, independently distinguished from exhausted work in a cache-only probe"
+  },
+  "policy": {
+    "moveDepth": 64,
+    "work": 1048576,
+    "resourceOwnerFieldsStillTraversed": true,
+    "inertOwnerScalarFieldsDoNotTriggerMoveTraversal": true
+  },
+  "native": {
+    "report": {
+      "path": ".cache/candidate-tagged/sdk-c-execution/native-inert-field-move-traversal.json",
+      "bytes": 5467,
+      "sha256": "a4722b1fc8191d721ceae5e55e61e50b2f68bf0b4c53f7017c6c352ae48df4d8"
+    },
+    "passedCases": 2,
+    "goldenCases": 58,
+    "stdout": "type_cli frames 26 producer work 116554\n",
+    "coverage": [
+      "Unchanged original type_cli source compiles and owned IR revalidates",
+      "Existing exact move/branch/loop diagnostic and related-span goldens remain valid"
+    ]
+  },
+  "check": {
+    "path": ".cache/candidate-tagged/sdk-c-execution/check-inert-field-move-traversal.json",
+    "bytes": 80,
+    "sha256": "14be462009d0313edb7dd26f0b865eef44599727f8afa8a237d8a09bb9efbe99"
+  },
+  "stableAPIChanged": false,
+  "GoChanged": false,
+  "normativeContractsChanged": false,
+  "dbChanged": false,
+  "ciChanged": false,
+  "fullOriginalCompilationPassed": true,
+  "originalMain": {
+    "report": {
+      "path": ".cache/candidate-tagged/sdk-c-execution/native-main-inert-field-move-traversal.json",
+      "bytes": 378,
+      "sha256": "cd1f1f6ddb13835690142dd306200a1f6d01af6ec830dff0a632dd5d6b092e62"
+    },
+    "inputPaths": {
+      "path": ".cache/candidate-tagged/sdk-c-execution/main-project-liveness-inputs.json",
+      "bytes": 13014,
+      "sha256": "3489423685e86ea9ca27ccae2b98db3adce341a6724607cb891ade5e4954a85e"
+    },
+    "sourceSet": {
+      "files": 235,
+      "bytes": 1655620,
+      "sha256": "5f54dc9025805e040a917d3afb0daae4c0e249a739f769ca408bed221154bd9a",
+      "encoding": "u64le path-byte length, UTF-8 relative path, u64le source-byte length, exact source bytes; in input order"
+    },
+    "units": 51,
+    "retries": 28,
+    "stdout": "compiled units 51 retries 28\n",
+    "nativeExecutionTimeoutSeconds": 60,
+    "command": {
+      "path": ".cache/candidate-tagged/sdk-c-execution/native-main-inert-field-move-traversal-command.json",
+      "bytes": 516,
+      "sha256": "7f162cc3cd9f158a560e02db91920e9be8bc6494b1ad2e155448f571a9449e63"
+    },
+    "validationHostCompileTimeoutSeconds": 120,
+    "coversEverySourceExactlyOnce": true
+  },
+  "deferred": [
+    "Dispatcher linking and C execution",
+    "Default compilation timeout/performance",
+    "Native driver",
+    "Linux",
+    "Standalone compiler profiles",
+    "Full suite",
+    "Stage1/Stage2"
+  ],
+  "pushed": false
+}

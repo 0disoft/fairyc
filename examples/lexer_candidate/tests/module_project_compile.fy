@@ -37,3 +37,11 @@ fn syntax::Parsed text(ref u8[] source){let b=switch(bytes::copy(source)){case .
     let declaration=syntax::declaration_at(v::at<syntax::Parsed>(ref sources,138),0);assert(bytes::equal(syntax::source_view(v::at<syntax::Parsed>(ref sources,138))[declaration.name_start..declaration.name_end],b"module_unit_origin_flow"));
     let unit=switch(compile::range(ref sources,ref metadata,138,139)){case .ok(p):{p}case .err(e):{failed(e);assert(false);return;}};assert(proof::check(ref unit).code==0);var usize maximum=0;i=1;while(i<=ir::count(ref unit)){let count=ir::node_count(ir::at(ref unit,i));if(count>maximum){maximum=count;}i+=1;}assert(maximum>4160 && maximum<=limits::program_expressions());discard io::write("maximum nodes ");discard io::write_usize(maximum);discard io::write(" owned frames ");discard io::write_usize(ir::count(ref unit));discard io::write(" work ");discard io::write_usize(ir::work(ref unit));discard io::write("\n");
 }
+
+@test @effects(filesystem,console) fn void original_type_cli_unit_skips_unowned_field_traversal(){
+    let count=process::arg_count()-1;assert(count>200 && count<=limits::source_files());var v::Vec<syntax::Parsed> sources=v::empty<syntax::Parsed>();var usize i=0;
+    while(i<count){var u8[4096] path=[0;4096];let n=switch(process::arg(i+1,ref mut path)){case .ok(n):{n}case .err(_):{assert(false);return;}};let b=switch(files::load(ref path[..n])){case .ok(b):{b}case .err(_):{assert(false);return;}};assert(v::push<syntax::Parsed>(ref mut sources,parsed(b)).is_ok);i+=1;}
+    let metadata=switch(signatures::build(ref sources)){case .ok(p):{p}case .err(e):{discard io::write("signatures ");discard io::write_u32(e.code);discard io::write("\n");assert(false);return;}};
+    let declaration=syntax::declaration_at(v::at<syntax::Parsed>(ref sources,222),0);assert(bytes::equal(syntax::source_view(v::at<syntax::Parsed>(ref sources,222))[declaration.name_start..declaration.name_end],b"type_cli"));
+    let unit=switch(compile::range(ref sources,ref metadata,222,223)){case .ok(p):{p}case .err(e):{failed(e);assert(false);return;}};assert(proof::check(ref unit).code==0);discard io::write("type_cli frames ");discard io::write_usize(ir::count(ref unit));discard io::write(" producer work ");discard io::write_usize(ir::work(ref unit));discard io::write("\n");
+}
