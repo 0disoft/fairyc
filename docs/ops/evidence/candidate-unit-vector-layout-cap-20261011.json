@@ -1,0 +1,87 @@
+{
+  "schema": "fairyc.candidate-unit-vector-layout-cap/v1",
+  "passed": true,
+  "parentCommit": "3b5b70872cf81f45c1768d99d1eb83213ac9c22b",
+  "implementation": {
+    "path": "examples/lexer_candidate/src/module_unit_interfaces.fy",
+    "bytes": 27952,
+    "sha256": "a43adc62bdfc8f7a2d9ab509babb91a4b09b359a5d009952963c9c2510c81ead"
+  },
+  "contract": {
+    "path": "docs/architecture/candidate-compilation-units-v0.md",
+    "bytes": 135456,
+    "sha256": "ae2b890d9c5d24226de9d526d15a96df6050c36238b9c23e4f06b40954c095cf"
+  },
+  "test": {
+    "path": "examples/lexer_candidate/tests/module_unit_vector_layout_capacity.fy",
+    "bytes": 3647,
+    "sha256": "9a5d359c9a0f73ebe4b162b07d668bfada076954a8b6be491bfd8c383fb14fad"
+  },
+  "receiptTool": {
+    "path": "tools/verify-candidate-unit-vector-layout-cap.py",
+    "bytes": 4939,
+    "sha256": "97638b994ce7d1071716b136605afd6a0d7228c0fb776585c8772c8a85f13c90"
+  },
+  "policy": {
+    "vectorLayouts": 256,
+    "sharedLimit": "sdk_vector_plan::limit",
+    "genericFunctionsPerUnit": 64,
+    "genericFunctionsPerDeclaration": 16,
+    "metadataFields": 1024,
+    "work": 1048576,
+    "note": "Independent table and traversal caps can reject before 256 layouts"
+  },
+  "native": {
+    "report": {
+      "path": ".cache/candidate-tagged/sdk-c-execution/native-unit-vector-layout-cap.json",
+      "bytes": 579,
+      "sha256": "03339a79414e177e4af491bb109c2f1074a82016f9eaa30b5d6362ca431ecee3"
+    },
+    "retry": {
+      "path": ".cache/candidate-tagged/sdk-c-execution/native-unit-vector-layout-cap-final.json",
+      "bytes": 443,
+      "sha256": "56cf51b621685030cbe5496a347678a1335e91d6f462f56e3484d2e4fe4b77b2"
+    },
+    "passedCases": 2,
+    "vectorLayouts": 65,
+    "executableGenericInstances": 0,
+    "fixtureCorrection": "Initial fixture exceeded the unchanged 128-declaration per-source catalog cap. Split the 65 nominal declarations and 65 function prototypes into separate sources. Also corrected the initial SDK field-count assertion and counted generic instances separately from retained ordinary functions. Unchanged passing generic-capacity case is reused.",
+    "diagnostic": {
+      "path": ".cache/candidate-tagged/sdk-c-execution/native-unit-vector-layout-cap-diagnostic.json",
+      "bytes": 429,
+      "sha256": "3dd79bc75001d7850f0da4ae76f25c17d5d98f490f1d04bf64ae4f02fbfc5a45"
+    },
+    "coverage": [
+      "65 distinct nominal-element Vec layouts admitted without executable specializations",
+      "80 executable generic instances still split under the 64-per-unit limit, preserving all 83 frames"
+    ]
+  },
+  "check": {
+    "path": ".cache/candidate-tagged/sdk-c-execution/check-unit-vector-layout-cap.txt",
+    "bytes": 80,
+    "sha256": "2cd38bf1d080b8a1937d8b8084b6102b17c606fa964fa32f540d486a894f6275"
+  },
+  "originalCompilationPassed": false,
+  "original": {
+    "before": {
+      "path": "docs/ops/evidence/candidate-project-independent-move-budget-20261011.json",
+      "bytes": 2499,
+      "sha256": "327ec73df1bd1d613c2e76df5b9d352a96e7b60cea983be08b9eb100d358346b"
+    },
+    "report": {
+      "path": ".cache/candidate-tagged/sdk-c-execution/native-main-unit-vector-layout-cap.json",
+      "bytes": 429,
+      "sha256": "226777dfcfa37783e8a16aac715ffdb900c478e4a91ff40ffb6e41b1ad266ebe"
+    },
+    "stdout": "stage 3 code 10 module 113 at 275..421 range 136..137\n",
+    "unitSource": "examples/lexer_candidate/src/module_unit_origin_check.fy",
+    "attributedDeclaration": "module_unit_drops::Node",
+    "nextStep": "Inspect imported shape/field capacity for the same original unit"
+  },
+  "deferred": [
+    "Remaining original units",
+    "Original dispatcher linking and C execution",
+    "Linux and Stage1/Stage2"
+  ],
+  "pushed": false
+}

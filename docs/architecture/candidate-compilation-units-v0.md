@@ -224,7 +224,7 @@ independently of per-unit executable specialization and layout budgets. The
 complete original CLI signature graph requires 107 descriptors across 234
 source modules. The canonical graph remains bounded at 4096 nodes; executable
 generic admission remains 64 per unit and 16 per declaration, and each unit's
-vector layout admission remains 64. All aliases and repeated element types
+vector layout admission is 256. All aliases and repeated element types
 continue to share canonical descriptors. Boundary validation measures the SDK's
 five scalar-view Vec descriptors before constructing 256 accepted and 257
 rejected descriptors.

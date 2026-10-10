@@ -14,6 +14,7 @@ import std::vec as v;
 import storage_intrinsics as storage;
 import module_unit_shape_contracts as contracts;
 import module_region_types as regions;
+import sdk_vector_plan as vector_plan;
 
 pub struct Shape {usize type;usize module_index;usize declaration;usize field_start;usize field_count;u32 abilities;bool repr_c;usize start;usize end;bool cleanup_nonempty;u32 cleanup_effects;}
 pub struct Field {u32 kind;usize type;usize module_index;usize declaration;usize source_index;usize start;usize end;usize name_start;usize name_end;usize payload_start;usize payload_count;}
@@ -105,7 +106,7 @@ fn Result<Interfaces,join::Problem> build_mode(ref v::Vec<syntax::Parsed> source
         while(cleanup_body_cursor<generics::cleanup_count(ref specializations)){let p=body_demands(sources,metadata,ref specializations,2,cleanup_body_cursor+1,ref mut graph,ref mut demanded,ref mut pending,ref mut seen,ref mut budget);if(p.code!=0){return .err(p);}cleanup_body_cursor+=1;}
         while(dependency_cursor<generics::dependency_count(ref specializations)){let d=generics::dependency_at(ref specializations,dependency_cursor);let usize type=if(d.aggregate_type!=0){d.aggregate_type}else{d.intrinsic_type};if(type!=0){let u32 code=mark(ref mut graph,ref mut pending,ref mut seen,ref mut budget,type);if(code!=0){return .err(fail(code,0,0,0));}}dependency_cursor+=1;}
         while(cleanup_cursor<generics::cleanup_dependency_count(ref specializations)){let d=generics::cleanup_dependency_at(ref specializations,cleanup_cursor);let usize type=if(d.aggregate_type!=0){d.aggregate_type}else{d.intrinsic_type};if(type!=0){let u32 code=mark(ref mut graph,ref mut pending,ref mut seen,ref mut budget,type);if(code!=0){return .err(fail(code,0,0,0));}}cleanup_cursor+=1;}
-        var v::Vec<usize> cleanup_seeds=v::empty<usize>();while(cursor<v::len<usize>(ref pending)){let usize id=*v::at<usize>(ref pending,cursor);let t=types::at(ref graph,id);if(!charge(ref mut budget,1)){return .err(fail(10,t.module_index,0,0));}if(t.kind==13){if(vectors>=64){return .err(fail(4503,t.module_index,0,0));}vectors+=1;}
+        var v::Vec<usize> cleanup_seeds=v::empty<usize>();while(cursor<v::len<usize>(ref pending)){let usize id=*v::at<usize>(ref pending,cursor);let t=types::at(ref graph,id);if(!charge(ref mut budget,1)){return .err(fail(10,t.module_index,0,0));}if(t.kind==13){if(vectors>=vector_plan::limit()){return .err(fail(4503,t.module_index,0,0));}vectors+=1;}
             if(t.kind==2 || t.kind==3 || t.kind==4 || t.kind==13){let p=shape(sources,metadata,id,ref mut graph,ref mut shapes,ref mut fields,ref mut names,ref mut pending,ref mut seen,binding::first(bound),binding::stop(bound),ref mut budget);if(p.code!=0){return .err(p);}}
             if(t.kind==3 || t.kind==13){if(!v::push<usize>(ref mut cleanup_seeds,id).is_ok){return .err(fail(11,t.module_index,0,0));}}
             if(t.kind>=5 && t.kind<=8 || t.kind==13 || t.kind==16 || t.kind==17 || t.kind==18 || t.kind==12 && t.first!=0){let u32 code=mark(ref mut graph,ref mut pending,ref mut seen,ref mut budget,t.first);if(code!=0){return .err(fail(code,0,0,0));}if(t.kind==6){let u32 code=mark(ref mut graph,ref mut pending,ref mut seen,ref mut budget,t.second);if(code!=0){return .err(fail(code,0,0,0));}}}cursor+=1;
