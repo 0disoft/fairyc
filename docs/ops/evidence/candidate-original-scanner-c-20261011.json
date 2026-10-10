@@ -1,0 +1,255 @@
+{
+  "schema": "fairyc.candidate-original-scanner-c/v1",
+  "passed": true,
+  "parentCommit": "693e6fc33900d9fddd43b411c67c7c1d66884dcd",
+  "identity": [
+    {
+      "path": "examples/lexer_candidate/src/scanner.fy",
+      "sha256": "1bd27d59bc093341d351547b7945f2864ae43219cbe35543283675eddaf82d84"
+    },
+    {
+      "path": "examples/lexer_candidate/src/numbers.fy",
+      "sha256": "ee8b40b5e8061317d70d3594c386c9e4c70d95132a7e4243ea6402947a4c3556"
+    },
+    {
+      "path": "examples/lexer_candidate/src/diagnostics.fy",
+      "sha256": "ee95f81ed3b3224702196fceef2888434e9713341b81abf01e03945592c4de8b"
+    },
+    {
+      "path": "examples/lexer_candidate/src/utf8.fy",
+      "sha256": "4a5425cea9efbfb1bff2c31a38c2bd8e392c6792af09f24e906c9a743621870d"
+    },
+    {
+      "path": "examples/lexer_candidate/src/strings.fy",
+      "sha256": "8f26db7c4d4039c8c8d9fbc6078097859c8f714ca5887957fdf0e69269dca521"
+    },
+    {
+      "path": "examples/lexer_candidate/src/budget.fy",
+      "sha256": "c2793aa302279b9d27f0af32edd71f70de4e93cb4f76f55facd3e757641cc494"
+    },
+    {
+      "path": "examples/lexer_candidate/src/candidate_limits.fy",
+      "sha256": "5666b6a3ad8190630c8fe7b7bca969ede7264d95f97e3ed17e166bf88417fc9d"
+    },
+    {
+      "path": "internal/sdkstdlib/sources/optional/std/vec.fy",
+      "sha256": "0ae4c395bf98c39079ad620bde035b3b590d51417864802e698edc069281db5b"
+    },
+    {
+      "path": "internal/sdkstdlib/sources/std/bytes.fy",
+      "sha256": "4740a506e93349fb002c383967dcc44d182d20f09f2094b83b5464a4ab252982"
+    },
+    {
+      "path": "internal/sdkstdlib/sources/std/io.fy",
+      "sha256": "4b89c3aeb8b4de4887395d29723095d364c5660c6b773c5696fb1f65f5365f48"
+    },
+    {
+      "path": "examples/lexer_candidate/tests/module_unit_c_scanner.fy",
+      "sha256": "cce43db0aca4a3b1e7c83c9d89998c1e7d098798c85a8b133ae911045be46318"
+    },
+    {
+      "path": "tools/verify-candidate-scanner-c.py",
+      "sha256": "d25aa62d4a3d04d58e2b180eca27b2732f085d4194a86cd12f9ae9c80ef96fac"
+    },
+    {
+      "path": ".cache/candidate-tagged/compiler-text-current.exe",
+      "sha256": "7accbaf3c65e6debd2f391c9de92889f908667f4738607fa8cd2d12e275d1a87"
+    },
+    {
+      "path": "examples/lexer_candidate/fairy.lock",
+      "sha256": "18c1601c7ebc228caff927790754459d39f7d02bf964cfe0e09a7b35432297ae"
+    }
+  ],
+  "sourceCheck": {
+    "reusedFrom": "docs/ops/evidence/candidate-import-body-budget-20261011.json",
+    "reason": "All tracked compiler source, SDK/runtime inputs and source lock remain unchanged after the verified budget commit",
+    "trackedCompilerTreeUnchanged": true,
+    "locked": true,
+    "sourceFiles": 274,
+    "mirFunctions": 3406
+  },
+  "native": {
+    "report": {
+      "path": ".cache/candidate-tagged/sdk-c-execution/native-scanner-artifact.json",
+      "sha256": "e877ab9f82e89390491cb9f874ca3c041214e0b86b76160ab15d02c83c19dbcd"
+    },
+    "count": 1,
+    "passed": 1,
+    "stdout": "retained instances 73\nC bytes 469905 SHA256 words 1589921341 133821473 244302062 1182944348 4184350551 1556245859 1153273876 1766258771\n",
+    "sourceArguments": [
+      "examples/lexer_candidate/src/scanner.fy",
+      "examples/lexer_candidate/src/numbers.fy",
+      "examples/lexer_candidate/src/diagnostics.fy",
+      "examples/lexer_candidate/src/utf8.fy",
+      "examples/lexer_candidate/src/strings.fy",
+      "examples/lexer_candidate/src/budget.fy",
+      "examples/lexer_candidate/src/candidate_limits.fy",
+      "internal/sdkstdlib/sources/optional/std/vec.fy",
+      "internal/sdkstdlib/sources/std/bytes.fy",
+      "internal/sdkstdlib/sources/std/io.fy"
+    ],
+    "artifactArgument": ".cache/candidate-tagged/sdk-c-execution/scanner-generated.c",
+    "sourceSHA256": "5ec4463d07f9f4210e8fc0ee46824c5cf9681f575cc26d6344bd90146946f853"
+  },
+  "CExecution": {
+    "schema": "fairyc.candidate-original-scanner-c-execution/v1",
+    "passed": true,
+    "retainedInstances": 73,
+    "sourceBytes": 469905,
+    "sourceSHA256": "5ec4463d07f9f4210e8fc0ee46824c5cf9681f575cc26d6344bd90146946f853",
+    "executions": [
+      {
+        "profile": "low",
+        "sourceSHA256": "5ec4463d07f9f4210e8fc0ee46824c5cf9681f575cc26d6344bd90146946f853",
+        "counts": {
+          "heapAttempts": 3,
+          "heapLive": 0,
+          "bufferDrops": 1,
+          "vectorReleases": 3,
+          "cleanupErrors": 0
+        },
+        "build": {
+          "argv": [
+            "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+            "/nologo",
+            "/std:c11",
+            "/TC",
+            "/Od",
+            "/DFY_CANDIDATE_NO_MAIN",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\scanner-c\\scanner.c",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\scanner-c\\scanner-runtime.c",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\scanner-c\\trap.c",
+            "/Fe:C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\scanner-c\\scanner-low.exe",
+            "/link",
+            "/INCREMENTAL:NO"
+          ],
+          "exit": 0,
+          "stdout": "scanner.c\r\nscanner-runtime.c\r\ntrap.c\r\nGenerating Code...\r\n",
+          "stderr": ""
+        },
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\scanner-c\\scanner-low.exe"
+          ],
+          "exit": 0,
+          "stdout": "4 0 0 3 0 2 2 3 4 0 3 0 4 5 0 10 0 5 6 0 5 0 6 7 1 49 10 0 7 8 0 1 0 8 8 0 0 ",
+          "stderr": "{\"heapAttempts\":3,\"heapLive\":0,\"bufferDrops\":1,\"vectorReleases\":3,\"cleanupErrors\":0}\r\n"
+        }
+      },
+      {
+        "profile": "optimized",
+        "sourceSHA256": "5ec4463d07f9f4210e8fc0ee46824c5cf9681f575cc26d6344bd90146946f853",
+        "counts": {
+          "heapAttempts": 3,
+          "heapLive": 0,
+          "bufferDrops": 1,
+          "vectorReleases": 3,
+          "cleanupErrors": 0
+        },
+        "build": {
+          "argv": [
+            "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+            "/nologo",
+            "/std:c11",
+            "/TC",
+            "/O2",
+            "/DFY_CANDIDATE_NO_MAIN",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\scanner-c\\scanner.c",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\scanner-c\\scanner-runtime.c",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\scanner-c\\trap.c",
+            "/Fe:C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\scanner-c\\scanner-optimized.exe",
+            "/link",
+            "/INCREMENTAL:NO"
+          ],
+          "exit": 0,
+          "stdout": "scanner.c\r\nscanner-runtime.c\r\ntrap.c\r\nGenerating Code...\r\n",
+          "stderr": ""
+        },
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\scanner-c\\scanner-optimized.exe"
+          ],
+          "exit": 0,
+          "stdout": "4 0 0 3 0 2 2 3 4 0 3 0 4 5 0 10 0 5 6 0 5 0 6 7 1 49 10 0 7 8 0 1 0 8 8 0 0 ",
+          "stderr": "{\"heapAttempts\":3,\"heapLive\":0,\"bufferDrops\":1,\"vectorReleases\":3,\"cleanupErrors\":0}\r\n"
+        }
+      }
+    ],
+    "runtimeInputs": [
+      {
+        "path": "internal\\cstdlib\\stage0_system_heap.c",
+        "sha256": "cae6664fa1ec70722b76025c3e2c3daadc133cd90d95fa9f02f2385915d3e55c"
+      },
+      {
+        "path": "internal\\cstdlib\\stage0_buffer.c",
+        "sha256": "41c7a26acb8b9f22fd5e0f82c976f4b59964df2e2e73e7ddb5fa8bee70e8390c"
+      },
+      {
+        "path": "internal\\cstdlib\\stage0_vector_storage.c",
+        "sha256": "eb9686951b480a7c40d6bfe670206d683548c5293387c42a44670ad0b6e5ccca"
+      },
+      {
+        "path": "internal\\cstdlib\\stage0_windows_console.c",
+        "sha256": "076bc219ff0ff8ab6945ef0838230c77a254de8cefc460dfd05a842549bab306"
+      }
+    ]
+  },
+  "reference": {
+    "passed": true,
+    "runs": [
+      {
+        "argv": [
+          "check"
+        ],
+        "exit": 0,
+        "stdout": "check ok: 2 instance(s), 16 source file(s), 260 MIR function(s), lock updated\n",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "run",
+          "--locked"
+        ],
+        "exit": 0,
+        "stdout": "4 0 0 3 0 2 2 3 4 0 3 0 4 5 0 10 0 5 6 0 5 0 6 7 1 49 10 0 7 8 0 1 0 8 8 0 0 ",
+        "stderr": ""
+      }
+    ],
+    "sourceSHA256": "9e2f527b31ea61398f7c4585be8f7001d89745d127c17048e92a5770cf2118dd",
+    "sourceInputs": [
+      "examples/lexer_candidate/src/scanner.fy",
+      "examples/lexer_candidate/src/numbers.fy",
+      "examples/lexer_candidate/src/diagnostics.fy",
+      "examples/lexer_candidate/src/utf8.fy",
+      "examples/lexer_candidate/src/strings.fy",
+      "examples/lexer_candidate/src/budget.fy",
+      "examples/lexer_candidate/src/candidate_limits.fy"
+    ]
+  },
+  "observations": [
+    "Original scanner.fy, numbers.fy, diagnostics.fy, utf8.fy, strings.fy, budget.fy and candidate_limits.fy are passed unchanged with authentic Vec/Buffer/IO SDK inputs.",
+    "The owned module pipeline retains 73 bodies and emits 469905 C bytes after releasing temporary parsed sources.",
+    "Scanner report_work executes let n=1; with exact token/trivia/span/cooked-byte/EOF observations matching Go reference stdout.",
+    "Both emitted C profiles verify 3 actual heap attempts, 1 Buffer drop, 3 vector releases, zero live allocations and zero cleanup errors.",
+    "Native test stdout remains under the unchanged 64KiB capture bound; C artifact export is an explicit filesystem test action and eight SHA256 words bind its exact bytes."
+  ],
+  "normativeContractsChanged": false,
+  "stableCLIChanged": false,
+  "sdkABIChanged": false,
+  "implementationChanged": false,
+  "dbChanged": false,
+  "ciChanged": false,
+  "hygieneChanged": false,
+  "runnerChanged": "Local standalone scanner C verifier and explicit test artifact export",
+  "pushed": false,
+  "skipped": {
+    "candidateRelease": "Emitted C /O2 executes; standalone candidate Release deferred",
+    "Linux": "Later batch",
+    "fullSuite": "Compiler source unchanged; focused scanner integration cases only"
+  },
+  "pending": [
+    "Scanner error, UTF8/string/comment, budget and allocation-failure execution matrix.",
+    "File-loader-to-scanner and full CLI dispatcher/project/native driver integration.",
+    "Full source self-hosting and Stage1/Stage2 promotion evidence."
+  ]
+}
