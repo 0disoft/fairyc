@@ -2212,3 +2212,37 @@ competing-read cases, including held selectors and effectful raw metadata.
 Candidate guard wiring and exact diagnostic parity are next. Public CLI
 acceptance changes for invalid competing reads; public API, SDK ABI, DB and
 CI are unchanged. Release/Linux remain deferred; no push.
+
+## Candidate ordinary owner-read guard parity (2026-10-10)
+
+The Fairy origin flow now checks direct owner reads against live exclusive
+root loans and call-held borrows. Alias/tagged retention, loop backedges,
+branches and generic provider returns preserve the lexical owner identity.
+Shared and expired loans permit reads, and the selected reference retains
+access. Resource consumption keeps E2105 and its owner anchor.
+
+A scoped source-node marker separates place selection from value reads.
+Fixed-array length and direct metadata fields of the first raw/storage
+constructor argument preserve their existing admission; callbacks and
+effectful argument blocks remain checked. The marker is restored after each
+expression and store-target evaluation. New traversals use the existing work
+budget and historical loan bounds. The cleanup receiver Symbol is prepared
+before borrowing its local Context; the corrected Go compiler exposed the
+previous later-argument read of that Context.
+
+Source checking and a fresh locked development build passed. All 31 selected
+CLI cases and the selected native diagnostic test match complete Go error,
+borrow, last-use and move-owner coordinates. The original nine competing-read
+acceptance gaps are closed. Six added cases cover branch release/retention,
+loop break/continue and a generic provider. Prior 158 CLI cases and six
+iteration conflict cases match their references; the owner suites preserve
+their documented Go differences. Three selected native API regressions match
+64 fixtures and all 71 owned fact rows. Evidence:
+`docs/ops/evidence/candidate-owner-read-access-20261010.json`.
+
+Remaining referent/call access edges, general move state, cleanup, borrow
+MIR/C/runtime, unsafe provenance, full dispatcher and stage1/stage2 remain
+pending. The known SDK fixture module graph and obsolete nonplain-owner test
+expectation also require repair. The full compiler suite was not rerun after
+this candidate source change; release/Linux remain deferred. The private
+Context shape changed; stable CLI, SDK ABI, DB and CI are unchanged. No push.
