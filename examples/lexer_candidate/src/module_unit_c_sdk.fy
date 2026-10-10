@@ -1,0 +1,85 @@
+module module_unit_c_sdk;
+import module_unit_body_ir_model as ir;
+import module_unit_cleanup_mir_model as clean;
+import module_unit_value_model as budget;
+import module_unit_c_aggregate as aggregate;
+import module_unit_sdk_authority as authority;
+import module_unit_sdk_sources as sources;
+import sdk_scopes as sdk;
+import repr_c_declarations as repr;
+import pointer_types as pointers;
+import syntax as syntax;
+import c_text as w;
+import std::bytes as bytes;
+import std::vec as v;
+
+// Closed runtime records use their real C tags. Internal nominal fields remain
+// distinct, and adapters copy fields instead of claiming compatible C types.
+pub resource Plan {v::Vec<usize> rules;v::Vec<usize> records;v::Vec<usize> layouts;usize arena;cleanup{}}
+fn clean::Problem fail(u32 code,usize module_index,usize start,usize end){return clean::Problem{.code,.module_index,.start,.end};}
+fn ref u8[] slot(ref u8[] pool,usize index,usize count){if(index==0 || index>count){return pool[..0];}var usize start=0;var usize i=1;while(i<index){while(pool[start]!=0){start+=1;}start+=1;i+=1;}var usize end=start;while(pool[end]!=0){end+=1;}return pool[start..end];}
+fn ref u8[] source_name(usize record){let pool=b"raw_process_args_result\0raw_text_result\0raw_text_view\0raw_console_write_result\0raw_console_read_result\0";return slot(pool,record,5);}
+fn ref u8[] wire_name(usize record){let pool=b"fy_std_process_args_result_v0\0fy_std_owned_text_result_v0\0fy_std_text_view_v0\0fy_std_console_write_result_v0\0fy_std_console_read_result_v0\0";return slot(pool,record,5);}
+fn usize record_id(ref u8[] name,usize sdk_id){var usize i=1;while(i<=5){if(sdk_id==if(i==1){6}else if(i<=3){7}else{4} && bytes::equal(name,source_name(i))){return i;}i+=1;}return 0;}
+fn ref u8[] field_name(usize record,usize index){let pool=b"status\0needed\0allocation_status\0data\0length\0written\0read\0";let usize at=if(record==3){if(index==0){4}else{5}}else if(index==0){1}else if(record==1){2}else if(record==2){3}else if(record==4){6}else{7};return slot(pool,at,7);}
+fn u32 field_type(usize record,usize index){return if(record==3 && index==0){pointers::make(3,false)}else if(index==0 || record==2){4}else{5};}
+pub fn usize rule(ref Plan p,usize callable){assert(callable<v::len<usize>(ref p.rules));return *v::at<usize>(ref p.rules,callable);}
+// Other authenticated SDK components still need their storage/record bridges.
+pub fn bool admitted(usize code){return code==1 || code==2 || code>=24 && code<=32 || code==70 || code==71;}
+pub fn usize record(ref Plan p,usize type){return if(type==0 || type>v::len<usize>(ref p.records)){0}else{*v::at<usize>(ref p.records,type-1)};}
+fn usize layout(ref Plan p,usize type){return *v::at<usize>(ref p.layouts,type-1);}
+fn Result<usize,clean::Problem> shape(ref ir::Program p,ref syntax::Parsed original,usize type,ref mut usize work){let t=clean::type_at(ir::cleanup_ir(p),type);if(t.declaration==0 || t.declaration>syntax::declaration_count(original)){return .err(fail(1001,t.module_index,0,0));}let d=syntax::declaration_at(original,t.declaration-1);var usize found=0;var usize i=0;
+    while(i<ir::layout_count(p)){if(!budget::charge(work,1)){return .err(fail(1002,t.module_index,0,0));}let s=ir::layout_at(p,i).value;if(s.type==type){if(found!=0 || s.module_index!=t.module_index || s.declaration!=t.declaration || s.start!=d.start || s.end!=d.end || s.field_count!=d.field_count || s.field_start>ir::field_count(p) || s.field_count>ir::field_count(p)-s.field_start || !bytes::equal(ir::layout_name(p,i),syntax::source_view(original)[d.name_start..d.name_end])){return .err(fail(1001,t.module_index,d.start,d.end));}found=i+1;}i+=1;}
+    if(found==0){return .err(fail(1001,t.module_index,d.start,d.end));}let s=ir::layout_at(p,found-1).value;i=0;
+    while(i<s.field_count){if(!budget::charge(work,1)){return .err(fail(1002,t.module_index,d.start,d.end));}let f=ir::field_at(p,s.field_start+i);let original_field=syntax::field_at(original,d.field_start+i);
+        if(f.kind!=0 || f.module_index!=t.module_index || f.declaration!=t.declaration || f.source_index!=d.field_start+i || f.start!=original_field.start || f.end!=original_field.end || f.payload_count!=0 || !bytes::equal(ir::field_name(p,s.field_start+i),syntax::source_view(original)[original_field.name_start..original_field.name_end]) || !authority::type_matches(p,original,t.module_index,original_field.type_root,f.type,0,work)){return .err(fail(if(*work>=1048576){1002}else{1001},t.module_index,f.start,f.end));}i+=1;
+    }return .ok(found);
+}
+pub fn Result<Plan,clean::Problem> build(ref ir::Program p,ref mut usize work){var v::Vec<usize> rules=v::empty<usize>();var v::Vec<usize> records=v::empty<usize>();var v::Vec<usize> layouts=v::empty<usize>();var usize arena=0;var usize i=0;
+    while(i<ir::callable_count(p)){if(!budget::charge(work,1)){return .err(fail(1002,0,0,0));}if(!v::push<usize>(ref mut rules,0).is_ok){return .err(fail(1003,0,0,0));}i+=1;}i=0;
+    while(i<clean::type_count(ir::cleanup_ir(p))){if(!budget::charge(work,1)){return .err(fail(1002,0,0,0));}if(!v::push<usize>(ref mut records,0).is_ok || !v::push<usize>(ref mut layouts,0).is_ok){return .err(fail(1003,0,0,0));}i+=1;}
+    var usize u=0;while(u<sources::count(ir::sdk_units(p))){let unit=sources::at(ir::sdk_units(p),u);let original=switch(authority::parsed(ir::sdk_units(p),u,work)){case .ok(p):{p}case .err(e):{return .err(e);}};i=0;
+        while(i<ir::callable_count(p)){if(!budget::charge(work,1)){return .err(fail(1002,unit.module_index,0,0));}let c=ir::callable_at(p,i);if(c.module_index==unit.module_index && c.foreign){let code=switch(authority::check_foreign(p,ref original,unit.module_index,unit.sdk_id,c,ir::linker_name(p,i),work)){case .ok(r):{r}case .err(e):{return .err(e);}};let slot=v::at_mut<usize>(ref mut rules,i);*slot=code;}i+=1;}
+        i=1;while(i<=clean::type_count(ir::cleanup_ir(p))){if(!budget::charge(work,1)){return .err(fail(1002,unit.module_index,0,0));}let t=clean::type_at(ir::cleanup_ir(p),i);
+            if(t.module_index==unit.module_index && (t.kind==2 || t.kind==3)){if(t.declaration==0 || t.declaration>syntax::declaration_count(ref original)){return .err(fail(1001,unit.module_index,0,0));}let d=syntax::declaration_at(ref original,t.declaration-1);let name=syntax::source_view(ref original)[d.name_start..d.name_end];let wire=record_id(name,unit.sdk_id);let is_arena=unit.sdk_id==1 && t.kind==3 && bytes::equal(name,b"Arena");
+                if(wire!=0 || is_arena){let found=switch(shape(p,ref original,i,work)){case .ok(s):{s}case .err(e):{return .err(e);}};let s=ir::layout_at(p,found-1).value;
+                    if(wire!=0){let representation=repr::read(ref original,t.declaration-1);if(t.kind!=2 || d.kind!=4 || !s.repr_c || !representation.repr_c || representation.code!=0 || s.field_count!=2){return .err(fail(1001,unit.module_index,d.start,d.end));}let slot=v::at_mut<usize>(ref mut records,i-1);*slot=wire;}
+                    else{if(arena!=0 || d.kind!=6 || s.field_count!=3){return .err(fail(1001,unit.module_index,d.start,d.end));}arena=i;}
+                    let slot=v::at_mut<usize>(ref mut layouts,i-1);*slot=found;
+                }
+            }i+=1;
+        }u+=1;
+    }return .ok(Plan{.rules,.records,.layouts,.arena});
+}
+pub fn bool type(ref ir::Program p,ref Plan plan,usize id,ref mut bytes::Buffer out,ref mut w::State s){let wire=record(plan,id);if(wire!=0){return w::text(out,s,b"struct ") && w::text(out,s,wire_name(wire));}let t=clean::type_at(ir::cleanup_ir(p),id);if((t.kind==7 || t.kind==8 || t.kind==12) && t.first!=0 && record(plan,t.first)!=0){return type(p,plan,t.first,out,s) && w::text(out,s,if(t.kind==8 || t.kind==12 && t.scalar==1){b" *"}else{b" const *"});}return aggregate::type(p,id,out,s);}
+pub fn bool allowed(ref ir::Program p,ref Plan plan,usize id,bool result){if(id==0 || id>clean::type_count(ir::cleanup_ir(p))){return false;}let t=clean::type_at(ir::cleanup_ir(p),id);if(record(plan,id)!=0){return result;}return !result && (t.kind==7 || t.kind==8 || t.kind==12) && t.first!=0 && record(plan,t.first)!=0;}
+pub fn bool name(ref mut bytes::Buffer out,ref mut w::State s,usize id){return w::text(out,s,b"fy_unit_sdk_call_") && w::number(out,s,id);}
+pub fn bool definitions(ref ir::Program p,ref Plan plan,ref mut bytes::Buffer out,ref mut w::State s,ref mut usize work){var bool[5] seen=[false;5];var usize id=1;
+    var usize callable=0;var bool arena_wire=false;while(callable<v::len<usize>(ref plan.rules)){let code=rule(plan,callable);if(code==70 || code==71){arena_wire=true;}callable+=1;}
+    if(arena_wire && !w::text(out,s,b"struct fy_std_arena_node_v0;\nstruct fy_std_arena_v0{struct fy_std_arena_node_v0 *head;uint64_t generation;uint8_t active_region;};\n_Static_assert(sizeof(struct fy_std_arena_v0)==24&&_Alignof(struct fy_std_arena_v0)==8,\"runtime Arena wire layout\");\n")){return false;}
+    while(id<=v::len<usize>(ref plan.records)){if(!budget::charge(work,1)){s.code=1002;return false;}let wire=record(plan,id);if(wire!=0){let shape=ir::layout_at(p,layout(plan,id)-1).value;
+            if(!seen[wire-1]){seen[wire-1]=true;if(!w::text(out,s,b"struct ") || !w::text(out,s,wire_name(wire)) || !w::text(out,s,b"{")){return false;}var usize j=0;while(j<2){if(!w::type(out,s,field_type(wire,j)) || !w::text(out,s,b" ") || !w::text(out,s,field_name(wire,j)) || !w::text(out,s,b";")){return false;}j+=1;}if(!w::text(out,s,b"};\n")){return false;}}
+            if(!w::text(out,s,b"_Static_assert(sizeof(") || !aggregate::type(p,id,out,s) || !w::text(out,s,b")==sizeof(struct ") || !w::text(out,s,wire_name(wire)) || !w::text(out,s,b")&&_Alignof(") || !aggregate::type(p,id,out,s) || !w::text(out,s,b")==_Alignof(struct ") || !w::text(out,s,wire_name(wire)) || !w::text(out,s,b"),\"SDK raw record layout\");\n")){return false;}
+            var usize j=0;while(j<2){if(!w::text(out,s,b"_Static_assert(offsetof(") || !aggregate::type(p,id,out,s) || !w::text(out,s,b",") || !aggregate::field(out,s,shape.field_start+j+1) || !w::text(out,s,b")==offsetof(struct ") || !w::text(out,s,wire_name(wire)) || !w::text(out,s,b",") || !w::text(out,s,field_name(wire,j)) || !w::text(out,s,b"),\"SDK raw field offset\");\n")){return false;}j+=1;}
+        }id+=1;
+    }
+    if(plan.arena!=0){let shape=ir::layout_at(p,layout(plan,plan.arena)-1).value;if(!w::text(out,s,b"_Static_assert(sizeof(") || !aggregate::type(p,plan.arena,out,s) || !w::text(out,s,b")==24&&_Alignof(") || !aggregate::type(p,plan.arena,out,s) || !w::text(out,s,b")==8,\"SDK Arena storage layout\");\n")){return false;}var usize j=0;while(j<3){if(!w::text(out,s,b"_Static_assert(offsetof(") || !aggregate::type(p,plan.arena,out,s) || !w::text(out,s,b",") || !aggregate::field(out,s,shape.field_start+j+1) || !w::text(out,s,b")==") || !w::number(out,s,j*8) || !w::text(out,s,b",\"SDK Arena storage offset\");\n")){return false;}j+=1;}}
+    return true;
+}
+// SDK record parameters are bridged through local wire objects. Mutable
+// pointers copy the official output fields back after the synchronous call.
+pub fn bool signature(ref ir::Program p,ref Plan plan,usize id,ref mut bytes::Buffer out,ref mut w::State s,ref mut usize work){let c=ir::callable_at(p,id-1);let code=rule(plan,id-1);
+    if(code==70 || code==71){return w::text(out,s,b"extern uint32_t ") && w::text(out,s,ir::linker_name(p,id-1)) && w::text(out,s,b"(struct fy_std_arena_v0 *);\nstatic uint32_t ") && name(out,s,id) && w::text(out,s,b"(void *a0){if(!a0)return ") && w::text(out,s,ir::linker_name(p,id-1)) && w::text(out,s,b"(NULL);struct fy_std_arena_v0 wire;\n") && (code==70 || w::text(out,s,b"fy_unit_copy(&wire,a0,sizeof wire);\n")) && w::text(out,s,b"uint32_t raw=") && w::text(out,s,ir::linker_name(p,id-1)) && w::text(out,s,b"(&wire);\n") && (code!=70 || w::text(out,s,b"if(!raw)")) && w::text(out,s,b"fy_unit_copy(a0,&wire,sizeof wire);return raw;}\n");}
+    if(!w::text(out,s,b"extern ") || !type(p,plan,c.result,out,s) || !w::text(out,s,b" ") || !w::text(out,s,ir::linker_name(p,id-1)) || !w::text(out,s,b"(")){return false;}var usize j=0;
+    while(j<c.parameter_count){if(j!=0 && !w::text(out,s,b",")){return false;}if(!type(p,plan,ir::parameter_at(p,c.parameter_start+j),out,s)){return false;}j+=1;}if(c.parameter_count==0 && !w::text(out,s,b"void")){return false;}if(!w::text(out,s,b");\nstatic ") || !aggregate::type(p,c.result,out,s) || !w::text(out,s,b" ") || !name(out,s,id) || !w::text(out,s,b"(")){return false;}j=0;
+    while(j<c.parameter_count){if(j!=0 && !w::text(out,s,b",")){return false;}if(!aggregate::type(p,ir::parameter_at(p,c.parameter_start+j),out,s) || !w::text(out,s,b" a") || !w::number(out,s,j)){return false;}j+=1;}if(c.parameter_count==0 && !w::text(out,s,b"void")){return false;}if(!w::text(out,s,b"){\n")){return false;}j=0;
+    while(j<c.parameter_count){if(!budget::charge(work,1)){s.code=1002;return false;}let t=clean::type_at(ir::cleanup_ir(p),ir::parameter_at(p,c.parameter_start+j));let wire=record(plan,t.first);
+        if(wire!=0){let shape=ir::layout_at(p,layout(plan,t.first)-1).value;if(!type(p,plan,t.first,out,s) || !w::text(out,s,b" b") || !w::number(out,s,j) || !w::text(out,s,b";\n")){return false;}var usize k=0;while(k<2){if(!w::text(out,s,b"b") || !w::number(out,s,j) || !w::text(out,s,b".") || !w::text(out,s,field_name(wire,k)) || !w::text(out,s,b"=a") || !w::number(out,s,j) || !w::text(out,s,b"->") || !aggregate::field(out,s,shape.field_start+k+1) || !w::text(out,s,b";\n")){return false;}k+=1;}}
+        j+=1;
+    }
+    if(!type(p,plan,c.result,out,s) || !w::text(out,s,b" raw=") || !w::text(out,s,ir::linker_name(p,id-1)) || !w::text(out,s,b"(")){return false;}j=0;
+    while(j<c.parameter_count){if(j!=0 && !w::text(out,s,b",")){return false;}let t=clean::type_at(ir::cleanup_ir(p),ir::parameter_at(p,c.parameter_start+j));if(!w::text(out,s,if(record(plan,t.first)!=0){b"&b"}else{b"a"}) || !w::number(out,s,j)){return false;}j+=1;}if(!w::text(out,s,b");\n")){return false;}j=0;
+    while(j<c.parameter_count){let t=clean::type_at(ir::cleanup_ir(p),ir::parameter_at(p,c.parameter_start+j));let wire=record(plan,t.first);if(wire!=0 && (t.kind==8 || t.kind==12 && t.scalar==1)){let shape=ir::layout_at(p,layout(plan,t.first)-1).value;var usize k=0;while(k<2){if(!w::text(out,s,b"a") || !w::number(out,s,j) || !w::text(out,s,b"->") || !aggregate::field(out,s,shape.field_start+k+1) || !w::text(out,s,b"=b") || !w::number(out,s,j) || !w::text(out,s,b".") || !w::text(out,s,field_name(wire,k)) || !w::text(out,s,b";\n")){return false;}k+=1;}}j+=1;}
+    let wire=record(plan,c.result);if(wire==0){return w::text(out,s,b"return raw;\n}\n");}let shape=ir::layout_at(p,layout(plan,c.result)-1).value;if(!aggregate::type(p,c.result,out,s) || !w::text(out,s,b" result;\n")){return false;}j=0;
+    while(j<2){if(!w::text(out,s,b"result.") || !aggregate::field(out,s,shape.field_start+j+1) || !w::text(out,s,b"=raw.") || !w::text(out,s,field_name(wire,j)) || !w::text(out,s,b";\n")){return false;}j+=1;}return w::text(out,s,b"return result;\n}\n");
+}

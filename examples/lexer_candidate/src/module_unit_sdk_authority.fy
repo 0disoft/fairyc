@@ -24,7 +24,7 @@ pub fn Result<syntax::Parsed,clean::Problem> parsed(ref sources::Sources owned,u
     let p=switch(syntax::parse(stream,512)){case .ok(p):{p}case .err(e):{return .err(fail(if(e==3){1003}else{1001},unit.module_index,0,raw.len));}};
     if(syntax::problem_count(ref p)!=0 || syntax::module_count(ref p)!=1){return .err(fail(1001,unit.module_index,0,raw.len));}return .ok(p);
 }
-fn bool type_matches(ref ir::Program p,ref syntax::Parsed original,usize module_index,usize root,usize id,usize depth,ref mut usize work){
+pub fn bool type_matches(ref ir::Program p,ref syntax::Parsed original,usize module_index,usize root,usize id,usize depth,ref mut usize work){
     if(depth>=64 || !budget::charge(work,1)){return false;}if(root==0 || root>syntax::type_count(original) || id==0 || id>clean::type_count(ir::cleanup_ir(p))){return false;}
     let n=syntax::type_at(original,root);let t=clean::type_at(ir::cleanup_ir(p),id);
     if(n.kind==5){return type_matches(p,original,module_index,n.left,id,depth+1,work);}

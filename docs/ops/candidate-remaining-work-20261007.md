@@ -2832,3 +2832,20 @@ Receipt: `docs/ops/evidence/candidate-sdk-call-authority-20261010.json`. New pri
 - Declaration/signature authentication only: no SDK C call, raw record layout/ABI or full unsafe provenance admission.
 - Unchanged: normative contracts, stable CLI, SDK ABI, Go, DB, CI and hygiene; no push. Candidate Release, Linux, full suite, allocation injection and standalone build were skipped for this focused validator unit.
 - Remaining: authenticated SDK C calls and raw-record bridges; SDK ordinary body materialization, Region C and whole dispatcher; full source/unsafe/path/dominance/initialization proof, foreign aggregate ABI layout, stage1/stage2 and promotion.
+
+## Candidate SDK process/console/Arena C execution (2026-10-10)
+
+Receipt: `docs/ops/evidence/candidate-sdk-c-execution-20261010.json`. Authenticated SDK process, console and Arena calls now execute through the private Fairy emitter and the local C verifier; every other SDK storage component remains closed.
+
+- Source check: locked candidate check passes 265 source files and 3360 MIR functions; `tests/module_unit_c_sdk.fy` native locked SDK 4/4 and `tests/module_unit_c_emit.fy` native locked scalar regression 6/6 both pass.
+- Emitter: the core emitter is entirely Fairy `.fy`; Python (`tools/verify-candidate-sdk-c.py`) only compiles and runs the generated programs against the actual internal/cstdlib runtime inputs.
+- Execution: MSVC `/Od` and `/O2` each run three programs (6/6 passes).
+- Process: argc 3 with args `abc` and `λ` preserves exact bytes; out-of-range and undersized argument cases fail.
+- Arena: create/switch/discard plus `Result<Arena, AllocError>` discard cleanup execute; the bridge keeps a real typed C prototype and a `memcpy` adapter around the SDK pointer-mut-void signature. The verification TU renames the real `stage0_arena.c` initialize/drop symbols so the wrapper calls the genuine functions; a separate main over the `FY_CANDIDATE_NO_MAIN` generated C asserts exactly 2 initialize, exactly 2 drop and 0 state errors, and both MSVC `/Od` and `/O2` profiles pass 6/6 runs including this check with no fake runtime replacement.
+- Console: `u32`/`i32`/`usize`/`i64` minimum values plus exact `λ` newline output match.
+- Admission: `sdk_plan` reparses the pinned owned SDK source, reauthenticates the linker/signature and validates the original nominal record declarations/fields; runtime C struct tags carry size/align/offset static asserts and internal-to-wire adapters.
+- Scope: admitted SDK codes are 1, 2, 24..32, 70 and 71 only; other SDK storage components remain closed.
+- Resolver: declaration local lookup now excludes pattern/Region/iteration slots to avoid numeric arena collisions; failing C diagnostics identify the CFG source statement.
+- Unchanged: public CLI, SDK ABI, normative contracts, Go, DB, CI and hygiene; the private emitter and local verifier are expanded; no push.
+- Deferred: candidate Release, Linux, the whole suite, stage1/stage2 promotion and full provenance/path proof were not tested or completed.
+- Remaining: root-only SDK body projection (tests select root and SDK 0..2); FS/Buffer/Vec/String bridges; full Region C and dispatcher; source/unsafe path/dominance/initialization proof; foreign aggregate ABI layout; stage1/stage2 and promotion.
