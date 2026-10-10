@@ -8,6 +8,7 @@ import module_unit_cleanup_mir_model as clean;
 import module_unit_value_model as budget;
 import module_unit_c_scalar as scalar;
 import module_unit_c_aggregate as aggregate;
+import module_unit_c_literals as literals;
 import ffi_symbols as ffi;
 import c_text as w;
 import std::bytes as bytes;
@@ -70,6 +71,7 @@ fn bool function(ref ir::Program p,ref cfg::Graph g,ref mut bytes::Buffer out,re
     while(i<=cfg::count(g)){if(!budget::charge(work,1)){s.code=1002;return false;}let n=cfg::at(g,i);if(!w::text(out,s,b"fy_b_") || !w::number(out,s,i) || !w::text(out,s,b":;\n")){return false;}
         if(n.kind==1){let e=ir::node_at(b,n.source-1).value;let left=lookup::node(b,e.left);let variant=e.kind==6 && left!=0 && ir::node_at(b,left-1).value.kind==28;
             if(e.kind==6 && !variant){if(e.builtin.kind!=0){s.code=1004;return false;}if(!call(p,g,n.source,0,out,s,work)){return false;}}
+            else if(e.kind==1 && literals::descriptor(clean::type_at(ir::cleanup_ir(p),e.type))){if(!literals::expression(p,b,n.source,out,s,work)){return false;}}
             else if((e.kind==1 || e.kind==23) && clean::type_at(ir::cleanup_ir(p),e.type).kind==12 || e.kind==2 || e.kind==3 || e.kind==8 || e.kind==9 || e.kind==10 || e.kind==21 || e.kind==22 || e.kind==24 || e.kind==26 || e.kind==28 || e.kind==29 || e.kind==30 || e.kind==4 && bytes::equal(ir::node_text(b,n.source-1),b"*") || variant){if(!aggregate::expression(p,b,n.source,out,s,work)){return false;}}
             else if(!scalar::expression(p,b,n.source,out,s)){return false;}}
         else if(n.kind==2){if(!store(p,b,n,out,s)){return false;}}
@@ -100,6 +102,7 @@ pub fn clean::Problem render(ref ir::Program p,usize entry,ref mut bytes::Buffer
     // under /O2; the scalar helpers keep their normal intrinsic behavior.
     if(!w::text(ref mut text,ref mut s,b"#ifdef _MSC_VER\n#pragma function(memcpy)\n__declspec(noinline)\n#endif\nstatic void fy_unit_copy(void *destination,const void *source,uintptr_t count){memcpy(destination,source,count);}\n#ifdef _MSC_VER\n#pragma intrinsic(memcpy)\n#endif\n")){return fail(if(s.code==3){1003}else{1002},0,0,0);}
     let marks=switch(aggregate::definitions(p,ref mut text,ref mut s,ref mut work)){case .ok(m):{m}case .err(e):{return fail(if(e<1000){if(e==3){1003}else{1002}}else{e},0,0,0);}};
+    if(!literals::definitions(p,ref mut text,ref mut s,ref mut work)){return fail(if(s.code<1000){if(s.code==3){1003}else{1002}}else{s.code},0,0,0);}
     if(!foreign_signatures(p,ref mut text,ref mut s,ref mut work)){return fail(if(s.code<1000){if(s.code==3){1003}else{1002}}else{s.code},0,0,0);}
     i=1;while(i<=ir::count(p)){if(!signature(p,i,ref mut text,ref mut s) || !w::text(ref mut text,ref mut s,b";\n")){return fail(if(s.code<1000){if(s.code==3){1003}else{1002}}else{s.code},clean::frame_at(ir::cleanup_ir(p),i).module_index,ir::start(ir::at(p,i)),ir::end(ir::at(p,i)));}i+=1;}
     if(!aggregate::drops(p,ref marks,ref mut text,ref mut s,ref mut work)){return fail(if(s.code<1000){if(s.code==3){1003}else{1002}}else{s.code},0,0,0);}

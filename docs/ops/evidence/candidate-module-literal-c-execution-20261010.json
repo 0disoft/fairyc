@@ -1,0 +1,317 @@
+{
+  "schema": "fairyc.candidate-module-literal-c-execution/v1",
+  "passed": true,
+  "identity": {
+    "nativeCompiler": {
+      "path": ".cache/candidate-tagged/compiler-origin-patterns.exe",
+      "sha256": "d36dae1b99751322e447880aaf4d28321bd6d53bdf776185308c6c4504889bb2"
+    },
+    "buildCompiler": {
+      "path": ".cache/candidate-tagged/compiler-build-240s.exe",
+      "sha256": "746fe10b022ed88cfbc0ae8ea13e3f867b842f3317ef5a2a4caa36d064a248dd"
+    },
+    "candidate": {
+      "path": "examples/lexer_candidate/build/lexer-candidate.exe",
+      "sha256": "89353f9625c02ef759c7d7f4f1013b8f932790ebb13446c8fc3e938adf9b9141"
+    },
+    "sources": [
+      {
+        "path": "examples/lexer_candidate/src/module_unit_c_literals.fy",
+        "sha256": "cbd54e4a239d268151c0306384c147ca988ed2cfb06ef9d8c9ca9e5986566cde"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_c_aggregate.fy",
+        "sha256": "506a16d4a3a67da95a5589f9349ab3c451e99e80613e5b9dc0e68b5220f31156"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_c_emit.fy",
+        "sha256": "f530eb907292e4549c02b8c956eb2925a45a09b790a6a12fb78a3e9675774830"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_body_ir_verify.fy",
+        "sha256": "b78bbdf95a6bd6208a36139e103823a33390540fe623a0ca00f1906a4065cbc3"
+      },
+      {
+        "path": "examples/lexer_candidate/src/literal_types.fy",
+        "sha256": "bce967c2f7b001144642642503af9bb4cf83bae1e50f99262676d16afb9ac7f6"
+      },
+      {
+        "path": "examples/lexer_candidate/src/sha256.fy",
+        "sha256": "4558eb7b75c94a5cda08022f397ae4ae1a9afafdede24ae89ac03f6a6ad09793"
+      },
+      {
+        "path": "examples/lexer_candidate/tests/module_unit_c_literals.fy",
+        "sha256": "0c049ddfe09425d6b61d3b1eab2f7c47b63afbbf6df258990ccd9ea5e82c6721"
+      },
+      {
+        "path": "examples/lexer_candidate/tests/module_unit_c_emit.fy",
+        "sha256": "f41250b79ace7477fd0b82e49fe8106c709dea614a1609e4e16733ef2b240ddf"
+      },
+      {
+        "path": "examples/lexer_candidate/tests/module_unit_c_owned.fy",
+        "sha256": "e2ae717d85e721adc6821bc99ed1bc5a46bfee7bd05194df918ea93e26f5c331"
+      },
+      {
+        "path": "examples/lexer_candidate/tests/module_unit_c_pointers.fy",
+        "sha256": "c930210a9353e0977025acf4904dc748ff02f3823c748f7e7f5bfb0c3395a454"
+      },
+      {
+        "path": "examples/lexer_candidate/tests/module_unit_c_views.fy",
+        "sha256": "a57af8e7dfb288b90ffa3bc916592a4a69aeaa4d75b54bf94362c72d6928dcae"
+      },
+      {
+        "path": "examples/lexer_candidate/fairy.lock",
+        "sha256": "b4f66663d535f3088aa7c0ea277bd365d97301f998bd1cbb823b80bbec9ff9af"
+      },
+      {
+        "path": "tools/verify-candidate-module-c.py",
+        "sha256": "bc8849693e573b05894213cf80526659d82fa5c0880ea73a5fda2d72cdaa3569"
+      }
+    ]
+  },
+  "sourceCheck": {
+    "argv": [
+      "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\compiler-origin-patterns.exe",
+      "check",
+      "--locked"
+    ],
+    "exit": 0,
+    "stdout": "check ok: 2 instance(s), 257 source file(s), 3284 MIR function(s), lock verified\n",
+    "stderr": ""
+  },
+  "developmentBuild": {
+    "argv": [
+      "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\compiler-build-240s.exe",
+      "build",
+      "--locked"
+    ],
+    "exit": 0,
+    "stdout": "built: build/lexer-candidate.exe (x86_64-windows-msvc, development, lock verified)\n",
+    "stderr": ""
+  },
+  "native": {
+    "initial": {
+      "count": 9,
+      "passed": 6,
+      "failed": 3
+    },
+    "rerun": {
+      "count": 3,
+      "passed": 3,
+      "failed": 0
+    },
+    "latestOutcomes": {
+      "tests::module_unit_c_emit::module_c_rejects_foreign_text_abi_and_bad_entry_without_partial_output": "passed",
+      "tests::module_unit_c_literals::literal_c_deduplicates_numeric_storage_across_types_and_functions": "passed",
+      "tests::module_unit_c_literals::literal_c_keeps_static_returns_and_provider_internal_transport": "passed",
+      "tests::module_unit_c_literals::literal_c_preserves_exact_bytes_empty_views_and_cstr_storage": "passed",
+      "tests::module_unit_c_literals::literal_c_rejects_foreign_descriptor_abi_transactionally": "passed",
+      "tests::module_unit_c_literals::literal_c_traps_byte_index_at_literal_length": "passed",
+      "tests::module_unit_c_owned::owned_c_rejects_foreign_text_abi_without_partial_output": "passed",
+      "tests::module_unit_c_pointers::pointer_c_transports_null_foreign_results_and_void_output_slots": "passed",
+      "tests::module_unit_c_views::view_c_mutates_owner_and_shares_call_arguments": "passed"
+    },
+    "reports": [
+      {
+        "path": ".cache/candidate-tagged/module-literal-c/native.json",
+        "sha256": "c7c9a4693a3b8ab745dabe121370e616dbe69be57fdf85be07858e116fb41303"
+      },
+      {
+        "path": ".cache/candidate-tagged/module-literal-c/native-correction.json",
+        "sha256": "2670f0a1b81d7b4a2e81e4eb7fd9ff4e8d7d5d6b84abe48c4e221f50a0892534"
+      }
+    ]
+  },
+  "fixtureCorrection": {
+    "reconstructedOriginalBytes": true,
+    "sixPassedInputsAndProductionUnchanged": true,
+    "changed": [
+      "examples/lexer_candidate/tests/module_unit_c_emit.fy",
+      "examples/lexer_candidate/tests/module_unit_c_literals.fy",
+      "examples/lexer_candidate/tests/module_unit_c_owned.fy"
+    ],
+    "reason": "Foreign descriptors are rejected 5102 during signature admission before owned-body construction; guards now assert that phase and separately check invalid-entry transactional emission"
+  },
+  "C": {
+    "compiler": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+    "executions": [
+      {
+        "name": "literal_c_preserves_exact_bytes_empty_views_and_cstr_storage",
+        "profile": "low",
+        "sourceSHA256": "e3f1937706bac79a358f971717cf31fd87cabf0dc5f6fe3e5b28e14cbcb7c9d6",
+        "buildExit": 0,
+        "expectedExit": 0,
+        "actualExit": 0,
+        "expectedStdout": "",
+        "actualStdout": ""
+      },
+      {
+        "name": "literal_c_preserves_exact_bytes_empty_views_and_cstr_storage",
+        "profile": "optimized",
+        "sourceSHA256": "e3f1937706bac79a358f971717cf31fd87cabf0dc5f6fe3e5b28e14cbcb7c9d6",
+        "buildExit": 0,
+        "expectedExit": 0,
+        "actualExit": 0,
+        "expectedStdout": "",
+        "actualStdout": ""
+      },
+      {
+        "name": "literal_c_keeps_static_returns_and_provider_internal_transport",
+        "profile": "low",
+        "sourceSHA256": "c6c658b39cfcf6b1b9dbbf3b202fbe6e07d36cdc0ff11e6dff627d6defe5dbff",
+        "buildExit": 0,
+        "expectedExit": 0,
+        "actualExit": 0,
+        "expectedStdout": "",
+        "actualStdout": ""
+      },
+      {
+        "name": "literal_c_keeps_static_returns_and_provider_internal_transport",
+        "profile": "optimized",
+        "sourceSHA256": "c6c658b39cfcf6b1b9dbbf3b202fbe6e07d36cdc0ff11e6dff627d6defe5dbff",
+        "buildExit": 0,
+        "expectedExit": 0,
+        "actualExit": 0,
+        "expectedStdout": "",
+        "actualStdout": ""
+      },
+      {
+        "name": "literal_c_deduplicates_numeric_storage_across_types_and_functions",
+        "profile": "low",
+        "sourceSHA256": "23769bc9b52f45740023fa57fcef128687d7b7decb5889c238c45d16dbde8c62",
+        "buildExit": 0,
+        "expectedExit": 0,
+        "actualExit": 0,
+        "expectedStdout": "",
+        "actualStdout": ""
+      },
+      {
+        "name": "literal_c_deduplicates_numeric_storage_across_types_and_functions",
+        "profile": "optimized",
+        "sourceSHA256": "23769bc9b52f45740023fa57fcef128687d7b7decb5889c238c45d16dbde8c62",
+        "buildExit": 0,
+        "expectedExit": 0,
+        "actualExit": 0,
+        "expectedStdout": "",
+        "actualStdout": ""
+      },
+      {
+        "name": "literal_c_traps_byte_index_at_literal_length",
+        "profile": "low",
+        "sourceSHA256": "76ec2caac9efbaf9562f09d9d5b5072f10ff4550ba17529936dd029da08052d9",
+        "buildExit": 0,
+        "expectedExit": 106,
+        "actualExit": 106,
+        "expectedStdout": "",
+        "actualStdout": ""
+      },
+      {
+        "name": "literal_c_traps_byte_index_at_literal_length",
+        "profile": "optimized",
+        "sourceSHA256": "76ec2caac9efbaf9562f09d9d5b5072f10ff4550ba17529936dd029da08052d9",
+        "buildExit": 0,
+        "expectedExit": 106,
+        "actualExit": 106,
+        "expectedStdout": "",
+        "actualStdout": ""
+      },
+      {
+        "name": "pointer_c_transports_null_foreign_results_and_void_output_slots",
+        "profile": "low",
+        "sourceSHA256": "7a3d37085be5460b6763e4e0a3e793c125f1843a404604c3e5686d5ce0fc7bbd",
+        "buildExit": 0,
+        "expectedExit": 0,
+        "actualExit": 0,
+        "expectedStdout": "42,77,",
+        "actualStdout": "42,77,"
+      },
+      {
+        "name": "pointer_c_transports_null_foreign_results_and_void_output_slots",
+        "profile": "optimized",
+        "sourceSHA256": "7a3d37085be5460b6763e4e0a3e793c125f1843a404604c3e5686d5ce0fc7bbd",
+        "buildExit": 0,
+        "expectedExit": 0,
+        "actualExit": 0,
+        "expectedStdout": "42,77,",
+        "actualStdout": "42,77,"
+      },
+      {
+        "name": "view_c_mutates_owner_and_shares_call_arguments",
+        "profile": "low",
+        "sourceSHA256": "d17016f3b90a89d9a52c78ea8666ebecea921679f7d7f1a2c33cc90dd6391387",
+        "buildExit": 0,
+        "expectedExit": 0,
+        "actualExit": 0,
+        "expectedStdout": "7,4,5,",
+        "actualStdout": "7,4,5,"
+      },
+      {
+        "name": "view_c_mutates_owner_and_shares_call_arguments",
+        "profile": "optimized",
+        "sourceSHA256": "d17016f3b90a89d9a52c78ea8666ebecea921679f7d7f1a2c33cc90dd6391387",
+        "buildExit": 0,
+        "expectedExit": 0,
+        "actualExit": 0,
+        "expectedStdout": "7,4,5,",
+        "actualStdout": "7,4,5,"
+      }
+    ],
+    "storage": "Numerical immutable translation-unit arrays; full SHA-256 symbol order; exact-byte deduplication/collision check; one-byte non-null empty sentinel with zero logical length; CStr decoded storage includes exactly one trailing NUL",
+    "transport": "Canonical distinct kind9 text/kind10 byte/kind14 CStr descriptors; internal arguments/returns/copies; immutable data-pointer casts; text and byte length/is_empty; byte checked indexing; no direct foreign descriptor ABI"
+  },
+  "goBoundary": [
+    {
+      "fixture": 0,
+      "exit": 0,
+      "stdout": "check ok: 1 file(s) (verified MIR: 1 function(s), 1 foreign declaration(s))\n",
+      "stderr": ""
+    },
+    {
+      "fixture": 2,
+      "exit": 2,
+      "stdout": "",
+      "stderr": "fairyc: requested program is outside the experimental verified-MIR check subset: lower main::main: raw-address cast source is not a direct borrow\n"
+    },
+    {
+      "fixture": 3,
+      "exit": 0,
+      "stdout": "check ok: 1 file(s) (verified MIR: 1 function(s), 0 foreign declaration(s))\n",
+      "stderr": ""
+    }
+  ],
+  "behavior": {
+    "proof": "Owned literal token-kind/type alignment, UTF-8 and exactly-one-trailing-NUL proof from commit 9acfc353",
+    "ffi": "Descriptor arguments rejected 5102 by module signature admission; permitted raw immutable pointers retain existing foreign ABI",
+    "lifetime": "Provider/static literal returns and internal descriptor arguments remain usable after the callee returns",
+    "dedup": "Text and byte fairy share one array; terminated fairy uses a second array; Python verifier independently checks literal hashes, uniqueness, order and numeric bytes",
+    "bounds": "Read at byte literal length traps category6/exit106 without unwinding"
+  },
+  "normativeContracts": [
+    "docs/adr/0065-compiler-owned-c-string-static-storage.md",
+    "docs/adr/0066-compiler-owned-byte-string-slice-storage.md",
+    "docs/adr/0067-compiler-owned-utf8-string-static-storage.md"
+  ],
+  "normativeContractsChanged": false,
+  "privateAPIExpanded": true,
+  "stableCLIChanged": false,
+  "sdkABIChanged": false,
+  "GoChanged": false,
+  "dbChanged": false,
+  "ciChanged": false,
+  "verifierChanged": true,
+  "hygieneChanged": false,
+  "pushed": false,
+  "pending": [
+    "Enums/Region/authenticated SDK and full dispatcher C execution",
+    "Raw views from authenticated SDK constructors",
+    "Foreign nominal pointer/aggregate ABI layout assertions",
+    "Original source/unsafe authentication, path/dominance/initialization proof and stage1/stage2",
+    "Resolve/test differential against baseline direct-call address subset"
+  ],
+  "skipped": {
+    "Linux": "Windows-focused unit",
+    "releaseCandidate": "Separate release batch; generated C /O2 is not candidate Release",
+    "fullSuite": "Nine focused native identities plus six C programs only",
+    "goImportedSource": "Single-source experimental check cannot establish provider graph parity; one standalone direct-call pointer example exceeds the baseline verified-MIR subset"
+  }
+}
