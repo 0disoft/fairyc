@@ -59,8 +59,8 @@ pub fn Result<Catalog,Problem> build(ref v::Vec<syntax::Parsed> sources){
         if(sdk::reserved(bytes::view(ref path)) && !sdk::authentic(bytes::view(ref path),syntax::source_view(p))){return .err(fail(6801,module_index,first.name_start,first.name_end));}
         var usize n=0;while(n<v::len<Module>(ref modules)){let m=*v::at<Module>(ref modules,n);if(spelling_same(ref names,m.start,m.end,bytes::view(ref path))){return .err(fail(1,module_index,first.name_start,first.name_end));}n+=1;}
         let usize start=bytes::len(ref names);let usize source_start=bytes::len(ref source_bytes);if(syntax::source_view(p).len>limits::source_bytes()){return .err(fail(10,module_index,0,syntax::source_view(p).len));}
-        if(syntax::source_view(p).len>limits::program_bytes()-source_start){return .err(fail(10,module_index,0,syntax::source_view(p).len));}
-        if(!append(ref mut source_bytes,syntax::source_view(p)) || !append(ref mut names,bytes::view(ref path)) || !v::push<Module>(ref mut modules,Module{.start,.end=bytes::len(ref names),.source_start,.source_end=bytes::len(ref source_bytes)}).is_ok){return .err(fail(11,module_index,first.start,first.end));}
+        if(source_start>limits::source_set_bytes() || syntax::source_view(p).len>limits::source_set_bytes()-source_start){return .err(fail(10,module_index,0,syntax::source_view(p).len));}
+        if(!bytes::append(ref mut source_bytes,syntax::source_view(p)).is_ok || !append(ref mut names,bytes::view(ref path)) || !v::push<Module>(ref mut modules,Module{.start,.end=bytes::len(ref names),.source_start,.source_end=bytes::len(ref source_bytes)}).is_ok){return .err(fail(11,module_index,first.start,first.end));}
         var usize index=1;var usize count=0;while(index<syntax::declaration_count(p)){
             let d=syntax::declaration_at(p,index);if(d.kind!=2 && d.kind!=3 && d.kind!=4 && d.kind!=6 && d.kind!=7 && d.kind!=9 && d.kind!=11 || d.owner_end!=0){return .err(fail(9,module_index,d.start,d.end));}
             let name=syntax::source_view(p)[d.name_start..d.name_end];if(bytes::equal(name,b"source_location")){return .err(fail(4401,module_index,d.name_start,d.name_end));}

@@ -24,7 +24,7 @@ pub fn Result<Plan,join::Problem> build(ref v::Vec<syntax::Parsed> sources){
     while(index<files){let p=v::at<syntax::Parsed>(sources,index);let Usage next=measured(p);
         if(syntax::problem_count(p)!=0 || next.declarations==0 || syntax::declaration_at(p,0).kind!=1){return .err(fail(9,index,next.bytes));}
         if(next.bytes>limits::source_bytes() || !fits(empty(),next,0)){return .err(fail(10,index,next.bytes));}
-        let usize separator=if(index==0){0}else{1};if(!room(total,separator,limits::program_bytes()) || !room(total+separator,next.bytes,limits::program_bytes())){return .err(fail(10,index,next.bytes));}total+=separator+next.bytes;
+        let usize separator=if(index==0){0}else{1};if(!room(total,separator,limits::source_set_bytes()) || !room(total+separator,next.bytes,limits::source_set_bytes())){return .err(fail(10,index,next.bytes));}total+=separator+next.bytes;
         if(!fits(usage,next,if(index==first){0}else{1})){
             if(!v::push<Unit>(ref mut units,Unit{.first,.stop=index,.usage}).is_ok){return .err(fail(11,index,0));}first=index;usage=empty();
         }

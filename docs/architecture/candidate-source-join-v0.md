@@ -52,6 +52,11 @@ Limits of the joined owner: 256 inputs, 1048576 joined bytes including separator
 1024 fields and 4096 attributes and attribute arguments. The existing scanner
 token, diagnostic and work budgets apply to the joined source.
 
+The separate source catalog and compilation-unit grouping can admit a complete
+source set up to 2097152 bytes. That aggregate budget does not change this joined
+owner's 1048576-byte or arena limits. The parser expression arena shares the
+existing 16384-expression owner cap; its other parser limits remain unchanged.
+
 `join_range(sources, first, stop)` now joins one nonempty half-open range while
 keeping these same per-owner limits. Errors retain full-vector module indexes.
 The original full join delegates to the entire range. Whole-module partitioning

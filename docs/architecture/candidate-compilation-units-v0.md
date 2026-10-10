@@ -18,8 +18,20 @@ by itself is rejected; function-level subdivision is not implemented here.
 Every group retains the existing joined-owner caps: 512 declarations, 16384
 expressions, 8192 statements, 1024 entries, 4096 types, 1024 fields, and 4096
 attributes and attribute arguments. The entire input still has at most 256
-files, at most 65536 bytes per file and at most 1048576 bytes including its
-original separator newlines. Partitioning does not admit larger source sets.
+files and at most 65536 bytes per file. The complete source set admits at most
+2097152 bytes including original separator newlines; each joined owner retains
+its 1048576-byte limit. `candidate_limits::source_set_bytes` owns the aggregate
+limit, while `program_bytes` continues to bound each independently joined owner.
+The source catalog preserves at most 2097152 raw source bytes without separator
+bytes; its separate name pool remains bounded at 1048576 bytes.
+
+The original CLI entrypoint's current private/SDK import closure has 234 modules
+and exceeds 1 MiB. Native source-set admission parses every exact file, verifies
+the catalog's original source snapshots and partitions them into 23 units.
+The parser's expression arena now uses the existing 16384-expression unit cap
+instead of 4160, admitting the original `module_unit_generics.fy`. Statement,
+entry, type, field, declaration and depth limits retain their prior values.
+This proves source-set admission, not whole-dispatcher C generation or execution.
 
 `module_ast_join::join_range` borrows the full source vector and joins only one
 nonempty range. It applies all existing join checks and remaps each selected

@@ -3009,3 +3009,13 @@ Receipt: `evidence/candidate-scanner-budget-c-20261011.json`.
 - Observations: exact exit/stdout/stderr agreement; lossless contiguous spans through EOF; E0010 recovery; zero live allocations and cleanup errors; balanced file closure; equal profile resource counts; unchanged fixture bytes. Work completion thresholds are 8 (ordinary), 17 (escaped Unicode string), 27 (nested comment).
 - Shared verifier regression: original file-token mode passes 16 cases and 80 C runs. Prior compiler source check reused after verifying unchanged compiler/SDK/runtime tree, bootstrap hashes and lock. Normative contracts, stable CLI/API, SDK ABI, Go, DB, CI and repository hygiene unchanged; no push.
 - Item 59 still needs full original CLI dispatcher/driver integration, default compilation timeout/performance, standalone candidate development/Release, Linux, full suite and Stage1/Stage2. The explicit scanner budget matrix above is complete.
+
+## Complete original main source-set admission (2026-10-11)
+
+Receipt: `evidence/candidate-main-source-set-admission-20261011.json`.
+
+- Original main import closure: 234 exact files (228 private, six SDK), 1646578 raw bytes, 1646811 separator-inclusive bytes. Native parser, catalog snapshot verification and 23-unit grouping pass without removing source declarations. Every module is grouped exactly once under the existing unit arena limits.
+- Original `module_unit_generics.fy` first failed with parser code 4. Parser expressions now share the existing 16384-expression joined-unit cap. Whole-source admission now has a separate 2 MiB cap; files retain 64 KiB and joined owners retain 1 MiB. Other parser limits and the separate catalog name pool remain unchanged.
+- Six focused native cases pass, including original-source admission, 256/257 files, raw/separator-inclusive 2 MiB boundaries, retained 1 MiB join rejection, expression boundary, large-span HIR/MIR and existing grouping regressions. One initial expression fixture exceeded the unchanged statement cap; it was corrected and selectively rerun. Unchanged passing cases are reused.
+- Source check and locked check pass (274 files, 3407 MIR functions). Architecture contracts and the source lock are updated. Go, stable CLI/API, SDK ABI, DB, CI and repository hygiene unchanged; no push. The validation-only host compile overlay remains 120 seconds; native test execution remains capped at 60 seconds.
+- Remaining: whole-dispatcher signatures/body closure/typing/C generation and execution, native driver integration, default compilation timeout/performance, standalone candidate development/Release, Linux, full suite and Stage1/Stage2. Source-set admission is complete; dispatcher execution is not yet proved.

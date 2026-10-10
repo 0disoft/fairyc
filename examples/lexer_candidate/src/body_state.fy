@@ -1,4 +1,5 @@
 module body_state;
+import candidate_limits as limits;
 import std::vec as v;
 import scanner as scanner;
 import parse_tokens as tokens;
@@ -32,7 +33,7 @@ pub fn bool expect(ref scanner::Stream stream, ref mut Cursor cursor, ref u8[] t
 }
 
 pub fn usize append(Node node, ref mut v::Vec<Node> nodes, ref mut Cursor cursor) {
-    if (cursor.nodes >= 4160) { cursor.status = 4; return 0; }
+    if (cursor.nodes >= limits::program_expressions()) { cursor.status = 4; return 0; }
     if (!v::push<Node>(nodes, node).is_ok) { cursor.status = 3; return 0; }
     cursor.nodes = cursor.nodes + 1;
     cursor.expression_kind = node.kind;
