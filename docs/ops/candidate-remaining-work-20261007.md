@@ -2849,3 +2849,16 @@ Receipt: `docs/ops/evidence/candidate-sdk-c-execution-20261010.json`. Authentica
 - Unchanged: public CLI, SDK ABI, normative contracts, Go, DB, CI and hygiene; the private emitter and local verifier are expanded; no push.
 - Deferred: candidate Release, Linux, the whole suite, stage1/stage2 promotion and full provenance/path proof were not tested or completed.
 - Remaining: root-only SDK body projection (tests select root and SDK 0..2); FS/Buffer/Vec/String bridges; full Region C and dispatcher; source/unsafe path/dominance/initialization proof; foreign aggregate ABI layout; stage1/stage2 and promotion.
+
+## Candidate SDK stdin/stderr C execution (2026-10-10)
+
+Receipt: `docs/ops/evidence/candidate-sdk-streams-c-20261010.json`. Authenticated SDK stdin/stdout/stderr byte transport now executes through the private C emitter and the local verifier.
+
+- Native: exact test `tests::module_unit_c_sdk::sdk_c_executes_stdin_and_stderr_byte_results` passes 1/1 locked.
+- Generated C: the actual `stage0_windows_console.c` passes under MSVC `/Od` and `/O2` (2/2).
+- stdin/stdout: input bytes `A NUL λ Z` (base64 `QQDOu1o=`) are read repeatedly, then EOF returns 0, and stdout reproduces the identical bytes.
+- stderr: the exact `42|-7|9|-9223372036854775808|true|λ` newline output matches.
+- Harness: a new `--case` selection avoids rebuilding the unchanged previous three programs; the prior four native test outcomes are reused because the emitter and sources are unchanged and only a new test was appended.
+- Verifier: `tools/verify-candidate-module-c.py` now takes an optional stdin bytes parameter and pipes input only when supplied, with timeout cleanup kept; the SDK helper forwards byte records as base64 and checks stderr.
+- Unchanged: no emitter, lock, API, runtime, Go or CI changes; the helper and test are the only edits; no push.
+- Remaining: root-only SDK bodies, Region C, other SDK storage, provenance and stage1/stage2.

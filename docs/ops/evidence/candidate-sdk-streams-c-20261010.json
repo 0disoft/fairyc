@@ -1,0 +1,193 @@
+{
+  "schema": "fairyc.candidate-sdk-streams-c/v1",
+  "passed": true,
+  "parentCommit": "4fef2095d413c7c1b39c0a54ec1b74228ccb7984",
+  "identity": [
+    {
+      "path": "examples/lexer_candidate/tests/module_unit_c_sdk.fy",
+      "sha256": "d80bd892b492c469165dcdb8ae8f2ef322421c6fd8de617dfe021600f856105f"
+    },
+    {
+      "path": "tools/verify-candidate-sdk-c.py",
+      "sha256": "9175fbf269f9788db369bc2713b060bad3042a4fc7809622f1f294ebf4c894ea"
+    },
+    {
+      "path": "tools/verify-candidate-module-c.py",
+      "sha256": "f4b6e84e19e5dc92690bf77196b4399f91810bff8c4c2037f3dba947f3a0303a"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_unit_c_sdk.fy",
+      "sha256": "c866d46d3644b6d8eaafa5819399a776869c4a19614ebe797c279a02ae2c6669"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_unit_c_emit.fy",
+      "sha256": "cc8b487891cada3b58529029780b63bab196fafc10dcd0786012d30c1b919837"
+    },
+    {
+      "path": "examples/lexer_candidate/fairy.lock",
+      "sha256": "ec3aece8fbf909bcc013b55395eb55989a6f9450939a65c1a0754a5ac71072ae"
+    },
+    {
+      "path": "internal/sdkstdlib/sources/std/io.fy",
+      "sha256": "4b89c3aeb8b4de4887395d29723095d364c5660c6b773c5696fb1f65f5365f48"
+    },
+    {
+      "path": ".cache/candidate-tagged/compiler-origin-patterns.exe",
+      "sha256": "d36dae1b99751322e447880aaf4d28321bd6d53bdf776185308c6c4504889bb2"
+    }
+  ],
+  "native": {
+    "identity": {
+      "path": ".cache/candidate-tagged/sdk-c-execution/native-streams.json",
+      "sha256": "44b8ff37a3215c6c23b87ed4203c6f608e23ec92dbfc73123e21327855cf0901"
+    },
+    "summary": {
+      "schemaVersion": "fairyc.test-report/v4",
+      "engine": "native",
+      "target": "x86_64-windows-msvc",
+      "profile": "development",
+      "tests": [
+        {
+          "identity": "tests::module_unit_c_sdk::sdk_c_executes_stdin_and_stderr_byte_results",
+          "outcome": "passed",
+          "trapCategory": null,
+          "stdoutBase64": "<generated C captured; report SHA256 retained>",
+          "stderrBase64": ""
+        }
+      ],
+      "count": 1,
+      "passed": 1,
+      "failed": 0,
+      "status": "ok",
+      "lock": "verified"
+    }
+  },
+  "CExecution": {
+    "schema": "fairyc.candidate-sdk-c-execution/v1",
+    "passed": true,
+    "reports": [
+      {
+        "path": ".cache\\candidate-tagged\\sdk-c-execution\\native-final.json",
+        "sha256": "c5cba31bab881ba8cceb9cee8b65d0c48726e709a00d22c3bc8b1a124ef62468"
+      },
+      {
+        "path": ".cache\\candidate-tagged\\sdk-c-execution\\native-streams.json",
+        "sha256": "44b8ff37a3215c6c23b87ed4203c6f608e23ec92dbfc73123e21327855cf0901"
+      }
+    ],
+    "executions": [
+      {
+        "name": "sdk_c_executes_stdin_and_stderr_byte_results",
+        "profile": "low",
+        "sourceSHA256": "4f5fccb0b84f3b51fb8ef17dbcd93b73764057d746b20caf7f8c7ddabeb5ed46",
+        "stdinBase64": "QQDOu1o=",
+        "arenaCounts": null,
+        "runtimeInputs": [
+          {
+            "path": "internal\\cstdlib\\stage0_windows_console.c",
+            "sha256": "076bc219ff0ff8ab6945ef0838230c77a254de8cefc460dfd05a842549bab306"
+          }
+        ],
+        "build": {
+          "argv": [
+            "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+            "/nologo",
+            "/std:c11",
+            "/TC",
+            "/Od",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\streams-c\\sdk_c_executes_stdin_and_stderr_byte_results.c",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\streams-c\\sdk_c_executes_stdin_and_stderr_byte_results-runtime.c",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\streams-c\\trap.c",
+            "/Fe:C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\streams-c\\sdk_c_executes_stdin_and_stderr_byte_results-low.exe",
+            "/link",
+            "/INCREMENTAL:NO"
+          ],
+          "exit": 0,
+          "stdout": "sdk_c_executes_stdin_and_stderr_byte_results.c\r\nsdk_c_executes_stdin_and_stderr_byte_results-runtime.c\r\ntrap.c\r\nGenerating Code...\r\n",
+          "stderr": ""
+        },
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\streams-c\\sdk_c_executes_stdin_and_stderr_byte_results-low.exe"
+          ],
+          "exit": 0,
+          "stdout": "A\u0000λZ",
+          "stderr": "42|-7|9|-9223372036854775808|true|λ\n"
+        }
+      },
+      {
+        "name": "sdk_c_executes_stdin_and_stderr_byte_results",
+        "profile": "optimized",
+        "sourceSHA256": "4f5fccb0b84f3b51fb8ef17dbcd93b73764057d746b20caf7f8c7ddabeb5ed46",
+        "stdinBase64": "QQDOu1o=",
+        "arenaCounts": null,
+        "runtimeInputs": [
+          {
+            "path": "internal\\cstdlib\\stage0_windows_console.c",
+            "sha256": "076bc219ff0ff8ab6945ef0838230c77a254de8cefc460dfd05a842549bab306"
+          }
+        ],
+        "build": {
+          "argv": [
+            "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+            "/nologo",
+            "/std:c11",
+            "/TC",
+            "/O2",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\streams-c\\sdk_c_executes_stdin_and_stderr_byte_results.c",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\streams-c\\sdk_c_executes_stdin_and_stderr_byte_results-runtime.c",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\streams-c\\trap.c",
+            "/Fe:C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\streams-c\\sdk_c_executes_stdin_and_stderr_byte_results-optimized.exe",
+            "/link",
+            "/INCREMENTAL:NO"
+          ],
+          "exit": 0,
+          "stdout": "sdk_c_executes_stdin_and_stderr_byte_results.c\r\nsdk_c_executes_stdin_and_stderr_byte_results-runtime.c\r\ntrap.c\r\nGenerating Code...\r\n",
+          "stderr": ""
+        },
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\streams-c\\sdk_c_executes_stdin_and_stderr_byte_results-optimized.exe"
+          ],
+          "exit": 0,
+          "stdout": "A\u0000λZ",
+          "stderr": "42|-7|9|-9223372036854775808|true|λ\n"
+        }
+      }
+    ],
+    "compiler": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+    "source": "Private Fairy emitter; actual repository C runtime components, no SDK stand-ins"
+  },
+  "reuse": {
+    "previousEvidence": "docs/ops/evidence/candidate-sdk-c-execution-20261010.json",
+    "unchangedEmitterAndLock": true,
+    "newNativeIdentityOnly": true,
+    "newCProgramOnly": true
+  },
+  "expected": {
+    "stdinBase64": "QQDOu1o=",
+    "stdout": "A\u0000λZ",
+    "stderr": "42|-7|9|-9223372036854775808|true|λ\n",
+    "eof": 0
+  },
+  "emitterChanged": false,
+  "publicAPIChanged": false,
+  "sdkABIChanged": false,
+  "normativeContractsChanged": false,
+  "GoChanged": false,
+  "ciChanged": false,
+  "pushed": false,
+  "skipped": {
+    "fullSuite": "Only added native identity and C program",
+    "candidateRelease": "Source engine development; generated C /O2 covered",
+    "Linux": "Windows runtime"
+  },
+  "pending": [
+    "Root-only SDK bodies",
+    "FS/Buffer/Vec/String bridges",
+    "Region C and whole dispatcher",
+    "Full provenance/path proof",
+    "Foreign aggregate ABI",
+    "Stage1/stage2 promotion"
+  ]
+}

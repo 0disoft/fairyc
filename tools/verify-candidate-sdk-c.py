@@ -21,6 +21,8 @@ CASES = {
         (["stage0_system_heap.c", "stage0_arena.c"], [], ""),
     "sdk_c_executes_console_numbers_bytes_and_record_result_bridges":
         (["stage0_windows_console.c"], [], "42|-7|9|-9223372036854775808|λ\n"),
+    "sdk_c_executes_stdin_and_stderr_byte_results":
+        (["stage0_windows_console.c"], [], "A\0λZ"),
 }
 PROOF = "sdk_c_plan_respects_work_budget_before_authority_or_output"
 
@@ -30,6 +32,7 @@ def main():
     parser.add_argument("--report", type=Path, action="append", required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--vcvars", type=Path, required=True)
+    parser.add_argument("--case", choices=CASES, action="append")
     args = parser.parse_args()
     outcomes = {}
     reports = []
@@ -63,7 +66,8 @@ def main():
                     "_Noreturn void fy_runtime_trap(uint32_t category){exit(100+(int)category);}\n",
                     encoding="utf-8")
     executions = []
-    for name, (components, argv, expected) in CASES.items():
+    for name in dict.fromkeys(args.case or CASES):
+        components, argv, expected = CASES[name]
         source = base64.b64decode(outcomes[name]["stdoutBase64"], validate=True)
         assert source.startswith(b"/* fairyc.candidate-module-owned-c/v1 */\n")
         assert not base64.b64decode(outcomes[name]["stderrBase64"], validate=True)
@@ -99,9 +103,13 @@ def main():
                                 str(generated), str(runtime), str(trap), f"/Fe:{binary}",
                                 "/link", "/INCREMENTAL:NO"], output, environment)
             assert build["exit"] == 0, build
-            run = driver.run([str(binary)] + argv, output)
-            assert run["exit"] == 0 and run["stdout"] == expected and not run["stderr"], run
+            reading = name == "sdk_c_executes_stdin_and_stderr_byte_results"
+            stdin = b"A\0\xce\xbbZ" if reading else None
+            expected_stderr = "42|-7|9|-9223372036854775808|true|λ\n" if reading else ""
+            run = driver.run([str(binary)] + argv, output, stdin=stdin)
+            assert run["exit"] == 0 and run["stdout"] == expected and run["stderr"] == expected_stderr, run
             executions.append(dict(name=name, profile=profile, sourceSHA256=hashlib.sha256(source).hexdigest(),
+                                   stdinBase64=base64.b64encode(stdin).decode('ascii') if stdin is not None else None,
                                    arenaCounts={"initialize": 2, "drop": 2, "nonzeroStatus": 0} if arena else None,
                                    runtimeInputs=[dict(path=str(path.relative_to(ROOT)),
                                                       sha256=hashlib.sha256(path.read_bytes()).hexdigest())

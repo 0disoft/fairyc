@@ -95,11 +95,11 @@ SWITCHES = {
 }
 
 
-def run(argv, cwd, env=None, timeout=60):
+def run(argv, cwd, env=None, timeout=60, stdin=None):
     process = subprocess.Popen(argv, cwd=cwd, env=env, stdout=subprocess.PIPE,
-                               stderr=subprocess.PIPE)
+                               stderr=subprocess.PIPE, stdin=subprocess.PIPE if stdin is not None else None)
     try:
-        stdout, stderr = process.communicate(timeout=timeout)
+        stdout, stderr = process.communicate(input=stdin, timeout=timeout)
     except subprocess.TimeoutExpired:
         subprocess.run(["taskkill", "/PID", str(process.pid), "/T", "/F"],
                        capture_output=True, timeout=30)
