@@ -1,0 +1,114 @@
+{
+  "schema": "fairyc.candidate-project-field-boundary/v1",
+  "passed": true,
+  "parentCommit": "3accd8c674650518bdb0a4a359933251e5c7d9cd",
+  "implementation": [
+    {
+      "path": "examples/lexer_candidate/src/candidate_limits.fy",
+      "bytes": 1156,
+      "sha256": "125c246b37d49cfbfe287d768c559160a0ef5b46bd18324f068735e237d240c0"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_project_metadata.fy",
+      "bytes": 9445,
+      "sha256": "4e971e13aef7543742569667c95474beb99dd3efb4b6c42be2f319edf21aef53"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_project_cleanup.fy",
+      "bytes": 5698,
+      "sha256": "738ddcb62dba1005664a2674e84a66db64f18475b167a0799dbdadb46b510073"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_unit_body_ir_verify.fy",
+      "bytes": 21525,
+      "sha256": "ca7bedd0bf5cea5cdf2f31b4bf97b058499a370a922c460b5c4a8473fc37b105"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_unit_cleanup_mir_verify.fy",
+      "bytes": 7021,
+      "sha256": "9f850cd059b4097e409898d6b54224772a696ffe30fa634b4a7317ca2628fbc3"
+    }
+  ],
+  "test": {
+    "path": "examples/lexer_candidate/tests/module_project_field_boundary.fy",
+    "bytes": 3356,
+    "sha256": "34a0641152a2acbd4d76830a98db44f761a746ed82e8109c9bab37001a2a49a7"
+  },
+  "contract": {
+    "path": "docs/architecture/candidate-compilation-units-v0.md",
+    "bytes": 134289,
+    "sha256": "2af74536e130f18c9967a7cbe90191fabf6518e82b939f023f2252ce07277a3e"
+  },
+  "receiptTool": {
+    "path": "tools/verify-candidate-project-field-boundary.py",
+    "bytes": 4837,
+    "sha256": "bfcdaeea09ae0df43cd277900df1c8860bcc001c8dc94acb726b474490a6b8ab"
+  },
+  "originalFailure": {
+    "report": {
+      "path": ".cache/candidate-tagged/sdk-c-execution/run-main-link-layout-diagnostic.json",
+      "bytes": 159,
+      "sha256": "1aff37e91682f2d6bd1edc820de3ac3335bad682ff1da8df32c500217ccba349"
+    },
+    "temporaryCode": 410303,
+    "moduleIndex": 213,
+    "source": "internal/sdkstdlib/sources/optional/std/vec.fy",
+    "admittedLayouts": 313,
+    "requestedFields": 2054,
+    "meaning": "The 2048 project field cap failed, independently of the 1024 layout cap or work guards"
+  },
+  "policy": {
+    "projectFields": 4096,
+    "importedUnitFields": 2048,
+    "sourceFields": 1024,
+    "projectLayouts": 1024,
+    "producerWork": 1048576,
+    "depth": 64
+  },
+  "native": {
+    "report": {
+      "path": ".cache/candidate-tagged/sdk-c-execution/native-project-field-boundary.json",
+      "bytes": 6344,
+      "sha256": "9881e0a38726bbe08ac9686e4d73ea8a94bcc37509e7dc0950fb5bd4582b6f37"
+    },
+    "passedCases": 2,
+    "acceptedFields": 4096,
+    "rejectedFields": 4097,
+    "positiveUnits": 8,
+    "fieldsPerUnit": 512,
+    "overflowUnit": 8,
+    "coverage": [
+      "Project layout and cleanup field tables agree at the exact cap",
+      "Owned IR revalidation accepts the merged table",
+      "One additional independently checked field rejects with 1002",
+      "Shared cleanup generation remains identical"
+    ],
+    "fixtureCorrection": "Explicit usize counts avoid default i32 literal inference in the generated source fixture"
+  },
+  "sourceCheck": {
+    "path": ".cache/candidate-tagged/sdk-c-execution/check-project-field-boundary.json",
+    "bytes": 169,
+    "sha256": "469b11f3afdd6303ca9702cca294ef4871205823c6e5eb2e692150916ea4aed8"
+  },
+  "reusedCExecution": {
+    "report": {
+      "path": ".cache/candidate-tagged/sdk-c-execution/project-link-c/execution.json",
+      "bytes": 11568,
+      "sha256": "8e67566e0b2f2678b6f6b8b8986f4460f11dade4f3ba1d53dce45a95e14d97c6"
+    },
+    "sourceSHA256": "41269b76713838e36b21729b18e504d2d92e4de5f955f47d2c78cbe08fc3e1a1",
+    "runs": 2,
+    "justification": "Fresh shared-cleanup C is byte-identical to the previously executed low/optimized artifacts"
+  },
+  "originalFullLinkPassed": false,
+  "deferred": [
+    "Complete original linking and C generation/execution",
+    "Native driver",
+    "Default timeout/performance",
+    "Standalone candidate profiles",
+    "Linux",
+    "Full suite",
+    "Stage1/Stage2"
+  ],
+  "pushed": false
+}

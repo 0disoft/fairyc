@@ -132,7 +132,8 @@ parameter storage is capped at 32768 and owned spelling storage at 65536 bytes.
 
 Project linking admits at most 4096 rebound frames under the existing 1048576
 work cap. The cleanup-MIR verifier uses the same frame cap. Project metadata
-and cleanup recipes share the 2048-field cap. Ordinary bodies are
+and cleanup recipes share a separate 4096-field project cap. Imported unit
+interfaces remain capped at 2048 fields. Ordinary bodies are
 indexed by original module/declaration coordinates; cleanup aliases are indexed
 by their canonical receiver type. Generic frames retain their unit namespace.
 Project callable prototypes have a separate 4096-entry cap and an 8192-slot
