@@ -14,6 +14,16 @@ spec = importlib.util.spec_from_file_location("candidate_c", ROOT / "tools/verif
 driver = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(driver)
 
+# attempts, external SDK String/CString/Buffer drops, injected malloc failure.
+TEXT_CASES = {
+    "sdk_c_executes_string_utf8_views_append_and_empty": (2, 2, 0, 0, None),
+    "sdk_c_executes_string_initial_allocation_failure": (1, 1, 0, 0, 1),
+    "sdk_c_executes_string_append_failure_preserves_owner": (2, 1, 0, 0, 2),
+    "sdk_c_executes_string_buffer_transfers_without_copy": (2, 2, 0, 3, None),
+    "sdk_c_executes_cstring_termination_and_interior_nul": (2, 0, 3, 0, None),
+    "sdk_c_executes_cstring_initial_allocation_failure": (1, 0, 1, 0, 1),
+}
+
 CASES = {
     "sdk_c_executes_nested_vector_move_and_cleanup":
         (["stage0_system_heap.c", "stage0_vector_storage.c"], [], "102,22,21,900,101,12,11,"),
@@ -54,7 +64,9 @@ CASES = {
     "sdk_c_executes_region_storage_or_tracking_failure_as_result":
         (["stage0_system_heap.c", "stage0_arena.c"], [], "B,7,S,"),
 }
-PROOFS = {"sdk_c_rejects_forged_storage_metadata","pointer_c_rejects_forged_raw_view_metadata","rejected_import_expansion_rolls_back_borrow_types","sdk_c_plan_respects_work_budget_before_authority_or_output",
+CASES.update({name: (["stage0_system_heap.c", "stage0_buffer.c", "stage0_text_view.c", "stage0_owned_text.c"], [], "")
+              for name in TEXT_CASES})
+PROOFS = {"sdk_c_rejects_forged_cstring_view_authority","sdk_c_rejects_forged_storage_metadata","pointer_c_rejects_forged_raw_view_metadata","rejected_import_expansion_rolls_back_borrow_types","sdk_c_plan_respects_work_budget_before_authority_or_output",
           "sdk_c_region_plan_respects_placement_budget_before_output"}
 
 
@@ -72,7 +84,7 @@ def main():
         report = json.loads(raw)
         assert report["engine"] == "native" and report["target"] == "x86_64-windows-msvc"
         for test in report["tests"]:
-            prefix = next((prefix for prefix in ("tests::module_unit_imports::", "tests::module_unit_c_pointers::", "tests::module_unit_c_sdk::") if test["identity"].startswith(prefix)), "")
+            prefix = next((prefix for prefix in ("tests::module_unit_imports::", "tests::module_unit_c_pointers::", "tests::module_unit_c_sdk::", "tests::module_unit_c_text::") if test["identity"].startswith(prefix)), "")
             if prefix:
                 name = test["identity"].removeprefix(prefix)
                 if name in CASES or name in PROOFS:
@@ -114,6 +126,7 @@ def main():
         arena = "stage0_arena.c" in components
         buffered = "stage0_buffer.c" in components
         vector = "stage0_vector_storage.c" in components
+        textual = name in TEXT_CASES
         heap_checked = buffered or vector or name in {"sdk_c_executes_region_placement_and_param_origin", "sdk_c_executes_region_storage_or_tracking_failure_as_result"}
         placing = name in {"sdk_c_executes_region_placement_and_param_origin",
                            "sdk_c_executes_region_storage_or_tracking_failure_as_result"}
@@ -192,7 +205,28 @@ def main():
                 b"if(status)++vector_release_errors;return status;}\n"
                 b"extern int32_t fy_candidate_entry(void);\nint main(void){int32_t result=fy_candidate_entry();"
                 + f"return result?result:(vector_releases==1&&!vector_release_errors&&heap_live==0&&heap_attempts=={vector_attempts}?0:90);}}\n".encode())
+        if textual:
+            attempts, string_drops, cstring_drops, buffer_drops, text_failure = TEXT_CASES[name]
+            instrumentation = (
+                b"#undef fy_std_string_drop_storage_v0\n#undef fy_std_cstring_drop_storage_v0\n#undef fy_std_buffer_drop_v0\n"
+                b"static unsigned string_dropped,cstring_dropped,buffer_dropped,text_drop_errors;\n"
+                b"struct fy_std_owned_text_result_v0 fy_std_string_drop_storage_v0(void *owner){"
+                b"struct fy_std_owned_text_result_v0 result=fy_test_actual_string_drop_storage_v0(owner);"
+                b"++string_dropped;if(result.status||result.allocation_status)++text_drop_errors;return result;}\n"
+                b"struct fy_std_owned_text_result_v0 fy_std_cstring_drop_storage_v0(void *owner){"
+                b"struct fy_std_owned_text_result_v0 result=fy_test_actual_cstring_drop_storage_v0(owner);"
+                b"++cstring_dropped;if(result.status||result.allocation_status)++text_drop_errors;return result;}\n"
+                b"uint32_t fy_std_buffer_drop_v0(struct fy_std_buffer_v0 *owner){uint32_t status=fy_test_actual_buffer_drop_v0(owner);"
+                b"++buffer_dropped;if(status)++text_drop_errors;return status;}\n"
+                b"int32_t test_cstring_probe(uint8_t const *data,size_t length){if(!data)return 0;"
+                b"return length==0?data[0]==0:length==3&&data[0]==206&&data[1]==187&&data[2]==90&&data[3]==0;}\n"
+                b"_Static_assert(sizeof(struct fy_std_string_v0)==32&&_Alignof(struct fy_std_string_v0)==8,\"runtime String storage\");\n"
+                b"_Static_assert(sizeof(struct fy_std_cstring_v0)==32&&_Alignof(struct fy_std_cstring_v0)==8,\"runtime CString storage\");\n"
+                b"extern int32_t fy_candidate_entry(void);\nint main(void){int32_t result=fy_candidate_entry();"
+                + f"return result?result:(string_dropped=={string_drops}&&cstring_dropped=={cstring_drops}&&buffer_dropped=={buffer_drops}&&!text_drop_errors&&heap_live==0&&heap_attempts=={attempts}?0:90);}}\n".encode())
         runtime.write_bytes(heap + b"#define FY_STD_SYSTEM_HEAP_MAX_ALIGNMENT_V0 ((size_t)16)\n" +
+                            (b"#define fy_std_string_drop_storage_v0 fy_test_actual_string_drop_storage_v0\n"
+                             b"#define fy_std_cstring_drop_storage_v0 fy_test_actual_cstring_drop_storage_v0\n" if textual else b"") +
                             (b"#define fy_private_vector_release_empty_v0 fy_test_actual_vector_release_empty_v0\n" if vector else b"") +
                             (b"#define fy_std_buffer_drop_v0 fy_test_actual_buffer_drop_v0\n" if buffered else b"") +
                             (b"#define fy_std_arena_initialize_v0 fy_test_actual_arena_initialize_v0\n"
@@ -210,7 +244,7 @@ def main():
             reading = name == "sdk_c_executes_stdin_and_stderr_byte_results"
             stdin = b"A\0\xce\xbbZ" if reading else None
             expected_stderr = "42|-7|9|-9223372036854775808|true|λ\n" if reading else ""
-            failures = (1, 2) if name == "sdk_c_executes_region_storage_or_tracking_failure_as_result" else (buffer_failure,) if buffered else (vector_failure,) if vector else (None,)
+            failures = (text_failure,) if textual else (1, 2) if name == "sdk_c_executes_region_storage_or_tracking_failure_as_result" else (buffer_failure,) if buffered else (vector_failure,) if vector else (None,)
             for failure in failures:
                 run_environment = dict(os.environ)
                 run_environment.pop("FY_TEST_HEAP_FAIL_AT", None)
@@ -221,7 +255,8 @@ def main():
                 executions.append(dict(name=name, profile=profile, sourceSHA256=hashlib.sha256(source).hexdigest(),
                                    stdinBase64=base64.b64encode(stdin).decode('ascii') if stdin is not None else None,
                                    heapFailureAt=failure, heapBalanceVerified=heap_checked,
-                                   heapCounts={"attempts": failure or (vector_attempts if vector else 3 if buffered else 10), "liveAfter": 0} if heap_checked else None,
+                                   heapCounts={"attempts": failure or (attempts if textual else vector_attempts if vector else 3 if buffered else 10), "liveAfter": 0} if heap_checked else None,
+                                   textCounts={"stringDrop": string_drops, "cstringDrop": cstring_drops, "dropStatusErrors": 0} if textual else None,
                                    vectorCounts={"release": 1, "releaseStatusErrors": 0} if vector else None,
                                    bufferCounts={"drop": buffer_drops, "dropStatusErrors": 0} if buffered else None,
                                    arenaCounts={"initialize": arena_count, "drop": arena_count, "nonzeroStatus": 0} if arena else None,
