@@ -1,5 +1,8 @@
 module tests::module_unit_c_owned;
 import module_unit_c_emit as emit;
+import module_unit_c_aggregate as aggregate;
+import module_unit_c_layout_index as layouts;
+import c_text as w;
 import module_unit_body_ir_model as ir;
 import module_unit_cfg_model as cfg;
 import module_unit_cfg_lower as flow;
@@ -31,6 +34,14 @@ fn syntax::Parsed parsed(ref u8[] text){let b=switch(bytes::copy(text)){case .ok
     return switch(lower::lower(ref sources,ref typed,closure::imported(ref ready),ref moved)){case .ok(p):{p}case .err(e):{discard io::write_u32(e.code);discard io::write(" at ");discard io::write_usize(e.start);discard io::write(".. ");discard io::write_usize(e.end);discard io::write(" lower\n");assert(false);retained(root,provider)}};
 }
 fn usize entry(ref ir::Program p){var usize found=0;var usize i=1;while(i<=ir::count(p)){let f=clean_ir::frame_at(ir::cleanup_ir(p),i);let type=clean_ir::type_at(ir::cleanup_ir(p),f.result);if(f.module_index==0 && f.kind==3 && type.kind==1 && type.scalar==1){var usize j=1;var usize params=0;let b=ir::at(p,i);while(j<=ir::local_count(b)){if(ir::local_at(b,j).kind==1){params+=1;}j+=1;}if(params==0){assert(found==0);found=i;}}i+=1;}return found;}
+@test @effects(console) fn void aggregate_c_indexes_layouts_and_respects_budget(){
+    var bytes::Buffer source=bytes::empty();var bytes::Buffer provider=bytes::empty();assert(bytes::append(ref mut source,b"module main;import helper as h;").is_ok);assert(bytes::append(ref mut provider,b"module helper;").is_ok);var usize i=0;
+    while(i<100){assert(bytes::append(ref mut source,b"struct S").is_ok);assert(bytes::append_usize(ref mut source,i).is_ok);assert(bytes::append(ref mut source,b"{i32 n;}").is_ok);i+=1;}while(i<200){assert(bytes::append(ref mut provider,b"pub struct S").is_ok);assert(bytes::append_usize(ref mut provider,i).is_ok);assert(bytes::append(ref mut provider,b"{i32 n;}").is_ok);i+=1;}
+    assert(bytes::append(ref mut source,b"fn i32 main(){").is_ok);i=0;while(i<200){assert(bytes::append(ref mut source,if(i<100){b"discard S"}else{b"discard h::S"}).is_ok);assert(bytes::append_usize(ref mut source,i).is_ok);assert(bytes::append(ref mut source,b"{.n=1};").is_ok);i+=1;}assert(bytes::append(ref mut source,b"return 0;}").is_ok);
+    var p=retained(bytes::view(ref source),bytes::view(ref provider));assert(ir::layout_count(ref p)==200);var usize work=0;var bytes::Buffer out=bytes::empty();var w::State state=w::State{.code=0};let marks=switch(aggregate::definitions(ref p,ref mut out,ref mut state,ref mut work)){case .ok(m):{m}case .err(_):{assert(false);return;}};assert(state.code==0 && work<4000);discard io::write("layouts 200 work ");discard io::write_usize(work);discard io::write("\n");
+    var usize index_work=0;let indexed=switch(layouts::build(ref p,ref mut index_work)){case .ok(index):{index}case .err(_):{assert(false);return;}};i=0;var u32 code=0;while(i<200){let type=ir::layout_at(ref p,i).value.type;assert(layouts::find(ref indexed,type,ref mut index_work,ref mut code)==i+1);i+=1;}assert(code==0);index_work=1048576;assert(layouts::find(ref indexed,ir::layout_at(ref p,0).value.type,ref mut index_work,ref mut code)==0 && code==1002);
+    index_work=0;code=0;assert(layouts::find(ref indexed,0,ref mut index_work,ref mut code)==0 && code==1001);work=1048576;let exhausted=switch(layouts::build(ref p,ref mut work)){case .ok(_):{false}case .err(e):{e==1002}};assert(exhausted);
+}
 @effects(console) fn void output(ref ir::Program p,usize frame){var bytes::Buffer c=bytes::empty();let e=emit::render(p,frame,ref mut c);if(e.code!=0){discard io::write_u32(e.code);discard io::write(" C at ");discard io::write_usize(e.start);discard io::write("\n");}assert(e.code==0);assert(bytes::view(ref c).len>100);assert(io::write_bytes(bytes::view(ref c)).is_ok);}
 @test @effects(console) fn void owned_c_replaces_owners_after_rhs_and_mutates_cleanup_receiver(){
     let p=retained(b"module main;@link_name(\"observe_cleanup\")@effects(console)unsafe extern C fn void trace(i32 n);@effects(console)resource R{i32 id;cleanup{this.id+=100;unsafe{trace(this.id);}}}@effects(console)fn i32 main(){var R r=R{.id=1};r.id=2;r=R{.id=3};return 0;}",b"");output(ref p,entry(ref p));

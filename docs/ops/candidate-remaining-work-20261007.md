@@ -3185,3 +3185,43 @@ candidate profiles, Linux, full suite and Stage1/Stage2 remain pending.
 
 The candidate unit contract and local evidence tool change. Stable CLI/API, SDK
 ABI, Go reference behavior, DB, CI and native runner limits are unchanged. No push.
+
+
+## Owned-C layout index and foreign-declaration work (2026-10-11)
+
+Receipt: `evidence/candidate-c-layout-index-20261011.json`.
+
+Aggregate definitions, cleanup functions and SDK shape checks now prepare a
+type-to-original-layout-row index. Preparation and lookups consume the existing
+work budget. Duplicate/out-of-range type rows reject; original SDK spelling,
+declaration coordinates, field spans and field type authentication remain.
+The original layout and field order, C spelling and capacity limits are retained.
+
+Four distinct Release native cases pass after correcting two fixture inputs.
+The 200-structure case spans two modules to respect the existing 128-declaration
+per-module limit; it verifies bounded aggregate-definition work, original row
+identity, invalid IDs and exhausted work, using 1622 work. Existing nested/tagged resource cleanup,
+SDK Vec struct slices and SDK work exhaustion also pass. Nested resource and real
+SDK Vec generated C execute under MSVC /Od and /O2 (four executions). The locked
+source check passes with 288 files and 3602 MIR functions.
+
+The first stress fixture exceeded the per-module declaration cap; the first Vec
+fixture used a nonexistent `sources/std/vec.fy` path instead of
+`sources/optional/std/vec.fy`. Their failed reports remain separate from passes.
+Only those two fixtures are rerun; the other two unchanged passing observations
+are reused. An earlier test tried to mutate a private IR field and failed before
+native execution; it was removed without relaxing visibility.
+
+The exact 236-file original main closure still links 3558 frames in 48 units
+with 25 retries. Full C generation now passes aggregate and literal definitions,
+SDK definitions and Region lifecycle definitions. Its next failure is
+`module_unit_c_emit::foreign_signatures`. That phase starts with 979985 work,
+reaches 1048576 work and retains 351827 temporary C bytes. Transactional public
+output stays empty; the output-size limit is not reached. Foreign declarations
+currently scan all callable prototypes for each invocation, including project
+calls. Indexing those retained callable coordinates is the next task.
+
+Full original C generation/execution, native driver, default timeout/performance,
+standalone candidate profiles, Linux, full suite and Stage1/Stage2 remain pending.
+The candidate unit contract and local evidence tool change. Stable CLI/API, SDK
+ABI, Go reference behavior, DB, CI and native runner limits are unchanged. No push.

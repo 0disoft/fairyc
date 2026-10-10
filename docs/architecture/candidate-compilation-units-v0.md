@@ -2135,6 +2135,24 @@ Stable CLI/API, SDK ABI, language revision, Go reference behavior, DB, CI and
 native runner policy are unchanged.
 
 
+## Indexed owned-C layout lookup (2026-10-11)
+
+`module_unit_c_layout_index` maps canonical type IDs to original one-based
+layout row IDs. Preparation charges one work unit per type slot and retained
+layout row. Zero, out-of-range and duplicated type IDs reject with 1001;
+allocation and exhausted work retain 1003 and 1002. Each lookup consumes work,
+and missing layouts remain distinguishable from a failed lookup.
+
+Aggregate definitions, aggregate cleanup functions and SDK shape authentication
+prepare this private index instead of repeatedly scanning all layouts. Layout
+order, field order and generated C spelling remain unchanged. SDK authentication
+still checks original declaration coordinates, spelling, field spans and types;
+the index supplies a row location and does not grant SDK authority. Enum
+definitions retain their independent shape checks. Existing work/output limits,
+stable CLI/API, SDK ABI, Go reference behavior, DB, CI and native runner policy
+are unchanged. Evidence: `docs/ops/evidence/candidate-c-layout-index-20261011.json`.
+
+
 ## Indexed literal storage collection (2026-10-11)
 
 Owned-unit C literal collection uses an explicit hash-slot vector for duplicate
