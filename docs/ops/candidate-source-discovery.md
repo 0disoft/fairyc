@@ -631,8 +631,33 @@ candidate C executions pass. Check passes 336 files and 4367 MIR functions; the
 source-derived literal check passes all ten parts.
 Evidence: `evidence/candidate-sdk-embedded-20261012.json`.
 
-Selection-work failure currently routes through the generic bundle-failure
-adapter; preserving its graph error category is the immediate follow-up. Lock
-projection and compiler/project CLI consumers remain. Stable CLI/API, SDK ABI and
+Selection-work failure retains the original graph problem through its own
+adapter; embedded construction failure retains its separate SDK reason and file
+index. Lock projection and compiler/project CLI consumers remain. Stable CLI/API, SDK ABI and
 version, DB and CI are unchanged. Linux, full suite and Stage1/Stage2 remain
 scheduled later; no push occurred.
+
+
+## SDK failure category and lazy work boundary
+
+The automatic SDK loader preserves the original graph selection problem instead
+of translating it to a bundle problem with the same numeric leaf code. Exhausted
+selection work remains graph code 4; exhausted literal copying is graph code 8
+with SDK reason 5 and original SDK file index. Both errors retain the untouched
+local graph and preserve caller source counters. A local source-limit failure
+still wins before SDK selection and keeps its original loader phase.
+
+Two native tests and both candidate C profiles pass four measured phase cases:
+selection exhaustion, embedded literal-copy exhaustion, earlier local source
+limit, and an SDK-unused project ending exactly at the final resolver work unit.
+The tests measure existing local load/selection work, then place the meter at the
+owning phase without hard-coded fixture work or timing. The unused SDK case
+succeeds at meter 16777216 without creating any SDK node, proving factory laziness
+at the work boundary. Source check passes 336 files and 4368 MIR functions.
+Evidence: `evidence/candidate-sdk-failures-20261012.json`.
+
+The prior embedded SDK graph/source corpus remains the evidence for unchanged
+successful SDK loading; this small fix covers error categorization and the exact
+lazy boundary. Lock projection and compiler/CLI integration remain. Stable
+CLI/API, SDK ABI/version, DB and CI are unchanged; Linux, full suite and Stage1/2
+are scheduled later and no push occurred.

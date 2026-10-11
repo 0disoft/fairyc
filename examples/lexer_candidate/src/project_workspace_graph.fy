@@ -18,6 +18,7 @@ pub resource Error{local::Graph local;local::Problem problem;cleanup{}}
 pub fn local::Problem error(ref Error error){return error.problem;}
 pub fn ref local::Graph error_local_graph(ref Error error){return ref error.local;}
 pub fn Error bundle_failure(local::Graph input,sdk::Problem failure){return Error{.local=input,.problem=local::Problem{.code=8,.reason=failure.code,.node=failure.file,.declaration=0}};}
+pub fn Error selection_failure(local::Graph input,local::Problem failure){return Error{.local=input,.problem=failure};}
 pub fn ref local::Graph local_graph(ref Graph graph){return ref graph.local;}
 pub fn bool has_sdk(ref Graph graph){return v::len<sdk::Bundle>(ref graph.library)==1;}
 pub fn usize local_node_count(ref Graph graph){return local::node_count(ref graph.local);}
