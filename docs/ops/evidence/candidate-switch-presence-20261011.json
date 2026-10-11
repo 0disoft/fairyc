@@ -1,0 +1,260 @@
+{
+  "schema": "fairyc.candidate-switch-presence/v1",
+  "passed": true,
+  "scope": "Avoid pattern bookkeeping after bounded inspection of all node, statement, and local arenas; orphan metadata still follows full checking",
+  "sources": [
+    {
+      "path": "examples/lexer_candidate/src/module_unit_body_ir_switches.fy",
+      "sha256": "3e7cab96e8eb4f84fb0b0f7018fe815640c1b7bb59064de7a42f165a2a8bdadd"
+    },
+    {
+      "path": "examples/lexer_candidate/tests/module_unit_body_ir_enums.fy",
+      "sha256": "cb0d829a966d0402f0f79d545d05fb99d1dd6f036ae43e9a999b837386654e8d"
+    }
+  ],
+  "limitsChanged": false,
+  "perBodyWorkLimit": 1048576,
+  "projectWorkLimit": 4194304,
+  "native": {
+    "exit": 0,
+    "profile": "development",
+    "passed": 4,
+    "failed": 0,
+    "seconds": 133.92313519999152,
+    "argv": [
+      "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\compiler-build-120s.exe",
+      "test",
+      "--native",
+      "--locked",
+      "--json",
+      "--capture-output",
+      "--exact",
+      "tests::module_unit_body_ir_enums::owned_switches_recheck_exhaustive_provider_and_builtin_patterns",
+      "--exact",
+      "tests::module_unit_body_ir_enums::owned_switches_reject_missing_arms_forged_payloads_and_escaped_symbols",
+      "--exact",
+      "tests::module_unit_ir_budgets::owned_ir_revalidation_has_an_independent_bounded_budget",
+      "--exact",
+      "tests::module_unit_body_ir_enums::owned_switches_skip_plain_bodies_but_reject_orphan_pattern_metadata"
+    ],
+    "tests": [
+      {
+        "identity": "tests::module_unit_body_ir_enums::owned_switches_recheck_exhaustive_provider_and_builtin_patterns",
+        "outcome": "passed"
+      },
+      {
+        "identity": "tests::module_unit_body_ir_enums::owned_switches_reject_missing_arms_forged_payloads_and_escaped_symbols",
+        "outcome": "passed"
+      },
+      {
+        "identity": "tests::module_unit_body_ir_enums::owned_switches_skip_plain_bodies_but_reject_orphan_pattern_metadata",
+        "outcome": "passed"
+      },
+      {
+        "identity": "tests::module_unit_ir_budgets::owned_ir_revalidation_has_an_independent_bounded_budget",
+        "outcome": "passed"
+      }
+    ],
+    "mutationModes": [
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25,
+      26,
+      27,
+      28,
+      29,
+      30,
+      31,
+      32,
+      33
+    ],
+    "invalidFrameRejectedBeforeIndexAtExhaustedBudget": true
+  },
+  "sourceCheck": {
+    "exit": 0,
+    "files": 292,
+    "mirFunctions": 3677,
+    "lockUpdated": true
+  },
+  "cli": {
+    "passed": true,
+    "compilerSHA256": "6aa12c0b83c3b0145e5cb16130bf854bb0901bb310ad83c0c036e857aea56324",
+    "cases": [
+      {
+        "name": "positive",
+        "exit": 0,
+        "seconds": 0.03643490000104066,
+        "stdoutBytes": 3565,
+        "stderr": "",
+        "packetSHA256": "68c878676f624102da5d214b87c36f673823603bcfbfc9ad30a919bedff430dc",
+        "priorCExecutionReused": true
+      },
+      {
+        "name": "dependency-entry",
+        "exit": 2,
+        "seconds": 0.03526340000098571,
+        "stdoutBytes": 0,
+        "stderr": ".cache/candidate-tagged/sdk-c-execution/project-cli-sdk/fixtures/root.fy:1:1: error: project phase 4 stage 0 code 1001 (bytes 0..0)\n"
+      },
+      {
+        "name": "wrong-result",
+        "exit": 2,
+        "seconds": 0.042400499994982965,
+        "stdoutBytes": 0,
+        "stderr": ".cache/candidate-tagged/sdk-c-execution/project-cli-sdk/fixtures/void.fy:1:1: error: project phase 5 stage 0 code 1001 (bytes 0..0)\n"
+      },
+      {
+        "name": "type-error",
+        "exit": 2,
+        "seconds": 0.01972100000421051,
+        "stdoutBytes": 0,
+        "stderr": ".cache/candidate-tagged/sdk-c-execution/project-cli-sdk/fixtures/type.fy:1:34: error: project phase 2 stage 4 code 1009 (bytes 33..37)\n"
+      },
+      {
+        "name": "syntax-error",
+        "exit": 2,
+        "seconds": 0.019792499995674007,
+        "stdoutBytes": 0,
+        "stderr": ".cache/candidate-tagged/sdk-c-execution/project-cli-sdk/fixtures/syntax.fy:1:36: error: expected } (bytes 35..35)\n"
+      },
+      {
+        "name": "missing-source",
+        "exit": 2,
+        "seconds": 0.01694590000261087,
+        "stdoutBytes": 0,
+        "stderr": "error: input file read failed\n"
+      },
+      {
+        "name": "blank-manifest",
+        "exit": 2,
+        "seconds": 0.022195999990799464,
+        "stdoutBytes": 0,
+        "stderr": "error: invalid module manifest\n"
+      },
+      {
+        "name": "invalid-utf8",
+        "exit": 2,
+        "seconds": 0.021844500006409362,
+        "stdoutBytes": 0,
+        "stderr": "error: invalid module manifest\n"
+      },
+      {
+        "name": "duplicate-source",
+        "exit": 2,
+        "seconds": 0.021699799995985813,
+        "stdoutBytes": 0,
+        "stderr": ".cache/candidate-tagged/sdk-c-execution/project-cli-sdk/fixtures/main.fy:1:8: error: project phase 1 stage 0 code 1 (bytes 7..11)\n"
+      },
+      {
+        "name": "vector-dev",
+        "exit": 0,
+        "seconds": 0.8270975000050385,
+        "stdout": "built: C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\bridge-switch-vector-dev.exe (low, 1 C units, 117248 bytes)\n",
+        "stderr": "",
+        "imageSHA256": "c6e9fc10ae8f8b6a9ce17109f98774042fe063f623c4b08644697016f6cf3d45",
+        "programExit": 0
+      },
+      {
+        "name": "vector-release",
+        "exit": 0,
+        "seconds": 0.8223758999956772,
+        "stdout": "built: C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\bridge-switch-vector-release.exe (optimized, 1 C units, 110592 bytes)\n",
+        "stderr": "",
+        "imageSHA256": "477c1b51d51299650699d5715059af2c8ff37ecec0ae978957f380f950f83501",
+        "programExit": 0
+      }
+    ]
+  },
+  "bootstrapValidation": {
+    "cacheOnlyInlining": true,
+    "productionReleaseFlagsChanged": false,
+    "sourceSHA256": "9383e61b8b3d15d844f13e84a1a76228de421c844148bed620df061b3b162dfb",
+    "runtimeObjectSHA256": "fd33d07717df1e64bfc59875d64f51071926dc798d9266d8ef3054f6ea5ec48b",
+    "compilerSHA256": "6aa12c0b83c3b0145e5cb16130bf854bb0901bb310ad83c0c036e857aea56324",
+    "runs": [
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\compiler-build-120s.exe",
+          "experimental",
+          "emit-workspace-c",
+          "--target",
+          "x86_64-windows-msvc",
+          "--locked"
+        ],
+        "exit": 0,
+        "seconds": 23.22445439999865,
+        "timeout": false,
+        "stdoutBytes": 21834415,
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+          "/nologo",
+          "/std:c11",
+          "/TC",
+          "/W4",
+          "/WX",
+          "/MT",
+          "/O2",
+          "/Ob1",
+          "/c",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\bootstrap-switch-presence.c",
+          "/Fo:C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\bootstrap-switch-presence.obj"
+        ],
+        "exit": 0,
+        "seconds": 41.6979954999988,
+        "timeout": false,
+        "stdoutBytes": 29,
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+          "/nologo",
+          "/MT",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\bootstrap-switch-presence.obj",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\bootstrap-retained-runtime.obj",
+          "/Fe:C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\bootstrap-switch-presence.exe",
+          "/link",
+          "/INCREMENTAL:NO"
+        ],
+        "exit": 0,
+        "seconds": 0.22181609999097418,
+        "timeout": false,
+        "stdoutBytes": 0,
+        "stderr": ""
+      }
+    ]
+  },
+  "fullCurrentDispatcher": {
+    "exit": 2,
+    "seconds": 31.765615600001183,
+    "stdout": "",
+    "stderr": "candidate build failed: candidate frontend failed: exit status 2: examples/lexer_candidate/src/main.fy:1:1: error: project phase 3 stage 0 code 1002 (bytes 0..0)\n",
+    "previousImagePreserved": true,
+    "sourceFiles": 285,
+    "joinedSourceBytes": 2024045,
+    "sourceInventorySHA256": "35b1294566087611d57e717e2d2ad19399d94cf00daa834342d209acb376b92e"
+  },
+  "fullCompilationProven": false,
+  "pushed": false,
+  "skipped": [
+    "Linux (deferred batch)",
+    "full suite (targeted change)",
+    "Stage1/Stage2 (full dispatcher incomplete)",
+    "default standalone Release policy change"
+  ]
+}

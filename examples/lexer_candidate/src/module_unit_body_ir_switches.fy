@@ -58,8 +58,16 @@ fn bool no_tail(ref ir::Program p,ref ir::Body b,usize block,usize subject,usize
 // All pattern records have exactly one owning arm. Bindings are associated
 // with that arm's retained lexical symbol, so inactive payloads cannot be
 // relabelled as bindings of a different variant or escape into another arm.
+fn Result<bool,clean::Problem> pattern_records(ref ir::Body b,usize module_index,ref mut usize work){
+    var u32 code=0;var usize i=0;while(i<ir::node_count(b)){if(!charge(work,1,ref mut code)){return .err(clean::Problem{.code,.module_index,.start=0,.end=0});}let e=ir::node_at(b,i).value;
+        if(e.kind==15 || e.kind==16 || e.kind==17 || e.kind==18 || e.kind==19 || e.kind==32 || e.kind==33){return .ok(true);}if(e.kind==2 && e.binding>ir::local_count(b)){return .err(clean::Problem{.code=1001,.module_index,.start=e.start,.end=e.end});}i+=1;
+    }i=0;while(i<ir::statement_count(b)){if(!charge(work,1,ref mut code)){return .err(clean::Problem{.code,.module_index,.start=0,.end=0});}let kind=ir::statement_at(b,i).value.kind;if(kind==17 || kind==18){return .ok(true);}i+=1;}
+    i=1;while(i<=ir::local_count(b)){if(!charge(work,1,ref mut code)){return .err(clean::Problem{.code,.module_index,.start=0,.end=0});}let kind=ir::local_at(b,i).kind;if(kind==4 || kind==5){return .ok(true);}i+=1;}
+    return .ok(false);
+}
 fn clean::Problem checked_body(ref ir::Program p,ref ir::Body b,usize frame,ref LayoutIndex index,ref mut usize work){
     if(frame==0 || frame>clean::frame_count(ir::cleanup_ir(p))){return clean::Problem{.code=1001,.module_index=0,.start=0,.end=0};}let module_index=clean::frame_at(ir::cleanup_ir(p),frame).module_index;
+    let patterns=switch(pattern_records(b,module_index,work)){case .ok(p):{p}case .err(e):{return e;}};if(!patterns){return clean::Problem{.code=0,.module_index=0,.start=0,.end=0};}
     var u32 code=0;var v::Vec<usize> owners=v::empty<usize>();var v::Vec<usize> locals=v::empty<usize>();var usize i=0;
     if(!zeros(ref mut owners,ir::node_count(b),work,ref mut code) || !zeros(ref mut locals,ir::local_count(b),work,ref mut code)){return clean::Problem{.code,.module_index,.start=0,.end=0};}
     while(i<ir::node_count(b)){if(!charge(work,1,ref mut code)){return clean::Problem{.code,.module_index,.start=0,.end=0};}let e=ir::node_at(b,i).value;
@@ -97,6 +105,7 @@ fn clean::Problem checked_body(ref ir::Program p,ref ir::Body b,usize frame,ref 
     return clean::Problem{.code=0,.module_index=0,.start=0,.end=0};
 }
 pub fn clean::Problem check_body(ref ir::Program p,ref ir::Body b,usize frame,ref mut usize work){
+    if(frame==0 || frame>clean::frame_count(ir::cleanup_ir(p))){return clean::Problem{.code=1001,.module_index=0,.start=0,.end=0};}
     let index=switch(layouts(p,work)){case .ok(p):{p}case .err(e):{return e;}};return checked_body(p,b,frame,ref index,work);
 }
 pub fn clean::Problem check(ref ir::Program p,ref mut usize work,ref mut usize total){

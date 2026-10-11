@@ -3564,3 +3564,31 @@ cache-only generated-C work-counter probe succeeds in 36.1011 seconds with error
 passing full link is not claimed. The next step avoids unnecessary pattern
 bookkeeping for bodies without switch, iteration or Region pattern records.
 Linux, the full suite and Stage1/Stage2 were skipped. No push.
+
+
+## Pattern bookkeeping only for structured bodies (2026-10-11)
+
+Receipt: `docs/ops/evidence/candidate-switch-presence-20261011.json`.
+
+The whole-program switch check now bounded-scans the node, statement and local
+arenas to establish absence before skipping the owner/local pattern arrays and
+repeated walks; any switch or pattern node, Region or iteration statement, and
+kind 4 or 5 local still gets the full original checks. Invalid expression
+binding bounds are rejected, and public `check_body` rejects invalid frames at
+exhausted budget before building the layout index. No limit changed: per-body
+1048576 and project 4194304. Checking passes 292 files and 3677 MIR functions
+with the lock updated.
+
+Four development native tests pass: exhaustive valid provider/builtin patterns
+with exhausted work, the 19 existing malformed pattern cases, the independent
+revalidation budget, and four new orphan-local, Region and iteration mutations
+plus invalid-frame budget priority. The nine CLI cases pass and the unchanged
+ordinary packet hash reuses the prior C execution; the real Vec executions pass
+in development and release.
+
+The latest full 285-source join is 2024045 bytes and fails with exit 2 at
+project phase 3, stage 0, plain 1002 in 31.7656 seconds, previous image
+preserved. The `/Ob1` bootstrap remains cache-only and the production Release
+policy is unchanged. The next step measures the remaining full-source
+revalidation budget in a cache-only scoped-capacity probe, without a full
+compile claim. Linux, the full suite and Stage1/Stage2 were skipped. No push.
