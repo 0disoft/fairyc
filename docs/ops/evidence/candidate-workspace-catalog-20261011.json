@@ -1,0 +1,893 @@
+{
+  "schema": "fairyc.candidate-private-tests/v1",
+  "passed": true,
+  "module": "project_workspace_catalog",
+  "sourceInputs": [
+    {
+      "path": "examples/lexer_candidate/src/attributes.fy",
+      "sha256": "dafe2e1c020446224fa8784e701e522096a58776a1066920f934c0717667b5e6"
+    },
+    {
+      "path": "examples/lexer_candidate/src/bodies.fy",
+      "sha256": "ea9bfd6dc1b3bce9dc407970b82d871185db33e7daadad35d348de84ab6ba294"
+    },
+    {
+      "path": "examples/lexer_candidate/src/body_state.fy",
+      "sha256": "0f4e1924d07e4d21bc5fbe35a4fb8f0c2b617206b6d63191e7a625300ec5bb3e"
+    },
+    {
+      "path": "examples/lexer_candidate/src/budget.fy",
+      "sha256": "c2793aa302279b9d27f0af32edd71f70de4e93cb4f76f55facd3e757641cc494"
+    },
+    {
+      "path": "examples/lexer_candidate/src/candidate_limits.fy",
+      "sha256": "7a27948d9a43bde84acdf1106f462d0c5a288f8a54f193560658eff0c0d00f3e"
+    },
+    {
+      "path": "examples/lexer_candidate/src/cleanup_syntax.fy",
+      "sha256": "1374cdcbfa6139a5e82e4e74606cc28ba46d9e81df62f7a0dd397f856fb0ad6f"
+    },
+    {
+      "path": "examples/lexer_candidate/src/diagnostics.fy",
+      "sha256": "ee95f81ed3b3224702196fceef2888434e9713341b81abf01e03945592c4de8b"
+    },
+    {
+      "path": "examples/lexer_candidate/src/file_source.fy",
+      "sha256": "1a7ac7f6c69ef27e78e734aa74dab90b895742a5500a32931baaed19379b938f"
+    },
+    {
+      "path": "examples/lexer_candidate/src/numbers.fy",
+      "sha256": "ee8b40b5e8061317d70d3594c386c9e4c70d95132a7e4243ea6402947a4c3556"
+    },
+    {
+      "path": "examples/lexer_candidate/src/parse_tokens.fy",
+      "sha256": "91984eb1086ff7faafa4a6c64a232fc2ddce365b8cd7c2ef23b143bb91d4c9a6"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_directory.fy",
+      "sha256": "70321e8a7cc84f131573eec91013fccad38d0162f781768bc0e47b136cf4ebc6"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_key_index.fy",
+      "sha256": "34ee26a1092361c5bc60860795a86c0974243eec3cfc5f829710d192fdf7ea28"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_manifest.fy",
+      "sha256": "378c68ca2801864301fef8df199393e020447099b75932b0230123040ba39466"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_manifest_values.fy",
+      "sha256": "4f21b9dedf744ffc449d1b843282f9aba2ecc221c61f043594bea70c4d56387d"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_module_path.fy",
+      "sha256": "b4217fe0f797e5f0fb4bab8ebc75435e6674b5f72b60d0129b5269c627709cb2"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_package_input.fy",
+      "sha256": "fe1a75622fbf72b03fe5bfba3ce0c158eb2e03033e31acfdaef05afea9ec68c8"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_path.fy",
+      "sha256": "20bde13864e5ba8752b33a616eab22b08caf8a20d6a435d2d2c2cc68f443f1a5"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_path_unicode_data.fy",
+      "sha256": "9cf3af27796644304493561591e1641c70c5c653bf739ed71a65e492db510fbd"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_source_catalog.fy",
+      "sha256": "5dd5b1a6f848968cf20676084af8ddcaf039cfc74e1837685c12c601c53fb131"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_source_file.fy",
+      "sha256": "6d1307e99f7ae9fb387fc447f3b6c36f6c0e77aebc90faca55e75665aad2d282"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_source_identity.fy",
+      "sha256": "f7a02cf002df1b9967bb9bc163e9badbf2f16e47f9fb482f9b2982305dccc31f"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_source_modules.fy",
+      "sha256": "23adf41c8e6cc0424968ebd78d4623ab0d95ed6bebb0125dd4440c4941fee20b"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_source_root.fy",
+      "sha256": "4880e506b45f360aea7f36b25542db011a8c1e328cac51487b23046ea863e642"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_source_set.fy",
+      "sha256": "7de61561dac17fa32b8e8282a71a3e93671a59a60ada9f37ea893984bc12e72a"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_toml_context.fy",
+      "sha256": "1682260043feced2ac662198fd3b29f4badb2a4a9f9b02a8e1f81462f3b3cc0f"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_toml_document.fy",
+      "sha256": "0bc3782206da0d9320ba8a39ea6a1f9ded52ec1bbf855580e31c1a1786f4b3a8"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_toml_model.fy",
+      "sha256": "4a6c295108e704749fc557204de4d8a0287e3228e59da396c50867ec8894b11e"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_toml_scalars.fy",
+      "sha256": "137d5dbdce313f22e91a9be87f8b34eb6f10011933b152f649421a895e274cb9"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_toml_strings.fy",
+      "sha256": "bc7e71acaaa68af5755d066c90fa1f763625de32c8fa2a6778e8447eebc187bb"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_toml_values.fy",
+      "sha256": "24255d1fdf0f34b6761f5304d383127667e8b127488a80409b3f35a13f62e81c"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_workspace_catalog.fy",
+      "sha256": "1d326941fddfc9559116fe0af172a13e57472bd3f636117017e005913a5b41fc"
+    },
+    {
+      "path": "examples/lexer_candidate/src/records.fy",
+      "sha256": "e2d1d3540285509aded981b476d4b2340857d8c7370364f4b1410bfd6883f6dd"
+    },
+    {
+      "path": "examples/lexer_candidate/src/scanner.fy",
+      "sha256": "3755e569fe63003f63b2c9b8272df2ba656c844791cedbc0da4f9245b8809cf7"
+    },
+    {
+      "path": "examples/lexer_candidate/src/sha256_block.fy",
+      "sha256": "bc48b9e751205bba8aeaf09987ea8681694d26bc989e24f4ecb3afa4c6e00fd4"
+    },
+    {
+      "path": "examples/lexer_candidate/src/sha256_stream.fy",
+      "sha256": "b5f97a9b5be679418a1365a6007028abfab5ba66ee3ae5c08b3e5b863fcfc8b9"
+    },
+    {
+      "path": "internal/sdkstdlib/sources/std/bytes.fy",
+      "sha256": "4740a506e93349fb002c383967dcc44d182d20f09f2094b83b5464a4ab252982"
+    },
+    {
+      "path": "internal/sdkstdlib/sources/std/fs.fy",
+      "sha256": "fd7ddfa9f0deed98304cecf94911644087d1e2a46e8be8995c35acbcb183b335"
+    },
+    {
+      "path": "internal/sdkstdlib/sources/std/io.fy",
+      "sha256": "4b89c3aeb8b4de4887395d29723095d364c5660c6b773c5696fb1f65f5365f48"
+    },
+    {
+      "path": "internal/sdkstdlib/sources/std/num.fy",
+      "sha256": "09aa0d45f075aa4212049527ded7bb48d99ceb6ffed56b310e267421bae20bb3"
+    },
+    {
+      "path": "internal/sdkstdlib/sources/std/process.fy",
+      "sha256": "9680a1481df4f761f481d5a039af7bdbefeb312d1091961194f8e7bc0681ae24"
+    },
+    {
+      "path": "internal/sdkstdlib/sources/std/text.fy",
+      "sha256": "cccd47e090fda11c9da063ffb321489dd8753fe9996855fc432833e05a79e695"
+    },
+    {
+      "path": "internal/sdkstdlib/sources/optional/std/vec.fy",
+      "sha256": "0ae4c395bf98c39079ad620bde035b3b590d51417864802e698edc069281db5b"
+    },
+    {
+      "path": "examples/lexer_candidate/src/strings.fy",
+      "sha256": "8f26db7c4d4039c8c8d9fbc6078097859c8f714ca5887957fdf0e69269dca521"
+    },
+    {
+      "path": "examples/lexer_candidate/src/syntax.fy",
+      "sha256": "cb040a2973447b89c2ad59b5447c65dab79df5df7930f73431afa7ea34ef25fd"
+    },
+    {
+      "path": "examples/lexer_candidate/src/types.fy",
+      "sha256": "53a77948af92724f00de0609837fd1507899df8e2b59b6d2778ef1f3c344395a"
+    },
+    {
+      "path": "examples/lexer_candidate/src/utf8.fy",
+      "sha256": "4a5425cea9efbfb1bff2c31a38c2bd8e392c6792af09f24e906c9a743621870d"
+    },
+    {
+      "path": "examples/lexer_candidate/tests/project_workspace_catalog.fy",
+      "sha256": "4a921c02e96df1a2180d6c1bb12cb7748bd5b28985ae03bb3d9004391e98e1a8"
+    },
+    {
+      "path": "tools/verify-candidate-private-tests.py",
+      "sha256": "04c7e44df7941bd0c1a12b523b115df623dbe10836f3eb8993dedc7d6ea5e8af"
+    },
+    {
+      "path": ".cache/candidate-workspace-catalog-20261011/fixture/root.bin",
+      "sha256": "5c424d43a9665d50a5e8ccef98cc9664b2bb665a73fb533711cf4ce3cfea9a43"
+    },
+    {
+      "path": "cmd/fairyc-candidate-workspace-catalog-reference/main.go",
+      "sha256": "c38720c53f4b5d17b6049a9e926cfaf4d9f9854932130f4c4256cdf83a98e62a"
+    },
+    {
+      "path": "internal/workspaceloader/loader.go",
+      "sha256": "6977f9f108741c30fb01a21be94fa90f127ddc06daea0bd991efcbcfb8c081f3"
+    }
+  ],
+  "tools": {
+    "compiler": {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\manifest-bootstrap.exe",
+      "sha256": "4e6a50a83b4d9f74a11d749c779a90683ab3a3916d19f4852bfe1cbd452cc664"
+    },
+    "candidate": {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-source-file-20261011\\compiler.exe",
+      "sha256": "e87cc5c8c19e30fc68ca68fa98ef66d87baa1300263d8989e255910bb1985d8f"
+    },
+    "builder": {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-source-file-20261011\\builder.exe",
+      "sha256": "8141ce6bcc461a52fe6bf0bf24e9e5f5a9d7842c3c7dbfc5863cc4e822584ea7"
+    }
+  },
+  "native": {
+    "schemaVersion": "fairyc.test-report/v4",
+    "engine": "native",
+    "target": "x86_64-windows-msvc",
+    "profile": "development",
+    "tests": [
+      {
+        "identity": "tests::project_workspace_catalog::owns_explicit_catalog_and_rejects_identity_path_and_budget_failures",
+        "outcome": "passed",
+        "trapCategory": null,
+        "stdoutBase64": "",
+        "stderrBase64": ""
+      }
+    ],
+    "count": 1,
+    "passed": 1,
+    "failed": 0,
+    "status": "ok",
+    "lock": "verified"
+  },
+  "nativeTests": 1,
+  "lockSHA256": "e2f7135322dbc04796be0624b8a1fea9c08ad29b9922febdcfe17cc0896954c0",
+  "candidateInputFiles": 47,
+  "candidatePacketSHA256": "89515754e46484d5e24b6e41e5c5749e0d4d1940cc45788490ff3760c615ca99",
+  "candidateExecutions": [
+    {
+      "profile": "development",
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-workspace-catalog-20261011\\execution\\development.exe",
+      "sha256": "b09aead00f6b73a5ab20876bb29206f13f4baf113a59bd5034782ed3bef10148",
+      "exit": 0
+    },
+    {
+      "profile": "release",
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-workspace-catalog-20261011\\execution\\release.exe",
+      "sha256": "48d3cd8edbe7063b28227ee3768721ab56cf765f325970407de56be5808e8641",
+      "exit": 0
+    }
+  ],
+  "invocations": [
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\manifest-bootstrap.exe",
+        "test",
+        "--native",
+        "--locked",
+        "--json",
+        "--capture-output",
+        "--exact",
+        "tests::project_workspace_catalog::owns_explicit_catalog_and_rejects_identity_path_and_budget_failures",
+        "--",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-workspace-catalog-20261011\\fixture\\root.bin"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "seconds": 54.31744850000541,
+      "exit": 0,
+      "stdoutBytes": 381,
+      "stdoutSHA256": "a7ab33de6e45814fc896af275edb0b071e5a8c86b2a5ffc49defd5aab8153c02",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-source-file-20261011\\compiler.exe",
+        "--c-project-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-workspace-catalog-20261011\\execution\\sources.list"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "seconds": 29.907851600000868,
+      "exit": 0,
+      "stdoutBytes": 3662198,
+      "stdoutSHA256": "89515754e46484d5e24b6e41e5c5749e0d4d1940cc45788490ff3760c615ca99",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-source-file-20261011\\builder.exe",
+        "--packet",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-workspace-catalog-20261011\\execution\\candidate-packet.bin",
+        "--packet-sha256",
+        "89515754e46484d5e24b6e41e5c5749e0d4d1940cc45788490ff3760c615ca99",
+        "--output",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-workspace-catalog-20261011\\execution\\development.exe"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "seconds": 3.0484027000056813,
+      "exit": 0,
+      "stdoutBytes": 188,
+      "stdoutSHA256": "5849720572a4b852871c1fd2ffca9c1113d85b295b34c1a5310449f5d1036e17",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-workspace-catalog-20261011\\execution\\development.exe",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-workspace-catalog-20261011\\fixture\\root.bin"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "seconds": 0.16122619999805465,
+      "exit": 0,
+      "stdoutBytes": 0,
+      "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-source-file-20261011\\builder.exe",
+        "--packet",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-workspace-catalog-20261011\\execution\\candidate-packet.bin",
+        "--packet-sha256",
+        "89515754e46484d5e24b6e41e5c5749e0d4d1940cc45788490ff3760c615ca99",
+        "--output",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-workspace-catalog-20261011\\execution\\release.exe",
+        "--release"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "seconds": 76.04783210001187,
+      "exit": 0,
+      "stdoutBytes": 189,
+      "stdoutSHA256": "de3faba0d5af274457cf232d1466d5e05bbc5d21aece0645e22bd067d9a11702",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-workspace-catalog-20261011\\execution\\release.exe",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-workspace-catalog-20261011\\fixture\\root.bin"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "seconds": 0.12143559999822173,
+      "exit": 0,
+      "stdoutBytes": 0,
+      "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr": ""
+    }
+  ],
+  "publicApiChanged": false,
+  "dbChanged": false,
+  "ciChanged": false,
+  "pushed": false,
+  "goOracle": [
+    {
+      "Name": "Single",
+      "Accepted": true,
+      "Reason": "",
+      "Paths": [
+        "."
+      ],
+      "UIDs": [
+        "example.root"
+      ],
+      "Digests": [
+        "fysrc1-sha256-11cf8ff7fd9faa5d60d37b4dced455748391e9353f35e875e89bf02bd7e7bef0"
+      ],
+      "Files": 1,
+      "Bytes": 13
+    },
+    {
+      "Name": "Valid",
+      "Accepted": true,
+      "Reason": "",
+      "Paths": [
+        ".",
+        "a",
+        "b"
+      ],
+      "UIDs": [
+        "example.root",
+        "example.zed",
+        "example.aaa"
+      ],
+      "Digests": [
+        "fysrc1-sha256-11cf8ff7fd9faa5d60d37b4dced455748391e9353f35e875e89bf02bd7e7bef0",
+        "fysrc1-sha256-2dc30f4252dd4b9a852c4832762b5ec8e6d5397f7df5a50a1f1af0c3ca716898",
+        "fysrc1-sha256-2dc30f4252dd4b9a852c4832762b5ec8e6d5397f7df5a50a1f1af0c3ca716898"
+      ],
+      "Files": 3,
+      "Bytes": 37
+    },
+    {
+      "Name": "NearNames",
+      "Accepted": true,
+      "Reason": "",
+      "Paths": [
+        ".",
+        "a",
+        "a-b"
+      ],
+      "UIDs": [
+        "example.root",
+        "example.member-0",
+        "example.member-1"
+      ],
+      "Digests": [
+        "fysrc1-sha256-11cf8ff7fd9faa5d60d37b4dced455748391e9353f35e875e89bf02bd7e7bef0",
+        "fysrc1-sha256-2dc30f4252dd4b9a852c4832762b5ec8e6d5397f7df5a50a1f1af0c3ca716898",
+        "fysrc1-sha256-2dc30f4252dd4b9a852c4832762b5ec8e6d5397f7df5a50a1f1af0c3ca716898"
+      ],
+      "Files": 3,
+      "Bytes": 37
+    },
+    {
+      "Name": "InterveningOverlap",
+      "Accepted": false,
+      "Reason": "overlapping-workspace-member",
+      "Paths": [],
+      "UIDs": [],
+      "Digests": [],
+      "Files": 0,
+      "Bytes": 0
+    },
+    {
+      "Name": "CaseCollision",
+      "Accepted": false,
+      "Reason": "noncanonical-path-case",
+      "Paths": [],
+      "UIDs": [],
+      "Digests": [],
+      "Files": 0,
+      "Bytes": 0
+    },
+    {
+      "Name": "Nested",
+      "Accepted": false,
+      "Reason": "nested-workspace",
+      "Paths": [],
+      "UIDs": [],
+      "Digests": [],
+      "Files": 0,
+      "Bytes": 0
+    },
+    {
+      "Name": "DuplicateUID",
+      "Accepted": false,
+      "Reason": "duplicate-package-uid",
+      "Paths": [],
+      "UIDs": [],
+      "Digests": [],
+      "Files": 0,
+      "Bytes": 0
+    },
+    {
+      "Name": "MemberLanguage",
+      "Accepted": false,
+      "Reason": "language-revision-mismatch",
+      "Paths": [],
+      "UIDs": [],
+      "Digests": [],
+      "Files": 0,
+      "Bytes": 0
+    },
+    {
+      "Name": "RootLanguage",
+      "Accepted": false,
+      "Reason": "language-revision-mismatch",
+      "Paths": [],
+      "UIDs": [],
+      "Digests": [],
+      "Files": 0,
+      "Bytes": 0
+    },
+    {
+      "Name": "MissingManifest",
+      "Accepted": false,
+      "Reason": "invalid-project-manifest",
+      "Paths": [],
+      "UIDs": [],
+      "Digests": [],
+      "Files": 0,
+      "Bytes": 0
+    },
+    {
+      "Name": "BadMemberSyntax",
+      "Accepted": false,
+      "Reason": "invalid-source-syntax",
+      "Paths": [],
+      "UIDs": [],
+      "Digests": [],
+      "Files": 0,
+      "Bytes": 0
+    },
+    {
+      "Name": "WrongCase",
+      "Accepted": false,
+      "Reason": "noncanonical-path-case",
+      "Paths": [],
+      "UIDs": [],
+      "Digests": [],
+      "Files": 0,
+      "Bytes": 0
+    },
+    {
+      "Name": "Undeclared",
+      "Accepted": true,
+      "Reason": "",
+      "Paths": [
+        "."
+      ],
+      "UIDs": [
+        "example.root"
+      ],
+      "Digests": [
+        "fysrc1-sha256-11cf8ff7fd9faa5d60d37b4dced455748391e9353f35e875e89bf02bd7e7bef0"
+      ],
+      "Files": 1,
+      "Bytes": 13
+    },
+    {
+      "Name": "TooMany",
+      "Accepted": false,
+      "Reason": "invalid-workspace-path",
+      "Paths": [],
+      "UIDs": [],
+      "Digests": [],
+      "Files": 0,
+      "Bytes": 0
+    }
+  ],
+  "fixtureFiles": [
+    {
+      "path": ".cache/candidate-workspace-catalog-20261011/fixture/BadMemberSyntax/a/fairy.toml",
+      "sha256": "b374cfe221ead38dee64a3b737ed5e495f272fcbce6b69db8b105d0404c4d55e"
+    },
+    {
+      "path": ".cache/candidate-workspace-catalog-20261011/fixture/BadMemberSyntax/a/src/lib.fy",
+      "sha256": "7ed61cfccf3b84de6bdbbe25f50dffacc8a64fd5ca91f1f9b4c53f6b9d135f2b"
+    },
+    {
+      "path": ".cache/candidate-workspace-catalog-20261011/fixture/BadMemberSyntax/catalog.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": ".cache/candidate-workspace-catalog-20261011/fixture/BadMemberSyntax/fairy.toml",
+      "sha256": "b525a4582122c82daa1ff481dad4e565950e42235349ba0316d047eec3c2be1e"
+    },
+    {
+      "path": ".cache/candidate-workspace-catalog-20261011/fixture/BadMemberSyntax/oracle.txt",
+      "sha256": "3a495d90099711161030fe7f57d4275e86bcc0bbd3ef8667a9dbd4906091aff2"
+    },
+    {
+      "path": ".cache/candidate-workspace-catalog-20261011/fixture/BadMemberSyntax/src/main.fy",
+      "sha256": "5075d2e2d2ea0ceedb49a53ad8daf559c89cb9c3f86b11853bcc1586907cf3d1"
+    },
+    {
+      "path": ".cache/candidate-workspace-catalog-20261011/fixture/CaseCollision/A/fairy.toml",
+      "sha256": "b374cfe221ead38dee64a3b737ed5e495f272fcbce6b69db8b105d0404c4d55e"
+    },
+    {
+      "path": ".cache/candidate-workspace-catalog-20261011/fixture/CaseCollision/A/src/lib.fy",
+      "sha256": "62cba17cd7f0956ebe0ee51770c5df7a8b04c068f8913ea7be4638c8e44329c3"
+    },
+    {
+      "path": ".cache/candidate-workspace-catalog-20261011/fixture/CaseCollision/catalog.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": ".cache/candidate-workspace-catalog-20261011/fixture/CaseCollision/fairy.toml",
+      "sha256": "6d7930077c2ed9f21e011d7ec64367aba9baef77f94a395a10d69289f96d2c01"
+    },
+    {
+      "path": ".cache/candidate-workspace-catalog-20261011/fixture/CaseCollision/oracle.txt",
+      "sha256": "930d731df1b2622957682dbb236253968fbee1c7664101df481cf3de97027132"
+    },
+    {
+      "path": ".cache/candidate-workspace-catalog-20261011/fixture/CaseCollision/src/main.fy",
+      "sha256": "5075d2e2d2ea0ceedb49a53ad8daf559c89cb9c3f86b11853bcc1586907cf3d1"
+    },
+    {
+      "path": ".cache/candidate-workspace-catalog-20261011/fixture/DuplicateUID/a/fairy.toml",
+      "sha256": "dcbc75dfe041279d161f9cf4f741e1800ebd77773025db97e1f8d538da8fdf71"
+    },
+    {
+      "path": ".cache/candidate-workspace-catalog-20261011/fixture/DuplicateUID/a/src/lib.fy",
+      "sha256": "62cba17cd7f0956ebe0ee51770c5df7a8b04c068f8913ea7be4638c8e44329c3"
+    },
+    {
+      "path": ".cache/candidate-workspace-catalog-20261011/fixture/DuplicateUID/catalog.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": ".cache/candidate-workspace-catalog-20261011/fixture/DuplicateUID/fairy.toml",
+      "sha256": "b525a4582122c82daa1ff481dad4e565950e42235349ba0316d047eec3c2be1e"
+    },
+    {
+      "path": ".cache/candidate-workspace-catalog-20261011/fixture/DuplicateUID/oracle.txt",
+      "sha256": "0504fcc691d431e36f7747956e8b10a01c1369b90769ebfc273d8488d6ba2133"
+    },
+    {
+      "path": ".cache/candidate-workspace-catalog-20261011/fixture/DuplicateUID/src/main.fy",
+      "sha256": "5075d2e2d2ea0ceedb49a53ad8daf559c89cb9c3f86b11853bcc1586907cf3d1"
+    },
+    {
+      "path": ".cache/candidate-workspace-catalog-20261011/fixture/InterveningOverlap/a/b/fairy.toml",
+      "sha256": "e93de6fc821f6d4396adda9cc6e7ecf141dc7fc507de48da30531957da53fae1"
+    },
+    {
+      "path": ".cache/candidate-workspace-catalog-20261011/fixture/InterveningOverlap/a/b/src/lib.fy",
+      "sha256": "62cba17cd7f0956ebe0ee51770c5df7a8b04c068f8913ea7be4638c8e44329c3"
+    },
+    {
+      "path": ".cache/candidate-workspace-catalog-20261011/fixture/InterveningOverlap/a/fairy.toml",
+      "sha256": "b374cfe221ead38dee64a3b737ed5e495f272fcbce6b69db8b105d0404c4d55e"
+    },
+    {
+      "path": ".cache/candidate-workspace-catalog-20261011/fixture/InterveningOverlap/a/src/lib.fy",
+      "sha256": "62cba17cd7f0956ebe0ee51770c5df7a8b04c068f8913ea7be4638c8e44329c3"
+    },
+    {
+      "path": ".cache/candidate-workspace-catalog-20261011/fixture/InterveningOverlap/a-b/fairy.toml",
+      "sha256": "51fbd6f3e3285d316868ab3118fb21465efaabb9d8e619518a127dd2d1505186"
+    },
+    {
+      "path": ".cache/candidate-workspace-catalog-20261011/fixture/InterveningOverlap/a-b/src/lib.fy",
+      "sha256": "62cba17cd7f0956ebe0ee51770c5df7a8b04c068f8913ea7be4638c8e44329c3"
+    },
+    {
+      "path": ".cache/candidate-workspace-catalog-20261011/fixture/InterveningOverlap/catalog.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": ".cache/candidate-workspace-catalog-20261011/fixture/InterveningOverlap/fairy.toml",
+      "sha256": "10c57366470541625ba985e1bc67bd144cc3ad03fe69c6ebadb2fb1a8bc58654"
+    },
+    {
+      "path": ".cache/candidate-workspace-catalog-20261011/fixture/InterveningOverlap/oracle.txt",
+      "sha256": "3b4a39c5944575167af04b561f53977eab21b1fbc7e10d3fddf7a033e27c66c3"
+    },
+    {
+      "path": ".cache/candidate-workspace-catalog-20261011/fixture/InterveningOverlap/src/main.fy",
+      "sha256": "5075d2e2d2ea0ceedb49a53ad8daf559c89cb9c3f86b11853bcc1586907cf3d1"
+    },
+    {
+      "path": ".cache/candidate-workspace-catalog-20261011/fixture/MemberLanguage/a/fairy.toml",
+      "sha256": "6d2b53fbaa6cfee8f75fd304c57d22e67b440ee184afa774642c1541e0ac3223"
+    },
+    {
+      "path": ".cache/candidate-workspace-catalog-20261011/fixture/MemberLanguage/a/src/lib.fy",
+      "sha256": "62cba17cd7f0956ebe0ee51770c5df7a8b04c068f8913ea7be4638c8e44329c3"
+    },
+    {
+      "path": ".cache/candidate-workspace-catalog-20261011/fixture/MemberLanguage/catalog.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": ".cache/candidate-workspace-catalog-20261011/fixture/MemberLanguage/fairy.toml",
+      "sha256": "b525a4582122c82daa1ff481dad4e565950e42235349ba0316d047eec3c2be1e"
+    },
+    {
+      "path": ".cache/candidate-workspace-catalog-20261011/fixture/MemberLanguage/oracle.txt",
+      "sha256": "c32203ef144ea494048040fd87618781ee782422b2db1abee6aa30dd57731eff"
+    },
+    {
+      "path": ".cache/candidate-workspace-catalog-20261011/fixture/MemberLanguage/src/main.fy",
+      "sha256": "5075d2e2d2ea0ceedb49a53ad8daf559c89cb9c3f86b11853bcc1586907cf3d1"
+    },
+    {
+      "path": ".cache/candidate-workspace-catalog-20261011/fixture/MissingManifest/catalog.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": ".cache/candidate-workspace-catalog-20261011/fixture/MissingManifest/fairy.toml",
+      "sha256": "b525a4582122c82daa1ff481dad4e565950e42235349ba0316d047eec3c2be1e"
+    },
+    {
+      "path": ".cache/candidate-workspace-catalog-20261011/fixture/MissingManifest/oracle.txt",
+      "sha256": "1772adc4ac2dee48eaa6787934db3f0a629dc0df3b53bdff2f5430671d5810e0"
+    },
+    {
+      "path": ".cache/candidate-workspace-catalog-20261011/fixture/MissingManifest/src/main.fy",
+      "sha256": "5075d2e2d2ea0ceedb49a53ad8daf559c89cb9c3f86b11853bcc1586907cf3d1"
+    },
+    {
+      "path": ".cache/candidate-workspace-catalog-20261011/fixture/NearNames/a/fairy.toml",
+      "sha256": "b374cfe221ead38dee64a3b737ed5e495f272fcbce6b69db8b105d0404c4d55e"
+    },
+    {
+      "path": ".cache/candidate-workspace-catalog-20261011/fixture/NearNames/a/src/lib.fy",
+      "sha256": "62cba17cd7f0956ebe0ee51770c5df7a8b04c068f8913ea7be4638c8e44329c3"
+    },
+    {
+      "path": ".cache/candidate-workspace-catalog-20261011/fixture/NearNames/a-b/fairy.toml",
+      "sha256": "51fbd6f3e3285d316868ab3118fb21465efaabb9d8e619518a127dd2d1505186"
+    },
+    {
+      "path": ".cache/candidate-workspace-catalog-20261011/fixture/NearNames/a-b/src/lib.fy",
+      "sha256": "62cba17cd7f0956ebe0ee51770c5df7a8b04c068f8913ea7be4638c8e44329c3"
+    },
+    {
+      "path": ".cache/candidate-workspace-catalog-20261011/fixture/NearNames/catalog.txt",
+      "sha256": "c04d39fe7d390f6d372ff71b830f57ae1dc846ec8621301396de030af8a16b75"
+    },
+    {
+      "path": ".cache/candidate-workspace-catalog-20261011/fixture/NearNames/fairy.toml",
+      "sha256": "b3b0b7bd02c5dfef9cae39d77da9de312ea7e60b035bfcb72363c8df1ae23604"
+    },
+    {
+      "path": ".cache/candidate-workspace-catalog-20261011/fixture/NearNames/oracle.txt",
+      "sha256": "e3949a4b725d800a0fe4abecf0429f8f90154826911cca138b05e47bdc683bd2"
+    },
+    {
+      "path": ".cache/candidate-workspace-catalog-20261011/fixture/NearNames/src/main.fy",
+      "sha256": "5075d2e2d2ea0ceedb49a53ad8daf559c89cb9c3f86b11853bcc1586907cf3d1"
+    },
+    {
+      "path": ".cache/candidate-workspace-catalog-20261011/fixture/Nested/a/fairy.toml",
+      "sha256": "189e9d525430370cb214bc1aeeb08bf7e8bd941697a1c2a1b26172070f4bae97"
+    },
+    {
+      "path": ".cache/candidate-workspace-catalog-20261011/fixture/Nested/a/src/lib.fy",
+      "sha256": "62cba17cd7f0956ebe0ee51770c5df7a8b04c068f8913ea7be4638c8e44329c3"
+    },
+    {
+      "path": ".cache/candidate-workspace-catalog-20261011/fixture/Nested/catalog.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": ".cache/candidate-workspace-catalog-20261011/fixture/Nested/fairy.toml",
+      "sha256": "b525a4582122c82daa1ff481dad4e565950e42235349ba0316d047eec3c2be1e"
+    },
+    {
+      "path": ".cache/candidate-workspace-catalog-20261011/fixture/Nested/oracle.txt",
+      "sha256": "7921d467ecbd40747bf7a7633ef00b4de81b797a9b4674101702bfae033a9f66"
+    },
+    {
+      "path": ".cache/candidate-workspace-catalog-20261011/fixture/Nested/src/main.fy",
+      "sha256": "5075d2e2d2ea0ceedb49a53ad8daf559c89cb9c3f86b11853bcc1586907cf3d1"
+    },
+    {
+      "path": ".cache/candidate-workspace-catalog-20261011/fixture/reference.json",
+      "sha256": "5ae0fdae628badb9abe73bb3b0f4b3c63c6cf9d20c678f8fea43fc1a8075d35d"
+    },
+    {
+      "path": ".cache/candidate-workspace-catalog-20261011/fixture/root.bin",
+      "sha256": "5c424d43a9665d50a5e8ccef98cc9664b2bb665a73fb533711cf4ce3cfea9a43"
+    },
+    {
+      "path": ".cache/candidate-workspace-catalog-20261011/fixture/RootLanguage/catalog.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": ".cache/candidate-workspace-catalog-20261011/fixture/RootLanguage/fairy.toml",
+      "sha256": "f21a175211085090fcf6c5226ad276e7e24d958b1c48bb9f86f0f6e345c4661e"
+    },
+    {
+      "path": ".cache/candidate-workspace-catalog-20261011/fixture/RootLanguage/oracle.txt",
+      "sha256": "c32203ef144ea494048040fd87618781ee782422b2db1abee6aa30dd57731eff"
+    },
+    {
+      "path": ".cache/candidate-workspace-catalog-20261011/fixture/RootLanguage/src/main.fy",
+      "sha256": "5075d2e2d2ea0ceedb49a53ad8daf559c89cb9c3f86b11853bcc1586907cf3d1"
+    },
+    {
+      "path": ".cache/candidate-workspace-catalog-20261011/fixture/Single/catalog.txt",
+      "sha256": "7355ae7d5f0b62cc42ba9d9cd992de09f9d04bc14ccbea75a07f7347a4c30a8f"
+    },
+    {
+      "path": ".cache/candidate-workspace-catalog-20261011/fixture/Single/fairy.toml",
+      "sha256": "dcbc75dfe041279d161f9cf4f741e1800ebd77773025db97e1f8d538da8fdf71"
+    },
+    {
+      "path": ".cache/candidate-workspace-catalog-20261011/fixture/Single/oracle.txt",
+      "sha256": "e3949a4b725d800a0fe4abecf0429f8f90154826911cca138b05e47bdc683bd2"
+    },
+    {
+      "path": ".cache/candidate-workspace-catalog-20261011/fixture/Single/src/main.fy",
+      "sha256": "5075d2e2d2ea0ceedb49a53ad8daf559c89cb9c3f86b11853bcc1586907cf3d1"
+    },
+    {
+      "path": ".cache/candidate-workspace-catalog-20261011/fixture/TooMany/catalog.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": ".cache/candidate-workspace-catalog-20261011/fixture/TooMany/fairy.toml",
+      "sha256": "e41d394f86706dfca1c6db351afe58f1efcdbf19571100677fbfbc56f821d642"
+    },
+    {
+      "path": ".cache/candidate-workspace-catalog-20261011/fixture/TooMany/oracle.txt",
+      "sha256": "1f28f2b8db79f28df6f4a87ca5a95ad362e8c484999b67e29452f8d0f7afe6bb"
+    },
+    {
+      "path": ".cache/candidate-workspace-catalog-20261011/fixture/TooMany/src/main.fy",
+      "sha256": "5075d2e2d2ea0ceedb49a53ad8daf559c89cb9c3f86b11853bcc1586907cf3d1"
+    },
+    {
+      "path": ".cache/candidate-workspace-catalog-20261011/fixture/Undeclared/a/fairy.toml",
+      "sha256": "f1234d75178d892a133a410355a5a990cf75d2f33eba25d575943d4df632f3a4"
+    },
+    {
+      "path": ".cache/candidate-workspace-catalog-20261011/fixture/Undeclared/catalog.txt",
+      "sha256": "7355ae7d5f0b62cc42ba9d9cd992de09f9d04bc14ccbea75a07f7347a4c30a8f"
+    },
+    {
+      "path": ".cache/candidate-workspace-catalog-20261011/fixture/Undeclared/fairy.toml",
+      "sha256": "dcbc75dfe041279d161f9cf4f741e1800ebd77773025db97e1f8d538da8fdf71"
+    },
+    {
+      "path": ".cache/candidate-workspace-catalog-20261011/fixture/Undeclared/oracle.txt",
+      "sha256": "e3949a4b725d800a0fe4abecf0429f8f90154826911cca138b05e47bdc683bd2"
+    },
+    {
+      "path": ".cache/candidate-workspace-catalog-20261011/fixture/Undeclared/src/main.fy",
+      "sha256": "5075d2e2d2ea0ceedb49a53ad8daf559c89cb9c3f86b11853bcc1586907cf3d1"
+    },
+    {
+      "path": ".cache/candidate-workspace-catalog-20261011/fixture/Valid/a/fairy.toml",
+      "sha256": "445489f19fb05a8d1740281d5289f45ec57d11abfbb2378c9fb880bd09b003c1"
+    },
+    {
+      "path": ".cache/candidate-workspace-catalog-20261011/fixture/Valid/a/src/lib.fy",
+      "sha256": "62cba17cd7f0956ebe0ee51770c5df7a8b04c068f8913ea7be4638c8e44329c3"
+    },
+    {
+      "path": ".cache/candidate-workspace-catalog-20261011/fixture/Valid/b/fairy.toml",
+      "sha256": "74fc847c06ed5e457bdaa6d375363b0ec7b47f2b22325b66aca830e0e2b46c39"
+    },
+    {
+      "path": ".cache/candidate-workspace-catalog-20261011/fixture/Valid/b/src/lib.fy",
+      "sha256": "62cba17cd7f0956ebe0ee51770c5df7a8b04c068f8913ea7be4638c8e44329c3"
+    },
+    {
+      "path": ".cache/candidate-workspace-catalog-20261011/fixture/Valid/catalog.txt",
+      "sha256": "bf9c588f37aa7f4e332d7037b61283efc2d0efda825d8dbc5db198ee48f41271"
+    },
+    {
+      "path": ".cache/candidate-workspace-catalog-20261011/fixture/Valid/fairy.toml",
+      "sha256": "05c8fee19476d92452b76bafa30ca369d695e87ad31c97939cfa8652af87beb1"
+    },
+    {
+      "path": ".cache/candidate-workspace-catalog-20261011/fixture/Valid/oracle.txt",
+      "sha256": "e3949a4b725d800a0fe4abecf0429f8f90154826911cca138b05e47bdc683bd2"
+    },
+    {
+      "path": ".cache/candidate-workspace-catalog-20261011/fixture/Valid/src/main.fy",
+      "sha256": "5075d2e2d2ea0ceedb49a53ad8daf559c89cb9c3f86b11853bcc1586907cf3d1"
+    },
+    {
+      "path": ".cache/candidate-workspace-catalog-20261011/fixture/WrongCase/a/fairy.toml",
+      "sha256": "b374cfe221ead38dee64a3b737ed5e495f272fcbce6b69db8b105d0404c4d55e"
+    },
+    {
+      "path": ".cache/candidate-workspace-catalog-20261011/fixture/WrongCase/a/src/lib.fy",
+      "sha256": "62cba17cd7f0956ebe0ee51770c5df7a8b04c068f8913ea7be4638c8e44329c3"
+    },
+    {
+      "path": ".cache/candidate-workspace-catalog-20261011/fixture/WrongCase/catalog.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": ".cache/candidate-workspace-catalog-20261011/fixture/WrongCase/fairy.toml",
+      "sha256": "59e2493dd391260dd7251e4825dc8423eafb6de80f7087e386666d91a39a3933"
+    },
+    {
+      "path": ".cache/candidate-workspace-catalog-20261011/fixture/WrongCase/oracle.txt",
+      "sha256": "930d731df1b2622957682dbb236253968fbee1c7664101df481cf3de97027132"
+    },
+    {
+      "path": ".cache/candidate-workspace-catalog-20261011/fixture/WrongCase/src/main.fy",
+      "sha256": "5075d2e2d2ea0ceedb49a53ad8daf559c89cb9c3f86b11853bcc1586907cf3d1"
+    }
+  ],
+  "productionCheck": {
+    "files": 317,
+    "mirFunctions": 4063,
+    "passed": true
+  },
+  "scope": "Retained explicit local catalog with path, UID and language checks; dependency declarations, features, graph, SDK injection and lock remain pending.",
+  "budgetCommitBoundary": "Commit caller source counters only after every local package, digest and catalog check succeeds; failures retain the original counters.",
+  "knownDifferences": [
+    "Existing reparse versus Go junction observations remain unresolved.",
+    "Catalog metadata validation happens after package-input reads, so overlapping simultaneous errors need not have Go priority.",
+    "The private shared work and parser bounds remain; this fixture matrix does not prove full loader equivalence."
+  ]
+}

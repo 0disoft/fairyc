@@ -253,10 +253,53 @@ Reproduce the reference inputs with
 `bun tools/run-go.ts run ./cmd/fairyc-candidate-source-digest-reference <output>`;
 pass its `root.bin` to the `project_source_identity` private-test verifier.
 
+## Explicit local workspace catalog
+
+`project_workspace_catalog.load` retains the root and exactly the root manifest's
+explicit members. Each entry owns the validated package input and its exact
+source digest. Canonical member paths and UIDs have independent owned byte
+indexes; stable merge sorting and binary lookup return original package
+positions. Mutable byte/vector columns are sealed into their immutable index
+owners after construction.
+
+The catalog rejects more than 1024 local packages, case-folded member collisions,
+ancestor/descendant overlap, nested workspace tables, duplicate package UIDs,
+root language other than `fairyc-language/20`, and member language mismatches.
+Overlap detection searches every segment prefix in the sorted folded index, so
+an intervening name such as `a-b` cannot hide `a` versus `a/b`. Comparisons in
+sorting and overlap search consume the shared work budget. Existing directory
+resolution supplies exact physical spelling, directory type and reparse checks.
+
+Source file/byte counters remain staged across the whole catalog, including
+digest and metadata checks, and commit only when all entries succeed. Catalog
+failures own their package and related paths. Nested package-input errors move
+into the error owner, retaining the selected original source bytes and span
+after temporary catalogs close. Undeclared manifests are ignored.
+
+Fourteen acceptance/reason cases and the complete successful path/UID/digest
+records agree with the Go workspace loader. One authored native test and both
+candidate C profiles pass. Cases include root-only and unused members, nearby
+non-overlapping names, intervening-name overlap, case collision, nested
+workspace, duplicate UID, root/member language, missing manifest, original
+module-error bytes/span, noncanonical directory case, and an over-limit member
+list. Successful cumulative counters reach exactly 4096 files and 64 MiB;
+failed loads preserve caller counters. Full check passes 317 files and 4063 MIR
+functions. Evidence: `evidence/candidate-workspace-catalog-20261011.json`.
+
+The matrix does not establish complete loader equivalence. Catalog metadata
+checks follow package-input reads, so multiple simultaneous failures can have
+different priority from Go. Existing parser/work bounds and the junction
+discrepancy remain. Dependency declarations, feature instances, module-import
+visibility, SDK injection and lock projection are not validated by this catalog.
+
+Reference fixture command:
+`bun tools/run-go.ts run ./cmd/fairyc-candidate-workspace-catalog-reference <output>`.
+
 ## Remaining connection
 
-Connect package inputs and their exact source identity to workspace catalog/package
-resolution and the project CLI. Broader parser-cap compatibility remains separate.
+Connect the retained catalog to dependency and feature-instance resolution,
+SDK injection, lock projection and the project CLI. Broader parser-cap
+compatibility remains separate.
 Resolve the Go junction observation discrepancy before any loader
 equivalence claim. Package/lock/CLI work remains separate.
 ReadDir is currently Windows AMD64 and keeps the existing SDK path bound.
