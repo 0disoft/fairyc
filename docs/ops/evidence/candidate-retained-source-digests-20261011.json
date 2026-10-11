@@ -1,0 +1,443 @@
+{
+  "schema": "fairyc.candidate-retained-source-digests/v1",
+  "cachedDigestOwner": "module_catalog::Catalog owns exact source bytes and one SHA-256 per original module; no caller digest grants freshness",
+  "freshness": "Exact length/byte comparison remains before retained stamps are compared with the catalog digest. Refreshed metadata from different same-length bytes cannot validate an older plan.",
+  "sourceCheck": {
+    "exit": 0,
+    "files": 292,
+    "mirFunctions": 3670,
+    "lockUpdated": true
+  },
+  "sources": [
+    {
+      "path": "examples/lexer_candidate/src/module_catalog.fy",
+      "sha256": "c504e0a8c771889b8107c758ec2a5ae634437b1936cc06372d8ace102f647779"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_signatures.fy",
+      "sha256": "d30425699f493db002cfc5d00aeea37c2e887c898a19eec73e9161fc0d631192"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_unit_generics.fy",
+      "sha256": "24f5f89766f8b95dbb64d01a423aae36be7229eb93b5afd8f77823d5bb1faa92"
+    },
+    {
+      "path": "examples/lexer_candidate/src/sdk_vector_plan.fy",
+      "sha256": "5b80e61e68d4e5f7c6684b262026358155696ef84562f801442e1181222580bd"
+    }
+  ],
+  "native": {
+    "exit": 0,
+    "profile": "release",
+    "passed": 4,
+    "failed": 0,
+    "seconds": 265.1514554999958,
+    "tests": [
+      {
+        "identity": "tests::module_project_cli::highest_source_module_keeps_nominal_and_callable_identity",
+        "outcome": "passed"
+      },
+      {
+        "identity": "tests::module_project_cli::root_main_selection_and_cross_module_packet",
+        "outcome": "passed"
+      },
+      {
+        "identity": "tests::module_unit_bodies::stale_provider_bytes_fail_before_cloning",
+        "outcome": "passed"
+      },
+      {
+        "identity": "tests::module_unit_generics::retained_plan_rejects_changed_provider_bytes_and_graph_prefix",
+        "outcome": "passed"
+      }
+    ]
+  },
+  "cli": {
+    "candidateProfile": "development",
+    "candidateSHA256": "ecf35fb9a7163b7ac2868d69f77ae9d784d93dce4ec14dcf250d847a57601b23",
+    "cases": [
+      {
+        "name": "positive",
+        "exit": 0,
+        "stdoutBytes": 3565,
+        "stderr": "",
+        "seconds": 0.107844500002102
+      },
+      {
+        "name": "dependency-entry",
+        "exit": 2,
+        "stdoutBytes": 0,
+        "stderr": ".cache/candidate-tagged/sdk-c-execution/project-cli-digest/fixtures/root.fy:1:1: error: project phase 4 stage 0 code 1001 (bytes 0..0)\n",
+        "seconds": 0.09619990000646794
+      },
+      {
+        "name": "wrong-result",
+        "exit": 2,
+        "stdoutBytes": 0,
+        "stderr": ".cache/candidate-tagged/sdk-c-execution/project-cli-digest/fixtures/void.fy:1:1: error: project phase 5 stage 0 code 1001 (bytes 0..0)\n",
+        "seconds": 0.09848709999641869
+      },
+      {
+        "name": "type-error",
+        "exit": 2,
+        "stdoutBytes": 0,
+        "stderr": ".cache/candidate-tagged/sdk-c-execution/project-cli-digest/fixtures/type.fy:1:34: error: project phase 2 stage 4 code 1009 (bytes 33..37)\n",
+        "seconds": 0.022868599997309502
+      },
+      {
+        "name": "syntax-error",
+        "exit": 2,
+        "stdoutBytes": 0,
+        "stderr": ".cache/candidate-tagged/sdk-c-execution/project-cli-digest/fixtures/syntax.fy:1:36: error: expected } (bytes 35..35)\n",
+        "seconds": 0.020244799998181406
+      },
+      {
+        "name": "missing-source",
+        "exit": 2,
+        "stdoutBytes": 0,
+        "stderr": "error: input file read failed\n",
+        "seconds": 0.021181899996008724
+      },
+      {
+        "name": "blank-manifest",
+        "exit": 2,
+        "stdoutBytes": 0,
+        "stderr": "error: invalid module manifest\n",
+        "seconds": 0.020511100003204774
+      },
+      {
+        "name": "invalid-utf8",
+        "exit": 2,
+        "stdoutBytes": 0,
+        "stderr": "error: invalid module manifest\n",
+        "seconds": 0.020785499997145962
+      },
+      {
+        "name": "duplicate-source",
+        "exit": 2,
+        "stdoutBytes": 0,
+        "stderr": ".cache/candidate-tagged/sdk-c-execution/project-cli-digest/fixtures/main.fy:1:8: error: project phase 1 stage 0 code 1 (bytes 7..11)\n",
+        "seconds": 0.02047630000015488
+      }
+    ],
+    "execution": {
+      "frames": 2,
+      "units": 1,
+      "literalDefinitions": 0,
+      "headerBytes": 2443,
+      "sourceBytes": 1097,
+      "packetSHA256": "68c878676f624102da5d214b87c36f673823603bcfbfc9ad30a919bedff430dc",
+      "executions": [
+        {
+          "profile": "low",
+          "build": {
+            "argv": [
+              "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+              "/nologo",
+              "/std:c11",
+              "/TC",
+              "/Od",
+              "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\project-cli-digest\\native\\fy_literals.c",
+              "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\project-cli-digest\\native\\fy_unit_0.c",
+              "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\project-cli-digest\\native\\trap.c",
+              "/Fe:C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\project-cli-digest\\native\\project-low.exe",
+              "/link",
+              "/INCREMENTAL:NO"
+            ],
+            "exit": 0,
+            "stdout": "fy_literals.c\r\nfy_unit_0.c\r\ntrap.c\r\nGenerating Code...\r\n",
+            "stderr": ""
+          },
+          "run": {
+            "argv": [
+              "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\project-cli-digest\\native\\project-low.exe"
+            ],
+            "exit": 0,
+            "stdout": "",
+            "stderr": ""
+          }
+        },
+        {
+          "profile": "optimized",
+          "build": {
+            "argv": [
+              "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+              "/nologo",
+              "/std:c11",
+              "/TC",
+              "/O2",
+              "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\project-cli-digest\\native\\fy_literals.c",
+              "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\project-cli-digest\\native\\fy_unit_0.c",
+              "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\project-cli-digest\\native\\trap.c",
+              "/Fe:C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\project-cli-digest\\native\\project-optimized.exe",
+              "/link",
+              "/INCREMENTAL:NO"
+            ],
+            "exit": 0,
+            "stdout": "fy_literals.c\r\nfy_unit_0.c\r\ntrap.c\r\nGenerating Code...\r\n",
+            "stderr": ""
+          },
+          "run": {
+            "argv": [
+              "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\project-cli-digest\\native\\project-optimized.exe"
+            ],
+            "exit": 0,
+            "stdout": "",
+            "stderr": ""
+          }
+        }
+      ]
+    },
+    "ordinaryPacketMatchesPrevious": true
+  },
+  "highestModulePacketMatchesPrevious": true,
+  "highestModulePreviousExecutionsReused": true,
+  "phaseObservation": {
+    "baselineRevision": "2fcf6f5f",
+    "inputMatchesBaselineHashes": true,
+    "before": {
+      "cacheOnlyInstrumentation": true,
+      "seconds": 60.037599399998726,
+      "exit": 1,
+      "timeout": true,
+      "events": [
+        {
+          "seconds": 0.024471999997331295,
+          "text": "TRACE parse-start"
+        },
+        {
+          "seconds": 0.4324013000004925,
+          "text": "TRACE parsed 32"
+        },
+        {
+          "seconds": 0.9854896999968332,
+          "text": "TRACE parsed 64"
+        },
+        {
+          "seconds": 1.485461199998099,
+          "text": "TRACE parsed 96"
+        },
+        {
+          "seconds": 2.0303302999964217,
+          "text": "TRACE parsed 128"
+        },
+        {
+          "seconds": 2.3936802000025637,
+          "text": "TRACE parsed 160"
+        },
+        {
+          "seconds": 2.9396868999974686,
+          "text": "TRACE parsed 192"
+        },
+        {
+          "seconds": 3.3429652999984683,
+          "text": "TRACE parsed 224"
+        },
+        {
+          "seconds": 3.697573999997985,
+          "text": "TRACE parsed 256"
+        },
+        {
+          "seconds": 3.9731792000020505,
+          "text": "TRACE parse-done"
+        },
+        {
+          "seconds": 3.9732500999962213,
+          "text": "TRACE signatures-start"
+        },
+        {
+          "seconds": 16.119944099998975,
+          "text": "TRACE compile-start"
+        },
+        {
+          "seconds": 16.12160159999621,
+          "text": "TRACE range 0,15 bind"
+        },
+        {
+          "seconds": 16.404671999996935,
+          "text": "TRACE range 0,15 closure"
+        },
+        {
+          "seconds": 20.954447600001004,
+          "text": "TRACE range 0,7 bind"
+        },
+        {
+          "seconds": 21.100210700002208,
+          "text": "TRACE range 0,7 closure"
+        },
+        {
+          "seconds": 35.79060529999697,
+          "text": "TRACE range 0,7 values"
+        },
+        {
+          "seconds": 36.57863989999896,
+          "text": "TRACE range 0,7 moves"
+        },
+        {
+          "seconds": 36.60877719999553,
+          "text": "TRACE range 0,7 lower"
+        },
+        {
+          "seconds": 36.96265560000029,
+          "text": "TRACE range 7,15 bind"
+        },
+        {
+          "seconds": 37.084312099999806,
+          "text": "TRACE range 7,15 closure"
+        },
+        {
+          "seconds": 48.288639699996565,
+          "text": "TRACE range 7,15 values"
+        },
+        {
+          "seconds": 48.91827629999898,
+          "text": "TRACE range 7,15 moves"
+        },
+        {
+          "seconds": 48.93321999999898,
+          "text": "TRACE range 7,15 lower"
+        },
+        {
+          "seconds": 49.148064299995895,
+          "text": "TRACE range 15,26 bind"
+        },
+        {
+          "seconds": 49.319836199996644,
+          "text": "TRACE range 15,26 closure"
+        }
+      ]
+    },
+    "after": {
+      "cacheOnlyInstrumentation": true,
+      "inputMatchesBaselineHashes": true,
+      "seconds": 60.042828999998164,
+      "exit": 1,
+      "timeout": true,
+      "events": [
+        {
+          "seconds": 0.028093499997339677,
+          "text": "TRACE parse-start"
+        },
+        {
+          "seconds": 0.43202500000188593,
+          "text": "TRACE parsed 32"
+        },
+        {
+          "seconds": 0.9509545999972033,
+          "text": "TRACE parsed 64"
+        },
+        {
+          "seconds": 1.4363889000014751,
+          "text": "TRACE parsed 96"
+        },
+        {
+          "seconds": 2.0446159999992233,
+          "text": "TRACE parsed 128"
+        },
+        {
+          "seconds": 2.399532499999623,
+          "text": "TRACE parsed 160"
+        },
+        {
+          "seconds": 2.9810282999969786,
+          "text": "TRACE parsed 192"
+        },
+        {
+          "seconds": 3.398403599996527,
+          "text": "TRACE parsed 224"
+        },
+        {
+          "seconds": 3.7962847000017064,
+          "text": "TRACE parsed 256"
+        },
+        {
+          "seconds": 4.057761600000958,
+          "text": "TRACE parse-done"
+        },
+        {
+          "seconds": 4.057836499996483,
+          "text": "TRACE signatures-start"
+        },
+        {
+          "seconds": 18.817537099996116,
+          "text": "TRACE compile-start"
+        },
+        {
+          "seconds": 18.81851849999657,
+          "text": "TRACE range 0,15 bind"
+        },
+        {
+          "seconds": 19.142170999999507,
+          "text": "TRACE range 0,15 closure"
+        },
+        {
+          "seconds": 24.439603500002704,
+          "text": "TRACE range 0,7 bind"
+        },
+        {
+          "seconds": 24.641209200002777,
+          "text": "TRACE range 0,7 closure"
+        },
+        {
+          "seconds": 36.5232931999999,
+          "text": "TRACE range 0,7 values"
+        },
+        {
+          "seconds": 36.88724589999765,
+          "text": "TRACE range 0,7 moves"
+        },
+        {
+          "seconds": 36.926869399998395,
+          "text": "TRACE range 0,7 lower"
+        },
+        {
+          "seconds": 37.42282780000096,
+          "text": "TRACE range 7,15 bind"
+        },
+        {
+          "seconds": 37.58591029999661,
+          "text": "TRACE range 7,15 closure"
+        },
+        {
+          "seconds": 43.92800310000166,
+          "text": "TRACE range 7,15 values"
+        },
+        {
+          "seconds": 44.108213100000285,
+          "text": "TRACE range 7,15 moves"
+        },
+        {
+          "seconds": 44.13372929999605,
+          "text": "TRACE range 7,15 lower"
+        },
+        {
+          "seconds": 44.91163290000259,
+          "text": "TRACE range 15,26 bind"
+        },
+        {
+          "seconds": 45.39558289999695,
+          "text": "TRACE range 15,26 closure"
+        }
+      ]
+    },
+    "interpretation": "Informational cache-only traces under a 60-second cap; host CPU contention was not controlled. No standalone benchmark or full compilation success claim."
+  },
+  "fullCurrentDispatcher": {
+    "exit": 2,
+    "seconds": 60.05530110000109,
+    "stdout": "",
+    "stderr": "candidate build failed: candidate frontend timeout: context deadline exceeded\n",
+    "sourceFiles": 285,
+    "joinedSourceBytes": 2020017,
+    "previousImagePreserved": true,
+    "sourceInventorySHA256": "2e7f2536530fc57d564349dc4f9222e0506a8e94a630afdefe348c0503dc39a6"
+  },
+  "limitsChanged": false,
+  "fullCompilationProven": false,
+  "skipped": [
+    "Release standalone candidate build",
+    "Linux",
+    "full suite",
+    "Stage1/Stage2"
+  ],
+  "pushed": false
+}

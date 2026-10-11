@@ -49,6 +49,7 @@ pub fn Result<types::Graph,u32> own_types(ref Plan p,v::Vec<types::Type> graph){
 pub fn usize module_count(ref Plan p){return catalog::module_count(ref p.declarations);}
 pub fn usize declaration_count(ref Plan p){return catalog::declaration_count(ref p.declarations);}
 pub fn bool source_matches(ref Plan p,usize module_index,ref syntax::Parsed source){return catalog::source_matches(ref p.declarations,module_index,source);}
+pub fn u32[8] source_digest(ref Plan p,usize module_index){return catalog::source_digest(ref p.declarations,module_index);}
 pub fn catalog::Lookup declaration_lookup(ref Plan p,usize module_index,ref u8[] spelling){return catalog::lookup(ref p.declarations,module_index,spelling);}
 pub fn catalog::Lookup declaration_lookup_measured(ref Plan p,usize module_index,ref u8[] spelling,ref mut usize probes){return catalog::lookup_measured(ref p.declarations,module_index,spelling,probes);}
 pub fn catalog::Declaration declaration_at(ref Plan p,usize id){return catalog::declaration_at(ref p.declarations,id);}

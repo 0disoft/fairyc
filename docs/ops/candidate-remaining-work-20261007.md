@@ -3408,3 +3408,30 @@ that same cap; complete dispatcher compilation, native compilation/execution of
 the complete dispatcher, standalone candidate profiles, Linux, the full suite
 and Stage1/Stage2 remain pending.
 Stable CLI/API, SDK ABI, Go, DB, CI and repository hygiene are unchanged. No push.
+
+
+## Retained source digests reused across plans (2026-10-11)
+
+Receipt: `docs/ops/evidence/candidate-retained-source-digests-20261011.json`.
+
+`module_catalog` now retains one SHA-256 per exact source snapshot, and no caller
+digest grants freshness. `sdk_vector_plan` and `module_signatures` expose it
+through `source_digest`, and `module_unit_generics` builds and validates its
+`SourceStamp` entries from that owner instead of re-hashing the sources.
+Validation still compares exact length and raw bytes before the stamp and keeps
+the graph-prefix check, so same-length changes and refreshed metadata cannot
+validate an older plan.
+
+Four Release native cases pass: root cross-module packet, highest module 511
+identity, same-length provider bytes rejected before cloning, and a retained plan
+rejected for changed provider bytes. The development candidate build passes the
+nine-case CLI matrix plus C execution under MSVC /Od and /O2; the root and
+highest-module packets match previous bytes, so the earlier /Od-/O2 executions
+are reused. `check` passes 292 files and 3670 MIR functions with the
+lock updated, and no limit changed.
+
+The full 285-file bridge joins 2020017 bytes and still stops at the 60-second
+frontend timeout (exit 2 at 60.0553 seconds) with the previous image preserved.
+The cache-only phase traces are informational under uncontrolled host contention,
+not a benchmark. Complete dispatcher compilation stays open, and repeated SDK Vec
+authentication optimization remains a cache-only prototype at this observation. No push.

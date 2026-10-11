@@ -9,7 +9,6 @@ import storage_intrinsics as storage;
 import sdk_authority as sdk;
 import std::bytes as bytes;
 import std::vec as v;
-import sha256 as hash;
 import resource_abilities as abilities;
 
 pub struct Instance {usize module_index;usize declaration;usize argument_start;usize argument_count;usize result;usize parameter_start;usize parameter_count;u32 effects;bool must_use;bool unsafe_call;}
@@ -75,7 +74,7 @@ fn Result<Plan,join::Problem> collect(ref v::Vec<syntax::Parsed> sources,ref sig
     }module_index+=1;}
     var v::Vec<u8> states=v::empty<u8>();var v::Vec<Dependency> dependencies=v::empty<Dependency>();var usize i=0;while(i<instance_limit()){if(!v::push<u8>(ref mut states,0).is_ok){return .err(fail(11,0,0,0));}i+=1;}i=1;
     while(i<=v::len<Instance>(ref instances)){let p=forward(sources,metadata,graph,ref mut instances,ref mut arguments,ref mut parameters,ref mut dependencies,ref mut states,ref mut budget,i,0);if(p.code!=0){return .err(p);}i+=1;}
-    var v::Vec<SourceStamp> stamps=v::empty<SourceStamp>();i=0;while(i<v::len<syntax::Parsed>(sources)){let text=syntax::source_view(v::at<syntax::Parsed>(sources,i));if(!v::push<SourceStamp>(ref mut stamps,SourceStamp{.length=text.len,.digest=hash::digest(text)}).is_ok){return .err(fail(11,i,0,0));}i+=1;}
+    var v::Vec<SourceStamp> stamps=v::empty<SourceStamp>();i=0;while(i<v::len<syntax::Parsed>(sources)){let text=syntax::source_view(v::at<syntax::Parsed>(sources,i));if(!v::push<SourceStamp>(ref mut stamps,SourceStamp{.length=text.len,.digest=signatures::source_digest(metadata,i)}).is_ok){return .err(fail(11,i,0,0));}i+=1;}
     var v::Vec<types::Type> prefix=v::empty<types::Type>();i=1;while(i<=types::count(graph)){if(!charge(ref mut budget,1)){return .err(fail(4503,0,0,0));}if(!v::push<types::Type>(ref mut prefix,types::at(graph,i)).is_ok){return .err(fail(11,0,0,0));}i+=1;}
     return .ok(Plan{.instances,.arguments,.parameters,.calls,.dependencies,.cleanups=v::empty<Cleanup>(),.cleanup_dependencies=v::empty<Dependency>(),.stamps,.prefix,.work=budget.work});
 }
@@ -163,7 +162,9 @@ pub fn Result<Plan,join::Problem> extend_cleanups(ref v::Vec<syntax::Parsed> sou
 }
 pub fn join::Problem validate(ref Plan p,ref v::Vec<syntax::Parsed> sources,ref signatures::Program metadata,ref v::Vec<types::Type> graph){
     if(v::len<SourceStamp>(ref p.stamps)!=v::len<syntax::Parsed>(sources) || signatures::module_count(metadata)!=v::len<syntax::Parsed>(sources) || types::count(graph)<v::len<types::Type>(ref p.prefix)){return fail(12,0,0,0);}var usize i=0;
-    while(i<v::len<syntax::Parsed>(sources)){let source=v::at<syntax::Parsed>(sources,i);let text=syntax::source_view(source);let stamp=*v::at<SourceStamp>(ref p.stamps,i);if(text.len!=stamp.length || !signatures::source_matches(metadata,i,source)){return fail(12,i,0,0);}let digest=hash::digest(text);var usize n=0;while(n<8){if(digest[n]!=stamp.digest[n]){return fail(12,i,0,0);}n+=1;}i+=1;}
+    // Exact source comparison above each stamp check retains freshness. The
+    // catalog owns the digest of those same bytes, so hashing again adds no proof.
+    while(i<v::len<syntax::Parsed>(sources)){let source=v::at<syntax::Parsed>(sources,i);let text=syntax::source_view(source);let stamp=*v::at<SourceStamp>(ref p.stamps,i);if(text.len!=stamp.length || !signatures::source_matches(metadata,i,source)){return fail(12,i,0,0);}let digest=signatures::source_digest(metadata,i);var usize n=0;while(n<8){if(digest[n]!=stamp.digest[n]){return fail(12,i,0,0);}n+=1;}i+=1;}
     i=1;while(i<=v::len<types::Type>(ref p.prefix)){let a=types::at(graph,i);let b=*v::at<types::Type>(ref p.prefix,i-1);if(a.kind!=b.kind || a.scalar!=b.scalar || a.module_index!=b.module_index || a.declaration!=b.declaration || a.first!=b.first || a.second!=b.second){return fail(12,0,0,0);}i+=1;}return fail(0,0,0,0);
 }
 pub fn Result<Plan,join::Problem> build(ref v::Vec<syntax::Parsed> sources,ref signatures::Program metadata,ref binding::Bound bound,ref mut v::Vec<types::Type> graph){

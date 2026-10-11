@@ -2263,3 +2263,30 @@ profiles, Linux, the full suite and Stage1/Stage2 remain pending.
 Evidence: `docs/ops/evidence/candidate-source-owner-512-20261011.json`.
 Stable CLI/API, SDK ABI, Go reference behavior, DB, CI and native runner limits
 are unchanged.
+
+
+## Retained source digests reused across plans (2026-10-11)
+
+`module_catalog::Catalog` now keeps one SHA-256 beside the exact source bytes it
+retains. `sdk_vector_plan` and `module_signatures` expose that digest through
+`source_digest`, and `module_unit_generics` builds and validates its
+`SourceStamp` entries from that owner instead of hashing the sources again.
+Validation still compares exact length and raw bytes before the stamp, and the
+graph-prefix check is unchanged, so changed same-length bytes and refreshed metadata
+cannot validate an older plan.
+
+Four Release native cases pass: the root cross-module packet, the highest module
+511 identity, same-length provider bytes rejected before cloning, and a retained
+plan rejected for changed provider bytes. The development candidate build passes
+the nine-case CLI matrix and C execution under MSVC /Od and /O2, and both packets
+are byte-identical to the previous run. The highest-module executions are reused.
+Source checking passes 292 files and 3670 MIR functions with the lock
+updated; every limit is unchanged.
+
+The full 285-file bridge joins 2020017 bytes and still stops at the 60-second
+frontend timeout (exit 2, 60.0553 seconds) with the previous image preserved. The
+cache-only phase traces are informational and not a benchmark. Complete
+dispatcher compilation and repeated SDK Vec authentication hashing remain; that
+hashing is a cache-only prototype, not main behavior.
+
+Evidence: `docs/ops/evidence/candidate-retained-source-digests-20261011.json`.
