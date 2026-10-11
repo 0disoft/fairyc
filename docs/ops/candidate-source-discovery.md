@@ -538,3 +538,57 @@ and dependencies; it does not implement a second selection algorithm. SDK graph
 injection, visibility, embedding, lock projection and compiler/CLI consumers
 remain. Stable API/ABI, SDK version, DB and CI are unchanged. No push, Linux,
 full suite or Stage1/Stage2 runs.
+
+
+## Selected SDK graph injection and module visibility
+
+`project_workspace_graph` owns the complete local feature-instance graph and
+optionally one authenticated SDK bundle and its PackageInstanceId. It retains
+local IDs and ownership; it does not move resource fields or mutate nested
+resource fields. The new SDK node is last, with `standard-library` role and
+catalog-count as a non-local package-index sentinel. Local package indices stay
+stable. Direct `stdlib` edges attach to exactly the selected local instance
+owners; the SDK has no outgoing package edges. Public core/vector bundle mismatch
+rejects before attachment, while the separately identified vector-candidate lane
+is explicit through its authenticated bundle metadata.
+
+Node and edge ranges are built off to the side. Dependency-first local order
+inserts the SDK immediately before the first direct SDK owner. All retained
+edges remain dependency-first, every node occurs once and there is no new cycle:
+the original graph is acyclic and the SDK has no outgoing edges. This is a valid
+order, not a promise to duplicate Go's choice of topological order. SDK digest
+collisions with an existing local instance reject. Existing local IDs, source
+caps, work caps and multiple-cycle witness limitations remain unchanged.
+
+`project_module_visibility` consumes the unified graph's module accessors,
+resolving both ordinary imports and SDK internal imports through own plus direct
+instances. SDK file paths and module names borrow from the bundle's retained
+owned metadata and original parsed source. `workspace_graph` and
+`error_workspace_graph` expose the full graph. Legacy `instance_graph` and
+`error_graph` expose the retained local prefix only; SDK consumers must use the
+full workspace accessors. `load_sdk` takes an already authenticated compiler
+bundle and commits local source counters only after load, injection and all
+imports succeed. SDK construction has its own bundle budget. Injection performs
+no source reads and adds no SDK files/bytes to local counts, matching Go's loader.
+Production embedding of those bytes is still separate work.
+
+Fourteen full Go-loader records match node IDs/roles, owner-grouped dependency
+IDs/bindings and every source/import/provider/module lookup. Tests exercise core,
+vector, candidate, child-only SDK ownership, distinct features, aliases,
+unreachable SDK imports, long trivia and ordinary similar namespaces, with local
+source counts at their exact ceilings. Wrong selected public bundles, missing
+`std`/`std::missing`, exhausted injection work and source counter rollback reject
+correctly. Missing SDK import rejection is confirmed by the full Go loader;
+partial error graph/source checks are candidate invariants, not a returned Go
+partial graph. Two native tests and development/release candidate C executions
+pass. The existing 19 local module-visibility cases also pass in native and both
+candidate C profiles after the unified accessors change. Source check passes 325
+files and 4349 MIR functions.
+Evidence: `evidence/candidate-sdk-graph-20261012.json`.
+
+The existing reference fixture command now also records full SDK graph and
+lookup observations:
+`bun tools/run-go.ts run ./cmd/fairyc-candidate-sdk-selection-reference <output>`.
+Production SDK embedding, lock projection and compiler/project CLI consumption
+remain. Stable CLI/API, SDK ABI/version, DB and CI are unchanged. Linux, full
+suite and Stage1/Stage2 are deferred; no push occurred.

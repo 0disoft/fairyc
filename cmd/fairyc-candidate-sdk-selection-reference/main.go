@@ -2,6 +2,7 @@
 package main
 
 import (
+	"encoding/binary"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -122,6 +123,57 @@ func main() {
 		}
 		write(dir, "selection.txt", record.String())
 		write(dir, "candidate.txt", fmt.Sprint(f.candidate))
+		ids := map[string]string{}
+		var nodes, edges, lookups strings.Builder
+		for _, n := range loaded.Graph.Nodes {
+			id, err := packagegraph.ComputeInstanceID(n.Identity)
+			if err != nil {
+				panic(err)
+			}
+			ids[n.ID] = id.String()
+			fmt.Fprintf(&nodes, "%s\n%s\n", id.String(), n.Role)
+		}
+		for _, n := range loaded.Graph.Nodes {
+			for _, e := range loaded.Graph.Dependencies {
+				if e.Owner == n.ID {
+					fmt.Fprintf(&edges, "%s\n%s\n%s\n", ids[e.Owner], e.Binding, ids[e.Target])
+				}
+			}
+		}
+		ordinal := 0
+		for _, n := range loaded.Graph.Nodes {
+			for _, m := range n.Modules {
+				for _, imported := range m.Imports {
+					l := loaded.Resolution.Lookups[ordinal]
+					if l.From != n.ID || l.ImportPath != imported || len(l.ProviderMembers) != 1 {
+						panic("unexpected owning lookup order")
+					}
+					fmt.Fprintf(&lookups, "%s\n%s\n%s\n%s\n%s\n", ids[n.ID], m.Path, imported, ids[l.ProviderMembers[0]], l.ModulePath)
+					ordinal++
+				}
+			}
+		}
+		fileCount, byteCount := 0, 0
+		for _, p := range loaded.Packages {
+			if p.SourceKind == workspaceloader.SourceKindLocal {
+				fileCount += len(p.Sources)
+				for _, s := range p.Sources {
+					byteCount += len(s.Bytes)
+				}
+			} else {
+				for _, s := range p.Sources {
+					write(root, s.Path, string(s.Bytes))
+				}
+			}
+		}
+		var counts [40]byte
+		for index, value := range []int{fileCount, byteCount, len(loaded.Graph.Nodes), len(loaded.Graph.Dependencies), len(loaded.Resolution.Lookups)} {
+			binary.BigEndian.PutUint64(counts[index*8:], uint64(value))
+		}
+		write(dir, "counts.bin", string(counts[:]))
+		write(dir, "nodes.txt", nodes.String())
+		write(dir, "edges.txt", edges.String())
+		write(dir, "lookups.txt", lookups.String())
 		observations = append(observations, map[string]any{"fixture": f.name, "profile": profile, "owners": owners, "candidate": f.candidate})
 	}
 	data, err := json.MarshalIndent(observations, "", "  ")
@@ -130,5 +182,24 @@ func main() {
 	}
 	write(root, "reference.json", string(data)+"\n")
 	write(root, "root.bin", filepath.ToSlash(root))
+	for _, name := range []string{"UnknownStd", "BareStd"} {
+		dir := filepath.Join(root, name)
+		imported := "std::missing"
+		if name == "BareStd" {
+			imported = "std"
+		}
+		write(dir, "fairy.toml", manifest("example.root", nil, nil))
+		write(dir, "src/main.fy", "module main;\nimport "+imported+" as sdk;\n")
+		_, err := workspaceloader.Load(dir)
+		if err == nil {
+			panic("unknown SDK import accepted")
+		}
+		rejection, ok := err.(*workspaceloader.LoadError)
+		if !ok || rejection.Reason != workspaceloader.ReasonPackageGraph || !strings.Contains(rejection.Detail, packagegraph.ReasonMissingVisibleModule) {
+			panic(err)
+		}
+		write(dir, "path.txt", imported)
+		write(dir, "reason.txt", packagegraph.ReasonMissingVisibleModule)
+	}
 	fmt.Println("PASS: 14 full Go-loader SDK selection fixtures")
 }
