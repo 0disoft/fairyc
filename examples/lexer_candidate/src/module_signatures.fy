@@ -42,6 +42,12 @@ fn bool ffi_type(ref v::Vec<syntax::Parsed> sources,ref v::Vec<types::Type> grap
 }
 pub fn Result<Program,catalog::Problem> build(ref v::Vec<syntax::Parsed> sources){
     let c=switch(catalog::build(sources)){case .ok(c):{c}case .err(p):{return .err(p);}};
+    return build_catalog(sources,c);
+}
+// Own the package-resolved catalog, accepting only its exact retained sources.
+pub fn Result<Program,catalog::Problem> build_catalog(ref v::Vec<syntax::Parsed> sources,catalog::Catalog c){
+    if(catalog::module_count(ref c)!=v::len<syntax::Parsed>(sources)){return .err(fail(9,0,0,0));}
+    var usize checked=0;while(checked<v::len<syntax::Parsed>(sources)){if(!catalog::source_matches(ref c,checked,v::at<syntax::Parsed>(sources,checked))){return .err(fail(9,checked,0,0));}checked+=1;}
     var v::Vec<types::Type> graph=v::empty<types::Type>();var v::Vec<Signature> signatures=v::empty<Signature>();var v::Vec<usize> parameters=v::empty<usize>();var v::Vec<bool> vector_sources=v::empty<bool>();var bytes::Buffer links=bytes::empty();
     var usize module_index=0;while(module_index<v::len<syntax::Parsed>(sources)){let p=v::at<syntax::Parsed>(sources,module_index);var usize index=1;
         let bool vector_sdk=catalog::sdk_vector_source(ref c,module_index);if(!v::push<bool>(ref mut vector_sources,vector_sdk).is_ok){return .err(fail(11,module_index,0,0));}

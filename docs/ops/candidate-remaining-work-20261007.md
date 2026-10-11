@@ -3967,3 +3967,16 @@ scheduled later. Public API, SDK, DB, CI and version are unchanged; no push occu
 
 Receipt: `evidence/candidate-lock-policy-20261012.json`. Public API, SDK, DB, CI and
 version are unchanged.
+
+
+## Package-aware compiler input (2026-10-12)
+
+Package-aware owned compiler inputs and signature construction now pass three native
+tests and both candidate C profiles. Six source snapshots from five packages match the
+owning Go CLI oracle, retaining independent nominal types and private visibility.
+Whole-closure semantic compilation, public check/build/run routing, entry/driver wiring
+and product timeout handling remain. Linux, the full suite and Stage1/Stage2 remain
+scheduled for later batches. Public API, SDK ABI/version, DB and CI are unchanged; no
+push occurred.
+
+Receipt: `evidence/candidate-compiler-input-20261012.json`.

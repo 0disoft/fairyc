@@ -962,3 +962,32 @@ scheduled later. DB, CI and version are unchanged; no push occurred.
 
 Three exact native tests and both candidate C profiles pass, including all 24 Go
 observations and 16 unchanged byte/mtime snapshots. No push occurred.
+
+
+## Package-aware compiler input (2026-10-12)
+
+Fairy now implements `project_compiler_input.project`. It consumes the freshly
+visibility-resolved workspace with no disk reads or reparse, copying exact
+parser/scanner arenas while preserving package instance IDs, original physical module
+coordinates, relative file paths, byte spans, and typed import provider bindings. Input
+independently owns ASTs after the workspace closes.
+
+`module_catalog.build_scoped` disambiguates identical module paths by package owner and
+validates ordered explicit provider bindings; the legacy flat build retains original
+global uniqueness. `module_signatures.build_catalog` owns the resolved catalog and
+rejects differing retained source snapshots before type/signature resolution.
+
+The Go oracle authors only a five-package/six-source fixture and invokes the stable Go
+CLI check: three independent common modules each define a distinct `Box`, and two
+dependencies see only their direct own common provider.
+
+Evidence: `candidate-compiler-input-20261012.json`.
+
+Three exact native tests and both candidate C profiles pass; all six retained source
+snapshots match the Go oracle after workspace closure. Scoped nominal type identity,
+private function visibility, malformed binding inputs, metering exhaustion and
+parser/scanner copy checks pass. Fixture bytes and modification times remain unchanged.
+The source check passes 351 files and 4593 MIR functions. Candidate C generation
+exceeded the harness's 60-second limit, then completed in 112 seconds with a 240-second
+verification-only allowance; the successful native invocation was reused. Product
+timeout behavior is unchanged.
