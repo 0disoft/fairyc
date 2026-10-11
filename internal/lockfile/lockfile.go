@@ -176,6 +176,9 @@ func Validate(document Document) error {
 	if document.Schema != SchemaVersion || document.PackageInstanceAlgorithm != packagegraph.InstanceIDEncoding || document.SourceDigestAlgorithm != packagecontent.DigestEncoding || document.Language == "" {
 		return fmt.Errorf("invalid lockfile header")
 	}
+	if document.Dependencies == nil {
+		return fmt.Errorf("lockfile has null dependencies")
+	}
 	if len(document.Packages) == 0 || !slices.IsSortedFunc(document.Packages, func(left, right PackageRecord) int { return strings.Compare(left.ID, right.ID) }) {
 		return fmt.Errorf("lockfile packages must be nonempty and sorted by id")
 	}

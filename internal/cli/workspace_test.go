@@ -2,6 +2,7 @@ package cli
 
 import (
 	"bytes"
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -171,9 +172,14 @@ language = "fairyc-language/20"
 source = "src"
 `)
 	writeWorkspaceFile(t, root, "src/main.fy", "module main;\n\nimport std::alloc as alloc;\n\nfn i32 inspect(ref mut alloc::Arena arena) {\n    return 1;\n}\n")
+	library, err := sdkstdlib.Load()
+	if err != nil {
+		t.Fatal(err)
+	}
+	expectedSources := fmt.Sprintf("2 instance(s), %d source file(s)", 1+len(library.Sources))
 
 	code, stdout, stderr := runForTest([]string{"experimental", "check-workspace"}, root)
-	if code != ExitSuccess || !strings.Contains(stdout, "2 instance(s), 7 source file(s)") || !strings.HasSuffix(stdout, "lock updated\n") || stderr != "" {
+	if code != ExitSuccess || !strings.Contains(stdout, expectedSources) || !strings.HasSuffix(stdout, "lock updated\n") || stderr != "" {
 		t.Fatalf("workspace check = (%d, %q, %q)", code, stdout, stderr)
 	}
 	document, _, err := lockfile.Read(filepath.Join(root, lockfile.FileName))

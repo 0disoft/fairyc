@@ -2,6 +2,7 @@ package lockfile
 
 import (
 	"bytes"
+	"encoding/json"
 	"os"
 	"path/filepath"
 	"strings"
@@ -49,6 +50,64 @@ func TestWorkspaceLockRoundTripAndAtomicReplacement(t *testing.T) {
 	actual, err := os.ReadFile(path)
 	if err != nil || !bytes.Equal(actual, contents) {
 		t.Fatalf("written lock = %q, error = %v", actual, err)
+	}
+}
+
+func TestLockRequiresExplicitDependencyArray(t *testing.T) {
+	t.Parallel()
+	root := t.TempDir()
+	writeSDKWorkspace(t, root)
+	if err := os.WriteFile(filepath.Join(root, "src", "main.fy"), []byte("module main;\nfn i32 main(){return 0;}\n"), 0600); err != nil {
+		t.Fatal(err)
+	}
+	workspace, err := workspaceloader.Load(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	document, err := FromWorkspace(workspace)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if document.Dependencies == nil || len(document.Dependencies) != 0 {
+		t.Fatalf("dependencies = %#v", document.Dependencies)
+	}
+	canonical, err := Marshal(document)
+	if err != nil {
+		t.Fatal(err)
+	}
+	parsed, err := Parse(canonical)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := MatchesWorkspace(parsed, workspace); err != nil {
+		t.Fatal(err)
+	}
+	var raw map[string]json.RawMessage
+	if err := json.Unmarshal(canonical, &raw); err != nil {
+		t.Fatal(err)
+	}
+	for _, name := range []string{"null", "omitted"} {
+		t.Run(name, func(t *testing.T) {
+			if name == "null" {
+				raw["dependencies"] = json.RawMessage("null")
+			} else {
+				delete(raw, "dependencies")
+			}
+			input, err := json.Marshal(raw)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if _, err := Parse(input); err == nil || !strings.Contains(err.Error(), "null dependencies") {
+				t.Fatalf("Parse(%s) error = %v", name, err)
+			}
+		})
+	}
+	document.Dependencies = nil
+	if err := Validate(document); err == nil || !strings.Contains(err.Error(), "null dependencies") {
+		t.Fatalf("Validate(nil dependencies) = %v", err)
+	}
+	if _, err := Marshal(document); err == nil || !strings.Contains(err.Error(), "null dependencies") {
+		t.Fatalf("Marshal(nil dependencies) = %v", err)
 	}
 }
 

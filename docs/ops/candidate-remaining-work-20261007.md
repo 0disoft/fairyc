@@ -3884,3 +3884,17 @@ Reconcile Go's currently accepted null dependency arrays with the non-null
 canonical collection contract during validation. Stable public CLI/API, SDK
 ABI/version, DB and CI are unchanged; Linux, full suite and Stage1/Stage2 remain
 scheduled later. No push occurred.
+
+
+## Lock dependency arrays: reference correction (2026-10-12)
+
+Go's previously accepted null/omitted dependencies now reject in `Validate`,
+`Parse` and `Marshal`, matching the existing explicit-array contract. Generated
+empty arrays retain their bytes and round-trip/match behavior. All lockfile tests
+and four scoped CLI lock-policy tests pass. The SDK CLI source-count assertion
+now derives from the actual bundled sources. The broad CLI suite was stopped and
+is not a pass. Receipt: `evidence/lock-dependency-array-correction-20261012.json`.
+
+Candidate semantic validation, stale matching, atomic persistence and compiler
+CLI integration remain. API signatures, DB, CI and version are unchanged. Linux
+and full suite remain scheduled later; no push occurred.

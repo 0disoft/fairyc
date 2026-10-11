@@ -813,3 +813,25 @@ through its semantic validator; that behavior must be reconciled with the
 non-null canonical collection contract in the validation unit. Stable public
 CLI/API, SDK ABI/version, DB and CI are unchanged. Linux, full suite and
 Stage1/Stage2 remain scheduled later; no push occurred.
+
+
+## Reference lock dependency-array contract correction
+
+The owning Go validator now rejects nil dependencies, aligning with lockfile-v1
+and ADR0145's explicit empty-array contract. A real root-only workspace proved
+that null and omitted JSON plus `Validate(nil dependencies)` previously passed.
+`Parse`, `Validate` and `Marshal` now share the nil guard; normal generated `[]`
+round-trips and matches the same workspace. No version, format, signature or valid
+output byte change is made; invalid public inputs reject earlier.
+
+All lockfile package tests and four scoped CLI lock-policy tests pass. One SDK
+CLI test's old seven-file literal failed against the current eight-file workspace;
+it now derives the count from the owning SDK bundle while retaining two instances,
+success/lock status and exact SDK origin assertions. The broad CLI suite was
+stopped to narrow scope and is not counted as a pass. Receipt:
+`evidence/lock-dependency-array-correction-20261012.json`.
+
+The candidate decoded draft still retains null flags for subsequent validation.
+Candidate identities/graphs, stale matching, persistence and compiler CLI work
+remain. Existing contract documents are unchanged; DB, CI and API signatures are
+unchanged. Linux and full suite remain deferred; no push occurred.

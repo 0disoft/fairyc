@@ -1,0 +1,50 @@
+{
+  "schema": "fairyc.lock-dependency-array-correction/v1",
+  "passed": true,
+  "sourceInputs": [
+    {
+      "path": "internal/lockfile/lockfile.go",
+      "sha256": "6fdab4d79c030703b4e6d5712e5d90cd4307fa1423c02baac9a9380416af102b"
+    },
+    {
+      "path": "internal/lockfile/lockfile_test.go",
+      "sha256": "f16b69cade167d8d70372a97f3cd05d60ca12e2d2aa4dacb47bdcca39ac7c615"
+    },
+    {
+      "path": "internal/cli/workspace_test.go",
+      "sha256": "42b5d7c7172255cb0955f6a6220872e79ad62e105a4b05f0577701e19452e771"
+    }
+  ],
+  "contract": [
+    "docs/package/lockfile-v1.md",
+    "docs/adr/0145-generated-lockfile-v1.md"
+  ],
+  "reproduction": {
+    "command": "bun tools/run-go.ts test ./internal/lockfile -run TestLockRequiresExplicitDependencyArray -count=1",
+    "exit": 1,
+    "observed": [
+      "Parse(null) error = <nil>",
+      "Parse(omitted) error = <nil>",
+      "Validate(nil dependencies) = <nil>"
+    ]
+  },
+  "verification": {
+    "command": "bun tools/run-go.ts test ./internal/lockfile ./internal/cli -run '^(TestLock.*|TestWorkspaceLock.*|TestExperimentalWorkspaceCheckUpdatesAndVerifiesLock|TestStableCheckOwnsTheCurrentWorkspaceAndLockContract|TestExperimentalWorkspaceCheckLocksBundledStandardLibrary|TestStableWorkspaceTestLockedModeRequiresCanonicalProductionLock)$' -count=1",
+    "exit": 0,
+    "packages": [
+      "internal/lockfile",
+      "internal/cli"
+    ],
+    "targetedCliTests": 4
+  },
+  "otherObservations": [
+    "Full lockfile package tests passed in an earlier combined invocation; the broad CLI suite was explicitly stopped to narrow the scope, not counted as a pass.",
+    "One SDK CLI test had a stale literal 7-file expectation against actual 8 files; expected sources now derive from the owning SDK bundle."
+  ],
+  "apiSignaturesChanged": false,
+  "invalidInputRejectionTightened": true,
+  "validGeneratedBytesChanged": false,
+  "dbChanged": false,
+  "ciChanged": false,
+  "pushed": false
+}
