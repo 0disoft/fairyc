@@ -86,11 +86,38 @@ the SDK's reparse flag. This discrepancy remains a compatibility item and these
 observations do not establish full Go-loader equivalence. No Go loader behavior
 was changed by this candidate unit.
 
+## Exact source-file bytes
+
+`project_source_file.read` resolves directory prefixes and observes the exact
+leaf spelling, reparse flag and regular-file kind. It opens the file, checks
+disk kind and its native identifier, repeats the path observation, and compares
+the identifier from a second open. It then retains the exact bytes from the
+first handle, with explicit close on success and owned cleanup on failure.
+These bounded observations do not create an atomic tree snapshot.
+
+Reads stream through a 4096-byte buffer with a one-byte overflow probe. The
+per-file read bound is the Go frontend's 8 MiB and the caller supplies its
+remaining workspace byte budget. Empty files are retained, as are NUL and
+malformed UTF-8 bytes; syntax validation is a later stage. This does not raise
+the candidate parser's distinct token, cooked-value, AST or joined-owner caps.
+
+The private C bridge now validates and copies the authenticated file-kind
+result and all six fields of the mutable native file-ID output. One native test
+and both candidate C profiles pass, including distinct-file versus repeated
+same-file IDs, exact bytes, 65 KiB and exact 8 MiB reads, oversize/remaining-byte
+rejection, case/nonregular/reparse/prefix errors and exhausted work. The candidate
+compiler was rebuilt from current Fairy sources. Evidence:
+`evidence/candidate-source-file-20261011.json`.
+
+The first release compile hit the old 60-second deadline. The final execution
+uses the committed real private deadline configuration from
+`candidate-compile-timeout.md`, without a timeout overlay.
+
 ## Remaining connection
 
-Connect source-root ownership to the catalog, read and retain exact source
-bytes, recheck regular files, enforce cumulative byte limits and bind declared
-modules. Resolve the Go junction observation discrepancy before any loader
+Connect source-root ownership, the catalog and per-file byte reader into one
+retained source set, enforce cumulative byte limits and bind declared modules.
+Resolve the Go junction observation discrepancy before any loader
 equivalence claim. Package/lock/CLI work remains separate.
 ReadDir is currently Windows AMD64 and keeps the existing SDK path bound.
 Linux and Stage 2 were not run for this component slice. Public CLI, SDK ABI,

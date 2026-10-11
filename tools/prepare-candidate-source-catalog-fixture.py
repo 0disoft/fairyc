@@ -13,7 +13,7 @@ def main():
     if os.name != 'nt':
         parser.error('the current SDK directory adapter requires Windows')
     base = args.root.resolve()
-    for name in ['Good/nested', 'Empty', 'Collision', 'Reparse', 'IgnoredReparse']:
+    for name in ['Good/nested', 'Empty', 'Collision', 'Reparse', 'IgnoredReparse', 'Reads']:
         (base / name).mkdir(parents=True, exist_ok=True)
     sources = {
         'Good/a.fy': 'module a;\n',
@@ -28,6 +28,12 @@ def main():
     }
     for name, source in sources.items():
         (base / name).write_text(source, encoding='utf-8', newline='\n')
+    (base / 'Reads/binary.fy').write_bytes(b'\x00\xff\r')
+    (base / 'Reads/large.fy').write_bytes(b'a' * 65536 + b'z')
+    (base / 'Reads/empty.fy').write_bytes(b'')
+    for name, size in [('maximum.fy', 8388608), ('too-large.fy', 8388609)]:
+        with (base / 'Reads' / name).open('wb') as file:
+            file.truncate(size)
     if len(list((base / 'Collision').glob('*.fy'))) != 2:
         raise RuntimeError('fixture filesystem must retain both dotted I and i')
     target = base / 'Good'
