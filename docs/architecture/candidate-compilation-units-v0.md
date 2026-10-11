@@ -2363,3 +2363,27 @@ Stage1/Stage2 and push were not run. No full compiler build or new dispatcher
 image exists yet; the next unit isolates the post-link budget/cap failure phase.
 
 Evidence: `docs/ops/evidence/candidate-project-frame-capacity-20261011.json`.
+
+
+## Per-unit cleanup layout presence (2026-10-11)
+
+`module_project_cleanup.fy` indexes source-unit nominal layout presence once into
+a `bool` vector and validates the original type ID range; recipe, frame, effect,
+abilities and field equality are still compared exactly, and no limit changed.
+
+Two selected development native tests pass: shared cleanup coalescing and nested
+Result entry partition. Generated C executes at MSVC `/Od` and `/O2` for both:
+shared outputs `7,` and nested outputs `99,7,`. `check --locked` passes 292 files
+and 3672 MIR functions.
+
+The latest actual full 285-file candidate bridge still fails with exit 2 at
+project phase 3, stage 0, plain 1002 in 28.9174 seconds (2020702 bytes), with the
+previous image preserved. The code 1002 comes from `ir::assemble_sdk` owned IR
+revalidation, separated by the cache-only localization diagnostic that completes
+in 29.7119 seconds with code 391002 (390000 plus 1002) while `cleanup::build`
+passes. The next step isolates the owned IR revalidation 1002 cause. The
+`/O2 /Ob1` bootstrap is a cache-only validation experiment and the product
+Release flags are unchanged; current full link and self-hosting success are not
+claimed. Linux, the full suite, Stage1/Stage2 and push were skipped.
+
+Evidence: `docs/ops/evidence/candidate-cleanup-layout-index-20261011.json`.

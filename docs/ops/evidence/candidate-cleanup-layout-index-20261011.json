@@ -1,0 +1,360 @@
+{
+  "schema": "fairyc.candidate-cleanup-layout-index/v1",
+  "passed": true,
+  "scope": "Per-source-unit layout presence reuse with exact cleanup recipe/frame/field equality retained",
+  "sources": [
+    {
+      "path": "examples/lexer_candidate/src/module_project_cleanup.fy",
+      "sha256": "12a5906e93f5cbf60a47b8bcddaf42ab23cd0ae746ca9ed1e76e451cb10b080e"
+    }
+  ],
+  "limitsChanged": false,
+  "native": {
+    "exit": 0,
+    "profile": "development",
+    "passed": 2,
+    "failed": 0,
+    "seconds": 82.86084980001033,
+    "argv": [
+      "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\compiler-build-120s.exe",
+      "test",
+      "--native",
+      "--locked",
+      "--json",
+      "--capture-output",
+      "--exact",
+      "tests::module_project_link::project_c_coalesces_shared_cleanup_bodies_and_preserves_drops",
+      "--exact",
+      "tests::module_project_link::project_c_entry_partition_keeps_nested_result_cleanup_and_omits_unused_bodies"
+    ],
+    "report": {
+      "path": ".cache/candidate-tagged/sdk-c-execution/native-cleanup-layout-index.json",
+      "sha256": "b3ffca8ceedfd377cb50df39409bb9fb10445112bdd6c8211b43c10e514c11a2"
+    },
+    "tests": [
+      {
+        "identity": "tests::module_project_link::project_c_coalesces_shared_cleanup_bodies_and_preserves_drops",
+        "outcome": "passed"
+      },
+      {
+        "identity": "tests::module_project_link::project_c_entry_partition_keeps_nested_result_cleanup_and_omits_unused_bodies",
+        "outcome": "passed"
+      }
+    ]
+  },
+  "generatedCExecution": {
+    "passed": true,
+    "entry": {
+      "frames": 4,
+      "units": 6,
+      "literalDefinitions": 0,
+      "headerBytes": 3405,
+      "sourceBytes": 2173,
+      "packetSHA256": "c59c138b22b32008fba89e30e56a897660f88d24cea2330cc7cb6311c5554842",
+      "executions": [
+        {
+          "profile": "low",
+          "build": {
+            "argv": [
+              "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+              "/nologo",
+              "/std:c11",
+              "/TC",
+              "/Od",
+              "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\cleanup-layout-index-entry\\fy_literals.c",
+              "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\cleanup-layout-index-entry\\fy_unit_0.c",
+              "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\cleanup-layout-index-entry\\fy_unit_1.c",
+              "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\cleanup-layout-index-entry\\fy_unit_2.c",
+              "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\cleanup-layout-index-entry\\fy_unit_3.c",
+              "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\cleanup-layout-index-entry\\fy_unit_4.c",
+              "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\cleanup-layout-index-entry\\fy_unit_5.c",
+              "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\cleanup-layout-index-entry\\trap.c",
+              "/Fe:C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\cleanup-layout-index-entry\\project-low.exe",
+              "/link",
+              "/INCREMENTAL:NO"
+            ],
+            "exit": 0,
+            "stdout": "fy_literals.c\r\nfy_unit_0.c\r\nfy_unit_1.c\r\nfy_unit_2.c\r\nfy_unit_3.c\r\nfy_unit_4.c\r\nfy_unit_5.c\r\ntrap.c\r\nGenerating Code...\r\n",
+            "stderr": ""
+          },
+          "run": {
+            "argv": [
+              "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\cleanup-layout-index-entry\\project-low.exe"
+            ],
+            "exit": 0,
+            "stdout": "99,7,",
+            "stderr": ""
+          }
+        },
+        {
+          "profile": "optimized",
+          "build": {
+            "argv": [
+              "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+              "/nologo",
+              "/std:c11",
+              "/TC",
+              "/O2",
+              "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\cleanup-layout-index-entry\\fy_literals.c",
+              "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\cleanup-layout-index-entry\\fy_unit_0.c",
+              "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\cleanup-layout-index-entry\\fy_unit_1.c",
+              "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\cleanup-layout-index-entry\\fy_unit_2.c",
+              "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\cleanup-layout-index-entry\\fy_unit_3.c",
+              "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\cleanup-layout-index-entry\\fy_unit_4.c",
+              "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\cleanup-layout-index-entry\\fy_unit_5.c",
+              "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\cleanup-layout-index-entry\\trap.c",
+              "/Fe:C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\cleanup-layout-index-entry\\project-optimized.exe",
+              "/link",
+              "/INCREMENTAL:NO"
+            ],
+            "exit": 0,
+            "stdout": "fy_literals.c\r\nfy_unit_0.c\r\nfy_unit_1.c\r\nfy_unit_2.c\r\nfy_unit_3.c\r\nfy_unit_4.c\r\nfy_unit_5.c\r\ntrap.c\r\nGenerating Code...\r\n",
+            "stderr": ""
+          },
+          "run": {
+            "argv": [
+              "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\cleanup-layout-index-entry\\project-optimized.exe"
+            ],
+            "exit": 0,
+            "stdout": "99,7,",
+            "stderr": ""
+          }
+        }
+      ]
+    },
+    "sharedCleanup": {
+      "sourceSHA256": "41269b76713838e36b21729b18e504d2d92e4de5f955f47d2c78cbe08fc3e1a1",
+      "executions": [
+        {
+          "profile": "low",
+          "build": {
+            "argv": [
+              "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+              "/nologo",
+              "/std:c11",
+              "/TC",
+              "/Od",
+              "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\cleanup-layout-index-shared\\shared.c",
+              "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\cleanup-layout-index-shared\\shim.c",
+              "/Fe:C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\cleanup-layout-index-shared\\low.exe",
+              "/link",
+              "/INCREMENTAL:NO"
+            ],
+            "exit": 0,
+            "stdout": "shared.c\r\nshim.c\r\nGenerating Code...\r\n",
+            "stderr": ""
+          },
+          "run": {
+            "argv": [
+              "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\cleanup-layout-index-shared\\low.exe"
+            ],
+            "exit": 0,
+            "stdout": "7,",
+            "stderr": ""
+          }
+        },
+        {
+          "profile": "optimized",
+          "build": {
+            "argv": [
+              "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+              "/nologo",
+              "/std:c11",
+              "/TC",
+              "/O2",
+              "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\cleanup-layout-index-shared\\shared.c",
+              "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\cleanup-layout-index-shared\\shim.c",
+              "/Fe:C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\cleanup-layout-index-shared\\optimized.exe",
+              "/link",
+              "/INCREMENTAL:NO"
+            ],
+            "exit": 0,
+            "stdout": "shared.c\r\nshim.c\r\nGenerating Code...\r\n",
+            "stderr": ""
+          },
+          "run": {
+            "argv": [
+              "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\cleanup-layout-index-shared\\optimized.exe"
+            ],
+            "exit": 0,
+            "stdout": "7,",
+            "stderr": ""
+          }
+        }
+      ]
+    }
+  },
+  "sourceCheck": {
+    "argv": [
+      ".cache/candidate-tagged/compiler-build-120s.exe",
+      "check",
+      "--locked"
+    ],
+    "exit": 0,
+    "files": 292,
+    "mirFunctions": 3672,
+    "lockVerified": true
+  },
+  "bootstrapValidation": {
+    "cacheOnlyInlining": true,
+    "productionReleaseFlagsChanged": false,
+    "sourceSHA256": "6a2c1a8e33ef2264104c1d9795c5578a99aed5c7a5d8e354004db849025a6852",
+    "runtimeObjectSHA256": "fd33d07717df1e64bfc59875d64f51071926dc798d9266d8ef3054f6ea5ec48b",
+    "compilerSHA256": "8a09d9114c4f9d690e1dcc980b5251528c1fac6548ccead9918a26b5b8046259",
+    "runs": [
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\compiler-build-120s.exe",
+          "experimental",
+          "emit-workspace-c",
+          "--target",
+          "x86_64-windows-msvc",
+          "--locked"
+        ],
+        "exit": 0,
+        "seconds": 21.195001600004616,
+        "timeout": false,
+        "stdoutBytes": 21805180,
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+          "/nologo",
+          "/std:c11",
+          "/TC",
+          "/W4",
+          "/WX",
+          "/MT",
+          "/O2",
+          "/Ob1",
+          "/c",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\bootstrap-cleanup-layout-index.c",
+          "/Fo:C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\bootstrap-cleanup-layout-index.obj"
+        ],
+        "exit": 0,
+        "seconds": 40.59008820001327,
+        "timeout": false,
+        "stdoutBytes": 34,
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+          "/nologo",
+          "/MT",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\bootstrap-cleanup-layout-index.obj",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\bootstrap-retained-runtime.obj",
+          "/Fe:C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\bootstrap-cleanup-layout-index.exe",
+          "/link",
+          "/INCREMENTAL:NO"
+        ],
+        "exit": 0,
+        "seconds": 0.1970422000013059,
+        "timeout": false,
+        "stdoutBytes": 0,
+        "stderr": ""
+      }
+    ]
+  },
+  "fullCurrentDispatcher": {
+    "exit": 2,
+    "seconds": 28.917419800010975,
+    "stdout": "",
+    "stderr": "candidate build failed: candidate frontend failed: exit status 2: examples/lexer_candidate/src/main.fy:1:1: error: project phase 3 stage 0 code 1002 (bytes 0..0)\n",
+    "previousImagePreserved": true,
+    "sourceFiles": 285,
+    "joinedSourceBytes": 2020702,
+    "sourceInventorySHA256": "6df82e7848182f55f9cc6ab2a3b10c3625bc1e3105fa99dbf81e33f1c23870a8"
+  },
+  "fullCompilationProven": false,
+  "next": "Localize remaining project phase 3 code 1002; complete current-source dispatcher compilation and Stage1/Stage2 remain open",
+  "pushed": false,
+  "skipped": [
+    "Linux (deferred batch)",
+    "full suite (targeted change)",
+    "Stage1/Stage2 (current-source full compile incomplete)",
+    "default standalone Release build policy change"
+  ],
+  "diagnosticLocalization": {
+    "cacheOnlyPhaseCodes": true,
+    "cleanupOuterOffset": 380000,
+    "markers": [
+      {
+        "code": 531002,
+        "sourceContext": "ean::type_count(ir::cleanup_ir(p));var v::Vec<bool> present=v::empty<bool>();var usize i=0;\n    while(i<=count){if(!limits::project_charge(work,1)){return .err(fail(1002,0));}if(!v::push<bool>(ref mut present,false).is_ok){return .err(fail(1003,0));}i+=1;}\n   "
+      },
+      {
+        "code": 532002,
+        "sourceContext": "push<bool>(ref mut present,false).is_ok){return .err(fail(1003,0));}i+=1;}\n    i=0;while(i<ir::layout_count(p)){if(!limits::project_charge(work,1)){return .err(fail(1002,0));}let type=ir::layout_at(p,i).value.type;if(type==0 || type>count){return .err(fail(100"
+      },
+      {
+        "code": 533002,
+        "sourceContext": "(source_layouts(p,work)){case .ok(p):{p}case .err(e):{return e;}};var usize type=1;while(type<=clean::type_count(c)){if(!limits::project_charge(work,1)){return fail(1002,0);}let id=types::mapped(graph,unit,type);let choice=metadata::choice(layouts,id);let curr"
+      },
+      {
+        "code": 534002,
+        "sourceContext": "e.unit,old.frame)){return fail(1001,clean::type_at(c,type).module_index);}var usize i=0;while(i<current.field_count){if(!limits::project_charge(work,1)){return fail(1002,0);}let a=clean::field_at(c,current.field_start+i);let b=clean::field_at(selected,old.fiel"
+      },
+      {
+        "code": 535002,
+        "sourceContext": ";var v::Vec<clean::Drop> drops=v::empty<clean::Drop>();var usize i=1;\n    while(i<=functions::count(functions)){if(!limits::project_charge(work,1)){return .err(fail(1002,0));}if(!v::push<clean::Frame>(ref mut frames,functions::at(functions,i)).is_ok){return .e"
+      },
+      {
+        "code": 536002,
+        "sourceContext": "functions::at(functions,i)).is_ok){return .err(fail(1003,0));}i+=1;}\n    i=1;while(i<=types::type_count(graph)){if(!limits::project_charge(work,1)){return .err(fail(1002,0));}let t=types::type_at(graph,i);var clean::Glue g=clean::Glue{.kind=if(t.kind==3 || t.k"
+      },
+      {
+        "code": 537002,
+        "sourceContext": "hoice.unit,g.frame);let start=g.field_start;g.field_start=v::len<clean::Field>(ref fields);if(g.field_count>limits::project_fields()-g.field_start){return .err(fail(1002,t.module_index));}var usize j=0;while(j<g.field_count){if(!limits::project_charge(work,1))"
+      },
+      {
+        "code": 538002,
+        "sourceContext": ":project_fields()-g.field_start){return .err(fail(537002,t.module_index));}var usize j=0;while(j<g.field_count){if(!limits::project_charge(work,1)){return .err(fail(1002,t.module_index));}var f=clean::field_at(source,start+j);f.owner=i;f.type=types::mapped(gra"
+      },
+      {
+        "code": 539002,
+        "sourceContext": "ram>(inputs,unit));var v::Vec<usize> maps=v::empty<usize>();i=1;\n        while(i<=clean::operand_count(source)){if(!limits::project_charge(work,1)){return .err(fail(1002,0));}var o=clean::operand_at(source,i);var usize id=0;if(chosen(functions,unit,o.frame)){i"
+      },
+      {
+        "code": 540002,
+        "sourceContext": "ail(539002,0));}var o=clean::operand_at(source,i);var usize id=0;if(chosen(functions,unit,o.frame)){if(v::len<clean::Operand>(ref operands)>=16384){return .err(fail(1002,0));}o.frame=functions::mapped(functions,unit,o.frame);o.type=types::mapped(graph,unit,o.t"
+      },
+      {
+        "code": 541002,
+        "sourceContext": "usize>(ref mut maps,id).is_ok){return .err(fail(1003,0));}i+=1;}\n        i=0;while(i<clean::drop_count(source)){if(!limits::project_charge(work,1)){return .err(fail(1002,0));}var d=clean::drop_at(source,i);d.operand=*v::at<usize>(ref maps,d.operand-1);if(d.ope"
+      },
+      {
+        "code": 542002,
+        "sourceContext": "541002,0));}var d=clean::drop_at(source,i);d.operand=*v::at<usize>(ref maps,d.operand-1);if(d.operand!=0){if(v::len<clean::Drop>(ref drops)>=16384){return .err(fail(1002,0));}if(!v::push<clean::Drop>(ref mut drops,d).is_ok){return .err(fail(1003,0));}}i+=1;}un"
+      }
+    ],
+    "runs": [
+      {
+        "exit": 0,
+        "seconds": 23.47960079999757,
+        "stdoutBytes": 21808736,
+        "stderr": ""
+      },
+      {
+        "exit": 0,
+        "seconds": 40.60856560000684,
+        "stdoutBytes": 34,
+        "stderr": ""
+      },
+      {
+        "exit": 0,
+        "seconds": 0.20765850000316277,
+        "stdoutBytes": 0,
+        "stderr": ""
+      },
+      {
+        "exit": 2,
+        "seconds": 29.71185590000823,
+        "stdoutBytes": 0,
+        "stderr": "examples/lexer_candidate/src/main.fy:1:1: error: project phase 3 stage 0 code 391002 (bytes 0..0)\n"
+      }
+    ],
+    "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}
