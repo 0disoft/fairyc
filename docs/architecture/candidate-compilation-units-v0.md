@@ -2387,3 +2387,33 @@ Release flags are unchanged; current full link and self-hosting success are not
 claimed. Linux, the full suite, Stage1/Stage2 and push were skipped.
 
 Evidence: `docs/ops/evidence/candidate-cleanup-layout-index-20261011.json`.
+
+
+## Owned switch layout index (2026-10-11)
+
+`module_unit_body_ir_switches` builds one private per-program original type to
+layout index; duplicate type layouts keep the missing/ambiguous lookup behavior
+and the exhaustive, payload-ownership and scope checks are unchanged. Direct
+`check_body` derives its own index and the verifier keeps the whole-program
+switch check, while the per-body 1 MiB and cumulative 4 MiB ledgers are
+preserved with no limit changed. Source checking passes 292 files and 3676 MIR
+functions with the lock updated.
+
+Three development native tests pass: exhaustive provider/builtin patterns with
+exhausted-work cases, 19 mutated missing-arm, forged-payload and escaped-symbol
+cases, and independent producer/revalidation budgets. The nine CLI matrix cases
+pass and the ordinary packet hash matches the prior SDK receipt, so the earlier
+C execution is reused; the real Vec bridge executes in development and release.
+
+The actual full 285-source join is 2022709 bytes and fails with exit 2 at
+project phase 3, stage 0, code 1002 in 32.3689 seconds, previous image
+preserved. The `/O2 /Ob1` bootstrap remains cache-only and the default Release
+policy is unchanged. The prior cache-only 1034002 (390000 plus 644002) localized
+the former rejection to the cumulative IR switch-checkpoint budget; the current
+cache-only generated-C work-counter probe succeeds in 36.1011 seconds with error
+5618510 and points at the `switches::check` cumulative project ledger, so a
+passing full link is not claimed. The next step avoids unnecessary pattern
+bookkeeping for bodies without switch, iteration or Region pattern records.
+Linux, the full suite, Stage1/Stage2 and push were skipped.
+
+Evidence: `docs/ops/evidence/candidate-switch-layout-index-20261011.json`.

@@ -1,0 +1,486 @@
+{
+  "schema": "fairyc.candidate-switch-layout-index/v1",
+  "passed": true,
+  "scope": "Private per-program switch layout index reused without relaxing original pattern or work checks",
+  "sources": [
+    {
+      "path": "examples/lexer_candidate/src/module_unit_body_ir_switches.fy",
+      "sha256": "a01b1ce6b2d496e18bebca8cb898d9b0937f6f39d78404626ab59e3af5a39b5d"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_unit_body_ir_verify.fy",
+      "sha256": "ad83214d7e8b3d51d15948f8873870bc5a4e33afbe6ae15d60a6403609c58c30"
+    }
+  ],
+  "limitsChanged": false,
+  "perBodyWorkLimit": 1048576,
+  "projectWorkLimit": 4194304,
+  "native": {
+    "exit": 0,
+    "profile": "development",
+    "passed": 3,
+    "failed": 0,
+    "seconds": 110.02973660000134,
+    "argv": [
+      "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\compiler-build-120s.exe",
+      "test",
+      "--native",
+      "--locked",
+      "--json",
+      "--capture-output",
+      "--exact",
+      "tests::module_unit_body_ir_enums::owned_switches_recheck_exhaustive_provider_and_builtin_patterns",
+      "--exact",
+      "tests::module_unit_body_ir_enums::owned_switches_reject_missing_arms_forged_payloads_and_escaped_symbols",
+      "--exact",
+      "tests::module_unit_ir_budgets::owned_ir_revalidation_has_an_independent_bounded_budget"
+    ],
+    "tests": [
+      {
+        "identity": "tests::module_unit_body_ir_enums::owned_switches_recheck_exhaustive_provider_and_builtin_patterns",
+        "outcome": "passed"
+      },
+      {
+        "identity": "tests::module_unit_body_ir_enums::owned_switches_reject_missing_arms_forged_payloads_and_escaped_symbols",
+        "outcome": "passed"
+      },
+      {
+        "identity": "tests::module_unit_ir_budgets::owned_ir_revalidation_has_an_independent_bounded_budget",
+        "outcome": "passed"
+      }
+    ],
+    "mutationModes": [
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25,
+      26,
+      27,
+      28,
+      29
+    ]
+  },
+  "sourceCheck": {
+    "exit": 0,
+    "files": 292,
+    "mirFunctions": 3676,
+    "lockUpdated": true
+  },
+  "cli": {
+    "passed": true,
+    "compilerSHA256": "e8de9782fa68a086335258323f8e495189fa186c5b91d948174cbd252e56fe6f",
+    "cases": [
+      {
+        "name": "positive",
+        "exit": 0,
+        "seconds": 0.04560230000060983,
+        "stdoutBytes": 3565,
+        "stderr": "",
+        "packetSHA256": "68c878676f624102da5d214b87c36f673823603bcfbfc9ad30a919bedff430dc",
+        "priorCExecutionReused": true
+      },
+      {
+        "name": "dependency-entry",
+        "exit": 2,
+        "seconds": 0.03063720000500325,
+        "stdoutBytes": 0,
+        "stderr": ".cache/candidate-tagged/sdk-c-execution/project-cli-sdk/fixtures/root.fy:1:1: error: project phase 4 stage 0 code 1001 (bytes 0..0)\n"
+      },
+      {
+        "name": "wrong-result",
+        "exit": 2,
+        "seconds": 0.03037860000040382,
+        "stdoutBytes": 0,
+        "stderr": ".cache/candidate-tagged/sdk-c-execution/project-cli-sdk/fixtures/void.fy:1:1: error: project phase 5 stage 0 code 1001 (bytes 0..0)\n"
+      },
+      {
+        "name": "type-error",
+        "exit": 2,
+        "seconds": 0.019069300004048273,
+        "stdoutBytes": 0,
+        "stderr": ".cache/candidate-tagged/sdk-c-execution/project-cli-sdk/fixtures/type.fy:1:34: error: project phase 2 stage 4 code 1009 (bytes 33..37)\n"
+      },
+      {
+        "name": "syntax-error",
+        "exit": 2,
+        "seconds": 0.016832799999974668,
+        "stdoutBytes": 0,
+        "stderr": ".cache/candidate-tagged/sdk-c-execution/project-cli-sdk/fixtures/syntax.fy:1:36: error: expected } (bytes 35..35)\n"
+      },
+      {
+        "name": "missing-source",
+        "exit": 2,
+        "seconds": 0.015443000011146069,
+        "stdoutBytes": 0,
+        "stderr": "error: input file read failed\n"
+      },
+      {
+        "name": "blank-manifest",
+        "exit": 2,
+        "seconds": 0.015254099998855963,
+        "stdoutBytes": 0,
+        "stderr": "error: invalid module manifest\n"
+      },
+      {
+        "name": "invalid-utf8",
+        "exit": 2,
+        "seconds": 0.015798099993844517,
+        "stdoutBytes": 0,
+        "stderr": "error: invalid module manifest\n"
+      },
+      {
+        "name": "duplicate-source",
+        "exit": 2,
+        "seconds": 0.01707929999975022,
+        "stdoutBytes": 0,
+        "stderr": ".cache/candidate-tagged/sdk-c-execution/project-cli-sdk/fixtures/main.fy:1:8: error: project phase 1 stage 0 code 1 (bytes 7..11)\n"
+      },
+      {
+        "name": "vector-dev",
+        "exit": 0,
+        "seconds": 0.6771191000007093,
+        "stdout": "built: C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\bridge-switch-vector-dev.exe (low, 1 C units, 117248 bytes)\n",
+        "stderr": "",
+        "imageSHA256": "ef3c5f391b6f183c9357aebf5c71695b96a3c3184d66b6e931cf780a0cc5d8be",
+        "programExit": 0
+      },
+      {
+        "name": "vector-release",
+        "exit": 0,
+        "seconds": 0.7528044000064256,
+        "stdout": "built: C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\bridge-switch-vector-release.exe (optimized, 1 C units, 110592 bytes)\n",
+        "stderr": "",
+        "imageSHA256": "9f43d961dc5ce42cc2e0ff534b355f027d32079e47d81e9e8b99e309692d756c",
+        "programExit": 0
+      }
+    ]
+  },
+  "bootstrapValidation": {
+    "cacheOnlyInlining": true,
+    "productionReleaseFlagsChanged": false,
+    "sourceSHA256": "cb359e5d1040550827d14f38f903ed0826d6045a064bba844c9b894defeeaaa4",
+    "runtimeObjectSHA256": "fd33d07717df1e64bfc59875d64f51071926dc798d9266d8ef3054f6ea5ec48b",
+    "compilerSHA256": "e8de9782fa68a086335258323f8e495189fa186c5b91d948174cbd252e56fe6f",
+    "runs": [
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\compiler-build-120s.exe",
+          "experimental",
+          "emit-workspace-c",
+          "--target",
+          "x86_64-windows-msvc",
+          "--locked"
+        ],
+        "exit": 0,
+        "seconds": 26.37114329999895,
+        "timeout": false,
+        "stdoutBytes": 21819827,
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+          "/nologo",
+          "/std:c11",
+          "/TC",
+          "/W4",
+          "/WX",
+          "/MT",
+          "/O2",
+          "/Ob1",
+          "/c",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\bootstrap-switch-layout-index.c",
+          "/Fo:C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\bootstrap-switch-layout-index.obj"
+        ],
+        "exit": 0,
+        "seconds": 41.726084899986745,
+        "timeout": false,
+        "stdoutBytes": 33,
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+          "/nologo",
+          "/MT",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\bootstrap-switch-layout-index.obj",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\bootstrap-retained-runtime.obj",
+          "/Fe:C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\bootstrap-switch-layout-index.exe",
+          "/link",
+          "/INCREMENTAL:NO"
+        ],
+        "exit": 0,
+        "seconds": 0.2086739999940619,
+        "timeout": false,
+        "stdoutBytes": 0,
+        "stderr": ""
+      }
+    ]
+  },
+  "previousDiagnostic": {
+    "cacheOnlyPhaseCodes": true,
+    "runs": [
+      {
+        "exit": 0,
+        "seconds": 20.85794069999247,
+        "stdoutBytes": 21815171,
+        "stderr": ""
+      },
+      {
+        "exit": 0,
+        "seconds": 38.69344269999419,
+        "stdoutBytes": 35,
+        "stderr": ""
+      },
+      {
+        "exit": 0,
+        "seconds": 0.203248200006783,
+        "stdoutBytes": 0,
+        "stderr": ""
+      },
+      {
+        "exit": 2,
+        "seconds": 28.939364600009867,
+        "stdoutBytes": 0,
+        "stderr": "examples/lexer_candidate/src/main.fy:1:1: error: project phase 3 stage 0 code 1034002 (bytes 0..0)\n"
+      }
+    ],
+    "rejectionMarker": 1034002,
+    "linkOffset": 390000,
+    "switchCheckpointMarker": 644002,
+    "sourceContext": "body(p,ir::at(p,i),i,ref mut work);if(matched.code!=0){return matched;}if(!checkpoint(project,ref mut work,ref mut total)){return fail(1002,0,0,0);}i+=1;}\n    i=1;while(i<=clean_ir::operand_count(ir::cleanup_ir"
+  },
+  "fullCurrentDispatcher": {
+    "exit": 2,
+    "seconds": 32.36892570000782,
+    "stdout": "",
+    "stderr": "candidate build failed: candidate frontend failed: exit status 2: examples/lexer_candidate/src/main.fy:1:1: error: project phase 3 stage 0 code 1002 (bytes 0..0)\n",
+    "previousImagePreserved": true,
+    "sourceFiles": 285,
+    "joinedSourceBytes": 2022709,
+    "sourceInventorySHA256": "ed4f04c96dfd33d51db00ebfda1cd5b9a303f025b63f0b69e9417c01ba5f414b"
+  },
+  "fullCompilationProven": false,
+  "next": "Avoid unnecessary pattern bookkeeping for bodies without switch, iteration, or Region pattern records. The current full-source switch ledger still exhausts at the unchanged 4194304 limit.",
+  "pushed": false,
+  "skipped": [
+    "Linux (deferred batch)",
+    "full suite (targeted change)",
+    "Stage1/Stage2 (full compilation incomplete)",
+    "default standalone Release policy change"
+  ],
+  "currentDiagnostic": {
+    "cacheOnlyPhaseCodes": true,
+    "linkOuterOffset": 390000,
+    "markers": [
+      {
+        "code": 611002,
+        "sourceContext": "ref mut usize work){var v::Vec<usize> slots=v::empty<usize>();var usize i=0;while(i<8192){if(!budget::charge(work,1)){return .err(fail(1002,0,0,0));}if(!v::push<usize>(ref mut slots,0).is_ok){return .err(fail(1"
+      },
+      {
+        "code": 612002,
+        "sourceContext": "e_index*104729 ^ c.declaration*3266489917)&8191;while(*v::at<usize>(ref slots,bucket)!=0){if(!budget::charge(work,1)){return .err(fail(1002,c.module_index,0,0));}let old=ir::callable_at(p,*v::at<usize>(ref slot"
+      },
+      {
+        "code": 613002,
+        "sourceContext": "0));}var usize bucket=(f.module_index*104729 ^ f.declaration*3266489917)&8191;while(true){if(!budget::charge(work,1)){return .err(fail(1002,f.module_index,0,0));}let id=*v::at<usize>(ref lookup.slots,bucket);if"
+      },
+      {
+        "code": 614002,
+        "sourceContext": "work){var v::Vec<usize> result=v::empty<usize>();var usize i=0;while(i<ir::node_count(b)){if(!budget::charge(work,1)){return .err(fail(1002,0,0,0));}if(ir::node_at(b,i).value.kind==31 && !v::push<usize>(ref mut"
+      },
+      {
+        "code": 615002,
+        "sourceContext": "et f=clean_ir::frame_at(ir::cleanup_ir(p),frame);var usize i=0;\n    while(i<ir::node_count(b)){if(!budget::charge(work,1)){return fail(1002,f.module_index,0,0);}let e=ir::node_at(b,i).value;\n        if(e.kind=="
+      },
+      {
+        "code": 616002,
+        "sourceContext": "{var usize root=left;var usize depth=0;while(ir::node_at(b,root-1).value.kind==3){if(depth>=64 || !budget::charge(work,1)){return fail(1002,f.module_index,e.start,e.end);}root=lookup::node(b,ir::node_at(b,root-"
+      },
+      {
+        "code": 617002,
+        "sourceContext": "rk){let f=clean_ir::frame_at(ir::cleanup_ir(p),frame);var usize i=0;while(i<ir::node_count(b)){if(!budget::charge(work,1)){return fail(1002,f.module_index,0,0);}let e=ir::node_at(b,i).value;\n    if(e.kind==6 &&"
+      },
+      {
+        "code": 618002,
+        "sourceContext": "4096 || ir::text_bytes(b)>1048576 || ir::region_count(b)>4096 || ir::reset_count(b)>16384 || ir::placement_count(b)>16384){return fail(1002,f.module_index,0,0);}\n    if(!span(ir::start(b),ir::end(b),ir::source_"
+      },
+      {
+        "code": 619002,
+        "sourceContext": "rt,root.end);}\n    var usize previous=0;var usize i=0;\n    while(i<ir::node_count(b)){\n        if(!budget::charge(work,1)){return fail(1002,f.module_index,0,0);}let n=ir::node_at(b,i);let e=n.value;let tree=n.s"
+      },
+      {
+        "code": 620002,
+        "sourceContext": "art,e.end);}\n        if(e.kind==1 && n.literal_kind>=7){let data=ir::node_cooked(b,i);if(!budget::charge(work,data.len+1)){return fail(1002,f.module_index,e.start,e.end);}if(n.literal_kind==7 && !literals::text"
+      },
+      {
+        "code": 621002,
+        "sourceContext": "us=e.source_index;i+=1;\n    }\n    previous=0;i=0;\n    while(i<ir::statement_count(b)){\n        if(!budget::charge(work,1)){return fail(1002,f.module_index,0,0);}let row=ir::statement_at(b,i);let s=row.value;\n  "
+      },
+      {
+        "code": 622002,
+        "sourceContext": ".\n        if(s.kind==1){var usize link=s.first;var usize count=0;while(link!=0){if(!budget::charge(work,1) || count>=4096){return fail(1002,f.module_index,s.start,s.end);}let index=lookup::statement(b,link);if("
+      },
+      {
+        "code": 623002,
+        "sourceContext": "dex,s.start,s.end);}previous=row.source_index;i+=1;\n    }\n    i=1;while(i<=ir::local_count(b)){if(!budget::charge(work,1)){return fail(1002,f.module_index,0,0);}let n=ir::local_at(b,i);if(n.type==0 || n.type>nt"
+      },
+      {
+        "code": 624002,
+        "sourceContext": "(b)){return fail(1001,f.module_index,n.start,n.end);}i+=1;}\n    i=0;while(i<ir::call_count(b)){if(!budget::charge(work,1)){return fail(1002,f.module_index,0,0);}let c=ir::call_at(b,i);if(c.expression==0 || c.ex"
+      },
+      {
+        "code": 625002,
+        "sourceContext": "c.end){return fail(1001,f.module_index,c.start,c.end);}var usize j=0;while(j<c.argument_count){if(!budget::charge(work,1)){return fail(1002,f.module_index,c.start,c.end);}let a=ir::argument_at(b,c.argument_star"
+      },
+      {
+        "code": 626002,
+        "sourceContext": "urn fail(1001,f.module_index,a.start,a.end);}j+=1;}i+=1;}\n    i=0;while(i<ir::region_count(b)){if(!budget::charge(work,1)){return fail(1002,f.module_index,0,0);}let r=ir::region_at(b,i);if(r.parent>i || r.capab"
+      },
+      {
+        "code": 627002,
+        "sourceContext": ".start,r.end);}}i+=1;}\n    var v::Vec<u8> placed=v::empty<u8>();i=0;while(i<ir::node_count(b)){if(!budget::charge(work,1)){return fail(1002,f.module_index,0,0);}if(!v::push<u8>(ref mut placed,0).is_ok){return f"
+      },
+      {
+        "code": 628002,
+        "sourceContext": "0).is_ok){return fail(1003,f.module_index,0,0);}i+=1;}\n    i=0;while(i<ir::placement_count(b)){if(!budget::charge(work,1)){return fail(1002,f.module_index,0,0);}let x=ir::placement_at(b,i);let call=lookup::node"
+      },
+      {
+        "code": 629002,
+        "sourceContext": "ty)){return fail(1001,f.module_index,x.start,x.end);}i+=1;}\n    i=0;while(i<ir::node_count(b)){if(!budget::charge(work,1)){return fail(1002,f.module_index,0,0);}let e=ir::node_at(b,i).value;if(e.kind==6 && e.bu"
+      },
+      {
+        "code": 630002,
+        "sourceContext": "=0){return fail(1001,f.module_index,e.start,e.end);}i+=1;}\n    i=0;while(i<ir::reset_count(b)){if(!budget::charge(work,1)){return fail(1002,f.module_index,0,0);}let e=ir::reset_at(b,i);if(e.region_id==0 || e.re"
+      },
+      {
+        "code": 631002,
+        "sourceContext": ":layout_count(p)>1024 || ir::field_count(p)>limits::project_fields() || ir::callable_count(p)>limits::project_callables()){return fail(1002,0,0,0);}\n    // Producer work remains capped above. Revalidation has i"
+      },
+      {
+        "code": 632002,
+        "sourceContext": "es::module_count(ir::sdk_units(p));\n    if(modules!=0){\n        while(i<=ir::count(p)){if(!budget::charge(ref mut work,1)){return fail(1002,0,0,0);}let f=clean_ir::frame_at(ir::cleanup_ir(p),i);if(f.module_inde"
+      },
+      {
+        "code": 633002,
+        "sourceContext": "(p),unit-1).len){return fail(1001,f.module_index,0,0);}i+=1;}\n        i=1;while(i<=nt){if(!budget::charge(ref mut work,1)){return fail(1002,0,0,0);}let t=clean_ir::type_at(ir::cleanup_ir(p),i);if((t.kind==2 || "
+      },
+      {
+        "code": 634002,
+        "sourceContext": "{return fail(1001,t.module_index,0,0);}i+=1;}\n        i=0;while(i<ir::layout_count(p)){if(!budget::charge(ref mut work,1)){return fail(1002,0,0,0);}if(ir::layout_at(p,i).value.module_index>=modules){return fail"
+      },
+      {
+        "code": 635002,
+        "sourceContext": "ndex>=modules){return fail(1001,0,0,0);}i+=1;}\n        i=0;while(i<ir::field_count(p)){if(!budget::charge(ref mut work,1)){return fail(1002,0,0,0);}if(ir::field_at(p,i).module_index>=modules){return fail(1001,0"
+      },
+      {
+        "code": 636002,
+        "sourceContext": "x>=modules){return fail(1001,0,0,0);}i+=1;}\n        i=0;while(i<ir::callable_count(p)){if(!budget::charge(ref mut work,1)){return fail(1002,0,0,0);}if(ir::callable_at(p,i).module_index>=modules){return fail(100"
+      },
+      {
+        "code": 637002,
+        "sourceContext": "le_at(p,i).module_index>=modules){return fail(1001,0,0,0);}i+=1;}\n    }if(!checkpoint(project,ref mut work,ref mut total)){return fail(1002,0,0,0);}i=1;\n    while(i<=ir::count(p)){let result=check_body(ir::at(p"
+      },
+      {
+        "code": 638002,
+        "sourceContext": "),i,allowed,ref blocks,ref mut work);if(stored.code!=0){return stored;}if(!checkpoint(project,ref mut work,ref mut total)){return fail(1002,0,0,0);}i+=1;}\n    i=0;while(i<ir::layout_count(p)){if(!budget::charge"
+      },
+      {
+        "code": 639002,
+        "sourceContext": "ref mut total)){return fail(638002,0,0,0);}i+=1;}\n    i=0;while(i<ir::layout_count(p)){if(!budget::charge(ref mut work,1)){return fail(1002,0,0,0);}let row=ir::layout_at(p,i);let s=row.value;if(s.type==0 || s.t"
+      },
+      {
+        "code": 640002,
+        "sourceContext": "rn fail(1001,s.module_index,s.start,s.end);}i+=1;}\n    i=0;while(i<ir::field_count(p)){if(!budget::charge(ref mut work,1)){return fail(1002,0,0,0);}let f=ir::field_at(p,i);if(f.type>nt || f.payload_start>ir::fi"
+      },
+      {
+        "code": 641002,
+        "sourceContext": "fail(1001,f.module_index,f.start,f.end);}i+=1;}\n    i=0;while(i<ir::callable_count(p)){if(!budget::charge(ref mut work,1)){return fail(1002,0,0,0);}let c=ir::callable_at(p,i);if(c.result>nt || c.parameter_start"
+      },
+      {
+        "code": 642002,
+        "sourceContext": "es(p))){return fail(1001,c.module_index,0,0);}var usize j=0;while(j<c.parameter_count){if(!budget::charge(ref mut work,1)){return fail(1002,c.module_index,0,0);}if(ir::parameter_at(p,c.parameter_start+j)>nt){re"
+      },
+      {
+        "code": 643002,
+        "sourceContext": "::check(p,ref mut work);if(enum_proof.code!=0){return enum_proof;}\n    if(!checkpoint(project,ref mut work,ref mut total)){return fail(1002,0,0,0);}let matched=switches::check(p,ref mut work,ref mut total);if(m"
+      },
+      {
+        "code": 644002,
+        "sourceContext": "code!=0){return matched;}\n    i=1;while(i<=clean_ir::operand_count(ir::cleanup_ir(p))){if(!budget::charge(ref mut work,1)){return fail(1002,0,0,0);}let o=clean_ir::operand_at(ir::cleanup_ir(p),i);let b=ir::at(p"
+      },
+      {
+        "code": 645002,
+        "sourceContext": "-1).value.type!=o.type){return fail(1001,0,o.start,o.end);}}i+=1;}\n    if(!checkpoint(project,ref mut work,ref mut total)){return fail(1002,0,0,0);}return fail(0,0,0,0);\n}\nfn bool checkpoint(bool project,ref mu"
+      }
+    ],
+    "runs": [
+      {
+        "exit": 0,
+        "seconds": 20.933789900009288,
+        "stdoutBytes": 21830597,
+        "stderr": ""
+      },
+      {
+        "exit": 0,
+        "seconds": 41.09013889999187,
+        "stdoutBytes": 39,
+        "stderr": ""
+      },
+      {
+        "exit": 0,
+        "seconds": 0.21395699999993667,
+        "stdoutBytes": 0,
+        "stderr": ""
+      },
+      {
+        "exit": 129,
+        "seconds": 32.94801949999237,
+        "stdoutBytes": 0,
+        "stderr": ""
+      }
+    ]
+  },
+  "workCounterProbe": {
+    "cacheOnlyGeneratedCInstrumentation": true,
+    "counterPrecision": 1024,
+    "offset": 2030002,
+    "runs": [
+      {
+        "exit": 0,
+        "seconds": 38.256749299995136,
+        "stdoutBytes": 34,
+        "stderr": ""
+      },
+      {
+        "exit": 0,
+        "seconds": 0.2058134999970207,
+        "stdoutBytes": 0,
+        "stderr": ""
+      },
+      {
+        "exit": 2,
+        "seconds": 36.10109480000392,
+        "stdoutBytes": 0,
+        "stderr": "examples/lexer_candidate/src/main.fy:1:1: error: project phase 3 stage 0 code 5618510 (bytes 0..0)\n"
+      }
+    ],
+    "priorTraceFailure": "The cache-only trace put counters into source ranges and violated diagnostic span invariants; exit129 was an instrumentation failure. The corrected probe uses valid empty spans.",
+    "decoded": {
+      "prefixWorkKiB": 3588,
+      "switchWorkKiBAtRejection": 508,
+      "precision": 1024
+    }
+  }
+}

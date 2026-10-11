@@ -4,12 +4,23 @@ import module_unit_body_ir_lookup as lookup;
 import module_unit_body_ir_enums as enums;
 import module_unit_cleanup_mir_model as clean;
 import module_unit_value_model as m;
+import candidate_limits as limits;
 import std::bytes as bytes;
 import std::vec as v;
 
 fn bool charge(ref mut usize work,usize amount,ref mut u32 code){if(!m::charge(work,amount)){*code=1002;return false;}return true;}
 fn bool mark(ref mut v::Vec<usize> owners,usize id,usize owner){if(id==0 || id>v::len<usize>(owners) || *v::at<usize>(owners,id-1)!=0){return false;}let slot=v::at_mut<usize>(owners,id-1);*slot=owner;return true;}
 fn bool zeros(ref mut v::Vec<usize> out,usize count,ref mut usize work,ref mut u32 code){var usize i=0;while(i<count){if(!charge(work,1,code)){return false;}if(!v::push<usize>(out,0).is_ok){*code=1003;return false;}i+=1;}return true;}
+resource LayoutIndex {v::Vec<usize> slots;cleanup{}}
+// Built from this immutable program once. A duplicate keeps the same missing
+// result as enums::layout; it cannot select one of several competing layouts.
+fn Result<LayoutIndex,clean::Problem> layouts(ref ir::Program p,ref mut usize work){
+    var u32 code=0;var v::Vec<usize> slots=v::empty<usize>();let count=clean::type_count(ir::cleanup_ir(p));
+    if(!zeros(ref mut slots,count+1,work,ref mut code)){return .err(clean::Problem{.code,.module_index=0,.start=0,.end=0});}var usize i=0;
+    while(i<ir::layout_count(p)){if(!charge(work,1,ref mut code)){return .err(clean::Problem{.code,.module_index=0,.start=0,.end=0});}let s=ir::layout_at(p,i).value;if(s.type==0 || s.type>count){return .err(clean::Problem{.code=1001,.module_index=s.module_index,.start=s.start,.end=s.end});}let slot=v::at_mut<usize>(ref mut slots,s.type);*slot=if(*slot==0){i+1}else{ir::layout_count(p)+1};i+=1;}
+    return .ok(LayoutIndex{.slots});
+}
+fn usize enum_layout(ref ir::Program p,ref LayoutIndex index,usize type,ref mut usize work,ref mut u32 code){if(type==0 || type>=v::len<usize>(ref index.slots) || !charge(work,1,code)){return 0;}let id=*v::at<usize>(ref index.slots,type);return if(id<=ir::layout_count(p)){id}else{0};}
 fn bool same(m::Field a,m::Field b){return a.id==b.id && a.owner==b.owner && a.module_index==b.module_index && a.declaration==b.declaration && a.source_index==b.source_index;}
 fn bool name(ref ir::Body b,usize id,ref u8[] expected,ref mut usize work,ref mut u32 code){return charge(work,expected.len+1,code) && bytes::equal(ir::node_text(b,id-1),expected);}
 fn bool binding(ref ir::Body b,usize original,usize type,m::Field field,usize arm,ref mut v::Vec<usize> owners,ref mut v::Vec<usize> locals,ref mut usize work,ref mut u32 code){
@@ -47,14 +58,14 @@ fn bool no_tail(ref ir::Program p,ref ir::Body b,usize block,usize subject,usize
 // All pattern records have exactly one owning arm. Bindings are associated
 // with that arm's retained lexical symbol, so inactive payloads cannot be
 // relabelled as bindings of a different variant or escape into another arm.
-pub fn clean::Problem check_body(ref ir::Program p,ref ir::Body b,usize frame,ref mut usize work){
+fn clean::Problem checked_body(ref ir::Program p,ref ir::Body b,usize frame,ref LayoutIndex index,ref mut usize work){
     if(frame==0 || frame>clean::frame_count(ir::cleanup_ir(p))){return clean::Problem{.code=1001,.module_index=0,.start=0,.end=0};}let module_index=clean::frame_at(ir::cleanup_ir(p),frame).module_index;
     var u32 code=0;var v::Vec<usize> owners=v::empty<usize>();var v::Vec<usize> locals=v::empty<usize>();var usize i=0;
     if(!zeros(ref mut owners,ir::node_count(b),work,ref mut code) || !zeros(ref mut locals,ir::local_count(b),work,ref mut code)){return clean::Problem{.code,.module_index,.start=0,.end=0};}
     while(i<ir::node_count(b)){if(!charge(work,1,ref mut code)){return clean::Problem{.code,.module_index,.start=0,.end=0};}let e=ir::node_at(b,i).value;
         if(e.kind==15){
             let subject=lookup::node(b,e.left);var bool valid=subject!=0 && e.state==1 && e.type!=0 && e.target!=0 && e.target<=clean::type_count(ir::cleanup_ir(p));var usize capacity=2;var usize base=0;var usize required=2;
-            if(valid){let actual=ir::node_at(b,subject-1).value;let t=clean::type_at(ir::cleanup_ir(p),e.target);valid=actual.state==1 && actual.type==e.target && (t.kind==4 || t.kind==5 || t.kind==6);if(valid && t.kind==4){let shape=enums::layout(p,e.target,work,ref mut code);valid=shape!=0;if(valid){let s=ir::layout_at(p,shape-1).value;capacity=s.field_count;base=s.field_start;required=0;var usize k=0;while(k<capacity){if(!charge(work,1,ref mut code)){valid=false;break;}if(ir::field_at(p,base+k).kind==3){required+=1;}k+=1;}}}}
+            if(valid){let actual=ir::node_at(b,subject-1).value;let t=clean::type_at(ir::cleanup_ir(p),e.target);valid=actual.state==1 && actual.type==e.target && (t.kind==4 || t.kind==5 || t.kind==6);if(valid && t.kind==4){let shape=enum_layout(p,index,e.target,work,ref mut code);valid=shape!=0;if(valid){let s=ir::layout_at(p,shape-1).value;capacity=s.field_count;base=s.field_start;required=0;var usize k=0;while(k<capacity){if(!charge(work,1,ref mut code)){valid=false;break;}if(ir::field_at(p,base+k).kind==3){required+=1;}k+=1;}}}}
             var v::Vec<usize> seen=v::empty<usize>();if(valid){valid=zeros(ref mut seen,capacity,work,ref mut code);}var usize link=e.right;var usize count=0;
             while(valid && link!=0){if(count>=required || !charge(work,1,ref mut code)){valid=false;break;}let pair=lookup::node(b,link);if(!mark(ref mut owners,pair,i+1)){valid=false;break;}let row=ir::node_at(b,pair-1).value;let arm=lookup::node(b,row.left);if(row.kind!=19 || row.state!=2 || !mark(ref mut owners,arm,i+1)){valid=false;break;}let a=ir::node_at(b,arm-1).value;let pat=lookup::node(b,a.left);let block=lookup::statement(b,a.right);
                 if(a.kind!=18 || a.state!=2 || a.target!=e.target || a.expected!=e.type || a.start<e.start || a.end>e.end || pat==0 || block==0){valid=false;break;}let body=ir::statement_at(b,block-1).value;let pat_value=ir::node_at(b,pat-1).value;
@@ -83,5 +94,13 @@ pub fn clean::Problem check_body(ref ir::Program p,ref ir::Body b,usize frame,re
         i+=1;
     }
     i=1;while(i<=ir::local_count(b)){if(!charge(work,1,ref mut code)){return clean::Problem{.code,.module_index,.start=0,.end=0};}let l=ir::local_at(b,i);if((l.kind==4 || l.kind==5) && *v::at<usize>(ref locals,i-1)==0){return clean::Problem{.code=1001,.module_index,.start=l.start,.end=l.end};}i+=1;}
+    return clean::Problem{.code=0,.module_index=0,.start=0,.end=0};
+}
+pub fn clean::Problem check_body(ref ir::Program p,ref ir::Body b,usize frame,ref mut usize work){
+    let index=switch(layouts(p,work)){case .ok(p):{p}case .err(e):{return e;}};return checked_body(p,b,frame,ref index,work);
+}
+pub fn clean::Problem check(ref ir::Program p,ref mut usize work,ref mut usize total){
+    let index=switch(layouts(p,work)){case .ok(p):{p}case .err(e):{return e;}};let project=clean::project(ir::cleanup_ir(p));var usize frame=1;
+    while(frame<=ir::count(p)){let result=checked_body(p,ir::at(p,frame),frame,ref index,work);if(result.code!=0){return result;}if(project){if(!limits::project_charge(total,*work)){return clean::Problem{.code=1002,.module_index=0,.start=0,.end=0};};*work=0;}frame+=1;}
     return clean::Problem{.code=0,.module_index=0,.start=0,.end=0};
 }
