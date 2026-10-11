@@ -1,0 +1,569 @@
+{
+  "schema": "fairyc.candidate-syntax-driver/v1",
+  "passed": true,
+  "sourceCheck": {
+    "files": 362,
+    "mirFunctions": 4673
+  },
+  "extraction": {
+    "schema": "fairyc.candidate-syntax-driver-extraction/v1",
+    "passed": true,
+    "baseline": "13b97d27",
+    "functionsCanonicalSHA256": {
+      "item_kind": "f4e96429a0a62a48c1168c27ee9ba718617ce9912e1473b452be20071f2c235e",
+      "failed": "69f79fff413f294ed19ded2b4861d8cd7ba7fb8f0379442200a17ac480a0837a",
+      "declaration": "dc29953e73665d70d41d5297e861bbf616abe2e7e0f32a7bc47e55ce5cd5f8c5",
+      "recover": "bf0aa7c860a592ad8a1300a84e6c2d935b14663a7556f5a1b485ae37ebdbdac4",
+      "parse_diagnostics": "e1b14f280f1a840fdd61bdc33e07c87e7178d1c218cbb108dddcf45b20646cbb"
+    },
+    "normalization": "Ignore owner qualification, whitespace and comments; map the assemble call back to the original Parsed initializer.",
+    "constructor": {
+      "owner": "syntax",
+      "fieldOrderPreserved": true,
+      "argumentOrder": [
+        "source",
+        "declarations",
+        "problems",
+        "expressions",
+        "entries",
+        "statements",
+        "types",
+        "fields",
+        "attributes",
+        "attribute_arguments"
+      ]
+    },
+    "publicEntrySignaturesChanged": false,
+    "privateAttemptOwnerMoved": true
+  },
+  "tests": {
+    "schema": "fairyc.candidate-private-tests/v1",
+    "passed": true,
+    "module": "syntax_recovery",
+    "tools": {
+      "compiler": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\manifest-bootstrap.exe",
+        "sha256": "18e72a61e9ff3fdd620652ecd8ce2e355b9371488b2ad1b2ccbadbf7a091783a"
+      },
+      "candidate": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-lock-write-20261012\\compiler.exe",
+        "sha256": "3c67203ca06e6c81aa73f383fb16685b57ad5c571b5028992fd638c0c17795b1"
+      },
+      "builder": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-source-file-20261011\\builder.exe",
+        "sha256": "8141ce6bcc461a52fe6bf0bf24e9e5f5a9d7842c3c7dbfc5863cc4e822584ea7"
+      }
+    },
+    "native": {
+      "schemaVersion": "fairyc.test-report/v4",
+      "engine": "native",
+      "target": "x86_64-windows-msvc",
+      "profile": "development",
+      "tests": [
+        {
+          "identity": "tests::syntax_recovery::declarations_keep_attributes_generics_cleanup_and_original_source",
+          "outcome": "passed",
+          "trapCategory": null,
+          "stdoutBase64": "",
+          "stderrBase64": ""
+        },
+        {
+          "identity": "tests::syntax_recovery::diagnostic_parse_retains_lexical_failures_and_declaration_limits",
+          "outcome": "passed",
+          "trapCategory": null,
+          "stdoutBase64": "",
+          "stderrBase64": ""
+        },
+        {
+          "identity": "tests::syntax_recovery::invalid_body_rolls_back_arenas_and_recovers_the_next_declaration",
+          "outcome": "passed",
+          "trapCategory": null,
+          "stdoutBase64": "",
+          "stderrBase64": ""
+        }
+      ],
+      "count": 3,
+      "passed": 3,
+      "failed": 0,
+      "status": "ok",
+      "lock": "verified"
+    },
+    "nativeTests": 3,
+    "lockSHA256": "af5dc9653fd9dfdd2b40dc9970f2893867fc9de8f30ad8060eb404a977c88f7e",
+    "candidateInputFiles": 21,
+    "candidatePacketSHA256": "7157c8059a6f35a2c5961133ddc68eaee0cfe3fa04b4a846e8f74c4ca3f7b81e",
+    "candidateExecutions": [
+      {
+        "profile": "development",
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-syntax-driver-20261012\\final-tests\\development.exe",
+        "sha256": "21885016d147cf69842d6bb8ab7d12c0c0370498e5c8c62b22616cf319ddcf94",
+        "exit": 0
+      },
+      {
+        "profile": "release",
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-syntax-driver-20261012\\final-tests\\release.exe",
+        "sha256": "d7e941c911565c478c9c55a3175626dfe1ca48e928639058927f8d07d939818e",
+        "exit": 0
+      }
+    ],
+    "invocations": [
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\manifest-bootstrap.exe",
+          "test",
+          "--native",
+          "--locked",
+          "--json",
+          "--capture-output",
+          "--exact",
+          "tests::syntax_recovery::declarations_keep_attributes_generics_cleanup_and_original_source",
+          "--exact",
+          "tests::syntax_recovery::invalid_body_rolls_back_arenas_and_recovers_the_next_declaration",
+          "--exact",
+          "tests::syntax_recovery::diagnostic_parse_retains_lexical_failures_and_declaration_limits"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "seconds": 136.51398270000936,
+        "exit": 0,
+        "stdoutBytes": 727,
+        "stdoutSHA256": "abcadd9cbc659028850076b3fa8fabb4b3e5cf54817684c1d2c20c88424fb631",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-lock-write-20261012\\compiler.exe",
+          "--c-project-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-syntax-driver-20261012\\final-tests\\sources.list"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+        "seconds": 11.657806300005177,
+        "exit": 0,
+        "stdoutBytes": 1248705,
+        "stdoutSHA256": "7157c8059a6f35a2c5961133ddc68eaee0cfe3fa04b4a846e8f74c4ca3f7b81e",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-source-file-20261011\\builder.exe",
+          "--packet",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-syntax-driver-20261012\\final-tests\\candidate-packet.bin",
+          "--packet-sha256",
+          "7157c8059a6f35a2c5961133ddc68eaee0cfe3fa04b4a846e8f74c4ca3f7b81e",
+          "--output",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-syntax-driver-20261012\\final-tests\\development.exe"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+        "seconds": 1.7748810999910347,
+        "exit": 0,
+        "stdoutBytes": 185,
+        "stdoutSHA256": "059d5368eb35ef9b298a20273cb9edc36354e28e965ab3705fcc596d8bd3577b",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-syntax-driver-20261012\\final-tests\\development.exe"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+        "seconds": 0.02721430000383407,
+        "exit": 0,
+        "stdoutBytes": 0,
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-source-file-20261011\\builder.exe",
+          "--packet",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-syntax-driver-20261012\\final-tests\\candidate-packet.bin",
+          "--packet-sha256",
+          "7157c8059a6f35a2c5961133ddc68eaee0cfe3fa04b4a846e8f74c4ca3f7b81e",
+          "--output",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-syntax-driver-20261012\\final-tests\\release.exe",
+          "--release"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+        "seconds": 7.60943650000263,
+        "exit": 0,
+        "stdoutBytes": 187,
+        "stdoutSHA256": "0a67737040672f29c9b3adf1824c9231f75963e35585b8db21f0849b8e55a8c7",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-syntax-driver-20261012\\final-tests\\release.exe"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+        "seconds": 0.025840300018899143,
+        "exit": 0,
+        "stdoutBytes": 0,
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderr": ""
+      }
+    ],
+    "publicApiChanged": false,
+    "dbChanged": false,
+    "ciChanged": false,
+    "pushed": false
+  },
+  "fullDispatcher": {
+    "schema": "fairyc.candidate-source-set-full/v1",
+    "sourceFiles": 355,
+    "sourceBytes": 2486853,
+    "seed": {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-syntax-driver-20261012\\seed.exe",
+      "sha256": "304e36e57fa9159df555b59db6d643c7eb0b976752b0e7976c388919804a2b92"
+    },
+    "frontendTimeoutSeconds": 900,
+    "productTimeoutChanged": false,
+    "invocations": [
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\manifest-bootstrap.exe",
+          "build",
+          "--locked"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "seconds": 34.9296342000016,
+        "exit": 0,
+        "stdoutBytes": 83,
+        "stdoutSHA256": "913d882a721755f5b674b0837a5dcdb182de237ba6bbcc5f15b49489af2c8bf9",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-syntax-driver-20261012\\seed.exe",
+          "--c-project-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-syntax-driver-20261012\\self-source.manifest"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+        "seconds": 566.5124136999948,
+        "exit": 3221225725,
+        "stdoutBytes": 0,
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderr": ""
+      }
+    ],
+    "emitted": false
+  },
+  "sourceInputDeltas": {
+    "tests": {
+      "schema": "fairyc.candidate-source-input-delta/v1",
+      "baselineReceipt": {
+        "path": "docs/ops/evidence/candidate-interface-analysis-20261012.json",
+        "sha256": "a95a87e980eb354a014d20665eb797eade371971c7fa8bba12e496d3edb9a1c0",
+        "scope": "tests"
+      },
+      "added": [
+        {
+          "index": 17,
+          "occurrence": 0,
+          "path": "examples/lexer_candidate/src/syntax_parse_driver.fy",
+          "sha256": "9db6518c69f6c2394ef1c697d7d2d07b0a78ec3336a907c92e9d2e2087e5b756"
+        },
+        {
+          "index": 20,
+          "occurrence": 0,
+          "path": "examples/lexer_candidate/tests/syntax_recovery.fy",
+          "sha256": "6fde18f7dec0d6bdcc0f0d4741c63d7399b131b2f10906c26276973b5123acd6"
+        }
+      ],
+      "updated": [
+        {
+          "occurrence": 0,
+          "previousSHA256": "954467cda42373f2166211334a5fe3714f9934f3679af01982827f2aa515f937",
+          "path": "examples/lexer_candidate/src/syntax.fy",
+          "sha256": "cb9244a18ea93777694d60e5b63eb67738d224297d097542bb84db2b7f31d5e6"
+        }
+      ],
+      "removed": [
+        {
+          "occurrence": 0,
+          "path": "examples/lexer_candidate/src/array_identity.fy",
+          "sha256": "8b501b0f72bb2805c00abc59afb195b5ba2c199796982122b62958bab64966ee"
+        },
+        {
+          "occurrence": 0,
+          "path": "examples/lexer_candidate/src/array_types.fy",
+          "sha256": "661e57ec5f65ea1d0be93eef637ce5235fc6e3f84e4ddf5babd8a4afd89f6688"
+        },
+        {
+          "occurrence": 0,
+          "path": "examples/lexer_candidate/src/borrow_shapes.fy",
+          "sha256": "36b2214d9530980d60b11956f3738c1959cf66d29fcb80ec2bc4bad853c421e3"
+        },
+        {
+          "occurrence": 0,
+          "path": "examples/lexer_candidate/src/c_abi_types.fy",
+          "sha256": "fdfb462bff12028ae1c8b805e21addd001bfdd152dd9cfd89cf7b9a1a8f7166a"
+        },
+        {
+          "occurrence": 0,
+          "path": "examples/lexer_candidate/src/effect_declarations.fy",
+          "sha256": "fd1670ba32fd1f94d7d8834b210b845afd797ff56d7c48819a872efa56d0c6ab"
+        },
+        {
+          "occurrence": 0,
+          "path": "examples/lexer_candidate/src/enum_types.fy",
+          "sha256": "d257e7cb599fd4f3bafc1f7d9ccf11d00d19f2719df063271186cf7c432f0a96"
+        },
+        {
+          "occurrence": 0,
+          "path": "examples/lexer_candidate/src/ffi_symbols.fy",
+          "sha256": "bf90ce5c6b76ad6d60fd499c5c168079520edbf5720ea757e705b99489b6cd29"
+        },
+        {
+          "occurrence": 0,
+          "path": "examples/lexer_candidate/src/foreign_declarations.fy",
+          "sha256": "8d18c542522789399c131786d618a50b3058ef961317a89f24a0c9f0dede5a08"
+        },
+        {
+          "occurrence": 0,
+          "path": "examples/lexer_candidate/src/literal_types.fy",
+          "sha256": "bce967c2f7b001144642642503af9bb4cf83bae1e50f99262676d16afb9ac7f6"
+        },
+        {
+          "occurrence": 0,
+          "path": "examples/lexer_candidate/src/module_ast_join.fy",
+          "sha256": "f758470311f4db82d1f0472c6d826a96d57a26d26237169fe1ec227341f0119c"
+        },
+        {
+          "occurrence": 0,
+          "path": "examples/lexer_candidate/src/module_bind.fy",
+          "sha256": "f29fdea4fc36618c2e408171157bb2e9bc39ff0ba6b68baa2b7547b0ddef07a3"
+        },
+        {
+          "occurrence": 0,
+          "path": "examples/lexer_candidate/src/module_catalog.fy",
+          "sha256": "9de686ab52a8a4fc1380de459b784110702e42bae218f3ba18108e1875da73d9"
+        },
+        {
+          "occurrence": 0,
+          "path": "examples/lexer_candidate/src/module_region_types.fy",
+          "sha256": "97b3591aaf20279007c5826fbde0c610fb5a2a995a9f34ffe451382e82968266"
+        },
+        {
+          "occurrence": 0,
+          "path": "examples/lexer_candidate/src/module_registry.fy",
+          "sha256": "9e0af7c32bf001bb81d7839a41869ce7710bf51e00f72cb866909e53ad03bb34"
+        },
+        {
+          "occurrence": 0,
+          "path": "examples/lexer_candidate/src/module_signatures.fy",
+          "sha256": "ad96412eedb18ecdc14996d72ea81adbbe0c04f900602543130c3b0cc748236e"
+        },
+        {
+          "occurrence": 0,
+          "path": "examples/lexer_candidate/src/module_types.fy",
+          "sha256": "bf9882a3b65bed52ce35af965dff9498bd2dc82b59ff34f2636ddf0166ea1b19"
+        },
+        {
+          "occurrence": 0,
+          "path": "examples/lexer_candidate/src/module_unit_bind.fy",
+          "sha256": "b9609fd6dad89f98d838bf8ab65db0f8adda4668f2fec4a0390bdd46b2770d5e"
+        },
+        {
+          "occurrence": 0,
+          "path": "examples/lexer_candidate/src/module_unit_body_types.fy",
+          "sha256": "9dc313da217fb59197287be8ef7eb2806ebbe41414d7b34476efdd1d44bd20fd"
+        },
+        {
+          "occurrence": 0,
+          "path": "examples/lexer_candidate/src/module_unit_generic_copy.fy",
+          "sha256": "0afe27a411f8b85b4e0979a5e4aa850e6fcf56ff1298f580d4b3ab6ac850d0f6"
+        },
+        {
+          "occurrence": 0,
+          "path": "examples/lexer_candidate/src/module_unit_generics.fy",
+          "sha256": "8a7cc80bf9e6ebc7e0caa5851c5eec12722cad4bac431ac04df706f7fab014b9"
+        },
+        {
+          "occurrence": 0,
+          "path": "examples/lexer_candidate/src/module_unit_interface_annotations.fy",
+          "sha256": "af152472cb32087aa64d4caab8d319958fc8244391e349cf16f259297440cc08"
+        },
+        {
+          "occurrence": 0,
+          "path": "examples/lexer_candidate/src/module_unit_interface_declarations.fy",
+          "sha256": "fa5def06ebc0efcbf9e707c26858d84247ff6e8ac860e0f54a9e183709416944"
+        },
+        {
+          "occurrence": 0,
+          "path": "examples/lexer_candidate/src/module_unit_interface_work.fy",
+          "sha256": "575d2ba14a7f0b3c4a45531742efae88d9a40825460e8c88bee761804eb222ac"
+        },
+        {
+          "occurrence": 0,
+          "path": "examples/lexer_candidate/src/module_unit_interfaces.fy",
+          "sha256": "92bf6bc278366b1fd8aa0fa7922efa1ba5e2dd12207fddd61ca4c559e2b94082"
+        },
+        {
+          "occurrence": 0,
+          "path": "examples/lexer_candidate/src/module_unit_shape_contracts.fy",
+          "sha256": "4ab7900ef6afd684016bf12fc72fe07d309c18ba321034b549dad01b45d1515f"
+        },
+        {
+          "occurrence": 0,
+          "path": "examples/lexer_candidate/src/nominal_identity.fy",
+          "sha256": "634cba7ac0667481c0863953640668841216554d852e0e1b1b245c8bc1606958"
+        },
+        {
+          "occurrence": 0,
+          "path": "examples/lexer_candidate/src/nominal_types.fy",
+          "sha256": "67f08ae69f35b1bcdf1d53eb080b5a5fa043a244ab0c48de2a1af26d38a63072"
+        },
+        {
+          "occurrence": 0,
+          "path": "examples/lexer_candidate/src/pointer_identity.fy",
+          "sha256": "31458fda72821f98d8383339f8b272f3aa1c78385fb23504cbe9f1aaa021ae3d"
+        },
+        {
+          "occurrence": 0,
+          "path": "examples/lexer_candidate/src/pointer_types.fy",
+          "sha256": "7cca6293336feedbf785912759ee6c50a17010ad9d966acb81877ad32cd55297"
+        },
+        {
+          "occurrence": 0,
+          "path": "examples/lexer_candidate/src/raw_view_intrinsics.fy",
+          "sha256": "d01c264221b717c7344f8119a9e645794037b0ce7b589e4eac31228c2b4af0d5"
+        },
+        {
+          "occurrence": 0,
+          "path": "examples/lexer_candidate/src/reference_types.fy",
+          "sha256": "f529bb686f06fe07d95f864e28fbde211200fce11a11c6aae260356103639b57"
+        },
+        {
+          "occurrence": 0,
+          "path": "examples/lexer_candidate/src/repr_c_declarations.fy",
+          "sha256": "20a8e1725551f932fb702e2049eda8edd24ea77a5b55be62e72d32fd5b2d47b8"
+        },
+        {
+          "occurrence": 0,
+          "path": "examples/lexer_candidate/src/resource_abilities.fy",
+          "sha256": "1dc0a26ba65e173ca7eb5825831e97a1e853593f8761131f10a6a6bf1ca186d1"
+        },
+        {
+          "occurrence": 0,
+          "path": "examples/lexer_candidate/src/resource_identity.fy",
+          "sha256": "7d85c65df4d6cc02f004f854d5108ec3cc7ba8ddb4885ea54c634f88f93594aa"
+        },
+        {
+          "occurrence": 0,
+          "path": "examples/lexer_candidate/src/resource_properties.fy",
+          "sha256": "fe0372ce1c546422e8b09d5ae9c9aa16f1bc11682fdded971e0820e96d30bac2"
+        },
+        {
+          "occurrence": 0,
+          "path": "examples/lexer_candidate/src/scalar_views.fy",
+          "sha256": "ab3044f3a36a81611a11a46fed80dd41546a9de3f953d4817b2d8e40bc6037bc"
+        },
+        {
+          "occurrence": 0,
+          "path": "examples/lexer_candidate/src/sdk_authority.fy",
+          "sha256": "ae0f2e21819a625a6bb5fe331173dd3366599486f3c203a523693680a0c4ee6c"
+        },
+        {
+          "occurrence": 0,
+          "path": "examples/lexer_candidate/src/sdk_file_rules.fy",
+          "sha256": "a7c5bc7224e12d29d54d284c54f31f34fa66f1067397e0fcb57de9dabe901e5b"
+        },
+        {
+          "occurrence": 0,
+          "path": "examples/lexer_candidate/src/sdk_scopes.fy",
+          "sha256": "7aabc14d6c8a54f959e4c454df8fccb4fc49c2a7efbefa882f8d939a131717e6"
+        },
+        {
+          "occurrence": 0,
+          "path": "examples/lexer_candidate/src/sdk_vector_plan.fy",
+          "sha256": "68ff8fa4608b6c0c9e6dd285acd8e03808bb84617aff9308e965bbfb546f13ee"
+        },
+        {
+          "occurrence": 0,
+          "path": "examples/lexer_candidate/src/sha256.fy",
+          "sha256": "eb89211fd749f7f527e8d2b72e97d70f8d9613bbac428bc95d975bef7c53bfa1"
+        },
+        {
+          "occurrence": 0,
+          "path": "examples/lexer_candidate/src/sha256_block.fy",
+          "sha256": "bc48b9e751205bba8aeaf09987ea8681694d26bc989e24f4ecb3afa4c6e00fd4"
+        },
+        {
+          "occurrence": 0,
+          "path": "examples/lexer_candidate/src/storage_intrinsics.fy",
+          "sha256": "6f8ae79d2086341058de549fe39ff54164a28bb0ad17934e2f78ff6c477a4300"
+        },
+        {
+          "occurrence": 0,
+          "path": "examples/lexer_candidate/src/tagged_encoding.fy",
+          "sha256": "bfc4c8398d4cac37cb15056a19814216e1faf437d88b22d61d52c5482aa37d2a"
+        },
+        {
+          "occurrence": 0,
+          "path": "examples/lexer_candidate/src/tagged_types.fy",
+          "sha256": "431f283e07d9dbea60c698d1f70f7e7009e1552314cf660688b10b09daad8338"
+        },
+        {
+          "occurrence": 0,
+          "path": "examples/lexer_candidate/src/type_state.fy",
+          "sha256": "7dbbf7d50be1e9513dc8aafd99b11afda5d8e2d7ce87d96b6436c4752c2123a0"
+        },
+        {
+          "occurrence": 0,
+          "path": "examples/lexer_candidate/tests/module_unit_interfaces.fy",
+          "sha256": "f4ff57b17e11bbcc8f9b14cc6966bf4e23bf830628069f589b5e6215e4071b99"
+        }
+      ],
+      "sourceFiles": 22,
+      "orderedSourceInputsSHA256": "46db1931933ef7210aab9ff8e730b9d948c3499ef44dc365a47b69a14ea63ea8",
+      "hashEncoding": "UTF-8 compact JSON with sorted object keys; preserve sourceInputs array order"
+    },
+    "dispatcher": {
+      "schema": "fairyc.candidate-source-input-delta/v1",
+      "baselineReceipt": {
+        "path": "docs/ops/evidence/candidate-interface-analysis-20261012.json",
+        "sha256": "a95a87e980eb354a014d20665eb797eade371971c7fa8bba12e496d3edb9a1c0",
+        "scope": "dispatcher"
+      },
+      "added": [
+        {
+          "index": 336,
+          "occurrence": 0,
+          "path": "examples/lexer_candidate/src/syntax_parse_driver.fy",
+          "sha256": "9db6518c69f6c2394ef1c697d7d2d07b0a78ec3336a907c92e9d2e2087e5b756"
+        }
+      ],
+      "updated": [
+        {
+          "occurrence": 0,
+          "previousSHA256": "954467cda42373f2166211334a5fe3714f9934f3679af01982827f2aa515f937",
+          "path": "examples/lexer_candidate/src/syntax.fy",
+          "sha256": "cb9244a18ea93777694d60e5b63eb67738d224297d097542bb84db2b7f31d5e6"
+        }
+      ],
+      "removed": [],
+      "sourceFiles": 355,
+      "orderedSourceInputsSHA256": "d4211964c2a4bdfdc37b3065a32bf6a15b2fd114ab7aec10877c0c7112c411fd",
+      "hashEncoding": "UTF-8 compact JSON with sorted object keys; preserve sourceInputs array order"
+    }
+  },
+  "previousStructuredFailure": "syntax.fy phase 2 stage 4 code 10; not reported by this run, whose crash phase remains unattributed",
+  "nextFailure": {
+    "exit": 3221225725,
+    "exitHex": "0xC00000FD",
+    "description": "Windows STATUS_STACK_OVERFLOW; no stderr or C packet",
+    "phaseAttributed": false
+  },
+  "analysisCapsChanged": false,
+  "productTimeoutChanged": false,
+  "stackReserveChanged": false,
+  "stage2Achieved": false,
+  "publicApiChanged": false,
+  "sdkAbiChanged": false,
+  "versionChanged": false,
+  "dbChanged": false,
+  "ciChanged": false,
+  "pushed": false,
+  "testExpectationCorrections": [
+    "Use generic_parameter_count instead of comparing the generic node ID to one.",
+    "Compare recovered arena counts with a clean parse of the surviving declaration; its ordinary entry is not a leaked failed binding."
+  ]
+}

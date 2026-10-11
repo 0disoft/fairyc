@@ -4077,3 +4077,22 @@ work remains. Source identities use ordered deltas against the preceding
 receipt instead of duplicate full snapshots. Analysis limits, product timeouts,
 public API, SDK ABI/version, DB and CI are unchanged; no push.
 Receipt: `evidence/candidate-interface-analysis-20261012.json`.
+
+## Parser driver partition (2026-10-12)
+
+Declaration parsing and recovery move to `syntax_parse_driver`; the existing
+parser entry points remain in `syntax`, and `syntax::assemble` still owns
+publication of `Parsed`. Five moved routines retain their normalized source
+except for the explicit owning-factory call. Source check passes 362 files /
+4673 MIR functions. Three regressions covering declaration metadata, failed
+body rollback/recovery, lexical diagnostic retention and item limits pass in
+Go-native and candidate C development/release. Test expectations now use the
+generic-parameter count API and compare recovered arenas with a clean parse.
+Full emission over 355 files / 2486853 bytes no longer reports the preceding
+structured `syntax.fy` analysis failure: it exits with Windows stack overflow
+`0xC00000FD` after 566.51 seconds, with no stderr or C packet. The crash phase
+is not attributed, and successful full syntax analysis is not claimed.
+Next: attribute and reduce that stack use; entry/driver/build/run, timeouts,
+Linux/full-suite and Stage1/Stage2 remain. Analysis limits, product timeouts,
+stack reserve, public API, SDK ABI/version, DB and CI are unchanged; no push.
+Receipt: `evidence/candidate-syntax-driver-20261012.json`.

@@ -2222,3 +2222,17 @@ Stage2 is produced. Parser analysis, entry/driver/build/run, timeouts,
 Linux/full-suite and Stage1/Stage2 remain. Limits, public API, SDK ABI/version,
 DB and CI are unchanged; no push. Receipt:
 [candidate-interface-analysis-20261012.json](../ops/evidence/candidate-interface-analysis-20261012.json).
+
+## Parser driver partition (2026-10-12)
+
+Declaration/recovery routines move to a helper; parser entry signatures and
+the original `Parsed` owner remain. Source check passes 362 files / 4673 MIR
+functions. Three parser regressions pass in Go-native and candidate C
+development/release, covering metadata, rollback/recovery, lexical diagnostics
+and declaration bounds. Full emission over 355 files / 2486853 bytes exits
+`0xC00000FD` after 566.51 seconds without stderr or C output. The preceding
+structured syntax analysis error is not reported, but the crash phase remains
+unattributed. Stack attribution/reduction is next; full C emission and Stage2
+are not achieved. Limits, stack reserve, public API, SDK ABI/version, DB and CI
+are unchanged; no push. Receipt:
+[candidate-syntax-driver-20261012.json](../ops/evidence/candidate-syntax-driver-20261012.json).
