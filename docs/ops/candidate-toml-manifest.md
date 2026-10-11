@@ -164,6 +164,31 @@ Source check passes 301 files and 3849 MIR functions. Evidence is
 `evidence/candidate-toml-context-20261011.json`. The 111 Go table observations
 were refreshed (49 accepted); parser parity remains pending integration.
 
+## Dotted context and table declaration integration
+
+The document parser now uses logical implicit/type metadata for dotted prefixes
+and table headers. A first dotted definition can be promoted to an explicit
+table; later dotted context establishment consumes that implicit flag. Dotted
+paths can enter already declared tables and the latest array-table entry.
+Array-typed prefixes are replaced with tables, with old children discarded and
+live-only pools rebuilt at publication. Unchanged documents use ordinary
+publication directly.
+
+Native assertions check retained values when tables are promoted, discarded
+array and prior-table contents on repeated replacement, and shared implicit
+metadata across physical array-table entries. The document corpus now has 48
+inputs: 46 Go acceptance matches and two recorded inline-table differences.
+This reduces the earlier four differences in that authored corpus to two;
+it does not claim complete parity for the separate 111-context corpus. Ignored
+implicit-table assignments and inline-table decoder behavior remain to connect.
+The 104-case manifest acceptance/reason/full-value corpus still matches Go.
+
+Evidence is `evidence/candidate-toml-document-context-20261011.json` and
+`evidence/candidate-manifest-context-20261011.json`. Three document and two
+manifest native tests and both candidate C profiles pass. Source check passes
+301 files and 3850 MIR functions. The private comparison runner's known-difference
+set and authored corpus were updated; no public command or CI workflow changed.
+
 ## Remaining connection
 
 1. Reconcile pinned Go table-definition behavior before claiming complete

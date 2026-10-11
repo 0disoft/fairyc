@@ -49,6 +49,11 @@ fn void keeps_table_array_scope_quoted_components_and_source_spans(){
     switch(document::parse(b"''=''")){case .ok(tree):{assert(m::node(ref tree,m::lookup(ref tree,1,b"")).kind==2);}case .err(_):{assert(false);}};
     switch(document::parse(b"a=true\nb={c=false}")){case .ok(tree):{let usize a=m::lookup(ref tree,1,b"a");let usize b=m::lookup(ref tree,1,b"b");let usize c=m::lookup(ref tree,b,b"c");assert(m::node(ref tree,a).kind==5 && bytes::equal(m::value(ref tree,a),b"true") && m::node(ref tree,c).kind==5 && m::node(ref tree,c).state==3 && bytes::equal(m::value(ref tree,c),b"false"));}case .err(_):{assert(false);}};
     switch(document::parse(b"a=1\nb=1979-05-27\nc=1.5\nd=[0xff,07:32:00]\n")){case .ok(tree):{assert(m::node(ref tree,m::lookup(ref tree,1,b"a")).kind==6 && m::node(ref tree,m::lookup(ref tree,1,b"b")).kind==8 && m::node(ref tree,m::lookup(ref tree,1,b"c")).kind==7);let usize d=m::lookup(ref tree,1,b"d");assert(m::node(ref tree,m::node(ref tree,d).first).kind==6 && m::node(ref tree,m::node(ref tree,d).last).kind==8);}case .err(_):{assert(false);}};
+    switch(document::parse(b"a.b='x'\n[a]")){case .ok(tree):{let usize a=m::lookup(ref tree,1,b"a");assert(m::node(ref tree,a).state==2 && bytes::equal(m::value(ref tree,m::lookup(ref tree,a,b"b")),b"x"));}case .err(_):{assert(false);}};
+    switch(document::parse(b"[a.b]\nx='x'\n[a]\nb.y='y'")){case .ok(tree):{let usize a=m::lookup(ref tree,1,b"a");let usize b=m::lookup(ref tree,a,b"b");assert(m::node(ref tree,b).children==2 && bytes::equal(m::value(ref tree,m::lookup(ref tree,b,b"y")),b"y"));}case .err(_):{assert(false);}};
+    switch(document::parse(b"a=['old']\na.b='y'")){case .ok(tree):{let usize a=m::lookup(ref tree,1,b"a");assert(m::count(ref tree)==3 && m::node(ref tree,a).kind==1 && m::node(ref tree,a).children==1 && bytes::equal(m::value(ref tree,m::lookup(ref tree,a,b"b")),b"y"));}case .err(_):{assert(false);}};
+    switch(document::parse(b"a=[]\na.b='x'\na.c='y'")){case .ok(tree):{let usize a=m::lookup(ref tree,1,b"a");assert(m::count(ref tree)==3 && m::lookup(ref tree,a,b"b")==0 && bytes::equal(m::value(ref tree,m::lookup(ref tree,a,b"c")),b"y"));}case .err(_):{assert(false);}};
+    switch(document::parse(b"[[a]]\nb.x='x'\n[[a]]\n[a.b]\n[a.b]")){case .ok(tree):{let usize a=m::lookup(ref tree,1,b"a");let m::Node array=m::node(ref tree,a);assert(array.children==2);let usize first=m::lookup(ref tree,array.first,b"b");let usize last=m::lookup(ref tree,array.last,b"b");assert(first!=last && m::node(ref tree,first).children==1 && m::node(ref tree,last).children==0);}case .err(_):{assert(false);}};
 }
 
 @test
@@ -56,7 +61,7 @@ fn void rejects_invalid_syntax_duplicates_and_closed_table_extensions(){
     rejected(b"a='x'\na='y'",1);rejected(b"a.b='x'\na.b='y'",1);rejected(b"[a]\n[a]",1);
     rejected(b"a='x'\n[a]",1);rejected(b"a=[]\n[[a]]",1);rejected(b"[[a]]\n[a]",1);
     rejected(b"a={b='x'}\na.c='y'",1);rejected(b"a={b={c='x'},b.d='y'}",1);
-    rejected(b"a.b='x'\n[a]",1);rejected(b"[a.b]\nx='x'\n[a]\nb.y='y'",1);
+    rejected(b"a.b='x'\na.c='y'\n[a]",1);rejected(b"[[a]]\nb.x='x'\n[[a]]\n[a.b]\n[a.b]\n[a.b]",1);rejected(b"a=['x']\n[a]",1);
     rejected(b"a=['x' 'y']",1);rejected(b"a=[,'x']",1);rejected(b"a=['x',,]",1);rejected(b"a=['x'",1);
     rejected(b"a={b='x' c='y'}",1);rejected(b"a={b='x',,}",1);rejected(b"a={b='x'",1);
     rejected(b"a='x' b='y'",1);rejected(b"a.'b='x'",1);rejected(b"a..b='x'",1);rejected(b"a.='x'",1);

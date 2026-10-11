@@ -65,7 +65,7 @@ def main():
     assert result.returncode == 0 and not result.stdout and not result.stderr, result.stderr
     report = json.loads(report_path.read_bytes())
     assert report['schema'] == 'fairyc.candidate-toml-documents-reference/v1' and len(report['cases']) == len(cases)
-    policy = {b"a={b='x'}\na.c='y'", b"a={b={c='x'},b.d='y'}", b"a.b='x'\n[a]", b"[a.b]\nx='x'\n[a]\nb.y='y'"}
+    policy = {b"a={b='x'}\na.c='y'", b"a={b={c='x'},b.d='y'}"}
     outside = set()
     differences = []
     for case, row in zip(cases, report['cases']):
