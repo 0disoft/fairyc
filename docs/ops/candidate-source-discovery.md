@@ -223,9 +223,39 @@ and 1,052,672 repeated bytes beyond the old cap. Explicit expected hashes were
 generated independently with Python hashlib. Full check passes 314 source files
 and 4010 MIR functions. Evidence: `evidence/candidate-sha256-stream-20261011.json`.
 
+## Exact package source identity
+
+`project_source_identity.compute` hashes the retained `Sources` owner using
+`docs/package/package-source-digest-v1.md`: domain/version bytes, network-order
+64-bit file count and path/body lengths, exact path order and exact file bytes.
+It returns `fysrc1-sha256-` plus 64 lowercase hexadecimal digits. The source-set
+constructor establishes canonical paths; the digest also verifies file/byte
+bounds and strict ordering before returning a result. The 4096 paths of at most
+4095 bytes and 64 MiB of bodies plus framing fit the streaming 96 MiB bound.
+Hashing borrows existing bodies and retains only a small hash state; it does not
+copy the encoded package or reopen files.
+
+`project_package_input.source_digest` exposes this identity over the owned,
+validated package input. Module lookup order, physical root, manifest UID and
+filesystem metadata do not enter the source digest. Package-instance identity
+and dependency metadata remain separate work.
+
+The Go reference generator writes eight deterministic source trees and computes
+their expected text with `internal/packagecontent.Compute`, checking reversed
+input order too. The authored native test and candidate C development/release
+program compare every tree against that oracle. Cases cover nested source paths,
+different physical roots, CRLF, NUL/invalid UTF-8, renamed paths, module-name
+versus file-path ordering, and a 1,052,672-byte body beyond the old hash cap.
+Full check passes 315 files and 4014 MIR functions. Evidence:
+`evidence/candidate-source-identity-20261011.json`.
+
+Reproduce the reference inputs with
+`bun tools/run-go.ts run ./cmd/fairyc-candidate-source-digest-reference <output>`;
+pass its `root.bin` to the `project_source_identity` private-test verifier.
+
 ## Remaining connection
 
-Connect package inputs to exact source identity, workspace catalog/package
+Connect package inputs and their exact source identity to workspace catalog/package
 resolution and the project CLI. Broader parser-cap compatibility remains separate.
 Resolve the Go junction observation discrepancy before any loader
 equivalence claim. Package/lock/CLI work remains separate.

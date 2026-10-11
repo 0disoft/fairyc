@@ -3,6 +3,7 @@ import project_source_set as sources;
 import project_source_modules as modules;
 import project_source_file as files;
 import project_manifest as manifest;
+import project_source_identity as identity;
 import std::bytes as bytes;
 
 // Phases 0..5 preserve the source loader's codes and span scopes. Phase 6
@@ -21,6 +22,7 @@ pub fn Problem error(ref Error error){return error.problem;}
 pub fn ref u8[] error_path(ref Error error){return bytes::view(ref error.path);}
 pub fn ref u8[] error_input(ref Error error){return bytes::view(ref error.input);}
 pub fn ref manifest::Manifest package(ref modules::Modules input){return sources::typed_manifest(modules::source_set(input));}
+pub fn Result<bytes::Buffer,u32> source_digest(ref modules::Modules input){return identity::compute(modules::source_set(input));}
 
 @effects(filesystem)
 pub fn Result<modules::Modules,Error> load(ref u8[] root,ref u8[] document,ref mut sources::Budget budget,ref mut usize work){
