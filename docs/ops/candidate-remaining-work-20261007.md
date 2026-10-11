@@ -4096,3 +4096,23 @@ Next: attribute and reduce that stack use; entry/driver/build/run, timeouts,
 Linux/full-suite and Stage1/Stage2 remain. Analysis limits, product timeouts,
 stack reserve, public API, SDK ABI/version, DB and CI are unchanged; no push.
 Receipt: `evidence/candidate-syntax-driver-20261012.json`.
+
+## CFG recursive stack reduction (2026-10-12)
+
+The stack trace identifies repeated `module_unit_cfg_lower::expression` frames.
+Six expression branches now use separate helpers; traversal order, depth 64,
+body work 1048576 and error mappings remain. A 50-term logical chain previously
+exited `0xC00000FD`; the current seed emits its C packet and both generated-C
+profiles execute successfully. Five focused CFG tests pass in Go-native and
+candidate C development/release. Source check passes 362 files / 4679 MIR functions.
+
+The complete 355-file replay exits normally with diagnostic code 1002 in phase 5
+after 645.61 seconds, without a C packet. Optimized diagnostic instrumentation
+isolates the shared preparation work counter: SDK authentication and both
+indexes pass; reachability exhausts the remaining counter. Split that analysis
+history next while charging every history to the existing 8388608 project
+ledger. Entry/driver/build/run, product timeout, Linux/full suite and Stage1/Stage2
+remain. The verifier now accepts an explicit authored test subset and an optional
+1..900-second frontend allowance; its defaults remain all tests and 60 seconds.
+Product timeout, stack reserve, API, SDK ABI, DB and CI are unchanged; no push.
+Receipt: `evidence/candidate-cfg-stack-20261012.json`.

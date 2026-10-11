@@ -25,12 +25,7 @@ fn Result<usize,clean_ir::Problem> drops(ref ir::Program p,ref drop_index::Table
 fn Result<usize,clean_ir::Problem> invoke(ref ir::Program p,ref drop_index::Table table,usize from,usize next,ref mut v::Vec<cfg::Block> blocks,ref mut v::Vec<cfg::Deferred> sites,ref mut v::Vec<cfg::Capture> captures,ref mut Context c){
     if(from>c.active_count){return .err(fail(c,1001,0,0));}var usize entry=next;var usize i=from;while(i<c.active_count){let id=c.active[i];let d=*v::at<cfg::Deferred>(sites,id-1);let b=ir::at(p,c.frame);let call=ir::call_at(b,d.invocation-1);entry=switch(emit(blocks,sites,captures,14,call.expression,id,entry,0,0,call.start,call.end,c)){case .ok(n):{n}case .err(e):{return .err(e);}};i+=1;}return .ok(entry);
 }
-fn Result<usize,clean_ir::Problem> expression(ref ir::Program p,ref drop_index::Table table,usize original,usize next,Loop loop,usize depth,ref mut v::Vec<cfg::Block> blocks,ref mut v::Vec<cfg::Deferred> sites,ref mut v::Vec<cfg::Capture> captures,ref mut Context c){
-    if(original==0){return .ok(next);}if(depth>=64 || !m::charge(ref mut c.work,1)){return .err(fail(c,1002,0,0));}let b=ir::at(p,c.frame);let id=lookup::node(b,original);if(id==0){return .err(fail(c,1001,0,0));}let e=ir::node_at(b,id-1).value;
-    if(e.kind==32 || e.kind==33){return .err(fail(c,1004,e.start,e.end));}
-    if(e.state==2 && e.kind==8){return expression(p,table,e.left,next,loop,depth+1,blocks,sites,captures,c);}
-    if(e.state==2 && (e.kind==2 || e.kind==17 || e.kind==20 || e.kind==16 || e.kind==28)){return .ok(next);}
-    if(e.kind==15){
+fn Result<usize,clean_ir::Problem> switch_expression(ref ir::Program p,ref drop_index::Table table,ref ir::Body b,ref m::Expression e,usize id,usize next,Loop loop,usize depth,ref mut v::Vec<cfg::Block> blocks,ref mut v::Vec<cfg::Deferred> sites,ref mut v::Vec<cfg::Capture> captures,ref mut Context c){
         let joined=switch(drops(p,table,7,e.start,e.end,next,blocks,sites,captures,c)){case .ok(n):{n}case .err(p):{return .err(p);}};
         var usize entry=switch(emit(blocks,sites,captures,12,0,0,0,0,0,e.start,e.end,c)){case .ok(n):{n}case .err(p):{return .err(p);}};
         var usize link=e.right;while(link!=0){if(!m::charge(ref mut c.work,1)){return .err(fail(c,1002,e.start,e.end));}let pair=ir::node_at(b,lookup::node(b,link)-1).value;let arm_id=lookup::node(b,pair.left);let arm=ir::node_at(b,arm_id-1).value;let root=ir::statement_at(b,lookup::statement(b,arm.right)-1).value;
@@ -41,27 +36,43 @@ fn Result<usize,clean_ir::Problem> expression(ref ir::Program p,ref drop_index::
             entry=switch(emit(blocks,sites,captures,18,id,arm_id,bound,entry,0,arm.start,arm.end,c)){case .ok(n):{n}case .err(p):{return .err(p);}};link=pair.right;
         }return expression(p,table,e.left,entry,loop,depth+1,blocks,sites,captures,c);
     }
-    if(e.kind==12 || e.kind==31){let root=ir::statement_at(b,lookup::statement(b,e.left)-1).value;let copied=switch(emit(blocks,sites,captures,11,id,lookup::node(b,root.expression),next,0,0,e.start,e.end,c)){case .ok(n):{n}case .err(p):{return .err(p);}};return block(p,table,e.left,copied,loop,depth+1,blocks,sites,captures,c);}
-    if(e.kind==13){let pair=ir::node_at(b,lookup::node(b,e.right)-1).value;let yes_root=ir::statement_at(b,lookup::statement(b,pair.left)-1).value;
+
+fn Result<usize,clean_ir::Problem> if_expression(ref ir::Program p,ref drop_index::Table table,ref ir::Body b,ref m::Expression e,usize id,usize next,Loop loop,usize depth,ref mut v::Vec<cfg::Block> blocks,ref mut v::Vec<cfg::Deferred> sites,ref mut v::Vec<cfg::Capture> captures,ref mut Context c){let pair=ir::node_at(b,lookup::node(b,e.right)-1).value;let yes_root=ir::statement_at(b,lookup::statement(b,pair.left)-1).value;
         let yes_copy=switch(emit(blocks,sites,captures,11,id,lookup::node(b,yes_root.expression),next,0,0,e.start,e.end,c)){case .ok(n):{n}case .err(p):{return .err(p);}};
         let yes=switch(block(p,table,pair.left,yes_copy,loop,depth+1,blocks,sites,captures,c)){case .ok(n):{n}case .err(p):{return .err(p);}};
         let no_copy=switch(emit(blocks,sites,captures,11,id,lookup::node(b,pair.right),next,0,0,e.start,e.end,c)){case .ok(n):{n}case .err(p):{return .err(p);}};
         let no=switch(expression(p,table,pair.right,no_copy,loop,depth+1,blocks,sites,captures,c)){case .ok(n):{n}case .err(p):{return .err(p);}};
         let branch=switch(emit(blocks,sites,captures,3,lookup::node(b,e.left),0,yes,no,0,e.start,e.end,c)){case .ok(n):{n}case .err(p):{return .err(p);}};return expression(p,table,e.left,branch,loop,depth+1,blocks,sites,captures,c);
     }
-    var usize after=switch(drops(p,table,7,e.start,e.end,next,blocks,sites,captures,c)){case .ok(n):{n}case .err(p):{return .err(p);}};
-    let evaluated=switch(emit(blocks,sites,captures,1,id,0,after,0,0,e.start,e.end,c)){case .ok(n):{n}case .err(p):{return .err(p);}};
-    if(e.kind==26){let bound_id=lookup::node(b,e.right);if(bound_id==0){return .err(fail(c,1001,e.start,e.end));}let pair=ir::node_at(b,bound_id-1).value;if(pair.kind!=27){return .err(fail(c,1001,e.start,e.end));}after=switch(expression(p,table,pair.right,evaluated,loop,depth+1,blocks,sites,captures,c)){case .ok(n):{n}case .err(p):{return .err(p);}};after=switch(expression(p,table,pair.left,after,loop,depth+1,blocks,sites,captures,c)){case .ok(n):{n}case .err(p):{return .err(p);}};return expression(p,table,e.left,after,loop,depth+1,blocks,sites,captures,c);}
-    if(e.kind==30){let returned=switch(emit(blocks,sites,captures,9,lookup::node(b,e.left),id,0,0,0,e.start,e.end,c)){case .ok(n):{n}case .err(p):{return .err(p);}};
+
+fn Result<usize,clean_ir::Problem> slice_expression(ref ir::Program p,ref drop_index::Table table,ref ir::Body b,ref m::Expression e,usize id,usize next,Loop loop,usize depth,ref mut v::Vec<cfg::Block> blocks,ref mut v::Vec<cfg::Deferred> sites,ref mut v::Vec<cfg::Capture> captures,ref mut Context c,usize evaluated){let bound_id=lookup::node(b,e.right);if(bound_id==0){return .err(fail(c,1001,e.start,e.end));}let pair=ir::node_at(b,bound_id-1).value;if(pair.kind!=27){return .err(fail(c,1001,e.start,e.end));}var usize after=switch(expression(p,table,pair.right,evaluated,loop,depth+1,blocks,sites,captures,c)){case .ok(n):{n}case .err(p):{return .err(p);}};after=switch(expression(p,table,pair.left,after,loop,depth+1,blocks,sites,captures,c)){case .ok(n):{n}case .err(p):{return .err(p);}};return expression(p,table,e.left,after,loop,depth+1,blocks,sites,captures,c);}
+
+fn Result<usize,clean_ir::Problem> result_expression(ref ir::Program p,ref drop_index::Table table,ref ir::Body b,ref m::Expression e,usize id,usize next,Loop loop,usize depth,ref mut v::Vec<cfg::Block> blocks,ref mut v::Vec<cfg::Deferred> sites,ref mut v::Vec<cfg::Capture> captures,ref mut Context c,usize evaluated){let returned=switch(emit(blocks,sites,captures,9,lookup::node(b,e.left),id,0,0,0,e.start,e.end,c)){case .ok(n):{n}case .err(p):{return .err(p);}};
         let dropped=switch(lifecycle::exit_indexed(p,table,c.frame,6,e.start,e.end,3,e.start,e.end,returned,blocks,ref mut c.work)){case .ok(n):{n}case .err(p):{return .err(p);}};
         let error=switch(invoke(p,table,0,dropped,blocks,sites,captures,c)){case .ok(n):{n}case .err(p):{return .err(p);}};let branch=switch(emit(blocks,sites,captures,4,lookup::node(b,e.left),id,evaluated,error,0,e.start,e.end,c)){case .ok(n):{n}case .err(p):{return .err(p);}};return expression(p,table,e.left,branch,loop,depth+1,blocks,sites,captures,c);}
-    let op=ir::node_text(b,id-1);if(e.kind==5 && (bytes::equal(op,b"&&") || bytes::equal(op,b"||"))){
+
+fn Result<usize,clean_ir::Problem> logical_expression(ref ir::Program p,ref drop_index::Table table,ref ir::Body b,ref m::Expression e,usize id,usize next,Loop loop,usize depth,ref mut v::Vec<cfg::Block> blocks,ref mut v::Vec<cfg::Deferred> sites,ref mut v::Vec<cfg::Capture> captures,ref mut Context c,usize evaluated,ref u8[] op){
         let right=switch(expression(p,table,e.right,evaluated,loop,depth+1,blocks,sites,captures,c)){case .ok(n):{n}case .err(p):{return .err(p);}};
         let skipped=switch(emit(blocks,sites,captures,10,id,lookup::node(b,e.left),next,0,0,e.start,e.end,c)){case .ok(n):{n}case .err(p):{return .err(p);}};
         let branch=switch(emit(blocks,sites,captures,3,lookup::node(b,e.left),0,if(bytes::equal(op,b"&&")){right}else{skipped},if(bytes::equal(op,b"&&")){skipped}else{right},0,e.start,e.end,c)){case .ok(n):{n}case .err(p):{return .err(p);}};return expression(p,table,e.left,branch,loop,depth+1,blocks,sites,captures,c);
     }
+
+fn Result<usize,clean_ir::Problem> argument_expression(ref ir::Program p,ref drop_index::Table table,ref ir::Body b,ref m::Expression e,usize id,usize next,Loop loop,usize depth,ref mut v::Vec<cfg::Block> blocks,ref mut v::Vec<cfg::Deferred> sites,ref mut v::Vec<cfg::Capture> captures,ref mut Context c,usize evaluated){var usize after=evaluated;var usize link=e.right;while(link!=0){if(!m::charge(ref mut c.work,1)){return .err(fail(c,1002,e.start,e.end));}let pair=ir::node_at(b,lookup::node(b,link)-1).value;after=switch(expression(p,table,pair.left,after,loop,depth+1,blocks,sites,captures,c)){case .ok(n):{n}case .err(p):{return .err(p);}};link=pair.right;}let receiver=if(e.builtin.kind==300){ir::node_at(b,lookup::node(b,e.left)-1).value.left}else{e.left};return expression(p,table,receiver,after,loop,depth+1,blocks,sites,captures,c);}
+fn Result<usize,clean_ir::Problem> expression(ref ir::Program p,ref drop_index::Table table,usize original,usize next,Loop loop,usize depth,ref mut v::Vec<cfg::Block> blocks,ref mut v::Vec<cfg::Deferred> sites,ref mut v::Vec<cfg::Capture> captures,ref mut Context c){
+    if(original==0){return .ok(next);}if(depth>=64 || !m::charge(ref mut c.work,1)){return .err(fail(c,1002,0,0));}let b=ir::at(p,c.frame);let id=lookup::node(b,original);if(id==0){return .err(fail(c,1001,0,0));}let e=ir::node_at(b,id-1).value;
+    if(e.kind==32 || e.kind==33){return .err(fail(c,1004,e.start,e.end));}
+    if(e.state==2 && e.kind==8){return expression(p,table,e.left,next,loop,depth+1,blocks,sites,captures,c);}
+    if(e.state==2 && (e.kind==2 || e.kind==17 || e.kind==20 || e.kind==16 || e.kind==28)){return .ok(next);}
+    if(e.kind==15){return switch_expression(p,table,b,ref e,id,next,loop,depth,blocks,sites,captures,c);}
+    if(e.kind==12 || e.kind==31){let root=ir::statement_at(b,lookup::statement(b,e.left)-1).value;let copied=switch(emit(blocks,sites,captures,11,id,lookup::node(b,root.expression),next,0,0,e.start,e.end,c)){case .ok(n):{n}case .err(p):{return .err(p);}};return block(p,table,e.left,copied,loop,depth+1,blocks,sites,captures,c);}
+    if(e.kind==13){return if_expression(p,table,b,ref e,id,next,loop,depth,blocks,sites,captures,c);}
+    var usize after=switch(drops(p,table,7,e.start,e.end,next,blocks,sites,captures,c)){case .ok(n):{n}case .err(p):{return .err(p);}};
+    let evaluated=switch(emit(blocks,sites,captures,1,id,0,after,0,0,e.start,e.end,c)){case .ok(n):{n}case .err(p):{return .err(p);}};
+    if(e.kind==26){return slice_expression(p,table,b,ref e,id,next,loop,depth,blocks,sites,captures,c,evaluated);}
+    if(e.kind==30){return result_expression(p,table,b,ref e,id,next,loop,depth,blocks,sites,captures,c,evaluated);}
+    let op=ir::node_text(b,id-1);if(e.kind==5 && (bytes::equal(op,b"&&") || bytes::equal(op,b"||"))){return logical_expression(p,table,b,ref e,id,next,loop,depth,blocks,sites,captures,c,evaluated,op);}
     after=evaluated;
-    if(e.kind==6 || e.kind==10 || e.kind==24){var usize link=e.right;while(link!=0){if(!m::charge(ref mut c.work,1)){return .err(fail(c,1002,e.start,e.end));}let pair=ir::node_at(b,lookup::node(b,link)-1).value;after=switch(expression(p,table,pair.left,after,loop,depth+1,blocks,sites,captures,c)){case .ok(n):{n}case .err(p):{return .err(p);}};link=pair.right;}let receiver=if(e.builtin.kind==300){ir::node_at(b,lookup::node(b,e.left)-1).value.left}else{e.left};return expression(p,table,receiver,after,loop,depth+1,blocks,sites,captures,c);}
+    if(e.kind==6 || e.kind==10 || e.kind==24){return argument_expression(p,table,b,ref e,id,next,loop,depth,blocks,sites,captures,c,evaluated);}
     if(e.kind!=20 && e.kind!=23){after=switch(expression(p,table,e.right,after,loop,depth+1,blocks,sites,captures,c)){case .ok(n):{n}case .err(p):{return .err(p);}};}return expression(p,table,e.left,after,loop,depth+1,blocks,sites,captures,c);
 }
 fn Result<usize,clean_ir::Problem> statement(ref ir::Program p,ref drop_index::Table table,usize original,usize next,Loop loop,usize depth,ref mut v::Vec<cfg::Block> blocks,ref mut v::Vec<cfg::Deferred> sites,ref mut v::Vec<cfg::Capture> captures,ref mut Context c){

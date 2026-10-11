@@ -22,6 +22,14 @@ import scanner as scanner;
 import std::bytes as bytes;
 import std::vec as v;
 import std::io as io;
+
+@test @effects(console) fn void cfg_deep_logical_chain_preserves_depth_and_graph_checks(){
+    var bytes::Buffer source=bytes::empty();assert(bytes::append(ref mut source,b"module main;fn bool deep(bool value){return ").is_ok);
+    var usize i=0;while(i<50){if(i!=0){assert(bytes::append(ref mut source,b"||").is_ok);}assert(bytes::append(ref mut source,b"value").is_ok);i+=1;}assert(bytes::append(ref mut source,b";}").is_ok);
+    let p=retained(bytes::view(ref source),b"");let frame=declared(ref p,2);assert(frame!=0);
+    let g=lowered(ref p,frame);assert(cfg::check(ref p,ref g).code==0);var usize branches=0;i=1;
+    while(i<=cfg::count(ref g)){if(cfg::at(ref g,i).kind==3){branches+=1;}i+=1;}assert(branches==49);
+}
 fn syntax::Parsed parsed(ref u8[] text){let b=switch(bytes::copy(text)){case .ok(b):{b}case .err(_):{assert(false);return parsed(b"module empty;");}};let s=switch(scanner::collect(b,false,65536,1048576,256,16777216)){case .ok(s):{s}case .err(_):{assert(false);return parsed(b"module empty;");}};let p=switch(syntax::parse(s,512)){case .ok(p):{p}case .err(_):{assert(false);return parsed(b"module empty;");}};assert(syntax::problem_count(ref p)==0);return p;}
 @effects(console) fn ir::Program retained(ref u8[] root,ref u8[] provider){
     var v::Vec<syntax::Parsed> sources=v::empty<syntax::Parsed>();assert(v::push<syntax::Parsed>(ref mut sources,parsed(root)).is_ok);if(provider.len!=0){assert(v::push<syntax::Parsed>(ref mut sources,parsed(provider)).is_ok);}

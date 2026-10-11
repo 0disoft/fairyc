@@ -2236,3 +2236,19 @@ unattributed. Stack attribution/reduction is next; full C emission and Stage2
 are not achieved. Limits, stack reserve, public API, SDK ABI/version, DB and CI
 are unchanged; no push. Receipt:
 [candidate-syntax-driver-20261012.json](../ops/evidence/candidate-syntax-driver-20261012.json).
+
+## CFG recursive stack reduction (2026-10-12)
+
+Six CFG expression helpers reduce recursive stack use without changing depth,
+work or graph semantics. The formerly crashing 50-term logical chain now emits
+C and executes in both profiles. Five CFG regressions pass with the Go frontend
+and candidate-generated C in development/release. Source check passes 362 files /
+4679 MIR functions. The full 355-file replay returns phase 5 code 1002 after
+645.61 seconds rather than crashing. Diagnostic instrumentation identifies
+reachability exhausting the shared preparation counter after SDK and indexes
+pass. Independent bounded preparation histories, all charged to the existing
+8 Mi work ledger, are next. Full C emission and Stage2 remain unachieved.
+The verification harness adds opt-in test subsets and frontend allowance;
+product timeout, stack reserve, public API, SDK ABI, DB and CI are unchanged.
+No push. Receipt:
+[candidate-cfg-stack-20261012.json](../ops/evidence/candidate-cfg-stack-20261012.json).

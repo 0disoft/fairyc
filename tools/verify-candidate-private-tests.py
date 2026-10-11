@@ -26,10 +26,14 @@ def main():
     parser.add_argument('--builder', type=Path, required=True)
     parser.add_argument('--module', required=True)
     parser.add_argument('--test', action='append', required=True)
+    parser.add_argument('--selected-tests-only', action='store_true', help='verify only explicitly selected authored tests instead of requiring the entire module')
+    parser.add_argument('--frontend-timeout', type=int, default=60, help='verification-only candidate frontend allowance, 1..900 seconds')
     parser.add_argument('--output', type=Path, required=True)
     parser.add_argument('--fixture', type=Path, help='hash and forward one binary oracle fixture to every execution')
     parser.add_argument('--unchanged-paths', type=Path, help='JSON list of repository-relative paths whose bytes and modification times must remain unchanged')
     args = parser.parse_args()
+    if not 1 <= args.frontend_timeout <= 900:
+        parser.error('frontend timeout must be in 1..900 seconds')
     if not __debug__:
         parser.error('verification requires Python without -O')
     if not re.fullmatch(r'[a-z][a-z0-9_]*', args.module):
@@ -41,7 +45,9 @@ def main():
     test_source = PROJECT / f'tests/{args.module}.fy'
     authored = test_source.read_text(encoding='utf-8')
     test_names = re.findall(r'@test\s+(?:@effects\([^\n]+\)\s+)?fn void (\w+)\(', authored)
-    if set(test_names) != set(args.test):
+    if not set(args.test).issubset(test_names):
+        parser.error('selected test is not authored in the module')
+    if not args.selected_tests_only and set(test_names) != set(args.test):
         parser.error('select all authored tests in the module')
     original_module = f'module tests::{args.module};'
     assert authored.startswith(original_module)
@@ -116,7 +122,7 @@ def main():
     assert {row['identity'] for row in report['tests']} == expected
     manifest = output / 'sources.list'
     manifest.write_text(''.join(p.relative_to(ROOT).as_posix() + '\n' for p in paths), encoding='utf-8', newline='\n')
-    packet = run([args.candidate.resolve(), '--c-project-file', manifest])
+    packet = run([args.candidate.resolve(), '--c-project-file', manifest], timeout=args.frontend_timeout)
     packet_path = output / 'candidate-packet.bin'
     packet_path.write_bytes(packet.stdout)
     assert packet.stdout.startswith(b'FYCPARTS1\n')
@@ -131,6 +137,9 @@ def main():
     assert all(digest(ROOT / row['path']) == row['sha256'] for row in source_inputs), 'sources changed during verification'
     assert all(digest(Path(row['path'])) == row['sha256'] for row in images.values()), 'tool changed during verification'
     receipt = dict(schema='fairyc.candidate-private-tests/v1', passed=True, module=args.module, sourceInputs=source_inputs, tools=images, native=report, nativeTests=len(expected), lockSHA256=lock_sha256, candidateInputFiles=len(paths), candidatePacketSHA256=digest(packet_path), candidateExecutions=executions, invocations=invocations, publicApiChanged=False, dbChanged=False, ciChanged=False, pushed=False)
+    receipt['selection'] = dict(mode='explicit-subset' if args.selected_tests_only else 'all-authored', authoredTests=len(test_names), selectedTests=len(expected))
+    receipt['frontendTimeoutSeconds'] = args.frontend_timeout
+    receipt['productTimeoutChanged'] = False
     if snapshots:
         receipt['unchangedPaths'] = [dict(path=name, snapshot=before) for name, _, before in snapshots]
     save(output / 'receipt.json', receipt)
