@@ -2,6 +2,7 @@
 package main
 
 import (
+	"bytes"
 	"encoding/binary"
 	"encoding/json"
 	"fmt"
@@ -9,6 +10,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/0disoft/fairyc/internal/lockfile"
 	"github.com/0disoft/fairyc/internal/packagegraph"
 	"github.com/0disoft/fairyc/internal/sdkstdlib"
 	"github.com/0disoft/fairyc/internal/workspaceloader"
@@ -39,6 +41,35 @@ func manifest(uid string, members []string, deps []dep) string {
 		body += fmt.Sprintf("[dependencies.%s]\npath=%q\nversion='1.0.0'\nfeatures=%s\n", d.binding, d.path, raw)
 	}
 	return body
+}
+func lockObservation(document lockfile.Document) []byte {
+	var out bytes.Buffer
+	writeNumber := func(value int) {
+		var data [8]byte
+		binary.BigEndian.PutUint64(data[:], uint64(value))
+		out.Write(data[:])
+	}
+	writeText := func(value string) { writeNumber(len(value)); out.WriteString(value) }
+	for _, value := range []string{document.Schema, document.PackageInstanceAlgorithm, document.SourceDigestAlgorithm, document.Language, document.Root} {
+		writeText(value)
+	}
+	writeNumber(len(document.Packages))
+	for _, p := range document.Packages {
+		for _, value := range []string{p.ID, p.Role, p.PackageUID, p.SourceKind, p.LocalPath, p.SDKIdentity, p.RuntimeABI, p.SourceIdentity, p.SourceDigest, p.Version} {
+			writeText(value)
+		}
+		writeNumber(len(p.Features))
+		for _, feature := range p.Features {
+			writeText(feature)
+		}
+	}
+	writeNumber(len(document.Dependencies))
+	for _, e := range document.Dependencies {
+		writeText(e.Owner)
+		writeText(e.Binding)
+		writeText(e.Target)
+	}
+	return out.Bytes()
 }
 func main() {
 	if len(os.Args) != 2 {
@@ -174,6 +205,21 @@ func main() {
 		write(dir, "nodes.txt", nodes.String())
 		write(dir, "edges.txt", edges.String())
 		write(dir, "lookups.txt", lookups.String())
+		document, lockErr := lockfile.FromWorkspace(loaded)
+		if lockErr != nil {
+			if !f.candidate || profile != 3 || !strings.Contains(lockErr.Error(), "contradictory SDK source origin") {
+				panic(lockErr)
+			}
+			write(dir, "lock-accepted.txt", "false")
+		} else {
+			canonical, err := lockfile.Marshal(document)
+			if err != nil {
+				panic(err)
+			}
+			write(dir, "lock-accepted.txt", "true")
+			write(dir, "lock.json", string(canonical))
+			write(dir, "projection.bin", string(lockObservation(document)))
+		}
 		observations = append(observations, map[string]any{"fixture": f.name, "profile": profile, "owners": owners, "candidate": f.candidate})
 	}
 	data, err := json.MarshalIndent(observations, "", "  ")

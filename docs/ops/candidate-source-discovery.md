@@ -661,3 +661,40 @@ successful SDK loading; this small fix covers error categorization and the exact
 lazy boundary. Lock projection and compiler/CLI integration remain. Stable
 CLI/API, SDK ABI/version, DB and CI are unchanged; Linux, full suite and Stage1/2
 are scheduled later and no push occurred.
+
+
+## Owned generated-lock document projection
+
+`project_lock_document` projects the validated resolved local/SDK graph into an
+owned document model with the exact five header values, ten scalar package
+fields, feature arrays and dependency endpoints/bindings of lockfile v1.
+Package records sort by full instance ID; edges sort by owner ID, binding and
+target ID, using a metered heap sort. Dependencies point into the sorted package
+array and equal-instance aliases retain their distinct binding records. Only
+root-reachable instances enter the document; local paths remain workspace-relative
+and SDK local paths/feature arrays remain empty. Schema/algorithm/language/root
+and SDK identity/ABI/version/source digest/source identity are exact.
+
+All strings copy into an owned bounded buffer; the original graph/source can
+close before reading the document. Projection consumes the existing shared work
+budget and an 8-MiB text ceiling. It performs no filesystem IO or counter update.
+The private vector-candidate SDK rejects instead of being normalized into the
+public SDK identity: current Go `lockfile.FromWorkspace`/`Validate` rejects that
+separately identified source too. An unused candidate lane with no injected SDK
+can project the ordinary local document.
+
+Thirteen full Go documents match every retained header/package/feature/dependency
+value and order. Exact-source graph, aliases, feature splits, core/vector SDK,
+unreachable members and similar namespaces are covered. All thirteen reject
+exhausted projection work; the private candidate rejection matches Go. Two native
+tests and development/release candidate C execution pass. The document remains
+readable after its source graph closes. Check passes 337 files and 4409 MIR
+functions. Evidence: `evidence/candidate-lock-document-20261012.json`.
+
+The SDK reference command now also calls owning `lockfile.FromWorkspace` and
+`Marshal`, saving canonical JSON for the next serializer unit and a test-only
+length-prefixed full-field observation for this projection. No second Go
+projection algorithm is used. This unit does not implement JSON, strict reading,
+stale matching or writing. Those and compiler/project CLI consumption remain.
+Stable CLI/API, SDK ABI/version, DB and CI are unchanged. Linux, full suite and
+Stage1/Stage2 remain scheduled later; no push occurred.
