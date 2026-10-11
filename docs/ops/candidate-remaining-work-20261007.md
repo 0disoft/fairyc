@@ -3831,3 +3831,20 @@ and API surface, the SDK ABI, DB, CI, caps, stack reserve and the timeout are
 unchanged. The full exact-source self replay does not pass inside the unchanged
 60-second frontend cap, so the reproducible two-stage bootstrap `promotion` row
 stays `blocked`, and no push, Linux, full suite or Stage 2 run has happened.
+
+
+## Strict lock reader: JSON lexical layer (2026-10-12)
+
+The bounded JSON decoder/scanner now retains owned source, decoded strings and
+token spans, preserves raw numbers and matches Go replacement behavior for
+malformed UTF-8 and unpaired UTF-16 surrogates. The 8-MiB pools, 1048576-token
+ceiling, shared work meter and transactional decode rollback are enforced.
+
+Go's 24 string cases, three exact native tests and candidate development/release
+execution pass; check passes 341 files and 4443 MIR functions. Receipt:
+`evidence/candidate-json-tokens-20261012.json`.
+
+JSON structure/duplicate keys, lock shape/identity/graph validation, stale
+comparison, atomic persistence and compiler/CLI integration remain. Stable
+CLI/API, SDK ABI/version, DB and CI are unchanged. Linux, full suite and
+Stage1/Stage2 remain scheduled later; no push occurred.

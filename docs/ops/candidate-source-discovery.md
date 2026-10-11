@@ -731,3 +731,24 @@ not a second canonical serializer. Strict JSON reading, identity/graph validatio
 stale comparison, atomic persistence and compiler/project CLI consumers remain.
 Stable CLI/API, SDK ABI/version, DB and CI are unchanged. Linux, full suite and
 Stage1/Stage2 remain scheduled later; no push occurred.
+
+
+## Bounded JSON string decoding and token scanning
+
+`project_json_decode` decodes JSON escapes and UTF-16 surrogate pairs, matching
+Go replacement behavior for malformed raw UTF-8 and unpaired surrogates.
+`project_json_tokens` owns source bytes, decoded strings and token spans and
+preserves raw number lexemes. Input/decoded pools cap at 8 MiB, tokens at 1048576,
+and both use the existing shared 16777216 work meter. Decoding restores the
+caller's prior output on failure; codes are 1 syntax, 2 allocation and 3 bound.
+
+The Go `encoding/json` oracle covers 24 string cases (14 accepted, 10 rejected).
+Three exact native tests and candidate development/release execution pass,
+covering the oracle, retained token values/spans, malformed lexemes, rollback,
+work exhaustion and oversized input. Check passes 341 files and 4443 MIR
+functions. Receipt: `evidence/candidate-json-tokens-20261012.json`.
+
+This is the lexical layer only. JSON structure/duplicate keys, lock shape and
+identity/graph validation, stale comparison, atomic persistence and compiler/CLI
+integration remain. Stable CLI/API, SDK ABI/version, DB and CI are unchanged;
+Linux, full suite and Stage1/Stage2 remain scheduled later and no push occurred.
