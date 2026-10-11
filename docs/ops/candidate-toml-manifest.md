@@ -145,6 +145,25 @@ next parser slice. The pinned Go oracle currently accepts 49; no Fairy parity
 claim is made for that corpus yet. Logical implicit/type metadata must follow
 the decoder across dotted paths, inline values and array-table entries.
 
+## Logical decoder context foundation
+
+`project_toml_context` interns decoded key components into bounded logical paths.
+Physical array items contribute no component, so repeated array-table entries
+and replacement tables share implicit/type metadata. Quoted dots and empty
+components keep their distinct mapping identities. The pinned decoder's empty
+assignment-key type behavior is represented separately from mapping identity.
+`define` consumes implicit metadata once, distinguishing retained tables from
+Array-typed replacement. Missing physical entries retain global implicit flags.
+
+Mutable name, entry and index owners stay separate. Their allocation, collision
+lookup and physical ancestor traversal share the document model's work budget;
+key bytes, entries and depth have explicit bounds. Three native tests and both
+candidate C profiles pass, including physical entry sharing, replacement,
+quoted/empty component identity, collision chains and depth/work exhaustion.
+Source check passes 301 files and 3849 MIR functions. Evidence is
+`evidence/candidate-toml-context-20261011.json`. The 111 Go table observations
+were refreshed (49 accepted); parser parity remains pending integration.
+
 ## Remaining connection
 
 1. Reconcile pinned Go table-definition behavior before claiming complete
