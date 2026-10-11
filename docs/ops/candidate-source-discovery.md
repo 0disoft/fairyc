@@ -208,6 +208,21 @@ input-buffer release and real manifest-file loading. Module mismatch retains
 the exact original 7..12 span and bytes. Full production check passes: 312 files
 and 3999 MIR functions. Evidence: `evidence/candidate-package-input-20261011.json`.
 
+## Streaming source hashing
+
+`sha256_stream` retains one 64-byte partial block and eight SHA-256 words,
+with checked modular compression shared by the existing one-shot implementation.
+It accepts up to 96 MiB without materializing a padded input buffer; the old
+one-shot API keeps its 1 MiB guard. Finalization copies the small state so the
+original can continue receiving input. Invalid state or an update exceeding the
+bound leaves the original unchanged.
+
+Two native tests and both candidate C profiles pass: empty/abc vectors, lengths
+55/56/63/64/65/127/128/129, seven-byte chunks, continuation after finalization,
+and 1,052,672 repeated bytes beyond the old cap. Explicit expected hashes were
+generated independently with Python hashlib. Full check passes 314 source files
+and 4010 MIR functions. Evidence: `evidence/candidate-sha256-stream-20261011.json`.
+
 ## Remaining connection
 
 Connect package inputs to exact source identity, workspace catalog/package
