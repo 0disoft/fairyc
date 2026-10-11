@@ -7,7 +7,6 @@ import effect_declarations as effects;
 import foreign_declarations as foreign;
 import repr_c_declarations as repr;
 import ffi_symbols as ffi;
-import sdk_authority as sdk;
 import std::bytes as bytes;
 import std::vec as v;
 
@@ -43,7 +42,7 @@ pub fn Result<Program,catalog::Problem> build(ref v::Vec<syntax::Parsed> sources
     let c=switch(catalog::build(sources)){case .ok(c):{c}case .err(p):{return .err(p);}};
     var v::Vec<types::Type> graph=v::empty<types::Type>();var v::Vec<Signature> signatures=v::empty<Signature>();var v::Vec<usize> parameters=v::empty<usize>();var v::Vec<bool> vector_sources=v::empty<bool>();var bytes::Buffer links=bytes::empty();
     var usize module_index=0;while(module_index<v::len<syntax::Parsed>(sources)){let p=v::at<syntax::Parsed>(sources,module_index);var usize index=1;
-        let bool vector_sdk=sdk::authentic(b"std::vec",syntax::source_view(p));if(!v::push<bool>(ref mut vector_sources,vector_sdk).is_ok){return .err(fail(11,module_index,0,0));}
+        let bool vector_sdk=catalog::sdk_vector_source(ref c,module_index);if(!v::push<bool>(ref mut vector_sources,vector_sdk).is_ok){return .err(fail(11,module_index,0,0));}
         while(index<syntax::declaration_count(p)){let d=syntax::declaration_at(p,index);if((d.kind==3 || d.kind==9) && d.generic_parameters==0){
             if(d.owner_end!=0 || d.generic_parameters!=0){return .err(fail(4501,module_index,d.start,d.end));}
             let contract=effects::read(p,index);if(contract.code!=0){return .err(fail(contract.code,module_index,contract.start,contract.end));}

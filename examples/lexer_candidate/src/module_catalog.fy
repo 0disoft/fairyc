@@ -10,7 +10,7 @@ import sdk_authority as sdk;
 // Program-local declaration coordinates. Names and aliases never define type
 // equality. This owner contains no borrowed syntax or source buffers.
 pub struct Problem {u32 code;usize module_index;usize start;usize end;}
-pub struct Module {usize start;usize end;usize source_start;usize source_end;u32[8] digest;}
+pub struct Module {usize start;usize end;usize source_start;usize source_end;u32[8] digest;bool vector_sdk;}
 pub struct Declaration {u32 kind;usize module_index;usize declaration;bool public;usize start;usize end;usize source_start;usize source_end;}
 pub struct Import {usize module_index;usize start;usize end;usize path_start;usize path_end;usize source_start;usize source_end;}
 pub struct Lookup {u32 code;usize item;}
@@ -24,9 +24,10 @@ pub fn usize declaration_count(ref Catalog c){return v::len<Declaration>(ref c.d
 // Digest belongs to the retained exact source snapshot, not a caller claim.
 pub fn u32[8] source_digest(ref Catalog c,usize module_index){assert(module_index<module_count(c));return v::at<Module>(ref c.modules,module_index).digest;}
 pub fn bool source_matches(ref Catalog c,usize module_index,ref syntax::Parsed p){if(module_index>=module_count(c)){return false;}let m=*v::at<Module>(ref c.modules,module_index);return bytes::equal(bytes::view(ref c.sources)[m.source_start..m.source_end],syntax::source_view(p));}
+// Build authenticates reserved source names before retaining this flag.
+pub fn bool sdk_vector_source(ref Catalog c,usize module_index){return module_index<module_count(c) && v::at<Module>(ref c.modules,module_index).vector_sdk;}
 pub fn bool sdk_vector(ref Catalog c,usize module_index,usize declaration){
-    if(module_index>=module_count(c)){return false;}let m=*v::at<Module>(ref c.modules,module_index);
-    if(!same(c,m.start,m.end,b"std::vec") || !sdk::authentic(b"std::vec",bytes::view(ref c.sources)[m.source_start..m.source_end])){return false;}
+    if(!sdk_vector_source(c,module_index)){return false;}
     let usize id=identity(c,module_index,declaration);return id!=0 && declaration_at(c,id).kind==6 && same(c,declaration_at(c,id).start,declaration_at(c,id).end,b"Vec");
 }
 pub fn Declaration declaration_at(ref Catalog c,usize id){assert(id>0 && id<=declaration_count(c));return *v::at<Declaration>(ref c.declarations,id-1);}
@@ -63,7 +64,7 @@ pub fn Result<Catalog,Problem> build(ref v::Vec<syntax::Parsed> sources){
         var usize n=0;while(n<v::len<Module>(ref modules)){let m=*v::at<Module>(ref modules,n);if(spelling_same(ref names,m.start,m.end,bytes::view(ref path))){return .err(fail(1,module_index,first.name_start,first.name_end));}n+=1;}
         let usize start=bytes::len(ref names);let usize source_start=bytes::len(ref source_bytes);if(syntax::source_view(p).len>limits::source_bytes()){return .err(fail(10,module_index,0,syntax::source_view(p).len));}
         if(source_start>limits::source_set_bytes() || syntax::source_view(p).len>limits::source_set_bytes()-source_start){return .err(fail(10,module_index,0,syntax::source_view(p).len));}
-        if(!bytes::append(ref mut source_bytes,syntax::source_view(p)).is_ok || !append(ref mut names,bytes::view(ref path)) || !v::push<Module>(ref mut modules,Module{.start,.end=bytes::len(ref names),.source_start,.source_end=bytes::len(ref source_bytes),.digest=hash::digest(syntax::source_view(p))}).is_ok){return .err(fail(11,module_index,first.start,first.end));}
+        if(!bytes::append(ref mut source_bytes,syntax::source_view(p)).is_ok || !append(ref mut names,bytes::view(ref path)) || !v::push<Module>(ref mut modules,Module{.start,.end=bytes::len(ref names),.source_start,.source_end=bytes::len(ref source_bytes),.digest=hash::digest(syntax::source_view(p)),.vector_sdk=bytes::equal(bytes::view(ref path),b"std::vec")}).is_ok){return .err(fail(11,module_index,first.start,first.end));}
         var usize index=1;var usize count=0;while(index<syntax::declaration_count(p)){
             let d=syntax::declaration_at(p,index);if(d.kind!=2 && d.kind!=3 && d.kind!=4 && d.kind!=6 && d.kind!=7 && d.kind!=9 && d.kind!=11 || d.owner_end!=0){return .err(fail(9,module_index,d.start,d.end));}
             let name=syntax::source_view(p)[d.name_start..d.name_end];if(bytes::equal(name,b"source_location")){return .err(fail(4401,module_index,d.name_start,d.name_end));}

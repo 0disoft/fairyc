@@ -7,7 +7,6 @@ import literal_types as literals;
 import pointer_types as pointers;
 import c_abi_types as abi;
 import array_types as arrays;
-import sdk_authority as sdk;
 import std::bytes as bytes;
 import std::vec as v;
 
@@ -118,7 +117,7 @@ pub fn Resolution declaration(ref catalog::Catalog c,usize module_index,usize de
 }
 pub fn Resolution specialize(ref catalog::Catalog c,ref syntax::Parsed p,usize module_index,usize declaration,usize root,ref v::Vec<usize> substitutions,ref mut v::Vec<Type> graph){
     if(!catalog::source_matches(c,module_index,p)){return fail(12,module_index,0,0);}if(declaration==0 || declaration>syntax::declaration_count(p) || root==0 || root>syntax::type_count(p)){return fail(4501,module_index,0,0);}
-    let d=syntax::declaration_at(p,declaration-1);let n=syntax::type_at(p,root);let usize size=v::len<usize>(substitutions);let bool vector=sdk::authentic(b"std::vec",syntax::source_view(p));let bool vector_cleanup=d.kind==6 && vector && bytes::equal(syntax::source_view(p)[d.name_start..d.name_end],b"Vec") && n.start>=d.cleanup_start && n.end<=d.cleanup_end;
+    let d=syntax::declaration_at(p,declaration-1);let n=syntax::type_at(p,root);let usize size=v::len<usize>(substitutions);let bool vector=catalog::sdk_vector_source(c,module_index);let bool vector_cleanup=d.kind==6 && vector && bytes::equal(syntax::source_view(p)[d.name_start..d.name_end],b"Vec") && n.start>=d.cleanup_start && n.end<=d.cleanup_end;
     if((d.kind!=3 && !vector_cleanup) || d.generic_parameters==0 || size==0 || size>8 || size!=syntax::generic_parameter_count(p,declaration-1) || n.start<d.start || n.end>d.end){return fail(4501,module_index,n.start,n.end);}
     var usize i=0;while(i<size){let usize id=*v::at<usize>(substitutions,i);if(id==0 || id>count(graph)){return fail(4502,module_index,n.start,n.end);}let t=at(graph,id);if(!(t.kind==1 && t.scalar>=1 && t.scalar<=6) && !(vector && (t.kind==2 || t.kind==3))){return fail(4502,module_index,n.start,n.end);}i+=1;}
     let usize before=count(graph);let result=walk(c,p,module_index,root,graph,0,declaration,substitutions);if(result.problem.code!=0){while(count(graph)>before){discard v::pop<Type>(graph);}}return result;

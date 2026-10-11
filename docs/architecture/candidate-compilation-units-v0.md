@@ -2290,3 +2290,28 @@ dispatcher compilation and repeated SDK Vec authentication hashing remain; that
 hashing is a cache-only prototype, not main behavior.
 
 Evidence: `docs/ops/evidence/candidate-retained-source-digests-20261011.json`.
+
+
+## Owned SDK authentication reused (2026-10-11)
+
+`module_catalog::Catalog` authenticates reserved SDK source names against the
+existing exact source pins and keeps the result as one immutable per-module flag
+in the owned module vector. `module_signatures`, Vec type validation and
+specialization, and the generic instance/forward/cleanup paths reuse that flag;
+source-byte freshness checks and the original SDK pins are unchanged.
+
+Three Release native cases pass: the authenticated Vec graph (element and
+provider, with fake SDK name 6801 rejected), an exact SDK resource template
+specializing on its named element, and a retained plan that still rejects changed
+provider bytes; the updated SDK-authority test covers the cached flag as true,
+false and out of range. The development candidate build keeps the unchanged
+nine-case CLI matrix and packet, so its previous C executions are reused. The Vec
+bridge compiles and runs real C in both profiles, while the fake SDK case stops
+at 6801 and preserves the previous image. Non-locked checking passes 292 files
+and 3671 MIR functions with the lock updated; no limit changed.
+
+The full 285-file bridge joins 2019997 bytes and still stops at the 60-second
+frontend timeout (exit 2, 60.0423 seconds) with the previous image preserved, so
+complete dispatcher compilation remains outstanding.
+
+Evidence: `docs/ops/evidence/candidate-sdk-authentication-cache-20261011.json`.

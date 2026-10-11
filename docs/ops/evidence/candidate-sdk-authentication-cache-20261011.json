@@ -1,0 +1,170 @@
+{
+  "schema": "fairyc.candidate-sdk-authentication-cache/v1",
+  "owner": "Catalog authenticates reserved SDK source names against existing exact source pins before retaining the immutable per-module Vec flag.",
+  "reuse": "Signatures, Vec type validation/specialization and generic instance/forward/cleanup paths reuse the owned flag. Source-byte freshness checks and original SDK pins remain unchanged.",
+  "sources": [
+    {
+      "path": "examples/lexer_candidate/src/module_catalog.fy",
+      "sha256": "0c2804b7b0628d53437531b5577d7d3dea5b1eb17dcb4d02a6dc9e3c812c5097"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_signatures.fy",
+      "sha256": "d0d03cd148533910a79e427ad2080cf3bc44cdc706d049ecb7ccaabd5caca9ed"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_types.fy",
+      "sha256": "2bbad7d79b6960537ec80c160d87937b0eddce2d29c781295b585b9a380ab2c5"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_unit_generics.fy",
+      "sha256": "b98696d3a798565567d32f9c23a8d876c8d7295551b75a6f2c85cd528c58b9a0"
+    }
+  ],
+  "sourceCheck": {
+    "exit": 0,
+    "files": 292,
+    "mirFunctions": 3671,
+    "lockUpdated": true
+  },
+  "native": {
+    "exit": 0,
+    "passed": 3,
+    "failed": 0,
+    "profile": "release",
+    "seconds": 137.84257600000274,
+    "tests": [
+      {
+        "identity": "tests::module_unit_generics::exact_sdk_templates_specialize_named_resource_elements",
+        "outcome": "passed"
+      },
+      {
+        "identity": "tests::module_unit_generics::retained_plan_rejects_changed_provider_bytes_and_graph_prefix",
+        "outcome": "passed"
+      },
+      {
+        "identity": "tests::sdk_authority::authenticated_vec_graph_retains_element_and_provider",
+        "outcome": "passed"
+      }
+    ]
+  },
+  "cli": {
+    "candidateSHA256": "a5318b1aa1fda141b0838fcdce2c3d9a11697f8a7f16a377df1be79335215b26",
+    "cases": [
+      {
+        "name": "positive",
+        "exit": 0,
+        "stdoutBytes": 3565,
+        "stderr": "",
+        "seconds": 0.09322350000002189
+      },
+      {
+        "name": "dependency-entry",
+        "exit": 2,
+        "stdoutBytes": 0,
+        "stderr": ".cache/candidate-tagged/sdk-c-execution/project-cli-sdk/fixtures/root.fy:1:1: error: project phase 4 stage 0 code 1001 (bytes 0..0)\n",
+        "seconds": 0.08184919999621343
+      },
+      {
+        "name": "wrong-result",
+        "exit": 2,
+        "stdoutBytes": 0,
+        "stderr": ".cache/candidate-tagged/sdk-c-execution/project-cli-sdk/fixtures/void.fy:1:1: error: project phase 5 stage 0 code 1001 (bytes 0..0)\n",
+        "seconds": 0.080663500004448
+      },
+      {
+        "name": "type-error",
+        "exit": 2,
+        "stdoutBytes": 0,
+        "stderr": ".cache/candidate-tagged/sdk-c-execution/project-cli-sdk/fixtures/type.fy:1:34: error: project phase 2 stage 4 code 1009 (bytes 33..37)\n",
+        "seconds": 0.019453000000794418
+      },
+      {
+        "name": "syntax-error",
+        "exit": 2,
+        "stdoutBytes": 0,
+        "stderr": ".cache/candidate-tagged/sdk-c-execution/project-cli-sdk/fixtures/syntax.fy:1:36: error: expected } (bytes 35..35)\n",
+        "seconds": 0.019790099999227095
+      },
+      {
+        "name": "missing-source",
+        "exit": 2,
+        "stdoutBytes": 0,
+        "stderr": "error: input file read failed\n",
+        "seconds": 0.016410299998824485
+      },
+      {
+        "name": "blank-manifest",
+        "exit": 2,
+        "stdoutBytes": 0,
+        "stderr": "error: invalid module manifest\n",
+        "seconds": 0.01859359999798471
+      },
+      {
+        "name": "invalid-utf8",
+        "exit": 2,
+        "stdoutBytes": 0,
+        "stderr": "error: invalid module manifest\n",
+        "seconds": 0.015609900001436472
+      },
+      {
+        "name": "duplicate-source",
+        "exit": 2,
+        "stdoutBytes": 0,
+        "stderr": ".cache/candidate-tagged/sdk-c-execution/project-cli-sdk/fixtures/main.fy:1:8: error: project phase 1 stage 0 code 1 (bytes 7..11)\n",
+        "seconds": 0.018033200001809746
+      }
+    ],
+    "ordinaryPacketMatchesPrevious": true,
+    "unchangedOrdinaryCExecutionsReused": true
+  },
+  "nativeBridge": {
+    "passed": true,
+    "cases": [
+      {
+        "name": "vector-dev",
+        "exit": 0,
+        "seconds": 1.2695909000030952,
+        "stdout": "built: C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\sdk-cache-fixtures\\vector-dev.exe (low, 1 C units, 117248 bytes)\n",
+        "stderr": "",
+        "programExit": 0,
+        "imageSHA256": "7b101b2cd045b97f5dc7c58b3972d6c67a8237ba1440491cf4570f8099aef91d"
+      },
+      {
+        "name": "vector-release",
+        "exit": 0,
+        "seconds": 1.3664688999997452,
+        "stdout": "built: C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\sdk-cache-fixtures\\vector-release.exe (optimized, 1 C units, 110592 bytes)\n",
+        "stderr": "",
+        "programExit": 0,
+        "imageSHA256": "a3b25c74c1d7c2a7136d8f2da6106e0c897f4a94a03dd29f0d5056984e6e6bc9"
+      },
+      {
+        "name": "fake-sdk",
+        "exit": 2,
+        "seconds": 0.04223639999690931,
+        "stdout": "",
+        "stderr": "candidate build failed: candidate frontend failed: exit status 2: .cache/candidate-tagged/sdk-c-execution/sdk-cache-fixtures/fake.fy:1:8: error: project phase 1 stage 0 code 6801 (bytes 7..15)\n",
+        "previousImagePreserved": true
+      }
+    ]
+  },
+  "fullCurrentDispatcher": {
+    "exit": 2,
+    "seconds": 60.04227060000267,
+    "stdout": "",
+    "stderr": "candidate build failed: candidate frontend timeout: context deadline exceeded\n",
+    "sourceFiles": 285,
+    "joinedSourceBytes": 2019997,
+    "previousImagePreserved": true,
+    "sourceInventorySHA256": "902034b913c9ff8838e2891ad4a084c148ac27e7cd0f47b04175b5ceb717b6d1"
+  },
+  "limitsChanged": false,
+  "fullCompilationProven": false,
+  "pushed": false,
+  "skipped": [
+    "Release standalone candidate build",
+    "Linux",
+    "full suite",
+    "Stage1/Stage2"
+  ]
+}
