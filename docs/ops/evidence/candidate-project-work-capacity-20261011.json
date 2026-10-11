@@ -1,0 +1,281 @@
+{
+  "schema": "fairyc.candidate-project-work-capacity/v1",
+  "passed": true,
+  "projectWork": 8388608,
+  "previousProjectWork": 4194304,
+  "perUnitAndBodyWork": 1048576,
+  "otherCapsChanged": false,
+  "sources": [
+    {
+      "path": "examples/lexer_candidate/src/candidate_limits.fy",
+      "sha256": "7a27948d9a43bde84acdf1106f462d0c5a288f8a54f193560658eff0c0d00f3e"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_unit_c_emit.fy",
+      "sha256": "7ac3cf86675b08da72c1fa106c7cf9b2b725f7b3129ef4104efc5f44d5a1ea2c"
+    },
+    {
+      "path": "examples/lexer_candidate/tests/module_unit_ir_budgets.fy",
+      "sha256": "e3287ce72bc37a61634f9182e7672a74b7d685ded50d346faa6adde082e51a83"
+    }
+  ],
+  "commentOnlyFollowup": "C-emitter comment names limits::project_work instead of stale 4MiB literal; check refreshed afterward, runtime code unchanged",
+  "native": {
+    "exit": 0,
+    "profile": "development",
+    "passed": 2,
+    "failed": 0,
+    "seconds": 88.02900779999618,
+    "argv": [
+      "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\compiler-build-120s.exe",
+      "test",
+      "--native",
+      "--locked",
+      "--json",
+      "--capture-output",
+      "--exact",
+      "tests::module_unit_ir_budgets::owned_ir_revalidation_has_an_independent_bounded_budget",
+      "--exact",
+      "tests::module_unit_ir_budgets::project_ir_work_capacity_keeps_an_exact_ceiling_and_unit_budget"
+    ],
+    "tests": [
+      {
+        "identity": "tests::module_unit_ir_budgets::owned_ir_revalidation_has_an_independent_bounded_budget",
+        "outcome": "passed"
+      },
+      {
+        "identity": "tests::module_unit_ir_budgets::project_ir_work_capacity_keeps_an_exact_ceiling_and_unit_budget",
+        "outcome": "passed"
+      }
+    ],
+    "exactProjectCapAccepted": true,
+    "projectCapPlusOneRejected": true,
+    "unitCapPlusOneRejected": true,
+    "failedChargePreservesCounter": true
+  },
+  "sourceCheck": {
+    "exit": 0,
+    "files": 292,
+    "mirFunctions": 3677,
+    "lockUpdated": true
+  },
+  "cacheOnlyCapacityProbe": {
+    "cacheOnlyCapacityProbe": true,
+    "projectWork": 8388608,
+    "productionProjectWork": 4194304,
+    "perUnitWork": 1048576,
+    "frontendTimeoutSeconds": 60,
+    "runs": [
+      {
+        "exit": 0,
+        "seconds": 20.36877529999765,
+        "stdoutBytes": 21837974,
+        "stderr": ""
+      },
+      {
+        "exit": 0,
+        "seconds": 37.76548969998839,
+        "stdoutBytes": 32,
+        "stderr": ""
+      },
+      {
+        "exit": 0,
+        "seconds": 0.19616619999578688,
+        "stdoutBytes": 0,
+        "stderr": ""
+      },
+      {
+        "exit": 0,
+        "seconds": 34.14437480000197,
+        "stdoutBytes": 25429918,
+        "stderr": ""
+      }
+    ],
+    "packetSHA256": "39b3d942d6c76a8dc20f6919e7df25a7ee6d932bac491ccce75d5d8b04589439"
+  },
+  "probePacket": {
+    "bytes": 25429918,
+    "headerBytes": 812068,
+    "literalsBytes": 200850,
+    "units": 35,
+    "selectedFrames": 4105,
+    "literalDefinitions": 996
+  },
+  "bootstrapValidation": {
+    "cacheOnlyInlining": true,
+    "productionReleaseFlagsChanged": false,
+    "sourceSHA256": "815db011af7bf8086905918b7d8fe34c64b0b1caefb3215dd1f880c7737f0df3",
+    "runtimeObjectSHA256": "fd33d07717df1e64bfc59875d64f51071926dc798d9266d8ef3054f6ea5ec48b",
+    "compilerSHA256": "2093cfcf54aee419e65e129fb3d2784635b6a964c5e11ec31b40470a1e62dedc",
+    "runs": [
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\compiler-build-120s.exe",
+          "experimental",
+          "emit-workspace-c",
+          "--target",
+          "x86_64-windows-msvc",
+          "--locked"
+        ],
+        "exit": 0,
+        "seconds": 25.24401590001071,
+        "timeout": false,
+        "stdoutBytes": 21834415,
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+          "/nologo",
+          "/std:c11",
+          "/TC",
+          "/W4",
+          "/WX",
+          "/MT",
+          "/O2",
+          "/Ob1",
+          "/c",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\bootstrap-project-work.c",
+          "/Fo:C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\bootstrap-project-work.obj"
+        ],
+        "exit": 0,
+        "seconds": 49.38722649999545,
+        "timeout": false,
+        "stdoutBytes": 26,
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+          "/nologo",
+          "/MT",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\bootstrap-project-work.obj",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\bootstrap-retained-runtime.obj",
+          "/Fe:C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\bootstrap-project-work.exe",
+          "/link",
+          "/INCREMENTAL:NO"
+        ],
+        "exit": 0,
+        "seconds": 0.2668184000067413,
+        "timeout": false,
+        "stdoutBytes": 0,
+        "stderr": ""
+      }
+    ]
+  },
+  "fullCurrentDispatcher": {
+    "exit": 0,
+    "seconds": 60.036876199999824,
+    "stdout": "built: C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\bridge-full-project-work.exe (low, 35 C units, 9634304 bytes)\n",
+    "stderr": "",
+    "previousImagePreserved": false,
+    "helpExit": 0,
+    "helpStdout": "usage: lexer-candidate --tokens-file <path>\n       lexer-candidate --declarations-file <path>\n       lexer-candidate --check-names-file <path>\n       lexer-candidate --bindings-file <path>\n       lexer-candidate --check-types-file <path>\n       lexer-candidate --check-modules-file <manifest>\n       lexer-candidate --check-return-origins-file <manifest>\n       lexer-candidate --c-modules-file <manifest>\n       lexer-candidate --c-project-file <manifest>\n       lexer-candidate --hir-file <path>\n       lexer-candidate --mir-file <path>\n       lexer-candidate --c-file <path>\n       lexer-candidate --help\nNo arguments: private binary stdin protocol.\n",
+    "helpStderr": "",
+    "imageBytes": 9634304,
+    "imageSHA256": "051fd5ad7d868bbc0c9b3f003c70e2e84bb426ad93d3e68e3150809ea1c211d9",
+    "sourceFiles": 285,
+    "joinedSourceBytes": 2024200,
+    "profile": "development",
+    "sourceInventorySHA256": "054137e9907443048d4f2faed40d5737c6de450c3497b7dbf4c88b65b2d8a2cb"
+  },
+  "fullCompilerOwnCli": {
+    "passed": true,
+    "compilerSHA256": "051fd5ad7d868bbc0c9b3f003c70e2e84bb426ad93d3e68e3150809ea1c211d9",
+    "cases": [
+      {
+        "name": "positive",
+        "exit": 0,
+        "seconds": 0.2941158000030555,
+        "stdoutBytes": 3565,
+        "stderr": "",
+        "packetSHA256": "68c878676f624102da5d214b87c36f673823603bcfbfc9ad30a919bedff430dc",
+        "priorCExecutionReused": true
+      },
+      {
+        "name": "dependency-entry",
+        "exit": 2,
+        "seconds": 0.17910360000678338,
+        "stdoutBytes": 0,
+        "stderr": ".cache/candidate-tagged/sdk-c-execution/project-cli-sdk/fixtures/root.fy:1:1: error: project phase 4 stage 0 code 1001 (bytes 0..0)\n"
+      },
+      {
+        "name": "wrong-result",
+        "exit": 2,
+        "seconds": 0.1680006999959005,
+        "stdoutBytes": 0,
+        "stderr": ".cache/candidate-tagged/sdk-c-execution/project-cli-sdk/fixtures/void.fy:1:1: error: project phase 5 stage 0 code 1001 (bytes 0..0)\n"
+      },
+      {
+        "name": "type-error",
+        "exit": 2,
+        "seconds": 0.02235060000384692,
+        "stdoutBytes": 0,
+        "stderr": ".cache/candidate-tagged/sdk-c-execution/project-cli-sdk/fixtures/type.fy:1:34: error: project phase 2 stage 4 code 1009 (bytes 33..37)\n"
+      },
+      {
+        "name": "syntax-error",
+        "exit": 2,
+        "seconds": 0.019166599988238886,
+        "stdoutBytes": 0,
+        "stderr": ".cache/candidate-tagged/sdk-c-execution/project-cli-sdk/fixtures/syntax.fy:1:36: error: expected } (bytes 35..35)\n"
+      },
+      {
+        "name": "missing-source",
+        "exit": 2,
+        "seconds": 0.019999900003313087,
+        "stdoutBytes": 0,
+        "stderr": "error: input file read failed\n"
+      },
+      {
+        "name": "blank-manifest",
+        "exit": 2,
+        "seconds": 0.017077700002118945,
+        "stdoutBytes": 0,
+        "stderr": "error: invalid module manifest\n"
+      },
+      {
+        "name": "invalid-utf8",
+        "exit": 2,
+        "seconds": 0.01879190000181552,
+        "stdoutBytes": 0,
+        "stderr": "error: invalid module manifest\n"
+      },
+      {
+        "name": "duplicate-source",
+        "exit": 2,
+        "seconds": 0.02590889998828061,
+        "stdoutBytes": 0,
+        "stderr": ".cache/candidate-tagged/sdk-c-execution/project-cli-sdk/fixtures/main.fy:1:8: error: project phase 1 stage 0 code 1 (bytes 7..11)\n"
+      },
+      {
+        "name": "vector-dev",
+        "exit": 0,
+        "seconds": 3.124869499995839,
+        "stdout": "built: C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\bridge-switch-vector-dev.exe (low, 1 C units, 117248 bytes)\n",
+        "stderr": "",
+        "imageSHA256": "5406bf995dacab7f4e4aabb51b18f86566ee1882354b32da06f210ae25c2b9f7",
+        "programExit": 0
+      },
+      {
+        "name": "vector-release",
+        "exit": 0,
+        "seconds": 2.793112100000144,
+        "stdout": "built: C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\bridge-switch-vector-release.exe (optimized, 1 C units, 110592 bytes)\n",
+        "stderr": "",
+        "imageSHA256": "b9807ece6185acef339917c505a7dbdd84500df49d7ff108b2d06a97f40abb9f",
+        "programExit": 0
+      }
+    ]
+  },
+  "fullCurrentSourceNativeCompilerProven": true,
+  "selfHostingReproducibilityGateProven": false,
+  "next": "Use the complete Fairy-generated compiler for controlled full-source Stage1/Stage2 replay and comparison",
+  "pushed": false,
+  "skipped": [
+    "Linux (deferred batch)",
+    "full suite (targeted change)",
+    "Stage1/Stage2 reproducibility gate (next slice)",
+    "default standalone Release policy change"
+  ]
+}

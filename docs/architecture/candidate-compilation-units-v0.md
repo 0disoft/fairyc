@@ -134,12 +134,12 @@ parameter storage is capped at 32768 and owned spelling storage at 65536 bytes.
 
 Project linking admits at most 8192 rebound frames. Type, frame and metadata
 plans each retain their 1048576 work cap. Whole-project rebinding and call
-validation have a separate 4194304 work cap, recorded by an explicit project
+validation have a separate 8388608 work cap, recorded by an explicit project
 scope in cleanup MIR. Unit constructors retain the 1048576 producer cap;
 project constructors admit the larger cumulative history. Cleanup revalidation
 has an independent 1048576 traversal budget. Owned body revalidation retains
 1048576 per body/metadata phase and also accounts every project checkpoint
-against a 4194304 aggregate budget. Unit revalidation keeps its original
+against a 8388608 aggregate budget. Unit revalidation keeps its original
 1048576 aggregate cap. The cleanup-MIR verifier uses the same frame cap. Project metadata
 and cleanup recipes share a separate 4096-field project cap. Imported unit
 interfaces remain capped at 2048 fields. Ordinary bodies are
@@ -2445,3 +2445,30 @@ revalidation budget in a cache-only scoped-capacity probe, without a full
 compile claim. Linux, the full suite, Stage1/Stage2 and push were skipped.
 
 Evidence: `docs/ops/evidence/candidate-switch-presence-20261011.json`.
+
+
+## Whole-project work capacity (2026-10-11)
+
+The actual full 285-source path with the current 4 MiB project cap still stops
+at code 1002, while the cache-only 8 MiB probe produces a complete validated
+FYCPARTS1 packet in 34.1444 seconds: 25429918 bytes, header 812068, literals
+200850, 35 C units, 4105 selected frames and 996 literals. The product
+`candidate_limits::project_work` now raises 4194304 to 8388608; the per-body and
+unit 1 MiB caps and the type, field, frame and byte caps are unchanged. Source
+checking passes 292 files and 3677 MIR functions with the lock updated.
+
+Two development native boundary tests pass in 88.0290 seconds: the exact 8 MiB
+ceiling plus or minus one and the unchanged 1 MiB unit, with an independent
+producer/revalidation budget. The actual current 285-source 2024200-byte join now
+completes as a full bridge, exit 0 in 60.0369 seconds of frontend plus the 35-unit
+native build, with the frontend 60-second cap unchanged; the built compiler
+answers `--help` with exit 0 in 0.0246 seconds and empty stderr. That first full
+current-source Fairy-generated development compiler image is 9634304 bytes, and
+its own nine CLI matrix cases and native Vec development and release executions
+pass, with the ordinary packet hash matching the prior SDK receipt so those C
+executions are reused. The current bound is 8 MiB. The Stage1/Stage2
+reproducibility gate is not yet completed. The Go-emitted `/O2 /Ob1` bootstrap
+remains cache-only and the product Release flags are unchanged. Linux, the full
+suite, Stage1/Stage2 gate and push were not run.
+
+Evidence: `docs/ops/evidence/candidate-project-work-capacity-20261011.json`.

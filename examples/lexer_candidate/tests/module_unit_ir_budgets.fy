@@ -24,6 +24,17 @@ fn Result<ir::Program,clean::Problem> empty(usize producer_work){
     let p=switch(empty(1048576)){case .ok(p):{p}case .err(_):{assert(false);return;}};assert(ir::work(ref p)==1048576 && proof::check(ref p).code==0);
     switch(empty(1048577)){case .ok(_):{assert(false);}case .err(e):{assert(e.code==1002);}};
 }
+fn Result<ir::Program,clean::Problem> empty_project(usize producer_work){
+    var v::Vec<types::Type> graph=v::empty<types::Type>();assert(v::push<types::Type>(ref mut graph,types::Type{.kind=1,.scalar=7,.module_index=0,.declaration=0,.first=0,.second=0}).is_ok);var v::Vec<clean::Glue> glues=v::empty<clean::Glue>();assert(v::push<clean::Glue>(ref mut glues,clean::Glue{.kind=0,.frame=0,.nonempty=false,.effects=0,.abilities=0,.field_start=0,.field_count=0}).is_ok);
+    let cleaned=switch(clean::assemble_project(graph,v::empty<clean::Frame>(),glues,v::empty<clean::Field>(),v::empty<clean::Operand>(),v::empty<clean::Drop>(),producer_work)){case .ok(p):{p}case .err(e):{return .err(e);}};
+    return ir::assemble(cleaned,v::empty<ir::Body>(),v::empty<ir::Layout>(),v::empty<interfaces::Field>(),v::empty<interfaces::Callable>(),v::empty<usize>(),bytes::empty(),producer_work);
+}
+@test fn void project_ir_work_capacity_keeps_an_exact_ceiling_and_unit_budget(){
+    assert(limits::project_work()==8388608);var usize work=limits::project_work()-1;assert(limits::project_charge(ref mut work,1) && work==limits::project_work());assert(!limits::project_charge(ref mut work,1) && work==limits::project_work());
+    let p=switch(empty_project(limits::project_work())){case .ok(p):{p}case .err(_):{assert(false);return;}};assert(ir::work(ref p)==limits::project_work() && proof::check(ref p).code==0);
+    switch(empty_project(limits::project_work()+1)){case .ok(_):{assert(false);}case .err(e):{assert(e.code==1002);}};
+    switch(empty(1048577)){case .ok(_):{assert(false);}case .err(e):{assert(e.code==1002);}};
+}
 @test @effects(filesystem,console) fn void original_bodies_unit_revalidates_with_all_main_sdk_sources(){
     let count=process::arg_count()-1;assert(count>200 && count<=limits::source_files());var v::Vec<syntax::Parsed> sources=v::empty<syntax::Parsed>();var usize i=0;
     while(i<count){var u8[4096] path=[0;4096];let n=switch(process::arg(i+1,ref mut path)){case .ok(n):{n}case .err(_):{assert(false);return;}};let b=switch(files::load(ref path[..n])){case .ok(b):{b}case .err(_):{assert(false);return;}};let s=switch(scanner::collect(b,false,limits::source_bytes(),1048576,256,16777216)){case .ok(p):{p}case .err(_):{assert(false);return;}};let p=switch(syntax::parse(s,512)){case .ok(p):{p}case .err(_):{assert(false);return;}};assert(syntax::problem_count(ref p)==0);assert(v::push<syntax::Parsed>(ref mut sources,p).is_ok);i+=1;}

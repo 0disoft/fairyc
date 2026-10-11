@@ -30,5 +30,7 @@ pub fn usize project_frames(){return 8192;}
 pub fn usize project_callables(){return 4096;}
 
 // Whole-project rebinding combines independently capped producer histories.
-pub fn usize project_work(){return 4194304;}
+// The complete dispatcher exceeds 4 MiB during owned IR revalidation. Each
+// source unit and body retains its separate 1 MiB budget; only the sum grows.
+pub fn usize project_work(){return 8388608;}
 pub fn bool project_charge(ref mut usize work,usize amount){if(*work>project_work() || amount>project_work()-*work){return false;};*work+=amount;return true;}

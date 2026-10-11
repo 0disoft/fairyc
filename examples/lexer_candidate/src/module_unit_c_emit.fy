@@ -171,7 +171,7 @@ fn clean::Problem append_project_units(ref Prepared p,usize first,usize stop,usi
 }
 // A complete project owns its validated IR and never exposes a successful prefix.
 // Analysis, common declarations and each body attempt retain 1 MiB work;
-// output buffers retain 2 MiB. All histories share the 4 MiB project ledger.
+// output buffers retain 2 MiB. All histories share limits::project_work().
 fn Result<Bundle,clean::Problem> partition_scoped(ir::Program program,usize entry,usize max_frames,bool entry_only){
     if(max_frames==0 || max_frames>limits::project_frames()){return .err(fail(1001,0,0,0));}let p=switch(prepare_project(program,entry,entry_only)){case .ok(p):{p}case .err(e):{return .err(e);}};let frames=ir::count(ref p.program);var usize total=p.work;var usize retries=0;var v::Vec<Unit> units=v::empty<Unit>();var usize first=1;
     while(first<=frames){let stop=if(max_frames<frames+1-first){first+max_frames}else{frames+1};let e=append_project_units(ref p,first,stop,0,ref mut units,ref mut total,ref mut retries);if(e.code!=0){return .err(e);}first=stop;}
