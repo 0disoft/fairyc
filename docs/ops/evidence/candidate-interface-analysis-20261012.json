@@ -1,0 +1,407 @@
+{
+  "schema": "fairyc.candidate-interface-analysis/v1",
+  "passed": true,
+  "sourceCheck": {
+    "files": 361,
+    "mirFunctions": 4672
+  },
+  "extraction": {
+    "schema": "fairyc.candidate-interface-extraction/v1",
+    "passed": true,
+    "baseline": "13d7a426",
+    "coordinatorEquivalent": true,
+    "functionCanonicalSHA256": {
+      "fail": "093660d3c289c963b18324b1394090d83f63ed7ce925c58acb6526c59169055d",
+      "charge": "e738078b0b86d2e9e318c83da417e86cdeb1330e6b35d5bae8d6cd182471f77e",
+      "mark": "e6fd588878fb72c558a413df3b3f3240c4815e74d689bbcad6ee0f73845bbbe0",
+      "append": "5b190d7f3807c24442dcc0ef69071b809a34dd404a7b5a607a274faf1c1c91a3",
+      "request": "8ae4d97cf5e5eec336f7a67fdd576f95c74e3b0767909d4c87d1dc688d122fac",
+      "annotations": "89a792dff86161c2707bd4ced3f2fe7a7cbefeacafb20314c8b224725a53152a",
+      "callable": "b732dc3f6da3f36889ba2228fdef97727d87ad577aaddaf182810252a04c96b0",
+      "shape": "3bebd5ebb97a46d6a5f318d8ae4cabae46514caffe9a1c803955dd1d79ab060c"
+    },
+    "canonicalization": "Ignore whitespace, pub helper visibility and owner/meter/declarations/annotation_builder qualification only."
+  },
+  "tests": {
+    "schema": "fairyc.candidate-private-tests/v1",
+    "passed": true,
+    "module": "module_unit_interfaces",
+    "tools": {
+      "compiler": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\manifest-bootstrap.exe",
+        "sha256": "18e72a61e9ff3fdd620652ecd8ce2e355b9371488b2ad1b2ccbadbf7a091783a"
+      },
+      "candidate": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-lock-write-20261012\\compiler.exe",
+        "sha256": "3c67203ca06e6c81aa73f383fb16685b57ad5c571b5028992fd638c0c17795b1"
+      },
+      "builder": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-source-file-20261011\\builder.exe",
+        "sha256": "8141ce6bcc461a52fe6bf0bf24e9e5f5a9d7842c3c7dbfc5863cc4e822584ea7"
+      }
+    },
+    "native": {
+      "schemaVersion": "fairyc.test-report/v4",
+      "engine": "native",
+      "target": "x86_64-windows-msvc",
+      "profile": "development",
+      "tests": [
+        {
+          "identity": "tests::module_unit_interfaces::invalid_local_annotation_reports_original_module_span",
+          "outcome": "passed",
+          "trapCategory": null,
+          "stdoutBase64": "",
+          "stderrBase64": ""
+        },
+        {
+          "identity": "tests::module_unit_interfaces::local_annotation_roots_keep_distinct_provider_identity_and_template_deferral",
+          "outcome": "passed",
+          "trapCategory": null,
+          "stdoutBase64": "",
+          "stderrBase64": ""
+        },
+        {
+          "identity": "tests::module_unit_interfaces::owned_provider_fields_signatures_and_templates_survive_source_removal",
+          "outcome": "passed",
+          "trapCategory": null,
+          "stdoutBase64": "",
+          "stderrBase64": ""
+        },
+        {
+          "identity": "tests::module_unit_interfaces::provider_field_queries_return_canonical_types_and_keep_resource_privacy",
+          "outcome": "passed",
+          "trapCategory": null,
+          "stdoutBase64": "",
+          "stderrBase64": ""
+        },
+        {
+          "identity": "tests::module_unit_interfaces::retained_bindings_recheck_changed_callers_and_private_provider_metadata",
+          "outcome": "passed",
+          "trapCategory": null,
+          "stdoutBase64": "",
+          "stderrBase64": ""
+        }
+      ],
+      "count": 5,
+      "passed": 5,
+      "failed": 0,
+      "status": "ok",
+      "lock": "verified"
+    },
+    "nativeTests": 5,
+    "lockSHA256": "f37603e7054e64d2cf59f2cba37cecb330767b093356ab04ecad2998a1e4cc79",
+    "candidateInputFiles": 66,
+    "candidatePacketSHA256": "3efdb06783d1abfaa3a81923c515749d7f82a394c0b2179068a382e5313b6b67",
+    "candidateExecutions": [
+      {
+        "profile": "development",
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-interface-analysis-20261012\\tests\\development.exe",
+        "sha256": "6b8b7d5dcdd1217ff2f8cca03d99de9f4cc0fa4f5dadc4077de222f136a43321",
+        "exit": 0
+      },
+      {
+        "profile": "release",
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-interface-analysis-20261012\\tests\\release.exe",
+        "sha256": "ea5112f9bc57271938c31611838d432256e86c5b61119992f6b683ce5d1ade02",
+        "exit": 0
+      }
+    ],
+    "invocations": [
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\manifest-bootstrap.exe",
+          "test",
+          "--native",
+          "--locked",
+          "--json",
+          "--capture-output",
+          "--exact",
+          "tests::module_unit_interfaces::owned_provider_fields_signatures_and_templates_survive_source_removal",
+          "--exact",
+          "tests::module_unit_interfaces::retained_bindings_recheck_changed_callers_and_private_provider_metadata",
+          "--exact",
+          "tests::module_unit_interfaces::provider_field_queries_return_canonical_types_and_keep_resource_privacy",
+          "--exact",
+          "tests::module_unit_interfaces::local_annotation_roots_keep_distinct_provider_identity_and_template_deferral",
+          "--exact",
+          "tests::module_unit_interfaces::invalid_local_annotation_reports_original_module_span"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "seconds": 221.30427849999978,
+        "exit": 0,
+        "stdoutBytes": 1139,
+        "stdoutSHA256": "6739a8d335ab49b66e7befb0d84dc17251f4c8c6bfe702e52ed0c8f81ae0a255",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-lock-write-20261012\\compiler.exe",
+          "--c-project-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-interface-analysis-20261012\\tests\\sources.list"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+        "seconds": 46.52697869998519,
+        "exit": 0,
+        "stdoutBytes": 3897738,
+        "stdoutSHA256": "3efdb06783d1abfaa3a81923c515749d7f82a394c0b2179068a382e5313b6b67",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-source-file-20261011\\builder.exe",
+          "--packet",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-interface-analysis-20261012\\tests\\candidate-packet.bin",
+          "--packet-sha256",
+          "3efdb06783d1abfaa3a81923c515749d7f82a394c0b2179068a382e5313b6b67",
+          "--output",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-interface-analysis-20261012\\tests\\development.exe"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+        "seconds": 4.469948299985845,
+        "exit": 0,
+        "stdoutBytes": 186,
+        "stdoutSHA256": "86f6dbb51b7777b0eb579ad55d25274f33a3a185da16c1b077cb94fd01f9e7e6",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-interface-analysis-20261012\\tests\\development.exe"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+        "seconds": 0.049076099996455014,
+        "exit": 0,
+        "stdoutBytes": 0,
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-source-file-20261011\\builder.exe",
+          "--packet",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-interface-analysis-20261012\\tests\\candidate-packet.bin",
+          "--packet-sha256",
+          "3efdb06783d1abfaa3a81923c515749d7f82a394c0b2179068a382e5313b6b67",
+          "--output",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-interface-analysis-20261012\\tests\\release.exe",
+          "--release"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+        "seconds": 47.816386300022714,
+        "exit": 0,
+        "stdoutBytes": 187,
+        "stdoutSHA256": "7af45b09a6b6fa0c9cd2d03e64171b552d21fbc209a4df407a0a787a2edade3c",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-interface-analysis-20261012\\tests\\release.exe"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+        "seconds": 0.030481699999654666,
+        "exit": 0,
+        "stdoutBytes": 0,
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderr": ""
+      }
+    ],
+    "publicApiChanged": false,
+    "dbChanged": false,
+    "ciChanged": false,
+    "pushed": false
+  },
+  "fullDispatcher": {
+    "schema": "fairyc.candidate-source-set-full/v1",
+    "sourceFiles": 354,
+    "sourceBytes": 2486396,
+    "seed": {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-interface-analysis-20261012\\seed.exe",
+      "sha256": "74ba5f87da3af9853015d9881ea7ebbd82cf8f4c58e3ad39553982212f46fb3c"
+    },
+    "frontendTimeoutSeconds": 900,
+    "productTimeoutChanged": false,
+    "invocations": [
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\manifest-bootstrap.exe",
+          "build",
+          "--locked"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "seconds": 44.81770420001703,
+        "exit": 0,
+        "stdoutBytes": 83,
+        "stdoutSHA256": "913d882a721755f5b674b0837a5dcdb182de237ba6bbcc5f15b49489af2c8bf9",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-interface-analysis-20261012\\seed.exe",
+          "--c-project-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-interface-analysis-20261012\\self-source.manifest"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+        "seconds": 469.93937429998186,
+        "exit": 2,
+        "stdoutBytes": 0,
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderr": "examples/lexer_candidate/src/syntax.fy:1:1: error: project phase 2 stage 4 code 10 (bytes 0..0)\n"
+      }
+    ],
+    "emitted": false
+  },
+  "sourceInputDeltas": {
+    "tests": {
+      "schema": "fairyc.candidate-source-input-delta/v1",
+      "baselineManifests": [
+        {
+          "path": "docs/ops/evidence/candidate-generic-copy-tests-1-20261012.json",
+          "sha256": "568e935bda1f7fd00d3f1b7df717ba863e73d1605a3d90fec0f8ce592b2d8c16"
+        }
+      ],
+      "added": [
+        {
+          "index": 27,
+          "occurrence": 0,
+          "path": "examples/lexer_candidate/src/module_unit_interface_annotations.fy",
+          "sha256": "af152472cb32087aa64d4caab8d319958fc8244391e349cf16f259297440cc08"
+        },
+        {
+          "index": 28,
+          "occurrence": 0,
+          "path": "examples/lexer_candidate/src/module_unit_interface_declarations.fy",
+          "sha256": "fa5def06ebc0efcbf9e707c26858d84247ff6e8ac860e0f54a9e183709416944"
+        },
+        {
+          "index": 29,
+          "occurrence": 0,
+          "path": "examples/lexer_candidate/src/module_unit_interface_work.fy",
+          "sha256": "575d2ba14a7f0b3c4a45531742efae88d9a40825460e8c88bee761804eb222ac"
+        },
+        {
+          "index": 65,
+          "occurrence": 0,
+          "path": "examples/lexer_candidate/tests/module_unit_interfaces.fy",
+          "sha256": "f4ff57b17e11bbcc8f9b14cc6966bf4e23bf830628069f589b5e6215e4071b99"
+        },
+        {
+          "index": 66,
+          "occurrence": 0,
+          "path": "tools/verify-candidate-private-tests.py",
+          "sha256": "9aa043a3bbb6339cdb55905d070cf6c429e24c01356b8234d41d1ba7669761d8"
+        }
+      ],
+      "updated": [
+        {
+          "occurrence": 0,
+          "previousSHA256": "eaa7d480216881624bcb0dffc0100b1c5e18b63faa084eb4897a9fa705da27e4",
+          "path": "examples/lexer_candidate/src/module_unit_interfaces.fy",
+          "sha256": "92bf6bc278366b1fd8aa0fa7922efa1ba5e2dd12207fddd61ca4c559e2b94082"
+        }
+      ],
+      "removed": [
+        {
+          "occurrence": 0,
+          "path": "examples/lexer_candidate/src/file_source.fy",
+          "sha256": "1a7ac7f6c69ef27e78e734aa74dab90b895742a5500a32931baaed19379b938f"
+        },
+        {
+          "occurrence": 0,
+          "path": "internal/sdkstdlib/sources/std/fs.fy",
+          "sha256": "fd7ddfa9f0deed98304cecf94911644087d1e2a46e8be8995c35acbcb183b335"
+        },
+        {
+          "occurrence": 0,
+          "path": "internal/sdkstdlib/sources/std/process.fy",
+          "sha256": "9680a1481df4f761f481d5a039af7bdbefeb312d1091961194f8e7bc0681ae24"
+        },
+        {
+          "occurrence": 0,
+          "path": "internal/sdkstdlib/sources/std/text.fy",
+          "sha256": "cccd47e090fda11c9da063ffb321489dd8753fe9996855fc432833e05a79e695"
+        },
+        {
+          "occurrence": 0,
+          "path": "examples/lexer_candidate/tests/module_unit_generics.fy",
+          "sha256": "aed487262aaded81463b14892b517becd7b5ccd34af80cdbe364d8cfc17e2e2b"
+        },
+        {
+          "occurrence": 0,
+          "path": ".cache/candidate-generic-copy-20261012/resume-tests.py",
+          "sha256": "eca3814321e7994e22fd86eaa927fb20dff868957b6ee3acb11a4b3b74329257"
+        },
+        {
+          "occurrence": 1,
+          "path": "internal/sdkstdlib/sources/optional/std/vec.fy",
+          "sha256": "0ae4c395bf98c39079ad620bde035b3b590d51417864802e698edc069281db5b"
+        }
+      ],
+      "sourceFiles": 67,
+      "orderedSourceInputsSHA256": "77b9d3cbaded16a128de30bf61d182e204b91d9d599d7df1a9007002841c7cb2",
+      "hashEncoding": "UTF-8 compact JSON with sorted object keys; preserve sourceInputs array order"
+    },
+    "dispatcher": {
+      "schema": "fairyc.candidate-source-input-delta/v1",
+      "baselineManifests": [
+        {
+          "path": "docs/ops/evidence/candidate-generic-copy-dispatcher-1-20261012.json",
+          "sha256": "98bfd3db1baae320054bd7dc2b4c57a03061126bb6052c59019d5e36cef63791"
+        },
+        {
+          "path": "docs/ops/evidence/candidate-generic-copy-dispatcher-2-20261012.json",
+          "sha256": "15f0bdfed8f0b714ed2515544624cdb0b61b1954593b0db0dedfeb57ffa68553"
+        },
+        {
+          "path": "docs/ops/evidence/candidate-generic-copy-dispatcher-3-20261012.json",
+          "sha256": "54cb84dc013fbf41d6c98c239589e5c658045ddf0bba66411266d36034d2ccf4"
+        },
+        {
+          "path": "docs/ops/evidence/candidate-generic-copy-dispatcher-4-20261012.json",
+          "sha256": "f09261e377875350a38c98dc62b1f0b52191f361de9f90ffbc172c913e8926fd"
+        }
+      ],
+      "added": [
+        {
+          "index": 166,
+          "occurrence": 0,
+          "path": "examples/lexer_candidate/src/module_unit_interface_annotations.fy",
+          "sha256": "af152472cb32087aa64d4caab8d319958fc8244391e349cf16f259297440cc08"
+        },
+        {
+          "index": 167,
+          "occurrence": 0,
+          "path": "examples/lexer_candidate/src/module_unit_interface_declarations.fy",
+          "sha256": "fa5def06ebc0efcbf9e707c26858d84247ff6e8ac860e0f54a9e183709416944"
+        },
+        {
+          "index": 168,
+          "occurrence": 0,
+          "path": "examples/lexer_candidate/src/module_unit_interface_work.fy",
+          "sha256": "575d2ba14a7f0b3c4a45531742efae88d9a40825460e8c88bee761804eb222ac"
+        }
+      ],
+      "updated": [
+        {
+          "occurrence": 0,
+          "previousSHA256": "eaa7d480216881624bcb0dffc0100b1c5e18b63faa084eb4897a9fa705da27e4",
+          "path": "examples/lexer_candidate/src/module_unit_interfaces.fy",
+          "sha256": "92bf6bc278366b1fd8aa0fa7922efa1ba5e2dd12207fddd61ca4c559e2b94082"
+        }
+      ],
+      "removed": [],
+      "sourceFiles": 354,
+      "orderedSourceInputsSHA256": "66e379021aad67a29987709837ebee6a098538bdbceb98b75c4d2f86ba7eae5e",
+      "hashEncoding": "UTF-8 compact JSON with sorted object keys; preserve sourceInputs array order"
+    }
+  },
+  "resolvedFailure": "module_unit_interfaces.fy phase 2 stage 4 code 10",
+  "nextFailure": "examples/lexer_candidate/src/syntax.fy:1:1: error: project phase 2 stage 4 code 10 (bytes 0..0)\n",
+  "analysisCapsChanged": false,
+  "productTimeoutChanged": false,
+  "stage2Achieved": false,
+  "publicApiChanged": false,
+  "sdkAbiChanged": false,
+  "versionChanged": false,
+  "dbChanged": false,
+  "ciChanged": false,
+  "pushed": false
+}

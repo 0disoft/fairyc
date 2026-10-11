@@ -4061,3 +4061,19 @@ Next: partition interface analysis, then the existing entry/driver/build/run,
 timeout, Linux/full-suite and Stage1/Stage2 work. Limits, product timeouts,
 public API, SDK ABI/version, DB and CI are unchanged; no push.
 Receipt: `evidence/candidate-generic-copy-20261012.json`.
+
+## Interface analysis partition (2026-10-12)
+
+Annotation resolution, callable/shape collection and the shared work meter now
+live in three helper modules. All eight moved functions and the remaining
+coordinator match the preceding source after ignoring module qualification,
+helper visibility and whitespace. Source check passes 361 files / 4672 MIR
+functions; five interface regressions pass in Go-native and both candidate C
+profiles. Full emission over 354 files / 2486396 bytes passes the interface
+module and stops at `syntax.fy`, phase 2, stage 4, code 10, after 469.94 seconds.
+No C packet or Stage2 is produced. Parser analysis partitioning is next; the
+existing entry/driver/build/run, timeout, Linux/full-suite and Stage1/Stage2
+work remains. Source identities use ordered deltas against the preceding
+receipt instead of duplicate full snapshots. Analysis limits, product timeouts,
+public API, SDK ABI/version, DB and CI are unchanged; no push.
+Receipt: `evidence/candidate-interface-analysis-20261012.json`.

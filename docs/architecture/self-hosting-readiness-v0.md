@@ -2210,3 +2210,15 @@ analysis partitioning remains the immediate blocker; entry/driver/build/run,
 timeouts, Linux/full-suite and Stage1/Stage2 remain. Public API, SDK ABI/version,
 DB and CI are unchanged; no push. Receipt:
 [candidate-generic-copy-20261012.json](../ops/evidence/candidate-generic-copy-20261012.json).
+
+## Interface analysis partition (2026-10-12)
+
+Eight helpers move to three modules with unchanged traversal and work/error
+semantics. Source check passes 361 files / 4672 MIR functions; five interface
+regressions pass in Go-native and candidate C development/release. Full
+emission over 354 files / 2486396 bytes passes the interface failure and stops
+at `syntax.fy`, phase 2, stage 4, code 10, after 469.94 seconds. No C packet or
+Stage2 is produced. Parser analysis, entry/driver/build/run, timeouts,
+Linux/full-suite and Stage1/Stage2 remain. Limits, public API, SDK ABI/version,
+DB and CI are unchanged; no push. Receipt:
+[candidate-interface-analysis-20261012.json](../ops/evidence/candidate-interface-analysis-20261012.json).
