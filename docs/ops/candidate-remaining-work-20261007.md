@@ -3994,3 +3994,18 @@ Linux/full-suite and Stage1/Stage2 work remain. No public API/SDK ABI/version/DB
 change or push.
 
 Receipt: `evidence/candidate-compiler-core-20261012.json`.
+
+
+## Parser arena copy and core candidate verification (2026-10-12)
+
+The syntax.fy candidate analysis-limit failure is resolved by nine small typed
+arena-copy functions, preserving work charges and existing budgets. Two core native
+tests, one parser native regression and both candidate C profiles pass, including eight
+Go locked-check outcomes, exact spans/instance IDs, 13 plain and 166 SDK MIR functions,
+and detached IR lifetime. Check passes 353 files / 4605 MIR functions; 96 fixture paths
+remain unchanged. Public check/build/run with diagnostic code/exit mapping, entry/driver
+wiring, product timeout, Linux/full suite and Stage1/Stage2 remain. No public API/SDK
+ABI/version/DB/CI change or push.
+
+Receipts: `evidence/candidate-compiler-core-20261012.json` and
+`evidence/candidate-syntax-arena-copy-20261012.json`.

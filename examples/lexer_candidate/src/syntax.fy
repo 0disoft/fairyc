@@ -1,5 +1,6 @@
 module syntax;
 import scanner as scanner;
+import syntax_arena_copy as arenas;
 import std::vec as v;
 import types as types;
 import records as records;
@@ -475,14 +476,14 @@ pub fn Parsed assemble(scanner::Stream source,v::Vec<Declaration> declarations,v
 // reparse. The caller can close the original source set immediately afterward.
 pub fn Result<Parsed,u32> copy(ref Parsed original,ref mut usize work){
     let source=switch(scanner::copy(ref original.source,work)){case .ok(value):{value}case .err(code):{return .err(code);}};
-    var v::Vec<Declaration> declarations=v::empty<Declaration>();var usize declarations_index=0;while(declarations_index<v::len<Declaration>(ref original.declarations)){if(*work>=1048576){return .err(10);};*work=*work+1;if(!v::push<Declaration>(ref mut declarations,*v::at<Declaration>(ref original.declarations,declarations_index)).is_ok){return .err(11);}declarations_index+=1;}
-    var v::Vec<Problem> problems=v::empty<Problem>();var usize problems_index=0;while(problems_index<v::len<Problem>(ref original.problems)){if(*work>=1048576){return .err(10);};*work=*work+1;if(!v::push<Problem>(ref mut problems,*v::at<Problem>(ref original.problems,problems_index)).is_ok){return .err(11);}problems_index+=1;}
-    var v::Vec<state::Node> expressions=v::empty<state::Node>();var usize expressions_index=0;while(expressions_index<v::len<state::Node>(ref original.expressions)){if(*work>=1048576){return .err(10);};*work=*work+1;if(!v::push<state::Node>(ref mut expressions,*v::at<state::Node>(ref original.expressions,expressions_index)).is_ok){return .err(11);}expressions_index+=1;}
-    var v::Vec<bodies::Entry> entries=v::empty<bodies::Entry>();var usize entries_index=0;while(entries_index<v::len<bodies::Entry>(ref original.entries)){if(*work>=1048576){return .err(10);};*work=*work+1;if(!v::push<bodies::Entry>(ref mut entries,*v::at<bodies::Entry>(ref original.entries,entries_index)).is_ok){return .err(11);}entries_index+=1;}
-    var v::Vec<state::Statement> statements=v::empty<state::Statement>();var usize statements_index=0;while(statements_index<v::len<state::Statement>(ref original.statements)){if(*work>=1048576){return .err(10);};*work=*work+1;if(!v::push<state::Statement>(ref mut statements,*v::at<state::Statement>(ref original.statements,statements_index)).is_ok){return .err(11);}statements_index+=1;}
-    var v::Vec<types::Node> types=v::empty<types::Node>();var usize types_index=0;while(types_index<v::len<types::Node>(ref original.types)){if(*work>=1048576){return .err(10);};*work=*work+1;if(!v::push<types::Node>(ref mut types,*v::at<types::Node>(ref original.types,types_index)).is_ok){return .err(11);}types_index+=1;}
-    var v::Vec<records::Field> fields=v::empty<records::Field>();var usize fields_index=0;while(fields_index<v::len<records::Field>(ref original.fields)){if(*work>=1048576){return .err(10);};*work=*work+1;if(!v::push<records::Field>(ref mut fields,*v::at<records::Field>(ref original.fields,fields_index)).is_ok){return .err(11);}fields_index+=1;}
-    var v::Vec<attributes::Attribute> attributes=v::empty<attributes::Attribute>();var usize attributes_index=0;while(attributes_index<v::len<attributes::Attribute>(ref original.attributes)){if(*work>=1048576){return .err(10);};*work=*work+1;if(!v::push<attributes::Attribute>(ref mut attributes,*v::at<attributes::Attribute>(ref original.attributes,attributes_index)).is_ok){return .err(11);}attributes_index+=1;}
-    var v::Vec<attributes::Argument> attribute_arguments=v::empty<attributes::Argument>();var usize attribute_arguments_index=0;while(attribute_arguments_index<v::len<attributes::Argument>(ref original.attribute_arguments)){if(*work>=1048576){return .err(10);};*work=*work+1;if(!v::push<attributes::Argument>(ref mut attribute_arguments,*v::at<attributes::Argument>(ref original.attribute_arguments,attribute_arguments_index)).is_ok){return .err(11);}attribute_arguments_index+=1;}
+    let declarations=switch(arenas::copy_declarations(ref original.declarations,work)){case .ok(value):{value}case .err(code):{return .err(code);}};
+    let problems=switch(arenas::copy_problems(ref original.problems,work)){case .ok(value):{value}case .err(code):{return .err(code);}};
+    let expressions=switch(arenas::copy_expressions(ref original.expressions,work)){case .ok(value):{value}case .err(code):{return .err(code);}};
+    let entries=switch(arenas::copy_entries(ref original.entries,work)){case .ok(value):{value}case .err(code):{return .err(code);}};
+    let statements=switch(arenas::copy_statements(ref original.statements,work)){case .ok(value):{value}case .err(code):{return .err(code);}};
+    let types=switch(arenas::copy_types(ref original.types,work)){case .ok(value):{value}case .err(code):{return .err(code);}};
+    let fields=switch(arenas::copy_fields(ref original.fields,work)){case .ok(value):{value}case .err(code):{return .err(code);}};
+    let attributes=switch(arenas::copy_attributes(ref original.attributes,work)){case .ok(value):{value}case .err(code):{return .err(code);}};
+    let attribute_arguments=switch(arenas::copy_attribute_arguments(ref original.attribute_arguments,work)){case .ok(value):{value}case .err(code):{return .err(code);}};
     return .ok(Parsed{.source,.declarations,.problems,.expressions,.entries,.statements,.types,.fields,.attributes,.attribute_arguments});
 }

@@ -379,7 +379,11 @@
     },
     {
       "path": "examples/lexer_candidate/src/syntax.fy",
-      "sha256": "3f361cef10071a55f571576518a028dc3b3f94137867271577c764164ab532fe"
+      "sha256": "f5b12ba9b1096e64734fffe663ee37db3160964ea612ade1450e90861c6e9f72"
+    },
+    {
+      "path": "examples/lexer_candidate/src/syntax_arena_copy.fy",
+      "sha256": "607d08f08918b6e4ba44ccbd57895bcef5952ae6b6397ce4c2d9b908f63dbf74"
     },
     {
       "path": "examples/lexer_candidate/src/tagged_encoding.fy",
@@ -396,10 +400,6 @@
     {
       "path": "examples/lexer_candidate/src/types.fy",
       "sha256": "53a77948af92724f00de0609837fd1507899df8e2b59b6d2778ef1f3c344395a"
-    },
-    {
-      "path": "examples/lexer_candidate/src/utf8.fy",
-      "sha256": "4a5425cea9efbfb1bff2c31a38c2bd8e392c6792af09f24e906c9a743621870d"
     }
   ]
 }

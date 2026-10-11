@@ -1,0 +1,389 @@
+{
+  "schema": "fairyc.candidate-readonly-paths/v1",
+  "unchangedPaths": [
+    {
+      "path": ".cache/candidate-compiler-core-20261012/fixture/Private/fairy.lock",
+      "snapshot": {
+        "size": 3928,
+        "modifiedNS": 1791747237631108700,
+        "sha256": "b8fbf3b5e31c1ba3913fc8d025ecfd23fbe681b181f7ffda6139076955437d9f"
+      }
+    },
+    {
+      "path": ".cache/candidate-compiler-core-20261012/fixture/Private/fairy.toml",
+      "snapshot": {
+        "size": 310,
+        "modifiedNS": 1791747237603959900,
+        "sha256": "2be75fefb4aa664b3767eef50075471fbb8ba14a3cef329fe982306842cd5b82"
+      }
+    },
+    {
+      "path": ".cache/candidate-compiler-core-20261012/fixture/Private/left/fairy.toml",
+      "snapshot": {
+        "size": 196,
+        "modifiedNS": 1791747237606821100,
+        "sha256": "4020dec17858341d8790032c4ca4e34b8b1aaad86d2139de5a7a7329afe6722e"
+      }
+    },
+    {
+      "path": ".cache/candidate-compiler-core-20261012/fixture/Private/left/src/left.fy",
+      "snapshot": {
+        "size": 140,
+        "modifiedNS": 1791747237607518000,
+        "sha256": "a1fb4f36820ba838cd2a2111bc15885fc3aa1541463589c431d369743a742485"
+      }
+    },
+    {
+      "path": ".cache/candidate-compiler-core-20261012/fixture/Private/left-lib/fairy.toml",
+      "snapshot": {
+        "size": 139,
+        "modifiedNS": 1791747237608854600,
+        "sha256": "5fa1107425ca2236e8f258ea16af89762bb77895e768418affee8d2d0efe84de"
+      }
+    },
+    {
+      "path": ".cache/candidate-compiler-core-20261012/fixture/Private/left-lib/src/common.fy",
+      "snapshot": {
+        "size": 113,
+        "modifiedNS": 1791747237609387700,
+        "sha256": "b2a43360fad3f185f0988c48ce3fd710fa94727b199198e3645903ad23066089"
+      }
+    },
+    {
+      "path": ".cache/candidate-compiler-core-20261012/fixture/Private/right/fairy.toml",
+      "snapshot": {
+        "size": 198,
+        "modifiedNS": 1791747237610850300,
+        "sha256": "dd61d9842b39217c399e25a765d6e8ac605d72445cb5dc6ab79857ac96a607b1"
+      }
+    },
+    {
+      "path": ".cache/candidate-compiler-core-20261012/fixture/Private/right/src/right.fy",
+      "snapshot": {
+        "size": 141,
+        "modifiedNS": 1791747237611612900,
+        "sha256": "1aba101017b1f511af9d3554892725095954f248a506baa9b5f9c69448eaf063"
+      }
+    },
+    {
+      "path": ".cache/candidate-compiler-core-20261012/fixture/Private/right-lib/fairy.toml",
+      "snapshot": {
+        "size": 140,
+        "modifiedNS": 1791747237612483300,
+        "sha256": "6c900c3d10a98483de9fd9ea9ed996ad57f6d7e744eef8ad6c654dbafb904aa6"
+      }
+    },
+    {
+      "path": ".cache/candidate-compiler-core-20261012/fixture/Private/right-lib/src/common.fy",
+      "snapshot": {
+        "size": 115,
+        "modifiedNS": 1791747237612991400,
+        "sha256": "63e8f8f0120fe2c94713a41fb216e90c1ef924c401c67d186a8f1aabd4c7ee17"
+      }
+    },
+    {
+      "path": ".cache/candidate-compiler-core-20261012/fixture/Private/src/common.fy",
+      "snapshot": {
+        "size": 111,
+        "modifiedNS": 1791747237605463000,
+        "sha256": "9b1af369ef8284b429b0a0b08cd35670b1064f528c110e82bbe95bb7eb943358"
+      }
+    },
+    {
+      "path": ".cache/candidate-compiler-core-20261012/fixture/Private/src/main.fy",
+      "snapshot": {
+        "size": 130,
+        "modifiedNS": 1791747237612991400,
+        "sha256": "c4aa4b5c961dae1ab6a564ca0c305da6479922a7bff7eff1ba9d0b55034ccbf2"
+      }
+    },
+    {
+      "path": ".cache/candidate-compiler-core-20261012/fixture/RootBody/fairy.lock",
+      "snapshot": {
+        "size": 3928,
+        "modifiedNS": 1791747237541221300,
+        "sha256": "37fd8893d101fadb803db02adae420beffed015aa39584fc6362fb336fa45845"
+      }
+    },
+    {
+      "path": ".cache/candidate-compiler-core-20261012/fixture/RootBody/fairy.toml",
+      "snapshot": {
+        "size": 310,
+        "modifiedNS": 1791747237506873600,
+        "sha256": "2be75fefb4aa664b3767eef50075471fbb8ba14a3cef329fe982306842cd5b82"
+      }
+    },
+    {
+      "path": ".cache/candidate-compiler-core-20261012/fixture/RootBody/left/fairy.toml",
+      "snapshot": {
+        "size": 196,
+        "modifiedNS": 1791747237510958000,
+        "sha256": "4020dec17858341d8790032c4ca4e34b8b1aaad86d2139de5a7a7329afe6722e"
+      }
+    },
+    {
+      "path": ".cache/candidate-compiler-core-20261012/fixture/RootBody/left/src/left.fy",
+      "snapshot": {
+        "size": 140,
+        "modifiedNS": 1791747237511973500,
+        "sha256": "a1fb4f36820ba838cd2a2111bc15885fc3aa1541463589c431d369743a742485"
+      }
+    },
+    {
+      "path": ".cache/candidate-compiler-core-20261012/fixture/RootBody/left-lib/fairy.toml",
+      "snapshot": {
+        "size": 139,
+        "modifiedNS": 1791747237513485600,
+        "sha256": "5fa1107425ca2236e8f258ea16af89762bb77895e768418affee8d2d0efe84de"
+      }
+    },
+    {
+      "path": ".cache/candidate-compiler-core-20261012/fixture/RootBody/left-lib/src/common.fy",
+      "snapshot": {
+        "size": 113,
+        "modifiedNS": 1791747237514549000,
+        "sha256": "b2a43360fad3f185f0988c48ce3fd710fa94727b199198e3645903ad23066089"
+      }
+    },
+    {
+      "path": ".cache/candidate-compiler-core-20261012/fixture/RootBody/right/fairy.toml",
+      "snapshot": {
+        "size": 198,
+        "modifiedNS": 1791747237515793300,
+        "sha256": "dd61d9842b39217c399e25a765d6e8ac605d72445cb5dc6ab79857ac96a607b1"
+      }
+    },
+    {
+      "path": ".cache/candidate-compiler-core-20261012/fixture/RootBody/right/src/right.fy",
+      "snapshot": {
+        "size": 141,
+        "modifiedNS": 1791747237516304500,
+        "sha256": "1aba101017b1f511af9d3554892725095954f248a506baa9b5f9c69448eaf063"
+      }
+    },
+    {
+      "path": ".cache/candidate-compiler-core-20261012/fixture/RootBody/right-lib/fairy.toml",
+      "snapshot": {
+        "size": 140,
+        "modifiedNS": 1791747237517318400,
+        "sha256": "6c900c3d10a98483de9fd9ea9ed996ad57f6d7e744eef8ad6c654dbafb904aa6"
+      }
+    },
+    {
+      "path": ".cache/candidate-compiler-core-20261012/fixture/RootBody/right-lib/src/common.fy",
+      "snapshot": {
+        "size": 115,
+        "modifiedNS": 1791747237517318400,
+        "sha256": "63e8f8f0120fe2c94713a41fb216e90c1ef924c401c67d186a8f1aabd4c7ee17"
+      }
+    },
+    {
+      "path": ".cache/candidate-compiler-core-20261012/fixture/RootBody/src/common.fy",
+      "snapshot": {
+        "size": 111,
+        "modifiedNS": 1791747237508457600,
+        "sha256": "9b1af369ef8284b429b0a0b08cd35670b1064f528c110e82bbe95bb7eb943358"
+      }
+    },
+    {
+      "path": ".cache/candidate-compiler-core-20261012/fixture/RootBody/src/main.fy",
+      "snapshot": {
+        "size": 100,
+        "modifiedNS": 1791747237518809300,
+        "sha256": "c2faef34df76432f9216a32b6626164e8ff3fca4b3b4ce6ea9c38bc1c7ebbde6"
+      }
+    },
+    {
+      "path": ".cache/candidate-compiler-core-20261012/fixture/SDK/fairy.lock",
+      "snapshot": {
+        "size": 4772,
+        "modifiedNS": 1791747237806115000,
+        "sha256": "e6a2a7c09122a50d34875c1adb38df279d795320ea67eb6d1803db4e762ba1f2"
+      }
+    },
+    {
+      "path": ".cache/candidate-compiler-core-20261012/fixture/SDK/fairy.toml",
+      "snapshot": {
+        "size": 310,
+        "modifiedNS": 1791747237747340500,
+        "sha256": "2be75fefb4aa664b3767eef50075471fbb8ba14a3cef329fe982306842cd5b82"
+      }
+    },
+    {
+      "path": ".cache/candidate-compiler-core-20261012/fixture/SDK/left/fairy.toml",
+      "snapshot": {
+        "size": 196,
+        "modifiedNS": 1791747237750075200,
+        "sha256": "4020dec17858341d8790032c4ca4e34b8b1aaad86d2139de5a7a7329afe6722e"
+      }
+    },
+    {
+      "path": ".cache/candidate-compiler-core-20261012/fixture/SDK/left/src/left.fy",
+      "snapshot": {
+        "size": 140,
+        "modifiedNS": 1791747237750611300,
+        "sha256": "a1fb4f36820ba838cd2a2111bc15885fc3aa1541463589c431d369743a742485"
+      }
+    },
+    {
+      "path": ".cache/candidate-compiler-core-20261012/fixture/SDK/left-lib/fairy.toml",
+      "snapshot": {
+        "size": 139,
+        "modifiedNS": 1791747237752911500,
+        "sha256": "5fa1107425ca2236e8f258ea16af89762bb77895e768418affee8d2d0efe84de"
+      }
+    },
+    {
+      "path": ".cache/candidate-compiler-core-20261012/fixture/SDK/left-lib/src/common.fy",
+      "snapshot": {
+        "size": 113,
+        "modifiedNS": 1791747237753422300,
+        "sha256": "b2a43360fad3f185f0988c48ce3fd710fa94727b199198e3645903ad23066089"
+      }
+    },
+    {
+      "path": ".cache/candidate-compiler-core-20261012/fixture/SDK/right/fairy.toml",
+      "snapshot": {
+        "size": 198,
+        "modifiedNS": 1791747237754437400,
+        "sha256": "dd61d9842b39217c399e25a765d6e8ac605d72445cb5dc6ab79857ac96a607b1"
+      }
+    },
+    {
+      "path": ".cache/candidate-compiler-core-20261012/fixture/SDK/right/src/right.fy",
+      "snapshot": {
+        "size": 239,
+        "modifiedNS": 1791747237759145400,
+        "sha256": "ff44db40fefbfc5f899d4938aab5b3fac2dbbd33bfd39c6e0d15410cb1879a47"
+      }
+    },
+    {
+      "path": ".cache/candidate-compiler-core-20261012/fixture/SDK/right-lib/fairy.toml",
+      "snapshot": {
+        "size": 140,
+        "modifiedNS": 1791747237756267600,
+        "sha256": "6c900c3d10a98483de9fd9ea9ed996ad57f6d7e744eef8ad6c654dbafb904aa6"
+      }
+    },
+    {
+      "path": ".cache/candidate-compiler-core-20261012/fixture/SDK/right-lib/src/common.fy",
+      "snapshot": {
+        "size": 115,
+        "modifiedNS": 1791747237756568700,
+        "sha256": "63e8f8f0120fe2c94713a41fb216e90c1ef924c401c67d186a8f1aabd4c7ee17"
+      }
+    },
+    {
+      "path": ".cache/candidate-compiler-core-20261012/fixture/SDK/src/common.fy",
+      "snapshot": {
+        "size": 111,
+        "modifiedNS": 1791747237748433100,
+        "sha256": "9b1af369ef8284b429b0a0b08cd35670b1064f528c110e82bbe95bb7eb943358"
+      }
+    },
+    {
+      "path": ".cache/candidate-compiler-core-20261012/fixture/SDK/src/main.fy",
+      "snapshot": {
+        "size": 130,
+        "modifiedNS": 1791747237749064200,
+        "sha256": "3cf3c024659d9b4894202517dd15d952221d8e428fb899891413d491d9e86a70"
+      }
+    },
+    {
+      "path": ".cache/candidate-compiler-core-20261012/fixture/Signature/fairy.lock",
+      "snapshot": {
+        "size": 3928,
+        "modifiedNS": 1791747237468433600,
+        "sha256": "7ca69d1a43735d07b54dc8f1184c04719e5aa2d0d86a8f14323f16d09a85bea7"
+      }
+    },
+    {
+      "path": ".cache/candidate-compiler-core-20261012/fixture/Signature/fairy.toml",
+      "snapshot": {
+        "size": 310,
+        "modifiedNS": 1791747237438931400,
+        "sha256": "2be75fefb4aa664b3767eef50075471fbb8ba14a3cef329fe982306842cd5b82"
+      }
+    },
+    {
+      "path": ".cache/candidate-compiler-core-20261012/fixture/Signature/left/fairy.toml",
+      "snapshot": {
+        "size": 196,
+        "modifiedNS": 1791747237441325600,
+        "sha256": "4020dec17858341d8790032c4ca4e34b8b1aaad86d2139de5a7a7329afe6722e"
+      }
+    },
+    {
+      "path": ".cache/candidate-compiler-core-20261012/fixture/Signature/left/src/left.fy",
+      "snapshot": {
+        "size": 140,
+        "modifiedNS": 1791747237441893100,
+        "sha256": "a1fb4f36820ba838cd2a2111bc15885fc3aa1541463589c431d369743a742485"
+      }
+    },
+    {
+      "path": ".cache/candidate-compiler-core-20261012/fixture/Signature/left-lib/fairy.toml",
+      "snapshot": {
+        "size": 139,
+        "modifiedNS": 1791747237442450700,
+        "sha256": "5fa1107425ca2236e8f258ea16af89762bb77895e768418affee8d2d0efe84de"
+      }
+    },
+    {
+      "path": ".cache/candidate-compiler-core-20261012/fixture/Signature/left-lib/src/common.fy",
+      "snapshot": {
+        "size": 113,
+        "modifiedNS": 1791747237443465600,
+        "sha256": "b2a43360fad3f185f0988c48ce3fd710fa94727b199198e3645903ad23066089"
+      }
+    },
+    {
+      "path": ".cache/candidate-compiler-core-20261012/fixture/Signature/right/fairy.toml",
+      "snapshot": {
+        "size": 198,
+        "modifiedNS": 1791747237443976600,
+        "sha256": "dd61d9842b39217c399e25a765d6e8ac605d72445cb5dc6ab79857ac96a607b1"
+      }
+    },
+    {
+      "path": ".cache/candidate-compiler-core-20261012/fixture/Signature/right/src/right.fy",
+      "snapshot": {
+        "size": 141,
+        "modifiedNS": 1791747237445394500,
+        "sha256": "1aba101017b1f511af9d3554892725095954f248a506baa9b5f9c69448eaf063"
+      }
+    },
+    {
+      "path": ".cache/candidate-compiler-core-20261012/fixture/Signature/right-lib/fairy.toml",
+      "snapshot": {
+        "size": 140,
+        "modifiedNS": 1791747237446919000,
+        "sha256": "6c900c3d10a98483de9fd9ea9ed996ad57f6d7e744eef8ad6c654dbafb904aa6"
+      }
+    },
+    {
+      "path": ".cache/candidate-compiler-core-20261012/fixture/Signature/right-lib/src/common.fy",
+      "snapshot": {
+        "size": 119,
+        "modifiedNS": 1791747237452212300,
+        "sha256": "38b6d63ceca3be7adab7b3b82b6dc02528bed37205a958c09d8a8cf57f116e89"
+      }
+    },
+    {
+      "path": ".cache/candidate-compiler-core-20261012/fixture/Signature/src/common.fy",
+      "snapshot": {
+        "size": 111,
+        "modifiedNS": 1791747237439442000,
+        "sha256": "9b1af369ef8284b429b0a0b08cd35670b1064f528c110e82bbe95bb7eb943358"
+      }
+    },
+    {
+      "path": ".cache/candidate-compiler-core-20261012/fixture/Signature/src/main.fy",
+      "snapshot": {
+        "size": 130,
+        "modifiedNS": 1791747237440456400,
+        "sha256": "3cf3c024659d9b4894202517dd15d952221d8e428fb899891413d491d9e86a70"
+      }
+    }
+  ]
+}

@@ -1,25 +1,21 @@
 {
   "schema": "fairyc.candidate-compiler-core/v1",
-  "passed": false,
-  "nativePassed": true,
-  "candidatePassed": false,
-  "sourceInputManifests": [
-    {
-      "path": "docs/ops/evidence/candidate-compiler-core-inputs-1-20261012.json",
-      "sha256": "4882d87c92a9b6543239ebe5e1cabe05936a58fbf8324be259418a89304f629e",
-      "count": 100
+  "passed": true,
+  "module": "project_compiler_core",
+  "tools": {
+    "compiler": {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\manifest-bootstrap.exe",
+      "sha256": "18e72a61e9ff3fdd620652ecd8ce2e355b9371488b2ad1b2ccbadbf7a091783a"
     },
-    {
-      "path": "docs/ops/evidence/candidate-compiler-core-inputs-2-20261012.json",
-      "sha256": "d7348e25397e9974f1d7fa8c44d588e11065f1eba6bf3431e3fda4693e21516d",
-      "count": 100
+    "candidate": {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-lock-write-20261012\\compiler.exe",
+      "sha256": "3c67203ca06e6c81aa73f383fb16685b57ad5c571b5028992fd638c0c17795b1"
     },
-    {
-      "path": "docs/ops/evidence/candidate-compiler-core-inputs-3-20261012.json",
-      "sha256": "048a1c9dda383b0b4fbf33d732da09d8b2c074be5da32fca9527163883ea168b",
-      "count": 6
+    "builder": {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-source-file-20261011\\builder.exe",
+      "sha256": "8141ce6bcc461a52fe6bf0bf24e9e5f5a9d7842c3c7dbfc5863cc4e822584ea7"
     }
-  ],
+  },
   "native": {
     "schemaVersion": "fairyc.test-report/v4",
     "engine": "native",
@@ -45,18 +41,123 @@
     "passed": 2,
     "failed": 0,
     "status": "ok",
-    "lock": "unchanged"
+    "lock": "verified"
   },
+  "nativeTests": 2,
   "nativeValidation": {
     "source": "exec_command/write_stdin",
-    "session": 84125,
-    "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
-    "compilerSHA256": "18e72a61e9ff3fdd620652ecd8ce2e355b9371488b2ad1b2ccbadbf7a091783a",
-    "exactTests": [
+    "reportPath": ".cache/candidate-compiler-core-20261012/arena-native.json",
+    "reportSHA256": "1ac6075bc8882a005218fe01f091f1e86e4c92549003874c28c824eff67642d1",
+    "argv": [
+      "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\manifest-bootstrap.exe",
+      "test",
+      "--native",
+      "--locked",
+      "--json",
+      "--capture-output",
+      "--exact",
       "tests::project_compiler_core::go_whole_closure_outcomes_spans_instances_and_sdk_match",
-      "tests::project_compiler_core::linked_ir_survives_source_and_workspace_owners_closing"
-    ]
+      "--exact",
+      "tests::project_compiler_core::linked_ir_survives_source_and_workspace_owners_closing",
+      "--",
+      "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-compiler-core-20261012\\fixture\\root.bin"
+    ],
+    "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+    "reused": true
   },
+  "lockSHA256": "8bc258f53c31eb5d6fa6bf25a78c32a5766751d704367bb1bc1d9c417e6ccf46",
+  "candidateInputFiles": 201,
+  "candidatePacketSHA256": "a9a07d79a9e3650452c0c99e8dce2b04a5873cec1e13327f59fbb9a5ce9a7b99",
+  "candidateExecutions": [
+    {
+      "profile": "development",
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-compiler-core-20261012\\execution\\development.exe",
+      "sha256": "7c318641a742d8448a11e8b08df12b1afae3f3489e57a42f89aac05d239b74bc",
+      "exit": 0
+    },
+    {
+      "profile": "release",
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-compiler-core-20261012\\execution\\release.exe",
+      "sha256": "296e6ba27f704c5a16079753b916eeb5f692192bd994ceb66a1cc9ded9d298a3",
+      "exit": 0
+    }
+  ],
+  "invocations": [
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-lock-write-20261012\\compiler.exe",
+        "--c-project-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-compiler-core-20261012\\execution\\sources.list"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "seconds": 316.3858915000019,
+      "exit": 0,
+      "stdoutBytes": 14957528,
+      "stdoutSHA256": "a9a07d79a9e3650452c0c99e8dce2b04a5873cec1e13327f59fbb9a5ce9a7b99",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-source-file-20261011\\builder.exe",
+        "--packet",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-compiler-core-20261012\\execution\\candidate-packet.bin",
+        "--packet-sha256",
+        "a9a07d79a9e3650452c0c99e8dce2b04a5873cec1e13327f59fbb9a5ce9a7b99",
+        "--output",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-compiler-core-20261012\\execution\\development.exe"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "seconds": 12.695535099992412,
+      "exit": 0,
+      "stdoutBytes": 185,
+      "stdoutSHA256": "322259897a0de163a141f4e29b033545ca791ba811f652c1bbcffdef4be51042",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-compiler-core-20261012\\execution\\development.exe",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-compiler-core-20261012\\fixture\\root.bin"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "seconds": 42.57276249999995,
+      "exit": 0,
+      "stdoutBytes": 0,
+      "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-source-file-20261011\\builder.exe",
+        "--packet",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-compiler-core-20261012\\execution\\candidate-packet.bin",
+        "--packet-sha256",
+        "a9a07d79a9e3650452c0c99e8dce2b04a5873cec1e13327f59fbb9a5ce9a7b99",
+        "--output",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-compiler-core-20261012\\execution\\release.exe",
+        "--release"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "seconds": 219.60213069999008,
+      "exit": 0,
+      "stdoutBytes": 187,
+      "stdoutSHA256": "0cae7c6523dd1b9085db76024c804f83993d04d30997a498ac339c67886df0cf",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-compiler-core-20261012\\execution\\release.exe",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-compiler-core-20261012\\fixture\\root.bin"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "seconds": 2.8332799000054365,
+      "exit": 0,
+      "stdoutBytes": 0,
+      "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr": ""
+    }
+  ],
+  "candidateGenerationTimeoutSeconds": 480,
+  "productionTimeoutChanged": false,
   "goCLIObservations": [
     {
       "name": "Current",
@@ -171,41 +272,91 @@
       "instance": "fypi1-sha256-3cbea3d72bd3c8a7f48377332aa8cc91f62732a419c0e89f7baa8e81b4e15471"
     }
   ],
-  "candidateInvocations": [
-    {
-      "argv": [
-        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-lock-write-20261012\\compiler.exe",
-        "--c-project-file",
-        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-compiler-core-20261012\\execution\\sources.list"
-      ],
-      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
-      "seconds": 201.01214160000382,
-      "exit": 2,
-      "stdoutBytes": 0,
-      "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-      "stderr": "examples/lexer_candidate/src/syntax.fy:1:1: error: project phase 2 stage 4 code 10 (bytes 0..0)\n"
-    }
-  ],
-  "check": {
-    "locked": true,
-    "sourceFiles": 352,
-    "mirFunctions": 4596
-  },
-  "candidateInputFiles": 200,
-  "blocker": "candidate type-analysis work bound in syntax.fy; project phase 2 stage 4 code 10; no C packet emitted",
   "stableCLIRouted": false,
   "publicApiChanged": false,
   "dbChanged": false,
   "ciChanged": false,
   "pushed": false,
   "remaining": [
-    "candidate compilation capacity for syntax arena copying",
-    "candidate development/release API execution",
-    "stable check/build/run routing",
+    "stable compiler CLI routing",
     "entry/driver wiring",
     "product timeout",
     "Linux",
     "full suite",
     "Stage1/Stage2"
-  ]
+  ],
+  "nativePassed": true,
+  "candidatePassed": true,
+  "sourceInputManifests": [
+    {
+      "path": "docs/ops/evidence/candidate-compiler-core-inputs-1-20261012.json",
+      "sha256": "4882d87c92a9b6543239ebe5e1cabe05936a58fbf8324be259418a89304f629e",
+      "count": 100
+    },
+    {
+      "path": "docs/ops/evidence/candidate-compiler-core-inputs-2-20261012.json",
+      "sha256": "f8b6d9313cd0f2d3f3061433fa48d9357f315a46fd5d85aad1af6763224f66fa",
+      "count": 100
+    },
+    {
+      "path": "docs/ops/evidence/candidate-compiler-core-inputs-3-20261012.json",
+      "sha256": "c8b98bb2274a0d5d2e1f7a6caf9a7f4d15892201dfe454dcc08217c494930b3f",
+      "count": 7
+    }
+  ],
+  "readonlyPathManifests": [
+    {
+      "path": "docs/ops/evidence/candidate-compiler-core-fixtures-1-20261012.json",
+      "sha256": "99039f10300a8b6d266b90d3840536458609824569df373ea8d0467a576fc35d",
+      "count": 48
+    },
+    {
+      "path": "docs/ops/evidence/candidate-compiler-core-fixtures-2-20261012.json",
+      "sha256": "b751803a63adda5dbf39a38102186e346d48ba19009f996ceeabd1db6af40041",
+      "count": 48
+    }
+  ],
+  "check": {
+    "locked": false,
+    "sourceFiles": 353,
+    "mirFunctions": 4605
+  },
+  "previousCandidateFailure": {
+    "commit": "324a715f",
+    "invocations": [
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-lock-write-20261012\\compiler.exe",
+          "--c-project-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-compiler-core-20261012\\execution\\sources.list"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+        "seconds": 201.01214160000382,
+        "exit": 2,
+        "stdoutBytes": 0,
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderr": "examples/lexer_candidate/src/syntax.fy:1:1: error: project phase 2 stage 4 code 10 (bytes 0..0)\n"
+      }
+    ],
+    "noPacketEmitted": true
+  },
+  "parserArenaRefactor": {
+    "source": "examples/lexer_candidate/src/syntax_arena_copy.fy",
+    "arenaCount": 9,
+    "analysisBudgetChanged": false,
+    "runtimeCopyBudgetChanged": false,
+    "sourceBytes": 34696
+  },
+  "postValidationFormatting": {
+    "path": "examples/lexer_candidate/src/syntax_arena_copy.fy",
+    "validatedSHA256": "607d08f08918b6e4ba44ccbd57895bcef5952ae6b6397ce4c2d9b908f63dbf74",
+    "currentSHA256": "89969f5d7d8bd0deb3070032d9c9ffd58afbc972ee95316c04236952e27ff098",
+    "change": "removed one trailing empty line",
+    "declarationAndBodySpansChanged": false,
+    "sourceCheckPassed": true,
+    "sourceFiles": 353,
+    "mirFunctions": 4605,
+    "currentLockSHA256": "4d994fe7257aa2500d2e85b29c806280f04964e6b1d416899e0a5226d258138d",
+    "compiledInputHashesPreserved": true
+  }
 }

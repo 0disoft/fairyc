@@ -1,0 +1,389 @@
+{
+  "schema": "fairyc.candidate-readonly-paths/v1",
+  "unchangedPaths": [
+    {
+      "path": ".cache/candidate-compiler-core-20261012/fixture/Current/fairy.lock",
+      "snapshot": {
+        "size": 3928,
+        "modifiedNS": 1791747237414639000,
+        "sha256": "f112d5facff6d462fcf545900306bb16368aaa9cbec98dc0ff5b908813d4fc1b"
+      }
+    },
+    {
+      "path": ".cache/candidate-compiler-core-20261012/fixture/Current/fairy.toml",
+      "snapshot": {
+        "size": 310,
+        "modifiedNS": 1791747237391961300,
+        "sha256": "2be75fefb4aa664b3767eef50075471fbb8ba14a3cef329fe982306842cd5b82"
+      }
+    },
+    {
+      "path": ".cache/candidate-compiler-core-20261012/fixture/Current/left/fairy.toml",
+      "snapshot": {
+        "size": 196,
+        "modifiedNS": 1791747237394468200,
+        "sha256": "4020dec17858341d8790032c4ca4e34b8b1aaad86d2139de5a7a7329afe6722e"
+      }
+    },
+    {
+      "path": ".cache/candidate-compiler-core-20261012/fixture/Current/left/src/left.fy",
+      "snapshot": {
+        "size": 140,
+        "modifiedNS": 1791747237396116700,
+        "sha256": "a1fb4f36820ba838cd2a2111bc15885fc3aa1541463589c431d369743a742485"
+      }
+    },
+    {
+      "path": ".cache/candidate-compiler-core-20261012/fixture/Current/left-lib/fairy.toml",
+      "snapshot": {
+        "size": 139,
+        "modifiedNS": 1791747237397635700,
+        "sha256": "5fa1107425ca2236e8f258ea16af89762bb77895e768418affee8d2d0efe84de"
+      }
+    },
+    {
+      "path": ".cache/candidate-compiler-core-20261012/fixture/Current/left-lib/src/common.fy",
+      "snapshot": {
+        "size": 113,
+        "modifiedNS": 1791747237398190600,
+        "sha256": "b2a43360fad3f185f0988c48ce3fd710fa94727b199198e3645903ad23066089"
+      }
+    },
+    {
+      "path": ".cache/candidate-compiler-core-20261012/fixture/Current/right/fairy.toml",
+      "snapshot": {
+        "size": 198,
+        "modifiedNS": 1791747237399147700,
+        "sha256": "dd61d9842b39217c399e25a765d6e8ac605d72445cb5dc6ab79857ac96a607b1"
+      }
+    },
+    {
+      "path": ".cache/candidate-compiler-core-20261012/fixture/Current/right/src/right.fy",
+      "snapshot": {
+        "size": 141,
+        "modifiedNS": 1791747237400202100,
+        "sha256": "1aba101017b1f511af9d3554892725095954f248a506baa9b5f9c69448eaf063"
+      }
+    },
+    {
+      "path": ".cache/candidate-compiler-core-20261012/fixture/Current/right-lib/fairy.toml",
+      "snapshot": {
+        "size": 140,
+        "modifiedNS": 1791747237401319700,
+        "sha256": "6c900c3d10a98483de9fd9ea9ed996ad57f6d7e744eef8ad6c654dbafb904aa6"
+      }
+    },
+    {
+      "path": ".cache/candidate-compiler-core-20261012/fixture/Current/right-lib/src/common.fy",
+      "snapshot": {
+        "size": 115,
+        "modifiedNS": 1791747237401885500,
+        "sha256": "63e8f8f0120fe2c94713a41fb216e90c1ef924c401c67d186a8f1aabd4c7ee17"
+      }
+    },
+    {
+      "path": ".cache/candidate-compiler-core-20261012/fixture/Current/src/common.fy",
+      "snapshot": {
+        "size": 111,
+        "modifiedNS": 1791747237392504500,
+        "sha256": "9b1af369ef8284b429b0a0b08cd35670b1064f528c110e82bbe95bb7eb943358"
+      }
+    },
+    {
+      "path": ".cache/candidate-compiler-core-20261012/fixture/Current/src/main.fy",
+      "snapshot": {
+        "size": 130,
+        "modifiedNS": 1791747237393402000,
+        "sha256": "3cf3c024659d9b4894202517dd15d952221d8e428fb899891413d491d9e86a70"
+      }
+    },
+    {
+      "path": ".cache/candidate-compiler-core-20261012/fixture/DependencyBody/fairy.lock",
+      "snapshot": {
+        "size": 3928,
+        "modifiedNS": 1791747237585867600,
+        "sha256": "c5126bb0dce6d3e0395617d2eac2e10861e06345b4bce37cbb204e798ace7f57"
+      }
+    },
+    {
+      "path": ".cache/candidate-compiler-core-20261012/fixture/DependencyBody/fairy.toml",
+      "snapshot": {
+        "size": 310,
+        "modifiedNS": 1791747237558085400,
+        "sha256": "2be75fefb4aa664b3767eef50075471fbb8ba14a3cef329fe982306842cd5b82"
+      }
+    },
+    {
+      "path": ".cache/candidate-compiler-core-20261012/fixture/DependencyBody/left/fairy.toml",
+      "snapshot": {
+        "size": 196,
+        "modifiedNS": 1791747237561324300,
+        "sha256": "4020dec17858341d8790032c4ca4e34b8b1aaad86d2139de5a7a7329afe6722e"
+      }
+    },
+    {
+      "path": ".cache/candidate-compiler-core-20261012/fixture/DependencyBody/left/src/left.fy",
+      "snapshot": {
+        "size": 140,
+        "modifiedNS": 1791747237562058600,
+        "sha256": "a1fb4f36820ba838cd2a2111bc15885fc3aa1541463589c431d369743a742485"
+      }
+    },
+    {
+      "path": ".cache/candidate-compiler-core-20261012/fixture/DependencyBody/left-lib/fairy.toml",
+      "snapshot": {
+        "size": 139,
+        "modifiedNS": 1791747237562952400,
+        "sha256": "5fa1107425ca2236e8f258ea16af89762bb77895e768418affee8d2d0efe84de"
+      }
+    },
+    {
+      "path": ".cache/candidate-compiler-core-20261012/fixture/DependencyBody/left-lib/src/common.fy",
+      "snapshot": {
+        "size": 113,
+        "modifiedNS": 1791747237564061000,
+        "sha256": "b2a43360fad3f185f0988c48ce3fd710fa94727b199198e3645903ad23066089"
+      }
+    },
+    {
+      "path": ".cache/candidate-compiler-core-20261012/fixture/DependencyBody/right/fairy.toml",
+      "snapshot": {
+        "size": 198,
+        "modifiedNS": 1791747237564569900,
+        "sha256": "dd61d9842b39217c399e25a765d6e8ac605d72445cb5dc6ab79857ac96a607b1"
+      }
+    },
+    {
+      "path": ".cache/candidate-compiler-core-20261012/fixture/DependencyBody/right/src/right.fy",
+      "snapshot": {
+        "size": 135,
+        "modifiedNS": 1791747237571304500,
+        "sha256": "eec253e43ce0dcf9a6c645e6461b48523e0891309553c2290bd91ad599372274"
+      }
+    },
+    {
+      "path": ".cache/candidate-compiler-core-20261012/fixture/DependencyBody/right-lib/fairy.toml",
+      "snapshot": {
+        "size": 140,
+        "modifiedNS": 1791747237567518900,
+        "sha256": "6c900c3d10a98483de9fd9ea9ed996ad57f6d7e744eef8ad6c654dbafb904aa6"
+      }
+    },
+    {
+      "path": ".cache/candidate-compiler-core-20261012/fixture/DependencyBody/right-lib/src/common.fy",
+      "snapshot": {
+        "size": 115,
+        "modifiedNS": 1791747237569254400,
+        "sha256": "63e8f8f0120fe2c94713a41fb216e90c1ef924c401c67d186a8f1aabd4c7ee17"
+      }
+    },
+    {
+      "path": ".cache/candidate-compiler-core-20261012/fixture/DependencyBody/src/common.fy",
+      "snapshot": {
+        "size": 111,
+        "modifiedNS": 1791747237558596500,
+        "sha256": "9b1af369ef8284b429b0a0b08cd35670b1064f528c110e82bbe95bb7eb943358"
+      }
+    },
+    {
+      "path": ".cache/candidate-compiler-core-20261012/fixture/DependencyBody/src/main.fy",
+      "snapshot": {
+        "size": 130,
+        "modifiedNS": 1791747237559784500,
+        "sha256": "3cf3c024659d9b4894202517dd15d952221d8e428fb899891413d491d9e86a70"
+      }
+    },
+    {
+      "path": ".cache/candidate-compiler-core-20261012/fixture/Moved/fairy.lock",
+      "snapshot": {
+        "size": 3928,
+        "modifiedNS": 1791747237728509100,
+        "sha256": "900fa962f8902c5e41ec2d03fba4c4c40d394b9a47f527d344b89dafce21a9ad"
+      }
+    },
+    {
+      "path": ".cache/candidate-compiler-core-20261012/fixture/Moved/fairy.toml",
+      "snapshot": {
+        "size": 310,
+        "modifiedNS": 1791747237700402900,
+        "sha256": "2be75fefb4aa664b3767eef50075471fbb8ba14a3cef329fe982306842cd5b82"
+      }
+    },
+    {
+      "path": ".cache/candidate-compiler-core-20261012/fixture/Moved/left/fairy.toml",
+      "snapshot": {
+        "size": 196,
+        "modifiedNS": 1791747237703449000,
+        "sha256": "4020dec17858341d8790032c4ca4e34b8b1aaad86d2139de5a7a7329afe6722e"
+      }
+    },
+    {
+      "path": ".cache/candidate-compiler-core-20261012/fixture/Moved/left/src/left.fy",
+      "snapshot": {
+        "size": 140,
+        "modifiedNS": 1791747237703449000,
+        "sha256": "a1fb4f36820ba838cd2a2111bc15885fc3aa1541463589c431d369743a742485"
+      }
+    },
+    {
+      "path": ".cache/candidate-compiler-core-20261012/fixture/Moved/left-lib/fairy.toml",
+      "snapshot": {
+        "size": 139,
+        "modifiedNS": 1791747237704997600,
+        "sha256": "5fa1107425ca2236e8f258ea16af89762bb77895e768418affee8d2d0efe84de"
+      }
+    },
+    {
+      "path": ".cache/candidate-compiler-core-20261012/fixture/Moved/left-lib/src/common.fy",
+      "snapshot": {
+        "size": 113,
+        "modifiedNS": 1791747237705532600,
+        "sha256": "b2a43360fad3f185f0988c48ce3fd710fa94727b199198e3645903ad23066089"
+      }
+    },
+    {
+      "path": ".cache/candidate-compiler-core-20261012/fixture/Moved/right/fairy.toml",
+      "snapshot": {
+        "size": 198,
+        "modifiedNS": 1791747237706544700,
+        "sha256": "dd61d9842b39217c399e25a765d6e8ac605d72445cb5dc6ab79857ac96a607b1"
+      }
+    },
+    {
+      "path": ".cache/candidate-compiler-core-20261012/fixture/Moved/right/src/right.fy",
+      "snapshot": {
+        "size": 141,
+        "modifiedNS": 1791747237707536900,
+        "sha256": "1aba101017b1f511af9d3554892725095954f248a506baa9b5f9c69448eaf063"
+      }
+    },
+    {
+      "path": ".cache/candidate-compiler-core-20261012/fixture/Moved/right-lib/fairy.toml",
+      "snapshot": {
+        "size": 140,
+        "modifiedNS": 1791747237708047300,
+        "sha256": "6c900c3d10a98483de9fd9ea9ed996ad57f6d7e744eef8ad6c654dbafb904aa6"
+      }
+    },
+    {
+      "path": ".cache/candidate-compiler-core-20261012/fixture/Moved/right-lib/src/common.fy",
+      "snapshot": {
+        "size": 115,
+        "modifiedNS": 1791747237709675200,
+        "sha256": "63e8f8f0120fe2c94713a41fb216e90c1ef924c401c67d186a8f1aabd4c7ee17"
+      }
+    },
+    {
+      "path": ".cache/candidate-compiler-core-20261012/fixture/Moved/src/common.fy",
+      "snapshot": {
+        "size": 111,
+        "modifiedNS": 1791747237700974300,
+        "sha256": "9b1af369ef8284b429b0a0b08cd35670b1064f528c110e82bbe95bb7eb943358"
+      }
+    },
+    {
+      "path": ".cache/candidate-compiler-core-20261012/fixture/Moved/src/main.fy",
+      "snapshot": {
+        "size": 256,
+        "modifiedNS": 1791747237715115700,
+        "sha256": "84670375879074b5f6e4e8dbf24dc5794a861b845eaa4086b4eae31bedc9241d"
+      }
+    },
+    {
+      "path": ".cache/candidate-compiler-core-20261012/fixture/Nominal/fairy.lock",
+      "snapshot": {
+        "size": 3928,
+        "modifiedNS": 1791747237682842300,
+        "sha256": "fc0d0c8e0155a1e811e5d34b28fe60567641ac420b85c69de191dd7afd0561b7"
+      }
+    },
+    {
+      "path": ".cache/candidate-compiler-core-20261012/fixture/Nominal/fairy.toml",
+      "snapshot": {
+        "size": 310,
+        "modifiedNS": 1791747237651239100,
+        "sha256": "2be75fefb4aa664b3767eef50075471fbb8ba14a3cef329fe982306842cd5b82"
+      }
+    },
+    {
+      "path": ".cache/candidate-compiler-core-20261012/fixture/Nominal/left/fairy.toml",
+      "snapshot": {
+        "size": 196,
+        "modifiedNS": 1791747237656322000,
+        "sha256": "4020dec17858341d8790032c4ca4e34b8b1aaad86d2139de5a7a7329afe6722e"
+      }
+    },
+    {
+      "path": ".cache/candidate-compiler-core-20261012/fixture/Nominal/left/src/left.fy",
+      "snapshot": {
+        "size": 140,
+        "modifiedNS": 1791747237657815800,
+        "sha256": "a1fb4f36820ba838cd2a2111bc15885fc3aa1541463589c431d369743a742485"
+      }
+    },
+    {
+      "path": ".cache/candidate-compiler-core-20261012/fixture/Nominal/left-lib/fairy.toml",
+      "snapshot": {
+        "size": 139,
+        "modifiedNS": 1791747237658827400,
+        "sha256": "5fa1107425ca2236e8f258ea16af89762bb77895e768418affee8d2d0efe84de"
+      }
+    },
+    {
+      "path": ".cache/candidate-compiler-core-20261012/fixture/Nominal/left-lib/src/common.fy",
+      "snapshot": {
+        "size": 113,
+        "modifiedNS": 1791747237660341200,
+        "sha256": "b2a43360fad3f185f0988c48ce3fd710fa94727b199198e3645903ad23066089"
+      }
+    },
+    {
+      "path": ".cache/candidate-compiler-core-20261012/fixture/Nominal/right/fairy.toml",
+      "snapshot": {
+        "size": 198,
+        "modifiedNS": 1791747237662656900,
+        "sha256": "dd61d9842b39217c399e25a765d6e8ac605d72445cb5dc6ab79857ac96a607b1"
+      }
+    },
+    {
+      "path": ".cache/candidate-compiler-core-20261012/fixture/Nominal/right/src/right.fy",
+      "snapshot": {
+        "size": 141,
+        "modifiedNS": 1791747237663189700,
+        "sha256": "1aba101017b1f511af9d3554892725095954f248a506baa9b5f9c69448eaf063"
+      }
+    },
+    {
+      "path": ".cache/candidate-compiler-core-20261012/fixture/Nominal/right-lib/fairy.toml",
+      "snapshot": {
+        "size": 140,
+        "modifiedNS": 1791747237664205800,
+        "sha256": "6c900c3d10a98483de9fd9ea9ed996ad57f6d7e744eef8ad6c654dbafb904aa6"
+      }
+    },
+    {
+      "path": ".cache/candidate-compiler-core-20261012/fixture/Nominal/right-lib/src/common.fy",
+      "snapshot": {
+        "size": 115,
+        "modifiedNS": 1791747237664850000,
+        "sha256": "63e8f8f0120fe2c94713a41fb216e90c1ef924c401c67d186a8f1aabd4c7ee17"
+      }
+    },
+    {
+      "path": ".cache/candidate-compiler-core-20261012/fixture/Nominal/src/common.fy",
+      "snapshot": {
+        "size": 111,
+        "modifiedNS": 1791747237651239100,
+        "sha256": "9b1af369ef8284b429b0a0b08cd35670b1064f528c110e82bbe95bb7eb943358"
+      }
+    },
+    {
+      "path": ".cache/candidate-compiler-core-20261012/fixture/Nominal/src/main.fy",
+      "snapshot": {
+        "size": 188,
+        "modifiedNS": 1791747237666541200,
+        "sha256": "61d0059f071e17498612364761d854d80a9066ebf0b8452f9309faaf1b9bc392"
+      }
+    }
+  ]
+}

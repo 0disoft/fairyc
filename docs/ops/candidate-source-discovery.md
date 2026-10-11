@@ -1019,3 +1019,30 @@ syntax.fy at project phase 2, stage 4, code 10 (analysis work bound), with no pa
 emitted. Candidate development/release executions therefore did not run. Source-input
 receipts are split into bounded manifests; the native-only result is not a full
 candidate pass.
+
+
+## Parser arena copy and core candidate verification (2026-10-12)
+
+Core commit 324a715f passed two native tests comparing eight Go locked-check cases and
+linked IR after source owners close. Candidate generation on 200 files hit syntax.fy
+projectphase2 stage4 code10 work limit with no C output; preserve this failure history.
+syntax.copy now delegates the nine typed AST vector copies to small ordinary functions
+in syntax_arena_copy, preserving exact arena ordering, work charge, bound 1048576,
+allocation code11 and bound code10, with scanner.copy unchanged. Final source files
+remain under 40KiB; syntax around 34.7KiB. Compiler budgets and product timeout
+unchanged; avoid claiming generic language extension. Source check passes 353 files/4605
+MIR; core native two tests rerun with --locked and pass. Candidate C generation on 201
+files succeeds (316 seconds under verification-only 480 timeout), and development
+execution matches all eight Go cases, exact failing package IDs/spans, 13 plain and 166
+SDK MIR functions and all original owners closing. Core API borrows independently owned
+input, builds catalog/signatures/full units/project IR, no file rereads or lock writes.
+Receipt candidate-compiler-core-20261012.json updated with split bounded source
+manifests plus candidate-syntax-arena-copy-20261012.json supplement. No public API, SDK
+ABI/version, DB, CI change or push.
+
+Both candidate development/release executions pass all eight Go oracle cases and the
+linked-IR lifetime test. Two core native tests and the exact parser
+cooked-byte/span/error native regression pass. All 96 fixture source/manifest/lock paths
+retain bytes and modification times. The updated core receipt preserves the failed
+attempt at commit324a715f and splits full source and fixture hashes into bounded
+manifests.

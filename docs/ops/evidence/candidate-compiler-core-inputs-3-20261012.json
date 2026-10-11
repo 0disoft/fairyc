@@ -2,6 +2,10 @@
   "schema": "fairyc.candidate-source-inputs/v1",
   "sourceInputs": [
     {
+      "path": "examples/lexer_candidate/src/utf8.fy",
+      "sha256": "4a5425cea9efbfb1bff2c31a38c2bd8e392c6792af09f24e906c9a743621870d"
+    },
+    {
       "path": "examples/lexer_candidate/tests/project_compiler_core.fy",
       "sha256": "71c58624deecfb92299945e533d57de95cd0ea5a57c927a40251d8bc18ca6f60"
     },
@@ -23,7 +27,7 @@
     },
     {
       "path": ".cache/verify-compiler-core.py",
-      "sha256": "ee9453bc532a8ed96ff2a93b394d25e4eb09af25e624a63e289243afdab0bfba"
+      "sha256": "1f5901f63cd5e137021ffb6742f090a190843fcb865504c12254e33546f34d8e"
     }
   ]
 }
