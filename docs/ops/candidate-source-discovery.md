@@ -336,6 +336,35 @@ Instance hashing/expansion, graph cycles, import visibility, SDK injection and
 lock projection remain separate work. This unit does not claim whole-loader
 equivalence or change the earlier junction/parser/work-bound limitations.
 
+## Canonical package-instance identity
+
+`project_instance_identity` implements `package-instance-id-v1.md`: tagged
+UID/source/version byte strings, network-order 64-bit lengths and a sorted
+unique feature set under the versioned domain. Components are nonempty opaque
+UTF-8, without manifest-specific name/version restrictions or normalization.
+Feature ordering is checked before empty/UTF-8 feature checks, matching Go's
+rejection priority. The private shared-work and 96 MiB encoding/hash bounds
+remain explicit implementation guards.
+
+The result owns both canonical bytes and its full lowercase
+`fypi1-sha256-` text. Record comparison requires exact canonical-byte equality
+after a digest match, and rejects malformed IDs or a claimed digest collision.
+The collision test injects a contradictory record; it does not find or claim a
+real SHA-256 collision. Local root/dependency adapters bind actual catalog UID,
+source digest, version and the independent feature set for that edge.
+
+All seven normative identity fixtures and thirteen additional UTF-8, Unicode
+composition, NUL, empty-value, feature-order/rejection-priority and over-1-MiB
+vectors match Go's canonical bytes, IDs or rejection category. Four identities
+from a real local workspace match Go; equal feature aliases compare equal and
+different feature sets remain distinct. Two native tests and both candidate C
+profiles pass. Full check passes 319 files and 4119 MIR functions. Evidence:
+`evidence/candidate-instance-identity-20261011.json`.
+
+Reference fixture command:
+`bun tools/run-go.ts run ./cmd/fairyc-candidate-instance-identity-reference <output>`.
+Feature graph expansion, cycle rejection and import visibility are still separate.
+
 ## Remaining connection
 
 Connect the validated catalog declarations to feature-instance resolution,
