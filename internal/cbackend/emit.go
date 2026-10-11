@@ -272,7 +272,7 @@ func emit(program mir.Program, entry string, profile Profile, storageTransfers b
 	if err != nil {
 		return Unit{}, err
 	}
-	resourceTypes, resourceByType, err := prepareResourceTypes(program.ResourceTypes, layoutEngine, structTypes, structByType)
+	resourceTypes, resourceByType, err := prepareResourceTypes(program.ResourceTypes, layoutEngine, structTypes, structByType, enumTypes, enumByType)
 	if err != nil {
 		return Unit{}, err
 	}
@@ -718,7 +718,7 @@ func filterForeignFunctions(foreignFunctions []mir.ForeignFunction, bySymbol map
 	return filtered, filteredBySymbol, nil
 }
 
-func prepareResourceTypes(definitions []mir.ResourceType, engine *layout.Engine, structures []structCType, structByType map[hir.Type]int) ([]resourceCType, map[hir.Type]int, error) {
+func prepareResourceTypes(definitions []mir.ResourceType, engine *layout.Engine, structures []structCType, structByType map[hir.Type]int, enumerations []enumCType, enumByType map[hir.Type]int) ([]resourceCType, map[hir.Type]int, error) {
 	ordered, err := orderResourceDefinitions(definitions)
 	if err != nil {
 		return nil, nil, err
@@ -741,6 +741,10 @@ func prepareResourceTypes(definitions []mir.ResourceType, engine *layout.Engine,
 			fieldType, ok := resourceFieldLayoutType(field.Type)
 			if structure, found := structByType[field.Type]; !ok && found {
 				fieldType, ok = structures[structure].layoutType, true
+				nestedCopy = true
+			}
+			if enumeration, found := enumByType[field.Type]; !ok && found {
+				fieldType, ok = enumerations[enumeration].layoutType, true
 				nestedCopy = true
 			}
 			if resource, found := byType[field.Type]; !ok && found {

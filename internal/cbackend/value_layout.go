@@ -40,7 +40,7 @@ func StorageLayout(program mir.Program, value hir.Type, profile Profile) (ValueS
 	if err != nil {
 		return ValueStorageLayout{}, err
 	}
-	resources, resourceByType, err := prepareResourceTypes(program.ResourceTypes, engine, structures, structByType)
+	resources, resourceByType, err := prepareResourceTypes(program.ResourceTypes, engine, structures, structByType, enumerations, enumByType)
 	if err != nil {
 		return ValueStorageLayout{}, err
 	}
