@@ -1,0 +1,1312 @@
+{
+  "schema": "fairyc.candidate-private-tests/v1",
+  "passed": true,
+  "module": "project_sdk_embedded",
+  "sourceInputs": [
+    {
+      "path": "examples/lexer_candidate/src/array_identity.fy",
+      "sha256": "8b501b0f72bb2805c00abc59afb195b5ba2c199796982122b62958bab64966ee"
+    },
+    {
+      "path": "examples/lexer_candidate/src/attributes.fy",
+      "sha256": "dafe2e1c020446224fa8784e701e522096a58776a1066920f934c0717667b5e6"
+    },
+    {
+      "path": "examples/lexer_candidate/src/bodies.fy",
+      "sha256": "ea9bfd6dc1b3bce9dc407970b82d871185db33e7daadad35d348de84ab6ba294"
+    },
+    {
+      "path": "examples/lexer_candidate/src/body_state.fy",
+      "sha256": "0f4e1924d07e4d21bc5fbe35a4fb8f0c2b617206b6d63191e7a625300ec5bb3e"
+    },
+    {
+      "path": "examples/lexer_candidate/src/budget.fy",
+      "sha256": "c2793aa302279b9d27f0af32edd71f70de4e93cb4f76f55facd3e757641cc494"
+    },
+    {
+      "path": "examples/lexer_candidate/src/candidate_limits.fy",
+      "sha256": "7a27948d9a43bde84acdf1106f462d0c5a288f8a54f193560658eff0c0d00f3e"
+    },
+    {
+      "path": "examples/lexer_candidate/src/cleanup_syntax.fy",
+      "sha256": "1374cdcbfa6139a5e82e4e74606cc28ba46d9e81df62f7a0dd397f856fb0ad6f"
+    },
+    {
+      "path": "examples/lexer_candidate/src/diagnostics.fy",
+      "sha256": "ee95f81ed3b3224702196fceef2888434e9713341b81abf01e03945592c4de8b"
+    },
+    {
+      "path": "examples/lexer_candidate/src/file_source.fy",
+      "sha256": "1a7ac7f6c69ef27e78e734aa74dab90b895742a5500a32931baaed19379b938f"
+    },
+    {
+      "path": "examples/lexer_candidate/src/nominal_identity.fy",
+      "sha256": "634cba7ac0667481c0863953640668841216554d852e0e1b1b245c8bc1606958"
+    },
+    {
+      "path": "examples/lexer_candidate/src/numbers.fy",
+      "sha256": "ee8b40b5e8061317d70d3594c386c9e4c70d95132a7e4243ea6402947a4c3556"
+    },
+    {
+      "path": "examples/lexer_candidate/src/parse_tokens.fy",
+      "sha256": "91984eb1086ff7faafa4a6c64a232fc2ddce365b8cd7c2ef23b143bb91d4c9a6"
+    },
+    {
+      "path": "examples/lexer_candidate/src/pointer_identity.fy",
+      "sha256": "31458fda72821f98d8383339f8b272f3aa1c78385fb23504cbe9f1aaa021ae3d"
+    },
+    {
+      "path": "examples/lexer_candidate/src/pointer_types.fy",
+      "sha256": "7cca6293336feedbf785912759ee6c50a17010ad9d966acb81877ad32cd55297"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_content_hash.fy",
+      "sha256": "68d867b37b8cc817382e6d6602aa4d66f4d66be8784e7fbe119c806832839a0e"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_directory.fy",
+      "sha256": "70321e8a7cc84f131573eec91013fccad38d0162f781768bc0e47b136cf4ebc6"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_import_path.fy",
+      "sha256": "bc0e5e10905ee833b36ffe94ae8ff835f6f33caccfc59970cd379537dcbb0c54"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_instance_graph.fy",
+      "sha256": "9a47a2cae4fbef1a6129b0805e683782be26c819ae2f41dd233129279cc226e9"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_instance_identity.fy",
+      "sha256": "797920212852438398bcfaa5acd34225c9ff2de722744c67d9c68c9d2c56e8dd"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_key_index.fy",
+      "sha256": "34ee26a1092361c5bc60860795a86c0974243eec3cfc5f829710d192fdf7ea28"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_manifest.fy",
+      "sha256": "943c3e163ddc04afb03a82ef4a0485aa6a618a67708e657086b8ed1acd56658a"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_manifest_values.fy",
+      "sha256": "4f21b9dedf744ffc449d1b843282f9aba2ecc221c61f043594bea70c4d56387d"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_module_path.fy",
+      "sha256": "b4217fe0f797e5f0fb4bab8ebc75435e6674b5f72b60d0129b5269c627709cb2"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_module_visibility.fy",
+      "sha256": "4a59054db0f4cfe190b748f2a5eb9978b632b98557750349641e34c09168e049"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_package_input.fy",
+      "sha256": "fe1a75622fbf72b03fe5bfba3ce0c158eb2e03033e31acfdaef05afea9ec68c8"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_path.fy",
+      "sha256": "20bde13864e5ba8752b33a616eab22b08caf8a20d6a435d2d2c2cc68f443f1a5"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_path_unicode_data.fy",
+      "sha256": "9cf3af27796644304493561591e1641c70c5c653bf739ed71a65e492db510fbd"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_sdk_bundle.fy",
+      "sha256": "5460af09656b30ff60eff9129a5ecc7d53db1456debc1322ed4aff4b253f1155"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_sdk_data_alloc_0.fy",
+      "sha256": "ac58625000197a88c33f322770c7f89fecc64126b3ff4479d6757aa4bfb16301"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_sdk_data_bytes_0.fy",
+      "sha256": "18734fec4d058c90a8b38cc729d711789b2ebfd2f4cd08756ccdad56ae9665b3"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_sdk_data_fs_0.fy",
+      "sha256": "a6c26d37224e5a43231d9068bfe1638ac9b357b971eddcaf628291d5c906ea0f"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_sdk_data_fs_1.fy",
+      "sha256": "0c2a6d16571e5681296d324293543771c69665b3a90606090b675d33e0fc5f17"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_sdk_data_fs_2.fy",
+      "sha256": "c20e6ac9ab0d7be6a84af43a52191ae76b402efef6d76bdd7ce0e1e3dffafea0"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_sdk_data_io_0.fy",
+      "sha256": "8527d39e50702591dcdf07e71663128bd4f61a8ad62f30e8b42998f30a548104"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_sdk_data_num_0.fy",
+      "sha256": "1859e2ffa80b3e675096cc50cec693bb33aa060dd47886feb837d4df37c2eda8"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_sdk_data_process_0.fy",
+      "sha256": "b14ace85f2736dee51a63f064cf7619ad925384797e0945c6053ba767f725f6c"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_sdk_data_text_0.fy",
+      "sha256": "a0d6b93d966f75b803a1677cfa0e3cd6504b1006bd4a10a1c2598668a5442d19"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_sdk_data_vec_0.fy",
+      "sha256": "6201186e9a75bb1957596eb9717e447194e67b6c5828355e44af98941a103a31"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_sdk_embedded.fy",
+      "sha256": "8c49d481331933981777e9bd90fa5f45621956010b6a3fea38a2ada4dd31d943"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_source_catalog.fy",
+      "sha256": "5dd5b1a6f848968cf20676084af8ddcaf039cfc74e1837685c12c601c53fb131"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_source_file.fy",
+      "sha256": "6d1307e99f7ae9fb387fc447f3b6c36f6c0e77aebc90faca55e75665aad2d282"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_source_identity.fy",
+      "sha256": "354bed4ced07109403b58f4432e8beddc765760a1ee083b3ca72fa0880c9f359"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_source_modules.fy",
+      "sha256": "d7d7e5b30a270389a1572f6e26cf3c0603db33e0125bd33fa17f4f177a0f7a1c"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_source_root.fy",
+      "sha256": "e6d896a57fde407db5e7042e244d6f2a35dddc4e113ad20555c4408f24842127"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_source_set.fy",
+      "sha256": "c4b70409d8aa627a1ef46488e5232d3deea7b07c0e796c26ef28449f367a98e1"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_toml_context.fy",
+      "sha256": "1682260043feced2ac662198fd3b29f4badb2a4a9f9b02a8e1f81462f3b3cc0f"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_toml_document.fy",
+      "sha256": "0bc3782206da0d9320ba8a39ea6a1f9ded52ec1bbf855580e31c1a1786f4b3a8"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_toml_model.fy",
+      "sha256": "4a6c295108e704749fc557204de4d8a0287e3228e59da396c50867ec8894b11e"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_toml_scalars.fy",
+      "sha256": "137d5dbdce313f22e91a9be87f8b34eb6f10011933b152f649421a895e274cb9"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_toml_strings.fy",
+      "sha256": "bc7e71acaaa68af5755d066c90fa1f763625de32c8fa2a6778e8447eebc187bb"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_toml_values.fy",
+      "sha256": "24255d1fdf0f34b6761f5304d383127667e8b127488a80409b3f35a13f62e81c"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_workspace_catalog.fy",
+      "sha256": "bc800dda99247aba4d8b80abdcbc092d9cb27ac5193cfb7a33bd405ec753c936"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_workspace_graph.fy",
+      "sha256": "bc9665cd9da36857ed1c3c878f91f8f55517f6d10cd87e6e245acc434fb36ed7"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_workspace_input.fy",
+      "sha256": "18a8a35c400eaa8c32da09ea55a70d704953e8b9a762998b44c9af4dd76689fd"
+    },
+    {
+      "path": "examples/lexer_candidate/src/records.fy",
+      "sha256": "e2d1d3540285509aded981b476d4b2340857d8c7370364f4b1410bfd6883f6dd"
+    },
+    {
+      "path": "examples/lexer_candidate/src/reference_types.fy",
+      "sha256": "f529bb686f06fe07d95f864e28fbde211200fce11a11c6aae260356103639b57"
+    },
+    {
+      "path": "examples/lexer_candidate/src/resource_identity.fy",
+      "sha256": "7d85c65df4d6cc02f004f854d5108ec3cc7ba8ddb4885ea54c634f88f93594aa"
+    },
+    {
+      "path": "examples/lexer_candidate/src/scanner.fy",
+      "sha256": "3755e569fe63003f63b2c9b8272df2ba656c844791cedbc0da4f9245b8809cf7"
+    },
+    {
+      "path": "examples/lexer_candidate/src/sdk_authority.fy",
+      "sha256": "ae0f2e21819a625a6bb5fe331173dd3366599486f3c203a523693680a0c4ee6c"
+    },
+    {
+      "path": "examples/lexer_candidate/src/sdk_file_rules.fy",
+      "sha256": "a7c5bc7224e12d29d54d284c54f31f34fa66f1067397e0fcb57de9dabe901e5b"
+    },
+    {
+      "path": "examples/lexer_candidate/src/sdk_scopes.fy",
+      "sha256": "7aabc14d6c8a54f959e4c454df8fccb4fc49c2a7efbefa882f8d939a131717e6"
+    },
+    {
+      "path": "examples/lexer_candidate/src/sha256.fy",
+      "sha256": "eb89211fd749f7f527e8d2b72e97d70f8d9613bbac428bc95d975bef7c53bfa1"
+    },
+    {
+      "path": "examples/lexer_candidate/src/sha256_block.fy",
+      "sha256": "bc48b9e751205bba8aeaf09987ea8681694d26bc989e24f4ecb3afa4c6e00fd4"
+    },
+    {
+      "path": "examples/lexer_candidate/src/sha256_stream.fy",
+      "sha256": "b5f97a9b5be679418a1365a6007028abfab5ba66ee3ae5c08b3e5b863fcfc8b9"
+    },
+    {
+      "path": "internal/sdkstdlib/sources/std/bytes.fy",
+      "sha256": "4740a506e93349fb002c383967dcc44d182d20f09f2094b83b5464a4ab252982"
+    },
+    {
+      "path": "internal/sdkstdlib/sources/std/fs.fy",
+      "sha256": "fd7ddfa9f0deed98304cecf94911644087d1e2a46e8be8995c35acbcb183b335"
+    },
+    {
+      "path": "internal/sdkstdlib/sources/std/io.fy",
+      "sha256": "4b89c3aeb8b4de4887395d29723095d364c5660c6b773c5696fb1f65f5365f48"
+    },
+    {
+      "path": "internal/sdkstdlib/sources/std/num.fy",
+      "sha256": "09aa0d45f075aa4212049527ded7bb48d99ceb6ffed56b310e267421bae20bb3"
+    },
+    {
+      "path": "internal/sdkstdlib/sources/std/process.fy",
+      "sha256": "9680a1481df4f761f481d5a039af7bdbefeb312d1091961194f8e7bc0681ae24"
+    },
+    {
+      "path": "internal/sdkstdlib/sources/std/text.fy",
+      "sha256": "cccd47e090fda11c9da063ffb321489dd8753fe9996855fc432833e05a79e695"
+    },
+    {
+      "path": "internal/sdkstdlib/sources/optional/std/vec.fy",
+      "sha256": "0ae4c395bf98c39079ad620bde035b3b590d51417864802e698edc069281db5b"
+    },
+    {
+      "path": "examples/lexer_candidate/src/strings.fy",
+      "sha256": "8f26db7c4d4039c8c8d9fbc6078097859c8f714ca5887957fdf0e69269dca521"
+    },
+    {
+      "path": "examples/lexer_candidate/src/syntax.fy",
+      "sha256": "cb040a2973447b89c2ad59b5447c65dab79df5df7930f73431afa7ea34ef25fd"
+    },
+    {
+      "path": "examples/lexer_candidate/src/type_state.fy",
+      "sha256": "7dbbf7d50be1e9513dc8aafd99b11afda5d8e2d7ce87d96b6436c4752c2123a0"
+    },
+    {
+      "path": "examples/lexer_candidate/src/types.fy",
+      "sha256": "53a77948af92724f00de0609837fd1507899df8e2b59b6d2778ef1f3c344395a"
+    },
+    {
+      "path": "examples/lexer_candidate/src/utf8.fy",
+      "sha256": "4a5425cea9efbfb1bff2c31a38c2bd8e392c6792af09f24e906c9a743621870d"
+    },
+    {
+      "path": "examples/lexer_candidate/tests/project_sdk_embedded.fy",
+      "sha256": "31182f20516dd5daf5cb86b87a89809943b0f261bc5ff11c81bc2bf4cadb953b"
+    },
+    {
+      "path": "tools/verify-candidate-private-tests.py",
+      "sha256": "04c7e44df7941bd0c1a12b523b115df623dbe10836f3eb8993dedc7d6ea5e8af"
+    },
+    {
+      "path": ".cache/candidate-sdk-embedded-20261012/fixture/root.bin",
+      "sha256": "8fac728b3a5eb9e99b907949ae4f7b597e6c7e239286c03c704640a7bc07d00c"
+    },
+    {
+      "path": "cmd/fairyc-candidate-sdk-embed/main.go",
+      "sha256": "8cb1f19545d48ead3dcbf04e42cd51cdb19443e338a829cb6ed4ced1b9ec1e24"
+    },
+    {
+      "path": "cmd/fairyc-candidate-sdk-selection-reference/main.go",
+      "sha256": "96f77bea63d7e8abbe1be7fa73ba3c1315bced4892c6a1811538593a3b758d7c"
+    },
+    {
+      "path": "internal/sdkstdlib/formatting_test.go",
+      "sha256": "1738693f52a0f8fef8d7fb1f91d6c41ad1b4e226fd026f27ef6655bd36c78553"
+    },
+    {
+      "path": "internal/sdkstdlib/io_i64_test.go",
+      "sha256": "b93e0bdec386b9a3545672d39827fad1d82b002b906efdbf3bb70f07d9352199"
+    },
+    {
+      "path": "internal/sdkstdlib/stdlib.go",
+      "sha256": "418b24a10b443b784275c886c7b87d3f9b97e72923406b567335b26569ac6f3b"
+    },
+    {
+      "path": "internal/sdkstdlib/stdlib_test.go",
+      "sha256": "f94430a01d60d6712996993a5a58b8bf8cc934ae1b9f421a36333fdb4d119fc6"
+    },
+    {
+      "path": "internal/sdkstdlib/vector.go",
+      "sha256": "bb8fc2b90fa40fcc578e11d0f54f996bf07608d7fd72f437f692a685776931e2"
+    },
+    {
+      "path": "internal/sdkstdlib/vector_candidate_test.go",
+      "sha256": "bc4c53ba63c50f5b93b7a5a9deb5bc4a5ef72651d077cb531a0f05797819f1d0"
+    },
+    {
+      "path": "internal/sdkstdlib/sources/optional/std/vec.fy",
+      "sha256": "0ae4c395bf98c39079ad620bde035b3b590d51417864802e698edc069281db5b"
+    },
+    {
+      "path": "internal/sdkstdlib/sources/std/alloc.fy",
+      "sha256": "61f50fa03239eee7b669c315659e8c9d07982117857cf50fe7f5a2b6f35a82c2"
+    },
+    {
+      "path": "internal/sdkstdlib/sources/std/bytes.fy",
+      "sha256": "4740a506e93349fb002c383967dcc44d182d20f09f2094b83b5464a4ab252982"
+    },
+    {
+      "path": "internal/sdkstdlib/sources/std/fs.fy",
+      "sha256": "fd7ddfa9f0deed98304cecf94911644087d1e2a46e8be8995c35acbcb183b335"
+    },
+    {
+      "path": "internal/sdkstdlib/sources/std/io.fy",
+      "sha256": "4b89c3aeb8b4de4887395d29723095d364c5660c6b773c5696fb1f65f5365f48"
+    },
+    {
+      "path": "internal/sdkstdlib/sources/std/num.fy",
+      "sha256": "09aa0d45f075aa4212049527ded7bb48d99ceb6ffed56b310e267421bae20bb3"
+    },
+    {
+      "path": "internal/sdkstdlib/sources/std/process.fy",
+      "sha256": "9680a1481df4f761f481d5a039af7bdbefeb312d1091961194f8e7bc0681ae24"
+    },
+    {
+      "path": "internal/sdkstdlib/sources/std/text.fy",
+      "sha256": "cccd47e090fda11c9da063ffb321489dd8753fe9996855fc432833e05a79e695"
+    }
+  ],
+  "tools": {
+    "compiler": {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\manifest-bootstrap.exe",
+      "sha256": "4e6a50a83b4d9f74a11d749c779a90683ab3a3916d19f4852bfe1cbd452cc664"
+    },
+    "candidate": {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-source-file-20261011\\compiler.exe",
+      "sha256": "e87cc5c8c19e30fc68ca68fa98ef66d87baa1300263d8989e255910bb1985d8f"
+    },
+    "builder": {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-source-file-20261011\\builder.exe",
+      "sha256": "8141ce6bcc461a52fe6bf0bf24e9e5f5a9d7842c3c7dbfc5863cc4e822584ea7"
+    }
+  },
+  "native": {
+    "schemaVersion": "fairyc.test-report/v4",
+    "engine": "native",
+    "target": "x86_64-windows-msvc",
+    "profile": "development",
+    "tests": [
+      {
+        "identity": "tests::project_sdk_embedded::default_loader_uses_exact_embedded_sdk_for_reachable_imports",
+        "outcome": "passed",
+        "trapCategory": null,
+        "stdoutBase64": "",
+        "stderrBase64": ""
+      },
+      {
+        "identity": "tests::project_sdk_embedded::embedded_factory_is_pure_and_rejects_invalid_profiles_and_work",
+        "outcome": "passed",
+        "trapCategory": null,
+        "stdoutBase64": "",
+        "stderrBase64": ""
+      },
+      {
+        "identity": "tests::project_sdk_embedded::unknown_embedded_sdk_imports_preserve_local_counter_rollback",
+        "outcome": "passed",
+        "trapCategory": null,
+        "stdoutBase64": "",
+        "stderrBase64": ""
+      }
+    ],
+    "count": 3,
+    "passed": 3,
+    "failed": 0,
+    "status": "ok",
+    "lock": "verified"
+  },
+  "nativeTests": 3,
+  "lockSHA256": "729bf1b5a6543d7b4d57ba4ef21cd87e0bacf700570a318f8ce82c5f960d2d7e",
+  "candidateInputFiles": 77,
+  "candidatePacketSHA256": "4fc85ac271e39193b3e54e2dbd27937730a1fe42f4c4073e1ca699e767d95f0f",
+  "candidateExecutions": [
+    {
+      "profile": "development",
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-sdk-embedded-20261012\\execution\\development.exe",
+      "sha256": "0b25f1fbbacbc78ce5eceeb6eb241b1a0a27d4364d02fb85fd2df7be96aae02d",
+      "exit": 0
+    },
+    {
+      "profile": "release",
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-sdk-embedded-20261012\\execution\\release.exe",
+      "sha256": "4fc99e526b2789d03a30c0bf6f8c68e41f04574607cc6a6ce79c6992450e4554",
+      "exit": 0
+    }
+  ],
+  "invocations": [
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\manifest-bootstrap.exe",
+        "test",
+        "--native",
+        "--locked",
+        "--json",
+        "--capture-output",
+        "--exact",
+        "tests::project_sdk_embedded::default_loader_uses_exact_embedded_sdk_for_reachable_imports",
+        "--exact",
+        "tests::project_sdk_embedded::unknown_embedded_sdk_imports_preserve_local_counter_rollback",
+        "--exact",
+        "tests::project_sdk_embedded::embedded_factory_is_pure_and_rejects_invalid_profiles_and_work",
+        "--",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-sdk-embedded-20261012\\fixture\\root.bin"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "seconds": 118.8219095999957,
+      "exit": 0,
+      "stdoutBytes": 731,
+      "stdoutSHA256": "121a7fe3be26b75f6067ac8da55a3f3646544dace17f5bf4f33a8cf1bc093cbf",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-source-file-20261011\\compiler.exe",
+        "--c-project-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-sdk-embedded-20261012\\execution\\sources.list"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "seconds": 45.6251065999968,
+      "exit": 0,
+      "stdoutBytes": 4791287,
+      "stdoutSHA256": "4fc85ac271e39193b3e54e2dbd27937730a1fe42f4c4073e1ca699e767d95f0f",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-source-file-20261011\\builder.exe",
+        "--packet",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-sdk-embedded-20261012\\execution\\candidate-packet.bin",
+        "--packet-sha256",
+        "4fc85ac271e39193b3e54e2dbd27937730a1fe42f4c4073e1ca699e767d95f0f",
+        "--output",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-sdk-embedded-20261012\\execution\\development.exe"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "seconds": 4.049258300001384,
+      "exit": 0,
+      "stdoutBytes": 184,
+      "stdoutSHA256": "b50aa595d9c6642790296db5e4af1d20ac31c54fa59ed3a18c0880e737e98704",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-sdk-embedded-20261012\\execution\\development.exe",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-sdk-embedded-20261012\\fixture\\root.bin"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "seconds": 4.291428299999097,
+      "exit": 0,
+      "stdoutBytes": 0,
+      "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-source-file-20261011\\builder.exe",
+        "--packet",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-sdk-embedded-20261012\\execution\\candidate-packet.bin",
+        "--packet-sha256",
+        "4fc85ac271e39193b3e54e2dbd27937730a1fe42f4c4073e1ca699e767d95f0f",
+        "--output",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-sdk-embedded-20261012\\execution\\release.exe",
+        "--release"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "seconds": 76.26674099999946,
+      "exit": 0,
+      "stdoutBytes": 185,
+      "stdoutSHA256": "a26572e6c5093b23977ef370ce24be1e09d8eedcc0e523fac4c9ba173349bb64",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-sdk-embedded-20261012\\execution\\release.exe",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-sdk-embedded-20261012\\fixture\\root.bin"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "seconds": 0.5045748999982607,
+      "exit": 0,
+      "stdoutBytes": 0,
+      "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr": ""
+    }
+  ],
+  "publicApiChanged": false,
+  "dbChanged": false,
+  "ciChanged": false,
+  "pushed": false,
+  "goOracle": [
+    {
+      "candidate": false,
+      "fixture": "None",
+      "owners": null,
+      "profile": 0
+    },
+    {
+      "candidate": true,
+      "fixture": "CandidateUnused",
+      "owners": null,
+      "profile": 0
+    },
+    {
+      "candidate": false,
+      "fixture": "Core",
+      "owners": [
+        "fypi1-sha256-fff7c11d9e2ba01039b762ca6eca85f9236a54baf9d2d276809b49faef8a55e2"
+      ],
+      "profile": 1
+    },
+    {
+      "candidate": false,
+      "fixture": "AliasCore",
+      "owners": [
+        "fypi1-sha256-8419f863dbaa45782aa272c6b85719d1c637f7e29aaccd3e452b6c3f19d0f541"
+      ],
+      "profile": 1
+    },
+    {
+      "candidate": false,
+      "fixture": "Vector",
+      "owners": [
+        "fypi1-sha256-824335fd17ccf8ad8708c739186092d36b99f79de7decdb1c85152788926586b"
+      ],
+      "profile": 2
+    },
+    {
+      "candidate": true,
+      "fixture": "CandidateCore",
+      "owners": [
+        "fypi1-sha256-fff7c11d9e2ba01039b762ca6eca85f9236a54baf9d2d276809b49faef8a55e2"
+      ],
+      "profile": 3
+    },
+    {
+      "candidate": false,
+      "fixture": "ChildOnly",
+      "owners": [
+        "fypi1-sha256-0eeada89fc5cf27a6ae56f564b51c8085cb7f43b335308154a57c8b8541a8da8"
+      ],
+      "profile": 1
+    },
+    {
+      "candidate": false,
+      "fixture": "Both",
+      "owners": [
+        "fypi1-sha256-7145aa10b92821433d2003807ef122fa4d74d171eb1e5dddeddf509a310c88a9",
+        "fypi1-sha256-0eeada89fc5cf27a6ae56f564b51c8085cb7f43b335308154a57c8b8541a8da8"
+      ],
+      "profile": 1
+    },
+    {
+      "candidate": false,
+      "fixture": "ChildVector",
+      "owners": [
+        "fypi1-sha256-cd9f72158de55e648f3d5be4cbd0ec333303c1baa45fca67e7ce8b14d5c455ab"
+      ],
+      "profile": 2
+    },
+    {
+      "candidate": false,
+      "fixture": "UnreachableVector",
+      "owners": null,
+      "profile": 0
+    },
+    {
+      "candidate": false,
+      "fixture": "FeatureSplit",
+      "owners": [
+        "fypi1-sha256-ca603919d3878c8853880ca66bf42aceb2b0fd8c208d3a18d0b90c646b05a168",
+        "fypi1-sha256-cddf150f60e269a57221c34ea41d2eaebc18dc90586f015525c7952bc91992f5"
+      ],
+      "profile": 1
+    },
+    {
+      "candidate": false,
+      "fixture": "InstanceAliases",
+      "owners": [
+        "fypi1-sha256-ca603919d3878c8853880ca66bf42aceb2b0fd8c208d3a18d0b90c646b05a168"
+      ],
+      "profile": 1
+    },
+    {
+      "candidate": false,
+      "fixture": "LongTrivia",
+      "owners": [
+        "fypi1-sha256-b17cde504d0ea3825858773eb5312899e6e06b725836df47bf2319f1fc74cd0a"
+      ],
+      "profile": 1
+    },
+    {
+      "candidate": false,
+      "fixture": "SimilarNamespaces",
+      "owners": null,
+      "profile": 0
+    }
+  ],
+  "fixtureFiles": [
+    {
+      "path": ".cache/candidate-sdk-embedded-20261012/fixture/AliasCore/candidate.txt",
+      "sha256": "fcbcf165908dd18a9e49f7ff27810176db8e9f63b4352213741664245224f8aa"
+    },
+    {
+      "path": ".cache/candidate-sdk-embedded-20261012/fixture/AliasCore/counts.bin",
+      "sha256": "2122de10fe3f3e3a0e36326dee6e9ad3b7740f6461e8d0cedfa8e8412176511d"
+    },
+    {
+      "path": ".cache/candidate-sdk-embedded-20261012/fixture/AliasCore/edges.txt",
+      "sha256": "0f7afef219774d7258afb8926571676f1641a7df26e10b66acec9b5995278fed"
+    },
+    {
+      "path": ".cache/candidate-sdk-embedded-20261012/fixture/AliasCore/fairy.toml",
+      "sha256": "842c0deaf9080f93aab8586f71c44223756605e9cc3577bbc4b756059a747a4c"
+    },
+    {
+      "path": ".cache/candidate-sdk-embedded-20261012/fixture/AliasCore/lookups.txt",
+      "sha256": "0b45c9716b4d6c28972670c258b451e7248f6be850ab9f56138c086a8705f82d"
+    },
+    {
+      "path": ".cache/candidate-sdk-embedded-20261012/fixture/AliasCore/nodes.txt",
+      "sha256": "befefd19189bcd59271d5d39dbe0e0f0a2f1bf79203cc97922c31c51a9470470"
+    },
+    {
+      "path": ".cache/candidate-sdk-embedded-20261012/fixture/AliasCore/selection.txt",
+      "sha256": "e4b6297d1c6465dbd67f37e95d4fa98af124ffdc3b163cdefff7255f935b0c37"
+    },
+    {
+      "path": ".cache/candidate-sdk-embedded-20261012/fixture/AliasCore/src/main.fy",
+      "sha256": "e645e3508d1e334622f67e5d3ea0a978d74fb48ee922b4d80965c87aae1b243b"
+    },
+    {
+      "path": ".cache/candidate-sdk-embedded-20261012/fixture/BareStd/fairy.toml",
+      "sha256": "842c0deaf9080f93aab8586f71c44223756605e9cc3577bbc4b756059a747a4c"
+    },
+    {
+      "path": ".cache/candidate-sdk-embedded-20261012/fixture/BareStd/path.txt",
+      "sha256": "a7f5397443359ea76c50be82c77f1f893a060925b51a332cc5da906f83d3344e"
+    },
+    {
+      "path": ".cache/candidate-sdk-embedded-20261012/fixture/BareStd/reason.txt",
+      "sha256": "b7d3808d5e0d85bcc68451684f5e8e97f29c92f7106f02b4c92fc2a402e8c3d6"
+    },
+    {
+      "path": ".cache/candidate-sdk-embedded-20261012/fixture/BareStd/src/main.fy",
+      "sha256": "030a0142c4d592eb3cb9d101df162bd8544377e04b26f33533157793eac35b6e"
+    },
+    {
+      "path": ".cache/candidate-sdk-embedded-20261012/fixture/Both/a/fairy.toml",
+      "sha256": "5955a3cbba16e1316a4033dc657c257fde338b904285fa714a03398005bf2929"
+    },
+    {
+      "path": ".cache/candidate-sdk-embedded-20261012/fixture/Both/a/src/lib.fy",
+      "sha256": "c98b3a0a5de7fd962b6838c15d504357ae3ae1d33cfa567d29514ae3ee193fd3"
+    },
+    {
+      "path": ".cache/candidate-sdk-embedded-20261012/fixture/Both/candidate.txt",
+      "sha256": "fcbcf165908dd18a9e49f7ff27810176db8e9f63b4352213741664245224f8aa"
+    },
+    {
+      "path": ".cache/candidate-sdk-embedded-20261012/fixture/Both/counts.bin",
+      "sha256": "588aa67cb3817a145a00876295039b70ed72d6ded1cf596687575d152e883502"
+    },
+    {
+      "path": ".cache/candidate-sdk-embedded-20261012/fixture/Both/edges.txt",
+      "sha256": "62379483634f809a4d88dd185d79dc98d8ed70a4d1daf371fe2869779e8565c7"
+    },
+    {
+      "path": ".cache/candidate-sdk-embedded-20261012/fixture/Both/fairy.toml",
+      "sha256": "070d88c326cb9ac1b6154e9ae817f5747d7ad966baf8766640937774bb977181"
+    },
+    {
+      "path": ".cache/candidate-sdk-embedded-20261012/fixture/Both/lookups.txt",
+      "sha256": "c8627d8a670a258dc86182fa1e317b6483f9b0fbfe725445e9f28b837429d941"
+    },
+    {
+      "path": ".cache/candidate-sdk-embedded-20261012/fixture/Both/nodes.txt",
+      "sha256": "a8f2d98fc89e1089eecade2955f25c82d9a8938f652d323e5a2b7577036ebf32"
+    },
+    {
+      "path": ".cache/candidate-sdk-embedded-20261012/fixture/Both/selection.txt",
+      "sha256": "c36ce8103fa7cc036c570cbc487f2eadf79a394441200055d8a21687ea66a17b"
+    },
+    {
+      "path": ".cache/candidate-sdk-embedded-20261012/fixture/Both/src/main.fy",
+      "sha256": "d28484d12f391eb1e65e72e115b8c9b7a37c1a4655009535ecb00beea946bcb0"
+    },
+    {
+      "path": ".cache/candidate-sdk-embedded-20261012/fixture/CandidateCore/candidate.txt",
+      "sha256": "b5bea41b6c623f7c09f1bf24dcae58ebab3c0cdd90ad966bc43a45b44867e12b"
+    },
+    {
+      "path": ".cache/candidate-sdk-embedded-20261012/fixture/CandidateCore/counts.bin",
+      "sha256": "94b089873b9ed2c7c17f77183d336854b28fbc52a61ed7bc43221269227ea4a2"
+    },
+    {
+      "path": ".cache/candidate-sdk-embedded-20261012/fixture/CandidateCore/edges.txt",
+      "sha256": "0ff39e8e7044c2f1199861a00a7f0a76ccabc2f3680e21a2306c6b2ee6d14615"
+    },
+    {
+      "path": ".cache/candidate-sdk-embedded-20261012/fixture/CandidateCore/fairy.toml",
+      "sha256": "842c0deaf9080f93aab8586f71c44223756605e9cc3577bbc4b756059a747a4c"
+    },
+    {
+      "path": ".cache/candidate-sdk-embedded-20261012/fixture/CandidateCore/lookups.txt",
+      "sha256": "a9612b02f77975a415cd44dc9b98bde09bc821fdd23bd92b80ebd67d07ef61a4"
+    },
+    {
+      "path": ".cache/candidate-sdk-embedded-20261012/fixture/CandidateCore/nodes.txt",
+      "sha256": "77d14ffa5a4f9ccad1be2822407a5143f333f7ec18ab2ac4d1642e6df33c09b2"
+    },
+    {
+      "path": ".cache/candidate-sdk-embedded-20261012/fixture/CandidateCore/selection.txt",
+      "sha256": "e1e35c6619924a3e005280f98ae1c697bce47eadb8cc6dff4ec709651dd38fd3"
+    },
+    {
+      "path": ".cache/candidate-sdk-embedded-20261012/fixture/CandidateCore/src/main.fy",
+      "sha256": "6cfd3d9e62582d99c19aa12873bf76f6d74de4f8868382e32966c126d8a6d518"
+    },
+    {
+      "path": ".cache/candidate-sdk-embedded-20261012/fixture/CandidateUnused/candidate.txt",
+      "sha256": "b5bea41b6c623f7c09f1bf24dcae58ebab3c0cdd90ad966bc43a45b44867e12b"
+    },
+    {
+      "path": ".cache/candidate-sdk-embedded-20261012/fixture/CandidateUnused/counts.bin",
+      "sha256": "206c1fe2677fb3ee35bbf475b30b1a2d38373743d2f13408bcd96bb83617b984"
+    },
+    {
+      "path": ".cache/candidate-sdk-embedded-20261012/fixture/CandidateUnused/edges.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": ".cache/candidate-sdk-embedded-20261012/fixture/CandidateUnused/fairy.toml",
+      "sha256": "842c0deaf9080f93aab8586f71c44223756605e9cc3577bbc4b756059a747a4c"
+    },
+    {
+      "path": ".cache/candidate-sdk-embedded-20261012/fixture/CandidateUnused/lookups.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": ".cache/candidate-sdk-embedded-20261012/fixture/CandidateUnused/nodes.txt",
+      "sha256": "7ff7e6e9160dd253b2d58bcd74720e3fa9cb1c7cd5500f65c633b94de514c688"
+    },
+    {
+      "path": ".cache/candidate-sdk-embedded-20261012/fixture/CandidateUnused/selection.txt",
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "path": ".cache/candidate-sdk-embedded-20261012/fixture/CandidateUnused/src/main.fy",
+      "sha256": "51e4c2b1b8b049778e1543110b6b45a60b6a5bc53bded4de74457f7fcc984cf4"
+    },
+    {
+      "path": ".cache/candidate-sdk-embedded-20261012/fixture/ChildOnly/a/fairy.toml",
+      "sha256": "5955a3cbba16e1316a4033dc657c257fde338b904285fa714a03398005bf2929"
+    },
+    {
+      "path": ".cache/candidate-sdk-embedded-20261012/fixture/ChildOnly/a/src/lib.fy",
+      "sha256": "c98b3a0a5de7fd962b6838c15d504357ae3ae1d33cfa567d29514ae3ee193fd3"
+    },
+    {
+      "path": ".cache/candidate-sdk-embedded-20261012/fixture/ChildOnly/candidate.txt",
+      "sha256": "fcbcf165908dd18a9e49f7ff27810176db8e9f63b4352213741664245224f8aa"
+    },
+    {
+      "path": ".cache/candidate-sdk-embedded-20261012/fixture/ChildOnly/counts.bin",
+      "sha256": "2707e91983ffe6763f819af4660356f7b71e4a195161c833a1ae469254c5a6fd"
+    },
+    {
+      "path": ".cache/candidate-sdk-embedded-20261012/fixture/ChildOnly/edges.txt",
+      "sha256": "52285b79bb2b1a19b7cd54c5c96c00db082fc1475e170fe938686257fc890fb0"
+    },
+    {
+      "path": ".cache/candidate-sdk-embedded-20261012/fixture/ChildOnly/fairy.toml",
+      "sha256": "070d88c326cb9ac1b6154e9ae817f5747d7ad966baf8766640937774bb977181"
+    },
+    {
+      "path": ".cache/candidate-sdk-embedded-20261012/fixture/ChildOnly/lookups.txt",
+      "sha256": "237aaf75663bf7b345497d957508c8102988a1819ad8b9a47294114ca53eabb5"
+    },
+    {
+      "path": ".cache/candidate-sdk-embedded-20261012/fixture/ChildOnly/nodes.txt",
+      "sha256": "793f13c6860bf489de9b88451e74ef5f1634f631c4392c48e68a0999fab0e417"
+    },
+    {
+      "path": ".cache/candidate-sdk-embedded-20261012/fixture/ChildOnly/selection.txt",
+      "sha256": "58ed056059afd865b32c5c0763552dbaab6683efb00c889a297c98f670344107"
+    },
+    {
+      "path": ".cache/candidate-sdk-embedded-20261012/fixture/ChildOnly/src/main.fy",
+      "sha256": "1c7d0fcf07500be283d696855db7e2672dc1bba9b48bc1e83c2516f4455d79a0"
+    },
+    {
+      "path": ".cache/candidate-sdk-embedded-20261012/fixture/ChildVector/a/fairy.toml",
+      "sha256": "5955a3cbba16e1316a4033dc657c257fde338b904285fa714a03398005bf2929"
+    },
+    {
+      "path": ".cache/candidate-sdk-embedded-20261012/fixture/ChildVector/a/src/lib.fy",
+      "sha256": "c059aa98b9a4f2de69394cb182b7f400643c9f3791a6ffd85bbc80519af3aca5"
+    },
+    {
+      "path": ".cache/candidate-sdk-embedded-20261012/fixture/ChildVector/candidate.txt",
+      "sha256": "fcbcf165908dd18a9e49f7ff27810176db8e9f63b4352213741664245224f8aa"
+    },
+    {
+      "path": ".cache/candidate-sdk-embedded-20261012/fixture/ChildVector/counts.bin",
+      "sha256": "7e07a23a596df66943e0c0cd0098d714308340baf11e4a15325d0e6278fe89e9"
+    },
+    {
+      "path": ".cache/candidate-sdk-embedded-20261012/fixture/ChildVector/edges.txt",
+      "sha256": "9a7811e2c1880e346f4a0837cedac667cb790e224129beef98b7d7548cbdb8f0"
+    },
+    {
+      "path": ".cache/candidate-sdk-embedded-20261012/fixture/ChildVector/fairy.toml",
+      "sha256": "070d88c326cb9ac1b6154e9ae817f5747d7ad966baf8766640937774bb977181"
+    },
+    {
+      "path": ".cache/candidate-sdk-embedded-20261012/fixture/ChildVector/lookups.txt",
+      "sha256": "34b4e40e0838d402f5a801848224d62009beb3787e0ed9020a096b8f20efacaf"
+    },
+    {
+      "path": ".cache/candidate-sdk-embedded-20261012/fixture/ChildVector/nodes.txt",
+      "sha256": "ca868302e5de769e8beb6c8bccbd39a69139cfb8f32befae441cc71aecfb1722"
+    },
+    {
+      "path": ".cache/candidate-sdk-embedded-20261012/fixture/ChildVector/selection.txt",
+      "sha256": "a66929d26f09624a806a73d5668195cb0c563e5ae97e1b31a5e109e803596c19"
+    },
+    {
+      "path": ".cache/candidate-sdk-embedded-20261012/fixture/ChildVector/src/main.fy",
+      "sha256": "1c7d0fcf07500be283d696855db7e2672dc1bba9b48bc1e83c2516f4455d79a0"
+    },
+    {
+      "path": ".cache/candidate-sdk-embedded-20261012/fixture/Core/candidate.txt",
+      "sha256": "fcbcf165908dd18a9e49f7ff27810176db8e9f63b4352213741664245224f8aa"
+    },
+    {
+      "path": ".cache/candidate-sdk-embedded-20261012/fixture/Core/counts.bin",
+      "sha256": "94b089873b9ed2c7c17f77183d336854b28fbc52a61ed7bc43221269227ea4a2"
+    },
+    {
+      "path": ".cache/candidate-sdk-embedded-20261012/fixture/Core/edges.txt",
+      "sha256": "4473d450c6ef9921f5fbc66258eab2a892fb6989f84afbd3f7966dcb92ecffc6"
+    },
+    {
+      "path": ".cache/candidate-sdk-embedded-20261012/fixture/Core/fairy.toml",
+      "sha256": "842c0deaf9080f93aab8586f71c44223756605e9cc3577bbc4b756059a747a4c"
+    },
+    {
+      "path": ".cache/candidate-sdk-embedded-20261012/fixture/Core/lookups.txt",
+      "sha256": "c7d128ef9ffe06eb4326e4968d0c287606b47cb13ddf7ab76aae63fc04d3bdcf"
+    },
+    {
+      "path": ".cache/candidate-sdk-embedded-20261012/fixture/Core/nodes.txt",
+      "sha256": "e61ebf12b91229531df69ac8c0ef805de20e3f3a9034a3f26794e4e65ace975d"
+    },
+    {
+      "path": ".cache/candidate-sdk-embedded-20261012/fixture/Core/selection.txt",
+      "sha256": "d3fd7cada3e8533bff3d0c3ca28a7ced1ed3cfe6a5bf797baea8e13d55aa683f"
+    },
+    {
+      "path": ".cache/candidate-sdk-embedded-20261012/fixture/Core/src/main.fy",
+      "sha256": "6cfd3d9e62582d99c19aa12873bf76f6d74de4f8868382e32966c126d8a6d518"
+    },
+    {
+      "path": ".cache/candidate-sdk-embedded-20261012/fixture/FeatureSplit/a/fairy.toml",
+      "sha256": "5955a3cbba16e1316a4033dc657c257fde338b904285fa714a03398005bf2929"
+    },
+    {
+      "path": ".cache/candidate-sdk-embedded-20261012/fixture/FeatureSplit/a/src/lib.fy",
+      "sha256": "c98b3a0a5de7fd962b6838c15d504357ae3ae1d33cfa567d29514ae3ee193fd3"
+    },
+    {
+      "path": ".cache/candidate-sdk-embedded-20261012/fixture/FeatureSplit/candidate.txt",
+      "sha256": "fcbcf165908dd18a9e49f7ff27810176db8e9f63b4352213741664245224f8aa"
+    },
+    {
+      "path": ".cache/candidate-sdk-embedded-20261012/fixture/FeatureSplit/counts.bin",
+      "sha256": "152d15d70ed7d611bdb5006224b0d7bbef3f73486bdd0528edfa92c6d6daeba0"
+    },
+    {
+      "path": ".cache/candidate-sdk-embedded-20261012/fixture/FeatureSplit/edges.txt",
+      "sha256": "d53b99a08fa1753d46fa977a3e68d3e786ba2efc372c4b76d548666a2f18b6d5"
+    },
+    {
+      "path": ".cache/candidate-sdk-embedded-20261012/fixture/FeatureSplit/fairy.toml",
+      "sha256": "6777705a67ed3760f383125314a92896c77bc52724680352de391c1bf75e6c3f"
+    },
+    {
+      "path": ".cache/candidate-sdk-embedded-20261012/fixture/FeatureSplit/lookups.txt",
+      "sha256": "02660e47f2e72855a1e329c1f6c713eab20787fc23cd581756b27598386fa54e"
+    },
+    {
+      "path": ".cache/candidate-sdk-embedded-20261012/fixture/FeatureSplit/nodes.txt",
+      "sha256": "03a40ef3cde3c5d9f8892d0fb591236e7a98732eb8fa937812e6925b889f0863"
+    },
+    {
+      "path": ".cache/candidate-sdk-embedded-20261012/fixture/FeatureSplit/selection.txt",
+      "sha256": "c7bb9f5ec94a69662a9ea15dec48f52c3b2e5b86c799a91079d0fa10e381a312"
+    },
+    {
+      "path": ".cache/candidate-sdk-embedded-20261012/fixture/FeatureSplit/src/main.fy",
+      "sha256": "51e4c2b1b8b049778e1543110b6b45a60b6a5bc53bded4de74457f7fcc984cf4"
+    },
+    {
+      "path": ".cache/candidate-sdk-embedded-20261012/fixture/InstanceAliases/a/fairy.toml",
+      "sha256": "5955a3cbba16e1316a4033dc657c257fde338b904285fa714a03398005bf2929"
+    },
+    {
+      "path": ".cache/candidate-sdk-embedded-20261012/fixture/InstanceAliases/a/src/lib.fy",
+      "sha256": "c98b3a0a5de7fd962b6838c15d504357ae3ae1d33cfa567d29514ae3ee193fd3"
+    },
+    {
+      "path": ".cache/candidate-sdk-embedded-20261012/fixture/InstanceAliases/candidate.txt",
+      "sha256": "fcbcf165908dd18a9e49f7ff27810176db8e9f63b4352213741664245224f8aa"
+    },
+    {
+      "path": ".cache/candidate-sdk-embedded-20261012/fixture/InstanceAliases/counts.bin",
+      "sha256": "9c2d569baef671d13179ba329a99c889ef863bea291ecba1f51136b62630b5d4"
+    },
+    {
+      "path": ".cache/candidate-sdk-embedded-20261012/fixture/InstanceAliases/edges.txt",
+      "sha256": "687c979487d84597c9d676f2a83ebf55ae79ea0f3df5664e3fa4a90283ffd762"
+    },
+    {
+      "path": ".cache/candidate-sdk-embedded-20261012/fixture/InstanceAliases/fairy.toml",
+      "sha256": "a37786e97c4844f64538d704c7bb01a614f8a25035701c3139d8dbb0f545a613"
+    },
+    {
+      "path": ".cache/candidate-sdk-embedded-20261012/fixture/InstanceAliases/lookups.txt",
+      "sha256": "46b988e2916e475262fdcfd3559153bc99bad13488262d4459d7ce092dbb057f"
+    },
+    {
+      "path": ".cache/candidate-sdk-embedded-20261012/fixture/InstanceAliases/nodes.txt",
+      "sha256": "ef4e2f0d78ebf89704158ad8e499e73ae8bfeb5800e40132899e3a6e387a1505"
+    },
+    {
+      "path": ".cache/candidate-sdk-embedded-20261012/fixture/InstanceAliases/selection.txt",
+      "sha256": "29cb276a18c5904c447e7fe4a76be909b0726fef8d23d31aeb46d74682a3d143"
+    },
+    {
+      "path": ".cache/candidate-sdk-embedded-20261012/fixture/InstanceAliases/src/main.fy",
+      "sha256": "51e4c2b1b8b049778e1543110b6b45a60b6a5bc53bded4de74457f7fcc984cf4"
+    },
+    {
+      "path": ".cache/candidate-sdk-embedded-20261012/fixture/LongTrivia/candidate.txt",
+      "sha256": "fcbcf165908dd18a9e49f7ff27810176db8e9f63b4352213741664245224f8aa"
+    },
+    {
+      "path": ".cache/candidate-sdk-embedded-20261012/fixture/LongTrivia/counts.bin",
+      "sha256": "e0a94aa244dc3a12a08e6000c3f2564446143c9f0ec5180be69c18566e96f416"
+    },
+    {
+      "path": ".cache/candidate-sdk-embedded-20261012/fixture/LongTrivia/edges.txt",
+      "sha256": "2ddfd46650e67b0229f671fe49eab97093747d3aa95431045df397c86d823eb5"
+    },
+    {
+      "path": ".cache/candidate-sdk-embedded-20261012/fixture/LongTrivia/fairy.toml",
+      "sha256": "842c0deaf9080f93aab8586f71c44223756605e9cc3577bbc4b756059a747a4c"
+    },
+    {
+      "path": ".cache/candidate-sdk-embedded-20261012/fixture/LongTrivia/lookups.txt",
+      "sha256": "c919983788cb4b8effee857fe0eacaed0e5a478d76690ac65a36283b0c3bb443"
+    },
+    {
+      "path": ".cache/candidate-sdk-embedded-20261012/fixture/LongTrivia/nodes.txt",
+      "sha256": "2f518bb565e68f1be82d1a3d942504009f85c5cbc92726448a0bcb84817123b6"
+    },
+    {
+      "path": ".cache/candidate-sdk-embedded-20261012/fixture/LongTrivia/selection.txt",
+      "sha256": "447d78d60acb95e1d104b72fc7e638c174f76ca719c9857a97eeccae1829ea96"
+    },
+    {
+      "path": ".cache/candidate-sdk-embedded-20261012/fixture/LongTrivia/src/main.fy",
+      "sha256": "d3e49cc37416ad6370348c9eb22f58d9c9cd6273e8e4641fc0b309809bd1a431"
+    },
+    {
+      "path": ".cache/candidate-sdk-embedded-20261012/fixture/None/candidate.txt",
+      "sha256": "fcbcf165908dd18a9e49f7ff27810176db8e9f63b4352213741664245224f8aa"
+    },
+    {
+      "path": ".cache/candidate-sdk-embedded-20261012/fixture/None/counts.bin",
+      "sha256": "206c1fe2677fb3ee35bbf475b30b1a2d38373743d2f13408bcd96bb83617b984"
+    },
+    {
+      "path": ".cache/candidate-sdk-embedded-20261012/fixture/None/edges.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": ".cache/candidate-sdk-embedded-20261012/fixture/None/fairy.toml",
+      "sha256": "842c0deaf9080f93aab8586f71c44223756605e9cc3577bbc4b756059a747a4c"
+    },
+    {
+      "path": ".cache/candidate-sdk-embedded-20261012/fixture/None/lookups.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": ".cache/candidate-sdk-embedded-20261012/fixture/None/nodes.txt",
+      "sha256": "7ff7e6e9160dd253b2d58bcd74720e3fa9cb1c7cd5500f65c633b94de514c688"
+    },
+    {
+      "path": ".cache/candidate-sdk-embedded-20261012/fixture/None/selection.txt",
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "path": ".cache/candidate-sdk-embedded-20261012/fixture/None/src/main.fy",
+      "sha256": "51e4c2b1b8b049778e1543110b6b45a60b6a5bc53bded4de74457f7fcc984cf4"
+    },
+    {
+      "path": ".cache/candidate-sdk-embedded-20261012/fixture/reference.json",
+      "sha256": "2ff2d1cad44a4cb4fc2539dcb3d05b187b72d87ce913a79ed098362f78c91ede"
+    },
+    {
+      "path": ".cache/candidate-sdk-embedded-20261012/fixture/root.bin",
+      "sha256": "8fac728b3a5eb9e99b907949ae4f7b597e6c7e239286c03c704640a7bc07d00c"
+    },
+    {
+      "path": ".cache/candidate-sdk-embedded-20261012/fixture/SimilarNamespaces/candidate.txt",
+      "sha256": "fcbcf165908dd18a9e49f7ff27810176db8e9f63b4352213741664245224f8aa"
+    },
+    {
+      "path": ".cache/candidate-sdk-embedded-20261012/fixture/SimilarNamespaces/counts.bin",
+      "sha256": "84624f1561e8a5e896a923f11392e94807fc1428cf2ad42344e0e920b530c791"
+    },
+    {
+      "path": ".cache/candidate-sdk-embedded-20261012/fixture/SimilarNamespaces/edges.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": ".cache/candidate-sdk-embedded-20261012/fixture/SimilarNamespaces/fairy.toml",
+      "sha256": "842c0deaf9080f93aab8586f71c44223756605e9cc3577bbc4b756059a747a4c"
+    },
+    {
+      "path": ".cache/candidate-sdk-embedded-20261012/fixture/SimilarNamespaces/lookups.txt",
+      "sha256": "c6afbb17c8207d2424575d40442a3b5e44ac5841060de5800728c55054cd80a1"
+    },
+    {
+      "path": ".cache/candidate-sdk-embedded-20261012/fixture/SimilarNamespaces/nodes.txt",
+      "sha256": "44c4f12fbf5da7b636ba4bd22fd972610c3446decd31fe817570ba7219eddda9"
+    },
+    {
+      "path": ".cache/candidate-sdk-embedded-20261012/fixture/SimilarNamespaces/selection.txt",
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "path": ".cache/candidate-sdk-embedded-20261012/fixture/SimilarNamespaces/src/foo/std.fy",
+      "sha256": "6eabdfda1289d6484b19f9832aa87297695e23c7725e943c71e28e3f4bcbb86f"
+    },
+    {
+      "path": ".cache/candidate-sdk-embedded-20261012/fixture/SimilarNamespaces/src/main.fy",
+      "sha256": "1e6d669e0c70296b0dacd573be3889f19e9c10b075cdd6bb43e78892c7263369"
+    },
+    {
+      "path": ".cache/candidate-sdk-embedded-20261012/fixture/SimilarNamespaces/src/stdx.fy",
+      "sha256": "f9730e2f5d9ae9506e6db8d42e63fef69e80a4cb1e46520a5556b0b24ee24355"
+    },
+    {
+      "path": ".cache/candidate-sdk-embedded-20261012/fixture/std/alloc.fy",
+      "sha256": "61f50fa03239eee7b669c315659e8c9d07982117857cf50fe7f5a2b6f35a82c2"
+    },
+    {
+      "path": ".cache/candidate-sdk-embedded-20261012/fixture/std/bytes.fy",
+      "sha256": "4740a506e93349fb002c383967dcc44d182d20f09f2094b83b5464a4ab252982"
+    },
+    {
+      "path": ".cache/candidate-sdk-embedded-20261012/fixture/std/fs.fy",
+      "sha256": "fd7ddfa9f0deed98304cecf94911644087d1e2a46e8be8995c35acbcb183b335"
+    },
+    {
+      "path": ".cache/candidate-sdk-embedded-20261012/fixture/std/io.fy",
+      "sha256": "4b89c3aeb8b4de4887395d29723095d364c5660c6b773c5696fb1f65f5365f48"
+    },
+    {
+      "path": ".cache/candidate-sdk-embedded-20261012/fixture/std/num.fy",
+      "sha256": "09aa0d45f075aa4212049527ded7bb48d99ceb6ffed56b310e267421bae20bb3"
+    },
+    {
+      "path": ".cache/candidate-sdk-embedded-20261012/fixture/std/process.fy",
+      "sha256": "9680a1481df4f761f481d5a039af7bdbefeb312d1091961194f8e7bc0681ae24"
+    },
+    {
+      "path": ".cache/candidate-sdk-embedded-20261012/fixture/std/text.fy",
+      "sha256": "cccd47e090fda11c9da063ffb321489dd8753fe9996855fc432833e05a79e695"
+    },
+    {
+      "path": ".cache/candidate-sdk-embedded-20261012/fixture/std/vec.fy",
+      "sha256": "0ae4c395bf98c39079ad620bde035b3b590d51417864802e698edc069281db5b"
+    },
+    {
+      "path": ".cache/candidate-sdk-embedded-20261012/fixture/UnknownStd/fairy.toml",
+      "sha256": "842c0deaf9080f93aab8586f71c44223756605e9cc3577bbc4b756059a747a4c"
+    },
+    {
+      "path": ".cache/candidate-sdk-embedded-20261012/fixture/UnknownStd/path.txt",
+      "sha256": "a40be0ebfd98d39feb65b43df272e8f0f56ed489f1b932290b432454b561fd61"
+    },
+    {
+      "path": ".cache/candidate-sdk-embedded-20261012/fixture/UnknownStd/reason.txt",
+      "sha256": "b7d3808d5e0d85bcc68451684f5e8e97f29c92f7106f02b4c92fc2a402e8c3d6"
+    },
+    {
+      "path": ".cache/candidate-sdk-embedded-20261012/fixture/UnknownStd/src/main.fy",
+      "sha256": "9dca886b570874cb2c5c242ed588957137a363cb181b94c5f669d2f027dc5298"
+    },
+    {
+      "path": ".cache/candidate-sdk-embedded-20261012/fixture/UnreachableVector/a/fairy.toml",
+      "sha256": "5955a3cbba16e1316a4033dc657c257fde338b904285fa714a03398005bf2929"
+    },
+    {
+      "path": ".cache/candidate-sdk-embedded-20261012/fixture/UnreachableVector/a/src/lib.fy",
+      "sha256": "c059aa98b9a4f2de69394cb182b7f400643c9f3791a6ffd85bbc80519af3aca5"
+    },
+    {
+      "path": ".cache/candidate-sdk-embedded-20261012/fixture/UnreachableVector/candidate.txt",
+      "sha256": "fcbcf165908dd18a9e49f7ff27810176db8e9f63b4352213741664245224f8aa"
+    },
+    {
+      "path": ".cache/candidate-sdk-embedded-20261012/fixture/UnreachableVector/counts.bin",
+      "sha256": "9801d033b19f236b49f4e4047db1185874c7e56ed22e2dadfed2518f559fbae8"
+    },
+    {
+      "path": ".cache/candidate-sdk-embedded-20261012/fixture/UnreachableVector/edges.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": ".cache/candidate-sdk-embedded-20261012/fixture/UnreachableVector/fairy.toml",
+      "sha256": "3cd69813ed6a263597e12feab4485efc16b064236eaeb833e670340d5ec2d922"
+    },
+    {
+      "path": ".cache/candidate-sdk-embedded-20261012/fixture/UnreachableVector/lookups.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": ".cache/candidate-sdk-embedded-20261012/fixture/UnreachableVector/nodes.txt",
+      "sha256": "7ff7e6e9160dd253b2d58bcd74720e3fa9cb1c7cd5500f65c633b94de514c688"
+    },
+    {
+      "path": ".cache/candidate-sdk-embedded-20261012/fixture/UnreachableVector/selection.txt",
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "path": ".cache/candidate-sdk-embedded-20261012/fixture/UnreachableVector/src/main.fy",
+      "sha256": "51e4c2b1b8b049778e1543110b6b45a60b6a5bc53bded4de74457f7fcc984cf4"
+    },
+    {
+      "path": ".cache/candidate-sdk-embedded-20261012/fixture/Vector/candidate.txt",
+      "sha256": "fcbcf165908dd18a9e49f7ff27810176db8e9f63b4352213741664245224f8aa"
+    },
+    {
+      "path": ".cache/candidate-sdk-embedded-20261012/fixture/Vector/counts.bin",
+      "sha256": "2962d1fbb067845eaec2d9d309f847356e9d6fc84eb87b3b2824b6d8f170cdaa"
+    },
+    {
+      "path": ".cache/candidate-sdk-embedded-20261012/fixture/Vector/edges.txt",
+      "sha256": "1daca82f92c4e328bf992be321b22f95c484f6fa4f1c319df57e8271c97f8a51"
+    },
+    {
+      "path": ".cache/candidate-sdk-embedded-20261012/fixture/Vector/fairy.toml",
+      "sha256": "842c0deaf9080f93aab8586f71c44223756605e9cc3577bbc4b756059a747a4c"
+    },
+    {
+      "path": ".cache/candidate-sdk-embedded-20261012/fixture/Vector/lookups.txt",
+      "sha256": "3453b7c06babb0b1c79390ac268f157c2c118d4fff4f910ee8b6e36f2a697a4a"
+    },
+    {
+      "path": ".cache/candidate-sdk-embedded-20261012/fixture/Vector/nodes.txt",
+      "sha256": "d72a590452c86445c313aa4cc1050eeedd6deebc667a3218ee8bd4721a643439"
+    },
+    {
+      "path": ".cache/candidate-sdk-embedded-20261012/fixture/Vector/selection.txt",
+      "sha256": "4b1cb8f17528e840fab2860616725f9dc8910b03c8caea6673b56b30c6df073f"
+    },
+    {
+      "path": ".cache/candidate-sdk-embedded-20261012/fixture/Vector/src/main.fy",
+      "sha256": "cf5818812a9786035851e4ccd141b67d142d08a53e0ed0f990404fc8bf8b5b41"
+    }
+  ],
+  "generatedDataFiles": [
+    {
+      "path": "examples/lexer_candidate/src/project_sdk_data_alloc_0.fy",
+      "bytes": 2056,
+      "sha256": "ac58625000197a88c33f322770c7f89fecc64126b3ff4479d6757aa4bfb16301"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_sdk_data_bytes_0.fy",
+      "bytes": 11854,
+      "sha256": "18734fec4d058c90a8b38cc729d711789b2ebfd2f4cd08756ccdad56ae9665b3"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_sdk_data_fs_0.fy",
+      "bytes": 18204,
+      "sha256": "a6c26d37224e5a43231d9068bfe1638ac9b357b971eddcaf628291d5c906ea0f"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_sdk_data_fs_1.fy",
+      "bytes": 18079,
+      "sha256": "0c2a6d16571e5681296d324293543771c69665b3a90606090b675d33e0fc5f17"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_sdk_data_fs_2.fy",
+      "bytes": 2153,
+      "sha256": "c20e6ac9ab0d7be6a84af43a52191ae76b402efef6d76bdd7ce0e1e3dffafea0"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_sdk_data_io_0.fy",
+      "bytes": 9610,
+      "sha256": "8527d39e50702591dcdf07e71663128bd4f61a8ad62f30e8b42998f30a548104"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_sdk_data_num_0.fy",
+      "bytes": 3619,
+      "sha256": "1859e2ffa80b3e675096cc50cec693bb33aa060dd47886feb837d4df37c2eda8"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_sdk_data_process_0.fy",
+      "bytes": 2051,
+      "sha256": "b14ace85f2736dee51a63f064cf7619ad925384797e0945c6053ba767f725f6c"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_sdk_data_text_0.fy",
+      "bytes": 8695,
+      "sha256": "a0d6b93d966f75b803a1677cfa0e3cd6504b1006bd4a10a1c2598668a5442d19"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_sdk_data_vec_0.fy",
+      "bytes": 9813,
+      "sha256": "6201186e9a75bb1957596eb9717e447194e67b6c5828355e44af98941a103a31"
+    }
+  ],
+  "productionCheck": {
+    "files": 336,
+    "mirFunctions": 4367,
+    "passed": true
+  },
+  "generatorCheck": {
+    "command": "bun tools/run-go.ts run ./cmd/fairyc-candidate-sdk-embed --check examples/lexer_candidate/src",
+    "passed": true,
+    "literalParts": 10,
+    "maximumPartBytes": 18204
+  },
+  "scope": "Exact owned SDK literals, pure authenticated factory and automatic default/candidate project loading. Lock projection and compiler/CLI consumption remain pending. Selection-vs-bundle work failure classification is the next fix.",
+  "cases": {
+    "fullGoGraphLookupAndSourceByteRecords": 14,
+    "missingSdkImports": 2,
+    "invalidFactoryProfiles": 2,
+    "exhaustedLiteralCopyWork": 1
+  },
+  "dataAuthority": "Go performs only deterministic byte quoting/chunking of the real compiler sdkstdlib sources; all runtime selection, source-pin authentication, parsing, source/instance identity and visibility remain in Fairy. Generated data is not a new design/source authority."
+}

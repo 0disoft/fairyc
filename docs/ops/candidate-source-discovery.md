@@ -592,3 +592,47 @@ lookup observations:
 Production SDK embedding, lock projection and compiler/project CLI consumption
 remain. Stable CLI/API, SDK ABI/version, DB and CI are unchanged. Linux, full
 suite and Stage1/Stage2 are deferred; no push occurred.
+
+
+## Compiler-owned embedded SDK bytes
+
+`project_sdk_embedded` supplies a pure, metered SDK factory. Ten generated Fairy
+byte-literal parts contain the exact eight current core/optional-vector source
+files from `internal/sdkstdlib`. The owning Go sources remain authoritative;
+`cmd/fairyc-candidate-sdk-embed` only quotes/chunks those bytes and verifies the
+source set. It implements no runtime loading, hashing, selection or lookup logic.
+Literal chunks are at most 2048 raw bytes and generated source parts stay below
+40 kB (current maximum 18204 bytes). Each append charges the existing work meter.
+No filesystem, environment, installer or registry lookup supplies SDK bytes.
+
+Factory profiles 1/2/3 construct core, public vector and explicit vector-candidate
+bundles respectively. Every decoded source still passes the existing Fairy source
+pins and owned bundle parser/digest/identity construction; literal placement or
+labels grant no authority. Profile 0 and unknown profiles reject. The default
+`project_module_visibility::load` now selects the SDK from actual reachable
+imports, creates it only when needed, injects it and resolves all imports.
+`load_embedded` admits the explicit candidate lane. Caller local source counters
+commit only after the complete path succeeds; SDK sources retain their separate
+budget. The supplied-bundle `load_sdk` remains available for private invariant
+checks. SDK-unneeded projects never invoke the factory.
+
+Generation and freshness commands:
+`bun tools/run-go.ts run ./cmd/fairyc-candidate-sdk-embed --write examples/lexer_candidate/src`
+and the same command with `--check`. The check compares exact source-derived file
+contents and rejects stale extra generated parts. Data regeneration and any pin
+or SDK metadata update require deliberate source review; there is no runtime
+fallback. These checks do not establish standalone SDK API or ABI changes.
+
+Fourteen full Go graph/node/edge/lookup cases match through automatic loading,
+including exact retained SDK bytes, owned paths/names and all three profiles.
+Missing reserved imports retain rollback, and invalid factory profiles plus
+exhausted pure literal-copy work reject. Three native tests and development/release
+candidate C executions pass. Check passes 336 files and 4367 MIR functions; the
+source-derived literal check passes all ten parts.
+Evidence: `evidence/candidate-sdk-embedded-20261012.json`.
+
+Selection-work failure currently routes through the generic bundle-failure
+adapter; preserving its graph error category is the immediate follow-up. Lock
+projection and compiler/project CLI consumers remain. Stable CLI/API, SDK ABI and
+version, DB and CI are unchanged. Linux, full suite and Stage1/Stage2 remain
+scheduled later; no push occurred.

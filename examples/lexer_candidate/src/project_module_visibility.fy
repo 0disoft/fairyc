@@ -8,6 +8,7 @@ import project_source_set as sources;
 import project_import_path as paths;
 import project_path as work;
 import project_sdk_bundle as bundled;
+import project_sdk_embedded as embedded;
 import syntax as syntax;
 import std::bytes as bytes;
 import std::vec as v;
@@ -70,6 +71,11 @@ fn LoadError input_failure(local_graph::LoadError e){var v::Vec<local_graph::Loa
 fn LoadError visibility_failure(Error e){var v::Vec<Error> errors=v::empty<Error>();let bool ok=v::push<Error>(ref mut errors,e).is_ok;return LoadError{.phase=if(ok){2}else{3},.input=v::empty<local_graph::LoadError>(),.visibility=errors,.sdk=v::empty<graph::Error>()};}
 fn LoadError sdk_failure(graph::Error e){var v::Vec<graph::Error> errors=v::empty<graph::Error>();let bool ok=v::push<graph::Error>(ref mut errors,e).is_ok;return LoadError{.phase=if(ok){4}else{3},.input=v::empty<local_graph::LoadError>(),.visibility=v::empty<Error>(),.sdk=errors};}
 @effects(filesystem)
-pub fn Result<Resolved,LoadError> load(ref u8[] root,ref mut sources::Budget budget,ref mut usize meter){var sources::Budget staged=*budget;let graph::Graph loaded=switch(graph::load(root,ref mut staged,meter)){case .ok(value):{value}case .err(e):{return .err(input_failure(e));}};let Resolved result=switch(resolve(loaded,meter)){case .ok(value):{value}case .err(e):{return .err(visibility_failure(e));}};*budget=staged;return .ok(result);}
+pub fn Result<Resolved,LoadError> load(ref u8[] root,ref mut sources::Budget budget,ref mut usize meter){return load_embedded(root,false,budget,meter);}
+@effects(filesystem)
+pub fn Result<Resolved,LoadError> load_embedded(ref u8[] root,bool candidate,ref mut sources::Budget budget,ref mut usize meter){var sources::Budget staged=*budget;let local_graph::Graph local=switch(local_graph::load(root,ref mut staged,meter)){case .ok(value):{value}case .err(e):{return .err(input_failure(e));}};
+    let local_graph::SDKSelection selected=switch(local_graph::select_sdk(ref local,candidate,meter)){case .ok(value):{value}case .err(p):{return .err(sdk_failure(graph::bundle_failure(local,bundled::Problem{.code=p.code,.file=p.node})));}};
+    let graph::Graph loaded=if(local_graph::sdk_profile(ref selected)==0){graph::without_sdk(local)}else{let bundled::Bundle library=switch(embedded::load(local_graph::sdk_profile(ref selected),meter)){case .ok(value):{value}case .err(p):{return .err(sdk_failure(graph::bundle_failure(local,p)));}};switch(graph::inject(local,library,meter)){case .ok(value):{value}case .err(e):{return .err(sdk_failure(e));}}};
+    let Resolved result=switch(resolve(loaded,meter)){case .ok(value):{value}case .err(e):{return .err(visibility_failure(e));}};*budget=staged;return .ok(result);}
 @effects(filesystem)
 pub fn Result<Resolved,LoadError> load_sdk(ref u8[] root,bundled::Bundle library,ref mut sources::Budget budget,ref mut usize meter){var sources::Budget staged=*budget;let local_graph::Graph local=switch(local_graph::load(root,ref mut staged,meter)){case .ok(value):{value}case .err(e):{return .err(input_failure(e));}};let graph::Graph injected=switch(graph::inject(local,library,meter)){case .ok(value):{value}case .err(e):{return .err(sdk_failure(e));}};let Resolved result=switch(resolve(injected,meter)){case .ok(value):{value}case .err(e):{return .err(visibility_failure(e));}};*budget=staged;return .ok(result);}
