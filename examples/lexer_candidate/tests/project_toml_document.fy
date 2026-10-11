@@ -47,6 +47,7 @@ fn void keeps_table_array_scope_quoted_components_and_source_spans(){
     }case .err(_):{assert(false);}};
     switch(document::parse(b"")){case .ok(tree):{assert(m::count(ref tree)==1);}case .err(_):{assert(false);}};
     switch(document::parse(b"''=''")){case .ok(tree):{assert(m::node(ref tree,m::lookup(ref tree,1,b"")).kind==2);}case .err(_):{assert(false);}};
+    switch(document::parse(b"a=true\nb={c=false}")){case .ok(tree):{let usize a=m::lookup(ref tree,1,b"a");let usize b=m::lookup(ref tree,1,b"b");let usize c=m::lookup(ref tree,b,b"c");assert(m::node(ref tree,a).kind==5 && bytes::equal(m::value(ref tree,a),b"true") && m::node(ref tree,c).kind==5 && m::node(ref tree,c).state==3 && bytes::equal(m::value(ref tree,c),b"false"));}case .err(_):{assert(false);}};
 }
 
 @test
@@ -61,6 +62,6 @@ fn void rejects_invalid_syntax_duplicates_and_closed_table_extensions(){
     rejected(b"[]= 'x'",1);rejected(b"[a]trailing",1);rejected(b"[[a]",1);rejected(b"[a] # bad\x01",1);
     rejected(b"a='x'\rb='y'",1);rejected(b"# bad\x7f",1);rejected(b"a=\"x\\q\"",1);rejected(b"\x00",1);rejected(b"a='\xff'",2);
     // The document component deliberately admits only manifest-v1 value kinds.
-    rejected(b"a=1",1);rejected(b"a=true",1);rejected(b"a=1979-05-27",1);
+    rejected(b"a=1",1);rejected(b"a=1979-05-27",1);rejected(b"a=trueX",1);rejected(b"a=False",1);
     var bytes::Buffer large=bytes::empty();assert(bytes::resize_zeroed(ref mut large,1048577).is_ok);rejected(bytes::view(ref large),4);
 }

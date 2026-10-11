@@ -27,6 +27,7 @@ def main():
     parser.add_argument('--module', required=True)
     parser.add_argument('--test', action='append', required=True)
     parser.add_argument('--output', type=Path, required=True)
+    parser.add_argument('--fixture', type=Path, help='hash and forward one binary oracle fixture to every execution')
     args = parser.parse_args()
     if not __debug__:
         parser.error('verification requires Python without -O')
@@ -64,6 +65,11 @@ def main():
         pending.extend(re.findall(r'^import\s+([\w:]+)', modules[name].read_text(encoding='utf-8'), re.M))
     paths = [main_source] + [modules[name] for name in sorted(seen - {'main'})]
     source_inputs = [dict(path=p.relative_to(ROOT).as_posix(), sha256=digest(p)) for p in paths[1:] + [test_source, Path(__file__)]]
+    arguments = []
+    if args.fixture:
+        fixture = args.fixture.resolve()
+        source_inputs.append(dict(path=fixture.relative_to(ROOT).as_posix(), sha256=digest(fixture)))
+        arguments = [str(fixture)]
     images = {name: dict(path=str(path.resolve()), sha256=digest(path)) for name, path in [('compiler', args.compiler), ('candidate', args.candidate), ('builder', args.builder)]}
     lock = PROJECT / 'fairy.lock'
     lock_sha256 = digest(lock)
@@ -75,12 +81,14 @@ def main():
         row = dict(argv=list(map(str, argv)), cwd=str(cwd), seconds=time.monotonic() - start, exit=result.returncode, stdoutBytes=len(result.stdout), stdoutSHA256=hashlib.sha256(result.stdout).hexdigest(), stderr=result.stderr.decode('utf-8', errors='replace'))
         invocations.append(row)
         save(output / 'invocations.json', invocations)
+        if len(argv)>1 and str(argv[1])=='test':
+            (output / 'native.json').write_bytes(result.stdout)
         assert result.returncode == 0 and not result.stderr, row
         return result
 
     expected = {f'tests::{args.module}::{name}' for name in args.test}
     selection = [arg for name in args.test for arg in ('--exact', f'tests::{args.module}::{name}')]
-    native = run([args.compiler.resolve(), 'test', '--native', '--locked', '--json', '--capture-output', *selection], cwd=PROJECT, timeout=600)
+    native = run([args.compiler.resolve(), 'test', '--native', '--locked', '--json', '--capture-output', *selection, *(['--', *arguments] if arguments else [])], cwd=PROJECT, timeout=600)
     report = json.loads(native.stdout)
     save(output / 'native.json', report)
     assert report['passed'] == len(expected) and report['failed'] == 0
@@ -96,7 +104,7 @@ def main():
     for profile, flags in [('development', []), ('release', ['--release'])]:
         image = output / (profile + '.exe')
         run([args.builder.resolve(), '--packet', packet_path, '--packet-sha256', digest(packet_path), '--output', image, *flags], timeout=600)
-        executed = run([image])
+        executed = run([image, *arguments])
         assert not executed.stdout
         executions.append(dict(profile=profile, path=str(image), sha256=digest(image), exit=executed.returncode))
     assert digest(lock) == lock_sha256, 'lock changed during verification'

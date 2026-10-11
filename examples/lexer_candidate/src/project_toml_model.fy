@@ -4,7 +4,7 @@ import std::text as text;
 import std::vec as v;
 
 // Separate mutable columns are verified and moved into an immutable owner.
-// Kind: 0 unassigned, 1 table, 2 string, 3 array, 4 table array.
+// Kind: 0 unassigned, 1 table, 2 string, 3 array, 4 table array, 5 boolean.
 // State: 0 implicit, 1 dotted, 2 declared, 3 closed. Syntax chooses the policy.
 pub struct Node{
     usize parent;usize name_start;usize name_end;usize value_start;usize value_end;
@@ -39,6 +39,9 @@ fn usize find(ref bytes::Buffer names,ref v::Vec<Node> nodes,ref v::Vec<usize> b
     while(id!=0 && steps<v::len<Node>(nodes)){let Node n=entry(nodes,id);if(n.hash==hash && n.parent==parent && bytes::equal(bytes::view(names)[n.name_start..n.name_end],key)){return id;}id=n.hash_next;steps+=1;}return 0;
 }
 pub fn usize lookup(ref Tree tree,usize parent,ref u8[] key){return find(ref tree.names,ref tree.nodes,ref tree.buckets,parent,key);}
+pub fn Result<usize,Problem> resolve(ref Tree tree,usize parent,ref u8[] key,ref mut usize work){
+    var State meta=tree.meta;meta.work=*work;let result=locate(ref mut meta,ref tree.names,ref tree.nodes,ref tree.buckets,parent,key,0,0);*work=meta.work;return result;
+}
 // Syntax uses the metered lookup while building. Immutable readers operate on
 // the already verified index and traverse at most the published node count.
 pub fn Result<usize,Problem> locate(ref mut State meta,ref bytes::Buffer names,ref v::Vec<Node> nodes,ref v::Vec<usize> buckets,usize parent,ref u8[] key,usize start,usize end){
@@ -83,12 +86,14 @@ pub fn Result<usize,Problem> element(ref mut State meta,ref mut bytes::Buffer na
 pub fn Result<usize,Problem> container(ref State meta,ref mut v::Vec<Node> nodes,usize id,u32 kind,u32 table_state,usize end){
     var Node n=entry(nodes,id);if(id==0 || id>v::len<Node>(nodes) || n.kind!=0 || n.state==3 || kind<1 || kind>4 || kind==2 || table_state>2 || (kind!=1 && table_state!=0) || !span(meta,n.start,end)){return .err(problem(meta,1,n.start,end));}n.kind=kind;n.state=table_state;n.end=end;set(nodes,id,n);return .ok(id);
 }
-pub fn Result<usize,Problem> string(ref mut State meta,ref mut bytes::Buffer values,ref mut v::Vec<Node> nodes,usize id,ref u8[] decoded,usize end){
+fn Result<usize,Problem> leaf(ref mut State meta,ref mut bytes::Buffer values,ref mut v::Vec<Node> nodes,usize id,ref u8[] decoded,usize end,u32 kind){
     var Node n=entry(nodes,id);if(id==0 || id!=v::len<Node>(nodes) || n.kind!=0 || n.state==3 || !span(meta,n.start,end)){return .err(problem(meta,1,n.start,end));}
     if(!text::validate_utf8(decoded).is_ok){return .err(problem(meta,2,n.start,end));}
     if(bytes::len(values)>1048576 || decoded.len>1048576-bytes::len(values) || !charge(meta,decoded.len+1)){return .err(problem(meta,4,n.start,end));}
-    let usize initial=bytes::len(values);if(!bytes::append(values,decoded).is_ok){return .err(problem(meta,3,n.start,end));}n.kind=2;n.value_start=initial;n.value_end=bytes::len(values);n.end=end;set(nodes,id,n);return .ok(id);
+    let usize initial=bytes::len(values);if(!bytes::append(values,decoded).is_ok){return .err(problem(meta,3,n.start,end));}n.kind=kind;n.value_start=initial;n.value_end=bytes::len(values);n.end=end;set(nodes,id,n);return .ok(id);
 }
+pub fn Result<usize,Problem> string(ref mut State meta,ref mut bytes::Buffer values,ref mut v::Vec<Node> nodes,usize id,ref u8[] decoded,usize end){return leaf(meta,values,nodes,id,decoded,end,2);}
+pub fn Result<usize,Problem> boolean(ref mut State meta,ref mut bytes::Buffer values,ref mut v::Vec<Node> nodes,usize id,bool value,usize end){return leaf(meta,values,nodes,id,if(value){b"true"}else{b"false"},end,5);}
 pub fn Result<usize,Problem> declare(ref State meta,ref mut v::Vec<Node> nodes,usize id,usize start,usize end){
     var Node n=entry(nodes,id);if(id==0 || id>v::len<Node>(nodes) || n.kind!=1 || n.state!=0 || !span(meta,start,end)){return .err(problem(meta,1,start,end));}n.state=2;n.start=start;n.end=end;set(nodes,id,n);return .ok(id);
 }
@@ -113,8 +118,8 @@ fn u32 verify(ref Tree tree){
     var usize names_end=0;var usize values_end=0;var usize named=0;var usize probes=0;i=1;
     while(i<=total){
         let Node n=node(tree,i);
-        if(n.kind<1 || n.kind>4 || n.state>3 || (n.kind!=1 && n.state!=0 && n.state!=3) || !span(ref tree.meta,n.start,n.end) || n.name_start!=names_end || n.name_end<n.name_start || n.name_end>bytes::len(ref tree.names) || n.value_end<n.value_start || n.value_end>bytes::len(ref tree.values) || !text::validate_utf8(name(tree,i)).is_ok){return 1;}names_end=n.name_end;
-        if(n.kind==2){if(n.value_start!=values_end || !text::validate_utf8(value(tree,i)).is_ok){return 1;}values_end=n.value_end;}else if(n.value_start!=0 || n.value_end!=0){return 1;}
+        if(n.kind<1 || n.kind>5 || n.state>3 || (n.kind!=1 && n.state!=0 && n.state!=3) || !span(ref tree.meta,n.start,n.end) || n.name_start!=names_end || n.name_end<n.name_start || n.name_end>bytes::len(ref tree.names) || n.value_end<n.value_start || n.value_end>bytes::len(ref tree.values) || !text::validate_utf8(name(tree,i)).is_ok){return 1;}names_end=n.name_end;
+        if(n.kind==2 || n.kind==5){if(n.value_start!=values_end || !text::validate_utf8(value(tree,i)).is_ok){return 1;}if(n.kind==5 && !bytes::equal(value(tree,i),b"true") && !bytes::equal(value(tree,i),b"false")){return 1;}values_end=n.value_end;}else if(n.value_start!=0 || n.value_end!=0){return 1;}
         if(i==1){if(n.kind!=1 || n.state!=2 || n.parent!=0 || n.depth!=0 || n.name_end!=0 || n.next!=0 || n.hash!=0 || n.hash_next!=0){return 1;}}
         else{
             if(n.parent==0 || n.parent>=i){return 1;}let Node p=node(tree,n.parent);if((p.kind!=1 && p.kind!=3 && p.kind!=4) || (p.kind==4 && n.kind!=1) || n.depth!=p.depth+1 || n.depth>512){return 1;}
@@ -136,7 +141,7 @@ fn u32 verify(ref Tree tree){
         }i+=1;
     }
     if(names_end!=bytes::len(ref tree.names) || values_end!=bytes::len(ref tree.values) || named!=tree.meta.named){return 1;}
-    i=1;while(i<=total){let Node n=node(tree,i);let Expected e=*v::at<Expected>(ref expected,i-1);if(n.first!=e.first || n.last!=e.last || n.children!=e.children || (n.last!=0 && node(tree,n.last).next!=0) || (n.kind==2 && n.children!=0)){return 1;}i+=1;}
+    i=1;while(i<=total){let Node n=node(tree,i);let Expected e=*v::at<Expected>(ref expected,i-1);if(n.first!=e.first || n.last!=e.last || n.children!=e.children || (n.last!=0 && node(tree,n.last).next!=0) || ((n.kind==2 || n.kind==5) && n.children!=0)){return 1;}i+=1;}
     i=0;while(i<size){if(*v::at<usize>(ref tree.buckets,i)!=*v::at<usize>(ref heads,i)){return 1;}i+=1;}return 0;
 }
 pub fn Result<Tree,Problem> publish(State meta,bytes::Buffer names,bytes::Buffer values,v::Vec<Node> nodes,v::Vec<usize> buckets){

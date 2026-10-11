@@ -16,6 +16,9 @@ package graph resolution, locks and project CLI execution belong to later slices
   pools, nodes and a parent-key hash index. Key components stay distinct: a
   quoted `"a.b"` is one component, whereas a dotted path has separate `a`/`b`
   components. Arrays retain insertion order; arrays of tables contain tables.
+- `project_manifest.fy` consumes the verified document, checks closed fields,
+  required fields and the decoded-value rules, and retains a read-only manifest
+  with dependency bindings sorted by a bounded merge sort.
 
 The document model keeps mutable columns in the caller until `publish` checks
 them and moves them into an immutable `Tree`. This follows the language's
@@ -27,7 +30,7 @@ declarations and closed inline tables. The syntax parser owns when each state
 is created and whether a source declaration is legal. Closing an inline table
 also seals descendants. The model alone does not establish TOML syntax parity.
 
-Publication checks exact byte-pool spans, UTF-8, parent-before-child ordering,
+Publication checks exact byte-pool spans, UTF-8, exact boolean spelling, parent-before-child ordering,
 sibling/child counts, key uniqueness, depth, table-array element types, closed
 descendants and the complete hash index. Failed publication returns no tree.
 The private source and decoded pools are capped at 1 MiB; node depth is capped
@@ -55,18 +58,53 @@ component rejects under TOML 1.1 table rules. The pinned Go decoder accepts
 those four. Neither full TOML parity nor manifest-parser parity is claimed.
 The public Go parser and executable manifest contract remain unchanged.
 
+Typed boolean nodes were subsequently added so a syntactically valid boolean
+in an unknown field reaches the closed-field check. This preserves the Go
+`unknown-field` reason in the existing `mystery = true` fixture. Booleans cannot
+fill an admitted manifest field; known fields reject the mismatched type.
+Numeric/date values still require future syntax/category reconciliation.
+
 The declaration and inline-table rules are specified at
 <https://toml.io/en/v1.1.0#table> and
 <https://toml.io/en/v1.1.0#inline-table>. Resolve the pinned-decoder compatibility
 boundary before promotion; keep the recorded differences observable.
 
+## Manifest field validation
+
+`project_manifest.fy` rejects unknown root/package/workspace/dependency fields,
+proves required fields, checks exact string/array/table types and applies the
+existing UID/name/version/language/path and sorted-unique-list validators.
+Dependencies use a bounded merge sort and are returned in binding-name order.
+The owned result exposes borrowed package/member/dependency/feature bytes after
+publication; error results retain reason, field ID and bounded original spans.
+Final public diagnostic rendering and complete field-path text remain later work.
+
+`evidence/candidate-manifest-20261011.json` records 58 Go manifest comparisons
+(9 accepted and 49 rejected), including all eight existing contract fixtures.
+Accepted results match all five package fields, workspace presence and members,
+dependency binding/path/version values and features. Rejected results match
+reason categories. The corpus includes 130 reverse-declared dependencies to
+exercise index rebuilding and merge-sort order. Two native tests and both
+candidate-generated C profiles pass. Source check passes 299 files and 3815 MIR
+functions. Validation lookup, shape/list processing and sorting share a private
+16 Mi work budget, and failed validation publishes no partial manifest.
+
+The typed-boolean document regression is separately recorded in
+`evidence/candidate-toml-document-boolean-20261011.json`: three native tests and
+both C profiles pass on 41 fixed syntax inputs plus the over-limit input. Go
+agrees on 35, with four table-definition policy differences and two
+numeric/date value-kind differences retained. The earlier document/model
+receipts above are historical snapshots of their respective implementation
+commits. Complete pinned-decoder compatibility remains unfinished.
+
+No public API, SDK ABI, DB, hygiene, CI or runner contract changed. Linux, full
+suite and Stage 2 were skipped for these component slices; no push occurred.
+
 ## Remaining connection
 
-1. Enforce exact root/package/workspace/dependency fields and required fields,
-   then apply decoded-value validators and deterministic dependency ordering.
-2. Compare complete documents against the pinned Go decoder and manifest
-   parser. Record decoder/spec disagreements explicitly before claiming parity.
-3. Connect the validated result to contained source discovery and the later
+1. Reconcile pinned Go decoder/spec disagreements and the remaining scalar
+   value/error categories before claiming complete manifest-parser parity.
+2. Connect the validated result to contained source discovery and the later
    package/lock/CLI stages.
 
 The value and string receipts are
