@@ -1,0 +1,89 @@
+{
+  "schema": "fairyc.candidate-complete-stage1/v1",
+  "passed": true,
+  "scope": "Complete dispatcher C-part image after a Go-produced Fairy seed; stage1 replay has no Go frontend fallback.",
+  "baselineCommit": "737254d4",
+  "sourceFiles": 355,
+  "sourceIdentityReceipt": {
+    "path": "docs/ops/evidence/candidate-c-literal-scopes-20261012.json",
+    "bytes": 5047,
+    "sha256": "4c638a2118d94b290bd0800b52061db329f8b309f7622e2163fc9e749a6e49eb"
+  },
+  "inputPacket": {
+    "path": ".cache/candidate-stack-current-20261012/literal-after/packet.bin",
+    "bytes": 29372117,
+    "sha256": "67058b1027cf36a982131d41baec5df5d09c254820dc79281a3a3b53020b25ad"
+  },
+  "image": {
+    "path": ".cache/candidate-stack-current-20261012/complete-stage1/compiler.exe",
+    "bytes": 4177920,
+    "sha256": "6e55b6aa6d8aa5f01b850a860b565d5b1b8e74a310c05425a11f58ca699d3b6e"
+  },
+  "replayPacket": {
+    "path": ".cache/candidate-stack-current-20261012/complete-stage1/next-packet.bin",
+    "bytes": 29372117,
+    "sha256": "67058b1027cf36a982131d41baec5df5d09c254820dc79281a3a3b53020b25ad"
+  },
+  "builder": {
+    "path": ".cache/candidate-stack-current-20261012/current-builder.exe",
+    "bytes": 4753408,
+    "sha256": "a8902cff33b6e1952aad19bb5addcf79972d528073a0d6367046c94f16e8ade8"
+  },
+  "build": {
+    "exit": 0,
+    "seconds": 249.8473413999891,
+    "stdout": "built: C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-stack-current-20261012\\complete-stage1\\compiler.exe (optimized, 45 C units, 4177920 bytes)\n",
+    "stderr": "",
+    "packetSHA256": "67058b1027cf36a982131d41baec5df5d09c254820dc79281a3a3b53020b25ad",
+    "builderSHA256": "a8902cff33b6e1952aad19bb5addcf79972d528073a0d6367046c94f16e8ade8"
+  },
+  "replay": {
+    "exit": 0,
+    "seconds": 85.26556130000972,
+    "stderr": "",
+    "packetBytes": 29372117,
+    "packetSHA256": "67058b1027cf36a982131d41baec5df5d09c254820dc79281a3a3b53020b25ad",
+    "imageSHA256": "6e55b6aa6d8aa5f01b850a860b565d5b1b8e74a310c05425a11f58ca699d3b6e",
+    "samePacket": true,
+    "frontendTimeoutSeconds": 900,
+    "productTimeoutChanged": false
+  },
+  "verifier": {
+    "path": "tools/verify-candidate-bootstrap.py",
+    "bytes": 8610,
+    "sha256": "156f44a062bcef424a677cc626144a1c75042c386b33b6e07f132dbc534555f4"
+  },
+  "verifierOptions": [
+    {
+      "argument": "--help",
+      "exit": 0
+    },
+    {
+      "argument": "0",
+      "exit": 2,
+      "expectedError": "frontend timeout must be in 1..900 seconds"
+    },
+    {
+      "argument": "901",
+      "exit": 2,
+      "expectedError": "frontend timeout must be in 1..900 seconds"
+    }
+  ],
+  "verificationFrontendAllowance": {
+    "defaultSeconds": 60,
+    "optInRange": [
+      1,
+      900
+    ],
+    "usedSeconds": 900,
+    "productTimeoutChanged": false
+  },
+  "stage2Achieved": false,
+  "promotionGateReady": false,
+  "publicApiChanged": false,
+  "sdkAbiChanged": false,
+  "dbChanged": false,
+  "ciChanged": false,
+  "pushed": false,
+  "next": "Build the second C-part image, compare full PE bytes, then run the lexer differential."
+}

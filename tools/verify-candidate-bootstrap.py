@@ -53,7 +53,10 @@ def main():
     parser.add_argument('--reference', type=Path, required=True)
     parser.add_argument('--output', type=Path, required=True)
     parser.add_argument('--reuse-receipt', type=Path)
+    parser.add_argument('--frontend-timeout', type=int, default=60, help='verification-only frontend allowance, 1..900 seconds')
     args = parser.parse_args()
+    if not 1 <= args.frontend_timeout <= 900:
+        parser.error('frontend timeout must be in 1..900 seconds')
     # Assertions are deliberate fail-closed checks, not optional debugging.
     if not __debug__:
         parser.error('verification requires Python without -O')
@@ -70,7 +73,7 @@ def main():
         assert receipt['schema'] in ('fairyc.candidate-two-stage-bootstrap/v1', 'fairyc.candidate-two-stage-bootstrap/v2') and receipt['passed']
         assert receipt['sourceInventorySHA256'] == inventory_sha and receipt['artifactPolicy'] == policy
         assert receipt['sourceFiles'] == len(original)
-        assert receipt['frontendTimeoutSeconds'] == 60
+        assert receipt['frontendTimeoutSeconds'] == args.frontend_timeout
         assert len(receipt['builds']) == 2 and all(item['exit'] == 0 and not item['stderr'] for item in receipt['builds'])
         images = [checked_artifact(receipt[name]) for name in ('stage1', 'stage2')]
         assert images[0].read_bytes() == images[1].read_bytes()
@@ -79,10 +82,10 @@ def main():
             assert [item['stage'] for item in receipt['frontends']] == [1, 2]
             assert len(receipt['packets']) == 2
             for observation in receipt['frontends']:
-                assert observation['exit'] == 0 and not observation['stderr'] and observation['seconds'] < 60
+                assert observation['exit'] == 0 and not observation['stderr'] and observation['seconds'] < args.frontend_timeout
             seed_packet, next_packet = [checked_artifact(item) for item in receipt['packets']]
         else:
-            assert receipt['stage1Replay']['exit'] == 0 and not receipt['stage1Replay']['stderr'] and receipt['stage1Replay']['seconds'] < 60
+            assert receipt['stage1Replay']['exit'] == 0 and not receipt['stage1Replay']['stderr'] and receipt['stage1Replay']['seconds'] < args.frontend_timeout
             seed_packet = Path(receipt['builds'][0]['argv'][1])
             next_packet = Path(receipt['builds'][1]['argv'][1])
             runtime = Path(receipt['builds'][0]['argv'][2])
@@ -98,7 +101,7 @@ def main():
         for stage in (1, 2):
             start = time.monotonic()
             emit_argv = [str(compiler.resolve()), '--c-project-file', str(manifest.resolve())]
-            emit = subprocess.run(emit_argv, cwd=ROOT, capture_output=True, timeout=60)
+            emit = subprocess.run(emit_argv, cwd=ROOT, capture_output=True, timeout=args.frontend_timeout)
             frontends.append(dict(stage=stage, argv=emit_argv, seconds=time.monotonic()-start, exit=emit.returncode, stdoutBytes=len(emit.stdout), stderr=emit.stderr.decode('utf-8', errors='replace')))
             assert emit.returncode == 0 and not emit.stderr and 0 < len(emit.stdout) <= 96 << 20
             packet = args.output / f'stage{stage}-input.bin'
@@ -116,13 +119,13 @@ def main():
             compiler = image
         assert images[0].read_bytes() == images[1].read_bytes()
         assert artifact(args.builder) == builder_identity, 'builder changed during verification'
-        receipt = dict(schema='fairyc.candidate-two-stage-bootstrap/v2', passed=True, scope='Consecutive C-part generations after a Go-produced Fairy seed; not byte equality with that monolithic seed image', artifactPolicy=policy, sourceInventorySHA256=inventory_sha, sourceFiles=len(original), frontendTimeoutSeconds=60, seed=seed_identity, builder=builder_identity, frontends=frontends, builds=observations, packets=[artifact(p) for p in packets], seedPacketSHA256=digest(packets[0]), packetSHA256=digest(packets[1]), stage1=artifact(images[0]), stage2=artifact(images[1]))
+        receipt = dict(schema='fairyc.candidate-two-stage-bootstrap/v2', passed=True, scope='Consecutive C-part generations after a Go-produced Fairy seed; not byte equality with that monolithic seed image', artifactPolicy=policy, sourceInventorySHA256=inventory_sha, sourceFiles=len(original), frontendTimeoutSeconds=args.frontend_timeout, seed=seed_identity, builder=builder_identity, frontends=frontends, builds=observations, packets=[artifact(p) for p in packets], seedPacketSHA256=digest(packets[0]), packetSHA256=digest(packets[1]), stage1=artifact(images[0]), stage2=artifact(images[1]))
     proof_dir = args.output / 'lexer'
     checked = subprocess.run([sys.executable, str(ROOT/'tools/verify-candidate-bootstrap-lexer.py'), '--reference', str(args.reference.resolve()), '--fixtures', str(ROOT/'spec/fixtures/lexer/candidate-bootstrap-v1.json'), '--stage1', str(images[0].resolve()), '--stage2', str(images[1].resolve()), '--seed', str(args.seed.resolve()), '--output', str(proof_dir.resolve())], cwd=ROOT, capture_output=True, timeout=60)
     assert checked.returncode == 0 and not checked.stderr, checked.stderr
     assert sources() == original, 'compiler sources changed during verification'
     assert artifact(args.seed) == seed_identity, 'seed changed during verification'
-    receipt.update(seedImageSHA256=digest(args.seed), manifestSHA256=digest(manifest), lexerDifferential=json.loads((proof_dir/'receipt.json').read_bytes()), promotionGateReady=False, deferred=['Full frontend differential', 'Linux', 'Current-commit hosted CI'], pushed=False)
+    receipt.update(seedImageSHA256=digest(args.seed), manifestSHA256=digest(manifest), lexerDifferential=json.loads((proof_dir/'receipt.json').read_bytes()), productTimeoutChanged=False, promotionGateReady=False, deferred=['Full frontend differential', 'Linux', 'Current-commit hosted CI'], pushed=False)
     (args.output/'receipt.json').write_text(json.dumps(receipt, indent=2)+'\n', encoding='utf-8', newline='\n')
     print('Consecutive compiler images and', receipt['lexerDifferential']['cases'], 'Go lexer cases verified')
 

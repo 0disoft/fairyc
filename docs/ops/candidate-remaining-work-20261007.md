@@ -4152,3 +4152,18 @@ The product MSVC timeout, entry/driver/build/run integration, Linux/full suite
 and promotion gates remain. Stage2 is not yet achieved. API, SDK ABI, DB and CI
 are unchanged; no push. Receipt:
 `evidence/candidate-c-literal-scopes-20261012.json`.
+
+## Complete C-part compiler Stage1 (2026-10-12)
+
+The current private builder links the full 45-unit packet in 249.85 seconds,
+producing a 4177920-byte optimized compiler. That C-part compiler processes
+all 355 self sources without a Go frontend fallback in 85.27 seconds and emits
+the same 29372117-byte packet, SHA256
+`67058b1027cf36a982131d41baec5df5d09c254820dc79281a3a3b53020b25ad`.
+
+The bootstrap verifier now accepts an explicit 1..900-second frontend allowance;
+the default remains 60 seconds and product timeout remains unchanged. Help and
+out-of-range options pass their checks. Next: build the second C-part image,
+compare complete PE bytes and run the lexer differential. Stage2 image and
+promotion gates remain pending; API, SDK ABI, DB and CI are unchanged, no push.
+Receipt: `evidence/candidate-complete-stage1-20261012.json`.

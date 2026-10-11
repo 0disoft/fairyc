@@ -2278,3 +2278,14 @@ emission from a Go-produced optimized seed. Full C-part compiler linkage,
 execution, consecutive generations and promotion remain separate gates.
 Product timeout, public API, SDK ABI, DB and CI are unchanged; no push. Receipt:
 [candidate-c-literal-scopes-20261012.json](../ops/evidence/candidate-c-literal-scopes-20261012.json).
+
+## Complete C-part compiler Stage1 (2026-10-12)
+
+The complete 45-unit compiler links in 249.85 seconds to a 4177920-byte optimized
+image. It processes all 355 self sources without Go frontend fallback in 85.27
+seconds and emits exactly the original 29372117 packet bytes. Stage1 C-part
+construction and replay pass; the second image and promotion remain pending.
+The bootstrap verifier permits opt-in frontend allowance 1..900 seconds while
+retaining the default 60 and unchanged product timeout. Help/boundary option
+checks pass. API, SDK ABI, DB and CI are unchanged; no push. Receipt:
+[candidate-complete-stage1-20261012.json](../ops/evidence/candidate-complete-stage1-20261012.json).
