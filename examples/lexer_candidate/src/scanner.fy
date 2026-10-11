@@ -110,6 +110,24 @@ fn bool keyword(ref u8[] input, usize start, usize end, bool previous) {
     return false;
 }
 
+// Already-normalized ASCII paths need no owned token stream. Keep trivia,
+// keywords and other spellings on the scanner path, using its keyword table.
+pub fn bool canonical_path(ref u8[] input) {
+    if (input.len == 0 || input.len > limits::source_bytes()) { return false; }
+    var usize at = 0;
+    while (at < input.len) {
+        let usize start = at;
+        if (!letter(input[at])) { return false; }
+        at += 1;
+        while (at < input.len && (letter(input[at]) || digit(input[at]))) { at += 1; }
+        if (keyword(input, start, at, false)) { return false; }
+        if (at == input.len) { return true; }
+        if (input.len - at < 3 || input[at] != 58 || input[at + 1] != 58) { return false; }
+        at += 2;
+    }
+    return false;
+}
+
 fn usize symbol_width(ref u8[] input, usize start) {
     if (start >= input.len) { return 0; }
     let u8 first = input[start];

@@ -2071,8 +2071,7 @@ the Go-emitted baseline in 37.4733 seconds
 native build takes 56.3886 seconds (9346560 bytes) and its same-source self replay
 stops at the 60.0522-second frontend timeout. The optimized raw packet build emits
 the same 35 units over 37 objects and exits 0 in 184.8278 seconds, and its exact
-same-source re-emission stops at the 60.0590-second frontend timeout with no
-output.
+same-source re-emission stops at the 60.0590-second frontend timeout.
 
 The four locally verified slices leave the whole self-hosting gates pending: the
 reproducible two-stage bootstrap `promotion` row stays `blocked` because no
@@ -2080,3 +2079,43 @@ stage finishes the exact same-source re-emission inside the unchanged 60-second
 frontend cap. No public API, SDK ABI, DB, CI, cap, timeout or stack reserve
 change, and no push; Linux, the full suite and Stage 2 were deferred. Evidence:
 docs/ops/evidence/candidate-inert-field-projection-20261011.json.
+
+## Canonical name normalization (2026-10-11)
+
+`scanner::canonical_path` reuses the existing letter, digit and keyword(false)
+tables so that only ASCII `identifier(::identifier)*` paths with no whitespace
+or comments are admitted, and the `source_bytes` cap is unchanged.
+`module_registry::normalize` appends the accepted bytes once and leaves every
+other input to the existing scanner fallback, so reserved keywords and `as`,
+`module`, `import` and `defer`, trivia and CRLF and comments, malformed UTF-8,
+partial-failure output, append semantics and over-limit handling behave as
+before. The addition is a private scanner helper; the public surface is
+unchanged.
+
+Source checking passes 293 files and 3690 MIR functions. The two authored
+normalization native cases and the existing
+`nominal_module_consumers_keep_identity_and_privacy` case pass 3 of 3 in 108.8601
+seconds, with the real native result in
+`.cache/candidate-tagged/sdk-c-execution/native-normalize.json`, and the new
+Stage1 CLI nine-case matrix plus the Vec development and release runs pass.
+
+The fresh baseline joins the exact 286 sources (2032971 bytes) and emits 24485052
+bytes over 35 units in 33.4711 seconds
+(SHA256 `d74de2f7b43b8ba25288da0514f8ae9d1b52e18f5c00d9676777a01a3f80edee`). The
+development native build takes 53.8747 seconds (9350144 bytes) and the full
+exact-source self replay stops at the 60.0351-second frontend timeout. The
+optimized release build exits 0 in 188.2586 seconds over the same 35 units and 37
+objects
+(`.cache/candidate-tagged/sdk-c-execution/stage1-normalize-release-build-observation.json`),
+and its exact same-source self replay stops at the 60.0460-second frontend timeout
+(`.cache/candidate-tagged/sdk-c-execution/stage1-normalize-release-replay.json`),
+so the reproducible two-stage bootstrap `promotion` row stays `blocked`.
+
+The sparse cache-only development phase profiler shows the signature phase at
+about 14.66 seconds, then repeated closure processing until timeout, while a
+separate counter probe records many normalize-driven scanner invocations; all of
+these are diagnostic only and none of them measures a whole-frontend speedup.
+Public semantics, SDK ABI, DB,
+CI, caps, stack reserve and the timeout are unchanged, and no push, Linux, full
+suite or Stage 2 run has happened. Evidence:
+docs/ops/evidence/candidate-canonical-name-normalization-20261011.json.

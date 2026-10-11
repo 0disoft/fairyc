@@ -3741,9 +3741,49 @@ the baseline in 37.4733 seconds
 native build takes 56.3886 seconds (9346560 bytes) and the same-source self replay
 stops at the 60.0522-second frontend timeout. The optimized raw packet build
 emits the same 35 units over 37 objects and exits 0 in 184.8278 seconds, and its
-exact same-source re-emission stops at the 60.0590-second frontend timeout with no
-output.
+exact same-source re-emission stops at the 60.0590-second frontend timeout.
 
 The self-hosting gates stay pending; no public API, SDK ABI, DB, CI, cap, timeout
 or stack reserve change, and no push; Linux, the full suite and Stage 2 were
 deferred.
+
+
+## Canonical name normalization (2026-10-11)
+
+Receipt: `docs/ops/evidence/candidate-canonical-name-normalization-20261011.json`.
+
+`scanner::canonical_path` reuses the existing letter, digit and keyword(false)
+tables to admit only ASCII `identifier(::identifier)*` paths that contain no
+whitespace or comments, and the `source_bytes` cap is unchanged.
+`module_registry::normalize` appends the accepted bytes once, and every other
+input keeps the existing scanner fallback. Reserved keywords and `as`,
+`module`, `import` and `defer`, trivia and CRLF and comments, malformed UTF-8,
+partial-failure output, append semantics and over-limit handling all stay as they
+were; the addition is a private scanner helper with no public surface change.
+
+Source checking passes 293 files and 3690 MIR functions. The two authored
+normalization native cases plus the existing
+`nominal_module_consumers_keep_identity_and_privacy` case pass 3 of 3 in 108.8601
+seconds, with the real native result in
+`.cache/candidate-tagged/sdk-c-execution/native-normalize.json`. The new Stage1
+CLI nine-case matrix and the Vec development and release runs pass.
+
+A fresh baseline joins the exact 286 sources (2032971 bytes) and emits 24485052
+bytes over 35 units in 33.4711 seconds
+(SHA256 `d74de2f7b43b8ba25288da0514f8ae9d1b52e18f5c00d9676777a01a3f80edee`). The
+development native build takes 53.8747 seconds (9350144 bytes) and the full
+exact-source self replay stops at the 60.0351-second frontend timeout. The
+optimized release build exits 0 in 188.2586 seconds over the same 35 units and 37
+objects
+(`.cache/candidate-tagged/sdk-c-execution/stage1-normalize-release-build-observation.json`),
+and the exact same-source self replay stops at the 60.0460-second frontend
+timeout
+(`.cache/candidate-tagged/sdk-c-execution/stage1-normalize-release-replay.json`).
+
+The sparse cache-only development phase profiler shows the signature phase at
+about 14.66 seconds, then repeated closure processing until timeout, and a
+separate counter probe records many normalize-driven scanner invocations. These
+numbers are diagnostic only and do not measure a whole-frontend speedup.
+Public semantics, SDK ABI, DB,
+CI, caps, stack reserve and the timeout are unchanged, and no push, Linux, full
+suite or Stage 2 run has happened.

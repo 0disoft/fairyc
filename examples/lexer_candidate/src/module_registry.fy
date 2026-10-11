@@ -25,6 +25,9 @@ pub fn u32 parameter_at(ref Registry registry, usize index) { return *v::at<u32>
 // 11 allocation, 10 limit, 9 unsupported. Input is a parser-accepted path,
 // an import declaration, or an actual name expression, not substitute source.
 pub fn u32 normalize(ref u8[] source, ref mut bytes::Buffer result) {
+    if (scanner::canonical_path(source)) {
+        return if (bytes::append(result, source).is_ok) { 0 } else { 11 };
+    }
     var bytes::Buffer input = bytes::empty();
     if (!bytes::append(ref mut input,source).is_ok) { return 11; }
     let scanner::Stream stream = switch(scanner::collect(input,false,limits::source_bytes(),1048576,256,16777216)) {

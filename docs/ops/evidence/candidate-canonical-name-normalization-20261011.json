@@ -1,0 +1,250 @@
+{
+  "schema": "fairyc.candidate-canonical-name-normalization/v1",
+  "passed": true,
+  "scope": "Canonical ASCII identifier paths reuse scanner character/keyword rules; all other spellings retain scanner fallback",
+  "sources": [
+    {
+      "path": "examples/lexer_candidate/src/scanner.fy",
+      "sha256": "3755e569fe63003f63b2c9b8272df2ba656c844791cedbc0da4f9245b8809cf7"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_registry.fy",
+      "sha256": "9e0af7c32bf001bb81d7839a41869ce7710bf51e00f72cb866909e53ad03bb34"
+    },
+    {
+      "path": "examples/lexer_candidate/tests/module_normalize.fy",
+      "sha256": "7d87bd81ea57a27e027c86b81f0f8e487ba3cdd5dcd368c2bec1e29ff7bc36b6"
+    },
+    {
+      "path": "examples/lexer_candidate/fairy.lock",
+      "sha256": "1460304fdb88dd614cbf9c9eb5fdf3487aa407eade95c354ca213c11061988a2"
+    }
+  ],
+  "sourceCheck": {
+    "exit": 0,
+    "files": 293,
+    "mirFunctions": 3690,
+    "lockUpdated": true
+  },
+  "native": {
+    "argv": [
+      "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\compiler-build-120s.exe",
+      "test",
+      "--native",
+      "--locked",
+      "--json",
+      "--capture-output",
+      "--exact",
+      "tests::module_normalize::canonical_paths_preserve_identifier_and_keyword_rules",
+      "--exact",
+      "tests::module_normalize::normalization_retains_scanner_fallback_and_failure_bytes",
+      "--exact",
+      "tests::module_program::nominal_module_consumers_keep_identity_and_privacy"
+    ],
+    "exit": 0,
+    "seconds": 108.86009539999941,
+    "stderr": ""
+  },
+  "nativeTests": [
+    {
+      "identity": "tests::module_normalize::canonical_paths_preserve_identifier_and_keyword_rules",
+      "outcome": "passed"
+    },
+    {
+      "identity": "tests::module_normalize::normalization_retains_scanner_fallback_and_failure_bytes",
+      "outcome": "passed"
+    },
+    {
+      "identity": "tests::module_program::nominal_module_consumers_keep_identity_and_privacy",
+      "outcome": "passed"
+    }
+  ],
+  "cliAndVector": {
+    "passed": true,
+    "compilerSHA256": "9108c73e3c1573eccb0049afe8797c277a152696b82cf442c7a209e080d34896",
+    "cases": [
+      {
+        "name": "positive",
+        "exit": 0,
+        "seconds": 0.1552047000004677,
+        "stdoutBytes": 3565,
+        "stderr": "",
+        "packetSHA256": "68c878676f624102da5d214b87c36f673823603bcfbfc9ad30a919bedff430dc",
+        "priorCExecutionReused": true
+      },
+      {
+        "name": "dependency-entry",
+        "exit": 2,
+        "seconds": 0.11741320000146516,
+        "stdoutBytes": 0,
+        "stderr": ".cache/candidate-tagged/sdk-c-execution/project-cli-sdk/fixtures/root.fy:1:1: error: project phase 4 stage 0 code 1001 (bytes 0..0)\n"
+      },
+      {
+        "name": "wrong-result",
+        "exit": 2,
+        "seconds": 0.13253729999996722,
+        "stdoutBytes": 0,
+        "stderr": ".cache/candidate-tagged/sdk-c-execution/project-cli-sdk/fixtures/void.fy:1:1: error: project phase 5 stage 0 code 1001 (bytes 0..0)\n"
+      },
+      {
+        "name": "type-error",
+        "exit": 2,
+        "seconds": 0.01889350000419654,
+        "stdoutBytes": 0,
+        "stderr": ".cache/candidate-tagged/sdk-c-execution/project-cli-sdk/fixtures/type.fy:1:34: error: project phase 2 stage 4 code 1009 (bytes 33..37)\n"
+      },
+      {
+        "name": "syntax-error",
+        "exit": 2,
+        "seconds": 0.016399399988586083,
+        "stdoutBytes": 0,
+        "stderr": ".cache/candidate-tagged/sdk-c-execution/project-cli-sdk/fixtures/syntax.fy:1:36: error: expected } (bytes 35..35)\n"
+      },
+      {
+        "name": "missing-source",
+        "exit": 2,
+        "seconds": 0.015820499989786185,
+        "stdoutBytes": 0,
+        "stderr": "error: input file read failed\n"
+      },
+      {
+        "name": "blank-manifest",
+        "exit": 2,
+        "seconds": 0.015529399999650195,
+        "stdoutBytes": 0,
+        "stderr": "error: invalid module manifest\n"
+      },
+      {
+        "name": "invalid-utf8",
+        "exit": 2,
+        "seconds": 0.020530199995846488,
+        "stdoutBytes": 0,
+        "stderr": "error: invalid module manifest\n"
+      },
+      {
+        "name": "duplicate-source",
+        "exit": 2,
+        "seconds": 0.017814800012274645,
+        "stdoutBytes": 0,
+        "stderr": ".cache/candidate-tagged/sdk-c-execution/project-cli-sdk/fixtures/main.fy:1:8: error: project phase 1 stage 0 code 1 (bytes 7..11)\n"
+      },
+      {
+        "name": "vector-dev",
+        "exit": 0,
+        "seconds": 2.8132937000045786,
+        "stdout": "built: C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\bridge-normalize-vector-dev.exe (low, 1 C units, 117248 bytes)\n",
+        "stderr": "",
+        "imageSHA256": "747acb1171be931214dba91c0427ea5c70f5e5a8f2439d9c2da6f550ebe87a69",
+        "programExit": 0
+      },
+      {
+        "name": "vector-release",
+        "exit": 0,
+        "seconds": 2.483363699997426,
+        "stdout": "built: C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\bridge-normalize-vector-release.exe (optimized, 1 C units, 110592 bytes)\n",
+        "stderr": "",
+        "imageSHA256": "9d32abb24bce96833bccd6d0078faff9e37a857e577c2ebdfe055db57b469e62",
+        "programExit": 0
+      }
+    ]
+  },
+  "bootstrap": {
+    "runs": [
+      {
+        "exit": 0,
+        "seconds": 26.111487000001944,
+        "stderr": "",
+        "stdoutBytes": 21918669
+      },
+      {
+        "exit": 0,
+        "seconds": 43.57598639999924,
+        "stderr": "",
+        "stdoutBytes": 23
+      },
+      {
+        "exit": 0,
+        "seconds": 0.21216179999464657,
+        "stderr": "",
+        "stdoutBytes": 0
+      }
+    ],
+    "sha256": "69ac666dc697411b0d2a456b3061407aa64ce693c35ffa5583eec68226a594b4"
+  },
+  "fullSource": {
+    "frontendTimeoutSeconds": 60,
+    "runs": [
+      {
+        "name": "baseline",
+        "exit": 0,
+        "seconds": 33.47113669999817,
+        "timeout": false,
+        "stdoutBytes": 24485052,
+        "stderr": "",
+        "compilerSHA256": "69ac666dc697411b0d2a456b3061407aa64ce693c35ffa5583eec68226a594b4",
+        "packetSHA256": "d74de2f7b43b8ba25288da0514f8ae9d1b52e18f5c00d9676777a01a3f80edee"
+      },
+      {
+        "name": "build-stage1-dev",
+        "exit": 0,
+        "seconds": 53.87465759999759,
+        "stdout": "built: C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\stage1-normalize.exe (low, 35 C units, 9350144 bytes)\n",
+        "stderr": ""
+      },
+      {
+        "name": "stage1-dev",
+        "exit": null,
+        "timeout": true,
+        "seconds": 60.03514490000089
+      }
+    ]
+  },
+  "sourceInventory": {
+    "count": 286,
+    "joinedBytes": 2032971,
+    "encoding": "Manifest-order path + space + SHA256 + newline",
+    "sha256": "6561a6940aeac5a335b40ad340b3673604497011eaa94c5329d5cb2497f28ae4",
+    "manifestSHA256": "5cebd2ea57b714167ee98620033666fc358b6e6cee56eee8ba0b28e9fee0d8c4"
+  },
+  "optimizedBuild": {
+    "exit": 0,
+    "seconds": 188.25861590000568,
+    "stdout": "PASS original candidate: 35 units, 37 objects, 188.02s\n",
+    "stderr": "",
+    "frontendReused": true
+  },
+  "optimizedReplay": {
+    "exit": null,
+    "seconds": 60.045984399999725,
+    "timeout": true
+  },
+  "diagnostics": {
+    "beforeSparsePhaseTrace": {
+      "exit": null,
+      "stdoutBytes": 0,
+      "stderr": "0 1550 enter module_signatures::build\r\n16688 1550 leave module_signatures::build\r\n16688 1333 enter module_project_compile::range\r\n16688 1612 enter module_unit_bind::bind\r\n17079 1612 leave module_unit_bind::bind\r\n17079 2174 enter module_unit_call_closure::build_unit\r\n19657 2174 leave module_unit_call_closure::build_unit\r\n19672 1333 leave module_project_compile::range\r\n19672 1333 enter module_project_compile::range\r\n19672 1612 enter module_unit_bind::bind\r\n19875 1612 leave module_unit_bind::bind\r\n19875 2174 enter module_unit_call_closure::build_unit\r\n24750 2174 leave module_unit_call_closure::build_unit\r\n24750 3608 enter module_unit_values::build\r\n25125 3608 leave module_unit_values::build\r\n25125 2864 enter module_unit_moves::build\r\n25157 2864 leave module_unit_moves::build\r\n25157 1798 enter module_unit_body_ir_lower::lower\r\n25969 1798 leave module_unit_body_ir_lower::lower\r\n25985 1333 leave module_project_compile::range\r\n25985 1333 enter module_project_compile::range\r\n25985 1612 enter module_unit_bind::bind\r\n26204 1612 leave module_unit_bind::bind\r\n26204 2174 enter module_unit_call_closure::build_unit\r\n30719 2174 leave module_unit_call_closure::build_unit\r\n30719 3608 enter module_unit_values::build\r\n31016 3608 leave module_unit_values::build\r\n31016 2864 enter module_unit_moves::build\r\n31047 2864 leave module_unit_moves::build\r\n31047 1798 enter module_unit_body_ir_lower::lower\r\n32000 1798 leave module_unit_body_ir_lower::lower\r\n32016 1333 leave module_project_compile::range\r\n32016 1333 enter module_project_compile::range\r\n32016 1612 enter module_unit_bind::bind\r\n32407 1612 leave module_unit_bind::bind\r\n32407 2174 enter module_unit_call_closure::build_unit\r\n34250 2174 leave module_unit_call_closure::build_unit\r\n34266 1333 leave module_project_compile::range\r\n34266 1333 enter module_project_compile::range\r\n34266 1612 enter module_unit_bind::bind\r\n34516 1612 leave module_unit_bind::bind\r\n34516 2174 enter module_unit_call_closure::build_unit\r\n39657 2174 leave module_unit_call_closure::build_unit\r\n39657 3608 enter module_unit_values::build\r\n39954 3608 leave module_unit_values::build\r\n39954 2864 enter module_unit_moves::build\r\n39969 2864 leave module_unit_moves::build\r\n39969 1798 enter module_unit_body_ir_lower::lower\r\n40829 1798 leave module_unit_body_ir_lower::lower\r\n40844 1333 leave module_project_compile::range\r\n40844 1333 enter module_project_compile::range\r\n40844 1612 enter module_unit_bind::bind\r\n41125 1612 leave module_unit_bind::bind\r\n41125 2174 enter module_unit_call_closure::build_unit\r\n49797 2174 leave module_unit_call_closure::build_unit\r\n49797 3608 enter module_unit_values::build\r\n50297 3608 leave module_unit_values::build\r\n50297 2864 enter module_unit_moves::build\r\n50344 2864 leave module_unit_moves::build\r\n50344 1798 enter module_unit_body_ir_lower::lower\r\n51407 1798 leave module_unit_body_ir_lower::lower\r\n51438 1333 leave module_project_compile::range\r\n51438 1333 enter module_project_compile::range\r\n51438 1612 enter module_unit_bind::bind\r\n51860 1612 leave module_unit_bind::bind\r\n51860 2174 enter module_unit_call_closure::build_unit\r\n53313 2174 leave module_unit_call_closure::build_unit\r\n53313 1333 leave module_project_compile::range\r\n53313 1333 enter module_project_compile::range\r\n53313 1612 enter module_unit_bind::bind\r\n53579 1612 leave module_unit_bind::bind\r\n53579 2174 enter module_unit_call_closure::build_unit\r\n",
+      "timeout": true
+    },
+    "afterSparsePhaseTrace": {
+      "exit": null,
+      "stdoutBytes": 0,
+      "stderr": "0 1550 enter module_signatures::build\r\n14656 1550 leave module_signatures::build\r\n14656 1333 enter module_project_compile::range\r\n14656 1612 enter module_unit_bind::bind\r\n14969 1612 leave module_unit_bind::bind\r\n14969 2174 enter module_unit_call_closure::build_unit\r\n16969 2174 leave module_unit_call_closure::build_unit\r\n16984 1333 leave module_project_compile::range\r\n16984 1333 enter module_project_compile::range\r\n16984 1612 enter module_unit_bind::bind\r\n17172 1612 leave module_unit_bind::bind\r\n17172 2174 enter module_unit_call_closure::build_unit\r\n21172 2174 leave module_unit_call_closure::build_unit\r\n21172 3608 enter module_unit_values::build\r\n21484 3608 leave module_unit_values::build\r\n21484 2864 enter module_unit_moves::build\r\n21500 2864 leave module_unit_moves::build\r\n21500 1798 enter module_unit_body_ir_lower::lower\r\n22344 1798 leave module_unit_body_ir_lower::lower\r\n22359 1333 leave module_project_compile::range\r\n22359 1333 enter module_project_compile::range\r\n22359 1612 enter module_unit_bind::bind\r\n22594 1612 leave module_unit_bind::bind\r\n22594 2174 enter module_unit_call_closure::build_unit\r\n26297 2174 leave module_unit_call_closure::build_unit\r\n26297 3608 enter module_unit_values::build\r\n26516 3608 leave module_unit_values::build\r\n26516 2864 enter module_unit_moves::build\r\n26531 2864 leave module_unit_moves::build\r\n26531 1798 enter module_unit_body_ir_lower::lower\r\n27312 1798 leave module_unit_body_ir_lower::lower\r\n27328 1333 leave module_project_compile::range\r\n27328 1333 enter module_project_compile::range\r\n27328 1612 enter module_unit_bind::bind\r\n27719 1612 leave module_unit_bind::bind\r\n27719 2174 enter module_unit_call_closure::build_unit\r\n29047 2174 leave module_unit_call_closure::build_unit\r\n29062 1333 leave module_project_compile::range\r\n29062 1333 enter module_project_compile::range\r\n29062 1612 enter module_unit_bind::bind\r\n29250 1612 leave module_unit_bind::bind\r\n29250 2174 enter module_unit_call_closure::build_unit\r\n32766 2174 leave module_unit_call_closure::build_unit\r\n32766 3608 enter module_unit_values::build\r\n33000 3608 leave module_unit_values::build\r\n33000 2864 enter module_unit_moves::build\r\n33031 2864 leave module_unit_moves::build\r\n33031 1798 enter module_unit_body_ir_lower::lower\r\n34031 1798 leave module_unit_body_ir_lower::lower\r\n34047 1333 leave module_project_compile::range\r\n34047 1333 enter module_project_compile::range\r\n34047 1612 enter module_unit_bind::bind\r\n34281 1612 leave module_unit_bind::bind\r\n34281 2174 enter module_unit_call_closure::build_unit\r\n40906 2174 leave module_unit_call_closure::build_unit\r\n40906 3608 enter module_unit_values::build\r\n41297 3608 leave module_unit_values::build\r\n41297 2864 enter module_unit_moves::build\r\n41344 2864 leave module_unit_moves::build\r\n41344 1798 enter module_unit_body_ir_lower::lower\r\n42312 1798 leave module_unit_body_ir_lower::lower\r\n42328 1333 leave module_project_compile::range\r\n42328 1333 enter module_project_compile::range\r\n42328 1612 enter module_unit_bind::bind\r\n42687 1612 leave module_unit_bind::bind\r\n42687 2174 enter module_unit_call_closure::build_unit\r\n44062 2174 leave module_unit_call_closure::build_unit\r\n44078 1333 leave module_project_compile::range\r\n44078 1333 enter module_project_compile::range\r\n44078 1612 enter module_unit_bind::bind\r\n44234 1612 leave module_unit_bind::bind\r\n44234 2174 enter module_unit_call_closure::build_unit\r\n49016 2174 leave module_unit_call_closure::build_unit\r\n49016 3608 enter module_unit_values::build\r\n49250 3608 leave module_unit_values::build\r\n49250 2864 enter module_unit_moves::build\r\n49281 2864 leave module_unit_moves::build\r\n49281 1798 enter module_unit_body_ir_lower::lower\r\n50203 1798 leave module_unit_body_ir_lower::lower\r\n50219 1333 leave module_project_compile::range\r\n50219 1333 enter module_project_compile::range\r\n50219 1612 enter module_unit_bind::bind\r\n50469 1612 leave module_unit_bind::bind\r\n50469 2174 enter module_unit_call_closure::build_unit\r\n",
+      "timeout": true
+    },
+    "note": "Cache-only instrumented observations; concurrent host work and tracing preclude a precise full-frontend speedup claim"
+  },
+  "frontendTimeoutSeconds": 60,
+  "stackReserveChanged": false,
+  "fullSourceSelfReplayPassed": false,
+  "stage1Stage2GatePassed": false,
+  "publicApiChanged": false,
+  "sdkAbiChanged": false,
+  "dbChanged": false,
+  "ciChanged": false,
+  "pushed": false,
+  "skipped": [
+    "Linux: deferred platform batch",
+    "Full suite: narrow normalization scope",
+    "Stage2: full-source frontend replay incomplete"
+  ]
+}
