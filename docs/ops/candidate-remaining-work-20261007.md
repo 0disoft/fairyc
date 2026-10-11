@@ -3214,6 +3214,30 @@ Original full C generation/execution, native driver/publication, default timeout
 standalone compiler profiles, Linux, full suite and Stage1/Stage2 remain pending.
 Stable CLI, SDK ABI, language version, Go behavior, DB and CI do not change. No push.
 
+## Entry C call/cleanup closure (2026-10-11)
+
+Receipt: `evidence/candidate-c-entry-reachability-20261011.json`.
+The private `partition_entry` path now selects ordinary/specialized calls and
+cleanup dependencies from the i32 entry. Checked CFG drop sites include resource
+cleanup bodies/fields and both tagged Option/Result payloads. A visited queue
+retains original IDs and avoids repeated fixed-point rescans. Body prototypes and
+drop helpers follow the selected closure; full type/literal/foreign declarations
+remain conservative. All preparation work/output/project caps stay unchanged.
+
+Two Release native cases pass. Separate C files link and execute with /Od and
+/O2 (four executions), preserving nested Result/resource outer-before-inner
+cleanup and excluding an unused resource/body pair. The all-frame literal packet
+matches the earlier partition implementation byte-for-byte. Locked source
+checking passes with 291 files and 3653 MIR functions.
+
+The original 236-file project again compiles 48 units with 25 retries and links
+3558 frames. Entry partitioning currently rejects with 1002, module 0, bytes
+0..0, after 64.60 seconds. This report does not isolate preparation work from
+the total partition ledger/output bound. No C bundle or original EXE is
+published. Identifying and dividing the failing bounded phase remains next.
+Native driver/publication, default-timeout performance, Linux, full suite and
+Stage1/Stage2 remain pending. No stable CLI/SDK ABI/DB/CI changes and no push.
+
 
 ## Owned-C layout index and foreign-declaration work (2026-10-11)
 

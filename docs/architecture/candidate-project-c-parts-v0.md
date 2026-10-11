@@ -39,3 +39,35 @@ partition attempt passes the earlier shared render-work failure and reaches
 unsupported `std::fs::ReadDir` cleanup (code 1004, module 209, bytes
 30613..30660). This observation does not establish original executable creation
 or entry reachability. No stable CLI, SDK ABI, language version or CI changes.
+
+## Entry-scoped function and cleanup selection
+
+`partition_entry` retains the same checked project IR and original interval
+coordinates, but emits only the conservative call/cleanup closure of the entry.
+`module_unit_c_reachability` starts with the entry frame and records each visited
+frame once. It resolves original ordinary/specialized call coordinates through
+the existing body index. Foreign calls retain the original callable identity;
+selection does not grant SDK authority or relax the emitter's ABI checks.
+
+Checked CFG drop sites seed canonical cleanup type IDs. Resource cleanup frames,
+resource fields with glue, and Option/Result success/error payloads join the same
+fixed point. Cleanup bodies may discover further ordinary or specialized calls.
+Each frame/type is queued once; slot preparation, call lookup, CFG visits and
+cleanup edges charge the existing preparation work cap. Missing identities,
+allocation failure and exhausted work retain 1001, 1003 and 1002.
+
+Only selected frames have body definitions/prototypes, and only selected cleanup
+types have drop helpers. Type/literal definitions and foreign declarations remain
+conservative over the retained project. Original intervals still cover every
+frame coordinate; excluded bodies can leave an include-only file. The new
+`project_selected_frames` accessor distinguishes emitted frames from the total.
+The all-frame `partition` entry point remains available.
+
+Two Release native cases and four /Od-/O2 separate-file executions pass. A six
+frame fixture emits four frames and three nested cleanup helpers, omits an unused
+resource/helper pair, and observes outer-before-inner cleanup (`99,7,`). The
+all-frame literal fixture keeps its earlier packet digest and pointer identity.
+The original 236-file project still rejects with code 1002, module 0, span 0..0;
+the failing preparation/project-budget phase has not yet been isolated. No
+original bundle or executable is published. Receipt:
+`docs/ops/evidence/candidate-c-entry-reachability-20261011.json`.

@@ -1,0 +1,121 @@
+{
+  "schema": "fairyc.candidate-c-entry-reachability/v1",
+  "passed": true,
+  "implementation": [
+    {
+      "path": "examples/lexer_candidate/src/module_unit_c_reachability.fy",
+      "bytes": 4959,
+      "sha256": "55c7801fb580a8c463523d9ed4f65a5940e7e3d3e4e2f6bb67f54aff2103a883"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_unit_c_emit.fy",
+      "bytes": 28855,
+      "sha256": "3191cfd4e3d189c2143decb004138361aceebf451ff5639879f1b3da8286a92e"
+    }
+  ],
+  "test": {
+    "path": "examples/lexer_candidate/tests/module_project_link.fy",
+    "bytes": 11889,
+    "sha256": "2e7daed9881256ce402e10859eac2fee429a93b308d222dcd07089a6cb71dd17"
+  },
+  "contract": {
+    "path": "docs/architecture/candidate-project-c-parts-v0.md",
+    "bytes": 4661,
+    "sha256": "174e3132a92030624503cf2c3741d36a58616c1433d828a92105fceee4ada0bb"
+  },
+  "receiptTools": [
+    {
+      "path": "tools/verify-candidate-project-c-parts.py",
+      "bytes": 7825,
+      "sha256": "dca489212d1da19c78e473f4d53170c303ff7c0c45de2c48db48d605b8a02b73"
+    },
+    {
+      "path": "tools/verify-candidate-c-entry-reachability.py",
+      "bytes": 4930,
+      "sha256": "3986f78bbc4172a4b1405d638c901e3c94b9e0c588ed2bb1474115f260fc0b40"
+    }
+  ],
+  "sourceCheck": {
+    "exit": 0,
+    "seconds": 12.664314,
+    "stdout": "check ok: 2 instance(s), 291 source file(s), 3653 MIR function(s), lock verified\n",
+    "stderr": null
+  },
+  "native": {
+    "report": {
+      "path": ".cache/candidate-tagged/sdk-c-execution/native-c-entry-parts.json",
+      "bytes": 20870,
+      "sha256": "e917db060563bd95a65b87f2c4baff0a870d6cd3fd93bca33b2da4388fc7a12f"
+    },
+    "passed": 2,
+    "observation": {
+      "path": ".cache/candidate-tagged/sdk-c-execution/native-c-entry-parts-observation.json",
+      "bytes": 577,
+      "sha256": "1b648f5cceba4330c9f849f7d3d7e717c74cb91e23bd90b28f1f92366ecb28ea"
+    }
+  },
+  "separateTranslationUnits": {
+    "report": {
+      "path": ".cache/candidate-tagged/sdk-c-execution/c-entry-parts-native-c/execution.json",
+      "bytes": 13332,
+      "sha256": "ae0230475fefb14e91e805e1e0725ad887bde24d714be1b7336d20e0f7bbd4c6"
+    },
+    "cases": 2,
+    "executions": 4,
+    "selectedFrames": 4,
+    "originalFrames": 6,
+    "cleanupTrace": "99,7,"
+  },
+  "literalCompatibility": {
+    "priorReceipt": {
+      "path": "docs/ops/evidence/candidate-project-c-parts-20261011.json",
+      "bytes": 83658,
+      "sha256": "396972840fcf39b38b773bbb716d108cf50c937b70f2e2c2b9d01fb5d2fd1415"
+    },
+    "packetSHA256": "ab078f84ca481668764ac788379f5efa41976f041cbb88a1453b1a593af6b03c",
+    "exact": true
+  },
+  "originalProject": {
+    "passed": false,
+    "sourceCount": 236,
+    "exactInputIdentitiesMatchPriorReceipt": true,
+    "report": {
+      "path": ".cache/candidate-tagged/sdk-c-execution/run-main-c-entry-probe.json",
+      "bytes": 14022,
+      "sha256": "bf863e2369db755b49d3cc3063834f661743eefec838d5ea3b495a2d4ca46c2a"
+    },
+    "exit": 2,
+    "seconds": 64.60345750000124,
+    "stdout": "compiled units 48 retries 25\nlinked frames 3558 work 3321980\nproject drops 6392 root drops 4\nroot CFG blocks 247 work 7650\npartition code 1002 module 0 at 0..0\n",
+    "stderr": "",
+    "timedOut": false,
+    "wrapper": {
+      "path": ".cache/candidate-tagged/sdk-c-execution/main-c-entry-probe/src/main.fy",
+      "bytes": 6807,
+      "sha256": "98ff7f012886e146cebbf3a77ef76584f5281f1547679338df47a0936954e50f"
+    },
+    "image": {
+      "path": ".cache/candidate-tagged/sdk-c-execution/main-c-entry-probe/build/main-c-entry-probe.exe",
+      "bytes": 2162688,
+      "sha256": "9b55a4237d6a8858398e5e7a8149d984755143cf86276eb0b474f2ccb5845351"
+    },
+    "bundlePublished": false,
+    "blocker": "Code 1002 module 0 span 0..0; preparation/project work versus output phase not yet isolated"
+  },
+  "limits": {
+    "preparationWork": 1048576,
+    "unitWork": 1048576,
+    "outputBytesPerBuffer": 2097152,
+    "projectWork": 4194304
+  },
+  "deferred": [
+    "Locate and divide the original preparation/project budget phase",
+    "Original complete C generation and execution",
+    "Native driver/publication",
+    "Default timeout/performance",
+    "Linux",
+    "Full suite",
+    "Stage1/Stage2"
+  ],
+  "pushed": false
+}

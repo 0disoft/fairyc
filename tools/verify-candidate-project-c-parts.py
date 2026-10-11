@@ -20,9 +20,10 @@ CASES = {
     "project_c_partition_keeps_generic_instance_namespaces": (5, ""),
     "project_c_partition_preserves_literal_pointer_identity": (4, ""),
 }
+ENTRY_CASE = "project_c_entry_partition_keeps_nested_result_cleanup_and_omits_unused_bodies"
 
 
-def packet(data):
+def packet(data, complete=True):
     assert data.startswith(b"FYCPARTS1\n")
     offset = len(b"FYCPARTS1\n")
 
@@ -59,7 +60,9 @@ def packet(data):
         raw = bytes(int(value) for value in payload.split(b","))
         assert hashlib.sha256(raw).hexdigest().encode() == digest or (raw == b"\0" and hashlib.sha256(b"").hexdigest().encode() == digest)
     frames = [int(frame) for unit in units for frame in re.findall(rb"^extern [^\n]+ fy_fn_([0-9]+)\([^\n]*\)\{", unit, re.M)]
-    assert frames == list(range(1, len(frames) + 1)), "Every frame must be defined once in original order"
+    assert frames == sorted(set(frames)) and frames and frames[-1] <= 4096
+    if complete:
+        assert frames == list(range(1, len(frames) + 1)), "Every frame must be defined once in original order"
     assert sum(unit.count(b"int32_t fy_candidate_entry(void){") for unit in units) == 1
     return header, literals, units, len(frames), len(definitions)
 
@@ -78,8 +81,8 @@ def environment(vcvars):
     return compiler, env
 
 
-def execute(data, folder, compiler, env, expected_frames, expected_stdout):
-    header, literals, units, frames, pool_size = packet(data)
+def execute(data, folder, compiler, env, expected_frames, expected_stdout, complete=True):
+    header, literals, units, frames, pool_size = packet(data, complete)
     assert frames == expected_frames
     folder.mkdir(parents=True, exist_ok=True)
     (folder / "fy_project.h").write_bytes(header)
@@ -104,24 +107,35 @@ def main():
     parser.add_argument("--report", required=True, type=Path)
     parser.add_argument("--vcvars", required=True, type=Path)
     parser.add_argument("--output", required=True, type=Path)
+    parser.add_argument("--suite", choices=("partition", "entry"), default="partition")
     args = parser.parse_args()
     native = json.loads(args.report.read_bytes())
     assert native["engine"] == "native" and native["profile"] == "release" and native["target"] == "x86_64-windows-msvc"
-    assert native["count"] == native["passed"] == 4 and native["failed"] == 0
+    assert native["count"] == native["passed"] == (4 if args.suite == "partition" else 2) and native["failed"] == 0
     cases = {}
     for test in native["tests"]:
         assert test["outcome"] == "passed" and not base64.b64decode(test["stderrBase64"], validate=True)
         name = test["identity"].split("::")[-1]
         assert name not in cases
         cases[name] = base64.b64decode(test["stdoutBase64"], validate=True)
-    stress = cases.pop("literal_pool_indexes_duplicates_and_sorts_large_unique_sets")
-    assert re.fullmatch(rb"work \d+ bytes \d+\nsha256 865a689f953e2a39bad216b2f9863d4f80058be03c5e03994834396ed3f0df48\n", stress)
-    assert cases.keys() == CASES.keys()
+    stress = b""
+    expected = CASES
+    if args.suite == "partition":
+        stress = cases.pop("literal_pool_indexes_duplicates_and_sorts_large_unique_sets")
+        assert re.fullmatch(rb"work \d+ bytes \d+\nsha256 865a689f953e2a39bad216b2f9863d4f80058be03c5e03994834396ed3f0df48\n", stress)
+    else:
+        expected = {ENTRY_CASE: (4, "99,7,"), "project_c_partition_preserves_literal_pointer_identity": CASES["project_c_partition_preserves_literal_pointer_identity"]}
+    assert cases.keys() == expected.keys()
     compiler, env = environment(args.vcvars)
     output = args.output.resolve()
     results = {}
-    for name, (frames, stdout) in CASES.items():
-        results[name] = execute(cases[name], output / name, compiler, env, frames, stdout)
+    for name, (frames, stdout) in expected.items():
+        if name == ENTRY_CASE:
+            header, _, units, selected, _ = packet(cases[name], False)
+            assert len(units) == 6 and selected == 4
+            assert not any(b"unused_cleanup(" in unit for unit in units)
+            assert len(re.findall(rb"^static void fy_unit_drop_[0-9]+\([^\n]*\)\{", header, re.M)) == 3
+        results[name] = execute(cases[name], output / name, compiler, env, frames, stdout, name != ENTRY_CASE)
         if name == "project_c_partition_preserves_literal_pointer_identity":
             assert results[name]["literalDefinitions"] == 3
         print(f"PASS /Od and /O2: {name}", flush=True)
