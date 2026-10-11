@@ -1,0 +1,806 @@
+{
+  "schema": "fairyc.candidate-private-tests/v1",
+  "passed": true,
+  "module": "project_sdk_selection",
+  "sourceInputs": [
+    {
+      "path": "examples/lexer_candidate/src/attributes.fy",
+      "sha256": "dafe2e1c020446224fa8784e701e522096a58776a1066920f934c0717667b5e6"
+    },
+    {
+      "path": "examples/lexer_candidate/src/bodies.fy",
+      "sha256": "ea9bfd6dc1b3bce9dc407970b82d871185db33e7daadad35d348de84ab6ba294"
+    },
+    {
+      "path": "examples/lexer_candidate/src/body_state.fy",
+      "sha256": "0f4e1924d07e4d21bc5fbe35a4fb8f0c2b617206b6d63191e7a625300ec5bb3e"
+    },
+    {
+      "path": "examples/lexer_candidate/src/budget.fy",
+      "sha256": "c2793aa302279b9d27f0af32edd71f70de4e93cb4f76f55facd3e757641cc494"
+    },
+    {
+      "path": "examples/lexer_candidate/src/candidate_limits.fy",
+      "sha256": "7a27948d9a43bde84acdf1106f462d0c5a288f8a54f193560658eff0c0d00f3e"
+    },
+    {
+      "path": "examples/lexer_candidate/src/cleanup_syntax.fy",
+      "sha256": "1374cdcbfa6139a5e82e4e74606cc28ba46d9e81df62f7a0dd397f856fb0ad6f"
+    },
+    {
+      "path": "examples/lexer_candidate/src/diagnostics.fy",
+      "sha256": "ee95f81ed3b3224702196fceef2888434e9713341b81abf01e03945592c4de8b"
+    },
+    {
+      "path": "examples/lexer_candidate/src/file_source.fy",
+      "sha256": "1a7ac7f6c69ef27e78e734aa74dab90b895742a5500a32931baaed19379b938f"
+    },
+    {
+      "path": "examples/lexer_candidate/src/numbers.fy",
+      "sha256": "ee8b40b5e8061317d70d3594c386c9e4c70d95132a7e4243ea6402947a4c3556"
+    },
+    {
+      "path": "examples/lexer_candidate/src/parse_tokens.fy",
+      "sha256": "91984eb1086ff7faafa4a6c64a232fc2ddce365b8cd7c2ef23b143bb91d4c9a6"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_content_hash.fy",
+      "sha256": "68d867b37b8cc817382e6d6602aa4d66f4d66be8784e7fbe119c806832839a0e"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_directory.fy",
+      "sha256": "70321e8a7cc84f131573eec91013fccad38d0162f781768bc0e47b136cf4ebc6"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_import_path.fy",
+      "sha256": "bc0e5e10905ee833b36ffe94ae8ff835f6f33caccfc59970cd379537dcbb0c54"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_instance_graph.fy",
+      "sha256": "9a47a2cae4fbef1a6129b0805e683782be26c819ae2f41dd233129279cc226e9"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_instance_identity.fy",
+      "sha256": "797920212852438398bcfaa5acd34225c9ff2de722744c67d9c68c9d2c56e8dd"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_key_index.fy",
+      "sha256": "34ee26a1092361c5bc60860795a86c0974243eec3cfc5f829710d192fdf7ea28"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_manifest.fy",
+      "sha256": "943c3e163ddc04afb03a82ef4a0485aa6a618a67708e657086b8ed1acd56658a"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_manifest_values.fy",
+      "sha256": "4f21b9dedf744ffc449d1b843282f9aba2ecc221c61f043594bea70c4d56387d"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_module_path.fy",
+      "sha256": "b4217fe0f797e5f0fb4bab8ebc75435e6674b5f72b60d0129b5269c627709cb2"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_package_input.fy",
+      "sha256": "fe1a75622fbf72b03fe5bfba3ce0c158eb2e03033e31acfdaef05afea9ec68c8"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_path.fy",
+      "sha256": "20bde13864e5ba8752b33a616eab22b08caf8a20d6a435d2d2c2cc68f443f1a5"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_path_unicode_data.fy",
+      "sha256": "9cf3af27796644304493561591e1641c70c5c653bf739ed71a65e492db510fbd"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_source_catalog.fy",
+      "sha256": "5dd5b1a6f848968cf20676084af8ddcaf039cfc74e1837685c12c601c53fb131"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_source_file.fy",
+      "sha256": "6d1307e99f7ae9fb387fc447f3b6c36f6c0e77aebc90faca55e75665aad2d282"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_source_identity.fy",
+      "sha256": "354bed4ced07109403b58f4432e8beddc765760a1ee083b3ca72fa0880c9f359"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_source_modules.fy",
+      "sha256": "d7d7e5b30a270389a1572f6e26cf3c0603db33e0125bd33fa17f4f177a0f7a1c"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_source_root.fy",
+      "sha256": "e6d896a57fde407db5e7042e244d6f2a35dddc4e113ad20555c4408f24842127"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_source_set.fy",
+      "sha256": "c4b70409d8aa627a1ef46488e5232d3deea7b07c0e796c26ef28449f367a98e1"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_toml_context.fy",
+      "sha256": "1682260043feced2ac662198fd3b29f4badb2a4a9f9b02a8e1f81462f3b3cc0f"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_toml_document.fy",
+      "sha256": "0bc3782206da0d9320ba8a39ea6a1f9ded52ec1bbf855580e31c1a1786f4b3a8"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_toml_model.fy",
+      "sha256": "4a6c295108e704749fc557204de4d8a0287e3228e59da396c50867ec8894b11e"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_toml_scalars.fy",
+      "sha256": "137d5dbdce313f22e91a9be87f8b34eb6f10011933b152f649421a895e274cb9"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_toml_strings.fy",
+      "sha256": "bc7e71acaaa68af5755d066c90fa1f763625de32c8fa2a6778e8447eebc187bb"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_toml_values.fy",
+      "sha256": "24255d1fdf0f34b6761f5304d383127667e8b127488a80409b3f35a13f62e81c"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_workspace_catalog.fy",
+      "sha256": "bc800dda99247aba4d8b80abdcbc092d9cb27ac5193cfb7a33bd405ec753c936"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_workspace_input.fy",
+      "sha256": "18a8a35c400eaa8c32da09ea55a70d704953e8b9a762998b44c9af4dd76689fd"
+    },
+    {
+      "path": "examples/lexer_candidate/src/records.fy",
+      "sha256": "e2d1d3540285509aded981b476d4b2340857d8c7370364f4b1410bfd6883f6dd"
+    },
+    {
+      "path": "examples/lexer_candidate/src/scanner.fy",
+      "sha256": "3755e569fe63003f63b2c9b8272df2ba656c844791cedbc0da4f9245b8809cf7"
+    },
+    {
+      "path": "examples/lexer_candidate/src/sdk_authority.fy",
+      "sha256": "ae0f2e21819a625a6bb5fe331173dd3366599486f3c203a523693680a0c4ee6c"
+    },
+    {
+      "path": "examples/lexer_candidate/src/sha256.fy",
+      "sha256": "eb89211fd749f7f527e8d2b72e97d70f8d9613bbac428bc95d975bef7c53bfa1"
+    },
+    {
+      "path": "examples/lexer_candidate/src/sha256_block.fy",
+      "sha256": "bc48b9e751205bba8aeaf09987ea8681694d26bc989e24f4ecb3afa4c6e00fd4"
+    },
+    {
+      "path": "examples/lexer_candidate/src/sha256_stream.fy",
+      "sha256": "b5f97a9b5be679418a1365a6007028abfab5ba66ee3ae5c08b3e5b863fcfc8b9"
+    },
+    {
+      "path": "internal/sdkstdlib/sources/std/bytes.fy",
+      "sha256": "4740a506e93349fb002c383967dcc44d182d20f09f2094b83b5464a4ab252982"
+    },
+    {
+      "path": "internal/sdkstdlib/sources/std/fs.fy",
+      "sha256": "fd7ddfa9f0deed98304cecf94911644087d1e2a46e8be8995c35acbcb183b335"
+    },
+    {
+      "path": "internal/sdkstdlib/sources/std/io.fy",
+      "sha256": "4b89c3aeb8b4de4887395d29723095d364c5660c6b773c5696fb1f65f5365f48"
+    },
+    {
+      "path": "internal/sdkstdlib/sources/std/num.fy",
+      "sha256": "09aa0d45f075aa4212049527ded7bb48d99ceb6ffed56b310e267421bae20bb3"
+    },
+    {
+      "path": "internal/sdkstdlib/sources/std/process.fy",
+      "sha256": "9680a1481df4f761f481d5a039af7bdbefeb312d1091961194f8e7bc0681ae24"
+    },
+    {
+      "path": "internal/sdkstdlib/sources/std/text.fy",
+      "sha256": "cccd47e090fda11c9da063ffb321489dd8753fe9996855fc432833e05a79e695"
+    },
+    {
+      "path": "internal/sdkstdlib/sources/optional/std/vec.fy",
+      "sha256": "0ae4c395bf98c39079ad620bde035b3b590d51417864802e698edc069281db5b"
+    },
+    {
+      "path": "examples/lexer_candidate/src/strings.fy",
+      "sha256": "8f26db7c4d4039c8c8d9fbc6078097859c8f714ca5887957fdf0e69269dca521"
+    },
+    {
+      "path": "examples/lexer_candidate/src/syntax.fy",
+      "sha256": "cb040a2973447b89c2ad59b5447c65dab79df5df7930f73431afa7ea34ef25fd"
+    },
+    {
+      "path": "examples/lexer_candidate/src/types.fy",
+      "sha256": "53a77948af92724f00de0609837fd1507899df8e2b59b6d2778ef1f3c344395a"
+    },
+    {
+      "path": "examples/lexer_candidate/src/utf8.fy",
+      "sha256": "4a5425cea9efbfb1bff2c31a38c2bd8e392c6792af09f24e906c9a743621870d"
+    },
+    {
+      "path": "examples/lexer_candidate/tests/project_sdk_selection.fy",
+      "sha256": "b96a2da09f797d7f3f2152bfe5cda0c2d7be470b5240e3d4b2f2ab8aa93ceeda"
+    },
+    {
+      "path": "tools/verify-candidate-private-tests.py",
+      "sha256": "04c7e44df7941bd0c1a12b523b115df623dbe10836f3eb8993dedc7d6ea5e8af"
+    },
+    {
+      "path": ".cache/candidate-sdk-selection-20261012/fixture/root.bin",
+      "sha256": "25690f381424144be844f9b47833a3f0d8d8b60c3f7f39ccbf682334e348f7b9"
+    },
+    {
+      "path": "cmd/fairyc-candidate-sdk-selection-reference/main.go",
+      "sha256": "a7d4ceb0b3d3549b0d391bd964f8ef02722f855ade6b5114e35bf8e24416c92e"
+    },
+    {
+      "path": "internal/workspaceloader/loader.go",
+      "sha256": "6977f9f108741c30fb01a21be94fa90f127ddc06daea0bd991efcbcfb8c081f3"
+    },
+    {
+      "path": "internal/workspaceloader/vector_candidate.go",
+      "sha256": "3b2efa4c7385aca64e50952d8070bacbb73691b975d9733266cd45b918ea841e"
+    },
+    {
+      "path": "internal/sdkstdlib/stdlib.go",
+      "sha256": "418b24a10b443b784275c886c7b87d3f9b97e72923406b567335b26569ac6f3b"
+    },
+    {
+      "path": "internal/sdkstdlib/vector.go",
+      "sha256": "bb8fc2b90fa40fcc578e11d0f54f996bf07608d7fd72f437f692a685776931e2"
+    }
+  ],
+  "tools": {
+    "compiler": {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\manifest-bootstrap.exe",
+      "sha256": "4e6a50a83b4d9f74a11d749c779a90683ab3a3916d19f4852bfe1cbd452cc664"
+    },
+    "candidate": {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-source-file-20261011\\compiler.exe",
+      "sha256": "e87cc5c8c19e30fc68ca68fa98ef66d87baa1300263d8989e255910bb1985d8f"
+    },
+    "builder": {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-source-file-20261011\\builder.exe",
+      "sha256": "8141ce6bcc461a52fe6bf0bf24e9e5f5a9d7842c3c7dbfc5863cc4e822584ea7"
+    }
+  },
+  "native": {
+    "schemaVersion": "fairyc.test-report/v4",
+    "engine": "native",
+    "target": "x86_64-windows-msvc",
+    "profile": "development",
+    "tests": [
+      {
+        "identity": "tests::project_sdk_selection::selects_sdk_only_for_exact_reachable_instance_imports",
+        "outcome": "passed",
+        "trapCategory": null,
+        "stdoutBase64": "",
+        "stderrBase64": ""
+      }
+    ],
+    "count": 1,
+    "passed": 1,
+    "failed": 0,
+    "status": "ok",
+    "lock": "verified"
+  },
+  "nativeTests": 1,
+  "lockSHA256": "a66b678dfc985ddcfbc70fcebe7b4c039ea91558a41b316ac732f2e2326229d4",
+  "candidateInputFiles": 54,
+  "candidatePacketSHA256": "494c3d33032949ec4ae00236c4064be78fd22fd42339da7db0504c4f8269c43e",
+  "candidateExecutions": [
+    {
+      "profile": "development",
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-sdk-selection-20261012\\execution\\development.exe",
+      "sha256": "3b1b8a597a063de3358762236f24636f768a50aee6f4590801f0e11bec8fcf71",
+      "exit": 0
+    },
+    {
+      "profile": "release",
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-sdk-selection-20261012\\execution\\release.exe",
+      "sha256": "d7ce1bcde518feb7db19770302aa6663cae0cc4f5317fdcf413a40375144a481",
+      "exit": 0
+    }
+  ],
+  "invocations": [
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\manifest-bootstrap.exe",
+        "test",
+        "--native",
+        "--locked",
+        "--json",
+        "--capture-output",
+        "--exact",
+        "tests::project_sdk_selection::selects_sdk_only_for_exact_reachable_instance_imports",
+        "--",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-sdk-selection-20261012\\fixture\\root.bin"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "seconds": 56.33608480000112,
+      "exit": 0,
+      "stdoutBytes": 363,
+      "stdoutSHA256": "c4161af2978a3fd9f79a967694dbae69a57fe48d94997da8c7260859f9647359",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-source-file-20261011\\compiler.exe",
+        "--c-project-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-sdk-selection-20261012\\execution\\sources.list"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "seconds": 33.878754699995625,
+      "exit": 0,
+      "stdoutBytes": 3985275,
+      "stdoutSHA256": "494c3d33032949ec4ae00236c4064be78fd22fd42339da7db0504c4f8269c43e",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-source-file-20261011\\builder.exe",
+        "--packet",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-sdk-selection-20261012\\execution\\candidate-packet.bin",
+        "--packet-sha256",
+        "494c3d33032949ec4ae00236c4064be78fd22fd42339da7db0504c4f8269c43e",
+        "--output",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-sdk-selection-20261012\\execution\\development.exe"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "seconds": 3.4566797000006773,
+      "exit": 0,
+      "stdoutBytes": 184,
+      "stdoutSHA256": "a5d35ae1164b1702bbfa42b75095976715546f8cfca4ecba6ab9cfd04575f3c2",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-sdk-selection-20261012\\execution\\development.exe",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-sdk-selection-20261012\\fixture\\root.bin"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "seconds": 0.30056750000221655,
+      "exit": 0,
+      "stdoutBytes": 0,
+      "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-source-file-20261011\\builder.exe",
+        "--packet",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-sdk-selection-20261012\\execution\\candidate-packet.bin",
+        "--packet-sha256",
+        "494c3d33032949ec4ae00236c4064be78fd22fd42339da7db0504c4f8269c43e",
+        "--output",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-sdk-selection-20261012\\execution\\release.exe",
+        "--release"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "seconds": 78.84309959999518,
+      "exit": 0,
+      "stdoutBytes": 185,
+      "stdoutSHA256": "0639543da683a76fbead3a1c9d7d3328d0970971c3e62cacc9e0e0665f835301",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-sdk-selection-20261012\\execution\\release.exe",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-sdk-selection-20261012\\fixture\\root.bin"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "seconds": 0.12266189999354538,
+      "exit": 0,
+      "stdoutBytes": 0,
+      "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr": ""
+    }
+  ],
+  "publicApiChanged": false,
+  "dbChanged": false,
+  "ciChanged": false,
+  "pushed": false,
+  "goOracle": [
+    {
+      "candidate": false,
+      "fixture": "None",
+      "owners": null,
+      "profile": 0
+    },
+    {
+      "candidate": true,
+      "fixture": "CandidateUnused",
+      "owners": null,
+      "profile": 0
+    },
+    {
+      "candidate": false,
+      "fixture": "Core",
+      "owners": [
+        "fypi1-sha256-fff7c11d9e2ba01039b762ca6eca85f9236a54baf9d2d276809b49faef8a55e2"
+      ],
+      "profile": 1
+    },
+    {
+      "candidate": false,
+      "fixture": "AliasCore",
+      "owners": [
+        "fypi1-sha256-8419f863dbaa45782aa272c6b85719d1c637f7e29aaccd3e452b6c3f19d0f541"
+      ],
+      "profile": 1
+    },
+    {
+      "candidate": false,
+      "fixture": "Vector",
+      "owners": [
+        "fypi1-sha256-824335fd17ccf8ad8708c739186092d36b99f79de7decdb1c85152788926586b"
+      ],
+      "profile": 2
+    },
+    {
+      "candidate": true,
+      "fixture": "CandidateCore",
+      "owners": [
+        "fypi1-sha256-fff7c11d9e2ba01039b762ca6eca85f9236a54baf9d2d276809b49faef8a55e2"
+      ],
+      "profile": 3
+    },
+    {
+      "candidate": false,
+      "fixture": "ChildOnly",
+      "owners": [
+        "fypi1-sha256-0eeada89fc5cf27a6ae56f564b51c8085cb7f43b335308154a57c8b8541a8da8"
+      ],
+      "profile": 1
+    },
+    {
+      "candidate": false,
+      "fixture": "Both",
+      "owners": [
+        "fypi1-sha256-7145aa10b92821433d2003807ef122fa4d74d171eb1e5dddeddf509a310c88a9",
+        "fypi1-sha256-0eeada89fc5cf27a6ae56f564b51c8085cb7f43b335308154a57c8b8541a8da8"
+      ],
+      "profile": 1
+    },
+    {
+      "candidate": false,
+      "fixture": "ChildVector",
+      "owners": [
+        "fypi1-sha256-cd9f72158de55e648f3d5be4cbd0ec333303c1baa45fca67e7ce8b14d5c455ab"
+      ],
+      "profile": 2
+    },
+    {
+      "candidate": false,
+      "fixture": "UnreachableVector",
+      "owners": null,
+      "profile": 0
+    },
+    {
+      "candidate": false,
+      "fixture": "FeatureSplit",
+      "owners": [
+        "fypi1-sha256-ca603919d3878c8853880ca66bf42aceb2b0fd8c208d3a18d0b90c646b05a168",
+        "fypi1-sha256-cddf150f60e269a57221c34ea41d2eaebc18dc90586f015525c7952bc91992f5"
+      ],
+      "profile": 1
+    },
+    {
+      "candidate": false,
+      "fixture": "InstanceAliases",
+      "owners": [
+        "fypi1-sha256-ca603919d3878c8853880ca66bf42aceb2b0fd8c208d3a18d0b90c646b05a168"
+      ],
+      "profile": 1
+    },
+    {
+      "candidate": false,
+      "fixture": "LongTrivia",
+      "owners": [
+        "fypi1-sha256-b17cde504d0ea3825858773eb5312899e6e06b725836df47bf2319f1fc74cd0a"
+      ],
+      "profile": 1
+    },
+    {
+      "candidate": false,
+      "fixture": "SimilarNamespaces",
+      "owners": null,
+      "profile": 0
+    }
+  ],
+  "fixtureFiles": [
+    {
+      "path": ".cache/candidate-sdk-selection-20261012/fixture/AliasCore/candidate.txt",
+      "sha256": "fcbcf165908dd18a9e49f7ff27810176db8e9f63b4352213741664245224f8aa"
+    },
+    {
+      "path": ".cache/candidate-sdk-selection-20261012/fixture/AliasCore/fairy.toml",
+      "sha256": "842c0deaf9080f93aab8586f71c44223756605e9cc3577bbc4b756059a747a4c"
+    },
+    {
+      "path": ".cache/candidate-sdk-selection-20261012/fixture/AliasCore/selection.txt",
+      "sha256": "e4b6297d1c6465dbd67f37e95d4fa98af124ffdc3b163cdefff7255f935b0c37"
+    },
+    {
+      "path": ".cache/candidate-sdk-selection-20261012/fixture/AliasCore/src/main.fy",
+      "sha256": "e645e3508d1e334622f67e5d3ea0a978d74fb48ee922b4d80965c87aae1b243b"
+    },
+    {
+      "path": ".cache/candidate-sdk-selection-20261012/fixture/Both/a/fairy.toml",
+      "sha256": "5955a3cbba16e1316a4033dc657c257fde338b904285fa714a03398005bf2929"
+    },
+    {
+      "path": ".cache/candidate-sdk-selection-20261012/fixture/Both/a/src/lib.fy",
+      "sha256": "c98b3a0a5de7fd962b6838c15d504357ae3ae1d33cfa567d29514ae3ee193fd3"
+    },
+    {
+      "path": ".cache/candidate-sdk-selection-20261012/fixture/Both/candidate.txt",
+      "sha256": "fcbcf165908dd18a9e49f7ff27810176db8e9f63b4352213741664245224f8aa"
+    },
+    {
+      "path": ".cache/candidate-sdk-selection-20261012/fixture/Both/fairy.toml",
+      "sha256": "070d88c326cb9ac1b6154e9ae817f5747d7ad966baf8766640937774bb977181"
+    },
+    {
+      "path": ".cache/candidate-sdk-selection-20261012/fixture/Both/selection.txt",
+      "sha256": "c36ce8103fa7cc036c570cbc487f2eadf79a394441200055d8a21687ea66a17b"
+    },
+    {
+      "path": ".cache/candidate-sdk-selection-20261012/fixture/Both/src/main.fy",
+      "sha256": "d28484d12f391eb1e65e72e115b8c9b7a37c1a4655009535ecb00beea946bcb0"
+    },
+    {
+      "path": ".cache/candidate-sdk-selection-20261012/fixture/CandidateCore/candidate.txt",
+      "sha256": "b5bea41b6c623f7c09f1bf24dcae58ebab3c0cdd90ad966bc43a45b44867e12b"
+    },
+    {
+      "path": ".cache/candidate-sdk-selection-20261012/fixture/CandidateCore/fairy.toml",
+      "sha256": "842c0deaf9080f93aab8586f71c44223756605e9cc3577bbc4b756059a747a4c"
+    },
+    {
+      "path": ".cache/candidate-sdk-selection-20261012/fixture/CandidateCore/selection.txt",
+      "sha256": "e1e35c6619924a3e005280f98ae1c697bce47eadb8cc6dff4ec709651dd38fd3"
+    },
+    {
+      "path": ".cache/candidate-sdk-selection-20261012/fixture/CandidateCore/src/main.fy",
+      "sha256": "6cfd3d9e62582d99c19aa12873bf76f6d74de4f8868382e32966c126d8a6d518"
+    },
+    {
+      "path": ".cache/candidate-sdk-selection-20261012/fixture/CandidateUnused/candidate.txt",
+      "sha256": "b5bea41b6c623f7c09f1bf24dcae58ebab3c0cdd90ad966bc43a45b44867e12b"
+    },
+    {
+      "path": ".cache/candidate-sdk-selection-20261012/fixture/CandidateUnused/fairy.toml",
+      "sha256": "842c0deaf9080f93aab8586f71c44223756605e9cc3577bbc4b756059a747a4c"
+    },
+    {
+      "path": ".cache/candidate-sdk-selection-20261012/fixture/CandidateUnused/selection.txt",
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "path": ".cache/candidate-sdk-selection-20261012/fixture/CandidateUnused/src/main.fy",
+      "sha256": "51e4c2b1b8b049778e1543110b6b45a60b6a5bc53bded4de74457f7fcc984cf4"
+    },
+    {
+      "path": ".cache/candidate-sdk-selection-20261012/fixture/ChildOnly/a/fairy.toml",
+      "sha256": "5955a3cbba16e1316a4033dc657c257fde338b904285fa714a03398005bf2929"
+    },
+    {
+      "path": ".cache/candidate-sdk-selection-20261012/fixture/ChildOnly/a/src/lib.fy",
+      "sha256": "c98b3a0a5de7fd962b6838c15d504357ae3ae1d33cfa567d29514ae3ee193fd3"
+    },
+    {
+      "path": ".cache/candidate-sdk-selection-20261012/fixture/ChildOnly/candidate.txt",
+      "sha256": "fcbcf165908dd18a9e49f7ff27810176db8e9f63b4352213741664245224f8aa"
+    },
+    {
+      "path": ".cache/candidate-sdk-selection-20261012/fixture/ChildOnly/fairy.toml",
+      "sha256": "070d88c326cb9ac1b6154e9ae817f5747d7ad966baf8766640937774bb977181"
+    },
+    {
+      "path": ".cache/candidate-sdk-selection-20261012/fixture/ChildOnly/selection.txt",
+      "sha256": "58ed056059afd865b32c5c0763552dbaab6683efb00c889a297c98f670344107"
+    },
+    {
+      "path": ".cache/candidate-sdk-selection-20261012/fixture/ChildOnly/src/main.fy",
+      "sha256": "1c7d0fcf07500be283d696855db7e2672dc1bba9b48bc1e83c2516f4455d79a0"
+    },
+    {
+      "path": ".cache/candidate-sdk-selection-20261012/fixture/ChildVector/a/fairy.toml",
+      "sha256": "5955a3cbba16e1316a4033dc657c257fde338b904285fa714a03398005bf2929"
+    },
+    {
+      "path": ".cache/candidate-sdk-selection-20261012/fixture/ChildVector/a/src/lib.fy",
+      "sha256": "c059aa98b9a4f2de69394cb182b7f400643c9f3791a6ffd85bbc80519af3aca5"
+    },
+    {
+      "path": ".cache/candidate-sdk-selection-20261012/fixture/ChildVector/candidate.txt",
+      "sha256": "fcbcf165908dd18a9e49f7ff27810176db8e9f63b4352213741664245224f8aa"
+    },
+    {
+      "path": ".cache/candidate-sdk-selection-20261012/fixture/ChildVector/fairy.toml",
+      "sha256": "070d88c326cb9ac1b6154e9ae817f5747d7ad966baf8766640937774bb977181"
+    },
+    {
+      "path": ".cache/candidate-sdk-selection-20261012/fixture/ChildVector/selection.txt",
+      "sha256": "a66929d26f09624a806a73d5668195cb0c563e5ae97e1b31a5e109e803596c19"
+    },
+    {
+      "path": ".cache/candidate-sdk-selection-20261012/fixture/ChildVector/src/main.fy",
+      "sha256": "1c7d0fcf07500be283d696855db7e2672dc1bba9b48bc1e83c2516f4455d79a0"
+    },
+    {
+      "path": ".cache/candidate-sdk-selection-20261012/fixture/Core/candidate.txt",
+      "sha256": "fcbcf165908dd18a9e49f7ff27810176db8e9f63b4352213741664245224f8aa"
+    },
+    {
+      "path": ".cache/candidate-sdk-selection-20261012/fixture/Core/fairy.toml",
+      "sha256": "842c0deaf9080f93aab8586f71c44223756605e9cc3577bbc4b756059a747a4c"
+    },
+    {
+      "path": ".cache/candidate-sdk-selection-20261012/fixture/Core/selection.txt",
+      "sha256": "d3fd7cada3e8533bff3d0c3ca28a7ced1ed3cfe6a5bf797baea8e13d55aa683f"
+    },
+    {
+      "path": ".cache/candidate-sdk-selection-20261012/fixture/Core/src/main.fy",
+      "sha256": "6cfd3d9e62582d99c19aa12873bf76f6d74de4f8868382e32966c126d8a6d518"
+    },
+    {
+      "path": ".cache/candidate-sdk-selection-20261012/fixture/FeatureSplit/a/fairy.toml",
+      "sha256": "5955a3cbba16e1316a4033dc657c257fde338b904285fa714a03398005bf2929"
+    },
+    {
+      "path": ".cache/candidate-sdk-selection-20261012/fixture/FeatureSplit/a/src/lib.fy",
+      "sha256": "c98b3a0a5de7fd962b6838c15d504357ae3ae1d33cfa567d29514ae3ee193fd3"
+    },
+    {
+      "path": ".cache/candidate-sdk-selection-20261012/fixture/FeatureSplit/candidate.txt",
+      "sha256": "fcbcf165908dd18a9e49f7ff27810176db8e9f63b4352213741664245224f8aa"
+    },
+    {
+      "path": ".cache/candidate-sdk-selection-20261012/fixture/FeatureSplit/fairy.toml",
+      "sha256": "6777705a67ed3760f383125314a92896c77bc52724680352de391c1bf75e6c3f"
+    },
+    {
+      "path": ".cache/candidate-sdk-selection-20261012/fixture/FeatureSplit/selection.txt",
+      "sha256": "c7bb9f5ec94a69662a9ea15dec48f52c3b2e5b86c799a91079d0fa10e381a312"
+    },
+    {
+      "path": ".cache/candidate-sdk-selection-20261012/fixture/FeatureSplit/src/main.fy",
+      "sha256": "51e4c2b1b8b049778e1543110b6b45a60b6a5bc53bded4de74457f7fcc984cf4"
+    },
+    {
+      "path": ".cache/candidate-sdk-selection-20261012/fixture/InstanceAliases/a/fairy.toml",
+      "sha256": "5955a3cbba16e1316a4033dc657c257fde338b904285fa714a03398005bf2929"
+    },
+    {
+      "path": ".cache/candidate-sdk-selection-20261012/fixture/InstanceAliases/a/src/lib.fy",
+      "sha256": "c98b3a0a5de7fd962b6838c15d504357ae3ae1d33cfa567d29514ae3ee193fd3"
+    },
+    {
+      "path": ".cache/candidate-sdk-selection-20261012/fixture/InstanceAliases/candidate.txt",
+      "sha256": "fcbcf165908dd18a9e49f7ff27810176db8e9f63b4352213741664245224f8aa"
+    },
+    {
+      "path": ".cache/candidate-sdk-selection-20261012/fixture/InstanceAliases/fairy.toml",
+      "sha256": "a37786e97c4844f64538d704c7bb01a614f8a25035701c3139d8dbb0f545a613"
+    },
+    {
+      "path": ".cache/candidate-sdk-selection-20261012/fixture/InstanceAliases/selection.txt",
+      "sha256": "29cb276a18c5904c447e7fe4a76be909b0726fef8d23d31aeb46d74682a3d143"
+    },
+    {
+      "path": ".cache/candidate-sdk-selection-20261012/fixture/InstanceAliases/src/main.fy",
+      "sha256": "51e4c2b1b8b049778e1543110b6b45a60b6a5bc53bded4de74457f7fcc984cf4"
+    },
+    {
+      "path": ".cache/candidate-sdk-selection-20261012/fixture/LongTrivia/candidate.txt",
+      "sha256": "fcbcf165908dd18a9e49f7ff27810176db8e9f63b4352213741664245224f8aa"
+    },
+    {
+      "path": ".cache/candidate-sdk-selection-20261012/fixture/LongTrivia/fairy.toml",
+      "sha256": "842c0deaf9080f93aab8586f71c44223756605e9cc3577bbc4b756059a747a4c"
+    },
+    {
+      "path": ".cache/candidate-sdk-selection-20261012/fixture/LongTrivia/selection.txt",
+      "sha256": "447d78d60acb95e1d104b72fc7e638c174f76ca719c9857a97eeccae1829ea96"
+    },
+    {
+      "path": ".cache/candidate-sdk-selection-20261012/fixture/LongTrivia/src/main.fy",
+      "sha256": "d3e49cc37416ad6370348c9eb22f58d9c9cd6273e8e4641fc0b309809bd1a431"
+    },
+    {
+      "path": ".cache/candidate-sdk-selection-20261012/fixture/None/candidate.txt",
+      "sha256": "fcbcf165908dd18a9e49f7ff27810176db8e9f63b4352213741664245224f8aa"
+    },
+    {
+      "path": ".cache/candidate-sdk-selection-20261012/fixture/None/fairy.toml",
+      "sha256": "842c0deaf9080f93aab8586f71c44223756605e9cc3577bbc4b756059a747a4c"
+    },
+    {
+      "path": ".cache/candidate-sdk-selection-20261012/fixture/None/selection.txt",
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "path": ".cache/candidate-sdk-selection-20261012/fixture/None/src/main.fy",
+      "sha256": "51e4c2b1b8b049778e1543110b6b45a60b6a5bc53bded4de74457f7fcc984cf4"
+    },
+    {
+      "path": ".cache/candidate-sdk-selection-20261012/fixture/reference.json",
+      "sha256": "2ff2d1cad44a4cb4fc2539dcb3d05b187b72d87ce913a79ed098362f78c91ede"
+    },
+    {
+      "path": ".cache/candidate-sdk-selection-20261012/fixture/root.bin",
+      "sha256": "25690f381424144be844f9b47833a3f0d8d8b60c3f7f39ccbf682334e348f7b9"
+    },
+    {
+      "path": ".cache/candidate-sdk-selection-20261012/fixture/SimilarNamespaces/candidate.txt",
+      "sha256": "fcbcf165908dd18a9e49f7ff27810176db8e9f63b4352213741664245224f8aa"
+    },
+    {
+      "path": ".cache/candidate-sdk-selection-20261012/fixture/SimilarNamespaces/fairy.toml",
+      "sha256": "842c0deaf9080f93aab8586f71c44223756605e9cc3577bbc4b756059a747a4c"
+    },
+    {
+      "path": ".cache/candidate-sdk-selection-20261012/fixture/SimilarNamespaces/selection.txt",
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "path": ".cache/candidate-sdk-selection-20261012/fixture/SimilarNamespaces/src/foo/std.fy",
+      "sha256": "6eabdfda1289d6484b19f9832aa87297695e23c7725e943c71e28e3f4bcbb86f"
+    },
+    {
+      "path": ".cache/candidate-sdk-selection-20261012/fixture/SimilarNamespaces/src/main.fy",
+      "sha256": "1e6d669e0c70296b0dacd573be3889f19e9c10b075cdd6bb43e78892c7263369"
+    },
+    {
+      "path": ".cache/candidate-sdk-selection-20261012/fixture/SimilarNamespaces/src/stdx.fy",
+      "sha256": "f9730e2f5d9ae9506e6db8d42e63fef69e80a4cb1e46520a5556b0b24ee24355"
+    },
+    {
+      "path": ".cache/candidate-sdk-selection-20261012/fixture/UnreachableVector/a/fairy.toml",
+      "sha256": "5955a3cbba16e1316a4033dc657c257fde338b904285fa714a03398005bf2929"
+    },
+    {
+      "path": ".cache/candidate-sdk-selection-20261012/fixture/UnreachableVector/a/src/lib.fy",
+      "sha256": "c059aa98b9a4f2de69394cb182b7f400643c9f3791a6ffd85bbc80519af3aca5"
+    },
+    {
+      "path": ".cache/candidate-sdk-selection-20261012/fixture/UnreachableVector/candidate.txt",
+      "sha256": "fcbcf165908dd18a9e49f7ff27810176db8e9f63b4352213741664245224f8aa"
+    },
+    {
+      "path": ".cache/candidate-sdk-selection-20261012/fixture/UnreachableVector/fairy.toml",
+      "sha256": "3cd69813ed6a263597e12feab4485efc16b064236eaeb833e670340d5ec2d922"
+    },
+    {
+      "path": ".cache/candidate-sdk-selection-20261012/fixture/UnreachableVector/selection.txt",
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "path": ".cache/candidate-sdk-selection-20261012/fixture/UnreachableVector/src/main.fy",
+      "sha256": "51e4c2b1b8b049778e1543110b6b45a60b6a5bc53bded4de74457f7fcc984cf4"
+    },
+    {
+      "path": ".cache/candidate-sdk-selection-20261012/fixture/Vector/candidate.txt",
+      "sha256": "fcbcf165908dd18a9e49f7ff27810176db8e9f63b4352213741664245224f8aa"
+    },
+    {
+      "path": ".cache/candidate-sdk-selection-20261012/fixture/Vector/fairy.toml",
+      "sha256": "842c0deaf9080f93aab8586f71c44223756605e9cc3577bbc4b756059a747a4c"
+    },
+    {
+      "path": ".cache/candidate-sdk-selection-20261012/fixture/Vector/selection.txt",
+      "sha256": "4b1cb8f17528e840fab2860616725f9dc8910b03c8caea6673b56b30c6df073f"
+    },
+    {
+      "path": ".cache/candidate-sdk-selection-20261012/fixture/Vector/src/main.fy",
+      "sha256": "cf5818812a9786035851e4ccd141b67d142d08a53e0ed0f990404fc8bf8b5b41"
+    }
+  ],
+  "productionCheck": {
+    "files": 324,
+    "mirFunctions": 4301,
+    "passed": true
+  },
+  "scope": "Exact root-reachable local-instance SDK import selection. Injection, SDK visibility, embedding, lock projection and compiler/CLI consumers remain pending.",
+  "policy": "Explicit candidate selects its vector bundle only when a reachable SDK owner exists. Unknown std namespaces still select core and must fail later visibility; source counters are unchanged by selection."
+}

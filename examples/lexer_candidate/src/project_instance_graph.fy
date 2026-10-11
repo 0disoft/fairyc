@@ -2,8 +2,12 @@ module project_instance_graph;
 import project_workspace_input as workspace;
 import project_workspace_catalog as catalog;
 import project_source_set as sources;
+import project_source_modules as modules;
+import project_import_path as imports;
 import project_instance_identity as identity;
 import project_path as work;
+import sdk_authority as sdk;
+import syntax as syntax;
 import std::bytes as bytes;
 import std::vec as v;
 
@@ -14,6 +18,12 @@ pub struct Edge{usize owner;usize target;usize declaration;}
 struct Range{usize first;usize count;}
 struct Frame{usize node;usize next;}
 pub struct Problem{u32 code;u32 reason;usize node;usize declaration;}
+// 0 no reachable SDK import; 1 core; 2 vector; 3 explicit vector candidate.
+// Owners are exact local instance indices, in graph order, without duplicates.
+pub resource SDKSelection{u32 profile;v::Vec<usize> owners;cleanup{}}
+pub fn u32 sdk_profile(ref SDKSelection selected){return selected.profile;}
+pub fn usize sdk_owner_count(ref SDKSelection selected){return v::len<usize>(ref selected.owners);}
+pub fn usize sdk_owner(ref SDKSelection selected,usize at){assert(at<sdk_owner_count(selected));return *v::at<usize>(ref selected.owners,at);}
 // 1 identity failure, 2 digest collision, 3 allocation, 4 work bound,
 // 5 dependency cycle, 6 invalid declaration shape.
 pub resource Graph{workspace::Workspace input;v::Vec<identity::Identity> identities;v::Vec<Node> nodes;v::Vec<Edge> edges;v::Vec<usize> order;cleanup{}}
@@ -37,6 +47,18 @@ pub fn usize edge_count(ref Graph graph){return v::len<Edge>(ref graph.edges);}
 pub fn Edge edge(ref Graph graph,usize at){assert(at<edge_count(graph));return *v::at<Edge>(ref graph.edges,at);}
 pub fn ref u8[] binding(ref Graph graph,usize at){return workspace::binding(ref graph.input,edge(graph,at).declaration);}
 pub fn usize build_order(ref Graph graph,usize at){assert(at<node_count(graph));return *v::at<usize>(ref graph.order,at);}
+// Selection uses only root-reachable graph instances and verified import tokens.
+// Unknown std::* still selects a bundle; module resolution must reject it later.
+pub fn Result<SDKSelection,Problem> select_sdk(ref Graph graph,bool candidate,ref mut usize meter){
+    var v::Vec<usize> owners=v::empty<usize>();var bool vector=false;var usize node=0;
+    while(node<node_count(graph)){if(!work::charge(meter,1)){return .err(fail(4,0,node,0));}let p=catalog::input(workspace::local_catalog(input(graph)),v::at<Node>(ref graph.nodes,node).package_index);var bool needed=false;var usize ordinal=0;
+        while(ordinal<modules::count(p)){let tree=modules::parsed(p,modules::ordered(p,ordinal));var usize declaration=1;
+            while(declaration<syntax::declaration_count(tree)){if(!work::charge(meter,1)){return .err(fail(4,0,node,declaration));}if(syntax::declaration_at(tree,declaration).kind==2){let path=switch(imports::read(tree,declaration,meter)){case .ok(value):{value}case .err(code):{return .err(fail(if(code==2){3}else if(code==3){4}else{6},code,node,declaration));}};needed=needed || sdk::reserved(imports::name(ref path));vector=vector || bytes::equal(imports::name(ref path),b"std::vec");}declaration+=1;
+            }ordinal+=1;
+        }if(needed && !v::push<usize>(ref mut owners,node).is_ok){return .err(fail(3,0,node,0));}node+=1;
+    }
+    return .ok(SDKSelection{.profile=if(v::len<usize>(ref owners)==0){0}else if(candidate){3}else if(vector){2}else{1},.owners});
+}
 fn void number(ref mut v::Vec<usize> values,usize at,usize value){let ref mut usize slot=v::at_mut<usize>(values,at);*slot=value;}
 fn void set_node(ref mut v::Vec<Node> nodes,usize at,Node value){let ref mut Node slot=v::at_mut<Node>(nodes,at);*slot=value;}
 fn void set_range(ref mut v::Vec<Range> ranges,usize at,Range value){let ref mut Range slot=v::at_mut<Range>(ranges,at);*slot=value;}

@@ -504,3 +504,37 @@ Reference fixture command:
 Linux, the full suite and Stage1/Stage2 are deferred; these results establish only
 the private bundle/encoding slice. Stable API, SDK ABI/version, DB and CI are
 unchanged, and no push occurred.
+
+
+## Root-reachable SDK selection
+
+`project_instance_graph::select_sdk` reads the already verified import tokens
+of root-reachable local instances and returns a private owner list with profile
+0 (none), 1 (core), 2 (vector) or 3 (explicit vector candidate). `std` and exact
+`std::` prefixes select the SDK; `stdx` and `foo::std` do not. Unknown reserved
+paths still select a bundle and remain for module visibility to reject later.
+Candidate selection overrides core/vector only when there is a reachable SDK
+owner. A reachable `std::vec` import selects vector for the shared bundle even
+when other owners need only core. Unreachable catalog modules do not participate.
+
+Owner indices are unique graph-order instance indices. Equal-instance aliases
+are already deduplicated; different feature instances of the same package each
+receive their own owner row. Shared import/path work is metered, including long
+trivia, and selection leaves source file/byte counters unchanged.
+
+Fourteen successful full Go-loader observations match exact profile and owner
+PackageInstanceIds: no SDK, unused candidate, core, duplicate import aliases,
+vector, candidate with core import, child-only and joint ownership, child vector,
+unreachable vector, feature split, equal-instance aliases, 70000-byte import
+trivia and similar ordinary namespaces. Each also rejects exhausted selection
+work. One native test and development/release candidate C execution pass; check
+passes 324 sources and 4301 MIR functions.
+Evidence: `evidence/candidate-sdk-selection-20261012.json`.
+
+Reference fixture command:
+`bun tools/run-go.ts run ./cmd/fairyc-candidate-sdk-selection-reference <output>`.
+The reference calls the full owning loader and observes its injected SDK package
+and dependencies; it does not implement a second selection algorithm. SDK graph
+injection, visibility, embedding, lock projection and compiler/CLI consumers
+remain. Stable API/ABI, SDK version, DB and CI are unchanged. No push, Linux,
+full suite or Stage1/Stage2 runs.
