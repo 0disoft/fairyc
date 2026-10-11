@@ -2308,3 +2308,16 @@ package entry/native driver/build/run integration, full parser/typing/executable
 differential, Linux/full suite and hosted CI remain. Product defaults, public
 API, SDK ABI, DB and CI are unchanged; no push. Receipt:
 [candidate-complete-stage2-20261012.json](../ops/evidence/candidate-complete-stage2-20261012.json).
+
+## Direct frontend-to-native build deadline (2026-10-12)
+
+The private bridge now forwards explicit frontend deadline `(0,10m]`, default
+60 seconds, and terminates the Windows process tree on expiry. With 2 minutes,
+the complete 355-source Stage2 frontend and 45-unit C compilation publish an image
+in 365.75 seconds, identical to the full Stage1/Stage2 image. No cached packet or
+Go frontend fallback is used. Actual child termination, previous-image retention,
+invalid options and existing build failures pass their checks.
+Workspace entry/build/run integration, stable deadline mapping and the remaining
+differential/platform/promotion gates are still open. Private command/internal Go
+API changed; public CLI, SDK ABI, DB and CI are unchanged; no push. Receipt:
+[candidate-frontend-timeout-20261012.json](../ops/evidence/candidate-frontend-timeout-20261012.json).

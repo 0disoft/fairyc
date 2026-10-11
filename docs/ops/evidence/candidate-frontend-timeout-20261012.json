@@ -1,0 +1,108 @@
+{
+  "schema": "fairyc.candidate-frontend-timeout/v1",
+  "passed": true,
+  "baselineCommit": "0c2ffb92",
+  "scope": "Private native transport deadline configuration; language frontend remains Fairy.",
+  "sources": [
+    {
+      "path": "cmd/fairyc-candidate-build/main.go",
+      "sha256": "137d2fde3a28b265853f9535f0eb331aa9e436e070c05f0c51a797662627c3b4"
+    },
+    {
+      "path": "internal/candidatebuild/build.go",
+      "sha256": "493ceb75c4388010d7bc247ad240df018f620fa62c857ee0780ea3fd70a86ee4"
+    },
+    {
+      "path": "internal/cdriver/tool_cancellation.go",
+      "sha256": "ce2b44024c725cc1cbf5e72ee236d717168d9b851ae9581c1f2bb0d7e5616be4"
+    },
+    {
+      "path": "internal/candidatebuild/build_test.go",
+      "sha256": "8b39bba2cb34d57efe16cd7af8b8e4f2d56a7e7943fa9af2db39b58842b697c7"
+    },
+    {
+      "path": "internal/candidatebuild/frontend_cancel_windows_test.go",
+      "sha256": "644857e6c763d4a31a84bd21106b55a375d4d14794ee46bf5b07851c116e2b0f"
+    }
+  ],
+  "checks": {
+    "command": "bun tools/run-go.ts test ./internal/candidatebuild ./internal/cdriver ./cmd/fairyc-candidate-build -run 'TestFrontend|TestCompileTimeoutRejected|TestBuildFailuresKeepPreviousImage|TestToolCompileDeadline' -count=1",
+    "exit": 0,
+    "frontendRangeAndPacket": true,
+    "deadlineTerminatesActualChild": true,
+    "deadlinePreservesPreviousImage": true,
+    "existingBuildFailureCases": true
+  },
+  "invalidOptions": [
+    {
+      "limit": "0s",
+      "exit": 2,
+      "previousImagePreserved": true
+    },
+    {
+      "limit": "-1s",
+      "exit": 2,
+      "previousImagePreserved": true
+    },
+    {
+      "limit": "10m0.000000001s",
+      "exit": 2,
+      "previousImagePreserved": true
+    }
+  ],
+  "directBuild": {
+    "argv": [
+      "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-frontend-timeout-20261012\\builder.exe",
+      "--candidate",
+      "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-stack-current-20261012\\complete-stage2\\compiler.exe",
+      "--manifest",
+      "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-stack-current-20261012\\literal-after\\sources.list",
+      "--frontend-timeout",
+      "2m",
+      "--output",
+      "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-frontend-timeout-20261012\\compiler.exe",
+      "--release"
+    ],
+    "exit": 0,
+    "seconds": 365.74900199999684,
+    "stdout": "built: C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-frontend-timeout-20261012\\compiler.exe (optimized, 45 C units, 4177920 bytes)\n",
+    "stderr": "",
+    "builderSHA256": "0eaa4aa9aed40f50b33f0526d27db2cf8e3a645782047e5941a0540134bea1f2",
+    "candidateSHA256": "6e55b6aa6d8aa5f01b850a860b565d5b1b8e74a310c05425a11f58ca699d3b6e",
+    "sourceFiles": 355,
+    "sourceInventorySHA256": "65a2b4afb5d14e52b7db18fe8f66f972fbb343322623af1006ae5b4b6988fd90",
+    "frontendTimeoutSeconds": 120,
+    "defaultFrontendTimeoutSeconds": 60,
+    "compileTimeoutSeconds": 120,
+    "cachedPacketUsed": false,
+    "GoFrontendFallback": false,
+    "imageBytes": 4177920,
+    "imageSHA256": "6e55b6aa6d8aa5f01b850a860b565d5b1b8e74a310c05425a11f58ca699d3b6e",
+    "sameCompilerImage": true
+  },
+  "priorCompilerReceipt": {
+    "path": "docs/ops/evidence/candidate-complete-stage2-20261012.json",
+    "sha256": "592a6500e878658527c04ffd6be5f213443ece537e9ea6d4958df6f388493b00"
+  },
+  "contract": {
+    "defaultFrontendSeconds": 60,
+    "maxFrontendSeconds": 600,
+    "defaultCompilerSeconds": 120,
+    "WindowsProcessTreeCancellation": true,
+    "hiddenWindowsLaunch": true,
+    "outputLimitsChanged": false
+  },
+  "privateCommandAddedOption": "--frontend-timeout",
+  "internalGoAPIAdded": "cdriver.ConfigureCommandCancellation",
+  "publicCliChanged": false,
+  "sdkAbiChanged": false,
+  "dbChanged": false,
+  "ciChanged": false,
+  "pushed": false,
+  "deferred": [
+    "Fairy workspace package entry/native build/run command integration",
+    "Stable CLI deadline mapping",
+    "Full frontend differential",
+    "Linux/full suite and promotion"
+  ]
+}

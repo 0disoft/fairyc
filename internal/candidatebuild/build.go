@@ -51,8 +51,8 @@ func (b *limitedBuffer) Write(p []byte) (int, error) {
 }
 
 func Emit(candidate, manifest, directory string, timeout time.Duration) ([]byte, error) {
-	if candidate == "" || manifest == "" || timeout <= 0 || timeout > time.Minute {
-		return nil, fmt.Errorf("candidate, manifest and timeout in (0,60s] are required")
+	if candidate == "" || manifest == "" || timeout <= 0 || timeout > 10*time.Minute {
+		return nil, fmt.Errorf("candidate, manifest and timeout in (0,10m] are required")
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), timeout)
 	defer cancel()
@@ -61,6 +61,7 @@ func Emit(candidate, manifest, directory string, timeout time.Duration) ([]byte,
 		return nil, err
 	}
 	command := exec.CommandContext(ctx, executable, "--c-project-file", manifest)
+	cdriver.ConfigureCommandCancellation(command)
 	command.Dir = directory
 	command.WaitDelay = 2 * time.Second
 	stdout := limitedBuffer{limit: maxPacket}

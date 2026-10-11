@@ -17,6 +17,21 @@ import (
 
 func packetFixture(mode string) []byte { return packetFixtureFrame(mode, 1) }
 
+func TestFrontendDeadlineAdmissionAndPacket(t *testing.T) {
+	for _, timeout := range []time.Duration{0, -time.Second, 10*time.Minute + time.Nanosecond} {
+		if _, err := Emit("must-not-run", "ignored", "", timeout); err == nil || !strings.Contains(err.Error(), "timeout in (0,10m]") {
+			t.Fatalf("invalid frontend deadline %s: %v", timeout, err)
+		}
+	}
+	t.Setenv("FAIRYC_CANDIDATE_TEST_FRONTEND", "valid")
+	for _, timeout := range []time.Duration{time.Minute, 2 * time.Minute, 10 * time.Minute} {
+		data, err := Emit(os.Args[0], "ignored", "", timeout)
+		if err != nil || !bytes.Equal(data, packetFixture("valid")) {
+			t.Fatalf("frontend deadline %s changed packet: %v", timeout, err)
+		}
+	}
+}
+
 func TestCompileTimeoutRejectedBeforePacketOrCompiler(t *testing.T) {
 	for _, timeout := range []time.Duration{-time.Second, 10*time.Minute + time.Nanosecond} {
 		if _, err := buildPacket(Options{CompileTimeout: timeout}, nil); err == nil || !strings.Contains(err.Error(), "compile timeout") {

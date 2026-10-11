@@ -9,6 +9,24 @@ are identical, with no excluded bytes. All 249 Go lexer cases and private framin
 checks pass for the seed and both generations. Receipt:
 `evidence/candidate-complete-stage2-20261012.json`.
 
+## Direct frontend deadline and native build (2026-10-12)
+
+The private native bridge accepts `--frontend-timeout` with the existing 60-second
+default and explicit range `(0,10m]`. It forwards the selected deadline to the
+real Fairy frontend and uses existing Windows host process-tree cancellation.
+A timed-out parent and child are both terminated; the previous image remains.
+Invalid options reject before output changes. Existing failure checks pass.
+
+An actual `--candidate` / `--manifest` / `--frontend-timeout 2m` Release build
+processes the full 355 self sources and 45 C units without cached packet or Go
+frontend fallback. It completes in 365.75 seconds and publishes the same complete
+4177920-byte compiler image as Stage1/Stage2. Product transport timeout config is
+now available without validation overlays. This is partial item 75; stable
+workspace deadline mapping and package entry/native build/run command integration
+remain. Private command/internal Go cancellation API change; public CLI, SDK ABI,
+DB and CI are unchanged; no push. Receipt:
+`evidence/candidate-frontend-timeout-20261012.json`.
+
 Next: product timeout and package entry/native driver/build/run integration,
 full parser/typing/executable differential, Linux/full suite and promotion.
 The 900-second frontend allowance is verification-only; product defaults remain.
