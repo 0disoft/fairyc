@@ -20,6 +20,7 @@ pub resource Error{sources::Sources sources;Problem problem;cleanup{}}
 pub fn Problem error(ref Error error){return error.problem;}
 pub fn ref sources::Sources error_sources(ref Error error){return ref error.sources;}
 pub fn usize count(ref Modules modules){return v::len<syntax::Parsed>(ref modules.contents.parsed);}
+pub fn usize ordered(ref Modules modules,usize at){assert(at<count(modules));return *v::at<usize>(ref modules.contents.order,at);}
 pub fn ref u8[] name(ref Modules modules,usize index){if(index>=count(modules)){return bytes::view(ref modules.contents.names)[..0];}let Span span=*v::at<Span>(ref modules.contents.modules,index);return bytes::view(ref modules.contents.names)[span.start..span.end];}
 pub fn ref u8[] path(ref Modules modules,usize index){return sources::path(ref modules.sources,index);}
 pub fn ref syntax::Parsed parsed(ref Modules modules,usize index){assert(index<count(modules));return v::at<syntax::Parsed>(ref modules.contents.parsed,index);}
@@ -42,6 +43,7 @@ fn u32 sorted(ref bytes::Buffer names,ref v::Vec<Span> spans,ref mut v::Vec<usiz
 }
 // Returns the original source-file index plus one; zero means absent.
 pub fn usize find(ref Modules modules,ref u8[] name){var usize low=0;var usize high=count(modules);while(low<high){let usize middle=low+(high-low)/2;let usize index=*v::at<usize>(ref modules.contents.order,middle);let ref u8[] candidate=key(ref modules.contents.names,ref modules.contents.modules,index);if(bytes::equal(candidate,name)){return index+1;}if(rules::before(candidate,name)){low=middle+1;}else{high=middle;}}return 0;}
+pub fn Result<usize,u32> find_metered(ref Modules modules,ref u8[] name,ref mut usize meter){var usize low=0;var usize high=count(modules);while(low<high){let usize middle=low+(high-low)/2;let usize index=ordered(modules,middle);let ref u8[] candidate=key(ref modules.contents.names,ref modules.contents.modules,index);if(!work::charge(meter,candidate.len+name.len+1)){return .err(8);}if(bytes::equal(candidate,name)){return .ok(index+1);}if(rules::before(candidate,name)){low=middle+1;}else{high=middle;}}return .ok(0);}
 fn Result<Parts,Problem> build(ref sources::Sources input,ref mut usize meter){
     let usize count=sources::count(input);if(count==0 || count>4096){return .err(fail(8,0,0,0,0,0));}var v::Vec<syntax::Parsed> parsed=v::empty<syntax::Parsed>();var bytes::Buffer names=bytes::empty();var v::Vec<Span> spans=v::empty<Span>();var usize index=0;
     while(index<count){let ref u8[] path=sources::path(input,index);

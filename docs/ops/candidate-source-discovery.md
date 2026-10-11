@@ -405,9 +405,59 @@ can differ from Go's sorted-class traversal. Import visibility, SDK injection,
 lock projection and compiler/project-CLI consumption remain separate; earlier
 filesystem/parser/work-bound limitations still apply.
 
+## Local module import visibility
+
+`project_module_visibility.load` resolves each root-reachable instance's imports
+through its own modules and direct dependency instances only. Equal-instance
+dependency aliases enter the visible set once; distinct feature instances remain
+separate providers. Current-instance modules have no shadowing precedence: two
+different visible instances exposing the same imported path reject as ambiguous.
+Dependency bindings do not rewrite source module paths. Unreachable catalog
+imports and transitive-only modules do not become visible.
+
+The source-module owner exposes its existing sorted name index. Instances and
+modules traverse in the same class/name order as Go, retaining source-order
+imports. Lookups preserve both source and provider instance/module coordinates,
+original declaration indices, target byte spans and canonical paths. Contiguous
+owner ranges prepare later compiler consumption. Direct providers are deduplicated
+with node stamps and heap-sorted, and module binary searches consume the shared
+work budget.
+
+`project_import_path` reads the already verified import tokens, skipping trivia
+and stopping before the alias. No second lexer or fragment copy introduces the
+older 64 KiB normalization limit. Successful and failed imports containing a
+70000-byte comment preserve their full original path spans. Missing/ambiguous
+errors own the graph, selected path, prior successful lookup prefix and actual
+visible/hidden provider coordinates, so original source remains available after
+temporary construction owners close. Input/cycle errors move intact. Caller
+source counters commit only after graph and visibility checks both succeed.
+
+Nineteen Go acceptance/reason cases, successful lookup records, partial lookup
+counts and rejection subjects match. One native test and both candidate C
+profiles pass, covering own/self and direct lookup, nested paths, long trivia,
+duplicate aliases, direct versus transitive visibility, own/direct and feature
+ambiguity, current-instance provider ordering, binding/case mismatch, unreachable
+imports, preserved lookup prefix, module-name versus file-path ordering, and
+cycle rejection before lookup. Original error bytes/spans and exact source-budget
+commit/rollback are checked. Full check passes 322 files and 4269 MIR functions.
+Evidence: `evidence/candidate-module-visibility-20261012.json`.
+
+Reference fixture command:
+`bun tools/run-go.ts run ./cmd/fairyc-candidate-module-visibility-reference <output>`.
+The full Go loader confirms rejected cases but does not return their partial
+graph. For lookup-error observations, the helper obtains the loader's feature
+graph with import-free headers, restores every original file, replaces modules
+with Go-parsed original imports and exact Go source digests, and calls the owning
+Go graph resolver to retain partial lookup/subject evidence. It does not implement
+the visibility decision itself.
+
+SDK injection and compiler/project-CLI consumption remain separate. Existing
+filesystem/parser/work bounds and multiple-cycle witness differences still apply;
+this local matrix does not establish complete loader equivalence.
+
 ## Remaining connection
 
-Connect the exact feature graph to import visibility, SDK injection, lock
+Connect the resolved local import graph to SDK injection, lock
 projection and the compiler/project CLI. Broader parser-cap
 compatibility remains separate.
 Resolve the Go junction observation discrepancy before any loader
