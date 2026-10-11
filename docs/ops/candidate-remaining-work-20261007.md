@@ -3848,3 +3848,18 @@ JSON structure/duplicate keys, lock shape/identity/graph validation, stale
 comparison, atomic persistence and compiler/CLI integration remain. Stable
 CLI/API, SDK ABI/version, DB and CI are unchanged. Linux, full suite and
 Stage1/Stage2 remain scheduled later; no push occurred.
+
+
+## Strict lock reader: JSON structure (2026-10-12)
+
+The generic JSON structural layer now rejects trailing values and exact decoded
+per-object duplicate keys, retains container skip indices/decoded values, and
+uses an explicit 512-frame depth limit with existing input/token/work bounds.
+Go's 45 cases (15 accepted, 24 syntax, 6 duplicate), three native tests and both
+candidate C profiles pass; check passes 342 files and 4462 MIR functions. Receipt:
+`evidence/candidate-json-tree-20261012.json`.
+
+Lock field/schema decoding, identities/graphs, stale matching, persistence and
+compiler CLI integration remain. Stable public CLI/API, SDK ABI/version, DB and
+CI are unchanged; Linux, full suite and Stage1/Stage2 remain scheduled later.
+No push occurred.

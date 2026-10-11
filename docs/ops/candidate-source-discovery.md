@@ -752,3 +752,29 @@ This is the lexical layer only. JSON structure/duplicate keys, lock shape and
 identity/graph validation, stale comparison, atomic persistence and compiler/CLI
 integration remain. Stable CLI/API, SDK ABI/version, DB and CI are unchanged;
 Linux, full suite and Stage1/Stage2 remain scheduled later and no push occurred.
+
+
+## Bounded JSON structure and decoded duplicate keys
+
+`project_json_tree` validates complete JSON syntax over owned tokens, rejects
+trailing values and exact decoded duplicate keys within each object, and accepts
+field order and whitespace variance. Case-different keys remain distinct at this
+generic layer. Escaped keys, unpaired surrogates and malformed UTF-8 replacement
+match the owning Go lock parser's duplicate-key prepass. Retained next indices
+skip whole containers; source spans and decoded values remain owned.
+
+An explicit Vec frame stack limits nesting to 512 without recursion. Existing
+8-MiB input, 1048576-token and shared 16777216-work limits remain; duplicate
+comparisons are metered. Codes are 1 malformed/trailing JSON, 2 allocation,
+3 bound and 4 duplicate key.
+
+The Go reference uses `encoding/json.Valid` and actual `lockfile.Parse` prepass,
+covering 45 cases: 15 accepted, 24 syntax errors and 6 duplicate-key errors.
+Three native tests and development/release candidate C execution pass, including
+retained skip indices/values, depth 512 accepted, depth 513 rejected and exhausted
+work. Check passes 342 files and 4462 MIR functions. Receipt:
+`evidence/candidate-json-tree-20261012.json`.
+
+Lock fields/schema, identities/graphs, stale matching, persistence and compiler
+CLI integration remain. Stable public CLI/API, SDK ABI/version, DB and CI are
+unchanged; Linux, full suite and Stage1/Stage2 remain scheduled later. No push.
