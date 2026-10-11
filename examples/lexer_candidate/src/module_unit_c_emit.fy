@@ -12,6 +12,7 @@ import module_unit_c_literals as literals;
 import module_unit_c_switches as switches;
 import module_unit_c_sdk as sdk;
 import module_unit_c_callable_index as contracts;
+import module_unit_c_frame_index as targets;
 import module_unit_c_region as lifecycle;
 import module_unit_c_raw_views as raw_views;
 import module_unit_c_storage as storage;
@@ -33,11 +34,10 @@ fn bool signature(ref ir::Program p,usize frame,ref mut bytes::Buffer out,ref mu
 }
 fn usize invocation(ref ir::Body b,usize expression,ref mut usize work){var usize i=0;while(i<ir::call_count(b)){if(!budget::charge(work,1)){return 0;}if(ir::call_at(b,i).expression==expression){return i+1;}i+=1;}return 0;}
 fn bool foreign_type(ref ir::Program p,ref sdk::Plan plan,bool authenticated,usize id,bool result){if(id==0 || id>clean::type_count(ir::cleanup_ir(p))){return false;}if(authenticated && sdk::allowed(p,plan,id,result)){return true;}let t=clean::type_at(ir::cleanup_ir(p),id);return if(t.kind==12){t.first==0 && ffi::scalar(t.scalar,result)}else{ffi::scalar(scalar::scalar(p,id),result)};}
-fn bool ordinary_owned(ref ir::Program p,ref contracts::Index indexed,clean::Frame frame,ref mut usize work,ref mut w::State s){if(frame.kind==3){return true;}if(frame.kind!=1){return false;}let id=contracts::find(p,indexed,frame.module_index,frame.declaration,work,ref mut s.code);if(id==0){return false;}let c=ir::callable_at(p,id-1);return !c.template && !c.foreign && c.result==frame.result;}
-fn usize target(ref ir::Program p,ref contracts::Index indexed,ref ir::Body b,usize caller,usize invocation,ref mut usize work,ref mut w::State s){
+fn usize target(ref ir::Program p,ref targets::Index body_index,ref ir::Body b,usize caller,usize invocation,ref mut usize work,ref mut w::State s){
     if(invocation==0){return 0;}let c=ir::call_at(b,invocation-1);if(!c.checked || c.kind!=1 && c.kind!=2){return 0;}
-    let e=ir::node_at(b,c.expression-1).value;let f=clean::frame_at(ir::cleanup_ir(p),caller);var usize found=0;var usize i=1;
-    while(i<=ir::count(p)){if(!budget::charge(work,1)){return 0;}let t=clean::frame_at(ir::cleanup_ir(p),i);if(t.module_index==c.target_module && t.declaration==c.target_declaration && (c.kind==1 && ordinary_owned(p,indexed,t,work,s) || c.kind==2 && t.kind==1 && t.context==c.instance)){if(found!=0 || t.result!=e.type || (f.effects&t.effects)!=t.effects){return 0;}found=i;}i+=1;}
+    let e=ir::node_at(b,c.expression-1).value;let f=clean::frame_at(ir::cleanup_ir(p),caller);let found=targets::find(p,body_index,c.target_module,c.target_declaration,c.instance,c.kind==2,work,ref mut s.code);
+    if(found!=0){let t=clean::frame_at(ir::cleanup_ir(p),found);if(t.result!=e.type || (f.effects&t.effects)!=t.effects){return 0;}}var usize i=1;
     if(found==0){return 0;}let body=ir::at(p,found);if(parameters(body)!=c.argument_count){return 0;}var usize position=0;i=1;
     while(i<=ir::local_count(body)){if(!budget::charge(work,1)){return 0;}let l=ir::local_at(body,i);if(l.kind==1){let a=ir::argument_at(b,c.argument_start+position);if(!a.checked || a.expected!=l.type || ir::node_at(b,a.expression-1).value.state!=1 || a.actual!=ir::node_at(b,a.expression-1).value.type || a.actual!=l.type && (!a.shared || !aggregate::shared(p,l.type,a.actual)) || a.actual==l.type && a.shared){return 0;}position+=1;}i+=1;}return found;
 }
@@ -50,8 +50,8 @@ fn bool foreign_signatures(ref ir::Program p,ref sdk::Plan plan,ref contracts::I
     var v::Vec<usize> seen=v::empty<usize>();var usize frame=1;while(frame<=ir::count(p)){let b=ir::at(p,frame);var usize i=1;while(i<=ir::call_count(b)){if(!budget::charge(work,1)){s.code=1002;return false;}let id=foreign(p,plan,indexed,b,frame,i,work,s);if(s.code!=0){return false;}if(id!=0){let c=ir::callable_at(p,id-1);var bool duplicate=false;var usize j=0;while(j<v::len<usize>(ref seen)){if(!budget::charge(work,1)){s.code=1002;return false;}let before=*v::at<usize>(ref seen,j);if(bytes::equal(ir::linker_name(p,before-1),ir::linker_name(p,id-1))){let old=ir::callable_at(p,before-1);if(old.result!=c.result || old.parameter_count!=c.parameter_count){s.code=1001;return false;}var usize k=0;while(k<c.parameter_count){if(ir::parameter_at(p,c.parameter_start+k)!=ir::parameter_at(p,old.parameter_start+k)){s.code=1001;return false;}k+=1;}duplicate=true;break;}j+=1;}
             if(!duplicate){if(!v::push<usize>(ref mut seen,id).is_ok){s.code=1003;return false;}if(sdk::rule(plan,id-1)!=0){if(!sdk::signature(p,plan,id,out,s,work)){return false;}}else{if(!w::text(out,s,b"extern ") || !aggregate::type(p,c.result,out,s) || !w::text(out,s,b" ") || !w::text(out,s,ir::linker_name(p,id-1)) || !w::text(out,s,b"(")){return false;}j=0;while(j<c.parameter_count){if(j!=0 && !w::text(out,s,b",")){return false;}if(!aggregate::type(p,ir::parameter_at(p,c.parameter_start+j),out,s)){return false;}j+=1;}if(c.parameter_count==0 && !w::text(out,s,b"void")){return false;}if(!w::text(out,s,b");\n")){return false;}}}}i+=1;}frame+=1;}return true;
 }
-fn bool call(ref ir::Program p,ref sdk::Plan plan,ref contracts::Index indexed,ref cfg::Graph g,usize expression,usize site,ref mut bytes::Buffer out,ref mut w::State s,ref mut usize work){
-    let b=ir::at(p,cfg::frame(g));let index=if(site==0){invocation(b,expression,work)}else{cfg::deferred_at(g,site).invocation};let callee=target(p,indexed,b,cfg::frame(g),index,work,s);
+fn bool call(ref ir::Program p,ref sdk::Plan plan,ref contracts::Index indexed,ref targets::Index body_index,ref cfg::Graph g,usize expression,usize site,ref mut bytes::Buffer out,ref mut w::State s,ref mut usize work){
+    let b=ir::at(p,cfg::frame(g));let index=if(site==0){invocation(b,expression,work)}else{cfg::deferred_at(g,site).invocation};let callee=target(p,body_index,b,cfg::frame(g),index,work,s);
     let usize external=if(callee==0){foreign(p,plan,indexed,b,cfg::frame(g),index,work,s)}else{0};
     if(s.code!=0){return false;}if(callee==0 && external==0){s.code=if(*work>=1048576){1002}else{1004};return false;}let c=ir::call_at(b,index-1);let type=scalar::scalar(p,ir::node_at(b,expression-1).value.type);
     if(site==0 && type!=7 && (!scalar::value(out,s,expression) || !w::text(out,s,b"="))){return false;}
@@ -69,7 +69,7 @@ fn bool store(ref ir::Program p,ref ir::Body b,cfg::Block n,ref mut bytes::Buffe
     else{if(op.len<2 || op[op.len-1]!=61){s.code=1001;return false;}let code=scalar::operator(op[..op.len-1]);if(code==0 || code==3 || code==4 || code>12 || type==0 || type==6){s.code=1004;return false;}if(!scalar::math_start(out,s,type,code) || !snapshot(out,s,n.target) || !w::text(out,s,b",") || !scalar::value(out,s,n.source) || !scalar::math_end(out,s,type)){return false;}}
     return w::text(out,s,b";\n");
 }
-fn bool function(ref ir::Program p,ref sdk::Plan plan,ref contracts::Index indexed,ref cfg::Graph g,ref mut bytes::Buffer out,ref mut w::State s,ref mut usize work,ref mut usize failed_start,ref mut usize failed_end){
+fn bool function(ref ir::Program p,ref sdk::Plan plan,ref contracts::Index indexed,ref targets::Index body_index,ref cfg::Graph g,ref mut bytes::Buffer out,ref mut w::State s,ref mut usize work,ref mut usize failed_start,ref mut usize failed_end){
     let b=ir::at(p,cfg::frame(g));if(!signature(p,cfg::frame(g),out,s) || !w::text(out,s,b"{\n")){return false;}var usize i=1;
     while(i<=ir::local_count(b)){if(!budget::charge(work,1)){s.code=1002;return false;}let l=ir::local_at(b,i);if(scalar::scalar(p,l.type)==7){s.code=1004;return false;}if(l.kind!=1 && l.kind!=10 && l.kind!=6 && (!aggregate::type(p,l.type,out,s) || !w::text(out,s,b" ") || !w::local(out,s,i) || !w::text(out,s,b";\n"))){return false;}i+=1;}
     if(!iteration::locals(g,out,s,work) || !lifecycle::locals(b,out,s,work)){return false;}
@@ -83,7 +83,7 @@ fn bool function(ref ir::Program p,ref sdk::Plan plan,ref contracts::Index index
             else if(e.kind==6 && e.builtin.kind>=9 && e.builtin.kind<=12){if(!raw_views::expression(p,b,n.source,out,s,work)){return false;}}
             else if(e.kind==6 && e.builtin.kind==300){if(!lifecycle::placement(p,plan,b,n.source,out,s,work)){return false;}}
             else if(clean::type_at(ir::cleanup_ir(p),e.type).kind==19){if(!lifecycle::value(b,n.source,out,s,work)){return false;}}
-            else if(e.kind==6 && !variant){if(e.builtin.kind!=0){s.code=1004;return false;}if(!call(p,plan,indexed,g,n.source,0,out,s,work)){return false;}}
+            else if(e.kind==6 && !variant){if(e.builtin.kind!=0){s.code=1004;return false;}if(!call(p,plan,indexed,body_index,g,n.source,0,out,s,work)){return false;}}
             else if(e.kind==1 && literals::descriptor(clean::type_at(ir::cleanup_ir(p),e.type))){if(!literals::expression(p,b,n.source,out,s,work)){return false;}}
             else if((e.kind==1 || e.kind==23) && clean::type_at(ir::cleanup_ir(p),e.type).kind==12 || e.kind==2 || e.kind==3 || e.kind==8 || e.kind==9 || e.kind==10 || e.kind==21 || e.kind==22 || e.kind==24 || e.kind==26 || e.kind==28 || e.kind==29 || e.kind==30 || e.kind==4 && bytes::equal(ir::node_text(b,n.source-1),b"*") || variant){if(!aggregate::expression(p,b,n.source,out,s,work)){return false;}}
             else if(!scalar::expression(p,b,n.source,out,s)){return false;}}
@@ -97,7 +97,7 @@ fn bool function(ref ir::Program p,ref sdk::Plan plan,ref contracts::Index index
         else if(n.kind==10 || n.kind==11){let type=scalar::scalar(p,ir::node_at(b,n.source-1).value.type);if(type!=7){if(n.target==0){s.code=1001;return false;}if(!scalar::value(out,s,n.source) || !w::text(out,s,b"=") || !scalar::value(out,s,n.target) || !w::text(out,s,b";\n")){return false;}}}
         else if(n.kind==12){if(!w::text(out,s,b"fy_runtime_trap(7);\n")){return false;}}
         else if(n.kind==13){if(!scalar::capture(out,s,n.target) || !w::text(out,s,b"=") || !scalar::value(out,s,n.source) || !w::text(out,s,b";\n")){return false;}}
-        else if(n.kind==14){if(!call(p,plan,indexed,g,n.source,n.target,out,s,work)){return false;}}
+        else if(n.kind==14){if(!call(p,plan,indexed,body_index,g,n.source,n.target,out,s,work)){return false;}}
         else if(n.kind==15 || n.kind==16){if(!lifecycle::block(b,n,out,s)){return false;}}
         else if(n.kind==17){if(!snapshot(out,s,n.target) || !w::text(out,s,b"=") || !aggregate::place(p,b,n.source,out,s,0) || !w::text(out,s,b";\n")){return false;}}
         else if(n.kind==18){if(!switches::branch(p,b,n,out,s,work)){return false;}}
@@ -125,7 +125,8 @@ pub fn clean::Problem render(ref ir::Program p,usize entry,ref mut bytes::Buffer
     if(!w::text(ref mut text,ref mut s,b"#include <stddef.h>\n") || !sdk::definitions(p,ref sdk_plan,ref mut text,ref mut s,ref mut work) || !lifecycle::definitions(p,ref sdk_plan,ref mut text,ref mut s,ref mut work) || !foreign_signatures(p,ref sdk_plan,ref indexed,ref mut text,ref mut s,ref mut work)){return fail(if(s.code<1000){if(s.code==3){1003}else{1002}}else{s.code},0,0,0);}
     i=1;while(i<=ir::count(p)){if(!signature(p,i,ref mut text,ref mut s) || !w::text(ref mut text,ref mut s,b";\n")){return fail(if(s.code<1000){if(s.code==3){1003}else{1002}}else{s.code},clean::frame_at(ir::cleanup_ir(p),i).module_index,ir::start(ir::at(p,i)),ir::end(ir::at(p,i)));}i+=1;}
     if(!aggregate::drops(p,ref marks,ref mut text,ref mut s,ref mut work)){return fail(if(s.code<1000){if(s.code==3){1003}else{1002}}else{s.code},0,0,0);}
-    i=1;while(i<=ir::count(p)){var usize failed_start=ir::start(ir::at(p,i));var usize failed_end=ir::end(ir::at(p,i));if(!function(p,ref sdk_plan,ref indexed,v::at<cfg::Graph>(ref graphs,i-1),ref mut text,ref mut s,ref mut work,ref mut failed_start,ref mut failed_end)){return fail(if(s.code<1000){if(s.code==3){1003}else{1002}}else{s.code},clean::frame_at(ir::cleanup_ir(p),i).module_index,failed_start,failed_end);}i+=1;}
+    let body_index=switch(targets::build(p,ref indexed,ref mut work)){case .ok(index):{index}case .err(e):{return fail(e,0,0,0);}};
+    i=1;while(i<=ir::count(p)){var usize failed_start=ir::start(ir::at(p,i));var usize failed_end=ir::end(ir::at(p,i));if(!function(p,ref sdk_plan,ref indexed,ref body_index,v::at<cfg::Graph>(ref graphs,i-1),ref mut text,ref mut s,ref mut work,ref mut failed_start,ref mut failed_end)){return fail(if(s.code<1000){if(s.code==3){1003}else{1002}}else{s.code},clean::frame_at(ir::cleanup_ir(p),i).module_index,failed_start,failed_end);}i+=1;}
     if(!w::text(ref mut text,ref mut s,b"int32_t fy_candidate_entry(void){return ") || !w::function(ref mut text,ref mut s,entry) || !w::text(ref mut text,ref mut s,b"();}\n#ifndef FY_CANDIDATE_NO_MAIN\nint main(void){return (int)fy_candidate_entry();}\n#endif\n")){return fail(if(s.code==3){1003}else{1002},0,0,0);}
     if(bytes::len(out)>2097152 || bytes::len(ref text)>2097152-bytes::len(out)){return fail(1002,0,0,0);}return fail(if(bytes::append(out,bytes::view(ref text)).is_ok){0}else{1003},0,0,0);
 }

@@ -2197,3 +2197,25 @@ retain their current behavior.
 Evidence: `docs/ops/evidence/candidate-c-callable-index-20261011.json`.
 Stable CLI/API, SDK ABI, Go reference behavior, work/output/capacity limits, DB,
 CI and native runner policy are unchanged.
+
+
+## Scoped and verified C body-frame lookup (2026-10-11)
+
+`module_unit_c_frame_index` prepares 256 module records and one pair of original
+next-frame IDs per body. Ordinary eligibility preserves the renderer's previous
+rules: source bodies qualify directly; kind-1 frames require a matching ordinary,
+non-foreign prototype with the same result type. Cleanup frames do not qualify.
+
+Preparation checks whether each module's ordinary frames are contiguous and
+strictly ordered by original declaration ID. Only those ranges use binary search;
+other ordinary queries traverse the module's original eligible frame list.
+Specialized queries directly check the instance frame ID only after preparation
+has proved every kind-1 context equals its original one-based frame ID. Otherwise
+they inspect the requested module's list and retain exact context/kind checks.
+Duplicate matches reject as before. No producer ordering is assumed.
+
+The C renderer still checks result type, effects, parameter count, exact argument
+types and shared argument rules after resolving a frame. Preparation and query
+steps consume the existing work budget. Frame IDs, C spelling, capacity/output
+limits, stable CLI/API, SDK ABI, Go behavior, DB, CI and runner policy are unchanged.
+Evidence: `docs/ops/evidence/candidate-c-frame-index-20261011.json`.

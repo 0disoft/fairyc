@@ -3261,3 +3261,43 @@ generation/execution, native driver, default timeout/performance, standalone
 candidate profiles, Linux, full suite and Stage1/Stage2 remain pending. The
 candidate unit contract and local evidence tool change. Stable CLI/API, SDK ABI,
 Go reference behavior, DB, CI and native runner limits are unchanged. No push.
+
+
+## Scoped C frame lookup and shared render-work boundary (2026-10-11)
+
+Receipt: `evidence/candidate-c-frame-index-20261011.json`.
+
+The renderer no longer scans all body frames for every ordinary or specialized
+call. Preparation records original frame lists per module, checks ordinary
+contiguity/declaration order and proves whether every kind-1 context equals its
+original frame ID. Verified ordinary ranges use binary search; verified instance
+IDs use direct checks. Other queries scan only the requested module's relevant
+list. Ordinary eligibility, duplicate-match rejection, result/effect checks,
+parameter count, exact argument types and shared argument rules remain.
+
+Four final Release native cases pass. The 1089-frame fixture checks every original
+ordinary row, a missing specialization and exhausted preparation/query work,
+with aggregate lookup work below 30000. Separate generic units, shared cleanup
+and authentic SDK Vec struct slices pass. Generated C matches the six previously
+executed /Od and /O2 artifacts byte-for-byte; unchanged SDK runtime source hashes
+also match, so those executions are reused. Locked source checking passes with
+290 files and 3619 MIR functions.
+
+An earlier full-frame hash table passed four bounded native cases but exhausted
+the original project's remaining shared work during index preparation. That
+attempt is preserved separately and is not the shipped implementation. The
+lighter verified-range/module-list index prepares successfully and lets original
+C emission pass the previous Vec push/commit failure.
+
+The exact 236-file original main closure still links 3558 frames across 48 units
+with 25 retries. Whole C generation now reaches `array_types::element`, module
+2, bytes 1689..1847. A cache-only counter observation identifies work exhaustion:
+state 1002, work 1048576 and 904508 temporary C bytes. The 2097152 output cap is
+not reached, and public output remains transactional at zero. The next task is
+to measure and divide C emission work into bounded sections for the original
+project; raising a shared cap has not been used as a substitute for that work.
+
+Original full C generation/execution, native driver, default timeout/performance,
+standalone candidate profiles, Linux, full suite and Stage1/Stage2 remain pending.
+The candidate unit contract and local evidence tool change. Stable CLI/API, SDK
+ABI, Go reference behavior, DB, CI and native runner limits are unchanged. No push.

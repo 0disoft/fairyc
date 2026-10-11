@@ -1,5 +1,7 @@
 module tests::module_project_frames_capacity;
 import module_unit_c_callable_index as contracts;
+import module_unit_c_frame_index as targets;
+import module_unit_cleanup_mir_model as clean;
 import module_project_compile as compile;
 import module_project_link as link;
 import module_unit_body_ir_verify as proof;
@@ -27,5 +29,6 @@ fn syntax::Parsed parsed(bytes::Buffer source){let s=switch(scanner::collect(sou
     let linked=switch(link::build(ref metadata,ref units)){case .ok(p):{p}case .err(e):{discard io::write("link ");discard io::write_u32(e.code);assert(false);return;}};assert(ir::count(ref linked)==1089 && ir::callable_count(ref linked)==1080 && proof::check(ref linked).code==0);
     var usize lookup_work=0;let indexed=switch(contracts::build(ref linked,ref mut lookup_work)){case .ok(index):{index}case .err(_):{assert(false);return;}};var usize row=0;var u32 code=0;while(row<ir::callable_count(ref linked)){let c=ir::callable_at(ref linked,row);assert(contracts::find(ref linked,ref indexed,c.module_index,c.declaration,ref mut lookup_work,ref mut code)==row+1);row+=1;}assert(code==0 && lookup_work<20000);assert(contracts::find(ref linked,ref indexed,255,1048576,ref mut lookup_work,ref mut code)==0 && code==0);lookup_work=1048576;let first=ir::callable_at(ref linked,0);assert(contracts::find(ref linked,ref indexed,first.module_index,first.declaration,ref mut lookup_work,ref mut code)==0 && code==1002);lookup_work=1048576;assert(switch(contracts::build(ref linked,ref mut lookup_work)){case .ok(_):{false}case .err(e):{e==1002}});
 
+    lookup_work=0;let body_index=switch(targets::build(ref linked,ref indexed,ref mut lookup_work)){case .ok(index):{index}case .err(_):{assert(false);return;}};code=0;row=1;while(row<=ir::count(ref linked)){let f=clean::frame_at(ir::cleanup_ir(ref linked),row);assert(targets::find(ref linked,ref body_index,f.module_index,f.declaration,f.context,false,ref mut lookup_work,ref mut code)==row);row+=1;}assert(code==0 && lookup_work<30000);assert(targets::find(ref linked,ref body_index,255,1048576,1,true,ref mut lookup_work,ref mut code)==0 && code==0);lookup_work=1048576;let f=clean::frame_at(ir::cleanup_ir(ref linked),1);assert(targets::find(ref linked,ref body_index,f.module_index,f.declaration,0,false,ref mut lookup_work,ref mut code)==0 && code==1002);lookup_work=1048576;assert(switch(targets::build(ref linked,ref indexed,ref mut lookup_work)){case .ok(_):{false}case .err(e):{e==1002}});
     discard io::write("frames ");discard io::write_usize(frames::count(ref p));discard io::write(" work ");discard io::write_usize(frames::work(ref p));discard io::write(" callables ");discard io::write_usize(ir::callable_count(ref linked));discard io::write("\n");
 }

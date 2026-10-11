@@ -1,0 +1,159 @@
+{
+  "schema": "fairyc.candidate-c-frame-index/v1",
+  "passed": true,
+  "implementation": [
+    {
+      "path": "examples/lexer_candidate/src/module_unit_c_frame_index.fy",
+      "bytes": 3749,
+      "sha256": "d77a2358db92b26c2160fe2eef6bec4f0326ae247a37a580b89cf03eee89c8b1"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_unit_c_emit.fy",
+      "bytes": 20575,
+      "sha256": "9595694591de2d761985b64924b588759cdc89b4eae25bafd0ba7d36fb503215"
+    }
+  ],
+  "test": {
+    "path": "examples/lexer_candidate/tests/module_project_frames_capacity.fy",
+    "bytes": 6409,
+    "sha256": "717e4aef368a136e6ac7b9ddcff8f80fa06b07d9f8e18b275a120d110c7992d2"
+  },
+  "receiptTool": {
+    "path": "tools/verify-candidate-c-frame-index.py",
+    "bytes": 6713,
+    "sha256": "1b2d28d194596e8f65e9fd01c7c0e78471a3be5dbfbc5451e3a47b3585831fbb"
+  },
+  "contract": {
+    "path": "docs/architecture/candidate-compilation-units-v0.md",
+    "bytes": 144104,
+    "sha256": "b9d435fc53810c3eeceb2d23dde68a886726ee6a8c254a8920c66cc8f2ca9438"
+  },
+  "sourceCheck": {
+    "exit": 0,
+    "seconds": 18.72444180000457,
+    "stdout": "check ok: 2 instance(s), 290 source file(s), 3619 MIR function(s), lock verified\n",
+    "stderr": ""
+  },
+  "native": {
+    "report": {
+      "path": ".cache/candidate-tagged/sdk-c-execution/native-c-frame-ranges.json",
+      "bytes": 44182,
+      "sha256": "39aa4ea55a48c541e85aef63abf0f91a126184cb9f205891093137cd8ee1bc66"
+    },
+    "passed": 4,
+    "coverage": [
+      "1089 original frame row identities with bounded preparation/queries",
+      "Missing specialized identity and exhausted preparation/query work",
+      "Distinct generic units",
+      "Shared cleanup foreign prototype",
+      "Authentic SDK Vec signatures"
+    ]
+  },
+  "reusedC": {
+    "reports": [
+      {
+        "report": {
+          "path": ".cache/candidate-tagged/sdk-c-execution/project-link-c/execution.json",
+          "bytes": 11568,
+          "sha256": "8e67566e0b2f2678b6f6b8b8986f4460f11dade4f3ba1d53dce45a95e14d97c6"
+        },
+        "executions": 4
+      },
+      {
+        "report": {
+          "path": ".cache/candidate-tagged/sdk-c-execution/c-layout-index-sdk-c/receipt.json",
+          "bytes": 6132,
+          "sha256": "7760096e7e3de9c237242b533fcd772f1e72334df784c376c38a772b12a39775"
+        },
+        "executions": 2
+      }
+    ],
+    "executions": 6,
+    "reason": "New emitted C is byte-identical to previously compiled and executed /Od and /O2 artifacts; SDK runtime inputs also match"
+  },
+  "originalProject": {
+    "inputList": {
+      "path": ".cache/candidate-tagged/sdk-c-execution/main-cfg-drop-index-closed-inputs.json",
+      "bytes": 13074,
+      "sha256": "b2205417da6586a56effc9956fa14cb3f53b57833252d25fef416b9829de4001"
+    },
+    "inputBytesSHA256": "801bb84c1f87a23a6baa445485c759a5ce101886c0556454f298b2488afe42d8",
+    "count": 236,
+    "units": 48,
+    "retries": 25,
+    "frames": 3558,
+    "before": {
+      "path": ".cache/candidate-tagged/sdk-c-execution/run-main-c-callable-index-probe.json",
+      "bytes": 14108,
+      "sha256": "f679ac99de4f1bb71028afdd8bc4fe2ff8eb847bdb4ce4b1bd3a17d46e76ffec"
+    },
+    "after": {
+      "path": ".cache/candidate-tagged/sdk-c-execution/run-main-c-frame-ranges-probe.json",
+      "bytes": 14102,
+      "sha256": "b9b78d87088ab210343b624ffa58e403faa2ba8d20ab7b46bf48eeced98b9933"
+    },
+    "phaseMap": {
+      "path": ".cache/candidate-tagged/sdk-c-execution/c-frame-ranges-phase-codes.json",
+      "bytes": 4350,
+      "sha256": "303aaec354338b5bb8186fdbe6d88cdaa1abb512f7a7a130ab09c62e4b275682"
+    },
+    "diagnosticEmitter": {
+      "path": ".cache/candidate-tagged/sdk-c-execution/main-c-frame-ranges-probe/src/module_unit_c_emit.fy",
+      "bytes": 21092,
+      "sha256": "75546421dc6717285c4fc0ebeaa4ed28519cdebcab6b0a1c8bb7d441afeaba68"
+    },
+    "cGenerationPassed": false,
+    "result": {
+      "code": 728013,
+      "module": 2,
+      "start": 1689,
+      "end": 1847,
+      "publicOutputBytes": 0,
+      "phase": "d=ir::end(ir::at(p,i));if(!function(p,ref sdk_plan,ref indexed,ref body_index,v::at<cfg::Graph>(ref graphs,i-1),ref mut text,ref mut s,ref mut work,ref mut failed_start,ref mut failed_end)){return fail(if(s.code<1000){if(s.code==3){1003}else{1002}}else{s.code},clean::frame_at(ir::cleanup_ir(p),i).module_index,failed_start,failed_end);"
+    },
+    "nextBudgetDiagnostic": {
+      "report": {
+        "path": ".cache/candidate-tagged/sdk-c-execution/run-main-c-frame-budget-probe.json",
+        "bytes": 14110,
+        "sha256": "fb1d4afecb6f96afeedaf6257b91d5b6a0b4b6c6d4c421a87bc9a7f814e8493f"
+      },
+      "stateCode": 1002,
+      "work": 1048576,
+      "temporaryBytes": 904508
+    }
+  },
+  "limits": {
+    "work": 1048576,
+    "outputBytes": 2097152,
+    "callableCount": 4096,
+    "raised": false
+  },
+  "abandonedHashAttempt": {
+    "native": {
+      "path": ".cache/candidate-tagged/sdk-c-execution/native-c-frame-hash-attempt.json",
+      "bytes": 44182,
+      "sha256": "39aa4ea55a48c541e85aef63abf0f91a126184cb9f205891093137cd8ee1bc66"
+    },
+    "original": {
+      "path": ".cache/candidate-tagged/sdk-c-execution/run-main-c-frame-index-probe.json",
+      "bytes": 14094,
+      "sha256": "49eecd8ab024f041e9f6cb6eacd604e10054fce28da3d6c1edfffea9fe4b0bb1"
+    },
+    "reason": "Full hash preparation exhausted existing C work before body emission; replaced with verified ranges, context identity and module-local lists"
+  },
+  "deferred": [
+    "Full original C generation/execution",
+    "Native driver",
+    "Default timeout/performance",
+    "Standalone candidate profiles",
+    "Linux",
+    "Full suite",
+    "Stage1/Stage2"
+  ],
+  "stableCLIChanged": false,
+  "sdkABIChanged": false,
+  "GoChanged": false,
+  "dbChanged": false,
+  "ciChanged": false,
+  "pushed": false
+}
