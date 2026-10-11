@@ -39,9 +39,26 @@ retains more specific private component errors. Evidence:
 `evidence/candidate-path-unicode-20261011.json` and
 `evidence/candidate-directory-20261011.json`.
 
+## Manifest source binding
+
+`project_source_root.load` validates supplied exact manifest bytes before any
+directory observation, resolves the decoded `package.source`, and returns one
+owner containing the typed manifest and actual source-root path. These values
+survive release or mutation of the caller's input buffer. It retains manifest
+errors as phase 1 with document spans and directory errors as phase 2 with
+decoded source-component spans, field 7 and the original OS code.
+
+Two native tests and both candidate C profiles pass, including escaped TOML
+source spelling, input-buffer release, mismatched/nested case, absent/file
+entries, Unicode folding, junction rejection, invalid manifests and exhausted
+directory work. Evidence: `evidence/candidate-source-root-20261011.json`.
+The compiler image from the preceding directory unit was reused: this unit
+changes the private loaded program and uses the same compiler capabilities.
+Full production check passes: 306 files and 3909 MIR functions.
+
 ## Remaining connection
 
-Connect the manifest source value, recursively collect every regular .fy,
+Recursively collect every regular .fy,
 reject source-case collisions, enforce cumulative file/byte limits, retain exact
 bytes and bind declared modules. Package/lock/CLI work remains separate.
 ReadDir is currently Windows AMD64 and keeps the existing SDK path bound.
