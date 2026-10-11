@@ -991,3 +991,31 @@ The source check passes 351 files and 4593 MIR functions. Candidate C generation
 exceeded the harness's 60-second limit, then completed in 112 seconds with a 240-second
 verification-only allowance; the successful native invocation was reused. Product
 timeout behavior is unchanged.
+
+
+## Package compiler core (2026-10-12)
+
+project_compiler_core.build borrows the independently owned package compiler input,
+creates package-scoped catalog and signatures, runs full checked-unit binding, call
+closure, type, ownership and owned IR compilation, then project IR linking and verifier
+gates. No new filesystem reads or lock writes. Success returns a standalone owned IR
+program; the caller retains the original input for exact file, instance and source
+locations through semantic errors and later C emission. Problems retain phase, semantic
+stage, code, module_index, original start/end and expected/actual type IDs. Link errors
+cannot claim source locations. Public command routing is not claimed. A Go-only oracle
+copies the five-package fixture from actual loader catalogs and invokes the stable Go
+locked check on eight cases: current same-name modules/types, unknown signature type,
+root return type error, dependency return type error, private function lookup,
+assignment across different package nominal types, moved resource, and real bundled SDK
+bytes empty/len. Failure spans checked against owning Go stderr; the failing package
+instance is computed by Go; success frame counts current13 and SDK166 recorded. Receipt:
+evidence/candidate-compiler-core-20261012.json.
+
+Two native tests pass, including all eight Go outcomes, exact source spans and package
+instance identities, plus verified linked IR after original owners close. Current and
+SDK cases match 13 and 166 MIR functions. Locked source check passes 352 files and 4596
+MIR functions. Candidate C generation remains incomplete: its 200-source input fails in
+syntax.fy at project phase 2, stage 4, code 10 (analysis work bound), with no packet
+emitted. Candidate development/release executions therefore did not run. Source-input
+receipts are split into bounded manifests; the native-only result is not a full
+candidate pass.

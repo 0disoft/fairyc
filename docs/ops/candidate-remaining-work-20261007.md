@@ -3980,3 +3980,17 @@ scheduled for later batches. Public API, SDK ABI/version, DB and CI are unchange
 push occurred.
 
 Receipt: `evidence/candidate-compiler-input-20261012.json`.
+
+
+## Package compiler core (2026-10-12)
+
+Package-scoped declarations/signatures, checked units and project IR linking are
+composed in Fairy. Two native tests match eight Go locked-check outcomes, exact failure
+spans and package identities; SDK and plain cases retain 166 and 13 MIR functions.
+Source check passes 352 files / 4596 MIR functions. Candidate C generation fails at
+syntax.fy phase 2, stage 4, code 10; both candidate profile runs remain unexecuted until
+that analysis bound is resolved. Public check/build/run, entry/driver, product timeout,
+Linux/full-suite and Stage1/Stage2 work remain. No public API/SDK ABI/version/DB/CI
+change or push.
+
+Receipt: `evidence/candidate-compiler-core-20261012.json`.

@@ -1,0 +1,211 @@
+{
+  "schema": "fairyc.candidate-compiler-core/v1",
+  "passed": false,
+  "nativePassed": true,
+  "candidatePassed": false,
+  "sourceInputManifests": [
+    {
+      "path": "docs/ops/evidence/candidate-compiler-core-inputs-1-20261012.json",
+      "sha256": "4882d87c92a9b6543239ebe5e1cabe05936a58fbf8324be259418a89304f629e",
+      "count": 100
+    },
+    {
+      "path": "docs/ops/evidence/candidate-compiler-core-inputs-2-20261012.json",
+      "sha256": "d7348e25397e9974f1d7fa8c44d588e11065f1eba6bf3431e3fda4693e21516d",
+      "count": 100
+    },
+    {
+      "path": "docs/ops/evidence/candidate-compiler-core-inputs-3-20261012.json",
+      "sha256": "048a1c9dda383b0b4fbf33d732da09d8b2c074be5da32fca9527163883ea168b",
+      "count": 6
+    }
+  ],
+  "native": {
+    "schemaVersion": "fairyc.test-report/v4",
+    "engine": "native",
+    "target": "x86_64-windows-msvc",
+    "profile": "development",
+    "tests": [
+      {
+        "identity": "tests::project_compiler_core::go_whole_closure_outcomes_spans_instances_and_sdk_match",
+        "outcome": "passed",
+        "trapCategory": null,
+        "stdoutBase64": "",
+        "stderrBase64": ""
+      },
+      {
+        "identity": "tests::project_compiler_core::linked_ir_survives_source_and_workspace_owners_closing",
+        "outcome": "passed",
+        "trapCategory": null,
+        "stdoutBase64": "",
+        "stderrBase64": ""
+      }
+    ],
+    "count": 2,
+    "passed": 2,
+    "failed": 0,
+    "status": "ok",
+    "lock": "unchanged"
+  },
+  "nativeValidation": {
+    "source": "exec_command/write_stdin",
+    "session": 84125,
+    "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+    "compilerSHA256": "18e72a61e9ff3fdd620652ecd8ce2e355b9371488b2ad1b2ccbadbf7a091783a",
+    "exactTests": [
+      "tests::project_compiler_core::go_whole_closure_outcomes_spans_instances_and_sdk_match",
+      "tests::project_compiler_core::linked_ir_survives_source_and_workspace_owners_closing"
+    ]
+  },
+  "goCLIObservations": [
+    {
+      "name": "Current",
+      "exit": 0,
+      "stdout": "check ok: 5 instance(s), 6 source file(s), 13 MIR function(s), lock verified\n",
+      "stderr": "",
+      "file": "",
+      "excerpt": "",
+      "start": 0,
+      "end": 0,
+      "phase": 0,
+      "stage": 0,
+      "mirFunctions": 13,
+      "instance": ""
+    },
+    {
+      "name": "Signature",
+      "exit": 3,
+      "stdout": "",
+      "stderr": "fairyc: semantic subset does not support type Missing at common.fy [bytes 49..56]\n",
+      "file": "right-lib/src/common.fy",
+      "excerpt": "Missing",
+      "start": 49,
+      "end": 56,
+      "phase": 2,
+      "stage": 0,
+      "mirFunctions": 0,
+      "instance": "fypi1-sha256-97d718dacebabc082f0df7bea2bd1d3de97e85a2cc9d73c625f2062efbea3351"
+    },
+    {
+      "name": "RootBody",
+      "exit": 3,
+      "stdout": "",
+      "stderr": "main.fy:5:24: E1009: return value does not match the declared result type [bytes 93..97]\n  expected-type: main.fy:5:4 [bytes 73..76]\n",
+      "file": "src/main.fy",
+      "excerpt": "true",
+      "start": 93,
+      "end": 97,
+      "phase": 3,
+      "stage": 4,
+      "mirFunctions": 0,
+      "instance": "fypi1-sha256-d1f3635dd47dfc87c00ca0438e26da2aa66f8d687d59aa2d0124aa58ec0a60b0"
+    },
+    {
+      "name": "DependencyBody",
+      "exit": 3,
+      "stdout": "",
+      "stderr": "right/right.fy:4:28: E1009: return value does not match the declared result type [bytes 101..105]\n  expected-type: right/right.fy:4:8 [bytes 81..84]\n",
+      "file": "right/src/right.fy",
+      "excerpt": "true",
+      "start": 101,
+      "end": 105,
+      "phase": 3,
+      "stage": 4,
+      "mirFunctions": 0,
+      "instance": "fypi1-sha256-470877435d8ccde79c479f9b2dcaf9d259cf39c06b7ee8694d9b4c72bda51f5c"
+    },
+    {
+      "name": "Private",
+      "exit": 3,
+      "stdout": "",
+      "stderr": "main.fy:5:35: E0103: item is not visible from this module [bytes 104..113]\n  declaration: left/left.fy:5:8 [bytes 120..126]\n",
+      "file": "src/main.fy",
+      "excerpt": "l::hidden",
+      "start": 104,
+      "end": 113,
+      "phase": 3,
+      "stage": 2,
+      "mirFunctions": 0,
+      "instance": "fypi1-sha256-f3adfbca4abb16ef6e0e7731e524dae89b7f8bd2ecd97f75ad0678ff6b44da9c"
+    },
+    {
+      "name": "Nominal",
+      "exit": 3,
+      "stdout": "",
+      "stderr": "main.fy:7:54: E1006: incompatible expected and actual types [bytes 184..185]\n  expected-type: main.fy:7:52 [bytes 182..183]\n",
+      "file": "src/main.fy",
+      "excerpt": "b",
+      "start": 184,
+      "end": 185,
+      "phase": 3,
+      "stage": 4,
+      "mirFunctions": 0,
+      "instance": "fypi1-sha256-f19b2595dcfa9b755cef1a1c75886bf6066cbbb745127d417b1636d2492b15ed"
+    },
+    {
+      "name": "Moved",
+      "exit": 3,
+      "stdout": "",
+      "stderr": "main.fy:9:48: E1101: resource is used after ownership was moved [bytes 250..251]\n  declaration: main.fy:9:20 [bytes 222..223]\n  move: main.fy:9:39 [bytes 241..242]\n",
+      "file": "src/main.fy",
+      "excerpt": "h",
+      "start": 250,
+      "end": 251,
+      "phase": 3,
+      "stage": 5,
+      "mirFunctions": 0,
+      "instance": "fypi1-sha256-7d5d217e60f6286bd3f5e4e52d7744581adf359d74264255314aa5f056bb599f"
+    },
+    {
+      "name": "SDK",
+      "exit": 0,
+      "stdout": "check ok: 6 instance(s), 13 source file(s), 166 MIR function(s), lock verified\n",
+      "stderr": "",
+      "file": "right/src/right.fy",
+      "excerpt": "",
+      "start": 0,
+      "end": 0,
+      "phase": 0,
+      "stage": 0,
+      "mirFunctions": 166,
+      "instance": "fypi1-sha256-3cbea3d72bd3c8a7f48377332aa8cc91f62732a419c0e89f7baa8e81b4e15471"
+    }
+  ],
+  "candidateInvocations": [
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-lock-write-20261012\\compiler.exe",
+        "--c-project-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-compiler-core-20261012\\execution\\sources.list"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "seconds": 201.01214160000382,
+      "exit": 2,
+      "stdoutBytes": 0,
+      "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr": "examples/lexer_candidate/src/syntax.fy:1:1: error: project phase 2 stage 4 code 10 (bytes 0..0)\n"
+    }
+  ],
+  "check": {
+    "locked": true,
+    "sourceFiles": 352,
+    "mirFunctions": 4596
+  },
+  "candidateInputFiles": 200,
+  "blocker": "candidate type-analysis work bound in syntax.fy; project phase 2 stage 4 code 10; no C packet emitted",
+  "stableCLIRouted": false,
+  "publicApiChanged": false,
+  "dbChanged": false,
+  "ciChanged": false,
+  "pushed": false,
+  "remaining": [
+    "candidate compilation capacity for syntax arena copying",
+    "candidate development/release API execution",
+    "stable check/build/run routing",
+    "entry/driver wiring",
+    "product timeout",
+    "Linux",
+    "full suite",
+    "Stage1/Stage2"
+  ]
+}

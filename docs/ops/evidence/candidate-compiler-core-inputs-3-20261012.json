@@ -1,0 +1,29 @@
+{
+  "schema": "fairyc.candidate-source-inputs/v1",
+  "sourceInputs": [
+    {
+      "path": "examples/lexer_candidate/tests/project_compiler_core.fy",
+      "sha256": "71c58624deecfb92299945e533d57de95cd0ea5a57c927a40251d8bc18ca6f60"
+    },
+    {
+      "path": "cmd/fairyc-candidate-compiler-core-reference/main.go",
+      "sha256": "ceba8491d8c2c6305ac81d8147a3d542addde18444ddba103611f81e2c76144d"
+    },
+    {
+      "path": ".cache/candidate-compiler-core-20261012/fixture/cases.bin",
+      "sha256": "e9b45ab941dabc50c425aab50c4e98eff9a67fd7fd1ae8134bf6f442e779c992"
+    },
+    {
+      "path": ".cache/candidate-compiler-core-20261012/fixture/observations.json",
+      "sha256": "48da1772b6b7a6fa45f703284eedda0211db6279b7cc4367cc51924c7e142a53"
+    },
+    {
+      "path": ".cache/candidate-compiler-core-20261012/fixture/root.bin",
+      "sha256": "6d8dccec087d1371abfc551ec94741cf9f69c30fc694113154235573188c5a66"
+    },
+    {
+      "path": ".cache/verify-compiler-core.py",
+      "sha256": "ee9453bc532a8ed96ff2a93b394d25e4eb09af25e624a63e289243afdab0bfba"
+    }
+  ]
+}
