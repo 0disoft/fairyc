@@ -31,3 +31,17 @@ fn void dependency_main_and_invalid_entry_do_not_publish_a_bundle(){
     assert(v::push<syntax::Parsed>(ref mut invalid,parsed(b"module main;fn void main(){}")).is_ok);
     switch(cli::build(ref invalid)){case .ok(_):{assert(false);}case .err(e):{assert(e.phase==5 && e.code==1001 && e.module_index==0);}};
 }
+
+@test @effects(console)
+fn void highest_source_module_keeps_nominal_and_callable_identity(){
+    var v::Vec<syntax::Parsed> sources=v::empty<syntax::Parsed>();
+    assert(v::push<syntax::Parsed>(ref mut sources,parsed(b"module main;import last as last;fn i32 main(){let last::S value=last::make();return value.n-7;}")).is_ok);
+    var usize i=1;while(i<511){
+        var bytes::Buffer text=bytes::empty();assert(bytes::append(ref mut text,b"module filler").is_ok && bytes::append_usize(ref mut text,i).is_ok && bytes::append(ref mut text,b";").is_ok);
+        assert(v::push<syntax::Parsed>(ref mut sources,parsed(bytes::view(ref text))).is_ok);i+=1;
+    }
+    assert(v::push<syntax::Parsed>(ref mut sources,parsed(b"module last;pub struct S{i32 n;}pub fn S make(){return S{.n=7};}")).is_ok);
+    let bundle=switch(cli::build(ref sources)){case .ok(p):{p}case .err(_):{assert(false);return;}};
+    assert(emit::project_frames(ref bundle)==2 && emit::project_selected_frames(ref bundle)==2);
+    assert(cli::packet(ref bundle)==0);
+}

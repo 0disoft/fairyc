@@ -52,7 +52,7 @@ fn i32 execute(ref u8[] path,u32 program_mode) {
     let ref u8[] source = bytes::view(ref manifest_source);
     var v::Vec<Path> entries = v::empty<Path>();
     let u32 status = paths(source,ref mut entries);
-    if (status != 0) { return error(if (status == 3) { "error: buffer allocation failed\n" } else if (status == 4) { "error: file path limit (4095 UTF-8 bytes)\n" } else if (status == 5) { "error: module limit (256 files)\n" } else { "error: invalid module manifest\n" }); }
+    if (status != 0) { return error(if (status == 3) { "error: buffer allocation failed\n" } else if (status == 4) { "error: file path limit (4095 UTF-8 bytes)\n" } else if (status == 5) { "error: module limit (512 files)\n" } else { "error: invalid module manifest\n" }); }
     var v::Vec<syntax::Parsed> parsed_files = v::empty<syntax::Parsed>();
     var usize index = 0;
     while (index < v::len<Path>(ref entries)) {

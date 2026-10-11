@@ -17,11 +17,13 @@ by itself is rejected; function-level subdivision is not implemented here.
 
 Every group retains the existing joined-owner caps: 512 declarations, 16384
 expressions, 8192 statements, 1024 entries, 4096 types, 1024 fields, and 4096
-attributes and attribute arguments. The entire input still has at most 256
+attributes and attribute arguments. The entire input still has at most 512
 files and at most 65536 bytes per file. The complete source set admits at most
 2097152 bytes including original separator newlines; each joined owner retains
-its 1048576-byte limit. `candidate_limits::source_set_bytes` owns the aggregate
-limit, while `program_bytes` continues to bound each independently joined owner.
+its 1048576-byte limit. `candidate_limits::source_files` owns the file/module
+identity cap (512 since 2026-10-11), `candidate_limits::source_set_bytes` owns
+the aggregate limit, while `program_bytes` continues to bound each
+independently joined owner.
 The source catalog preserves at most 2097152 raw source bytes without separator
 bytes; its separate name pool remains bounded at 1048576 bytes.
 
@@ -2206,6 +2208,11 @@ next-frame IDs per body. Ordinary eligibility preserves the renderer's previous
 rules: source bodies qualify directly; kind-1 frames require a matching ordinary,
 non-foreign prototype with the same result type. Cleanup frames do not qualify.
 
+That 256-record preparation is the dated observation under the previous file
+cap. The frame table now sizes itself from `candidate_limits::source_files()`
+and validates `module_index` against the same constant, so the current module
+record count is 512.
+
 Preparation checks whether each module's ordinary frames are contiguous and
 strictly ordered by original declaration ID. Only those ranges use binary search;
 other ordinary queries traverse the module's original eligible frame list.
@@ -2222,3 +2229,37 @@ Evidence: `docs/ops/evidence/candidate-c-frame-index-20261011.json`.
 
 Project C partition ownership, shared literal storage and output/work bounds:
 `candidate-project-c-parts-v0.md`.
+
+
+## Source-owner file cap raised to 512 (2026-10-11)
+
+`candidate_limits::source_files()` now admits 512 source owners, up from 256.
+The old cap rejected the complete 285-file dispatcher source set before grouping
+could start. Per-file source bytes (65536), the aggregate 2097152-byte source-set
+budget, the joined-owner arenas and the work/output/frame/depth caps are
+unchanged; only the file and module identity bound moved. The manifest module
+bound and the module-index checks in joined-body verification, cleanup MIR types
+and verification and the C callable and frame indexes all read that constant, so
+both candidate CLIs report `error: module limit (512 files)` from one source.
+
+Two Release native cases pass. The manifest case admits 512 lines (status 0, 512
+entries) and rejects 513 lines with status 5. The identity case builds a 512-file
+source set whose highest admitted module is 511, keeps its nominal and callable
+identity, links two frames in one unit and emits a checked packet. The C
+emitted for that module compiles and runs under MSVC /Od and /O2 with exit 0.
+Locked source checking passes 292 files and 3667 MIR functions, and the
+development candidate build passes the nine-case CLI matrix plus its C
+execution. The separate Release candidate clone build hit its 180-second
+validation timeout and is not counted as a pass.
+
+The full 285-file bridge joins 2019281 source bytes, inside the unchanged 2 MiB
+budget, and then stops at the private 60-second frontend timeout (`candidate
+frontend timeout: context deadline exceeded`, exit 2, 60.0466 observed seconds)
+with the previous image preserved. The next task is measuring the slow phases
+under that same 60-second cap. Complete dispatcher compilation, native
+compilation/execution of the complete dispatcher, standalone candidate
+profiles, Linux, the full suite and Stage1/Stage2 remain pending.
+
+Evidence: `docs/ops/evidence/candidate-source-owner-512-20261011.json`.
+Stable CLI/API, SDK ABI, Go reference behavior, DB, CI and native runner limits
+are unchanged.

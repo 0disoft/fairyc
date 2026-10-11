@@ -47,10 +47,12 @@ member index payload_start+payload_count shifts with the same field base.
 Scalar function templates retain original source ownership until binding and
 specialization. Generic aggregate/receiver declarations remain closed here.
 
-Limits of the joined owner: 256 inputs, 1048576 joined bytes including separators,
+Limits of the joined owner: 512 inputs, 1048576 joined bytes including separators,
 512 declarations, 16384 expressions, 8192 statements, 1024 entries, 4096 types,
-1024 fields and 4096 attributes and attribute arguments. The existing scanner
-token, diagnostic and work budgets apply to the joined source.
+1024 fields and 4096 attributes and attribute arguments. The input cap is
+`candidate_limits::source_files()`, raised from 256 to 512 on 2026-10-11 so the
+complete 285-file dispatcher source set is admitted before grouping. The existing
+scanner token, diagnostic and work budgets apply to the joined source.
 
 The separate source catalog and compilation-unit grouping can admit a complete
 source set up to 2097152 bytes. That aggregate budget does not change this joined

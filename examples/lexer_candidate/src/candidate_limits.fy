@@ -5,7 +5,9 @@ module candidate_limits;
 pub fn usize source_bytes(){return 65536;}
 pub fn usize program_bytes(){return 1048576;}
 pub fn usize source_set_bytes(){return 2097152;}
-pub fn usize source_files(){return 256;}
+// The complete dispatcher imports 285 source owners. This bounds file/module
+// identities only; source-set bytes and each checked unit keep their own caps.
+pub fn usize source_files(){return 512;}
 pub fn usize manifest_bytes(){return 65536;}
 
 // Imported layouts combine fields from multiple original source owners.

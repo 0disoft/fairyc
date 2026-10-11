@@ -4,6 +4,7 @@ import module_types as types;
 import c_abi_types as abi;
 import pointer_types as pointers;
 import scalar_views as views;
+import candidate_limits as limits;
 
 pub fn bool same(types::Type a,types::Type b){return a.kind==b.kind && a.scalar==b.scalar && a.module_index==b.module_index && a.declaration==b.declaration && a.first==b.first && a.second==b.second;}
 pub fn usize bucket(types::Type t){return (t.kind as usize*31 ^ t.scalar as usize*2246822519 ^ t.module_index*104729 ^ t.declaration*3266489917 ^ t.first*2654435761 ^ t.second*668265263)&8191;}
@@ -12,8 +13,8 @@ pub fn usize bucket(types::Type t){return (t.kind as usize*31 ^ t.scalar as usiz
 // looking up declarations or replacing their canonical module coordinates.
 pub fn bool valid(ref ir::Program p,usize id){
     let t=ir::type_at(p,id);
-    if(t.kind==2 || t.kind==3 || t.kind==4){return t.module_index<256 && t.declaration!=0 && t.scalar==0 && t.first==0 && t.second==0;}
-    if(t.kind==13){return t.module_index<256 && t.declaration!=0 && t.scalar==0 && t.first!=0 && t.first<id && t.second==0;}
+    if(t.kind==2 || t.kind==3 || t.kind==4){return t.module_index<limits::source_files() && t.declaration!=0 && t.scalar==0 && t.first==0 && t.second==0;}
+    if(t.kind==13){return t.module_index<limits::source_files() && t.declaration!=0 && t.scalar==0 && t.first!=0 && t.first<id && t.second==0;}
     if(t.module_index!=0 || t.declaration!=0){return false;}
     if(t.kind==1){return t.scalar!=0 && (t.scalar<=7 || abi::valid(t.scalar)) && t.first==0 && t.second==0;}
     if(t.kind==15){return views::extended(t.scalar) && t.first==0 && t.second==0;}

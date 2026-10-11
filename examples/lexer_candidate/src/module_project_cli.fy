@@ -59,7 +59,7 @@ pub fn i32 run(ref u8[] path){
     let manifest=switch(files::manifest(path)){case .ok(p):{p}case .err(code):{return error(if(code==4){"error: manifest limit (65536 bytes)\n"}else if(code==3){"error: buffer allocation failed\n"}else{"error: manifest file read failed\n"});}};
     let text=bytes::view(ref manifest);var v::Vec<manifests::Path> paths=v::empty<manifests::Path>();
     let u32 status=manifests::paths(text,ref mut paths);
-    if(status!=0){return error(if(status==3){"error: buffer allocation failed\n"}else if(status==4){"error: file path limit (4095 UTF-8 bytes)\n"}else if(status==5){"error: module limit (256 files)\n"}else{"error: invalid module manifest\n"});}
+    if(status!=0){return error(if(status==3){"error: buffer allocation failed\n"}else if(status==4){"error: file path limit (4095 UTF-8 bytes)\n"}else if(status==5){"error: module limit (512 files)\n"}else{"error: invalid module manifest\n"});}
     var v::Vec<syntax::Parsed> sources=v::empty<syntax::Parsed>();var usize i=0;
     while(i<v::len<manifests::Path>(ref paths)){
         let entry=*v::at<manifests::Path>(ref paths,i);let filename=text[entry.start..entry.end];

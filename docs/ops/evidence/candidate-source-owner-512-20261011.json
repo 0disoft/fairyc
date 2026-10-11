@@ -1,0 +1,286 @@
+{
+  "schema": "fairyc.candidate-source-owner-512/v1",
+  "sourceFilesLimit": 512,
+  "previousLimit": 256,
+  "sourceSetBytesLimit": 2097152,
+  "sourceBytesLimit": 65536,
+  "changedSources": [
+    {
+      "path": "examples/lexer_candidate/src/candidate_limits.fy",
+      "sha256": "75ffd6d9ce352ffa470626f4eff93c5f06dd8d64a7f83446b0e2a0b65147887f"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_cli.fy",
+      "sha256": "2c7f25446088d676584d953497fc0948c5995001b230b1d0dac2a8dea527a992"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_project_cli.fy",
+      "sha256": "83eca8d6a149160ec1bd669d0d516604b716fe551be75b55afa6a60b64705733"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_unit_body_ir_verify.fy",
+      "sha256": "c84756acdc6d8fa69d7c8cdf8f932522b5ae97a7f5b022309bd6641d9474920c"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_unit_cleanup_mir_types.fy",
+      "sha256": "598b80fa48ca7a15333b5a91db119758fa69a078512f4f3580e124365407df43"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_unit_cleanup_mir_verify.fy",
+      "sha256": "39674d6ae0305d3eb7a1d6b6fd0dda50d7f41bc9bd2f38de9a5d31f1c943fa23"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_unit_c_callable_index.fy",
+      "sha256": "364294da38f73021c44dbe7274816e9f9ab278d71abe4e8e5fc9781a2bc66c2f"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_unit_c_frame_index.fy",
+      "sha256": "4b738125ad631fd086eb4d620c53d27d765c65700235970549befc4cdb3509f1"
+    }
+  ],
+  "sourceCheck": {
+    "locked": true,
+    "exit": 0,
+    "files": 292,
+    "mirFunctions": 3667
+  },
+  "nativeTests": {
+    "exit": 0,
+    "profile": "release",
+    "passed": 2,
+    "failed": 0,
+    "tests": [
+      {
+        "identity": "tests::module_project_cli::highest_source_module_keeps_nominal_and_callable_identity",
+        "outcome": "passed"
+      },
+      {
+        "identity": "tests::modules::manifest_lines_and_limits",
+        "outcome": "passed"
+      }
+    ],
+    "seconds": 168.44966679999925
+  },
+  "highestModuleCExecution": {
+    "frames": 2,
+    "units": 1,
+    "literalDefinitions": 0,
+    "headerBytes": 2487,
+    "sourceBytes": 1120,
+    "packetSHA256": "8cf5078268d876ccb665b2392cea2b833e392dc7906f0ea046d2f3b80c91ed2b",
+    "executions": [
+      {
+        "profile": "low",
+        "build": {
+          "argv": [
+            "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+            "/nologo",
+            "/std:c11",
+            "/TC",
+            "/Od",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\source-owner-511-native\\fy_literals.c",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\source-owner-511-native\\fy_unit_0.c",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\source-owner-511-native\\trap.c",
+            "/Fe:C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\source-owner-511-native\\project-low.exe",
+            "/link",
+            "/INCREMENTAL:NO"
+          ],
+          "exit": 0,
+          "stdout": "fy_literals.c\r\nfy_unit_0.c\r\ntrap.c\r\nGenerating Code...\r\n",
+          "stderr": ""
+        },
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\source-owner-511-native\\project-low.exe"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      },
+      {
+        "profile": "optimized",
+        "build": {
+          "argv": [
+            "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+            "/nologo",
+            "/std:c11",
+            "/TC",
+            "/O2",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\source-owner-511-native\\fy_literals.c",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\source-owner-511-native\\fy_unit_0.c",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\source-owner-511-native\\trap.c",
+            "/Fe:C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\source-owner-511-native\\project-optimized.exe",
+            "/link",
+            "/INCREMENTAL:NO"
+          ],
+          "exit": 0,
+          "stdout": "fy_literals.c\r\nfy_unit_0.c\r\ntrap.c\r\nGenerating Code...\r\n",
+          "stderr": ""
+        },
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\source-owner-511-native\\project-optimized.exe"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      }
+    ]
+  },
+  "cli": {
+    "candidateProfile": "development",
+    "candidateSHA256": "5d509d0651788942570aa55daeac253ecd21aed6e4a11c2011a0d112dc94d86a",
+    "cases": [
+      {
+        "name": "positive",
+        "exit": 0,
+        "stdoutBytes": 3565,
+        "stderr": "",
+        "seconds": 0.0930302999986452
+      },
+      {
+        "name": "dependency-entry",
+        "exit": 2,
+        "stdoutBytes": 0,
+        "stderr": ".cache/candidate-tagged/sdk-c-execution/project-cli-512/fixtures/root.fy:1:1: error: project phase 4 stage 0 code 1001 (bytes 0..0)\n",
+        "seconds": 0.07150970000657253
+      },
+      {
+        "name": "wrong-result",
+        "exit": 2,
+        "stdoutBytes": 0,
+        "stderr": ".cache/candidate-tagged/sdk-c-execution/project-cli-512/fixtures/void.fy:1:1: error: project phase 5 stage 0 code 1001 (bytes 0..0)\n",
+        "seconds": 0.08045890000357758
+      },
+      {
+        "name": "type-error",
+        "exit": 2,
+        "stdoutBytes": 0,
+        "stderr": ".cache/candidate-tagged/sdk-c-execution/project-cli-512/fixtures/type.fy:1:34: error: project phase 2 stage 4 code 1009 (bytes 33..37)\n",
+        "seconds": 0.0207250000021304
+      },
+      {
+        "name": "syntax-error",
+        "exit": 2,
+        "stdoutBytes": 0,
+        "stderr": ".cache/candidate-tagged/sdk-c-execution/project-cli-512/fixtures/syntax.fy:1:36: error: expected } (bytes 35..35)\n",
+        "seconds": 0.01690969999617664
+      },
+      {
+        "name": "missing-source",
+        "exit": 2,
+        "stdoutBytes": 0,
+        "stderr": "error: input file read failed\n",
+        "seconds": 0.016944599999987986
+      },
+      {
+        "name": "blank-manifest",
+        "exit": 2,
+        "stdoutBytes": 0,
+        "stderr": "error: invalid module manifest\n",
+        "seconds": 0.015659100004995707
+      },
+      {
+        "name": "invalid-utf8",
+        "exit": 2,
+        "stdoutBytes": 0,
+        "stderr": "error: invalid module manifest\n",
+        "seconds": 0.020314800000051036
+      },
+      {
+        "name": "duplicate-source",
+        "exit": 2,
+        "stdoutBytes": 0,
+        "stderr": ".cache/candidate-tagged/sdk-c-execution/project-cli-512/fixtures/main.fy:1:8: error: project phase 1 stage 0 code 1 (bytes 7..11)\n",
+        "seconds": 0.0178992000001017
+      }
+    ],
+    "execution": {
+      "frames": 2,
+      "units": 1,
+      "literalDefinitions": 0,
+      "headerBytes": 2443,
+      "sourceBytes": 1097,
+      "packetSHA256": "68c878676f624102da5d214b87c36f673823603bcfbfc9ad30a919bedff430dc",
+      "executions": [
+        {
+          "profile": "low",
+          "build": {
+            "argv": [
+              "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+              "/nologo",
+              "/std:c11",
+              "/TC",
+              "/Od",
+              "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\project-cli-512\\native\\fy_literals.c",
+              "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\project-cli-512\\native\\fy_unit_0.c",
+              "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\project-cli-512\\native\\trap.c",
+              "/Fe:C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\project-cli-512\\native\\project-low.exe",
+              "/link",
+              "/INCREMENTAL:NO"
+            ],
+            "exit": 0,
+            "stdout": "fy_literals.c\r\nfy_unit_0.c\r\ntrap.c\r\nGenerating Code...\r\n",
+            "stderr": ""
+          },
+          "run": {
+            "argv": [
+              "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\project-cli-512\\native\\project-low.exe"
+            ],
+            "exit": 0,
+            "stdout": "",
+            "stderr": ""
+          }
+        },
+        {
+          "profile": "optimized",
+          "build": {
+            "argv": [
+              "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+              "/nologo",
+              "/std:c11",
+              "/TC",
+              "/O2",
+              "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\project-cli-512\\native\\fy_literals.c",
+              "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\project-cli-512\\native\\fy_unit_0.c",
+              "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\project-cli-512\\native\\trap.c",
+              "/Fe:C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\project-cli-512\\native\\project-optimized.exe",
+              "/link",
+              "/INCREMENTAL:NO"
+            ],
+            "exit": 0,
+            "stdout": "fy_literals.c\r\nfy_unit_0.c\r\ntrap.c\r\nGenerating Code...\r\n",
+            "stderr": ""
+          },
+          "run": {
+            "argv": [
+              "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\project-cli-512\\native\\project-optimized.exe"
+            ],
+            "exit": 0,
+            "stdout": "",
+            "stderr": ""
+          }
+        }
+      ]
+    }
+  },
+  "candidateReleaseBuild": {
+    "exit": null,
+    "passed": false,
+    "reason": "Validation subprocess timed out at 180 seconds; orphan MSVC compiler stopped. Development candidate build succeeded; no release candidate success claimed."
+  },
+  "fullCurrentDispatcher": {
+    "exit": 2,
+    "seconds": 60.046605200004706,
+    "stdout": "",
+    "stderr": "candidate build failed: candidate frontend timeout: context deadline exceeded\n",
+    "sourceFiles": 285,
+    "joinedSourceBytes": 2019281,
+    "previousImagePreserved": true,
+    "sourceInventorySHA256": "cd2bb91cb3063ee9a0c78ba538a92e34fd177ab064220285493ce067b4d1e726"
+  },
+  "fullCompilationProven": false,
+  "pushed": false
+}

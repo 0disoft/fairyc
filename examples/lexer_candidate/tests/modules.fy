@@ -129,7 +129,10 @@ fn void manifest_lines_and_limits() {
     assert(cli::paths(b"\xef\xbb\xbfa.fy",ref mut paths) == 1);
     assert(cli::paths(b"\xff.fy",ref mut paths) == 1);
     var bytes::Buffer manifest = bytes::empty(); var usize index = 0;
-    while (index < 257) { assert(bytes::append(ref mut manifest,b"a.fy\n").is_ok); index += 1; }
+    while (index < 512) { assert(bytes::append(ref mut manifest,b"a.fy\n").is_ok); index += 1; }
+    discard v::clear<cli::Path>(ref mut paths);
+    assert(cli::paths(bytes::view(ref manifest),ref mut paths) == 0 && v::len<cli::Path>(ref paths) == 512);
+    assert(bytes::append(ref mut manifest,b"a.fy\n").is_ok);
     discard v::clear<cli::Path>(ref mut paths);
     assert(cli::paths(bytes::view(ref manifest),ref mut paths) == 5);
 }

@@ -3376,3 +3376,35 @@ Original full C generation/execution, native driver, default timeout/performance
 standalone candidate profiles, Linux, full suite and Stage1/Stage2 remain pending.
 The candidate unit contract and local evidence tool change. Stable CLI/API, SDK
 ABI, Go reference behavior, DB, CI and native runner limits are unchanged. No push.
+
+
+## Source-owner file cap raised to 512 (2026-10-11)
+
+Receipt: `docs/ops/evidence/candidate-source-owner-512-20261011.json`.
+
+`candidate_limits::source_files()` returns 512 instead of 256. Only the
+file/module identity bound moved: per-file source bytes (65536), the aggregate
+2097152-byte source-set budget, the joined-owner arenas and the work/output/
+frame/depth caps are unchanged. The manifest module bound and the module-index
+checks in joined-body verification, cleanup MIR types and verification and the C
+callable and frame indexes read the same constant, so both candidate CLIs print
+`error: module limit (512 files)`.
+
+Two Release native cases pass. The manifest case admits 512 lines (status 0, 512
+entries) and rejects 513 with status 5. The identity case builds a 512-file
+source set whose highest admitted module is 511, keeps its nominal and callable
+identity, links two frames in one unit and emits a checked packet; the C
+emitted for that module compiles and runs under MSVC /Od and /O2. Locked source
+checking passes 292 files and 3667 MIR functions, and the development candidate
+build passes the nine-case CLI matrix plus its C execution. The separate Release
+candidate clone build hit its 180-second validation timeout and is not counted
+as a pass.
+
+The full 285-file bridge joins 2019281 source bytes, inside the unchanged 2 MiB
+budget, then stops at the private 60-second frontend timeout (`candidate
+frontend timeout: context deadline exceeded`, exit 2 at 60.0466 seconds) with
+the previous image preserved. The next task is measuring the slow phases under
+that same cap; complete dispatcher compilation, native compilation/execution of
+the complete dispatcher, standalone candidate profiles, Linux, the full suite
+and Stage1/Stage2 remain pending.
+Stable CLI/API, SDK ABI, Go, DB, CI and repository hygiene are unchanged. No push.
