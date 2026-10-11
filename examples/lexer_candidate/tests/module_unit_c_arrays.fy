@@ -48,3 +48,12 @@ fn usize entry(ref ir::Program p){var usize found=0;var usize i=1;while(i<=ir::c
 @test @effects(console) fn void array_c_checks_target_bounds_before_rhs_effects(){
     let p=retained(b"module main;@link_name(\"observe_cleanup\")@effects(console)unsafe extern C fn void trace(i32 n);@effects(console)fn void signal(i32 n){unsafe{trace(n);}}@effects(console)fn i32 rhs(i32 n){unsafe{trace(99);}return n;}@effects(console)resource R{i32 id;cleanup{unsafe{trace(this.id);}}}@effects(console)fn i32 main(){let R owner=R{.id=5};defer signal(88);var i32[2] row=[1,2];var usize index=row.len;unsafe{trace(1);}row[index]=rhs(9);return 0;}",b"");output(ref p,entry(ref p));
 }
+@test @effects(console) fn void array_c_reads_borrowed_fields_without_recursive_stack_copies(){
+    let p=retained(b"module main;struct Context{usize[1024] values;usize n;}fn usize recurse(ref Context c,usize depth){var usize total=0;total+=c.values[0];total+=c.values[1];total+=c.values[2];total+=c.values[3];total+=c.values[4];total+=c.values[5];total+=c.values[6];total+=c.values[7];total+=c.values[8];total+=c.values[9];total+=c.values[10];total+=c.values[11];total+=c.values[12];total+=c.values[13];total+=c.values[14];total+=c.values[15];total+=c.values[16];total+=c.values[17];total+=c.values[18];total+=c.values[19];total+=c.values[20];total+=c.values[21];total+=c.values[22];total+=c.values[23];if(depth==0){return total+c.n;}return recurse(c,depth-1)+1;}fn i32 main(){let Context c=Context{.values=[0;1024],.n=42};assert(recurse(ref c,32)==74);return 0;}",b"");output(ref p,entry(ref p));
+}
+@test @effects(console) fn void array_c_keeps_borrowed_field_snapshot_before_effectful_index(){
+    let p=retained(b"module main;struct Context{usize[2] values;}fn usize index(ref mut Context c){c.values[0]=99;return 0;}fn usize read(ref mut Context c){return c.values[index(c)];}fn i32 main(){var Context c=Context{.values=[1,2]};assert(read(ref mut c)==1);assert(c.values[0]==99);return 0;}",b"");output(ref p,entry(ref p));
+}
+@test @effects(console) fn void array_c_traps_borrowed_field_index_at_extent(){
+    let p=retained(b"module main;struct Context{usize[2] values;}fn usize read(ref Context c,usize index){return c.values[index];}fn i32 main(){let Context c=Context{.values=[1,2]};discard read(ref c,2);return 0;}",b"");output(ref p,entry(ref p));
+}

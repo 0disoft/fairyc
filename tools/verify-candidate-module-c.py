@@ -51,6 +51,11 @@ ARRAYS = {
     "array_c_traps_read_at_extent": (106, ""),
     "array_c_checks_target_bounds_before_rhs_effects": (106, "1,"),
 }
+BORROWED_ARRAYS = {
+    "array_c_reads_borrowed_fields_without_recursive_stack_copies": (0, ""),
+    "array_c_keeps_borrowed_field_snapshot_before_effectful_index": (0, ""),
+    "array_c_traps_borrowed_field_index_at_extent": (106, ""),
+}
 VIEWS = {
     "view_c_mutates_owner_and_shares_call_arguments": (0, "7,4,5,"),
     "view_c_selects_original_plain_struct_field_storage": (0, "6,7,"),
@@ -122,7 +127,7 @@ def main():
     parser.add_argument("--report", required=True, type=Path, action="append")
     parser.add_argument("--output", required=True, type=Path)
     parser.add_argument("--vcvars", required=True, type=Path)
-    parser.add_argument("--suite", choices=("scalar", "owned", "references", "reference-call-fields", "arrays", "views", "casts", "pointers", "literals", "enum-transport", "switches", "project", "constants", "all"), default="scalar")
+    parser.add_argument("--suite", choices=("scalar", "owned", "references", "reference-call-fields", "arrays", "borrowed-arrays", "views", "casts", "pointers", "literals", "enum-transport", "switches", "project", "constants", "all"), default="scalar")
     args = parser.parse_args()
     scalar_cases = {name: (exit_code, "") for name, exit_code in EXPECTED.items()}
     owned_cases = {name: (0, trace) for name, trace in OWNED.items()}
@@ -132,6 +137,7 @@ def main():
               "references": (reference_cases, {REFERENCE_PROOF}),
               "reference-call-fields": ({"reference_c_reborrows_fields_from_shared_and_mutable_call_results": (0, "")}, set()),
               "arrays": (ARRAYS, {REJECTION, OWNED_REJECTION}),
+              "borrowed-arrays": (BORROWED_ARRAYS, set()),
               "views": (VIEWS | {"array_c_evaluates_repeated_values_once_and_orders_literal_effects": ARRAYS["array_c_evaluates_repeated_values_once_and_orders_literal_effects"],
                                 "owned_c_drops_active_tagged_payloads_and_nested_fields_in_reverse_order": owned_cases["owned_c_drops_active_tagged_payloads_and_nested_fields_in_reverse_order"]},
                         {REJECTION, OWNED_REJECTION}),
@@ -148,7 +154,7 @@ def main():
               "switches": (SWITCHES | ENUM_TRANSPORT, {ENUM_TRANSPORT_REJECTION}),
               "project": (PROJECT, {PROJECT_REJECTION}),
               "constants": ({"folded_literals_link_and_execute_as_scalar_operands": (0, "")}, {"private_literals_keep_declared_type_value_and_reject_unused_invalid_items", "constant_argument_type_mismatch_is_rejected"}),
-              "all": (scalar_cases | owned_cases | reference_cases | ARRAYS | VIEWS | CASTS | POINTERS | LITERALS | ENUM_TRANSPORT | SWITCHES,
+              "all": (scalar_cases | owned_cases | reference_cases | ARRAYS | BORROWED_ARRAYS | VIEWS | CASTS | POINTERS | LITERALS | ENUM_TRANSPORT | SWITCHES,
                       {REJECTION, OWNED_REJECTION, REFERENCE_PROOF, CAST_REJECTION, POINTER_REJECTION, LITERAL_REJECTION, ENUM_TRANSPORT_REJECTION})}
     expected_cases, rejections = suites[args.suite]
     count = len(expected_cases) + len(rejections)

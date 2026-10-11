@@ -3619,3 +3619,30 @@ executions are reused. The current bound is 8 MiB. The Stage1/Stage2
 reproducibility gate is not yet completed. The Go-emitted `/O2 /Ob1` bootstrap
 remains cache-only and the product Release flags are unchanged. Linux, the full
 suite, Stage1/Stage2 gate and push were not run. No push.
+
+
+## Borrowed-array field read fusion (2026-10-11)
+
+Receipt: `docs/ops/evidence/candidate-borrowed-array-read-20261011.json`.
+
+`module_unit_c_borrowed_arrays` is imported by `module_unit_c_emit` and fuses one narrow
+shape: single-use array field access on a reference receiver whose index is a
+literal or a local, with no intervening effect or control node, is read where the
+field lives instead of through a whole-aggregate copy. Ordinary snapshot
+semantics are retained, including a snapshot for an index that mutates the
+source, and the fused node omits its temporary only inside that proven shape.
+
+Checking passes 293 files and 3681 MIR functions with the lock verified. Three
+native emission tests pass in 110.7170 seconds, and six generated-C executions
+pass under `/Od` and `/O2`, including 33 recursive frames with 24 `usize[1024]`
+reads, an effectful index that still snapshots 1 before 99, and a bounds trap
+reporting 106.
+
+A fresh Go-emitted cache `/O2 /Ob1` bootstrap joins the full 286 sources
+(2028270 bytes) and emits a 25485402-byte packet with 35 units, exit 0 in 37.5842
+seconds. The generated Stage1 development compiler builds in 61.9567 seconds
+(9652224 bytes), but the full exact-source replay still exits 0xC00000FD after
+33.3301 seconds with no output. Stage1/Stage2 therefore remains pending and this
+slice does not claim the whole compiler is fixed; the stack attribution belongs to
+the next slice. No public API, SDK ABI, DB or CI change, the 60-second frontend
+cap is unchanged, Linux and the full suite were not run, and no push was made.

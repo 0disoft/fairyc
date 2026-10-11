@@ -1952,3 +1952,31 @@ region enter/reset, loans, lifetimes, conflicts, moves, unsafe provenance,
 stage1/stage2, release and Linux. The public Stage 0 CLI and SDK ABI are
 unchanged. DB and CI are unchanged; no push was made. Evidence:
 docs/ops/evidence/candidate-module-region-escape-20261010.json.
+
+## Borrowed-array read fusion (2026-10-11)
+
+The candidate C emitter now imports `module_unit_c_borrowed_arrays` and fuses one
+narrow shape: a single-use array field read on a reference receiver whose index is
+a literal or a local, with no intervening effect or control node, is emitted
+against the field itself instead of first copying the whole aggregate into a value
+temporary. An effectful index remains outside the fused shape and retains the
+array snapshot, so mutating the source still observes 1 before 99, and a bounds
+failure still traps with 106. Outside the proven shape the previous copy behavior
+is unchanged.
+
+Checking passes 293 files and 3681 MIR functions with the lock verified. Three
+native emission tests pass in 110.7170 seconds, and six generated-C executions
+pass under `/Od` and `/O2`, including 33 recursive frames with 24 `usize[1024]`
+reads.
+
+A fresh Go-emitted cache `/O2 /Ob1` bootstrap joins the full 286 sources
+(2028270 bytes) and emits a 25485402-byte packet with 35 units, exit 0 in 37.5842
+seconds. The generated Stage1 development compiler builds in 61.9567 seconds
+(9652224 bytes), yet the full exact-source replay still exits 0xC00000FD after
+33.3301 seconds with no output. The reproducible two-stage bootstrap
+`promotion` row stays `blocked`: stage1/stage2 artifacts and differential
+results do not match yet, and this slice does not claim the whole compiler is
+fixed. The stack attribution is deliberately left to the next slice. The 60-second
+frontend cap, the public Stage 0 CLI, the SDK ABI, DB and CI are unchanged; Linux,
+the full suite and the Stage1/Stage2 gate were not run, and no push was made.
+Evidence: docs/ops/evidence/candidate-borrowed-array-read-20261011.json.
