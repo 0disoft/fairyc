@@ -147,12 +147,16 @@ fn Result<Prepared,clean::Problem> prepare_project(ir::Program p,usize entry,boo
     let sdk_plan=switch(sdk::build(ref p,ref mut work)){case .ok(p):{p}case .err(e):{return .err(e);}};let indexed=switch(contracts::build(ref p,ref mut work)){case .ok(p):{p}case .err(e):{return .err(fail(e,0,0,0));}};
     let body_index=switch(targets::build(ref p,ref indexed,ref mut work)){case .ok(p):{p}case .err(e):{return .err(fail(e,0,0,0));}};
     let selected=switch(if(entry_only){reachable::build(ref p,ref graphs,ref indexed,ref body_index,entry,ref mut work)}else{reachable::all(ref p,ref mut work)}){case .ok(p):{p}case .err(e):{return .err(fail(e,0,0,0));}};
+    // Checked analysis and common C declarations are independently bounded;
+    // both histories remain charged to the existing whole-project ledger.
+    var usize total=0;if(!limits::project_charge(ref mut total,work)){return .err(fail(1002,0,0,0));}work=0;
     var bytes::Buffer header=bytes::empty();var w::State s=w::State{.code=0};if(!w::text(ref mut header,ref mut s,b"#ifndef FY_CANDIDATE_PROJECT_HEADER_V1\n#define FY_CANDIDATE_PROJECT_HEADER_V1\n") || !prologue(ref mut header,ref mut s)){return .err(fail(error_code(s),0,0,0));}
     let marks=switch(aggregate::definitions(ref p,ref mut header,ref mut s,ref mut work)){case .ok(m):{m}case .err(e):{return .err(fail(if(e<1000){if(e==3){1003}else{1002}}else{e},0,0,0));}};
     var bytes::Buffer literal_source=bytes::empty();if(!literals::shared_storage(ref p,ref mut header,ref mut literal_source,ref mut s,ref mut work) || !w::text(ref mut header,ref mut s,b"#include <stddef.h>\n") || !sdk::definitions(ref p,ref sdk_plan,ref mut header,ref mut s,ref mut work) || !lifecycle::definitions(ref p,ref sdk_plan,ref mut header,ref mut s,ref mut work) || !foreign_signatures(ref p,ref sdk_plan,ref indexed,ref mut header,ref mut s,ref mut work)){return .err(fail(error_code(s),0,0,0));}
     i=1;while(i<=ir::count(ref p)){if(reachable::frame(ref selected,i) && (!signature(ref p,i,ref mut header,ref mut s,true) || !w::text(ref mut header,ref mut s,b";\n"))){return .err(fail(error_code(s),clean::frame_at(ir::cleanup_ir(ref p),i).module_index,ir::start(ir::at(ref p,i)),ir::end(ir::at(ref p,i))));}i+=1;}
     if(!aggregate::drops(ref p,if(entry_only){reachable::drops(ref selected)}else{ref marks},ref mut header,ref mut s,ref mut work) || !w::text(ref mut header,ref mut s,b"#endif\n")){return .err(fail(error_code(s),0,0,0));}
-    return .ok(Prepared{.program=p,.graphs,.sdk_plan,.indexed,.body_index,.selected,.header,.literal_source,.entry,.work});
+    if(!limits::project_charge(ref mut total,work)){return .err(fail(1002,0,0,0));}
+    return .ok(Prepared{.program=p,.graphs,.sdk_plan,.indexed,.body_index,.selected,.header,.literal_source,.entry,.work=total});
 }
 fn Result<bytes::Buffer,clean::Problem> project_unit(ref Prepared p,usize first,usize stop,ref mut usize work){
     var bytes::Buffer text=bytes::empty();var w::State s=w::State{.code=0};if(!w::text(ref mut text,ref mut s,b"/* fairyc.candidate-project-unit-c/v1 */\n#include \"fy_project.h\"\n")){return .err(fail(error_code(s),0,0,0));}var usize i=first;
@@ -166,8 +170,8 @@ fn clean::Problem append_project_units(ref Prepared p,usize first,usize stop,usi
     };return fail(1001,0,0,0);
 }
 // A complete project owns its validated IR and never exposes a successful prefix.
-// Header and individual units each retain 1 MiB work and 2 MiB output bounds;
-// successful and failed unit attempts share the existing 4 MiB project ledger.
+// Analysis, common declarations and each body attempt retain 1 MiB work;
+// output buffers retain 2 MiB. All histories share the 4 MiB project ledger.
 fn Result<Bundle,clean::Problem> partition_scoped(ir::Program program,usize entry,usize max_frames,bool entry_only){
     if(max_frames==0 || max_frames>limits::project_frames()){return .err(fail(1001,0,0,0));}let p=switch(prepare_project(program,entry,entry_only)){case .ok(p):{p}case .err(e):{return .err(e);}};let frames=ir::count(ref p.program);var usize total=p.work;var usize retries=0;var v::Vec<Unit> units=v::empty<Unit>();var usize first=1;
     while(first<=frames){let stop=if(max_frames<frames+1-first){first+max_frames}else{frames+1};let e=append_project_units(ref p,first,stop,0,ref mut units,ref mut total,ref mut retries);if(e.code!=0){return .err(e);}first=stop;}

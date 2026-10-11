@@ -1,0 +1,121 @@
+{
+  "schema": "fairyc.candidate-c-preparation-scopes/v1",
+  "passed": true,
+  "implementation": {
+    "path": "examples/lexer_candidate/src/module_unit_c_emit.fy",
+    "bytes": 29203,
+    "sha256": "8c0fb4660892b583f5209ace9df830f77ca69dfa6719f85cb4a967c1e7fc652d"
+  },
+  "contract": {
+    "path": "docs/architecture/candidate-project-c-parts-v0.md",
+    "bytes": 6158,
+    "sha256": "f3a7ff00ca611cc5efacc88d3443d040974346333da023bd0804cecd9fd244cd"
+  },
+  "receiptTool": {
+    "path": "tools/verify-candidate-c-preparation-scopes.py",
+    "bytes": 5353,
+    "sha256": "06dea861284f14bdd8b6dc6acc851da6f79e6f271671e75e664993ac92b07f6b"
+  },
+  "sourceCheck": {
+    "exit": 0,
+    "seconds": 12.5615253,
+    "stdout": "check ok: 2 instance(s), 291 source file(s), 3653 MIR function(s), lock verified\n",
+    "stderr": null
+  },
+  "native": {
+    "report": {
+      "path": ".cache/candidate-tagged/sdk-c-execution/native-c-entry-scopes.json",
+      "bytes": 20870,
+      "sha256": "e917db060563bd95a65b87f2c4baff0a870d6cd3fd93bca33b2da4388fc7a12f"
+    },
+    "passed": 2
+  },
+  "unchangedPackets": {
+    "exact": true,
+    "previousNative": {
+      "path": ".cache/candidate-tagged/sdk-c-execution/native-c-entry-parts.json",
+      "bytes": 20870,
+      "sha256": "e917db060563bd95a65b87f2c4baff0a870d6cd3fd93bca33b2da4388fc7a12f"
+    },
+    "execution": {
+      "path": ".cache/candidate-tagged/sdk-c-execution/c-entry-parts-native-c/execution.json",
+      "bytes": 13332,
+      "sha256": "ae0230475fefb14e91e805e1e0725ad887bde24d714be1b7336d20e0f7bbd4c6"
+    },
+    "reusedExecutions": 4
+  },
+  "failureMeter": {
+    "report": {
+      "path": ".cache/candidate-tagged/sdk-c-execution/run-main-c-entry-meter.json",
+      "bytes": 14340,
+      "sha256": "faf1416b8101e59f315eada239fe87c15aa9139bc7d8ae710f7331e1fc619c50"
+    },
+    "wrapper": {
+      "path": ".cache/candidate-tagged/sdk-c-execution/main-c-entry-meter/src/module_unit_c_emit.fy",
+      "bytes": 30050,
+      "sha256": "1942b3d25b7b734e7f530c832cb810ac2c87a042fdcdf834593d6de196a14e6c"
+    },
+    "exit": 2,
+    "stdout": "compiled units 48 retries 25\nlinked frames 3558 work 3321980\nproject drops 6392 root drops 4\nroot CFG blocks 247 work 7650\nCFG rows work 264577 bytes 0 extra 0\nSDK and callable index work 369053 bytes 0 extra 0\nbody index work 374252 bytes 0 extra 0\nreachability work 787768 bytes 0 extra 3222\nprologue work 787768 bytes 0 extra 0\naggregate types work 1016330 bytes 107055 extra 0\nwriter failure work 1048576 bytes 107055 extra 1002\npartition code 1002 module 0 at 0..0\n"
+  },
+  "originalProject": {
+    "emissionPassed": true,
+    "sourceCount": 236,
+    "sourceIdentityReceipt": {
+      "path": "docs/ops/evidence/candidate-project-c-parts-20261011.json",
+      "bytes": 83658,
+      "sha256": "396972840fcf39b38b773bbb716d108cf50c937b70f2e2c2b9d01fb5d2fd1415"
+    },
+    "inputsMatch": true,
+    "report": {
+      "path": ".cache/candidate-tagged/sdk-c-execution/run-main-c-entry-scopes.json",
+      "bytes": 14079,
+      "sha256": "caa5a48e01222ac6da6f73aae54f0111bff14ef23e9ed2cfdaf589174ffc4794"
+    },
+    "exit": 0,
+    "seconds": 82.56271629999537,
+    "stdout": "compiled units 48 retries 25\nlinked frames 3558 work 3321980\nproject drops 6392 root drops 4\nroot CFG blocks 247 work 7650\npartition frames 3558 units 28 retries 0 work 3233248\npacket header 655466 literals 149489\n",
+    "wrapper": {
+      "path": ".cache/candidate-tagged/sdk-c-execution/main-c-entry-scopes/src/main.fy",
+      "bytes": 6814,
+      "sha256": "68502a0e8997c4242cc6bbcff327ef885d55edac982f8be2e4b8772b0f2c8e72"
+    },
+    "image": {
+      "path": ".cache/candidate-tagged/sdk-c-execution/main-c-entry-scopes/build/main-c-entry-scopes.exe",
+      "bytes": 2169856,
+      "sha256": "3536153d55f367239b6e9698897bbedb268450c8689037ebb5082bea1f1dc0ea"
+    },
+    "packet": {
+      "path": ".cache/candidate-tagged/sdk-c-execution/project-entry-scopes-packet.bin",
+      "bytes": 20093736,
+      "sha256": "91cfcac3ebf734a0f77cbee6a549adff7e511eb85af5cb205ef3dd50417b091c"
+    },
+    "frames": 3558,
+    "selectedFrames": 3222,
+    "units": 28,
+    "retries": 0,
+    "work": 3233248,
+    "headerBytes": 655466,
+    "literalBytes": 149489,
+    "literalDefinitions": 775,
+    "bodyBytes": 19288554,
+    "maxBodyBytes": 1432228
+  },
+  "limits": {
+    "analysisWork": 1048576,
+    "commonDeclarationWork": 1048576,
+    "unitWork": 1048576,
+    "outputBytesPerBuffer": 2097152,
+    "projectWork": 4194304
+  },
+  "deferred": [
+    "Original executable linkage and execution",
+    "Native driver/publication",
+    "Default timeout/performance",
+    "Standalone compiler profiles",
+    "Linux",
+    "Full suite",
+    "Stage1/Stage2"
+  ],
+  "pushed": false
+}

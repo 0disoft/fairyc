@@ -3238,6 +3238,29 @@ published. Identifying and dividing the failing bounded phase remains next.
 Native driver/publication, default-timeout performance, Linux, full suite and
 Stage1/Stage2 remain pending. No stable CLI/SDK ABI/DB/CI changes and no push.
 
+## Complete original project C emission (2026-10-11)
+
+Receipt: `evidence/candidate-c-preparation-scopes-20261011.json`.
+The preparation failure is now isolated and fixed. Analysis/reachability used
+787768 work; aggregate declarations raised the old shared counter to 1016330;
+literal collection exhausted it at 1048576 while the header held only 107055
+bytes. Analysis and common C declarations now use separate existing 1048576
+caps, and both histories remain in the existing 4194304 project ledger.
+
+The unchanged 236-file project compiles 48 units with 25 retries and links 3558
+frames. Complete C emission succeeds in 82.56 seconds: 3222 selected definitions,
+28 body files, no C retries and 3233248 total work. Header/literal storage are
+655466/149489 bytes; 775 shared literals remain unique and digest-ordered. Body
+output totals 19288554 bytes, with a 1432228-byte largest unit, below the unchanged
+2097152 buffer cap. The exact 20093736-byte packet is validation-only output.
+
+Two Release native cases pass and produce byte-identical prior packets, so four
+unchanged MSVC /Od-/O2 executions are reused. Locked source checking passes with
+291 files and 3653 MIR functions. Original executable linkage/execution, native
+driver/publication, default-timeout performance, standalone compiler profiles,
+Linux, full suite and Stage1/Stage2 remain pending. Stable CLI/SDK ABI/DB/CI and
+all existing numeric limits remain unchanged. No push.
+
 
 ## Owned-C layout index and foreign-declaration work (2026-10-11)
 

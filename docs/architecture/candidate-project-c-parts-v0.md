@@ -18,8 +18,9 @@ and full SHA-256 ordering. The header declares `extern const uint8_t` storage;
 therefore keep their shared pointer identity across translation units, including
 empty payload sentinels. CStr terminators remain part of the cooked payload.
 
-Preparation and each body attempt retain the 1048576 work cap. Each output
-buffer retains the 2097152-byte cap. Preparation, successful body attempts and
+Checked analysis, common declarations and each body attempt each retain the
+1048576 work cap. Each output buffer retains the 2097152-byte cap. Both
+preparation histories, successful body attempts and
 failed attempts charge the existing 4194304 project ledger. A code-1002 body
 failure may bisect its interval, to depth 12; a single frame, other error codes
 or an exhausted project ledger reject. Frame intervals must cover every original
@@ -71,3 +72,28 @@ The original 236-file project still rejects with code 1002, module 0, span 0..0;
 the failing preparation/project-budget phase has not yet been isolated. No
 original bundle or executable is published. Receipt:
 `docs/ops/evidence/candidate-c-entry-reachability-20261011.json`.
+
+## Bounded preparation phases
+
+Analysis/SDK authentication/indexes/reachability and common C declarations now
+have separate 1048576 counters. Each completed history is folded into the same
+4194304 project ledger before its local counter resets. Resetting a counter
+never discards work from the project total. Output limits, body splitting,
+original identities and transactional bundle publication retain their contracts.
+
+A cache-only observation isolates the earlier failure: analysis used 787768
+work and selected 3222 frames; aggregate declarations brought the combined
+counter to 1016330. Literal collection then exhausted 1048576 work with only
+107055 header bytes retained. The 2097152 output limit was not reached.
+
+After phase separation, the unchanged 236-source original project emits the
+complete entry bundle: 3558 original frames, 3222 selected definitions, 28 body
+files, no retries, 3233248 total work, a 655466-byte header and a 149489-byte
+literal source containing 775 unique definitions. Body sources total 19288554
+bytes; the largest is 1432228 bytes. Exact packet parsing verifies unique ordered
+frame definitions, one entry wrapper and shared numeric literal storage.
+
+Two Release native cases retain their previous packet bytes exactly; their four
+unchanged /Od-/O2 executions are reused. Original executable linkage/execution is
+a separate next gate. Receipt:
+`docs/ops/evidence/candidate-c-preparation-scopes-20261011.json`.
