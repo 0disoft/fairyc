@@ -1980,3 +1980,35 @@ fixed. The stack attribution is deliberately left to the next slice. The 60-seco
 frontend cap, the public Stage 0 CLI, the SDK ABI, DB and CI are unchanged; Linux,
 the full suite and the Stage1/Stage2 gate were not run, and no push was made.
 Evidence: docs/ops/evidence/candidate-borrowed-array-read-20261011.json.
+
+## Move-analysis stack isolation (2026-10-11)
+
+A native trace of the earlier failing packet attributed the move-analysis stack
+pressure to two functions: `moves::build` (`fy_fn_2857`, about 401472 bytes of
+frame delta) and `move_walk::expression` (`fy_fn_2849`, about 35728 bytes per
+recursive frame). The bounded 1024-by-3-array Context constructor now lives in
+`g::context`, and `move_walk::expression` is split into binding, logical and
+projected helpers over a borrowed `Expression`. The change is limited to
+emission and layout: traversal order, the depth 64 and 1 MiB work bounds, and the
+pending-count restore are unchanged.
+
+Checking passes 293 files and 3685 MIR functions with the lock updated, and the
+three existing native tests (reachable branches and loop edges, exact move facts,
+retained and call-held owner loans) pass in 112.7483 seconds.
+
+The full 286-source 2029931-byte join emits a 25490785-byte packet with 35 units,
+exit 0 in 35.7388 seconds from the Go-emitted baseline, and the full development
+native build exits 0 in 56.2073 seconds (9651200 bytes). The exact self replay
+still exits 0xC00000FD after 41.3244 seconds, so the reproducible two-stage
+bootstrap `promotion` row stays `blocked`. The cache-only trace now repeats
+`fn_3516`/`fn_3522` (`evaluate`/`binary`) in scalar value typing on the
+former move path, and localization continues. The source C root runtime
+`e4b91c553b5f6db9e65cd031569763a9ddf73e77e58db4ce9fad4c19830be6b7` verifies
+against the current Go runtime owners. The optimized native compiler builds
+from the retained packet in 200.6866 seconds, but its exact-source replay reaches
+the unchanged 60-second frontend timeout without a packet. This slice claims
+only reduced move-frame pressure.
+
+The 60-second frontend cap, the caps, the public Stage 0 CLI, the SDK ABI, DB and
+CI are unchanged; Linux, the full suite, Stage 2 and push were not run. Evidence:
+docs/ops/evidence/candidate-move-analysis-stack-20261011.json.

@@ -9,6 +9,8 @@ pub struct Cell {u32 state;usize move_start;usize move_end;}
 pub struct Diagnostic {u32 code;usize frame;usize module_index;usize start;usize end;usize declaration_start;usize declaration_end;usize move_start;usize move_end;usize header_start;usize header_end;usize field_module;usize field_start;usize field_end;}
 pub struct Fact {usize frame;usize binding;usize expression;u32 kind;u32 before;u32 after;usize start;usize end;usize move_start;usize move_end;usize type;u32 exit;}
 pub struct Context {m::Frame value;usize frame;usize work;usize loop;usize cleanup_end;usize pending_count;usize[1024] pending_types;usize[1024] pending_loops;usize[1024] pending_expressions;}
+// Construct the large bounded storage outside the frame that runs recursion.
+pub fn Context context(m::Frame value,usize frame,usize work,usize cleanup_end){return Context{.value,.frame,.work,.loop=0,.cleanup_end,.pending_count=0,.pending_types=[0;1024],.pending_loops=[0;1024],.pending_expressions=[0;1024]};}
 pub resource Edge {usize loop;bool back;usize start;usize end;v::Vec<Cell> cells;cleanup{}}
 pub fn Edge edge(usize loop,bool back,usize start,usize end,v::Vec<Cell> cells){return Edge{.loop,.back,.start,.end,.cells};}
 pub fn usize edge_loop(ref Edge p){return p.loop;}
