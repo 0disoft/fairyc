@@ -1,0 +1,257 @@
+{
+  "schema": "fairyc.candidate-body-type-batches/v1",
+  "passed": true,
+  "scope": "Ordered body and cleanup annotations validate exact provider source once per query batch; charged prefix errors precede a later work-limit error",
+  "sources": [
+    {
+      "path": "examples/lexer_candidate/src/module_unit_body_types.fy",
+      "sha256": "9dc313da217fb59197287be8ef7eb2806ebbe41414d7b34476efdd1d44bd20fd"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_unit_bodies.fy",
+      "sha256": "b0d09ef53909ef2cb0819c7e1fdf195b4ab0713c5382d79dc1411ef4e0298c99"
+    },
+    {
+      "path": "examples/lexer_candidate/fairy.lock",
+      "sha256": "6d9dec235070f79a4357d76f32a92d8444673e7ff442e40623aa573d8c0ab21d"
+    }
+  ],
+  "sourceCheck": {
+    "exit": 0,
+    "files": 293,
+    "mirFunctions": 3700
+  },
+  "native": {
+    "argv": [
+      "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\compiler-build-120s.exe",
+      "test",
+      "--native",
+      "--locked",
+      "--json",
+      "--capture-output",
+      "--exact",
+      "tests::module_unit_body_types::private_local_types_close_fields_cleanups_and_new_helper_bodies",
+      "--exact",
+      "tests::module_unit_body_types::failed_local_type_collection_rolls_back_graph_additions",
+      "--exact",
+      "tests::module_unit_body_types::invalid_cleanup_local_type_keeps_provider_position",
+      "--exact",
+      "tests::module_unit_bodies::stale_provider_bytes_fail_before_cloning",
+      "--exact",
+      "tests::module_unit_bodies::authenticated_sdk_bodies_own_storage_intrinsic_and_resource_annotations",
+      "--exact",
+      "tests::module_unit_bodies::invalid_provider_local_annotation_preserves_original_span"
+    ],
+    "exit": 5,
+    "seconds": 182.62278649999644,
+    "stderr": ""
+  },
+  "sdkRerun": {
+    "identity": "tests::module_unit_bodies::authenticated_sdk_bodies_own_storage_intrinsic_and_resource_annotations",
+    "passed": 1,
+    "source": "internal/sdkstdlib/sources/optional/std/vec.fy",
+    "sourceSHA256": "0ae4c395bf98c39079ad620bde035b3b590d51417864802e698edc069281db5b",
+    "reason": "First invocation omitted required SDK path; first retry used nonexistent std/vec.fy; correct existing optional/std/vec.fy passed without source edits"
+  },
+  "nativeTests": [
+    {
+      "identity": "tests::module_unit_bodies::authenticated_sdk_bodies_own_storage_intrinsic_and_resource_annotations",
+      "outcome": "passed"
+    },
+    {
+      "identity": "tests::module_unit_bodies::invalid_provider_local_annotation_preserves_original_span",
+      "outcome": "passed"
+    },
+    {
+      "identity": "tests::module_unit_bodies::stale_provider_bytes_fail_before_cloning",
+      "outcome": "passed"
+    },
+    {
+      "identity": "tests::module_unit_body_types::failed_local_type_collection_rolls_back_graph_additions",
+      "outcome": "passed"
+    },
+    {
+      "identity": "tests::module_unit_body_types::invalid_cleanup_local_type_keeps_provider_position",
+      "outcome": "passed"
+    },
+    {
+      "identity": "tests::module_unit_body_types::private_local_types_close_fields_cleanups_and_new_helper_bodies",
+      "outcome": "passed"
+    }
+  ],
+  "cliAndVector": {
+    "passed": true,
+    "compilerSHA256": "9742f2b61deaca3064ff2515becb0981038e00f729a89233ec8f85c582248b44",
+    "cases": [
+      {
+        "name": "positive",
+        "exit": 0,
+        "seconds": 0.14144320000195876,
+        "stdoutBytes": 3565,
+        "stderr": "",
+        "packetSHA256": "68c878676f624102da5d214b87c36f673823603bcfbfc9ad30a919bedff430dc",
+        "priorCExecutionReused": true
+      },
+      {
+        "name": "dependency-entry",
+        "exit": 2,
+        "seconds": 0.11706570000387728,
+        "stdoutBytes": 0,
+        "stderr": ".cache/candidate-tagged/sdk-c-execution/project-cli-sdk/fixtures/root.fy:1:1: error: project phase 4 stage 0 code 1001 (bytes 0..0)\n"
+      },
+      {
+        "name": "wrong-result",
+        "exit": 2,
+        "seconds": 0.1247016999986954,
+        "stdoutBytes": 0,
+        "stderr": ".cache/candidate-tagged/sdk-c-execution/project-cli-sdk/fixtures/void.fy:1:1: error: project phase 5 stage 0 code 1001 (bytes 0..0)\n"
+      },
+      {
+        "name": "type-error",
+        "exit": 2,
+        "seconds": 0.02146109999739565,
+        "stdoutBytes": 0,
+        "stderr": ".cache/candidate-tagged/sdk-c-execution/project-cli-sdk/fixtures/type.fy:1:34: error: project phase 2 stage 4 code 1009 (bytes 33..37)\n"
+      },
+      {
+        "name": "syntax-error",
+        "exit": 2,
+        "seconds": 0.018347799996263348,
+        "stdoutBytes": 0,
+        "stderr": ".cache/candidate-tagged/sdk-c-execution/project-cli-sdk/fixtures/syntax.fy:1:36: error: expected } (bytes 35..35)\n"
+      },
+      {
+        "name": "missing-source",
+        "exit": 2,
+        "seconds": 0.016845600010128692,
+        "stdoutBytes": 0,
+        "stderr": "error: input file read failed\n"
+      },
+      {
+        "name": "blank-manifest",
+        "exit": 2,
+        "seconds": 0.01634050000575371,
+        "stdoutBytes": 0,
+        "stderr": "error: invalid module manifest\n"
+      },
+      {
+        "name": "invalid-utf8",
+        "exit": 2,
+        "seconds": 0.0157043000072008,
+        "stdoutBytes": 0,
+        "stderr": "error: invalid module manifest\n"
+      },
+      {
+        "name": "duplicate-source",
+        "exit": 2,
+        "seconds": 0.019299199993838556,
+        "stdoutBytes": 0,
+        "stderr": ".cache/candidate-tagged/sdk-c-execution/project-cli-sdk/fixtures/main.fy:1:8: error: project phase 1 stage 0 code 1 (bytes 7..11)\n"
+      },
+      {
+        "name": "vector-dev",
+        "exit": 0,
+        "seconds": 2.6076041999913286,
+        "stdout": "built: C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\bridge-body-batch-vector-dev.exe (low, 1 C units, 117248 bytes)\n",
+        "stderr": "",
+        "imageSHA256": "e20f76d25c41bca909df332edbdbe4075b6d7fdb088787506041cf495a6ea19c",
+        "programExit": 0
+      },
+      {
+        "name": "vector-release",
+        "exit": 0,
+        "seconds": 2.6654959000006784,
+        "stdout": "built: C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\bridge-body-batch-vector-release.exe (optimized, 1 C units, 110592 bytes)\n",
+        "stderr": "",
+        "imageSHA256": "1de16cb24595aa5ca082c6451bfc8727df93da13041e69baea1a12059f40b231",
+        "programExit": 0
+      }
+    ]
+  },
+  "bootstrap": {
+    "runs": [
+      {
+        "exit": 0,
+        "seconds": 22.56395560000965,
+        "stderr": "",
+        "stdoutBytes": 21952292
+      },
+      {
+        "exit": 0,
+        "seconds": 40.007488399991416,
+        "stderr": "",
+        "stdoutBytes": 24
+      },
+      {
+        "exit": 0,
+        "seconds": 0.21085689999745227,
+        "stderr": "",
+        "stdoutBytes": 0
+      }
+    ],
+    "sha256": "2d2f2e3a5920bf1de57213fe837e22025034d66f9be82abc4c29eda2ab6a5aa7"
+  },
+  "fullSource": {
+    "frontendTimeoutSeconds": 60,
+    "runs": [
+      {
+        "name": "baseline",
+        "exit": 0,
+        "seconds": 37.795796000005794,
+        "timeout": false,
+        "stdoutBytes": 24528979,
+        "stderr": "",
+        "compilerSHA256": "2d2f2e3a5920bf1de57213fe837e22025034d66f9be82abc4c29eda2ab6a5aa7",
+        "packetSHA256": "a672d25b54ff3a784a73f8196941e722a082a478ca96182dce780fef8f4e081c"
+      },
+      {
+        "name": "build-stage1-dev",
+        "exit": 0,
+        "seconds": 56.55315680000058,
+        "stdout": "built: C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\stage1-body-batch.exe (low, 36 C units, 9363968 bytes)\n",
+        "stderr": ""
+      },
+      {
+        "name": "stage1-dev",
+        "exit": null,
+        "timeout": true,
+        "seconds": 60.03685800000676
+      }
+    ]
+  },
+  "sourceInventory": {
+    "count": 286,
+    "joinedBytes": 2038297,
+    "encoding": "Manifest-order path + space + SHA256 + newline",
+    "sha256": "b10061f4f92789e7378b1f763815810f71d699e493e93c587f4dadc0d2c275d5",
+    "manifestSHA256": "5cebd2ea57b714167ee98620033666fc358b6e6cee56eee8ba0b28e9fee0d8c4"
+  },
+  "optimizedBuild": {
+    "exit": 0,
+    "seconds": 197.72950960000162,
+    "stdout": "PASS original candidate: 36 units, 38 objects, 197.48s\n",
+    "stderr": "",
+    "frontendReused": true
+  },
+  "optimizedReplay": {
+    "exit": null,
+    "seconds": 60.05884139999398,
+    "timeout": true
+  },
+  "frontendTimeoutSeconds": 60,
+  "canonicalTypeLimit": 4096,
+  "workLimit": 1048576,
+  "stackReserveChanged": false,
+  "fullSourceSelfReplayPassed": false,
+  "stage1Stage2GatePassed": false,
+  "publicApiChanged": false,
+  "sdkAbiChanged": false,
+  "dbChanged": false,
+  "ciChanged": false,
+  "pushed": false,
+  "skipped": [
+    "Linux: deferred platform batch",
+    "Full suite: scoped batch consumer validation",
+    "Stage2 artifact and differential gate"
+  ]
+}
