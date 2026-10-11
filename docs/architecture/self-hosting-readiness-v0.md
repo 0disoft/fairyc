@@ -2252,3 +2252,16 @@ The verification harness adds opt-in test subsets and frontend allowance;
 product timeout, stack reserve, public API, SDK ABI, DB and CI are unchanged.
 No push. Receipt:
 [candidate-cfg-stack-20261012.json](../ops/evidence/candidate-cfg-stack-20261012.json).
+
+## Independent C reachability history (2026-10-12)
+
+Index/SDK preparation (545600 work) and reachability (625962) now pass separate
+1 Mi work bounds while both count toward the unchanged 8 Mi project ledger.
+The full 355-file replay still fails phase 5 code 1002: aggregate declarations
+use 343438 work, then literal collection exhausts their shared 1 Mi meter.
+Literal-pool isolation is next; no complete C packet or Stage2 is claimed.
+Source check passes 362 files / 4679 MIR functions. Two Release native cases
+pass with verification-only build allowance 240 seconds after the product's
+60-second allowance timed out. Exact packets permit four prior C executions
+to be reused. Public API, SDK ABI, DB and CI are unchanged; no push. Receipt:
+[candidate-c-reachability-scopes-20261012.json](../ops/evidence/candidate-c-reachability-scopes-20261012.json).

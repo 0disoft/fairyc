@@ -97,3 +97,23 @@ Two Release native cases retain their previous packet bytes exactly; their four
 unchanged /Od-/O2 executions are reused. Original executable linkage/execution is
 a separate next gate. Receipt:
 `docs/ops/evidence/candidate-c-preparation-scopes-20261011.json`.
+
+## Independent reachability history
+
+Index/SDK preparation and reachability now use independent 1048576 work meters.
+Both completed histories enter the existing 8388608 whole-project ledger exactly
+once before common declarations begin. Both all-frame and entry-only partitioning
+use these boundaries. The previous 4194304 ledger mentioned above is historical.
+
+The current 355-file dispatcher uses 545600 work for index/SDK preparation and
+625962 for reachability: each fits its own bound, their sum exceeds the former
+shared bound. Aggregate declarations then use 343438 work; literal collection
+exhausts the shared common-declaration meter at 1048576. No bundle is published.
+Literal collection is the next bounded phase to isolate.
+
+Two Release native cases pass with a current-source verification bootstrap whose
+MSVC build allowance is 240 seconds. The product's 60-second allowance timed out
+and remains unchanged. Exact packet bytes match the previous cases, allowing
+their four /Od-/O2 C executions to be reused. Source check passes 362 files /
+4679 MIR functions. Receipt:
+`docs/ops/evidence/candidate-c-reachability-scopes-20261012.json`.

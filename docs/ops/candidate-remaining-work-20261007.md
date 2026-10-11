@@ -4116,3 +4116,21 @@ remain. The verifier now accepts an explicit authored test subset and an optiona
 1..900-second frontend allowance; its defaults remain all tests and 60 seconds.
 Product timeout, stack reserve, API, SDK ABI, DB and CI are unchanged; no push.
 Receipt: `evidence/candidate-cfg-stack-20261012.json`.
+
+## Independent C reachability history (2026-10-12)
+
+Preparation now charges index/SDK work and reachability to independent 1048576
+meters, folding each history once into the unchanged 8388608 project ledger.
+The current dispatcher uses 545600 and 625962 work respectively; both phases
+pass. The next failure is literal collection: aggregate declarations use 343438
+work, then literals exhaust the shared declaration meter at 1048576.
+The 355-file optimized full replay still emits no packet and exits phase 5
+code 1002; Stage2 remains unachieved. Isolate literal-pool work next.
+
+Source check passes 362 files / 4679 MIR functions. Two Release native cases
+pass, preserving their exact packet bytes; four prior C executions are reused.
+The default MSVC 60-second build allowance timed out. A current-source bootstrap
+with verification-only 240-second build allowance completes both cases in 210.75
+seconds; product timeout work remains pending. API, SDK ABI, DB and CI are
+unchanged; no push. Receipt:
+`evidence/candidate-c-reachability-scopes-20261012.json`.

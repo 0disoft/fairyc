@@ -153,10 +153,11 @@ fn Result<Prepared,clean::Problem> prepare_project(ir::Program p,usize entry,boo
     let graphs=switch(flow::lower_all(ref p)){case .ok(g):{g}case .err(e):{return .err(e);}};var usize work=0;var usize i=0;while(i<v::len<cfg::Graph>(ref graphs)){if(!budget::charge(ref mut work,cfg::count(v::at<cfg::Graph>(ref graphs,i)))){return .err(fail(1002,0,0,0));}i+=1;}
     let sdk_plan=switch(sdk::build(ref p,ref mut work)){case .ok(p):{p}case .err(e):{return .err(e);}};let indexed=switch(contracts::build(ref p,ref mut work)){case .ok(p):{p}case .err(e):{return .err(fail(e,0,0,0));}};
     let body_index=switch(targets::build(ref p,ref indexed,ref mut work)){case .ok(p):{p}case .err(e):{return .err(fail(e,0,0,0));}};
-    let selected=switch(if(entry_only){reachable::build(ref p,ref graphs,ref indexed,ref body_index,entry,ref mut work)}else{reachable::all(ref p,ref mut work)}){case .ok(p):{p}case .err(e):{return .err(fail(e,0,0,0));}};
-    // Checked analysis and common C declarations are independently bounded;
-    // both histories remain charged to the existing whole-project ledger.
+    // Index/SDK preparation and the reachability fixed point each retain their
+    // own work bound. Every completed history enters the whole-project ledger.
     var usize total=0;if(!limits::project_charge(ref mut total,work)){return .err(fail(1002,0,0,0));}work=0;
+    let selected=switch(if(entry_only){reachable::build(ref p,ref graphs,ref indexed,ref body_index,entry,ref mut work)}else{reachable::all(ref p,ref mut work)}){case .ok(p):{p}case .err(e):{return .err(fail(e,0,0,0));}};
+    if(!limits::project_charge(ref mut total,work)){return .err(fail(1002,0,0,0));}work=0;
     var bytes::Buffer header=bytes::empty();var w::State s=w::State{.code=0};if(!w::text(ref mut header,ref mut s,b"#ifndef FY_CANDIDATE_PROJECT_HEADER_V1\n#define FY_CANDIDATE_PROJECT_HEADER_V1\n") || !prologue(ref mut header,ref mut s)){return .err(fail(error_code(s),0,0,0));}
     let marks=switch(aggregate::definitions(ref p,ref mut header,ref mut s,ref mut work)){case .ok(m):{m}case .err(e):{return .err(fail(if(e<1000){if(e==3){1003}else{1002}}else{e},0,0,0));}};
     var bytes::Buffer literal_source=bytes::empty();if(!literals::shared_storage(ref p,ref mut header,ref mut literal_source,ref mut s,ref mut work) || !w::text(ref mut header,ref mut s,b"#include <stddef.h>\n") || !sdk::definitions(ref p,ref sdk_plan,ref mut header,ref mut s,ref mut work) || !lifecycle::definitions(ref p,ref sdk_plan,ref mut header,ref mut s,ref mut work) || !foreign_signatures(ref p,ref sdk_plan,ref indexed,ref mut header,ref mut s,ref mut work)){return .err(fail(error_code(s),0,0,0));}

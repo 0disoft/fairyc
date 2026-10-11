@@ -1,0 +1,164 @@
+{
+  "schema": "fairyc.candidate-c-reachability-scopes/v1",
+  "passed": true,
+  "baselineCommit": "a6d7206b",
+  "implementation": {
+    "path": "examples/lexer_candidate/src/module_unit_c_emit.fy",
+    "sha256": "894be3ee9118b065379743b449fe56df817fddde1ead3838d98c9db3480fc4cb"
+  },
+  "sourceCheck": {
+    "files": 362,
+    "mirFunctions": 4679,
+    "lock": "verified by locked C emission"
+  },
+  "limits": {
+    "indexPreparation": 1048576,
+    "reachability": 1048576,
+    "commonDeclarations": 1048576,
+    "project": 8388608
+  },
+  "sourceIdentity": {
+    "baselineReceipt": "docs/ops/evidence/candidate-cfg-stack-20261012.json",
+    "orderingUnchanged": true,
+    "sourceSetSHA256": "6dfbc3832e281b34f1259a141aebb006513d06fb1f0cffdfc39d71b55e9dbb5c",
+    "updated": [
+      {
+        "path": "examples/lexer_candidate/src/module_unit_c_emit.fy",
+        "sha256": "894be3ee9118b065379743b449fe56df817fddde1ead3838d98c9db3480fc4cb"
+      }
+    ]
+  },
+  "native": {
+    "passed": 2,
+    "profile": "release",
+    "run": {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-stack-current-20261012\\reachability-after\\validation-bootstrap.exe",
+        "test",
+        "--native",
+        "--release",
+        "--locked",
+        "--json",
+        "--capture-output",
+        "--exact",
+        "tests::module_project_link::project_c_entry_partition_keeps_nested_result_cleanup_and_omits_unused_bodies",
+        "--exact",
+        "tests::module_project_link::project_c_partition_preserves_literal_pointer_identity"
+      ],
+      "seconds": 210.75417309999466,
+      "exit": 0,
+      "stderr": ""
+    },
+    "report": {
+      "path": ".cache/candidate-stack-current-20261012/reachability-after/native.json",
+      "sha256": "e917db060563bd95a65b87f2c4baff0a870d6cd3fd93bca33b2da4388fc7a12f"
+    },
+    "validationCompiler": {
+      "path": ".cache/candidate-stack-current-20261012/reachability-after/validation-bootstrap.exe",
+      "sha256": "c30c42ab832f8503d403916db7b6c2bc08caa2de2c8f089f222ae5572e21844e"
+    },
+    "buildTimeoutSeconds": 240,
+    "productTimeoutChanged": false
+  },
+  "defaultBuildTimeoutFailure": {
+    "argv": [
+      "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\manifest-bootstrap.exe",
+      "test",
+      "--native",
+      "--release",
+      "--locked",
+      "--json",
+      "--capture-output",
+      "--exact",
+      "tests::module_project_link::project_c_entry_partition_keeps_nested_result_cleanup_and_omits_unused_bodies",
+      "--exact",
+      "tests::module_project_link::project_c_partition_preserves_literal_pointer_identity"
+    ],
+    "seconds": 185.8967425999872,
+    "exit": 6,
+    "stderr": "fairyc: build failed: MSVC host command exceeded 1m0s\n"
+  },
+  "unchangedPackets": {
+    "passed": true,
+    "nativeTests": 2,
+    "unchangedPacketBytes": true,
+    "reusedCExecutions": 4,
+    "baselineReceipt": "docs/ops/evidence/candidate-c-preparation-scopes-20261011.json",
+    "packetSHA256": {
+      "tests::module_project_link::project_c_entry_partition_keeps_nested_result_cleanup_and_omits_unused_bodies": "c59c138b22b32008fba89e30e56a897660f88d24cea2330cc7cb6311c5554842",
+      "tests::module_project_link::project_c_partition_preserves_literal_pointer_identity": "ab078f84ca481668764ac788379f5efa41976f041cbb88a1453b1a593af6b03c"
+    }
+  },
+  "observedWork": {
+    "indexPreparation": 545600,
+    "reachability": 625962,
+    "aggregateDeclarations": 343438,
+    "literalCollectionFailure": 1048576
+  },
+  "fullEmission": {
+    "exit": 2,
+    "seconds": 89.76484740001615,
+    "stderr": "examples/lexer_candidate/src/main.fy:1:1: error: project phase 5 stage 0 code 1002 (bytes 0..0)\n",
+    "packetBytes": 0,
+    "packetSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "imageSHA256": "5600336c3f1f685670d89602bd315c29bb8d92b114c1c46f2f3ed5f1f8c2d143",
+    "sourceFiles": 355,
+    "sourceBytes": 2489449,
+    "sourceSetSHA256": "6dfbc3832e281b34f1259a141aebb006513d06fb1f0cffdfc39d71b55e9dbb5c",
+    "seedProfile": "release",
+    "stackReserveChanged": false,
+    "productTimeoutChanged": false
+  },
+  "meter": {
+    "exit": 2,
+    "seconds": 64.98399180002161,
+    "stdoutBytes": 0,
+    "stderr": "module_unit_c_sdk::build work 399310\r\nmodule_unit_c_sdk::build work 525401\r\nmodule_unit_c_callable_index::build work 525401\r\nmodule_unit_c_callable_index::build work 537274\r\nmodule_unit_c_frame_index::build work 537274\r\nmodule_unit_c_frame_index::build work 545600\r\nmodule_unit_c_reachability::build work 0\r\nmodule_unit_c_reachability::build work 625962\r\nmodule_unit_c_aggregate::definitions work 0\r\nmodule_unit_c_aggregate::definitions work 343438\r\nmodule_unit_c_literals::shared_storage work 343438\r\nmodule_unit_c_literals::shared_storage work 1048576\r\nexamples/lexer_candidate/src/main.fy:1:1: error: project phase 5 stage 0 code 1002 (bytes 0..0)\n"
+  },
+  "emissionInvocations": [
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\manifest-bootstrap.exe",
+        "experimental",
+        "emit-workspace-c",
+        "--target",
+        "x86_64-windows-msvc",
+        "--locked"
+      ],
+      "seconds": 31.398033800011035,
+      "exit": 0,
+      "stderr": "",
+      "stdoutSHA256": "ab1c61887803d94451cc9f70426f464bda5075c4830acc6518ba674156b4ced4"
+    },
+    {
+      "argv": [
+        "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+        "/nologo",
+        "/std:c11",
+        "/TC",
+        "/W4",
+        "/WX",
+        "/MT",
+        "/O2",
+        "/Ob1",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-stack-current-20261012\\reachability-after\\compiler.c",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-stack-current-20261012\\runtime.c",
+        "/Fe:C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-stack-current-20261012\\reachability-after\\seed.exe",
+        "/link",
+        "/INCREMENTAL:NO"
+      ],
+      "seconds": 58.878464800014626,
+      "exit": 0,
+      "stderr": "",
+      "stdoutSHA256": "9080b4d4825daf0ebdbb0debb34b038e8a8db4cbecce01a24db9483ff37fbdcb"
+    }
+  ],
+  "nextFailure": "Literal pool shares common declaration meter and exhausts it after aggregate definitions.",
+  "stage2Achieved": false,
+  "stackReserveChanged": false,
+  "publicApiChanged": false,
+  "sdkAbiChanged": false,
+  "dbChanged": false,
+  "ciChanged": false,
+  "pushed": false
+}
