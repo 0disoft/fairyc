@@ -3,7 +3,11 @@ package candidatebuild
 import (
 	"bytes"
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
 	"fmt"
+	"io"
+	"os"
 	"os/exec"
 	"path/filepath"
 	"regexp"
@@ -112,6 +116,50 @@ func Build(options Options) (Result, error) {
 	data, err := Emit(options.Candidate, options.Manifest, options.Directory, options.Timeout)
 	if err != nil {
 		return Result{}, err
+	}
+	return buildPacket(options, data)
+}
+
+// BuildCached consumes an immutable previously emitted packet. The digest is
+// mandatory, so cache reuse cannot silently select different frontend output.
+func BuildCached(options Options, path, expected string) (Result, error) {
+	if options.Candidate != "" || options.Manifest != "" {
+		return Result{}, fmt.Errorf("cached packet cannot be combined with candidate or manifest")
+	}
+	data, err := cachedPacket(path, expected)
+	if err != nil {
+		return Result{}, err
+	}
+	return buildPacket(options, data)
+}
+
+func cachedPacket(path, expected string) ([]byte, error) {
+	want, err := hex.DecodeString(expected)
+	if err != nil || len(want) != sha256.Size || path == "" {
+		return nil, fmt.Errorf("packet path and SHA256 digest are required")
+	}
+	file, err := os.Open(path)
+	if err != nil {
+		return nil, err
+	}
+	defer file.Close()
+	data, err := io.ReadAll(io.LimitReader(file, maxPacket+1))
+	if err != nil {
+		return nil, err
+	}
+	if len(data) > maxPacket {
+		return nil, fmt.Errorf("cached packet exceeds 96 MiB")
+	}
+	got := sha256.Sum256(data)
+	if !bytes.Equal(got[:], want) {
+		return nil, fmt.Errorf("cached packet SHA256 mismatch")
+	}
+	return data, nil
+}
+
+func buildPacket(options Options, data []byte) (Result, error) {
+	if runtime.GOOS != "windows" || runtime.GOARCH != "amd64" || options.Output == "" {
+		return Result{}, fmt.Errorf("candidate native bridge requires Windows x64 MSVC and output executable")
 	}
 	packet, err := Decode(data)
 	if err != nil {

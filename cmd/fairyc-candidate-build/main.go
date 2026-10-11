@@ -16,6 +16,8 @@ func run(args []string) int {
 	flags := flag.NewFlagSet("fairyc-candidate-build", flag.ContinueOnError)
 	candidate := flags.String("candidate", "", "candidate executable")
 	manifest := flags.String("manifest", "", "private source manifest")
+	packet := flags.String("packet", "", "previously emitted private C packet")
+	packetDigest := flags.String("packet-sha256", "", "required cached packet SHA256 digest")
 	output := flags.String("output", "", "destination executable")
 	directory := flags.String("directory", ".", "source paths working directory")
 	release := flags.Bool("release", false, "optimized native build")
@@ -25,11 +27,18 @@ func run(args []string) int {
 		}
 		return 2
 	}
-	if flags.NArg() != 0 || *candidate == "" || *manifest == "" || *output == "" {
-		fmt.Fprintln(os.Stderr, "candidate, manifest and output are required")
+	if flags.NArg() != 0 || *output == "" || (*packet == "" && (*candidate == "" || *manifest == "" || *packetDigest != "")) || (*packet != "" && (*packetDigest == "" || *candidate != "" || *manifest != "")) {
+		fmt.Fprintln(os.Stderr, "output and either candidate/manifest or packet/packet-sha256 are required")
 		return 2
 	}
-	result, err := candidatebuild.Build(candidatebuild.Options{Candidate: *candidate, Manifest: *manifest, Directory: *directory, Output: *output, Release: *release, Timeout: time.Minute})
+	options := candidatebuild.Options{Candidate: *candidate, Manifest: *manifest, Directory: *directory, Output: *output, Release: *release, Timeout: time.Minute}
+	var result candidatebuild.Result
+	var err error
+	if *packet != "" {
+		result, err = candidatebuild.BuildCached(options, *packet, *packetDigest)
+	} else {
+		result, err = candidatebuild.Build(options)
+	}
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "candidate build failed:", err)
 		return 2

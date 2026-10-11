@@ -2,6 +2,8 @@ package candidatebuild
 
 import (
 	"bytes"
+	"crypto/sha256"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"os"
@@ -14,6 +16,29 @@ import (
 )
 
 func packetFixture(mode string) []byte { return packetFixtureFrame(mode, 1) }
+
+func TestCachedPacketRejectsChangedBytesWithoutFrontendFallback(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "candidate.bin")
+	data := packetFixture("")
+	if err := os.WriteFile(path, data, 0o600); err != nil {
+		t.Fatal(err)
+	}
+	sum := sha256.Sum256(data)
+	digest := hex.EncodeToString(sum[:])
+	got, err := cachedPacket(path, digest)
+	if err != nil || !bytes.Equal(got, data) {
+		t.Fatalf("cached packet changed: %v", err)
+	}
+	if err := os.WriteFile(path, append(data, 'x'), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := cachedPacket(path, digest); err == nil || !strings.Contains(err.Error(), "SHA256 mismatch") {
+		t.Fatalf("accepted changed packet: %v", err)
+	}
+	if _, err := BuildCached(Options{Candidate: "must-not-run"}, path, digest); err == nil || !strings.Contains(err.Error(), "cannot be combined") {
+		t.Fatalf("accepted mixed frontend/cache mode: %v", err)
+	}
+}
 
 func packetFixtureFrame(mode string, frame int) []byte {
 	header := "#ifndef FY_CANDIDATE_PROJECT_HEADER_V1\n#define FY_CANDIDATE_PROJECT_HEADER_V1\n#include <stdint.h>\nextern int32_t missing(void);\n#endif\n"
