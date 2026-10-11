@@ -932,3 +932,33 @@ functions. Receipt evidence/candidate-lock-write-20261012.json.
 
 Stable compiler CLI consumers remain. Linux, full suite and Stage1/Stage2 remain
 scheduled later. DB, CI and version are unchanged; no push occurred.
+
+
+## Workspace lock policy (2026-10-12)
+
+- `project_workspace_lock.load` owns fresh visibility-resolved workspace and lock
+  status; it stages local source budget and commits counters only when both loading and
+  lock policy succeed. Original load diagnostics remain owned/accessed.
+- `project_lock_policy.apply` projects fresh canonical bytes before touching the lock.
+  Ordinary mode preserves an exact canonical existing lock and atomic-writes missing,
+  invalid, stale, or noncanonical locks. Locked mode strict-reads and canonicalizes the
+  actual document for matching, preserves reordered valid bytes, and rejects
+  missing/invalid/stale with separate errors, never writing.
+- Import visibility and source syntax/manifest errors precede the lock update; ordinary
+  valid-syntax type errors occur after it, as the owning Go CLI shows. No public
+  check/build/run spelling is wired yet, so CLI completion must not be claimed.
+- Go CLI oracle covers 24 cases with SDK and local dependency stale inputs, exact
+  states/after bytes, and true Go exits.
+- Existing shared work/bounds/private vector SDK projection rejects without writes or
+  committing counters.
+- Harness snapshots 16 readonly lock paths, including missing files and directories,
+  verifying bytes and modification times are unchanged after native and both candidate
+  profiles.
+- Source check passes 350 files and 4563 MIR.
+- Separate Go C backend prerequisite fixed omitted enum resource field layout plus
+  storage queries; tag/payload tests for GNU/MSVC and full internal/cbackend tests
+  passed, with API signatures/SDK/DB/CI/version unchanged.
+- Receipt: evidence/candidate-lock-policy-20261012.json.
+
+Three exact native tests and both candidate C profiles pass, including all 24 Go
+observations and 16 unchanged byte/mtime snapshots. No push occurred.

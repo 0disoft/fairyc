@@ -1,0 +1,1009 @@
+{
+  "schema": "fairyc.candidate-private-tests/v1",
+  "passed": true,
+  "module": "project_workspace_lock",
+  "sourceInputs": [
+    {
+      "path": "examples/lexer_candidate/src/array_identity.fy",
+      "sha256": "8b501b0f72bb2805c00abc59afb195b5ba2c199796982122b62958bab64966ee"
+    },
+    {
+      "path": "examples/lexer_candidate/src/attributes.fy",
+      "sha256": "dafe2e1c020446224fa8784e701e522096a58776a1066920f934c0717667b5e6"
+    },
+    {
+      "path": "examples/lexer_candidate/src/bodies.fy",
+      "sha256": "ea9bfd6dc1b3bce9dc407970b82d871185db33e7daadad35d348de84ab6ba294"
+    },
+    {
+      "path": "examples/lexer_candidate/src/body_state.fy",
+      "sha256": "0f4e1924d07e4d21bc5fbe35a4fb8f0c2b617206b6d63191e7a625300ec5bb3e"
+    },
+    {
+      "path": "examples/lexer_candidate/src/budget.fy",
+      "sha256": "c2793aa302279b9d27f0af32edd71f70de4e93cb4f76f55facd3e757641cc494"
+    },
+    {
+      "path": "examples/lexer_candidate/src/candidate_limits.fy",
+      "sha256": "7a27948d9a43bde84acdf1106f462d0c5a288f8a54f193560658eff0c0d00f3e"
+    },
+    {
+      "path": "examples/lexer_candidate/src/cleanup_syntax.fy",
+      "sha256": "1374cdcbfa6139a5e82e4e74606cc28ba46d9e81df62f7a0dd397f856fb0ad6f"
+    },
+    {
+      "path": "examples/lexer_candidate/src/diagnostics.fy",
+      "sha256": "ee95f81ed3b3224702196fceef2888434e9713341b81abf01e03945592c4de8b"
+    },
+    {
+      "path": "examples/lexer_candidate/src/file_source.fy",
+      "sha256": "1a7ac7f6c69ef27e78e734aa74dab90b895742a5500a32931baaed19379b938f"
+    },
+    {
+      "path": "examples/lexer_candidate/src/nominal_identity.fy",
+      "sha256": "634cba7ac0667481c0863953640668841216554d852e0e1b1b245c8bc1606958"
+    },
+    {
+      "path": "examples/lexer_candidate/src/numbers.fy",
+      "sha256": "ee8b40b5e8061317d70d3594c386c9e4c70d95132a7e4243ea6402947a4c3556"
+    },
+    {
+      "path": "examples/lexer_candidate/src/parse_tokens.fy",
+      "sha256": "91984eb1086ff7faafa4a6c64a232fc2ddce365b8cd7c2ef23b143bb91d4c9a6"
+    },
+    {
+      "path": "examples/lexer_candidate/src/pointer_identity.fy",
+      "sha256": "31458fda72821f98d8383339f8b272f3aa1c78385fb23504cbe9f1aaa021ae3d"
+    },
+    {
+      "path": "examples/lexer_candidate/src/pointer_types.fy",
+      "sha256": "7cca6293336feedbf785912759ee6c50a17010ad9d966acb81877ad32cd55297"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_content_hash.fy",
+      "sha256": "68d867b37b8cc817382e6d6602aa4d66f4d66be8784e7fbe119c806832839a0e"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_directory.fy",
+      "sha256": "70321e8a7cc84f131573eec91013fccad38d0162f781768bc0e47b136cf4ebc6"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_import_path.fy",
+      "sha256": "bc0e5e10905ee833b36ffe94ae8ff835f6f33caccfc59970cd379537dcbb0c54"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_instance_graph.fy",
+      "sha256": "9a47a2cae4fbef1a6129b0805e683782be26c819ae2f41dd233129279cc226e9"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_instance_identity.fy",
+      "sha256": "797920212852438398bcfaa5acd34225c9ff2de722744c67d9c68c9d2c56e8dd"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_json_decode.fy",
+      "sha256": "ff6b493e6cb535736a88708c3dba98fddf7ae5b182a738d33a8b2f65b94c4ef1"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_json_string.fy",
+      "sha256": "03e76c4239b19ef6fba1a9ebdf97aeb9407d2fb97529fa9f2c6f1d8fbfce6c53"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_json_tokens.fy",
+      "sha256": "98c179f289bab904242a1b8ea44cbf819134eecd75a8e7f08eee8b7b79d0c6a4"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_json_tree.fy",
+      "sha256": "3b407afd0ae9c658beb650a92276e9263931f358edff41bdb34464266ea94084"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_key_index.fy",
+      "sha256": "34ee26a1092361c5bc60860795a86c0974243eec3cfc5f829710d192fdf7ea28"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_lock_document.fy",
+      "sha256": "cfb5415d9f4cbcc4bf484694404b15dd9f3b16c6c6d2ff47ccad0a1340b217b5"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_lock_fields.fy",
+      "sha256": "f7618eda338faa94a93198e11a945312b0d1825c72b36388d4f8732969b76fc2"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_lock_json.fy",
+      "sha256": "d980496da9b9ef7cdcefab991830f46aee0450d13c55ac785baaafc9c3900800"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_lock_policy.fy",
+      "sha256": "1c2eb9ef76b9214d4173ce2bfcd2536de9da50a9ab2b7e9d53b651b0ba4fb413"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_lock_read_file.fy",
+      "sha256": "509f72cbbcb520d13bd1b2fd03ad6fe60f72d4d7984da3151cd7a532f5d9c55c"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_lock_reader.fy",
+      "sha256": "8ac9e130a01ea78b82f0bb4ce0b548e795229212cc30b054792dda0c31d92860"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_lock_validate.fy",
+      "sha256": "c8f1d73870643de92c891768ba466278b9bda887a05e484c0a9bf45f9fe0cb10"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_lock_write.fy",
+      "sha256": "1347b90a1e7651ec9feb9cd211e0a71c313e6f3cc0c1d296110d7876b7a2fc11"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_manifest.fy",
+      "sha256": "943c3e163ddc04afb03a82ef4a0485aa6a618a67708e657086b8ed1acd56658a"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_manifest_values.fy",
+      "sha256": "4f21b9dedf744ffc449d1b843282f9aba2ecc221c61f043594bea70c4d56387d"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_module_path.fy",
+      "sha256": "b4217fe0f797e5f0fb4bab8ebc75435e6674b5f72b60d0129b5269c627709cb2"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_module_visibility.fy",
+      "sha256": "a03c433d5302f904620df34585697e99e67e417b3b2121a474432839108ab0bb"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_package_input.fy",
+      "sha256": "fe1a75622fbf72b03fe5bfba3ce0c158eb2e03033e31acfdaef05afea9ec68c8"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_path.fy",
+      "sha256": "20bde13864e5ba8752b33a616eab22b08caf8a20d6a435d2d2c2cc68f443f1a5"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_path_unicode_data.fy",
+      "sha256": "9cf3af27796644304493561591e1641c70c5c653bf739ed71a65e492db510fbd"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_sdk_bundle.fy",
+      "sha256": "a7bde8c483cc986a6bf6b38f56ab1852cc46a4d27a21a48b0868064bf1eb8217"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_sdk_data_alloc_0.fy",
+      "sha256": "ac58625000197a88c33f322770c7f89fecc64126b3ff4479d6757aa4bfb16301"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_sdk_data_bytes_0.fy",
+      "sha256": "18734fec4d058c90a8b38cc729d711789b2ebfd2f4cd08756ccdad56ae9665b3"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_sdk_data_fs_0.fy",
+      "sha256": "a6c26d37224e5a43231d9068bfe1638ac9b357b971eddcaf628291d5c906ea0f"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_sdk_data_fs_1.fy",
+      "sha256": "0c2a6d16571e5681296d324293543771c69665b3a90606090b675d33e0fc5f17"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_sdk_data_fs_2.fy",
+      "sha256": "c20e6ac9ab0d7be6a84af43a52191ae76b402efef6d76bdd7ce0e1e3dffafea0"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_sdk_data_io_0.fy",
+      "sha256": "8527d39e50702591dcdf07e71663128bd4f61a8ad62f30e8b42998f30a548104"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_sdk_data_num_0.fy",
+      "sha256": "1859e2ffa80b3e675096cc50cec693bb33aa060dd47886feb837d4df37c2eda8"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_sdk_data_process_0.fy",
+      "sha256": "b14ace85f2736dee51a63f064cf7619ad925384797e0945c6053ba767f725f6c"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_sdk_data_text_0.fy",
+      "sha256": "a0d6b93d966f75b803a1677cfa0e3cd6504b1006bd4a10a1c2598668a5442d19"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_sdk_data_vec_0.fy",
+      "sha256": "6201186e9a75bb1957596eb9717e447194e67b6c5828355e44af98941a103a31"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_sdk_embedded.fy",
+      "sha256": "8c49d481331933981777e9bd90fa5f45621956010b6a3fea38a2ada4dd31d943"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_source_catalog.fy",
+      "sha256": "5dd5b1a6f848968cf20676084af8ddcaf039cfc74e1837685c12c601c53fb131"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_source_file.fy",
+      "sha256": "6d1307e99f7ae9fb387fc447f3b6c36f6c0e77aebc90faca55e75665aad2d282"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_source_identity.fy",
+      "sha256": "354bed4ced07109403b58f4432e8beddc765760a1ee083b3ca72fa0880c9f359"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_source_modules.fy",
+      "sha256": "d7d7e5b30a270389a1572f6e26cf3c0603db33e0125bd33fa17f4f177a0f7a1c"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_source_root.fy",
+      "sha256": "e6d896a57fde407db5e7042e244d6f2a35dddc4e113ad20555c4408f24842127"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_source_set.fy",
+      "sha256": "c4b70409d8aa627a1ef46488e5232d3deea7b07c0e796c26ef28449f367a98e1"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_toml_context.fy",
+      "sha256": "1682260043feced2ac662198fd3b29f4badb2a4a9f9b02a8e1f81462f3b3cc0f"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_toml_document.fy",
+      "sha256": "0bc3782206da0d9320ba8a39ea6a1f9ded52ec1bbf855580e31c1a1786f4b3a8"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_toml_model.fy",
+      "sha256": "4a6c295108e704749fc557204de4d8a0287e3228e59da396c50867ec8894b11e"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_toml_scalars.fy",
+      "sha256": "137d5dbdce313f22e91a9be87f8b34eb6f10011933b152f649421a895e274cb9"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_toml_strings.fy",
+      "sha256": "bc7e71acaaa68af5755d066c90fa1f763625de32c8fa2a6778e8447eebc187bb"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_toml_values.fy",
+      "sha256": "24255d1fdf0f34b6761f5304d383127667e8b127488a80409b3f35a13f62e81c"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_workspace_catalog.fy",
+      "sha256": "bc800dda99247aba4d8b80abdcbc092d9cb27ac5193cfb7a33bd405ec753c936"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_workspace_graph.fy",
+      "sha256": "bac53290ea919d58d825f7a663c716b97541404a1973aa8585da891bfb689dc1"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_workspace_input.fy",
+      "sha256": "18a8a35c400eaa8c32da09ea55a70d704953e8b9a762998b44c9af4dd76689fd"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_workspace_lock.fy",
+      "sha256": "ed5d220496daca3b94c688655a49de75c1b9bcc9bdb73ca94ab34472400b283a"
+    },
+    {
+      "path": "examples/lexer_candidate/src/records.fy",
+      "sha256": "e2d1d3540285509aded981b476d4b2340857d8c7370364f4b1410bfd6883f6dd"
+    },
+    {
+      "path": "examples/lexer_candidate/src/reference_types.fy",
+      "sha256": "f529bb686f06fe07d95f864e28fbde211200fce11a11c6aae260356103639b57"
+    },
+    {
+      "path": "examples/lexer_candidate/src/resource_identity.fy",
+      "sha256": "7d85c65df4d6cc02f004f854d5108ec3cc7ba8ddb4885ea54c634f88f93594aa"
+    },
+    {
+      "path": "examples/lexer_candidate/src/scanner.fy",
+      "sha256": "3755e569fe63003f63b2c9b8272df2ba656c844791cedbc0da4f9245b8809cf7"
+    },
+    {
+      "path": "examples/lexer_candidate/src/sdk_authority.fy",
+      "sha256": "ae0f2e21819a625a6bb5fe331173dd3366599486f3c203a523693680a0c4ee6c"
+    },
+    {
+      "path": "examples/lexer_candidate/src/sdk_file_rules.fy",
+      "sha256": "a7c5bc7224e12d29d54d284c54f31f34fa66f1067397e0fcb57de9dabe901e5b"
+    },
+    {
+      "path": "examples/lexer_candidate/src/sdk_scopes.fy",
+      "sha256": "7aabc14d6c8a54f959e4c454df8fccb4fc49c2a7efbefa882f8d939a131717e6"
+    },
+    {
+      "path": "examples/lexer_candidate/src/sha256.fy",
+      "sha256": "eb89211fd749f7f527e8d2b72e97d70f8d9613bbac428bc95d975bef7c53bfa1"
+    },
+    {
+      "path": "examples/lexer_candidate/src/sha256_block.fy",
+      "sha256": "bc48b9e751205bba8aeaf09987ea8681694d26bc989e24f4ecb3afa4c6e00fd4"
+    },
+    {
+      "path": "examples/lexer_candidate/src/sha256_stream.fy",
+      "sha256": "b5f97a9b5be679418a1365a6007028abfab5ba66ee3ae5c08b3e5b863fcfc8b9"
+    },
+    {
+      "path": "internal/sdkstdlib/sources/std/bytes.fy",
+      "sha256": "4740a506e93349fb002c383967dcc44d182d20f09f2094b83b5464a4ab252982"
+    },
+    {
+      "path": "internal/sdkstdlib/sources/std/fs.fy",
+      "sha256": "fd7ddfa9f0deed98304cecf94911644087d1e2a46e8be8995c35acbcb183b335"
+    },
+    {
+      "path": "internal/sdkstdlib/sources/std/io.fy",
+      "sha256": "4b89c3aeb8b4de4887395d29723095d364c5660c6b773c5696fb1f65f5365f48"
+    },
+    {
+      "path": "internal/sdkstdlib/sources/std/num.fy",
+      "sha256": "09aa0d45f075aa4212049527ded7bb48d99ceb6ffed56b310e267421bae20bb3"
+    },
+    {
+      "path": "internal/sdkstdlib/sources/std/process.fy",
+      "sha256": "9680a1481df4f761f481d5a039af7bdbefeb312d1091961194f8e7bc0681ae24"
+    },
+    {
+      "path": "internal/sdkstdlib/sources/std/text.fy",
+      "sha256": "cccd47e090fda11c9da063ffb321489dd8753fe9996855fc432833e05a79e695"
+    },
+    {
+      "path": "internal/sdkstdlib/sources/optional/std/vec.fy",
+      "sha256": "0ae4c395bf98c39079ad620bde035b3b590d51417864802e698edc069281db5b"
+    },
+    {
+      "path": "examples/lexer_candidate/src/strings.fy",
+      "sha256": "8f26db7c4d4039c8c8d9fbc6078097859c8f714ca5887957fdf0e69269dca521"
+    },
+    {
+      "path": "examples/lexer_candidate/src/syntax.fy",
+      "sha256": "cb040a2973447b89c2ad59b5447c65dab79df5df7930f73431afa7ea34ef25fd"
+    },
+    {
+      "path": "examples/lexer_candidate/src/type_state.fy",
+      "sha256": "7dbbf7d50be1e9513dc8aafd99b11afda5d8e2d7ce87d96b6436c4752c2123a0"
+    },
+    {
+      "path": "examples/lexer_candidate/src/types.fy",
+      "sha256": "53a77948af92724f00de0609837fd1507899df8e2b59b6d2778ef1f3c344395a"
+    },
+    {
+      "path": "examples/lexer_candidate/src/utf8.fy",
+      "sha256": "4a5425cea9efbfb1bff2c31a38c2bd8e392c6792af09f24e906c9a743621870d"
+    },
+    {
+      "path": "examples/lexer_candidate/tests/project_workspace_lock.fy",
+      "sha256": "a2caf8df2e9f139a3b94a2910cc4dbe92a03b82d444b441cf62ca8a6fa39f877"
+    },
+    {
+      "path": "tools/verify-candidate-private-tests.py",
+      "sha256": "b4510d108bc9cad88fb22de6f68ac730733586d09380ba32550e566a9eee675f"
+    },
+    {
+      "path": ".cache/candidate-lock-policy-20261012/fixture/unchanged-paths.json",
+      "sha256": "3d42ac69258d9deac891b6aa248c7e45a7e5ed273fd1ed71834c5c8291de9342"
+    },
+    {
+      "path": ".cache/candidate-lock-policy-20261012/fixture/root.bin",
+      "sha256": "120e9009effa1d092234f04ca15a094fecadf97517d46395047d7058998ef1d8"
+    },
+    {
+      "path": "cmd/fairyc-candidate-lock-policy-reference/main.go",
+      "sha256": "582fc4a8531505a91766c844e2935a54cb49b8f62d964c1bae5e318da009a7ae"
+    },
+    {
+      "path": ".cache/candidate-lock-policy-20261012/fixture/policies.bin",
+      "sha256": "d562e9c2d48cd457a30979c015c5af16b68d50dc302ccf83938cb9c4eba77746"
+    },
+    {
+      "path": ".cache/candidate-lock-policy-20261012/fixture/observations.json",
+      "sha256": "b635af1e1040aea42134bff05ac2c4322e5168a5013cc2b8bf247cbc6729786e"
+    }
+  ],
+  "tools": {
+    "compiler": {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\manifest-bootstrap.exe",
+      "sha256": "18e72a61e9ff3fdd620652ecd8ce2e355b9371488b2ad1b2ccbadbf7a091783a"
+    },
+    "candidate": {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-lock-write-20261012\\compiler.exe",
+      "sha256": "3c67203ca06e6c81aa73f383fb16685b57ad5c571b5028992fd638c0c17795b1"
+    },
+    "builder": {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-source-file-20261011\\builder.exe",
+      "sha256": "8141ce6bcc461a52fe6bf0bf24e9e5f5a9d7842c3c7dbfc5863cc4e822584ea7"
+    }
+  },
+  "native": {
+    "schemaVersion": "fairyc.test-report/v4",
+    "engine": "native",
+    "target": "x86_64-windows-msvc",
+    "profile": "development",
+    "tests": [
+      {
+        "identity": "tests::project_workspace_lock::missing_import_retains_visibility_error_and_preserves_lock",
+        "outcome": "passed",
+        "trapCategory": null,
+        "stdoutBase64": "",
+        "stderrBase64": ""
+      },
+      {
+        "identity": "tests::project_workspace_lock::owning_go_cli_lock_states_bytes_failures_and_budget_commit_match",
+        "outcome": "passed",
+        "trapCategory": null,
+        "stdoutBase64": "",
+        "stderrBase64": ""
+      },
+      {
+        "identity": "tests::project_workspace_lock::private_projection_and_bounds_never_publish_or_commit_source_counters",
+        "outcome": "passed",
+        "trapCategory": null,
+        "stdoutBase64": "",
+        "stderrBase64": ""
+      }
+    ],
+    "count": 3,
+    "passed": 3,
+    "failed": 0,
+    "status": "ok",
+    "lock": "verified"
+  },
+  "nativeTests": 3,
+  "lockSHA256": "1b554c7c1ae8c89a0d303e3d8bd6f601391e41ea2c28c3e2312b6ffb8a776911",
+  "candidateInputFiles": 90,
+  "candidatePacketSHA256": "39960d7fcb78865a79a335e78bf5daea438fa3b1f0b8397c5a9250a043a36b63",
+  "candidateExecutions": [
+    {
+      "profile": "development",
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-lock-policy-20261012\\execution\\development.exe",
+      "sha256": "a84109029e1fbc4b348151c6276008b63b5893f7afa00ef5595e458372c1fee0",
+      "exit": 0
+    },
+    {
+      "profile": "release",
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-lock-policy-20261012\\execution\\release.exe",
+      "sha256": "04dbdac399b5d638c471bafcefd32e926808630f209bed9f0d5d30bfc8f193d3",
+      "exit": 0
+    }
+  ],
+  "invocations": [
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\manifest-bootstrap.exe",
+        "test",
+        "--native",
+        "--locked",
+        "--json",
+        "--capture-output",
+        "--exact",
+        "tests::project_workspace_lock::owning_go_cli_lock_states_bytes_failures_and_budget_commit_match",
+        "--exact",
+        "tests::project_workspace_lock::private_projection_and_bounds_never_publish_or_commit_source_counters",
+        "--exact",
+        "tests::project_workspace_lock::missing_import_retains_visibility_error_and_preserves_lock",
+        "--",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-lock-policy-20261012\\fixture\\root.bin"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "seconds": 123.63966269999219,
+      "exit": 0,
+      "stdoutBytes": 746,
+      "stdoutSHA256": "48c08a5e482eb923cacf49f979de9effaffcd35ee69d4c0dabbdb35cb780c95b",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-lock-write-20261012\\compiler.exe",
+        "--c-project-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-lock-policy-20261012\\execution\\sources.list"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "seconds": 53.3991062999994,
+      "exit": 0,
+      "stdoutBytes": 5697557,
+      "stdoutSHA256": "39960d7fcb78865a79a335e78bf5daea438fa3b1f0b8397c5a9250a043a36b63",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-source-file-20261011\\builder.exe",
+        "--packet",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-lock-policy-20261012\\execution\\candidate-packet.bin",
+        "--packet-sha256",
+        "39960d7fcb78865a79a335e78bf5daea438fa3b1f0b8397c5a9250a043a36b63",
+        "--output",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-lock-policy-20261012\\execution\\development.exe"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "seconds": 4.454334099995322,
+      "exit": 0,
+      "stdoutBytes": 183,
+      "stdoutSHA256": "7a2552fb0359ba8faf20d16aec563976374157571d7a47c2ae03647ad1f10351",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-lock-policy-20261012\\execution\\development.exe",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-lock-policy-20261012\\fixture\\root.bin"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "seconds": 1.3365013000002364,
+      "exit": 0,
+      "stdoutBytes": 0,
+      "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-source-file-20261011\\builder.exe",
+        "--packet",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-lock-policy-20261012\\execution\\candidate-packet.bin",
+        "--packet-sha256",
+        "39960d7fcb78865a79a335e78bf5daea438fa3b1f0b8397c5a9250a043a36b63",
+        "--output",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-lock-policy-20261012\\execution\\release.exe",
+        "--release"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "seconds": 83.70339609999792,
+      "exit": 0,
+      "stdoutBytes": 184,
+      "stdoutSHA256": "5bb1efa5f5a5cf198d0a9f6ec0bdbf79faf169a189d3812c27250b85e1f4ff6a",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-lock-policy-20261012\\execution\\release.exe",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-lock-policy-20261012\\fixture\\root.bin"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "seconds": 0.34483410000393633,
+      "exit": 0,
+      "stdoutBytes": 0,
+      "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr": ""
+    }
+  ],
+  "publicApiChanged": false,
+  "dbChanged": false,
+  "ciChanged": false,
+  "pushed": false,
+  "unchangedPaths": [
+    {
+      "path": ".cache/candidate-lock-policy-20261012/fixture/Current/fairy.lock",
+      "snapshot": {
+        "directory": false,
+        "size": 842,
+        "modifiedNS": 1700000000000000000,
+        "sha256": "80b2eeb437b6ecac3ad231a4a8a178d13d8d21f67f55009936d5c7241d85435c"
+      }
+    },
+    {
+      "path": ".cache/candidate-lock-policy-20261012/fixture/LockedCurrent/fairy.lock",
+      "snapshot": {
+        "directory": false,
+        "size": 842,
+        "modifiedNS": 1700000000000000000,
+        "sha256": "80b2eeb437b6ecac3ad231a4a8a178d13d8d21f67f55009936d5c7241d85435c"
+      }
+    },
+    {
+      "path": ".cache/candidate-lock-policy-20261012/fixture/LockedMissing/fairy.lock",
+      "snapshot": null
+    },
+    {
+      "path": ".cache/candidate-lock-policy-20261012/fixture/LockedReordered/fairy.lock",
+      "snapshot": {
+        "directory": false,
+        "size": 931,
+        "modifiedNS": 1700000000000000000,
+        "sha256": "2249db12564518a32e803bdd18385d4c930da85e2c6d7894d8a9177b0e5600eb"
+      }
+    },
+    {
+      "path": ".cache/candidate-lock-policy-20261012/fixture/LockedMalformed/fairy.lock",
+      "snapshot": {
+        "directory": false,
+        "size": 1,
+        "modifiedNS": 1700000000000000000,
+        "sha256": "021fb596db81e6d02bf3d2586ee3981fe519f275c0ac9ca76bbcf2ebb4097d96"
+      }
+    },
+    {
+      "path": ".cache/candidate-lock-policy-20261012/fixture/LockedEmpty/fairy.lock",
+      "snapshot": {
+        "directory": false,
+        "size": 0,
+        "modifiedNS": 1700000000000000000,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "path": ".cache/candidate-lock-policy-20261012/fixture/LockedStale/fairy.lock",
+      "snapshot": {
+        "directory": false,
+        "size": 842,
+        "modifiedNS": 1700000000000000000,
+        "sha256": "80b2eeb437b6ecac3ad231a4a8a178d13d8d21f67f55009936d5c7241d85435c"
+      }
+    },
+    {
+      "path": ".cache/candidate-lock-policy-20261012/fixture/Directory/fairy.lock",
+      "snapshot": {
+        "directory": true,
+        "size": 0,
+        "modifiedNS": 1791743682397740100,
+        "sha256": null
+      }
+    },
+    {
+      "path": ".cache/candidate-lock-policy-20261012/fixture/LockedDirectory/fairy.lock",
+      "snapshot": {
+        "directory": true,
+        "size": 0,
+        "modifiedNS": 1791743682406333700,
+        "sha256": null
+      }
+    },
+    {
+      "path": ".cache/candidate-lock-policy-20261012/fixture/LockedSDK/fairy.lock",
+      "snapshot": {
+        "directory": false,
+        "size": 1688,
+        "modifiedNS": 1700000000000000000,
+        "sha256": "d805768e5fb64bcbce615602e1c81d29a8ba5165da70b882fd876ca81b4f9170"
+      }
+    },
+    {
+      "path": ".cache/candidate-lock-policy-20261012/fixture/LockedDependencyStale/fairy.lock",
+      "snapshot": {
+        "directory": false,
+        "size": 1610,
+        "modifiedNS": 1700000000000000000,
+        "sha256": "d1bef6fffca11937ebf3f72848f70a62da33e085a5b452af6a40f4330f4aeb67"
+      }
+    },
+    {
+      "path": ".cache/candidate-lock-policy-20261012/fixture/Manifest/fairy.lock",
+      "snapshot": {
+        "directory": false,
+        "size": 842,
+        "modifiedNS": 1700000000000000000,
+        "sha256": "80b2eeb437b6ecac3ad231a4a8a178d13d8d21f67f55009936d5c7241d85435c"
+      }
+    },
+    {
+      "path": ".cache/candidate-lock-policy-20261012/fixture/LockedManifest/fairy.lock",
+      "snapshot": {
+        "directory": false,
+        "size": 842,
+        "modifiedNS": 1700000000000000000,
+        "sha256": "80b2eeb437b6ecac3ad231a4a8a178d13d8d21f67f55009936d5c7241d85435c"
+      }
+    },
+    {
+      "path": ".cache/candidate-lock-policy-20261012/fixture/Syntax/fairy.lock",
+      "snapshot": {
+        "directory": false,
+        "size": 842,
+        "modifiedNS": 1700000000000000000,
+        "sha256": "80b2eeb437b6ecac3ad231a4a8a178d13d8d21f67f55009936d5c7241d85435c"
+      }
+    },
+    {
+      "path": ".cache/candidate-lock-policy-20261012/fixture/LockedSyntax/fairy.lock",
+      "snapshot": {
+        "directory": false,
+        "size": 842,
+        "modifiedNS": 1700000000000000000,
+        "sha256": "80b2eeb437b6ecac3ad231a4a8a178d13d8d21f67f55009936d5c7241d85435c"
+      }
+    },
+    {
+      "path": ".cache/candidate-lock-policy-20261012/fixture/Import/fairy.lock",
+      "snapshot": {
+        "directory": false,
+        "size": 842,
+        "modifiedNS": 1700000000000000000,
+        "sha256": "80b2eeb437b6ecac3ad231a4a8a178d13d8d21f67f55009936d5c7241d85435c"
+      }
+    }
+  ],
+  "check": {
+    "sourceFiles": 350,
+    "mirFunctions": 4563
+  },
+  "goCLIObservations": [
+    {
+      "name": "Current",
+      "locked": false,
+      "goExit": 0,
+      "policyState": 1,
+      "loadPhase": 0,
+      "policyStage": 0,
+      "kind": 1,
+      "unchanged": true,
+      "stdout": "check ok: 1 instance(s), 1 source file(s), 1 MIR function(s), lock unchanged\n",
+      "stderr": ""
+    },
+    {
+      "name": "LockedCurrent",
+      "locked": true,
+      "goExit": 0,
+      "policyState": 3,
+      "loadPhase": 0,
+      "policyStage": 0,
+      "kind": 1,
+      "unchanged": true,
+      "stdout": "check ok: 1 instance(s), 1 source file(s), 1 MIR function(s), lock verified\n",
+      "stderr": ""
+    },
+    {
+      "name": "Missing",
+      "locked": false,
+      "goExit": 0,
+      "policyState": 2,
+      "loadPhase": 0,
+      "policyStage": 0,
+      "kind": 0,
+      "unchanged": false,
+      "stdout": "check ok: 1 instance(s), 1 source file(s), 1 MIR function(s), lock updated\n",
+      "stderr": ""
+    },
+    {
+      "name": "LockedMissing",
+      "locked": true,
+      "goExit": 7,
+      "policyState": 0,
+      "loadPhase": 2,
+      "policyStage": 3,
+      "kind": 0,
+      "unchanged": true,
+      "stdout": "",
+      "stderr": "fairyc: package workspace failure: locked workspace requires a valid fairy.lock: GetFileAttributesEx C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-lock-policy-20261012\\fixture\\LockedMissing\\fairy.lock: The system cannot find the file specified.\n"
+    },
+    {
+      "name": "Reordered",
+      "locked": false,
+      "goExit": 0,
+      "policyState": 2,
+      "loadPhase": 0,
+      "policyStage": 0,
+      "kind": 1,
+      "unchanged": false,
+      "stdout": "check ok: 1 instance(s), 1 source file(s), 1 MIR function(s), lock updated\n",
+      "stderr": ""
+    },
+    {
+      "name": "LockedReordered",
+      "locked": true,
+      "goExit": 0,
+      "policyState": 3,
+      "loadPhase": 0,
+      "policyStage": 0,
+      "kind": 1,
+      "unchanged": true,
+      "stdout": "check ok: 1 instance(s), 1 source file(s), 1 MIR function(s), lock verified\n",
+      "stderr": ""
+    },
+    {
+      "name": "Malformed",
+      "locked": false,
+      "goExit": 0,
+      "policyState": 2,
+      "loadPhase": 0,
+      "policyStage": 0,
+      "kind": 1,
+      "unchanged": false,
+      "stdout": "check ok: 1 instance(s), 1 source file(s), 1 MIR function(s), lock updated\n",
+      "stderr": ""
+    },
+    {
+      "name": "LockedMalformed",
+      "locked": true,
+      "goExit": 7,
+      "policyState": 0,
+      "loadPhase": 2,
+      "policyStage": 3,
+      "kind": 1,
+      "unchanged": true,
+      "stdout": "",
+      "stderr": "fairyc: package workspace failure: locked workspace requires a valid fairy.lock: unexpected end of JSON input\n"
+    },
+    {
+      "name": "Empty",
+      "locked": false,
+      "goExit": 0,
+      "policyState": 2,
+      "loadPhase": 0,
+      "policyStage": 0,
+      "kind": 1,
+      "unchanged": false,
+      "stdout": "check ok: 1 instance(s), 1 source file(s), 1 MIR function(s), lock updated\n",
+      "stderr": ""
+    },
+    {
+      "name": "LockedEmpty",
+      "locked": true,
+      "goExit": 7,
+      "policyState": 0,
+      "loadPhase": 2,
+      "policyStage": 3,
+      "kind": 1,
+      "unchanged": true,
+      "stdout": "",
+      "stderr": "fairyc: package workspace failure: locked workspace requires a valid fairy.lock: EOF\n"
+    },
+    {
+      "name": "Stale",
+      "locked": false,
+      "goExit": 0,
+      "policyState": 2,
+      "loadPhase": 0,
+      "policyStage": 0,
+      "kind": 1,
+      "unchanged": false,
+      "stdout": "check ok: 1 instance(s), 1 source file(s), 2 MIR function(s), lock updated\n",
+      "stderr": ""
+    },
+    {
+      "name": "LockedStale",
+      "locked": true,
+      "goExit": 7,
+      "policyState": 0,
+      "loadPhase": 2,
+      "policyStage": 4,
+      "kind": 1,
+      "unchanged": true,
+      "stdout": "",
+      "stderr": "fairyc: package workspace failure: lockfile is stale for the current workspace\n"
+    },
+    {
+      "name": "Directory",
+      "locked": false,
+      "goExit": 7,
+      "policyState": 0,
+      "loadPhase": 2,
+      "policyStage": 6,
+      "kind": 2,
+      "unchanged": true,
+      "stdout": "",
+      "stderr": "fairyc: package workspace failure: rename C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-lock-policy-20261012\\fixture\\Directory\\.fairy-lock-1105597609 C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-lock-policy-20261012\\fixture\\Directory\\fairy.lock: Access is denied.\n"
+    },
+    {
+      "name": "LockedDirectory",
+      "locked": true,
+      "goExit": 7,
+      "policyState": 0,
+      "loadPhase": 2,
+      "policyStage": 3,
+      "kind": 2,
+      "unchanged": true,
+      "stdout": "",
+      "stderr": "fairyc: package workspace failure: locked workspace requires a valid fairy.lock: lockfile is not a bounded regular file\n"
+    },
+    {
+      "name": "SDK",
+      "locked": false,
+      "goExit": 0,
+      "policyState": 2,
+      "loadPhase": 0,
+      "policyStage": 0,
+      "kind": 0,
+      "unchanged": false,
+      "stdout": "check ok: 2 instance(s), 8 source file(s), 153 MIR function(s), lock updated\n",
+      "stderr": ""
+    },
+    {
+      "name": "LockedSDK",
+      "locked": true,
+      "goExit": 0,
+      "policyState": 3,
+      "loadPhase": 0,
+      "policyStage": 0,
+      "kind": 1,
+      "unchanged": true,
+      "stdout": "check ok: 2 instance(s), 8 source file(s), 153 MIR function(s), lock verified\n",
+      "stderr": ""
+    },
+    {
+      "name": "DependencyStale",
+      "locked": false,
+      "goExit": 0,
+      "policyState": 2,
+      "loadPhase": 0,
+      "policyStage": 0,
+      "kind": 1,
+      "unchanged": false,
+      "stdout": "check ok: 2 instance(s), 2 source file(s), 3 MIR function(s), lock updated\n",
+      "stderr": ""
+    },
+    {
+      "name": "LockedDependencyStale",
+      "locked": true,
+      "goExit": 7,
+      "policyState": 0,
+      "loadPhase": 2,
+      "policyStage": 4,
+      "kind": 1,
+      "unchanged": true,
+      "stdout": "",
+      "stderr": "fairyc: package workspace failure: lockfile is stale for the current workspace\n"
+    },
+    {
+      "name": "Manifest",
+      "locked": false,
+      "goExit": 7,
+      "policyState": 0,
+      "loadPhase": 1,
+      "policyStage": 0,
+      "kind": 1,
+      "unchanged": true,
+      "stdout": "",
+      "stderr": "fairyc: package workspace failure: workspace ./fairy.toml invalid-project-manifest: manifest package missing-field: field is required\n"
+    },
+    {
+      "name": "LockedManifest",
+      "locked": true,
+      "goExit": 7,
+      "policyState": 0,
+      "loadPhase": 1,
+      "policyStage": 0,
+      "kind": 1,
+      "unchanged": true,
+      "stdout": "",
+      "stderr": "fairyc: package workspace failure: workspace ./fairy.toml invalid-project-manifest: manifest package missing-field: field is required\n"
+    },
+    {
+      "name": "Syntax",
+      "locked": false,
+      "goExit": 3,
+      "policyState": 0,
+      "loadPhase": 1,
+      "policyStage": 0,
+      "kind": 1,
+      "unchanged": true,
+      "stdout": "",
+      "stderr": "main.fy:3:1: E0007: expected \"}\" [bytes 30..30, repair=insert]\n"
+    },
+    {
+      "name": "LockedSyntax",
+      "locked": true,
+      "goExit": 3,
+      "policyState": 0,
+      "loadPhase": 1,
+      "policyStage": 0,
+      "kind": 1,
+      "unchanged": true,
+      "stdout": "",
+      "stderr": "main.fy:3:1: E0007: expected \"}\" [bytes 30..30, repair=insert]\n"
+    },
+    {
+      "name": "Semantic",
+      "locked": false,
+      "goExit": 3,
+      "policyState": 2,
+      "loadPhase": 0,
+      "policyStage": 0,
+      "kind": 1,
+      "unchanged": false,
+      "stdout": "",
+      "stderr": "main.fy:2:24: E1009: return value does not match the declared result type [bytes 36..40]\n  expected-type: main.fy:2:4 [bytes 16..19]\n"
+    },
+    {
+      "name": "Import",
+      "locked": false,
+      "goExit": 7,
+      "policyState": 0,
+      "loadPhase": 1,
+      "policyStage": 0,
+      "kind": 1,
+      "unchanged": true,
+      "stdout": "",
+      "stderr": "fairyc: package workspace failure: workspace invalid-package-graph: missing-visible-module: [pkg:root[]]\n"
+    }
+  ],
+  "backendPrerequisite": {
+    "commit": "4bd0be17",
+    "command": "bun tools/run-go.ts test ./internal/cbackend -count=1",
+    "passed": true,
+    "enumResourceLayouts": true,
+    "storageQueries": true
+  },
+  "stableCLIRouted": false,
+  "remaining": [
+    "stable compiler CLI routing",
+    "package-aware whole-closure compilation",
+    "Linux",
+    "full suite",
+    "Stage1/Stage2"
+  ]
+}

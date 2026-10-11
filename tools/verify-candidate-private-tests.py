@@ -28,6 +28,7 @@ def main():
     parser.add_argument('--test', action='append', required=True)
     parser.add_argument('--output', type=Path, required=True)
     parser.add_argument('--fixture', type=Path, help='hash and forward one binary oracle fixture to every execution')
+    parser.add_argument('--unchanged-paths', type=Path, help='JSON list of repository-relative paths whose bytes and modification times must remain unchanged')
     args = parser.parse_args()
     if not __debug__:
         parser.error('verification requires Python without -O')
@@ -65,6 +66,23 @@ def main():
         pending.extend(re.findall(r'^import\s+([\w:]+)', modules[name].read_text(encoding='utf-8'), re.M))
     paths = [main_source] + [modules[name] for name in sorted(seen - {'main'})]
     source_inputs = [dict(path=p.relative_to(ROOT).as_posix(), sha256=digest(p)) for p in paths[1:] + [test_source, Path(__file__)]]
+    snapshots = []
+    if args.unchanged_paths:
+        listed = args.unchanged_paths.resolve()
+        source_inputs.append(dict(path=listed.relative_to(ROOT).as_posix(), sha256=digest(listed)))
+        targets = json.loads(listed.read_text(encoding='utf-8'))
+        if not isinstance(targets, list) or len(targets) > 128:
+            parser.error('unchanged paths must be a bounded list')
+        for name in targets:
+            if not isinstance(name, str) or Path(name).is_absolute() or '..' in Path(name).parts:
+                parser.error('unchanged paths must stay within the repository')
+            path = ROOT / name
+            def snapshot(path=path):
+                if not path.exists():
+                    return None
+                stat = path.stat()
+                return dict(directory=path.is_dir(), size=stat.st_size, modifiedNS=stat.st_mtime_ns, sha256=None if path.is_dir() else digest(path))
+            snapshots.append((name, snapshot, snapshot()))
     arguments = []
     if args.fixture:
         fixture = args.fixture.resolve()
@@ -81,6 +99,8 @@ def main():
         row = dict(argv=list(map(str, argv)), cwd=str(cwd), seconds=time.monotonic() - start, exit=result.returncode, stdoutBytes=len(result.stdout), stdoutSHA256=hashlib.sha256(result.stdout).hexdigest(), stderr=result.stderr.decode('utf-8', errors='replace'))
         invocations.append(row)
         save(output / 'invocations.json', invocations)
+        for name, snapshot, before in snapshots:
+            assert snapshot() == before, 'readonly path changed: ' + name
         if len(argv)>1 and str(argv[1])=='test':
             (output / 'native.json').write_bytes(result.stdout)
         assert result.returncode == 0 and not result.stderr, row
@@ -111,6 +131,8 @@ def main():
     assert all(digest(ROOT / row['path']) == row['sha256'] for row in source_inputs), 'sources changed during verification'
     assert all(digest(Path(row['path'])) == row['sha256'] for row in images.values()), 'tool changed during verification'
     receipt = dict(schema='fairyc.candidate-private-tests/v1', passed=True, module=args.module, sourceInputs=source_inputs, tools=images, native=report, nativeTests=len(expected), lockSHA256=lock_sha256, candidateInputFiles=len(paths), candidatePacketSHA256=digest(packet_path), candidateExecutions=executions, invocations=invocations, publicApiChanged=False, dbChanged=False, ciChanged=False, pushed=False)
+    if snapshots:
+        receipt['unchangedPaths'] = [dict(path=name, snapshot=before) for name, _, before in snapshots]
     save(output / 'receipt.json', receipt)
     print(args.module, 'passed:', len(expected), 'native tests and both candidate C profiles', flush=True)
 

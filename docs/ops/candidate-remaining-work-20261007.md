@@ -3952,3 +3952,18 @@ SDK path_kind admission was added. Receipt:
 
 Stable compiler CLI consumers remain. Linux, full suite and Stage1/Stage2 remain
 scheduled later. Public API, SDK, DB, CI and version are unchanged; no push occurred.
+
+
+## Workspace lock policy (2026-10-12)
+
+- Three exact native tests and both candidate C profiles pass. All 24 Go CLI lock
+  observations match; 16 readonly paths preserve bytes and modification times. Source
+  check passes 350 files and 4563 MIR functions.
+- Fresh source loading, SDK selection, import visibility, canonical lock projection,
+  locked checking and atomic update are now composed, with source-counter commit only on
+  success. Stable compiler CLI routing remains outstanding, along with the Linux, full
+  suite, Stage1, and Stage2 runs.
+- No push has been made.
+
+Receipt: `evidence/candidate-lock-policy-20261012.json`. Public API, SDK, DB, CI and
+version are unchanged.
