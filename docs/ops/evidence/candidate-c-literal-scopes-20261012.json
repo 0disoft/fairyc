@@ -1,0 +1,143 @@
+{
+  "schema": "fairyc.candidate-c-literal-scopes/v1",
+  "passed": true,
+  "baselineCommit": "6d8d1a03",
+  "implementation": {
+    "path": "examples/lexer_candidate/src/module_unit_c_emit.fy",
+    "sha256": "270822685ade56f69d13e7f0f08fe1652916009120c4d9150227c94d666eebd0"
+  },
+  "sourceCheck": {
+    "files": 362,
+    "mirFunctions": 4679,
+    "lock": "verified by locked C emission"
+  },
+  "limits": {
+    "indexPreparation": 1048576,
+    "reachability": 1048576,
+    "aggregateDeclarations": 1048576,
+    "literalPool": 1048576,
+    "remainingDeclarations": 1048576,
+    "project": 8388608,
+    "outputBufferBytes": 2097152
+  },
+  "sourceIdentity": {
+    "baselineReceipt": "docs/ops/evidence/candidate-c-reachability-scopes-20261012.json",
+    "orderingUnchanged": true,
+    "sourceSetSHA256": "06b09fccee4be98d80851353e7e2351f1d29afae491ff3cb1a48653bfd887545",
+    "updated": [
+      {
+        "path": "examples/lexer_candidate/src/module_unit_c_emit.fy",
+        "sha256": "270822685ade56f69d13e7f0f08fe1652916009120c4d9150227c94d666eebd0"
+      }
+    ]
+  },
+  "native": {
+    "passed": 1,
+    "profile": "release",
+    "run": {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-stack-current-20261012\\reachability-after\\validation-bootstrap.exe",
+        "test",
+        "--native",
+        "--release",
+        "--locked",
+        "--json",
+        "--capture-output",
+        "--exact",
+        "tests::module_project_link::project_c_partition_preserves_literal_pointer_identity"
+      ],
+      "seconds": 123.3557121999911,
+      "exit": 0,
+      "stderr": ""
+    },
+    "report": {
+      "path": ".cache/candidate-stack-current-20261012/literal-after/native.json",
+      "sha256": "93cdef8aeff6dd0ba0d42abf427b73b916cd98e45904dbb3e04b47938946c3d5"
+    },
+    "validationCompiler": {
+      "path": ".cache/candidate-stack-current-20261012/reachability-after/validation-bootstrap.exe",
+      "sha256": "c30c42ab832f8503d403916db7b6c2bc08caa2de2c8f089f222ae5572e21844e"
+    },
+    "buildTimeoutSeconds": 240,
+    "productTimeoutChanged": false
+  },
+  "unchangedPackets": {
+    "passed": true,
+    "nativeTests": 1,
+    "unchangedPacketBytes": true,
+    "reusedCExecutions": 2,
+    "baselineReceipt": "docs/ops/evidence/candidate-c-preparation-scopes-20261011.json",
+    "packetSHA256": {
+      "tests::module_project_link::project_c_partition_preserves_literal_pointer_identity": "ab078f84ca481668764ac788379f5efa41976f041cbb88a1453b1a593af6b03c"
+    }
+  },
+  "fullEmission": {
+    "exit": 0,
+    "seconds": 67.26898729999084,
+    "stderr": "",
+    "packetBytes": 29372117,
+    "packetSHA256": "67058b1027cf36a982131d41baec5df5d09c254820dc79281a3a3b53020b25ad",
+    "imageSHA256": "d8ec3a98fea0ec2ba4bdc408faa6d4c2a7b5ac39d303638f9ee3d6e387c7e8f4",
+    "sourceFiles": 355,
+    "sourceBytes": 2489680,
+    "sourceSetSHA256": "06b09fccee4be98d80851353e7e2351f1d29afae491ff3cb1a48653bfd887545",
+    "seedProfile": "release",
+    "stackReserveChanged": false,
+    "productTimeoutChanged": false
+  },
+  "packet": {
+    "headerBytes": 1030902,
+    "literalBytes": 507881,
+    "units": 45,
+    "selectedFrames": 5200,
+    "literalDefinitions": 1226,
+    "bodyBytes": 27832988,
+    "maxBodyBytes": 1302387
+  },
+  "emissionInvocations": [
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\manifest-bootstrap.exe",
+        "experimental",
+        "emit-workspace-c",
+        "--target",
+        "x86_64-windows-msvc",
+        "--locked"
+      ],
+      "seconds": 28.599707600020338,
+      "exit": 0,
+      "stderr": "",
+      "stdoutSHA256": "9700d0ea96eceb68c4a83d5d8ae53cc22d1e67c3f71a7259ec543f8cf37e263e"
+    },
+    {
+      "argv": [
+        "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+        "/nologo",
+        "/std:c11",
+        "/TC",
+        "/W4",
+        "/WX",
+        "/MT",
+        "/O2",
+        "/Ob1",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-stack-current-20261012\\literal-after\\compiler.c",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-stack-current-20261012\\runtime.c",
+        "/Fe:C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-stack-current-20261012\\literal-after\\seed.exe",
+        "/link",
+        "/INCREMENTAL:NO"
+      ],
+      "seconds": 64.28881949998322,
+      "exit": 0,
+      "stderr": "",
+      "stdoutSHA256": "9080b4d4825daf0ebdbb0debb34b038e8a8db4cbecce01a24db9483ff37fbdcb"
+    }
+  ],
+  "stage2Achieved": false,
+  "stackReserveChanged": false,
+  "publicApiChanged": false,
+  "sdkAbiChanged": false,
+  "dbChanged": false,
+  "ciChanged": false,
+  "pushed": false,
+  "next": "Link and execute the complete C-part compiler, then replay it and compare generations."
+}

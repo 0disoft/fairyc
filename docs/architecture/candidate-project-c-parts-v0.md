@@ -117,3 +117,24 @@ and remains unchanged. Exact packet bytes match the previous cases, allowing
 their four /Od-/O2 C executions to be reused. Source check passes 362 files /
 4679 MIR functions. Receipt:
 `docs/ops/evidence/candidate-c-reachability-scopes-20261012.json`.
+
+## Independent literal-pool history
+
+Aggregate declarations, literal-pool construction/storage and remaining SDK,
+foreign, prototype and cleanup declarations each retain a 1048576 work meter.
+Each completed history is folded once into the unchanged 8388608 project ledger.
+The 2097152-byte output-buffer cap and transactional publication remain unchanged.
+
+The complete current 355-file dispatcher now emits its full entry bundle in
+67.27 seconds: 29372117 packet bytes, 5200 selected frames, 45 body files,
+1030902 header bytes, 507881 literal-source bytes and 1226 shared literals.
+Body sources total 27832988 bytes; the largest is 1302387 bytes. Packet parsing
+checks frame uniqueness, one entry wrapper and the shared literal definitions.
+The Go-produced optimized seed emitted this packet; linkage and execution of
+this complete C-part compiler and consecutive-generation comparison are next.
+
+The literal-pointer-identity Release native case passes with the verification
+build allowance; its exact packet retains two prior /Od-/O2 C executions.
+Source check passes 362 files / 4679 MIR functions. No product timeout, API,
+SDK ABI, DB or CI change; no push. Receipt:
+`docs/ops/evidence/candidate-c-literal-scopes-20261012.json`.

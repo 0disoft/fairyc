@@ -2265,3 +2265,16 @@ pass with verification-only build allowance 240 seconds after the product's
 60-second allowance timed out. Exact packets permit four prior C executions
 to be reused. Public API, SDK ABI, DB and CI are unchanged; no push. Receipt:
 [candidate-c-reachability-scopes-20261012.json](../ops/evidence/candidate-c-reachability-scopes-20261012.json).
+
+## Complete dispatcher C emission (2026-10-12)
+
+Separate bounded aggregate/literal/common-declaration histories resolve the
+preparation failure without raising the project ledger or output bounds.
+The complete 355-file dispatcher emits a 29372117-byte C packet in 67.27 seconds:
+5200 selected frames, 45 body files and 1226 shared literals. Source check passes
+362 files / 4679 MIR functions. The Release native literal-pointer case passes;
+unchanged packet bytes retain its two prior C executions. This is complete C
+emission from a Go-produced optimized seed. Full C-part compiler linkage,
+execution, consecutive generations and promotion remain separate gates.
+Product timeout, public API, SDK ABI, DB and CI are unchanged; no push. Receipt:
+[candidate-c-literal-scopes-20261012.json](../ops/evidence/candidate-c-literal-scopes-20261012.json).

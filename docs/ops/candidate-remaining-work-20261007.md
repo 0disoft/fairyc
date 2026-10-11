@@ -4134,3 +4134,21 @@ with verification-only 240-second build allowance completes both cases in 210.75
 seconds; product timeout work remains pending. API, SDK ABI, DB and CI are
 unchanged; no push. Receipt:
 `evidence/candidate-c-reachability-scopes-20261012.json`.
+
+## Complete dispatcher C emission (2026-10-12)
+
+Aggregate declarations, shared literals and remaining declarations now have
+independent 1048576 work histories, each charged once to the unchanged 8388608
+project ledger. The complete 355-file dispatcher emits successfully from a
+Go-produced optimized seed in 67.27 seconds: 29372117 packet bytes, 5200 selected
+frames, 45 body files and 1226 shared literals. Header size is 1030902 bytes;
+the largest body source is 1302387 bytes, inside the unchanged output bounds.
+
+Source check passes 362 files / 4679 MIR functions. The Release native literal
+pointer-identity case passes with verification-only build allowance; its exact
+packet retains two prior C executions. Next: link/execute this full C-part
+compiler and replay the same sources for consecutive-generation comparison.
+The product MSVC timeout, entry/driver/build/run integration, Linux/full suite
+and promotion gates remain. Stage2 is not yet achieved. API, SDK ABI, DB and CI
+are unchanged; no push. Receipt:
+`evidence/candidate-c-literal-scopes-20261012.json`.
