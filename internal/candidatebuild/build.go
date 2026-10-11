@@ -25,6 +25,7 @@ type Options struct {
 	Candidate, Manifest, Directory, Output string
 	Release                                bool
 	Timeout                                time.Duration
+	CompileTimeout                         time.Duration
 }
 type Result struct {
 	PacketSHA256      string
@@ -158,6 +159,13 @@ func cachedPacket(path, expected string) ([]byte, error) {
 }
 
 func buildPacket(options Options, data []byte) (Result, error) {
+	compileTimeout := options.CompileTimeout
+	if compileTimeout == 0 {
+		compileTimeout = 2 * time.Minute
+	}
+	if compileTimeout <= 0 || compileTimeout > 10*time.Minute {
+		return Result{}, fmt.Errorf("candidate compile timeout must be in (0,10m]")
+	}
 	if runtime.GOOS != "windows" || runtime.GOARCH != "amd64" || options.Output == "" {
 		return Result{}, fmt.Errorf("candidate native bridge requires Windows x64 MSVC and output executable")
 	}
@@ -177,7 +185,7 @@ func buildPacket(options Options, data []byte) (Result, error) {
 	if options.Release {
 		profile = cdriver.OptimizedProfile
 	}
-	artifact, err := cdriver.BuildWindowsMSVCTargetParts(toolchain, profile, packet.Header, packet.Literals, packet.Units, support)
+	artifact, err := cdriver.BuildWindowsMSVCTargetPartsWithTimeout(toolchain, profile, packet.Header, packet.Literals, packet.Units, support, compileTimeout)
 	if err != nil {
 		return Result{}, err
 	}

@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"runtime"
 	"strings"
+	"time"
 
 	"github.com/0disoft/fairyc/internal/pecoff"
 )
@@ -18,6 +19,15 @@ import (
 // The shared header is written once; no source concatenation or frontend fallback
 // occurs here. Failed compilation/linking returns no publishable image.
 func BuildWindowsMSVCTargetParts(toolchain WindowsHostToolchain, profile Profile, header, literals string, units []string, runtimeSource string) (WindowsHostArtifact, error) {
+	return BuildWindowsMSVCTargetPartsWithTimeout(toolchain, profile, header, literals, units, runtimeSource, commandTimeout)
+}
+
+// BuildWindowsMSVCTargetPartsWithTimeout applies the deadline separately to
+// each compiler invocation and the final link; it does not change program execution.
+func BuildWindowsMSVCTargetPartsWithTimeout(toolchain WindowsHostToolchain, profile Profile, header, literals string, units []string, runtimeSource string, timeout time.Duration) (WindowsHostArtifact, error) {
+	if timeout <= 0 || timeout > 10*time.Minute {
+		return WindowsHostArtifact{}, fmt.Errorf("MSVC project compile timeout must be in (0,10m]")
+	}
 	if runtime.GOOS != "windows" || runtime.GOARCH != "amd64" {
 		return WindowsHostArtifact{}, fmt.Errorf("MSVC project build requires windows/amd64")
 	}
@@ -68,7 +78,7 @@ func BuildWindowsMSVCTargetParts(toolchain WindowsHostToolchain, profile Profile
 		objectPath := filepath.Join(directory, objectName)
 		// Candidate partitions retain their existing consumer flags. Stable
 		// single-unit target builders keep their separate /W4 /WX policy.
-		if _, err := runWindowsHostCommand(toolchain.Path, toolchain.Environment, directory,
+		if _, err := runWindowsHostCommandWithLimitAndTimeout(toolchain.Path, toolchain.Environment, directory, maxProcessOutput, timeout,
 			"/nologo", "/std:c11", "/TC", "/MT", "/Brepro", optimization, "/c", sourcePath, "/Fo:"+objectPath); err != nil {
 			return WindowsHostArtifact{}, fmt.Errorf("compile project source %s: %s", source.Name, strings.ReplaceAll(err.Error(), directory, "<temporary>"))
 		}
@@ -87,7 +97,7 @@ func BuildWindowsMSVCTargetParts(toolchain WindowsHostToolchain, profile Profile
 	// Private bootstrap images must compare byte-for-byte across generations;
 	// timestamp bytes are reproducible inputs, never removed by the comparator.
 	arguments = append(arguments, "/Fe:"+executable, "/link", "/INCREMENTAL:NO", "/Brepro")
-	if _, err := runWindowsHostCommand(toolchain.Path, toolchain.Environment, directory, arguments...); err != nil {
+	if _, err := runWindowsHostCommandWithLimitAndTimeout(toolchain.Path, toolchain.Environment, directory, maxProcessOutput, timeout, arguments...); err != nil {
 		return WindowsHostArtifact{}, fmt.Errorf("link project C: %s", strings.ReplaceAll(err.Error(), directory, "<temporary>"))
 	}
 	contents, err := readArtifact(executable)

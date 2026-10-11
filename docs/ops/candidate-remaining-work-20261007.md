@@ -151,7 +151,7 @@ provider-local helper 및 nominal 인자는 원래 선언 정체성을 보존한
 72. check/build/run, dev/release 프로필과 프로그램 인자 통합.
 73. 구조화 진단과 실패 종류별 기존 종료 코드 유지.
 74. native test 탐색·정확한 선택·격리 실행·JSON 결과 통합.
-75. 컴파일러 프로세스 timeout과 자식 종료 정책 정리. 현재 release 검증이 60초 bootstrap 제한을 120초로 늘린 검증 전용 overlay를 사용한다. 실제 프로젝트 빌드 경로에서는 timeout 설정·진단·종료 처리를 연결해 검증 전용 EXE 의존을 제거.
+75. 부분 완료: 실제 private candidate-build에 --compile-timeout을 연결했다. 기본 120초·상한 10분의 컴파일/링크 단계별 제한을 사용하고 기존 target-parts API는 60초를 유지한다. Windows 취소는 부모·자식 컴파일러를 종료하며 실제 자식 PID 관찰 테스트와 후보 빌드 전체 테스트를 통과했다. 검증 전용 timeout overlay 없이 실행 가능하다. 공개 프로젝트 CLI의 timeout/종료 코드 매핑과 Linux 처리는 후속 단위. 근거: candidate-compile-timeout.md.
 76. 파일·핸들·할당 오류를 후보 CLI까지 전달.
 77. 플랫폼 공통 검증 진입점 유지. PowerShell이 유일한 기여자 실행 경로가 되지 않게 정리.
 

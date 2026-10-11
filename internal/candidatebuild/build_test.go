@@ -17,6 +17,14 @@ import (
 
 func packetFixture(mode string) []byte { return packetFixtureFrame(mode, 1) }
 
+func TestCompileTimeoutRejectedBeforePacketOrCompiler(t *testing.T) {
+	for _, timeout := range []time.Duration{-time.Second, 10*time.Minute + time.Nanosecond} {
+		if _, err := buildPacket(Options{CompileTimeout: timeout}, nil); err == nil || !strings.Contains(err.Error(), "compile timeout") {
+			t.Fatalf("invalid compile timeout %s: %v", timeout, err)
+		}
+	}
+}
+
 func TestCachedPacketRejectsChangedBytesWithoutFrontendFallback(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "candidate.bin")
 	data := packetFixture("")

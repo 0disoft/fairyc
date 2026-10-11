@@ -21,6 +21,7 @@ func run(args []string) int {
 	output := flags.String("output", "", "destination executable")
 	directory := flags.String("directory", ".", "source paths working directory")
 	release := flags.Bool("release", false, "optimized native build")
+	compileTimeout := flags.Duration("compile-timeout", 2*time.Minute, "per-compiler/link deadline in (0,10m]")
 	if err := flags.Parse(args); err != nil {
 		if err == flag.ErrHelp {
 			return 0
@@ -31,7 +32,11 @@ func run(args []string) int {
 		fmt.Fprintln(os.Stderr, "output and either candidate/manifest or packet/packet-sha256 are required")
 		return 2
 	}
-	options := candidatebuild.Options{Candidate: *candidate, Manifest: *manifest, Directory: *directory, Output: *output, Release: *release, Timeout: time.Minute}
+	if *compileTimeout <= 0 || *compileTimeout > 10*time.Minute {
+		fmt.Fprintln(os.Stderr, "compile-timeout must be in (0,10m]")
+		return 2
+	}
+	options := candidatebuild.Options{Candidate: *candidate, Manifest: *manifest, Directory: *directory, Output: *output, Release: *release, Timeout: time.Minute, CompileTimeout: *compileTimeout}
 	var result candidatebuild.Result
 	var err error
 	if *packet != "" {

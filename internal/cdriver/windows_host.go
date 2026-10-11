@@ -1086,9 +1086,18 @@ func runWindowsHostCommand(name string, environment []string, directory string, 
 }
 
 func runWindowsHostCommandWithLimit(name string, environment []string, directory string, limit int, arguments ...string) (string, error) {
-	contextValue, cancel := context.WithTimeout(context.Background(), commandTimeout)
+	return runWindowsHostCommandWithLimitAndTimeout(name, environment, directory, limit, commandTimeout, arguments...)
+}
+
+func runWindowsHostCommandWithLimitAndTimeout(name string, environment []string, directory string, limit int, timeout time.Duration, arguments ...string) (string, error) {
+	if timeout <= 0 || timeout > 10*time.Minute {
+		return "", fmt.Errorf("MSVC command timeout must be in (0,10m]")
+	}
+	contextValue, cancel := context.WithTimeout(context.Background(), timeout)
 	defer cancel()
 	command := exec.CommandContext(contextValue, name, arguments...)
+	configureToolCancellation(command)
+	command.WaitDelay = 2 * time.Second
 	command.Stdin = nil
 	if len(environment) != 0 {
 		command.Env = environment
@@ -1099,7 +1108,7 @@ func runWindowsHostCommandWithLimit(name string, environment []string, directory
 	command.Stderr = &output
 	err := command.Run()
 	if errors.Is(contextValue.Err(), context.DeadlineExceeded) {
-		return output.String(), fmt.Errorf("MSVC host command exceeded %s", commandTimeout)
+		return output.String(), fmt.Errorf("MSVC host command exceeded %s", timeout)
 	}
 	if output.truncated {
 		return output.String(), fmt.Errorf("MSVC host command exceeded %d output bytes", limit)
