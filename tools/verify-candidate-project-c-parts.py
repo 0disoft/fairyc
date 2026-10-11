@@ -60,7 +60,7 @@ def packet(data, complete=True):
         raw = bytes(int(value) for value in payload.split(b","))
         assert hashlib.sha256(raw).hexdigest().encode() == digest or (raw == b"\0" and hashlib.sha256(b"").hexdigest().encode() == digest)
     frames = [int(frame) for unit in units for frame in re.findall(rb"^extern [^\n]+ fy_fn_([0-9]+)\([^\n]*\)\{", unit, re.M)]
-    assert frames == sorted(set(frames)) and frames and frames[-1] <= 4096
+    assert frames == sorted(set(frames)) and frames and frames[-1] <= 8192
     if complete:
         assert frames == list(range(1, len(frames) + 1)), "Every frame must be defined once in original order"
     assert sum(unit.count(b"int32_t fy_candidate_entry(void){") for unit in units) == 1

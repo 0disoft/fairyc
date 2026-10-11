@@ -132,7 +132,7 @@ materialize a field table for every nominal node in the global prefix. Each
 result retains the 512-shape, 2048-field and 512-callable bounds;
 parameter storage is capped at 32768 and owned spelling storage at 65536 bytes.
 
-Project linking admits at most 4096 rebound frames. Type, frame and metadata
+Project linking admits at most 8192 rebound frames. Type, frame and metadata
 plans each retain their 1048576 work cap. Whole-project rebinding and call
 validation have a separate 4194304 work cap, recorded by an explicit project
 scope in cleanup MIR. Unit constructors retain the 1048576 producer cap;
@@ -2339,3 +2339,27 @@ informational under uncontrolled host contention and not a benchmark; the next
 unit investigates optimized bootstrap native build cost, currently cache-only.
 
 Evidence: `docs/ops/evidence/candidate-name-authentication-cache-20261011.json`.
+
+
+## Project frame capacity raised to 8192 (2026-10-11)
+
+`candidate_limits::project_frames()` now admits 8192 rebound frames, up from 4096,
+and the Go packet decoder and the Python project parser follow that frame ID
+bound. The unit count stays 4096 and no other cap moved; work, byte, SDK ABI and
+the private project frame contract are otherwise unchanged.
+
+A development native case links 4257 frames across 129 independent units with 32
+generic and one ordinary frame per unit, passing original namespace coordinates
+and owned-IR revalidation, and Go packet tests accept frame ID 8192 and reject
+8193. Checking passes 292 files and 3671 MIR functions with the lock updated. The
+optimized run of the fixed 285-file path stops at project phase 3 code 1002 in
+24.92 seconds at module 0 with the previous image preserved; the cache-only 352002
+probe had identified the earlier stop as the former 4096 frame cap in
+`frames::build`, not classification-work exhaustion (351002).
+
+The /Ob1 C build (38.78 seconds, correct help output) is a cache-only measurement,
+the default Release native policy is unchanged, and Linux, the full suite,
+Stage1/Stage2 and push were not run. No full compiler build or new dispatcher
+image exists yet; the next unit isolates the post-link budget/cap failure phase.
+
+Evidence: `docs/ops/evidence/candidate-project-frame-capacity-20261011.json`.

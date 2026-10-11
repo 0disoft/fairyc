@@ -1,0 +1,190 @@
+{
+  "schema": "fairyc.candidate-project-frame-capacity/v1",
+  "previousFrames": 4096,
+  "frames": 8192,
+  "cUnitLimit": 4096,
+  "sourceFilesLimit": 512,
+  "otherLimitsChanged": false,
+  "sources": [
+    {
+      "path": "examples/lexer_candidate/src/candidate_limits.fy",
+      "sha256": "148c2ab06631a0ef103a8d23e945ad83eb1fcf7683bd8fa81e86b2cbf33b55e7"
+    },
+    {
+      "path": "examples/lexer_candidate/tests/module_project_frames_capacity.fy",
+      "sha256": "4eb4d8649b8b618a7abcbb186d26495565e730bda8ae66d7c3583a709b519461"
+    },
+    {
+      "path": "internal/candidatebuild/packet.go",
+      "sha256": "38925dd154f3f618e4fd4ad03c8ab6cfbcaa05771ca2320037d1453344363c08"
+    },
+    {
+      "path": "internal/candidatebuild/build_test.go",
+      "sha256": "7c7bdf16e28cc5ae22af03c9f12570118d225c827d752231b4a767664e1c367f"
+    },
+    {
+      "path": "tools/verify-candidate-project-c-parts.py",
+      "sha256": "bbf69ff32040918a916644de509d1241f8e8f564e75eec64387885761149360a"
+    }
+  ],
+  "native": {
+    "exit": 0,
+    "profile": "development",
+    "passed": 1,
+    "failed": 0,
+    "frames": 4257,
+    "units": 129,
+    "genericFramesPerUnit": 32,
+    "ordinaryFramesPerUnit": 1,
+    "irRevalidationPassed": true,
+    "namespaceCoordinatesChecked": true,
+    "seconds": 58.27425190000213
+  },
+  "goPacketTests": {
+    "command": "bun tools/run-go.ts test ./internal/candidatebuild -run '^TestPacket' -count=1",
+    "passed": true,
+    "acceptedFrame": 8192,
+    "rejectedFrame": 8193
+  },
+  "sourceCheck": {
+    "exit": 0,
+    "files": 292,
+    "mirFunctions": 3671,
+    "lockUpdated": true
+  },
+  "optimizedBootstrapExperiment": {
+    "cacheOnlyInliningExperiment": true,
+    "profile": "MSVC /O2 /Ob1",
+    "passed": true,
+    "sourceSHA256": "1b06cda5d8ae32ba28cbbd1cc2cdfe8c1fe4e8003088703ab765eeaf50e20e03",
+    "runtimeObjectSHA256": "fd33d07717df1e64bfc59875d64f51071926dc798d9266d8ef3054f6ea5ec48b",
+    "runtimeObjectOrigin": "Retained same-bootstrap runtime object from timed-out clone build; no runtime/source policy change",
+    "runs": [
+      {
+        "argv": [
+          "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+          "/nologo",
+          "/std:c11",
+          "/TC",
+          "/W4",
+          "/WX",
+          "/MT",
+          "/O2",
+          "/Ob1",
+          "/c",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\latest-bootstrap-names.c",
+          "/Fo:C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\bootstrap-ob1.obj"
+        ],
+        "exit": 0,
+        "seconds": 38.78141389999655,
+        "timeout": false,
+        "stdout": "latest-bootstrap-names.c\r\n",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+          "/nologo",
+          "/MT",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\bootstrap-ob1.obj",
+          "C:\\Users\\cherr\\AppData\\Local\\Temp\\fairyc-msvc-host-1737405107\\runtime.obj",
+          "/Fe:C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\bootstrap-ob1.exe",
+          "/link",
+          "/INCREMENTAL:NO"
+        ],
+        "exit": 0,
+        "seconds": 0.19511970000166912,
+        "timeout": false,
+        "stdout": "",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\bootstrap-ob1.exe",
+          "--help"
+        ],
+        "exit": 0,
+        "seconds": 0.024254300005850382,
+        "timeout": false,
+        "stdout": "usage: lexer-candidate --tokens-file <path>\n       lexer-candidate --declarations-file <path>\n       lexer-candidate --check-names-file <path>\n       lexer-candidate --bindings-file <path>\n       lexer-candidate --check-types-file <path>\n       lexer-candidate --check-modules-file <manifest>\n       lexer-candidate --check-return-origins-file <manifest>\n       lexer-candidate --c-modules-file <manifest>\n       lexer-candidate --c-project-file <manifest>\n       lexer-candidate --hir-file <path>\n       lexer-candidate --mir-file <path>\n       lexer-candidate --c-file <path>\n       lexer-candidate --help\nNo arguments: private binary stdin protocol.\n",
+        "stderr": ""
+      }
+    ]
+  },
+  "oldFrameCapProbe": {
+    "cacheOnlyPhaseCodes": true,
+    "classificationWorkMarker": 351002,
+    "frameCapacityMarker": 352002,
+    "runs": [
+      {
+        "exit": 0,
+        "seconds": 20.819991000003938,
+        "timeout": false,
+        "stdoutBytes": 21801633,
+        "stderr": ""
+      },
+      {
+        "exit": 0,
+        "seconds": 43.98397510000359,
+        "timeout": false,
+        "stdoutBytes": 25,
+        "stderr": ""
+      },
+      {
+        "exit": 0,
+        "seconds": 0.21161169999686535,
+        "timeout": false,
+        "stdoutBytes": 0,
+        "stderr": ""
+      },
+      {
+        "exit": 2,
+        "seconds": 24.982055599997693,
+        "timeout": false,
+        "stdoutBytes": 0,
+        "stderr": "internal/sdkstdlib/sources/optional/std/vec.fy:1:1: error: project phase 3 stage 0 code 352002 (bytes 0..0)\n"
+      }
+    ]
+  },
+  "oldFrameCapProbeInterpretation": "Cache-only 352002 identifies frames::build rejection at the former 4096 cap, not classification-work exhaustion.",
+  "bootstrapBuild": {
+    "validationOnlyInlining": true,
+    "passed": true,
+    "runs": [
+      {
+        "exit": 0,
+        "seconds": 41.08830570000282,
+        "timeout": false,
+        "stdoutBytes": 27,
+        "stderr": ""
+      },
+      {
+        "exit": 0,
+        "seconds": 0.2042414000025019,
+        "timeout": false,
+        "stdoutBytes": 0,
+        "stderr": ""
+      }
+    ]
+  },
+  "fullCurrentDispatcher": {
+    "exit": 2,
+    "seconds": 24.917988999994122,
+    "validationTimeout": false,
+    "stdout": "",
+    "stderr": "candidate build failed: candidate frontend failed: exit status 2: examples/lexer_candidate/src/main.fy:1:1: error: project phase 3 stage 0 code 1002 (bytes 0..0)\n",
+    "sourceFiles": 285,
+    "joinedSourceBytes": 2020078,
+    "previousImagePreserved": true,
+    "sourceInventorySHA256": "2ea302d3f0a45be1ee625fbe94161d7824f346de025609ed7f33c335793e3828"
+  },
+  "fullCompilationProven": false,
+  "next": "Isolate the subsequent project link code 1002 at original module 0. No native C bundle or new full dispatcher image exists.",
+  "pushed": false,
+  "skipped": [
+    "Default standalone Release build policy change",
+    "Linux",
+    "full suite",
+    "Stage1/Stage2"
+  ]
+}

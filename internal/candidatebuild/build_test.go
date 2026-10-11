@@ -13,7 +13,9 @@ import (
 	"time"
 )
 
-func packetFixture(mode string) []byte {
+func packetFixture(mode string) []byte { return packetFixtureFrame(mode, 1) }
+
+func packetFixtureFrame(mode string, frame int) []byte {
 	header := "#ifndef FY_CANDIDATE_PROJECT_HEADER_V1\n#define FY_CANDIDATE_PROJECT_HEADER_V1\n#include <stdint.h>\nextern int32_t missing(void);\n#endif\n"
 	literals := "/* fairyc.candidate-project-literals-c/v1 */\n#include \"fy_project.h\"\n"
 	value := "0"
@@ -27,6 +29,7 @@ func packetFixture(mode string) []byte {
 		header = strings.Replace(header, "#endif\n", "extern uint32_t fy_std_unknown_v0(void);\n#endif\n", 1)
 	}
 	unit := "/* fairyc.candidate-project-unit-c/v1 */\n#include \"fy_project.h\"\nextern int32_t fy_fn_1(void){return " + value + ";}\nint32_t fy_candidate_entry(void){return fy_fn_1();}\nint main(void){return (int)fy_candidate_entry();}\n"
+	unit = strings.ReplaceAll(unit, "fy_fn_1", fmt.Sprintf("fy_fn_%d", frame))
 	var out bytes.Buffer
 	out.WriteString("FYCPARTS1\n")
 	fmt.Fprintf(&out, "%d\n%s%d\n%s1\n%d\n%s", len(header), header, len(literals), literals, len(unit), unit)
@@ -73,6 +76,15 @@ func TestPacketRejectsTruncationAndExtraBytes(t *testing.T) {
 		if _, err := Decode(bad); err == nil {
 			t.Fatalf("accepted malformed packet %d", index)
 		}
+	}
+}
+
+func TestPacketFrameBounds(t *testing.T) {
+	if _, err := Decode(packetFixtureFrame("", maxProjectFrames)); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := Decode(packetFixtureFrame("", maxProjectFrames+1)); err == nil {
+		t.Fatal("accepted frame beyond the project cap")
 	}
 }
 

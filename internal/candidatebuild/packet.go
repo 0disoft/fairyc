@@ -14,6 +14,9 @@ import (
 
 const maxPacket = 96 * 1024 * 1024
 
+// Matches candidate_limits::project_frames; C unit count is separately bounded.
+const maxProjectFrames = 8192
+
 type Packet struct {
 	Header, Literals string
 	Units            []string
@@ -118,7 +121,7 @@ func Decode(data []byte) (Packet, error) {
 		}
 		for _, match := range frameDefinitions.FindAllStringSubmatch(unit, -1) {
 			id, err := strconv.Atoi(match[1])
-			if err != nil || id <= lastFrame || id > 4096 {
+			if err != nil || id <= lastFrame || id > maxProjectFrames {
 				return Packet{}, fmt.Errorf("duplicate or unordered original frame")
 			}
 			lastFrame = id
