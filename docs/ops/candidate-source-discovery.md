@@ -874,3 +874,37 @@ compiler CLI consumption remain. Those later gates compare root-reachable curren
 content with this validated document. Stable public CLI/API, SDK ABI/version,
 DB and CI are unchanged. Linux, full suite and Stage1/Stage2 remain scheduled
 later; no push occurred.
+
+
+## Bounded physical lock reads and exact-current matching
+
+`project_lock_read_file.read` uses the existing project file reader for the exact
+canonical `fairy.lock` leaf, with the 8-MiB ceiling, regular/disk file checks,
+reparse rejection and opened identity checks, then invokes strict lock parsing.
+File/path errors retain OS codes and path offsets; JSON/semantic errors retain
+their own stages, offsets and package/edge indices. Read errors never become stale.
+
+`project_lock_match.matches` projects a fresh already-resolved visibility graph,
+marshals actual and expected canonically and compares every byte on the shared
+meter. False means valid but stale; projection/marshal/work failures stay errors.
+Matching performs no filesystem writes or source-budget counter updates.
+
+The Go reference uses owning `lockfile.Read`/`MatchesWorkspace` with fresh
+workspace loading. Twenty-six cases produce 18 current and 8 stale results:
+13 real SDK/local baselines, 3 reordered locks and 10 mutations. Source, version,
+UID, SDK profile, features, binding, local path and coherent SDK digest changes
+are stale. Cosmetic package names and unreachable member source changes remain
+current. The changed SDK digest is strictly parseable but current matching rejects
+it. Missing, empty, malformed, null-dependency, directory, oversized and reparse
+lock fixtures reject; a real junction exercises reparse handling.
+
+Three native tests and both candidate C profiles pass, including all matches,
+file/parse failure categories, exhausted read/match work, private candidate SDK
+projection as an error, unchanged counters and immediate before/after lock bytes.
+The lock SHA/mtime snapshot taken while native verification was live stays
+unchanged through later profiles. Check passes 347 files and 4530 MIR functions.
+Receipt: `evidence/candidate-lock-match-20261012.json`.
+
+Atomic persistence and compiler CLI consumers remain. Public CLI/API, SDK
+ABI/version, DB and CI are unchanged. Linux, full suite and Stage1/Stage2 remain
+scheduled later; no push occurred.

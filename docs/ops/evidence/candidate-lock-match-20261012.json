@@ -1,0 +1,1129 @@
+{
+  "schema": "fairyc.candidate-private-tests/v1",
+  "passed": true,
+  "module": "project_lock_match",
+  "sourceInputs": [
+    {
+      "path": "examples/lexer_candidate/src/array_identity.fy",
+      "sha256": "8b501b0f72bb2805c00abc59afb195b5ba2c199796982122b62958bab64966ee"
+    },
+    {
+      "path": "examples/lexer_candidate/src/attributes.fy",
+      "sha256": "dafe2e1c020446224fa8784e701e522096a58776a1066920f934c0717667b5e6"
+    },
+    {
+      "path": "examples/lexer_candidate/src/bodies.fy",
+      "sha256": "ea9bfd6dc1b3bce9dc407970b82d871185db33e7daadad35d348de84ab6ba294"
+    },
+    {
+      "path": "examples/lexer_candidate/src/body_state.fy",
+      "sha256": "0f4e1924d07e4d21bc5fbe35a4fb8f0c2b617206b6d63191e7a625300ec5bb3e"
+    },
+    {
+      "path": "examples/lexer_candidate/src/budget.fy",
+      "sha256": "c2793aa302279b9d27f0af32edd71f70de4e93cb4f76f55facd3e757641cc494"
+    },
+    {
+      "path": "examples/lexer_candidate/src/candidate_limits.fy",
+      "sha256": "7a27948d9a43bde84acdf1106f462d0c5a288f8a54f193560658eff0c0d00f3e"
+    },
+    {
+      "path": "examples/lexer_candidate/src/cleanup_syntax.fy",
+      "sha256": "1374cdcbfa6139a5e82e4e74606cc28ba46d9e81df62f7a0dd397f856fb0ad6f"
+    },
+    {
+      "path": "examples/lexer_candidate/src/diagnostics.fy",
+      "sha256": "ee95f81ed3b3224702196fceef2888434e9713341b81abf01e03945592c4de8b"
+    },
+    {
+      "path": "examples/lexer_candidate/src/file_source.fy",
+      "sha256": "1a7ac7f6c69ef27e78e734aa74dab90b895742a5500a32931baaed19379b938f"
+    },
+    {
+      "path": "examples/lexer_candidate/src/nominal_identity.fy",
+      "sha256": "634cba7ac0667481c0863953640668841216554d852e0e1b1b245c8bc1606958"
+    },
+    {
+      "path": "examples/lexer_candidate/src/numbers.fy",
+      "sha256": "ee8b40b5e8061317d70d3594c386c9e4c70d95132a7e4243ea6402947a4c3556"
+    },
+    {
+      "path": "examples/lexer_candidate/src/parse_tokens.fy",
+      "sha256": "91984eb1086ff7faafa4a6c64a232fc2ddce365b8cd7c2ef23b143bb91d4c9a6"
+    },
+    {
+      "path": "examples/lexer_candidate/src/pointer_identity.fy",
+      "sha256": "31458fda72821f98d8383339f8b272f3aa1c78385fb23504cbe9f1aaa021ae3d"
+    },
+    {
+      "path": "examples/lexer_candidate/src/pointer_types.fy",
+      "sha256": "7cca6293336feedbf785912759ee6c50a17010ad9d966acb81877ad32cd55297"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_content_hash.fy",
+      "sha256": "68d867b37b8cc817382e6d6602aa4d66f4d66be8784e7fbe119c806832839a0e"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_directory.fy",
+      "sha256": "70321e8a7cc84f131573eec91013fccad38d0162f781768bc0e47b136cf4ebc6"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_import_path.fy",
+      "sha256": "bc0e5e10905ee833b36ffe94ae8ff835f6f33caccfc59970cd379537dcbb0c54"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_instance_graph.fy",
+      "sha256": "9a47a2cae4fbef1a6129b0805e683782be26c819ae2f41dd233129279cc226e9"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_instance_identity.fy",
+      "sha256": "797920212852438398bcfaa5acd34225c9ff2de722744c67d9c68c9d2c56e8dd"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_json_decode.fy",
+      "sha256": "ff6b493e6cb535736a88708c3dba98fddf7ae5b182a738d33a8b2f65b94c4ef1"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_json_string.fy",
+      "sha256": "03e76c4239b19ef6fba1a9ebdf97aeb9407d2fb97529fa9f2c6f1d8fbfce6c53"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_json_tokens.fy",
+      "sha256": "98c179f289bab904242a1b8ea44cbf819134eecd75a8e7f08eee8b7b79d0c6a4"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_json_tree.fy",
+      "sha256": "3b407afd0ae9c658beb650a92276e9263931f358edff41bdb34464266ea94084"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_key_index.fy",
+      "sha256": "34ee26a1092361c5bc60860795a86c0974243eec3cfc5f829710d192fdf7ea28"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_lock_document.fy",
+      "sha256": "cfb5415d9f4cbcc4bf484694404b15dd9f3b16c6c6d2ff47ccad0a1340b217b5"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_lock_fields.fy",
+      "sha256": "f7618eda338faa94a93198e11a945312b0d1825c72b36388d4f8732969b76fc2"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_lock_json.fy",
+      "sha256": "d980496da9b9ef7cdcefab991830f46aee0450d13c55ac785baaafc9c3900800"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_lock_match.fy",
+      "sha256": "8f40c15987cd8587eccd25dc5547cf13bbe834859b059bc4beb704971c0577fe"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_lock_read_file.fy",
+      "sha256": "509f72cbbcb520d13bd1b2fd03ad6fe60f72d4d7984da3151cd7a532f5d9c55c"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_lock_reader.fy",
+      "sha256": "8ac9e130a01ea78b82f0bb4ce0b548e795229212cc30b054792dda0c31d92860"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_lock_validate.fy",
+      "sha256": "c8f1d73870643de92c891768ba466278b9bda887a05e484c0a9bf45f9fe0cb10"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_manifest.fy",
+      "sha256": "943c3e163ddc04afb03a82ef4a0485aa6a618a67708e657086b8ed1acd56658a"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_manifest_values.fy",
+      "sha256": "4f21b9dedf744ffc449d1b843282f9aba2ecc221c61f043594bea70c4d56387d"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_module_path.fy",
+      "sha256": "b4217fe0f797e5f0fb4bab8ebc75435e6674b5f72b60d0129b5269c627709cb2"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_module_visibility.fy",
+      "sha256": "a03c433d5302f904620df34585697e99e67e417b3b2121a474432839108ab0bb"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_package_input.fy",
+      "sha256": "fe1a75622fbf72b03fe5bfba3ce0c158eb2e03033e31acfdaef05afea9ec68c8"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_path.fy",
+      "sha256": "20bde13864e5ba8752b33a616eab22b08caf8a20d6a435d2d2c2cc68f443f1a5"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_path_unicode_data.fy",
+      "sha256": "9cf3af27796644304493561591e1641c70c5c653bf739ed71a65e492db510fbd"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_sdk_bundle.fy",
+      "sha256": "a7bde8c483cc986a6bf6b38f56ab1852cc46a4d27a21a48b0868064bf1eb8217"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_sdk_data_alloc_0.fy",
+      "sha256": "ac58625000197a88c33f322770c7f89fecc64126b3ff4479d6757aa4bfb16301"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_sdk_data_bytes_0.fy",
+      "sha256": "18734fec4d058c90a8b38cc729d711789b2ebfd2f4cd08756ccdad56ae9665b3"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_sdk_data_fs_0.fy",
+      "sha256": "a6c26d37224e5a43231d9068bfe1638ac9b357b971eddcaf628291d5c906ea0f"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_sdk_data_fs_1.fy",
+      "sha256": "0c2a6d16571e5681296d324293543771c69665b3a90606090b675d33e0fc5f17"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_sdk_data_fs_2.fy",
+      "sha256": "c20e6ac9ab0d7be6a84af43a52191ae76b402efef6d76bdd7ce0e1e3dffafea0"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_sdk_data_io_0.fy",
+      "sha256": "8527d39e50702591dcdf07e71663128bd4f61a8ad62f30e8b42998f30a548104"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_sdk_data_num_0.fy",
+      "sha256": "1859e2ffa80b3e675096cc50cec693bb33aa060dd47886feb837d4df37c2eda8"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_sdk_data_process_0.fy",
+      "sha256": "b14ace85f2736dee51a63f064cf7619ad925384797e0945c6053ba767f725f6c"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_sdk_data_text_0.fy",
+      "sha256": "a0d6b93d966f75b803a1677cfa0e3cd6504b1006bd4a10a1c2598668a5442d19"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_sdk_data_vec_0.fy",
+      "sha256": "6201186e9a75bb1957596eb9717e447194e67b6c5828355e44af98941a103a31"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_sdk_embedded.fy",
+      "sha256": "8c49d481331933981777e9bd90fa5f45621956010b6a3fea38a2ada4dd31d943"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_source_catalog.fy",
+      "sha256": "5dd5b1a6f848968cf20676084af8ddcaf039cfc74e1837685c12c601c53fb131"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_source_file.fy",
+      "sha256": "6d1307e99f7ae9fb387fc447f3b6c36f6c0e77aebc90faca55e75665aad2d282"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_source_identity.fy",
+      "sha256": "354bed4ced07109403b58f4432e8beddc765760a1ee083b3ca72fa0880c9f359"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_source_modules.fy",
+      "sha256": "d7d7e5b30a270389a1572f6e26cf3c0603db33e0125bd33fa17f4f177a0f7a1c"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_source_root.fy",
+      "sha256": "e6d896a57fde407db5e7042e244d6f2a35dddc4e113ad20555c4408f24842127"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_source_set.fy",
+      "sha256": "c4b70409d8aa627a1ef46488e5232d3deea7b07c0e796c26ef28449f367a98e1"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_toml_context.fy",
+      "sha256": "1682260043feced2ac662198fd3b29f4badb2a4a9f9b02a8e1f81462f3b3cc0f"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_toml_document.fy",
+      "sha256": "0bc3782206da0d9320ba8a39ea6a1f9ded52ec1bbf855580e31c1a1786f4b3a8"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_toml_model.fy",
+      "sha256": "4a6c295108e704749fc557204de4d8a0287e3228e59da396c50867ec8894b11e"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_toml_scalars.fy",
+      "sha256": "137d5dbdce313f22e91a9be87f8b34eb6f10011933b152f649421a895e274cb9"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_toml_strings.fy",
+      "sha256": "bc7e71acaaa68af5755d066c90fa1f763625de32c8fa2a6778e8447eebc187bb"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_toml_values.fy",
+      "sha256": "24255d1fdf0f34b6761f5304d383127667e8b127488a80409b3f35a13f62e81c"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_workspace_catalog.fy",
+      "sha256": "bc800dda99247aba4d8b80abdcbc092d9cb27ac5193cfb7a33bd405ec753c936"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_workspace_graph.fy",
+      "sha256": "bac53290ea919d58d825f7a663c716b97541404a1973aa8585da891bfb689dc1"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_workspace_input.fy",
+      "sha256": "18a8a35c400eaa8c32da09ea55a70d704953e8b9a762998b44c9af4dd76689fd"
+    },
+    {
+      "path": "examples/lexer_candidate/src/records.fy",
+      "sha256": "e2d1d3540285509aded981b476d4b2340857d8c7370364f4b1410bfd6883f6dd"
+    },
+    {
+      "path": "examples/lexer_candidate/src/reference_types.fy",
+      "sha256": "f529bb686f06fe07d95f864e28fbde211200fce11a11c6aae260356103639b57"
+    },
+    {
+      "path": "examples/lexer_candidate/src/resource_identity.fy",
+      "sha256": "7d85c65df4d6cc02f004f854d5108ec3cc7ba8ddb4885ea54c634f88f93594aa"
+    },
+    {
+      "path": "examples/lexer_candidate/src/scanner.fy",
+      "sha256": "3755e569fe63003f63b2c9b8272df2ba656c844791cedbc0da4f9245b8809cf7"
+    },
+    {
+      "path": "examples/lexer_candidate/src/sdk_authority.fy",
+      "sha256": "ae0f2e21819a625a6bb5fe331173dd3366599486f3c203a523693680a0c4ee6c"
+    },
+    {
+      "path": "examples/lexer_candidate/src/sdk_file_rules.fy",
+      "sha256": "a7c5bc7224e12d29d54d284c54f31f34fa66f1067397e0fcb57de9dabe901e5b"
+    },
+    {
+      "path": "examples/lexer_candidate/src/sdk_scopes.fy",
+      "sha256": "7aabc14d6c8a54f959e4c454df8fccb4fc49c2a7efbefa882f8d939a131717e6"
+    },
+    {
+      "path": "examples/lexer_candidate/src/sha256.fy",
+      "sha256": "eb89211fd749f7f527e8d2b72e97d70f8d9613bbac428bc95d975bef7c53bfa1"
+    },
+    {
+      "path": "examples/lexer_candidate/src/sha256_block.fy",
+      "sha256": "bc48b9e751205bba8aeaf09987ea8681694d26bc989e24f4ecb3afa4c6e00fd4"
+    },
+    {
+      "path": "examples/lexer_candidate/src/sha256_stream.fy",
+      "sha256": "b5f97a9b5be679418a1365a6007028abfab5ba66ee3ae5c08b3e5b863fcfc8b9"
+    },
+    {
+      "path": "internal/sdkstdlib/sources/std/bytes.fy",
+      "sha256": "4740a506e93349fb002c383967dcc44d182d20f09f2094b83b5464a4ab252982"
+    },
+    {
+      "path": "internal/sdkstdlib/sources/std/fs.fy",
+      "sha256": "fd7ddfa9f0deed98304cecf94911644087d1e2a46e8be8995c35acbcb183b335"
+    },
+    {
+      "path": "internal/sdkstdlib/sources/std/io.fy",
+      "sha256": "4b89c3aeb8b4de4887395d29723095d364c5660c6b773c5696fb1f65f5365f48"
+    },
+    {
+      "path": "internal/sdkstdlib/sources/std/num.fy",
+      "sha256": "09aa0d45f075aa4212049527ded7bb48d99ceb6ffed56b310e267421bae20bb3"
+    },
+    {
+      "path": "internal/sdkstdlib/sources/std/process.fy",
+      "sha256": "9680a1481df4f761f481d5a039af7bdbefeb312d1091961194f8e7bc0681ae24"
+    },
+    {
+      "path": "internal/sdkstdlib/sources/std/text.fy",
+      "sha256": "cccd47e090fda11c9da063ffb321489dd8753fe9996855fc432833e05a79e695"
+    },
+    {
+      "path": "internal/sdkstdlib/sources/optional/std/vec.fy",
+      "sha256": "0ae4c395bf98c39079ad620bde035b3b590d51417864802e698edc069281db5b"
+    },
+    {
+      "path": "examples/lexer_candidate/src/strings.fy",
+      "sha256": "8f26db7c4d4039c8c8d9fbc6078097859c8f714ca5887957fdf0e69269dca521"
+    },
+    {
+      "path": "examples/lexer_candidate/src/syntax.fy",
+      "sha256": "cb040a2973447b89c2ad59b5447c65dab79df5df7930f73431afa7ea34ef25fd"
+    },
+    {
+      "path": "examples/lexer_candidate/src/type_state.fy",
+      "sha256": "7dbbf7d50be1e9513dc8aafd99b11afda5d8e2d7ce87d96b6436c4752c2123a0"
+    },
+    {
+      "path": "examples/lexer_candidate/src/types.fy",
+      "sha256": "53a77948af92724f00de0609837fd1507899df8e2b59b6d2778ef1f3c344395a"
+    },
+    {
+      "path": "examples/lexer_candidate/src/utf8.fy",
+      "sha256": "4a5425cea9efbfb1bff2c31a38c2bd8e392c6792af09f24e906c9a743621870d"
+    },
+    {
+      "path": "examples/lexer_candidate/tests/project_lock_match.fy",
+      "sha256": "551f489248ea720daba5e9be2fcfc6e1311954d477309b708765f1a07b83800b"
+    },
+    {
+      "path": "tools/verify-candidate-private-tests.py",
+      "sha256": "04c7e44df7941bd0c1a12b523b115df623dbe10836f3eb8993dedc7d6ea5e8af"
+    },
+    {
+      "path": ".cache/candidate-lock-match-20261012/fixture/root.bin",
+      "sha256": "a82386c7814a82377ebc9789e14e2b8fcee7f6e5c39488a28cbec014a8d5872f"
+    }
+  ],
+  "tools": {
+    "compiler": {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\manifest-bootstrap.exe",
+      "sha256": "4e6a50a83b4d9f74a11d749c779a90683ab3a3916d19f4852bfe1cbd452cc664"
+    },
+    "candidate": {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-source-file-20261011\\compiler.exe",
+      "sha256": "e87cc5c8c19e30fc68ca68fa98ef66d87baa1300263d8989e255910bb1985d8f"
+    },
+    "builder": {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-source-file-20261011\\builder.exe",
+      "sha256": "8141ce6bcc461a52fe6bf0bf24e9e5f5a9d7842c3c7dbfc5863cc4e822584ea7"
+    }
+  },
+  "native": {
+    "schemaVersion": "fairyc.test-report/v4",
+    "engine": "native",
+    "target": "x86_64-windows-msvc",
+    "profile": "development",
+    "tests": [
+      {
+        "identity": "tests::project_lock_match::physical_lock_and_fresh_workspace_matching_agree_with_go_without_writes",
+        "outcome": "passed",
+        "trapCategory": null,
+        "stdoutBase64": "",
+        "stderrBase64": ""
+      },
+      {
+        "identity": "tests::project_lock_match::private_candidate_projection_is_an_error_instead_of_stale",
+        "outcome": "passed",
+        "trapCategory": null,
+        "stdoutBase64": "",
+        "stderrBase64": ""
+      },
+      {
+        "identity": "tests::project_lock_match::regular_file_bounds_and_strict_read_failures_keep_their_categories",
+        "outcome": "passed",
+        "trapCategory": null,
+        "stdoutBase64": "",
+        "stderrBase64": ""
+      }
+    ],
+    "count": 3,
+    "passed": 3,
+    "failed": 0,
+    "status": "ok",
+    "lock": "verified"
+  },
+  "nativeTests": 3,
+  "lockSHA256": "76c6556e354ae0e05f1c8942102d63c02c50e9c633074c8bbd55201b39c9cb08",
+  "candidateInputFiles": 88,
+  "candidatePacketSHA256": "bd7ce76cede0929c8731a45f78394442e386a1ef7edca69b3720c1f0816b919b",
+  "candidateExecutions": [
+    {
+      "profile": "development",
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-lock-match-20261012\\execution\\development.exe",
+      "sha256": "bd0ecfbd0218c1bdcddf92cb2f4baee3040c4e9f9123c082a3ce079257c818c1",
+      "exit": 0
+    },
+    {
+      "profile": "release",
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-lock-match-20261012\\execution\\release.exe",
+      "sha256": "efafe2380948f2f2f50dcd1a3bf02f5d76b2d21aade4ef589d5d9d7fb75163c2",
+      "exit": 0
+    }
+  ],
+  "invocations": [
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\manifest-bootstrap.exe",
+        "test",
+        "--native",
+        "--locked",
+        "--json",
+        "--capture-output",
+        "--exact",
+        "tests::project_lock_match::physical_lock_and_fresh_workspace_matching_agree_with_go_without_writes",
+        "--exact",
+        "tests::project_lock_match::regular_file_bounds_and_strict_read_failures_keep_their_categories",
+        "--exact",
+        "tests::project_lock_match::private_candidate_projection_is_an_error_instead_of_stale",
+        "--",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-lock-match-20261012\\fixture\\root.bin"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "seconds": 125.30011300000479,
+      "exit": 0,
+      "stdoutBytes": 737,
+      "stdoutSHA256": "e14fd5c1a5fa55cc232368ae21fac07f0b2925a0006103ab49043725a8bca887",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-source-file-20261011\\compiler.exe",
+        "--c-project-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-lock-match-20261012\\execution\\sources.list"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "seconds": 53.91003370001272,
+      "exit": 0,
+      "stdoutBytes": 5538501,
+      "stdoutSHA256": "bd7ce76cede0929c8731a45f78394442e386a1ef7edca69b3720c1f0816b919b",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-source-file-20261011\\builder.exe",
+        "--packet",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-lock-match-20261012\\execution\\candidate-packet.bin",
+        "--packet-sha256",
+        "bd7ce76cede0929c8731a45f78394442e386a1ef7edca69b3720c1f0816b919b",
+        "--output",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-lock-match-20261012\\execution\\development.exe"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "seconds": 4.3447343000007095,
+      "exit": 0,
+      "stdoutBytes": 182,
+      "stdoutSHA256": "b140732d36c918f4f5ad764cf3006aad1af67219f34ffb325cf9b1327a55bc65",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-lock-match-20261012\\execution\\development.exe",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-lock-match-20261012\\fixture\\root.bin"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "seconds": 6.201196800000616,
+      "exit": 0,
+      "stdoutBytes": 0,
+      "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-source-file-20261011\\builder.exe",
+        "--packet",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-lock-match-20261012\\execution\\candidate-packet.bin",
+        "--packet-sha256",
+        "bd7ce76cede0929c8731a45f78394442e386a1ef7edca69b3720c1f0816b919b",
+        "--output",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-lock-match-20261012\\execution\\release.exe",
+        "--release"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "seconds": 78.30547140000272,
+      "exit": 0,
+      "stdoutBytes": 183,
+      "stdoutSHA256": "f161dc55653c3287620e1d8084aa25164cbc2cb3f24a8fbdc106bb3c8c98eae1",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-lock-match-20261012\\execution\\release.exe",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-lock-match-20261012\\fixture\\root.bin"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "seconds": 0.8101518000039505,
+      "exit": 0,
+      "stdoutBytes": 0,
+      "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr": ""
+    }
+  ],
+  "publicApiChanged": false,
+  "dbChanged": false,
+  "ciChanged": false,
+  "pushed": false,
+  "reference": {
+    "sources": [
+      {
+        "path": "cmd/fairyc-candidate-lock-match-reference/main.go",
+        "sha256": "09d6fd52d5f3d5d16f07af426455664c46c16445e8f9b6fc380f13da70106a1e"
+      },
+      {
+        "path": "cmd/fairyc-candidate-sdk-selection-reference/main.go",
+        "sha256": "5943bebe93accda6b435adc8f9eab0561f3ce608c6037e0ebe2017bd2706a195"
+      },
+      {
+        "path": "internal/lockfile/lockfile.go",
+        "sha256": "6fdab4d79c030703b4e6d5712e5d90cd4307fa1423c02baac9a9380416af102b"
+      }
+    ],
+    "oracles": [
+      "owning lockfile.Read",
+      "owning lockfile.MatchesWorkspace",
+      "fresh owning workspaceloader.Load/LoadVectorCandidate"
+    ],
+    "cases": 26,
+    "current": 18,
+    "stale": 8,
+    "faults": [
+      "missing",
+      "empty",
+      "malformed",
+      "null dependencies",
+      "directory",
+      "8MiB+1",
+      "reparse junction"
+    ],
+    "goReparseRejected": true
+  },
+  "sourceCheck": {
+    "exit": 0,
+    "sourceFiles": 347,
+    "mirFunctions": 4530
+  },
+  "unchangedLocks": {
+    "count": 26,
+    "snapshotScope": "Lock SHA256/mtime snapshot while native invocation was live through later candidate profiles; authored tests also compare immediate before/after bytes for every matching case.",
+    "records": [
+      {
+        "path": "None",
+        "sha256": "a939d519308acf154542aa0446bf8894d6a5a65c711d17fc8ca19c1bd0353e1c",
+        "mtime_ns": 1791740480117916800
+      },
+      {
+        "path": "CandidateUnused",
+        "sha256": "a939d519308acf154542aa0446bf8894d6a5a65c711d17fc8ca19c1bd0353e1c",
+        "mtime_ns": 1791740480122420100
+      },
+      {
+        "path": "Core",
+        "sha256": "414615fc5fe2fe181a01e9baee24522efd22d12250eaf5b605068c0c2ff722c9",
+        "mtime_ns": 1791740480124659400
+      },
+      {
+        "path": "AliasCore",
+        "sha256": "59b653569e52395505c86d653c390903f009cbeb5a7b2bd1406a7a4b62ade39e",
+        "mtime_ns": 1791740480142279100
+      },
+      {
+        "path": "Vector",
+        "sha256": "6813c0fa2c016c213b3d8fd0f03cb81c985c15e131537664513aa9f48b93ab98",
+        "mtime_ns": 1791740480156771300
+      },
+      {
+        "path": "ChildOnly",
+        "sha256": "a90e506ecfc3aeebae7fe32cf50633dca500188b592778f61a3aa6d491fce699",
+        "mtime_ns": 1791740480173679600
+      },
+      {
+        "path": "Both",
+        "sha256": "dcb86921d743e0000536b729fb581f89b59b2ef10cbe100345f4eb9bbc0ce96a",
+        "mtime_ns": 1791740480189744900
+      },
+      {
+        "path": "ChildVector",
+        "sha256": "f61d4416261d6304c6c236e931cee65ec4711b4c48d0da30932b51b4c54056ce",
+        "mtime_ns": 1791740480206928700
+      },
+      {
+        "path": "UnreachableVector",
+        "sha256": "a939d519308acf154542aa0446bf8894d6a5a65c711d17fc8ca19c1bd0353e1c",
+        "mtime_ns": 1791740480224731800
+      },
+      {
+        "path": "FeatureSplit",
+        "sha256": "712621dd181fa4fa6bc9188fa204e77c63d3a22b6f222e56bc74c1c95713b2e1",
+        "mtime_ns": 1791740480229251000
+      },
+      {
+        "path": "InstanceAliases",
+        "sha256": "b8b5873c3998c671c5ee61792dbb223ba7888d2b87ae42f05f07932a377bfe7b",
+        "mtime_ns": 1791740480245342200
+      },
+      {
+        "path": "LongTrivia",
+        "sha256": "7bfd74bc0904bc76584c4f34e67998c3840512c21d3a177960a82c92aa6f07c8",
+        "mtime_ns": 1791740480262724400
+      },
+      {
+        "path": "SimilarNamespaces",
+        "sha256": "2723848a67a7cc704227ddcbec8a90ee8ff658c1e0246b612192f1c2931b7767",
+        "mtime_ns": 1791740480277647600
+      },
+      {
+        "path": "reordered/None",
+        "sha256": "7455228fd7323828dcdc4d42baeb4f35b924ca018303c95036961606921bccac",
+        "mtime_ns": 1791740480293310200
+      },
+      {
+        "path": "reordered/Core",
+        "sha256": "c672d47cc68e156b3e562a46050e9ae3fd542983b1eef71b80276cefba5be59e",
+        "mtime_ns": 1791740480305924300
+      },
+      {
+        "path": "reordered/FeatureSplit",
+        "sha256": "df317df6b52b6a3c2fa840a24ab2c633b668ca6e288954bf6447749a2ec47ca7",
+        "mtime_ns": 1791740480332827800
+      },
+      {
+        "path": "mutations/Source",
+        "sha256": "a939d519308acf154542aa0446bf8894d6a5a65c711d17fc8ca19c1bd0353e1c",
+        "mtime_ns": 1791740480352479700
+      },
+      {
+        "path": "mutations/Version",
+        "sha256": "a939d519308acf154542aa0446bf8894d6a5a65c711d17fc8ca19c1bd0353e1c",
+        "mtime_ns": 1791740480364002600
+      },
+      {
+        "path": "mutations/UID",
+        "sha256": "a939d519308acf154542aa0446bf8894d6a5a65c711d17fc8ca19c1bd0353e1c",
+        "mtime_ns": 1791740480376166600
+      },
+      {
+        "path": "mutations/Name",
+        "sha256": "a939d519308acf154542aa0446bf8894d6a5a65c711d17fc8ca19c1bd0353e1c",
+        "mtime_ns": 1791740480389028400
+      },
+      {
+        "path": "mutations/Profile",
+        "sha256": "414615fc5fe2fe181a01e9baee24522efd22d12250eaf5b605068c0c2ff722c9",
+        "mtime_ns": 1791740480401327700
+      },
+      {
+        "path": "mutations/Unreachable",
+        "sha256": "a939d519308acf154542aa0446bf8894d6a5a65c711d17fc8ca19c1bd0353e1c",
+        "mtime_ns": 1791740480431814100
+      },
+      {
+        "path": "mutations/Features",
+        "sha256": "712621dd181fa4fa6bc9188fa204e77c63d3a22b6f222e56bc74c1c95713b2e1",
+        "mtime_ns": 1791740480446974000
+      },
+      {
+        "path": "mutations/Binding",
+        "sha256": "b8b5873c3998c671c5ee61792dbb223ba7888d2b87ae42f05f07932a377bfe7b",
+        "mtime_ns": 1791740480478394000
+      },
+      {
+        "path": "mutations/LocalPath",
+        "sha256": "dcb86921d743e0000536b729fb581f89b59b2ef10cbe100345f4eb9bbc0ce96a",
+        "mtime_ns": 1791740480507814400
+      },
+      {
+        "path": "mutations/SDKDigest",
+        "sha256": "89743d4664e4e596c004fbd552d5a933e36e0cb799f56cd2885305d9ccd959da",
+        "mtime_ns": 1791740480543024100
+      }
+    ]
+  },
+  "fixtureInputs": [
+    {
+      "path": ".cache/candidate-lock-match-20261012/fixture/AliasCore/fairy.lock",
+      "sha256": "59b653569e52395505c86d653c390903f009cbeb5a7b2bd1406a7a4b62ade39e"
+    },
+    {
+      "path": ".cache/candidate-lock-match-20261012/fixture/AliasCore/fairy.toml",
+      "sha256": "842c0deaf9080f93aab8586f71c44223756605e9cc3577bbc4b756059a747a4c"
+    },
+    {
+      "path": ".cache/candidate-lock-match-20261012/fixture/AliasCore/src/main.fy",
+      "sha256": "e645e3508d1e334622f67e5d3ea0a978d74fb48ee922b4d80965c87aae1b243b"
+    },
+    {
+      "path": ".cache/candidate-lock-match-20261012/fixture/Both/a/fairy.toml",
+      "sha256": "5955a3cbba16e1316a4033dc657c257fde338b904285fa714a03398005bf2929"
+    },
+    {
+      "path": ".cache/candidate-lock-match-20261012/fixture/Both/a/src/lib.fy",
+      "sha256": "c98b3a0a5de7fd962b6838c15d504357ae3ae1d33cfa567d29514ae3ee193fd3"
+    },
+    {
+      "path": ".cache/candidate-lock-match-20261012/fixture/Both/fairy.lock",
+      "sha256": "dcb86921d743e0000536b729fb581f89b59b2ef10cbe100345f4eb9bbc0ce96a"
+    },
+    {
+      "path": ".cache/candidate-lock-match-20261012/fixture/Both/fairy.toml",
+      "sha256": "070d88c326cb9ac1b6154e9ae817f5747d7ad966baf8766640937774bb977181"
+    },
+    {
+      "path": ".cache/candidate-lock-match-20261012/fixture/Both/src/main.fy",
+      "sha256": "d28484d12f391eb1e65e72e115b8c9b7a37c1a4655009535ecb00beea946bcb0"
+    },
+    {
+      "path": ".cache/candidate-lock-match-20261012/fixture/CandidateUnused/fairy.lock",
+      "sha256": "a939d519308acf154542aa0446bf8894d6a5a65c711d17fc8ca19c1bd0353e1c"
+    },
+    {
+      "path": ".cache/candidate-lock-match-20261012/fixture/CandidateUnused/fairy.toml",
+      "sha256": "842c0deaf9080f93aab8586f71c44223756605e9cc3577bbc4b756059a747a4c"
+    },
+    {
+      "path": ".cache/candidate-lock-match-20261012/fixture/CandidateUnused/src/main.fy",
+      "sha256": "51e4c2b1b8b049778e1543110b6b45a60b6a5bc53bded4de74457f7fcc984cf4"
+    },
+    {
+      "path": ".cache/candidate-lock-match-20261012/fixture/ChildOnly/a/fairy.toml",
+      "sha256": "5955a3cbba16e1316a4033dc657c257fde338b904285fa714a03398005bf2929"
+    },
+    {
+      "path": ".cache/candidate-lock-match-20261012/fixture/ChildOnly/a/src/lib.fy",
+      "sha256": "c98b3a0a5de7fd962b6838c15d504357ae3ae1d33cfa567d29514ae3ee193fd3"
+    },
+    {
+      "path": ".cache/candidate-lock-match-20261012/fixture/ChildOnly/fairy.lock",
+      "sha256": "a90e506ecfc3aeebae7fe32cf50633dca500188b592778f61a3aa6d491fce699"
+    },
+    {
+      "path": ".cache/candidate-lock-match-20261012/fixture/ChildOnly/fairy.toml",
+      "sha256": "070d88c326cb9ac1b6154e9ae817f5747d7ad966baf8766640937774bb977181"
+    },
+    {
+      "path": ".cache/candidate-lock-match-20261012/fixture/ChildOnly/src/main.fy",
+      "sha256": "1c7d0fcf07500be283d696855db7e2672dc1bba9b48bc1e83c2516f4455d79a0"
+    },
+    {
+      "path": ".cache/candidate-lock-match-20261012/fixture/ChildVector/a/fairy.toml",
+      "sha256": "5955a3cbba16e1316a4033dc657c257fde338b904285fa714a03398005bf2929"
+    },
+    {
+      "path": ".cache/candidate-lock-match-20261012/fixture/ChildVector/a/src/lib.fy",
+      "sha256": "c059aa98b9a4f2de69394cb182b7f400643c9f3791a6ffd85bbc80519af3aca5"
+    },
+    {
+      "path": ".cache/candidate-lock-match-20261012/fixture/ChildVector/fairy.lock",
+      "sha256": "f61d4416261d6304c6c236e931cee65ec4711b4c48d0da30932b51b4c54056ce"
+    },
+    {
+      "path": ".cache/candidate-lock-match-20261012/fixture/ChildVector/fairy.toml",
+      "sha256": "070d88c326cb9ac1b6154e9ae817f5747d7ad966baf8766640937774bb977181"
+    },
+    {
+      "path": ".cache/candidate-lock-match-20261012/fixture/ChildVector/src/main.fy",
+      "sha256": "1c7d0fcf07500be283d696855db7e2672dc1bba9b48bc1e83c2516f4455d79a0"
+    },
+    {
+      "path": ".cache/candidate-lock-match-20261012/fixture/Core/fairy.lock",
+      "sha256": "414615fc5fe2fe181a01e9baee24522efd22d12250eaf5b605068c0c2ff722c9"
+    },
+    {
+      "path": ".cache/candidate-lock-match-20261012/fixture/Core/fairy.toml",
+      "sha256": "842c0deaf9080f93aab8586f71c44223756605e9cc3577bbc4b756059a747a4c"
+    },
+    {
+      "path": ".cache/candidate-lock-match-20261012/fixture/Core/src/main.fy",
+      "sha256": "6cfd3d9e62582d99c19aa12873bf76f6d74de4f8868382e32966c126d8a6d518"
+    },
+    {
+      "path": ".cache/candidate-lock-match-20261012/fixture/FeatureSplit/a/fairy.toml",
+      "sha256": "5955a3cbba16e1316a4033dc657c257fde338b904285fa714a03398005bf2929"
+    },
+    {
+      "path": ".cache/candidate-lock-match-20261012/fixture/FeatureSplit/a/src/lib.fy",
+      "sha256": "c98b3a0a5de7fd962b6838c15d504357ae3ae1d33cfa567d29514ae3ee193fd3"
+    },
+    {
+      "path": ".cache/candidate-lock-match-20261012/fixture/FeatureSplit/fairy.lock",
+      "sha256": "712621dd181fa4fa6bc9188fa204e77c63d3a22b6f222e56bc74c1c95713b2e1"
+    },
+    {
+      "path": ".cache/candidate-lock-match-20261012/fixture/FeatureSplit/fairy.toml",
+      "sha256": "6777705a67ed3760f383125314a92896c77bc52724680352de391c1bf75e6c3f"
+    },
+    {
+      "path": ".cache/candidate-lock-match-20261012/fixture/FeatureSplit/src/main.fy",
+      "sha256": "51e4c2b1b8b049778e1543110b6b45a60b6a5bc53bded4de74457f7fcc984cf4"
+    },
+    {
+      "path": ".cache/candidate-lock-match-20261012/fixture/InstanceAliases/a/fairy.toml",
+      "sha256": "5955a3cbba16e1316a4033dc657c257fde338b904285fa714a03398005bf2929"
+    },
+    {
+      "path": ".cache/candidate-lock-match-20261012/fixture/InstanceAliases/a/src/lib.fy",
+      "sha256": "c98b3a0a5de7fd962b6838c15d504357ae3ae1d33cfa567d29514ae3ee193fd3"
+    },
+    {
+      "path": ".cache/candidate-lock-match-20261012/fixture/InstanceAliases/fairy.lock",
+      "sha256": "b8b5873c3998c671c5ee61792dbb223ba7888d2b87ae42f05f07932a377bfe7b"
+    },
+    {
+      "path": ".cache/candidate-lock-match-20261012/fixture/InstanceAliases/fairy.toml",
+      "sha256": "a37786e97c4844f64538d704c7bb01a614f8a25035701c3139d8dbb0f545a613"
+    },
+    {
+      "path": ".cache/candidate-lock-match-20261012/fixture/InstanceAliases/src/main.fy",
+      "sha256": "51e4c2b1b8b049778e1543110b6b45a60b6a5bc53bded4de74457f7fcc984cf4"
+    },
+    {
+      "path": ".cache/candidate-lock-match-20261012/fixture/LongTrivia/fairy.lock",
+      "sha256": "7bfd74bc0904bc76584c4f34e67998c3840512c21d3a177960a82c92aa6f07c8"
+    },
+    {
+      "path": ".cache/candidate-lock-match-20261012/fixture/LongTrivia/fairy.toml",
+      "sha256": "842c0deaf9080f93aab8586f71c44223756605e9cc3577bbc4b756059a747a4c"
+    },
+    {
+      "path": ".cache/candidate-lock-match-20261012/fixture/LongTrivia/src/main.fy",
+      "sha256": "d3e49cc37416ad6370348c9eb22f58d9c9cd6273e8e4641fc0b309809bd1a431"
+    },
+    {
+      "path": ".cache/candidate-lock-match-20261012/fixture/matches.bin",
+      "sha256": "84178807f31c7757714e461daf3d0b4722c9facb95bba85ca4218b05a5e22ac3"
+    },
+    {
+      "path": ".cache/candidate-lock-match-20261012/fixture/matches.json",
+      "sha256": "3897973302a9df3045ee172c1ac0148297ae631696c040f89e4a94a2319f2609"
+    },
+    {
+      "path": ".cache/candidate-lock-match-20261012/fixture/mutations/Binding/a/fairy.toml",
+      "sha256": "5955a3cbba16e1316a4033dc657c257fde338b904285fa714a03398005bf2929"
+    },
+    {
+      "path": ".cache/candidate-lock-match-20261012/fixture/mutations/Binding/a/src/lib.fy",
+      "sha256": "c98b3a0a5de7fd962b6838c15d504357ae3ae1d33cfa567d29514ae3ee193fd3"
+    },
+    {
+      "path": ".cache/candidate-lock-match-20261012/fixture/mutations/Binding/fairy.lock",
+      "sha256": "b8b5873c3998c671c5ee61792dbb223ba7888d2b87ae42f05f07932a377bfe7b"
+    },
+    {
+      "path": ".cache/candidate-lock-match-20261012/fixture/mutations/Binding/fairy.toml",
+      "sha256": "d8af798b3565cae98d7a10523b1437d8cf76c4d15c5d7f9ccc1b7fb4e53ad7ec"
+    },
+    {
+      "path": ".cache/candidate-lock-match-20261012/fixture/mutations/Binding/src/main.fy",
+      "sha256": "51e4c2b1b8b049778e1543110b6b45a60b6a5bc53bded4de74457f7fcc984cf4"
+    },
+    {
+      "path": ".cache/candidate-lock-match-20261012/fixture/mutations/Features/a/fairy.toml",
+      "sha256": "5955a3cbba16e1316a4033dc657c257fde338b904285fa714a03398005bf2929"
+    },
+    {
+      "path": ".cache/candidate-lock-match-20261012/fixture/mutations/Features/a/src/lib.fy",
+      "sha256": "c98b3a0a5de7fd962b6838c15d504357ae3ae1d33cfa567d29514ae3ee193fd3"
+    },
+    {
+      "path": ".cache/candidate-lock-match-20261012/fixture/mutations/Features/fairy.lock",
+      "sha256": "712621dd181fa4fa6bc9188fa204e77c63d3a22b6f222e56bc74c1c95713b2e1"
+    },
+    {
+      "path": ".cache/candidate-lock-match-20261012/fixture/mutations/Features/fairy.toml",
+      "sha256": "9653521d41426e96b6edd5110dec7abb976002da121254fd7fa78cad3ca38f87"
+    },
+    {
+      "path": ".cache/candidate-lock-match-20261012/fixture/mutations/Features/src/main.fy",
+      "sha256": "51e4c2b1b8b049778e1543110b6b45a60b6a5bc53bded4de74457f7fcc984cf4"
+    },
+    {
+      "path": ".cache/candidate-lock-match-20261012/fixture/mutations/LocalPath/b/fairy.toml",
+      "sha256": "5955a3cbba16e1316a4033dc657c257fde338b904285fa714a03398005bf2929"
+    },
+    {
+      "path": ".cache/candidate-lock-match-20261012/fixture/mutations/LocalPath/b/src/lib.fy",
+      "sha256": "c98b3a0a5de7fd962b6838c15d504357ae3ae1d33cfa567d29514ae3ee193fd3"
+    },
+    {
+      "path": ".cache/candidate-lock-match-20261012/fixture/mutations/LocalPath/fairy.lock",
+      "sha256": "dcb86921d743e0000536b729fb581f89b59b2ef10cbe100345f4eb9bbc0ce96a"
+    },
+    {
+      "path": ".cache/candidate-lock-match-20261012/fixture/mutations/LocalPath/fairy.toml",
+      "sha256": "4c7838d333aa55efa078ce3f1c99225dd5508fcfe65fa42054ed386d23a8c94f"
+    },
+    {
+      "path": ".cache/candidate-lock-match-20261012/fixture/mutations/LocalPath/src/main.fy",
+      "sha256": "d28484d12f391eb1e65e72e115b8c9b7a37c1a4655009535ecb00beea946bcb0"
+    },
+    {
+      "path": ".cache/candidate-lock-match-20261012/fixture/mutations/Name/fairy.lock",
+      "sha256": "a939d519308acf154542aa0446bf8894d6a5a65c711d17fc8ca19c1bd0353e1c"
+    },
+    {
+      "path": ".cache/candidate-lock-match-20261012/fixture/mutations/Name/fairy.toml",
+      "sha256": "eb2f4bc8275d8ec79dae592d608d9f3359b29749cdc01b63e119684adbcda243"
+    },
+    {
+      "path": ".cache/candidate-lock-match-20261012/fixture/mutations/Name/src/main.fy",
+      "sha256": "51e4c2b1b8b049778e1543110b6b45a60b6a5bc53bded4de74457f7fcc984cf4"
+    },
+    {
+      "path": ".cache/candidate-lock-match-20261012/fixture/mutations/Profile/fairy.lock",
+      "sha256": "414615fc5fe2fe181a01e9baee24522efd22d12250eaf5b605068c0c2ff722c9"
+    },
+    {
+      "path": ".cache/candidate-lock-match-20261012/fixture/mutations/Profile/fairy.toml",
+      "sha256": "842c0deaf9080f93aab8586f71c44223756605e9cc3577bbc4b756059a747a4c"
+    },
+    {
+      "path": ".cache/candidate-lock-match-20261012/fixture/mutations/Profile/src/main.fy",
+      "sha256": "cf5818812a9786035851e4ccd141b67d142d08a53e0ed0f990404fc8bf8b5b41"
+    },
+    {
+      "path": ".cache/candidate-lock-match-20261012/fixture/mutations/SDKDigest/fairy.lock",
+      "sha256": "89743d4664e4e596c004fbd552d5a933e36e0cb799f56cd2885305d9ccd959da"
+    },
+    {
+      "path": ".cache/candidate-lock-match-20261012/fixture/mutations/SDKDigest/fairy.toml",
+      "sha256": "842c0deaf9080f93aab8586f71c44223756605e9cc3577bbc4b756059a747a4c"
+    },
+    {
+      "path": ".cache/candidate-lock-match-20261012/fixture/mutations/SDKDigest/src/main.fy",
+      "sha256": "6cfd3d9e62582d99c19aa12873bf76f6d74de4f8868382e32966c126d8a6d518"
+    },
+    {
+      "path": ".cache/candidate-lock-match-20261012/fixture/mutations/Source/fairy.lock",
+      "sha256": "a939d519308acf154542aa0446bf8894d6a5a65c711d17fc8ca19c1bd0353e1c"
+    },
+    {
+      "path": ".cache/candidate-lock-match-20261012/fixture/mutations/Source/fairy.toml",
+      "sha256": "842c0deaf9080f93aab8586f71c44223756605e9cc3577bbc4b756059a747a4c"
+    },
+    {
+      "path": ".cache/candidate-lock-match-20261012/fixture/mutations/Source/src/main.fy",
+      "sha256": "9d7d67b5c67d84a3b8f6b9b67746810e1838190601668700f017b50653186ca6"
+    },
+    {
+      "path": ".cache/candidate-lock-match-20261012/fixture/mutations/UID/fairy.lock",
+      "sha256": "a939d519308acf154542aa0446bf8894d6a5a65c711d17fc8ca19c1bd0353e1c"
+    },
+    {
+      "path": ".cache/candidate-lock-match-20261012/fixture/mutations/UID/fairy.toml",
+      "sha256": "d3ba9b7c71da991ed484a45961854fa9d49d4171e816da2a767025b32823afe1"
+    },
+    {
+      "path": ".cache/candidate-lock-match-20261012/fixture/mutations/UID/src/main.fy",
+      "sha256": "51e4c2b1b8b049778e1543110b6b45a60b6a5bc53bded4de74457f7fcc984cf4"
+    },
+    {
+      "path": ".cache/candidate-lock-match-20261012/fixture/mutations/Unreachable/a/fairy.toml",
+      "sha256": "5955a3cbba16e1316a4033dc657c257fde338b904285fa714a03398005bf2929"
+    },
+    {
+      "path": ".cache/candidate-lock-match-20261012/fixture/mutations/Unreachable/a/src/lib.fy",
+      "sha256": "89b59266d1037ac0f5286f9688c842c1bd1c5617b694124c14736911555db760"
+    },
+    {
+      "path": ".cache/candidate-lock-match-20261012/fixture/mutations/Unreachable/fairy.lock",
+      "sha256": "a939d519308acf154542aa0446bf8894d6a5a65c711d17fc8ca19c1bd0353e1c"
+    },
+    {
+      "path": ".cache/candidate-lock-match-20261012/fixture/mutations/Unreachable/fairy.toml",
+      "sha256": "3cd69813ed6a263597e12feab4485efc16b064236eaeb833e670340d5ec2d922"
+    },
+    {
+      "path": ".cache/candidate-lock-match-20261012/fixture/mutations/Unreachable/src/main.fy",
+      "sha256": "51e4c2b1b8b049778e1543110b6b45a60b6a5bc53bded4de74457f7fcc984cf4"
+    },
+    {
+      "path": ".cache/candidate-lock-match-20261012/fixture/mutations/Version/fairy.lock",
+      "sha256": "a939d519308acf154542aa0446bf8894d6a5a65c711d17fc8ca19c1bd0353e1c"
+    },
+    {
+      "path": ".cache/candidate-lock-match-20261012/fixture/mutations/Version/fairy.toml",
+      "sha256": "ccfd6a51731a77a2028432f831a9dfa746432ebc8c6f2930a6b10329bc727d10"
+    },
+    {
+      "path": ".cache/candidate-lock-match-20261012/fixture/mutations/Version/src/main.fy",
+      "sha256": "51e4c2b1b8b049778e1543110b6b45a60b6a5bc53bded4de74457f7fcc984cf4"
+    },
+    {
+      "path": ".cache/candidate-lock-match-20261012/fixture/None/fairy.lock",
+      "sha256": "a939d519308acf154542aa0446bf8894d6a5a65c711d17fc8ca19c1bd0353e1c"
+    },
+    {
+      "path": ".cache/candidate-lock-match-20261012/fixture/None/fairy.toml",
+      "sha256": "842c0deaf9080f93aab8586f71c44223756605e9cc3577bbc4b756059a747a4c"
+    },
+    {
+      "path": ".cache/candidate-lock-match-20261012/fixture/None/src/main.fy",
+      "sha256": "51e4c2b1b8b049778e1543110b6b45a60b6a5bc53bded4de74457f7fcc984cf4"
+    },
+    {
+      "path": ".cache/candidate-lock-match-20261012/fixture/reordered/Core/fairy.lock",
+      "sha256": "c672d47cc68e156b3e562a46050e9ae3fd542983b1eef71b80276cefba5be59e"
+    },
+    {
+      "path": ".cache/candidate-lock-match-20261012/fixture/reordered/Core/fairy.toml",
+      "sha256": "842c0deaf9080f93aab8586f71c44223756605e9cc3577bbc4b756059a747a4c"
+    },
+    {
+      "path": ".cache/candidate-lock-match-20261012/fixture/reordered/Core/src/main.fy",
+      "sha256": "6cfd3d9e62582d99c19aa12873bf76f6d74de4f8868382e32966c126d8a6d518"
+    },
+    {
+      "path": ".cache/candidate-lock-match-20261012/fixture/reordered/FeatureSplit/a/fairy.toml",
+      "sha256": "5955a3cbba16e1316a4033dc657c257fde338b904285fa714a03398005bf2929"
+    },
+    {
+      "path": ".cache/candidate-lock-match-20261012/fixture/reordered/FeatureSplit/a/src/lib.fy",
+      "sha256": "c98b3a0a5de7fd962b6838c15d504357ae3ae1d33cfa567d29514ae3ee193fd3"
+    },
+    {
+      "path": ".cache/candidate-lock-match-20261012/fixture/reordered/FeatureSplit/fairy.lock",
+      "sha256": "df317df6b52b6a3c2fa840a24ab2c633b668ca6e288954bf6447749a2ec47ca7"
+    },
+    {
+      "path": ".cache/candidate-lock-match-20261012/fixture/reordered/FeatureSplit/fairy.toml",
+      "sha256": "6777705a67ed3760f383125314a92896c77bc52724680352de391c1bf75e6c3f"
+    },
+    {
+      "path": ".cache/candidate-lock-match-20261012/fixture/reordered/FeatureSplit/src/main.fy",
+      "sha256": "51e4c2b1b8b049778e1543110b6b45a60b6a5bc53bded4de74457f7fcc984cf4"
+    },
+    {
+      "path": ".cache/candidate-lock-match-20261012/fixture/reordered/None/fairy.lock",
+      "sha256": "7455228fd7323828dcdc4d42baeb4f35b924ca018303c95036961606921bccac"
+    },
+    {
+      "path": ".cache/candidate-lock-match-20261012/fixture/reordered/None/fairy.toml",
+      "sha256": "842c0deaf9080f93aab8586f71c44223756605e9cc3577bbc4b756059a747a4c"
+    },
+    {
+      "path": ".cache/candidate-lock-match-20261012/fixture/reordered/None/src/main.fy",
+      "sha256": "51e4c2b1b8b049778e1543110b6b45a60b6a5bc53bded4de74457f7fcc984cf4"
+    },
+    {
+      "path": ".cache/candidate-lock-match-20261012/fixture/SimilarNamespaces/fairy.lock",
+      "sha256": "2723848a67a7cc704227ddcbec8a90ee8ff658c1e0246b612192f1c2931b7767"
+    },
+    {
+      "path": ".cache/candidate-lock-match-20261012/fixture/SimilarNamespaces/fairy.toml",
+      "sha256": "842c0deaf9080f93aab8586f71c44223756605e9cc3577bbc4b756059a747a4c"
+    },
+    {
+      "path": ".cache/candidate-lock-match-20261012/fixture/SimilarNamespaces/src/foo/std.fy",
+      "sha256": "6eabdfda1289d6484b19f9832aa87297695e23c7725e943c71e28e3f4bcbb86f"
+    },
+    {
+      "path": ".cache/candidate-lock-match-20261012/fixture/SimilarNamespaces/src/main.fy",
+      "sha256": "1e6d669e0c70296b0dacd573be3889f19e9c10b075cdd6bb43e78892c7263369"
+    },
+    {
+      "path": ".cache/candidate-lock-match-20261012/fixture/SimilarNamespaces/src/stdx.fy",
+      "sha256": "f9730e2f5d9ae9506e6db8d42e63fef69e80a4cb1e46520a5556b0b24ee24355"
+    },
+    {
+      "path": ".cache/candidate-lock-match-20261012/fixture/UnreachableVector/a/fairy.toml",
+      "sha256": "5955a3cbba16e1316a4033dc657c257fde338b904285fa714a03398005bf2929"
+    },
+    {
+      "path": ".cache/candidate-lock-match-20261012/fixture/UnreachableVector/a/src/lib.fy",
+      "sha256": "c059aa98b9a4f2de69394cb182b7f400643c9f3791a6ffd85bbc80519af3aca5"
+    },
+    {
+      "path": ".cache/candidate-lock-match-20261012/fixture/UnreachableVector/fairy.lock",
+      "sha256": "a939d519308acf154542aa0446bf8894d6a5a65c711d17fc8ca19c1bd0353e1c"
+    },
+    {
+      "path": ".cache/candidate-lock-match-20261012/fixture/UnreachableVector/fairy.toml",
+      "sha256": "3cd69813ed6a263597e12feab4485efc16b064236eaeb833e670340d5ec2d922"
+    },
+    {
+      "path": ".cache/candidate-lock-match-20261012/fixture/UnreachableVector/src/main.fy",
+      "sha256": "51e4c2b1b8b049778e1543110b6b45a60b6a5bc53bded4de74457f7fcc984cf4"
+    },
+    {
+      "path": ".cache/candidate-lock-match-20261012/fixture/Vector/fairy.lock",
+      "sha256": "6813c0fa2c016c213b3d8fd0f03cb81c985c15e131537664513aa9f48b93ab98"
+    },
+    {
+      "path": ".cache/candidate-lock-match-20261012/fixture/Vector/fairy.toml",
+      "sha256": "842c0deaf9080f93aab8586f71c44223756605e9cc3577bbc4b756059a747a4c"
+    },
+    {
+      "path": ".cache/candidate-lock-match-20261012/fixture/Vector/src/main.fy",
+      "sha256": "cf5818812a9786035851e4ccd141b67d142d08a53e0ed0f990404fc8bf8b5b41"
+    }
+  ],
+  "scope": "Bounded physical read and exact-current comparison; atomic persistence and CLI consumers remain"
+}

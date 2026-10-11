@@ -3915,3 +3915,22 @@ atomic persistence and compiler CLI integration remain. A valid but changed SDK
 digest is parseable; exact-current matching still has to reject that drift.
 Public CLI/API, SDK ABI/version, DB and CI are unchanged. Linux, full suite and
 Stage1/Stage2 remain scheduled later; no push occurred.
+
+
+## Lock read and stale matching (2026-10-12)
+
+The bounded physical lock reader now preserves file/path and strict JSON/semantic
+error categories. Exact-current matching compares full canonical actual/expected
+documents from a fresh resolved workspace; stale false differs from errors and
+neither operation writes a lock or updates source counters.
+
+Go's 26 cases (18 current, 8 stale), seven physical/read failures, three native
+tests and both candidate C profiles pass. Source/version/UID/profile/feature/
+binding/path/coherent-SDK-digest drift rejects, while cosmetic names and
+unreachable member changes remain current. Read and matching bounds, private SDK
+projection failure and unchanged lock bytes are covered. Check passes 347 files
+and 4530 MIR functions. Receipt: `evidence/candidate-lock-match-20261012.json`.
+
+Atomic persistence and compiler CLI integration remain. Public CLI/API, SDK
+ABI/version, DB and CI are unchanged. Linux, full suite and Stage1/Stage2 remain
+scheduled later; no push occurred.
