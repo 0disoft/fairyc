@@ -1,0 +1,114 @@
+{
+  "schema": "fairyc.candidate-hir-view-slots/v1",
+  "passed": true,
+  "implementation": {
+    "path": "examples/lexer_candidate/src/hir_view_check.fy",
+    "bytes": 21244,
+    "sha256": "98be34e6a6d8f1b00c3fa1fcd63a560eb5b4af215aefe0976a4280476f7f8bd9"
+  },
+  "lock": {
+    "path": "examples/lexer_candidate/fairy.lock",
+    "bytes": 1698,
+    "sha256": "fc429dfdae26bcdda30dbabdaaf51d640a40ff270cb274d6f09867b268186262"
+  },
+  "sourceCheck": {
+    "exit": 0,
+    "seconds": 12.7377849,
+    "stdout": "check ok: 2 instance(s), 291 source file(s), 3657 MIR function(s), lock verified\n",
+    "stderr": null
+  },
+  "storage": {
+    "owned": "std::vec::Vec<usize>",
+    "lanes": 4,
+    "bindingSlotsPerLane": 1153,
+    "initializedEntries": 4612,
+    "unknownSummary": 65538,
+    "workLimit": 1048576,
+    "originDepthLimit": 64
+  },
+  "native": {
+    "engine": "native",
+    "profile": "release",
+    "target": "x86_64-windows-msvc",
+    "count": 4,
+    "passed": 4,
+    "failed": 0,
+    "tests": [
+      "tests::hir_mutable::exclusive_parent_sibling_and_call_conflicts_are_rejected",
+      "tests::hir_mutable::mutable_generations_resume_after_last_child_use",
+      "tests::hir_mutable::mutable_local_origin_cannot_escape",
+      "tests::hir_views::retained_shared_array_views_and_slices"
+    ]
+  },
+  "generatedC": {
+    "packet": {
+      "packetBytes": 20061796,
+      "packetSHA256": "62c105053f03e0a313ba29edecc74baded6deaf6b5889bd5672e1dc5ae568b1a",
+      "frames": 3229,
+      "units": 28,
+      "literalDefinitions": 775,
+      "headerBytes": 656001,
+      "literalBytes": 149489,
+      "bodyBytes": 19256078,
+      "maxUnitBytes": 1391930
+    },
+    "emission": "compiled units 48 retries 25\nlinked frames 3564 work 3323622\nproject drops 6404 root drops 4\nroot CFG blocks 247 work 7662\npartition frames 3564 units 28 retries 0 work 3232639\npacket header 656001 literals 149489\n",
+    "hirAggregateLocalBytes": {
+      "before": 1762443,
+      "after": 18040,
+      "measurement": "Sum of generated aggregate local sizes; excludes scalar locals, optimizer allocation and callee frames"
+    },
+    "activeBorrowCases": [
+      {
+        "name": "shared",
+        "exact": true,
+        "exit": 0
+      },
+      {
+        "name": "conflict",
+        "exact": true,
+        "exit": 2
+      },
+      {
+        "name": "escape",
+        "exact": true,
+        "exit": 2
+      }
+    ],
+    "cliCases": [
+      {
+        "mode": "--tokens-file",
+        "exact": true,
+        "exit": 0
+      },
+      {
+        "mode": "--check-names-file",
+        "exact": true,
+        "exit": 0
+      },
+      {
+        "mode": "--check-types-file",
+        "exact": true,
+        "exit": 0
+      },
+      {
+        "mode": "--hir-file",
+        "exact": true,
+        "exit": 0
+      },
+      {
+        "mode": "--mir-file",
+        "exact": false,
+        "exit": 3221225725
+      }
+    ],
+    "referenceSourceProvenance": "Existing stage0-built candidate image; source identity is not established by this comparison"
+  },
+  "remaining": [
+    "MIR lowering stack overflow in original generated-C image",
+    "C CLI execution after MIR fix",
+    "native driver and candidate promotion profiles",
+    "Linux and full suite not run"
+  ],
+  "pushed": false
+}
