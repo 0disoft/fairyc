@@ -465,3 +465,42 @@ equivalence claim. Package/lock/CLI work remains separate.
 ReadDir is currently Windows AMD64 and keeps the existing SDK path bound.
 Linux and Stage 2 were not run for this component slice. Public CLI, SDK ABI,
 DB and CI workflows are unchanged.
+
+## Authenticated SDK source bundle
+
+`project_sdk_bundle` assembles a complete core (seven sources), public vector
+(eight sources) or separately identified vector-candidate bundle from owned
+compiler SDK bytes. Caller labels never grant authority: the existing
+`sdk_authority` source pins authenticate every file, and missing, duplicate,
+out-of-range or changed inputs reject. There is no filesystem lookup or source
+fallback in assembly. Production embedding and graph injection remain pending.
+
+The bundle keeps freshly parsed original sources in exact canonical path order,
+module lookup and the SDK package metadata. `project_content_hash` is the shared
+streaming package-source/v1 encoder for local sources and SDK files. The composed
+source identity uses SDK identity, runtime ABI and the complete exact-byte source
+digest. The vector-candidate lane uses the vector bytes but retains its distinct
+SDK identity. SDK package metadata mirrors the current `internal/sdkstdlib`
+constants; it does not change the public SDK version or ABI.
+
+Source file/byte counters commit only after authentication, parsing, digest and
+identity construction all succeed. The existing 4096-file, 64-MiB aggregate,
+8-MiB individual source and 16,777,216 work bounds apply. Bundle authenticity is
+separate from source selection, graph injection, direct module visibility, lock
+projection and compiler/project CLI consumption, which remain later work.
+
+
+Three complete SDK profile/source/module/import records match the owning Go SDK
+loader, including canonical order from reversed inputs, exact retained bytes,
+metadata, digest and composed identity. Twelve invalid label, duplicate, changed,
+incomplete and source/work-bound cases reject without changing caller counters.
+Two native tests and development/release candidate C executions pass. The shared
+encoder also passes the existing eight local package-digest fixtures in native
+and both candidate C profiles. Check passes 324 source files and 4297 MIR
+functions. Evidence: `evidence/candidate-sdk-bundle-20261012.json`.
+
+Reference fixture command:
+`bun tools/run-go.ts run ./cmd/fairyc-candidate-sdk-bundle-reference <output>`.
+Linux, the full suite and Stage1/Stage2 are deferred; these results establish only
+the private bundle/encoding slice. Stable API, SDK ABI/version, DB and CI are
+unchanged, and no push occurred.

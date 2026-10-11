@@ -1,0 +1,1008 @@
+{
+  "schema": "fairyc.candidate-private-tests/v1",
+  "passed": true,
+  "module": "project_sdk_bundle",
+  "sourceInputs": [
+    {
+      "path": "examples/lexer_candidate/src/array_identity.fy",
+      "sha256": "8b501b0f72bb2805c00abc59afb195b5ba2c199796982122b62958bab64966ee"
+    },
+    {
+      "path": "examples/lexer_candidate/src/attributes.fy",
+      "sha256": "dafe2e1c020446224fa8784e701e522096a58776a1066920f934c0717667b5e6"
+    },
+    {
+      "path": "examples/lexer_candidate/src/bodies.fy",
+      "sha256": "ea9bfd6dc1b3bce9dc407970b82d871185db33e7daadad35d348de84ab6ba294"
+    },
+    {
+      "path": "examples/lexer_candidate/src/body_state.fy",
+      "sha256": "0f4e1924d07e4d21bc5fbe35a4fb8f0c2b617206b6d63191e7a625300ec5bb3e"
+    },
+    {
+      "path": "examples/lexer_candidate/src/budget.fy",
+      "sha256": "c2793aa302279b9d27f0af32edd71f70de4e93cb4f76f55facd3e757641cc494"
+    },
+    {
+      "path": "examples/lexer_candidate/src/candidate_limits.fy",
+      "sha256": "7a27948d9a43bde84acdf1106f462d0c5a288f8a54f193560658eff0c0d00f3e"
+    },
+    {
+      "path": "examples/lexer_candidate/src/cleanup_syntax.fy",
+      "sha256": "1374cdcbfa6139a5e82e4e74606cc28ba46d9e81df62f7a0dd397f856fb0ad6f"
+    },
+    {
+      "path": "examples/lexer_candidate/src/diagnostics.fy",
+      "sha256": "ee95f81ed3b3224702196fceef2888434e9713341b81abf01e03945592c4de8b"
+    },
+    {
+      "path": "examples/lexer_candidate/src/file_source.fy",
+      "sha256": "1a7ac7f6c69ef27e78e734aa74dab90b895742a5500a32931baaed19379b938f"
+    },
+    {
+      "path": "examples/lexer_candidate/src/nominal_identity.fy",
+      "sha256": "634cba7ac0667481c0863953640668841216554d852e0e1b1b245c8bc1606958"
+    },
+    {
+      "path": "examples/lexer_candidate/src/numbers.fy",
+      "sha256": "ee8b40b5e8061317d70d3594c386c9e4c70d95132a7e4243ea6402947a4c3556"
+    },
+    {
+      "path": "examples/lexer_candidate/src/parse_tokens.fy",
+      "sha256": "91984eb1086ff7faafa4a6c64a232fc2ddce365b8cd7c2ef23b143bb91d4c9a6"
+    },
+    {
+      "path": "examples/lexer_candidate/src/pointer_identity.fy",
+      "sha256": "31458fda72821f98d8383339f8b272f3aa1c78385fb23504cbe9f1aaa021ae3d"
+    },
+    {
+      "path": "examples/lexer_candidate/src/pointer_types.fy",
+      "sha256": "7cca6293336feedbf785912759ee6c50a17010ad9d966acb81877ad32cd55297"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_content_hash.fy",
+      "sha256": "68d867b37b8cc817382e6d6602aa4d66f4d66be8784e7fbe119c806832839a0e"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_directory.fy",
+      "sha256": "70321e8a7cc84f131573eec91013fccad38d0162f781768bc0e47b136cf4ebc6"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_import_path.fy",
+      "sha256": "bc0e5e10905ee833b36ffe94ae8ff835f6f33caccfc59970cd379537dcbb0c54"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_manifest.fy",
+      "sha256": "943c3e163ddc04afb03a82ef4a0485aa6a618a67708e657086b8ed1acd56658a"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_manifest_values.fy",
+      "sha256": "4f21b9dedf744ffc449d1b843282f9aba2ecc221c61f043594bea70c4d56387d"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_path.fy",
+      "sha256": "20bde13864e5ba8752b33a616eab22b08caf8a20d6a435d2d2c2cc68f443f1a5"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_path_unicode_data.fy",
+      "sha256": "9cf3af27796644304493561591e1641c70c5c653bf739ed71a65e492db510fbd"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_sdk_bundle.fy",
+      "sha256": "dfe9922527ccb55486511efece7c5e6a63d99fea811ec6837eeef9b13e3ab178"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_source_catalog.fy",
+      "sha256": "5dd5b1a6f848968cf20676084af8ddcaf039cfc74e1837685c12c601c53fb131"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_source_file.fy",
+      "sha256": "6d1307e99f7ae9fb387fc447f3b6c36f6c0e77aebc90faca55e75665aad2d282"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_source_root.fy",
+      "sha256": "e6d896a57fde407db5e7042e244d6f2a35dddc4e113ad20555c4408f24842127"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_source_set.fy",
+      "sha256": "c4b70409d8aa627a1ef46488e5232d3deea7b07c0e796c26ef28449f367a98e1"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_toml_context.fy",
+      "sha256": "1682260043feced2ac662198fd3b29f4badb2a4a9f9b02a8e1f81462f3b3cc0f"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_toml_document.fy",
+      "sha256": "0bc3782206da0d9320ba8a39ea6a1f9ded52ec1bbf855580e31c1a1786f4b3a8"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_toml_model.fy",
+      "sha256": "4a6c295108e704749fc557204de4d8a0287e3228e59da396c50867ec8894b11e"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_toml_scalars.fy",
+      "sha256": "137d5dbdce313f22e91a9be87f8b34eb6f10011933b152f649421a895e274cb9"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_toml_strings.fy",
+      "sha256": "bc7e71acaaa68af5755d066c90fa1f763625de32c8fa2a6778e8447eebc187bb"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_toml_values.fy",
+      "sha256": "24255d1fdf0f34b6761f5304d383127667e8b127488a80409b3f35a13f62e81c"
+    },
+    {
+      "path": "examples/lexer_candidate/src/records.fy",
+      "sha256": "e2d1d3540285509aded981b476d4b2340857d8c7370364f4b1410bfd6883f6dd"
+    },
+    {
+      "path": "examples/lexer_candidate/src/reference_types.fy",
+      "sha256": "f529bb686f06fe07d95f864e28fbde211200fce11a11c6aae260356103639b57"
+    },
+    {
+      "path": "examples/lexer_candidate/src/resource_identity.fy",
+      "sha256": "7d85c65df4d6cc02f004f854d5108ec3cc7ba8ddb4885ea54c634f88f93594aa"
+    },
+    {
+      "path": "examples/lexer_candidate/src/scanner.fy",
+      "sha256": "3755e569fe63003f63b2c9b8272df2ba656c844791cedbc0da4f9245b8809cf7"
+    },
+    {
+      "path": "examples/lexer_candidate/src/sdk_authority.fy",
+      "sha256": "ae0f2e21819a625a6bb5fe331173dd3366599486f3c203a523693680a0c4ee6c"
+    },
+    {
+      "path": "examples/lexer_candidate/src/sdk_file_rules.fy",
+      "sha256": "a7c5bc7224e12d29d54d284c54f31f34fa66f1067397e0fcb57de9dabe901e5b"
+    },
+    {
+      "path": "examples/lexer_candidate/src/sdk_scopes.fy",
+      "sha256": "7aabc14d6c8a54f959e4c454df8fccb4fc49c2a7efbefa882f8d939a131717e6"
+    },
+    {
+      "path": "examples/lexer_candidate/src/sha256.fy",
+      "sha256": "eb89211fd749f7f527e8d2b72e97d70f8d9613bbac428bc95d975bef7c53bfa1"
+    },
+    {
+      "path": "examples/lexer_candidate/src/sha256_block.fy",
+      "sha256": "bc48b9e751205bba8aeaf09987ea8681694d26bc989e24f4ecb3afa4c6e00fd4"
+    },
+    {
+      "path": "examples/lexer_candidate/src/sha256_stream.fy",
+      "sha256": "b5f97a9b5be679418a1365a6007028abfab5ba66ee3ae5c08b3e5b863fcfc8b9"
+    },
+    {
+      "path": "internal/sdkstdlib/sources/std/bytes.fy",
+      "sha256": "4740a506e93349fb002c383967dcc44d182d20f09f2094b83b5464a4ab252982"
+    },
+    {
+      "path": "internal/sdkstdlib/sources/std/fs.fy",
+      "sha256": "fd7ddfa9f0deed98304cecf94911644087d1e2a46e8be8995c35acbcb183b335"
+    },
+    {
+      "path": "internal/sdkstdlib/sources/std/io.fy",
+      "sha256": "4b89c3aeb8b4de4887395d29723095d364c5660c6b773c5696fb1f65f5365f48"
+    },
+    {
+      "path": "internal/sdkstdlib/sources/std/num.fy",
+      "sha256": "09aa0d45f075aa4212049527ded7bb48d99ceb6ffed56b310e267421bae20bb3"
+    },
+    {
+      "path": "internal/sdkstdlib/sources/std/process.fy",
+      "sha256": "9680a1481df4f761f481d5a039af7bdbefeb312d1091961194f8e7bc0681ae24"
+    },
+    {
+      "path": "internal/sdkstdlib/sources/std/text.fy",
+      "sha256": "cccd47e090fda11c9da063ffb321489dd8753fe9996855fc432833e05a79e695"
+    },
+    {
+      "path": "internal/sdkstdlib/sources/optional/std/vec.fy",
+      "sha256": "0ae4c395bf98c39079ad620bde035b3b590d51417864802e698edc069281db5b"
+    },
+    {
+      "path": "examples/lexer_candidate/src/strings.fy",
+      "sha256": "8f26db7c4d4039c8c8d9fbc6078097859c8f714ca5887957fdf0e69269dca521"
+    },
+    {
+      "path": "examples/lexer_candidate/src/syntax.fy",
+      "sha256": "cb040a2973447b89c2ad59b5447c65dab79df5df7930f73431afa7ea34ef25fd"
+    },
+    {
+      "path": "examples/lexer_candidate/src/type_state.fy",
+      "sha256": "7dbbf7d50be1e9513dc8aafd99b11afda5d8e2d7ce87d96b6436c4752c2123a0"
+    },
+    {
+      "path": "examples/lexer_candidate/src/types.fy",
+      "sha256": "53a77948af92724f00de0609837fd1507899df8e2b59b6d2778ef1f3c344395a"
+    },
+    {
+      "path": "examples/lexer_candidate/src/utf8.fy",
+      "sha256": "4a5425cea9efbfb1bff2c31a38c2bd8e392c6792af09f24e906c9a743621870d"
+    },
+    {
+      "path": "examples/lexer_candidate/tests/project_sdk_bundle.fy",
+      "sha256": "67a8ce57f7d3899a5bf65726c343e88efef1f4234d3863ba543a8b82aa3d6088"
+    },
+    {
+      "path": "tools/verify-candidate-private-tests.py",
+      "sha256": "04c7e44df7941bd0c1a12b523b115df623dbe10836f3eb8993dedc7d6ea5e8af"
+    },
+    {
+      "path": ".cache/candidate-sdk-bundle-20261012/fixture/root.bin",
+      "sha256": "c11f0983ac9425bb269cb6f7536bae0ab98b1fb4ec4b90ad5750c7f453f8dc00"
+    },
+    {
+      "path": "cmd/fairyc-candidate-sdk-bundle-reference/main.go",
+      "sha256": "66eb058eb18fb4bff7061d39d024c9d7f3eeec71382b1172633ce235a74d24d9"
+    },
+    {
+      "path": "internal/sdkstdlib/formatting_test.go",
+      "sha256": "1738693f52a0f8fef8d7fb1f91d6c41ad1b4e226fd026f27ef6655bd36c78553"
+    },
+    {
+      "path": "internal/sdkstdlib/io_i64_test.go",
+      "sha256": "b93e0bdec386b9a3545672d39827fad1d82b002b906efdbf3bb70f07d9352199"
+    },
+    {
+      "path": "internal/sdkstdlib/stdlib.go",
+      "sha256": "418b24a10b443b784275c886c7b87d3f9b97e72923406b567335b26569ac6f3b"
+    },
+    {
+      "path": "internal/sdkstdlib/stdlib_test.go",
+      "sha256": "f94430a01d60d6712996993a5a58b8bf8cc934ae1b9f421a36333fdb4d119fc6"
+    },
+    {
+      "path": "internal/sdkstdlib/vector.go",
+      "sha256": "bb8fc2b90fa40fcc578e11d0f54f996bf07608d7fd72f437f692a685776931e2"
+    },
+    {
+      "path": "internal/sdkstdlib/vector_candidate_test.go",
+      "sha256": "bc4c53ba63c50f5b93b7a5a9deb5bc4a5ef72651d077cb531a0f05797819f1d0"
+    },
+    {
+      "path": "cmd/fairyc-candidate-source-digest-reference/main.go",
+      "sha256": "3be761239fa0c98c471e4049c649c1fc8cf55ff51fc39046f0ce17df9c6f5b6c"
+    },
+    {
+      "path": "internal/packagecontent/digest.go",
+      "sha256": "3aa42860d6a05ac6456650cd71803e109daccc4a3f26a8e72e8be5712c1141fd"
+    },
+    {
+      "path": "internal/packagecontent/digest_test.go",
+      "sha256": "c8cc9b6a940452133d721c4eb3def3d1615f9c98ffe7101c5a406cc75358749c"
+    },
+    {
+      "path": "internal/packagecontent/file_identity.go",
+      "sha256": "9616976aaede473fd236430a950091bebb23e509a943986bdf847afb9e0dc977"
+    },
+    {
+      "path": "internal/packagecontent/file_identity_test.go",
+      "sha256": "80477ab77171c482bffd21c1e3f0e6eff326f91a9ef4985cf01c2533b5db0ac4"
+    }
+  ],
+  "tools": {
+    "compiler": {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\manifest-bootstrap.exe",
+      "sha256": "4e6a50a83b4d9f74a11d749c779a90683ab3a3916d19f4852bfe1cbd452cc664"
+    },
+    "candidate": {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-source-file-20261011\\compiler.exe",
+      "sha256": "e87cc5c8c19e30fc68ca68fa98ef66d87baa1300263d8989e255910bb1985d8f"
+    },
+    "builder": {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-source-file-20261011\\builder.exe",
+      "sha256": "8141ce6bcc461a52fe6bf0bf24e9e5f5a9d7842c3c7dbfc5863cc4e822584ea7"
+    }
+  },
+  "native": {
+    "schemaVersion": "fairyc.test-report/v4",
+    "engine": "native",
+    "target": "x86_64-windows-msvc",
+    "profile": "development",
+    "tests": [
+      {
+        "identity": "tests::project_sdk_bundle::authenticates_exact_core_and_vector_profiles",
+        "outcome": "passed",
+        "trapCategory": null,
+        "stdoutBase64": "",
+        "stderrBase64": ""
+      },
+      {
+        "identity": "tests::project_sdk_bundle::rejects_changed_incomplete_and_over_budget_bundles",
+        "outcome": "passed",
+        "trapCategory": null,
+        "stdoutBase64": "",
+        "stderrBase64": ""
+      }
+    ],
+    "count": 2,
+    "passed": 2,
+    "failed": 0,
+    "status": "ok",
+    "lock": "verified"
+  },
+  "nativeTests": 2,
+  "lockSHA256": "0e9ea336f92ed3e80e58c8ddc9fa318dbfe89b669115eacc3cedd8efe3b1982e",
+  "candidateInputFiles": 55,
+  "candidatePacketSHA256": "f33361055e36de29f502e9c297166e057ba94500ded1f83a42e61cb6a8f84026",
+  "candidateExecutions": [
+    {
+      "profile": "development",
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-sdk-bundle-20261012\\execution\\development.exe",
+      "sha256": "9cb9f5eae38341ab40303caef5aa837a227c66089e84b0b782d4c3ec42e6e817",
+      "exit": 0
+    },
+    {
+      "profile": "release",
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-sdk-bundle-20261012\\execution\\release.exe",
+      "sha256": "6dad0b57379abb5682bfa24d7b8a262025924866b39bdb28b0f9abd7ee72015d",
+      "exit": 0
+    }
+  ],
+  "invocations": [
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\manifest-bootstrap.exe",
+        "test",
+        "--native",
+        "--locked",
+        "--json",
+        "--capture-output",
+        "--exact",
+        "tests::project_sdk_bundle::authenticates_exact_core_and_vector_profiles",
+        "--exact",
+        "tests::project_sdk_bundle::rejects_changed_incomplete_and_over_budget_bundles",
+        "--",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-sdk-bundle-20261012\\fixture\\root.bin"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "seconds": 86.1019793000014,
+      "exit": 0,
+      "stdoutBytes": 519,
+      "stdoutSHA256": "a8c7243e28eb08c08343323a332e5f2f3feab62a4d860b48d1a4c74c53b2001e",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-source-file-20261011\\compiler.exe",
+        "--c-project-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-sdk-bundle-20261012\\execution\\sources.list"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "seconds": 33.97862379999424,
+      "exit": 0,
+      "stdoutBytes": 1626392,
+      "stdoutSHA256": "f33361055e36de29f502e9c297166e057ba94500ded1f83a42e61cb6a8f84026",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-source-file-20261011\\builder.exe",
+        "--packet",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-sdk-bundle-20261012\\execution\\candidate-packet.bin",
+        "--packet-sha256",
+        "f33361055e36de29f502e9c297166e057ba94500ded1f83a42e61cb6a8f84026",
+        "--output",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-sdk-bundle-20261012\\execution\\development.exe"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "seconds": 2.330219900002703,
+      "exit": 0,
+      "stdoutBytes": 180,
+      "stdoutSHA256": "e93a67a4abef536628a3e076d576b5df17ffb9b763d079bcb000c1ca6910461d",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-sdk-bundle-20261012\\execution\\development.exe",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-sdk-bundle-20261012\\fixture\\root.bin"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "seconds": 1.231025300003239,
+      "exit": 0,
+      "stdoutBytes": 0,
+      "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-source-file-20261011\\builder.exe",
+        "--packet",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-sdk-bundle-20261012\\execution\\candidate-packet.bin",
+        "--packet-sha256",
+        "f33361055e36de29f502e9c297166e057ba94500ded1f83a42e61cb6a8f84026",
+        "--output",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-sdk-bundle-20261012\\execution\\release.exe",
+        "--release"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "seconds": 18.614406500011683,
+      "exit": 0,
+      "stdoutBytes": 182,
+      "stdoutSHA256": "0aee2a787fbc8fd567025d49354afa241c74694fd61cf0c5a8141b132fd713f7",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-sdk-bundle-20261012\\execution\\release.exe",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-sdk-bundle-20261012\\fixture\\root.bin"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "seconds": 0.14684390000184067,
+      "exit": 0,
+      "stdoutBytes": 0,
+      "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr": ""
+    }
+  ],
+  "publicApiChanged": false,
+  "dbChanged": false,
+  "ciChanged": false,
+  "pushed": false,
+  "goOracle": [
+    {
+      "digest": "fysrc1-sha256-782df5e2039ff3f7817c1055454caa24feb2ea755e62f78d8ee67418916a5b83",
+      "files": 7,
+      "profile": "core",
+      "sourceIdentity": "fairyc-sdk-stdlib/0;fairyc-runtime/0;fysrc1-sha256-782df5e2039ff3f7817c1055454caa24feb2ea755e62f78d8ee67418916a5b83"
+    },
+    {
+      "digest": "fysrc1-sha256-aab51ddcd0ccc7e895837a4f7276011bf3206204f8d3efb6760b6218ca277039",
+      "files": 8,
+      "profile": "vector",
+      "sourceIdentity": "fairyc-sdk-stdlib/0;fairyc-runtime/0;fysrc1-sha256-aab51ddcd0ccc7e895837a4f7276011bf3206204f8d3efb6760b6218ca277039"
+    },
+    {
+      "digest": "fysrc1-sha256-aab51ddcd0ccc7e895837a4f7276011bf3206204f8d3efb6760b6218ca277039",
+      "files": 8,
+      "profile": "candidate",
+      "sourceIdentity": "fairyc-sdk-vector-candidate/0;fairyc-runtime/0;fysrc1-sha256-aab51ddcd0ccc7e895837a4f7276011bf3206204f8d3efb6760b6218ca277039"
+    }
+  ],
+  "fixtureFiles": [
+    {
+      "path": ".cache/candidate-sdk-bundle-20261012/fixture/candidate.txt",
+      "sha256": "a01080420da7478bce457a5ae2ee75e0169af099d0fce883df5f811231dc770f"
+    },
+    {
+      "path": ".cache/candidate-sdk-bundle-20261012/fixture/core.txt",
+      "sha256": "9595d487c3c0329591cdd835055f45e2401e52f66c7c48d29329d89f539d9cc6"
+    },
+    {
+      "path": ".cache/candidate-sdk-bundle-20261012/fixture/reference.json",
+      "sha256": "a321da7f2df737b92d542d7034d9d8718daf6f13d5423d0b9c5faf388e442242"
+    },
+    {
+      "path": ".cache/candidate-sdk-bundle-20261012/fixture/root.bin",
+      "sha256": "c11f0983ac9425bb269cb6f7536bae0ab98b1fb4ec4b90ad5750c7f453f8dc00"
+    },
+    {
+      "path": ".cache/candidate-sdk-bundle-20261012/fixture/std/alloc.fy",
+      "sha256": "61f50fa03239eee7b669c315659e8c9d07982117857cf50fe7f5a2b6f35a82c2"
+    },
+    {
+      "path": ".cache/candidate-sdk-bundle-20261012/fixture/std/bytes.fy",
+      "sha256": "4740a506e93349fb002c383967dcc44d182d20f09f2094b83b5464a4ab252982"
+    },
+    {
+      "path": ".cache/candidate-sdk-bundle-20261012/fixture/std/fs.fy",
+      "sha256": "fd7ddfa9f0deed98304cecf94911644087d1e2a46e8be8995c35acbcb183b335"
+    },
+    {
+      "path": ".cache/candidate-sdk-bundle-20261012/fixture/std/io.fy",
+      "sha256": "4b89c3aeb8b4de4887395d29723095d364c5660c6b773c5696fb1f65f5365f48"
+    },
+    {
+      "path": ".cache/candidate-sdk-bundle-20261012/fixture/std/num.fy",
+      "sha256": "09aa0d45f075aa4212049527ded7bb48d99ceb6ffed56b310e267421bae20bb3"
+    },
+    {
+      "path": ".cache/candidate-sdk-bundle-20261012/fixture/std/process.fy",
+      "sha256": "9680a1481df4f761f481d5a039af7bdbefeb312d1091961194f8e7bc0681ae24"
+    },
+    {
+      "path": ".cache/candidate-sdk-bundle-20261012/fixture/std/text.fy",
+      "sha256": "cccd47e090fda11c9da063ffb321489dd8753fe9996855fc432833e05a79e695"
+    },
+    {
+      "path": ".cache/candidate-sdk-bundle-20261012/fixture/std/vec.fy",
+      "sha256": "0ae4c395bf98c39079ad620bde035b3b590d51417864802e698edc069281db5b"
+    },
+    {
+      "path": ".cache/candidate-sdk-bundle-20261012/fixture/vector.txt",
+      "sha256": "867e4b61f964b5991365e1440d74e9f791fbeaf228217eb79999c4d8e04ce55b"
+    }
+  ],
+  "productionCheck": {
+    "files": 324,
+    "mirFunctions": 4297,
+    "passed": true
+  },
+  "bundleCases": {
+    "acceptedProfiles": 3,
+    "rejectedInputs": 12,
+    "canonicalInputOrder": "reversed input files assembled into exact canonical SDK path order"
+  },
+  "scope": "Authenticated owned complete SDK bundle and exact metadata/source identity only. Production embedding, root-reachable selection, graph injection, SDK visibility, lock projection and compiler/project CLI consumption remain pending.",
+  "counterPolicy": "Caller file and byte counters commit only after complete successful assembly. Existing aggregate, individual source and shared work bounds remain.",
+  "localDigestRegression": {
+    "schema": "fairyc.candidate-private-tests/v1",
+    "passed": true,
+    "module": "project_source_identity",
+    "sourceInputs": [
+      {
+        "path": "examples/lexer_candidate/src/attributes.fy",
+        "sha256": "dafe2e1c020446224fa8784e701e522096a58776a1066920f934c0717667b5e6"
+      },
+      {
+        "path": "examples/lexer_candidate/src/bodies.fy",
+        "sha256": "ea9bfd6dc1b3bce9dc407970b82d871185db33e7daadad35d348de84ab6ba294"
+      },
+      {
+        "path": "examples/lexer_candidate/src/body_state.fy",
+        "sha256": "0f4e1924d07e4d21bc5fbe35a4fb8f0c2b617206b6d63191e7a625300ec5bb3e"
+      },
+      {
+        "path": "examples/lexer_candidate/src/budget.fy",
+        "sha256": "c2793aa302279b9d27f0af32edd71f70de4e93cb4f76f55facd3e757641cc494"
+      },
+      {
+        "path": "examples/lexer_candidate/src/candidate_limits.fy",
+        "sha256": "7a27948d9a43bde84acdf1106f462d0c5a288f8a54f193560658eff0c0d00f3e"
+      },
+      {
+        "path": "examples/lexer_candidate/src/cleanup_syntax.fy",
+        "sha256": "1374cdcbfa6139a5e82e4e74606cc28ba46d9e81df62f7a0dd397f856fb0ad6f"
+      },
+      {
+        "path": "examples/lexer_candidate/src/diagnostics.fy",
+        "sha256": "ee95f81ed3b3224702196fceef2888434e9713341b81abf01e03945592c4de8b"
+      },
+      {
+        "path": "examples/lexer_candidate/src/file_source.fy",
+        "sha256": "1a7ac7f6c69ef27e78e734aa74dab90b895742a5500a32931baaed19379b938f"
+      },
+      {
+        "path": "examples/lexer_candidate/src/numbers.fy",
+        "sha256": "ee8b40b5e8061317d70d3594c386c9e4c70d95132a7e4243ea6402947a4c3556"
+      },
+      {
+        "path": "examples/lexer_candidate/src/parse_tokens.fy",
+        "sha256": "91984eb1086ff7faafa4a6c64a232fc2ddce365b8cd7c2ef23b143bb91d4c9a6"
+      },
+      {
+        "path": "examples/lexer_candidate/src/project_content_hash.fy",
+        "sha256": "68d867b37b8cc817382e6d6602aa4d66f4d66be8784e7fbe119c806832839a0e"
+      },
+      {
+        "path": "examples/lexer_candidate/src/project_directory.fy",
+        "sha256": "70321e8a7cc84f131573eec91013fccad38d0162f781768bc0e47b136cf4ebc6"
+      },
+      {
+        "path": "examples/lexer_candidate/src/project_manifest.fy",
+        "sha256": "943c3e163ddc04afb03a82ef4a0485aa6a618a67708e657086b8ed1acd56658a"
+      },
+      {
+        "path": "examples/lexer_candidate/src/project_manifest_values.fy",
+        "sha256": "4f21b9dedf744ffc449d1b843282f9aba2ecc221c61f043594bea70c4d56387d"
+      },
+      {
+        "path": "examples/lexer_candidate/src/project_module_path.fy",
+        "sha256": "b4217fe0f797e5f0fb4bab8ebc75435e6674b5f72b60d0129b5269c627709cb2"
+      },
+      {
+        "path": "examples/lexer_candidate/src/project_package_input.fy",
+        "sha256": "fe1a75622fbf72b03fe5bfba3ce0c158eb2e03033e31acfdaef05afea9ec68c8"
+      },
+      {
+        "path": "examples/lexer_candidate/src/project_path.fy",
+        "sha256": "20bde13864e5ba8752b33a616eab22b08caf8a20d6a435d2d2c2cc68f443f1a5"
+      },
+      {
+        "path": "examples/lexer_candidate/src/project_path_unicode_data.fy",
+        "sha256": "9cf3af27796644304493561591e1641c70c5c653bf739ed71a65e492db510fbd"
+      },
+      {
+        "path": "examples/lexer_candidate/src/project_source_catalog.fy",
+        "sha256": "5dd5b1a6f848968cf20676084af8ddcaf039cfc74e1837685c12c601c53fb131"
+      },
+      {
+        "path": "examples/lexer_candidate/src/project_source_file.fy",
+        "sha256": "6d1307e99f7ae9fb387fc447f3b6c36f6c0e77aebc90faca55e75665aad2d282"
+      },
+      {
+        "path": "examples/lexer_candidate/src/project_source_identity.fy",
+        "sha256": "354bed4ced07109403b58f4432e8beddc765760a1ee083b3ca72fa0880c9f359"
+      },
+      {
+        "path": "examples/lexer_candidate/src/project_source_modules.fy",
+        "sha256": "d7d7e5b30a270389a1572f6e26cf3c0603db33e0125bd33fa17f4f177a0f7a1c"
+      },
+      {
+        "path": "examples/lexer_candidate/src/project_source_root.fy",
+        "sha256": "e6d896a57fde407db5e7042e244d6f2a35dddc4e113ad20555c4408f24842127"
+      },
+      {
+        "path": "examples/lexer_candidate/src/project_source_set.fy",
+        "sha256": "c4b70409d8aa627a1ef46488e5232d3deea7b07c0e796c26ef28449f367a98e1"
+      },
+      {
+        "path": "examples/lexer_candidate/src/project_toml_context.fy",
+        "sha256": "1682260043feced2ac662198fd3b29f4badb2a4a9f9b02a8e1f81462f3b3cc0f"
+      },
+      {
+        "path": "examples/lexer_candidate/src/project_toml_document.fy",
+        "sha256": "0bc3782206da0d9320ba8a39ea6a1f9ded52ec1bbf855580e31c1a1786f4b3a8"
+      },
+      {
+        "path": "examples/lexer_candidate/src/project_toml_model.fy",
+        "sha256": "4a6c295108e704749fc557204de4d8a0287e3228e59da396c50867ec8894b11e"
+      },
+      {
+        "path": "examples/lexer_candidate/src/project_toml_scalars.fy",
+        "sha256": "137d5dbdce313f22e91a9be87f8b34eb6f10011933b152f649421a895e274cb9"
+      },
+      {
+        "path": "examples/lexer_candidate/src/project_toml_strings.fy",
+        "sha256": "bc7e71acaaa68af5755d066c90fa1f763625de32c8fa2a6778e8447eebc187bb"
+      },
+      {
+        "path": "examples/lexer_candidate/src/project_toml_values.fy",
+        "sha256": "24255d1fdf0f34b6761f5304d383127667e8b127488a80409b3f35a13f62e81c"
+      },
+      {
+        "path": "examples/lexer_candidate/src/records.fy",
+        "sha256": "e2d1d3540285509aded981b476d4b2340857d8c7370364f4b1410bfd6883f6dd"
+      },
+      {
+        "path": "examples/lexer_candidate/src/scanner.fy",
+        "sha256": "3755e569fe63003f63b2c9b8272df2ba656c844791cedbc0da4f9245b8809cf7"
+      },
+      {
+        "path": "examples/lexer_candidate/src/sha256_block.fy",
+        "sha256": "bc48b9e751205bba8aeaf09987ea8681694d26bc989e24f4ecb3afa4c6e00fd4"
+      },
+      {
+        "path": "examples/lexer_candidate/src/sha256_stream.fy",
+        "sha256": "b5f97a9b5be679418a1365a6007028abfab5ba66ee3ae5c08b3e5b863fcfc8b9"
+      },
+      {
+        "path": "internal/sdkstdlib/sources/std/bytes.fy",
+        "sha256": "4740a506e93349fb002c383967dcc44d182d20f09f2094b83b5464a4ab252982"
+      },
+      {
+        "path": "internal/sdkstdlib/sources/std/fs.fy",
+        "sha256": "fd7ddfa9f0deed98304cecf94911644087d1e2a46e8be8995c35acbcb183b335"
+      },
+      {
+        "path": "internal/sdkstdlib/sources/std/io.fy",
+        "sha256": "4b89c3aeb8b4de4887395d29723095d364c5660c6b773c5696fb1f65f5365f48"
+      },
+      {
+        "path": "internal/sdkstdlib/sources/std/num.fy",
+        "sha256": "09aa0d45f075aa4212049527ded7bb48d99ceb6ffed56b310e267421bae20bb3"
+      },
+      {
+        "path": "internal/sdkstdlib/sources/std/process.fy",
+        "sha256": "9680a1481df4f761f481d5a039af7bdbefeb312d1091961194f8e7bc0681ae24"
+      },
+      {
+        "path": "internal/sdkstdlib/sources/std/text.fy",
+        "sha256": "cccd47e090fda11c9da063ffb321489dd8753fe9996855fc432833e05a79e695"
+      },
+      {
+        "path": "internal/sdkstdlib/sources/optional/std/vec.fy",
+        "sha256": "0ae4c395bf98c39079ad620bde035b3b590d51417864802e698edc069281db5b"
+      },
+      {
+        "path": "examples/lexer_candidate/src/strings.fy",
+        "sha256": "8f26db7c4d4039c8c8d9fbc6078097859c8f714ca5887957fdf0e69269dca521"
+      },
+      {
+        "path": "examples/lexer_candidate/src/syntax.fy",
+        "sha256": "cb040a2973447b89c2ad59b5447c65dab79df5df7930f73431afa7ea34ef25fd"
+      },
+      {
+        "path": "examples/lexer_candidate/src/types.fy",
+        "sha256": "53a77948af92724f00de0609837fd1507899df8e2b59b6d2778ef1f3c344395a"
+      },
+      {
+        "path": "examples/lexer_candidate/src/utf8.fy",
+        "sha256": "4a5425cea9efbfb1bff2c31a38c2bd8e392c6792af09f24e906c9a743621870d"
+      },
+      {
+        "path": "examples/lexer_candidate/tests/project_source_identity.fy",
+        "sha256": "fabeaebd9c46ac6ad6c18144605c70e45292b22892e2a76e71901330b5913a83"
+      },
+      {
+        "path": "tools/verify-candidate-private-tests.py",
+        "sha256": "04c7e44df7941bd0c1a12b523b115df623dbe10836f3eb8993dedc7d6ea5e8af"
+      },
+      {
+        "path": ".cache/candidate-source-identity-20261011/fixture/root.bin",
+        "sha256": "32c31a95de982746f58e0fcb06547c35e52d5a2fa6b2859167fd3f0c02e5d8fa"
+      }
+    ],
+    "tools": {
+      "compiler": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\manifest-bootstrap.exe",
+        "sha256": "4e6a50a83b4d9f74a11d749c779a90683ab3a3916d19f4852bfe1cbd452cc664"
+      },
+      "candidate": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-source-file-20261011\\compiler.exe",
+        "sha256": "e87cc5c8c19e30fc68ca68fa98ef66d87baa1300263d8989e255910bb1985d8f"
+      },
+      "builder": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-source-file-20261011\\builder.exe",
+        "sha256": "8141ce6bcc461a52fe6bf0bf24e9e5f5a9d7842c3c7dbfc5863cc4e822584ea7"
+      }
+    },
+    "native": {
+      "schemaVersion": "fairyc.test-report/v4",
+      "engine": "native",
+      "target": "x86_64-windows-msvc",
+      "profile": "development",
+      "tests": [
+        {
+          "identity": "tests::project_source_identity::matches_go_exact_paths_bytes_order_and_large_input",
+          "outcome": "passed",
+          "trapCategory": null,
+          "stdoutBase64": "",
+          "stderrBase64": ""
+        }
+      ],
+      "count": 1,
+      "passed": 1,
+      "failed": 0,
+      "status": "ok",
+      "lock": "verified"
+    },
+    "nativeTests": 1,
+    "lockSHA256": "0e9ea336f92ed3e80e58c8ddc9fa318dbfe89b669115eacc3cedd8efe3b1982e",
+    "candidateInputFiles": 46,
+    "candidatePacketSHA256": "3632e9f7ca4782672efd2b932bb623302150331e681e65789b87ab925c641e55",
+    "candidateExecutions": [
+      {
+        "profile": "development",
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-sdk-bundle-20261012\\source-identity-regression\\development.exe",
+        "sha256": "49e0b11d2c085a5810010b70506e75a8b17c69b10fbf6498132036d47c5fb647",
+        "exit": 0
+      },
+      {
+        "profile": "release",
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-sdk-bundle-20261012\\source-identity-regression\\release.exe",
+        "sha256": "738b07f5339f42bdff631bb3bf31c44c11a4582d660ef743c99e5ff6504f2024",
+        "exit": 0
+      }
+    ],
+    "invocations": [
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\manifest-bootstrap.exe",
+          "test",
+          "--native",
+          "--locked",
+          "--json",
+          "--capture-output",
+          "--exact",
+          "tests::project_source_identity::matches_go_exact_paths_bytes_order_and_large_input",
+          "--",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-source-identity-20261011\\fixture\\root.bin"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "seconds": 57.51112700000522,
+        "exit": 0,
+        "stdoutBytes": 362,
+        "stdoutSHA256": "2ca76e9c7cfd6de0de440f4492d9c5cfa56ebb723a77eb434d8fd37c04544f4e",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-source-file-20261011\\compiler.exe",
+          "--c-project-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-sdk-bundle-20261012\\source-identity-regression\\sources.list"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+        "seconds": 29.210656399998697,
+        "exit": 0,
+        "stdoutBytes": 3425390,
+        "stdoutSHA256": "3632e9f7ca4782672efd2b932bb623302150331e681e65789b87ab925c641e55",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-source-file-20261011\\builder.exe",
+          "--packet",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-sdk-bundle-20261012\\source-identity-regression\\candidate-packet.bin",
+          "--packet-sha256",
+          "3632e9f7ca4782672efd2b932bb623302150331e681e65789b87ab925c641e55",
+          "--output",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-sdk-bundle-20261012\\source-identity-regression\\development.exe"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+        "seconds": 2.8906198000040604,
+        "exit": 0,
+        "stdoutBytes": 198,
+        "stdoutSHA256": "c4d294729c9e9e7b5b6ce0a184199558ffee681e10ddc9ac75c6b112322e3d39",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-sdk-bundle-20261012\\source-identity-regression\\development.exe",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-source-identity-20261011\\fixture\\root.bin"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+        "seconds": 3.7701501000119606,
+        "exit": 0,
+        "stdoutBytes": 0,
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-source-file-20261011\\builder.exe",
+          "--packet",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-sdk-bundle-20261012\\source-identity-regression\\candidate-packet.bin",
+          "--packet-sha256",
+          "3632e9f7ca4782672efd2b932bb623302150331e681e65789b87ab925c641e55",
+          "--output",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-sdk-bundle-20261012\\source-identity-regression\\release.exe",
+          "--release"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+        "seconds": 76.35794689999602,
+        "exit": 0,
+        "stdoutBytes": 199,
+        "stdoutSHA256": "94a5a8da20b9d95cb69bc674b66996b03927cfa327c3140a3f1017801bb0fb91",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-sdk-bundle-20261012\\source-identity-regression\\release.exe",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-source-identity-20261011\\fixture\\root.bin"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+        "seconds": 0.3162161000072956,
+        "exit": 0,
+        "stdoutBytes": 0,
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderr": ""
+      }
+    ],
+    "publicApiChanged": false,
+    "dbChanged": false,
+    "ciChanged": false,
+    "pushed": false,
+    "fixtureFiles": [
+      {
+        "path": ".cache/candidate-source-identity-20261011/fixture/Binary/digest.txt",
+        "sha256": "e1b011605ef87b82c3cc55ec72a4600e67d1e91859a0e7ad11ba480633ea8a5c"
+      },
+      {
+        "path": ".cache/candidate-source-identity-20261011/fixture/Binary/fairy.toml",
+        "sha256": "62ced7aac1132f58507ceea058b33292019b16ad97af35a74986b362f24a16c9"
+      },
+      {
+        "path": ".cache/candidate-source-identity-20261011/fixture/Binary/src/a.fy",
+        "sha256": "6171db06a1c89b1ff8ab77e479d5df976ccd88a7b63567b4b18f413649e12ff3"
+      },
+      {
+        "path": ".cache/candidate-source-identity-20261011/fixture/CRLF/digest.txt",
+        "sha256": "22a6182ae4aec4d2ec01e8407433b8b069b9b458aeb5980ed0462f9b2d3edf8a"
+      },
+      {
+        "path": ".cache/candidate-source-identity-20261011/fixture/CRLF/fairy.toml",
+        "sha256": "62ced7aac1132f58507ceea058b33292019b16ad97af35a74986b362f24a16c9"
+      },
+      {
+        "path": ".cache/candidate-source-identity-20261011/fixture/CRLF/src/a.fy",
+        "sha256": "b73194cdb24d1ef74e36d44dbcf665cd555e22f225dc6206c1e3d358394f0610"
+      },
+      {
+        "path": ".cache/candidate-source-identity-20261011/fixture/Large/digest.txt",
+        "sha256": "db6f01f3ed76f4bb9a4d65a656e53fbbb55742be21c7ae771ff0963a60f1e5a2"
+      },
+      {
+        "path": ".cache/candidate-source-identity-20261011/fixture/Large/fairy.toml",
+        "sha256": "62ced7aac1132f58507ceea058b33292019b16ad97af35a74986b362f24a16c9"
+      },
+      {
+        "path": ".cache/candidate-source-identity-20261011/fixture/Large/src/a.fy",
+        "sha256": "5c8287eaf42d038c965c0bc4face4222cbaf8b6cf50362be965090f9ce71a9ff"
+      },
+      {
+        "path": ".cache/candidate-source-identity-20261011/fixture/ModuleOrder/digest.txt",
+        "sha256": "e24a63a34b495f3efd6011c9f8f9c18b467503290aa38cd7c8186a6bedeb438f"
+      },
+      {
+        "path": ".cache/candidate-source-identity-20261011/fixture/ModuleOrder/fairy.toml",
+        "sha256": "62ced7aac1132f58507ceea058b33292019b16ad97af35a74986b362f24a16c9"
+      },
+      {
+        "path": ".cache/candidate-source-identity-20261011/fixture/ModuleOrder/src/a/item.fy",
+        "sha256": "cdf7f8a319a4b87a8a0ece7c27230711f8684ee74f94583d47f1db10a5f4f33a"
+      },
+      {
+        "path": ".cache/candidate-source-identity-20261011/fixture/ModuleOrder/src/a0.fy",
+        "sha256": "d848cb30d5820ee9ebaf21491e689c81b9d8c51a2f5793a69705c3ed35eab605"
+      },
+      {
+        "path": ".cache/candidate-source-identity-20261011/fixture/One/digest.txt",
+        "sha256": "d1f502169eeaefb2345226ea7ec64bc2bb28cc57cb4672e6fdb1e52ebbd8dd00"
+      },
+      {
+        "path": ".cache/candidate-source-identity-20261011/fixture/One/fairy.toml",
+        "sha256": "62ced7aac1132f58507ceea058b33292019b16ad97af35a74986b362f24a16c9"
+      },
+      {
+        "path": ".cache/candidate-source-identity-20261011/fixture/One/src/a.fy",
+        "sha256": "fca3b7169045967e9f8c2b824305edd980c74a9f4241594b122ba52e34593329"
+      },
+      {
+        "path": ".cache/candidate-source-identity-20261011/fixture/OtherRoot/digest.txt",
+        "sha256": "5c88d52c0be1643aa4b207c39e0a099c90ef5e89db19e99efa9e753532f1f857"
+      },
+      {
+        "path": ".cache/candidate-source-identity-20261011/fixture/OtherRoot/fairy.toml",
+        "sha256": "62ced7aac1132f58507ceea058b33292019b16ad97af35a74986b362f24a16c9"
+      },
+      {
+        "path": ".cache/candidate-source-identity-20261011/fixture/OtherRoot/src/a.fy",
+        "sha256": "fca3b7169045967e9f8c2b824305edd980c74a9f4241594b122ba52e34593329"
+      },
+      {
+        "path": ".cache/candidate-source-identity-20261011/fixture/OtherRoot/src/nested/z.fy",
+        "sha256": "ee3323933f1c6ae9742a768a1032e4b1f64ba94877ebaa40617524630f2089f8"
+      },
+      {
+        "path": ".cache/candidate-source-identity-20261011/fixture/OtherRoot/src/z.fy",
+        "sha256": "42990eece7dd909f5732424e382d69023231a14c1db9e0ea1d031c0e8a31dcd6"
+      },
+      {
+        "path": ".cache/candidate-source-identity-20261011/fixture/reference.json",
+        "sha256": "ed1de51b79924c009c755457622700f921f36d51d9e814121501292ace32f86b"
+      },
+      {
+        "path": ".cache/candidate-source-identity-20261011/fixture/Renamed/digest.txt",
+        "sha256": "81bee7e85eaa92798e55f3edef5cf9c743501f2a2fed650b2ce46a11276f70ba"
+      },
+      {
+        "path": ".cache/candidate-source-identity-20261011/fixture/Renamed/fairy.toml",
+        "sha256": "62ced7aac1132f58507ceea058b33292019b16ad97af35a74986b362f24a16c9"
+      },
+      {
+        "path": ".cache/candidate-source-identity-20261011/fixture/Renamed/src/b.fy",
+        "sha256": "fca3b7169045967e9f8c2b824305edd980c74a9f4241594b122ba52e34593329"
+      },
+      {
+        "path": ".cache/candidate-source-identity-20261011/fixture/root.bin",
+        "sha256": "32c31a95de982746f58e0fcb06547c35e52d5a2fa6b2859167fd3f0c02e5d8fa"
+      },
+      {
+        "path": ".cache/candidate-source-identity-20261011/fixture/Three/digest.txt",
+        "sha256": "5c88d52c0be1643aa4b207c39e0a099c90ef5e89db19e99efa9e753532f1f857"
+      },
+      {
+        "path": ".cache/candidate-source-identity-20261011/fixture/Three/fairy.toml",
+        "sha256": "62ced7aac1132f58507ceea058b33292019b16ad97af35a74986b362f24a16c9"
+      },
+      {
+        "path": ".cache/candidate-source-identity-20261011/fixture/Three/src/a.fy",
+        "sha256": "fca3b7169045967e9f8c2b824305edd980c74a9f4241594b122ba52e34593329"
+      },
+      {
+        "path": ".cache/candidate-source-identity-20261011/fixture/Three/src/nested/z.fy",
+        "sha256": "ee3323933f1c6ae9742a768a1032e4b1f64ba94877ebaa40617524630f2089f8"
+      },
+      {
+        "path": ".cache/candidate-source-identity-20261011/fixture/Three/src/z.fy",
+        "sha256": "42990eece7dd909f5732424e382d69023231a14c1db9e0ea1d031c0e8a31dcd6"
+      }
+    ]
+  },
+  "localDigestFixtureRefresh": {
+    "command": "bun tools/run-go.ts run ./cmd/fairyc-candidate-source-digest-reference .cache/candidate-sdk-bundle-20261012/local-digest-oracle",
+    "matchedFixtureFiles": 30,
+    "passed": true
+  }
+}
