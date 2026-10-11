@@ -1,12 +1,13 @@
 module project_toml_document;
 import project_toml_model as m;
 import project_toml_strings as strings;
+import project_toml_scalars as atoms;
 import std::bytes as bytes;
 import std::text as text;
 import std::vec as v;
 
-// Private syntax for strings, arrays, tables and typed boolean rejection.
-// Numeric/date values remain outside this component.
+// Manifest syntax retains typed atoms so valid unknown fields and malformed
+// values preserve the executable Go decoder's rejection categories.
 struct Cursor{usize offset;usize depth;}
 fn m::Problem fail(ref u8[] source,u32 code,usize start,usize end){let usize a=if(start<source.len){start}else{source.len};let usize b=if(end<source.len){end}else{source.len};return m::Problem{.code,.start=a,.end=if(b>=a){b}else{a}};}
 fn m::Problem here(ref u8[] source,ref Cursor cursor){return fail(source,1,cursor.offset,cursor.offset+1);}
@@ -56,7 +57,7 @@ fn Result<usize,m::Problem> value(ref u8[] source,ref mut Cursor cursor,ref mut 
     if(c==34 || c==39){var bytes::Buffer cooked=bytes::empty();let usize end=switch(strings::append(source,start,true,ref mut cooked)){case .ok(n):{n}case .err(e):{return .err(fail(source,e.code,e.start,e.end));}};cursor.offset=end;return m::string(meta,values,nodes,id,bytes::view(ref cooked),end);}
     if(source.len-start>=4 && bytes::equal(source[start..start+4],b"true")){cursor.offset+=4;return m::boolean(meta,values,nodes,id,true,cursor.offset);}
     if(source.len-start>=5 && bytes::equal(source[start..start+5],b"false")){cursor.offset+=5;return m::boolean(meta,values,nodes,id,false,cursor.offset);}
-    if(c!=91 && c!=123){return .err(here(source,cursor));}if(cursor.depth>=512){return .err(fail(source,4,start,start+1));}cursor.depth+=1;
+    if(c!=91 && c!=123){let atoms::Token token=atoms::read(source,start);if(token.kind==0){return .err(fail(source,1,start,token.end));}cursor.offset=token.end;return m::atom(meta,values,nodes,id,source[start..token.end],token.end,token.kind);}if(cursor.depth>=512){return .err(fail(source,4,start,start+1));}cursor.depth+=1;
     let result=if(c==91){array(source,cursor,meta,names,values,nodes,buckets,id)}else{inline_table(source,cursor,meta,names,values,nodes,buckets,id)};cursor.depth-=1;return result;
 }
 fn Result<usize,m::Problem> array(ref u8[] source,ref mut Cursor cursor,ref mut m::State meta,ref mut bytes::Buffer names,ref mut bytes::Buffer values,ref mut v::Vec<m::Node> nodes,ref mut v::Vec<usize> buckets,usize id){

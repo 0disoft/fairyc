@@ -1,0 +1,313 @@
+{
+  "schema": "fairyc.candidate-toml-scalars/v1",
+  "passed": true,
+  "scope": "Integer/float/date-time syntax and range classification for manifest error parity; values stay typed raw atoms",
+  "sourceInputs": [
+    {
+      "path": "examples/lexer_candidate/src/candidate_limits.fy",
+      "sha256": "7a27948d9a43bde84acdf1106f462d0c5a288f8a54f193560658eff0c0d00f3e"
+    },
+    {
+      "path": "examples/lexer_candidate/src/file_source.fy",
+      "sha256": "1a7ac7f6c69ef27e78e734aa74dab90b895742a5500a32931baaed19379b938f"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_toml_scalars.fy",
+      "sha256": "137d5dbdce313f22e91a9be87f8b34eb6f10011933b152f649421a895e274cb9"
+    },
+    {
+      "path": "internal/sdkstdlib/sources/std/bytes.fy",
+      "sha256": "4740a506e93349fb002c383967dcc44d182d20f09f2094b83b5464a4ab252982"
+    },
+    {
+      "path": "internal/sdkstdlib/sources/std/fs.fy",
+      "sha256": "fd7ddfa9f0deed98304cecf94911644087d1e2a46e8be8995c35acbcb183b335"
+    },
+    {
+      "path": "internal/sdkstdlib/sources/std/io.fy",
+      "sha256": "4b89c3aeb8b4de4887395d29723095d364c5660c6b773c5696fb1f65f5365f48"
+    },
+    {
+      "path": "internal/sdkstdlib/sources/std/process.fy",
+      "sha256": "9680a1481df4f761f481d5a039af7bdbefeb312d1091961194f8e7bc0681ae24"
+    },
+    {
+      "path": "internal/sdkstdlib/sources/std/text.fy",
+      "sha256": "cccd47e090fda11c9da063ffb321489dd8753fe9996855fc432833e05a79e695"
+    },
+    {
+      "path": "examples/lexer_candidate/tests/project_toml_scalars.fy",
+      "sha256": "787b6a83b9b2fa7d818d61ea33efe5135da4c1f03c36e24b508323cef34fcb4d"
+    },
+    {
+      "path": "tools/verify-candidate-private-tests.py",
+      "sha256": "04c7e44df7941bd0c1a12b523b115df623dbe10836f3eb8993dedc7d6ea5e8af"
+    },
+    {
+      "path": ".cache/candidate-toml-scalars/reference.bin",
+      "sha256": "efc89eec9e63fba0c68b012972c2b7f234c5989e31148917e411fe6b5efb6210"
+    },
+    {
+      "path": "spec/fixtures/project-manifest/candidate-toml-scalars-v1.json",
+      "sha256": "961e13b4401c27b2dc222cd5fcc488d5bdfff8b0596272c18de148a3e8450195"
+    },
+    {
+      "path": "cmd/fairyc-candidate-toml-scalar-reference/main.go",
+      "sha256": "750acde7c52d420ff536faaa1361e2a16c691da47677cb86342b4ed1e6610fe7"
+    },
+    {
+      "path": "go.mod",
+      "sha256": "653cd3aa3f5ddeb194907ffb410b5d276797b0ee157f2e5233a95721e92378ef"
+    },
+    {
+      "path": "go.sum",
+      "sha256": "3978e93be4721773d6ab8779e6fd37e11a7d12669075c07beba4cc2ecf5e3b7a"
+    },
+    {
+      "path": "tools/verify-candidate-toml-scalars.py",
+      "sha256": "4d6dca0306d8b94673cb5938f0b6cf4ad675a4621d00f173e8088dea5913f1aa"
+    }
+  ],
+  "cases": 372,
+  "kinds": {
+    "0": 170,
+    "6": 17,
+    "7": 35,
+    "8": 150
+  },
+  "reference": {
+    "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-toml-scalar-reference.exe",
+    "sha256": "d24ddd80b55ea405f2387efbbaf44f4220f2a2d9e25da415ba742a97394f1c81",
+    "reportSHA256": "77f0894ebed82a38e6f02315b3f34003b35adf09ec05058ba7b5b503534a9129"
+  },
+  "fixtureSHA256": "efc89eec9e63fba0c68b012972c2b7f234c5989e31148917e411fe6b5efb6210",
+  "fixtureBytes": 8303,
+  "execution": {
+    "schema": "fairyc.candidate-private-tests/v1",
+    "passed": true,
+    "module": "project_toml_scalars",
+    "sourceInputs": [
+      {
+        "path": "examples/lexer_candidate/src/candidate_limits.fy",
+        "sha256": "7a27948d9a43bde84acdf1106f462d0c5a288f8a54f193560658eff0c0d00f3e"
+      },
+      {
+        "path": "examples/lexer_candidate/src/file_source.fy",
+        "sha256": "1a7ac7f6c69ef27e78e734aa74dab90b895742a5500a32931baaed19379b938f"
+      },
+      {
+        "path": "examples/lexer_candidate/src/project_toml_scalars.fy",
+        "sha256": "137d5dbdce313f22e91a9be87f8b34eb6f10011933b152f649421a895e274cb9"
+      },
+      {
+        "path": "internal/sdkstdlib/sources/std/bytes.fy",
+        "sha256": "4740a506e93349fb002c383967dcc44d182d20f09f2094b83b5464a4ab252982"
+      },
+      {
+        "path": "internal/sdkstdlib/sources/std/fs.fy",
+        "sha256": "fd7ddfa9f0deed98304cecf94911644087d1e2a46e8be8995c35acbcb183b335"
+      },
+      {
+        "path": "internal/sdkstdlib/sources/std/io.fy",
+        "sha256": "4b89c3aeb8b4de4887395d29723095d364c5660c6b773c5696fb1f65f5365f48"
+      },
+      {
+        "path": "internal/sdkstdlib/sources/std/process.fy",
+        "sha256": "9680a1481df4f761f481d5a039af7bdbefeb312d1091961194f8e7bc0681ae24"
+      },
+      {
+        "path": "internal/sdkstdlib/sources/std/text.fy",
+        "sha256": "cccd47e090fda11c9da063ffb321489dd8753fe9996855fc432833e05a79e695"
+      },
+      {
+        "path": "examples/lexer_candidate/tests/project_toml_scalars.fy",
+        "sha256": "787b6a83b9b2fa7d818d61ea33efe5135da4c1f03c36e24b508323cef34fcb4d"
+      },
+      {
+        "path": "tools/verify-candidate-private-tests.py",
+        "sha256": "04c7e44df7941bd0c1a12b523b115df623dbe10836f3eb8993dedc7d6ea5e8af"
+      },
+      {
+        "path": ".cache/candidate-toml-scalars/reference.bin",
+        "sha256": "efc89eec9e63fba0c68b012972c2b7f234c5989e31148917e411fe6b5efb6210"
+      }
+    ],
+    "tools": {
+      "compiler": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\manifest-bootstrap.exe",
+        "sha256": "4e6a50a83b4d9f74a11d749c779a90683ab3a3916d19f4852bfe1cbd452cc664"
+      },
+      "candidate": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\two-stage-maintained-fresh\\stage1.exe",
+        "sha256": "32a019327c8cceac8a5a01402fd32d79b95c5fe3d57f9d898bfa977956905dc0"
+      },
+      "builder": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-build-cached.exe",
+        "sha256": "1ed255a4b1f828c30b43caa99ff762e78b213bc55ba4bf6f4db840574bf2e3d1"
+      }
+    },
+    "native": {
+      "schemaVersion": "fairyc.test-report/v4",
+      "engine": "native",
+      "target": "x86_64-windows-msvc",
+      "profile": "development",
+      "tests": [
+        {
+          "identity": "tests::project_toml_scalars::bounds_integer_float_calendar_and_token_consumption",
+          "outcome": "passed",
+          "trapCategory": null,
+          "stdoutBase64": "",
+          "stderrBase64": ""
+        },
+        {
+          "identity": "tests::project_toml_scalars::matches_pinned_go_scalar_kinds",
+          "outcome": "passed",
+          "trapCategory": null,
+          "stdoutBase64": "",
+          "stderrBase64": ""
+        }
+      ],
+      "count": 2,
+      "passed": 2,
+      "failed": 0,
+      "status": "ok",
+      "lock": "verified"
+    },
+    "nativeTests": 2,
+    "lockSHA256": "ac4e391cac4857751b6baf913e621c9707a4bd518a738da1c5face6c82dfd3eb",
+    "candidateInputFiles": 9,
+    "candidatePacketSHA256": "66114606e629f8304a463bbd58b832ff31400c83656163712b6d941155124e85",
+    "candidateExecutions": [
+      {
+        "profile": "development",
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-toml-scalars-execution\\development.exe",
+        "sha256": "a3cb10f90c4294287ef2b116c7ec8e5a2ad204979d3184ddb823db59ebdb8e59",
+        "exit": 0
+      },
+      {
+        "profile": "release",
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-toml-scalars-execution\\release.exe",
+        "sha256": "469b887a55d3aec6f4c982a43af1dc4e3a94b287c926ba5c585f59742d4e83b0",
+        "exit": 0
+      }
+    ],
+    "invocations": [
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\manifest-bootstrap.exe",
+          "test",
+          "--native",
+          "--locked",
+          "--json",
+          "--capture-output",
+          "--exact",
+          "tests::project_toml_scalars::bounds_integer_float_calendar_and_token_consumption",
+          "--exact",
+          "tests::project_toml_scalars::matches_pinned_go_scalar_kinds",
+          "--",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-toml-scalars\\reference.bin"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "seconds": 94.31035749999864,
+        "exit": 0,
+        "stdoutBytes": 510,
+        "stdoutSHA256": "8f8e2613139d17e9f21a73de77e0843e75feebe29ffe323cfd351c2e07d8e3ef",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\two-stage-maintained-fresh\\stage1.exe",
+          "--c-project-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-toml-scalars-execution\\sources.list"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+        "seconds": 3.7524489000061294,
+        "exit": 0,
+        "stdoutBytes": 233436,
+        "stdoutSHA256": "66114606e629f8304a463bbd58b832ff31400c83656163712b6d941155124e85",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-build-cached.exe",
+          "--packet",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-toml-scalars-execution\\candidate-packet.bin",
+          "--packet-sha256",
+          "66114606e629f8304a463bbd58b832ff31400c83656163712b6d941155124e85",
+          "--output",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-toml-scalars-execution\\development.exe"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+        "seconds": 1.1195823999878485,
+        "exit": 0,
+        "stdoutBytes": 173,
+        "stdoutSHA256": "c43cf48790d9c11ebd63bbe427cd338018060f4a9e8bf9d73688ae9ec31136a4",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-toml-scalars-execution\\development.exe",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-toml-scalars\\reference.bin"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+        "seconds": 0.027580200010561384,
+        "exit": 0,
+        "stdoutBytes": 0,
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-build-cached.exe",
+          "--packet",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-toml-scalars-execution\\candidate-packet.bin",
+          "--packet-sha256",
+          "66114606e629f8304a463bbd58b832ff31400c83656163712b6d941155124e85",
+          "--output",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-toml-scalars-execution\\release.exe",
+          "--release"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+        "seconds": 27.910878499998944,
+        "exit": 0,
+        "stdoutBytes": 175,
+        "stdoutSHA256": "d9d753092b65a6343cdb0d4cdfa349ee254b138e5a7640a3ac86a2c7a172519b",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-toml-scalars-execution\\release.exe",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-toml-scalars\\reference.bin"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+        "seconds": 0.0329626000020653,
+        "exit": 0,
+        "stdoutBytes": 0,
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderr": ""
+      }
+    ],
+    "publicApiChanged": false,
+    "dbChanged": false,
+    "ciChanged": false,
+    "pushed": false
+  },
+  "executionReused": true,
+  "fullTOMLParity": false,
+  "publicApiChanged": false,
+  "dbChanged": false,
+  "ciChanged": false,
+  "pushed": false,
+  "sourceCheck": {
+    "instances": 2,
+    "files": 300,
+    "mirFunctions": 3826,
+    "passed": true
+  },
+  "limits": [
+    "Table-definition compatibility remains subsequent work.",
+    "Typed numeric/date atoms support manifest rejection categories; no new Fairy language or manifest value types.",
+    "Filesystem discovery, graph, lock and public project CLI connection remain later work.",
+    "Linux, full suite and Stage 2 deferred for this slice."
+  ]
+}

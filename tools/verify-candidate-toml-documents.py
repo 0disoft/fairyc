@@ -66,7 +66,7 @@ def main():
     report = json.loads(report_path.read_bytes())
     assert report['schema'] == 'fairyc.candidate-toml-documents-reference/v1' and len(report['cases']) == len(cases)
     policy = {b"a={b='x'}\na.c='y'", b"a={b={c='x'},b.d='y'}", b"a.b='x'\n[a]", b"[a.b]\nx='x'\n[a]\nb.y='y'"}
-    outside = {b'a=1', b'a=1979-05-27'}
+    outside = set()
     differences = []
     for case, row in zip(cases, report['cases']):
         assert case['name'] == row['name']

@@ -100,10 +100,32 @@ commits. Complete pinned-decoder compatibility remains unfinished.
 No public API, SDK ABI, DB, hygiene, CI or runner contract changed. Linux, full
 suite and Stage 2 were skipped for these component slices; no push occurred.
 
+## Typed scalar rejection
+
+`project_toml_scalars.fy` classifies integer, float and date/time atoms and the
+document/model retain their exact raw bytes. This allows valid unknown scalar
+fields to reach `unknown-field`, while invalid syntax/range and wrong known
+field types remain parse failures. Integer range is signed 64-bit; finite float
+overflow uses the exact binary64 rounding threshold. Signed zero, underflow and
+explicit inf/nan are retained as valid tokens. Date/time validation checks the
+calendar, leap years, optional seconds, fractions and the pinned Go offset
+bounds. Neither floating-point nor date types were added to Fairy or manifest
+fields.
+
+`evidence/candidate-toml-scalars-20261011.json` records 372 Go classifications
+(170 invalid, 17 integer, 35 float and 150 date/time). Native 2 and candidate C
+development/release pass. `evidence/candidate-manifest-scalars-20261011.json`
+records 104 complete manifest acceptance/reason/value comparisons through
+native 2 and both C profiles. `evidence/candidate-toml-document-scalars-20261011.json`
+records the document native 3 and both C profiles: 42 fixed inputs, 38 Go
+matches and the four remaining table-definition differences. Source check
+passes 300 files and 3826 MIR functions. These receipts supersede the earlier
+scalar-exclusion observations, which remain historical evidence.
+
 ## Remaining connection
 
-1. Reconcile pinned Go decoder/spec disagreements and the remaining scalar
-   value/error categories before claiming complete manifest-parser parity.
+1. Reconcile pinned Go table-definition behavior before claiming complete
+   manifest-parser parity.
 2. Connect the validated result to contained source discovery and the later
    package/lock/CLI stages.
 

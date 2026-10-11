@@ -37,6 +37,11 @@
       "candidateAccepted": true
     },
     {
+      "name": "empty-3",
+      "source": "YT0xCmI9MTk3OS0wNS0yNwpjPTEuNQpkPVsweGZmLDA3OjMyOjAwXQo=",
+      "candidateAccepted": true
+    },
+    {
       "name": "rejected-0",
       "source": "YT0neCcKYT0neSc=",
       "candidateAccepted": false,
@@ -218,13 +223,13 @@
     },
     {
       "name": "rejected-30",
-      "source": "YT0x",
+      "source": "YT0xXw==",
       "candidateAccepted": false,
       "errorCode": 1
     },
     {
       "name": "rejected-31",
-      "source": "YT0xOTc5LTA1LTI3",
+      "source": "YT0xOTc5LTAyLTMw",
       "candidateAccepted": false,
       "errorCode": 1
     },
