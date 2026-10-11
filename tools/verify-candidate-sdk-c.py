@@ -54,6 +54,10 @@ def loader_fixtures(folder):
     return {name: hashlib.sha256(raw).hexdigest() for name, raw in data.items()}
 
 CASES = {
+    "sdk_c_compares_exact_byte_views_with_authenticated_bulk_reads":
+        (["stage0_system_heap.c", "stage0_buffer.c"], [], ""),
+    "sdk_c_keeps_user_byte_comparison_bodies_ordinary":
+        ([], [], ""),
     "byte_loop_c_evaluates_view_once_empty_and_nested_control": ([], [], ""),
     "byte_loop_c_preserves_iteration_defer_and_owner_cleanup": ([], [], "101,1,102,2,103,3,9,"),
     "sdk_c_executes_nested_vector_move_and_cleanup":
@@ -156,6 +160,10 @@ def main():
         components, argv, expected = CASES[name]
         source = base64.b64decode(outcomes[name]["stdoutBase64"], validate=True)
         assert source.startswith(b"/* fairyc.candidate-module-owned-c/v1 */\n")
+        if name == "sdk_c_compares_exact_byte_views_with_authenticated_bulk_reads":
+            assert b"memcmp(" in source
+        elif name == "sdk_c_keeps_user_byte_comparison_bodies_ordinary":
+            assert b"memcmp(" not in source
         assert not base64.b64decode(outcomes[name]["stderrBase64"], validate=True)
         generated = output / f"{name}.c"
         generated.write_bytes(source)
@@ -227,6 +235,8 @@ def main():
         buffer_failure = (1 if name == "sdk_c_executes_buffer_initial_allocation_failure" else
                           2 if name == "sdk_c_executes_buffer_growth_failure_preserves_bytes" else None)
         if buffered:
+            buffer_attempts = (0 if name == "sdk_c_compares_exact_byte_views_with_authenticated_bulk_reads"
+                               else buffer_failure or 3)
             instrumentation = (
                 b"#undef fy_std_buffer_drop_v0\n#include <stdint.h>\n"
                 b"static unsigned buffer_dropped,buffer_drop_errors;\n"
@@ -234,7 +244,7 @@ def main():
                 b"uint32_t status=fy_test_actual_buffer_drop_v0(b);++buffer_dropped;"
                 b"if(status)++buffer_drop_errors;return status;}\n"
                 b"extern int32_t fy_candidate_entry(void);\nint main(void){int32_t result=fy_candidate_entry();"
-                + f"return result?result:(buffer_dropped=={buffer_drops}&&!buffer_drop_errors&&heap_live==0&&heap_attempts=={buffer_failure or 3}?0:90);}}\n".encode())
+                + f"return result?result:(buffer_dropped=={buffer_drops}&&!buffer_drop_errors&&heap_live==0&&heap_attempts=={buffer_attempts}?0:90);}}\n".encode())
         vector_failure = (1 if name in {"sdk_c_executes_vector_failed_push_returns_donor",
                                        "sdk_c_executes_nested_vector_failed_push_donor"} else
                           2 if name == "sdk_c_executes_vector_growth_failure_preserves_prefix" else None)
@@ -347,7 +357,7 @@ def main():
                 executions.append(dict(name=name, profile=profile, sourceSHA256=hashlib.sha256(source).hexdigest(),
                                    stdinBase64=base64.b64encode(stdin).decode('ascii') if stdin is not None else None,
                                    heapFailureAt=failure, heapBalanceVerified=heap_checked,
-                                   heapCounts={"attempts": failure or (attempts if textual or filing else vector_attempts if vector else 3 if buffered else 10), "liveAfter": 0} if heap_checked else None,
+                                   heapCounts={"attempts": failure or (attempts if textual or filing else vector_attempts if vector else buffer_attempts if buffered else 10), "liveAfter": 0} if heap_checked else None,
                                    textCounts={"stringDrop": string_drops, "cstringDrop": cstring_drops, "dropStatusErrors": 0} if textual else None,
                                    fileCounts={"open": opened, "close": closed, "drop": drops, "automaticClose": auto_closed,
                                                "dropStatusErrors": 0, "closedHandleVerified": auto_closed > 0} if filing else None,

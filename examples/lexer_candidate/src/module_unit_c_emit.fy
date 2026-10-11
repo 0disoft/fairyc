@@ -11,6 +11,7 @@ import module_unit_c_aggregate as aggregate;
 import module_unit_c_literals as literals;
 import module_unit_c_switches as switches;
 import module_unit_c_sdk as sdk;
+import module_unit_c_bytes as byte_compare;
 import module_unit_c_callable_index as contracts;
 import module_unit_c_frame_index as targets;
 import module_unit_c_reachability as reachable;
@@ -74,6 +75,7 @@ fn bool store(ref ir::Program p,ref ir::Body b,cfg::Block n,ref mut bytes::Buffe
 }
 fn bool function(ref ir::Program p,ref sdk::Plan plan,ref contracts::Index indexed,ref targets::Index body_index,ref cfg::Graph g,ref mut bytes::Buffer out,ref mut w::State s,ref mut usize work,ref mut usize failed_start,ref mut usize failed_end,bool shared){
     let b=ir::at(p,cfg::frame(g));if(!signature(p,cfg::frame(g),out,s,shared) || !w::text(out,s,b"{\n")){return false;}var usize i=1;
+    if(cfg::frame(g)==sdk::byte_equal_frame(plan)){return byte_compare::body(b,out,s);}
     let arrays=switch(borrowed_arrays::build(p,b,g,work)){case .ok(a):{a}case .err(code):{s.code=code;return false;}};
     while(i<=ir::local_count(b)){if(!budget::charge(work,1)){s.code=1002;return false;}let l=ir::local_at(b,i);if(scalar::scalar(p,l.type)==7){s.code=1004;return false;}if(l.kind!=1 && l.kind!=10 && l.kind!=6 && (!aggregate::type(p,l.type,out,s) || !w::text(out,s,b" ") || !w::local(out,s,i) || !w::text(out,s,b";\n"))){return false;}i+=1;}
     if(!iteration::locals(g,out,s,work) || !lifecycle::locals(b,out,s,work)){return false;}

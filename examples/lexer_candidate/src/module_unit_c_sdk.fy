@@ -7,6 +7,7 @@ import module_unit_c_layout_index as layout_index;
 import module_unit_c_buffer as buffer;
 import module_unit_c_text as text_storage;
 import module_unit_c_file as file_storage;
+import module_unit_c_bytes as byte_compare;
 import sdk_file_rules as file_rules;
 import module_unit_sdk_authority as authority;
 import module_unit_sdk_sources as sources;
@@ -20,7 +21,7 @@ import std::vec as v;
 
 // Closed runtime records use their real C tags. Internal nominal fields remain
 // distinct, and adapters copy fields instead of claiming compatible C types.
-pub resource Plan {v::Vec<usize> rules;v::Vec<usize> records;v::Vec<usize> layouts;v::Vec<usize> vectors;usize arena;usize alloc_error;usize buffer;usize string;usize cstring;usize file;cleanup{}}
+pub resource Plan {v::Vec<usize> rules;v::Vec<usize> records;v::Vec<usize> layouts;v::Vec<usize> vectors;usize byte_equal;usize arena;usize alloc_error;usize buffer;usize string;usize cstring;usize file;cleanup{}}
 fn clean::Problem fail(u32 code,usize module_index,usize start,usize end){return clean::Problem{.code,.module_index,.start,.end};}
 fn ref u8[] slot(ref u8[] pool,usize index,usize count){if(index==0 || index>count){return pool[..0];}var usize start=0;var usize i=1;while(i<index){while(pool[start]!=0){start+=1;}start+=1;i+=1;}var usize end=start;while(pool[end]!=0){end+=1;}return pool[start..end];}
 fn ref u8[] source_name(usize record){if(file_storage::fields(record)!=0){return file_rules::record_name(record);}let pool=b"raw_process_args_result\0raw_text_result\0raw_text_view\0raw_console_write_result\0raw_console_read_result\0";return slot(pool,record,5);}
@@ -31,6 +32,7 @@ fn ref u8[] field_name(usize record,usize index){if(record>=6){return file_stora
 fn u32 field_type(usize record,usize index){if(record>=6){return file_rules::field_type(record,index);}return if(record==3 && index==0){pointers::make(3,false)}else if(index==0 || record==2){4}else{5};}
 pub fn usize rule(ref Plan p,usize callable){assert(callable<v::len<usize>(ref p.rules));return *v::at<usize>(ref p.rules,callable);}
 pub fn usize arena_type(ref Plan p){return p.arena;}
+pub fn usize byte_equal_frame(ref Plan p){return p.byte_equal;}
 pub fn usize allocation_error(ref Plan p){return p.alloc_error;}
 pub fn usize status_field(ref ir::Program p,ref Plan plan){assert(plan.alloc_error!=0);return ir::layout_at(p,layout(plan,plan.alloc_error)-1).value.field_start+1;}
 // Other authenticated SDK components still need their storage/record bridges.
@@ -46,10 +48,10 @@ fn Result<usize,clean::Problem> shape(ref ir::Program p,ref layout_index::Index 
 }
 fn bool carries(ref ir::Program p,usize actual,usize wanted,usize depth,ref mut usize work){if(depth>=64 || !budget::charge(work,1)){return true;}if(actual==wanted){return true;}if(actual==0){return false;}let t=clean::type_at(ir::cleanup_ir(p),actual);return (t.kind>=5 && t.kind<=8 || t.kind==12 && t.first!=0 || t.kind==16) && (carries(p,t.first,wanted,depth+1,work) || t.kind==6 && carries(p,t.second,wanted,depth+1,work));}
 fn bool used(ref ir::Program p,usize type,bool signatures,ref mut usize work){var usize i=1;while(i<=ir::count(p)){if(!budget::charge(work,1)){return true;}let b=ir::at(p,i);if(carries(p,clean::frame_at(ir::cleanup_ir(p),i).result,type,0,work)){return true;}var usize j=1;while(j<=ir::local_count(b)){if(carries(p,ir::local_at(b,j).type,type,0,work)){return true;}j+=1;}j=0;while(j<ir::node_count(b)){let e=ir::node_at(b,j).value;if(e.state==1 && carries(p,e.type,type,0,work)){return true;}j+=1;}i+=1;}i=0;while(signatures && i<ir::callable_count(p)){if(!budget::charge(work,1)){return true;}let c=ir::callable_at(p,i);if(carries(p,c.result,type,0,work)){return true;}var usize j=0;while(j<c.parameter_count){if(carries(p,ir::parameter_at(p,c.parameter_start+j),type,0,work)){return true;}j+=1;}i+=1;}return false;}
-pub fn Result<Plan,clean::Problem> build(ref ir::Program p,ref mut usize work){let indexed=switch(layout_index::build(p,work)){case .ok(index):{index}case .err(e):{return .err(fail(e,0,0,0));}};var v::Vec<usize> rules=v::empty<usize>();var v::Vec<usize> records=v::empty<usize>();var v::Vec<usize> layouts=v::empty<usize>();var v::Vec<usize> vectors=v::empty<usize>();var usize arena=0;var usize alloc_error=0;var usize buffer=0;var usize string=0;var usize cstring=0;var usize file=0;var usize i=0;
+pub fn Result<Plan,clean::Problem> build(ref ir::Program p,ref mut usize work){let indexed=switch(layout_index::build(p,work)){case .ok(index):{index}case .err(e):{return .err(fail(e,0,0,0));}};var v::Vec<usize> rules=v::empty<usize>();var v::Vec<usize> records=v::empty<usize>();var v::Vec<usize> layouts=v::empty<usize>();var v::Vec<usize> vectors=v::empty<usize>();var usize byte_equal=0;var usize arena=0;var usize alloc_error=0;var usize buffer=0;var usize string=0;var usize cstring=0;var usize file=0;var usize i=0;
     while(i<ir::callable_count(p)){if(!budget::charge(work,1)){return .err(fail(1002,0,0,0));}if(!v::push<usize>(ref mut rules,0).is_ok){return .err(fail(1003,0,0,0));}i+=1;}i=0;
     while(i<clean::type_count(ir::cleanup_ir(p))){if(!budget::charge(work,1)){return .err(fail(1002,0,0,0));}if(!v::push<usize>(ref mut records,0).is_ok || !v::push<usize>(ref mut layouts,0).is_ok || !v::push<usize>(ref mut vectors,0).is_ok){return .err(fail(1003,0,0,0));}i+=1;}
-    var usize u=0;while(u<sources::count(ir::sdk_units(p))){let unit=sources::at(ir::sdk_units(p),u);let original=switch(authority::parsed(ir::sdk_units(p),u,work)){case .ok(p):{p}case .err(e):{return .err(e);}};i=0;
+    var usize u=0;while(u<sources::count(ir::sdk_units(p))){let unit=sources::at(ir::sdk_units(p),u);let original=switch(authority::parsed(ir::sdk_units(p),u,work)){case .ok(p):{p}case .err(e):{return .err(e);}};if(unit.sdk_id==2){byte_equal=switch(byte_compare::find(p,ref original,unit.module_index,work)){case .ok(f):{f}case .err(e):{return .err(e);}};}i=0;
         while(i<ir::callable_count(p)){if(!budget::charge(work,1)){return .err(fail(1002,unit.module_index,0,0));}let c=ir::callable_at(p,i);if(c.module_index==unit.module_index && c.foreign){let code=switch(authority::check_foreign(p,ref original,unit.module_index,unit.sdk_id,c,ir::linker_name(p,i),work)){case .ok(r):{r}case .err(e):{return .err(e);}};let slot=v::at_mut<usize>(ref mut rules,i);*slot=code;}i+=1;}
         i=1;while(i<=clean::type_count(ir::cleanup_ir(p))){if(!budget::charge(work,1)){return .err(fail(1002,unit.module_index,0,0));}let t=clean::type_at(ir::cleanup_ir(p),i);
             if(t.module_index==unit.module_index && (t.kind==2 || t.kind==3 || t.kind==13)){if(t.declaration==0 || t.declaration>syntax::declaration_count(ref original)){return .err(fail(1001,unit.module_index,0,0));}let d=syntax::declaration_at(ref original,t.declaration-1);let name=syntax::source_view(ref original)[d.name_start..d.name_end];let wire=record_id(name,unit.sdk_id);let is_arena=unit.sdk_id==1 && t.kind==3 && bytes::equal(name,b"Arena");let is_error=unit.sdk_id==1 && t.kind==2 && bytes::equal(name,b"AllocError");let is_buffer=unit.sdk_id==2 && t.kind==3 && bytes::equal(name,b"Buffer");let is_string=unit.sdk_id==7 && t.kind==3 && bytes::equal(name,b"String");let is_cstring=unit.sdk_id==7 && t.kind==3 && bytes::equal(name,b"CString");let is_file=unit.sdk_id==3 && t.kind==3 && bytes::equal(name,b"File");let is_vector=unit.sdk_id==8 && t.kind==13 && bytes::equal(name,b"Vec");
@@ -65,7 +67,7 @@ pub fn Result<Plan,clean::Problem> build(ref ir::Program p,ref mut usize work){l
                 }
             }i+=1;
         }u+=1;
-    }i=1;while(i<=clean::type_count(ir::cleanup_ir(p))){if(!budget::charge(work,1)){return .err(fail(1002,0,0,0));}if(clean::type_at(ir::cleanup_ir(p),i).kind==13 && *v::at<usize>(ref vectors,i-1)==0){return .err(fail(1001,clean::type_at(ir::cleanup_ir(p),i).module_index,0,0));}i+=1;}return .ok(Plan{.rules,.records,.layouts,.vectors,.arena,.alloc_error,.buffer,.string,.cstring,.file});
+    }i=1;while(i<=clean::type_count(ir::cleanup_ir(p))){if(!budget::charge(work,1)){return .err(fail(1002,0,0,0));}if(clean::type_at(ir::cleanup_ir(p),i).kind==13 && *v::at<usize>(ref vectors,i-1)==0){return .err(fail(1001,clean::type_at(ir::cleanup_ir(p),i).module_index,0,0));}i+=1;}return .ok(Plan{.rules,.records,.layouts,.vectors,.byte_equal,.arena,.alloc_error,.buffer,.string,.cstring,.file});
 }
 pub fn bool type(ref ir::Program p,ref Plan plan,usize id,ref mut bytes::Buffer out,ref mut w::State s){let wire=record(plan,id);if(wire!=0){return w::text(out,s,b"struct ") && w::text(out,s,wire_name(wire));}let t=clean::type_at(ir::cleanup_ir(p),id);if((t.kind==7 || t.kind==8 || t.kind==12) && t.first!=0 && record(plan,t.first)!=0){return type(p,plan,t.first,out,s) && w::text(out,s,if(t.kind==8 || t.kind==12 && t.scalar==1){b" *"}else{b" const *"});}return aggregate::type(p,id,out,s);}
 pub fn bool allowed(ref ir::Program p,ref Plan plan,usize id,bool result){if(id==0 || id>clean::type_count(ir::cleanup_ir(p))){return false;}let t=clean::type_at(ir::cleanup_ir(p),id);if(record(plan,id)!=0){return result;}return !result && (t.kind==7 || t.kind==8 || t.kind==12) && t.first!=0 && record(plan,t.first)!=0;}

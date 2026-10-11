@@ -1,0 +1,645 @@
+{
+  "schema": "fairyc.candidate-authenticated-byte-comparison/v1",
+  "passed": true,
+  "scope": "C emitter replaces only the exact authenticated std::bytes::equal frame with length-checked, zero-extent-safe memcmp; ordinary signatures, calls and user functions retained",
+  "sources": [
+    {
+      "path": "examples/lexer_candidate/src/module_unit_c_bytes.fy",
+      "sha256": "7ae8ac26ce121031a9de09cc40b310f31407a40aff7339d876c4532e6931a5cd"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_unit_c_sdk.fy",
+      "sha256": "d2b309fdad7c7e6f9e2db95c19cb51ae8384ca77e53112945909b36e82aa5c67"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_unit_c_emit.fy",
+      "sha256": "d79c78c207866a9f258a59a3d7d004e1a7cb241da30821b8d572728bdada0149"
+    },
+    {
+      "path": "examples/lexer_candidate/tests/module_unit_c_sdk.fy",
+      "sha256": "59c838a4c9d0b46fcff213bed1951cab3ae4e58bcefe40bf64b402a52152e866"
+    },
+    {
+      "path": "tools/verify-candidate-sdk-c.py",
+      "sha256": "9c8d03ad9da597d7a67815b66e52ed70f00e4a26ecfb0ddabdec58209efe0e91"
+    },
+    {
+      "path": "examples/lexer_candidate/fairy.lock",
+      "sha256": "92cae2581a11d43713ec8ff00fcad9d63dec212864e02f1807cd0a066c1de818"
+    }
+  ],
+  "sourceCheck": {
+    "exit": 0,
+    "files": 294,
+    "mirFunctions": 3704
+  },
+  "native": {
+    "argv": [
+      "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\compiler-build-120s.exe",
+      "test",
+      "--native",
+      "--locked",
+      "--json",
+      "--capture-output",
+      "--exact",
+      "tests::module_unit_c_sdk::sdk_c_compares_exact_byte_views_with_authenticated_bulk_reads",
+      "--exact",
+      "tests::module_unit_c_sdk::sdk_c_keeps_user_byte_comparison_bodies_ordinary",
+      "--exact",
+      "tests::module_unit_c_sdk::sdk_c_executes_buffer_owned_views_and_cleanup",
+      "--",
+      "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\internal\\sdkstdlib\\sources\\std\\bytes.fy",
+      "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\internal\\sdkstdlib\\sources\\std\\bytes.fy",
+      "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\internal\\sdkstdlib\\sources\\std\\bytes.fy",
+      "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\internal\\sdkstdlib\\sources\\std\\bytes.fy"
+    ],
+    "exit": 0,
+    "seconds": 104.53717989999859,
+    "stderr": ""
+  },
+  "nativeTests": [
+    {
+      "identity": "tests::module_unit_c_sdk::sdk_c_compares_exact_byte_views_with_authenticated_bulk_reads",
+      "outcome": "passed"
+    },
+    {
+      "identity": "tests::module_unit_c_sdk::sdk_c_executes_buffer_owned_views_and_cleanup",
+      "outcome": "passed"
+    },
+    {
+      "identity": "tests::module_unit_c_sdk::sdk_c_keeps_user_byte_comparison_bodies_ordinary",
+      "outcome": "passed"
+    }
+  ],
+  "nullViewRerun": {
+    "passed": 1,
+    "emptyBuffer": true,
+    "heapAttempts": 0,
+    "bufferDrops": 1
+  },
+  "generatedC": {
+    "passed": true,
+    "executions": [
+      {
+        "name": "sdk_c_keeps_user_byte_comparison_bodies_ordinary",
+        "profile": "low",
+        "sourceSHA256": "47bc6db55efd3ff110e7d93285debf839775f39229f08c6b5a91396a9d9bb39f",
+        "stdinBase64": null,
+        "heapFailureAt": null,
+        "heapBalanceVerified": false,
+        "heapCounts": null,
+        "textCounts": null,
+        "fileCounts": null,
+        "loaderFixtures": null,
+        "vectorCounts": null,
+        "bufferCounts": null,
+        "arenaCounts": null,
+        "regionCounts": null,
+        "runtimeInputs": [],
+        "build": {
+          "argv": [
+            "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+            "/nologo",
+            "/std:c11",
+            "/TC",
+            "/Od",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\byte-compare-c-proof\\sdk_c_keeps_user_byte_comparison_bodies_ordinary.c",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\byte-compare-c-proof\\sdk_c_keeps_user_byte_comparison_bodies_ordinary-runtime.c",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\byte-compare-c-proof\\trap.c",
+            "/Fe:C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\byte-compare-c-proof\\sdk_c_keeps_user_byte_comparison_bodies_ordinary-low.exe",
+            "/link",
+            "/INCREMENTAL:NO"
+          ],
+          "exit": 0,
+          "stdout": "sdk_c_keeps_user_byte_comparison_bodies_ordinary.c\r\nsdk_c_keeps_user_byte_comparison_bodies_ordinary-runtime.c\r\ntrap.c\r\nGenerating Code...\r\n",
+          "stderr": ""
+        },
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\byte-compare-c-proof\\sdk_c_keeps_user_byte_comparison_bodies_ordinary-low.exe"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      },
+      {
+        "name": "sdk_c_keeps_user_byte_comparison_bodies_ordinary",
+        "profile": "optimized",
+        "sourceSHA256": "47bc6db55efd3ff110e7d93285debf839775f39229f08c6b5a91396a9d9bb39f",
+        "stdinBase64": null,
+        "heapFailureAt": null,
+        "heapBalanceVerified": false,
+        "heapCounts": null,
+        "textCounts": null,
+        "fileCounts": null,
+        "loaderFixtures": null,
+        "vectorCounts": null,
+        "bufferCounts": null,
+        "arenaCounts": null,
+        "regionCounts": null,
+        "runtimeInputs": [],
+        "build": {
+          "argv": [
+            "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+            "/nologo",
+            "/std:c11",
+            "/TC",
+            "/O2",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\byte-compare-c-proof\\sdk_c_keeps_user_byte_comparison_bodies_ordinary.c",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\byte-compare-c-proof\\sdk_c_keeps_user_byte_comparison_bodies_ordinary-runtime.c",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\byte-compare-c-proof\\trap.c",
+            "/Fe:C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\byte-compare-c-proof\\sdk_c_keeps_user_byte_comparison_bodies_ordinary-optimized.exe",
+            "/link",
+            "/INCREMENTAL:NO"
+          ],
+          "exit": 0,
+          "stdout": "sdk_c_keeps_user_byte_comparison_bodies_ordinary.c\r\nsdk_c_keeps_user_byte_comparison_bodies_ordinary-runtime.c\r\ntrap.c\r\nGenerating Code...\r\n",
+          "stderr": ""
+        },
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\byte-compare-c-proof\\sdk_c_keeps_user_byte_comparison_bodies_ordinary-optimized.exe"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      },
+      {
+        "name": "sdk_c_executes_buffer_owned_views_and_cleanup",
+        "profile": "low",
+        "sourceSHA256": "d4f765d451d42bfae961e583a34fe5f49cadf6408badd9bb8f375a057244a276",
+        "stdinBase64": null,
+        "heapFailureAt": null,
+        "heapBalanceVerified": true,
+        "heapCounts": {
+          "attempts": 3,
+          "liveAfter": 0
+        },
+        "textCounts": null,
+        "fileCounts": null,
+        "loaderFixtures": null,
+        "vectorCounts": null,
+        "bufferCounts": {
+          "drop": 2,
+          "dropStatusErrors": 0
+        },
+        "arenaCounts": null,
+        "regionCounts": null,
+        "runtimeInputs": [
+          {
+            "path": "internal\\cstdlib\\stage0_system_heap.c",
+            "sha256": "cae6664fa1ec70722b76025c3e2c3daadc133cd90d95fa9f02f2385915d3e55c"
+          },
+          {
+            "path": "internal\\cstdlib\\stage0_buffer.c",
+            "sha256": "41c7a26acb8b9f22fd5e0f82c976f4b59964df2e2e73e7ddb5fa8bee70e8390c"
+          }
+        ],
+        "build": {
+          "argv": [
+            "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+            "/nologo",
+            "/std:c11",
+            "/TC",
+            "/Od",
+            "/DFY_CANDIDATE_NO_MAIN",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\byte-compare-c-proof\\sdk_c_executes_buffer_owned_views_and_cleanup.c",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\byte-compare-c-proof\\sdk_c_executes_buffer_owned_views_and_cleanup-runtime.c",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\byte-compare-c-proof\\trap.c",
+            "/Fe:C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\byte-compare-c-proof\\sdk_c_executes_buffer_owned_views_and_cleanup-low.exe",
+            "/link",
+            "/INCREMENTAL:NO"
+          ],
+          "exit": 0,
+          "stdout": "sdk_c_executes_buffer_owned_views_and_cleanup.c\r\nsdk_c_executes_buffer_owned_views_and_cleanup-runtime.c\r\ntrap.c\r\nGenerating Code...\r\n",
+          "stderr": ""
+        },
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\byte-compare-c-proof\\sdk_c_executes_buffer_owned_views_and_cleanup-low.exe"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      },
+      {
+        "name": "sdk_c_executes_buffer_owned_views_and_cleanup",
+        "profile": "optimized",
+        "sourceSHA256": "d4f765d451d42bfae961e583a34fe5f49cadf6408badd9bb8f375a057244a276",
+        "stdinBase64": null,
+        "heapFailureAt": null,
+        "heapBalanceVerified": true,
+        "heapCounts": {
+          "attempts": 3,
+          "liveAfter": 0
+        },
+        "textCounts": null,
+        "fileCounts": null,
+        "loaderFixtures": null,
+        "vectorCounts": null,
+        "bufferCounts": {
+          "drop": 2,
+          "dropStatusErrors": 0
+        },
+        "arenaCounts": null,
+        "regionCounts": null,
+        "runtimeInputs": [
+          {
+            "path": "internal\\cstdlib\\stage0_system_heap.c",
+            "sha256": "cae6664fa1ec70722b76025c3e2c3daadc133cd90d95fa9f02f2385915d3e55c"
+          },
+          {
+            "path": "internal\\cstdlib\\stage0_buffer.c",
+            "sha256": "41c7a26acb8b9f22fd5e0f82c976f4b59964df2e2e73e7ddb5fa8bee70e8390c"
+          }
+        ],
+        "build": {
+          "argv": [
+            "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+            "/nologo",
+            "/std:c11",
+            "/TC",
+            "/O2",
+            "/DFY_CANDIDATE_NO_MAIN",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\byte-compare-c-proof\\sdk_c_executes_buffer_owned_views_and_cleanup.c",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\byte-compare-c-proof\\sdk_c_executes_buffer_owned_views_and_cleanup-runtime.c",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\byte-compare-c-proof\\trap.c",
+            "/Fe:C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\byte-compare-c-proof\\sdk_c_executes_buffer_owned_views_and_cleanup-optimized.exe",
+            "/link",
+            "/INCREMENTAL:NO"
+          ],
+          "exit": 0,
+          "stdout": "sdk_c_executes_buffer_owned_views_and_cleanup.c\r\nsdk_c_executes_buffer_owned_views_and_cleanup-runtime.c\r\ntrap.c\r\nGenerating Code...\r\n",
+          "stderr": ""
+        },
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\byte-compare-c-proof\\sdk_c_executes_buffer_owned_views_and_cleanup-optimized.exe"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      },
+      {
+        "name": "sdk_c_compares_exact_byte_views_with_authenticated_bulk_reads",
+        "profile": "low",
+        "sourceSHA256": "24c4526f49a49913157e5fe1c75843d54a00dfccc90deb736d5c65735460a351",
+        "stdinBase64": null,
+        "heapFailureAt": null,
+        "heapBalanceVerified": true,
+        "heapCounts": {
+          "attempts": 0,
+          "liveAfter": 0
+        },
+        "textCounts": null,
+        "fileCounts": null,
+        "loaderFixtures": null,
+        "vectorCounts": null,
+        "bufferCounts": {
+          "drop": 1,
+          "dropStatusErrors": 0
+        },
+        "arenaCounts": null,
+        "regionCounts": null,
+        "runtimeInputs": [
+          {
+            "path": "internal\\cstdlib\\stage0_system_heap.c",
+            "sha256": "cae6664fa1ec70722b76025c3e2c3daadc133cd90d95fa9f02f2385915d3e55c"
+          },
+          {
+            "path": "internal\\cstdlib\\stage0_buffer.c",
+            "sha256": "41c7a26acb8b9f22fd5e0f82c976f4b59964df2e2e73e7ddb5fa8bee70e8390c"
+          }
+        ],
+        "build": {
+          "argv": [
+            "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+            "/nologo",
+            "/std:c11",
+            "/TC",
+            "/Od",
+            "/DFY_CANDIDATE_NO_MAIN",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\byte-compare-null-proof\\sdk_c_compares_exact_byte_views_with_authenticated_bulk_reads.c",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\byte-compare-null-proof\\sdk_c_compares_exact_byte_views_with_authenticated_bulk_reads-runtime.c",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\byte-compare-null-proof\\trap.c",
+            "/Fe:C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\byte-compare-null-proof\\sdk_c_compares_exact_byte_views_with_authenticated_bulk_reads-low.exe",
+            "/link",
+            "/INCREMENTAL:NO"
+          ],
+          "exit": 0,
+          "stdout": "sdk_c_compares_exact_byte_views_with_authenticated_bulk_reads.c\r\nsdk_c_compares_exact_byte_views_with_authenticated_bulk_reads-runtime.c\r\ntrap.c\r\nGenerating Code...\r\n",
+          "stderr": ""
+        },
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\byte-compare-null-proof\\sdk_c_compares_exact_byte_views_with_authenticated_bulk_reads-low.exe"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      },
+      {
+        "name": "sdk_c_compares_exact_byte_views_with_authenticated_bulk_reads",
+        "profile": "optimized",
+        "sourceSHA256": "24c4526f49a49913157e5fe1c75843d54a00dfccc90deb736d5c65735460a351",
+        "stdinBase64": null,
+        "heapFailureAt": null,
+        "heapBalanceVerified": true,
+        "heapCounts": {
+          "attempts": 0,
+          "liveAfter": 0
+        },
+        "textCounts": null,
+        "fileCounts": null,
+        "loaderFixtures": null,
+        "vectorCounts": null,
+        "bufferCounts": {
+          "drop": 1,
+          "dropStatusErrors": 0
+        },
+        "arenaCounts": null,
+        "regionCounts": null,
+        "runtimeInputs": [
+          {
+            "path": "internal\\cstdlib\\stage0_system_heap.c",
+            "sha256": "cae6664fa1ec70722b76025c3e2c3daadc133cd90d95fa9f02f2385915d3e55c"
+          },
+          {
+            "path": "internal\\cstdlib\\stage0_buffer.c",
+            "sha256": "41c7a26acb8b9f22fd5e0f82c976f4b59964df2e2e73e7ddb5fa8bee70e8390c"
+          }
+        ],
+        "build": {
+          "argv": [
+            "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+            "/nologo",
+            "/std:c11",
+            "/TC",
+            "/O2",
+            "/DFY_CANDIDATE_NO_MAIN",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\byte-compare-null-proof\\sdk_c_compares_exact_byte_views_with_authenticated_bulk_reads.c",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\byte-compare-null-proof\\sdk_c_compares_exact_byte_views_with_authenticated_bulk_reads-runtime.c",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\byte-compare-null-proof\\trap.c",
+            "/Fe:C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\byte-compare-null-proof\\sdk_c_compares_exact_byte_views_with_authenticated_bulk_reads-optimized.exe",
+            "/link",
+            "/INCREMENTAL:NO"
+          ],
+          "exit": 0,
+          "stdout": "sdk_c_compares_exact_byte_views_with_authenticated_bulk_reads.c\r\nsdk_c_compares_exact_byte_views_with_authenticated_bulk_reads-runtime.c\r\ntrap.c\r\nGenerating Code...\r\n",
+          "stderr": ""
+        },
+        "run": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\byte-compare-null-proof\\sdk_c_compares_exact_byte_views_with_authenticated_bulk_reads-optimized.exe"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      }
+    ]
+  },
+  "initialFixtureFailure": {
+    "argv": [
+      "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\compiler-build-120s.exe",
+      "test",
+      "--native",
+      "--locked",
+      "--json",
+      "--capture-output",
+      "--exact",
+      "tests::module_unit_c_sdk::sdk_c_compares_exact_byte_views_with_authenticated_bulk_reads",
+      "--exact",
+      "tests::module_unit_c_sdk::sdk_c_keeps_user_byte_comparison_bodies_ordinary",
+      "--exact",
+      "tests::module_unit_c_sdk::sdk_c_executes_buffer_owned_views_and_cleanup",
+      "--",
+      "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\internal\\sdkstdlib\\sources\\std\\bytes.fy",
+      "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\internal\\sdkstdlib\\sources\\std\\bytes.fy",
+      "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\internal\\sdkstdlib\\sources\\std\\bytes.fy",
+      "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\internal\\sdkstdlib\\sources\\std\\bytes.fy"
+    ],
+    "exit": 6,
+    "seconds": 49.99516799999401,
+    "stderr": "fairyc: build failed: execute native test tests::module_unit_c_sdk::sdk_c_compares_exact_byte_views_with_authenticated_bulk_reads: MSVC target executable exceeded 65536 output bytes\n"
+  },
+  "fixtureCorrections": [
+    "Use 256-byte arrays instead of expanding 4096-byte arrays beyond native-test 65536-byte stdout cap",
+    "Empty Buffer performs zero allocations; harness expectation corrected from three to zero"
+  ],
+  "cliAndVector": {
+    "passed": true,
+    "compilerSHA256": "b9ace7602bb7b2871c67aa41abb1a19a93181828abc6a5f7591039310779a3e5",
+    "cases": [
+      {
+        "name": "positive",
+        "exit": 0,
+        "seconds": 0.18714510000427254,
+        "stdoutBytes": 3565,
+        "stderr": "",
+        "packetSHA256": "68c878676f624102da5d214b87c36f673823603bcfbfc9ad30a919bedff430dc",
+        "priorCExecutionReused": true
+      },
+      {
+        "name": "dependency-entry",
+        "exit": 2,
+        "seconds": 0.15700760000618175,
+        "stdoutBytes": 0,
+        "stderr": ".cache/candidate-tagged/sdk-c-execution/project-cli-sdk/fixtures/root.fy:1:1: error: project phase 4 stage 0 code 1001 (bytes 0..0)\n"
+      },
+      {
+        "name": "wrong-result",
+        "exit": 2,
+        "seconds": 0.13853440000093542,
+        "stdoutBytes": 0,
+        "stderr": ".cache/candidate-tagged/sdk-c-execution/project-cli-sdk/fixtures/void.fy:1:1: error: project phase 5 stage 0 code 1001 (bytes 0..0)\n"
+      },
+      {
+        "name": "type-error",
+        "exit": 2,
+        "seconds": 0.023342200001934543,
+        "stdoutBytes": 0,
+        "stderr": ".cache/candidate-tagged/sdk-c-execution/project-cli-sdk/fixtures/type.fy:1:34: error: project phase 2 stage 4 code 1009 (bytes 33..37)\n"
+      },
+      {
+        "name": "syntax-error",
+        "exit": 2,
+        "seconds": 0.01933439999993425,
+        "stdoutBytes": 0,
+        "stderr": ".cache/candidate-tagged/sdk-c-execution/project-cli-sdk/fixtures/syntax.fy:1:36: error: expected } (bytes 35..35)\n"
+      },
+      {
+        "name": "missing-source",
+        "exit": 2,
+        "seconds": 0.018265200007590465,
+        "stdoutBytes": 0,
+        "stderr": "error: input file read failed\n"
+      },
+      {
+        "name": "blank-manifest",
+        "exit": 2,
+        "seconds": 0.016576900001382455,
+        "stdoutBytes": 0,
+        "stderr": "error: invalid module manifest\n"
+      },
+      {
+        "name": "invalid-utf8",
+        "exit": 2,
+        "seconds": 0.017764800009899773,
+        "stdoutBytes": 0,
+        "stderr": "error: invalid module manifest\n"
+      },
+      {
+        "name": "duplicate-source",
+        "exit": 2,
+        "seconds": 0.020990899996832013,
+        "stdoutBytes": 0,
+        "stderr": ".cache/candidate-tagged/sdk-c-execution/project-cli-sdk/fixtures/main.fy:1:8: error: project phase 1 stage 0 code 1 (bytes 7..11)\n"
+      },
+      {
+        "name": "vector-dev",
+        "exit": 0,
+        "seconds": 2.3626107000018237,
+        "stdout": "built: C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\bridge-byte-compare-vector-dev.exe (low, 1 C units, 117248 bytes)\n",
+        "stderr": "",
+        "imageSHA256": "a9b660d696c1956832dccb0a0e33ece295df3eb718c7adb8161ed3ae6210d005",
+        "programExit": 0
+      },
+      {
+        "name": "vector-release",
+        "exit": 0,
+        "seconds": 2.3842574000009336,
+        "stdout": "built: C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\bridge-byte-compare-vector-release.exe (optimized, 1 C units, 110592 bytes)\n",
+        "stderr": "",
+        "imageSHA256": "75bbe2068a7035cd174346ef5b25eb1119d74f0d8538cc98d2537faa78da37ea",
+        "programExit": 0
+      }
+    ]
+  },
+  "bootstrap": {
+    "runs": [
+      {
+        "exit": 0,
+        "seconds": 20.969718599997577,
+        "stderr": "",
+        "stdoutBytes": 21986603
+      },
+      {
+        "exit": 0,
+        "seconds": 40.205336500002886,
+        "stderr": "",
+        "stdoutBytes": 26
+      },
+      {
+        "exit": 0,
+        "seconds": 0.19933980000496376,
+        "stderr": "",
+        "stdoutBytes": 0
+      }
+    ],
+    "sha256": "04f87dc3bf04f5b220a99044615cd2368eb6359b73f79a7f503674a9b8369312"
+  },
+  "fullSource": {
+    "frontendTimeoutSeconds": 60,
+    "runs": [
+      {
+        "name": "baseline",
+        "exit": 0,
+        "seconds": 33.509774899997865,
+        "timeout": false,
+        "stdoutBytes": 24563387,
+        "stderr": "",
+        "compilerSHA256": "04f87dc3bf04f5b220a99044615cd2368eb6359b73f79a7f503674a9b8369312",
+        "packetSHA256": "1987876159b6395dddd19ea2f349df5701c478692a255dfda699058978f645b7"
+      },
+      {
+        "name": "build-stage1-dev",
+        "exit": 0,
+        "seconds": 52.186857699998654,
+        "stdout": "built: C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\stage1-byte-compare.exe (low, 36 C units, 9377280 bytes)\n",
+        "stderr": ""
+      },
+      {
+        "name": "stage1-dev",
+        "exit": null,
+        "timeout": true,
+        "seconds": 60.041249899994
+      }
+    ]
+  },
+  "sourceInventory": {
+    "count": 287,
+    "joinedBytes": 2041694,
+    "encoding": "Manifest-order path + space + SHA256 + newline",
+    "sha256": "cadff2cc422a91682d03de8262a2646311b4dd5003fd231d17fcb1415cfc5d83",
+    "manifestSHA256": "0637f832bdbcfa49e6460d8bd23e9a3215f82456b00ae6b5f542b8f012af5740"
+  },
+  "optimizedBuild": {
+    "exit": 0,
+    "seconds": 183.20158410001022,
+    "stdout": "PASS original candidate: 36 units, 38 objects, 182.95s\n",
+    "stderr": "",
+    "frontendReused": true
+  },
+  "optimizedReplay": {
+    "exit": 0,
+    "seconds": 50.70040220000374,
+    "stdoutBytes": 24563387,
+    "stderr": "",
+    "timeout": false,
+    "packetSHA256": "1987876159b6395dddd19ea2f349df5701c478692a255dfda699058978f645b7",
+    "matchesBaseline": true
+  },
+  "bottleneckDiagnostic": {
+    "tags": {
+      "1080": "module_catalog::source_matches",
+      "1333": "module_project_compile::range",
+      "1488": "module_registry::normalize",
+      "1552": "module_signatures::build",
+      "1555": "module_types::validate",
+      "1567": "module_types::intern",
+      "1645": "module_unit_bind::bind",
+      "1652": "module_unit_bodies::collect",
+      "1731": "module_unit_body_ast::copy",
+      "1964": "module_unit_body_types::scan",
+      "2188": "module_unit_call_closure::build_unit",
+      "2240": "module_unit_calls::build",
+      "2456": "module_unit_drops::build",
+      "2536": "module_unit_generics::validate",
+      "2586": "module_unit_interfaces::annotations",
+      "2588": "module_unit_interfaces::shape",
+      "2590": "module_unit_interfaces::build_mode",
+      "2939": "module_unit_names::build",
+      "2956": "module_unit_ordinary_names::build"
+    },
+    "run": {
+      "exit": null,
+      "stdoutBytes": 0,
+      "stderr": "PROFILE elapsed 10.007 depth 5\n1080 module_catalog::source_matches calls 48421 inclusive 6.036 exclusive 6.036\n1333 module_project_compile::range calls 8 inclusive 6.251 exclusive 0.603\n1488 module_registry::normalize calls 75520 inclusive 0.076 exclusive 0.076\n1552 module_signatures::build calls 1 inclusive 2.824 exclusive 1.031\n1555 module_types::validate calls 27 inclusive 0.207 exclusive 0.207\n1567 module_types::intern calls 44030 inclusive 0.138 exclusive 0.138\n1645 module_unit_bind::bind calls 9 inclusive 0.531 exclusive 0.278\n1652 module_unit_bodies::collect calls 12 inclusive 0.755 exclusive 0.051\n1731 module_unit_body_ast::copy calls 1523 inclusive 0.519 exclusive 0.519\n1964 module_unit_body_types::scan calls 822 inclusive 0.332 exclusive 0.112\n2188 module_unit_call_closure::build_unit calls 8 inclusive 4.932 exclusive 0.027\n2240 module_unit_calls::build calls 11 inclusive 0.420 exclusive 0.117\n2456 module_unit_drops::build calls 11 inclusive 0.006 exclusive 0.006\n2536 module_unit_generics::validate calls 50 inclusive 1.338 exclusive 0.009\n2586 module_unit_interfaces::annotations calls 15 inclusive 0.091 exclusive 0.067\n2588 module_unit_interfaces::shape calls 910 inclusive 1.193 exclusive 0.030\n2590 module_unit_interfaces::build_mode calls 15 inclusive 3.506 exclusive 0.447\n2939 module_unit_names::build calls 11 inclusive 0.399 exclusive 0.098\n2956 module_unit_ordinary_names::build calls 11 inclusive 0.679 exclusive 0.152\nACTIVE module_project_compile::range module_unit_call_closure::build_unit module_unit_bodies::collect module_unit_generics::validate module_catalog::source_matches \nPROFILE elapsed 20.012 depth 5\n1080 module_catalog::source_matches calls 99451 inclusive 11.792 exclusive 11.792\n1333 module_project_compile::range calls 21 inclusive 17.008 exclusive 1.641\n1488 module_registry::normalize calls 161738 inclusive 0.144 exclusive 0.144\n1552 module_signatures::build calls 1 inclusive 2.824 exclusive 1.031\n1555 module_types::validate calls 62 inclusive 0.478 exclusive 0.478\n1567 module_types::intern calls 80144 inclusive 0.257 exclusive 0.257\n1645 module_unit_bind::bind calls 22 inclusive 1.229 exclusive 0.612\n1652 module_unit_bodies::collect calls 30 inclusive 1.893 exclusive 0.121\n1731 module_unit_body_ast::copy calls 3587 inclusive 1.458 exclusive 1.458\n1964 module_unit_body_types::scan calls 1898 inclusive 0.748 exclusive 0.249\n2188 module_unit_call_closure::build_unit calls 21 inclusive 13.455 exclusive 0.065\n2240 module_unit_calls::build calls 26 inclusive 0.996 exclusive 0.282\n2456 module_unit_drops::build calls 26 inclusive 0.013 exclusive 0.013\n2536 module_unit_generics::validate calls 121 inclusive 3.244 exclusive 0.021\n2586 module_unit_interfaces::annotations calls 35 inclusive 0.214 exclusive 0.156\n2588 module_unit_interfaces::shape calls 2012 inclusive 2.618 exclusive 0.068\n2590 module_unit_interfaces::build_mode calls 34 inclusive 7.835 exclusive 1.002\n2939 module_unit_names::build calls 26 inclusive 0.934 exclusive 0.232\n2956 module_unit_ordinary_names::build calls 26 inclusive 1.719 exclusive 0.378\nACTIVE module_project_compile::range module_unit_call_closure::build_unit module_unit_interfaces::build_mode module_unit_interfaces::shape module_catalog::source_matches \nPROFILE elapsed 30.027 depth 4\n1080 module_catalog::source_matches calls 155685 inclusive 18.420 exclusive 18.420\n1333 module_project_compile::range calls 33 inclusive 27.145 exclusive 2.392\n1488 module_registry::normalize calls 209463 inclusive 0.187 exclusive 0.187\n1552 module_signatures::build calls 1 inclusive 2.824 exclusive 1.031\n1555 module_types::validate calls 94 inclusive 0.735 exclusive 0.735\n1567 module_types::intern calls 118073 inclusive 0.439 exclusive 0.439\n1645 module_unit_bind::bind calls 34 inclusive 1.747 exclusive 0.788\n1652 module_unit_bodies::collect calls 47 inclusive 3.336 exclusive 0.250\n1731 module_unit_body_ast::copy calls 5738 inclusive 2.121 exclusive 2.121\n1964 module_unit_body_types::scan calls 3608 inclusive 1.414 exclusive 0.482\n2188 module_unit_call_closure::build_unit calls 33 inclusive 22.062 exclusive 0.100\n2240 module_unit_calls::build calls 40 inclusive 1.476 exclusive 0.364\n2456 module_unit_drops::build calls 40 inclusive 0.023 exclusive 0.023\n2536 module_unit_generics::validate calls 187 inclusive 5.104 exclusive 0.033\n2586 module_unit_interfaces::annotations calls 53 inclusive 0.294 exclusive 0.210\n2588 module_unit_interfaces::shape calls 4063 inclusive 4.939 exclusive 0.154\n2590 module_unit_interfaces::build_mode calls 53 inclusive 13.276 exclusive 1.407\n2939 module_unit_names::build calls 40 inclusive 1.519 exclusive 0.416\n2956 module_unit_ordinary_names::build calls 40 inclusive 2.332 exclusive 0.472\nACTIVE module_project_compile::range module_unit_call_closure::build_unit module_unit_interfaces::build_mode module_catalog::source_matches \nPROFILE elapsed 40.038 depth 5\n1080 module_catalog::source_matches calls 209901 inclusive 24.620 exclusive 24.620\n1333 module_project_compile::range calls 45 inclusive 37.012 exclusive 3.121\n1488 module_registry::normalize calls 272951 inclusive 0.240 exclusive 0.240\n1552 module_signatures::build calls 1 inclusive 2.824 exclusive 1.031\n1555 module_types::validate calls 128 inclusive 1.007 exclusive 1.007\n1567 module_types::intern calls 151471 inclusive 0.582 exclusive 0.582\n1645 module_unit_bind::bind calls 46 inclusive 2.296 exclusive 1.009\n1652 module_unit_bodies::collect calls 64 inclusive 4.526 exclusive 0.331\n1731 module_unit_body_ast::copy calls 7796 inclusive 3.136 exclusive 3.136\n1964 module_unit_body_types::scan calls 4820 inclusive 1.916 exclusive 0.654\n2188 module_unit_call_closure::build_unit calls 45 inclusive 30.213 exclusive 0.131\n2240 module_unit_calls::build calls 56 inclusive 2.036 exclusive 0.498\n2456 module_unit_drops::build calls 56 inclusive 0.032 exclusive 0.032\n2536 module_unit_generics::validate calls 260 inclusive 7.110 exclusive 0.046\n2586 module_unit_interfaces::annotations calls 74 inclusive 0.400 exclusive 0.281\n2588 module_unit_interfaces::shape calls 5541 inclusive 6.764 exclusive 0.211\n2590 module_unit_interfaces::build_mode calls 73 inclusive 17.931 exclusive 1.869\n2939 module_unit_names::build calls 56 inclusive 2.130 exclusive 0.577\n2956 module_unit_ordinary_names::build calls 56 inclusive 3.426 exclusive 0.647\nACTIVE module_project_compile::range module_unit_call_closure::build_unit module_unit_interfaces::build_mode module_unit_interfaces::shape module_catalog::source_matches \nPROFILE elapsed 50.042 depth 5\n1080 module_catalog::source_matches calls 263938 inclusive 30.637 exclusive 30.637\n1333 module_project_compile::range calls 55 inclusive 46.461 exclusive 3.947\n1488 module_registry::normalize calls 339686 inclusive 0.292 exclusive 0.292\n1552 module_signatures::build calls 1 inclusive 2.824 exclusive 1.031\n1555 module_types::validate calls 164 inclusive 1.291 exclusive 1.291\n1567 module_types::intern calls 187486 inclusive 0.738 exclusive 0.738\n1645 module_unit_bind::bind calls 56 inclusive 2.797 exclusive 1.236\n1652 module_unit_bodies::collect calls 82 inclusive 5.887 exclusive 0.431\n1731 module_unit_body_ast::copy calls 10016 inclusive 4.134 exclusive 4.134\n1964 module_unit_body_types::scan calls 6315 inclusive 2.489 exclusive 0.858\n2188 module_unit_call_closure::build_unit calls 55 inclusive 37.949 exclusive 0.183\n2240 module_unit_calls::build calls 71 inclusive 2.581 exclusive 0.647\n2456 module_unit_drops::build calls 71 inclusive 0.040 exclusive 0.040\n2536 module_unit_generics::validate calls 330 inclusive 8.977 exclusive 0.058\n2586 module_unit_interfaces::annotations calls 92 inclusive 0.488 exclusive 0.335\n2588 module_unit_interfaces::shape calls 7346 inclusive 8.733 exclusive 0.282\n2590 module_unit_interfaces::build_mode calls 91 inclusive 22.695 exclusive 2.318\n2939 module_unit_names::build calls 71 inclusive 2.683 exclusive 0.743\n2956 module_unit_ordinary_names::build calls 71 inclusive 4.390 exclusive 0.821\nACTIVE module_project_compile::range module_unit_call_closure::build_unit module_unit_interfaces::build_mode module_unit_interfaces::shape module_catalog::source_matches \n",
+      "timeout": true
+    },
+    "note": "Cache-only instrumented observation before bulk comparison; timings do not establish a whole-frontend speedup ratio"
+  },
+  "frontendTimeoutSeconds": 60,
+  "canonicalTypeLimit": 4096,
+  "workLimit": 1048576,
+  "stackReserveChanged": false,
+  "fullSourceSelfReplayPassed": true,
+  "stage1Stage2GatePassed": false,
+  "publicApiChanged": false,
+  "sdkSourceChanged": false,
+  "sdkAbiChanged": false,
+  "dbChanged": false,
+  "ciChanged": false,
+  "pushed": false,
+  "skipped": [
+    "Linux: deferred platform batch",
+    "Full suite: scoped byte comparison validation",
+    "Stage2 artifact and differential gate: next slice"
+  ]
+}
