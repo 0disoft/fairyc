@@ -56,11 +56,42 @@ The compiler image from the preceding directory unit was reused: this unit
 changes the private loaded program and uses the same compiler capabilities.
 Full production check passes: 306 files and 3909 MIR functions.
 
+## Recursive source paths
+
+`project_source_catalog.collect` walks actual directory entries with one open
+stream at a time and an explicit directory queue. It owns exact relative UTF-8
+paths, returns them in byte order, includes only regular files with an exact
+`.fy` extension and rejects every observed reparse entry, including otherwise
+ignored names. Directories are traversed regardless of their extension.
+
+Separate merge sorts detect collisions under Unicode lower-case rules and
+produce deterministic exact-path order. An explicit work meter bounds path
+storage, traversal and comparisons; there is no all-pairs collision scan.
+The caller's cumulative 4096-file counter changes only on success. Errors own
+their observed path and OS code. Entry sizes are observations only; subsequent
+reads must enforce exact-byte budgets and recheck file identity/type.
+
+One native test and both candidate C profiles pass. Real filesystem cases
+cover nested sorted paths, ignored `.FY` and text files, input-path release,
+dotted-I/i lower-case collision, empty roots, junctions, non-directory roots,
+cumulative file bounds, exhausted work and malformed UTF-8. Full production
+check passes: 307 files and 3936 MIR functions. The test-only fixture generator
+and Go reference helper are included in the input identities. Evidence:
+`evidence/candidate-source-catalog-20261011.json`.
+
+The Go reference agrees on the ordinary sorted source paths, empty-root
+rejection and Unicode collision. It accepts the two trees containing Windows
+junctions, which its WalkDir callback ignores; the candidate rejects them by
+the SDK's reparse flag. This discrepancy remains a compatibility item and these
+observations do not establish full Go-loader equivalence. No Go loader behavior
+was changed by this candidate unit.
+
 ## Remaining connection
 
-Recursively collect every regular .fy,
-reject source-case collisions, enforce cumulative file/byte limits, retain exact
-bytes and bind declared modules. Package/lock/CLI work remains separate.
+Connect source-root ownership to the catalog, read and retain exact source
+bytes, recheck regular files, enforce cumulative byte limits and bind declared
+modules. Resolve the Go junction observation discrepancy before any loader
+equivalence claim. Package/lock/CLI work remains separate.
 ReadDir is currently Windows AMD64 and keeps the existing SDK path bound.
 Linux and Stage 2 were not run for this component slice. Public CLI, SDK ABI,
 DB and CI workflows are unchanged.
