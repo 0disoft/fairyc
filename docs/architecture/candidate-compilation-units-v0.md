@@ -2219,3 +2219,6 @@ types and shared argument rules after resolving a frame. Preparation and query
 steps consume the existing work budget. Frame IDs, C spelling, capacity/output
 limits, stable CLI/API, SDK ABI, Go behavior, DB, CI and runner policy are unchanged.
 Evidence: `docs/ops/evidence/candidate-c-frame-index-20261011.json`.
+
+Project C partition ownership, shared literal storage and output/work bounds:
+`candidate-project-c-parts-v0.md`.

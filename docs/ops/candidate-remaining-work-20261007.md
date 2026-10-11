@@ -3186,6 +3186,34 @@ candidate profiles, Linux, full suite and Stage1/Stage2 remain pending.
 The candidate unit contract and local evidence tool change. Stable CLI/API, SDK
 ABI, Go reference behavior, DB, CI and native runner limits are unchanged. No push.
 
+## Owned project C partitions and shared literal identity (2026-10-11)
+
+Contract: `../architecture/candidate-project-c-parts-v0.md`.
+Receipt: `evidence/candidate-project-c-parts-20261011.json`.
+
+The candidate now returns a complete owned C bundle: one guarded shared header,
+one external literal-storage file and bounded body intervals. Preparation and
+each body attempt retain 1048576 work; every buffer retains 2097152 bytes.
+Successful and failed split attempts share the existing 4194304 project ledger.
+The single-buffer render path retains its spelling and transaction behavior.
+
+Four Release native cases pass. Three separate-file bundles compile, link and
+execute with MSVC /Od and /O2 (six executions), preserving shared nominal cleanup,
+generic instance calls and cross-file literal pointer identity. The existing
+800-literal stress digest is unchanged. Locked checking passes with 290 source
+files and 3643 MIR functions.
+
+The exact 236-file original main project still compiles 48 units with 25 retries
+and links 3558 frames. Partition emission passes the earlier shared render-work
+failure and now rejects unsupported ReadDir cleanup at std::fs module 209,
+bytes 30613..30660, code 1004. No bundle or original EXE is published. The linker
+currently retains every body in each source, including unused SDK functions;
+entry-reachable calls and cleanup selection are the next implementation unit.
+
+Original full C generation/execution, native driver/publication, default timeout,
+standalone compiler profiles, Linux, full suite and Stage1/Stage2 remain pending.
+Stable CLI, SDK ABI, language version, Go behavior, DB and CI do not change. No push.
+
 
 ## Owned-C layout index and foreign-declaration work (2026-10-11)
 

@@ -35,7 +35,7 @@ fn bool symbol(u32[8] hash,ref mut bytes::Buffer out,ref mut w::State s){
 }
 // Numeric static storage has no dependence on C string spelling or host encoding.
 // Full SHA-256 symbol order and exact-byte collision checks match ADRs 0065-0067.
-pub fn bool definitions(ref ir::Program p,ref mut bytes::Buffer out,ref mut w::State s,ref mut usize work){
+fn bool emit_pool(ref ir::Program p,ref mut bytes::Buffer out,ref mut w::State s,ref mut usize work,ref mut bytes::Buffer storage,bool shared){
     var v::Vec<Literal> pool=v::empty<Literal>();var v::Vec<usize> slots=v::empty<usize>();var usize frame=1;
     while(frame<=ir::count(p)){let b=ir::at(p,frame);var usize node=0;while(node<ir::node_count(b)){
         if(!budget::charge(work,1)){s.code=1002;return false;}let n=ir::node_at(b,node);
@@ -44,10 +44,17 @@ pub fn bool definitions(ref ir::Program p,ref mut bytes::Buffer out,ref mut w::S
         }node+=1;
     }frame+=1;}
     var v::Vec<usize> order=v::empty<usize>();if(!sorted(ref pool,ref mut order,s,work)){return false;}var usize i=0;while(i<v::len<Literal>(ref pool)){let entry=*v::at<Literal>(ref pool,*v::at<usize>(ref order,i));let data=ir::node_cooked(ir::at(p,entry.frame),entry.node);
-        if(!w::text(out,s,b"static const uint8_t ") || !symbol(entry.hash,out,s) || !w::text(out,s,b"[]={")){return false;}
-        var usize j=0;while(j<data.len){if(!budget::charge(work,1)){s.code=1002;return false;}if(j!=0 && !w::text(out,s,b",")){return false;}if(!w::number(out,s,data[j] as usize)){return false;}j+=1;}
-        if(data.len==0 && !w::text(out,s,b"0")){return false;}if(!w::text(out,s,b"};\n")){return false;}i+=1;
+        if(shared){if(!w::text(out,s,b"extern const uint8_t ") || !symbol(entry.hash,out,s) || !w::text(out,s,b"[];\n")){return false;}}
+        let target=if(shared){storage}else{out};
+        if(!w::text(target,s,if(shared){b"const uint8_t "}else{b"static const uint8_t "}) || !symbol(entry.hash,target,s) || !w::text(target,s,b"[]={")){return false;}
+        var usize j=0;while(j<data.len){if(!budget::charge(work,1)){s.code=1002;return false;}if(j!=0 && !w::text(target,s,b",")){return false;}if(!w::number(target,s,data[j] as usize)){return false;}j+=1;}
+        if(data.len==0 && !w::text(target,s,b"0")){return false;}if(!w::text(target,s,b"};\n")){return false;}i+=1;
     }return true;
+}
+pub fn bool definitions(ref ir::Program p,ref mut bytes::Buffer out,ref mut w::State s,ref mut usize work){var bytes::Buffer unused=bytes::empty();return emit_pool(p,out,s,work,ref mut unused,false);}
+// One program-wide pool keeps pointer identity across C translation units.
+pub fn bool shared_storage(ref ir::Program p,ref mut bytes::Buffer declarations,ref mut bytes::Buffer storage,ref mut w::State s,ref mut usize work){
+    return w::text(storage,s,b"/* fairyc.candidate-project-literals-c/v1 */\n#include \"fy_project.h\"\n") && emit_pool(p,declarations,s,work,storage,true);
 }
 pub fn bool expression(ref ir::Program p,ref ir::Body b,usize id,ref mut bytes::Buffer out,ref mut w::State s,ref mut usize work){
     let n=ir::node_at(b,id-1);let t=clean::type_at(ir::cleanup_ir(p),n.value.type);let data=ir::node_cooked(b,id-1);
