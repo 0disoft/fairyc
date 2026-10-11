@@ -228,6 +228,18 @@ func main() {
 	}
 	write(root, "reference.json", string(data)+"\n")
 	write(root, "root.bin", filepath.ToSlash(root))
+	controls := make([]byte, 32)
+	for i := range controls {
+		controls[i] = byte(i)
+	}
+	for _, sample := range []struct{ name, value string }{{"Empty", ""}, {"ASCII", "a/b ' plain"}, {"Controls", string(controls)}, {"Escapes", "\"\\"}, {"HTML", "<>&"}, {"Unicode", "제로디✨😀\u2028\u2029"}, {"DELHigh", "\x7f\u0080\u00ff"}, {"Large", strings.Repeat("x", 65537)}} {
+		quoted, err := json.Marshal(sample.value)
+		if err != nil {
+			panic(err)
+		}
+		write(root, "strings/"+sample.name+".bin", sample.value)
+		write(root, "strings/"+sample.name+".json", string(quoted))
+	}
 	for _, name := range []string{"UnknownStd", "BareStd"} {
 		dir := filepath.Join(root, name)
 		imported := "std::missing"

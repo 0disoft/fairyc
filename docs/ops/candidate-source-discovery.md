@@ -698,3 +698,36 @@ projection algorithm is used. This unit does not implement JSON, strict reading,
 stale matching or writing. Those and compiler/project CLI consumption remain.
 Stable CLI/API, SDK ABI/version, DB and CI are unchanged. Linux, full suite and
 Stage1/Stage2 remain scheduled later; no push occurred.
+
+
+## Canonical lock JSON emission
+
+`project_lock_json` emits the owning lockfile-v1 field order, two-space indentation,
+explicit empty arrays and exactly one final LF from the owned projected document.
+Sorted package/edge order and exact local/SDK identity values come from projection.
+`project_json_string` matches Go `encoding/json` string spelling for valid UTF-8:
+controls, quotes/backslashes, HTML `<>&`, U+2028/U+2029 and unchanged other Unicode.
+Invalid UTF-8 rejects instead of using Go's replacement behavior; projected lock
+values already pass the source/manifest UTF-8 validation boundary. Ordinary runs
+append as whole slices, avoiding per-byte calls into the target buffer runtime.
+
+The existing shared work meter and 8-MiB output ceiling bound emission. Failure
+returns no partial buffer. Thirteen complete canonical Go lockfiles match every
+byte, including empty/nonempty feature and dependency arrays. Eight direct Go
+string cases cover all 32 control bytes, escapes, HTML, Korean/emoji/separators,
+DEL/high Unicode, empty input and a 65537-byte string. Invalid UTF-8, exhausted
+work and an oversized 8-MiB input reject. All thirteen documents reject exhausted
+marshal work too. Three native tests and development/release candidate C execution
+pass; check passes 339 files and 4418 MIR functions.
+Evidence: `evidence/candidate-lock-json-20261012.json`.
+
+The boundary fixture originally used both `file_source` readers, which share a
+65536-byte cap; their native failures were read assertions. Fixture reads now
+use the existing project file reader with explicit 1-MiB maximum, retaining the
+large boundary case rather than shrinking it. Product caps are unchanged.
+
+The reference uses the owning `lockfile.Marshal` and standard `encoding/json`,
+not a second canonical serializer. Strict JSON reading, identity/graph validation,
+stale comparison, atomic persistence and compiler/project CLI consumers remain.
+Stable CLI/API, SDK ABI/version, DB and CI are unchanged. Linux, full suite and
+Stage1/Stage2 remain scheduled later; no push occurred.
