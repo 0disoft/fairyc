@@ -189,6 +189,22 @@ manifest native tests and both candidate C profiles pass. Source check passes
 301 files and 3850 MIR functions. The private comparison runner's known-difference
 set and authored corpus were updated; no public command or CI workflow changed.
 
+## Separate decoder mapping and literal values
+
+`project_toml_values` adds bounded value handles and independently indexed map
+slots. Decoder-global mappings and returned inline-table mappings can refer to
+the same literal; overwriting a global slot does not mutate the returned map.
+Publication projects only root-reachable values into the existing strict model,
+duplicates shared values and excludes unreachable scratch names and payloads.
+This models the pinned decoder's inline-table return behavior without changing
+its contract. Parser integration follows this foundation.
+
+Three native tests and both candidate C profiles pass for mapping replacement,
+shared-value projection, empty keys, array-table ordering, index rebuilds,
+invalid references and cyclic scratch depth exhaustion. Source check passes
+302 files and 3885 MIR functions. Evidence:
+`evidence/candidate-toml-values-20261011.json`.
+
 ## Remaining connection
 
 1. Reconcile pinned Go table-definition behavior before claiming complete
