@@ -69,7 +69,7 @@ func BuildWindowsMSVCTargetParts(toolchain WindowsHostToolchain, profile Profile
 		// Candidate partitions retain their existing consumer flags. Stable
 		// single-unit target builders keep their separate /W4 /WX policy.
 		if _, err := runWindowsHostCommand(toolchain.Path, toolchain.Environment, directory,
-			"/nologo", "/std:c11", "/TC", "/MT", optimization, "/c", sourcePath, "/Fo:"+objectPath); err != nil {
+			"/nologo", "/std:c11", "/TC", "/MT", "/Brepro", optimization, "/c", sourcePath, "/Fo:"+objectPath); err != nil {
 			return WindowsHostArtifact{}, fmt.Errorf("compile project source %s: %s", source.Name, strings.ReplaceAll(err.Error(), directory, "<temporary>"))
 		}
 		contents, err := readArtifact(objectPath)
@@ -84,7 +84,9 @@ func BuildWindowsMSVCTargetParts(toolchain WindowsHostToolchain, profile Profile
 	}
 	executable := filepath.Join(directory, "program.exe")
 	arguments := append([]string{"/nologo", "/MT"}, objectPaths...)
-	arguments = append(arguments, "/Fe:"+executable, "/link", "/INCREMENTAL:NO")
+	// Private bootstrap images must compare byte-for-byte across generations;
+	// timestamp bytes are reproducible inputs, never removed by the comparator.
+	arguments = append(arguments, "/Fe:"+executable, "/link", "/INCREMENTAL:NO", "/Brepro")
 	if _, err := runWindowsHostCommand(toolchain.Path, toolchain.Environment, directory, arguments...); err != nil {
 		return WindowsHostArtifact{}, fmt.Errorf("link project C: %s", strings.ReplaceAll(err.Error(), directory, "<temporary>"))
 	}

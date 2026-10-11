@@ -1,6 +1,7 @@
 package cdriver
 
 import (
+	"bytes"
 	"runtime"
 	"strings"
 	"testing"
@@ -30,6 +31,13 @@ func TestWindowsProjectSeparateCompilationAndFailures(t *testing.T) {
 		}
 		if len(artifact.Objects) != 4 {
 			t.Fatalf("expected four separately inspected objects, got %d", len(artifact.Objects))
+		}
+		rebuilt, err := BuildWindowsMSVCTargetParts(toolchain, profile, header, literals, units, scalar)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if !bytes.Equal(artifact.Bytes, rebuilt.Bytes) {
+			t.Fatalf("private project images differ across fresh build directories for profile %s", profile.Name)
 		}
 		outcome, err := ExecuteWindowsMSVCTarget(artifact)
 		if err != nil || outcome.ExitCode != 0 || outcome.Stdout != "" || outcome.Stderr != "" {
