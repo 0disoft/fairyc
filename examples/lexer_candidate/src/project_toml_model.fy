@@ -38,7 +38,7 @@ fn usize fingerprint(usize parent,ref u8[] key){var usize hash=parent%16777213;v
 fn usize find(ref bytes::Buffer names,ref v::Vec<Node> nodes,ref v::Vec<usize> buckets,usize parent,ref u8[] key){
     if(entry(nodes,parent).kind!=1 || v::len<usize>(buckets)==0){return 0;}
     let usize hash=fingerprint(parent,key);var usize id=*v::at<usize>(buckets,hash%v::len<usize>(buckets));var usize steps=0;
-    while(id!=0 && steps<v::len<Node>(nodes)){let Node n=entry(nodes,id);if(n.hash==hash && n.parent==parent && bytes::equal(bytes::view(names)[n.name_start..n.name_end],key)){return id;}id=n.hash_next;steps+=1;}return 0;
+    while(id!=0 && steps<v::len<Node>(nodes)){let Node n=entry(nodes,id);if(n.kind!=9 && n.hash==hash && n.parent==parent && bytes::equal(bytes::view(names)[n.name_start..n.name_end],key)){return id;}id=n.hash_next;steps+=1;}return 0;
 }
 pub fn usize lookup(ref Tree tree,usize parent,ref u8[] key){return find(ref tree.names,ref tree.nodes,ref tree.buckets,parent,key);}
 pub fn Result<usize,Problem> resolve(ref Tree tree,usize parent,ref u8[] key,ref mut usize work){
@@ -55,7 +55,7 @@ pub fn Result<usize,Problem> locate(ref mut State meta,ref bytes::Buffer names,r
         if(id>v::len<Node>(nodes) || steps>=v::len<Node>(nodes)){return .err(problem(meta,1,start,end));}
         if(!charge(meta,1)){return .err(problem(meta,4,start,end));}steps+=1;let Node n=entry(nodes,id);
         if(n.name_start>n.name_end || n.name_end>bytes::len(names)){return .err(problem(meta,1,start,end));}
-        if(n.hash==hash && n.parent==parent && n.name_end-n.name_start==key.len){
+        if(n.kind!=9 && n.hash==hash && n.parent==parent && n.name_end-n.name_start==key.len){
             if(!charge(meta,key.len)){return .err(problem(meta,4,start,end));}
             if(bytes::equal(bytes::view(names)[n.name_start..n.name_end],key)){return .ok(id);}
         }id=n.hash_next;
@@ -110,6 +110,21 @@ pub fn Result<usize,Problem> close(ref mut State meta,ref mut v::Vec<Node> nodes
         if(n.first!=0){cursor=n.first;continue;}while(cursor!=id && entry(nodes,cursor).next==0){cursor=entry(nodes,cursor).parent;}if(cursor==id){break;}cursor=entry(nodes,cursor).next;
     }return .ok(id);
 }
+// Decoder-compatible replacement keeps arena IDs stable until parsing ends.
+// Kind 9 is a discarded scratch node; ordinary publish always rejects it.
+pub fn Result<usize,Problem> replace_table(ref mut State meta,ref mut v::Vec<Node> nodes,usize id){
+    var Node owner=entry(nodes,id);if(id<=1 || id>v::len<Node>(nodes) || owner.kind==0 || owner.kind==9){return .err(problem(meta,1,owner.start,owner.end));}
+    if(!charge(meta,v::len<Node>(nodes)*3)){return .err(problem(meta,4,owner.start,owner.end));}
+    var usize cursor=owner.first;var usize steps=0;
+    while(cursor!=0){if(cursor<=id || cursor>v::len<Node>(nodes) || steps>=v::len<Node>(nodes)*2){return .err(problem(meta,1,owner.start,owner.end));}steps+=1;var Node n=entry(nodes,cursor);n.kind=9;set(nodes,cursor,n);
+        if(n.first!=0){cursor=n.first;continue;}while(entry(nodes,cursor).next==0 && entry(nodes,cursor).parent!=id){cursor=entry(nodes,cursor).parent;if(cursor<=id || cursor>v::len<Node>(nodes) || steps>=v::len<Node>(nodes)*2){return .err(problem(meta,1,owner.start,owner.end));}steps+=1;}
+        cursor=entry(nodes,cursor).next;
+    }
+    owner.kind=1;owner.state=2;owner.first=0;owner.last=0;owner.children=0;owner.value_start=0;owner.value_end=0;set(nodes,id,owner);return .ok(id);
+}
+pub fn Result<usize,Problem> define_table(ref State meta,ref mut v::Vec<Node> nodes,usize id,usize start,usize end){
+    var Node n=entry(nodes,id);if(id<=1 || id>v::len<Node>(nodes) || n.kind!=1 || !span(meta,start,end)){return .err(problem(meta,1,start,end));}n.state=2;n.start=start;n.end=end;set(nodes,id,n);return .ok(id);
+}
 fn bool power_of_two(usize size){var usize n=size;while(n>1 && n%2==0){n/=2;}return n==1;}
 fn u32 verify(ref Tree tree){
     let usize total=count(tree);let usize size=v::len<usize>(ref tree.buckets);
@@ -149,4 +164,25 @@ fn u32 verify(ref Tree tree){
 }
 pub fn Result<Tree,Problem> publish(State meta,bytes::Buffer names,bytes::Buffer values,v::Vec<Node> nodes,v::Vec<usize> buckets){
     let Tree tree=Tree{.names,.values,.nodes,.buckets,.meta};let u32 code=verify(ref tree);if(code!=0){return .err(problem(ref tree.meta,code,0,0));}return .ok(tree);
+}
+// Rebuild the live graph from trusted parser scratch after replacement. All
+// pools/indexes are rebuilt, then the normal publication verifier runs. The
+// strict factory above still rejects forged/orphaned/tombstoned normal input.
+pub fn Result<Tree,Problem> publish_compacted(State raw,bytes::Buffer names,bytes::Buffer values,v::Vec<Node> nodes,v::Vec<usize> buckets){
+    let usize total=v::len<Node>(ref nodes);let Node root=entry(ref nodes,1);
+    if(raw.source_bytes>1048576 || total==0 || total>raw.source_bytes+1 || root.kind!=1 || root.parent!=0 || root.state!=2 || bytes::len(ref names)>1048576 || bytes::len(ref values)>1048576){return .err(problem(ref raw,1,0,0));}
+    var State meta=state(raw.source_bytes);var bytes::Buffer out_names=bytes::empty();var bytes::Buffer out_values=bytes::empty();var v::Vec<Node> out_nodes=v::empty<Node>();var v::Vec<usize> out_buckets=v::empty<usize>();var v::Vec<usize> map=v::empty<usize>();
+    let u32 initialized=initialize(ref meta,ref mut out_nodes);if(initialized!=0){return .err(problem(ref meta,initialized,0,0));}meta.work=raw.work;if(!charge(ref mut meta,total)){return .err(problem(ref meta,4,0,0));}
+    if(!v::reserve<usize>(ref mut map,total).is_ok){return .err(problem(ref meta,3,0,0));}var usize at=0;while(at<total){if(!v::push<usize>(ref mut map,0).is_ok){return .err(problem(ref meta,3,0,0));}at+=1;}number(ref mut map,0,1);
+    at=2;while(at<=total){let Node n=entry(ref nodes,at);if(n.kind==9){at+=1;continue;}
+        if(n.parent==0 || n.parent>=at || n.kind<1 || n.kind>8 || n.state>3 || n.name_start>n.name_end || n.name_end>bytes::len(ref names) || n.value_start>n.value_end || n.value_end>bytes::len(ref values) || !span(ref meta,n.start,n.end)){return .err(problem(ref meta,1,n.start,n.end));}
+        let usize parent=*v::at<usize>(ref map,n.parent-1);if(parent==0){return .err(problem(ref meta,1,n.start,n.end));}
+        let usize id=if(entry(ref out_nodes,parent).kind==1){switch(reserve_key(ref mut meta,ref mut out_names,ref mut out_nodes,ref mut out_buckets,parent,bytes::view(ref names)[n.name_start..n.name_end],n.start,n.end)){case .ok(x):{x}case .err(e):{return .err(e);}}}else{switch(element(ref mut meta,ref mut out_names,ref mut out_nodes,ref mut out_buckets,parent,n.start,n.end)){case .ok(x):{x}case .err(e):{return .err(e);}}};
+        let result=if(n.kind==1 || n.kind==3 || n.kind==4){container(ref meta,ref mut out_nodes,id,n.kind,if(n.kind==1){if(n.state==3){2}else{n.state}}else{0},n.end)}else{if(n.kind==2){string(ref mut meta,ref mut out_values,ref mut out_nodes,id,bytes::view(ref values)[n.value_start..n.value_end],n.end)}else{if(n.kind==5){
+            let ref u8[] value=bytes::view(ref values)[n.value_start..n.value_end];if(!bytes::equal(value,b"true") && !bytes::equal(value,b"false")){return .err(problem(ref meta,1,n.start,n.end));}boolean(ref mut meta,ref mut out_values,ref mut out_nodes,id,bytes::equal(value,b"true"),n.end)
+        }else{atom(ref mut meta,ref mut out_values,ref mut out_nodes,id,bytes::view(ref values)[n.value_start..n.value_end],n.end,n.kind)}}};
+        switch(result){case .ok(_):{}case .err(e):{return .err(e);}};number(ref mut map,at-1,id);at+=1;
+    }
+    at=2;while(at<=total){let Node n=entry(ref nodes,at);if(n.kind!=9 && n.state==3){let usize id=*v::at<usize>(ref map,at-1);var Node out=entry(ref out_nodes,id);out.state=3;set(ref mut out_nodes,id,out);}at+=1;}
+    return publish(meta,out_names,out_values,out_nodes,out_buckets);
 }

@@ -122,6 +122,29 @@ matches and the four remaining table-definition differences. Source check
 passes 300 files and 3826 MIR functions. These receipts supersede the earlier
 scalar-exclusion observations, which remain historical evidence.
 
+## Replacement arena foundation
+
+The pinned decoder sometimes replaces arrays with tables during dotted context
+establishment. `replace_table` preserves arena IDs, marks superseded children
+as scratch tombstones and clears the owner's child/value links. Metered lookup
+skips those tombstones. `publish_compacted` rebuilds live nodes, byte pools and
+indexes before invoking the ordinary publication verifier. Ordinary `publish`
+still rejects tombstones and retains its forged-graph checks; the compacting
+entry point is for trusted parser scratch. Parser metadata integration is next.
+
+`evidence/candidate-toml-replacement-20261011.json` records three native cases
+and both candidate C profiles: repeated replacement drops old key/value bytes,
+old keys cannot be found, strict publication rejects discarded scratch, and a
+50-level branch is removed before its later sibling. The existing document
+model's three native cases and both C profiles also pass in
+`evidence/candidate-toml-model-replacement-regression-20261011.json`. Source
+check passes 300 files and 3829 MIR functions.
+
+`candidate-toml-table-contexts-v1.json` captures 111 context transitions for the
+next parser slice. The pinned Go oracle currently accepts 49; no Fairy parity
+claim is made for that corpus yet. Logical implicit/type metadata must follow
+the decoder across dotted paths, inline values and array-table entries.
+
 ## Remaining connection
 
 1. Reconcile pinned Go table-definition behavior before claiming complete
