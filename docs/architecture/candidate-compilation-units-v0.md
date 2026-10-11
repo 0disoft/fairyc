@@ -2315,3 +2315,27 @@ frontend timeout (exit 2, 60.0423 seconds) with the previous image preserved, so
 complete dispatcher compilation remains outstanding.
 
 Evidence: `docs/ops/evidence/candidate-sdk-authentication-cache-20261011.json`.
+
+
+## Owned name authentication reused (2026-10-11)
+
+Generic/cleanup name frames and ordinary name frames reuse the retained
+authenticated Vec flag after the existing exact source, specialization and
+owned-body equality checks, so no function re-hashes its whole source for the same
+SDK permission; the source and pin checks are unchanged.
+
+Three development native cases pass: stale and private imports rejected before
+publishing, SDK intrinsics kept distinct by unsafe context and dropping receiver,
+and stale sources with interface range mismatches left unbound. The Vec bridge
+runs real C in development and release, and the ordinary root packet matches the
+previous bytes, so those executions are reused. The development candidate build
+takes 29.49 seconds; checking passes 292 files and 3671 MIR functions with the
+lock updated and no limit changed.
+
+The full 285-file bridge joins 2019930 bytes and still stops at the 60-second
+frontend timeout (exit 2, 60.0357 seconds) with the previous image preserved, so
+complete dispatcher compilation remains outstanding. The fixed-input trace is
+informational under uncontrolled host contention and not a benchmark; the next
+unit investigates optimized bootstrap native build cost, currently cache-only.
+
+Evidence: `docs/ops/evidence/candidate-name-authentication-cache-20261011.json`.

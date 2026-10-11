@@ -1,0 +1,461 @@
+{
+  "schema": "fairyc.candidate-name-authentication-cache/v1",
+  "reuse": "Generic/cleanup and ordinary function name frames reuse the retained authenticated Vec flag after existing exact source, specialization and owned-body equality checks; no function hashes its whole source for the same SDK permission.",
+  "sources": [
+    {
+      "path": "examples/lexer_candidate/src/module_unit_names.fy",
+      "sha256": "6e41be8d025a57f50a313c84dbcfaab90c15aa5e2ceeb79ef05c77c4c652fb7b"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_unit_ordinary_names.fy",
+      "sha256": "69c9d7891ced748ca215484f70bebb7dac01a20de7e43084ef56e9ef9b19768b"
+    }
+  ],
+  "sourceCheck": {
+    "exit": 0,
+    "files": 292,
+    "mirFunctions": 3671,
+    "lockUpdated": true
+  },
+  "native": {
+    "exit": 0,
+    "profile": "development",
+    "passed": 3,
+    "failed": 0,
+    "seconds": 103.72416680000606,
+    "tests": [
+      {
+        "identity": "tests::module_unit_names::private_imports_and_stale_owned_bodies_are_not_published",
+        "outcome": "passed"
+      },
+      {
+        "identity": "tests::module_unit_names::sdk_storage_refs_unsafe_context_and_dropping_receiver_are_distinct",
+        "outcome": "passed"
+      },
+      {
+        "identity": "tests::module_unit_ordinary_names::stale_sources_and_interface_ranges_are_not_rebound",
+        "outcome": "passed"
+      }
+    ]
+  },
+  "candidateBuild": {
+    "exit": 0,
+    "seconds": 29.4914226999972,
+    "stdout": "built: build/project-cli-names.exe (x86_64-windows-msvc, development, lock updated)\n",
+    "stderr": ""
+  },
+  "nativeBridge": {
+    "passed": true,
+    "ordinary": {
+      "exit": 0,
+      "packetSHA256": "68c878676f624102da5d214b87c36f673823603bcfbfc9ad30a919bedff430dc",
+      "previousExecutionsReused": true
+    },
+    "cases": [
+      {
+        "release": false,
+        "exit": 0,
+        "seconds": 1.1593471000014688,
+        "programExit": 0,
+        "imageSHA256": "a23be3aaf5fce6d0992ea16294cb4b9cf9edc86f51f460c7dad56594a572505c"
+      },
+      {
+        "release": true,
+        "exit": 0,
+        "seconds": 1.2261627999978373,
+        "programExit": 0,
+        "imageSHA256": "ef195ebb30a3fb7935c56341e2f213151a1ef311eaa267c89c69d14f331d1b6e"
+      }
+    ]
+  },
+  "fullCurrentDispatcher": {
+    "exit": 2,
+    "seconds": 60.03569370000332,
+    "stdout": "",
+    "stderr": "candidate build failed: candidate frontend timeout: context deadline exceeded\n",
+    "sourceFiles": 285,
+    "joinedSourceBytes": 2019930,
+    "previousImagePreserved": true,
+    "sourceInventorySHA256": "a16c30a29ef5ac69bf7a7bda456a571720ea477634b73b3829582f95dbb19d9c"
+  },
+  "phaseObservation": {
+    "cacheOnlyInstrumentation": true,
+    "cacheOnlyNameAuthenticationPrototype": true,
+    "inputMatchesBaselineHashes": true,
+    "seconds": 60.02939009999682,
+    "exit": 1,
+    "timeout": true,
+    "events": [
+      {
+        "seconds": 0.025598699998226948,
+        "text": "TRACE parse-start"
+      },
+      {
+        "seconds": 0.39121069999964675,
+        "text": "TRACE parsed 32"
+      },
+      {
+        "seconds": 0.8991095999954268,
+        "text": "TRACE parsed 64"
+      },
+      {
+        "seconds": 1.3613904000012553,
+        "text": "TRACE parsed 96"
+      },
+      {
+        "seconds": 1.869472799997311,
+        "text": "TRACE parsed 128"
+      },
+      {
+        "seconds": 2.217584400001215,
+        "text": "TRACE parsed 160"
+      },
+      {
+        "seconds": 2.739747300001909,
+        "text": "TRACE parsed 192"
+      },
+      {
+        "seconds": 3.13415079999686,
+        "text": "TRACE parsed 224"
+      },
+      {
+        "seconds": 3.4690961000014795,
+        "text": "TRACE parsed 256"
+      },
+      {
+        "seconds": 3.7149703999966732,
+        "text": "TRACE parse-done"
+      },
+      {
+        "seconds": 3.7150393999982043,
+        "text": "TRACE signatures-start"
+      },
+      {
+        "seconds": 9.774147999996785,
+        "text": "TRACE compile-start"
+      },
+      {
+        "seconds": 9.774475099999108,
+        "text": "TRACE range 0,15 bind"
+      },
+      {
+        "seconds": 9.991641499997058,
+        "text": "TRACE range 0,15 closure"
+      },
+      {
+        "seconds": 11.043812199997774,
+        "text": "TRACE range 0,7 bind"
+      },
+      {
+        "seconds": 11.176378500000283,
+        "text": "TRACE range 0,7 closure"
+      },
+      {
+        "seconds": 13.482510399997409,
+        "text": "TRACE range 0,7 values"
+      },
+      {
+        "seconds": 13.693415499998082,
+        "text": "TRACE range 0,7 moves"
+      },
+      {
+        "seconds": 13.716144099998928,
+        "text": "TRACE range 0,7 lower"
+      },
+      {
+        "seconds": 13.992158699998981,
+        "text": "TRACE range 7,15 bind"
+      },
+      {
+        "seconds": 14.094903799996246,
+        "text": "TRACE range 7,15 closure"
+      },
+      {
+        "seconds": 15.523439699994924,
+        "text": "TRACE range 7,15 values"
+      },
+      {
+        "seconds": 15.627998799995112,
+        "text": "TRACE range 7,15 moves"
+      },
+      {
+        "seconds": 15.64345940000203,
+        "text": "TRACE range 7,15 lower"
+      },
+      {
+        "seconds": 15.867347699997481,
+        "text": "TRACE range 15,26 bind"
+      },
+      {
+        "seconds": 16.03588640000089,
+        "text": "TRACE range 15,26 closure"
+      },
+      {
+        "seconds": 20.97895679999783,
+        "text": "TRACE range 15,26 values"
+      },
+      {
+        "seconds": 21.245936100000108,
+        "text": "TRACE range 15,26 moves"
+      },
+      {
+        "seconds": 21.270268299995223,
+        "text": "TRACE range 15,26 lower"
+      },
+      {
+        "seconds": 22.3589948000008,
+        "text": "TRACE range 26,31 bind"
+      },
+      {
+        "seconds": 22.534416900001816,
+        "text": "TRACE range 26,31 closure"
+      },
+      {
+        "seconds": 23.759262200001103,
+        "text": "TRACE range 26,28 bind"
+      },
+      {
+        "seconds": 23.896780399998534,
+        "text": "TRACE range 26,28 closure"
+      },
+      {
+        "seconds": 25.06016819999786,
+        "text": "TRACE range 26,27 bind"
+      },
+      {
+        "seconds": 25.161314999997558,
+        "text": "TRACE range 26,27 closure"
+      },
+      {
+        "seconds": 28.644854199999827,
+        "text": "TRACE range 26,27 values"
+      },
+      {
+        "seconds": 28.945596999998088,
+        "text": "TRACE range 26,27 moves"
+      },
+      {
+        "seconds": 28.954116399996565,
+        "text": "TRACE range 26,27 lower"
+      },
+      {
+        "seconds": 29.132358299997577,
+        "text": "TRACE range 27,28 bind"
+      },
+      {
+        "seconds": 29.227168999997957,
+        "text": "TRACE range 27,28 closure"
+      },
+      {
+        "seconds": 31.986572199995862,
+        "text": "TRACE range 27,28 values"
+      },
+      {
+        "seconds": 32.16063099999883,
+        "text": "TRACE range 27,28 moves"
+      },
+      {
+        "seconds": 32.16634969999723,
+        "text": "TRACE range 27,28 lower"
+      },
+      {
+        "seconds": 32.336113899997144,
+        "text": "TRACE range 28,31 bind"
+      },
+      {
+        "seconds": 32.412701900000684,
+        "text": "TRACE range 28,31 closure"
+      },
+      {
+        "seconds": 34.146567899995716,
+        "text": "TRACE range 28,31 values"
+      },
+      {
+        "seconds": 34.24436869999772,
+        "text": "TRACE range 28,31 moves"
+      },
+      {
+        "seconds": 34.24883399999817,
+        "text": "TRACE range 28,31 lower"
+      },
+      {
+        "seconds": 34.41926109999622,
+        "text": "TRACE range 31,41 bind"
+      },
+      {
+        "seconds": 34.638246399998025,
+        "text": "TRACE range 31,41 closure"
+      },
+      {
+        "seconds": 35.38208019999729,
+        "text": "TRACE range 31,36 bind"
+      },
+      {
+        "seconds": 35.505000199998904,
+        "text": "TRACE range 31,36 closure"
+      },
+      {
+        "seconds": 37.469444499998644,
+        "text": "TRACE range 31,33 bind"
+      },
+      {
+        "seconds": 37.54631629999494,
+        "text": "TRACE range 31,33 closure"
+      },
+      {
+        "seconds": 39.58868689999508,
+        "text": "TRACE range 31,33 values"
+      },
+      {
+        "seconds": 39.69764700000087,
+        "text": "TRACE range 31,33 moves"
+      },
+      {
+        "seconds": 39.708562200001325,
+        "text": "TRACE range 31,33 lower"
+      },
+      {
+        "seconds": 39.8744732999985,
+        "text": "TRACE range 33,36 bind"
+      },
+      {
+        "seconds": 39.96915749999607,
+        "text": "TRACE range 33,36 closure"
+      },
+      {
+        "seconds": 41.713846400001785,
+        "text": "TRACE range 33,34 bind"
+      },
+      {
+        "seconds": 41.777313499995216,
+        "text": "TRACE range 33,34 closure"
+      },
+      {
+        "seconds": 43.94507860000158,
+        "text": "TRACE range 33,34 values"
+      },
+      {
+        "seconds": 44.028984099997615,
+        "text": "TRACE range 33,34 moves"
+      },
+      {
+        "seconds": 44.0349980999963,
+        "text": "TRACE range 33,34 lower"
+      },
+      {
+        "seconds": 44.185620299998845,
+        "text": "TRACE range 34,36 bind"
+      },
+      {
+        "seconds": 44.27959369999735,
+        "text": "TRACE range 34,36 closure"
+      },
+      {
+        "seconds": 47.94677660000161,
+        "text": "TRACE range 34,36 values"
+      },
+      {
+        "seconds": 48.10261779999564,
+        "text": "TRACE range 34,36 moves"
+      },
+      {
+        "seconds": 48.132885400002124,
+        "text": "TRACE range 34,36 lower"
+      },
+      {
+        "seconds": 48.349824699995224,
+        "text": "TRACE range 36,41 bind"
+      },
+      {
+        "seconds": 48.484786399996665,
+        "text": "TRACE range 36,41 closure"
+      },
+      {
+        "seconds": 48.91840959999536,
+        "text": "TRACE range 36,38 bind"
+      },
+      {
+        "seconds": 49.00277679999999,
+        "text": "TRACE range 36,38 closure"
+      },
+      {
+        "seconds": 52.32861769999727,
+        "text": "TRACE range 36,38 values"
+      },
+      {
+        "seconds": 52.43819639999856,
+        "text": "TRACE range 36,38 moves"
+      },
+      {
+        "seconds": 52.449874400001136,
+        "text": "TRACE range 36,38 lower"
+      },
+      {
+        "seconds": 52.65505100000155,
+        "text": "TRACE range 38,41 bind"
+      },
+      {
+        "seconds": 52.757878500000515,
+        "text": "TRACE range 38,41 closure"
+      },
+      {
+        "seconds": 53.12898960000166,
+        "text": "TRACE range 38,39 bind"
+      },
+      {
+        "seconds": 53.1992986999976,
+        "text": "TRACE range 38,39 closure"
+      },
+      {
+        "seconds": 55.28281119999883,
+        "text": "TRACE range 38,39 values"
+      },
+      {
+        "seconds": 55.374329899997974,
+        "text": "TRACE range 38,39 moves"
+      },
+      {
+        "seconds": 55.3859999999986,
+        "text": "TRACE range 38,39 lower"
+      },
+      {
+        "seconds": 55.54976170000009,
+        "text": "TRACE range 39,41 bind"
+      },
+      {
+        "seconds": 55.641451499999675,
+        "text": "TRACE range 39,41 closure"
+      },
+      {
+        "seconds": 58.54996250000113,
+        "text": "TRACE range 39,41 values"
+      },
+      {
+        "seconds": 58.70539039999858,
+        "text": "TRACE range 39,41 moves"
+      },
+      {
+        "seconds": 58.72216169999592,
+        "text": "TRACE range 39,41 lower"
+      },
+      {
+        "seconds": 58.894334899996466,
+        "text": "TRACE range 41,47 bind"
+      },
+      {
+        "seconds": 59.13685379999515,
+        "text": "TRACE range 41,47 closure"
+      }
+    ]
+  },
+  "phaseObservationLimit": "Informational trace of the fixed source bytes under uncontrolled host contention; cache-only instrumentation is excluded from the actual bridge executable.",
+  "limitsChanged": false,
+  "fullCompilationProven": false,
+  "skipped": [
+    "Release standalone candidate build",
+    "Linux",
+    "full suite",
+    "Stage1/Stage2"
+  ],
+  "pushed": false
+}
