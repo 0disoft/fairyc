@@ -365,10 +365,50 @@ Reference fixture command:
 `bun tools/run-go.ts run ./cmd/fairyc-candidate-instance-identity-reference <output>`.
 Feature graph expansion, cycle rejection and import visibility are still separate.
 
+## Root-reachable feature-instance graph
+
+`project_instance_graph.load` expands only root-reachable local instances using
+the exact PackageInstanceId tuple. Equal feature aliases share one node;
+different feature sets remain separate. Each instance follows its catalog
+package's fixed declaration features, without feature unification or propagation.
+Outgoing ranges avoid rescanning the whole catalog, and per-declaration target
+memoization avoids recomputing an ID for every owner feature instance.
+
+The bounded hash index compares retained canonical bytes after digest equality
+and fails closed on contradictory tuples. Its bucket growth rebuilds links from
+current node headers; edge-span publication rereads those headers so a copy made
+before growth cannot overwrite rebuilt links. Mutable construction columns seal
+into the graph owner after all checks succeed.
+
+Iterative DFS rejects self, multi-package and feature-induced cycles after exact
+instance deduplication. Successful postorder is a dependency-first build order.
+Cycle errors retain the original workspace, parser/manifest owners, declaration
+coordinates and a closed path of instance IDs. Source counters commit only after
+declaration loading, expansion and cycle checks all pass. Unreachable catalog
+cycles do not enter the resolved graph, while their declarations remain retained
+and validated by the preceding layer.
+
+Eleven Go acceptance/reason cases and complete successful node/path/feature/edge
+ID records match. One native test and both candidate C profiles pass, covering
+aliases, feature split/diamond, self/two-package/feature cycles, unreachable
+cycles, nested version failures and a 71-node/70-edge chain exercising bucket
+growth and traversal beyond a small recursive depth. Every successful edge has
+its dependency before its owner in the build order. Cycle instance IDs are
+computed with the Go identity implementation. Failed graph loads preserve caller
+source counters. Full check passes 320 files and 4199 MIR functions. Evidence:
+`evidence/candidate-instance-graph-20261011.json`.
+
+Reference fixture command:
+`bun tools/run-go.ts run ./cmd/fairyc-candidate-instance-graph-reference <output>`.
+With multiple available cycles, witness selection follows declaration order and
+can differ from Go's sorted-class traversal. Import visibility, SDK injection,
+lock projection and compiler/project-CLI consumption remain separate; earlier
+filesystem/parser/work-bound limitations still apply.
+
 ## Remaining connection
 
-Connect the validated catalog declarations to feature-instance resolution,
-SDK injection, lock projection and the project CLI. Broader parser-cap
+Connect the exact feature graph to import visibility, SDK injection, lock
+projection and the compiler/project CLI. Broader parser-cap
 compatibility remains separate.
 Resolve the Go junction observation discrepancy before any loader
 equivalence claim. Package/lock/CLI work remains separate.
