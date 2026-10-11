@@ -2119,3 +2119,46 @@ Public semantics, SDK ABI, DB,
 CI, caps, stack reserve and the timeout are unchanged, and no push, Linux, full
 suite or Stage 2 run has happened. Evidence:
 docs/ops/evidence/candidate-canonical-name-normalization-20261011.json.
+
+## Borrowed canonical type comparisons (2026-10-11)
+
+The private `same` helper in `module_types` now reads two `ref Type` instead of
+two `Type` values, `validate` keeps its outer `t` as a shared reference to a
+`Vec` element, and `intern` compares the candidate value against the existing key
+borrowed from `Vec::at` before the loan ends and the push happens. The comparison
+keeps its six fields and their order, the first-match ID, duplicate rejection, and
+graph rollback, admission and the 4096 cap; the index and hash algorithm are
+unchanged.
+
+Source checking passes 293 files and 3690 MIR functions, and the three existing
+native cases `module_type_graph_native_contract`,
+`reordered_wrappers_rebind_edges_and_preserve_array_lengths` and
+`retained_plan_rejects_changed_provider_bytes_and_graph_prefix` pass 3 of 3 in
+97.6437 seconds.
+
+The real generated-C canonical key probe interns 256 keys for 32 passes and
+measures only private interner key identity rather than catalog admission. Old
+and new builds both return 0 in native development and `/O2` across three runs
+each, with median seconds moving from 0.1983919 to 0.1056381 in the low profile
+and from 0.0538169 to 0.0189355 optimized
+(`.cache/candidate-tagged/sdk-c-execution/type-comparison-probe-before.json` and
+`type-comparison-probe-after.json`). This is a call-specific measurement and does
+not establish a whole-frontend speedup.
+
+A fresh bootstrap joins the same 286 sources (2033072 bytes) and emits a
+24487241-byte packet over 35 units in 33.1035 seconds
+(SHA256 `0bc3d3db452ee5a9b3868aaa078485d003350da361ce7ac4e2071eddba6c626f`). The
+development native build takes 52.9479 seconds (9350656 bytes) and the
+exact-source full self replay stops at the 60.0371-second frontend timeout. The
+new Stage1 CLI nine-case matrix and the Vec development and optimized runs pass.
+The optimized build exits 0 in 185.0607 seconds over the same 35 units and 37
+objects
+(`.cache/candidate-tagged/sdk-c-execution/stage1-type-borrow-release-build-observation.json`),
+and its exact same-source self replay stops at the 60.0479-second frontend
+timeout
+(`.cache/candidate-tagged/sdk-c-execution/stage1-type-borrow-release-replay.json`),
+so the reproducible two-stage bootstrap `promotion` row stays `blocked` while
+the by-reference signature stays private to the `same` helper. The public source
+and API surface, the SDK ABI, DB, CI, caps, stack reserve and the timeout are
+unchanged, and no push, Linux, full suite or Stage 2 run has happened. Evidence:
+docs/ops/evidence/candidate-borrowed-type-comparisons-20261011.json.

@@ -15,10 +15,11 @@ pub struct Type {u32 kind;u32 scalar;usize module_index;usize declaration;usize 
 pub struct Problem {u32 code;usize module_index;usize start;usize end;}
 pub struct Resolution {usize type;Problem problem;}
 pub resource Graph {v::Vec<Type> types;cleanup{}}
-fn bool same(Type a,Type b){return a.kind==b.kind && a.scalar==b.scalar && a.module_index==b.module_index && a.declaration==b.declaration && a.first==b.first && a.second==b.second;}
+// Comparisons borrow the frozen records; no graph write occurs until they end.
+fn bool same(ref Type a,ref Type b){return a.kind==b.kind && a.scalar==b.scalar && a.module_index==b.module_index && a.declaration==b.declaration && a.first==b.first && a.second==b.second;}
 pub fn u32 validate(ref catalog::Catalog c,ref v::Vec<Type> types){
-    if(v::len<Type>(types)>4096){return 10;}var usize i=0;while(i<v::len<Type>(types)){let t=*v::at<Type>(types,i);
-        var usize previous=0;while(previous<i){if(same(*v::at<Type>(types,previous),t)){return 9;}previous+=1;}
+    if(v::len<Type>(types)>4096){return 10;}var usize i=0;while(i<v::len<Type>(types)){let t=v::at<Type>(types,i);
+        var usize previous=0;while(previous<i){if(same(v::at<Type>(types,previous),t)){return 9;}previous+=1;}
         if(t.kind==13){if(t.scalar!=0 || t.first==0 || t.first>i || t.second!=0 || !catalog::sdk_vector(c,t.module_index,t.declaration) || !element(types,t.first,0)){return 9;}}
         else if(t.kind==2 || t.kind==3 || t.kind==4){let usize item=catalog::identity(c,t.module_index,t.declaration);if(item==0 || t.scalar!=0 || t.first!=0 || t.second!=0){return 9;}let d=catalog::declaration_at(c,item);if(d.kind!=if(t.kind==2){4}else if(t.kind==3){6}else{11} || t.kind==3 && catalog::sdk_vector(c,t.module_index,t.declaration)){return 9;}}
         else{if(t.module_index!=0 || t.declaration!=0){return 9;}
@@ -58,7 +59,7 @@ fn bool array_element(ref v::Vec<Type> graph,usize id,usize length){
     return copy_element(graph,id,0);
 }
 fn usize intern(ref mut v::Vec<Type> graph,Type value){
-    var usize i=1;while(i<=count(graph)){if(same(at(graph,i),value)){return i;}i+=1;}
+    var usize i=1;while(i<=count(graph)){if(same(v::at<Type>(graph,i-1),ref value)){return i;}i+=1;}
     if(count(graph)>=4096 || !v::push<Type>(graph,value).is_ok){return 0;}return count(graph);
 }
 pub fn usize canonical(ref mut v::Vec<Type> graph,Type value){return intern(graph,value);}

@@ -1,0 +1,301 @@
+{
+  "schema": "fairyc.candidate-borrowed-type-comparisons/v1",
+  "passed": true,
+  "scope": "Private six-field canonical equality borrows frozen records; indexing order and duplicate rejection unchanged",
+  "sources": [
+    {
+      "path": "examples/lexer_candidate/src/module_types.fy",
+      "sha256": "a81206c8ced68e3dff96cd7a1a846bc0f818f1aa4c59d0a73b8d71fa9862c4d8"
+    },
+    {
+      "path": "examples/lexer_candidate/fairy.lock",
+      "sha256": "1aa0d57f84d1a511984cb4a3007ec83594ec502c3b956ce34effb7cecda9af9b"
+    }
+  ],
+  "sourceCheck": {
+    "exit": 0,
+    "files": 293,
+    "mirFunctions": 3690,
+    "lockUpdated": true
+  },
+  "native": {
+    "argv": [
+      "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\compiler-build-120s.exe",
+      "test",
+      "--native",
+      "--locked",
+      "--json",
+      "--capture-output",
+      "--exact",
+      "tests::module_type_graph::module_type_graph_native_contract",
+      "--exact",
+      "tests::module_project_types::reordered_wrappers_rebind_edges_and_preserve_array_lengths",
+      "--exact",
+      "tests::module_unit_generics::retained_plan_rejects_changed_provider_bytes_and_graph_prefix"
+    ],
+    "exit": 0,
+    "seconds": 97.64371190000384,
+    "stderr": ""
+  },
+  "nativeTests": [
+    {
+      "identity": "tests::module_project_types::reordered_wrappers_rebind_edges_and_preserve_array_lengths",
+      "outcome": "passed"
+    },
+    {
+      "identity": "tests::module_type_graph::module_type_graph_native_contract",
+      "outcome": "passed"
+    },
+    {
+      "identity": "tests::module_unit_generics::retained_plan_rejects_changed_provider_bytes_and_graph_prefix",
+      "outcome": "passed"
+    }
+  ],
+  "generatedCKeyProbe": {
+    "before": {
+      "typeSource": "2bbad7d79b6960537ec80c160d87937b0eddce2d29c781295b585b9a380ab2c5",
+      "scope": "Private canonical interner key identity, not catalog admission",
+      "uniqueKeys": 256,
+      "passes": 32,
+      "observations": [
+        {
+          "profile": "low",
+          "exit": 0,
+          "seconds": [
+            0.21598009999433998,
+            0.19839189999038354,
+            0.19735010000295006
+          ],
+          "imageSHA256": "42b185e4f9105718a150a47e0666fe020101c7f70d27705dfba20cbadd5c2875"
+        },
+        {
+          "profile": "optimized",
+          "exit": 0,
+          "seconds": [
+            0.06616620000568219,
+            0.0538168999919435,
+            0.05321969999931753
+          ],
+          "imageSHA256": "268fc1dbd4e41b68c9bb875b1c5def749e3b24aeb553b5e6c9bea321f41d0dd7"
+        }
+      ]
+    },
+    "after": {
+      "typeSource": "a81206c8ced68e3dff96cd7a1a846bc0f818f1aa4c59d0a73b8d71fa9862c4d8",
+      "scope": "Private canonical interner key identity, not catalog admission",
+      "uniqueKeys": 256,
+      "passes": 32,
+      "observations": [
+        {
+          "profile": "low",
+          "exit": 0,
+          "seconds": [
+            0.11853530000371393,
+            0.10563810000894591,
+            0.10455849999561906
+          ],
+          "imageSHA256": "89138d069877e46b68786520a7e8fd037cc4411b9ca04076a304498f4abed098"
+        },
+        {
+          "profile": "optimized",
+          "exit": 0,
+          "seconds": [
+            0.033770199996070005,
+            0.018935500003863126,
+            0.018329200000152923
+          ],
+          "imageSHA256": "8972cfb4cccceaf14c03a04484cac92caacdb334a8bf62daa838c9ba6c587c03"
+        }
+      ]
+    },
+    "comparison": [
+      {
+        "profile": "low",
+        "beforeMedianSeconds": 0.19839189999038354,
+        "afterMedianSeconds": 0.10563810000894591,
+        "afterOverBefore": 0.5324718398990402
+      },
+      {
+        "profile": "optimized",
+        "beforeMedianSeconds": 0.0538168999919435,
+        "afterMedianSeconds": 0.018935500003863126,
+        "afterOverBefore": 0.35185044115691927
+      }
+    ],
+    "note": "Canonical interner key identity only; no catalog admission or whole-frontend speedup claim"
+  },
+  "cliAndVector": {
+    "passed": true,
+    "compilerSHA256": "d3fc847f337c59ea15bcc665650363ea4859ddcccb13067be995bdc2dfd91981",
+    "cases": [
+      {
+        "name": "positive",
+        "exit": 0,
+        "seconds": 0.1652721999998903,
+        "stdoutBytes": 3565,
+        "stderr": "",
+        "packetSHA256": "68c878676f624102da5d214b87c36f673823603bcfbfc9ad30a919bedff430dc",
+        "priorCExecutionReused": true
+      },
+      {
+        "name": "dependency-entry",
+        "exit": 2,
+        "seconds": 0.10552989999996498,
+        "stdoutBytes": 0,
+        "stderr": ".cache/candidate-tagged/sdk-c-execution/project-cli-sdk/fixtures/root.fy:1:1: error: project phase 4 stage 0 code 1001 (bytes 0..0)\n"
+      },
+      {
+        "name": "wrong-result",
+        "exit": 2,
+        "seconds": 0.12360649999754969,
+        "stdoutBytes": 0,
+        "stderr": ".cache/candidate-tagged/sdk-c-execution/project-cli-sdk/fixtures/void.fy:1:1: error: project phase 5 stage 0 code 1001 (bytes 0..0)\n"
+      },
+      {
+        "name": "type-error",
+        "exit": 2,
+        "seconds": 0.01822369999717921,
+        "stdoutBytes": 0,
+        "stderr": ".cache/candidate-tagged/sdk-c-execution/project-cli-sdk/fixtures/type.fy:1:34: error: project phase 2 stage 4 code 1009 (bytes 33..37)\n"
+      },
+      {
+        "name": "syntax-error",
+        "exit": 2,
+        "seconds": 0.016842800003360026,
+        "stdoutBytes": 0,
+        "stderr": ".cache/candidate-tagged/sdk-c-execution/project-cli-sdk/fixtures/syntax.fy:1:36: error: expected } (bytes 35..35)\n"
+      },
+      {
+        "name": "missing-source",
+        "exit": 2,
+        "seconds": 0.015414399997098371,
+        "stdoutBytes": 0,
+        "stderr": "error: input file read failed\n"
+      },
+      {
+        "name": "blank-manifest",
+        "exit": 2,
+        "seconds": 0.01585890000569634,
+        "stdoutBytes": 0,
+        "stderr": "error: invalid module manifest\n"
+      },
+      {
+        "name": "invalid-utf8",
+        "exit": 2,
+        "seconds": 0.020303500001318753,
+        "stdoutBytes": 0,
+        "stderr": "error: invalid module manifest\n"
+      },
+      {
+        "name": "duplicate-source",
+        "exit": 2,
+        "seconds": 0.01693640000303276,
+        "stdoutBytes": 0,
+        "stderr": ".cache/candidate-tagged/sdk-c-execution/project-cli-sdk/fixtures/main.fy:1:8: error: project phase 1 stage 0 code 1 (bytes 7..11)\n"
+      },
+      {
+        "name": "vector-dev",
+        "exit": 0,
+        "seconds": 2.6328674999967916,
+        "stdout": "built: C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\bridge-type-borrow-vector-dev.exe (low, 1 C units, 117248 bytes)\n",
+        "stderr": "",
+        "imageSHA256": "dd7bd04033d75945121bedb145f42f6cf0b783bddb7b1fac907d37dc87f557b2",
+        "programExit": 0
+      },
+      {
+        "name": "vector-release",
+        "exit": 0,
+        "seconds": 2.913973300004727,
+        "stdout": "built: C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\bridge-type-borrow-vector-release.exe (optimized, 1 C units, 110592 bytes)\n",
+        "stderr": "",
+        "imageSHA256": "efcb81219d93cb16479623a908036ced6ee3eee8c47b4538a0f56ee06212fad6",
+        "programExit": 0
+      }
+    ]
+  },
+  "bootstrap": {
+    "runs": [
+      {
+        "exit": 0,
+        "seconds": 21.09512640000321,
+        "stderr": "",
+        "stdoutBytes": 21919027
+      },
+      {
+        "exit": 0,
+        "seconds": 40.188188999993145,
+        "stderr": "",
+        "stdoutBytes": 25
+      },
+      {
+        "exit": 0,
+        "seconds": 0.2011767000076361,
+        "stderr": "",
+        "stdoutBytes": 0
+      }
+    ],
+    "sha256": "602c442e5712f72f6f17776cdb1ceb480d580a01d3ea1e2621c899eea60a91d3"
+  },
+  "fullSource": {
+    "frontendTimeoutSeconds": 60,
+    "runs": [
+      {
+        "name": "baseline",
+        "exit": 0,
+        "seconds": 33.103518299991265,
+        "timeout": false,
+        "stdoutBytes": 24487241,
+        "stderr": "",
+        "compilerSHA256": "602c442e5712f72f6f17776cdb1ceb480d580a01d3ea1e2621c899eea60a91d3",
+        "packetSHA256": "0bc3d3db452ee5a9b3868aaa078485d003350da361ce7ac4e2071eddba6c626f"
+      },
+      {
+        "name": "build-stage1-dev",
+        "exit": 0,
+        "seconds": 52.947937500008265,
+        "stdout": "built: C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\stage1-type-borrow.exe (low, 35 C units, 9350656 bytes)\n",
+        "stderr": ""
+      },
+      {
+        "name": "stage1-dev",
+        "exit": null,
+        "timeout": true,
+        "seconds": 60.037149800002226
+      }
+    ]
+  },
+  "sourceInventory": {
+    "count": 286,
+    "joinedBytes": 2033072,
+    "encoding": "Manifest-order path + space + SHA256 + newline",
+    "sha256": "f2db693f3a8a08d0e09b005d30bae2befc6e675370627e5938b0814f62ab47f3",
+    "manifestSHA256": "5cebd2ea57b714167ee98620033666fc358b6e6cee56eee8ba0b28e9fee0d8c4"
+  },
+  "optimizedBuild": {
+    "exit": 0,
+    "seconds": 185.06074650000664,
+    "stdout": "PASS original candidate: 35 units, 37 objects, 184.83s\n",
+    "stderr": "",
+    "frontendReused": true
+  },
+  "optimizedReplay": {
+    "exit": null,
+    "seconds": 60.047900499994284,
+    "timeout": true
+  },
+  "frontendTimeoutSeconds": 60,
+  "canonicalTypeLimit": 4096,
+  "stackReserveChanged": false,
+  "fullSourceSelfReplayPassed": false,
+  "stage1Stage2GatePassed": false,
+  "publicApiChanged": false,
+  "sdkAbiChanged": false,
+  "dbChanged": false,
+  "ciChanged": false,
+  "pushed": false,
+  "skipped": [
+    "Linux: deferred platform batch",
+    "Full suite: narrow equality scope",
+    "Stage2: full-source frontend replay incomplete"
+  ]
+}
