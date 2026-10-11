@@ -1,0 +1,312 @@
+{
+  "schema": "fairyc.candidate-toml-strings/v1",
+  "passed": true,
+  "scope": "String tokens and quoted keys only; document tables, arrays, closed fields and source discovery are subsequent units",
+  "sourceInputs": [
+    {
+      "path": "examples/lexer_candidate/src/project_toml_strings.fy",
+      "sha256": "bc7e71acaaa68af5755d066c90fa1f763625de32c8fa2a6778e8447eebc187bb"
+    },
+    {
+      "path": "examples/lexer_candidate/tests/project_toml_strings.fy",
+      "sha256": "2adb803ee1d46026a2e22b5da7c1aa3796b0424db285ce2fef7ed105cdb0b312"
+    },
+    {
+      "path": "spec/fixtures/project-manifest/candidate-toml-strings-v1.json",
+      "sha256": "77408a769d93a02f2af34fcd6916ddf2837b3bfd4609a0051de0b6521181f7cc"
+    },
+    {
+      "path": "cmd/fairyc-candidate-toml-reference/main.go",
+      "sha256": "0c256c8c4fbfb12d5b6deba1ae91dd69901c6bd888f196be9c1113c38917de8c"
+    },
+    {
+      "path": "tools/verify-candidate-manifest-values.py",
+      "sha256": "7cd3eba0e835028c39a7a753c6ad63978db84397a8780adde2626d9b5fa289e0"
+    }
+  ],
+  "tools": {
+    "compiler": {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\manifest-bootstrap.exe",
+      "sha256": "4e6a50a83b4d9f74a11d749c779a90683ab3a3916d19f4852bfe1cbd452cc664"
+    },
+    "reference": {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-toml-reference.exe",
+      "sha256": "6e15910cec2ec460b5ddac186e78cfb420ec3947176c37d70642a5c1b4e7d99c"
+    },
+    "candidate": {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\two-stage-maintained-fresh\\stage1.exe",
+      "sha256": "32a019327c8cceac8a5a01402fd32d79b95c5fe3d57f9d898bfa977956905dc0"
+    },
+    "builder": {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-build-cached.exe",
+      "sha256": "1ed255a4b1f828c30b43caa99ff762e78b213bc55ba4bf6f4db840574bf2e3d1"
+    }
+  },
+  "cases": 1275,
+  "accepted": 468,
+  "referenceSHA256": "8592274ec764748e05c6ab7aee828c3907d6264464f7e2b8366ca1cacc11f1fe",
+  "binaryFixtureSHA256": "9fb18575ffe5d993ac3fbbc494bf1e91f0d85d95d09725f42697f86d32e17b24",
+  "binaryFixtureBytes": 16948,
+  "nativeTests": 2,
+  "native": {
+    "schemaVersion": "fairyc.test-report/v4",
+    "engine": "native",
+    "target": "x86_64-windows-msvc",
+    "profile": "development",
+    "tests": [
+      {
+        "identity": "tests::project_toml_strings::decodes_tokens_keeps_cursors_and_rolls_back_errors",
+        "outcome": "passed",
+        "trapCategory": null,
+        "stdoutBase64": "",
+        "stderrBase64": ""
+      },
+      {
+        "identity": "tests::project_toml_strings::matches_pinned_go_toml_string_reference",
+        "outcome": "passed",
+        "trapCategory": null,
+        "stdoutBase64": "",
+        "stderrBase64": ""
+      }
+    ],
+    "count": 2,
+    "passed": 2,
+    "failed": 0,
+    "status": "ok",
+    "lock": "verified"
+  },
+  "nativeInputs": {
+    "compilerSHA256": "4e6a50a83b4d9f74a11d749c779a90683ab3a3916d19f4852bfe1cbd452cc664",
+    "binarySHA256": "9fb18575ffe5d993ac3fbbc494bf1e91f0d85d95d09725f42697f86d32e17b24",
+    "lockSHA256": "3adeb95dacef002d5c1401b14fa049257ac998e96bd4d9f8c43a7c9989206682",
+    "sources": [
+      {
+        "path": "examples/lexer_candidate/src/project_toml_strings.fy",
+        "sha256": "bc7e71acaaa68af5755d066c90fa1f763625de32c8fa2a6778e8447eebc187bb"
+      },
+      {
+        "path": "examples/lexer_candidate/tests/project_toml_strings.fy",
+        "sha256": "2adb803ee1d46026a2e22b5da7c1aa3796b0424db285ce2fef7ed105cdb0b312"
+      }
+    ]
+  },
+  "nativeInvocation": {
+    "argv": [
+      "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\manifest-bootstrap.exe",
+      "test",
+      "--native",
+      "--locked",
+      "--json",
+      "--capture-output",
+      "--exact",
+      "tests::project_toml_strings::decodes_tokens_keeps_cursors_and_rolls_back_errors",
+      "--exact",
+      "tests::project_toml_strings::matches_pinned_go_toml_string_reference",
+      "--",
+      "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-toml-strings\\reference.bin"
+    ],
+    "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+    "seconds": 88.53270060000068,
+    "exit": 0,
+    "stdoutBytes": 518,
+    "stdoutSHA256": "d38f057d8309dcb8d08b15d7ac146652eeda102aaaa2f4da5e5d2171feef59db",
+    "stderr": ""
+  },
+  "nativeReused": false,
+  "candidateInputFiles": 10,
+  "candidatePacketSHA256": "8e643bcfebbb8a3e3660d5d7cb449129cf69d045137f40d5351f5f9514abed24",
+  "candidateExecutions": [
+    {
+      "profile": "development",
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-toml-strings\\development.exe",
+      "sha256": "f4b735f5b57b752691bd64b597cf3c306f0f6d65749780fc9bc33373404c242c",
+      "exit": 0
+    },
+    {
+      "profile": "release",
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-toml-strings\\release.exe",
+      "sha256": "08f10bfd509a3a9b60986e14bef4cc6887f4dd458fcba28848692ea55bcd81be",
+      "exit": 0
+    }
+  ],
+  "invocations": [
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-toml-reference.exe",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-toml-strings\\reference-request.json",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-toml-strings\\reference.bin",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-toml-strings\\reference.json"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "seconds": 0.0698600999894552,
+      "exit": 0,
+      "stdoutBytes": 0,
+      "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\manifest-bootstrap.exe",
+        "test",
+        "--native",
+        "--locked",
+        "--json",
+        "--capture-output",
+        "--exact",
+        "tests::project_toml_strings::decodes_tokens_keeps_cursors_and_rolls_back_errors",
+        "--exact",
+        "tests::project_toml_strings::matches_pinned_go_toml_string_reference",
+        "--",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-toml-strings\\reference.bin"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "seconds": 88.53270060000068,
+      "exit": 0,
+      "stdoutBytes": 518,
+      "stdoutSHA256": "d38f057d8309dcb8d08b15d7ac146652eeda102aaaa2f4da5e5d2171feef59db",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\two-stage-maintained-fresh\\stage1.exe",
+        "--c-project-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-toml-strings\\sources.list"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "seconds": 4.61211970000295,
+      "exit": 0,
+      "stdoutBytes": 226208,
+      "stdoutSHA256": "8e643bcfebbb8a3e3660d5d7cb449129cf69d045137f40d5351f5f9514abed24",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-build-cached.exe",
+        "--packet",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-toml-strings\\candidate-packet.bin",
+        "--packet-sha256",
+        "8e643bcfebbb8a3e3660d5d7cb449129cf69d045137f40d5351f5f9514abed24",
+        "--output",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-toml-strings\\development.exe"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "seconds": 1.264475299991318,
+      "exit": 0,
+      "stdoutBytes": 163,
+      "stdoutSHA256": "826a785ea7b047d8b825ba2c8f8b0981548be894bcd53a9d76d66388384231eb",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-toml-strings\\development.exe",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-toml-strings\\reference.bin"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "seconds": 0.034671900008106604,
+      "exit": 0,
+      "stdoutBytes": 0,
+      "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-build-cached.exe",
+        "--packet",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-toml-strings\\candidate-packet.bin",
+        "--packet-sha256",
+        "8e643bcfebbb8a3e3660d5d7cb449129cf69d045137f40d5351f5f9514abed24",
+        "--output",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-toml-strings\\release.exe",
+        "--release"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "seconds": 19.690138100006152,
+      "exit": 0,
+      "stdoutBytes": 165,
+      "stdoutSHA256": "0dabc741e7cd69f424d4acc2141bc6eb791d622b69095b74c9eb60831e5ce7c8",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-toml-strings\\release.exe",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-toml-strings\\reference.bin"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "seconds": 0.021208699996350333,
+      "exit": 0,
+      "stdoutBytes": 0,
+      "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr": ""
+    }
+  ],
+  "manifestParsingComplete": false,
+  "projectDiscoveryComplete": false,
+  "publicApiChanged": false,
+  "dbChanged": false,
+  "ciChanged": false,
+  "pushed": false,
+  "baseCommit": "cf4387b3a670ad6f08c2f40379eefc1a9ce17d5f",
+  "requirement": "41-87 original continuation; TOML string tokens and quoted keys are a prerequisite for manifest-based source discovery item 65",
+  "owningContracts": [
+    "docs/package/project-manifest-v1.md",
+    "docs/adr/0143-local-exact-project-manifest-v1.md",
+    "https://toml.io/en/v1.1.0#string"
+  ],
+  "decoderReference": {
+    "module": "github.com/BurntSushi/toml",
+    "version": "v1.6.0",
+    "source": "go.mod"
+  },
+  "sourceOfTruthDocumentsChanged": [],
+  "sourceCheck": {
+    "command": "fairyc check",
+    "passed": true,
+    "files": 296,
+    "mirFunctions": 3726
+  },
+  "coverage": [
+    "Basic, literal, multiline basic and multiline literal strings",
+    "Pinned decoder xHH, uHHHH, UHHHHHHHH and escape-character escapes",
+    "UTF-8 scalar output, including NUL and rejection of surrogate/out-of-range scalars",
+    "Multiline first-newline trimming, line folding and preserved CRLF bytes",
+    "Quoted-key multiline rejection and exact token-ending cursor",
+    "All 256 raw byte values in four string forms",
+    "Mutation and malformed token comparisons with the pinned Go decoder",
+    "Syntax and malformed UTF-8 failures preserve pre-existing output bytes",
+    "1 MiB source and output limits, including rollback after partial UTF-8 output",
+    "Out-of-input cursors produce bounded error spans"
+  ],
+  "runnerChange": "Existing opt-in manifest verifier gains a strings mode; new Go command is only a test oracle",
+  "repositoryHygieneChange": "Refreshed candidate lock source identity; no new ignore patterns",
+  "limits": {
+    "sourceBytes": 1048576,
+    "outputBytes": 1048576
+  },
+  "skipped": [
+    {
+      "check": "Whole manifest parser",
+      "reason": "Tables, arrays, duplicate keys, closed fields and model publication are subsequent units"
+    },
+    {
+      "check": "Project source discovery",
+      "reason": "Requires the complete manifest model and filesystem integration"
+    },
+    {
+      "check": "Whole frontend differential",
+      "reason": "These cases establish string-token and quoted-key behavior only"
+    },
+    {
+      "check": "Linux",
+      "reason": "Separate platform batch"
+    },
+    {
+      "check": "Full repository suite and hosted CI",
+      "reason": "Focused local implementation slice; no push authorized"
+    }
+  ],
+  "next": [
+    "Bare and dotted keys, string arrays and document table state",
+    "Closed-field manifest model and exact reason/field errors",
+    "Manifest-based project source discovery"
+  ]
+}

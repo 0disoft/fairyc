@@ -1,0 +1,1266 @@
+{
+  "schema": "fairyc.candidate-toml-strings-corpus/v1",
+  "exhaustiveStringForms": [
+    "basic",
+    "literal",
+    "multi-basic",
+    "multi-literal"
+  ],
+  "cases": [
+    {
+      "name": "fixed-value-0",
+      "source": "IiI=",
+      "key": false
+    },
+    {
+      "name": "fixed-key-0",
+      "source": "IiI=",
+      "key": true
+    },
+    {
+      "name": "fixed-value-1",
+      "source": "Jyc=",
+      "key": false
+    },
+    {
+      "name": "fixed-key-1",
+      "source": "Jyc=",
+      "key": true
+    },
+    {
+      "name": "fixed-value-2",
+      "source": "ImFiYyI=",
+      "key": false
+    },
+    {
+      "name": "fixed-key-2",
+      "source": "ImFiYyI=",
+      "key": true
+    },
+    {
+      "name": "fixed-value-3",
+      "source": "J0M6XFVzZXJzXHJhdyc=",
+      "key": false
+    },
+    {
+      "name": "fixed-key-3",
+      "source": "J0M6XFVzZXJzXHJhdyc=",
+      "key": true
+    },
+    {
+      "name": "fixed-value-4",
+      "source": "IlxiXHRcblxmXHJcZVwiXFwi",
+      "key": false
+    },
+    {
+      "name": "fixed-key-4",
+      "source": "IlxiXHRcblxmXHJcZVwiXFwi",
+      "key": true
+    },
+    {
+      "name": "fixed-value-5",
+      "source": "Ilx4MDBceDdmXHg4MFx4RkYi",
+      "key": false
+    },
+    {
+      "name": "fixed-key-5",
+      "source": "Ilx4MDBceDdmXHg4MFx4RkYi",
+      "key": true
+    },
+    {
+      "name": "fixed-value-6",
+      "source": "Ilx1MDAwMFx1MDA3Zlx1MDA4MFx1MDdmZlx1MDgwMFx1ZmZmZiI=",
+      "key": false
+    },
+    {
+      "name": "fixed-key-6",
+      "source": "Ilx1MDAwMFx1MDA3Zlx1MDA4MFx1MDdmZlx1MDgwMFx1ZmZmZiI=",
+      "key": true
+    },
+    {
+      "name": "fixed-value-7",
+      "source": "IlxVMDAwMTAwMDBcVTAwMTBmZmZmIg==",
+      "key": false
+    },
+    {
+      "name": "fixed-key-7",
+      "source": "IlxVMDAwMTAwMDBcVTAwMTBmZmZmIg==",
+      "key": true
+    },
+    {
+      "name": "fixed-value-8",
+      "source": "Ilx1ZDgwMCI=",
+      "key": false
+    },
+    {
+      "name": "fixed-key-8",
+      "source": "Ilx1ZDgwMCI=",
+      "key": true
+    },
+    {
+      "name": "fixed-value-9",
+      "source": "Ilx1ZGZmZiI=",
+      "key": false
+    },
+    {
+      "name": "fixed-key-9",
+      "source": "Ilx1ZGZmZiI=",
+      "key": true
+    },
+    {
+      "name": "fixed-value-10",
+      "source": "IlxVMDAxMTAwMDAi",
+      "key": false
+    },
+    {
+      "name": "fixed-key-10",
+      "source": "IlxVMDAxMTAwMDAi",
+      "key": true
+    },
+    {
+      "name": "fixed-value-11",
+      "source": "IlxVZmZmZmZmZmYi",
+      "key": false
+    },
+    {
+      "name": "fixed-key-11",
+      "source": "IlxVZmZmZmZmZmYi",
+      "key": true
+    },
+    {
+      "name": "fixed-value-12",
+      "source": "Ilx1MTIzIg==",
+      "key": false
+    },
+    {
+      "name": "fixed-key-12",
+      "source": "Ilx1MTIzIg==",
+      "key": true
+    },
+    {
+      "name": "fixed-value-13",
+      "source": "Ilx1MTJHNCI=",
+      "key": false
+    },
+    {
+      "name": "fixed-key-13",
+      "source": "Ilx1MTJHNCI=",
+      "key": true
+    },
+    {
+      "name": "fixed-value-14",
+      "source": "Ilx4RiI=",
+      "key": false
+    },
+    {
+      "name": "fixed-key-14",
+      "source": "Ilx4RiI=",
+      "key": true
+    },
+    {
+      "name": "fixed-value-15",
+      "source": "Ilx4R0ci",
+      "key": false
+    },
+    {
+      "name": "fixed-key-15",
+      "source": "Ilx4R0ci",
+      "key": true
+    },
+    {
+      "name": "fixed-value-16",
+      "source": "IlxxIg==",
+      "key": false
+    },
+    {
+      "name": "fixed-key-16",
+      "source": "IlxxIg==",
+      "key": true
+    },
+    {
+      "name": "fixed-value-17",
+      "source": "IlwgIg==",
+      "key": false
+    },
+    {
+      "name": "fixed-key-17",
+      "source": "IlwgIg==",
+      "key": true
+    },
+    {
+      "name": "fixed-value-18",
+      "source": "IlwJIg==",
+      "key": false
+    },
+    {
+      "name": "fixed-key-18",
+      "source": "IlwJIg==",
+      "key": true
+    },
+    {
+      "name": "fixed-value-19",
+      "source": "Im9wZW4=",
+      "key": false
+    },
+    {
+      "name": "fixed-key-19",
+      "source": "Im9wZW4=",
+      "key": true
+    },
+    {
+      "name": "fixed-value-20",
+      "source": "J29wZW4=",
+      "key": false
+    },
+    {
+      "name": "fixed-key-20",
+      "source": "J29wZW4=",
+      "key": true
+    },
+    {
+      "name": "fixed-value-21",
+      "source": "ImEKYiI=",
+      "key": false
+    },
+    {
+      "name": "fixed-key-21",
+      "source": "ImEKYiI=",
+      "key": true
+    },
+    {
+      "name": "fixed-value-22",
+      "source": "ImENCmIi",
+      "key": false
+    },
+    {
+      "name": "fixed-key-22",
+      "source": "ImENCmIi",
+      "key": true
+    },
+    {
+      "name": "fixed-value-23",
+      "source": "ImENYiI=",
+      "key": false
+    },
+    {
+      "name": "fixed-key-23",
+      "source": "ImENYiI=",
+      "key": true
+    },
+    {
+      "name": "fixed-value-24",
+      "source": "ImEJYiI=",
+      "key": false
+    },
+    {
+      "name": "fixed-key-24",
+      "source": "ImEJYiI=",
+      "key": true
+    },
+    {
+      "name": "fixed-value-25",
+      "source": "IlwwIg==",
+      "key": false
+    },
+    {
+      "name": "fixed-key-25",
+      "source": "IlwwIg==",
+      "key": true
+    },
+    {
+      "name": "fixed-value-26",
+      "source": "IlwvIg==",
+      "key": false
+    },
+    {
+      "name": "fixed-key-26",
+      "source": "IlwvIg==",
+      "key": true
+    },
+    {
+      "name": "fixed-value-27",
+      "source": "Iu2VnOq4gPCfmIAi",
+      "key": false
+    },
+    {
+      "name": "fixed-key-27",
+      "source": "Iu2VnOq4gPCfmIAi",
+      "key": true
+    },
+    {
+      "name": "fixed-value-28",
+      "source": "IiIiIiIi",
+      "key": false
+    },
+    {
+      "name": "fixed-key-28",
+      "source": "IiIiIiIi",
+      "key": true
+    },
+    {
+      "name": "fixed-value-29",
+      "source": "JycnJycn",
+      "key": false
+    },
+    {
+      "name": "fixed-key-29",
+      "source": "JycnJycn",
+      "key": true
+    },
+    {
+      "name": "fixed-value-30",
+      "source": "IiIiCnRleHQKIiIi",
+      "key": false
+    },
+    {
+      "name": "fixed-key-30",
+      "source": "IiIiCnRleHQKIiIi",
+      "key": true
+    },
+    {
+      "name": "fixed-value-31",
+      "source": "IiIiDQp0ZXh0DQoiIiI=",
+      "key": false
+    },
+    {
+      "name": "fixed-key-31",
+      "source": "IiIiDQp0ZXh0DQoiIiI=",
+      "key": true
+    },
+    {
+      "name": "fixed-value-32",
+      "source": "JycnCnRleHQKJycn",
+      "key": false
+    },
+    {
+      "name": "fixed-key-32",
+      "source": "JycnCnRleHQKJycn",
+      "key": true
+    },
+    {
+      "name": "fixed-value-33",
+      "source": "JycnDQp0ZXh0DQonJyc=",
+      "key": false
+    },
+    {
+      "name": "fixed-key-33",
+      "source": "JycnDQp0ZXh0DQonJyc=",
+      "key": true
+    },
+    {
+      "name": "fixed-value-34",
+      "source": "IiIidGV4dA1saW5lIiIi",
+      "key": false
+    },
+    {
+      "name": "fixed-key-34",
+      "source": "IiIidGV4dA1saW5lIiIi",
+      "key": true
+    },
+    {
+      "name": "fixed-value-35",
+      "source": "IiIiYVwKIAkNCiBiIiIi",
+      "key": false
+    },
+    {
+      "name": "fixed-key-35",
+      "source": "IiIiYVwKIAkNCiBiIiIi",
+      "key": true
+    },
+    {
+      "name": "fixed-value-36",
+      "source": "IiIiYVwgCQ0KIGIiIiI=",
+      "key": false
+    },
+    {
+      "name": "fixed-key-36",
+      "source": "IiIiYVwgCQ0KIGIiIiI=",
+      "key": true
+    },
+    {
+      "name": "fixed-value-37",
+      "source": "IiIiYVwgIGIiIiI=",
+      "key": false
+    },
+    {
+      "name": "fixed-key-37",
+      "source": "IiIiYVwgIGIiIiI=",
+      "key": true
+    },
+    {
+      "name": "fixed-value-38",
+      "source": "IiIiYVxcCiBiIiIi",
+      "key": false
+    },
+    {
+      "name": "fixed-key-38",
+      "source": "IiIiYVxcCiBiIiIi",
+      "key": true
+    },
+    {
+      "name": "fixed-value-39",
+      "source": "JycnYVwKIGInJyc=",
+      "key": false
+    },
+    {
+      "name": "fixed-key-39",
+      "source": "JycnYVwKIGInJyc=",
+      "key": true
+    },
+    {
+      "name": "fixed-value-40",
+      "source": "IiIiYSJiIiJjIiIi",
+      "key": false
+    },
+    {
+      "name": "fixed-key-40",
+      "source": "IiIiYSJiIiJjIiIi",
+      "key": true
+    },
+    {
+      "name": "fixed-value-41",
+      "source": "JycnYSdiJydjJycn",
+      "key": false
+    },
+    {
+      "name": "fixed-key-41",
+      "source": "JycnYSdiJydjJycn",
+      "key": true
+    },
+    {
+      "name": "fixed-value-42",
+      "source": "IiIidGV4dCIiIiI=",
+      "key": false
+    },
+    {
+      "name": "fixed-key-42",
+      "source": "IiIidGV4dCIiIiI=",
+      "key": true
+    },
+    {
+      "name": "fixed-value-43",
+      "source": "IiIidGV4dCIiIiIi",
+      "key": false
+    },
+    {
+      "name": "fixed-key-43",
+      "source": "IiIidGV4dCIiIiIi",
+      "key": true
+    },
+    {
+      "name": "fixed-value-44",
+      "source": "IiIidGV4dCIiIiIiIg==",
+      "key": false
+    },
+    {
+      "name": "fixed-key-44",
+      "source": "IiIidGV4dCIiIiIiIg==",
+      "key": true
+    },
+    {
+      "name": "fixed-value-45",
+      "source": "JycndGV4dCcnJyc=",
+      "key": false
+    },
+    {
+      "name": "fixed-key-45",
+      "source": "JycndGV4dCcnJyc=",
+      "key": true
+    },
+    {
+      "name": "fixed-value-46",
+      "source": "JycndGV4dCcnJycn",
+      "key": false
+    },
+    {
+      "name": "fixed-key-46",
+      "source": "JycndGV4dCcnJycn",
+      "key": true
+    },
+    {
+      "name": "fixed-value-47",
+      "source": "JycndGV4dCcnJycnJw==",
+      "key": false
+    },
+    {
+      "name": "fixed-key-47",
+      "source": "JycndGV4dCcnJycnJw==",
+      "key": true
+    },
+    {
+      "name": "fixed-value-48",
+      "source": "IiIidGV4dFwiIiIiIiI=",
+      "key": false
+    },
+    {
+      "name": "fixed-key-48",
+      "source": "IiIidGV4dFwiIiIiIiI=",
+      "key": true
+    },
+    {
+      "name": "fixed-value-49",
+      "source": "IiIidGV4dFwiIiIiIiIi",
+      "key": false
+    },
+    {
+      "name": "fixed-key-49",
+      "source": "IiIidGV4dFwiIiIiIiIi",
+      "key": true
+    },
+    {
+      "name": "fixed-value-50",
+      "source": "IiIiXHUwMDBBXHgwZCIiIg==",
+      "key": false
+    },
+    {
+      "name": "fixed-key-50",
+      "source": "IiIiXHUwMDBBXHgwZCIiIg==",
+      "key": true
+    },
+    {
+      "name": "fixed-value-51",
+      "source": "IsCvIg==",
+      "key": false
+    },
+    {
+      "name": "fixed-key-51",
+      "source": "IsCvIg==",
+      "key": true
+    },
+    {
+      "name": "fixed-value-52",
+      "source": "Iu2ggCI=",
+      "key": false
+    },
+    {
+      "name": "fixed-key-52",
+      "source": "Iu2ggCI=",
+      "key": true
+    },
+    {
+      "name": "fixed-value-53",
+      "source": "IvSQgIAi",
+      "key": false
+    },
+    {
+      "name": "fixed-key-53",
+      "source": "IvSQgIAi",
+      "key": true
+    },
+    {
+      "name": "fixed-value-54",
+      "source": "IuKCIg==",
+      "key": false
+    },
+    {
+      "name": "fixed-key-54",
+      "source": "IuKCIg==",
+      "key": true
+    },
+    {
+      "name": "fixed-value-55",
+      "source": "Iu+/vSI=",
+      "key": false
+    },
+    {
+      "name": "fixed-key-55",
+      "source": "Iu+/vSI=",
+      "key": true
+    },
+    {
+      "name": "fixed-value-56",
+      "source": "Iu+7vyI=",
+      "key": false
+    },
+    {
+      "name": "fixed-key-56",
+      "source": "Iu+7vyI=",
+      "key": true
+    },
+    {
+      "name": "mutation-0-0-0",
+      "source": "AFxiXHRcblxmXHJcZVwiXFwi",
+      "key": false
+    },
+    {
+      "name": "mutation-0-0-34",
+      "source": "IlxiXHRcblxmXHJcZVwiXFwi",
+      "key": false
+    },
+    {
+      "name": "mutation-0-0-39",
+      "source": "J1xiXHRcblxmXHJcZVwiXFwi",
+      "key": false
+    },
+    {
+      "name": "mutation-0-0-92",
+      "source": "XFxiXHRcblxmXHJcZVwiXFwi",
+      "key": false
+    },
+    {
+      "name": "mutation-0-0-10",
+      "source": "ClxiXHRcblxmXHJcZVwiXFwi",
+      "key": false
+    },
+    {
+      "name": "mutation-0-0-13",
+      "source": "DVxiXHRcblxmXHJcZVwiXFwi",
+      "key": false
+    },
+    {
+      "name": "mutation-0-0-255",
+      "source": "/1xiXHRcblxmXHJcZVwiXFwi",
+      "key": false
+    },
+    {
+      "name": "mutation-0-9-0",
+      "source": "IlxiXHRcblxmAHJcZVwiXFwi",
+      "key": false
+    },
+    {
+      "name": "mutation-0-9-34",
+      "source": "IlxiXHRcblxmInJcZVwiXFwi",
+      "key": false
+    },
+    {
+      "name": "mutation-0-9-39",
+      "source": "IlxiXHRcblxmJ3JcZVwiXFwi",
+      "key": false
+    },
+    {
+      "name": "mutation-0-9-92",
+      "source": "IlxiXHRcblxmXHJcZVwiXFwi",
+      "key": false
+    },
+    {
+      "name": "mutation-0-9-10",
+      "source": "IlxiXHRcblxmCnJcZVwiXFwi",
+      "key": false
+    },
+    {
+      "name": "mutation-0-9-13",
+      "source": "IlxiXHRcblxmDXJcZVwiXFwi",
+      "key": false
+    },
+    {
+      "name": "mutation-0-9-255",
+      "source": "IlxiXHRcblxm/3JcZVwiXFwi",
+      "key": false
+    },
+    {
+      "name": "mutation-0-17-0",
+      "source": "IlxiXHRcblxmXHJcZVwiXFwA",
+      "key": false
+    },
+    {
+      "name": "mutation-0-17-34",
+      "source": "IlxiXHRcblxmXHJcZVwiXFwi",
+      "key": false
+    },
+    {
+      "name": "mutation-0-17-39",
+      "source": "IlxiXHRcblxmXHJcZVwiXFwn",
+      "key": false
+    },
+    {
+      "name": "mutation-0-17-92",
+      "source": "IlxiXHRcblxmXHJcZVwiXFxc",
+      "key": false
+    },
+    {
+      "name": "mutation-0-17-10",
+      "source": "IlxiXHRcblxmXHJcZVwiXFwK",
+      "key": false
+    },
+    {
+      "name": "mutation-0-17-13",
+      "source": "IlxiXHRcblxmXHJcZVwiXFwN",
+      "key": false
+    },
+    {
+      "name": "mutation-0-17-255",
+      "source": "IlxiXHRcblxmXHJcZVwiXFz/",
+      "key": false
+    },
+    {
+      "name": "mutation-1-0-0",
+      "source": "AFx1MDAwMFx1MDA3Zlx1MDA4MFx1MDdmZlx1MDgwMFx1ZmZmZiI=",
+      "key": false
+    },
+    {
+      "name": "mutation-1-0-34",
+      "source": "Ilx1MDAwMFx1MDA3Zlx1MDA4MFx1MDdmZlx1MDgwMFx1ZmZmZiI=",
+      "key": false
+    },
+    {
+      "name": "mutation-1-0-39",
+      "source": "J1x1MDAwMFx1MDA3Zlx1MDA4MFx1MDdmZlx1MDgwMFx1ZmZmZiI=",
+      "key": false
+    },
+    {
+      "name": "mutation-1-0-92",
+      "source": "XFx1MDAwMFx1MDA3Zlx1MDA4MFx1MDdmZlx1MDgwMFx1ZmZmZiI=",
+      "key": false
+    },
+    {
+      "name": "mutation-1-0-10",
+      "source": "Clx1MDAwMFx1MDA3Zlx1MDA4MFx1MDdmZlx1MDgwMFx1ZmZmZiI=",
+      "key": false
+    },
+    {
+      "name": "mutation-1-0-13",
+      "source": "DVx1MDAwMFx1MDA3Zlx1MDA4MFx1MDdmZlx1MDgwMFx1ZmZmZiI=",
+      "key": false
+    },
+    {
+      "name": "mutation-1-0-255",
+      "source": "/1x1MDAwMFx1MDA3Zlx1MDA4MFx1MDdmZlx1MDgwMFx1ZmZmZiI=",
+      "key": false
+    },
+    {
+      "name": "mutation-1-19-0",
+      "source": "Ilx1MDAwMFx1MDA3Zlx1MDA4MAB1MDdmZlx1MDgwMFx1ZmZmZiI=",
+      "key": false
+    },
+    {
+      "name": "mutation-1-19-34",
+      "source": "Ilx1MDAwMFx1MDA3Zlx1MDA4MCJ1MDdmZlx1MDgwMFx1ZmZmZiI=",
+      "key": false
+    },
+    {
+      "name": "mutation-1-19-39",
+      "source": "Ilx1MDAwMFx1MDA3Zlx1MDA4MCd1MDdmZlx1MDgwMFx1ZmZmZiI=",
+      "key": false
+    },
+    {
+      "name": "mutation-1-19-92",
+      "source": "Ilx1MDAwMFx1MDA3Zlx1MDA4MFx1MDdmZlx1MDgwMFx1ZmZmZiI=",
+      "key": false
+    },
+    {
+      "name": "mutation-1-19-10",
+      "source": "Ilx1MDAwMFx1MDA3Zlx1MDA4MAp1MDdmZlx1MDgwMFx1ZmZmZiI=",
+      "key": false
+    },
+    {
+      "name": "mutation-1-19-13",
+      "source": "Ilx1MDAwMFx1MDA3Zlx1MDA4MA11MDdmZlx1MDgwMFx1ZmZmZiI=",
+      "key": false
+    },
+    {
+      "name": "mutation-1-19-255",
+      "source": "Ilx1MDAwMFx1MDA3Zlx1MDA4MP91MDdmZlx1MDgwMFx1ZmZmZiI=",
+      "key": false
+    },
+    {
+      "name": "mutation-1-37-0",
+      "source": "Ilx1MDAwMFx1MDA3Zlx1MDA4MFx1MDdmZlx1MDgwMFx1ZmZmZgA=",
+      "key": false
+    },
+    {
+      "name": "mutation-1-37-34",
+      "source": "Ilx1MDAwMFx1MDA3Zlx1MDA4MFx1MDdmZlx1MDgwMFx1ZmZmZiI=",
+      "key": false
+    },
+    {
+      "name": "mutation-1-37-39",
+      "source": "Ilx1MDAwMFx1MDA3Zlx1MDA4MFx1MDdmZlx1MDgwMFx1ZmZmZic=",
+      "key": false
+    },
+    {
+      "name": "mutation-1-37-92",
+      "source": "Ilx1MDAwMFx1MDA3Zlx1MDA4MFx1MDdmZlx1MDgwMFx1ZmZmZlw=",
+      "key": false
+    },
+    {
+      "name": "mutation-1-37-10",
+      "source": "Ilx1MDAwMFx1MDA3Zlx1MDA4MFx1MDdmZlx1MDgwMFx1ZmZmZgo=",
+      "key": false
+    },
+    {
+      "name": "mutation-1-37-13",
+      "source": "Ilx1MDAwMFx1MDA3Zlx1MDA4MFx1MDdmZlx1MDgwMFx1ZmZmZg0=",
+      "key": false
+    },
+    {
+      "name": "mutation-1-37-255",
+      "source": "Ilx1MDAwMFx1MDA3Zlx1MDA4MFx1MDdmZlx1MDgwMFx1ZmZmZv8=",
+      "key": false
+    },
+    {
+      "name": "mutation-2-0-0",
+      "source": "ACIiCnRleHQKIiIi",
+      "key": false
+    },
+    {
+      "name": "mutation-2-0-34",
+      "source": "IiIiCnRleHQKIiIi",
+      "key": false
+    },
+    {
+      "name": "mutation-2-0-39",
+      "source": "JyIiCnRleHQKIiIi",
+      "key": false
+    },
+    {
+      "name": "mutation-2-0-92",
+      "source": "XCIiCnRleHQKIiIi",
+      "key": false
+    },
+    {
+      "name": "mutation-2-0-10",
+      "source": "CiIiCnRleHQKIiIi",
+      "key": false
+    },
+    {
+      "name": "mutation-2-0-13",
+      "source": "DSIiCnRleHQKIiIi",
+      "key": false
+    },
+    {
+      "name": "mutation-2-0-255",
+      "source": "/yIiCnRleHQKIiIi",
+      "key": false
+    },
+    {
+      "name": "mutation-2-6-0",
+      "source": "IiIiCnRlAHQKIiIi",
+      "key": false
+    },
+    {
+      "name": "mutation-2-6-34",
+      "source": "IiIiCnRlInQKIiIi",
+      "key": false
+    },
+    {
+      "name": "mutation-2-6-39",
+      "source": "IiIiCnRlJ3QKIiIi",
+      "key": false
+    },
+    {
+      "name": "mutation-2-6-92",
+      "source": "IiIiCnRlXHQKIiIi",
+      "key": false
+    },
+    {
+      "name": "mutation-2-6-10",
+      "source": "IiIiCnRlCnQKIiIi",
+      "key": false
+    },
+    {
+      "name": "mutation-2-6-13",
+      "source": "IiIiCnRlDXQKIiIi",
+      "key": false
+    },
+    {
+      "name": "mutation-2-6-255",
+      "source": "IiIiCnRl/3QKIiIi",
+      "key": false
+    },
+    {
+      "name": "mutation-2-11-0",
+      "source": "IiIiCnRleHQKIiIA",
+      "key": false
+    },
+    {
+      "name": "mutation-2-11-34",
+      "source": "IiIiCnRleHQKIiIi",
+      "key": false
+    },
+    {
+      "name": "mutation-2-11-39",
+      "source": "IiIiCnRleHQKIiIn",
+      "key": false
+    },
+    {
+      "name": "mutation-2-11-92",
+      "source": "IiIiCnRleHQKIiJc",
+      "key": false
+    },
+    {
+      "name": "mutation-2-11-10",
+      "source": "IiIiCnRleHQKIiIK",
+      "key": false
+    },
+    {
+      "name": "mutation-2-11-13",
+      "source": "IiIiCnRleHQKIiIN",
+      "key": false
+    },
+    {
+      "name": "mutation-2-11-255",
+      "source": "IiIiCnRleHQKIiL/",
+      "key": false
+    },
+    {
+      "name": "mutation-3-0-0",
+      "source": "ACIiYVwKIAkNCiBiIiIi",
+      "key": false
+    },
+    {
+      "name": "mutation-3-0-34",
+      "source": "IiIiYVwKIAkNCiBiIiIi",
+      "key": false
+    },
+    {
+      "name": "mutation-3-0-39",
+      "source": "JyIiYVwKIAkNCiBiIiIi",
+      "key": false
+    },
+    {
+      "name": "mutation-3-0-92",
+      "source": "XCIiYVwKIAkNCiBiIiIi",
+      "key": false
+    },
+    {
+      "name": "mutation-3-0-10",
+      "source": "CiIiYVwKIAkNCiBiIiIi",
+      "key": false
+    },
+    {
+      "name": "mutation-3-0-13",
+      "source": "DSIiYVwKIAkNCiBiIiIi",
+      "key": false
+    },
+    {
+      "name": "mutation-3-0-255",
+      "source": "/yIiYVwKIAkNCiBiIiIi",
+      "key": false
+    },
+    {
+      "name": "mutation-3-7-0",
+      "source": "IiIiYVwKIAANCiBiIiIi",
+      "key": false
+    },
+    {
+      "name": "mutation-3-7-34",
+      "source": "IiIiYVwKICINCiBiIiIi",
+      "key": false
+    },
+    {
+      "name": "mutation-3-7-39",
+      "source": "IiIiYVwKICcNCiBiIiIi",
+      "key": false
+    },
+    {
+      "name": "mutation-3-7-92",
+      "source": "IiIiYVwKIFwNCiBiIiIi",
+      "key": false
+    },
+    {
+      "name": "mutation-3-7-10",
+      "source": "IiIiYVwKIAoNCiBiIiIi",
+      "key": false
+    },
+    {
+      "name": "mutation-3-7-13",
+      "source": "IiIiYVwKIA0NCiBiIiIi",
+      "key": false
+    },
+    {
+      "name": "mutation-3-7-255",
+      "source": "IiIiYVwKIP8NCiBiIiIi",
+      "key": false
+    },
+    {
+      "name": "mutation-3-14-0",
+      "source": "IiIiYVwKIAkNCiBiIiIA",
+      "key": false
+    },
+    {
+      "name": "mutation-3-14-34",
+      "source": "IiIiYVwKIAkNCiBiIiIi",
+      "key": false
+    },
+    {
+      "name": "mutation-3-14-39",
+      "source": "IiIiYVwKIAkNCiBiIiIn",
+      "key": false
+    },
+    {
+      "name": "mutation-3-14-92",
+      "source": "IiIiYVwKIAkNCiBiIiJc",
+      "key": false
+    },
+    {
+      "name": "mutation-3-14-10",
+      "source": "IiIiYVwKIAkNCiBiIiIK",
+      "key": false
+    },
+    {
+      "name": "mutation-3-14-13",
+      "source": "IiIiYVwKIAkNCiBiIiIN",
+      "key": false
+    },
+    {
+      "name": "mutation-3-14-255",
+      "source": "IiIiYVwKIAkNCiBiIiL/",
+      "key": false
+    },
+    {
+      "name": "mutation-4-0-0",
+      "source": "ACIiYSJiIiJjIiIi",
+      "key": false
+    },
+    {
+      "name": "mutation-4-0-34",
+      "source": "IiIiYSJiIiJjIiIi",
+      "key": false
+    },
+    {
+      "name": "mutation-4-0-39",
+      "source": "JyIiYSJiIiJjIiIi",
+      "key": false
+    },
+    {
+      "name": "mutation-4-0-92",
+      "source": "XCIiYSJiIiJjIiIi",
+      "key": false
+    },
+    {
+      "name": "mutation-4-0-10",
+      "source": "CiIiYSJiIiJjIiIi",
+      "key": false
+    },
+    {
+      "name": "mutation-4-0-13",
+      "source": "DSIiYSJiIiJjIiIi",
+      "key": false
+    },
+    {
+      "name": "mutation-4-0-255",
+      "source": "/yIiYSJiIiJjIiIi",
+      "key": false
+    },
+    {
+      "name": "mutation-4-6-0",
+      "source": "IiIiYSJiACJjIiIi",
+      "key": false
+    },
+    {
+      "name": "mutation-4-6-34",
+      "source": "IiIiYSJiIiJjIiIi",
+      "key": false
+    },
+    {
+      "name": "mutation-4-6-39",
+      "source": "IiIiYSJiJyJjIiIi",
+      "key": false
+    },
+    {
+      "name": "mutation-4-6-92",
+      "source": "IiIiYSJiXCJjIiIi",
+      "key": false
+    },
+    {
+      "name": "mutation-4-6-10",
+      "source": "IiIiYSJiCiJjIiIi",
+      "key": false
+    },
+    {
+      "name": "mutation-4-6-13",
+      "source": "IiIiYSJiDSJjIiIi",
+      "key": false
+    },
+    {
+      "name": "mutation-4-6-255",
+      "source": "IiIiYSJi/yJjIiIi",
+      "key": false
+    },
+    {
+      "name": "mutation-4-11-0",
+      "source": "IiIiYSJiIiJjIiIA",
+      "key": false
+    },
+    {
+      "name": "mutation-4-11-34",
+      "source": "IiIiYSJiIiJjIiIi",
+      "key": false
+    },
+    {
+      "name": "mutation-4-11-39",
+      "source": "IiIiYSJiIiJjIiIn",
+      "key": false
+    },
+    {
+      "name": "mutation-4-11-92",
+      "source": "IiIiYSJiIiJjIiJc",
+      "key": false
+    },
+    {
+      "name": "mutation-4-11-10",
+      "source": "IiIiYSJiIiJjIiIK",
+      "key": false
+    },
+    {
+      "name": "mutation-4-11-13",
+      "source": "IiIiYSJiIiJjIiIN",
+      "key": false
+    },
+    {
+      "name": "mutation-4-11-255",
+      "source": "IiIiYSJiIiJjIiL/",
+      "key": false
+    },
+    {
+      "name": "quote-run-34-1",
+      "source": "Ig==",
+      "key": false
+    },
+    {
+      "name": "quote-run-39-1",
+      "source": "Jw==",
+      "key": false
+    },
+    {
+      "name": "quote-run-34-2",
+      "source": "IiI=",
+      "key": false
+    },
+    {
+      "name": "quote-run-39-2",
+      "source": "Jyc=",
+      "key": false
+    },
+    {
+      "name": "quote-run-34-3",
+      "source": "IiIi",
+      "key": false
+    },
+    {
+      "name": "quote-run-39-3",
+      "source": "Jycn",
+      "key": false
+    },
+    {
+      "name": "quote-run-34-4",
+      "source": "IiIiIg==",
+      "key": false
+    },
+    {
+      "name": "quote-run-39-4",
+      "source": "JycnJw==",
+      "key": false
+    },
+    {
+      "name": "quote-run-34-5",
+      "source": "IiIiIiI=",
+      "key": false
+    },
+    {
+      "name": "quote-run-39-5",
+      "source": "JycnJyc=",
+      "key": false
+    },
+    {
+      "name": "quote-run-34-6",
+      "source": "IiIiIiIi",
+      "key": false
+    },
+    {
+      "name": "quote-run-39-6",
+      "source": "JycnJycn",
+      "key": false
+    },
+    {
+      "name": "quote-run-34-7",
+      "source": "IiIiIiIiIg==",
+      "key": false
+    },
+    {
+      "name": "quote-run-39-7",
+      "source": "JycnJycnJw==",
+      "key": false
+    },
+    {
+      "name": "quote-run-34-8",
+      "source": "IiIiIiIiIiI=",
+      "key": false
+    },
+    {
+      "name": "quote-run-39-8",
+      "source": "JycnJycnJyc=",
+      "key": false
+    },
+    {
+      "name": "quote-run-34-9",
+      "source": "IiIiIiIiIiIi",
+      "key": false
+    },
+    {
+      "name": "quote-run-39-9",
+      "source": "JycnJycnJycn",
+      "key": false
+    },
+    {
+      "name": "unicode-0",
+      "source": "IlxVMDAwMDAwMDAi",
+      "key": false
+    },
+    {
+      "name": "unicode-127",
+      "source": "IlxVMDAwMDAwN0Yi",
+      "key": false
+    },
+    {
+      "name": "unicode-128",
+      "source": "IlxVMDAwMDAwODAi",
+      "key": false
+    },
+    {
+      "name": "unicode-2047",
+      "source": "IlxVMDAwMDA3RkYi",
+      "key": false
+    },
+    {
+      "name": "unicode-2048",
+      "source": "IlxVMDAwMDA4MDAi",
+      "key": false
+    },
+    {
+      "name": "unicode-55295",
+      "source": "IlxVMDAwMEQ3RkYi",
+      "key": false
+    },
+    {
+      "name": "unicode-55296",
+      "source": "IlxVMDAwMEQ4MDAi",
+      "key": false
+    },
+    {
+      "name": "unicode-57343",
+      "source": "IlxVMDAwMERGRkYi",
+      "key": false
+    },
+    {
+      "name": "unicode-57344",
+      "source": "IlxVMDAwMEUwMDAi",
+      "key": false
+    },
+    {
+      "name": "unicode-65535",
+      "source": "IlxVMDAwMEZGRkYi",
+      "key": false
+    },
+    {
+      "name": "unicode-65536",
+      "source": "IlxVMDAwMTAwMDAi",
+      "key": false
+    },
+    {
+      "name": "unicode-1114111",
+      "source": "IlxVMDAxMEZGRkYi",
+      "key": false
+    },
+    {
+      "name": "unicode-1114112",
+      "source": "IlxVMDAxMTAwMDAi",
+      "key": false
+    },
+    {
+      "name": "unicode-4294967295",
+      "source": "IlxVRkZGRkZGRkYi",
+      "key": false
+    }
+  ]
+}
