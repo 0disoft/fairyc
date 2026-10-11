@@ -1,0 +1,294 @@
+{
+  "schema": "fairyc.candidate-manifest-values/v1",
+  "passed": true,
+  "scope": "Decoded manifest values only; TOML parsing, source discovery and project CLI are subsequent implementation units",
+  "sourceInputs": [
+    {
+      "path": "examples/lexer_candidate/src/project_manifest_values.fy",
+      "sha256": "4f21b9dedf744ffc449d1b843282f9aba2ecc221c61f043594bea70c4d56387d"
+    },
+    {
+      "path": "examples/lexer_candidate/tests/project_manifest_values.fy",
+      "sha256": "2070b00cb6fef49d6a23c16491957952ce1f6887abc8aa320342fdbdc6df1b35"
+    },
+    {
+      "path": "spec/fixtures/project-manifest/candidate-values-v1.json",
+      "sha256": "38c4bb0fc287959e5aa756f8498684f146d9d88c475f86041200d9ba6df161f2"
+    },
+    {
+      "path": "cmd/fairyc-candidate-manifest-reference/main.go",
+      "sha256": "3272f4bb536ed6aba84ca81d6747a7564c11c98aec5da7b726163d958a40e35c"
+    },
+    {
+      "path": "tools/verify-candidate-manifest-values.py",
+      "sha256": "93cdbbfc8adef1cbb2deef3a62aab77df518a2629b434b788020b09cd449a1eb"
+    }
+  ],
+  "tools": {
+    "compiler": {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\manifest-bootstrap.exe",
+      "sha256": "4e6a50a83b4d9f74a11d749c779a90683ab3a3916d19f4852bfe1cbd452cc664"
+    },
+    "reference": {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-manifest-reference.exe",
+      "sha256": "61f3d0283827d0bff331ce553c7172413e3f3f50e67167e4d71c229ac473ac35"
+    },
+    "candidate": {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\two-stage-maintained-fresh\\stage1.exe",
+      "sha256": "32a019327c8cceac8a5a01402fd32d79b95c5fe3d57f9d898bfa977956905dc0"
+    },
+    "builder": {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-build-cached.exe",
+      "sha256": "1ed255a4b1f828c30b43caa99ff762e78b213bc55ba4bf6f4db840574bf2e3d1"
+    }
+  },
+  "cases": 1709,
+  "accepted": 200,
+  "referenceSHA256": "14648d2929c1c94be0047db519c14bc5950e29bdf0e882b93e1d75da045345af",
+  "binaryFixtureSHA256": "588eac78860461260293d312daa6fb18ab4cf2ca264e441989351955a742cb86",
+  "binaryFixtureBytes": 34318,
+  "nativeTests": 2,
+  "native": {
+    "schemaVersion": "fairyc.test-report/v4",
+    "engine": "native",
+    "target": "x86_64-windows-msvc",
+    "profile": "development",
+    "tests": [
+      {
+        "identity": "tests::project_manifest_values::keeps_exact_manifest_names_paths_and_versions",
+        "outcome": "passed",
+        "trapCategory": null,
+        "stdoutBase64": "",
+        "stderrBase64": ""
+      },
+      {
+        "identity": "tests::project_manifest_values::matches_go_manifest_value_reference",
+        "outcome": "passed",
+        "trapCategory": null,
+        "stdoutBase64": "",
+        "stderrBase64": ""
+      }
+    ],
+    "count": 2,
+    "passed": 2,
+    "failed": 0,
+    "status": "ok",
+    "lock": "verified"
+  },
+  "nativeInputs": {
+    "compilerSHA256": "4e6a50a83b4d9f74a11d749c779a90683ab3a3916d19f4852bfe1cbd452cc664",
+    "binarySHA256": "588eac78860461260293d312daa6fb18ab4cf2ca264e441989351955a742cb86",
+    "lockSHA256": "696258c22d20bdbb573480b10b3655b0ea557f61afd09db39efef8a598c0167e",
+    "sources": [
+      {
+        "path": "examples/lexer_candidate/src/project_manifest_values.fy",
+        "sha256": "4f21b9dedf744ffc449d1b843282f9aba2ecc221c61f043594bea70c4d56387d"
+      },
+      {
+        "path": "examples/lexer_candidate/tests/project_manifest_values.fy",
+        "sha256": "2070b00cb6fef49d6a23c16491957952ce1f6887abc8aa320342fdbdc6df1b35"
+      }
+    ]
+  },
+  "nativeInvocation": {
+    "argv": [
+      "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\manifest-bootstrap.exe",
+      "test",
+      "--native",
+      "--locked",
+      "--json",
+      "--capture-output",
+      "--exact",
+      "tests::project_manifest_values::keeps_exact_manifest_names_paths_and_versions",
+      "--exact",
+      "tests::project_manifest_values::matches_go_manifest_value_reference",
+      "--",
+      "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-manifest-values\\reference.bin"
+    ],
+    "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+    "seconds": 69.30765629999223,
+    "exit": 0,
+    "stdoutBytes": 515,
+    "stdoutSHA256": "c09d0ba474d18f30f464b5263e5c11b175db98814ae2e584b3aa41dd682eaa12",
+    "stderr": ""
+  },
+  "nativeReused": true,
+  "candidateInputFiles": 9,
+  "candidatePacketSHA256": "9f7959f090323c59fdd0b7bd8d28cb531e33e2d93893e4a4446d46b28109ee47",
+  "candidateExecutions": [
+    {
+      "profile": "development",
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-manifest-values\\development.exe",
+      "sha256": "9a63d89b7f60433e72a3949c250e4c37fdc2fa9d48dbb6e3eb42d5e205c203a2",
+      "exit": 0
+    },
+    {
+      "profile": "release",
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-manifest-values\\release.exe",
+      "sha256": "7a18930f9318670aac7b011af5e9be75aabf942b9139497e8393283556b7f123",
+      "exit": 0
+    }
+  ],
+  "invocations": [
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-manifest-reference.exe",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-manifest-values\\reference-request.json",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-manifest-values\\reference.bin",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-manifest-values\\reference.json"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "seconds": 0.08289089999743737,
+      "exit": 0,
+      "stdoutBytes": 0,
+      "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\manifest-bootstrap.exe",
+        "check",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "seconds": 12.308355600005598,
+      "exit": 0,
+      "stdoutBytes": 81,
+      "stdoutSHA256": "41b5f122b9d9ab14c72c8c2b94e40d87879807ec3c98bfb00fda6ec146eb2e6a",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\two-stage-maintained-fresh\\stage1.exe",
+        "--c-project-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-manifest-values\\sources.list"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "seconds": 3.200882899996941,
+      "exit": 0,
+      "stdoutBytes": 186497,
+      "stdoutSHA256": "9f7959f090323c59fdd0b7bd8d28cb531e33e2d93893e4a4446d46b28109ee47",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-build-cached.exe",
+        "--packet",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-manifest-values\\candidate-packet.bin",
+        "--packet-sha256",
+        "9f7959f090323c59fdd0b7bd8d28cb531e33e2d93893e4a4446d46b28109ee47",
+        "--output",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-manifest-values\\development.exe"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "seconds": 1.0331486999930348,
+      "exit": 0,
+      "stdoutBytes": 166,
+      "stdoutSHA256": "c77485590ed51179668e841db3bd21008d2f6c6a9a1f12d65152ee6d0c14eb0a",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-manifest-values\\development.exe",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-manifest-values\\reference.bin"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "seconds": 0.021072000003186986,
+      "exit": 0,
+      "stdoutBytes": 0,
+      "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-build-cached.exe",
+        "--packet",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-manifest-values\\candidate-packet.bin",
+        "--packet-sha256",
+        "9f7959f090323c59fdd0b7bd8d28cb531e33e2d93893e4a4446d46b28109ee47",
+        "--output",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-manifest-values\\release.exe",
+        "--release"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "seconds": 16.339454700006172,
+      "exit": 0,
+      "stdoutBytes": 168,
+      "stdoutSHA256": "8ddd274e36e3c51b9482460988649f2eb3bea4dfdc0880ef533cc19c96de1c83",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-manifest-values\\release.exe",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-manifest-values\\reference.bin"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "seconds": 0.01825269999972079,
+      "exit": 0,
+      "stdoutBytes": 0,
+      "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr": ""
+    }
+  ],
+  "manifestParsingComplete": false,
+  "projectDiscoveryComplete": false,
+  "publicApiChanged": false,
+  "dbChanged": false,
+  "ciChanged": false,
+  "pushed": false,
+  "baseCommit": "12894edfde1890bea193c549b619ed79fe6334bb",
+  "requirement": "41-87 original continuation; decoded manifest-v1 value rules are a prerequisite for source discovery item 65 and package identity item 66",
+  "owningContracts": [
+    "docs/package/project-manifest-v1.md",
+    "docs/adr/0143-local-exact-project-manifest-v1.md",
+    "internal/projectmanifest/manifest.go"
+  ],
+  "sourceOfTruthDocumentsChanged": [],
+  "sourceCheck": {
+    "command": "fairyc check",
+    "passed": true,
+    "files": 295,
+    "mirFunctions": 3718
+  },
+  "goReferenceCheck": {
+    "command": "bun tools/run-go.ts test ./internal/projectmanifest -count=1",
+    "passed": true
+  },
+  "coverage": [
+    "Lowercase kebab names and multi-segment UID",
+    "Exact language revision spelling without numeric overflow",
+    "SemVer core, prerelease and build identifiers including unbounded numeric spellings",
+    "ASCII portable segments, canonical relative paths and Windows reserved bases",
+    "Strict byte ordering for sorted unique names and paths",
+    "Every one-byte input in all six value domains",
+    "Decoded inputs through 4096-byte length in the differential corpus; no new value-rule length cap"
+  ],
+  "runnerChange": "Private test-only Go value oracle and opt-in Python verifier; native execution and Fairy-emitted C compare the same authored test bodies",
+  "skipped": [
+    {
+      "check": "Whole manifest parser",
+      "reason": "Next implementation unit; this leaf consumes already decoded values"
+    },
+    {
+      "check": "Project source discovery",
+      "reason": "Requires manifest parse result and filesystem integration"
+    },
+    {
+      "check": "Whole frontend differential",
+      "reason": "These cases validate manifest value rules only"
+    },
+    {
+      "check": "Linux",
+      "reason": "Separate platform batch"
+    },
+    {
+      "check": "Full repository suite and hosted CI",
+      "reason": "Focused local implementation slice; no push authorized"
+    }
+  ],
+  "next": [
+    "TOML decode and closed-field manifest model",
+    "Manifest-based canonical source discovery",
+    "Package graph identity and locked CLI integration"
+  ]
+}
