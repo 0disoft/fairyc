@@ -1,0 +1,203 @@
+{
+  "schema": "fairyc.candidate-build-bridge/v1",
+  "passed": true,
+  "implementations": [
+    {
+      "path": "internal/candidatebuild/packet.go",
+      "bytes": 4327,
+      "sha256": "80daf7b4777bcbc4e1594c9152d4d86b3282532c9d011a24d780225c4362cb4b"
+    },
+    {
+      "path": "internal/candidatebuild/build.go",
+      "bytes": 3938,
+      "sha256": "257d69731f0b17f08ad8ee6864f9dc5a4c57c505eace656c8c6babdaff91d226"
+    },
+    {
+      "path": "internal/candidatebuild/publish.go",
+      "bytes": 2537,
+      "sha256": "e2f36ab223636966f7867d2d209f9f39cdec2f059af7601117e40e0d43f24bc9"
+    },
+    {
+      "path": "internal/cstdlib/vector_storage.go",
+      "bytes": 1682,
+      "sha256": "f568c61934ed5ebb80bc91a3cede4bcb3391dfb6995d2925b927329d97a67c4c"
+    },
+    {
+      "path": "cmd/fairyc-candidate-build/main.go",
+      "bytes": 1422,
+      "sha256": "ba6046ffcfe7f30d137791c2ef9af6bd0c17ec7fe9c286e42b4487f1856dfcb8"
+    }
+  ],
+  "tests": {
+    "path": "internal/candidatebuild/build_test.go",
+    "bytes": 5710,
+    "sha256": "5902b8f5aa8b02b2039d0e7950a1a905eb62bc11407d3b45b17891007246e95f"
+  },
+  "command": "fairyc-candidate-build --candidate <exe> --manifest <source-list> --output <exe> [--directory <cwd>] [--release]",
+  "validation": {
+    "command": "bun tools/run-go.ts test ./internal/candidatebuild ./cmd/fairyc-candidate-build -count=1 -json",
+    "passed": [
+      "TestPacketRejectsTruncationAndExtraBytes",
+      "TestBuildFailuresKeepPreviousImage/source-error",
+      "TestBuildFailuresKeepPreviousImage/framing-error",
+      "TestBuildFailuresKeepPreviousImage/diagnostics",
+      "TestBuildFailuresKeepPreviousImage/output-limit",
+      "TestBuildFailuresKeepPreviousImage/timeout",
+      "TestBuildFailuresKeepPreviousImage/runtime-error",
+      "TestBuildFailuresKeepPreviousImage/compile-error",
+      "TestBuildFailuresKeepPreviousImage/link-error",
+      "TestBuildFailuresKeepPreviousImage",
+      "TestSuccessfulBuildReplacesCompleteImage",
+      "TestPublicationFailuresKeepPreviousImage/write",
+      "TestPublicationFailuresKeepPreviousImage/sync",
+      "TestPublicationFailuresKeepPreviousImage/close",
+      "TestPublicationFailuresKeepPreviousImage/rename",
+      "TestPublicationFailuresKeepPreviousImage"
+    ],
+    "buildFailureCases": [
+      "source-error",
+      "framing-error",
+      "diagnostics",
+      "output-limit",
+      "timeout",
+      "runtime-error",
+      "compile-error",
+      "link-error"
+    ],
+    "publicationFailureCases": [
+      "write",
+      "sync",
+      "close",
+      "rename"
+    ]
+  },
+  "actualCandidateExecution": {
+    "passed": true,
+    "candidateSHA256": "28b22fc312fa802172b3670e0877ae5747682af54b536acbcafb03cec183cea2",
+    "bridgeSHA256": "5c9780a721a151c49fa3c3c345c8b18191e138348c1a8c11f8e20a4a4da45eed",
+    "cases": [
+      {
+        "name": "ordinary-dev",
+        "exit": 0,
+        "seconds": 0.7629844000039157,
+        "stdout": "built: C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\bridge-fixtures\\ordinary-dev.exe (low, 1 C units, 109568 bytes)\n",
+        "stderr": "",
+        "imageBytes": 109568,
+        "imageSHA256": "5a22c7ebb8002e88fd57ec3fbbd7b08bd3b9b930c6f38c22c940320bc50cb66f",
+        "programExit": 0
+      },
+      {
+        "name": "ordinary-release",
+        "exit": 0,
+        "seconds": 0.7007513999997173,
+        "stdout": "built: C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\bridge-fixtures\\ordinary-release.exe (optimized, 1 C units, 107520 bytes)\n",
+        "stderr": "",
+        "imageBytes": 107520,
+        "imageSHA256": "d3212df03d0ce724c159a4441d5b98f916587f202fe75968efef8750d2dc451f",
+        "programExit": 0
+      },
+      {
+        "name": "type-error",
+        "exit": 2,
+        "seconds": 0.04388209999888204,
+        "stdout": "",
+        "stderr": "candidate build failed: candidate frontend failed: exit status 2: .cache/candidate-tagged/sdk-c-execution/project-cli/fixtures/type.fy:1:34: error: project phase 2 stage 4 code 1009 (bytes 33..37)\n",
+        "previousImagePreserved": true
+      },
+      {
+        "name": "syntax-error",
+        "exit": 2,
+        "seconds": 0.03962030000548111,
+        "stdout": "",
+        "stderr": "candidate build failed: candidate frontend failed: exit status 2: .cache/candidate-tagged/sdk-c-execution/project-cli/fixtures/syntax.fy:1:36: error: expected } (bytes 35..35)\n",
+        "previousImagePreserved": true
+      },
+      {
+        "name": "missing-source",
+        "exit": 2,
+        "seconds": 0.03905950000626035,
+        "stdout": "",
+        "stderr": "candidate build failed: candidate frontend failed: exit status 2: error: input file read failed\n",
+        "previousImagePreserved": true
+      },
+      {
+        "name": "dependency-entry",
+        "exit": 2,
+        "seconds": 0.10058939999726135,
+        "stdout": "",
+        "stderr": "candidate build failed: candidate frontend failed: exit status 2: .cache/candidate-tagged/sdk-c-execution/project-cli/fixtures/root.fy:1:1: error: project phase 4 stage 0 code 1001 (bytes 0..0)\n",
+        "previousImagePreserved": true
+      },
+      {
+        "name": "wrong-result",
+        "exit": 2,
+        "seconds": 0.09854279999854043,
+        "stdout": "",
+        "stderr": "candidate build failed: candidate frontend failed: exit status 2: .cache/candidate-tagged/sdk-c-execution/project-cli/fixtures/void.fy:1:1: error: project phase 5 stage 0 code 1001 (bytes 0..0)\n",
+        "previousImagePreserved": true
+      },
+      {
+        "name": "invalid-utf8",
+        "exit": 2,
+        "seconds": 0.03757499999483116,
+        "stdout": "",
+        "stderr": "candidate build failed: candidate frontend failed: exit status 2: error: invalid module manifest\n",
+        "previousImagePreserved": true
+      },
+      {
+        "name": "duplicate-source",
+        "exit": 2,
+        "seconds": 0.03779010000289418,
+        "stdout": "",
+        "stderr": "candidate build failed: candidate frontend failed: exit status 2: .cache/candidate-tagged/sdk-c-execution/project-cli/fixtures/main.fy:1:8: error: project phase 1 stage 0 code 1 (bytes 7..11)\n",
+        "previousImagePreserved": true
+      },
+      {
+        "name": "vector-dev",
+        "exit": 0,
+        "seconds": 2.3533027000012225,
+        "stdout": "built: C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\bridge-fixtures\\vector-dev.exe (low, 1 C units, 117248 bytes)\n",
+        "stderr": "",
+        "imageBytes": 117248,
+        "imageSHA256": "6fea6dd36e6a2946695f92c693a388c4d6d37d6a0f19fa31bc1f2f85eab27747",
+        "programExit": 0
+      },
+      {
+        "name": "vector-release",
+        "exit": 0,
+        "seconds": 2.3357419000021764,
+        "stdout": "built: C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\bridge-fixtures\\vector-release.exe (optimized, 1 C units, 110592 bytes)\n",
+        "stderr": "",
+        "imageBytes": 110592,
+        "imageSHA256": "800ba7db991bf7bbb205af6e575ef29f537a3ad5d6aaa3cdf3790977cfec8b70",
+        "programExit": 0
+      }
+    ]
+  },
+  "policy": {
+    "frontend": "Selected Fairy candidate executable; no Go frontend fallback",
+    "transport": "Exact bounded FYCPARTS1 framing, literal identities, frame ordering and one entry",
+    "runtime": "Closed Windows runtime symbols plus optional private vector transport; heap composed once",
+    "publication": "Open destination parent, stage/write/sync/close, rename; never delete old image on rename failure",
+    "frontendTimeoutSeconds": 60,
+    "frontendDiagnosticCap": 65536,
+    "packetCap": 100663296,
+    "compilerCommandTimeoutChanged": false,
+    "childPolicy": "Owned frontend process killed on timeout; WaitDelay bounds pipe cleanup"
+  },
+  "scope": {
+    "privateBootstrapCommandAdded": true,
+    "stableCLIChanged": false,
+    "goFrontendChanged": false,
+    "sdkABIChanged": false,
+    "dbChanged": false,
+    "ciChanged": false
+  },
+  "remaining": [
+    "Latest full original candidate source through the new bridge and default frontend budget",
+    "Standalone Fairy command integration, manifest/lock identity and program run/test commands",
+    "Full child-process-tree timeout policy",
+    "Stage1/Stage2, Linux and full suite"
+  ],
+  "pushed": false
+}

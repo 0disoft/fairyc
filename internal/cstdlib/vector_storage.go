@@ -2,6 +2,24 @@ package cstdlib
 
 import _ "embed"
 
+// WindowsMSVCCandidateSourceForSymbols composes the closed SDK runtime slice
+// with optional private vector transport, including the heap exactly once.
+func WindowsMSVCCandidateSourceForSymbols(symbols []string, vectors bool) (string, error) {
+	selected := append([]string(nil), symbols...)
+	if vectors {
+		selected = append(selected, "fy_std_system_heap_allocate_v0")
+	}
+	source, err := WindowsMSVCSourceForSymbols(selected)
+	if err != nil || !vectors {
+		return source, err
+	}
+	storage, err := canonicalSource("private vector storage", vectorStorage)
+	if err != nil {
+		return "", err
+	}
+	return source + "\n" + storage, nil
+}
+
 //go:embed stage0_vector_storage.c
 var vectorStorage string
 
