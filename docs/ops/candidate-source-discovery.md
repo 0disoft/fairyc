@@ -186,10 +186,32 @@ name-fragment guard no longer constrains binding. Wider parser compatibility
 remains explicit work.
 It does not establish complete Go syntax or workspace-loader equivalence.
 
+## Package input transaction
+
+`project_package_input.load` stages the cumulative source budget and commits it
+only after source loading and module binding both succeed. `load_manifest`
+performs one exact file read of the real `fairy.toml`, then follows the same
+transaction. Failed manifest parsing, filesystem collection and module binding
+leave the caller's file and byte counters unchanged; the work meter remains
+consumed. Typed manifest access is available without copying or reparsing it.
+
+Uniform failures retain the source-loader phases 0..5 and module phase 6,
+including OS/field/diagnostic codes, file index and original span. They own the
+relevant manifest or source-file bytes and path, so callers can release their
+input document and render diagnostics after temporary source/parser owners
+close. The wrapper retains the selected diagnostic file rather than the entire
+failed package. Phase 7 reports failure to allocate this diagnostic snapshot.
+
+One native test and both candidate C profiles pass, covering exact cumulative
+limits, module/syntax/UTF-8/path failures after reads, manifest error snapshots,
+input-buffer release and real manifest-file loading. Module mismatch retains
+the exact original 7..12 span and bytes. Full production check passes: 312 files
+and 3999 MIR functions. Evidence: `evidence/candidate-package-input-20261011.json`.
+
 ## Remaining connection
 
-Connect module binding to the package-load transaction, package resolution and
-project CLI. Broader parser-cap compatibility remains separate.
+Connect package inputs to exact source identity, workspace catalog/package
+resolution and the project CLI. Broader parser-cap compatibility remains separate.
 Resolve the Go junction observation discrepancy before any loader
 equivalence claim. Package/lock/CLI work remains separate.
 ReadDir is currently Windows AMD64 and keeps the existing SDK path bound.

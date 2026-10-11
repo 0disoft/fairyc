@@ -4,6 +4,7 @@ import project_source_catalog as catalog;
 import project_source_file as files;
 import std::bytes as bytes;
 import std::vec as v;
+import project_manifest as manifest;
 
 pub struct Budget{usize files;usize bytes;}
 struct Span{usize start;usize end;}
@@ -22,6 +23,7 @@ pub fn ref u8[] path(ref Sources sources,usize index){return catalog::path(ref s
 pub fn ref u8[] source(ref Sources sources,usize index){if(index>=count(sources)){return bytes::view(ref sources.contents)[..0];}let Span span=*v::at<Span>(ref sources.spans,index);return bytes::view(ref sources.contents)[span.start..span.end];}
 pub fn ref u8[] package_value(ref Sources sources,ref u8[] key){return roots::package_value(ref sources.root,key);}
 pub fn ref u8[] source_root_path(ref Sources sources){return roots::path(ref sources.root);}
+pub fn ref manifest::Manifest typed_manifest(ref Sources sources){return roots::typed_manifest(ref sources.root);}
 
 @effects(filesystem)
 pub fn Result<Sources,Error> load(ref u8[] root,ref u8[] manifest,ref mut Budget budget,ref mut usize work){

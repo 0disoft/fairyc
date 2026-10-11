@@ -22,3 +22,4 @@ pub fn Result<SourceRoot,Error> load(ref u8[] root,ref u8[] source,ref mut usize
 }
 pub fn ref u8[] path(ref SourceRoot root){return bytes::view(ref root.path);}
 pub fn ref u8[] package_value(ref SourceRoot root,ref u8[] key){return manifest::package_value(ref root.package,key);}
+pub fn ref manifest::Manifest typed_manifest(ref SourceRoot root){return ref root.package;}
