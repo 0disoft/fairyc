@@ -1067,3 +1067,19 @@ diagnostic aggregation, OS/JSON details and the help inventory remain, as do bui
 package entry and native driver, product timeout, Linux/full suite and Stage1/Stage2. The full
 main closure exceeds the 2 MiB catalog cap (inventory-only, no candidate C run); API, SDK
 ABI/version, DB and CI are unchanged, nothing pushed.
+
+## Source-set cap (2026-10-12)
+
+Aggregate source admission rises from 2 MiB to 4 MiB; bootstrap `sources()` uses the same cap.
+Per-file 64 KiB, 512 files, joined-source 1 MiB, all analysis caps and product timeouts stay unchanged.
+The stale 256-file/2-MiB `source_limits` test now follows the actual 512-file/4-MiB limits:
+512 files, raw 4 MiB and separator-inclusive exact 4 MiB pass; an extra file, raw-source overflow and separator-inclusive one-byte overflow fail.
+The existing joined-source 1-MiB and expression-arena 16k bounds remain covered.
+Three native tests and all three tests in both candidate-generated C profiles pass; native results were reused without a rerun.
+Anchored regex fixes inline `@test` stripping after the earlier phase-1 code-3 failure at line 27.
+Source check passes 357 files / 4665 MIR functions. A fresh Go-native full-dispatcher seed builds in 37.70 seconds.
+The full 350-file candidate input (2,483,350 bytes) runs emission for 237.47 seconds, exits 2 and emits zero C bytes:
+`module_unit_generics.fy`, project phase 2, stage 4, code 10, bytes 0..0. Byte admission is resolved; analysis work still stops execution.
+Stage2 is not achieved. Next: analysis partitioning, then package entry/C bundle/build/run/driver and timeouts, Linux/full suite, Stage1/Stage2.
+API, SDK ABI/version, DB and CI are unchanged; no push. Receipt:
+`evidence/candidate-source-set-cap-20261012.json`.

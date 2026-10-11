@@ -42,7 +42,7 @@ def sources():
     paths = [modules['main']] + [modules[name] for name in sorted(seen - {'main'})]
     assert 0 < len(paths) <= 512
     assert all(path.stat().st_size <= 65536 for path in paths)
-    assert sum(path.stat().st_size for path in paths)+len(paths)-1 <= 2097152
+    assert sum(path.stat().st_size for path in paths)+len(paths)-1 <= 4194304
     return [dict(path=p.relative_to(ROOT).as_posix(), sha256=digest(p)) for p in paths]
 
 

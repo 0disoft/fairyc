@@ -1,0 +1,281 @@
+{
+  "schema": "fairyc.candidate-source-set-cap/v1",
+  "passed": true,
+  "sourceSetBytes": {
+    "before": 2097152,
+    "after": 4194304
+  },
+  "sourceFileBytes": 65536,
+  "sourceFiles": 512,
+  "joinedBytes": 1048576,
+  "analysisCapsChanged": false,
+  "productTimeoutChanged": false,
+  "sourceCheck": {
+    "files": 357,
+    "mirFunctions": 4665
+  },
+  "tests": {
+    "schema": "fairyc.candidate-source-set-tests/v1",
+    "passed": true,
+    "native": {
+      "schemaVersion": "fairyc.test-report/v4",
+      "engine": "native",
+      "target": "x86_64-windows-msvc",
+      "profile": "development",
+      "tests": [
+        {
+          "identity": "tests::source_limits::large_joined_spans_survive_owned_hir_and_mir",
+          "outcome": "passed",
+          "trapCategory": null,
+          "stdoutBase64": "",
+          "stderrBase64": ""
+        },
+        {
+          "identity": "tests::source_limits::parser_expression_arena_uses_the_bounded_unit_limit",
+          "outcome": "passed",
+          "trapCategory": null,
+          "stdoutBase64": "",
+          "stderrBase64": ""
+        },
+        {
+          "identity": "tests::source_limits::source_set_boundaries_are_consistent",
+          "outcome": "passed",
+          "trapCategory": null,
+          "stdoutBase64": "",
+          "stderrBase64": ""
+        }
+      ],
+      "count": 3,
+      "passed": 3,
+      "failed": 0,
+      "status": "ok",
+      "lock": "verified"
+    },
+    "nativeReused": true,
+    "tools": {
+      "candidate": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-lock-write-20261012\\compiler.exe",
+        "sha256": "3c67203ca06e6c81aa73f383fb16685b57ad5c571b5028992fd638c0c17795b1"
+      },
+      "builder": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-source-file-20261011\\builder.exe",
+        "sha256": "8141ce6bcc461a52fe6bf0bf24e9e5f5a9d7842c3c7dbfc5863cc4e822584ea7"
+      }
+    },
+    "lockSHA256": "cdb17f7a4fd50d091d05eb6e825c100254da74ffeb1096b98dc173e7320cc903",
+    "candidatePacketSHA256": "9c0cc12ede33eeb427dc53d07f05d9637b05f79565e936bd12ddfd2e3caf315c",
+    "candidateInputFiles": 145,
+    "images": [
+      {
+        "profile": "development",
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-source-set-cap-20261012\\tests\\development.exe",
+        "sha256": "c94d476a86260414fc62f6194d3e3825dfbbd215ff74811be21fcbf095761ef8",
+        "exit": 0
+      },
+      {
+        "profile": "release",
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-source-set-cap-20261012\\tests\\release.exe",
+        "sha256": "385d2475e5a102b0a2bd7efec92dfdf7206607088d6396f5d7bd4ee4538b8ce3",
+        "exit": 0
+      }
+    ],
+    "invocations": [
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\manifest-bootstrap.exe",
+          "test",
+          "--native",
+          "--locked",
+          "--json",
+          "--capture-output",
+          "--exact",
+          "tests::source_limits::source_set_boundaries_are_consistent",
+          "--exact",
+          "tests::source_limits::large_joined_spans_survive_owned_hir_and_mir",
+          "--exact",
+          "tests::source_limits::parser_expression_arena_uses_the_bounded_unit_limit"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "seconds": 158.35020749999967,
+        "exit": 0,
+        "stdoutBytes": 659,
+        "stdoutSHA256": "6fdb53db3f48bca87422fb0e7dcc28a06a353e7267bced77936d3839c374bbd6",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-lock-write-20261012\\compiler.exe",
+          "--c-project-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-source-set-cap-20261012\\tests\\sources.list"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+        "seconds": 2.2177278000017395,
+        "exit": 2,
+        "stdoutBytes": 0,
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderr": ".cache/candidate-source-set-cap-20261012/tests/main.fy:27:1: error: project phase 1 stage 0 code 3 (bytes 1809..1814)\n"
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-lock-write-20261012\\compiler.exe",
+          "--c-project-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-source-set-cap-20261012\\tests\\sources.list"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+        "seconds": 115.2664866999985,
+        "exit": 0,
+        "stdoutBytes": 10303910,
+        "stdoutSHA256": "9c0cc12ede33eeb427dc53d07f05d9637b05f79565e936bd12ddfd2e3caf315c",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-source-file-20261011\\builder.exe",
+          "--packet",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-source-set-cap-20261012\\tests\\candidate-packet.bin",
+          "--packet-sha256",
+          "9c0cc12ede33eeb427dc53d07f05d9637b05f79565e936bd12ddfd2e3caf315c",
+          "--output",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-source-set-cap-20261012\\tests\\development.exe"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+        "seconds": 7.441889699999592,
+        "exit": 0,
+        "stdoutBytes": 182,
+        "stdoutSHA256": "ddc07701b6f8e593c9a073dc61035e16708a78b24d300b2d8a53335cd465cae0",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-source-set-cap-20261012\\tests\\development.exe"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+        "seconds": 46.06500319999759,
+        "exit": 0,
+        "stdoutBytes": 0,
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-source-file-20261011\\builder.exe",
+          "--packet",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-source-set-cap-20261012\\tests\\candidate-packet.bin",
+          "--packet-sha256",
+          "9c0cc12ede33eeb427dc53d07f05d9637b05f79565e936bd12ddfd2e3caf315c",
+          "--output",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-source-set-cap-20261012\\tests\\release.exe",
+          "--release"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+        "seconds": 74.28641290000814,
+        "exit": 0,
+        "stdoutBytes": 184,
+        "stdoutSHA256": "22fbcce7345df1e2888ee2235cd797020086635163eaf1c9b9b5bcb3d5bdd8c3",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-source-set-cap-20261012\\tests\\release.exe"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+        "seconds": 3.368456199998036,
+        "exit": 0,
+        "stdoutBytes": 0,
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderr": ""
+      }
+    ],
+    "frontendVerificationTimeoutSeconds": 900,
+    "executionVerificationTimeoutSeconds": 120,
+    "productTimeoutChanged": false
+  },
+  "fullDispatcher": {
+    "schema": "fairyc.candidate-source-set-full/v1",
+    "sourceFiles": 350,
+    "sourceBytes": 2483350,
+    "seed": {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-source-set-cap-20261012\\seed.exe",
+      "sha256": "b0b1fee80484ef84c16094478b169538696e52a86c29f994d6cf297733f900c3"
+    },
+    "frontendTimeoutSeconds": 900,
+    "productTimeoutChanged": false,
+    "invocations": [
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\manifest-bootstrap.exe",
+          "build",
+          "--locked"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "seconds": 37.7024042000121,
+        "exit": 0,
+        "stdoutBytes": 83,
+        "stdoutSHA256": "913d882a721755f5b674b0837a5dcdb182de237ba6bbcc5f15b49489af2c8bf9",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-source-set-cap-20261012\\seed.exe",
+          "--c-project-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-source-set-cap-20261012\\self-source.manifest"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+        "seconds": 237.46999879999203,
+        "exit": 2,
+        "stdoutBytes": 0,
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderr": "examples/lexer_candidate/src/module_unit_generics.fy:1:1: error: project phase 2 stage 4 code 10 (bytes 0..0)\n"
+      }
+    ],
+    "emitted": false
+  },
+  "sourceManifests": {
+    "tests": [
+      {
+        "path": "docs/ops/evidence/candidate-source-set-cap-tests-1-20261012.json",
+        "sha256": "8496f3f8d1ff948d7f1293a0ade6eab723310fcfbff984ab6be04e417d1071d8"
+      },
+      {
+        "path": "docs/ops/evidence/candidate-source-set-cap-tests-2-20261012.json",
+        "sha256": "ba2a1735d07c39f8747c373afe0d16cc5e16a712853c5580a525ced39bb9bc1c"
+      }
+    ],
+    "full": [
+      {
+        "path": "docs/ops/evidence/candidate-source-set-cap-full-1-20261012.json",
+        "sha256": "4f0e97620fbf03b1dbbaddd9abd5bddda52eb30909b894bdc05cadf0d8ec629f"
+      },
+      {
+        "path": "docs/ops/evidence/candidate-source-set-cap-full-2-20261012.json",
+        "sha256": "0edfe8ee7c2e4322cf698a3937a91115cb0570487050f9773581de42514169bd"
+      },
+      {
+        "path": "docs/ops/evidence/candidate-source-set-cap-full-3-20261012.json",
+        "sha256": "b6dd6557efcedc6a9e67f58e48f3b5a9400976ffea202fa923a87d56eaa3bfcc"
+      },
+      {
+        "path": "docs/ops/evidence/candidate-source-set-cap-full-4-20261012.json",
+        "sha256": "6778b9f3504399b4e45667fdcb2a718f5102a583644d98da2ee15baee4e184f1"
+      }
+    ]
+  },
+  "verificationTools": [
+    {
+      "path": "tools/verify-candidate-bootstrap.py",
+      "sha256": "dc8062b7ad580c77db445d765f65b7df007151f2e3219aa9b5e7b5c9be5433bf"
+    },
+    {
+      "path": "tools/verify-candidate-private-tests.py",
+      "sha256": "9aa043a3bbb6339cdb55905d070cf6c429e24c01356b8234d41d1ba7669761d8"
+    }
+  ],
+  "nextFailure": "Full candidate emission reaches module_unit_generics.fy, project phase 2 stage 4 code 10, bytes 0..0; no C packet or Stage2 image.",
+  "promotionGateReady": false,
+  "publicApiChanged": false,
+  "sdkAbiChanged": false,
+  "versionChanged": false,
+  "dbChanged": false,
+  "ciChanged": false,
+  "pushed": false
+}

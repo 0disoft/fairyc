@@ -4,7 +4,10 @@ module candidate_limits;
 // Byte limits do not raise the separate binding, depth or work limits.
 pub fn usize source_bytes(){return 65536;}
 pub fn usize program_bytes(){return 1048576;}
-pub fn usize source_set_bytes(){return 2097152;}
+// Workspace/check/lock integration makes the complete current dispatcher
+// about 2.5 MB. This bounds aggregate retained bytes only; each joined unit,
+// source file and analysis pass retains its independent admission cap.
+pub fn usize source_set_bytes(){return 4194304;}
 // The complete dispatcher imports 285 source owners. This bounds file/module
 // identities only; source-set bytes and each checked unit keep their own caps.
 pub fn usize source_files(){return 512;}

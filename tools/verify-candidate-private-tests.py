@@ -45,7 +45,7 @@ def main():
         parser.error('select all authored tests in the module')
     original_module = f'module tests::{args.module};'
     assert authored.startswith(original_module)
-    authored = authored.replace(original_module, 'module main;', 1).replace('@test\n', '')
+    authored = re.sub(r'(?m)^(\s*)@test\b\s*', r'\1', authored.replace(original_module, 'module main;', 1))
     authored += '\n@effects(filesystem,console) fn i32 main(){' + ''.join(name + '();' for name in args.test) + 'return 0;}\n'
     main_source = output / 'main.fy'
     main_source.write_text(authored, encoding='utf-8', newline='\n')

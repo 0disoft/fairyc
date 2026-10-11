@@ -27,9 +27,9 @@ import std::io as io;
 @test @effects(console) fn void source_set_boundaries_are_consistent(){
     var v::Vec<syntax::Parsed> files=v::empty<syntax::Parsed>();var usize i=0;
     while(i<limits::source_files()){assert(v::push<syntax::Parsed>(ref mut files,module_at(i,false)).is_ok);i+=1;}
-    let owned=switch(catalog::build(ref files)){case .ok(c):{c}case .err(e):{discard io::write_stderr("catalog ");discard io::write_stderr_u32(e.code);assert(false);return;}};assert(catalog::module_count(ref owned)==256);
+    let owned=switch(catalog::build(ref files)){case .ok(c):{c}case .err(e):{discard io::write_stderr("catalog ");discard io::write_stderr_u32(e.code);assert(false);return;}};assert(catalog::module_count(ref owned)==limits::source_files());
     let joined=switch(join::join(ref files)){case .ok(p):{p}case .err(e):{discard io::write_stderr("join ");discard io::write_stderr_u32(e.code);discard io::write_stderr_usize(e.module_index);assert(false);return;}};
-    assert(v::push<syntax::Parsed>(ref mut files,module_at(256,false)).is_ok);
+    assert(v::push<syntax::Parsed>(ref mut files,module_at(limits::source_files(),false)).is_ok);
     assert(!catalog::build(ref files).is_ok && !join::join(ref files).is_ok);
     discard v::clear<syntax::Parsed>(ref mut files);i=0;
     while(i<16){assert(v::push<syntax::Parsed>(ref mut files,module_at(i,true)).is_ok);i+=1;}
@@ -38,18 +38,19 @@ import std::io as io;
     assert(v::push<syntax::Parsed>(ref mut files,module_at(16,true)).is_ok);
     assert(catalog::build(ref files).is_ok && units::build(ref files).is_ok);
     assert(!join::join(ref files).is_ok); // A single joined owner still has 1 MiB.
-    i=17;while(i<32){assert(v::push<syntax::Parsed>(ref mut files,module_at(i,true)).is_ok);i+=1;}
-    assert(catalog::build(ref files).is_ok); // Exactly 2 MiB of raw catalog source.
-    assert(!units::build(ref files).is_ok); // Its separators would exceed 2 MiB.
-    assert(v::push<syntax::Parsed>(ref mut files,module_at(32,false)).is_ok);
+    let usize full_files=limits::source_set_bytes()/limits::source_bytes();
+    i=17;while(i<full_files){assert(v::push<syntax::Parsed>(ref mut files,module_at(i,true)).is_ok);i+=1;}
+    assert(catalog::build(ref files).is_ok); // Exactly the raw catalog byte cap.
+    assert(!units::build(ref files).is_ok); // Separators exceed the aggregate cap.
+    assert(v::push<syntax::Parsed>(ref mut files,module_at(full_files,false)).is_ok);
     assert(!catalog::build(ref files).is_ok);
     discard v::pop<syntax::Parsed>(ref mut files);discard v::pop<syntax::Parsed>(ref mut files);
-    assert(v::push<syntax::Parsed>(ref mut files,module_sized(31,limits::source_bytes()-31)).is_ok);
+    assert(v::push<syntax::Parsed>(ref mut files,module_sized(full_files-1,limits::source_bytes()-(full_files-1))).is_ok);
     let split=switch(units::build(ref files)){case .ok(p):{p}case .err(_):{assert(false);return;}};
-    assert(units::source_bytes(ref split)==limits::source_set_bytes() && units::count(ref split)==3);
+    assert(units::source_bytes(ref split)==limits::source_set_bytes() && units::count(ref split)==(full_files+14)/15);
     assert(catalog::build(ref files).is_ok && !join::join(ref files).is_ok);
     discard v::pop<syntax::Parsed>(ref mut files);
-    assert(v::push<syntax::Parsed>(ref mut files,module_sized(31,limits::source_bytes()-30)).is_ok);
+    assert(v::push<syntax::Parsed>(ref mut files,module_sized(full_files-1,limits::source_bytes()-(full_files-2))).is_ok);
     assert(catalog::build(ref files).is_ok && !units::build(ref files).is_ok); // One separator-inclusive byte over.
 }
 @test @effects(console) fn void large_joined_spans_survive_owned_hir_and_mir(){
