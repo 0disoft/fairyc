@@ -18,11 +18,17 @@ func run(args []string) error {
 	if err != nil {
 		return err
 	}
+	type file struct {
+		Path   string
+		Bytes  []byte
+		Module string
+	}
 	type row struct {
 		Source   string
 		Accepted bool
 		Reason   string
 		Paths    []string
+		Files    []file
 	}
 	rows := []row{}
 	for _, source := range []string{"Good", "Empty", "Collision", "Reparse", "IgnoredReparse"} {
@@ -41,6 +47,7 @@ func run(args []string) error {
 		} else {
 			for _, source := range workspace.Packages[0].Sources {
 				r.Paths = append(r.Paths, source.Path)
+				r.Files = append(r.Files, file{source.Path, source.Bytes, source.Module.Path})
 			}
 		}
 		rows = append(rows, r)

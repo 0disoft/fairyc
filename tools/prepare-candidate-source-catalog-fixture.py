@@ -13,7 +13,7 @@ def main():
     if os.name != 'nt':
         parser.error('the current SDK directory adapter requires Windows')
     base = args.root.resolve()
-    for name in ['Good/nested', 'Empty', 'Collision', 'Reparse', 'IgnoredReparse', 'Reads']:
+    for name in ['Good/nested', 'Empty', 'Collision', 'Reparse', 'IgnoredReparse', 'Reads', 'Package/src/nested']:
         (base / name).mkdir(parents=True, exist_ok=True)
     sources = {
         'Good/a.fy': 'module a;\n',
@@ -25,6 +25,10 @@ def main():
         'Collision/i.fy': 'module second;\n',
         'Reparse/a.fy': 'module a;\n',
         'IgnoredReparse/a.fy': 'module a;\n',
+        'Package/src/a.fy': 'module a;\n',
+        'Package/src/z.fy': 'module z;\n',
+        'Package/src/nested/z.fy': 'module nested::z;\n',
+        'Package/fairy.toml': "schema='fairyc.manifest/v1'\n[package]\nuid='example.catalog'\nname='catalog'\nversion='1.0.0'\nlanguage='fairyc-language/20'\nsource='src'\n",
     }
     for name, source in sources.items():
         (base / name).write_text(source, encoding='utf-8', newline='\n')

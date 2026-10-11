@@ -1,0 +1,400 @@
+{
+  "schema": "fairyc.candidate-private-tests/v1",
+  "passed": true,
+  "module": "project_source_set",
+  "sourceInputs": [
+    {
+      "path": "examples/lexer_candidate/src/candidate_limits.fy",
+      "sha256": "7a27948d9a43bde84acdf1106f462d0c5a288f8a54f193560658eff0c0d00f3e"
+    },
+    {
+      "path": "examples/lexer_candidate/src/file_source.fy",
+      "sha256": "1a7ac7f6c69ef27e78e734aa74dab90b895742a5500a32931baaed19379b938f"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_directory.fy",
+      "sha256": "1108036aa7af33be8c0179a2e45b4ad27b5f5f884a35de7ab4156ff5ec9e2499"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_manifest.fy",
+      "sha256": "378c68ca2801864301fef8df199393e020447099b75932b0230123040ba39466"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_manifest_values.fy",
+      "sha256": "4f21b9dedf744ffc449d1b843282f9aba2ecc221c61f043594bea70c4d56387d"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_path.fy",
+      "sha256": "aa253a5f63c1c8a79d760501a076d3c758cd999ef571881f36c4e1143bbfb72b"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_path_unicode_data.fy",
+      "sha256": "9cf3af27796644304493561591e1641c70c5c653bf739ed71a65e492db510fbd"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_source_catalog.fy",
+      "sha256": "5dd5b1a6f848968cf20676084af8ddcaf039cfc74e1837685c12c601c53fb131"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_source_file.fy",
+      "sha256": "ff112c40c8b81693610045a7bad5129168beb355b1b6b0b3d6e0649124fbc90e"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_source_root.fy",
+      "sha256": "de146691f7618114f3c59c3b3700e2003f92b7050cebdd303c0c74c564eb3567"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_source_set.fy",
+      "sha256": "9dc680ed07ceac5240e30fe335abe57bd22fd7ebf4a42bc3f9d24642faa5fb6e"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_toml_context.fy",
+      "sha256": "1682260043feced2ac662198fd3b29f4badb2a4a9f9b02a8e1f81462f3b3cc0f"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_toml_document.fy",
+      "sha256": "0bc3782206da0d9320ba8a39ea6a1f9ded52ec1bbf855580e31c1a1786f4b3a8"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_toml_model.fy",
+      "sha256": "4a6c295108e704749fc557204de4d8a0287e3228e59da396c50867ec8894b11e"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_toml_scalars.fy",
+      "sha256": "137d5dbdce313f22e91a9be87f8b34eb6f10011933b152f649421a895e274cb9"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_toml_strings.fy",
+      "sha256": "bc7e71acaaa68af5755d066c90fa1f763625de32c8fa2a6778e8447eebc187bb"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_toml_values.fy",
+      "sha256": "24255d1fdf0f34b6761f5304d383127667e8b127488a80409b3f35a13f62e81c"
+    },
+    {
+      "path": "internal/sdkstdlib/sources/std/bytes.fy",
+      "sha256": "4740a506e93349fb002c383967dcc44d182d20f09f2094b83b5464a4ab252982"
+    },
+    {
+      "path": "internal/sdkstdlib/sources/std/fs.fy",
+      "sha256": "fd7ddfa9f0deed98304cecf94911644087d1e2a46e8be8995c35acbcb183b335"
+    },
+    {
+      "path": "internal/sdkstdlib/sources/std/num.fy",
+      "sha256": "09aa0d45f075aa4212049527ded7bb48d99ceb6ffed56b310e267421bae20bb3"
+    },
+    {
+      "path": "internal/sdkstdlib/sources/std/process.fy",
+      "sha256": "9680a1481df4f761f481d5a039af7bdbefeb312d1091961194f8e7bc0681ae24"
+    },
+    {
+      "path": "internal/sdkstdlib/sources/std/text.fy",
+      "sha256": "cccd47e090fda11c9da063ffb321489dd8753fe9996855fc432833e05a79e695"
+    },
+    {
+      "path": "internal/sdkstdlib/sources/optional/std/vec.fy",
+      "sha256": "0ae4c395bf98c39079ad620bde035b3b590d51417864802e698edc069281db5b"
+    },
+    {
+      "path": "examples/lexer_candidate/tests/project_source_set.fy",
+      "sha256": "5c457ebbdaa7417206ee3bb7f5bd61c6702852d36b22d8b8bdab4dd0b2426802"
+    },
+    {
+      "path": "tools/verify-candidate-private-tests.py",
+      "sha256": "04c7e44df7941bd0c1a12b523b115df623dbe10836f3eb8993dedc7d6ea5e8af"
+    },
+    {
+      "path": ".cache/candidate-source-catalog-20261011/root.bin",
+      "sha256": "3c4788418d6aba17a5b2225255ebd933525ed69b33888f43bf019239169fa8a1"
+    },
+    {
+      "path": "tools/prepare-candidate-source-catalog-fixture.py",
+      "sha256": "6117dac12720b18630e69ce83f2ca76d4456950df80f4d124b97f2d478e1d52a"
+    },
+    {
+      "path": "cmd/fairyc-candidate-source-catalog-reference/main.go",
+      "sha256": "83b866da9880115ae6afa00577f14fdd77afef975f277bbe67cb6d2023991f0c"
+    },
+    {
+      "path": "internal/workspaceloader/loader.go",
+      "sha256": "6977f9f108741c30fb01a21be94fa90f127ddc06daea0bd991efcbcfb8c081f3"
+    }
+  ],
+  "tools": {
+    "compiler": {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\manifest-bootstrap.exe",
+      "sha256": "4e6a50a83b4d9f74a11d749c779a90683ab3a3916d19f4852bfe1cbd452cc664"
+    },
+    "candidate": {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-source-file-20261011\\compiler.exe",
+      "sha256": "e87cc5c8c19e30fc68ca68fa98ef66d87baa1300263d8989e255910bb1985d8f"
+    },
+    "builder": {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-source-file-20261011\\builder.exe",
+      "sha256": "8141ce6bcc461a52fe6bf0bf24e9e5f5a9d7842c3c7dbfc5863cc4e822584ea7"
+    }
+  },
+  "native": {
+    "schemaVersion": "fairyc.test-report/v4",
+    "engine": "native",
+    "target": "x86_64-windows-msvc",
+    "profile": "development",
+    "tests": [
+      {
+        "identity": "tests::project_source_set::retains_source_set_and_commits_cumulative_budgets_only_on_success",
+        "outcome": "passed",
+        "trapCategory": null,
+        "stdoutBase64": "",
+        "stderrBase64": ""
+      }
+    ],
+    "count": 1,
+    "passed": 1,
+    "failed": 0,
+    "status": "ok",
+    "lock": "verified"
+  },
+  "nativeTests": 1,
+  "lockSHA256": "3eb28476c134dec029b4ac97c5fd94575e46598f67553bec1fefc0bd12e881c9",
+  "candidateInputFiles": 24,
+  "candidatePacketSHA256": "36a349d74e07fe7a8898e5f660a87869597577f8e3d13d376a23e5e28ff25647",
+  "candidateExecutions": [
+    {
+      "profile": "development",
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-source-set-20261011\\execution\\development.exe",
+      "sha256": "0f00a09198916bf2e686589b3aab8a124294616417f9159e853f83c19d1880f9",
+      "exit": 0
+    },
+    {
+      "profile": "release",
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-source-set-20261011\\execution\\release.exe",
+      "sha256": "34380e1d3c356d55cafd922d06e2fa9ceea5c88049c55b82810747555239a6eb",
+      "exit": 0
+    }
+  ],
+  "invocations": [
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\manifest-bootstrap.exe",
+        "test",
+        "--native",
+        "--locked",
+        "--json",
+        "--capture-output",
+        "--exact",
+        "tests::project_source_set::retains_source_set_and_commits_cumulative_budgets_only_on_success",
+        "--",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-source-catalog-20261011\\root.bin"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "seconds": 55.90133059999789,
+      "exit": 0,
+      "stdoutBytes": 372,
+      "stdoutSHA256": "cdd741b4a819f4a91f9428423306b18fe6fa4f9aede7620ca45f5214137fb0db",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-source-file-20261011\\compiler.exe",
+        "--c-project-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-source-set-20261011\\execution\\sources.list"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "seconds": 21.726770100009162,
+      "exit": 0,
+      "stdoutBytes": 2003585,
+      "stdoutSHA256": "36a349d74e07fe7a8898e5f660a87869597577f8e3d13d376a23e5e28ff25647",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-source-file-20261011\\builder.exe",
+        "--packet",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-source-set-20261011\\execution\\candidate-packet.bin",
+        "--packet-sha256",
+        "36a349d74e07fe7a8898e5f660a87869597577f8e3d13d376a23e5e28ff25647",
+        "--output",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-source-set-20261011\\execution\\development.exe"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "seconds": 2.4649686999910045,
+      "exit": 0,
+      "stdoutBytes": 181,
+      "stdoutSHA256": "e2982c6fbc5d73d0270159d4817dbaa093e023bb7e38b91c81fcdca2820850b4",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-source-set-20261011\\execution\\development.exe",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-source-catalog-20261011\\root.bin"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "seconds": 0.057577300001867115,
+      "exit": 0,
+      "stdoutBytes": 0,
+      "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-source-file-20261011\\builder.exe",
+        "--packet",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-source-set-20261011\\execution\\candidate-packet.bin",
+        "--packet-sha256",
+        "36a349d74e07fe7a8898e5f660a87869597577f8e3d13d376a23e5e28ff25647",
+        "--output",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-source-set-20261011\\execution\\release.exe",
+        "--release"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "seconds": 59.88042100000894,
+      "exit": 0,
+      "stdoutBytes": 182,
+      "stdoutSHA256": "fbcfc7b0bd0db1dd554593c9fd24c6faffc9d57f18436004b1f1d36209dbde81",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-source-set-20261011\\execution\\release.exe",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-source-catalog-20261011\\root.bin"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "seconds": 0.04812959999253508,
+      "exit": 0,
+      "stdoutBytes": 0,
+      "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr": ""
+    }
+  ],
+  "publicApiChanged": false,
+  "dbChanged": false,
+  "ciChanged": false,
+  "pushed": false,
+  "fixtureFiles": [
+    {
+      "path": "Good/a.fy",
+      "bytes": 10,
+      "sha256": "fca3b7169045967e9f8c2b824305edd980c74a9f4241594b122ba52e34593329"
+    },
+    {
+      "path": "Good/z.fy",
+      "bytes": 10,
+      "sha256": "42990eece7dd909f5732424e382d69023231a14c1db9e0ea1d031c0e8a31dcd6"
+    },
+    {
+      "path": "Good/nested/z.fy",
+      "bytes": 18,
+      "sha256": "ee3323933f1c6ae9742a768a1032e4b1f64ba94877ebaa40617524630f2089f8"
+    },
+    {
+      "path": "Package/fairy.toml",
+      "bytes": 134,
+      "sha256": "41b12802444aed22cdea07026170aa27246b0adf1367c10f7d59a797cef41fb4"
+    },
+    {
+      "path": "Package/src/a.fy",
+      "bytes": 10,
+      "sha256": "fca3b7169045967e9f8c2b824305edd980c74a9f4241594b122ba52e34593329"
+    },
+    {
+      "path": "Package/src/z.fy",
+      "bytes": 10,
+      "sha256": "42990eece7dd909f5732424e382d69023231a14c1db9e0ea1d031c0e8a31dcd6"
+    },
+    {
+      "path": "Package/src/nested/z.fy",
+      "bytes": 18,
+      "sha256": "ee3323933f1c6ae9742a768a1032e4b1f64ba94877ebaa40617524630f2089f8"
+    },
+    {
+      "path": "Collision/İ.fy",
+      "bytes": 14,
+      "sha256": "5fbe96af8ec5de505b9bfaa719bc7257edceadaf5a13f950c223553451307310"
+    },
+    {
+      "path": "Collision/i.fy",
+      "bytes": 15,
+      "sha256": "3f393622fc520dc15f47dcd63acce9b20c20685397615884119bfb8544dc66f4"
+    }
+  ],
+  "goReferenceObservations": [
+    {
+      "Source": "Good",
+      "Accepted": true,
+      "Reason": "",
+      "Paths": [
+        "a.fy",
+        "nested/z.fy",
+        "z.fy"
+      ],
+      "Files": [
+        {
+          "Path": "a.fy",
+          "Bytes": "bW9kdWxlIGE7Cg==",
+          "Module": "a"
+        },
+        {
+          "Path": "nested/z.fy",
+          "Bytes": "bW9kdWxlIG5lc3RlZDo6ejsK",
+          "Module": "nested::z"
+        },
+        {
+          "Path": "z.fy",
+          "Bytes": "bW9kdWxlIHo7Cg==",
+          "Module": "z"
+        }
+      ]
+    },
+    {
+      "Source": "Empty",
+      "Accepted": false,
+      "Reason": "invalid-source-root",
+      "Paths": [],
+      "Files": null
+    },
+    {
+      "Source": "Collision",
+      "Accepted": false,
+      "Reason": "source-path-case-collision",
+      "Paths": [],
+      "Files": null
+    },
+    {
+      "Source": "Reparse",
+      "Accepted": true,
+      "Reason": "",
+      "Paths": [
+        "a.fy"
+      ],
+      "Files": [
+        {
+          "Path": "a.fy",
+          "Bytes": "bW9kdWxlIGE7Cg==",
+          "Module": "a"
+        }
+      ]
+    },
+    {
+      "Source": "IgnoredReparse",
+      "Accepted": true,
+      "Reason": "",
+      "Paths": [
+        "a.fy"
+      ],
+      "Files": [
+        {
+          "Path": "a.fy",
+          "Bytes": "bW9kdWxlIGE7Cg==",
+          "Module": "a"
+        }
+      ]
+    }
+  ],
+  "matchedReferenceBytesByPath": true,
+  "candidateImageReuse": "The preceding source-file unit image has the same compiler/backend implementation; the source-set program is freshly emitted from the hashed input files.",
+  "productionCheck": {
+    "files": 309,
+    "mirFunctions": 3958,
+    "passed": true
+  }
+}

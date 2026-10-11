@@ -113,10 +113,41 @@ The first release compile hit the old 60-second deadline. The final execution
 uses the committed real private deadline configuration from
 `candidate-compile-timeout.md`, without a timeout overlay.
 
+## Retained source sets
+
+`project_source_set.load` composes manifest validation, source-root resolution,
+recursive path discovery and exact file reads into one owned source set. It
+retains the typed manifest, source-root path, sorted relative file paths and
+exact bytes. File and byte counters are cumulative across calls and commit only
+after all files have loaded: 4096 files and 64 MiB of source bytes. The manifest
+is outside the source byte counter, as in the Go loader.
+
+`load_manifest` also reads the real root `fairy.toml` through the exact spelling,
+reparse and file-ID observation boundary, with a 1 MiB manifest input cap.
+Errors retain their leaf phase/reason, OS code, relevant span and owned path.
+Manifest-validation spans are document-relative; source-root spans refer to
+decoded `package.source`; file-read spans refer to the retained relative path.
+Caller root spelling remains an explicit anchor, without whole-workspace root
+canonicalization or an atomic filesystem snapshot.
+
+One native test and both candidate C profiles pass, including exact-limit
+aggregate success, a later-file byte failure with unchanged caller counters,
+file/collision/reparse/empty-tree failures, input manifest release and actual
+manifest-file loading. Empty fallback path/byte borrows stay rooted in their
+source owner. The ordinary sorted paths and all retained bytes agree with the
+Go loader reference observation. Full production check passes: 309 files and
+3958 MIR functions. Evidence: `evidence/candidate-source-set-20261011.json`.
+
+The candidate image from the source-file unit was reused; its compiler/backend
+implementation is unchanged and this unit's program was emitted from fresh
+hashed source inputs. No module binding or package-graph success is claimed by
+the byte-retention layer.
+
 ## Remaining connection
 
-Connect source-root ownership, the catalog and per-file byte reader into one
-retained source set, enforce cumulative byte limits and bind declared modules.
+Bind declared modules to the retained source paths, enforce exactly one module
+per file, reject syntax/path mismatches and duplicate modules, then connect the
+source set to package resolution and the project CLI.
 Resolve the Go junction observation discrepancy before any loader
 equivalence claim. Package/lock/CLI work remains separate.
 ReadDir is currently Windows AMD64 and keeps the existing SDK path bound.

@@ -17,7 +17,7 @@ pub fn u32 error_os_code(ref Error error){return error.os_code;}
 pub fn ref u8[] error_path(ref Error error){return bytes::view(ref error.path);}
 fn Error fail(u32 code,u32 os_code,ref u8[] path){var bytes::Buffer copy=bytes::empty();if(!bytes::append(ref mut copy,path).is_ok){return Error{.code=7,.os_code=0,.path=copy};}return Error{.code,.os_code,.path=copy};}
 pub fn usize count(ref Catalog catalog){return v::len<File>(ref catalog.files);}
-pub fn ref u8[] path(ref Catalog catalog,usize index){if(index>=count(catalog)){return b"";}let File file=*v::at<File>(ref catalog.files,*v::at<usize>(ref catalog.order,index));return bytes::view(ref catalog.names)[file.start..file.end];}
+pub fn ref u8[] path(ref Catalog catalog,usize index){if(index>=count(catalog)){return bytes::view(ref catalog.names)[..0];}let File file=*v::at<File>(ref catalog.files,*v::at<usize>(ref catalog.order,index));return bytes::view(ref catalog.names)[file.start..file.end];}
 pub fn usize observed_size(ref Catalog catalog,usize index){return if(index<count(catalog)){v::at<File>(ref catalog.files,*v::at<usize>(ref catalog.order,index)).size}else{0};}
 fn ref u8[] key(ref bytes::Buffer names,ref v::Vec<File> files,usize index,bool lower){let File file=*v::at<File>(files,index);return if(lower){bytes::view(names)[file.lower_start..file.lower_end]}else{bytes::view(names)[file.start..file.end]};}
 fn void put(ref mut v::Vec<usize> values,usize index,usize value){let ref mut usize slot=v::at_mut<usize>(values,index);*slot=value;}
