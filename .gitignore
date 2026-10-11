@@ -20,4 +20,5 @@ coverage/
 .tmp/
 tmp/
 *.tsbuildinfo
+/tools/__pycache__/
 # <<< ssealed ignore patterns <<<

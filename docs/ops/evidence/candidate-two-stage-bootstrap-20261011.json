@@ -1,0 +1,400 @@
+{
+  "schema": "fairyc.candidate-two-stage-bootstrap/v2",
+  "passed": true,
+  "scope": "Consecutive C-part generations after a Go-produced Fairy seed; not byte equality with that monolithic seed image",
+  "artifactPolicy": {
+    "identity": "fairyc.private-project-image-repro/v1",
+    "compilerFlags": [
+      "/Brepro"
+    ],
+    "linkerFlags": [
+      "/INCREMENTAL:NO",
+      "/Brepro"
+    ],
+    "comparison": "Exact full PE image bytes",
+    "excludedBytes": []
+  },
+  "sourceInventorySHA256": "cadff2cc422a91682d03de8262a2646311b4dd5003fd231d17fcb1415cfc5d83",
+  "sourceFiles": 287,
+  "frontendTimeoutSeconds": 60,
+  "seed": {
+    "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\bootstrap-byte-compare.exe",
+    "bytes": 2581504,
+    "sha256": "04f87dc3bf04f5b220a99044615cd2368eb6359b73f79a7f503674a9b8369312"
+  },
+  "builder": {
+    "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-build-cached.exe",
+    "bytes": 4731392,
+    "sha256": "1ed255a4b1f828c30b43caa99ff762e78b213bc55ba4bf6f4db840574bf2e3d1"
+  },
+  "frontends": [
+    {
+      "stage": 1,
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\bootstrap-byte-compare.exe",
+        "--c-project-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\two-stage-maintained-fresh\\self-source.manifest"
+      ],
+      "seconds": 33.446881299998495,
+      "exit": 0,
+      "stdoutBytes": 24563387,
+      "stderr": ""
+    },
+    {
+      "stage": 2,
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\two-stage-maintained-fresh\\stage1.exe",
+        "--c-project-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\two-stage-maintained-fresh\\self-source.manifest"
+      ],
+      "seconds": 49.388641900004586,
+      "exit": 0,
+      "stdoutBytes": 24563387,
+      "stderr": ""
+    }
+  ],
+  "builds": [
+    {
+      "stage": 1,
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-build-cached.exe",
+        "--packet",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\two-stage-maintained-fresh\\stage1-input.bin",
+        "--packet-sha256",
+        "1987876159b6395dddd19ea2f349df5701c478692a255dfda699058978f645b7",
+        "--output",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\two-stage-maintained-fresh\\stage1.exe",
+        "--release"
+      ],
+      "seconds": 181.84899510000832,
+      "exit": 0,
+      "stdout": "built: C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\two-stage-maintained-fresh\\stage1.exe (optimized, 36 C units, 3527168 bytes)\n",
+      "stderr": ""
+    },
+    {
+      "stage": 2,
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-build-cached.exe",
+        "--packet",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\two-stage-maintained-fresh\\stage2-input.bin",
+        "--packet-sha256",
+        "1987876159b6395dddd19ea2f349df5701c478692a255dfda699058978f645b7",
+        "--output",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\two-stage-maintained-fresh\\stage2.exe",
+        "--release"
+      ],
+      "seconds": 188.88377620000392,
+      "exit": 0,
+      "stdout": "built: C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\two-stage-maintained-fresh\\stage2.exe (optimized, 36 C units, 3527168 bytes)\n",
+      "stderr": ""
+    }
+  ],
+  "packets": [
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\two-stage-maintained-fresh\\stage1-input.bin",
+      "bytes": 24563387,
+      "sha256": "1987876159b6395dddd19ea2f349df5701c478692a255dfda699058978f645b7"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\two-stage-maintained-fresh\\stage2-input.bin",
+      "bytes": 24563387,
+      "sha256": "1987876159b6395dddd19ea2f349df5701c478692a255dfda699058978f645b7"
+    }
+  ],
+  "seedPacketSHA256": "1987876159b6395dddd19ea2f349df5701c478692a255dfda699058978f645b7",
+  "packetSHA256": "1987876159b6395dddd19ea2f349df5701c478692a255dfda699058978f645b7",
+  "stage1": {
+    "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\two-stage-maintained-fresh\\stage1.exe",
+    "bytes": 3527168,
+    "sha256": "32a019327c8cceac8a5a01402fd32d79b95c5fe3d57f9d898bfa977956905dc0"
+  },
+  "stage2": {
+    "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\two-stage-maintained-fresh\\stage2.exe",
+    "bytes": 3527168,
+    "sha256": "32a019327c8cceac8a5a01402fd32d79b95c5fe3d57f9d898bfa977956905dc0"
+  },
+  "seedImageSHA256": "04f87dc3bf04f5b220a99044615cd2368eb6359b73f79a7f503674a9b8369312",
+  "lexerDifferential": {
+    "schema": "fairyc.candidate-bootstrap-lexer-differential/v1",
+    "passed": true,
+    "fixturesSHA256": "ef701e3bb16f46c8f7499be2e99498ea4b298a690db97405a3ebb0b24e4ab6ed",
+    "referenceImageSHA256": "b90649222d1fe5382a3dff50bfe8cd430305f8bd08cf390949dede5be564feb5",
+    "referenceReportSHA256": "53fde54b05bb782c9e21bef7a6a12a5149245d5c3bcecc29c4ffcf9d6cf03b5e",
+    "inputSHA256": "bad8f8f9823246bebef08dbc5aabced8b59ae830338b7b47772068bd27ba6b4a",
+    "inputBytes": 17652,
+    "cases": 249,
+    "oracle": "Current Go lexer canonical tokens, cooked bytes, diagnostics and spans",
+    "observations": [
+      {
+        "stage": "go-produced-seed",
+        "imageSHA256": "04f87dc3bf04f5b220a99044615cd2368eb6359b73f79a7f503674a9b8369312",
+        "seconds": 0.19335860000865068,
+        "cases": 249,
+        "stdoutBytes": 56480,
+        "stdoutSHA256": "8fbb3b6fced01d08c4860e21fabfa56c99257e2096f56af645bf15415530747d",
+        "malformedFrames": [
+          {
+            "case": 0,
+            "exit": 8
+          },
+          {
+            "case": 1,
+            "exit": 8
+          },
+          {
+            "case": 2,
+            "exit": 8
+          },
+          {
+            "case": 3,
+            "exit": 8
+          },
+          {
+            "case": 4,
+            "exit": 8
+          },
+          {
+            "case": 5,
+            "exit": 8
+          },
+          {
+            "case": 6,
+            "exit": 4
+          }
+        ]
+      },
+      {
+        "stage": "stage1",
+        "imageSHA256": "32a019327c8cceac8a5a01402fd32d79b95c5fe3d57f9d898bfa977956905dc0",
+        "seconds": 0.19892280000203755,
+        "cases": 249,
+        "stdoutBytes": 56480,
+        "stdoutSHA256": "8fbb3b6fced01d08c4860e21fabfa56c99257e2096f56af645bf15415530747d",
+        "malformedFrames": [
+          {
+            "case": 0,
+            "exit": 8
+          },
+          {
+            "case": 1,
+            "exit": 8
+          },
+          {
+            "case": 2,
+            "exit": 8
+          },
+          {
+            "case": 3,
+            "exit": 8
+          },
+          {
+            "case": 4,
+            "exit": 8
+          },
+          {
+            "case": 5,
+            "exit": 8
+          },
+          {
+            "case": 6,
+            "exit": 4
+          }
+        ]
+      },
+      {
+        "stage": "stage2",
+        "imageSHA256": "32a019327c8cceac8a5a01402fd32d79b95c5fe3d57f9d898bfa977956905dc0",
+        "seconds": 0.2016312000050675,
+        "cases": 249,
+        "stdoutBytes": 56480,
+        "stdoutSHA256": "8fbb3b6fced01d08c4860e21fabfa56c99257e2096f56af645bf15415530747d",
+        "malformedFrames": [
+          {
+            "case": 0,
+            "exit": 8
+          },
+          {
+            "case": 1,
+            "exit": 8
+          },
+          {
+            "case": 2,
+            "exit": 8
+          },
+          {
+            "case": 3,
+            "exit": 8
+          },
+          {
+            "case": 4,
+            "exit": 8
+          },
+          {
+            "case": 5,
+            "exit": 8
+          },
+          {
+            "case": 6,
+            "exit": 4
+          }
+        ]
+      }
+    ],
+    "scope": "Lexer and private framing only; parser, typing and executable behavior require separate differential evidence"
+  },
+  "promotionGateReady": false,
+  "deferred": [
+    "Full frontend differential",
+    "Linux",
+    "Current-commit hosted CI"
+  ],
+  "pushed": false,
+  "reusedReceiptSHA256": "842a7c48d9f998c079be436c7fe2bfa685cb96edcc21a7db09b465a8b384a854",
+  "manifestSHA256": "0637f832bdbcfa49e6460d8bd23e9a3215f82456b00ae6b5f542b8f012af5740",
+  "compilerSourceCommit": "f7e4341fc7681ea357cb714c622f76a8d0de3e9c",
+  "sourceInputs": [
+    {
+      "path": ".gitignore",
+      "sha256": "e49cd5d5a1944a2d940698a89ea811b5d4153a1dcef7e3ee0c646ab87fddc931"
+    },
+    {
+      "path": "cmd/fairyc-candidate-lexer-reference/main.go",
+      "sha256": "a15f8c8303fa7cfe4f8e1e12cf85b21fb89f9f5acc684142ee8d4ceca76a0234"
+    },
+    {
+      "path": "cmd/fairyc-candidate-build/main.go",
+      "sha256": "72cb451b4d27a1e11921f4b81f0668602dd9ec309c87d3ef48d86188ca73efcb"
+    },
+    {
+      "path": "internal/candidatebuild/build.go",
+      "sha256": "8205fdcfd8b53e2ecfc46f009cbf5503b84b9e97d8e8d4e28194526503199276"
+    },
+    {
+      "path": "internal/candidatebuild/packet.go",
+      "sha256": "38925dd154f3f618e4fd4ad03c8ab6cfbcaa05771ca2320037d1453344363c08"
+    },
+    {
+      "path": "internal/candidatebuild/publish.go",
+      "sha256": "e2f36ab223636966f7867d2d209f9f39cdec2f059af7601117e40e0d43f24bc9"
+    },
+    {
+      "path": "internal/cdriver/windows_project.go",
+      "sha256": "3d841268c34a2fe810e8021743832171b5787a850dc4f46dd8335541cbb8d18b"
+    },
+    {
+      "path": "tools/verify-candidate-bootstrap.py",
+      "sha256": "7ebeeba664be0ea26c4388d310674cd246a0d47fa311ffe3423c702813e1e1e5"
+    },
+    {
+      "path": "tools/verify-candidate-bootstrap-lexer.py",
+      "sha256": "b3f2316e2350f2dd9cf3f9550ae25dac60ed83c8a83744760aaeb7a4da4984cf"
+    },
+    {
+      "path": "spec/fixtures/lexer/candidate-bootstrap-v1.json",
+      "sha256": "ef701e3bb16f46c8f7499be2e99498ea4b298a690db97405a3ebb0b24e4ab6ed"
+    },
+    {
+      "path": "examples/lexer_candidate/fairy.lock",
+      "sha256": "92cae2581a11d43713ec8ff00fcad9d63dec212864e02f1807cd0a066c1de818"
+    },
+    {
+      "path": "go.mod",
+      "sha256": "653cd3aa3f5ddeb194907ffb410b5d276797b0ee157f2e5233a95721e92378ef"
+    },
+    {
+      "path": "go.sum",
+      "sha256": "3978e93be4721773d6ab8779e6fd37e11a7d12669075c07beba4cc2ecf5e3b7a"
+    },
+    {
+      "path": "internal/lexer/documentation.go",
+      "sha256": "15c124a8ed8c682ac54841e9394d96d21025c3aa041243fd2f88a5debf81a400"
+    },
+    {
+      "path": "internal/lexer/editor.go",
+      "sha256": "bbebd7f5e0f821f394bdb5012b42401fd6f786dc3e7c08b0b5da0d0419d7394f"
+    },
+    {
+      "path": "internal/lexer/lexer.go",
+      "sha256": "0482e58e128e6306fd98aac999fc09aa7812e13c4a41e059b55f3541c679ab6b"
+    },
+    {
+      "path": "internal/lexer/literal.go",
+      "sha256": "14e1817e55b0eb799b470ae937d77c74d92bb00170c43ca058a496b98cd9d14f"
+    },
+    {
+      "path": "internal/lexer/token.go",
+      "sha256": "e68cb8ad993d1d8196dd4c7c2eddc62b6bf9fb2b64b9b065af979751ac16b6c0"
+    }
+  ],
+  "freshNativeImagesMatchPreviousExperiment": true,
+  "verificationGuards": {
+    "passed": true,
+    "observations": [
+      {
+        "case": "optimized-python",
+        "exit": 2,
+        "passed": true
+      },
+      {
+        "case": "changed-source-inventory",
+        "exit": 1,
+        "passed": true
+      },
+      {
+        "case": "changed-image-digest",
+        "exit": 1,
+        "passed": true
+      }
+    ]
+  },
+  "hostTools": {
+    "python": "3.14.6",
+    "go": "go1.27.1 windows/amd64",
+    "observedMSVC": "14.51.36231"
+  },
+  "targetedChecks": [
+    {
+      "command": "bun tools/run-go.ts test ./internal/candidatebuild -count=1",
+      "exit": 0
+    },
+    {
+      "command": "bun tools/run-go.ts test ./internal/lexer -count=1",
+      "exit": 0
+    },
+    {
+      "command": "Python source compilation for both verification tools",
+      "exit": 0
+    }
+  ],
+  "sourceOfTruthDocumentsChanged": [],
+  "publicApiChanged": false,
+  "dbChanged": false,
+  "runnerChange": "Private opt-in verification tools and test-only Go oracle; hosted workflow unchanged",
+  "repositoryHygieneChange": "Ignore tools/__pycache__ generated by Python source verification",
+  "ciChanged": false,
+  "fullFrontendDifferentialPassed": false,
+  "promoted": false,
+  "priorEvidence": [
+    "docs/ops/evidence/candidate-ordered-type-batches-20261011.json",
+    "docs/ops/evidence/candidate-body-type-batches-20261011.json",
+    "docs/ops/evidence/candidate-authenticated-byte-comparison-20261011.json"
+  ],
+  "skipped": [
+    {
+      "check": "Full frontend differential",
+      "reason": "Separate promotion prerequisite; this receipt covers exact C packets, PE images and lexer/framing only"
+    },
+    {
+      "check": "Full repository suite",
+      "reason": "Targeted candidate tests and private bootstrap validation for this slice"
+    },
+    {
+      "check": "Linux",
+      "reason": "Separate platform validation batch"
+    },
+    {
+      "check": "Current-commit hosted CI",
+      "reason": "Local work only; no push authorized"
+    }
+  ]
+}
