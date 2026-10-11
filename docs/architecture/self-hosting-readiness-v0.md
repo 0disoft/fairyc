@@ -2012,3 +2012,36 @@ only reduced move-frame pressure.
 The 60-second frontend cap, the caps, the public Stage 0 CLI, the SDK ABI, DB and
 CI are unchanged; Linux, the full suite, Stage 2 and push were not run. Evidence:
 docs/ops/evidence/candidate-move-analysis-stack-20261011.json.
+
+## Scalar typing snapshots (2026-10-11)
+
+The scalar `evaluate` path now borrows `E` for dispatch, and `binary` keeps only
+its five coordinate fields in a 40-byte `BinarySource` with borrowed operands,
+freezing the scalar result before the mutable record is touched. Inference order
+and source spans, the depth 64 bound and the work budget are unchanged.
+
+Checking passes 293 files and 3686 MIR functions with the lock updated. Four
+targeted native outcomes pass after a focused rerun: generic, cleanup and ordinary
+call results, direct literal contexts, type and overflow spans, and scalar casts.
+The first four-run pass was 3 of 4 in 133.7185 seconds, and the single failure
+reproduced identically against the old-source baseline (31.6533 seconds) with the
+previous source reporting 4 frames, 5 inferred, 4 checked returns and 537 work
+against stale 3/3 expectations. The updated test expects 4/4 and the focused
+rerun passes in 46.1721 seconds, reusing the three unchanged results. The nine CLI
+cases and the Vec development and release runs pass.
+
+The full 286-source 2030206-byte join emits a 25490067-byte, 35-unit packet from
+the Go-emitted baseline in 39.226 seconds
+(SHA256 `98d7ccd80786a7611e8f39bc0b7392d39bf70a31a643a00f4dea6ed61a35f7c3`). The
+Stage1 development native build takes 61.117 seconds (9650688 bytes), and its full
+same-source replay now reaches the 60.0419-second frontend timeout with no output
+and no observed stack failure. The release raw packet build takes 196.7524
+seconds over 37 objects and its full self replay stops at the 60.0415-second
+timeout.
+
+The earlier observed stack failures are gone inside the unchanged 60-second
+frontend cap, but neither a full finish nor the reproducible two-stage bootstrap
+`promotion` row is proven, so that row stays `blocked` and bottleneck profiling
+comes next. No cap, timeout, public Stage 0 CLI, SDK ABI, DB, CI or stack reserve
+change, and no push; Linux, the full suite and Stage 2 were skipped. Evidence:
+docs/ops/evidence/candidate-scalar-stack-20261011.json.
