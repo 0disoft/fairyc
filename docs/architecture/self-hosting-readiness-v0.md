@@ -2289,3 +2289,22 @@ The bootstrap verifier permits opt-in frontend allowance 1..900 seconds while
 retaining the default 60 and unchanged product timeout. Help/boundary option
 checks pass. API, SDK ABI, DB and CI are unchanged; no push. Receipt:
 [candidate-complete-stage1-20261012.json](../ops/evidence/candidate-complete-stage1-20261012.json).
+
+## Complete C-part compiler Stage2 fixed point (2026-10-12)
+
+The second C-part compiler builds in 271.92 seconds from Stage1's identical
+packet. Complete Stage1/Stage2 PE bytes match exactly (4177920 bytes, no excluded
+bytes). Both generations process all 355 self sources without Go frontend
+fallback: Stage1 takes 85.27 seconds, Stage2 takes 95.15, and both emit the same
+29372117 packet bytes. The seed and both images match 249 fresh Go lexer cases
+and the private framing contract. The bootstrap verifier passes by reusing the
+measured emissions/builds with explicit verification allowance 900 seconds.
+An initial lexer-oracle invocation used the general CLI and was corrected to
+the dedicated current-source oracle before successful candidate comparisons.
+
+This complete private Windows C-part fixed point satisfies consecutive
+generation/image comparison. Promotion remains false: product timeout and
+package entry/native driver/build/run integration, full parser/typing/executable
+differential, Linux/full suite and hosted CI remain. Product defaults, public
+API, SDK ABI, DB and CI are unchanged; no push. Receipt:
+[candidate-complete-stage2-20261012.json](../ops/evidence/candidate-complete-stage2-20261012.json).

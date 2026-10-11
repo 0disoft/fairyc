@@ -1,5 +1,19 @@
 # Fairy 컴파일러 전환: 후속 작업 목록
 
+## Latest validated milestone (2026-10-12)
+
+The complete current 355-source dispatcher reaches a fixed point through the
+private Windows C-part bootstrap path. Both Stage1 and Stage2 process all self
+sources and emit the same 29372117 bytes. Their complete 4177920-byte PE images
+are identical, with no excluded bytes. All 249 Go lexer cases and private framing
+checks pass for the seed and both generations. Receipt:
+`evidence/candidate-complete-stage2-20261012.json`.
+
+Next: product timeout and package entry/native driver/build/run integration,
+full parser/typing/executable differential, Linux/full suite and promotion.
+The 900-second frontend allowance is verification-only; product defaults remain.
+The dated entries below preserve their original narrower scopes and results.
+
 2026-10-07 현재 소스와 진행표를 기준으로 정리했다. 14번의 구조체 필드와
 배열 실행, 15번의 resource 타입·필드 소유권과 16번의 factory 생성, 17번의 이동 HIR과
 18번의 이동 후 사용 검사, 19번의 분기 합류와 20번의 반복·재진입 검사까지 완료했다.
@@ -4167,3 +4181,22 @@ out-of-range options pass their checks. Next: build the second C-part image,
 compare complete PE bytes and run the lexer differential. Stage2 image and
 promotion gates remain pending; API, SDK ABI, DB and CI are unchanged, no push.
 Receipt: `evidence/candidate-complete-stage1-20261012.json`.
+
+## Complete C-part compiler Stage2 (2026-10-12)
+
+Stage2 builds from Stage1's identical packet in 271.92 seconds. Both complete
+optimized PE images are 4177920 bytes with SHA256
+`6e55b6aa6d8aa5f01b850a860b565d5b1b8e74a310c05425a11f58ca699d3b6e`;
+no bytes are excluded. Stage2 itself processes all 355 self sources in 95.15
+seconds and emits the identical 29372117-byte packet. Stage1 had taken 85.27
+seconds. The fresh dedicated Go lexer oracle verifies 249 cases and framing for
+the seed and both generations. The general CLI was mistakenly selected as the
+first oracle; that harness invocation failed before comparisons and was corrected.
+
+The repository bootstrap verifier passes with receipt reuse and explicit
+verification allowance 900 seconds. Native builds and unchanged emissions are
+reused without repetition. This establishes the complete private Windows C-part
+bootstrap fixed point; promotion remains gated by product timeout/command
+integration, full frontend/executable differential, Linux/full suite and hosted
+CI. API, SDK ABI, DB and CI are unchanged; no push. Receipt:
+`evidence/candidate-complete-stage2-20261012.json`.
