@@ -778,3 +778,38 @@ work. Check passes 342 files and 4462 MIR functions. Receipt:
 Lock fields/schema, identities/graphs, stale matching, persistence and compiler
 CLI integration remain. Stable public CLI/API, SDK ABI/version, DB and CI are
 unchanged; Linux, full suite and Stage1/Stage2 remain scheduled later. No push.
+
+
+## Owned closed lock-field decoding
+
+`project_lock_fields` decodes five headers, ten package scalar fields/features
+and three dependency fields from an owned validated JSON tree. Unknown keys and
+incompatible types reject at every object level. Arbitrary field order, whitespace,
+decoded escapes and Unicode simple-fold lookup match Go's closed JSON decoder.
+Exact duplicate keys reject in the generic tree; case variants follow the Go
+field decoder. Null strings preserve a prior value, defaulting empty when absent.
+Nullable collection flags remain explicit in the decoded draft.
+
+Repeated case-variant package/dependency arrays reuse earlier record fields,
+including tails beyond a prior shortened length. Feature arrays retain old strings
+for null elements; empty/null arrays reset that slice state. Explicit retained
+capacity mirrors this Go behavior. Feature pool retention caps at 1048576 entries;
+copying/lookup/iteration consume the shared work budget. Existing input/token/depth
+limits remain. Codes 5 and 6 mean unknown field and wrong type respectively.
+
+The Go reference uses the actual lock parser's duplicate-key prepass and a closed
+`encoding/json` decoder into owning `lockfile.Document`. Fifty-six cases cover
+13 canonical Go locks, 3 reordered locks and 40 synthetic cases: 39 decoded,
+2 syntax, 3 duplicate, 3 unknown and 9 type errors. Eight additional cases cover
+slice reuse/reset. Two exact native tests and both candidate C profiles pass,
+including retained ownership and exhausted work. Check passes 343 files and
+4502 MIR functions. Receipt: `evidence/candidate-lock-fields-20261012.json`.
+
+This returns a decoded draft, never a validated lock Document. Empty/default/null
+values still require semantic validation. Identity recomputation, SDK/local
+provenance, role/path/order/endpoints/bindings/cycles, stale matching, persistence
+and compiler CLI integration remain. Go currently permits null dependency arrays
+through its semantic validator; that behavior must be reconciled with the
+non-null canonical collection contract in the validation unit. Stable public
+CLI/API, SDK ABI/version, DB and CI are unchanged. Linux, full suite and
+Stage1/Stage2 remain scheduled later; no push occurred.

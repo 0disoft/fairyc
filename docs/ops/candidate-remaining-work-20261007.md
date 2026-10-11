@@ -3863,3 +3863,24 @@ Lock field/schema decoding, identities/graphs, stale matching, persistence and
 compiler CLI integration remain. Stable public CLI/API, SDK ABI/version, DB and
 CI are unchanged; Linux, full suite and Stage1/Stage2 remain scheduled later.
 No push occurred.
+
+
+## Strict lock reader: closed fields (2026-10-12)
+
+The owned lock-field decoder now rejects unknown fields and incompatible types
+while preserving defaults, nullable collection flags, Unicode-fold field names,
+case-variant assignments and Go slice reuse, including retained tails and
+empty/null reset. This is decoded draft data; identity/graph validation remains.
+
+The Go corpus covers 56 cases (39 decoded, 2 syntax, 3 duplicate, 3 unknown,
+9 type), including 13 canonical locks, 3 reordered locks and 8 slice-reuse cases.
+Two exact native tests and candidate development/release execution pass; check
+passes 343 files and 4502 MIR functions. Receipt:
+`evidence/candidate-lock-fields-20261012.json`.
+
+Identity recomputation, SDK/local provenance, role/path/order/endpoints/bindings/
+cycles, stale matching, atomic persistence and compiler CLI integration remain.
+Reconcile Go's currently accepted null dependency arrays with the non-null
+canonical collection contract during validation. Stable public CLI/API, SDK
+ABI/version, DB and CI are unchanged; Linux, full suite and Stage1/Stage2 remain
+scheduled later. No push occurred.

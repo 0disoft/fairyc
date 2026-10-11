@@ -1,0 +1,23 @@
+module tests::project_lock_fields;
+import project_lock_fields as fields;
+import file_source as files;
+import std::bytes as bytes;
+import std::process as process;
+import std::io as io;
+
+@effects(filesystem)
+fn bytes::Buffer fixture(){var u8[4096] argument=[0;4096];let usize length=switch(process::arg(1,ref mut argument)){case .ok(value):{value}case .err(_):{assert(false);0}};let ref u8[] input=ref argument;return switch(files::manifest(input[..length])){case .ok(value):{value}case .err(_):{assert(false);bytes::empty()}};}
+fn usize read_number(ref u8[] input,ref mut usize at){assert(*at<=input.len && input.len-*at>=8);var usize value=0;var usize index=0;while(index<8){value=value*256+(input[*at+index] as usize);index+=1;}*at+=8;return value;}
+fn ref u8[] read_field(ref u8[] input,ref mut usize at){let usize size=read_number(input,at);assert(*at<=input.len && size<=input.len-*at);let usize start=*at;*at+=size;return input[start..*at];}
+fn bytes::Buffer copy(ref u8[] input){var bytes::Buffer result=bytes::empty();assert(bytes::append(ref mut result,input).is_ok);return result;}
+fn u8 octet(usize value){let ref u8[] digits=b"\x00\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0a\x0b\x0c\x0d\x0e\x0f";return (digits[(value/16)%16]<<4)|digits[value%16];}
+fn void number(ref mut bytes::Buffer output,usize value){var u8[8] encoded=[0;8];var usize index=0;var usize remaining=value;while(index<8){encoded[7-index]=octet(remaining%256);remaining/=256;index+=1;}let ref u8[] input=ref encoded;assert(remaining==0 && bytes::append(output,input).is_ok);}
+fn void text(ref mut bytes::Buffer output,ref u8[] value){number(output,value.len);assert(bytes::append(output,value).is_ok);}
+fn void flag(ref mut bytes::Buffer output,bool value){number(output,if(value){1}else{0});}
+fn bytes::Buffer observation(ref fields::Fields input){var bytes::Buffer output=bytes::empty();var usize field=0;while(field<5){text(ref mut output,fields::header(input,field));field+=1;}flag(ref mut output,fields::null_packages(input));number(ref mut output,fields::package_count(input));var usize at=0;while(at<fields::package_count(input)){field=0;while(field<10){text(ref mut output,fields::package_field(input,at,field));field+=1;}flag(ref mut output,fields::null_features(input,at));number(ref mut output,fields::feature_count(input,at));var usize index=0;while(index<fields::feature_count(input,at)){text(ref mut output,fields::feature(input,at,index));index+=1;}at+=1;}flag(ref mut output,fields::null_dependencies(input));number(ref mut output,fields::dependency_count(input));at=0;while(at<fields::dependency_count(input)){field=0;while(field<3){text(ref mut output,fields::dependency_field(input,at,field));field+=1;}at+=1;}return output;}
+@test
+@effects(filesystem,console)
+fn void full_lock_fields_defaults_nulls_folding_and_rejections_match_go(){let owned=fixture();let input=bytes::view(ref owned);assert(input.len>=16 && bytes::equal(input[..8],b"FYLFIELD"));var usize at=8;let usize count=read_number(input,ref mut at);assert(count==56);var usize index=0;while(index<count){let source=read_field(input,ref mut at);let usize code=read_number(input,ref mut at);let expected=read_field(input,ref mut at);var usize meter=0;switch(fields::parse(copy(source),ref mut meter)){case .ok(value):{let actual=observation(ref value);if(code!=0 || !bytes::equal(bytes::view(ref actual),expected)){discard io::write_stderr_bytes(source);assert(false);}}case .err(p):{if((p.code as usize)!=code || p.start>p.end || p.end>source.len){discard io::write_stderr_bytes(source);assert(false);}}};index+=1;}assert(at==input.len);}
+fn fields::Fields retained(){var usize meter=0;return switch(fields::parse(copy(b"{\"schema\":\"retained\",\"packages\":[{\"id\":\"one\",\"features\":[\"a\",\"b\"]}],\"dependencies\":[{\"owner\":\"one\",\"binding\":\"alias\",\"target\":\"two\"}]}"),ref mut meter)){case .ok(value):{value}case .err(_):{assert(false);return retained();}};}
+@test
+fn void field_views_retain_source_ownership_and_work_limits(){let input=retained();assert(bytes::equal(fields::header(ref input,0),b"retained") && fields::package_count(ref input)==1 && fields::feature_count(ref input,0)==2 && fields::dependency_count(ref input)==1);assert(bytes::equal(fields::package_field(ref input,0,0),b"one") && bytes::equal(fields::feature(ref input,0,1),b"b") && bytes::equal(fields::dependency_field(ref input,0,1),b"alias"));assert(!fields::null_features(ref input,0) && !fields::null_packages(ref input) && !fields::null_dependencies(ref input));var usize meter=16777216;assert(switch(fields::parse(copy(b"{}"),ref mut meter)){case .ok(_):{false}case .err(p):{p.code==3}});}
