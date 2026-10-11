@@ -92,6 +92,9 @@ pub fn Result<usize,Problem> string(ref mut State meta,ref mut bytes::Buffer val
 pub fn Result<usize,Problem> declare(ref State meta,ref mut v::Vec<Node> nodes,usize id,usize start,usize end){
     var Node n=entry(nodes,id);if(id==0 || id>v::len<Node>(nodes) || n.kind!=1 || n.state!=0 || !span(meta,start,end)){return .err(problem(meta,1,start,end));}n.state=2;n.start=start;n.end=end;set(nodes,id,n);return .ok(id);
 }
+pub fn Result<usize,Problem> finish_container(ref State meta,ref mut v::Vec<Node> nodes,usize id,usize end){
+    var Node n=entry(nodes,id);if(id<=1 || id>v::len<Node>(nodes) || (n.kind!=1 && n.kind!=3 && n.kind!=4) || n.state==3 || !span(meta,n.start,end)){return .err(problem(meta,1,n.start,end));}n.end=end;set(nodes,id,n);return .ok(id);
+}
 pub fn Result<usize,Problem> close(ref mut State meta,ref mut v::Vec<Node> nodes,usize id,usize end){
     let Node root=entry(nodes,id);if(id<=1 || id>v::len<Node>(nodes) || root.kind!=1 || root.state==3 || !span(meta,root.start,end)){return .err(problem(meta,1,root.start,end));}
     if(!charge(meta,v::len<Node>(nodes)*3)){return .err(problem(meta,4,root.start,end));}

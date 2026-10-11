@@ -1,0 +1,233 @@
+{
+  "schema": "fairyc.candidate-toml-documents-corpus/v1",
+  "cases": [
+    {
+      "name": "manifest-0",
+      "source": "c2NoZW1hID0gJ2ZhaXJ5Yy5tYW5pZmVzdC92MScKW3BhY2thZ2VdCnVpZD0nZXhhbXBsZS50b29scy5hcHAnCm5hbWU9J2V4YW1wbGUtYXBwJwp2ZXJzaW9uPScxLjIuMycKbGFuZ3VhZ2U9J2ZhaXJ5Yy1sYW5ndWFnZS8yMCcKc291cmNlPSdzcmMnClt3b3Jrc3BhY2VdCm1lbWJlcnM9WydsaWJzL25ldCcsICMgaXRlbQogJ2xpYnMvdXRpbCcsXQpbZGVwZW5kZW5jaWVzLm5ldF0KcGF0aD0nbGlicy9uZXQnCnZlcnNpb249JzEuNC4wJwpmZWF0dXJlcz1bXQo=",
+      "candidateAccepted": true
+    },
+    {
+      "name": "manifest-1",
+      "source": "c2NoZW1hPSdmYWlyeWMubWFuaWZlc3QvdjEnCnBhY2thZ2UudWlkPSdleGFtcGxlLnRvb2xzLmFwcCcKcGFja2FnZS5uYW1lPSdleGFtcGxlLWFwcCcKcGFja2FnZS52ZXJzaW9uPScxLjIuMycKcGFja2FnZS5sYW5ndWFnZT0nZmFpcnljLWxhbmd1YWdlLzIwJwpwYWNrYWdlLnNvdXJjZT0nc3JjJwp3b3Jrc3BhY2UubWVtYmVycz1bJ2xpYnMvbmV0JywnbGlicy91dGlsJ10KZGVwZW5kZW5jaWVzLm5ldC5wYXRoPSdsaWJzL25ldCcKZGVwZW5kZW5jaWVzLm5ldC52ZXJzaW9uPScxLjQuMCcKZGVwZW5kZW5jaWVzLm5ldC5mZWF0dXJlcz1bXQ==",
+      "candidateAccepted": true
+    },
+    {
+      "name": "manifest-2",
+      "source": "IyBoZWFkZXINCiJzY2hlbWEiPSJmYWlyeWMubWFuaWZlc3QvdjEiDQoncGFja2FnZSc9eyB1aWQ9J2V4YW1wbGUudG9vbHMuYXBwJywgbmFtZT0nZXhhbXBsZS1hcHAnLCB2ZXJzaW9uPScxLjIuMycsCiMgVE9NTCAxLjEgaW5saW5lIHRyaXZpYQpsYW5ndWFnZT0nZmFpcnljLWxhbmd1YWdlLzIwJywgc291cmNlPSdzcmMnLCB9DQp3b3Jrc3BhY2U9e21lbWJlcnM9WydsaWJzL25ldCcsJ2xpYnMvdXRpbCddfQ0KZGVwZW5kZW5jaWVzPXtuZXQ9e3BhdGg9J2xpYnMvbmV0Jyx2ZXJzaW9uPScxLjQuMCcsZmVhdHVyZXM9W119fSAjIGVuZA==",
+      "candidateAccepted": true
+    },
+    {
+      "name": "document-0",
+      "source": "ImEuYiI9J2ZsYXQnCmEuYj0nbmVzdGVkJwpbaW1wbGljaXQuY2hpbGRdCng9J3gnCltpbXBsaWNpdF0KeT0neScKW1tlbnRyeV1dCm5hbWU9J2ZpcnN0JwpbZW50cnkuZGV0YWlsc10KdmFsdWU9J29uZScKW1tlbnRyeV1dCm5hbWU9J3NlY29uZCcKW2VudHJ5LmRldGFpbHNdCnZhbHVlPSd0d28nCmFycmF5PVtbJ3gnXSx7IiI9J8OpJywgcXVvdGVkPSIiIgptdWx0aWxpbmUiIiJ9LF0K",
+      "candidateAccepted": true
+    },
+    {
+      "name": "empty-0",
+      "source": "",
+      "candidateAccepted": true
+    },
+    {
+      "name": "empty-1",
+      "source": "Jyc9Jyc=",
+      "candidateAccepted": true
+    },
+    {
+      "name": "rejected-0",
+      "source": "YT0neCcKYT0neSc=",
+      "candidateAccepted": false,
+      "errorCode": 1
+    },
+    {
+      "name": "rejected-1",
+      "source": "YS5iPSd4JwphLmI9J3kn",
+      "candidateAccepted": false,
+      "errorCode": 1
+    },
+    {
+      "name": "rejected-2",
+      "source": "W2FdClthXQ==",
+      "candidateAccepted": false,
+      "errorCode": 1
+    },
+    {
+      "name": "rejected-3",
+      "source": "YT0neCcKW2Fd",
+      "candidateAccepted": false,
+      "errorCode": 1
+    },
+    {
+      "name": "rejected-4",
+      "source": "YT1bXQpbW2FdXQ==",
+      "candidateAccepted": false,
+      "errorCode": 1
+    },
+    {
+      "name": "rejected-5",
+      "source": "W1thXV0KW2Fd",
+      "candidateAccepted": false,
+      "errorCode": 1
+    },
+    {
+      "name": "rejected-6",
+      "source": "YT17Yj0neCd9CmEuYz0neSc=",
+      "candidateAccepted": false,
+      "errorCode": 1
+    },
+    {
+      "name": "rejected-7",
+      "source": "YT17Yj17Yz0neCd9LGIuZD0neSd9",
+      "candidateAccepted": false,
+      "errorCode": 1
+    },
+    {
+      "name": "rejected-8",
+      "source": "YS5iPSd4JwpbYV0=",
+      "candidateAccepted": false,
+      "errorCode": 1
+    },
+    {
+      "name": "rejected-9",
+      "source": "W2EuYl0KeD0neCcKW2FdCmIueT0neSc=",
+      "candidateAccepted": false,
+      "errorCode": 1
+    },
+    {
+      "name": "rejected-10",
+      "source": "YT1bJ3gnICd5J10=",
+      "candidateAccepted": false,
+      "errorCode": 1
+    },
+    {
+      "name": "rejected-11",
+      "source": "YT1bLCd4J10=",
+      "candidateAccepted": false,
+      "errorCode": 1
+    },
+    {
+      "name": "rejected-12",
+      "source": "YT1bJ3gnLCxd",
+      "candidateAccepted": false,
+      "errorCode": 1
+    },
+    {
+      "name": "rejected-13",
+      "source": "YT1bJ3gn",
+      "candidateAccepted": false,
+      "errorCode": 1
+    },
+    {
+      "name": "rejected-14",
+      "source": "YT17Yj0neCcgYz0neSd9",
+      "candidateAccepted": false,
+      "errorCode": 1
+    },
+    {
+      "name": "rejected-15",
+      "source": "YT17Yj0neCcsLH0=",
+      "candidateAccepted": false,
+      "errorCode": 1
+    },
+    {
+      "name": "rejected-16",
+      "source": "YT17Yj0neCc=",
+      "candidateAccepted": false,
+      "errorCode": 1
+    },
+    {
+      "name": "rejected-17",
+      "source": "YT0neCcgYj0neSc=",
+      "candidateAccepted": false,
+      "errorCode": 1
+    },
+    {
+      "name": "rejected-18",
+      "source": "YS4nYj0neCc=",
+      "candidateAccepted": false,
+      "errorCode": 1
+    },
+    {
+      "name": "rejected-19",
+      "source": "YS4uYj0neCc=",
+      "candidateAccepted": false,
+      "errorCode": 1
+    },
+    {
+      "name": "rejected-20",
+      "source": "YS49J3gn",
+      "candidateAccepted": false,
+      "errorCode": 1
+    },
+    {
+      "name": "rejected-21",
+      "source": "W109ICd4Jw==",
+      "candidateAccepted": false,
+      "errorCode": 1
+    },
+    {
+      "name": "rejected-22",
+      "source": "W2FddHJhaWxpbmc=",
+      "candidateAccepted": false,
+      "errorCode": 1
+    },
+    {
+      "name": "rejected-23",
+      "source": "W1thXQ==",
+      "candidateAccepted": false,
+      "errorCode": 1
+    },
+    {
+      "name": "rejected-24",
+      "source": "W2FdICMgYmFkAQ==",
+      "candidateAccepted": false,
+      "errorCode": 1
+    },
+    {
+      "name": "rejected-25",
+      "source": "YT0neCcNYj0neSc=",
+      "candidateAccepted": false,
+      "errorCode": 1
+    },
+    {
+      "name": "rejected-26",
+      "source": "IyBiYWR/",
+      "candidateAccepted": false,
+      "errorCode": 1
+    },
+    {
+      "name": "rejected-27",
+      "source": "YT0ieFxxIg==",
+      "candidateAccepted": false,
+      "errorCode": 1
+    },
+    {
+      "name": "rejected-28",
+      "source": "AA==",
+      "candidateAccepted": false,
+      "errorCode": 1
+    },
+    {
+      "name": "rejected-29",
+      "source": "YT0n/yc=",
+      "candidateAccepted": false,
+      "errorCode": 2
+    },
+    {
+      "name": "rejected-30",
+      "source": "YT0x",
+      "candidateAccepted": false,
+      "errorCode": 1
+    },
+    {
+      "name": "rejected-31",
+      "source": "YT10cnVl",
+      "candidateAccepted": false,
+      "errorCode": 1
+    },
+    {
+      "name": "rejected-32",
+      "source": "YT0xOTc5LTA1LTI3",
+      "candidateAccepted": false,
+      "errorCode": 1
+    }
+  ]
+}

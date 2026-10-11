@@ -37,15 +37,36 @@ byte comparisons; syntax must use this lookup while building. Immutable
 `lookup` walks at most the published node count. These are candidate limits,
 not additional manifest schema fields.
 
+## Document syntax
+
+`project_toml_document.fy` connects quoted/bare/dotted keys, assignments,
+strings, ordered arrays, inline tables and ordinary/array table headers to the
+model. It retains byte spans, checks full-source UTF-8 and exact statement
+terminators, and seals inline descendants. It is private syntax for manifest
+value kinds, not a general TOML decoder.
+
+The document receipt is `evidence/candidate-toml-document-20261011.json`. Source
+check passes 298 files and 3788 MIR functions; three native tests and both
+candidate-generated C profiles execute 39 authored fixed inputs plus the
+over-limit input. Go agrees on 32 fixed inputs. The seven differences are
+recorded individually: three use numeric/bool/date values outside this
+component, and four extend inline/dotted/already-declared tables that this
+component rejects under TOML 1.1 table rules. The pinned Go decoder accepts
+those four. Neither full TOML parity nor manifest-parser parity is claimed.
+The public Go parser and executable manifest contract remain unchanged.
+
+The declaration and inline-table rules are specified at
+<https://toml.io/en/v1.1.0#table> and
+<https://toml.io/en/v1.1.0#inline-table>. Resolve the pinned-decoder compatibility
+boundary before promotion; keep the recorded differences observable.
+
 ## Remaining connection
 
-1. Parse dotted/quoted paths, assignments, arrays, inline tables and table
-   headers into the model, retaining original byte spans.
-2. Enforce exact root/package/workspace/dependency fields and required fields,
+1. Enforce exact root/package/workspace/dependency fields and required fields,
    then apply decoded-value validators and deterministic dependency ordering.
-3. Compare complete documents against the pinned Go decoder and manifest
+2. Compare complete documents against the pinned Go decoder and manifest
    parser. Record decoder/spec disagreements explicitly before claiming parity.
-4. Connect the validated result to contained source discovery and the later
+3. Connect the validated result to contained source discovery and the later
    package/lock/CLI stages.
 
 The value and string receipts are
