@@ -1,0 +1,169 @@
+{
+  "schema": "fairyc.candidate-toml-contexts/v1",
+  "passed": true,
+  "sourceInputs": [
+    {
+      "path": "examples/lexer_candidate/src/candidate_limits.fy",
+      "sha256": "7a27948d9a43bde84acdf1106f462d0c5a288f8a54f193560658eff0c0d00f3e"
+    },
+    {
+      "path": "examples/lexer_candidate/src/file_source.fy",
+      "sha256": "1a7ac7f6c69ef27e78e734aa74dab90b895742a5500a32931baaed19379b938f"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_toml_context.fy",
+      "sha256": "1682260043feced2ac662198fd3b29f4badb2a4a9f9b02a8e1f81462f3b3cc0f"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_toml_document.fy",
+      "sha256": "0bc3782206da0d9320ba8a39ea6a1f9ded52ec1bbf855580e31c1a1786f4b3a8"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_toml_model.fy",
+      "sha256": "4a6c295108e704749fc557204de4d8a0287e3228e59da396c50867ec8894b11e"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_toml_scalars.fy",
+      "sha256": "137d5dbdce313f22e91a9be87f8b34eb6f10011933b152f649421a895e274cb9"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_toml_strings.fy",
+      "sha256": "bc7e71acaaa68af5755d066c90fa1f763625de32c8fa2a6778e8447eebc187bb"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_toml_values.fy",
+      "sha256": "24255d1fdf0f34b6761f5304d383127667e8b127488a80409b3f35a13f62e81c"
+    },
+    {
+      "path": "internal/sdkstdlib/sources/std/bytes.fy",
+      "sha256": "4740a506e93349fb002c383967dcc44d182d20f09f2094b83b5464a4ab252982"
+    },
+    {
+      "path": "internal/sdkstdlib/sources/std/fs.fy",
+      "sha256": "fd7ddfa9f0deed98304cecf94911644087d1e2a46e8be8995c35acbcb183b335"
+    },
+    {
+      "path": "internal/sdkstdlib/sources/std/io.fy",
+      "sha256": "4b89c3aeb8b4de4887395d29723095d364c5660c6b773c5696fb1f65f5365f48"
+    },
+    {
+      "path": "internal/sdkstdlib/sources/std/num.fy",
+      "sha256": "09aa0d45f075aa4212049527ded7bb48d99ceb6ffed56b310e267421bae20bb3"
+    },
+    {
+      "path": "internal/sdkstdlib/sources/std/process.fy",
+      "sha256": "9680a1481df4f761f481d5a039af7bdbefeb312d1091961194f8e7bc0681ae24"
+    },
+    {
+      "path": "internal/sdkstdlib/sources/std/text.fy",
+      "sha256": "cccd47e090fda11c9da063ffb321489dd8753fe9996855fc432833e05a79e695"
+    },
+    {
+      "path": "internal/sdkstdlib/sources/optional/std/vec.fy",
+      "sha256": "0ae4c395bf98c39079ad620bde035b3b590d51417864802e698edc069281db5b"
+    },
+    {
+      "path": "examples/lexer_candidate/tests/project_toml_compatibility.fy",
+      "sha256": "ffb20b758fbfb0578ef5e8caa49e7cb32b9acef202141e8438d5ad2a5e4c9f01"
+    },
+    {
+      "path": "tools/verify-candidate-private-tests.py",
+      "sha256": "04c7e44df7941bd0c1a12b523b115df623dbe10836f3eb8993dedc7d6ea5e8af"
+    },
+    {
+      "path": ".cache/candidate-toml-decoder-final/reference.bin",
+      "sha256": "8a8cb688500e3220406de67c14a5dadf55d0d2fa474a51ac4cad5ab1486be8ec"
+    },
+    {
+      "path": "spec/fixtures/project-manifest/candidate-toml-table-contexts-v1.json",
+      "sha256": "0b9606a31a672bb97f37abcd39a56871d83bac7a0255796a15ad0e37ed5e1f5f"
+    },
+    {
+      "path": "cmd/fairyc-candidate-toml-document-reference/main.go",
+      "sha256": "336d38901aefbbb281c80b429934adf83982f1d33250d2bf0005ea2a50fc31e2"
+    },
+    {
+      "path": "go.mod",
+      "sha256": "653cd3aa3f5ddeb194907ffb410b5d276797b0ee157f2e5233a95721e92378ef"
+    },
+    {
+      "path": "go.sum",
+      "sha256": "3978e93be4721773d6ab8779e6fd37e11a7d12669075c07beba4cc2ecf5e3b7a"
+    },
+    {
+      "path": "tools/verify-candidate-toml-contexts.py",
+      "sha256": "09101647f96391405a66e42f68066b11d47f7db62c484d2c692b4537c2bbd5aa"
+    }
+  ],
+  "cases": 111,
+  "accepted": 49,
+  "acceptanceOnly": true,
+  "fullTOMLParity": false,
+  "manifestParsingComplete": false,
+  "projectDiscoveryComplete": false,
+  "reference": {
+    "sha256": "809ab1f7312c14120f122eb6c97d3f116f3a2cf5d26048144a131d94aeccc2e0",
+    "reportSHA256": "8390b8219ad47891f742d1b32963cde18c62712c87946a416449e29b39d3ab17"
+  },
+  "nativeTests": 1,
+  "native": {
+    "schemaVersion": "fairyc.test-report/v4",
+    "engine": "native",
+    "target": "x86_64-windows-msvc",
+    "profile": "development",
+    "tests": [
+      {
+        "identity": "tests::project_toml_compatibility::matches_pinned_go_table_context_acceptance",
+        "outcome": "passed",
+        "trapCategory": null,
+        "stdoutBase64": "",
+        "stderrBase64": ""
+      }
+    ],
+    "count": 1,
+    "passed": 1,
+    "failed": 0,
+    "status": "ok",
+    "lock": "verified"
+  },
+  "candidateExecutions": [
+    {
+      "profile": "development",
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-toml-decoder-final\\execution\\development.exe",
+      "sha256": "58135da92e25a054522936592731c8d5ee62160a7b84615a143241386e6d3d12",
+      "exit": 0
+    },
+    {
+      "profile": "release",
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-toml-decoder-final\\execution\\release.exe",
+      "sha256": "270f8fcbee2056542a010870748c6df2c110b5b85f3314c9d913d7eba0bf95ed",
+      "exit": 0
+    }
+  ],
+  "tools": {
+    "compiler": {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\manifest-bootstrap.exe",
+      "sha256": "4e6a50a83b4d9f74a11d749c779a90683ab3a3916d19f4852bfe1cbd452cc664"
+    },
+    "candidate": {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\sdk-c-execution\\two-stage-maintained-fresh\\stage1.exe",
+      "sha256": "32a019327c8cceac8a5a01402fd32d79b95c5fe3d57f9d898bfa977956905dc0"
+    },
+    "builder": {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-build-cached.exe",
+      "sha256": "1ed255a4b1f828c30b43caa99ff762e78b213bc55ba4bf6f4db840574bf2e3d1"
+    }
+  },
+  "lockSHA256": "743782f3f6715fe16da919710593f060208aa32a7858a0e5622d7dc13eddea2f",
+  "executionReceiptSHA256": "b912515b222d9489baa2855e9421b1e8336cc2f77a3148ecf251ec4678140bdb",
+  "publicApiChanged": false,
+  "dbChanged": false,
+  "ciChanged": false,
+  "pushed": false,
+  "sourceCheck": {
+    "instances": 2,
+    "files": 302,
+    "mirFunctions": 3892,
+    "passed": true
+  }
+}

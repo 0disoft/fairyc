@@ -205,10 +205,45 @@ invalid references and cyclic scratch depth exhaustion. Source check passes
 302 files and 3885 MIR functions. Evidence:
 `evidence/candidate-toml-values-20261011.json`.
 
+## Decoder mapping integration
+
+The parser now keeps the decoder-global mapping distinct from returned literal
+values. Inline tables establish the global context, update it through the
+implicit/type rules, and independently populate their returned map. Arrays set
+type metadata before reading elements. Final assignments consume global implicit
+flags after the entire literal is read, retaining or replacing the mapping just
+as the pinned decoder does. Only reachable values are projected into the strict
+immutable document model; ignored literals and temporary contexts are omitted.
+The string and scalar codecs retain their existing bounds and syntax checks.
+
+The 56 authored document inputs all match Go acceptance, with zero remaining
+recorded differences in that corpus. Native value assertions cover inline-table
+extensions, ignored scalar assignments, array replacement, the different
+`a={b.c=1,b=2}` and `a=[{b.c=1,b=2}]` results, and header-component source spans.
+An empty key inside an inline array element can change the decoder's metadata
+and retain its temporary array-table mapping. The former test assumed an
+ordinary two-element array; the actual Go output has one table, and the native
+assertions now require that observed result. Inline maps remain extensible under
+the pinned decoder rather than being sealed by the candidate parser.
+
+The separate 111-transition corpus also matches Go acceptance (49 accepted,
+62 rejected). `tools/verify-candidate-toml-contexts.py` regenerates its binary
+oracle and checks one authored native test and both candidate C profiles. This
+corpus proves acceptance, not all generic decoded values. The manifest corpus's
+104 acceptance/reason/full-value comparisons still pass. Source check passes
+302 files and 3892 MIR functions. Document native 3, table-context native 1,
+manifest native 2, and every associated candidate C development/release run pass.
+
+Current evidence: `evidence/candidate-toml-document-decoder-20261011.json`,
+`evidence/candidate-toml-contexts-decoder-20261011.json`, and
+`evidence/candidate-manifest-decoder-20261011.json`. Earlier receipts and their
+known differences remain historical. Complete TOML parity is not inferred from
+these finite corpora. No public CLI, SDK ABI, DB or CI workflow changed.
+
 ## Remaining connection
 
-1. Reconcile pinned Go table-definition behavior before claiming complete
-   manifest-parser parity.
+1. Keep the pinned decoder comparison coverage with parser changes; complete
+   TOML parity remains unclaimed beyond the observed corpora.
 2. Connect the validated result to contained source discovery and the later
    package/lock/CLI stages.
 
