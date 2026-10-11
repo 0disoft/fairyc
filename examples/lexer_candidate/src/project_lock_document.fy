@@ -8,6 +8,8 @@ import project_manifest as manifest;
 import project_manifest_values as rules;
 import project_sdk_bundle as sdk;
 import project_path as work;
+import project_lock_validate as validated;
+import project_lock_fields as decoded;
 import std::bytes as bytes;
 import std::vec as v;
 
@@ -51,5 +53,17 @@ pub fn Result<Document,Problem> project(ref visibility::Resolved input,ref mut u
     var bytes::Buffer text=bytes::empty();var v::Vec<Span> fields=v::empty<Span>();var v::Vec<Package> packages=v::empty<Package>();var v::Vec<Span> features=v::empty<Span>();var v::Vec<Dependency> dependencies=v::empty<Dependency>();var v::Vec<usize> positions=v::empty<usize>();var u32 code=field(ref mut text,ref mut fields,b"fairyc.lock/v1",meter);if(code!=0){return .err(fail(code,0));}code=field(ref mut text,ref mut fields,b"fairyc.package-instance/v1",meter);if(code!=0){return .err(fail(code,0));}code=field(ref mut text,ref mut fields,b"fairyc.package-source/v1",meter);if(code!=0){return .err(fail(code,0));}let root=catalog::package(workspace::local_catalog(local::input(graph::local_graph(graph))),0);code=field(ref mut text,ref mut fields,manifest::package_value(root,b"language"),meter);if(code!=0){return .err(fail(code,0));}code=field(ref mut text,ref mut fields,graph::node_id(graph,0),meter);if(code!=0){return .err(fail(code,0));}var usize at=0;while(at<graph::node_count(graph)){if(!v::push<usize>(ref mut positions,0).is_ok){return .err(fail(2,at));}at+=1;}at=0;
     while(at<v::len<usize>(ref nodes)){let usize node=*v::at<usize>(ref nodes,at);number(ref mut positions,node,at);let usize first=v::len<Span>(ref fields);code=package_fields(graph,node,ref mut text,ref mut fields,meter);if(code!=0){return .err(fail(code,node));}let usize feature_first=v::len<Span>(ref features);if(!graph::is_sdk(graph,node)){let usize feature_edge=graph::node(graph,node).feature_edge;if(feature_edge!=0){let workspace=local::input(graph::local_graph(graph));var usize id=workspace::feature_first(workspace,feature_edge-1);while(id!=0){let Span span=switch(append(ref mut text,workspace::feature(workspace,feature_edge-1,id),meter)){case .ok(value):{value}case .err(code):{return .err(fail(code,node));}};if(!v::push<Span>(ref mut features,span).is_ok){return .err(fail(2,node));}id=workspace::next_feature(workspace,feature_edge-1,id);}}}if(!v::push<Package>(ref mut packages,Package{.first,.feature_first,.feature_count=v::len<Span>(ref features)-feature_first}).is_ok){return .err(fail(2,node));}at+=1;
     }at=0;while(at<v::len<usize>(ref edges)){let usize edge_index=*v::at<usize>(ref edges,at);let e=graph::edge(graph,edge_index);let Span binding=switch(append(ref mut text,graph::binding(graph,edge_index),meter)){case .ok(value):{value}case .err(code):{return .err(fail(code,e.owner));}};if(!v::push<Dependency>(ref mut dependencies,Dependency{.owner=*v::at<usize>(ref positions,e.owner),.binding,.target=*v::at<usize>(ref positions,e.target)}).is_ok){return .err(fail(2,e.owner));}at+=1;}
+    return .ok(Document{.text,.fields,.packages,.features,.dependencies});
+}
+
+// Only a successful full validation can supply a decoded document. Copy every
+// retained value so the JSON tree and validation scratch can close afterward.
+pub fn Result<Document,Problem> from_validated(ref validated::Validated input,ref mut usize meter){
+    let draft=validated::fields(input);var bytes::Buffer text=bytes::empty();var v::Vec<Span> fields=v::empty<Span>();var v::Vec<Package> packages=v::empty<Package>();var v::Vec<Span> features=v::empty<Span>();var v::Vec<Dependency> dependencies=v::empty<Dependency>();
+    var usize index=0;while(index<5){let u32 code=field(ref mut text,ref mut fields,decoded::header(draft,index),meter);if(code!=0){return .err(fail(code,0));}index+=1;}
+    var usize at=0;while(at<decoded::package_count(draft)){let usize first=v::len<Span>(ref fields);index=0;while(index<10){let u32 code=field(ref mut text,ref mut fields,decoded::package_field(draft,at,index),meter);if(code!=0){return .err(fail(code,at));}index+=1;}
+        let usize feature_first=v::len<Span>(ref features);index=0;while(index<decoded::feature_count(draft,at)){let Span span=switch(append(ref mut text,decoded::feature(draft,at,index),meter)){case .ok(value):{value}case .err(code):{return .err(fail(code,at));}};if(!v::push<Span>(ref mut features,span).is_ok){return .err(fail(2,at));}index+=1;}
+        if(!v::push<Package>(ref mut packages,Package{.first,.feature_first,.feature_count=decoded::feature_count(draft,at)}).is_ok){return .err(fail(2,at));}at+=1;
+    }at=0;while(at<validated::edge_count(input)){let e=validated::edge(input,at);let Span binding=switch(append(ref mut text,decoded::dependency_field(draft,at,1),meter)){case .ok(value):{value}case .err(code):{return .err(fail(code,e.owner));}};if(!v::push<Dependency>(ref mut dependencies,Dependency{.owner=e.owner,.binding,.target=e.target}).is_ok){return .err(fail(2,e.owner));}at+=1;}
     return .ok(Document{.text,.fields,.packages,.features,.dependencies});
 }

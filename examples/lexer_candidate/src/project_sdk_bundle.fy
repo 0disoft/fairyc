@@ -25,7 +25,8 @@ pub fn ref u8[] language(){return b"fairyc-language/20";}
 pub fn ref u8[] runtime_abi(){return b"fairyc-runtime/0";}
 pub fn ref u8[] package_path(){return b"@sdk/stdlib";}
 pub fn ref u8[] node_id(){return b"sdk:stdlib[]";}
-pub fn ref u8[] sdk_identity(ref Bundle bundle){if(bundle.candidate){return b"fairyc-sdk-vector-candidate/0";}return b"fairyc-sdk-stdlib/0";}
+pub fn ref u8[] public_identity(){return b"fairyc-sdk-stdlib/0";}
+pub fn ref u8[] sdk_identity(ref Bundle bundle){if(bundle.candidate){return b"fairyc-sdk-vector-candidate/0";}return public_identity();}
 pub fn usize count(ref Bundle bundle){return v::len<syntax::Parsed>(ref bundle.modules);}
 pub fn bool vector(ref Bundle bundle){return count(bundle)==8;}
 pub fn bool candidate(ref Bundle bundle){return bundle.candidate;}

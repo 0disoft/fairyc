@@ -835,3 +835,42 @@ The candidate decoded draft still retains null flags for subsequent validation.
 Candidate identities/graphs, stale matching, persistence and compiler CLI work
 remain. Existing contract documents are unchanged; DB, CI and API signatures are
 unchanged. Linux and full suite remain deferred; no push occurred.
+
+
+## Strict owned lock decoding and semantic validation
+
+`project_lock_validate` checks headers, explicit arrays, nonempty sorted unique
+package IDs, existing package-instance identity recomputation including features,
+digest syntax, local identity/canonical relative paths, exact public SDK origin,
+roles, one matching root at `.`, and at most one SDK. Dependencies must be sorted
+by owner/binding/target, have known endpoints and nonempty unique owner bindings.
+An explicit Kahn queue and adjacency ranges reject cycles across all nodes,
+including unreachable components. Alias edges contribute separate indegrees;
+there is no recursive graph traversal. All comparisons, copies and graph work
+consume the existing shared meter; input/token/depth bounds remain.
+
+Successful validation owns the decoded draft and resolved endpoints.
+`project_lock_document.from_validated` copies every retained field into an
+independent owned document. `project_lock_reader.parse` connects JSON, closed
+fields, full semantic validation and retained projection, preserving JSON byte
+errors and semantic package/edge indices. The existing canonical writer emits
+from that document. `sdk::public_identity` shares the existing SDK identity
+constant with validation; SDK behavior, bytes, ABI and version stay unchanged.
+
+The Go oracle uses owning `lockfile.Parse`/`Marshal` and `ComputeInstanceID` for
+mutation refresh, with no second validator. Ninety-five cases cover 13 complete
+Go locks and 3 reordered locks, headers/identity/source/SDK/null/order/path/binding
+mutations, aliases, a 256-node chain and cycle, and an unreachable cycle. All 29
+accepted documents match complete canonical Go bytes; all 66 rejected documents
+reject. Opaque UID/version/path/binding values and a correctly recomposed changed
+SDK digest remain parseable as Go allows; matching the current workspace is a
+separate gate. Two native tests and both candidate C profiles pass, including
+retained ownership and exhausted parser/semantic/projection work. Check passes
+345 files and 4528 MIR functions. Receipt:
+`evidence/candidate-lock-validation-20261012.json`.
+
+Filesystem lock reading, fresh-workspace stale matching, atomic persistence and
+compiler CLI consumption remain. Those later gates compare root-reachable current
+content with this validated document. Stable public CLI/API, SDK ABI/version,
+DB and CI are unchanged. Linux, full suite and Stage1/Stage2 remain scheduled
+later; no push occurred.

@@ -3898,3 +3898,20 @@ is not a pass. Receipt: `evidence/lock-dependency-array-correction-20261012.json
 Candidate semantic validation, stale matching, atomic persistence and compiler
 CLI integration remain. API signatures, DB, CI and version are unchanged. Linux
 and full suite remain scheduled later; no push occurred.
+
+
+## Strict lock reader: semantic validation (2026-10-12)
+
+The pure candidate reader now decodes closed JSON fields, recomputes identities,
+validates local/SDK origin, roles/root, sorted packages/dependencies, endpoints
+and bindings, and rejects all-node cycles through a metered explicit Kahn queue.
+It returns an independently owned canonical lock document after full validation.
+Go's 95 cases (29 accepted canonical-byte matches, 66 rejected), two exact native
+tests and candidate development/release execution pass. Check passes 345 files
+and 4528 MIR functions. Receipt: `evidence/candidate-lock-validation-20261012.json`.
+
+Filesystem lock reading, stale comparison with the freshly resolved workspace,
+atomic persistence and compiler CLI integration remain. A valid but changed SDK
+digest is parseable; exact-current matching still has to reject that drift.
+Public CLI/API, SDK ABI/version, DB and CI are unchanged. Linux, full suite and
+Stage1/Stage2 remain scheduled later; no push occurred.
