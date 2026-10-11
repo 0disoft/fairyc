@@ -1,6 +1,5 @@
 module project_source_file;
 import project_directory as directory;
-import project_manifest_values as rules;
 import project_path as paths;
 import std::bytes as bytes;
 import std::text as text;
@@ -15,8 +14,8 @@ fn u32 directory_code(u32 code){return if(code==3 || code==2){2}else if(code==4)
 @effects(filesystem)
 fn Result<bytes::Buffer,Error> observe(ref u8[] root,ref u8[] relative,ref mut usize work){
     if(root.len==0 || root.len>4095 || relative.len>4095){return .err(fail(5,0,0,relative.len));}if(!text::validate_utf8(root).is_ok){return .err(fail(7,0,0,0));}
-    if(!rules::path(relative)){return .err(fail(2,0,0,relative.len));}var usize leaf=0;var usize index=0;while(index<relative.len){if(relative[index]==47){leaf=index+1;}index+=1;}
-    var bytes::Buffer parent=if(leaf>0){switch(directory::resolve(root,relative[..leaf-1],work)){case .ok(value):{value}case .err(e):{return .err(fail(directory_code(e.code),e.os_code,e.start,e.end));}}}else{var bytes::Buffer copy=bytes::empty();if(!bytes::append(ref mut copy,root).is_ok){return .err(fail(6,0,0,leaf));}copy};
+    if(!paths::source_relative(relative)){return .err(fail(2,0,0,relative.len));}var usize leaf=0;var usize index=0;while(index<relative.len){if(relative[index]==47){leaf=index+1;}index+=1;}
+    var bytes::Buffer parent=if(leaf>0){switch(directory::resolve_source(root,relative[..leaf-1],work)){case .ok(value):{value}case .err(e):{return .err(fail(directory_code(e.code),e.os_code,e.start,e.end));}}}else{var bytes::Buffer copy=bytes::empty();if(!bytes::append(ref mut copy,root).is_ok){return .err(fail(6,0,0,leaf));}copy};
     if(bytes::len(ref parent)==0 || bytes::len(ref parent)+relative.len-leaf+1>4095 || !paths::charge(work,bytes::len(ref parent)+relative.len-leaf+1)){return .err(fail(5,0,leaf,relative.len));}
     let ref str path=switch(text::validate_utf8(bytes::view(ref parent))){case .ok(value):{value}case .err(_):{return .err(fail(7,0,0,leaf));}};
     var fs::ReadDir stream=switch(fs::read_dir_utf8(path)){case .ok(value):{value}case .err(e):{return .err(fail(if(e.os_code==1920){8}else{1},e.os_code,0,leaf));}};

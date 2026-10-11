@@ -13,8 +13,8 @@ fn Problem fail(u32 code,u32 os_code,usize start,usize end){return Problem{.code
 fn u32 open_code(fs::FileError error){if(error.os_code==1920){return 4;}if(error.os_code==8 || error.os_code==14){return 7;}if(error.status==6){return 8;}if(error.status==5){return 9;}if(error.os_code==267){return 5;}return 1;}
 pub fn ref str reason(u32 code){if(code==3){return "noncanonical-path-case";}if(code==4){return "symlink-not-supported";}if(code==8){return "source-limit-exceeded";}if(code==7){return "allocation-failed";}return "invalid-workspace-path";}
 @effects(filesystem)
-pub fn Result<bytes::Buffer,Problem> resolve(ref u8[] root,ref u8[] relative,ref mut usize work){
-    if(root.len==0 || root.len>4095 || relative.len>4095){return .err(fail(8,0,0,relative.len));}if(!rules::path(relative)){return .err(fail(2,0,0,relative.len));}if(!text::validate_utf8(root).is_ok){return .err(fail(9,0,0,0));}if(!paths::charge(work,root.len+relative.len+1)){return .err(fail(8,0,0,relative.len));}
+fn Result<bytes::Buffer,Problem> walk(ref u8[] root,ref u8[] relative,bool source,ref mut usize work){
+    if(root.len==0 || root.len>4095 || relative.len>4095){return .err(fail(8,0,0,relative.len));}if(!(if(source){paths::source_relative(relative)}else{rules::path(relative)})){return .err(fail(2,0,0,relative.len));}if(!text::validate_utf8(root).is_ok){return .err(fail(9,0,0,0));}if(!paths::charge(work,root.len+relative.len+1)){return .err(fail(8,0,0,relative.len));}
     var bytes::Buffer current=bytes::empty();if(!bytes::append(ref mut current,root).is_ok){return .err(fail(7,0,0,0));}var usize start=0;
     while(start<relative.len){var usize end=start;while(end<relative.len && relative[end]!=47){end+=1;}let ref u8[] segment=relative[start..end];
         let ref str directory=switch(text::validate_utf8(bytes::view(ref current))){case .ok(value):{value}case .err(_):{return .err(fail(9,0,start,end));}};var fs::ReadDir stream=switch(fs::read_dir_utf8(directory)){case .ok(value):{value}case .err(e):{return .err(fail(open_code(e),e.os_code,start,end));}};
@@ -28,3 +28,7 @@ pub fn Result<bytes::Buffer,Problem> resolve(ref u8[] root,ref u8[] relative,ref
         if(length+segment.len+if(separator){1}else{0}>4095){return .err(fail(8,0,start,end));}if(separator && !bytes::append_byte(ref mut current,47).is_ok || !bytes::append(ref mut current,segment).is_ok){return .err(fail(7,0,start,end));}start=end+1;
     }return .ok(current);
 }
+@effects(filesystem)
+pub fn Result<bytes::Buffer,Problem> resolve(ref u8[] root,ref u8[] relative,ref mut usize work){return walk(root,relative,false,work);}
+@effects(filesystem)
+pub fn Result<bytes::Buffer,Problem> resolve_source(ref u8[] root,ref u8[] relative,ref mut usize work){return walk(root,relative,true,work);}

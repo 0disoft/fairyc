@@ -143,11 +143,49 @@ implementation is unchanged and this unit's program was emitted from fresh
 hashed source inputs. No module binding or package-graph success is claimed by
 the byte-retention layer.
 
+## Source-module binding
+
+`project_source_modules.bind` consumes the retained source set and parses every
+file through the actual Fairy scanner/parser. Each file must declare exactly
+one module and that declaration must match its exact source-root-relative path.
+The ASCII identifier rule comes from `internal/source/source.go` and the language
+source-file mapping; physical path discovery itself keeps UTF-8 names.
+`project_module_path.expected` operates only on canonical catalog paths and does
+not implement the Go helper's general path-cleaning API.
+
+Success owns the source set, independent parser results and a sorted module
+index. Binary lookup returns the original file index, preserving file ordering
+when module-name ordering differs. A defensive sorted duplicate check remains;
+two ordinary files declaring the same module are already rejected by their
+distinct required module paths. Failure owns the original source set together
+with its file index, byte span and lexical/syntax/bound classification, allowing
+diagnostics to read the exact input after partial parser owners are released.
+
+The byte reader previously reused ASCII manifest-path validation and rejected
+Unicode source filenames prematurely. `project_path.source_relative` and
+`project_directory.resolve_source` now observe UTF-8 physical source paths,
+while manifest paths retain their portable manifest-v1 rules. Unicode files
+and directories are retained and then rejected by module binding with E0002.
+Traversal, wildcard, device syntax and noncanonical path components still reject.
+
+Two native tests and both candidate C profiles pass. Thirteen source-tree
+acceptance observations agree with the Go loader, including normal/nested and
+65 KiB files, module/path sort differences, mismatched names and case, second or
+missing modules, malformed syntax, invalid UTF-8, Unicode/hyphen source paths
+and duplicate declared names. Original source bytes/spans survive failures.
+Full production check passes: 311 files and 3986 MIR functions. Evidence:
+`evidence/candidate-source-modules-20261011.json`.
+
+This layer retains the parser's separate declaration, AST, cooked-value and
+storage limits. Trivia-containing module names still use the existing name
+normalizer's 64 KiB input guard; wider compatibility remains explicit work.
+It does not establish complete Go syntax or workspace-loader equivalence.
+
 ## Remaining connection
 
-Bind declared modules to the retained source paths, enforce exactly one module
-per file, reject syntax/path mismatches and duplicate modules, then connect the
-source set to package resolution and the project CLI.
+Remove the module-name normalizer's redundant re-scan/input guard, then connect
+module binding to the package-load transaction, package resolution and project
+CLI. Broader parser-cap compatibility remains separate.
 Resolve the Go junction observation discrepancy before any loader
 equivalence claim. Package/lock/CLI work remains separate.
 ReadDir is currently Windows AMD64 and keeps the existing SDK path bound.

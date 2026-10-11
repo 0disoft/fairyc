@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/0disoft/fairyc/internal/diagnostic"
 	"github.com/0disoft/fairyc/internal/workspaceloader"
 )
 
@@ -24,14 +25,15 @@ func run(args []string) error {
 		Module string
 	}
 	type row struct {
-		Source   string
-		Accepted bool
-		Reason   string
-		Paths    []string
-		Files    []file
+		Source      string
+		Accepted    bool
+		Reason      string
+		Paths       []string
+		Files       []file
+		Diagnostics []diagnostic.Diagnostic
 	}
 	rows := []row{}
-	for _, source := range []string{"Good", "Empty", "Collision", "Reparse", "IgnoredReparse"} {
+	for _, source := range []string{"Good", "Empty", "Collision", "Reparse", "IgnoredReparse", "ModuleOrder", "BadModule", "BadCase", "SecondModule", "MissingModule", "BrokenSyntax", "InvalidUtf8", "UnicodeFile", "UnicodeDir", "HyphenDir", "LargeModules", "DuplicateDeclared"} {
 		manifest := fmt.Sprintf("schema='fairyc.manifest/v1'\n[package]\nuid='example.catalog'\nname='catalog'\nversion='1.0.0'\nlanguage='fairyc-language/20'\nsource=%q\n", source)
 		if err := os.WriteFile(filepath.Join(root, "fairy.toml"), []byte(manifest), 0600); err != nil {
 			return err
@@ -41,6 +43,7 @@ func run(args []string) error {
 		if err != nil {
 			if e, ok := err.(*workspaceloader.LoadError); ok {
 				r.Reason = e.Reason
+				r.Diagnostics = e.Diagnostics
 			} else {
 				return err
 			}

@@ -13,7 +13,9 @@ def main():
     if os.name != 'nt':
         parser.error('the current SDK directory adapter requires Windows')
     base = args.root.resolve()
-    for name in ['Good/nested', 'Empty', 'Collision', 'Reparse', 'IgnoredReparse', 'Reads', 'Package/src/nested']:
+    for name in ['Good/nested', 'Empty', 'Collision', 'Reparse', 'IgnoredReparse', 'Reads', 'Package/src/nested',
+                 'ModuleOrder/a', 'BadModule', 'BadCase', 'SecondModule', 'MissingModule', 'BrokenSyntax',
+                 'InvalidUtf8', 'UnicodeFile', 'UnicodeDir/Ü', 'HyphenDir/bad-name', 'LargeModules', 'DuplicateDeclared']:
         (base / name).mkdir(parents=True, exist_ok=True)
     sources = {
         'Good/a.fy': 'module a;\n',
@@ -29,12 +31,26 @@ def main():
         'Package/src/z.fy': 'module z;\n',
         'Package/src/nested/z.fy': 'module nested::z;\n',
         'Package/fairy.toml': "schema='fairyc.manifest/v1'\n[package]\nuid='example.catalog'\nname='catalog'\nversion='1.0.0'\nlanguage='fairyc-language/20'\nsource='src'\n",
+        'ModuleOrder/a/x.fy': 'module a::x;\n',
+        'ModuleOrder/a0.fy': 'module a0;\n',
+        'BadModule/a.fy': 'module other;\n',
+        'BadCase/a.fy': 'module A;\n',
+        'SecondModule/a.fy': 'module a;\nmodule b;\n',
+        'MissingModule/a.fy': 'fn i32 main(){return 0;}\n',
+        'BrokenSyntax/a.fy': 'module a;\nbogus;\n',
+        'UnicodeFile/Ü.fy': 'module a;\n',
+        'UnicodeDir/Ü/a.fy': 'module a;\n',
+        'HyphenDir/bad-name/a.fy': 'module a;\n',
+        'DuplicateDeclared/a.fy': 'module a;\n',
+        'DuplicateDeclared/b.fy': 'module a;\n',
     }
     for name, source in sources.items():
         (base / name).write_text(source, encoding='utf-8', newline='\n')
     (base / 'Reads/binary.fy').write_bytes(b'\x00\xff\r')
     (base / 'Reads/large.fy').write_bytes(b'a' * 65536 + b'z')
     (base / 'Reads/empty.fy').write_bytes(b'')
+    (base / 'InvalidUtf8/a.fy').write_bytes(b'module a;\n\xff')
+    (base / 'LargeModules/large.fy').write_bytes(b'module large;\n' + b' ' * (65537 - 14))
     for name, size in [('maximum.fy', 8388608), ('too-large.fy', 8388609)]:
         with (base / 'Reads' / name).open('wb') as file:
             file.truncate(size)

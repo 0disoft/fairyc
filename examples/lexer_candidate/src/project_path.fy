@@ -5,6 +5,12 @@ import std::text as text;
 
 struct Rune{u32 value;usize next;}
 pub fn bool charge(ref mut usize work,usize cost){if(*work>16777216 || cost>16777216-*work){return false;};*work+=cost;return true;}
+// Physical source paths are broader than portable manifest-v1 paths. Keep
+// UTF-8 names until the language layer checks Stage 0 module identifiers.
+pub fn bool source_relative(ref u8[] path){
+    if(path.len==0 || path.len>4095 || !text::validate_utf8(path).is_ok){return false;}var usize start=0;var usize index=0;
+    while(index<=path.len){if(index==path.len || path[index]==47){let ref u8[] segment=path[start..index];if(segment.len==0 || bytes::equal(segment,b".") || bytes::equal(segment,b"..") || segment[segment.len-1]==46 || segment[segment.len-1]==32){return false;}start=index+1;}else{let u8 value=path[index];if(value<32 || value==127 || value==92 || value==58 || value==34 || value==60 || value==62 || value==124 || value==42 || value==63){return false;}}index+=1;}return true;
+}
 // Call only after UTF-8 validation. Each access belongs to a complete scalar.
 fn Rune read(ref u8[] source,usize at){let u32 first=source[at] as u32;if(first<128){return Rune{.value=first,.next=at+1};}
     if(first<224){return Rune{.value=(first&31)*64+(source[at+1] as u32 & 63),.next=at+2};}
