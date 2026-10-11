@@ -8,6 +8,7 @@ import name_cli as names;
 import type_cli as typing;
 import module_cli as modules;
 import module_project_cli as projects;
+import project_check_cli as checking;
 import hir_cli as hir;
 import mir_cli as mir;
 import c_cli as c;
@@ -18,7 +19,7 @@ import std::process as process;
 
 @effects(console)
 fn i32 error(ref str message) { discard io::write_stderr(message); return 2; }
-fn ref str usage() { return "usage: lexer-candidate --tokens-file <path>\n       lexer-candidate --declarations-file <path>\n       lexer-candidate --check-names-file <path>\n       lexer-candidate --bindings-file <path>\n       lexer-candidate --check-types-file <path>\n       lexer-candidate --check-modules-file <manifest>\n       lexer-candidate --check-return-origins-file <manifest>\n       lexer-candidate --c-modules-file <manifest>\n       lexer-candidate --c-project-file <manifest>\n       lexer-candidate --hir-file <path>\n       lexer-candidate --mir-file <path>\n       lexer-candidate --c-file <path>\n"; }
+fn ref str usage() { return "usage: lexer-candidate check [--locked]\n       lexer-candidate --tokens-file <path>\n       lexer-candidate --declarations-file <path>\n       lexer-candidate --check-names-file <path>\n       lexer-candidate --bindings-file <path>\n       lexer-candidate --check-types-file <path>\n       lexer-candidate --check-modules-file <manifest>\n       lexer-candidate --check-return-origins-file <manifest>\n       lexer-candidate --c-modules-file <manifest>\n       lexer-candidate --c-project-file <manifest>\n       lexer-candidate --hir-file <path>\n       lexer-candidate --mir-file <path>\n       lexer-candidate --c-file <path>\n"; }
 
 @effects(filesystem)
 pub fn Result<bytes::Buffer, u32> load(ref u8[] path_bytes) {
@@ -28,13 +29,15 @@ pub fn Result<bytes::Buffer, u32> load(ref u8[] path_bytes) {
 @effects(filesystem, console)
 pub fn i32 run() {
     let usize argc = process::arg_count();
-    if (argc != 2 && argc != 3) { return error(usage()); }
+    if (argc < 2) { return error(usage()); }
     var bytes::Buffer argument = bytes::empty();
     if (!bytes::resize_zeroed(ref mut argument, 4096).is_ok) { return error("error: buffer allocation failed\n"); }
     let usize flag_length = switch(process::arg(1, bytes::view_mut(ref mut argument))) {
         case .ok(value): { value } case .err(_): { return error(usage()); }
     };
     let ref u8[] flag = bytes::view(ref argument)[..flag_length];
+    if (bytes::equal(flag,b"check")) { return checking::arguments(); }
+    if (argc != 2 && argc != 3) { return error(usage()); }
     if (argc == 2 && bytes::equal(flag, b"--help")) {
         return if (io::write(usage()).is_ok && io::write("       lexer-candidate --help\nNo arguments: private binary stdin protocol.\n").is_ok) { 0 }
             else { error("error: stdout write failed\n") };

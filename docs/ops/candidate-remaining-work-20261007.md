@@ -4009,3 +4009,24 @@ ABI/version/DB/CI change or push.
 
 Receipts: `evidence/candidate-compiler-core-20261012.json` and
 `evidence/candidate-syntax-arena-copy-20261012.json`.
+
+## Candidate check CLI (2026-10-12)
+
+The candidate `check` and `check --locked` compose workspace loading, SDK selection, import
+resolution, lock handling and success statistics. Diagnostics retain the original source, so
+lexical/parser, return, private, nominal and move spans come from the parsed program with no
+disk reread. Unlocked updates rewrite `fairy.lock`, locked runs keep its bytes and mtime, and
+the rewritten canonical hash matches the Go oracle.
+
+The Go check passes 357 files and 4665 MIR functions, and the full Fairy dispatcher built by Go
+passes all 21 cases. Candidate C generation over 204 input source files (1,478,325 bytes) emits
+a 15,188,946-byte packet in 226.52 seconds under the external 900-second allowance, product
+default untouched. Development passes all 21 cases; the release build takes 205.97 seconds and its execution passes the
+same 21 process cases. Receipt `evidence/candidate-check-cli-20261012.json`: 63 matches over
+three images (3 x 21), 15 full stderr, 3 first-line, 3 package-prefix per image.
+
+This is a partial candidate behind a private shim, not the full Go-native dispatcher; general
+diagnostic aggregation, OS/JSON details and the help inventory remain, as do build/run, the
+package entry and native driver, product timeout, Linux/full suite and Stage1/Stage2. The full
+main closure exceeds the 2 MiB catalog cap (inventory-only, no candidate C run); API, SDK
+ABI/version, DB and CI are unchanged, nothing pushed.

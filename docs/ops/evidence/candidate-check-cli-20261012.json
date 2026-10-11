@@ -1,0 +1,223 @@
+{
+  "schema": "fairyc.candidate-check-cli/v1",
+  "passed": true,
+  "candidateCLIChanged": true,
+  "publicCLIChanged": false,
+  "stableCheckComplete": false,
+  "sourceCheck": {
+    "files": 357,
+    "mirFunctions": 4665
+  },
+  "build": {
+    "schema": "fairyc.candidate-check-build/v1",
+    "entryScope": "project_check_cli::arguments with real OS argv; excludes file_cli dispatcher",
+    "dispatcherImage": {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-check-cli-20261012\\build-final\\go-dispatch.exe",
+      "sha256": "dde21b09a29051e99623ec357f1f3219e3784c8d192230da5e4e198176d419bc"
+    },
+    "lockSHA256": "1bac2260392786701cf2a9707a7fd2b2e2d2231eb556ca43bc8e578a498fb75e",
+    "tools": {
+      "candidate": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-lock-write-20261012\\compiler.exe",
+        "sha256": "3c67203ca06e6c81aa73f383fb16685b57ad5c571b5028992fd638c0c17795b1"
+      },
+      "builder": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-source-file-20261011\\builder.exe",
+        "sha256": "8141ce6bcc461a52fe6bf0bf24e9e5f5a9d7842c3c7dbfc5863cc4e822584ea7"
+      },
+      "bootstrap": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\manifest-bootstrap.exe",
+        "sha256": "18e72a61e9ff3fdd620652ecd8ce2e355b9371488b2ad1b2ccbadbf7a091783a"
+      }
+    },
+    "images": [
+      {
+        "profile": "development",
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-check-cli-20261012\\build-final\\development.exe",
+        "sha256": "5083c77dcbb377085ab424d00624ed981b509384e5eebc2e9d60a108e9ec5ffb"
+      },
+      {
+        "profile": "release",
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-check-cli-20261012\\build-final\\release.exe",
+        "sha256": "82ec24a50bd20ad6ab45c250e7f3a7cc7a2f353750dc4f9e94a10603b6f16ae7"
+      }
+    ],
+    "candidatePacketSHA256": "30d6ab9ab0e551ec028535b69f3f7895b936a0804dc6d25388b10084b9bd797a",
+    "invocations": [
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\manifest-bootstrap.exe",
+          "check"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "seconds": 17.187535099990782,
+        "exit": 0,
+        "stdoutBytes": 80,
+        "stdoutSHA256": "b882eeb4c94c24f129328b9462bf821c2203835c30650779d0ee3a709829a44d",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\manifest-bootstrap.exe",
+          "build",
+          "--locked"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "seconds": 31.976085599992075,
+        "exit": 0,
+        "stdoutBytes": 83,
+        "stdoutSHA256": "913d882a721755f5b674b0837a5dcdb182de237ba6bbcc5f15b49489af2c8bf9",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-lock-write-20261012\\compiler.exe",
+          "--c-project-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-check-cli-20261012\\build-final\\sources.list"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+        "seconds": 226.51954470000055,
+        "exit": 0,
+        "stdoutBytes": 15188946,
+        "stdoutSHA256": "30d6ab9ab0e551ec028535b69f3f7895b936a0804dc6d25388b10084b9bd797a",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-source-file-20261011\\builder.exe",
+          "--packet",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-check-cli-20261012\\build-final\\candidate-packet.bin",
+          "--packet-sha256",
+          "30d6ab9ab0e551ec028535b69f3f7895b936a0804dc6d25388b10084b9bd797a",
+          "--output",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-check-cli-20261012\\build-final\\development.exe"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+        "seconds": 14.005563900005654,
+        "exit": 0,
+        "stdoutBytes": 183,
+        "stdoutSHA256": "9c5bb82b67d35f54d49b3f68744333bb0929868d75c2c91c72bcd8e0d972f925",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-source-file-20261011\\builder.exe",
+          "--packet",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-check-cli-20261012\\build-final\\candidate-packet.bin",
+          "--packet-sha256",
+          "30d6ab9ab0e551ec028535b69f3f7895b936a0804dc6d25388b10084b9bd797a",
+          "--output",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-check-cli-20261012\\build-final\\release.exe",
+          "--release"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+        "seconds": 205.97120450000511,
+        "exit": 0,
+        "stdoutBytes": 185,
+        "stdoutSHA256": "875e1978b4db1d98191389a38ed68bb990baf23ea72dc7c36916644f1c590994",
+        "stderr": ""
+      }
+    ]
+  },
+  "sourceInputs": {
+    "inputs": [
+      {
+        "path": "docs/ops/evidence/candidate-check-cli-inputs-1-20261012.json",
+        "sha256": "9c9ae7c18859bee7556a4f3498de7ce190d7a969d95586f9d320a282fdab508f"
+      },
+      {
+        "path": "docs/ops/evidence/candidate-check-cli-inputs-2-20261012.json",
+        "sha256": "5c29ab494c46abf98a67d192d8e60838e2eaef2fbcd21577f3f7bb25e89517cd"
+      },
+      {
+        "path": "docs/ops/evidence/candidate-check-cli-inputs-3-20261012.json",
+        "sha256": "e8167e0df07fcbbc65c833759c5cf142818938f1ca7ce0b4b97c5aae94a13258"
+      }
+    ],
+    "dispatcher": [
+      {
+        "path": "docs/ops/evidence/candidate-check-cli-dispatcher-1-20261012.json",
+        "sha256": "94814490b9d6e63f1f2c6ae5481c488061c29947a39d09db34e7dc2957718a97"
+      },
+      {
+        "path": "docs/ops/evidence/candidate-check-cli-dispatcher-2-20261012.json",
+        "sha256": "7037c9cb4ee5b7d08b1e17421831b5ae07da5bd1ea7b9ffd0848c54a613c2da4"
+      },
+      {
+        "path": "docs/ops/evidence/candidate-check-cli-dispatcher-3-20261012.json",
+        "sha256": "bfffd78c9c9589d738285c326ca4438a0caf9485e5f89799c072e549c19b5b44"
+      },
+      {
+        "path": "docs/ops/evidence/candidate-check-cli-dispatcher-4-20261012.json",
+        "sha256": "b7f88e06f16801c248ea9ffb332a285b8d93b92231e8a9633109a5cc9416d090"
+      }
+    ]
+  },
+  "goOracle": {
+    "path": "docs/ops/evidence/candidate-check-cli-go-reference-20261012.json",
+    "sha256": "74a6f3c6fc406783bebe9f84e2d4613aed4c53388177c0a04b28dc6eb04f577d"
+  },
+  "processObservations": [
+    {
+      "path": "docs/ops/evidence/candidate-check-cli-go-dispatch-final-20261012.json",
+      "sha256": "5894d93009d990755a0a67ef7aaecfe117ed97b34afc0f4bdf0d1d0063ea605f"
+    },
+    {
+      "path": "docs/ops/evidence/candidate-check-cli-candidate-development-20261012.json",
+      "sha256": "891665079b713df556773978870fb674847e3304586f5b0df5ee77af4788b400"
+    },
+    {
+      "path": "docs/ops/evidence/candidate-check-cli-candidate-release-20261012.json",
+      "sha256": "776ff35242a0fc3515cdee89e2e33899d635aa28503f62608a346671599ddc46"
+    }
+  ],
+  "verificationTools": [
+    {
+      "path": "tools/build-candidate-check-probe.py",
+      "sha256": "3ae9b8738043c1ec0bfb05995677d202dbea5bbc64171343c5a4bf0f7c6efa26"
+    },
+    {
+      "path": "tools/verify-candidate-check-cli.py",
+      "sha256": "3fcbdf3c23a5954d47b4e7dc0325002d0d2017418ac5944d2a31b11befcf7fbc"
+    }
+  ],
+  "fullDispatcherInventory": {
+    "sourceFiles": 350,
+    "sourceBytes": 2483126,
+    "catalogLimitBytes": 2097152,
+    "runtimeEmissionAttempted": false
+  },
+  "comparisons": {
+    "casesPerImage": 21,
+    "images": 3,
+    "totalMatched": 63,
+    "completeStderrCasesPerImage": 15,
+    "invocationFirstLineCasesPerImage": 3,
+    "packagePrefixAndStatusCasesPerImage": 3
+  },
+  "readonly": "Every input file hash and mtime remains unchanged except fairy.lock in three unlocked update cases; locked commands never write.",
+  "implementation": "Fairy workspace load, lock policy, package compilation and retained-source diagnostics; Python only builds probes and compares real processes.",
+  "limitations": [
+    "Candidate C probe forwards real OS argv to project_check_cli::arguments; full file_cli dispatcher is tested through Go-frontend native build.",
+    "Current full dispatcher source closure exceeds the 2 MiB catalog input cap; no full-source candidate emission or Stage2 claimed.",
+    "General diagnostic vocabulary/aggregation parity, full stable help inventory and exact OS/JSON package error details remain.",
+    "Internal allocation/output failure status mapping inspected but not fault-injected in this unit.",
+    "Public build/run, package entry/native driver, timeout wiring, Linux/full suite and Stage1/Stage2 remain."
+  ],
+  "correctedAttempt": {
+    "processReport": ".cache/candidate-check-cli-20261012/go-dispatch/observations.json",
+    "mismatches": [
+      "Signature path",
+      "RootBody E1009",
+      "DependencyBody E1009",
+      "SemanticUpdated E1009"
+    ],
+    "candidateGeneration": "First generation deliberately stopped after 35.37s to apply discovered render corrections; not used as validation."
+  },
+  "publicApiChanged": false,
+  "sdkAbiChanged": false,
+  "dbChanged": false,
+  "ciChanged": false,
+  "versionChanged": false,
+  "pushed": false
+}

@@ -1,0 +1,26 @@
+{
+  "schema": "fairyc.candidate-check-inputs/v1",
+  "scope": "inputs",
+  "sources": [
+    {
+      "path": "examples/lexer_candidate/src/tagged_types.fy",
+      "sha256": "431f283e07d9dbea60c698d1f70f7e7009e1552314cf660688b10b09daad8338",
+      "bytes": 4824
+    },
+    {
+      "path": "examples/lexer_candidate/src/type_state.fy",
+      "sha256": "7dbbf7d50be1e9513dc8aafd99b11afda5d8e2d7ce87d96b6436c4752c2123a0",
+      "bytes": 5972
+    },
+    {
+      "path": "examples/lexer_candidate/src/types.fy",
+      "sha256": "53a77948af92724f00de0609837fd1507899df8e2b59b6d2778ef1f3c344395a",
+      "bytes": 10832
+    },
+    {
+      "path": "examples/lexer_candidate/src/utf8.fy",
+      "sha256": "4a5425cea9efbfb1bff2c31a38c2bd8e392c6792af09f24e906c9a743621870d",
+      "bytes": 807
+    }
+  ]
+}

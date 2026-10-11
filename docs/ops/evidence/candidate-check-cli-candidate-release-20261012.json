@@ -1,0 +1,345 @@
+{
+  "schema": "fairyc.candidate-check-process/v1",
+  "image": {
+    "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-check-cli-20261012\\build-final\\release.exe",
+    "sha256": "82ec24a50bd20ad6ab45c250e7f3a7cc7a2f353750dc4f9e94a10603b6f16ae7"
+  },
+  "cases": [
+    {
+      "name": "Current",
+      "argv": [
+        "check",
+        "--locked"
+      ],
+      "exit": 0,
+      "stdout": "check ok: 5 instance(s), 6 source file(s), 13 MIR function(s), lock verified\n",
+      "stderr": "",
+      "seconds": 0.08426540000073146,
+      "diagnosticComparison": "complete",
+      "inputSHA256": "6e82797fb3f59605349ad9daa84ce2bcf086f3be91fe8bca380c1487486a2fe8",
+      "changedPaths": [],
+      "lockSHA256": "f112d5facff6d462fcf545900306bb16368aaa9cbec98dc0ff5b908813d4fc1b",
+      "matched": true
+    },
+    {
+      "name": "Signature",
+      "argv": [
+        "check",
+        "--locked"
+      ],
+      "exit": 3,
+      "stdout": "",
+      "stderr": "fairyc: semantic subset does not support type Missing at common.fy [bytes 49..56]\n",
+      "seconds": 0.043912399996770546,
+      "diagnosticComparison": "complete",
+      "inputSHA256": "30604dbb00c7be4af06201fdb57cefad6702541afdc98c62b2f5a354286b5048",
+      "changedPaths": [],
+      "lockSHA256": "7ca69d1a43735d07b54dc8f1184c04719e5aa2d0d86a8f14323f16d09a85bea7",
+      "matched": true
+    },
+    {
+      "name": "RootBody",
+      "argv": [
+        "check",
+        "--locked"
+      ],
+      "exit": 3,
+      "stdout": "",
+      "stderr": "main.fy:5:24: E1009: return value does not match the declared result type [bytes 93..97]\n  expected-type: main.fy:5:4 [bytes 73..76]\n",
+      "seconds": 0.04329190000134986,
+      "diagnosticComparison": "complete",
+      "inputSHA256": "46b0143c70012218f2c078d5964421e72332b75bb9afbe13b224188f72c4cdad",
+      "changedPaths": [],
+      "lockSHA256": "37fd8893d101fadb803db02adae420beffed015aa39584fc6362fb336fa45845",
+      "matched": true
+    },
+    {
+      "name": "DependencyBody",
+      "argv": [
+        "check",
+        "--locked"
+      ],
+      "exit": 3,
+      "stdout": "",
+      "stderr": "right/right.fy:4:28: E1009: return value does not match the declared result type [bytes 101..105]\n  expected-type: right/right.fy:4:8 [bytes 81..84]\n",
+      "seconds": 0.046837899993988685,
+      "diagnosticComparison": "complete",
+      "inputSHA256": "b1ba89ced70c69fb1a4dfce89a51d4d5b572f6b20a24933e9f103accc1174ad8",
+      "changedPaths": [],
+      "lockSHA256": "c5126bb0dce6d3e0395617d2eac2e10861e06345b4bce37cbb204e798ace7f57",
+      "matched": true
+    },
+    {
+      "name": "Private",
+      "argv": [
+        "check",
+        "--locked"
+      ],
+      "exit": 3,
+      "stdout": "",
+      "stderr": "main.fy:5:35: E0103: item is not visible from this module [bytes 104..113]\n  declaration: left/left.fy:5:8 [bytes 120..126]\n",
+      "seconds": 0.04279310000129044,
+      "diagnosticComparison": "complete",
+      "inputSHA256": "07e2b4ff2c880c2caf34cd8f2f47eb2f46ef7879807df1579df82e0c66e0f167",
+      "changedPaths": [],
+      "lockSHA256": "b8fbf3b5e31c1ba3913fc8d025ecfd23fbe681b181f7ffda6139076955437d9f",
+      "matched": true
+    },
+    {
+      "name": "Nominal",
+      "argv": [
+        "check",
+        "--locked"
+      ],
+      "exit": 3,
+      "stdout": "",
+      "stderr": "main.fy:7:54: E1006: incompatible expected and actual types [bytes 184..185]\n  expected-type: main.fy:7:52 [bytes 182..183]\n",
+      "seconds": 0.045613599999342114,
+      "diagnosticComparison": "complete",
+      "inputSHA256": "ee5cffb7c241e6e0313ec708771eef34dacfa63f902c60bead1ca0e0625b8bc3",
+      "changedPaths": [],
+      "lockSHA256": "fc0d0c8e0155a1e811e5d34b28fe60567641ac420b85c69de191dd7afd0561b7",
+      "matched": true
+    },
+    {
+      "name": "Moved",
+      "argv": [
+        "check",
+        "--locked"
+      ],
+      "exit": 3,
+      "stdout": "",
+      "stderr": "main.fy:9:48: E1101: resource is used after ownership was moved [bytes 250..251]\n  declaration: main.fy:9:20 [bytes 222..223]\n  move: main.fy:9:39 [bytes 241..242]\n",
+      "seconds": 0.04584859999886248,
+      "diagnosticComparison": "complete",
+      "inputSHA256": "7d36464f7aaae7ea6f88b50609316b506fb66b769b1e645a88f6705f121b662c",
+      "changedPaths": [],
+      "lockSHA256": "900fa962f8902c5e41ec2d03fba4c4c40d394b9a47f527d344b89dafce21a9ad",
+      "matched": true
+    },
+    {
+      "name": "SDK",
+      "argv": [
+        "check",
+        "--locked"
+      ],
+      "exit": 0,
+      "stdout": "check ok: 6 instance(s), 13 source file(s), 166 MIR function(s), lock verified\n",
+      "stderr": "",
+      "seconds": 2.1808511999988696,
+      "diagnosticComparison": "complete",
+      "inputSHA256": "4fd1062f9eac851590cbde9bcba59020ac3c78fadb09ab9eb7a343de10da442a",
+      "changedPaths": [],
+      "lockSHA256": "e6a2a7c09122a50d34875c1adb38df279d795320ea67eb6d1803db4e762ba1f2",
+      "matched": true
+    },
+    {
+      "name": "Unchanged",
+      "argv": [
+        "check"
+      ],
+      "exit": 0,
+      "stdout": "check ok: 5 instance(s), 6 source file(s), 13 MIR function(s), lock unchanged\n",
+      "stderr": "",
+      "seconds": 0.07459119999839459,
+      "diagnosticComparison": "complete",
+      "inputSHA256": "6e82797fb3f59605349ad9daa84ce2bcf086f3be91fe8bca380c1487486a2fe8",
+      "changedPaths": [],
+      "lockSHA256": "f112d5facff6d462fcf545900306bb16368aaa9cbec98dc0ff5b908813d4fc1b",
+      "matched": true
+    },
+    {
+      "name": "Updated",
+      "argv": [
+        "check"
+      ],
+      "exit": 0,
+      "stdout": "check ok: 5 instance(s), 6 source file(s), 13 MIR function(s), lock updated\n",
+      "stderr": "",
+      "seconds": 0.07119600000442006,
+      "diagnosticComparison": "complete",
+      "inputSHA256": "87f6a869a74fd6652a3509fb1c452d594d5d7169d57bb57dc9143c04364baad6",
+      "changedPaths": [
+        "fairy.lock"
+      ],
+      "lockSHA256": "f112d5facff6d462fcf545900306bb16368aaa9cbec98dc0ff5b908813d4fc1b",
+      "matched": true
+    },
+    {
+      "name": "Recanonicalized",
+      "argv": [
+        "check"
+      ],
+      "exit": 0,
+      "stdout": "check ok: 5 instance(s), 6 source file(s), 13 MIR function(s), lock updated\n",
+      "stderr": "",
+      "seconds": 0.07537839999713469,
+      "diagnosticComparison": "complete",
+      "inputSHA256": "d4e950f712b749f89559f8c9fed6a8cfc44d1ed96f9cb1f4e638d79bc2cb20e7",
+      "changedPaths": [
+        "fairy.lock"
+      ],
+      "lockSHA256": "f112d5facff6d462fcf545900306bb16368aaa9cbec98dc0ff5b908813d4fc1b",
+      "matched": true
+    },
+    {
+      "name": "SemanticUpdated",
+      "argv": [
+        "check"
+      ],
+      "exit": 3,
+      "stdout": "",
+      "stderr": "main.fy:5:24: E1009: return value does not match the declared result type [bytes 93..97]\n  expected-type: main.fy:5:4 [bytes 73..76]\n",
+      "seconds": 0.048933699988992885,
+      "diagnosticComparison": "complete",
+      "inputSHA256": "601c0041f0fc55c331161b44cc07dcc231efc080491bbd7fd8501ffdc74b9cfa",
+      "changedPaths": [
+        "fairy.lock"
+      ],
+      "lockSHA256": "37fd8893d101fadb803db02adae420beffed015aa39584fc6362fb336fa45845",
+      "matched": true
+    },
+    {
+      "name": "Lexical",
+      "argv": [
+        "check"
+      ],
+      "exit": 3,
+      "stdout": "",
+      "stderr": "main.fy:7:1: E0001: invalid UTF-8 or unsupported identifier syntax [bytes 131..132, repair=none]\nmain.fy:7:1: E0008: unexpected token [bytes 131..132, repair=skip]\n",
+      "seconds": 0.02722910000011325,
+      "diagnosticComparison": "complete",
+      "inputSHA256": "15a14861ed10588dde6fef043e6fbb0db37803da277c9b0186c4f0cd7e6fe30e",
+      "changedPaths": [],
+      "lockSHA256": "f112d5facff6d462fcf545900306bb16368aaa9cbec98dc0ff5b908813d4fc1b",
+      "matched": true
+    },
+    {
+      "name": "Syntax",
+      "argv": [
+        "check"
+      ],
+      "exit": 3,
+      "stdout": "",
+      "stderr": "main.fy:7:25: E0007: expected \";\" [bytes 155..155, repair=insert]\n",
+      "seconds": 0.026372199994511902,
+      "diagnosticComparison": "complete",
+      "inputSHA256": "bd8a82cb63ebe5cefd715c79c1ede2a4e0e374bca5e1a0f3f2a5caa4511fa653",
+      "changedPaths": [],
+      "lockSHA256": "f112d5facff6d462fcf545900306bb16368aaa9cbec98dc0ff5b908813d4fc1b",
+      "matched": true
+    },
+    {
+      "name": "MissingLock",
+      "argv": [
+        "check",
+        "--locked"
+      ],
+      "exit": 7,
+      "stdout": "",
+      "stderr": "fairyc: package workspace failure: locked workspace requires a valid fairy.lock: lockfile is not a bounded regular file\n",
+      "seconds": 0.045146899996325374,
+      "diagnosticComparison": "package-prefix",
+      "inputSHA256": "87f6a869a74fd6652a3509fb1c452d594d5d7169d57bb57dc9143c04364baad6",
+      "changedPaths": [],
+      "lockSHA256": null,
+      "matched": true
+    },
+    {
+      "name": "StaleLock",
+      "argv": [
+        "check",
+        "--locked"
+      ],
+      "exit": 7,
+      "stdout": "",
+      "stderr": "fairyc: package workspace failure: lockfile is stale for the current workspace\n",
+      "seconds": 0.056902299998910166,
+      "diagnosticComparison": "complete",
+      "inputSHA256": "e6bbadfec0c54f4045afb00afe5d9a7ba601a4c142496f374e4f09f0b044b17a",
+      "changedPaths": [],
+      "lockSHA256": "f112d5facff6d462fcf545900306bb16368aaa9cbec98dc0ff5b908813d4fc1b",
+      "matched": true
+    },
+    {
+      "name": "InvalidLock",
+      "argv": [
+        "check",
+        "--locked"
+      ],
+      "exit": 7,
+      "stdout": "",
+      "stderr": "fairyc: package workspace failure: locked workspace requires a valid fairy.lock: lockfile is not a valid lock document\n",
+      "seconds": 0.05406850000144914,
+      "diagnosticComparison": "package-prefix",
+      "inputSHA256": "4426af13d93adb90d70644059b93d84ca125aab8c5ff7a6c3856a1627ce9cc27",
+      "changedPaths": [],
+      "lockSHA256": "91f35273b18a8a2b0ffcc90c46515c14ec015cdc2a0a9233892f3d66469bf40b",
+      "matched": true
+    },
+    {
+      "name": "MissingManifest",
+      "argv": [
+        "check"
+      ],
+      "exit": 7,
+      "stdout": "",
+      "stderr": "fairyc: package workspace failure: fairy.toml: invalid package input\n",
+      "seconds": 0.015513499994995072,
+      "diagnosticComparison": "package-prefix",
+      "inputSHA256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+      "changedPaths": [],
+      "lockSHA256": null,
+      "matched": true
+    },
+    {
+      "name": "UnknownFlag",
+      "argv": [
+        "check",
+        "--bad"
+      ],
+      "exit": 2,
+      "stdout": "",
+      "stderr": "fairyc: command \"check\" accepts only optional --locked\n",
+      "seconds": 0.022621899988735095,
+      "diagnosticComparison": "invocation-first-line",
+      "inputSHA256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+      "changedPaths": [],
+      "lockSHA256": null,
+      "matched": true
+    },
+    {
+      "name": "RepeatedLocked",
+      "argv": [
+        "check",
+        "--locked",
+        "--locked"
+      ],
+      "exit": 2,
+      "stdout": "",
+      "stderr": "fairyc: command \"check\" accepts only optional --locked\n",
+      "seconds": 0.02377689999411814,
+      "diagnosticComparison": "invocation-first-line",
+      "inputSHA256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+      "changedPaths": [],
+      "lockSHA256": null,
+      "matched": true
+    },
+    {
+      "name": "Positional",
+      "argv": [
+        "check",
+        "src/main.fy"
+      ],
+      "exit": 2,
+      "stdout": "",
+      "stderr": "fairyc: command \"check\" accepts only optional --locked\n",
+      "seconds": 0.021264299997710623,
+      "diagnosticComparison": "invocation-first-line",
+      "inputSHA256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+      "changedPaths": [],
+      "lockSHA256": null,
+      "matched": true
+    }
+  ]
+}

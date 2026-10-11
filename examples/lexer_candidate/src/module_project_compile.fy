@@ -11,10 +11,10 @@ import syntax as syntax;
 import std::vec as v;
 
 // Stages: 1 grouping, 2 binding, 3 closure, 4 values, 5 moves, 6 owned IR.
-pub struct Problem {u32 stage;u32 code;usize module_index;usize start;usize end;usize first;usize stop;usize expected;usize actual;}
+pub struct Problem {u32 stage;u32 code;usize module_index;usize start;usize end;usize first;usize stop;usize expected;usize actual;usize declaration_start;usize declaration_end;usize move_start;usize move_end;usize header_start;usize header_end;usize field_module;usize field_start;usize field_end;}
 pub struct Range {usize first;usize stop;}
 pub resource Plan {v::Vec<ir::Program> units;v::Vec<Range> ranges;usize files;usize retries;cleanup{}}
-fn Problem failed(u32 stage,u32 code,usize module_index,usize start,usize end,usize first,usize stop,usize expected,usize actual){return Problem{.stage,.code,.module_index,.start,.end,.first,.stop,.expected,.actual};}
+fn Problem failed(u32 stage,u32 code,usize module_index,usize start,usize end,usize first,usize stop,usize expected,usize actual){return Problem{.stage,.code,.module_index,.start,.end,.first,.stop,.expected,.actual,.declaration_start=0,.declaration_end=0,.move_start=0,.move_end=0,.header_start=0,.header_end=0,.field_module=0,.field_start=0,.field_end=0};}
 pub fn Result<ir::Program,Problem> range(ref v::Vec<syntax::Parsed> sources,ref signatures::Program metadata,usize first,usize stop){
     let bound=switch(binding::bind(sources,metadata,first,stop)){case .ok(p):{p}case .err(e):{return .err(failed(2,e.code,e.module_index,e.start,e.end,first,stop,0,0));}};
     let ready=switch(closure::build_unit(sources,metadata,ref bound)){case .ok(p):{p}case .err(e):{return .err(failed(3,e.code,e.module_index,e.start,e.end,first,stop,0,0));}};
@@ -22,7 +22,7 @@ pub fn Result<ir::Program,Problem> range(ref v::Vec<syntax::Parsed> sources,ref 
     // Values and ownership are separately checked phases. A completed type
     // pass must not consume the ownership pass's traversal allowance.
     let moved=switch(moves::build(sources,ref typed,0)){case .ok(p):{p}case .err(e):{return .err(failed(5,e.code,e.module_index,e.start,e.end,first,stop,e.expected,e.actual));}};
-    if(moves::count(ref moved)!=0){let e=moves::at(ref moved,0);return .err(failed(5,e.code,e.module_index,e.start,e.end,first,stop,0,0));}
+    if(moves::count(ref moved)!=0){let e=moves::at(ref moved,0);var Problem p=failed(5,e.code,e.module_index,e.start,e.end,first,stop,0,0);p.declaration_start=e.declaration_start;p.declaration_end=e.declaration_end;p.move_start=e.move_start;p.move_end=e.move_end;p.header_start=e.header_start;p.header_end=e.header_end;p.field_module=e.field_module;p.field_start=e.field_start;p.field_end=e.field_end;return .err(p);}
     return switch(lower::lower(sources,ref typed,closure::imported(ref ready),ref moved)){case .ok(p):{.ok(p)}case .err(e):{.err(failed(6,e.code,e.module_index,e.start,e.end,first,stop,0,0))}};
 }
 // Cleanup policy retains raw code 10 through the owned-IR lowerer; later

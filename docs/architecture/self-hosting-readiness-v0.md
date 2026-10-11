@@ -2162,3 +2162,22 @@ the by-reference signature stays private to the `same` helper. The public source
 and API surface, the SDK ABI, DB, CI, caps, stack reserve and the timeout are
 unchanged, and no push, Linux, full suite or Stage 2 run has happened. Evidence:
 docs/ops/evidence/candidate-borrowed-type-comparisons-20261011.json.
+
+## Candidate check CLI (2026-10-12)
+
+The private Fairy `check [--locked]` composes workspace/SDK/import loading,
+lock policy and package compilation with retained-source diagnostic rendering.
+Source checking passes 357 files / 4665 MIR functions. The Go-frontend native
+dispatcher and candidate-generated C development/release probes match 21 cases
+each (63 observations): 15 complete stderr comparisons, three invocation first
+lines and three package prefixes/statuses per image. Locked inputs retain bytes
+and modification times; three unlocked update cases produce Go-identical locks.
+
+The candidate probes forward real OS arguments through a private check-only
+entry; the full dispatcher is verified through the Go frontend. The current
+350-file closure is 2,483,126 source bytes and exceeds the 2 MiB catalog cap;
+this inventory is not a full-source candidate replay. General diagnostic/help
+parity, package entry/build/run/native driver and timeout wiring, Linux/full
+suite and Stage1/Stage2 remain. Promotion is not completed. Public API, SDK
+ABI/version, DB and CI are unchanged; no push occurred. Receipt:
+[candidate-check-cli-20261012.json](../ops/evidence/candidate-check-cli-20261012.json).

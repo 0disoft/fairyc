@@ -191,6 +191,12 @@ fn void recover(ref scanner::Stream stream, ref mut state::Cursor cursor, usize 
 // Syntax problems return an owned incomplete result, never an executable program.
 pub fn Result<Parsed, i32> parse(scanner::Stream input, usize max_items) {
     if (scanner::diagnostic_count(ref input) != 0) { return .err(5); }
+    return parse_diagnostics(input,max_items);
+}
+// Diagnostic recovery retains lexical failures in source_stream. Consumers
+// must check both diagnostic owners; the ordinary executable parse rejects
+// lexical failures before reaching this recovery-only entry.
+pub fn Result<Parsed, i32> parse_diagnostics(scanner::Stream input, usize max_items) {
     if (max_items > 512) { return .err(4); }
     var v::Vec<Declaration> declarations = v::empty<Declaration>();
     var v::Vec<Problem> problems = v::empty<Problem>();

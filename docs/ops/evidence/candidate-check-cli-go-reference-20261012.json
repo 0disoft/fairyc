@@ -1,0 +1,324 @@
+{
+  "schema": "fairyc.candidate-check-process/v1",
+  "image": {
+    "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\manifest-bootstrap.exe",
+    "sha256": "18e72a61e9ff3fdd620652ecd8ce2e355b9371488b2ad1b2ccbadbf7a091783a"
+  },
+  "cases": [
+    {
+      "name": "Current",
+      "argv": [
+        "check",
+        "--locked"
+      ],
+      "exit": 0,
+      "stdout": "check ok: 5 instance(s), 6 source file(s), 13 MIR function(s), lock verified\n",
+      "stderr": "",
+      "seconds": 0.06404769999790005,
+      "diagnosticComparison": "complete",
+      "inputSHA256": "6e82797fb3f59605349ad9daa84ce2bcf086f3be91fe8bca380c1487486a2fe8",
+      "changedPaths": [],
+      "lockSHA256": "f112d5facff6d462fcf545900306bb16368aaa9cbec98dc0ff5b908813d4fc1b"
+    },
+    {
+      "name": "Signature",
+      "argv": [
+        "check",
+        "--locked"
+      ],
+      "exit": 3,
+      "stdout": "",
+      "stderr": "fairyc: semantic subset does not support type Missing at common.fy [bytes 49..56]\n",
+      "seconds": 0.05904889998782892,
+      "diagnosticComparison": "complete",
+      "inputSHA256": "30604dbb00c7be4af06201fdb57cefad6702541afdc98c62b2f5a354286b5048",
+      "changedPaths": [],
+      "lockSHA256": "7ca69d1a43735d07b54dc8f1184c04719e5aa2d0d86a8f14323f16d09a85bea7"
+    },
+    {
+      "name": "RootBody",
+      "argv": [
+        "check",
+        "--locked"
+      ],
+      "exit": 3,
+      "stdout": "",
+      "stderr": "main.fy:5:24: E1009: return value does not match the declared result type [bytes 93..97]\n  expected-type: main.fy:5:4 [bytes 73..76]\n",
+      "seconds": 0.056652000013855286,
+      "diagnosticComparison": "complete",
+      "inputSHA256": "46b0143c70012218f2c078d5964421e72332b75bb9afbe13b224188f72c4cdad",
+      "changedPaths": [],
+      "lockSHA256": "37fd8893d101fadb803db02adae420beffed015aa39584fc6362fb336fa45845"
+    },
+    {
+      "name": "DependencyBody",
+      "argv": [
+        "check",
+        "--locked"
+      ],
+      "exit": 3,
+      "stdout": "",
+      "stderr": "right/right.fy:4:28: E1009: return value does not match the declared result type [bytes 101..105]\n  expected-type: right/right.fy:4:8 [bytes 81..84]\n",
+      "seconds": 0.060769499992602505,
+      "diagnosticComparison": "complete",
+      "inputSHA256": "b1ba89ced70c69fb1a4dfce89a51d4d5b572f6b20a24933e9f103accc1174ad8",
+      "changedPaths": [],
+      "lockSHA256": "c5126bb0dce6d3e0395617d2eac2e10861e06345b4bce37cbb204e798ace7f57"
+    },
+    {
+      "name": "Private",
+      "argv": [
+        "check",
+        "--locked"
+      ],
+      "exit": 3,
+      "stdout": "",
+      "stderr": "main.fy:5:35: E0103: item is not visible from this module [bytes 104..113]\n  declaration: left/left.fy:5:8 [bytes 120..126]\n",
+      "seconds": 0.06057489999511745,
+      "diagnosticComparison": "complete",
+      "inputSHA256": "07e2b4ff2c880c2caf34cd8f2f47eb2f46ef7879807df1579df82e0c66e0f167",
+      "changedPaths": [],
+      "lockSHA256": "b8fbf3b5e31c1ba3913fc8d025ecfd23fbe681b181f7ffda6139076955437d9f"
+    },
+    {
+      "name": "Nominal",
+      "argv": [
+        "check",
+        "--locked"
+      ],
+      "exit": 3,
+      "stdout": "",
+      "stderr": "main.fy:7:54: E1006: incompatible expected and actual types [bytes 184..185]\n  expected-type: main.fy:7:52 [bytes 182..183]\n",
+      "seconds": 0.05808970000362024,
+      "diagnosticComparison": "complete",
+      "inputSHA256": "ee5cffb7c241e6e0313ec708771eef34dacfa63f902c60bead1ca0e0625b8bc3",
+      "changedPaths": [],
+      "lockSHA256": "fc0d0c8e0155a1e811e5d34b28fe60567641ac420b85c69de191dd7afd0561b7"
+    },
+    {
+      "name": "Moved",
+      "argv": [
+        "check",
+        "--locked"
+      ],
+      "exit": 3,
+      "stdout": "",
+      "stderr": "main.fy:9:48: E1101: resource is used after ownership was moved [bytes 250..251]\n  declaration: main.fy:9:20 [bytes 222..223]\n  move: main.fy:9:39 [bytes 241..242]\n",
+      "seconds": 0.05783839999639895,
+      "diagnosticComparison": "complete",
+      "inputSHA256": "7d36464f7aaae7ea6f88b50609316b506fb66b769b1e645a88f6705f121b662c",
+      "changedPaths": [],
+      "lockSHA256": "900fa962f8902c5e41ec2d03fba4c4c40d394b9a47f527d344b89dafce21a9ad"
+    },
+    {
+      "name": "SDK",
+      "argv": [
+        "check",
+        "--locked"
+      ],
+      "exit": 0,
+      "stdout": "check ok: 6 instance(s), 13 source file(s), 166 MIR function(s), lock verified\n",
+      "stderr": "",
+      "seconds": 0.10934109998925123,
+      "diagnosticComparison": "complete",
+      "inputSHA256": "4fd1062f9eac851590cbde9bcba59020ac3c78fadb09ab9eb7a343de10da442a",
+      "changedPaths": [],
+      "lockSHA256": "e6a2a7c09122a50d34875c1adb38df279d795320ea67eb6d1803db4e762ba1f2"
+    },
+    {
+      "name": "Unchanged",
+      "argv": [
+        "check"
+      ],
+      "exit": 0,
+      "stdout": "check ok: 5 instance(s), 6 source file(s), 13 MIR function(s), lock unchanged\n",
+      "stderr": "",
+      "seconds": 0.06889320000482257,
+      "diagnosticComparison": "complete",
+      "inputSHA256": "6e82797fb3f59605349ad9daa84ce2bcf086f3be91fe8bca380c1487486a2fe8",
+      "changedPaths": [],
+      "lockSHA256": "f112d5facff6d462fcf545900306bb16368aaa9cbec98dc0ff5b908813d4fc1b"
+    },
+    {
+      "name": "Updated",
+      "argv": [
+        "check"
+      ],
+      "exit": 0,
+      "stdout": "check ok: 5 instance(s), 6 source file(s), 13 MIR function(s), lock updated\n",
+      "stderr": "",
+      "seconds": 0.07657150000159163,
+      "diagnosticComparison": "complete",
+      "inputSHA256": "87f6a869a74fd6652a3509fb1c452d594d5d7169d57bb57dc9143c04364baad6",
+      "changedPaths": [
+        "fairy.lock"
+      ],
+      "lockSHA256": "f112d5facff6d462fcf545900306bb16368aaa9cbec98dc0ff5b908813d4fc1b"
+    },
+    {
+      "name": "Recanonicalized",
+      "argv": [
+        "check"
+      ],
+      "exit": 0,
+      "stdout": "check ok: 5 instance(s), 6 source file(s), 13 MIR function(s), lock updated\n",
+      "stderr": "",
+      "seconds": 0.0796386000001803,
+      "diagnosticComparison": "complete",
+      "inputSHA256": "d4e950f712b749f89559f8c9fed6a8cfc44d1ed96f9cb1f4e638d79bc2cb20e7",
+      "changedPaths": [
+        "fairy.lock"
+      ],
+      "lockSHA256": "f112d5facff6d462fcf545900306bb16368aaa9cbec98dc0ff5b908813d4fc1b"
+    },
+    {
+      "name": "SemanticUpdated",
+      "argv": [
+        "check"
+      ],
+      "exit": 3,
+      "stdout": "",
+      "stderr": "main.fy:5:24: E1009: return value does not match the declared result type [bytes 93..97]\n  expected-type: main.fy:5:4 [bytes 73..76]\n",
+      "seconds": 0.07971509998606052,
+      "diagnosticComparison": "complete",
+      "inputSHA256": "601c0041f0fc55c331161b44cc07dcc231efc080491bbd7fd8501ffdc74b9cfa",
+      "changedPaths": [
+        "fairy.lock"
+      ],
+      "lockSHA256": "37fd8893d101fadb803db02adae420beffed015aa39584fc6362fb336fa45845"
+    },
+    {
+      "name": "Lexical",
+      "argv": [
+        "check"
+      ],
+      "exit": 3,
+      "stdout": "",
+      "stderr": "main.fy:7:1: E0001: invalid UTF-8 or unsupported identifier syntax [bytes 131..132, repair=none]\nmain.fy:7:1: E0008: unexpected token [bytes 131..132, repair=skip]\n",
+      "seconds": 0.06300670000200626,
+      "diagnosticComparison": "complete",
+      "inputSHA256": "15a14861ed10588dde6fef043e6fbb0db37803da277c9b0186c4f0cd7e6fe30e",
+      "changedPaths": [],
+      "lockSHA256": "f112d5facff6d462fcf545900306bb16368aaa9cbec98dc0ff5b908813d4fc1b"
+    },
+    {
+      "name": "Syntax",
+      "argv": [
+        "check"
+      ],
+      "exit": 3,
+      "stdout": "",
+      "stderr": "main.fy:7:25: E0007: expected \";\" [bytes 155..155, repair=insert]\n",
+      "seconds": 0.0672095000045374,
+      "diagnosticComparison": "complete",
+      "inputSHA256": "bd8a82cb63ebe5cefd715c79c1ede2a4e0e374bca5e1a0f3f2a5caa4511fa653",
+      "changedPaths": [],
+      "lockSHA256": "f112d5facff6d462fcf545900306bb16368aaa9cbec98dc0ff5b908813d4fc1b"
+    },
+    {
+      "name": "MissingLock",
+      "argv": [
+        "check",
+        "--locked"
+      ],
+      "exit": 7,
+      "stdout": "",
+      "stderr": "fairyc: package workspace failure: locked workspace requires a valid fairy.lock: GetFileAttributesEx fairy.lock: The system cannot find the file specified.\n",
+      "seconds": 0.06997969999792986,
+      "diagnosticComparison": "package-prefix",
+      "inputSHA256": "87f6a869a74fd6652a3509fb1c452d594d5d7169d57bb57dc9143c04364baad6",
+      "changedPaths": [],
+      "lockSHA256": null
+    },
+    {
+      "name": "StaleLock",
+      "argv": [
+        "check",
+        "--locked"
+      ],
+      "exit": 7,
+      "stdout": "",
+      "stderr": "fairyc: package workspace failure: lockfile is stale for the current workspace\n",
+      "seconds": 0.08048000000417233,
+      "diagnosticComparison": "complete",
+      "inputSHA256": "e6bbadfec0c54f4045afb00afe5d9a7ba601a4c142496f374e4f09f0b044b17a",
+      "changedPaths": [],
+      "lockSHA256": "f112d5facff6d462fcf545900306bb16368aaa9cbec98dc0ff5b908813d4fc1b"
+    },
+    {
+      "name": "InvalidLock",
+      "argv": [
+        "check",
+        "--locked"
+      ],
+      "exit": 7,
+      "stdout": "",
+      "stderr": "fairyc: package workspace failure: locked workspace requires a valid fairy.lock: invalid character 'b' looking for beginning of value\n",
+      "seconds": 0.07170369999948889,
+      "diagnosticComparison": "package-prefix",
+      "inputSHA256": "4426af13d93adb90d70644059b93d84ca125aab8c5ff7a6c3856a1627ce9cc27",
+      "changedPaths": [],
+      "lockSHA256": "91f35273b18a8a2b0ffcc90c46515c14ec015cdc2a0a9233892f3d66469bf40b"
+    },
+    {
+      "name": "MissingManifest",
+      "argv": [
+        "check"
+      ],
+      "exit": 7,
+      "stdout": "",
+      "stderr": "fairyc: package workspace failure: workspace ./fairy.toml invalid-project-manifest: GetFileAttributesEx C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-check-cli-20261012\\go-reference-v2\\MissingManifest\\fairy.toml: The system cannot find the file specified.\n",
+      "seconds": 0.050829200001317076,
+      "diagnosticComparison": "package-prefix",
+      "inputSHA256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+      "changedPaths": [],
+      "lockSHA256": null
+    },
+    {
+      "name": "UnknownFlag",
+      "argv": [
+        "check",
+        "--bad"
+      ],
+      "exit": 2,
+      "stdout": "",
+      "stderr": "fairyc: command \"check\" accepts only optional --locked\n\nFairy C Stage 0 compiler prototype\n\nUsage:\n  fairyc new <package-name> --uid <package-uid>\n  fairyc check [--locked]\n  fairyc build [--release] [--locked]\n  fairyc run [--release] [--locked] [-- <program-args...>]\n  fairyc test [--json] [--locations] [--native [--release] [--stdin | --stdin-file <portable-workspace-file>] [--timeout-seconds <1..60>] [--capture-output] [-- <program-args>...]] [--workspace | --package <package-uid>] [--dir <portable-test-directory>]... [--file <portable-test-path>]... [--exact <test-identity>]... [--locked]\n  fairyc test --list [--json] [--locations] [--workspace | --package <package-uid>] [--dir <portable-test-directory>]... [--file <portable-test-path>]... [--locked]\n  fairyc explain <diagnostic-code>\n  fairyc targets\n  fairyc experimental parse <file.fy>\n  fairyc experimental check-syntax <file.fy>\n  fairyc experimental check-semantics <file.fy> [<file.fy>...]\n  fairyc experimental check <primary.fy> [--source <file.fy>]...\n  fairyc experimental check-workspace [--locked]\n  fairyc experimental atlas-pack overview --package-uid <uid> --max-records <count> --max-selection-bytes <bytes> --max-output-bytes <bytes> [--pack-version <1|2|3>] [--locked]\n  fairyc experimental atlas-pack show --package-uid <uid> --symbol <symbol-id> --direction <outgoing|incoming|both> --relation <kind> [--relation <kind>]... --max-records <count> --max-relations <count> --max-selection-bytes <bytes> --max-output-bytes <bytes> [--pack-version <1|2|3>] [--locked]\n  fairyc experimental atlas-pack around --package-uid <uid> --symbol <symbol-id> --direction <outgoing|incoming|both> --relation <kind> [--relation <kind>]... --max-records <count> --max-relations <count> --max-depth <depth> --max-selection-bytes <bytes> --max-output-bytes <bytes> [--pack-version <1|2|3>] [--locked]\n  fairyc experimental atlas-symbols list --package-uid <uid> --kind <kind> [--kind <kind>]... [--module <module>] [--name <identifier>] [--after <full-symbol-id>] --max-symbols <count> --max-selection-bytes <bytes> --max-output-bytes <bytes> [--catalog-version <1|2|3>] [--locked]\n  fairyc experimental atlas-calls list --package-uid <uid> --symbol <symbol-id> --direction <outgoing|incoming|both> --max-packages <count> --max-calls <count> --max-output-bytes <bytes> [--catalog-version <0|1|2>] [--locked]\n  fairyc experimental atlas-text source --package-uid <uid> --symbol <symbol-id> --origin workspace-authored --max-fragments <count> --max-fragment-bytes <bytes> --max-text-bytes <bytes> --max-output-bytes <bytes> [--locked]\n  fairyc experimental atlas-text documentation --package-uid <uid> --symbol <symbol-id> --origin workspace-authored --max-fragments <count> --max-fragment-bytes <bytes> --max-text-bytes <bytes> --max-output-bytes <bytes> [--locked]\n  fairyc experimental atlas-evidence show --package-uid <uid> --symbol <symbol-id> --direction <outgoing|incoming|both> --relation <kind> [--relation <kind>]... --max-records <count> --max-relations <count> --max-selection-bytes <bytes> --max-fragment-bytes <bytes> --max-text-bytes <bytes> --max-facts-bytes <bytes> --max-text-document-bytes <bytes> --max-output-bytes <bytes> [--bundle-version <0|1|2>] [--locked]\n  fairyc experimental check-workspace-cache --target <target-id> --cache-dir <build/path> --cache-max-entries <count> --cache-max-bytes <bytes> --cache-max-record-bytes <bytes> --cache-max-artifact-bytes <bytes> --cache-temp-max-age-seconds <seconds> [--locked]\n  fairyc experimental check-workspace-session --target <target-id> --max-requests <count> --cache-max-entries <count> --cache-max-bytes <bytes> --cache-max-artifact-bytes <bytes> [--locked]\n  fairyc experimental build-workspace --target x86_64-windows-msvc --profile <low|optimized> --output <build/path.exe> [--locked]\n  fairyc experimental build-workspace --target x86_64-linux-gnu --cc <gcc|clang> --profile <low|optimized> --output <build/path> [--locked]\n  fairyc experimental run-workspace --target x86_64-windows-msvc --profile <low|optimized> [--locked]\n  fairyc experimental run-workspace --target x86_64-linux-gnu --cc <gcc|clang> --profile <low|optimized> [--locked]\n  fairyc experimental emit-workspace-c --target <target-id> [--locked]\n  fairyc experimental target-spec <target-id>\n  fairyc experimental emit-c <entry.fy> [--source <file.fy>]...\n  fairyc experimental build <entry.fy> [--source <file.fy>]... --cc <clang|gcc> --profile <low|optimized> --output <build/path>\n  fairyc experimental build-target <entry.fy> [--source <file.fy>]... --target x86_64-windows-msvc --profile <low|optimized> --output <build/path.exe>\n  fairyc experimental run-target <entry.fy> [--source <file.fy>]... --target x86_64-windows-msvc --profile <low|optimized>\n  fairyc experimental exec-target <entry.fy> [--source <file.fy>]... --target x86_64-windows-msvc --profile <low|optimized>\n  fairyc experimental build-host <entry.fy> [--source <file.fy>]... --profile <low|optimized> --output <build/path.exe>\n  fairyc experimental run-host <entry.fy> [--source <file.fy>]... --profile <low|optimized>\n  fairyc experimental run <entry.fy> [--source <file.fy>]...\n  fairyc --help\n  fairyc --version\n\nThe experimental commands are unstable. \"fairyc new\" creates one no-overwrite child starter with\nan explicit package UID. \"fairyc check\" verifies the local workspace. \"fairyc build\"\ncreates or replaces build/<package-name>.exe on Windows or build/<package-name> on Linux GNU amd64.\nLinux builds require GCC or Clang on PATH. \"fairyc run\" builds and executes a temporary native\nimage, forwards caller stdin, bounded program output, and any arguments after \"--\" as the\nprogram's process arguments, preserves ordinary program status, and retains no artifact.\n\"fairyc test\" checks the root package, one explicitly selected root-reachable local package, or every\nunambiguous root-reachable local package with --workspace plus their isolated tests/ sources. It lists\ncanonical test identities or runs all, exact portable test directories, exact portable test files, or exact identities through the semantic interpreter or as\nisolated Windows or Linux images with --native; --json selects a stable machine report for listing or execution,\n--locations adds exact-current portable source anchors, and native tests receive any process arguments\nafter \"--\" in every isolated execution. Explicit --stdin attaches caller input only when exactly one\nnative test is selected; native tests otherwise receive EOF. Explicit --capture-output requires\nnative JSON execution and adds exact base64 process streams to each outcome.\nExplicit --stdin-file replays one bounded workspace-contained file from byte zero to every native test.\nExplicit --timeout-seconds bounds each isolated native test process and defaults to 60 seconds.\n\"fairyc experimental emit-workspace-c\" writes one private, explicitly targeted C11 bootstrap unit\nto stdout without invoking a toolchain. Its generated source is compiler-internal transport, not a\ncross-release C API or standalone product artifact. Pass --release to build, run, or native test for\noptimization. All four stable workspace commands read fairy.toml and refresh fairy.lock unless\n--locked is supplied.\n",
+      "seconds": 0.06733130000066012,
+      "diagnosticComparison": "invocation-first-line",
+      "inputSHA256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+      "changedPaths": [],
+      "lockSHA256": null
+    },
+    {
+      "name": "RepeatedLocked",
+      "argv": [
+        "check",
+        "--locked",
+        "--locked"
+      ],
+      "exit": 2,
+      "stdout": "",
+      "stderr": "fairyc: command \"check\" accepts only optional --locked\n\nFairy C Stage 0 compiler prototype\n\nUsage:\n  fairyc new <package-name> --uid <package-uid>\n  fairyc check [--locked]\n  fairyc build [--release] [--locked]\n  fairyc run [--release] [--locked] [-- <program-args...>]\n  fairyc test [--json] [--locations] [--native [--release] [--stdin | --stdin-file <portable-workspace-file>] [--timeout-seconds <1..60>] [--capture-output] [-- <program-args>...]] [--workspace | --package <package-uid>] [--dir <portable-test-directory>]... [--file <portable-test-path>]... [--exact <test-identity>]... [--locked]\n  fairyc test --list [--json] [--locations] [--workspace | --package <package-uid>] [--dir <portable-test-directory>]... [--file <portable-test-path>]... [--locked]\n  fairyc explain <diagnostic-code>\n  fairyc targets\n  fairyc experimental parse <file.fy>\n  fairyc experimental check-syntax <file.fy>\n  fairyc experimental check-semantics <file.fy> [<file.fy>...]\n  fairyc experimental check <primary.fy> [--source <file.fy>]...\n  fairyc experimental check-workspace [--locked]\n  fairyc experimental atlas-pack overview --package-uid <uid> --max-records <count> --max-selection-bytes <bytes> --max-output-bytes <bytes> [--pack-version <1|2|3>] [--locked]\n  fairyc experimental atlas-pack show --package-uid <uid> --symbol <symbol-id> --direction <outgoing|incoming|both> --relation <kind> [--relation <kind>]... --max-records <count> --max-relations <count> --max-selection-bytes <bytes> --max-output-bytes <bytes> [--pack-version <1|2|3>] [--locked]\n  fairyc experimental atlas-pack around --package-uid <uid> --symbol <symbol-id> --direction <outgoing|incoming|both> --relation <kind> [--relation <kind>]... --max-records <count> --max-relations <count> --max-depth <depth> --max-selection-bytes <bytes> --max-output-bytes <bytes> [--pack-version <1|2|3>] [--locked]\n  fairyc experimental atlas-symbols list --package-uid <uid> --kind <kind> [--kind <kind>]... [--module <module>] [--name <identifier>] [--after <full-symbol-id>] --max-symbols <count> --max-selection-bytes <bytes> --max-output-bytes <bytes> [--catalog-version <1|2|3>] [--locked]\n  fairyc experimental atlas-calls list --package-uid <uid> --symbol <symbol-id> --direction <outgoing|incoming|both> --max-packages <count> --max-calls <count> --max-output-bytes <bytes> [--catalog-version <0|1|2>] [--locked]\n  fairyc experimental atlas-text source --package-uid <uid> --symbol <symbol-id> --origin workspace-authored --max-fragments <count> --max-fragment-bytes <bytes> --max-text-bytes <bytes> --max-output-bytes <bytes> [--locked]\n  fairyc experimental atlas-text documentation --package-uid <uid> --symbol <symbol-id> --origin workspace-authored --max-fragments <count> --max-fragment-bytes <bytes> --max-text-bytes <bytes> --max-output-bytes <bytes> [--locked]\n  fairyc experimental atlas-evidence show --package-uid <uid> --symbol <symbol-id> --direction <outgoing|incoming|both> --relation <kind> [--relation <kind>]... --max-records <count> --max-relations <count> --max-selection-bytes <bytes> --max-fragment-bytes <bytes> --max-text-bytes <bytes> --max-facts-bytes <bytes> --max-text-document-bytes <bytes> --max-output-bytes <bytes> [--bundle-version <0|1|2>] [--locked]\n  fairyc experimental check-workspace-cache --target <target-id> --cache-dir <build/path> --cache-max-entries <count> --cache-max-bytes <bytes> --cache-max-record-bytes <bytes> --cache-max-artifact-bytes <bytes> --cache-temp-max-age-seconds <seconds> [--locked]\n  fairyc experimental check-workspace-session --target <target-id> --max-requests <count> --cache-max-entries <count> --cache-max-bytes <bytes> --cache-max-artifact-bytes <bytes> [--locked]\n  fairyc experimental build-workspace --target x86_64-windows-msvc --profile <low|optimized> --output <build/path.exe> [--locked]\n  fairyc experimental build-workspace --target x86_64-linux-gnu --cc <gcc|clang> --profile <low|optimized> --output <build/path> [--locked]\n  fairyc experimental run-workspace --target x86_64-windows-msvc --profile <low|optimized> [--locked]\n  fairyc experimental run-workspace --target x86_64-linux-gnu --cc <gcc|clang> --profile <low|optimized> [--locked]\n  fairyc experimental emit-workspace-c --target <target-id> [--locked]\n  fairyc experimental target-spec <target-id>\n  fairyc experimental emit-c <entry.fy> [--source <file.fy>]...\n  fairyc experimental build <entry.fy> [--source <file.fy>]... --cc <clang|gcc> --profile <low|optimized> --output <build/path>\n  fairyc experimental build-target <entry.fy> [--source <file.fy>]... --target x86_64-windows-msvc --profile <low|optimized> --output <build/path.exe>\n  fairyc experimental run-target <entry.fy> [--source <file.fy>]... --target x86_64-windows-msvc --profile <low|optimized>\n  fairyc experimental exec-target <entry.fy> [--source <file.fy>]... --target x86_64-windows-msvc --profile <low|optimized>\n  fairyc experimental build-host <entry.fy> [--source <file.fy>]... --profile <low|optimized> --output <build/path.exe>\n  fairyc experimental run-host <entry.fy> [--source <file.fy>]... --profile <low|optimized>\n  fairyc experimental run <entry.fy> [--source <file.fy>]...\n  fairyc --help\n  fairyc --version\n\nThe experimental commands are unstable. \"fairyc new\" creates one no-overwrite child starter with\nan explicit package UID. \"fairyc check\" verifies the local workspace. \"fairyc build\"\ncreates or replaces build/<package-name>.exe on Windows or build/<package-name> on Linux GNU amd64.\nLinux builds require GCC or Clang on PATH. \"fairyc run\" builds and executes a temporary native\nimage, forwards caller stdin, bounded program output, and any arguments after \"--\" as the\nprogram's process arguments, preserves ordinary program status, and retains no artifact.\n\"fairyc test\" checks the root package, one explicitly selected root-reachable local package, or every\nunambiguous root-reachable local package with --workspace plus their isolated tests/ sources. It lists\ncanonical test identities or runs all, exact portable test directories, exact portable test files, or exact identities through the semantic interpreter or as\nisolated Windows or Linux images with --native; --json selects a stable machine report for listing or execution,\n--locations adds exact-current portable source anchors, and native tests receive any process arguments\nafter \"--\" in every isolated execution. Explicit --stdin attaches caller input only when exactly one\nnative test is selected; native tests otherwise receive EOF. Explicit --capture-output requires\nnative JSON execution and adds exact base64 process streams to each outcome.\nExplicit --stdin-file replays one bounded workspace-contained file from byte zero to every native test.\nExplicit --timeout-seconds bounds each isolated native test process and defaults to 60 seconds.\n\"fairyc experimental emit-workspace-c\" writes one private, explicitly targeted C11 bootstrap unit\nto stdout without invoking a toolchain. Its generated source is compiler-internal transport, not a\ncross-release C API or standalone product artifact. Pass --release to build, run, or native test for\noptimization. All four stable workspace commands read fairy.toml and refresh fairy.lock unless\n--locked is supplied.\n",
+      "seconds": 0.059815500004333444,
+      "diagnosticComparison": "invocation-first-line",
+      "inputSHA256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+      "changedPaths": [],
+      "lockSHA256": null
+    },
+    {
+      "name": "Positional",
+      "argv": [
+        "check",
+        "src/main.fy"
+      ],
+      "exit": 2,
+      "stdout": "",
+      "stderr": "fairyc: command \"check\" accepts only optional --locked\n\nFairy C Stage 0 compiler prototype\n\nUsage:\n  fairyc new <package-name> --uid <package-uid>\n  fairyc check [--locked]\n  fairyc build [--release] [--locked]\n  fairyc run [--release] [--locked] [-- <program-args...>]\n  fairyc test [--json] [--locations] [--native [--release] [--stdin | --stdin-file <portable-workspace-file>] [--timeout-seconds <1..60>] [--capture-output] [-- <program-args>...]] [--workspace | --package <package-uid>] [--dir <portable-test-directory>]... [--file <portable-test-path>]... [--exact <test-identity>]... [--locked]\n  fairyc test --list [--json] [--locations] [--workspace | --package <package-uid>] [--dir <portable-test-directory>]... [--file <portable-test-path>]... [--locked]\n  fairyc explain <diagnostic-code>\n  fairyc targets\n  fairyc experimental parse <file.fy>\n  fairyc experimental check-syntax <file.fy>\n  fairyc experimental check-semantics <file.fy> [<file.fy>...]\n  fairyc experimental check <primary.fy> [--source <file.fy>]...\n  fairyc experimental check-workspace [--locked]\n  fairyc experimental atlas-pack overview --package-uid <uid> --max-records <count> --max-selection-bytes <bytes> --max-output-bytes <bytes> [--pack-version <1|2|3>] [--locked]\n  fairyc experimental atlas-pack show --package-uid <uid> --symbol <symbol-id> --direction <outgoing|incoming|both> --relation <kind> [--relation <kind>]... --max-records <count> --max-relations <count> --max-selection-bytes <bytes> --max-output-bytes <bytes> [--pack-version <1|2|3>] [--locked]\n  fairyc experimental atlas-pack around --package-uid <uid> --symbol <symbol-id> --direction <outgoing|incoming|both> --relation <kind> [--relation <kind>]... --max-records <count> --max-relations <count> --max-depth <depth> --max-selection-bytes <bytes> --max-output-bytes <bytes> [--pack-version <1|2|3>] [--locked]\n  fairyc experimental atlas-symbols list --package-uid <uid> --kind <kind> [--kind <kind>]... [--module <module>] [--name <identifier>] [--after <full-symbol-id>] --max-symbols <count> --max-selection-bytes <bytes> --max-output-bytes <bytes> [--catalog-version <1|2|3>] [--locked]\n  fairyc experimental atlas-calls list --package-uid <uid> --symbol <symbol-id> --direction <outgoing|incoming|both> --max-packages <count> --max-calls <count> --max-output-bytes <bytes> [--catalog-version <0|1|2>] [--locked]\n  fairyc experimental atlas-text source --package-uid <uid> --symbol <symbol-id> --origin workspace-authored --max-fragments <count> --max-fragment-bytes <bytes> --max-text-bytes <bytes> --max-output-bytes <bytes> [--locked]\n  fairyc experimental atlas-text documentation --package-uid <uid> --symbol <symbol-id> --origin workspace-authored --max-fragments <count> --max-fragment-bytes <bytes> --max-text-bytes <bytes> --max-output-bytes <bytes> [--locked]\n  fairyc experimental atlas-evidence show --package-uid <uid> --symbol <symbol-id> --direction <outgoing|incoming|both> --relation <kind> [--relation <kind>]... --max-records <count> --max-relations <count> --max-selection-bytes <bytes> --max-fragment-bytes <bytes> --max-text-bytes <bytes> --max-facts-bytes <bytes> --max-text-document-bytes <bytes> --max-output-bytes <bytes> [--bundle-version <0|1|2>] [--locked]\n  fairyc experimental check-workspace-cache --target <target-id> --cache-dir <build/path> --cache-max-entries <count> --cache-max-bytes <bytes> --cache-max-record-bytes <bytes> --cache-max-artifact-bytes <bytes> --cache-temp-max-age-seconds <seconds> [--locked]\n  fairyc experimental check-workspace-session --target <target-id> --max-requests <count> --cache-max-entries <count> --cache-max-bytes <bytes> --cache-max-artifact-bytes <bytes> [--locked]\n  fairyc experimental build-workspace --target x86_64-windows-msvc --profile <low|optimized> --output <build/path.exe> [--locked]\n  fairyc experimental build-workspace --target x86_64-linux-gnu --cc <gcc|clang> --profile <low|optimized> --output <build/path> [--locked]\n  fairyc experimental run-workspace --target x86_64-windows-msvc --profile <low|optimized> [--locked]\n  fairyc experimental run-workspace --target x86_64-linux-gnu --cc <gcc|clang> --profile <low|optimized> [--locked]\n  fairyc experimental emit-workspace-c --target <target-id> [--locked]\n  fairyc experimental target-spec <target-id>\n  fairyc experimental emit-c <entry.fy> [--source <file.fy>]...\n  fairyc experimental build <entry.fy> [--source <file.fy>]... --cc <clang|gcc> --profile <low|optimized> --output <build/path>\n  fairyc experimental build-target <entry.fy> [--source <file.fy>]... --target x86_64-windows-msvc --profile <low|optimized> --output <build/path.exe>\n  fairyc experimental run-target <entry.fy> [--source <file.fy>]... --target x86_64-windows-msvc --profile <low|optimized>\n  fairyc experimental exec-target <entry.fy> [--source <file.fy>]... --target x86_64-windows-msvc --profile <low|optimized>\n  fairyc experimental build-host <entry.fy> [--source <file.fy>]... --profile <low|optimized> --output <build/path.exe>\n  fairyc experimental run-host <entry.fy> [--source <file.fy>]... --profile <low|optimized>\n  fairyc experimental run <entry.fy> [--source <file.fy>]...\n  fairyc --help\n  fairyc --version\n\nThe experimental commands are unstable. \"fairyc new\" creates one no-overwrite child starter with\nan explicit package UID. \"fairyc check\" verifies the local workspace. \"fairyc build\"\ncreates or replaces build/<package-name>.exe on Windows or build/<package-name> on Linux GNU amd64.\nLinux builds require GCC or Clang on PATH. \"fairyc run\" builds and executes a temporary native\nimage, forwards caller stdin, bounded program output, and any arguments after \"--\" as the\nprogram's process arguments, preserves ordinary program status, and retains no artifact.\n\"fairyc test\" checks the root package, one explicitly selected root-reachable local package, or every\nunambiguous root-reachable local package with --workspace plus their isolated tests/ sources. It lists\ncanonical test identities or runs all, exact portable test directories, exact portable test files, or exact identities through the semantic interpreter or as\nisolated Windows or Linux images with --native; --json selects a stable machine report for listing or execution,\n--locations adds exact-current portable source anchors, and native tests receive any process arguments\nafter \"--\" in every isolated execution. Explicit --stdin attaches caller input only when exactly one\nnative test is selected; native tests otherwise receive EOF. Explicit --capture-output requires\nnative JSON execution and adds exact base64 process streams to each outcome.\nExplicit --stdin-file replays one bounded workspace-contained file from byte zero to every native test.\nExplicit --timeout-seconds bounds each isolated native test process and defaults to 60 seconds.\n\"fairyc experimental emit-workspace-c\" writes one private, explicitly targeted C11 bootstrap unit\nto stdout without invoking a toolchain. Its generated source is compiler-internal transport, not a\ncross-release C API or standalone product artifact. Pass --release to build, run, or native test for\noptimization. All four stable workspace commands read fairy.toml and refresh fairy.lock unless\n--locked is supplied.\n",
+      "seconds": 0.05542489999788813,
+      "diagnosticComparison": "invocation-first-line",
+      "inputSHA256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+      "changedPaths": [],
+      "lockSHA256": null
+    }
+  ]
+}
