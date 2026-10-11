@@ -2174,3 +2174,26 @@ The work cap stays 1048576 and the C output cap stays 2097152 bytes.
 Evidence: `docs/ops/evidence/candidate-literal-pool-index-20261011.json`.
 Stable CLI/API, SDK ABI, language revision, Go reference semantics, DB, CI and
 native runner policy are unchanged.
+
+
+## Indexed C callable coordinates (2026-10-11)
+
+`module_unit_c_callable_index` retains original one-based callable row IDs in a
+power-of-two hash-slot table keyed by original module and declaration IDs. The
+table has at least twice as many slots as retained callables, with at most 8192
+slots for the existing 4096 callable cap. Preparation and every insertion/query
+probe consume the existing C work budget. Duplicate or invalid coordinates reject
+with 1001, allocation failure retains 1003 and work exhaustion retains 1002.
+
+The C renderer prepares the index once. Foreign declarations, foreign call
+emission and ordinary-callable ownership checks reuse it without changing
+original prototype identity. SDK authentication, unsafe-call permission, result
+and parameter types, caller effects and shared argument rules remain mandatory.
+Foreign lookup exhaustion propagates immediately; a missing row stays distinct
+from a failed query. Linker spelling and compatibility-based declaration sharing
+remain unchanged. Body-frame and per-body invocation lookup are separate and
+retain their current behavior.
+
+Evidence: `docs/ops/evidence/candidate-c-callable-index-20261011.json`.
+Stable CLI/API, SDK ABI, Go reference behavior, work/output/capacity limits, DB,
+CI and native runner policy are unchanged.

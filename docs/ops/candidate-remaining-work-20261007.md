@@ -3225,3 +3225,39 @@ Full original C generation/execution, native driver, default timeout/performance
 standalone candidate profiles, Linux, full suite and Stage1/Stage2 remain pending.
 The candidate unit contract and local evidence tool change. Stable CLI/API, SDK
 ABI, Go reference behavior, DB, CI and native runner limits are unchanged. No push.
+
+
+## Indexed C callable lookup (2026-10-11)
+
+Receipt: `evidence/candidate-c-callable-index-20261011.json`.
+
+The C renderer prepares a hash-slot table for original module/declaration
+coordinates once. Foreign declaration collection, foreign calls and ordinary
+callable ownership reuse original prototype row IDs. Duplicate/invalid
+coordinates and exhausted preparation/query work reject. SDK authentication,
+unsafe permission, result/argument types, caller effects, shared arguments and
+linker-name compatibility checks remain. Foreign lookup exhaustion now propagates
+immediately instead of being treated as a missing foreign declaration.
+
+Four Release native cases pass. The existing 1089-frame/1080-callable fixture now
+checks every indexed row, a missing identity and exhausted preparation/query
+work, with lookup work below 20000. Distinct generic units, shared cleanup and
+authentic SDK Vec struct slices pass. All three generated C outputs match the
+previously compiled and executed /Od and /O2 artifacts byte-for-byte (six reused
+executions); the SDK runtime source hashes also match. The locked source check
+passes with 289 files and 3605 MIR functions. No unchanged C artifact is rebuilt.
+
+The exact 236-file original main closure still compiles 48 units with 25 retries
+and links 3558 frames. Whole C generation now passes foreign declarations, all
+function prototypes and aggregate cleanup definitions. It next exhausts work
+while emitting a function body: cache-only phase code 725012, original module
+213 (`internal/sdkstdlib/sources/optional/std/vec.fy`), bytes 7561..7620. This is
+the `commit_raw` call inside Vec push. Public C output remains transactional at
+zero. Per-call target lookup still scans all body frames; that is the next
+repeated lookup to remove. Per-body invocation lookup also remains unchanged.
+
+Work, output-size and callable-count limits remain unchanged. Original full C
+generation/execution, native driver, default timeout/performance, standalone
+candidate profiles, Linux, full suite and Stage1/Stage2 remain pending. The
+candidate unit contract and local evidence tool change. Stable CLI/API, SDK ABI,
+Go reference behavior, DB, CI and native runner limits are unchanged. No push.
