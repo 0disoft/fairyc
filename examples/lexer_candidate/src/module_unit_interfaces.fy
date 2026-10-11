@@ -41,12 +41,17 @@ fn Result<v::Vec<Annotation>,join::Problem> annotations(ref v::Vec<syntax::Parse
     i=1;while(i<=syntax::expression_count(p)){if(!charge(work,1)){return .err(fail(10,binding::first(bound),0,0));}let e=syntax::expression_at(p,i);if(e.kind==23){request(ref mut table,e.right);}else if(e.kind==20){var usize link=e.right;while(link!=0){let n=syntax::type_at(p,link);request(ref mut table,storage::annotation_root(p,i,n.left,*v::at<bool>(ref vectors,syntax::module_index(p,e.start))));link=n.right;}}i+=1;}
     i=1;while(i<=syntax::statement_count(p)){let s=syntax::statement_at(p,i);if(s.kind==18){request(ref mut table,s.second);}i+=1;}
     var usize base=0;var usize module_index=binding::first(bound);
-    while(module_index<binding::stop(bound)){let original=v::at<syntax::Parsed>(sources,module_index);var usize owner=0;i=1;
+    while(module_index<binding::stop(bound)){let original=v::at<syntax::Parsed>(sources,module_index);var usize owner=0;var v::Vec<usize> queries=v::empty<usize>();i=1;
         while(i<=syntax::type_count(original)){let n=syntax::type_at(original,i);while(owner+1<syntax::declaration_count(original) && n.start>=syntax::declaration_at(original,owner).end){owner+=1;}
+            var usize query=0;
             if(v::at<Annotation>(ref table,base+i-1).required){let d=syntax::declaration_at(original,owner);if(d.generic_parameters!=0){let ref mut Annotation slot=v::at_mut<Annotation>(ref mut table,base+i-1);slot.deferred=true;}
-                else{let r=signatures::resolve_type(metadata,original,module_index,i,graph);if(r.problem.code!=0){return .err(fail(if(r.problem.code==9 && d.kind==4 && n.kind==8){2}else{r.problem.code},module_index,r.problem.start,r.problem.end));}let ref mut Annotation slot=v::at_mut<Annotation>(ref mut table,base+i-1);slot.type=r.type;}}
+                else{query=i;}}
+            if(!v::push<usize>(ref mut queries,query).is_ok){return .err(fail(11,module_index,n.start,n.end));}
             i+=1;
-        }base+=syntax::type_count(original);module_index+=1;
+        }
+        let resolved=switch(signatures::resolve_types(metadata,original,module_index,ref queries,graph)){case .ok(p):{p}case .err(e):{let problem=e.problem;var u32 code=problem.code;if(code==9 && e.request!=0){let n=syntax::type_at(original,e.request);owner=0;while(owner+1<syntax::declaration_count(original) && n.start>=syntax::declaration_at(original,owner).end){owner+=1;}if(syntax::declaration_at(original,owner).kind==4 && n.kind==8){code=2;}}return .err(fail(code,module_index,problem.start,problem.end));}};
+        i=0;while(i<v::len<usize>(ref resolved)){let slot=v::at_mut<Annotation>(ref mut table,base+i);slot.type=*v::at<usize>(ref resolved,i);i+=1;}
+        base+=syntax::type_count(original);module_index+=1;
     }return .ok(table);
 }
 fn join::Problem callable(ref v::Vec<syntax::Parsed> sources,ref signatures::Program metadata,binding::Coordinate c,ref mut v::Vec<types::Type> graph,ref mut v::Vec<Callable> callables,ref mut v::Vec<usize> parameters,ref mut bytes::Buffer names,ref mut v::Vec<usize> pending,ref mut bytes::Buffer seen,ref mut Budget work){

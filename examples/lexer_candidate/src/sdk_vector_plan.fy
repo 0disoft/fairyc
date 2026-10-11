@@ -44,6 +44,8 @@ pub fn usize find(ref Plan p,usize type){var usize i=0;while(i<count(p)){if(at(p
 pub fn types::Type type_at(ref Plan p,usize id){return types::graph_at(ref p.graph,id);}
 pub fn usize type_count(ref Plan p){return types::graph_count(ref p.graph);}
 pub fn types::Resolution resolve_type(ref Plan p,ref syntax::Parsed source,usize module_index,usize root,ref mut v::Vec<types::Type> graph){return types::resolve(ref p.declarations,source,module_index,root,graph);}
+pub fn Result<v::Vec<usize>,types::BatchProblem> resolve_types(ref Plan p,ref syntax::Parsed source,usize module_index,ref v::Vec<usize> roots,ref mut v::Vec<types::Type> graph){return types::resolve_many(ref p.declarations,source,module_index,roots,graph);}
+pub fn Result<v::Vec<usize>,types::BatchProblem> specialize_types(ref Plan p,ref syntax::Parsed source,usize module_index,usize declaration,ref v::Vec<usize> roots,ref v::Vec<usize> arguments,ref mut v::Vec<types::Type> graph){return types::specialize_many(ref p.declarations,source,module_index,declaration,roots,arguments,graph);}
 pub fn types::Resolution declaration_type(ref Plan p,usize module_index,usize declaration,ref mut v::Vec<types::Type> graph){return types::declaration(ref p.declarations,module_index,declaration,graph);}
 pub fn Result<types::Graph,u32> own_types(ref Plan p,v::Vec<types::Type> graph){return types::assemble(ref p.declarations,graph);}
 pub fn usize module_count(ref Plan p){return catalog::module_count(ref p.declarations);}

@@ -60,6 +60,35 @@ fn void catalog_rejects_duplicate_and_unresolved_coordinates(){
     graph_publication_rejects_forged_nominal_or_child_identity();
 }
 
+@test fn void ordered_type_batches_preserve_identity_and_rollback_on_later_errors(){
+    let text=b"module a;import b as lib;fn i32 scalar(){}fn Option<lib::Token> wrapped(){}fn Result<u8,lib::Hidden> invalid(){}";
+    let c=build(text,b"module b;pub struct Token{i32 n;}struct Hidden{i32 n;}");let p=parsed(text);
+    var v::Vec<usize> roots=v::empty<usize>();assert(v::push<usize>(ref mut roots,result_root(ref p,0)).is_ok && v::push<usize>(ref mut roots,0).is_ok && v::push<usize>(ref mut roots,result_root(ref p,1)).is_ok);
+    var v::Vec<types::Type> graph=v::empty<types::Type>();let ids=switch(types::resolve_many(ref c,ref p,0,ref roots,ref mut graph)){case .ok(ids):{ids}case .err(_):{assert(false);return;}};
+    assert(v::len<usize>(ref ids)==3 && *v::at<usize>(ref ids,1)==0 && types::count(ref graph)==3);
+    var v::Vec<types::Type> single=v::empty<types::Type>();var usize i=0;while(i<3){let root=*v::at<usize>(ref roots,i);if(root!=0){let r=types::resolve(ref c,ref p,0,root,ref mut single);assert(r.problem.code==0 && r.type==*v::at<usize>(ref ids,i));}i+=1;}assert(types::count(ref single)==types::count(ref graph));
+    let changed=parsed(b"module a;import b as lib;fn i64 scalar(){}fn Option<lib::Token> wrapped(){}fn Result<u8,lib::Hidden> invalid(){}");
+    assert(syntax::source_view(ref changed).len==syntax::source_view(ref p).len);
+    switch(types::resolve_many(ref c,ref changed,0,ref roots,ref mut graph)){case .ok(_):{assert(false);}case .err(e):{assert(e.problem.code==12 && e.request==0 && types::count(ref graph)==3);}};
+    discard v::pop<usize>(ref mut roots);assert(v::push<usize>(ref mut roots,result_root(ref p,2)).is_ok);
+    switch(types::resolve_many(ref c,ref p,0,ref roots,ref mut graph)){case .ok(_):{assert(false);}case .err(e):{assert(e.problem.code==6 && e.request==3 && e.problem.end>e.problem.start && types::count(ref graph)==3);}};
+    var v::Vec<types::Type> fresh=v::empty<types::Type>();switch(types::resolve_many(ref c,ref p,0,ref roots,ref mut fresh)){case .ok(_):{assert(false);}case .err(e):{assert(e.request==3 && types::count(ref fresh)==0);}};
+}
+
+@test fn void specialized_type_batches_keep_substitutions_and_reject_invalid_roots(){
+    let text=b"module a;fn Option<T> wrap<T>(T value){return .some(value);}fn i32 scalar(){}";let c=build(text,b"module b;");let p=parsed(text);
+    var v::Vec<types::Type> graph=v::empty<types::Type>();let scalar=types::resolve(ref c,ref p,0,result_root(ref p,1),ref mut graph);assert(scalar.problem.code==0);
+    var v::Vec<usize> args=v::empty<usize>();assert(v::push<usize>(ref mut args,scalar.type).is_ok);
+    var v::Vec<usize> roots=v::empty<usize>();assert(v::push<usize>(ref mut roots,result_root(ref p,0)).is_ok && v::push<usize>(ref mut roots,0).is_ok);
+    let ids=switch(types::specialize_many(ref c,ref p,0,2,ref roots,ref args,ref mut graph)){case .ok(ids):{ids}case .err(_):{assert(false);return;}};
+    let option=*v::at<usize>(ref ids,0);assert(*v::at<usize>(ref ids,1)==0 && types::at(ref graph,option).kind==5 && types::at(ref graph,option).first==scalar.type);
+    let single=types::specialize(ref c,ref p,0,2,result_root(ref p,0),ref args,ref mut graph);assert(single.problem.code==0 && single.type==option && types::count(ref graph)==2);
+    assert(v::push<usize>(ref mut roots,result_root(ref p,1)).is_ok);
+    var v::Vec<types::Type> fresh=v::empty<types::Type>();assert(types::resolve(ref c,ref p,0,result_root(ref p,1),ref mut fresh).type==scalar.type);
+    switch(types::specialize_many(ref c,ref p,0,2,ref roots,ref args,ref mut fresh)){case .ok(_):{assert(false);}case .err(e):{assert(e.problem.code==4501 && e.request==3 && types::count(ref fresh)==1);}};
+    let changed=parsed(b"module a;fn Option<T> wrap<T>(T value){return .none;}fn i32 scalar(){}");switch(types::specialize_many(ref c,ref changed,0,2,ref roots,ref args,ref mut graph)){case .ok(_):{assert(false);}case .err(e):{assert(e.problem.code==12 && types::count(ref graph)==2);}};
+}
+
 @test fn void catalog_lookup_stays_inside_ordered_module_tables(){
     var v::Vec<syntax::Parsed> files=v::empty<syntax::Parsed>();var usize module_index=0;
     while(module_index<22){var bytes::Buffer source=bytes::empty();assert(bytes::append(ref mut source,b"module user").is_ok && bytes::append_usize(ref mut source,module_index).is_ok && bytes::append(ref mut source,b";import user0 as p;import user21 as q;pub fn void value(){}fn void hidden(){}").is_ok);

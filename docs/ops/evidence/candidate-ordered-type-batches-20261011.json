@@ -1,0 +1,107 @@
+{
+  "schema": "fairyc.candidate-ordered-type-batches/v1",
+  "passed": true,
+  "scope": "Exact source validation once per ordered type query batch; interface annotations use aligned roots and generic deferral",
+  "sources": [
+    {
+      "path": "examples/lexer_candidate/src/module_types.fy",
+      "sha256": "bf9882a3b65bed52ce35af965dff9498bd2dc82b59ff34f2636ddf0166ea1b19"
+    },
+    {
+      "path": "examples/lexer_candidate/src/sdk_vector_plan.fy",
+      "sha256": "68ff8fa4608b6c0c9e6dd285acd8e03808bb84617aff9308e965bbfb546f13ee"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_signatures.fy",
+      "sha256": "daecf2791c3205f444f44837b1b142778bde66d3f911074aeb4f786da42d1f7c"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_unit_interfaces.fy",
+      "sha256": "eaa7d480216881624bcb0dffc0100b1c5e18b63faa084eb4897a9fa705da27e4"
+    },
+    {
+      "path": "examples/lexer_candidate/tests/module_type_graph.fy",
+      "sha256": "1d6be8e83047ed151fc319d5253580929f7b27660df1818712efcccce0e899d0"
+    },
+    {
+      "path": "examples/lexer_candidate/fairy.lock",
+      "sha256": "424961dd92e59c48f64708ee3ae771cdd8aca5046be2da70a5fb082ac41ffbf9"
+    }
+  ],
+  "sourceCheck": {
+    "exit": 0,
+    "files": 293,
+    "mirFunctions": 3700
+  },
+  "native": {
+    "argv": [
+      "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-tagged\\compiler-build-120s.exe",
+      "test",
+      "--native",
+      "--locked",
+      "--json",
+      "--capture-output",
+      "--exact",
+      "tests::module_type_graph::module_type_graph_native_contract",
+      "--exact",
+      "tests::module_type_graph::ordered_type_batches_preserve_identity_and_rollback_on_later_errors",
+      "--exact",
+      "tests::module_type_graph::specialized_type_batches_keep_substitutions_and_reject_invalid_roots",
+      "--exact",
+      "tests::module_unit_interfaces::local_annotation_roots_keep_distinct_provider_identity_and_template_deferral",
+      "--exact",
+      "tests::module_unit_interfaces::invalid_local_annotation_reports_original_module_span",
+      "--exact",
+      "tests::module_unit_interfaces::retained_bindings_recheck_changed_callers_and_private_provider_metadata"
+    ],
+    "exit": 5,
+    "seconds": 187.20071829999506,
+    "stderr": ""
+  },
+  "rerun": {
+    "identity": "tests::module_type_graph::specialized_type_batches_keep_substitutions_and_reject_invalid_roots",
+    "passed": 1,
+    "reason": "Test supplied module declaration 1 instead of function declaration 2; only test input corrected"
+  },
+  "nativeTests": [
+    {
+      "identity": "tests::module_type_graph::module_type_graph_native_contract",
+      "outcome": "passed"
+    },
+    {
+      "identity": "tests::module_type_graph::ordered_type_batches_preserve_identity_and_rollback_on_later_errors",
+      "outcome": "passed"
+    },
+    {
+      "identity": "tests::module_type_graph::specialized_type_batches_keep_substitutions_and_reject_invalid_roots",
+      "outcome": "passed"
+    },
+    {
+      "identity": "tests::module_unit_interfaces::invalid_local_annotation_reports_original_module_span",
+      "outcome": "passed"
+    },
+    {
+      "identity": "tests::module_unit_interfaces::local_annotation_roots_keep_distinct_provider_identity_and_template_deferral",
+      "outcome": "passed"
+    },
+    {
+      "identity": "tests::module_unit_interfaces::retained_bindings_recheck_changed_callers_and_private_provider_metadata",
+      "outcome": "passed"
+    }
+  ],
+  "ordinarySameLengthSourceMismatchRejected": true,
+  "batchFailureRollsBackAllAddedTypes": true,
+  "specializedIdentityMatchesScalarQueries": true,
+  "requestIndexOneBased": true,
+  "syntaxTypeLimit": 4096,
+  "canonicalTypeLimit": 4096,
+  "frontendTimeoutSeconds": 60,
+  "stage1Stage2GatePassed": false,
+  "pushed": false,
+  "skipped": [
+    "Full self replay: queued after body-query consumer slice",
+    "Linux",
+    "Full suite",
+    "Stage2"
+  ]
+}
