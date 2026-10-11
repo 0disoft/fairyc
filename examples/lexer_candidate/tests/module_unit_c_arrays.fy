@@ -57,3 +57,6 @@ fn usize entry(ref ir::Program p){var usize found=0;var usize i=1;while(i<=ir::c
 @test @effects(console) fn void array_c_traps_borrowed_field_index_at_extent(){
     let p=retained(b"module main;struct Context{usize[2] values;}fn usize read(ref Context c,usize index){return c.values[index];}fn i32 main(){let Context c=Context{.values=[1,2]};discard read(ref c,2);return 0;}",b"");output(ref p,entry(ref p));
 }
+@test @effects(console) fn void array_c_reads_inert_struct_fields_without_recursive_stack_copies(){
+    let p=retained(b"module main;struct Frame{usize[512] spare;usize n;}struct Context{Frame frame;}fn usize recurse(ref Context c,usize depth){let Frame f=c.frame;var usize total=0;total+=f.n;total+=f.n;total+=f.n;total+=f.n;total+=f.n;total+=f.n;total+=f.n;total+=f.n;total+=f.n;total+=f.n;total+=f.n;total+=f.n;total+=f.n;total+=f.n;total+=f.n;total+=f.n;total+=f.n;total+=f.n;total+=f.n;total+=f.n;total+=f.n;total+=f.n;total+=f.n;total+=f.n;if(depth==0){return total;}return recurse(c,depth-1)+total;}fn i32 main(){let Context c=Context{.frame=Frame{.spare=[0;512],.n=1}};assert(recurse(ref c,32)==792);return 0;}",b"");output(ref p,entry(ref p));
+}

@@ -3712,3 +3712,38 @@ This clears the earlier observed stack failures inside the unchanged 60-second
 frontend cap, and it does not prove a full finish or the Stage1/Stage2 gate;
 bottleneck profiling is next. No cap, timeout, public API, SDK ABI, DB, CI or
 stack reserve change, and no push; Linux, the full suite and Stage 2 were skipped.
+
+
+## Inert struct field projections (2026-10-11)
+
+Receipt: `docs/ops/evidence/candidate-inert-field-projection-20261011.json`.
+
+The CFG fusion now also covers a single-use inert struct value node that is
+immediately followed by a field read. It accepts only a direct or original place
+with local or reference field-safe ancestry, no intervening effect, store or
+control node, and it ignores call-result owners and by-value or resource use. The
+owner temporary is skipped, while the selected field still goes through the
+existing opaque `fy_unit_copy`, so the MSVC view aliasing protection stays in
+place.
+
+Checking passes 293 files and 3689 MIR functions with a comment-only lock
+refresh. Six native emission tests pass in 198.1855 seconds, and twelve `/Od` and
+`/O2` generated-C executions pass, including a new 33-depth, 24-frame-read
+`usize[512]` array reproducer where the previous old-low binary's 0xC00000FD is
+0 in the new low build, plus the effectful index snapshots, the bounds trap and
+the original root and projected snapshot with view mutation regression. The nine
+own CLI cases and the Vec development and release runs pass.
+
+The full 286-source 2032081-byte join emits a 24476397-byte, 35-unit packet from
+the baseline in 37.4733 seconds
+(SHA256 `62bc25db9f06cebfe647c77c4072d66f7954af80bb7955e5ae50a82a8acaa02b`),
+1013670 bytes below the previous 25490067-byte packet. The full development
+native build takes 56.3886 seconds (9346560 bytes) and the same-source self replay
+stops at the 60.0522-second frontend timeout. The optimized raw packet build
+emits the same 35 units over 37 objects and exits 0 in 184.8278 seconds, and its
+exact same-source re-emission stops at the 60.0590-second frontend timeout with no
+output.
+
+The self-hosting gates stay pending; no public API, SDK ABI, DB, CI, cap, timeout
+or stack reserve change, and no push; Linux, the full suite and Stage 2 were
+deferred.
