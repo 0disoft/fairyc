@@ -1,0 +1,135 @@
+{
+  "schema": "fairyc.candidate-project-native-driver/v1",
+  "passed": true,
+  "implementation": {
+    "path": "internal/cdriver/windows_project.go",
+    "bytes": 6010,
+    "sha256": "c86e23f6b25da1bca250e72adf21bdf253a04859330e3ab4bd18c4240ab304c2"
+  },
+  "tests": {
+    "path": "internal/cdriver/windows_project_test.go",
+    "bytes": 2193,
+    "sha256": "51f8170f361ad0d290c0dd717d026be2d79d5f02685bffe3651a4a56de32b30b"
+  },
+  "api": "internal/cdriver.BuildWindowsMSVCTargetParts",
+  "validation": {
+    "command": "bun tools/run-go.ts test ./internal/cdriver -run '^TestWindowsProjectSeparateCompilationAndFailures$' -count=1",
+    "passed": true,
+    "seconds": 1.931,
+    "cases": [
+      "Shared header and cross-file literal in low/optimized native execution",
+      "Compile failure returns no image or partial objects",
+      "Link failure returns no image or partial objects"
+    ]
+  },
+  "policy": {
+    "sharedHeaderWrittenOnce": true,
+    "separateObjects": true,
+    "commandTimeoutSeconds": 60,
+    "commandTimeoutChanged": false,
+    "headerPartCap": 2097152,
+    "bodyPartCap": 2097152,
+    "unitCap": 4096,
+    "totalTransportCap": 100663296,
+    "objects": "Inspect code COFF with existing verifier; separately check AMD64 data-only/include-only COFF",
+    "image": "Existing 64 MiB image bound and PE executable inspection",
+    "consumerFlags": "Candidate partitions retain their existing flags; stable single-unit builders retain /W4 /WX"
+  },
+  "originalCandidate": {
+    "packet": {
+      "path": ".cache/candidate-tagged/sdk-c-execution/project-mir-statement-frame-packet.bin",
+      "bytes": 20058517,
+      "sha256": "66c95b355d4e40802a09410d5d42229d265de6e6fcb9fafc4666d6f232bb4601"
+    },
+    "runtime": {
+      "path": ".cache/candidate-tagged/sdk-c-execution/main-c-mir-statement-frame-native/fy_runtime.c",
+      "bytes": 114856,
+      "sha256": "e4b91c553b5f6db9e65cd031569763a9ddf73e77e58db4ce9fad4c19830be6b7"
+    },
+    "packetSnapshotSourceCommit": "7162ad9f",
+    "provenance": "Previously validated original 236-source candidate packet, before the new project CLI flag; no claim that the latest dispatcher has been regenerated",
+    "profiles": [
+      {
+        "empty": {
+          "ExitCode": 0,
+          "Stdout": "",
+          "Stderr": "",
+          "TrapControl": ""
+        },
+        "help": {
+          "ExitCode": 0,
+          "Stdout": "usage: lexer-candidate --tokens-file <path>\n       lexer-candidate --declarations-file <path>\n       lexer-candidate --check-names-file <path>\n       lexer-candidate --bindings-file <path>\n       lexer-candidate --check-types-file <path>\n       lexer-candidate --check-modules-file <manifest>\n       lexer-candidate --check-return-origins-file <manifest>\n       lexer-candidate --c-modules-file <manifest>\n       lexer-candidate --hir-file <path>\n       lexer-candidate --mir-file <path>\n       lexer-candidate --c-file <path>\n       lexer-candidate --help\nNo arguments: private binary stdin protocol.\n",
+          "Stderr": "",
+          "TrapControl": ""
+        },
+        "imageBytes": 7683072,
+        "imageSHA256": "c7a252e397a66399b68cd1803336942579e3bb48d7cd9f8df613b2e3c8119e56",
+        "invalid": {
+          "ExitCode": 8,
+          "Stdout": "",
+          "Stderr": "",
+          "TrapControl": ""
+        },
+        "objects": 30,
+        "packetSHA256": "66c95b355d4e40802a09410d5d42229d265de6e6fcb9fafc4666d6f232bb4601",
+        "passed": true,
+        "profile": "low",
+        "runtimeSHA256": "e4b91c553b5f6db9e65cd031569763a9ddf73e77e58db4ce9fad4c19830be6b7",
+        "seconds": 13.8676747,
+        "toolchain": {
+          "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+          "version": "14.51.36231"
+        },
+        "units": 28
+      },
+      {
+        "empty": {
+          "ExitCode": 0,
+          "Stdout": "",
+          "Stderr": "",
+          "TrapControl": ""
+        },
+        "help": {
+          "ExitCode": 0,
+          "Stdout": "usage: lexer-candidate --tokens-file <path>\n       lexer-candidate --declarations-file <path>\n       lexer-candidate --check-names-file <path>\n       lexer-candidate --bindings-file <path>\n       lexer-candidate --check-types-file <path>\n       lexer-candidate --check-modules-file <manifest>\n       lexer-candidate --check-return-origins-file <manifest>\n       lexer-candidate --c-modules-file <manifest>\n       lexer-candidate --hir-file <path>\n       lexer-candidate --mir-file <path>\n       lexer-candidate --c-file <path>\n       lexer-candidate --help\nNo arguments: private binary stdin protocol.\n",
+          "Stderr": "",
+          "TrapControl": ""
+        },
+        "imageBytes": 2893312,
+        "imageSHA256": "ec36c54c6bbbd3cf19dc36c65b833a3b563071c1495312fd59311a637d55180c",
+        "invalid": {
+          "ExitCode": 8,
+          "Stdout": "",
+          "Stderr": "",
+          "TrapControl": ""
+        },
+        "objects": 30,
+        "packetSHA256": "66c95b355d4e40802a09410d5d42229d265de6e6fcb9fafc4666d6f232bb4601",
+        "passed": true,
+        "profile": "optimized",
+        "runtimeSHA256": "e4b91c553b5f6db9e65cd031569763a9ddf73e77e58db4ce9fad4c19830be6b7",
+        "seconds": 162.7474889,
+        "toolchain": {
+          "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+          "version": "14.51.36231"
+        },
+        "units": 28
+      }
+    ]
+  },
+  "scope": {
+    "goFrontendChanged": false,
+    "internalDriverAPIAdded": true,
+    "stableCLIChanged": false,
+    "sdkABIChanged": false,
+    "dbChanged": false,
+    "ciChanged": false
+  },
+  "remaining": [
+    "Candidate CLI packet-to-driver command bridge",
+    "Failure-atomic executable publication and retained previous output",
+    "Latest full original CLI and Stage1/Stage2",
+    "Default frontend timeout/performance, Linux and full suite"
+  ],
+  "pushed": false
+}
