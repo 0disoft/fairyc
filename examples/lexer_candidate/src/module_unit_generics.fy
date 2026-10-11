@@ -1,5 +1,6 @@
 module module_unit_generics;
 import module_unit_bind as binding;
+import module_unit_generic_copy as copying;
 import module_signatures as signatures;
 import module_types as types;
 import module_ast_join as join;
@@ -74,21 +75,21 @@ fn Result<Plan,join::Problem> collect(ref v::Vec<syntax::Parsed> sources,ref sig
     var v::Vec<u8> states=v::empty<u8>();var v::Vec<Dependency> dependencies=v::empty<Dependency>();var usize i=0;while(i<instance_limit()){if(!v::push<u8>(ref mut states,0).is_ok){return .err(fail(11,0,0,0));}i+=1;}i=1;
     while(i<=v::len<Instance>(ref instances)){let p=forward(sources,metadata,graph,ref mut instances,ref mut arguments,ref mut parameters,ref mut dependencies,ref mut states,ref mut budget,i,0);if(p.code!=0){return .err(p);}i+=1;}
     var v::Vec<SourceStamp> stamps=v::empty<SourceStamp>();i=0;while(i<v::len<syntax::Parsed>(sources)){let text=syntax::source_view(v::at<syntax::Parsed>(sources,i));if(!v::push<SourceStamp>(ref mut stamps,SourceStamp{.length=text.len,.digest=signatures::source_digest(metadata,i)}).is_ok){return .err(fail(11,i,0,0));}i+=1;}
-    var v::Vec<types::Type> prefix=v::empty<types::Type>();i=1;while(i<=types::count(graph)){if(!charge(ref mut budget,1)){return .err(fail(4503,0,0,0));}if(!v::push<types::Type>(ref mut prefix,types::at(graph,i)).is_ok){return .err(fail(11,0,0,0));}i+=1;}
+    var v::Vec<types::Type> prefix=switch(copying::type_records(graph,ref mut budget.work)){case .ok(value):{value}case .err(code):{return .err(fail(code,0,0,0));}};
     return .ok(Plan{.instances,.arguments,.parameters,.calls,.dependencies,.cleanups=v::empty<Cleanup>(),.cleanup_dependencies=v::empty<Dependency>(),.stamps,.prefix,.work=budget.work});
 }
 // Materialize ordinary calls outside the selected source range with the same
 // owned body projection as concrete templates; zero arguments marks this lane.
 fn Result<Plan,join::Problem> expand_imports(ref v::Vec<syntax::Parsed> sources,ref signatures::Program metadata,ref binding::Bound bound,ref v::Vec<binding::Coordinate> seeds,Plan input,ref mut v::Vec<types::Type> graph){
     var Budget budget=Budget{.work=input.work};var usize i=0;
-    var v::Vec<Instance> instances=v::empty<Instance>();i=0;while(i<v::len<Instance>(ref input.instances)){if(!charge(ref mut budget,1)){return .err(fail(4503,0,0,0));}if(!v::push<Instance>(ref mut instances,*v::at<Instance>(ref input.instances,i)).is_ok){return .err(fail(11,0,0,0));}i+=1;}
-    var v::Vec<usize> arguments=v::empty<usize>();i=0;while(i<v::len<usize>(ref input.arguments)){if(!charge(ref mut budget,1)){return .err(fail(4503,0,0,0));}if(!v::push<usize>(ref mut arguments,*v::at<usize>(ref input.arguments,i)).is_ok){return .err(fail(11,0,0,0));}i+=1;}
-    var v::Vec<usize> parameters=v::empty<usize>();i=0;while(i<v::len<usize>(ref input.parameters)){if(!charge(ref mut budget,1)){return .err(fail(4503,0,0,0));}if(!v::push<usize>(ref mut parameters,*v::at<usize>(ref input.parameters,i)).is_ok){return .err(fail(11,0,0,0));}i+=1;}
-    var v::Vec<Call> calls=v::empty<Call>();i=0;while(i<v::len<Call>(ref input.calls)){if(!charge(ref mut budget,1)){return .err(fail(4503,0,0,0));}if(!v::push<Call>(ref mut calls,*v::at<Call>(ref input.calls,i)).is_ok){return .err(fail(11,0,0,0));}i+=1;}
-    var v::Vec<Dependency> dependencies=v::empty<Dependency>();i=0;while(i<v::len<Dependency>(ref input.dependencies)){if(!charge(ref mut budget,1)){return .err(fail(4503,0,0,0));}if(!v::push<Dependency>(ref mut dependencies,*v::at<Dependency>(ref input.dependencies,i)).is_ok){return .err(fail(11,0,0,0));}i+=1;}
-    var v::Vec<Cleanup> cleanups=v::empty<Cleanup>();i=0;while(i<v::len<Cleanup>(ref input.cleanups)){if(!charge(ref mut budget,1)){return .err(fail(4503,0,0,0));}if(!v::push<Cleanup>(ref mut cleanups,*v::at<Cleanup>(ref input.cleanups,i)).is_ok){return .err(fail(11,0,0,0));}i+=1;}
-    var v::Vec<Dependency> cleanup_dependencies=v::empty<Dependency>();i=0;while(i<v::len<Dependency>(ref input.cleanup_dependencies)){if(!charge(ref mut budget,1)){return .err(fail(4503,0,0,0));}if(!v::push<Dependency>(ref mut cleanup_dependencies,*v::at<Dependency>(ref input.cleanup_dependencies,i)).is_ok){return .err(fail(11,0,0,0));}i+=1;}
-    var v::Vec<SourceStamp> stamps=v::empty<SourceStamp>();i=0;while(i<v::len<SourceStamp>(ref input.stamps)){if(!charge(ref mut budget,1)){return .err(fail(4503,0,0,0));}if(!v::push<SourceStamp>(ref mut stamps,*v::at<SourceStamp>(ref input.stamps,i)).is_ok){return .err(fail(11,0,0,0));}i+=1;}
+    var v::Vec<Instance> instances=switch(copying::instances(ref input.instances,ref mut budget.work)){case .ok(value):{value}case .err(code):{return .err(fail(code,0,0,0));}};
+    var v::Vec<usize> arguments=switch(copying::indices(ref input.arguments,ref mut budget.work)){case .ok(value):{value}case .err(code):{return .err(fail(code,0,0,0));}};
+    var v::Vec<usize> parameters=switch(copying::indices(ref input.parameters,ref mut budget.work)){case .ok(value):{value}case .err(code):{return .err(fail(code,0,0,0));}};
+    var v::Vec<Call> calls=switch(copying::calls(ref input.calls,ref mut budget.work)){case .ok(value):{value}case .err(code):{return .err(fail(code,0,0,0));}};
+    var v::Vec<Dependency> dependencies=switch(copying::dependencies(ref input.dependencies,ref mut budget.work)){case .ok(value):{value}case .err(code):{return .err(fail(code,0,0,0));}};
+    var v::Vec<Cleanup> cleanups=switch(copying::cleanups(ref input.cleanups,ref mut budget.work)){case .ok(value):{value}case .err(code):{return .err(fail(code,0,0,0));}};
+    var v::Vec<Dependency> cleanup_dependencies=switch(copying::dependencies(ref input.cleanup_dependencies,ref mut budget.work)){case .ok(value):{value}case .err(code):{return .err(fail(code,0,0,0));}};
+    var v::Vec<SourceStamp> stamps=switch(copying::stamps(ref input.stamps,ref mut budget.work)){case .ok(value):{value}case .err(code):{return .err(fail(code,0,0,0));}};
     let usize before=v::len<Instance>(ref instances);i=0;let usize total=binding::target_count(bound)+v::len<binding::Coordinate>(seeds);
     while(i<total){if(!charge(ref mut budget,1)){return .err(fail(4503,0,0,0));}let c=if(i<binding::target_count(bound)){binding::target_at(bound,i+1)}else{*v::at<binding::Coordinate>(seeds,i-binding::target_count(bound))};i+=1;
         if(c.module_index>=v::len<syntax::Parsed>(sources) || c.declaration==0 || c.declaration>syntax::declaration_count(v::at<syntax::Parsed>(sources,c.module_index))){return .err(fail(12,c.module_index,c.start,c.end));}let original=v::at<syntax::Parsed>(sources,c.module_index);let d=syntax::declaration_at(original,c.declaration-1);
@@ -100,7 +101,8 @@ fn Result<Plan,join::Problem> expand_imports(ref v::Vec<syntax::Parsed> sources,
         if(!v::push<Instance>(ref mut instances,Instance{.module_index=c.module_index,.declaration=c.declaration,.argument_start=v::len<usize>(ref arguments),.argument_count=0,.result=sig.result,.parameter_start,.parameter_count=sig.parameter_count,.effects=sig.effects,.must_use=sig.must_use,.unsafe_call=sig.unsafe_call}).is_ok){return .err(fail(11,c.module_index,d.start,d.end));}
     }
     var v::Vec<u8> states=v::empty<u8>();i=0;while(i<instance_limit()){if(!v::push<u8>(ref mut states,if(i<before){2}else{0}).is_ok){return .err(fail(11,0,0,0));}i+=1;}i=before+1;
-    while(i<=v::len<Instance>(ref instances)){let checked=forward(sources,metadata,graph,ref mut instances,ref mut arguments,ref mut parameters,ref mut dependencies,ref mut states,ref mut budget,i,0);if(checked.code!=0){return .err(checked);}i+=1;}var v::Vec<types::Type> prefix=v::empty<types::Type>();i=1;while(i<=types::count(graph)){if(!charge(ref mut budget,1)){return .err(fail(4503,0,0,0));}if(!v::push<types::Type>(ref mut prefix,types::at(graph,i)).is_ok){return .err(fail(11,0,0,0));}i+=1;}
+    while(i<=v::len<Instance>(ref instances)){let checked=forward(sources,metadata,graph,ref mut instances,ref mut arguments,ref mut parameters,ref mut dependencies,ref mut states,ref mut budget,i,0);if(checked.code!=0){return .err(checked);}i+=1;}
+    var v::Vec<types::Type> prefix=switch(copying::type_records(graph,ref mut budget.work)){case .ok(value):{value}case .err(code):{return .err(fail(code,0,0,0));}};
     return .ok(Plan{.instances,.arguments,.parameters,.calls,.dependencies,.cleanups,.cleanup_dependencies,.stamps,.prefix,.work=budget.work});
 }
 pub fn Result<Plan,join::Problem> extend_imports(ref v::Vec<syntax::Parsed> sources,ref signatures::Program metadata,ref binding::Bound bound,ref v::Vec<binding::Coordinate> seeds,Plan input,ref mut v::Vec<types::Type> graph){let usize before=types::count(graph);return switch(expand_imports(sources,metadata,bound,seeds,input,graph)){case .ok(p):{.ok(p)}case .err(p):{while(types::count(graph)>before){discard v::pop<types::Type>(graph);}.err(p)}};}
@@ -144,16 +146,16 @@ fn join::Problem cleanup_requests(ref v::Vec<syntax::Parsed> sources,ref signatu
 }
 fn Result<Plan,join::Problem> expand_cleanups(ref v::Vec<syntax::Parsed> sources,ref signatures::Program metadata,Plan input,ref mut v::Vec<types::Type> graph,ref v::Vec<usize> seeds){
     if(v::len<usize>(seeds)==0){return .ok(input);}var Budget budget=Budget{.work=input.work};var usize i=0;
-    var v::Vec<Instance> instances=v::empty<Instance>();i=0;while(i<v::len<Instance>(ref input.instances)){if(!charge(ref mut budget,1)){return .err(fail(4503,0,0,0));}if(!v::push<Instance>(ref mut instances,*v::at<Instance>(ref input.instances,i)).is_ok){return .err(fail(11,0,0,0));}i+=1;}
-    var v::Vec<usize> arguments=v::empty<usize>();i=0;while(i<v::len<usize>(ref input.arguments)){if(!charge(ref mut budget,1)){return .err(fail(4503,0,0,0));}if(!v::push<usize>(ref mut arguments,*v::at<usize>(ref input.arguments,i)).is_ok){return .err(fail(11,0,0,0));}i+=1;}
-    var v::Vec<usize> parameters=v::empty<usize>();i=0;while(i<v::len<usize>(ref input.parameters)){if(!charge(ref mut budget,1)){return .err(fail(4503,0,0,0));}if(!v::push<usize>(ref mut parameters,*v::at<usize>(ref input.parameters,i)).is_ok){return .err(fail(11,0,0,0));}i+=1;}
-    var v::Vec<Call> calls=v::empty<Call>();i=0;while(i<v::len<Call>(ref input.calls)){if(!charge(ref mut budget,1)){return .err(fail(4503,0,0,0));}if(!v::push<Call>(ref mut calls,*v::at<Call>(ref input.calls,i)).is_ok){return .err(fail(11,0,0,0));}i+=1;}
-    var v::Vec<Dependency> dependencies=v::empty<Dependency>();i=0;while(i<v::len<Dependency>(ref input.dependencies)){if(!charge(ref mut budget,1)){return .err(fail(4503,0,0,0));}if(!v::push<Dependency>(ref mut dependencies,*v::at<Dependency>(ref input.dependencies,i)).is_ok){return .err(fail(11,0,0,0));}i+=1;}
-    var v::Vec<Cleanup> cleanups=v::empty<Cleanup>();i=0;while(i<v::len<Cleanup>(ref input.cleanups)){if(!charge(ref mut budget,1)){return .err(fail(4503,0,0,0));}if(!v::push<Cleanup>(ref mut cleanups,*v::at<Cleanup>(ref input.cleanups,i)).is_ok){return .err(fail(11,0,0,0));}i+=1;}
-    var v::Vec<Dependency> cleanup_dependencies=v::empty<Dependency>();i=0;while(i<v::len<Dependency>(ref input.cleanup_dependencies)){if(!charge(ref mut budget,1)){return .err(fail(4503,0,0,0));}if(!v::push<Dependency>(ref mut cleanup_dependencies,*v::at<Dependency>(ref input.cleanup_dependencies,i)).is_ok){return .err(fail(11,0,0,0));}i+=1;}
-    var v::Vec<SourceStamp> stamps=v::empty<SourceStamp>();i=0;while(i<v::len<SourceStamp>(ref input.stamps)){if(!charge(ref mut budget,1)){return .err(fail(4503,0,0,0));}if(!v::push<SourceStamp>(ref mut stamps,*v::at<SourceStamp>(ref input.stamps,i)).is_ok){return .err(fail(11,0,0,0));}i+=1;}
+    var v::Vec<Instance> instances=switch(copying::instances(ref input.instances,ref mut budget.work)){case .ok(value):{value}case .err(code):{return .err(fail(code,0,0,0));}};
+    var v::Vec<usize> arguments=switch(copying::indices(ref input.arguments,ref mut budget.work)){case .ok(value):{value}case .err(code):{return .err(fail(code,0,0,0));}};
+    var v::Vec<usize> parameters=switch(copying::indices(ref input.parameters,ref mut budget.work)){case .ok(value):{value}case .err(code):{return .err(fail(code,0,0,0));}};
+    var v::Vec<Call> calls=switch(copying::calls(ref input.calls,ref mut budget.work)){case .ok(value):{value}case .err(code):{return .err(fail(code,0,0,0));}};
+    var v::Vec<Dependency> dependencies=switch(copying::dependencies(ref input.dependencies,ref mut budget.work)){case .ok(value):{value}case .err(code):{return .err(fail(code,0,0,0));}};
+    var v::Vec<Cleanup> cleanups=switch(copying::cleanups(ref input.cleanups,ref mut budget.work)){case .ok(value):{value}case .err(code):{return .err(fail(code,0,0,0));}};
+    var v::Vec<Dependency> cleanup_dependencies=switch(copying::dependencies(ref input.cleanup_dependencies,ref mut budget.work)){case .ok(value):{value}case .err(code):{return .err(fail(code,0,0,0));}};
+    var v::Vec<SourceStamp> stamps=switch(copying::stamps(ref input.stamps,ref mut budget.work)){case .ok(value):{value}case .err(code):{return .err(fail(code,0,0,0));}};
     i=0;while(i<v::len<usize>(seeds)){let p=cleanup_requests(sources,metadata,ref mut instances,ref mut arguments,ref mut parameters,ref mut dependencies,ref mut cleanups,ref mut cleanup_dependencies,ref mut budget,graph,*v::at<usize>(seeds,i));if(p.code!=0){return .err(p);}i+=1;}
-    var v::Vec<types::Type> prefix=v::empty<types::Type>();i=1;while(i<=types::count(graph)){if(!charge(ref mut budget,1)){return .err(fail(4503,0,0,0));}if(!v::push<types::Type>(ref mut prefix,types::at(graph,i)).is_ok){return .err(fail(11,0,0,0));}i+=1;}
+    var v::Vec<types::Type> prefix=switch(copying::type_records(graph,ref mut budget.work)){case .ok(value):{value}case .err(code):{return .err(fail(code,0,0,0));}};
     return .ok(Plan{.instances,.arguments,.parameters,.calls,.dependencies,.cleanups,.cleanup_dependencies,.stamps,.prefix,.work=budget.work});
 }
 pub fn Result<Plan,join::Problem> extend_cleanups(ref v::Vec<syntax::Parsed> sources,ref signatures::Program metadata,Plan input,ref mut v::Vec<types::Type> graph,ref v::Vec<usize> seeds){

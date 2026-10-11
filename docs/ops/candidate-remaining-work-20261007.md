@@ -4046,3 +4046,18 @@ The full 350-file candidate input (2,483,350 bytes) runs emission for 237.47 sec
 Stage2 is not achieved. Next: analysis partitioning, then package entry/C bundle/build/run/driver and timeouts, Linux/full suite, Stage1/Stage2.
 API, SDK ABI/version, DB and CI are unchanged; no push. Receipt:
 `evidence/candidate-source-set-cap-20261012.json`.
+
+## Generic plan copies (2026-10-12)
+
+Seven concrete copy helpers preserve record order, one work unit per element,
+the 1048576 work limit, work error 4503 and allocation error 11. Source check
+passes 358 files / 4672 MIR functions. All nine generic regressions pass in
+Go-native and candidate C development/release executions; eight native passes
+were reused and the SDK fixture case was rerun with `optional/std/vec.fy`.
+Fresh full-dispatcher emission over 351 files / 2484337 bytes advances past
+`module_unit_generics.fy` and stops at `module_unit_interfaces.fy`, phase 2,
+stage 4, code 10, after 258.23 seconds. No C packet or Stage2 is produced.
+Next: partition interface analysis, then the existing entry/driver/build/run,
+timeout, Linux/full-suite and Stage1/Stage2 work. Limits, product timeouts,
+public API, SDK ABI/version, DB and CI are unchanged; no push.
+Receipt: `evidence/candidate-generic-copy-20261012.json`.

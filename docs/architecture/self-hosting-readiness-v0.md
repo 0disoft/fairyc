@@ -2197,3 +2197,16 @@ The full 350-file candidate input (2,483,350 bytes) runs emission for 237.47 sec
 Stage2 is not achieved. Next: analysis partitioning, then package entry/C bundle/build/run/driver and timeouts, Linux/full suite, Stage1/Stage2.
 API, SDK ABI/version, DB and CI are unchanged; no push. Receipt:
 [candidate-source-set-cap-20261012.json](../ops/evidence/candidate-source-set-cap-20261012.json).
+
+## Generic plan copies (2026-10-12)
+
+Seven concrete helpers preserve copy order and work/error semantics without
+raising analysis limits. Source check passes 358 files / 4672 MIR functions;
+nine generic regressions pass in Go-native and candidate C development/release.
+Full emission over 351 files / 2484337 bytes now passes the previous generic
+module failure and stops at `module_unit_interfaces.fy`, phase 2, stage 4,
+code 10, after 258.23 seconds. No C packet or Stage2 is produced. Interface
+analysis partitioning remains the immediate blocker; entry/driver/build/run,
+timeouts, Linux/full-suite and Stage1/Stage2 remain. Public API, SDK ABI/version,
+DB and CI are unchanged; no push. Receipt:
+[candidate-generic-copy-20261012.json](../ops/evidence/candidate-generic-copy-20261012.json).
