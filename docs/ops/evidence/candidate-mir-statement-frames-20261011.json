@@ -1,0 +1,298 @@
+{
+  "schema": "fairyc.candidate-mir-statement-frames/v1",
+  "passed": true,
+  "implementation": {
+    "path": "examples/lexer_candidate/src/mir_statement_lower.fy",
+    "bytes": 15879,
+    "sha256": "12f88d27db3a7537254619abaa0d4aedeb475c8d17cbbbc9474e12daeb1b0a09"
+  },
+  "lock": {
+    "path": "examples/lexer_candidate/fairy.lock",
+    "bytes": 1698,
+    "sha256": "bfb202bde867f1a80eb48e5fb1700fe7dfbdfb911a5840845857184ee1b60eec"
+  },
+  "sourceCheck": {
+    "exit": 0,
+    "stdout": "check ok: 2 instance(s), 291 source file(s), 3660 MIR function(s), lock verified\n",
+    "stderr": ""
+  },
+  "scope": {
+    "change": "Separate defer capture and loop snapshot helpers from recursive statement frames",
+    "limitsChanged": false,
+    "sourceDepthChanged": false,
+    "stableCLIChanged": false,
+    "sdkABIChanged": false,
+    "goReferenceChanged": false,
+    "dbChanged": false,
+    "ciChanged": false,
+    "runnerChanged": false
+  },
+  "native": {
+    "count": 3,
+    "passed": 3,
+    "failed": 0,
+    "engine": "native",
+    "profile": "release",
+    "target": "x86_64-windows-msvc",
+    "tests": [
+      "tests::mir::defer_scopes_produce_lifo_calls",
+      "tests::mir::for_continue_goes_through_checked_post",
+      "tests::mir_resource_exit::loop_exits_discharge_only_body_and_nested_roots"
+    ]
+  },
+  "generatedC": {
+    "packet": {
+      "packetBytes": 20058517,
+      "packetSHA256": "66c95b355d4e40802a09410d5d42229d265de6e6fcb9fafc4666d6f232bb4601",
+      "frames": 3235,
+      "units": 28,
+      "literalDefinitions": 775,
+      "headerBytes": 657255,
+      "literalBytes": 149489,
+      "bodyBytes": 19251544,
+      "maxUnitBytes": 1373878
+    },
+    "emission": "compiled units 48 retries 25\nlinked frames 3570 work 3324833\nproject drops 6308 root drops 4\nroot CFG blocks 247 work 7566\npartition frames 3570 units 28 retries 0 work 3229311\npacket header 657255 literals 149489\n",
+    "statementAggregateLocalBytes": {
+      "before": 141226,
+      "after": 57034,
+      "deferHelper": 55780,
+      "loopHelper": 28604,
+      "measurement": "Sum of generated aggregate local sizes; excludes scalar locals, optimizer allocation and callee frames"
+    },
+    "profiles": [
+      {
+        "profile": "low",
+        "buildExit": 0,
+        "buildSeconds": 6.729273999997531,
+        "imageSHA256": "bce3d631cf6814775cad1c7c91490255b640ec2578682b5126e120deb8ba5d0d",
+        "referenceSHA256": "bc90928d241e370d79727b6e8995a71582cfe1c68ba5b5597098c1ec0e3e14d4",
+        "cliCases": [
+          {
+            "mode": "--tokens-file",
+            "exact": true,
+            "exit": 0
+          },
+          {
+            "mode": "--check-names-file",
+            "exact": true,
+            "exit": 0
+          },
+          {
+            "mode": "--check-types-file",
+            "exact": true,
+            "exit": 0
+          },
+          {
+            "mode": "--hir-file",
+            "exact": true,
+            "exit": 0
+          },
+          {
+            "mode": "--mir-file",
+            "exact": true,
+            "exit": 0
+          },
+          {
+            "mode": "--c-file",
+            "exact": true,
+            "exit": 0
+          }
+        ],
+        "activeCases": [
+          {
+            "name": "defer",
+            "mode": "--mir-file",
+            "exact": true,
+            "exit": 0
+          },
+          {
+            "name": "defer",
+            "mode": "--c-file",
+            "exact": true,
+            "exit": 0
+          },
+          {
+            "name": "for",
+            "mode": "--mir-file",
+            "exact": true,
+            "exit": 0
+          },
+          {
+            "name": "for",
+            "mode": "--c-file",
+            "exact": true,
+            "exit": 0
+          },
+          {
+            "name": "return-argument",
+            "mode": "--mir-file",
+            "exact": true,
+            "exit": 0
+          },
+          {
+            "name": "return-argument",
+            "mode": "--c-file",
+            "exact": true,
+            "exit": 0
+          },
+          {
+            "name": "resource-loop",
+            "mode": "--mir-file",
+            "exact": true,
+            "exit": 0
+          },
+          {
+            "name": "resource-loop",
+            "mode": "--c-file",
+            "exact": true,
+            "exit": 0
+          },
+          {
+            "name": "resource-result",
+            "mode": "--mir-file",
+            "exact": true,
+            "exit": 0
+          },
+          {
+            "name": "resource-result",
+            "mode": "--c-file",
+            "exact": true,
+            "exit": 0
+          }
+        ]
+      },
+      {
+        "profile": "optimized",
+        "buildExit": 0,
+        "buildSeconds": 100.35890939999808,
+        "imageSHA256": "7f8185ebc1eda085fc13342ddf756e559163958029aa93e7dd653384b51dc368",
+        "referenceSHA256": "bc90928d241e370d79727b6e8995a71582cfe1c68ba5b5597098c1ec0e3e14d4",
+        "cliCases": [
+          {
+            "mode": "--tokens-file",
+            "exact": true,
+            "exit": 0
+          },
+          {
+            "mode": "--check-names-file",
+            "exact": true,
+            "exit": 0
+          },
+          {
+            "mode": "--check-types-file",
+            "exact": true,
+            "exit": 0
+          },
+          {
+            "mode": "--hir-file",
+            "exact": true,
+            "exit": 0
+          },
+          {
+            "mode": "--mir-file",
+            "exact": true,
+            "exit": 0
+          },
+          {
+            "mode": "--c-file",
+            "exact": true,
+            "exit": 0
+          }
+        ],
+        "activeCases": [
+          {
+            "name": "defer",
+            "mode": "--mir-file",
+            "exact": true,
+            "exit": 0
+          },
+          {
+            "name": "defer",
+            "mode": "--c-file",
+            "exact": true,
+            "exit": 0
+          },
+          {
+            "name": "for",
+            "mode": "--mir-file",
+            "exact": true,
+            "exit": 0
+          },
+          {
+            "name": "for",
+            "mode": "--c-file",
+            "exact": true,
+            "exit": 0
+          },
+          {
+            "name": "return-argument",
+            "mode": "--mir-file",
+            "exact": true,
+            "exit": 0
+          },
+          {
+            "name": "return-argument",
+            "mode": "--c-file",
+            "exact": true,
+            "exit": 0
+          },
+          {
+            "name": "resource-loop",
+            "mode": "--mir-file",
+            "exact": true,
+            "exit": 0
+          },
+          {
+            "name": "resource-loop",
+            "mode": "--c-file",
+            "exact": true,
+            "exit": 0
+          },
+          {
+            "name": "resource-result",
+            "mode": "--mir-file",
+            "exact": true,
+            "exit": 0
+          },
+          {
+            "name": "resource-result",
+            "mode": "--c-file",
+            "exact": true,
+            "exit": 0
+          }
+        ]
+      }
+    ],
+    "referenceSourceProvenance": "Existing stage0-built candidate image; source identity is not established by this comparison",
+    "selfEmittedExecutions": {
+      "profile": "optimized",
+      "cases": [
+        {
+          "name": "defer",
+          "expectedExit": 9,
+          "exit": 9,
+          "buildExit": 0
+        },
+        {
+          "name": "resource-loop",
+          "expectedExit": 0,
+          "exit": 0,
+          "buildExit": 0
+        },
+        {
+          "name": "resource-result",
+          "expectedExit": 1,
+          "exit": 1,
+          "buildExit": 0
+        }
+      ]
+    }
+  },
+  "remaining": [
+    "Native driver integration and default timeout/performance",
+    "Standalone candidate promotion and Stage1/Stage2",
+    "Linux and full suite not run"
+  ],
+  "pushed": false
+}

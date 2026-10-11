@@ -14,29 +14,73 @@ import std::bytes as bytes;
 import std::vec as v;
 import mir_lower as lowering;
 
+// Large defer captures and loop snapshots belong only to their selected
+// statement helpers, rather than every recursive statement frame.
+fn bool defer_statement(ref h::Program input, ref mut v::Vec<m::Local> locals, ref mut v::Vec<m::Block> blocks, ref mut v::Vec<m::Operation> operations, ref mut v::Vec<usize> edges, ref mut bytes::Buffer payload, ref mut state::Context c, usize id, h::Statement s, usize depth) {
+    let h::Expression call = h::expression_at(input,s.expression);
+    let usize callee = c.targets[call.binding];
+    let u32 target_kind=h::binding_code(h::binding_at(input,call.binding).kind);
+    if (h::expression_code(call.kind) != 6 || h::type_code(call.type) != 7 || callee == 0 || (target_kind!=1 && target_kind!=11)) { discard state::fail(c,4,s.start,s.end); return false; }
+    if (c.defer_count >= 256) { discard state::fail(c,2,s.start,s.end); return false; }
+    let usize captured = c.capture_count; var usize j = 0;
+    while (j < call.edge_count) {
+        let usize value = lowering::expression(input,locals,blocks,operations,edges,payload,c,h::edge_at(input,call.edge_start + j),depth + 1);
+        if (c.current == 0 || c.problem.code != 0) { return c.problem.code == 0; }
+        if (c.capture_count >= 4096) { discard state::fail(c,2,s.start,s.end); return false; }
+        let u32 capture_type=v::at<m::Local>(locals,value-1).type;if(capture_type<1 || capture_type>6){discard state::fail(c,4,s.start,s.end);return false;}
+        let usize slot = c.capture_count; c.captures[slot] = value; c.capture_count += 1; j += 1;
+    }
+    let usize at = c.defer_count; c.defer_count += 1;
+    c.deferred_unsafe[at]=call.boolean; c.deferred_targets[at] = callee; c.deferred_starts[at] = s.start; c.deferred_ends[at] = s.end;
+    c.deferred_arg_starts[at] = captured; c.deferred_arg_counts[at] = call.edge_count;
+    return true;
+}
+
+fn bool loop_statement(ref h::Program input, ref mut v::Vec<m::Local> locals, ref mut v::Vec<m::Block> blocks, ref mut v::Vec<m::Operation> operations, ref mut v::Vec<usize> edges, ref mut bytes::Buffer payload, ref mut state::Context c, usize id, h::Statement s, usize depth) {
+    if (s.initial != 0 && !statement(input,locals,blocks,operations,edges,payload,c,s.initial,depth + 1)) { return false; }
+    if (c.current == 0 || c.problem.code != 0) { return c.problem.code == 0; }
+    let usize header = state::new_block(blocks,c,s.start,s.end);
+    if (!state::jump(blocks,c,header,s.start,s.end)) { return false; }
+    c.current = header;
+    var usize condition = 0;
+    if (s.expression != 0) { condition = lowering::expression(input,locals,blocks,operations,edges,payload,c,s.expression,depth + 1); }
+    else {
+        condition = state::local(locals,c,6,0,false,false,s.start,s.end);
+        var m::Operation truth = state::operation(1,condition,6,6,0,0,0,s.start,s.end); truth.boolean = true;
+        if (state::emit(operations,blocks,c,truth) == 0) { return false; }
+    }
+    if (c.current == 0 || c.problem.code != 0) { return c.problem.code == 0; }
+    let usize body = state::new_block(blocks,c,s.start,s.end);
+    let usize exit = state::new_block(blocks,c,s.start,s.end);
+    if (!state::branch(blocks,c,condition,body,exit,s.start,s.end)) { return false; }
+    if (c.loop_depth >= 64) { discard state::fail(c,2,s.start,s.end); return false; }
+    let usize frame = c.loop_depth; c.loop_depth += 1;
+    let u8[1153] incoming=c.live;let u8[4096] incoming_pending=c.pending;
+    c.loop_ids[frame] = id; c.breaks[frame] = exit;
+    let usize deferred_base = c.defer_count; c.loop_defer_base[frame] = deferred_base;
+    c.continues[frame] = if (s.post == 0) { header } else { 0 };
+    c.current = body;
+    discard lowering::block(input,locals,blocks,operations,edges,payload,c,s.body,depth + 1);
+    if (c.problem.code != 0) { return false; }
+    if (c.current != 0) {
+        if (c.continues[frame] == 0) { let usize post = state::new_block(blocks,c,s.start,s.end); c.continues[frame] = post; }
+        let usize target = c.continues[frame];
+        if (!state::jump(blocks,c,target,s.start,s.end)) { return false; }
+    }
+    let usize post = c.continues[frame]; c.loop_depth -= 1;
+    if (s.post != 0 && post != 0) {
+        c.current = post;
+        if (!statement(input,locals,blocks,operations,edges,payload,c,s.post,depth + 1)) { return false; }
+        if (c.current != 0 && !state::jump(blocks,c,header,s.start,s.end)) { return false; }
+    }
+    c.live=incoming;c.pending=incoming_pending;c.current = exit; return true;
+}
+
 // Shared owned context and source-depth budgets remain with the coordinator.
 pub fn bool statement(ref h::Program input, ref mut v::Vec<m::Local> locals, ref mut v::Vec<m::Block> blocks, ref mut v::Vec<m::Operation> operations, ref mut v::Vec<usize> edges, ref mut bytes::Buffer payload, ref mut state::Context c, usize id, usize depth) {
     let h::Statement s = h::statement_at(input,id); let u32 kind = h::statement_code(s.kind);
     if (depth >= 64) { discard state::fail(c,2,s.start,s.end); return false; }
-    if (kind == 11) {
-        let h::Expression call = h::expression_at(input,s.expression);
-        let usize callee = c.targets[call.binding];
-        let u32 target_kind=h::binding_code(h::binding_at(input,call.binding).kind);
-        if (h::expression_code(call.kind) != 6 || h::type_code(call.type) != 7 || callee == 0 || (target_kind!=1 && target_kind!=11)) { discard state::fail(c,4,s.start,s.end); return false; }
-        if (c.defer_count >= 256) { discard state::fail(c,2,s.start,s.end); return false; }
-        let usize captured = c.capture_count; var usize j = 0;
-        while (j < call.edge_count) {
-            let usize value = lowering::expression(input,locals,blocks,operations,edges,payload,c,h::edge_at(input,call.edge_start + j),depth + 1);
-            if (c.current == 0 || c.problem.code != 0) { return c.problem.code == 0; }
-            if (c.capture_count >= 4096) { discard state::fail(c,2,s.start,s.end); return false; }
-            let u32 capture_type=v::at<m::Local>(locals,value-1).type;if(capture_type<1 || capture_type>6){discard state::fail(c,4,s.start,s.end);return false;}
-            let usize slot = c.capture_count; c.captures[slot] = value; c.capture_count += 1; j += 1;
-        }
-        let usize at = c.defer_count; c.defer_count += 1;
-        c.deferred_unsafe[at]=call.boolean; c.deferred_targets[at] = callee; c.deferred_starts[at] = s.start; c.deferred_ends[at] = s.end;
-        c.deferred_arg_starts[at] = captured; c.deferred_arg_counts[at] = call.edge_count;
-        return true;
-    }
+    if (kind == 11) { return defer_statement(input,locals,blocks,operations,edges,payload,c,id,s,depth); }
     if (kind == 7 || kind == 8) {
         if (c.loop_depth == 0 || c.loop_ids[c.loop_depth - 1] != s.loop_target) { discard state::fail(c,4,s.start,s.end); return false; }
         let usize frame = c.loop_depth - 1;
@@ -53,45 +97,7 @@ pub fn bool statement(ref h::Program input, ref mut v::Vec<m::Local> locals, ref
         return state::jump(blocks,c,target,s.start,s.end);
     }
     if(kind==12){let e=h::expression_at(input,s.expression);let usize binding=e.binding;let usize local=c.locals[binding];if(h::expression_code(e.kind)!=24 || local==0 || c.live[binding]==0){discard state::fail(c,4,s.start,s.end);return false;}c.live[binding]=0;state::release(c,local);let u32 type=h::type_code(e.type);return state::emit(operations,blocks,c,state::operation(27,0,type,type,0,local,0,s.start,s.end))!=0;}
-    if (kind == 5 || kind == 6) {
-        if (s.initial != 0 && !statement(input,locals,blocks,operations,edges,payload,c,s.initial,depth + 1)) { return false; }
-        if (c.current == 0 || c.problem.code != 0) { return c.problem.code == 0; }
-        let usize header = state::new_block(blocks,c,s.start,s.end);
-        if (!state::jump(blocks,c,header,s.start,s.end)) { return false; }
-        c.current = header;
-        var usize condition = 0;
-        if (s.expression != 0) { condition = lowering::expression(input,locals,blocks,operations,edges,payload,c,s.expression,depth + 1); }
-        else {
-            condition = state::local(locals,c,6,0,false,false,s.start,s.end);
-            var m::Operation truth = state::operation(1,condition,6,6,0,0,0,s.start,s.end); truth.boolean = true;
-            if (state::emit(operations,blocks,c,truth) == 0) { return false; }
-        }
-        if (c.current == 0 || c.problem.code != 0) { return c.problem.code == 0; }
-        let usize body = state::new_block(blocks,c,s.start,s.end);
-        let usize exit = state::new_block(blocks,c,s.start,s.end);
-        if (!state::branch(blocks,c,condition,body,exit,s.start,s.end)) { return false; }
-        if (c.loop_depth >= 64) { discard state::fail(c,2,s.start,s.end); return false; }
-        let usize frame = c.loop_depth; c.loop_depth += 1;
-        let u8[1153] incoming=c.live;let u8[4096] incoming_pending=c.pending;
-        c.loop_ids[frame] = id; c.breaks[frame] = exit;
-        let usize deferred_base = c.defer_count; c.loop_defer_base[frame] = deferred_base;
-        c.continues[frame] = if (s.post == 0) { header } else { 0 };
-        c.current = body;
-        discard lowering::block(input,locals,blocks,operations,edges,payload,c,s.body,depth + 1);
-        if (c.problem.code != 0) { return false; }
-        if (c.current != 0) {
-            if (c.continues[frame] == 0) { let usize post = state::new_block(blocks,c,s.start,s.end); c.continues[frame] = post; }
-            let usize target = c.continues[frame];
-            if (!state::jump(blocks,c,target,s.start,s.end)) { return false; }
-        }
-        let usize post = c.continues[frame]; c.loop_depth -= 1;
-        if (s.post != 0 && post != 0) {
-            c.current = post;
-            if (!statement(input,locals,blocks,operations,edges,payload,c,s.post,depth + 1)) { return false; }
-            if (c.current != 0 && !state::jump(blocks,c,header,s.start,s.end)) { return false; }
-        }
-        c.live=incoming;c.pending=incoming_pending;c.current = exit; return true;
-    }
+    if (kind == 5 || kind == 6) { return loop_statement(input,locals,blocks,operations,edges,payload,c,id,s,depth); }
     if(kind==3){let target=h::expression_at(input,s.target);let usize root=places::root(input,s.target,false);let bool deref=h::expression_code(target.kind)==4 && h::operator_code(target.operator)==5;
         if(deref || root!=0 && refs::mutable(h::type_code(h::binding_at(input,root).type)) && s.target!=0 && h::expression_code(target.kind)==10){
             let usize pointer=if(deref){lowering::expression(input,locals,blocks,operations,edges,payload,c,target.left,depth+1)}else{lowering::address(input,locals,blocks,operations,edges,payload,c,s.target,true,depth+1)};if(pointer==0 || c.current==0){return c.problem.code==0;}
