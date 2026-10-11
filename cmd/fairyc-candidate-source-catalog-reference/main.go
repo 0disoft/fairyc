@@ -33,7 +33,7 @@ func run(args []string) error {
 		Diagnostics []diagnostic.Diagnostic
 	}
 	rows := []row{}
-	for _, source := range []string{"Good", "Empty", "Collision", "Reparse", "IgnoredReparse", "ModuleOrder", "BadModule", "BadCase", "SecondModule", "MissingModule", "BrokenSyntax", "InvalidUtf8", "UnicodeFile", "UnicodeDir", "HyphenDir", "LargeModules", "DuplicateDeclared"} {
+	for _, source := range []string{"Good", "Empty", "Collision", "Reparse", "IgnoredReparse", "ModuleOrder", "BadModule", "BadCase", "SecondModule", "MissingModule", "BrokenSyntax", "InvalidUtf8", "UnicodeFile", "UnicodeDir", "HyphenDir", "LargeModules", "DuplicateDeclared", "LongModuleTrivia"} {
 		manifest := fmt.Sprintf("schema='fairyc.manifest/v1'\n[package]\nuid='example.catalog'\nname='catalog'\nversion='1.0.0'\nlanguage='fairyc-language/20'\nsource=%q\n", source)
 		if err := os.WriteFile(filepath.Join(root, "fairy.toml"), []byte(manifest), 0600); err != nil {
 			return err

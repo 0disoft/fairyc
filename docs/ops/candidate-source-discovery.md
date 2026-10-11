@@ -168,24 +168,28 @@ while manifest paths retain their portable manifest-v1 rules. Unicode files
 and directories are retained and then rejected by module binding with E0002.
 Traversal, wildcard, device syntax and noncanonical path components still reject.
 
-Two native tests and both candidate C profiles pass. Thirteen source-tree
+Two native tests and both candidate C profiles pass. Fourteen source-tree
 acceptance observations agree with the Go loader, including normal/nested and
 65 KiB files, module/path sort differences, mismatched names and case, second or
 missing modules, malformed syntax, invalid UTF-8, Unicode/hyphen source paths
-and duplicate declared names. Original source bytes/spans survive failures.
-Full production check passes: 311 files and 3986 MIR functions. Evidence:
-`evidence/candidate-source-modules-20261011.json`.
+and duplicate declared names, plus a module name containing a 70000-byte block
+comment. Original source bytes/spans survive failures. Full production check
+passes: 311 files and 3987 MIR functions. Current evidence:
+`evidence/candidate-source-modules-token-20261011.json`; the preceding binding
+unit is recorded in `evidence/candidate-source-modules-20261011.json`.
 
 This layer retains the parser's separate declaration, AST, cooked-value and
-storage limits. Trivia-containing module names still use the existing name
-normalizer's 64 KiB input guard; wider compatibility remains explicit work.
+storage limits. Module declarations now compare their already parsed name tokens
+directly, skipping trivia and locating the name span with binary search. No
+second scanner or temporary canonical-name buffer is used; the former 64 KiB
+name-fragment guard no longer constrains binding. Wider parser compatibility
+remains explicit work.
 It does not establish complete Go syntax or workspace-loader equivalence.
 
 ## Remaining connection
 
-Remove the module-name normalizer's redundant re-scan/input guard, then connect
-module binding to the package-load transaction, package resolution and project
-CLI. Broader parser-cap compatibility remains separate.
+Connect module binding to the package-load transaction, package resolution and
+project CLI. Broader parser-cap compatibility remains separate.
 Resolve the Go junction observation discrepancy before any loader
 equivalence claim. Package/lock/CLI work remains separate.
 ReadDir is currently Windows AMD64 and keeps the existing SDK path bound.

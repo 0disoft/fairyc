@@ -15,7 +15,7 @@ def main():
     base = args.root.resolve()
     for name in ['Good/nested', 'Empty', 'Collision', 'Reparse', 'IgnoredReparse', 'Reads', 'Package/src/nested',
                  'ModuleOrder/a', 'BadModule', 'BadCase', 'SecondModule', 'MissingModule', 'BrokenSyntax',
-                 'InvalidUtf8', 'UnicodeFile', 'UnicodeDir/Ü', 'HyphenDir/bad-name', 'LargeModules', 'DuplicateDeclared']:
+                 'InvalidUtf8', 'UnicodeFile', 'UnicodeDir/Ü', 'HyphenDir/bad-name', 'LargeModules', 'DuplicateDeclared', 'LongModuleTrivia/net']:
         (base / name).mkdir(parents=True, exist_ok=True)
     sources = {
         'Good/a.fy': 'module a;\n',
@@ -51,6 +51,7 @@ def main():
     (base / 'Reads/empty.fy').write_bytes(b'')
     (base / 'InvalidUtf8/a.fy').write_bytes(b'module a;\n\xff')
     (base / 'LargeModules/large.fy').write_bytes(b'module large;\n' + b' ' * (65537 - 14))
+    (base / 'LongModuleTrivia/net/http.fy').write_bytes(b'module net /*' + b't' * 70000 + b'*/ :: http;\n')
     for name, size in [('maximum.fy', 8388608), ('too-large.fy', 8388609)]:
         with (base / 'Reads' / name).open('wb') as file:
             file.truncate(size)

@@ -3,7 +3,6 @@ import project_source_set as sources;
 import project_module_path as paths;
 import project_path as work;
 import project_manifest_values as rules;
-import module_registry as spelling;
 import scanner as scanner;
 import syntax as syntax;
 import std::bytes as bytes;
@@ -28,6 +27,12 @@ pub fn ref v::Vec<syntax::Parsed> parser_inputs(ref Modules modules){return ref 
 pub fn ref sources::Sources source_set(ref Modules modules){return ref modules.sources;}
 fn ref u8[] key(ref bytes::Buffer names,ref v::Vec<Span> spans,usize index){let Span span=*v::at<Span>(spans,index);return bytes::view(names)[span.start..span.end];}
 fn void put(ref mut v::Vec<usize> values,usize index,usize value){let ref mut usize slot=v::at_mut<usize>(values,index);*slot=value;}
+// Compare the already verified module path tokens. Trivia never becomes a
+// spelling byte and no second lexer or temporary canonical-name buffer is used.
+fn Result<bool,u32> matches_declaration(ref syntax::Parsed tree,syntax::Declaration declaration,ref u8[] expected,ref mut usize meter){
+    var usize low=0;var usize high=syntax::token_count(tree);while(low<high){if(!work::charge(meter,1)){return .err(8);}let usize middle=low+(high-low)/2;if(syntax::token_info(tree,middle).start<declaration.name_start){low=middle+1;}else{high=middle;}}
+    var usize matched=0;while(low<syntax::token_count(tree)){let token=syntax::token_info(tree,low);if(token.start>=declaration.name_end){break;}if(!work::charge(meter,1)){return .err(8);}if(token.end>declaration.name_end){return .err(3);}if(token.kind!=2){let ref u8[] value=syntax::source_view(tree)[token.start..token.end];if(!work::charge(meter,value.len+1)){return .err(8);}if(value.len>expected.len-matched || !bytes::equal(value,expected[matched..matched+value.len])){return .ok(false);}matched+=value.len;}low+=1;}return .ok(matched==expected.len);
+}
 fn u32 sorted(ref bytes::Buffer names,ref v::Vec<Span> spans,ref mut v::Vec<usize> output,ref mut usize meter){
     let usize count=v::len<Span>(spans);var v::Vec<usize> scratch=v::empty<usize>();var usize index=0;while(index<count){if(!v::push<usize>(output,index).is_ok || !v::push<usize>(ref mut scratch,0).is_ok){return 7;}index+=1;}
     var usize width=1;while(width<count){var usize start=0;while(start<count){let usize middle=if(width<count-start){start+width}else{count};let usize end=if(width<count-middle){middle+width}else{count};var usize left=start;var usize right=middle;var usize out=start;
@@ -47,8 +52,8 @@ fn Result<Parts,Problem> build(ref sources::Sources input,ref mut usize meter){
         if(syntax::problem_count(ref tree)>0){let problem=syntax::problem_at(ref tree,0);return .err(fail(3,0,0,index,problem.start,problem.end));}
         if(syntax::module_count(ref tree)!=1 || syntax::declaration_count(ref tree)==0){return .err(fail(4,0,0,index,0,original.len));}let declaration=syntax::declaration_at(ref tree,0);if(declaration.kind!=1){return .err(fail(4,0,0,index,declaration.start,declaration.end));}
         let bytes::Buffer expected=switch(paths::expected(path,meter)){case .ok(value):{value}case .err(code):{return .err(fail(if(code==2){7}else if(code==3){8}else{1},if(code==1){2}else{0},0,index,declaration.name_start,declaration.name_end));}};
-        var bytes::Buffer declared=bytes::empty();let u32 normalized=spelling::normalize(original[declaration.name_start..declaration.name_end],ref mut declared);if(normalized!=0){return .err(fail(if(normalized==11){7}else if(normalized==10){8}else{3},0,0,index,declaration.name_start,declaration.name_end));}
-        if(!bytes::equal(bytes::view(ref expected),bytes::view(ref declared))){return .err(fail(5,2,0,index,declaration.name_start,declaration.name_end));}
+        let bool matches=switch(matches_declaration(ref tree,declaration,bytes::view(ref expected),meter)){case .ok(value):{value}case .err(code):{return .err(fail(code,0,0,index,declaration.name_start,declaration.name_end));}};
+        if(!matches){return .err(fail(5,2,0,index,declaration.name_start,declaration.name_end));}
         let usize start=bytes::len(ref names);if(!bytes::append(ref mut names,bytes::view(ref expected)).is_ok || !v::push<Span>(ref mut spans,Span{.start,.end=bytes::len(ref names)}).is_ok){return .err(fail(7,0,3,index,0,0));}if(!v::push<syntax::Parsed>(ref mut parsed,tree).is_ok){return .err(fail(7,0,3,index,0,0));}index+=1;
     }
     var v::Vec<usize> order=v::empty<usize>();let u32 code=sorted(ref names,ref spans,ref mut order,meter);if(code!=0){return .err(fail(code,0,0,0,0,0));}index=1;while(index<count){let usize before=*v::at<usize>(ref order,index-1);let usize after=*v::at<usize>(ref order,index);if(!work::charge(meter,key(ref names,ref spans,before).len+key(ref names,ref spans,after).len+1)){return .err(fail(8,0,0,after,0,0));}if(bytes::equal(key(ref names,ref spans,before),key(ref names,ref spans,after))){return .err(fail(6,0,0,after,0,0));}index+=1;}
