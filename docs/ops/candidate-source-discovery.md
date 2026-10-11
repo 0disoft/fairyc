@@ -908,3 +908,27 @@ Receipt: `evidence/candidate-lock-match-20261012.json`.
 Atomic persistence and compiler CLI consumers remain. Public CLI/API, SDK
 ABI/version, DB and CI are unchanged. Linux, full suite and Stage1/Stage2 remain
 scheduled later; no push occurred.
+
+
+## Atomic canonical lock publication (2026-10-12)
+
+`project_lock_write.write` accepts exact canonical strict-valid lock bytes, caps input
+at 8 MiB, uses shared work/path bounds, and checks the root directory before any side
+effect. It tries 4096 deterministic exclusive sibling temp names, leaving colliding
+files or directories untouched. It completes `write_all`, `sync`, and consuming close
+before `replace_file`. On failure it owns cleanup of its created name while preserving
+primary failure and secondary close/cleanup status.
+
+The existing source-authenticated SDK `path_kind` bridge code55 was missing from the
+candidate C admission list and is now admitted. No SDK or public API change.
+
+Windows verification passes two exact native tests, both candidate development/release
+profiles, and 22 fault/termination observations (11 per native profile): success,
+first-write-full, partial-write-full, sync, close, replace, secondary-close, cleanup
+failure, force-kill during partial write, before publication, and after publication.
+Close injection actually closes the handle then reports error and is no handle-leak
+proof. No hardware power-loss claim. Check passes 348 source files and 4535 MIR
+functions. Receipt evidence/candidate-lock-write-20261012.json.
+
+Stable compiler CLI consumers remain. Linux, full suite and Stage1/Stage2 remain
+scheduled later. DB, CI and version are unchanged; no push occurred.

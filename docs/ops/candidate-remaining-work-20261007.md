@@ -3934,3 +3934,21 @@ and 4530 MIR functions. Receipt: `evidence/candidate-lock-match-20261012.json`.
 Atomic persistence and compiler CLI integration remain. Public CLI/API, SDK
 ABI/version, DB and CI are unchanged. Linux, full suite and Stage1/Stage2 remain
 scheduled later; no push occurred.
+
+
+## Atomic lock save (2026-10-12)
+
+`project_lock_write.write` accepts exact canonical strict-valid lock bytes, caps input
+at 8 MiB, uses shared work/path bounds, and checks the root directory before any side
+effect. It tries 4096 deterministic exclusive sibling temp names, leaving colliding
+files or directories untouched. It completes `write_all`, `sync`, and consuming close
+before `replace_file`. On failure it owns cleanup of its created name while preserving
+primary failure and secondary close/cleanup status.
+
+Two native tests, both candidate C profiles and 22 injected failure/termination
+observations pass. Check passes 348 files and 4535 MIR functions. Existing authenticated
+SDK path_kind admission was added. Receipt:
+`evidence/candidate-lock-write-20261012.json`.
+
+Stable compiler CLI consumers remain. Linux, full suite and Stage1/Stage2 remain
+scheduled later. Public API, SDK, DB, CI and version are unchanged; no push occurred.
