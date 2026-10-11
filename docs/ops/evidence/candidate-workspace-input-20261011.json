@@ -1,0 +1,926 @@
+{
+  "schema": "fairyc.candidate-private-tests/v1",
+  "passed": true,
+  "module": "project_workspace_input",
+  "sourceInputs": [
+    {
+      "path": "examples/lexer_candidate/src/attributes.fy",
+      "sha256": "dafe2e1c020446224fa8784e701e522096a58776a1066920f934c0717667b5e6"
+    },
+    {
+      "path": "examples/lexer_candidate/src/bodies.fy",
+      "sha256": "ea9bfd6dc1b3bce9dc407970b82d871185db33e7daadad35d348de84ab6ba294"
+    },
+    {
+      "path": "examples/lexer_candidate/src/body_state.fy",
+      "sha256": "0f4e1924d07e4d21bc5fbe35a4fb8f0c2b617206b6d63191e7a625300ec5bb3e"
+    },
+    {
+      "path": "examples/lexer_candidate/src/budget.fy",
+      "sha256": "c2793aa302279b9d27f0af32edd71f70de4e93cb4f76f55facd3e757641cc494"
+    },
+    {
+      "path": "examples/lexer_candidate/src/candidate_limits.fy",
+      "sha256": "7a27948d9a43bde84acdf1106f462d0c5a288f8a54f193560658eff0c0d00f3e"
+    },
+    {
+      "path": "examples/lexer_candidate/src/cleanup_syntax.fy",
+      "sha256": "1374cdcbfa6139a5e82e4e74606cc28ba46d9e81df62f7a0dd397f856fb0ad6f"
+    },
+    {
+      "path": "examples/lexer_candidate/src/diagnostics.fy",
+      "sha256": "ee95f81ed3b3224702196fceef2888434e9713341b81abf01e03945592c4de8b"
+    },
+    {
+      "path": "examples/lexer_candidate/src/file_source.fy",
+      "sha256": "1a7ac7f6c69ef27e78e734aa74dab90b895742a5500a32931baaed19379b938f"
+    },
+    {
+      "path": "examples/lexer_candidate/src/numbers.fy",
+      "sha256": "ee8b40b5e8061317d70d3594c386c9e4c70d95132a7e4243ea6402947a4c3556"
+    },
+    {
+      "path": "examples/lexer_candidate/src/parse_tokens.fy",
+      "sha256": "91984eb1086ff7faafa4a6c64a232fc2ddce365b8cd7c2ef23b143bb91d4c9a6"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_directory.fy",
+      "sha256": "70321e8a7cc84f131573eec91013fccad38d0162f781768bc0e47b136cf4ebc6"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_key_index.fy",
+      "sha256": "34ee26a1092361c5bc60860795a86c0974243eec3cfc5f829710d192fdf7ea28"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_manifest.fy",
+      "sha256": "943c3e163ddc04afb03a82ef4a0485aa6a618a67708e657086b8ed1acd56658a"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_manifest_values.fy",
+      "sha256": "4f21b9dedf744ffc449d1b843282f9aba2ecc221c61f043594bea70c4d56387d"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_module_path.fy",
+      "sha256": "b4217fe0f797e5f0fb4bab8ebc75435e6674b5f72b60d0129b5269c627709cb2"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_package_input.fy",
+      "sha256": "fe1a75622fbf72b03fe5bfba3ce0c158eb2e03033e31acfdaef05afea9ec68c8"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_path.fy",
+      "sha256": "20bde13864e5ba8752b33a616eab22b08caf8a20d6a435d2d2c2cc68f443f1a5"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_path_unicode_data.fy",
+      "sha256": "9cf3af27796644304493561591e1641c70c5c653bf739ed71a65e492db510fbd"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_source_catalog.fy",
+      "sha256": "5dd5b1a6f848968cf20676084af8ddcaf039cfc74e1837685c12c601c53fb131"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_source_file.fy",
+      "sha256": "6d1307e99f7ae9fb387fc447f3b6c36f6c0e77aebc90faca55e75665aad2d282"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_source_identity.fy",
+      "sha256": "f7a02cf002df1b9967bb9bc163e9badbf2f16e47f9fb482f9b2982305dccc31f"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_source_modules.fy",
+      "sha256": "23adf41c8e6cc0424968ebd78d4623ab0d95ed6bebb0125dd4440c4941fee20b"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_source_root.fy",
+      "sha256": "e6d896a57fde407db5e7042e244d6f2a35dddc4e113ad20555c4408f24842127"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_source_set.fy",
+      "sha256": "c4b70409d8aa627a1ef46488e5232d3deea7b07c0e796c26ef28449f367a98e1"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_toml_context.fy",
+      "sha256": "1682260043feced2ac662198fd3b29f4badb2a4a9f9b02a8e1f81462f3b3cc0f"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_toml_document.fy",
+      "sha256": "0bc3782206da0d9320ba8a39ea6a1f9ded52ec1bbf855580e31c1a1786f4b3a8"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_toml_model.fy",
+      "sha256": "4a6c295108e704749fc557204de4d8a0287e3228e59da396c50867ec8894b11e"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_toml_scalars.fy",
+      "sha256": "137d5dbdce313f22e91a9be87f8b34eb6f10011933b152f649421a895e274cb9"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_toml_strings.fy",
+      "sha256": "bc7e71acaaa68af5755d066c90fa1f763625de32c8fa2a6778e8447eebc187bb"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_toml_values.fy",
+      "sha256": "24255d1fdf0f34b6761f5304d383127667e8b127488a80409b3f35a13f62e81c"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_workspace_catalog.fy",
+      "sha256": "bc800dda99247aba4d8b80abdcbc092d9cb27ac5193cfb7a33bd405ec753c936"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_workspace_input.fy",
+      "sha256": "18a8a35c400eaa8c32da09ea55a70d704953e8b9a762998b44c9af4dd76689fd"
+    },
+    {
+      "path": "examples/lexer_candidate/src/records.fy",
+      "sha256": "e2d1d3540285509aded981b476d4b2340857d8c7370364f4b1410bfd6883f6dd"
+    },
+    {
+      "path": "examples/lexer_candidate/src/scanner.fy",
+      "sha256": "3755e569fe63003f63b2c9b8272df2ba656c844791cedbc0da4f9245b8809cf7"
+    },
+    {
+      "path": "examples/lexer_candidate/src/sha256_block.fy",
+      "sha256": "bc48b9e751205bba8aeaf09987ea8681694d26bc989e24f4ecb3afa4c6e00fd4"
+    },
+    {
+      "path": "examples/lexer_candidate/src/sha256_stream.fy",
+      "sha256": "b5f97a9b5be679418a1365a6007028abfab5ba66ee3ae5c08b3e5b863fcfc8b9"
+    },
+    {
+      "path": "internal/sdkstdlib/sources/std/bytes.fy",
+      "sha256": "4740a506e93349fb002c383967dcc44d182d20f09f2094b83b5464a4ab252982"
+    },
+    {
+      "path": "internal/sdkstdlib/sources/std/fs.fy",
+      "sha256": "fd7ddfa9f0deed98304cecf94911644087d1e2a46e8be8995c35acbcb183b335"
+    },
+    {
+      "path": "internal/sdkstdlib/sources/std/io.fy",
+      "sha256": "4b89c3aeb8b4de4887395d29723095d364c5660c6b773c5696fb1f65f5365f48"
+    },
+    {
+      "path": "internal/sdkstdlib/sources/std/num.fy",
+      "sha256": "09aa0d45f075aa4212049527ded7bb48d99ceb6ffed56b310e267421bae20bb3"
+    },
+    {
+      "path": "internal/sdkstdlib/sources/std/process.fy",
+      "sha256": "9680a1481df4f761f481d5a039af7bdbefeb312d1091961194f8e7bc0681ae24"
+    },
+    {
+      "path": "internal/sdkstdlib/sources/std/text.fy",
+      "sha256": "cccd47e090fda11c9da063ffb321489dd8753fe9996855fc432833e05a79e695"
+    },
+    {
+      "path": "internal/sdkstdlib/sources/optional/std/vec.fy",
+      "sha256": "0ae4c395bf98c39079ad620bde035b3b590d51417864802e698edc069281db5b"
+    },
+    {
+      "path": "examples/lexer_candidate/src/strings.fy",
+      "sha256": "8f26db7c4d4039c8c8d9fbc6078097859c8f714ca5887957fdf0e69269dca521"
+    },
+    {
+      "path": "examples/lexer_candidate/src/syntax.fy",
+      "sha256": "cb040a2973447b89c2ad59b5447c65dab79df5df7930f73431afa7ea34ef25fd"
+    },
+    {
+      "path": "examples/lexer_candidate/src/types.fy",
+      "sha256": "53a77948af92724f00de0609837fd1507899df8e2b59b6d2778ef1f3c344395a"
+    },
+    {
+      "path": "examples/lexer_candidate/src/utf8.fy",
+      "sha256": "4a5425cea9efbfb1bff2c31a38c2bd8e392c6792af09f24e906c9a743621870d"
+    },
+    {
+      "path": "examples/lexer_candidate/tests/project_workspace_input.fy",
+      "sha256": "17ac0533eda8f43ed9f178b2a3f26195bef0ca97a0304b05bfc768cb2f8e1744"
+    },
+    {
+      "path": "tools/verify-candidate-private-tests.py",
+      "sha256": "04c7e44df7941bd0c1a12b523b115df623dbe10836f3eb8993dedc7d6ea5e8af"
+    },
+    {
+      "path": ".cache/candidate-workspace-input-20261011/fixture/root.bin",
+      "sha256": "bc58cd65f2f2ded3ea7307e378d5672579d1721a62d02969af48a894a6ad3bee"
+    },
+    {
+      "path": "cmd/fairyc-candidate-workspace-input-reference/main.go",
+      "sha256": "020beac50a9c0acbecddb771f90a080e536b3f6da63c6f314024b4d81f4cd88e"
+    },
+    {
+      "path": "internal/workspaceloader/loader.go",
+      "sha256": "6977f9f108741c30fb01a21be94fa90f127ddc06daea0bd991efcbcfb8c081f3"
+    }
+  ],
+  "tools": {
+    "compiler": {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\manifest-bootstrap.exe",
+      "sha256": "4e6a50a83b4d9f74a11d749c779a90683ab3a3916d19f4852bfe1cbd452cc664"
+    },
+    "candidate": {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-source-file-20261011\\compiler.exe",
+      "sha256": "e87cc5c8c19e30fc68ca68fa98ef66d87baa1300263d8989e255910bb1985d8f"
+    },
+    "builder": {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-source-file-20261011\\builder.exe",
+      "sha256": "8141ce6bcc461a52fe6bf0bf24e9e5f5a9d7842c3c7dbfc5863cc4e822584ea7"
+    }
+  },
+  "native": {
+    "schemaVersion": "fairyc.test-report/v4",
+    "engine": "native",
+    "target": "x86_64-windows-msvc",
+    "profile": "development",
+    "tests": [
+      {
+        "identity": "tests::project_workspace_input::retains_dependency_edges_features_and_original_error_inputs",
+        "outcome": "passed",
+        "trapCategory": null,
+        "stdoutBase64": "",
+        "stderrBase64": ""
+      }
+    ],
+    "count": 1,
+    "passed": 1,
+    "failed": 0,
+    "status": "ok",
+    "lock": "verified"
+  },
+  "nativeTests": 1,
+  "lockSHA256": "a4d39eeece5a7306836c770901190ab83c13b41226c527c02ea7ecaa2e3ecade",
+  "candidateInputFiles": 48,
+  "candidatePacketSHA256": "13c97dd9bca19e6812f3bc2fca46c542833381721bc70c8061087f69040e81be",
+  "candidateExecutions": [
+    {
+      "profile": "development",
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-workspace-input-20261011\\execution\\development.exe",
+      "sha256": "4a1e65f2ce8f84b8a53a1e992adc91366e9abfba80479d090acb2bb91834649f",
+      "exit": 0
+    },
+    {
+      "profile": "release",
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-workspace-input-20261011\\execution\\release.exe",
+      "sha256": "faf44f3fad7c3c8a398730fe743fa5293130ac5c6b32271f63ed4803a6a39c6e",
+      "exit": 0
+    }
+  ],
+  "invocations": [
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\manifest-bootstrap.exe",
+        "test",
+        "--native",
+        "--locked",
+        "--json",
+        "--capture-output",
+        "--exact",
+        "tests::project_workspace_input::retains_dependency_edges_features_and_original_error_inputs",
+        "--",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-workspace-input-20261011\\fixture\\root.bin"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "seconds": 55.22815740000806,
+      "exit": 0,
+      "stdoutBytes": 371,
+      "stdoutSHA256": "02375202d86486900f835cf73457fd382634353669daf4b41f6948c2980f1435",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-source-file-20261011\\compiler.exe",
+        "--c-project-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-workspace-input-20261011\\execution\\sources.list"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "seconds": 34.676391099987086,
+      "exit": 0,
+      "stdoutBytes": 3761992,
+      "stdoutSHA256": "13c97dd9bca19e6812f3bc2fca46c542833381721bc70c8061087f69040e81be",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-source-file-20261011\\builder.exe",
+        "--packet",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-workspace-input-20261011\\execution\\candidate-packet.bin",
+        "--packet-sha256",
+        "13c97dd9bca19e6812f3bc2fca46c542833381721bc70c8061087f69040e81be",
+        "--output",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-workspace-input-20261011\\execution\\development.exe"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "seconds": 3.209147599991411,
+      "exit": 0,
+      "stdoutBytes": 186,
+      "stdoutSHA256": "df24e208df6efab7ac2f968e59840c98126f9eb86504549459bc0dd3ecf68008",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-workspace-input-20261011\\execution\\development.exe",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-workspace-input-20261011\\fixture\\root.bin"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "seconds": 0.18981739999435376,
+      "exit": 0,
+      "stdoutBytes": 0,
+      "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-source-file-20261011\\builder.exe",
+        "--packet",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-workspace-input-20261011\\execution\\candidate-packet.bin",
+        "--packet-sha256",
+        "13c97dd9bca19e6812f3bc2fca46c542833381721bc70c8061087f69040e81be",
+        "--output",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-workspace-input-20261011\\execution\\release.exe",
+        "--release"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "seconds": 76.88117590000911,
+      "exit": 0,
+      "stdoutBytes": 187,
+      "stdoutSHA256": "936fb19053f986f65be8146f34cff6ab35db5bf20e5c74bff89966b80e5b2a81",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-workspace-input-20261011\\execution\\release.exe",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-workspace-input-20261011\\fixture\\root.bin"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "seconds": 0.14177099999506027,
+      "exit": 0,
+      "stdoutBytes": 0,
+      "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr": ""
+    }
+  ],
+  "publicApiChanged": false,
+  "dbChanged": false,
+  "ciChanged": false,
+  "pushed": false,
+  "goOracle": [
+    {
+      "Name": "Simple",
+      "Accepted": true,
+      "Reason": "",
+      "Edges": [
+        {
+          "Owner": ".",
+          "Binding": "shared",
+          "Target": "a",
+          "Features": []
+        }
+      ],
+      "Files": 2,
+      "Bytes": 25
+    },
+    {
+      "Name": "Features",
+      "Accepted": true,
+      "Reason": "",
+      "Edges": [
+        {
+          "Owner": ".",
+          "Binding": "a-lane",
+          "Target": "a",
+          "Features": [
+            "alpha"
+          ]
+        },
+        {
+          "Owner": ".",
+          "Binding": "b-lane",
+          "Target": "a",
+          "Features": [
+            "beta"
+          ]
+        },
+        {
+          "Owner": "a",
+          "Binding": "shared",
+          "Target": "b",
+          "Features": []
+        }
+      ],
+      "Files": 3,
+      "Bytes": 39
+    },
+    {
+      "Name": "UnknownRoot",
+      "Accepted": false,
+      "Reason": "unknown-path-dependency",
+      "Edges": [],
+      "Files": 0,
+      "Bytes": 0
+    },
+    {
+      "Name": "UnknownMember",
+      "Accepted": false,
+      "Reason": "unknown-path-dependency",
+      "Edges": [],
+      "Files": 0,
+      "Bytes": 0
+    },
+    {
+      "Name": "Version",
+      "Accepted": false,
+      "Reason": "dependency-version-mismatch",
+      "Edges": [],
+      "Files": 0,
+      "Bytes": 0
+    },
+    {
+      "Name": "BuildVersion",
+      "Accepted": false,
+      "Reason": "dependency-version-mismatch",
+      "Edges": [],
+      "Files": 0,
+      "Bytes": 0
+    },
+    {
+      "Name": "UnreachableVersion",
+      "Accepted": false,
+      "Reason": "dependency-version-mismatch",
+      "Edges": [],
+      "Files": 0,
+      "Bytes": 0
+    },
+    {
+      "Name": "ReservedUID",
+      "Accepted": false,
+      "Reason": "invalid-standard-library",
+      "Edges": [],
+      "Files": 0,
+      "Bytes": 0
+    },
+    {
+      "Name": "ReservedUIDMember",
+      "Accepted": false,
+      "Reason": "invalid-standard-library",
+      "Edges": [],
+      "Files": 0,
+      "Bytes": 0
+    },
+    {
+      "Name": "ReservedModule",
+      "Accepted": false,
+      "Reason": "invalid-standard-library",
+      "Edges": [],
+      "Files": 0,
+      "Bytes": 0
+    },
+    {
+      "Name": "ReservedNamespace",
+      "Accepted": false,
+      "Reason": "invalid-standard-library",
+      "Edges": [],
+      "Files": 0,
+      "Bytes": 0
+    },
+    {
+      "Name": "ReservedModuleMember",
+      "Accepted": false,
+      "Reason": "invalid-standard-library",
+      "Edges": [],
+      "Files": 0,
+      "Bytes": 0
+    },
+    {
+      "Name": "ReservedBinding",
+      "Accepted": false,
+      "Reason": "invalid-standard-library",
+      "Edges": [],
+      "Files": 0,
+      "Bytes": 0
+    },
+    {
+      "Name": "NearSDKNames",
+      "Accepted": true,
+      "Reason": "",
+      "Edges": [
+        {
+          "Owner": ".",
+          "Binding": "stdlib-extra",
+          "Target": "a",
+          "Features": []
+        }
+      ],
+      "Files": 2,
+      "Bytes": 29
+    },
+    {
+      "Name": "CatalogFailure",
+      "Accepted": false,
+      "Reason": "invalid-project-manifest",
+      "Edges": [],
+      "Files": 0,
+      "Bytes": 0
+    }
+  ],
+  "fixtureFiles": [
+    {
+      "path": ".cache/candidate-workspace-input-20261011/fixture/BuildVersion/a/fairy.toml",
+      "sha256": "58eb65bf351f78fc29919ab4f4104f231d80d33fa94755b6673942ab47c15087"
+    },
+    {
+      "path": ".cache/candidate-workspace-input-20261011/fixture/BuildVersion/a/src/lib.fy",
+      "sha256": "62cba17cd7f0956ebe0ee51770c5df7a8b04c068f8913ea7be4638c8e44329c3"
+    },
+    {
+      "path": ".cache/candidate-workspace-input-20261011/fixture/BuildVersion/edges.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": ".cache/candidate-workspace-input-20261011/fixture/BuildVersion/fairy.toml",
+      "sha256": "577c26a84f71bcd1c20f331d3ba8c8920a89f84e12cfc29b0361c9e376a3faaa"
+    },
+    {
+      "path": ".cache/candidate-workspace-input-20261011/fixture/BuildVersion/oracle.txt",
+      "sha256": "4a7b62a89714d1d58909cedc952e5dbd84c7ef26193f67843bb548a936dea397"
+    },
+    {
+      "path": ".cache/candidate-workspace-input-20261011/fixture/BuildVersion/src/main.fy",
+      "sha256": "5075d2e2d2ea0ceedb49a53ad8daf559c89cb9c3f86b11853bcc1586907cf3d1"
+    },
+    {
+      "path": ".cache/candidate-workspace-input-20261011/fixture/CatalogFailure/edges.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": ".cache/candidate-workspace-input-20261011/fixture/CatalogFailure/fairy.toml",
+      "sha256": "c4899b0d71609c351c98d89f068c6f5a7f1f35a840de75553b98590407dfe8ca"
+    },
+    {
+      "path": ".cache/candidate-workspace-input-20261011/fixture/CatalogFailure/oracle.txt",
+      "sha256": "1772adc4ac2dee48eaa6787934db3f0a629dc0df3b53bdff2f5430671d5810e0"
+    },
+    {
+      "path": ".cache/candidate-workspace-input-20261011/fixture/CatalogFailure/src/main.fy",
+      "sha256": "5075d2e2d2ea0ceedb49a53ad8daf559c89cb9c3f86b11853bcc1586907cf3d1"
+    },
+    {
+      "path": ".cache/candidate-workspace-input-20261011/fixture/Features/a/fairy.toml",
+      "sha256": "ef8c5189a35b49a55df89b58b1f071ea08a23037fbc859f48daa5b7acb0f796c"
+    },
+    {
+      "path": ".cache/candidate-workspace-input-20261011/fixture/Features/a/src/lib.fy",
+      "sha256": "62cba17cd7f0956ebe0ee51770c5df7a8b04c068f8913ea7be4638c8e44329c3"
+    },
+    {
+      "path": ".cache/candidate-workspace-input-20261011/fixture/Features/b/fairy.toml",
+      "sha256": "25935e206af9e1b9ef3e6575d33ecf54743c43effe65665cb515fa126e049d62"
+    },
+    {
+      "path": ".cache/candidate-workspace-input-20261011/fixture/Features/b/src/other.fy",
+      "sha256": "7ed61cfccf3b84de6bdbbe25f50dffacc8a64fd5ca91f1f9b4c53f6b9d135f2b"
+    },
+    {
+      "path": ".cache/candidate-workspace-input-20261011/fixture/Features/edges.txt",
+      "sha256": "21e53c36be43aabdfd55f0b41210ed64cac7ca03656f215b00152e47a0e67d6b"
+    },
+    {
+      "path": ".cache/candidate-workspace-input-20261011/fixture/Features/fairy.toml",
+      "sha256": "384236e3a07e355b8038e9eab3685742fbb8d1eda4f5015f7ef0cb9cbf52a62c"
+    },
+    {
+      "path": ".cache/candidate-workspace-input-20261011/fixture/Features/oracle.txt",
+      "sha256": "e3949a4b725d800a0fe4abecf0429f8f90154826911cca138b05e47bdc683bd2"
+    },
+    {
+      "path": ".cache/candidate-workspace-input-20261011/fixture/Features/src/main.fy",
+      "sha256": "5075d2e2d2ea0ceedb49a53ad8daf559c89cb9c3f86b11853bcc1586907cf3d1"
+    },
+    {
+      "path": ".cache/candidate-workspace-input-20261011/fixture/NearSDKNames/a/fairy.toml",
+      "sha256": "dbbb1eb24cedf4559da3950f86e6aeeb3c9d41b8c2d824585c6ccb280453c05a"
+    },
+    {
+      "path": ".cache/candidate-workspace-input-20261011/fixture/NearSDKNames/a/src/lib.fy",
+      "sha256": "62cba17cd7f0956ebe0ee51770c5df7a8b04c068f8913ea7be4638c8e44329c3"
+    },
+    {
+      "path": ".cache/candidate-workspace-input-20261011/fixture/NearSDKNames/edges.txt",
+      "sha256": "78b2880de33e2d819663c939d8d7d1d8ba090d3ed1d37a8df5b23d3e1be84188"
+    },
+    {
+      "path": ".cache/candidate-workspace-input-20261011/fixture/NearSDKNames/fairy.toml",
+      "sha256": "b0e79736f89de8ebea3220608f54391497c6f8d7bc3a26d123ee9963f2a6952b"
+    },
+    {
+      "path": ".cache/candidate-workspace-input-20261011/fixture/NearSDKNames/oracle.txt",
+      "sha256": "e3949a4b725d800a0fe4abecf0429f8f90154826911cca138b05e47bdc683bd2"
+    },
+    {
+      "path": ".cache/candidate-workspace-input-20261011/fixture/NearSDKNames/src/stdtools.fy",
+      "sha256": "832f81da0fbb4236786e53d26c79658ef1f3266dc90ec97b50841d6b94c69ce9"
+    },
+    {
+      "path": ".cache/candidate-workspace-input-20261011/fixture/reference.json",
+      "sha256": "be86224377e62cefe8074c377549c01dbbcfd94c89f6707b8e0dad0646e60fb7"
+    },
+    {
+      "path": ".cache/candidate-workspace-input-20261011/fixture/ReservedBinding/a/fairy.toml",
+      "sha256": "dbbb1eb24cedf4559da3950f86e6aeeb3c9d41b8c2d824585c6ccb280453c05a"
+    },
+    {
+      "path": ".cache/candidate-workspace-input-20261011/fixture/ReservedBinding/a/src/lib.fy",
+      "sha256": "62cba17cd7f0956ebe0ee51770c5df7a8b04c068f8913ea7be4638c8e44329c3"
+    },
+    {
+      "path": ".cache/candidate-workspace-input-20261011/fixture/ReservedBinding/edges.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": ".cache/candidate-workspace-input-20261011/fixture/ReservedBinding/fairy.toml",
+      "sha256": "a739d382b7f39523f1456f81b6af7c87987bc7ed0e00901675e3ab6dc25edb61"
+    },
+    {
+      "path": ".cache/candidate-workspace-input-20261011/fixture/ReservedBinding/oracle.txt",
+      "sha256": "c295e895d4955c22717084bbef9d110b984cbac7d1b4ba9b67143a50d61af829"
+    },
+    {
+      "path": ".cache/candidate-workspace-input-20261011/fixture/ReservedBinding/src/main.fy",
+      "sha256": "5075d2e2d2ea0ceedb49a53ad8daf559c89cb9c3f86b11853bcc1586907cf3d1"
+    },
+    {
+      "path": ".cache/candidate-workspace-input-20261011/fixture/ReservedModule/a/fairy.toml",
+      "sha256": "dbbb1eb24cedf4559da3950f86e6aeeb3c9d41b8c2d824585c6ccb280453c05a"
+    },
+    {
+      "path": ".cache/candidate-workspace-input-20261011/fixture/ReservedModule/a/src/lib.fy",
+      "sha256": "62cba17cd7f0956ebe0ee51770c5df7a8b04c068f8913ea7be4638c8e44329c3"
+    },
+    {
+      "path": ".cache/candidate-workspace-input-20261011/fixture/ReservedModule/edges.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": ".cache/candidate-workspace-input-20261011/fixture/ReservedModule/fairy.toml",
+      "sha256": "c4899b0d71609c351c98d89f068c6f5a7f1f35a840de75553b98590407dfe8ca"
+    },
+    {
+      "path": ".cache/candidate-workspace-input-20261011/fixture/ReservedModule/oracle.txt",
+      "sha256": "c295e895d4955c22717084bbef9d110b984cbac7d1b4ba9b67143a50d61af829"
+    },
+    {
+      "path": ".cache/candidate-workspace-input-20261011/fixture/ReservedModule/src/std.fy",
+      "sha256": "96403248bb25436e1cf72e772591a78d4c27a14c889cc19a78c156df6b2f9e98"
+    },
+    {
+      "path": ".cache/candidate-workspace-input-20261011/fixture/ReservedModuleMember/a/fairy.toml",
+      "sha256": "dbbb1eb24cedf4559da3950f86e6aeeb3c9d41b8c2d824585c6ccb280453c05a"
+    },
+    {
+      "path": ".cache/candidate-workspace-input-20261011/fixture/ReservedModuleMember/a/src/std/x.fy",
+      "sha256": "754c37f11757b3dcc8a305a73a63e1b0020595f62f52ce655012bc63d2e9a045"
+    },
+    {
+      "path": ".cache/candidate-workspace-input-20261011/fixture/ReservedModuleMember/edges.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": ".cache/candidate-workspace-input-20261011/fixture/ReservedModuleMember/fairy.toml",
+      "sha256": "c4899b0d71609c351c98d89f068c6f5a7f1f35a840de75553b98590407dfe8ca"
+    },
+    {
+      "path": ".cache/candidate-workspace-input-20261011/fixture/ReservedModuleMember/oracle.txt",
+      "sha256": "c295e895d4955c22717084bbef9d110b984cbac7d1b4ba9b67143a50d61af829"
+    },
+    {
+      "path": ".cache/candidate-workspace-input-20261011/fixture/ReservedModuleMember/src/main.fy",
+      "sha256": "5075d2e2d2ea0ceedb49a53ad8daf559c89cb9c3f86b11853bcc1586907cf3d1"
+    },
+    {
+      "path": ".cache/candidate-workspace-input-20261011/fixture/ReservedNamespace/a/fairy.toml",
+      "sha256": "dbbb1eb24cedf4559da3950f86e6aeeb3c9d41b8c2d824585c6ccb280453c05a"
+    },
+    {
+      "path": ".cache/candidate-workspace-input-20261011/fixture/ReservedNamespace/a/src/lib.fy",
+      "sha256": "62cba17cd7f0956ebe0ee51770c5df7a8b04c068f8913ea7be4638c8e44329c3"
+    },
+    {
+      "path": ".cache/candidate-workspace-input-20261011/fixture/ReservedNamespace/edges.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": ".cache/candidate-workspace-input-20261011/fixture/ReservedNamespace/fairy.toml",
+      "sha256": "c4899b0d71609c351c98d89f068c6f5a7f1f35a840de75553b98590407dfe8ca"
+    },
+    {
+      "path": ".cache/candidate-workspace-input-20261011/fixture/ReservedNamespace/oracle.txt",
+      "sha256": "c295e895d4955c22717084bbef9d110b984cbac7d1b4ba9b67143a50d61af829"
+    },
+    {
+      "path": ".cache/candidate-workspace-input-20261011/fixture/ReservedNamespace/src/std/x.fy",
+      "sha256": "754c37f11757b3dcc8a305a73a63e1b0020595f62f52ce655012bc63d2e9a045"
+    },
+    {
+      "path": ".cache/candidate-workspace-input-20261011/fixture/ReservedUID/a/fairy.toml",
+      "sha256": "dbbb1eb24cedf4559da3950f86e6aeeb3c9d41b8c2d824585c6ccb280453c05a"
+    },
+    {
+      "path": ".cache/candidate-workspace-input-20261011/fixture/ReservedUID/a/src/lib.fy",
+      "sha256": "62cba17cd7f0956ebe0ee51770c5df7a8b04c068f8913ea7be4638c8e44329c3"
+    },
+    {
+      "path": ".cache/candidate-workspace-input-20261011/fixture/ReservedUID/edges.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": ".cache/candidate-workspace-input-20261011/fixture/ReservedUID/fairy.toml",
+      "sha256": "92f432bcbcd7ce21352c94892f1a28711b5d69def291db2f2dc52eaba7964dc6"
+    },
+    {
+      "path": ".cache/candidate-workspace-input-20261011/fixture/ReservedUID/oracle.txt",
+      "sha256": "c295e895d4955c22717084bbef9d110b984cbac7d1b4ba9b67143a50d61af829"
+    },
+    {
+      "path": ".cache/candidate-workspace-input-20261011/fixture/ReservedUID/src/main.fy",
+      "sha256": "5075d2e2d2ea0ceedb49a53ad8daf559c89cb9c3f86b11853bcc1586907cf3d1"
+    },
+    {
+      "path": ".cache/candidate-workspace-input-20261011/fixture/ReservedUIDMember/a/fairy.toml",
+      "sha256": "5053071a7b4e7d38cd14fde554e740d8a5bbb58b7ccf7273deba936b69e05b15"
+    },
+    {
+      "path": ".cache/candidate-workspace-input-20261011/fixture/ReservedUIDMember/a/src/lib.fy",
+      "sha256": "62cba17cd7f0956ebe0ee51770c5df7a8b04c068f8913ea7be4638c8e44329c3"
+    },
+    {
+      "path": ".cache/candidate-workspace-input-20261011/fixture/ReservedUIDMember/edges.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": ".cache/candidate-workspace-input-20261011/fixture/ReservedUIDMember/fairy.toml",
+      "sha256": "c4899b0d71609c351c98d89f068c6f5a7f1f35a840de75553b98590407dfe8ca"
+    },
+    {
+      "path": ".cache/candidate-workspace-input-20261011/fixture/ReservedUIDMember/oracle.txt",
+      "sha256": "c295e895d4955c22717084bbef9d110b984cbac7d1b4ba9b67143a50d61af829"
+    },
+    {
+      "path": ".cache/candidate-workspace-input-20261011/fixture/ReservedUIDMember/src/main.fy",
+      "sha256": "5075d2e2d2ea0ceedb49a53ad8daf559c89cb9c3f86b11853bcc1586907cf3d1"
+    },
+    {
+      "path": ".cache/candidate-workspace-input-20261011/fixture/root.bin",
+      "sha256": "bc58cd65f2f2ded3ea7307e378d5672579d1721a62d02969af48a894a6ad3bee"
+    },
+    {
+      "path": ".cache/candidate-workspace-input-20261011/fixture/Simple/a/fairy.toml",
+      "sha256": "dbbb1eb24cedf4559da3950f86e6aeeb3c9d41b8c2d824585c6ccb280453c05a"
+    },
+    {
+      "path": ".cache/candidate-workspace-input-20261011/fixture/Simple/a/src/lib.fy",
+      "sha256": "62cba17cd7f0956ebe0ee51770c5df7a8b04c068f8913ea7be4638c8e44329c3"
+    },
+    {
+      "path": ".cache/candidate-workspace-input-20261011/fixture/Simple/edges.txt",
+      "sha256": "bc798681b16b14961bea95a33b6366dc1a6d73f613eaa74218cea4e473b69083"
+    },
+    {
+      "path": ".cache/candidate-workspace-input-20261011/fixture/Simple/fairy.toml",
+      "sha256": "c4899b0d71609c351c98d89f068c6f5a7f1f35a840de75553b98590407dfe8ca"
+    },
+    {
+      "path": ".cache/candidate-workspace-input-20261011/fixture/Simple/oracle.txt",
+      "sha256": "e3949a4b725d800a0fe4abecf0429f8f90154826911cca138b05e47bdc683bd2"
+    },
+    {
+      "path": ".cache/candidate-workspace-input-20261011/fixture/Simple/src/main.fy",
+      "sha256": "5075d2e2d2ea0ceedb49a53ad8daf559c89cb9c3f86b11853bcc1586907cf3d1"
+    },
+    {
+      "path": ".cache/candidate-workspace-input-20261011/fixture/UnknownMember/a/fairy.toml",
+      "sha256": "e67f221e08c1d8476795803435fce638cc385f8c7434fda6ed2009caf79a835f"
+    },
+    {
+      "path": ".cache/candidate-workspace-input-20261011/fixture/UnknownMember/a/src/lib.fy",
+      "sha256": "62cba17cd7f0956ebe0ee51770c5df7a8b04c068f8913ea7be4638c8e44329c3"
+    },
+    {
+      "path": ".cache/candidate-workspace-input-20261011/fixture/UnknownMember/edges.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": ".cache/candidate-workspace-input-20261011/fixture/UnknownMember/fairy.toml",
+      "sha256": "5c4a2b471254e8925a7acf9884363eecd248be72868394cef138a012cac7e8be"
+    },
+    {
+      "path": ".cache/candidate-workspace-input-20261011/fixture/UnknownMember/ghost/fairy.toml",
+      "sha256": "0c12a46880040ff55c67290e23d903c3cf0f14fd802a1e4d330c74a0c8b1adb5"
+    },
+    {
+      "path": ".cache/candidate-workspace-input-20261011/fixture/UnknownMember/ghost/src/lib.fy",
+      "sha256": "62cba17cd7f0956ebe0ee51770c5df7a8b04c068f8913ea7be4638c8e44329c3"
+    },
+    {
+      "path": ".cache/candidate-workspace-input-20261011/fixture/UnknownMember/oracle.txt",
+      "sha256": "29c305f8568ac81c2f9c1682ea0b492bc7c1fe40e4ab47948cc1a8829258f53c"
+    },
+    {
+      "path": ".cache/candidate-workspace-input-20261011/fixture/UnknownMember/src/main.fy",
+      "sha256": "5075d2e2d2ea0ceedb49a53ad8daf559c89cb9c3f86b11853bcc1586907cf3d1"
+    },
+    {
+      "path": ".cache/candidate-workspace-input-20261011/fixture/UnknownRoot/a/fairy.toml",
+      "sha256": "dbbb1eb24cedf4559da3950f86e6aeeb3c9d41b8c2d824585c6ccb280453c05a"
+    },
+    {
+      "path": ".cache/candidate-workspace-input-20261011/fixture/UnknownRoot/a/src/lib.fy",
+      "sha256": "62cba17cd7f0956ebe0ee51770c5df7a8b04c068f8913ea7be4638c8e44329c3"
+    },
+    {
+      "path": ".cache/candidate-workspace-input-20261011/fixture/UnknownRoot/edges.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": ".cache/candidate-workspace-input-20261011/fixture/UnknownRoot/fairy.toml",
+      "sha256": "f614a05f0ebd1378ea2078085ee5478ca4d07b93dc800801bc8cec6c6acb6f80"
+    },
+    {
+      "path": ".cache/candidate-workspace-input-20261011/fixture/UnknownRoot/ghost/fairy.toml",
+      "sha256": "0c12a46880040ff55c67290e23d903c3cf0f14fd802a1e4d330c74a0c8b1adb5"
+    },
+    {
+      "path": ".cache/candidate-workspace-input-20261011/fixture/UnknownRoot/ghost/src/lib.fy",
+      "sha256": "62cba17cd7f0956ebe0ee51770c5df7a8b04c068f8913ea7be4638c8e44329c3"
+    },
+    {
+      "path": ".cache/candidate-workspace-input-20261011/fixture/UnknownRoot/oracle.txt",
+      "sha256": "29c305f8568ac81c2f9c1682ea0b492bc7c1fe40e4ab47948cc1a8829258f53c"
+    },
+    {
+      "path": ".cache/candidate-workspace-input-20261011/fixture/UnknownRoot/src/main.fy",
+      "sha256": "5075d2e2d2ea0ceedb49a53ad8daf559c89cb9c3f86b11853bcc1586907cf3d1"
+    },
+    {
+      "path": ".cache/candidate-workspace-input-20261011/fixture/UnreachableVersion/a/fairy.toml",
+      "sha256": "bf5755291b6b00c594f82fcf535e5dfbe780af4d283939f7cd94c925fd087c9e"
+    },
+    {
+      "path": ".cache/candidate-workspace-input-20261011/fixture/UnreachableVersion/a/src/lib.fy",
+      "sha256": "62cba17cd7f0956ebe0ee51770c5df7a8b04c068f8913ea7be4638c8e44329c3"
+    },
+    {
+      "path": ".cache/candidate-workspace-input-20261011/fixture/UnreachableVersion/b/fairy.toml",
+      "sha256": "1394737a7b5f0ba1b0437de42cdc17730c0763cc63c83d2cc2cfd7abb71c852b"
+    },
+    {
+      "path": ".cache/candidate-workspace-input-20261011/fixture/UnreachableVersion/b/src/other.fy",
+      "sha256": "7ed61cfccf3b84de6bdbbe25f50dffacc8a64fd5ca91f1f9b4c53f6b9d135f2b"
+    },
+    {
+      "path": ".cache/candidate-workspace-input-20261011/fixture/UnreachableVersion/edges.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": ".cache/candidate-workspace-input-20261011/fixture/UnreachableVersion/fairy.toml",
+      "sha256": "96b28b78abb786fd71f5415d635f48efc303571f71a4f697e25e2ddada448507"
+    },
+    {
+      "path": ".cache/candidate-workspace-input-20261011/fixture/UnreachableVersion/oracle.txt",
+      "sha256": "4a7b62a89714d1d58909cedc952e5dbd84c7ef26193f67843bb548a936dea397"
+    },
+    {
+      "path": ".cache/candidate-workspace-input-20261011/fixture/UnreachableVersion/src/main.fy",
+      "sha256": "5075d2e2d2ea0ceedb49a53ad8daf559c89cb9c3f86b11853bcc1586907cf3d1"
+    },
+    {
+      "path": ".cache/candidate-workspace-input-20261011/fixture/Version/a/fairy.toml",
+      "sha256": "dbbb1eb24cedf4559da3950f86e6aeeb3c9d41b8c2d824585c6ccb280453c05a"
+    },
+    {
+      "path": ".cache/candidate-workspace-input-20261011/fixture/Version/a/src/lib.fy",
+      "sha256": "62cba17cd7f0956ebe0ee51770c5df7a8b04c068f8913ea7be4638c8e44329c3"
+    },
+    {
+      "path": ".cache/candidate-workspace-input-20261011/fixture/Version/edges.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": ".cache/candidate-workspace-input-20261011/fixture/Version/fairy.toml",
+      "sha256": "a937cecf58b59c7c78d34647f30cd32d04caa0d9b7cfc17506f7e9a9ffe1b26a"
+    },
+    {
+      "path": ".cache/candidate-workspace-input-20261011/fixture/Version/oracle.txt",
+      "sha256": "4a7b62a89714d1d58909cedc952e5dbd84c7ef26193f67843bb548a936dea397"
+    },
+    {
+      "path": ".cache/candidate-workspace-input-20261011/fixture/Version/src/main.fy",
+      "sha256": "5075d2e2d2ea0ceedb49a53ad8daf559c89cb9c3f86b11853bcc1586907cf3d1"
+    }
+  ],
+  "productionCheck": {
+    "files": 318,
+    "mirFunctions": 4105,
+    "passed": true
+  },
+  "scope": "Local catalog dependency declarations, reserved SDK names, exact versions and retained feature edges. Feature-instance expansion, package identity, cycles, visibility, SDK injection and lock projection remain pending.",
+  "budgetCommitBoundary": "Commit only after catalog loading and all dependency declarations succeed; nested catalog and post-load errors leave caller source counters unchanged.",
+  "diagnosticInput": "Manifest or source error snapshots preserve original bytes and byte spans after the temporary catalog closes."
+}

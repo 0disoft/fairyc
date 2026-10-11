@@ -295,9 +295,50 @@ visibility, SDK injection and lock projection are not validated by this catalog.
 Reference fixture command:
 `bun tools/run-go.ts run ./cmd/fairyc-candidate-workspace-catalog-reference <output>`.
 
+## Validated local dependency declarations
+
+`project_workspace_input.load` stages the catalog's source counters, validates
+every catalog package's dependency declarations, and retains one ordered edge
+per declaration. Each edge preserves owner/target catalog positions, binding
+and its independent sorted feature list; the declaration order is already
+canonical in the manifest owner. Repeated targets with different features stay
+separate. Unreachable catalog members are checked too.
+
+Targets must name an exact explicit workspace member, and required version
+bytes must equal its declared version, including prerelease/build metadata.
+Physically present but undeclared packages do not become dependency targets.
+The compiler-owned `fairyc.std` UID, `std`/`std::*` local module namespace and
+`stdlib` dependency binding reject. Similar user names such as `fairyc.stdtools`,
+`stdtools` and `stdlib-extra` remain ordinary names.
+
+The source-root owner now retains the original manifest alongside its decoded
+tree. Declaration failures own the selected original manifest/source bytes,
+file and package paths, decoded context/target and original byte span. Nested
+catalog failures move their existing error owner intact. Allocation and work
+failures have explicit private categories. Caller counters commit only after
+catalog and declaration checks both succeed; the work meter remains consumed.
+
+Fifteen acceptance/reason cases and all successful owner/binding/target/feature
+records agree with the Go loader. One native test and both candidate C profiles
+pass, including independent feature edges, exact build-version mismatch,
+unreachable-member validation, root/member reserved identities and namespaces,
+similar allowed names, original error bytes/spans after catalog cleanup, and
+nested missing-manifest errors. Successful counters reach the exact cumulative
+source limits, while all failures preserve caller counters. Full check passes
+318 files and 4105 MIR functions. Evidence:
+`evidence/candidate-workspace-input-20261011.json`.
+
+Reference fixture command:
+`bun tools/run-go.ts run ./cmd/fairyc-candidate-workspace-input-reference <output>`.
+
+The retained edges are catalog declarations, not resolved feature instances.
+Instance hashing/expansion, graph cycles, import visibility, SDK injection and
+lock projection remain separate work. This unit does not claim whole-loader
+equivalence or change the earlier junction/parser/work-bound limitations.
+
 ## Remaining connection
 
-Connect the retained catalog to dependency and feature-instance resolution,
+Connect the validated catalog declarations to feature-instance resolution,
 SDK injection, lock projection and the project CLI. Broader parser-cap
 compatibility remains separate.
 Resolve the Go junction observation discrepancy before any loader

@@ -24,6 +24,7 @@ pub fn ref u8[] source(ref Sources sources,usize index){if(index>=count(sources)
 pub fn ref u8[] package_value(ref Sources sources,ref u8[] key){return roots::package_value(ref sources.root,key);}
 pub fn ref u8[] source_root_path(ref Sources sources){return roots::path(ref sources.root);}
 pub fn ref manifest::Manifest typed_manifest(ref Sources sources){return roots::typed_manifest(ref sources.root);}
+pub fn ref u8[] manifest_input(ref Sources sources){return roots::manifest_input(ref sources.root);}
 
 @effects(filesystem)
 pub fn Result<Sources,Error> load(ref u8[] root,ref u8[] manifest,ref mut Budget budget,ref mut usize work){

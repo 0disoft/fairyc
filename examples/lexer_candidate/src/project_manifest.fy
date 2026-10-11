@@ -9,6 +9,7 @@ import std::vec as v;
 // 6 version, 7 language, 8 path, 9 sorted/unique, 10 schema, 11 size,
 // 12 UTF-8, 13 allocation, 14 work. Field IDs name the schema fields below.
 pub struct Error{u32 reason;u32 field;usize start;usize end;}
+pub struct Span{usize start;usize end;}
 pub resource Manifest{m::Tree tree;v::Vec<usize> dependencies;usize package;usize workspace;cleanup{}}
 pub fn ref u8[] field(u32 id){
     if(id==1){return b"schema";}if(id==2){return b"package";}if(id==3){return b"uid";}if(id==4){return b"name";}if(id==5){return b"version";}if(id==6){return b"language";}if(id==7){return b"source";}if(id==8){return b"workspace";}if(id==9){return b"members";}if(id==10){return b"dependencies";}if(id==11){return b"path";}if(id==12){return b"features";}return b"";
@@ -88,3 +89,5 @@ fn usize dependency(ref Manifest manifest,usize index){return if(index<dependenc
 pub fn ref u8[] dependency_name(ref Manifest manifest,usize index){return m::name(ref manifest.tree,dependency(manifest,index));}
 pub fn ref u8[] dependency_value(ref Manifest manifest,usize index,ref u8[] key){return m::value(ref manifest.tree,m::lookup(ref manifest.tree,dependency(manifest,index),key));}
 pub fn usize feature_first(ref Manifest manifest,usize index){return m::node(ref manifest.tree,m::lookup(ref manifest.tree,dependency(manifest,index),b"features")).first;}
+pub fn Span package_span(ref Manifest manifest,ref u8[] key){let n=m::node(ref manifest.tree,m::lookup(ref manifest.tree,manifest.package,key));return Span{.start=n.start,.end=n.end};}
+pub fn Span dependency_span(ref Manifest manifest,usize index,ref u8[] key){let usize id=dependency(manifest,index);let n=m::node(ref manifest.tree,if(key.len==0){id}else{m::lookup(ref manifest.tree,id,key)});return Span{.start=n.start,.end=n.end};}

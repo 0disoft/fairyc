@@ -31,6 +31,7 @@ pub fn ref modules::Modules input(ref Catalog catalog,usize at){return ref v::at
 pub fn ref manifest::Manifest package(ref Catalog catalog,usize at){return packages::package(input(catalog,at));}
 pub fn ref u8[] digest(ref Catalog catalog,usize at){return bytes::view(ref v::at<Entry>(ref catalog.entries,at).digest);}
 pub fn usize find(ref Catalog catalog,ref u8[] path){return keys::find(ref catalog.paths,path);}
+pub fn Result<usize,u32> find_metered(ref Catalog catalog,ref u8[] path,ref mut usize meter){return keys::find_metered(ref catalog.paths,path,meter);}
 pub fn usize find_uid(ref Catalog catalog,ref u8[] uid){return keys::find(ref catalog.uids,uid);}
 fn Result<keys::Index,Error> members(ref manifest::Manifest root,ref mut usize meter){
     var bytes::Buffer names=bytes::empty();var v::Vec<keys::Span> spans=v::empty<keys::Span>();var bytes::Buffer lowered=bytes::empty();var v::Vec<keys::Span> lower_spans=v::empty<keys::Span>();if(!keys::append(ref mut names,ref mut spans,b".")){return .err(fail(problem(10,0,0,0),b".",b""));}var usize id=manifest::member_first(root);
