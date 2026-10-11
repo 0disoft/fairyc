@@ -1,0 +1,160 @@
+{
+  "schema": "fairyc.candidate-mir-lower-frame/v1",
+  "passed": true,
+  "implementation": {
+    "path": "examples/lexer_candidate/src/mir_lower.fy",
+    "bytes": 12217,
+    "sha256": "c7aa71460a0063aac21b4ddc6dfaff7613682502f22b37ded9c326fd02c0901a"
+  },
+  "lock": {
+    "path": "examples/lexer_candidate/fairy.lock",
+    "bytes": 1698,
+    "sha256": "bbca3c3e01dcd396f2b1fc1bcd252a87ee1524a227241205f3c47b55660150e6"
+  },
+  "sourceCheck": {
+    "exit": 0,
+    "stdout": "check ok: 2 instance(s), 291 source file(s), 3658 MIR function(s), lock verified\n",
+    "stderr": ""
+  },
+  "storage": {
+    "contextOwnership": "Coordinator-owned fixed arrays; function lowering borrows the Context",
+    "limitsChanged": false,
+    "sourceDepthChanged": false
+  },
+  "native": {
+    "count": 4,
+    "passed": 4,
+    "failed": 0,
+    "engine": "native",
+    "profile": "release",
+    "target": "x86_64-windows-msvc",
+    "tests": [
+      "tests::mir::defer_scopes_produce_lifo_calls",
+      "tests::mir::for_continue_goes_through_checked_post",
+      "tests::mir::owned_constants_and_module_identity",
+      "tests::mir::return_in_argument_does_not_publish_parent_edges"
+    ]
+  },
+  "generatedC": {
+    "packet": {
+      "packetBytes": 20058764,
+      "packetSHA256": "2d5e043112a17012659775b5a71b33bb86ee111f508f6bee93244c17006f3115",
+      "frames": 3233,
+      "units": 28,
+      "literalDefinitions": 775,
+      "headerBytes": 656645,
+      "literalBytes": 149489,
+      "bodyBytes": 19252401,
+      "maxUnitBytes": 1373878
+    },
+    "emission": "compiled units 48 retries 25\nlinked frames 3568 work 3324466\nproject drops 6308 root drops 4\nroot CFG blocks 247 work 7566\npartition frames 3568 units 28 retries 0 work 3232184\npacket header 656645 literals 149489\n",
+    "lowerAggregateLocalBytes": {
+      "before": 3057299,
+      "after": 322512,
+      "borrowedHelper": 53115,
+      "measurement": "Sum of generated aggregate local sizes; excludes scalar locals, optimizer allocation and callee frames"
+    },
+    "cliCases": [
+      {
+        "mode": "--tokens-file",
+        "exact": true,
+        "exit": 0
+      },
+      {
+        "mode": "--check-names-file",
+        "exact": true,
+        "exit": 0
+      },
+      {
+        "mode": "--check-types-file",
+        "exact": true,
+        "exit": 0
+      },
+      {
+        "mode": "--hir-file",
+        "exact": true,
+        "exit": 0
+      },
+      {
+        "mode": "--mir-file",
+        "exact": true,
+        "exit": 0
+      },
+      {
+        "mode": "--c-file",
+        "exact": true,
+        "exit": 0
+      }
+    ],
+    "activeCases": [
+      {
+        "name": "defer",
+        "mode": "--mir-file",
+        "exact": true,
+        "exit": 0
+      },
+      {
+        "name": "defer",
+        "mode": "--c-file",
+        "exact": true,
+        "exit": 0
+      },
+      {
+        "name": "for",
+        "mode": "--mir-file",
+        "exact": true,
+        "exit": 0
+      },
+      {
+        "name": "for",
+        "mode": "--c-file",
+        "exact": true,
+        "exit": 0
+      },
+      {
+        "name": "return-argument",
+        "mode": "--mir-file",
+        "exact": true,
+        "exit": 0
+      },
+      {
+        "name": "return-argument",
+        "mode": "--c-file",
+        "exact": true,
+        "exit": 0
+      },
+      {
+        "name": "resource-loop",
+        "mode": "--mir-file",
+        "exact": false,
+        "exit": 3221225725
+      },
+      {
+        "name": "resource-loop",
+        "mode": "--c-file",
+        "exact": false,
+        "exit": 3221225725
+      },
+      {
+        "name": "resource-result",
+        "mode": "--mir-file",
+        "exact": true,
+        "exit": 0
+      },
+      {
+        "name": "resource-result",
+        "mode": "--c-file",
+        "exact": true,
+        "exit": 0
+      }
+    ],
+    "referenceSourceProvenance": "Existing stage0-built candidate image; source identity is not established by this comparison"
+  },
+  "remaining": [
+    "Nested resource loop still overflows recursive statement frames in original generated C",
+    "optimized original C execution",
+    "native driver and candidate promotion profiles",
+    "Linux and full suite not run"
+  ],
+  "pushed": false
+}

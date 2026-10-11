@@ -79,6 +79,40 @@ pub fn usize block(ref h::Program input, ref mut v::Vec<m::Local> locals, ref mu
     return value;
 }
 
+// Keep the large owned Context in the coordinator. Borrow it here so field
+// access and updates do not materialize whole-Context expression temporaries
+// in the coordinator's generated C frame. Source depth and limits are unchanged.
+fn m::Problem lower_functions(ref h::Program input, ref mut state::Context c, ref mut bytes::Buffer source, ref mut bytes::Buffer payload, ref mut v::Vec<m::Target> targets, ref mut v::Vec<m::Signature> signatures, ref mut v::Vec<m::Drop> drops, ref mut v::Vec<m::Function> functions, ref mut v::Vec<m::Local> locals, ref mut v::Vec<m::Block> blocks, ref mut v::Vec<m::Operation> operations, ref mut v::Vec<usize> edges) {
+    if (!targets_lower::prepare(input,targets,signatures,c)) { return c.problem; }
+    var usize dropping=0;while(dropping<h::drop_count(input)){let d=h::drop_at(input,dropping);if(!v::push<m::Drop>(drops,m::Drop{.abilities=d.abilities,.type=d.type,.target=if(d.nonempty){c.targets[d.function]}else{0},.nonempty=d.nonempty}).is_ok){return m::Problem{.code=3,.start=d.start,.end=d.end};}dropping+=1;}
+    if (!bytes::append(source,h::source_view(input)).is_ok) { return m::Problem { .code = 3, .start = 0, .end = 0 }; }
+    var usize index = 0;
+    while (index < h::function_count(input)) {
+        let h::Function f = h::function_at(input,index); c.function = index + 1;c.live=[0;1153];c.pending=[0;4096];c.keep=0;c.scope=f.scope;
+        let usize local_start = v::len<m::Local>(locals);c.base=local_start; let usize block_start = v::len<m::Block>(blocks);
+        var usize id = 1;
+        while (id <= h::binding_count(input)) {
+            let h::Binding b = h::binding_at(input,id);
+            if (b.owner == f.binding) { let usize local = state::local(locals,c,h::type_code(b.type),id,h::binding_code(b.kind) == 2 || h::binding_code(b.kind)==10,h::binding_code(b.kind) == 4 || h::binding_code(b.kind)==10,b.start,b.end); c.locals[id] = local;if(h::binding_code(b.kind)==2 && shapes::needs_drop(h::type_code(b.type))){c.live[id]=1;} }
+            id += 1;
+        }
+        let usize parameter_start = v::len<usize>(edges); var usize j = 0;
+        while (j < f.parameter_count) { let usize parameter = c.locals[h::edge_at(input,f.parameter_start + j)]; if (!state::edge(edges,parameter,c)) { return c.problem; } j += 1; }
+        let usize entry = state::new_block(blocks,c,f.start,f.end); c.current = entry;
+        discard block(input,locals,blocks,operations,edges,payload,c,f.body,0);
+        if (c.problem.code != 0) { return c.problem; }
+        if (c.current != 0) {
+            if(!lifetime::scope(input,locals,blocks,operations,edges,c,0,f.start,f.end)){return c.problem;}
+            if (h::type_code(h::binding_at(input,f.binding).type) != 7) { return m::Problem { .code = 4, .start = f.start, .end = f.end }; }
+            var m::Block term = state::block(c.function,f.start,f.end); term.kind = 1;
+            if (!state::terminate(blocks,c,term)) { return c.problem; }
+        }
+        if (!v::push<m::Function>(functions,m::Function { .target = c.targets[f.binding], .entry, .local_start, .local_count = v::len<m::Local>(locals) - local_start, .block_start, .block_count = v::len<m::Block>(blocks) - block_start, .parameter_start, .parameter_count = f.parameter_count, .start = f.start, .end = f.end, .public = f.public }).is_ok) { return m::Problem { .code = 3, .start = f.start, .end = f.end }; }
+        index += 1;
+    }
+    return c.problem;
+}
+
 pub fn Result<m::Program,m::Problem> lower(h::Program input) {
     let h::Problem proof = views::check(ref input); if (proof.code != 0) { return .err(m::Problem { .code=proof.code,.start=proof.start,.end=proof.end }); }
     let shapes::Table table = switch(shapes::copy(h::nominal(ref input))) { case .ok(value): { value } case .err(code): { return .err(m::Problem { .code, .start = 0, .end = 0 }); } };
@@ -87,33 +121,8 @@ pub fn Result<m::Program,m::Problem> lower(h::Program input) {
     var v::Vec<m::Drop> drops=v::empty<m::Drop>();
     var v::Vec<m::Function> functions = v::empty<m::Function>(); var v::Vec<m::Local> locals = v::empty<m::Local>();
     var v::Vec<m::Block> blocks = v::empty<m::Block>(); var v::Vec<m::Operation> operations = v::empty<m::Operation>(); var v::Vec<usize> edges = v::empty<usize>();
-    if (!targets_lower::prepare(ref input,ref mut targets,ref mut signatures,ref mut c)) { return .err(c.problem); }
-    var usize dropping=0;while(dropping<h::drop_count(ref input)){let d=h::drop_at(ref input,dropping);if(!v::push<m::Drop>(ref mut drops,m::Drop{.abilities=d.abilities,.type=d.type,.target=if(d.nonempty){c.targets[d.function]}else{0},.nonempty=d.nonempty}).is_ok){return .err(m::Problem{.code=3,.start=d.start,.end=d.end});}dropping+=1;}
-    if (!bytes::append(ref mut source,h::source_view(ref input)).is_ok) { return .err(m::Problem { .code = 3, .start = 0, .end = 0 }); }
-    var usize index = 0;
-    while (index < h::function_count(ref input)) {
-        let h::Function f = h::function_at(ref input,index); c.function = index + 1;c.live=[0;1153];c.pending=[0;4096];c.keep=0;c.scope=f.scope;
-        let usize local_start = v::len<m::Local>(ref locals);c.base=local_start; let usize block_start = v::len<m::Block>(ref blocks);
-        var usize id = 1;
-        while (id <= h::binding_count(ref input)) {
-            let h::Binding b = h::binding_at(ref input,id);
-            if (b.owner == f.binding) { let usize local = state::local(ref mut locals,ref mut c,h::type_code(b.type),id,h::binding_code(b.kind) == 2 || h::binding_code(b.kind)==10,h::binding_code(b.kind) == 4 || h::binding_code(b.kind)==10,b.start,b.end); c.locals[id] = local;if(h::binding_code(b.kind)==2 && shapes::needs_drop(h::type_code(b.type))){c.live[id]=1;} }
-            id += 1;
-        }
-        let usize parameter_start = v::len<usize>(ref edges); var usize j = 0;
-        while (j < f.parameter_count) { let usize parameter = c.locals[h::edge_at(ref input,f.parameter_start + j)]; if (!state::edge(ref mut edges,parameter,ref mut c)) { return .err(c.problem); } j += 1; }
-        let usize entry = state::new_block(ref mut blocks,ref mut c,f.start,f.end); c.current = entry;
-        discard block(ref input,ref mut locals,ref mut blocks,ref mut operations,ref mut edges,ref mut payload,ref mut c,f.body,0);
-        if (c.problem.code != 0) { return .err(c.problem); }
-        if (c.current != 0) {
-            if(!lifetime::scope(ref input,ref mut locals,ref mut blocks,ref mut operations,ref mut edges,ref mut c,0,f.start,f.end)){return .err(c.problem);}
-            if (h::type_code(h::binding_at(ref input,f.binding).type) != 7) { return .err(m::Problem { .code = 4, .start = f.start, .end = f.end }); }
-            var m::Block term = state::block(c.function,f.start,f.end); term.kind = 1;
-            if (!state::terminate(ref mut blocks,ref mut c,term)) { return .err(c.problem); }
-        }
-        if (!v::push<m::Function>(ref mut functions,m::Function { .target = c.targets[f.binding], .entry, .local_start, .local_count = v::len<m::Local>(ref locals) - local_start, .block_start, .block_count = v::len<m::Block>(ref blocks) - block_start, .parameter_start, .parameter_count = f.parameter_count, .start = f.start, .end = f.end, .public = f.public }).is_ok) { return .err(m::Problem { .code = 3, .start = f.start, .end = f.end }); }
-        index += 1;
-    }
+    let m::Problem lowered = lower_functions(ref input,ref mut c,ref mut source,ref mut payload,ref mut targets,ref mut signatures,ref mut drops,ref mut functions,ref mut locals,ref mut blocks,ref mut operations,ref mut edges);
+    if (lowered.code != 0) { return .err(lowered); }
     let m::Program result = switch(m::assemble_resources(source,payload,targets,signatures,functions,locals,blocks,operations,edges,h::module_index(ref input),table,drops)) {
         case .ok(value): { value } case .err(problem): { return .err(problem); }
     };
