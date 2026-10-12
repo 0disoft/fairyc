@@ -42,16 +42,17 @@ pub fn bool type(ref ir::Program p,usize id,ref mut bytes::Buffer out,ref mut w:
     if(id==0 || id>clean::type_count(ir::cleanup_ir(p))){s.code=1001;return false;}let t=clean::type_at(ir::cleanup_ir(p),id);
     if(t.kind==19){return w::text(out,s,b"struct fy_unit_region_bridge *");}
     if(t.kind==12){return if(t.first==0){w::type(out,s,t.scalar)}else{type(p,t.first,out,s) && w::text(out,s,if(places::raw_mutable(t)){b" *"}else{b" const *"})};}
-    if(t.kind==1 && (t.scalar<=7 || t.scalar==132)){return w::type(out,s,t.scalar);}if(t.kind==7 || t.kind==8){return type(p,t.first,out,s) && w::text(out,s,if(t.kind==7){b" const *"}else{b" *"});}if(t.kind!=2 && t.kind!=3 && t.kind!=13 && t.kind!=4 && t.kind!=5 && t.kind!=6 && t.kind!=16 && !view(t) && !literals::descriptor(t)){s.code=1004;return false;}
+    if(t.kind==1 && (t.scalar<=7 || t.scalar==132 || t.scalar==138)){return w::type(out,s,t.scalar);}if(t.kind==7 || t.kind==8){return type(p,t.first,out,s) && w::text(out,s,if(t.kind==7){b" const *"}else{b" *"});}if(t.kind!=2 && t.kind!=3 && t.kind!=13 && t.kind!=4 && t.kind!=5 && t.kind!=6 && t.kind!=16 && !view(t) && !literals::descriptor(t)){s.code=1004;return false;}
     return w::text(out,s,b"struct fy_unit_t_") && w::number(out,s,id);
 }
 pub fn bool field(ref mut bytes::Buffer out,ref mut w::State s,usize id){return w::text(out,s,b"fy_f_") && w::number(out,s,id);}
 fn bool define(ref ir::Program p,ref layouts::Index indexed,usize id,ref mut v::Vec<u8> marks,ref mut bytes::Buffer out,ref mut w::State s,ref mut usize work,usize depth){
     if(id==0 || id>v::len<u8>(marks)){s.code=1001;return false;}if(depth>=64 || !budget::charge(work,1)){s.code=1002;return false;}let mark=*v::at<u8>(marks,id-1);if(mark==2){return true;}if(mark==1){s.code=1001;return false;}{let slot=v::at_mut<u8>(marks,id-1);*slot=1;}let t=clean::type_at(ir::cleanup_ir(p),id);
-    if(t.kind==1){if(t.scalar>7 && t.scalar!=132){s.code=1004;return false;}
+    if(t.kind==1){if(t.scalar>7 && t.scalar!=132 && t.scalar!=138){s.code=1004;return false;}
         // ADR 0286: keep c::int nominally distinct and prove the target ABI
-        // before any explicit i32 crossing. Other C scalars stay closed.
-        if(t.scalar==132 && !w::text(out,s,b"_Static_assert(sizeof(int)==4 && _Alignof(int)==4 && INT_MIN==INT32_MIN && INT_MAX==INT32_MAX,\"requires signed-32 c.int ABI\");\n")){return false;}}
+        // before any explicit i32 crossing. ssize_t is transport-only.
+        if(t.scalar==132 && !w::text(out,s,b"_Static_assert(sizeof(int)==4 && _Alignof(int)==4 && INT_MIN==INT32_MIN && INT_MAX==INT32_MAX,\"requires signed-32 c.int ABI\");\n")){return false;}
+        if(t.scalar==138 && !w::text(out,s,b"_Static_assert(sizeof(ssize_t)==8 && _Alignof(ssize_t)==8 && ((ssize_t)-1)<0,\"requires signed-64 POSIX ssize_t ABI\");\n")){return false;}}
     // A nominal raw pointee needs a forward declaration here, not its size.
     // Complete marked pointees after by-value layouts, allowing E -> ptr S -> E.
     else if(t.kind==12 || t.kind==19){}

@@ -10,13 +10,16 @@ fn bool check(u32 type,usize size,ref mut bytes::Buffer out,ref mut w::State s){
 }
 // Availability and feature selection must precede every system header. Keep
 // ssize_t distinct: Windows cannot replace it with a pointer-sized integer.
+pub fn bool posix_header(ref mut bytes::Buffer out,ref mut w::State s){
+    return w::text(out,s,b"#if defined(__linux__) && !defined(_WIN32)\n#ifndef _POSIX_C_SOURCE\n#define _POSIX_C_SOURCE 200809L\n#elif _POSIX_C_SOURCE < 200809L\n#error c.ssize_t requires POSIX.1-2008\n#endif\n#include <sys/types.h>\n#else\n#error c.ssize_t is unavailable for candidate target\n#endif\n");
+}
 pub fn bool prepare(ref m::Program p,ref mut bytes::Buffer out,ref mut w::State s){
     var bool posix=false;var usize i=1;
     while(i<=m::local_count(p)){if(m::local_at(p,i).type==138){posix=true;}i+=1;}
     i=1;while(i<=m::target_count(p)){if(m::target_at(p,i).result==138){posix=true;}i+=1;}
     i=0;while(i<m::signature_count(p)){if(m::signature_at(p,i)==138){posix=true;}i+=1;}
     i=1;while(i<=shapes::field_count(m::nominal(p))){if(shapes::field_at(m::nominal(p),i).type==138){posix=true;}i+=1;}
-    return !posix || w::text(out,s,b"#if defined(__linux__) && !defined(_WIN32)\n#ifndef _POSIX_C_SOURCE\n#define _POSIX_C_SOURCE 200809L\n#elif _POSIX_C_SOURCE < 200809L\n#error c.ssize_t requires POSIX.1-2008\n#endif\n#include <sys/types.h>\n#else\n#error c.ssize_t is unavailable for candidate target\n#endif\n");
+    return !posix || posix_header(out,s);
 }
 pub fn bool emit(ref m::Program p,ref mut bytes::Buffer out,ref mut w::State s){
     var bool[16] used=[false;16];var usize i=1;var bool needed=false;

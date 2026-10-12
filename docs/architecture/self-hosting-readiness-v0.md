@@ -37,9 +37,14 @@ All 16 declared C scalar identities, including c::ssize_t, now survive semantic
 and MIR transport. Legacy C output requires POSIX.1-2008 before system headers
 and proves 8-byte signed ssize_t; Windows MSVC rejects at the target guard.
 Three authored tests pass Go native and both candidate C profiles. Source check
-passes 385 files / 4887 MIR functions. All 378 current self sources build one
+passes 385 files / 4888 MIR functions after the owned C change. The previous
+semantic snapshot's 378 self sources build one
 complete 4,376,064-byte release image with an explicit 16 MiB stack. Owned project
-C output for ssize_t remains closed; Linux positive execution is unverified.
+C source now carries ssize_t through foreign calls and locals; both standalone
+output and partitioned headers select POSIX before system headers. Three authored
+tests pass Go native and both candidate C profiles, with identical emitted C;
+Windows MSVC rejects at the explicit target guard. A fresh full
+dispatcher image remains to be rebuilt; Linux positive execution is unverified.
 The fresh 75-case comparison matches 73 cases, retaining one status gap (package
 state) and one first-code/span gap (package-state codec). Six live CLI cases match
 reference exit and first diagnostic code/span, including E1014 named arguments.
@@ -53,7 +58,8 @@ uses E1010. Full semantic parity is not claimed. Evidence:
 [const-eval declarations](../ops/evidence/candidate-const-eval-declarations-20261012.json),
 [const-eval execution](../ops/evidence/candidate-const-eval-calls-20261012.json),
 [named-argument diagnostic](../ops/evidence/candidate-argument-label-code-20261012.json),
-[c::ssize_t semantic identity](../ops/evidence/candidate-ssize-semantic-20261012.json).
+[c::ssize_t semantic identity](../ops/evidence/candidate-ssize-semantic-20261012.json),
+[owned project C transport](../ops/evidence/candidate-owned-ssize-transport-20261012.json).
 
 Public borrow admission is complete, while full frontend/executable
 parity, product timeout/host-stack integration, Linux/full suite and same-head

@@ -23,6 +23,7 @@ import module_unit_c_borrowed_arrays as borrowed_arrays;
 import ffi_symbols as ffi;
 import candidate_limits as limits;
 import c_text as w;
+import c_abi_contract as abi;
 import std::bytes as bytes;
 import std::vec as v;
 
@@ -116,7 +117,9 @@ fn bool function(ref ir::Program p,ref sdk::Plan plan,ref contracts::Index index
         if(n.kind!=3 && n.kind!=4 && n.kind!=6 && n.kind!=9 && n.kind!=12 && n.kind!=18 && n.kind!=21 && !w::jump(out,s,n.first)){return false;}i+=1;
     }return w::text(out,s,b"}\n");
 }
-fn bool prologue(ref mut bytes::Buffer text,ref mut w::State s){
+fn bool prologue(ref ir::Program p,ref mut bytes::Buffer text,ref mut w::State s,ref mut usize work){
+    var usize i=1;var bool posix=false;while(i<=clean::type_count(ir::cleanup_ir(p))){if(!budget::charge(work,1)){s.code=1002;return false;}let t=clean::type_at(ir::cleanup_ir(p),i);if(t.kind==1 && t.scalar==138){posix=true;}i+=1;}
+    if(posix && !abi::posix_header(text,s)){return false;}
     if(!w::text(text,s,b"/* fairyc.candidate-module-owned-c/v1 */\n#include <stdint.h>\n#include <limits.h>\n#include <string.h>\n_Static_assert(CHAR_BIT==8 && UINTPTR_MAX==UINT64_MAX,\"requires 64-bit target\");\n_Static_assert(INT32_MIN==(-INT32_MAX-1) && INT64_MIN==(-INT64_MAX-1),\"requires two's complement\");\n_Noreturn void fy_runtime_trap(uint32_t category);\n") || !scalar::helpers(text,s)){return false;}
     // Keep aggregate reads from live owner storage behind an opaque CRT copy
     // on MSVC. Inline aggregate copies cached a pre-view-write array element
@@ -132,7 +135,7 @@ pub fn clean::Problem render(ref ir::Program p,usize entry,ref mut bytes::Buffer
     let sdk_plan=switch(sdk::build(p,ref mut work)){case .ok(p):{p}case .err(e):{return e;}};
     let indexed=switch(contracts::build(p,ref mut work)){case .ok(index):{index}case .err(e):{return fail(e,0,0,0);}};
     var bytes::Buffer text=bytes::empty();var w::State s=w::State{.code=0};
-    if(!prologue(ref mut text,ref mut s)){return fail(if(s.code==3){1003}else{1002},0,0,0);}
+    if(!prologue(p,ref mut text,ref mut s,ref mut work)){return fail(if(s.code==3){1003}else{1002},0,0,0);}
     let marks=switch(aggregate::definitions(p,ref mut text,ref mut s,ref mut work)){case .ok(m):{m}case .err(e):{return fail(if(e<1000){if(e==3){1003}else{1002}}else{e},0,0,0);}};
     if(!literals::definitions(p,ref mut text,ref mut s,ref mut work)){return fail(if(s.code<1000){if(s.code==3){1003}else{1002}}else{s.code},0,0,0);}
     if(!w::text(ref mut text,ref mut s,b"#include <stddef.h>\n") || !sdk::definitions(p,ref sdk_plan,ref mut text,ref mut s,ref mut work) || !lifecycle::definitions(p,ref sdk_plan,ref mut text,ref mut s,ref mut work) || !foreign_signatures(p,ref sdk_plan,ref indexed,ref mut text,ref mut s,ref mut work)){return fail(if(s.code<1000){if(s.code==3){1003}else{1002}}else{s.code},0,0,0);}
@@ -158,7 +161,7 @@ fn Result<Prepared,clean::Problem> prepare_project(ir::Program p,usize entry,boo
     var usize total=0;if(!limits::project_charge(ref mut total,work)){return .err(fail(1002,0,0,0));}work=0;
     let selected=switch(if(entry_only){reachable::build(ref p,ref graphs,ref indexed,ref body_index,entry,ref mut work)}else{reachable::all(ref p,ref mut work)}){case .ok(p):{p}case .err(e):{return .err(fail(e,0,0,0));}};
     if(!limits::project_charge(ref mut total,work)){return .err(fail(1002,0,0,0));}work=0;
-    var bytes::Buffer header=bytes::empty();var w::State s=w::State{.code=0};if(!w::text(ref mut header,ref mut s,b"#ifndef FY_CANDIDATE_PROJECT_HEADER_V1\n#define FY_CANDIDATE_PROJECT_HEADER_V1\n") || !prologue(ref mut header,ref mut s)){return .err(fail(error_code(s),0,0,0));}
+    var bytes::Buffer header=bytes::empty();var w::State s=w::State{.code=0};if(!w::text(ref mut header,ref mut s,b"#ifndef FY_CANDIDATE_PROJECT_HEADER_V1\n#define FY_CANDIDATE_PROJECT_HEADER_V1\n") || !prologue(ref p,ref mut header,ref mut s,ref mut work)){return .err(fail(error_code(s),0,0,0));}
     let marks=switch(aggregate::definitions(ref p,ref mut header,ref mut s,ref mut work)){case .ok(m):{m}case .err(e):{return .err(fail(if(e<1000){if(e==3){1003}else{1002}}else{e},0,0,0));}};
     if(!limits::project_charge(ref mut total,work)){return .err(fail(1002,0,0,0));}work=0;
     var bytes::Buffer literal_source=bytes::empty();if(!literals::shared_storage(ref p,ref mut header,ref mut literal_source,ref mut s,ref mut work)){return .err(fail(error_code(s),0,0,0));}

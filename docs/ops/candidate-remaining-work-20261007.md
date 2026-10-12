@@ -1,5 +1,26 @@
 # Fairy 컴파일러 전환: 후속 작업 목록
 
+## Owned project C ssize_t transport connected (2026-10-12)
+
+The owned C emitter now spells c::ssize_t in foreign signatures and typed locals.
+Its standalone C prologue and partitioned project header share the POSIX.1-2008
+feature/header gate with the legacy emitter. The owned declaration owner proves
+8-byte size/alignment and signedness before use; scalar casts/operators remain
+closed. The type scan charges the existing bounded work ledger. ISO-only output
+does not select POSIX.
+
+Three authored tests pass Go native and both candidate C profiles; standalone
+emitted C matches the exact Go-native bytes. Source check passes 385 files /
+4888 MIR functions and the final native run verifies the lock. Windows MSVC
+rejects generated owned C at the explicit target guard. The initial partition
+test incorrectly supplied module IR; its corrected project-link setup passes.
+This unit does not rebuild the complete dispatcher or replay the 75-case corpus. The last live
+semantic comparison remains 73/75, with package-state status and codec diagnostic
+gaps. Current-source fixed point, product timeout/default stack, Linux/full suite
+and same-head hosted CI remain pending. No public API, SDK ABI, DB, CI, runner or
+product timeout changes; no push. Receipt:
+`evidence/candidate-owned-ssize-transport-20261012.json`.
+
 ## Target-neutral c::ssize_t identity connected (2026-10-12)
 
 All 16 declared C scalar identities now survive semantic and MIR transport.
