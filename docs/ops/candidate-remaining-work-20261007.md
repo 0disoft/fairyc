@@ -1,5 +1,22 @@
 # Fairy 컴파일러 전환: 후속 작업 목록
 
+## Region dependencies of retained template bodies (2026-10-13)
+
+Region capability collection now skips uninstantiated generic source bodies.
+Selected ordinary bodies, retained generic/imported functions and retained resource
+cleanup contexts still demand the authenticated SDK Arena and AllocError types.
+New cleanup contexts trigger another bounded collection pass; unrelated sources
+are not scanned. The existing source, type and work limits remain unchanged.
+
+Actual Go AnalyzeGenericPackages reaches Flow for all four valid authored cases
+and rejects the active ordinary body without an allocator. Three authored tests
+pass Go native and candidate C development/release with the unchanged SDK alloc
+source. Their isolated import closure passes check and native locked execution.
+The initial zero-based cleanup lookup trapped with integer-overflow; the final
+one-based traversal passes. No latest-source full image/fixed point, Linux/full
+suite or hosted CI is claimed. Public API, SDK ABI, CI and product timeout are
+unchanged; no push. Receipt: [evidence](evidence/candidate-region-template-demands-20261013.json).
+
 ## Reachable original template closure hashes (2026-10-13)
 
 The Fairy source-template graph now computes the actual Go templateClosure
