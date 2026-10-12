@@ -1,5 +1,30 @@
 # Fairy 컴파일러 전환: 후속 작업 목록
 
+## Fresh state-aware compiler and complete paired corpus (2026-10-12)
+
+All 380 current self sources emit a 30,962,039-byte C packet and build one complete
+4,398,080-byte release compiler with the explicit 16 MiB stack reserve. Source
+hashes remain unchanged across emission/build. The prior interim image is not
+reused as current evidence because the binding implementation changed during its
+build; the fresh complete build uses the final source inventory.
+
+The 75-case live comparison now matches all 75 cases, with zero status and zero
+first-code/span differences. Only the two previously differing package-state
+observations change; the other 73 candidate observations and all fixture source
+hashes remain unchanged. Sixteen additional state CLI cases match reference exit,
+first diagnostic path/line/column/code/span and explicit pass/fail expectations.
+They include cooked Unicode UID, empty layout, malformed authority, duplicate
+state/fields, codec closure, contextual names and ordinary scalar/name isolation.
+
+The valid contextual-state program returns 42 in native development/release.
+Fresh CLI owned-project C emission also admits c::ssize_t and retains the POSIX
+header and ABI guard. Its Linux native execution remains unverified. Current-
+source consecutive-generation fixed point, broader/multiple diagnostics, state
+public interface/cache admission, product timeout/default stack, Linux/full suite
+and same-head hosted CI remain open. No public API, SDK ABI, DB, CI, runner or
+product timeout setting change; no push. Receipt:
+`evidence/candidate-package-state-cli-20261012.json`.
+
 ## Package state ownership and canonical layout retained (2026-10-12)
 
 State declarations now have a separate semantic owner rather than entering the

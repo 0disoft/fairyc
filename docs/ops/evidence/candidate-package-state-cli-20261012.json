@@ -1,0 +1,690 @@
+{
+  "schema": "fairyc.candidate-package-state-cli-integration/v1",
+  "passed": true,
+  "scope": "Fresh complete current-source Fairy compiler and live state/C-scalar frontend integration",
+  "sourceInventorySHA256": "68794bca0ff22d5f98f16706a83892cafdb31a4904a6bbd248c6682b349e28a5",
+  "sourceFiles": 380,
+  "sourceHashesVerified": true,
+  "fullImage": {
+    "schema": "fairyc.candidate-state-full-image/v1",
+    "passed": true,
+    "sourceFiles": 380,
+    "sourceInventorySHA256": "68794bca0ff22d5f98f16706a83892cafdb31a4904a6bbd248c6682b349e28a5",
+    "sourceHashesVerified": true,
+    "seedSHA256": "fb46a91341af1950610add4f647376e4c8769ea5edfa4841f0ec3e9f27357bd2",
+    "builderSHA256": "02abe2328daa9921705910c7b995e82c1312cb960fe024106c11468569aefff0",
+    "packetBytes": 30962039,
+    "packetSHA256": "ac7de1cd4f661288771b8f4a7993b0e18ec5b05088567bcd299f6c580ba24a21",
+    "imageBytes": 4398080,
+    "imageSHA256": "0c77c32d39b1ae1ddaa105f13bec9ce86e66029aa6ca5694863ac0ba68111480",
+    "stackReserveBytes": 16777216,
+    "currentSourceConsecutiveGenerations": false,
+    "receiptSHA256": "c63931cb860a58cc82721252327dccd5333181fd9586d6d75bc1455eace5970a",
+    "emission": {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\c-ssize-semantic-build-20261012\\candidate-release.exe",
+        "--c-project-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-semantic-final-build-20261012\\sources.list"
+      ],
+      "seconds": 222.4514636999811,
+      "exit": 0,
+      "stderr": "",
+      "stdoutBytes": 30962039
+    },
+    "build": {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-rooted-builder-stack-20261012.exe",
+        "--packet",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-semantic-final-build-20261012\\packet.bin",
+        "--packet-sha256",
+        "ac7de1cd4f661288771b8f4a7993b0e18ec5b05088567bcd299f6c580ba24a21",
+        "--output",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-semantic-final-build-20261012\\candidate-release.exe",
+        "--release",
+        "--stack-reserve-bytes",
+        "16777216"
+      ],
+      "seconds": 321.9235362999898,
+      "exit": 0,
+      "stderr": "",
+      "stdoutBytes": 190
+    }
+  },
+  "corpus": {
+    "receiptSHA256": "6a2051bdf17e0525ef8471f10194dae46a518ff550206918032595c09557db7c",
+    "scriptSHA256": "56157e1c58f1a0f55e28af5da1f3762cc533806286e8c624a9815cc8baa7635d",
+    "cases": 75,
+    "matched": 75,
+    "statusDifferences": 0,
+    "firstDiagnosticDifferences": 0,
+    "referenceMatchesAllFixtures": true,
+    "previousMatched": 73,
+    "changedCandidateObservations": [
+      "pass.type.package-state",
+      "fail.type.package-state-codec"
+    ],
+    "other73ObservationsUnchanged": true
+  },
+  "extraCLI": {
+    "receiptSHA256": "e813a2095526799b112c072d574e90f9e854e1a2e913e6f4dbf79e4f662853b1",
+    "cases": 16,
+    "passed": true,
+    "firstPathLineColumnAndCodeSpanMatch": true,
+    "rows": [
+      {
+        "name": "empty",
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-extra-cli-20261012\\empty",
+        "expectedPass": true,
+        "sourceSHA256": "20fde56e1b25446fd83373b1c6fcb95f1a4cbf35e9ab02512dbf7cadc4421ffa",
+        "go": {
+          "exit": 0,
+          "seconds": 0.10192729998379946,
+          "stdout": "check ok: 1 instance(s), 1 source file(s), 1 MIR function(s), lock updated\n",
+          "stderr": "",
+          "diagnostics": []
+        },
+        "candidate": {
+          "exit": 0,
+          "seconds": 0.05319979999330826,
+          "stdout": "check ok: 1 instance(s), 1 source file(s), 1 MIR function(s), lock unchanged\n",
+          "stderr": "",
+          "diagnostics": []
+        },
+        "statusMatch": true,
+        "firstDiagnosticMatch": true
+      },
+      {
+        "name": "unicode_uid",
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-extra-cli-20261012\\unicode_uid",
+        "expectedPass": true,
+        "sourceSHA256": "24c8d5ff6c316aae476ef10c89855129472c4b1e1e386d02c5f77515b3cf9750",
+        "go": {
+          "exit": 0,
+          "seconds": 0.08061100001214072,
+          "stdout": "check ok: 1 instance(s), 1 source file(s), 1 MIR function(s), lock updated\n",
+          "stderr": "",
+          "diagnostics": []
+        },
+        "candidate": {
+          "exit": 0,
+          "seconds": 0.043718600005377084,
+          "stdout": "check ok: 1 instance(s), 1 source file(s), 1 MIR function(s), lock unchanged\n",
+          "stderr": "",
+          "diagnostics": []
+        },
+        "statusMatch": true,
+        "firstDiagnosticMatch": true
+      },
+      {
+        "name": "missing_uid",
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-extra-cli-20261012\\missing_uid",
+        "expectedPass": false,
+        "sourceSHA256": "01cbdf7597edbee12f330319081132a77e6a8ced90e2cd099863af937d1a0ab5",
+        "go": {
+          "exit": 3,
+          "seconds": 0.10255999999935739,
+          "stdout": "",
+          "stderr": "main.fy:1:13: E7201: A package state declaration has malformed UID authority, invalid visibility, or more than one package owner. [bytes 12..35]\n",
+          "diagnostics": [
+            {
+              "code": "E7201",
+              "start": 12,
+              "end": 35
+            }
+          ]
+        },
+        "candidate": {
+          "exit": 3,
+          "seconds": 0.023475299996789545,
+          "stdout": "",
+          "stderr": "main.fy:1:13: E7201: invalid package state declaration or contract UID authority [bytes 12..35]\n",
+          "diagnostics": [
+            {
+              "code": "E7201",
+              "start": 12,
+              "end": 35
+            }
+          ]
+        },
+        "statusMatch": true,
+        "firstDiagnosticMatch": true
+      },
+      {
+        "name": "public",
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-extra-cli-20261012\\public",
+        "expectedPass": false,
+        "sourceSHA256": "4fcc64fe5141bdbd3120c2c70c9586b8736c4fc6e4381ab24d43074680ffd0d9",
+        "go": {
+          "exit": 3,
+          "seconds": 0.14156479999655858,
+          "stdout": "",
+          "stderr": "main.fy:1:13: E7201: A package state declaration has malformed UID authority, invalid visibility, or more than one package owner. [bytes 12..56]\n",
+          "diagnostics": [
+            {
+              "code": "E7201",
+              "start": 12,
+              "end": 56
+            }
+          ]
+        },
+        "candidate": {
+          "exit": 3,
+          "seconds": 0.020107399992411956,
+          "stdout": "",
+          "stderr": "main.fy:1:13: E7201: invalid package state declaration or contract UID authority [bytes 12..56]\n",
+          "diagnostics": [
+            {
+              "code": "E7201",
+              "start": 12,
+              "end": 56
+            }
+          ]
+        },
+        "statusMatch": true,
+        "firstDiagnosticMatch": true
+      },
+      {
+        "name": "empty_uid",
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-extra-cli-20261012\\empty_uid",
+        "expectedPass": false,
+        "sourceSHA256": "9dbf59c0cb033ad4817fb8f2138ff9177137d7a3bf2035d52d6ca7f5ab9b08d1",
+        "go": {
+          "exit": 3,
+          "seconds": 0.11996099998941645,
+          "stdout": "",
+          "stderr": "main.fy:1:13: E7201: A package state declaration has malformed UID authority, invalid visibility, or more than one package owner. [bytes 12..29]\nmain.fy:1:13: E7201: A package state declaration has malformed UID authority, invalid visibility, or more than one package owner. [bytes 12..36]\n",
+          "diagnostics": [
+            {
+              "code": "E7201",
+              "start": 12,
+              "end": 29
+            },
+            {
+              "code": "E7201",
+              "start": 12,
+              "end": 36
+            }
+          ]
+        },
+        "candidate": {
+          "exit": 3,
+          "seconds": 0.017769900005077943,
+          "stdout": "",
+          "stderr": "main.fy:1:13: E7201: invalid package state declaration or contract UID authority [bytes 12..29]\n",
+          "diagnostics": [
+            {
+              "code": "E7201",
+              "start": 12,
+              "end": 29
+            }
+          ]
+        },
+        "statusMatch": true,
+        "firstDiagnosticMatch": true
+      },
+      {
+        "name": "invalid_uid",
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-extra-cli-20261012\\invalid_uid",
+        "expectedPass": false,
+        "sourceSHA256": "7fd035d26ad9bfbf32b7700d59c7028f94e764417d7af14b94dd656b7e471463",
+        "go": {
+          "exit": 3,
+          "seconds": 0.09073690001969226,
+          "stdout": "",
+          "stderr": "main.fy:1:13: E7201: A package state declaration has malformed UID authority, invalid visibility, or more than one package owner. [bytes 12..39]\n",
+          "diagnostics": [
+            {
+              "code": "E7201",
+              "start": 12,
+              "end": 39
+            }
+          ]
+        },
+        "candidate": {
+          "exit": 3,
+          "seconds": 0.01937809999799356,
+          "stdout": "",
+          "stderr": "main.fy:1:13: E7201: invalid package state declaration or contract UID authority [bytes 12..39]\n",
+          "diagnostics": [
+            {
+              "code": "E7201",
+              "start": 12,
+              "end": 39
+            }
+          ]
+        },
+        "statusMatch": true,
+        "firstDiagnosticMatch": true
+      },
+      {
+        "name": "duplicate_uid",
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-extra-cli-20261012\\duplicate_uid",
+        "expectedPass": false,
+        "sourceSHA256": "43c0e098cb799937694de5a0ae8856c07ba5321057f6df38777d96262957805f",
+        "go": {
+          "exit": 3,
+          "seconds": 0.09237370002665557,
+          "stdout": "",
+          "stderr": "main.fy:1:31: E7201: A package state declaration has malformed UID authority, invalid visibility, or more than one package owner. [bytes 30..48]\n",
+          "diagnostics": [
+            {
+              "code": "E7201",
+              "start": 30,
+              "end": 48
+            }
+          ]
+        },
+        "candidate": {
+          "exit": 3,
+          "seconds": 0.018531000008806586,
+          "stdout": "",
+          "stderr": "main.fy:1:31: E7201: invalid package state declaration or contract UID authority [bytes 30..48]\n",
+          "diagnostics": [
+            {
+              "code": "E7201",
+              "start": 30,
+              "end": 48
+            }
+          ]
+        },
+        "statusMatch": true,
+        "firstDiagnosticMatch": true
+      },
+      {
+        "name": "unknown_attribute",
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-extra-cli-20261012\\unknown_attribute",
+        "expectedPass": false,
+        "sourceSHA256": "43ff69c3a881a6d960a2a9d3773187b797f46b1827fa9a71bba36f3cc4d2c8f2",
+        "go": {
+          "exit": 3,
+          "seconds": 0.09715439999126829,
+          "stdout": "",
+          "stderr": "main.fy:1:13: E7201: A package state declaration has malformed UID authority, invalid visibility, or more than one package owner. [bytes 12..23]\nmain.fy:1:13: E7201: A package state declaration has malformed UID authority, invalid visibility, or more than one package owner. [bytes 12..30]\n",
+          "diagnostics": [
+            {
+              "code": "E7201",
+              "start": 12,
+              "end": 23
+            },
+            {
+              "code": "E7201",
+              "start": 12,
+              "end": 30
+            }
+          ]
+        },
+        "candidate": {
+          "exit": 3,
+          "seconds": 0.03902659998857416,
+          "stdout": "",
+          "stderr": "main.fy:1:13: E7201: invalid package state declaration or contract UID authority [bytes 12..23]\n",
+          "diagnostics": [
+            {
+              "code": "E7201",
+              "start": 12,
+              "end": 23
+            }
+          ]
+        },
+        "statusMatch": true,
+        "firstDiagnosticMatch": true
+      },
+      {
+        "name": "duplicate_field",
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-extra-cli-20261012\\duplicate_field",
+        "expectedPass": false,
+        "sourceSHA256": "9f99a2c7022cbf18be00e7384c2ee1f402003e02b66551f66ae815024316f630",
+        "go": {
+          "exit": 3,
+          "seconds": 0.11355079998611473,
+          "stdout": "",
+          "stderr": "main.fy:1:62: E7202: A package state field name is declared more than once. [bytes 61..67]\n  previous-declaration: main.fy:1:46 [bytes 45..51]\n",
+          "diagnostics": [
+            {
+              "code": "E7202",
+              "start": 61,
+              "end": 67
+            }
+          ]
+        },
+        "candidate": {
+          "exit": 3,
+          "seconds": 0.01904740001191385,
+          "stdout": "",
+          "stderr": "main.fy:1:62: E7202: package state field name is declared more than once [bytes 61..67]\n",
+          "diagnostics": [
+            {
+              "code": "E7202",
+              "start": 61,
+              "end": 67
+            }
+          ]
+        },
+        "statusMatch": true,
+        "firstDiagnosticMatch": true
+      },
+      {
+        "name": "bad_value",
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-extra-cli-20261012\\bad_value",
+        "expectedPass": false,
+        "sourceSHA256": "967702e77b997739a94cdc9ee2bdcd48c44b364b0c0793d62fa485aeeac80ad1",
+        "go": {
+          "exit": 3,
+          "seconds": 0.09264359998633154,
+          "stdout": "",
+          "stderr": "main.fy:1:42: E7203: A package state field uses an unsupported or malformed storage codec declaration. [bytes 41..47]\n",
+          "diagnostics": [
+            {
+              "code": "E7203",
+              "start": 41,
+              "end": 47
+            }
+          ]
+        },
+        "candidate": {
+          "exit": 3,
+          "seconds": 0.021116600022651255,
+          "stdout": "",
+          "stderr": "main.fy:1:42: E7203: unsupported or malformed package state storage codec [bytes 41..47]\n",
+          "diagnostics": [
+            {
+              "code": "E7203",
+              "start": 41,
+              "end": 47
+            }
+          ]
+        },
+        "statusMatch": true,
+        "firstDiagnosticMatch": true
+      },
+      {
+        "name": "bad_key",
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-extra-cli-20261012\\bad_key",
+        "expectedPass": false,
+        "sourceSHA256": "ac6eb3a7e155e95e27884206d8db7dd6ed307a140b745782ebb082537c8d1edd",
+        "go": {
+          "exit": 3,
+          "seconds": 0.07988460001070052,
+          "stdout": "",
+          "stderr": "main.fy:1:41: E7203: A package state field uses an unsupported or malformed storage codec declaration. [bytes 40..43]\n",
+          "diagnostics": [
+            {
+              "code": "E7203",
+              "start": 40,
+              "end": 43
+            }
+          ]
+        },
+        "candidate": {
+          "exit": 3,
+          "seconds": 0.023581799992825836,
+          "stdout": "",
+          "stderr": "main.fy:1:41: E7203: unsupported or malformed package state storage codec [bytes 40..43]\n",
+          "diagnostics": [
+            {
+              "code": "E7203",
+              "start": 40,
+              "end": 43
+            }
+          ]
+        },
+        "statusMatch": true,
+        "firstDiagnosticMatch": true
+      },
+      {
+        "name": "generic_codec",
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-extra-cli-20261012\\generic_codec",
+        "expectedPass": false,
+        "sourceSHA256": "df806340a46ce024f33d494065e0acb044f1caa0ad22c24e68edaf0239fd0205",
+        "go": {
+          "exit": 3,
+          "seconds": 0.07213849999243394,
+          "stdout": "",
+          "stderr": "main.fy:1:42: E7203: A package state field uses an unsupported or malformed storage codec declaration. [bytes 41..52]\n",
+          "diagnostics": [
+            {
+              "code": "E7203",
+              "start": 41,
+              "end": 52
+            }
+          ]
+        },
+        "candidate": {
+          "exit": 3,
+          "seconds": 0.018568299972685054,
+          "stdout": "",
+          "stderr": "main.fy:1:42: E7203: unsupported or malformed package state storage codec [bytes 41..52]\n",
+          "diagnostics": [
+            {
+              "code": "E7203",
+              "start": 41,
+              "end": 52
+            }
+          ]
+        },
+        "statusMatch": true,
+        "firstDiagnosticMatch": true
+      },
+      {
+        "name": "duplicate_state_precedence",
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-extra-cli-20261012\\duplicate_state_precedence",
+        "expectedPass": false,
+        "sourceSHA256": "bac297173dac82ee6b734845532192e2328235a26526712dc52d66c735f2adb3",
+        "go": {
+          "exit": 3,
+          "seconds": 0.07543249998707324,
+          "stdout": "",
+          "stderr": "main.fy:1:56: E7201: A package state declaration has malformed UID authority, invalid visibility, or more than one package owner. [bytes 55..80]\n  previous-declaration: main.fy:1:13 [bytes 12..55]\n",
+          "diagnostics": [
+            {
+              "code": "E7201",
+              "start": 55,
+              "end": 80
+            }
+          ]
+        },
+        "candidate": {
+          "exit": 3,
+          "seconds": 0.018259700009366497,
+          "stdout": "",
+          "stderr": "main.fy:1:56: E7201: invalid package state declaration or contract UID authority [bytes 55..80]\n",
+          "diagnostics": [
+            {
+              "code": "E7201",
+              "start": 55,
+              "end": 80
+            }
+          ]
+        },
+        "statusMatch": true,
+        "firstDiagnosticMatch": true
+      },
+      {
+        "name": "runtime_u64_stays_closed",
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-extra-cli-20261012\\runtime_u64_stays_closed",
+        "expectedPass": false,
+        "sourceSHA256": "8946111ff3b01648812aabe345f578a3336e23001506fa6deeca72576cfff035",
+        "go": {
+          "exit": 3,
+          "seconds": 0.07926240001688711,
+          "stdout": "",
+          "stderr": "fairyc: semantic subset does not support type u64 at main.fy [bytes 56..59]\n",
+          "diagnostics": []
+        },
+        "candidate": {
+          "exit": 3,
+          "seconds": 0.01944030000595376,
+          "stdout": "",
+          "stderr": "fairyc: semantic subset does not support type u64 at main.fy [bytes 56..59]\n",
+          "diagnostics": []
+        },
+        "statusMatch": true,
+        "firstDiagnosticMatch": true
+      },
+      {
+        "name": "field_not_a_variable",
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-extra-cli-20261012\\field_not_a_variable",
+        "expectedPass": false,
+        "sourceSHA256": "f2754b3eea3fb89c0531790182adbf965b20a71fc90f6233bfd0e2f6cf9a6c42",
+        "go": {
+          "exit": 3,
+          "seconds": 0.08724620001157746,
+          "stdout": "",
+          "stderr": "main.fy:1:76: E0101: unresolved name or path [bytes 75..81]\n",
+          "diagnostics": [
+            {
+              "code": "E0101",
+              "start": 75,
+              "end": 81
+            }
+          ]
+        },
+        "candidate": {
+          "exit": 3,
+          "seconds": 0.018123799993190914,
+          "stdout": "",
+          "stderr": "main.fy:1:76: E0101: name or qualified path cannot be resolved [bytes 75..81]\n",
+          "diagnostics": [
+            {
+              "code": "E0101",
+              "start": 75,
+              "end": 81
+            }
+          ]
+        },
+        "statusMatch": true,
+        "firstDiagnosticMatch": true
+      },
+      {
+        "name": "contextual_state_name",
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-extra-cli-20261012\\contextual_state_name",
+        "expectedPass": true,
+        "sourceSHA256": "15519bb0614359752c177ab3887bdadcb527701ae69b30f3d83dce024c2e5d9b",
+        "go": {
+          "exit": 0,
+          "seconds": 0.08217199999489821,
+          "stdout": "check ok: 1 instance(s), 1 source file(s), 2 MIR function(s), lock updated\n",
+          "stderr": "",
+          "diagnostics": []
+        },
+        "candidate": {
+          "exit": 0,
+          "seconds": 0.04709529998945072,
+          "stdout": "check ok: 1 instance(s), 1 source file(s), 2 MIR function(s), lock unchanged\n",
+          "stderr": "",
+          "diagnostics": []
+        },
+        "statusMatch": true,
+        "firstDiagnosticMatch": true
+      }
+    ]
+  },
+  "nativeAndOwnedSSizeCLI": {
+    "receiptSHA256": "c51d58fd2ee4001bbaa014f7f40e391a577efbbd004993d588a835280c95bc48",
+    "facts": {
+      "schema": "fairyc.candidate-state-runtime-and-ssize-cli/v1",
+      "passed": true,
+      "candidateSHA256": "0c77c32d39b1ae1ddaa105f13bec9ce86e66029aa6ca5694863ac0ba68111480",
+      "builderSHA256": "02abe2328daa9921705910c7b995e82c1312cb960fe024106c11468569aefff0",
+      "statePacketSHA256": "e8fd5e08e3391bf81cbc41d58c4bef91a96ad7187500cabfcbca4efcc3208021",
+      "stateNativeExecutions": 2,
+      "stateExpectedExit": 42,
+      "ssizeOwnedCLIAdmitted": true,
+      "ssizePacketBytes": 3495,
+      "ssizePacketSHA256": "216ba2d60d2ca192cb797d236ca307d4e6d5ab3e4d1bb0cecf9b36f8951a1394",
+      "ssizeNativeExecuted": false,
+      "linuxNativeExecuted": false,
+      "invocations": [
+        {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-semantic-final-build-20261012\\candidate-release.exe",
+            "--c-project-file",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-runtime-integration-20261012\\state.list"
+          ],
+          "seconds": 0.04850750000332482,
+          "exit": 0,
+          "stdoutBytes": 3042,
+          "stdoutSHA256": "e8fd5e08e3391bf81cbc41d58c4bef91a96ad7187500cabfcbca4efcc3208021",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-rooted-builder-stack-20261012.exe",
+            "--packet",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-runtime-integration-20261012\\state-packet.bin",
+            "--packet-sha256",
+            "e8fd5e08e3391bf81cbc41d58c4bef91a96ad7187500cabfcbca4efcc3208021",
+            "--output",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-runtime-integration-20261012\\development.exe"
+          ],
+          "seconds": 0.5901356999820564,
+          "exit": 0,
+          "stdoutBytes": 175,
+          "stdoutSHA256": "c5bb8123b43e1deaf6cd8e5546d5de49e132fcf7c3ae6aa3a9dfb672b8d74dcd",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-runtime-integration-20261012\\development.exe"
+          ],
+          "seconds": 0.022529699985170737,
+          "exit": 42,
+          "stdoutBytes": 0,
+          "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-rooted-builder-stack-20261012.exe",
+            "--packet",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-runtime-integration-20261012\\state-packet.bin",
+            "--packet-sha256",
+            "e8fd5e08e3391bf81cbc41d58c4bef91a96ad7187500cabfcbca4efcc3208021",
+            "--output",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-runtime-integration-20261012\\release.exe",
+            "--release"
+          ],
+          "seconds": 0.5792291999969166,
+          "exit": 0,
+          "stdoutBytes": 177,
+          "stdoutSHA256": "cab83e57b5dd4e222642ed56b7b45ff527ee4d0bc12104eef92bc366ba0fee28",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-runtime-integration-20261012\\release.exe"
+          ],
+          "seconds": 0.02213800000026822,
+          "exit": 42,
+          "stdoutBytes": 0,
+          "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-semantic-final-build-20261012\\candidate-release.exe",
+            "--c-project-file",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-runtime-integration-20261012\\ssize.list"
+          ],
+          "seconds": 0.04666290001478046,
+          "exit": 0,
+          "stdoutBytes": 3495,
+          "stdoutSHA256": "216ba2d60d2ca192cb797d236ca307d4e6d5ab3e4d1bb0cecf9b36f8951a1394",
+          "stderr": ""
+        }
+      ]
+    }
+  },
+  "limitations": [
+    "This build is one current-source complete image, not consecutive-generation fixed-point evidence.",
+    "Broader/multiple diagnostic parity, state public interface/cache admission, product timeout/default stack, Linux/full suite and same-head hosted CI remain open.",
+    "ssize_t native execution on Linux remains unverified."
+  ],
+  "publicApiChanged": false,
+  "sdkAbiChanged": false,
+  "dbChanged": false,
+  "ciChanged": false,
+  "runnerChanged": false,
+  "productTimeoutChanged": false,
+  "pushed": false
+}

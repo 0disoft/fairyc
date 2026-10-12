@@ -2,6 +2,21 @@
 
 ## Current local candidate evidence (2026-10-12)
 
+The latest complete image covers all 380 current self sources: a 30,962,039-byte
+C packet and a 4,398,080-byte release compiler with the explicit 16 MiB stack.
+Current source hashes are verified. Fresh paired CLI comparison matches all 75
+semantic/resource cases, with zero status and first-code/span differences. Only
+the two previous package-state differences change; the other 73 observations and
+fixture source hashes remain unchanged. Sixteen extra state cases also match
+first diagnostic path/line/column/code/span. A state-declaration program returns
+42 in both native profiles; live owned-project ssize_t C emission succeeds.
+This is one fresh complete-image build. Current-source consecutive-generation
+fixed point, broader/multiple diagnostics, state interface/cache admission,
+product timeout/default stack, Linux/full suite and hosted CI remain open.
+Evidence: [fresh state CLI integration](../ops/evidence/candidate-package-state-cli-20261012.json).
+
+The following paragraphs retain earlier snapshot evidence for comparison.
+
 The candidate project check path enforces transitive return-origin and final
 live-loan checks before owned IR. The previous borrow-gate source snapshot's
 complete private Windows bootstrap retains
