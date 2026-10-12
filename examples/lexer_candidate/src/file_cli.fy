@@ -9,6 +9,7 @@ import type_cli as typing;
 import module_cli as modules;
 import module_project_cli as projects;
 import project_check_cli as checking;
+import project_emit_cli as workspace_c;
 import hir_cli as hir;
 import mir_cli as mir;
 import c_cli as c;
@@ -37,6 +38,7 @@ pub fn i32 run() {
     };
     let ref u8[] flag = bytes::view(ref argument)[..flag_length];
     if (bytes::equal(flag,b"check")) { return checking::arguments(); }
+    if (bytes::equal(flag,b"--c-workspace")) { return workspace_c::arguments(); }
     if (argc != 2 && argc != 3) { return error(usage()); }
     if (argc == 2 && bytes::equal(flag, b"--help")) {
         return if (io::write(usage()).is_ok && io::write("       lexer-candidate --help\nNo arguments: private binary stdin protocol.\n").is_ok) { 0 }

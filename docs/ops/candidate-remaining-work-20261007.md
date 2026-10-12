@@ -9,6 +9,26 @@ are identical, with no excluded bytes. All 249 Go lexer cases and private framin
 checks pass for the seed and both generations. Receipt:
 `evidence/candidate-complete-stage2-20261012.json`.
 
+## Workspace-owned C emission (2026-10-12)
+
+The private Fairy dispatcher accepts `--c-workspace <root> [--locked]`.
+Manifest/dependency loading, lock admission, source projection, semantic/IR
+compilation, canonical root entry and reachable C partitioning all run in Fairy.
+Its current 359-source dispatcher builds from the verified Stage2 seed in
+394.16 seconds, without Go frontend fallback. The root workspace packet builds
+and executes with result 42 in both native profiles. Five invalid entries reject
+with code 2; missing/stale locks use 7; syntax/type diagnostics use 3. Rejected
+commands emit no packet and locked fixtures remain unchanged. Four invalid
+argument cases also reject.
+
+The first type fixture hit stale lock admission; refreshing its lock reaches
+E1009 and code 3. The corrected verifier reuses the compiler only after exact
+Fairy-source, seed, builder and image hashes match. Source check passes 366 files
+/ 4701 MIR functions. Native bridge workspace selection, stable build/run and
+deadline mapping remain; full differential, Linux/full suite and promotion
+remain open. Public API, SDK ABI, DB and CI are unchanged; no push. Receipt:
+`evidence/candidate-workspace-emission-20261012.json`.
+
 ## Canonical workspace entry selection (2026-10-12)
 
 Fairy now selects only the root instance's exact `main::main`, with zero

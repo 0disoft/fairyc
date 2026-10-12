@@ -2332,3 +2332,17 @@ source provenance. Source check passes 363 files / 4681 MIR functions.
 Workspace emission/build/run integration and the remaining promotion gates are
 still open. Public API, SDK ABI, DB and CI are unchanged; no push. Receipt:
 [candidate-entry-selection-20261012.json](../ops/evidence/candidate-entry-selection-20261012.json).
+
+## Fairy workspace C command (2026-10-12)
+
+`--c-workspace <root> [--locked]` connects Fairy-owned manifest/dependency/lock,
+source and semantic/IR processing to canonical entry selection and C partitioning.
+The 359-source dispatcher builds through the Stage2 seed without Go frontend
+fallback. Its workspace packet executes with result 42 in development and release.
+Invalid entries, missing/stale locks, syntax/type errors and invalid arguments
+reject without a packet; locked fixtures remain unchanged. The initial type
+fixture was corrected to pass lock admission before checking E1009/code 3.
+Source check passes 366 files / 4701 MIR functions. Stable build/run, native bridge
+workspace selection and the broader differential/platform/promotion gates remain.
+Public API, SDK ABI, DB and CI are unchanged; no push. Receipt:
+[candidate-workspace-emission-20261012.json](../ops/evidence/candidate-workspace-emission-20261012.json).
