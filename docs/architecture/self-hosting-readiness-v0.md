@@ -2321,3 +2321,14 @@ Workspace entry/build/run integration, stable deadline mapping and the remaining
 differential/platform/promotion gates are still open. Private command/internal Go
 API changed; public CLI, SDK ABI, DB and CI are unchanged; no push. Receipt:
 [candidate-frontend-timeout-20261012.json](../ops/evidence/candidate-frontend-timeout-20261012.json).
+
+## Root-owned workspace entry (2026-10-12)
+
+The Fairy selector resolves the root instance's exact `main::main` rather than
+the first manifest source. It enforces fn() -> i32 and ignores helper/dependency
+entries. Six locked workspace cases agree with the Go oracle; two authored tests
+pass in Go-native and both candidate C profiles, including bounded work and
+source provenance. Source check passes 363 files / 4681 MIR functions.
+Workspace emission/build/run integration and the remaining promotion gates are
+still open. Public API, SDK ABI, DB and CI are unchanged; no push. Receipt:
+[candidate-entry-selection-20261012.json](../ops/evidence/candidate-entry-selection-20261012.json).

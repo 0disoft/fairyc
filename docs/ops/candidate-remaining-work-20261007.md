@@ -9,6 +9,21 @@ are identical, with no excluded bytes. All 249 Go lexer cases and private framin
 checks pass for the seed and both generations. Receipt:
 `evidence/candidate-complete-stage2-20261012.json`.
 
+## Canonical workspace entry selection (2026-10-12)
+
+Fairy now selects only the root instance's exact `main::main`, with zero
+parameters and i32 result. Root owner zero comes from instance-graph expansion;
+the first source file and dependency/helper functions no longer determine this
+workspace entry. Missing, wrong-module, bool-result, parameterized and generic
+entries reject. Six real locked workspace fixtures agree with the Go oracle.
+
+Both authored tests pass in Go-native and candidate C development/release,
+including original-source spans and exhausted selection work. Source check
+passes 363 files / 4681 MIR functions. The selector is not yet connected to
+workspace C emission/build/run; that is next. Existing bootstrap receipts remain
+valid for their recorded inputs. API, SDK ABI, DB and CI are unchanged; no push.
+Receipt: `evidence/candidate-entry-selection-20261012.json`.
+
 ## Direct frontend deadline and native build (2026-10-12)
 
 The private native bridge accepts `--frontend-timeout` with the existing 60-second
