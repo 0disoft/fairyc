@@ -33,5 +33,8 @@ pub fn ref u8[] summary(u32 code){
     if(code==5106){return b"invalid or conflicting link_name declaration";}
     if(code==7101){return b"invalid effects declaration";}
     if(code==7102){return b"call or resource cleanup exceeds the declared effects";}
+    if(code==7201){return b"invalid package state declaration or contract UID authority";}
+    if(code==7202){return b"package state field name is declared more than once";}
+    if(code==7203){return b"unsupported or malformed package state storage codec";}
     return b"";
 }

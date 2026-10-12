@@ -61,6 +61,21 @@ uses E1010. Full semantic parity is not claimed. Evidence:
 [c::ssize_t semantic identity](../ops/evidence/candidate-ssize-semantic-20261012.json),
 [owned project C transport](../ops/evidence/candidate-owned-ssize-transport-20261012.json).
 
+Package state declarations now retain owned UID/name bytes, ordered cell/map codec
+facts, canonical field prefixes and layout hash. Package-instance coordinates own
+uniqueness; malformed authority, duplicate names and unsupported storage codecs
+retain E7201/E7202/E7203 source spans. Scanner string hex transport is decoded
+before UID validation. Ordinary type binding and annotation keep storage codecs
+outside the executable scalar graph. Project linking copies the state plan into
+owned IR; verification recomputes canonical identities and rejects alterations.
+Four tests pass both candidate C profiles. Go native coverage reuses three
+unaffected metadata/hash tests and freshly replays the affected linked-IR test.
+The actual Go builder supplies matching canonical prefix/hash expectations.
+Source check passes 387 files / 4942 MIR functions. The full dispatcher and CLI
+comparison are being rebuilt; the last 73/75 result remains the older snapshot.
+Public interface/cache admission, broader diagnostics and promotion remain open.
+Evidence: [package state layout](../ops/evidence/candidate-package-state-layout-20261012.json).
+
 Public borrow admission is complete, while full frontend/executable
 parity, product timeout/host-stack integration, Linux/full suite and same-head
 hosted CI remain promotion requirements. No shipping Go compiler or SDK ABI

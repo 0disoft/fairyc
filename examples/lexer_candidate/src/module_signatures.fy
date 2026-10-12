@@ -1,5 +1,7 @@
 module module_signatures;
 import module_catalog as catalog;
+import module_state_declarations as state_declarations;
+import module_state_layout as state;
 import module_types as types;
 import sdk_vector_plan as vectors;
 import syntax as syntax;
@@ -12,7 +14,8 @@ import std::bytes as bytes;
 import std::vec as v;
 
 pub struct Signature {usize module_index;usize declaration;bool public;usize result;usize parameter_start;usize parameter_count;u32 effects;bool must_use;bool unsafe_call;bool foreign;usize link_start;usize link_end;}
-pub resource Program {vectors::Plan types;v::Vec<Signature> signatures;v::Vec<usize> parameters;v::Vec<bool> vector_sources;bytes::Buffer links;cleanup{}}
+pub resource Program {state::Plan states;vectors::Plan types;v::Vec<Signature> signatures;v::Vec<usize> parameters;v::Vec<bool> vector_sources;bytes::Buffer links;cleanup{}}
+pub fn ref state::Plan state_layouts(ref Program p){return ref p.states;}
 pub fn bool sdk_vector_source(ref Program p,usize module_index){return module_index<v::len<bool>(ref p.vector_sources) && *v::at<bool>(ref p.vector_sources,module_index);}
 pub fn usize module_count(ref Program p){return vectors::module_count(ref p.types);}
 pub fn usize module_owner(ref Program p,usize module_index){return vectors::module_owner(ref p.types,module_index);}
@@ -50,6 +53,7 @@ pub fn Result<Program,catalog::Problem> build(ref v::Vec<syntax::Parsed> sources
 pub fn Result<Program,catalog::Problem> build_catalog(ref v::Vec<syntax::Parsed> sources,catalog::Catalog c){
     if(catalog::module_count(ref c)!=v::len<syntax::Parsed>(sources)){return .err(fail(9,0,0,0));}
     var usize checked=0;while(checked<v::len<syntax::Parsed>(sources)){let source=v::at<syntax::Parsed>(sources,checked);if(!catalog::source_matches(ref c,checked,source)){return .err(fail(9,checked,0,0));}var usize declaration=0;while(declaration<syntax::declaration_count(source)){let admission=const_eval::read(source,declaration);if(admission.code!=0){return .err(fail(admission.code,checked,admission.start,admission.end));}declaration+=1;}checked+=1;}
+    let states=switch(state_declarations::build(sources,ref c)){case .ok(p):{p}case .err(e):{return .err(e);}};
     var v::Vec<types::Type> graph=v::empty<types::Type>();var v::Vec<Signature> signatures=v::empty<Signature>();var v::Vec<usize> parameters=v::empty<usize>();var v::Vec<bool> vector_sources=v::empty<bool>();var bytes::Buffer links=bytes::empty();
     var usize module_index=0;while(module_index<v::len<syntax::Parsed>(sources)){let p=v::at<syntax::Parsed>(sources,module_index);var usize index=1;
         let bool vector_sdk=catalog::sdk_vector_source(ref c,module_index);if(!v::push<bool>(ref mut vector_sources,vector_sdk).is_ok){return .err(fail(11,module_index,0,0));}
@@ -73,7 +77,7 @@ pub fn Result<Program,catalog::Problem> build_catalog(ref v::Vec<syntax::Parsed>
     }
     let owned=switch(types::assemble(ref c,graph)){case .ok(g):{g}case .err(code):{return .err(fail(code,0,0,0));}};
     let planned=switch(vectors::build(c,owned)){case .ok(p):{p}case .err(code):{return .err(fail(code,0,0,0));}};
-    return .ok(Program{.types=planned,.signatures,.parameters,.vector_sources,.links});
+    return .ok(Program{.states,.types=planned,.signatures,.parameters,.vector_sources,.links});
 }
 
 pub fn types::Resolution specialize_type(ref Program p,ref syntax::Parsed source,usize module_index,usize declaration,usize root,ref v::Vec<usize> args,ref mut v::Vec<types::Type> graph){return vectors::specialize_type(ref p.types,source,module_index,declaration,root,args,graph);}

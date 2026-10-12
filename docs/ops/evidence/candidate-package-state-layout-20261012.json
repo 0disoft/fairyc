@@ -1,0 +1,333 @@
+{
+  "schema": "fairyc.candidate-package-state-layout/v1",
+  "passed": true,
+  "scope": "Package-instance state ownership, closed storage codecs, canonical field prefixes and layout hash, and retained owned project IR",
+  "owningContracts": [
+    "docs/adr/0377-source-package-contract-state-declarations.md",
+    "internal/semantic/state.go",
+    "internal/contractstate/layout.go",
+    "internal/contractstate/codec.go",
+    "docs/diagnostics/catalog-v0.md"
+  ],
+  "sourceInputs": [
+    {
+      "path": "examples/lexer_candidate/src/module_catalog.fy",
+      "bytes": 12539,
+      "sha256": "063e0ec3438dd1e9f89aea836038ba51be82e5026bb5f739c7e343caead7d20b"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_signatures.fy",
+      "bytes": 11613,
+      "sha256": "3d94b247aae7bb4d01700a67a4d4e28719ac38efd81980b9b1391c24970dc8ea"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_state_layout.fy",
+      "bytes": 7246,
+      "sha256": "58395167fac35425c2b24e73e7768c3315a20170a9407dbc0e8aebac692eef38"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_state_declarations.fy",
+      "bytes": 6219,
+      "sha256": "e3884d4fbc099047b614798ba1280a2deed316ec0d3fcea6e224d122e91dd752"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_unit_bind.fy",
+      "bytes": 9469,
+      "sha256": "5106831b0fcb353475e5bb76943d31b7a5a9034c23fb9ee30996aa6065033b54"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_unit_interface_annotations.fy",
+      "bytes": 4124,
+      "sha256": "b90e5a47521ae999f61fff6123cf5d8344433d94c308965e23826913489b98b1"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_project_link.fy",
+      "bytes": 6504,
+      "sha256": "f63da212a5912ebfbd5d3d6c210822b2480c49d5e7730f259e5ff820b57d9f92"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_unit_body_ir_model.fy",
+      "bytes": 7848,
+      "sha256": "f45322ff97f56648667f5ca329a5df5eadd21748ee37f87ddb1bd01937c270d5"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_unit_body_ir_verify.fy",
+      "bytes": 26872,
+      "sha256": "5b40a1b84dc4b4cdfc4b1a8070c36a24a350fdae6d1c106454b74f72bf6c4438"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_diagnostic_codes.fy",
+      "bytes": 2513,
+      "sha256": "e354b51fd03f19ad54fcf347bde6989d3a4e60ebd0b266ec71fb62a71ada2502"
+    },
+    {
+      "path": "examples/lexer_candidate/tests/module_state_layout.fy",
+      "bytes": 7573,
+      "sha256": "cdbb4f7fa89ffa49b971cbb9dc737368150038f56f9c491e97b424d3fcc3fb5d"
+    },
+    {
+      "path": "examples/lexer_candidate/fairy.lock",
+      "bytes": 1698,
+      "sha256": "d55b7972173319bed4a5dfaf8e991e989e581787ad741a4ae9cbd67af8ee441c"
+    }
+  ],
+  "sourceCheck": {
+    "passed": true,
+    "files": 387,
+    "mirFunctions": 4942,
+    "lockUpdated": true
+  },
+  "canonicalGoOracle": {
+    "sourceSHA256": "5500334747ebd339954e3b45d12a720368da6397dd4762d1686cf9d144e2898c",
+    "receiptSHA256": "c596f09713b579e15d1e95318342eded63227d9ce5fa16094266db24d39bee72",
+    "facts": {
+      "fields": [
+        {
+          "name": "total_supply",
+          "prefix": [
+            506277646,
+            883593563,
+            1609707817,
+            2481775483,
+            2757222962,
+            1456554660,
+            1461222578,
+            2550245238
+          ]
+        },
+        {
+          "name": "balances",
+          "prefix": [
+            3089451091,
+            3058147140,
+            1445608855,
+            3058200239,
+            3040188848,
+            1974353460,
+            1828231896,
+            1061597317
+          ]
+        },
+        {
+          "name": "paused",
+          "prefix": [
+            107627531,
+            1408091346,
+            2307935832,
+            1734039910,
+            2051719330,
+            2702277835,
+            854158243,
+            1565747435
+          ]
+        },
+        {
+          "name": "count",
+          "prefix": [
+            1789612539,
+            1451449907,
+            3781494778,
+            2756169587,
+            648033904,
+            217120459,
+            1798569327,
+            1796992695
+          ]
+        },
+        {
+          "name": "root",
+          "prefix": [
+            2975261854,
+            3744990163,
+            2065963572,
+            3361067548,
+            1339804074,
+            2306037198,
+            1681351006,
+            3529104001
+          ]
+        }
+      ],
+      "hash": [
+        2228573728,
+        2676884447,
+        2887346710,
+        2989097650,
+        72141878,
+        1087492126,
+        1089733372,
+        2723509058
+      ]
+    },
+    "contractSourceSHA256": "91eeca2d03bdb03836961557381fd27cc2ed2335ac1e7147248c1b149b3a4bba",
+    "codecSourceSHA256": "756e342a66546714fcda759ef40f2d29b85cd83e9409bc9c68f8d091b80a8a20"
+  },
+  "goNative": {
+    "tests": [
+      {
+        "identity": "tests::module_state_layout::state_declarations_reject_bad_authority_duplicates_and_nonstorage_codecs",
+        "outcome": "passed",
+        "trapCategory": null,
+        "stdoutBase64": "",
+        "stderrBase64": ""
+      },
+      {
+        "identity": "tests::module_state_layout::state_layout_owns_order_codecs_and_reference_canonical_hashes",
+        "outcome": "passed",
+        "trapCategory": null,
+        "stdoutBase64": "",
+        "stderrBase64": ""
+      },
+      {
+        "identity": "tests::module_state_layout::state_uniqueness_uses_package_owners_and_precedes_codec_validation",
+        "outcome": "passed",
+        "trapCategory": null,
+        "stdoutBase64": "",
+        "stderrBase64": ""
+      },
+      {
+        "identity": "tests::module_state_layout::linked_ir_retains_state_and_rejects_changed_layout_identity",
+        "outcome": "passed",
+        "trapCategory": null,
+        "stdoutBase64": "",
+        "stderrBase64": ""
+      }
+    ],
+    "firstReportSHA256": "1b012a31b3a72daa5233ce4437c2b9421a529dfb3f864c283c743bd15c829e0a",
+    "firstReportPassed": 3,
+    "firstReportFailed": 1,
+    "freshLinkedReportSHA256": "60ab015b72103cd7fd821b8947407b0e6c7b736ffa5ecba559a4ec0ef0e26ad0",
+    "freshLinkedPassed": 1,
+    "reuseReason": "The three successful metadata/codec/hash tests do not execute the binding or annotation paths subsequently changed; the affected linked-IR test was rerun after those changes."
+  },
+  "candidate": {
+    "receiptSHA256": "641c00a6c9bd46e9a130b424bdf9a98e6c5ebc07dac9da2c3a4d7d56a918f1bd",
+    "sourceClosureFiles": 179,
+    "sourceClosureHashesVerified": true,
+    "tools": {
+      "compiler": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-frontend-oracle-current-20261012.exe",
+        "sha256": "3ecc4501ee3bb47ecc39e7288200266b31cbcd8bf6ffec302ae54867705ce5d1"
+      },
+      "candidate": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\c-ssize-semantic-build-20261012\\candidate-release.exe",
+        "sha256": "fb46a91341af1950610add4f647376e4c8769ea5edfa4841f0ec3e9f27357bd2"
+      },
+      "builder": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-rooted-builder-stack-20261012.exe",
+        "sha256": "02abe2328daa9921705910c7b995e82c1312cb960fe024106c11468569aefff0"
+      }
+    },
+    "packetSHA256": "a1f307d16fb5da773cd1accaaec4d2fb939abec900c883dfb37c40f4862f3fa1",
+    "executions": [
+      {
+        "profile": "development",
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-layout-candidate-final-20261012\\development.exe",
+        "sha256": "baf2022ae2345b5b76f75dea6c73ae26a287a25461079f2019eacc59a147f423",
+        "exit": 0
+      },
+      {
+        "profile": "release",
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-layout-candidate-final-20261012\\release.exe",
+        "sha256": "96099ab3ff1df0ceadea9bdce78d6bf041d9caf3ba66475bfa6fbca2b14374f8",
+        "exit": 0
+      }
+    ],
+    "invocations": [
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\c-ssize-semantic-build-20261012\\candidate-release.exe",
+          "--c-project-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-layout-candidate-final-20261012\\sources.list"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+        "seconds": 79.28170989998034,
+        "exit": 0,
+        "stdoutBytes": 13722213,
+        "stdoutSHA256": "a1f307d16fb5da773cd1accaaec4d2fb939abec900c883dfb37c40f4862f3fa1",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-rooted-builder-stack-20261012.exe",
+          "--packet",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-layout-candidate-final-20261012\\candidate-packet.bin",
+          "--packet-sha256",
+          "a1f307d16fb5da773cd1accaaec4d2fb939abec900c883dfb37c40f4862f3fa1",
+          "--output",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-layout-candidate-final-20261012\\development.exe"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+        "seconds": 15.717902500007767,
+        "exit": 0,
+        "stdoutBytes": 180,
+        "stdoutSHA256": "dde9a9e581af2cde4cce76fbf145c34fa60dc677d55be39fc03dd01c4a09a113",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-layout-candidate-final-20261012\\development.exe"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+        "seconds": 0.22372059998451732,
+        "exit": 0,
+        "stdoutBytes": 0,
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-rooted-builder-stack-20261012.exe",
+          "--packet",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-layout-candidate-final-20261012\\candidate-packet.bin",
+          "--packet-sha256",
+          "a1f307d16fb5da773cd1accaaec4d2fb939abec900c883dfb37c40f4862f3fa1",
+          "--output",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-layout-candidate-final-20261012\\release.exe",
+          "--release"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+        "seconds": 146.75768539999262,
+        "exit": 0,
+        "stdoutBytes": 182,
+        "stdoutSHA256": "56ff0cd223e0b039b047007ebe66d67c3a10888067132372e11fd3c6e94c609d",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-layout-candidate-final-20261012\\release.exe"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+        "seconds": 0.06126839999342337,
+        "exit": 0,
+        "stdoutBytes": 0,
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderr": ""
+      }
+    ],
+    "selection": {
+      "mode": "all-authored",
+      "authoredTests": 4,
+      "selectedTests": 4
+    }
+  },
+  "correctedAttempts": [
+    "The initial test used invalid unicode escape syntax; corrected to the language u{74} form.",
+    "Scanner cooked strings use hex transport; UID decoding was added before authority checks.",
+    "The linked test exposed ordinary type binding/annotation of storage codecs; both paths now leave validated state codecs to their own owner.",
+    "An interim complete image build started before the final binding change; its source hash check rejects reuse as current-source evidence.",
+    "Stale lock attempts were rejected; the source check refreshed it before final locked runs."
+  ],
+  "limitations": [
+    "Fresh complete dispatcher build and 75-case CLI comparison are a following integration unit.",
+    "Current-source consecutive-generation fixed point, broader/multiple diagnostic parity, product timeout/default stack, Linux/full suite and hosted CI remain open.",
+    "No state reads/writes, persistence provider or public interface/cache admission is claimed."
+  ],
+  "publicApiChanged": false,
+  "sdkAbiChanged": false,
+  "dbChanged": false,
+  "ciChanged": false,
+  "runnerChanged": false,
+  "productTimeoutChanged": false,
+  "pushed": false
+}

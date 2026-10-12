@@ -1,5 +1,33 @@
 # Fairy 컴파일러 전환: 후속 작업 목록
 
+## Package state ownership and canonical layout retained (2026-10-12)
+
+State declarations now have a separate semantic owner rather than entering the
+ordinary named/type catalog. Package-instance coordinates enforce one declaration
+across all package modules; different package instances retain independent layouts.
+Exactly one contract_uid string, private visibility, ASCII UID/name bounds, unique
+field names and the five closed storage codecs are checked. Scanner hex transport
+is decoded before validating the cooked UID. E7201/E7202/E7203 retain source spans
+and are registered in the shared public diagnostic output.
+
+The Fairy implementation owns UID/name bytes and ordered cell/map codec facts.
+It computes field prefixes and the complete layout hash using the canonical
+big-endian encoding and domain strings from the existing contract-state contract.
+Signature metadata retains the result and project linking copies it into owned IR.
+IR verification recomputes prefix/hash and rejects altered identities or ranges.
+State codecs do not add ordinary executable scalar types or state operations.
+Declaration and validation histories retain the existing 1 MiB work bound; copy
+and project verification charge the existing project ledger. No public API, SDK
+ABI, DB, CI or runner settings change. Source check passes 387 files / 4942 MIR
+functions. Four tests pass both candidate C profiles with current source hashes
+verified. Go native covers all four: three unaffected metadata/hash outcomes are
+reused and the linked-IR test passes a fresh replay after binding-path changes.
+Canonical prefixes and layout hash match the actual Go contract-state builder.
+The full-image/CLI integration follows; broader/multiple diagnostics, public
+interface/cache admission and promotion gates remain. No state operations or
+persistence provider are claimed; no push. Receipt:
+`evidence/candidate-package-state-layout-20261012.json`.
+
 ## Owned project C ssize_t transport connected (2026-10-12)
 
 The owned C emitter now spells c::ssize_t in foreign signatures and typed locals.

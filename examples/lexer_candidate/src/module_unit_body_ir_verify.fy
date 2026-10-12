@@ -17,6 +17,7 @@ import pointer_types as pointers;
 import raw_view_intrinsics as raw;
 import std::bytes as bytes;
 import std::vec as v;
+import module_state_layout as state;
 
 fn clean_ir::Problem fail(u32 code,usize module_index,usize start,usize end){return clean_ir::Problem{.code,.module_index,.start,.end};}
 fn bool span(usize start,usize end,usize limit){return start<=end && end<=limit;}
@@ -90,14 +91,16 @@ pub fn clean_ir::Problem check_body(ref ir::Body b,ref clean_ir::Program cleaned
     return fail(0,0,0,0);
 }
 pub fn clean_ir::Problem check(ref ir::Program p){
+    var usize state_work=0;let state_code=state::validate(ir::state_layouts(p),ref mut state_work);if(state_code!=0){return fail(if(state_code==10){1002}else if(state_code==11){1003}else{1001},0,0,0);}
     let cleaned=cleaning::check(ir::cleanup_ir(p));if(cleaned.code!=0){return cleaned;}
     if(ir::count(p)!=clean_ir::frame_count(ir::cleanup_ir(p))){return fail(1001,0,0,0);}if(ir::work(p)>clean_ir::work_limit(ir::cleanup_ir(p)) || ir::name_bytes(p)>1048576 || ir::layout_count(p)>1024 || ir::field_count(p)>limits::project_fields() || ir::callable_count(p)>limits::project_callables()){return fail(1002,0,0,0);}
     // Producer work remains capped above. Revalidation has its own bounded
     // traversal, so its capacity does not depend on the producer's history.
-    var usize work=0;var usize total=0;let project=clean_ir::project(ir::cleanup_ir(p));var usize i=1;let nt=clean_ir::type_count(ir::cleanup_ir(p));
+    var usize work=0;var usize total=0;let project=clean_ir::project(ir::cleanup_ir(p));if(!(if(project){limits::project_charge(ref mut total,state_work)}else{budget::charge(ref mut work,state_work)})){return fail(1002,0,0,0);}var usize i=1;let nt=clean_ir::type_count(ir::cleanup_ir(p));
     let sdk=sdk_sources::check(ir::sdk_units(p),ref mut work);if(sdk.code!=0){return sdk;}
     let permission_index=switch(contracts(p,ref mut work)){case .ok(p):{p}case .err(e):{return e;}};let modules=sdk_sources::module_count(ir::sdk_units(p));
     if(modules!=0){
+        var usize state_index=0;while(state_index<state::count(ir::state_layouts(p))){if(!budget::charge(ref mut work,1)){return fail(1002,0,0,0);}let layout=state::at(ir::state_layouts(p),state_index);if(layout.module_index>=modules){return fail(1001,layout.module_index,layout.start,layout.end);}state_index+=1;}
         while(i<=ir::count(p)){if(!budget::charge(ref mut work,1)){return fail(1002,0,0,0);}let f=clean_ir::frame_at(ir::cleanup_ir(p),i);if(f.module_index>=modules){return fail(1001,f.module_index,0,0);}let unit=sdk_sources::find(ir::sdk_units(p),f.module_index);if(unit!=0 && ir::source_bytes(ir::at(p,i))!=sdk_sources::source_at(ir::sdk_units(p),unit-1).len){return fail(1001,f.module_index,0,0);}i+=1;}
         i=1;while(i<=nt){if(!budget::charge(ref mut work,1)){return fail(1002,0,0,0);}let t=clean_ir::type_at(ir::cleanup_ir(p),i);if((t.kind==2 || t.kind==3 || t.kind==4 || t.kind==13) && t.module_index>=modules){return fail(1001,t.module_index,0,0);}i+=1;}
         i=0;while(i<ir::layout_count(p)){if(!budget::charge(ref mut work,1)){return fail(1002,0,0,0);}if(ir::layout_at(p,i).value.module_index>=modules){return fail(1001,0,0,0);}i+=1;}

@@ -16,7 +16,7 @@ pub fn Result<v::Vec<owner::Annotation>,join::Problem> annotations(ref v::Vec<sy
     while(i<syntax::type_count(p)){if(!meter::charge(work,1)){return .err(meter::fail(10,binding::first(bound),0,0));}if(!v::push<owner::Annotation>(ref mut table,owner::Annotation{.type=0,.required=false,.deferred=false}).is_ok){return .err(meter::fail(11,binding::first(bound),0,0));}i+=1;}
     i=0;while(i<syntax::declaration_count(p)){request(ref mut table,syntax::declaration_at(p,i).result_type);i+=1;}
     i=0;while(i<syntax::entry_count(p)){request(ref mut table,syntax::entry_at(p,i).type_root);i+=1;}
-    i=0;while(i<syntax::field_count(p)){request(ref mut table,syntax::field_at(p,i).type_root);i+=1;}
+    i=0;while(i<syntax::field_count(p)){let field=syntax::field_at(p,i);if(field.kind!=1 && field.kind!=2){request(ref mut table,field.type_root);}i+=1;}
     i=1;while(i<=syntax::expression_count(p)){if(!meter::charge(work,1)){return .err(meter::fail(10,binding::first(bound),0,0));}let e=syntax::expression_at(p,i);if(e.kind==23){request(ref mut table,e.right);}else if(e.kind==20){var usize link=e.right;while(link!=0){let n=syntax::type_at(p,link);request(ref mut table,storage::annotation_root(p,i,n.left,*v::at<bool>(ref vectors,syntax::module_index(p,e.start))));link=n.right;}}i+=1;}
     i=1;while(i<=syntax::statement_count(p)){let s=syntax::statement_at(p,i);if(s.kind==18){request(ref mut table,s.second);}i+=1;}
     var usize base=0;var usize module_index=binding::first(bound);

@@ -8,6 +8,7 @@ import module_project_body_equal as equality;
 import module_project_cleanup as cleaning;
 import module_project_calls as calls;
 import module_signatures as signatures;
+import module_state_layout as state;
 import module_types as descriptors;
 import module_unit_body_ir_model as ir;
 import module_unit_cleanup_mir_model as clean;
@@ -33,5 +34,6 @@ pub fn Result<ir::Program,clean::Problem> build(ref signatures::Program catalog,
     var v::Vec<ir::Layout> shapes=v::empty<ir::Layout>();var v::Vec<interfaces::Field> fields=v::empty<interfaces::Field>();var v::Vec<interfaces::Callable> callables=v::empty<interfaces::Callable>();var v::Vec<usize> parameters=v::empty<usize>();i=0;
     while(i<metadata::layout_count(ref layouts)){if(!limits::project_charge(ref mut work,1)){return .err(fail(1002));}if(!v::push<ir::Layout>(ref mut shapes,metadata::layout_at(ref layouts,i)).is_ok){return .err(fail(1003));}i+=1;}i=0;while(i<metadata::field_count(ref layouts)){if(!limits::project_charge(ref mut work,1)){return .err(fail(1002));}if(!v::push<interfaces::Field>(ref mut fields,metadata::field_at(ref layouts,i)).is_ok){return .err(fail(1003));}i+=1;}i=0;while(i<metadata::callable_count(ref layouts)){if(!limits::project_charge(ref mut work,1)){return .err(fail(1002));}if(!v::push<interfaces::Callable>(ref mut callables,metadata::callable_at(ref layouts,i)).is_ok){return .err(fail(1003));}i+=1;}i=0;while(i<metadata::parameter_count(ref layouts)){if(!limits::project_charge(ref mut work,1)){return .err(fail(1002));}if(!v::push<usize>(ref mut parameters,metadata::parameter_at(ref layouts,i)).is_ok){return .err(fail(1003));}i+=1;}
     if(!limits::project_charge(ref mut work,metadata::names(ref layouts).len)){return .err(fail(1002));}let names=switch(bytes::copy(metadata::names(ref layouts))){case .ok(p):{p}case .err(_):{return .err(fail(1003));}};
-    let result=switch(ir::assemble_sdk(sdk_sources,cleaned,retained,shapes,fields,callables,parameters,names,work)){case .ok(p):{p}case .err(e):{return .err(e);}};let linked=calls::check(ref result,ref mut work);if(linked.code!=0){return .err(linked);}return .ok(result);
+    var usize state_work=0;let states=switch(state::copy(signatures::state_layouts(catalog),ref mut state_work)){case .ok(p):{p}case .err(e):{return .err(fail(if(e==10){1002}else{1003}));}};if(!limits::project_charge(ref mut work,state_work)){return .err(fail(1002));}
+    let result=switch(ir::assemble_sdk_states(states,sdk_sources,cleaned,retained,shapes,fields,callables,parameters,names,work)){case .ok(p):{p}case .err(e):{return .err(e);}};let linked=calls::check(ref result,ref mut work);if(linked.code!=0){return .err(linked);}return .ok(result);
 }
