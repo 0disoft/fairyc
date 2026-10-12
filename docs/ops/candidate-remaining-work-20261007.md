@@ -2,6 +2,25 @@
 
 ## Latest validated milestone (2026-10-12)
 
+The native-dispatcher snapshot at `1ce8d6b9` reaches a complete 369-source Windows
+C-part fixed point. Both generations emit 29998661 identical bytes and produce
+identical complete 4257280-byte PE images (no excluded metadata). The first
+validated generation is reused after source/packet/image/driver hash checks;
+the second is independently emitted and built. All 249 Go lexer cases and
+framing checks pass, and the new generation passes 15 native CLI invocations.
+
+Promotion remains pending. A fresh Go workspace-check comparison over the
+63 semantic and 12 resource fixtures finds 11 status differences and 35 first
+diagnostic code/span differences. All 75 Go observations match their fixture
+status and first diagnostic code. Eight invalid cases are incorrectly accepted
+by the candidate: loop control outside a loop plus seven borrow/origin/owner
+cases. Three valid cases are rejected: c_ssize_t, compile-time evaluation and
+package-state declarations. Generic subset messages also lose semantic codes.
+Next: connect these missing semantic validations and diagnostic transport before
+the full differential, Linux/hosted CI and promotion gates. The probe compares
+workspace status and the first diagnostic, not every semantic fact-table field.
+Receipt: `evidence/candidate-public-native-fixed-point-20261012.json`.
+
 The 369-source candidate dispatcher now runs the public build/run spellings with
 Fairy-owned options, workspace loading, emission, native-driver calls and run
 classification. The private Go companion consumes fresh packets and publishes

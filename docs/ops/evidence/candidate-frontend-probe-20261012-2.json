@@ -1,0 +1,457 @@
+[
+  {
+    "family": "semantic",
+    "id": "pass.flow.foreign-call",
+    "manifestSHA256": "165b181c063b24cd6ef80c3e91b417840d3f1b2ea33a9eec635ae79341f332fa",
+    "expected": "pass",
+    "sources": [
+      {
+        "original": "spec/fixtures/semantic/cases/pass/foreign-call/src/main.fy",
+        "sourceSHA256": "8033e47d07fc726e6f848693d88032982d2bbc9b8b8b56ab677add44a9459c8a",
+        "projectSource": "main.fy"
+      }
+    ],
+    "observations": [
+      {
+        "engine": "go",
+        "exit": 0,
+        "seconds": 0.04996420000679791,
+        "stdout": "check ok: 1 instance(s), 1 source file(s), 1 MIR function(s), lock updated\n",
+        "stderr": "",
+        "diagnostics": []
+      },
+      {
+        "engine": "candidate",
+        "exit": 0,
+        "seconds": 0.03841520001878962,
+        "stdout": "check ok: 1 instance(s), 1 source file(s), 1 MIR function(s), lock unchanged\n",
+        "stderr": "",
+        "diagnostics": []
+      }
+    ],
+    "statusMatch": true,
+    "firstDiagnosticMatch": true,
+    "goMatchesFixture": true
+  },
+  {
+    "family": "semantic",
+    "id": "pass.type.c-int-foreign-roundtrip",
+    "manifestSHA256": "165b181c063b24cd6ef80c3e91b417840d3f1b2ea33a9eec635ae79341f332fa",
+    "expected": "pass",
+    "sources": [
+      {
+        "original": "spec/fixtures/semantic/cases/pass/c-int-foreign-roundtrip/src/main.fy",
+        "sourceSHA256": "846217987ac558c00be8e610e3085c3efe00fb2bb006b725a07e22d9cbe3e20b",
+        "projectSource": "main.fy"
+      }
+    ],
+    "observations": [
+      {
+        "engine": "go",
+        "exit": 0,
+        "seconds": 0.05078250000951812,
+        "stdout": "check ok: 1 instance(s), 1 source file(s), 1 MIR function(s), lock updated\n",
+        "stderr": "",
+        "diagnostics": []
+      },
+      {
+        "engine": "candidate",
+        "exit": 0,
+        "seconds": 0.052100100001553074,
+        "stdout": "check ok: 1 instance(s), 1 source file(s), 1 MIR function(s), lock unchanged\n",
+        "stderr": "",
+        "diagnostics": []
+      }
+    ],
+    "statusMatch": true,
+    "firstDiagnosticMatch": true,
+    "goMatchesFixture": true
+  },
+  {
+    "family": "semantic",
+    "id": "pass.type.c-long-foreign-roundtrip",
+    "manifestSHA256": "165b181c063b24cd6ef80c3e91b417840d3f1b2ea33a9eec635ae79341f332fa",
+    "expected": "pass",
+    "sources": [
+      {
+        "original": "spec/fixtures/semantic/cases/pass/c-long-foreign-roundtrip/src/main.fy",
+        "sourceSHA256": "a8da37b487af2fd2296d9388799b9c2bdd6d4d8b6d102075686fb9cb74c87b8e",
+        "projectSource": "main.fy"
+      }
+    ],
+    "observations": [
+      {
+        "engine": "go",
+        "exit": 0,
+        "seconds": 0.05355000001145527,
+        "stdout": "check ok: 1 instance(s), 1 source file(s), 1 MIR function(s), lock updated\n",
+        "stderr": "",
+        "diagnostics": []
+      },
+      {
+        "engine": "candidate",
+        "exit": 0,
+        "seconds": 0.04364400001941249,
+        "stdout": "check ok: 1 instance(s), 1 source file(s), 1 MIR function(s), lock unchanged\n",
+        "stderr": "",
+        "diagnostics": []
+      }
+    ],
+    "statusMatch": true,
+    "firstDiagnosticMatch": true,
+    "goMatchesFixture": true
+  },
+  {
+    "family": "semantic",
+    "id": "pass.type.c-scalar-family-foreign-roundtrip",
+    "manifestSHA256": "165b181c063b24cd6ef80c3e91b417840d3f1b2ea33a9eec635ae79341f332fa",
+    "expected": "pass",
+    "sources": [
+      {
+        "original": "spec/fixtures/semantic/cases/pass/c-scalar-family-foreign-roundtrip/src/main.fy",
+        "sourceSHA256": "501ee4df2e54895e5de4cde41e5f4d595baeb9a779e2025f82d37a85d1a22b83",
+        "projectSource": "main.fy"
+      }
+    ],
+    "observations": [
+      {
+        "engine": "go",
+        "exit": 0,
+        "seconds": 0.057695800001965836,
+        "stdout": "check ok: 1 instance(s), 1 source file(s), 13 MIR function(s), lock updated\n",
+        "stderr": "",
+        "diagnostics": []
+      },
+      {
+        "engine": "candidate",
+        "exit": 0,
+        "seconds": 0.0469990000128746,
+        "stdout": "check ok: 1 instance(s), 1 source file(s), 13 MIR function(s), lock unchanged\n",
+        "stderr": "",
+        "diagnostics": []
+      }
+    ],
+    "statusMatch": true,
+    "firstDiagnosticMatch": true,
+    "goMatchesFixture": true
+  },
+  {
+    "family": "semantic",
+    "id": "pass.type.c-size-t-foreign-roundtrip",
+    "manifestSHA256": "165b181c063b24cd6ef80c3e91b417840d3f1b2ea33a9eec635ae79341f332fa",
+    "expected": "pass",
+    "sources": [
+      {
+        "original": "spec/fixtures/semantic/cases/pass/c-size-t-foreign-roundtrip/src/main.fy",
+        "sourceSHA256": "de95cc29d193b1408e5cc4e2680253dd7eca870ae1f4b45237db7c48d5b9afdf",
+        "projectSource": "main.fy"
+      }
+    ],
+    "observations": [
+      {
+        "engine": "go",
+        "exit": 0,
+        "seconds": 0.049570799979846925,
+        "stdout": "check ok: 1 instance(s), 1 source file(s), 1 MIR function(s), lock updated\n",
+        "stderr": "",
+        "diagnostics": []
+      },
+      {
+        "engine": "candidate",
+        "exit": 0,
+        "seconds": 0.040683999977773055,
+        "stdout": "check ok: 1 instance(s), 1 source file(s), 1 MIR function(s), lock unchanged\n",
+        "stderr": "",
+        "diagnostics": []
+      }
+    ],
+    "statusMatch": true,
+    "firstDiagnosticMatch": true,
+    "goMatchesFixture": true
+  },
+  {
+    "family": "semantic",
+    "id": "pass.type.c-ssize-t-foreign-roundtrip",
+    "manifestSHA256": "165b181c063b24cd6ef80c3e91b417840d3f1b2ea33a9eec635ae79341f332fa",
+    "expected": "pass",
+    "sources": [
+      {
+        "original": "spec/fixtures/semantic/cases/pass/c-ssize-t-foreign-roundtrip/src/main.fy",
+        "sourceSHA256": "02945cc55bc233b3b2979f38cbbbeface98fbb51e396137ca5c02c7896c6eb68",
+        "projectSource": "main.fy"
+      }
+    ],
+    "observations": [
+      {
+        "engine": "go",
+        "exit": 0,
+        "seconds": 0.05697390000568703,
+        "stdout": "check ok: 1 instance(s), 1 source file(s), 1 MIR function(s), lock updated\n",
+        "stderr": "",
+        "diagnostics": []
+      },
+      {
+        "engine": "candidate",
+        "exit": 3,
+        "seconds": 0.017454300017561764,
+        "stdout": "",
+        "stderr": "main.fy:4:20: source is outside the supported compiler subset [bytes 77..87]\n",
+        "diagnostics": []
+      }
+    ],
+    "statusMatch": false,
+    "firstDiagnosticMatch": true,
+    "goMatchesFixture": true
+  },
+  {
+    "family": "semantic",
+    "id": "fail.resolve.unresolved-name",
+    "manifestSHA256": "165b181c063b24cd6ef80c3e91b417840d3f1b2ea33a9eec635ae79341f332fa",
+    "expected": "fail",
+    "sources": [
+      {
+        "original": "spec/fixtures/semantic/cases/fail/unresolved-name/src/main.fy",
+        "sourceSHA256": "ce908ff7c983457e41f48f9ea7aaa77b84eabef1283aa741aac14cbb9ea2c179",
+        "projectSource": "main.fy"
+      }
+    ],
+    "observations": [
+      {
+        "engine": "go",
+        "exit": 3,
+        "seconds": 0.05283380000037141,
+        "stdout": "",
+        "stderr": "main.fy:4:12: E0101: unresolved name or path [bytes 43..50]\n",
+        "diagnostics": [
+          {
+            "code": "E0101",
+            "start": 43,
+            "end": 50
+          }
+        ]
+      },
+      {
+        "engine": "candidate",
+        "exit": 3,
+        "seconds": 0.017161099996883422,
+        "stdout": "",
+        "stderr": "main.fy:4:12: source is outside the supported compiler subset [bytes 43..50]\n",
+        "diagnostics": []
+      }
+    ],
+    "statusMatch": true,
+    "firstDiagnosticMatch": false,
+    "goMatchesFixture": true
+  },
+  {
+    "family": "semantic",
+    "id": "fail.resolve.duplicate-declaration",
+    "manifestSHA256": "165b181c063b24cd6ef80c3e91b417840d3f1b2ea33a9eec635ae79341f332fa",
+    "expected": "fail",
+    "sources": [
+      {
+        "original": "spec/fixtures/semantic/cases/fail/duplicate-declaration/src/main.fy",
+        "sourceSHA256": "6eb21960f662d3d502ae19d838369ad05514dffde1d108920983e116d214de3a",
+        "projectSource": "main.fy"
+      }
+    ],
+    "observations": [
+      {
+        "engine": "go",
+        "exit": 3,
+        "seconds": 0.053379899996798486,
+        "stdout": "",
+        "stderr": "main.fy:7:8: E0102: duplicate declaration in one scope [bytes 55..60]\n  previous-declaration: main.fy:3:8 [bytes 21..26]\n",
+        "diagnostics": [
+          {
+            "code": "E0102",
+            "start": 55,
+            "end": 60
+          }
+        ]
+      },
+      {
+        "engine": "candidate",
+        "exit": 3,
+        "seconds": 0.017307200003415346,
+        "stdout": "",
+        "stderr": "main.fy:7:8: source is outside the supported compiler subset [bytes 55..60]\n",
+        "diagnostics": []
+      }
+    ],
+    "statusMatch": true,
+    "firstDiagnosticMatch": false,
+    "goMatchesFixture": true
+  },
+  {
+    "family": "semantic",
+    "id": "fail.type.type-mismatch",
+    "manifestSHA256": "165b181c063b24cd6ef80c3e91b417840d3f1b2ea33a9eec635ae79341f332fa",
+    "expected": "fail",
+    "sources": [
+      {
+        "original": "spec/fixtures/semantic/cases/fail/type-mismatch/src/main.fy",
+        "sourceSHA256": "905c0426cafdc90815f1ec3b269666de78a082435a7874988fdddc8298b9675d",
+        "projectSource": "main.fy"
+      }
+    ],
+    "observations": [
+      {
+        "engine": "go",
+        "exit": 3,
+        "seconds": 0.04878049998660572,
+        "stdout": "",
+        "stderr": "main.fy:4:22: E1006: incompatible expected and actual types [bytes 53..54]\n  expected-type: main.fy:4:9 [bytes 40..44]\n",
+        "diagnostics": [
+          {
+            "code": "E1006",
+            "start": 53,
+            "end": 54
+          }
+        ]
+      },
+      {
+        "engine": "candidate",
+        "exit": 3,
+        "seconds": 0.01789459999417886,
+        "stdout": "",
+        "stderr": "main.fy:4:22: E1006: incompatible expected and actual types [bytes 53..54]\n",
+        "diagnostics": [
+          {
+            "code": "E1006",
+            "start": 53,
+            "end": 54
+          }
+        ]
+      }
+    ],
+    "statusMatch": true,
+    "firstDiagnosticMatch": true,
+    "goMatchesFixture": true
+  },
+  {
+    "family": "semantic",
+    "id": "fail.type.integer-literal-range",
+    "manifestSHA256": "165b181c063b24cd6ef80c3e91b417840d3f1b2ea33a9eec635ae79341f332fa",
+    "expected": "fail",
+    "sources": [
+      {
+        "original": "spec/fixtures/semantic/cases/fail/integer-literal-range/src/main.fy",
+        "sourceSHA256": "ff11e247472e64a6d1e98156566a849e5bcc6445738afdea8176bbf4e22bd334",
+        "projectSource": "main.fy"
+      }
+    ],
+    "observations": [
+      {
+        "engine": "go",
+        "exit": 3,
+        "seconds": 0.04960009999922477,
+        "stdout": "",
+        "stderr": "main.fy:4:19: E1013: Integer literal is outside the range of its selected `i32`, `u8`, `u32`, or `usize` type. [bytes 48..53]\n",
+        "diagnostics": [
+          {
+            "code": "E1013",
+            "start": 48,
+            "end": 53
+          }
+        ]
+      },
+      {
+        "engine": "candidate",
+        "exit": 3,
+        "seconds": 0.030316200020024553,
+        "stdout": "",
+        "stderr": "main.fy:4:19: source is outside the supported compiler subset [bytes 48..53]\n",
+        "diagnostics": []
+      }
+    ],
+    "statusMatch": true,
+    "firstDiagnosticMatch": false,
+    "goMatchesFixture": true
+  },
+  {
+    "family": "semantic",
+    "id": "fail.type.non-bool-condition",
+    "manifestSHA256": "165b181c063b24cd6ef80c3e91b417840d3f1b2ea33a9eec635ae79341f332fa",
+    "expected": "fail",
+    "sources": [
+      {
+        "original": "spec/fixtures/semantic/cases/fail/non-bool-condition/src/main.fy",
+        "sourceSHA256": "1302f4f8fedad4db79bee44dd9f1d97d269968e8b60771b31d6c14e430a0b5cf",
+        "projectSource": "main.fy"
+      }
+    ],
+    "observations": [
+      {
+        "engine": "go",
+        "exit": 3,
+        "seconds": 0.055386099993484095,
+        "stdout": "",
+        "stderr": "main.fy:4:16: E1007: condition or logical operand must be bool [bytes 47..48]\n",
+        "diagnostics": [
+          {
+            "code": "E1007",
+            "start": 47,
+            "end": 48
+          }
+        ]
+      },
+      {
+        "engine": "candidate",
+        "exit": 3,
+        "seconds": 0.017485300020780414,
+        "stdout": "",
+        "stderr": "main.fy:4:16: source is outside the supported compiler subset [bytes 47..48]\n",
+        "diagnostics": []
+      }
+    ],
+    "statusMatch": true,
+    "firstDiagnosticMatch": false,
+    "goMatchesFixture": true
+  },
+  {
+    "family": "semantic",
+    "id": "fail.type.loop-control-outside-loop",
+    "manifestSHA256": "165b181c063b24cd6ef80c3e91b417840d3f1b2ea33a9eec635ae79341f332fa",
+    "expected": "fail",
+    "sources": [
+      {
+        "original": "spec/fixtures/semantic/cases/fail/loop-control-outside-loop/src/main.fy",
+        "sourceSHA256": "47769a8eedbef1a21770d2836993cb85bc465b6f1ab2ace956e83d29d7856096",
+        "projectSource": "main.fy"
+      }
+    ],
+    "observations": [
+      {
+        "engine": "go",
+        "exit": 3,
+        "seconds": 0.04943249997450039,
+        "stdout": "",
+        "stderr": "main.fy:4:5: E1012: break and continue require an enclosing loop [bytes 37..43]\nmain.fy:5:5: E1012: break and continue require an enclosing loop [bytes 48..57]\n",
+        "diagnostics": [
+          {
+            "code": "E1012",
+            "start": 37,
+            "end": 43
+          },
+          {
+            "code": "E1012",
+            "start": 48,
+            "end": 57
+          }
+        ]
+      },
+      {
+        "engine": "candidate",
+        "exit": 0,
+        "seconds": 0.040977700002258644,
+        "stdout": "check ok: 1 instance(s), 1 source file(s), 1 MIR function(s), lock unchanged\n",
+        "stderr": "",
+        "diagnostics": []
+      }
+    ],
+    "statusMatch": false,
+    "firstDiagnosticMatch": false,
+    "goMatchesFixture": true
+  }
+]

@@ -1,0 +1,140 @@
+[
+  {
+    "family": "resource",
+    "id": "fail.flow.loop-state-mismatch",
+    "manifestSHA256": "e8a50e86ab356732fdf8fa9e1e114f3190e5f52b1f3c4c79c826c053aef9dfd8",
+    "expected": "fail",
+    "sources": [
+      {
+        "original": "spec/fixtures/resource/cases/fail/loop-state-mismatch/src/main.fy",
+        "sourceSHA256": "d0b88b49a830040f81ac7dda386065d09d3eecc49951767e6b8b729228089f77",
+        "projectSource": "main.fy"
+      }
+    ],
+    "observations": [
+      {
+        "engine": "go",
+        "exit": 3,
+        "seconds": 0.0543242999992799,
+        "stdout": "",
+        "stderr": "main.fy:15:5: E1105: loop body changes the resource state required by the next iteration [bytes 198..242]\n  declaration: main.fy:14:15 [bytes 164..169]\n  loop-header: main.fy:15:5 [bytes 198..209]\n  move: main.fy:16:17 [bytes 229..234]\n",
+        "diagnostics": [
+          {
+            "code": "E1105",
+            "start": 198,
+            "end": 242
+          }
+        ]
+      },
+      {
+        "engine": "candidate",
+        "exit": 3,
+        "seconds": 0.019876699981978163,
+        "stdout": "",
+        "stderr": "main.fy:15:5: E1105: resource ownership differs at loop entry [bytes 198..242]\n  declaration: main.fy:14:15 [bytes 164..169]\n  move: main.fy:16:17 [bytes 229..234]\n  loop-header: main.fy:15:5 [bytes 198..209]\n",
+        "diagnostics": [
+          {
+            "code": "E1105",
+            "start": 198,
+            "end": 242
+          }
+        ]
+      }
+    ],
+    "statusMatch": true,
+    "firstDiagnosticMatch": true,
+    "goMatchesFixture": true
+  },
+  {
+    "family": "resource",
+    "id": "fail.flow.break-state-mismatch",
+    "manifestSHA256": "e8a50e86ab356732fdf8fa9e1e114f3190e5f52b1f3c4c79c826c053aef9dfd8",
+    "expected": "fail",
+    "sources": [
+      {
+        "original": "spec/fixtures/resource/cases/fail/break-state-mismatch/src/main.fy",
+        "sourceSHA256": "265259db30fc5171d24d6b31f92a89148ef255d63e989562370f5f5a8b1ed213",
+        "projectSource": "main.fy"
+      }
+    ],
+    "observations": [
+      {
+        "engine": "go",
+        "exit": 3,
+        "seconds": 0.05061129998648539,
+        "stdout": "",
+        "stderr": "main.fy:15:5: E1105: loop body changes the resource state required by the next iteration [bytes 198..257]\n  declaration: main.fy:14:15 [bytes 164..169]\n  loop-header: main.fy:15:5 [bytes 198..209]\n  move: main.fy:16:17 [bytes 229..234]\n",
+        "diagnostics": [
+          {
+            "code": "E1105",
+            "start": 198,
+            "end": 257
+          }
+        ]
+      },
+      {
+        "engine": "candidate",
+        "exit": 3,
+        "seconds": 0.019592399999964982,
+        "stdout": "",
+        "stderr": "main.fy:15:5: E1105: resource ownership differs at loop entry [bytes 198..257]\n  declaration: main.fy:14:15 [bytes 164..169]\n  move: main.fy:16:17 [bytes 229..234]\n  loop-header: main.fy:15:5 [bytes 198..209]\n",
+        "diagnostics": [
+          {
+            "code": "E1105",
+            "start": 198,
+            "end": 257
+          }
+        ]
+      }
+    ],
+    "statusMatch": true,
+    "firstDiagnosticMatch": true,
+    "goMatchesFixture": true
+  },
+  {
+    "family": "resource",
+    "id": "fail.flow.continue-state-mismatch",
+    "manifestSHA256": "e8a50e86ab356732fdf8fa9e1e114f3190e5f52b1f3c4c79c826c053aef9dfd8",
+    "expected": "fail",
+    "sources": [
+      {
+        "original": "spec/fixtures/resource/cases/fail/continue-state-mismatch/src/main.fy",
+        "sourceSHA256": "008d27dcebbbbe0f55227a45a40d94aa29385570139e18216f8db78e4c128d1e",
+        "projectSource": "main.fy"
+      }
+    ],
+    "observations": [
+      {
+        "engine": "go",
+        "exit": 3,
+        "seconds": 0.05108669999754056,
+        "stdout": "",
+        "stderr": "main.fy:15:5: E1105: loop body changes the resource state required by the next iteration [bytes 198..260]\n  declaration: main.fy:14:15 [bytes 164..169]\n  loop-header: main.fy:15:5 [bytes 198..209]\n  move: main.fy:16:17 [bytes 229..234]\n",
+        "diagnostics": [
+          {
+            "code": "E1105",
+            "start": 198,
+            "end": 260
+          }
+        ]
+      },
+      {
+        "engine": "candidate",
+        "exit": 3,
+        "seconds": 0.03211060000467114,
+        "stdout": "",
+        "stderr": "main.fy:15:5: E1105: resource ownership differs at loop entry [bytes 198..260]\n  declaration: main.fy:14:15 [bytes 164..169]\n  move: main.fy:16:17 [bytes 229..234]\n  loop-header: main.fy:15:5 [bytes 198..209]\n",
+        "diagnostics": [
+          {
+            "code": "E1105",
+            "start": 198,
+            "end": 260
+          }
+        ]
+      }
+    ],
+    "statusMatch": true,
+    "firstDiagnosticMatch": true,
+    "goMatchesFixture": true
+  }
+]

@@ -1,0 +1,475 @@
+[
+  {
+    "family": "semantic",
+    "id": "fail.type.external-resource-construction",
+    "manifestSHA256": "165b181c063b24cd6ef80c3e91b417840d3f1b2ea33a9eec635ae79341f332fa",
+    "expected": "fail",
+    "sources": [
+      {
+        "original": "spec/fixtures/semantic/cases/fail/external-resource-construction/src/lib.fy",
+        "sourceSHA256": "1145c055b68137ed0dd9e0be86a520d2a57f4aa6e73cf49059dc7fca2870532c",
+        "projectSource": "lib.fy"
+      },
+      {
+        "original": "spec/fixtures/semantic/cases/fail/external-resource-construction/src/main.fy",
+        "sourceSHA256": "65267f5cfd4ff9fb85cf1d704d720307d16bf6524157ece8b5d612b1037457b9",
+        "projectSource": "main.fy"
+      }
+    ],
+    "observations": [
+      {
+        "engine": "go",
+        "exit": 3,
+        "seconds": 0.05147639999631792,
+        "stdout": "",
+        "stderr": "main.fy:6:28: E0103: item is not visible from this module [bytes 77..87]\n  declaration: lib.fy:3:14 [bytes 26..31]\n",
+        "diagnostics": [
+          {
+            "code": "E0103",
+            "start": 77,
+            "end": 87
+          }
+        ]
+      },
+      {
+        "engine": "candidate",
+        "exit": 3,
+        "seconds": 0.019309299997985363,
+        "stdout": "",
+        "stderr": "main.fy:6:28: source is outside the supported compiler subset [bytes 77..87]\n",
+        "diagnostics": []
+      }
+    ],
+    "statusMatch": true,
+    "firstDiagnosticMatch": false,
+    "goMatchesFixture": true
+  },
+  {
+    "family": "semantic",
+    "id": "pass.type.package-state",
+    "manifestSHA256": "165b181c063b24cd6ef80c3e91b417840d3f1b2ea33a9eec635ae79341f332fa",
+    "expected": "pass",
+    "sources": [
+      {
+        "original": "spec/fixtures/semantic/cases/pass/package-state/src/state.fy",
+        "sourceSHA256": "2dff590904cbdc1fe83c73b20502368a3dfa384938bf975dc1eb8e7e023baacb",
+        "projectSource": "state.fy"
+      }
+    ],
+    "observations": [
+      {
+        "engine": "go",
+        "exit": 0,
+        "seconds": 0.05253769998671487,
+        "stdout": "check ok: 1 instance(s), 1 source file(s), 1 MIR function(s), lock updated\n",
+        "stderr": "",
+        "diagnostics": []
+      },
+      {
+        "engine": "candidate",
+        "exit": 3,
+        "seconds": 0.017052800016244873,
+        "stdout": "",
+        "stderr": "state.fy:3:1: source is outside the supported compiler subset [bytes 15..134]\n",
+        "diagnostics": []
+      }
+    ],
+    "statusMatch": false,
+    "firstDiagnosticMatch": true,
+    "goMatchesFixture": true
+  },
+  {
+    "family": "semantic",
+    "id": "fail.type.package-state-codec",
+    "manifestSHA256": "165b181c063b24cd6ef80c3e91b417840d3f1b2ea33a9eec635ae79341f332fa",
+    "expected": "fail",
+    "sources": [
+      {
+        "original": "spec/fixtures/semantic/cases/fail/package-state-codec/src/state.fy",
+        "sourceSHA256": "b47ff9e0d75e03f15dff483fbf4f22f909115cb3cb3efcbb86396eb1332d71fb",
+        "projectSource": "state.fy"
+      }
+    ],
+    "observations": [
+      {
+        "engine": "go",
+        "exit": 3,
+        "seconds": 0.06165809999220073,
+        "stdout": "",
+        "stderr": "state.fy:3:14: E7203: A package state field uses an unsupported or malformed storage codec declaration. [bytes 58..64]\n",
+        "diagnostics": [
+          {
+            "code": "E7203",
+            "start": 58,
+            "end": 64
+          }
+        ]
+      },
+      {
+        "engine": "candidate",
+        "exit": 3,
+        "seconds": 0.01983879998442717,
+        "stdout": "",
+        "stderr": "state.fy:2:1: source is outside the supported compiler subset [bytes 14..73]\n",
+        "diagnostics": []
+      }
+    ],
+    "statusMatch": true,
+    "firstDiagnosticMatch": false,
+    "goMatchesFixture": true
+  },
+  {
+    "family": "resource",
+    "id": "pass.flow.whole-move",
+    "manifestSHA256": "e8a50e86ab356732fdf8fa9e1e114f3190e5f52b1f3c4c79c826c053aef9dfd8",
+    "expected": "pass",
+    "sources": [
+      {
+        "original": "spec/fixtures/resource/cases/pass/whole-move/src/main.fy",
+        "sourceSHA256": "8080f0e9993c10e4aea1667709f335ffb6092dfc70702e889881062c608925f4",
+        "projectSource": "main.fy"
+      }
+    ],
+    "observations": [
+      {
+        "engine": "go",
+        "exit": 0,
+        "seconds": 0.051796200015814975,
+        "stdout": "check ok: 1 instance(s), 1 source file(s), 2 MIR function(s), lock updated\n",
+        "stderr": "",
+        "diagnostics": []
+      },
+      {
+        "engine": "candidate",
+        "exit": 0,
+        "seconds": 0.04041119999601506,
+        "stdout": "check ok: 1 instance(s), 1 source file(s), 3 MIR function(s), lock unchanged\n",
+        "stderr": "",
+        "diagnostics": []
+      }
+    ],
+    "statusMatch": true,
+    "firstDiagnosticMatch": true,
+    "goMatchesFixture": true
+  },
+  {
+    "family": "resource",
+    "id": "pass.flow.scope-cleanup",
+    "manifestSHA256": "e8a50e86ab356732fdf8fa9e1e114f3190e5f52b1f3c4c79c826c053aef9dfd8",
+    "expected": "pass",
+    "sources": [
+      {
+        "original": "spec/fixtures/resource/cases/pass/scope-cleanup/src/main.fy",
+        "sourceSHA256": "4f3efe665e14b6cb6bd7a8a4baaa786cec3dc04cb15d31311688cc90ce4589d2",
+        "projectSource": "main.fy"
+      }
+    ],
+    "observations": [
+      {
+        "engine": "go",
+        "exit": 0,
+        "seconds": 0.05166749999625608,
+        "stdout": "check ok: 1 instance(s), 1 source file(s), 2 MIR function(s), lock updated\n",
+        "stderr": "",
+        "diagnostics": []
+      },
+      {
+        "engine": "candidate",
+        "exit": 0,
+        "seconds": 0.038592299999436364,
+        "stdout": "check ok: 1 instance(s), 1 source file(s), 3 MIR function(s), lock unchanged\n",
+        "stderr": "",
+        "diagnostics": []
+      }
+    ],
+    "statusMatch": true,
+    "firstDiagnosticMatch": true,
+    "goMatchesFixture": true
+  },
+  {
+    "family": "resource",
+    "id": "pass.flow.balanced-branch",
+    "manifestSHA256": "e8a50e86ab356732fdf8fa9e1e114f3190e5f52b1f3c4c79c826c053aef9dfd8",
+    "expected": "pass",
+    "sources": [
+      {
+        "original": "spec/fixtures/resource/cases/pass/balanced-branch/src/main.fy",
+        "sourceSHA256": "71a59160906ad7f9cc3cc4f2786db74a9b82bffe3a67676b63d145c3cddcab41",
+        "projectSource": "main.fy"
+      }
+    ],
+    "observations": [
+      {
+        "engine": "go",
+        "exit": 0,
+        "seconds": 0.051092499983496964,
+        "stdout": "check ok: 1 instance(s), 1 source file(s), 2 MIR function(s), lock updated\n",
+        "stderr": "",
+        "diagnostics": []
+      },
+      {
+        "engine": "candidate",
+        "exit": 0,
+        "seconds": 0.03950060001807287,
+        "stdout": "check ok: 1 instance(s), 1 source file(s), 3 MIR function(s), lock unchanged\n",
+        "stderr": "",
+        "diagnostics": []
+      }
+    ],
+    "statusMatch": true,
+    "firstDiagnosticMatch": true,
+    "goMatchesFixture": true
+  },
+  {
+    "family": "resource",
+    "id": "pass.flow.reassign-live",
+    "manifestSHA256": "e8a50e86ab356732fdf8fa9e1e114f3190e5f52b1f3c4c79c826c053aef9dfd8",
+    "expected": "pass",
+    "sources": [
+      {
+        "original": "spec/fixtures/resource/cases/pass/reassign-live/src/main.fy",
+        "sourceSHA256": "cd5a8e6d596aba38de55b3e6227b3e200187dc55b12012606f570d1fea243638",
+        "projectSource": "main.fy"
+      }
+    ],
+    "observations": [
+      {
+        "engine": "go",
+        "exit": 0,
+        "seconds": 0.05040000000735745,
+        "stdout": "check ok: 1 instance(s), 1 source file(s), 1 MIR function(s), lock updated\n",
+        "stderr": "",
+        "diagnostics": []
+      },
+      {
+        "engine": "candidate",
+        "exit": 0,
+        "seconds": 0.037781499995617196,
+        "stdout": "check ok: 1 instance(s), 1 source file(s), 2 MIR function(s), lock unchanged\n",
+        "stderr": "",
+        "diagnostics": []
+      }
+    ],
+    "statusMatch": true,
+    "firstDiagnosticMatch": true,
+    "goMatchesFixture": true
+  },
+  {
+    "family": "resource",
+    "id": "pass.flow.reassign-dead",
+    "manifestSHA256": "e8a50e86ab356732fdf8fa9e1e114f3190e5f52b1f3c4c79c826c053aef9dfd8",
+    "expected": "pass",
+    "sources": [
+      {
+        "original": "spec/fixtures/resource/cases/pass/reassign-dead/src/main.fy",
+        "sourceSHA256": "7e671f2da928939e40b50523d8c9083aa13b21f703257e4ee487cf5873a78b61",
+        "projectSource": "main.fy"
+      }
+    ],
+    "observations": [
+      {
+        "engine": "go",
+        "exit": 0,
+        "seconds": 0.049222800007555634,
+        "stdout": "check ok: 1 instance(s), 1 source file(s), 2 MIR function(s), lock updated\n",
+        "stderr": "",
+        "diagnostics": []
+      },
+      {
+        "engine": "candidate",
+        "exit": 0,
+        "seconds": 0.036553299985826015,
+        "stdout": "check ok: 1 instance(s), 1 source file(s), 3 MIR function(s), lock unchanged\n",
+        "stderr": "",
+        "diagnostics": []
+      }
+    ],
+    "statusMatch": true,
+    "firstDiagnosticMatch": true,
+    "goMatchesFixture": true
+  },
+  {
+    "family": "resource",
+    "id": "fail.flow.use-after-move",
+    "manifestSHA256": "e8a50e86ab356732fdf8fa9e1e114f3190e5f52b1f3c4c79c826c053aef9dfd8",
+    "expected": "fail",
+    "sources": [
+      {
+        "original": "spec/fixtures/resource/cases/fail/use-after-move/src/main.fy",
+        "sourceSHA256": "b5d041d4d3312362cb6b227e6d5271164acde9503def621e89e8c37f30fad1ee",
+        "projectSource": "main.fy"
+      }
+    ],
+    "observations": [
+      {
+        "engine": "go",
+        "exit": 3,
+        "seconds": 0.06353729998227209,
+        "stdout": "",
+        "stderr": "main.fy:16:20: E1101: resource is used after ownership was moved [bytes 240..245]\n  declaration: main.fy:14:15 [bytes 155..160]\n  move: main.fy:15:29 [bytes 213..218]\n",
+        "diagnostics": [
+          {
+            "code": "E1101",
+            "start": 240,
+            "end": 245
+          }
+        ]
+      },
+      {
+        "engine": "candidate",
+        "exit": 3,
+        "seconds": 0.02517089998582378,
+        "stdout": "",
+        "stderr": "main.fy:16:20: E1101: resource is used after ownership was moved [bytes 240..245]\n  declaration: main.fy:14:15 [bytes 155..160]\n  move: main.fy:15:29 [bytes 213..218]\n",
+        "diagnostics": [
+          {
+            "code": "E1101",
+            "start": 240,
+            "end": 245
+          }
+        ]
+      }
+    ],
+    "statusMatch": true,
+    "firstDiagnosticMatch": true,
+    "goMatchesFixture": true
+  },
+  {
+    "family": "resource",
+    "id": "fail.flow.use-after-option-match",
+    "manifestSHA256": "e8a50e86ab356732fdf8fa9e1e114f3190e5f52b1f3c4c79c826c053aef9dfd8",
+    "expected": "fail",
+    "sources": [
+      {
+        "original": "spec/fixtures/resource/cases/fail/use-after-option-match/src/main.fy",
+        "sourceSHA256": "ace809bdb466a69ab500366e57507e249aecdb0742224c005986d176252fb253",
+        "projectSource": "main.fy"
+      }
+    ],
+    "observations": [
+      {
+        "engine": "go",
+        "exit": 3,
+        "seconds": 0.055895800003781915,
+        "stdout": "",
+        "stderr": "main.fy:15:5: E1101: resource is used after ownership was moved [bytes 264..271]\n  declaration: main.fy:10:23 [bytes 103..110]\n  move: main.fy:11:29 [bytes 171..178]\n",
+        "diagnostics": [
+          {
+            "code": "E1101",
+            "start": 264,
+            "end": 271
+          }
+        ]
+      },
+      {
+        "engine": "candidate",
+        "exit": 3,
+        "seconds": 0.020067400007974356,
+        "stdout": "",
+        "stderr": "main.fy:15:5: E1101: resource is used after ownership was moved [bytes 264..271]\n  declaration: main.fy:10:23 [bytes 103..110]\n  move: main.fy:11:29 [bytes 171..178]\n",
+        "diagnostics": [
+          {
+            "code": "E1101",
+            "start": 264,
+            "end": 271
+          }
+        ]
+      }
+    ],
+    "statusMatch": true,
+    "firstDiagnosticMatch": true,
+    "goMatchesFixture": true
+  },
+  {
+    "family": "resource",
+    "id": "fail.flow.partial-field-move",
+    "manifestSHA256": "e8a50e86ab356732fdf8fa9e1e114f3190e5f52b1f3c4c79c826c053aef9dfd8",
+    "expected": "fail",
+    "sources": [
+      {
+        "original": "spec/fixtures/resource/cases/fail/partial-field-move/src/main.fy",
+        "sourceSHA256": "d99cf837c4adb8292bf4e399e6ae3f86dad63c7619ec21cf9972aa87a02100e1",
+        "projectSource": "main.fy"
+      }
+    ],
+    "observations": [
+      {
+        "engine": "go",
+        "exit": 3,
+        "seconds": 0.05559699999867007,
+        "stdout": "",
+        "stderr": "main.fy:21:27: E1103: moving a field out of a resource is not supported [bytes 289..298]\n  field: main.fy:10:11 [bytes 91..95]\n  owner: main.fy:17:14 [bytes 165..169]\n",
+        "diagnostics": [
+          {
+            "code": "E1103",
+            "start": 289,
+            "end": 298
+          }
+        ]
+      },
+      {
+        "engine": "candidate",
+        "exit": 3,
+        "seconds": 0.019421099976170808,
+        "stdout": "",
+        "stderr": "main.fy:21:27: E1103: resource field cannot be moved separately [bytes 289..298]\n  declaration: main.fy:17:14 [bytes 165..169]\n",
+        "diagnostics": [
+          {
+            "code": "E1103",
+            "start": 289,
+            "end": 298
+          }
+        ]
+      }
+    ],
+    "statusMatch": true,
+    "firstDiagnosticMatch": true,
+    "goMatchesFixture": true
+  },
+  {
+    "family": "resource",
+    "id": "fail.flow.branch-maybe-live",
+    "manifestSHA256": "e8a50e86ab356732fdf8fa9e1e114f3190e5f52b1f3c4c79c826c053aef9dfd8",
+    "expected": "fail",
+    "sources": [
+      {
+        "original": "spec/fixtures/resource/cases/fail/branch-maybe-live/src/main.fy",
+        "sourceSHA256": "815382cddb956ba2005422261b789ef1570603be4dff85d955bbd50bb9eec3f5",
+        "projectSource": "main.fy"
+      }
+    ],
+    "observations": [
+      {
+        "engine": "go",
+        "exit": 3,
+        "seconds": 0.05188980000093579,
+        "stdout": "",
+        "stderr": "main.fy:15:22: E1104: branch join leaves resource ownership path-dependent [bytes 215..254]\n  declaration: main.fy:14:15 [bytes 164..169]\n  move: main.fy:15:42 [bytes 235..240]\n",
+        "diagnostics": [
+          {
+            "code": "E1104",
+            "start": 215,
+            "end": 254
+          }
+        ]
+      },
+      {
+        "engine": "candidate",
+        "exit": 3,
+        "seconds": 0.020015899994177744,
+        "stdout": "",
+        "stderr": "main.fy:15:22: E1104: resource ownership differs between branches [bytes 215..254]\n  declaration: main.fy:14:15 [bytes 164..169]\n  move: main.fy:15:42 [bytes 235..240]\n",
+        "diagnostics": [
+          {
+            "code": "E1104",
+            "start": 215,
+            "end": 254
+          }
+        ]
+      }
+    ],
+    "statusMatch": true,
+    "firstDiagnosticMatch": true,
+    "goMatchesFixture": true
+  }
+]

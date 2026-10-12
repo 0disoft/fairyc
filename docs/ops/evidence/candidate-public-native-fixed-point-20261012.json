@@ -1,0 +1,312 @@
+{
+  "schema": "fairyc.candidate-public-native-fixed-point/v1",
+  "passed": true,
+  "scope": "Consecutive Fairy-produced C-part generations including the native build/run dispatcher",
+  "artifactPolicy": {
+    "identity": "fairyc.private-project-image-repro/v1",
+    "compilerFlags": [
+      "/Brepro"
+    ],
+    "linkerFlags": [
+      "/INCREMENTAL:NO",
+      "/Brepro"
+    ],
+    "comparison": "Exact full PE image bytes",
+    "excludedBytes": []
+  },
+  "sourceInventorySHA256": "8f4d1a682190e895abbca5d1911e19831b267513c737c7244519a5d7623a7318",
+  "sourceFiles": 369,
+  "frontendTimeoutSeconds": 900,
+  "seed": {
+    "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-public-native-cli-20261012\\release\\fairyc.exe",
+    "bytes": 4257280,
+    "sha256": "365b89efb757a5ddcd0f248dfe7eae16906b85e3e51addd22cf6c9dbb13e0e66"
+  },
+  "builder": {
+    "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-rooted-builder-20261012.exe",
+    "bytes": 4786176,
+    "sha256": "78d6732a5549d46eeff5120ee30513b71e00ce6d6f74e796bd0d9c87e7c0fb97"
+  },
+  "frontends": [
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-public-native-cli-20261012\\release\\fairyc.exe",
+        "--c-project-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-public-native-cli-rooted-20261012\\sources.list"
+      ],
+      "exit": 0,
+      "seconds": 78.73610749997897,
+      "stderr": "",
+      "stage": 1,
+      "stdoutBytes": 29998661
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-public-native-cli-rooted-20261012\\release\\fairyc.exe",
+        "--c-project-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-public-native-fixed-point-20261012\\self-source.manifest"
+      ],
+      "exit": 0,
+      "seconds": 91.47417649999261,
+      "stderr": "",
+      "stdoutBytes": 29998661,
+      "stage": 2
+    }
+  ],
+  "builds": [
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-rooted-builder-20261012.exe",
+        "--packet",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-public-native-cli-rooted-20261012\\packet.bin",
+        "--packet-sha256",
+        "a042b12a879ab16ce4c4a6b389139a039f2f16a624aa653db644fa7ddae92abe",
+        "--output",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-public-native-cli-rooted-20261012\\release\\fairyc.exe",
+        "--release"
+      ],
+      "exit": 0,
+      "seconds": 322.74374080001144,
+      "stderr": "",
+      "stage": 1,
+      "reusedValidatedBuild": true
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-rooted-builder-20261012.exe",
+        "--packet",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-public-native-fixed-point-20261012\\stage2-input.bin",
+        "--packet-sha256",
+        "a042b12a879ab16ce4c4a6b389139a039f2f16a624aa653db644fa7ddae92abe",
+        "--output",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-public-native-fixed-point-20261012\\stage2.exe",
+        "--release"
+      ],
+      "exit": 0,
+      "seconds": 317.2179804999905,
+      "stderr": "",
+      "stdoutBytes": 188,
+      "stdout": "built: C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-public-native-fixed-point-20261012\\stage2.exe (optimized, 46 C units, 4257280 bytes)\n",
+      "stage": 2
+    }
+  ],
+  "packets": [
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-public-native-cli-rooted-20261012\\packet.bin",
+      "bytes": 29998661,
+      "sha256": "a042b12a879ab16ce4c4a6b389139a039f2f16a624aa653db644fa7ddae92abe"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-public-native-fixed-point-20261012\\stage2-input.bin",
+      "bytes": 29998661,
+      "sha256": "a042b12a879ab16ce4c4a6b389139a039f2f16a624aa653db644fa7ddae92abe"
+    }
+  ],
+  "seedPacketSHA256": "a042b12a879ab16ce4c4a6b389139a039f2f16a624aa653db644fa7ddae92abe",
+  "packetSHA256": "a042b12a879ab16ce4c4a6b389139a039f2f16a624aa653db644fa7ddae92abe",
+  "stage1": {
+    "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-public-native-cli-rooted-20261012\\release\\fairyc.exe",
+    "bytes": 4257280,
+    "sha256": "e4f84720790ef4d2150635578178fb299408988e0fe0fcbfea0e4a0d1c7b6cdd"
+  },
+  "stage2": {
+    "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-public-native-fixed-point-20261012\\stage2.exe",
+    "bytes": 4257280,
+    "sha256": "e4f84720790ef4d2150635578178fb299408988e0fe0fcbfea0e4a0d1c7b6cdd"
+  },
+  "reusedStage1ReceiptSHA256": "da16f4b9ca2e88424204cdf3e3bc5ea9f43035c4def6be3d689402b96800b8b6",
+  "reusedReceiptSHA256": "dd159f677253683ac1760ca4b9f5ad820c3c9659e47a39a61f9bc89e255a659a",
+  "seedImageSHA256": "365b89efb757a5ddcd0f248dfe7eae16906b85e3e51addd22cf6c9dbb13e0e66",
+  "manifestSHA256": "d7ee5c429788c13c15880c8ec22ff048cc7bcae85e8fe2c957e126083d4e83b2",
+  "lexerDifferential": {
+    "schema": "fairyc.candidate-bootstrap-lexer-differential/v1",
+    "passed": true,
+    "fixturesSHA256": "ef701e3bb16f46c8f7499be2e99498ea4b298a690db97405a3ebb0b24e4ab6ed",
+    "referenceImageSHA256": "762b4d739b70885dc67b9c0301a57f271a6438e5042360e8785ac124e4d57757",
+    "referenceReportSHA256": "53fde54b05bb782c9e21bef7a6a12a5149245d5c3bcecc29c4ffcf9d6cf03b5e",
+    "inputSHA256": "bad8f8f9823246bebef08dbc5aabced8b59ae830338b7b47772068bd27ba6b4a",
+    "inputBytes": 17652,
+    "cases": 249,
+    "oracle": "Current Go lexer canonical tokens, cooked bytes, diagnostics and spans",
+    "observations": [
+      {
+        "stage": "go-produced-seed",
+        "imageSHA256": "365b89efb757a5ddcd0f248dfe7eae16906b85e3e51addd22cf6c9dbb13e0e66",
+        "seconds": 0.3803554000041913,
+        "cases": 249,
+        "stdoutBytes": 56480,
+        "stdoutSHA256": "8fbb3b6fced01d08c4860e21fabfa56c99257e2096f56af645bf15415530747d",
+        "malformedFrames": [
+          {
+            "case": 0,
+            "exit": 8
+          },
+          {
+            "case": 1,
+            "exit": 8
+          },
+          {
+            "case": 2,
+            "exit": 8
+          },
+          {
+            "case": 3,
+            "exit": 8
+          },
+          {
+            "case": 4,
+            "exit": 8
+          },
+          {
+            "case": 5,
+            "exit": 8
+          },
+          {
+            "case": 6,
+            "exit": 4
+          }
+        ]
+      },
+      {
+        "stage": "stage1",
+        "imageSHA256": "e4f84720790ef4d2150635578178fb299408988e0fe0fcbfea0e4a0d1c7b6cdd",
+        "seconds": 0.3482454999757465,
+        "cases": 249,
+        "stdoutBytes": 56480,
+        "stdoutSHA256": "8fbb3b6fced01d08c4860e21fabfa56c99257e2096f56af645bf15415530747d",
+        "malformedFrames": [
+          {
+            "case": 0,
+            "exit": 8
+          },
+          {
+            "case": 1,
+            "exit": 8
+          },
+          {
+            "case": 2,
+            "exit": 8
+          },
+          {
+            "case": 3,
+            "exit": 8
+          },
+          {
+            "case": 4,
+            "exit": 8
+          },
+          {
+            "case": 5,
+            "exit": 8
+          },
+          {
+            "case": 6,
+            "exit": 4
+          }
+        ]
+      },
+      {
+        "stage": "stage2",
+        "imageSHA256": "e4f84720790ef4d2150635578178fb299408988e0fe0fcbfea0e4a0d1c7b6cdd",
+        "seconds": 0.36562170000979677,
+        "cases": 249,
+        "stdoutBytes": 56480,
+        "stdoutSHA256": "8fbb3b6fced01d08c4860e21fabfa56c99257e2096f56af645bf15415530747d",
+        "malformedFrames": [
+          {
+            "case": 0,
+            "exit": 8
+          },
+          {
+            "case": 1,
+            "exit": 8
+          },
+          {
+            "case": 2,
+            "exit": 8
+          },
+          {
+            "case": 3,
+            "exit": 8
+          },
+          {
+            "case": 4,
+            "exit": 8
+          },
+          {
+            "case": 5,
+            "exit": 8
+          },
+          {
+            "case": 6,
+            "exit": 4
+          }
+        ]
+      }
+    ],
+    "scope": "Lexer and private framing only; parser, typing and executable behavior require separate differential evidence"
+  },
+  "productTimeoutChanged": false,
+  "promotionGateReady": false,
+  "deferred": [
+    "Fix workspace borrow/control false acceptance",
+    "Complete diagnostic/feature parity",
+    "Linux",
+    "Current-commit hosted CI",
+    "Cost/package/readiness work"
+  ],
+  "pushed": false,
+  "baselineCommit": "1ce8d6b9",
+  "shippingCompilerChanged": false,
+  "nativeCli": {
+    "path": "docs/ops/evidence/candidate-fixed-point-native-cli-20261012.json",
+    "sha256": "3d571e20596c089c0caf76f585f46bea18fdd339305979ca648b1eb76b620a44",
+    "cases": 15
+  },
+  "frontendCorpusProbe": {
+    "cases": 75,
+    "goMatchesFixture": 75,
+    "statusDifferences": 11,
+    "firstDiagnosticDifferences": 35,
+    "parts": [
+      {
+        "path": "docs/ops/evidence/candidate-frontend-probe-20261012-1.json",
+        "cases": 12,
+        "sha256": "ec0acb84463b09e594980206b8fa7dbb9606c0613fdae0cabea7ae8b642365a2"
+      },
+      {
+        "path": "docs/ops/evidence/candidate-frontend-probe-20261012-2.json",
+        "cases": 12,
+        "sha256": "087b3c6bc2d173735e806f3b1c221c7b4b66a1429a6aac15890c3b0d5f65cbbf"
+      },
+      {
+        "path": "docs/ops/evidence/candidate-frontend-probe-20261012-3.json",
+        "cases": 12,
+        "sha256": "6622412056890de8df24dc917348a15e0cfde699dd992ee37063fe6907b72a94"
+      },
+      {
+        "path": "docs/ops/evidence/candidate-frontend-probe-20261012-4.json",
+        "cases": 12,
+        "sha256": "8f43cd1a6852c1fccd8d711452f6f904b68bec9c835c255a4db7c1d6db8da037"
+      },
+      {
+        "path": "docs/ops/evidence/candidate-frontend-probe-20261012-5.json",
+        "cases": 12,
+        "sha256": "348e203bf5dab47275431b9817f04dcccb4ba579716ae25a6fc27b2d6554edf9"
+      },
+      {
+        "path": "docs/ops/evidence/candidate-frontend-probe-20261012-6.json",
+        "cases": 12,
+        "sha256": "d033f4368c30f372691fa83ed2fae7e10cd61d179e29dcaa48c2efc990f05c74"
+      },
+      {
+        "path": "docs/ops/evidence/candidate-frontend-probe-20261012-7.json",
+        "cases": 3,
+        "sha256": "d9774935db87032935a448287d0122cdc0113320d5e09adc21dadb20c59a230c"
+      }
+    ],
+    "scope": "Workspace check status and first diagnostic code/span; semantic fact tables are not compared.",
+    "oracleSHA256": "3ecc4501ee3bb47ecc39e7288200266b31cbcd8bf6ffec302ae54867705ce5d1",
+    "correctedHarness": "Fixture UID numeric segment replaced with caseN; Go status and first diagnostic code now match all original fixtures."
+  }
+}

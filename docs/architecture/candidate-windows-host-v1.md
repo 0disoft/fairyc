@@ -267,6 +267,23 @@ it was changed to the public Buffer while retaining the full 8192-byte argument.
 An overly narrow verifier prefix check was also corrected for source-positioned
 entry diagnostics. No SDK ABI, DB or CI change; no push.
 CLI receipt: [candidate-public-native-cli-20261012.json](../ops/evidence/candidate-public-native-cli-20261012.json).
+
+## Current native dispatcher fixed point
+
+At snapshot `1ce8d6b9`, consecutive complete 369-source C-part generations emit
+the same 29998661 bytes and produce identical entire 4257280-byte PE images,
+SHA256 `e4f84720790ef4d2150635578178fb299408988e0fe0fcbfea0e4a0d1c7b6cdd`.
+The previously successful first-generation build is reused only after matching
+source inventory, packet, image and driver hashes. The next generation is newly
+emitted/built and passes 249 Go lexer cases/framing plus 15 native CLI invocations.
+
+A 75-case semantic/resource workspace-check probe then finds 11 status and 35
+first-diagnostic differences against a freshly built Go oracle. The candidate
+accepts eight invalid loop/borrow cases and rejects three valid feature cases;
+several source errors also lose their semantic codes behind subset messages.
+These gaps must be resolved before promotion. Full semantic fact tables, Linux,
+hosted CI and cost/package gates remain unverified. No shipped compiler change
+or push. Receipt: [candidate-public-native-fixed-point-20261012.json](../ops/evidence/candidate-public-native-fixed-point-20261012.json).
 Native records and flags follow [STARTUPINFOW](https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/ns-processthreadsapi-startupinfow),
 [extended job limits](https://learn.microsoft.com/en-us/windows/win32/api/winnt/ns-winnt-jobobject_extended_limit_information),
 [CreateProcessW](https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-createprocessw)

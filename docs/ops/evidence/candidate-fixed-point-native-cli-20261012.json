@@ -1,0 +1,249 @@
+{
+  "schema": "fairyc.candidate-native-cli-execution/v1",
+  "passed": true,
+  "executions": [
+    {
+      "label": "release invalid build option",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-public-native-fixed-point-20261012\\stage2.exe",
+        "build",
+        "--bad"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-public-native-fixed-point-20261012\\native-cli\\fixtures\\release\\run-1791778257762719600\\\ud55c\uae00 simple",
+      "exit": 2,
+      "seconds": 0.016467300010845065,
+      "stdoutBytes": 0,
+      "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr": "fairyc: command \"build\" accepts only optional --release and --locked\n"
+    },
+    {
+      "label": "release duplicate run option",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-public-native-fixed-point-20261012\\stage2.exe",
+        "run",
+        "--locked",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-public-native-fixed-point-20261012\\native-cli\\fixtures\\release\\run-1791778257762719600\\\ud55c\uae00 simple",
+      "exit": 2,
+      "seconds": 0.016226200008532032,
+      "stdoutBytes": 0,
+      "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr": "fairyc: command \"run\" received --locked more than once\n"
+    },
+    {
+      "label": "release default build",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-public-native-fixed-point-20261012\\stage2.exe",
+        "build"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-public-native-fixed-point-20261012\\native-cli\\fixtures\\release\\run-1791778257762719600\\\ud55c\uae00 simple",
+      "exit": 0,
+      "seconds": 0.6464629000111017,
+      "stdoutBytes": 77,
+      "stdoutSHA256": "a0f63ec9c7afc1f41d79cc4507acf020d234ca5940594693caccd53bb322dc0a",
+      "stderr": ""
+    },
+    {
+      "label": "release built executable",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-public-native-fixed-point-20261012\\native-cli\\fixtures\\release\\run-1791778257762719600\\\ud55c\uae00 simple\\build\\native-app.exe"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-public-native-fixed-point-20261012\\native-cli\\fixtures\\release\\run-1791778257762719600\\\ud55c\uae00 simple",
+      "exit": 42,
+      "seconds": 0.02395289999549277,
+      "stdoutBytes": 0,
+      "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr": ""
+    },
+    {
+      "label": "release locked release build",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-public-native-fixed-point-20261012\\stage2.exe",
+        "build",
+        "--release",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-public-native-fixed-point-20261012\\native-cli\\fixtures\\release\\run-1791778257762719600\\\ud55c\uae00 simple",
+      "exit": 0,
+      "seconds": 0.6288424000085797,
+      "stdoutBytes": 74,
+      "stdoutSHA256": "21ea3a2c6c40c97f011b39d9da92ca39879353015584ea2f203cf1d80fbff84c",
+      "stderr": ""
+    },
+    {
+      "label": "release ordinary run exit",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-public-native-fixed-point-20261012\\stage2.exe",
+        "run",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-public-native-fixed-point-20261012\\native-cli\\fixtures\\release\\run-1791778257762719600\\\ud55c\uae00 simple",
+      "exit": 42,
+      "seconds": 1.1299036999989767,
+      "stdoutBytes": 0,
+      "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr": ""
+    },
+    {
+      "label": "release missing companion",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-public-native-fixed-point-20261012\\native-cli\\release-missing-driver\\fairyc.exe",
+        "build",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-public-native-fixed-point-20261012\\native-cli\\fixtures\\release\\run-1791778257762719600\\\ud55c\uae00 simple",
+      "exit": 6,
+      "seconds": 0.08134090001112781,
+      "stdoutBytes": 0,
+      "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr": "fairyc: build failed: native driver execution failed\n"
+    },
+    {
+      "label": "release stale lock",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-public-native-fixed-point-20261012\\stage2.exe",
+        "build",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-public-native-fixed-point-20261012\\native-cli\\fixtures\\release\\run-1791778257762719600\\\ud55c\uae00 simple",
+      "exit": 7,
+      "seconds": 0.02245799999218434,
+      "stdoutBytes": 0,
+      "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr": "fairyc: package workspace failure: lockfile is stale for the current workspace\n"
+    },
+    {
+      "label": "release output directory escape",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-public-native-fixed-point-20261012\\stage2.exe",
+        "build"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-public-native-fixed-point-20261012\\native-cli\\fixtures\\release\\run-1791778257762719600\\\ud55c\uae00 output-alias",
+      "exit": 6,
+      "seconds": 0.6496706000179984,
+      "stdoutBytes": 0,
+      "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr": "fairyc: build failed: mkdirat build: statat build: path escapes from parent\n"
+    },
+    {
+      "label": "release argv stdin stdout stderr and reserved ordinary exit",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-public-native-fixed-point-20261012\\stage2.exe",
+        "run",
+        "--",
+        "plain",
+        "",
+        "\ud55c\uae00\ud83e\uddda",
+        "ends\\",
+        "quote\"here",
+        "--release",
+        {
+          "bytes": 8192,
+          "sha256": "18f8d2eb4a387bbc1e37ec099a7326805739bc9c99ecf0f14b808a5bcb65bf49"
+        }
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-public-native-fixed-point-20261012\\native-cli\\fixtures\\release\\run-1791778257762719600\\\ud55c\uae00 io",
+      "exit": 134,
+      "seconds": 5.045160900015617,
+      "stdoutBytes": 8251,
+      "stdoutSHA256": "09c46040c27d32bea10921258c27d1caa1a596e9c9fd2ad6b322802f58faffc3",
+      "stderr": "child stderr\n"
+    },
+    {
+      "label": "release recognized trap",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-public-native-fixed-point-20261012\\stage2.exe",
+        "run",
+        "--release"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-public-native-fixed-point-20261012\\native-cli\\fixtures\\release\\run-1791778257762719600\\\ud55c\uae00 trap",
+      "exit": 5,
+      "seconds": 1.2143841999932192,
+      "stdoutBytes": 0,
+      "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr": "trap: assertion-failed\n"
+    },
+    {
+      "label": "release full Windows exit bits",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-public-native-fixed-point-20261012\\stage2.exe",
+        "run"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-public-native-fixed-point-20261012\\native-cli\\fixtures\\release\\run-1791778257762719600\\\ud55c\uae00 negative",
+      "exit": 4294967295,
+      "seconds": 1.128511199989589,
+      "stdoutBytes": 0,
+      "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr": ""
+    },
+    {
+      "label": "release invalid entry",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-public-native-fixed-point-20261012\\stage2.exe",
+        "build"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-public-native-fixed-point-20261012\\native-cli\\fixtures\\release\\run-1791778257762719600\\\ud55c\uae00 invalid",
+      "exit": 2,
+      "seconds": 0.04509160001180135,
+      "stdoutBytes": 0,
+      "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr": "main.fy:1:13: fairyc: candidate workspace root entry main::main must have type fn() -> i32\n"
+    },
+    {
+      "label": "release missing lock",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-public-native-fixed-point-20261012\\stage2.exe",
+        "run",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-public-native-fixed-point-20261012\\native-cli\\fixtures\\release\\run-1791778257762719600\\\ud55c\uae00 missing",
+      "exit": 7,
+      "seconds": 0.0184268000011798,
+      "stdoutBytes": 0,
+      "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr": "fairyc: package workspace failure: locked workspace requires a valid fairy.lock: lockfile is not a bounded regular file\n"
+    },
+    {
+      "label": "release bounded combined output",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-public-native-fixed-point-20261012\\stage2.exe",
+        "run"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-public-native-fixed-point-20261012\\native-cli\\fixtures\\release\\run-1791778257762719600\\\ud55c\uae00 output-limit",
+      "exit": 6,
+      "seconds": 4.99281319999136,
+      "stdoutBytes": 0,
+      "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr": "fairyc: build failed: program execution failed\n"
+    }
+  ],
+  "profiles": [
+    "release"
+  ],
+  "images": {
+    "release": {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-public-native-fixed-point-20261012\\stage2.exe",
+      "sha256": "e4f84720790ef4d2150635578178fb299408988e0fe0fcbfea0e4a0d1c7b6cdd",
+      "driverSHA256": "78d6732a5549d46eeff5120ee30513b71e00ce6d6f74e796bd0d9c87e7c0fb97"
+    }
+  },
+  "productGoFrontendInvoked": false,
+  "goReferenceInvocations": 0,
+  "arguments": {
+    "values": [
+      "plain",
+      "",
+      "\ud55c\uae00\ud83e\uddda",
+      "ends\\",
+      "quote\"here",
+      "--release"
+    ],
+    "lastRepeatedByte": "x",
+    "lastBytes": 8192
+  },
+  "stdinSHA256": "076658b4ee84d2e2a8ff4980bf32a67b4f8f141104cf98b2c8466e02f97216f8",
+  "programStdoutSHA256": "09c46040c27d32bea10921258c27d1caa1a596e9c9fd2ad6b322802f58faffc3",
+  "scratchDirectoryLeaks": false,
+  "verifierSHA256": "d5191303ef5e6ad022c3f577edfca70854d105f5742e6cf26cc61601f0ac5ce7"
+}
