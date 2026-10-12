@@ -1,12 +1,34 @@
 # Fairy 컴파일러 전환: 후속 작업 목록
 
+## Target-neutral c::ssize_t identity connected (2026-10-12)
+
+All 16 declared C scalar identities now survive semantic and MIR transport.
+Legacy C output selects POSIX.1-2008 before system headers and checks the real
+8-byte signed ssize_t ABI; Windows MSVC rejects at the explicit target guard.
+Three authored tests pass Go native and both candidate C profiles. Source check
+passes 385 files / 4887 MIR functions with the current lock verified. All 378
+self sources build one complete 4,376,064-byte release image with an explicit
+16 MiB stack; current-source consecutive-generation fixed point remains open.
+
+Fresh comparison matches 73/75 cases, retaining one status gap (package state)
+and one first-code/span gap (package-state codec). All other prior candidate
+observations are preserved. Six live CLI cases also match reference exit and
+first diagnostic code/span, including c::ssize_t and named arguments. E1014
+live routing is verified; broader/multiple diagnostics remain open.
+Owned project C output still rejects c::ssize_t with zero partial stdout.
+Linux positive ABI/native execution remains unverified after the local WSL
+probe failed. Product timeout/default stack, Linux/full suite and hosted CI
+remain promotion gates. Public API, SDK ABI, DB, hygiene, CI and runner settings
+are unchanged; no push. Receipt:
+`evidence/candidate-ssize-semantic-20261012.json`.
+
 ## Argument-label diagnostic output registered (2026-10-12)
 
 The shared analysis diagnostic output now retains E1014, already declared in the
 public diagnostic catalog. It no longer drops ordinary/const-eval named-argument
 failures into an unnamed subset fallback. Two authored boundary tests pass both
 candidate C profiles; source check passes 385 files / 4886 MIR functions. The
-dispatcher image and live CLI cases are batched with the next C-scalar unit.
+dispatcher image and six live CLI cases now pass in the C-scalar unit above.
 Public API, SDK ABI, DB, hygiene, CI, runner and product timeouts are unchanged;
 no push. Receipt: `evidence/candidate-argument-label-code-20261012.json`.
 

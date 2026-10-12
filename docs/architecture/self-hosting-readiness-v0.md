@@ -9,8 +9,8 @@ identical 30136053-byte C packets and identical full 4280832-byte Stage1/Stage2
 images. Stage2 processes all 370 admitted repository sources in 253.81 seconds
 and emits the identical packet; both generations pass 249 lexer/framing cases.
 The diagnostic-output and span revisions reduce first-code/span differences
-from 27 to nine, five, two and then one over 75 fresh paired observations, retaining two
-status differences while preserving the other candidate observations. Six additional cases match
+from 27 to nine, five, two and then one over 75 fresh paired observations, retaining one
+status difference after c::ssize_t admission while preserving other observations. Six additional cases match
 the first diagnostic's path/line/column/span and attached provider declaration
 locations; multiple semantic diagnostics remain a separate parity requirement.
 The diagnostic-span snapshot's 371 self sources emit and build a complete private native release
@@ -33,17 +33,27 @@ five programs pass ten native development/release executions. Source check passe
 complete 4,376,576-byte release image with the explicit 16 MiB stack. The full
 current-source consecutive-generation fixed-point replay remains a later gate.
 
-Named-label/multiple diagnostic output remains open. E1014 is registered in the
-source; live dispatcher replay is batched with C-scalar admission. The grammar
-has no user scalar type-alias declaration, so no alias-admission gate is added. Extra probes record Go reference differences without claiming full semantic
-parity: Go accepts an ill-typed unselected if/logical branch, and reports E4302 for
-wrong const-eval arity while candidate uses E1010. The fresh 75-case comparison
-retains two status gaps (c::ssize_t and package state) and one first-code/span gap
-(package-state codec). Evidence:
+All 16 declared C scalar identities, including c::ssize_t, now survive semantic
+and MIR transport. Legacy C output requires POSIX.1-2008 before system headers
+and proves 8-byte signed ssize_t; Windows MSVC rejects at the target guard.
+Three authored tests pass Go native and both candidate C profiles. Source check
+passes 385 files / 4887 MIR functions. All 378 current self sources build one
+complete 4,376,064-byte release image with an explicit 16 MiB stack. Owned project
+C output for ssize_t remains closed; Linux positive execution is unverified.
+The fresh 75-case comparison matches 73 cases, retaining one status gap (package
+state) and one first-code/span gap (package-state codec). Six live CLI cases match
+reference exit and first diagnostic code/span, including E1014 named arguments.
+Broader/multiple diagnostics and current-source fixed-point replay remain open.
+The grammar has no user scalar type-alias declaration, so no alias gate is added.
+Extra probes record Go reference differences: Go accepts an ill-typed unselected
+if/logical branch and reports E4302 for wrong const-eval arity while candidate
+uses E1010. Full semantic parity is not claimed. Evidence:
 [constant arithmetic](../ops/evidence/candidate-constant-arithmetic-20261012.json),
 [connected module constants](../ops/evidence/candidate-constant-engine-20261012.json),
-[const-eval declaration admission](../ops/evidence/candidate-const-eval-declarations-20261012.json),
-[const-eval execution](../ops/evidence/candidate-const-eval-calls-20261012.json).
+[const-eval declarations](../ops/evidence/candidate-const-eval-declarations-20261012.json),
+[const-eval execution](../ops/evidence/candidate-const-eval-calls-20261012.json),
+[named-argument diagnostic](../ops/evidence/candidate-argument-label-code-20261012.json),
+[c::ssize_t semantic identity](../ops/evidence/candidate-ssize-semantic-20261012.json).
 
 Public borrow admission is complete, while full frontend/executable
 parity, product timeout/host-stack integration, Linux/full suite and same-head

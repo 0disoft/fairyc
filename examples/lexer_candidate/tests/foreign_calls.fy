@@ -60,7 +60,7 @@ fn m::Program changed(ref m::Program p,u32 mutation){
 }
 
 @test fn void c_scalar_identity_and_cast_lane_are_closed(){
-    var u32 type=128;while(type<=143){assert(c_types::valid(type)==(type!=138));assert(!pointers::valid(type) && !tags::builtin(type) && !arrays::valid(type));type+=1;}
+    var u32 type=128;while(type<=143){assert(c_types::valid(type));assert(!pointers::valid(type) && !tags::builtin(type) && !arrays::valid(type));type+=1;}
     assert(c_types::named(b"c::int")==132 && c_types::named(b"c::longdouble")==0 && c_types::named(b"c::ssize_t")==138);
     assert(casts::allowed(1,132) && casts::allowed(132,1));assert(!casts::allowed(4,140) && !casts::allowed(128,6));
     let p=switch(lower::lower(fixture::retained(b"module main;@link_name(\"fixture_make_int\")unsafe extern C fn c::int host();fn i32 main(){let c::int n=unsafe{host()};return n as i32;}"))){case .ok(p):{p}case .err(_):{assert(false);return;}};

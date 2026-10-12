@@ -1,9 +1,9 @@
 module c_abi_types;
 import syntax as syntax;
 import std::bytes as bytes;
-// Closed TargetSpec scalar identities; POSIX-only ssize_t waits for explicit
-// target selection. C scalar values have transport, not Fairy literal/operators.
-pub fn bool valid(u32 type){return type>=128 && type<=143 && type!=138;}
+// Semantic identities are independent of target availability. The C emitter
+// proves each target ABI before using its spelling; no Fairy literals/operators.
+pub fn bool valid(u32 type){return type>=128 && type<=143;}
 pub fn u32 named(ref u8[] text){return if(bytes::equal(text,b"c::bool")){128} else if(bytes::equal(text,b"c::char")){129} else if(bytes::equal(text,b"c::double")){130} else if(bytes::equal(text,b"c::float")){131} else if(bytes::equal(text,b"c::int")){132} else if(bytes::equal(text,b"c::long")){133} else if(bytes::equal(text,b"c::longlong")){134} else if(bytes::equal(text,b"c::schar")){135} else if(bytes::equal(text,b"c::short")){136} else if(bytes::equal(text,b"c::size_t")){137} else if(bytes::equal(text,b"c::ssize_t")){138} else if(bytes::equal(text,b"c::uchar")){139} else if(bytes::equal(text,b"c::uint")){140} else if(bytes::equal(text,b"c::ulong")){141} else if(bytes::equal(text,b"c::ulonglong")){142} else if(bytes::equal(text,b"c::ushort")){143} else{0};}
 pub fn u32 resolve(ref syntax::Parsed p,usize root){return if(root!=0 && syntax::type_at(p,root).kind==1){named(syntax::type_text(p,root))}else{0};}
 pub fn ref u8[] spelling(u32 type){

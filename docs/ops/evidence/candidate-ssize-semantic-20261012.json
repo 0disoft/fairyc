@@ -1,0 +1,527 @@
+{
+  "schema": "fairyc.candidate-ssize-semantic/v1",
+  "passed": true,
+  "scope": "Target-neutral c::ssize_t semantic and MIR identity; POSIX target constraints in legacy C emission; current E1014 live CLI routing",
+  "owningContracts": [
+    "docs/adr/0054-posix-ssize-t-source-transport.md",
+    "docs/adr/0056-complete-c-scalar-source-transport.md",
+    "docs/abi/c-abi-v0.md",
+    "docs/diagnostics/catalog-v0.md"
+  ],
+  "sourceInputs": [
+    {
+      "path": "examples/lexer_candidate/src/c_abi_types.fy",
+      "bytes": 1735,
+      "sha256": "2a4c6efd7b00dd4fef5ccc47950d9f70c21ed3ae2ac0eaa9817d80c0e03fdfa0"
+    },
+    {
+      "path": "examples/lexer_candidate/src/c_abi_contract.fy",
+      "bytes": 3521,
+      "sha256": "af28966752a8d9f355d8dafb9969b1a591d9e54fa276611b3362ae6087595919"
+    },
+    {
+      "path": "examples/lexer_candidate/src/c_emit.fy",
+      "bytes": 10253,
+      "sha256": "bba46d079f07c218a22b1c39fa64df161098639bd4b65010ebca292dddfcc028"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_diagnostic_codes.fy",
+      "bytes": 2255,
+      "sha256": "0f5e0ebf8685857892ac06a9c2c3cd5eefe008dc887419c75cd79f111c79eae6"
+    },
+    {
+      "path": "examples/lexer_candidate/tests/c_ssize_transport.fy",
+      "bytes": 3655,
+      "sha256": "52cf97ab4477a54fcab57b73e4a064e2ce0d34df7a59bcf76ab8e578f5d747db"
+    },
+    {
+      "path": "examples/lexer_candidate/tests/foreign_calls.fy",
+      "bytes": 8924,
+      "sha256": "5e1ce31ee7f6cc49a8bf6f402776bc3235c79d27e4232e990fae4b1d345bfa5a"
+    },
+    {
+      "path": "examples/lexer_candidate/fairy.lock",
+      "bytes": 1698,
+      "sha256": "a108a77007bdc829dffd898d9a6eee052b3c225a33c93aba13cdd533a3a6bf4a"
+    }
+  ],
+  "sourceCheck": {
+    "passed": true,
+    "files": 385,
+    "mirFunctions": 4887,
+    "lockUpdated": true
+  },
+  "privateTests": {
+    "receiptSHA256": "66b11893e17171a48d2cc7818ec7e63ec3b9067375760686df44b5ac75738ed0",
+    "authoredTests": 3,
+    "selection": {
+      "mode": "all-authored",
+      "authoredTests": 3,
+      "selectedTests": 3
+    },
+    "candidateExecutions": [
+      {
+        "profile": "development",
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\c-ssize-transport-complete-20261012\\development.exe",
+        "sha256": "7efe61459aa732b3e1ecaea0bb898c2f253d85518cf4c5c30ffd67e112a61765",
+        "exit": 0
+      },
+      {
+        "profile": "release",
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\c-ssize-transport-complete-20261012\\release.exe",
+        "sha256": "0e8fbb3eb422e731ed951f20b36f600d7ba14658ad9908825daa84e9edc3adb3",
+        "exit": 0
+      }
+    ],
+    "tools": {
+      "compiler": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-frontend-oracle-current-20261012.exe",
+        "sha256": "3ecc4501ee3bb47ecc39e7288200266b31cbcd8bf6ffec302ae54867705ce5d1"
+      },
+      "candidate": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\const-eval-engine-build-20261012\\candidate-release.exe",
+        "sha256": "a9d651ac4bac0f6bf25e8957ac339e0a6e58e06f2cd386d037f3fedcbaf3ba94"
+      },
+      "builder": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-rooted-builder-stack-20261012.exe",
+        "sha256": "02abe2328daa9921705910c7b995e82c1312cb960fe024106c11468569aefff0"
+      }
+    },
+    "exactStdout": {
+      "stdout": {
+        "bytes": 1418,
+        "sha256": "4f2d19622abc540da6607ed44d8094ace5b73c90a108ab12e3a7d93e762fa70f"
+      }
+    }
+  },
+  "goNative": {
+    "receiptSHA256": "a1e88dfa6a965b7ccdc8802a667e7e3b83e7a05b2a12d97e4a8f73a960d6210f",
+    "report": {
+      "schemaVersion": "fairyc.test-report/v4",
+      "engine": "native",
+      "target": "x86_64-windows-msvc",
+      "profile": "development",
+      "tests": [
+        {
+          "identity": "tests::c_ssize_transport::generated_posix_source_requires_the_real_target_abi_before_headers",
+          "outcome": "passed",
+          "trapCategory": null,
+          "stdoutBase64": "LyogZmFpcnljLmNhbmRpZGF0ZS1zY2FsYXItYy92MTsgQzExLCA2NC1iaXQgdHJhbnNwb3J0ICovCiNpZiBkZWZpbmVkKF9fbGludXhfXykgJiYgIWRlZmluZWQoX1dJTjMyKQojaWZuZGVmIF9QT1NJWF9DX1NPVVJDRQojZGVmaW5lIF9QT1NJWF9DX1NPVVJDRSAyMDA4MDlMCiNlbGlmIF9QT1NJWF9DX1NPVVJDRSA8IDIwMDgwOUwKI2Vycm9yIGMuc3NpemVfdCByZXF1aXJlcyBQT1NJWC4xLTIwMDgKI2VuZGlmCiNpbmNsdWRlIDxzeXMvdHlwZXMuaD4KI2Vsc2UKI2Vycm9yIGMuc3NpemVfdCBpcyB1bmF2YWlsYWJsZSBmb3IgY2FuZGlkYXRlIHRhcmdldAojZW5kaWYKI2luY2x1ZGUgPHN0ZGludC5oPgojaW5jbHVkZSA8bGltaXRzLmg+CiNpbmNsdWRlIDxzdHJpbmcuaD4KX1N0YXRpY19hc3NlcnQoQ0hBUl9CSVQ9PTggJiYgVUlOVFBUUl9NQVg9PVVJTlQ2NF9NQVgsInJlcXVpcmVzIDY0LWJpdCBieXRlLWFkZHJlc3NlZCB0YXJnZXQiKTsKX1N0YXRpY19hc3NlcnQoSU5UMzJfTUlOPT0oLUlOVDMyX01BWC0xKSAmJiBJTlQ2NF9NSU49PSgtSU5UNjRfTUFYLTEpLCJyZXF1aXJlcyB0d28ncyBjb21wbGVtZW50IHNpZ25lZCBpbnRlZ2VycyIpOwpfTm9yZXR1cm4gdm9pZCBmeV9ydW50aW1lX3RyYXAodWludDMyX3QgY2F0ZWdvcnkpOwojaW5jbHVkZSA8c3RkZGVmLmg+Cl9TdGF0aWNfYXNzZXJ0KHNpemVvZihzc2l6ZV90KSA9PSA4ICYmIF9BbGlnbm9mKHNzaXplX3QpID09IDgsImNhbmRpZGF0ZSB0YXJnZXQgQyBzY2FsYXIgc2l6ZS9hbGlnbm1lbnQiKTsKX1N0YXRpY19hc3NlcnQoKChzc2l6ZV90KS0xKSA8IDAsImNhbmRpZGF0ZSB0YXJnZXQgQyBzY2FsYXIgc2lnbmVkbmVzcyIpOwpleHRlcm4gc3NpemVfdCBmYWlyeWNfZml4dHVyZV9tYWtlX2Nfc3NpemVfdCh2b2lkKTsKZXh0ZXJuIGludDMyX3QgZmFpcnljX2ZpeHR1cmVfY29uc3VtZV9jX3NzaXplX3Qoc3NpemVfdCk7CmludDMyX3QgZnlfZm5fMyh2b2lkKTsKaW50MzJfdCBmeV9mbl8zKHZvaWQpewogICAgc3NpemVfdCBmeV9sXzE9MDsKICAgICh2b2lkKWZ5X2xfMTsKICAgIGludDMyX3QgZnlfbF8yPTA7CiAgICAodm9pZClmeV9sXzI7CiAgICBnb3RvIGZ5X2JfMTsKZnlfYl8xOjsKICAgIGZ5X2xfMT1mYWlyeWNfZml4dHVyZV9tYWtlX2Nfc3NpemVfdCgpOwogICAgZ290byBmeV9iXzI7CmZ5X2JfMjo7CiAgICBmeV9sXzI9ZmFpcnljX2ZpeHR1cmVfY29uc3VtZV9jX3NzaXplX3QoZnlfbF8xKTsKICAgIGdvdG8gZnlfYl8zOwpmeV9iXzM6OwogICAgcmV0dXJuIGZ5X2xfMjsKfQppbnQzMl90IGZ5X2NhbmRpZGF0ZV9lbnRyeSh2b2lkKXtyZXR1cm4gZnlfZm5fMygpO30KI2lmbmRlZiBGWV9DQU5ESURBVEVfTk9fTUFJTgppbnQgbWFpbih2b2lkKXtyZXR1cm4gKGludClmeV9jYW5kaWRhdGVfZW50cnkoKTt9CiNlbmRpZgo=",
+          "stderrBase64": ""
+        },
+        {
+          "identity": "tests::c_ssize_transport::ssize_identity_survives_foreign_results_parameters_and_mir_locals",
+          "outcome": "passed",
+          "trapCategory": null,
+          "stdoutBase64": "",
+          "stderrBase64": ""
+        },
+        {
+          "identity": "tests::c_ssize_transport::ssize_literals_and_operators_stay_outside_the_transport_lane",
+          "outcome": "passed",
+          "trapCategory": null,
+          "stdoutBase64": "",
+          "stderrBase64": ""
+        }
+      ],
+      "count": 3,
+      "passed": 3,
+      "failed": 0,
+      "status": "ok",
+      "lock": "verified"
+    }
+  },
+  "selfSourceBuild": {
+    "sourceFiles": 378,
+    "sourceInventorySHA256": "d36b85f41a74a94dc09945d1c14f3d44c98a4c644ea78b8f89dc76d0fa8357d9",
+    "packetBytes": 30698975,
+    "packetSHA256": "7b8a89ecea3463c43a6a9f17593ac022febfcfa4d0f082977eb7f91e621ba316",
+    "image": {
+      "bytes": 4376064,
+      "sha256": "fb46a91341af1950610add4f647376e4c8769ea5edfa4841f0ec3e9f27357bd2"
+    },
+    "invocations": {
+      "emit": {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\const-eval-engine-build-20261012\\candidate-release.exe",
+          "--c-project-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\c-ssize-semantic-build-20261012\\sources.list"
+        ],
+        "seconds": 182.89260469999863,
+        "exit": 0,
+        "stderr": "",
+        "stdoutBytes": 30698975
+      },
+      "build": {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-rooted-builder-stack-20261012.exe",
+          "--packet",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\c-ssize-semantic-build-20261012\\packet.bin",
+          "--packet-sha256",
+          "7b8a89ecea3463c43a6a9f17593ac022febfcfa4d0f082977eb7f91e621ba316",
+          "--output",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\c-ssize-semantic-build-20261012\\candidate-release.exe",
+          "--release",
+          "--stack-reserve-bytes",
+          "16777216"
+        ],
+        "seconds": 287.7385413000011,
+        "exit": 0,
+        "stderr": "",
+        "stdoutBytes": 186
+      }
+    },
+    "stackReserveBytes": 16777216,
+    "fixedPointReplay": false
+  },
+  "frontendCorpus": {
+    "receiptSHA256": "23783531d41d97552d4e3535017f3024ec60813f8f51dc86b34d2ff73d742506",
+    "cases": 75,
+    "matched": 73,
+    "statusDifferences": 1,
+    "firstDiagnosticDifferences": 1,
+    "improved": [
+      {
+        "family": "semantic",
+        "id": "pass.type.c-ssize-t-foreign-roundtrip",
+        "manifestSHA256": "165b181c063b24cd6ef80c3e91b417840d3f1b2ea33a9eec635ae79341f332fa",
+        "expected": "pass",
+        "sources": [
+          {
+            "original": "spec/fixtures/semantic/cases/pass/c-ssize-t-foreign-roundtrip/src/main.fy",
+            "sourceSHA256": "02945cc55bc233b3b2979f38cbbbeface98fbb51e396137ca5c02c7896c6eb68",
+            "projectSource": "main.fy"
+          }
+        ],
+        "observations": [
+          {
+            "engine": "go",
+            "exit": 0,
+            "seconds": 0.054497200006153435,
+            "stdout": "check ok: 1 instance(s), 1 source file(s), 1 MIR function(s), lock updated\n",
+            "stderr": "",
+            "diagnostics": []
+          },
+          {
+            "engine": "candidate",
+            "exit": 0,
+            "seconds": 0.03838359998189844,
+            "stdout": "check ok: 1 instance(s), 1 source file(s), 1 MIR function(s), lock unchanged\n",
+            "stderr": "",
+            "diagnostics": []
+          }
+        ],
+        "statusMatch": true,
+        "firstDiagnosticMatch": true,
+        "goMatchesFixture": true
+      }
+    ],
+    "remaining": [
+      {
+        "family": "semantic",
+        "id": "pass.type.package-state",
+        "manifestSHA256": "165b181c063b24cd6ef80c3e91b417840d3f1b2ea33a9eec635ae79341f332fa",
+        "expected": "pass",
+        "sources": [
+          {
+            "original": "spec/fixtures/semantic/cases/pass/package-state/src/state.fy",
+            "sourceSHA256": "2dff590904cbdc1fe83c73b20502368a3dfa384938bf975dc1eb8e7e023baacb",
+            "projectSource": "state.fy"
+          }
+        ],
+        "observations": [
+          {
+            "engine": "go",
+            "exit": 0,
+            "seconds": 0.050095100014004856,
+            "stdout": "check ok: 1 instance(s), 1 source file(s), 1 MIR function(s), lock updated\n",
+            "stderr": "",
+            "diagnostics": []
+          },
+          {
+            "engine": "candidate",
+            "exit": 3,
+            "seconds": 0.01868030001060106,
+            "stdout": "",
+            "stderr": "state.fy:3:1: source is outside the supported compiler subset [bytes 15..134]\n",
+            "diagnostics": []
+          }
+        ],
+        "statusMatch": false,
+        "firstDiagnosticMatch": true,
+        "goMatchesFixture": true
+      },
+      {
+        "family": "semantic",
+        "id": "fail.type.package-state-codec",
+        "manifestSHA256": "165b181c063b24cd6ef80c3e91b417840d3f1b2ea33a9eec635ae79341f332fa",
+        "expected": "fail",
+        "sources": [
+          {
+            "original": "spec/fixtures/semantic/cases/fail/package-state-codec/src/state.fy",
+            "sourceSHA256": "b47ff9e0d75e03f15dff483fbf4f22f909115cb3cb3efcbb86396eb1332d71fb",
+            "projectSource": "state.fy"
+          }
+        ],
+        "observations": [
+          {
+            "engine": "go",
+            "exit": 3,
+            "seconds": 0.07840200001373887,
+            "stdout": "",
+            "stderr": "state.fy:3:14: E7203: A package state field uses an unsupported or malformed storage codec declaration. [bytes 58..64]\n",
+            "diagnostics": [
+              {
+                "code": "E7203",
+                "start": 58,
+                "end": 64
+              }
+            ]
+          },
+          {
+            "engine": "candidate",
+            "exit": 3,
+            "seconds": 0.01972919999388978,
+            "stdout": "",
+            "stderr": "state.fy:2:1: source is outside the supported compiler subset [bytes 14..73]\n",
+            "diagnostics": []
+          }
+        ],
+        "statusMatch": true,
+        "firstDiagnosticMatch": false,
+        "goMatchesFixture": true
+      }
+    ],
+    "unchangedOtherCandidateObservations": true
+  },
+  "extraCli": {
+    "schema": "fairyc.candidate-ssize-label-cli/v1",
+    "passed": true,
+    "cases": [
+      {
+        "name": "ssize",
+        "sourceSHA256": "02945cc55bc233b3b2979f38cbbbeface98fbb51e396137ca5c02c7896c6eb68",
+        "source": "module main;\n\n@link_name(\"fairyc_fixture_make_c_ssize_t\")\nunsafe extern C fn c::ssize_t make_c_ssize_t() ;\n\n@link_name(\"fairyc_fixture_consume_c_ssize_t\")\nunsafe extern C fn i32 consume_c_ssize_t(c::ssize_t value) ;\n\nfn i32 main() {\n    return unsafe {\n        consume_c_ssize_t(make_c_ssize_t())\n    };\n}\n",
+        "observations": [
+          {
+            "engine": "reference",
+            "exit": 0,
+            "stderr": "",
+            "diagnostics": []
+          },
+          {
+            "engine": "candidate",
+            "exit": 0,
+            "stderr": "",
+            "diagnostics": []
+          }
+        ]
+      },
+      {
+        "name": "ordinary-label",
+        "sourceSHA256": "adc7b95f673bd83f8ee72cee74eabff2f94ef28716ffff6b37036e8b7c0d4c06",
+        "source": "module main;fn i32 add(i32 a,i32 b){return a+b;}fn i32 main(){return add(.wrong=41,.b=1);}",
+        "observations": [
+          {
+            "engine": "reference",
+            "exit": 3,
+            "stderr": "main.fy:1:74: E1014: Call argument label does not match its position or the call target does not support labels. [bytes 73..82]\n",
+            "diagnostics": [
+              {
+                "code": "E1014",
+                "start": 73,
+                "end": 82
+              }
+            ]
+          },
+          {
+            "engine": "candidate",
+            "exit": 3,
+            "stderr": "main.fy:1:74: E1014: call argument label does not match its position or target [bytes 73..82]\n",
+            "diagnostics": [
+              {
+                "code": "E1014",
+                "start": 73,
+                "end": 82
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "public-label",
+        "sourceSHA256": "8f512f34e0af19da471a7eac2f8b3b2c8e0c580d0a28141ec9d990d60872b15a",
+        "source": "module main;pub fn i32 add(i32 a,i32 b){return a+b;}fn i32 main(){return add(.a=41,.b=1);}",
+        "observations": [
+          {
+            "engine": "reference",
+            "exit": 3,
+            "stderr": "main.fy:1:74: E1014: Call argument label does not match its position or the call target does not support labels. [bytes 73..88]\n",
+            "diagnostics": [
+              {
+                "code": "E1014",
+                "start": 73,
+                "end": 88
+              }
+            ]
+          },
+          {
+            "engine": "candidate",
+            "exit": 3,
+            "stderr": "main.fy:1:74: E1014: call argument label does not match its position or target [bytes 73..88]\n",
+            "diagnostics": [
+              {
+                "code": "E1014",
+                "start": 73,
+                "end": 88
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "const-eval-label",
+        "sourceSHA256": "00592d63d0b6979a36f179c59903f5be1618d396fab6b70540681fe56f50f824",
+        "source": "module main;@const_eval fn i32 add(i32 a,i32 b){return a+b;}const i32 N=add(.wrong=41,.b=1);fn i32 main(){return N;}",
+        "observations": [
+          {
+            "engine": "reference",
+            "exit": 3,
+            "stderr": "main.fy:1:77: E1014: Call argument label does not match its position or the call target does not support labels. [bytes 76..85]\n",
+            "diagnostics": [
+              {
+                "code": "E1014",
+                "start": 76,
+                "end": 85
+              }
+            ]
+          },
+          {
+            "engine": "candidate",
+            "exit": 3,
+            "stderr": "main.fy:1:77: E1014: call argument label does not match its position or target [bytes 76..85]\n",
+            "diagnostics": [
+              {
+                "code": "E1014",
+                "start": 76,
+                "end": 85
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "valid-label",
+        "sourceSHA256": "7a402215436c60f5d350d5dc231f4b16013f602de97f724a7c4174059257122d",
+        "source": "module main;fn i32 add(i32 a,i32 b){return a+b;}fn i32 main(){return add(.a=41,.b=1);}",
+        "observations": [
+          {
+            "engine": "reference",
+            "exit": 0,
+            "stderr": "",
+            "diagnostics": []
+          },
+          {
+            "engine": "candidate",
+            "exit": 0,
+            "stderr": "",
+            "diagnostics": []
+          }
+        ]
+      },
+      {
+        "name": "valid-const-eval-label",
+        "sourceSHA256": "4bff3666f24b84acd57ddf8bd0cab3100e3f13828221393b404c053b3efbad02",
+        "source": "module main;@const_eval fn i32 add(i32 a,i32 b){return a+b;}const i32 N=add(.a=41,.b=1);fn i32 main(){return N;}",
+        "observations": [
+          {
+            "engine": "reference",
+            "exit": 0,
+            "stderr": "",
+            "diagnostics": []
+          },
+          {
+            "engine": "candidate",
+            "exit": 0,
+            "stderr": "",
+            "diagnostics": []
+          }
+        ]
+      }
+    ],
+    "candidateSHA256": "fb46a91341af1950610add4f647376e4c8769ea5edfa4841f0ec3e9f27357bd2",
+    "referenceSHA256": "3ecc4501ee3bb47ecc39e7288200266b31cbcd8bf6ffec302ae54867705ce5d1",
+    "scriptSHA256": "ac3461d9adecbc25c928900355430cf69f3dd22eba1611fcbe17bd6ed33227b2",
+    "ssizeNativeExecuted": false
+  },
+  "windowsTargetRejection": {
+    "schema": "fairyc.candidate-ssize-target-rejection/v1",
+    "passed": true,
+    "argv": [
+      "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\nominal-c-file-cli\\native-runner.exe",
+      "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\c-ssize-windows-rejection-20261012\\request.json",
+      "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\c-ssize-windows-rejection-20261012\\report.json"
+    ],
+    "exit": 1,
+    "sourceSHA256": "4f2d19622abc540da6607ed44d8094ace5b73c90a108ab12e3a7d93e762fa70f",
+    "runnerSHA256": "155d21ad1c9b6d09de864d799f6018fc0298de71c2db60f1a606421f87c9cd32",
+    "observations": [
+      {
+        "name": "ssize-unavailable",
+        "profile": "low",
+        "compiler": "msvc",
+        "compilerPath": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+        "compilerVersion": "14.51.36231",
+        "source": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\c-ssize-transport-tests-20261012\\generated.c",
+        "sourceSHA256": "4f2d19622abc540da6607ed44d8094ace5b73c90a108ab12e3a7d93e762fa70f",
+        "runtimeSHA256": "9e6f00b2d175d9cba6b4f2f3745321be004c3d7cff1d5bb7d215dbbb8c182475",
+        "image": "",
+        "imageSHA256": "",
+        "exit": 0,
+        "stdout": "",
+        "stderr": "",
+        "stdoutBytes": "",
+        "stderrBytes": "",
+        "trap": 0,
+        "value": 0,
+        "error": "MSVC host command failed: exit status 2: unit.c\r\n<temporary>\\unit.c(10): fatal error C1189: #error:  c.ssize_t is unavailable for candidate target\r\nruntime.c\r\nGenerating Code..."
+      }
+    ],
+    "stderr": "ssize-unavailable/msvc/low: MSVC host command failed: exit status 2: unit.c\r\n<temporary>\\unit.c(10): fatal error C1189: #error:  c.ssize_t is unavailable for candidate target\r\nruntime.c\r\nGenerating Code...\n",
+    "linuxExecuted": false
+  },
+  "liveEmission": {
+    "schema": "fairyc.candidate-ssize-live-emission/v1",
+    "passed": true,
+    "candidateSHA256": "fb46a91341af1950610add4f647376e4c8769ea5edfa4841f0ec3e9f27357bd2",
+    "sourceSHA256": "02945cc55bc233b3b2979f38cbbbeface98fbb51e396137ca5c02c7896c6eb68",
+    "legacy": {
+      "exit": 0,
+      "bytes": 1418,
+      "sha256": "4f2d19622abc540da6607ed44d8094ace5b73c90a108ab12e3a7d93e762fa70f",
+      "stderr": ""
+    },
+    "owned": {
+      "exit": 2,
+      "stdoutBytes": 0,
+      "stderr": ".cache/c-ssize-label-extra-20261012/ssize/src/main.fy:1:1: error: project phase 5 stage 0 code 1004 (bytes 0..0)\n"
+    },
+    "ownedCTransportAdmitted": false,
+    "linuxNativeExecuted": false
+  },
+  "limits": [
+    "Owned project C transport remains closed for c::ssize_t; live --c-project-file rejects without partial stdout.",
+    "The Linux positive ABI/native execution is not verified: WSL query reported REGDB_E_CLASSNOTREG and a separate query timed out after 30 seconds.",
+    "Legacy C emission proves the POSIX prefix/headers and signed 8-byte target assertions and explicitly rejects Windows; it does not replace Linux native proof.",
+    "Current-source fixed point, broader/multiple diagnostics, product timeout/default stack, full suite and same-head hosted CI remain promotion gates.",
+    "Package-state declaration admission and package-state codec are the two remaining 75-case observations."
+  ],
+  "publicApiChanged": false,
+  "sdkAbiChanged": false,
+  "dbChanged": false,
+  "repositoryHygieneChanged": false,
+  "ciChanged": false,
+  "runnerChanged": false,
+  "productTimeoutChanged": false,
+  "pushed": false
+}
