@@ -179,6 +179,21 @@ Capture receipt: [candidate-windows-run-capture-20261012.json](../ops/evidence/c
 Options receipt: [candidate-native-cli-options-20261012.json](../ops/evidence/candidate-native-cli-options-20261012.json).
 Driver receipt: [candidate-native-packet-input-20261012.json](../ops/evidence/candidate-native-packet-input-20261012.json).
 Packet-file receipt: [candidate-native-packet-file-20261012.json](../ops/evidence/candidate-native-packet-file-20261012.json).
+
+## Workspace native plan
+
+`project_emit::evaluate` returns an owned plan containing the checked C bundle,
+root package name and lock state from the same load. Source/graph owners are
+released after emission; failure diagnostics keep their existing owners. The
+stdout packet command borrows the plan's bundle, preserving the transport.
+
+Two authored tests pass in Go-native and candidate C development/release:
+updated/unchanged/verified locks retain the root name and usable bundle, and
+missing locked input plus invalid entries retain diagnostics and exit codes.
+The initial missing-lock test expected 2; the existing contract returns 7, so
+only that expectation was corrected. Source check passes 372 files / 4769 MIR
+functions. Public build/run remains pending.
+Plan receipt: [candidate-native-plan-20261012.json](../ops/evidence/candidate-native-plan-20261012.json).
 Native records and flags follow [STARTUPINFOW](https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/ns-processthreadsapi-startupinfow),
 [extended job limits](https://learn.microsoft.com/en-us/windows/win32/api/winnt/ns-winnt-jobobject_extended_limit_information),
 [CreateProcessW](https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-createprocessw)

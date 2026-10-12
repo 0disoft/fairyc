@@ -9,7 +9,7 @@ import std::io as io;
 @effects(console) fn i32 failure(ref str message,i32 code){return if(io::write_stderr(message).is_ok){code}else{4};}
 @effects(filesystem,console)
 pub fn i32 run(ref u8[] root,bool locked){return switch(emit::evaluate(root,locked)){
-    case .ok(bundle):{transport::packet(ref bundle)}
+    case .ok(plan):{transport::packet(emit::output_bundle(ref plan))}
     case .err(e):{var bytes::Buffer text=bytes::empty();if(!output::error(ref e,ref mut text)){return failure("fairyc: internal compiler processing failed\n",4);}return if(switch(io::write_stderr_bytes(bytes::view(ref text))){case .ok(n):{n==bytes::len(ref text)}case .err(_):{false}}){output::exit_code(ref e)}else{4};}
 };}
 @effects(filesystem,console)

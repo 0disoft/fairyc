@@ -9,6 +9,17 @@ are identical, with no excluded bytes. All 249 Go lexer cases and private framin
 checks pass for the seed and both generations. Receipt:
 `evidence/candidate-complete-stage2-20261012.json`.
 
+## Workspace native plan (2026-10-12)
+
+The Fairy emission result now owns the C bundle, root package name and exact
+observed lock state. The stdout transport uses its bundle unchanged. Two authored
+tests pass in Go-native and both candidate C profiles, including the three lock
+states and retained locked/entry diagnostics. Source check passes 372 files /
+4769 MIR functions. Next: owned host temporary directory, native-driver dispatch
+and public build/run output/exit behavior. Go compiler code, public API, SDK ABI,
+DB and CI are unchanged; no push. Receipt:
+`evidence/candidate-native-plan-20261012.json`.
+
 ## Fairy packet-file publication (2026-10-12)
 
 Fairy streams a complete checked C bundle to a caller-owned file after exact
