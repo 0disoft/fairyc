@@ -24,6 +24,13 @@ and exact-fit/exhausted collection/lookup histories. Source check passes 415 fil
 lock hashes. The initial oracle file-path and test type/origin issues were fixed
 before the final passing run.
 
+The follow-up reserves all thirteen scalar names recognized by the Go generic
+source adapter, including currently unadmitted value types such as i8 and f64.
+Go rejects both authored parameter-name cases; the four tests pass again in all
+three engines. The final root check refreshes the changed source lock, and
+check --locked verifies 415 files / 5317 MIR functions after the test executions.
+No additional scalar value type is admitted.
+
 Bounds: 16MiB collection/lookup work, 1MiB per definition and owned text, 4096
 templates and eight parameters per template. Successful definition histories fold
 once into collection work. These records are not yet planner declarations:

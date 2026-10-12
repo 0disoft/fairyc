@@ -28,7 +28,7 @@ fn Result<Text,u32> retain(ref mut bytes::Buffer names,ref u8[] data,ref mut usi
     if(data.len>1048576 || bytes::len(names)>1048576-data.len || !budget::charge(work,data.len+1)){return .err(10);}
     let start=bytes::len(names);if(!bytes::append(names,data).is_ok){return .err(11);}return .ok(Text{.start,.end=bytes::len(names)});
 }
-fn bool builtin(ref u8[] name){return bytes::equal(name,b"bool") || bytes::equal(name,b"u8") || bytes::equal(name,b"i32") || bytes::equal(name,b"i64") || bytes::equal(name,b"u32") || bytes::equal(name,b"usize") || bytes::equal(name,b"void") || bytes::equal(name,b"never") || bytes::equal(name,b"str") || bytes::equal(name,b"Region") || bytes::equal(name,b"Option") || bytes::equal(name,b"Result");}
+fn bool builtin(ref u8[] name){return bytes::equal(name,b"bool") || bytes::equal(name,b"u8") || bytes::equal(name,b"i8") || bytes::equal(name,b"i16") || bytes::equal(name,b"u16") || bytes::equal(name,b"i32") || bytes::equal(name,b"i64") || bytes::equal(name,b"u32") || bytes::equal(name,b"u64") || bytes::equal(name,b"isize") || bytes::equal(name,b"usize") || bytes::equal(name,b"f32") || bytes::equal(name,b"f64") || bytes::equal(name,b"void") || bytes::equal(name,b"never") || bytes::equal(name,b"str") || bytes::equal(name,b"Region") || bytes::equal(name,b"Option") || bytes::equal(name,b"Result");}
 fn bool generated(ref u8[] name){return name.len>=12 && bytes::equal(name[..12],b"_fy_generic_");}
 fn Result<bool,u32> less(ref bytes::Buffer names,Text a,Text b,ref mut usize work){
     let left=bytes::view(names)[a.start..a.end];let right=bytes::view(names)[b.start..b.end];var usize i=0;

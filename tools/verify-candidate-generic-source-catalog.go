@@ -69,6 +69,16 @@ func run() error {
 	if err != nil {
 		return err
 	}
+	for _, name := range []string{"i8", "f64"} {
+		parsed, err := frontend.AnalyzeSyntax(source.NewFile("plain.fy", []byte("module plain;fn i32 first<"+name+">(i32 x){return x;}")), source.DefaultLimits())
+		if err != nil || parsed.AST == nil || !parsed.Tree.ErrorFree() {
+			return fmt.Errorf("reserved parameter fixture %s failed to parse", name)
+		}
+		_, err = genericsource.PreparePackages([]genericsource.PackageModule{{Module: parsed.AST, Owner: owners[0]}}, genericplan.DefaultPlanLimits())
+		if err == nil {
+			return fmt.Errorf("reserved parameter %s was admitted", name)
+		}
+	}
 	number(&out, len(expanded.Declarations))
 	var functions, aggregates, parameters int
 	for _, origin := range expanded.Declarations {
@@ -162,7 +172,7 @@ func run() error {
 	if err := os.WriteFile(filepath.Join(root, "oracle.bin"), out.Bytes(), 0644); err != nil {
 		return err
 	}
-	report := map[string]any{"modules": len(raw), "templates": len(expanded.Declarations), "functions": functions, "aggregates": aggregates, "parameters": parameters, "publicTemplates": len(expanded.Templates), "bytes": out.Len(), "fixture": filepath.Join(root, "oracle.bin"), "source": "genericsource.PrepareSDKStoragePackages.Declarations + actual AST package definitions"}
+	report := map[string]any{"modules": len(raw), "templates": len(expanded.Declarations), "functions": functions, "aggregates": aggregates, "parameters": parameters, "publicTemplates": len(expanded.Templates), "bytes": out.Len(), "fixture": filepath.Join(root, "oracle.bin"), "source": "genericsource.PrepareSDKStoragePackages.Declarations + actual AST package definitions", "reservedParametersRejected": []string{"i8", "f64"}}
 	encoded, err := json.MarshalIndent(report, "", "  ")
 	if err != nil {
 		return err
