@@ -1,5 +1,33 @@
 # Fairy 컴파일러 전환: 후속 작업 목록
 
+## Branch dispatch preserves syntax depth (2026-10-12)
+
+Origin and liveness branch helpers visit the current syntax node, so dispatch
+no longer adds a depth level. Child traversal still increments depth and the
+64-depth / 1048576-work limits remain. The preceding full replay failed at
+`sdk_scopes.fy:35:2224`, bytes 4596..4600, after 201.71 seconds. The isolated
+probe exhausted depth with only 32373 work; after correction it completes
+diagnostics and owned IR, with its last final frame at 78325 work.
+
+The 32-branch borrowed-result regression preserves its parameter origin.
+Two authored tests pass in both candidate C profiles with the compiler's private
+16 MiB reserve. The Go-produced baseline passes development and the deep case
+passes release. Its development image overflows the default 1 MiB stack; that
+product-stack limitation remains. An initially malformed generated else tail
+was corrected. Source check passes 377 files / 4804 MIR functions.
+
+The optimized cached borrow preview now processes all 370 self sources without
+a Go frontend fallback, in 256.88 seconds. Its complete 30136053-byte C packet
+is byte-identical to the seed's packet, SHA256
+`21040f3c05c22a4d989e47c4c5950b903b0992378b2ef2360e04e917984d778e`.
+Native build passes with explicit 16 MiB reservation. All 75 corpus statuses
+and first diagnostics retain the prior result: three status and 27 diagnostic
+differences. The unchanged Go observations are reused after checking image,
+manifest and source hashes. Stage2 image comparison is in progress; public
+borrow admission, frontend parity, Linux, hosted CI and product timeout work
+remain. Public API, SDK ABI, DB, CI and product timeouts are unchanged, no push.
+Receipt: `evidence/candidate-borrow-branch-depth-20261012.json`.
+
 ## Compact backward-live environments (2026-10-12)
 
 Liveness keeps mutable use-state only for borrowed locals. Each compact entry

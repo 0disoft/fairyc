@@ -29,3 +29,19 @@ import module_unit_origin_diagnostics as diagnostics;
     assert(diagnostics::exit_code(ref report)==0 && diagnostics::work(ref report)>origins::work(ref plan) && diagnostics::work(ref report)<3145728);
     switch(diagnostics::collect_budgeted(ref plan,1048576)){case .ok(_):{assert(false);}case .err(e):{assert(e.code==10);}};
 }
+
+@test fn void branch_dispatch_does_not_add_a_syntax_depth_level(){
+    var bytes::Buffer text=bytes::empty();assert(bytes::append(ref mut text,b"module main;fn ref i32 deep(ref i32 n){return ").is_ok);
+    var usize i=0;while(i<32){assert(bytes::append(ref mut text,b"if(true){n}else ").is_ok);i+=1;}assert(bytes::append(ref mut text,b"{n};}").is_ok);
+    let data=switch(bytes::copy(bytes::view(ref text))){case .ok(p):{p}case .err(_):{assert(false);return;}};
+    let tokens=switch(scanner::collect(data,false,65536,1048576,256,16777216)){case .ok(p):{p}case .err(_):{assert(false);return;}};
+    let source=switch(syntax::parse(tokens,512)){case .ok(p):{p}case .err(_):{assert(false);return;}};assert(syntax::problem_count(ref source)==0);
+    var v::Vec<syntax::Parsed> sources=v::empty<syntax::Parsed>();assert(v::push<syntax::Parsed>(ref mut sources,source).is_ok);
+    let metadata=switch(signatures::build(ref sources)){case .ok(p):{p}case .err(_):{assert(false);return;}};
+    let bound=switch(binding::bind(ref sources,ref metadata,0,1)){case .ok(p):{p}case .err(_):{assert(false);return;}};
+    let ready=switch(closure::build_unit(ref sources,ref metadata,ref bound)){case .ok(p):{p}case .err(_):{assert(false);return;}};
+    let primary=switch(values::build(ref sources,ref metadata,ref ready)){case .ok(p):{p}case .err(_):{assert(false);return;}};
+    let plan=switch(origins::build(ref sources,ref metadata,ref primary)){case .ok(p):{p}case .err(_):{assert(false);return;}};
+    assert(origins::source_count(ref plan,1)==1 && origins::source(ref plan,1,0)==inputs::parameter(origins::owned_inputs(ref plan),1,0)+2);
+    let report=switch(diagnostics::collect(ref plan)){case .ok(p):{p}case .err(_):{assert(false);return;}};assert(diagnostics::exit_code(ref report)==0);
+}
