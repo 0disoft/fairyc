@@ -1,5 +1,31 @@
 # Fairy 컴파일러 전환: 후속 작업 목록
 
+## Source function definition digest (2026-10-13)
+
+The source function serializer now computes the real standalone template
+Definition directly from original Function JSON, using the existing
+source-function-ast-v0 / fairyc.genericplan.digest.v0 framing and SHA-256 owner.
+JSON projection and hash encoding/streaming share one 1MiB work ledger; errors
+publish no successful digest. Definition text is exact lowercase 64-byte hex.
+
+The Go oracle reads sixteen function-body fixtures, sixteen written/synthetic
+view-loop fixtures and six definition variants. All 38 function JSON values and
+Definition digests match actual Go json.Marshal and genericplan.DigestText.
+Body, visibility, documentation, parameter name and type-parameter name changes
+invalidate the baseline digest. Three tests pass Go native and candidate C
+development/release, including invalid declaration selection and measured
+exact-fit/exhausted combined JSON/hash work. Source check passes 408 files /
+5179 MIR functions; final tests verify the updated lock and original/copy hashes.
+The 129931-byte oracle uses the existing project reader with a test-only 1MiB
+allowance.
+
+This closes the standalone function-definition component. Aggregate and module
+AST definitions, resolved package import binding, reachable-template closures,
+actual planner facts and dispatcher/cache consumers remain next. Full image /
+current-source fixed point, Linux/full suite and hosted CI are not rerun.
+No public API, SDK ABI, DB, CI/runner or product timeout changes; no push. Receipt:
+[evidence](evidence/candidate-generic-source-function-definitions-20261013.json).
+
 ## Source view-loop written and synthetic JSON (2026-10-13)
 
 ByteFor now retains exact written span/name/type/view/body JSON and the Go
