@@ -2,6 +2,34 @@
 
 ## Current local candidate evidence (2026-10-13)
 
+Remaining source declaration JSON (2026-10-13)
+
+The source item writer retains exact Go AST records for imports, constants,
+static assertions, state declarations and foreign functions. Imports join
+significant path tokens but retain written path/alias spans. Constants and
+assertions reuse the original expression serializer; ordered cell/map fields
+preserve null cell keys and written map key/value types. Foreign declarations
+retain ABI C, attached documentation, attributes, parameters and result type.
+The existing parameter serializer is shared without changing its body. This is
+syntax projection only; semantic admission and resolved import providers remain
+separate.
+
+Thirteen authored cases match actual Go syntax-only AST JSON byte for byte,
+including BOM/CRLF, comments in import paths, UTF-8/HTML-escaped strings, attributed
+and empty state, nullable cell/map keys and C-function parameter types. Three
+tests pass Go native and candidate C development/release, including alias,
+constant-expression, state-field and foreign-signature changes, invalid
+selections, retained failure state and exact-fit/exhausted work. Source check
+passes 410 files / 5191 MIR functions; final receipts verify source/copy hashes
+and the updated lock.
+
+Complete module AST/nominal definitions, resolved package import binding,
+reachable-template closures, actual planner facts and dispatcher/cache consumers
+remain next. Latest-source full image/fixed point, Linux/full suite and same-head
+hosted CI are not rerun. No public API, SDK ABI, DB, CI/runner or product timeout
+change; no push.
+Receipt: [evidence](../ops/evidence/candidate-generic-source-items-20261013.json).
+
 Source aggregate JSON and definitions (2026-10-13)
 
 The retained syntax now emits exact Go AST JSON for structs, resources and
