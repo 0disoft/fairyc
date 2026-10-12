@@ -9,6 +9,25 @@ are identical, with no excluded bytes. All 249 Go lexer cases and private framin
 checks pass for the seed and both generations. Receipt:
 `evidence/candidate-complete-stage2-20261012.json`.
 
+## Direct workspace-to-native bridge (2026-10-12)
+
+The private builder accepts exactly one `--manifest` or `--workspace` with the
+Fairy executable; `--locked` belongs to workspace mode. The bridge forwards
+workspace arguments and bounded deadlines, then compiles the returned C packet.
+All manifest/dependency/lock and language processing remains in Fairy.
+Actual direct workspace builds use no cached packet or Go frontend fallback;
+development and release programs both return 42. Nine entry/lock/syntax/type
+failures preserve the previous executable. Invalid selectors, argument forwarding,
+existing deadline tree cancellation and cached/build-failure regressions pass.
+
+Source check passes 366 files / 4701 MIR functions after adding the private
+workspace command to help. Runtime reuses the unchanged command implementation
+from `43c45458`; that image predates this help-only change. Stable build/run,
+program arguments, stable failure/deadline mapping and the broader
+differential/platform/promotion gates remain. Private Go bridge API changed;
+public API, SDK ABI, DB and CI are unchanged; no push. Receipt:
+`evidence/candidate-workspace-native-build-20261012.json`.
+
 ## Workspace-owned C emission (2026-10-12)
 
 The private Fairy dispatcher accepts `--c-workspace <root> [--locked]`.
@@ -212,9 +231,9 @@ provider-local helper 및 nominal 인자는 원래 선언 정체성을 보존한
 66. 진행 중: catalog의 UID/language 검사에 이어 명시된 member만 참조하는 의존성 선언과 정확한 version 검사를 연결했다. build metadata 차이, 물리적으로 존재하는 미등록 경로, unreachable member 오류, fairyc.std/std namespace/stdlib 예약 이름을 검사하며 declaration별 feature edge를 보존한다. manifest 원본도 소유해 catalog 종료 후 정확한 오류 바이트/span을 보관한다. Go 15개 허용/거부와 정상 owner/binding/target/feature 기록, native 1개·후보 C 개발/릴리스 실행을 통과했다. catalog+의존성 전체 성공 시에만 집계를 반영한다. 근거: `evidence/candidate-workspace-input-20261011.json`. PackageInstanceId v1 canonical bytes와 SHA-256 ID 및 동일 hash의 전체 튜플 비교도 연결했다. 공식 fixture 7개와 추가 13개 바이트/UTF-8/feature/한도 사례, 실제 로컬 workspace ID 4개가 Go와 일치한다. native 2개·후보 C 개발/릴리스 실행을 통과했다. 근거: `evidence/candidate-instance-identity-20261011.json`. root-reachable feature-instance graph와 반복 없는 DFS 순환 검사도 연결했다. 동일 튜플 별칭은 합치고 서로 다른 feature는 구분하며, declaration별 대상 ID를 재사용하고 dependency-first 순서를 보관한다. Go graph 11개 허용/거부와 정상 node/path/feature/edge ID, 71노드/70edge 체인, native 1개·후보 C 개발/릴리스 실행을 통과했다. 순환 오류는 원래 workspace와 실제 instance ID 경로를 보관하며 집계를 되돌린다. 여러 순환의 witness 선택은 Go와 다를 수 있다. 근거: `evidence/candidate-instance-graph-20261011.json`. 로컬 모듈 import 가시성도 연결했다. 현재 인스턴스와 deduplicated 직접 의존성만 검색하며, 전이 모듈 비노출·동일 인스턴스 별칭·서로 다른 feature 공급자의 ambiguity·binding 비재작성·정확한 대소문자·이름순 module 순회를 검사한다. 기존 검증 토큰으로 경로를 읽어 70000바이트 주석의 정상/실패 span을 보존한다. Go 19개 허용/거부와 정상 lookup 기록·오류 provider/hidden 목록·실패 전 lookup 개수가 일치하고 native 1개·후보 C 개발/릴리스 실행을 통과했다. 전체 graph+lookup 성공 시에만 source 집계를 반영한다. 근거: `evidence/candidate-module-visibility-20261012.json`. SDK 연결과 compiler/CLI 소비는 남아 있다. SDK bundle 소유도 연결했다. core/vector/vector-candidate 세 프로필의 원본 소스·module/import·metadata·digest·source identity가 Go와 일치하고, 변조·누락·중복·잘못된 label·source/work 한도 12개 실패는 집계를 되돌린다. native 2개·후보 개발/릴리스 C 실행과 공통 encoder의 기존 로컬 digest 8개 회귀가 통과했다. 근거: `evidence/candidate-sdk-bundle-20261012.json`. 실제 bundle embedding·root-reachable 선택·SDK graph 주입/visibility·lock projection·compiler/CLI 소비는 남아 있다. root-reachable SDK 선택도 연결했다. std/std:: namespace와 exact std::vec, 별도 candidate 우선순위를 검증하고 도달하지 않는 vector와 일반 stdx/foo::std 이름은 제외한다. Go 전체 로더의 profile/owner ID 14개가 일치하며 각 경우의 work 소진도 닫힌 오류로 끝난다. native 1개·후보 개발/릴리스 C 실행 통과. 근거: `evidence/candidate-sdk-selection-20261012.json`. SDK 주입·가시성·embedding·lock·compiler/CLI는 남아 있다. SDK graph 주입과 자체/직접 module lookup도 연결했다. 로컬 그래프 소유·ID를 보존하며 선택된 instance에만 stdlib 간선을 붙이고 core/vector/candidate SDK를 하나의 노드로 해석한다. Go 정상 graph/edge/전체 lookup 14개, 잘못된 profile 2개·없는 SDK module 2개·work 소진 1개, native 2개·후보 개발/릴리스 C 실행이 통과했다. 로컬 source 집계는 SDK를 더하지 않고 전체 성공 때만 반영하며 기존 로컬 visibility 19개도 native·개발/릴리스 C에서 회귀를 통과했다. 근거: `evidence/candidate-sdk-graph-20261012.json`. 실제 SDK embedding·lock projection·compiler/project CLI 소비는 남아 있다. SDK 원본 8개를 40kB 미만 Fairy 리터럴 10개로 내장하고 순수·한도 있는 factory를 기본/candidate project loader에 연결했다. SDK가 필요하지 않으면 factory를 호출하지 않는다. Go graph/lookup/source byte 14개, 없는 SDK import 2개·잘못된 factory profile 2개·리터럴 work 소진 1개, native 3개·후보 개발/릴리스 C 실행, 원본 대비 생성 데이터 check를 통과했다. 근거: `evidence/candidate-sdk-embedded-20261012.json`. SDK 선택 work 오류의 graph category 보존이 즉시 후속이며 lock projection·compiler/CLI 소비는 남아 있다. SDK 선택 work 오류는 graph code 4를 보존하고 내장 데이터 work 오류는 bundle code 8/reason 5로 구분했다. local source 오류 우선순위와 집계 복구도 유지한다. 입력의 실제 load/selection work를 측정해 정확한 단계에서 소진시키며 SDK가 없는 프로젝트는 마지막 resolver work 1개만 남긴 상태에서도 성공한다. native 2개·후보 개발/릴리스 C 실행 통과. 근거: `evidence/candidate-sdk-failures-20261012.json`. lock projection·compiler/CLI 소비는 남아 있다. lock document projection을 소유형 모델로 연결했다. header·package 10개 필드·feature·dependency 값과 ID/owner-binding-target 정렬이 Go 문서 13개와 일치하고, 원래 그래프가 종료된 뒤에도 값이 보존된다. 별도 vector 후보 SDK는 Go public lock과 동일하게 거부하며 13개 work 소진도 닫힌 오류로 끝난다. native 2개·후보 개발/릴리스 C 실행 통과. 근거: `evidence/candidate-lock-document-20261012.json`. canonical JSON·strict read/match·persist와 compiler/CLI는 남아 있다. lock canonical JSON도 연결했다. 필드 순서·두 칸 들여쓰기·빈 배열·마지막 LF가 Go lock 13개와 바이트 단위로 일치한다. JSON 문자열의 control/HTML/quote/slash/Unicode/U+2028·2029/65537-byte 입력 8개가 Go와 일치하며 UTF-8·work·8MiB 입력 한도를 닫힌 오류로 검사한다. native 3개·후보 개발/릴리스 C 실행 통과. fixture reader의 64KiB 한도 오류는 명시적 1MiB project reader로 수정했으며 product cap은 유지한다. 근거: `evidence/candidate-lock-json-20261012.json`. strict read/match·persist와 compiler/CLI는 남아 있다.
 67. lock 생성·locked 입력 검사와 정확한 stale-lock 종료 코드 연결.
 68. bundled SDK 선택과 source/compiler/runtime identity digest 연결.
-69. entry 선택·도달성·runtime/C 라이브러리 링크 연결.
-70. 후보 C 출력을 지원되는 native compiler driver에 연결.
-71. 소스·C 컴파일·링크·결과 공개 실패 시 기존 실행 파일 보존.
+69. 부분 완료: 루트 패키지 main::main 선택과 도달 가능한 C 분할 출력을 Fairy 워크스페이스 로더에 연결했다. private 브리지에서 필요한 runtime/C 심벌을 연결해 dev/release 실행값 42를 확인했다. stable build/run 연결은 남음. 근거: candidate-workspace-emission-20261012.json, candidate-workspace-native-build-20261012.json.
+70. 부분 완료: private 브리지가 --workspace와 --locked를 Fairy에 전달하고 생성된 C를 실제 Windows MSVC driver로 빌드한다. cached packet이나 Go frontend 대체 없이 dev/release 빌드를 확인했다. stable 명령·Linux 통합은 남음.
+71. 부분 완료: entry·lock·문법·타입 오류 9개와 기존 C/링크/timeout 실패 회귀 검사에서 이전 실행 파일을 보존했다. private 브리지 범위의 결과이며 stable 명령 실패 매핑은 남음.
 72. check/build/run, dev/release 프로필과 프로그램 인자 통합.
 73. 구조화 진단과 실패 종류별 기존 종료 코드 유지.
 74. native test 탐색·정확한 선택·격리 실행·JSON 결과 통합.

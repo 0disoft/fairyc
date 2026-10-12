@@ -4,11 +4,13 @@ import (
 	"bytes"
 	"crypto/sha256"
 	"encoding/hex"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"reflect"
 	"runtime"
 	"strings"
 	"testing"
@@ -28,6 +30,37 @@ func TestFrontendDeadlineAdmissionAndPacket(t *testing.T) {
 		data, err := Emit(os.Args[0], "ignored", "", timeout)
 		if err != nil || !bytes.Equal(data, packetFixture("valid")) {
 			t.Fatalf("frontend deadline %s changed packet: %v", timeout, err)
+		}
+	}
+}
+
+func TestWorkspaceFrontendArgumentsAndAdmission(t *testing.T) {
+	t.Setenv("FAIRYC_CANDIDATE_TEST_FRONTEND", "valid")
+	for _, locked := range []bool{false, true} {
+		want := []string{"--c-workspace", "workspace with spaces"}
+		if locked {
+			want = append(want, "--locked")
+		}
+		encoded, _ := json.Marshal(want)
+		t.Setenv("FAIRYC_CANDIDATE_TEST_ARGUMENTS", string(encoded))
+		data, err := EmitWorkspace(os.Args[0], "workspace with spaces", "", locked, time.Minute)
+		if err != nil || !bytes.Equal(data, packetFixture("valid")) {
+			t.Fatalf("workspace transport locked=%v: %v", locked, err)
+		}
+	}
+	for _, options := range []Options{{}, {Manifest: "m", Workspace: "w"}, {Manifest: "m", Locked: true}} {
+		if _, err := Build(options); err == nil || !strings.Contains(err.Error(), "exactly one") {
+			t.Fatalf("mixed frontend inputs admitted: %+v %v", options, err)
+		}
+	}
+	for _, options := range []Options{{Workspace: "w"}, {Locked: true}} {
+		if _, err := BuildCached(options, "must-not-read", ""); err == nil || !strings.Contains(err.Error(), "cannot be combined") {
+			t.Fatalf("mixed packet workspace admitted: %v", err)
+		}
+	}
+	for _, timeout := range []time.Duration{0, -time.Second, 10*time.Minute + 1} {
+		if _, err := EmitWorkspace("must-not-run", "w", "", false, timeout); err == nil {
+			t.Fatal("invalid workspace deadline admitted")
 		}
 	}
 }
@@ -88,6 +121,13 @@ func init() {
 	mode := os.Getenv("FAIRYC_CANDIDATE_TEST_FRONTEND")
 	if mode == "" {
 		return
+	}
+	if encoded := os.Getenv("FAIRYC_CANDIDATE_TEST_ARGUMENTS"); encoded != "" {
+		var want []string
+		if err := json.Unmarshal([]byte(encoded), &want); err != nil || !reflect.DeepEqual(os.Args[1:], want) {
+			fmt.Fprintf(os.Stderr, "wrong frontend arguments: %q", os.Args[1:])
+			os.Exit(2)
+		}
 	}
 	switch mode {
 	case "source-error":

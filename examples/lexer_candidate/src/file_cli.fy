@@ -20,7 +20,7 @@ import std::process as process;
 
 @effects(console)
 fn i32 error(ref str message) { discard io::write_stderr(message); return 2; }
-fn ref str usage() { return "usage: lexer-candidate check [--locked]\n       lexer-candidate --tokens-file <path>\n       lexer-candidate --declarations-file <path>\n       lexer-candidate --check-names-file <path>\n       lexer-candidate --bindings-file <path>\n       lexer-candidate --check-types-file <path>\n       lexer-candidate --check-modules-file <manifest>\n       lexer-candidate --check-return-origins-file <manifest>\n       lexer-candidate --c-modules-file <manifest>\n       lexer-candidate --c-project-file <manifest>\n       lexer-candidate --hir-file <path>\n       lexer-candidate --mir-file <path>\n       lexer-candidate --c-file <path>\n"; }
+fn ref str usage() { return "usage: lexer-candidate check [--locked]\n       lexer-candidate --tokens-file <path>\n       lexer-candidate --declarations-file <path>\n       lexer-candidate --check-names-file <path>\n       lexer-candidate --bindings-file <path>\n       lexer-candidate --check-types-file <path>\n       lexer-candidate --check-modules-file <manifest>\n       lexer-candidate --check-return-origins-file <manifest>\n       lexer-candidate --c-modules-file <manifest>\n       lexer-candidate --c-project-file <manifest>\n       lexer-candidate --c-workspace <root> [--locked]\n       lexer-candidate --hir-file <path>\n       lexer-candidate --mir-file <path>\n       lexer-candidate --c-file <path>\n"; }
 
 @effects(filesystem)
 pub fn Result<bytes::Buffer, u32> load(ref u8[] path_bytes) {

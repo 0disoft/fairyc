@@ -23,6 +23,8 @@ import (
 
 type Options struct {
 	Candidate, Manifest, Directory, Output string
+	Workspace                              string
+	Locked                                 bool
 	Release                                bool
 	Timeout                                time.Duration
 	CompileTimeout                         time.Duration
@@ -54,13 +56,30 @@ func Emit(candidate, manifest, directory string, timeout time.Duration) ([]byte,
 	if candidate == "" || manifest == "" || timeout <= 0 || timeout > 10*time.Minute {
 		return nil, fmt.Errorf("candidate, manifest and timeout in (0,10m] are required")
 	}
+	return emit(candidate, []string{"--c-project-file", manifest}, directory, timeout)
+}
+
+// EmitWorkspace delegates manifest, dependency, lock and frontend processing
+// entirely to the selected Fairy executable. The bridge owns process transport.
+func EmitWorkspace(candidate, workspace, directory string, locked bool, timeout time.Duration) ([]byte, error) {
+	if candidate == "" || workspace == "" || timeout <= 0 || timeout > 10*time.Minute {
+		return nil, fmt.Errorf("candidate, workspace and timeout in (0,10m] are required")
+	}
+	arguments := []string{"--c-workspace", workspace}
+	if locked {
+		arguments = append(arguments, "--locked")
+	}
+	return emit(candidate, arguments, directory, timeout)
+}
+
+func emit(candidate string, arguments []string, directory string, timeout time.Duration) ([]byte, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), timeout)
 	defer cancel()
 	executable, err := filepath.Abs(candidate)
 	if err != nil {
 		return nil, err
 	}
-	command := exec.CommandContext(ctx, executable, "--c-project-file", manifest)
+	command := exec.CommandContext(ctx, executable, arguments...)
 	cdriver.ConfigureCommandCancellation(command)
 	command.Dir = directory
 	command.WaitDelay = 2 * time.Second
@@ -109,13 +128,22 @@ func runtimeSource(header string) (string, error) {
 }
 
 func Build(options Options) (Result, error) {
+	if (options.Manifest == "") == (options.Workspace == "") || options.Locked && options.Workspace == "" {
+		return Result{}, fmt.Errorf("exactly one manifest or workspace is required; locked requires workspace")
+	}
 	if runtime.GOOS != "windows" || runtime.GOARCH != "amd64" {
 		return Result{}, fmt.Errorf("candidate native bridge requires Windows x64 MSVC")
 	}
 	if options.Output == "" {
 		return Result{}, fmt.Errorf("output executable is required")
 	}
-	data, err := Emit(options.Candidate, options.Manifest, options.Directory, options.Timeout)
+	var data []byte
+	var err error
+	if options.Workspace != "" {
+		data, err = EmitWorkspace(options.Candidate, options.Workspace, options.Directory, options.Locked, options.Timeout)
+	} else {
+		data, err = Emit(options.Candidate, options.Manifest, options.Directory, options.Timeout)
+	}
 	if err != nil {
 		return Result{}, err
 	}
@@ -125,8 +153,8 @@ func Build(options Options) (Result, error) {
 // BuildCached consumes an immutable previously emitted packet. The digest is
 // mandatory, so cache reuse cannot silently select different frontend output.
 func BuildCached(options Options, path, expected string) (Result, error) {
-	if options.Candidate != "" || options.Manifest != "" {
-		return Result{}, fmt.Errorf("cached packet cannot be combined with candidate or manifest")
+	if options.Candidate != "" || options.Manifest != "" || options.Workspace != "" || options.Locked {
+		return Result{}, fmt.Errorf("cached packet cannot be combined with candidate, manifest, workspace or locked")
 	}
 	data, err := cachedPacket(path, expected)
 	if err != nil {

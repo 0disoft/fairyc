@@ -24,6 +24,7 @@ def main():
     parser.add_argument('--compiler', type=Path, required=True, help='Go oracle only')
     parser.add_argument('--candidate', type=Path, required=True, help='verified Fairy seed')
     parser.add_argument('--builder', type=Path, required=True)
+    parser.add_argument('--workspace-builder', type=Path, help='exercise direct workspace frontend-to-native builds')
     parser.add_argument('--fixtures', type=Path, required=True, help='candidate-entry-reference output')
     parser.add_argument('--output', type=Path, required=True)
     parser.add_argument('--reuse-build', type=Path, help='reuse a successful compiler with identical Fairy sources/tool inputs')
@@ -68,6 +69,8 @@ def main():
     inputs = [dict(path=p.relative_to(ROOT).as_posix(), sha256=digest(p)) for p in paths]
     inputs.append(dict(path=Path(__file__).relative_to(ROOT).as_posix(), sha256=digest(Path(__file__))))
     tools = {name: dict(path=str(path.resolve()), sha256=digest(path)) for name, path in [('compiler',args.compiler),('candidate',args.candidate),('builder',args.builder)]}
+    if args.workspace_builder:
+        tools['workspaceBuilder'] = dict(path=str(args.workspace_builder.resolve()),sha256=digest(args.workspace_builder))
     manifest = output / 'sources.list'
     manifest.write_text(''.join(p.relative_to(ROOT).as_posix()+'\n' for p in paths), encoding='utf-8')
     image = output / 'compiler.exe'
@@ -100,11 +103,14 @@ def main():
     programs = []
     for profile, flags in [('development',[]),('release',['--release'])]:
         program = output / (profile+'.exe')
-        r = run([args.builder.resolve(),'--packet',packet,'--packet-sha256',digest(packet),'--output',program,*flags], timeout=600)
+        if args.workspace_builder:
+            r = run([args.workspace_builder.resolve(),'--candidate',image,'--workspace',fixture/'Root','--locked','--output',program,*flags],timeout=600)
+        else:
+            r = run([args.builder.resolve(),'--packet',packet,'--packet-sha256',digest(packet),'--output',program,*flags], timeout=600)
         assert r.returncode == 0 and not r.stderr, invocations[-1]
         r = run([program])
         assert r.returncode == 42 and not r.stdout and not r.stderr, invocations[-1]
-        programs.append(dict(profile=profile, exit=r.returncode, sha256=digest(program)))
+        programs.append(dict(profile=profile, exit=r.returncode, sha256=digest(program),cachedPacketUsed=not bool(args.workspace_builder)))
     for name, mutation in [('MissingLock','missing'),('StaleLock','stale'),('SyntaxError','syntax'),('TypeError','type')]:
         directory = output/name
         shutil.copytree(fixture/'Root', directory, dirs_exist_ok=True)
@@ -131,12 +137,26 @@ def main():
     for arguments in [[],['--c-workspace'],['--c-workspace',str(fixture/'Root'),'--bad'],['--c-workspace','']]:
         r = run([image,*arguments])
         assert r.returncode == 2 and not r.stdout and r.stderr, invocations[-1]
+    failed_builds = []
+    if args.workspace_builder:
+        previous = output/'previous.exe'
+        sentinel = b'previous image retained'
+        for row in cases:
+            if row['name'] == 'Root':
+                continue
+            directory = fixture/row['name'] if (fixture/row['name']).exists() else output/row['name']
+            previous.write_bytes(sentinel)
+            r = run([args.workspace_builder.resolve(),'--candidate',image,'--workspace',directory,'--locked','--output',previous],timeout=600)
+            assert r.returncode == 2 and not r.stdout and r.stderr and previous.read_bytes()==sentinel,invocations[-1]
+            failed_builds.append(dict(name=row['name'],exit=r.returncode,previousImagePreserved=True))
     assert fixture_inputs == {str(p):digest(p) for p in fixture.rglob('*') if p.is_file()}, 'fixture workspace changed'
     assert all(digest(ROOT/p['path']) == p['sha256'] for p in inputs), 'sources changed'
     assert all(digest(Path(p['path'])) == p['sha256'] for p in tools.values()), 'tools changed'
     receipt = dict(schema='fairyc.candidate-workspace-emission/v1',passed=True,sourceInputs=inputs,tools=tools,sourceFiles=len(paths),compilerSHA256=digest(image),packetSHA256=digest(packet),cases=cases,programs=programs,invalidArgumentCases=4,fixtureUnchanged=True,GoFrontendFallback=False,invocations=invocations,publicApiChanged=False,sdkAbiChanged=False,dbChanged=False,ciChanged=False,pushed=False)
     if reused:
         receipt['reusedBuild'] = reused
+    if args.workspace_builder:
+        receipt['failedWorkspaceBuilds'] = failed_builds
     save(output/'receipt.json',receipt)
     print('workspace entry, lock/source rejection and both native profiles passed',flush=True)
 

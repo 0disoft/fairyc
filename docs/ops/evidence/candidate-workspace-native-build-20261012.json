@@ -1,0 +1,360 @@
+{
+  "schema": "fairyc.candidate-workspace-native-build/v1",
+  "passed": true,
+  "baselineCommit": "43c45458",
+  "sources": [
+    {
+      "path": "internal/candidatebuild/build.go",
+      "sha256": "953af6f0c0a6068bf565884c8e5ae62c03468d80d5d10331a8eb24ea454c6d41"
+    },
+    {
+      "path": "internal/candidatebuild/build_test.go",
+      "sha256": "8fb8354a0074bdf3d81d2a274001d6b0f6fdf924b49a5e4368dd89916e6bf09e"
+    },
+    {
+      "path": "cmd/fairyc-candidate-build/main.go",
+      "sha256": "bec0c67142abb0069691f10f5e4da71f87c7eb0dab468bbe4fd8190db40db3ee"
+    },
+    {
+      "path": "cmd/fairyc-candidate-build/main_test.go",
+      "sha256": "d0f49b50042c813f1e77de362c74d2843f0ac96147a003075f0025e4b5e821d2"
+    },
+    {
+      "path": "tools/verify-candidate-workspace.py",
+      "sha256": "5f3ea1e8c44d17c004053af1b4fa1336e82fd0bf34111419cd68b1aba98fc67d"
+    },
+    {
+      "path": "examples/lexer_candidate/src/file_cli.fy",
+      "sha256": "273c7389f7001c3940d1437bd1c3c7fa8fe5a8f6b765dae9f878e50f4905df09"
+    },
+    {
+      "path": "examples/lexer_candidate/fairy.lock",
+      "sha256": "490f2209d8efcdd93b0e973b1cb10a74d2f6bddbc2b30abb4f9c6c6b39df985e"
+    }
+  ],
+  "checks": {
+    "command": "bun tools/run-go.ts test ./internal/candidatebuild ./cmd/fairyc-candidate-build -run 'TestWorkspace|TestFrontend|TestBuildFailuresKeepPreviousImage|TestCachedPacket' -count=1",
+    "exit": 0,
+    "argvForwarding": true,
+    "invalidSelectionPreservesImage": true,
+    "existingTreeCancellationAndBuildFailures": true
+  },
+  "sourceCheck": {
+    "files": 366,
+    "mirFunctions": 4701,
+    "exit": 0
+  },
+  "compilerSHA256": "f2f4a0f66c3f21455e6ff9f454d041a98c68022214dd8f3058ddc2c0c125e1ce",
+  "runtimeCandidateCommit": "43c45458",
+  "tools": {
+    "compiler": {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-workspace-oracle-20261012.exe",
+      "sha256": "3fc80316f40922dfc3b713ad6cc890c0a7cf35d7e272be647160a7022fd75245"
+    },
+    "candidate": {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-stack-current-20261012\\complete-stage2\\compiler.exe",
+      "sha256": "6e55b6aa6d8aa5f01b850a860b565d5b1b8e74a310c05425a11f58ca699d3b6e"
+    },
+    "builder": {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-frontend-timeout-20261012\\builder.exe",
+      "sha256": "0eaa4aa9aed40f50b33f0526d27db2cf8e3a645782047e5941a0540134bea1f2"
+    },
+    "workspaceBuilder": {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-workspace-native-builder-20261012.exe",
+      "sha256": "2014f5f407231fc56305b14b2f099f186f91d77d592dd2a32d495d9165abd983"
+    }
+  },
+  "programs": [
+    {
+      "profile": "development",
+      "exit": 42,
+      "sha256": "2e8666dd800c54455242296e93d25362bbf1bdaf2a60c199c3b375a48b4347af",
+      "cachedPacketUsed": false
+    },
+    {
+      "profile": "release",
+      "exit": 42,
+      "sha256": "5c419dca9f41c88766e47b4901d32a50a2874cd6b7b7c11f5fe239fda13e3138",
+      "cachedPacketUsed": false
+    }
+  ],
+  "failedWorkspaceBuilds": [
+    {
+      "name": "Missing",
+      "exit": 2,
+      "previousImagePreserved": true
+    },
+    {
+      "name": "WrongModule",
+      "exit": 2,
+      "previousImagePreserved": true
+    },
+    {
+      "name": "WrongResult",
+      "exit": 2,
+      "previousImagePreserved": true
+    },
+    {
+      "name": "Parameter",
+      "exit": 2,
+      "previousImagePreserved": true
+    },
+    {
+      "name": "Generic",
+      "exit": 2,
+      "previousImagePreserved": true
+    },
+    {
+      "name": "MissingLock",
+      "exit": 2,
+      "previousImagePreserved": true
+    },
+    {
+      "name": "StaleLock",
+      "exit": 2,
+      "previousImagePreserved": true
+    },
+    {
+      "name": "SyntaxError",
+      "exit": 2,
+      "previousImagePreserved": true
+    },
+    {
+      "name": "TypeError",
+      "exit": 2,
+      "previousImagePreserved": true
+    }
+  ],
+  "invocations": [
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-workspace-native-builder-20261012.exe",
+        "--candidate",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-workspace-emission-20261012\\compiler.exe",
+        "--workspace",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-entry-selection-20261012\\fixture\\Root",
+        "--locked",
+        "--output",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-workspace-emission-20261012\\development.exe"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "seconds": 0.7345405999803916,
+      "exit": 0,
+      "stdoutBytes": 178,
+      "stdoutSHA256": "6348d2a7a9184ce94a48be9d8da1950120de4c63bf0f0d4810e200d202cb5571",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-workspace-emission-20261012\\development.exe"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "seconds": 0.024860900011844933,
+      "exit": 42,
+      "stdoutBytes": 0,
+      "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-workspace-native-builder-20261012.exe",
+        "--candidate",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-workspace-emission-20261012\\compiler.exe",
+        "--workspace",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-entry-selection-20261012\\fixture\\Root",
+        "--locked",
+        "--output",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-workspace-emission-20261012\\release.exe",
+        "--release"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "seconds": 0.7718660000246018,
+      "exit": 0,
+      "stdoutBytes": 180,
+      "stdoutSHA256": "0f720291047f2083922b7c562d062ac0ed050fdf8ba77d0c0aba3921eaaefff9",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-workspace-emission-20261012\\release.exe"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "seconds": 0.024703600007342175,
+      "exit": 42,
+      "stdoutBytes": 0,
+      "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-workspace-native-builder-20261012.exe",
+        "--candidate",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-workspace-emission-20261012\\compiler.exe",
+        "--workspace",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-entry-selection-20261012\\fixture\\Missing",
+        "--locked",
+        "--output",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-workspace-emission-20261012\\previous.exe"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "seconds": 0.07679659998393618,
+      "exit": 2,
+      "stdoutBytes": 0,
+      "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr": "candidate build failed: candidate frontend failed: exit status 2: fairyc: candidate workspace root entry main::main must have type fn() -> i32\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-workspace-native-builder-20261012.exe",
+        "--candidate",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-workspace-emission-20261012\\compiler.exe",
+        "--workspace",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-entry-selection-20261012\\fixture\\WrongModule",
+        "--locked",
+        "--output",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-workspace-emission-20261012\\previous.exe"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "seconds": 0.08384969999315217,
+      "exit": 2,
+      "stdoutBytes": 0,
+      "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr": "candidate build failed: candidate frontend failed: exit status 2: fairyc: candidate workspace root entry main::main must have type fn() -> i32\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-workspace-native-builder-20261012.exe",
+        "--candidate",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-workspace-emission-20261012\\compiler.exe",
+        "--workspace",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-entry-selection-20261012\\fixture\\WrongResult",
+        "--locked",
+        "--output",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-workspace-emission-20261012\\previous.exe"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "seconds": 0.08508250000886619,
+      "exit": 2,
+      "stdoutBytes": 0,
+      "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr": "candidate build failed: candidate frontend failed: exit status 2: main.fy:1:13: fairyc: candidate workspace root entry main::main must have type fn() -> i32\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-workspace-native-builder-20261012.exe",
+        "--candidate",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-workspace-emission-20261012\\compiler.exe",
+        "--workspace",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-entry-selection-20261012\\fixture\\Parameter",
+        "--locked",
+        "--output",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-workspace-emission-20261012\\previous.exe"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "seconds": 0.07343660001060925,
+      "exit": 2,
+      "stdoutBytes": 0,
+      "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr": "candidate build failed: candidate frontend failed: exit status 2: main.fy:1:13: fairyc: candidate workspace root entry main::main must have type fn() -> i32\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-workspace-native-builder-20261012.exe",
+        "--candidate",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-workspace-emission-20261012\\compiler.exe",
+        "--workspace",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-entry-selection-20261012\\fixture\\Generic",
+        "--locked",
+        "--output",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-workspace-emission-20261012\\previous.exe"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "seconds": 0.07290570001350716,
+      "exit": 2,
+      "stdoutBytes": 0,
+      "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr": "candidate build failed: candidate frontend failed: exit status 2: fairyc: candidate workspace root entry main::main must have type fn() -> i32\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-workspace-native-builder-20261012.exe",
+        "--candidate",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-workspace-emission-20261012\\compiler.exe",
+        "--workspace",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-workspace-emission-20261012\\MissingLock",
+        "--locked",
+        "--output",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-workspace-emission-20261012\\previous.exe"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "seconds": 0.052550300024449825,
+      "exit": 2,
+      "stdoutBytes": 0,
+      "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr": "candidate build failed: candidate frontend failed: exit status 7: fairyc: package workspace failure: locked workspace requires a valid fairy.lock: lockfile is not a bounded regular file\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-workspace-native-builder-20261012.exe",
+        "--candidate",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-workspace-emission-20261012\\compiler.exe",
+        "--workspace",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-workspace-emission-20261012\\StaleLock",
+        "--locked",
+        "--output",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-workspace-emission-20261012\\previous.exe"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "seconds": 0.06189559999620542,
+      "exit": 2,
+      "stdoutBytes": 0,
+      "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr": "candidate build failed: candidate frontend failed: exit status 7: fairyc: package workspace failure: lockfile is stale for the current workspace\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-workspace-native-builder-20261012.exe",
+        "--candidate",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-workspace-emission-20261012\\compiler.exe",
+        "--workspace",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-workspace-emission-20261012\\SyntaxError",
+        "--locked",
+        "--output",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-workspace-emission-20261012\\previous.exe"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "seconds": 0.0436139999947045,
+      "exit": 2,
+      "stdoutBytes": 0,
+      "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr": "candidate build failed: candidate frontend failed: exit status 3: main.fy:1:35: E0007: expected \"}\" [bytes 34..34, repair=insert]\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-workspace-native-builder-20261012.exe",
+        "--candidate",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-workspace-emission-20261012\\compiler.exe",
+        "--workspace",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-workspace-emission-20261012\\TypeError",
+        "--locked",
+        "--output",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-workspace-emission-20261012\\previous.exe"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "seconds": 0.05625490000238642,
+      "exit": 2,
+      "stdoutBytes": 0,
+      "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr": "candidate build failed: candidate frontend failed: exit status 3: main.fy:1:34: E1009: return value does not match the declared result type [bytes 33..37]\n  expected-type: main.fy:1:16 [bytes 15..18]\n"
+    }
+  ],
+  "GoFrontendFallback": false,
+  "cachedPacketUsed": false,
+  "stableBuildRunIntegrated": false,
+  "privateApiChanged": true,
+  "publicApiChanged": false,
+  "sdkAbiChanged": false,
+  "dbChanged": false,
+  "ciChanged": false,
+  "pushed": false
+}

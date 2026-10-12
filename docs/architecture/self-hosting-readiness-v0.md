@@ -2346,3 +2346,16 @@ Source check passes 366 files / 4701 MIR functions. Stable build/run, native bri
 workspace selection and the broader differential/platform/promotion gates remain.
 Public API, SDK ABI, DB and CI are unchanged; no push. Receipt:
 [candidate-workspace-emission-20261012.json](../ops/evidence/candidate-workspace-emission-20261012.json).
+
+## Direct workspace native bridge (2026-10-12)
+
+The private bridge accepts `--workspace` with optional `--locked`, forwards the
+arguments to Fairy and compiles its packet through the Windows MSVC driver.
+Both direct workspace profiles return 42 without a cached packet or Go frontend
+fallback. Nine frontend rejection cases preserve the previous image; selector,
+argv and existing deadline/build-failure checks pass. Source check passes 366
+files / 4701 MIR functions; runtime reuses the `43c45458` dispatcher before its
+help-only update. Stable build/run, program arguments, status/deadline mapping and
+the broader differential/platform/promotion gates remain. Private bridge API
+changed; public API, SDK ABI, DB and CI are unchanged; no push. Receipt:
+[candidate-workspace-native-build-20261012.json](../ops/evidence/candidate-workspace-native-build-20261012.json).

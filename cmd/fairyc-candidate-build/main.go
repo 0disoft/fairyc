@@ -16,6 +16,8 @@ func run(args []string) int {
 	flags := flag.NewFlagSet("fairyc-candidate-build", flag.ContinueOnError)
 	candidate := flags.String("candidate", "", "candidate executable")
 	manifest := flags.String("manifest", "", "private source manifest")
+	workspace := flags.String("workspace", "", "Fairy workspace root; candidate owns manifest/dependency loading")
+	locked := flags.Bool("locked", false, "verify workspace lock without writing")
 	packet := flags.String("packet", "", "previously emitted private C packet")
 	packetDigest := flags.String("packet-sha256", "", "required cached packet SHA256 digest")
 	output := flags.String("output", "", "destination executable")
@@ -29,8 +31,8 @@ func run(args []string) int {
 		}
 		return 2
 	}
-	if flags.NArg() != 0 || *output == "" || (*packet == "" && (*candidate == "" || *manifest == "" || *packetDigest != "")) || (*packet != "" && (*packetDigest == "" || *candidate != "" || *manifest != "")) {
-		fmt.Fprintln(os.Stderr, "output and either candidate/manifest or packet/packet-sha256 are required")
+	if flags.NArg() != 0 || *output == "" || (*packet == "" && (*candidate == "" || (*manifest == "") == (*workspace == "") || *packetDigest != "" || *locked && *workspace == "")) || (*packet != "" && (*packetDigest == "" || *candidate != "" || *manifest != "" || *workspace != "" || *locked)) {
+		fmt.Fprintln(os.Stderr, "output and either candidate with one manifest/workspace, or packet/packet-sha256 are required; locked requires workspace")
 		return 2
 	}
 	if *compileTimeout <= 0 || *compileTimeout > 10*time.Minute {
@@ -41,7 +43,7 @@ func run(args []string) int {
 		fmt.Fprintln(os.Stderr, "frontend-timeout must be in (0,10m]")
 		return 2
 	}
-	options := candidatebuild.Options{Candidate: *candidate, Manifest: *manifest, Directory: *directory, Output: *output, Release: *release, Timeout: *frontendTimeout, CompileTimeout: *compileTimeout}
+	options := candidatebuild.Options{Candidate: *candidate, Manifest: *manifest, Workspace: *workspace, Locked: *locked, Directory: *directory, Output: *output, Release: *release, Timeout: *frontendTimeout, CompileTimeout: *compileTimeout}
 	var result candidatebuild.Result
 	var err error
 	if *packet != "" {
