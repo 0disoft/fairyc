@@ -6,8 +6,26 @@ import std::vec as v;
 // Canonical sparse maps own the furthest source use for each live binding.
 // A zero map is empty, not an unanalysed point (Point.checked distinguishes it).
 pub fn Result<usize,m::Problem> intern(ref v::Vec<l::Use> env,ref mut v::Vec<l::Header> maps,ref mut v::Vec<l::Row> rows,ref mut l::Context c){
-    var usize count=0;var usize i=0;while(i<v::len<l::Use>(env)){if(!m::charge(ref mut c.work,1)){return .err(l::fail(c,10,0,0));}if(v::at<l::Use>(env,i).end!=0){count+=1;}i+=1;}if(count==0){return .ok(0);}var usize id=0;while(id<v::len<l::Header>(maps)){if(!m::charge(ref mut c.work,1)){return .err(l::fail(c,10,0,0));}let h=*v::at<l::Header>(maps,id);if(h.count==count){var usize j=0;i=0;var bool equal=true;while(i<v::len<l::Use>(env) && equal){if(!m::charge(ref mut c.work,1)){return .err(l::fail(c,10,0,0));}let value=*v::at<l::Use>(env,i);if(value.end!=0){let row=*v::at<l::Row>(rows,h.start+j);equal=row.local==i+1 && row.start==value.start && row.end==value.end;j+=1;}i+=1;}if(equal){return .ok(id+1);}}id+=1;}
-    if(v::len<l::Header>(maps)>=4096 || count>32768-v::len<l::Row>(rows)){return .err(l::fail(c,10,0,0));}let start=v::len<l::Row>(rows);i=0;while(i<v::len<l::Use>(env)){if(!m::charge(ref mut c.work,1)){return .err(l::fail(c,10,0,0));}let value=*v::at<l::Use>(env,i);if(value.end!=0 && !v::push<l::Row>(rows,l::Row{.local=i+1,.start=value.start,.end=value.end}).is_ok){return .err(l::fail(c,11,0,0));}i+=1;}if(!v::push<l::Header>(maps,l::Header{.start,.count}).is_ok){return .err(l::fail(c,11,0,0));}return .ok(v::len<l::Header>(maps));
+    var usize count=0;var usize hash=0;var usize i=0;
+    while(i<v::len<l::Use>(env)){
+        if(!m::charge(ref mut c.work,1)){return .err(l::fail(c,10,0,0));}
+        let value=*v::at<l::Use>(env,i);
+        if(value.end!=0){count+=1;hash=(hash*31+(i+1)%65521)%65521;hash=(hash*31+value.start%65521)%65521;hash=(hash*31+value.end%65521)%65521;}i+=1;
+    }
+    if(count==0){return .ok(0);}let bucket=hash%1024;var usize id=c.buckets[bucket];
+    // Hashes choose a bounded collision chain; exact rows still decide identity.
+    // Handles retain insertion order and rows retain original lexical local IDs.
+    while(id!=0){
+        if(!m::charge(ref mut c.work,1)){return .err(l::fail(c,10,0,0));}
+        if(id>v::len<l::Header>(maps)){return .err(l::fail(c,12,0,0));}let h=*v::at<l::Header>(maps,id-1);
+        if(h.hash==hash && h.count==count){var usize j=0;i=0;var bool equal=true;
+            while(i<v::len<l::Use>(env) && equal){if(!m::charge(ref mut c.work,1)){return .err(l::fail(c,10,0,0));}let value=*v::at<l::Use>(env,i);if(value.end!=0){let row=*v::at<l::Row>(rows,h.start+j);equal=row.local==i+1 && row.start==value.start && row.end==value.end;j+=1;}i+=1;}
+            if(equal){return .ok(id);}
+        }id=h.next;
+    }
+    if(v::len<l::Header>(maps)>=4096 || count>32768-v::len<l::Row>(rows)){return .err(l::fail(c,10,0,0));}let start=v::len<l::Row>(rows);i=0;
+    while(i<v::len<l::Use>(env)){if(!m::charge(ref mut c.work,1)){return .err(l::fail(c,10,0,0));}let value=*v::at<l::Use>(env,i);if(value.end!=0 && !v::push<l::Row>(rows,l::Row{.local=i+1,.start=value.start,.end=value.end}).is_ok){return .err(l::fail(c,11,0,0));}i+=1;}
+    if(!v::push<l::Header>(maps,l::Header{.start,.count,.hash,.next=c.buckets[bucket]}).is_ok){return .err(l::fail(c,11,0,0));}let result=v::len<l::Header>(maps);c.buckets[bucket]=result;return .ok(result);
 }
 pub fn Result<v::Vec<l::Use>,m::Problem> restore(usize map,usize locals,ref v::Vec<l::Header> maps,ref v::Vec<l::Row> rows,ref mut l::Context c){var result=switch(l::empty(locals,c)){case .ok(v):{v}case .err(p):{return .err(p);}};if(map==0){return .ok(result);}if(map>v::len<l::Header>(maps)){return .err(l::fail(c,12,0,0));}let h=*v::at<l::Header>(maps,map-1);var usize i=0;while(i<h.count){if(!m::charge(ref mut c.work,1)){return .err(l::fail(c,10,0,0));}let row=*v::at<l::Row>(rows,h.start+i);if(row.local==0 || row.local>locals){return .err(l::fail(c,12,0,0));}let slot=v::at_mut<l::Use>(ref mut result,row.local-1);*slot=l::Use{.start=row.start,.end=row.end};i+=1;}return .ok(result);}
 pub fn Result<usize,m::Problem> index(ref v::Vec<l::Point> points,usize original,ref mut l::Context c){var usize low=0;var usize high=v::len<l::Point>(points);while(low<high){if(!m::charge(ref mut c.work,1)){return .err(l::fail(c,10,0,0));}let mid=low+(high-low)/2;if(v::at<l::Point>(points,mid).source_index<original){low=mid+1;}else{high=mid;}}return if(low<v::len<l::Point>(points) && v::at<l::Point>(points,low).source_index==original){.ok(low)}else{.err(l::fail(c,12,0,0))};}

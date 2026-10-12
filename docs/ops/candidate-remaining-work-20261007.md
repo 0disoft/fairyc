@@ -1,5 +1,28 @@
 # Fairy 컴파일러 전환: 후속 작업 목록
 
+## Indexed liveness map reuse (2026-10-12)
+
+Canonical last-use maps use 1024 bounded collision buckets. Hashes narrow
+candidate rows; exact lexical local IDs and source spans still decide identity.
+Insertion order and all published points remain stable. The existing 1048576
+work, 4096 map and 32768 row bounds remain; private headers/context carry the
+index. Source check passes 377 files / 4804 MIR functions and refreshes the lock.
+
+The repeated-map/collision/exhausted-budget test passes in Go-native and both
+candidate C profiles. Sixteen frozen binding, branch and loop-control cases
+retain identical 6697-byte output in all three engines. The first harness run
+expected empty stdout; completed observations were reused with the authored
+test's captured Go output and the release build was completed separately.
+
+Single-unit profiling attributes the full preview failure to liveness frame 69
+in `module_unit_origin_flow`, before summary convergence. The index reduces the
+history entering that frame from 127979 to 121331, but the replay still fails
+code 10. Distinguish traversal exhaustion from map/row capacity next. No complete
+self packet or new fixed point is claimed. Public borrow admission, frontend
+parity, Linux and hosted CI remain; public API, SDK ABI, DB, CI and product
+timeouts are unchanged, no push. Receipt:
+`evidence/candidate-borrow-live-map-index-20261012.json`.
+
 ## Bounded frontend observation (2026-10-12)
 
 The native observer retains stderr, phase events and live progress, terminates

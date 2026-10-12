@@ -5,10 +5,10 @@ import std::vec as v;
 pub struct Use {usize start;usize end;}
 pub struct Local {usize start;usize end;bool borrowed;}
 pub struct Row {usize local;usize start;usize end;}
-pub struct Header {usize start;usize count;}
+pub struct Header {usize start;usize count;usize hash;usize next;}
 pub struct Point {usize source_index;usize start;usize end;usize map;bool checked;}
 pub struct Loop {usize break_live;usize continue_live;}
-pub struct Context {m::Frame frame;usize work;usize rounds;}
+pub struct Context {m::Frame frame;usize work;usize rounds;usize[1024] buckets;}
 pub resource Plan {v::Vec<Local> locals;v::Vec<Point> expressions;v::Vec<Point> statements;v::Vec<Header> maps;v::Vec<Row> rows;usize start;usize end;usize work;usize rounds;cleanup{}}
 pub fn Plan assemble(v::Vec<Local> locals,v::Vec<Point> expressions,v::Vec<Point> statements,v::Vec<Header> maps,v::Vec<Row> rows,usize start,usize end,usize work,usize rounds){return Plan{.locals,.expressions,.statements,.maps,.rows,.start,.end,.work,.rounds};}
 pub fn usize start(ref Plan p){return p.start;}
