@@ -2,7 +2,17 @@
 
 ## Current local candidate evidence (2026-10-12)
 
-The latest source slice adds the canonical public-interface v5 header/state
+The latest source slice provides the complete ordinary public-interface v5
+descriptor encoder and canonical text hash, linked to selected signature state
+metadata. All five ordinary item kinds, ordered modules/items/fields/variants,
+public callable facts and resource abilities match actual Go Encode/Compute
+bytes and hash text. Four tests pass Go native and both candidate C profiles;
+source check passes 391 files / 4997 MIR functions. Typed source/type projection,
+the separate generic-template identity and cache v4 consumption remain pending.
+The current 384-source dispatcher has not been rebuilt or replayed for a fixed point.
+Evidence: [complete v5 encoding](../ops/evidence/candidate-public-interface-v5-20261012.json).
+
+The preceding source slice adds the canonical public-interface v5 header/state
 prefix through package signature metadata. Selected UID and raw layout hash
 exclude local package/module/declaration numbers; selected canonical facts are
 revalidated independently of unrelated packages. Four tests pass Go native and

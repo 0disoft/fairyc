@@ -3,6 +3,8 @@ import module_catalog as catalog;
 import module_state_declarations as state_declarations;
 import module_state_layout as state;
 import module_state_interface as state_interface;
+import module_public_interface as public_interface;
+import module_public_interface_model as public_model;
 import module_types as types;
 import sdk_vector_plan as vectors;
 import syntax as syntax;
@@ -18,6 +20,7 @@ pub struct Signature {usize module_index;usize declaration;bool public;usize res
 pub resource Program {state::Plan states;vectors::Plan types;v::Vec<Signature> signatures;v::Vec<usize> parameters;v::Vec<bool> vector_sources;bytes::Buffer links;cleanup{}}
 pub fn ref state::Plan state_layouts(ref Program p){return ref p.states;}
 pub fn Result<bytes::Buffer,u32> public_state_prefix(ref Program p,usize owner,ref mut usize work){return state_interface::prefix(ref p.states,owner,work);}
+pub fn Result<bytes::Buffer,u32> public_interface_hash(ref Program p,usize owner,ref public_model::Descriptor descriptor,ref mut usize work){return public_interface::hash(ref p.states,owner,descriptor,work);}
 pub fn bool sdk_vector_source(ref Program p,usize module_index){return module_index<v::len<bool>(ref p.vector_sources) && *v::at<bool>(ref p.vector_sources,module_index);}
 pub fn usize module_count(ref Program p){return vectors::module_count(ref p.types);}
 pub fn usize module_owner(ref Program p,usize module_index){return vectors::module_owner(ref p.types,module_index);}

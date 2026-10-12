@@ -1,5 +1,32 @@
 # Fairy 컴파일러 전환: 후속 작업 목록
 
+## Complete ordinary public-interface v5 encoder (2026-10-12)
+
+An owned descriptor, bounded writer and full encoder now produce the complete
+public-interface v5 stream and its canonical `fyif5-sha256-` text hash.
+`signatures::public_interface_hash` combines selected state metadata with a
+caller-supplied descriptor. Modules and items are ordered by path and kind/name.
+The stream retains repr(C), unsafe/must_use, ABI/link name/owner, effect/ability/
+parameter lists, results, ordered struct fields and enum variant payloads.
+Local storage offsets are excluded. Resource abilities follow drop/store/key;
+key requires store. Invalid ranges, empty module sets, ordering and duplicates
+reject within the unchanged 1048576 shared work/output bounds.
+
+The actual Go Encode/Compute oracle emits a 1127-byte stream for all five ordinary
+item kinds, two modules and an empty state layout, plus a no-state companion.
+Complete bytes and hash text match. Four authored tests pass Go native and both
+candidate C profiles, including storage-offset invariance, must_use invalidation,
+ten malformed descriptors and exact-fit/exhausted work. Source check passes
+391 files / 4997 MIR functions; final native tests verify the updated source lock.
+
+Typed source/public type extraction into this descriptor, the separate private
+generic-template interface identity and cache v4 consumption remain pending.
+The current 384-source dispatcher is not rebuilt or replayed in this slice; the
+prior complete-image/fixed-point proof is historical. Broader diagnostics, product
+timeout/default stack, Linux/full suite and hosted CI remain. No public API, SDK
+ABI, DB, CI, runner or timeout change; no push. Receipt:
+`evidence/candidate-public-interface-v5-20261012.json`.
+
 ## Canonical state public-interface prefix (2026-10-12)
 
 `module_state_interface` emits the public-interface v5 header and state section
