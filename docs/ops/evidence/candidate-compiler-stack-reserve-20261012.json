@@ -1,0 +1,74 @@
+{
+  "schema": "fairyc.candidate-private-stack-reserve/v1",
+  "passed": true,
+  "scope": "Explicit private compiler-image stack reservation; ordinary project builders retain native default",
+  "sourceInputs": [
+    {
+      "path": "internal/cdriver/windows_project.go",
+      "sha256": "11a891d5158bc5efe58e7fe4dbead8a3de15f3cdabb020b610fd26b1e96ff3f5"
+    },
+    {
+      "path": "internal/cdriver/windows_project_test.go",
+      "sha256": "5d3f622d90927237e3e8a40e18a5317ffea864215a3e631bd6968ca22d77069d"
+    },
+    {
+      "path": "internal/candidatebuild/build.go",
+      "sha256": "a6af099240bfdbc10ba26047a897ddb74311c3ff8cabc000c296b7a726135e09"
+    },
+    {
+      "path": "internal/candidatebuild/build_test.go",
+      "sha256": "7a036eae0c87adaf0c8401ebd33951c060e795a7c3997c084fb0e5adb43e4431"
+    },
+    {
+      "path": "cmd/fairyc-candidate-build/main.go",
+      "sha256": "2e008fd984ce2d339856acee577a35d912b1037d23fda58ae5cf8e4744a1612b"
+    },
+    {
+      "path": "cmd/fairyc-candidate-build/main_test.go",
+      "sha256": "cbdf8127978ba52e7f89d255deef2ea071a03eef25d6e1007368d9e40e527cae"
+    }
+  ],
+  "builder": {
+    "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-rooted-builder-stack-20261012.exe",
+    "sha256": "02abe2328daa9921705910c7b995e82c1312cb960fe024106c11468569aefff0",
+    "bytes": 4793344
+  },
+  "reservePolicy": {
+    "default": 0,
+    "minimum": 65536,
+    "maximum": 16777216,
+    "alignment": 65536,
+    "linkerFlag": "/STACK:<reserve>",
+    "commitOverride": false
+  },
+  "goTests": {
+    "command": "bun tools/run-go.ts test ./internal/cdriver ./internal/candidatebuild ./cmd/fairyc-candidate-build -run 'TestWindowsProjectExplicitCompilerStackReservation|TestStackReserveRejectedBeforePacketOrCompiler|TestWorkspaceSelectionRejectsBeforeOutput|TestCompileTimeoutRejectedBeforePacketOrCompiler' -count=1",
+    "exit": 0,
+    "packages": 3
+  },
+  "nativeProbe": {
+    "command": "bun tools/run-go.ts test ./internal/cdriver -run '^TestWindowsProjectExplicitCompilerStackReservation$' -v -count=1",
+    "exit": 0,
+    "skipped": false,
+    "observations": [
+      {
+        "reserve": 1048576,
+        "commit": 4096,
+        "imageBytes": 107520,
+        "exit": 0
+      },
+      {
+        "reserve": 16777216,
+        "commit": 4096,
+        "imageBytes": 107520,
+        "exit": 0
+      }
+    ]
+  },
+  "privateApiChanged": true,
+  "publicCliChanged": false,
+  "dbChanged": false,
+  "ciChanged": false,
+  "productTimeoutChanged": false,
+  "pushed": false
+}

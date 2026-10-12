@@ -25,6 +25,24 @@ func BuildWindowsMSVCTargetParts(toolchain WindowsHostToolchain, profile Profile
 // BuildWindowsMSVCTargetPartsWithTimeout applies the deadline separately to
 // each compiler invocation and the final link; it does not change program execution.
 func BuildWindowsMSVCTargetPartsWithTimeout(toolchain WindowsHostToolchain, profile Profile, header, literals string, units []string, runtimeSource string, timeout time.Duration) (WindowsHostArtifact, error) {
+	return BuildWindowsMSVCTargetPartsWithStackReserve(toolchain, profile, header, literals, units, runtimeSource, timeout, 0)
+}
+
+// ValidateWindowsProjectStackReserve bounds a private compiler-host reservation.
+// Zero retains the native linker's default. Commit size is never overridden.
+func ValidateWindowsProjectStackReserve(reserve uint64) error {
+	if reserve != 0 && (reserve < 65536 || reserve > 16*1024*1024 || reserve%65536 != 0) {
+		return fmt.Errorf("project stack reserve must be zero or 64 KiB aligned in [64 KiB,16 MiB]")
+	}
+	return nil
+}
+
+// BuildWindowsMSVCTargetPartsWithStackReserve is for explicitly sized private
+// compiler images; ordinary project builds use the zero-reservation wrapper.
+func BuildWindowsMSVCTargetPartsWithStackReserve(toolchain WindowsHostToolchain, profile Profile, header, literals string, units []string, runtimeSource string, timeout time.Duration, reserve uint64) (WindowsHostArtifact, error) {
+	if err := ValidateWindowsProjectStackReserve(reserve); err != nil {
+		return WindowsHostArtifact{}, err
+	}
 	if timeout <= 0 || timeout > 10*time.Minute {
 		return WindowsHostArtifact{}, fmt.Errorf("MSVC project compile timeout must be in (0,10m]")
 	}
@@ -97,6 +115,9 @@ func BuildWindowsMSVCTargetPartsWithTimeout(toolchain WindowsHostToolchain, prof
 	// Private bootstrap images must compare byte-for-byte across generations;
 	// timestamp bytes are reproducible inputs, never removed by the comparator.
 	arguments = append(arguments, "/Fe:"+executable, "/link", "/INCREMENTAL:NO", "/Brepro")
+	if reserve != 0 {
+		arguments = append(arguments, fmt.Sprintf("/STACK:%d", reserve))
+	}
 	if _, err := runWindowsHostCommandWithLimitAndTimeout(toolchain.Path, toolchain.Environment, directory, maxProcessOutput, timeout, arguments...); err != nil {
 		return WindowsHostArtifact{}, fmt.Errorf("link project C: %s", strings.ReplaceAll(err.Error(), directory, "<temporary>"))
 	}

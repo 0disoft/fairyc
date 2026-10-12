@@ -23,6 +23,10 @@ func TestWorkspaceSelectionRejectsBeforeOutput(t *testing.T) {
 		{"--packet", "must-not-read", "--packet-sha256", "bad", "--workspace", "w"},
 		{"--packet", "must-not-read", "--packet-sha256", "bad", "--locked"},
 		{"--workspace", "w"},
+		{"--packet-input", "must-not-read", "--stack-reserve-bytes", "-1"},
+		{"--packet-input", "must-not-read", "--stack-reserve-bytes", "1"},
+		{"--packet-input", "must-not-read", "--stack-reserve-bytes", "65537"},
+		{"--packet-input", "must-not-read", "--stack-reserve-bytes", "16777217"},
 	} {
 		if code := run(append(arguments, "--output", output)); code != 2 {
 			t.Fatalf("invalid selection: %v code=%d", arguments, code)

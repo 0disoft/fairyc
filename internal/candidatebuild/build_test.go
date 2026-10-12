@@ -73,6 +73,14 @@ func TestCompileTimeoutRejectedBeforePacketOrCompiler(t *testing.T) {
 	}
 }
 
+func TestStackReserveRejectedBeforePacketOrCompiler(t *testing.T) {
+	for _, reserve := range []uint64{1, 65535, 65537, 16*1024*1024 + 1, ^uint64(0)} {
+		if _, err := buildPacket(Options{StackReserveBytes: reserve}, nil); err == nil || !strings.Contains(err.Error(), "stack reserve") {
+			t.Fatalf("invalid stack reserve %d: %v", reserve, err)
+		}
+	}
+}
+
 func TestCachedPacketRejectsChangedBytesWithoutFrontendFallback(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "candidate.bin")
 	data := packetFixture("")

@@ -23,6 +23,22 @@ Receipts: `evidence/candidate-loop-control-private-20261012.json`,
 Next: connect the existing transitive borrowed-result and live-loan analysis
 before admitting project IR, retaining source diagnostic codes and spans.
 
+## Explicit compiler-image stack reservation (2026-10-12)
+
+The private MSVC packet driver now accepts `--stack-reserve-bytes`: zero keeps
+its native default; explicit values must be 64 KiB aligned in [64 KiB,16 MiB].
+The packet bridge forwards this only as a numeric `/STACK` linker option and
+never overrides initial commit size. Ordinary builders and Fairy public native
+commands continue to omit the option. Invalid values fail before packet decode
+or output publication. Go owns only this private native transport.
+
+Focused driver/bridge/CLI tests pass. A real separately compiled native probe
+runs with both 1 MiB/default and explicit 16 MiB reservation: initial commit is
+4096 bytes and each image is 107520 bytes. The broader candidate borrow analysis
+and self-source emission remain work in progress. No public language/CLI, DB,
+CI or product timeout changes; no push. Receipt:
+`evidence/candidate-compiler-stack-reserve-20261012.json`.
+
 ## Borrow integration preflight (2026-10-12)
 
 The cached integration preview connects existing borrowed-result/loan analysis

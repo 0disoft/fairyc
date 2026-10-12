@@ -31,6 +31,7 @@ type Options struct {
 	RunTrapControl                         bool
 	Timeout                                time.Duration
 	CompileTimeout                         time.Duration
+	StackReserveBytes                      uint64
 }
 type Result struct {
 	PacketSHA256      string
@@ -241,6 +242,9 @@ func cachedPacket(path, expected string) ([]byte, error) {
 }
 
 func buildPacket(options Options, data []byte) (Result, error) {
+	if err := cdriver.ValidateWindowsProjectStackReserve(options.StackReserveBytes); err != nil {
+		return Result{}, err
+	}
 	compileTimeout := options.CompileTimeout
 	if compileTimeout == 0 {
 		compileTimeout = 2 * time.Minute
@@ -267,7 +271,7 @@ func buildPacket(options Options, data []byte) (Result, error) {
 	if options.Release {
 		profile = cdriver.OptimizedProfile
 	}
-	artifact, err := cdriver.BuildWindowsMSVCTargetPartsWithTimeout(toolchain, profile, packet.Header, packet.Literals, packet.Units, support, compileTimeout)
+	artifact, err := cdriver.BuildWindowsMSVCTargetPartsWithStackReserve(toolchain, profile, packet.Header, packet.Literals, packet.Units, support, compileTimeout, options.StackReserveBytes)
 	if err != nil {
 		return Result{}, err
 	}
