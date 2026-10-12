@@ -31,6 +31,7 @@ def main():
     parser.add_argument('--output', type=Path, required=True)
     parser.add_argument('--fixture', type=Path, help='hash and forward one binary oracle fixture to every execution')
     parser.add_argument('--candidate-only', action='store_true', help='execute private host-ABI tests only through candidate C; Go native cannot link these private adapters')
+    parser.add_argument('--isolated-native', action='store_true', help='run Go native tests on exact copies of the selected module import closure; retain the original workspace source-check separately')
     parser.add_argument('--stdin-fixture', type=Path, help='exact binary input for each candidate C execution')
     parser.add_argument('--stdout-fixture', type=Path, help='expected complete candidate stdout, empty by default')
     parser.add_argument('--stderr-fixture', type=Path, help='expected complete candidate stderr, empty by default')
@@ -38,6 +39,8 @@ def main():
     args = parser.parse_args()
     if not 1 <= args.frontend_timeout <= 900:
         parser.error('frontend timeout must be in 1..900 seconds')
+    if args.isolated_native and args.candidate_only:
+        parser.error('isolated-native requires Go native execution')
     if not __debug__:
         parser.error('verification requires Python without -O')
     if not re.fullmatch(r'[a-z][a-z0-9_]*', args.module):
@@ -134,13 +137,42 @@ def main():
     expected = {f'tests::{args.module}::{name}' for name in args.test}
     selection = [arg for name in args.test for arg in ('--exact', f'tests::{args.module}::{name}')]
     report = None
+    native_isolation = None
     if not args.candidate_only:
-        native = run([args.compiler.resolve(), 'test', '--native', '--locked', '--json', '--capture-output', *selection, *(['--', *arguments] if arguments else [])], cwd=PROJECT, timeout=600)
+        native_project = PROJECT
+        copied_inputs = []
+        if args.isolated_native:
+            originals = [test_source] + [path for path in paths[1:] if path.is_relative_to(PROJECT / 'src')]
+            manifest_bytes = (PROJECT / 'fairy.toml').read_bytes()
+            source_inputs.append(dict(path=(PROJECT / 'fairy.toml').relative_to(ROOT).as_posix(), sha256=hashlib.sha256(manifest_bytes).hexdigest()))
+            fingerprint = hashlib.sha256(manifest_bytes + b''.join(str(path.relative_to(PROJECT)).encode() + bytes.fromhex(digest(path)) for path in originals)).hexdigest()
+            native_project = output / ('native-project-' + fingerprint[:20])
+            native_project.mkdir(parents=True, exist_ok=True)
+            native_manifest = native_project / 'fairy.toml'
+            native_manifest.write_bytes(manifest_bytes)
+            copied_inputs.append((native_manifest, hashlib.sha256(manifest_bytes).hexdigest()))
+            expected_sources = set()
+            for original in originals:
+                destination = native_project / original.relative_to(PROJECT)
+                destination.parent.mkdir(parents=True, exist_ok=True)
+                destination.write_bytes(original.read_bytes())
+                copied_inputs.append((destination, digest(original)))
+                expected_sources.add(destination)
+            entry = native_project / 'src' / 'main.fy'
+            assert entry not in expected_sources
+            entry.write_bytes(b'module main;fn i32 main(){return 0;}\n')
+            expected_sources.add(entry)
+            copied_inputs.append((entry, digest(entry)))
+            assert set(native_project.rglob('*.fy')) == expected_sources, 'isolated native sources contain unexpected files'
+            run([args.compiler.resolve(), 'check'], cwd=native_project, timeout=600)
+            native_isolation = dict(path=str(native_project), localSourceFiles=len(expected_sources)-1, inputFingerprint=fingerprint, copiedInputs=[dict(path=str(path), sha256=sha) for path, sha in copied_inputs])
+        native = run([args.compiler.resolve(), 'test', '--native', '--locked', '--json', '--capture-output', *selection, *(['--', *arguments] if arguments else [])], cwd=native_project, timeout=600)
         report = json.loads(native.stdout)
         save(output / 'native.json', report)
         assert report['passed'] == len(expected) and report['failed'] == 0
         assert report['engine'] == 'native' and report['lock'] == 'verified'
         assert {row['identity'] for row in report['tests']} == expected
+        assert all(digest(path) == sha for path, sha in copied_inputs), 'isolated native input changed during execution'
     manifest = output / 'sources.list'
     manifest.write_text(''.join(p.relative_to(ROOT).as_posix() + '\n' for p in paths), encoding='utf-8', newline='\n')
     packet = run([args.candidate.resolve(), '--c-project-file', manifest], timeout=args.frontend_timeout)
@@ -162,6 +194,8 @@ def main():
     receipt['frontendTimeoutSeconds'] = args.frontend_timeout
     receipt['productTimeoutChanged'] = False
     receipt['wrapperEffects'] = effects
+    if native_isolation:
+        receipt['nativeIsolation'] = native_isolation
     if streams:
         receipt['streamVerification'] = {name:dict(bytes=len(data),sha256=hashlib.sha256(data).hexdigest()) for name,data in streams.items()}
     if snapshots:
