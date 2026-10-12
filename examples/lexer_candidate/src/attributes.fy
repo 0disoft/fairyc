@@ -38,7 +38,7 @@ fn bool read(ref scanner::Stream stream, ref mut Cursor cursor, ref mut v::Vec<A
             while (!types::word(stream,cursor.index,b")")) {
                 if (cursor.arguments >= 1024) { cursor.status = 4; return false; }
                 let usize token = cursor.index; let scanner::TokenInfo info = scanner::token_info(stream,token);
-                let u32 kind = if (info.kind == 3) { 1 } else if (info.kind == 5) { 2 } else if (info.kind == 7) { 3 } else { 0 };
+                let u32 kind = if (info.kind == 3) { 1 } else if (info.kind == 5) { 2 } else if (info.kind == 7 || info.kind == 8 || info.kind == 9) { 3 } else { 0 };
                 if (kind == 0) { cursor.expected = 15; return false; }
                 if (kind == 1) { if (!path(stream,cursor)) { return false; } } else { advance(stream,cursor); }
                 let Argument value = Argument { .kind, .start = info.start, .end = cursor.end, .token };

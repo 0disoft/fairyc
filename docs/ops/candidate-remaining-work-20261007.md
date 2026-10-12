@@ -1,5 +1,30 @@
 # Fairy 컴파일러 전환: 후속 작업 목록
 
+## Source declaration metadata and documentation spans (2026-10-13)
+
+The retained syntax now produces the exact Go Function header JSON: written
+name/owner, public/unsafe flags, generic parameters, attributes and their raw and
+Go-decoded string values, parameter names/types, result type and original byte
+spans. The shared token helper canonicalizes significant-token paths; the
+documentation helper follows exact standalone consecutive /// attachment across
+LF/CRLF, indentation and BOM. Blank lines, ordinary/block comments and trailing
+same-line documentation break attachment. The private attribute parser now
+retains byte/C-string arguments already admitted by Go syntax; their Cooked
+field remains empty. All helpers share the existing bounded JSON work ledger.
+
+Eleven authored sources match the actual Go syntax-only frontend, with five
+attached documentation spans. Four tests pass Go native and candidate-generated
+C development/release, including qualified paths, UTF-8, HTML/separator escaping,
+invalid selections and exact-fit/exhausted work. Source check passes 403 files /
+5136 MIR functions; final tests verify the unchanged lock and original/copy hashes.
+
+This writes only function header fields; Body is still absent. Function body and
+aggregate definition JSON, resolved imports and reachable-template closures,
+actual planner facts and dispatcher/cache consumers remain next. Current-source
+fixed point, full differential, Linux/full suite and hosted CI are not rerun.
+No public API, SDK ABI, DB, CI/runner or product timeout changes; no push. Receipt:
+[evidence](evidence/candidate-generic-source-declarations-20261013.json).
+
 ## Source-AST type JSON for generic definitions (2026-10-13)
 
 `generic_source_type_json` reads the retained syntax type arena and projects the
