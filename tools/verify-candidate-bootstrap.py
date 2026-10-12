@@ -119,13 +119,13 @@ def main():
             compiler = image
         assert images[0].read_bytes() == images[1].read_bytes()
         assert artifact(args.builder) == builder_identity, 'builder changed during verification'
-        receipt = dict(schema='fairyc.candidate-two-stage-bootstrap/v2', passed=True, scope='Consecutive C-part generations after a Go-produced Fairy seed; not byte equality with that monolithic seed image', artifactPolicy=policy, sourceInventorySHA256=inventory_sha, sourceFiles=len(original), frontendTimeoutSeconds=args.frontend_timeout, seed=seed_identity, builder=builder_identity, frontends=frontends, builds=observations, packets=[artifact(p) for p in packets], seedPacketSHA256=digest(packets[0]), packetSHA256=digest(packets[1]), stage1=artifact(images[0]), stage2=artifact(images[1]))
+        receipt = dict(schema='fairyc.candidate-two-stage-bootstrap/v2', passed=True, scope='Consecutive C-part generations from the recorded input seed; image equality compares Stage1 and Stage2', artifactPolicy=policy, sourceInventorySHA256=inventory_sha, sourceFiles=len(original), frontendTimeoutSeconds=args.frontend_timeout, seed=seed_identity, builder=builder_identity, frontends=frontends, builds=observations, packets=[artifact(p) for p in packets], seedPacketSHA256=digest(packets[0]), packetSHA256=digest(packets[1]), stage1=artifact(images[0]), stage2=artifact(images[1]))
     proof_dir = args.output / 'lexer'
     checked = subprocess.run([sys.executable, str(ROOT/'tools/verify-candidate-bootstrap-lexer.py'), '--reference', str(args.reference.resolve()), '--fixtures', str(ROOT/'spec/fixtures/lexer/candidate-bootstrap-v1.json'), '--stage1', str(images[0].resolve()), '--stage2', str(images[1].resolve()), '--seed', str(args.seed.resolve()), '--output', str(proof_dir.resolve())], cwd=ROOT, capture_output=True, timeout=60)
     assert checked.returncode == 0 and not checked.stderr, checked.stderr
     assert sources() == original, 'compiler sources changed during verification'
     assert artifact(args.seed) == seed_identity, 'seed changed during verification'
-    receipt.update(seedImageSHA256=digest(args.seed), manifestSHA256=digest(manifest), lexerDifferential=json.loads((proof_dir/'receipt.json').read_bytes()), productTimeoutChanged=False, promotionGateReady=False, deferred=['Full frontend differential', 'Linux', 'Current-commit hosted CI'], pushed=False)
+    receipt.update(scope='Consecutive C-part generations from the recorded input seed; image equality compares Stage1 and Stage2', seedImageSHA256=digest(args.seed), manifestSHA256=digest(manifest), lexerDifferential=json.loads((proof_dir/'receipt.json').read_bytes()), productTimeoutChanged=False, promotionGateReady=False, deferred=['Full frontend differential', 'Linux', 'Current-commit hosted CI'], pushed=False)
     (args.output/'receipt.json').write_text(json.dumps(receipt, indent=2)+'\n', encoding='utf-8', newline='\n')
     print('Consecutive compiler images and', receipt['lexerDifferential']['cases'], 'Go lexer cases verified')
 

@@ -1,0 +1,280 @@
+{
+  "schema": "fairyc.candidate-two-stage-bootstrap/v2",
+  "passed": true,
+  "scope": "Consecutive C-part generations from the recorded input seed; image equality compares Stage1 and Stage2",
+  "artifactPolicy": {
+    "identity": "fairyc.private-project-image-repro/v1",
+    "compilerFlags": [
+      "/Brepro"
+    ],
+    "linkerFlags": [
+      "/INCREMENTAL:NO",
+      "/Brepro"
+    ],
+    "comparison": "Exact full PE image bytes",
+    "excludedBytes": []
+  },
+  "sourceInventorySHA256": "128e1f0735259ee194a1f250a9158d1b79dd99742702fe0d7245d34fe7cdca23",
+  "sourceFiles": 370,
+  "frontendTimeoutSeconds": 900,
+  "seed": {
+    "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-public-native-fixed-point-20261012\\stage2.exe",
+    "bytes": 4257280,
+    "sha256": "e4f84720790ef4d2150635578178fb299408988e0fe0fcbfea0e4a0d1c7b6cdd"
+  },
+  "builder": {
+    "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-rooted-builder-20261012.exe",
+    "bytes": 4786176,
+    "sha256": "78d6732a5549d46eeff5120ee30513b71e00ce6d6f74e796bd0d9c87e7c0fb97"
+  },
+  "frontends": [
+    {
+      "stage": 1,
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-public-native-fixed-point-20261012\\stage2.exe",
+        "--c-project-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-loop-control-bootstrap-20261012\\self-source.manifest"
+      ],
+      "seconds": 87.0803555000166,
+      "exit": 0,
+      "stdoutBytes": 30023193,
+      "stderr": ""
+    },
+    {
+      "stage": 2,
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-loop-control-bootstrap-20261012\\stage1.exe",
+        "--c-project-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-loop-control-bootstrap-20261012\\self-source.manifest"
+      ],
+      "seconds": 97.45385549997445,
+      "exit": 0,
+      "stdoutBytes": 30023193,
+      "stderr": ""
+    }
+  ],
+  "builds": [
+    {
+      "stage": 1,
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-rooted-builder-20261012.exe",
+        "--packet",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-loop-control-bootstrap-20261012\\stage1-input.bin",
+        "--packet-sha256",
+        "c121aa7c90c60ffd27a17183d22b383c4e3585f68ebe261fc0a9b279ef018fde",
+        "--output",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-loop-control-bootstrap-20261012\\stage1.exe",
+        "--release"
+      ],
+      "seconds": 306.1948703000089,
+      "exit": 0,
+      "stdout": "built: C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-loop-control-bootstrap-20261012\\stage1.exe (optimized, 46 C units, 4251648 bytes)\n",
+      "stderr": ""
+    },
+    {
+      "stage": 2,
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-rooted-builder-20261012.exe",
+        "--packet",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-loop-control-bootstrap-20261012\\stage2-input.bin",
+        "--packet-sha256",
+        "c121aa7c90c60ffd27a17183d22b383c4e3585f68ebe261fc0a9b279ef018fde",
+        "--output",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-loop-control-bootstrap-20261012\\stage2.exe",
+        "--release"
+      ],
+      "seconds": 313.8768498999998,
+      "exit": 0,
+      "stdout": "built: C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-loop-control-bootstrap-20261012\\stage2.exe (optimized, 46 C units, 4251648 bytes)\n",
+      "stderr": ""
+    }
+  ],
+  "packets": [
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-loop-control-bootstrap-20261012\\stage1-input.bin",
+      "bytes": 30023193,
+      "sha256": "c121aa7c90c60ffd27a17183d22b383c4e3585f68ebe261fc0a9b279ef018fde"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-loop-control-bootstrap-20261012\\stage2-input.bin",
+      "bytes": 30023193,
+      "sha256": "c121aa7c90c60ffd27a17183d22b383c4e3585f68ebe261fc0a9b279ef018fde"
+    }
+  ],
+  "seedPacketSHA256": "c121aa7c90c60ffd27a17183d22b383c4e3585f68ebe261fc0a9b279ef018fde",
+  "packetSHA256": "c121aa7c90c60ffd27a17183d22b383c4e3585f68ebe261fc0a9b279ef018fde",
+  "stage1": {
+    "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-loop-control-bootstrap-20261012\\stage1.exe",
+    "bytes": 4251648,
+    "sha256": "873a9996bc2a9a3bcd844814b2ad28d1cfd72e4c0b5519086481f213dc0d57e0"
+  },
+  "stage2": {
+    "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-loop-control-bootstrap-20261012\\stage2.exe",
+    "bytes": 4251648,
+    "sha256": "873a9996bc2a9a3bcd844814b2ad28d1cfd72e4c0b5519086481f213dc0d57e0"
+  },
+  "seedImageSHA256": "e4f84720790ef4d2150635578178fb299408988e0fe0fcbfea0e4a0d1c7b6cdd",
+  "manifestSHA256": "3ffa37a2f150ce9a2efbbdf6fa14b735067912d51ddea0a59cc30e2b684defdb",
+  "lexerDifferential": {
+    "schema": "fairyc.candidate-bootstrap-lexer-differential/v1",
+    "passed": true,
+    "fixturesSHA256": "ef701e3bb16f46c8f7499be2e99498ea4b298a690db97405a3ebb0b24e4ab6ed",
+    "referenceImageSHA256": "762b4d739b70885dc67b9c0301a57f271a6438e5042360e8785ac124e4d57757",
+    "referenceReportSHA256": "53fde54b05bb782c9e21bef7a6a12a5149245d5c3bcecc29c4ffcf9d6cf03b5e",
+    "inputSHA256": "bad8f8f9823246bebef08dbc5aabced8b59ae830338b7b47772068bd27ba6b4a",
+    "inputBytes": 17652,
+    "cases": 249,
+    "oracle": "Current Go lexer canonical tokens, cooked bytes, diagnostics and spans",
+    "observations": [
+      {
+        "stage": "input-seed",
+        "imageSHA256": "e4f84720790ef4d2150635578178fb299408988e0fe0fcbfea0e4a0d1c7b6cdd",
+        "seconds": 0.2005498000071384,
+        "cases": 249,
+        "stdoutBytes": 56480,
+        "stdoutSHA256": "8fbb3b6fced01d08c4860e21fabfa56c99257e2096f56af645bf15415530747d",
+        "malformedFrames": [
+          {
+            "case": 0,
+            "exit": 8
+          },
+          {
+            "case": 1,
+            "exit": 8
+          },
+          {
+            "case": 2,
+            "exit": 8
+          },
+          {
+            "case": 3,
+            "exit": 8
+          },
+          {
+            "case": 4,
+            "exit": 8
+          },
+          {
+            "case": 5,
+            "exit": 8
+          },
+          {
+            "case": 6,
+            "exit": 4
+          }
+        ]
+      },
+      {
+        "stage": "stage1",
+        "imageSHA256": "873a9996bc2a9a3bcd844814b2ad28d1cfd72e4c0b5519086481f213dc0d57e0",
+        "seconds": 0.1981241999892518,
+        "cases": 249,
+        "stdoutBytes": 56480,
+        "stdoutSHA256": "8fbb3b6fced01d08c4860e21fabfa56c99257e2096f56af645bf15415530747d",
+        "malformedFrames": [
+          {
+            "case": 0,
+            "exit": 8
+          },
+          {
+            "case": 1,
+            "exit": 8
+          },
+          {
+            "case": 2,
+            "exit": 8
+          },
+          {
+            "case": 3,
+            "exit": 8
+          },
+          {
+            "case": 4,
+            "exit": 8
+          },
+          {
+            "case": 5,
+            "exit": 8
+          },
+          {
+            "case": 6,
+            "exit": 4
+          }
+        ]
+      },
+      {
+        "stage": "stage2",
+        "imageSHA256": "873a9996bc2a9a3bcd844814b2ad28d1cfd72e4c0b5519086481f213dc0d57e0",
+        "seconds": 0.21290059998864308,
+        "cases": 249,
+        "stdoutBytes": 56480,
+        "stdoutSHA256": "8fbb3b6fced01d08c4860e21fabfa56c99257e2096f56af645bf15415530747d",
+        "malformedFrames": [
+          {
+            "case": 0,
+            "exit": 8
+          },
+          {
+            "case": 1,
+            "exit": 8
+          },
+          {
+            "case": 2,
+            "exit": 8
+          },
+          {
+            "case": 3,
+            "exit": 8
+          },
+          {
+            "case": 4,
+            "exit": 8
+          },
+          {
+            "case": 5,
+            "exit": 8
+          },
+          {
+            "case": 6,
+            "exit": 4
+          }
+        ]
+      }
+    ],
+    "scope": "Lexer and private framing only; parser, typing and executable behavior require separate differential evidence"
+  },
+  "productTimeoutChanged": false,
+  "promotionGateReady": false,
+  "deferred": [
+    "Full frontend differential",
+    "Linux",
+    "Current-commit hosted CI"
+  ],
+  "pushed": false,
+  "reusedReceiptSHA256": "65f1428a6dad3abff8294b74e608c7aa7196938c6ad02ed053395971fc7a0147",
+  "sourceInputParts": [
+    {
+      "path": "docs/ops/evidence/candidate-loop-control-fixed-point-20261012-sources1.json",
+      "sha256": "704de6828427e68ea15325ab6b7ffffdc617dc40dfd9a35c9f15db94f36b48a6",
+      "sources": 150
+    },
+    {
+      "path": "docs/ops/evidence/candidate-loop-control-fixed-point-20261012-sources2.json",
+      "sha256": "716bd48e86372db5049882d59e3407f1219402a212eb9df5d5b5b931fba56393",
+      "sources": 150
+    },
+    {
+      "path": "docs/ops/evidence/candidate-loop-control-fixed-point-20261012-sources3.json",
+      "sha256": "a31f962503adfc5912969eda3a62dd526651cad6012515a952adb27003fd591d",
+      "sources": 70
+    }
+  ],
+  "baselineCommit": "452f0ea3",
+  "shippingCompilerChanged": false,
+  "seedProvenance": "Fairy-produced Stage2 from candidate-public-native-fixed-point-20261012",
+  "reusedPublicCheckReceipt": {
+    "path": "docs/ops/evidence/candidate-loop-control-public-20261012.json",
+    "sha256": "d76b32c455fd10058cd951f62a541f0358032cbd91a8b9e90f2da28e0e635901",
+    "reason": "The tested Stage1 and freshly built Stage2 have identical complete PE bytes."
+  }
+}

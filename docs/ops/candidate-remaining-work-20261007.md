@@ -11,13 +11,15 @@ Two authored tests pass in Go-native and both candidate C profiles. The freshly
 built Stage1 compiler matches the Go reference on nine public check cases.
 The 75-fixture probe now has 10 status differences and 34 first-diagnostic
 code/span differences; seven borrow/origin failures are still accepted and the
-same three supported-language gaps still reject valid inputs. Stage2/full image
-fixed-point regeneration is in progress; earlier fixed-point results describe
-only their recorded source snapshot. No shipping Go CLI, public API, SDK ABI,
+same three supported-language gaps still reject valid inputs. The 370-source Stage1/Stage2 fixed point is also verified: both emit
+30023193 identical C-part bytes and produce identical complete 4251648-byte PE
+images. The 249 Go lexer cases and framing checks pass. The seed is the prior
+Fairy-produced Stage2, with Go confined to the native transport/reference. No shipping Go CLI, public API, SDK ABI,
 DB or CI change, and no push.
 Receipts: `evidence/candidate-loop-control-private-20261012.json`,
 `evidence/candidate-loop-control-public-20261012.json`,
-`evidence/candidate-loop-control-corpus-20261012.json`.
+`evidence/candidate-loop-control-corpus-20261012.json`,
+`evidence/candidate-loop-control-fixed-point-20261012.json`.
 Next: connect the existing transitive borrowed-result and live-loan analysis
 before admitting project IR, retaining source diagnostic codes and spans.
 

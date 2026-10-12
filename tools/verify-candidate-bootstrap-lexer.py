@@ -51,7 +51,7 @@ def main():
     if args.stage2:
         programs.append(('stage2', args.stage2))
     if args.seed:
-        programs.insert(0, ('go-produced-seed', args.seed))
+        programs.insert(0, ('input-seed', args.seed))
     malformed = [b'\x04', b'\0', b'\0\0', b'\0\1\0', b'\2\0\0', b'\2\0\0\1', b'\0\1\x80']
     rows = []
     for label, exe in programs:
