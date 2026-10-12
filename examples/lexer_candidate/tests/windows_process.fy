@@ -38,3 +38,13 @@ fn bytes::Buffer joined(ref u8[] root,ref u8[] file){var bytes::Buffer out=bytes
     let directory=root();let program=joined(bytes::view(ref directory),b"receiver.exe");var v::Vec<bytes::Buffer> args=v::empty<bytes::Buffer>();add(ref mut args,b"stdio");
     let result=switch(child::run(bytes::view(ref program),ref args,bytes::view(ref directory),2000)){case .ok(p):{p}case .err(e):{failure(e);return;}};require(result.exit_code==41 && result.pid!=0,9);
 }
+@effects(filesystem,console) fn u32 leave_running(ref u8[] program,ref v::Vec<bytes::Buffer> args,ref u8[] directory){
+    let running=switch(child::start(program,args,directory,b"",child::inherited_handles())){case .ok(p):{p}case .err(e):{failure(e);return 0;}};
+    switch(child::poll(ref running,0)){case .ok(done):{require(!done,10);}case .err(e):{failure(e);}};
+    switch(child::result(ref running)){case .ok(_):{assert(false);}case .err(e):{require(e.kind==7 && e.os_code==0 && e.pid==child::pid(ref running),11);}};
+    return child::pid(ref running);
+}
+@test @effects(filesystem,console) fn void early_return_drops_the_owned_running_job(){
+    let directory=root();let program=joined(bytes::view(ref directory),b"receiver.exe");var v::Vec<bytes::Buffer> args=v::empty<bytes::Buffer>();add(ref mut args,b"sleep");let first=leave_running(bytes::view(ref program),ref args,bytes::view(ref directory));require(first!=0 && exited(first),12);let before=handles();var usize i=0;
+    while(i<4){let pid=leave_running(bytes::view(ref program),ref args,bytes::view(ref directory));require(pid!=0 && exited(pid),13);i+=1;}require(handles()==before,14);
+}

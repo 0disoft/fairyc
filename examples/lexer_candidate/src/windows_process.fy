@@ -22,12 +22,19 @@ import std::vec as v;
 @link_name("fairyc_private_windows_job_size_v1") unsafe extern C fn usize job_size();
 
 @effects(filesystem) resource Handle{ptr mut void raw;cleanup{if(this.raw!=null){unsafe{discard close(this.raw);};}}}
+pub resource Running{Handle job;Handle process;Handle thread;u32 pid;cleanup{}}
+pub struct Handles{ptr mut void input;ptr mut void output;ptr mut void error;}
 // 1 input, 2 allocation, 3 native ABI, 4 creation, 5 job setup, 6 resume,
 // 7 wait/result, 8 deadline. Native error and the created PID are retained.
 pub struct Problem{u32 kind;u32 os_code;u32 pid;}
 pub struct Outcome{u32 exit_code;u32 pid;}
 fn Problem fail(u32 kind,u32 os_code,u32 pid){return Problem{.kind,.os_code,.pid};}
 fn Problem encoded_error(command::Problem p){return fail(if(p.kind==3){2}else{1},0,0);}
+@effects(console) pub fn Handles inherited_handles(){return Handles{.input=unsafe{std_handle(4294967286)},.output=unsafe{std_handle(4294967285)},.error=unsafe{std_handle(4294967284)}};}
+pub fn u32 pid(ref Running running){return running.pid;}
+@effects(filesystem) pub fn void terminate(ref Running running){unsafe{discard kill_job(running.job.raw,1);discard wait(running.process.raw,2000);};}
+@effects(filesystem) pub fn Result<bool,Problem> poll(ref Running running,u32 timeout){let waited=unsafe{wait(running.process.raw,timeout)};return if(waited==0){.ok(true)}else if(waited==258){.ok(false)}else{.err(fail(7,unsafe{last_error()},running.pid))};}
+@effects(filesystem) pub fn Result<Outcome,Problem> result(ref Running running){switch(poll(running,0)){case .ok(done):{if(!done){return .err(fail(7,0,running.pid));}}case .err(e):{return .err(e);}};var u32 exit_code=0;if(unsafe{get_exit(running.process.raw,ref mut exit_code as ptr mut u32)}==0){return .err(fail(7,unsafe{last_error()},running.pid));}return .ok(Outcome{.exit_code,.pid=running.pid});}
 @effects(filesystem,console)
 pub fn Result<Outcome,Problem> run(ref u8[] program,ref v::Vec<bytes::Buffer> arguments,ref u8[] directory,u32 timeout){if(timeout==0 || timeout>600000){return .err(fail(1,0,0));}
     return launch(program,arguments,directory,timeout,b"");
@@ -39,13 +46,20 @@ pub fn Result<Outcome,Problem> run_environment(ref u8[] program,ref v::Vec<bytes
 }
 @effects(filesystem,console)
 fn Result<Outcome,Problem> launch(ref u8[] program,ref v::Vec<bytes::Buffer> arguments,ref u8[] directory,u32 timeout,ref u8[] environment){if(timeout==0 || timeout>600000){return .err(fail(1,0,0));}
+    let running=switch(start(program,arguments,directory,environment,inherited_handles())){case .ok(p):{p}case .err(e):{return .err(e);}};
+    switch(poll(ref running,timeout)){case .ok(done):{if(!done){terminate(ref running);return .err(fail(8,0,running.pid));}}case .err(e):{terminate(ref running);return .err(e);}};return result(ref running);
+}
+// Ownership is published only after suspended launch, job assignment and resume.
+// The caller owns all three handles until collection or an early-return cleanup.
+@effects(filesystem,console)
+pub fn Result<Running,Problem> start(ref u8[] program,ref v::Vec<bytes::Buffer> arguments,ref u8[] directory,ref u8[] environment,Handles handles){
+    if(environment.len!=0 && (environment.len<4 || environment.len>1048576 || environment.len%2!=0 || environment[environment.len-1]!=0 || environment[environment.len-2]!=0 || environment[environment.len-3]!=0 || environment[environment.len-4]!=0)){return .err(fail(1,0,0));}
     let app=switch(command::path(program)){case .ok(p):{p}case .err(e):{return .err(encoded_error(e));}};var bytes::Buffer line=switch(command::build(program,arguments)){case .ok(p):{p}case .err(e):{return .err(encoded_error(e));}};let cwd=switch(command::path(directory)){case .ok(p):{p}case .err(e):{return .err(encoded_error(e));}};
     if(unsafe{startup_size()!=104 || job_size()!=144}){return .err(fail(3,0,0));}var bytes::Buffer limits=bytes::empty();if(!bytes::resize_zeroed(ref mut limits,144).is_ok){return .err(fail(2,0,0));}{let data=bytes::view_mut(ref mut limits);data[17]=32;}
     let job=Handle{.raw=unsafe{create_job()}};if(job.raw==null){return .err(fail(5,unsafe{last_error()},0));}if(unsafe{set_job(job.raw,9,bytes::view(ref limits) as ptr u8,144)}==0){return .err(fail(5,unsafe{last_error()},0));}
-    var Startup startup=Startup{.size=104,.reserved=null,.desktop=null,.title=null,.x=0,.y=0,.width=0,.height=0,.columns=0,.rows=0,.fill=0,.flags=257,.show_reserved=0,.reserved_bytes=null,.input=unsafe{std_handle(4294967286)},.output=unsafe{std_handle(4294967285)},.error=unsafe{std_handle(4294967284)}};
+    var Startup startup=Startup{.size=104,.reserved=null,.desktop=null,.title=null,.x=0,.y=0,.width=0,.height=0,.columns=0,.rows=0,.fill=0,.flags=257,.show_reserved=0,.reserved_bytes=null,.input=handles.input,.output=handles.output,.error=handles.error};
     var Information information=Information{.process=null,.thread=null,.pid=0,.tid=0};let i32 created=if(environment.len==0){unsafe{create(bytes::view(ref app) as ptr u8,bytes::view_mut(ref mut line) as ptr mut u8,bytes::view(ref cwd) as ptr u8,1,134217732,ref mut startup as ptr mut void,ref mut information as ptr mut void)}}else{unsafe{create_environment(bytes::view(ref app) as ptr u8,bytes::view_mut(ref mut line) as ptr mut u8,bytes::view(ref cwd) as ptr u8,1,134218756,ref mut startup as ptr mut void,ref mut information as ptr mut void,environment as ptr u8)}};if(created==0){return .err(fail(4,unsafe{last_error()},0));}
     let process=Handle{.raw=information.process};let thread=Handle{.raw=information.thread};if(unsafe{assign(job.raw,process.raw)}==0){let error=unsafe{last_error()};unsafe{discard kill_process(process.raw,1);discard wait(process.raw,2000);};return .err(fail(5,error,information.pid));}
     if(unsafe{resume(thread.raw)}==4294967295){let error=unsafe{last_error()};unsafe{discard kill_job(job.raw,1);discard wait(process.raw,2000);};return .err(fail(6,error,information.pid));}
-    let waited=unsafe{wait(process.raw,timeout)};if(waited!=0){let u32 error=if(waited==258){0}else{unsafe{last_error()}};unsafe{discard kill_job(job.raw,1);discard wait(process.raw,2000);};return .err(fail(if(waited==258){8}else{7},error,information.pid));}
-    var u32 exit_code=0;if(unsafe{get_exit(process.raw,ref mut exit_code as ptr mut u32)}==0){return .err(fail(7,unsafe{last_error()},information.pid));}return .ok(Outcome{.exit_code,.pid=information.pid});
+    return .ok(Running{.job,.process,.thread,.pid=information.pid});
 }

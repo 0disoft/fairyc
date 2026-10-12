@@ -93,10 +93,26 @@ One earlier post-normalization run failed an unlabelled assertion. That exact
 binary subsequently passed unchanged; the transient failure is not attributed.
 The final source uses labelled failure assertions and passes both profiles.
 
+## Owned running process
+
+`windows_process::start` publishes `Running` only after job assignment and
+resume. It owns the job, process and thread handles and accepts explicit standard
+handles for the upcoming bounded-output collector. `poll` reports pending or
+completed status; `result` rejects a still-running process and retains all exit
+bits after completion. An early return drops the owned job and terminates the
+child. Existing blocking APIs use the same owner and retain their deadlines.
+
+Four process tests and all four control-channel tests pass in both candidate C
+profiles. The new case observes a live child, rejects premature collection and
+checks actual exit after early return, including four repeats without handle
+growth. Source check passes 369 files / 4736 MIR functions. Bounded combined
+stdout/stderr capture is the next public-run prerequisite.
+
 Receipt: [candidate-windows-process-20261012.json](../ops/evidence/candidate-windows-process-20261012.json).
 Stream receipt: [candidate-windows-streams-20261012.json](../ops/evidence/candidate-windows-streams-20261012.json).
 Argument receipt: [candidate-windows-argv-20261012.json](../ops/evidence/candidate-windows-argv-20261012.json).
 Control receipt: [candidate-windows-run-control-20261012.json](../ops/evidence/candidate-windows-run-control-20261012.json).
+Running receipt: [candidate-running-owner-20261012.json](../ops/evidence/candidate-running-owner-20261012.json).
 Native records and flags follow [STARTUPINFOW](https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/ns-processthreadsapi-startupinfow),
 [extended job limits](https://learn.microsoft.com/en-us/windows/win32/api/winnt/ns-winnt-jobobject_extended_limit_information),
 [CreateProcessW](https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-createprocessw)

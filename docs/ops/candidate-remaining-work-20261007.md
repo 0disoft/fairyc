@@ -9,6 +9,19 @@ are identical, with no excluded bytes. All 249 Go lexer cases and private framin
 checks pass for the seed and both generations. Receipt:
 `evidence/candidate-complete-stage2-20261012.json`.
 
+## Owned running process (2026-10-12)
+
+Fairy publishes a running owner after job assignment/resume and supports polling,
+explicit standard handles and guarded result collection. Early return terminates
+the observed live child; four repeats retain the warmed handle count. Four
+process tests and four control-channel tests pass in both candidate C profiles.
+Source check passes 369 files / 4736 MIR functions. Existing blocking behavior,
+stream bytes, trap mapping and actual parent/child deadline cancellation remain
+covered. Go-native is skipped for private adapter linkage. Next: the stable
+combined 64KiB output collector before public build/run wiring. Private API
+changed; public API, SDK ABI, DB and CI are unchanged; no push. Receipt:
+`evidence/candidate-running-owner-20261012.json`.
+
 ## Windows run control channel (2026-10-12)
 
 Fairy owns the private receipt pipe, copied Unicode environment and category
