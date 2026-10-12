@@ -2,6 +2,34 @@
 
 ## Current local candidate evidence (2026-10-13)
 
+Complete original module AST and nominal definitions (2026-10-13)
+
+The original module writer now composes every declaration category and both
+original CST sidecars in exact Go AST field order. It retains canonical module
+path, root span, full source byte count and LF-derived line starts, including
+BOM/CRLF and final-newline geometry. Absent declaration categories remain null;
+source order is retained within each category. Function JSON exposes the same
+writer through the shared ledger without changing its output. Nongeneric local
+struct/resource definitions now hash the entire original module, newline and
+name with source-nominal-module-v0, conservatively including private helpers.
+
+Eighteen full modules and five standalone nominal definition hashes match actual
+Go json.Marshal / genericplan.DigestChunks. The unchanged real SDK Vec module's
+157400-byte AST matches exactly, including ordinary/generic function bodies,
+cleanup, original bindings and literals. Three tests pass Go native and candidate
+C development/release: exact modules/definitions, field/helper/line-geometry
+invalidation, invalid source/selection, generic aggregate exclusion, retained
+failure and exact-fit/exhausted combined work. Source check passes 412 files /
+5216 MIR functions; source/copy hashes and updated lock are verified. The test
+fixture's incorrectly embedded literal newlines were corrected before replay.
+
+Resolved package import bindings and the closed nominal graph context remain
+next, followed by template closures and actual planner/dispatcher/cache facts.
+Latest-source full image/fixed point, Linux/full suite and same-head hosted CI
+are not rerun. No public API, SDK ABI, DB, CI/runner or product timeout change;
+no push.
+Receipt: [evidence](../ops/evidence/candidate-generic-source-modules-20261013.json).
+
 Original source binding and literal observations (2026-10-13)
 
 Original module sidecars now retain the Go CST binding and literal lists.
