@@ -23,6 +23,30 @@ Receipts: `evidence/candidate-loop-control-private-20261012.json`,
 Next: connect the existing transitive borrowed-result and live-loan analysis
 before admitting project IR, retaining source diagnostic codes and spans.
 
+## Dependency-sensitive return summary iteration (2026-10-12)
+
+Borrower frames now snapshot each callee's origin, allocation and subview
+summary. A body runs initially and again only when a consumed summary changes;
+recursive/transitive changes still propagate over the unchanged 64-round cap.
+The final loan pass always evaluates every required frame. Snapshots and scans
+are charged to the unchanged shared 1048576 allowance.
+
+Seven existing origin/loan tests pass in Go-native and both candidate C
+profiles; source check passes 377 files / 4802 MIR functions. The clean cached
+integration emits 30090362 C-part bytes and builds, but still reaches stage 7
+code 10 at hir_expression_lower.fy:1:1 in 247.46 seconds with no self packet.
+Boundary-tagged diagnostic-only previews attribute that failure to the body
+flow traversal, rather than input preparation or diagnostic publication.
+No full-source success or timing improvement is claimed. Next: replace the
+per-call/per-argument linear invocation scans with checked indexed lookup.
+
+The preceding final-pass preview's fresh 75-case corpus confirms three status
+differences and 27 first-diagnostic code/span differences; all seven former
+borrow/origin false acceptances are rejected. The public borrow gate remains
+unapplied. Public API, DB and CI are unchanged, no push. Receipts:
+`evidence/candidate-borrow-summary-dependencies-20261012.json`,
+`evidence/candidate-borrow-final-pass-corpus-20261012.json`.
+
 ## Converged return summaries before final loan checks (2026-10-12)
 
 Only borrower-returning frames run during summary convergence. A final pass
