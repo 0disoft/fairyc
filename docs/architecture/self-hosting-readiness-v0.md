@@ -21,6 +21,13 @@ above describe the earlier snapshot. Evidence:
 [candidate diagnostic codes](../ops/evidence/candidate-project-diagnostic-codes-20261012.json).
 [first diagnostic and provider spans](../ops/evidence/candidate-project-diagnostic-spans-20261012.json).
 
+A checked bool/u8/i32/i64/u32 arithmetic component now passes three authored
+boundary/representation tests in Go native and both candidate C profiles. Its
+379-file / 4820-function source check passes, but it is not yet connected to the
+constant evaluator. The exact 371-source main import closure and hashes are
+unchanged, so the existing frontend comparison remains applicable. Evidence:
+[constant arithmetic component](../ops/evidence/candidate-constant-arithmetic-20261012.json).
+
 Public borrow admission is complete, while full frontend/executable
 parity, product timeout/host-stack integration, Linux/full suite and same-head
 hosted CI remain promotion requirements. No shipping Go compiler or SDK ABI

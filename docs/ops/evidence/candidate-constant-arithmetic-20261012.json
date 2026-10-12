@@ -1,0 +1,85 @@
+{
+  "schema": "fairyc.candidate-constant-arithmetic/v1",
+  "passed": true,
+  "scope": "Checked bool/u8/i32/i64/u32 scalar arithmetic component for the bounded compile-time evaluator; not yet connected to project checking",
+  "owningContracts": [
+    "docs/adr/0220-bounded-scalar-compile-time-evaluation.md",
+    "internal/semantic/compile_time.go",
+    "internal/semantic/i64_compile_time.go"
+  ],
+  "sourceInputs": [
+    {
+      "path": "examples/lexer_candidate/src/module_constant_arithmetic.fy",
+      "bytes": 5663,
+      "sha256": "22ec01b86cc0a6c901ed2f23d62a9d09d807e0d90c383f345698216870c4a6a1"
+    },
+    {
+      "path": "examples/lexer_candidate/tests/module_constant_arithmetic.fy",
+      "bytes": 3031,
+      "sha256": "f065ce1d55b9db3b7d4a426f06f00d36ad1298d1d56815e2a49f12dd980d607a"
+    },
+    {
+      "path": "examples/lexer_candidate/fairy.lock",
+      "bytes": 1698,
+      "sha256": "5fbc3aaa12503a57436873937da7b34c80acae60af885221ecd86bb0babb28ef"
+    }
+  ],
+  "sourceCheck": {
+    "passed": true,
+    "files": 379,
+    "mirFunctions": 4820,
+    "lockUpdated": true
+  },
+  "tests": {
+    "receiptSHA256": "a876db93676583c94ed2f39bd045253f6b33dd5b277f1b37e486a3efe2e31c10",
+    "authoredTestsExecuted": 3,
+    "nativeTests": 3,
+    "selection": {
+      "mode": "all-authored",
+      "authoredTests": 3,
+      "selectedTests": 3
+    },
+    "candidateExecutions": [
+      {
+        "profile": "development",
+        "exit": 0,
+        "sha256": "ae9c6cd3c036bfe7a5357826db7eba7bc8cba90a10d530f503a88f7c64fb2af0"
+      },
+      {
+        "profile": "release",
+        "exit": 0,
+        "sha256": "1a5325893e83d4fd149d55c79271f1919e6b56843c96173b4a9fb34e0b89f56e"
+      }
+    ],
+    "coverage": [
+      "Declared-width signed/unsigned addition, subtraction and multiplication overflow.",
+      "Division/remainder zero and signed minimum divided by negative one.",
+      "Signed arithmetic right shifts and checked left shifts through 64-bit boundaries.",
+      "Bool/integer comparisons, bitwise values and prefix minimum traps.",
+      "Invalid scalar IDs, forged out-of-width bits and excluded operators fail closed."
+    ]
+  },
+  "representation": "Exact declared-width two's-complement bits in AMD64 usize; bounded bit conversion avoids unsupported narrowing casts and signed-minimum negation.",
+  "maximumConversionIterations": 63,
+  "maximumMagnitudeConversionIterations": 63,
+  "mainReachableSourceFiles": 371,
+  "mainReachableInventoryUnchanged": true,
+  "mainInventoryReceiptSHA256": "0ccb3c88f0c0727b42182441c0ebb18a57265bd95a8af161ea0d93b0117aa8f0",
+  "frontendCorpusReuse": "The exact main import closure and every source hash are unchanged; reuse the existing 75-case receipt (five diagnostic and three status differences).",
+  "integrationComplete": false,
+  "next": [
+    "Collect module-local constants and per-package budgets; validate dependencies and reject cycles before evaluation.",
+    "Evaluate and fold constants, reject false static_assert without runtime output, and preserve exact diagnostic spans.",
+    "Connect const_eval eligibility/calls, short-circuit and selected branches, casts and i64 values to owned HIR/MIR.",
+    "Refresh current-source candidate/fixed-point evidence after integration."
+  ],
+  "publicLanguageChanged": false,
+  "publicAPIChanged": false,
+  "candidateCheckBehaviorChanged": false,
+  "sdkABIChanged": false,
+  "dbChanged": false,
+  "ciChanged": false,
+  "productTimeoutChanged": false,
+  "promotionGateReady": false,
+  "pushed": false
+}

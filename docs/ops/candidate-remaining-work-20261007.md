@@ -1,5 +1,28 @@
 # Fairy 컴파일러 전환: 후속 작업 목록
 
+## Checked scalar arithmetic component prepared (2026-10-12)
+
+`module_constant_arithmetic.fy` implements the declared-width operations for
+bool/u8/i32/i64/u32, including 64-bit limits. It checks overflow, invalid shifts,
+zero division and signed-minimum division/remainder before host execution.
+Two's-complement conversion uses at most 63 bounded bit iterations, without
+narrowing casts or negating the signed minimum. Invalid internal scalar bits
+fail closed; the component uses no target/host I/O or allocator operations.
+
+Three authored boundary/prefix/shift/representation tests pass Go native and
+both candidate C profiles. Source check passes 379 files / 4820 MIR functions.
+The exact 371-source main import closure and every hash are unchanged, so the
+75-case compiler comparison is reused rather than rerun. Five diagnostic and
+three status differences remain: this arithmetic component is not yet connected
+to project checking and is not a claim of complete compile-time evaluation.
+
+Next commits collect module-local constant dependencies and package budgets,
+reject cycles, fold values and handle static_assert; then connect const_eval
+eligibility/calls, selected branches, casts and i64 folding. Refresh native and
+fixed-point evidence after integration. Public language/API, SDK ABI, DB, CI
+and timeouts are unchanged; no push. Receipt:
+`evidence/candidate-constant-arithmetic-20261012.json`.
+
 ## First diagnostic and provider spans aligned (2026-10-12)
 
 Candidate check maps the checked-name unresolved status to E0101 and preserves
