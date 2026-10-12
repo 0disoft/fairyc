@@ -23,6 +23,30 @@ Receipts: `evidence/candidate-loop-control-private-20261012.json`,
 Next: connect the existing transitive borrowed-result and live-loan analysis
 before admitting project IR, retaining source diagnostic codes and spans.
 
+## Independent final-loan and publication histories (2026-10-12)
+
+Preparation/summary convergence and the final loan traversal now each own a
+1048576-work meter. Plan.work records their combined history, and
+Plan.summary_work identifies the completed preparation/convergence prefix.
+The same 64-round and frame/owner/expression/loan/storage bounds remain. The
+final pass still verifies that summaries do not change. Diagnostic publication
+also owns a bounded meter; Report.work preserves cumulative history without
+charging completed origin work again. Explicit exhausted phase budgets fail.
+This changes the internal total history ceilings to 2097152 for origins and
+3145728 for publication; each individual traversal remains capped at 1048576.
+
+A near-exhausted summary regression proves final checks and publication still
+run, while explicit exhausted publication budgets fail. Three focused tests
+pass in Go-native and both candidate C profiles, including primary/related
+diagnostic spans and the prior explicit-budget failure contract. Source check
+passes 377 files / 4804 MIR functions. The 75-case corpus retains three status
+and 27 first-diagnostic differences. The clean cached preview emits 30106662
+C-part bytes and builds with explicit 16 MiB stack reservation; complete
+self-source emission is running. No fixed point or promotion claim is made.
+The public borrow gate remains unapplied. Public language/CLI, SDK ABI, DB, CI
+and product timeouts are unchanged, no push. Receipt:
+`evidence/candidate-borrow-phase-budgets-20261012.json`.
+
 ## Borrow places projected from returned references (2026-10-12)
 
 An explicit field borrow rooted in a returned reference now carries that
@@ -38,7 +62,8 @@ owner mutation before a borrowed field's last use (E2101). The 75-case corpus
 retains three status and 27 first-diagnostic differences, with no regression.
 Source check passes 377 files / 4803 MIR functions. The clean cached preview
 emits 30105611 C-part bytes and builds with explicit 16 MiB stack reservation;
-its complete self-source emission is still running. The public borrow gate is
+its self replay reaches module_unit_body_ir_verify.fy:114:212 and fails stage 7
+code 10 (bytes 25788..25848) in 661.22 seconds with no packet. The public borrow gate is
 still unapplied, and full fixed point, Linux and hosted CI remain. Public API,
 DB, CI and product timeouts are unchanged, no push. Receipt:
 `evidence/candidate-borrow-call-places-20261012.json`.

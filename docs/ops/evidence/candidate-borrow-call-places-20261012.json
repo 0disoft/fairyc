@@ -3763,9 +3763,20 @@
       "exit": 0,
       "stderr": "",
       "stdoutBytes": 185
+    },
+    "self-emit": {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\borrow-call-places-integration-20261012\\candidate-dev.exe",
+        "--c-project-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\borrow-call-places-integration-20261012\\sources.list"
+      ],
+      "seconds": 661.2240134000021,
+      "exit": 2,
+      "stderr": "examples/lexer_candidate/src/module_unit_body_ir_verify.fy:114:212: error: project phase 2 stage 7 code 10 (bytes 25788..25848)\n",
+      "stdoutBytes": 0
     }
   },
-  "selfEmissionPending": true,
+  "selfEmissionPending": false,
   "sourceCheck": {
     "files": 377,
     "mirFunctions": 4803
