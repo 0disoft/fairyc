@@ -1,0 +1,914 @@
+{
+  "schema": "fairyc.candidate-specialization-identity/v1",
+  "passed": true,
+  "scope": "Private resolved specialization hash encoder; planner facts are caller-supplied, not source extraction or planner admission",
+  "sourceCheck": {
+    "command": ".cache/candidate-frontend-oracle-current-20261012.exe check",
+    "cwd": "examples/lexer_candidate",
+    "exit": 0,
+    "files": 398,
+    "mirFunctions": 5108,
+    "lock": "updated and verified by native tests"
+  },
+  "sources": [
+    {
+      "path": "examples/lexer_candidate/src/generic_identity.fy",
+      "sha256": "af82d3b359138f3efaea398e0c0faeb353b0fd94728f3c60179b1a481ba53fd3"
+    },
+    {
+      "path": "examples/lexer_candidate/src/generic_specialization_identity.fy",
+      "sha256": "fb316b186d871ac0e6ae0b8a970ae766e3a67dbd73e9239270198ee38291c932"
+    },
+    {
+      "path": "examples/lexer_candidate/tests/generic_specialization_identity.fy",
+      "sha256": "9ef200a7975933a78c44fa18604556dbe0dab39046723698a422b22156c7562a"
+    },
+    {
+      "path": "examples/lexer_candidate/fairy.lock",
+      "sha256": "dac679d87df7f4839d0ef0aa835b3f1b976156af94135af837c8d68649e8d061"
+    },
+    {
+      "path": "tools/verify-candidate-specialization.go",
+      "sha256": "67e51be583ed1f5988940369006bc0dd9922f55248f920a1ec245ac6b3463ed4"
+    }
+  ],
+  "oracle": {
+    "command": "bun tools/run-go.ts run tools/verify-candidate-specialization.go",
+    "exit": 0,
+    "fixtureSHA256": "e9f91501a81fd9c1c00e32a8ff3ff022b0d80c79bb0edb2061a50b3281b03a9a",
+    "result": {
+      "bytes": 12291,
+      "passed": true,
+      "records": [
+        {
+          "Name": "planner-0",
+          "Expected": "g0_4c10f81d44362e178b15646c674c823a337c1cd03f769dad892c86dedad4931a",
+          "Declaration": "app::root",
+          "Owner": "app",
+          "Definition": "a9213e51cc90d2600a48f4b12b31e9660d2eafb05707a65bd3092e560ad3480d",
+          "Arguments": [
+            {
+              "ID": "i32",
+              "Owner": "builtin",
+              "Definition": "043f01ddaaecf804caef6ea3ea3336294b026c0c2059d696e55f631a309bed80",
+              "Abilities": [
+                "copy",
+                "drop",
+                "inert",
+                "scalar",
+                "store"
+              ]
+            }
+          ],
+          "Constraints": [
+            {
+              "ID": "app::A",
+              "Definition": "cb073767337dcb922cb2097bd8f940c62e63f1b5ad6d97fcb521e0c01148b146",
+              "Arguments": [
+                {
+                  "ID": "i32",
+                  "Definition": "043f01ddaaecf804caef6ea3ea3336294b026c0c2059d696e55f631a309bed80"
+                }
+              ],
+              "Provider": "app::provide_a",
+              "ProviderDefinition": "a7d70fcce12862ff3b9a4ed149994fcbcff4ccf8fb385da67d1a2306715cf2e7"
+            },
+            {
+              "ID": "app::B",
+              "Definition": "b4f34bdc840bd819df1f68b14059d0955fa3d202c58bd7aae793c4bcdd6ae860",
+              "Arguments": [
+                {
+                  "ID": "i32",
+                  "Definition": "043f01ddaaecf804caef6ea3ea3336294b026c0c2059d696e55f631a309bed80"
+                }
+              ],
+              "Provider": "app::provide_b",
+              "ProviderDefinition": "0cc6c64857ae30718de7e2d3b9ed6eb0fec23776393554b80c0d75dcab4eb7d5"
+            }
+          ],
+          "Dependencies": [
+            "g0_481fb86b3f95d29f4a7cd1b2ae687c9bf8a0788fd2b3372d91e0e86ad15479b8",
+            "g0_82f5a136862df4f6dc6e734e2824f0e53a6f99850bc94fc237c4f9129d1aff25"
+          ]
+        },
+        {
+          "Name": "planner-1",
+          "Expected": "g0_91dff9f7994292702ecd28b628e3d61962435b7ff4dd9e40725379208fa99500",
+          "Declaration": "app::root",
+          "Owner": "app",
+          "Definition": "a9213e51cc90d2600a48f4b12b31e9660d2eafb05707a65bd3092e560ad3480d",
+          "Arguments": [
+            {
+              "ID": "i64",
+              "Owner": "builtin",
+              "Definition": "1ae8f725309d4d424134a1fc61d74fdc0e1bd546edef5aac3adb6ad6337dfd24",
+              "Abilities": [
+                "copy",
+                "drop",
+                "inert",
+                "scalar",
+                "store"
+              ]
+            }
+          ],
+          "Constraints": [
+            {
+              "ID": "app::A",
+              "Definition": "cb073767337dcb922cb2097bd8f940c62e63f1b5ad6d97fcb521e0c01148b146",
+              "Arguments": [
+                {
+                  "ID": "i64",
+                  "Definition": "1ae8f725309d4d424134a1fc61d74fdc0e1bd546edef5aac3adb6ad6337dfd24"
+                }
+              ],
+              "Provider": "app::provide_a",
+              "ProviderDefinition": "a7d70fcce12862ff3b9a4ed149994fcbcff4ccf8fb385da67d1a2306715cf2e7"
+            },
+            {
+              "ID": "app::B",
+              "Definition": "b4f34bdc840bd819df1f68b14059d0955fa3d202c58bd7aae793c4bcdd6ae860",
+              "Arguments": [
+                {
+                  "ID": "i64",
+                  "Definition": "1ae8f725309d4d424134a1fc61d74fdc0e1bd546edef5aac3adb6ad6337dfd24"
+                }
+              ],
+              "Provider": "app::provide_b",
+              "ProviderDefinition": "0cc6c64857ae30718de7e2d3b9ed6eb0fec23776393554b80c0d75dcab4eb7d5"
+            }
+          ],
+          "Dependencies": [
+            "g0_2a99a83f1c4310a5f236d1cc7ec220740c0c89cc33232341c4a35e7e2c2e91d4",
+            "g0_8d5f3eaceceb5906e01c20c96794758e0c6df5e3ce33265ecb9fc3a02f042904"
+          ]
+        },
+        {
+          "Name": "planner-2",
+          "Expected": "g0_9cc3a34d172520c3cf512a77210139657f6c124685eea8ce064ce9c788901377",
+          "Declaration": "app::root",
+          "Owner": "app",
+          "Definition": "261242dc971bc2ac225722c720dfd8221169a27077a83f19f600841a636cf2f8",
+          "Arguments": [
+            {
+              "ID": "i32",
+              "Owner": "builtin",
+              "Definition": "043f01ddaaecf804caef6ea3ea3336294b026c0c2059d696e55f631a309bed80",
+              "Abilities": [
+                "copy",
+                "drop",
+                "inert",
+                "scalar",
+                "store"
+              ]
+            }
+          ],
+          "Constraints": [
+            {
+              "ID": "app::A",
+              "Definition": "cb073767337dcb922cb2097bd8f940c62e63f1b5ad6d97fcb521e0c01148b146",
+              "Arguments": [
+                {
+                  "ID": "i32",
+                  "Definition": "043f01ddaaecf804caef6ea3ea3336294b026c0c2059d696e55f631a309bed80"
+                }
+              ],
+              "Provider": "app::provide_a",
+              "ProviderDefinition": "a7d70fcce12862ff3b9a4ed149994fcbcff4ccf8fb385da67d1a2306715cf2e7"
+            },
+            {
+              "ID": "app::B",
+              "Definition": "b4f34bdc840bd819df1f68b14059d0955fa3d202c58bd7aae793c4bcdd6ae860",
+              "Arguments": [
+                {
+                  "ID": "i32",
+                  "Definition": "043f01ddaaecf804caef6ea3ea3336294b026c0c2059d696e55f631a309bed80"
+                }
+              ],
+              "Provider": "app::provide_b",
+              "ProviderDefinition": "0cc6c64857ae30718de7e2d3b9ed6eb0fec23776393554b80c0d75dcab4eb7d5"
+            }
+          ],
+          "Dependencies": [
+            "g0_481fb86b3f95d29f4a7cd1b2ae687c9bf8a0788fd2b3372d91e0e86ad15479b8",
+            "g0_82f5a136862df4f6dc6e734e2824f0e53a6f99850bc94fc237c4f9129d1aff25"
+          ]
+        },
+        {
+          "Name": "planner-3",
+          "Expected": "g0_4276b9e1b9571057d2f705b0fa5d08d99d1968fba0ebbeb208224cac9642c5be",
+          "Declaration": "app::root",
+          "Owner": "app",
+          "Definition": "a9213e51cc90d2600a48f4b12b31e9660d2eafb05707a65bd3092e560ad3480d",
+          "Arguments": [
+            {
+              "ID": "i32",
+              "Owner": "builtin",
+              "Definition": "043f01ddaaecf804caef6ea3ea3336294b026c0c2059d696e55f631a309bed80",
+              "Abilities": [
+                "copy",
+                "drop",
+                "inert",
+                "scalar",
+                "store"
+              ]
+            }
+          ],
+          "Constraints": [
+            {
+              "ID": "app::A",
+              "Definition": "cb073767337dcb922cb2097bd8f940c62e63f1b5ad6d97fcb521e0c01148b146",
+              "Arguments": [
+                {
+                  "ID": "i32",
+                  "Definition": "043f01ddaaecf804caef6ea3ea3336294b026c0c2059d696e55f631a309bed80"
+                }
+              ],
+              "Provider": "app::provide_a",
+              "ProviderDefinition": "9ff854961a0c17b7fddc8565294089317e977c2db07b126f231c2daf91500a88"
+            },
+            {
+              "ID": "app::B",
+              "Definition": "b4f34bdc840bd819df1f68b14059d0955fa3d202c58bd7aae793c4bcdd6ae860",
+              "Arguments": [
+                {
+                  "ID": "i32",
+                  "Definition": "043f01ddaaecf804caef6ea3ea3336294b026c0c2059d696e55f631a309bed80"
+                }
+              ],
+              "Provider": "app::provide_b",
+              "ProviderDefinition": "0cc6c64857ae30718de7e2d3b9ed6eb0fec23776393554b80c0d75dcab4eb7d5"
+            }
+          ],
+          "Dependencies": [
+            "g0_481fb86b3f95d29f4a7cd1b2ae687c9bf8a0788fd2b3372d91e0e86ad15479b8",
+            "g0_82f5a136862df4f6dc6e734e2824f0e53a6f99850bc94fc237c4f9129d1aff25"
+          ]
+        },
+        {
+          "Name": "planner-4",
+          "Expected": "g0_bd614e6733c23a078b506e15fdc219547b633f26c395adb3c96776745b12e191",
+          "Declaration": "app::root",
+          "Owner": "app",
+          "Definition": "a9213e51cc90d2600a48f4b12b31e9660d2eafb05707a65bd3092e560ad3480d",
+          "Arguments": [
+            {
+              "ID": "i32",
+              "Owner": "builtin",
+              "Definition": "043f01ddaaecf804caef6ea3ea3336294b026c0c2059d696e55f631a309bed80",
+              "Abilities": [
+                "copy",
+                "drop",
+                "inert",
+                "scalar",
+                "store"
+              ]
+            }
+          ],
+          "Constraints": [
+            {
+              "ID": "app::A",
+              "Definition": "c8c33334e9add4163e733608ed3f7be40f1d111b51ddab8d09cf51c3be404806",
+              "Arguments": [
+                {
+                  "ID": "i32",
+                  "Definition": "043f01ddaaecf804caef6ea3ea3336294b026c0c2059d696e55f631a309bed80"
+                }
+              ],
+              "Provider": "app::provide_a",
+              "ProviderDefinition": "a7d70fcce12862ff3b9a4ed149994fcbcff4ccf8fb385da67d1a2306715cf2e7"
+            },
+            {
+              "ID": "app::B",
+              "Definition": "b4f34bdc840bd819df1f68b14059d0955fa3d202c58bd7aae793c4bcdd6ae860",
+              "Arguments": [
+                {
+                  "ID": "i32",
+                  "Definition": "043f01ddaaecf804caef6ea3ea3336294b026c0c2059d696e55f631a309bed80"
+                }
+              ],
+              "Provider": "app::provide_b",
+              "ProviderDefinition": "0cc6c64857ae30718de7e2d3b9ed6eb0fec23776393554b80c0d75dcab4eb7d5"
+            }
+          ],
+          "Dependencies": [
+            "g0_481fb86b3f95d29f4a7cd1b2ae687c9bf8a0788fd2b3372d91e0e86ad15479b8",
+            "g0_82f5a136862df4f6dc6e734e2824f0e53a6f99850bc94fc237c4f9129d1aff25"
+          ]
+        },
+        {
+          "Name": "planner-5",
+          "Expected": "g0_b8035a3bee80330e914e91464a4f90a25e517cb91fc699fcb030cb0aaa160e04",
+          "Declaration": "app::root",
+          "Owner": "app",
+          "Definition": "a9213e51cc90d2600a48f4b12b31e9660d2eafb05707a65bd3092e560ad3480d",
+          "Arguments": [
+            {
+              "ID": "i32",
+              "Owner": "builtin",
+              "Definition": "043f01ddaaecf804caef6ea3ea3336294b026c0c2059d696e55f631a309bed80",
+              "Abilities": [
+                "copy",
+                "drop",
+                "inert",
+                "scalar",
+                "store"
+              ]
+            }
+          ],
+          "Constraints": [
+            {
+              "ID": "app::A",
+              "Definition": "cb073767337dcb922cb2097bd8f940c62e63f1b5ad6d97fcb521e0c01148b146",
+              "Arguments": [
+                {
+                  "ID": "i32",
+                  "Definition": "043f01ddaaecf804caef6ea3ea3336294b026c0c2059d696e55f631a309bed80"
+                }
+              ],
+              "Provider": "app::provide_a",
+              "ProviderDefinition": "a7d70fcce12862ff3b9a4ed149994fcbcff4ccf8fb385da67d1a2306715cf2e7"
+            },
+            {
+              "ID": "app::B",
+              "Definition": "b4f34bdc840bd819df1f68b14059d0955fa3d202c58bd7aae793c4bcdd6ae860",
+              "Arguments": [
+                {
+                  "ID": "i32",
+                  "Definition": "043f01ddaaecf804caef6ea3ea3336294b026c0c2059d696e55f631a309bed80"
+                }
+              ],
+              "Provider": "app::provide_b",
+              "ProviderDefinition": "0cc6c64857ae30718de7e2d3b9ed6eb0fec23776393554b80c0d75dcab4eb7d5"
+            }
+          ],
+          "Dependencies": [
+            "g0_82f5a136862df4f6dc6e734e2824f0e53a6f99850bc94fc237c4f9129d1aff25",
+            "g0_de82350386c77490187d903a9a764f85b3f7729753887342583b8bc90d2e8644"
+          ]
+        },
+        {
+          "Name": "planner-6",
+          "Expected": "g0_91d771c1c512ce1f82bfae9a19e4c5428d9bd14212ec59554c95a87d7725b192",
+          "Declaration": "app::root",
+          "Owner": "app",
+          "Definition": "a9213e51cc90d2600a48f4b12b31e9660d2eafb05707a65bd3092e560ad3480d",
+          "Arguments": [
+            {
+              "ID": "i32",
+              "Owner": "builtin",
+              "Definition": "450b8a9d3278013fa9d51497be22c6d4b7f52f476565fc7977b94c33ebf9dd36",
+              "Abilities": [
+                "copy",
+                "drop",
+                "inert",
+                "scalar",
+                "store"
+              ]
+            }
+          ],
+          "Constraints": [
+            {
+              "ID": "app::A",
+              "Definition": "cb073767337dcb922cb2097bd8f940c62e63f1b5ad6d97fcb521e0c01148b146",
+              "Arguments": [
+                {
+                  "ID": "i32",
+                  "Definition": "450b8a9d3278013fa9d51497be22c6d4b7f52f476565fc7977b94c33ebf9dd36"
+                }
+              ],
+              "Provider": "app::provide_a",
+              "ProviderDefinition": "a7d70fcce12862ff3b9a4ed149994fcbcff4ccf8fb385da67d1a2306715cf2e7"
+            },
+            {
+              "ID": "app::B",
+              "Definition": "b4f34bdc840bd819df1f68b14059d0955fa3d202c58bd7aae793c4bcdd6ae860",
+              "Arguments": [
+                {
+                  "ID": "i32",
+                  "Definition": "450b8a9d3278013fa9d51497be22c6d4b7f52f476565fc7977b94c33ebf9dd36"
+                }
+              ],
+              "Provider": "app::provide_b",
+              "ProviderDefinition": "0cc6c64857ae30718de7e2d3b9ed6eb0fec23776393554b80c0d75dcab4eb7d5"
+            }
+          ],
+          "Dependencies": [
+            "g0_8b108f304842461d9f186683ea13b742ae5a368495e3672c431960f993db6c1e",
+            "g0_ed1054ac57684b9d8b463e825df7cce9f185de32f3ae4a51228749a9efaf569b"
+          ]
+        },
+        {
+          "Name": "planner-7",
+          "Expected": "g0_b5204098febf3a15959b889016a763a3593d04696b9d63b8680ecc026223e1ef",
+          "Declaration": "app::root",
+          "Owner": "app",
+          "Definition": "a9213e51cc90d2600a48f4b12b31e9660d2eafb05707a65bd3092e560ad3480d",
+          "Arguments": [
+            {
+              "ID": "i32",
+              "Owner": "builtin",
+              "Definition": "043f01ddaaecf804caef6ea3ea3336294b026c0c2059d696e55f631a309bed80",
+              "Abilities": [
+                "copy",
+                "drop",
+                "inert",
+                "store"
+              ]
+            }
+          ],
+          "Constraints": [
+            {
+              "ID": "app::A",
+              "Definition": "cb073767337dcb922cb2097bd8f940c62e63f1b5ad6d97fcb521e0c01148b146",
+              "Arguments": [
+                {
+                  "ID": "i32",
+                  "Definition": "043f01ddaaecf804caef6ea3ea3336294b026c0c2059d696e55f631a309bed80"
+                }
+              ],
+              "Provider": "app::provide_a",
+              "ProviderDefinition": "a7d70fcce12862ff3b9a4ed149994fcbcff4ccf8fb385da67d1a2306715cf2e7"
+            },
+            {
+              "ID": "app::B",
+              "Definition": "b4f34bdc840bd819df1f68b14059d0955fa3d202c58bd7aae793c4bcdd6ae860",
+              "Arguments": [
+                {
+                  "ID": "i32",
+                  "Definition": "043f01ddaaecf804caef6ea3ea3336294b026c0c2059d696e55f631a309bed80"
+                }
+              ],
+              "Provider": "app::provide_b",
+              "ProviderDefinition": "0cc6c64857ae30718de7e2d3b9ed6eb0fec23776393554b80c0d75dcab4eb7d5"
+            }
+          ],
+          "Dependencies": [
+            "g0_0597366b31f60ea642c0a17fc98bf58af0d4a63eb60d1a545f4094f5c1e9e7e7",
+            "g0_b3368fe10395c34f2696dae28a9cf481702541a806ca4fc4ac8860c74f1fa02a"
+          ]
+        },
+        {
+          "Name": "planner-8",
+          "Expected": "g0_ec0f94767ea49c83308229595a8b5e10c8e5a4510f04d1caf2b4bc6a81e79679",
+          "Declaration": "app::root",
+          "Owner": "app",
+          "Definition": "a9213e51cc90d2600a48f4b12b31e9660d2eafb05707a65bd3092e560ad3480d",
+          "Arguments": [
+            {
+              "ID": "i32",
+              "Owner": "builtin",
+              "Definition": "043f01ddaaecf804caef6ea3ea3336294b026c0c2059d696e55f631a309bed80",
+              "Abilities": [
+                "copy",
+                "drop",
+                "inert",
+                "scalar",
+                "store"
+              ]
+            }
+          ],
+          "Constraints": [
+            {
+              "ID": "app::A",
+              "Definition": "cb073767337dcb922cb2097bd8f940c62e63f1b5ad6d97fcb521e0c01148b146",
+              "Arguments": [
+                {
+                  "ID": "i32",
+                  "Definition": "043f01ddaaecf804caef6ea3ea3336294b026c0c2059d696e55f631a309bed80"
+                }
+              ],
+              "Provider": "app::provide_a",
+              "ProviderDefinition": "a7d70fcce12862ff3b9a4ed149994fcbcff4ccf8fb385da67d1a2306715cf2e7"
+            },
+            {
+              "ID": "app::A",
+              "Definition": "cb073767337dcb922cb2097bd8f940c62e63f1b5ad6d97fcb521e0c01148b146",
+              "Arguments": [
+                {
+                  "ID": "i32",
+                  "Definition": "043f01ddaaecf804caef6ea3ea3336294b026c0c2059d696e55f631a309bed80"
+                }
+              ],
+              "Provider": "app::provide_a",
+              "ProviderDefinition": "a7d70fcce12862ff3b9a4ed149994fcbcff4ccf8fb385da67d1a2306715cf2e7"
+            },
+            {
+              "ID": "app::B",
+              "Definition": "b4f34bdc840bd819df1f68b14059d0955fa3d202c58bd7aae793c4bcdd6ae860",
+              "Arguments": [
+                {
+                  "ID": "i32",
+                  "Definition": "043f01ddaaecf804caef6ea3ea3336294b026c0c2059d696e55f631a309bed80"
+                }
+              ],
+              "Provider": "app::provide_b",
+              "ProviderDefinition": "0cc6c64857ae30718de7e2d3b9ed6eb0fec23776393554b80c0d75dcab4eb7d5"
+            }
+          ],
+          "Dependencies": [
+            "g0_481fb86b3f95d29f4a7cd1b2ae687c9bf8a0788fd2b3372d91e0e86ad15479b8",
+            "g0_82f5a136862df4f6dc6e734e2824f0e53a6f99850bc94fc237c4f9129d1aff25"
+          ]
+        },
+        {
+          "Name": "planner-9",
+          "Expected": "g0_ff5ec30c3f65f5b4100364fad859d7f2d0e026d339d994c4e70498d6f9a8f3f5",
+          "Declaration": "app::root",
+          "Owner": "app",
+          "Definition": "a9213e51cc90d2600a48f4b12b31e9660d2eafb05707a65bd3092e560ad3480d",
+          "Arguments": [
+            {
+              "ID": "i32",
+              "Owner": "builtin",
+              "Definition": "043f01ddaaecf804caef6ea3ea3336294b026c0c2059d696e55f631a309bed80",
+              "Abilities": [
+                "copy",
+                "drop",
+                "inert",
+                "scalar",
+                "store"
+              ]
+            },
+            {
+              "ID": "i64",
+              "Owner": "builtin",
+              "Definition": "1ae8f725309d4d424134a1fc61d74fdc0e1bd546edef5aac3adb6ad6337dfd24",
+              "Abilities": [
+                "copy",
+                "drop",
+                "inert",
+                "scalar",
+                "store"
+              ]
+            }
+          ],
+          "Constraints": [
+            {
+              "ID": "app::A",
+              "Definition": "cb073767337dcb922cb2097bd8f940c62e63f1b5ad6d97fcb521e0c01148b146",
+              "Arguments": [
+                {
+                  "ID": "i32",
+                  "Definition": "043f01ddaaecf804caef6ea3ea3336294b026c0c2059d696e55f631a309bed80"
+                }
+              ],
+              "Provider": "app::provide_a",
+              "ProviderDefinition": "a7d70fcce12862ff3b9a4ed149994fcbcff4ccf8fb385da67d1a2306715cf2e7"
+            },
+            {
+              "ID": "app::B",
+              "Definition": "b4f34bdc840bd819df1f68b14059d0955fa3d202c58bd7aae793c4bcdd6ae860",
+              "Arguments": [
+                {
+                  "ID": "i32",
+                  "Definition": "043f01ddaaecf804caef6ea3ea3336294b026c0c2059d696e55f631a309bed80"
+                }
+              ],
+              "Provider": "app::provide_b",
+              "ProviderDefinition": "0cc6c64857ae30718de7e2d3b9ed6eb0fec23776393554b80c0d75dcab4eb7d5"
+            }
+          ],
+          "Dependencies": [
+            "g0_481fb86b3f95d29f4a7cd1b2ae687c9bf8a0788fd2b3372d91e0e86ad15479b8",
+            "g0_82f5a136862df4f6dc6e734e2824f0e53a6f99850bc94fc237c4f9129d1aff25"
+          ]
+        },
+        {
+          "Name": "sdk-Vec<i32>",
+          "Expected": "g0_6952ac245498ba801b37176e4ae85e7d8aba32eae9582f8b1af0699f111a2fde",
+          "Declaration": "package_coordinate_v1_b0a4d6314db7dbe3f4f42c54d28d492054cc437fedd64985129b89c66b340424::std::vec::Vec",
+          "Owner": "package_coordinate_v1_b0a4d6314db7dbe3f4f42c54d28d492054cc437fedd64985129b89c66b340424",
+          "Definition": "d76e25012c918c75954e764a177e9beb69d1fe38e5dd94c8a097e6bd859544bd",
+          "Arguments": [
+            {
+              "ID": "i32",
+              "Owner": "builtin",
+              "Definition": "043f01ddaaecf804caef6ea3ea3336294b026c0c2059d696e55f631a309bed80",
+              "Abilities": [
+                "copy",
+                "drop",
+                "inert",
+                "scalar",
+                "store"
+              ]
+            }
+          ],
+          "Constraints": null,
+          "Dependencies": [
+            "g0_3a64612497c32dd9e89a49e5c51222e7c5595a1eacff280a28cc9f42d1bb403d"
+          ]
+        },
+        {
+          "Name": "sdk-Vec<i64>",
+          "Expected": "g0_62b9e4bb890f1323536061407b179feab70790dd0e6d5c42292936790130d943",
+          "Declaration": "package_coordinate_v1_b0a4d6314db7dbe3f4f42c54d28d492054cc437fedd64985129b89c66b340424::std::vec::Vec",
+          "Owner": "package_coordinate_v1_b0a4d6314db7dbe3f4f42c54d28d492054cc437fedd64985129b89c66b340424",
+          "Definition": "d76e25012c918c75954e764a177e9beb69d1fe38e5dd94c8a097e6bd859544bd",
+          "Arguments": [
+            {
+              "ID": "i64",
+              "Owner": "builtin",
+              "Definition": "1ae8f725309d4d424134a1fc61d74fdc0e1bd546edef5aac3adb6ad6337dfd24",
+              "Abilities": [
+                "copy",
+                "drop",
+                "inert",
+                "scalar",
+                "store"
+              ]
+            }
+          ],
+          "Constraints": null,
+          "Dependencies": [
+            "g0_008286fc9e7bed883d1302c706e8f61cb8553465d0e21ccedb9c52131942083c"
+          ]
+        }
+      ]
+    }
+  },
+  "tests": {
+    "schema": "fairyc.candidate-private-tests/v1",
+    "passed": true,
+    "module": "generic_specialization_identity",
+    "sourceInputs": [
+      {
+        "path": "examples/lexer_candidate/src/candidate_limits.fy",
+        "sha256": "e337e22a7feff699a675f0a12d882fc92b577e62f58712ceb24bd0fac136ab85"
+      },
+      {
+        "path": "examples/lexer_candidate/src/file_source.fy",
+        "sha256": "1a7ac7f6c69ef27e78e734aa74dab90b895742a5500a32931baaed19379b938f"
+      },
+      {
+        "path": "examples/lexer_candidate/src/generic_identity.fy",
+        "sha256": "af82d3b359138f3efaea398e0c0faeb353b0fd94728f3c60179b1a481ba53fd3"
+      },
+      {
+        "path": "examples/lexer_candidate/src/generic_specialization_identity.fy",
+        "sha256": "fb316b186d871ac0e6ae0b8a970ae766e3a67dbd73e9239270198ee38291c932"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_public_interface_model.fy",
+        "sha256": "029b9a86471765d1dd2ff5878e5c0d0adcfaa8e6f5b8c81e1bbe9656c4f3b2f0"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_public_interface_write.fy",
+        "sha256": "9a8868217c8bb3a7eef097e13c4890393dc0ef7deaa70f1df49d65437acf9e24"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_state_layout.fy",
+        "sha256": "58395167fac35425c2b24e73e7768c3315a20170a9407dbc0e8aebac692eef38"
+      },
+      {
+        "path": "examples/lexer_candidate/src/project_manifest_values.fy",
+        "sha256": "4f21b9dedf744ffc449d1b843282f9aba2ecc221c61f043594bea70c4d56387d"
+      },
+      {
+        "path": "examples/lexer_candidate/src/sha256.fy",
+        "sha256": "eb89211fd749f7f527e8d2b72e97d70f8d9613bbac428bc95d975bef7c53bfa1"
+      },
+      {
+        "path": "examples/lexer_candidate/src/sha256_block.fy",
+        "sha256": "bc48b9e751205bba8aeaf09987ea8681694d26bc989e24f4ecb3afa4c6e00fd4"
+      },
+      {
+        "path": "examples/lexer_candidate/src/sha256_stream.fy",
+        "sha256": "b5f97a9b5be679418a1365a6007028abfab5ba66ee3ae5c08b3e5b863fcfc8b9"
+      },
+      {
+        "path": "internal/sdkstdlib/sources/std/bytes.fy",
+        "sha256": "4740a506e93349fb002c383967dcc44d182d20f09f2094b83b5464a4ab252982"
+      },
+      {
+        "path": "internal/sdkstdlib/sources/std/fs.fy",
+        "sha256": "fd7ddfa9f0deed98304cecf94911644087d1e2a46e8be8995c35acbcb183b335"
+      },
+      {
+        "path": "internal/sdkstdlib/sources/std/process.fy",
+        "sha256": "9680a1481df4f761f481d5a039af7bdbefeb312d1091961194f8e7bc0681ae24"
+      },
+      {
+        "path": "internal/sdkstdlib/sources/std/text.fy",
+        "sha256": "cccd47e090fda11c9da063ffb321489dd8753fe9996855fc432833e05a79e695"
+      },
+      {
+        "path": "internal/sdkstdlib/sources/optional/std/vec.fy",
+        "sha256": "0ae4c395bf98c39079ad620bde035b3b590d51417864802e698edc069281db5b"
+      },
+      {
+        "path": "examples/lexer_candidate/tests/generic_specialization_identity.fy",
+        "sha256": "9ef200a7975933a78c44fa18604556dbe0dab39046723698a422b22156c7562a"
+      },
+      {
+        "path": "tools/verify-candidate-private-tests.py",
+        "sha256": "8a5a0bd3f157168003e995aa73e866b4028e8dcaeddcd245e0e627f0956d3cc1"
+      },
+      {
+        "path": ".cache/generic-specialization-20261013/facts.bin",
+        "sha256": "e9f91501a81fd9c1c00e32a8ff3ff022b0d80c79bb0edb2061a50b3281b03a9a"
+      }
+    ],
+    "tools": {
+      "compiler": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-frontend-oracle-current-20261012.exe",
+        "sha256": "3ecc4501ee3bb47ecc39e7288200266b31cbcd8bf6ffec302ae54867705ce5d1"
+      },
+      "candidate": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-semantic-final-build-20261012\\candidate-release.exe",
+        "sha256": "0c77c32d39b1ae1ddaa105f13bec9ce86e66029aa6ca5694863ac0ba68111480"
+      },
+      "builder": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-rooted-builder-stack-20261012.exe",
+        "sha256": "02abe2328daa9921705910c7b995e82c1312cb960fe024106c11468569aefff0"
+      }
+    },
+    "native": {
+      "schemaVersion": "fairyc.test-report/v4",
+      "engine": "native",
+      "target": "x86_64-windows-msvc",
+      "profile": "development",
+      "tests": [
+        {
+          "identity": "tests::generic_specialization_identity::matches_go_planner_and_actual_sdk_vec_specializations",
+          "outcome": "passed",
+          "trapCategory": null,
+          "stdoutBase64": "",
+          "stderrBase64": ""
+        },
+        {
+          "identity": "tests::generic_specialization_identity::rejects_noncanonical_resolved_identity_facts",
+          "outcome": "passed",
+          "trapCategory": null,
+          "stdoutBase64": "",
+          "stderrBase64": ""
+        },
+        {
+          "identity": "tests::generic_specialization_identity::specialization_identity_honors_exact_shared_work_allowance",
+          "outcome": "passed",
+          "trapCategory": null,
+          "stdoutBase64": "",
+          "stderrBase64": ""
+        },
+        {
+          "identity": "tests::generic_specialization_identity::type_definition_provider_capability_and_dependency_changes_invalidate",
+          "outcome": "passed",
+          "trapCategory": null,
+          "stdoutBase64": "",
+          "stderrBase64": ""
+        }
+      ],
+      "count": 4,
+      "passed": 4,
+      "failed": 0,
+      "status": "ok",
+      "lock": "verified"
+    },
+    "nativeTests": 4,
+    "authoredTestsExecuted": 4,
+    "candidateOnly": false,
+    "lockSHA256": "dac679d87df7f4839d0ef0aa835b3f1b976156af94135af837c8d68649e8d061",
+    "candidateInputFiles": 17,
+    "candidatePacketSHA256": "834362f564746b654e4bc5d2327f82121cddcc40b6ae899c738405cb6b68ce3e",
+    "candidateExecutions": [
+      {
+        "profile": "development",
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\generic-specialization-20261013\\tests-final\\development.exe",
+        "sha256": "dd0ee1148f66ca5c6539c002e45f4ffa7b55a424679e2b57e71badbcfe1cfb80",
+        "exit": 0
+      },
+      {
+        "profile": "release",
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\generic-specialization-20261013\\tests-final\\release.exe",
+        "sha256": "c3be7cc4ef3c83196739f2cafc416d8bee36a617b09de653308b47e8760bc6cc",
+        "exit": 0
+      }
+    ],
+    "invocations": [
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-frontend-oracle-current-20261012.exe",
+          "test",
+          "--native",
+          "--locked",
+          "--json",
+          "--capture-output",
+          "--exact",
+          "tests::generic_specialization_identity::matches_go_planner_and_actual_sdk_vec_specializations",
+          "--exact",
+          "tests::generic_specialization_identity::type_definition_provider_capability_and_dependency_changes_invalidate",
+          "--exact",
+          "tests::generic_specialization_identity::rejects_noncanonical_resolved_identity_facts",
+          "--exact",
+          "tests::generic_specialization_identity::specialization_identity_honors_exact_shared_work_allowance",
+          "--",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\generic-specialization-20261013\\facts.bin"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "seconds": 286.4264364000119,
+        "exit": 0,
+        "stdoutBytes": 937,
+        "stdoutSHA256": "5b914209a6d930035ba6094eba5ea300afb17f5fc59e836849b0bde2c19360da",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-semantic-final-build-20261012\\candidate-release.exe",
+          "--c-project-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\generic-specialization-20261013\\tests-final\\sources.list"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+        "seconds": 8.976471700007096,
+        "exit": 0,
+        "stdoutBytes": 445785,
+        "stdoutSHA256": "834362f564746b654e4bc5d2327f82121cddcc40b6ae899c738405cb6b68ce3e",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-rooted-builder-stack-20261012.exe",
+          "--packet",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\generic-specialization-20261013\\tests-final\\candidate-packet.bin",
+          "--packet-sha256",
+          "834362f564746b654e4bc5d2327f82121cddcc40b6ae899c738405cb6b68ce3e",
+          "--output",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\generic-specialization-20261013\\tests-final\\development.exe"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+        "seconds": 2.4150034000049345,
+        "exit": 0,
+        "stdoutBytes": 184,
+        "stdoutSHA256": "2219d68e2a75d8c587613b256afe5884af1acdd8d4db96d55d6879d7da0b5429",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\generic-specialization-20261013\\tests-final\\development.exe",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\generic-specialization-20261013\\facts.bin"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+        "seconds": 0.09122850000858307,
+        "exit": 0,
+        "stdoutBytes": 0,
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-rooted-builder-stack-20261012.exe",
+          "--packet",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\generic-specialization-20261013\\tests-final\\candidate-packet.bin",
+          "--packet-sha256",
+          "834362f564746b654e4bc5d2327f82121cddcc40b6ae899c738405cb6b68ce3e",
+          "--output",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\generic-specialization-20261013\\tests-final\\release.exe",
+          "--release"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+        "seconds": 23.980881299998146,
+        "exit": 0,
+        "stdoutBytes": 186,
+        "stdoutSHA256": "6fae9386db4f2f207851977953f17dc1049b5b4621c27c159685f082800e0083",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\generic-specialization-20261013\\tests-final\\release.exe",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\generic-specialization-20261013\\facts.bin"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+        "seconds": 0.054953299986664206,
+        "exit": 0,
+        "stdoutBytes": 0,
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderr": ""
+      }
+    ],
+    "publicApiChanged": false,
+    "dbChanged": false,
+    "ciChanged": false,
+    "pushed": false,
+    "selection": {
+      "mode": "all-authored",
+      "authoredTests": 4,
+      "selectedTests": 4
+    },
+    "frontendTimeoutSeconds": 180,
+    "productTimeoutChanged": false,
+    "wrapperEffects": [
+      "filesystem",
+      "console"
+    ]
+  },
+  "remaining": [
+    "Typed-source template definition and reachable-template closure extraction",
+    "Dispatcher and package-cache integration",
+    "Full image/corpus/current-source fixed point, Linux/full suite/hosted CI"
+  ],
+  "publicApiChanged": false,
+  "sdkABIChanged": false,
+  "dbChanged": false,
+  "ciChanged": false,
+  "runnerChanged": false,
+  "repositoryHygieneChanged": false,
+  "pushed": false
+}

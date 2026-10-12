@@ -2,6 +2,31 @@
 
 ## Current local candidate evidence (2026-10-13)
 
+`generic_specialization_identity` computes the private `g0_` identity of
+`internal/genericplan/specialization.go`. It frames the domain, declaration ID,
+owner and definition digest, followed by ordered type arguments with their
+owners, canonical abilities and definitions, resolved capability constraints
+with argument definitions and selected provider digests, and sorted unique
+dependency specialization IDs. Noncanonical names, digests, abilities, ranges
+and ordering reject under the existing 1048576 shared work/output bound.
+Distinct symbolic constraints that resolve to the same constraint remain in the
+stream, matching the Go planner.
+
+Four authored tests pass Go native and both candidate C development/release
+profiles. Twelve records match real Go planner IDs, including the current SDK's
+`Vec<i32>` and `Vec<i64>`, two type arguments and duplicate resolved constraints.
+Definition, type, ability, capability, provider and dependency changes invalidate
+the identity; malformed records and exact-fit/exhausted work histories pass.
+Source check passes 398 files / 5108 MIR functions; native tests verify the lock.
+
+Resolved planner facts are caller-supplied. Typed-source template definition and
+reachable-template closure extraction, dispatcher wiring and cache consumption
+remain pending. This does not admit providers or executable specializations.
+No full image, corpus, current-source fixed point, Linux/full suite or hosted CI
+is rerun for this bounded encoder slice. No public API, SDK ABI, DB, CI, runner or
+product timeout change; no push. Receipt:
+[evidence](../ops/evidence/candidate-specialization-identity-20261013.json).
+
 `module_generic_interface` computes the private source-interface identity of
 `internal/moduleinterface/generic.go`. The encoder frames the generic and ordinary
 algorithm names, appends the raw ordinary v5 digest, the template count and each
@@ -19,8 +44,9 @@ input ordering does not, and exact-fit/exhausted histories pass. Source check
 passes 397 files / 5084 MIR functions; native tests verify the source lock.
 
 Closures are caller-supplied. Typed-source definition and reachable-template
-closure extraction, specialization/Vec identities and dispatcher/cache consumers
-remain pending. No full image, corpus or current-source fixed point is rerun.
+closure extraction and dispatcher/cache consumers remain pending. The resolved
+specialization/Vec encoder is covered above. No full image, corpus or
+current-source fixed point is rerun.
 No public API, SDK ABI, DB, CI, runner or product timeout change; no push. Receipt:
 [evidence](../ops/evidence/candidate-generic-public-interface-20261013.json).
 
