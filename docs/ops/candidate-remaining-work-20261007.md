@@ -1,5 +1,31 @@
 # Fairy 컴파일러 전환: 후속 작업 목록
 
+## Current state-aware fixed point and native CLI (2026-10-12)
+
+The fixed point now covers all 380 current self sources. Stage1 replays them in
+207.11 seconds and emits the recorded 30,962,039-byte packet exactly. Stage2 builds
+in 270.96 seconds; both complete 4,398,080-byte images match byte for byte with no
+excluded metadata. Stage2 replays the sources in 216.54 seconds and emits the same
+packet. Both generations pass all 249 Go lexer cases and malformed-frame checks.
+The maintained bootstrap verifier reuses the recorded builds and verifies the
+input seed and both generations against the lexer oracle; source hashes still match.
+
+The latest release image passes all 15 native CLI executions: real build/run,
+Korean paths, empty/Unicode/quote/backslash/8192-byte arguments, binary stdin and
+exact stdout/stderr, traps and ordinary exit 134, full Windows exit bits, invalid
+options/entry, missing/stale locks, absent driver, output-directory escape and
+bounded combined output. Previous products survive failed publication; no owned
+scratch directories leak. This profile uses no Go frontend or Go CLI oracle.
+
+The bootstrap verifier now accepts an explicit stack reserve, records it and
+checks both actual PE headers. Help, invalid bounds/alignment and mismatched
+receipt/image settings pass rejection checks. The private compiler uses 16 MiB;
+ordinary application stacks and product timeout defaults remain unchanged.
+Broader/multiple diagnostics, state public interface/cache admission, product
+timeout/default-stack integration, Linux/full suite and same-head hosted CI remain
+open. Promotion remains false. No public API, SDK ABI, DB, CI or runner change;
+no push. Receipt: `evidence/candidate-state-fixed-point-native-cli-20261012.json`.
+
 ## Fresh state-aware compiler and complete paired corpus (2026-10-12)
 
 All 380 current self sources emit a 30,962,039-byte C packet and build one complete

@@ -4,6 +4,7 @@ import hashlib
 import json
 from pathlib import Path
 import re
+import struct
 import subprocess
 import sys
 import time
@@ -23,6 +24,14 @@ def checked_artifact(info):
     path = Path(info['path'])
     assert artifact(path) == info, 'artifact changed: '+str(path)
     return path
+
+
+def stack_reserve(path):
+    image = path.read_bytes()
+    assert image[:2] == b'MZ', 'compiler image is not PE'
+    pe = struct.unpack_from('<I', image, 60)[0]
+    assert image[pe:pe+4] == b'PE\0\0' and struct.unpack_from('<H', image, pe+24)[0] == 0x20b, 'compiler image is not PE32+'
+    return struct.unpack_from('<Q', image, pe+24+72)[0]
 
 
 def sources():
@@ -54,9 +63,12 @@ def main():
     parser.add_argument('--output', type=Path, required=True)
     parser.add_argument('--reuse-receipt', type=Path)
     parser.add_argument('--frontend-timeout', type=int, default=60, help='verification-only frontend allowance, 1..900 seconds')
+    parser.add_argument('--stack-reserve-bytes', type=int, default=0, help='private compiler image stack: zero/default or 64 KiB aligned, at most 16 MiB')
     args = parser.parse_args()
     if not 1 <= args.frontend_timeout <= 900:
         parser.error('frontend timeout must be in 1..900 seconds')
+    if args.stack_reserve_bytes != 0 and not (65536 <= args.stack_reserve_bytes <= 16777216 and args.stack_reserve_bytes % 65536 == 0):
+        parser.error('stack reserve must be zero/default or 64 KiB aligned, at most 16 MiB')
     # Assertions are deliberate fail-closed checks, not optional debugging.
     if not __debug__:
         parser.error('verification requires Python without -O')
@@ -74,6 +86,7 @@ def main():
         assert receipt['sourceInventorySHA256'] == inventory_sha and receipt['artifactPolicy'] == policy
         assert receipt['sourceFiles'] == len(original)
         assert receipt['frontendTimeoutSeconds'] == args.frontend_timeout
+        assert receipt.get('stackReserveBytes', 0) == args.stack_reserve_bytes, 'stack reserve differs from the recorded build'
         assert len(receipt['builds']) == 2 and all(item['exit'] == 0 and not item['stderr'] for item in receipt['builds'])
         images = [checked_artifact(receipt[name]) for name in ('stage1', 'stage2')]
         assert images[0].read_bytes() == images[1].read_bytes()
@@ -110,6 +123,8 @@ def main():
                 assert packet.read_bytes() == packets[0].read_bytes()
             image = args.output / f'stage{stage}.exe'
             argv = [str(args.builder.resolve()), '--packet', str(packet.resolve()), '--packet-sha256', digest(packet), '--output', str(image.resolve()), '--release']
+            if args.stack_reserve_bytes:
+                argv.extend(['--stack-reserve-bytes', str(args.stack_reserve_bytes)])
             start = time.monotonic()
             built = subprocess.run(argv, cwd=ROOT, capture_output=True, timeout=600)
             assert built.returncode == 0 and not built.stderr, built.stderr
@@ -120,12 +135,15 @@ def main():
         assert images[0].read_bytes() == images[1].read_bytes()
         assert artifact(args.builder) == builder_identity, 'builder changed during verification'
         receipt = dict(schema='fairyc.candidate-two-stage-bootstrap/v2', passed=True, scope='Consecutive C-part generations from the recorded input seed; image equality compares Stage1 and Stage2', artifactPolicy=policy, sourceInventorySHA256=inventory_sha, sourceFiles=len(original), frontendTimeoutSeconds=args.frontend_timeout, seed=seed_identity, builder=builder_identity, frontends=frontends, builds=observations, packets=[artifact(p) for p in packets], seedPacketSHA256=digest(packets[0]), packetSHA256=digest(packets[1]), stage1=artifact(images[0]), stage2=artifact(images[1]))
+    image_stacks = [stack_reserve(image) for image in images]
+    if args.stack_reserve_bytes:
+        assert image_stacks == [args.stack_reserve_bytes] * 2, 'compiler image stack reserve differs from the requested build'
     proof_dir = args.output / 'lexer'
     checked = subprocess.run([sys.executable, str(ROOT/'tools/verify-candidate-bootstrap-lexer.py'), '--reference', str(args.reference.resolve()), '--fixtures', str(ROOT/'spec/fixtures/lexer/candidate-bootstrap-v1.json'), '--stage1', str(images[0].resolve()), '--stage2', str(images[1].resolve()), '--seed', str(args.seed.resolve()), '--output', str(proof_dir.resolve())], cwd=ROOT, capture_output=True, timeout=60)
     assert checked.returncode == 0 and not checked.stderr, checked.stderr
     assert sources() == original, 'compiler sources changed during verification'
     assert artifact(args.seed) == seed_identity, 'seed changed during verification'
-    receipt.update(scope='Consecutive C-part generations from the recorded input seed; image equality compares Stage1 and Stage2', seedImageSHA256=digest(args.seed), manifestSHA256=digest(manifest), lexerDifferential=json.loads((proof_dir/'receipt.json').read_bytes()), productTimeoutChanged=False, promotionGateReady=False, deferred=['Full frontend differential', 'Linux', 'Current-commit hosted CI'], pushed=False)
+    receipt.update(scope='Consecutive C-part generations from the recorded input seed; image equality compares Stage1 and Stage2', seedImageSHA256=digest(args.seed), manifestSHA256=digest(manifest), stackReserveBytes=args.stack_reserve_bytes, imageStackReserveBytes=image_stacks, lexerDifferential=json.loads((proof_dir/'receipt.json').read_bytes()), productTimeoutChanged=False, promotionGateReady=False, deferred=['Full frontend differential', 'Linux', 'Current-commit hosted CI'], pushed=False)
     (args.output/'receipt.json').write_text(json.dumps(receipt, indent=2)+'\n', encoding='utf-8', newline='\n')
     print('Consecutive compiler images and', receipt['lexerDifferential']['cases'], 'Go lexer cases verified')
 

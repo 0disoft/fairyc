@@ -10,10 +10,17 @@ the two previous package-state differences change; the other 73 observations and
 fixture source hashes remain unchanged. Sixteen extra state cases also match
 first diagnostic path/line/column/code/span. A state-declaration program returns
 42 in both native profiles; live owned-project ssize_t C emission succeeds.
-This is one fresh complete-image build. Current-source consecutive-generation
-fixed point, broader/multiple diagnostics, state interface/cache admission,
-product timeout/default stack, Linux/full suite and hosted CI remain open.
+Current-source consecutive generations now match complete image bytes, with no
+exclusions; Stage1 and Stage2 replay all 380 sources into the identical packet.
+Both pass 249 lexer cases and malformed-frame checks. The maintained bootstrap
+verifier reuses these native builds, checks the explicit 16 MiB stack in both PE
+headers and verifies the input seed and both generations against the Go lexer.
+The release compiler also passes 15 real public build/run executions, including
+argument/stream/exit handling, lock failures, failed publication and scratch cleanup.
+Broader/multiple diagnostics, state interface/cache admission, product timeout/
+default stack, Linux/full suite and hosted CI remain open; promotion is still false.
 Evidence: [fresh state CLI integration](../ops/evidence/candidate-package-state-cli-20261012.json).
+[current fixed point and native CLI](../ops/evidence/candidate-state-fixed-point-native-cli-20261012.json).
 
 The following paragraphs retain earlier snapshot evidence for comparison.
 
