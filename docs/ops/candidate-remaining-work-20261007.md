@@ -1,5 +1,36 @@
 # Fairy 컴파일러 전환: 후속 작업 목록
 
+## Candidate check preserves semantic diagnostic codes (2026-10-12)
+
+The experimental candidate check now prints the retained E-codes for must-use,
+integer/condition/assignment/arity, FFI, effects, compile-time and reserved
+intrinsic failures. Catalog duplicate names and binding lookup failures use
+phase-scoped resolution translation; unrelated internal statuses keep their
+existing fallback. Primary source spans and exit classification are preserved.
+
+Fresh paired Go/candidate observations over all 75 semantic/resource cases reduce
+first-code/span differences from 27 to nine, fixing 18 cases. Every candidate
+exit code and every previously matching diagnostic remains unchanged. Success
+counts also match; the new probe runs Go before candidate, so only its expected
+lock updated/unchanged difference is normalized for comparison with the earlier
+candidate-only replay. Three frontend support/status differences remain.
+
+Source check passes 378 files / 4806 MIR functions. The internal-status overlap
+regression passes Go native and both candidate C profiles. The earlier Fairy
+Stage2 emits all 371 current self sources without a Go frontend fallback, and
+the complete private release native build succeeds with a 16 MiB stack reserve.
+The prior full fixed-point receipt below belongs to its earlier exact source
+snapshot; current-source fixed-point replay is batched after the remaining
+diagnostic corrections, and is not claimed for this revision.
+
+Remaining first-diagnostic differences: unresolved name, foreign parameter and
+call-effect spans, compile-time trap/cycle/assert/const-eval, external resource
+visibility code, and package-state codec. Linux/full suite, broader executable
+parity, product timeout/host-stack integration and hosted CI still gate promotion.
+Shipping Go, public language/API, SDK ABI, DB, CI and product timeouts are
+unchanged; no push. Receipt:
+`evidence/candidate-project-diagnostic-codes-20261012.json`.
+
 ## Borrow gate admitted with complete Windows fixed point (2026-10-12)
 
 Candidate project checking now infers transitive return origins, runs final

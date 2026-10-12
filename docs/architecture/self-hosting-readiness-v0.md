@@ -2,13 +2,22 @@
 
 ## Current local candidate evidence (2026-10-12)
 
-The candidate project check path now enforces transitive return-origin and final
-live-loan checks before owned IR. The complete private Windows bootstrap retains
+The candidate project check path enforces transitive return-origin and final
+live-loan checks before owned IR. The previous borrow-gate source snapshot's
+complete private Windows bootstrap retains
 identical 30136053-byte C packets and identical full 4280832-byte Stage1/Stage2
 images. Stage2 processes all 370 admitted repository sources in 253.81 seconds
 and emits the identical packet; both generations pass 249 lexer/framing cases.
-The 75-case frontend comparison retains three status and 27 first-diagnostic
-differences. Public borrow admission is complete, while full frontend/executable
+The current diagnostic-output revision reduces first-code/span differences from
+27 to nine over 75 fresh paired observations, retaining three status differences
+and every prior candidate exit. Its 371 self sources emit and build a complete
+private native release image; the internal-status overlap test passes Go native
+and both candidate C profiles. Current-source fixed-point replay is deferred
+until the diagnostic correction batch finishes; the byte-identical generations
+above describe the earlier snapshot. Evidence:
+[candidate diagnostic codes](../ops/evidence/candidate-project-diagnostic-codes-20261012.json).
+
+Public borrow admission is complete, while full frontend/executable
 parity, product timeout/host-stack integration, Linux/full suite and same-head
 hosted CI remain promotion requirements. No shipping Go compiler or SDK ABI
 change, release or push is claimed. Evidence:

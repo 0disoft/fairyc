@@ -1,0 +1,450 @@
+{
+  "schema": "fairyc.candidate-project-diagnostic-codes/v1",
+  "passed": true,
+  "scope": "Preserve admitted semantic E-codes and original spans in experimental candidate project check output; keep phase-scoped resolution status translation",
+  "sourceInputs": [
+    {
+      "path": "examples/lexer_candidate/src/project_check_text.fy",
+      "bytes": 14689,
+      "sha256": "9d505b5a60d79dd961f236a5cdbec936503d1c1ee366c683f9e52610181944ed"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_diagnostic_codes.fy",
+      "bytes": 2047,
+      "sha256": "8b6d459f6ee0a0c2bc158bcf1e80e5ba6348f242a28e747716d58f6cf54423dd"
+    },
+    {
+      "path": "examples/lexer_candidate/tests/project_diagnostic_codes.fy",
+      "bytes": 517,
+      "sha256": "91bcf735f794adc62635657bc4159e1fc222e00db4455e0d7b1fde4e1e0cc8cf"
+    },
+    {
+      "path": "examples/lexer_candidate/fairy.lock",
+      "bytes": 1698,
+      "sha256": "d79677ee0b9ab887a5c0b7e9b371902f5872013ba5fa0d82eac7d803bbe5c862"
+    }
+  ],
+  "sourceFiles": 371,
+  "sourceInventorySHA256": "c703d3ce0244752ebb05379b9ad223f4aead9c0f7f193b54e6f6a1a83a23aff3",
+  "sourceCheck": {
+    "passed": true,
+    "files": 378,
+    "mirFunctions": 4806,
+    "lockUpdated": true
+  },
+  "privateTests": {
+    "receiptSHA256": "a123817228fb07f80ae8decc053b4ce0cc33e9a7c31324112e7767c6cd68656f",
+    "nativeTests": 1,
+    "candidateExecutions": [
+      {
+        "profile": "development",
+        "exit": 0,
+        "sha256": "3d41cdb659af667f9491fe7768edc0673c5f07de4916d748ac66e25870c3f2b0"
+      },
+      {
+        "profile": "release",
+        "exit": 0,
+        "sha256": "4e1e5014078f5d1513e045c71463dadf8a747205890e0599464bdb0b3f0ad2b6"
+      }
+    ],
+    "coverage": "Resolution/internal status overlap rejection in Go native and both candidate C profiles"
+  },
+  "builds": [
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\borrow-branch-depth-stage2-20261012\\stage2.exe",
+        "--c-project-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\diagnostic-codes-build-20261012\\sources.list"
+      ],
+      "seconds": 268.9598588999943,
+      "exit": 0,
+      "stderr": "",
+      "stdoutBytes": 30159410
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-rooted-builder-stack-20261012.exe",
+        "--packet",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\diagnostic-codes-build-20261012\\packet.bin",
+        "--packet-sha256",
+        "81ce05ddc8590f040f9712219463a6aae26f4c46b5b916225c1c184ba1784ee1",
+        "--output",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\diagnostic-codes-build-20261012\\candidate-release.exe",
+        "--release",
+        "--stack-reserve-bytes",
+        "16777216"
+      ],
+      "seconds": 343.70269230002305,
+      "exit": 0,
+      "stderr": "",
+      "stdoutBytes": 186
+    }
+  ],
+  "packet": {
+    "path": ".cache/diagnostic-codes-build-20261012/packet.bin",
+    "bytes": 30159410,
+    "sha256": "81ce05ddc8590f040f9712219463a6aae26f4c46b5b916225c1c184ba1784ee1"
+  },
+  "candidate": {
+    "path": ".cache/diagnostic-codes-build-20261012/candidate-release.exe",
+    "bytes": 4289536,
+    "sha256": "e28ac656dda06f4221991d86da94e43cf8e2ca8a502fd91b28a90182b2750426"
+  },
+  "verificationStackReserveBytes": 16777216,
+  "frontendCorpus": {
+    "cases": 75,
+    "referenceSHA256": "3ecc4501ee3bb47ecc39e7288200266b31cbcd8bf6ffec302ae54867705ce5d1",
+    "receiptSHA256": "76e26996b4dd02fd8060fd2dceb808099b294a6cb734b4217f136860f3bb0bb8",
+    "priorReceiptSHA256": "4bc5a7b24c9f7f40583320b00efc6b0e606ae2276408498c3ca75ce43b45a58f",
+    "exactExitRegressions": 0,
+    "successfulOutputRegressions": 0,
+    "previouslyMatchedDiagnosticRegressions": 0,
+    "firstDiagnosticDifferencesBefore": 27,
+    "firstDiagnosticDifferencesAfter": 9,
+    "statusDifferences": 3,
+    "improved": [
+      {
+        "family": "semantic",
+        "id": "fail.flow.must-use-ignored",
+        "diagnostic": {
+          "code": "E4202",
+          "start": 75,
+          "end": 83
+        }
+      },
+      {
+        "family": "semantic",
+        "id": "fail.type.must-use-invalid",
+        "diagnostic": {
+          "code": "E4201",
+          "start": 14,
+          "end": 23
+        }
+      },
+      {
+        "family": "semantic",
+        "id": "fail.resolve.duplicate-declaration",
+        "diagnostic": {
+          "code": "E0102",
+          "start": 55,
+          "end": 60
+        }
+      },
+      {
+        "family": "semantic",
+        "id": "fail.type.integer-literal-range",
+        "diagnostic": {
+          "code": "E1013",
+          "start": 48,
+          "end": 53
+        }
+      },
+      {
+        "family": "semantic",
+        "id": "fail.type.non-bool-condition",
+        "diagnostic": {
+          "code": "E1007",
+          "start": 47,
+          "end": 48
+        }
+      },
+      {
+        "family": "semantic",
+        "id": "fail.type.foreign-call-outside-unsafe",
+        "diagnostic": {
+          "code": "E5101",
+          "start": 86,
+          "end": 97
+        }
+      },
+      {
+        "family": "semantic",
+        "id": "fail.type.malformed-link-name",
+        "diagnostic": {
+          "code": "E5106",
+          "start": 14,
+          "end": 27
+        }
+      },
+      {
+        "family": "semantic",
+        "id": "fail.type.duplicate-link-name",
+        "diagnostic": {
+          "code": "E5106",
+          "start": 41,
+          "end": 68
+        }
+      },
+      {
+        "family": "semantic",
+        "id": "fail.flow.missing-resource-drop-effect",
+        "diagnostic": {
+          "code": "E7102",
+          "start": 193,
+          "end": 202
+        }
+      },
+      {
+        "family": "semantic",
+        "id": "fail.type.unknown-effect",
+        "diagnostic": {
+          "code": "E7101",
+          "start": 23,
+          "end": 31
+        }
+      },
+      {
+        "family": "semantic",
+        "id": "fail.type.duplicate-effect",
+        "diagnostic": {
+          "code": "E7101",
+          "start": 32,
+          "end": 39
+        }
+      },
+      {
+        "family": "semantic",
+        "id": "fail.type.immutable-parameter-assignment",
+        "diagnostic": {
+          "code": "E1008",
+          "start": 44,
+          "end": 49
+        }
+      },
+      {
+        "family": "semantic",
+        "id": "fail.type.borrowed-view-raw-parts-outside-unsafe",
+        "diagnostic": {
+          "code": "E5101",
+          "start": 141,
+          "end": 193
+        }
+      },
+      {
+        "family": "semantic",
+        "id": "fail.resolve.compile-time-invalid",
+        "diagnostic": {
+          "code": "E4301",
+          "start": 14,
+          "end": 36
+        }
+      },
+      {
+        "family": "semantic",
+        "id": "fail.type.compile-time-excluded",
+        "diagnostic": {
+          "code": "E4302",
+          "start": 67,
+          "end": 77
+        }
+      },
+      {
+        "family": "semantic",
+        "id": "fail.resolve.source-location-reserved",
+        "diagnostic": {
+          "code": "E4401",
+          "start": 21,
+          "end": 36
+        }
+      },
+      {
+        "family": "semantic",
+        "id": "fail.type.source-location-non-call",
+        "diagnostic": {
+          "code": "E4401",
+          "start": 44,
+          "end": 59
+        }
+      },
+      {
+        "family": "semantic",
+        "id": "fail.type.source-location-arity",
+        "diagnostic": {
+          "code": "E1010",
+          "start": 44,
+          "end": 62
+        }
+      }
+    ],
+    "remainingDiagnostics": [
+      {
+        "family": "semantic",
+        "id": "fail.resolve.unresolved-name",
+        "reference": [
+          {
+            "code": "E0101",
+            "start": 43,
+            "end": 50
+          }
+        ],
+        "candidate": [],
+        "stderr": "main.fy:4:12: source is outside the supported compiler subset [bytes 43..50]\n"
+      },
+      {
+        "family": "semantic",
+        "id": "fail.type.foreign-safe-reference",
+        "reference": [
+          {
+            "code": "E5102",
+            "start": 45,
+            "end": 52
+          }
+        ],
+        "candidate": [
+          {
+            "code": "E5102",
+            "start": 14,
+            "end": 61
+          }
+        ],
+        "stderr": "main.fy:3:1: E5102: raw foreign signature contains a safe reference [bytes 14..61]\n"
+      },
+      {
+        "family": "semantic",
+        "id": "fail.type.missing-call-effect",
+        "reference": [
+          {
+            "code": "E7102",
+            "start": 88,
+            "end": 92
+          }
+        ],
+        "candidate": [
+          {
+            "code": "E7102",
+            "start": 88,
+            "end": 94
+          }
+        ],
+        "stderr": "main.fy:6:24: E7102: call or resource cleanup exceeds the declared effects [bytes 88..94]\n"
+      },
+      {
+        "family": "semantic",
+        "id": "fail.type.compile-time-trap",
+        "reference": [
+          {
+            "code": "E4303",
+            "start": 30,
+            "end": 35
+          }
+        ],
+        "candidate": [
+          {
+            "code": "E4302",
+            "start": 30,
+            "end": 35
+          }
+        ],
+        "stderr": "main.fy:3:17: E4302: expression is outside the supported compile-time subset [bytes 30..35]\n"
+      },
+      {
+        "family": "semantic",
+        "id": "fail.type.compile-time-cycle",
+        "reference": [
+          {
+            "code": "E4304",
+            "start": 24,
+            "end": 29
+          }
+        ],
+        "candidate": [
+          {
+            "code": "E4302",
+            "start": 32,
+            "end": 38
+          }
+        ],
+        "stderr": "main.fy:3:19: E4302: expression is outside the supported compile-time subset [bytes 32..38]\n"
+      },
+      {
+        "family": "semantic",
+        "id": "fail.type.compile-time-assert",
+        "reference": [
+          {
+            "code": "E4305",
+            "start": 14,
+            "end": 35
+          }
+        ],
+        "candidate": [],
+        "stderr": "main.fy:3:1: source is outside the supported compiler subset [bytes 14..35]\n"
+      },
+      {
+        "family": "semantic",
+        "id": "fail.type.source-location-const-eval",
+        "reference": [
+          {
+            "code": "E4302",
+            "start": 52,
+            "end": 73
+          }
+        ],
+        "candidate": [],
+        "stderr": "main.fy:3:1: source is outside the supported compiler subset [bytes 14..25]\n"
+      },
+      {
+        "family": "semantic",
+        "id": "fail.type.external-resource-construction",
+        "reference": [
+          {
+            "code": "E0103",
+            "start": 77,
+            "end": 87
+          }
+        ],
+        "candidate": [],
+        "stderr": "main.fy:6:28: source is outside the supported compiler subset [bytes 77..87]\n"
+      },
+      {
+        "family": "semantic",
+        "id": "fail.type.package-state-codec",
+        "reference": [
+          {
+            "code": "E7203",
+            "start": 58,
+            "end": 64
+          }
+        ],
+        "candidate": [],
+        "stderr": "state.fy:2:1: source is outside the supported compiler subset [bytes 14..73]\n"
+      }
+    ],
+    "statusGaps": [
+      {
+        "family": "semantic",
+        "id": "pass.type.c-ssize-t-foreign-roundtrip",
+        "referenceExit": 0,
+        "candidateExit": 3
+      },
+      {
+        "family": "semantic",
+        "id": "pass.type.compile-time-evaluation",
+        "referenceExit": 0,
+        "candidateExit": 3
+      },
+      {
+        "family": "semantic",
+        "id": "pass.type.package-state",
+        "referenceExit": 0,
+        "candidateExit": 3
+      }
+    ],
+    "successfulOutputComparison": "Complete success output compared with only lock updated/unchanged normalized: the new paired Go observation publishes the lock before the candidate, while the previous replay ran candidate alone."
+  },
+  "promotionGateReady": false,
+  "remaining": [
+    "Nine first-diagnostic differences: unresolved name, foreign parameter span, call-effect span, compile-time trap/cycle/assert/const-eval, external resource visibility code and package-state codec.",
+    "Three frontend support/status differences: c::ssize_t, compile-time evaluation and package state.",
+    "Current-source full fixed-point replay is deferred until the diagnostic correction batch is complete; the prior borrow-gate receipt describes its earlier exact source snapshot.",
+    "Broader executable/frontend parity, product timeout/host stack integration, Linux/full suite and same-head hosted CI."
+  ],
+  "shippingGoCompilerChanged": false,
+  "publicLanguageChanged": false,
+  "publicAPIChanged": false,
+  "candidateCheckBehaviorChanged": true,
+  "sdkABIChanged": false,
+  "dbChanged": false,
+  "ciChanged": false,
+  "productTimeoutChanged": false,
+  "pushed": false
+}

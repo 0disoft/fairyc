@@ -9,6 +9,7 @@ import project_workspace_input as workspace;
 import project_workspace_catalog as catalog;
 import project_package_input as packages;
 import project_compiler_input as input;
+import project_diagnostic_codes as diagnostics;
 import syntax as syntax;
 import scanner as scanner;
 import std::bytes as bytes;
@@ -62,7 +63,7 @@ fn bool compilation(ref check::Error e,ref mut bytes::Buffer out){let p=check::c
     else if(p.code==1103){if(!append(out,b"E1103: resource field cannot be moved separately")){return false;}}
     else if(p.code==1104 || p.code==1105){if(!append(out,if(p.code==1104){b"E1104: resource ownership differs between branches"}else{b"E1105: resource ownership differs at loop entry"})){return false;}}
     else if(p.code==1006 || p.code==1009){var bool returned=p.code==1009;var usize at=1;while(at<=syntax::statement_count(parsed)){let s=syntax::statement_at(parsed,at);if(s.kind==3 && s.expression!=0){let value=syntax::expression_at(parsed,s.expression);returned=returned || value.start==p.start && value.end==p.end;}at+=1;}if(!append(out,if(returned){b"E1009: return value does not match the declared result type"}else{b"E1006: incompatible expected and actual types"})){return false;}}
-    else{if(!append(out,b"source is outside the supported compiler subset")){return false;}}
+    else{let code=diagnostics::code(p.phase,p.stage,p.code);if(code!=0){if(!code_text(out,code) || !append(out,b": ") || !append(out,diagnostics::summary(code))){return false;}}else if(!append(out,b"source is outside the supported compiler subset")){return false;}}
     if(!range(out,p.start,p.end)){return false;}let file=input::file(sources,p.module_index);
     if(p.code==6){return private_declaration(e,out);}
     if(p.code==1006 || p.code==1009){var usize at=1;while(at<=syntax::statement_count(parsed)){let s=syntax::statement_at(parsed,at);if(s.expression!=0){let value=syntax::expression_at(parsed,s.expression);if(value.start==p.start && value.end==p.end){if(s.kind==3){var usize index=1;while(index<syntax::declaration_count(parsed)){let d=syntax::declaration_at(parsed,index);if(d.kind==3 && d.start<=p.start && p.end<=d.end){let t=syntax::type_at(parsed,d.result_type);return related(out,b"expected-type",package,file,source,t.start,t.end);}index+=1;}}else if(s.kind==4 && s.target!=0){let target=syntax::expression_at(parsed,s.target);return related(out,b"expected-type",package,file,source,target.start,target.end);}}}at+=1;}}
