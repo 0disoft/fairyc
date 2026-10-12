@@ -33,8 +33,9 @@ five programs pass ten native development/release executions. Source check passe
 complete 4,376,576-byte release image with the explicit 16 MiB stack. The full
 current-source consecutive-generation fixed-point replay remains a later gate.
 
-Canonical scalar alias admission and named-label/multiple diagnostic output remain
-open. Extra probes record Go reference differences without claiming full semantic
+Named-label/multiple diagnostic output remains open. E1014 is registered in the
+source; live dispatcher replay is batched with C-scalar admission. The grammar
+has no user scalar type-alias declaration, so no alias-admission gate is added. Extra probes record Go reference differences without claiming full semantic
 parity: Go accepts an ill-typed unselected if/logical branch, and reports E4302 for
 wrong const-eval arity while candidate uses E1010. The fresh 75-case comparison
 retains two status gaps (c::ssize_t and package state) and one first-code/span gap

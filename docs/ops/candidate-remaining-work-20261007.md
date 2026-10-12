@@ -1,5 +1,20 @@
 # Fairy 컴파일러 전환: 후속 작업 목록
 
+## Argument-label diagnostic output registered (2026-10-12)
+
+The shared analysis diagnostic output now retains E1014, already declared in the
+public diagnostic catalog. It no longer drops ordinary/const-eval named-argument
+failures into an unnamed subset fallback. Two authored boundary tests pass both
+candidate C profiles; source check passes 385 files / 4886 MIR functions. The
+dispatcher image and live CLI cases are batched with the next C-scalar unit.
+Public API, SDK ABI, DB, hygiene, CI, runner and product timeouts are unchanged;
+no push. Receipt: `evidence/candidate-argument-label-code-20261012.json`.
+
+Scope correction: the current grammar and surface syntax provide no user scalar
+type-alias declarations. Previous notes inferred an alias-admission follow-up from
+Go canonical type lookup; it is not an additional requirement or promotion gate.
+
+
 ## Const-eval calls, selected branches and casts connected (2026-10-12)
 
 The Fairy evaluator now binds immutable scalar parameters, executes nested private
@@ -36,8 +51,8 @@ Two extra Go reference differences remain explicit: wrong const-eval arity repor
 E4302 in Go versus ordinary E1010 in the candidate, and Go accepts an ill-typed
 unselected if branch while the candidate enforces compatible branch types. The
 prior dead logical-operand gap also remains. Full semantic parity is not claimed.
-Canonical scalar alias admission, named-label diagnostic output and broader/multiple
-diagnostics remain follow-ups. c::ssize_t and package state still differ in status,
+Named-label diagnostic output and broader/multiple diagnostics remain follow-ups.
+The current grammar has no user scalar type-alias declaration; no alias gate is added. c::ssize_t and package state still differ in status,
 and package-state codec is the remaining first diagnostic. Current-source fixed
 point, product timeout/default stack, Linux/full suite and hosted CI still gate
 promotion. Public API, SDK ABI, DB, hygiene, CI, runner and timeout configuration
@@ -52,8 +67,7 @@ attributes and placement on records, enums, resources, cleanup, constants and
 foreign declarations reject E4301 at the attribute. Public/unsafe/method/generic
 functions, effect-bearing functions, non-primitive scalar signatures and bodies
 other than one explicit value return reject E4301 at the function name. The
-admitted fixed scalar spellings include i64; canonical alias admission remains
-outside this primitive-only slice.
+admitted fixed scalar spellings include i64, matching the current scalar syntax.
 
 Valid declarations retain the return expression and parameter count, but the
 constant engine still rejects their expression as E4302. Function graph traversal,

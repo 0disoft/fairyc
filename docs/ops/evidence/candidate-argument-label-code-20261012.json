@@ -1,0 +1,73 @@
+{
+  "schema": "fairyc.candidate-argument-label-code/v1",
+  "passed": true,
+  "scope": "Register the existing E1014 argument-label diagnostic at the shared analysis-phase output boundary without relabeling internal capacity/status codes",
+  "sourceInputs": [
+    {
+      "path": "examples/lexer_candidate/src/project_diagnostic_codes.fy",
+      "sha256": "0f5e0ebf8685857892ac06a9c2c3cd5eefe008dc887419c75cd79f111c79eae6"
+    },
+    {
+      "path": "examples/lexer_candidate/tests/project_diagnostic_codes.fy",
+      "sha256": "2b12f0302e85b43fa90dddf6da5e85fc8c4e185948f54700816bd47a9402fda7"
+    },
+    {
+      "path": "examples/lexer_candidate/fairy.lock",
+      "sha256": "409a5af50f0720067a88d19171dd312b16b03d1194791e0350e092866a6c2d93"
+    }
+  ],
+  "sourceCheck": {
+    "passed": true,
+    "files": 385,
+    "mirFunctions": 4886,
+    "lockUpdated": true
+  },
+  "privateTestReceiptSHA256": "592968839488f0276fd6fbef7c83c3e997a37da04002f5d444dbb71e2bf7c52d",
+  "authoredTests": 2,
+  "candidateExecutions": [
+    {
+      "profile": "development",
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\argument-label-code-tests-20261012\\development.exe",
+      "sha256": "a4465806c0273a8ff64ee169c00f41455dba3597961a2bd7cd2f8922b275891e",
+      "exit": 0
+    },
+    {
+      "profile": "release",
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\argument-label-code-tests-20261012\\release.exe",
+      "sha256": "6632d62a7e21a4cdfe68b592a6a4d8a2349148e07a4054bbad510fdd95e17ef3",
+      "exit": 0
+    }
+  ],
+  "tools": {
+    "compiler": {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-frontend-oracle-current-20261012.exe",
+      "sha256": "3ecc4501ee3bb47ecc39e7288200266b31cbcd8bf6ffec302ae54867705ce5d1"
+    },
+    "candidate": {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\const-eval-engine-build-20261012\\candidate-release.exe",
+      "sha256": "a9d651ac4bac0f6bf25e8957ac339e0a6e58e06f2cd386d037f3fedcbaf3ba94"
+    },
+    "builder": {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-rooted-builder-stack-20261012.exe",
+      "sha256": "02abe2328daa9921705910c7b995e82c1312cb960fe024106c11468569aefff0"
+    }
+  },
+  "limits": [
+    "Dispatcher image rebuild and live CLI output observation batched with the following C-scalar semantic admission unit.",
+    "Go native interpreter is not used for this private diagnostic component; both candidate C profiles execute its authored tests."
+  ],
+  "scopeCorrection": {
+    "requirement": "No user scalar type-alias admission gate exists in current language syntax",
+    "sources": [
+      "spec/grammar/stage0.ebnf",
+      "docs/language/0005-surface-syntax-v0.md"
+    ]
+  },
+  "publicApiChanged": false,
+  "dbChanged": false,
+  "sdkAbiChanged": false,
+  "ciChanged": false,
+  "runnerChanged": false,
+  "productTimeoutChanged": false,
+  "pushed": false
+}
