@@ -2,6 +2,38 @@
 
 ## Current local candidate evidence (2026-10-13)
 
+### Direct original template dependencies (2026-10-13)
+
+The source catalog now owns detached direct dependency edges and ordered type
+arguments. Iterative arena traversal follows the actual Go executable AST
+projection, including function signatures, aggregate fields/cleanup and loop
+bodies; inert written ByteFor view facts do not create execution edges.
+Exact aliases deduplicate, imported private/unknown targets and invalid arity or
+arguments reject, and generated type names reject as in the Go source adapter.
+Finite recursive declaration graphs remain descriptions, not admitted executable
+recursive specializations. Per-template edges sort by the canonical expression
+key; exact genericplan.Declaration JSON includes scalar ability closure and the
+original package-bound definition bytes.
+
+The real expandAll catalog observer is crosschecked against
+PrepareSDKStoragePackages. Four source graphs each contain 25 templates and
+28/29 direct edges; all 100 canonical declarations match byte for byte. Three
+authored tests pass Go native and candidate C development/release, including
+ownership after parser destruction, cycles, stale/private/unknown input and
+exact-fit/exhausted histories. The first fixture read failed because 121717
+bytes exceeded the test manifest reader; an independent 128KiB test reader fixes
+that without changing product limits. Source check and check --locked pass
+420 files / 5383 MIR functions with the final root lock refreshed.
+
+Bounds: 16MiB collection work, 1MiB owned graph text, 4096 source templates,
+eight arguments and 32 unique dependencies per template, bounded iterative
+pending work; canonical JSON retains the existing 1MiB work/output bound.
+Reachable-template closure hashes, actual specialization facts and dispatcher/
+cache consumption remain next. Latest-source complete image/fixed point,
+Linux/full suite and same-head hosted CI are not rerun. Private candidate API
+added; public API, SDK ABI, DB, CI/runners and product timeouts unchanged. No push.
+Receipt: [evidence](../ops/evidence/candidate-generic-source-dependencies-20261013.json).
+
 ### Original source template catalog and resolved targets
 
 `generic_source_catalog` owns original generic function and authenticated SDK Vec
