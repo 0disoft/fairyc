@@ -23,6 +23,24 @@ Receipts: `evidence/candidate-loop-control-private-20261012.json`,
 Next: connect the existing transitive borrowed-result and live-loan analysis
 before admitting project IR, retaining source diagnostic codes and spans.
 
+## Converged return summaries before final loan checks (2026-10-12)
+
+Only borrower-returning frames run during summary convergence. A final pass
+checks all needed bodies with the stable summaries, preserving loan facts and
+conflicts from scalar/void callers. The shared 1048576 allowance and 64 summary
+round cap remain. Six existing origin tests and a new three-hop scalar caller
+conflict test pass in Go-native and candidate development/release profiles.
+Source-input hashes match the saved receipts; source check passes 377 files /
+4801 MIR functions.
+
+The real 16 MiB development integration preview emits 30061793 C-part bytes
+from the Fairy seed, builds successfully and advances to hir_expression_lower.fy
+with stage 7 code 10 (bytes 0..0) after 249.85 seconds; it emits no self packet.
+The public borrow gate remains unapplied. Next: attribute that remaining
+capacity failure before integrating; frontend parity, fixed point, Linux and
+hosted CI remain. No public API, DB or CI change, no push. Receipt:
+`evidence/candidate-borrow-final-pass-20261012.json`.
+
 ## Lazy provider origin frames and independent phases (2026-10-12)
 
 Provider value plans remain checked and cached by module. Origin/loan traversal
@@ -44,7 +62,8 @@ Source check passes 377 files / 4801 MIR functions.
 The public project borrow gate is still a cached integration preview. With the
 real explicit 16 MiB host-stack build, the selected-frame preview advances past
 the prior syntax.fy:46 budget failure but reaches code 10 at syntax.fy:190.
-The fresh independent-phase preview is under self-source verification. No
+The independent-phase preview fails at generic_expand.fy:116; the newer
+final-pass preview advances to hir_expression_lower.fy (see above). No
 current-source full image fixed point, full semantic facts, Linux, hosted CI or
 promotion claim is made. No shipping Go compiler semantics, public API, DB or CI
 changes; no push. Receipts:
