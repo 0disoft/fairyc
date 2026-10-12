@@ -1,5 +1,34 @@
 # Fairy 컴파일러 전환: 후속 작업 목록
 
+## Ordinary canonical public type names (2026-10-13)
+
+`module_public_type_text` renders source-independent public type names from typed
+interface records, signature metadata, exact nominal sources and a caller-owned
+coordinate table. It retains all sixteen C scalar spellings, str/CStr, scalar
+and nominal shared/exclusive views, references, Option/Result, fixed arrays and
+raw/opaque pointers. Result's comma-space matches the existing contract. Own
+nominals use `self::module::Name`; dependency nominals use `dep[fypc1-sha256-...]`.
+Full-width lowercase coordinate text is checked; instance IDs are rejected.
+Private types and invalid/missing/duplicate selected coordinates reject with 9;
+stale nominal sources reject with 12. Source authentication is charged to the
+unchanged 1048576 ledger, with depth 64 and bounded output. Vec remains on the
+separate private generic-interface lane and currently rejects with 4503.
+
+The actual Go frontend, semantic analysis and interface extractor supply 37
+ordinary self parameter strings. Go extraction of rewritten typed cross-package
+references supplies 37 dependency strings; Go also rejects the private-type case.
+Four authored tests pass Go native and both candidate C profiles, including exact
+strings, owner renumbering 7 to 19, stale/private input rejection and exact-fit/
+exhausted work. Source check passes 392 files / 5009 MIR functions; final native
+tests verify the updated source lock.
+
+Typed declaration extraction, coordinate collection, generic identity and cache
+consumption remain pending. This helper is not yet wired into the dispatcher;
+its 384-source main closure is unchanged from the previous encoder slice. The
+full image, corpus and current-source fixed point are not rerun. Other promotion
+gates remain. No public API, SDK ABI, DB, CI, runner or timeout change; no push.
+Receipt: `evidence/candidate-public-type-text-20261013.json`.
+
 ## Complete ordinary public-interface v5 encoder (2026-10-12)
 
 An owned descriptor, bounded writer and full encoder now produce the complete

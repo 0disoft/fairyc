@@ -1,8 +1,21 @@
 # Self-hosting readiness v0
 
-## Current local candidate evidence (2026-10-12)
+## Current local candidate evidence (2026-10-13)
 
-The latest source slice provides the complete ordinary public-interface v5
+Canonical public type rendering now consumes typed interface records, retained
+signature metadata and exact nominal sources. Go supplies matching expectations
+for 37 own and 37 dependency parameter strings, including all C scalars, scalar/
+nominal views, references, tagged types, arrays and raw pointers. Dependency
+namespace text uses source-independent coordinate IDs; instance IDs, malformed
+coordinates, private types and stale sources reject. Four tests pass Go native
+and both candidate C profiles; source check passes 392 files / 5009 MIR functions.
+Typed declaration extraction, coordinate collection, generic/vector identities
+and cache consumption remain open. The helper is not connected to the dispatcher
+yet; its 384-source main closure is unchanged. No fresh full-image/corpus/fixed-
+point claim is added. Evidence:
+[canonical public type names](../ops/evidence/candidate-public-type-text-20261013.json).
+
+The preceding source slice provides the complete ordinary public-interface v5
 descriptor encoder and canonical text hash, linked to selected signature state
 metadata. All five ordinary item kinds, ordered modules/items/fields/variants,
 public callable facts and resource abilities match actual Go Encode/Compute
