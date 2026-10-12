@@ -1,5 +1,32 @@
 # Fairy 컴파일러 전환: 후속 작업 목록
 
+## Source function body JSON (2026-10-13)
+
+The function serializer joins original header metadata to retained statement
+and expression arenas. It emits exact Go AST blocks/tails, typed and inferred
+let/var bindings, assignments, return/assert/discard/defer/burn, jumps, while,
+classic for, region, unsafe blocks, if/else-if and switch with positional or
+named payload patterns. Classic-for initializer spans exclude the semicolon;
+ordinary statement spans retain it. Pattern paths and named binding Cooked text
+are reconstructed from original tokens. Internal parser list/header nodes are
+never published as source AST statements. Byte-view loops remain an explicit
+4503 rejection until their retained and synthetic Go AST members are connected.
+
+Sixteen authored functions match actual Go syntax-only frontend JSON, including
+empty blocks, absent return operands, nested tails, empty loop clauses, comments,
+BOM/CRLF, UTF-8, associated functions and attributes. Three new tests and three
+expression regressions pass Go native and candidate C development/release.
+Invalid node/selection, exact-fit/exhausted work, depth and sticky failure checks
+pass. Source check passes 407 files / 5160 MIR functions; final tests verify the
+updated lock and original/copy hashes. A reserved-name fixture was corrected
+before the reference oracle passed.
+
+Next: byte-view loop written/synthetic AST, broader classic-for clause retention,
+then definition/import/aggregate extraction and template closure integration.
+Full image/current-source fixed point, Linux/full suite and hosted CI are not
+rerun. No public API, SDK ABI, DB, CI/runner or product timeout changes; no push.
+Receipt: [evidence](evidence/candidate-generic-source-functions-20261013.json).
+
 ## Source expression JSON for generic definitions (2026-10-13)
 
 Source expression JSON now preserves exact Go AST field order, null/omitted
