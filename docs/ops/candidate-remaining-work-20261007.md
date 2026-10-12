@@ -1,5 +1,36 @@
 # Fairy 컴파일러 전환: 후속 작업 목록
 
+## Typed ordinary public declaration extraction (2026-10-13)
+
+`module_public_interface_extract` projects typed ordinary source declarations
+into the v5 descriptor. It reads the actual typed source, signature metadata and
+typed `Interfaces`, emits nongeneric pub struct, enum, resource, function and
+foreign-function items, and heap-sorts modules and items. It keeps enum ordered
+payloads, repr(C), unsafe / must_use, effects and resource abilities with drop
+effects, and validates the selected owner `fypc1` coordinate. Private
+declarations are skipped; the type renderer rejects only a public type that
+contains a private nominal. Stale sources reject with 12, a missing owner
+coordinate with 9 and exhausted work with 10. Public generic templates are
+flagged on the projection; the separate generic identity remains unfinished.
+
+The committed Go oracle harness `tools/verify-candidate-public-interface-extract.go`
+reads the committed test fixture bytes and goldens directly and reproduces the
+actual Go frontend, `semantic.Analyze` and `moduleinterface.Extract/Encode/Compute`
+baseline with `bun tools/run-go.ts run tools/verify-candidate-public-interface-extract.go`.
+It emits a 1246-byte baseline for two modules and seven items; module and
+declaration reordering together with a changed private body keeps the same
+`fyif5` hash, while mutating the public `Leaf` field from `i64` to `i32` changes
+it. The four authored tests pass Go native and both candidate C development and
+release profiles, and the lock is verified. Source check passes 393 files /
+5043 MIR functions.
+
+Dispatcher wiring, coordinate collection, generic and Vec identities and
+package-cache v4 consumption remain pending. This closes the previously open
+typed ordinary declaration extraction. The 384-source main closure is unchanged
+and no full image, corpus or current-source fixed point is rerun. No public API,
+SDK ABI, DB, CI or timeout change; no push. Receipt:
+`evidence/candidate-public-interface-extract-20261013.json`.
+
 ## Ordinary canonical public type names (2026-10-13)
 
 `module_public_type_text` renders source-independent public type names from typed

@@ -43,4 +43,5 @@ fn u32 walk(ref v::Vec<syntax::Parsed> sources,ref signatures::Program metadata,
     // Vec specializations need the separate private generic interface identity.
     return if(t.kind==13){4503}else{9};
 }
+pub fn u32 validate_owner(ref Coordinates coordinates,usize owner,ref mut usize work){return switch(coordinate(coordinates,owner,work)){case .ok(_):{0}case .err(code):{code}};}
 pub fn Result<bytes::Buffer,u32> render(ref v::Vec<syntax::Parsed> sources,ref signatures::Program metadata,ref typed::Interfaces graph,ref Coordinates coordinates,usize owner,usize id,ref mut usize work){if(owner>=512 || v::len<syntax::Parsed>(sources)!=signatures::module_count(metadata)){return .err(9);}var bytes::Buffer out=bytes::empty();let code=walk(sources,metadata,graph,coordinates,owner,id,0,ref mut out,work);if(code!=0){return .err(code);}return .ok(out);}

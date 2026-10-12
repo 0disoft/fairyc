@@ -2,6 +2,30 @@
 
 ## Current local candidate evidence (2026-10-13)
 
+Typed ordinary declaration extraction is now closed. `module_public_interface_extract`
+projects nongeneric pub struct / enum / resource / function / foreign-function
+declarations from the actual typed source, signature metadata and typed
+`Interfaces` into the v5 descriptor, heap-sorts modules and items, keeps enum
+ordered payloads, repr(C), unsafe / must_use, effects and resource abilities with
+drop effects, and validates the selected owner `fypc1` coordinate. Private
+declarations are skipped; the type renderer rejects only a public type that
+contains a private nominal. Stale sources reject with 12, a missing owner
+coordinate with 9 and exhausted work with 10. Public generic templates are
+flagged; the generic and Vec identities stay separate and unfinished. The
+committed Go oracle harness `tools/verify-candidate-public-interface-extract.go`
+reads the committed test fixture bytes and goldens directly and reproduces the
+actual Go frontend, `semantic.Analyze` and
+`moduleinterface.Extract/Encode/Compute` baseline with
+`bun tools/run-go.ts run tools/verify-candidate-public-interface-extract.go`,
+recording a 1246-byte two-module / seven-item result in which module and
+declaration reordering with a changed private body keeps the same `fyif5` hash
+while a public `Leaf` field change from `i64` to `i32` moves it. The four
+authored tests pass Go native and both candidate C development / release
+profiles with the lock verified, and the source check passes 393 files / 5043
+MIR functions. Dispatcher wiring, coordinate collection and cache v4
+consumption remain open, and the 384-source closure is unchanged with no
+full-image or fixed-point claim. Evidence: [typed ordinary declaration extraction](../ops/evidence/candidate-public-interface-extract-20261013.json).
+
 Canonical public type rendering now consumes typed interface records, retained
 signature metadata and exact nominal sources. Go supplies matching expectations
 for 37 own and 37 dependency parameter strings, including all C scalars, scalar/
