@@ -1,5 +1,30 @@
 # Fairy 컴파일러 전환: 후속 작업 목록
 
+## Original source binding and literal observations (2026-10-13)
+
+Original module sidecars now retain the Go CST binding and literal lists.
+Bindings preserve source preorder, including enclosing-before-nested bindings
+and classic-for initializer spans without the semicolon. Literals include
+expression values, numeric array lengths and attribute arguments, with original
+Raw/Kind/Cooked values. Function and C-function-type children visit parameters
+before the earlier-written result; bounded interval rotations retain that order
+without changing source records. Byte-for synthetic AST bindings/literals and
+implicit region/pattern names do not enter the original CST lists.
+
+Fifteen sources, including the unchanged original SDK Vec, match the real Go
+AST sidecars byte for byte: 32 bindings and 93 literals. Three tests pass Go
+native and candidate C development/release, including nested declarations,
+attributes, array types, source literals, nested C function types, empty lists,
+retained failure state and exact-fit/exhausted work. Source check passes 411
+files / 5211 MIR functions; source/copy hashes and updated lock are verified.
+An initially misspelled region fixture was corrected before the final replay.
+
+Complete module AST/nominal definitions, resolved import binding, template
+closures and planner/dispatcher/cache consumers remain next. Latest-source full
+image/fixed point, Linux/full suite and same-head hosted CI are not rerun.
+No public API, SDK ABI, DB, CI/runner or product timeout change; no push.
+Receipt: [evidence](evidence/candidate-generic-source-observations-20261013.json).
+
 ## Remaining source declaration JSON (2026-10-13)
 
 The source item writer retains exact Go AST records for imports, constants,
