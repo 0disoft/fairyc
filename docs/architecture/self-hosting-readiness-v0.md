@@ -2,6 +2,39 @@
 
 ## Current local candidate evidence (2026-10-13)
 
+### Original source template catalog and resolved targets
+
+`generic_source_catalog` owns original generic function and authenticated SDK Vec
+metadata before expansion: canonical package/module/name ID, package-bound original
+AST definition hash, public visibility, original source/name spans and ordered
+parameters. User function parameters require scalar abilities; exact SDK Vec
+parameters retain their admitted nominal exception. Every input source stamp is
+checked before collection; duplicate/builtin parameters, namespace collisions,
+generated names, unauthenticated std sources and user aggregates reject.
+Detached exact local/alias lookup separates functions and aggregates, reuses
+aliases to one provider, and rejects imported private templates.
+
+Actual Go PrepareSDKStoragePackages supplies 21 source origins from two user
+modules and the unchanged SDK Vec: 20 functions, one resource, 22 parameters and
+16 public templates. All IDs, definitions, visibility, parameters and source/name
+spans match. Four tests pass Go native and candidate C development/release,
+including detached ownership, source/owner reordering, stale source, admission,
+and exact-fit/exhausted collection/lookup histories. Source check passes 415 files
+/ 5317 MIR functions. Final verification checks source/copy, fixture, tool and
+lock hashes. The initial oracle file-path and test type/origin issues were fixed
+before the final passing run.
+
+Bounds: 16MiB collection/lookup work, 1MiB per definition and owned text, 4096
+templates and eight parameters per template. Successful definition histories fold
+once into collection work. These records are not yet planner declarations:
+direct dependencies, reachable public closures and actual specialization facts
+remain next, followed by dispatcher/cache consumption. Latest-source full image,
+fixed point, Linux/full suite and same-head hosted CI are not rerun. Private
+candidate API added; public API, SDK ABI, DB, CI/runner, hygiene and product
+timeouts remain unchanged. No push. Receipt:
+[evidence](../ops/evidence/candidate-generic-source-catalog-20261013.json).
+
+
 Closed nominal package context and streamed definitions (2026-10-13)
 
 `generic_package_context` retains every original module AST and exact resolved
