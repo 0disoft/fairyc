@@ -23,6 +23,34 @@ Receipts: `evidence/candidate-loop-control-private-20261012.json`,
 Next: connect the existing transitive borrowed-result and live-loan analysis
 before admitting project IR, retaining source diagnostic codes and spans.
 
+## Lazy provider origin frames and independent phases (2026-10-12)
+
+Provider value plans remain checked and cached by module. Origin/loan traversal
+now retains only each required ordinary function and its transitive borrowed
+callees, including generic instances; repeated calls reuse retained frames.
+Original value-plan context indices, generic unit identities and source spans
+are preserved. Unused provider functions are not origin-analysis roots.
+
+Completed provider type checking has its own existing value-phase allowance;
+its work is no longer charged again against origin/liveness traversal. Frame,
+expression, owner, provider and 1,048,576 traversal bounds remain enforced.
+Six authored origin tests passed in Go-native and both candidate C profiles.
+After separating provider type work, the two affected cross-unit/provider tests
+also passed in all three engines. The old generic-provider test used the imported
+body lane and failed identically on the preceding source snapshot; it now uses
+the actual unit-scoped entry point to exercise distinct provider identities.
+Source check passes 377 files / 4801 MIR functions.
+
+The public project borrow gate is still a cached integration preview. With the
+real explicit 16 MiB host-stack build, the selected-frame preview advances past
+the prior syntax.fy:46 budget failure but reaches code 10 at syntax.fy:190.
+The fresh independent-phase preview is under self-source verification. No
+current-source full image fixed point, full semantic facts, Linux, hosted CI or
+promotion claim is made. No shipping Go compiler semantics, public API, DB or CI
+changes; no push. Receipts:
+`evidence/candidate-borrow-selected-frames-20261012.json`,
+`evidence/candidate-borrow-provider-phase-budget-20261012.json`.
+
 ## Explicit compiler-image stack reservation (2026-10-12)
 
 The private MSVC packet driver now accepts `--stack-reserve-bytes`: zero keeps
