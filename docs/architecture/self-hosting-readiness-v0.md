@@ -2,6 +2,26 @@
 
 ## Current local candidate evidence (2026-10-13)
 
+`project_coordinate_identity` now computes `PackageCoordinateId` in Fairy.
+The encoder writes `fairyc.package-coordinate`, 00, version byte 01, tagged u/v
+strings and the tagged f feature list with unsigned 64-bit network-order lengths,
+and SHA-256 hashes the complete bytes into canonical lowercase `fypc1` text.
+Source identity is absent by construction. The committed Go oracle reads the
+actual authored inputs and matches full bytes and hashes on five fixtures,
+including Unicode, NUL, empty/two-feature sets and ambiguous unframed strings.
+
+Four authored tests pass Go native and both candidate C profiles. Empty/invalid
+UTF-8 components, unsorted/duplicate/empty/invalid UTF-8 features and malformed
+text reject. Encoding, validation and hashing charge the existing 16777216
+workspace ledger; measured exact-fit and one-unit-exhausted histories pass.
+Source check passes 394 files / 5052 MIR functions, with the lock updated and
+verified by native tests. No public API, SDK ABI, DB, CI or timeout change; no push.
+
+Root/dependency/SDK graph collection, dispatcher wiring, generic/Vec identities
+and package-cache v4 consumption remain pending. The 384-source main closure is
+unchanged; no full image, corpus or current-source fixed point is rerun. Receipt:
+[evidence](../ops/evidence/candidate-package-coordinate-20261013.json).
+
 Typed ordinary declaration extraction is now closed. `module_public_interface_extract`
 projects nongeneric pub struct / enum / resource / function / foreign-function
 declarations from the actual typed source, signature metadata and typed
