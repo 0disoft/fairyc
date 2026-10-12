@@ -1,0 +1,55 @@
+{
+  "schema": "fairyc.candidate-frontend-corpus-probe/v1",
+  "scriptSHA256": "56157e1c58f1a0f55e28af5da1f3762cc533806286e8c624a9815cc8baa7635d",
+  "allStatusMatch": false,
+  "allFirstDiagnosticMatch": false,
+  "cases": 75,
+  "matched": 38,
+  "candidateSHA256": "873a9996bc2a9a3bcd844814b2ad28d1cfd72e4c0b5519086481f213dc0d57e0",
+  "oracleSHA256": "3ecc4501ee3bb47ecc39e7288200266b31cbcd8bf6ffec302ae54867705ce5d1",
+  "parts": [
+    {
+      "path": "docs/ops/evidence/candidate-loop-control-corpus-20261012-part1.json",
+      "sha256": "d04465a5afd0c156b6e01b23c2aa6e99fdb5b79f09b7e2420a9db80b78802542",
+      "cases": 10
+    },
+    {
+      "path": "docs/ops/evidence/candidate-loop-control-corpus-20261012-part2.json",
+      "sha256": "f39f2154bb58b6e5b82215b97db85434fb3c41112d1a7f8a6f7fe3acc0198d5b",
+      "cases": 10
+    },
+    {
+      "path": "docs/ops/evidence/candidate-loop-control-corpus-20261012-part3.json",
+      "sha256": "f2c770775cb54e3d266512b65a394a6d83d76eb62dad243967da58bb3c76fe92",
+      "cases": 10
+    },
+    {
+      "path": "docs/ops/evidence/candidate-loop-control-corpus-20261012-part4.json",
+      "sha256": "f08c948c9d54273e1a98e84febe1ea75f2e33aa6d30d7e451f16407cd7f1a542",
+      "cases": 10
+    },
+    {
+      "path": "docs/ops/evidence/candidate-loop-control-corpus-20261012-part5.json",
+      "sha256": "5fec8dccdc1c9f4e1187542b75d4f94159e1d33a6f48dbda0e25822d0fe95c05",
+      "cases": 10
+    },
+    {
+      "path": "docs/ops/evidence/candidate-loop-control-corpus-20261012-part6.json",
+      "sha256": "de739db6b2f8189f26bca6880e0c13d39691ea60c66734548b5279fef0a5415d",
+      "cases": 10
+    },
+    {
+      "path": "docs/ops/evidence/candidate-loop-control-corpus-20261012-part7.json",
+      "sha256": "5f9cb1287752c0d2927568fd1f37e5d55931db0def6eaa78ee01ef24b3e9f7af",
+      "cases": 10
+    },
+    {
+      "path": "docs/ops/evidence/candidate-loop-control-corpus-20261012-part8.json",
+      "sha256": "73abb097054d892ab710a58dd4632b8c60206d75d7e34cb471a1291452b850d6",
+      "cases": 5
+    }
+  ],
+  "statusDifferences": 10,
+  "firstDiagnosticDifferences": 34,
+  "allGoMatchFixture": true
+}

@@ -51,6 +51,7 @@ fn bool compilation(ref check::Error e,ref mut bytes::Buffer out){let p=check::c
     if(p.phase==2 && p.code==5){return append(out,b"fairyc: semantic subset does not support type ") && append(out,source[p.start..p.end]) && append(out,b" at ") && append(out,input::file(sources,p.module_index)) && range(out,p.start,p.end);}
     if(!prefix(out,package,input::file(sources,p.module_index),source,p.start)){return false;}
     if(p.code==6){if(!append(out,b"E0103: item is not visible from this module")){return false;}}
+    else if(p.code==1012){if(!append(out,b"E1012: loop control is outside a loop")){return false;}}
     else if(p.code==1101){if(!append(out,b"E1101: resource is used after ownership was moved")){return false;}}
     else if(p.code==1102){if(!append(out,b"E1102: resource representation cannot be moved or overwritten")){return false;}}
     else if(p.code==1103){if(!append(out,b"E1103: resource field cannot be moved separately")){return false;}}

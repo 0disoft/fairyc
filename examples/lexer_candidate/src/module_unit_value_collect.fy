@@ -1,4 +1,5 @@
 module module_unit_value_collect;
+import module_unit_loop_control as loop_control;
 import module_unit_value_model as m;
 import module_unit_value_walk as walk;
 import module_unit_argument_collect as args;
@@ -33,6 +34,7 @@ pub fn m::Problem ordinary_seeds(ref ast::Ast a,ref syntax::Parsed source,ref in
 }
 pub fn Result<m::Values,m::Problem> project(ref v::Vec<syntax::Parsed> sources,ref signatures::Program metadata,ref interfaces::Interfaces imported,ref syntax::Parsed source,ref ast::Ast a,ref names::Resolved resolved,m::Frame frame,ref calls::Plan declared,ref mut usize cursor,ref v::Vec<m::Seed> seeds,ref mut v::Vec<types::Type> graph,ref m::Atoms atoms,ref constants::Plan constants){
     var usize work=0;var v::Vec<m::Expression> expressions=v::empty<m::Expression>();var v::Vec<m::Local> locals=v::empty<m::Local>();var v::Vec<m::Return> returns=v::empty<m::Return>();var v::Vec<m::Invocation> invocations=v::empty<m::Invocation>();var v::Vec<m::Argument> arguments=v::empty<m::Argument>();var v::Vec<m::Consumer> consumers=v::empty<m::Consumer>();var usize i=1;
+    let controls=loop_control::check(a,frame,ref mut work);if(controls.code!=0){return .err(controls);}
     if(names::use_count(resolved)!=ast::expression_count(a) || v::len<m::Seed>(seeds)!=ast::expression_count(a)){return .err(m::fail(frame,12,0,0,0,0));}
     while(i<=ast::expression_count(a)){let original=ast::expression_origin(a,i);let e=syntax::expression_at(source,original);let n=ast::expression_at(a,i);var usize type=0;var usize constant=0;var usize constant_bits=0;var u32 state=0;var m::Place place=m::no_place();var m::Builtin builtin=m::Builtin{.kind=0,.element=0,.slice=false,.unsafe_context=false};
         if(!m::charge(ref mut work,1)){return .err(m::fail(frame,10,e.start,e.end,0,0));}

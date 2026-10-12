@@ -1,0 +1,284 @@
+{
+  "schema": "fairyc.candidate-loop-control/v1",
+  "passed": true,
+  "tools": {
+    "candidate": {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-loop-control-bootstrap-20261012\\stage1.exe",
+      "sha256": "873a9996bc2a9a3bcd844814b2ad28d1cfd72e4c0b5519086481f213dc0d57e0"
+    },
+    "reference": {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-frontend-oracle-current-20261012.exe",
+      "sha256": "3ecc4501ee3bb47ecc39e7288200266b31cbcd8bf6ffec302ae54867705ce5d1"
+    }
+  },
+  "sourceInputs": [
+    {
+      "path": "examples/lexer_candidate/src/module_unit_loop_control.fy",
+      "sha256": "7442c5d32e3939519252a507c4548cb2bc80edb6b45dfa89abeacb06ddae1489"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_unit_value_collect.fy",
+      "sha256": "4493da99bbf5c0bff2f60bb87159cc0933a01b8441d9b771aeb0b27afdddccb5"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_check_text.fy",
+      "sha256": "c99b1d4e8d5f959c0481fa38a0cd7999f3726b314e37a42fddfda5ed40b64df5"
+    },
+    {
+      "path": "tools/verify-candidate-loop-control.py",
+      "sha256": "ded9bd23181c9f0af6e9e801d82cbcf59f42bb70177e3b03065a3a7af08aa4e6"
+    }
+  ],
+  "cases": [
+    {
+      "name": "outside-break",
+      "sourceSHA256": "f44b76200847a9b9dc6bdc2de5ae99fca9d7c25e875964cdf2ebf70e6e260862",
+      "expectedCode": "E1012",
+      "observations": [
+        {
+          "engine": "candidate",
+          "exit": 3,
+          "stdout": "",
+          "stderr": "main.fy:1:27: E1012: loop control is outside a loop [bytes 26..32]\n",
+          "diagnostics": [
+            {
+              "code": "E1012",
+              "start": 26,
+              "end": 32
+            }
+          ]
+        },
+        {
+          "engine": "reference",
+          "exit": 3,
+          "stdout": "",
+          "stderr": "main.fy:1:27: E1012: break and continue require an enclosing loop [bytes 26..32]\n",
+          "diagnostics": [
+            {
+              "code": "E1012",
+              "start": 26,
+              "end": 32
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "outside-continue",
+      "sourceSHA256": "bfdde2be6ad0810556cc7abb9d8a63087a95807e679ab530eb76794ba1719c3b",
+      "expectedCode": "E1012",
+      "observations": [
+        {
+          "engine": "candidate",
+          "exit": 3,
+          "stdout": "",
+          "stderr": "main.fy:1:27: E1012: loop control is outside a loop [bytes 26..35]\n",
+          "diagnostics": [
+            {
+              "code": "E1012",
+              "start": 26,
+              "end": 35
+            }
+          ]
+        },
+        {
+          "engine": "reference",
+          "exit": 3,
+          "stdout": "",
+          "stderr": "main.fy:1:27: E1012: break and continue require an enclosing loop [bytes 26..35]\n",
+          "diagnostics": [
+            {
+              "code": "E1012",
+              "start": 26,
+              "end": 35
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "expression-block",
+      "sourceSHA256": "2aca835294918b0efd404a4677afd654136c8cf361486c163fcf57cd608f6d1c",
+      "expectedCode": "E1012",
+      "observations": [
+        {
+          "engine": "candidate",
+          "exit": 3,
+          "stdout": "",
+          "stderr": "main.fy:1:44: E1012: loop control is outside a loop [bytes 43..49]\n",
+          "diagnostics": [
+            {
+              "code": "E1012",
+              "start": 43,
+              "end": 49
+            }
+          ]
+        },
+        {
+          "engine": "reference",
+          "exit": 3,
+          "stdout": "",
+          "stderr": "main.fy:1:44: E1012: break and continue require an enclosing loop [bytes 43..49]\n",
+          "diagnostics": [
+            {
+              "code": "E1012",
+              "start": 43,
+              "end": 49
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "loop-condition",
+      "sourceSHA256": "66949f4112dc947da79cebc81640ec1d76ae7345d298bfbf74798a6f66bf3cc3",
+      "expectedCode": "E1012",
+      "observations": [
+        {
+          "engine": "candidate",
+          "exit": 3,
+          "stdout": "",
+          "stderr": "main.fy:1:34: E1012: loop control is outside a loop [bytes 33..39]\n",
+          "diagnostics": [
+            {
+              "code": "E1012",
+              "start": 33,
+              "end": 39
+            }
+          ]
+        },
+        {
+          "engine": "reference",
+          "exit": 3,
+          "stdout": "",
+          "stderr": "main.fy:1:34: E1012: break and continue require an enclosing loop [bytes 33..39]\n",
+          "diagnostics": [
+            {
+              "code": "E1012",
+              "start": 33,
+              "end": 39
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "other-function",
+      "sourceSHA256": "717ec0d4befe71b71d19cd024ace60c152e9b7537b3fd2135a3b6daf99dd8889",
+      "expectedCode": "E1012",
+      "observations": [
+        {
+          "engine": "candidate",
+          "exit": 3,
+          "stdout": "",
+          "stderr": "main.fy:1:71: E1012: loop control is outside a loop [bytes 70..79]\n",
+          "diagnostics": [
+            {
+              "code": "E1012",
+              "start": 70,
+              "end": 79
+            }
+          ]
+        },
+        {
+          "engine": "reference",
+          "exit": 3,
+          "stdout": "",
+          "stderr": "main.fy:1:71: E1012: break and continue require an enclosing loop [bytes 70..79]\n",
+          "diagnostics": [
+            {
+              "code": "E1012",
+              "start": 70,
+              "end": 79
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "nested-body",
+      "sourceSHA256": "789f2d4b40b898180f9d087a2bf4def27c13f6940eb9628b712f712deace2cb3",
+      "expectedCode": null,
+      "observations": [
+        {
+          "engine": "candidate",
+          "exit": 0,
+          "stdout": "check ok: 1 instance(s), 1 source file(s), 1 MIR function(s), lock updated\n",
+          "stderr": "",
+          "diagnostics": []
+        },
+        {
+          "engine": "reference",
+          "exit": 0,
+          "stdout": "check ok: 1 instance(s), 1 source file(s), 1 MIR function(s), lock unchanged\n",
+          "stderr": "",
+          "diagnostics": []
+        }
+      ]
+    },
+    {
+      "name": "outer-loop-condition",
+      "sourceSHA256": "b0fe75bd88bd3abd64345ff37d4907a98c772aa498024b3cc56d6a54919380da",
+      "expectedCode": null,
+      "observations": [
+        {
+          "engine": "candidate",
+          "exit": 0,
+          "stdout": "check ok: 1 instance(s), 1 source file(s), 1 MIR function(s), lock updated\n",
+          "stderr": "",
+          "diagnostics": []
+        },
+        {
+          "engine": "reference",
+          "exit": 0,
+          "stdout": "check ok: 1 instance(s), 1 source file(s), 1 MIR function(s), lock unchanged\n",
+          "stderr": "",
+          "diagnostics": []
+        }
+      ]
+    },
+    {
+      "name": "classic-for",
+      "sourceSHA256": "f8c5dd13caecb0fdbd0808c28d51d22427c345253323ae32e2803a95fe08204b",
+      "expectedCode": null,
+      "observations": [
+        {
+          "engine": "candidate",
+          "exit": 0,
+          "stdout": "check ok: 1 instance(s), 1 source file(s), 1 MIR function(s), lock updated\n",
+          "stderr": "",
+          "diagnostics": []
+        },
+        {
+          "engine": "reference",
+          "exit": 0,
+          "stdout": "check ok: 1 instance(s), 1 source file(s), 1 MIR function(s), lock unchanged\n",
+          "stderr": "",
+          "diagnostics": []
+        }
+      ]
+    },
+    {
+      "name": "byte-for",
+      "sourceSHA256": "c086ce9b621d84c00cb06bb651dbe6a9bf94015c5fb3ef4782976ddf06538db1",
+      "expectedCode": null,
+      "observations": [
+        {
+          "engine": "candidate",
+          "exit": 0,
+          "stdout": "check ok: 1 instance(s), 1 source file(s), 2 MIR function(s), lock updated\n",
+          "stderr": "",
+          "diagnostics": []
+        },
+        {
+          "engine": "reference",
+          "exit": 0,
+          "stdout": "check ok: 1 instance(s), 1 source file(s), 2 MIR function(s), lock unchanged\n",
+          "stderr": "",
+          "diagnostics": []
+        }
+      ]
+    }
+  ],
+  "pushed": false
+}

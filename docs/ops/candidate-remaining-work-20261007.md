@@ -1,6 +1,27 @@
 # Fairy 컴파일러 전환: 후속 작업 목록
 
-## Latest validated milestone (2026-10-12)
+## Loop-control semantic parity (2026-10-12)
+
+The public checked-unit path now rejects `break`/`continue` without an enclosing
+loop body as E1012 at the exact original statement span. A nested loop's header
+may use its enclosing outer loop; a header alone does not establish loop scope.
+Checks cover expression blocks, while/classic-for/byte-for bodies and separate
+function arenas. The traversal shares the existing bounded value-pass allowance.
+Two authored tests pass in Go-native and both candidate C profiles. The freshly
+built Stage1 compiler matches the Go reference on nine public check cases.
+The 75-fixture probe now has 10 status differences and 34 first-diagnostic
+code/span differences; seven borrow/origin failures are still accepted and the
+same three supported-language gaps still reject valid inputs. Stage2/full image
+fixed-point regeneration is in progress; earlier fixed-point results describe
+only their recorded source snapshot. No shipping Go CLI, public API, SDK ABI,
+DB or CI change, and no push.
+Receipts: `evidence/candidate-loop-control-private-20261012.json`,
+`evidence/candidate-loop-control-public-20261012.json`,
+`evidence/candidate-loop-control-corpus-20261012.json`.
+Next: connect the existing transitive borrowed-result and live-loan analysis
+before admitting project IR, retaining source diagnostic codes and spans.
+
+## Prior native-dispatcher milestone (2026-10-12)
 
 The native-dispatcher snapshot at `1ce8d6b9` reaches a complete 369-source Windows
 C-part fixed point. Both generations emit 29998661 identical bytes and produce
