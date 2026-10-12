@@ -1,6 +1,7 @@
 module module_constant_engine;
 import module_unit_value_model as m;
 import module_constant_arithmetic as arithmetic;
+import module_const_eval_declarations as const_eval;
 import module_signatures as signatures;
 import syntax as syntax;
 import type_state as scalars;
@@ -89,7 +90,7 @@ fn Result<Value,m::Problem> evaluate(ref v::Vec<syntax::Parsed> sources,ref mut 
 // owners are package-instance coordinates, not module-name spellings.
 pub fn Result<Plan,m::Problem> build_owned(ref v::Vec<syntax::Parsed> sources,ref v::Vec<usize> owners){
     if(v::len<usize>(owners)!=0 && v::len<usize>(owners)!=v::len<syntax::Parsed>(sources)){return .err(fail(0,12,0,0));}var v::Vec<Entry> entries=v::empty<Entry>();var v::Vec<u32> states=v::empty<u32>();var v::Vec<Counter> counters=v::empty<Counter>();var usize work=0;var usize module_index=0;
-    while(module_index<v::len<syntax::Parsed>(sources)){let source=v::at<syntax::Parsed>(sources,module_index);var usize i=0;while(i<syntax::declaration_count(source)){let d=syntax::declaration_at(source,i);if(!charge(ref mut work)){return .err(fail(module_index,4304,d.start,d.end));}var usize a=0;while(a<d.attribute_count){let attribute=syntax::attribute_at(source,d.attribute_start+a);if(bytes::equal(syntax::source_view(source)[attribute.name_start..attribute.name_end],b"const_eval")){return .err(fail(module_index,4302,attribute.start,attribute.end));}a+=1;}
+    while(module_index<v::len<syntax::Parsed>(sources)){let source=v::at<syntax::Parsed>(sources,module_index);var usize i=0;while(i<syntax::declaration_count(source)){let d=syntax::declaration_at(source,i);if(!charge(ref mut work)){return .err(fail(module_index,4304,d.start,d.end));}let admission=const_eval::read(source,i);if(admission.code!=0){return .err(fail(module_index,admission.code,admission.start,admission.end));}if(admission.annotated){let expression=syntax::expression_at(source,admission.expression);return .err(fail(module_index,4302,expression.start,expression.end));}
         if(d.kind==7){let u32 scalar=scalars::primitive(source,d.result_type);if(d.public || d.attribute_count!=0 || d.result_type==0 || syntax::type_at(source,d.result_type).kind!=1 || !admitted(scalar)){return .err(fail(module_index,4301,d.start,d.end));}if(v::len<Entry>(ref entries)>=1024){return .err(fail(module_index,4304,d.start,d.end));}if(!v::push<Entry>(ref mut entries,Entry{.module_index,.declaration=i+1,.start=d.start,.end=d.end,.value=Value{.scalar,.bits=0}}).is_ok || !v::push<u32>(ref mut states,0).is_ok){return .err(fail(module_index,11,d.start,d.end));}}
         if(d.kind==8 && (d.public || d.attribute_count!=0)){return .err(fail(module_index,4301,d.start,d.end));}i+=1;
     }module_index+=1;}

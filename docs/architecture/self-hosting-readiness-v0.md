@@ -34,6 +34,16 @@ claimed. Current-source fixed-point replay remains batched after integration.
 Evidence: [constant arithmetic](../ops/evidence/candidate-constant-arithmetic-20261012.json),
 [connected constant evaluator](../ops/evidence/candidate-constant-engine-20261012.json).
 
+Const-eval declaration admission now shares one Fairy owner across signatures,
+effect contracts and the constant engine. Invalid placement, attributes,
+visibility, signatures and body shape produce E4301 with owning source spans.
+Three authored tests pass Go native and both candidate C profiles; four existing
+signature tests pass both C profiles. Source check passes 381 files / 4853 MIR
+functions. Valid function expressions still reject E4302 pending call-graph and
+parameter-binding integration; current complete-image and fixed-point counts
+above retain their earlier snapshots. Evidence:
+[const-eval declaration admission](../ops/evidence/candidate-const-eval-declarations-20261012.json).
+
 Public borrow admission is complete, while full frontend/executable
 parity, product timeout/host-stack integration, Linux/full suite and same-head
 hosted CI remain promotion requirements. No shipping Go compiler or SDK ABI

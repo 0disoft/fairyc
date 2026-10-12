@@ -1,0 +1,325 @@
+{
+  "schema": "fairyc.candidate-const-eval-declarations/v1",
+  "passed": true,
+  "scope": "Shared primitive scalar const_eval declaration admission for signature, effects and constant-engine owners; expression execution remains closed",
+  "sourceInputs": [
+    {
+      "path": "examples/lexer_candidate/src/module_const_eval_declarations.fy",
+      "bytes": 2768,
+      "sha256": "8e93ea3fe0035090ad946bc920862cfa3d9281bb65f7b7270cc18c64edf3e129"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_signatures.fy",
+      "bytes": 11307,
+      "sha256": "e9cd1431b3e3d19c710a3392730f5215aee3440c2542ebcb2b9998fc0766011c"
+    },
+    {
+      "path": "examples/lexer_candidate/src/effect_declarations.fy",
+      "bytes": 3420,
+      "sha256": "5fc47d2d48f4422b7cd897eaf3894f3feb984b4e09127a2ebf025e89e4ae1739"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_constant_engine.fy",
+      "bytes": 20243,
+      "sha256": "943b0ddcce6f5444bff9637e6d579d9f1588146b3a785ea8db7d36cc6d674b6c"
+    },
+    {
+      "path": "examples/lexer_candidate/tests/module_const_eval_declarations.fy",
+      "bytes": 4213,
+      "sha256": "5b21b354f1dc0b419bd4085d10c3410e07f5ffe27a7a8267b3dbbb9095581866"
+    },
+    {
+      "path": "examples/lexer_candidate/fairy.lock",
+      "bytes": 1698,
+      "sha256": "ab51dd2c41833ff93fcdcfc6c2929fa101214ccc3c31df97d170a5f3285af767"
+    }
+  ],
+  "owningContracts": [
+    "docs/adr/0220-bounded-scalar-compile-time-evaluation.md",
+    "docs/language/0007-name-resolution-and-typing-v0.md"
+  ],
+  "sourceCheck": {
+    "argv": [
+      ".cache/candidate-frontend-oracle-current-20261012.exe",
+      "check"
+    ],
+    "cwd": "examples/lexer_candidate",
+    "passed": true,
+    "files": 381,
+    "mirFunctions": 4853,
+    "lockUpdated": true
+  },
+  "privateTests": [
+    {
+      "module": "module_const_eval_declarations",
+      "receiptSHA256": "87328d4b2e12904d464f65d730e96ff3717fa3839801b489ece9170c3fe2165f",
+      "authoredTests": 3,
+      "nativeTests": 3,
+      "candidateOnly": false,
+      "selection": {
+        "mode": "all-authored",
+        "authoredTests": 3,
+        "selectedTests": 3
+      },
+      "candidateInputFiles": 58,
+      "tools": {
+        "compiler": {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-frontend-oracle-current-20261012.exe",
+          "sha256": "3ecc4501ee3bb47ecc39e7288200266b31cbcd8bf6ffec302ae54867705ce5d1"
+        },
+        "candidate": {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\constant-engine-build-20261012\\candidate-release.exe",
+          "sha256": "93e311308d3ceb3ec7e5dc09eec20f2c0f1636741908828586a283f3512cc7c2"
+        },
+        "builder": {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-rooted-builder-stack-20261012.exe",
+          "sha256": "02abe2328daa9921705910c7b995e82c1312cb960fe024106c11468569aefff0"
+        }
+      },
+      "invocations": [
+        {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-frontend-oracle-current-20261012.exe",
+            "test",
+            "--native",
+            "--locked",
+            "--json",
+            "--capture-output",
+            "--exact",
+            "tests::module_const_eval_declarations::eligible_scalar_functions_retain_return_and_parameter_ids",
+            "--exact",
+            "tests::module_const_eval_declarations::invalid_arity_duplicates_and_misplacement_report_attribute_spans",
+            "--exact",
+            "tests::module_const_eval_declarations::invalid_visibility_signature_effects_and_body_report_function_names"
+          ],
+          "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+          "seconds": 127.59744919999503,
+          "exit": 0,
+          "stdoutBytes": 767,
+          "stdoutSHA256": "9a84f4229b43da0d0a77b42f6837220282c2dd214c0bfbda5d6f2b1cfdbf1f34",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\constant-engine-build-20261012\\candidate-release.exe",
+            "--c-project-file",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\const-eval-declarations-tests-20261012\\sources.list"
+          ],
+          "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+          "seconds": 9.827902499993797,
+          "exit": 0,
+          "stdoutBytes": 2719091,
+          "stdoutSHA256": "bd9643f63b2c71fd4bf60f043d9413e687d552473bdfd4f1de2e5787df94a9f4",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-rooted-builder-stack-20261012.exe",
+            "--packet",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\const-eval-declarations-tests-20261012\\candidate-packet.bin",
+            "--packet-sha256",
+            "bd9643f63b2c71fd4bf60f043d9413e687d552473bdfd4f1de2e5787df94a9f4",
+            "--output",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\const-eval-declarations-tests-20261012\\development.exe",
+            "--stack-reserve-bytes",
+            "16777216"
+          ],
+          "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+          "seconds": 3.0949699000047985,
+          "exit": 0,
+          "stdoutBytes": 180,
+          "stdoutSHA256": "9fe73c478a9c8aa10b9d002e90455a7f88490a0a8207e2ef2d5a9b5376447441",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\const-eval-declarations-tests-20261012\\development.exe"
+          ],
+          "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+          "seconds": 0.03394829999888316,
+          "exit": 0,
+          "stdoutBytes": 0,
+          "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-rooted-builder-stack-20261012.exe",
+            "--packet",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\const-eval-declarations-tests-20261012\\candidate-packet.bin",
+            "--packet-sha256",
+            "bd9643f63b2c71fd4bf60f043d9413e687d552473bdfd4f1de2e5787df94a9f4",
+            "--output",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\const-eval-declarations-tests-20261012\\release.exe",
+            "--stack-reserve-bytes",
+            "16777216",
+            "--release"
+          ],
+          "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+          "seconds": 15.867531600000802,
+          "exit": 0,
+          "stdoutBytes": 181,
+          "stdoutSHA256": "c56dc2288f02d143cdc7fe47c7129f50435ba90d6986d9d0862ab5061b81f162",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\const-eval-declarations-tests-20261012\\release.exe"
+          ],
+          "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+          "seconds": 0.02459479999379255,
+          "exit": 0,
+          "stdoutBytes": 0,
+          "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderr": ""
+        }
+      ],
+      "candidateExecutions": [
+        {
+          "profile": "development",
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\const-eval-declarations-tests-20261012\\development.exe",
+          "sha256": "0afa09e98327c49a18ed56fb28eb59fe1d7aad6833eafa38a30509a84ec2f477",
+          "exit": 0
+        },
+        {
+          "profile": "release",
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\const-eval-declarations-tests-20261012\\release.exe",
+          "sha256": "71922519e2dce6c998b21c60abb92c7aca613ab858b8304ca9374c03d01bbee9",
+          "exit": 0
+        }
+      ]
+    },
+    {
+      "module": "module_signatures",
+      "receiptSHA256": "0622c4d3950109909e4fb290c4b233680eda406e1f5303847e05e49472ad0501",
+      "authoredTests": 4,
+      "nativeTests": 0,
+      "candidateOnly": true,
+      "selection": {
+        "mode": "all-authored",
+        "authoredTests": 4,
+        "selectedTests": 4
+      },
+      "candidateInputFiles": 52,
+      "tools": {
+        "compiler": {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-frontend-oracle-current-20261012.exe",
+          "sha256": "3ecc4501ee3bb47ecc39e7288200266b31cbcd8bf6ffec302ae54867705ce5d1"
+        },
+        "candidate": {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\constant-engine-build-20261012\\candidate-release.exe",
+          "sha256": "93e311308d3ceb3ec7e5dc09eec20f2c0f1636741908828586a283f3512cc7c2"
+        },
+        "builder": {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-rooted-builder-stack-20261012.exe",
+          "sha256": "02abe2328daa9921705910c7b995e82c1312cb960fe024106c11468569aefff0"
+        }
+      },
+      "invocations": [
+        {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\constant-engine-build-20261012\\candidate-release.exe",
+            "--c-project-file",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\const-eval-signature-regression-20261012\\sources.list"
+          ],
+          "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+          "seconds": 7.7436150000139605,
+          "exit": 0,
+          "stdoutBytes": 2409516,
+          "stdoutSHA256": "8e0ce9d5355f67808646a3e145180d45a9ab74276691fe9580883adfac18ba81",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-rooted-builder-stack-20261012.exe",
+            "--packet",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\const-eval-signature-regression-20261012\\candidate-packet.bin",
+            "--packet-sha256",
+            "8e0ce9d5355f67808646a3e145180d45a9ab74276691fe9580883adfac18ba81",
+            "--output",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\const-eval-signature-regression-20261012\\development.exe",
+            "--stack-reserve-bytes",
+            "16777216"
+          ],
+          "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+          "seconds": 2.6125946999818552,
+          "exit": 0,
+          "stdoutBytes": 181,
+          "stdoutSHA256": "367d19b31da5df88a996a44f7bb6c0601cdc970481ae12008397c0e5b39a740a",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\const-eval-signature-regression-20261012\\development.exe"
+          ],
+          "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+          "seconds": 0.041731500008609146,
+          "exit": 0,
+          "stdoutBytes": 0,
+          "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-rooted-builder-stack-20261012.exe",
+            "--packet",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\const-eval-signature-regression-20261012\\candidate-packet.bin",
+            "--packet-sha256",
+            "8e0ce9d5355f67808646a3e145180d45a9ab74276691fe9580883adfac18ba81",
+            "--output",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\const-eval-signature-regression-20261012\\release.exe",
+            "--stack-reserve-bytes",
+            "16777216",
+            "--release"
+          ],
+          "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+          "seconds": 23.87350580000202,
+          "exit": 0,
+          "stdoutBytes": 183,
+          "stdoutSHA256": "71e3ab882b03d9c8e241a4c16be16e29b69f4c1a69bfa124e15eb26e40887e98",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\const-eval-signature-regression-20261012\\release.exe"
+          ],
+          "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+          "seconds": 0.03156559998751618,
+          "exit": 0,
+          "stdoutBytes": 0,
+          "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderr": ""
+        }
+      ],
+      "candidateExecutions": [
+        {
+          "profile": "development",
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\const-eval-signature-regression-20261012\\development.exe",
+          "sha256": "632b79f758de1e4e6d45db35e3b8132f085268fd093c1ce0a746b39c681306d7",
+          "exit": 0
+        },
+        {
+          "profile": "release",
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\const-eval-signature-regression-20261012\\release.exe",
+          "sha256": "4d59a29a32c6f1588890662f8690876b63b78ec4d787431677e9f887b53c5607",
+          "exit": 0
+        }
+      ]
+    }
+  ],
+  "limits": [
+    "Function expression evaluation remains E4302 until dependency graph and parameter binding integration.",
+    "Only primitive fixed scalar type spellings; canonical alias admission remains open.",
+    "Current-source complete compiler image and Stage1/Stage2 fixed-point replay deferred until const-eval integration.",
+    "Existing 75-case corpus remains the previous constant-engine snapshot; no fresh CLI parity count claimed here.",
+    "Full Linux suite and same-head hosted CI remain deferred."
+  ],
+  "publicApiChanged": false,
+  "sdkAbiChanged": false,
+  "dbChanged": false,
+  "repositoryHygieneChanged": false,
+  "ciChanged": false,
+  "runnerChanged": false,
+  "productTimeoutChanged": false,
+  "pushed": false
+}

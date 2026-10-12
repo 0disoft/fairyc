@@ -1,5 +1,28 @@
 # Fairy 컴파일러 전환: 후속 작업 목록
 
+## Const-eval declaration admission connected (2026-10-12)
+
+The Fairy declaration owner now distinguishes invalid const_eval attributes from
+unsupported constant expressions. Signature building, effect contracts and the
+constant engine share its exact retained syntax checks. Duplicate/argument-bearing
+attributes and placement on records, enums, resources, cleanup, constants and
+foreign declarations reject E4301 at the attribute. Public/unsafe/method/generic
+functions, effect-bearing functions, non-primitive scalar signatures and bodies
+other than one explicit value return reject E4301 at the function name. The
+admitted fixed scalar spellings include i64; canonical alias admission remains
+outside this primitive-only slice.
+
+Valid declarations retain the return expression and parameter count, but the
+constant engine still rejects their expression as E4302. Function graph traversal,
+parameter binding and invocation evaluation are the next integration unit. This
+does not yet claim executable const_eval or a current-source fixed-point replay.
+Three authored declaration tests pass Go native and both candidate C profiles;
+four existing signature tests pass both candidate C profiles. Source check passes
+381 files / 4853 MIR functions. Full compiler replay, Linux and hosted CI stay
+batched after evaluator integration; public API, SDK ABI, DB, hygiene, CI, runner
+and product timeout configuration are unchanged. No push.
+Receipt: `evidence/candidate-const-eval-declarations-20261012.json`.
+
 ## Constant dependencies, folding and static assertions connected (2026-10-12)
 
 Candidate project checking now uses the checked scalar arithmetic component for

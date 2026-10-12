@@ -1,5 +1,6 @@
 module effect_declarations;
 import syntax as syntax;
+import module_const_eval_declarations as const_eval;
 import std::bytes as bytes;
 // Closed language/11 authority set. Allocation and unsafe are not effects.
 pub struct Info { bool must_use; usize must_start; usize must_end; u32 bits; u32 code; usize start; usize end; }
@@ -14,6 +15,7 @@ pub fn u32 bit(ref u8[] name) {
 pub fn bool includes(u32 authority,u32 required){return (authority&required)==required;}
 pub fn Info read(ref syntax::Parsed p,usize declaration){
     let d=syntax::declaration_at(p,declaration);var Info info=Info{.must_use=false,.must_start=0,.must_end=0,.bits=0,.code=0,.start=d.start,.end=d.end};
+    let admission=const_eval::read(p,declaration);if(admission.code!=0){info.code=admission.code;info.start=admission.start;info.end=admission.end;return info;}
     var bool seen=false;var usize i=0;
     while(i<d.attribute_count){let a=syntax::attribute_at(p,d.attribute_start+i);let name=syntax::source_view(p)[a.name_start..a.name_end];
         if(bytes::equal(name,b"must_use")){
@@ -21,6 +23,8 @@ pub fn Info read(ref syntax::Parsed p,usize declaration){
             info.must_use=true;info.must_start=a.start;info.must_end=a.end;i+=1;continue;
         }
         if(bytes::equal(name,b"link_name") && d.kind==9){i+=1;continue;}
+        // The module signature owner validates const_eval placement and shape.
+        if(bytes::equal(name,b"const_eval") && d.kind==3){i+=1;continue;}
         if(!bytes::equal(name,b"effects") && d.kind==6){i+=1;continue;}
         if(!bytes::equal(name,b"effects")){info.code=3;info.start=a.start;info.end=a.end;return info;}
         if(seen || a.argument_count==0){info.code=7101;info.start=a.start;info.end=a.end;return info;}seen=true;
