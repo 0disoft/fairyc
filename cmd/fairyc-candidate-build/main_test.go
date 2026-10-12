@@ -13,6 +13,10 @@ func TestWorkspaceSelectionRejectsBeforeOutput(t *testing.T) {
 		t.Fatal(err)
 	}
 	for _, arguments := range [][]string{
+		{"--packet-input", "must-not-read", "--packet", "p", "--packet-sha256", "bad"},
+		{"--packet-input", "must-not-read", "--packet-sha256", "bad"},
+		{"--packet-input", "must-not-read", "--candidate", "must-not-run", "--workspace", "w"},
+		{"--packet-input", "must-not-read", "--locked"},
 		{"--candidate", "must-not-run"},
 		{"--candidate", "must-not-run", "--manifest", "m", "--workspace", "w"},
 		{"--candidate", "must-not-run", "--manifest", "m", "--locked"},

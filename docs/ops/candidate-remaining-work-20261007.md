@@ -9,6 +9,20 @@ are identical, with no excluded bytes. All 249 Go lexer cases and private framin
 checks pass for the seed and both generations. Receipt:
 `evidence/candidate-complete-stage2-20261012.json`.
 
+## Fresh packet native-driver input (2026-10-12)
+
+The private Go bridge can consume a fresh C packet without invoking a frontend
+or selecting a cached artifact. It copies one bounded regular-file snapshot and
+uses the existing decoder/MSVC/publication path. Cache replay still requires its
+SHA256. Focused input/selector/cache checks pass, including malformed inputs and
+preservation of the previous image. Fresh and checksum-pinned modes produce
+identical PE bytes in both profiles from a real Fairy packet; all four return
+134. Go frontend/semantic/IR/emitter code is unchanged. Next: Fairy packet-file
+serialization, workspace metadata/publication and public build/run wiring.
+Broader differential, Linux/full suite and promotion remain. Private bridge
+API changed; public API, SDK ABI, DB and CI are unchanged; no push. Receipt:
+`evidence/candidate-native-packet-input-20261012.json`.
+
 ## Native build/run option ownership (2026-10-12)
 
 Fairy implements strict build/run flags, duplicate rejection, the first run

@@ -1,0 +1,68 @@
+{
+  "passed": true,
+  "executions": [
+    {
+      "mode": "fresh",
+      "profile": "development",
+      "packetSHA256": "9c9bfb8f1f2476d7ff9dd17260902ba4e65e3baf55b2950fe90ec14f25d56845",
+      "imageSHA256": "bc0dab89874a778d241933bcb3be2ec0969edf0c21cc0113c8b873e8f5521cb6",
+      "exit": 134,
+      "frontendInvoked": false
+    },
+    {
+      "mode": "cached",
+      "profile": "development",
+      "packetSHA256": "9c9bfb8f1f2476d7ff9dd17260902ba4e65e3baf55b2950fe90ec14f25d56845",
+      "imageSHA256": "bc0dab89874a778d241933bcb3be2ec0969edf0c21cc0113c8b873e8f5521cb6",
+      "exit": 134,
+      "frontendInvoked": false
+    },
+    {
+      "mode": "fresh",
+      "profile": "release",
+      "packetSHA256": "9c9bfb8f1f2476d7ff9dd17260902ba4e65e3baf55b2950fe90ec14f25d56845",
+      "imageSHA256": "b1c6b1306994cbc41fb3d7ad58c2a62e098353957e1257c9191c1cbd7d220aa8",
+      "exit": 134,
+      "frontendInvoked": false
+    },
+    {
+      "mode": "cached",
+      "profile": "release",
+      "packetSHA256": "9c9bfb8f1f2476d7ff9dd17260902ba4e65e3baf55b2950fe90ec14f25d56845",
+      "imageSHA256": "b1c6b1306994cbc41fb3d7ad58c2a62e098353957e1257c9191c1cbd7d220aa8",
+      "exit": 134,
+      "frontendInvoked": false
+    }
+  ],
+  "schema": "fairyc.candidate-native-packet-input/v1",
+  "baselineCommit": "2454b19a",
+  "sources": [
+    {
+      "path": "internal/candidatebuild/build.go",
+      "sha256": "853f3779c46be18fe6d3a88598d5a06960d03dc3e6fcc12e7088d2341b79145c"
+    },
+    {
+      "path": "internal/candidatebuild/input_test.go",
+      "sha256": "769fe9f3f940f87b9fdeb0c50965f196b3f3e2504815cbd1b1e42d1ea513a5d4"
+    },
+    {
+      "path": "cmd/fairyc-candidate-build/main.go",
+      "sha256": "aaacf40124ce4e0451304dd1e39449247db4d98e5ca9fb867589874f62fe89d1"
+    },
+    {
+      "path": "cmd/fairyc-candidate-build/main_test.go",
+      "sha256": "d352a22c4253ac5ea5cd0aba2b0388111d258de55a73165a79b3b8c6872b42a7"
+    }
+  ],
+  "focusedChecks": {
+    "command": "bun tools/run-go.ts test ./internal/candidatebuild ./cmd/fairyc-candidate-build -run 'TestFreshPacketInput|TestWorkspaceSelectionRejectsBeforeOutput|TestCachedPacketRejectsChangedBytesWithoutFrontendFallback' -count=1",
+    "exit": 0
+  },
+  "builderSHA256": "1d80142b57478109bfd29da50da1cf1005fc3b2607319094538f291203f08979",
+  "stableBuildRunIntegrated": false,
+  "publicApiChanged": false,
+  "sdkAbiChanged": false,
+  "dbChanged": false,
+  "ciChanged": false,
+  "pushed": false
+}

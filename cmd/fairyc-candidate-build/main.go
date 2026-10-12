@@ -19,6 +19,7 @@ func run(args []string) int {
 	workspace := flags.String("workspace", "", "Fairy workspace root; candidate owns manifest/dependency loading")
 	locked := flags.Bool("locked", false, "verify workspace lock without writing")
 	packet := flags.String("packet", "", "previously emitted private C packet")
+	packetInput := flags.String("packet-input", "", "fresh private C packet from the calling Fairy compiler; no frontend or cache replay")
 	packetDigest := flags.String("packet-sha256", "", "required cached packet SHA256 digest")
 	output := flags.String("output", "", "destination executable")
 	directory := flags.String("directory", ".", "source paths working directory")
@@ -32,8 +33,20 @@ func run(args []string) int {
 		}
 		return 2
 	}
-	if flags.NArg() != 0 || *output == "" || (*packet == "" && (*candidate == "" || (*manifest == "") == (*workspace == "") || *packetDigest != "" || *locked && *workspace == "")) || (*packet != "" && (*packetDigest == "" || *candidate != "" || *manifest != "" || *workspace != "" || *locked)) {
-		fmt.Fprintln(os.Stderr, "output and either candidate with one manifest/workspace, or packet/packet-sha256 are required; locked requires workspace")
+	sourceMode := *candidate != "" || *manifest != "" || *workspace != ""
+	cacheMode := *packet != ""
+	inputMode := *packetInput != ""
+	selected := 0
+	for _, enabled := range []bool{sourceMode, cacheMode, inputMode} {
+		if enabled {
+			selected++
+		}
+	}
+	invalidSource := sourceMode && (*candidate == "" || (*manifest == "") == (*workspace == "") || *packetDigest != "" || *locked && *workspace == "")
+	invalidCache := cacheMode && (*packetDigest == "" || *locked)
+	invalidInput := inputMode && (*packetDigest != "" || *locked)
+	if flags.NArg() != 0 || *output == "" || selected != 1 || invalidSource || invalidCache || invalidInput {
+		fmt.Fprintln(os.Stderr, "output and either candidate with one manifest/workspace, packet/packet-sha256, or fresh packet-input are required; locked requires workspace")
 		return 2
 	}
 	if *compileTimeout <= 0 || *compileTimeout > 10*time.Minute {
@@ -47,7 +60,9 @@ func run(args []string) int {
 	options := candidatebuild.Options{Candidate: *candidate, Manifest: *manifest, Workspace: *workspace, Locked: *locked, Directory: *directory, Output: *output, Release: *release, RunTrapControl: *runTrapControl, Timeout: *frontendTimeout, CompileTimeout: *compileTimeout}
 	var result candidatebuild.Result
 	var err error
-	if *packet != "" {
+	if *packetInput != "" {
+		result, err = candidatebuild.BuildInput(options, *packetInput)
+	} else if *packet != "" {
 		result, err = candidatebuild.BuildCached(options, *packet, *packetDigest)
 	} else {
 		result, err = candidatebuild.Build(options)

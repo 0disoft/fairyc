@@ -143,6 +143,20 @@ argument in both profiles. Source check passes 371 files / 4758 MIR functions.
 The dispatcher does not expose build/run yet: native driver transport and
 publication are still required.
 
+## Fresh native driver input
+
+The private bridge accepts `--packet-input` for a freshly serialized C packet
+from the calling Fairy compiler. It reads a regular file into one bounded
+snapshot, validates the existing framing/parts contract and invokes MSVC without
+starting any frontend. The cache-replay `--packet` mode still requires its exact
+SHA256. Input/cache/source modes reject mixing before reading or publication.
+
+Fresh input and checksum-pinned replay produce identical complete images in
+development and release from a real Fairy packet; all four images return 134.
+Focused tests reject malformed/nonfile/mixed inputs, preserve the prior image
+on rejection and execute successful native builds. Public build/run wiring
+still requires Fairy packet-file serialization and workspace publication.
+
 Receipt: [candidate-windows-process-20261012.json](../ops/evidence/candidate-windows-process-20261012.json).
 Stream receipt: [candidate-windows-streams-20261012.json](../ops/evidence/candidate-windows-streams-20261012.json).
 Argument receipt: [candidate-windows-argv-20261012.json](../ops/evidence/candidate-windows-argv-20261012.json).
@@ -150,6 +164,7 @@ Control receipt: [candidate-windows-run-control-20261012.json](../ops/evidence/c
 Running receipt: [candidate-running-owner-20261012.json](../ops/evidence/candidate-running-owner-20261012.json).
 Capture receipt: [candidate-windows-run-capture-20261012.json](../ops/evidence/candidate-windows-run-capture-20261012.json).
 Options receipt: [candidate-native-cli-options-20261012.json](../ops/evidence/candidate-native-cli-options-20261012.json).
+Driver receipt: [candidate-native-packet-input-20261012.json](../ops/evidence/candidate-native-packet-input-20261012.json).
 Native records and flags follow [STARTUPINFOW](https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/ns-processthreadsapi-startupinfow),
 [extended job limits](https://learn.microsoft.com/en-us/windows/win32/api/winnt/ns-winnt-jobobject_extended_limit_information),
 [CreateProcessW](https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-createprocessw)

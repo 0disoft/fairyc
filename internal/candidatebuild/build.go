@@ -175,6 +175,46 @@ func BuildCached(options Options, path, expected string) (Result, error) {
 	return buildPacket(options, data)
 }
 
+// BuildInput consumes a fresh packet produced by the calling Fairy compiler.
+// Unlike cache replay it selects no prior artifact: the opened file is copied
+// once, bounded and decoded before any destination publication. No frontend runs.
+func BuildInput(options Options, path string) (Result, error) {
+	if options.Candidate != "" || options.Manifest != "" || options.Workspace != "" || options.Locked {
+		return Result{}, fmt.Errorf("packet input cannot be combined with candidate, manifest, workspace or locked")
+	}
+	data, err := readPacketInput(path)
+	if err != nil {
+		return Result{}, err
+	}
+	return buildPacket(options, data)
+}
+
+func readPacketInput(path string) ([]byte, error) {
+	if path == "" {
+		return nil, fmt.Errorf("packet input path is required")
+	}
+	file, err := os.Open(path)
+	if err != nil {
+		return nil, err
+	}
+	defer file.Close()
+	stat, err := file.Stat()
+	if err != nil {
+		return nil, err
+	}
+	if !stat.Mode().IsRegular() || stat.Size() > maxPacket {
+		return nil, fmt.Errorf("packet input must be a regular file within 96 MiB")
+	}
+	data, err := io.ReadAll(io.LimitReader(file, maxPacket+1))
+	if err != nil {
+		return nil, err
+	}
+	if len(data) > maxPacket {
+		return nil, fmt.Errorf("packet input exceeds 96 MiB")
+	}
+	return data, nil
+}
+
 func cachedPacket(path, expected string) ([]byte, error) {
 	want, err := hex.DecodeString(expected)
 	if err != nil || len(want) != sha256.Size || path == "" {
