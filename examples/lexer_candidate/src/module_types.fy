@@ -38,6 +38,7 @@ pub fn u32 validate(ref catalog::Catalog c,ref v::Vec<Type> types){
 }
 pub fn Result<Graph,u32> assemble(ref catalog::Catalog c,v::Vec<Type> types){let u32 code=validate(c,ref types);if(code!=0){return .err(code);}return .ok(Graph{.types});}
 pub fn usize graph_count(ref Graph graph){return v::len<Type>(ref graph.types);}
+pub fn ref v::Vec<Type> graph_records(ref Graph graph){return ref graph.types;}
 pub fn u32 validate_graph(ref catalog::Catalog c,ref Graph graph){return validate(c,ref graph.types);}
 pub fn Type graph_at(ref Graph graph,usize id){assert(id>0 && id<=graph_count(graph));return *v::at<Type>(ref graph.types,id-1);}
 pub fn usize count(ref v::Vec<Type> graph){return v::len<Type>(graph);}

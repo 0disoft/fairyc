@@ -1,5 +1,24 @@
 # Fairy candidate module progress
 
+## Compiler handles mapped to original-source identities (2026-10-13)
+
+`module_source_specializations` owns g0_ bytes indexed by the actual typed
+compiler's function/type/cleanup handles. It verifies source stamps, owners,
+imports and the type prefix, converts zero-based source declarations to compiler
+handles, and matches ordered concrete arguments. Ordinary rows are zero;
+failures retain the handle kind/index and publish no partial selection. Calls
+follow their existing instance handle to an ID; Vec cleanup selects the same
+resource specialization as its type descriptor.
+
+Three tests cover five functions, six Vec descriptors, cleanup/alias calls,
+detached ownership, stale sources/wrong owners and exact work boundaries. Go
+native and candidate C dev/release pass; root check and check --locked pass
+429 files / 5549 MIR functions. A concurrent lock refresh invalidated an initial
+successful child run's wrapper; the final rerun preserves the refreshed lock.
+Executable IR/C consumers, full Vec interfaces and cache publication remain.
+Public API/ABI, DB and CI are unchanged. Linux/full suite/fixed point/hosted CI
+are not rerun; no push. Evidence: `evidence/candidate-source-selection-20261013.json`.
+
 The existing Go package/module contracts remain the reference. These are
 candidate implementation units, not additions to the public language.
 

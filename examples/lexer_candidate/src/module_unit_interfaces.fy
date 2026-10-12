@@ -80,6 +80,7 @@ pub fn usize work(ref Interfaces p){return p.work;}
 pub fn usize annotation_count(ref Interfaces p){return v::len<Annotation>(ref p.annotations);}
 pub fn Annotation annotation_at(ref Interfaces p,usize root){assert(root>0 && root<=annotation_count(p));return *v::at<Annotation>(ref p.annotations,root-1);}
 pub fn ref generics::Plan specializations(ref Interfaces p){return ref p.specializations;}
+pub fn join::Problem validate_specializations(ref Interfaces p,ref v::Vec<syntax::Parsed> sources,ref signatures::Program metadata){return generics::validate(ref p.specializations,sources,metadata,types::graph_records(ref p.graph));}
 pub fn Result<usize,u32> field_measured(ref Interfaces p,usize type,usize caller,ref u8[] name,ref mut usize probes){
     if(type==0 || type>type_count(p)){return .err(18);}var usize owner=type;let t=type_at(p,owner);if(t.kind==7 || t.kind==8){owner=t.first;}
     var usize i=0;while(i<shape_count(p)){*probes=*probes+1;let s=shape_at(p,i);if(s.type==owner){let inner=type_at(p,owner);if(inner.kind!=2 && inner.kind!=3 && inner.kind!=13){return .err(18);}if((inner.kind==3 || inner.kind==13) && caller!=s.module_index){return .err(6201);}var usize f=0;while(f<s.field_count){*probes=*probes+name.len+1;if(bytes::equal(field_name(p,s.field_start+f),name)){return .ok(s.field_start+f+1);}f+=1;}return .err(18);}i+=1;}return .err(18);

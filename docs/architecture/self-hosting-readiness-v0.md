@@ -2,6 +2,30 @@
 
 ## Current local candidate evidence (2026-10-13)
 
+### Compiler-handle source specialization selection (2026-10-13)
+
+`module_source_specializations` maps the typed compiler's one-based function,
+type and cleanup handles to original-source specialization nodes and owned g0_
+bytes. Source template declaration indices are zero-based and explicitly
+converted. Ordered concrete arguments preserve nominal provider ownership;
+aliases share a node. Ordinary rows are zero. Missing or incomplete matches
+publish no selection and retain the failing handle kind/index. Source stamps,
+package owners, resolved imports and the retained type prefix must match first.
+
+Three tests exercise the real SDK Vec source: five concrete functions, six vector
+descriptors, vector cleanup and alias/cleanup calls. Go native and candidate C
+development/release pass, including owner destruction, stale providers, wrong
+owners and exact 16MiB work boundaries. Root check and check --locked pass
+429 files / 5549 MIR functions. An initial successful child run was invalidated
+by a concurrent root-lock refresh; the final run preserves the refreshed lock.
+
+This private bridge selects actual typed handles. Executable IR/C naming and
+call identity consumers, full SDK Vec public interfaces, precise root planning
+locations and dispatcher/cache publication remain. Body/Flow gates, public
+language/API, SDK ABI, DB and CI are unchanged. Latest-source full image/fixed
+point, Linux, full suite and hosted CI are not rerun; no push.
+Receipt: [evidence](../ops/evidence/candidate-source-selection-20261013.json).
+
 ### Dependency-closed original-source specialization plans (2026-10-13)
 
 `generic_source_plan` consumes the detached source planning input and computes
