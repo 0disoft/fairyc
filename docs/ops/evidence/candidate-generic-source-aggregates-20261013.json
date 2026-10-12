@@ -1,0 +1,750 @@
+{
+  "schema": "fairyc.candidate-generic-source-aggregates/v1",
+  "passed": true,
+  "scope": "Exact source aggregate AST JSON and standalone source-aggregate-ast-v0 definitions, including the original SDK Vec; syntax projection does not widen generic admission",
+  "sourceCheck": {
+    "command": ".cache/candidate-frontend-oracle-current-20261012.exe check",
+    "cwd": "examples/lexer_candidate",
+    "exit": 0,
+    "files": 409,
+    "mirFunctions": 5187,
+    "lock": "updated and verified unchanged through final tests"
+  },
+  "sources": [
+    {
+      "path": "examples/lexer_candidate/src/generic_source_aggregate_json.fy",
+      "sha256": "a49222c0b0b606155adc17bff2832fdd68ca82ea8380216184107ee64dd4aa5c"
+    },
+    {
+      "path": "examples/lexer_candidate/src/generic_source_declaration_json.fy",
+      "sha256": "64133df433159cc059adb5b15725bfde636e546cfc7a69d6b5e5bb310676d07b"
+    },
+    {
+      "path": "examples/lexer_candidate/tests/generic_source_aggregate_json.fy",
+      "sha256": "abdbf5f09be3867ee0ce48aeb110a859ec419cd20d3b96e38ff0b859a1bc87b4"
+    },
+    {
+      "path": "examples/lexer_candidate/fairy.lock",
+      "sha256": "54178b96f4c333c46ded1577107f9284fb101fae8fd12fda77b5dd92068f35bd"
+    },
+    {
+      "path": "tools/verify-candidate-source-aggregate-json.go",
+      "sha256": "ffd1a40295ee120276ee382a487f9073cdef2bbe9ff7f017dcf0bdac858e3468"
+    },
+    {
+      "path": "tools/verify-candidate-private-tests.py",
+      "sha256": "99992bae10e09c11e3140a689a155404ee80a6db4ac9e26d9824ddf208d0205b"
+    },
+    {
+      "path": "internal/sdkstdlib/sources/optional/std/vec.fy",
+      "sha256": "0ae4c395bf98c39079ad620bde035b3b590d51417864802e698edc069281db5b"
+    }
+  ],
+  "oracle": {
+    "command": "bun tools/run-go.ts run tools/verify-candidate-source-aggregate-json.go",
+    "exit": 0,
+    "result": {
+      "aggregates": 13,
+      "cases": [
+        {
+          "aggregateBytes": 212,
+          "case": 0,
+          "definition": "ea0ff08c60b3cececf1f285f534cb66f76ea7d4ac43121dc5360657d5ce63b0f",
+          "templateBytes": 239
+        },
+        {
+          "aggregateBytes": 1774,
+          "case": 1,
+          "definition": "120cac10bb4859780a34210a3e7c3f67825fa1a73ed961307e5e69f389e56595",
+          "templateBytes": 1801
+        },
+        {
+          "aggregateBytes": 1652,
+          "case": 2,
+          "definition": "d40bad22d5f912874402b3d3ffa3f4c95a528d88be98df5e2295c1559233ec90",
+          "templateBytes": 1679
+        },
+        {
+          "aggregateBytes": 504,
+          "case": 3,
+          "definition": "4439ff0e5ac457fa2f77a3a53af3341ddcc16572caa9623b136a1962ee98c35a",
+          "templateBytes": 531
+        },
+        {
+          "aggregateBytes": 377,
+          "case": 4,
+          "definition": "63c0803017432e7d473f5afc971251e2d80434da3fd6319bbe2c1b62b51138d6",
+          "templateBytes": 404
+        },
+        {
+          "aggregateBytes": 1491,
+          "case": 5,
+          "definition": "c2dfae392a49e5e7390a5e78e71e8d84864930360214d82fff016b24db9c3386",
+          "templateBytes": 1518
+        },
+        {
+          "aggregateBytes": 5516,
+          "case": 6,
+          "definition": "9699dd7e7cf76b287cb25fbff1c90db114ccaba262edadd4b19bc8944b7fd374",
+          "templateBytes": 5543
+        },
+        {
+          "aggregateBytes": 400,
+          "case": 7,
+          "definition": "",
+          "templateBytes": 0
+        },
+        {
+          "aggregateBytes": 1800,
+          "case": 8,
+          "definition": "",
+          "templateBytes": 0
+        },
+        {
+          "aggregateBytes": 2802,
+          "case": 9,
+          "definition": "63cd473f82936bb1c5d8c0e2c916d17b08a356eec0a5a00b1e25e82a15cc3608",
+          "templateBytes": 2829
+        },
+        {
+          "aggregateBytes": 2104,
+          "case": 10,
+          "definition": "2e0fe49744cfaa001a9614a14ceb7779294ef0748b9e6a43a1eb54df94e3425e",
+          "templateBytes": 2131
+        },
+        {
+          "aggregateBytes": 2266,
+          "case": 11,
+          "definition": "940f8f07a33e0a0ee138295f7a6d2196566b6cda27f1d16236333f4df31f0d4a",
+          "templateBytes": 2293
+        },
+        {
+          "aggregateBytes": 10036,
+          "case": 12,
+          "definition": "fe6048071a68c08652394432262d13b40d7d5b789499a6a7a5159a90b44d3872",
+          "templateBytes": 10063
+        }
+      ],
+      "definitions": 11,
+      "fixtureBytes": 70830,
+      "passed": true,
+      "sdk": {
+        "bytes": 8702,
+        "path": "internal/sdkstdlib/sources/optional/std/vec.fy",
+        "sha256": "0ae4c395bf98c39079ad620bde035b3b590d51417864802e698edc069281db5b"
+      }
+    },
+    "fixtureSHA256": "87350c5373ad86772cd169d8758a716eb05dac4ef03025b9bd5c3c030fdb3017"
+  },
+  "tests": {
+    "schema": "fairyc.candidate-private-tests/v1",
+    "passed": true,
+    "module": "generic_source_aggregate_json",
+    "sourceInputs": [
+      {
+        "path": "examples/lexer_candidate/src/attributes.fy",
+        "sha256": "c1d0eb0c7db61c6e46acac84ca74ec413f2a14061a37d6848ddc13f7191e70bf"
+      },
+      {
+        "path": "examples/lexer_candidate/src/bodies.fy",
+        "sha256": "ea9bfd6dc1b3bce9dc407970b82d871185db33e7daadad35d348de84ab6ba294"
+      },
+      {
+        "path": "examples/lexer_candidate/src/body_state.fy",
+        "sha256": "0f4e1924d07e4d21bc5fbe35a4fb8f0c2b617206b6d63191e7a625300ec5bb3e"
+      },
+      {
+        "path": "examples/lexer_candidate/src/budget.fy",
+        "sha256": "c2793aa302279b9d27f0af32edd71f70de4e93cb4f76f55facd3e757641cc494"
+      },
+      {
+        "path": "examples/lexer_candidate/src/candidate_limits.fy",
+        "sha256": "e337e22a7feff699a675f0a12d882fc92b577e62f58712ceb24bd0fac136ab85"
+      },
+      {
+        "path": "examples/lexer_candidate/src/cleanup_syntax.fy",
+        "sha256": "1374cdcbfa6139a5e82e4e74606cc28ba46d9e81df62f7a0dd397f856fb0ad6f"
+      },
+      {
+        "path": "examples/lexer_candidate/src/diagnostics.fy",
+        "sha256": "ee95f81ed3b3224702196fceef2888434e9713341b81abf01e03945592c4de8b"
+      },
+      {
+        "path": "examples/lexer_candidate/src/generic_identity.fy",
+        "sha256": "af82d3b359138f3efaea398e0c0faeb353b0fd94728f3c60179b1a481ba53fd3"
+      },
+      {
+        "path": "examples/lexer_candidate/src/generic_source_aggregate_json.fy",
+        "sha256": "a49222c0b0b606155adc17bff2832fdd68ca82ea8380216184107ee64dd4aa5c"
+      },
+      {
+        "path": "examples/lexer_candidate/src/generic_source_declaration_json.fy",
+        "sha256": "64133df433159cc059adb5b15725bfde636e546cfc7a69d6b5e5bb310676d07b"
+      },
+      {
+        "path": "examples/lexer_candidate/src/generic_source_documentation.fy",
+        "sha256": "fd2b7d8461938ce5ef9303ce488984a2a15c4fa28bd6b6f01a64a063eaa1c063"
+      },
+      {
+        "path": "examples/lexer_candidate/src/generic_source_expression_fields.fy",
+        "sha256": "b0a81a4076947c7a3ac334fa00a3a6636acfa90149c1412702ff31333ff76ade"
+      },
+      {
+        "path": "examples/lexer_candidate/src/generic_source_expression_json.fy",
+        "sha256": "1d7a7f8bcfcc51eaf6e5c2acf330ced76f874f081306334c6ab06c7c74e1636c"
+      },
+      {
+        "path": "examples/lexer_candidate/src/generic_source_json.fy",
+        "sha256": "ba8087871f463c8d9e655e57fe64de816bc7971a96d25ec7b340ba5bb483d3a9"
+      },
+      {
+        "path": "examples/lexer_candidate/src/generic_source_statement_fields.fy",
+        "sha256": "c955c78e10b9d25a837123af9f9a654fa874149af56bf2a79cb4ce79a3cbb7af"
+      },
+      {
+        "path": "examples/lexer_candidate/src/generic_source_tokens.fy",
+        "sha256": "fc91de43a0983de7e4156585a9fac50e8fb708b333317290bcfa75bdb57e98cf"
+      },
+      {
+        "path": "examples/lexer_candidate/src/generic_source_type_json.fy",
+        "sha256": "0743f95519c13e680eba1076a8149a47031df6ed087f686bdf38c4966a0bfe18"
+      },
+      {
+        "path": "examples/lexer_candidate/src/generic_source_view_loop_json.fy",
+        "sha256": "cda15b92da26e2dafa4847b3161aaebbfada6796a9d86270ff9672891218464d"
+      },
+      {
+        "path": "examples/lexer_candidate/src/literal_types.fy",
+        "sha256": "bce967c2f7b001144642642503af9bb4cf83bae1e50f99262676d16afb9ac7f6"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_public_interface_model.fy",
+        "sha256": "029b9a86471765d1dd2ff5878e5c0d0adcfaa8e6f5b8c81e1bbe9656c4f3b2f0"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_public_interface_write.fy",
+        "sha256": "9a8868217c8bb3a7eef097e13c4890393dc0ef7deaa70f1df49d65437acf9e24"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_state_layout.fy",
+        "sha256": "58395167fac35425c2b24e73e7768c3315a20170a9407dbc0e8aebac692eef38"
+      },
+      {
+        "path": "examples/lexer_candidate/src/numbers.fy",
+        "sha256": "ee8b40b5e8061317d70d3594c386c9e4c70d95132a7e4243ea6402947a4c3556"
+      },
+      {
+        "path": "examples/lexer_candidate/src/parse_tokens.fy",
+        "sha256": "91984eb1086ff7faafa4a6c64a232fc2ddce365b8cd7c2ef23b143bb91d4c9a6"
+      },
+      {
+        "path": "examples/lexer_candidate/src/project_directory.fy",
+        "sha256": "70321e8a7cc84f131573eec91013fccad38d0162f781768bc0e47b136cf4ebc6"
+      },
+      {
+        "path": "examples/lexer_candidate/src/project_json_string.fy",
+        "sha256": "03e76c4239b19ef6fba1a9ebdf97aeb9407d2fb97529fa9f2c6f1d8fbfce6c53"
+      },
+      {
+        "path": "examples/lexer_candidate/src/project_manifest_values.fy",
+        "sha256": "4f21b9dedf744ffc449d1b843282f9aba2ecc221c61f043594bea70c4d56387d"
+      },
+      {
+        "path": "examples/lexer_candidate/src/project_path.fy",
+        "sha256": "20bde13864e5ba8752b33a616eab22b08caf8a20d6a435d2d2c2cc68f443f1a5"
+      },
+      {
+        "path": "examples/lexer_candidate/src/project_path_unicode_data.fy",
+        "sha256": "9cf3af27796644304493561591e1641c70c5c653bf739ed71a65e492db510fbd"
+      },
+      {
+        "path": "examples/lexer_candidate/src/project_source_file.fy",
+        "sha256": "6d1307e99f7ae9fb387fc447f3b6c36f6c0e77aebc90faca55e75665aad2d282"
+      },
+      {
+        "path": "examples/lexer_candidate/src/records.fy",
+        "sha256": "e2d1d3540285509aded981b476d4b2340857d8c7370364f4b1410bfd6883f6dd"
+      },
+      {
+        "path": "examples/lexer_candidate/src/scalar_views.fy",
+        "sha256": "ab3044f3a36a81611a11a46fed80dd41546a9de3f953d4817b2d8e40bc6037bc"
+      },
+      {
+        "path": "examples/lexer_candidate/src/scanner.fy",
+        "sha256": "3755e569fe63003f63b2c9b8272df2ba656c844791cedbc0da4f9245b8809cf7"
+      },
+      {
+        "path": "examples/lexer_candidate/src/sha256.fy",
+        "sha256": "eb89211fd749f7f527e8d2b72e97d70f8d9613bbac428bc95d975bef7c53bfa1"
+      },
+      {
+        "path": "examples/lexer_candidate/src/sha256_block.fy",
+        "sha256": "bc48b9e751205bba8aeaf09987ea8681694d26bc989e24f4ecb3afa4c6e00fd4"
+      },
+      {
+        "path": "examples/lexer_candidate/src/sha256_stream.fy",
+        "sha256": "b5f97a9b5be679418a1365a6007028abfab5ba66ee3ae5c08b3e5b863fcfc8b9"
+      },
+      {
+        "path": "internal/sdkstdlib/sources/std/bytes.fy",
+        "sha256": "4740a506e93349fb002c383967dcc44d182d20f09f2094b83b5464a4ab252982"
+      },
+      {
+        "path": "internal/sdkstdlib/sources/std/fs.fy",
+        "sha256": "fd7ddfa9f0deed98304cecf94911644087d1e2a46e8be8995c35acbcb183b335"
+      },
+      {
+        "path": "internal/sdkstdlib/sources/std/io.fy",
+        "sha256": "4b89c3aeb8b4de4887395d29723095d364c5660c6b773c5696fb1f65f5365f48"
+      },
+      {
+        "path": "internal/sdkstdlib/sources/std/process.fy",
+        "sha256": "9680a1481df4f761f481d5a039af7bdbefeb312d1091961194f8e7bc0681ae24"
+      },
+      {
+        "path": "internal/sdkstdlib/sources/std/text.fy",
+        "sha256": "cccd47e090fda11c9da063ffb321489dd8753fe9996855fc432833e05a79e695"
+      },
+      {
+        "path": "internal/sdkstdlib/sources/optional/std/vec.fy",
+        "sha256": "0ae4c395bf98c39079ad620bde035b3b590d51417864802e698edc069281db5b"
+      },
+      {
+        "path": "examples/lexer_candidate/src/strings.fy",
+        "sha256": "8f26db7c4d4039c8c8d9fbc6078097859c8f714ca5887957fdf0e69269dca521"
+      },
+      {
+        "path": "examples/lexer_candidate/src/syntax.fy",
+        "sha256": "cb9244a18ea93777694d60e5b63eb67738d224297d097542bb84db2b7f31d5e6"
+      },
+      {
+        "path": "examples/lexer_candidate/src/syntax_arena_copy.fy",
+        "sha256": "89969f5d7d8bd0deb3070032d9c9ffd58afbc972ee95316c04236952e27ff098"
+      },
+      {
+        "path": "examples/lexer_candidate/src/syntax_parse_driver.fy",
+        "sha256": "9db6518c69f6c2394ef1c697d7d2d07b0a78ec3336a907c92e9d2e2087e5b756"
+      },
+      {
+        "path": "examples/lexer_candidate/src/types.fy",
+        "sha256": "53a77948af92724f00de0609837fd1507899df8e2b59b6d2778ef1f3c344395a"
+      },
+      {
+        "path": "examples/lexer_candidate/src/utf8.fy",
+        "sha256": "4a5425cea9efbfb1bff2c31a38c2bd8e392c6792af09f24e906c9a743621870d"
+      },
+      {
+        "path": "examples/lexer_candidate/tests/generic_source_aggregate_json.fy",
+        "sha256": "abdbf5f09be3867ee0ce48aeb110a859ec419cd20d3b96e38ff0b859a1bc87b4"
+      },
+      {
+        "path": "tools/verify-candidate-private-tests.py",
+        "sha256": "99992bae10e09c11e3140a689a155404ee80a6db4ac9e26d9824ddf208d0205b"
+      },
+      {
+        "path": ".cache/generic-source-aggregates-20261013/facts.bin",
+        "sha256": "87350c5373ad86772cd169d8758a716eb05dac4ef03025b9bd5c3c030fdb3017"
+      },
+      {
+        "path": "examples/lexer_candidate/fairy.toml",
+        "sha256": "5dd473fe42d35270b362d16d383627167d9981244761a925e42a45f57c8b737f"
+      }
+    ],
+    "tools": {
+      "compiler": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-frontend-oracle-current-20261012.exe",
+        "sha256": "3ecc4501ee3bb47ecc39e7288200266b31cbcd8bf6ffec302ae54867705ce5d1"
+      },
+      "candidate": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-semantic-final-build-20261012\\candidate-release.exe",
+        "sha256": "0c77c32d39b1ae1ddaa105f13bec9ce86e66029aa6ca5694863ac0ba68111480"
+      },
+      "builder": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-rooted-builder-stack-20261012.exe",
+        "sha256": "02abe2328daa9921705910c7b995e82c1312cb960fe024106c11468569aefff0"
+      }
+    },
+    "native": {
+      "schemaVersion": "fairyc.test-report/v4",
+      "engine": "native",
+      "target": "x86_64-windows-msvc",
+      "profile": "development",
+      "tests": [
+        {
+          "identity": "tests::generic_source_aggregate_json::aggregate_invalid_selection_and_exact_combined_work",
+          "outcome": "passed",
+          "trapCategory": null,
+          "stdoutBase64": "",
+          "stderrBase64": ""
+        },
+        {
+          "identity": "tests::generic_source_aggregate_json::field_cleanup_and_type_parameter_changes_invalidate",
+          "outcome": "passed",
+          "trapCategory": null,
+          "stdoutBase64": "",
+          "stderrBase64": ""
+        },
+        {
+          "identity": "tests::generic_source_aggregate_json::matches_go_struct_resource_enum_and_real_sdk_vec",
+          "outcome": "passed",
+          "trapCategory": null,
+          "stdoutBase64": "",
+          "stderrBase64": ""
+        }
+      ],
+      "count": 3,
+      "passed": 3,
+      "failed": 0,
+      "status": "ok",
+      "lock": "verified"
+    },
+    "nativeTests": 3,
+    "authoredTestsExecuted": 3,
+    "candidateOnly": false,
+    "lockSHA256": "54178b96f4c333c46ded1577107f9284fb101fae8fd12fda77b5dd92068f35bd",
+    "candidateInputFiles": 49,
+    "candidatePacketSHA256": "3716acfddb5bee34ee2ff4f2fdfa93de80dafbc6c57dfcb44135ce2e94cc0810",
+    "candidateExecutions": [
+      {
+        "profile": "development",
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\generic-source-aggregates-20261013\\final\\development.exe",
+        "sha256": "9b1a3654fbd47c5e680491e1daf47b98a4b656bd138a81ff2841826a1867d210",
+        "exit": 0
+      },
+      {
+        "profile": "release",
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\generic-source-aggregates-20261013\\final\\release.exe",
+        "sha256": "94bad2abdf7c65d51c5d0712e6cdcf33078447e7364aa7ed9d3829322ca6e0c6",
+        "exit": 0
+      }
+    ],
+    "invocations": [
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-frontend-oracle-current-20261012.exe",
+          "check"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\generic-source-aggregates-20261013\\final\\native-project-a4a915db0a52ad576700",
+        "seconds": 1.6653883999970276,
+        "exit": 0,
+        "stdoutBytes": 78,
+        "stdoutSHA256": "6bc8544707d2d3b20c1a886d9e60554f00d83eb741873da8ecd345b823ee7c67",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-frontend-oracle-current-20261012.exe",
+          "test",
+          "--native",
+          "--locked",
+          "--json",
+          "--capture-output",
+          "--exact",
+          "tests::generic_source_aggregate_json::matches_go_struct_resource_enum_and_real_sdk_vec",
+          "--exact",
+          "tests::generic_source_aggregate_json::field_cleanup_and_type_parameter_changes_invalidate",
+          "--exact",
+          "tests::generic_source_aggregate_json::aggregate_invalid_selection_and_exact_combined_work",
+          "--",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\generic-source-aggregates-20261013\\facts.bin"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\generic-source-aggregates-20261013\\final\\native-project-a4a915db0a52ad576700",
+        "seconds": 11.504577299987432,
+        "exit": 0,
+        "stdoutBytes": 726,
+        "stdoutSHA256": "484b4978b641adb2dbfe42874095396265dbd0c5f646cb054b47fc323616e482",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-semantic-final-build-20261012\\candidate-release.exe",
+          "--c-project-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\generic-source-aggregates-20261013\\final\\sources.list"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+        "seconds": 9.211596000008285,
+        "exit": 0,
+        "stdoutBytes": 2821597,
+        "stdoutSHA256": "3716acfddb5bee34ee2ff4f2fdfa93de80dafbc6c57dfcb44135ce2e94cc0810",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-rooted-builder-stack-20261012.exe",
+          "--packet",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\generic-source-aggregates-20261013\\final\\candidate-packet.bin",
+          "--packet-sha256",
+          "3716acfddb5bee34ee2ff4f2fdfa93de80dafbc6c57dfcb44135ce2e94cc0810",
+          "--output",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\generic-source-aggregates-20261013\\final\\development.exe"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+        "seconds": 2.659319200000027,
+        "exit": 0,
+        "stdoutBytes": 182,
+        "stdoutSHA256": "52866692a6a9e8dd8a36184057794b90bc22879504a82bee1f00cb5dd2b456dc",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\generic-source-aggregates-20261013\\final\\development.exe",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\generic-source-aggregates-20261013\\facts.bin"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+        "seconds": 0.15524020002339967,
+        "exit": 0,
+        "stdoutBytes": 0,
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-rooted-builder-stack-20261012.exe",
+          "--packet",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\generic-source-aggregates-20261013\\final\\candidate-packet.bin",
+          "--packet-sha256",
+          "3716acfddb5bee34ee2ff4f2fdfa93de80dafbc6c57dfcb44135ce2e94cc0810",
+          "--output",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\generic-source-aggregates-20261013\\final\\release.exe",
+          "--release"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+        "seconds": 74.3448575999937,
+        "exit": 0,
+        "stdoutBytes": 183,
+        "stdoutSHA256": "64bd8e61f17c1a59fce05a8a952e2174ee3c85662111106db6da5ca95d35893f",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\generic-source-aggregates-20261013\\final\\release.exe",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\generic-source-aggregates-20261013\\facts.bin"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+        "seconds": 0.037460000021383166,
+        "exit": 0,
+        "stdoutBytes": 0,
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderr": ""
+      }
+    ],
+    "publicApiChanged": false,
+    "dbChanged": false,
+    "ciChanged": false,
+    "pushed": false,
+    "selection": {
+      "mode": "all-authored",
+      "authoredTests": 3,
+      "selectedTests": 3
+    },
+    "frontendTimeoutSeconds": 180,
+    "productTimeoutChanged": false,
+    "wrapperEffects": [
+      "filesystem",
+      "console"
+    ],
+    "nativeIsolation": {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\generic-source-aggregates-20261013\\final\\native-project-a4a915db0a52ad576700",
+      "localSourceFiles": 43,
+      "inputFingerprint": "a4a915db0a52ad576700b83f1275fa973d543bd079a69443d39b839aa1a2441a",
+      "copiedInputs": [
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\generic-source-aggregates-20261013\\final\\native-project-a4a915db0a52ad576700\\fairy.toml",
+          "sha256": "5dd473fe42d35270b362d16d383627167d9981244761a925e42a45f57c8b737f"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\generic-source-aggregates-20261013\\final\\native-project-a4a915db0a52ad576700\\tests\\generic_source_aggregate_json.fy",
+          "sha256": "abdbf5f09be3867ee0ce48aeb110a859ec419cd20d3b96e38ff0b859a1bc87b4"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\generic-source-aggregates-20261013\\final\\native-project-a4a915db0a52ad576700\\src\\attributes.fy",
+          "sha256": "c1d0eb0c7db61c6e46acac84ca74ec413f2a14061a37d6848ddc13f7191e70bf"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\generic-source-aggregates-20261013\\final\\native-project-a4a915db0a52ad576700\\src\\bodies.fy",
+          "sha256": "ea9bfd6dc1b3bce9dc407970b82d871185db33e7daadad35d348de84ab6ba294"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\generic-source-aggregates-20261013\\final\\native-project-a4a915db0a52ad576700\\src\\body_state.fy",
+          "sha256": "0f4e1924d07e4d21bc5fbe35a4fb8f0c2b617206b6d63191e7a625300ec5bb3e"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\generic-source-aggregates-20261013\\final\\native-project-a4a915db0a52ad576700\\src\\budget.fy",
+          "sha256": "c2793aa302279b9d27f0af32edd71f70de4e93cb4f76f55facd3e757641cc494"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\generic-source-aggregates-20261013\\final\\native-project-a4a915db0a52ad576700\\src\\candidate_limits.fy",
+          "sha256": "e337e22a7feff699a675f0a12d882fc92b577e62f58712ceb24bd0fac136ab85"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\generic-source-aggregates-20261013\\final\\native-project-a4a915db0a52ad576700\\src\\cleanup_syntax.fy",
+          "sha256": "1374cdcbfa6139a5e82e4e74606cc28ba46d9e81df62f7a0dd397f856fb0ad6f"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\generic-source-aggregates-20261013\\final\\native-project-a4a915db0a52ad576700\\src\\diagnostics.fy",
+          "sha256": "ee95f81ed3b3224702196fceef2888434e9713341b81abf01e03945592c4de8b"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\generic-source-aggregates-20261013\\final\\native-project-a4a915db0a52ad576700\\src\\generic_identity.fy",
+          "sha256": "af82d3b359138f3efaea398e0c0faeb353b0fd94728f3c60179b1a481ba53fd3"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\generic-source-aggregates-20261013\\final\\native-project-a4a915db0a52ad576700\\src\\generic_source_aggregate_json.fy",
+          "sha256": "a49222c0b0b606155adc17bff2832fdd68ca82ea8380216184107ee64dd4aa5c"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\generic-source-aggregates-20261013\\final\\native-project-a4a915db0a52ad576700\\src\\generic_source_declaration_json.fy",
+          "sha256": "64133df433159cc059adb5b15725bfde636e546cfc7a69d6b5e5bb310676d07b"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\generic-source-aggregates-20261013\\final\\native-project-a4a915db0a52ad576700\\src\\generic_source_documentation.fy",
+          "sha256": "fd2b7d8461938ce5ef9303ce488984a2a15c4fa28bd6b6f01a64a063eaa1c063"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\generic-source-aggregates-20261013\\final\\native-project-a4a915db0a52ad576700\\src\\generic_source_expression_fields.fy",
+          "sha256": "b0a81a4076947c7a3ac334fa00a3a6636acfa90149c1412702ff31333ff76ade"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\generic-source-aggregates-20261013\\final\\native-project-a4a915db0a52ad576700\\src\\generic_source_expression_json.fy",
+          "sha256": "1d7a7f8bcfcc51eaf6e5c2acf330ced76f874f081306334c6ab06c7c74e1636c"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\generic-source-aggregates-20261013\\final\\native-project-a4a915db0a52ad576700\\src\\generic_source_json.fy",
+          "sha256": "ba8087871f463c8d9e655e57fe64de816bc7971a96d25ec7b340ba5bb483d3a9"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\generic-source-aggregates-20261013\\final\\native-project-a4a915db0a52ad576700\\src\\generic_source_statement_fields.fy",
+          "sha256": "c955c78e10b9d25a837123af9f9a654fa874149af56bf2a79cb4ce79a3cbb7af"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\generic-source-aggregates-20261013\\final\\native-project-a4a915db0a52ad576700\\src\\generic_source_tokens.fy",
+          "sha256": "fc91de43a0983de7e4156585a9fac50e8fb708b333317290bcfa75bdb57e98cf"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\generic-source-aggregates-20261013\\final\\native-project-a4a915db0a52ad576700\\src\\generic_source_type_json.fy",
+          "sha256": "0743f95519c13e680eba1076a8149a47031df6ed087f686bdf38c4966a0bfe18"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\generic-source-aggregates-20261013\\final\\native-project-a4a915db0a52ad576700\\src\\generic_source_view_loop_json.fy",
+          "sha256": "cda15b92da26e2dafa4847b3161aaebbfada6796a9d86270ff9672891218464d"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\generic-source-aggregates-20261013\\final\\native-project-a4a915db0a52ad576700\\src\\literal_types.fy",
+          "sha256": "bce967c2f7b001144642642503af9bb4cf83bae1e50f99262676d16afb9ac7f6"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\generic-source-aggregates-20261013\\final\\native-project-a4a915db0a52ad576700\\src\\module_public_interface_model.fy",
+          "sha256": "029b9a86471765d1dd2ff5878e5c0d0adcfaa8e6f5b8c81e1bbe9656c4f3b2f0"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\generic-source-aggregates-20261013\\final\\native-project-a4a915db0a52ad576700\\src\\module_public_interface_write.fy",
+          "sha256": "9a8868217c8bb3a7eef097e13c4890393dc0ef7deaa70f1df49d65437acf9e24"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\generic-source-aggregates-20261013\\final\\native-project-a4a915db0a52ad576700\\src\\module_state_layout.fy",
+          "sha256": "58395167fac35425c2b24e73e7768c3315a20170a9407dbc0e8aebac692eef38"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\generic-source-aggregates-20261013\\final\\native-project-a4a915db0a52ad576700\\src\\numbers.fy",
+          "sha256": "ee8b40b5e8061317d70d3594c386c9e4c70d95132a7e4243ea6402947a4c3556"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\generic-source-aggregates-20261013\\final\\native-project-a4a915db0a52ad576700\\src\\parse_tokens.fy",
+          "sha256": "91984eb1086ff7faafa4a6c64a232fc2ddce365b8cd7c2ef23b143bb91d4c9a6"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\generic-source-aggregates-20261013\\final\\native-project-a4a915db0a52ad576700\\src\\project_directory.fy",
+          "sha256": "70321e8a7cc84f131573eec91013fccad38d0162f781768bc0e47b136cf4ebc6"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\generic-source-aggregates-20261013\\final\\native-project-a4a915db0a52ad576700\\src\\project_json_string.fy",
+          "sha256": "03e76c4239b19ef6fba1a9ebdf97aeb9407d2fb97529fa9f2c6f1d8fbfce6c53"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\generic-source-aggregates-20261013\\final\\native-project-a4a915db0a52ad576700\\src\\project_manifest_values.fy",
+          "sha256": "4f21b9dedf744ffc449d1b843282f9aba2ecc221c61f043594bea70c4d56387d"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\generic-source-aggregates-20261013\\final\\native-project-a4a915db0a52ad576700\\src\\project_path.fy",
+          "sha256": "20bde13864e5ba8752b33a616eab22b08caf8a20d6a435d2d2c2cc68f443f1a5"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\generic-source-aggregates-20261013\\final\\native-project-a4a915db0a52ad576700\\src\\project_path_unicode_data.fy",
+          "sha256": "9cf3af27796644304493561591e1641c70c5c653bf739ed71a65e492db510fbd"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\generic-source-aggregates-20261013\\final\\native-project-a4a915db0a52ad576700\\src\\project_source_file.fy",
+          "sha256": "6d1307e99f7ae9fb387fc447f3b6c36f6c0e77aebc90faca55e75665aad2d282"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\generic-source-aggregates-20261013\\final\\native-project-a4a915db0a52ad576700\\src\\records.fy",
+          "sha256": "e2d1d3540285509aded981b476d4b2340857d8c7370364f4b1410bfd6883f6dd"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\generic-source-aggregates-20261013\\final\\native-project-a4a915db0a52ad576700\\src\\scalar_views.fy",
+          "sha256": "ab3044f3a36a81611a11a46fed80dd41546a9de3f953d4817b2d8e40bc6037bc"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\generic-source-aggregates-20261013\\final\\native-project-a4a915db0a52ad576700\\src\\scanner.fy",
+          "sha256": "3755e569fe63003f63b2c9b8272df2ba656c844791cedbc0da4f9245b8809cf7"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\generic-source-aggregates-20261013\\final\\native-project-a4a915db0a52ad576700\\src\\sha256.fy",
+          "sha256": "eb89211fd749f7f527e8d2b72e97d70f8d9613bbac428bc95d975bef7c53bfa1"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\generic-source-aggregates-20261013\\final\\native-project-a4a915db0a52ad576700\\src\\sha256_block.fy",
+          "sha256": "bc48b9e751205bba8aeaf09987ea8681694d26bc989e24f4ecb3afa4c6e00fd4"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\generic-source-aggregates-20261013\\final\\native-project-a4a915db0a52ad576700\\src\\sha256_stream.fy",
+          "sha256": "b5f97a9b5be679418a1365a6007028abfab5ba66ee3ae5c08b3e5b863fcfc8b9"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\generic-source-aggregates-20261013\\final\\native-project-a4a915db0a52ad576700\\src\\strings.fy",
+          "sha256": "8f26db7c4d4039c8c8d9fbc6078097859c8f714ca5887957fdf0e69269dca521"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\generic-source-aggregates-20261013\\final\\native-project-a4a915db0a52ad576700\\src\\syntax.fy",
+          "sha256": "cb9244a18ea93777694d60e5b63eb67738d224297d097542bb84db2b7f31d5e6"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\generic-source-aggregates-20261013\\final\\native-project-a4a915db0a52ad576700\\src\\syntax_arena_copy.fy",
+          "sha256": "89969f5d7d8bd0deb3070032d9c9ffd58afbc972ee95316c04236952e27ff098"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\generic-source-aggregates-20261013\\final\\native-project-a4a915db0a52ad576700\\src\\syntax_parse_driver.fy",
+          "sha256": "9db6518c69f6c2394ef1c697d7d2d07b0a78ec3336a907c92e9d2e2087e5b756"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\generic-source-aggregates-20261013\\final\\native-project-a4a915db0a52ad576700\\src\\types.fy",
+          "sha256": "53a77948af92724f00de0609837fd1507899df8e2b59b6d2778ef1f3c344395a"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\generic-source-aggregates-20261013\\final\\native-project-a4a915db0a52ad576700\\src\\utf8.fy",
+          "sha256": "4a5425cea9efbfb1bff2c31a38c2bd8e392c6792af09f24e906c9a743621870d"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\generic-source-aggregates-20261013\\final\\native-project-a4a915db0a52ad576700\\src\\main.fy",
+          "sha256": "b7e7795830a146ea3dcec47f5a4ef9cae3cf6b5e22c2e7ba9b621338d401b78c"
+        }
+      ]
+    }
+  },
+  "remaining": [
+    "source module AST definitions",
+    "resolved package import bindings",
+    "reachable template closures",
+    "actual planner facts",
+    "dispatcher and package cache consumers",
+    "latest source full image and fixed point",
+    "Linux, full suite and same-head hosted CI"
+  ],
+  "publicApiChanged": false,
+  "sdkAbiChanged": false,
+  "dbChanged": false,
+  "ciChanged": false,
+  "runnerChanged": false,
+  "productTimeoutChanged": false,
+  "pushed": false
+}

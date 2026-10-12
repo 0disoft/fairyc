@@ -1,5 +1,30 @@
 # Fairy 컴파일러 전환: 후속 작업 목록
 
+## Source aggregate JSON and definitions (2026-10-13)
+
+The retained syntax now emits exact Go AST JSON for structs, resources and
+restricted enums, preserving type parameters, visibility, attributes/documentation,
+ordered fields and variant payloads. Resource cleanup retains its own span,
+attributes and complete original body, including written/synthetic byte-view
+loops. Struct/resource wrappers produce source-aggregate-ast-v0 definition digests
+through the existing shared 1MiB JSON/hash work ledger. This is syntax projection,
+not new generic aggregate or type admission.
+
+Thirteen source cases match actual Go syntax AST JSON, and eleven struct/resource
+wrappers and definition hashes match json.Marshal / genericplan.DigestText. The
+cases include the unchanged 8702-byte SDK Vec<T> with six fields and cleanup,
+BOM/CRLF, documentation and foreign-function field types. Three tests pass Go
+native and candidate C development/release: exact JSON/hash equality, field/
+cleanup/type-parameter invalidation, invalid selections, sticky failure and
+exact-fit/exhausted combined work. Source check passes 409 files / 5187 MIR
+functions; final receipts verify source/copy hashes and the updated lock.
+
+Module AST definitions, resolved import providers, reachable-template closures,
+actual planner facts and dispatcher/cache consumers remain next. Latest-source
+full image/fixed point, Linux/full suite and same-head hosted CI are not rerun.
+No public API, SDK ABI, DB, CI/runner or product timeout change; no push.
+Receipt: [evidence](evidence/candidate-generic-source-aggregates-20261013.json).
+
 ## Source function definition digest (2026-10-13)
 
 The source function serializer now computes the real standalone template
