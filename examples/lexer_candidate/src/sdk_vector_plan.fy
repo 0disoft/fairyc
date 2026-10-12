@@ -49,6 +49,7 @@ pub fn Result<v::Vec<usize>,types::BatchProblem> specialize_types(ref Plan p,ref
 pub fn types::Resolution declaration_type(ref Plan p,usize module_index,usize declaration,ref mut v::Vec<types::Type> graph){return types::declaration(ref p.declarations,module_index,declaration,graph);}
 pub fn Result<types::Graph,u32> own_types(ref Plan p,v::Vec<types::Type> graph){return types::assemble(ref p.declarations,graph);}
 pub fn usize module_count(ref Plan p){return catalog::module_count(ref p.declarations);}
+pub fn usize module_owner(ref Plan p,usize module_index){return catalog::module_owner(ref p.declarations,module_index);}
 pub fn usize declaration_count(ref Plan p){return catalog::declaration_count(ref p.declarations);}
 pub fn bool source_matches(ref Plan p,usize module_index,ref syntax::Parsed source){return catalog::source_matches(ref p.declarations,module_index,source);}
 pub fn u32[8] source_digest(ref Plan p,usize module_index){return catalog::source_digest(ref p.declarations,module_index);}

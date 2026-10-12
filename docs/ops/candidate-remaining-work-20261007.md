@@ -1,5 +1,42 @@
 # Fairy 컴파일러 전환: 후속 작업 목록
 
+## Constant dependencies, folding and static assertions connected (2026-10-12)
+
+Candidate project checking now uses the checked scalar arithmetic component for
+module-local forward constants, including i64. A separate evaluator owner keeps
+dependency states and values; the existing value lookup boundary stays stable.
+All dependencies are validated before evaluation, so a dead logical branch
+cannot hide a cycle. All admitted branches are type checked, while actual
+evaluation short circuits. Scalar values enter owned IR as ordinary literals.
+Unnamed static_assert items skip the declaration name catalog, are evaluated
+before owned IR, and emit no executable assertion or named declaration.
+
+The 65,536 evaluated-node allowance follows checked package-instance owners.
+Twelve balanced 2048-leaf assertion trees pass when split between two owners and
+exhaust E4304 when all share one owner. The existing 1024 constant entries,
+64 syntax depth and 1048576 analysis work bounds remain unchanged.
+
+Five selected authored tests pass Go native and both candidate C profiles.
+Source check passes 380 files / 4849 MIR functions. The 373 current self sources
+emit and build a complete private release image with the explicit 16 MiB stack.
+The fresh 75-case comparison reduces first-code/span differences from five to
+two, fixing trap/cycle/static-assert failures without changing any prior exit,
+successful output or matching diagnostic. Three status differences remain.
+Eight extra CLI cases verify forward references, signed/unsigned limits,
+multiple assertions, short-circuit traps, cycle/type failures and the reference
+gap below. Four programs pass native development/release execution (eight runs).
+
+Additional reference gap: Go accepts `false && 1`; candidate rejects E1007 under
+the exact bool operand rule in language typing v0. This difference is retained
+in the receipt, not counted as successful semantic parity. Go source is unchanged.
+const_eval eligibility/calls, combined call cycles, selected if branches and
+casts remain unconnected. Source-location const-eval and package-state codec
+are the remaining two corpus diagnostics. Full fixed-point replay stays batched
+after integration; broader/multiple-diagnostic parity, c::ssize_t, package state,
+product timeout/host stack, Linux/full suite and hosted CI still gate promotion.
+Public language/API, SDK ABI, DB, CI and timeouts are unchanged; no push. Receipt:
+`evidence/candidate-constant-engine-20261012.json`.
+
 ## Checked scalar arithmetic component prepared (2026-10-12)
 
 `module_constant_arithmetic.fy` implements the declared-width operations for

@@ -14,6 +14,7 @@ pub struct Signature {usize module_index;usize declaration;bool public;usize res
 pub resource Program {vectors::Plan types;v::Vec<Signature> signatures;v::Vec<usize> parameters;v::Vec<bool> vector_sources;bytes::Buffer links;cleanup{}}
 pub fn bool sdk_vector_source(ref Program p,usize module_index){return module_index<v::len<bool>(ref p.vector_sources) && *v::at<bool>(ref p.vector_sources,module_index);}
 pub fn usize module_count(ref Program p){return vectors::module_count(ref p.types);}
+pub fn usize module_owner(ref Program p,usize module_index){return vectors::module_owner(ref p.types,module_index);}
 pub fn usize declaration_count(ref Program p){return vectors::declaration_count(ref p.types);}
 pub fn bool source_matches(ref Program p,usize module_index,ref syntax::Parsed source){return vectors::source_matches(ref p.types,module_index,source);}
 pub fn u32[8] source_digest(ref Program p,usize module_index){return vectors::source_digest(ref p.types,module_index);}

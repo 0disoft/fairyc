@@ -9,7 +9,7 @@ identical 30136053-byte C packets and identical full 4280832-byte Stage1/Stage2
 images. Stage2 processes all 370 admitted repository sources in 253.81 seconds
 and emits the identical packet; both generations pass 249 lexer/framing cases.
 The diagnostic-output and span revisions reduce first-code/span differences
-from 27 to nine and then five over 75 fresh paired observations, retaining three
+from 27 to nine, five and then two over 75 fresh paired observations, retaining three
 status differences and every prior candidate exit. Six additional cases match
 the first diagnostic's path/line/column/span and attached provider declaration
 locations; multiple semantic diagnostics remain a separate parity requirement.
@@ -21,12 +21,18 @@ above describe the earlier snapshot. Evidence:
 [candidate diagnostic codes](../ops/evidence/candidate-project-diagnostic-codes-20261012.json).
 [first diagnostic and provider spans](../ops/evidence/candidate-project-diagnostic-spans-20261012.json).
 
-A checked bool/u8/i32/i64/u32 arithmetic component now passes three authored
-boundary/representation tests in Go native and both candidate C profiles. Its
-379-file / 4820-function source check passes, but it is not yet connected to the
-constant evaluator. The exact 371-source main import closure and hashes are
-unchanged, so the existing frontend comparison remains applicable. Evidence:
-[constant arithmetic component](../ops/evidence/candidate-constant-arithmetic-20261012.json).
+The checked bool/u8/i32/i64/u32 arithmetic component is now connected to forward
+module constants, dependency/cycle and branch type validation, per-package node
+allowances, i64 literal folding and static_assert. Five selected authored tests
+pass Go native and both candidate C profiles; four folded-value programs pass
+eight native executions. Source check passes 380 files / 4849 MIR functions;
+the 373 current self sources emit and build a complete private release image.
+const_eval calls/eligibility, selected if branches and casts remain open. The
+additional `false && 1` probe exposes a Go reference gap: candidate rejects E1007
+under the normative bool rule, while Go accepts it. Full semantic parity is not
+claimed. Current-source fixed-point replay remains batched after integration.
+Evidence: [constant arithmetic](../ops/evidence/candidate-constant-arithmetic-20261012.json),
+[connected constant evaluator](../ops/evidence/candidate-constant-engine-20261012.json).
 
 Public borrow admission is complete, while full frontend/executable
 parity, product timeout/host-stack integration, Linux/full suite and same-head

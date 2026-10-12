@@ -1,0 +1,291 @@
+{
+  "schema": "fairyc.candidate-constant-engine/v1",
+  "passed": true,
+  "scope": "Connect module-local forward constants, checked scalar expressions, complete dependency/cycle and type validation, per-package evaluation counters, i64 folding and static_assert to candidate project checking",
+  "owningContracts": [
+    "docs/adr/0220-bounded-scalar-compile-time-evaluation.md",
+    "docs/language/0007-name-resolution-and-typing-v0.md"
+  ],
+  "sourceInputs": [
+    {
+      "path": "examples/lexer_candidate/src/module_constant_engine.fy",
+      "bytes": 20169,
+      "sha256": "f378abbbd4d37a1640b6f873041f6791673f2bd6eab2cc4fb3b9840d4c3af46d"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_unit_constants.fy",
+      "bytes": 1385,
+      "sha256": "a2bf7587822ea307fe4009643cedc3600fa666b974f05da6a528121cb82df6d6"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_unit_values.fy",
+      "bytes": 9559,
+      "sha256": "d7163ee06a4b31e8d05ffb546726624b56d7c37a34800a0067b37e9a09bb2b8e"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_signatures.fy",
+      "bytes": 10997,
+      "sha256": "3e914a245a7b3ad16cf3adf027379cfb971fe74070c80479cce777cfdd178d72"
+    },
+    {
+      "path": "examples/lexer_candidate/src/sdk_vector_plan.fy",
+      "bytes": 5518,
+      "sha256": "bab7275da47a81e2ec700f1e0478649597c16eda8ea1c37c769d7bc7a5ee04d5"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_catalog.fy",
+      "bytes": 12525,
+      "sha256": "39936921054db2c1fcd68977c24eba875b8a8ebdefd7ba45327a5c73b78099e7"
+    },
+    {
+      "path": "examples/lexer_candidate/tests/module_unit_constants.fy",
+      "bytes": 7508,
+      "sha256": "ff8836670dda2ce5e7734131d7a313a5514e340673dca0d3f1e17e471e8477f9"
+    },
+    {
+      "path": "examples/lexer_candidate/tests/module_constant_budgets.fy",
+      "bytes": 2349,
+      "sha256": "6d2886daaf5b8bd3ecfc3fa8d025262fd71c3a506a707707532392493475e1a0"
+    },
+    {
+      "path": "examples/lexer_candidate/fairy.lock",
+      "bytes": 1698,
+      "sha256": "987feb8c625ea30b738e9834cdf2f096f53d21a78479fd2ad66ef1e83d7d822d"
+    }
+  ],
+  "sourceFiles": 373,
+  "sourceInventorySHA256": "1cd9964a368f65a8c5c858943b1e31d53da175e34cbe4ce9272e2f9ff69afcba",
+  "sourceCheck": {
+    "passed": true,
+    "files": 380,
+    "mirFunctions": 4849,
+    "lockUpdated": true
+  },
+  "privateTests": [
+    {
+      "module": "module_unit_constants",
+      "receiptSHA256": "e815bff03f82aaabaad448076e221578cbbb4501ce9a9b89dbdc3233c97715d6",
+      "authoredTests": 4,
+      "nativeTests": 4,
+      "selection": {
+        "mode": "explicit-subset",
+        "authoredTests": 5,
+        "selectedTests": 4
+      },
+      "candidateExecutions": [
+        {
+          "profile": "development",
+          "exit": 0,
+          "sha256": "6e3bc59afdd7416eadb3441cf787547561cc1144d665f2d8fbb10479743d42de"
+        },
+        {
+          "profile": "release",
+          "exit": 0,
+          "sha256": "be946eeda738247f24eec7fc2e53a283b105e8d97764c9d4d4630a97e784b7fc"
+        }
+      ]
+    },
+    {
+      "module": "module_constant_budgets",
+      "receiptSHA256": "1088b67b3216b505dd530586cdf088b1cd44de4946247684c103aadabdb58e5d",
+      "authoredTests": 1,
+      "nativeTests": 1,
+      "selection": {
+        "mode": "all-authored",
+        "authoredTests": 1,
+        "selectedTests": 1
+      },
+      "candidateExecutions": [
+        {
+          "profile": "development",
+          "exit": 0,
+          "sha256": "cf847bd39bb5e117a0acc82d6a5b4314b107257564f37e0b69b05044fd0af78f"
+        },
+        {
+          "profile": "release",
+          "exit": 0,
+          "sha256": "3bad5f342374bde4dc83273803b5900d05f2555b044040075ccadd501af259e9"
+        }
+      ]
+    }
+  ],
+  "bounds": {
+    "expressionNodesPerPackage": 65536,
+    "constantEntries": 1024,
+    "syntaxDepth": 64,
+    "analysisWork": 1048576
+  },
+  "packageBudgetProof": "The same twelve 2048-leaf balanced assertion trees pass with six modules assigned to each of two package owners, and exhaust E4304 when all modules share one owner.",
+  "builds": [
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\diagnostic-spans-build-20261012\\candidate-release.exe",
+        "--c-project-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\constant-engine-build-20261012\\sources.list"
+      ],
+      "seconds": 184.9918948999839,
+      "exit": 0,
+      "stderr": "",
+      "stdoutBytes": 30453662
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-rooted-builder-stack-20261012.exe",
+        "--packet",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\constant-engine-build-20261012\\packet.bin",
+        "--packet-sha256",
+        "96e40100d172abbc0ca65da4029936ea20642280cc9d9abddfb8c027932a395a",
+        "--output",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\constant-engine-build-20261012\\candidate-release.exe",
+        "--release",
+        "--stack-reserve-bytes",
+        "16777216"
+      ],
+      "seconds": 277.5941959999909,
+      "exit": 0,
+      "stderr": "",
+      "stdoutBytes": 185
+    }
+  ],
+  "packet": {
+    "path": ".cache/constant-engine-build-20261012/packet.bin",
+    "bytes": 30453662,
+    "sha256": "96e40100d172abbc0ca65da4029936ea20642280cc9d9abddfb8c027932a395a"
+  },
+  "candidate": {
+    "path": ".cache/constant-engine-build-20261012/candidate-release.exe",
+    "bytes": 4319744,
+    "sha256": "93e311308d3ceb3ec7e5dc09eec20f2c0f1636741908828586a283f3512cc7c2"
+  },
+  "verificationStackReserveBytes": 16777216,
+  "frontendCorpus": {
+    "cases": 75,
+    "referenceSHA256": "3ecc4501ee3bb47ecc39e7288200266b31cbcd8bf6ffec302ae54867705ce5d1",
+    "receiptSHA256": "92b74b9662faa00ec18951981f6cc9e7969fc7ab83eecce1f9d0eb658bb3717b",
+    "priorReceiptSHA256": "fbd9d0be32b4baa0078645b0972d749eec2f594af913d5b71a93b8eb8b5982c4",
+    "exactExitRegressions": 0,
+    "successfulOutputRegressions": 0,
+    "previouslyMatchedDiagnosticRegressions": 0,
+    "firstDiagnosticDifferencesBefore": 5,
+    "firstDiagnosticDifferencesAfter": 2,
+    "statusDifferences": 3,
+    "improved": [
+      {
+        "id": "fail.type.compile-time-trap",
+        "diagnostic": {
+          "code": "E4303",
+          "start": 30,
+          "end": 35
+        }
+      },
+      {
+        "id": "fail.type.compile-time-cycle",
+        "diagnostic": {
+          "code": "E4304",
+          "start": 24,
+          "end": 29
+        }
+      },
+      {
+        "id": "fail.type.compile-time-assert",
+        "diagnostic": {
+          "code": "E4305",
+          "start": 14,
+          "end": 35
+        }
+      }
+    ],
+    "remainingDiagnostics": [
+      {
+        "id": "fail.type.source-location-const-eval",
+        "reference": [
+          {
+            "code": "E4302",
+            "start": 52,
+            "end": 73
+          }
+        ],
+        "candidate": []
+      },
+      {
+        "id": "fail.type.package-state-codec",
+        "reference": [
+          {
+            "code": "E7203",
+            "start": 58,
+            "end": 64
+          }
+        ],
+        "candidate": []
+      }
+    ]
+  },
+  "additionalProof": {
+    "cases": 8,
+    "nativeExecutions": 8,
+    "receiptSHA256": "e4c5bb9c24f77a5bb6c254c22ed86fb564b233e3f2a8dbf34a7408053532390b",
+    "nativePrograms": [
+      "Forward",
+      "I64",
+      "Unsigned",
+      "Assertions"
+    ],
+    "referenceGap": "Go accepts false && 1; candidate rejects E1007 according to exact bool operand rule in docs/language/0007-name-resolution-and-typing-v0.md:141.",
+    "referenceGapObservation": {
+      "name": "DeadType",
+      "sourceSHA256": "671331241319da4709f8cd8b9981209280f014185c34abeb910641422d5a1e43",
+      "observations": [
+        {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-frontend-oracle-current-20261012.exe",
+            "check"
+          ],
+          "seconds": 0.05825030000414699,
+          "exit": 0,
+          "stdoutBytes": 75,
+          "stderr": "",
+          "engine": "reference",
+          "diagnostics": []
+        },
+        {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\constant-engine-build-20261012\\candidate-release.exe",
+            "check"
+          ],
+          "seconds": 0.018301500007510185,
+          "exit": 3,
+          "stdoutBytes": 0,
+          "stderr": "main.fy:1:37: E1007: condition or logical operand is not bool [bytes 36..37]\n",
+          "engine": "candidate",
+          "diagnostics": [
+            {
+              "code": "E1007",
+              "start": 36,
+              "end": 37
+            }
+          ]
+        }
+      ],
+      "executions": []
+    }
+  },
+  "integrationComplete": false,
+  "remaining": [
+    "const_eval function eligibility/calls, combined function/constant cycles, selected if branches and casts; source_location const-eval rejection span.",
+    "Package-state codec diagnostic and package-state support.",
+    "c::ssize_t check/target capability separation.",
+    "The recorded Go reference accepts an ill-typed dead logical operand; candidate follows the normative exact bool requirement.",
+    "Full multiple-diagnostic ordering, broader frontend/executable parity and current-source fixed-point replay.",
+    "Product timeout/host stack integration, Linux/full suite and same-head hosted CI."
+  ],
+  "promotionGateReady": false,
+  "shippingGoCompilerChanged": false,
+  "publicLanguageChanged": false,
+  "publicAPIChanged": false,
+  "candidateCheckBehaviorChanged": true,
+  "sdkABIChanged": false,
+  "dbChanged": false,
+  "ciChanged": false,
+  "productTimeoutChanged": false,
+  "pushed": false
+}
