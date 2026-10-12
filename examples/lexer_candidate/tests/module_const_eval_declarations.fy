@@ -20,8 +20,8 @@ fn void rejected(ref u8[] source,ref u8[] span){var v::Vec<syntax::Parsed> sourc
     assert(bytes::equal(syntax::expression_text(ref source,info.expression),b"n"));let contract=effects::read(ref source,1);assert(contract.code==0 && contract.bits==0 && contract.must_use);
     let plain=declarations::read(ref source,2);assert(!plain.annotated && plain.code==0);
     var v::Vec<syntax::Parsed> sources=v::empty<syntax::Parsed>();assert(v::push<syntax::Parsed>(ref mut sources,source).is_ok);let metadata=switch(signatures::build(ref sources)){case .ok(p):{p}case .err(_):{assert(false);return;}};assert(signatures::count(ref metadata)==2);
-    // Function expression evaluation remains closed until the next integration.
-    switch(constants::build(ref sources)){case .ok(_):{assert(false);}case .err(p):{assert(p.code==4302 && bytes::equal(syntax::source_view(v::at<syntax::Parsed>(ref sources,0))[p.start..p.end],b"n"));}};
+    // A valid unused function is validated but not executed with invented inputs.
+    let checked=switch(constants::build(ref sources)){case .ok(p):{p}case .err(_):{assert(false);return;}};assert(constants::work(ref checked)>0);
 }
 @test fn void invalid_arity_duplicates_and_misplacement_report_attribute_spans(){
     rejected(b"module main;@const_eval(1) fn i32 bad(){return 0;}",b"@const_eval(1)");

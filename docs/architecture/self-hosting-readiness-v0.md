@@ -9,40 +9,40 @@ identical 30136053-byte C packets and identical full 4280832-byte Stage1/Stage2
 images. Stage2 processes all 370 admitted repository sources in 253.81 seconds
 and emits the identical packet; both generations pass 249 lexer/framing cases.
 The diagnostic-output and span revisions reduce first-code/span differences
-from 27 to nine, five and then two over 75 fresh paired observations, retaining three
-status differences and every prior candidate exit. Six additional cases match
+from 27 to nine, five, two and then one over 75 fresh paired observations, retaining two
+status differences while preserving the other candidate observations. Six additional cases match
 the first diagnostic's path/line/column/span and attached provider declaration
 locations; multiple semantic diagnostics remain a separate parity requirement.
-The 371 current self sources emit and build a complete private native release
+The diagnostic-span snapshot's 371 self sources emit and build a complete private native release
 image; six selected authored tests pass Go native and both candidate C profiles.
-Current-source fixed-point replay is deferred
-until the diagnostic correction batch finishes; the byte-identical generations
+Current-source fixed-point replay remains open; the byte-identical generations
 above describe the earlier snapshot. Evidence:
 [candidate diagnostic codes](../ops/evidence/candidate-project-diagnostic-codes-20261012.json).
 [first diagnostic and provider spans](../ops/evidence/candidate-project-diagnostic-spans-20261012.json).
 
-The checked bool/u8/i32/i64/u32 arithmetic component is now connected to forward
-module constants, dependency/cycle and branch type validation, per-package node
-allowances, i64 literal folding and static_assert. Five selected authored tests
-pass Go native and both candidate C profiles; four folded-value programs pass
-eight native executions. Source check passes 380 files / 4849 MIR functions;
-the 373 current self sources emit and build a complete private release image.
-const_eval calls/eligibility, selected if branches and casts remain open. The
-additional `false && 1` probe exposes a Go reference gap: candidate rejects E1007
-under the normative bool rule, while Go accepts it. Full semantic parity is not
-claimed. Current-source fixed-point replay remains batched after integration.
-Evidence: [constant arithmetic](../ops/evidence/candidate-constant-arithmetic-20261012.json),
-[connected constant evaluator](../ops/evidence/candidate-constant-engine-20261012.json).
+The checked bool/u8/i32/i64/u32 evaluator now admits forward module constants,
+private const_eval calls with immutable parameter binding, combined graph cycles,
+selected conditional branches, pure tail blocks, value-preserving casts and
+static_assert. Annotated functions stay ordinary runtime callables. Graph traversal
+uses explicit DFS frames; runtime calls keep the exact 32-depth limit and owners
+share the 65,536-node allowance. Four new authored tests pass Go native and both
+candidate C profiles; eight declaration/constant/package-budget regression tests
+pass both C profiles. Twelve extra CLI cases pass their explicit expectations and
+five programs pass ten native development/release executions. Source check passes
+385 files / 4886 MIR functions. All 378 current self sources emit and build one
+complete 4,376,576-byte release image with the explicit 16 MiB stack. The full
+current-source consecutive-generation fixed-point replay remains a later gate.
 
-Const-eval declaration admission now shares one Fairy owner across signatures,
-effect contracts and the constant engine. Invalid placement, attributes,
-visibility, signatures and body shape produce E4301 with owning source spans.
-Three authored tests pass Go native and both candidate C profiles; four existing
-signature tests pass both C profiles. Source check passes 381 files / 4853 MIR
-functions. Valid function expressions still reject E4302 pending call-graph and
-parameter-binding integration; current complete-image and fixed-point counts
-above retain their earlier snapshots. Evidence:
-[const-eval declaration admission](../ops/evidence/candidate-const-eval-declarations-20261012.json).
+Canonical scalar alias admission and named-label/multiple diagnostic output remain
+open. Extra probes record Go reference differences without claiming full semantic
+parity: Go accepts an ill-typed unselected if/logical branch, and reports E4302 for
+wrong const-eval arity while candidate uses E1010. The fresh 75-case comparison
+retains two status gaps (c::ssize_t and package state) and one first-code/span gap
+(package-state codec). Evidence:
+[constant arithmetic](../ops/evidence/candidate-constant-arithmetic-20261012.json),
+[connected module constants](../ops/evidence/candidate-constant-engine-20261012.json),
+[const-eval declaration admission](../ops/evidence/candidate-const-eval-declarations-20261012.json),
+[const-eval execution](../ops/evidence/candidate-const-eval-calls-20261012.json).
 
 Public borrow admission is complete, while full frontend/executable
 parity, product timeout/host-stack integration, Linux/full suite and same-head

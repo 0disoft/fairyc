@@ -71,3 +71,11 @@ pub fn Computed binary(u32 scalar,ref u8[] op,usize left,usize right){
         if(b!=0 && a>limit/b){return fail(4303);}return result(scalar,encoded(scalar,negative,a*b));
     }return fail(4302);
 }
+
+// The current language only admits these value-preserving scalar widenings.
+pub fn Computed cast(u32 source,u32 target,usize value){
+    if(!valid(source,value)){return fail(12);}
+    if(source==3 && (target==1 || target==2 || target==4) || source==4 && target==2){return result(target,value);}
+    if(source==1 && target==2){return result(target,if(value<=2147483647){value}else{18446744073709551615-(4294967295-value)});}
+    return fail(4303);
+}

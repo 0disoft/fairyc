@@ -1,5 +1,48 @@
 # Fairy 컴파일러 전환: 후속 작업 목록
 
+## Const-eval calls, selected branches and casts connected (2026-10-12)
+
+The Fairy evaluator now binds immutable scalar parameters, executes nested private
+module-local const_eval calls, follows parameter shadowing and preserves distinct
+argument values across repeated calls. Eligible functions remain ordinary runtime
+callables. The combined constant/function graph rejects cycles in all branches
+before evaluation, including unused functions; an explicit DFS stack owns graph
+traversal. Runtime execution short circuits and evaluates only the selected if
+branch. Pure tail blocks and the language's value-preserving scalar widenings,
+including i32 sign extension to i64, are connected.
+
+The 32-call-depth limit passes at 32 and rejects at 33; constant references do not
+increment call depth. Per-package 65,536 evaluated nodes, 64 syntax depth, 1024
+constants and 1,048,576 shared analysis work stay bounded. Function/parameter
+catalogs use the existing 4096-function, 128-parameter and 32768-parameter limits.
+The evaluator is partitioned into graph, type, runtime and model owners; every
+changed Fairy source is below 10 KiB.
+
+Four new authored tests pass Go native and both candidate C profiles. Three
+declaration, four constant and one package-budget regression tests pass both C
+profiles. Source check passes 385 files / 4886 MIR functions with the current lock
+verified. All 378 current self sources emit a 30,689,128-byte C packet and build
+one complete 4,376,576-byte release image with the explicit 16 MiB stack. This is
+a current complete-image build, not a consecutive-generation fixed-point replay.
+
+The fresh 75-case CLI comparison now matches 72 cases: first-code/span differences
+reduce from two to one and status differences from three to two. The compile-time
+pass and source-location const-eval failure now match; all other prior observations
+are preserved. Twelve additional CLI cases exercise the complete owning fixture,
+normal runtime calls, widening, short circuits, depth, cycles, argument failures
+and cast traps. Five programs pass ten native development/release executions.
+
+Two extra Go reference differences remain explicit: wrong const-eval arity reports
+E4302 in Go versus ordinary E1010 in the candidate, and Go accepts an ill-typed
+unselected if branch while the candidate enforces compatible branch types. The
+prior dead logical-operand gap also remains. Full semantic parity is not claimed.
+Canonical scalar alias admission, named-label diagnostic output and broader/multiple
+diagnostics remain follow-ups. c::ssize_t and package state still differ in status,
+and package-state codec is the remaining first diagnostic. Current-source fixed
+point, product timeout/default stack, Linux/full suite and hosted CI still gate
+promotion. Public API, SDK ABI, DB, hygiene, CI, runner and timeout configuration
+are unchanged; no push. Receipt: `evidence/candidate-const-eval-calls-20261012.json`.
+
 ## Const-eval declaration admission connected (2026-10-12)
 
 The Fairy declaration owner now distinguishes invalid const_eval attributes from

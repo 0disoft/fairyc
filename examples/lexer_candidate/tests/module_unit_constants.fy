@@ -23,7 +23,7 @@ fn void rejected(ref u8[] source,u32 expected){var v::Vec<syntax::Parsed> source
     let yes=switch(constants::get(ref p,0,5,ref mut work)){case .ok(v):{v}case .err(_):{assert(false);return;}};assert(yes.scalar==6 && yes.bits==1);
     rejected(b"module main;pub const i32 X=1;",4301);rejected(b"module main;const usize X=1;",4301);rejected(b"module main;const u8[1] X=[1];",4301);
     rejected(b"module main;const u8 X=256;",1013);rejected(b"module main;const i32 X=2147483648;",1013);rejected(b"module main;const i32 X=-2147483649;",1013);rejected(b"module main;const u32 X=4294967296;",1013);rejected(b"module main;const bool X=1;",1006);
-    rejected(b"module main;const i32 X=-(-2147483648);",4303);rejected(b"module main;@const_eval fn i32 value(){return 1;}",4302);rejected(b"module main;static_assert(false);",4305);rejected(b"module main;static_assert(1);",1007);
+    rejected(b"module main;const i32 X=-(-2147483648);",4303);rejected(b"module main;@const_eval fn i32 value(){return ordinary();}fn i32 ordinary(){return 1;}",4302);rejected(b"module main;static_assert(false);",4305);rejected(b"module main;static_assert(1);",1007);
 }
 @test fn void forward_dependencies_short_circuit_and_i64_values_are_folded(){
     var v::Vec<syntax::Parsed> sources=v::empty<syntax::Parsed>();assert(v::push<syntax::Parsed>(ref mut sources,parsed(b"module main;const i32 FIRST=SECOND+6;const i32 SECOND=6*6;const u32 WIDE=40+2;const bool READY=42==WIDE;const bool SAFE=false && (1/0==0);const i64 LOW=-9223372036854775808;const i64 STEP=LOW+1;static_assert(READY && !SAFE);static_assert(STEP<0);static_assert(true);")).is_ok);let p=switch(constants::build(ref sources)){case .ok(p):{p}case .err(_):{assert(false);return;}};var usize work=0;
