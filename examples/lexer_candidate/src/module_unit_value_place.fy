@@ -9,9 +9,10 @@ import pointer_types as pointers;
 pub fn m::Place field(ref v::Vec<types::Type> graph,m::Expression receiver,m::Expression selected){
     if(selected.field.id==0 || receiver.type==0){return m::no_place();}let t=types::at(graph,receiver.type);var p=receiver.place;
     if(p.kind==0 && t.kind!=7 && t.kind!=8){return m::no_place();}p.kind=2;p.projection=selected.source_index;p.indirect=p.indirect || t.kind==7 || t.kind==8;
-    // A reference call result denotes existing storage even when its whole-owner
-    // origin is not known here. Project its referent, not the temporary pointer.
-    if(t.kind==7 || t.kind==8){p.mutable=t.kind==8;p.borrowable=true;}let owner=types::at(graph,selected.field.owner);p.resource_field=p.resource_field || owner.kind==3 || owner.kind==13;return p;
+    // ADR 0391 permits shared-reference call projections. ADRs 0445/0446
+    // restrict mutable-reference field places to named roots; grouping keeps
+    // that root place, while a returned temporary reference has no named place.
+    if(t.kind==7 || t.kind==8){let named_mutable=receiver.place.kind==1 && receiver.place.root!=0;p.mutable=t.kind==8 && named_mutable;p.borrowable=t.kind==7 || named_mutable;}let owner=types::at(graph,selected.field.owner);p.resource_field=p.resource_field || owner.kind==3 || owner.kind==13;return p;
 }
 pub fn bool referent(types::Type t){return t.kind==1 && t.scalar>=1 && t.scalar<=6 || t.kind==2 || t.kind==3 || t.kind==4 || t.kind==5 || t.kind==6 || t.kind==13 || t.kind==12 && t.first==0 && t.scalar==1048591;}
 pub fn bool raw_mutable(types::Type t){return t.kind==12 && if(t.first==0){pointers::mutable(t.scalar)}else{t.scalar==1};}

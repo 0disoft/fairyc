@@ -23,6 +23,33 @@ Receipts: `evidence/candidate-loop-control-private-20261012.json`,
 Next: connect the existing transitive borrowed-result and live-loan analysis
 before admitting project IR, retaining source diagnostic codes and spans.
 
+## Mutable call-place admission boundary (2026-10-12)
+
+ADR 0446 admits named/grouped mutable plain-struct reference roots and excludes
+borrowed call-result roots. Candidate field place construction now retains that
+boundary: a mutable reference becomes a mutable/borrowable field place only
+when its receiver has a named local place. ADR 0391 shared-reference call
+projections keep their existing admission. Ordinary reads are unchanged.
+
+The authored type-phase rejection test passes in Go-native and both candidate
+C profiles. Two previously accepted/late-rejected mutable call cases now match
+Go rejection and its complete primary span. Two named/grouped cases preserve
+Go's live-conflict diagnostic and last-use release; three shared-call cases
+also preserve status and first diagnostic code/span. The 75-case corpus still
+has three status and 27 first-diagnostic differences. Source check passes
+377 files / 4804 MIR functions; the clean cached integration emits 30108200
+C-part bytes and builds with explicit 16 MiB reservation.
+
+Complete self replay is deferred after the preceding phase-budget preview
+exhausted its 900-second verification allowance without a completed packet.
+Next: profile repeated provider/type and flow work before repeating that full
+run, then admit the public borrow gate and establish a new complete fixed
+point. The gate is still only an experimental preview. The supported-language
+gaps c::ssize_t, comptime and package state, diagnostic differences, Linux and
+hosted CI remain. Public language/CLI, SDK ABI, DB, CI and product timeouts are
+unchanged, no push. Receipt:
+`evidence/candidate-borrow-mutable-call-place-guard-20261012.json`.
+
 ## Independent final-loan and publication histories (2026-10-12)
 
 Preparation/summary convergence and the final loan traversal now each own a
@@ -42,7 +69,9 @@ diagnostic spans and the prior explicit-budget failure contract. Source check
 passes 377 files / 4804 MIR functions. The 75-case corpus retains three status
 and 27 first-diagnostic differences. The clean cached preview emits 30106662
 C-part bytes and builds with explicit 16 MiB stack reservation; complete
-self-source emission is running. No fixed point or promotion claim is made.
+self-source emission times out after 900 seconds. No completed packet or
+fixed point is observed; the partial process streams were not retained.
+Promotion remains unready. Profile repeated work before another full replay.
 The public borrow gate remains unapplied. Public language/CLI, SDK ABI, DB, CI
 and product timeouts are unchanged, no push. Receipt:
 `evidence/candidate-borrow-phase-budgets-20261012.json`.

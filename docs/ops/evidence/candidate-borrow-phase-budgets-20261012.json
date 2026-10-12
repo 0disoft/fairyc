@@ -4430,9 +4430,24 @@
       "exit": 0,
       "stderr": "",
       "stdoutBytes": 187
+    },
+    "self-emit": {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\borrow-phase-budgets-integration-20261012\\candidate-dev.exe",
+        "--c-project-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\borrow-phase-budgets-integration-20261012\\sources.list"
+      ],
+      "timedOut": true,
+      "timeoutSeconds": 900,
+      "completionObserved": false,
+      "exit": null,
+      "stdoutBytes": null,
+      "stderr": null,
+      "packetArtifactCreated": false,
+      "observation": "Python subprocess.TimeoutExpired; child was terminated by subprocess.run; partial process streams were not retained"
     }
   },
-  "selfEmissionPending": true,
+  "selfEmissionPending": false,
   "sourceCheck": {
     "files": 377,
     "mirFunctions": 4804
