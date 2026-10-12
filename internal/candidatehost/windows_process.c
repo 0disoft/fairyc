@@ -22,6 +22,7 @@ int32_t fairyc_private_windows_kill_process_v1(void *process, uint32_t code) { r
 int32_t fairyc_private_windows_close_v1(void *handle) { return CloseHandle(handle); }
 void *fairyc_private_windows_std_handle_v1(uint32_t kind) { return GetStdHandle(kind); }
 uint32_t fairyc_private_windows_error_v1(void) { return GetLastError(); }
+size_t fairyc_private_windows_ticks_v1(void) { return (size_t)GetTickCount64(); }
 size_t fairyc_private_windows_startup_size_v1(void) { return sizeof(STARTUPINFOW); }
 size_t fairyc_private_windows_job_size_v1(void) { return sizeof(JOBOBJECT_EXTENDED_LIMIT_INFORMATION); }
 int32_t fairyc_private_windows_create_env_v1(const uint8_t *app, uint8_t *line, const uint8_t *cwd,

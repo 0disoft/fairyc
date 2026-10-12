@@ -1,0 +1,355 @@
+{
+  "schema": "fairyc.candidate-windows-run-capture/v1",
+  "passed": true,
+  "module": "windows_run_capture",
+  "sourceInputs": [
+    {
+      "path": "examples/lexer_candidate/src/candidate_limits.fy",
+      "sha256": "e337e22a7feff699a675f0a12d882fc92b577e62f58712ceb24bd0fac136ab85"
+    },
+    {
+      "path": "examples/lexer_candidate/src/file_source.fy",
+      "sha256": "1a7ac7f6c69ef27e78e734aa74dab90b895742a5500a32931baaed19379b938f"
+    },
+    {
+      "path": "internal/sdkstdlib/sources/std/bytes.fy",
+      "sha256": "4740a506e93349fb002c383967dcc44d182d20f09f2094b83b5464a4ab252982"
+    },
+    {
+      "path": "internal/sdkstdlib/sources/std/fs.fy",
+      "sha256": "fd7ddfa9f0deed98304cecf94911644087d1e2a46e8be8995c35acbcb183b335"
+    },
+    {
+      "path": "internal/sdkstdlib/sources/std/io.fy",
+      "sha256": "4b89c3aeb8b4de4887395d29723095d364c5660c6b773c5696fb1f65f5365f48"
+    },
+    {
+      "path": "internal/sdkstdlib/sources/std/process.fy",
+      "sha256": "9680a1481df4f761f481d5a039af7bdbefeb312d1091961194f8e7bc0681ae24"
+    },
+    {
+      "path": "internal/sdkstdlib/sources/std/text.fy",
+      "sha256": "cccd47e090fda11c9da063ffb321489dd8753fe9996855fc432833e05a79e695"
+    },
+    {
+      "path": "internal/sdkstdlib/sources/optional/std/vec.fy",
+      "sha256": "0ae4c395bf98c39079ad620bde035b3b590d51417864802e698edc069281db5b"
+    },
+    {
+      "path": "examples/lexer_candidate/src/windows_command.fy",
+      "sha256": "e1dda5292a2e8d6a6a7b8d919f887832b0028a3dc3e3576b7ab4a21083eedef6"
+    },
+    {
+      "path": "examples/lexer_candidate/src/windows_process.fy",
+      "sha256": "2dc3d17549428a7067f030b6c821e56f2de029583cc66569dbc9260807994412"
+    },
+    {
+      "path": "examples/lexer_candidate/src/windows_run_capture.fy",
+      "sha256": "3f35d18e8123cd675f0da7bf0faf49c20400cc93b269e07c4913954bb3930457"
+    },
+    {
+      "path": "examples/lexer_candidate/src/windows_run_control.fy",
+      "sha256": "416f776f2acde2e989108557a49afa642c8afe6eb2047979b01d776b879884e5"
+    },
+    {
+      "path": "examples/lexer_candidate/tests/windows_run_capture.fy",
+      "sha256": "1efd4bb097d759d073849ab541ea16277b0e12b719e148168fb0151bdf2f4413"
+    },
+    {
+      "path": "tools/verify-candidate-private-tests.py",
+      "sha256": "8a5a0bd3f157168003e995aa73e866b4028e8dcaeddcd245e0e627f0956d3cc1"
+    },
+    {
+      "path": ".cache/candidate-run-control-20261012/fixture.txt",
+      "sha256": "671449ef1a5246259ea81d5af84ae73ee449a11cdac6e3b6ef260f2df69694f0"
+    },
+    {
+      "path": ".cache/candidate-run-control-20261012/input.bin",
+      "sha256": "b8a928331bae55f798a3b85b6c8665e782eab672504a0e5399e57b6b0e714411"
+    },
+    {
+      "path": ".cache/candidate-run-control-20261012/stdout.bin",
+      "sha256": "b530e00cf94440e8801e4f4aabd7eb10f8105cab642d86061bc2471844dd7520"
+    },
+    {
+      "path": ".cache/candidate-run-control-20261012/stderr.bin",
+      "sha256": "1e65ff300948ccc730d8e2df550a42a59cb72b1e8df9a16d37387b91744c4470"
+    }
+  ],
+  "tools": {
+    "compiler": {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\manifest-bootstrap.exe",
+      "sha256": "18e72a61e9ff3fdd620652ecd8ce2e355b9371488b2ad1b2ccbadbf7a091783a"
+    },
+    "candidate": {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-stack-current-20261012\\complete-stage2\\compiler.exe",
+      "sha256": "6e55b6aa6d8aa5f01b850a860b565d5b1b8e74a310c05425a11f58ca699d3b6e"
+    },
+    "builder": {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-capture-builder-20261012.exe",
+      "sha256": "acb8c80d350cf7e9cb2fb5c4a76b753f731399fcea60436a58c9149571aa1a24"
+    }
+  },
+  "native": null,
+  "nativeTests": 0,
+  "authoredTestsExecuted": 5,
+  "candidateOnly": true,
+  "lockSHA256": "901e5744f58c6138a81b7b576b3d15264952057c1b9ad6743fd3c662456a7e2a",
+  "candidateInputFiles": 13,
+  "candidatePacketSHA256": "2d5aaf497f694feb12469e265d6c556575474d360072e7206e97431580000427",
+  "candidateExecutions": [
+    {
+      "profile": "development",
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-run-capture-20261012\\verified\\development.exe",
+      "sha256": "63dba3cc4d7eef4d7501e1be88379225b925676e7c069f87592e6968306363b3",
+      "exit": 0
+    },
+    {
+      "profile": "release",
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-run-capture-20261012\\verified\\release.exe",
+      "sha256": "e57692c02c1391489791af9b993b797e3205199f530d6f4ce789e7a724b60a51",
+      "exit": 0
+    }
+  ],
+  "invocations": [
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-stack-current-20261012\\complete-stage2\\compiler.exe",
+        "--c-project-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-run-capture-20261012\\verified\\sources.list"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "seconds": 4.674390600004699,
+      "exit": 0,
+      "stdoutBytes": 429927,
+      "stdoutSHA256": "2d5aaf497f694feb12469e265d6c556575474d360072e7206e97431580000427",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-capture-builder-20261012.exe",
+        "--packet",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-run-capture-20261012\\verified\\candidate-packet.bin",
+        "--packet-sha256",
+        "2d5aaf497f694feb12469e265d6c556575474d360072e7206e97431580000427",
+        "--output",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-run-capture-20261012\\verified\\development.exe"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "seconds": 1.6657963000179734,
+      "exit": 0,
+      "stdoutBytes": 180,
+      "stdoutSHA256": "41adb9d7f310311553e884f0748326f6c078799972bec9821f47ffa6a15afa9e",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-run-capture-20261012\\verified\\development.exe",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-run-control-20261012\\fixture.txt"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "seconds": 1.3233697999967262,
+      "exit": 0,
+      "stdoutBytes": 13,
+      "stdoutSHA256": "b530e00cf94440e8801e4f4aabd7eb10f8105cab642d86061bc2471844dd7520",
+      "stderr": "child stderr\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-capture-builder-20261012.exe",
+        "--packet",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-run-capture-20261012\\verified\\candidate-packet.bin",
+        "--packet-sha256",
+        "2d5aaf497f694feb12469e265d6c556575474d360072e7206e97431580000427",
+        "--output",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-run-capture-20261012\\verified\\release.exe",
+        "--release"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "seconds": 15.997471999988193,
+      "exit": 0,
+      "stdoutBytes": 182,
+      "stdoutSHA256": "a62398fc1a6dc30f26b4e4d706dd5c82f81aeda5fa28dcb8061eb4b11cfc25f4",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-run-capture-20261012\\verified\\release.exe",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-run-control-20261012\\fixture.txt"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "seconds": 1.3097776000213344,
+      "exit": 0,
+      "stdoutBytes": 13,
+      "stdoutSHA256": "b530e00cf94440e8801e4f4aabd7eb10f8105cab642d86061bc2471844dd7520",
+      "stderr": "child stderr\n"
+    }
+  ],
+  "publicApiChanged": false,
+  "dbChanged": false,
+  "ciChanged": false,
+  "pushed": false,
+  "selection": {
+    "mode": "all-authored",
+    "authoredTests": 5,
+    "selectedTests": 5
+  },
+  "frontendTimeoutSeconds": 60,
+  "productTimeoutChanged": false,
+  "wrapperEffects": [
+    "filesystem",
+    "console",
+    "environment",
+    "clock"
+  ],
+  "streamVerification": {
+    "stdin": {
+      "bytes": 7,
+      "sha256": "b8a928331bae55f798a3b85b6c8665e782eab672504a0e5399e57b6b0e714411"
+    },
+    "stdout": {
+      "bytes": 13,
+      "sha256": "b530e00cf94440e8801e4f4aabd7eb10f8105cab642d86061bc2471844dd7520"
+    },
+    "stderr": {
+      "bytes": 13,
+      "sha256": "1e65ff300948ccc730d8e2df550a42a59cb72b1e8df9a16d37387b91744c4470"
+    }
+  },
+  "baselineCommit": "4b35e0c9",
+  "sourceCheck": {
+    "files": 370,
+    "mirFunctions": 4748,
+    "exit": 0
+  },
+  "physicalExitBits": {
+    "passed": true,
+    "executions": [
+      {
+        "expected": 5,
+        "observed": 5,
+        "profile": "development",
+        "source": "module main;import windows_run_capture as capture;fn i32 main(){return capture::exit_bits(5);}\n",
+        "sourceSHA256": "1846ae2718cb603125ce81531e9a9c1c7997a3516ce18debfa7ea9cb46fa7dff",
+        "packetSHA256": "4d65d605913c9c01ca6f38d185d1551a77408b028ae167fcf15442f91a33342e",
+        "imageSHA256": "81bbb822f5fc4f34652240731c62b542cf591babc026e8a44686d3c9c0482876",
+        "emptyStreams": true
+      },
+      {
+        "expected": 5,
+        "observed": 5,
+        "profile": "release",
+        "source": "module main;import windows_run_capture as capture;fn i32 main(){return capture::exit_bits(5);}\n",
+        "sourceSHA256": "1846ae2718cb603125ce81531e9a9c1c7997a3516ce18debfa7ea9cb46fa7dff",
+        "packetSHA256": "4d65d605913c9c01ca6f38d185d1551a77408b028ae167fcf15442f91a33342e",
+        "imageSHA256": "e0f7ef49032e066e96507078289b8f9fd6af078d03f0129342091ab02d918a78",
+        "emptyStreams": true
+      },
+      {
+        "expected": 2147483647,
+        "observed": 2147483647,
+        "profile": "development",
+        "source": "module main;import windows_run_capture as capture;fn i32 main(){return capture::exit_bits(2147483647);}\n",
+        "sourceSHA256": "8069832cee829f76d258d326e0a8eae24aa2d928f28c1d592fa0e7076b81b777",
+        "packetSHA256": "920e431b43362119fe46ffba0354e342b41b205bbbe889e40f0a1e87f9686458",
+        "imageSHA256": "6efcae271bf5e6a6de0f3b4c7ce5399231e51444d46f3657c1079eb1736452a6",
+        "emptyStreams": true
+      },
+      {
+        "expected": 2147483647,
+        "observed": 2147483647,
+        "profile": "release",
+        "source": "module main;import windows_run_capture as capture;fn i32 main(){return capture::exit_bits(2147483647);}\n",
+        "sourceSHA256": "8069832cee829f76d258d326e0a8eae24aa2d928f28c1d592fa0e7076b81b777",
+        "packetSHA256": "920e431b43362119fe46ffba0354e342b41b205bbbe889e40f0a1e87f9686458",
+        "imageSHA256": "04d9e3f50ad5405f0f00f8dcd70d4530d2873071f7d679243cb4b55f9ad43673",
+        "emptyStreams": true
+      },
+      {
+        "expected": 2147483648,
+        "observed": 2147483648,
+        "profile": "development",
+        "source": "module main;import windows_run_capture as capture;fn i32 main(){return capture::exit_bits(2147483648);}\n",
+        "sourceSHA256": "e090ac2382bdf74c524fd4bd02046a4572b899d6468d91e7e1704196811d3cd9",
+        "packetSHA256": "b7582c36103e665c9e1eecff90404ebfe959698af53272491b2e4f30f314e927",
+        "imageSHA256": "31d1545a1381198e97f415d63177be8eb68e5c7bb23bc4601d9afa4c4d54c150",
+        "emptyStreams": true
+      },
+      {
+        "expected": 2147483648,
+        "observed": 2147483648,
+        "profile": "release",
+        "source": "module main;import windows_run_capture as capture;fn i32 main(){return capture::exit_bits(2147483648);}\n",
+        "sourceSHA256": "e090ac2382bdf74c524fd4bd02046a4572b899d6468d91e7e1704196811d3cd9",
+        "packetSHA256": "b7582c36103e665c9e1eecff90404ebfe959698af53272491b2e4f30f314e927",
+        "imageSHA256": "db1205258656d1f9c794e36e1de4d06880c0f72705948f464e777714a3677fe2",
+        "emptyStreams": true
+      },
+      {
+        "expected": 2147483690,
+        "observed": 2147483690,
+        "profile": "development",
+        "source": "module main;import windows_run_capture as capture;fn i32 main(){return capture::exit_bits(2147483690);}\n",
+        "sourceSHA256": "777edb6c49ab6d0701c038288e513eb0674b66d5b4325a25883b7f85c61ba5ee",
+        "packetSHA256": "17f5035ae3243d02c934cf3668a246af71733dddd22593810b0a3d305c07642e",
+        "imageSHA256": "5af8adc19bc8fde1e5e96a1710b5db28862063d5b63e39bc3c1e3e6f36879f7f",
+        "emptyStreams": true
+      },
+      {
+        "expected": 2147483690,
+        "observed": 2147483690,
+        "profile": "release",
+        "source": "module main;import windows_run_capture as capture;fn i32 main(){return capture::exit_bits(2147483690);}\n",
+        "sourceSHA256": "777edb6c49ab6d0701c038288e513eb0674b66d5b4325a25883b7f85c61ba5ee",
+        "packetSHA256": "17f5035ae3243d02c934cf3668a246af71733dddd22593810b0a3d305c07642e",
+        "imageSHA256": "1f9ffee701d3d330dd5480acec6736997ad25c924297321e8b7ed9920cd34855",
+        "emptyStreams": true
+      },
+      {
+        "expected": 4294967295,
+        "observed": 4294967295,
+        "profile": "development",
+        "source": "module main;import windows_run_capture as capture;fn i32 main(){return capture::exit_bits(4294967295);}\n",
+        "sourceSHA256": "85acfec56ca2eda8087285161e47bde04ca319f9a8b05996e75b2f9805225950",
+        "packetSHA256": "1960ab3631e6b4eb9cbdd3b3c0936099e5f1719d946f817e285df94d5f7929c5",
+        "imageSHA256": "84378e7243c23b45d67292b5388dac30c1206dc7d793e17c10fce5a9ec759ab7",
+        "emptyStreams": true
+      },
+      {
+        "expected": 4294967295,
+        "observed": 4294967295,
+        "profile": "release",
+        "source": "module main;import windows_run_capture as capture;fn i32 main(){return capture::exit_bits(4294967295);}\n",
+        "sourceSHA256": "85acfec56ca2eda8087285161e47bde04ca319f9a8b05996e75b2f9805225950",
+        "packetSHA256": "1960ab3631e6b4eb9cbdd3b3c0936099e5f1719d946f817e285df94d5f7929c5",
+        "imageSHA256": "07c8b12bc25fa4074b38cbec2ab6336b9fe51e40dfe8d4685802e33e52a0fed1",
+        "emptyStreams": true
+      }
+    ]
+  },
+  "receiverSHA256": "671ec69806fb9f2a6ddd058e80a1dc3ff642cb3819485b90cf6181adbfa54d38",
+  "implementationSources": [
+    {
+      "path": "internal/candidatehost/runtime.go",
+      "sha256": "fc5ac2fb2cb7312f5e75ed8775d38ac144ac63e652cc9c80a9434863ded040ce"
+    },
+    {
+      "path": "internal/candidatehost/windows_process.c",
+      "sha256": "405cd681a3631c1642d5cad8c454dc6e131bf7a031389a6ea649af20d727a2ab"
+    },
+    {
+      "path": "cmd/fairyc-candidate-process-reference/main_windows.go",
+      "sha256": "1fc3dffc1a71a1e0d8cd848a6cb5a554d6c0314333ef2b23f740e5d92b271315"
+    }
+  ],
+  "hostSelection": {
+    "command": "bun tools/run-go.ts test ./internal/candidatehost -run TestPrivateWindowsHostSymbolSelection -count=1",
+    "exit": 0
+  },
+  "sharedOutputLimitBytes": 65536,
+  "controlFloodBytes": 8192,
+  "childCompletionAfterOverflowVerified": true,
+  "GoNativeSkipped": "Stable Go native runner cannot link private host adapters.",
+  "stableBuildRunIntegrated": false,
+  "sdkAbiChanged": false
+}

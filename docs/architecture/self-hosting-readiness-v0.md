@@ -2425,3 +2425,15 @@ the final labelled tests pass both profiles. Stable build/run wiring, broader
 differential, Linux/full suite and promotion remain open. Private ABI, bridge
 and verifier changed; public API, SDK ABI, DB and CI are unchanged; no push.
 Receipt: [candidate-windows-run-control-20261012.json](../ops/evidence/candidate-windows-run-control-20261012.json).
+
+## Bounded native program output (2026-10-12)
+
+Five capture tests pass in both candidate C profiles: the shared 64KiB boundary,
+continued draining after overflow, malformed control flooding, real traps/raw
+exits, binary streams and live parent/child timeout cancellation. Ten standalone
+executions retain five raw Windows statuses through the signed main ABI in both
+profiles. Source check passes 370 files / 4748 MIR functions and host selection
+passes. Go-native is skipped for private adapter linkage. Public build/run wiring,
+broader differential, Linux/full suite and promotion remain open. Private API and
+clock adapter changed; public API, SDK ABI, DB and CI are unchanged; no push.
+Receipt: [candidate-windows-run-capture-20261012.json](../ops/evidence/candidate-windows-run-capture-20261012.json).

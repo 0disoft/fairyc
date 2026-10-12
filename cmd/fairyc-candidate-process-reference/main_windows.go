@@ -18,6 +18,45 @@ func main() {
 		os.Exit(2)
 	}
 	switch os.Args[1] {
+	case "bulk":
+		count := func(value string) int {
+			n, err := strconv.ParseUint(value, 10, 32)
+			if err != nil || n > 1048576 {
+				panic("invalid bulk size")
+			}
+			return int(n)
+		}
+		pattern := func(n int, pattern []byte) []byte {
+			data := make([]byte, n)
+			for i := range data {
+				data[i] = pattern[i%len(pattern)]
+			}
+			return data
+		}
+		if _, err := os.Stdout.Write(pattern(count(os.Args[2]), []byte{0, 1, 2, 255})); err != nil {
+			panic(err)
+		}
+		if _, err := os.Stderr.Write(pattern(count(os.Args[3]), []byte{255, 0, 65, 10})); err != nil {
+			panic(err)
+		}
+		if err := os.WriteFile(os.Args[4], []byte("done"), 0600); err != nil {
+			panic(err)
+		}
+		os.Exit(42)
+	case "flood-control":
+		handle, err := strconv.ParseUint(os.Getenv("FAIRYC_TRAP_CONTROL_HANDLE_V1"), 10, 64)
+		if err != nil || handle == 0 {
+			panic("missing control handle")
+		}
+		data := bytes.Repeat([]byte{3}, 8192)
+		var written uint32
+		if err := syscall.WriteFile(syscall.Handle(handle), data, &written, nil); err != nil || written != uint32(len(data)) {
+			panic("control flood write failed")
+		}
+		if err := os.WriteFile(os.Args[2], []byte("done"), 0600); err != nil {
+			panic(err)
+		}
+		os.Exit(131)
 	case "control":
 		if os.Getenv("FAIRYC_CONTROL_PRESERVE") != "한글 environment 🧚" {
 			panic("inherited environment was not preserved")

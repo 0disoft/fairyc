@@ -9,6 +9,25 @@ are identical, with no excluded bytes. All 249 Go lexer cases and private framin
 checks pass for the seed and both generations. Receipt:
 `evidence/candidate-complete-stage2-20261012.json`.
 
+## Bounded Windows run output (2026-10-12)
+
+Fairy drains stdout/stderr and the private control pipe while polling an owned
+process. The shared retained-output limit is exactly 65536 bytes; extra bytes
+are discarded until the child finishes, then failure suppresses retained buffers.
+An 8192-byte malformed control stream also drains without deadlock. Stdin is
+inherited directly; execution and final collection have bounded deadlines.
+
+Five authored tests pass in both candidate C profiles, covering exact capacity,
+one-byte overflow with a fresh child-completion marker, real traps/ordinary exits,
+full exit bits, actual parent/child deadline cancellation and binary streams.
+Ten standalone executions prove five raw process statuses through the signed
+i32 main ABI in both profiles. Source check passes 370 files / 4748 MIR functions;
+host selection passes. Go-native is skipped for private adapter linkage.
+Next: public build/run command parsing, native driver transport and publication,
+then broader differential, Linux/full suite and promotion. Private API and a
+clock adapter changed; public API, SDK ABI, DB and CI are unchanged; no push.
+Receipt: `evidence/candidate-windows-run-capture-20261012.json`.
+
 ## Owned running process (2026-10-12)
 
 Fairy publishes a running owner after job assignment/resume and supports polling,

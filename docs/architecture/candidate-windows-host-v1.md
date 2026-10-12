@@ -108,11 +108,32 @@ checks actual exit after early return, including four repeats without handle
 growth. Source check passes 369 files / 4736 MIR functions. Bounded combined
 stdout/stderr capture is the next public-run prerequisite.
 
+## Bounded program output
+
+`windows_run_capture.fy` drains stdout, stderr and the private control pipe
+round by round while polling the owned process. It inherits stdin directly.
+The shared stdout/stderr retention limit is exactly 65536 bytes. Excess bytes
+are drained and discarded until completion, preserving the existing runner's
+write behavior; overflow returns private problem 11 without publishing buffers.
+The control pipe retains at most two bytes while draining any excess, then
+validates the receipt. The whole execution has a monotonic deadline, with a
+bounded final collection period. Job termination retains the recorded exit bits.
+
+Five authored tests pass in both candidate C profiles: exact combined capacity,
+one-byte overflow with proof that the child finished its writes, an 8192-byte
+control flood without pipe deadlock, real Fairy assertion/ordinary exits, full
+exit bits, live parent/child deadline cancellation and exact binary streams.
+Ten standalone C executions verify the signed i32 main ABI for five normal/raw
+statuses in both profiles, including the high bit and 0xffffffff. Source check
+passes 370 files / 4748 MIR functions; private host selection passes. Go-native
+is skipped for private linkage. Public build/run wiring remains pending.
+
 Receipt: [candidate-windows-process-20261012.json](../ops/evidence/candidate-windows-process-20261012.json).
 Stream receipt: [candidate-windows-streams-20261012.json](../ops/evidence/candidate-windows-streams-20261012.json).
 Argument receipt: [candidate-windows-argv-20261012.json](../ops/evidence/candidate-windows-argv-20261012.json).
 Control receipt: [candidate-windows-run-control-20261012.json](../ops/evidence/candidate-windows-run-control-20261012.json).
 Running receipt: [candidate-running-owner-20261012.json](../ops/evidence/candidate-running-owner-20261012.json).
+Capture receipt: [candidate-windows-run-capture-20261012.json](../ops/evidence/candidate-windows-run-capture-20261012.json).
 Native records and flags follow [STARTUPINFOW](https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/ns-processthreadsapi-startupinfow),
 [extended job limits](https://learn.microsoft.com/en-us/windows/win32/api/winnt/ns-winnt-jobobject_extended_limit_information),
 [CreateProcessW](https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-createprocessw)
