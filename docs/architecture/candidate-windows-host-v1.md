@@ -157,6 +157,19 @@ Focused tests reject malformed/nonfile/mixed inputs, preserve the prior image
 on rejection and execute successful native builds. Public build/run wiring
 still requires Fairy packet-file serialization and workspace publication.
 
+`native_packet.fy` now writes the same FYCPARTS1 framing directly to a
+caller-owned file. It computes the complete bounded size before the first write,
+streams checked header/literals/units and reports exact write progress. The
+caller must sync and close successful output before native compilation. No
+second whole-packet buffer or frontend subprocess is required.
+
+Two authored tests pass in Go-native and both candidate C profiles. The 3387-byte
+file equals existing stdout transport and the Go-native output exactly; the
+fresh driver builds that file into programs returning 42 in both profiles.
+Read-only write failure reports zero progress and retains prior file contents.
+Source check passes 372 files / 4766 MIR functions. Workspace metadata,
+temporary-file lifetime and public build/run dispatch remain pending.
+
 Receipt: [candidate-windows-process-20261012.json](../ops/evidence/candidate-windows-process-20261012.json).
 Stream receipt: [candidate-windows-streams-20261012.json](../ops/evidence/candidate-windows-streams-20261012.json).
 Argument receipt: [candidate-windows-argv-20261012.json](../ops/evidence/candidate-windows-argv-20261012.json).
@@ -165,6 +178,7 @@ Running receipt: [candidate-running-owner-20261012.json](../ops/evidence/candida
 Capture receipt: [candidate-windows-run-capture-20261012.json](../ops/evidence/candidate-windows-run-capture-20261012.json).
 Options receipt: [candidate-native-cli-options-20261012.json](../ops/evidence/candidate-native-cli-options-20261012.json).
 Driver receipt: [candidate-native-packet-input-20261012.json](../ops/evidence/candidate-native-packet-input-20261012.json).
+Packet-file receipt: [candidate-native-packet-file-20261012.json](../ops/evidence/candidate-native-packet-file-20261012.json).
 Native records and flags follow [STARTUPINFOW](https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/ns-processthreadsapi-startupinfow),
 [extended job limits](https://learn.microsoft.com/en-us/windows/win32/api/winnt/ns-winnt-jobobject_extended_limit_information),
 [CreateProcessW](https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-createprocessw)

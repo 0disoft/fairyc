@@ -1,0 +1,228 @@
+{
+  "schema": "fairyc.candidate-native-packet-file/v1",
+  "passed": true,
+  "module": "native_packet",
+  "tools": {
+    "compiler": {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\manifest-bootstrap.exe",
+      "sha256": "18e72a61e9ff3fdd620652ecd8ce2e355b9371488b2ad1b2ccbadbf7a091783a"
+    },
+    "candidate": {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-stack-current-20261012\\complete-stage2\\compiler.exe",
+      "sha256": "6e55b6aa6d8aa5f01b850a860b565d5b1b8e74a310c05425a11f58ca699d3b6e"
+    },
+    "builder": {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-packet-input-builder-20261012.exe",
+      "sha256": "1d80142b57478109bfd29da50da1cf1005fc3b2607319094538f291203f08979"
+    }
+  },
+  "native": {
+    "schemaVersion": "fairyc.test-report/v4",
+    "engine": "native",
+    "target": "x86_64-windows-msvc",
+    "profile": "development",
+    "tests": [
+      {
+        "identity": "tests::native_packet::reports_write_failure_without_changing_the_prior_packet",
+        "outcome": "passed",
+        "trapCategory": null,
+        "stdoutBase64": "",
+        "stderrBase64": ""
+      },
+      {
+        "identity": "tests::native_packet::streams_the_same_complete_packet_as_stdout_transport",
+        "outcome": "passed",
+        "trapCategory": null,
+        "stdoutBase64": "RllDUEFSVFMxCjI0NDMKI2lmbmRlZiBGWV9DQU5ESURBVEVfUFJPSkVDVF9IRUFERVJfVjEKI2RlZmluZSBGWV9DQU5ESURBVEVfUFJPSkVDVF9IRUFERVJfVjEKLyogZmFpcnljLmNhbmRpZGF0ZS1tb2R1bGUtb3duZWQtYy92MSAqLwojaW5jbHVkZSA8c3RkaW50Lmg+CiNpbmNsdWRlIDxsaW1pdHMuaD4KI2luY2x1ZGUgPHN0cmluZy5oPgpfU3RhdGljX2Fzc2VydChDSEFSX0JJVD09OCAmJiBVSU5UUFRSX01BWD09VUlOVDY0X01BWCwicmVxdWlyZXMgNjQtYml0IHRhcmdldCIpOwpfU3RhdGljX2Fzc2VydChJTlQzMl9NSU49PSgtSU5UMzJfTUFYLTEpICYmIElOVDY0X01JTj09KC1JTlQ2NF9NQVgtMSksInJlcXVpcmVzIHR3bydzIGNvbXBsZW1lbnQiKTsKX05vcmV0dXJuIHZvaWQgZnlfcnVudGltZV90cmFwKHVpbnQzMl90IGNhdGVnb3J5KTsKc3RhdGljIGludDY0X3QgZnlfdW5pdF9iaXRzKHVpbnQ2NF90IHgsdW5zaWduZWQgd2lkdGgpe2lmKHdpZHRoPT0zMil7dWludDMyX3QgYj0odWludDMyX3QpeDtpbnQzMl90IHI7bWVtY3B5KCZyLCZiLDQpO3JldHVybiByO31pbnQ2NF90IHI7bWVtY3B5KCZyLCZ4LDgpO3JldHVybiByO30Kc3RhdGljIHVpbnQ2NF90IGZ5X3VuaXRfdW5zaWduZWQodW5zaWduZWQgb3AsdWludDY0X3QgYSx1aW50NjRfdCBiLHVpbnQ2NF90IG1heCx1bnNpZ25lZCB3aWR0aCl7c3dpdGNoKG9wKXtjYXNlIDE6aWYoYT5tYXgtYilmeV9ydW50aW1lX3RyYXAoMSk7cmV0dXJuIGErYjtjYXNlIDI6aWYoYTxiKWZ5X3J1bnRpbWVfdHJhcCgxKTtyZXR1cm4gYS1iO2Nhc2UgNTppZihiJiZhPm1heC9iKWZ5X3J1bnRpbWVfdHJhcCgxKTtyZXR1cm4gYSpiO2Nhc2UgNjpjYXNlIDc6aWYoIWIpZnlfcnVudGltZV90cmFwKDIpO3JldHVybiBvcD09Nj9hL2I6YSViO2Nhc2UgODpyZXR1cm4gYSZiO2Nhc2UgOTpyZXR1cm4gYXxiO2Nhc2UgMTA6cmV0dXJuIGFeYjtjYXNlIDExOmNhc2UgMTI6aWYoYj49d2lkdGgpZnlfcnVudGltZV90cmFwKDQpO2lmKG9wPT0xMSl7aWYoYT4obWF4Pj5iKSlmeV9ydW50aW1lX3RyYXAoMSk7cmV0dXJuIGE8PGI7fXJldHVybiBhPj5iO2RlZmF1bHQ6ZnlfcnVudGltZV90cmFwKDcpO319CnN0YXRpYyBpbnQ2NF90IGZ5X3VuaXRfc2lnbmVkKHVuc2lnbmVkIG9wLGludDY0X3QgYSxpbnQ2NF90IGIsaW50NjRfdCBtaW4saW50NjRfdCBtYXgsdW5zaWduZWQgd2lkdGgpe3N3aXRjaChvcCl7Y2FzZSAxOmlmKChiPjAmJmE+bWF4LWIpfHwoYjwwJiZhPG1pbi1iKSlmeV9ydW50aW1lX3RyYXAoMSk7cmV0dXJuIGErYjtjYXNlIDI6aWYoKGI8MCYmYT5tYXgrYil8fChiPjAmJmE8bWluK2IpKWZ5X3J1bnRpbWVfdHJhcCgxKTtyZXR1cm4gYS1iO2Nhc2UgNTppZihhPjA/KGI+MD9hPm1heC9iOmI8bWluL2EpOihhPDA/KGI+MD9hPG1pbi9iOmI8MCYmYTxtYXgvYik6MCkpZnlfcnVudGltZV90cmFwKDEpO3JldHVybiBhKmI7Y2FzZSA2OmNhc2UgNzppZighYilmeV9ydW50aW1lX3RyYXAoMik7aWYoYT09bWluJiZiPT0tMSlmeV9ydW50aW1lX3RyYXAoMyk7cmV0dXJuIG9wPT02P2EvYjphJWI7Y2FzZSA4OnJldHVybiBmeV91bml0X2JpdHMoKHVpbnQ2NF90KWEmKHVpbnQ2NF90KWIsd2lkdGgpO2Nhc2UgOTpyZXR1cm4gZnlfdW5pdF9iaXRzKCh1aW50NjRfdClhfCh1aW50NjRfdCliLHdpZHRoKTtjYXNlIDEwOnJldHVybiBmeV91bml0X2JpdHMoKHVpbnQ2NF90KWFeKHVpbnQ2NF90KWIsd2lkdGgpO2Nhc2UgMTE6Y2FzZSAxMjppZihiPDB8fCh1aW50NjRfdCliPj13aWR0aClmeV9ydW50aW1lX3RyYXAoNCk7aWYob3A9PTExKXtpZihhPDB8fCh1aW50NjRfdClhPigodWludDY0X3QpbWF4Pj5iKSlmeV9ydW50aW1lX3RyYXAoMSk7cmV0dXJuIChpbnQ2NF90KSgodWludDY0X3QpYTw8Yik7fWlmKCFifHxhPj0wKXJldHVybiBhPj5iO3JldHVybiBmeV91bml0X2JpdHMoKCh1aW50NjRfdClhPj5iKXwoVUlOVDY0X01BWDw8KDY0LSh1bnNpZ25lZCliKSksd2lkdGgpO2RlZmF1bHQ6ZnlfcnVudGltZV90cmFwKDcpO319CiNpZmRlZiBfTVNDX1ZFUgojcHJhZ21hIGZ1bmN0aW9uKG1lbWNweSkKX19kZWNsc3BlYyhub2lubGluZSkKI2VuZGlmCnN0YXRpYyB2b2lkIGZ5X3VuaXRfY29weSh2b2lkICpkZXN0aW5hdGlvbixjb25zdCB2b2lkICpzb3VyY2UsdWludHB0cl90IGNvdW50KXttZW1jcHkoZGVzdGluYXRpb24sc291cmNlLGNvdW50KTt9CiNpZmRlZiBfTVNDX1ZFUgojcHJhZ21hIGludHJpbnNpYyhtZW1jcHkpCiNlbmRpZgpzdHJ1Y3QgZnlfdW5pdF9yZWdpb25fYnJpZGdlOwpzdHJ1Y3QgZnlfdW5pdF90Xzg7CnN0cnVjdCBmeV91bml0X3RfOTsKc3RydWN0IGZ5X3VuaXRfdF8xMDsKI2luY2x1ZGUgPHN0ZGRlZi5oPgpleHRlcm4gaW50MzJfdCBmeV9mbl8xKHZvaWQpOwpleHRlcm4gaW50MzJfdCBmeV9mbl8zKGludDMyX3QgZnlfbF8xLGludDMyX3QgZnlfbF8yKTsKI2VuZGlmCjY5Ci8qIGZhaXJ5Yy5jYW5kaWRhdGUtcHJvamVjdC1saXRlcmFscy1jL3YxICovCiNpbmNsdWRlICJmeV9wcm9qZWN0LmgiCjEKODUxCi8qIGZhaXJ5Yy5jYW5kaWRhdGUtcHJvamVjdC11bml0LWMvdjEgKi8KI2luY2x1ZGUgImZ5X3Byb2plY3QuaCIKZXh0ZXJuIGludDMyX3QgZnlfZm5fMSh2b2lkKXsKaW50MzJfdCBmeV92XzI7CmludDMyX3QgZnlfdl80OwppbnQzMl90IGZ5X3ZfNjsKZ290byBmeV9iXzU7CmZ5X2JfMTo7CmZ5X3J1bnRpbWVfdHJhcCg3KTsKZnlfYl8yOjsKcmV0dXJuIGZ5X3ZfNjsKZnlfYl8zOjsKZnlfdl82PWZ5X2ZuXzMoZnlfdl8yLGZ5X3ZfNCk7CmdvdG8gZnlfYl8yOwpmeV9iXzQ6OwpmeV92XzQ9ZnlfdW5pdF9iaXRzKFVJTlQ2NF9DKDIpLDMyKTsKZ290byBmeV9iXzM7CmZ5X2JfNTo7CmZ5X3ZfMj1meV91bml0X2JpdHMoVUlOVDY0X0MoNDApLDMyKTsKZ290byBmeV9iXzQ7Cn0KZXh0ZXJuIGludDMyX3QgZnlfZm5fMyhpbnQzMl90IGZ5X2xfMSxpbnQzMl90IGZ5X2xfMil7CmludDMyX3QgZnlfdl8xOwppbnQzMl90IGZ5X3ZfMjsKaW50MzJfdCBmeV92XzM7CmdvdG8gZnlfYl81OwpmeV9iXzE6OwpmeV9ydW50aW1lX3RyYXAoNyk7CmZ5X2JfMjo7CnJldHVybiBmeV92XzM7CmZ5X2JfMzo7CmZ5X3ZfMz1meV91bml0X3NpZ25lZCgxLGZ5X3ZfMSxmeV92XzIsSU5UMzJfTUlOLElOVDMyX01BWCwzMik7CmdvdG8gZnlfYl8yOwpmeV9iXzQ6OwpmeV92XzI9ZnlfbF8yOwpnb3RvIGZ5X2JfMzsKZnlfYl81OjsKZnlfdl8xPWZ5X2xfMTsKZ290byBmeV9iXzQ7Cn0KaW50MzJfdCBmeV9jYW5kaWRhdGVfZW50cnkodm9pZCl7cmV0dXJuIGZ5X2ZuXzEoKTt9CiNpZm5kZWYgRllfQ0FORElEQVRFX05PX01BSU4KaW50IG1haW4odm9pZCl7cmV0dXJuIChpbnQpZnlfY2FuZGlkYXRlX2VudHJ5KCk7fQojZW5kaWYK",
+        "stderrBase64": ""
+      }
+    ],
+    "count": 2,
+    "passed": 2,
+    "failed": 0,
+    "status": "ok",
+    "lock": "verified"
+  },
+  "nativeTests": 2,
+  "authoredTestsExecuted": 2,
+  "candidateOnly": false,
+  "lockSHA256": "cbb95ee2b29bef77cc1cae2856c9293a331c27b9c09b17c6de99c64bb7d37b39",
+  "candidateInputFiles": 288,
+  "candidatePacketSHA256": "2405310682d9e5e6f192b8db818cea8428f420cc2323c4df4aea349293d5aec8",
+  "candidateExecutions": [
+    {
+      "profile": "development",
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-native-packet-20261012\\verified-linear-close\\development.exe",
+      "sha256": "515bbf4fdc33eb9b074bd7b7c76e908f8b03784f640f515ef54999a75306a3ad",
+      "exit": 0
+    },
+    {
+      "profile": "release",
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-native-packet-20261012\\verified-linear-close\\release.exe",
+      "sha256": "ad8ebb6199575bb43f3057375556d2ed0ed90e684cb5dc316dcffd58dee4844f",
+      "exit": 0
+    }
+  ],
+  "invocations": [
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\manifest-bootstrap.exe",
+        "test",
+        "--native",
+        "--locked",
+        "--json",
+        "--capture-output",
+        "--exact",
+        "tests::native_packet::streams_the_same_complete_packet_as_stdout_transport",
+        "--exact",
+        "tests::native_packet::reports_write_failure_without_changing_the_prior_packet",
+        "--",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-native-packet-20261012\\fixture.txt"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+      "seconds": 102.2191826000053,
+      "exit": 0,
+      "stdoutBytes": 5038,
+      "stdoutSHA256": "ea8c897ba8eae2457de08fb661b0bf5d3cdd71cae8a30ec5d7cc82ddf2df639f",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-stack-current-20261012\\complete-stage2\\compiler.exe",
+        "--c-project-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-native-packet-20261012\\verified-linear-close\\sources.list"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "seconds": 53.7807962000079,
+      "exit": 0,
+      "stdoutBytes": 13671455,
+      "stdoutSHA256": "2405310682d9e5e6f192b8db818cea8428f420cc2323c4df4aea349293d5aec8",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-packet-input-builder-20261012.exe",
+        "--packet",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-native-packet-20261012\\verified-linear-close\\candidate-packet.bin",
+        "--packet-sha256",
+        "2405310682d9e5e6f192b8db818cea8428f420cc2323c4df4aea349293d5aec8",
+        "--output",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-native-packet-20261012\\verified-linear-close\\development.exe"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "seconds": 12.34342900000047,
+      "exit": 0,
+      "stdoutBytes": 197,
+      "stdoutSHA256": "e7e48e774c81a1b38ce25d98b31e418d15a68b13609b41489f058746447584c0",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-native-packet-20261012\\verified-linear-close\\development.exe",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-native-packet-20261012\\fixture.txt"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "seconds": 0.2851336999738123,
+      "exit": 0,
+      "stdoutBytes": 3387,
+      "stdoutSHA256": "09ff6f3aeacc8248d4a88b3a4550b2b606d9799e0388c9e94a82a7424bdc7a2b",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-packet-input-builder-20261012.exe",
+        "--packet",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-native-packet-20261012\\verified-linear-close\\candidate-packet.bin",
+        "--packet-sha256",
+        "2405310682d9e5e6f192b8db818cea8428f420cc2323c4df4aea349293d5aec8",
+        "--output",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-native-packet-20261012\\verified-linear-close\\release.exe",
+        "--release"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "seconds": 124.13287309999578,
+      "exit": 0,
+      "stdoutBytes": 199,
+      "stdoutSHA256": "b667093fd2db58336eefe30e32648d21b28ac7ab95035afd7b6e98312e52f481",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-native-packet-20261012\\verified-linear-close\\release.exe",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-native-packet-20261012\\fixture.txt"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "seconds": 0.08641430002171546,
+      "exit": 0,
+      "stdoutBytes": 3387,
+      "stdoutSHA256": "09ff6f3aeacc8248d4a88b3a4550b2b606d9799e0388c9e94a82a7424bdc7a2b",
+      "stderr": ""
+    }
+  ],
+  "publicApiChanged": false,
+  "dbChanged": false,
+  "ciChanged": false,
+  "pushed": false,
+  "selection": {
+    "mode": "all-authored",
+    "authoredTests": 2,
+    "selectedTests": 2
+  },
+  "frontendTimeoutSeconds": 900,
+  "productTimeoutChanged": false,
+  "wrapperEffects": [
+    "filesystem",
+    "console"
+  ],
+  "streamVerification": {
+    "stdout": {
+      "bytes": 3387,
+      "sha256": "09ff6f3aeacc8248d4a88b3a4550b2b606d9799e0388c9e94a82a7424bdc7a2b"
+    }
+  },
+  "baselineCommit": "158afa29",
+  "sourceCheck": {
+    "files": 372,
+    "mirFunctions": 4766,
+    "exit": 0
+  },
+  "freshNativeBuild": {
+    "passed": true,
+    "packetBytes": 3387,
+    "packetSHA256": "09ff6f3aeacc8248d4a88b3a4550b2b606d9799e0388c9e94a82a7424bdc7a2b",
+    "goNativeStdoutEqual": true,
+    "executions": [
+      {
+        "profile": "development",
+        "imageSHA256": "20942c760d3a9e99a9836d986e8c651ec6fa6c6326db736bd4d83939959abd6e",
+        "exit": 42,
+        "noFrontendInvocation": true
+      },
+      {
+        "profile": "release",
+        "imageSHA256": "5c419dca9f41c88766e47b4901d32a50a2874cd6b7b7c11f5fe239fda13e3138",
+        "exit": 42,
+        "noFrontendInvocation": true
+      }
+    ]
+  },
+  "sourceInputParts": [
+    {
+      "path": "docs/ops/evidence/candidate-native-packet-sources-20261012-1.json",
+      "entries": 128,
+      "sha256": "c8fe7e720413f9e3aae5e2ac326ef41c24dc617a899ddc4607d28404b6a01e21"
+    },
+    {
+      "path": "docs/ops/evidence/candidate-native-packet-sources-20261012-2.json",
+      "entries": 128,
+      "sha256": "327c93d383eacff62c06f08cc25acca79219cfea1c1c6045f5cf07aa6b6faa9f"
+    },
+    {
+      "path": "docs/ops/evidence/candidate-native-packet-sources-20261012-3.json",
+      "entries": 35,
+      "sha256": "e49368ddb1913ed3df6527df2e8a0ad613742f98dbe736e3635788a71ded7a92"
+    }
+  ],
+  "stableBuildRunIntegrated": false,
+  "sdkAbiChanged": false
+}

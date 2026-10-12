@@ -1,0 +1,142 @@
+[
+  {
+    "path": "examples/lexer_candidate/src/sha256.fy",
+    "sha256": "eb89211fd749f7f527e8d2b72e97d70f8d9613bbac428bc95d975bef7c53bfa1"
+  },
+  {
+    "path": "examples/lexer_candidate/src/sha256_block.fy",
+    "sha256": "bc48b9e751205bba8aeaf09987ea8681694d26bc989e24f4ecb3afa4c6e00fd4"
+  },
+  {
+    "path": "internal/sdkstdlib/sources/std/bytes.fy",
+    "sha256": "4740a506e93349fb002c383967dcc44d182d20f09f2094b83b5464a4ab252982"
+  },
+  {
+    "path": "internal/sdkstdlib/sources/std/fs.fy",
+    "sha256": "fd7ddfa9f0deed98304cecf94911644087d1e2a46e8be8995c35acbcb183b335"
+  },
+  {
+    "path": "internal/sdkstdlib/sources/std/io.fy",
+    "sha256": "4b89c3aeb8b4de4887395d29723095d364c5660c6b773c5696fb1f65f5365f48"
+  },
+  {
+    "path": "internal/sdkstdlib/sources/std/process.fy",
+    "sha256": "9680a1481df4f761f481d5a039af7bdbefeb312d1091961194f8e7bc0681ae24"
+  },
+  {
+    "path": "internal/sdkstdlib/sources/std/text.fy",
+    "sha256": "cccd47e090fda11c9da063ffb321489dd8753fe9996855fc432833e05a79e695"
+  },
+  {
+    "path": "internal/sdkstdlib/sources/optional/std/vec.fy",
+    "sha256": "0ae4c395bf98c39079ad620bde035b3b590d51417864802e698edc069281db5b"
+  },
+  {
+    "path": "examples/lexer_candidate/src/storage_intrinsics.fy",
+    "sha256": "6f8ae79d2086341058de549fe39ff54164a28bb0ad17934e2f78ff6c477a4300"
+  },
+  {
+    "path": "examples/lexer_candidate/src/strings.fy",
+    "sha256": "8f26db7c4d4039c8c8d9fbc6078097859c8f714ca5887957fdf0e69269dca521"
+  },
+  {
+    "path": "examples/lexer_candidate/src/syntax.fy",
+    "sha256": "cb9244a18ea93777694d60e5b63eb67738d224297d097542bb84db2b7f31d5e6"
+  },
+  {
+    "path": "examples/lexer_candidate/src/syntax_arena_copy.fy",
+    "sha256": "89969f5d7d8bd0deb3070032d9c9ffd58afbc972ee95316c04236952e27ff098"
+  },
+  {
+    "path": "examples/lexer_candidate/src/syntax_parse_driver.fy",
+    "sha256": "9db6518c69f6c2394ef1c697d7d2d07b0a78ec3336a907c92e9d2e2087e5b756"
+  },
+  {
+    "path": "examples/lexer_candidate/src/tagged_check.fy",
+    "sha256": "1692313a6569515619d3835a9e03946a41d328d99f6d593d1011b46164498186"
+  },
+  {
+    "path": "examples/lexer_candidate/src/tagged_encoding.fy",
+    "sha256": "bfc4c8398d4cac37cb15056a19814216e1faf437d88b22d61d52c5482aa37d2a"
+  },
+  {
+    "path": "examples/lexer_candidate/src/tagged_types.fy",
+    "sha256": "431f283e07d9dbea60c698d1f70f7e7009e1552314cf660688b10b09daad8338"
+  },
+  {
+    "path": "examples/lexer_candidate/src/token_output.fy",
+    "sha256": "5397f109de250238e498bc6fd4424cadcc9f854b982518f1daf11d44cbe3b8cc"
+  },
+  {
+    "path": "examples/lexer_candidate/src/type_check.fy",
+    "sha256": "513ca7b4c1109d3b2e57488e47deb3e6330dbd39153529192bee7252fec51286"
+  },
+  {
+    "path": "examples/lexer_candidate/src/type_cli.fy",
+    "sha256": "10903a2009889628b0d01ca7287651c73430f8246ff5636b2a895cc2fbad607d"
+  },
+  {
+    "path": "examples/lexer_candidate/src/type_collect.fy",
+    "sha256": "68d47ce73b9ecd100a202247e370e518079e04ef396ad9183e5005b788e0ae16"
+  },
+  {
+    "path": "examples/lexer_candidate/src/type_control.fy",
+    "sha256": "41ad386d9a61975f2fefb246e7faf8049794b406a518ec0b708e3df2ebb1ff5b"
+  },
+  {
+    "path": "examples/lexer_candidate/src/type_expr_access.fy",
+    "sha256": "389d9a20dbc7fd220c17f61a3de3939cfd0efe3f9083164a843baba22534d521"
+  },
+  {
+    "path": "examples/lexer_candidate/src/type_expr_call.fy",
+    "sha256": "708af053b705858132abdea8e3654d075e61b2d5401c6b12964c111430b1946d"
+  },
+  {
+    "path": "examples/lexer_candidate/src/type_expr_record.fy",
+    "sha256": "ed82e6ca7d52bddaea0deaf9a2faf491471321c3a07e0adb99b52a92ded1bad3"
+  },
+  {
+    "path": "examples/lexer_candidate/src/type_expr_scalar.fy",
+    "sha256": "362a86db2692a7dfcb376f529798a4a04254164890a9f816336b2fac9dbb0758"
+  },
+  {
+    "path": "examples/lexer_candidate/src/type_expr_tagged.fy",
+    "sha256": "c9936536758be8d9a61b0abd18d1b5f34914f6d4a129817da1367fdc0818b42f"
+  },
+  {
+    "path": "examples/lexer_candidate/src/type_state.fy",
+    "sha256": "7dbbf7d50be1e9513dc8aafd99b11afda5d8e2d7ce87d96b6436c4752c2123a0"
+  },
+  {
+    "path": "examples/lexer_candidate/src/type_statement.fy",
+    "sha256": "1da68d12ea7ac8cb047902f5d043fbe1c91f47e46ba9ae51a2fd0214b05af961"
+  },
+  {
+    "path": "examples/lexer_candidate/src/types.fy",
+    "sha256": "53a77948af92724f00de0609837fd1507899df8e2b59b6d2778ef1f3c344395a"
+  },
+  {
+    "path": "examples/lexer_candidate/src/unsafe_scopes.fy",
+    "sha256": "e655a51e391a5870fec2cc8ba1b2701da48914c6b229e4ba2225407d515a48eb"
+  },
+  {
+    "path": "examples/lexer_candidate/src/utf8.fy",
+    "sha256": "4a5425cea9efbfb1bff2c31a38c2bd8e392c6792af09f24e906c9a743621870d"
+  },
+  {
+    "path": "examples/lexer_candidate/tests/native_packet.fy",
+    "sha256": "e68899e2d46aa373859d9e7b6cbbde8eb6978a1f8a386210aecacf7a4b595afb"
+  },
+  {
+    "path": "tools/verify-candidate-private-tests.py",
+    "sha256": "8a5a0bd3f157168003e995aa73e866b4028e8dcaeddcd245e0e627f0956d3cc1"
+  },
+  {
+    "path": ".cache/candidate-native-packet-20261012/fixture.txt",
+    "sha256": "516fb1686e05d6bf523feffe356cc73692d65a571b75057104bf0d50713f40dc"
+  },
+  {
+    "path": ".cache/candidate-native-packet-20261012/stdout.bin",
+    "sha256": "09ff6f3aeacc8248d4a88b3a4550b2b606d9799e0388c9e94a82a7424bdc7a2b"
+  }
+]

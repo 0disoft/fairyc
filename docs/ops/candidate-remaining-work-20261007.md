@@ -9,6 +9,22 @@ are identical, with no excluded bytes. All 249 Go lexer cases and private framin
 checks pass for the seed and both generations. Receipt:
 `evidence/candidate-complete-stage2-20261012.json`.
 
+## Fairy packet-file publication (2026-10-12)
+
+Fairy streams a complete checked C bundle to a caller-owned file after exact
+96MiB-bound preflight. It preserves the existing packet framing and reports
+write status/native error/byte progress; the caller syncs/closes before driver
+handoff. Two authored tests pass in Go-native and both candidate C profiles.
+The 3387-byte file equals stdout transport and Go-native bytes exactly. The
+fresh native driver builds it into result-42 programs in both profiles.
+Read-only failure retains the previous file. Source check passes 372 files /
+4766 MIR functions. Initial test ownership errors from conditional close calls
+were corrected to unconditional close operations. Next: workspace metadata,
+temporary-file ownership/publication and public build/run dispatch. Broader
+differential, Linux/full suite and promotion remain. Private API added; public
+API, SDK ABI, DB and CI are unchanged; no push. Receipt:
+`evidence/candidate-native-packet-file-20261012.json`.
+
 ## Fresh packet native-driver input (2026-10-12)
 
 The private Go bridge can consume a fresh C packet without invoking a frontend
