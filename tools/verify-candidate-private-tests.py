@@ -53,10 +53,17 @@ def main():
         parser.error('selected test is not authored in the module')
     if not args.selected_tests_only and set(test_names) != set(args.test):
         parser.error('select all authored tests in the module')
+    effects = ['filesystem', 'console']
+    for declaration, name in re.findall(r'@test\s+(?:@effects\(([^\n)]+)\)\s+)?fn void (\w+)\(', authored):
+        if name in args.test:
+            for effect in declaration.split(','):
+                effect = effect.strip()
+                if effect and effect not in effects:
+                    effects.append(effect)
     original_module = f'module tests::{args.module};'
     assert authored.startswith(original_module)
     authored = re.sub(r'(?m)^(\s*)@test\b\s*', r'\1', authored.replace(original_module, 'module main;', 1))
-    authored += '\n@effects(filesystem,console) fn i32 main(){' + ''.join(name + '();' for name in args.test) + 'return 0;}\n'
+    authored += '\n@effects(' + ','.join(effects) + ') fn i32 main(){' + ''.join(name + '();' for name in args.test) + 'return 0;}\n'
     main_source = output / 'main.fy'
     main_source.write_text(authored, encoding='utf-8', newline='\n')
     modules = {}
@@ -154,6 +161,7 @@ def main():
     receipt['selection'] = dict(mode='explicit-subset' if args.selected_tests_only else 'all-authored', authoredTests=len(test_names), selectedTests=len(expected))
     receipt['frontendTimeoutSeconds'] = args.frontend_timeout
     receipt['productTimeoutChanged'] = False
+    receipt['wrapperEffects'] = effects
     if streams:
         receipt['streamVerification'] = {name:dict(bytes=len(data),sha256=hashlib.sha256(data).hexdigest()) for name,data in streams.items()}
     if snapshots:

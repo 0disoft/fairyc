@@ -18,6 +18,33 @@ func main() {
 		os.Exit(2)
 	}
 	switch os.Args[1] {
+	case "control":
+		if os.Getenv("FAIRYC_CONTROL_PRESERVE") != "한글 environment 🧚" {
+			panic("inherited environment was not preserved")
+		}
+		handle, err := strconv.ParseUint(os.Getenv("FAIRYC_TRAP_CONTROL_HANDLE_V1"), 10, 64)
+		if err != nil || handle == 0 {
+			panic("missing private control handle")
+		}
+		var receipt []byte
+		for _, value := range os.Args[3:] {
+			b, err := strconv.ParseUint(value, 10, 8)
+			if err != nil {
+				panic(err)
+			}
+			receipt = append(receipt, byte(b))
+		}
+		if len(receipt) > 0 {
+			var written uint32
+			if err := syscall.WriteFile(syscall.Handle(handle), receipt, &written, nil); err != nil || written != uint32(len(receipt)) {
+				panic("private control write failed")
+			}
+		}
+		status, err := strconv.ParseUint(os.Args[2], 10, 32)
+		if err != nil {
+			panic(err)
+		}
+		os.Exit(int(status))
 	case "stdio":
 		data, err := io.ReadAll(os.Stdin)
 		if err != nil || !bytes.Equal(data, []byte("in\x00put\n")) {

@@ -13,6 +13,11 @@ var windowsProcess string
 
 var symbols = regexp.MustCompile(`\bfairyc_private_windows_[A-Za-z0-9_]+\s*\(`)
 var admitted = map[string]bool{
+	"fairyc_private_windows_create_env_v1": true, "fairyc_private_windows_pipe_v1": true,
+	"fairyc_private_windows_inherit_v1": true, "fairyc_private_windows_peek_v1": true,
+	"fairyc_private_windows_read_v1": true, "fairyc_private_windows_handle_value_v1": true,
+	"fairyc_private_windows_environment_v1": true, "fairyc_private_windows_free_environment_v1": true,
+	"fairyc_private_windows_environment_word_v1": true, "fairyc_private_windows_compare_name_v1": true,
 	"fairyc_private_windows_open_v1": true, "fairyc_private_windows_handle_count_v1": true,
 	"fairyc_private_windows_job_v1": true, "fairyc_private_windows_job_info_v1": true,
 	"fairyc_private_windows_create_v1": true, "fairyc_private_windows_assign_v1": true,

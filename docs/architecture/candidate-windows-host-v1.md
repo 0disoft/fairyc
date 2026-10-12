@@ -26,7 +26,7 @@ SDK ABI and source-language contracts are unchanged.
 `Outcome` retains the full u32 exit bits and PID. `Problem` retains kind,
 native error and any created PID: 1 input, 2 allocation, 3 ABI, 4 create,
 5 job setup/assignment, 6 resume, 7 wait/result, 8 deadline. This does not yet map
-to stable build/run status or language-trap receipts. Command encoding follows
+to the public build/run command yet. Command encoding follows
 the Go Windows host's `syscall.EscapeArg`: empty or space/tab-containing values
 are quoted; backslashes before quotes and quoted trailing backslashes double.
 Executable names containing quotes reject. The provisional 1024-argument cap
@@ -59,9 +59,44 @@ checksum-checked by the private verifier and only supplied to native executions.
 Linux, broad frontend
 differential, the full suite, public build/run and promotion remain pending.
 
+## Private run control channel
+
+`windows_run_control.fy` owns a separate pipe, a copied Unicode environment
+block and receipt classification. Only the writer is marked inheritable. The
+parent environment is never changed; ordinal case-insensitive name comparison
+replaces any inherited `FAIRYC_TRAP_CONTROL_HANDLE_V1`, retaining other entries
+and their order. The private snapshot/output allowance is one MiB. The new
+`windows_process::run_environment` passes that block with
+CREATE_UNICODE_ENVIRONMENT through a thin CreateProcessW adapter.
+
+After the parent exits and its job closes, the caller inspects the pipe without
+waiting for EOF. Zero bytes preserve every u32 exit status, including 129..135
+and 0xffffffff. Exactly one matching byte recognizes a Fairy trap and maps it
+to status 5. Mismatched or multiple bytes reject as private problem 10; pipe and
+environment failures use problem 9. Existing process problems 1..8 are retained.
+
+The private C emitter's existing tags are overflow 1, division 2, signed
+division 3, shift 4, assertion 5, bounds 6 and unreachable 7. Fairy normalizes
+authenticated tags to the public category numbering; stdout/stderr never act
+as control data. The private bridge's explicit `--run-trap-control` selects
+the existing receipt runtime at exit base 128. Its default stays at base 100.
+
+Four authored tests pass in both candidate C profiles on the Korean/space path.
+They cover all seven tags, malformed receipts, exact environment reconstruction,
+a real candidate-generated assertion child and an ordinary return, stable
+handle counts, parent environment preservation and binary stdin/stdout/stderr.
+The three existing process tests also pass in both profiles, including actual
+parent/child deadline cancellation. Go-native remains skipped for the private
+adapter linkage. The verifier now derives wrapper effects from selected tests.
+
+One earlier post-normalization run failed an unlabelled assertion. That exact
+binary subsequently passed unchanged; the transient failure is not attributed.
+The final source uses labelled failure assertions and passes both profiles.
+
 Receipt: [candidate-windows-process-20261012.json](../ops/evidence/candidate-windows-process-20261012.json).
 Stream receipt: [candidate-windows-streams-20261012.json](../ops/evidence/candidate-windows-streams-20261012.json).
 Argument receipt: [candidate-windows-argv-20261012.json](../ops/evidence/candidate-windows-argv-20261012.json).
+Control receipt: [candidate-windows-run-control-20261012.json](../ops/evidence/candidate-windows-run-control-20261012.json).
 Native records and flags follow [STARTUPINFOW](https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/ns-processthreadsapi-startupinfow),
 [extended job limits](https://learn.microsoft.com/en-us/windows/win32/api/winnt/ns-winnt-jobobject_extended_limit_information),
 [CreateProcessW](https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-createprocessw)

@@ -2409,3 +2409,19 @@ check passes 368 files / 4717 MIR functions. Private trap control, stable
 build/run, Linux/full suite and promotion remain open. Public API, SDK ABI,
 DB and CI are unchanged; no push. Receipt:
 [candidate-windows-argv-20261012.json](../ops/evidence/candidate-windows-argv-20261012.json).
+
+## Private Windows run control (2026-10-12)
+
+Four control-channel tests and three existing process tests pass in both
+candidate C profiles. Fairy preserves ordinary u32 exits, normalizes the private
+C trap tags only with matching receipts, preserves parent/inherited environment
+bytes and forwards binary streams. The child uses a separate inherited pipe;
+receipt inspection never waits for EOF. The bridge explicitly opts into the
+existing receipt runtime at base 128; its default stays at base 100.
+Source check passes 369 files / 4730 MIR functions and selected bridge checks
+pass. Go-native is skipped for private adapter linkage. One transient assertion
+failure remains unattributed; its exact binary passed unchanged on replay, and
+the final labelled tests pass both profiles. Stable build/run wiring, broader
+differential, Linux/full suite and promotion remain open. Private ABI, bridge
+and verifier changed; public API, SDK ABI, DB and CI are unchanged; no push.
+Receipt: [candidate-windows-run-control-20261012.json](../ops/evidence/candidate-windows-run-control-20261012.json).

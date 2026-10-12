@@ -9,6 +9,26 @@ are identical, with no excluded bytes. All 249 Go lexer cases and private framin
 checks pass for the seed and both generations. Receipt:
 `evidence/candidate-complete-stage2-20261012.json`.
 
+## Windows run control channel (2026-10-12)
+
+Fairy owns the private receipt pipe, copied Unicode environment and category
+normalization. Four authored tests pass in both candidate C profiles: every
+ordinary exit bit is preserved without a receipt; matching tags recognize
+traps; malformed/multiple bytes reject. A real candidate-generated assertion
+child is recognized, inherited Unicode variables and the parent environment
+are preserved, and binary stream bytes match. The existing three process tests
+pass in both profiles, including live parent/child deadline cancellation.
+
+Source check passes 369 files / 4730 MIR functions. Host selection, cached packet,
+default build publication and CLI rejection checks pass. Go-native is skipped
+for private adapter linkage. An initial missing wrapper environment effect was
+fixed; one post-normalization assertion failure remains unattributed, and that
+exact binary passed unchanged on replay. Final labelled assertions pass both
+profiles. Private ABI, bridge flag and verifier effects changed. Public API,
+SDK ABI, DB and CI are unchanged; no push. Next: stable build/run command wiring,
+then broader differential, Linux/full suite and promotion. Receipt:
+`evidence/candidate-windows-run-control-20261012.json`.
+
 ## Stable Windows argument admission (2026-10-12)
 
 The provisional 1024-argument cap is removed. Fairy uses the actual 32767-word

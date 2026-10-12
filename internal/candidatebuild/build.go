@@ -27,6 +27,7 @@ type Options struct {
 	Workspace                              string
 	Locked                                 bool
 	Release                                bool
+	RunTrapControl                         bool
 	Timeout                                time.Duration
 	CompileTimeout                         time.Duration
 }
@@ -106,7 +107,7 @@ func emit(candidate string, arguments []string, directory string, timeout time.D
 
 var stdSymbols = regexp.MustCompile(`\b(fy_std_[A-Za-z0-9_]+)\s*\(`)
 
-func runtimeSource(header string) (string, error) {
+func runtimeSource(header string, runTrapControl bool) (string, error) {
 	set := map[string]bool{}
 	for _, match := range stdSymbols.FindAllStringSubmatch(header, -1) {
 		set[match[1]] = true
@@ -122,6 +123,9 @@ func runtimeSource(header string) (string, error) {
 		return "", err
 	}
 	scalar, err := cruntime.ScalarSource(100)
+	if runTrapControl {
+		scalar, err = cruntime.WindowsRunSource(128)
+	}
 	if err != nil {
 		return "", err
 	}
@@ -210,7 +214,7 @@ func buildPacket(options Options, data []byte) (Result, error) {
 	if err != nil {
 		return Result{}, fmt.Errorf("decode candidate output: %w", err)
 	}
-	support, err := runtimeSource(packet.Header)
+	support, err := runtimeSource(packet.Header, options.RunTrapControl)
 	if err != nil {
 		return Result{}, fmt.Errorf("select candidate runtime: %w", err)
 	}
