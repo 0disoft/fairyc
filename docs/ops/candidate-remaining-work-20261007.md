@@ -1,5 +1,32 @@
 # Fairy 컴파일러 전환: 후속 작업 목록
 
+## Graph coordinate collection with workspace owners (2026-10-13)
+
+`project_coordinate_graph::collect` walks the retained workspace graph and
+produces owned `module_public_type_text::Coordinates` under the same owner
+numbers used by `project_compiler_input`. Root UID/version use an empty feature
+set; each local instance retains its selected incoming edge's resolved features;
+the authenticated SDK uses its own UID/version with no features. Local package
+and feature-edge coordinates are checked before reading them. Exact instance IDs
+remain separate. Private candidate read accessors expose the owned rows/text.
+
+The committed Go workspace-loader oracle prepares four graphs: Base, Edited and
+Reordered each contain five local instances plus SDK, while NoSDK has five local
+instances. The authored tests match coordinates by exact instance ID and verify
+compiler-input owner alignment. Editing a private common-package body changes
+both feature-instance IDs while all coordinates remain identical. Feature sets
+remain separate namespaces; instance text rejects as a coordinate. Owned tables
+survive workspace destruction. Exact-fit/exhausted shared-work histories pass,
+and the 43 fixture files remain unchanged through every test invocation.
+
+Four tests pass Go native and both candidate C development/release profiles.
+Source check passes 395 files / 5061 MIR functions; native tests verify the lock.
+Dispatcher wiring, package-cache v4 consumption and generic/Vec identities remain
+pending. The 384-source dispatcher closure is unchanged; no full image, corpus or
+current-source fixed point is rerun. No public API, SDK ABI, DB, CI, runner or
+product timeout change; no push. Receipt:
+[evidence](evidence/candidate-package-coordinate-graph-20261013.json).
+
 ## Standalone package coordinate encoder (2026-10-13)
 
 `project_coordinate_identity` now computes `PackageCoordinateId` in Fairy.

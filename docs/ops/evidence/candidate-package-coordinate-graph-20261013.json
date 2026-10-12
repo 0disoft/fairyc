@@ -1,0 +1,1357 @@
+{
+  "schema": "fairyc.candidate-package-coordinate-graph/v1",
+  "passed": true,
+  "scope": "Detached owner-aligned package coordinates collected from root/dependency-feature/SDK workspace graphs",
+  "sources": [
+    {
+      "path": "examples/lexer_candidate/src/project_coordinate_graph.fy",
+      "sha256": "a4e67fad8636b97a761f3ffe1383d88bd2ae1d2ca36e387fe0a5adad9409c94d"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_public_type_text.fy",
+      "sha256": "84e265a7f97ccb4d0ffe94e1ff7008fbcc59e7c40fd256e7347170d4f137130c"
+    },
+    {
+      "path": "examples/lexer_candidate/tests/project_coordinate_graph.fy",
+      "sha256": "2604a4ab5323a2603c7818f7bd1ba47259bbc5ade0df8db58f01a85e99bf3ae2"
+    },
+    {
+      "path": "examples/lexer_candidate/fairy.lock",
+      "sha256": "f5b1620f3cc788cb9a032637d7913c8c23c2e55685e69b4079a1b6dbd2db2ab5"
+    },
+    {
+      "path": "tools/verify-candidate-coordinate-graph.go",
+      "sha256": "85209b153d8820302557cad45563d4a473ab81067b75283ce114967ae16d3290"
+    }
+  ],
+  "sourceCheck": {
+    "command": "candidate-frontend-oracle-current-20261012.exe check",
+    "exit": 0,
+    "files": 395,
+    "mirFunctions": 5061,
+    "lock": "updated; verified by native tests"
+  },
+  "oracle": {
+    "command": "bun tools/run-go.ts run tools/verify-candidate-coordinate-graph.go",
+    "exit": 0,
+    "observations": {
+      "cases": [
+        {
+          "case": "Base",
+          "changedInstanceIDs": 0,
+          "packages": 6,
+          "packagesObserved": [
+            {
+              "PackageUID": "example.coordinate.root",
+              "Instance": "fypi1-sha256-d1a6f71ae7953ad6a5ead427c1daa9e1a68428c69c3e0c491685312621cd2200",
+              "Coordinate": "fypc1-sha256-d5efb7bebfbb25abe78e8cd90b782a84249cc3d52531a2b7fcface89a1581a23",
+              "Features": null,
+              "SourceKind": "local"
+            },
+            {
+              "PackageUID": "example.coordinate.left",
+              "Instance": "fypi1-sha256-bda77beeca0be4dfe8866540f8f948008c6a4b61b02858e3d5b4d54f8b226be0",
+              "Coordinate": "fypc1-sha256-ba44e152256352fa60071d126ec151d4af72d533badb2fc58010143c380b9dac",
+              "Features": [],
+              "SourceKind": "local"
+            },
+            {
+              "PackageUID": "example.coordinate.right",
+              "Instance": "fypi1-sha256-6a0c2683adb6e95554ec2615548b18b7db17dcdade0300759fe9c69fcfcf7da8",
+              "Coordinate": "fypc1-sha256-e8ea6cab4170cdb30ebecf40f1ebfb776d7c942dc434b6e3a1c7cc2a78ba4f25",
+              "Features": [],
+              "SourceKind": "local"
+            },
+            {
+              "PackageUID": "example.coordinate.common",
+              "Instance": "fypi1-sha256-5aa55de167a7db721481b6389f91333c625d75d7b23bcd9b363fabf700bebccf",
+              "Coordinate": "fypc1-sha256-fe9eba5e8f5944ea44c97b3702302a677bcd393aa1d7733ca1052bd690d2baba",
+              "Features": [
+                "fast"
+              ],
+              "SourceKind": "local"
+            },
+            {
+              "PackageUID": "example.coordinate.common",
+              "Instance": "fypi1-sha256-5ce0820f5d053de00b4c87f9718083e294b702beff14da6f31182d52994bce9a",
+              "Coordinate": "fypc1-sha256-d916529474f050b8ffb58943ab7910c1f48e5d61f3418732a37249ed7f5bf610",
+              "Features": [
+                "tls"
+              ],
+              "SourceKind": "local"
+            },
+            {
+              "PackageUID": "fairyc.std",
+              "Instance": "fypi1-sha256-c18350128fcbce1cee2c63f0e7acc467f9f77ff184c458af1d20eab69a58e89a",
+              "Coordinate": "fypc1-sha256-b0a4d6314db7dbe3f4f42c54d28d492054cc437fedd64985129b89c66b340424",
+              "Features": [],
+              "SourceKind": "sdk"
+            }
+          ]
+        },
+        {
+          "case": "Edited",
+          "changedInstanceIDs": 2,
+          "packages": 6,
+          "packagesObserved": [
+            {
+              "PackageUID": "example.coordinate.root",
+              "Instance": "fypi1-sha256-d1a6f71ae7953ad6a5ead427c1daa9e1a68428c69c3e0c491685312621cd2200",
+              "Coordinate": "fypc1-sha256-d5efb7bebfbb25abe78e8cd90b782a84249cc3d52531a2b7fcface89a1581a23",
+              "Features": null,
+              "SourceKind": "local"
+            },
+            {
+              "PackageUID": "example.coordinate.left",
+              "Instance": "fypi1-sha256-bda77beeca0be4dfe8866540f8f948008c6a4b61b02858e3d5b4d54f8b226be0",
+              "Coordinate": "fypc1-sha256-ba44e152256352fa60071d126ec151d4af72d533badb2fc58010143c380b9dac",
+              "Features": [],
+              "SourceKind": "local"
+            },
+            {
+              "PackageUID": "example.coordinate.right",
+              "Instance": "fypi1-sha256-6a0c2683adb6e95554ec2615548b18b7db17dcdade0300759fe9c69fcfcf7da8",
+              "Coordinate": "fypc1-sha256-e8ea6cab4170cdb30ebecf40f1ebfb776d7c942dc434b6e3a1c7cc2a78ba4f25",
+              "Features": [],
+              "SourceKind": "local"
+            },
+            {
+              "PackageUID": "example.coordinate.common",
+              "Instance": "fypi1-sha256-d5b293c4aa3015fab5482d5c141f613ce6f412a452e73a7990d43b3f788e6b2c",
+              "Coordinate": "fypc1-sha256-fe9eba5e8f5944ea44c97b3702302a677bcd393aa1d7733ca1052bd690d2baba",
+              "Features": [
+                "fast"
+              ],
+              "SourceKind": "local"
+            },
+            {
+              "PackageUID": "example.coordinate.common",
+              "Instance": "fypi1-sha256-2fc0672fdab4d80e738f56d6a0a12b6d66064d0557b0abddc0fe33afe2931abe",
+              "Coordinate": "fypc1-sha256-d916529474f050b8ffb58943ab7910c1f48e5d61f3418732a37249ed7f5bf610",
+              "Features": [
+                "tls"
+              ],
+              "SourceKind": "local"
+            },
+            {
+              "PackageUID": "fairyc.std",
+              "Instance": "fypi1-sha256-c18350128fcbce1cee2c63f0e7acc467f9f77ff184c458af1d20eab69a58e89a",
+              "Coordinate": "fypc1-sha256-b0a4d6314db7dbe3f4f42c54d28d492054cc437fedd64985129b89c66b340424",
+              "Features": [],
+              "SourceKind": "sdk"
+            }
+          ]
+        },
+        {
+          "case": "Reordered",
+          "changedInstanceIDs": 0,
+          "packages": 6,
+          "packagesObserved": [
+            {
+              "PackageUID": "example.coordinate.root",
+              "Instance": "fypi1-sha256-d1a6f71ae7953ad6a5ead427c1daa9e1a68428c69c3e0c491685312621cd2200",
+              "Coordinate": "fypc1-sha256-d5efb7bebfbb25abe78e8cd90b782a84249cc3d52531a2b7fcface89a1581a23",
+              "Features": null,
+              "SourceKind": "local"
+            },
+            {
+              "PackageUID": "example.coordinate.left",
+              "Instance": "fypi1-sha256-bda77beeca0be4dfe8866540f8f948008c6a4b61b02858e3d5b4d54f8b226be0",
+              "Coordinate": "fypc1-sha256-ba44e152256352fa60071d126ec151d4af72d533badb2fc58010143c380b9dac",
+              "Features": [],
+              "SourceKind": "local"
+            },
+            {
+              "PackageUID": "example.coordinate.right",
+              "Instance": "fypi1-sha256-6a0c2683adb6e95554ec2615548b18b7db17dcdade0300759fe9c69fcfcf7da8",
+              "Coordinate": "fypc1-sha256-e8ea6cab4170cdb30ebecf40f1ebfb776d7c942dc434b6e3a1c7cc2a78ba4f25",
+              "Features": [],
+              "SourceKind": "local"
+            },
+            {
+              "PackageUID": "example.coordinate.common",
+              "Instance": "fypi1-sha256-5aa55de167a7db721481b6389f91333c625d75d7b23bcd9b363fabf700bebccf",
+              "Coordinate": "fypc1-sha256-fe9eba5e8f5944ea44c97b3702302a677bcd393aa1d7733ca1052bd690d2baba",
+              "Features": [
+                "fast"
+              ],
+              "SourceKind": "local"
+            },
+            {
+              "PackageUID": "example.coordinate.common",
+              "Instance": "fypi1-sha256-5ce0820f5d053de00b4c87f9718083e294b702beff14da6f31182d52994bce9a",
+              "Coordinate": "fypc1-sha256-d916529474f050b8ffb58943ab7910c1f48e5d61f3418732a37249ed7f5bf610",
+              "Features": [
+                "tls"
+              ],
+              "SourceKind": "local"
+            },
+            {
+              "PackageUID": "fairyc.std",
+              "Instance": "fypi1-sha256-c18350128fcbce1cee2c63f0e7acc467f9f77ff184c458af1d20eab69a58e89a",
+              "Coordinate": "fypc1-sha256-b0a4d6314db7dbe3f4f42c54d28d492054cc437fedd64985129b89c66b340424",
+              "Features": [],
+              "SourceKind": "sdk"
+            }
+          ]
+        },
+        {
+          "case": "NoSDK",
+          "changedInstanceIDs": 1,
+          "packages": 5,
+          "packagesObserved": [
+            {
+              "PackageUID": "example.coordinate.root",
+              "Instance": "fypi1-sha256-bf438587c2e8ef0c70cc9822b122ce43ff59aad4f59f9fc25931b173fae319b1",
+              "Coordinate": "fypc1-sha256-d5efb7bebfbb25abe78e8cd90b782a84249cc3d52531a2b7fcface89a1581a23",
+              "Features": null,
+              "SourceKind": "local"
+            },
+            {
+              "PackageUID": "example.coordinate.left",
+              "Instance": "fypi1-sha256-bda77beeca0be4dfe8866540f8f948008c6a4b61b02858e3d5b4d54f8b226be0",
+              "Coordinate": "fypc1-sha256-ba44e152256352fa60071d126ec151d4af72d533badb2fc58010143c380b9dac",
+              "Features": [],
+              "SourceKind": "local"
+            },
+            {
+              "PackageUID": "example.coordinate.right",
+              "Instance": "fypi1-sha256-6a0c2683adb6e95554ec2615548b18b7db17dcdade0300759fe9c69fcfcf7da8",
+              "Coordinate": "fypc1-sha256-e8ea6cab4170cdb30ebecf40f1ebfb776d7c942dc434b6e3a1c7cc2a78ba4f25",
+              "Features": [],
+              "SourceKind": "local"
+            },
+            {
+              "PackageUID": "example.coordinate.common",
+              "Instance": "fypi1-sha256-5aa55de167a7db721481b6389f91333c625d75d7b23bcd9b363fabf700bebccf",
+              "Coordinate": "fypc1-sha256-fe9eba5e8f5944ea44c97b3702302a677bcd393aa1d7733ca1052bd690d2baba",
+              "Features": [
+                "fast"
+              ],
+              "SourceKind": "local"
+            },
+            {
+              "PackageUID": "example.coordinate.common",
+              "Instance": "fypi1-sha256-5ce0820f5d053de00b4c87f9718083e294b702beff14da6f31182d52994bce9a",
+              "Coordinate": "fypc1-sha256-d916529474f050b8ffb58943ab7910c1f48e5d61f3418732a37249ed7f5bf610",
+              "Features": [
+                "tls"
+              ],
+              "SourceKind": "local"
+            }
+          ]
+        }
+      ],
+      "fixture": ".cache\\coordinate-graph-20261013\\fixture",
+      "passed": true
+    }
+  },
+  "tests": {
+    "schema": "fairyc.candidate-private-tests/v1",
+    "passed": true,
+    "module": "project_coordinate_graph",
+    "sourceInputs": [
+      {
+        "path": "examples/lexer_candidate/src/array_identity.fy",
+        "sha256": "8b501b0f72bb2805c00abc59afb195b5ba2c199796982122b62958bab64966ee"
+      },
+      {
+        "path": "examples/lexer_candidate/src/array_types.fy",
+        "sha256": "661e57ec5f65ea1d0be93eef637ce5235fc6e3f84e4ddf5babd8a4afd89f6688"
+      },
+      {
+        "path": "examples/lexer_candidate/src/attributes.fy",
+        "sha256": "dafe2e1c020446224fa8784e701e522096a58776a1066920f934c0717667b5e6"
+      },
+      {
+        "path": "examples/lexer_candidate/src/bodies.fy",
+        "sha256": "ea9bfd6dc1b3bce9dc407970b82d871185db33e7daadad35d348de84ab6ba294"
+      },
+      {
+        "path": "examples/lexer_candidate/src/body_state.fy",
+        "sha256": "0f4e1924d07e4d21bc5fbe35a4fb8f0c2b617206b6d63191e7a625300ec5bb3e"
+      },
+      {
+        "path": "examples/lexer_candidate/src/borrow_shapes.fy",
+        "sha256": "36b2214d9530980d60b11956f3738c1959cf66d29fcb80ec2bc4bad853c421e3"
+      },
+      {
+        "path": "examples/lexer_candidate/src/budget.fy",
+        "sha256": "c2793aa302279b9d27f0af32edd71f70de4e93cb4f76f55facd3e757641cc494"
+      },
+      {
+        "path": "examples/lexer_candidate/src/c_abi_types.fy",
+        "sha256": "2a4c6efd7b00dd4fef5ccc47950d9f70c21ed3ae2ac0eaa9817d80c0e03fdfa0"
+      },
+      {
+        "path": "examples/lexer_candidate/src/candidate_limits.fy",
+        "sha256": "e337e22a7feff699a675f0a12d882fc92b577e62f58712ceb24bd0fac136ab85"
+      },
+      {
+        "path": "examples/lexer_candidate/src/cleanup_syntax.fy",
+        "sha256": "1374cdcbfa6139a5e82e4e74606cc28ba46d9e81df62f7a0dd397f856fb0ad6f"
+      },
+      {
+        "path": "examples/lexer_candidate/src/diagnostics.fy",
+        "sha256": "ee95f81ed3b3224702196fceef2888434e9713341b81abf01e03945592c4de8b"
+      },
+      {
+        "path": "examples/lexer_candidate/src/effect_declarations.fy",
+        "sha256": "5fc47d2d48f4422b7cd897eaf3894f3feb984b4e09127a2ebf025e89e4ae1739"
+      },
+      {
+        "path": "examples/lexer_candidate/src/enum_types.fy",
+        "sha256": "d257e7cb599fd4f3bafc1f7d9ccf11d00d19f2719df063271186cf7c432f0a96"
+      },
+      {
+        "path": "examples/lexer_candidate/src/ffi_symbols.fy",
+        "sha256": "bf90ce5c6b76ad6d60fd499c5c168079520edbf5720ea757e705b99489b6cd29"
+      },
+      {
+        "path": "examples/lexer_candidate/src/file_source.fy",
+        "sha256": "1a7ac7f6c69ef27e78e734aa74dab90b895742a5500a32931baaed19379b938f"
+      },
+      {
+        "path": "examples/lexer_candidate/src/foreign_declarations.fy",
+        "sha256": "8d18c542522789399c131786d618a50b3058ef961317a89f24a0c9f0dede5a08"
+      },
+      {
+        "path": "examples/lexer_candidate/src/literal_types.fy",
+        "sha256": "bce967c2f7b001144642642503af9bb4cf83bae1e50f99262676d16afb9ac7f6"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_ast_join.fy",
+        "sha256": "f758470311f4db82d1f0472c6d826a96d57a26d26237169fe1ec227341f0119c"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_bind.fy",
+        "sha256": "f29fdea4fc36618c2e408171157bb2e9bc39ff0ba6b68baa2b7547b0ddef07a3"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_catalog.fy",
+        "sha256": "063e0ec3438dd1e9f89aea836038ba51be82e5026bb5f739c7e343caead7d20b"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_const_eval_declarations.fy",
+        "sha256": "8e93ea3fe0035090ad946bc920862cfa3d9281bb65f7b7270cc18c64edf3e129"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_public_interface.fy",
+        "sha256": "d51f0695987bc04a70697a88918050c7d4cec3adf206cc17a45308be196a83a7"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_public_interface_model.fy",
+        "sha256": "029b9a86471765d1dd2ff5878e5c0d0adcfaa8e6f5b8c81e1bbe9656c4f3b2f0"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_public_interface_write.fy",
+        "sha256": "9a8868217c8bb3a7eef097e13c4890393dc0ef7deaa70f1df49d65437acf9e24"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_public_type_text.fy",
+        "sha256": "84e265a7f97ccb4d0ffe94e1ff7008fbcc59e7c40fd256e7347170d4f137130c"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_region_types.fy",
+        "sha256": "97b3591aaf20279007c5826fbde0c610fb5a2a995a9f34ffe451382e82968266"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_registry.fy",
+        "sha256": "9e0af7c32bf001bb81d7839a41869ce7710bf51e00f72cb866909e53ad03bb34"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_signatures.fy",
+        "sha256": "f90b53c94caddf641b1dba6b8b0b7f7da11c10a52b93877c4ff3f1bb4725cf91"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_state_declarations.fy",
+        "sha256": "e3884d4fbc099047b614798ba1280a2deed316ec0d3fcea6e224d122e91dd752"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_state_interface.fy",
+        "sha256": "3e21f30e1e1148dac0faa322d3a4cac809ac99c268cb4587ace971d2a6c1c501"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_state_layout.fy",
+        "sha256": "58395167fac35425c2b24e73e7768c3315a20170a9407dbc0e8aebac692eef38"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_types.fy",
+        "sha256": "bf9882a3b65bed52ce35af965dff9498bd2dc82b59ff34f2636ddf0166ea1b19"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_bind.fy",
+        "sha256": "5106831b0fcb353475e5bb76943d31b7a5a9034c23fb9ee30996aa6065033b54"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_body_types.fy",
+        "sha256": "9dc313da217fb59197287be8ef7eb2806ebbe41414d7b34476efdd1d44bd20fd"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_generic_copy.fy",
+        "sha256": "0afe27a411f8b85b4e0979a5e4aa850e6fcf56ff1298f580d4b3ab6ac850d0f6"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_generics.fy",
+        "sha256": "8a7cc80bf9e6ebc7e0caa5851c5eec12722cad4bac431ac04df706f7fab014b9"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_interface_annotations.fy",
+        "sha256": "b90e5a47521ae999f61fff6123cf5d8344433d94c308965e23826913489b98b1"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_interface_declarations.fy",
+        "sha256": "fa5def06ebc0efcbf9e707c26858d84247ff6e8ac860e0f54a9e183709416944"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_interface_work.fy",
+        "sha256": "575d2ba14a7f0b3c4a45531742efae88d9a40825460e8c88bee761804eb222ac"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_interfaces.fy",
+        "sha256": "92bf6bc278366b1fd8aa0fa7922efa1ba5e2dd12207fddd61ca4c559e2b94082"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_shape_contracts.fy",
+        "sha256": "4ab7900ef6afd684016bf12fc72fe07d309c18ba321034b549dad01b45d1515f"
+      },
+      {
+        "path": "examples/lexer_candidate/src/nominal_identity.fy",
+        "sha256": "634cba7ac0667481c0863953640668841216554d852e0e1b1b245c8bc1606958"
+      },
+      {
+        "path": "examples/lexer_candidate/src/nominal_types.fy",
+        "sha256": "67f08ae69f35b1bcdf1d53eb080b5a5fa043a244ab0c48de2a1af26d38a63072"
+      },
+      {
+        "path": "examples/lexer_candidate/src/numbers.fy",
+        "sha256": "ee8b40b5e8061317d70d3594c386c9e4c70d95132a7e4243ea6402947a4c3556"
+      },
+      {
+        "path": "examples/lexer_candidate/src/parse_tokens.fy",
+        "sha256": "91984eb1086ff7faafa4a6c64a232fc2ddce365b8cd7c2ef23b143bb91d4c9a6"
+      },
+      {
+        "path": "examples/lexer_candidate/src/pointer_identity.fy",
+        "sha256": "31458fda72821f98d8383339f8b272f3aa1c78385fb23504cbe9f1aaa021ae3d"
+      },
+      {
+        "path": "examples/lexer_candidate/src/pointer_types.fy",
+        "sha256": "7cca6293336feedbf785912759ee6c50a17010ad9d966acb81877ad32cd55297"
+      },
+      {
+        "path": "examples/lexer_candidate/src/project_compiler_input.fy",
+        "sha256": "ba73aebc8d3c4fd4aae052849589e301dc5f6aec88c97dc8a6ac094d4f15c475"
+      },
+      {
+        "path": "examples/lexer_candidate/src/project_content_hash.fy",
+        "sha256": "68d867b37b8cc817382e6d6602aa4d66f4d66be8784e7fbe119c806832839a0e"
+      },
+      {
+        "path": "examples/lexer_candidate/src/project_coordinate_graph.fy",
+        "sha256": "a4e67fad8636b97a761f3ffe1383d88bd2ae1d2ca36e387fe0a5adad9409c94d"
+      },
+      {
+        "path": "examples/lexer_candidate/src/project_coordinate_identity.fy",
+        "sha256": "c9e5a9bc49d19420cbaa333211f1d82eb7cc73be9b1b70de4e6b4bd5f5fc8872"
+      },
+      {
+        "path": "examples/lexer_candidate/src/project_directory.fy",
+        "sha256": "70321e8a7cc84f131573eec91013fccad38d0162f781768bc0e47b136cf4ebc6"
+      },
+      {
+        "path": "examples/lexer_candidate/src/project_import_path.fy",
+        "sha256": "bc0e5e10905ee833b36ffe94ae8ff835f6f33caccfc59970cd379537dcbb0c54"
+      },
+      {
+        "path": "examples/lexer_candidate/src/project_instance_graph.fy",
+        "sha256": "9a47a2cae4fbef1a6129b0805e683782be26c819ae2f41dd233129279cc226e9"
+      },
+      {
+        "path": "examples/lexer_candidate/src/project_instance_identity.fy",
+        "sha256": "797920212852438398bcfaa5acd34225c9ff2de722744c67d9c68c9d2c56e8dd"
+      },
+      {
+        "path": "examples/lexer_candidate/src/project_key_index.fy",
+        "sha256": "34ee26a1092361c5bc60860795a86c0974243eec3cfc5f829710d192fdf7ea28"
+      },
+      {
+        "path": "examples/lexer_candidate/src/project_manifest.fy",
+        "sha256": "943c3e163ddc04afb03a82ef4a0485aa6a618a67708e657086b8ed1acd56658a"
+      },
+      {
+        "path": "examples/lexer_candidate/src/project_manifest_values.fy",
+        "sha256": "4f21b9dedf744ffc449d1b843282f9aba2ecc221c61f043594bea70c4d56387d"
+      },
+      {
+        "path": "examples/lexer_candidate/src/project_module_path.fy",
+        "sha256": "b4217fe0f797e5f0fb4bab8ebc75435e6674b5f72b60d0129b5269c627709cb2"
+      },
+      {
+        "path": "examples/lexer_candidate/src/project_module_visibility.fy",
+        "sha256": "a03c433d5302f904620df34585697e99e67e417b3b2121a474432839108ab0bb"
+      },
+      {
+        "path": "examples/lexer_candidate/src/project_package_input.fy",
+        "sha256": "fe1a75622fbf72b03fe5bfba3ce0c158eb2e03033e31acfdaef05afea9ec68c8"
+      },
+      {
+        "path": "examples/lexer_candidate/src/project_path.fy",
+        "sha256": "20bde13864e5ba8752b33a616eab22b08caf8a20d6a435d2d2c2cc68f443f1a5"
+      },
+      {
+        "path": "examples/lexer_candidate/src/project_path_unicode_data.fy",
+        "sha256": "9cf3af27796644304493561591e1641c70c5c653bf739ed71a65e492db510fbd"
+      },
+      {
+        "path": "examples/lexer_candidate/src/project_sdk_bundle.fy",
+        "sha256": "a7bde8c483cc986a6bf6b38f56ab1852cc46a4d27a21a48b0868064bf1eb8217"
+      },
+      {
+        "path": "examples/lexer_candidate/src/project_sdk_data_alloc_0.fy",
+        "sha256": "ac58625000197a88c33f322770c7f89fecc64126b3ff4479d6757aa4bfb16301"
+      },
+      {
+        "path": "examples/lexer_candidate/src/project_sdk_data_bytes_0.fy",
+        "sha256": "18734fec4d058c90a8b38cc729d711789b2ebfd2f4cd08756ccdad56ae9665b3"
+      },
+      {
+        "path": "examples/lexer_candidate/src/project_sdk_data_fs_0.fy",
+        "sha256": "a6c26d37224e5a43231d9068bfe1638ac9b357b971eddcaf628291d5c906ea0f"
+      },
+      {
+        "path": "examples/lexer_candidate/src/project_sdk_data_fs_1.fy",
+        "sha256": "0c2a6d16571e5681296d324293543771c69665b3a90606090b675d33e0fc5f17"
+      },
+      {
+        "path": "examples/lexer_candidate/src/project_sdk_data_fs_2.fy",
+        "sha256": "c20e6ac9ab0d7be6a84af43a52191ae76b402efef6d76bdd7ce0e1e3dffafea0"
+      },
+      {
+        "path": "examples/lexer_candidate/src/project_sdk_data_io_0.fy",
+        "sha256": "8527d39e50702591dcdf07e71663128bd4f61a8ad62f30e8b42998f30a548104"
+      },
+      {
+        "path": "examples/lexer_candidate/src/project_sdk_data_num_0.fy",
+        "sha256": "1859e2ffa80b3e675096cc50cec693bb33aa060dd47886feb837d4df37c2eda8"
+      },
+      {
+        "path": "examples/lexer_candidate/src/project_sdk_data_process_0.fy",
+        "sha256": "b14ace85f2736dee51a63f064cf7619ad925384797e0945c6053ba767f725f6c"
+      },
+      {
+        "path": "examples/lexer_candidate/src/project_sdk_data_text_0.fy",
+        "sha256": "a0d6b93d966f75b803a1677cfa0e3cd6504b1006bd4a10a1c2598668a5442d19"
+      },
+      {
+        "path": "examples/lexer_candidate/src/project_sdk_data_vec_0.fy",
+        "sha256": "6201186e9a75bb1957596eb9717e447194e67b6c5828355e44af98941a103a31"
+      },
+      {
+        "path": "examples/lexer_candidate/src/project_sdk_embedded.fy",
+        "sha256": "8c49d481331933981777e9bd90fa5f45621956010b6a3fea38a2ada4dd31d943"
+      },
+      {
+        "path": "examples/lexer_candidate/src/project_source_catalog.fy",
+        "sha256": "5dd5b1a6f848968cf20676084af8ddcaf039cfc74e1837685c12c601c53fb131"
+      },
+      {
+        "path": "examples/lexer_candidate/src/project_source_file.fy",
+        "sha256": "6d1307e99f7ae9fb387fc447f3b6c36f6c0e77aebc90faca55e75665aad2d282"
+      },
+      {
+        "path": "examples/lexer_candidate/src/project_source_identity.fy",
+        "sha256": "354bed4ced07109403b58f4432e8beddc765760a1ee083b3ca72fa0880c9f359"
+      },
+      {
+        "path": "examples/lexer_candidate/src/project_source_modules.fy",
+        "sha256": "d7d7e5b30a270389a1572f6e26cf3c0603db33e0125bd33fa17f4f177a0f7a1c"
+      },
+      {
+        "path": "examples/lexer_candidate/src/project_source_root.fy",
+        "sha256": "e6d896a57fde407db5e7042e244d6f2a35dddc4e113ad20555c4408f24842127"
+      },
+      {
+        "path": "examples/lexer_candidate/src/project_source_set.fy",
+        "sha256": "c4b70409d8aa627a1ef46488e5232d3deea7b07c0e796c26ef28449f367a98e1"
+      },
+      {
+        "path": "examples/lexer_candidate/src/project_toml_context.fy",
+        "sha256": "1682260043feced2ac662198fd3b29f4badb2a4a9f9b02a8e1f81462f3b3cc0f"
+      },
+      {
+        "path": "examples/lexer_candidate/src/project_toml_document.fy",
+        "sha256": "0bc3782206da0d9320ba8a39ea6a1f9ded52ec1bbf855580e31c1a1786f4b3a8"
+      },
+      {
+        "path": "examples/lexer_candidate/src/project_toml_model.fy",
+        "sha256": "4a6c295108e704749fc557204de4d8a0287e3228e59da396c50867ec8894b11e"
+      },
+      {
+        "path": "examples/lexer_candidate/src/project_toml_scalars.fy",
+        "sha256": "137d5dbdce313f22e91a9be87f8b34eb6f10011933b152f649421a895e274cb9"
+      },
+      {
+        "path": "examples/lexer_candidate/src/project_toml_strings.fy",
+        "sha256": "bc7e71acaaa68af5755d066c90fa1f763625de32c8fa2a6778e8447eebc187bb"
+      },
+      {
+        "path": "examples/lexer_candidate/src/project_toml_values.fy",
+        "sha256": "24255d1fdf0f34b6761f5304d383127667e8b127488a80409b3f35a13f62e81c"
+      },
+      {
+        "path": "examples/lexer_candidate/src/project_workspace_catalog.fy",
+        "sha256": "bc800dda99247aba4d8b80abdcbc092d9cb27ac5193cfb7a33bd405ec753c936"
+      },
+      {
+        "path": "examples/lexer_candidate/src/project_workspace_graph.fy",
+        "sha256": "bac53290ea919d58d825f7a663c716b97541404a1973aa8585da891bfb689dc1"
+      },
+      {
+        "path": "examples/lexer_candidate/src/project_workspace_input.fy",
+        "sha256": "18a8a35c400eaa8c32da09ea55a70d704953e8b9a762998b44c9af4dd76689fd"
+      },
+      {
+        "path": "examples/lexer_candidate/src/raw_view_intrinsics.fy",
+        "sha256": "d01c264221b717c7344f8119a9e645794037b0ce7b589e4eac31228c2b4af0d5"
+      },
+      {
+        "path": "examples/lexer_candidate/src/records.fy",
+        "sha256": "e2d1d3540285509aded981b476d4b2340857d8c7370364f4b1410bfd6883f6dd"
+      },
+      {
+        "path": "examples/lexer_candidate/src/reference_types.fy",
+        "sha256": "f529bb686f06fe07d95f864e28fbde211200fce11a11c6aae260356103639b57"
+      },
+      {
+        "path": "examples/lexer_candidate/src/repr_c_declarations.fy",
+        "sha256": "20a8e1725551f932fb702e2049eda8edd24ea77a5b55be62e72d32fd5b2d47b8"
+      },
+      {
+        "path": "examples/lexer_candidate/src/resource_abilities.fy",
+        "sha256": "1dc0a26ba65e173ca7eb5825831e97a1e853593f8761131f10a6a6bf1ca186d1"
+      },
+      {
+        "path": "examples/lexer_candidate/src/resource_identity.fy",
+        "sha256": "7d85c65df4d6cc02f004f854d5108ec3cc7ba8ddb4885ea54c634f88f93594aa"
+      },
+      {
+        "path": "examples/lexer_candidate/src/resource_properties.fy",
+        "sha256": "fe0372ce1c546422e8b09d5ae9c9aa16f1bc11682fdded971e0820e96d30bac2"
+      },
+      {
+        "path": "examples/lexer_candidate/src/scalar_views.fy",
+        "sha256": "ab3044f3a36a81611a11a46fed80dd41546a9de3f953d4817b2d8e40bc6037bc"
+      },
+      {
+        "path": "examples/lexer_candidate/src/scanner.fy",
+        "sha256": "3755e569fe63003f63b2c9b8272df2ba656c844791cedbc0da4f9245b8809cf7"
+      },
+      {
+        "path": "examples/lexer_candidate/src/sdk_authority.fy",
+        "sha256": "ae0f2e21819a625a6bb5fe331173dd3366599486f3c203a523693680a0c4ee6c"
+      },
+      {
+        "path": "examples/lexer_candidate/src/sdk_file_rules.fy",
+        "sha256": "a7c5bc7224e12d29d54d284c54f31f34fa66f1067397e0fcb57de9dabe901e5b"
+      },
+      {
+        "path": "examples/lexer_candidate/src/sdk_scopes.fy",
+        "sha256": "7aabc14d6c8a54f959e4c454df8fccb4fc49c2a7efbefa882f8d939a131717e6"
+      },
+      {
+        "path": "examples/lexer_candidate/src/sdk_vector_plan.fy",
+        "sha256": "bab7275da47a81e2ec700f1e0478649597c16eda8ea1c37c769d7bc7a5ee04d5"
+      },
+      {
+        "path": "examples/lexer_candidate/src/sha256.fy",
+        "sha256": "eb89211fd749f7f527e8d2b72e97d70f8d9613bbac428bc95d975bef7c53bfa1"
+      },
+      {
+        "path": "examples/lexer_candidate/src/sha256_block.fy",
+        "sha256": "bc48b9e751205bba8aeaf09987ea8681694d26bc989e24f4ecb3afa4c6e00fd4"
+      },
+      {
+        "path": "examples/lexer_candidate/src/sha256_stream.fy",
+        "sha256": "b5f97a9b5be679418a1365a6007028abfab5ba66ee3ae5c08b3e5b863fcfc8b9"
+      },
+      {
+        "path": "internal/sdkstdlib/sources/std/bytes.fy",
+        "sha256": "4740a506e93349fb002c383967dcc44d182d20f09f2094b83b5464a4ab252982"
+      },
+      {
+        "path": "internal/sdkstdlib/sources/std/fs.fy",
+        "sha256": "fd7ddfa9f0deed98304cecf94911644087d1e2a46e8be8995c35acbcb183b335"
+      },
+      {
+        "path": "internal/sdkstdlib/sources/std/io.fy",
+        "sha256": "4b89c3aeb8b4de4887395d29723095d364c5660c6b773c5696fb1f65f5365f48"
+      },
+      {
+        "path": "internal/sdkstdlib/sources/std/num.fy",
+        "sha256": "09aa0d45f075aa4212049527ded7bb48d99ceb6ffed56b310e267421bae20bb3"
+      },
+      {
+        "path": "internal/sdkstdlib/sources/std/process.fy",
+        "sha256": "9680a1481df4f761f481d5a039af7bdbefeb312d1091961194f8e7bc0681ae24"
+      },
+      {
+        "path": "internal/sdkstdlib/sources/std/text.fy",
+        "sha256": "cccd47e090fda11c9da063ffb321489dd8753fe9996855fc432833e05a79e695"
+      },
+      {
+        "path": "internal/sdkstdlib/sources/optional/std/vec.fy",
+        "sha256": "0ae4c395bf98c39079ad620bde035b3b590d51417864802e698edc069281db5b"
+      },
+      {
+        "path": "examples/lexer_candidate/src/storage_intrinsics.fy",
+        "sha256": "6f8ae79d2086341058de549fe39ff54164a28bb0ad17934e2f78ff6c477a4300"
+      },
+      {
+        "path": "examples/lexer_candidate/src/strings.fy",
+        "sha256": "8f26db7c4d4039c8c8d9fbc6078097859c8f714ca5887957fdf0e69269dca521"
+      },
+      {
+        "path": "examples/lexer_candidate/src/syntax.fy",
+        "sha256": "cb9244a18ea93777694d60e5b63eb67738d224297d097542bb84db2b7f31d5e6"
+      },
+      {
+        "path": "examples/lexer_candidate/src/syntax_arena_copy.fy",
+        "sha256": "89969f5d7d8bd0deb3070032d9c9ffd58afbc972ee95316c04236952e27ff098"
+      },
+      {
+        "path": "examples/lexer_candidate/src/syntax_parse_driver.fy",
+        "sha256": "9db6518c69f6c2394ef1c697d7d2d07b0a78ec3336a907c92e9d2e2087e5b756"
+      },
+      {
+        "path": "examples/lexer_candidate/src/tagged_encoding.fy",
+        "sha256": "bfc4c8398d4cac37cb15056a19814216e1faf437d88b22d61d52c5482aa37d2a"
+      },
+      {
+        "path": "examples/lexer_candidate/src/tagged_types.fy",
+        "sha256": "431f283e07d9dbea60c698d1f70f7e7009e1552314cf660688b10b09daad8338"
+      },
+      {
+        "path": "examples/lexer_candidate/src/type_state.fy",
+        "sha256": "7dbbf7d50be1e9513dc8aafd99b11afda5d8e2d7ce87d96b6436c4752c2123a0"
+      },
+      {
+        "path": "examples/lexer_candidate/src/types.fy",
+        "sha256": "53a77948af92724f00de0609837fd1507899df8e2b59b6d2778ef1f3c344395a"
+      },
+      {
+        "path": "examples/lexer_candidate/src/utf8.fy",
+        "sha256": "4a5425cea9efbfb1bff2c31a38c2bd8e392c6792af09f24e906c9a743621870d"
+      },
+      {
+        "path": "examples/lexer_candidate/tests/project_coordinate_graph.fy",
+        "sha256": "2604a4ab5323a2603c7818f7bd1ba47259bbc5ade0df8db58f01a85e99bf3ae2"
+      },
+      {
+        "path": "tools/verify-candidate-private-tests.py",
+        "sha256": "8a5a0bd3f157168003e995aa73e866b4028e8dcaeddcd245e0e627f0956d3cc1"
+      },
+      {
+        "path": ".cache/coordinate-graph-20261013/fixture-inputs.json",
+        "sha256": "f8c18ac1268fc0370ed82ec0bbca2091c70f1ca108d3d4d95907a808def73ee3"
+      },
+      {
+        "path": ".cache/coordinate-graph-20261013/fixture-root.txt",
+        "sha256": "a9007a60a9e955db9b7d22c1473cc68bd4df44de061559d7b1752f4eb36e8b97"
+      }
+    ],
+    "tools": {
+      "compiler": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-frontend-oracle-current-20261012.exe",
+        "sha256": "3ecc4501ee3bb47ecc39e7288200266b31cbcd8bf6ffec302ae54867705ce5d1"
+      },
+      "candidate": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-semantic-final-build-20261012\\candidate-release.exe",
+        "sha256": "0c77c32d39b1ae1ddaa105f13bec9ce86e66029aa6ca5694863ac0ba68111480"
+      },
+      "builder": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-rooted-builder-stack-20261012.exe",
+        "sha256": "02abe2328daa9921705910c7b995e82c1312cb960fe024106c11468569aefff0"
+      }
+    },
+    "native": {
+      "schemaVersion": "fairyc.test-report/v4",
+      "engine": "native",
+      "target": "x86_64-windows-msvc",
+      "profile": "development",
+      "tests": [
+        {
+          "identity": "tests::project_coordinate_graph::keeps_feature_namespaces_distinct_and_rejects_instance_text",
+          "outcome": "passed",
+          "trapCategory": null,
+          "stdoutBase64": "",
+          "stderrBase64": ""
+        },
+        {
+          "identity": "tests::project_coordinate_graph::matches_go_root_feature_instances_and_sdk_coordinates",
+          "outcome": "passed",
+          "trapCategory": null,
+          "stdoutBase64": "",
+          "stderrBase64": ""
+        },
+        {
+          "identity": "tests::project_coordinate_graph::owns_coordinates_after_workspace_closes_and_honors_budget",
+          "outcome": "passed",
+          "trapCategory": null,
+          "stdoutBase64": "",
+          "stderrBase64": ""
+        },
+        {
+          "identity": "tests::project_coordinate_graph::preserves_coordinates_across_source_edits_and_reordering",
+          "outcome": "passed",
+          "trapCategory": null,
+          "stdoutBase64": "",
+          "stderrBase64": ""
+        }
+      ],
+      "count": 4,
+      "passed": 4,
+      "failed": 0,
+      "status": "ok",
+      "lock": "verified"
+    },
+    "nativeTests": 4,
+    "authoredTestsExecuted": 4,
+    "candidateOnly": false,
+    "lockSHA256": "f5b1620f3cc788cb9a032637d7913c8c23c2e55685e69b4079a1b6dbd2db2ab5",
+    "candidateInputFiles": 124,
+    "candidatePacketSHA256": "2a731ae68df426701c48c8ab0a74028de4aa7222f83ab0ad154ef823e8aabf0a",
+    "candidateExecutions": [
+      {
+        "profile": "development",
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\coordinate-graph-20261013\\tests-final-views\\development.exe",
+        "sha256": "a16ae28fda00eb90877bd867c2d4be87a89606b4a40fd980b85b3f83be6a6a8f",
+        "exit": 0
+      },
+      {
+        "profile": "release",
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\coordinate-graph-20261013\\tests-final-views\\release.exe",
+        "sha256": "072cb3404459e681f86362b8edcc717cd3d30e60d70d4a4d9ef11730be109db7",
+        "exit": 0
+      }
+    ],
+    "invocations": [
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-frontend-oracle-current-20261012.exe",
+          "test",
+          "--native",
+          "--locked",
+          "--json",
+          "--capture-output",
+          "--exact",
+          "tests::project_coordinate_graph::matches_go_root_feature_instances_and_sdk_coordinates",
+          "--exact",
+          "tests::project_coordinate_graph::preserves_coordinates_across_source_edits_and_reordering",
+          "--exact",
+          "tests::project_coordinate_graph::owns_coordinates_after_workspace_closes_and_honors_budget",
+          "--exact",
+          "tests::project_coordinate_graph::keeps_feature_namespaces_distinct_and_rejects_instance_text",
+          "--",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\coordinate-graph-20261013\\fixture-root.txt"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "seconds": 257.3555779999879,
+        "exit": 0,
+        "stdoutBytes": 910,
+        "stdoutSHA256": "2254d23495ce30aa2218fe3ad5ca935051acdceb0b318a2b20606bd721b63c92",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-semantic-final-build-20261012\\candidate-release.exe",
+          "--c-project-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\coordinate-graph-20261013\\tests-final-views\\sources.list"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+        "seconds": 53.31408169999486,
+        "exit": 0,
+        "stdoutBytes": 5144071,
+        "stdoutSHA256": "2a731ae68df426701c48c8ab0a74028de4aa7222f83ab0ad154ef823e8aabf0a",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-rooted-builder-stack-20261012.exe",
+          "--packet",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\coordinate-graph-20261013\\tests-final-views\\candidate-packet.bin",
+          "--packet-sha256",
+          "2a731ae68df426701c48c8ab0a74028de4aa7222f83ab0ad154ef823e8aabf0a",
+          "--output",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\coordinate-graph-20261013\\tests-final-views\\development.exe"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+        "seconds": 6.2316546000074595,
+        "exit": 0,
+        "stdoutBytes": 186,
+        "stdoutSHA256": "3f8cf573b6e14f4bf66d5b79a64f74feb62076ff4c71d5fd0a8925f660559329",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\coordinate-graph-20261013\\tests-final-views\\development.exe",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\coordinate-graph-20261013\\fixture-root.txt"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+        "seconds": 3.66516530001536,
+        "exit": 0,
+        "stdoutBytes": 0,
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-rooted-builder-stack-20261012.exe",
+          "--packet",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\coordinate-graph-20261013\\tests-final-views\\candidate-packet.bin",
+          "--packet-sha256",
+          "2a731ae68df426701c48c8ab0a74028de4aa7222f83ab0ad154ef823e8aabf0a",
+          "--output",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\coordinate-graph-20261013\\tests-final-views\\release.exe",
+          "--release"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+        "seconds": 92.29622109999764,
+        "exit": 0,
+        "stdoutBytes": 187,
+        "stdoutSHA256": "6b20bf9603c25992b0a4936d447f2b7d0ebac48b1656bef91248bcb1f482112f",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\coordinate-graph-20261013\\tests-final-views\\release.exe",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\coordinate-graph-20261013\\fixture-root.txt"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+        "seconds": 0.6391476000135299,
+        "exit": 0,
+        "stdoutBytes": 0,
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderr": ""
+      }
+    ],
+    "publicApiChanged": false,
+    "dbChanged": false,
+    "ciChanged": false,
+    "pushed": false,
+    "selection": {
+      "mode": "all-authored",
+      "authoredTests": 4,
+      "selectedTests": 4
+    },
+    "frontendTimeoutSeconds": 180,
+    "productTimeoutChanged": false,
+    "wrapperEffects": [
+      "filesystem",
+      "console"
+    ],
+    "unchangedPaths": [
+      {
+        "path": ".cache/coordinate-graph-20261013/fixture/Base/common/fairy.toml",
+        "snapshot": {
+          "directory": false,
+          "size": 147,
+          "modifiedNS": 1791822323275304700,
+          "sha256": "92abb2b31e7809d2bfc80ad16dce3cdc4b9f70ef0181a56e6bdab643e66ce6f7"
+        }
+      },
+      {
+        "path": ".cache/coordinate-graph-20261013/fixture/Base/common/src/common.fy",
+        "snapshot": {
+          "directory": false,
+          "size": 77,
+          "modifiedNS": 1791822323271241000,
+          "sha256": "1f933ed4ae221795ed4e7e3f9b7478e2b8703d3568615805895c83ad55c5f69d"
+        }
+      },
+      {
+        "path": ".cache/coordinate-graph-20261013/fixture/Base/coordinates.bin",
+        "snapshot": {
+          "directory": false,
+          "size": 1036,
+          "modifiedNS": 1791822323298914800,
+          "sha256": "f2f73fc43cbb11b01d19090433cb78cfa0ba9f79a5b41dfc663cbe39dc94ed87"
+        }
+      },
+      {
+        "path": ".cache/coordinate-graph-20261013/fixture/Base/fairy.toml",
+        "snapshot": {
+          "directory": false,
+          "size": 306,
+          "modifiedNS": 1791822323272244400,
+          "sha256": "1ee5497e0b2e7bbcb4450a9bd564e05a89696263db18628a5718063a5a0a391b"
+        }
+      },
+      {
+        "path": ".cache/coordinate-graph-20261013/fixture/Base/left/fairy.toml",
+        "snapshot": {
+          "directory": false,
+          "size": 210,
+          "modifiedNS": 1791822323273241600,
+          "sha256": "aa96041118fb301e8e3f5f6a320be10d36fb03e15034a252d949166ef15c33ad"
+        }
+      },
+      {
+        "path": ".cache/coordinate-graph-20261013/fixture/Base/left/src/left.fy",
+        "snapshot": {
+          "directory": false,
+          "size": 70,
+          "modifiedNS": 1791822323271241000,
+          "sha256": "dedb49f4b6deb0953af1080d8acbb43dd4500a84a478dbb4d1f9e6834753e007"
+        }
+      },
+      {
+        "path": ".cache/coordinate-graph-20261013/fixture/Base/right/fairy.toml",
+        "snapshot": {
+          "directory": false,
+          "size": 210,
+          "modifiedNS": 1791822323274752100,
+          "sha256": "06208d4e18ce1dfb7bad01125b6da65dd899df0ec5a6eb67e81d34756b7e7e19"
+        }
+      },
+      {
+        "path": ".cache/coordinate-graph-20261013/fixture/Base/right/src/right.fy",
+        "snapshot": {
+          "directory": false,
+          "size": 71,
+          "modifiedNS": 1791822323272244400,
+          "sha256": "c2341089600e90fcc786f745f664828589f27f282c29adb78ad6bae342fa284b"
+        }
+      },
+      {
+        "path": ".cache/coordinate-graph-20261013/fixture/Base/src/main.fy",
+        "snapshot": {
+          "directory": false,
+          "size": 93,
+          "modifiedNS": 1791822323273241600,
+          "sha256": "f93f708fb3e06d5a4e125f0d8aae273f77e74f5b236ad8ccbd5b640988a13e72"
+        }
+      },
+      {
+        "path": ".cache/coordinate-graph-20261013/fixture/Edited/common/fairy.toml",
+        "snapshot": {
+          "directory": false,
+          "size": 147,
+          "modifiedNS": 1791822323302645300,
+          "sha256": "92abb2b31e7809d2bfc80ad16dce3cdc4b9f70ef0181a56e6bdab643e66ce6f7"
+        }
+      },
+      {
+        "path": ".cache/coordinate-graph-20261013/fixture/Edited/common/src/common.fy",
+        "snapshot": {
+          "directory": false,
+          "size": 77,
+          "modifiedNS": 1791822323303702800,
+          "sha256": "da6cd03d447e42e5b1293210a5a45b90d0c6abf82c1f6df9567b4bf17ee734b5"
+        }
+      },
+      {
+        "path": ".cache/coordinate-graph-20261013/fixture/Edited/coordinates.bin",
+        "snapshot": {
+          "directory": false,
+          "size": 1036,
+          "modifiedNS": 1791822323326526000,
+          "sha256": "9b6c1269a36ac47e9cabd3a347fc8b633c232792543c88e3dc411e15fcdd8ea7"
+        }
+      },
+      {
+        "path": ".cache/coordinate-graph-20261013/fixture/Edited/fairy.toml",
+        "snapshot": {
+          "directory": false,
+          "size": 306,
+          "modifiedNS": 1791822323306379500,
+          "sha256": "1ee5497e0b2e7bbcb4450a9bd564e05a89696263db18628a5718063a5a0a391b"
+        }
+      },
+      {
+        "path": ".cache/coordinate-graph-20261013/fixture/Edited/left/fairy.toml",
+        "snapshot": {
+          "directory": false,
+          "size": 210,
+          "modifiedNS": 1791822323300510300,
+          "sha256": "aa96041118fb301e8e3f5f6a320be10d36fb03e15034a252d949166ef15c33ad"
+        }
+      },
+      {
+        "path": ".cache/coordinate-graph-20261013/fixture/Edited/left/src/left.fy",
+        "snapshot": {
+          "directory": false,
+          "size": 70,
+          "modifiedNS": 1791822323304244700,
+          "sha256": "dedb49f4b6deb0953af1080d8acbb43dd4500a84a478dbb4d1f9e6834753e007"
+        }
+      },
+      {
+        "path": ".cache/coordinate-graph-20261013/fixture/Edited/right/fairy.toml",
+        "snapshot": {
+          "directory": false,
+          "size": 210,
+          "modifiedNS": 1791822323301573800,
+          "sha256": "06208d4e18ce1dfb7bad01125b6da65dd899df0ec5a6eb67e81d34756b7e7e19"
+        }
+      },
+      {
+        "path": ".cache/coordinate-graph-20261013/fixture/Edited/right/src/right.fy",
+        "snapshot": {
+          "directory": false,
+          "size": 71,
+          "modifiedNS": 1791822323305837200,
+          "sha256": "c2341089600e90fcc786f745f664828589f27f282c29adb78ad6bae342fa284b"
+        }
+      },
+      {
+        "path": ".cache/coordinate-graph-20261013/fixture/Edited/src/main.fy",
+        "snapshot": {
+          "directory": false,
+          "size": 93,
+          "modifiedNS": 1791822323306379500,
+          "sha256": "f93f708fb3e06d5a4e125f0d8aae273f77e74f5b236ad8ccbd5b640988a13e72"
+        }
+      },
+      {
+        "path": ".cache/coordinate-graph-20261013/fixture/NoSDK/common/fairy.toml",
+        "snapshot": {
+          "directory": false,
+          "size": 147,
+          "modifiedNS": 1791822323367013200,
+          "sha256": "92abb2b31e7809d2bfc80ad16dce3cdc4b9f70ef0181a56e6bdab643e66ce6f7"
+        }
+      },
+      {
+        "path": ".cache/coordinate-graph-20261013/fixture/NoSDK/common/src/common.fy",
+        "snapshot": {
+          "directory": false,
+          "size": 77,
+          "modifiedNS": 1791822323359023100,
+          "sha256": "1f933ed4ae221795ed4e7e3f9b7478e2b8703d3568615805895c83ad55c5f69d"
+        }
+      },
+      {
+        "path": ".cache/coordinate-graph-20261013/fixture/NoSDK/coordinates.bin",
+        "snapshot": {
+          "directory": false,
+          "size": 866,
+          "modifiedNS": 1791822323378567000,
+          "sha256": "275869ebc119727754415da55c8c83978677e1b7108346938c30f1cb7090efaa"
+        }
+      },
+      {
+        "path": ".cache/coordinate-graph-20261013/fixture/NoSDK/fairy.toml",
+        "snapshot": {
+          "directory": false,
+          "size": 306,
+          "modifiedNS": 1791822323363698800,
+          "sha256": "1ee5497e0b2e7bbcb4450a9bd564e05a89696263db18628a5718063a5a0a391b"
+        }
+      },
+      {
+        "path": ".cache/coordinate-graph-20261013/fixture/NoSDK/left/fairy.toml",
+        "snapshot": {
+          "directory": false,
+          "size": 210,
+          "modifiedNS": 1791822323365927400,
+          "sha256": "aa96041118fb301e8e3f5f6a320be10d36fb03e15034a252d949166ef15c33ad"
+        }
+      },
+      {
+        "path": ".cache/coordinate-graph-20261013/fixture/NoSDK/left/src/left.fy",
+        "snapshot": {
+          "directory": false,
+          "size": 70,
+          "modifiedNS": 1791822323360950400,
+          "sha256": "dedb49f4b6deb0953af1080d8acbb43dd4500a84a478dbb4d1f9e6834753e007"
+        }
+      },
+      {
+        "path": ".cache/coordinate-graph-20261013/fixture/NoSDK/right/fairy.toml",
+        "snapshot": {
+          "directory": false,
+          "size": 210,
+          "modifiedNS": 1791822323366482700,
+          "sha256": "06208d4e18ce1dfb7bad01125b6da65dd899df0ec5a6eb67e81d34756b7e7e19"
+        }
+      },
+      {
+        "path": ".cache/coordinate-graph-20261013/fixture/NoSDK/right/src/right.fy",
+        "snapshot": {
+          "directory": false,
+          "size": 71,
+          "modifiedNS": 1791822323363134200,
+          "sha256": "c2341089600e90fcc786f745f664828589f27f282c29adb78ad6bae342fa284b"
+        }
+      },
+      {
+        "path": ".cache/coordinate-graph-20261013/fixture/NoSDK/src/main.fy",
+        "snapshot": {
+          "directory": false,
+          "size": 72,
+          "modifiedNS": 1791822323365378800,
+          "sha256": "7c1064cabf320f0d9ab0177ac9c91eee4e18f2db5fe4b0e6d2cb4b9dec58af48"
+        }
+      },
+      {
+        "path": ".cache/coordinate-graph-20261013/fixture/Reordered/common/fairy.toml",
+        "snapshot": {
+          "directory": false,
+          "size": 147,
+          "modifiedNS": 1791822323334551700,
+          "sha256": "92abb2b31e7809d2bfc80ad16dce3cdc4b9f70ef0181a56e6bdab643e66ce6f7"
+        }
+      },
+      {
+        "path": ".cache/coordinate-graph-20261013/fixture/Reordered/common/src/common.fy",
+        "snapshot": {
+          "directory": false,
+          "size": 77,
+          "modifiedNS": 1791822323335552600,
+          "sha256": "1f933ed4ae221795ed4e7e3f9b7478e2b8703d3568615805895c83ad55c5f69d"
+        }
+      },
+      {
+        "path": ".cache/coordinate-graph-20261013/fixture/Reordered/coordinates.bin",
+        "snapshot": {
+          "directory": false,
+          "size": 1036,
+          "modifiedNS": 1791822323356822200,
+          "sha256": "f2f73fc43cbb11b01d19090433cb78cfa0ba9f79a5b41dfc663cbe39dc94ed87"
+        }
+      },
+      {
+        "path": ".cache/coordinate-graph-20261013/fixture/Reordered/fairy.toml",
+        "snapshot": {
+          "directory": false,
+          "size": 306,
+          "modifiedNS": 1791822323331106100,
+          "sha256": "a273295f40681122e77c523d691d98ddd073c40cb3c72a2217904cd2854a4487"
+        }
+      },
+      {
+        "path": ".cache/coordinate-graph-20261013/fixture/Reordered/left/fairy.toml",
+        "snapshot": {
+          "directory": false,
+          "size": 210,
+          "modifiedNS": 1791822323332110500,
+          "sha256": "aa96041118fb301e8e3f5f6a320be10d36fb03e15034a252d949166ef15c33ad"
+        }
+      },
+      {
+        "path": ".cache/coordinate-graph-20261013/fixture/Reordered/left/src/left.fy",
+        "snapshot": {
+          "directory": false,
+          "size": 70,
+          "modifiedNS": 1791822323328052600,
+          "sha256": "dedb49f4b6deb0953af1080d8acbb43dd4500a84a478dbb4d1f9e6834753e007"
+        }
+      },
+      {
+        "path": ".cache/coordinate-graph-20261013/fixture/Reordered/right/fairy.toml",
+        "snapshot": {
+          "directory": false,
+          "size": 210,
+          "modifiedNS": 1791822323332110500,
+          "sha256": "06208d4e18ce1dfb7bad01125b6da65dd899df0ec5a6eb67e81d34756b7e7e19"
+        }
+      },
+      {
+        "path": ".cache/coordinate-graph-20261013/fixture/Reordered/right/src/right.fy",
+        "snapshot": {
+          "directory": false,
+          "size": 71,
+          "modifiedNS": 1791822323330595600,
+          "sha256": "c2341089600e90fcc786f745f664828589f27f282c29adb78ad6bae342fa284b"
+        }
+      },
+      {
+        "path": ".cache/coordinate-graph-20261013/fixture/Reordered/src/main.fy",
+        "snapshot": {
+          "directory": false,
+          "size": 93,
+          "modifiedNS": 1791822323332110500,
+          "sha256": "f93f708fb3e06d5a4e125f0d8aae273f77e74f5b236ad8ccbd5b640988a13e72"
+        }
+      },
+      {
+        "path": ".cache/coordinate-graph-20261013/fixture/std/alloc.fy",
+        "snapshot": {
+          "directory": false,
+          "size": 1453,
+          "modifiedNS": 1791822323380094300,
+          "sha256": "61f50fa03239eee7b669c315659e8c9d07982117857cf50fe7f5a2b6f35a82c2"
+        }
+      },
+      {
+        "path": ".cache/coordinate-graph-20261013/fixture/std/bytes.fy",
+        "snapshot": {
+          "directory": false,
+          "size": 10480,
+          "modifiedNS": 1791822323381607600,
+          "sha256": "4740a506e93349fb002c383967dcc44d182d20f09f2094b83b5464a4ab252982"
+        }
+      },
+      {
+        "path": ".cache/coordinate-graph-20261013/fixture/std/fs.fy",
+        "snapshot": {
+          "directory": false,
+          "size": 34347,
+          "modifiedNS": 1791822323382624700,
+          "sha256": "fd7ddfa9f0deed98304cecf94911644087d1e2a46e8be8995c35acbcb183b335"
+        }
+      },
+      {
+        "path": ".cache/coordinate-graph-20261013/fixture/std/io.fy",
+        "snapshot": {
+          "directory": false,
+          "size": 8421,
+          "modifiedNS": 1791822323384152500,
+          "sha256": "4b89c3aeb8b4de4887395d29723095d364c5660c6b773c5696fb1f65f5365f48"
+        }
+      },
+      {
+        "path": ".cache/coordinate-graph-20261013/fixture/std/num.fy",
+        "snapshot": {
+          "directory": false,
+          "size": 2900,
+          "modifiedNS": 1791822323385149800,
+          "sha256": "09aa0d45f075aa4212049527ded7bb48d99ceb6ffed56b310e267421bae20bb3"
+        }
+      },
+      {
+        "path": ".cache/coordinate-graph-20261013/fixture/std/process.fy",
+        "snapshot": {
+          "directory": false,
+          "size": 1457,
+          "modifiedNS": 1791822323387150300,
+          "sha256": "9680a1481df4f761f481d5a039af7bdbefeb312d1091961194f8e7bc0681ae24"
+        }
+      },
+      {
+        "path": ".cache/coordinate-graph-20261013/fixture/std/text.fy",
+        "snapshot": {
+          "directory": false,
+          "size": 7606,
+          "modifiedNS": 1791822323388150900,
+          "sha256": "cccd47e090fda11c9da063ffb321489dd8753fe9996855fc432833e05a79e695"
+        }
+      }
+    ]
+  },
+  "dispatcherMainClosureSources": 384,
+  "collectorWiredIntoDispatcher": false,
+  "privateCandidateReadAccessorsAdded": true,
+  "remaining": [
+    "Dispatcher and interface/cache consumer wiring",
+    "Generic/Vec identity",
+    "Fresh full dispatcher/corpus/fixed point and Linux/full suite/hosted CI"
+  ],
+  "publicApiChanged": false,
+  "sdkABIChanged": false,
+  "dbChanged": false,
+  "ciChanged": false,
+  "productTimeoutChanged": false,
+  "pushed": false
+}
