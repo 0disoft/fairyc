@@ -2398,3 +2398,14 @@ Stable argument admission and build/run/status/trap integration remain open,
 alongside the broader platform/promotion gates. Public API, SDK ABI, DB and CI
 are unchanged; no push. Receipt:
 [candidate-windows-streams-20261012.json](../ops/evidence/candidate-windows-streams-20261012.json).
+
+## Windows argument admission parity (2026-10-12)
+
+The private encoder removes its provisional 1024-argument cap and enforces the
+actual 32767 UTF-16 words including NUL. Seventy Go `syscall.EscapeArg` command
+lines match byte-for-byte, including quoted executable trailing backslashes.
+Three authored tests pass in Go-native and both candidate C profiles; source
+check passes 368 files / 4717 MIR functions. Private trap control, stable
+build/run, Linux/full suite and promotion remain open. Public API, SDK ABI,
+DB and CI are unchanged; no push. Receipt:
+[candidate-windows-argv-20261012.json](../ops/evidence/candidate-windows-argv-20261012.json).

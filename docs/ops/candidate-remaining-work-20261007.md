@@ -9,6 +9,18 @@ are identical, with no excluded bytes. All 249 Go lexer cases and private framin
 checks pass for the seed and both generations. Receipt:
 `evidence/candidate-complete-stage2-20261012.json`.
 
+## Stable Windows argument admission (2026-10-12)
+
+The provisional 1024-argument cap is removed. Fairy uses the actual 32767-word
+UTF-16 command-line bound including NUL; a one-word executable admits 16382
+one-word arguments and rejects 16383. Quoting follows the current Go Windows
+host's `syscall.EscapeArg`, including quoted executable trailing backslashes.
+All 70 oracle command lines compare byte-for-byte. Three authored tests pass
+in Go-native and candidate C development/release. Source check passes 368 files /
+4717 MIR functions. Next: private trap control, then stable build/run integration.
+Linux/full suite and promotion remain open. Public API, SDK ABI, DB and CI are
+unchanged; no push. Receipt: `evidence/candidate-windows-argv-20261012.json`.
+
 ## Native process stream bytes (2026-10-12)
 
 The actual Fairy process API forwards seven binary stdin bytes including NUL,

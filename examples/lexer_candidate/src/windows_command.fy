@@ -4,7 +4,7 @@ import std::text as text;
 import std::vec as v;
 
 // Private CreateProcessW transport: at most 32767 UTF-16 words including NUL.
-// argv[0] uses CRT executable-name rules; later arguments use CRT escaping.
+// Quotes follow the Go Windows host's EscapeArg rule; executable quotes reject.
 // The complete builder owns its mutable buffer and publishes no partial line.
 pub struct Problem{u32 kind;usize offset;}
 fn Problem fail(u32 kind,usize offset){return Problem{.kind,.offset};}
@@ -19,23 +19,27 @@ fn bool character(ref mut bytes::Buffer out,ref u8[] input,ref mut usize at){let
     *at=*at+width;return if(code<=65535){word(out,code)}else{word(out,55296+(code-65536)/1024) && word(out,56320+(code-65536)%1024)};
 }
 fn Problem output_failure(ref bytes::Buffer out,usize at){return fail(if(bytes::len(out)>=65532){2}else{3},at);}
+fn bool quoted(ref u8[] input){if(input.len==0){return true;}var usize i=0;while(i<input.len){if(input[i]==32 || input[i]==9){return true;}i+=1;}return false;}
 fn Result<bytes::Buffer,Problem> executable(ref u8[] input){if(input.len==0){return .err(fail(1,0));}switch(valid(input)){case .ok(_):{}case .err(e):{return .err(e);}};
-    var bytes::Buffer wide=bytes::empty();if(!word(ref mut wide,34)){return .err(fail(3,0));}var usize at=0;
+    let quote=quoted(input);var bytes::Buffer wide=bytes::empty();if(quote && !word(ref mut wide,34)){return .err(fail(3,0));}var usize at=0;
     while(at<input.len){if(input[at]==34){return .err(fail(1,at));}if(!character(ref mut wide,input,ref mut at)){return .err(output_failure(ref wide,at));}}
-    if(!word(ref mut wide,34)){return .err(output_failure(ref wide,at));}return .ok(wide);
+    if(quote){var usize trailing=0;while(trailing<input.len && input[input.len-trailing-1]==92){trailing+=1;}if(!slashes(ref mut wide,trailing) || !word(ref mut wide,34)){return .err(output_failure(ref wide,at));}}return .ok(wide);
 }
 fn Problem argument(ref mut bytes::Buffer out,ref u8[] input){switch(valid(input)){case .ok(_):{}case .err(e):{return e;}};
-    if(!word(out,32) || !word(out,34)){return output_failure(out,0);}var usize at=0;
+    let quote=quoted(input);if(!word(out,32) || quote && !word(out,34)){return output_failure(out,0);}var usize at=0;
     while(at<input.len){var usize count=0;while(at<input.len && input[at]==92){count+=1;at+=1;}
-        if(!slashes(out,if(at==input.len || input[at]==34){count*2}else{count})){return output_failure(out,at);}
+        if(!slashes(out,if(at<input.len && input[at]==34 || at==input.len && quote){count*2}else{count})){return output_failure(out,at);}
         if(at==input.len){break;}if(input[at]==34 && !word(out,92)){return output_failure(out,at);}if(!character(out,input,ref mut at)){return output_failure(out,at);}
-    }return if(word(out,34)){fail(0,0)}else{output_failure(out,at)};
+    }return if(!quote || word(out,34)){fail(0,0)}else{output_failure(out,at)};
 }
 pub fn Result<bytes::Buffer,Problem> path(ref u8[] input){if(input.len==0){return .err(fail(1,0));}switch(valid(input)){case .ok(_):{}case .err(e):{return .err(e);}};var bytes::Buffer out=bytes::empty();var usize at=0;
     while(at<input.len){if(!character(ref mut out,input,ref mut at)){return .err(output_failure(ref out,at));}}
     if(!bytes::append_byte(ref mut out,0).is_ok || !bytes::append_byte(ref mut out,0).is_ok){return .err(fail(3,at));}return .ok(out);
 }
-pub fn Result<bytes::Buffer,Problem> build(ref u8[] program,ref v::Vec<bytes::Buffer> arguments){if(v::len<bytes::Buffer>(arguments)>1023){return .err(fail(2,0));}
+// A nonempty executable consumes at least one word. Every argument consumes at
+// least a separator and one word, so 16383 arguments cannot fit, even before
+// quoting. All smaller counts are admitted only by their actual encoded length.
+pub fn Result<bytes::Buffer,Problem> build(ref u8[] program,ref v::Vec<bytes::Buffer> arguments){if(v::len<bytes::Buffer>(arguments)>16382){return .err(fail(2,0));}
     var bytes::Buffer out=switch(executable(program)){case .ok(p):{p}case .err(e):{return .err(e);}};var usize i=0;
     while(i<v::len<bytes::Buffer>(arguments)){let e=argument(ref mut out,bytes::view(v::at<bytes::Buffer>(arguments,i)));if(e.kind!=0){return .err(e);}i+=1;}
     if(!bytes::append_byte(ref mut out,0).is_ok || !bytes::append_byte(ref mut out,0).is_ok){return .err(fail(3,0));}return .ok(out);
