@@ -1,0 +1,28 @@
+module module_generic_interface;
+import module_public_interface_model as model;
+import module_public_interface as ordinary;
+import module_public_interface_write as write;
+import module_state_layout as budget;
+import generic_identity as identity;
+import project_manifest_values as lexical;
+import std::bytes as bytes;
+import std::vec as v;
+
+pub struct Template{model::Text module_path;model::Text name;model::Text closure;}
+pub resource Templates{bytes::Buffer names;v::Vec<Template> rows;cleanup{}}
+pub fn Templates assemble(bytes::Buffer names,v::Vec<Template> rows){return Templates{.names,.rows};}
+pub fn usize count(ref Templates p){return v::len<Template>(ref p.rows);}
+pub fn Template at(ref Templates p,usize index){assert(index<count(p));return *v::at<Template>(ref p.rows,index);}
+fn bool valid(ref Templates p,model::Text t){return t.start<=t.end && t.end<=bytes::len(ref p.names);}
+fn ref u8[] text(ref Templates p,model::Text t){assert(valid(p,t));return bytes::view(ref p.names)[t.start..t.end];}
+fn Result<i32,u32> compare(ref Templates p,usize a,usize b,ref mut usize work){let left=at(p,a);let right=at(p,b);let am=text(p,left.module_path);let bm=text(p,right.module_path);let an=text(p,left.name);let bn=text(p,right.name);if(!budget::charge(work,am.len+bm.len+an.len+bn.len+1)){return .err(10);}return .ok(if(!bytes::equal(am,bm)){if(lexical::before(am,bm)){-1}else{1}}else if(bytes::equal(an,bn)){0}else if(lexical::before(an,bn)){-1}else{1});}
+fn void swap(ref mut v::Vec<usize> indices,usize a,usize b){let left=*v::at<usize>(indices,a);let right=*v::at<usize>(indices,b);{let slot=v::at_mut<usize>(indices,a);*slot=right;}{let slot=v::at_mut<usize>(indices,b);*slot=left;}}
+fn u32 sift(ref Templates p,ref mut v::Vec<usize> indices,usize root,usize count,ref mut usize work){var usize at=root;while(at<count/2){var usize child=at*2+1;if(child+1<count){let order=switch(compare(p,*v::at<usize>(indices,child),*v::at<usize>(indices,child+1),work)){case .ok(n):{n}case .err(code):{return code;}};if(order<0){child+=1;}}let order=switch(compare(p,*v::at<usize>(indices,at),*v::at<usize>(indices,child),work)){case .ok(n):{n}case .err(code):{return code;}};if(order>=0){return 0;}swap(indices,at,child);at=child;}return 0;}
+fn Result<v::Vec<usize>,u32> ordered(ref Templates p,ref mut usize work){if(count(p)>4096 || bytes::len(ref p.names)>1048576){return .err(9);}var v::Vec<usize> indices=v::empty<usize>();var usize i=0;while(i<count(p)){if(!budget::charge(work,1)){return .err(10);}let row=at(p,i);if(!valid(p,row.module_path) || !valid(p,row.name) || !valid(p,row.closure) || row.module_path.start==row.module_path.end || row.name.start==row.name.end){return .err(9);}if(!v::push<usize>(ref mut indices,i).is_ok){return .err(11);}i+=1;}i=count(p)/2;while(i>0){i-=1;let code=sift(p,ref mut indices,i,count(p),work);if(code!=0){return .err(code);}}i=count(p);while(i>1){i-=1;swap(ref mut indices,0,i);let code=sift(p,ref mut indices,0,i,work);if(code!=0){return .err(code);}}return .ok(indices);}
+fn u32 admit(ref model::Descriptor ordinary,ref u8[] module_path,ref u8[] name,ref mut usize work){var usize i=0;while(i<model::module_count(ordinary)){if(!budget::charge(work,1)){return 10;}let m=model::module_at(ordinary,i);let path=model::text(ordinary,m.path);if(!budget::charge(work,path.len+module_path.len+1)){return 10;}if(bytes::equal(path,module_path)){var usize j=0;while(j<m.items.count){if(!budget::charge(work,1)){return 10;}let value=model::text(ordinary,model::item_at(ordinary,m.items.first+j).name);if(!budget::charge(work,value.len+name.len+1)){return 10;}if(bytes::equal(value,name)){return 9;}j+=1;}return 0;}i+=1;}return 9;}
+pub fn Result<bytes::Buffer,u32> encode(ref budget::Plan layouts,usize owner,ref model::Descriptor descriptor,ref Templates templates,ref mut usize work){
+    let base=switch(ordinary::hash(layouts,owner,descriptor,work)){case .ok(value):{value}case .err(code):{return .err(code);}};let order=switch(ordered(templates,work)){case .ok(value):{value}case .err(code):{return .err(code);}};var bytes::Buffer out=bytes::empty();var u32 code=identity::text(ref mut out,b"fairyc.generic-public-interface/v0",work);if(code!=0){return .err(code);}code=identity::text(ref mut out,b"fairyc.public-interface/v5",work);if(code!=0){return .err(code);}code=identity::digest(ref mut out,bytes::view(ref base)[13..],false,work);if(code!=0){return .err(code);}code=write::number(ref mut out,count(templates),work);if(code!=0){return .err(code);}var usize i=0;
+    while(i<count(templates)){if(!budget::charge(work,1)){return .err(10);}let row=at(templates,*v::at<usize>(ref order,i));if(i>0){let compared=switch(compare(templates,*v::at<usize>(ref order,i-1),*v::at<usize>(ref order,i),work)){case .ok(n):{n}case .err(code):{return .err(code);}};if(compared>=0){return .err(9);}}let module_path=text(templates,row.module_path);let name=text(templates,row.name);code=admit(descriptor,module_path,name,work);if(code!=0){return .err(code);}code=identity::text(ref mut out,module_path,work);if(code!=0){return .err(code);}code=identity::text(ref mut out,name,work);if(code!=0){return .err(code);}code=identity::digest(ref mut out,text(templates,row.closure),true,work);if(code!=0){return .err(code);}i+=1;}
+    return .ok(out);
+}
+pub fn Result<bytes::Buffer,u32> hash(ref budget::Plan layouts,usize owner,ref model::Descriptor descriptor,ref Templates templates,ref mut usize work){let encoded=switch(encode(layouts,owner,descriptor,templates,work)){case .ok(value):{value}case .err(code):{return .err(code);}};return identity::hash(ref encoded,b"fygif0-sha256-",work);}

@@ -2,6 +2,28 @@
 
 ## Current local candidate evidence (2026-10-13)
 
+`module_generic_interface` computes the private source-interface identity of
+`internal/moduleinterface/generic.go`. The encoder frames the generic and ordinary
+algorithm names, appends the raw ordinary v5 digest, the template count and each
+module/name/nonzero closure triple in canonical order, then produces lowercase
+`fygif0` text. Sorting detached indices preserves the caller's original records.
+Missing modules, empty names, duplicate keys, ordinary-public name collisions,
+invalid ranges and malformed/zero closure digests reject within the existing
+1048576 shared work/output bound. `generic_identity::digest_text` also matches
+Go's domain-separated definition digest algorithm.
+
+Four tests pass Go native and both candidate C profiles. Five interface hashes
+and four definition digests match the real Go implementation; the canonical full
+stream matches the oracle fixture. Public/template changes invalidate the hash,
+input ordering does not, and exact-fit/exhausted histories pass. Source check
+passes 397 files / 5084 MIR functions; native tests verify the source lock.
+
+Closures are caller-supplied. Typed-source definition and reachable-template
+closure extraction, specialization/Vec identities and dispatcher/cache consumers
+remain pending. No full image, corpus or current-source fixed point is rerun.
+No public API, SDK ABI, DB, CI, runner or product timeout change; no push. Receipt:
+[evidence](../ops/evidence/candidate-generic-public-interface-20261013.json).
+
 `project_coordinate_graph::collect` walks the retained workspace graph and
 produces owned `module_public_type_text::Coordinates` under the same owner
 numbers used by `project_compiler_input`. Root UID/version use an empty feature
