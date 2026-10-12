@@ -194,6 +194,26 @@ The initial missing-lock test expected 2; the existing contract returns 7, so
 only that expectation was corrected. Source check passes 372 files / 4769 MIR
 functions. Public build/run remains pending.
 Plan receipt: [candidate-native-plan-20261012.json](../ops/evidence/candidate-native-plan-20261012.json).
+
+## Owned native scratch directory
+
+`native_scratch.fy` creates one exclusive directory under a caller-supplied host
+temporary root. Existing file/directory names select another bounded slot and
+never confer cleanup ownership. Automatic resource cleanup removes the created
+tree on early return. Explicit close consumes ownership once and returns exact
+recursive removal progress or the SDK error; it does not silently retry.
+
+Three authored tests pass in Go-native and candidate C development/release:
+collision contents survive early-return cleanup, explicit close removes two
+files plus the owned directory, and invalid/missing-parent admission leaves no
+directory. Candidate C initially rejected SDK create/remove-tree calls. Its
+authenticated file bridge now admits existing rules 36 and 39 with the existing
+file-result carrier. A narrow Fairy C emission executable was rebuilt by the
+previous Fairy compiler without a Go frontend; it emitted the tested packet.
+Unchanged successful Go-native tests were reused after this C-only admission fix.
+Source check passes 373 files / 4775 MIR functions. Host temporary-root discovery
+and public build/run dispatch remain pending; public SDK ABI is unchanged.
+Scratch receipt: [candidate-native-scratch-20261012.json](../ops/evidence/candidate-native-scratch-20261012.json).
 Native records and flags follow [STARTUPINFOW](https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/ns-processthreadsapi-startupinfow),
 [extended job limits](https://learn.microsoft.com/en-us/windows/win32/api/winnt/ns-winnt-jobobject_extended_limit_information),
 [CreateProcessW](https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-createprocessw)

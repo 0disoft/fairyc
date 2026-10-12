@@ -11,6 +11,19 @@ checks pass for the seed and both generations. Receipt:
 
 ## Workspace native plan (2026-10-12)
 
+The next prerequisite is also complete: `native_scratch` owns one exclusively
+created host temporary directory, preserves colliding names and removes its
+tree on early return or explicit close. Three authored filesystem tests pass in
+Go-native and both candidate C profiles. Rules 36/39 of the existing authenticated
+SDK bridge now transport directory creation and recursive removal. The updated
+narrow C emitter was rebuilt through Fairy, without a Go frontend fallback;
+unchanged successful Go-native results were reused. Source check passes 373
+files / 4775 MIR functions. Next: host temporary-root/companion-driver discovery,
+public native build/run dispatch and stable output/exit behavior. Full bootstrap,
+Linux/full suite and promotion checks were not repeated for this private slice.
+Public API, SDK ABI, DB and CI are unchanged; no push. Receipt:
+`evidence/candidate-native-scratch-20261012.json`.
+
 The Fairy emission result now owns the C bundle, root package name and exact
 observed lock state. The stdout transport uses its bundle unchanged. Two authored
 tests pass in Go-native and both candidate C profiles, including the three lock

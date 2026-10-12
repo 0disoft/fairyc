@@ -1,0 +1,239 @@
+{
+  "passed": true,
+  "module": "native_scratch",
+  "sourceInputs": [
+    {
+      "path": ".cache/candidate-native-scratch-20261012/verified/main.fy",
+      "sha256": "a72332730eff33000d52c775eca7e81921bea7b495578abedfdc6897eaa7f39d"
+    },
+    {
+      "path": "examples/lexer_candidate/src/candidate_limits.fy",
+      "sha256": "e337e22a7feff699a675f0a12d882fc92b577e62f58712ceb24bd0fac136ab85"
+    },
+    {
+      "path": "examples/lexer_candidate/src/file_source.fy",
+      "sha256": "1a7ac7f6c69ef27e78e734aa74dab90b895742a5500a32931baaed19379b938f"
+    },
+    {
+      "path": "examples/lexer_candidate/src/native_scratch.fy",
+      "sha256": "30cbcc506ed8a7f148de87bddf5ee24d92224100d631bd96f9333e97bc4b363c"
+    },
+    {
+      "path": "internal/sdkstdlib/sources/std/bytes.fy",
+      "sha256": "4740a506e93349fb002c383967dcc44d182d20f09f2094b83b5464a4ab252982"
+    },
+    {
+      "path": "internal/sdkstdlib/sources/std/fs.fy",
+      "sha256": "fd7ddfa9f0deed98304cecf94911644087d1e2a46e8be8995c35acbcb183b335"
+    },
+    {
+      "path": "internal/sdkstdlib/sources/std/process.fy",
+      "sha256": "9680a1481df4f761f481d5a039af7bdbefeb312d1091961194f8e7bc0681ae24"
+    },
+    {
+      "path": "internal/sdkstdlib/sources/std/text.fy",
+      "sha256": "cccd47e090fda11c9da063ffb321489dd8753fe9996855fc432833e05a79e695"
+    },
+    {
+      "path": "examples/lexer_candidate/tests/native_scratch.fy",
+      "sha256": "42a23ed588a8de02d19b02afa89707cde3e38183b55ccab66634dfe58d31219c"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_unit_c_file.fy",
+      "sha256": "d8fc4a39332a54ae7f224ade7b36a1c9a318389034523af29f859e2613c0c7e4"
+    }
+  ],
+  "native": {
+    "schemaVersion": "fairyc.test-report/v4",
+    "engine": "native",
+    "target": "x86_64-windows-msvc",
+    "profile": "development",
+    "tests": [
+      {
+        "identity": "tests::native_scratch::early_return_removes_only_the_created_directory",
+        "outcome": "passed",
+        "trapCategory": null,
+        "stdoutBase64": "",
+        "stderrBase64": ""
+      },
+      {
+        "identity": "tests::native_scratch::explicit_close_reports_recursive_progress",
+        "outcome": "passed",
+        "trapCategory": null,
+        "stdoutBase64": "",
+        "stderrBase64": ""
+      },
+      {
+        "identity": "tests::native_scratch::failed_admission_creates_no_directory",
+        "outcome": "passed",
+        "trapCategory": null,
+        "stdoutBase64": "",
+        "stderrBase64": ""
+      }
+    ],
+    "count": 3,
+    "passed": 3,
+    "failed": 0,
+    "status": "ok",
+    "lock": "verified"
+  },
+  "nativeTests": 3,
+  "authoredTestsExecuted": 3,
+  "candidateExecutions": [
+    {
+      "profile": "development",
+      "sha256": "bda0724644394d815ea0f7e59847ba41e0ed0f531265d35621ca165b8923f9ca",
+      "exit": 0
+    },
+    {
+      "profile": "release",
+      "sha256": "a0c52f714dc6663490f8d7ef4b8b6138523f735e053bd077c8ab85a10cea1e4a",
+      "exit": 0
+    }
+  ],
+  "candidatePacketSHA256": "c96df9eed173a2350cf87d37e3cd868dbf9b5d6aa96faffa5993c6749988e18e",
+  "invocations": [
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-native-scratch-20261012\\emitter\\compiler.exe",
+        "--c-project-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-native-scratch-20261012\\verified\\sources.list"
+      ],
+      "seconds": 3.2576351999887265,
+      "exit": 0,
+      "stdoutBytes": 184073,
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-packet-input-builder-20261012.exe",
+        "--packet",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-native-scratch-20261012\\verified\\candidate-packet.bin",
+        "--packet-sha256",
+        "c96df9eed173a2350cf87d37e3cd868dbf9b5d6aa96faffa5993c6749988e18e",
+        "--output",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-native-scratch-20261012\\verified\\development.exe"
+      ],
+      "seconds": 1.3113580000062939,
+      "exit": 0,
+      "stdoutBytes": 183,
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-native-scratch-20261012\\verified\\development.exe",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-native-scratch-20261012\\fixture.txt"
+      ],
+      "seconds": 0.04088770001544617,
+      "exit": 0,
+      "stdoutBytes": 0,
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-packet-input-builder-20261012.exe",
+        "--packet",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-native-scratch-20261012\\verified\\candidate-packet.bin",
+        "--packet-sha256",
+        "c96df9eed173a2350cf87d37e3cd868dbf9b5d6aa96faffa5993c6749988e18e",
+        "--output",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-native-scratch-20261012\\verified\\release.exe",
+        "--release"
+      ],
+      "seconds": 15.940978700004052,
+      "exit": 0,
+      "stdoutBytes": 185,
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-native-scratch-20261012\\verified\\release.exe",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-native-scratch-20261012\\fixture.txt"
+      ],
+      "seconds": 0.031641699984902516,
+      "exit": 0,
+      "stdoutBytes": 0,
+      "stderr": ""
+    }
+  ],
+  "emitterRebuild": {
+    "passed": true,
+    "rootSource": "module main;\nimport module_project_cli as cli;\nimport std::process as process;\n@effects(filesystem,console) fn i32 main(){var u8[4096] data=[0;4096];let n=switch(process::arg(2,ref mut data)){case .ok(n):{n}case .err(_):{return 2;}};let ref u8[] view=ref data;return cli::run(view[..n]);}\n",
+    "packetSHA256": "943c5c8b09f5c50e93a1efdc17614c5f1c533a07e05c1f4d832b944c4e292fa0",
+    "imageSHA256": "bf9f572c1ed63a0198d8b82f5dcdb2be9331ff6125be0019298c8cd7c30ee014",
+    "invocations": [
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-stack-current-20261012\\complete-stage2\\compiler.exe",
+          "--c-project-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-native-scratch-20261012\\emitter\\sources.list"
+        ],
+        "exit": 0,
+        "seconds": 53.022706700023264,
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-packet-input-builder-20261012.exe",
+          "--packet",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-native-scratch-20261012\\emitter\\packet.bin",
+          "--packet-sha256",
+          "943c5c8b09f5c50e93a1efdc17614c5f1c533a07e05c1f4d832b944c4e292fa0",
+          "--output",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-native-scratch-20261012\\emitter\\compiler.exe",
+          "--release"
+        ],
+        "exit": 0,
+        "seconds": 128.48091899999417,
+        "stderr": ""
+      }
+    ],
+    "goFrontendInvoked": false,
+    "sourceInputParts": [
+      {
+        "path": "docs/ops/evidence/candidate-native-scratch-emitter-sources-20261012-1.json",
+        "entries": 128,
+        "sha256": "26b51be417a650c0c6bec4c488efb00f2436cc1c5dc6dc49a589431b44e9112c"
+      },
+      {
+        "path": "docs/ops/evidence/candidate-native-scratch-emitter-sources-20261012-2.json",
+        "entries": 128,
+        "sha256": "b6cd96faaace61cc667399c502b582e999c5f5cf3dfd1baa69f83440e7fefd69"
+      },
+      {
+        "path": "docs/ops/evidence/candidate-native-scratch-emitter-sources-20261012-3.json",
+        "entries": 31,
+        "sha256": "1c935205410ffedca5d67c5f41e27cd80548b833107c06130b21f75c42970c80"
+      }
+    ]
+  },
+  "nativeReportReused": true,
+  "nativeReuseReason": "Authored tests, scratch implementation and SDK unchanged; only private C emission admission changed.",
+  "initialCandidateFailure": {
+    "argv": [
+      "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-stack-current-20261012\\complete-stage2\\compiler.exe",
+      "--c-project-file",
+      "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-native-scratch-20261012\\verified\\sources.list"
+    ],
+    "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+    "seconds": 3.2582275999884587,
+    "exit": 2,
+    "stdoutBytes": 0,
+    "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stderr": "internal/sdkstdlib/sources/std/fs.fy:474:9: error: project phase 5 stage 0 code 1004 (bytes 13020..13056)\n"
+  },
+  "publicApiChanged": false,
+  "dbChanged": false,
+  "ciChanged": false,
+  "pushed": false,
+  "schema": "fairyc.candidate-native-scratch/v1",
+  "baselineCommit": "1735f35b",
+  "sourceCheck": {
+    "files": 373,
+    "mirFunctions": 4775,
+    "exit": 0
+  },
+  "hostTemporaryRootDiscoveryIntegrated": false,
+  "stableBuildRunIntegrated": false,
+  "sdkAbiChanged": false
+}

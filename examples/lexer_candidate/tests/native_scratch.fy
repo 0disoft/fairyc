@@ -1,0 +1,17 @@
+module tests::native_scratch;
+import native_scratch as scratch;
+import file_source as files;
+import std::process as process;
+import std::bytes as bytes;
+import std::text as text;
+import std::fs as fs;
+
+@effects(filesystem) fn bytes::Buffer root(){var u8[4096] data=[0;4096];let n=switch(process::arg(1,ref mut data)){case .ok(n):{n}case .err(_):{assert(false);0}};let ref u8[] view=ref data;return switch(files::manifest(view[..n])){case .ok(p):{p}case .err(_):{assert(false);return root();}};}
+fn bytes::Buffer joined(ref u8[] root,ref u8[] leaf){var bytes::Buffer out=bytes::empty();assert(bytes::append(ref mut out,root).is_ok && bytes::append_byte(ref mut out,47).is_ok && bytes::append(ref mut out,leaf).is_ok);return out;}
+fn text::CString cpath(ref u8[] path){let value=switch(text::validate_utf8(path)){case .ok(p):{p}case .err(_):{assert(false);return cpath(path);}};return switch(text::cstring_from_text(value)){case .ok(p):{p}case .err(_):{assert(false);return cpath(path);}};}
+@effects(filesystem) fn bool exists(ref u8[] path){let native=cpath(path);return fs::path_kind(text::cstring_as_cstr(ref native)).is_ok;}
+@effects(filesystem) fn void put(ref u8[] path,ref u8[] payload){let native=cpath(path);var fs::File file=switch(fs::create_truncate(text::cstring_as_cstr(ref native))){case .ok(p):{p}case .err(_):{assert(false);return;}};assert(fs::write_all(ref mut file,payload).is_ok);assert(fs::close(file).is_ok);}
+@effects(filesystem) fn bytes::Buffer scoped(ref u8[] base){let directory=switch(scratch::create(base)){case .ok(p):{p}case .err(_):{assert(false);return bytes::empty();}};let retained=switch(bytes::copy(scratch::path(ref directory))){case .ok(p):{p}case .err(_):{assert(false);return bytes::empty();}};let packet=joined(scratch::path(ref directory),b"packet.bin");put(bytes::view(ref packet),b"complete packet");return retained;}
+@test @effects(filesystem) fn void early_return_removes_only_the_created_directory(){let base=root();let collision=joined(bytes::view(ref base),b"fairyc-native-0");put(bytes::view(ref collision),b"previous caller");let created=scoped(bytes::view(ref base));assert(!exists(bytes::view(ref created)));let prior=switch(files::manifest(bytes::view(ref collision))){case .ok(p):{p}case .err(_):{assert(false);return;}};assert(bytes::equal(bytes::view(ref prior),b"previous caller"));}
+@test @effects(filesystem) fn void explicit_close_reports_recursive_progress(){let base=root();let directory=switch(scratch::create(bytes::view(ref base))){case .ok(p):{p}case .err(_):{assert(false);return;}};let retained=switch(bytes::copy(scratch::path(ref directory))){case .ok(p):{p}case .err(_):{assert(false);return;}};let a=joined(scratch::path(ref directory),b"packet.bin");let b=joined(scratch::path(ref directory),b"program.exe");put(bytes::view(ref a),b"packet");put(bytes::view(ref b),b"image");switch(scratch::close(directory)){case .ok(n):{assert(n==3);}case .err(_):{assert(false);}};assert(!exists(bytes::view(ref retained)));}
+@test @effects(filesystem) fn void failed_admission_creates_no_directory(){switch(scratch::create(b"")){case .ok(_):{assert(false);}case .err(e):{assert(e.stage==1 && e.status==1);}};switch(scratch::create(b"\xff")){case .ok(_):{assert(false);}case .err(e):{assert(e.stage==1 && e.status==3);}};let base=root();let missing=joined(bytes::view(ref base),b"absent-parent");switch(scratch::create(bytes::view(ref missing))){case .ok(_):{assert(false);}case .err(e):{assert(e.stage==2 && e.status!=0);}};assert(!exists(bytes::view(ref missing)));}
