@@ -9,6 +9,20 @@ are identical, with no excluded bytes. All 249 Go lexer cases and private framin
 checks pass for the seed and both generations. Receipt:
 `evidence/candidate-complete-stage2-20261012.json`.
 
+## Native build/run option ownership (2026-10-12)
+
+Fairy implements strict build/run flags, duplicate rejection, the first run
+delimiter and owned verbatim program arguments. It retains Go's NUL-before-flag
+error precedence and existing diagnostics. Process argv storage grows to the
+SDK's exact requested length. Three authored tests pass in Go-native and both
+candidate C profiles. A direct process entry probe forwards both flags, empty
+and Unicode arguments and an 8192-byte argument in both profiles. Source check
+passes 371 files / 4758 MIR functions after the final comment-only edit and lock
+refresh. Next: native driver transport, workspace metadata/publication and dispatcher
+build/run wiring. Broader differential, Linux/full suite and promotion remain.
+Private API added; public API, SDK ABI, DB and CI are unchanged; no push. Receipt:
+`evidence/candidate-native-cli-options-20261012.json`.
+
 ## Bounded Windows run output (2026-10-12)
 
 Fairy drains stdout/stderr and the private control pipe while polling an owned

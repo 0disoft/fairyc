@@ -128,12 +128,28 @@ statuses in both profiles, including the high bit and 0xffffffff. Source check
 passes 370 files / 4748 MIR functions; private host selection passes. Go-native
 is skipped for private linkage. Public build/run wiring remains pending.
 
+## Native command options
+
+`native_cli_options.fy` implements the existing build/run argument contract:
+only optional `--locked`/`--release` before the first run delimiter, duplicate
+rejection, and verbatim owned arguments after it. NUL rejection precedes compiler
+flag parsing, matching Go's split-before-parse order. Diagnostics retain the
+existing command/flag messages. The process reader retries using the SDK's exact
+needed size instead of imposing a fixed path/argument buffer limit.
+
+Three authored tests pass in Go-native and both candidate C profiles. A direct
+`from_process` probe preserves both flags, empty/Unicode values and an 8192-byte
+argument in both profiles. Source check passes 371 files / 4758 MIR functions.
+The dispatcher does not expose build/run yet: native driver transport and
+publication are still required.
+
 Receipt: [candidate-windows-process-20261012.json](../ops/evidence/candidate-windows-process-20261012.json).
 Stream receipt: [candidate-windows-streams-20261012.json](../ops/evidence/candidate-windows-streams-20261012.json).
 Argument receipt: [candidate-windows-argv-20261012.json](../ops/evidence/candidate-windows-argv-20261012.json).
 Control receipt: [candidate-windows-run-control-20261012.json](../ops/evidence/candidate-windows-run-control-20261012.json).
 Running receipt: [candidate-running-owner-20261012.json](../ops/evidence/candidate-running-owner-20261012.json).
 Capture receipt: [candidate-windows-run-capture-20261012.json](../ops/evidence/candidate-windows-run-capture-20261012.json).
+Options receipt: [candidate-native-cli-options-20261012.json](../ops/evidence/candidate-native-cli-options-20261012.json).
 Native records and flags follow [STARTUPINFOW](https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/ns-processthreadsapi-startupinfow),
 [extended job limits](https://learn.microsoft.com/en-us/windows/win32/api/winnt/ns-winnt-jobobject_extended_limit_information),
 [CreateProcessW](https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-createprocessw)
