@@ -2387,3 +2387,14 @@ promotion gates remain. Private host ABI added; public API, SDK ABI, DB and CI a
 unchanged; no push. Contract:
 [candidate-windows-host-v1.md](candidate-windows-host-v1.md). Receipt:
 [candidate-windows-process-20261012.json](../ops/evidence/candidate-windows-process-20261012.json).
+
+## Native stream forwarding (2026-10-12)
+
+All three process tests pass in both candidate C profiles. The new case forwards
+binary stdin including NUL, exact stdout/stderr bytes and child exit 41 through
+the existing Fairy process API. The unchanged library's prior source check is
+reused; Go-native remains explicitly skipped for private adapter linkage.
+Stable argument admission and build/run/status/trap integration remain open,
+alongside the broader platform/promotion gates. Public API, SDK ABI, DB and CI
+are unchanged; no push. Receipt:
+[candidate-windows-streams-20261012.json](../ops/evidence/candidate-windows-streams-20261012.json).

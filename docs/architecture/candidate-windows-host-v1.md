@@ -12,7 +12,9 @@ CreateProcessW. Commands use mutable owned UTF-16; the process starts suspended
 and hidden, enters a kill-on-close Job Object, then resumes. Parent standard
 handles are inherited. Timeout terminates the job and waits for the parent;
 thread/process/job handles are owned resources. Exact stdin/stdout/stderr byte
-forwarding remains a separate acceptance case before stable run integration.
+forwarding passes in development and release: the test child receives seven
+stdin bytes including NUL and emits exactly the expected 13-byte stdout and
+13-byte stderr. Its full exit code 41 reaches the Fairy caller.
 
 The Windows x64 startup layout is 104 bytes. Its two adjacent WORD fields are
 represented by one zero u32. Process information retains two handles and two
@@ -27,7 +29,7 @@ native error and any created PID: 1 input, 2 allocation, 3 ABI, 4 create,
 to stable build/run status or language-trap receipts. The command encoder's
 provisional 1024-argument limit must be reconciled with stable run admission.
 
-Two Fairy tests run under candidate C development/release with a Go test child.
+Three Fairy tests run under candidate C development/release with a Go test child.
 They verify special arguments, full exit bits, repeated success/failure handle
 counts and a child observed live through its native handle before PID publication.
 The deadline case then checks native wait status for both parent and child.
@@ -41,10 +43,13 @@ verifier's explicit `--candidate-only` records zero Go-native tests rather than
 claiming a comparison. Go source checking, adapter selection and existing private
 bridge deadline/argv checks pass. An ordinary workspace packet built by the new
 bridge has exactly the previously verified development image hash, confirming
-that unused private adapters do not alter that artifact. Linux, broad frontend
+that unused private adapters do not alter that artifact. Stream fixtures are
+checksum-checked by the private verifier and only supplied to native executions.
+Linux, broad frontend
 differential, the full suite, public build/run and promotion remain pending.
 
 Receipt: [candidate-windows-process-20261012.json](../ops/evidence/candidate-windows-process-20261012.json).
+Stream receipt: [candidate-windows-streams-20261012.json](../ops/evidence/candidate-windows-streams-20261012.json).
 Native records and flags follow [STARTUPINFOW](https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/ns-processthreadsapi-startupinfow),
 [extended job limits](https://learn.microsoft.com/en-us/windows/win32/api/winnt/ns-winnt-jobobject_extended_limit_information),
 [CreateProcessW](https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-createprocessw)

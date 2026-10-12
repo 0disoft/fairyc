@@ -34,3 +34,7 @@ fn bytes::Buffer joined(ref u8[] root,ref u8[] file){var bytes::Buffer out=bytes
     switch(child::run(bytes::view(ref program),ref args,bytes::view(ref directory),500)){case .ok(_):{assert(false);}case .err(e):{assert(e.kind==8 && e.os_code==0 && e.pid!=0 && exited(e.pid));}};
     let data=switch(files::manifest(bytes::view(ref report))){case .ok(p):{p}case .err(_):{assert(false);return;}};let view=bytes::view(ref data);var u32 pid=0;var usize i=0;while(i<view.len && view[i]!=32){assert(view[i]>=48 && view[i]<=57);pid=pid*10+(view[i] as u32)-48;i+=1;}assert(i<view.len && bytes::equal(view[i..],b" 259") && pid!=0 && exited(pid));assert(handles()==before);
 }
+@test @effects(filesystem,console) fn void forwards_binary_stdin_and_exact_stdout_stderr(){
+    let directory=root();let program=joined(bytes::view(ref directory),b"receiver.exe");var v::Vec<bytes::Buffer> args=v::empty<bytes::Buffer>();add(ref mut args,b"stdio");
+    let result=switch(child::run(bytes::view(ref program),ref args,bytes::view(ref directory),2000)){case .ok(p):{p}case .err(e):{failure(e);return;}};require(result.exit_code==41 && result.pid!=0,9);
+}

@@ -9,6 +9,19 @@ are identical, with no excluded bytes. All 249 Go lexer cases and private framin
 checks pass for the seed and both generations. Receipt:
 `evidence/candidate-complete-stage2-20261012.json`.
 
+## Native process stream bytes (2026-10-12)
+
+The actual Fairy process API forwards seven binary stdin bytes including NUL,
+exactly 13 stdout and 13 stderr bytes, and exit code 41. All three authored
+process cases pass in both candidate C profiles on the Korean/space path; argv,
+full exit bits, warmed handle counts and parent/child cancellation remain covered.
+The verifier hashes and forwards explicit stream fixtures and preserves its
+empty-output defaults. The process library is unchanged; its prior Go source
+check is reused. Go-native remains explicitly skipped for private adapter
+linkage. Next: stable argument admission, then build/run/status/trap integration.
+Public API, SDK ABI, DB and CI are unchanged; no push. Receipt:
+`evidence/candidate-windows-streams-20261012.json`.
+
 ## Fairy-owned Windows process lifecycle (2026-10-12)
 
 Fairy now owns process flags, suspended launch, Job Object assignment, resume,

@@ -2,7 +2,9 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
+	"io"
 	"os"
 	"os/exec"
 	"reflect"
@@ -16,6 +18,15 @@ func main() {
 		os.Exit(2)
 	}
 	switch os.Args[1] {
+	case "stdio":
+		data, err := io.ReadAll(os.Stdin)
+		if err != nil || !bytes.Equal(data, []byte("in\x00put\n")) {
+			fmt.Fprintf(os.Stderr, "wrong stdin: %q (%v)", data, err)
+			os.Exit(2)
+		}
+		fmt.Fprint(os.Stdout, "child stdout\n")
+		fmt.Fprint(os.Stderr, "child stderr\n")
+		os.Exit(41)
 	case "args":
 		want := []string{"args", "", "a b", "x\\\"y\\", "한글🧚", "--flag"}
 		if !reflect.DeepEqual(os.Args[1:], want) {

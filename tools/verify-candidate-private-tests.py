@@ -31,6 +31,9 @@ def main():
     parser.add_argument('--output', type=Path, required=True)
     parser.add_argument('--fixture', type=Path, help='hash and forward one binary oracle fixture to every execution')
     parser.add_argument('--candidate-only', action='store_true', help='execute private host-ABI tests only through candidate C; Go native cannot link these private adapters')
+    parser.add_argument('--stdin-fixture', type=Path, help='exact binary input for each candidate C execution')
+    parser.add_argument('--stdout-fixture', type=Path, help='expected complete candidate stdout, empty by default')
+    parser.add_argument('--stderr-fixture', type=Path, help='expected complete candidate stderr, empty by default')
     parser.add_argument('--unchanged-paths', type=Path, help='JSON list of repository-relative paths whose bytes and modification times must remain unchanged')
     args = parser.parse_args()
     if not 1 <= args.frontend_timeout <= 900:
@@ -96,13 +99,21 @@ def main():
         source_inputs.append(dict(path=fixture.relative_to(ROOT).as_posix(), sha256=digest(fixture)))
         arguments = [str(fixture)]
     images = {name: dict(path=str(path.resolve()), sha256=digest(path)) for name, path in [('compiler', args.compiler), ('candidate', args.candidate), ('builder', args.builder)]}
+    streams = {}
+    for name, path in [('stdin',args.stdin_fixture),('stdout',args.stdout_fixture),('stderr',args.stderr_fixture)]:
+        if path:
+            path = path.resolve()
+            if path.stat().st_size > 1048576:
+                parser.error('stream fixtures must be at most 1 MiB')
+            streams[name] = path.read_bytes()
+            source_inputs.append(dict(path=path.relative_to(ROOT).as_posix(),sha256=digest(path)))
     lock = PROJECT / 'fairy.lock'
     lock_sha256 = digest(lock)
     invocations = []
 
-    def run(argv, cwd=ROOT, timeout=60):
+    def run(argv, cwd=ROOT, timeout=60, stdin=None, stderr=b''):
         start = time.monotonic()
-        result = subprocess.run(list(map(str, argv)), cwd=cwd, capture_output=True, timeout=timeout)
+        result = subprocess.run(list(map(str, argv)), cwd=cwd, capture_output=True, timeout=timeout, input=stdin)
         row = dict(argv=list(map(str, argv)), cwd=str(cwd), seconds=time.monotonic() - start, exit=result.returncode, stdoutBytes=len(result.stdout), stdoutSHA256=hashlib.sha256(result.stdout).hexdigest(), stderr=result.stderr.decode('utf-8', errors='replace'))
         invocations.append(row)
         save(output / 'invocations.json', invocations)
@@ -110,7 +121,7 @@ def main():
             assert snapshot() == before, 'readonly path changed: ' + name
         if len(argv)>1 and str(argv[1])=='test':
             (output / 'native.json').write_bytes(result.stdout)
-        assert result.returncode == 0 and not result.stderr, row
+        assert result.returncode == 0 and result.stderr == stderr, row
         return result
 
     expected = {f'tests::{args.module}::{name}' for name in args.test}
@@ -133,8 +144,8 @@ def main():
     for profile, flags in [('development', []), ('release', ['--release'])]:
         image = output / (profile + '.exe')
         run([args.builder.resolve(), '--packet', packet_path, '--packet-sha256', digest(packet_path), '--output', image, *flags], timeout=600)
-        executed = run([image, *arguments])
-        assert not executed.stdout
+        executed = run([image, *arguments],stdin=streams.get('stdin'),stderr=streams.get('stderr',b''))
+        assert executed.stdout == streams.get('stdout',b''), invocations[-1]
         executions.append(dict(profile=profile, path=str(image), sha256=digest(image), exit=executed.returncode))
     assert digest(lock) == lock_sha256, 'lock changed during verification'
     assert all(digest(ROOT / row['path']) == row['sha256'] for row in source_inputs), 'sources changed during verification'
@@ -143,6 +154,8 @@ def main():
     receipt['selection'] = dict(mode='explicit-subset' if args.selected_tests_only else 'all-authored', authoredTests=len(test_names), selectedTests=len(expected))
     receipt['frontendTimeoutSeconds'] = args.frontend_timeout
     receipt['productTimeoutChanged'] = False
+    if streams:
+        receipt['streamVerification'] = {name:dict(bytes=len(data),sha256=hashlib.sha256(data).hexdigest()) for name,data in streams.items()}
     if snapshots:
         receipt['unchangedPaths'] = [dict(path=name, snapshot=before) for name, _, before in snapshots]
     save(output / 'receipt.json', receipt)
