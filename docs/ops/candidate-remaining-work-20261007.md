@@ -1,5 +1,29 @@
 # Fairy 컴파일러 전환: 후속 작업 목록
 
+## Compact backward-live environments (2026-10-12)
+
+Liveness keeps mutable use-state only for borrowed locals. Each compact entry
+retains its original lexical local ID; declarations, kills, loop restoration
+and published maps preserve those identities and source spans. Scalar locals
+retain declaration metadata without participating in state copies and joins.
+The 1048576 work, 4096 map and 32768 row bounds remain unchanged.
+
+Two map/identity/budget tests and the sixteen frozen binding/control cases pass
+in Go-native and both candidate C profiles. The frozen output remains exactly
+6697 bytes. Source check passes 377 files / 4804 MIR functions and refreshes the
+lock. Profiling proves the earlier failure exhausted work at exactly 1048576,
+not map/row storage. The same isolated source unit now completes liveness with
+416966 work, converges summaries in four rounds, completes final loan checks
+(last frame at 738694 work), publishes diagnostics and lowers owned IR. The
+probe deliberately returns code 9999 after successful range completion; it does
+not emit a full self packet. Inputs remain unchanged.
+
+The fresh-source complete optimized preview is being built. Full replay, public
+borrow gate admission, new fixed point, frontend parity, Linux and hosted CI
+remain pending. Only private analysis/layout and evidence change; public API,
+SDK ABI, DB, CI and product timeouts are unchanged, no push. Receipt:
+`evidence/candidate-borrow-live-compact-20261012.json`.
+
 ## Indexed liveness map reuse (2026-10-12)
 
 Canonical last-use maps use 1024 bounded collision buckets. Hashes narrow

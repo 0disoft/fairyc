@@ -1,0 +1,442 @@
+{
+  "schema": "fairyc.candidate-borrow-live-compact/v1",
+  "passed": true,
+  "scope": "Compact backward-live environments to borrowed locals while preserving original lexical IDs, publication spans and analysis bounds",
+  "sourceInputs": [
+    {
+      "path": "examples/lexer_candidate/src/module_unit_loan_live_maps.fy",
+      "sha256": "ee006e228f22fa8274186d6fa85b16592939239ef0544836ae707047301f4ff6"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_unit_loan_live_model.fy",
+      "sha256": "83201ecf9152770e50d3afccd7a6086c69b32f109e672997819b949a3a658238"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_unit_loan_liveness.fy",
+      "sha256": "564eab78d4f49746852d47d141db4d25e91cd325e0962653932096322fa9048c"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_unit_loan_live_walk.fy",
+      "sha256": "7a5f5d6f8b54d801891cb87e1f7a98b8dd3ecb6f98469acffb3770c13a2bdaac"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_unit_loan_live_control.fy",
+      "sha256": "386b5df1b8a5219ef490d9d00f7cbf8bee0e795df1d9200c7f553dce509a3e1d"
+    },
+    {
+      "path": "examples/lexer_candidate/tests/module_unit_loan_live_maps.fy",
+      "sha256": "ac796f9f134134883ea30c5f450124e59c44c2af93362ea97426c4b5a3521546"
+    },
+    {
+      "path": "examples/lexer_candidate/fairy.lock",
+      "sha256": "0dc558e2194cf7a22835a05fb8853a5fa0d7c1e4a4e29c612ec25729fa559a7f"
+    }
+  ],
+  "privateTests": [
+    {
+      "passed": true,
+      "module": "module_unit_loan_live_maps",
+      "authoredTests": 2,
+      "sourceInputFiles": 50,
+      "sourceInventorySHA256": "6f7c12aa95f9af691cd1fd19be4e85741a5fdb55db18585072f4b1ebe8315ae0",
+      "nativeTests": 2,
+      "candidateExecutions": [
+        {
+          "profile": "development",
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\borrow-live-compact-map-tests-20261012\\development.exe",
+          "sha256": "caa842b5380fa40dd855019fca5ed4956855884197ed8ef9091a1151399d98a5",
+          "exit": 0
+        },
+        {
+          "profile": "release",
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\borrow-live-compact-map-tests-20261012\\release.exe",
+          "sha256": "af8044c38e02949d075c27378047f3785408c54462ec54924168da827c9024d7",
+          "exit": 0
+        }
+      ],
+      "invocations": [
+        {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\manifest-bootstrap.exe",
+            "test",
+            "--native",
+            "--locked",
+            "--json",
+            "--capture-output",
+            "--exact",
+            "tests::module_unit_loan_live_maps::repeated_maps_reuse_exact_rows_without_scanning_all_prior_maps",
+            "--exact",
+            "tests::module_unit_loan_live_maps::compact_live_slots_keep_original_bindings_across_restore_and_kill"
+          ],
+          "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+          "seconds": 126.58253740001237,
+          "exit": 0,
+          "stdoutBytes": 568,
+          "stdoutSHA256": "25e42b64a7665bd7d73d709016f9053f81d138ce59617efce135db5314d57749",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-loop-control-bootstrap-20261012\\stage2.exe",
+            "--c-project-file",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\borrow-live-compact-map-tests-20261012\\sources.list"
+          ],
+          "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+          "seconds": 4.441803699999582,
+          "exit": 0,
+          "stdoutBytes": 296086,
+          "stdoutSHA256": "be958cc86e2e55433a6cc0e643db5b8c7fb48faef89cb1a5617343eadd60fd89",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-rooted-builder-stack-20261012.exe",
+            "--packet",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\borrow-live-compact-map-tests-20261012\\candidate-packet.bin",
+            "--packet-sha256",
+            "be958cc86e2e55433a6cc0e643db5b8c7fb48faef89cb1a5617343eadd60fd89",
+            "--output",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\borrow-live-compact-map-tests-20261012\\development.exe"
+          ],
+          "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+          "seconds": 1.7713980999833439,
+          "exit": 0,
+          "stdoutBytes": 179,
+          "stdoutSHA256": "d1b95257b950d6a197aae931ce925871d69ba3eab143c69c8d6824da0d2e5260",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\borrow-live-compact-map-tests-20261012\\development.exe"
+          ],
+          "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+          "seconds": 0.0261457999877166,
+          "exit": 0,
+          "stdoutBytes": 0,
+          "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-rooted-builder-stack-20261012.exe",
+            "--packet",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\borrow-live-compact-map-tests-20261012\\candidate-packet.bin",
+            "--packet-sha256",
+            "be958cc86e2e55433a6cc0e643db5b8c7fb48faef89cb1a5617343eadd60fd89",
+            "--output",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\borrow-live-compact-map-tests-20261012\\release.exe",
+            "--release"
+          ],
+          "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+          "seconds": 3.821388799988199,
+          "exit": 0,
+          "stdoutBytes": 181,
+          "stdoutSHA256": "bc79cb198682867a6d9616bb5dbbbb1320b8d96c8bf6b4e8c2910786e6fdd8f1",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\borrow-live-compact-map-tests-20261012\\release.exe"
+          ],
+          "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+          "seconds": 0.03448040000512265,
+          "exit": 0,
+          "stdoutBytes": 0,
+          "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderr": ""
+        }
+      ]
+    },
+    {
+      "passed": true,
+      "module": "module_unit_loan_liveness",
+      "authoredTests": 1,
+      "sourceInputFiles": 120,
+      "sourceInventorySHA256": "700cda27b2d956a3ac245c01a39cbf428c5ee21caaa6c9ac2c8c96d1309c4b7e",
+      "nativeTests": 1,
+      "candidateExecutions": [
+        {
+          "profile": "development",
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\borrow-live-compact-liveness-tests-20261012\\development.exe",
+          "sha256": "688a7a2abd43419715950eb0d66b0093977f3c3f67a4401bfc10ddad54e98e2c",
+          "exit": 0
+        },
+        {
+          "profile": "release",
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\borrow-live-compact-liveness-tests-20261012\\release.exe",
+          "sha256": "08085ef5f581d5a739e1c00eb8b173a67fd39cf5c225e8df514f1de250e8a03c",
+          "exit": 0
+        }
+      ],
+      "invocations": [
+        {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\manifest-bootstrap.exe",
+            "test",
+            "--native",
+            "--locked",
+            "--json",
+            "--capture-output",
+            "--exact",
+            "tests::module_unit_loan_liveness::last_uses_follow_bindings_branches_and_loop_control"
+          ],
+          "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+          "seconds": 85.81703970002127,
+          "exit": 0,
+          "stdoutBytes": 9297,
+          "stdoutSHA256": "50fc941823c828aef69d44953c360cdac0a8cff3e60dfc1934bca6590b1e16be",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-loop-control-bootstrap-20261012\\stage2.exe",
+            "--c-project-file",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\borrow-live-compact-liveness-tests-20261012\\sources.list"
+          ],
+          "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+          "seconds": 21.075111699989066,
+          "exit": 0,
+          "stdoutBytes": 8029388,
+          "stdoutSHA256": "5cfb7f67afbf64cdcd753dba6bfac962c895d80fa86c6fbaefb585d057a336e1",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-rooted-builder-stack-20261012.exe",
+            "--packet",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\borrow-live-compact-liveness-tests-20261012\\candidate-packet.bin",
+            "--packet-sha256",
+            "5cfb7f67afbf64cdcd753dba6bfac962c895d80fa86c6fbaefb585d057a336e1",
+            "--output",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\borrow-live-compact-liveness-tests-20261012\\development.exe"
+          ],
+          "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+          "seconds": 8.186549699981697,
+          "exit": 0,
+          "stdoutBytes": 186,
+          "stdoutSHA256": "a49cbb83989b4979c3e9729d7cae6be7efeb3008f267bccb9ff0b07f538d5946",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\borrow-live-compact-liveness-tests-20261012\\development.exe"
+          ],
+          "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+          "seconds": 0.12584520000382327,
+          "exit": 0,
+          "stdoutBytes": 6697,
+          "stdoutSHA256": "4d622e218c4ca10db9539b992cadb5bf894fd3be1d0b1f05b7d7f7a89d6345e9",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-rooted-builder-stack-20261012.exe",
+            "--packet",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\borrow-live-compact-liveness-tests-20261012\\candidate-packet.bin",
+            "--packet-sha256",
+            "5cfb7f67afbf64cdcd753dba6bfac962c895d80fa86c6fbaefb585d057a336e1",
+            "--output",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\borrow-live-compact-liveness-tests-20261012\\release.exe",
+            "--release"
+          ],
+          "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+          "seconds": 79.43281130000832,
+          "exit": 0,
+          "stdoutBytes": 188,
+          "stdoutSHA256": "87a0591e2a8400ada9fccf5254bf150872976365d3c156542398ccf909c1908a",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\borrow-live-compact-liveness-tests-20261012\\release.exe"
+          ],
+          "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+          "seconds": 0.054940300004091114,
+          "exit": 0,
+          "stdoutBytes": 6697,
+          "stdoutSHA256": "4d622e218c4ca10db9539b992cadb5bf894fd3be1d0b1f05b7d7f7a89d6345e9",
+          "stderr": ""
+        }
+      ]
+    }
+  ],
+  "frozenLivenessCases": 16,
+  "frozenStdoutBytes": 6697,
+  "sourceCheck": {
+    "passed": true,
+    "files": 377,
+    "mirFunctions": 4804,
+    "lockUpdated": true
+  },
+  "priorBudget": {
+    "schema": "fairyc.candidate-frontend-observation/v1",
+    "passed": false,
+    "argv": [
+      "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\borrow-live-limit-unit-profile-20261012\\candidate.exe",
+      "--c-project-file",
+      "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\borrow-profile-final-20261012\\target.list"
+    ],
+    "candidateSHA256": "10f1642566ebe904bea7d54dca4a091fd03614eb2cec4eca15e239f0a5cddcb3",
+    "manifestSHA256": "93a3e65be6e3c040be0c1a907c727ac28c58946a5cae1d97d7710c9a4e0ed622",
+    "sourceFiles": 370,
+    "sourceUnchanged": true,
+    "timeoutSeconds": 180,
+    "timedOut": false,
+    "streamLimitExceeded": false,
+    "exit": 2,
+    "seconds": 44.18678240000736,
+    "stdoutComplete": false,
+    "packetBytes": 0,
+    "packetSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "profileEvents": 258,
+    "diagnostics": [
+      {
+        "seconds": 43.76073469998664,
+        "text": ".cache/borrow-profile-final-20261012/target/examples/lexer_candidate/src/module_unit_origin_flow.fy:1:1: error: project phase 2 stage 7 code 10 (bytes 0..0)"
+      }
+    ],
+    "latest": {
+      "seconds": 43.72794919999433,
+      "phase": "live-budget",
+      "first": 193,
+      "stop": 23,
+      "work": 1048576
+    },
+    "productTimeoutChanged": false,
+    "promotionGateReady": false
+  },
+  "successfulUnitProbe": {
+    "receipt": {
+      "schema": "fairyc.candidate-frontend-observation/v1",
+      "passed": false,
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\borrow-live-compact-unit-profile-20261012\\candidate.exe",
+        "--c-project-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\borrow-profile-final-20261012\\target.list"
+      ],
+      "candidateSHA256": "17c49c86f3a56fcf228fa2f6408a52fa2372ddae6e69d16824b13af5665154bc",
+      "manifestSHA256": "93a3e65be6e3c040be0c1a907c727ac28c58946a5cae1d97d7710c9a4e0ed622",
+      "sourceFiles": 370,
+      "sourceUnchanged": true,
+      "timeoutSeconds": 180,
+      "timedOut": false,
+      "streamLimitExceeded": false,
+      "exit": 2,
+      "seconds": 53.434318100014934,
+      "stdoutComplete": false,
+      "packetBytes": 0,
+      "packetSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "profileEvents": 451,
+      "diagnostics": [
+        {
+          "seconds": 53.00251479999861,
+          "text": ".cache/borrow-profile-final-20261012/target/examples/lexer_candidate/src/module_unit_origin_flow.fy:1:1: error: project phase 2 stage 1 code 9999 (bytes 0..0)"
+        }
+      ],
+      "latest": {
+        "seconds": 52.96862960001454,
+        "phase": "lower-end",
+        "first": 193,
+        "stop": 194,
+        "work": null
+      },
+      "productTimeoutChanged": false,
+      "promotionGateReady": false
+    },
+    "completion": "The private probe deliberately returns stage 1 code 9999 after range() succeeds; this is not a complete self packet.",
+    "milestones": [
+      {
+        "seconds": 51.558498500002315,
+        "phase": "inputs-ready",
+        "first": 79,
+        "stop": 7377,
+        "work": 416966
+      },
+      {
+        "seconds": 51.56714840000495,
+        "phase": "validated",
+        "first": 79,
+        "stop": 0,
+        "work": 425034
+      },
+      {
+        "seconds": 51.56772690001526,
+        "phase": "summary-round",
+        "first": 0,
+        "stop": 79,
+        "work": 425448
+      },
+      {
+        "seconds": 51.57503249999718,
+        "phase": "summary-round",
+        "first": 1,
+        "stop": 79,
+        "work": 430297
+      },
+      {
+        "seconds": 51.577153699996416,
+        "phase": "summary-round",
+        "first": 2,
+        "stop": 79,
+        "work": 432368
+      },
+      {
+        "seconds": 51.57904490001965,
+        "phase": "summary-round",
+        "first": 3,
+        "stop": 79,
+        "work": 434319
+      },
+      {
+        "seconds": 51.57947190001141,
+        "phase": "final-pass",
+        "first": 4,
+        "stop": 79,
+        "work": 0
+      },
+      {
+        "seconds": 52.038506100012455,
+        "phase": "origins",
+        "first": 193,
+        "stop": 194,
+        "work": null
+      },
+      {
+        "seconds": 52.03872380001121,
+        "phase": "diagnostics",
+        "first": 193,
+        "stop": 194,
+        "work": null
+      },
+      {
+        "seconds": 52.96862960001454,
+        "phase": "lower-end",
+        "first": 193,
+        "stop": 194,
+        "work": null
+      }
+    ],
+    "lastFinalFrame": {
+      "seconds": 52.03834120000829,
+      "phase": "frame-end",
+      "first": 79,
+      "stop": 341,
+      "work": 738694
+    }
+  },
+  "limits": {
+    "work": 1048576,
+    "maps": 4096,
+    "rows": 32768
+  },
+  "limitations": [
+    "The complete fresh-source optimized preview is being built and has not yet completed self replay.",
+    "Public borrow gate admission, new complete fixed point, full frontend parity, Linux and hosted CI remain pending."
+  ],
+  "publicAPIChanged": false,
+  "sdkABIChanged": false,
+  "dbChanged": false,
+  "ciChanged": false,
+  "productTimeoutChanged": false,
+  "pushed": false
+}

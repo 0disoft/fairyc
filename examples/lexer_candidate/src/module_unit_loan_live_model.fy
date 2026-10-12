@@ -2,8 +2,8 @@ module module_unit_loan_live_model;
 import module_unit_value_model as m;
 import std::vec as v;
 
-pub struct Use {usize start;usize end;}
-pub struct Local {usize start;usize end;bool borrowed;}
+pub struct Use {usize local;usize start;usize end;}
+pub struct Local {usize slot;usize start;usize end;bool borrowed;}
 pub struct Row {usize local;usize start;usize end;}
 pub struct Header {usize start;usize count;usize hash;usize next;}
 pub struct Point {usize source_index;usize start;usize end;usize map;bool checked;}
@@ -24,9 +24,11 @@ pub fn Point statement_at(ref Plan p,usize index){return *v::at<Point>(ref p.sta
 pub fn usize use_count(ref Plan p,Point point){return if(point.map==0){0}else{v::at<Header>(ref p.maps,point.map-1).count};}
 pub fn Row use_at(ref Plan p,Point point,usize index){return *v::at<Row>(ref p.rows,v::at<Header>(ref p.maps,point.map-1).start+index);}
 pub fn m::Problem fail(ref Context c,u32 code,usize start,usize end){return m::fail(c.frame,code,start,end,0,0);}
-pub fn Result<v::Vec<Use>,m::Problem> empty(usize count,ref mut Context c){var v::Vec<Use> result=v::empty<Use>();var usize i=0;while(i<count){if(!m::charge(ref mut c.work,1)){return .err(fail(c,10,0,0));}if(!v::push<Use>(ref mut result,Use{.start=0,.end=0}).is_ok){return .err(fail(c,11,0,0));}i+=1;}return .ok(result);}
+// Only borrowed locals need a backward live-use slot. Original local IDs remain
+// in each entry, so publication and loan queries never compare compact indices.
+pub fn Result<v::Vec<Use>,m::Problem> empty(ref v::Vec<Local> locals,ref mut Context c){var v::Vec<Use> result=v::empty<Use>();var usize i=0;while(i<v::len<Local>(locals)){if(!m::charge(ref mut c.work,1)){return .err(fail(c,10,0,0));}let local=*v::at<Local>(locals,i);if(local.borrowed){if(local.slot!=v::len<Use>(ref result)+1){return .err(fail(c,12,0,0));}if(!v::push<Use>(ref mut result,Use{.local=i+1,.start=0,.end=0}).is_ok){return .err(fail(c,11,0,0));}}else if(local.slot!=0){return .err(fail(c,12,0,0));}i+=1;}return .ok(result);}
 pub fn Result<v::Vec<Use>,m::Problem> copy(ref v::Vec<Use> source,ref mut Context c){var v::Vec<Use> result=v::empty<Use>();var usize i=0;while(i<v::len<Use>(source)){if(!m::charge(ref mut c.work,1)){return .err(fail(c,10,0,0));}if(!v::push<Use>(ref mut result,*v::at<Use>(source,i)).is_ok){return .err(fail(c,11,0,0));}i+=1;}return .ok(result);}
 pub fn m::Problem merge(ref mut v::Vec<Use> target,ref v::Vec<Use> source,ref mut Context c){if(v::len<Use>(target)!=v::len<Use>(source)){return fail(c,12,0,0);}var usize i=0;while(i<v::len<Use>(source)){if(!m::charge(ref mut c.work,1)){return fail(c,10,0,0);}let next=*v::at<Use>(source,i);if(next.end>v::at<Use>(target,i).end){let slot=v::at_mut<Use>(target,i);*slot=next;}i+=1;}return fail(c,0,0,0);}
 pub fn m::Problem replace(ref mut v::Vec<Use> target,ref v::Vec<Use> source,ref mut Context c){if(v::len<Use>(target)!=v::len<Use>(source)){return fail(c,12,0,0);}var usize i=0;while(i<v::len<Use>(source)){if(!m::charge(ref mut c.work,1)){return fail(c,10,0,0);}let slot=v::at_mut<Use>(target,i);*slot=*v::at<Use>(source,i);i+=1;}return fail(c,0,0,0);}
 pub fn Result<bool,m::Problem> same(ref v::Vec<Use> a,ref v::Vec<Use> b,ref mut Context c){if(v::len<Use>(a)!=v::len<Use>(b)){return .err(fail(c,12,0,0));}var usize i=0;while(i<v::len<Use>(a)){if(!m::charge(ref mut c.work,1)){return .err(fail(c,10,0,0));}let x=*v::at<Use>(a,i);let y=*v::at<Use>(b,i);if(x.start!=y.start || x.end!=y.end){return .ok(false);}i+=1;}return .ok(true);}
-pub fn m::Problem kill(ref mut v::Vec<Use> env,usize local,ref v::Vec<Local> locals,ref mut Context c){if(local==0){return fail(c,0,0,0);}if(local>v::len<Local>(locals) || local>v::len<Use>(env)){return fail(c,12,0,0);}if(!m::charge(ref mut c.work,1)){return fail(c,10,0,0);}if(v::at<Local>(locals,local-1).borrowed){let slot=v::at_mut<Use>(env,local-1);*slot=Use{.start=0,.end=0};}return fail(c,0,0,0);}
+pub fn m::Problem kill(ref mut v::Vec<Use> env,usize local,ref v::Vec<Local> locals,ref mut Context c){if(local==0){return fail(c,0,0,0);}if(local>v::len<Local>(locals)){return fail(c,12,0,0);}if(!m::charge(ref mut c.work,1)){return fail(c,10,0,0);}let selected=*v::at<Local>(locals,local-1);if(selected.borrowed){if(selected.slot==0 || selected.slot>v::len<Use>(env) || v::at<Use>(env,selected.slot-1).local!=local){return fail(c,12,0,0);}let slot=v::at_mut<Use>(env,selected.slot-1);*slot=Use{.local,.start=0,.end=0};}return fail(c,0,0,0);}
