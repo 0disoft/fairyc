@@ -22,6 +22,7 @@ func run(args []string) int {
 	packetInput := flags.String("packet-input", "", "fresh private C packet from the calling Fairy compiler; no frontend or cache replay")
 	packetDigest := flags.String("packet-sha256", "", "required cached packet SHA256 digest")
 	output := flags.String("output", "", "destination executable")
+	outputRoot := flags.String("output-root", "", "opened publication root; output must be relative and remain inside this root")
 	directory := flags.String("directory", ".", "source paths working directory")
 	release := flags.Bool("release", false, "optimized native build")
 	runTrapControl := flags.Bool("run-trap-control", false, "private stable-run trap channel and exit base")
@@ -57,7 +58,7 @@ func run(args []string) int {
 		fmt.Fprintln(os.Stderr, "frontend-timeout must be in (0,10m]")
 		return 2
 	}
-	options := candidatebuild.Options{Candidate: *candidate, Manifest: *manifest, Workspace: *workspace, Locked: *locked, Directory: *directory, Output: *output, Release: *release, RunTrapControl: *runTrapControl, Timeout: *frontendTimeout, CompileTimeout: *compileTimeout}
+	options := candidatebuild.Options{Candidate: *candidate, Manifest: *manifest, Workspace: *workspace, Locked: *locked, Directory: *directory, Output: *output, OutputRoot: *outputRoot, Release: *release, RunTrapControl: *runTrapControl, Timeout: *frontendTimeout, CompileTimeout: *compileTimeout}
 	var result candidatebuild.Result
 	var err error
 	if *packetInput != "" {

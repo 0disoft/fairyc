@@ -10,6 +10,7 @@ import module_cli as modules;
 import module_project_cli as projects;
 import project_check_cli as checking;
 import project_emit_cli as workspace_c;
+import native_cli as native;
 import hir_cli as hir;
 import mir_cli as mir;
 import c_cli as c;
@@ -20,14 +21,14 @@ import std::process as process;
 
 @effects(console)
 fn i32 error(ref str message) { discard io::write_stderr(message); return 2; }
-fn ref str usage() { return "usage: lexer-candidate check [--locked]\n       lexer-candidate --tokens-file <path>\n       lexer-candidate --declarations-file <path>\n       lexer-candidate --check-names-file <path>\n       lexer-candidate --bindings-file <path>\n       lexer-candidate --check-types-file <path>\n       lexer-candidate --check-modules-file <manifest>\n       lexer-candidate --check-return-origins-file <manifest>\n       lexer-candidate --c-modules-file <manifest>\n       lexer-candidate --c-project-file <manifest>\n       lexer-candidate --c-workspace <root> [--locked]\n       lexer-candidate --hir-file <path>\n       lexer-candidate --mir-file <path>\n       lexer-candidate --c-file <path>\n"; }
+fn ref str usage() { return "usage: lexer-candidate check [--locked]\n       lexer-candidate build [--release] [--locked]\n       lexer-candidate run [--release] [--locked] [-- <program arguments>]\n       lexer-candidate --tokens-file <path>\n       lexer-candidate --declarations-file <path>\n       lexer-candidate --check-names-file <path>\n       lexer-candidate --bindings-file <path>\n       lexer-candidate --check-types-file <path>\n       lexer-candidate --check-modules-file <manifest>\n       lexer-candidate --check-return-origins-file <manifest>\n       lexer-candidate --c-modules-file <manifest>\n       lexer-candidate --c-project-file <manifest>\n       lexer-candidate --c-workspace <root> [--locked]\n       lexer-candidate --hir-file <path>\n       lexer-candidate --mir-file <path>\n       lexer-candidate --c-file <path>\n"; }
 
 @effects(filesystem)
 pub fn Result<bytes::Buffer, u32> load(ref u8[] path_bytes) {
     return files::load(path_bytes);
 }
 
-@effects(filesystem, console)
+@effects(filesystem, console, environment, clock)
 pub fn i32 run() {
     let usize argc = process::arg_count();
     if (argc < 2) { return error(usage()); }
@@ -38,6 +39,8 @@ pub fn i32 run() {
     };
     let ref u8[] flag = bytes::view(ref argument)[..flag_length];
     if (bytes::equal(flag,b"check")) { return checking::arguments(); }
+    if (bytes::equal(flag,b"build")) { return native::run(false); }
+    if (bytes::equal(flag,b"run")) { return native::run(true); }
     if (bytes::equal(flag,b"--c-workspace")) { return workspace_c::arguments(); }
     if (argc != 2 && argc != 3) { return error(usage()); }
     if (argc == 2 && bytes::equal(flag, b"--help")) {

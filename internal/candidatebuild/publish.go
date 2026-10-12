@@ -24,6 +24,23 @@ type publishHooks struct {
 
 func Publish(path string, image []byte) error { return publish(path, image, publishHooks{}) }
 
+// The Fairy caller owns the root and relative destination selection. All
+// directory creation and staged publication stay under the opened root.
+func PublishWithin(directory, path string, image []byte) error {
+	if !filepath.IsLocal(path) || filepath.Base(path) == "." || len(image) == 0 || len(image) > 64*1024*1024 {
+		return fmt.Errorf("invalid rooted output image or path")
+	}
+	root, err := os.OpenRoot(directory)
+	if err != nil {
+		return err
+	}
+	defer root.Close()
+	if err := root.MkdirAll(filepath.Dir(path), 0755); err != nil {
+		return err
+	}
+	return publishOpened(root, path, image, publishHooks{})
+}
+
 // Stage, sync and close inside the destination's opened parent before rename.
 // A failed rename never removes the existing image to make replacement work.
 func publish(path string, image []byte, hooks publishHooks) error {
@@ -43,6 +60,10 @@ func publish(path string, image []byte, hooks publishHooks) error {
 		return err
 	}
 	defer root.Close()
+	return publishOpened(root, leaf, image, hooks)
+}
+
+func publishOpened(root *os.Root, leaf string, image []byte, hooks publishHooks) error {
 	if info, err := root.Lstat(leaf); err == nil && !info.Mode().IsRegular() {
 		return fmt.Errorf("output is not a regular file")
 	} else if err != nil && !errors.Is(err, os.ErrNotExist) {
@@ -52,7 +73,7 @@ func publish(path string, image []byte, hooks publishHooks) error {
 	if _, err := rand.Read(nonce[:]); err != nil {
 		return err
 	}
-	temporary := ".fairyc-candidate-" + hex.EncodeToString(nonce[:]) + ".tmp"
+	temporary := filepath.Join(filepath.Dir(leaf), ".fairyc-candidate-"+hex.EncodeToString(nonce[:])+".tmp")
 	file, err := root.OpenFile(temporary, os.O_CREATE|os.O_EXCL|os.O_WRONLY, 0700)
 	if err != nil {
 		return err

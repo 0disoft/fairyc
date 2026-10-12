@@ -1,0 +1,149 @@
+{
+  "schema": "fairyc.candidate-public-native-cli/v1",
+  "passed": true,
+  "baselineCommit": "b39e1fa7",
+  "sourceCheck": {
+    "files": 376,
+    "mirFunctions": 4798,
+    "exit": 0
+  },
+  "selfSources": 369,
+  "packetSHA256": "a042b12a879ab16ce4c4a6b389139a039f2f16a624aa653db644fa7ddae92abe",
+  "packetBytes": 29998661,
+  "buildInvocations": [
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-public-native-cli-20261012\\release\\fairyc.exe",
+        "--c-project-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-public-native-cli-rooted-20261012\\sources.list"
+      ],
+      "exit": 0,
+      "seconds": 78.73610749997897,
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-rooted-builder-20261012.exe",
+        "--packet",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-public-native-cli-rooted-20261012\\packet.bin",
+        "--packet-sha256",
+        "a042b12a879ab16ce4c4a6b389139a039f2f16a624aa653db644fa7ddae92abe",
+        "--output",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-public-native-cli-rooted-20261012\\development\\fairyc.exe"
+      ],
+      "exit": 0,
+      "seconds": 23.171894099999918,
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-rooted-builder-20261012.exe",
+        "--packet",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-public-native-cli-rooted-20261012\\packet.bin",
+        "--packet-sha256",
+        "a042b12a879ab16ce4c4a6b389139a039f2f16a624aa653db644fa7ddae92abe",
+        "--output",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-public-native-cli-rooted-20261012\\release\\fairyc.exe",
+        "--release"
+      ],
+      "exit": 0,
+      "seconds": 322.74374080001144,
+      "stderr": ""
+    }
+  ],
+  "productGoFrontendInvoked": false,
+  "goCompilerCoreChanged": false,
+  "candidateCliChanged": true,
+  "shippingCliChanged": false,
+  "sdkAbiChanged": false,
+  "dbChanged": false,
+  "ciChanged": false,
+  "pushed": false,
+  "sourceInputParts": [
+    {
+      "path": "docs/ops/evidence/candidate-public-native-cli-sources-20261012-1.json",
+      "entries": 128,
+      "sha256": "66759c5200c84b841b1ac106c379962e0af23fde0e8b7df0b2fa65c820893fb0"
+    },
+    {
+      "path": "docs/ops/evidence/candidate-public-native-cli-sources-20261012-2.json",
+      "entries": 128,
+      "sha256": "df8fa6e57bcb85ce80c9c681e97ac019e1c399bb902e6990ada31ed4f401e67c"
+    },
+    {
+      "path": "docs/ops/evidence/candidate-public-native-cli-sources-20261012-3.json",
+      "entries": 113,
+      "sha256": "4aa95114ed572b5c24dcfdf2311497e7b2ff46a21955ee644ccfff386c668d49"
+    }
+  ],
+  "executions": [
+    {
+      "path": "docs/ops/evidence/candidate-public-native-cli-development-20261012.json",
+      "sha256": "28acf5162b8382ac67b1b97c4ba990c89b8dd87ef07c59d4dd33891f0679a1b5",
+      "cases": 16,
+      "image": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-public-native-cli-rooted-20261012\\development\\fairyc.exe",
+        "sha256": "1bdc8d32a3e66aa97637733625d19415bce7bba92468f3fe8a26103bbf044f9d",
+        "driverSHA256": "78d6732a5549d46eeff5120ee30513b71e00ce6d6f74e796bd0d9c87e7c0fb97"
+      }
+    },
+    {
+      "path": "docs/ops/evidence/candidate-public-native-cli-release-20261012.json",
+      "sha256": "4c620f97417215f8b1166a3a8e697a0f31c8d4f45801212a0e1d60df93e28ef1",
+      "cases": 15,
+      "image": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-public-native-cli-rooted-20261012\\release\\fairyc.exe",
+        "sha256": "e4f84720790ef4d2150635578178fb299408988e0fe0fcbfea0e4a0d1c7b6cdd",
+        "driverSHA256": "78d6732a5549d46eeff5120ee30513b71e00ce6d6f74e796bd0d9c87e7c0fb97"
+      }
+    }
+  ],
+  "bridgeInputs": [
+    {
+      "path": "cmd/fairyc-candidate-build/main.go",
+      "sha256": "c56b176fddb80718fe6029ee38708daf04f5a0c31c2f4bb222137f9dd1a86b34"
+    },
+    {
+      "path": "internal/candidatebuild/build.go",
+      "sha256": "5f6f6d89bf216b1b5f0a202479c7d84938fbe8b994a86bd5da60c49794ad0908"
+    },
+    {
+      "path": "internal/candidatebuild/publish.go",
+      "sha256": "41ca8c331dda425fcd78d609d11bbbff72bf94d30ea695bc104fb0b6c175172d"
+    },
+    {
+      "path": "internal/candidatebuild/publish_root_test.go",
+      "sha256": "ecc78d5b1a101f2f2d35e68ad97427ad8d8094ce9274811f0bdaf4bc93194e1e"
+    },
+    {
+      "path": "internal/candidatehost/windows_process.c",
+      "sha256": "2e79f139c088ce403031b7615268b7ffbdc9c11f33c00b0a703b6cdc77b2f12b"
+    },
+    {
+      "path": "internal/candidatehost/runtime.go",
+      "sha256": "942ce9cbc249f15affe4995c6bb87dc4d7685303595e80263846daaa596ccdca"
+    },
+    {
+      "path": "tools/verify-candidate-native-cli.py",
+      "sha256": "d5191303ef5e6ad022c3f577edfca70854d105f5742e6cf26cc61601f0ac5ce7"
+    }
+  ],
+  "goChecks": [
+    "candidatebuild TestPublicationFailuresKeepPreviousImage (write/sync/close/rename)",
+    "candidatebuild TestPublishWithinReplacesOnlyContainedOutput",
+    "candidatebuild TestPublishWithinRejectsDirectoryEscape (not skipped)",
+    "cmd/fairyc-candidate-build tests"
+  ],
+  "unverifiedGates": [
+    "full current two-generation exact image bootstrap",
+    "full frontend/executable differential",
+    "Linux",
+    "hosted CI",
+    "promotion",
+    "allocation/close/cleanup fault injection and detailed failure parity"
+  ],
+  "correctedVerificationFixtures": [
+    "10000-byte fixed array replaced with public Buffer to preserve 8192-byte argv case",
+    "source-position-prefixed entry diagnostic accepted by verifier"
+  ]
+}

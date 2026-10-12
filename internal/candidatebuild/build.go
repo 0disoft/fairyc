@@ -25,6 +25,7 @@ import (
 type Options struct {
 	Candidate, Manifest, Directory, Output string
 	Workspace                              string
+	OutputRoot                             string
 	Locked                                 bool
 	Release                                bool
 	RunTrapControl                         bool
@@ -270,8 +271,14 @@ func buildPacket(options Options, data []byte) (Result, error) {
 	if err != nil {
 		return Result{}, err
 	}
-	if err := Publish(options.Output, artifact.Bytes); err != nil {
-		return Result{}, err
+	var publication error
+	if options.OutputRoot != "" {
+		publication = PublishWithin(options.OutputRoot, options.Output, artifact.Bytes)
+	} else {
+		publication = Publish(options.Output, artifact.Bytes)
+	}
+	if publication != nil {
+		return Result{}, publication
 	}
 	return result(data, len(packet.Units), len(artifact.Bytes), profile.Name), nil
 }

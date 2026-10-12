@@ -230,6 +230,43 @@ its runtime does not link private host adapters. The host symbol-selection Go
 test passes. Source check passes 374 files / 4786 MIR functions. Public build/run
 dispatch remains pending; public SDK ABI is unchanged.
 Path receipt: [candidate-windows-host-paths-20261012.json](../ops/evidence/candidate-windows-host-paths-20261012.json).
+
+## Candidate build/run dispatcher
+
+The candidate dispatcher now exposes `build [--release] [--locked]` and
+`run [--release] [--locked] [-- <arguments>]`. Fairy owns option parsing,
+workspace/lock admission, entry selection, C emission, packet-file sync/close,
+output-path selection, driver invocation, scratch lifetime and run classification.
+The adjacent private Go driver consumes only the fresh packet and performs MSVC
+transport plus atomic image publication. Go compiler/frontend code is unchanged.
+
+Build selects `build/<root-name>.exe` and the existing target/profile/lock success
+line. The private `--output-root` transport publishes the relative path through
+the caller's opened source root, rejecting a directory escape and retaining the
+prior image on failure. Run uses a fresh scratch directory as cwd, leaves stdin
+for the child, forwards captured streams, preserves all ordinary 32-bit exit
+bits and emits recognized Fairy traps with code 5. MSVC commands and program
+execution retain the existing 60-second limit; the outer driver job is bounded
+to ten minutes across compilation/link commands.
+
+The 369-source dispatcher was emitted and built through Fairy C in development
+and release. Across both profiles, 31 completed invocations verify default and
+locked/release builds, artifact execution, duplicate/invalid flags, missing
+driver, stale/missing lock, directory escapes, exact empty/Unicode/quoted/8192-byte
+argv and binary stdin/streams, ordinary status 134 and 0xffffffff, assertion trap,
+invalid entry and output overflow without partial stdout or scratch leaks. One
+Go reference run matches the complete program streams. Focused publication tests
+cover write/sync/close/rename failure preservation and opened-root escape.
+Source check passes 376 files / 4798 MIR functions.
+
+The shipped Go CLI remains unchanged after this candidate command integration. The
+current full two-generation image fixed point, full frontend/executable corpus,
+Linux/hosted CI and detailed allocation/cleanup failure parity remain unverified.
+The initial I/O fixture exceeded the candidate's 4096-element fixed-array bound;
+it was changed to the public Buffer while retaining the full 8192-byte argument.
+An overly narrow verifier prefix check was also corrected for source-positioned
+entry diagnostics. No SDK ABI, DB or CI change; no push.
+CLI receipt: [candidate-public-native-cli-20261012.json](../ops/evidence/candidate-public-native-cli-20261012.json).
 Native records and flags follow [STARTUPINFOW](https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/ns-processthreadsapi-startupinfow),
 [extended job limits](https://learn.microsoft.com/en-us/windows/win32/api/winnt/ns-winnt-jobobject_extended_limit_information),
 [CreateProcessW](https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-createprocessw)

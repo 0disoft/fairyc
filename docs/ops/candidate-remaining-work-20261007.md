@@ -2,7 +2,24 @@
 
 ## Latest validated milestone (2026-10-12)
 
-The complete current 355-source dispatcher reaches a fixed point through the
+The 369-source candidate dispatcher now runs the public build/run spellings with
+Fairy-owned options, workspace loading, emission, native-driver calls and run
+classification. The private Go companion consumes fresh packets and publishes
+selected relative build outputs inside an opened source root. Both candidate
+profiles complete 31 invocations covering build/run/lock behavior, directory
+escapes, exact argv/stdin/streams (including 8192-byte argv), ordinary full exit
+bits, traps and bounded output. One Go reference run matches the complete I/O.
+No scratch directories leak. Source check passes 376 files / 4798 MIR functions;
+focused native publication and private driver tests pass.
+
+The shipped Go CLI is unchanged. Current-source full image fixed point, broader
+frontend/executable differential, Linux/hosted CI, allocation/cleanup failure
+parity and promotion remain pending. No push. Receipt:
+`evidence/candidate-public-native-cli-20261012.json`.
+
+### Prior fixed point before native command integration
+
+The earlier 355-source dispatcher reached a fixed point through the
 private Windows C-part bootstrap path. Both Stage1 and Stage2 process all self
 sources and emit the same 29372117 bytes. Their complete 4177920-byte PE images
 are identical, with no excluded bytes. All 249 Go lexer cases and private framing

@@ -35,7 +35,7 @@ fn Word read_word() {
 // Modes 0/1 use defaults; 2/3 add four u32 LE limits after the u16 LE length.
 // Odd modes select the previous revision. Exact source bytes follow the header.
 // Clean EOF is accepted only between frames; malformed framing exits 8.
-@effects(filesystem, console)
+@effects(filesystem, console, environment, clock)
 fn i32 main() {
     if (process::arg_count() != 1) { return file_cli::run(); }
     var usize frames = 0;
