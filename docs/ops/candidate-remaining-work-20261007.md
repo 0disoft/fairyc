@@ -1,5 +1,34 @@
 # Fairy 컴파일러 전환: 후속 작업 목록
 
+## Reachable original template closure hashes (2026-10-13)
+
+The Fairy source-template graph now computes the actual Go templateClosure
+identity: Root plus all reachable canonical declarations, ordered by complete
+DeclarationID, then DigestText under source-public-template-closure-v0.
+An iterative visited set marks each declaration once, so unused self/mutual
+recursion remains finite to describe without admitting executable recursive
+specializations. The retained source catalog supplies canonical ordering; no
+source parser ownership or disposable module number enters this closure record.
+
+All 100 closure digests and 100 declaration JSON records from the four actual
+Go catalog graphs match. Reordered modules/owners preserve all 25 oracle hashes;
+an inert written view producer body edit changes only that producer's closure.
+Five authored tests pass Go native and candidate C development/release. Private
+helper edits propagate through transitive dependencies while unrelated cycle
+and unused roots retain their hashes. Detached graph ownership, exact-fit/shared
+1MiB work exhaustion, invalid roots/ranges/targets/argument spans and text bounds
+reject without publishing an identity. The dependency JSON writer now checks
+these ranges before indexed access. One initial new-guard mutable-argument loan
+error was fixed before the final passing run. Source check and check --locked
+pass 421 files / 5389 MIR functions with the refreshed final root lock.
+
+Public-template summary projection and source-interface integration, real
+specialization facts and dispatcher/cache consumers remain next. Latest-source
+complete image/fixed point, Linux/full suite and same-head hosted CI are not
+rerun. Private candidate API added; public API, SDK ABI, DB, CI/runners and
+product timeout defaults unchanged. No push. Receipt:
+[evidence](evidence/candidate-generic-source-closure-20261013.json).
+
 ## Direct original template dependencies (2026-10-13)
 
 The source catalog now owns detached direct dependency edges and ordered type

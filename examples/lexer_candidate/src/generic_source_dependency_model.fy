@@ -21,6 +21,8 @@ pub fn Argument argument_at(ref Data p,usize at){assert(at<v::len<Argument>(ref 
 pub fn Range range_at(ref Data p,usize at){assert(at<v::len<Range>(ref p.ranges));return *v::at<Range>(ref p.ranges,at);}
 pub fn ref u8[] text(ref Data p,Text t){assert(t.start<=t.end && t.end<=bytes::len(ref p.names));return bytes::view(ref p.names)[t.start..t.end];}
 pub fn usize argument_count(ref Data p){return v::len<Argument>(ref p.arguments);}
+pub fn usize range_count(ref Data p){return v::len<Range>(ref p.ranges);}
+pub fn bool valid_text(ref Data p,Text t){return t.start<t.end && t.end<=bytes::len(ref p.names);}
 pub fn Data assemble_data(bytes::Buffer names,v::Vec<Argument> arguments,v::Vec<Edge> edges,v::Vec<Range> ranges){return Data{.names,.arguments,.edges,.ranges};}
 fn Result<Text,u32> retain(ref mut bytes::Buffer names,ref u8[] value,ref mut usize work){if(value.len>1048576 || bytes::len(names)>1048576-value.len || !budget::charge(work,value.len+1)){return .err(10);}let start=bytes::len(names);if(!bytes::append(names,value).is_ok){return .err(11);}return .ok(Text{.start,.end=bytes::len(names)});}
 pub fn u32 argument(ref mut bytes::Buffer names,ref mut v::Vec<Argument> arguments,ref u8[] name,bool parameter,ref mut usize work){if(v::len<Argument>(arguments)>=1048576){return 10;}let saved=switch(retain(names,name,work)){case .ok(value):{value}case .err(code):{return code;}};return if(v::push<Argument>(arguments,Argument{.name=saved,.parameter}).is_ok){0}else{11};}
