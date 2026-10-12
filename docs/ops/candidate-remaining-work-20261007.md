@@ -1,5 +1,37 @@
 # Fairy 컴파일러 전환: 후속 작업 목록
 
+## Bound original-source specialization inputs (2026-10-13)
+
+`generic_source_plan_input` owns direct roots, the original template catalog,
+direct dependencies and the concrete type catalog in one detached input. Root
+arguments select exact concrete descriptors; dependency arguments retain either
+an originating-template parameter position or a concrete descriptor. Binding
+walks each edge/argument once and preserves original slots after edge sorting,
+without searching all declarations for every parameter. The existing owning
+dependency-graph API now delegates to the same borrowed collector.
+
+Four actual Go package graphs match 48 roots, 91 declarations and 85 direct
+edges. Parameter names/abilities, declaration owners/definitions, dependency
+targets and all selected concrete type IDs/owners/definitions/abilities match.
+The actual Plan.Roots and all specialization IDs are independently crosschecked
+against PrepareSDKStoragePackages by the Go observer. Cases include private
+helper edits, module/owner reordering and a distinct owner of the same helper
+module. Four new tests and one owning-dependency regression pass Go native and
+candidate C development/release. Detached ownership, unused symbolic cycles,
+exact-fit/exhausted work/encoding/hash scopes, sticky failure and changed-source
+rejection pass. Import/accessor namespace collisions were fixed before the final
+passing check. Root check and check --locked pass 427 files / 5480 MIR functions
+with the final refreshed source lock.
+
+The existing 16MiB bookkeeping, 1GiB encoding, 96MiB streamed-hash, template,
+argument and edge bounds remain unchanged. This input performs no executable
+specialization, capability selection or body/Flow admission. Dependency-first
+expansion, scalar requirements and cycle/growth limits, complete source g0_ IDs,
+precise planning locations, SDK Vec interfaces and dispatcher/cache publication
+remain next. Latest-source full image/fixed point, Linux/full suite and same-head
+hosted CI are not rerun. Public API, SDK ABI, product timeouts and CI are unchanged;
+no push. Receipt: [evidence](evidence/candidate-source-plan-input-20261013.json).
+
 ## Direct original-source specialization requests (2026-10-13)
 
 `generic_source_requests` owns detached direct source roots and the original
