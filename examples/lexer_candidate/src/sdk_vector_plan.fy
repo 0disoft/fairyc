@@ -55,6 +55,7 @@ pub fn bool source_matches(ref Plan p,usize module_index,ref syntax::Parsed sour
 pub fn u32[8] source_digest(ref Plan p,usize module_index){return catalog::source_digest(ref p.declarations,module_index);}
 pub fn catalog::Lookup declaration_lookup(ref Plan p,usize module_index,ref u8[] spelling){return catalog::lookup(ref p.declarations,module_index,spelling);}
 pub fn catalog::Lookup declaration_lookup_measured(ref Plan p,usize module_index,ref u8[] spelling,ref mut usize probes){return catalog::lookup_measured(ref p.declarations,module_index,spelling,probes);}
+pub fn catalog::Lookup import_target_measured(ref Plan p,usize module_index,ref u8[] alias,ref mut usize probes){return catalog::import_target_measured(ref p.declarations,module_index,alias,probes);}
 pub fn catalog::Declaration declaration_at(ref Plan p,usize id){return catalog::declaration_at(ref p.declarations,id);}
 
 pub fn usize field_count(){return 6;}

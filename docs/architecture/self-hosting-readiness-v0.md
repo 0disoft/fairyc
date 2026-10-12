@@ -2,6 +2,33 @@
 
 ## Current local candidate evidence (2026-10-13)
 
+### Original public template projection and source interfaces (2026-10-13)
+
+Public source templates now project canonical module/name/reachable-closure rows
+from the owned dependency graph. Bounded heap sorting preserves module-prefix
+ordering, including root versus root::child. A source-interface helper combines
+these rows with the typed ordinary v5 descriptor. It checks original source
+digests, owner-aligned coordinates and exact resolved import providers before
+combining independently measured phase histories into the 16MiB project ledger.
+
+Six actual Go PrepareSDKStoragePackages/AnalyzeSDKStoragePackages cases finish
+Flow. All 113 public-template triples and twelve ordinary plus twelve generic
+user-package hashes match. Cases cover private edits, source/owner reordering,
+inert view edits, nested modules and a package with no public templates. All six
+SDK packages intentionally reject full interface hashing with 4503 until concrete
+Vec specialization names are represented. Five authored tests pass Go native and
+candidate C development/release, including changed import providers, stale
+sources/coordinates, missing owners and exact-fit/exhausted shared work. Root
+check and check --locked pass 424 files / 5406 MIR functions with the
+final refreshed source lock.
+
+This helper supplies source facts; the owning compiler still must gate publication
+on body/Flow success. Actual specialization facts, complete SDK Vec type rendering,
+dispatcher and cache consumers remain next. No latest-source full image/fixed
+point, Linux/full suite or hosted CI is claimed. Public API, SDK ABI, product
+timeouts and CI are unchanged; no push. Receipt:
+[evidence](../ops/evidence/candidate-public-templates-20261013.json).
+
 ### Region dependencies of retained template bodies (2026-10-13)
 
 Region capability collection now skips uninstantiated generic source bodies.

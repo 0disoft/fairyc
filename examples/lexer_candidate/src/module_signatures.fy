@@ -29,6 +29,7 @@ pub fn bool source_matches(ref Program p,usize module_index,ref syntax::Parsed s
 pub fn u32[8] source_digest(ref Program p,usize module_index){return vectors::source_digest(ref p.types,module_index);}
 pub fn catalog::Lookup declaration_lookup(ref Program p,usize module_index,ref u8[] spelling){return vectors::declaration_lookup(ref p.types,module_index,spelling);}
 pub fn catalog::Lookup declaration_lookup_measured(ref Program p,usize module_index,ref u8[] spelling,ref mut usize probes){return vectors::declaration_lookup_measured(ref p.types,module_index,spelling,probes);}
+pub fn catalog::Lookup import_target_measured(ref Program p,usize module_index,ref u8[] alias,ref mut usize probes){return vectors::import_target_measured(ref p.types,module_index,alias,probes);}
 pub fn catalog::Declaration declaration_at(ref Program p,usize id){return vectors::declaration_at(ref p.types,id);}
 pub fn usize vector_count(ref Program p){return vectors::count(ref p.types);}
 pub fn vectors::Instance vector_at(ref Program p,usize index){return vectors::at(ref p.types,index);}

@@ -45,6 +45,11 @@ fn usize first(ref Catalog c,usize module_index,bool imports,ref mut usize probe
     return low;
 }
 pub fn Lookup lookup(ref Catalog c,usize module_index,ref u8[] spelling){var usize probes=0;return lookup_measured(c,module_index,spelling,ref mut probes);}
+// The item is the one-based resolved module, including empty providers.
+pub fn Lookup import_target_measured(ref Catalog c,usize module_index,ref u8[] alias,ref mut usize probes){
+    if(module_index>=module_count(c)){return Lookup{.code=9,.item=0};}var usize n=first(c,module_index,true,probes);
+    while(n<v::len<Import>(ref c.imports)){*probes=*probes+alias.len+1;let i=*v::at<Import>(ref c.imports,n);if(i.module_index!=module_index){break;}if(same(c,i.start,i.end,alias)){let target=destination(c,i,probes);return Lookup{.code=if(target==0){4}else{0},.item=target};}n+=1;}return Lookup{.code=4,.item=0};
+}
 pub fn Lookup lookup_measured(ref Catalog c,usize module_index,ref u8[] spelling,ref mut usize probes){
     if(module_index>=module_count(c)){return Lookup{.code=9,.item=0};}
     var bytes::Buffer canonical=bytes::empty();let u32 code=scalar_modules::normalize(spelling,ref mut canonical);if(code!=0){return Lookup{.code,.item=0};}
