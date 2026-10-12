@@ -4,6 +4,7 @@ import generic_source_tokens as tokens;
 import generic_source_type_json as types;
 import generic_source_expression_fields as fields;
 import generic_source_statement_fields as statements;
+import generic_source_view_loop_json as view_loops;
 import syntax as syntax;
 import std::bytes as bytes;
 
@@ -65,6 +66,8 @@ fn bool binding(ref syntax::Parsed p,syntax::Statement s,usize end,usize depth,r
     return json::raw(out,b",\"Expression\":",work) && optional_expression(p,e.expression,depth+1,out,work) && json::raw(out,b"}",work);
 }
 fn bool statement_expression(ref syntax::Parsed p,syntax::Statement s,usize depth,ref mut bytes::Buffer out,ref mut json::Ledger work){
+    if(s.kind==18){let admitted=view_loops::admitted(p,s,work);if(work.code!=0){return false;}if(!admitted){return json::raw(out,b"null",work);}var bytes::Buffer view=bytes::empty();var bytes::Buffer type=bytes::empty();var bytes::Buffer item=bytes::empty();var bytes::Buffer body=bytes::empty();
+        return value(p,s.expression,depth+1,ref mut view,work) && types::value(p,s.second,depth+1,ref mut type,work) && view_loops::item(p,s,bytes::view(ref view),bytes::view(ref type),ref mut item,work) && block_with_prefix(p,s.first,depth+1,bytes::view(ref item),ref mut body,work) && view_loops::synthetic(p,s,bytes::view(ref view),bytes::view(ref body),out,work);}
     if(s.kind==8 || s.kind==9 || s.kind==10 || s.kind==17){var bytes::Buffer text=bytes::empty();if(s.kind==17){if(s.target==0 || s.target>syntax::expression_count(p)){return json::reject(work,9);}let name=syntax::expression_at(p,s.target);if(name.kind!=17 || name.token>=syntax::token_count(p)){return json::reject(work,9);}let token=syntax::token_info(p,name.token);if(!json::raw(ref mut text,syntax::source_view(p)[token.start..token.end],work)){return false;}}
         if(!statements::expression(statements::kind(s.kind),s.start,s.end,bytes::view(ref text),out,work)){return false;}
         if(s.kind==9 || s.kind==10){if(!json::raw(out,b"null",work)){return false;}}
@@ -85,12 +88,16 @@ pub fn bool statement(ref syntax::Parsed p,usize id,usize depth,bool initializer
     if(s.kind==4){if(s.operator>=syntax::token_count(p)){return json::reject(work,9);}let token=syntax::token_info(p,s.operator);if(!tokens::text(p,token.start,token.end,out,work)){return false;}}else if(!json::quoted(out,b"",work)){return false;}
     if(!json::raw(out,b",\"Binding\":",work)){return false;}if(s.kind==2){if(!binding(p,s,end,depth,out,work)){return false;}}else if(!json::raw(out,b"null",work)){return false;}
     if(!json::raw(out,b",\"Target\":",work) || !optional_expression(p,if(s.kind==4){s.target}else{0},depth+1,out,work) || !json::raw(out,b",\"Expression\":",work) || !statement_expression(p,s,depth,out,work) || !json::raw(out,b",\"For\":",work)){return false;}
-    if(s.kind==14){if(!classic_for(p,s,depth,out,work)){return false;}}else if(!json::raw(out,b"null",work)){return false;}return json::raw(out,b",\"ByteFor\":null}",work);
+    if(s.kind==14){if(!classic_for(p,s,depth,out,work)){return false;}}else if(!json::raw(out,b"null",work)){return false;}if(!json::raw(out,b",\"ByteFor\":",work)){return false;}
+    if(s.kind==18){if(!view_loops::valid(p,s,work)){return false;}let c=view_loops::context(p,s);
+        if(!json::raw(out,b"{\"Span\":",work) || !json::span(out,s.start,s.end,work) || !json::raw(out,b",\"Name\":",work) || !tokens::text(p,c.name_start,c.name_end,out,work) || !json::raw(out,b",\"NameSpan\":",work) || !json::span(out,c.name_start,c.name_end,work) || !json::raw(out,b",\"Type\":",work) || !types::value(p,s.second,depth+1,out,work) || !json::raw(out,b",\"View\":",work) || !value(p,s.expression,depth+1,out,work) || !json::raw(out,b",\"Body\":",work) || !block(p,s.first,depth+1,out,work) || !json::raw(out,b"}",work)){return false;}
+    }else if(!json::raw(out,b"null",work)){return false;}return json::raw(out,b"}",work);
 }
-pub fn bool block(ref syntax::Parsed p,usize id,usize depth,ref mut bytes::Buffer out,ref mut json::Ledger work){if(depth>=64){return json::reject(work,10);}if(!json::charge(work,1) || !statements::valid(p,id,work)){return false;}let b=syntax::statement_at(p,id);if(b.kind!=1){return json::reject(work,9);}var usize link=b.first;var usize count=0;
+fn bool block_with_prefix(ref syntax::Parsed p,usize id,usize depth,ref u8[] prefix,ref mut bytes::Buffer out,ref mut json::Ledger work){if(depth>=64){return json::reject(work,10);}if(!json::charge(work,1) || !statements::valid(p,id,work)){return false;}let b=syntax::statement_at(p,id);if(b.kind!=1){return json::reject(work,9);}var usize link=b.first;var usize count=0;
     while(link!=0){if(!json::charge(work,1) || !statements::valid(p,link,work)){return false;}let n=syntax::statement_at(p,link);if(n.kind!=7 || n.first==0 || n.first>=link || n.second>=link){return json::reject(work,9);}count+=1;link=n.second;}if(count!=b.second){return json::reject(work,9);}
     if(!json::raw(out,b"{\"Span\":",work) || !json::span(out,b.start,b.end,work) || !json::raw(out,b",\"Statements\":",work)){return false;}
-    if(count==0){if(!json::raw(out,b"null",work)){return false;}}else{if(!json::raw(out,b"[",work)){return false;}var usize index=0;while(index<count){link=b.first;var usize remaining=count-1;while(remaining>index){if(!json::charge(work,1)){return false;}link=syntax::statement_at(p,link).second;remaining-=1;}
-        if(index!=0 && !json::raw(out,b",",work)){return false;}if(!statement(p,syntax::statement_at(p,link).first,depth+1,false,out,work)){return false;}index+=1;}if(!json::raw(out,b"]",work)){return false;}}
+    if(count==0 && prefix.len==0){if(!json::raw(out,b"null",work)){return false;}}else{if(!json::raw(out,b"[",work)){return false;}if(prefix.len!=0 && !json::raw(out,prefix,work)){return false;}var usize index=0;while(index<count){link=b.first;var usize remaining=count-1;while(remaining>index){if(!json::charge(work,1)){return false;}link=syntax::statement_at(p,link).second;remaining-=1;}
+        if((index!=0 || prefix.len!=0) && !json::raw(out,b",",work)){return false;}if(!statement(p,syntax::statement_at(p,link).first,depth+1,false,out,work)){return false;}index+=1;}if(!json::raw(out,b"]",work)){return false;}}
     return json::raw(out,b",\"Tail\":",work) && optional_expression(p,b.expression,depth+1,out,work) && json::raw(out,b"}",work);
 }
+pub fn bool block(ref syntax::Parsed p,usize id,usize depth,ref mut bytes::Buffer out,ref mut json::Ledger work){return block_with_prefix(p,id,depth,b"",out,work);}

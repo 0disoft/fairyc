@@ -2,6 +2,36 @@
 
 ## Current local candidate evidence (2026-10-13)
 
+Source view-loop written and synthetic JSON (2026-10-13)
+
+ByteFor now retains exact written span/name/type/view/body JSON and the Go
+syntax-only synthetic expression. Eight admitted projection shapes produce the
+private NUL-named bound/index bindings, usize types, length observation, classic
+loop condition/post and original body prefixed by item binding. Mutable item
+borrows retain the exact name span and &mut prefix. Named/field/grouped-field
+and sliced sources match Go; unsupported written element/source forms keep
+Expression null rather than losing their original ByteFor. Nested loop blocks
+retain original scopes, source order and repeated syntax representations.
+
+Sixteen authored functions match Go JSON byte for byte, with eight synthetic
+root loops and eight null projections. Three tests and three function regressions
+pass Go native and candidate C development/release. Malformed facts, sticky
+failure and exact-fit/exhausted work pass. Source check passes 408 files / 5178
+MIR functions; final receipts verify original/copy hashes and the updated lock.
+The initial fixture reader rejected the 79934-byte oracle at its 64KiB bound;
+only this test now uses the existing project reader with an explicit 1MiB bound.
+A grouped item type outside the existing lookahead was replaced by a written
+array case. Product input and analysis bounds remain unchanged.
+
+Scope correction: arbitrary classic-for expression clauses are outside the
+normative for_init/for_post grammar and ADR 0213. The Go syntax parser's wider
+retention is not another admission task. Next: source definition digests,
+aggregate/module and resolved import extraction, template dependency closures,
+planner facts and dispatcher/cache consumption. Full image/current-source fixed
+point, Linux/full suite and hosted CI are not rerun. No public API, SDK ABI, DB,
+CI/runner or product timeout changes; no push. Receipt:
+[evidence](../ops/evidence/candidate-generic-source-view-loops-20261013.json).
+
 Source function body JSON (2026-10-13)
 
 The function serializer joins original header metadata to retained statement

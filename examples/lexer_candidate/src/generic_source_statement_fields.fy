@@ -6,7 +6,7 @@ import std::bytes as bytes;
 pub fn ref u8[] kind(u32 code){
     if(code==2){return b"binding";}if(code==3){return b"return";}if(code==4){return b"assignment";}if(code==6){return b"expression-statement";}
     if(code==8){return b"while";}if(code==9){return b"break";}if(code==10){return b"continue";}if(code==11){return b"assert";}
-    if(code==12){return b"discard";}if(code==13){return b"defer";}if(code==14){return b"for";}if(code==16){return b"burn";}if(code==17){return b"region";}return b"";
+    if(code==12){return b"discard";}if(code==13){return b"defer";}if(code==14){return b"for";}if(code==16){return b"burn";}if(code==17){return b"region";}if(code==18){return b"byte-for";}return b"";
 }
 // Go AST expressions also represent statement-only control nodes. Keep one
 // exact field prefix for synthetic block, region, while and jump projections.
