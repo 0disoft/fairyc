@@ -9,6 +9,24 @@ are identical, with no excluded bytes. All 249 Go lexer cases and private framin
 checks pass for the seed and both generations. Receipt:
 `evidence/candidate-complete-stage2-20261012.json`.
 
+## Fairy Windows command encoding (2026-10-12)
+
+`windows_command` builds a complete owned UTF-16 command line in Fairy, with
+separate executable-name and CRT argument quoting. Empty arguments, spaces,
+embedded quotes, trailing backslashes, Korean and supplementary Unicode retain
+their exact bytes. Invalid UTF-8/NUL and quoted executable names reject; the
+32767-word Windows limit includes the final NUL. Exactly 1024 arguments including
+the executable are admitted; overflow rejects without publishing a partial line.
+The builder mutates only its local whole buffer and borrows source arguments.
+
+Two authored tests pass in Go-native and candidate C development/release. Source
+check passes 367 files / 4712 MIR functions. Raw process creation/wait/cancellation
+is the next unit; stable build/run and the remaining promotion gates are open.
+Public API, SDK ABI, DB and CI are unchanged; no push. Receipt:
+`evidence/candidate-windows-command-20261012.json`. Limits and quoting follow
+[CreateProcessW](https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-createprocessw)
+and the [Microsoft CRT](https://learn.microsoft.com/en-us/cpp/c-language/parsing-c-command-line-arguments).
+
 ## Direct workspace-to-native bridge (2026-10-12)
 
 The private builder accepts exactly one `--manifest` or `--workspace` with the

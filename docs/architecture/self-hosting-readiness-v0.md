@@ -2359,3 +2359,15 @@ help-only update. Stable build/run, program arguments, status/deadline mapping a
 the broader differential/platform/promotion gates remain. Private bridge API
 changed; public API, SDK ABI, DB and CI are unchanged; no push. Receipt:
 [candidate-workspace-native-build-20261012.json](../ops/evidence/candidate-workspace-native-build-20261012.json).
+
+## Fairy Windows argv encoder (2026-10-12)
+
+The private Fairy encoder owns complete UTF-16 command construction and CRT
+quoting, including empty/Unicode arguments, quotes and trailing backslashes.
+The exact 32767-word limit includes NUL; argument count is bounded at 1024
+including the executable. Invalid UTF-8/NUL, executable quotes and overflow
+reject without a successful prefix. Two Go-native tests and both candidate C
+profiles pass; source check passes 367 files / 4712 MIR functions. Process launch
+and stable build/run remain pending. Public API, SDK ABI, DB and CI are unchanged;
+no push. Receipt:
+[candidate-windows-command-20261012.json](../ops/evidence/candidate-windows-command-20261012.json).
