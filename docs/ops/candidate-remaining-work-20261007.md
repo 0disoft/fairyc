@@ -1,5 +1,32 @@
 # Fairy 컴파일러 전환: 후속 작업 목록
 
+## Source expression JSON for generic definitions (2026-10-13)
+
+Source expression JSON now preserves exact Go AST field order, null/omitted
+fields, byte spans and scanner Cooked data for literals, canonical paths,
+groups, prefixes, binary operations, calls with sparse argument labels,
+explicit type arguments and casts, field/index access, array lists/repeats,
+record initialization (including shorthand and explicit generic arguments),
+contextual variants, propagation and all four slice-bound forms. Parser list
+links are validated and emitted in source order. Generic record constructors
+project their type arguments and original path rather than a synthetic
+specialization child. Omitted slice bounds retain Go's precise spans.
+
+Sixteen authored sources / 110 Go expression nodes match the real syntax-only
+frontend JSON byte for byte. Three tests pass Go native and candidate C
+development/release, including invalid/internal IDs, unsupported control nodes,
+exact-fit/exhausted work, depth admission and retained failure state. Source check
+passes 405 files / 5149 MIR functions; final tests verify the updated lock and
+exact original/copy hashes. An initial malformed fixture escape was corrected
+before the oracle passed.
+
+Blocks, control-flow and statement JSON remain next, then complete function and
+aggregate definitions, resolved imports, reachable-template closures and actual
+planner/dispatcher/cache integration. Full image/current-source fixed point,
+Linux/full suite and hosted CI are not rerun. No public API, SDK ABI, DB,
+CI/runner or product timeout changes; no push. Receipt:
+[evidence](evidence/candidate-generic-source-expressions-20261013.json).
+
 ## Source declaration metadata and documentation spans (2026-10-13)
 
 The retained syntax now produces the exact Go Function header JSON: written
