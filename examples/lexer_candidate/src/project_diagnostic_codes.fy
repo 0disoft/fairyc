@@ -5,6 +5,7 @@ module project_diagnostic_codes;
 pub fn u32 code(u32 phase,u32 stage,u32 raw){
     if(phase==1 && raw==2){return 102;}
     if(phase==3 && stage==2 && (raw==4 || raw==5)){return 101;}
+    if(phase==3 && stage==3 && raw==1){return 101;}
     if(phase>=1 && phase<=3 && summary(raw).len!=0){return raw;}
     return 0;
 }
@@ -13,6 +14,7 @@ pub fn u32 code(u32 phase,u32 stage,u32 raw){
 pub fn ref u8[] summary(u32 code){
     if(code==101){return b"name or qualified path cannot be resolved";}
     if(code==102){return b"declaration duplicates a name in the same scope";}
+    if(code==103){return b"item is not visible from this module";}
     if(code==1007){return b"condition or logical operand is not bool";}
     if(code==1008){return b"assignment target is not a mutable place";}
     if(code==1010){return b"call argument count does not match the declaration";}

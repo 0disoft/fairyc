@@ -1,0 +1,480 @@
+{
+  "schema": "fairyc.candidate-project-diagnostic-spans/v1",
+  "passed": true,
+  "scope": "Preserve first diagnostic identity and exact rejected foreign type/callee spans; emit provider declaration and effect-declaration related locations",
+  "sourceInputs": [
+    {
+      "path": "examples/lexer_candidate/src/project_check_text.fy",
+      "bytes": 16160,
+      "sha256": "5d07a8afd776b34599d2a4d3c3eb7aea54bb8319f13f75cf6fe467b79c5a203c"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_diagnostic_codes.fy",
+      "bytes": 2166,
+      "sha256": "22c03d3c1714a1946bbf7799742d6dde77335d5dd4faeea14fa9a983d5e0f9d8"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_signatures.fy",
+      "bytes": 10880,
+      "sha256": "bc4c1d88a08566417ceb64d563517b7850f13a186783119ac94403899ff46c79"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_unit_call_contracts.fy",
+      "bytes": 6844,
+      "sha256": "5cc2b684e82aa0583a606cd55fc0baa002887b495191f2e2c76db76d730e3229"
+    },
+    {
+      "path": "examples/lexer_candidate/tests/project_diagnostic_codes.fy",
+      "bytes": 687,
+      "sha256": "40a08c4ad8bacfd8a6e44edcd478c09edf64d79472d5a958cc5bfdb272ba4a5e"
+    },
+    {
+      "path": "examples/lexer_candidate/tests/module_signatures.fy",
+      "bytes": 9557,
+      "sha256": "7232177ef3dccd71c4ee1dfe99445f98d4b505e4e958aa42128c9ca3baa89526"
+    },
+    {
+      "path": "examples/lexer_candidate/tests/module_unit_call_contracts.fy",
+      "bytes": 1756,
+      "sha256": "c5f7e06a14f511c128cbb0eccc81af17769100a9224a7d52baeb4b96d2a322c9"
+    },
+    {
+      "path": "examples/lexer_candidate/fairy.lock",
+      "bytes": 1698,
+      "sha256": "62e21d9a3f7675eabbf81d22b270f0d5f25b3b520244781bfe46f0edd8384b41"
+    }
+  ],
+  "sourceFiles": 371,
+  "sourceInventorySHA256": "4b8565d8ea8c6f186b4eaf0490505efbe5a7f8e9b068815606892be250dbfcb5",
+  "sourceCheck": {
+    "passed": true,
+    "files": 378,
+    "mirFunctions": 4807,
+    "lockUpdated": true
+  },
+  "privateTests": [
+    {
+      "module": "project_diagnostic_codes",
+      "receiptSHA256": "97b5ba083d8f161e8904699873e04afb0c645ece744680b92e11aabd0a5c744d",
+      "nativeTests": 1,
+      "selection": {
+        "mode": "all-authored",
+        "authoredTests": 1,
+        "selectedTests": 1
+      },
+      "candidateExecutions": [
+        {
+          "profile": "development",
+          "exit": 0,
+          "sha256": "bd5aefdcde30668226d2b50b18fb846fded0bed3ab4bfcfe0d4ef94bdebbe84e"
+        },
+        {
+          "profile": "release",
+          "exit": 0,
+          "sha256": "06db9c1e877c97e7f94c4ec67ca11612a055ceff08258f2b7039dc24ef3ef25f"
+        }
+      ]
+    },
+    {
+      "module": "module_signatures",
+      "receiptSHA256": "33890324ca9567bdd3e0d92aa3dfdfa5d26360be983154e4adfef62d76cced11",
+      "nativeTests": 3,
+      "selection": {
+        "mode": "explicit-subset",
+        "authoredTests": 4,
+        "selectedTests": 3
+      },
+      "candidateExecutions": [
+        {
+          "profile": "development",
+          "exit": 0,
+          "sha256": "1a22bbe2f2aa133d8d47cb834608cdc25566f23656315f1c287e0a813f9fde3c"
+        },
+        {
+          "profile": "release",
+          "exit": 0,
+          "sha256": "5c72de2b46bdb1e9ce95487791595a848518bfdb5333793b81036631331228ff"
+        }
+      ]
+    },
+    {
+      "module": "module_unit_call_contracts",
+      "receiptSHA256": "4becece64f86be8692cc2ba5aa22a3ab3451bc2884088f0c9dd1c86878576202",
+      "nativeTests": 2,
+      "selection": {
+        "mode": "all-authored",
+        "authoredTests": 2,
+        "selectedTests": 2
+      },
+      "candidateExecutions": [
+        {
+          "profile": "development",
+          "exit": 0,
+          "sha256": "91e247b1bc5aea00125b5037fcd392181415ec7aa75a58f488dcebb05a45537e"
+        },
+        {
+          "profile": "release",
+          "exit": 0,
+          "sha256": "e8b3a3c0a43b7f1c3946733b3f2087804d004f42768c8f162e9ab79aac130182"
+        }
+      ]
+    }
+  ],
+  "builds": [
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\diagnostic-codes-build-20261012\\candidate-release.exe",
+        "--c-project-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\diagnostic-spans-build-20261012\\sources.list"
+      ],
+      "seconds": 273.3298173999938,
+      "exit": 0,
+      "stderr": "",
+      "stdoutBytes": 30179710
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-rooted-builder-stack-20261012.exe",
+        "--packet",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\diagnostic-spans-build-20261012\\packet.bin",
+        "--packet-sha256",
+        "e592eb5674d62537d3691a596665bba381abb939397edec459f098fa853f74b0",
+        "--output",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\diagnostic-spans-build-20261012\\candidate-release.exe",
+        "--release",
+        "--stack-reserve-bytes",
+        "16777216"
+      ],
+      "seconds": 318.44744139999966,
+      "exit": 0,
+      "stderr": "",
+      "stdoutBytes": 186
+    }
+  ],
+  "packet": {
+    "path": ".cache/diagnostic-spans-build-20261012/packet.bin",
+    "bytes": 30179710,
+    "sha256": "e592eb5674d62537d3691a596665bba381abb939397edec459f098fa853f74b0"
+  },
+  "candidate": {
+    "path": ".cache/diagnostic-spans-build-20261012/candidate-release.exe",
+    "bytes": 4293632,
+    "sha256": "23e57372453e384d00781e2d939270ed8769448684b511a1e97cd3b80a03c7dd"
+  },
+  "verificationStackReserveBytes": 16777216,
+  "frontendCorpus": {
+    "cases": 75,
+    "referenceSHA256": "3ecc4501ee3bb47ecc39e7288200266b31cbcd8bf6ffec302ae54867705ce5d1",
+    "receiptSHA256": "fbd9d0be32b4baa0078645b0972d749eec2f594af913d5b71a93b8eb8b5982c4",
+    "priorReceiptSHA256": "76e26996b4dd02fd8060fd2dceb808099b294a6cb734b4217f136860f3bb0bb8",
+    "exactExitRegressions": 0,
+    "successfulOutputRegressions": 0,
+    "previouslyMatchedDiagnosticRegressions": 0,
+    "firstDiagnosticDifferencesBefore": 9,
+    "firstDiagnosticDifferencesAfter": 5,
+    "statusDifferences": 3,
+    "improved": [
+      {
+        "family": "semantic",
+        "id": "fail.resolve.unresolved-name",
+        "diagnostic": {
+          "code": "E0101",
+          "start": 43,
+          "end": 50
+        },
+        "stderr": "main.fy:4:12: E0101: name or qualified path cannot be resolved [bytes 43..50]\n"
+      },
+      {
+        "family": "semantic",
+        "id": "fail.type.foreign-safe-reference",
+        "diagnostic": {
+          "code": "E5102",
+          "start": 45,
+          "end": 52
+        },
+        "stderr": "main.fy:3:32: E5102: raw foreign signature contains a safe reference [bytes 45..52]\n  declaration: main.fy:3:24 [bytes 37..44]\n"
+      },
+      {
+        "family": "semantic",
+        "id": "fail.type.missing-call-effect",
+        "diagnostic": {
+          "code": "E7102",
+          "start": 88,
+          "end": 92
+        },
+        "stderr": "main.fy:6:24: E7102: call or resource cleanup exceeds the declared effects [bytes 88..92]\n  effect-declaration: main.fy:3:1 [bytes 14..34]\n"
+      },
+      {
+        "family": "semantic",
+        "id": "fail.type.external-resource-construction",
+        "diagnostic": {
+          "code": "E0103",
+          "start": 77,
+          "end": 87
+        },
+        "stderr": "main.fy:6:28: E0103: item is not visible from this module [bytes 77..87]\n  declaration: lib.fy:3:14 [bytes 26..31]\n"
+      }
+    ],
+    "remainingDiagnostics": [
+      {
+        "family": "semantic",
+        "id": "fail.type.compile-time-trap",
+        "reference": [
+          {
+            "code": "E4303",
+            "start": 30,
+            "end": 35
+          }
+        ],
+        "candidate": [
+          {
+            "code": "E4302",
+            "start": 30,
+            "end": 35
+          }
+        ],
+        "stderr": "main.fy:3:17: E4302: expression is outside the supported compile-time subset [bytes 30..35]\n"
+      },
+      {
+        "family": "semantic",
+        "id": "fail.type.compile-time-cycle",
+        "reference": [
+          {
+            "code": "E4304",
+            "start": 24,
+            "end": 29
+          }
+        ],
+        "candidate": [
+          {
+            "code": "E4302",
+            "start": 32,
+            "end": 38
+          }
+        ],
+        "stderr": "main.fy:3:19: E4302: expression is outside the supported compile-time subset [bytes 32..38]\n"
+      },
+      {
+        "family": "semantic",
+        "id": "fail.type.compile-time-assert",
+        "reference": [
+          {
+            "code": "E4305",
+            "start": 14,
+            "end": 35
+          }
+        ],
+        "candidate": [],
+        "stderr": "main.fy:3:1: source is outside the supported compiler subset [bytes 14..35]\n"
+      },
+      {
+        "family": "semantic",
+        "id": "fail.type.source-location-const-eval",
+        "reference": [
+          {
+            "code": "E4302",
+            "start": 52,
+            "end": 73
+          }
+        ],
+        "candidate": [],
+        "stderr": "main.fy:3:1: source is outside the supported compiler subset [bytes 14..25]\n"
+      },
+      {
+        "family": "semantic",
+        "id": "fail.type.package-state-codec",
+        "reference": [
+          {
+            "code": "E7203",
+            "start": 58,
+            "end": 64
+          }
+        ],
+        "candidate": [],
+        "stderr": "state.fy:2:1: source is outside the supported compiler subset [bytes 14..73]\n"
+      }
+    ],
+    "statusGaps": [
+      {
+        "family": "semantic",
+        "id": "pass.type.c-ssize-t-foreign-roundtrip",
+        "referenceExit": 0,
+        "candidateExit": 3
+      },
+      {
+        "family": "semantic",
+        "id": "pass.type.compile-time-evaluation",
+        "referenceExit": 0,
+        "candidateExit": 3
+      },
+      {
+        "family": "semantic",
+        "id": "pass.type.package-state",
+        "referenceExit": 0,
+        "candidateExit": 3
+      }
+    ]
+  },
+  "extraCases": {
+    "cases": 6,
+    "receiptSHA256": "07578879c209581200001cca0ed98fc7350208448b203320b34719be74b82a89",
+    "comparison": "First diagnostic code/path/line/column/span and its attached related spans; raw stderr retains later reference diagnostics",
+    "casesPassed": [
+      {
+        "name": "ImportedEffect",
+        "diagnostic": {
+          "primary": [
+            "main.fy",
+            "1",
+            "52",
+            "E7102",
+            "51",
+            "60"
+          ],
+          "related": [
+            [
+              "effect-declaration",
+              "lib.fy",
+              "1",
+              "12",
+              "11",
+              "31"
+            ]
+          ]
+        }
+      },
+      {
+        "name": "ImportedGenericEffect",
+        "diagnostic": {
+          "primary": [
+            "main.fy",
+            "1",
+            "52",
+            "E7102",
+            "51",
+            "65"
+          ],
+          "related": [
+            [
+              "effect-declaration",
+              "lib.fy",
+              "1",
+              "12",
+              "11",
+              "31"
+            ]
+          ]
+        }
+      },
+      {
+        "name": "LocalGenericEffect",
+        "diagnostic": {
+          "primary": [
+            "main.fy",
+            "1",
+            "82",
+            "E7102",
+            "81",
+            "90"
+          ],
+          "related": [
+            [
+              "effect-declaration",
+              "main.fy",
+              "1",
+              "13",
+              "12",
+              "32"
+            ]
+          ]
+        }
+      },
+      {
+        "name": "ForeignLateParameter",
+        "diagnostic": {
+          "primary": [
+            "main.fy",
+            "1",
+            "52",
+            "E5102",
+            "51",
+            "58"
+          ],
+          "related": [
+            [
+              "declaration",
+              "main.fy",
+              "1",
+              "36",
+              "35",
+              "42"
+            ]
+          ]
+        }
+      },
+      {
+        "name": "ForeignResult",
+        "diagnostic": {
+          "primary": [
+            "main.fy",
+            "1",
+            "32",
+            "E5102",
+            "31",
+            "38"
+          ],
+          "related": [
+            [
+              "declaration",
+              "main.fy",
+              "1",
+              "40",
+              "39",
+              "46"
+            ]
+          ]
+        }
+      },
+      {
+        "name": "ExternalConstruction",
+        "diagnostic": {
+          "primary": [
+            "main.fy",
+            "1",
+            "66",
+            "E0103",
+            "65",
+            "75"
+          ],
+          "related": [
+            [
+              "declaration",
+              "lib.fy",
+              "1",
+              "25",
+              "24",
+              "29"
+            ]
+          ]
+        }
+      }
+    ]
+  },
+  "promotionGateReady": false,
+  "remaining": [
+    "Five first-diagnostic differences: compile-time trap/cycle/assert/const-eval and package-state codec.",
+    "Three frontend support/status differences: c::ssize_t, compile-time evaluation and package state.",
+    "Candidate project checking still returns its first semantic failure; full multi-diagnostic ordering and broader executable/frontend parity remain.",
+    "Current-source fixed-point replay is batched after the diagnostic correction work; the previous borrow-gate receipt describes an earlier source snapshot.",
+    "Product timeout/host stack integration, Linux/full suite and same-head hosted CI."
+  ],
+  "shippingGoCompilerChanged": false,
+  "publicLanguageChanged": false,
+  "publicAPIChanged": false,
+  "candidateCheckBehaviorChanged": true,
+  "sdkABIChanged": false,
+  "dbChanged": false,
+  "ciChanged": false,
+  "productTimeoutChanged": false,
+  "pushed": false
+}

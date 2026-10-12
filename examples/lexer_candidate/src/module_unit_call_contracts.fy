@@ -12,7 +12,7 @@ fn void expression(ref v::Vec<syntax::Parsed> sources,ref signatures::Program me
     if(id==0 || c.problem.code!=0){return;}let e=syntax::expression_at(source,id);
     if(depth>=64 || !charge(c,1,e.start,e.end)){fail(c,10,e.start,e.end);return;}
     if(e.kind==6){
-        var target=syntax::expression_at(source,e.left);if(target.kind==20){target=syntax::expression_at(source,target.left);}
+        let callee=syntax::expression_at(source,e.left);var target=callee;if(target.kind==20){target=syntax::expression_at(source,target.left);}
         if(target.kind==2){var usize probes=0;let found=signatures::declaration_lookup_measured(metadata,c.module_index,syntax::source_view(source)[target.start..target.end],ref mut probes);
             if(!charge(c,probes,e.start,e.end)){return;}
             // Name resolution already validates calls. Intrinsics have no source
@@ -20,7 +20,7 @@ fn void expression(ref v::Vec<syntax::Parsed> sources,ref signatures::Program me
             if(found.code==0){let d=signatures::declaration_at(metadata,found.item);if(d.kind==3 || d.kind==9){
                 let provider=v::at<syntax::Parsed>(sources,d.module_index);let info=effects::read(provider,d.declaration-1);
                 if(info.code!=0){fail(c,info.code,e.start,e.end);return;}
-                if(!effects::includes(c.authority,info.bits)){fail(c,7102,e.start,e.end);return;}
+                if(!effects::includes(c.authority,info.bits)){fail(c,7102,callee.start,callee.end);return;}
                 let declaration=syntax::declaration_at(provider,d.declaration-1);
                 if(declaration.unsafe_end!=0 && !c.unsafe_function && !unsafe_context){fail(c,5101,e.start,e.end);return;}
                 if(info.must_use && !handled){fail(c,4202,e.start,e.end);return;}

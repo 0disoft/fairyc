@@ -1,5 +1,36 @@
 # Fairy 컴파일러 전환: 후속 작업 목록
 
+## First diagnostic and provider spans aligned (2026-10-12)
+
+Candidate check maps the checked-name unresolved status to E0101 and preserves
+the external resource construction E0103. Foreign parameter rejection points
+to the first rejected type instead of the whole signature. Call-effect rejection
+points to the original callee, including generic arguments, instead of the whole
+argument list. Related declaration/effect-declaration locations come from the
+retained local or imported provider source, preserving package/module identity.
+
+The fresh 75-case Go/candidate comparison reduces first-code/span differences
+from nine to five. Every previous exit, successful output and already matching
+first diagnostic is preserved. Three support/status differences remain. Six
+additional local/imported/generic/foreign/visibility cases match the first
+diagnostic's complete path/line/column/span and attached related locations.
+Later reference diagnostics remain in the raw evidence; candidate project
+checking still returns its first semantic failure.
+
+Six selected authored tests pass Go native and both candidate C profiles.
+Source check passes 378 files / 4807 MIR functions. The Fairy candidate emits
+all 371 current self sources and the complete private release native build
+succeeds with the existing explicit 16 MiB stack reserve. Full current-source
+fixed-point replay remains batched after the diagnostic correction work.
+
+Remaining first-diagnostic differences are compile-time trap/cycle/assert/
+const-eval and package-state codec. c::ssize_t, compile-time evaluation and
+package state still differ in status. Multi-diagnostic ordering, broader
+executable parity, product timeout/host stack, Linux/full suite and hosted CI
+remain. Shipping Go, public language/API, SDK ABI, DB, CI and product timeouts
+are unchanged; no push. Receipt:
+`evidence/candidate-project-diagnostic-spans-20261012.json`.
+
 ## Candidate check preserves semantic diagnostic codes (2026-10-12)
 
 The experimental candidate check now prints the retained E-codes for must-use,

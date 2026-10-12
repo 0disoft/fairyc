@@ -8,14 +8,18 @@ complete private Windows bootstrap retains
 identical 30136053-byte C packets and identical full 4280832-byte Stage1/Stage2
 images. Stage2 processes all 370 admitted repository sources in 253.81 seconds
 and emits the identical packet; both generations pass 249 lexer/framing cases.
-The current diagnostic-output revision reduces first-code/span differences from
-27 to nine over 75 fresh paired observations, retaining three status differences
-and every prior candidate exit. Its 371 self sources emit and build a complete
-private native release image; the internal-status overlap test passes Go native
-and both candidate C profiles. Current-source fixed-point replay is deferred
+The diagnostic-output and span revisions reduce first-code/span differences
+from 27 to nine and then five over 75 fresh paired observations, retaining three
+status differences and every prior candidate exit. Six additional cases match
+the first diagnostic's path/line/column/span and attached provider declaration
+locations; multiple semantic diagnostics remain a separate parity requirement.
+The 371 current self sources emit and build a complete private native release
+image; six selected authored tests pass Go native and both candidate C profiles.
+Current-source fixed-point replay is deferred
 until the diagnostic correction batch finishes; the byte-identical generations
 above describe the earlier snapshot. Evidence:
 [candidate diagnostic codes](../ops/evidence/candidate-project-diagnostic-codes-20261012.json).
+[first diagnostic and provider spans](../ops/evidence/candidate-project-diagnostic-spans-20261012.json).
 
 Public borrow admission is complete, while full frontend/executable
 parity, product timeout/host-stack integration, Linux/full suite and same-head

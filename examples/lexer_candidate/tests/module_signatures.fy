@@ -32,6 +32,12 @@ fn catalog::Problem rejected(ref u8[] a,ref u8[] b){var v::Vec<syntax::Parsed> f
     let aliases=owned(b"module a;@link_name(\"host_alias\")unsafe extern C fn i32 first(i32 n);",b"module b;@link_name(\"host_alias\")unsafe extern C fn i32 second(i32 n);");assert(signatures::at(ref aliases,1).result==signatures::at(ref aliases,2).result);
 }
 
+@test fn void foreign_parameter_rejection_keeps_the_first_rejected_type_span(){
+    let text=b"module a;unsafe extern C fn i32 inspect(i32 tag,ref i32 value,ref u8 another);";
+    let p=rejected(text,b"module b;");assert(p.code==5102 && p.module_index==0 && bytes::equal(text[p.start..p.end],b"ref i32"));
+    let result=b"module a;unsafe extern C fn ref i32 inspect(i32 tag);";
+    let q=rejected(result,b"module b;");assert(q.code==5102 && q.module_index==0 && bytes::equal(result[q.start..q.end],b"ref i32"));
+}
 @test fn void fixed_array_signatures_keep_canonical_elements_and_lengths(){
     let p=owned(b"module a;import b as lib;struct Token{i32 n;}fn i32[20] same(i32[20] n){}fn usize[20] other(){}fn Token[2] local(){}fn lib::Token[2] imported(){}fn i32[3][4] matrix(){}fn usize[1153] large(){}",
         b"module b;pub struct Token{i32 n;}pub fn i32[0x14] same(i32[0b10100] n){}pub fn Token[2] make(){}");
