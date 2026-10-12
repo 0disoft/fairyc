@@ -2,6 +2,39 @@
 
 ## Current local candidate evidence (2026-10-13)
 
+### Direct original-source specialization requests (2026-10-13)
+
+`generic_source_requests` owns detached direct source roots and the original
+source catalog. It reuses the dependency walk's executable AST projection for
+nongeneric function signatures/bodies, aggregate fields and resource cleanup.
+Unused generic bodies contribute no direct roots. Exact declaration/ordered
+concrete-type keys deduplicate aliases and repeated calls across all sources;
+inert written view producers remain excluded while loop bodies are traversed.
+SDK ordinary signatures also request their concrete Vec types. Output sorts by
+canonical request key; planner ordering and dependency expansion remain separate.
+
+Four real Go package graphs supply twelve unique roots each, resolved from the
+actual expandAll Plan.Roots. All 48 request keys, declaration IDs and ordered type
+arguments match. The observer also crosschecks both roots and all specialization
+IDs against PrepareSDKStoragePackages. Private helper edits, original module/owner
+reordering and an alternate owner of the same helper module are included. Four
+new tests and three existing dependency regressions pass Go native and candidate
+C development/release. They cover detached ownership, alias deduplication,
+unused roots, source stamps, private/unknown targets, arity/argument/generated-name
+rejection and exact-fit/exhausted work. Initial fixture helper and twin-coordinate
+errors were corrected before the final passing runs. Root check and check --locked
+pass 426 files / 5458 MIR functions with the refreshed source lock.
+
+The root set is bounded to 4096 requests under the existing 16MiB collection work,
+1MiB owned text, eight arguments and bounded pending tasks. Generic-template
+dependencies keep their existing 32-edge per-template limit. This collector does
+not admit executable bodies or issue final planning diagnostics. Concrete catalog
+binding, dependency-closed function/Vec plans and identities, precise planning
+locations, complete SDK Vec interfaces and dispatcher/cache publication remain.
+Latest-source full image/fixed point, Linux/full suite and same-head hosted CI are
+not rerun. Public API, SDK ABI, product timeouts and CI remain unchanged; no push.
+Receipt: [evidence](../ops/evidence/candidate-source-requests-20261013.json).
+
 ### Actual source planner concrete type descriptors (2026-10-13)
 
 The Fairy concrete catalog now collects the real source planner type facts:
