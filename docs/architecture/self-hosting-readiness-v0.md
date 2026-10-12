@@ -2,6 +2,43 @@
 
 ## Current local candidate evidence (2026-10-13)
 
+### Dependency-closed original-source specialization plans (2026-10-13)
+
+`generic_source_plan` consumes the detached source planning input and computes
+real source-function and authenticated SDK Vec g0_ IDs. Iterative depth-first
+expansion substitutes ordered parameters and concrete types, sorts resolved
+request keys, deduplicates requests after substitution, and shares completed
+instances. A per-template chain avoids scanning unrelated nodes. Requests enter
+in the Go planner's order: depth, memo/cycle, count limits, then scalar abilities.
+Dependency IDs sort before entering the identity stream. Every successful node
+is published only after its dependencies and identity complete; failed planning
+returns no partial plan. Source capability constraints remain absent under the
+current admitted source policy; no provider or broader source feature is invented.
+
+Four actual Go graphs match all 84 specialization IDs and their full ordered
+bindings/dependencies, 48 root IDs and dependency-first specialization order.
+Private helper edits, reordered original modules/owners and alternate helper
+ownership are included. The observer independently crosschecks actual roots and
+IDs against PrepareSDKStoragePackages. Its real SDK-owner adapter also verifies
+G2005 cycle, G2003 scalar ability and G2006 total/per-declaration/depth/invalid-limit
+failure categories. Five final authored tests pass Go native and candidate C
+development/release. They include detached ownership, post-substitution duplicate
+edges, shared instances, unused cycles, exact work limits and empty plans. After
+an initial four-test pass, a zero-template invalid-initial-work gap was fixed and
+all five tests rerun. Initial namespace, must-use/loan and observer fixture errors
+were corrected before the final passes. Root check and check --locked pass
+428 files / 5528 MIR functions with the final source lock.
+
+Planning uses the reference defaults (4096 nodes, 256 per declaration, depth 64),
+the existing 32 direct edges, at most 2048 active pending requests, 16MiB project
+work and 1MiB owned-text/per-identity scopes. No executable expansion limit,
+public scalar set, body/Flow admission or SDK ABI is changed by this helper.
+Precise root planning locations, actual compiler declaration/call mapping, body
+publication gates, complete SDK Vec public interfaces and dispatcher/cache
+consumers remain. Latest-source full image/fixed point, Linux/full suite and
+same-head hosted CI are not rerun. Product timeouts and CI are unchanged; no push.
+Receipt: [evidence](../ops/evidence/candidate-source-plan-20261013.json).
+
 ### Bound original-source specialization inputs (2026-10-13)
 
 `generic_source_plan_input` owns direct roots, the original template catalog,
