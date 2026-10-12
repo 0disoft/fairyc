@@ -2,6 +2,39 @@
 
 ## Current local candidate evidence (2026-10-13)
 
+Resolved package import definitions (2026-10-13)
+
+`generic_package_bindings` collects the exact projected source owners and import
+providers together with owner-aligned package coordinates. It owns canonical
+package_coordinate_v1_<hex> namespaces, normalized module paths and byte-sorted
+alias=owner::module records. Original source SHA-256 stamps prevent stale AST
+reuse. Duplicate coordinate namespaces, missing/contradictory providers, alias
+collisions and conflicting providers across modules in one package reject.
+No-import lists remain null, matching Go. Function and aggregate definitions now
+combine the original AST and actual resolved bindings with source-package-function-v0
+and source-package-aggregate-v0. Collection uses the existing 16MiB workspace
+ledger; each JSON/definition request preserves its independent 1MiB ledger.
+
+Four real Go-loaded workspace graphs supply 54 modules, 36 import records and 26
+function/aggregate definition hashes. All match the Fairy projection. Private
+provider body edits and manifest dependency reordering preserve caller identity;
+changing the resolved feature-instance provider invalidates it. The unchanged
+original SDK Vec supplies another 16 matching package definition hashes. Five
+authored tests pass Go native and candidate C development/release, including
+prefix-alias byte ordering, same-package multi-module provider conflicts, stale
+source, malformed coordinates/bindings, detached ownership, retained failure and
+exact-fit/exhausted work. All 49 fixture files remain unchanged. Source check
+passes 413 files / 5249 MIR functions; original/copy hashes and lock are verified.
+The initial test typing/origin issues and coordinate-prefix length error were
+corrected before the final passing replay.
+
+Closed nominal graph context, reachable-template closures and actual planner
+facts remain next, followed by dispatcher/cache consumption. Latest-source full
+image/fixed point, Linux/full suite and same-head hosted CI are not rerun for this
+bounded slice. Private candidate API added; public API, SDK ABI, DB, CI/runner and
+product timeout remain unchanged. No push.
+Receipt: [evidence](../ops/evidence/candidate-generic-package-bindings-20261013.json).
+
 Complete original module AST and nominal definitions (2026-10-13)
 
 The original module writer now composes every declaration category and both

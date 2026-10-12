@@ -1,0 +1,394 @@
+{
+  "schema": "fairyc.candidate-generic-package-bindings/v1",
+  "passed": true,
+  "scope": "Exact retained resolved import providers and package-bound function/aggregate definitions; no planner/dispatcher/cache consumption",
+  "sources": [
+    {
+      "path": "examples/lexer_candidate/src/generic_package_bindings.fy",
+      "sha256": "3cc9909d6109f8b9740d778250d9040f9c8be1473dce120cd96cee8d3ae44fb8"
+    },
+    {
+      "path": "examples/lexer_candidate/tests/generic_package_bindings.fy",
+      "sha256": "09fcf226668066a0db29e49112a9e27a6b07c96a12637a41071d47cbf3d2d748"
+    },
+    {
+      "path": "tools/verify-candidate-generic-package-bindings.go",
+      "sha256": "345cd9bb70230bd8476a68b25111b56763f7b8022297d8a06b2e709bf8aed207"
+    },
+    {
+      "path": "examples/lexer_candidate/fairy.lock",
+      "sha256": "0343453b145f6e8c3b1f74821a2bd8bf1e41a0cf030fc623db7a433796d0efb2"
+    }
+  ],
+  "sourceCheck": {
+    "command": "candidate-frontend-oracle-current-20261012.exe check",
+    "exit": 0,
+    "files": 413,
+    "mirFunctions": 5249,
+    "lock": "updated; original lock verified after private tests"
+  },
+  "oracle": {
+    "command": "bun tools/run-go.ts run tools/verify-candidate-generic-package-bindings.go",
+    "exit": 0,
+    "observations": {
+      "cases": [
+        {
+          "case": "Base",
+          "definitions": 7,
+          "fixtureBytes": 4484,
+          "imports": 9,
+          "modules": 14,
+          "packages": 6
+        },
+        {
+          "case": "Edited",
+          "definitions": 7,
+          "fixtureBytes": 4484,
+          "imports": 9,
+          "modules": 14,
+          "packages": 6
+        },
+        {
+          "case": "Reordered",
+          "definitions": 7,
+          "fixtureBytes": 4484,
+          "imports": 9,
+          "modules": 14,
+          "packages": 6
+        },
+        {
+          "case": "Provider",
+          "definitions": 5,
+          "fixtureBytes": 3891,
+          "imports": 9,
+          "modules": 12,
+          "packages": 5
+        }
+      ],
+      "fixture": ".cache\\generic-package-bindings-20261013\\fixture",
+      "fixtureFiles": [
+        {
+          "path": ".cache/generic-package-bindings-20261013/fixture/Base/bindings.bin",
+          "sha256": "e8a6a60fa9bf2ee0222d60ec52f5c9ef9e23365b5757660dec9f6dacd56b89f2"
+        },
+        {
+          "path": ".cache/generic-package-bindings-20261013/fixture/Base/common/fairy.toml",
+          "sha256": "cde54544ba3fd110d1a96bb5b7eaf0b1b0a3dc6160f7ce04b8f73242d54328f0"
+        },
+        {
+          "path": ".cache/generic-package-bindings-20261013/fixture/Base/common/src/common.fy",
+          "sha256": "aedef410eaff0a40fed633caec29cae6b1051d636d55bf792d64c09577cd0b12"
+        },
+        {
+          "path": ".cache/generic-package-bindings-20261013/fixture/Base/common/src/helper.fy",
+          "sha256": "99d5a76f1750cdfe0e3bf7a4c468fb037554697504dcc37494d51d177c241537"
+        },
+        {
+          "path": ".cache/generic-package-bindings-20261013/fixture/Base/fairy.toml",
+          "sha256": "181512232b021afb7c780ab6be1659b7dd15abaf941754e6838b379a19d29622"
+        },
+        {
+          "path": ".cache/generic-package-bindings-20261013/fixture/Base/left/fairy.toml",
+          "sha256": "fa985b26a2008d12da1498aeb1d1ef90fbdb9577452791a36ce8c59696d232e2"
+        },
+        {
+          "path": ".cache/generic-package-bindings-20261013/fixture/Base/left/src/left.fy",
+          "sha256": "a76258ad6ed3f079d3e3e64880fe38a1d62caada4bd287a5f8c8cf3841708a75"
+        },
+        {
+          "path": ".cache/generic-package-bindings-20261013/fixture/Base/right/fairy.toml",
+          "sha256": "6e0ef18db04791cd98c71ff24e48c2e9a999a2bd1a2b9ae7b8c8437b72af6898"
+        },
+        {
+          "path": ".cache/generic-package-bindings-20261013/fixture/Base/right/src/right.fy",
+          "sha256": "5a00204543ca166cf442791ab0b51a93c5313e83e2b12c1306cd4ef7d14e2ff6"
+        },
+        {
+          "path": ".cache/generic-package-bindings-20261013/fixture/Base/src/main.fy",
+          "sha256": "6122a0abf06ed341a435c4c5f6b926017258d8a63121193faaa1977cd53f394e"
+        },
+        {
+          "path": ".cache/generic-package-bindings-20261013/fixture/Edited/bindings.bin",
+          "sha256": "72061e2247385ec509e5704e733fb192c618e3c23aa787b544991e18bef36a6b"
+        },
+        {
+          "path": ".cache/generic-package-bindings-20261013/fixture/Edited/common/fairy.toml",
+          "sha256": "cde54544ba3fd110d1a96bb5b7eaf0b1b0a3dc6160f7ce04b8f73242d54328f0"
+        },
+        {
+          "path": ".cache/generic-package-bindings-20261013/fixture/Edited/common/src/common.fy",
+          "sha256": "28e876193195d7f14169491667f3a456f42871cbc8bdb1305a89d3a04388a3d7"
+        },
+        {
+          "path": ".cache/generic-package-bindings-20261013/fixture/Edited/common/src/helper.fy",
+          "sha256": "99d5a76f1750cdfe0e3bf7a4c468fb037554697504dcc37494d51d177c241537"
+        },
+        {
+          "path": ".cache/generic-package-bindings-20261013/fixture/Edited/fairy.toml",
+          "sha256": "181512232b021afb7c780ab6be1659b7dd15abaf941754e6838b379a19d29622"
+        },
+        {
+          "path": ".cache/generic-package-bindings-20261013/fixture/Edited/left/fairy.toml",
+          "sha256": "fa985b26a2008d12da1498aeb1d1ef90fbdb9577452791a36ce8c59696d232e2"
+        },
+        {
+          "path": ".cache/generic-package-bindings-20261013/fixture/Edited/left/src/left.fy",
+          "sha256": "a76258ad6ed3f079d3e3e64880fe38a1d62caada4bd287a5f8c8cf3841708a75"
+        },
+        {
+          "path": ".cache/generic-package-bindings-20261013/fixture/Edited/right/fairy.toml",
+          "sha256": "6e0ef18db04791cd98c71ff24e48c2e9a999a2bd1a2b9ae7b8c8437b72af6898"
+        },
+        {
+          "path": ".cache/generic-package-bindings-20261013/fixture/Edited/right/src/right.fy",
+          "sha256": "5a00204543ca166cf442791ab0b51a93c5313e83e2b12c1306cd4ef7d14e2ff6"
+        },
+        {
+          "path": ".cache/generic-package-bindings-20261013/fixture/Edited/src/main.fy",
+          "sha256": "6122a0abf06ed341a435c4c5f6b926017258d8a63121193faaa1977cd53f394e"
+        },
+        {
+          "path": ".cache/generic-package-bindings-20261013/fixture/Provider/bindings.bin",
+          "sha256": "33ec30f228d019291f2a8b145c094e5d54cfd280dbddf776c82118ef9b3a3f30"
+        },
+        {
+          "path": ".cache/generic-package-bindings-20261013/fixture/Provider/common/fairy.toml",
+          "sha256": "cde54544ba3fd110d1a96bb5b7eaf0b1b0a3dc6160f7ce04b8f73242d54328f0"
+        },
+        {
+          "path": ".cache/generic-package-bindings-20261013/fixture/Provider/common/src/common.fy",
+          "sha256": "aedef410eaff0a40fed633caec29cae6b1051d636d55bf792d64c09577cd0b12"
+        },
+        {
+          "path": ".cache/generic-package-bindings-20261013/fixture/Provider/common/src/helper.fy",
+          "sha256": "99d5a76f1750cdfe0e3bf7a4c468fb037554697504dcc37494d51d177c241537"
+        },
+        {
+          "path": ".cache/generic-package-bindings-20261013/fixture/Provider/fairy.toml",
+          "sha256": "181512232b021afb7c780ab6be1659b7dd15abaf941754e6838b379a19d29622"
+        },
+        {
+          "path": ".cache/generic-package-bindings-20261013/fixture/Provider/left/fairy.toml",
+          "sha256": "fbad2b068c9b6bb7fd72b973fe7dd35fee27a84015dcf95de7d5b64b94e1de07"
+        },
+        {
+          "path": ".cache/generic-package-bindings-20261013/fixture/Provider/left/src/left.fy",
+          "sha256": "a76258ad6ed3f079d3e3e64880fe38a1d62caada4bd287a5f8c8cf3841708a75"
+        },
+        {
+          "path": ".cache/generic-package-bindings-20261013/fixture/Provider/right/fairy.toml",
+          "sha256": "6e0ef18db04791cd98c71ff24e48c2e9a999a2bd1a2b9ae7b8c8437b72af6898"
+        },
+        {
+          "path": ".cache/generic-package-bindings-20261013/fixture/Provider/right/src/right.fy",
+          "sha256": "5a00204543ca166cf442791ab0b51a93c5313e83e2b12c1306cd4ef7d14e2ff6"
+        },
+        {
+          "path": ".cache/generic-package-bindings-20261013/fixture/Provider/src/main.fy",
+          "sha256": "6122a0abf06ed341a435c4c5f6b926017258d8a63121193faaa1977cd53f394e"
+        },
+        {
+          "path": ".cache/generic-package-bindings-20261013/fixture/Reordered/bindings.bin",
+          "sha256": "e8a6a60fa9bf2ee0222d60ec52f5c9ef9e23365b5757660dec9f6dacd56b89f2"
+        },
+        {
+          "path": ".cache/generic-package-bindings-20261013/fixture/Reordered/common/fairy.toml",
+          "sha256": "cde54544ba3fd110d1a96bb5b7eaf0b1b0a3dc6160f7ce04b8f73242d54328f0"
+        },
+        {
+          "path": ".cache/generic-package-bindings-20261013/fixture/Reordered/common/src/common.fy",
+          "sha256": "aedef410eaff0a40fed633caec29cae6b1051d636d55bf792d64c09577cd0b12"
+        },
+        {
+          "path": ".cache/generic-package-bindings-20261013/fixture/Reordered/common/src/helper.fy",
+          "sha256": "99d5a76f1750cdfe0e3bf7a4c468fb037554697504dcc37494d51d177c241537"
+        },
+        {
+          "path": ".cache/generic-package-bindings-20261013/fixture/Reordered/fairy.toml",
+          "sha256": "06eff4c273e97b75e94a255726566ad0e1794b92885da3ea4f3c5ecb47e45dae"
+        },
+        {
+          "path": ".cache/generic-package-bindings-20261013/fixture/Reordered/left/fairy.toml",
+          "sha256": "fa985b26a2008d12da1498aeb1d1ef90fbdb9577452791a36ce8c59696d232e2"
+        },
+        {
+          "path": ".cache/generic-package-bindings-20261013/fixture/Reordered/left/src/left.fy",
+          "sha256": "a76258ad6ed3f079d3e3e64880fe38a1d62caada4bd287a5f8c8cf3841708a75"
+        },
+        {
+          "path": ".cache/generic-package-bindings-20261013/fixture/Reordered/right/fairy.toml",
+          "sha256": "6e0ef18db04791cd98c71ff24e48c2e9a999a2bd1a2b9ae7b8c8437b72af6898"
+        },
+        {
+          "path": ".cache/generic-package-bindings-20261013/fixture/Reordered/right/src/right.fy",
+          "sha256": "5a00204543ca166cf442791ab0b51a93c5313e83e2b12c1306cd4ef7d14e2ff6"
+        },
+        {
+          "path": ".cache/generic-package-bindings-20261013/fixture/Reordered/src/main.fy",
+          "sha256": "6122a0abf06ed341a435c4c5f6b926017258d8a63121193faaa1977cd53f394e"
+        },
+        {
+          "path": ".cache/generic-package-bindings-20261013/fixture/root.bin",
+          "sha256": "0eb8d7fdc0dbca508410e814b524bbe1257b9e48604f6f26726e757c24bb7039"
+        },
+        {
+          "path": ".cache/generic-package-bindings-20261013/fixture/std/alloc.fy",
+          "sha256": "61f50fa03239eee7b669c315659e8c9d07982117857cf50fe7f5a2b6f35a82c2"
+        },
+        {
+          "path": ".cache/generic-package-bindings-20261013/fixture/std/bytes.fy",
+          "sha256": "4740a506e93349fb002c383967dcc44d182d20f09f2094b83b5464a4ab252982"
+        },
+        {
+          "path": ".cache/generic-package-bindings-20261013/fixture/std/fs.fy",
+          "sha256": "fd7ddfa9f0deed98304cecf94911644087d1e2a46e8be8995c35acbcb183b335"
+        },
+        {
+          "path": ".cache/generic-package-bindings-20261013/fixture/std/io.fy",
+          "sha256": "4b89c3aeb8b4de4887395d29723095d364c5660c6b773c5696fb1f65f5365f48"
+        },
+        {
+          "path": ".cache/generic-package-bindings-20261013/fixture/std/num.fy",
+          "sha256": "09aa0d45f075aa4212049527ded7bb48d99ceb6ffed56b310e267421bae20bb3"
+        },
+        {
+          "path": ".cache/generic-package-bindings-20261013/fixture/std/process.fy",
+          "sha256": "9680a1481df4f761f481d5a039af7bdbefeb312d1091961194f8e7bc0681ae24"
+        },
+        {
+          "path": ".cache/generic-package-bindings-20261013/fixture/std/text.fy",
+          "sha256": "cccd47e090fda11c9da063ffb321489dd8753fe9996855fc432833e05a79e695"
+        },
+        {
+          "path": ".cache/generic-package-bindings-20261013/fixture/vec.bin",
+          "sha256": "8ab8024c6893ef4a8adb6c0583e1d83af46851a5a34385a87694d35c018addff"
+        }
+      ],
+      "passed": true,
+      "vec": {
+        "definitions": 16,
+        "sourceSHA256": "0ae4c395bf98c39079ad620bde035b3b590d51417864802e698edc069281db5b"
+      }
+    }
+  },
+  "verification": {
+    "command": "python tools/verify-candidate-private-tests.py --compiler .cache/candidate-frontend-oracle-current-20261012.exe --candidate .cache/state-semantic-final-build-20261012/candidate-release.exe --builder .cache/candidate-rooted-builder-stack-20261012.exe --module generic_package_bindings --test matches_go_resolved_workspace_providers_and_definitions --test rejects_invalid_bindings_coordinates_and_stale_source --test owns_sorted_bindings_and_preserves_exact_work_limits --test matches_original_sdk_vec_package_definitions --test rejects_conflicting_package_providers_across_aliases_and_modules --isolated-native --fixture .cache/generic-package-bindings-20261013/fixture/root.bin --unchanged-paths .cache/generic-package-bindings-20261013/unchanged.json --frontend-timeout 240 --output .cache/generic-package-bindings-20261013/final-replay",
+    "exit": 0,
+    "tools": {
+      "compiler": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-frontend-oracle-current-20261012.exe",
+        "sha256": "3ecc4501ee3bb47ecc39e7288200266b31cbcd8bf6ffec302ae54867705ce5d1"
+      },
+      "candidate": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-semantic-final-build-20261012\\candidate-release.exe",
+        "sha256": "0c77c32d39b1ae1ddaa105f13bec9ce86e66029aa6ca5694863ac0ba68111480"
+      },
+      "builder": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-rooted-builder-stack-20261012.exe",
+        "sha256": "02abe2328daa9921705910c7b995e82c1312cb960fe024106c11468569aefff0"
+      }
+    },
+    "native": {
+      "schemaVersion": "fairyc.test-report/v4",
+      "engine": "native",
+      "target": "x86_64-windows-msvc",
+      "profile": "development",
+      "tests": [
+        {
+          "identity": "tests::generic_package_bindings::matches_go_resolved_workspace_providers_and_definitions",
+          "outcome": "passed",
+          "trapCategory": null,
+          "stdoutBase64": "",
+          "stderrBase64": ""
+        },
+        {
+          "identity": "tests::generic_package_bindings::matches_original_sdk_vec_package_definitions",
+          "outcome": "passed",
+          "trapCategory": null,
+          "stdoutBase64": "",
+          "stderrBase64": ""
+        },
+        {
+          "identity": "tests::generic_package_bindings::owns_sorted_bindings_and_preserves_exact_work_limits",
+          "outcome": "passed",
+          "trapCategory": null,
+          "stdoutBase64": "",
+          "stderrBase64": ""
+        },
+        {
+          "identity": "tests::generic_package_bindings::rejects_conflicting_package_providers_across_aliases_and_modules",
+          "outcome": "passed",
+          "trapCategory": null,
+          "stdoutBase64": "",
+          "stderrBase64": ""
+        },
+        {
+          "identity": "tests::generic_package_bindings::rejects_invalid_bindings_coordinates_and_stale_source",
+          "outcome": "passed",
+          "trapCategory": null,
+          "stdoutBase64": "",
+          "stderrBase64": ""
+        }
+      ],
+      "count": 5,
+      "passed": 5,
+      "failed": 0,
+      "status": "ok",
+      "lock": "verified"
+    },
+    "candidateExecutions": [
+      {
+        "profile": "development",
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\generic-package-bindings-20261013\\final-replay\\development.exe",
+        "sha256": "3f4650395ae936d301df0171b877b8e2a0fcf584a7b249c9f58685b0cafd167c",
+        "exit": 0
+      },
+      {
+        "profile": "release",
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\generic-package-bindings-20261013\\final-replay\\release.exe",
+        "sha256": "45c37995199ccf7692a8013490abd1f3be59a6c5a877bdca6b29ec158ead1296",
+        "exit": 0
+      }
+    ],
+    "candidateInputFiles": 138,
+    "candidatePacketSHA256": "db1991511cb3de7440d78a0fbe0466abe26fcf0450c939927b98d4970b960e7e",
+    "sourceInputsVerified": 142,
+    "fixtureFilesUnchanged": 49,
+    "lockSHA256": "0343453b145f6e8c3b1f74821a2bd8bf1e41a0cf030fc623db7a433796d0efb2",
+    "isolatedNativeInputFingerprint": "e07e2cafea6ddc0500d0288dbee874688c8805fc0c6a6f437bf5d4c67071f818",
+    "receiptSHA256": "5cf9cc3fa4592b5d04b87bc006618adc5a310a6f4c520c4a44e179b945271a20",
+    "frontendTimeoutSeconds": 240
+  },
+  "coverage": {
+    "workspaceModules": 54,
+    "resolvedImports": 36,
+    "workspaceDefinitions": 26,
+    "originalSDKVecDefinitions": 16,
+    "invariants": [
+      "Source-instance IDs remain separate from package_coordinate_v1_<coordinate hex> namespaces",
+      "Byte-sorted alias=owner::module records; prefix alias a0 sorts before a=",
+      "No imports encode null, matching Go nil string slices",
+      "Private provider edits and manifest dependency order preserve caller definition; changed feature provider invalidates it",
+      "Reject missing, duplicate, conflicting, out-of-order and out-of-range bindings; malformed, zero, missing or ambiguous coordinates; stale source",
+      "Retained table survives source and coordinate destruction",
+      "Exact-fit and exhausted 16MiB collection and 1MiB JSON/definition histories; sticky errors"
+    ]
+  },
+  "remaining": [
+    "Closed nominal graph context",
+    "Reachable template closure and actual planner facts",
+    "Dispatcher and package-cache v4 consumers",
+    "Latest-source full image and fixed point",
+    "Linux/full suite/same-head hosted CI"
+  ],
+  "changes": {
+    "privateCandidateApi": true,
+    "publicApi": false,
+    "sdkAbi": false,
+    "db": false,
+    "ci": false,
+    "runner": false,
+    "productTimeout": false,
+    "pushed": false
+  }
+}
