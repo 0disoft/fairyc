@@ -1,5 +1,38 @@
 # Fairy 컴파일러 전환: 후속 작업 목록
 
+## Actual source planner concrete type descriptors (2026-10-13)
+
+The Fairy concrete catalog now collects the real source planner type facts:
+thirteen builtin scalar IDs with canonical copy/drop/inert/scalar/store abilities,
+and nongeneric struct/resource IDs bound to original package/module/declaration
+coordinates and closed nominal source definitions. Nominal planner abilities stay
+empty, as in Go; value typing, layout and resource Flow remain separate. Source
+aliases resolve the exact provider and reject imported private types. Typed
+selection admits the candidate's six existing scalar kinds and exact nominal
+coordinates; enum/composite/Vec argument forms stay explicitly unsupported.
+Owned argument copying feeds these derived facts into the existing g0_ encoder.
+
+The actual expandAll immutable catalog supplies 75 matching descriptors across
+four source graphs: 52 scalar and 23 nominal records. All 23 nominal selections
+come from the actual typed signature graph. Four dependency-free helper IDs match
+the real source planner; all observer plan IDs are also crosschecked against
+PrepareSDKStoragePackages. Private helper edits, original source/owner reordering,
+and two distinct owners of the same helper module are included. Five authored
+tests pass Go native and candidate C development/release, covering ownership after
+source/catalog destruction, alias/private selection, stale sources and exact
+collection/encoding/hash/lookup/argument-copy work boundaries. Initial observer,
+static-return and fixture syntax errors were corrected before the final pass.
+Root check and check --locked pass 425 files / 5452 MIR functions with the refreshed
+source lock. Collection reuses the existing 16MiB bookkeeping, 1GiB encoding and
+96MiB streamed-hash scopes, with 4096 records and 1MiB owned text; no caps increase.
+
+Full source/typed root requests, dependency-closed function/Vec planning, complete
+SDK Vec interface rendering and dispatcher/cache publication remain next. This
+descriptor helper admits no new scalar value type or executable artifact. Latest-
+source full image/fixed point, Linux/full suite and same-head hosted CI are not
+rerun. Public API, SDK ABI, product timeout and CI are unchanged; no push. Receipt:
+[evidence](evidence/candidate-concrete-types-20261013.json).
+
 ## Original public template projection and source interfaces (2026-10-13)
 
 Public source templates now project canonical module/name/reachable-closure rows
