@@ -23,6 +23,26 @@ Receipts: `evidence/candidate-loop-control-private-20261012.json`,
 Next: connect the existing transitive borrowed-result and live-loan analysis
 before admitting project IR, retaining source diagnostic codes and spans.
 
+## Borrow places projected from returned references (2026-10-12)
+
+An explicit field borrow rooted in a returned reference now carries that
+evaluated call's origin, allocation and loan through the field projection.
+Ordinary field values retain their existing descriptor behavior; owner/loan
+checks still reject escapes and conflicting writes. Calls are evaluated once,
+and the existing work/depth limits remain.
+
+Two authored tests pass in Go-native and candidate development/release. Three
+public cases match the Go reference's status and first diagnostic code/span:
+valid parameter-derived field returns, local-reference escape (E2102), and
+owner mutation before a borrowed field's last use (E2101). The 75-case corpus
+retains three status and 27 first-diagnostic differences, with no regression.
+Source check passes 377 files / 4803 MIR functions. The clean cached preview
+emits 30105611 C-part bytes and builds with explicit 16 MiB stack reservation;
+its complete self-source emission is still running. The public borrow gate is
+still unapplied, and full fixed point, Linux and hosted CI remain. Public API,
+DB, CI and product timeouts are unchanged, no push. Receipt:
+`evidence/candidate-borrow-call-places-20261012.json`.
+
 ## Checked invocation lookup during borrow traversal (2026-10-12)
 
 Origin/loan validation now rejects invocation records with zero, duplicate or
@@ -37,7 +57,9 @@ profiles. Source check passes 377 files / 4803 MIR functions. The clean cached
 build emits 30098350 C-part bytes and builds with the explicit private 16 MiB
 stack reservation. Its 75-case corpus retains three status and 27 first-
 diagnostic differences, with all seven borrow/origin false acceptances fixed.
-Self-source emission is still running; no fixed-point/promotion claim is made.
+Self-source emission advances beyond the prior work failure, then stops at
+module_unit_c_emit.fy:203:65 with stage 7 code 2 (bytes 30193..30245) after
+478.81 seconds; no packet or fixed-point/promotion claim is made.
 The public borrow gate remains a preview. Public API, DB, CI and product
 timeouts are unchanged, no push. Receipt:
 `evidence/candidate-borrow-call-index-20261012.json`.

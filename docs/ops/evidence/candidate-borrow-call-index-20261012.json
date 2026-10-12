@@ -4378,9 +4378,20 @@
       "exit": 0,
       "stderr": "",
       "stdoutBytes": 184
+    },
+    "self-emit": {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\borrow-call-index-integration-20261012\\candidate-dev.exe",
+        "--c-project-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\borrow-call-index-integration-20261012\\sources.list"
+      ],
+      "seconds": 478.8078357000195,
+      "exit": 2,
+      "stderr": "examples/lexer_candidate/src/module_unit_c_emit.fy:203:65: error: project phase 2 stage 7 code 2 (bytes 30193..30245)\n",
+      "stdoutBytes": 0
     }
   },
-  "selfEmissionPending": true,
+  "selfEmissionPending": false,
   "sourceCheck": {
     "files": 377,
     "mirFunctions": 4803
