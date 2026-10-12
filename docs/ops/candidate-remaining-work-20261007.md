@@ -23,6 +23,25 @@ Receipts: `evidence/candidate-loop-control-private-20261012.json`,
 Next: connect the existing transitive borrowed-result and live-loan analysis
 before admitting project IR, retaining source diagnostic codes and spans.
 
+## Checked invocation lookup during borrow traversal (2026-10-12)
+
+Origin/loan validation now rejects invocation records with zero, duplicate or
+descending source indices before traversal. Borrowed-result substitution and
+argument mutability lookup use bounded binary searches of that checked order,
+preserving one-based target identities and missing/builtin-call behavior.
+The existing shared allowance is unchanged.
+
+Three focused tests covering argument ordering, generic unit identities and
+transitive scalar-caller conflicts pass in Go-native and both candidate C
+profiles. Source check passes 377 files / 4803 MIR functions. The clean cached
+build emits 30098350 C-part bytes and builds with the explicit private 16 MiB
+stack reservation. Its 75-case corpus retains three status and 27 first-
+diagnostic differences, with all seven borrow/origin false acceptances fixed.
+Self-source emission is still running; no fixed-point/promotion claim is made.
+The public borrow gate remains a preview. Public API, DB, CI and product
+timeouts are unchanged, no push. Receipt:
+`evidence/candidate-borrow-call-index-20261012.json`.
+
 ## Dependency-sensitive return summary iteration (2026-10-12)
 
 Borrower frames now snapshot each callee's origin, allocation and subview

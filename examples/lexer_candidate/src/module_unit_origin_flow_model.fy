@@ -26,6 +26,12 @@ pub fn Result<m::Expression,m::Problem> expression(ref m::Values body,usize orig
     var usize low=0;var usize high=m::expression_count(body);while(low<high){if(!m::charge(ref mut c.work,1)){return .err(fail(c,10,0,0));}let usize mid=low+(high-low)/2;if(m::expression_at(body,mid+1).source_index<original){low=mid+1;}else{high=mid;}}
     if(low>=m::expression_count(body) || m::expression_at(body,low+1).source_index!=original){return .err(fail(c,12,0,0));}return .ok(m::expression_at(body,low+1));
 }
+// Invocation records follow the checked source-index order, like expressions.
+// Zero means no ordinary/generic invocation (for example, a builtin call).
+pub fn Result<usize,m::Problem> invocation(ref m::Values body,usize original,ref mut Context c){
+    var usize low=0;var usize high=m::call_count(body);while(low<high){if(!m::charge(ref mut c.work,1)){return .err(fail(c,10,0,0));}let mid=low+(high-low)/2;if(m::call_at(body,mid).source_index<original){low=mid+1;}else{high=mid;}}
+    return .ok(if(low<m::call_count(body) && m::call_at(body,low).source_index==original){low+1}else{0});
+}
 pub fn Result<v::Vec<Value>,m::Problem> copy(ref v::Vec<Value> env,ref mut Context c,usize start,usize end){
     if(!m::charge(ref mut c.work,v::len<Value>(env)+1)){return .err(fail(c,10,start,end));}var v::Vec<Value> result=v::empty<Value>();var usize i=0;while(i<v::len<Value>(env)){if(!v::push<Value>(ref mut result,*v::at<Value>(env,i)).is_ok){return .err(fail(c,11,start,end));}i+=1;}return .ok(result);
 }
