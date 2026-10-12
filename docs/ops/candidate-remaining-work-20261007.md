@@ -1,5 +1,45 @@
 # Fairy 컴파일러 전환: 후속 작업 목록
 
+## Source-AST type JSON for generic definitions (2026-10-13)
+
+`generic_source_type_json` reads the retained syntax type arena and projects the
+actual written type into the exact `encoding/json` representation of Go
+`ast.TypeReference`. It retains spelling and byte spans, named paths, mutability,
+recursive elements and ordered type arguments, C function parameters/results,
+array length spelling/span/kind and ABI. Named paths and named lengths remove
+token trivia while the written type text retains its original spelling. Absent pointer and slice fields are
+`null`; string quoting retains Go's HTML and JavaScript separator escaping.
+The shared writer keeps the existing 1048576 work/output bound and publishes no
+partial successful result. Invalid IDs/internal nodes, UTF-8 and depth/work
+exhaustion reject with the existing private error classes.
+
+The Go frontend oracle reads six authored source strings and emits fifteen
+actual AST type values. They include nested generics, grouped/reference/pointer
+types, multidimensional literal and named array lengths, C function types,
+comments, spaced paths, UTF-8 and CRLF. Four authored tests pass Go native and
+both candidate C development/release profiles, including exact-fit/exhausted
+work, depth, invalid IDs/internal nodes and invalid UTF-8. Source check passes
+400 files / 5121 MIR functions; the original source lock is verified unchanged.
+The first comparison exposed an incorrect test parameter count and a real
+path-normalization difference; both are corrected in the final passing replay.
+
+The private test verifier adds opt-in `--isolated-native`. It preserves the
+original manifest, exact-copies the selected test and its local import closure,
+rejects unexpected source files and verifies original/copy hashes. Ordinary
+full-workspace source check remains separate. The final native run passes all
+four tests with 29 copied local source/test files in 26.38 seconds; the preceding
+full-workspace native run took 390.92 seconds and included the failed comparison,
+so it is retained as failure evidence rather than a like-for-like benchmark.
+Default verification behavior and CI/runner configuration are unchanged.
+
+This is the type component of source definition extraction, not a complete
+function or aggregate definition digest. Declaration attributes/documentation,
+parameters, expressions/statements, resolved imports and template dependency
+closures remain to be connected. Dispatcher/cache consumption and current-source
+fixed-point/Linux/full-suite/hosted-CI evidence remain pending. No public API,
+SDK ABI, DB, CI/runner configuration or product timeout change; no push. Receipt:
+[evidence](evidence/candidate-generic-source-types-20261013.json).
+
 ## Candidate concrete generic and Vec specialization identity (2026-10-13)
 
 `generic_specialization_identity` computes the private `g0_` identity of

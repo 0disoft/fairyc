@@ -2,6 +2,24 @@
 
 ## Current local candidate evidence (2026-10-13)
 
+`generic_source_type_json` reads retained syntax type records into the exact Go
+`ast.TypeReference` JSON used by generic source definition digests. The output
+retains original spelling/spans, paths, mutability, elements/arguments, C
+function parameters/results, array lengths and ABI, including `null` fields and
+Go string escaping. The shared writer retains the 1048576 work/output bound.
+The real Go frontend fixture contains six authored sources and fifteen type
+values. Four authored tests pass Go native and both candidate C profiles; source
+check passes 400 files / 5121 MIR functions. Named paths normalize token trivia
+without changing written type text. The verifier's opt-in isolated-native mode
+hash-verifies 29 copied local source/test files and executes all four tests in
+26.38 seconds; default verification and CI/runner settings remain unchanged.
+Full declaration/body/aggregate JSON, resolved imports and template
+dependency-closure extraction remain open, along with dispatcher/cache
+consumption and current-source fixed-point/Linux/full-suite/hosted-CI evidence.
+No public API, SDK ABI, DB, CI/runner configuration or product timeout change;
+no push. Receipt:
+[evidence](../ops/evidence/candidate-generic-source-types-20261013.json).
+
 `generic_specialization_identity` computes the private `g0_` identity of
 `internal/genericplan/specialization.go`. It frames the domain, declaration ID,
 owner and definition digest, followed by ordered type arguments with their
