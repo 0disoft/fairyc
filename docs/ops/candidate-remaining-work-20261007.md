@@ -1,5 +1,32 @@
 # Fairy 컴파일러 전환: 후속 작업 목록
 
+## Borrow gate admitted with complete Windows fixed point (2026-10-12)
+
+Candidate project checking now infers transitive return origins, runs final
+live-loan checks, and rejects visible borrow/Region diagnostics before admitting
+owned IR. E2101/E2102/E2103/E2105/E3101 retain primary codes and spans. Only
+capacity failures may retry smaller units; semantic rejections retain their
+original location. The admitted source files exactly match the tested preview.
+Source check passes 377 files / 4804 MIR functions and refreshes the lock.
+
+The seed and Stage1 emit identical complete 30136053-byte C packets. A separate
+Stage2 native build succeeds; both 4280832-byte PE images are byte-identical,
+SHA256 `69a2fffc002255f9a28f3471bac859581a66fc3c394b4cb2b02a834e79434a50`,
+with no bytes excluded. Stage2 then processes all 370 admitted self sources at
+their actual repository paths in 253.81 seconds, without a Go frontend fallback,
+and emits the identical packet. This also verifies that replacing the two cached
+preview source paths with their repository owners does not change the packet.
+Both builds use the private explicit 16 MiB host stack.
+
+The seed, Stage1 and Stage2 pass 249 lexer cases plus framing checks against the
+Go oracle. The first image's fresh 75-case candidate replay preserves all prior
+statuses and first diagnostics; the byte-identical second image reuses that
+comparison. Three status differences and 27 diagnostic differences remain.
+Full frontend/executable parity, product timeout/host-stack integration, Linux,
+full suite and hosted CI still gate promotion. The shipping Go compiler, public
+language, SDK ABI, DB, CI and product timeouts are unchanged; no push.
+Receipt: `evidence/candidate-borrow-gate-admission-20261012.json`.
+
 ## Branch dispatch preserves syntax depth (2026-10-12)
 
 Origin and liveness branch helpers visit the current syntax node, so dispatch

@@ -1,5 +1,19 @@
 # Self-hosting readiness v0
 
+## Current local candidate evidence (2026-10-12)
+
+The candidate project check path now enforces transitive return-origin and final
+live-loan checks before owned IR. The complete private Windows bootstrap retains
+identical 30136053-byte C packets and identical full 4280832-byte Stage1/Stage2
+images. Stage2 processes all 370 admitted repository sources in 253.81 seconds
+and emits the identical packet; both generations pass 249 lexer/framing cases.
+The 75-case frontend comparison retains three status and 27 first-diagnostic
+differences. Public borrow admission is complete, while full frontend/executable
+parity, product timeout/host-stack integration, Linux/full suite and same-head
+hosted CI remain promotion requirements. No shipping Go compiler or SDK ABI
+change, release or push is claimed. Evidence:
+[borrow-gate admission and fixed point](../ops/evidence/candidate-borrow-gate-admission-20261012.json).
+
 ## Purpose
 
 This document is the executable ownership checklist for the roadmap self-hosting gate. It does not start a Fairy-written compiler and it does not weaken the Go compiler's role as bootstrap and reference semantics implementation.

@@ -4,13 +4,15 @@ import module_unit_bind as binding;
 import module_unit_call_closure as closure;
 import module_unit_values as values;
 import module_unit_moves as moves;
+import module_unit_origin_returns as origins;
+import module_unit_origin_diagnostics as diagnostics;
 import module_unit_body_ir_lower as lower;
 import module_unit_body_ir_model as ir;
 import module_signatures as signatures;
 import syntax as syntax;
 import std::vec as v;
 
-// Stages: 1 grouping, 2 binding, 3 closure, 4 values, 5 moves, 6 owned IR.
+// Stages: 1 grouping, 2 binding, 3 closure, 4 values, 5 moves, 6 owned IR, 7 borrows.
 pub struct Problem {u32 stage;u32 code;usize module_index;usize start;usize end;usize first;usize stop;usize expected;usize actual;usize declaration_start;usize declaration_end;usize move_start;usize move_end;usize header_start;usize header_end;usize field_module;usize field_start;usize field_end;}
 pub struct Range {usize first;usize stop;}
 pub resource Plan {v::Vec<ir::Program> units;v::Vec<Range> ranges;usize files;usize retries;cleanup{}}
@@ -23,11 +25,16 @@ pub fn Result<ir::Program,Problem> range(ref v::Vec<syntax::Parsed> sources,ref 
     // pass must not consume the ownership pass's traversal allowance.
     let moved=switch(moves::build(sources,ref typed,0)){case .ok(p):{p}case .err(e):{return .err(failed(5,e.code,e.module_index,e.start,e.end,first,stop,e.expected,e.actual));}};
     if(moves::count(ref moved)!=0){let e=moves::at(ref moved,0);var Problem p=failed(5,e.code,e.module_index,e.start,e.end,first,stop,0,0);p.declaration_start=e.declaration_start;p.declaration_end=e.declaration_end;p.move_start=e.move_start;p.move_end=e.move_end;p.header_start=e.header_start;p.header_end=e.header_end;p.field_module=e.field_module;p.field_start=e.field_start;p.field_end=e.field_end;return .err(p);}
+    // Infer the transitive borrowed-result providers before admitting owned IR.
+    // Ownership and borrow traversals have independent bounded work allowances.
+    let inferred=switch(origins::build(sources,metadata,ref typed)){case .ok(p):{p}case .err(e):{return .err(failed(7,e.code,e.module_index,e.start,e.end,first,stop,e.expected,e.actual));}};
+    let report=switch(diagnostics::collect(ref inferred)){case .ok(p):{p}case .err(e):{return .err(failed(7,e.code,e.module_index,e.start,e.end,first,stop,e.expected,e.actual));}};
+    var usize diagnostic=0;while(diagnostic<diagnostics::count(ref report)){if(diagnostics::visible_at(ref report,diagnostic)){let e=diagnostics::at(ref report,diagnostic);return .err(failed(7,e.code,e.module_index,e.start,e.end,first,stop,0,0));}diagnostic+=1;}
     return switch(lower::lower(sources,ref typed,closure::imported(ref ready),ref moved)){case .ok(p):{.ok(p)}case .err(e):{.err(failed(6,e.code,e.module_index,e.start,e.end,first,stop,0,0))}};
 }
 // Cleanup policy retains raw code 10 through the owned-IR lowerer; later
 // IR construction and verification use 1002 for the same capacity class.
-fn bool budget(Problem p){return (p.stage>=2 && p.stage<=6 && p.code==10) || p.stage==3 && p.code==4503 || p.stage==6 && p.code==1002;}
+fn bool budget(Problem p){return (p.stage>=2 && p.stage<=7 && p.code==10) || (p.stage==3 || p.stage==7) && p.code==4503 || p.stage==6 && p.code==1002;}
 fn Problem append_range(ref v::Vec<syntax::Parsed> sources,ref signatures::Program metadata,usize first,usize stop,usize depth,ref mut v::Vec<ir::Program> programs,ref mut v::Vec<Range> ranges,ref mut usize retries){
     switch(range(sources,metadata,first,stop)){
         case .ok(p):{
