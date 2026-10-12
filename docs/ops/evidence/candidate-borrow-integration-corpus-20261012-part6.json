@@ -1,0 +1,398 @@
+{
+  "schema": "fairyc.candidate-frontend-corpus-part/v1",
+  "rows": [
+    {
+      "family": "semantic",
+      "id": "fail.type.compile-time-excluded",
+      "manifestSHA256": "165b181c063b24cd6ef80c3e91b417840d3f1b2ea33a9eec635ae79341f332fa",
+      "expected": "fail",
+      "sources": [
+        {
+          "original": "spec/fixtures/semantic/cases/fail/compile-time-excluded/src/main.fy",
+          "sourceSHA256": "e73ea26cdbb77dce17418721d715f420ab536501ad08c905343a65d25aa76a66",
+          "projectSource": "main.fy"
+        }
+      ],
+      "observations": [
+        {
+          "engine": "go",
+          "exit": 3,
+          "seconds": 0.05186619999585673,
+          "stdout": "",
+          "stderr": "main.fy:7:17: E4302: A well-typed expression is outside the admitted compile-time subset. [bytes 67..77]\n",
+          "diagnostics": [
+            {
+              "code": "E4302",
+              "start": 67,
+              "end": 77
+            }
+          ]
+        },
+        {
+          "engine": "candidate",
+          "exit": 3,
+          "seconds": 0.02269969999906607,
+          "stdout": "",
+          "stderr": "main.fy:7:17: source is outside the supported compiler subset [bytes 67..77]\n",
+          "diagnostics": []
+        }
+      ],
+      "statusMatch": true,
+      "firstDiagnosticMatch": false,
+      "goMatchesFixture": true
+    },
+    {
+      "family": "semantic",
+      "id": "fail.type.compile-time-trap",
+      "manifestSHA256": "165b181c063b24cd6ef80c3e91b417840d3f1b2ea33a9eec635ae79341f332fa",
+      "expected": "fail",
+      "sources": [
+        {
+          "original": "spec/fixtures/semantic/cases/fail/compile-time-trap/src/main.fy",
+          "sourceSHA256": "96ed63eff19096280e5195f06e3bf29f69ec8869776cd7a62eb97a887dc0458f",
+          "projectSource": "main.fy"
+        }
+      ],
+      "observations": [
+        {
+          "engine": "go",
+          "exit": 3,
+          "seconds": 0.048567499994533136,
+          "stdout": "",
+          "stderr": "main.fy:3:17: E4303: Compile-time evaluation traps on arithmetic, division, shift, or cast semantics. [bytes 30..35]\n",
+          "diagnostics": [
+            {
+              "code": "E4303",
+              "start": 30,
+              "end": 35
+            }
+          ]
+        },
+        {
+          "engine": "candidate",
+          "exit": 3,
+          "seconds": 0.02244210001663305,
+          "stdout": "",
+          "stderr": "main.fy:3:17: source is outside the supported compiler subset [bytes 30..35]\n",
+          "diagnostics": []
+        }
+      ],
+      "statusMatch": true,
+      "firstDiagnosticMatch": false,
+      "goMatchesFixture": true
+    },
+    {
+      "family": "semantic",
+      "id": "fail.type.compile-time-cycle",
+      "manifestSHA256": "165b181c063b24cd6ef80c3e91b417840d3f1b2ea33a9eec635ae79341f332fa",
+      "expected": "fail",
+      "sources": [
+        {
+          "original": "spec/fixtures/semantic/cases/fail/compile-time-cycle/src/main.fy",
+          "sourceSHA256": "90211723eebf9aaa76bd0d82d2dab251defbb3cda4f15d68b2459ad2c0005594",
+          "projectSource": "main.fy"
+        }
+      ],
+      "observations": [
+        {
+          "engine": "go",
+          "exit": 3,
+          "seconds": 0.04871249999268912,
+          "stdout": "",
+          "stderr": "main.fy:3:11: E4304: A compile-time dependency cycle or deterministic evaluator budget prevents a result. [bytes 24..29]\n",
+          "diagnostics": [
+            {
+              "code": "E4304",
+              "start": 24,
+              "end": 29
+            }
+          ]
+        },
+        {
+          "engine": "candidate",
+          "exit": 3,
+          "seconds": 0.022115100000519305,
+          "stdout": "",
+          "stderr": "main.fy:3:19: source is outside the supported compiler subset [bytes 32..38]\n",
+          "diagnostics": []
+        }
+      ],
+      "statusMatch": true,
+      "firstDiagnosticMatch": false,
+      "goMatchesFixture": true
+    },
+    {
+      "family": "semantic",
+      "id": "fail.type.compile-time-assert",
+      "manifestSHA256": "165b181c063b24cd6ef80c3e91b417840d3f1b2ea33a9eec635ae79341f332fa",
+      "expected": "fail",
+      "sources": [
+        {
+          "original": "spec/fixtures/semantic/cases/fail/compile-time-assert/src/main.fy",
+          "sourceSHA256": "a6fbc2caf02db260b0ab4300a5ecb7076847ad44a3d1646072e610b38748a415",
+          "projectSource": "main.fy"
+        }
+      ],
+      "observations": [
+        {
+          "engine": "go",
+          "exit": 3,
+          "seconds": 0.05247850000159815,
+          "stdout": "",
+          "stderr": "main.fy:3:1: E4305: A module-level `static_assert` evaluates to false. [bytes 14..35]\n",
+          "diagnostics": [
+            {
+              "code": "E4305",
+              "start": 14,
+              "end": 35
+            }
+          ]
+        },
+        {
+          "engine": "candidate",
+          "exit": 3,
+          "seconds": 0.02031120000174269,
+          "stdout": "",
+          "stderr": "main.fy:3:1: source is outside the supported compiler subset [bytes 14..35]\n",
+          "diagnostics": []
+        }
+      ],
+      "statusMatch": true,
+      "firstDiagnosticMatch": false,
+      "goMatchesFixture": true
+    },
+    {
+      "family": "semantic",
+      "id": "pass.type.source-location",
+      "manifestSHA256": "165b181c063b24cd6ef80c3e91b417840d3f1b2ea33a9eec635ae79341f332fa",
+      "expected": "pass",
+      "sources": [
+        {
+          "original": "spec/fixtures/semantic/cases/pass/source-location/src/main.fy",
+          "sourceSHA256": "01d295a9e253004e32d45b326185d527bbef36856f01b74ab8bc8b8604c19f91",
+          "projectSource": "main.fy"
+        }
+      ],
+      "observations": [
+        {
+          "engine": "go",
+          "exit": 0,
+          "seconds": 0.04900070000439882,
+          "stdout": "check ok: 1 instance(s), 1 source file(s), 2 MIR function(s), lock updated\n",
+          "stderr": "",
+          "diagnostics": []
+        },
+        {
+          "engine": "candidate",
+          "exit": 0,
+          "seconds": 0.1172519999963697,
+          "stdout": "check ok: 1 instance(s), 1 source file(s), 2 MIR function(s), lock unchanged\n",
+          "stderr": "",
+          "diagnostics": []
+        }
+      ],
+      "statusMatch": true,
+      "firstDiagnosticMatch": true,
+      "goMatchesFixture": true
+    },
+    {
+      "family": "semantic",
+      "id": "fail.resolve.source-location-reserved",
+      "manifestSHA256": "165b181c063b24cd6ef80c3e91b417840d3f1b2ea33a9eec635ae79341f332fa",
+      "expected": "fail",
+      "sources": [
+        {
+          "original": "spec/fixtures/semantic/cases/fail/source-location-reserved/src/main.fy",
+          "sourceSHA256": "138b682b139138932b90df445fd64499af0116c302f1c64d5c0746209042d2bf",
+          "projectSource": "main.fy"
+        }
+      ],
+      "observations": [
+        {
+          "engine": "go",
+          "exit": 3,
+          "seconds": 0.049327699991408736,
+          "stdout": "",
+          "stderr": "main.fy:3:8: E4401: The reserved `source_location` intrinsic name is declared, bound, or used without its exact call form. [bytes 21..36]\n",
+          "diagnostics": [
+            {
+              "code": "E4401",
+              "start": 21,
+              "end": 36
+            }
+          ]
+        },
+        {
+          "engine": "candidate",
+          "exit": 3,
+          "seconds": 0.02394730001105927,
+          "stdout": "",
+          "stderr": "main.fy:3:8: source is outside the supported compiler subset [bytes 21..36]\n",
+          "diagnostics": []
+        }
+      ],
+      "statusMatch": true,
+      "firstDiagnosticMatch": false,
+      "goMatchesFixture": true
+    },
+    {
+      "family": "semantic",
+      "id": "fail.type.source-location-non-call",
+      "manifestSHA256": "165b181c063b24cd6ef80c3e91b417840d3f1b2ea33a9eec635ae79341f332fa",
+      "expected": "fail",
+      "sources": [
+        {
+          "original": "spec/fixtures/semantic/cases/fail/source-location-non-call/src/main.fy",
+          "sourceSHA256": "37e3efb7a45da201c41213e56133ab96c6e6c4a0fe50b8fe47ec86214a90e6f5",
+          "projectSource": "main.fy"
+        }
+      ],
+      "observations": [
+        {
+          "engine": "go",
+          "exit": 3,
+          "seconds": 0.04989650001516566,
+          "stdout": "",
+          "stderr": "main.fy:4:12: E4401: The reserved `source_location` intrinsic name is declared, bound, or used without its exact call form. [bytes 44..59]\n",
+          "diagnostics": [
+            {
+              "code": "E4401",
+              "start": 44,
+              "end": 59
+            }
+          ]
+        },
+        {
+          "engine": "candidate",
+          "exit": 3,
+          "seconds": 0.03551260000676848,
+          "stdout": "",
+          "stderr": "main.fy:4:12: source is outside the supported compiler subset [bytes 44..59]\n",
+          "diagnostics": []
+        }
+      ],
+      "statusMatch": true,
+      "firstDiagnosticMatch": false,
+      "goMatchesFixture": true
+    },
+    {
+      "family": "semantic",
+      "id": "fail.type.source-location-arity",
+      "manifestSHA256": "165b181c063b24cd6ef80c3e91b417840d3f1b2ea33a9eec635ae79341f332fa",
+      "expected": "fail",
+      "sources": [
+        {
+          "original": "spec/fixtures/semantic/cases/fail/source-location-arity/src/main.fy",
+          "sourceSHA256": "ad9ecdad6c3a5a79858a4ef3ab635b6133e8824ec74d926b48cad6dd31604711",
+          "projectSource": "main.fy"
+        }
+      ],
+      "observations": [
+        {
+          "engine": "go",
+          "exit": 3,
+          "seconds": 0.054270599997835234,
+          "stdout": "",
+          "stderr": "main.fy:4:12: E1010: call argument count does not match the declaration [bytes 44..62]\n",
+          "diagnostics": [
+            {
+              "code": "E1010",
+              "start": 44,
+              "end": 62
+            }
+          ]
+        },
+        {
+          "engine": "candidate",
+          "exit": 3,
+          "seconds": 0.022664499992970377,
+          "stdout": "",
+          "stderr": "main.fy:4:12: source is outside the supported compiler subset [bytes 44..62]\n",
+          "diagnostics": []
+        }
+      ],
+      "statusMatch": true,
+      "firstDiagnosticMatch": false,
+      "goMatchesFixture": true
+    },
+    {
+      "family": "semantic",
+      "id": "fail.type.source-location-const-eval",
+      "manifestSHA256": "165b181c063b24cd6ef80c3e91b417840d3f1b2ea33a9eec635ae79341f332fa",
+      "expected": "fail",
+      "sources": [
+        {
+          "original": "spec/fixtures/semantic/cases/fail/source-location-const-eval/src/main.fy",
+          "sourceSHA256": "502284acf26dbc9404cb1ab1cdf973796ec83da92d930538d282eabd6ecbe614",
+          "projectSource": "main.fy"
+        }
+      ],
+      "observations": [
+        {
+          "engine": "go",
+          "exit": 3,
+          "seconds": 0.05091729998821393,
+          "stdout": "",
+          "stderr": "main.fy:5:12: E4302: A well-typed expression is outside the admitted compile-time subset. [bytes 52..73]\n",
+          "diagnostics": [
+            {
+              "code": "E4302",
+              "start": 52,
+              "end": 73
+            }
+          ]
+        },
+        {
+          "engine": "candidate",
+          "exit": 3,
+          "seconds": 0.02363000001059845,
+          "stdout": "",
+          "stderr": "main.fy:3:1: source is outside the supported compiler subset [bytes 14..25]\n",
+          "diagnostics": []
+        }
+      ],
+      "statusMatch": true,
+      "firstDiagnosticMatch": false,
+      "goMatchesFixture": true
+    },
+    {
+      "family": "semantic",
+      "id": "pass.type.explicit-factory-construction",
+      "manifestSHA256": "165b181c063b24cd6ef80c3e91b417840d3f1b2ea33a9eec635ae79341f332fa",
+      "expected": "pass",
+      "sources": [
+        {
+          "original": "spec/fixtures/semantic/cases/pass/explicit-factory-construction/src/lib.fy",
+          "sourceSHA256": "ed62d2aab9155239042d60a57304a81d10e7f59b6cefec4d2ab0fc05056d1dd9",
+          "projectSource": "lib.fy"
+        },
+        {
+          "original": "spec/fixtures/semantic/cases/pass/explicit-factory-construction/src/main.fy",
+          "sourceSHA256": "799bf1e49d7d99873ad503d833024e24bc62d9d009845cf2c9d6c4d092792949",
+          "projectSource": "main.fy"
+        }
+      ],
+      "observations": [
+        {
+          "engine": "go",
+          "exit": 0,
+          "seconds": 0.05297730001620948,
+          "stdout": "check ok: 1 instance(s), 2 source file(s), 2 MIR function(s), lock updated\n",
+          "stderr": "",
+          "diagnostics": []
+        },
+        {
+          "engine": "candidate",
+          "exit": 0,
+          "seconds": 0.12102439999580383,
+          "stdout": "check ok: 1 instance(s), 2 source file(s), 3 MIR function(s), lock unchanged\n",
+          "stderr": "",
+          "diagnostics": []
+        }
+      ],
+      "statusMatch": true,
+      "firstDiagnosticMatch": true,
+      "goMatchesFixture": true
+    }
+  ]
+}

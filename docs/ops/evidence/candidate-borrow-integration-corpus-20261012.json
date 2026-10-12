@@ -1,0 +1,57 @@
+{
+  "schema": "fairyc.candidate-frontend-corpus-probe/v1",
+  "scriptSHA256": "56157e1c58f1a0f55e28af5da1f3762cc533806286e8c624a9815cc8baa7635d",
+  "allStatusMatch": false,
+  "allFirstDiagnosticMatch": false,
+  "cases": 75,
+  "matched": 45,
+  "candidateSHA256": "25c4924c42f177c6506c61eaa00fa879ebde4572147c7d5e9dc9270991de91fa",
+  "oracleSHA256": "3ecc4501ee3bb47ecc39e7288200266b31cbcd8bf6ffec302ae54867705ce5d1",
+  "parts": [
+    {
+      "path": "docs/ops/evidence/candidate-borrow-integration-corpus-20261012-part1.json",
+      "sha256": "cf862ebfaa75d21f863ce2e4598c1babcfd824c2b3568e40f7a02baa715c4865",
+      "cases": 10
+    },
+    {
+      "path": "docs/ops/evidence/candidate-borrow-integration-corpus-20261012-part2.json",
+      "sha256": "586838c37ffbfe93648d016d83377c0750a0b35c2e77b0d869ff4fd3a202a95d",
+      "cases": 10
+    },
+    {
+      "path": "docs/ops/evidence/candidate-borrow-integration-corpus-20261012-part3.json",
+      "sha256": "86ab7a95b7e73ed3bcac0475e6c7b71ca3639f1355a5b84f9c200b193ef64c1a",
+      "cases": 10
+    },
+    {
+      "path": "docs/ops/evidence/candidate-borrow-integration-corpus-20261012-part4.json",
+      "sha256": "10279a8e0fdb3ff35322eb1ce6785a4bac66640ff603e0096bb5e8480d4ff6ee",
+      "cases": 10
+    },
+    {
+      "path": "docs/ops/evidence/candidate-borrow-integration-corpus-20261012-part5.json",
+      "sha256": "0ca3dd1f37dfedddd70638f73355ca6569883a7d6e7081dd79b7343720a2ea37",
+      "cases": 10
+    },
+    {
+      "path": "docs/ops/evidence/candidate-borrow-integration-corpus-20261012-part6.json",
+      "sha256": "d502c8a3fa16d537bb632191d4fd4a0c704e294aa32779b170aa817fdac7680e",
+      "cases": 10
+    },
+    {
+      "path": "docs/ops/evidence/candidate-borrow-integration-corpus-20261012-part7.json",
+      "sha256": "e592c8307a07020c94d51cb9b03168f944ae0e4117d2197fb1c2d891e514a9c8",
+      "cases": 10
+    },
+    {
+      "path": "docs/ops/evidence/candidate-borrow-integration-corpus-20261012-part8.json",
+      "sha256": "5e67abc61261e8132d8af7c3bc5a4cfbc9c899ddeb8ee0e634ab910fac31d385",
+      "cases": 5
+    }
+  ],
+  "statusDifferences": 3,
+  "firstDiagnosticDifferences": 27,
+  "allGoMatchFixture": true,
+  "experimentalPreview": true,
+  "sourceChangeApplied": false
+}

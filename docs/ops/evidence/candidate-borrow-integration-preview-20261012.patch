@@ -1,0 +1,30 @@
+--- a/examples/lexer_candidate/src/module_project_compile.fy
++++ b/examples/lexer_candidate/src/module_project_compile.fy
+@@ -6,0 +7,2 @@
++import module_unit_origin_returns as origins;
++import module_unit_origin_diagnostics as diagnostics;
+@@ -13 +15 @@
+-// Stages: 1 grouping, 2 binding, 3 closure, 4 values, 5 moves, 6 owned IR.
++// Stages: 1 grouping, 2 binding, 3 closure, 4 values, 5 moves, 6 owned IR, 7 borrows.
+@@ -25,0 +28,5 @@
++    // Infer the transitive borrowed-result providers before admitting owned IR.
++    // Ownership and borrow traversals have independent bounded work allowances.
++    let inferred=switch(origins::build(sources,metadata,ref typed)){case .ok(p):{p}case .err(e):{return .err(failed(7,e.code,e.module_index,e.start,e.end,first,stop,e.expected,e.actual));}};
++    let report=switch(diagnostics::collect(ref inferred)){case .ok(p):{p}case .err(e):{return .err(failed(7,e.code,e.module_index,e.start,e.end,first,stop,e.expected,e.actual));}};
++    var usize diagnostic=0;while(diagnostic<diagnostics::count(ref report)){if(diagnostics::visible_at(ref report,diagnostic)){let e=diagnostics::at(ref report,diagnostic);return .err(failed(7,e.code,e.module_index,e.start,e.end,first,stop,0,0));}diagnostic+=1;}
+@@ -30 +37 @@
+-fn bool budget(Problem p){return (p.stage>=2 && p.stage<=6 && p.code==10) || p.stage==3 && p.code==4503 || p.stage==6 && p.code==1002;}
++fn bool budget(Problem p){return (p.stage>=2 && p.stage<=7 && p.code==10) || (p.stage==3 || p.stage==7) && p.code==4503 || p.stage==6 && p.code==1002;}
+--- a/examples/lexer_candidate/src/module_unit_origin_inputs.fy
++++ b/examples/lexer_candidate/src/module_unit_origin_inputs.fy
+@@ -85 +85 @@
+-    let ready=switch(closure::build(sources,metadata,ref bound)){case .ok(p):{p}case .err(p):{return .err(m::Problem{.code=p.code,.module_index=p.module_index,.start=p.start,.end=p.end,.expected=0,.actual=0});}};return values::build(sources,metadata,ref ready);
++    let ready=switch(closure::build_unit(sources,metadata,ref bound)){case .ok(p):{p}case .err(p):{return .err(m::Problem{.code=p.code,.module_index=p.module_index,.start=p.start,.end=p.end,.expected=0,.actual=0});}};return values::build(sources,metadata,ref ready);
+--- a/examples/lexer_candidate/src/project_check_text.fy
++++ b/examples/lexer_candidate/src/project_check_text.fy
+@@ -53,0 +54,5 @@
++    else if(p.code==2101){if(!append(out,b"E2101: borrow conflicts with a live loan")){return false;}}
++    else if(p.code==2102){if(!append(out,b"E2102: returned borrow escapes a local owner")){return false;}}
++    else if(p.code==2103){if(!append(out,b"E2103: returned borrow has multiple origins")){return false;}}
++    else if(p.code==2105){if(!append(out,b"E2105: owner is moved while borrowed")){return false;}}
++    else if(p.code==3101){if(!append(out,b"E3101: borrow escapes a local Region")){return false;}}

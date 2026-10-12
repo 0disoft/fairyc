@@ -1,0 +1,171 @@
+{
+  "schema": "fairyc.candidate-borrow-integration-preview/v1",
+  "sourceBaseline": "4601970a",
+  "promotable": false,
+  "sourceChangeApplied": false,
+  "sourceInputParts": [
+    {
+      "path": "docs/ops/evidence/candidate-borrow-integration-preview-20261012-sources1.json",
+      "sha256": "fffd69a8b0f76ce6ddca2abde34ef5bb676b70b2ac47baa556854fa17c6f84fb",
+      "sources": 150
+    },
+    {
+      "path": "docs/ops/evidence/candidate-borrow-integration-preview-20261012-sources2.json",
+      "sha256": "23fd4f516bfa54eb77e4c0eb7c626199de6d483f766095fc2d081268785212b1",
+      "sources": 150
+    },
+    {
+      "path": "docs/ops/evidence/candidate-borrow-integration-preview-20261012-sources3.json",
+      "sha256": "a31f962503adfc5912969eda3a62dd526651cad6012515a952adb27003fd591d",
+      "sources": 70
+    }
+  ],
+  "proposal": {
+    "path": "docs/ops/evidence/candidate-borrow-integration-preview-20261012.patch",
+    "sha256": "b654c8addc5a9b6b04cd59fb5c9ed6c4b681fccb392a3174ace9df3f9a4eaa56",
+    "format": "Zero-context unified diff; git apply --unidiff-zero required"
+  },
+  "artifacts": {
+    "packet.bin": {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\borrow-integration-preview-20261012\\packet.bin",
+      "sha256": "4000fe2c7ff835201255490451413cc32045f5257c8f52693d64da7170b8ccac",
+      "bytes": 30040807
+    },
+    "candidate.exe": {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\borrow-integration-preview-20261012\\candidate.exe",
+      "sha256": "0524296ceb4724bfd8defb1db67a4d0b06c4cab758d649217d0b65a4dbb6f256",
+      "bytes": 4262912
+    },
+    "packet-unit.bin": {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\borrow-integration-preview-20261012\\packet-unit.bin",
+      "sha256": "fa08511272dcedfff93785ae3aece3b91735ff0bb090882adafec9a136999121",
+      "bytes": 30041286
+    },
+    "candidate-unit-dev.exe": {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\borrow-integration-preview-20261012\\candidate-unit-dev.exe",
+      "sha256": "25c4924c42f177c6506c61eaa00fa879ebde4572147c7d5e9dc9270991de91fa",
+      "bytes": 11627520
+    },
+    "candidate-unit-stack-probe.exe": {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\borrow-integration-preview-20261012\\candidate-unit-stack-probe.exe",
+      "sha256": "7511881c0a16e6911b1115a51219953af7c6909fffe973b42ea900ec377c5600",
+      "bytes": 11627520
+    },
+    "sources.list": {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\borrow-integration-preview-20261012\\sources.list",
+      "sha256": "e5fae4daa10c647782168d39870ad9f1ce034be62fa69a991d1fb58cf9d93295",
+      "bytes": 18925
+    }
+  },
+  "observations": {
+    "emit.json": {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-public-native-fixed-point-20261012\\stage2.exe",
+        "--c-project-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\borrow-integration-preview-20261012\\sources.list"
+      ],
+      "seconds": 106.5317156999954,
+      "exit": 0,
+      "stderr": "",
+      "stdoutBytes": 30040807
+    },
+    "build.json": {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-rooted-builder-20261012.exe",
+        "--packet",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\borrow-integration-preview-20261012\\packet.bin",
+        "--packet-sha256",
+        "4000fe2c7ff835201255490451413cc32045f5257c8f52693d64da7170b8ccac",
+        "--output",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\borrow-integration-preview-20261012\\candidate.exe",
+        "--release"
+      ],
+      "seconds": 320.6971470999997,
+      "exit": 0,
+      "stdout": "built: C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\borrow-integration-preview-20261012\\candidate.exe (optimized, 46 C units, 4262912 bytes)\n",
+      "stderr": ""
+    },
+    "self-emit.json": {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\borrow-integration-preview-20261012\\candidate.exe",
+        "--c-project-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\borrow-integration-preview-20261012\\sources.list"
+      ],
+      "seconds": 2.935516199999256,
+      "exit": 2,
+      "stderr": "examples/lexer_candidate/src/syntax_arena_copy.fy:39:103: error: project phase 2 stage 7 code 4503 (bytes 2885..2905)\n",
+      "stdoutBytes": 0
+    },
+    "emit-unit.json": {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-loop-control-bootstrap-20261012\\stage2.exe",
+        "--c-project-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\borrow-integration-preview-20261012\\sources.list"
+      ],
+      "seconds": 77.84903780001332,
+      "exit": 0,
+      "stderr": "",
+      "stdoutBytes": 30041286
+    },
+    "build-unit-dev.json": {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-rooted-builder-20261012.exe",
+        "--packet",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\borrow-integration-preview-20261012\\packet-unit.bin",
+        "--packet-sha256",
+        "fa08511272dcedfff93785ae3aece3b91735ff0bb090882adafec9a136999121",
+        "--output",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\borrow-integration-preview-20261012\\candidate-unit-dev.exe"
+      ],
+      "seconds": 24.01052719997824,
+      "exit": 0,
+      "stdout": "built: C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\borrow-integration-preview-20261012\\candidate-unit-dev.exe (low, 46 C units, 11627520 bytes)\n",
+      "stderr": ""
+    },
+    "self-emit-unit.json": {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\borrow-integration-preview-20261012\\candidate-unit-dev.exe",
+        "--c-project-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\borrow-integration-preview-20261012\\sources.list"
+      ],
+      "seconds": 46.6178086999862,
+      "exit": 3221225725,
+      "stderr": "",
+      "stdoutBytes": 0
+    },
+    "self-emit-stack-probe.json": {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\borrow-integration-preview-20261012\\candidate-unit-stack-probe.exe",
+        "--c-project-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\borrow-integration-preview-20261012\\sources.list"
+      ],
+      "seconds": 58.61620319998474,
+      "exit": 2,
+      "stderr": "examples/lexer_candidate/src/syntax.fy:46:12: error: project phase 2 stage 7 code 10 (bytes 2987..3074)\n",
+      "stdoutBytes": 0,
+      "stackReserveBefore": 1048576,
+      "stackReserveAfter": 16777216,
+      "diagnosticOnly": true
+    }
+  },
+  "corpus": {
+    "path": "docs/ops/evidence/candidate-borrow-integration-corpus-20261012.json",
+    "sha256": "95bca734270f719da4dd11a71bf4fbf041ca7395e09089ce77d308b0e486f656"
+  },
+  "findings": [
+    "The preview fixes all seven borrow/origin false acceptances on the 75 semantic/resource fixtures; three prior valid-input rejections and 27 first-diagnostic differences remain.",
+    "Whole-module provider expansion first exceeds generic capacity (4503). Unit-pruned expansion fixes that failure but the development compiler overflows its default 1 MiB Windows stack (0xC00000FD).",
+    "A diagnostic-only cached PE stack-reservation edit to 16 MiB avoids the crash and reaches a bounded work rejection (code 10) in syntax.fy. This edited executable is not a build or fixed-point proof.",
+    "No borrow integration source was applied: the last admitted 370-source loop-control compiler still self-hosts at its exact recorded fixed point."
+  ],
+  "next": [
+    "Project only the borrowed-result function and its transitive borrowed-result callees, instead of every function in a provider module. Preserve canonical source/type coordinates and bounded work.",
+    "Bound recursive analysis stack usage; evaluate a compiler-host-only explicit stack reservation only after the analysis graph is reduced.",
+    "Re-run the existing cross-unit/generic-return origin tests, the 75-fixture comparison and self-source emission before applying the integration."
+  ],
+  "shippingCompilerChanged": false,
+  "publicApiChanged": false,
+  "dbChanged": false,
+  "ciChanged": false,
+  "pushed": false
+}

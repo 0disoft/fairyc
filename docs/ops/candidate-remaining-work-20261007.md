@@ -23,6 +23,32 @@ Receipts: `evidence/candidate-loop-control-private-20261012.json`,
 Next: connect the existing transitive borrowed-result and live-loan analysis
 before admitting project IR, retaining source diagnostic codes and spans.
 
+## Borrow integration preflight (2026-10-12)
+
+The cached integration preview connects existing borrowed-result/loan analysis
+before IR admission and preserves E2101/E2102/E2103/E2105/E3101 primary spans.
+All seven unsafe acceptances are rejected: the 75-fixture comparison reaches
+three status differences and 27 first-diagnostic differences. This result is
+experimental and does not describe the admitted source checkout.
+
+Self-source emission exposed two scaling issues. Whole-module provider expansion
+exceeds generic capacity (4503). Unit-pruned expansion passes that point but the
+development image overflows its default 1 MiB Windows stack (0xC00000FD). A
+**diagnostic-only** cached PE edit reserving 16 MiB reaches the work-budget limit
+(code 10 in syntax.fy) instead. That edited image is not a native build or fixed
+point proof. The integration has not been applied, so the admitted loop-control
+candidate retains its recorded full fixed point and still has 10 corpus status
+differences.
+
+Next: project only each required borrowed-result function and transitive callee,
+keeping source coordinates and independent bounded budgets. Reduce recursive
+stack usage, verify existing cross-unit/generic origin tests, then rerun corpus
+and self emission before applying the integration. No public API, DB, CI or
+shipping Go compiler change; no push. Proposal and observations:
+`evidence/candidate-borrow-integration-preview-20261012.json`,
+`evidence/candidate-borrow-integration-preview-20261012.patch`,
+`evidence/candidate-borrow-integration-corpus-20261012.json`.
+
 ## Prior native-dispatcher milestone (2026-10-12)
 
 The native-dispatcher snapshot at `1ce8d6b9` reaches a complete 369-source Windows
