@@ -1,5 +1,23 @@
 # Fairy 컴파일러 전환: 후속 작업 목록
 
+## Bounded frontend observation (2026-10-12)
+
+The native observer retains stderr, phase events and live progress, terminates
+the child on verification timeout or stream bounds, and publishes input/image
+hashes plus a receipt. Output completion is distinct from C packet validation.
+Normal output, structured rejection and timeout cases pass; Python compilation
+and diff hygiene pass. Hashing streams files instead of loading entire packets.
+
+The clean optimized borrow preview exits stage 7 code 10 at
+`module_unit_origin_flow.fy:1:1` after 80.71 seconds, with no packet. Development
+profiling records 295 phase events before its 180-second allowance expires;
+the last event is binding range 67..72. Inputs remain unchanged in both runs.
+The origin subphase is still unattributed; optimized profiling is next. The
+public borrow gate and new fixed point remain pending. Only verification
+transport and evidence change; public API, SDK ABI, DB, CI and product timeouts
+are unchanged, no push. Receipt:
+`evidence/candidate-borrow-frontend-observer-20261012.json`.
+
 ## Loop-control semantic parity (2026-10-12)
 
 The public checked-unit path now rejects `break`/`continue` without an enclosing

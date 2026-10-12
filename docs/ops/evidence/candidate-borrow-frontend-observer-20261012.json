@@ -1,0 +1,172 @@
+{
+  "schema": "fairyc.candidate-borrow-frontend-observer/v1",
+  "observerSHA256": "62abd16b8cae99ef746bac0cda9c717009b51910be08765b120b60c48046762b",
+  "checks": [
+    {
+      "case": "success",
+      "receipt": {
+        "schema": "fairyc.candidate-frontend-observation/v1",
+        "passed": true,
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-loop-control-bootstrap-20261012\\stage2.exe",
+          "--c-project-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\frontend-observer-smoke-20261012\\sources.list"
+        ],
+        "candidateSHA256": "873a9996bc2a9a3bcd844814b2ad28d1cfd72e4c0b5519086481f213dc0d57e0",
+        "manifestSHA256": "86659907bb851b774845df9b876d29ded80f8a7db268d696bd94d631cdba02f1",
+        "sourceFiles": 1,
+        "sourceUnchanged": true,
+        "timeoutSeconds": 15,
+        "timedOut": false,
+        "streamLimitExceeded": false,
+        "exit": 0,
+        "seconds": 0.30543379997834563,
+        "stdoutComplete": true,
+        "packetBytes": 2857,
+        "packetSHA256": "b69793581cdfb9005f465caaccb91a45fae92601514d8af090bef1ff2f9ba4d1",
+        "profileEvents": 0,
+        "diagnostics": [],
+        "latest": null,
+        "productTimeoutChanged": false,
+        "promotionGateReady": false
+      }
+    },
+    {
+      "case": "rejection",
+      "receipt": {
+        "schema": "fairyc.candidate-frontend-observation/v1",
+        "passed": false,
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-loop-control-bootstrap-20261012\\stage2.exe",
+          "--c-project-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\frontend-observer-smoke-20261012\\sources.list"
+        ],
+        "candidateSHA256": "873a9996bc2a9a3bcd844814b2ad28d1cfd72e4c0b5519086481f213dc0d57e0",
+        "manifestSHA256": "86659907bb851b774845df9b876d29ded80f8a7db268d696bd94d631cdba02f1",
+        "sourceFiles": 1,
+        "sourceUnchanged": true,
+        "timeoutSeconds": 15,
+        "timedOut": false,
+        "streamLimitExceeded": false,
+        "exit": 2,
+        "seconds": 0.2516010999970604,
+        "stdoutComplete": false,
+        "packetBytes": 0,
+        "packetSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "profileEvents": 0,
+        "diagnostics": [
+          {
+            "seconds": 0.043481400003656745,
+            "text": ".cache/frontend-observer-smoke-20261012/main.fy:1:34: error: project phase 2 stage 4 code 1009 (bytes 33..37)"
+          }
+        ],
+        "latest": null,
+        "productTimeoutChanged": false,
+        "promotionGateReady": false
+      }
+    },
+    {
+      "case": "timeout",
+      "receipt": {
+        "schema": "fairyc.candidate-frontend-observation/v1",
+        "passed": false,
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\borrow-profile-final-20261012\\candidate.exe",
+          "--c-project-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\borrow-profile-final-20261012\\target.list"
+        ],
+        "candidateSHA256": "00a7bcc5f5fa48ed908888cf258733be12ab36f7a9412eadc78095ba740ca6cf",
+        "manifestSHA256": "93a3e65be6e3c040be0c1a907c727ac28c58946a5cae1d97d7710c9a4e0ed622",
+        "sourceFiles": 370,
+        "sourceUnchanged": true,
+        "timeoutSeconds": 1,
+        "timedOut": true,
+        "streamLimitExceeded": false,
+        "exit": 1,
+        "seconds": 1.2522440000029746,
+        "stdoutComplete": false,
+        "packetBytes": 0,
+        "packetSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "profileEvents": 0,
+        "diagnostics": [],
+        "latest": null,
+        "productTimeoutChanged": false,
+        "promotionGateReady": false
+      }
+    }
+  ],
+  "optimizedCleanReplay": {
+    "schema": "fairyc.candidate-frontend-observation/v1",
+    "passed": false,
+    "argv": [
+      "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\borrow-mutable-call-guard-release-20261012\\candidate.exe",
+      "--c-project-file",
+      "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\borrow-mutable-call-guard-integration-20261012\\sources.list"
+    ],
+    "candidateSHA256": "8a9c333d58ab49406cfada359561f74b2500a4f469396cabe4cbb5bbb140591d",
+    "manifestSHA256": "ec725a23546d11ed304881fa31dc5c96f96d0a7aa4445e5831b5f264a2f28e7a",
+    "sourceFiles": 370,
+    "sourceUnchanged": true,
+    "timeoutSeconds": 900,
+    "timedOut": false,
+    "streamLimitExceeded": false,
+    "exit": 2,
+    "seconds": 80.71478989999741,
+    "stdoutComplete": false,
+    "packetBytes": 0,
+    "packetSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "profileEvents": 0,
+    "diagnostics": [
+      {
+        "seconds": 80.42626320000272,
+        "text": "examples/lexer_candidate/src/module_unit_origin_flow.fy:1:1: error: project phase 2 stage 7 code 10 (bytes 0..0)"
+      }
+    ],
+    "latest": null,
+    "productTimeoutChanged": false,
+    "promotionGateReady": false
+  },
+  "developmentProfile": {
+    "schema": "fairyc.candidate-frontend-observation/v1",
+    "passed": false,
+    "argv": [
+      "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\borrow-profile-final-20261012\\candidate.exe",
+      "--c-project-file",
+      "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\borrow-profile-final-20261012\\target.list"
+    ],
+    "candidateSHA256": "00a7bcc5f5fa48ed908888cf258733be12ab36f7a9412eadc78095ba740ca6cf",
+    "manifestSHA256": "93a3e65be6e3c040be0c1a907c727ac28c58946a5cae1d97d7710c9a4e0ed622",
+    "sourceFiles": 370,
+    "sourceUnchanged": true,
+    "timeoutSeconds": 180,
+    "timedOut": true,
+    "streamLimitExceeded": false,
+    "exit": 1,
+    "seconds": 180.22081859997706,
+    "stdoutComplete": false,
+    "packetBytes": 0,
+    "packetSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "profileEvents": 295,
+    "diagnostics": [],
+    "latest": {
+      "seconds": 176.30037879999145,
+      "phase": "bind",
+      "first": 67,
+      "stop": 72,
+      "work": null
+    },
+    "productTimeoutChanged": false,
+    "promotionGateReady": false
+  },
+  "limitations": [
+    "Development profiling exceeded the verification allowance; no completed C packet.",
+    "Optimized clean replay fails at stage 7 code 10; the particular origin subphase is not yet attributed.",
+    "No public borrow gate admission or full current-source fixed point."
+  ],
+  "publicAPIChanged": false,
+  "sdkABIChanged": false,
+  "dbChanged": false,
+  "ciChanged": false,
+  "productTimeoutChanged": false,
+  "pushed": false
+}
