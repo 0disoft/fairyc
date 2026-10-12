@@ -2,7 +2,17 @@
 
 ## Current local candidate evidence (2026-10-12)
 
-The latest complete image covers all 380 current self sources: a 30,962,039-byte
+The latest source slice adds the canonical public-interface v5 header/state
+prefix through package signature metadata. Selected UID and raw layout hash
+exclude local package/module/declaration numbers; selected canonical facts are
+revalidated independently of unrelated packages. Four tests pass Go native and
+both candidate C profiles, including actual Go encoder bytes and partial-budget
+exhaustion. Source check passes 388 files / 4948 MIR functions. Full module/item
+extraction, interface hashing and cache consumption remain pending. The current
+381-source dispatcher has not been rebuilt or replayed for a new fixed point.
+Evidence: [state public-interface prefix](../ops/evidence/candidate-state-public-prefix-20261012.json).
+
+The preceding complete image covers the 380-source state-layout snapshot: a 30,962,039-byte
 C packet and a 4,398,080-byte release compiler with the explicit 16 MiB stack.
 Current source hashes are verified. Fresh paired CLI comparison matches all 75
 semantic/resource cases, with zero status and first-code/span differences. Only
@@ -10,7 +20,7 @@ the two previous package-state differences change; the other 73 observations and
 fixture source hashes remain unchanged. Sixteen extra state cases also match
 first diagnostic path/line/column/code/span. A state-declaration program returns
 42 in both native profiles; live owned-project ssize_t C emission succeeds.
-Current-source consecutive generations now match complete image bytes, with no
+That snapshot's consecutive generations match complete image bytes, with no
 exclusions; Stage1 and Stage2 replay all 380 sources into the identical packet.
 Both pass 249 lexer cases and malformed-frame checks. The maintained bootstrap
 verifier reuses these native builds, checks the explicit 16 MiB stack in both PE

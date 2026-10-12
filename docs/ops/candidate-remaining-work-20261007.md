@@ -1,5 +1,30 @@
 # Fairy 컴파일러 전환: 후속 작업 목록
 
+## Canonical state public-interface prefix (2026-10-12)
+
+`module_state_interface` emits the public-interface v5 header and state section
+through `signatures::public_state_prefix`. The selected package's cooked UID is
+length-framed with big-endian u64, followed by the raw 32-byte layout hash.
+Package, module and declaration numbers are excluded. No state is distinct from
+an empty state layout. Selected field prefixes and layout hash are recomputed;
+malformed unrelated package layouts do not affect this package's record.
+Duplicate selected layouts, invalid ranges and changed canonical facts reject.
+
+Four authored tests pass Go native and both candidate C profiles, including exact
+bytes produced by the actual Go `moduleinterface.Encode` oracle and partially
+exhausted work histories. Validation has its own bounded history, folded once
+into the unchanged 1048576 caller ledger before publication. Source check passes
+388 files / 4948 MIR functions; the source lock is updated and final native tests
+verify it. The current dispatcher has 381 reachable sources.
+
+This section is a prefix, not the complete public-interface hash or package cache
+key. Module/item extraction, full v5 hashing and the cache consumer remain open.
+The complete image, paired CLI corpus and current-source fixed point are not
+replayed in this slice; the preceding 380-source fixed point is historical.
+Broader/multiple diagnostics, product timeout/default stack, Linux/full suite and
+hosted CI remain. No public API, SDK ABI, DB, CI, runner or timeout change; no push.
+Receipt: `evidence/candidate-state-public-prefix-20261012.json`.
+
 ## Current state-aware fixed point and native CLI (2026-10-12)
 
 The fixed point now covers all 380 current self sources. Stage1 replays them in
