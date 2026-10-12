@@ -28,6 +28,7 @@ def main():
     parser.add_argument('--test', action='append', required=True)
     parser.add_argument('--selected-tests-only', action='store_true', help='verify only explicitly selected authored tests instead of requiring the entire module')
     parser.add_argument('--frontend-timeout', type=int, default=60, help='verification-only candidate frontend allowance, 1..900 seconds')
+    parser.add_argument('--execution-timeout', type=int, default=60, help='verification-only combined candidate test image allowance, 1..900 seconds')
     parser.add_argument('--output', type=Path, required=True)
     parser.add_argument('--fixture', type=Path, help='hash and forward one binary oracle fixture to every execution')
     parser.add_argument('--candidate-only', action='store_true', help='execute private host-ABI tests only through candidate C; Go native cannot link these private adapters')
@@ -39,6 +40,8 @@ def main():
     args = parser.parse_args()
     if not 1 <= args.frontend_timeout <= 900:
         parser.error('frontend timeout must be in 1..900 seconds')
+    if not 1 <= args.execution_timeout <= 900:
+        parser.error('execution timeout must be in 1..900 seconds')
     if args.isolated_native and args.candidate_only:
         parser.error('isolated-native requires Go native execution')
     if not __debug__:
@@ -183,7 +186,7 @@ def main():
     for profile, flags in [('development', []), ('release', ['--release'])]:
         image = output / (profile + '.exe')
         run([args.builder.resolve(), '--packet', packet_path, '--packet-sha256', digest(packet_path), '--output', image, *flags], timeout=600)
-        executed = run([image, *arguments],stdin=streams.get('stdin'),stderr=streams.get('stderr',b''))
+        executed = run([image, *arguments],timeout=args.execution_timeout,stdin=streams.get('stdin'),stderr=streams.get('stderr',b''))
         assert executed.stdout == streams.get('stdout',b''), invocations[-1]
         executions.append(dict(profile=profile, path=str(image), sha256=digest(image), exit=executed.returncode))
     assert digest(lock) == lock_sha256, 'lock changed during verification'
@@ -192,6 +195,7 @@ def main():
     receipt = dict(schema='fairyc.candidate-private-tests/v1', passed=True, module=args.module, sourceInputs=source_inputs, tools=images, native=report, nativeTests=0 if args.candidate_only else len(expected), authoredTestsExecuted=len(expected), candidateOnly=args.candidate_only, lockSHA256=lock_sha256, candidateInputFiles=len(paths), candidatePacketSHA256=digest(packet_path), candidateExecutions=executions, invocations=invocations, publicApiChanged=False, dbChanged=False, ciChanged=False, pushed=False)
     receipt['selection'] = dict(mode='explicit-subset' if args.selected_tests_only else 'all-authored', authoredTests=len(test_names), selectedTests=len(expected))
     receipt['frontendTimeoutSeconds'] = args.frontend_timeout
+    receipt['executionTimeoutSeconds'] = args.execution_timeout
     receipt['productTimeoutChanged'] = False
     receipt['wrapperEffects'] = effects
     if native_isolation:

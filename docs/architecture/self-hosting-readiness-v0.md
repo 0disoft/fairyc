@@ -2,6 +2,50 @@
 
 ## Current local candidate evidence (2026-10-13)
 
+Closed nominal package context and streamed definitions (2026-10-13)
+
+`generic_package_context` retains every original module AST and exact resolved
+alias-to-provider namespace in the Go closed-graph identity. Modules sort by
+canonical package owner then module path; import maps sort by alias and retain
+empty {}. Original source stamps are checked. The shared module header writer
+keeps standalone bytes unchanged while graph/module JSON streams in declaration,
+header and original binding/literal fragments. A first pass measures the exact
+joined byte length; a second feeds DigestChunks-compatible domain/length framing
+and fragments into SHA-256. Complete graph and module JSON are not retained.
+Owned contexts survive workspace/table destruction and produce
+source-nominal-package-v0 definitions for nongeneric structs/resources.
+
+Six Go context hashes and 127 nominal definitions match: four real workspaces
+contain 54 modules and 124 nominal definitions, the three-module authored graph
+adds three, and eight unchanged original SDK Vec ASTs form a 1260177-byte scale
+graph. All real workspace contexts also exceed 1MiB. Private helper/provider
+changes invalidate identity; manifest order, source order and disposable owner
+numbers do not. Five authored tests pass Go native and candidate C dev/release,
+including exact-fit/exhausted bookkeeping, encoding and hash histories, retained
+failure, stale sources and invalid/generic selection. Three existing complete
+module JSON/nominal regression tests pass all three engines. All 55 fixture files
+remain unchanged. Source check passes 414 files / 5286 MIR functions; source/copy
+hashes and the original lock are verified.
+
+Bounds are explicit: 1MiB per declaration/header/sidecar writer, 16MiB graph
+bookkeeping, 1GiB cumulative abstract encoding work and 96MiB hash input. This
+adds a graph operation without changing the existing standalone writer limit.
+The initial whole-module work exhaustion required fragmentation. The initial
+combined candidate development run exceeded the verifier's default 60-second
+execution allowance and is not a pass. An explicit verification-only 240-second
+option now bounds that workload; its default remains 60 seconds and invalid
+0/901 values reject. Unchanged Go-native results are reused after exact input
+fingerprint and 135 copied source/test hash checks. Product timeout is unchanged.
+No memory or compiler-speed claim is made; batch nominal extraction remains a
+later consumer optimization.
+
+Reachable-template closures and actual planner facts remain next, followed by
+dispatcher/cache integration. Latest-source full image/fixed point, Linux/full
+suite and same-head hosted CI are not rerun for this bounded slice. Private
+candidate API and verification harness change; public API, SDK ABI, DB,
+repository hygiene, CI/runner and product timeout remain unchanged. No push.
+Receipt: [evidence](../ops/evidence/candidate-generic-package-context-20261013.json).
+
 Resolved package import definitions (2026-10-13)
 
 `generic_package_bindings` collects the exact projected source owners and import
