@@ -214,6 +214,22 @@ Unchanged successful Go-native tests were reused after this C-only admission fix
 Source check passes 373 files / 4775 MIR functions. Host temporary-root discovery
 and public build/run dispatch remain pending; public SDK ABI is unchanged.
 Scratch receipt: [candidate-native-scratch-20261012.json](../ops/evidence/candidate-native-scratch-20261012.json).
+
+## Native host paths
+
+`windows_host_paths.fy` queries the current directory, host temporary root and
+compiler image through three direct OS adapters. Fairy validates bounded UTF-16,
+rejects malformed surrogates/NULs and owns the resulting UTF-8 paths. The private
+driver is selected beside the compiler image as `fairyc-candidate-build.exe`.
+This introduces no workspace configuration or environment override.
+
+Two authored tests pass in candidate C development/release: exact Unicode
+conversion/malformed rejection, native current/temp paths against an OS oracle,
+image path against argv and companion selection. Go-native is skipped because
+its runtime does not link private host adapters. The host symbol-selection Go
+test passes. Source check passes 374 files / 4786 MIR functions. Public build/run
+dispatch remains pending; public SDK ABI is unchanged.
+Path receipt: [candidate-windows-host-paths-20261012.json](../ops/evidence/candidate-windows-host-paths-20261012.json).
 Native records and flags follow [STARTUPINFOW](https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/ns-processthreadsapi-startupinfow),
 [extended job limits](https://learn.microsoft.com/en-us/windows/win32/api/winnt/ns-winnt-jobobject_extended_limit_information),
 [CreateProcessW](https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-createprocessw)

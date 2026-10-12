@@ -11,6 +11,14 @@ checks pass for the seed and both generations. Receipt:
 
 ## Workspace native plan (2026-10-12)
 
+Host current/temp/image path discovery and adjacent private-driver selection are
+now Fairy-owned. Two authored tests pass in both candidate C profiles against
+physical OS paths and malformed Unicode fixtures; Go-native cannot link the
+private OS adapters. Source check passes 374 files / 4786 MIR functions, and the
+host symbol-selection Go test passes. Next: public build/run dispatcher,
+native-driver calls and exact stable output/exit behavior. Receipt:
+`evidence/candidate-windows-host-paths-20261012.json`.
+
 The next prerequisite is also complete: `native_scratch` owns one exclusively
 created host temporary directory, preserves colliding names and removes its
 tree on early return or explicit close. Three authored filesystem tests pass in

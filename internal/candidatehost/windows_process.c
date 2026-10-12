@@ -53,3 +53,6 @@ int32_t fairyc_private_windows_compare_name_v1(const uint8_t *left, size_t left_
 }
 void *fairyc_private_windows_open_v1(uint32_t access, int32_t inherit, uint32_t pid) { return OpenProcess(access, inherit, pid); }
 int32_t fairyc_private_windows_handle_count_v1(uint32_t *count) { return GetProcessHandleCount(GetCurrentProcess(), count); }
+uint32_t fairyc_private_windows_current_path_v1(uint8_t *data, uint32_t capacity) { return GetCurrentDirectoryW(capacity, (LPWSTR)data); }
+uint32_t fairyc_private_windows_temp_path_v1(uint8_t *data, uint32_t capacity) { return GetTempPathW(capacity, (LPWSTR)data); }
+uint32_t fairyc_private_windows_image_path_v1(uint8_t *data, uint32_t capacity) { return GetModuleFileNameW(NULL, (LPWSTR)data, capacity); }
