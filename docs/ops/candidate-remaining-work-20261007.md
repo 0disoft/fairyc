@@ -9,6 +9,28 @@ are identical, with no excluded bytes. All 249 Go lexer cases and private framin
 checks pass for the seed and both generations. Receipt:
 `evidence/candidate-complete-stage2-20261012.json`.
 
+## Fairy-owned Windows process lifecycle (2026-10-12)
+
+Fairy now owns process flags, suspended launch, Job Object assignment, resume,
+bounded wait and handle resources. Thin C adapters forward Win32 ABI calls;
+the bridge embeds them only for registered private symbols. Two authored tests
+pass in candidate C development/release on ordinary and Korean/space-containing
+paths. Special argv and full 32-bit exit bits pass; a test child observed live
+with native status 259 is terminated with its parent on the 500ms deadline.
+Eight repeated successes and eight repeated creation failures retain their own
+warmed handle baselines. The initial once-only 49-to-93 handle increase is not
+attributed; no repeated growth is observed. An ordinary packet's development
+image remains byte-identical to its prior artifact.
+
+Go source check passes 368 files / 4716 MIR functions. Host-symbol selection and
+existing bridge argv/deadline checks pass. Private Go-native tests are explicitly
+skipped because the stable runner has no linkage for these adapters; both actual
+candidate C profiles execute. Next: stream byte forwarding, reconcile provisional
+argument admission, then stable build/run and status/trap mapping. Linux/full suite
+and promotion remain open. Private host ABI added; public API, SDK ABI, DB and CI
+are unchanged; no push. Contract: `../architecture/candidate-windows-host-v1.md`.
+Receipt: `evidence/candidate-windows-process-20261012.json`.
+
 ## Fairy Windows command encoding (2026-10-12)
 
 `windows_command` builds a complete owned UTF-16 command line in Fairy, with

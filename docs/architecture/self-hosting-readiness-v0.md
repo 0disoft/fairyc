@@ -2371,3 +2371,19 @@ profiles pass; source check passes 367 files / 4712 MIR functions. Process launc
 and stable build/run remain pending. Public API, SDK ABI, DB and CI are unchanged;
 no push. Receipt:
 [candidate-windows-command-20261012.json](../ops/evidence/candidate-windows-command-20261012.json).
+
+## Fairy Windows process host (2026-10-12)
+
+Fairy owns hidden suspended launch, job assignment/resume, deadlines and handle
+resources. C adapters only marshal Win32 calls. Two actual candidate C cases pass
+in both profiles on ordinary and Korean/space paths: argv/full exit bits,
+repeated warmed handle counts and native confirmation that the observed live
+parent/child terminate at the deadline. The initial one-time handle increase is
+not attributed. An ordinary development image retains its exact prior bytes.
+Go source check passes 368 files / 4716 MIR functions and host/bridge checks pass.
+Go-native is explicitly skipped for private adapter linkage. Stream byte tests,
+stable argument admission, build/run/status/trap integration and broader platform
+promotion gates remain. Private host ABI added; public API, SDK ABI, DB and CI are
+unchanged; no push. Contract:
+[candidate-windows-host-v1.md](candidate-windows-host-v1.md). Receipt:
+[candidate-windows-process-20261012.json](../ops/evidence/candidate-windows-process-20261012.json).

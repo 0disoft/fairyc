@@ -16,6 +16,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/0disoft/fairyc/internal/candidatehost"
 	"github.com/0disoft/fairyc/internal/cdriver"
 	"github.com/0disoft/fairyc/internal/cruntime"
 	"github.com/0disoft/fairyc/internal/cstdlib"
@@ -124,7 +125,14 @@ func runtimeSource(header string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return scalar + "\n" + storage, nil
+	host, err := candidatehost.WindowsSource(header)
+	if err != nil {
+		return "", err
+	}
+	if host == "" {
+		return scalar + "\n" + storage, nil
+	}
+	return scalar + "\n" + storage + "\n" + host, nil
 }
 
 func Build(options Options) (Result, error) {

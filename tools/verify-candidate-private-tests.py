@@ -30,6 +30,7 @@ def main():
     parser.add_argument('--frontend-timeout', type=int, default=60, help='verification-only candidate frontend allowance, 1..900 seconds')
     parser.add_argument('--output', type=Path, required=True)
     parser.add_argument('--fixture', type=Path, help='hash and forward one binary oracle fixture to every execution')
+    parser.add_argument('--candidate-only', action='store_true', help='execute private host-ABI tests only through candidate C; Go native cannot link these private adapters')
     parser.add_argument('--unchanged-paths', type=Path, help='JSON list of repository-relative paths whose bytes and modification times must remain unchanged')
     args = parser.parse_args()
     if not 1 <= args.frontend_timeout <= 900:
@@ -114,12 +115,14 @@ def main():
 
     expected = {f'tests::{args.module}::{name}' for name in args.test}
     selection = [arg for name in args.test for arg in ('--exact', f'tests::{args.module}::{name}')]
-    native = run([args.compiler.resolve(), 'test', '--native', '--locked', '--json', '--capture-output', *selection, *(['--', *arguments] if arguments else [])], cwd=PROJECT, timeout=600)
-    report = json.loads(native.stdout)
-    save(output / 'native.json', report)
-    assert report['passed'] == len(expected) and report['failed'] == 0
-    assert report['engine'] == 'native' and report['lock'] == 'verified'
-    assert {row['identity'] for row in report['tests']} == expected
+    report = None
+    if not args.candidate_only:
+        native = run([args.compiler.resolve(), 'test', '--native', '--locked', '--json', '--capture-output', *selection, *(['--', *arguments] if arguments else [])], cwd=PROJECT, timeout=600)
+        report = json.loads(native.stdout)
+        save(output / 'native.json', report)
+        assert report['passed'] == len(expected) and report['failed'] == 0
+        assert report['engine'] == 'native' and report['lock'] == 'verified'
+        assert {row['identity'] for row in report['tests']} == expected
     manifest = output / 'sources.list'
     manifest.write_text(''.join(p.relative_to(ROOT).as_posix() + '\n' for p in paths), encoding='utf-8', newline='\n')
     packet = run([args.candidate.resolve(), '--c-project-file', manifest], timeout=args.frontend_timeout)
@@ -136,14 +139,14 @@ def main():
     assert digest(lock) == lock_sha256, 'lock changed during verification'
     assert all(digest(ROOT / row['path']) == row['sha256'] for row in source_inputs), 'sources changed during verification'
     assert all(digest(Path(row['path'])) == row['sha256'] for row in images.values()), 'tool changed during verification'
-    receipt = dict(schema='fairyc.candidate-private-tests/v1', passed=True, module=args.module, sourceInputs=source_inputs, tools=images, native=report, nativeTests=len(expected), lockSHA256=lock_sha256, candidateInputFiles=len(paths), candidatePacketSHA256=digest(packet_path), candidateExecutions=executions, invocations=invocations, publicApiChanged=False, dbChanged=False, ciChanged=False, pushed=False)
+    receipt = dict(schema='fairyc.candidate-private-tests/v1', passed=True, module=args.module, sourceInputs=source_inputs, tools=images, native=report, nativeTests=0 if args.candidate_only else len(expected), authoredTestsExecuted=len(expected), candidateOnly=args.candidate_only, lockSHA256=lock_sha256, candidateInputFiles=len(paths), candidatePacketSHA256=digest(packet_path), candidateExecutions=executions, invocations=invocations, publicApiChanged=False, dbChanged=False, ciChanged=False, pushed=False)
     receipt['selection'] = dict(mode='explicit-subset' if args.selected_tests_only else 'all-authored', authoredTests=len(test_names), selectedTests=len(expected))
     receipt['frontendTimeoutSeconds'] = args.frontend_timeout
     receipt['productTimeoutChanged'] = False
     if snapshots:
         receipt['unchangedPaths'] = [dict(path=name, snapshot=before) for name, _, before in snapshots]
     save(output / 'receipt.json', receipt)
-    print(args.module, 'passed:', len(expected), 'native tests and both candidate C profiles', flush=True)
+    print(args.module, 'passed:', len(expected), 'authored tests in both candidate C profiles' + ('' if args.candidate_only else ' and Go-native'), flush=True)
 
 
 if __name__ == '__main__':
