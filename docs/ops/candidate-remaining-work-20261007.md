@@ -11,7 +11,9 @@ Complete original specialization membership is now retained and verified in the
 [specialization checkpoint](candidate-cache-specializations-20261014.md).
 Exact loaded workspace facts matched to the complete owner are now verified in
 the [workspace checkpoint](candidate-cache-workspace-20261014.md).
-Execution-environment facts, complete-owner key composition and actual reuse
+The actual running Windows compiler image identity is now verified in the
+[compiler identity checkpoint](candidate-compiler-identity-20261014.md).
+SDK/target/cache environment composition, complete-owner keys and actual reuse
 remain open.
 
 Current source-identified build/run integration:

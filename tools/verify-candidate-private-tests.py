@@ -39,6 +39,7 @@ def main():
     parser.add_argument('--native-stack-editor', type=Path, help='explicit MSVC editbin for applying --stack-reserve-bytes to the private Go-native program; requires --native-program')
     parser.add_argument('--stdin-fixture', type=Path, help='exact binary input for each candidate C execution')
     parser.add_argument('--stdout-fixture', type=Path, help='expected complete candidate stdout, empty by default')
+    parser.add_argument('--stdout-executable-identity', action='store_true', help='expect the exact running image SHA-256 identity on stdout and verify a spoofed argv[0] launch too')
     parser.add_argument('--stderr-fixture', type=Path, help='expected complete candidate stderr, empty by default')
     parser.add_argument('--unchanged-paths', type=Path, help='JSON list of repository-relative paths whose bytes and modification times must remain unchanged')
     args = parser.parse_args()
@@ -54,6 +55,8 @@ def main():
         parser.error('native-program requires isolated-native and Go execution')
     if args.native_stack_editor and (not args.native_program or not args.stack_reserve_bytes):
         parser.error('native-stack-editor requires native-program and a nonzero stack reserve')
+    if args.stdout_executable_identity and (args.stdout_fixture or not (args.native_program or args.candidate_only)):
+        parser.error('stdout-executable-identity requires native-program or candidate-only and excludes stdout-fixture')
     if not __debug__:
         parser.error('verification requires Python without -O')
     if not re.fullmatch(r'[a-z][a-z0-9_]*', args.module):
@@ -136,11 +139,13 @@ def main():
     lock_sha256 = digest(lock)
     invocations = []
 
-    def run(argv, cwd=ROOT, timeout=60, stdin=None, stderr=b''):
+    def run(argv, cwd=ROOT, timeout=60, stdin=None, stderr=b'', executable=None):
         start = time.monotonic()
-        result = subprocess.run(list(map(str, argv)), cwd=cwd, capture_output=True, timeout=timeout, input=stdin)
+        result = subprocess.run(list(map(str, argv)), cwd=cwd, capture_output=True, timeout=timeout, input=stdin, executable=None if executable is None else str(executable))
         row = dict(argv=list(map(str, argv)), cwd=str(cwd), seconds=time.monotonic() - start, exit=result.returncode, stdoutBytes=len(result.stdout), stdoutSHA256=hashlib.sha256(result.stdout).hexdigest(), stderr=result.stderr.decode('utf-8', errors='replace'))
         invocations.append(row)
+        if executable is not None:
+            row['executable'] = str(executable)
         save(output / 'invocations.json', invocations)
         for name, snapshot, before in snapshots:
             assert snapshot() == before, 'readonly path changed: ' + name
@@ -204,7 +209,11 @@ def main():
                 assert bytes(expected_image) == after, 'stack editor changed private program code or data'
                 native_stack = dict(reserveBytes=args.stack_reserve_bytes, originalReserveBytes=struct.unpack_from('<Q', before, offset + 72)[0], originalSHA256=hashlib.sha256(before).hexdigest())
             native = run([built[0], *arguments], cwd=native_project, timeout=args.execution_timeout, stdin=streams.get('stdin', b''))
-            assert native.stdout == streams.get('stdout', b''), 'Go program output differs from the expected complete fixture'
+            expected_stdout = (b'fairyc.compiler-executable-sha256/v1:' + digest(built[0]).encode() + b'\n') if args.stdout_executable_identity else streams.get('stdout', b'')
+            assert native.stdout == expected_stdout, 'Go program output differs from the expected complete fixture'
+            if args.stdout_executable_identity:
+                spoofed = run(['missing-compiler-argv-zero.exe', *arguments], cwd=native_project, timeout=args.execution_timeout, stdin=streams.get('stdin', b''), executable=built[0])
+                assert spoofed.stdout == expected_stdout, 'Go current image identity followed spoofed argv[0]'
             native_program = dict(path=str(built[0]), sha256=digest(built[0]), selectedTests=sorted(expected), stdoutBytes=len(native.stdout), stdoutSHA256=hashlib.sha256(native.stdout).hexdigest())
             native_program['stack'] = native_stack
         else:
@@ -230,7 +239,11 @@ def main():
             offset = struct.unpack_from('<I', pe, 60)[0] + 24
             assert struct.unpack_from('<H', pe, offset)[0] == 0x20b and struct.unpack_from('<Q', pe, offset + 72)[0] == args.stack_reserve_bytes, 'PE stack reserve differs from the explicit test setting'
         executed = run([image, *arguments],timeout=args.execution_timeout,stdin=streams.get('stdin'),stderr=streams.get('stderr',b''))
-        assert executed.stdout == streams.get('stdout',b''), invocations[-1]
+        expected_stdout = (b'fairyc.compiler-executable-sha256/v1:' + digest(image).encode() + b'\n') if args.stdout_executable_identity else streams.get('stdout',b'')
+        assert executed.stdout == expected_stdout, invocations[-1]
+        if args.stdout_executable_identity:
+            spoofed = run(['missing-compiler-argv-zero.exe', *arguments], timeout=args.execution_timeout, stdin=streams.get('stdin'), stderr=streams.get('stderr',b''), executable=image)
+            assert spoofed.stdout == expected_stdout, 'candidate current image identity followed spoofed argv[0]'
         executions.append(dict(profile=profile, path=str(image), sha256=digest(image), exit=executed.returncode))
     assert digest(lock) == lock_sha256, 'lock changed during verification'
     assert all(digest(ROOT / row['path']) == row['sha256'] for row in source_inputs), 'sources changed during verification'
@@ -245,6 +258,8 @@ def main():
     receipt['executionTimeoutSeconds'] = args.execution_timeout
     receipt['productTimeoutChanged'] = False
     receipt['stackReserveBytes'] = args.stack_reserve_bytes
+    if args.stdout_executable_identity:
+        receipt['executableIdentityVerification'] = dict(encoding='fairyc.compiler-executable-sha256/v1', independentOracle='Python hashlib SHA-256 of each complete executed image', spoofedArgvZeroPassed=True)
     receipt['wrapperEffects'] = effects
     if native_isolation:
         receipt['nativeIsolation'] = native_isolation
