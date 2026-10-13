@@ -1,0 +1,30 @@
+module tests::generic_signature_diagnostics;
+import generic_signature_diagnostics as reports;
+import project_source_plan as planner;
+import generic_source_plan as plan;
+import module_public_type_text as coordinates;
+import module_catalog as catalog;
+import syntax as syntax;
+import scanner as scanner;
+import std::fs as fs;
+import std::text as text;
+import std::bytes as bytes;
+import std::process as process;
+import std::vec as v;
+
+fn syntax::Parsed parsed(ref u8[] raw){let b=switch(bytes::copy(raw)){case .ok(value):{value}case .err(_):{assert(false);return parsed(raw);}};let s=switch(scanner::collect(b,false,65536,1048576,256,16777216)){case .ok(value):{value}case .err(_):{assert(false);return parsed(raw);}};return switch(syntax::parse(s,512)){case .ok(value):{assert(syntax::problem_count(ref value)==0);value}case .err(_):{assert(false);parsed(raw)}};}
+fn coordinates::Coordinates table(){let name=b"fypc1-sha256-1111111111111111111111111111111111111111111111111111111111111111";let names=switch(bytes::copy(name)){case .ok(value):{value}case .err(_):{assert(false);return table();}};var v::Vec<coordinates::Coordinate> rows=v::empty<coordinates::Coordinate>();assert(v::push<coordinates::Coordinate>(ref mut rows,coordinates::Coordinate{.owner=0,.start=0,.end=name.len}).is_ok);return coordinates::assemble(names,rows);}
+fn plan::Plan planned(ref v::Vec<syntax::Parsed> sources,ref v::Vec<catalog::Binding> imports){var v::Vec<usize> owners=v::empty<usize>();var usize i=0;while(i<v::len<syntax::Parsed>(sources)){assert(v::push<usize>(ref mut owners,0).is_ok);i+=1;}let table=table();var usize work=0;return switch(planner::build_sources(sources,ref owners,imports,ref table,ref mut work)){case .ok(value):{value}case .err(_):{assert(false);planned(sources,imports)}};}
+fn usize number(ref u8[] wire,ref mut usize at){assert(*at<=wire.len && wire.len-*at>=8);var usize out=0;var usize i=0;while(i<8){out=out*256+(wire[*at+i] as usize);i+=1;}*at+=8;return out;}
+fn ref u8[] field(ref u8[] wire,ref mut usize at){let size=number(wire,at);assert(*at<=wire.len && size<=wire.len-*at);let start=*at;*at+=size;return wire[start..*at];}
+@effects(filesystem)
+fn bytes::Buffer fixture(){var u8[4096] path=[0;4096];let size=switch(process::arg(1,ref mut path)){case .ok(value):{value}case .err(_):{assert(false);0}};let ref u8[] view=ref path;let name=switch(text::validate_utf8(view[..size])){case .ok(value):{value}case .err(_):{assert(false);return bytes::empty();}};var fs::File file=switch(fs::open_read_utf8(name)){case .ok(value):{value}case .err(_):{assert(false);return bytes::empty();}};var bytes::Buffer out=bytes::empty();assert(bytes::resize_zeroed(ref mut out,1048577).is_ok);var usize used=0;while(true){let n=switch(fs::read(ref mut file,bytes::view_mut(ref mut out)[used..])){case .ok(value):{value}case .err(_):{assert(false);return out;}};used+=n;assert(used<=1048576);if(n==0){break;}}assert(fs::close(file).is_ok && bytes::truncate(ref mut out,used).is_ok);return out;}
+// Return detached reports after the source and plan owners have been cleaned up.
+fn reports::Reports from_wire(ref u8[] wire,ref mut usize cursor){let total=number(wire,cursor);discard field(wire,cursor);var v::Vec<syntax::Parsed> sources=v::empty<syntax::Parsed>();var v::Vec<catalog::Binding> imports=v::empty<catalog::Binding>();var usize i=0;while(i<total){discard field(wire,cursor);assert(v::push<syntax::Parsed>(ref mut sources,parsed(field(wire,cursor))).is_ok);let count=number(wire,cursor);var usize j=0;while(j<count){assert(v::push<catalog::Binding>(ref mut imports,catalog::Binding{.source=i,.declaration=j+2,.target=number(wire,cursor)}).is_ok);j+=1;}i+=1;}let original=planned(ref sources,ref imports);var usize work=0;return switch(reports::collect(ref original,ref sources,ref mut work)){case .ok(value):{value}case .err(_):{assert(false);reports::empty()}};}
+@test
+@effects(filesystem)
+fn void signature_reports_match_go_original_spans_and_features(){let fixture=fixture();let wire=bytes::view(ref fixture);assert(wire.len>16 && bytes::equal(wire[..8],b"FYUSIG01"));var usize cursor=8;let cases=number(wire,ref mut cursor);assert(cases==22);var usize c=0;while(c<cases){let actual=from_wire(wire,ref mut cursor);let count=number(wire,ref mut cursor);assert(reports::count(ref actual)==count);var usize i=0;while(i<count){let d=reports::at(ref actual,i);assert(d.module_index==number(wire,ref mut cursor) && d.start==number(wire,ref mut cursor) && d.end==number(wire,ref mut cursor) && bytes::equal(reports::name(ref actual,i),field(wire,ref mut cursor)));i+=1;}c+=1;}assert(cursor==wire.len);}
+fn v::Vec<syntax::Parsed> source(ref u8[] raw){var v::Vec<syntax::Parsed> sources=v::empty<syntax::Parsed>();assert(v::push<syntax::Parsed>(ref mut sources,parsed(raw)).is_ok);return sources;}
+fn ref u8[] sample(){return b"module root;fn T id<T>(T x){return x;}fn void main(){discard id<u16>(42);}";}
+@test
+fn void signature_reports_reject_stale_sources_and_exhausted_work(){let sources=source(sample());let imports=v::empty<catalog::Binding>();let original=planned(ref sources,ref imports);var usize work=0;let actual=switch(reports::collect(ref original,ref sources,ref mut work)){case .ok(value):{value}case .err(_):{assert(false);return;}};assert(reports::count(ref actual)==2 && work>0);let needed=work;work=16777216-needed;assert(reports::collect(ref original,ref sources,ref mut work).is_ok && work==16777216);work=16777216-needed+1;let overflow=reports::collect(ref original,ref sources,ref mut work);switch(overflow){case .ok(_):{assert(false);}case .err(code):{assert(code==10);}};work=16777217;switch(reports::collect(ref original,ref sources,ref mut work)){case .ok(_):{assert(false);}case .err(code):{assert(code==10);}};let changed=source(b"module root;fn T id<T>(T x){return x;}fn void main(){discard id<u16>(43);}");work=0;switch(reports::collect(ref original,ref changed,ref mut work)){case .ok(_):{assert(false);}case .err(code):{assert(code==12);}};let missing=v::empty<syntax::Parsed>();work=0;switch(reports::collect(ref original,ref missing,ref mut work)){case .ok(_):{assert(false);}case .err(code):{assert(code==9);}};}
