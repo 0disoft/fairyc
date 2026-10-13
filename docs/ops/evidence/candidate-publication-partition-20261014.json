@@ -1,0 +1,179 @@
+{
+  "schema": "fairyc.candidate-publication-partition/v1",
+  "date": "2026-10-14",
+  "targetedTestsPassed": true,
+  "fullDispatcherPassed": false,
+  "sourceInputs": [
+    {
+      "path": "examples/lexer_candidate/src/module_unit_c_emit.fy",
+      "sha256": "fe223349cbf8ee6ac79aee2fb3bd8893259e6cdd54def4dc90d4298ce9522dcb"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_project_complete_c.fy",
+      "sha256": "307869668098b5c48261f32e813d276d96d4376a528ca3bbd951692d5355829e"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_unit_generics.fy",
+      "sha256": "d78f6c48c4db843c0ce2d3b10fdd135f909c0190d84d294bb75e2c8bc5ac4f4e"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_unit_generic_cleanup.fy",
+      "sha256": "366d3f36e4c1f189e0d17ebd2258b58e5f30ac2fa188e678d2c6872966dde738"
+    },
+    {
+      "path": "examples/lexer_candidate/tests/module_project_complete_c.fy",
+      "sha256": "a8f75c486da7a5492cb55b2d25f28113986511a5c0a5f7e68e75082126c1e8e8"
+    },
+    {
+      "path": "examples/lexer_candidate/fairy.lock",
+      "sha256": "64be8d042d450d6315fedc6dada1e70e24aac54d551cd0a496084114ca73e055"
+    }
+  ],
+  "sourceCheck": {
+    "files": 450,
+    "mirFunctions": 5822
+  },
+  "tests": [
+    {
+      "module": "module_project_complete_c",
+      "nativeTests": 2,
+      "selection": {
+        "mode": "all-authored",
+        "authoredTests": 2,
+        "selectedTests": 2
+      },
+      "candidateExecutions": [
+        {
+          "profile": "development",
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\complete-c-owner-split-20261014\\development.exe",
+          "sha256": "9eeab8582bf1bb2f50c33485c1b52fa794746e5f80475b143bc5daf5253d1391",
+          "exit": 0
+        },
+        {
+          "profile": "release",
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\complete-c-owner-split-20261014\\release.exe",
+          "sha256": "536790d52398fc368b1bbc2e5a527773b0e5213ae9b4c3a5be8d4d72f136ed4a",
+          "exit": 0
+        }
+      ],
+      "packetSHA256": "10da88c67c966ea15cc225fa05f19922aff4328f00b1e3cdfdbf2b170dd084c3",
+      "sourceInventorySHA256": "31cd7f08b6ca2a2c80a13942b210879dd73180c6309eb6f335c27f7dd8af7591",
+      "tools": {
+        "compiler": {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-frontend-oracle-current-20261012.exe",
+          "sha256": "3ecc4501ee3bb47ecc39e7288200266b31cbcd8bf6ffec302ae54867705ce5d1"
+        },
+        "candidate": {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\catalog-capacity-emitter-20261014\\driver-release.exe",
+          "sha256": "e039dc65afc85bc66ff1f0b27c02edd375117a561898fe0ac1441c7c4dbad9f2"
+        },
+        "builder": {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-rooted-builder-stack-20261012.exe",
+          "sha256": "02abe2328daa9921705910c7b995e82c1312cb960fe024106c11468569aefff0"
+        }
+      }
+    },
+    {
+      "module": "module_unit_cleanups",
+      "nativeTests": 2,
+      "selection": {
+        "mode": "explicit-subset",
+        "authoredTests": 3,
+        "selectedTests": 2
+      },
+      "candidateExecutions": [
+        {
+          "profile": "development",
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\generic-cleanup-split-20261014-sdk\\development.exe",
+          "sha256": "3f99fbe66114bdd267aff340d0830b24e7207f8ffd52102de88a0a2a1baa1696",
+          "exit": 0
+        },
+        {
+          "profile": "release",
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\generic-cleanup-split-20261014-sdk\\release.exe",
+          "sha256": "f82731820d01a4a051721eba755c1f165f4ba6ad0d09a84f4583388cbb7f9f5a",
+          "exit": 0
+        }
+      ],
+      "packetSHA256": "1145f6747ffc41b2cfa36778e2dcce702bc88aff36cf27fab1929c78eeacb8cc",
+      "sourceInventorySHA256": "7336a00300ed0b17f307bba5b843233bb0693570f28644a1fa394fb8787d64b5",
+      "tools": {
+        "compiler": {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-frontend-oracle-current-20261012.exe",
+          "sha256": "3ecc4501ee3bb47ecc39e7288200266b31cbcd8bf6ffec302ae54867705ce5d1"
+        },
+        "candidate": {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\catalog-capacity-emitter-20261014\\driver-release.exe",
+          "sha256": "e039dc65afc85bc66ff1f0b27c02edd375117a561898fe0ac1441c7c4dbad9f2"
+        },
+        "builder": {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-rooted-builder-stack-20261012.exe",
+          "sha256": "02abe2328daa9921705910c7b995e82c1312cb960fe024106c11468569aefff0"
+        }
+      }
+    }
+  ],
+  "fullDispatcherAttempts": [
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\catalog-capacity-emitter-20261014\\driver-release.exe",
+        "--c-project-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\identified-native-cli-20261014-final\\sources.list"
+      ],
+      "seconds": 55.408734800003,
+      "exit": 2,
+      "stdoutBytes": 0,
+      "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr": "examples/lexer_candidate/src/module_unit_c_emit.fy:1:1: error: project phase 2 stage 7 code 10 (bytes 0..0)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\catalog-capacity-emitter-20261014\\driver-release.exe",
+        "--c-project-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\identified-native-cli-20261014-split\\sources.list"
+      ],
+      "seconds": 102.64620049996302,
+      "exit": 2,
+      "stdoutBytes": 0,
+      "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr": "examples/lexer_candidate/src/module_unit_generics.fy:1:1: error: project phase 2 stage 4 code 10 (bytes 0..0)\n"
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\catalog-capacity-emitter-20261014\\driver-release.exe",
+        "--c-project-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\identified-native-cli-20261014-partitioned\\sources.list"
+      ],
+      "seconds": 220.92146280000452,
+      "exit": 2,
+      "stdoutBytes": 0,
+      "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr": "examples/lexer_candidate/src/project_toml_values.fy:1:1: error: project phase 3 stage 0 code 1002 (bytes 0..0)\n"
+    }
+  ],
+  "failedTestHistory": {
+    "missingSDKFixture": true,
+    "resourceReceiverFailsOnUnchangedBaseline": true
+  },
+  "pendingIntegration": {
+    "projectEmit": ".cache/identified-native-cli-20261014-partitioned/project_emit.pending.fy",
+    "builder": ".cache/build-candidate-native-probe.pending.py",
+    "nativeVerifier": ".cache/verify-candidate-native-cli.pending.py",
+    "freshEmitter": ".cache/catalog-capacity-emitter-20261014/driver-release.exe"
+  },
+  "remaining": [
+    "classify project link 1002 at project_toml_values.fy",
+    "complete identified build/run/cache integration",
+    "latest-source full-image and fixed-point promotion",
+    "product stack/deadline integration",
+    "Linux/full suite and same-head hosted CI"
+  ],
+  "stackReserveBytes": 16777216,
+  "productStackChanged": false,
+  "productTimeoutChanged": false,
+  "publicApiChanged": false,
+  "sdkAbiChanged": false,
+  "dbChanged": false,
+  "ciChanged": false,
+  "pushed": false
+}

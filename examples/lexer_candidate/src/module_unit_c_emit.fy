@@ -25,7 +25,6 @@ import module_unit_c_calls as calls;
 import module_identified_ir as identified;
 import module_project_identified_ir as project;
 import module_project_c_owner as owner;
-import project_compiler_core as compiler;
 import ffi_symbols as ffi;
 import candidate_limits as limits;
 import c_text as w;
@@ -162,7 +161,7 @@ fn clean::Problem append_project_units(ref Prepared p,usize first,usize stop,usi
 // A complete project owns its validated IR and never exposes a successful prefix.
 // Analysis, common declarations and each body attempt retain 1 MiB work;
 // output buffers retain 2 MiB. All histories share limits::project_work().
-fn Result<Bundle,clean::Problem> partition_scoped(owner::Program program,names::Table named,usize entry,usize max_frames,bool entry_only){
+pub fn Result<Bundle,clean::Problem> partition_scoped(owner::Program program,names::Table named,usize entry,usize max_frames,bool entry_only){
     if(max_frames==0 || max_frames>limits::project_frames()){return .err(fail(1001,0,0,0));}let p=switch(prepare_project(program,named,entry,entry_only)){case .ok(p):{p}case .err(e):{return .err(e);}};let frames=ir::count(owner::ir_program(ref p.program));var usize total=p.work;var usize retries=0;var v::Vec<Unit> units=v::empty<Unit>();var usize first=1;
     while(first<=frames){let stop=if(max_frames<frames+1-first){first+max_frames}else{frames+1};let e=append_project_units(ref p,first,stop,0,ref mut units,ref mut total,ref mut retries);if(e.code!=0){return .err(e);}first=stop;}
     let usize count=v::len<Unit>(ref units);var usize index=0;var usize next=1;while(index<count){let unit=v::at<Unit>(ref units,index);if(unit.first!=next || unit.first>=unit.stop){return .err(fail(1001,0,0,0));}next=unit.stop;index+=1;}if(next!=frames+1){return .err(fail(1001,0,0,0));}
@@ -174,14 +173,8 @@ pub fn Result<Bundle,clean::Problem> partition_entry(ir::Program program,usize e
 fn Result<Bundle,clean::Problem> partition_named(project::Program program,usize entry,usize max_frames,bool entry_only){if(max_frames==0 || max_frames>limits::project_frames()){return .err(fail(1001,0,0,0));}var usize work=0;let named=switch(names::build_project(ref program,ref mut work)){case .ok(p):{p}case .err(e):{return .err(e);}};let owned=switch(owner::named(program)){case .ok(p):{p}case .err(e):{return .err(e);}};return partition_scoped(owned,named,entry,max_frames,entry_only);}
 pub fn Result<Bundle,clean::Problem> partition_project(project::Program program,usize entry,usize max_frames){return partition_named(program,entry,max_frames,false);}
 pub fn Result<Bundle,clean::Problem> partition_project_entry(project::Program program,usize entry,usize max_frames){return partition_named(program,entry,max_frames,true);}
-// Keep the checked IR and its complete detached interfaces in the same owner.
-// Name preparation borrows that IR before ownership passes to the C bundle.
-fn Result<Bundle,clean::Problem> partition_complete(compiler::Complete program,usize entry,usize max_frames,bool entry_only){if(max_frames==0 || max_frames>limits::project_frames()){return .err(fail(1001,0,0,0));}var usize work=0;let named=switch(names::build_project(compiler::checked_program(ref program),ref mut work)){case .ok(p):{p}case .err(e):{return .err(e);}};let owned=switch(owner::complete(program)){case .ok(p):{p}case .err(e):{return .err(e);}};return partition_scoped(owned,named,entry,max_frames,entry_only);}
-pub fn Result<Bundle,clean::Problem> partition_complete_project(compiler::Complete program,usize entry,usize max_frames){return partition_complete(program,entry,max_frames,false);}
-pub fn Result<Bundle,clean::Problem> partition_complete_project_entry(compiler::Complete program,usize entry,usize max_frames){return partition_complete(program,entry,max_frames,true);}
-pub fn bool project_has_complete(ref Bundle p){return owner::has_complete(ref p.prepared.program);}
-pub fn ref compiler::Complete project_complete(ref Bundle p){return owner::complete_project(ref p.prepared.program);}
 pub fn ref u8[] project_header(ref Bundle p){return bytes::view(ref p.prepared.header);}
+pub fn ref owner::Program project_owner(ref Bundle p){return ref p.prepared.program;}
 pub fn ref u8[] project_literals(ref Bundle p){return bytes::view(ref p.prepared.literal_source);}
 pub fn usize project_unit_count(ref Bundle p){return v::len<Unit>(ref p.units);}
 pub fn usize project_frames(ref Bundle p){return p.frames;}
