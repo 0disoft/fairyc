@@ -1,5 +1,18 @@
 # Fairy 컴파일러 전환: 후속 작업 목록
 
+## Empty cleanup arena projection (2026-10-13)
+
+Ordinary unannotated empty cleanups no longer copy unrelated AST arenas or scan
+them for type demands. They retain one owned block, original spans and constant
+work; annotated, generic and nonempty declarations use the existing path.
+Three authored tests pass Go native and candidate C development/release. Root
+check and locked check pass 430 files / 5562 MIR functions. This does not close
+the latest identified-IR C bootstrap failure or full dispatcher promotion.
+Next: current-source compiler replay, then IR/C symbol names and project-wide
+identity linking. Limits/timeouts, public API, SDK ABI, DB and CI are unchanged;
+Linux/full suite/hosted CI are deferred; no push.
+Receipt: [evidence](evidence/candidate-empty-cleanup-20261013.json).
+
 ## Dependency-closed original-source specialization plans (2026-10-13)
 
 `generic_source_plan` consumes the detached source planning input and computes

@@ -2,6 +2,24 @@
 
 ## Current local candidate evidence (2026-10-13)
 
+### Empty cleanup arena projection (2026-10-13)
+
+An ordinary unannotated empty resource cleanup now owns only its original block.
+AST copying and type-demand collection avoid unrelated function/type arenas;
+generic, annotated and nonempty cases keep the existing projection path. Source
+authentication, declaration checks, owned spans and the 1MiB work limit remain.
+The empty type-resolution batch already returns without inspecting arguments or
+graph records; the shortcut is restricted to nongeneric declarations with no
+arguments and leaves the type prefix unchanged.
+
+Three authored tests pass Go native and candidate C development/release. They
+cover 600 unrelated statements, constant work, original block spans, exact-fit
+and exhausted work, and the annotated/nonempty fallback. Root check and locked
+check pass 430 files / 5562 MIR functions. This proves the projection helper,
+not a fresh full dispatcher or resolution of the identified-IR closure failure.
+Linux/full suite/hosted CI are deferred; API, SDK ABI, DB, CI and product limits
+are unchanged; no push. Receipt: [evidence](../ops/evidence/candidate-empty-cleanup-20261013.json).
+
 ### Checked IR source identities: native verified, C bootstrap pending (2026-10-13)
 
 `module_project_compile::range_identified` reuses the ordinary preparation and

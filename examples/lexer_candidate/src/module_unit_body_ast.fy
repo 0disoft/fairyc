@@ -36,9 +36,17 @@ fn ast::Node expression(syntax::Expression n,ref Maps m,ref mut u32 code){
 fn ast::Statement statement(syntax::Statement n,ref Maps m,ref mut u32 code){let usize second=if(n.kind==7 || n.kind==14 || n.kind==15){linked(ref m.statements,n.second,code)}else if(n.kind==18){linked(ref m.types,n.second,code)}else{n.second};
     return ast::Statement{.kind=n.kind,.start=n.start,.end=n.end,.expression=linked(ref m.expressions,n.expression,code),.target=linked(ref m.expressions,n.target,code),.first=linked(ref m.statements,n.first,code),.second,.entry=linked(ref m.entries,n.entry,code),.operator=n.operator};
 }
+// An unannotated empty cleanup owns one block and no arena references. Do not
+// repeatedly scan unrelated function/type arenas to prove those empty maps.
+fn Result<Ast,u32> empty_cleanup(syntax::Declaration input,syntax::Statement block,ref mut usize work){
+    if(!charge(work,1)){return .err(10);}var d=input;d.expression=0;d.entry_start=0;d.body=0;d.cleanup_body=1;d.result_type=0;d.generic_parameters=0;d.attribute_start=0;d.field_start=0;d.field_count=0;
+    var v::Vec<ast::Statement> statements=v::empty<ast::Statement>();if(!v::push<ast::Statement>(ref mut statements,ast::Statement{.kind=block.kind,.start=block.start,.end=block.end,.expression=0,.target=0,.first=0,.second=0,.entry=0,.operator=0}).is_ok){return .err(11);}
+    return .ok(Ast{.declaration=d,.expressions=v::empty<ast::Node>(),.statements,.entries=v::empty<entries::Entry>(),.types=v::empty<types::Node>(),.original_entries=v::empty<usize>(),.original_types=v::empty<usize>(),.original_expressions=v::empty<usize>(),.attributes=v::empty<attrs::Attribute>(),.arguments=v::empty<attrs::Argument>()});
+}
 fn Result<Ast,u32> copy(ref syntax::Parsed file,usize declaration,bool cleaning,ref mut usize work){
     if(syntax::problem_count(file)!=0 || declaration==0 || declaration>syntax::declaration_count(file)){return .err(9);}var syntax::Declaration d=syntax::declaration_at(file,declaration-1);
     if(cleaning){if(d.kind!=6 || d.cleanup_body==0 || d.cleanup_attribute_count!=0){return .err(9);}}else if(d.kind!=3 || d.body==0 || d.field_count!=0 || d.cleanup_body!=0 || d.cleanup_attribute_count!=0){return .err(9);}
+    if(cleaning && d.attribute_count==0 && d.entry_count==0 && d.expression==0 && d.body==0 && d.result_type==0 && d.generic_parameters==0){let block=syntax::statement_at(file,d.cleanup_body);if(block.kind==1 && block.expression==0 && block.target==0 && block.first==0 && block.second==0 && block.entry==0 && block.operator==0){return empty_cleanup(d,block,work);}}
     var selection=d;if(cleaning){selection.start=d.cleanup_start;selection.end=d.cleanup_end;}
     let m=switch(maps(file,selection,work)){case .ok(m):{m}case .err(c):{return .err(c);}};var u32 code=0;
     var v::Vec<ast::Node> expressions=v::empty<ast::Node>();var v::Vec<ast::Statement> statements=v::empty<ast::Statement>();var v::Vec<entries::Entry> entries=v::empty<entries::Entry>();var v::Vec<types::Node> types=v::empty<types::Node>();var v::Vec<usize> original_entries=v::empty<usize>();var v::Vec<usize> original_types=v::empty<usize>();var v::Vec<usize> original_expressions=v::empty<usize>();var v::Vec<attrs::Attribute> attributes=v::empty<attrs::Attribute>();var v::Vec<attrs::Argument> arguments=v::empty<attrs::Argument>();
