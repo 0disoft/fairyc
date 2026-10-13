@@ -2,6 +2,12 @@ module tests::module_project_identified_compile;
 import module_project_identified_compile as project;
 import module_project_compile as compile;
 import module_identified_ir as identified;
+import module_project_identified_ir as linked;
+import module_project_link as linking;
+import module_project_inputs as inputs;
+import module_unit_body_ir_verify as proof;
+import module_unit_c_emit as c;
+import candidate_limits as limits;
 import module_unit_body_ir_model as ir;
 import module_unit_cleanup_mir_model as clean;
 import module_signatures as signatures;
@@ -54,4 +60,17 @@ fn void later_unit_failure_does_not_publish_checked_prefix(){let sources=source_
 @test @effects(console)
 fn void attachment_work_and_stale_sources_do_not_retry_or_publish(){let sources=source_set(false,false,false);let metadata=switch(signatures::build(ref sources)){case .ok(p):{p}case .err(_):{assert(false);return;}};let original=planned(ref sources,ref metadata);var usize measured=0;assert(switch(project::build(ref sources,ref metadata,ref original,ref mut measured)){case .ok(p):{project::count(ref p)==1 && project::retries(ref p)==0}case .err(_):{false}} && measured>0);var usize work=16777216-measured;assert(switch(project::build(ref sources,ref metadata,ref original,ref mut work)){case .ok(_):{true}case .err(_):{false}} && work==16777216);work=16777216-measured+1;switch(project::build(ref sources,ref metadata,ref original,ref mut work)){case .ok(_):{assert(false);}case .err(e):{assert(e.stage==8 && e.code==10 && !compile::capacity_failure(e));}};work=16777217;switch(project::build(ref sources,ref metadata,ref original,ref mut work)){case .ok(_):{assert(false);}case .err(e):{assert(e.stage==8 && e.code==10 && work==16777217);}};
     let changed=source_set(false,false,true);let changed_metadata=switch(signatures::build(ref changed)){case .ok(p):{p}case .err(_):{assert(false);return;}};work=0;switch(project::build(ref changed,ref changed_metadata,ref original,ref mut work)){case .ok(_):{assert(false);}case .err(e):{assert(e.stage==8 && e.code==12 && !compile::capacity_failure(e));}};
+}
+
+@effects(console)
+fn linked::Program linked_program(){let sources=source_set(true,false,false);let metadata=switch(signatures::build(ref sources)){case .ok(p):{p}case .err(_):{assert(false);return linked_program();}};let original=planned(ref sources,ref metadata);var usize work=0;let units=switch(project::build(ref sources,ref metadata,ref original,ref mut work)){case .ok(p):{p}case .err(_):{assert(false);return linked_program();}};work=0;return switch(linked::build(ref metadata,ref units,ref mut work)){case .ok(p):{p}case .err(e):{discard io::write_stderr_bytes(b"link=");discard io::write_stderr_u32(e.code);assert(false);linked_program()}};}
+@test @effects(console)
+fn void identified_project_link_deduplicates_calls_and_detaches_ids(){let owned=linked_program();let program=linked::ir_program(ref owned);assert(ir::count(program)==84 && proof::check(program).code==0);var usize i=1;var usize functions=0;var usize shared=0;var usize shared_calls=0;var usize shared_frame=0;
+    while(i<=ir::count(program)){let frame=clean::frame_at(ir::cleanup_ir(program),i);let row=linked::frame_at(ref owned,i);let id=linked::identity(ref owned,row);if(row.node!=0){assert(frame.kind==1 && frame.context==i && id.len==67 && bytes::equal(id[..3],b"g0_"));functions+=1;if(frame.module_index==3){assert(frame.declaration==2);shared+=1;shared_frame=i;}}else{assert(id.len==0);}i+=1;}
+    assert(functions==81 && shared==1 && shared_frame>0);i=1;while(i<=ir::count(program)){let body=ir::at(program,i);var usize j=0;while(j<ir::call_count(body)){let call=ir::call_at(body,j);var usize work=0;let target=switch(linked::call_frame(ref owned,i,j,ref mut work)){case .ok(n):{n}case .err(_):{assert(false);0}};assert(target>0);if(call.kind==2){assert(call.instance==target && linked::frame_at(ref owned,target).node!=0);if(call.target_module==3){assert(target==shared_frame);shared_calls+=1;}}j+=1;}i+=1;}assert(shared_calls==2);
+    i=1;while(i<=clean::type_count(ir::cleanup_ir(program))){assert(linked::identity(ref owned,linked::type_at(ref owned,i)).len==0);i+=1;}
+}
+@test @effects(console)
+fn void project_link_work_limits_and_disjoint_input_domains(){let sources=source_set(false,false,false);let metadata=switch(signatures::build(ref sources)){case .ok(p):{p}case .err(_):{assert(false);return;}};let original=planned(ref sources,ref metadata);var usize work=0;let named=switch(project::build(ref sources,ref metadata,ref original,ref mut work)){case .ok(p):{p}case .err(_):{assert(false);return;}};var usize measured=0;assert(switch(linked::build(ref metadata,ref named,ref mut measured)){case .ok(_):{true}case .err(_):{false}} && measured>0);work=limits::project_work()-measured;assert(switch(linked::build(ref metadata,ref named,ref mut work)){case .ok(_):{true}case .err(_):{false}} && work==limits::project_work());work=limits::project_work()-measured+1;switch(linked::build(ref metadata,ref named,ref mut work)){case .ok(_):{assert(false);}case .err(e):{assert(e.code==1002);}};work=limits::project_work()+1;switch(linked::build(ref metadata,ref named,ref mut work)){case .ok(_):{assert(false);}case .err(e):{assert(e.code==1002 && work==limits::project_work()+1);}};
+    var v::Vec<ir::Program> ordinary=v::empty<ir::Program>();let unit=switch(compile::range(ref sources,ref metadata,0,2)){case .ok(p):{p}case .err(_):{assert(false);return;}};assert(v::push<ir::Program>(ref mut ordinary,unit).is_ok);switch(linking::prepare_inputs(ref metadata,ref ordinary,ref named)){case .ok(_):{assert(false);}case .err(e):{assert(e.code==1001);}};assert(switch(linking::build(ref metadata,ref ordinary)){case .ok(p):{proof::check(ref p).code==0 && ir::count(ref p)==2}case .err(_):{false}});
 }

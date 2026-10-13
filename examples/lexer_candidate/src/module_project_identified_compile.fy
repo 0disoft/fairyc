@@ -10,6 +10,7 @@ import std::vec as v;
 // Every retained unit owns its checked IR and its original-source identities.
 // No resource field is moved out and no borrowed source/planner owner is stored.
 pub resource Plan{v::Vec<identified::Program> units;v::Vec<compile::Range> ranges;usize files;usize retries;cleanup{}}
+pub fn Plan empty(){return Plan{.units=v::empty<identified::Program>(),.ranges=v::empty<compile::Range>(),.files=0,.retries=0};}
 pub fn usize count(ref Plan p){return v::len<identified::Program>(ref p.units);}
 pub fn usize file_count(ref Plan p){return p.files;}
 pub fn usize retries(ref Plan p){return p.retries;}

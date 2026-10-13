@@ -2,6 +2,31 @@
 
 ## Current local candidate evidence (2026-10-13)
 
+### Source-identified project linking (2026-10-13)
+
+Project linking reads ordinary and identified IR owners through disjoint input
+paths without copying input IR or returning a borrow with two input origins.
+Ordinary numeric linking retains its API. Identified generic functions deduplicate
+by canonical g0 identity, require matching rebound frame contracts and compare
+complete rebound bodies. Calls use the shared global frame. Type and cleanup
+maps retain owned source IDs; conflicting mapped identities reject. The linked
+owner factory derives its program, ID table and call index from the same input.
+
+Five authored cases pass Go native and candidate C development/release: generic
+deduplication, detached owners and call targets; work/domain rejection; actual
+SDK Vec type/cleanup rebinding and C transport; and ordinary missing/duplicate
+body rejection. The 57,516-byte generated C matches across Go and both candidate
+profiles and returns 42 at /Od and /O2 with separate current runtime support and
+ordinary application stacks. Private compiler API tests explicitly use 16MiB.
+Root check and locked check pass 437 files / 5629 MIR functions.
+
+Next: source-identified partition symbols, complete Vec public interfaces and
+dispatcher/cache consumers. The current partition renderer remains numeric.
+Latest full-image/fixed-point promotion, product timing/stack integration,
+Linux/full suite and hosted CI remain open. Limits, public CLI/API, SDK ABI,
+DB and CI are unchanged; no push. Receipt:
+[evidence](../ops/evidence/candidate-project-identified-link-20261013.json).
+
 ### Owned identified project units (2026-10-13)
 
 The project collector retains each independently checked identified IR owner,
