@@ -1,0 +1,77 @@
+{
+  "schema": "fairyc.candidate-complete-c/v1",
+  "date": "2026-10-14",
+  "passed": true,
+  "sourceInputs": [
+    {
+      "path": "examples/lexer_candidate/src/module_project_c_owner.fy",
+      "sha256": "3b942ce3ef1bed27dd0362936231d877ff7069328309136e30e506ae41a70cbc"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_unit_c_emit.fy",
+      "sha256": "7976f6010de3b3290ff2fb0f3e6f32dfd549fc37726cb728ffaf220272d12ace"
+    },
+    {
+      "path": "examples/lexer_candidate/tests/module_project_complete_c.fy",
+      "sha256": "9f825566e830423e8e2f9b01222acde464b27a1e0c9ebb48508ed568b1115a9e"
+    },
+    {
+      "path": "examples/lexer_candidate/fairy.lock",
+      "sha256": "c3f95788a44696b66eccb637247662da54680decd063fee746bee140e23071d4"
+    }
+  ],
+  "sourceCheck": {
+    "files": 448,
+    "mirFunctions": 5820,
+    "locked": true
+  },
+  "tests": {
+    "module": "module_project_complete_c",
+    "native": 2,
+    "candidateExecutions": [
+      {
+        "profile": "development",
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\complete-c-owner-20261014\\development.exe",
+        "sha256": "f57b204f2e961cb72866628723ca94560e182470e6a68dc14bd24bc62c4742df",
+        "exit": 0
+      },
+      {
+        "profile": "release",
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\complete-c-owner-20261014\\release.exe",
+        "sha256": "91b993be2040fd8019cfd82e2a23aee6c5fa3a3e8ff3ac9a04be8a167ea92ac9",
+        "exit": 0
+      }
+    ]
+  },
+  "candidateInputFiles": 303,
+  "candidateSourceInventorySHA256": "b974b497f6cfd46b5ec9b4745ce059ad248595d07ed0bec38f9cdfda9432786d",
+  "candidatePacketSHA256": "d932cc13c749e9496e45c65870e829e93a74c5655ef2b2d7e39c11a1d851a769",
+  "tools": {
+    "compiler": {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-frontend-oracle-current-20261012.exe",
+      "sha256": "3ecc4501ee3bb47ecc39e7288200266b31cbcd8bf6ffec302ae54867705ce5d1"
+    },
+    "candidate": {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-cleanup-20261013\\current-driver\\driver-release.exe",
+      "sha256": "67be18bdabb9d6499edcfcd8b7d3e3245dd932fd265ba79ab4cd7136748ec0ac"
+    },
+    "builder": {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-rooted-builder-stack-20261012.exe",
+      "sha256": "02abe2328daa9921705910c7b995e82c1312cb960fe024106c11468569aefff0"
+    }
+  },
+  "stackReserveBytes": 16777216,
+  "remaining": [
+    "identified build/run/cache consumers",
+    "latest-source full-image and fixed-point promotion",
+    "product stack/deadline integration",
+    "Linux/full suite and same-head hosted CI"
+  ],
+  "productStackChanged": false,
+  "productTimeoutChanged": false,
+  "publicApiChanged": false,
+  "sdkAbiChanged": false,
+  "dbChanged": false,
+  "ciChanged": false,
+  "pushed": false
+}
