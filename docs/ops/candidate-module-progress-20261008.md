@@ -1,5 +1,29 @@
 # Fairy candidate module progress
 
+## Checked IR owns source specialization IDs (2026-10-13)
+
+`range_identified` uses the same preparation/type/move/borrow/IR gates as `range`,
+then attaches source IDs at stage 8. The new `module_identified_ir` owner retains
+the IR, copied IDs, frame mapping and call-target index. It verifies the type
+prefix and frame coordinates, rejects unselected late Vec descriptors, and
+allows specialized calls to retrieve the exact target ID after AST/planner
+owners leave scope. Failed checking/attachment returns no program prefix.
+
+Three Go-native tests pass: five functions/six Vec types/six Vec cleanup frames
+in a closed SDK fixture, ordinary C rendering, identical type/move/borrow
+diagnostics and exhausted-work/wrong-owner rejection. A root-only unit is not
+C-closed for imported ordinary functions; the rendering case includes all three
+modules. C symbols are still numeric, with identity-aware naming/linking pending.
+
+Candidate C dev/release tests remain unverified: the pinned frontend rejects
+the 277-source closure at Ast cleanup with project phase 2/stage 3/code 10.
+A current-source private C probe passes that exact range (32 shapes/232 fields).
+Its whole-project development run times out at 180 seconds; optimized building
+hits the existing MSVC 60-second deadline. Private stack-header adjustments are
+diagnostic only. Source caps/product timeouts, public API/ABI, DB and CI are
+unchanged. Linux/full suite/fixed point/hosted CI are not rerun; no push.
+Evidence: `evidence/candidate-identified-ir-20261013.json`.
+
 ## Compiler handles mapped to original-source identities (2026-10-13)
 
 `module_source_specializations` owns g0_ bytes indexed by the actual typed

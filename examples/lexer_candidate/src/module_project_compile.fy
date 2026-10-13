@@ -9,6 +9,8 @@ import module_unit_origin_diagnostics as diagnostics;
 import module_unit_body_ir_lower as lower;
 import module_unit_body_ir_model as ir;
 import module_signatures as signatures;
+import module_identified_ir as identified;
+import generic_source_plan as source_plan;
 import syntax as syntax;
 import std::vec as v;
 
@@ -17,10 +19,8 @@ pub struct Problem {u32 stage;u32 code;usize module_index;usize start;usize end;
 pub struct Range {usize first;usize stop;}
 pub resource Plan {v::Vec<ir::Program> units;v::Vec<Range> ranges;usize files;usize retries;cleanup{}}
 fn Problem failed(u32 stage,u32 code,usize module_index,usize start,usize end,usize first,usize stop,usize expected,usize actual){return Problem{.stage,.code,.module_index,.start,.end,.first,.stop,.expected,.actual,.declaration_start=0,.declaration_end=0,.move_start=0,.move_end=0,.header_start=0,.header_end=0,.field_module=0,.field_start=0,.field_end=0};}
-pub fn Result<ir::Program,Problem> range(ref v::Vec<syntax::Parsed> sources,ref signatures::Program metadata,usize first,usize stop){
-    let bound=switch(binding::bind(sources,metadata,first,stop)){case .ok(p):{p}case .err(e):{return .err(failed(2,e.code,e.module_index,e.start,e.end,first,stop,0,0));}};
-    let ready=switch(closure::build_unit(sources,metadata,ref bound)){case .ok(p):{p}case .err(e):{return .err(failed(3,e.code,e.module_index,e.start,e.end,first,stop,0,0));}};
-    let typed=switch(values::build(sources,metadata,ref ready)){case .ok(p):{p}case .err(e):{return .err(failed(4,e.code,e.module_index,e.start,e.end,first,stop,e.expected,e.actual));}};
+fn Result<ir::Program,Problem> checked(ref v::Vec<syntax::Parsed> sources,ref signatures::Program metadata,ref closure::Ready ready,usize first,usize stop){
+    let typed=switch(values::build(sources,metadata,ready)){case .ok(p):{p}case .err(e):{return .err(failed(4,e.code,e.module_index,e.start,e.end,first,stop,e.expected,e.actual));}};
     // Values and ownership are separately checked phases. A completed type
     // pass must not consume the ownership pass's traversal allowance.
     let moved=switch(moves::build(sources,ref typed,0)){case .ok(p):{p}case .err(e):{return .err(failed(5,e.code,e.module_index,e.start,e.end,first,stop,e.expected,e.actual));}};
@@ -30,7 +30,21 @@ pub fn Result<ir::Program,Problem> range(ref v::Vec<syntax::Parsed> sources,ref 
     let inferred=switch(origins::build(sources,metadata,ref typed)){case .ok(p):{p}case .err(e):{return .err(failed(7,e.code,e.module_index,e.start,e.end,first,stop,e.expected,e.actual));}};
     let report=switch(diagnostics::collect(ref inferred)){case .ok(p):{p}case .err(e):{return .err(failed(7,e.code,e.module_index,e.start,e.end,first,stop,e.expected,e.actual));}};
     var usize diagnostic=0;while(diagnostic<diagnostics::count(ref report)){if(diagnostics::visible_at(ref report,diagnostic)){let e=diagnostics::at(ref report,diagnostic);return .err(failed(7,e.code,e.module_index,e.start,e.end,first,stop,0,0));}diagnostic+=1;}
-    return switch(lower::lower(sources,ref typed,closure::imported(ref ready),ref moved)){case .ok(p):{.ok(p)}case .err(e):{.err(failed(6,e.code,e.module_index,e.start,e.end,first,stop,0,0))}};
+    return switch(lower::lower(sources,ref typed,closure::imported(ready),ref moved)){case .ok(p):{.ok(p)}case .err(e):{.err(failed(6,e.code,e.module_index,e.start,e.end,first,stop,0,0))}};
+}
+fn Result<closure::Ready,Problem> prepare(ref v::Vec<syntax::Parsed> sources,ref signatures::Program metadata,usize first,usize stop){
+    let bound=switch(binding::bind(sources,metadata,first,stop)){case .ok(p):{p}case .err(e):{return .err(failed(2,e.code,e.module_index,e.start,e.end,first,stop,0,0));}};
+    return switch(closure::build_unit(sources,metadata,ref bound)){case .ok(p):{.ok(p)}case .err(e):{.err(failed(3,e.code,e.module_index,e.start,e.end,first,stop,0,0))}};
+}
+pub fn Result<ir::Program,Problem> range(ref v::Vec<syntax::Parsed> sources,ref signatures::Program metadata,usize first,usize stop){
+    let ready=switch(prepare(sources,metadata,first,stop)){case .ok(p):{p}case .err(e):{return .err(e);}};return checked(sources,metadata,ref ready,first,stop);
+}
+// Stage 8 attaches source identities only after the same body/Flow/borrow gates.
+// Neither failed checking nor failed attachment exposes a successful IR prefix.
+pub fn Result<identified::Program,Problem> range_identified(ref v::Vec<syntax::Parsed> sources,ref signatures::Program metadata,ref source_plan::Plan plan,usize first,usize stop,ref mut usize work){
+    let ready=switch(prepare(sources,metadata,first,stop)){case .ok(p):{p}case .err(e):{return .err(e);}};
+    let program=switch(checked(sources,metadata,ref ready,first,stop)){case .ok(p):{p}case .err(e):{return .err(e);}};
+    return switch(identified::build(program,plan,sources,metadata,closure::imported(ref ready),work)){case .ok(p):{.ok(p)}case .err(e):{.err(failed(8,e.code,e.module_index,e.start,e.end,first,stop,e.kind as usize,e.id))}};
 }
 // Cleanup policy retains raw code 10 through the owned-IR lowerer; later
 // IR construction and verification use 1002 for the same capacity class.

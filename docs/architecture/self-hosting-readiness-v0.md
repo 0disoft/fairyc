@@ -2,6 +2,41 @@
 
 ## Current local candidate evidence (2026-10-13)
 
+### Checked IR source identities: native verified, C bootstrap pending (2026-10-13)
+
+`module_project_compile::range_identified` reuses the ordinary preparation and
+checking path. Type checking, moves, borrowed-result inference and owned IR
+construction finish before source IDs are attached. Stage 8 returns attachment
+failures without exposing an IR prefix. `module_identified_ir` owns IR, source
+identity bytes, frame rows and a target index; original AST/planner/interface
+owners can leave scope. It checks the canonical type prefix, rejects an
+unselected late Vec, maps concrete function/cleanup frames and resolves
+specialized calls through the existing backend frame index.
+
+Three authored Go-native tests pass on exact current source copies. A closed
+three-module SDK Vec fixture covers five concrete functions, six vector types,
+six vector cleanup frames, ordinary/imported calls and ordinary C rendering.
+Type/move/borrow failures preserve stages 4/5/7 and source spans. Exhausted work
+and mismatched planning owners fail at stage 8. The single-root unit correctly
+leaves imported ordinary bodies for project linking; the C rendering case uses
+all three original modules. Numeric C symbols are still unchanged.
+
+Candidate C dev/release execution is **not verified** for this unit. The pinned
+2026-10-12 frontend rejects the 277-source test closure at
+`module_unit_body_ast` cleanup, project phase 2/stage 3/code 10. A current-source
+private C project-driver probe passes the exact Ast range with 32 shapes/232
+fields, below the unchanged metadata cap. The unoptimized whole-project probe
+times out at 180 seconds, and its optimized build hits the existing 60-second
+MSVC host deadline. The original development probe's default 1MiB stack also
+overflows; private PE stack-reserve changes only support diagnosis. Neither
+source capacity nor product timeouts were raised. These probes are not a latest
+dispatcher build, fixed point or successful candidate test run.
+
+IR/C symbol naming, project-wide identity rebinding, complete Vec interfaces,
+precise planning diagnostics and dispatcher/cache publication remain open.
+Linux/full suite/hosted CI are not rerun. Public API, SDK ABI, DB and CI are
+unchanged; no push. Receipt: [evidence](../ops/evidence/candidate-identified-ir-20261013.json).
+
 ### Compiler-handle source specialization selection (2026-10-13)
 
 `module_source_specializations` maps the typed compiler's one-based function,
