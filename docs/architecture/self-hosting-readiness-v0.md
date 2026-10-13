@@ -1,5 +1,31 @@
 # Self-hosting readiness v0
 
+## Ordinary type application diagnostics (2026-10-13)
+
+The original-source request collector separates three states. With no templates,
+an applied ordinary local or imported function keeps its exact applied node span
+as private 4504 and the check renderer publishes the complete Go
+unsupported-call-target stderr at exit 3. With templates present, an unknown or
+ordinary target that is not a template reports E0101 over the complete applied
+span, independent of aliases; with no templates a missing symbol keeps the bare
+path span. The 4504 path is private and source-only: it adds no callable or
+language, publishes no IR, and leaves product stack and timeouts unchanged.
+
+Five authored generic_source_requests tests pass in all three profiles. The
+native authored-Go and both candidate C images match all 21 old process
+comparisons (63/63) and all 17 generic statuses (51/51). Exact stdout and first
+diagnostic or complete unsupported message matches 16/17 on each image (48/51);
+only the unsupported scalar u16 diagnostic stays incorrect while its reject 3 is
+correct. Root build check passes 446 files / 5767 MIR functions with the lock
+updated, and the final --locked recheck verifies the same 446 files / 5767 MIR
+functions.
+
+The receipt records the verified source, tool, image and copied-input hashes and
+reports genericDifferentialPassed=false, stableCheckComplete=false and the
+remaining UnsupportedScalar. Public API, SDK ABI, DB and CI are unchanged;
+no push occurred. Receipt:
+[candidate-ordinary-application-20261013.json](../ops/evidence/candidate-ordinary-application-20261013.json).
+
 ## Identified check command (2026-10-13)
 
 `project_check` collects the exact loaded-workspace coordinates, calls

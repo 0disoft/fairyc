@@ -1,0 +1,224 @@
+{
+  "schema": "fairyc.candidate-ordinary-application/v1",
+  "connected": true,
+  "stableCheckComplete": false,
+  "genericDifferentialPassed": false,
+  "parentCommit": "b81d4568f4523d57d5e96ffc840002c7d8df8e2a",
+  "scope": "Preserve unsupported ordinary type application without templates and full applied source spans for generic-context unknown targets; source-only private4504 never admits a callable or publishes IR/interfaces.",
+  "sourceInventories": [
+    {
+      "path": "docs/ops/evidence/candidate-ordinary-application-inputs-20261013-1.json",
+      "bytes": 19293,
+      "sha256": "d27ad18e05863d994cde60192f588f6c5911f007cb968f7d34a58a588f411e90"
+    },
+    {
+      "path": "docs/ops/evidence/candidate-ordinary-application-inputs-20261013-2.json",
+      "bytes": 21062,
+      "sha256": "4b715f0524ed0f841c831350d99e780df0d572083baa8934e6ed48a41aa3252b"
+    },
+    {
+      "path": "docs/ops/evidence/candidate-ordinary-application-inputs-20261013-3.json",
+      "bytes": 22102,
+      "sha256": "4459085afcdeb3f096adfd1f7e26c7524a76fe82f8ed99ebf1360e8f8fa3d124"
+    },
+    {
+      "path": "docs/ops/evidence/candidate-ordinary-application-inputs-20261013-4.json",
+      "bytes": 19283,
+      "sha256": "7b39506e3a609ddd787af4946f90b3b710efeadbf21323e3f41dbd23f6dcd99e"
+    },
+    {
+      "path": "docs/ops/evidence/candidate-ordinary-application-inputs-20261013-5.json",
+      "bytes": 10077,
+      "sha256": "4e7d332f3106926ba9cb5668d97db4bccbc0cff2d59ad708c8c1875a5d8958df"
+    }
+  ],
+  "sourceInputsVerified": 456,
+  "build": {
+    "path": ".cache/source-unsupported-application-20261013/build/receipt.json",
+    "bytes": 253172,
+    "sha256": "971a8975ce7239ea77b5f38dcdee335fe18598cb4765b3fafbbadfb30e9de503"
+  },
+  "nativeInputCopiesVerified": 282,
+  "sourceChecks": [
+    {
+      "output": "check ok: 2 instance(s), 446 source file(s), 5767 MIR function(s), lock updated",
+      "invocation": {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-frontend-oracle-current-20261012.exe",
+          "check"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\examples\\lexer_candidate",
+        "seconds": 16.99658769997768,
+        "exit": 0,
+        "stdoutBytes": 80,
+        "stdoutSHA256": "3eeaa7e0db9ad2933458d06051c1f34676f63b453c5517cdf4018740248c5d9b",
+        "stderr": ""
+      }
+    },
+    {
+      "output": "check ok: 2 instance(s), 446 source file(s), 5767 MIR function(s), lock verified",
+      "log": {
+        "path": ".cache/source-unsupported-application-20261013/root-locked-check.txt",
+        "bytes": 82,
+        "sha256": "528bb6e034fa8ca354c20ed8219d9c2f445909ae05ce4a01113c24e5b2133732"
+      }
+    }
+  ],
+  "processReference": {
+    "path": ".cache/source-identified-check-20261013/process/reference/observations.json",
+    "bytes": 33473,
+    "sha256": "0e76ce5c676631faa393aa5b5ce6f15356dcb8659d044f95c8bc382ae2740799"
+  },
+  "processComparisons": [
+    {
+      "label": "native",
+      "receipt": {
+        "path": ".cache/source-unsupported-application-20261013/process/native/observations.json",
+        "bytes": 11909,
+        "sha256": "233b1352c43d4e88dfd674cf2d27dcdf03bc98cd874d071bbfe5ee242885085e"
+      },
+      "matched": 21
+    },
+    {
+      "label": "development",
+      "receipt": {
+        "path": ".cache/source-unsupported-application-20261013/process/development/observations.json",
+        "bytes": 11899,
+        "sha256": "71a1ed1ad609747ec058445dd666ae677b407b123571343b8189bdf881ca7eb3"
+      },
+      "matched": 21
+    },
+    {
+      "label": "release",
+      "receipt": {
+        "path": ".cache/source-unsupported-application-20261013/process/release/observations.json",
+        "bytes": 11900,
+        "sha256": "72a621152c2eb8329ee9b90942bf649dc8783c8adc35a454724f704b60c47f76"
+      },
+      "matched": 21
+    }
+  ],
+  "genericReference": {
+    "path": ".cache/source-unsupported-application-20261013/generic/reference/observations.json",
+    "bytes": 14736,
+    "sha256": "fa041c48b0020031a82f5ec2bf5be784f1aa062f4ab2ae4a78ea65e55d87ef9c"
+  },
+  "genericComparisons": [
+    {
+      "label": "native",
+      "receipt": {
+        "path": ".cache/source-unsupported-application-20261013/generic/native/observations.json",
+        "bytes": 14654,
+        "sha256": "a69089881e138d726c95e54ec1b9cc6508104f9343c6ebf303f200c4105ae54d"
+      },
+      "observed": 17,
+      "matched": 16,
+      "statusMatches": 17,
+      "mismatches": [
+        {
+          "name": "UnsupportedScalar",
+          "expected": "fairyc: semantic subset does not support type u16 at main.fy [bytes 27..28]\nfairyc: semantic subset does not support type u16 at main.fy [bytes 35..36]\n",
+          "actual": "main.fy:2:51: E0101: name or qualified path cannot be resolved [bytes 74..77]\n",
+          "exit": 3
+        }
+      ]
+    },
+    {
+      "label": "development",
+      "receipt": {
+        "path": ".cache/source-unsupported-application-20261013/generic/development/observations.json",
+        "bytes": 14650,
+        "sha256": "17a5037c4d902cc555feefab03dd3ec8981498a3268d9e8a9a8c37ad01df28a3"
+      },
+      "observed": 17,
+      "matched": 16,
+      "statusMatches": 17,
+      "mismatches": [
+        {
+          "name": "UnsupportedScalar",
+          "expected": "fairyc: semantic subset does not support type u16 at main.fy [bytes 27..28]\nfairyc: semantic subset does not support type u16 at main.fy [bytes 35..36]\n",
+          "actual": "main.fy:2:51: E0101: name or qualified path cannot be resolved [bytes 74..77]\n",
+          "exit": 3
+        }
+      ]
+    },
+    {
+      "label": "release",
+      "receipt": {
+        "path": ".cache/source-unsupported-application-20261013/generic/release/observations.json",
+        "bytes": 14649,
+        "sha256": "f34bfb98502b280975350cea1f6a4a2b45fc0d94aead81cca25d9d53e762c9f7"
+      },
+      "observed": 17,
+      "matched": 16,
+      "statusMatches": 17,
+      "mismatches": [
+        {
+          "name": "UnsupportedScalar",
+          "expected": "fairyc: semantic subset does not support type u16 at main.fy [bytes 27..28]\nfairyc: semantic subset does not support type u16 at main.fy [bytes 35..36]\n",
+          "actual": "main.fy:2:51: E0101: name or qualified path cannot be resolved [bytes 74..77]\n",
+          "exit": 3
+        }
+      ]
+    }
+  ],
+  "authoredRegressions": [
+    {
+      "module": "generic_source_requests",
+      "authoredTests": 5,
+      "receipt": {
+        "path": ".cache/source-unsupported-application-20261013/requests-regression/receipt.json",
+        "bytes": 83444,
+        "sha256": "00d22415c7bc984b914ac84910adbdd23185121e562d77467532fbe89974bffd"
+      },
+      "native": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\source-unsupported-application-20261013\\requests-regression\\native-project-3436b4f758ea5e953b5a\\build\\lexer-candidate.exe",
+        "sha256": "0aff3579edd3a15843e434e5c86f7c37d558d229f0bb28b94fc067d1dc390f9b",
+        "selectedTests": [
+          "tests::generic_source_requests::direct_source_roots_match_actual_go_plan",
+          "tests::generic_source_requests::ordinary_application_and_template_lookup_keep_their_original_boundary",
+          "tests::generic_source_requests::owns_unique_roots_and_exact_shared_work",
+          "tests::generic_source_requests::rejects_stale_private_unknown_arity_and_generated_roots",
+          "tests::generic_source_requests::unused_templates_do_not_create_direct_roots"
+        ],
+        "stdoutBytes": 0,
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stack": {
+          "reserveBytes": 16777216,
+          "originalReserveBytes": 1048576,
+          "originalSHA256": "d565358570661195ee7df1c06b821b8e63b2bfa3485075dc0f622790519e57ea"
+        }
+      },
+      "candidateExecutions": [
+        {
+          "profile": "development",
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\source-unsupported-application-20261013\\requests-regression\\development.exe",
+          "sha256": "239479baa65a66be3841a51724d97f5c9dc42fdbf8e54197b3d7a13c94fe8823",
+          "exit": 0
+        },
+        {
+          "profile": "release",
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\source-unsupported-application-20261013\\requests-regression\\release.exe",
+          "sha256": "3f80f2e5e278cf139d5f173509e3ff870111647118b58ff89ab7372b9e17b1ad",
+          "exit": 0
+        }
+      ]
+    }
+  ],
+  "remaining": [
+    "UnsupportedScalar substituted type diagnostics",
+    "identified build/run/cache consumers",
+    "complete diagnostic aggregation",
+    "latest full fixed point",
+    "product stacks/deadlines",
+    "Linux/full suite/same-head CI"
+  ],
+  "privateStackReserveBytes": 16777216,
+  "productStackChanged": false,
+  "productTimeoutChanged": false,
+  "publicApiChanged": false,
+  "sdkAbiChanged": false,
+  "dbChanged": false,
+  "ciChanged": false,
+  "pushed": false
+}

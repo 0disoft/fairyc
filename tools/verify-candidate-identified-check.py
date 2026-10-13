@@ -48,9 +48,13 @@ def main():
                         'helper': 'fn T id<T>(T x){return x;}'}, 'E0103'),
         ('NominalArgument', 3, {'main': 'struct Leaf{i32 n;}fn T id<T>(T x){return x;}fn i32 main(){let Leaf v=id<Leaf>(Leaf{.n=42});return v.n;}'}, 'E4502'),
         ('NonGenericApplication', 3, {'main': 'fn i32 id(i32 x){return x;}fn i32 main(){return id<i32>(42);}'}, ''),
+        ('NonGenericImported', 3, {'main': 'import helper as h;fn i32 main(){return h::id<i32>(42);}', 'helper': 'pub fn i32 id(i32 x){return x;}'}, ''),
+        ('NonGenericWithTemplate', 3, {'main': 'fn T unused<T>(T x){return x;}fn i32 id(i32 x){return x;}fn i32 main(){return id<i32>(42);}'}, 'E0101'),
+        ('UnknownWithTemplate', 3, {'main': 'fn T unused<T>(T x){return x;}fn i32 main(){return missing<i32>(42);}'}, 'E0101'),
         ('ReferenceArgument', 3, {'main': 'fn T id<T>(T x){return x;}fn i32 main(){return id<ref i32>(42);}'}, 'E4502'),
         ('UnsupportedScalar', 3, {'main': 'fn T id<T>(T x){return x;}fn i32 main(){return id<u16>(42);}'}, ''),
     ]
+    total_cases = len(cases)
     if args.case:
         assert len(set(args.case)) == len(args.case) and set(args.case) <= {c[0] for c in cases}
         cases = [case for case in cases if case[0] in args.case]
@@ -84,7 +88,7 @@ def main():
         report = dict(schema='fairyc.candidate-identified-check/v1', image=dict(path=str(image), sha256=sha(image.read_bytes())),
                       lockCompiler=dict(path=str(compiler), sha256=sha(compiler.read_bytes())),
                       comparison='exact stdout, status and first diagnostic path/line/column/code/byte span or complete unsupported diagnostics; locked bytes/mtime unchanged',
-                      selectedCases=[case[0] for case in cases], allCases=14,
+                      selectedCases=[case[0] for case in cases], allCases=total_cases,
                       cases=observations, passed=all(r['matched'] for r in observations))
         (destination / 'observations.json').write_text(json.dumps(report, indent=2) + '\n', encoding='utf-8', newline='\n')
         print(name, result.returncode, 'matched=' + str(row['matched']), flush=True)

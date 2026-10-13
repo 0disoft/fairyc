@@ -16,12 +16,14 @@ struct Task {u32 kind;usize node;}
 struct Context {usize template_index;usize module_index;usize first;bool vector;bool root;}
 fn u32 push(ref mut v::Vec<Task> pending,u32 kind,usize node,ref mut usize work){if(node==0){return 0;}if(v::len<Task>(pending)>=65536 || !budget::charge(work,1)){return 10;}return if(v::push<Task>(pending,Task{.kind,.node}).is_ok){0}else{11};}
 fn u32 list(ref syntax::Parsed p,usize tail,u32 kind,ref mut v::Vec<Task> pending,ref mut usize work){var usize link=tail;while(link!=0){if(!budget::charge(work,1)){return 10;}if(link>syntax::type_count(p)){return 9;}let n=syntax::type_at(p,link);if(n.kind!=kind || n.left==0 || n.left>=link || n.right>=link){return 9;}let code=push(pending,1,n.left,work);if(code!=0){return code;}link=n.right;}return 0;}
-// Explicit application of an ordinary callable is a request error, while a
-// missing/private provider keeps the source name-resolution diagnostic.
+// Go prepares generic sources only when templates exist. With none, explicit
+// application of an ordinary callable stays unsupported in ordinary typing.
+// Private code 4504 carries that boundary; it is not a public E-code.
 fn u32 missing_function(ref catalog::Catalog c,ref v::Vec<syntax::Parsed> sources,usize module_index,ref u8[] path,ref mut usize work){
+    if(catalog::count(c)!=0){return 101;}
     let packages=catalog::packages(c);var usize split=path.len;var usize i=0;while(i<path.len){if(path[i]==58){split=i;break;}i+=1;}var usize target=module_index;
     if(split!=path.len){target=bindings::count(packages);let m=bindings::module_at(packages,module_index);i=0;while(i<m.count){if(!budget::charge(work,split+1)){return 10;}let b=bindings::import_at(packages,m.first+i);if(bytes::equal(bindings::text(packages,b.alias),path[..split])){target=b.target;break;}i+=1;}if(target>=v::len<syntax::Parsed>(sources)){return 101;}}
-    let name=if(split==path.len){path}else{path[split+2..]};let p=v::at<syntax::Parsed>(sources,target);i=1;while(i<syntax::declaration_count(p)){if(!budget::charge(work,1)){return 10;}let d=syntax::declaration_at(p,i);if(d.kind==3 || d.kind==9){if(!budget::charge(work,name.len+1)){return 10;}if(bytes::equal(name,syntax::source_view(p)[d.name_start..d.name_end])){return if(target!=module_index && !d.public){13}else{4502};}}i+=1;}return 101;
+    let name=if(split==path.len){path}else{path[split+2..]};let p=v::at<syntax::Parsed>(sources,target);i=1;while(i<syntax::declaration_count(p)){if(!budget::charge(work,1)){return 10;}let d=syntax::declaration_at(p,i);if(d.kind==3 || d.kind==9){if(!budget::charge(work,name.len+1)){return 10;}if(bytes::equal(name,syntax::source_view(p)[d.name_start..d.name_end])){return 4504;}}i+=1;}return 101;
 }
 fn u32 edge(ref catalog::Catalog c,ref v::Vec<syntax::Parsed> sources,ref syntax::Parsed p,Context context,ref u8[] name,usize tail,u32 kind,ref mut bytes::Buffer names,ref mut v::Vec<model::Argument> args,ref mut v::Vec<model::Edge> edges,ref mut v::Vec<model::Range> ranges,ref mut usize work){
     let target=switch(catalog::lookup(c,context.module_index,name,kind,work)){case .ok(value):{value}case .err(code):{return code;}};if(target==0){return if(kind==0){0}else{missing_function(c,sources,context.module_index,name,work)};}let template=catalog::template_at(c,target-1);var usize count=0;var usize link=tail;var usize[8] roots=[0;8];
@@ -88,7 +90,7 @@ fn model::Problem scan(ref catalog::Catalog c,ref v::Vec<syntax::Parsed> sources
     else{var usize i=d.field_start;while(i<d.field_start+d.field_count && code==0){if(!budget::charge(work,1)){code=10;break;}code=push(ref mut pending,1,syntax::field_at(p,i).type_root,work);i+=1;}if(code==0){code=push(ref mut pending,3,d.cleanup_body,work);}}
     while(v::len<Task>(ref pending)!=0 && code==0){if(!budget::charge(work,1)){code=10;break;}let task=*v::at<Task>(ref pending,v::len<Task>(ref pending)-1);discard v::pop<Task>(ref mut pending);
         code=if(task.kind==1){typ(c,sources,p,context,task.node,names,args,edges,ranges,ref mut pending,work)}else if(task.kind==2){expression(c,sources,p,context,task.node,names,args,edges,ranges,ref mut pending,work)}else{statement(c,p,context,task.node,ref mut pending,work)};
-        if(code!=0){if(task.kind==1){let n=syntax::type_at(p,task.node);start=n.start;end=n.end;}else if(task.kind==2){let n=syntax::expression_at(p,task.node);start=n.start;end=n.end;if(code==101 && n.kind==20 && n.left!=0){let name=syntax::expression_at(p,n.left);start=name.start;end=name.end;}}else{let n=syntax::statement_at(p,task.node);start=n.start;end=n.end;}}
+        if(code!=0){if(task.kind==1){let n=syntax::type_at(p,task.node);start=n.start;end=n.end;}else if(task.kind==2){let n=syntax::expression_at(p,task.node);start=n.start;end=n.end;if(code==101 && catalog::count(c)==0 && n.kind==20 && n.left!=0){let name=syntax::expression_at(p,n.left);start=name.start;end=name.end;}}else{let n=syntax::statement_at(p,task.node);start=n.start;end=n.end;}}
     }return model::Problem{.code,.module_index=context.module_index,.declaration,.start,.end};
 }
 pub fn model::Problem collect(ref catalog::Catalog c,ref v::Vec<syntax::Parsed> sources,usize template_index,ref mut bytes::Buffer names,ref mut v::Vec<model::Argument> args,ref mut v::Vec<model::Edge> edges,ref mut v::Vec<model::Range> ranges,ref mut usize work){
