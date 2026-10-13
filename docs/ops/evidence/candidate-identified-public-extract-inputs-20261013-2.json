@@ -1,0 +1,70 @@
+{
+  "schema": "fairyc.candidate-source-inputs/v1",
+  "inputs": [
+    {
+      "path": "examples/lexer_candidate/src/tagged_encoding.fy",
+      "bytes": 6103,
+      "sha256": "bfc4c8398d4cac37cb15056a19814216e1faf437d88b22d61d52c5482aa37d2a"
+    },
+    {
+      "path": "examples/lexer_candidate/src/tagged_types.fy",
+      "bytes": 4824,
+      "sha256": "431f283e07d9dbea60c698d1f70f7e7009e1552314cf660688b10b09daad8338"
+    },
+    {
+      "path": "examples/lexer_candidate/src/type_state.fy",
+      "bytes": 5972,
+      "sha256": "7dbbf7d50be1e9513dc8aafd99b11afda5d8e2d7ce87d96b6436c4752c2123a0"
+    },
+    {
+      "path": "examples/lexer_candidate/src/types.fy",
+      "bytes": 10832,
+      "sha256": "53a77948af92724f00de0609837fd1507899df8e2b59b6d2778ef1f3c344395a"
+    },
+    {
+      "path": "examples/lexer_candidate/src/utf8.fy",
+      "bytes": 807,
+      "sha256": "4a5425cea9efbfb1bff2c31a38c2bd8e392c6792af09f24e906c9a743621870d"
+    },
+    {
+      "path": "examples/lexer_candidate/tests/module_public_vector_interface.fy",
+      "bytes": 13421,
+      "sha256": "e28ccf9f7be6ae4fc67b1fc24b8a3ab2b7a2cd319c60aa6191aff6f6fe10afb4"
+    },
+    {
+      "path": "tools/verify-candidate-private-tests.py",
+      "bytes": 16387,
+      "sha256": "e970eddc22cdba4ddbaa3a6d5a197f11431bd38b68d2810b16efe32d7985eb97"
+    },
+    {
+      "path": ".cache/identified-public-extract-20261013/fixture.bin",
+      "bytes": 14113,
+      "sha256": "71e6972007a09197a2dc97b2de663a6175bfa7b988acc9071cadcc78388fd7c8"
+    },
+    {
+      "path": "examples/lexer_candidate/fairy.toml",
+      "bytes": 163,
+      "sha256": "5dd473fe42d35270b362d16d383627167d9981244761a925e42a45f57c8b737f"
+    },
+    {
+      "path": "examples/lexer_candidate/tests/module_public_interface_extract.fy",
+      "bytes": 11675,
+      "sha256": "5230dccc163599da7aa67eaeb78f15e872234eb200299a24ca2d6c9fcf765c05"
+    },
+    {
+      "path": "tools/verify-candidate-public-vector-types.go",
+      "bytes": 6783,
+      "sha256": "5759d901f4bac9ca04588743bdf8834801a19e38dc5eb72006c6f7f9a2f26cf6"
+    },
+    {
+      "path": ".cache/source-specializations-20261013/vec.fy",
+      "bytes": 8702,
+      "sha256": "0ae4c395bf98c39079ad620bde035b3b590d51417864802e698edc069281db5b"
+    },
+    {
+      "path": ".cache/identified-public-extract-20261013/oracle.json",
+      "bytes": 2145,
+      "sha256": "1573adc0c8c259af28efb0909070152fa060122e28fc5ce2ab57149a8034e776"
+    }
+  ]
+}

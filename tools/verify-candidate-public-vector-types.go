@@ -27,7 +27,7 @@ import (
 	"github.com/0disoft/fairyc/internal/source"
 )
 
-func run(sdkPath, output string) error {
+func run(sdkPath, output string, interfaces bool) error {
 	authored, err := os.ReadFile("examples/lexer_candidate/tests/module_public_vector_types.fy")
 	if err != nil {
 		return err
@@ -127,6 +127,39 @@ func run(sdkPath, output string) error {
 	for _, p := range parameters {
 		field([]byte(p))
 	}
+	interfaceReports := []map[string]any{}
+	if interfaces {
+		generated := map[string]bool{}
+		for _, name := range prepared.GeneratedNames {
+			generated[name] = true
+		}
+		number(3)
+		for owner := hir.PackageID(1); owner <= 3; owner++ {
+			descriptor, err := moduleinterface.Extract(checked.HIR, owner, coordinates)
+			if err != nil {
+				return err
+			}
+			for i := range descriptor.Modules {
+				descriptor.Modules[i].Items = slices.DeleteFunc(descriptor.Modules[i].Items, func(item moduleinterface.Item) bool { return generated[item.Name] })
+			}
+			encoded, err := moduleinterface.Encode(descriptor)
+			if err != nil {
+				return err
+			}
+			hash, err := moduleinterface.Compute(descriptor)
+			if err != nil {
+				return err
+			}
+			if hash != analysis.OrdinaryInterfaces[owner] {
+				return fmt.Errorf("ordinary interface publication mismatch for %d", owner)
+			}
+			number(int(owner) - 1)
+			field(encoded)
+			field([]byte(hash.String()))
+			field([]byte(analysis.Interfaces[owner].String()))
+			interfaceReports = append(interfaceReports, map[string]any{"owner": int(owner) - 1, "bytes": len(encoded), "ordinary": hash.String(), "generic": analysis.Interfaces[owner].String()})
+		}
+	}
 	if wire.Len() > 1<<20 {
 		return fmt.Errorf("fixture exceeds 1MiB")
 	}
@@ -136,17 +169,18 @@ func run(sdkPath, output string) error {
 	if err := os.WriteFile(output, wire.Bytes(), 0644); err != nil {
 		return err
 	}
-	return json.NewEncoder(os.Stdout).Encode(map[string]any{"schema": "fairyc.candidate-public-vector-types-oracle/v1", "passed": true, "vectors": names, "parameters": parameters, "flowCompleted": true, "fixture": output, "bytes": wire.Len()})
+	return json.NewEncoder(os.Stdout).Encode(map[string]any{"schema": "fairyc.candidate-public-vector-types-oracle/v1", "passed": true, "vectors": names, "parameters": parameters, "flowCompleted": true, "fixture": output, "bytes": wire.Len(), "interfaces": interfaceReports})
 }
 func main() {
 	sdk := flag.String("sdk", "", "original authenticated SDK Vec source")
 	output := flag.String("output", "", "bounded fixture output")
+	interfaces := flag.Bool("interfaces", false, "append exact source-filtered descriptors and published ordinary/generic interfaces")
 	flag.Parse()
 	if *sdk == "" || *output == "" {
 		fmt.Fprintln(os.Stderr, "explicit sdk/output required")
 		os.Exit(2)
 	}
-	if e := run(*sdk, *output); e != nil {
+	if e := run(*sdk, *output, *interfaces); e != nil {
 		fmt.Fprintln(os.Stderr, e)
 		os.Exit(1)
 	}

@@ -1,5 +1,27 @@
 # Fairy 컴파일러 전환: 후속 작업 목록
 
+## Identified public descriptor extraction (2026-10-13)
+
+Identified public descriptor extraction validates the complete source/type-name
+table once before rendering its fields and signatures. Prepared rendering keeps
+the same bounded work history without repeating whole-source authentication per
+field. Original templates remain separately recorded and generated declarations
+do not enter the ordinary public item stream.
+
+All 3471 v5 encoding bytes and all three ordinary hashes match actual Go
+publication for user, provider and Vec SDK packages. Three authored tests and
+four existing extraction regressions pass Go native and candidate C dev/release.
+Detached SDK descriptors, exact-fit/exhausted work, invalid owners and the legacy
+Vec rejection path are covered. The Go observer's original vector fixture stays
+byte-identical. Root check and locked check pass 440 files / 5676 MIR functions.
+
+Next: combine source-planned public template closures and the identified ordinary
+descriptor into complete Vec SDK source-interface hashes, then dispatcher/cache
+consumers. Executable/cache publication still belongs to completed body/Flow
+checking. Latest full-image/fixed-point promotion, product timing/stack integration,
+Linux/full suite and hosted CI remain open. Public API, SDK ABI, limits, DB and CI
+are unchanged; no push. Receipt: [evidence](evidence/candidate-identified-public-extract-20261013.json).
+
 ## Original-source Vec public type names (2026-10-13)
 
 The source type-name factory derives detached Vec names from the original
