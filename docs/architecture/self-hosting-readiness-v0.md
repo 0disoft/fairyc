@@ -9,6 +9,8 @@ The bounded cleanup-IR component now has verified binary transport and fresh
 verification accounting: [cleanup receipt](../ops/evidence/candidate-cleanup-artifact-20261014.json).
 The per-body IR component now has verified binary transport, detached ownership
 and fresh verification accounting: [body receipt](../ops/evidence/candidate-body-artifact-20261014.json).
+The SDK-source component now restores exact bytes through fresh authentication:
+[SDK receipt](../ops/evidence/candidate-sdk-artifact-20261014.json).
 Whole-program artifacts, checked-owner rebinding and cache reuse remain open.
 The current candidate-owned IR environment is verified in the
 [environment checkpoint](../ops/candidate-cache-environment-20261014.md).

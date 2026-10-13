@@ -34,6 +34,9 @@ pub fn clean::Problem check(ref Sources p,ref mut usize used){
     if(end!=data(p).len){return fail(1001,0,end,data(p).len);}return fail(0,0,0,0);
 }
 pub fn Result<Sources,clean::Problem> assemble(usize modules,v::Vec<Unit> units,bytes::Buffer source,usize work){let p=Sources{.modules,.units,.source,.work};var usize used=work;let checked=check(ref p,ref mut used);if(checked.code!=0){return .err(checked);}return .ok(p);}
+// Stored bytes never carry producer history or an authentication flag. Restore
+// a fresh owner only after the ordinary checker authenticates its exact bytes.
+pub fn Result<Sources,clean::Problem> assemble_artifact(usize modules,v::Vec<Unit> units,bytes::Buffer source,ref mut usize verification_work){let p=Sources{.modules,.units,.source,.work=0};let checked=check(ref p,verification_work);if(checked.code!=0){return .err(checked);}return .ok(p);}
 pub fn Result<Sources,clean::Problem> collect(ref v::Vec<syntax::Parsed> sources,ref mut usize work){
     let base=*work;let modules=v::len<syntax::Parsed>(sources);if(modules>limits::source_files()){return .err(fail(1002,0,0,0));}var v::Vec<Unit> units=v::empty<Unit>();var bytes::Buffer owned=bytes::empty();var usize i=0;
     while(i<modules){if(!budget::charge(work,1)){return .err(fail(1002,i,0,0));}let p=v::at<syntax::Parsed>(sources,i);let raw=syntax::source_view(p);
