@@ -40,7 +40,10 @@ restores its complete IR, nonempty authenticated SDK and source provenance:
 Combined full-IR/source/identity transport now restores detached components,
 re-encodes byte-identically and rejects SDK/source contradictions:
 [project artifact receipt](evidence/candidate-project-artifact-20261014.json).
-Current-source checked-owner rebinding and cache reuse remain open.
+Current source facts and specialization handles now rebind across source/owner
+renumbering and reject stale sources and mismatched original templates:
+[current artifact receipt](evidence/candidate-project-artifact-current-20261014.json).
+Whole-IR renumbering, checked Complete-owner rebinding and cache reuse remain open.
 
 Current source-identified build/run integration:
 [2026-10-14 native checkpoint](candidate-identified-native-20261014.md).
