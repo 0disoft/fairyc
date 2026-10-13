@@ -1,5 +1,10 @@
 # Self-hosting readiness v0
 
+Cache-key v4/v0 encoders and the checked ordinary state-body identity are now
+verified: [key checkpoint](../ops/candidate-generic-cache-key-20261014.md) and
+[body checkpoint](../ops/candidate-cache-body-identity-20261014.md). Remaining
+complete-owner/workspace/environment facts and actual artifact reuse stay open.
+
 Current source-identified build/run integration and its 51 process observations:
 [2026-10-14 native checkpoint](../ops/candidate-identified-native-20261014.md).
 Cache consumers, latest complete fixed point, product defaults/performance and
