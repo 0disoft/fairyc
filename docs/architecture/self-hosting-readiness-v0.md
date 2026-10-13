@@ -25,7 +25,10 @@ Type/frame specialization identities now round-trip against verified cleanup
 context and match current source identities. A locked generic/Vec workspace
 restores its complete IR, nonempty authenticated SDK and source provenance:
 [identity receipt](../ops/evidence/candidate-identity-artifact-20261014.json).
-Combined source-identified artifacts, checked-owner rebinding and cache reuse remain open.
+Combined full-IR/source/identity transport now restores detached components,
+re-encodes byte-identically and rejects SDK/source contradictions:
+[project artifact receipt](../ops/evidence/candidate-project-artifact-20261014.json).
+Current-source checked-owner rebinding and cache reuse remain open.
 The current candidate-owned IR environment is verified in the
 [environment checkpoint](../ops/candidate-cache-environment-20261014.md).
 The actual running Windows compiler image identity is verified
