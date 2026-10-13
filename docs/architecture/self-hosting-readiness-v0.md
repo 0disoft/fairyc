@@ -19,7 +19,9 @@ The state-layout component now restores detached UIDs, fields and hashes through
 fresh canonical identity verification: [state receipt](../ops/evidence/candidate-state-artifact-20261014.json).
 Whole-program IR transport now restores all components through fresh full
 verification: [program receipt](../ops/evidence/candidate-program-artifact-20261014.json).
-Original-source identity transport, checked-owner rebinding and cache reuse remain open.
+Exact source/package/import provenance now round-trips and rebinds to current
+input across source-order and owner renumbering: [source receipt](../ops/evidence/candidate-source-artifact-20261014.json).
+Specialization identity transport, checked-owner rebinding and cache reuse remain open.
 The current candidate-owned IR environment is verified in the
 [environment checkpoint](../ops/candidate-cache-environment-20261014.md).
 The actual running Windows compiler image identity is verified

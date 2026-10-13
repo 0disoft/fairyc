@@ -1,0 +1,12 @@
+module module_source_artifact_decode;
+import module_source_artifact_model as model;
+import generic_package_bindings as bindings;
+import candidate_artifact_wire as wire;
+import project_cache_encoding as budget;
+import std::bytes as bytes;
+import std::vec as v;
+pub fn Result<model::Snapshot,u32> decode(ref u8[] raw,ref mut usize work){if(!budget::charge(work,0)){return .err(1002);}var c=switch(wire::cursor(raw,b"FYPROV00",work)){case .ok(c):{c}case .err(code):{return .err(code);}};let count=wire::count_from(raw,ref mut c,512,128,work);if(wire::status(ref c)!=0){return .err(wire::status(ref c));}var v::Vec<bindings::Module> modules=v::empty<bindings::Module>();var usize i=0;
+    while(i<count){var row=bindings::Module{.owner=wire::number_from(raw,ref mut c,work),.namespace=bindings::Text{.start=wire::number_from(raw,ref mut c,work),.end=wire::number_from(raw,ref mut c,work)},.path=bindings::Text{.start=wire::number_from(raw,ref mut c,work),.end=wire::number_from(raw,ref mut c,work)},.first=wire::number_from(raw,ref mut c,work),.count=wire::number_from(raw,ref mut c,work),.source_size=wire::number_from(raw,ref mut c,work),.digest=[0;8]};var usize j=0;while(j<8){row.digest[j]=wire::word_from(raw,ref mut c,work);j+=1;}if(wire::status(ref c)!=0){return .err(wire::status(ref c));}if(!v::push<bindings::Module>(ref mut modules,row).is_ok){return .err(1003);}i+=1;}
+    let imports_count=wire::count_from(raw,ref mut c,32768,56,work);if(wire::status(ref c)!=0){return .err(wire::status(ref c));}var v::Vec<bindings::Import> imports=v::empty<bindings::Import>();i=0;while(i<imports_count){let row=bindings::Import{.module_index=wire::number_from(raw,ref mut c,work),.declaration=wire::number_from(raw,ref mut c,work),.target=wire::number_from(raw,ref mut c,work),.alias=bindings::Text{.start=wire::number_from(raw,ref mut c,work),.end=wire::number_from(raw,ref mut c,work)},.binding=bindings::Text{.start=wire::number_from(raw,ref mut c,work),.end=wire::number_from(raw,ref mut c,work)}};if(wire::status(ref c)!=0){return .err(wire::status(ref c));}if(!v::push<bindings::Import>(ref mut imports,row).is_ok){return .err(1003);}i+=1;}
+    let size=wire::count_from(raw,ref mut c,1048576,1,work);if(wire::status(ref c)!=0){return .err(wire::status(ref c));}if(!budget::charge(work,size+1)){return .err(1002);}let names=switch(bytes::copy(raw[c.offset..c.offset+size])){case .ok(p):{p}case .err(_):{return .err(1003);}};c.offset+=size;let code=wire::end(raw,ref mut c,work);if(code!=0){return .err(code);}return model::assemble(names,modules,imports,work);
+}

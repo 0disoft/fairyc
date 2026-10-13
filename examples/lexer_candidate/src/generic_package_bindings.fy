@@ -23,6 +23,7 @@ pub resource Bindings{bytes::Buffer names;v::Vec<Module> modules;v::Vec<Import> 
 pub struct Problem{u32 code;usize module_index;usize declaration;}
 fn Problem fail(u32 code,usize module_index,usize declaration){return Problem{.code,.module_index,.declaration};}
 pub fn usize count(ref Bindings p){return v::len<Module>(ref p.modules);}
+pub fn ref u8[] names_view(ref Bindings p){return bytes::view(ref p.names);}
 pub fn Module module_at(ref Bindings p,usize at){assert(at<count(p));return *v::at<Module>(ref p.modules,at);}
 pub fn ref u8[] text(ref Bindings p,Text t){assert(t.start<=t.end && t.end<=bytes::len(ref p.names));return bytes::view(ref p.names)[t.start..t.end];}
 pub fn usize import_count(ref Bindings p){return v::len<Import>(ref p.imports);}
