@@ -2,6 +2,30 @@
 
 ## Current local candidate evidence (2026-10-13)
 
+### Owned identified project units (2026-10-13)
+
+The project collector retains each independently checked identified IR owner,
+source identities and exact source range through the existing adaptive grouping.
+One capacity retry splits 81 unique source specializations across two units;
+82 specialized frames include the same shared g0 ID in both units. All 82
+specialized calls retain checked targets after the source/planner owners leave
+scope. The ordinary and identified coordinators share one capacity predicate.
+Stage-8 attachment failures retain the shared 16MiB identity-work history and
+never retry. A later-unit type error returns no collected prefix and preserves
+the ordinary compiler's complete error fields.
+
+Three authored tests pass Go native and candidate C development/release. The
+candidate emits 246 sources in 97.54 seconds;
+private compiler API images explicitly reserve 16MiB stacks. Root check and
+locked check pass 434 files / 5597 MIR functions. Product limits/timeouts,
+public CLI/API, SDK ABI, DB and CI are unchanged; no push.
+
+Next: identity-aware project link/rebinding and specialization deduplication,
+then named partitions, complete Vec interfaces and dispatcher/cache consumers.
+Latest full-image/fixed-point promotion, product timing/stack integration,
+Linux/full suite and hosted CI remain open. Receipt:
+[evidence](../ops/evidence/candidate-project-identified-compile-20261013.json).
+
 ### Source-identified C functions and cleanup (2026-10-13)
 
 The identified renderer derives an owned name table from the same checked IR

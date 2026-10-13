@@ -48,7 +48,7 @@ pub fn Result<identified::Program,Problem> range_identified(ref v::Vec<syntax::P
 }
 // Cleanup policy retains raw code 10 through the owned-IR lowerer; later
 // IR construction and verification use 1002 for the same capacity class.
-fn bool budget(Problem p){return (p.stage>=2 && p.stage<=7 && p.code==10) || (p.stage==3 || p.stage==7) && p.code==4503 || p.stage==6 && p.code==1002;}
+pub fn bool capacity_failure(Problem p){return (p.stage>=2 && p.stage<=7 && p.code==10) || (p.stage==3 || p.stage==7) && p.code==4503 || p.stage==6 && p.code==1002;}
 fn Problem append_range(ref v::Vec<syntax::Parsed> sources,ref signatures::Program metadata,usize first,usize stop,usize depth,ref mut v::Vec<ir::Program> programs,ref mut v::Vec<Range> ranges,ref mut usize retries){
     switch(range(sources,metadata,first,stop)){
         case .ok(p):{
@@ -58,7 +58,7 @@ fn Problem append_range(ref v::Vec<syntax::Parsed> sources,ref signatures::Progr
         case .err(e):{
             // Only capacity failures can be retried. Single-source failures retain
             // the exact failing stage and location; no successful prefix escapes.
-            if(!budget(e) || stop-first<=1 || depth>=8){return e;};
+            if(!capacity_failure(e) || stop-first<=1 || depth>=8){return e;};
             *retries=*retries+1;let middle=first+(stop-first)/2;
             let left=append_range(sources,metadata,first,middle,depth+1,programs,ranges,retries);if(left.code!=0){return left;}
             return append_range(sources,metadata,middle,stop,depth+1,programs,ranges,retries);
