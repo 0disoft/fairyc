@@ -39,6 +39,7 @@ pub fn usize parameter_at(ref Program p,usize index){return *v::at<usize>(ref p.
 pub fn types::Type type_at(ref Program p,usize id){return vectors::type_at(ref p.types,id);}
 pub fn usize type_count(ref Program p){return vectors::type_count(ref p.types);}
 pub fn types::Resolution resolve_type(ref Program p,ref syntax::Parsed source,usize module_index,usize root,ref mut v::Vec<types::Type> graph){return vectors::resolve_type(ref p.types,source,module_index,root,graph);}
+pub fn types::Resolution resolve_argument(ref Program p,ref syntax::Parsed source,usize module_index,usize declaration,usize root,ref v::Vec<usize> args,ref mut v::Vec<types::Type> graph){return vectors::resolve_argument(ref p.types,source,module_index,declaration,root,args,graph);}
 pub fn Result<v::Vec<usize>,types::BatchProblem> resolve_types(ref Program p,ref syntax::Parsed source,usize module_index,ref v::Vec<usize> roots,ref mut v::Vec<types::Type> graph){return vectors::resolve_types(ref p.types,source,module_index,roots,graph);}
 pub fn Result<v::Vec<usize>,types::BatchProblem> specialize_types(ref Program p,ref syntax::Parsed source,usize module_index,usize declaration,ref v::Vec<usize> roots,ref v::Vec<usize> arguments,ref mut v::Vec<types::Type> graph){return vectors::specialize_types(ref p.types,source,module_index,declaration,roots,arguments,graph);}
 pub fn types::Resolution declaration_type(ref Program p,usize module_index,usize declaration,ref mut v::Vec<types::Type> graph){return vectors::declaration_type(ref p.types,module_index,declaration,graph);}

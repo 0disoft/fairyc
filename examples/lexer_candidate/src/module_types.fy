@@ -7,6 +7,7 @@ import literal_types as literals;
 import pointer_types as pointers;
 import c_abi_types as abi;
 import array_types as arrays;
+import generic_scalar_arguments as arguments;
 import std::bytes as bytes;
 import std::vec as v;
 
@@ -71,7 +72,7 @@ fn Resolution walk(ref catalog::Catalog c,ref syntax::Parsed p,usize module_inde
     if(root==0 || root>syntax::type_count(p)){return fail(9,module_index,0,0);}let n=syntax::type_at(p,root);if(depth>=64){return fail(10,module_index,n.start,n.end);}
     if(n.kind==1){let name=syntax::type_text(p,root);
         if(bytes::equal(name,b"Region")){return accepted(graph,node(19,0,0,0,0,0),module_index,n.start,n.end);}
-        if(declaration!=0){var usize i=0;while(i<v::len<usize>(substitutions)){let param=syntax::generic_parameter_at(p,declaration-1,i);if(bytes::equal(name,syntax::source_view(p)[param.start..param.end])){return Resolution{.type=*v::at<usize>(substitutions,i),.problem=Problem{.code=0,.module_index,.start=0,.end=0}};}i+=1;}}
+        if(declaration!=0){var usize i=0;while(i<v::len<usize>(substitutions)){let param=syntax::generic_parameter_at(p,declaration-1,i);if(bytes::equal(name,syntax::source_view(p)[param.start..param.end])){let id=*v::at<usize>(substitutions,i);if(arguments::descriptor(id)){return fail(5,module_index,n.start,n.end);}return Resolution{.type=id,.problem=Problem{.code=0,.module_index,.start=0,.end=0}};}i+=1;}}
         let u32 scalar=scalars::primitive(p,root);let u32 c_scalar=abi::resolve(p,root);
         if(scalar!=7 || bytes::equal(name,b"void")){return accepted(graph,node(1,scalar,0,0,0,0),module_index,n.start,n.end);}
         if(abi::valid(c_scalar)){return accepted(graph,node(1,c_scalar,0,0,0,0),module_index,n.start,n.end);}
@@ -122,12 +123,27 @@ pub fn Resolution declaration(ref catalog::Catalog c,usize module_index,usize de
 pub fn Resolution specialize(ref catalog::Catalog c,ref syntax::Parsed p,usize module_index,usize declaration,usize root,ref v::Vec<usize> substitutions,ref mut v::Vec<Type> graph){
     if(!catalog::source_matches(c,module_index,p)){return fail(12,module_index,0,0);}return specialize_current(c,p,module_index,declaration,root,substitutions,graph);
 }
+fn u32 substitution_code(ref catalog::Catalog c,ref syntax::Parsed p,usize module_index,usize declaration,usize root,ref v::Vec<usize> substitutions,ref v::Vec<Type> graph){
+    if(declaration==0 || declaration>syntax::declaration_count(p) || root==0 || root>syntax::type_count(p)){return 4501;}
+    let d=syntax::declaration_at(p,declaration-1);let n=syntax::type_at(p,root);let usize size=v::len<usize>(substitutions);let bool vector=catalog::sdk_vector_source(c,module_index);let bool vector_cleanup=d.kind==6 && vector && bytes::equal(syntax::source_view(p)[d.name_start..d.name_end],b"Vec") && n.start>=d.cleanup_start && n.end<=d.cleanup_end;
+    if((d.kind!=3 && !vector_cleanup) || d.generic_parameters==0 || size==0 || size>8 || size!=syntax::generic_parameter_count(p,declaration-1) || n.start<d.start || n.end>d.end){return 4501;}
+    var usize i=0;while(i<size){let usize id=*v::at<usize>(substitutions,i);if(arguments::descriptor(id)){i+=1;continue;}if(id==0 || id>count(graph)){return 4502;}let t=at(graph,id);if(!(t.kind==1 && t.scalar>=1 && t.scalar<=6) && !(vector && (t.kind==2 || t.kind==3))){return 4502;}i+=1;}return 0;
+}
 fn Resolution specialize_current(ref catalog::Catalog c,ref syntax::Parsed p,usize module_index,usize declaration,usize root,ref v::Vec<usize> substitutions,ref mut v::Vec<Type> graph){
     if(declaration==0 || declaration>syntax::declaration_count(p) || root==0 || root>syntax::type_count(p)){return fail(4501,module_index,0,0);}
-    let d=syntax::declaration_at(p,declaration-1);let n=syntax::type_at(p,root);let usize size=v::len<usize>(substitutions);let bool vector=catalog::sdk_vector_source(c,module_index);let bool vector_cleanup=d.kind==6 && vector && bytes::equal(syntax::source_view(p)[d.name_start..d.name_end],b"Vec") && n.start>=d.cleanup_start && n.end<=d.cleanup_end;
-    if((d.kind!=3 && !vector_cleanup) || d.generic_parameters==0 || size==0 || size>8 || size!=syntax::generic_parameter_count(p,declaration-1) || n.start<d.start || n.end>d.end){return fail(4501,module_index,n.start,n.end);}
-    var usize i=0;while(i<size){let usize id=*v::at<usize>(substitutions,i);if(id==0 || id>count(graph)){return fail(4502,module_index,n.start,n.end);}let t=at(graph,id);if(!(t.kind==1 && t.scalar>=1 && t.scalar<=6) && !(vector && (t.kind==2 || t.kind==3))){return fail(4502,module_index,n.start,n.end);}i+=1;}
+    let code=substitution_code(c,p,module_index,declaration,root,substitutions,graph);if(code!=0){return fail(code,module_index,if(root>0 && root<=syntax::type_count(p)){syntax::type_at(p,root).start}else{0},if(root>0 && root<=syntax::type_count(p)){syntax::type_at(p,root).end}else{0});}
     let usize before=count(graph);let result=walk(c,p,module_index,root,graph,0,declaration,substitutions);if(result.problem.code!=0){while(count(graph)>before){discard v::pop<Type>(graph);}}return result;
+}
+// Only direct written scalar arguments and forwarded parameters can return a
+// source-only descriptor. General resolve/specialize still return value types.
+pub fn Resolution resolve_argument(ref catalog::Catalog c,ref syntax::Parsed p,usize module_index,usize declaration,usize root,ref v::Vec<usize> substitutions,ref mut v::Vec<Type> graph){
+    if(!catalog::source_matches(c,module_index,p)){return fail(12,module_index,0,0);}if(root==0 || root>syntax::type_count(p)){return fail(4501,module_index,0,0);}let n=syntax::type_at(p,root);
+    if(declaration==0 && v::len<usize>(substitutions)!=0){return fail(4501,module_index,n.start,n.end);}
+    if(declaration!=0){let code=substitution_code(c,p,module_index,declaration,root,substitutions,graph);if(code!=0){return fail(code,module_index,n.start,n.end);}}
+    if(n.kind==1){let name=syntax::type_text(p,root);if(declaration!=0){var usize i=0;while(i<v::len<usize>(substitutions)){let param=syntax::generic_parameter_at(p,declaration-1,i);if(bytes::equal(name,syntax::source_view(p)[param.start..param.end])){return Resolution{.type=*v::at<usize>(substitutions,i),.problem=Problem{.code=0,.module_index,.start=0,.end=0}};}i+=1;}}
+        let id=arguments::named(name);if(id!=0){return Resolution{.type=id,.problem=Problem{.code=0,.module_index,.start=0,.end=0}};}
+    }
+    return if(declaration==0){resolve(c,p,module_index,root,graph)}else{specialize_current(c,p,module_index,declaration,root,substitutions,graph)};
 }
 fn BatchProblem batch_fail(u32 code,usize module_index,usize request){return BatchProblem{.problem=Problem{.code,.module_index,.start=0,.end=0},.request};}
 fn void rollback(ref mut v::Vec<Type> graph,usize before){while(count(graph)>before){discard v::pop<Type>(graph);}}
