@@ -1,0 +1,53 @@
+{
+  "schema": "fairyc.candidate-source-inputs/v1",
+  "sources": [
+    {
+      "path": ".cache/project-source-provenance-20261013/baseline-probe/src/sha256_block.fy",
+      "sha256": "bc48b9e751205bba8aeaf09987ea8681694d26bc989e24f4ecb3afa4c6e00fd4"
+    },
+    {
+      "path": ".cache/project-source-provenance-20261013/baseline-probe/src/sha256_stream.fy",
+      "sha256": "b5f97a9b5be679418a1365a6007028abfab5ba66ee3ae5c08b3e5b863fcfc8b9"
+    },
+    {
+      "path": ".cache/project-source-provenance-20261013/baseline-probe/src/storage_intrinsics.fy",
+      "sha256": "6f8ae79d2086341058de549fe39ff54164a28bb0ad17934e2f78ff6c477a4300"
+    },
+    {
+      "path": ".cache/project-source-provenance-20261013/baseline-probe/src/strings.fy",
+      "sha256": "8f26db7c4d4039c8c8d9fbc6078097859c8f714ca5887957fdf0e69269dca521"
+    },
+    {
+      "path": ".cache/project-source-provenance-20261013/baseline-probe/src/syntax.fy",
+      "sha256": "cb9244a18ea93777694d60e5b63eb67738d224297d097542bb84db2b7f31d5e6"
+    },
+    {
+      "path": ".cache/project-source-provenance-20261013/baseline-probe/src/syntax_arena_copy.fy",
+      "sha256": "89969f5d7d8bd0deb3070032d9c9ffd58afbc972ee95316c04236952e27ff098"
+    },
+    {
+      "path": ".cache/project-source-provenance-20261013/baseline-probe/src/syntax_parse_driver.fy",
+      "sha256": "9db6518c69f6c2394ef1c697d7d2d07b0a78ec3336a907c92e9d2e2087e5b756"
+    },
+    {
+      "path": ".cache/project-source-provenance-20261013/baseline-probe/src/tagged_encoding.fy",
+      "sha256": "bfc4c8398d4cac37cb15056a19814216e1faf437d88b22d61d52c5482aa37d2a"
+    },
+    {
+      "path": ".cache/project-source-provenance-20261013/baseline-probe/src/tagged_types.fy",
+      "sha256": "431f283e07d9dbea60c698d1f70f7e7009e1552314cf660688b10b09daad8338"
+    },
+    {
+      "path": ".cache/project-source-provenance-20261013/baseline-probe/src/type_state.fy",
+      "sha256": "7dbbf7d50be1e9513dc8aafd99b11afda5d8e2d7ce87d96b6436c4752c2123a0"
+    },
+    {
+      "path": ".cache/project-source-provenance-20261013/baseline-probe/src/types.fy",
+      "sha256": "53a77948af92724f00de0609837fd1507899df8e2b59b6d2778ef1f3c344395a"
+    },
+    {
+      "path": ".cache/project-source-provenance-20261013/baseline-probe/src/utf8.fy",
+      "sha256": "4a5425cea9efbfb1bff2c31a38c2bd8e392c6792af09f24e906c9a743621870d"
+    }
+  ]
+}

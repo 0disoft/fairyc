@@ -1,0 +1,185 @@
+{
+  "schema": "fairyc.candidate-source-inputs/v1",
+  "sources": [
+    {
+      "path": "examples/lexer_candidate/src/module_unit_origin_flow_model.fy",
+      "sha256": "825a6834aa2dad4af6d42ddc0452af2c98a1b94bd39e983e416f23926878cc1e"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_unit_loan_model.fy",
+      "sha256": "7d5b3cf3c691e3f27eea95fe283fbd280bbd72a8ce5dc7a9929431cd1c9f480f"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_unit_origin_provenance.fy",
+      "sha256": "70381599968c8fd17d9d814b0137bdf9e1ada64b0c24d8d49bd38d7eec55f398"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_unit_loan_checks.fy",
+      "sha256": "341b6460db802834678eaadb7b7a187f53089a67a9caf89ee981eba9292a144d"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_unit_origin_flow_control.fy",
+      "sha256": "011cb92385adb7ff7dc23187a69265d177a3a653f50ff09600db85b821da7bbd"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_unit_loan_iteration.fy",
+      "sha256": "018e9dca19d96f107f1f7c5722b2adf74f55d921187f25a151e018abd1fadde7"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_unit_loan_reference.fy",
+      "sha256": "8cfe4aee4f356b168ab6d42dcc76d240845b1067c20c4a3accd03bb219669650"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_unit_loan_generations.fy",
+      "sha256": "f9c1435a8fa5eb1d823217754954715586e41d6e9dd8d3358efd807f45c01059"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_unit_origin_match.fy",
+      "sha256": "34125cbf2c537ea660f3cd84669855aa981707333a4689e2237b5d474712d1e6"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_unit_origin_flow.fy",
+      "sha256": "b18c0f8e369541d96ca3f9545a584b8d92b491f84d9a744f3f5428dc70acc701"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_unit_loan_owner_reads.fy",
+      "sha256": "e186447b50acf0c015e8c5d01a33a85d2cd749b2f4c5450a0d397ec792f726e4"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_project_inputs.fy",
+      "sha256": "5cd6fd546fafb12894f4979cf14012159fa1dee25bae116dbf9f1c99208ac5a1"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_project_types.fy",
+      "sha256": "fccd8c241ae28cc54bca5e38cafca3056ce9d845dfa2d51e849d323b37bd98c9"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_project_link.fy",
+      "sha256": "22ead90c86362550544adb82ba56f3d96bd6d1074a36ef8774878f3dd9a71502"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_project_calls.fy",
+      "sha256": "0c032232662b83d8fa070ec57091a0f2cffcc57367b54d39cf75a99ca289e955"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_project_cleanup.fy",
+      "sha256": "c13781333e193fe3d1e738b25e98fbced663e2950015ef32b202d3e2d7393d9d"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_project_metadata.fy",
+      "sha256": "4c3abaf9a9d09113e1e326de136cff6695eede88974cbb13f5fd9736ac3d9c6e"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_project_body_equal.fy",
+      "sha256": "e34fd3eb412d35221ff29a19341adc36dd2bd82ab968af5314c0d4cf56614a70"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_project_body.fy",
+      "sha256": "e762021268515ae8b196716cfec7e2dc3dd606edca6857f151a6d20c1573ff83"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_unit_c_calls.fy",
+      "sha256": "2129b8eca140f4efdab700d4f6617c15e8596e8f4d3be988074c6ade14e3114d"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_unit_c_names.fy",
+      "sha256": "5a7a00d57e1a13f18bb0105d0d46ec87e9f70494b264c1e3c842e45ff1d07889"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_unit_c_sdk.fy",
+      "sha256": "27bf5815e82857909204f5a88c46a0aa154e68bec229104c00b5e9ca7c4ba993"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_unit_c_bytes.fy",
+      "sha256": "7ae8ac26ce121031a9de09cc40b310f31407a40aff7339d876c4532e6931a5cd"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_unit_c_file.fy",
+      "sha256": "d8fc4a39332a54ae7f224ade7b36a1c9a318389034523af29f859e2613c0c7e4"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_unit_c_aggregate.fy",
+      "sha256": "c98475e06118c8f61b9e05a149d7a915a0a5af12c051152154c990e1389eb540"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_unit_c_enums.fy",
+      "sha256": "934b0c58318a997eae56597b069ea686aba623870e65e144e694a60760db3492"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_unit_c_scalar.fy",
+      "sha256": "1b0ea06ee2ea41fc6b8818227c6f5a624c533642fd85529a5382e6ea7671af60"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_unit_c_layout_index.fy",
+      "sha256": "06aad7f2c437ecb8c8081d4f921377603e6cf27361c75896990b10dccea42aa0"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_unit_c_literals.fy",
+      "sha256": "40c8b3033247bc6e217312e0b8fbf2f75fb3223416e3084134cd453b165f81aa"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_unit_c_text.fy",
+      "sha256": "2b90b0bd5ba94597051e3365d423c717e0f02bc4b059e849e2eaffb013944bb1"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_unit_c_buffer.fy",
+      "sha256": "7ff00a330dd6c09544a395b934c6008033378f37771f25d1dc2466000187f4cc"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_unit_cfg_model.fy",
+      "sha256": "bd2fa366300c9fb79947c74ac7c7c395a65faa4522d075a43898b1e9883ae6f1"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_unit_cfg_drops.fy",
+      "sha256": "e37b2cc1d8b9597ad3dbe06ccb25ec1701d93c244fa9a544739a83db7721603f"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_unit_cfg_iteration.fy",
+      "sha256": "e4750781eef0997a9e8d2727f689014b62497ec75aad52d78507486e4612c562"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_unit_cfg_switches.fy",
+      "sha256": "bcee5d4f0b2c2c26d5facf5555f69576ded6ccfae54fe3872fa1067bb505da99"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_unit_cfg_region.fy",
+      "sha256": "1acebd5db14edaf8c8422e88c77c49cf7ff241725aaf7e83308d6227ccc21962"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_unit_cfg_defer.fy",
+      "sha256": "d34d9d96d716b78bf834ac8dc72deb8059f0a3568a917ed0d8d713486a91767c"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_unit_c_borrowed_arrays.fy",
+      "sha256": "bef6a6ccfe3448a0b3c248a5ca1b6d2a4d7480e4530c31bf2f41ff139c2681be"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_unit_c_iteration.fy",
+      "sha256": "a6428f16a9cbb4f03608308955089e052ed78a87a19c0045a3327b871deb8110"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_unit_c_storage.fy",
+      "sha256": "27ea45c265e4dbf81673d73aea38d3bb5c1d964232d1941d6db7961695467cfb"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_unit_c_raw_views.fy",
+      "sha256": "0b4abd329f2d4db8165498018a94555e7c91e8ff1c01b59bb4c206e222a566f2"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_unit_c_region.fy",
+      "sha256": "dc2c0a369caf625ac197d900c5f204f7322256d847febb6616a93e4ec81ac491"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_unit_c_reachability.fy",
+      "sha256": "55c7801fb580a8c463523d9ed4f65a5940e7e3d3e4e2f6bb67f54aff2103a883"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_unit_c_switches.fy",
+      "sha256": "ad3a85a12d2f3c202e835781bfa9be21ecbfa11aacf989e72eaa53131bec9202"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_unit_cfg_lower.fy",
+      "sha256": "7a666f9129716358dfc0c9606d532418ec52eb7a4af580157a0eeb93f0beb787"
+    }
+  ]
+}

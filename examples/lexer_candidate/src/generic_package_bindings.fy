@@ -27,6 +27,13 @@ pub fn Module module_at(ref Bindings p,usize at){assert(at<count(p));return *v::
 pub fn ref u8[] text(ref Bindings p,Text t){assert(t.start<=t.end && t.end<=bytes::len(ref p.names));return bytes::view(ref p.names)[t.start..t.end];}
 pub fn usize import_count(ref Bindings p){return v::len<Import>(ref p.imports);}
 pub fn Import import_at(ref Bindings p,usize at){assert(at<import_count(p));return *v::at<Import>(ref p.imports,at);}
+pub fn Bindings empty(){return Bindings{.names=bytes::empty(),.modules=v::empty<Module>(),.imports=v::empty<Import>()};}
+// Detached provenance keeps exact source stamps and resolved import/namespace
+// records without retaining parser arenas or source bytes.
+pub fn Result<Bindings,u32> copy(ref Bindings input,ref mut usize meter){
+    if(count(input)>512 || import_count(input)>32768 || bytes::len(ref input.names)>1048576){return .err(9);}if(!budget::charge(meter,bytes::len(ref input.names)+1)){return .err(10);}let names=switch(bytes::copy(bytes::view(ref input.names))){case .ok(p):{p}case .err(_):{return .err(11);}};var v::Vec<Module> modules=v::empty<Module>();var v::Vec<Import> imports=v::empty<Import>();var usize i=0;
+    while(i<count(input)){if(!budget::charge(meter,1)){return .err(10);}if(!v::push<Module>(ref mut modules,module_at(input,i)).is_ok){return .err(11);}i+=1;}i=0;while(i<import_count(input)){if(!budget::charge(meter,1)){return .err(10);}if(!v::push<Import>(ref mut imports,import_at(input,i)).is_ok){return .err(11);}i+=1;}return .ok(Bindings{.names,.modules,.imports});
+}
 fn Result<Text,u32> retain(ref mut bytes::Buffer names,ref u8[] data,ref mut usize meter){if(data.len>1048576 || bytes::len(names)>1048576-data.len || !budget::charge(meter,data.len+1)){return .err(10);}let start=bytes::len(names);if(!bytes::append(names,data).is_ok){return .err(11);}return .ok(Text{.start,.end=bytes::len(names)});}
 fn Result<bytes::Buffer,u32> namespace(ref coordinates::Coordinates table,usize owner,ref mut usize meter){var usize checked=0;let code=coordinates::validate_owner(table,owner,ref mut checked);if(!budget::charge(meter,checked)){return .err(10);}if(code!=0){return .err(code);}var usize found=coordinates::coordinate_count(table);var usize i=0;
     while(i<coordinates::coordinate_count(table)){if(!budget::charge(meter,1)){return .err(10);}let row=coordinates::coordinate_at(table,i);if(row.owner==owner){if(found!=coordinates::coordinate_count(table) || row.start>row.end || row.end-row.start!=77){return .err(9);}found=i;}i+=1;}

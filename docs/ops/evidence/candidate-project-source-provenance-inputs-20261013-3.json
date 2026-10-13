@@ -1,0 +1,89 @@
+{
+  "schema": "fairyc.candidate-source-inputs/v1",
+  "sources": [
+    {
+      "path": "examples/lexer_candidate/src/sha256_block.fy",
+      "sha256": "bc48b9e751205bba8aeaf09987ea8681694d26bc989e24f4ecb3afa4c6e00fd4"
+    },
+    {
+      "path": "examples/lexer_candidate/src/sha256_stream.fy",
+      "sha256": "b5f97a9b5be679418a1365a6007028abfab5ba66ee3ae5c08b3e5b863fcfc8b9"
+    },
+    {
+      "path": "internal/sdkstdlib/sources/std/bytes.fy",
+      "sha256": "4740a506e93349fb002c383967dcc44d182d20f09f2094b83b5464a4ab252982"
+    },
+    {
+      "path": "internal/sdkstdlib/sources/std/fs.fy",
+      "sha256": "fd7ddfa9f0deed98304cecf94911644087d1e2a46e8be8995c35acbcb183b335"
+    },
+    {
+      "path": "internal/sdkstdlib/sources/std/io.fy",
+      "sha256": "4b89c3aeb8b4de4887395d29723095d364c5660c6b773c5696fb1f65f5365f48"
+    },
+    {
+      "path": "internal/sdkstdlib/sources/std/num.fy",
+      "sha256": "09aa0d45f075aa4212049527ded7bb48d99ceb6ffed56b310e267421bae20bb3"
+    },
+    {
+      "path": "internal/sdkstdlib/sources/std/text.fy",
+      "sha256": "cccd47e090fda11c9da063ffb321489dd8753fe9996855fc432833e05a79e695"
+    },
+    {
+      "path": "internal/sdkstdlib/sources/optional/std/vec.fy",
+      "sha256": "0ae4c395bf98c39079ad620bde035b3b590d51417864802e698edc069281db5b"
+    },
+    {
+      "path": "examples/lexer_candidate/src/storage_intrinsics.fy",
+      "sha256": "6f8ae79d2086341058de549fe39ff54164a28bb0ad17934e2f78ff6c477a4300"
+    },
+    {
+      "path": "examples/lexer_candidate/src/strings.fy",
+      "sha256": "8f26db7c4d4039c8c8d9fbc6078097859c8f714ca5887957fdf0e69269dca521"
+    },
+    {
+      "path": "examples/lexer_candidate/src/syntax.fy",
+      "sha256": "cb9244a18ea93777694d60e5b63eb67738d224297d097542bb84db2b7f31d5e6"
+    },
+    {
+      "path": "examples/lexer_candidate/src/syntax_arena_copy.fy",
+      "sha256": "89969f5d7d8bd0deb3070032d9c9ffd58afbc972ee95316c04236952e27ff098"
+    },
+    {
+      "path": "examples/lexer_candidate/src/syntax_parse_driver.fy",
+      "sha256": "9db6518c69f6c2394ef1c697d7d2d07b0a78ec3336a907c92e9d2e2087e5b756"
+    },
+    {
+      "path": "examples/lexer_candidate/src/tagged_encoding.fy",
+      "sha256": "bfc4c8398d4cac37cb15056a19814216e1faf437d88b22d61d52c5482aa37d2a"
+    },
+    {
+      "path": "examples/lexer_candidate/src/tagged_types.fy",
+      "sha256": "431f283e07d9dbea60c698d1f70f7e7009e1552314cf660688b10b09daad8338"
+    },
+    {
+      "path": "examples/lexer_candidate/src/type_state.fy",
+      "sha256": "7dbbf7d50be1e9513dc8aafd99b11afda5d8e2d7ce87d96b6436c4752c2123a0"
+    },
+    {
+      "path": "examples/lexer_candidate/src/types.fy",
+      "sha256": "53a77948af92724f00de0609837fd1507899df8e2b59b6d2778ef1f3c344395a"
+    },
+    {
+      "path": "examples/lexer_candidate/src/utf8.fy",
+      "sha256": "4a5425cea9efbfb1bff2c31a38c2bd8e392c6792af09f24e906c9a743621870d"
+    },
+    {
+      "path": "examples/lexer_candidate/tests/module_project_source_provenance.fy",
+      "sha256": "ab80c2fbd76b44bffd048c98a1aadcf4068345bcd6423c2ef54395e808891517"
+    },
+    {
+      "path": "tools/verify-candidate-private-tests.py",
+      "sha256": "7f4e5909401dfb1eaf3d71b1b2cc2bf55aaa793991f16e322c2b041ee17de810"
+    },
+    {
+      "path": "examples/lexer_candidate/fairy.toml",
+      "sha256": "5dd473fe42d35270b362d16d383627167d9981244761a925e42a45f57c8b737f"
+    }
+  ]
+}
