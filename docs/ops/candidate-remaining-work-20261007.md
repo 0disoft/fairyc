@@ -2,7 +2,9 @@
 
 Whole-package cache-key v4 encoding is now verified in the
 [2026-10-14 cache-key checkpoint](candidate-package-cache-key-20261014.md).
-Generic keys, complete-owner facts and actual verified artifact reuse remain open.
+Source-generic cache-key v0 encoding is also verified in the
+[generic cache-key checkpoint](candidate-generic-cache-key-20261014.md).
+Complete-owner facts and actual verified artifact reuse remain open.
 
 Current source-identified build/run integration:
 [2026-10-14 native checkpoint](candidate-identified-native-20261014.md).

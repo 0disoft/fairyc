@@ -13,6 +13,8 @@ pub fn Environment environment_of(bytes::Buffer compiler_build,bytes::Buffer lan
 pub fn Inputs assemble(Environment environment,v::Vec<bytes::Buffer> profile_flags,Facts facts,v::Vec<Dependency> dependencies,v::Vec<bytes::Buffer> features){return Inputs{.environment,.profile_flags,.facts,.dependencies,.features};}
 pub fn ref u8[] canonical(ref Identity value){return bytes::view(ref value.canonical);}
 pub fn ref u8[] digest(ref Identity value){return bytes::view(ref value.digest);}
+pub fn usize dependency_count(ref Inputs p){return v::len<Dependency>(ref p.dependencies);}
+pub fn Dependency dependency_at(ref Inputs p,usize at){return *v::at<Dependency>(ref p.dependencies,at);}
 fn u32 environment_check(ref Environment e,ref mut usize work){
     var u32 code=enc::string_check(bytes::view(ref e.compiler_build),work);if(code!=0){return code;}
     code=enc::string_check(bytes::view(ref e.language_revision),work);if(code!=0){return code;}
@@ -59,7 +61,7 @@ fn u32 facts(ref mut bytes::Buffer out,ref Facts f,ref mut usize work){
 }
 // Exact Go packagecache v4 bytes, including the independently versioned state
 // body identity. A successful key is a fact, not a checked artifact or hit.
-pub fn Result<Identity,u32> compute(ref Inputs p,ref mut usize work){
+pub fn Result<bytes::Buffer,u32> encode(ref Inputs p,ref mut usize work){
     var u32 code=validate(p,work);if(code!=0){return .err(code);}var bytes::Buffer out=bytes::empty();
     code=enc::raw(ref mut out,b"fairyc.package-cache-key\x00\x04",work);if(code!=0){return .err(code);}var usize at=0;
     while(at<10){code=enc::string(ref mut out,marker(at),work);if(code!=0){return .err(code);}at+=1;}
@@ -70,6 +72,10 @@ pub fn Result<Identity,u32> compute(ref Inputs p,ref mut usize work){
     let count=v::len<Dependency>(ref p.dependencies);code=enc::length(ref mut out,count,work);if(code!=0){return .err(code);}at=0;
     while(at<count){let row=v::at<Dependency>(ref p.dependencies,at);code=enc::raw(ref mut out,ref row.coordinate,work);if(code!=0){return .err(code);}code=enc::raw(ref mut out,ref row.interface_hash,work);if(code!=0){return .err(code);}at+=1;}
     code=enc::strings(ref mut out,ref p.features,work);if(code!=0){return .err(code);}
+    return .ok(out);
+}
+pub fn Result<Identity,u32> compute(ref Inputs p,ref mut usize work){
+    let out=switch(encode(p,work)){case .ok(b):{b}case .err(code):{return .err(code);}};
     if(!enc::charge(work,bytes::len(ref out)+1+81)){return .err(5);}var sha::State state=sha::empty();if(!sha::update(ref mut state,bytes::view(ref out))){return .err(5);}var bytes::Buffer key=bytes::empty();
     if(!bytes::append(ref mut key,b"fycache4-sha256-").is_ok || !sha::append_hex(ref state,ref mut key)){return .err(4);}return .ok(Identity{.canonical=out,.digest=key});
 }
