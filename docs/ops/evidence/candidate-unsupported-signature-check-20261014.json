@@ -1,0 +1,343 @@
+{
+  "schema": "fairyc.candidate-unsupported-signature-check/v1",
+  "date": "2026-10-14",
+  "parentCommit": "bd163ac2",
+  "connected": true,
+  "targetedChangePassed": true,
+  "stableCheckComplete": false,
+  "genericDifferentialPassed": false,
+  "scope": "publish complete detached original-source unsupported function-signature diagnostics before executable typing, without admitting unsupported scalar values",
+  "sourceInputs": [
+    {
+      "path": "examples/lexer_candidate/src/project_check.fy",
+      "sha256": "06a6947c6fc11aadc84df2090a99c51aea01d71174875c58b6d781fa49859eac",
+      "bytes": 5666
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_check_text.fy",
+      "sha256": "816659276bc1dc6ca9f88f422b8076163db065f2ec442656727db6ae109f0c49",
+      "bytes": 17147
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_compiler_core.fy",
+      "sha256": "b0fc1900ae69df3eda36c77276b7d0137209dc324435ba097591d1f9207d38b1",
+      "bytes": 8511
+    },
+    {
+      "path": "examples/lexer_candidate/src/generic_signature_diagnostics.fy",
+      "sha256": "1a004c7150c9733dd1309ae2d87f7758d693a83e4249a8862c6360164269cffd",
+      "bytes": 7302
+    },
+    {
+      "path": "examples/lexer_candidate/tests/project_compiler_complete.fy",
+      "sha256": "415a2d13ce2f11146b15a6d6fde2e3cbcb240ce0641e3f3bf6ff805a3c83061a",
+      "bytes": 15005
+    },
+    {
+      "path": "tools/verify-candidate-identified-check.py",
+      "sha256": "d467a8ea85fad6738d65ea126d12d87e9a6cf8ef56d27aabc22b2261a0d1ad97",
+      "bytes": 8939
+    },
+    {
+      "path": "examples/lexer_candidate/fairy.lock",
+      "sha256": "c232e31ca89e368ec5056b026dd3efca4fc9ee4b21e16c35672d92f3dfeb8f2f",
+      "bytes": 1698
+    }
+  ],
+  "sourceInputsVerified": true,
+  "nativeInputCopiesVerified": true,
+  "build": {
+    "receipt": {
+      "path": ".cache/unsupported-signatures-20261014/check-build/receipt.json",
+      "sha256": "91a89c9c08d3c0e6ce4a7ca20e401b0af1e31f98f286b0c358e3f85817b012ee",
+      "bytes": 253373
+    },
+    "tools": {
+      "candidate": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-cleanup-20261013\\current-driver\\driver-release.exe",
+        "sha256": "67be18bdabb9d6499edcfcd8b7d3e3245dd932fd265ba79ab4cd7136748ec0ac"
+      },
+      "builder": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-rooted-builder-stack-20261012.exe",
+        "sha256": "02abe2328daa9921705910c7b995e82c1312cb960fe024106c11468569aefff0"
+      },
+      "bootstrap": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-frontend-oracle-current-20261012.exe",
+        "sha256": "3ecc4501ee3bb47ecc39e7288200266b31cbcd8bf6ffec302ae54867705ce5d1"
+      },
+      "nativeStackEditor": {
+        "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\editbin.exe",
+        "sha256": "be37ead809e0cab3b62ff7c141fece6655b6c6ab1e2951a118abbaef48acbc07"
+      }
+    },
+    "stackReserveBytes": 16777216,
+    "candidatePacketSHA256": "35e3d973602b20dfe0d5467928ff8e0c08fbd89fd9326565e53b2896170e6ce9",
+    "sourceClosureSHA256": "b1c340510acdf28db21f825c1fd164061f92d20a6389b4a5df5691cf215c5d2f",
+    "sourceClosureFiles": 290
+  },
+  "processComparisons": [
+    {
+      "label": "native",
+      "image": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\unsupported-signatures-20261014\\check-build\\go-dispatch.exe",
+        "sha256": "71fef9025616ee85f5acbf17a6774b43eac44b0f8a6728fc3eeca22d5cc3109e"
+      },
+      "existingCommands": {
+        "receipt": {
+          "path": ".cache/unsupported-signatures-20261014/process/native/observations.json",
+          "sha256": "a57d25199ddef5ff88d21a8af6d4a7f6e7c1c6eadb7a6646886b27beb9ca1504",
+          "bytes": 11905
+        },
+        "matched": 21,
+        "total": 21
+      },
+      "generic": {
+        "receipt": {
+          "path": ".cache/unsupported-signatures-20261014/commands/native/observations.json",
+          "sha256": "602d74a646f02f4b097f2166d52524c64a974d45d352538739fbdb346b4b520d",
+          "bytes": 29471
+        },
+        "matched": 31,
+        "total": 32,
+        "originalCasesMatched": 17,
+        "unsupportedScalar": {
+          "name": "UnsupportedScalar",
+          "exit": 3,
+          "stdout": "",
+          "stderr": "fairyc: semantic subset does not support type u16 at main.fy [bytes 27..28]\nfairyc: semantic subset does not support type u16 at main.fy [bytes 35..36]\n",
+          "firstDiagnostic": null,
+          "unsupportedDiagnostics": [
+            "fairyc: semantic subset does not support type u16 at main.fy [bytes 27..28]",
+            "fairyc: semantic subset does not support type u16 at main.fy [bytes 35..36]"
+          ],
+          "seconds": 0.02662269998108968,
+          "inputs": {
+            "fairy.lock": "33e7a0642af2484fb7494d215fab13c463a153f9ab2748ac88accc5ee4fa62b8",
+            "fairy.toml": "14e9d2861c23fcddb40549e8a8657f5f4a75694625190c8189ff737f34ddcc51",
+            "src/main.fy": "c1d1d85b19ee9e2df994c6fafbaba86de3b28caf0b087967fb841d9f9f484651"
+          },
+          "expectedExit": 3,
+          "expectedCode": "",
+          "matched": true
+        },
+        "failures": [
+          {
+            "name": "UnusedUnsupportedParameter",
+            "exit": 3,
+            "stdout": "",
+            "stderr": "main.fy:2:63: E0101: name or qualified path cannot be resolved [bytes 86..89]\n",
+            "firstDiagnostic": [
+              "main.fy",
+              "2",
+              "63",
+              "E0101",
+              "86",
+              "89"
+            ],
+            "unsupportedDiagnostics": [],
+            "seconds": 0.02619479998247698,
+            "inputs": {
+              "fairy.lock": "d4dc329214eaa09da902f96c3df9b09aefd60cfc275b8efc118dfde268c7d27c",
+              "fairy.toml": "14e9d2861c23fcddb40549e8a8657f5f4a75694625190c8189ff737f34ddcc51",
+              "src/main.fy": "aa3fc59122788f2b536f38236d72718ab42c451ee7e575d15f8425b91b3ccf61"
+            },
+            "expectedExit": 0,
+            "expectedCode": "",
+            "matched": false
+          }
+        ]
+      }
+    },
+    {
+      "label": "development",
+      "image": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\unsupported-signatures-20261014\\check-build\\development.exe",
+        "sha256": "e8761856214e76a1334d65172157d303edf5d146c8492b1177b8496f72894a92"
+      },
+      "existingCommands": {
+        "receipt": {
+          "path": ".cache/unsupported-signatures-20261014/process/development/observations.json",
+          "sha256": "413f11aab9f3381fdfe2ba704a9071298f3cd7e022c87c21dfa9dd4f5a719b1f",
+          "bytes": 11898
+        },
+        "matched": 21,
+        "total": 21
+      },
+      "generic": {
+        "receipt": {
+          "path": ".cache/unsupported-signatures-20261014/commands/development/observations.json",
+          "sha256": "0cdb6c24b1c68b61be4a4088fa9ac2f1f884ebb8db9704fd9cfcf7009b0f1dd0",
+          "bytes": 29473
+        },
+        "matched": 31,
+        "total": 32,
+        "originalCasesMatched": 17,
+        "unsupportedScalar": {
+          "name": "UnsupportedScalar",
+          "exit": 3,
+          "stdout": "",
+          "stderr": "fairyc: semantic subset does not support type u16 at main.fy [bytes 27..28]\nfairyc: semantic subset does not support type u16 at main.fy [bytes 35..36]\n",
+          "firstDiagnostic": null,
+          "unsupportedDiagnostics": [
+            "fairyc: semantic subset does not support type u16 at main.fy [bytes 27..28]",
+            "fairyc: semantic subset does not support type u16 at main.fy [bytes 35..36]"
+          ],
+          "seconds": 0.04127440002048388,
+          "inputs": {
+            "fairy.lock": "33e7a0642af2484fb7494d215fab13c463a153f9ab2748ac88accc5ee4fa62b8",
+            "fairy.toml": "14e9d2861c23fcddb40549e8a8657f5f4a75694625190c8189ff737f34ddcc51",
+            "src/main.fy": "c1d1d85b19ee9e2df994c6fafbaba86de3b28caf0b087967fb841d9f9f484651"
+          },
+          "expectedExit": 3,
+          "expectedCode": "",
+          "matched": true
+        },
+        "failures": [
+          {
+            "name": "UnusedUnsupportedParameter",
+            "exit": 3,
+            "stdout": "",
+            "stderr": "main.fy:2:63: E0101: name or qualified path cannot be resolved [bytes 86..89]\n",
+            "firstDiagnostic": [
+              "main.fy",
+              "2",
+              "63",
+              "E0101",
+              "86",
+              "89"
+            ],
+            "unsupportedDiagnostics": [],
+            "seconds": 0.041743199981283396,
+            "inputs": {
+              "fairy.lock": "d4dc329214eaa09da902f96c3df9b09aefd60cfc275b8efc118dfde268c7d27c",
+              "fairy.toml": "14e9d2861c23fcddb40549e8a8657f5f4a75694625190c8189ff737f34ddcc51",
+              "src/main.fy": "aa3fc59122788f2b536f38236d72718ab42c451ee7e575d15f8425b91b3ccf61"
+            },
+            "expectedExit": 0,
+            "expectedCode": "",
+            "matched": false
+          }
+        ]
+      }
+    },
+    {
+      "label": "release",
+      "image": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\unsupported-signatures-20261014\\check-build\\release.exe",
+        "sha256": "d59262418ce1d992c743038aa5d355c74b7167e40ca4e7516510f7829f95c383"
+      },
+      "existingCommands": {
+        "receipt": {
+          "path": ".cache/unsupported-signatures-20261014/process/release/observations.json",
+          "sha256": "be6eea9c460a70b20485279ea4e5e1e7c38d930dee9efe3e9894295a998d6fb5",
+          "bytes": 11900
+        },
+        "matched": 21,
+        "total": 21
+      },
+      "generic": {
+        "receipt": {
+          "path": ".cache/unsupported-signatures-20261014/commands/release/observations.json",
+          "sha256": "9b317798f1bfee12b1f170fca678249306b167ea23f967627d1dd5fedc315c54",
+          "bytes": 29464
+        },
+        "matched": 31,
+        "total": 32,
+        "originalCasesMatched": 17,
+        "unsupportedScalar": {
+          "name": "UnsupportedScalar",
+          "exit": 3,
+          "stdout": "",
+          "stderr": "fairyc: semantic subset does not support type u16 at main.fy [bytes 27..28]\nfairyc: semantic subset does not support type u16 at main.fy [bytes 35..36]\n",
+          "firstDiagnostic": null,
+          "unsupportedDiagnostics": [
+            "fairyc: semantic subset does not support type u16 at main.fy [bytes 27..28]",
+            "fairyc: semantic subset does not support type u16 at main.fy [bytes 35..36]"
+          ],
+          "seconds": 0.02059150004060939,
+          "inputs": {
+            "fairy.lock": "33e7a0642af2484fb7494d215fab13c463a153f9ab2748ac88accc5ee4fa62b8",
+            "fairy.toml": "14e9d2861c23fcddb40549e8a8657f5f4a75694625190c8189ff737f34ddcc51",
+            "src/main.fy": "c1d1d85b19ee9e2df994c6fafbaba86de3b28caf0b087967fb841d9f9f484651"
+          },
+          "expectedExit": 3,
+          "expectedCode": "",
+          "matched": true
+        },
+        "failures": [
+          {
+            "name": "UnusedUnsupportedParameter",
+            "exit": 3,
+            "stdout": "",
+            "stderr": "main.fy:2:63: E0101: name or qualified path cannot be resolved [bytes 86..89]\n",
+            "firstDiagnostic": [
+              "main.fy",
+              "2",
+              "63",
+              "E0101",
+              "86",
+              "89"
+            ],
+            "unsupportedDiagnostics": [],
+            "seconds": 0.021380599995609373,
+            "inputs": {
+              "fairy.lock": "d4dc329214eaa09da902f96c3df9b09aefd60cfc275b8efc118dfde268c7d27c",
+              "fairy.toml": "14e9d2861c23fcddb40549e8a8657f5f4a75694625190c8189ff737f34ddcc51",
+              "src/main.fy": "aa3fc59122788f2b536f38236d72718ab42c451ee7e575d15f8425b91b3ccf61"
+            },
+            "expectedExit": 0,
+            "expectedCode": "",
+            "matched": false
+          }
+        ]
+      }
+    }
+  ],
+  "sourceCheck": {
+    "files": 447,
+    "mirFunctions": 5798,
+    "locked": true
+  },
+  "nativeCoreTest": {
+    "command": [
+      "fairyc",
+      "test",
+      "--native",
+      "--locked",
+      "--json",
+      "--exact",
+      "tests::project_compiler_complete::complete_reports_unsupported_signatures_without_publishing_ir"
+    ],
+    "engine": "native",
+    "profile": "development",
+    "passed": 1,
+    "failed": 0,
+    "status": "ok",
+    "lock": "verified"
+  },
+  "remaining": [
+    {
+      "name": "UnusedUnsupportedParameter",
+      "source": "fn i32 constant<T>(){return 42;} fn i32 main(){return constant<u16>();}",
+      "referenceExit": 0,
+      "candidateExit": 3,
+      "candidateCode": "E0101",
+      "stage": "module_unit_bind rejects the concrete type argument before discovering it has no executable uses"
+    },
+    {
+      "name": "BodyTypeDiagnostics",
+      "scope": "signature evidence does not aggregate unsupported body annotations"
+    },
+    {
+      "name": "Promotion",
+      "scope": "identified build/run/cache, latest full-image fixed point, product stack/deadlines, Linux/full suite and same-head hosted CI remain"
+    }
+  ],
+  "productStackChanged": false,
+  "productTimeoutChanged": false,
+  "publicApiChanged": false,
+  "sdkAbiChanged": false,
+  "dbChanged": false,
+  "ciChanged": false,
+  "pushed": false
+}

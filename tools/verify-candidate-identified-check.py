@@ -53,6 +53,18 @@ def main():
         ('UnknownWithTemplate', 3, {'main': 'fn T unused<T>(T x){return x;}fn i32 main(){return missing<i32>(42);}'}, 'E0101'),
         ('ReferenceArgument', 3, {'main': 'fn T id<T>(T x){return x;}fn i32 main(){return id<ref i32>(42);}'}, 'E4502'),
         ('UnsupportedScalar', 3, {'main': 'fn T id<T>(T x){return x;}fn i32 main(){return id<u16>(42);}'}, ''),
+        *[(f'Unsupported_{scalar}', 3, {'main': f'fn T id<T>(T x){{return x;}}fn i32 main(){{discard id<{scalar}>(42);return 0;}}'}, '')
+          for scalar in ['i8', 'i16', 'isize', 'u64', 'f32', 'f64']],
+        ('UnsupportedRepeated', 3, {'main': 'fn T id<T>(T x){return x;}fn i32 main(){discard id<u16>(42);discard id<u16>(43);discard id<u64>(44);return 0;}'}, ''),
+        ('UnsupportedForward', 3, {'main': 'import helper as h;fn T outer<T>(T x){return h::id<T>(x);}fn i32 main(){discard outer<u16>(42);return 0;}',
+                                  'helper': 'pub fn T id<T>(T x){return x;}'}, ''),
+        ('UnsupportedReference', 3, {'main': 'fn ref T id<T>(ref T x){return x;}fn i32 main(){discard id<u16>(42);return 0;}'}, ''),
+        ('UnsupportedPointer', 3, {'main': 'fn ptr T id<T>(ptr T x){return x;}fn i32 main(){discard id<u16>(42);return 0;}'}, ''),
+        ('UnsupportedOption', 3, {'main': 'fn Option<T> id<T>(Option<T> x){return x;}fn i32 main(){discard id<u16>(42);return 0;}'}, ''),
+        ('UnsupportedArray', 3, {'main': 'fn T[2] id<T>(T[2] x){return x;}fn i32 main(){discard id<u16>(42);return 0;}'}, ''),
+        ('UnsupportedPair', 3, {'main': 'fn A pair<A,B>(A x,B y){return x;}fn i32 main(){discard pair<u16,u64>(42,43);return 0;}'}, ''),
+        ('UnusedUnsupportedParameter', 0, {'main': 'fn i32 constant<T>(){return 42;}fn i32 main(){return constant<u16>();}'}, ''),
+        ('UnusedUnsupportedTemplate', 0, {'main': 'fn T unused<T>(T x){return x;}fn i32 main(){return 42;}'}, ''),
     ]
     total_cases = len(cases)
     if args.case:

@@ -10,6 +10,7 @@ import project_workspace_catalog as catalog;
 import project_package_input as packages;
 import project_compiler_input as input;
 import project_diagnostic_codes as diagnostics;
+import generic_signature_diagnostics as signatures;
 import syntax as syntax;
 import scanner as scanner;
 import std::bytes as bytes;
@@ -51,6 +52,12 @@ fn bool referenced_declaration(ref check::Error e,bool effect,ref mut bytes::Buf
     while(at<visibility::lookup_count(resolved)){let l=visibility::lookup(resolved,at);if(l.owner==original.owner && l.source_module==original.module_index){let d=syntax::declaration_at(input::source(sources,p.module_index),l.declaration);if(bytes::equal(source[d.name_start..d.name_end],spelling[..split])){let parsed=graph::module_parser(g,l.provider,l.provider_module);let bytes=syntax::source_view(parsed);var usize index=1;while(index<syntax::declaration_count(parsed)){let declaration=syntax::declaration_at(parsed,index);if(bytes::equal(bytes[declaration.name_start..declaration.name_end],spelling[split+2..])){return declaration_note(parsed,index,package_path(loaded,l.provider),graph::module_file(g,l.provider,l.provider_module),effect,out);}index+=1;}}}at+=1;}return true;
 }
 fn bool compilation(ref check::Error e,ref mut bytes::Buffer out){let p=check::compiler_error(e);let sources=check::compiler_input(e);if(p.module_index>=input::count(sources)){return append(out,b"fairyc: internal compiler invariant failed\n");}let parsed=input::source(sources,p.module_index);let source=syntax::source_view(parsed);let package=package_path(check::compiler_workspace(e),input::origin(sources,p.module_index).owner);
+    if(p.phase==5 && p.stage==6 && p.code==4505){
+        if(check::report_count(e)!=1){return false;}let reports=check::signature_reports(e);if(signatures::count(reports)==0){return false;}var usize i=0;
+        while(i<signatures::count(reports)){let d=signatures::at(reports,i);if(d.module_index>=input::count(sources) || d.start>d.end || d.end>syntax::source_view(input::source(sources,d.module_index)).len){return false;}
+            if(!append(out,b"fairyc: semantic subset does not support type ") || !append(out,signatures::name(reports,i)) || !append(out,b" at ") || !append(out,input::file(sources,d.module_index)) || !range(out,d.start,d.end)){return false;}i+=1;
+        }return true;
+    }
     if(p.phase==5 && p.stage==3 && p.code==4504){return append(out,b"fairyc: semantic subset does not support call target that is not a function at ") && append(out,input::file(sources,p.module_index)) && range(out,p.start,p.end);}
     if(p.phase==2 && p.code==5){return append(out,b"fairyc: semantic subset does not support type ") && append(out,source[p.start..p.end]) && append(out,b" at ") && append(out,input::file(sources,p.module_index)) && range(out,p.start,p.end);}
     if(!prefix(out,package,input::file(sources,p.module_index),source,p.start)){return false;}

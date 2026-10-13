@@ -11,6 +11,7 @@ import module_project_identified_compile as identified_units;
 import module_project_identified_ir as identified;
 import module_project_interfaces as interfaces;
 import generic_source_plan as original_plan;
+import generic_signature_diagnostics as diagnostics;
 import std::vec as v;
 import module_catalog as modules;
 
@@ -51,9 +52,19 @@ pub fn ref interfaces::Records public_interfaces(ref Complete p){return ref p.in
 // rebinding and all package interfaces must finish before either member escapes.
 pub fn Result<Complete,Problem> build_complete(ref input::Input sources,ref coordinates::Coordinates table,ref mut usize source_work,ref mut usize link_work){return build_complete_sources(input::sources(sources),input::owners(sources),input::bindings(sources),table,source_work,link_work);}
 pub fn Result<Complete,Problem> build_complete_sources(ref v::Vec<syntax::Parsed> sources,ref v::Vec<usize> owners,ref v::Vec<modules::Binding> imports,ref coordinates::Coordinates table,ref mut usize source_work,ref mut usize link_work){
+    var v::Vec<diagnostics::Reports> reports=v::empty<diagnostics::Reports>();
+    return build_complete_reporting_sources(sources,owners,imports,table,ref mut reports,source_work,link_work);
+}
+// An initially empty error-only sink receives one detached report owner only
+// for an unsupported signature. Normal and other failed builds leave it empty.
+pub fn Result<Complete,Problem> build_complete_reporting(ref input::Input sources,ref coordinates::Coordinates table,ref mut v::Vec<diagnostics::Reports> reports,ref mut usize source_work,ref mut usize link_work){return build_complete_reporting_sources(input::sources(sources),input::owners(sources),input::bindings(sources),table,reports,source_work,link_work);}
+pub fn Result<Complete,Problem> build_complete_reporting_sources(ref v::Vec<syntax::Parsed> sources,ref v::Vec<usize> owners,ref v::Vec<modules::Binding> imports,ref coordinates::Coordinates table,ref mut v::Vec<diagnostics::Reports> reports,ref mut usize source_work,ref mut usize link_work){
+    if(v::len<diagnostics::Reports>(reports)!=0){return .err(fail(5,6,9,0,0,0,0,0));}
     let catalog=switch(modules::build_scoped(sources,owners,imports)){case .ok(p):{p}case .err(e):{return .err(fail(1,0,e.code,e.module_index,e.start,e.end,0,0));}};
     let metadata=switch(signatures::build_catalog(sources,catalog)){case .ok(p):{p}case .err(e):{return .err(fail(2,0,e.code,e.module_index,e.start,e.end,0,0));}};
     let original=switch(source_plan::build_sources(sources,owners,imports,table,source_work)){case .ok(p):{p}case .err(e):{return .err(fail(5,e.stage,e.code,e.module_index,e.start,e.end,0,0));}};
+    let unsupported=switch(diagnostics::collect(ref original,sources,source_work)){case .ok(p):{p}case .err(code):{return .err(fail(5,6,code,0,0,0,0,0));}};
+    if(diagnostics::count(ref unsupported)!=0){let first=diagnostics::at(ref unsupported,0);if(!v::push<diagnostics::Reports>(reports,unsupported).is_ok){return .err(fail(5,6,11,0,0,0,0,0));}return .err(fail(5,6,4505,first.module_index,first.start,first.end,0,0));}
     let program=switch(link_identified(sources,ref metadata,ref original,source_work,link_work)){case .ok(p):{p}case .err(e):{return .err(e);}};
     let interfaces=switch(interfaces::build(ref program,ref original,sources,ref metadata,table,source_work)){case .ok(p):{p}case .err(e):{return .err(fail(6,0,e,0,0,0,0,0));}};
     return .ok(Complete{.program,.interfaces});
