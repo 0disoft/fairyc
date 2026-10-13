@@ -7,7 +7,9 @@ Source-generic cache-key v0 encoding is also verified in the
 Complete-owner facts and actual verified artifact reuse remain open.
 The checked-owner state-body member is now derived and verified in the
 [body-identity checkpoint](candidate-cache-body-identity-20261014.md).
-Emitted specialization/workspace/environment facts and actual reuse remain open.
+Complete original specialization membership is now retained and verified in the
+[specialization checkpoint](candidate-cache-specializations-20261014.md).
+Workspace/environment facts and actual reuse remain open.
 
 Current source-identified build/run integration:
 [2026-10-14 native checkpoint](candidate-identified-native-20261014.md).

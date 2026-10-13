@@ -9,6 +9,7 @@ import module_public_templates as public;
 import module_public_type_text as coordinates;
 import module_signatures as signatures;
 import module_source_provenance as provenance;
+import module_source_specialization_set as specializations;
 import generic_source_plan as plans;
 import generic_source_plan_input as input;
 import generic_source_catalog as catalog;
@@ -19,7 +20,7 @@ import std::vec as v;
 
 // Detached package interfaces derived only after complete body/Flow checking.
 // No parser/planner owner, provisional Interfaces or caller-supplied hash survives.
-pub resource Record{usize owner;extract::Projection ordinary;generic::Templates templates;bytes::Buffer ordinary_hash;bytes::Buffer source_hash;cleanup{}}
+pub resource Record{usize owner;extract::Projection ordinary;generic::Templates templates;bytes::Buffer ordinary_hash;bytes::Buffer source_hash;v::Vec<bytes::Buffer> specializations;cleanup{}}
 pub resource Records{v::Vec<Record> packages;cleanup{}}
 pub fn usize count(ref Records p){return v::len<Record>(ref p.packages);}
 pub fn ref Record at(ref Records p,usize index){assert(index<count(p));return v::at<Record>(ref p.packages,index);}
@@ -28,13 +29,15 @@ pub fn ref model::Descriptor descriptor(ref Record p){return extract::descriptor
 pub fn ref generic::Templates templates(ref Record p){return ref p.templates;}
 pub fn ref u8[] ordinary_hash(ref Record p){return bytes::view(ref p.ordinary_hash);}
 pub fn ref u8[] source_hash(ref Record p){return bytes::view(ref p.source_hash);}
+pub fn ref v::Vec<bytes::Buffer> source_specializations(ref Record p){return ref p.specializations;}
 
 fn Result<Record,u32> package(ref view::View facts,ref plans::Plan plan,ref v::Vec<syntax::Parsed> sources,ref signatures::Program metadata,ref coordinates::Coordinates table,usize owner,ref mut usize work){
     let original=plans::input(plan);let templates=switch(public::collect_records(input::templates(original),input::dependencies(original),owner,work)){case .ok(p):{p}case .err(e):{return .err(e);}};
     var usize measured=0;let descriptor=switch(extract::extract_records_prepared(sources,metadata,view::type_records(facts),view::shape_records(facts),view::field_records(facts),view::name_records(facts),table,view::type_names(facts),owner,true,ref mut measured)){case .ok(p):{p}case .err(e):{discard budget::charge(work,measured);return .err(e);}};if(!budget::charge(work,measured)){return .err(10);}if(extract::has_templates(ref descriptor)!=(generic::count(ref templates)!=0)){return .err(9);}
     measured=0;let ordinary_hash=switch(ordinary::hash(signatures::state_layouts(metadata),owner,extract::descriptor(ref descriptor),ref mut measured)){case .ok(p):{p}case .err(e):{discard budget::charge(work,measured);return .err(e);}};if(!budget::charge(work,measured)){return .err(10);}
     measured=0;let source_hash=switch(generic::hash(signatures::state_layouts(metadata),owner,extract::descriptor(ref descriptor),ref templates,ref mut measured)){case .ok(p):{p}case .err(e):{discard budget::charge(work,measured);return .err(e);}};if(!budget::charge(work,measured)){return .err(10);}
-    return .ok(Record{.owner,.ordinary=descriptor,.templates,.ordinary_hash,.source_hash});
+    let selected=switch(specializations::collect(plan,owner,work)){case .ok(p):{p}case .err(e):{return .err(e);}};
+    return .ok(Record{.owner,.ordinary=descriptor,.templates,.ordinary_hash,.source_hash,.specializations=selected});
 }
 // Authenticate the complete checked view and original plan once for all owners.
 // Independent descriptor/hash/closure histories fold into the 16MiB ledger.
