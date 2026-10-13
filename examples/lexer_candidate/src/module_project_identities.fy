@@ -15,6 +15,7 @@ pub resource Table{bytes::Buffer names;v::Vec<selection::Row> types;v::Vec<selec
 fn selection::Row empty(){return selection::Row{.node=0,.id=records::Text{.start=0,.end=0}};}
 fn clean::Problem fail(u32 code){return clean::Problem{.code,.module_index=0,.start=0,.end=0};}
 pub fn usize type_count(ref Table p){return v::len<selection::Row>(ref p.types);}
+pub fn ref u8[] names_view(ref Table p){return bytes::view(ref p.names);}
 pub fn usize frame_count(ref Table p){return v::len<selection::Row>(ref p.frames);}
 pub fn selection::Row type_at(ref Table p,usize id){assert(id>0 && id<=type_count(p));return *v::at<selection::Row>(ref p.types,id-1);}
 pub fn selection::Row frame_at(ref Table p,usize id){assert(id>0 && id<=frame_count(p));return *v::at<selection::Row>(ref p.frames,id-1);}

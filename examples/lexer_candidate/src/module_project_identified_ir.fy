@@ -19,6 +19,7 @@ pub resource Program{ir::Program program;identities::Table identities;targets::I
 pub fn ref bindings::Bindings source_provenance(ref Program p){return ref p.provenance;}
 pub fn u32 current(ref Program p,ref v::Vec<syntax::Parsed> sources,ref signatures::Program metadata,ref coordinates::Coordinates table,ref mut usize work){return provenance::current(ref p.provenance,sources,metadata,table,work);}
 pub fn ref ir::Program ir_program(ref Program p){return ref p.program;}
+pub fn ref identities::Table source_identities(ref Program p){return ref p.identities;}
 pub fn usize frame_count(ref Program p){return identities::frame_count(ref p.identities);}
 pub fn selection::Row frame_at(ref Program p,usize id){return identities::frame_at(ref p.identities,id);}
 pub fn selection::Row type_at(ref Program p,usize id){return identities::type_at(ref p.identities,id);}
