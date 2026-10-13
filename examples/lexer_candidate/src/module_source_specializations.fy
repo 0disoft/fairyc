@@ -9,6 +9,7 @@ import module_unit_generics as generics;
 import module_signatures as signatures;
 import module_public_interface_model as records;
 import module_types as types;
+import generic_scalar_arguments as source_arguments;
 import project_path as budget;
 import syntax as syntax;
 import std::bytes as bytes;
@@ -45,7 +46,7 @@ fn Result<Row,u32> select(ref source::Plan plan,usize module_index,usize declara
 }
 fn Result<Row,u32> callable(ref source::Plan plan,ref typed::Interfaces graph,usize module_index,usize declaration,usize first,usize count,ref mut bytes::Buffer names,ref mut usize work){
     if(count==0){return .ok(empty());}if(count>8){return .err(9);}var usize[8] arguments=[0;8];var usize i=0;
-    while(i<count){if(!budget::charge(work,1)){return .err(10);}let id=generics::argument_at(typed::specializations(graph),first+i);if(id==0 || id>typed::type_count(graph)){return .err(9);}arguments[i]=switch(concrete::lookup_typed(input::types(source::input(plan)),typed::type_at(graph,id),work)){case .ok(value):{value}case .err(code):{return .err(code);}};i+=1;}
+    while(i<count){if(!budget::charge(work,1)){return .err(10);}let id=generics::argument_at(typed::specializations(graph),first+i);if(!source_arguments::descriptor(id) && (id==0 || id>typed::type_count(graph))){return .err(9);}arguments[i]=switch(if(source_arguments::descriptor(id)){concrete::lookup_id(input::types(source::input(plan)),source_arguments::name(id),work)}else{concrete::lookup_typed(input::types(source::input(plan)),typed::type_at(graph,id),work)}){case .ok(value):{value}case .err(code):{return .err(code);}};i+=1;}
     return select(plan,module_index,declaration,count,arguments,names,work);
 }
 pub fn Result<Selection,Problem> build(ref source::Plan plan,ref v::Vec<syntax::Parsed> sources,ref signatures::Program metadata,ref typed::Interfaces graph,ref mut usize work){

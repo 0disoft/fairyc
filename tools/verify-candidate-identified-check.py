@@ -65,6 +65,14 @@ def main():
         ('UnsupportedPair', 3, {'main': 'fn A pair<A,B>(A x,B y){return x;}fn i32 main(){discard pair<u16,u64>(42,43);return 0;}'}, ''),
         ('UnusedUnsupportedParameter', 0, {'main': 'fn i32 constant<T>(){return 42;}fn i32 main(){return constant<u16>();}'}, ''),
         ('UnusedUnsupportedTemplate', 0, {'main': 'fn T unused<T>(T x){return x;}fn i32 main(){return 42;}'}, ''),
+        ('PhantomAllScalars', 0, {'main': 'fn i32 constant<T>(){return 42;}fn i32 main(){discard constant<i8>();discard constant<i16>();discard constant<isize>();discard constant<u16>();discard constant<u64>();discard constant<f32>();return constant<f64>();}'}, ''),
+        ('PhantomForward', 0, {'main': 'import helper as h;fn i32 outer<T>(){return h::constant<T>();}fn i32 main(){return outer<u16>();}',
+                              'helper': 'pub fn i32 constant<T>(){return 42;}'}, ''),
+        ('PhantomAliases', 0, {'main': 'import helper as a;import helper as b;fn i32 main(){discard a::constant<u16>();discard b::constant<u64>();return b::constant<u16>();}',
+                              'helper': 'pub fn i32 constant<T>(){return 42;}'}, ''),
+        ('PhantomMixed', 0, {'main': 'fn A first<A,B>(A value){return value;}fn i32 main(){return first<i32,u16>(42);}'}, ''),
+        ('PhantomDefer', 0, {'main': 'fn void touch<T>(i32 value){discard value;}fn i32 main(){defer touch<u16>(42);return 0;}'}, ''),
+        ('PhantomCleanup', 0, {'main': 'fn void touch<T>(){}resource Owned{i32 value;cleanup{touch<u16>();}}fn i32 main(){let Owned value=Owned{.value=42};return 0;}'}, ''),
     ]
     total_cases = len(cases)
     if args.case:

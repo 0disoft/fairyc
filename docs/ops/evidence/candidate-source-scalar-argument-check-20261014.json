@@ -1,0 +1,385 @@
+{
+  "schema": "fairyc.candidate-source-scalar-argument-check/v1",
+  "date": "2026-10-14",
+  "parentCommit": "ed398770",
+  "connected": true,
+  "targetedChangePassed": true,
+  "authoredGenericMatrixPassed": true,
+  "genericDifferentialPassed": true,
+  "genericDifferentialScope": "38 authored check-process cases; exact stdout/status/first diagnostic or complete unsupported diagnostics; not all language/IR facts",
+  "stableCheckComplete": false,
+  "scope": "source-only arguments through lexical binding, generic instantiation/forwarding/cleanup, value-only annotation demand and checked source identity selection",
+  "sourceInputs": [
+    {
+      "path": "examples/lexer_candidate/src/generic_scalar_arguments.fy",
+      "sha256": "e8203b5dfe3ebdcd69d737e336196b263613f7c1ce7d4d98d11dfffbe953a544",
+      "bytes": 728
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_types.fy",
+      "sha256": "c6c14b967f19efb28f3432a295846c7b75aa5f6b3d4dd9ddd62aceb24eb6d2b6",
+      "bytes": 19347
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_bind.fy",
+      "sha256": "d426503990475626492fee579d5da4b53178c76976ae3c5d21bae39f931c2f8f",
+      "bytes": 6877
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_unit_generics.fy",
+      "sha256": "7bed66a68fa62139575a5e5338e72175a240fba25f7c19b35470e9ac878bd7e1",
+      "bytes": 35213
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_unit_bodies.fy",
+      "sha256": "3b8eeeecf1b28f20368791dfdafb5de09aee0ea279059257a1b384e6bd416468",
+      "bytes": 14703
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_source_specializations.fy",
+      "sha256": "73373584837e19b7a0669c33c1003b4d6476c39b7d1ad8323add4d0dcb382f07",
+      "bytes": 7940
+    },
+    {
+      "path": "examples/lexer_candidate/src/storage_intrinsics.fy",
+      "sha256": "15d2394baf23343cf6a678e9fb5d4949cd53b99f42d61e3e67e9985dedfda5b0",
+      "bytes": 3495
+    },
+    {
+      "path": "examples/lexer_candidate/tests/project_compiler_complete.fy",
+      "sha256": "40768ea45c1bd73ac4588e1461882fdb3ea11db07671d8d593b6567c2c215c98",
+      "bytes": 16240
+    },
+    {
+      "path": "tools/verify-candidate-identified-check.py",
+      "sha256": "fa4171bab7b0ece669d4a957eb87865943e1c2f6f85bc2937db000718c8de1be",
+      "bytes": 10130
+    },
+    {
+      "path": "examples/lexer_candidate/fairy.lock",
+      "sha256": "9ec3feb7406ebed014bf162df5fb59eda2a7463a3df3dc7092446d10e2f49473",
+      "bytes": 1698
+    }
+  ],
+  "sourceInputsVerified": true,
+  "nativeInputCopiesVerified": true,
+  "build": {
+    "receipt": {
+      "path": ".cache/source-only-arguments-20261014/check-build/receipt.json",
+      "sha256": "3d13d68de0cd2322ee9c0a4075f0ee53c039e98b764bdf6604395da6317b5032",
+      "bytes": 253843
+    },
+    "tools": {
+      "candidate": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-cleanup-20261013\\current-driver\\driver-release.exe",
+        "sha256": "67be18bdabb9d6499edcfcd8b7d3e3245dd932fd265ba79ab4cd7136748ec0ac"
+      },
+      "builder": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-rooted-builder-stack-20261012.exe",
+        "sha256": "02abe2328daa9921705910c7b995e82c1312cb960fe024106c11468569aefff0"
+      },
+      "bootstrap": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-frontend-oracle-current-20261012.exe",
+        "sha256": "3ecc4501ee3bb47ecc39e7288200266b31cbcd8bf6ffec302ae54867705ce5d1"
+      },
+      "nativeStackEditor": {
+        "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\editbin.exe",
+        "sha256": "be37ead809e0cab3b62ff7c141fece6655b6c6ab1e2951a118abbaef48acbc07"
+      }
+    },
+    "sourceClosureFiles": 291,
+    "sourceClosureSHA256": "bec5f84eed335786fbaca41b102940b71efbd49afd26e231900951b597b13e8c",
+    "candidatePacketSHA256": "20e091e2ebc71809bf180066b3084c1b583303a819d7ed81a955597e4204e09a"
+  },
+  "processComparisons": [
+    {
+      "label": "native",
+      "image": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\source-only-arguments-20261014\\check-build\\go-dispatch.exe",
+        "sha256": "ef3efcb3c70f4a2fa11332074d0fd5da25a7d3ddd06e97b60fe9c6971ed0f0a5"
+      },
+      "existingCommands": {
+        "receipt": {
+          "path": ".cache/source-only-arguments-20261014/process/native/observations.json",
+          "sha256": "29c474c0b79d9058fe17259a09501b3f65c20eb7dd23e68399e9a5189f743bdd",
+          "bytes": 11903
+        },
+        "matched": 21,
+        "total": 21
+      },
+      "generic": {
+        "receipt": {
+          "path": ".cache/source-only-arguments-20261014/commands/native/observations.json",
+          "sha256": "8d41a636e7d9eb9ef389d3e94443acc8562fffc88927198e01e3117d5f485bf4",
+          "bytes": 33617
+        },
+        "matched": 38,
+        "total": 38,
+        "caseNames": [
+          "Scalar",
+          "Aliases",
+          "Vector",
+          "Cycle",
+          "AliasCycle",
+          "DuplicateParameter",
+          "Arity",
+          "Implicit",
+          "Unknown",
+          "Private",
+          "NominalArgument",
+          "NonGenericApplication",
+          "NonGenericImported",
+          "NonGenericWithTemplate",
+          "UnknownWithTemplate",
+          "ReferenceArgument",
+          "UnsupportedScalar",
+          "Unsupported_i8",
+          "Unsupported_i16",
+          "Unsupported_isize",
+          "Unsupported_u64",
+          "Unsupported_f32",
+          "Unsupported_f64",
+          "UnsupportedRepeated",
+          "UnsupportedForward",
+          "UnsupportedReference",
+          "UnsupportedPointer",
+          "UnsupportedOption",
+          "UnsupportedArray",
+          "UnsupportedPair",
+          "UnusedUnsupportedParameter",
+          "UnusedUnsupportedTemplate",
+          "PhantomAllScalars",
+          "PhantomForward",
+          "PhantomAliases",
+          "PhantomMixed",
+          "PhantomDefer",
+          "PhantomCleanup"
+        ],
+        "unusedParameter": {
+          "name": "UnusedUnsupportedParameter",
+          "exit": 0,
+          "stdout": "check ok: 1 instance(s), 1 source file(s), 2 MIR function(s), lock verified\n",
+          "stderr": "",
+          "firstDiagnostic": null,
+          "unsupportedDiagnostics": [],
+          "seconds": 0.08666130003985018,
+          "inputs": {
+            "fairy.lock": "d4dc329214eaa09da902f96c3df9b09aefd60cfc275b8efc118dfde268c7d27c",
+            "fairy.toml": "14e9d2861c23fcddb40549e8a8657f5f4a75694625190c8189ff737f34ddcc51",
+            "src/main.fy": "aa3fc59122788f2b536f38236d72718ab42c451ee7e575d15f8425b91b3ccf61"
+          },
+          "expectedExit": 0,
+          "expectedCode": "",
+          "matched": true
+        }
+      }
+    },
+    {
+      "label": "development",
+      "image": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\source-only-arguments-20261014\\check-build\\development.exe",
+        "sha256": "dd82257e5527c82c0dd95425809a2d9ac2e5d81dca79f439f38df95283acbde4"
+      },
+      "existingCommands": {
+        "receipt": {
+          "path": ".cache/source-only-arguments-20261014/process/development/observations.json",
+          "sha256": "7035f694b008946aedfa9ea5099ca91da44f3a6206b4d60628dada4f92d166d1",
+          "bytes": 11895
+        },
+        "matched": 21,
+        "total": 21
+      },
+      "generic": {
+        "receipt": {
+          "path": ".cache/source-only-arguments-20261014/commands/development/observations.json",
+          "sha256": "97896bb2a5773ffcf1a176e6ad692f81b7d9f17ee651ea4bb87e78d6f71abe4f",
+          "bytes": 33605
+        },
+        "matched": 38,
+        "total": 38,
+        "caseNames": [
+          "Scalar",
+          "Aliases",
+          "Vector",
+          "Cycle",
+          "AliasCycle",
+          "DuplicateParameter",
+          "Arity",
+          "Implicit",
+          "Unknown",
+          "Private",
+          "NominalArgument",
+          "NonGenericApplication",
+          "NonGenericImported",
+          "NonGenericWithTemplate",
+          "UnknownWithTemplate",
+          "ReferenceArgument",
+          "UnsupportedScalar",
+          "Unsupported_i8",
+          "Unsupported_i16",
+          "Unsupported_isize",
+          "Unsupported_u64",
+          "Unsupported_f32",
+          "Unsupported_f64",
+          "UnsupportedRepeated",
+          "UnsupportedForward",
+          "UnsupportedReference",
+          "UnsupportedPointer",
+          "UnsupportedOption",
+          "UnsupportedArray",
+          "UnsupportedPair",
+          "UnusedUnsupportedParameter",
+          "UnusedUnsupportedTemplate",
+          "PhantomAllScalars",
+          "PhantomForward",
+          "PhantomAliases",
+          "PhantomMixed",
+          "PhantomDefer",
+          "PhantomCleanup"
+        ],
+        "unusedParameter": {
+          "name": "UnusedUnsupportedParameter",
+          "exit": 0,
+          "stdout": "check ok: 1 instance(s), 1 source file(s), 2 MIR function(s), lock verified\n",
+          "stderr": "",
+          "firstDiagnostic": null,
+          "unsupportedDiagnostics": [],
+          "seconds": 0.14010200003394857,
+          "inputs": {
+            "fairy.lock": "d4dc329214eaa09da902f96c3df9b09aefd60cfc275b8efc118dfde268c7d27c",
+            "fairy.toml": "14e9d2861c23fcddb40549e8a8657f5f4a75694625190c8189ff737f34ddcc51",
+            "src/main.fy": "aa3fc59122788f2b536f38236d72718ab42c451ee7e575d15f8425b91b3ccf61"
+          },
+          "expectedExit": 0,
+          "expectedCode": "",
+          "matched": true
+        }
+      }
+    },
+    {
+      "label": "release",
+      "image": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\source-only-arguments-20261014\\check-build\\release.exe",
+        "sha256": "f4566faaa2d3109cd13a358deda5236fa96c9b0cf849051e3cea86d734de72d6"
+      },
+      "existingCommands": {
+        "receipt": {
+          "path": ".cache/source-only-arguments-20261014/process/release/observations.json",
+          "sha256": "8d9357116e783106c5a151d8f8ab1dc87625efabb915632d9a88c52be4620db7",
+          "bytes": 11897
+        },
+        "matched": 21,
+        "total": 21
+      },
+      "generic": {
+        "receipt": {
+          "path": ".cache/source-only-arguments-20261014/commands/release/observations.json",
+          "sha256": "70fb566baacdbd0fe002e7c5a2ee2c55773796f6f14be5f4eb6d0e7cd3a43a85",
+          "bytes": 33615
+        },
+        "matched": 38,
+        "total": 38,
+        "caseNames": [
+          "Scalar",
+          "Aliases",
+          "Vector",
+          "Cycle",
+          "AliasCycle",
+          "DuplicateParameter",
+          "Arity",
+          "Implicit",
+          "Unknown",
+          "Private",
+          "NominalArgument",
+          "NonGenericApplication",
+          "NonGenericImported",
+          "NonGenericWithTemplate",
+          "UnknownWithTemplate",
+          "ReferenceArgument",
+          "UnsupportedScalar",
+          "Unsupported_i8",
+          "Unsupported_i16",
+          "Unsupported_isize",
+          "Unsupported_u64",
+          "Unsupported_f32",
+          "Unsupported_f64",
+          "UnsupportedRepeated",
+          "UnsupportedForward",
+          "UnsupportedReference",
+          "UnsupportedPointer",
+          "UnsupportedOption",
+          "UnsupportedArray",
+          "UnsupportedPair",
+          "UnusedUnsupportedParameter",
+          "UnusedUnsupportedTemplate",
+          "PhantomAllScalars",
+          "PhantomForward",
+          "PhantomAliases",
+          "PhantomMixed",
+          "PhantomDefer",
+          "PhantomCleanup"
+        ],
+        "unusedParameter": {
+          "name": "UnusedUnsupportedParameter",
+          "exit": 0,
+          "stdout": "check ok: 1 instance(s), 1 source file(s), 2 MIR function(s), lock verified\n",
+          "stderr": "",
+          "firstDiagnostic": null,
+          "unsupportedDiagnostics": [],
+          "seconds": 0.04386709997197613,
+          "inputs": {
+            "fairy.lock": "d4dc329214eaa09da902f96c3df9b09aefd60cfc275b8efc118dfde268c7d27c",
+            "fairy.toml": "14e9d2861c23fcddb40549e8a8657f5f4a75694625190c8189ff737f34ddcc51",
+            "src/main.fy": "aa3fc59122788f2b536f38236d72718ab42c451ee7e575d15f8425b91b3ccf61"
+          },
+          "expectedExit": 0,
+          "expectedCode": "",
+          "matched": true
+        }
+      }
+    }
+  ],
+  "rootCheck": {
+    "files": 448,
+    "mirFunctions": 5805,
+    "locked": true
+  },
+  "nativeCoreTest": {
+    "command": [
+      "fairyc",
+      "test",
+      "--native",
+      "--locked",
+      "--json",
+      "--exact",
+      "tests::project_compiler_complete::phantom_arguments_keep_distinct_specializations_without_runtime_types"
+    ],
+    "engine": "native",
+    "profile": "development",
+    "passed": 1,
+    "failed": 0,
+    "status": "ok",
+    "lock": "verified",
+    "proves": [
+      "two source IDs for u16/u64",
+      "repeated identical request compacted",
+      "no unsupported value scalar in verified IR"
+    ],
+    "failedHistory": "initial test incorrectly allowed only i32/void in a graph that legitimately preseeds all six executable scalars; final assertion uses the executable scalar domain"
+  },
+  "remaining": [
+    "unsupported body-annotation diagnostics are not fully aggregated",
+    "identified build/run/cache consumers",
+    "latest-source full-image and fixed-point promotion",
+    "product stack/deadline integration",
+    "Linux/full suite and same-head hosted CI"
+  ],
+  "privateStackReserveBytes": 16777216,
+  "productStackChanged": false,
+  "productTimeoutChanged": false,
+  "publicApiChanged": false,
+  "sdkAbiChanged": false,
+  "dbChanged": false,
+  "ciChanged": false,
+  "pushed": false
+}

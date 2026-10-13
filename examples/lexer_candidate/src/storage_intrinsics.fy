@@ -12,8 +12,9 @@ import std::bytes as bytes;
 // Private SDK storage operations relocate scalars, structs and resource values.
 // Safe element borrows retain the owner independently of the raw slot.
 pub fn u32 named(ref u8[] name){return if(bytes::equal(name,b"storage_size")){1}else if(bytes::equal(name,b"storage_alignment")){2}else if(bytes::equal(name,b"storage_take")){3}else if(bytes::equal(name,b"storage_put")){4}else if(bytes::equal(name,b"storage_element_address")){5}else if(bytes::equal(name,b"storage_borrow")){6}else if(bytes::equal(name,b"storage_borrow_mut")){7}else{0};}
-// A private slice type argument describes a view, not a stored unsized value.
-pub fn usize annotation_root(ref syntax::Parsed p,usize specialization,usize root,bool vector){let e=syntax::expression_at(p,specialization);let u32 code=named(syntax::expression_text(p,e.left));let n=syntax::type_at(p,root);return if(vector && (code==6 || code==7) && n.kind==4){n.left}else{root};}
+// Ordinary template arguments are consumed by the specialization plan. Only
+// authenticated storage queries need a runtime element/view annotation here.
+pub fn usize annotation_root(ref syntax::Parsed p,usize specialization,usize root,bool vector){let e=syntax::expression_at(p,specialization);let u32 code=named(syntax::expression_text(p,e.left));if(!vector || code==0){return 0;}let n=syntax::type_at(p,root);return if((code==6 || code==7) && n.kind==4){n.left}else{root};}
 pub fn u32 call(ref syntax::Parsed p,usize id){
     if(id==0){return 0;}let e=syntax::expression_at(p,id);if(e.kind!=6){return 0;}
     let g=syntax::expression_at(p,e.left);if(g.kind!=20){return 0;}let base=syntax::expression_at(p,g.left);

@@ -15,6 +15,8 @@ import scanner as scanner;
 import std::bytes as bytes;
 import std::vec as v;
 import generic_signature_diagnostics as diagnostics;
+import module_unit_body_ir_model as body_ir;
+import module_unit_cleanup_mir_model as clean_ir;
 import std::fs as fs;
 import std::text as text;
 import std::process as process;
@@ -63,4 +65,11 @@ fn void complete_reports_unsupported_signatures_without_publishing_ir(){
     switch(core::build_complete_reporting_sources(ref normal.sources,ref normal.owners,ref normal.imports,ref coords,ref mut clean,ref mut work,ref mut linking)){case .ok(p):{assert(proof::check(checked::ir_program(core::checked_program(ref p))).code==0);}case .err(_):{assert(false);}};assert(v::len<diagnostics::Reports>(ref clean)==0);
     work=0;linking=0;switch(core::build_complete_reporting_sources(ref normal.sources,ref normal.owners,ref normal.imports,ref coords,ref mut reports,ref mut work,ref mut linking)){case .ok(_):{assert(false);}case .err(e):{assert(e.phase==5 && e.stage==6 && e.code==9);}};assert(work==0 && linking==0 && v::len<diagnostics::Reports>(ref reports)==1);
     var v::Vec<diagnostics::Reports> exhausted=v::empty<diagnostics::Reports>();work=16777217;switch(core::build_complete_reporting_sources(ref source.sources,ref source.owners,ref source.imports,ref coords,ref mut exhausted,ref mut work,ref mut linking)){case .ok(_):{assert(false);}case .err(e):{assert(e.code==10);}};assert(v::len<diagnostics::Reports>(ref exhausted)==0 && linking==0);
+}
+
+@test @effects(console)
+fn void phantom_arguments_keep_distinct_specializations_without_runtime_types(){
+    let source=simple(b"module root;fn i32 constant<T>(){return 42;}fn i32 main(){discard constant<u16>();discard constant<u64>();return constant<u16>();}");let coords=table(0,false,false);var usize work=0;var usize linking=0;let result=complete(ref source,ref coords,ref mut work,ref mut linking);let program=core::checked_program(ref result);assert(proof::check(checked::ir_program(program)).code==0 && checked::frame_count(program)==3);
+    var usize specialized=0;var bytes::Buffer first=bytes::empty();var usize i=1;while(i<=checked::frame_count(program)){let row=checked::frame_at(program,i);if(row.node!=0){let id=checked::identity(program,row);assert(id.len==67);if(specialized==0){assert(bytes::append(ref mut first,id).is_ok);}else{assert(!bytes::equal(bytes::view(ref first),id));}specialized+=1;}i+=1;}assert(specialized==2);
+    let graph=body_ir::cleanup_ir(checked::ir_program(program));i=1;while(i<=clean_ir::type_count(graph)){let t=clean_ir::type_at(graph,i);assert(t.kind!=1 || t.scalar>=1 && t.scalar<=7);i+=1;}
 }
