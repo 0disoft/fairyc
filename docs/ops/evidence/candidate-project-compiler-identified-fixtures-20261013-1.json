@@ -1,0 +1,505 @@
+{
+  "schema": "fairyc.candidate-fixture-inputs/v1",
+  "fixtures": [
+    {
+      "path": ".cache/project-core-identified-20261013/fixture/cases.bin",
+      "bytes": 1335,
+      "sha256": "e9b45ab941dabc50c425aab50c4e98eff9a67fd7fd1ae8134bf6f442e779c992"
+    },
+    {
+      "path": ".cache/project-core-identified-20261013/fixture/Current/fairy.lock",
+      "bytes": 3928,
+      "sha256": "f112d5facff6d462fcf545900306bb16368aaa9cbec98dc0ff5b908813d4fc1b"
+    },
+    {
+      "path": ".cache/project-core-identified-20261013/fixture/Current/fairy.toml",
+      "bytes": 310,
+      "sha256": "2be75fefb4aa664b3767eef50075471fbb8ba14a3cef329fe982306842cd5b82"
+    },
+    {
+      "path": ".cache/project-core-identified-20261013/fixture/Current/left/fairy.toml",
+      "bytes": 196,
+      "sha256": "4020dec17858341d8790032c4ca4e34b8b1aaad86d2139de5a7a7329afe6722e"
+    },
+    {
+      "path": ".cache/project-core-identified-20261013/fixture/Current/left/src/left.fy",
+      "bytes": 140,
+      "sha256": "a1fb4f36820ba838cd2a2111bc15885fc3aa1541463589c431d369743a742485"
+    },
+    {
+      "path": ".cache/project-core-identified-20261013/fixture/Current/left-lib/fairy.toml",
+      "bytes": 139,
+      "sha256": "5fa1107425ca2236e8f258ea16af89762bb77895e768418affee8d2d0efe84de"
+    },
+    {
+      "path": ".cache/project-core-identified-20261013/fixture/Current/left-lib/src/common.fy",
+      "bytes": 113,
+      "sha256": "b2a43360fad3f185f0988c48ce3fd710fa94727b199198e3645903ad23066089"
+    },
+    {
+      "path": ".cache/project-core-identified-20261013/fixture/Current/right/fairy.toml",
+      "bytes": 198,
+      "sha256": "dd61d9842b39217c399e25a765d6e8ac605d72445cb5dc6ab79857ac96a607b1"
+    },
+    {
+      "path": ".cache/project-core-identified-20261013/fixture/Current/right/src/right.fy",
+      "bytes": 141,
+      "sha256": "1aba101017b1f511af9d3554892725095954f248a506baa9b5f9c69448eaf063"
+    },
+    {
+      "path": ".cache/project-core-identified-20261013/fixture/Current/right-lib/fairy.toml",
+      "bytes": 140,
+      "sha256": "6c900c3d10a98483de9fd9ea9ed996ad57f6d7e744eef8ad6c654dbafb904aa6"
+    },
+    {
+      "path": ".cache/project-core-identified-20261013/fixture/Current/right-lib/src/common.fy",
+      "bytes": 115,
+      "sha256": "63e8f8f0120fe2c94713a41fb216e90c1ef924c401c67d186a8f1aabd4c7ee17"
+    },
+    {
+      "path": ".cache/project-core-identified-20261013/fixture/Current/src/common.fy",
+      "bytes": 111,
+      "sha256": "9b1af369ef8284b429b0a0b08cd35670b1064f528c110e82bbe95bb7eb943358"
+    },
+    {
+      "path": ".cache/project-core-identified-20261013/fixture/Current/src/main.fy",
+      "bytes": 130,
+      "sha256": "3cf3c024659d9b4894202517dd15d952221d8e428fb899891413d491d9e86a70"
+    },
+    {
+      "path": ".cache/project-core-identified-20261013/fixture/DependencyBody/fairy.lock",
+      "bytes": 3928,
+      "sha256": "c5126bb0dce6d3e0395617d2eac2e10861e06345b4bce37cbb204e798ace7f57"
+    },
+    {
+      "path": ".cache/project-core-identified-20261013/fixture/DependencyBody/fairy.toml",
+      "bytes": 310,
+      "sha256": "2be75fefb4aa664b3767eef50075471fbb8ba14a3cef329fe982306842cd5b82"
+    },
+    {
+      "path": ".cache/project-core-identified-20261013/fixture/DependencyBody/left/fairy.toml",
+      "bytes": 196,
+      "sha256": "4020dec17858341d8790032c4ca4e34b8b1aaad86d2139de5a7a7329afe6722e"
+    },
+    {
+      "path": ".cache/project-core-identified-20261013/fixture/DependencyBody/left/src/left.fy",
+      "bytes": 140,
+      "sha256": "a1fb4f36820ba838cd2a2111bc15885fc3aa1541463589c431d369743a742485"
+    },
+    {
+      "path": ".cache/project-core-identified-20261013/fixture/DependencyBody/left-lib/fairy.toml",
+      "bytes": 139,
+      "sha256": "5fa1107425ca2236e8f258ea16af89762bb77895e768418affee8d2d0efe84de"
+    },
+    {
+      "path": ".cache/project-core-identified-20261013/fixture/DependencyBody/left-lib/src/common.fy",
+      "bytes": 113,
+      "sha256": "b2a43360fad3f185f0988c48ce3fd710fa94727b199198e3645903ad23066089"
+    },
+    {
+      "path": ".cache/project-core-identified-20261013/fixture/DependencyBody/right/fairy.toml",
+      "bytes": 198,
+      "sha256": "dd61d9842b39217c399e25a765d6e8ac605d72445cb5dc6ab79857ac96a607b1"
+    },
+    {
+      "path": ".cache/project-core-identified-20261013/fixture/DependencyBody/right/src/right.fy",
+      "bytes": 135,
+      "sha256": "eec253e43ce0dcf9a6c645e6461b48523e0891309553c2290bd91ad599372274"
+    },
+    {
+      "path": ".cache/project-core-identified-20261013/fixture/DependencyBody/right-lib/fairy.toml",
+      "bytes": 140,
+      "sha256": "6c900c3d10a98483de9fd9ea9ed996ad57f6d7e744eef8ad6c654dbafb904aa6"
+    },
+    {
+      "path": ".cache/project-core-identified-20261013/fixture/DependencyBody/right-lib/src/common.fy",
+      "bytes": 115,
+      "sha256": "63e8f8f0120fe2c94713a41fb216e90c1ef924c401c67d186a8f1aabd4c7ee17"
+    },
+    {
+      "path": ".cache/project-core-identified-20261013/fixture/DependencyBody/src/common.fy",
+      "bytes": 111,
+      "sha256": "9b1af369ef8284b429b0a0b08cd35670b1064f528c110e82bbe95bb7eb943358"
+    },
+    {
+      "path": ".cache/project-core-identified-20261013/fixture/DependencyBody/src/main.fy",
+      "bytes": 130,
+      "sha256": "3cf3c024659d9b4894202517dd15d952221d8e428fb899891413d491d9e86a70"
+    },
+    {
+      "path": ".cache/project-core-identified-20261013/fixture/Generic/fairy.lock",
+      "bytes": 1697,
+      "sha256": "e666e383e9164ea6805fabc67669375fd18bef56d239b8b5c802aa1b90db3e1c"
+    },
+    {
+      "path": ".cache/project-core-identified-20261013/fixture/Generic/fairy.toml",
+      "bytes": 152,
+      "sha256": "707e3a7b5d166ef18ec42f4d6049570977ed66d5c9c953a1b175fbb420bdef06"
+    },
+    {
+      "path": ".cache/project-core-identified-20261013/fixture/Generic/src/helper.fy",
+      "bytes": 54,
+      "sha256": "b251eff1c90d7e8dc1df6db3824772ae0395a7c6af0c33f74a74279ca4b16d55"
+    },
+    {
+      "path": ".cache/project-core-identified-20261013/fixture/Generic/src/main.fy",
+      "bytes": 194,
+      "sha256": "96fa45d065a20db45a49f56d78e607d3dd18bc0d4619727d76f3c85650efc273"
+    },
+    {
+      "path": ".cache/project-core-identified-20261013/fixture/Moved/fairy.lock",
+      "bytes": 3928,
+      "sha256": "900fa962f8902c5e41ec2d03fba4c4c40d394b9a47f527d344b89dafce21a9ad"
+    },
+    {
+      "path": ".cache/project-core-identified-20261013/fixture/Moved/fairy.toml",
+      "bytes": 310,
+      "sha256": "2be75fefb4aa664b3767eef50075471fbb8ba14a3cef329fe982306842cd5b82"
+    },
+    {
+      "path": ".cache/project-core-identified-20261013/fixture/Moved/left/fairy.toml",
+      "bytes": 196,
+      "sha256": "4020dec17858341d8790032c4ca4e34b8b1aaad86d2139de5a7a7329afe6722e"
+    },
+    {
+      "path": ".cache/project-core-identified-20261013/fixture/Moved/left/src/left.fy",
+      "bytes": 140,
+      "sha256": "a1fb4f36820ba838cd2a2111bc15885fc3aa1541463589c431d369743a742485"
+    },
+    {
+      "path": ".cache/project-core-identified-20261013/fixture/Moved/left-lib/fairy.toml",
+      "bytes": 139,
+      "sha256": "5fa1107425ca2236e8f258ea16af89762bb77895e768418affee8d2d0efe84de"
+    },
+    {
+      "path": ".cache/project-core-identified-20261013/fixture/Moved/left-lib/src/common.fy",
+      "bytes": 113,
+      "sha256": "b2a43360fad3f185f0988c48ce3fd710fa94727b199198e3645903ad23066089"
+    },
+    {
+      "path": ".cache/project-core-identified-20261013/fixture/Moved/right/fairy.toml",
+      "bytes": 198,
+      "sha256": "dd61d9842b39217c399e25a765d6e8ac605d72445cb5dc6ab79857ac96a607b1"
+    },
+    {
+      "path": ".cache/project-core-identified-20261013/fixture/Moved/right/src/right.fy",
+      "bytes": 141,
+      "sha256": "1aba101017b1f511af9d3554892725095954f248a506baa9b5f9c69448eaf063"
+    },
+    {
+      "path": ".cache/project-core-identified-20261013/fixture/Moved/right-lib/fairy.toml",
+      "bytes": 140,
+      "sha256": "6c900c3d10a98483de9fd9ea9ed996ad57f6d7e744eef8ad6c654dbafb904aa6"
+    },
+    {
+      "path": ".cache/project-core-identified-20261013/fixture/Moved/right-lib/src/common.fy",
+      "bytes": 115,
+      "sha256": "63e8f8f0120fe2c94713a41fb216e90c1ef924c401c67d186a8f1aabd4c7ee17"
+    },
+    {
+      "path": ".cache/project-core-identified-20261013/fixture/Moved/src/common.fy",
+      "bytes": 111,
+      "sha256": "9b1af369ef8284b429b0a0b08cd35670b1064f528c110e82bbe95bb7eb943358"
+    },
+    {
+      "path": ".cache/project-core-identified-20261013/fixture/Moved/src/main.fy",
+      "bytes": 256,
+      "sha256": "84670375879074b5f6e4e8dbf24dc5794a861b845eaa4086b4eae31bedc9241d"
+    },
+    {
+      "path": ".cache/project-core-identified-20261013/fixture/Nominal/fairy.lock",
+      "bytes": 3928,
+      "sha256": "fc0d0c8e0155a1e811e5d34b28fe60567641ac420b85c69de191dd7afd0561b7"
+    },
+    {
+      "path": ".cache/project-core-identified-20261013/fixture/Nominal/fairy.toml",
+      "bytes": 310,
+      "sha256": "2be75fefb4aa664b3767eef50075471fbb8ba14a3cef329fe982306842cd5b82"
+    },
+    {
+      "path": ".cache/project-core-identified-20261013/fixture/Nominal/left/fairy.toml",
+      "bytes": 196,
+      "sha256": "4020dec17858341d8790032c4ca4e34b8b1aaad86d2139de5a7a7329afe6722e"
+    },
+    {
+      "path": ".cache/project-core-identified-20261013/fixture/Nominal/left/src/left.fy",
+      "bytes": 140,
+      "sha256": "a1fb4f36820ba838cd2a2111bc15885fc3aa1541463589c431d369743a742485"
+    },
+    {
+      "path": ".cache/project-core-identified-20261013/fixture/Nominal/left-lib/fairy.toml",
+      "bytes": 139,
+      "sha256": "5fa1107425ca2236e8f258ea16af89762bb77895e768418affee8d2d0efe84de"
+    },
+    {
+      "path": ".cache/project-core-identified-20261013/fixture/Nominal/left-lib/src/common.fy",
+      "bytes": 113,
+      "sha256": "b2a43360fad3f185f0988c48ce3fd710fa94727b199198e3645903ad23066089"
+    },
+    {
+      "path": ".cache/project-core-identified-20261013/fixture/Nominal/right/fairy.toml",
+      "bytes": 198,
+      "sha256": "dd61d9842b39217c399e25a765d6e8ac605d72445cb5dc6ab79857ac96a607b1"
+    },
+    {
+      "path": ".cache/project-core-identified-20261013/fixture/Nominal/right/src/right.fy",
+      "bytes": 141,
+      "sha256": "1aba101017b1f511af9d3554892725095954f248a506baa9b5f9c69448eaf063"
+    },
+    {
+      "path": ".cache/project-core-identified-20261013/fixture/Nominal/right-lib/fairy.toml",
+      "bytes": 140,
+      "sha256": "6c900c3d10a98483de9fd9ea9ed996ad57f6d7e744eef8ad6c654dbafb904aa6"
+    },
+    {
+      "path": ".cache/project-core-identified-20261013/fixture/Nominal/right-lib/src/common.fy",
+      "bytes": 115,
+      "sha256": "63e8f8f0120fe2c94713a41fb216e90c1ef924c401c67d186a8f1aabd4c7ee17"
+    },
+    {
+      "path": ".cache/project-core-identified-20261013/fixture/Nominal/src/common.fy",
+      "bytes": 111,
+      "sha256": "9b1af369ef8284b429b0a0b08cd35670b1064f528c110e82bbe95bb7eb943358"
+    },
+    {
+      "path": ".cache/project-core-identified-20261013/fixture/Nominal/src/main.fy",
+      "bytes": 188,
+      "sha256": "61d0059f071e17498612364761d854d80a9066ebf0b8452f9309faaf1b9bc392"
+    },
+    {
+      "path": ".cache/project-core-identified-20261013/fixture/observations.json",
+      "bytes": 3420,
+      "sha256": "48da1772b6b7a6fa45f703284eedda0211db6279b7cc4367cc51924c7e142a53"
+    },
+    {
+      "path": ".cache/project-core-identified-20261013/fixture/Private/fairy.lock",
+      "bytes": 3928,
+      "sha256": "b8fbf3b5e31c1ba3913fc8d025ecfd23fbe681b181f7ffda6139076955437d9f"
+    },
+    {
+      "path": ".cache/project-core-identified-20261013/fixture/Private/fairy.toml",
+      "bytes": 310,
+      "sha256": "2be75fefb4aa664b3767eef50075471fbb8ba14a3cef329fe982306842cd5b82"
+    },
+    {
+      "path": ".cache/project-core-identified-20261013/fixture/Private/left/fairy.toml",
+      "bytes": 196,
+      "sha256": "4020dec17858341d8790032c4ca4e34b8b1aaad86d2139de5a7a7329afe6722e"
+    },
+    {
+      "path": ".cache/project-core-identified-20261013/fixture/Private/left/src/left.fy",
+      "bytes": 140,
+      "sha256": "a1fb4f36820ba838cd2a2111bc15885fc3aa1541463589c431d369743a742485"
+    },
+    {
+      "path": ".cache/project-core-identified-20261013/fixture/Private/left-lib/fairy.toml",
+      "bytes": 139,
+      "sha256": "5fa1107425ca2236e8f258ea16af89762bb77895e768418affee8d2d0efe84de"
+    },
+    {
+      "path": ".cache/project-core-identified-20261013/fixture/Private/left-lib/src/common.fy",
+      "bytes": 113,
+      "sha256": "b2a43360fad3f185f0988c48ce3fd710fa94727b199198e3645903ad23066089"
+    },
+    {
+      "path": ".cache/project-core-identified-20261013/fixture/Private/right/fairy.toml",
+      "bytes": 198,
+      "sha256": "dd61d9842b39217c399e25a765d6e8ac605d72445cb5dc6ab79857ac96a607b1"
+    },
+    {
+      "path": ".cache/project-core-identified-20261013/fixture/Private/right/src/right.fy",
+      "bytes": 141,
+      "sha256": "1aba101017b1f511af9d3554892725095954f248a506baa9b5f9c69448eaf063"
+    },
+    {
+      "path": ".cache/project-core-identified-20261013/fixture/Private/right-lib/fairy.toml",
+      "bytes": 140,
+      "sha256": "6c900c3d10a98483de9fd9ea9ed996ad57f6d7e744eef8ad6c654dbafb904aa6"
+    },
+    {
+      "path": ".cache/project-core-identified-20261013/fixture/Private/right-lib/src/common.fy",
+      "bytes": 115,
+      "sha256": "63e8f8f0120fe2c94713a41fb216e90c1ef924c401c67d186a8f1aabd4c7ee17"
+    },
+    {
+      "path": ".cache/project-core-identified-20261013/fixture/Private/src/common.fy",
+      "bytes": 111,
+      "sha256": "9b1af369ef8284b429b0a0b08cd35670b1064f528c110e82bbe95bb7eb943358"
+    },
+    {
+      "path": ".cache/project-core-identified-20261013/fixture/Private/src/main.fy",
+      "bytes": 130,
+      "sha256": "c4aa4b5c961dae1ab6a564ca0c305da6479922a7bff7eff1ba9d0b55034ccbf2"
+    },
+    {
+      "path": ".cache/project-core-identified-20261013/fixture/root.bin",
+      "bytes": 126,
+      "sha256": "5080bc90c841c67715b1f43e65171a68c043483ea4c10452548c831d3dd76d9d"
+    },
+    {
+      "path": ".cache/project-core-identified-20261013/fixture/RootBody/fairy.lock",
+      "bytes": 3928,
+      "sha256": "37fd8893d101fadb803db02adae420beffed015aa39584fc6362fb336fa45845"
+    },
+    {
+      "path": ".cache/project-core-identified-20261013/fixture/RootBody/fairy.toml",
+      "bytes": 310,
+      "sha256": "2be75fefb4aa664b3767eef50075471fbb8ba14a3cef329fe982306842cd5b82"
+    },
+    {
+      "path": ".cache/project-core-identified-20261013/fixture/RootBody/left/fairy.toml",
+      "bytes": 196,
+      "sha256": "4020dec17858341d8790032c4ca4e34b8b1aaad86d2139de5a7a7329afe6722e"
+    },
+    {
+      "path": ".cache/project-core-identified-20261013/fixture/RootBody/left/src/left.fy",
+      "bytes": 140,
+      "sha256": "a1fb4f36820ba838cd2a2111bc15885fc3aa1541463589c431d369743a742485"
+    },
+    {
+      "path": ".cache/project-core-identified-20261013/fixture/RootBody/left-lib/fairy.toml",
+      "bytes": 139,
+      "sha256": "5fa1107425ca2236e8f258ea16af89762bb77895e768418affee8d2d0efe84de"
+    },
+    {
+      "path": ".cache/project-core-identified-20261013/fixture/RootBody/left-lib/src/common.fy",
+      "bytes": 113,
+      "sha256": "b2a43360fad3f185f0988c48ce3fd710fa94727b199198e3645903ad23066089"
+    },
+    {
+      "path": ".cache/project-core-identified-20261013/fixture/RootBody/right/fairy.toml",
+      "bytes": 198,
+      "sha256": "dd61d9842b39217c399e25a765d6e8ac605d72445cb5dc6ab79857ac96a607b1"
+    },
+    {
+      "path": ".cache/project-core-identified-20261013/fixture/RootBody/right/src/right.fy",
+      "bytes": 141,
+      "sha256": "1aba101017b1f511af9d3554892725095954f248a506baa9b5f9c69448eaf063"
+    },
+    {
+      "path": ".cache/project-core-identified-20261013/fixture/RootBody/right-lib/fairy.toml",
+      "bytes": 140,
+      "sha256": "6c900c3d10a98483de9fd9ea9ed996ad57f6d7e744eef8ad6c654dbafb904aa6"
+    },
+    {
+      "path": ".cache/project-core-identified-20261013/fixture/RootBody/right-lib/src/common.fy",
+      "bytes": 115,
+      "sha256": "63e8f8f0120fe2c94713a41fb216e90c1ef924c401c67d186a8f1aabd4c7ee17"
+    },
+    {
+      "path": ".cache/project-core-identified-20261013/fixture/RootBody/src/common.fy",
+      "bytes": 111,
+      "sha256": "9b1af369ef8284b429b0a0b08cd35670b1064f528c110e82bbe95bb7eb943358"
+    },
+    {
+      "path": ".cache/project-core-identified-20261013/fixture/RootBody/src/main.fy",
+      "bytes": 100,
+      "sha256": "c2faef34df76432f9216a32b6626164e8ff3fca4b3b4ce6ea9c38bc1c7ebbde6"
+    },
+    {
+      "path": ".cache/project-core-identified-20261013/fixture/SDK/fairy.lock",
+      "bytes": 4772,
+      "sha256": "e6a2a7c09122a50d34875c1adb38df279d795320ea67eb6d1803db4e762ba1f2"
+    },
+    {
+      "path": ".cache/project-core-identified-20261013/fixture/SDK/fairy.toml",
+      "bytes": 310,
+      "sha256": "2be75fefb4aa664b3767eef50075471fbb8ba14a3cef329fe982306842cd5b82"
+    },
+    {
+      "path": ".cache/project-core-identified-20261013/fixture/SDK/left/fairy.toml",
+      "bytes": 196,
+      "sha256": "4020dec17858341d8790032c4ca4e34b8b1aaad86d2139de5a7a7329afe6722e"
+    },
+    {
+      "path": ".cache/project-core-identified-20261013/fixture/SDK/left/src/left.fy",
+      "bytes": 140,
+      "sha256": "a1fb4f36820ba838cd2a2111bc15885fc3aa1541463589c431d369743a742485"
+    },
+    {
+      "path": ".cache/project-core-identified-20261013/fixture/SDK/left-lib/fairy.toml",
+      "bytes": 139,
+      "sha256": "5fa1107425ca2236e8f258ea16af89762bb77895e768418affee8d2d0efe84de"
+    },
+    {
+      "path": ".cache/project-core-identified-20261013/fixture/SDK/left-lib/src/common.fy",
+      "bytes": 113,
+      "sha256": "b2a43360fad3f185f0988c48ce3fd710fa94727b199198e3645903ad23066089"
+    },
+    {
+      "path": ".cache/project-core-identified-20261013/fixture/SDK/right/fairy.toml",
+      "bytes": 198,
+      "sha256": "dd61d9842b39217c399e25a765d6e8ac605d72445cb5dc6ab79857ac96a607b1"
+    },
+    {
+      "path": ".cache/project-core-identified-20261013/fixture/SDK/right/src/right.fy",
+      "bytes": 239,
+      "sha256": "ff44db40fefbfc5f899d4938aab5b3fac2dbbd33bfd39c6e0d15410cb1879a47"
+    },
+    {
+      "path": ".cache/project-core-identified-20261013/fixture/SDK/right-lib/fairy.toml",
+      "bytes": 140,
+      "sha256": "6c900c3d10a98483de9fd9ea9ed996ad57f6d7e744eef8ad6c654dbafb904aa6"
+    },
+    {
+      "path": ".cache/project-core-identified-20261013/fixture/SDK/right-lib/src/common.fy",
+      "bytes": 115,
+      "sha256": "63e8f8f0120fe2c94713a41fb216e90c1ef924c401c67d186a8f1aabd4c7ee17"
+    },
+    {
+      "path": ".cache/project-core-identified-20261013/fixture/SDK/src/common.fy",
+      "bytes": 111,
+      "sha256": "9b1af369ef8284b429b0a0b08cd35670b1064f528c110e82bbe95bb7eb943358"
+    },
+    {
+      "path": ".cache/project-core-identified-20261013/fixture/SDK/src/main.fy",
+      "bytes": 130,
+      "sha256": "3cf3c024659d9b4894202517dd15d952221d8e428fb899891413d491d9e86a70"
+    },
+    {
+      "path": ".cache/project-core-identified-20261013/fixture/Signature/fairy.lock",
+      "bytes": 3928,
+      "sha256": "7ca69d1a43735d07b54dc8f1184c04719e5aa2d0d86a8f14323f16d09a85bea7"
+    },
+    {
+      "path": ".cache/project-core-identified-20261013/fixture/Signature/fairy.toml",
+      "bytes": 310,
+      "sha256": "2be75fefb4aa664b3767eef50075471fbb8ba14a3cef329fe982306842cd5b82"
+    },
+    {
+      "path": ".cache/project-core-identified-20261013/fixture/Signature/left/fairy.toml",
+      "bytes": 196,
+      "sha256": "4020dec17858341d8790032c4ca4e34b8b1aaad86d2139de5a7a7329afe6722e"
+    },
+    {
+      "path": ".cache/project-core-identified-20261013/fixture/Signature/left/src/left.fy",
+      "bytes": 140,
+      "sha256": "a1fb4f36820ba838cd2a2111bc15885fc3aa1541463589c431d369743a742485"
+    },
+    {
+      "path": ".cache/project-core-identified-20261013/fixture/Signature/left-lib/fairy.toml",
+      "bytes": 139,
+      "sha256": "5fa1107425ca2236e8f258ea16af89762bb77895e768418affee8d2d0efe84de"
+    },
+    {
+      "path": ".cache/project-core-identified-20261013/fixture/Signature/left-lib/src/common.fy",
+      "bytes": 113,
+      "sha256": "b2a43360fad3f185f0988c48ce3fd710fa94727b199198e3645903ad23066089"
+    },
+    {
+      "path": ".cache/project-core-identified-20261013/fixture/Signature/right/fairy.toml",
+      "bytes": 198,
+      "sha256": "dd61d9842b39217c399e25a765d6e8ac605d72445cb5dc6ab79857ac96a607b1"
+    },
+    {
+      "path": ".cache/project-core-identified-20261013/fixture/Signature/right/src/right.fy",
+      "bytes": 141,
+      "sha256": "1aba101017b1f511af9d3554892725095954f248a506baa9b5f9c69448eaf063"
+    },
+    {
+      "path": ".cache/project-core-identified-20261013/fixture/Signature/right-lib/fairy.toml",
+      "bytes": 140,
+      "sha256": "6c900c3d10a98483de9fd9ea9ed996ad57f6d7e744eef8ad6c654dbafb904aa6"
+    }
+  ]
+}

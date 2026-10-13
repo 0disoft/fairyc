@@ -1,0 +1,20 @@
+{
+  "schema": "fairyc.candidate-fixture-inputs/v1",
+  "fixtures": [
+    {
+      "path": ".cache/project-core-identified-20261013/fixture/Signature/right-lib/src/common.fy",
+      "bytes": 119,
+      "sha256": "38b6d63ceca3be7adab7b3b82b6dc02528bed37205a958c09d8a8cf57f116e89"
+    },
+    {
+      "path": ".cache/project-core-identified-20261013/fixture/Signature/src/common.fy",
+      "bytes": 111,
+      "sha256": "9b1af369ef8284b429b0a0b08cd35670b1064f528c110e82bbe95bb7eb943358"
+    },
+    {
+      "path": ".cache/project-core-identified-20261013/fixture/Signature/src/main.fy",
+      "bytes": 130,
+      "sha256": "3cf3c024659d9b4894202517dd15d952221d8e428fb899891413d491d9e86a70"
+    }
+  ]
+}

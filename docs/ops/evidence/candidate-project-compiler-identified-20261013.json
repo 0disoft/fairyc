@@ -1,0 +1,478 @@
+{
+  "schema": "fairyc.candidate-project-compiler-identified/v1",
+  "passed": true,
+  "parentCommit": "8d26c02404d2bacaabac7ebcf5ecd7c4a7054ae9",
+  "scope": "Fresh original-source specialization planning from resolved workspace inputs, followed by complete body/Flow checking and owned identified project linking. Stable command routing and interface/cache publication remain next.",
+  "sourceInventories": [
+    {
+      "path": "docs/ops/evidence/candidate-project-compiler-identified-inputs-20261013-1.json",
+      "bytes": 20280,
+      "sha256": "4a449187bc5b5de37eae244c96b891bbaa51273ee7562c6955a95ea8e78581f2"
+    },
+    {
+      "path": "docs/ops/evidence/candidate-project-compiler-identified-inputs-20261013-2.json",
+      "bytes": 20225,
+      "sha256": "f68941f00fa20d48d0dac20841574e384a7ab95972775a221b0577b527faf9e3"
+    },
+    {
+      "path": "docs/ops/evidence/candidate-project-compiler-identified-inputs-20261013-3.json",
+      "bytes": 6240,
+      "sha256": "1d4f282f8b58d1d90e4cb667f051defb50620eb1a87592c8cb7d7e9f932f15c5"
+    }
+  ],
+  "tools": {
+    "compiler": {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-frontend-oracle-current-20261012.exe",
+      "sha256": "3ecc4501ee3bb47ecc39e7288200266b31cbcd8bf6ffec302ae54867705ce5d1"
+    },
+    "candidate": {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-cleanup-20261013\\current-driver\\driver-release.exe",
+      "sha256": "67be18bdabb9d6499edcfcd8b7d3e3245dd932fd265ba79ab4cd7136748ec0ac"
+    },
+    "builder": {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-rooted-builder-stack-20261012.exe",
+      "sha256": "02abe2328daa9921705910c7b995e82c1312cb960fe024106c11468569aefff0"
+    },
+    "nativeStackEditor": {
+      "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\editbin.exe",
+      "sha256": "be37ead809e0cab3b62ff7c141fece6655b6c6ab1e2951a118abbaef48acbc07"
+    }
+  },
+  "nativeProgram": {
+    "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-core-identified-20261013\\verification-stack\\native-project-df34b4b0c190d9bb3a6f\\build\\lexer-candidate.exe",
+    "sha256": "f86e888fa546b6b7322fb0f1e147b2f6d8dfe6bc26610bd0892cebf6c3a6c6bd",
+    "selectedTests": [
+      "tests::project_compiler_identified::generic_vec_owner_survives_project_and_source_plan_closing",
+      "tests::project_compiler_identified::independent_work_limits_and_invalid_coordinates_publish_no_owner",
+      "tests::project_compiler_identified::whole_project_outcomes_preserve_go_spans_and_body_failures"
+    ],
+    "stdoutBytes": 0,
+    "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stack": {
+      "reserveBytes": 16777216,
+      "originalReserveBytes": 1048576,
+      "originalSHA256": "11d7c9eb369054824ee8ff1a8b2d76bb5624460ab978f0afe4764b6077afcdc4"
+    }
+  },
+  "nativeTests": 3,
+  "candidateInputFiles": 276,
+  "candidatePacketSHA256": "fc3317659e28458162d3b4c4b066fe14fd4dfb6166e57f0d439fdac76a83db7e",
+  "candidateExecutions": [
+    {
+      "profile": "development",
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-core-identified-20261013\\verification-stack\\development.exe",
+      "sha256": "93eae768c23119acf1b8cd01a286ecbac2eac3d71f4036037cdac05f380095e6",
+      "exit": 0
+    },
+    {
+      "profile": "release",
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-core-identified-20261013\\verification-stack\\release.exe",
+      "sha256": "bfc9797edd48ca96f1dd125a89598661f2b5ad63b8fd83d04f171d7b8b36f4c0",
+      "exit": 0
+    }
+  ],
+  "invocations": [
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-frontend-oracle-current-20261012.exe",
+        "check"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-core-identified-20261013\\verification-stack\\native-project-df34b4b0c190d9bb3a6f",
+      "seconds": 12.173694900004193,
+      "exit": 0,
+      "stdoutBytes": 80,
+      "stdoutSHA256": "ae05ef156cfb9f87d3cfada36bb1531023fd4419d56486ce9534c073d7c20f03",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-frontend-oracle-current-20261012.exe",
+        "build",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-core-identified-20261013\\verification-stack\\native-project-df34b4b0c190d9bb3a6f",
+      "seconds": 30.684892299992498,
+      "exit": 0,
+      "stdoutBytes": 83,
+      "stdoutSHA256": "913d882a721755f5b674b0837a5dcdb182de237ba6bbcc5f15b49489af2c8bf9",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\editbin.exe",
+        "/nologo",
+        "/stack:16777216",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-core-identified-20261013\\verification-stack\\native-project-df34b4b0c190d9bb3a6f\\build\\lexer-candidate.exe"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-core-identified-20261013\\verification-stack\\native-project-df34b4b0c190d9bb3a6f",
+      "seconds": 0.0971805999870412,
+      "exit": 0,
+      "stdoutBytes": 0,
+      "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-core-identified-20261013\\verification-stack\\native-project-df34b4b0c190d9bb3a6f\\build\\lexer-candidate.exe",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-core-identified-20261013\\fixture\\root.bin"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-core-identified-20261013\\verification-stack\\native-project-df34b4b0c190d9bb3a6f",
+      "seconds": 42.670661100011785,
+      "exit": 0,
+      "stdoutBytes": 0,
+      "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-cleanup-20261013\\current-driver\\driver-release.exe",
+        "--c-project-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-core-identified-20261013\\verification-stack\\sources.list"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "seconds": 228.56563829997322,
+      "exit": 0,
+      "stdoutBytes": 21418611,
+      "stdoutSHA256": "fc3317659e28458162d3b4c4b066fe14fd4dfb6166e57f0d439fdac76a83db7e",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-rooted-builder-stack-20261012.exe",
+        "--packet",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-core-identified-20261013\\verification-stack\\candidate-packet.bin",
+        "--packet-sha256",
+        "fc3317659e28458162d3b4c4b066fe14fd4dfb6166e57f0d439fdac76a83db7e",
+        "--output",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-core-identified-20261013\\verification-stack\\development.exe",
+        "--stack-reserve-bytes",
+        "16777216"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "seconds": 65.03867410001112,
+      "exit": 0,
+      "stdoutBytes": 194,
+      "stdoutSHA256": "0361fcfbac4d4fd15d729b0a6581e37daf73d645a01c4b5866beea46f4bac4bf",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-core-identified-20261013\\verification-stack\\development.exe",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-core-identified-20261013\\fixture\\root.bin"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "seconds": 241.18743960000575,
+      "exit": 0,
+      "stdoutBytes": 0,
+      "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-rooted-builder-stack-20261012.exe",
+        "--packet",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-core-identified-20261013\\verification-stack\\candidate-packet.bin",
+        "--packet-sha256",
+        "fc3317659e28458162d3b4c4b066fe14fd4dfb6166e57f0d439fdac76a83db7e",
+        "--output",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-core-identified-20261013\\verification-stack\\release.exe",
+        "--release",
+        "--stack-reserve-bytes",
+        "16777216"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "seconds": 295.13809060002677,
+      "exit": 0,
+      "stdoutBytes": 196,
+      "stdoutSHA256": "79715339b978218d7f2f160c828dd53a32719a7330bd676f7632624fa6ae3f1f",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-core-identified-20261013\\verification-stack\\release.exe",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-core-identified-20261013\\fixture\\root.bin"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "seconds": 16.24554860003991,
+      "exit": 0,
+      "stdoutBytes": 0,
+      "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr": ""
+    }
+  ],
+  "goCLIObservations": [
+    {
+      "name": "Current",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-frontend-oracle-current-20261012.exe",
+        "check",
+        "--locked"
+      ],
+      "exit": 0,
+      "stdout": "check ok: 5 instance(s), 6 source file(s), 13 MIR function(s), lock verified\n",
+      "stderr": "",
+      "seconds": 0.08395390002988279
+    },
+    {
+      "name": "Signature",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-frontend-oracle-current-20261012.exe",
+        "check",
+        "--locked"
+      ],
+      "exit": 3,
+      "stdout": "",
+      "stderr": "fairyc: semantic subset does not support type Missing at common.fy [bytes 49..56]\n",
+      "seconds": 0.08016240003053099
+    },
+    {
+      "name": "RootBody",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-frontend-oracle-current-20261012.exe",
+        "check",
+        "--locked"
+      ],
+      "exit": 3,
+      "stdout": "",
+      "stderr": "main.fy:5:24: E1009: return value does not match the declared result type [bytes 93..97]\n  expected-type: main.fy:5:4 [bytes 73..76]\n",
+      "seconds": 0.08728800003882498
+    },
+    {
+      "name": "DependencyBody",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-frontend-oracle-current-20261012.exe",
+        "check",
+        "--locked"
+      ],
+      "exit": 3,
+      "stdout": "",
+      "stderr": "right/right.fy:4:28: E1009: return value does not match the declared result type [bytes 101..105]\n  expected-type: right/right.fy:4:8 [bytes 81..84]\n",
+      "seconds": 0.08130149997305125
+    },
+    {
+      "name": "Private",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-frontend-oracle-current-20261012.exe",
+        "check",
+        "--locked"
+      ],
+      "exit": 3,
+      "stdout": "",
+      "stderr": "main.fy:5:35: E0103: item is not visible from this module [bytes 104..113]\n  declaration: left/left.fy:5:8 [bytes 120..126]\n",
+      "seconds": 0.0781670999713242
+    },
+    {
+      "name": "Nominal",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-frontend-oracle-current-20261012.exe",
+        "check",
+        "--locked"
+      ],
+      "exit": 3,
+      "stdout": "",
+      "stderr": "main.fy:7:54: E1006: incompatible expected and actual types [bytes 184..185]\n  expected-type: main.fy:7:52 [bytes 182..183]\n",
+      "seconds": 0.07211310003185645
+    },
+    {
+      "name": "Moved",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-frontend-oracle-current-20261012.exe",
+        "check",
+        "--locked"
+      ],
+      "exit": 3,
+      "stdout": "",
+      "stderr": "main.fy:9:48: E1101: resource is used after ownership was moved [bytes 250..251]\n  declaration: main.fy:9:20 [bytes 222..223]\n  move: main.fy:9:39 [bytes 241..242]\n",
+      "seconds": 0.07805399998323992
+    },
+    {
+      "name": "SDK",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-frontend-oracle-current-20261012.exe",
+        "check",
+        "--locked"
+      ],
+      "exit": 0,
+      "stdout": "check ok: 6 instance(s), 13 source file(s), 166 MIR function(s), lock verified\n",
+      "stderr": "",
+      "seconds": 0.23742449999554083
+    },
+    {
+      "name": "Generic",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-frontend-oracle-current-20261012.exe",
+        "run",
+        "--locked"
+      ],
+      "profile": "development",
+      "exit": 42,
+      "stdout": "",
+      "stderr": "",
+      "seconds": 1.7346339999930933
+    },
+    {
+      "name": "Generic",
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-frontend-oracle-current-20261012.exe",
+        "run",
+        "--locked",
+        "--release"
+      ],
+      "profile": "release",
+      "exit": 42,
+      "stdout": "",
+      "stderr": "",
+      "seconds": 2.014014899963513
+    }
+  ],
+  "currentSourceAudit": {
+    "path": ".cache/project-core-identified-20261013/current-source-audit.json",
+    "bytes": 46248,
+    "sha256": "2204f69c3f02e6a13f0962a0d62fcfafff765e2baef444676882b50144ef30ee"
+  },
+  "rootCheck": {
+    "source": "exec_command/write_stdin",
+    "compiler": {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-frontend-oracle-current-20261012.exe",
+      "sha256": "3ecc4501ee3bb47ecc39e7288200266b31cbcd8bf6ffec302ae54867705ce5d1"
+    },
+    "cwd": "examples/lexer_candidate",
+    "commands": [
+      {
+        "argv": [
+          "check"
+        ],
+        "exit": 0,
+        "stdout": "check ok: 2 instance(s), 441 source file(s), 5680 MIR function(s), lock updated\n"
+      },
+      {
+        "argv": [
+          "check",
+          "--locked"
+        ],
+        "exit": 0,
+        "stdout": "check ok: 2 instance(s), 441 source file(s), 5680 MIR function(s), lock verified\n"
+      }
+    ],
+    "reused": true
+  },
+  "rootLock": {
+    "path": "examples/lexer_candidate/fairy.lock",
+    "bytes": 1698,
+    "sha256": "ebcf31f251c1039fe98a7bfdcb63dfe5abea8d2d4e5240ee752d9ee09117dd5e"
+  },
+  "coverage": [
+    "Eight current Go locked-check observations match the original full-closure oracle, including all failure spans and source instances",
+    "Identified and ordinary compilation return equal complete body/type/move error fields; failed units never enter project linking",
+    "Real workspace coordinates, package owners and resolved imports construct a fresh specialization plan",
+    "Detached generic function and Vec type identities survive source, workspace, metadata and source-plan owners closing; specialized calls retain identified target frames",
+    "Exact-fit/exhausted independent 16MiB source and 8MiB link histories, invalid initial work and missing coordinates return no owner",
+    "The separate Go-built generic/Vec fixture returns 42 under native development and release",
+    "Private Go-native stack editing changes only PE stack reserve and optional checksum; executable code/data bytes remain identical"
+  ],
+  "knownLimitations": [
+    {
+      "scope": "Default-stack native API probe",
+      "exit": 6,
+      "diagnostic": "fairyc: build failed: native test tests::project_compiler_identified::generic_vec_owner_survives_project_and_source_plan_closing exited with status -1073741571 without valid trap control\n",
+      "phaseTrace": {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-core-identified-20261013\\trace\\build\\lexer-candidate.exe",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-core-identified-20261013\\fixture\\root.bin"
+        ],
+        "exit": 3221225725,
+        "stdout": "",
+        "stderr": "before loader\nafter loader\nafter coordinates\nafter input\nbefore core\nbefore plan\nbefore units\n"
+      },
+      "resolution": "The explicit private Go-native program and candidate development/release images all use verified 16MiB stacks. Product default-stack integration remains open."
+    },
+    {
+      "scope": "Go-native optimized probe",
+      "diagnostic": "MSVC host command exceeded 1m0s",
+      "resolution": "The successful private Go-native development program is reused. Product compilation timeout integration remains open."
+    },
+    {
+      "scope": "Earlier candidate-only matrix",
+      "diagnostic": "sources changed during verification",
+      "cause": "The private verifier was updated during that earlier run. The final current-source matrix above passes its complete freshness guards."
+    }
+  ],
+  "privateVerifierArgumentChecks": [
+    {
+      "argv": [
+        "python",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\tools\\verify-candidate-private-tests.py",
+        "--compiler",
+        "unused",
+        "--candidate",
+        "unused",
+        "--builder",
+        "unused",
+        "--module",
+        "unused",
+        "--test",
+        "unused",
+        "--output",
+        "unused",
+        "--native-stack-editor",
+        "unused"
+      ],
+      "exit": 2,
+      "stdout": "",
+      "stderr": "usage: verify-candidate-private-tests.py [-h] --compiler COMPILER\r\n                                         --candidate CANDIDATE\r\n                                         --builder BUILDER --module MODULE\r\n                                         --test TEST [--selected-tests-only]\r\n                                         [--frontend-timeout FRONTEND_TIMEOUT]\r\n                                         [--execution-timeout EXECUTION_TIMEOUT]\r\n                                         [--stack-reserve-bytes STACK_RESERVE_BYTES]\r\n                                         --output OUTPUT [--fixture FIXTURE]\r\n                                         [--candidate-only]\r\n                                         [--isolated-native]\r\n                                         [--native-program]\r\n                                         [--native-stack-editor NATIVE_STACK_EDITOR]\r\n                                         [--stdin-fixture STDIN_FIXTURE]\r\n                                         [--stdout-fixture STDOUT_FIXTURE]\r\n                                         [--stderr-fixture STDERR_FIXTURE]\r\n                                         [--unchanged-paths UNCHANGED_PATHS]\r\nverify-candidate-private-tests.py: error: native-stack-editor requires native-program and a nonzero stack reserve\r\n"
+    },
+    {
+      "argv": [
+        "python",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\tools\\verify-candidate-private-tests.py",
+        "--compiler",
+        "unused",
+        "--candidate",
+        "unused",
+        "--builder",
+        "unused",
+        "--module",
+        "unused",
+        "--test",
+        "unused",
+        "--output",
+        "unused",
+        "--native-stack-editor",
+        "unused",
+        "--native-program",
+        "--isolated-native"
+      ],
+      "exit": 2,
+      "stdout": "",
+      "stderr": "usage: verify-candidate-private-tests.py [-h] --compiler COMPILER\r\n                                         --candidate CANDIDATE\r\n                                         --builder BUILDER --module MODULE\r\n                                         --test TEST [--selected-tests-only]\r\n                                         [--frontend-timeout FRONTEND_TIMEOUT]\r\n                                         [--execution-timeout EXECUTION_TIMEOUT]\r\n                                         [--stack-reserve-bytes STACK_RESERVE_BYTES]\r\n                                         --output OUTPUT [--fixture FIXTURE]\r\n                                         [--candidate-only]\r\n                                         [--isolated-native]\r\n                                         [--native-program]\r\n                                         [--native-stack-editor NATIVE_STACK_EDITOR]\r\n                                         [--stdin-fixture STDIN_FIXTURE]\r\n                                         [--stdout-fixture STDOUT_FIXTURE]\r\n                                         [--stderr-fixture STDERR_FIXTURE]\r\n                                         [--unchanged-paths UNCHANGED_PATHS]\r\nverify-candidate-private-tests.py: error: native-stack-editor requires native-program and a nonzero stack reserve\r\n"
+    }
+  ],
+  "next": [
+    "Compose complete public interface records with the owning checked compile result",
+    "Route stable check/build/run through the identified core and partitions with diagnostic parity",
+    "Connect verified artifacts and source/interface identities to package cache consumers",
+    "Product timeout/default-stack integration, current-source fixed point, Linux/full suite and same-head hosted CI"
+  ],
+  "privateCandidateApiChanged": true,
+  "privateVerifierChanged": true,
+  "stableCLIRouted": false,
+  "publicApiChanged": false,
+  "sdkAbiChanged": false,
+  "limitsChanged": false,
+  "productTimeoutChanged": false,
+  "dbChanged": false,
+  "ciChanged": false,
+  "pushed": false,
+  "fixtureInventories": [
+    {
+      "path": "docs/ops/evidence/candidate-project-compiler-identified-fixtures-20261013-1.json",
+      "bytes": 20676,
+      "sha256": "8ee5a0d494e0e3aca87b0c2404cc41984261037c8996b8ea6ae22bc441fc1077"
+    },
+    {
+      "path": "docs/ops/evidence/candidate-project-compiler-identified-fixtures-20261013-2.json",
+      "bytes": 696,
+      "sha256": "5748393ef09ade90aa65eb5aba75ae4e42e2659db1b6a0746b5a74334daf80eb"
+    }
+  ]
+}
