@@ -1,0 +1,635 @@
+{
+  "schema": "fairyc.candidate-project-c-names-execution/v1",
+  "passed": true,
+  "invocations": [
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-cleanup-20261013\\current-driver\\support.exe",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-c-names-20261013\\symbols.json",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-c-names-20261013\\runtime.c"
+      ],
+      "seconds": 0.025634999998146668,
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+        "/nologo",
+        "/std:c11",
+        "/TC",
+        "/MT",
+        "/Od",
+        "/Brepro",
+        "/c",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-c-names-20261013\\fy_literals.c",
+        "/Fo:C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-c-names-20261013\\fy_literals-development.obj"
+      ],
+      "seconds": 0.11456350001390092,
+      "exit": 0,
+      "stdout": "fy_literals.c\r\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+        "/nologo",
+        "/std:c11",
+        "/TC",
+        "/MT",
+        "/Od",
+        "/Brepro",
+        "/c",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-c-names-20261013\\fy_unit_0.c",
+        "/Fo:C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-c-names-20261013\\fy_unit_0-development.obj"
+      ],
+      "seconds": 0.10602209999342449,
+      "exit": 0,
+      "stdout": "fy_unit_0.c\r\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+        "/nologo",
+        "/std:c11",
+        "/TC",
+        "/MT",
+        "/Od",
+        "/Brepro",
+        "/c",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-c-names-20261013\\fy_unit_1.c",
+        "/Fo:C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-c-names-20261013\\fy_unit_1-development.obj"
+      ],
+      "seconds": 0.12061589999939315,
+      "exit": 0,
+      "stdout": "fy_unit_1.c\r\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+        "/nologo",
+        "/std:c11",
+        "/TC",
+        "/MT",
+        "/Od",
+        "/Brepro",
+        "/c",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-c-names-20261013\\fy_unit_2.c",
+        "/Fo:C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-c-names-20261013\\fy_unit_2-development.obj"
+      ],
+      "seconds": 0.10861759999534115,
+      "exit": 0,
+      "stdout": "fy_unit_2.c\r\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+        "/nologo",
+        "/std:c11",
+        "/TC",
+        "/MT",
+        "/Od",
+        "/Brepro",
+        "/c",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-c-names-20261013\\fy_unit_3.c",
+        "/Fo:C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-c-names-20261013\\fy_unit_3-development.obj"
+      ],
+      "seconds": 0.1139238000032492,
+      "exit": 0,
+      "stdout": "fy_unit_3.c\r\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+        "/nologo",
+        "/std:c11",
+        "/TC",
+        "/MT",
+        "/Od",
+        "/Brepro",
+        "/c",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-c-names-20261013\\fy_unit_4.c",
+        "/Fo:C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-c-names-20261013\\fy_unit_4-development.obj"
+      ],
+      "seconds": 0.16575210000155494,
+      "exit": 0,
+      "stdout": "fy_unit_4.c\r\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+        "/nologo",
+        "/std:c11",
+        "/TC",
+        "/MT",
+        "/Od",
+        "/Brepro",
+        "/c",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-c-names-20261013\\fy_unit_5.c",
+        "/Fo:C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-c-names-20261013\\fy_unit_5-development.obj"
+      ],
+      "seconds": 0.12696750002214685,
+      "exit": 0,
+      "stdout": "fy_unit_5.c\r\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+        "/nologo",
+        "/std:c11",
+        "/TC",
+        "/MT",
+        "/Od",
+        "/Brepro",
+        "/c",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-c-names-20261013\\fy_unit_6.c",
+        "/Fo:C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-c-names-20261013\\fy_unit_6-development.obj"
+      ],
+      "seconds": 0.11242719998699613,
+      "exit": 0,
+      "stdout": "fy_unit_6.c\r\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+        "/nologo",
+        "/std:c11",
+        "/TC",
+        "/MT",
+        "/Od",
+        "/Brepro",
+        "/c",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-c-names-20261013\\fy_unit_7.c",
+        "/Fo:C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-c-names-20261013\\fy_unit_7-development.obj"
+      ],
+      "seconds": 0.10972919999039732,
+      "exit": 0,
+      "stdout": "fy_unit_7.c\r\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+        "/nologo",
+        "/std:c11",
+        "/TC",
+        "/MT",
+        "/Od",
+        "/Brepro",
+        "/c",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-c-names-20261013\\fy_unit_8.c",
+        "/Fo:C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-c-names-20261013\\fy_unit_8-development.obj"
+      ],
+      "seconds": 0.13847719997284003,
+      "exit": 0,
+      "stdout": "fy_unit_8.c\r\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+        "/nologo",
+        "/std:c11",
+        "/TC",
+        "/MT",
+        "/Od",
+        "/Brepro",
+        "/c",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-c-names-20261013\\fy_unit_9.c",
+        "/Fo:C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-c-names-20261013\\fy_unit_9-development.obj"
+      ],
+      "seconds": 0.10699680002289824,
+      "exit": 0,
+      "stdout": "fy_unit_9.c\r\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+        "/nologo",
+        "/std:c11",
+        "/TC",
+        "/MT",
+        "/Od",
+        "/Brepro",
+        "/c",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-c-names-20261013\\fy_unit_10.c",
+        "/Fo:C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-c-names-20261013\\fy_unit_10-development.obj"
+      ],
+      "seconds": 0.10549489999539219,
+      "exit": 0,
+      "stdout": "fy_unit_10.c\r\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+        "/nologo",
+        "/std:c11",
+        "/TC",
+        "/MT",
+        "/Od",
+        "/Brepro",
+        "/c",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-c-names-20261013\\fy_unit_11.c",
+        "/Fo:C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-c-names-20261013\\fy_unit_11-development.obj"
+      ],
+      "seconds": 0.10513329997775145,
+      "exit": 0,
+      "stdout": "fy_unit_11.c\r\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+        "/nologo",
+        "/std:c11",
+        "/TC",
+        "/MT",
+        "/Od",
+        "/Brepro",
+        "/c",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-c-names-20261013\\fy_unit_12.c",
+        "/Fo:C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-c-names-20261013\\fy_unit_12-development.obj"
+      ],
+      "seconds": 0.1038066000037361,
+      "exit": 0,
+      "stdout": "fy_unit_12.c\r\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+        "/nologo",
+        "/std:c11",
+        "/TC",
+        "/MT",
+        "/Od",
+        "/Brepro",
+        "/c",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-c-names-20261013\\runtime.c",
+        "/Fo:C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-c-names-20261013\\runtime-development.obj"
+      ],
+      "seconds": 0.11316540002007969,
+      "exit": 0,
+      "stdout": "runtime.c\r\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+        "/nologo",
+        "/MT",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-c-names-20261013\\fy_literals-development.obj",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-c-names-20261013\\fy_unit_0-development.obj",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-c-names-20261013\\fy_unit_1-development.obj",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-c-names-20261013\\fy_unit_2-development.obj",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-c-names-20261013\\fy_unit_3-development.obj",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-c-names-20261013\\fy_unit_4-development.obj",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-c-names-20261013\\fy_unit_5-development.obj",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-c-names-20261013\\fy_unit_6-development.obj",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-c-names-20261013\\fy_unit_7-development.obj",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-c-names-20261013\\fy_unit_8-development.obj",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-c-names-20261013\\fy_unit_9-development.obj",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-c-names-20261013\\fy_unit_10-development.obj",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-c-names-20261013\\fy_unit_11-development.obj",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-c-names-20261013\\fy_unit_12-development.obj",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-c-names-20261013\\runtime-development.obj",
+        "/Fe:C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-c-names-20261013\\program-development.exe",
+        "/link",
+        "/INCREMENTAL:NO",
+        "/Brepro"
+      ],
+      "seconds": 0.16792049998184666,
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-c-names-20261013\\program-development.exe"
+      ],
+      "seconds": 0.02500809999764897,
+      "exit": 42,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+        "/nologo",
+        "/std:c11",
+        "/TC",
+        "/MT",
+        "/O2",
+        "/Brepro",
+        "/c",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-c-names-20261013\\fy_literals.c",
+        "/Fo:C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-c-names-20261013\\fy_literals-release.obj"
+      ],
+      "seconds": 0.10450739998486824,
+      "exit": 0,
+      "stdout": "fy_literals.c\r\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+        "/nologo",
+        "/std:c11",
+        "/TC",
+        "/MT",
+        "/O2",
+        "/Brepro",
+        "/c",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-c-names-20261013\\fy_unit_0.c",
+        "/Fo:C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-c-names-20261013\\fy_unit_0-release.obj"
+      ],
+      "seconds": 0.11318129999563098,
+      "exit": 0,
+      "stdout": "fy_unit_0.c\r\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+        "/nologo",
+        "/std:c11",
+        "/TC",
+        "/MT",
+        "/O2",
+        "/Brepro",
+        "/c",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-c-names-20261013\\fy_unit_1.c",
+        "/Fo:C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-c-names-20261013\\fy_unit_1-release.obj"
+      ],
+      "seconds": 0.13556669998797588,
+      "exit": 0,
+      "stdout": "fy_unit_1.c\r\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+        "/nologo",
+        "/std:c11",
+        "/TC",
+        "/MT",
+        "/O2",
+        "/Brepro",
+        "/c",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-c-names-20261013\\fy_unit_2.c",
+        "/Fo:C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-c-names-20261013\\fy_unit_2-release.obj"
+      ],
+      "seconds": 0.15010180001263507,
+      "exit": 0,
+      "stdout": "fy_unit_2.c\r\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+        "/nologo",
+        "/std:c11",
+        "/TC",
+        "/MT",
+        "/O2",
+        "/Brepro",
+        "/c",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-c-names-20261013\\fy_unit_3.c",
+        "/Fo:C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-c-names-20261013\\fy_unit_3-release.obj"
+      ],
+      "seconds": 0.10991810000268742,
+      "exit": 0,
+      "stdout": "fy_unit_3.c\r\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+        "/nologo",
+        "/std:c11",
+        "/TC",
+        "/MT",
+        "/O2",
+        "/Brepro",
+        "/c",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-c-names-20261013\\fy_unit_4.c",
+        "/Fo:C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-c-names-20261013\\fy_unit_4-release.obj"
+      ],
+      "seconds": 0.11350259999744594,
+      "exit": 0,
+      "stdout": "fy_unit_4.c\r\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+        "/nologo",
+        "/std:c11",
+        "/TC",
+        "/MT",
+        "/O2",
+        "/Brepro",
+        "/c",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-c-names-20261013\\fy_unit_5.c",
+        "/Fo:C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-c-names-20261013\\fy_unit_5-release.obj"
+      ],
+      "seconds": 0.179345500015188,
+      "exit": 0,
+      "stdout": "fy_unit_5.c\r\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+        "/nologo",
+        "/std:c11",
+        "/TC",
+        "/MT",
+        "/O2",
+        "/Brepro",
+        "/c",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-c-names-20261013\\fy_unit_6.c",
+        "/Fo:C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-c-names-20261013\\fy_unit_6-release.obj"
+      ],
+      "seconds": 0.11238070001127198,
+      "exit": 0,
+      "stdout": "fy_unit_6.c\r\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+        "/nologo",
+        "/std:c11",
+        "/TC",
+        "/MT",
+        "/O2",
+        "/Brepro",
+        "/c",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-c-names-20261013\\fy_unit_7.c",
+        "/Fo:C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-c-names-20261013\\fy_unit_7-release.obj"
+      ],
+      "seconds": 0.10944430000381544,
+      "exit": 0,
+      "stdout": "fy_unit_7.c\r\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+        "/nologo",
+        "/std:c11",
+        "/TC",
+        "/MT",
+        "/O2",
+        "/Brepro",
+        "/c",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-c-names-20261013\\fy_unit_8.c",
+        "/Fo:C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-c-names-20261013\\fy_unit_8-release.obj"
+      ],
+      "seconds": 0.11152710000169463,
+      "exit": 0,
+      "stdout": "fy_unit_8.c\r\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+        "/nologo",
+        "/std:c11",
+        "/TC",
+        "/MT",
+        "/O2",
+        "/Brepro",
+        "/c",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-c-names-20261013\\fy_unit_9.c",
+        "/Fo:C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-c-names-20261013\\fy_unit_9-release.obj"
+      ],
+      "seconds": 0.11122099999920465,
+      "exit": 0,
+      "stdout": "fy_unit_9.c\r\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+        "/nologo",
+        "/std:c11",
+        "/TC",
+        "/MT",
+        "/O2",
+        "/Brepro",
+        "/c",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-c-names-20261013\\fy_unit_10.c",
+        "/Fo:C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-c-names-20261013\\fy_unit_10-release.obj"
+      ],
+      "seconds": 0.11005220000515692,
+      "exit": 0,
+      "stdout": "fy_unit_10.c\r\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+        "/nologo",
+        "/std:c11",
+        "/TC",
+        "/MT",
+        "/O2",
+        "/Brepro",
+        "/c",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-c-names-20261013\\fy_unit_11.c",
+        "/Fo:C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-c-names-20261013\\fy_unit_11-release.obj"
+      ],
+      "seconds": 0.1148424000130035,
+      "exit": 0,
+      "stdout": "fy_unit_11.c\r\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+        "/nologo",
+        "/std:c11",
+        "/TC",
+        "/MT",
+        "/O2",
+        "/Brepro",
+        "/c",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-c-names-20261013\\fy_unit_12.c",
+        "/Fo:C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-c-names-20261013\\fy_unit_12-release.obj"
+      ],
+      "seconds": 0.10527780000120401,
+      "exit": 0,
+      "stdout": "fy_unit_12.c\r\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+        "/nologo",
+        "/std:c11",
+        "/TC",
+        "/MT",
+        "/O2",
+        "/Brepro",
+        "/c",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-c-names-20261013\\runtime.c",
+        "/Fo:C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-c-names-20261013\\runtime-release.obj"
+      ],
+      "seconds": 0.177117699990049,
+      "exit": 0,
+      "stdout": "runtime.c\r\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+        "/nologo",
+        "/MT",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-c-names-20261013\\fy_literals-release.obj",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-c-names-20261013\\fy_unit_0-release.obj",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-c-names-20261013\\fy_unit_1-release.obj",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-c-names-20261013\\fy_unit_2-release.obj",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-c-names-20261013\\fy_unit_3-release.obj",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-c-names-20261013\\fy_unit_4-release.obj",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-c-names-20261013\\fy_unit_5-release.obj",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-c-names-20261013\\fy_unit_6-release.obj",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-c-names-20261013\\fy_unit_7-release.obj",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-c-names-20261013\\fy_unit_8-release.obj",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-c-names-20261013\\fy_unit_9-release.obj",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-c-names-20261013\\fy_unit_10-release.obj",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-c-names-20261013\\fy_unit_11-release.obj",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-c-names-20261013\\fy_unit_12-release.obj",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-c-names-20261013\\runtime-release.obj",
+        "/Fe:C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-c-names-20261013\\program-release.exe",
+        "/link",
+        "/INCREMENTAL:NO",
+        "/Brepro"
+      ],
+      "seconds": 0.17027930001495406,
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-c-names-20261013\\program-release.exe"
+      ],
+      "seconds": 0.025940499996067956,
+      "exit": 42,
+      "stdout": "",
+      "stderr": ""
+    }
+  ]
+}

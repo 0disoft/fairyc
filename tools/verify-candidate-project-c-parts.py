@@ -23,7 +23,7 @@ CASES = {
 ENTRY_CASE = "project_c_entry_partition_keeps_nested_result_cleanup_and_omits_unused_bodies"
 
 
-def packet(data, complete=True):
+def packet(data, complete=True, identified=False):
     assert data.startswith(b"FYCPARTS1\n")
     offset = len(b"FYCPARTS1\n")
 
@@ -59,10 +59,23 @@ def packet(data, complete=True):
     for digest, payload in definitions:
         raw = bytes(int(value) for value in payload.split(b","))
         assert hashlib.sha256(raw).hexdigest().encode() == digest or (raw == b"\0" and hashlib.sha256(b"").hexdigest().encode() == digest)
-    frames = [int(frame) for unit in units for frame in re.findall(rb"^extern [^\n]+ fy_fn_([0-9]+)\([^\n]*\)\{", unit, re.M)]
-    assert frames == sorted(set(frames)) and frames and frames[-1] <= 8192
-    if complete:
-        assert frames == list(range(1, len(frames) + 1)), "Every frame must be defined once in original order"
+    if identified:
+        symbol = rb"fy_(?:fn_(?:[0-9]+|g0_[0-9a-f]{64})|cleanup_g0_[0-9a-f]{64})"
+        spellings = re.findall(rb"\bfy_(?:fn|cleanup)_[A-Za-z0-9_]+\b", b"\n".join([header, *units]))
+        assert all(re.fullmatch(symbol, name) for name in spellings), "Noncanonical function/cleanup identifier"
+        frames = [name for unit in units for name in re.findall(rb"^extern [^\n]+ (" + symbol + rb")\([^\n]*\)\{", unit, re.M)]
+        declared = re.findall(rb"^extern [^\n]+ (" + symbol + rb")\([^\n]*\);$", header, re.M)
+        assert frames and len(frames) == len(set(frames)) <= 8192
+        assert declared == frames, "Each selected declaration must have exactly one ordered definition"
+        references = set(re.findall(rb"\b(" + symbol + rb")\(", b"\n".join([header, *units])))
+        assert references == set(frames), "Every function/cleanup reference must resolve in the bundle"
+        assert any(name.startswith(b"fy_fn_g0_") for name in frames)
+        assert any(name.startswith(b"fy_cleanup_g0_") for name in frames)
+    else:
+        frames = [int(frame) for unit in units for frame in re.findall(rb"^extern [^\n]+ fy_fn_([0-9]+)\([^\n]*\)\{", unit, re.M)]
+        assert frames == sorted(set(frames)) and frames and frames[-1] <= 8192
+        if complete:
+            assert frames == list(range(1, len(frames) + 1)), "Every frame must be defined once in original order"
     assert sum(unit.count(b"int32_t fy_candidate_entry(void){") for unit in units) == 1
     return header, literals, units, len(frames), len(definitions)
 

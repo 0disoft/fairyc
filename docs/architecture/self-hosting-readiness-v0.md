@@ -1,5 +1,30 @@
 # Self-hosting readiness v0
 
+## Source-identified project C partitions (2026-10-13)
+
+Source-identified full and entry-selected partition APIs derive one owned name
+table from the linked IR owner. Prototypes, definitions, calls and Vec cleanup
+glue retain canonical g0 symbols across all body files. Ordinary numeric APIs
+remain available; no IR copy or multi-owner borrow is introduced.
+
+Two authored cases pass through an isolated Go-built program and candidate C
+development/release. All 75,802 output bytes match. The complete bundle contains
+100 frames in 13 body files; each compiles separately and the linked program
+returns 42 under /Od and /O2 with ordinary application stacks. Detached names,
+entry-only omission, work boundaries, invalid inputs and sticky output failure
+are covered. The existing five-frame numeric partition passes Go native and
+actual /Od-/O2 linkage. Four malformed packet variants reject.
+
+The first native-test capture exceeded its 64KiB report bound. The private
+verifier's explicit isolated native-program mode compares complete streams
+without changing that product bound. Root check and locked check pass 438 files /
+5648 MIR functions. Candidate API images retain explicit 16MiB stacks.
+
+Next: complete Vec public interfaces and dispatcher/cache consumers. Latest
+full-image/fixed-point promotion, product timing/stack integration, Linux/full
+suite and hosted CI remain open. Public CLI/API, SDK ABI, limits, DB and CI are
+unchanged; no push. Receipt: [evidence](../ops/evidence/candidate-project-c-names-20261013.json).
+
 ## Current local candidate evidence (2026-10-13)
 
 ### Source-identified project linking (2026-10-13)

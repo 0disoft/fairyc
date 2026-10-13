@@ -1,5 +1,31 @@
 # Candidate project C partitions v0
 
+## Source-identified project owners
+
+`partition_project` and `partition_project_entry` consume the checked
+`module_project_identified_ir::Program`. Preparation derives one owned name table
+from that same linked owner. Specialized prototypes, definitions, calls and
+cleanup glue use `fy_fn_g0_<digest>` and `fy_cleanup_g0_<digest>` consistently
+across the common header and every body partition. Ordinary frames retain
+numeric names. The bundle retains the linked IR and its source identities through
+a single owner; it does not copy IR or borrow from two competing inputs.
+
+Name collection and frame-contract matching retain their bounded work histories
+and enter the existing project ledger. Invalid entry, partition size, identity
+or exhausted work returns no bundle. Both selection modes retain the original
+frame intervals and the same conservative call/cleanup closure as ordinary
+partitioning. The legacy `partition` and `partition_entry` APIs remain available.
+
+The packet verifier's explicit `identified=True` mode checks canonical names,
+unique ordered definitions, exact prototype coverage and resolved references.
+Its default numeric mode retains contiguous-frame checks. Large compiler-output
+tests may opt into the private test verifier's `--native-program` with
+`--isolated-native`: the Go compiler builds the same authored entry, whose full
+streams are compared directly against both candidate profiles. This leaves the
+product native-test report's 64KiB stream bound unchanged.
+
+Receipt: `docs/ops/evidence/candidate-project-c-names-20261013.json`.
+
 `module_unit_c_emit::partition` consumes a linked, owned project IR and returns
 an owned `Bundle` only after complete frame coverage succeeds. This is private
 candidate transport. The existing single-buffer `render` path retains its C

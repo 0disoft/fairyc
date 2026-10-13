@@ -7,6 +7,8 @@ import module_project_link as linking;
 import module_project_inputs as inputs;
 import module_unit_body_ir_verify as proof;
 import module_unit_c_emit as c;
+import module_unit_c_names as names;
+import c_text as ctext;
 import candidate_limits as limits;
 import module_unit_body_ir_model as ir;
 import module_unit_cleanup_mir_model as clean;
@@ -60,3 +62,16 @@ fn void shared_vec_type_cleanup_and_call_ids_survive_project_link(){let owned=co
 }
 @test @effects(filesystem,console)
 fn void vec_link_native_transport(){let owned=compiled();let program=linked::ir_program(ref owned);var usize entry=0;var usize i=1;while(i<=ir::count(program)){let f=clean::frame_at(ir::cleanup_ir(program),i);if(f.module_index==0 && f.kind==3){assert(entry==0);entry=i;}i+=1;}assert(entry>0);var bytes::Buffer out=bytes::empty();let rendered=c::render(program,entry,ref mut out);if(rendered.code!=0){discard io::write_stderr_u32(rendered.code);}assert(rendered.code==0 && bytes::len(ref out)>1000);assert(io::write_bytes(bytes::view(ref out)).is_ok);}
+
+fn usize entry(ref linked::Program owned){let program=linked::ir_program(owned);var usize result=0;var usize i=1;while(i<=ir::count(program)){let f=clean::frame_at(ir::cleanup_ir(program),i);if(f.module_index==0 && f.kind==3){assert(result==0);result=i;}i+=1;}assert(result>0);return result;}
+fn bool contains(ref u8[] text,ref u8[] word){var usize i=0;while(i<=text.len){if(word.len<=text.len-i && bytes::equal(text[i..i+word.len],word)){return true;}i+=1;}return false;}
+@effects(console)
+fn void packet(ref c::Bundle packed){assert(io::write("FYCPARTS1\n").is_ok);let header=c::project_header(packed);assert(io::write_usize(header.len).is_ok && io::write("\n").is_ok && io::write_bytes(header).is_ok);let literals=c::project_literals(packed);assert(io::write_usize(literals.len).is_ok && io::write("\n").is_ok && io::write_bytes(literals).is_ok && io::write_usize(c::project_unit_count(packed)).is_ok && io::write("\n").is_ok);var usize i=0;while(i<c::project_unit_count(packed)){let text=c::project_source(packed,i);assert(io::write_usize(text.len).is_ok && io::write("\n").is_ok && io::write_bytes(text).is_ok);i+=1;}}
+@test @effects(filesystem,console)
+fn void identified_partition_native_transport(){let owned=compiled();let selected=entry(ref owned);let frames=ir::count(linked::ir_program(ref owned));let packed=switch(c::partition_project(owned,selected,8)){case .ok(p):{p}case .err(e):{discard io::write_stderr_u32(e.code);assert(false);return;}};assert(c::project_frames(ref packed)==frames && c::project_selected_frames(ref packed)==frames && c::project_unit_count(ref packed)>1 && c::project_work(ref packed)<=limits::project_work());assert(contains(c::project_header(ref packed),b"fy_fn_g0_") && contains(c::project_header(ref packed),b"fy_cleanup_g0_"));var usize next=1;var usize i=0;while(i<c::project_unit_count(ref packed)){assert(c::project_first(ref packed,i)==next);next=c::project_stop(ref packed,i);i+=1;}assert(next==frames+1);packet(ref packed);}
+@effects(filesystem,console)
+fn names::Table detached_names(){let owned=compiled();var usize work=0;return switch(names::build_project(ref owned,ref mut work)){case .ok(p):{assert(names::work(ref p)==work);p}case .err(_):{assert(false);names::empty()}};}
+@test @effects(filesystem,console)
+fn void identified_partition_selection_names_and_failure_boundaries(){let detached=detached_names();var bytes::Buffer spelling=bytes::empty();var ctext::State state=ctext::State{.code=0};var usize i=1;while(i<=names::count(ref detached)){assert(names::function(ref detached,i,ref mut spelling,ref mut state));i+=1;}assert(contains(bytes::view(ref spelling),b"fy_fn_g0_") && contains(bytes::view(ref spelling),b"fy_cleanup_g0_"));state.code=1003;let old=bytes::len(ref spelling);assert(!names::function(ref detached,1,ref mut spelling,ref mut state) && state.code==1003 && bytes::len(ref spelling)==old);
+    let owned=compiled();let selected=entry(ref owned);var usize work=0;let table=switch(names::build_project(ref owned,ref mut work)){case .ok(p):{p}case .err(_):{assert(false);return;}};let measured=work;work=1048576-measured;let exact=switch(names::build_project(ref owned,ref mut work)){case .ok(p):{p}case .err(_):{assert(false);return;}};assert(work==1048576 && names::count(ref exact)==names::count(ref table));work=1048577-measured;assert(switch(names::build_project(ref owned,ref mut work)){case .ok(_):{false}case .err(e):{e.code==1002}});let packed=switch(c::partition_project_entry(owned,selected,8)){case .ok(p):{p}case .err(_):{assert(false);return;}};assert(c::project_selected_frames(ref packed)<c::project_frames(ref packed) && contains(c::project_header(ref packed),b"fy_fn_g0_") && contains(c::project_header(ref packed),b"fy_cleanup_g0_"));assert(switch(c::partition_project(compiled(),0,8)){case .ok(_):{false}case .err(e):{e.code==1001}});assert(switch(c::partition_project(compiled(),1,0)){case .ok(_):{false}case .err(e):{e.code==1001}});
+}
