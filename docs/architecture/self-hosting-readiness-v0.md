@@ -1,5 +1,35 @@
 # Self-hosting readiness v0
 
+## Complete project owner publication (2026-10-13)
+
+`project_compiler_core` `build_complete`/`build_complete_sources` runs the original
+source plan, the complete body/Flow verification and the identified IR linking, then
+builds every package interface and returns one `Complete` owner holding the checked
+IR plus the detached interface `Records`. Each record carries the ordinary
+descriptor, the source public template closures, the ordinary v5 hash and the
+generic source hash. `generic_source_closure`, `dependency_json` and
+`module_public_templates` keep their existing Graph API and read the plan input's
+borrowed catalog and dependency rows directly. Source freshness, owners, imports and
+coordinates are authenticated and the phase fails closed without a partial result.
+Existing 16MiB source, 8MiB link and 1MiB phase histories are retained.
+
+Thirteen tests pass on Go native, candidate C development and release: four
+`project_compiler_complete`, four `project_compiler_identified` workspace tests (three
+existing plus one real-workspace completed-owner check) and five existing
+`module_public_templates` regressions, spanning real workspace Current/SDK/Generic. The
+new core testcase keeps six Go graphs, 18 descriptors with ordinary and generic hashes,
+and 113 templates; root and locked check pass 445 source files / 5745 MIR functions.
+The initial verification-only workspace C development run timed out at 120s; after
+re-checking the authored entry, Go-native copied sources and packet SHA, the existing Go
+result/packet/dev image was reused to finish it at verification-only 900s (development
+269.08s, release 22.19s, release build 195.94s) on private test-harness stacks; product
+defaults unchanged.
+
+Next: identified CLI/cache consumers, latest-source full image/fixed point, product
+default stack/deadlines, and Linux/full suite/same-head CI. Private test images keep
+16MiB stacks; public API, SDK ABI, DB and CI are unchanged; no push.
+Receipt: [evidence](../ops/evidence/candidate-project-complete-20261013.json).
+
 ## Complete source-identified Vec SDK interfaces (2026-10-13)
 
 The identified source-interface helper combines original public template closures

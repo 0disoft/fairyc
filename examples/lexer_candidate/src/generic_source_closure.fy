@@ -12,7 +12,10 @@ import std::vec as v;
 // specialization admission remains the planner's separate responsibility.
 // Catalog order is canonical DeclarationID order, independent of source owners.
 pub fn Result<v::Vec<bool>,u32> reachable(ref model::Graph graph,usize root,ref mut usize work){
-    let templates=model::templates(graph);let total=catalog::count(templates);let data=model::data(graph);
+    return reachable_records(model::templates(graph),model::data(graph),root,work);
+}
+pub fn Result<v::Vec<bool>,u32> reachable_records(ref catalog::Catalog templates,ref model::Data data,usize root,ref mut usize work){
+    let total=catalog::count(templates);
     if(root>=total || model::range_count(data)!=total){return .err(9);}if(total>4096){return .err(10);}
     var v::Vec<bool> seen=v::empty<bool>();var v::Vec<usize> pending=v::empty<usize>();var usize i=0;
     while(i<total){if(!budget::charge(work,1)){return .err(10);}if(!v::push<bool>(ref mut seen,false).is_ok){return .err(11);}i+=1;}
@@ -24,14 +27,20 @@ pub fn Result<v::Vec<bool>,u32> reachable(ref model::Graph graph,usize root,ref 
         }
     }return .ok(seen);
 }
-fn bool document(ref model::Graph graph,usize root,ref v::Vec<bool> seen,ref mut bytes::Buffer out,ref mut json::Ledger work){
-    let templates=model::templates(graph);let total=catalog::count(templates);if(root>=total || v::len<bool>(seen)!=total){return json::reject(work,9);}let row=catalog::template_at(templates,root);
+fn bool document(ref catalog::Catalog templates,ref model::Data data,usize root,ref v::Vec<bool> seen,ref mut bytes::Buffer out,ref mut json::Ledger work){
+    let total=catalog::count(templates);if(root>=total || v::len<bool>(seen)!=total){return json::reject(work,9);}let row=catalog::template_at(templates,root);
     if(!json::raw(out,b"{\"Root\":",work) || !json::quoted(out,catalog::text(templates,row.id),work) || !json::raw(out,b",\"Declarations\":[",work)){return false;}var bool first=true;var usize i=0;
-    while(i<total){if(!json::charge(work,1)){return false;}if(*v::at<bool>(seen,i)){if(!first && !json::raw(out,b",",work)){return false;}if(!declarations::declaration(graph,i,out,work)){return false;}first=false;}i+=1;}return json::raw(out,b"]}",work);
+    while(i<total){if(!json::charge(work,1)){return false;}if(*v::at<bool>(seen,i)){if(!first && !json::raw(out,b",",work)){return false;}if(!declarations::declaration_records(templates,data,i,out,work)){return false;}first=false;}i+=1;}return json::raw(out,b"]}",work);
 }
 pub fn Result<bytes::Buffer,u32> encode(ref model::Graph graph,usize root,ref mut usize work){
-    let seen=switch(reachable(graph,root,work)){case .ok(value):{value}case .err(code):{return .err(code);}};var json::Ledger ledger=json::Ledger{.used=*work,.code=0};var bytes::Buffer out=bytes::empty();let ok=document(graph,root,ref seen,ref mut out,ref mut ledger);*work=ledger.used;if(!ok){return .err(ledger.code);}return .ok(out);
+    return encode_records(model::templates(graph),model::data(graph),root,work);
+}
+pub fn Result<bytes::Buffer,u32> encode_records(ref catalog::Catalog templates,ref model::Data data,usize root,ref mut usize work){
+    let seen=switch(reachable_records(templates,data,root,work)){case .ok(value):{value}case .err(code):{return .err(code);}};var json::Ledger ledger=json::Ledger{.used=*work,.code=0};var bytes::Buffer out=bytes::empty();let ok=document(templates,data,root,ref seen,ref mut out,ref mut ledger);*work=ledger.used;if(!ok){return .err(ledger.code);}return .ok(out);
 }
 pub fn Result<bytes::Buffer,u32> digest(ref model::Graph graph,usize root,ref mut usize work){
-    let encoded=switch(encode(graph,root,work)){case .ok(value):{value}case .err(code):{return .err(code);}};return identity::digest_text(b"source-public-template-closure-v0",bytes::view(ref encoded),work);
+    return digest_records(model::templates(graph),model::data(graph),root,work);
+}
+pub fn Result<bytes::Buffer,u32> digest_records(ref catalog::Catalog templates,ref model::Data data,usize root,ref mut usize work){
+    let encoded=switch(encode_records(templates,data,root,work)){case .ok(value):{value}case .err(code):{return .err(code);}};return identity::digest_text(b"source-public-template-closure-v0",bytes::view(ref encoded),work);
 }

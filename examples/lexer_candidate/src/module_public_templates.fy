@@ -19,11 +19,16 @@ fn u32 sort(ref bytes::Buffer names,ref mut v::Vec<generic::Template> rows,ref m
 // closure retains its independent 1MiB ledger, folded once into project work.
 // Uninstantiated public templates count; private dependencies stay in closures.
 pub fn Result<generic::Templates,u32> collect(ref graph::Graph input,usize owner,ref mut usize work){
-    let templates=graph::templates(input);let packages=catalog::packages(templates);if(owner>=512){return .err(9);}var bool found=false;var usize i=0;
+    return collect_records(graph::templates(input),graph::data(input),owner,work);
+}
+// Borrow the original catalog and dependencies already owned by source planning.
+// Preserve canonical closure bytes and every existing work charge.
+pub fn Result<generic::Templates,u32> collect_records(ref catalog::Catalog templates,ref graph::Data data,usize owner,ref mut usize work){
+    let packages=catalog::packages(templates);if(owner>=512){return .err(9);}var bool found=false;var usize i=0;
     while(i<bindings::count(packages)){if(!budget::charge(work,1)){return .err(10);}if(bindings::module_at(packages,i).owner==owner){found=true;}i+=1;}if(!found){return .err(9);}
     var bytes::Buffer names=bytes::empty();var v::Vec<generic::Template> rows=v::empty<generic::Template>();i=0;
     while(i<catalog::count(templates)){if(!budget::charge(work,1)){return .err(10);}let row=catalog::template_at(templates,i);let owned_module=bindings::module_at(packages,row.module_index);
-        if(row.public && owned_module.owner==owner){var usize measured=0;let digest=switch(closure::digest(input,i,ref mut measured)){case .ok(value):{value}case .err(code):{discard budget::charge(work,measured);return .err(code);}};if(!budget::charge(work,measured)){return .err(10);}
+        if(row.public && owned_module.owner==owner){var usize measured=0;let digest=switch(closure::digest_records(templates,data,i,ref mut measured)){case .ok(value):{value}case .err(code):{discard budget::charge(work,measured);return .err(code);}};if(!budget::charge(work,measured)){return .err(10);}
             let module_path=switch(retain(ref mut names,bindings::text(packages,owned_module.path),work)){case .ok(value):{value}case .err(code):{return .err(code);}};let name=switch(retain(ref mut names,catalog::text(templates,row.name),work)){case .ok(value):{value}case .err(code):{return .err(code);}};let closure=switch(retain(ref mut names,bytes::view(ref digest),work)){case .ok(value):{value}case .err(code):{return .err(code);}};
             if(!v::push<generic::Template>(ref mut rows,generic::Template{.module_path,.name,.closure}).is_ok){return .err(11);}
         }i+=1;

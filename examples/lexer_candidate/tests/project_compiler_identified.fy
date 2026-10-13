@@ -17,6 +17,7 @@ import std::bytes as bytes;
 import std::vec as v;
 import std::process as process;
 import std::io as io;
+import module_project_interfaces as interfaces;
 fn bytes::Buffer join(ref u8[] root,ref u8[] leaf){var bytes::Buffer output=bytes::empty();assert(bytes::append(ref mut output,root).is_ok && bytes::append_byte(ref mut output,47).is_ok && bytes::append(ref mut output,leaf).is_ok);return output;}
 @effects(filesystem)
 fn bytes::Buffer root(){var u8[4096] path=[0;4096];let count=switch(process::arg(1,ref mut path)){case .ok(value):{value}case .err(_):{assert(false);0}};let ref u8[] view=ref path;return switch(fixture::manifest(view[..count])){case .ok(value):{value}case .err(_):{assert(false);bytes::empty()}};}
@@ -57,3 +58,8 @@ fn void independent_work_limits_and_invalid_coordinates_publish_no_owner(){let p
  source_work=16777217;link_work=0;switch(core::build_identified(ref loaded.sources,ref loaded.coordinates,ref mut source_work,ref mut link_work)){case .ok(_):{assert(false);}case .err(e):{assert(e.phase==5 && e.stage==0 && e.code==10 && link_work==0);}};
  let missing=table::assemble(bytes::empty(),v::empty<table::Coordinate>());source_work=0;link_work=0;switch(core::build_identified(ref loaded.sources,ref missing,ref mut source_work,ref mut link_work)){case .ok(_):{assert(false);}case .err(e):{assert(e.phase==5 && e.code==9 && link_work==0);}};
 }
+@test @effects(filesystem,console)
+fn void real_workspace_complete_result_owns_all_reachable_package_interfaces(){let parent=root();var usize case_index=0;while(case_index<3){let path=join(bytes::view(ref parent),if(case_index==0){b"Current"}else if(case_index==1){b"SDK"}else{b"Generic"});let loaded=owned(bytes::view(ref path));var usize source_work=0;var usize link_work=0;
+ let result=switch(core::build_complete(ref loaded.sources,ref loaded.coordinates,ref mut source_work,ref mut link_work)){case .ok(p):{p}case .err(e):{failed(b"complete workspace",e);assert(false);return;}};let program=core::checked_program(ref result);assert(proof::check(identified::ir_program(program)).code==0);let packages=core::public_interfaces(ref result);var bool[512] owners=[false;512];var usize expected=0;var usize i=0;
+ while(i<input::count(ref loaded.sources)){let owner=*v::at<usize>(input::owners(ref loaded.sources),i);if(!owners[owner]){owners[owner]=true;expected+=1;}i+=1;}assert(interfaces::count(packages)==expected);i=0;while(i<expected){let record=interfaces::at(packages,i);assert(owners[interfaces::owner(record)] && interfaces::ordinary_hash(record).len==77 && interfaces::source_hash(record).len==78);if(i>0){assert(interfaces::owner(interfaces::at(packages,i-1))<interfaces::owner(record));}i+=1;}
+ if(case_index==0){assert(ir::count(identified::ir_program(program))==13);}if(case_index==1){assert(ir::count(identified::ir_program(program))==166);}case_index+=1;}}
