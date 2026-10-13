@@ -3,7 +3,9 @@
 Cache-key v4/v0 encoders and the checked ordinary state-body identity are now
 verified: [key checkpoint](../ops/candidate-generic-cache-key-20261014.md) and
 [body checkpoint](../ops/candidate-cache-body-identity-20261014.md). Remaining
-workspace/environment facts and actual artifact reuse stay open. Complete
+execution-environment facts, complete-owner key composition and actual artifact
+reuse stay open. Exact loaded workspace facts are verified in the
+[workspace checkpoint](../ops/candidate-cache-workspace-20261014.md). Complete
 original specialization membership is verified in the
 [specialization checkpoint](../ops/candidate-cache-specializations-20261014.md).
 

@@ -1,0 +1,816 @@
+{
+  "schema": "fairyc.candidate-cache-workspace/v1",
+  "date": "2026-10-14",
+  "parentCommit": "6271ffcc",
+  "passed": true,
+  "scope": "derive loaded workspace metadata only after authenticating complete source/coordinate/import provenance; no environment or artifact-reuse authority",
+  "sourceInputs": [
+    {
+      "path": "examples/lexer_candidate/src/project_cache_workspace.fy",
+      "sha256": "fe87d71e6de7aa00f21af53c8ebd6ecc4c26c30b1228fa331e89c59e84f2abc3",
+      "bytes": 7756
+    },
+    {
+      "path": "examples/lexer_candidate/tests/project_cache_workspace.fy",
+      "sha256": "db201e660bfa5fafc840a38265957993c247d38b7a40997446b606c23ba135f9",
+      "bytes": 8866
+    },
+    {
+      "path": "tools/verify-candidate-cache-workspace.go",
+      "sha256": "916615572fc3a38b8eed0efdfa2e74f7105c53674bb7ffccc866029510b66065",
+      "bytes": 4787
+    },
+    {
+      "path": "examples/lexer_candidate/fairy.lock",
+      "sha256": "737bf7e96236c3894f36297ae08eedd533bada4e2d079381957d03ce55927a78",
+      "bytes": 1698
+    }
+  ],
+  "oracle": {
+    "tool": {
+      "path": "tools/verify-candidate-cache-workspace.go",
+      "sha256": "916615572fc3a38b8eed0efdfa2e74f7105c53674bb7ffccc866029510b66065",
+      "bytes": 4787
+    },
+    "report": {
+      "path": ".cache/cache-workspace-oracle-20261014.json",
+      "sha256": "428ba1c5206ada8a3ffac06f36ccdc9505cd286f94d6968f4d6358c6e92be923",
+      "bytes": 21488
+    },
+    "regeneratedReport": {
+      "path": ".cache/cache-workspace-20261014/regenerated-oracle.json",
+      "sha256": "0d381f07f184d99d2b8b4e3e340437e2de9630a6081a2277c942a1146679d9df",
+      "bytes": 21492
+    },
+    "regenerationByteIdentical": true,
+    "cases": [
+      {
+        "case": "Base",
+        "fixture": {
+          "path": ".cache/cache-workspace-20261014/fixture/Base/facts.bin",
+          "sha256": "caa4f0b768ec64c1a0a452b60bc4489d37855244f262cb45e07397757eb48154",
+          "bytes": 2181
+        },
+        "packages": [
+          {
+            "ID": 1,
+            "PackageUID": "example.cache.root",
+            "Instance": "fypi1-sha256-347a7a978617c6f615643a39213df57196c167ffdb1aa32fa253a714de641d20",
+            "Coordinate": "fypc1-sha256-b3c962c44ef1734cc8165147a9aad82f5586676a0fd60b135da942d3cfd56a0e",
+            "Source": "fysrc1-sha256-54b9f9f7f131a8d375224925c8112e4ba6db23a9da429af1365d6dd93cd7762b",
+            "Features": null,
+            "Dependencies": [
+              2,
+              3,
+              6
+            ]
+          },
+          {
+            "ID": 2,
+            "PackageUID": "example.cache.left",
+            "Instance": "fypi1-sha256-8b6ebe557fc4164ed457cc84852d0d422396d187d43621d8f4832879acd179ea",
+            "Coordinate": "fypc1-sha256-7dbd9ed77cf41edf2c786ca4238841f9785b99cb62d68132565284656fafd7da",
+            "Source": "fysrc1-sha256-c7b42166eec20a08a21a56af08d88b12ba993d5a3e43fd828634b653af654651",
+            "Features": [],
+            "Dependencies": [
+              4
+            ]
+          },
+          {
+            "ID": 3,
+            "PackageUID": "example.cache.right",
+            "Instance": "fypi1-sha256-c252369db56d16a8929f72b592915034fff7e5639f635f00e528cb69fb16dac1",
+            "Coordinate": "fypc1-sha256-d93cdc0bb83a74dceb7809cb7b4df915866b8d5ffb5d95fd343ee2219522237f",
+            "Source": "fysrc1-sha256-b2b7a87845e07560be44f971ef1bf2d6893e7ff952dbfe7c725ce15a9f9dc8d4",
+            "Features": [],
+            "Dependencies": [
+              5
+            ]
+          },
+          {
+            "ID": 4,
+            "PackageUID": "example.cache.common",
+            "Instance": "fypi1-sha256-566329e83e7874346c10c95d506cceb480ea07d1e210dae3d4c32a26a1a13a24",
+            "Coordinate": "fypc1-sha256-bfb530d1089745b343a17712cd95a495fd2c2a534702ccd3a18ae5b82ef74392",
+            "Source": "fysrc1-sha256-02e8a0912605b80d7633a0aa94db9082c7ed8336e22a66c181f45670c5cb62be",
+            "Features": [
+              "fast"
+            ],
+            "Dependencies": []
+          },
+          {
+            "ID": 5,
+            "PackageUID": "example.cache.common",
+            "Instance": "fypi1-sha256-41a4b178c3e414031487f1e7b6c53d8fdf4b472e097f01a2c9f7ca497ee59fba",
+            "Coordinate": "fypc1-sha256-bed09d402a7589bf8b2597662031c1ba2c422f4ee0c9ef8fc85002a90bf8a955",
+            "Source": "fysrc1-sha256-02e8a0912605b80d7633a0aa94db9082c7ed8336e22a66c181f45670c5cb62be",
+            "Features": [
+              "tls"
+            ],
+            "Dependencies": []
+          },
+          {
+            "ID": 6,
+            "PackageUID": "fairyc.std",
+            "Instance": "fypi1-sha256-c18350128fcbce1cee2c63f0e7acc467f9f77ff184c458af1d20eab69a58e89a",
+            "Coordinate": "fypc1-sha256-b0a4d6314db7dbe3f4f42c54d28d492054cc437fedd64985129b89c66b340424",
+            "Source": "fysrc1-sha256-782df5e2039ff3f7817c1055454caa24feb2ea755e62f78d8ee67418916a5b83",
+            "Features": [],
+            "Dependencies": []
+          }
+        ],
+        "selectedSDK": "fypi1-sha256-c18350128fcbce1cee2c63f0e7acc467f9f77ff184c458af1d20eab69a58e89a"
+      },
+      {
+        "case": "Edited",
+        "fixture": {
+          "path": ".cache/cache-workspace-20261014/fixture/Edited/facts.bin",
+          "sha256": "029be1c46b0ae94edf45adb06622c5645ea3717339a1ad2f5b964963cd9581bd",
+          "bytes": 2181
+        },
+        "packages": [
+          {
+            "ID": 1,
+            "PackageUID": "example.cache.root",
+            "Instance": "fypi1-sha256-347a7a978617c6f615643a39213df57196c167ffdb1aa32fa253a714de641d20",
+            "Coordinate": "fypc1-sha256-b3c962c44ef1734cc8165147a9aad82f5586676a0fd60b135da942d3cfd56a0e",
+            "Source": "fysrc1-sha256-54b9f9f7f131a8d375224925c8112e4ba6db23a9da429af1365d6dd93cd7762b",
+            "Features": null,
+            "Dependencies": [
+              2,
+              3,
+              6
+            ]
+          },
+          {
+            "ID": 2,
+            "PackageUID": "example.cache.left",
+            "Instance": "fypi1-sha256-8b6ebe557fc4164ed457cc84852d0d422396d187d43621d8f4832879acd179ea",
+            "Coordinate": "fypc1-sha256-7dbd9ed77cf41edf2c786ca4238841f9785b99cb62d68132565284656fafd7da",
+            "Source": "fysrc1-sha256-c7b42166eec20a08a21a56af08d88b12ba993d5a3e43fd828634b653af654651",
+            "Features": [],
+            "Dependencies": [
+              4
+            ]
+          },
+          {
+            "ID": 3,
+            "PackageUID": "example.cache.right",
+            "Instance": "fypi1-sha256-c252369db56d16a8929f72b592915034fff7e5639f635f00e528cb69fb16dac1",
+            "Coordinate": "fypc1-sha256-d93cdc0bb83a74dceb7809cb7b4df915866b8d5ffb5d95fd343ee2219522237f",
+            "Source": "fysrc1-sha256-b2b7a87845e07560be44f971ef1bf2d6893e7ff952dbfe7c725ce15a9f9dc8d4",
+            "Features": [],
+            "Dependencies": [
+              5
+            ]
+          },
+          {
+            "ID": 4,
+            "PackageUID": "example.cache.common",
+            "Instance": "fypi1-sha256-61356c82bfb81905d3b4445f44dedebcc67886ba637a3730283809640649bedb",
+            "Coordinate": "fypc1-sha256-bfb530d1089745b343a17712cd95a495fd2c2a534702ccd3a18ae5b82ef74392",
+            "Source": "fysrc1-sha256-33ec4c34be15d29ac163dc112d0b5e3ccdce06a37539a07cda24bd7d7ec46057",
+            "Features": [
+              "fast"
+            ],
+            "Dependencies": []
+          },
+          {
+            "ID": 5,
+            "PackageUID": "example.cache.common",
+            "Instance": "fypi1-sha256-9646cf173bd977da2d85aa587f4d2679660a399bae2ad1f1bd053ba2f5237666",
+            "Coordinate": "fypc1-sha256-bed09d402a7589bf8b2597662031c1ba2c422f4ee0c9ef8fc85002a90bf8a955",
+            "Source": "fysrc1-sha256-33ec4c34be15d29ac163dc112d0b5e3ccdce06a37539a07cda24bd7d7ec46057",
+            "Features": [
+              "tls"
+            ],
+            "Dependencies": []
+          },
+          {
+            "ID": 6,
+            "PackageUID": "fairyc.std",
+            "Instance": "fypi1-sha256-c18350128fcbce1cee2c63f0e7acc467f9f77ff184c458af1d20eab69a58e89a",
+            "Coordinate": "fypc1-sha256-b0a4d6314db7dbe3f4f42c54d28d492054cc437fedd64985129b89c66b340424",
+            "Source": "fysrc1-sha256-782df5e2039ff3f7817c1055454caa24feb2ea755e62f78d8ee67418916a5b83",
+            "Features": [],
+            "Dependencies": []
+          }
+        ],
+        "selectedSDK": "fypi1-sha256-c18350128fcbce1cee2c63f0e7acc467f9f77ff184c458af1d20eab69a58e89a"
+      },
+      {
+        "case": "Reordered",
+        "fixture": {
+          "path": ".cache/cache-workspace-20261014/fixture/Reordered/facts.bin",
+          "sha256": "caa4f0b768ec64c1a0a452b60bc4489d37855244f262cb45e07397757eb48154",
+          "bytes": 2181
+        },
+        "packages": [
+          {
+            "ID": 1,
+            "PackageUID": "example.cache.root",
+            "Instance": "fypi1-sha256-347a7a978617c6f615643a39213df57196c167ffdb1aa32fa253a714de641d20",
+            "Coordinate": "fypc1-sha256-b3c962c44ef1734cc8165147a9aad82f5586676a0fd60b135da942d3cfd56a0e",
+            "Source": "fysrc1-sha256-54b9f9f7f131a8d375224925c8112e4ba6db23a9da429af1365d6dd93cd7762b",
+            "Features": null,
+            "Dependencies": [
+              2,
+              3,
+              6
+            ]
+          },
+          {
+            "ID": 2,
+            "PackageUID": "example.cache.left",
+            "Instance": "fypi1-sha256-8b6ebe557fc4164ed457cc84852d0d422396d187d43621d8f4832879acd179ea",
+            "Coordinate": "fypc1-sha256-7dbd9ed77cf41edf2c786ca4238841f9785b99cb62d68132565284656fafd7da",
+            "Source": "fysrc1-sha256-c7b42166eec20a08a21a56af08d88b12ba993d5a3e43fd828634b653af654651",
+            "Features": [],
+            "Dependencies": [
+              4
+            ]
+          },
+          {
+            "ID": 3,
+            "PackageUID": "example.cache.right",
+            "Instance": "fypi1-sha256-c252369db56d16a8929f72b592915034fff7e5639f635f00e528cb69fb16dac1",
+            "Coordinate": "fypc1-sha256-d93cdc0bb83a74dceb7809cb7b4df915866b8d5ffb5d95fd343ee2219522237f",
+            "Source": "fysrc1-sha256-b2b7a87845e07560be44f971ef1bf2d6893e7ff952dbfe7c725ce15a9f9dc8d4",
+            "Features": [],
+            "Dependencies": [
+              5
+            ]
+          },
+          {
+            "ID": 4,
+            "PackageUID": "example.cache.common",
+            "Instance": "fypi1-sha256-566329e83e7874346c10c95d506cceb480ea07d1e210dae3d4c32a26a1a13a24",
+            "Coordinate": "fypc1-sha256-bfb530d1089745b343a17712cd95a495fd2c2a534702ccd3a18ae5b82ef74392",
+            "Source": "fysrc1-sha256-02e8a0912605b80d7633a0aa94db9082c7ed8336e22a66c181f45670c5cb62be",
+            "Features": [
+              "fast"
+            ],
+            "Dependencies": []
+          },
+          {
+            "ID": 5,
+            "PackageUID": "example.cache.common",
+            "Instance": "fypi1-sha256-41a4b178c3e414031487f1e7b6c53d8fdf4b472e097f01a2c9f7ca497ee59fba",
+            "Coordinate": "fypc1-sha256-bed09d402a7589bf8b2597662031c1ba2c422f4ee0c9ef8fc85002a90bf8a955",
+            "Source": "fysrc1-sha256-02e8a0912605b80d7633a0aa94db9082c7ed8336e22a66c181f45670c5cb62be",
+            "Features": [
+              "tls"
+            ],
+            "Dependencies": []
+          },
+          {
+            "ID": 6,
+            "PackageUID": "fairyc.std",
+            "Instance": "fypi1-sha256-c18350128fcbce1cee2c63f0e7acc467f9f77ff184c458af1d20eab69a58e89a",
+            "Coordinate": "fypc1-sha256-b0a4d6314db7dbe3f4f42c54d28d492054cc437fedd64985129b89c66b340424",
+            "Source": "fysrc1-sha256-782df5e2039ff3f7817c1055454caa24feb2ea755e62f78d8ee67418916a5b83",
+            "Features": [],
+            "Dependencies": []
+          }
+        ],
+        "selectedSDK": "fypi1-sha256-c18350128fcbce1cee2c63f0e7acc467f9f77ff184c458af1d20eab69a58e89a"
+      },
+      {
+        "case": "NoSDK",
+        "fixture": {
+          "path": ".cache/cache-workspace-20261014/fixture/NoSDK/facts.bin",
+          "sha256": "5c9979323020d36e38a6d48d8b8de087ec7f91334cc306c7325d922efd84ae18",
+          "bytes": 1747
+        },
+        "packages": [
+          {
+            "ID": 1,
+            "PackageUID": "example.cache.root",
+            "Instance": "fypi1-sha256-f83a213dde9d8849359f3c5baa54c6345c3d8bf3ef008ee073dc6581fe8d421b",
+            "Coordinate": "fypc1-sha256-b3c962c44ef1734cc8165147a9aad82f5586676a0fd60b135da942d3cfd56a0e",
+            "Source": "fysrc1-sha256-29d18d2662fe1c496b75ca9923bb24b4716535f8c5f2d5959342dfd4ee1b5fce",
+            "Features": null,
+            "Dependencies": [
+              2,
+              3
+            ]
+          },
+          {
+            "ID": 2,
+            "PackageUID": "example.cache.left",
+            "Instance": "fypi1-sha256-8b6ebe557fc4164ed457cc84852d0d422396d187d43621d8f4832879acd179ea",
+            "Coordinate": "fypc1-sha256-7dbd9ed77cf41edf2c786ca4238841f9785b99cb62d68132565284656fafd7da",
+            "Source": "fysrc1-sha256-c7b42166eec20a08a21a56af08d88b12ba993d5a3e43fd828634b653af654651",
+            "Features": [],
+            "Dependencies": [
+              4
+            ]
+          },
+          {
+            "ID": 3,
+            "PackageUID": "example.cache.right",
+            "Instance": "fypi1-sha256-c252369db56d16a8929f72b592915034fff7e5639f635f00e528cb69fb16dac1",
+            "Coordinate": "fypc1-sha256-d93cdc0bb83a74dceb7809cb7b4df915866b8d5ffb5d95fd343ee2219522237f",
+            "Source": "fysrc1-sha256-b2b7a87845e07560be44f971ef1bf2d6893e7ff952dbfe7c725ce15a9f9dc8d4",
+            "Features": [],
+            "Dependencies": [
+              5
+            ]
+          },
+          {
+            "ID": 4,
+            "PackageUID": "example.cache.common",
+            "Instance": "fypi1-sha256-566329e83e7874346c10c95d506cceb480ea07d1e210dae3d4c32a26a1a13a24",
+            "Coordinate": "fypc1-sha256-bfb530d1089745b343a17712cd95a495fd2c2a534702ccd3a18ae5b82ef74392",
+            "Source": "fysrc1-sha256-02e8a0912605b80d7633a0aa94db9082c7ed8336e22a66c181f45670c5cb62be",
+            "Features": [
+              "fast"
+            ],
+            "Dependencies": []
+          },
+          {
+            "ID": 5,
+            "PackageUID": "example.cache.common",
+            "Instance": "fypi1-sha256-41a4b178c3e414031487f1e7b6c53d8fdf4b472e097f01a2c9f7ca497ee59fba",
+            "Coordinate": "fypc1-sha256-bed09d402a7589bf8b2597662031c1ba2c422f4ee0c9ef8fc85002a90bf8a955",
+            "Source": "fysrc1-sha256-02e8a0912605b80d7633a0aa94db9082c7ed8336e22a66c181f45670c5cb62be",
+            "Features": [
+              "tls"
+            ],
+            "Dependencies": []
+          }
+        ],
+        "selectedSDK": ""
+      },
+      {
+        "case": "Vec",
+        "fixture": {
+          "path": ".cache/cache-workspace-20261014/fixture/Vec/facts.bin",
+          "sha256": "9e2f358fe377d84bdb683ec06ce3435da36b00631f29f30382d57a7e5b6ab08e",
+          "bytes": 2181
+        },
+        "packages": [
+          {
+            "ID": 1,
+            "PackageUID": "example.cache.root",
+            "Instance": "fypi1-sha256-1c3bb9451daa0769a778a8dbcc6ba6c1441409b50a5b62498fd6e85c5a781ce0",
+            "Coordinate": "fypc1-sha256-b3c962c44ef1734cc8165147a9aad82f5586676a0fd60b135da942d3cfd56a0e",
+            "Source": "fysrc1-sha256-7f9a468ae273e6a0abddd04f77afacb6d9354f34ae6282c2d50a5826ed560387",
+            "Features": null,
+            "Dependencies": [
+              2,
+              3,
+              6
+            ]
+          },
+          {
+            "ID": 2,
+            "PackageUID": "example.cache.left",
+            "Instance": "fypi1-sha256-8b6ebe557fc4164ed457cc84852d0d422396d187d43621d8f4832879acd179ea",
+            "Coordinate": "fypc1-sha256-7dbd9ed77cf41edf2c786ca4238841f9785b99cb62d68132565284656fafd7da",
+            "Source": "fysrc1-sha256-c7b42166eec20a08a21a56af08d88b12ba993d5a3e43fd828634b653af654651",
+            "Features": [],
+            "Dependencies": [
+              4
+            ]
+          },
+          {
+            "ID": 3,
+            "PackageUID": "example.cache.right",
+            "Instance": "fypi1-sha256-c252369db56d16a8929f72b592915034fff7e5639f635f00e528cb69fb16dac1",
+            "Coordinate": "fypc1-sha256-d93cdc0bb83a74dceb7809cb7b4df915866b8d5ffb5d95fd343ee2219522237f",
+            "Source": "fysrc1-sha256-b2b7a87845e07560be44f971ef1bf2d6893e7ff952dbfe7c725ce15a9f9dc8d4",
+            "Features": [],
+            "Dependencies": [
+              5
+            ]
+          },
+          {
+            "ID": 4,
+            "PackageUID": "example.cache.common",
+            "Instance": "fypi1-sha256-566329e83e7874346c10c95d506cceb480ea07d1e210dae3d4c32a26a1a13a24",
+            "Coordinate": "fypc1-sha256-bfb530d1089745b343a17712cd95a495fd2c2a534702ccd3a18ae5b82ef74392",
+            "Source": "fysrc1-sha256-02e8a0912605b80d7633a0aa94db9082c7ed8336e22a66c181f45670c5cb62be",
+            "Features": [
+              "fast"
+            ],
+            "Dependencies": []
+          },
+          {
+            "ID": 5,
+            "PackageUID": "example.cache.common",
+            "Instance": "fypi1-sha256-41a4b178c3e414031487f1e7b6c53d8fdf4b472e097f01a2c9f7ca497ee59fba",
+            "Coordinate": "fypc1-sha256-bed09d402a7589bf8b2597662031c1ba2c422f4ee0c9ef8fc85002a90bf8a955",
+            "Source": "fysrc1-sha256-02e8a0912605b80d7633a0aa94db9082c7ed8336e22a66c181f45670c5cb62be",
+            "Features": [
+              "tls"
+            ],
+            "Dependencies": []
+          },
+          {
+            "ID": 6,
+            "PackageUID": "fairyc.std",
+            "Instance": "fypi1-sha256-86c14252642af2b070e755759e12b841707c27c8a222a96de9401af4159ff406",
+            "Coordinate": "fypc1-sha256-b0a4d6314db7dbe3f4f42c54d28d492054cc437fedd64985129b89c66b340424",
+            "Source": "fysrc1-sha256-aab51ddcd0ccc7e895837a4f7276011bf3206204f8d3efb6760b6218ca277039",
+            "Features": [],
+            "Dependencies": []
+          }
+        ],
+        "selectedSDK": "fypi1-sha256-86c14252642af2b070e755759e12b841707c27c8a222a96de9401af4159ff406"
+      },
+      {
+        "case": "Version",
+        "fixture": {
+          "path": ".cache/cache-workspace-20261014/fixture/Version/facts.bin",
+          "sha256": "a5f4e543e9d08ba10d44b7d3bc4813a97b9c256826151a73c60d246e5052273b",
+          "bytes": 2181
+        },
+        "packages": [
+          {
+            "ID": 1,
+            "PackageUID": "example.cache.root",
+            "Instance": "fypi1-sha256-a7c30c8902f4398a806fffcb015fdec2d328c9cc83b481c23ed1512a2c911b01",
+            "Coordinate": "fypc1-sha256-3fc9f5a3a47b5d98df459a62cfebdca7743e7def527ef5f0cdbf47cb5716fb12",
+            "Source": "fysrc1-sha256-54b9f9f7f131a8d375224925c8112e4ba6db23a9da429af1365d6dd93cd7762b",
+            "Features": null,
+            "Dependencies": [
+              2,
+              3,
+              6
+            ]
+          },
+          {
+            "ID": 2,
+            "PackageUID": "example.cache.left",
+            "Instance": "fypi1-sha256-8b6ebe557fc4164ed457cc84852d0d422396d187d43621d8f4832879acd179ea",
+            "Coordinate": "fypc1-sha256-7dbd9ed77cf41edf2c786ca4238841f9785b99cb62d68132565284656fafd7da",
+            "Source": "fysrc1-sha256-c7b42166eec20a08a21a56af08d88b12ba993d5a3e43fd828634b653af654651",
+            "Features": [],
+            "Dependencies": [
+              4
+            ]
+          },
+          {
+            "ID": 3,
+            "PackageUID": "example.cache.right",
+            "Instance": "fypi1-sha256-c252369db56d16a8929f72b592915034fff7e5639f635f00e528cb69fb16dac1",
+            "Coordinate": "fypc1-sha256-d93cdc0bb83a74dceb7809cb7b4df915866b8d5ffb5d95fd343ee2219522237f",
+            "Source": "fysrc1-sha256-b2b7a87845e07560be44f971ef1bf2d6893e7ff952dbfe7c725ce15a9f9dc8d4",
+            "Features": [],
+            "Dependencies": [
+              5
+            ]
+          },
+          {
+            "ID": 4,
+            "PackageUID": "example.cache.common",
+            "Instance": "fypi1-sha256-566329e83e7874346c10c95d506cceb480ea07d1e210dae3d4c32a26a1a13a24",
+            "Coordinate": "fypc1-sha256-bfb530d1089745b343a17712cd95a495fd2c2a534702ccd3a18ae5b82ef74392",
+            "Source": "fysrc1-sha256-02e8a0912605b80d7633a0aa94db9082c7ed8336e22a66c181f45670c5cb62be",
+            "Features": [
+              "fast"
+            ],
+            "Dependencies": []
+          },
+          {
+            "ID": 5,
+            "PackageUID": "example.cache.common",
+            "Instance": "fypi1-sha256-41a4b178c3e414031487f1e7b6c53d8fdf4b472e097f01a2c9f7ca497ee59fba",
+            "Coordinate": "fypc1-sha256-bed09d402a7589bf8b2597662031c1ba2c422f4ee0c9ef8fc85002a90bf8a955",
+            "Source": "fysrc1-sha256-02e8a0912605b80d7633a0aa94db9082c7ed8336e22a66c181f45670c5cb62be",
+            "Features": [
+              "tls"
+            ],
+            "Dependencies": []
+          },
+          {
+            "ID": 6,
+            "PackageUID": "fairyc.std",
+            "Instance": "fypi1-sha256-c18350128fcbce1cee2c63f0e7acc467f9f77ff184c458af1d20eab69a58e89a",
+            "Coordinate": "fypc1-sha256-b0a4d6314db7dbe3f4f42c54d28d492054cc437fedd64985129b89c66b340424",
+            "Source": "fysrc1-sha256-782df5e2039ff3f7817c1055454caa24feb2ea755e62f78d8ee67418916a5b83",
+            "Features": [],
+            "Dependencies": []
+          }
+        ],
+        "selectedSDK": "fypi1-sha256-c18350128fcbce1cee2c63f0e7acc467f9f77ff184c458af1d20eab69a58e89a"
+      },
+      {
+        "case": "Feature",
+        "fixture": {
+          "path": ".cache/cache-workspace-20261014/fixture/Feature/facts.bin",
+          "sha256": "d19d50bfef15cc11a006f7e127fb297dc5377d0b8336dac887f6422ed8431b45",
+          "bytes": 2182
+        },
+        "packages": [
+          {
+            "ID": 1,
+            "PackageUID": "example.cache.root",
+            "Instance": "fypi1-sha256-347a7a978617c6f615643a39213df57196c167ffdb1aa32fa253a714de641d20",
+            "Coordinate": "fypc1-sha256-b3c962c44ef1734cc8165147a9aad82f5586676a0fd60b135da942d3cfd56a0e",
+            "Source": "fysrc1-sha256-54b9f9f7f131a8d375224925c8112e4ba6db23a9da429af1365d6dd93cd7762b",
+            "Features": null,
+            "Dependencies": [
+              2,
+              3,
+              6
+            ]
+          },
+          {
+            "ID": 2,
+            "PackageUID": "example.cache.left",
+            "Instance": "fypi1-sha256-8b6ebe557fc4164ed457cc84852d0d422396d187d43621d8f4832879acd179ea",
+            "Coordinate": "fypc1-sha256-7dbd9ed77cf41edf2c786ca4238841f9785b99cb62d68132565284656fafd7da",
+            "Source": "fysrc1-sha256-c7b42166eec20a08a21a56af08d88b12ba993d5a3e43fd828634b653af654651",
+            "Features": [],
+            "Dependencies": [
+              4
+            ]
+          },
+          {
+            "ID": 3,
+            "PackageUID": "example.cache.right",
+            "Instance": "fypi1-sha256-c252369db56d16a8929f72b592915034fff7e5639f635f00e528cb69fb16dac1",
+            "Coordinate": "fypc1-sha256-d93cdc0bb83a74dceb7809cb7b4df915866b8d5ffb5d95fd343ee2219522237f",
+            "Source": "fysrc1-sha256-b2b7a87845e07560be44f971ef1bf2d6893e7ff952dbfe7c725ce15a9f9dc8d4",
+            "Features": [],
+            "Dependencies": [
+              5
+            ]
+          },
+          {
+            "ID": 4,
+            "PackageUID": "example.cache.common",
+            "Instance": "fypi1-sha256-51e2f9aa992120f01890471b9b704b1f1095845514d8738d4313c081fb45f832",
+            "Coordinate": "fypc1-sha256-0fe4a93de999f85343c8878107a54e87859e428efbd40ed417655735d8e9ce93",
+            "Source": "fysrc1-sha256-02e8a0912605b80d7633a0aa94db9082c7ed8336e22a66c181f45670c5cb62be",
+            "Features": [
+              "turbo"
+            ],
+            "Dependencies": []
+          },
+          {
+            "ID": 5,
+            "PackageUID": "example.cache.common",
+            "Instance": "fypi1-sha256-41a4b178c3e414031487f1e7b6c53d8fdf4b472e097f01a2c9f7ca497ee59fba",
+            "Coordinate": "fypc1-sha256-bed09d402a7589bf8b2597662031c1ba2c422f4ee0c9ef8fc85002a90bf8a955",
+            "Source": "fysrc1-sha256-02e8a0912605b80d7633a0aa94db9082c7ed8336e22a66c181f45670c5cb62be",
+            "Features": [
+              "tls"
+            ],
+            "Dependencies": []
+          },
+          {
+            "ID": 6,
+            "PackageUID": "fairyc.std",
+            "Instance": "fypi1-sha256-c18350128fcbce1cee2c63f0e7acc467f9f77ff184c458af1d20eab69a58e89a",
+            "Coordinate": "fypc1-sha256-b0a4d6314db7dbe3f4f42c54d28d492054cc437fedd64985129b89c66b340424",
+            "Source": "fysrc1-sha256-782df5e2039ff3f7817c1055454caa24feb2ea755e62f78d8ee67418916a5b83",
+            "Features": [],
+            "Dependencies": []
+          }
+        ],
+        "selectedSDK": "fypi1-sha256-c18350128fcbce1cee2c63f0e7acc467f9f77ff184c458af1d20eab69a58e89a"
+      }
+    ],
+    "packageObservations": 41
+  },
+  "initialDefaultStackFailure": {
+    "image": {
+      "path": ".cache/cache-workspace-20261014/tests/native-project-e28558693e49b6ffd8b0/build/lexer-candidate.exe",
+      "sha256": "1bcfda6074783cabf080ee79d9c50610dbe41771d52c73a56493b03924364781",
+      "bytes": 6643712
+    },
+    "source": {
+      "path": ".cache/cache-workspace-20261014/tests/main.fy",
+      "sha256": "3f2054beb08f33fb0c956842cc0cae41918aee71ead93467b0c058ccafdafc4c",
+      "bytes": 7286
+    },
+    "stackReserveBytes": 1048576,
+    "exit": 3221225725,
+    "seconds": 12.18345109996153,
+    "invocations": {
+      "path": ".cache/cache-workspace-20261014/initial-default-stack-invocations.json",
+      "sha256": "2aea2ccc36ee74fc03b6c40a85208df0a8ae9b918c6f8e004347535446f994fc",
+      "bytes": 1907
+    }
+  },
+  "verification": {
+    "receipt": {
+      "path": ".cache/cache-workspace-20261014/final-tests/receipt.json",
+      "sha256": "e8c506f38acea2a92fc86828fd409bc544b848af8490d65984b70c3e50199982",
+      "bytes": 146890
+    },
+    "selectedTests": [
+      "tests::project_cache_workspace::matches_go_source_sdk_features_and_deduplicated_dependencies",
+      "tests::project_cache_workspace::owns_facts_after_graph_and_complete_close_and_honors_work",
+      "tests::project_cache_workspace::rejects_checked_ir_with_a_different_import_provider",
+      "tests::project_cache_workspace::rejects_stale_source_and_coordinate_without_partial_facts"
+    ],
+    "native": {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\cache-workspace-20261014\\final-tests\\native-project-be3ef0a3814c278adbb3\\build\\lexer-candidate.exe",
+      "sha256": "5b1b85253dc58ba37593f0e9d8fb9caeac741ea3da6f915b5f4ea3a494233f28",
+      "selectedTests": [
+        "tests::project_cache_workspace::matches_go_source_sdk_features_and_deduplicated_dependencies",
+        "tests::project_cache_workspace::owns_facts_after_graph_and_complete_close_and_honors_work",
+        "tests::project_cache_workspace::rejects_checked_ir_with_a_different_import_provider",
+        "tests::project_cache_workspace::rejects_stale_source_and_coordinate_without_partial_facts"
+      ],
+      "stdoutBytes": 0,
+      "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stack": {
+        "reserveBytes": 16777216,
+        "originalReserveBytes": 1048576,
+        "originalSHA256": "fb4045c1d6db0ccbdfba3284c2ad956860d06442dbaf8b9bb823ebc39f69631b"
+      }
+    },
+    "candidateInputFiles": 280,
+    "candidatePacketSHA256": "4ebc5e8be6523d20dbc79e0fafe883c1c2f6d2658840f00615a8481e065d4e36",
+    "candidateExecutions": [
+      {
+        "profile": "development",
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\cache-workspace-20261014\\final-tests\\development.exe",
+        "sha256": "a623b6aef45dbd636d9d7a2551dd656c721b142dc8adb69901fb33b8b4c421d2",
+        "exit": 0
+      },
+      {
+        "profile": "release",
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\cache-workspace-20261014\\final-tests\\release.exe",
+        "sha256": "0dff813260e84219a3539749b1bedb770ca7a75612dd2025659d83804e975e02",
+        "exit": 0
+      }
+    ],
+    "tools": {
+      "compiler": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-frontend-oracle-current-20261012.exe",
+        "sha256": "3ecc4501ee3bb47ecc39e7288200266b31cbcd8bf6ffec302ae54867705ce5d1"
+      },
+      "candidate": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-cleanup-20261013\\current-driver\\driver-release.exe",
+        "sha256": "67be18bdabb9d6499edcfcd8b7d3e3245dd932fd265ba79ab4cd7136748ec0ac"
+      },
+      "builder": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-rooted-builder-stack-20261012.exe",
+        "sha256": "02abe2328daa9921705910c7b995e82c1312cb960fe024106c11468569aefff0"
+      },
+      "nativeStackEditor": {
+        "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\editbin.exe",
+        "sha256": "be37ead809e0cab3b62ff7c141fece6655b6c6ab1e2951a118abbaef48acbc07"
+      }
+    },
+    "invocations": [
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-frontend-oracle-current-20261012.exe",
+          "check"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\cache-workspace-20261014\\final-tests\\native-project-be3ef0a3814c278adbb3",
+        "seconds": 10.64730429998599,
+        "exit": 0,
+        "stdoutBytes": 80,
+        "stdoutSHA256": "0cd63fa204fe55d798b5bdef60e763a430d59fe1f51ed05c037fef6bfada6467",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-frontend-oracle-current-20261012.exe",
+          "build",
+          "--locked"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\cache-workspace-20261014\\final-tests\\native-project-be3ef0a3814c278adbb3",
+        "seconds": 21.255423100024927,
+        "exit": 0,
+        "stdoutBytes": 83,
+        "stdoutSHA256": "913d882a721755f5b674b0837a5dcdb182de237ba6bbcc5f15b49489af2c8bf9",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\editbin.exe",
+          "/nologo",
+          "/stack:16777216",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\cache-workspace-20261014\\final-tests\\native-project-be3ef0a3814c278adbb3\\build\\lexer-candidate.exe"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\cache-workspace-20261014\\final-tests\\native-project-be3ef0a3814c278adbb3",
+        "seconds": 0.059389400004874915,
+        "exit": 0,
+        "stdoutBytes": 0,
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\cache-workspace-20261014\\final-tests\\native-project-be3ef0a3814c278adbb3\\build\\lexer-candidate.exe",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\cache-workspace-20261014\\root.txt"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\cache-workspace-20261014\\final-tests\\native-project-be3ef0a3814c278adbb3",
+        "seconds": 80.14796709996881,
+        "exit": 0,
+        "stdoutBytes": 0,
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-cleanup-20261013\\current-driver\\driver-release.exe",
+          "--c-project-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\cache-workspace-20261014\\final-tests\\sources.list"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+        "seconds": 112.80064079997828,
+        "exit": 0,
+        "stdoutBytes": 21700586,
+        "stdoutSHA256": "4ebc5e8be6523d20dbc79e0fafe883c1c2f6d2658840f00615a8481e065d4e36",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-rooted-builder-stack-20261012.exe",
+          "--packet",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\cache-workspace-20261014\\final-tests\\candidate-packet.bin",
+          "--packet-sha256",
+          "4ebc5e8be6523d20dbc79e0fafe883c1c2f6d2658840f00615a8481e065d4e36",
+          "--output",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\cache-workspace-20261014\\final-tests\\development.exe",
+          "--stack-reserve-bytes",
+          "16777216"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+        "seconds": 17.33956880000187,
+        "exit": 0,
+        "stdoutBytes": 179,
+        "stdoutSHA256": "1ce848f9a9f0be446656995e084364a4dc40284c0aac6fe7e5125a5f9e1f83b8",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\cache-workspace-20261014\\final-tests\\development.exe",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\cache-workspace-20261014\\root.txt"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+        "seconds": 370.7469214000157,
+        "exit": 0,
+        "stdoutBytes": 0,
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-rooted-builder-stack-20261012.exe",
+          "--packet",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\cache-workspace-20261014\\final-tests\\candidate-packet.bin",
+          "--packet-sha256",
+          "4ebc5e8be6523d20dbc79e0fafe883c1c2f6d2658840f00615a8481e065d4e36",
+          "--output",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\cache-workspace-20261014\\final-tests\\release.exe",
+          "--release",
+          "--stack-reserve-bytes",
+          "16777216"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+        "seconds": 192.87657049996778,
+        "exit": 0,
+        "stdoutBytes": 181,
+        "stdoutSHA256": "947b0ec407ba761eef34f5e27eb9b34ea1a4a3a298d164c067e384d4e71023c8",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\cache-workspace-20261014\\final-tests\\release.exe",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\cache-workspace-20261014\\root.txt"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+        "seconds": 31.77258609997807,
+        "exit": 0,
+        "stdoutBytes": 0,
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderr": ""
+      }
+    ],
+    "stackReserveBytes": 16777216,
+    "frontendTimeoutSeconds": 900,
+    "executionTimeoutSeconds": 900
+  },
+  "sourceCheck": {
+    "command": "check and check --locked",
+    "exit": 0,
+    "files": 458,
+    "mirFunctions": 5913,
+    "locked": true
+  },
+  "selectedSDKIsEnvironmentStandardLibrary": false,
+  "cacheConsumerConnected": false,
+  "remaining": [
+    "execution-environment facts and complete-owner key composition",
+    "verified reusable artifacts and actual cache lookup/publication",
+    "current full fixed point",
+    "product stack/deadlines/performance",
+    "Linux/full suite/same-head CI"
+  ],
+  "publicApiChanged": false,
+  "sdkAbiChanged": false,
+  "productStackChanged": false,
+  "productTimeoutChanged": false,
+  "pushed": false
+}
