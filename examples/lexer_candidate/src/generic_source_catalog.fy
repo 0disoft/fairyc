@@ -14,7 +14,7 @@ import std::vec as v;
 pub struct Text {usize start;usize end;}
 pub struct Parameter {Text name;bool scalar;}
 pub struct Template {usize module_index;usize declaration;u32 kind;bool public;Text name;Text id;Text definition;usize first;usize count;usize start;usize end;usize name_start;usize name_end;}
-pub resource Catalog {bindings::Bindings bindings;bytes::Buffer names;v::Vec<Template> templates;v::Vec<Parameter> parameters;cleanup{}}
+pub resource Catalog {bindings::Bindings bindings;bytes::Buffer names;v::Vec<Template> templates;v::Vec<Parameter> parameters;bool scalar_constraints;cleanup{}}
 pub struct Problem {u32 code;usize module_index;usize declaration;}
 // Private helper codes: 9 invalid input, 10 work/output, 11 allocation, 12 stale,
 // 13 inaccessible target, 4501 source template admission. No public diagnostics.
@@ -24,6 +24,7 @@ pub fn Template template_at(ref Catalog p,usize at){assert(at<count(p));return *
 pub fn Parameter parameter_at(ref Catalog p,usize at){assert(at<v::len<Parameter>(ref p.parameters));return *v::at<Parameter>(ref p.parameters,at);}
 pub fn ref u8[] text(ref Catalog p,Text t){assert(t.start<=t.end && t.end<=bytes::len(ref p.names));return bytes::view(ref p.names)[t.start..t.end];}
 pub fn ref bindings::Bindings packages(ref Catalog p){return ref p.bindings;}
+pub fn bool scalar_constraints(ref Catalog p){return p.scalar_constraints;}
 fn Result<Text,u32> retain(ref mut bytes::Buffer names,ref u8[] data,ref mut usize work){
     if(data.len>1048576 || bytes::len(names)>1048576-data.len || !budget::charge(work,data.len+1)){return .err(10);}
     let start=bytes::len(names);if(!bytes::append(names,data).is_ok){return .err(11);}return .ok(Text{.start,.end=bytes::len(names)});
@@ -81,7 +82,15 @@ pub fn Result<Catalog,Problem> build(bindings::Bindings resolved,ref v::Vec<synt
                 let row=switch(collect_template(ref resolved,m,p,d_index,vector,ref mut names,ref mut parameters,work)){case .ok(value):{value}case .err(code):{return .err(fail(code,m,d_index));}};if(!v::push<Template>(ref mut rows,row).is_ok){return .err(fail(11,m,d_index));}
             }d_index+=1;
         }m+=1;
-    }let code=sorted(ref mut rows,ref names,work);if(code!=0){return .err(fail(code,0,0));}return .ok(Catalog{.bindings=resolved,.names,.templates=rows,.parameters});
+    }let code=sorted(ref mut rows,ref names,work);if(code!=0){return .err(fail(code,0,0));}return .ok(Catalog{.bindings=resolved,.names,.templates=rows,.parameters,.scalar_constraints=true});
+}
+// Go's ordinary package preparation has no explicit parameter abilities;
+// its authenticated Vec lane adds scalar abilities to user templates. Keep
+// source admission (Parameter.scalar) separate from that serialized fact.
+pub fn Result<Catalog,Problem> build_project(bindings::Bindings resolved,ref v::Vec<syntax::Parsed> sources,ref mut usize work){
+    var out=switch(build(resolved,sources,work)){case .ok(p):{p}case .err(e):{return .err(e);}};var bool vector=false;var usize i=0;
+    while(i<bindings::count(ref out.bindings)){let m=bindings::module_at(ref out.bindings,i);let path=bindings::text(ref out.bindings,m.path);if(!budget::charge(work,path.len+1)){return .err(fail(10,i,0));}if(bytes::equal(path,b"std::vec")){vector=true;}i+=1;}
+    out.scalar_constraints=vector;return .ok(out);
 }
 // Missing targets are ok(0), so nongeneric named types need no fabricated edge.
 // kind 3 selects functions; kind 0 selects structs/resources. Indices are 1-based.

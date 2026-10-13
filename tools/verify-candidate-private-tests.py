@@ -20,6 +20,46 @@ def save(path, value):
     path.write_text(json.dumps(value, indent=2) + '\n', encoding='utf-8', newline='\n')
 
 
+def package_key_ledger(data, image):
+    """Check compiler binding and full canonical preimages independently."""
+    assert len(data) <= 4 * 1048576 and data[:8] == b'FYCKOUT1', 'invalid key ledger'
+    at = 8
+    def number():
+        nonlocal at
+        assert at + 8 <= len(data), 'short key ledger number'
+        n = int.from_bytes(data[at:at+8], 'big'); at += 8
+        return n
+    def field():
+        nonlocal at
+        n = number()
+        assert n <= 2 * 1048576 and at + n <= len(data), 'short key ledger field'
+        result = data[at:at+n]; at += n
+        return result
+    compiler = b'fairyc.compiler-executable-sha256/v1:' + digest(image).encode()
+    assert field() == compiler, 'key environment does not identify the executed image'
+    count = number(); assert 1 <= count <= 16
+    rows = []
+    cases = set()
+    for _ in range(count):
+        case = field().decode('utf-8'); assert case and case not in cases; cases.add(case)
+        packages = number(); assert 1 <= packages <= 512
+        seen = set()
+        for _ in range(packages):
+            instance = field().decode('ascii'); coordinate = field().decode('ascii')
+            assert re.fullmatch(r'fypi1-sha256-[0-9a-f]{64}', instance) and instance not in seen
+            assert re.fullmatch(r'fypc1-sha256-[0-9a-f]{64}', coordinate)
+            seen.add(instance)
+            values = []
+            for prefix in (b'fycache4-sha256-', b'fycacheg0-sha256-'):
+                canonical = field(); key = field()
+                assert canonical.count(compiler) == 1, 'missing or duplicated compiler key member'
+                assert key == prefix + hashlib.sha256(canonical).hexdigest().encode(), 'key contradicts its full preimage'
+                values.append(dict(bytes=len(canonical), canonicalSHA256=hashlib.sha256(canonical).hexdigest(), key=key.decode('ascii')))
+            rows.append(dict(case=case, instance=instance, coordinate=coordinate, ordinary=values[0], generic=values[1]))
+    assert at == len(data), 'trailing key ledger bytes'
+    return dict(compiler=compiler.decode(), cases=count, packages=len(rows), rows=rows)
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--compiler', type=Path, required=True)
@@ -40,6 +80,7 @@ def main():
     parser.add_argument('--stdin-fixture', type=Path, help='exact binary input for each candidate C execution')
     parser.add_argument('--stdout-fixture', type=Path, help='expected complete candidate stdout, empty by default')
     parser.add_argument('--stdout-executable-identity', action='store_true', help='expect the exact running image SHA-256 identity on stdout and verify a spoofed argv[0] launch too')
+    parser.add_argument('--stdout-package-cache-keys', action='store_true', help='verify a binary package-key ledger against full executed image identity and Python SHA-256')
     parser.add_argument('--stderr-fixture', type=Path, help='expected complete candidate stderr, empty by default')
     parser.add_argument('--unchanged-paths', type=Path, help='JSON list of repository-relative paths whose bytes and modification times must remain unchanged')
     args = parser.parse_args()
@@ -57,6 +98,8 @@ def main():
         parser.error('native-stack-editor requires native-program and a nonzero stack reserve')
     if args.stdout_executable_identity and (args.stdout_fixture or not (args.native_program or args.candidate_only)):
         parser.error('stdout-executable-identity requires native-program or candidate-only and excludes stdout-fixture')
+    if args.stdout_package_cache_keys and (args.stdout_fixture or args.stdout_executable_identity or not (args.native_program or args.candidate_only)):
+        parser.error('stdout-package-cache-keys requires native-program or candidate-only and excludes other stdout modes')
     if not __debug__:
         parser.error('verification requires Python without -O')
     if not re.fullmatch(r'[a-z][a-z0-9_]*', args.module):
@@ -159,6 +202,7 @@ def main():
     report = None
     native_isolation = None
     native_program = None
+    key_ledgers = []
     if not args.candidate_only:
         native_project = PROJECT
         copied_inputs = []
@@ -210,7 +254,11 @@ def main():
                 native_stack = dict(reserveBytes=args.stack_reserve_bytes, originalReserveBytes=struct.unpack_from('<Q', before, offset + 72)[0], originalSHA256=hashlib.sha256(before).hexdigest())
             native = run([built[0], *arguments], cwd=native_project, timeout=args.execution_timeout, stdin=streams.get('stdin', b''))
             expected_stdout = (b'fairyc.compiler-executable-sha256/v1:' + digest(built[0]).encode() + b'\n') if args.stdout_executable_identity else streams.get('stdout', b'')
-            assert native.stdout == expected_stdout, 'Go program output differs from the expected complete fixture'
+            if args.stdout_package_cache_keys:
+                key_ledgers.append(dict(profile='Go-native', facts=package_key_ledger(native.stdout, built[0])))
+                (output / 'native-key-ledger.bin').write_bytes(native.stdout)
+            else:
+                assert native.stdout == expected_stdout, 'Go program output differs from the expected complete fixture'
             if args.stdout_executable_identity:
                 spoofed = run(['missing-compiler-argv-zero.exe', *arguments], cwd=native_project, timeout=args.execution_timeout, stdin=streams.get('stdin', b''), executable=built[0])
                 assert spoofed.stdout == expected_stdout, 'Go current image identity followed spoofed argv[0]'
@@ -240,7 +288,11 @@ def main():
             assert struct.unpack_from('<H', pe, offset)[0] == 0x20b and struct.unpack_from('<Q', pe, offset + 72)[0] == args.stack_reserve_bytes, 'PE stack reserve differs from the explicit test setting'
         executed = run([image, *arguments],timeout=args.execution_timeout,stdin=streams.get('stdin'),stderr=streams.get('stderr',b''))
         expected_stdout = (b'fairyc.compiler-executable-sha256/v1:' + digest(image).encode() + b'\n') if args.stdout_executable_identity else streams.get('stdout',b'')
-        assert executed.stdout == expected_stdout, invocations[-1]
+        if args.stdout_package_cache_keys:
+            key_ledgers.append(dict(profile=profile, facts=package_key_ledger(executed.stdout, image)))
+            (output / (profile + '-key-ledger.bin')).write_bytes(executed.stdout)
+        else:
+            assert executed.stdout == expected_stdout, invocations[-1]
         if args.stdout_executable_identity:
             spoofed = run(['missing-compiler-argv-zero.exe', *arguments], timeout=args.execution_timeout, stdin=streams.get('stdin'), stderr=streams.get('stderr',b''), executable=image)
             assert spoofed.stdout == expected_stdout, 'candidate current image identity followed spoofed argv[0]'
@@ -260,6 +312,8 @@ def main():
     receipt['stackReserveBytes'] = args.stack_reserve_bytes
     if args.stdout_executable_identity:
         receipt['executableIdentityVerification'] = dict(encoding='fairyc.compiler-executable-sha256/v1', independentOracle='Python hashlib SHA-256 of each complete executed image', spoofedArgvZeroPassed=True)
+    if args.stdout_package_cache_keys:
+        receipt['packageKeyVerification'] = dict(independentOracle='Python SHA-256 of complete key preimages and whole executed image bytes', ledgers=key_ledgers)
     receipt['wrapperEffects'] = effects
     if native_isolation:
         receipt['nativeIsolation'] = native_isolation

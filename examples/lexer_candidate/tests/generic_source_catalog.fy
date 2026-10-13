@@ -9,6 +9,7 @@ import file_source as files;
 import std::bytes as bytes;
 import std::process as process;
 import std::vec as v;
+import generic_source_requests as requests;
 
 fn syntax::Parsed parsed(ref u8[] raw){let b=switch(bytes::copy(raw)){case .ok(value):{value}case .err(_):{assert(false);return parsed(raw);}};let s=switch(scanner::collect(b,false,65536,1048576,256,16777216)){case .ok(value):{value}case .err(_):{assert(false);return parsed(raw);}};return switch(syntax::parse(s,512)){case .ok(value):{assert(syntax::problem_count(ref value)==0);value}case .err(_):{assert(false);parsed(raw)}};}
 fn coordinates::Coordinates coords(usize count,usize shift){var bytes::Buffer names=bytes::empty();var v::Vec<coordinates::Coordinate> rows=v::empty<coordinates::Coordinate>();var usize i=0;while(i<count){let start=bytes::len(ref names);assert(bytes::append(ref mut names,b"fypc1-sha256-").is_ok);var usize n=0;while(n<64){assert(bytes::append(ref mut names,if(i==0){b"1"}else if(i==1){b"2"}else{b"3"}).is_ok);n+=1;}assert(v::push<coordinates::Coordinate>(ref mut rows,coordinates::Coordinate{.owner=i+shift,.start,.end=bytes::len(ref names)}).is_ok);i+=1;}return coordinates::assemble(names,rows);}
@@ -16,6 +17,14 @@ fn bindings::Bindings bound(ref v::Vec<syntax::Parsed> sources,usize shift,bool 
 fn ref u8[] raw(usize mode){if(mode==0){return b"module root;import helper as a;import helper as a0;pub fn T export<T>(T value){return a::id<T>(value);}fn T local<T>(T value){return value;}";}return b"module helper;pub fn U id<U>(U value){return value;}fn A pair<A,B>(A a,B b){return a;}fn T secret<T>(T value){return value;}";}
 fn v::Vec<syntax::Parsed> sources(bool reverse){var v::Vec<syntax::Parsed> out=v::empty<syntax::Parsed>();assert(v::push<syntax::Parsed>(ref mut out,parsed(raw(if(reverse){1}else{0}))).is_ok && v::push<syntax::Parsed>(ref mut out,parsed(raw(if(reverse){0}else{1}))).is_ok);return out;}
 fn templates::Catalog detached(usize shift,bool reverse,ref mut usize work){let input=sources(reverse);let resolved=bound(ref input,shift,false,reverse);return switch(templates::build(resolved,ref input,work)){case .ok(value):{value}case .err(_):{assert(false);return detached(shift,reverse,work);}};}
+fn templates::Catalog project(ref v::Vec<syntax::Parsed> input,ref mut usize work){let resolved=bound(input,0,false,false);return switch(templates::build_project(resolved,input,work)){case .ok(value):{value}case .err(_):{assert(false);return project(input,work);}};}
+@test
+fn void ordinary_project_identity_preserves_scalar_admission_and_exact_work(){
+    let input=sources(false);var usize cost=0;let actual=project(ref input,ref mut cost);assert(!templates::scalar_constraints(ref actual) && cost>0);var usize work=16777216-cost;let exact=project(ref input,ref mut work);assert(work==16777216 && templates::count(ref actual)==templates::count(ref exact));var usize i=0;
+    while(i<templates::count(ref actual)){let row=templates::template_at(ref actual,i);assert(row.kind==3 && templates::parameter_at(ref actual,row.first).scalar);i+=1;}
+    let resolved=bound(ref input,0,false,false);work=16777216-cost+1;assert(switch(templates::build_project(resolved,ref input,ref mut work)){case .ok(_):{false}case .err(e):{e.code==10}} && work<=16777216);
+    var v::Vec<syntax::Parsed> invalid=v::empty<syntax::Parsed>();assert(v::push<syntax::Parsed>(ref mut invalid,parsed(b"module root;import helper as a;import helper as a0;struct Token{i32 value;}fn void use(){discard a::id<Token>(Token{.value=1});}")).is_ok && v::push<syntax::Parsed>(ref mut invalid,parsed(raw(1))).is_ok);work=0;let catalog=project(ref invalid,ref mut work);assert(switch(requests::build(catalog,ref invalid,ref mut work)){case .ok(_):{false}case .err(e):{e.code==4502}});
+}
 fn usize number(ref u8[] wire,ref mut usize at){assert(*at<=wire.len && wire.len-*at>=8);var usize out=0;var usize i=0;while(i<8){out=out*256+(wire[*at+i] as usize);i+=1;}*at+=8;return out;}
 fn ref u8[] field(ref u8[] wire,ref mut usize at){let size=number(wire,at);assert(*at<=wire.len && size<=wire.len-*at);let start=*at;*at+=size;return wire[start..*at];}
 @effects(filesystem)

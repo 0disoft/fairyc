@@ -2,8 +2,9 @@
 
 Cache-key v4/v0 encoders and the checked ordinary state-body identity are now
 verified: [key checkpoint](../ops/candidate-generic-cache-key-20261014.md) and
-[body checkpoint](../ops/candidate-cache-body-identity-20261014.md). Remaining
-Complete-owner package key composition and actual artifact reuse stay open.
+[body checkpoint](../ops/candidate-cache-body-identity-20261014.md).
+Complete-owner v4/v0 package keys now match Go canonical preimages; see the
+[composition receipt](../ops/evidence/candidate-complete-cache-keys-20261014.json). Verified artifact reuse remains open.
 The current candidate-owned IR environment is verified in the
 [environment checkpoint](../ops/candidate-cache-environment-20261014.md).
 The actual running Windows compiler image identity is verified

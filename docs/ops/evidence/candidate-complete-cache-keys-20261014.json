@@ -1,0 +1,1079 @@
+{
+  "schema": "fairyc.candidate-complete-cache-keys/v1",
+  "date": "2026-10-14",
+  "parentCommit": "5fe247d627a7987c2333ba43e2342fc01db6d286",
+  "passed": true,
+  "scope": "derive all v4/v0 package keys atomically from loaded workspace, opaque complete owner and current executing-image environment; no artifact authority",
+  "sourceInputs": [
+    {
+      "path": "examples/lexer_candidate/src/project_cache_keys.fy",
+      "sha256": "30c21ed709fff853447b6a5ddfa766c8d8c035f5d981af0910def068db1730e9",
+      "bytes": 9276
+    },
+    {
+      "path": "examples/lexer_candidate/tests/project_cache_keys.fy",
+      "sha256": "f3ecc1334d33dcfc8694ee22a8bc42703c379ff9659f8a1720e5ff91ae683604",
+      "bytes": 9031
+    },
+    {
+      "path": "examples/lexer_candidate/src/generic_source_catalog.fy",
+      "sha256": "cd4152c247f41ee290fb747c4b154c0b211875d0c18bb52f2c87459d38537a87",
+      "bytes": 12705
+    },
+    {
+      "path": "examples/lexer_candidate/src/generic_source_dependency_json.fy",
+      "sha256": "63e66c98fd1718a77f7cc46e89e9b8f10105bd325273ced21b1543c31ede576a",
+      "bytes": 4124
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_source_plan.fy",
+      "sha256": "271b613bfa6306f11248f38b03f4e92b41108ff19f18f492c7d0bc03d152654e",
+      "bytes": 3380
+    },
+    {
+      "path": "examples/lexer_candidate/tests/generic_source_catalog.fy",
+      "sha256": "512424f6106aed2ccb32a630158aeaf3a0a44cbe38496bf62116c48eb1698d80",
+      "bytes": 12078
+    },
+    {
+      "path": "tools/verify-candidate-private-tests.py",
+      "sha256": "cd5a88c8a961c9896ad0015a6fcf033804260e6623bef98800f2e2ffcfbf994b",
+      "bytes": 23580
+    },
+    {
+      "path": "tools/verify-candidate-complete-keys.go",
+      "sha256": "227b12528abcf00216279579716f0bee43c12a2c2ee050d754ef4ef66821cddd",
+      "bytes": 9553
+    },
+    {
+      "path": "examples/lexer_candidate/fairy.lock",
+      "sha256": "881347c556053e1e2c952bfad798b116b35a5050aee74b620945f12c9e689aea",
+      "bytes": 1698
+    }
+  ],
+  "tools": {
+    "compiler": {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-frontend-oracle-current-20261012.exe",
+      "sha256": "3ecc4501ee3bb47ecc39e7288200266b31cbcd8bf6ffec302ae54867705ce5d1"
+    },
+    "candidate": {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-cleanup-20261013\\current-driver\\driver-release.exe",
+      "sha256": "67be18bdabb9d6499edcfcd8b7d3e3245dd932fd265ba79ab4cd7136748ec0ac"
+    },
+    "builder": {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-rooted-builder-stack-20261012.exe",
+      "sha256": "02abe2328daa9921705910c7b995e82c1312cb960fe024106c11468569aefff0"
+    }
+  },
+  "oracle": {
+    "tool": {
+      "path": "tools/verify-candidate-complete-keys.go",
+      "sha256": "227b12528abcf00216279579716f0bee43c12a2c2ee050d754ef4ef66821cddd",
+      "bytes": 9553
+    },
+    "report": {
+      "path": ".cache/complete-keys-20261014/regenerated-oracle.json",
+      "sha256": "e7f940e57ea5efb2181d5a433c492707bffa8a52e81da1bf05cf7a4d9a85416b",
+      "bytes": 17823
+    },
+    "cases": [
+      {
+        "case": "Aliases",
+        "packages": 3
+      },
+      {
+        "case": "PrivateEdit",
+        "packages": 3
+      },
+      {
+        "case": "Reordered",
+        "packages": 3
+      },
+      {
+        "case": "Vec",
+        "packages": 4
+      },
+      {
+        "case": "State",
+        "packages": 3
+      },
+      {
+        "case": "Plain",
+        "packages": 3
+      }
+    ],
+    "regeneration": {
+      "passed": true,
+      "rows": [
+        {
+          "case": "Aliases",
+          "sha256": "9f1d7f58525e7368f4553a798935448023c967a6cb90856ba94ffb613b7edda8"
+        },
+        {
+          "case": "Plain",
+          "sha256": "8b711793cced813b6ebc3f75967fa05418d3c7636f3b29f12461a2c1340af748"
+        },
+        {
+          "case": "PrivateEdit",
+          "sha256": "6f4b414eeaf741e1c165ae3fd3808e8edf7dfb0d9b0eedb141809a1c3c7af627"
+        },
+        {
+          "case": "Reordered",
+          "sha256": "9f1d7f58525e7368f4553a798935448023c967a6cb90856ba94ffb613b7edda8"
+        },
+        {
+          "case": "State",
+          "sha256": "00233d79fdb5dc1522de2bd0fb1c960b5c3d09fd9c9acd9467668aa4a1fd5b6b"
+        },
+        {
+          "case": "Vec",
+          "sha256": "afce315ecefacc48229c63eff2cf104873c3b3cf18a195c60896f3929d7e5992"
+        }
+      ]
+    }
+  },
+  "keyTests": {
+    "receipt": {
+      "path": ".cache/complete-keys-20261014/key-fixed/receipt.json",
+      "sha256": "faa2c894513e0fae4562b1e0d54c38000c13e37da29cfb29e051358345954de9",
+      "bytes": 87970
+    },
+    "candidateInputFiles": 290,
+    "authoredTestsExecuted": 3,
+    "candidateExecutions": [
+      {
+        "profile": "development",
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\complete-keys-20261014\\key-fixed\\development.exe",
+        "sha256": "932952c88dab3afbd65e41251fd58095d1d899b8b84909f47bb05c014b523095",
+        "exit": 0
+      },
+      {
+        "profile": "release",
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\complete-keys-20261014\\key-fixed\\release.exe",
+        "sha256": "2e5456faad8f7e4d89806203d98dc11955add32522126fa2056fc4fd47b8bb0d",
+        "exit": 0
+      }
+    ],
+    "invocations": [
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-cleanup-20261013\\current-driver\\driver-release.exe",
+          "--c-project-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\complete-keys-20261014\\key-fixed\\sources.list"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+        "seconds": 118.83939630002715,
+        "exit": 0,
+        "stdoutBytes": 22207489,
+        "stdoutSHA256": "33e501ecf1b5c6f9f0d121e5d8c5234a5666ac2924bd398a2aa87d192a0d6126",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-rooted-builder-stack-20261012.exe",
+          "--packet",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\complete-keys-20261014\\key-fixed\\candidate-packet.bin",
+          "--packet-sha256",
+          "33e501ecf1b5c6f9f0d121e5d8c5234a5666ac2924bd398a2aa87d192a0d6126",
+          "--output",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\complete-keys-20261014\\key-fixed\\development.exe",
+          "--stack-reserve-bytes",
+          "16777216"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+        "seconds": 18.157370900036767,
+        "exit": 0,
+        "stdoutBytes": 175,
+        "stdoutSHA256": "d4347ee6aa816f0b8c2ec0e160791334a03cd265bf32f7be51b9f84fa67ae5c6",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\complete-keys-20261014\\key-fixed\\development.exe",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\complete-keys-20261014\\root.txt"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+        "seconds": 102.78265010000905,
+        "exit": 0,
+        "stdoutBytes": 49116,
+        "stdoutSHA256": "d58eb367171069f8b80af2906ac7fc840e416d62f463434285c7e055df91437a",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-rooted-builder-stack-20261012.exe",
+          "--packet",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\complete-keys-20261014\\key-fixed\\candidate-packet.bin",
+          "--packet-sha256",
+          "33e501ecf1b5c6f9f0d121e5d8c5234a5666ac2924bd398a2aa87d192a0d6126",
+          "--output",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\complete-keys-20261014\\key-fixed\\release.exe",
+          "--release",
+          "--stack-reserve-bytes",
+          "16777216"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+        "seconds": 195.94976039999165,
+        "exit": 0,
+        "stdoutBytes": 177,
+        "stdoutSHA256": "0bcc6f93f010cee2e34f70948ba989cd73dc1fcf4227d4c36c948aa7bdd904a0",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\complete-keys-20261014\\key-fixed\\release.exe",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\complete-keys-20261014\\root.txt"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+        "seconds": 6.216253599966876,
+        "exit": 0,
+        "stdoutBytes": 49116,
+        "stdoutSHA256": "c2606494ad141cf9611c569aa60bc086f3156c4c9b8618924166de523f04ad6a",
+        "stderr": ""
+      }
+    ],
+    "packageKeyVerification": {
+      "independentOracle": "Python SHA-256 of complete key preimages and whole executed image bytes",
+      "ledgers": [
+        {
+          "profile": "development",
+          "facts": {
+            "compiler": "fairyc.compiler-executable-sha256/v1:932952c88dab3afbd65e41251fd58095d1d899b8b84909f47bb05c014b523095",
+            "cases": 6,
+            "packages": 19,
+            "rows": [
+              {
+                "case": "Aliases",
+                "instance": "fypi1-sha256-ecd68ceecc7ce5c9a7dbe2346b2007e7f7e0dad0b1b7d2b3bd8d4e66a0758a40",
+                "coordinate": "fypc1-sha256-27d783b44da2d8cdca633fcaffd8178468663f93f8badd9d84beabd70915a6a5",
+                "ordinary": {
+                  "bytes": 1052,
+                  "canonicalSHA256": "bbfb0c78d28b884505bb3b349651ede190532234eb525350dc7352b659b67fd0",
+                  "key": "fycache4-sha256-bbfb0c78d28b884505bb3b349651ede190532234eb525350dc7352b659b67fd0"
+                },
+                "generic": {
+                  "bytes": 1429,
+                  "canonicalSHA256": "0d922306fa590f5dc594d65bdd2b930ba02d8726c6ce8df1f5cf463034c27443",
+                  "key": "fycacheg0-sha256-0d922306fa590f5dc594d65bdd2b930ba02d8726c6ce8df1f5cf463034c27443"
+                }
+              },
+              {
+                "case": "Aliases",
+                "instance": "fypi1-sha256-590e616646ffe33b186e60c2eaa1c750182406a874de55c9f9707f7ab75790d5",
+                "coordinate": "fypc1-sha256-4c5df082e69720776041389662d578eceadb2be69568ecc0d303df522d1aea11",
+                "ordinary": {
+                  "bytes": 936,
+                  "canonicalSHA256": "3d22584ed923cfae13c3e89f1da49de63eeb475c321197c3fd1da2b7574624e0",
+                  "key": "fycache4-sha256-3d22584ed923cfae13c3e89f1da49de63eeb475c321197c3fd1da2b7574624e0"
+                },
+                "generic": {
+                  "bytes": 1185,
+                  "canonicalSHA256": "2a5c06747dad845e52df2c2b013f2c068faf3cf69a03217ac1a624cd32a9b352",
+                  "key": "fycacheg0-sha256-2a5c06747dad845e52df2c2b013f2c068faf3cf69a03217ac1a624cd32a9b352"
+                }
+              },
+              {
+                "case": "Aliases",
+                "instance": "fypi1-sha256-d76fdc8d8210ae65e78e2fb6d29c4ffa9cf3f1a6870c3aeb6f402b33019e140d",
+                "coordinate": "fypc1-sha256-5c3d5721998eb0d418685ffb900b8ebd71bb8cc6854b516dd55e8e93213c1c26",
+                "ordinary": {
+                  "bytes": 924,
+                  "canonicalSHA256": "be51bc8fb4d36c09646f0cb348773f952fd1bb0de199ad7671b73ac7fe56cd05",
+                  "key": "fycache4-sha256-be51bc8fb4d36c09646f0cb348773f952fd1bb0de199ad7671b73ac7fe56cd05"
+                },
+                "generic": {
+                  "bytes": 1023,
+                  "canonicalSHA256": "1a5dae8f05097163cb6c2fb868985eea6f621c97bb2d8adb3a37d7c3ccbd521e",
+                  "key": "fycacheg0-sha256-1a5dae8f05097163cb6c2fb868985eea6f621c97bb2d8adb3a37d7c3ccbd521e"
+                }
+              },
+              {
+                "case": "PrivateEdit",
+                "instance": "fypi1-sha256-ecd68ceecc7ce5c9a7dbe2346b2007e7f7e0dad0b1b7d2b3bd8d4e66a0758a40",
+                "coordinate": "fypc1-sha256-27d783b44da2d8cdca633fcaffd8178468663f93f8badd9d84beabd70915a6a5",
+                "ordinary": {
+                  "bytes": 1052,
+                  "canonicalSHA256": "bbfb0c78d28b884505bb3b349651ede190532234eb525350dc7352b659b67fd0",
+                  "key": "fycache4-sha256-bbfb0c78d28b884505bb3b349651ede190532234eb525350dc7352b659b67fd0"
+                },
+                "generic": {
+                  "bytes": 1429,
+                  "canonicalSHA256": "6c2b3a9e0b74751f7a40b6c14fa8d785cd94eb73da33d2490c49823723db18da",
+                  "key": "fycacheg0-sha256-6c2b3a9e0b74751f7a40b6c14fa8d785cd94eb73da33d2490c49823723db18da"
+                }
+              },
+              {
+                "case": "PrivateEdit",
+                "instance": "fypi1-sha256-b545da107bf4e195e9c724416659c3f86b961e1c15e0838cadab8dc57b1d8ccb",
+                "coordinate": "fypc1-sha256-4c5df082e69720776041389662d578eceadb2be69568ecc0d303df522d1aea11",
+                "ordinary": {
+                  "bytes": 936,
+                  "canonicalSHA256": "01c00a510a1cb5ae28a74919684983d8508927f6df8bf30e678c2c02abdba502",
+                  "key": "fycache4-sha256-01c00a510a1cb5ae28a74919684983d8508927f6df8bf30e678c2c02abdba502"
+                },
+                "generic": {
+                  "bytes": 1185,
+                  "canonicalSHA256": "7842996c6d572708d2a20aa1596475718d75583cdc5fa35a565b3c5603a76488",
+                  "key": "fycacheg0-sha256-7842996c6d572708d2a20aa1596475718d75583cdc5fa35a565b3c5603a76488"
+                }
+              },
+              {
+                "case": "PrivateEdit",
+                "instance": "fypi1-sha256-d76fdc8d8210ae65e78e2fb6d29c4ffa9cf3f1a6870c3aeb6f402b33019e140d",
+                "coordinate": "fypc1-sha256-5c3d5721998eb0d418685ffb900b8ebd71bb8cc6854b516dd55e8e93213c1c26",
+                "ordinary": {
+                  "bytes": 924,
+                  "canonicalSHA256": "be51bc8fb4d36c09646f0cb348773f952fd1bb0de199ad7671b73ac7fe56cd05",
+                  "key": "fycache4-sha256-be51bc8fb4d36c09646f0cb348773f952fd1bb0de199ad7671b73ac7fe56cd05"
+                },
+                "generic": {
+                  "bytes": 1023,
+                  "canonicalSHA256": "1a5dae8f05097163cb6c2fb868985eea6f621c97bb2d8adb3a37d7c3ccbd521e",
+                  "key": "fycacheg0-sha256-1a5dae8f05097163cb6c2fb868985eea6f621c97bb2d8adb3a37d7c3ccbd521e"
+                }
+              },
+              {
+                "case": "Reordered",
+                "instance": "fypi1-sha256-ecd68ceecc7ce5c9a7dbe2346b2007e7f7e0dad0b1b7d2b3bd8d4e66a0758a40",
+                "coordinate": "fypc1-sha256-27d783b44da2d8cdca633fcaffd8178468663f93f8badd9d84beabd70915a6a5",
+                "ordinary": {
+                  "bytes": 1052,
+                  "canonicalSHA256": "bbfb0c78d28b884505bb3b349651ede190532234eb525350dc7352b659b67fd0",
+                  "key": "fycache4-sha256-bbfb0c78d28b884505bb3b349651ede190532234eb525350dc7352b659b67fd0"
+                },
+                "generic": {
+                  "bytes": 1429,
+                  "canonicalSHA256": "0d922306fa590f5dc594d65bdd2b930ba02d8726c6ce8df1f5cf463034c27443",
+                  "key": "fycacheg0-sha256-0d922306fa590f5dc594d65bdd2b930ba02d8726c6ce8df1f5cf463034c27443"
+                }
+              },
+              {
+                "case": "Reordered",
+                "instance": "fypi1-sha256-590e616646ffe33b186e60c2eaa1c750182406a874de55c9f9707f7ab75790d5",
+                "coordinate": "fypc1-sha256-4c5df082e69720776041389662d578eceadb2be69568ecc0d303df522d1aea11",
+                "ordinary": {
+                  "bytes": 936,
+                  "canonicalSHA256": "3d22584ed923cfae13c3e89f1da49de63eeb475c321197c3fd1da2b7574624e0",
+                  "key": "fycache4-sha256-3d22584ed923cfae13c3e89f1da49de63eeb475c321197c3fd1da2b7574624e0"
+                },
+                "generic": {
+                  "bytes": 1185,
+                  "canonicalSHA256": "2a5c06747dad845e52df2c2b013f2c068faf3cf69a03217ac1a624cd32a9b352",
+                  "key": "fycacheg0-sha256-2a5c06747dad845e52df2c2b013f2c068faf3cf69a03217ac1a624cd32a9b352"
+                }
+              },
+              {
+                "case": "Reordered",
+                "instance": "fypi1-sha256-d76fdc8d8210ae65e78e2fb6d29c4ffa9cf3f1a6870c3aeb6f402b33019e140d",
+                "coordinate": "fypc1-sha256-5c3d5721998eb0d418685ffb900b8ebd71bb8cc6854b516dd55e8e93213c1c26",
+                "ordinary": {
+                  "bytes": 924,
+                  "canonicalSHA256": "be51bc8fb4d36c09646f0cb348773f952fd1bb0de199ad7671b73ac7fe56cd05",
+                  "key": "fycache4-sha256-be51bc8fb4d36c09646f0cb348773f952fd1bb0de199ad7671b73ac7fe56cd05"
+                },
+                "generic": {
+                  "bytes": 1023,
+                  "canonicalSHA256": "1a5dae8f05097163cb6c2fb868985eea6f621c97bb2d8adb3a37d7c3ccbd521e",
+                  "key": "fycacheg0-sha256-1a5dae8f05097163cb6c2fb868985eea6f621c97bb2d8adb3a37d7c3ccbd521e"
+                }
+              },
+              {
+                "case": "Vec",
+                "instance": "fypi1-sha256-07494873c2c0a11f6b05e559127f643c0414c3d894de32fde8293302769c0207",
+                "coordinate": "fypc1-sha256-27d783b44da2d8cdca633fcaffd8178468663f93f8badd9d84beabd70915a6a5",
+                "ordinary": {
+                  "bytes": 1116,
+                  "canonicalSHA256": "3352255b63dcaa3b0eb69f8e73ce6341f92d20f93ddc5833290216ab72107565",
+                  "key": "fycache4-sha256-3352255b63dcaa3b0eb69f8e73ce6341f92d20f93ddc5833290216ab72107565"
+                },
+                "generic": {
+                  "bytes": 1557,
+                  "canonicalSHA256": "181a21552b48a780d516fef296734d3e7cc3db757c0ab1001c05fb6b8b4314f8",
+                  "key": "fycacheg0-sha256-181a21552b48a780d516fef296734d3e7cc3db757c0ab1001c05fb6b8b4314f8"
+                }
+              },
+              {
+                "case": "Vec",
+                "instance": "fypi1-sha256-590e616646ffe33b186e60c2eaa1c750182406a874de55c9f9707f7ab75790d5",
+                "coordinate": "fypc1-sha256-4c5df082e69720776041389662d578eceadb2be69568ecc0d303df522d1aea11",
+                "ordinary": {
+                  "bytes": 936,
+                  "canonicalSHA256": "3d22584ed923cfae13c3e89f1da49de63eeb475c321197c3fd1da2b7574624e0",
+                  "key": "fycache4-sha256-3d22584ed923cfae13c3e89f1da49de63eeb475c321197c3fd1da2b7574624e0"
+                },
+                "generic": {
+                  "bytes": 1185,
+                  "canonicalSHA256": "88e7c5d1a624cbe9f725d9f6f766174a3fd91e2737ed8d0c78971066eb60d7a5",
+                  "key": "fycacheg0-sha256-88e7c5d1a624cbe9f725d9f6f766174a3fd91e2737ed8d0c78971066eb60d7a5"
+                }
+              },
+              {
+                "case": "Vec",
+                "instance": "fypi1-sha256-d76fdc8d8210ae65e78e2fb6d29c4ffa9cf3f1a6870c3aeb6f402b33019e140d",
+                "coordinate": "fypc1-sha256-5c3d5721998eb0d418685ffb900b8ebd71bb8cc6854b516dd55e8e93213c1c26",
+                "ordinary": {
+                  "bytes": 924,
+                  "canonicalSHA256": "be51bc8fb4d36c09646f0cb348773f952fd1bb0de199ad7671b73ac7fe56cd05",
+                  "key": "fycache4-sha256-be51bc8fb4d36c09646f0cb348773f952fd1bb0de199ad7671b73ac7fe56cd05"
+                },
+                "generic": {
+                  "bytes": 1023,
+                  "canonicalSHA256": "1a5dae8f05097163cb6c2fb868985eea6f621c97bb2d8adb3a37d7c3ccbd521e",
+                  "key": "fycacheg0-sha256-1a5dae8f05097163cb6c2fb868985eea6f621c97bb2d8adb3a37d7c3ccbd521e"
+                }
+              },
+              {
+                "case": "Vec",
+                "instance": "fypi1-sha256-86c14252642af2b070e755759e12b841707c27c8a222a96de9401af4159ff406",
+                "coordinate": "fypc1-sha256-b0a4d6314db7dbe3f4f42c54d28d492054cc437fedd64985129b89c66b340424",
+                "ordinary": {
+                  "bytes": 924,
+                  "canonicalSHA256": "73f851edfe3de2e114b07c0dcc6f62a5a58714555e597aa0c0fa0523ac917c93",
+                  "key": "fycache4-sha256-73f851edfe3de2e114b07c0dcc6f62a5a58714555e597aa0c0fa0523ac917c93"
+                },
+                "generic": {
+                  "bytes": 1998,
+                  "canonicalSHA256": "cd3b949068f68f27e73ca9db3285447fc94f0939d103ef419224c1a64aee1fbd",
+                  "key": "fycacheg0-sha256-cd3b949068f68f27e73ca9db3285447fc94f0939d103ef419224c1a64aee1fbd"
+                }
+              },
+              {
+                "case": "State",
+                "instance": "fypi1-sha256-22cfd2a763d5b79f43f63455c856d1da7b3090b53d4f4eaaf9dfc39a0dc97417",
+                "coordinate": "fypc1-sha256-27d783b44da2d8cdca633fcaffd8178468663f93f8badd9d84beabd70915a6a5",
+                "ordinary": {
+                  "bytes": 1052,
+                  "canonicalSHA256": "2d1e3a6b9127ca301a38d568144105c1e662e23462ac19afb5b9b07d9aa0b718",
+                  "key": "fycache4-sha256-2d1e3a6b9127ca301a38d568144105c1e662e23462ac19afb5b9b07d9aa0b718"
+                },
+                "generic": {
+                  "bytes": 1279,
+                  "canonicalSHA256": "dbb02915b45f4ac415c506a952a8f5469638f3e604c8c91c8219d3b770791bba",
+                  "key": "fycacheg0-sha256-dbb02915b45f4ac415c506a952a8f5469638f3e604c8c91c8219d3b770791bba"
+                }
+              },
+              {
+                "case": "State",
+                "instance": "fypi1-sha256-590e616646ffe33b186e60c2eaa1c750182406a874de55c9f9707f7ab75790d5",
+                "coordinate": "fypc1-sha256-4c5df082e69720776041389662d578eceadb2be69568ecc0d303df522d1aea11",
+                "ordinary": {
+                  "bytes": 936,
+                  "canonicalSHA256": "3d22584ed923cfae13c3e89f1da49de63eeb475c321197c3fd1da2b7574624e0",
+                  "key": "fycache4-sha256-3d22584ed923cfae13c3e89f1da49de63eeb475c321197c3fd1da2b7574624e0"
+                },
+                "generic": {
+                  "bytes": 1185,
+                  "canonicalSHA256": "2a5c06747dad845e52df2c2b013f2c068faf3cf69a03217ac1a624cd32a9b352",
+                  "key": "fycacheg0-sha256-2a5c06747dad845e52df2c2b013f2c068faf3cf69a03217ac1a624cd32a9b352"
+                }
+              },
+              {
+                "case": "State",
+                "instance": "fypi1-sha256-d76fdc8d8210ae65e78e2fb6d29c4ffa9cf3f1a6870c3aeb6f402b33019e140d",
+                "coordinate": "fypc1-sha256-5c3d5721998eb0d418685ffb900b8ebd71bb8cc6854b516dd55e8e93213c1c26",
+                "ordinary": {
+                  "bytes": 924,
+                  "canonicalSHA256": "be51bc8fb4d36c09646f0cb348773f952fd1bb0de199ad7671b73ac7fe56cd05",
+                  "key": "fycache4-sha256-be51bc8fb4d36c09646f0cb348773f952fd1bb0de199ad7671b73ac7fe56cd05"
+                },
+                "generic": {
+                  "bytes": 1023,
+                  "canonicalSHA256": "1a5dae8f05097163cb6c2fb868985eea6f621c97bb2d8adb3a37d7c3ccbd521e",
+                  "key": "fycacheg0-sha256-1a5dae8f05097163cb6c2fb868985eea6f621c97bb2d8adb3a37d7c3ccbd521e"
+                }
+              },
+              {
+                "case": "Plain",
+                "instance": "fypi1-sha256-2cb6baeb9272434d9c65ea0246c0b1cfb103b5af1c4e17a9c455281c161c18fa",
+                "coordinate": "fypc1-sha256-27d783b44da2d8cdca633fcaffd8178468663f93f8badd9d84beabd70915a6a5",
+                "ordinary": {
+                  "bytes": 1052,
+                  "canonicalSHA256": "c58cecbd8332937dc23979e470aa083fc5212c1bf01098656090e2da963ea3b3",
+                  "key": "fycache4-sha256-c58cecbd8332937dc23979e470aa083fc5212c1bf01098656090e2da963ea3b3"
+                },
+                "generic": {
+                  "bytes": 1279,
+                  "canonicalSHA256": "523706058a952a5bb40c5d6d3c1dd03d2015cc0a96b27d331f573d9e40553b96",
+                  "key": "fycacheg0-sha256-523706058a952a5bb40c5d6d3c1dd03d2015cc0a96b27d331f573d9e40553b96"
+                }
+              },
+              {
+                "case": "Plain",
+                "instance": "fypi1-sha256-590e616646ffe33b186e60c2eaa1c750182406a874de55c9f9707f7ab75790d5",
+                "coordinate": "fypc1-sha256-4c5df082e69720776041389662d578eceadb2be69568ecc0d303df522d1aea11",
+                "ordinary": {
+                  "bytes": 936,
+                  "canonicalSHA256": "3d22584ed923cfae13c3e89f1da49de63eeb475c321197c3fd1da2b7574624e0",
+                  "key": "fycache4-sha256-3d22584ed923cfae13c3e89f1da49de63eeb475c321197c3fd1da2b7574624e0"
+                },
+                "generic": {
+                  "bytes": 1035,
+                  "canonicalSHA256": "c5c599f73d752498163044f76ebf90e8f3a0a4184d55baa5576c94d145423623",
+                  "key": "fycacheg0-sha256-c5c599f73d752498163044f76ebf90e8f3a0a4184d55baa5576c94d145423623"
+                }
+              },
+              {
+                "case": "Plain",
+                "instance": "fypi1-sha256-d76fdc8d8210ae65e78e2fb6d29c4ffa9cf3f1a6870c3aeb6f402b33019e140d",
+                "coordinate": "fypc1-sha256-5c3d5721998eb0d418685ffb900b8ebd71bb8cc6854b516dd55e8e93213c1c26",
+                "ordinary": {
+                  "bytes": 924,
+                  "canonicalSHA256": "be51bc8fb4d36c09646f0cb348773f952fd1bb0de199ad7671b73ac7fe56cd05",
+                  "key": "fycache4-sha256-be51bc8fb4d36c09646f0cb348773f952fd1bb0de199ad7671b73ac7fe56cd05"
+                },
+                "generic": {
+                  "bytes": 1023,
+                  "canonicalSHA256": "1a5dae8f05097163cb6c2fb868985eea6f621c97bb2d8adb3a37d7c3ccbd521e",
+                  "key": "fycacheg0-sha256-1a5dae8f05097163cb6c2fb868985eea6f621c97bb2d8adb3a37d7c3ccbd521e"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "profile": "release",
+          "facts": {
+            "compiler": "fairyc.compiler-executable-sha256/v1:2e5456faad8f7e4d89806203d98dc11955add32522126fa2056fc4fd47b8bb0d",
+            "cases": 6,
+            "packages": 19,
+            "rows": [
+              {
+                "case": "Aliases",
+                "instance": "fypi1-sha256-ecd68ceecc7ce5c9a7dbe2346b2007e7f7e0dad0b1b7d2b3bd8d4e66a0758a40",
+                "coordinate": "fypc1-sha256-27d783b44da2d8cdca633fcaffd8178468663f93f8badd9d84beabd70915a6a5",
+                "ordinary": {
+                  "bytes": 1052,
+                  "canonicalSHA256": "4c8a2614fe49a24e7433d2a0175198da129a4c885a756f7f7a57a05a11530103",
+                  "key": "fycache4-sha256-4c8a2614fe49a24e7433d2a0175198da129a4c885a756f7f7a57a05a11530103"
+                },
+                "generic": {
+                  "bytes": 1429,
+                  "canonicalSHA256": "bfd417035635c9f034dc0c51fb0e28e74d0599e989193dc74514ab0ffc554ae6",
+                  "key": "fycacheg0-sha256-bfd417035635c9f034dc0c51fb0e28e74d0599e989193dc74514ab0ffc554ae6"
+                }
+              },
+              {
+                "case": "Aliases",
+                "instance": "fypi1-sha256-590e616646ffe33b186e60c2eaa1c750182406a874de55c9f9707f7ab75790d5",
+                "coordinate": "fypc1-sha256-4c5df082e69720776041389662d578eceadb2be69568ecc0d303df522d1aea11",
+                "ordinary": {
+                  "bytes": 936,
+                  "canonicalSHA256": "85ae736986bce3179628aa134c5ecb1eff783db0abbe03c96e3c1351067ee238",
+                  "key": "fycache4-sha256-85ae736986bce3179628aa134c5ecb1eff783db0abbe03c96e3c1351067ee238"
+                },
+                "generic": {
+                  "bytes": 1185,
+                  "canonicalSHA256": "fa846140f558f5f112a1b9a2d631de3579b867fec7a4d7c1a0c9cd912076f682",
+                  "key": "fycacheg0-sha256-fa846140f558f5f112a1b9a2d631de3579b867fec7a4d7c1a0c9cd912076f682"
+                }
+              },
+              {
+                "case": "Aliases",
+                "instance": "fypi1-sha256-d76fdc8d8210ae65e78e2fb6d29c4ffa9cf3f1a6870c3aeb6f402b33019e140d",
+                "coordinate": "fypc1-sha256-5c3d5721998eb0d418685ffb900b8ebd71bb8cc6854b516dd55e8e93213c1c26",
+                "ordinary": {
+                  "bytes": 924,
+                  "canonicalSHA256": "499495176c6f5c2b9450373451dd8c868ac0f817d2f759f63c706343bd420529",
+                  "key": "fycache4-sha256-499495176c6f5c2b9450373451dd8c868ac0f817d2f759f63c706343bd420529"
+                },
+                "generic": {
+                  "bytes": 1023,
+                  "canonicalSHA256": "d9e70618ec172d3ba014f13566db0eff8a23692b83534dd16d19197420e60690",
+                  "key": "fycacheg0-sha256-d9e70618ec172d3ba014f13566db0eff8a23692b83534dd16d19197420e60690"
+                }
+              },
+              {
+                "case": "PrivateEdit",
+                "instance": "fypi1-sha256-ecd68ceecc7ce5c9a7dbe2346b2007e7f7e0dad0b1b7d2b3bd8d4e66a0758a40",
+                "coordinate": "fypc1-sha256-27d783b44da2d8cdca633fcaffd8178468663f93f8badd9d84beabd70915a6a5",
+                "ordinary": {
+                  "bytes": 1052,
+                  "canonicalSHA256": "4c8a2614fe49a24e7433d2a0175198da129a4c885a756f7f7a57a05a11530103",
+                  "key": "fycache4-sha256-4c8a2614fe49a24e7433d2a0175198da129a4c885a756f7f7a57a05a11530103"
+                },
+                "generic": {
+                  "bytes": 1429,
+                  "canonicalSHA256": "9f0dea4eb7a541aab0ebea553a7438ebc9bbb459779784a5393908862e252748",
+                  "key": "fycacheg0-sha256-9f0dea4eb7a541aab0ebea553a7438ebc9bbb459779784a5393908862e252748"
+                }
+              },
+              {
+                "case": "PrivateEdit",
+                "instance": "fypi1-sha256-b545da107bf4e195e9c724416659c3f86b961e1c15e0838cadab8dc57b1d8ccb",
+                "coordinate": "fypc1-sha256-4c5df082e69720776041389662d578eceadb2be69568ecc0d303df522d1aea11",
+                "ordinary": {
+                  "bytes": 936,
+                  "canonicalSHA256": "022048c12b1763b3bf3b9a8a9a8d25a02ba1e477bcebf260503c2832141eacc3",
+                  "key": "fycache4-sha256-022048c12b1763b3bf3b9a8a9a8d25a02ba1e477bcebf260503c2832141eacc3"
+                },
+                "generic": {
+                  "bytes": 1185,
+                  "canonicalSHA256": "5e27176ddfbd80424a29cfd194ef0d02325d87acb474a9430b79d8c2dded2b70",
+                  "key": "fycacheg0-sha256-5e27176ddfbd80424a29cfd194ef0d02325d87acb474a9430b79d8c2dded2b70"
+                }
+              },
+              {
+                "case": "PrivateEdit",
+                "instance": "fypi1-sha256-d76fdc8d8210ae65e78e2fb6d29c4ffa9cf3f1a6870c3aeb6f402b33019e140d",
+                "coordinate": "fypc1-sha256-5c3d5721998eb0d418685ffb900b8ebd71bb8cc6854b516dd55e8e93213c1c26",
+                "ordinary": {
+                  "bytes": 924,
+                  "canonicalSHA256": "499495176c6f5c2b9450373451dd8c868ac0f817d2f759f63c706343bd420529",
+                  "key": "fycache4-sha256-499495176c6f5c2b9450373451dd8c868ac0f817d2f759f63c706343bd420529"
+                },
+                "generic": {
+                  "bytes": 1023,
+                  "canonicalSHA256": "d9e70618ec172d3ba014f13566db0eff8a23692b83534dd16d19197420e60690",
+                  "key": "fycacheg0-sha256-d9e70618ec172d3ba014f13566db0eff8a23692b83534dd16d19197420e60690"
+                }
+              },
+              {
+                "case": "Reordered",
+                "instance": "fypi1-sha256-ecd68ceecc7ce5c9a7dbe2346b2007e7f7e0dad0b1b7d2b3bd8d4e66a0758a40",
+                "coordinate": "fypc1-sha256-27d783b44da2d8cdca633fcaffd8178468663f93f8badd9d84beabd70915a6a5",
+                "ordinary": {
+                  "bytes": 1052,
+                  "canonicalSHA256": "4c8a2614fe49a24e7433d2a0175198da129a4c885a756f7f7a57a05a11530103",
+                  "key": "fycache4-sha256-4c8a2614fe49a24e7433d2a0175198da129a4c885a756f7f7a57a05a11530103"
+                },
+                "generic": {
+                  "bytes": 1429,
+                  "canonicalSHA256": "bfd417035635c9f034dc0c51fb0e28e74d0599e989193dc74514ab0ffc554ae6",
+                  "key": "fycacheg0-sha256-bfd417035635c9f034dc0c51fb0e28e74d0599e989193dc74514ab0ffc554ae6"
+                }
+              },
+              {
+                "case": "Reordered",
+                "instance": "fypi1-sha256-590e616646ffe33b186e60c2eaa1c750182406a874de55c9f9707f7ab75790d5",
+                "coordinate": "fypc1-sha256-4c5df082e69720776041389662d578eceadb2be69568ecc0d303df522d1aea11",
+                "ordinary": {
+                  "bytes": 936,
+                  "canonicalSHA256": "85ae736986bce3179628aa134c5ecb1eff783db0abbe03c96e3c1351067ee238",
+                  "key": "fycache4-sha256-85ae736986bce3179628aa134c5ecb1eff783db0abbe03c96e3c1351067ee238"
+                },
+                "generic": {
+                  "bytes": 1185,
+                  "canonicalSHA256": "fa846140f558f5f112a1b9a2d631de3579b867fec7a4d7c1a0c9cd912076f682",
+                  "key": "fycacheg0-sha256-fa846140f558f5f112a1b9a2d631de3579b867fec7a4d7c1a0c9cd912076f682"
+                }
+              },
+              {
+                "case": "Reordered",
+                "instance": "fypi1-sha256-d76fdc8d8210ae65e78e2fb6d29c4ffa9cf3f1a6870c3aeb6f402b33019e140d",
+                "coordinate": "fypc1-sha256-5c3d5721998eb0d418685ffb900b8ebd71bb8cc6854b516dd55e8e93213c1c26",
+                "ordinary": {
+                  "bytes": 924,
+                  "canonicalSHA256": "499495176c6f5c2b9450373451dd8c868ac0f817d2f759f63c706343bd420529",
+                  "key": "fycache4-sha256-499495176c6f5c2b9450373451dd8c868ac0f817d2f759f63c706343bd420529"
+                },
+                "generic": {
+                  "bytes": 1023,
+                  "canonicalSHA256": "d9e70618ec172d3ba014f13566db0eff8a23692b83534dd16d19197420e60690",
+                  "key": "fycacheg0-sha256-d9e70618ec172d3ba014f13566db0eff8a23692b83534dd16d19197420e60690"
+                }
+              },
+              {
+                "case": "Vec",
+                "instance": "fypi1-sha256-07494873c2c0a11f6b05e559127f643c0414c3d894de32fde8293302769c0207",
+                "coordinate": "fypc1-sha256-27d783b44da2d8cdca633fcaffd8178468663f93f8badd9d84beabd70915a6a5",
+                "ordinary": {
+                  "bytes": 1116,
+                  "canonicalSHA256": "82ceabfe2da334e4579447b855f70baa49dec80aa94b539dba837c98cacd8e1f",
+                  "key": "fycache4-sha256-82ceabfe2da334e4579447b855f70baa49dec80aa94b539dba837c98cacd8e1f"
+                },
+                "generic": {
+                  "bytes": 1557,
+                  "canonicalSHA256": "bba5bc402ca99a24712a1a0bfe6bb5ad4a1861dacbbd234f9422dbe226e4abc7",
+                  "key": "fycacheg0-sha256-bba5bc402ca99a24712a1a0bfe6bb5ad4a1861dacbbd234f9422dbe226e4abc7"
+                }
+              },
+              {
+                "case": "Vec",
+                "instance": "fypi1-sha256-590e616646ffe33b186e60c2eaa1c750182406a874de55c9f9707f7ab75790d5",
+                "coordinate": "fypc1-sha256-4c5df082e69720776041389662d578eceadb2be69568ecc0d303df522d1aea11",
+                "ordinary": {
+                  "bytes": 936,
+                  "canonicalSHA256": "85ae736986bce3179628aa134c5ecb1eff783db0abbe03c96e3c1351067ee238",
+                  "key": "fycache4-sha256-85ae736986bce3179628aa134c5ecb1eff783db0abbe03c96e3c1351067ee238"
+                },
+                "generic": {
+                  "bytes": 1185,
+                  "canonicalSHA256": "5bf6ca85ea4d3ea0002b754ac766adeb3ac54623578fccb973f86ef1ce0381d3",
+                  "key": "fycacheg0-sha256-5bf6ca85ea4d3ea0002b754ac766adeb3ac54623578fccb973f86ef1ce0381d3"
+                }
+              },
+              {
+                "case": "Vec",
+                "instance": "fypi1-sha256-d76fdc8d8210ae65e78e2fb6d29c4ffa9cf3f1a6870c3aeb6f402b33019e140d",
+                "coordinate": "fypc1-sha256-5c3d5721998eb0d418685ffb900b8ebd71bb8cc6854b516dd55e8e93213c1c26",
+                "ordinary": {
+                  "bytes": 924,
+                  "canonicalSHA256": "499495176c6f5c2b9450373451dd8c868ac0f817d2f759f63c706343bd420529",
+                  "key": "fycache4-sha256-499495176c6f5c2b9450373451dd8c868ac0f817d2f759f63c706343bd420529"
+                },
+                "generic": {
+                  "bytes": 1023,
+                  "canonicalSHA256": "d9e70618ec172d3ba014f13566db0eff8a23692b83534dd16d19197420e60690",
+                  "key": "fycacheg0-sha256-d9e70618ec172d3ba014f13566db0eff8a23692b83534dd16d19197420e60690"
+                }
+              },
+              {
+                "case": "Vec",
+                "instance": "fypi1-sha256-86c14252642af2b070e755759e12b841707c27c8a222a96de9401af4159ff406",
+                "coordinate": "fypc1-sha256-b0a4d6314db7dbe3f4f42c54d28d492054cc437fedd64985129b89c66b340424",
+                "ordinary": {
+                  "bytes": 924,
+                  "canonicalSHA256": "edf190e450ad82919b820a0b9e747c284aab92a299d9b6872f8418d719b558ab",
+                  "key": "fycache4-sha256-edf190e450ad82919b820a0b9e747c284aab92a299d9b6872f8418d719b558ab"
+                },
+                "generic": {
+                  "bytes": 1998,
+                  "canonicalSHA256": "5adfd08e9fec368884bf949d087251121cac970284be7996193352c2b09178ab",
+                  "key": "fycacheg0-sha256-5adfd08e9fec368884bf949d087251121cac970284be7996193352c2b09178ab"
+                }
+              },
+              {
+                "case": "State",
+                "instance": "fypi1-sha256-22cfd2a763d5b79f43f63455c856d1da7b3090b53d4f4eaaf9dfc39a0dc97417",
+                "coordinate": "fypc1-sha256-27d783b44da2d8cdca633fcaffd8178468663f93f8badd9d84beabd70915a6a5",
+                "ordinary": {
+                  "bytes": 1052,
+                  "canonicalSHA256": "085143659c82c003e1f177db5df87a992563df86daac4fe8175e3b85f665fc3e",
+                  "key": "fycache4-sha256-085143659c82c003e1f177db5df87a992563df86daac4fe8175e3b85f665fc3e"
+                },
+                "generic": {
+                  "bytes": 1279,
+                  "canonicalSHA256": "ff5fca1cc4d2e9faa40ce70d1054f2106793e97852053f5fab4f6938c7b72d1a",
+                  "key": "fycacheg0-sha256-ff5fca1cc4d2e9faa40ce70d1054f2106793e97852053f5fab4f6938c7b72d1a"
+                }
+              },
+              {
+                "case": "State",
+                "instance": "fypi1-sha256-590e616646ffe33b186e60c2eaa1c750182406a874de55c9f9707f7ab75790d5",
+                "coordinate": "fypc1-sha256-4c5df082e69720776041389662d578eceadb2be69568ecc0d303df522d1aea11",
+                "ordinary": {
+                  "bytes": 936,
+                  "canonicalSHA256": "85ae736986bce3179628aa134c5ecb1eff783db0abbe03c96e3c1351067ee238",
+                  "key": "fycache4-sha256-85ae736986bce3179628aa134c5ecb1eff783db0abbe03c96e3c1351067ee238"
+                },
+                "generic": {
+                  "bytes": 1185,
+                  "canonicalSHA256": "fa846140f558f5f112a1b9a2d631de3579b867fec7a4d7c1a0c9cd912076f682",
+                  "key": "fycacheg0-sha256-fa846140f558f5f112a1b9a2d631de3579b867fec7a4d7c1a0c9cd912076f682"
+                }
+              },
+              {
+                "case": "State",
+                "instance": "fypi1-sha256-d76fdc8d8210ae65e78e2fb6d29c4ffa9cf3f1a6870c3aeb6f402b33019e140d",
+                "coordinate": "fypc1-sha256-5c3d5721998eb0d418685ffb900b8ebd71bb8cc6854b516dd55e8e93213c1c26",
+                "ordinary": {
+                  "bytes": 924,
+                  "canonicalSHA256": "499495176c6f5c2b9450373451dd8c868ac0f817d2f759f63c706343bd420529",
+                  "key": "fycache4-sha256-499495176c6f5c2b9450373451dd8c868ac0f817d2f759f63c706343bd420529"
+                },
+                "generic": {
+                  "bytes": 1023,
+                  "canonicalSHA256": "d9e70618ec172d3ba014f13566db0eff8a23692b83534dd16d19197420e60690",
+                  "key": "fycacheg0-sha256-d9e70618ec172d3ba014f13566db0eff8a23692b83534dd16d19197420e60690"
+                }
+              },
+              {
+                "case": "Plain",
+                "instance": "fypi1-sha256-2cb6baeb9272434d9c65ea0246c0b1cfb103b5af1c4e17a9c455281c161c18fa",
+                "coordinate": "fypc1-sha256-27d783b44da2d8cdca633fcaffd8178468663f93f8badd9d84beabd70915a6a5",
+                "ordinary": {
+                  "bytes": 1052,
+                  "canonicalSHA256": "585b618adee25fcad2c7fbdebb306d8ba1441b3bacab74908eb244b0694a2b91",
+                  "key": "fycache4-sha256-585b618adee25fcad2c7fbdebb306d8ba1441b3bacab74908eb244b0694a2b91"
+                },
+                "generic": {
+                  "bytes": 1279,
+                  "canonicalSHA256": "6555f59af7ba36ef19592cbc1e235dc6ea174aff0afa27210bb3d575b22eb9d8",
+                  "key": "fycacheg0-sha256-6555f59af7ba36ef19592cbc1e235dc6ea174aff0afa27210bb3d575b22eb9d8"
+                }
+              },
+              {
+                "case": "Plain",
+                "instance": "fypi1-sha256-590e616646ffe33b186e60c2eaa1c750182406a874de55c9f9707f7ab75790d5",
+                "coordinate": "fypc1-sha256-4c5df082e69720776041389662d578eceadb2be69568ecc0d303df522d1aea11",
+                "ordinary": {
+                  "bytes": 936,
+                  "canonicalSHA256": "85ae736986bce3179628aa134c5ecb1eff783db0abbe03c96e3c1351067ee238",
+                  "key": "fycache4-sha256-85ae736986bce3179628aa134c5ecb1eff783db0abbe03c96e3c1351067ee238"
+                },
+                "generic": {
+                  "bytes": 1035,
+                  "canonicalSHA256": "856252063a894803119d5ad3c39671ad3dd4d6dead9609b6a8f20f1d3c060aac",
+                  "key": "fycacheg0-sha256-856252063a894803119d5ad3c39671ad3dd4d6dead9609b6a8f20f1d3c060aac"
+                }
+              },
+              {
+                "case": "Plain",
+                "instance": "fypi1-sha256-d76fdc8d8210ae65e78e2fb6d29c4ffa9cf3f1a6870c3aeb6f402b33019e140d",
+                "coordinate": "fypc1-sha256-5c3d5721998eb0d418685ffb900b8ebd71bb8cc6854b516dd55e8e93213c1c26",
+                "ordinary": {
+                  "bytes": 924,
+                  "canonicalSHA256": "499495176c6f5c2b9450373451dd8c868ac0f817d2f759f63c706343bd420529",
+                  "key": "fycache4-sha256-499495176c6f5c2b9450373451dd8c868ac0f817d2f759f63c706343bd420529"
+                },
+                "generic": {
+                  "bytes": 1023,
+                  "canonicalSHA256": "d9e70618ec172d3ba014f13566db0eff8a23692b83534dd16d19197420e60690",
+                  "key": "fycacheg0-sha256-d9e70618ec172d3ba014f13566db0eff8a23692b83534dd16d19197420e60690"
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "stackReserveBytes": 16777216,
+    "goNativeSkipped": "exact running image adapter is a private Windows linkage boundary"
+  },
+  "catalogTests": {
+    "receipt": {
+      "path": ".cache/complete-keys-20261014/catalog-regression/receipt.json",
+      "sha256": "843fdc68215828b1ff3bd550ed6b0f2874b69d8013094494e210a368372d538d",
+      "bytes": 78450
+    },
+    "native": {
+      "schemaVersion": "fairyc.test-report/v4",
+      "engine": "native",
+      "target": "x86_64-windows-msvc",
+      "profile": "development",
+      "tests": [
+        {
+          "identity": "tests::generic_source_catalog::ordinary_project_identity_preserves_scalar_admission_and_exact_work",
+          "outcome": "passed",
+          "trapCategory": null,
+          "stdoutBase64": "",
+          "stderrBase64": ""
+        },
+        {
+          "identity": "tests::generic_source_catalog::owns_templates_and_resolves_exact_aliases_with_privacy",
+          "outcome": "passed",
+          "trapCategory": null,
+          "stdoutBase64": "",
+          "stderrBase64": ""
+        }
+      ],
+      "count": 2,
+      "passed": 2,
+      "failed": 0,
+      "status": "ok",
+      "lock": "verified"
+    },
+    "candidateExecutions": [
+      {
+        "profile": "development",
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\complete-keys-20261014\\catalog-regression\\development.exe",
+        "sha256": "f2a9675280250b5d5154a4fe72571b602896243bafa7af60460cea4f8f0675d1",
+        "exit": 0
+      },
+      {
+        "profile": "release",
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\complete-keys-20261014\\catalog-regression\\release.exe",
+        "sha256": "f1646062389d025d0d412d8553250c8e29562c80447ba4d762393c7bac05b217",
+        "exit": 0
+      }
+    ],
+    "invocations": [
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-frontend-oracle-current-20261012.exe",
+          "check"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\complete-keys-20261014\\catalog-regression\\native-project-c3f68009c7a049324051",
+        "seconds": 4.881409700028598,
+        "exit": 0,
+        "stdoutBytes": 80,
+        "stdoutSHA256": "e8527b8736f0c153f79569f01da9c937fc1645f3b38948abe88d6bf0a29b75e1",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-frontend-oracle-current-20261012.exe",
+          "test",
+          "--native",
+          "--locked",
+          "--json",
+          "--capture-output",
+          "--exact",
+          "tests::generic_source_catalog::owns_templates_and_resolves_exact_aliases_with_privacy",
+          "--exact",
+          "tests::generic_source_catalog::ordinary_project_identity_preserves_scalar_admission_and_exact_work"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\complete-keys-20261014\\catalog-regression\\native-project-c3f68009c7a049324051",
+        "seconds": 17.74002569995355,
+        "exit": 0,
+        "stdoutBytes": 554,
+        "stdoutSHA256": "0d9e3d27fad94066f0033e3c06f520eaed65956f71aba47ed44518d7093ae2e8",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-cleanup-20261013\\current-driver\\driver-release.exe",
+          "--c-project-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\complete-keys-20261014\\catalog-regression\\sources.list"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+        "seconds": 29.4661216000095,
+        "exit": 0,
+        "stdoutBytes": 3494826,
+        "stdoutSHA256": "163e09ffaf8da7a676df298d993cce56d8c89d206d1ce5310ec8bef54563a9f0",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-rooted-builder-stack-20261012.exe",
+          "--packet",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\complete-keys-20261014\\catalog-regression\\candidate-packet.bin",
+          "--packet-sha256",
+          "163e09ffaf8da7a676df298d993cce56d8c89d206d1ce5310ec8bef54563a9f0",
+          "--output",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\complete-keys-20261014\\catalog-regression\\development.exe"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+        "seconds": 4.818955600028858,
+        "exit": 0,
+        "stdoutBytes": 184,
+        "stdoutSHA256": "3ed637ec73650ff5cc057b7745c7a50ad4738a17c443a3032d59eea113b0ed54",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\complete-keys-20261014\\catalog-regression\\development.exe"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+        "seconds": 0.1372296999907121,
+        "exit": 0,
+        "stdoutBytes": 0,
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-rooted-builder-stack-20261012.exe",
+          "--packet",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\complete-keys-20261014\\catalog-regression\\candidate-packet.bin",
+          "--packet-sha256",
+          "163e09ffaf8da7a676df298d993cce56d8c89d206d1ce5310ec8bef54563a9f0",
+          "--output",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\complete-keys-20261014\\catalog-regression\\release.exe",
+          "--release"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+        "seconds": 15.13356190000195,
+        "exit": 0,
+        "stdoutBytes": 185,
+        "stdoutSHA256": "0b6b5dafdca2ccd0665e8cd54ebdf8b5914684a9f6fa1413660312c3cf47a0eb",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\complete-keys-20261014\\catalog-regression\\release.exe"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+        "seconds": 0.030805999995209277,
+        "exit": 0,
+        "stdoutBytes": 0,
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderr": ""
+      }
+    ],
+    "stackReserveBytes": 0
+  },
+  "sourceCheck": {
+    "passed": true,
+    "runs": [
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-frontend-oracle-current-20261012.exe",
+          "check"
+        ],
+        "exit": 0,
+        "files": 463,
+        "mirFunctions": 5977,
+        "stdout": "check ok: 2 instance(s), 463 source file(s), 5977 MIR function(s), lock unchanged\n",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-frontend-oracle-current-20261012.exe",
+          "check",
+          "--locked"
+        ],
+        "exit": 0,
+        "files": 463,
+        "mirFunctions": 5977,
+        "stdout": "check ok: 2 instance(s), 463 source file(s), 5977 MIR function(s), lock verified\n",
+        "stderr": ""
+      }
+    ]
+  },
+  "initialFailure": {
+    "invocations": [
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-cleanup-20261013\\current-driver\\driver-release.exe",
+          "--c-project-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\complete-keys-20261014\\key-final\\sources.list"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+        "seconds": 117.44668940000702,
+        "exit": 0,
+        "stdoutBytes": 22200894,
+        "stdoutSHA256": "61c3169e2bd5b217fafd5cc7bcb3add1a960bed3fa81d27e63bff8d91fb667ce",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-rooted-builder-stack-20261012.exe",
+          "--packet",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\complete-keys-20261014\\key-final\\candidate-packet.bin",
+          "--packet-sha256",
+          "61c3169e2bd5b217fafd5cc7bcb3add1a960bed3fa81d27e63bff8d91fb667ce",
+          "--output",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\complete-keys-20261014\\key-final\\development.exe",
+          "--stack-reserve-bytes",
+          "16777216"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+        "seconds": 17.70749259996228,
+        "exit": 0,
+        "stdoutBytes": 175,
+        "stdoutSHA256": "21eb6189824a79babcc915ce3f6c0c5082f18c8d9f7b85af74e5f94f718b85d5",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\complete-keys-20261014\\key-final\\development.exe",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\complete-keys-20261014\\root.txt"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+        "seconds": 15.913203699979931,
+        "exit": 105,
+        "stdoutBytes": 0,
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderr": ""
+      }
+    ],
+    "assertion": "root generic dependency source-interface first byte at offset 1175",
+    "cause": "ordinary Go package preparation has empty parameter abilities; SDK Vec preparation adds scalar abilities to user templates",
+    "correction": "project catalog derives serialized ability mode from authenticated Vec presence while retaining scalar source admission"
+  },
+  "completeOwnerPackageKeys": true,
+  "artifactCodecConnected": false,
+  "cacheConsumerConnected": false,
+  "publicCliChanged": false,
+  "sdkAbiChanged": false,
+  "productStackChanged": false,
+  "productTimeoutChanged": false,
+  "pushed": false,
+  "remaining": [
+    "verified artifact codec, lookup, publication and reuse",
+    "latest whole-source fixed point",
+    "product defaults and performance",
+    "Linux/full suite/same-head hosted CI"
+  ]
+}

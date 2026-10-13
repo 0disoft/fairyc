@@ -4,7 +4,7 @@ Whole-package cache-key v4 encoding is now verified in the
 [2026-10-14 cache-key checkpoint](candidate-package-cache-key-20261014.md).
 Source-generic cache-key v0 encoding is also verified in the
 [generic cache-key checkpoint](candidate-generic-cache-key-20261014.md).
-Complete-owner facts and actual verified artifact reuse remain open.
+Actual verified artifact reuse remains open.
 The checked-owner state-body member is now derived and verified in the
 [body-identity checkpoint](candidate-cache-body-identity-20261014.md).
 Complete original specialization membership is now retained and verified in the
@@ -15,7 +15,8 @@ The actual running Windows compiler image identity is now verified in the
 [compiler identity checkpoint](candidate-compiler-identity-20261014.md).
 The actual candidate-owned IR cache environment is now verified in the
 [environment checkpoint](candidate-cache-environment-20261014.md).
-Complete-owner package key composition and actual artifact reuse remain open.
+Complete-owner v4/v0 package keys now match Go canonical preimages; see the
+[composition receipt](evidence/candidate-complete-cache-keys-20261014.json). Verified artifact reuse remains open.
 
 Current source-identified build/run integration:
 [2026-10-14 native checkpoint](candidate-identified-native-20261014.md).
