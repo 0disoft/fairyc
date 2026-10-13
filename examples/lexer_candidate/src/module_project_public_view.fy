@@ -25,6 +25,9 @@ pub fn usize type_count(ref View p){return v::len<types::Type>(ref p.types);}
 pub fn types::Type type_at(ref View p,usize id){assert(id>0 && id<=type_count(p));return *v::at<types::Type>(ref p.types,id-1);}
 pub fn ref v::Vec<types::Type> type_records(ref View p){return ref p.types;}
 pub fn ref ids::Table type_names(ref View p){return ref p.identities;}
+pub fn ref v::Vec<records::Shape> shape_records(ref View p){return ref p.shapes;}
+pub fn ref v::Vec<records::Field> field_records(ref View p){return ref p.fields;}
+pub fn ref bytes::Buffer name_records(ref View p){return ref p.names;}
 pub fn usize shape_count(ref View p){return v::len<records::Shape>(ref p.shapes);}
 pub fn records::Shape shape_at(ref View p,usize index){return *v::at<records::Shape>(ref p.shapes,index);}
 pub fn usize field_count(ref View p){return v::len<records::Field>(ref p.fields);}

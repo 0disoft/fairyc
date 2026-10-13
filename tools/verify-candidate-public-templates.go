@@ -19,6 +19,7 @@ import (
 	"github.com/0disoft/fairyc/internal/genericplan"
 	"github.com/0disoft/fairyc/internal/genericsource"
 	"github.com/0disoft/fairyc/internal/hir"
+	"github.com/0disoft/fairyc/internal/moduleinterface"
 	"github.com/0disoft/fairyc/internal/packagegraph"
 	"github.com/0disoft/fairyc/internal/semantic"
 	"github.com/0disoft/fairyc/internal/source"
@@ -146,13 +147,17 @@ func readFixture(path string) ([]fixture, error) {
 	result = append(result, private)
 	return result, nil
 }
-func run(inputPath, output string) error {
+func run(inputPath, output string, descriptors bool) error {
 	cases, err := readFixture(inputPath)
 	if err != nil {
 		return err
 	}
 	var wire bytes.Buffer
-	wire.WriteString("FYGPUB01")
+	if descriptors {
+		wire.WriteString("FYGPDES1")
+	} else {
+		wire.WriteString("FYGPUB01")
+	}
 	number := func(n int) { _ = binary.Write(&wire, binary.BigEndian, uint64(n)) }
 	field := func(b []byte) { number(len(b)); wire.Write(b) }
 	number(len(cases))
@@ -225,6 +230,11 @@ func run(inputPath, output string) error {
 		slices.Sort(digits)
 		number(len(digits))
 		total := 0
+		descriptorBytes := 0
+		generated := map[string]bool{}
+		for _, name := range prepared.GeneratedNames {
+			generated[name] = true
+		}
 		counts := map[int]int{}
 		for _, digit := range digits {
 			number(digit)
@@ -243,10 +253,30 @@ func run(inputPath, output string) error {
 			}
 			field([]byte(analysis.OrdinaryInterfaces[hir.PackageID(digit)].String()))
 			field([]byte(analysis.Interfaces[hir.PackageID(digit)].String()))
+			if descriptors {
+				descriptor, err := moduleinterface.Extract(analysis.Analysis.Semantic.HIR, hir.PackageID(digit), coordinates)
+				if err != nil {
+					return err
+				}
+				for i := range descriptor.Modules {
+					descriptor.Modules[i].Items = slices.DeleteFunc(descriptor.Modules[i].Items, func(item moduleinterface.Item) bool { return generated[item.Name] })
+				}
+				encoded, err := moduleinterface.Encode(descriptor)
+				if err != nil {
+					return err
+				}
+				hash, err := moduleinterface.Compute(descriptor)
+				if err != nil || hash != analysis.OrdinaryInterfaces[hir.PackageID(digit)] {
+					return fmt.Errorf("%s public descriptor hash differs from compiler publication: %v", f.label, err)
+				}
+				field(encoded)
+				descriptorBytes += len(encoded)
+			}
+
 			counts[digit] = len(templates)
 			total += len(templates)
 		}
-		reports = append(reports, map[string]any{"case": f.label, "modules": len(inputs), "publicTemplates": total, "packageCounts": counts, "flowCompleted": analysis.Analysis.Semantic.CompletedThrough == semantic.PhaseFlow})
+		reports = append(reports, map[string]any{"case": f.label, "modules": len(inputs), "publicTemplates": total, "packageCounts": counts, "flowCompleted": analysis.Analysis.Semantic.CompletedThrough == semantic.PhaseFlow, "descriptorBytes": descriptorBytes})
 	}
 	if wire.Len() > 131072 {
 		return fmt.Errorf("fixture exceeds the authored reader bound")
@@ -262,12 +292,13 @@ func run(inputPath, output string) error {
 func main() {
 	input := flag.String("input", "", "original Go dependency fixture")
 	output := flag.String("output", "", "bounded public-template fixture output")
+	descriptors := flag.Bool("descriptors", false, "append exact published ordinary descriptor bytes in a separate FYGPDES1 fixture")
 	flag.Parse()
 	if *input == "" || *output == "" {
 		fmt.Fprintln(os.Stderr, "explicit input/output required")
 		os.Exit(2)
 	}
-	if err := run(*input, *output); err != nil {
+	if err := run(*input, *output, *descriptors); err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}

@@ -65,6 +65,11 @@ fn Result<Interfaces,join::Problem> build_mode(ref v::Vec<syntax::Parsed> source
     let owned=switch(signatures::own_types(metadata,graph)){case .ok(g):{g}case .err(code):{return .err(meter::fail(code,0,0,0));}};
     return .ok(Interfaces{.region_error,.region_arena,.graph=owned,.shapes,.fields,.callables,.parameters,.annotations=roots,.specializations,.body_types=demanded,.names,.work=budget.work,.first=binding::first(bound),.stop=binding::stop(bound)});
 }
+// Immutable declaration records shared by public descriptor consumers.
+pub fn ref v::Vec<types::Type> type_records(ref Interfaces p){return types::graph_records(ref p.graph);}
+pub fn ref v::Vec<Shape> shape_records(ref Interfaces p){return ref p.shapes;}
+pub fn ref v::Vec<Field> field_records(ref Interfaces p){return ref p.fields;}
+pub fn ref bytes::Buffer name_records(ref Interfaces p){return ref p.names;}
 pub fn usize type_count(ref Interfaces p){return types::graph_count(ref p.graph);}
 pub fn types::Type type_at(ref Interfaces p,usize id){return types::graph_at(ref p.graph,id);}
 pub fn usize shape_count(ref Interfaces p){return v::len<Shape>(ref p.shapes);}
