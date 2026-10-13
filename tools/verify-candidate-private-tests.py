@@ -20,6 +20,16 @@ def save(path, value):
     path.write_text(json.dumps(value, indent=2) + '\n', encoding='utf-8', newline='\n')
 
 
+def private_source_path(original, main_source, native_program):
+    if original == main_source:
+        return Path('src/main.fy')
+    if native_program and original.is_relative_to(PROJECT / 'tests'):
+        # A normal src/main cannot import test-only modules. Keep their
+        # logical tests:: names but load private fixture copies as source.
+        return Path('src/tests') / original.relative_to(PROJECT / 'tests')
+    return original.relative_to(PROJECT)
+
+
 def package_key_ledger(data, image):
     """Check compiler binding and full canonical preimages independently."""
     assert len(data) <= 4 * 1048576 and data[:8] == b'FYCKOUT1', 'invalid key ledger'
@@ -210,7 +220,7 @@ def main():
             originals = ([main_source] if args.native_program else [test_source]) + [path for path in paths[1:] if path.is_relative_to(PROJECT)]
             manifest_bytes = (PROJECT / 'fairy.toml').read_bytes()
             source_inputs.append(dict(path=(PROJECT / 'fairy.toml').relative_to(ROOT).as_posix(), sha256=hashlib.sha256(manifest_bytes).hexdigest()))
-            fingerprint = hashlib.sha256(manifest_bytes + b''.join(str(Path('src/main.fy') if path == main_source else path.relative_to(PROJECT)).encode() + bytes.fromhex(digest(path)) for path in originals)).hexdigest()
+            fingerprint = hashlib.sha256(manifest_bytes + b''.join(str(private_source_path(path, main_source, args.native_program)).encode() + bytes.fromhex(digest(path)) for path in originals)).hexdigest()
             native_project = output / ('native-project-' + fingerprint[:20])
             native_project.mkdir(parents=True, exist_ok=True)
             native_manifest = native_project / 'fairy.toml'
@@ -218,7 +228,7 @@ def main():
             copied_inputs.append((native_manifest, hashlib.sha256(manifest_bytes).hexdigest()))
             expected_sources = set()
             for original in originals:
-                destination = native_project / 'src/main.fy' if original == main_source else native_project / original.relative_to(PROJECT)
+                destination = native_project / private_source_path(original, main_source, args.native_program)
                 destination.parent.mkdir(parents=True, exist_ok=True)
                 destination.write_bytes(original.read_bytes())
                 copied_inputs.append((destination, digest(original)))
