@@ -5,6 +5,9 @@ import module_project_compile as compile;
 import module_unit_body_ir_model as ir;
 import module_unit_cleanup_mir_model as clean;
 import module_unit_c_emit as c;
+import module_identified_c as identified_c;
+import module_unit_c_names as names;
+import c_text as c_text;
 import module_unit_interfaces as typed;
 import module_unit_generics as generics;
 import module_unit_bind as binding;
@@ -69,3 +72,18 @@ fn void identified_compilation_preserves_type_move_and_borrow_failure_gates(){va
 @test
 @effects(filesystem,console)
 fn void failed_identity_attachment_returns_no_checked_prefix(){let sources=sources();let metadata=signatures_for(ref sources,0);let original=planned(ref sources,0);var usize work=16777216;switch(compile::range_identified(ref sources,ref metadata,ref original,0,1,ref mut work)){case .ok(_):{assert(false);}case .err(e):{assert(e.stage==8 && e.code==10 && e.first==0 && e.stop==1);}};let shifted=planned(ref sources,19);work=0;switch(compile::range_identified(ref sources,ref metadata,ref shifted,0,1,ref mut work)){case .ok(_):{assert(false);}case .err(e):{assert(e.stage==8 && e.code==9);}};}
+
+fn usize entry(ref identified::Program actual){let program=identified::ir_program(actual);var usize i=1;while(i<=ir::count(program)){let f=clean::frame_at(ir::cleanup_ir(program),i);if(f.module_index==0 && f.kind==3 && f.result!=0 && clean::type_at(ir::cleanup_ir(program),f.result).kind==1 && clean::type_at(ir::cleanup_ir(program),f.result).scalar==1){return i;}i+=1;}assert(false);return 0;}
+fn usize occurrences(ref u8[] text,ref u8[] name){assert(name.len!=0);var usize count=0;var usize i=0;while(i<=text.len && name.len<=text.len-i){if(bytes::equal(text[i..i+name.len],name)){count+=1;}i+=1;}return count;}
+@test
+@effects(filesystem,console)
+fn void c_source_names_match_prototypes_calls_and_cleanup_glue(){let actual=compiled();let program=identified::ir_program(ref actual);var usize work=0;let named=switch(names::build(ref actual,ref mut work)){case .ok(p):{p}case .err(_):{assert(false);return;}};var bytes::Buffer output=bytes::empty();assert(identified_c::render(ref actual,entry(ref actual),ref mut output).code==0);var usize i=1;var usize functions=0;var usize cleanups=0;
+while(i<=ir::count(program)){let f=clean::frame_at(ir::cleanup_ir(program),i);let row=identified::frame_at(ref actual,i);var bytes::Buffer emitted=bytes::empty();var c_text::State state=c_text::State{.code=0};assert(names::function(ref named,i,ref mut emitted,ref mut state));var bytes::Buffer expected=bytes::empty();if(row.node!=0){assert(bytes::append(ref mut expected,if(f.kind==2){b"fy_cleanup_"}else{b"fy_fn_"}).is_ok && bytes::append(ref mut expected,identified::identity(ref actual,row)).is_ok);assert(occurrences(bytes::view(ref output),bytes::view(ref expected))>=if(f.kind==2){3}else{2});if(f.kind==2){cleanups+=1;}else{functions+=1;}}else{assert(bytes::append(ref mut expected,b"fy_fn_").is_ok && bytes::append_usize(ref mut expected,i).is_ok);}assert(bytes::equal(bytes::view(ref expected),bytes::view(ref emitted)));let body=ir::at(program,i);var usize j=0;while(j<ir::call_count(body)){let call=ir::call_at(body,j);if(call.kind==2){let target=switch(identified::call_frame(ref actual,i,j,ref mut work)){case .ok(n):{n}case .err(_):{assert(false);0}};var bytes::Buffer target_name=bytes::empty();state.code=0;assert(names::function(ref named,target,ref mut target_name,ref mut state) && bytes::append_byte(ref mut target_name,40).is_ok);assert(occurrences(bytes::view(ref output),bytes::view(ref target_name))>=3);}j+=1;}i+=1;}assert(functions==5 && cleanups==6 && names::count(ref named)==ir::count(program));}
+@effects(filesystem,console)
+fn names::Table detached_names(){let actual=compiled();var usize work=0;return switch(names::build(ref actual,ref mut work)){case .ok(p):{p}case .err(_):{assert(false);detached_names()}};}
+@test
+@effects(filesystem,console)
+fn void c_name_ownership_work_limits_and_failed_render_preserve_output(){let actual=compiled();var usize measured=0;let named=switch(names::build(ref actual,ref mut measured)){case .ok(p):{p}case .err(_):{assert(false);return;}};assert(measured>0 && names::work(ref named)==measured);var usize work=1048576-measured;assert(switch(names::build(ref actual,ref mut work)){case .ok(_):{true}case .err(_):{false}} && work==1048576);work=1048576-measured+1;assert(switch(names::build(ref actual,ref mut work)){case .ok(_):{false}case .err(e):{e.code==1002}});let saved=detached_names();var bytes::Buffer output=bytes::empty();var c_text::State state=c_text::State{.code=0};var usize i=1;while(i<=names::count(ref saved)){assert(names::function(ref saved,i,ref mut output,ref mut state));i+=1;}assert(bytes::len(ref output)>0);let before=bytes::len(ref output);state.code=1001;assert(!names::function(ref saved,1,ref mut output,ref mut state) && bytes::len(ref output)==before);state.code=0;assert(!names::function(ref saved,names::count(ref saved)+1,ref mut output,ref mut state) && state.code==1001 && bytes::len(ref output)==before);assert(identified_c::render(ref actual,0,ref mut output).code==1001 && bytes::len(ref output)==before);}
+@test
+@effects(filesystem,console)
+fn void c_named_program_native_transport(){let actual=compiled();var bytes::Buffer output=bytes::empty();let result=identified_c::render(ref actual,entry(ref actual),ref mut output);if(result.code!=0){discard io::write_stderr_u32(result.code);}assert(result.code==0 && bytes::len(ref output)>1000);assert(io::write_bytes(bytes::view(ref output)).is_ok);}

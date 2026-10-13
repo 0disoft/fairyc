@@ -4,6 +4,7 @@ import hashlib
 import json
 from pathlib import Path
 import re
+import struct
 import subprocess
 import time
 
@@ -29,6 +30,7 @@ def main():
     parser.add_argument('--selected-tests-only', action='store_true', help='verify only explicitly selected authored tests instead of requiring the entire module')
     parser.add_argument('--frontend-timeout', type=int, default=60, help='verification-only candidate frontend allowance, 1..900 seconds')
     parser.add_argument('--execution-timeout', type=int, default=60, help='verification-only combined candidate test image allowance, 1..900 seconds')
+    parser.add_argument('--stack-reserve-bytes', type=int, default=0, help='private compiler API test stack: zero/default or 64KiB aligned in [64KiB,16MiB]')
     parser.add_argument('--output', type=Path, required=True)
     parser.add_argument('--fixture', type=Path, help='hash and forward one binary oracle fixture to every execution')
     parser.add_argument('--candidate-only', action='store_true', help='execute private host-ABI tests only through candidate C; Go native cannot link these private adapters')
@@ -42,6 +44,8 @@ def main():
         parser.error('frontend timeout must be in 1..900 seconds')
     if not 1 <= args.execution_timeout <= 900:
         parser.error('execution timeout must be in 1..900 seconds')
+    if args.stack_reserve_bytes != 0 and not (65536 <= args.stack_reserve_bytes <= 16777216 and args.stack_reserve_bytes % 65536 == 0):
+        parser.error('stack reserve must be zero or 64KiB aligned in [64KiB,16MiB]')
     if args.isolated_native and args.candidate_only:
         parser.error('isolated-native requires Go native execution')
     if not __debug__:
@@ -185,7 +189,11 @@ def main():
     executions = []
     for profile, flags in [('development', []), ('release', ['--release'])]:
         image = output / (profile + '.exe')
-        run([args.builder.resolve(), '--packet', packet_path, '--packet-sha256', digest(packet_path), '--output', image, *flags], timeout=600)
+        run([args.builder.resolve(), '--packet', packet_path, '--packet-sha256', digest(packet_path), '--output', image, *flags, *(['--stack-reserve-bytes', str(args.stack_reserve_bytes)] if args.stack_reserve_bytes else [])], timeout=600)
+        if args.stack_reserve_bytes:
+            pe = image.read_bytes()
+            offset = struct.unpack_from('<I', pe, 60)[0] + 24
+            assert struct.unpack_from('<H', pe, offset)[0] == 0x20b and struct.unpack_from('<Q', pe, offset + 72)[0] == args.stack_reserve_bytes, 'PE stack reserve differs from the explicit test setting'
         executed = run([image, *arguments],timeout=args.execution_timeout,stdin=streams.get('stdin'),stderr=streams.get('stderr',b''))
         assert executed.stdout == streams.get('stdout',b''), invocations[-1]
         executions.append(dict(profile=profile, path=str(image), sha256=digest(image), exit=executed.returncode))
@@ -197,6 +205,7 @@ def main():
     receipt['frontendTimeoutSeconds'] = args.frontend_timeout
     receipt['executionTimeoutSeconds'] = args.execution_timeout
     receipt['productTimeoutChanged'] = False
+    receipt['stackReserveBytes'] = args.stack_reserve_bytes
     receipt['wrapperEffects'] = effects
     if native_isolation:
         receipt['nativeIsolation'] = native_isolation

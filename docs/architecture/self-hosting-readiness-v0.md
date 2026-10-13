@@ -2,6 +2,39 @@
 
 ## Current local candidate evidence (2026-10-13)
 
+### Source-identified C functions and cleanup (2026-10-13)
+
+The identified renderer derives an owned name table from the same checked IR
+owner. Specialized functions use `fy_fn_g0_<digest>`; specialized cleanup bodies
+use `fy_cleanup_g0_<digest>`. Prototypes, definitions, ordinary/deferred calls
+and aggregate drop-glue calls consume that table. Ordinary functions and the
+existing numeric project partition path retain their current spellings. The
+table validates canonical lowercase IDs, rejects same-kind duplicate names,
+owns frame/name bytes, and uses the existing 1MiB work/text bounds. Final C
+publication remains transactional; raw name-table rendering is private.
+
+Three authored tests pass fresh Go native and candidate C development/release.
+Both candidate executions reproduce the complete 37,787-byte Go C output,
+SHA256 `a48bf7c0837cd8980e332d2c270adc8a9e33ed885f2007cc258dd34624e02f98`.
+The output defines five distinct identified functions and six identified Vec
+cleanup bodies. Separately compiled current runtime support and the generated
+program link and return 42 at `/Od` and `/O2`, with ordinary application stacks.
+Tests cover names in prototypes/calls/glue, detached ownership, exact-fit and
+exhausted work, sticky writer failure and unchanged output on invalid entry.
+
+The first candidate replay hit stage-4 code 10 in the enlarged emitter. Eight
+callable helpers moved unchanged into `module_unit_c_calls`; the emitter is now
+24KiB and the helper 8KiB. The final replay passes in 120.18 seconds without a
+capacity increase. Root check and locked check pass 433 files / 5582 functions.
+The maintained private-test verifier now accepts an explicit bounded stack
+reserve and checks both PE headers; compiler API images use 16MiB. Product
+defaults, public CLI/API, SDK ABI, DB and CI are unchanged; no push.
+
+Project-wide identity rebinding/deduplication and named partition output, Vec
+type/interface names, precise planning diagnostics and dispatcher/cache consumers
+remain. Latest full-image/fixed-point promotion, default frontend timing, Linux,
+full suite and hosted CI are deferred. Receipt: [evidence](../ops/evidence/candidate-c-source-names-20261013.json).
+
 ### Checked IR identity bridge: current-source C execution (2026-10-13)
 
 A fresh private project driver uses exact copies of 370 current Fairy modules

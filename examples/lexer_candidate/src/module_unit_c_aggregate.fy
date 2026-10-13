@@ -4,6 +4,7 @@ import module_unit_body_ir_lookup as lookup;
 import module_unit_cleanup_mir_model as clean;
 import module_unit_value_model as budget;
 import module_unit_c_scalar as scalar;
+import module_unit_c_names as names;
 import c_text as w;
 import array_types as arrays;
 import scalar_views as views;
@@ -80,11 +81,12 @@ pub fn Result<v::Vec<u8>,u32> definitions(ref ir::Program p,ref mut bytes::Buffe
 }
 fn bool drop_name(ref mut bytes::Buffer out,ref mut w::State s,usize id){return w::text(out,s,b"fy_unit_drop_") && w::number(out,s,id);}
 pub fn bool drop_call(ref ir::Program p,usize id,ref mut bytes::Buffer out,ref mut w::State s){return drop_name(out,s,id) && w::text(out,s,b"(");}
-pub fn bool drops(ref ir::Program p,ref v::Vec<u8> marks,ref mut bytes::Buffer out,ref mut w::State s,ref mut usize work){
+pub fn bool drops(ref ir::Program p,ref v::Vec<u8> marks,ref mut bytes::Buffer out,ref mut w::State s,ref mut usize work){let named=names::empty();return drops_named(p,ref named,marks,out,s,work);}
+pub fn bool drops_named(ref ir::Program p,ref names::Table named,ref v::Vec<u8> marks,ref mut bytes::Buffer out,ref mut w::State s,ref mut usize work){
     let indexed=switch(layouts::build(p,work)){case .ok(index):{index}case .err(e):{s.code=e;return false;}};
     let c=ir::cleanup_ir(p);var usize i=1;while(i<=clean::type_count(c)){if(*v::at<u8>(marks,i-1)==2 && clean::glue_at(c,i).kind!=0){if(!w::text(out,s,b"static void ") || !drop_name(out,s,i) || !w::text(out,s,b"(") || !type(p,i,out,s) || !w::text(out,s,b" *fy_owner);\n")){return false;}}i+=1;}
     i=1;while(i<=clean::type_count(c)){let g=clean::glue_at(c,i);if(*v::at<u8>(marks,i-1)==2 && g.kind!=0){if(!budget::charge(work,1)){s.code=1002;return false;}let t=clean::type_at(c,i);if(!w::text(out,s,b"static void ") || !drop_name(out,s,i) || !w::text(out,s,b"(") || !type(p,i,out,s) || !w::text(out,s,b" *fy_owner){\n")){return false;}
-            if(g.kind==1){if(g.frame!=0 && (!w::function(out,s,g.frame) || !w::text(out,s,b"(fy_owner);\n"))){return false;}let index=layouts::find(ref indexed,i,work,ref mut s.code);if(index==0){if(s.code==0){s.code=1001;}return false;}let shape=ir::layout_at(p,index-1).value;var usize j=g.field_count;while(j>0){j-=1;if(!budget::charge(work,1)){s.code=1002;return false;}let f=clean::field_at(c,g.field_start+j);if(clean::glue_at(c,f.type).kind!=0 && (!drop_call(p,f.type,out,s) || !w::text(out,s,b"&fy_owner->") || !field(out,s,shape.field_start+j+1) || !w::text(out,s,b");\n"))){return false;}}}
+            if(g.kind==1){if(g.frame!=0 && (!names::function(named,g.frame,out,s) || !w::text(out,s,b"(fy_owner);\n"))){return false;}let index=layouts::find(ref indexed,i,work,ref mut s.code);if(index==0){if(s.code==0){s.code=1001;}return false;}let shape=ir::layout_at(p,index-1).value;var usize j=g.field_count;while(j>0){j-=1;if(!budget::charge(work,1)){s.code=1002;return false;}let f=clean::field_at(c,g.field_start+j);if(clean::glue_at(c,f.type).kind!=0 && (!drop_call(p,f.type,out,s) || !w::text(out,s,b"&fy_owner->") || !field(out,s,shape.field_start+j+1) || !w::text(out,s,b");\n"))){return false;}}}
             else{if(clean::glue_at(c,t.first).kind!=0 && (!w::text(out,s,b"if(fy_owner->fy_tag){") || !drop_call(p,t.first,out,s) || !w::text(out,s,b"&fy_owner->fy_payload.fy_ok);}\n"))){return false;}if(g.kind==3 && clean::glue_at(c,t.second).kind!=0 && (!w::text(out,s,b"if(!fy_owner->fy_tag){") || !drop_call(p,t.second,out,s) || !w::text(out,s,b"&fy_owner->fy_payload.fy_err);}\n"))){return false;}}
             if(!w::text(out,s,b"}\n")){return false;}}i+=1;}return true;
 }

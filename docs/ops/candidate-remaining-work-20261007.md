@@ -1,5 +1,28 @@
 # Fairy 컴파일러 전환: 후속 작업 목록
 
+## Source-identified C functions and cleanup (2026-10-13)
+
+The identified renderer names specialized functions `fy_fn_g0_<digest>` and
+cleanup bodies `fy_cleanup_g0_<digest>`. One owned table supplies prototypes,
+definitions, calls and aggregate glue; raw table rendering stays private.
+Three new tests pass Go native and candidate C development/release, including
+detachment, work boundaries and preserved output on failure. Both candidate
+profiles reproduce all 37,787 Go C bytes. The generated program links with
+separate current runtime support and returns 42 at `/Od` and `/O2` with ordinary
+application stacks. Five function and six Vec cleanup definitions are distinct.
+
+A first stage-4 work failure in the enlarged emitter is resolved by moving eight
+callable helpers into a separate module. No capacity/timeout default changes.
+The final candidate replay takes 120.18 seconds; root check and locked check pass
+433 files / 5582 MIR functions. Private compiler API tests explicitly use 16MiB
+stacks, checked by the maintained verifier's new optional stack setting.
+
+Next: project identity rebinding/deduplication and named C partitions, then Vec
+type/public-interface names and dispatcher/cache publication. The existing
+numeric project path is still in use. Latest full dispatcher/fixed point, product
+timing, Linux/full suite/hosted CI remain open. Public API, SDK ABI, DB and CI
+are unchanged; no push. Receipt: [evidence](evidence/candidate-c-source-names-20261013.json).
+
 ## Checked IR identity bridge: current-source C execution (2026-10-13)
 
 A fresh private driver retains exact copies of 370 current Fairy modules and a
