@@ -13,6 +13,10 @@ pub fn usize source_set_bytes(){return 4194304;}
 pub fn usize source_files(){return 512;}
 pub fn usize manifest_bytes(){return 65536;}
 
+// The source-identified dispatcher exceeds 4096 original declarations.
+// This catalog bound is separate from executable callables, types and frames.
+pub fn usize project_declarations(){return 8192;}
+
 // Imported layouts combine fields from multiple original source owners.
 // The source parser and joined AST retain their separate 1024-field caps.
 pub fn usize metadata_fields(){return 2048;}

@@ -1,0 +1,89 @@
+{
+  "schema": "fairyc.candidate-declaration-capacity/v1",
+  "date": "2026-10-14",
+  "passed": true,
+  "sourceInputs": [
+    {
+      "path": "examples/lexer_candidate/src/module_catalog.fy",
+      "sha256": "1a025ad3452dcd9dd9302802ab6202ea2ccb47a9d6404063c44f32fac9920657"
+    },
+    {
+      "path": "examples/lexer_candidate/src/candidate_limits.fy",
+      "sha256": "9ccb39257c906b122735737fe3967b09ce017684d27a44a4d36dca86950ff1f6"
+    },
+    {
+      "path": "examples/lexer_candidate/tests/module_catalog_capacity.fy",
+      "sha256": "5cecb2a9f4e7dc42ccd7acbefc869167569edc992f06203ef3c0d48cc97ae2a5"
+    },
+    {
+      "path": "examples/lexer_candidate/fairy.lock",
+      "sha256": "01665887c1800cafcef5816e6ebc2780ee4f89d18b348319d804fbc619684221"
+    }
+  ],
+  "sourceCheck": {
+    "files": 448,
+    "mirFunctions": 5821
+  },
+  "tests": {
+    "native": 2,
+    "candidateExecutions": [
+      {
+        "profile": "development",
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\catalog-capacity-20261014-verified\\development.exe",
+        "sha256": "c805693700919990a4fa973a1db3aafdb86e23c84ec594762caa17490b01662a",
+        "exit": 0
+      },
+      {
+        "profile": "release",
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\catalog-capacity-20261014-verified\\release.exe",
+        "sha256": "1f4373e540e61bbfaf9d3e74d0440ec46b6fd6f8f56af50ade5d603bf46dfbee",
+        "exit": 0
+      }
+    ]
+  },
+  "candidatePacketSHA256": "721715b8c11f7b44d5062c237bfa2a08088967cc83988213481b3370303a552e",
+  "tools": {
+    "compiler": {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-frontend-oracle-current-20261012.exe",
+      "sha256": "3ecc4501ee3bb47ecc39e7288200266b31cbcd8bf6ffec302ae54867705ce5d1"
+    },
+    "candidate": {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-cleanup-20261013\\current-driver\\driver-release.exe",
+      "sha256": "67be18bdabb9d6499edcfcd8b7d3e3245dd932fd265ba79ab4cd7136748ec0ac"
+    },
+    "builder": {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-rooted-builder-stack-20261012.exe",
+      "sha256": "02abe2328daa9921705910c7b995e82c1312cb960fe024106c11468569aefff0"
+    }
+  },
+  "capacity": {
+    "originalDeclarations": 8192,
+    "perFile": 128,
+    "executableCallables": 4096
+  },
+  "fullDispatcherFailure": {
+    "argv": [
+      "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-cleanup-20261013\\current-driver\\driver-release.exe",
+      "--c-project-file",
+      "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\identified-native-cli-20261014\\sources.list"
+    ],
+    "seconds": 0.8598873000009917,
+    "exit": 2,
+    "stdoutBytes": 0,
+    "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stderr": "internal/sdkstdlib/sources/std/fs.fy:258:1: error: project phase 1 stage 0 code 10 (bytes 7254..7366)\n"
+  },
+  "fullDispatcherPassed": false,
+  "failedTestConstruction": [
+    "unsupported Option.is_some field",
+    "conditional move of source buffer"
+  ],
+  "stackReserveBytes": 16777216,
+  "productStackChanged": false,
+  "productTimeoutChanged": false,
+  "publicApiChanged": false,
+  "sdkAbiChanged": false,
+  "dbChanged": false,
+  "ciChanged": false,
+  "pushed": false
+}
