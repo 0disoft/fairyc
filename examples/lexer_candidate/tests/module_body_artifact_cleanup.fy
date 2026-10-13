@@ -1,0 +1,6 @@
+module tests::module_body_artifact_cleanup;
+import module_unit_cleanup_mir_model as clean_ir;
+import module_types as types;
+import std::vec as v;
+fn clean_ir::Program build_private(){var v::Vec<types::Type> graph=v::empty<types::Type>();assert(v::push<types::Type>(ref mut graph,types::Type{.kind=1,.scalar=1,.module_index=0,.declaration=0,.first=0,.second=0}).is_ok && v::push<types::Type>(ref mut graph,types::Type{.kind=1,.scalar=7,.module_index=0,.declaration=0,.first=0,.second=0}).is_ok);var v::Vec<clean_ir::Glue> glues=v::empty<clean_ir::Glue>();var usize i=0;while(i<2){assert(v::push<clean_ir::Glue>(ref mut glues,clean_ir::Glue{.kind=0,.frame=0,.nonempty=false,.effects=0,.abilities=0,.field_start=0,.field_count=0}).is_ok);i+=1;}var v::Vec<clean_ir::Frame> frames=v::empty<clean_ir::Frame>();assert(v::push<clean_ir::Frame>(ref mut frames,clean_ir::Frame{.kind=1,.context=1,.module_index=0,.declaration=1,.result=1,.effects=0,.receiver=0,.receiver_type=0}).is_ok);return switch(clean_ir::assemble(graph,frames,glues,v::empty<clean_ir::Field>(),v::empty<clean_ir::Operand>(),v::empty<clean_ir::Drop>(),0)){case .ok(p):{p}case .err(_):{assert(false);return build();}};}
+pub fn clean_ir::Program build(){return build_private();}

@@ -1,0 +1,78 @@
+module tests::module_body_artifact;
+import tests::module_body_artifact_sample as sample;
+import module_body_artifact_encode as encoder;
+import module_body_artifact_decode as decoder;
+import module_body_artifact_wire as wire;
+import candidate_artifact_wire as common;
+import module_unit_body_ir_model as ir;
+import module_unit_body_ir_verify as proof;
+import module_unit_cleanup_mir_model as clean_ir;
+import module_types as types;
+import module_unit_value_model as values;
+import module_unit_region_model as regions;
+import module_unit_interfaces as interfaces;
+import module_unit_body_ir_lower as lower;
+import module_unit_moves as moves;
+import module_unit_values as typed_values;
+import module_unit_bind as binding;
+import module_unit_call_closure as closure;
+import module_signatures as signatures;
+import syntax as syntax;
+import scanner as scanner;
+import file_source as files;
+import std::process as process;
+import std::bytes as bytes;
+import std::vec as v;
+import std::io as io;
+resource Fixture{bytes::Buffer golden;bytes::Buffer allocator;cleanup{}}
+@effects(filesystem) fn Fixture fixture(){var u8[4096] path=[0;4096];let n=switch(process::arg(1,ref mut path)){case .ok(n):{n}case .err(_):{assert(false);0}};let ref u8[] view=ref path;let data=switch(files::manifest(view[..n])){case .ok(p):{p}case .err(_):{assert(false);return fixture();}};let raw=bytes::view(ref data);var usize work=0;var cursor=switch(wire::cursor(raw,b"FYBGOLD0",ref mut work)){case .ok(c):{c}case .err(_):{assert(false);return fixture();}};let golden=wire::blob_from(raw,ref mut cursor,65536,ref mut work);let allocator=wire::blob_from(raw,ref mut cursor,65536,ref mut work);assert(wire::end(raw,ref mut cursor,ref mut work)==0);return Fixture{.golden,.allocator};}
+fn ref u8[] golden(ref Fixture p){return bytes::view(ref p.golden);}
+fn ref u8[] allocator(ref Fixture p){return bytes::view(ref p.allocator);}
+@effects(console) fn common::Payload encoded(ref ir::Program p,usize frame,ref mut usize work){return switch(encoder::encode(p,frame,work)){case .ok(p):{p}case .err(code):{discard io::write_stderr_u32(code);assert(false);return encoded(p,frame,work);}};}
+@effects(console) fn ir::Body decoded(ref u8[] raw,ref clean_ir::Program cleaned,usize frame,ref mut usize work){return switch(decoder::decode(raw,cleaned,frame,work)){case .ok(p):{p}case .err(code):{discard io::write_stderr_u32(code);assert(false);return decoded(raw,cleaned,frame,work);}};}
+fn bytes::Buffer copied(ref u8[] raw){return switch(bytes::copy(raw)){case .ok(p):{p}case .err(_):{assert(false);return copied(raw);}};}
+fn u32 rejected(ref u8[] raw,ref clean_ir::Program cleaned,usize frame){var usize work=0;return switch(decoder::decode(raw,cleaned,frame,ref mut work)){case .ok(_):{0}case .err(code):{code}};}
+fn void same_node(ir::Node a,ir::Node b){assert(a.value.constant==b.value.constant && a.value.constant_bits==b.value.constant_bits && a.value.source_index==b.value.source_index && a.value.binding==b.value.binding && a.value.kind==b.value.kind && a.value.start==b.value.start && a.value.end==b.value.end && a.value.left==b.value.left && a.value.right==b.value.right && a.value.target==b.value.target && a.value.field.id==b.value.field.id && a.value.field.owner==b.value.field.owner && a.value.field.module_index==b.value.field.module_index && a.value.field.declaration==b.value.field.declaration && a.value.field.source_index==b.value.field.source_index && a.value.place.kind==b.value.place.kind && a.value.place.root==b.value.place.root && a.value.place.scope==b.value.place.scope && a.value.place.projection==b.value.place.projection && a.value.place.mutable==b.value.place.mutable && a.value.place.indirect==b.value.place.indirect && a.value.place.resource_field==b.value.place.resource_field && a.value.place.borrowable==b.value.place.borrowable && a.value.builtin.kind==b.value.builtin.kind && a.value.builtin.element==b.value.builtin.element && a.value.builtin.slice==b.value.builtin.slice && a.value.builtin.unsafe_context==b.value.builtin.unsafe_context && a.value.expected==b.value.expected && a.value.type==b.value.type && a.value.state==b.value.state && a.value.flexible==b.value.flexible && a.value.minimum==b.value.minimum && a.syntax.kind==b.syntax.kind && a.syntax.start==b.syntax.start && a.syntax.end==b.syntax.end && a.syntax.token==b.syntax.token && a.syntax.left==b.syntax.left && a.syntax.right==b.syntax.right && a.literal_kind==b.literal_kind && a.text_start==b.text_start && a.text_end==b.text_end && a.cooked_start==b.cooked_start && a.cooked_end==b.cooked_end);}
+fn void same_statement(ir::Statement a,ir::Statement b){assert(a.source_index==b.source_index && a.value.kind==b.value.kind && a.value.start==b.value.start && a.value.end==b.value.end && a.value.expression==b.value.expression && a.value.target==b.value.target && a.value.first==b.value.first && a.value.second==b.value.second && a.value.entry==b.value.entry && a.value.operator==b.value.operator && a.operator_start==b.operator_start && a.operator_end==b.operator_end);}
+fn void same_local(values::Local a,values::Local b){assert(a.header_start==b.header_start && a.header_end==b.header_end && a.kind==b.kind && a.source_index==b.source_index && a.initializer==b.initializer && a.expected==b.expected && a.type==b.type && a.scope==b.scope && a.origin.kind==b.origin.kind && a.origin.root==b.origin.root && a.origin.scope==b.origin.scope && a.origin.projection==b.origin.projection && a.origin.mutable==b.origin.mutable && a.origin.indirect==b.origin.indirect && a.origin.resource_field==b.origin.resource_field && a.origin.borrowable==b.origin.borrowable && a.start==b.start && a.end==b.end);}
+fn void same_call(values::Invocation a,values::Invocation b){assert(a.kind==b.kind && a.expression==b.expression && a.source_index==b.source_index && a.target_module==b.target_module && a.target_declaration==b.target_declaration && a.instance==b.instance && a.argument_start==b.argument_start && a.argument_count==b.argument_count && a.start==b.start && a.end==b.end && a.checked==b.checked);}
+fn void same_argument(values::Argument a,values::Argument b){assert(a.invocation==b.invocation && a.position==b.position && a.expression==b.expression && a.source_index==b.source_index && a.expected==b.expected && a.actual==b.actual && a.start==b.start && a.end==b.end && a.label_start==b.label_start && a.label_end==b.label_end && a.checked==b.checked && a.shared==b.shared);}
+fn void same_region(regions::Scope a,regions::Scope b){assert(a.parent==b.parent && a.capability==b.capability && a.scope==b.scope && a.statement==b.statement && a.body==b.body && a.source==b.source && a.source_binding==b.source_binding && a.arena_owner==b.arena_owner && a.arena_type==b.arena_type && a.source_type==b.source_type && a.source_mode==b.source_mode && a.start==b.start && a.end==b.end && a.body_start==b.body_start && a.body_end==b.body_end);}
+fn void same_placement(regions::Placement a,regions::Placement b){assert(a.region_id==b.region_id && a.capability==b.capability && a.expression==b.expression && a.argument==b.argument && a.owner_type==b.owner_type && a.borrow_type==b.borrow_type && a.result_type==b.result_type && a.error_type==b.error_type && a.start==b.start && a.end==b.end);}
+fn void same_reset(regions::Exit a,regions::Exit b){assert(a.region_id==b.region_id && a.kind==b.kind && a.group==b.group && a.order==b.order && a.loop==b.loop && a.start==b.start && a.end==b.end);}
+fn void same(ref ir::Body a,ref ir::Body b){assert(ir::body(a)==ir::body(b) && ir::source_bytes(a)==ir::source_bytes(b) && ir::start(a)==ir::start(b) && ir::end(a)==ir::end(b) && bytes::equal(ir::text_view(a),ir::text_view(b)));var usize i=0;
+assert(ir::node_count(a)==ir::node_count(b));i=0;while(i<ir::node_count(a)){same_node(ir::node_at(a,i),ir::node_at(b,i));i+=1;}
+assert(ir::statement_count(a)==ir::statement_count(b));i=0;while(i<ir::statement_count(a)){same_statement(ir::statement_at(a,i),ir::statement_at(b,i));i+=1;}
+assert(ir::local_count(a)==ir::local_count(b));i=0;while(i<ir::local_count(a)){same_local(ir::local_at(a,i+1),ir::local_at(b,i+1));i+=1;}
+assert(ir::call_count(a)==ir::call_count(b));i=0;while(i<ir::call_count(a)){same_call(ir::call_at(a,i),ir::call_at(b,i));i+=1;}
+assert(ir::argument_count(a)==ir::argument_count(b));i=0;while(i<ir::argument_count(a)){same_argument(ir::argument_at(a,i),ir::argument_at(b,i));i+=1;}
+assert(ir::region_count(a)==ir::region_count(b));i=0;while(i<ir::region_count(a)){same_region(ir::region_at(a,i),ir::region_at(b,i));i+=1;}
+assert(ir::placement_count(a)==ir::placement_count(b));i=0;while(i<ir::placement_count(a)){same_placement(ir::placement_at(a,i),ir::placement_at(b,i));i+=1;}
+assert(ir::reset_count(a)==ir::reset_count(b));i=0;while(i<ir::reset_count(a)){same_reset(ir::reset_at(a,i),ir::reset_at(b,i));i+=1;}
+}
+fn syntax::Parsed parsed(ref u8[] text){let b=switch(bytes::copy(text)){case .ok(b):{b}case .err(_):{assert(false);return parsed(b"module empty;");}};let s=switch(scanner::collect(b,false,65536,1048576,256,16777216)){case .ok(s):{s}case .err(_):{assert(false);return parsed(b"module empty;");}};let p=switch(syntax::parse(s,512)){case .ok(p):{p}case .err(_):{assert(false);return parsed(b"module empty;");}};assert(syntax::problem_count(ref p)==0);return p;}
+@effects(console) fn ir::Program retained(ref u8[] root,ref u8[] provider){
+    var v::Vec<syntax::Parsed> sources=v::empty<syntax::Parsed>();assert(v::push<syntax::Parsed>(ref mut sources,parsed(root)).is_ok);if(provider.len!=0){assert(v::push<syntax::Parsed>(ref mut sources,parsed(provider)).is_ok);}
+    let metadata=switch(signatures::build(ref sources)){case .ok(p):{p}case .err(e):{discard io::write_u32(e.code);discard io::write(" before lower\n");assert(false);return retained(root,provider);}};
+    let bound=switch(binding::bind(ref sources,ref metadata,0,v::len<syntax::Parsed>(ref sources))){case .ok(p):{p}case .err(e):{discard io::write_u32(e.code);discard io::write(" before lower\n");assert(false);return retained(root,provider);}};
+    let ready=switch(closure::build(ref sources,ref metadata,ref bound)){case .ok(p):{p}case .err(e):{discard io::write_u32(e.code);discard io::write(" before lower\n");assert(false);return retained(root,provider);}};
+    let typed=switch(typed_values::build(ref sources,ref metadata,ref ready)){case .ok(p):{p}case .err(e):{discard io::write_u32(e.code);discard io::write(" before lower\n");assert(false);return retained(root,provider);}};
+    let moved=switch(moves::build(ref sources,ref typed,typed_values::work(ref typed))){case .ok(p):{p}case .err(e):{discard io::write_u32(e.code);discard io::write(" before lower\n");assert(false);return retained(root,provider);}};
+    return switch(lower::lower(ref sources,ref typed,closure::imported(ref ready),ref moved)){case .ok(p):{p}case .err(e):{discard io::write_u32(e.code);discard io::write(" at ");discard io::write_usize(e.start);discard io::write(".. ");discard io::write_usize(e.end);discard io::write(" lower\n");assert(false);retained(root,provider)}};
+}
+
+@effects(console) fn ir::Body detached(){let p=sample::build();var usize work=0;let payload=encoded(ref p,1,ref mut work);work=0;return decoded(common::content(ref payload),ir::cleanup_ir(ref p),1,ref mut work);}
+@test @effects(filesystem,console)
+fn void body_binary_matches_independent_golden_and_detaches(){let fixture=fixture();let p=sample::build();var usize work=0;let payload=encoded(ref p,1,ref mut work);assert(bytes::equal(common::content(ref payload),golden(ref fixture)));work=0;let restored=detached();same(ir::at(ref p,1),ref restored);}
+@effects(console) fn void roundtrip(ref ir::Program p){var usize frame=1;while(frame<=ir::count(p)){var usize work=0;let payload=encoded(p,frame,ref mut work);work=0;let restored=decoded(common::content(ref payload),ir::cleanup_ir(p),frame,ref mut work);same(ir::at(p,frame),ref restored);frame+=1;}}
+@test @effects(filesystem,console)
+fn void source_body_records_preserve_calls_views_cleanup_and_regions(){let fixture=fixture();
+let a=retained(b"module main;fn i32 f(){let s=\"a\\n\";let c=c\"ok\";let b=b\"\\x00\\xff\";var i32 n=0;for(var i32 i=0;i<3;i+=1){n+=i;}return n;}",b"");roundtrip(ref a);
+let b=retained(b"module main;import provider as p;@effects(console)resource R{i32 n;cleanup{discard 2;}}@effects(console)fn i32 f(){let p::R x=p::make(3);let R y=R{.n=1};return p::number(7);}",b"module provider;@effects(console)pub resource R{i32 n;cleanup{discard 1;}}pub fn R make(i32 n){return R{.n=n};}pub fn i32 number(i32 n){return n;}");roundtrip(ref b);
+let c=retained(b"module main;resource R{i32 n;cleanup{}}resource Pair{R a;R b;i32 n;cleanup{}}fn R make(){return R{.n=1};}fn Result<i32,i32> number(){return .err(1);}fn Result<Pair,i32> f(){return .ok(Pair{.a=make(),.b=make(),.n=number()?});}",b"");roundtrip(ref c);
+let d=retained(b"module main;fn i32 f(){var i32[3] a=[1,2,3];let ref mut i32[] view=ref mut a;for(let ref mut i32 n in view){*n+=1;}return a[0];}",b"");roundtrip(ref d);
+let e=retained(b"module main;import std::alloc as a;fn void f(ref mut a::Arena owner){region r in owner{discard r.place(3);}}",allocator(ref fixture));roundtrip(ref e);var usize regions=0;var usize placements=0;var usize resets=0;var usize i=1;while(i<=ir::count(ref e)){regions+=ir::region_count(ir::at(ref e,i));placements+=ir::placement_count(ir::at(ref e,i));resets+=ir::reset_count(ir::at(ref e,i));i+=1;}assert(regions>0 && placements>0 && resets>0);}
+@test @effects(console)
+fn void body_codec_enforces_exact_work_and_rejects_wrong_frames(){let p=sample::build();var usize cost=0;let payload=encoded(ref p,1,ref mut cost);var usize work=33554432-cost;let exact=encoded(ref p,1,ref mut work);assert(work==33554432 && bytes::equal(common::content(ref payload),common::content(ref exact)));work=33554432-cost+1;assert(switch(encoder::encode(ref p,1,ref mut work)){case .ok(_):{false}case .err(code):{code==1002}} && work<=33554432);cost=0;let restored=decoded(common::content(ref payload),ir::cleanup_ir(ref p),1,ref mut cost);work=33554432-cost;let fit=decoded(common::content(ref payload),ir::cleanup_ir(ref p),1,ref mut work);assert(work==33554432);same(ref restored,ref fit);work=33554432-cost+1;assert(switch(decoder::decode(common::content(ref payload),ir::cleanup_ir(ref p),1,ref mut work)){case .ok(_):{false}case .err(code):{code==1002}} && work<=33554432);work=33554433;assert(switch(decoder::decode(common::content(ref payload),ir::cleanup_ir(ref p),1,ref mut work)){case .ok(_):{false}case .err(code):{code==1002}} && work==33554433);assert(rejected(common::content(ref payload),ir::cleanup_ir(ref p),0)==1001 && rejected(common::content(ref payload),ir::cleanup_ir(ref p),2)==1001);}
+@test @effects(console)
+fn void body_codec_rejects_truncation_mismatched_links_and_noncanonical_scalars(){let p=sample::build();var usize work=0;let payload=encoded(ref p,1,ref mut work);let raw=common::content(ref payload);assert(raw.len==754);var usize i=0;while(i<raw.len){assert(rejected(raw[..i],ir::cleanup_ir(ref p),1)!=0);i+=1;}var bytes::Buffer trailing=copied(raw);assert(bytes::append_byte(ref mut trailing,0).is_ok && rejected(bytes::view(ref trailing),ir::cleanup_ir(ref p),1)==1001);var u32 mode=0;while(mode<8){var bytes::Buffer changed=copied(raw);let view=bytes::view_mut(ref mut changed);if(mode==0){view[7]=49;}else if(mode==1){view[15]=2;}else if(mode==2){view[48]=255;}else if(mode==3){view[88]=1;}else if(mode==4){view[64]=1;}else if(mode==5){view[311]=2;}else if(mode==6){view[335]=0;}else{view[447]=2;}assert(rejected(bytes::view(ref changed),ir::cleanup_ir(ref p),1)==if(mode==2){1002}else{1001});mode+=1;}}
