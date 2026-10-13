@@ -13,6 +13,8 @@ The SDK-source component now restores exact bytes through fresh authentication:
 [SDK receipt](../ops/evidence/candidate-sdk-artifact-20261014.json).
 Fresh Program assembly now re-enters full verification with measured state,
 cleanup and body costs: [owner receipt](../ops/evidence/candidate-program-artifact-owner-20261014.json).
+Layout, field, callable, parameter and name components now round-trip into a
+fresh fully verified Program: [metadata receipt](../ops/evidence/candidate-metadata-artifact-20261014.json).
 Whole-program artifacts, checked-owner rebinding and cache reuse remain open.
 The current candidate-owned IR environment is verified in the
 [environment checkpoint](../ops/candidate-cache-environment-20261014.md).
