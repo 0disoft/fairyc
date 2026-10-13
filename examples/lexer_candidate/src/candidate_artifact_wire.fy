@@ -1,0 +1,22 @@
+module candidate_artifact_wire;
+import project_cache_encoding as budget;
+import std::bytes as bytes;
+// Eight-byte big-endian fields, 8MiB payload and independent 16MiB work.
+// Cleanup errors: 1001 malformed, 1002 bound/work, 1003 allocation.
+pub struct Cursor{usize offset;u32 code;}
+pub struct Status{u32 code;}
+pub resource Payload{bytes::Buffer data;cleanup{}}
+pub fn usize byte_limit(){return 8388608;}
+pub fn u32 status(ref Cursor c){return c.code;}
+pub fn u32 output_status(ref Status p){return p.code;}
+pub fn ref u8[] content(ref Payload p){return bytes::view(ref p.data);}
+pub fn bytes::Buffer writer(ref u8[] marker,ref mut Status state,ref mut usize work){var bytes::Buffer data=bytes::empty();if(state.code==0){let u32 code=if(marker.len!=8){1001}else{budget::raw(ref mut data,marker,work)};state.code=if(code==0 || code==1001){code}else if(code==4){1003}else{1002};}return data;}
+pub fn void number(ref mut bytes::Buffer p,usize value,ref mut Status state,ref mut usize work){if(state.code!=0){return;}if(bytes::len(p)>byte_limit()-8){state.code=1002;return;}let code=budget::length(p,value,work);if(code!=0){state.code=if(code==4){1003}else{1002};}}
+pub fn Result<Payload,u32> finish(bytes::Buffer p,Status state){if(state.code!=0){return .err(state.code);}return .ok(Payload{.data=p});}
+pub fn Result<Cursor,u32> cursor(ref u8[] raw,ref u8[] marker,ref mut usize work){if(!budget::charge(work,9)){return .err(1002);}if(raw.len>byte_limit()){return .err(1002);}if(marker.len!=8 || raw.len<8 || !bytes::equal(raw[..8],marker)){return .err(1001);}return .ok(Cursor{.offset=8,.code=0});}
+fn bool field(ref u8[] raw,ref mut Cursor c,ref mut usize work){if(c.code!=0){return false;}if(!budget::charge(work,9)){c.code=1002;return false;}if(c.offset>raw.len || raw.len-c.offset<8){c.code=1001;return false;}return true;}
+pub fn usize number_from(ref u8[] raw,ref mut Cursor c,ref mut usize work){if(!field(raw,c,work)){return 0;}var usize value=0;var usize i=0;while(i<8){value=value*256+(raw[c.offset+i] as usize);i+=1;}c.offset+=8;return value;}
+pub fn u32 word_from(ref u8[] raw,ref mut Cursor c,ref mut usize work){if(!field(raw,c,work)){return 0;}var usize i=0;while(i<4){if(raw[c.offset+i]!=0){c.code=1001;return 0;}i+=1;}var u32 value=0;while(i<8){value=value*256+(raw[c.offset+i] as u32);i+=1;}c.offset+=8;return value;}
+pub fn bool flag_from(ref u8[] raw,ref mut Cursor c,ref mut usize work){let value=number_from(raw,c,work);if(value>1){c.code=1001;}return value==1;}
+pub fn usize count_from(ref u8[] raw,ref mut Cursor c,usize limit,usize width,ref mut usize work){let value=number_from(raw,c,work);if(c.code!=0){return 0;}if(value>limit){c.code=1002;return 0;}if(width==0 || c.offset>raw.len || value>(raw.len-c.offset)/width){c.code=1001;return 0;}return value;}
+pub fn u32 end(ref u8[] raw,ref mut Cursor c,ref mut usize work){if(c.code==0){if(!budget::charge(work,1)){c.code=1002;}else if(c.offset!=raw.len){c.code=1001;}}return c.code;}

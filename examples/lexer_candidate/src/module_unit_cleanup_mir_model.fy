@@ -17,6 +17,7 @@ pub struct Drop {usize operand;u32 exit;usize start;usize end;}
 pub struct Problem {u32 code;usize module_index;usize start;usize end;}
 pub resource Program {v::Vec<types::Type> types;v::Vec<Frame> frames;v::Vec<Glue> glues;v::Vec<Field> fields;v::Vec<Operand> operands;v::Vec<Drop> drops;usize work;bool project;cleanup{}}
 pub fn usize type_count(ref Program p){return v::len<types::Type>(ref p.types);}
+pub fn usize glue_count(ref Program p){return v::len<Glue>(ref p.glues);}
 pub fn types::Type type_at(ref Program p,usize id){assert(id!=0 && id<=type_count(p));return *v::at<types::Type>(ref p.types,id-1);}
 pub fn Glue glue_at(ref Program p,usize type){assert(type!=0 && type<=type_count(p));return *v::at<Glue>(ref p.glues,type-1);}
 pub fn usize frame_count(ref Program p){return v::len<Frame>(ref p.frames);}
@@ -38,4 +39,12 @@ pub fn Result<Program,Problem> assemble(v::Vec<types::Type> types,v::Vec<Frame> 
 }
 pub fn Result<Program,Problem> assemble_project(v::Vec<types::Type> types,v::Vec<Frame> frames,v::Vec<Glue> glues,v::Vec<Field> fields,v::Vec<Operand> operands,v::Vec<Drop> drops,usize work){
     return assemble_scoped(types,frames,glues,fields,operands,drops,work,true);
+}
+
+// Artifact reconstruction resets producer accounting and re-enters the same
+// verifier. Fresh verification work is returned even on rejection; this owner
+// alone grants neither source checking nor whole-package cache-hit authority.
+pub fn Result<Program,Problem> assemble_artifact(v::Vec<types::Type> types,v::Vec<Frame> frames,v::Vec<Glue> glues,v::Vec<Field> fields,v::Vec<Operand> operands,v::Vec<Drop> drops,bool project,ref mut usize verification_work){
+    if(v::len<Glue>(ref glues)!=v::len<types::Type>(ref types)){return .err(Problem{.code=1001,.module_index=0,.start=0,.end=0});}
+    let p=Program{.types,.frames,.glues,.fields,.operands,.drops,.work=0,.project};let checked=proof::check_metered(ref p,verification_work);if(checked.code!=0){return .err(checked);}return .ok(p);
 }

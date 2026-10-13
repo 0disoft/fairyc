@@ -17,6 +17,9 @@ The actual candidate-owned IR cache environment is now verified in the
 [environment checkpoint](candidate-cache-environment-20261014.md).
 Complete-owner v4/v0 package keys now match Go canonical preimages; see the
 [composition receipt](evidence/candidate-complete-cache-keys-20261014.json). Verified artifact reuse remains open.
+The bounded cleanup-IR component now has verified binary transport and fresh
+verification accounting: [cleanup receipt](evidence/candidate-cleanup-artifact-20261014.json).
+Complete body artifacts, checked-owner rebinding and cache reuse remain open.
 
 Current source-identified build/run integration:
 [2026-10-14 native checkpoint](candidate-identified-native-20261014.md).

@@ -13,6 +13,8 @@ pub fn usize bucket(types::Type t){return (t.kind as usize*31 ^ t.scalar as usiz
 // looking up declarations or replacing their canonical module coordinates.
 pub fn bool valid(ref ir::Program p,usize id){
     let t=ir::type_at(p,id);
+    // Reject untrusted coordinates before the canonical bucket arithmetic.
+    if(t.module_index>=limits::source_files() || t.declaration>1048576 || t.first>4096 || t.second>4096){return false;}
     if(t.kind==2 || t.kind==3 || t.kind==4){return t.module_index<limits::source_files() && t.declaration!=0 && t.scalar==0 && t.first==0 && t.second==0;}
     if(t.kind==13){return t.module_index<limits::source_files() && t.declaration!=0 && t.scalar==0 && t.first!=0 && t.first<id && t.second==0;}
     if(t.module_index!=0 || t.declaration!=0){return false;}
