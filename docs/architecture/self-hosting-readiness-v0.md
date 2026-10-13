@@ -1,5 +1,28 @@
 # Self-hosting readiness v0
 
+## Original-source Vec public type names (2026-10-13)
+
+The source type-name factory derives detached Vec names from the original
+specialization plan and checked typed handles. Retained type rows and complete
+source/owner stamps reject a different graph, stale sources or changed owners.
+The recursive renderer uses `self::std::vec::_fy_generic_g0_<digest>` or the
+coordinate-qualified dependency form, including shared/mutable references and
+Option/Result wrappers. Ordinary rendering retains its previous behavior.
+
+The actual Go SDK preparation and completed-Flow public descriptor supply six
+Vec names and four composite signature strings. All twelve self/dependency
+spellings and the four signatures match. Three authored tests and four ordinary
+regressions pass Go native and candidate C development/release. Detached owners,
+stale nominal sources, changed owners and exact-fit/exhausted work are covered.
+Root check and locked check pass 440 files / 5673 MIR functions. Private C API
+test images use explicit 16MiB stacks; application defaults are unchanged.
+
+Next: identified public descriptor extraction and complete SDK source-interface
+hashes, then dispatcher/cache consumers. This fact table does not authorize
+executable/cache publication. Latest full-image/fixed-point promotion, product
+timing/stack integration, Linux/full suite and hosted CI remain open. Public
+CLI/API, SDK ABI, limits, DB and CI are unchanged; no push. Receipt: [evidence](../ops/evidence/candidate-public-vector-types-20261013.json).
+
 ## Source-identified project C partitions (2026-10-13)
 
 Source-identified full and entry-selected partition APIs derive one owned name

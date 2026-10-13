@@ -1,0 +1,65 @@
+{
+  "schema": "fairyc.candidate-source-inputs/v1",
+  "inputs": [
+    {
+      "path": "examples/lexer_candidate/src/tagged_types.fy",
+      "bytes": 4824,
+      "sha256": "431f283e07d9dbea60c698d1f70f7e7009e1552314cf660688b10b09daad8338"
+    },
+    {
+      "path": "examples/lexer_candidate/src/type_state.fy",
+      "bytes": 5972,
+      "sha256": "7dbbf7d50be1e9513dc8aafd99b11afda5d8e2d7ce87d96b6436c4752c2123a0"
+    },
+    {
+      "path": "examples/lexer_candidate/src/types.fy",
+      "bytes": 10832,
+      "sha256": "53a77948af92724f00de0609837fd1507899df8e2b59b6d2778ef1f3c344395a"
+    },
+    {
+      "path": "examples/lexer_candidate/src/utf8.fy",
+      "bytes": 807,
+      "sha256": "4a5425cea9efbfb1bff2c31a38c2bd8e392c6792af09f24e906c9a743621870d"
+    },
+    {
+      "path": "examples/lexer_candidate/tests/module_public_vector_types.fy",
+      "bytes": 14008,
+      "sha256": "25ed672dab733447122d300c62202925716d6dae4501d73f65593f7468c2d349"
+    },
+    {
+      "path": "tools/verify-candidate-private-tests.py",
+      "bytes": 16387,
+      "sha256": "e970eddc22cdba4ddbaa3a6d5a197f11431bd38b68d2810b16efe32d7985eb97"
+    },
+    {
+      "path": ".cache/public-vector-types-20261013/fixture.bin",
+      "bytes": 10073,
+      "sha256": "a66789f4a2fa8fe1f2cb4fd27d589d1dcb4cd480ce8223f59bde1106f058adf6"
+    },
+    {
+      "path": "examples/lexer_candidate/fairy.toml",
+      "bytes": 163,
+      "sha256": "5dd473fe42d35270b362d16d383627167d9981244761a925e42a45f57c8b737f"
+    },
+    {
+      "path": "examples/lexer_candidate/tests/module_public_type_text.fy",
+      "bytes": 11632,
+      "sha256": "f9e362de71562cc78229544b33f5773fdc0c80df646d744ea89821bcdb8057d4"
+    },
+    {
+      "path": "tools/verify-candidate-public-vector-types.go",
+      "bytes": 5398,
+      "sha256": "e6b958fba69a0a9f1596185f2ed185b27066e4870774344f417297fd083e1669"
+    },
+    {
+      "path": ".cache/source-specializations-20261013/vec.fy",
+      "bytes": 8702,
+      "sha256": "0ae4c395bf98c39079ad620bde035b3b590d51417864802e698edc069281db5b"
+    },
+    {
+      "path": ".cache/public-vector-types-20261013/oracle.json",
+      "bytes": 1505,
+      "sha256": "467d46005ba09651d135b5a0f849593cf78942df774e7fd2b74a360e4bc63274"
+    }
+  ]
+}
