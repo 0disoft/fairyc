@@ -21,8 +21,9 @@ pub fn usize project_declarations(){return 8192;}
 // The source parser and joined AST retain their separate 1024-field caps.
 pub fn usize metadata_fields(){return 2048;}
 
-// A project merges field tables from independently checked units.
-pub fn usize project_fields(){return 4096;}
+// The source-identified dispatcher exceeds 4096 rebound fields. This bounds
+// their combined table; each independently checked unit retains its 2048 cap.
+pub fn usize project_fields(){return 8192;}
 
 // Joined bodies include original modules plus authenticated SDK specializations.
 // Per-file parser limits remain separate; all downstream consumers share this cap.

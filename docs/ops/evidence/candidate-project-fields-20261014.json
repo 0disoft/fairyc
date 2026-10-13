@@ -1,0 +1,99 @@
+{
+  "schema": "fairyc.candidate-project-fields/v1",
+  "date": "2026-10-14",
+  "targetedChangePassed": true,
+  "sourceInputs": [
+    {
+      "path": "examples/lexer_candidate/src/candidate_limits.fy",
+      "sha256": "a1402b90455c05f052334ecd8cb6c26375979e6813ce9e0b996e1fa613f6faa5"
+    },
+    {
+      "path": "examples/lexer_candidate/tests/module_project_field_boundary.fy",
+      "sha256": "3fd4d5443f6cd1fb8d143b7ef84a6f41a4ca5f6250278fd3f0600770695b1b7b"
+    },
+    {
+      "path": "examples/lexer_candidate/fairy.lock",
+      "sha256": "a60e1a6d8a7670918f094a9a1047c5ee0290ff9f5d87e3642243531ba2765d74"
+    }
+  ],
+  "sourceCheck": {
+    "files": 450,
+    "mirFunctions": 5822
+  },
+  "capacity": {
+    "projectFields": 8192,
+    "unitFields": 2048
+  },
+  "diagnosticOnly": {
+    "exit": 2,
+    "seconds": 221.5458568999893,
+    "stdoutBytes": 0,
+    "stderr": "examples/lexer_candidate/src/project_toml_values.fy:1:1: error: project phase 3 stage 0 code 900002 (bytes 0..0)\n",
+    "imageSHA256": "10c58804642ddc6c15520185759087e772d8dd29c0f28c715f96079c77d8d1a2",
+    "metadataSHA256": "f90c848f1f34cf92a2b4defd1d58af8ebae60a960874d86073061ab7d3131d4b"
+  },
+  "tests": {
+    "native": 1,
+    "selection": {
+      "mode": "all-authored",
+      "authoredTests": 1,
+      "selectedTests": 1
+    },
+    "candidateExecutions": [
+      {
+        "profile": "development",
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-fields-8192-20261014\\development.exe",
+        "sha256": "09f687a4c801d2279c54e5539d5ac61322fd76d1f749e457bb1e400785be9a9d",
+        "exit": 0
+      },
+      {
+        "profile": "release",
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-fields-8192-20261014\\release.exe",
+        "sha256": "979e29f675fb36b6d9e940c3ecc6eeb9a470d5bd99ef4a72dea8d422b5bc9df0",
+        "exit": 0
+      }
+    ],
+    "streamVerification": {
+      "stdout": {
+        "bytes": 59,
+        "sha256": "6371bdb66a55b0c551267b56453ad3efdea7556518789cfaa3f66ba1490d86ff"
+      }
+    },
+    "packetSHA256": "902c92f0c1bdf27098f77ca2009b34d9a40ab00fd6c5e47df826475eb17fbdb1",
+    "tools": {
+      "compiler": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-frontend-oracle-current-20261012.exe",
+        "sha256": "3ecc4501ee3bb47ecc39e7288200266b31cbcd8bf6ffec302ae54867705ce5d1"
+      },
+      "candidate": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\catalog-capacity-emitter-20261014\\driver-release.exe",
+        "sha256": "e039dc65afc85bc66ff1f0b27c02edd375117a561898fe0ac1441c7c4dbad9f2"
+      },
+      "builder": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-rooted-builder-stack-20261012.exe",
+        "sha256": "02abe2328daa9921705910c7b995e82c1312cb960fe024106c11468569aefff0"
+      }
+    }
+  },
+  "currentEmitter": {
+    "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-fields-emitter-20261014\\driver-release.exe",
+    "sha256": "454aafa618a1930f024a461c8b274301a72280abc457971d2905ce0ddce9e9c2",
+    "goSeed": true,
+    "sourceInventorySHA256": "21079ae5b842016349ddbda9393b31984c426ca210aac3ed3d72d72076cdc7a0"
+  },
+  "fullDispatcherPassed": false,
+  "remaining": [
+    "current-source full dispatcher emission and native CLI",
+    "identified build/run/cache consumers",
+    "current fixed point and promotion",
+    "product stack/deadlines",
+    "Linux/full suite and same-head CI"
+  ],
+  "productStackChanged": false,
+  "productTimeoutChanged": false,
+  "publicApiChanged": false,
+  "sdkAbiChanged": false,
+  "dbChanged": false,
+  "ciChanged": false,
+  "pushed": false
+}
