@@ -2,6 +2,33 @@
 
 ## Current local candidate evidence (2026-10-13)
 
+### Checked IR identity bridge: current-source C execution (2026-10-13)
+
+A fresh private project driver uses exact copies of 370 current Fairy modules
+and a check-only C-project entry, with no diagnostic overlays. The Go bootstrap
+emits its initial C; current SDK/runtime sources supply the native support.
+MSVC `/O2 /Ob1` compiles the driver in 38.86 seconds. The driver processes the
+277-source identified-IR test closure without a Go frontend fallback in 106.37
+seconds, emitting 19,046,779 bytes in 39 C body partitions. The earlier Ast
+cleanup failure is absent in this current-source replay.
+
+All three authored identified-IR tests pass fresh Go native and generated C
+development/release execution. They retain the actual SDK Vec bytes, five
+concrete functions, six Vec descriptors/cleanup frames, detached identity bytes,
+checked call-target selection and stages 4/5/7/8 failure behavior. Both private
+compiler API test images and the seed driver explicitly reserve 16MiB stacks;
+ordinary application defaults are unchanged. Source, fixture and tool hashes
+are retained and checked. The preceding 430-file / 5562-function root checks
+are reused after confirming unchanged compiler inputs and root lock.
+
+This closes C execution for the identity-attachment unit. The private driver's
+entry is not the full dispatcher; its 106-second replay exceeds the default
+60-second frontend allowance. Latest full-image/fixed-point promotion, product
+timeout/stack integration, Linux/full suite/hosted CI remain open. IR/C symbol
+names, project identity rebinding, full Vec interfaces and dispatcher/cache
+publication also remain. Public API, SDK ABI, DB and CI are unchanged; no push.
+Receipt: [evidence](../ops/evidence/candidate-identified-ir-c-20261013.json).
+
 ### Empty cleanup arena projection (2026-10-13)
 
 An ordinary unannotated empty resource cleanup now owns only its original block.
@@ -20,7 +47,7 @@ not a fresh full dispatcher or resolution of the identified-IR closure failure.
 Linux/full suite/hosted CI are deferred; API, SDK ABI, DB, CI and product limits
 are unchanged; no push. Receipt: [evidence](../ops/evidence/candidate-empty-cleanup-20261013.json).
 
-### Checked IR source identities: native verified, C bootstrap pending (2026-10-13)
+### Initial checked IR source identities: native verified, C bootstrap pending (2026-10-13)
 
 `module_project_compile::range_identified` reuses the ordinary preparation and
 checking path. Type checking, moves, borrowed-result inference and owned IR
@@ -39,7 +66,7 @@ and mismatched planning owners fail at stage 8. The single-root unit correctly
 leaves imported ordinary bodies for project linking; the C rendering case uses
 all three original modules. Numeric C symbols are still unchanged.
 
-Candidate C dev/release execution is **not verified** for this unit. The pinned
+At this initial checkpoint candidate C dev/release execution was **not verified**. The pinned
 2026-10-12 frontend rejects the 277-source test closure at
 `module_unit_body_ast` cleanup, project phase 2/stage 3/code 10. A current-source
 private C project-driver probe passes the exact Ast range with 32 shapes/232

@@ -1,5 +1,24 @@
 # Fairy 컴파일러 전환: 후속 작업 목록
 
+## Checked IR identity bridge: current-source C execution (2026-10-13)
+
+A fresh private driver retains exact copies of 370 current Fairy modules and a
+C-project-only entry. Its optimized Go-seeded C image processes the 277-source
+identified-IR test closure in 106.37 seconds, emitting a 19,046,779-byte packet
+with 39 body partitions. The previous Ast cleanup failure is absent. All three
+authored tests pass fresh Go native and candidate C development/release; actual
+SDK Vec, detached IDs, call targets and checking/attachment failure gates remain
+covered. Explicit 16MiB private compiler/test stacks and verification allowances
+do not change application stack or product timeout defaults.
+
+The 430-file / 5562-function root checks are reused after source/lock identity
+checks. This closes C execution for the identity-attachment unit, not a fresh
+full dispatcher/fixed point. Next: IR/C symbol naming and project identity
+rebinding, complete Vec public interfaces and dispatcher/cache consumers. The
+106-second replay still exceeds the default frontend timeout. Linux/full suite/
+hosted CI remain deferred. Public API, SDK ABI, DB and CI are unchanged; no push.
+Receipt: [evidence](evidence/candidate-identified-ir-c-20261013.json).
+
 ## Empty cleanup arena projection (2026-10-13)
 
 Ordinary unannotated empty cleanups no longer copy unrelated AST arenas or scan
