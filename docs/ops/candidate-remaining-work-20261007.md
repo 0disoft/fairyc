@@ -27,6 +27,8 @@ Fresh Program assembly now re-enters full verification with measured state,
 cleanup and body costs: [owner receipt](evidence/candidate-program-artifact-owner-20261014.json).
 Layout, field, callable, parameter and name components now round-trip into a
 fresh fully verified Program: [metadata receipt](evidence/candidate-metadata-artifact-20261014.json).
+The state-layout component now restores detached UIDs, fields and hashes through
+fresh canonical identity verification: [state receipt](evidence/candidate-state-artifact-20261014.json).
 Whole-program artifacts, checked-owner rebinding and cache reuse remain open.
 
 Current source-identified build/run integration:

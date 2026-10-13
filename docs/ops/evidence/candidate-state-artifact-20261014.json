@@ -1,0 +1,2502 @@
+{
+  "schema": "fairyc.candidate-state-artifact/v0",
+  "date": "2026-10-14",
+  "parentCommit": "4e9b028f40ff44cd9fceae8e9fc2cd20bbc9505c",
+  "passed": true,
+  "sourceInputs": [
+    {
+      "path": "examples/lexer_candidate/src/module_state_artifact.fy",
+      "sha256": "ceb980725fc8069825f41786197ab0fe9e794c525652658ecddaa6ca2a7c3439",
+      "bytes": 5540
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_state_layout.fy",
+      "sha256": "0db50bbffc1000f1f0161dc093108a5e7831b516c48c6e2eca73f416bd66f493",
+      "bytes": 7314
+    },
+    {
+      "path": "examples/lexer_candidate/tests/module_state_artifact.fy",
+      "sha256": "6d50dd688805bf6990fd9d1491e5ef4836ae9ec0476b5a06e5da1ebb085decdd",
+      "bytes": 9416
+    },
+    {
+      "path": "examples/lexer_candidate/tests/module_state_artifact_fixture.fy",
+      "sha256": "6ea0ba56975d63dcd277ef0fc31c82ab03fcdeb430fb86bad50698806ee9465b",
+      "bytes": 4372
+    },
+    {
+      "path": "tools/verify-candidate-state-artifact-golden.py",
+      "sha256": "9c8ae82736fd624d2ca49c2091ce24c37137bd423ebba5c3f7cfde84222dcc45",
+      "bytes": 2650
+    },
+    {
+      "path": "examples/lexer_candidate/fairy.lock",
+      "sha256": "68fc86643264fa72200b12975844b1ac0a9d9af8a877d21265af3d36bc32ea46",
+      "bytes": 1698
+    }
+  ],
+  "format": {
+    "marker": "FYSTATE0",
+    "integerEncoding": "unsigned 64-bit big-endian; u32 high half zero",
+    "byteLimit": 8388608,
+    "phaseWorkLimit": 16777216,
+    "tables": [
+      "layouts with owner/module/declaration/source spans and hash",
+      "ordered fields with codec identities and prefix hashes",
+      "exact UID and field name bytes"
+    ],
+    "golden": {
+      "bytes": 816,
+      "sha256": "5d7d46f013d9c8c182c5391b013e5748b533aa5dd70d8a7c3b685563116e2965",
+      "layoutDigest": "84d556209f8e03dfac196a16b22a02b2044ccc3640d1d01e40f402fca2557342",
+      "independentEncoding": "Python struct big-endian integers and hashlib canonical preimages"
+    }
+  },
+  "testReceipt": {
+    "schema": "fairyc.candidate-private-tests/v1",
+    "passed": true,
+    "module": "module_state_artifact",
+    "sourceInputs": [
+      {
+        "path": "examples/lexer_candidate/src/array_identity.fy",
+        "sha256": "8b501b0f72bb2805c00abc59afb195b5ba2c199796982122b62958bab64966ee"
+      },
+      {
+        "path": "examples/lexer_candidate/src/array_types.fy",
+        "sha256": "661e57ec5f65ea1d0be93eef637ce5235fc6e3f84e4ddf5babd8a4afd89f6688"
+      },
+      {
+        "path": "examples/lexer_candidate/src/attributes.fy",
+        "sha256": "c1d0eb0c7db61c6e46acac84ca74ec413f2a14061a37d6848ddc13f7191e70bf"
+      },
+      {
+        "path": "examples/lexer_candidate/src/bodies.fy",
+        "sha256": "ea9bfd6dc1b3bce9dc407970b82d871185db33e7daadad35d348de84ab6ba294"
+      },
+      {
+        "path": "examples/lexer_candidate/src/body_state.fy",
+        "sha256": "0f4e1924d07e4d21bc5fbe35a4fb8f0c2b617206b6d63191e7a625300ec5bb3e"
+      },
+      {
+        "path": "examples/lexer_candidate/src/borrow_shapes.fy",
+        "sha256": "36b2214d9530980d60b11956f3738c1959cf66d29fcb80ec2bc4bad853c421e3"
+      },
+      {
+        "path": "examples/lexer_candidate/src/budget.fy",
+        "sha256": "c2793aa302279b9d27f0af32edd71f70de4e93cb4f76f55facd3e757641cc494"
+      },
+      {
+        "path": "examples/lexer_candidate/src/c_abi_types.fy",
+        "sha256": "2a4c6efd7b00dd4fef5ccc47950d9f70c21ed3ae2ac0eaa9817d80c0e03fdfa0"
+      },
+      {
+        "path": "examples/lexer_candidate/src/candidate_artifact_wire.fy",
+        "sha256": "a0d5fa478e74e853d7959e5f9db18d3816ed33d050e0ccd6739c8db98db8573e"
+      },
+      {
+        "path": "examples/lexer_candidate/src/candidate_limits.fy",
+        "sha256": "a1402b90455c05f052334ecd8cb6c26375979e6813ce9e0b996e1fa613f6faa5"
+      },
+      {
+        "path": "examples/lexer_candidate/src/cleanup_syntax.fy",
+        "sha256": "1374cdcbfa6139a5e82e4e74606cc28ba46d9e81df62f7a0dd397f856fb0ad6f"
+      },
+      {
+        "path": "examples/lexer_candidate/src/diagnostics.fy",
+        "sha256": "ee95f81ed3b3224702196fceef2888434e9713341b81abf01e03945592c4de8b"
+      },
+      {
+        "path": "examples/lexer_candidate/src/effect_declarations.fy",
+        "sha256": "5fc47d2d48f4422b7cd897eaf3894f3feb984b4e09127a2ebf025e89e4ae1739"
+      },
+      {
+        "path": "examples/lexer_candidate/src/enum_types.fy",
+        "sha256": "d257e7cb599fd4f3bafc1f7d9ccf11d00d19f2719df063271186cf7c432f0a96"
+      },
+      {
+        "path": "examples/lexer_candidate/src/ffi_symbols.fy",
+        "sha256": "bf90ce5c6b76ad6d60fd499c5c168079520edbf5720ea757e705b99489b6cd29"
+      },
+      {
+        "path": "examples/lexer_candidate/src/file_source.fy",
+        "sha256": "1a7ac7f6c69ef27e78e734aa74dab90b895742a5500a32931baaed19379b938f"
+      },
+      {
+        "path": "examples/lexer_candidate/src/foreign_declarations.fy",
+        "sha256": "8d18c542522789399c131786d618a50b3058ef961317a89f24a0c9f0dede5a08"
+      },
+      {
+        "path": "examples/lexer_candidate/src/generic_concrete_types.fy",
+        "sha256": "7d0b322eaddfcc56f87f3df28bb9e5d2a44d7aea7ef69fb71131177ab91fffcc"
+      },
+      {
+        "path": "examples/lexer_candidate/src/generic_identity.fy",
+        "sha256": "af82d3b359138f3efaea398e0c0faeb353b0fd94728f3c60179b1a481ba53fd3"
+      },
+      {
+        "path": "examples/lexer_candidate/src/generic_package_bindings.fy",
+        "sha256": "9298a084674ea2327639fef7e0efb269ca92a943b15f564728ac1d817c41a6b2"
+      },
+      {
+        "path": "examples/lexer_candidate/src/generic_package_context.fy",
+        "sha256": "e13300607b3da9142b8fc6dbffd2cdc1452735a4b094d530b049f4d29b0daa02"
+      },
+      {
+        "path": "examples/lexer_candidate/src/generic_scalar_arguments.fy",
+        "sha256": "e8203b5dfe3ebdcd69d737e336196b263613f7c1ce7d4d98d11dfffbe953a544"
+      },
+      {
+        "path": "examples/lexer_candidate/src/generic_source_aggregate_json.fy",
+        "sha256": "a49222c0b0b606155adc17bff2832fdd68ca82ea8380216184107ee64dd4aa5c"
+      },
+      {
+        "path": "examples/lexer_candidate/src/generic_source_arguments.fy",
+        "sha256": "b6dff24c73b194f3de417b3b4b8a32d66df7a0c271cca06982dc1aa2f5991744"
+      },
+      {
+        "path": "examples/lexer_candidate/src/generic_source_catalog.fy",
+        "sha256": "cd4152c247f41ee290fb747c4b154c0b211875d0c18bb52f2c87459d38537a87"
+      },
+      {
+        "path": "examples/lexer_candidate/src/generic_source_declaration_json.fy",
+        "sha256": "d60cf894b43fe313247d19e53991c0731d736141b0206e1dbf4a9fcfa92b663e"
+      },
+      {
+        "path": "examples/lexer_candidate/src/generic_source_dependencies.fy",
+        "sha256": "e416ef6fe8f191fdc00c6e2ad15ce4ff31912bdbd7c5fc63a452ad6c6c110456"
+      },
+      {
+        "path": "examples/lexer_candidate/src/generic_source_dependency_model.fy",
+        "sha256": "f95fc9930ddc1db55bd1a0d25475bbaef9087d906df4ec2f57963d1802627ee3"
+      },
+      {
+        "path": "examples/lexer_candidate/src/generic_source_dependency_walk.fy",
+        "sha256": "c9884cab82be619aa6d2c150428db489c8a2a8bc234e0b81674ee92b465eb105"
+      },
+      {
+        "path": "examples/lexer_candidate/src/generic_source_documentation.fy",
+        "sha256": "fd2b7d8461938ce5ef9303ce488984a2a15c4fa28bd6b6f01a64a063eaa1c063"
+      },
+      {
+        "path": "examples/lexer_candidate/src/generic_source_expression_fields.fy",
+        "sha256": "b0a81a4076947c7a3ac334fa00a3a6636acfa90149c1412702ff31333ff76ade"
+      },
+      {
+        "path": "examples/lexer_candidate/src/generic_source_expression_json.fy",
+        "sha256": "44d147d7cd08bc405361d8e42d5e214bd0675b4a4e2ded0dc66d13ecb5e04827"
+      },
+      {
+        "path": "examples/lexer_candidate/src/generic_source_function_json.fy",
+        "sha256": "5955eac9f38ab6a98bce5a5acb9e8cebdea3f812b958befe03e1fa941b58592f"
+      },
+      {
+        "path": "examples/lexer_candidate/src/generic_source_item_json.fy",
+        "sha256": "e0344f3251dcd0f100af155727862a8644a33b4f09efe87131dcf01dc7664b1d"
+      },
+      {
+        "path": "examples/lexer_candidate/src/generic_source_json.fy",
+        "sha256": "ba8087871f463c8d9e655e57fe64de816bc7971a96d25ec7b340ba5bb483d3a9"
+      },
+      {
+        "path": "examples/lexer_candidate/src/generic_source_module_json.fy",
+        "sha256": "33dcb9228499f6abda57c8ad311584e8167143e77d1af44c7f2736807cc1a615"
+      },
+      {
+        "path": "examples/lexer_candidate/src/generic_source_observations.fy",
+        "sha256": "231687176559ae09ce81eb9be7b28fca207dd2bd79d3b04ff6146d7b5531d312"
+      },
+      {
+        "path": "examples/lexer_candidate/src/generic_source_plan.fy",
+        "sha256": "3e467f987f2156b09be1c8bf5aca06e804fb6b2925b957417627aa3d96e03215"
+      },
+      {
+        "path": "examples/lexer_candidate/src/generic_source_plan_input.fy",
+        "sha256": "1e92df9a867a97888867d93907995d0d5c891f6a6c6d363a44de8512fc401e42"
+      },
+      {
+        "path": "examples/lexer_candidate/src/generic_source_requests.fy",
+        "sha256": "9ab65a4b2fbc7e64158d997f13260dbcf9b1c85e90dbeede6f21b02531d4da5f"
+      },
+      {
+        "path": "examples/lexer_candidate/src/generic_source_statement_fields.fy",
+        "sha256": "c955c78e10b9d25a837123af9f9a654fa874149af56bf2a79cb4ce79a3cbb7af"
+      },
+      {
+        "path": "examples/lexer_candidate/src/generic_source_tokens.fy",
+        "sha256": "fc91de43a0983de7e4156585a9fac50e8fb708b333317290bcfa75bdb57e98cf"
+      },
+      {
+        "path": "examples/lexer_candidate/src/generic_source_type_json.fy",
+        "sha256": "0743f95519c13e680eba1076a8149a47031df6ed087f686bdf38c4966a0bfe18"
+      },
+      {
+        "path": "examples/lexer_candidate/src/generic_source_view_loop_json.fy",
+        "sha256": "cda15b92da26e2dafa4847b3161aaebbfada6796a9d86270ff9672891218464d"
+      },
+      {
+        "path": "examples/lexer_candidate/src/generic_specialization_identity.fy",
+        "sha256": "fb316b186d871ac0e6ae0b8a970ae766e3a67dbd73e9239270198ee38291c932"
+      },
+      {
+        "path": "examples/lexer_candidate/src/literal_types.fy",
+        "sha256": "bce967c2f7b001144642642503af9bb4cf83bae1e50f99262676d16afb9ac7f6"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_ast_join.fy",
+        "sha256": "f758470311f4db82d1f0472c6d826a96d57a26d26237169fe1ec227341f0119c"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_bind.fy",
+        "sha256": "d426503990475626492fee579d5da4b53178c76976ae3c5d21bae39f931c2f8f"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_body_artifact_decode.fy",
+        "sha256": "728bd23372422f1093a08579c9a507ed623b2f601e44e667b71ab989c03ed34d"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_body_artifact_encode.fy",
+        "sha256": "79205d8c69e5dffe529090e632161e60376af0e578d20f77b4a3dd2c56466743"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_body_artifact_wire.fy",
+        "sha256": "207ab2f4c6b85dd92733a1c9cfa1f262422f01f91d1ee3904ba9f048ad12878a"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_catalog.fy",
+        "sha256": "1a025ad3452dcd9dd9302802ab6202ea2ccb47a9d6404063c44f32fac9920657"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_cleanup_artifact_decode.fy",
+        "sha256": "b08bafe4ea1f010fd0981da53e78a95d418c956c371a33cf359a8d4be8fa5207"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_cleanup_artifact_encode.fy",
+        "sha256": "dcdd6be1dbb225bf5b707dce2b7063784729af02272771af41dfabdc961e1858"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_const_eval_declarations.fy",
+        "sha256": "8e93ea3fe0035090ad946bc920862cfa3d9281bb65f7b7270cc18c64edf3e129"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_constant_arithmetic.fy",
+        "sha256": "2dfa422a86601064b62d2a76f74dd3f0a92fef0ae76b2150f8c191dfda718211"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_constant_engine.fy",
+        "sha256": "47c8b387e4c095a78586d93ad01f92f5914188f7ae95425fb24bf892c72bc939"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_constant_graph.fy",
+        "sha256": "f4d9f1e5f0bfeb89d36c4c89f4caf41400ce455858070495144561fe51c4a4d3"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_constant_model.fy",
+        "sha256": "f3f3becaf100e5cc877f9ef495dbb02a57cecf206eb150419ccf7b5354de5299"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_constant_runtime.fy",
+        "sha256": "88c585280ae602c666242fae9d4e59b7cb1118e9e548ac63bedb1f864f860b59"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_constant_types.fy",
+        "sha256": "4c5a93d8bd47995a2d1654d623c0946bc245177a9085354fb1f12a7800dd8ee3"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_identified_ir.fy",
+        "sha256": "f6834c8a1e7bb46f043ffe0dce1cdd7b6ed25e0c566783176887916c99bcda55"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_metadata_artifact_decode.fy",
+        "sha256": "423b096ee7a4b9c82fc5ae3257b6e4dbe4357e12d4660fec8be933ea3220e089"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_metadata_artifact_encode.fy",
+        "sha256": "c2b5a767edc49a67238ba2cfed52164735a4ffb7996687e2c62f60623db60c52"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_metadata_artifact_model.fy",
+        "sha256": "a91b007e98440d7ddb534226cb211653b7a61898c18b9f369fa4a4336db0d66a"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_project_body.fy",
+        "sha256": "e762021268515ae8b196716cfec7e2dc3dd606edca6857f151a6d20c1573ff83"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_project_body_equal.fy",
+        "sha256": "e34fd3eb412d35221ff29a19341adc36dd2bd82ab968af5314c0d4cf56614a70"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_project_calls.fy",
+        "sha256": "0c032232662b83d8fa070ec57091a0f2cffcc57367b54d39cf75a99ca289e955"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_project_cleanup.fy",
+        "sha256": "c13781333e193fe3d1e738b25e98fbced663e2950015ef32b202d3e2d7393d9d"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_project_compile.fy",
+        "sha256": "8960197e137483a410d8f5fffa01be29ee74afb4415893db649ba8f3e3be7cbf"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_project_frames.fy",
+        "sha256": "d40228c39c3150b04f843ef69628b8d59bff805e273985fcd766f50116aa9e57"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_project_identified_compile.fy",
+        "sha256": "46ed8eb35af978bdb9845455b7491162653b5280e408c7536c8ff95e412ab6e3"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_project_inputs.fy",
+        "sha256": "5cd6fd546fafb12894f4979cf14012159fa1dee25bae116dbf9f1c99208ac5a1"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_project_link.fy",
+        "sha256": "22ead90c86362550544adb82ba56f3d96bd6d1074a36ef8774878f3dd9a71502"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_project_metadata.fy",
+        "sha256": "4c3abaf9a9d09113e1e326de136cff6695eede88974cbb13f5fd9736ac3d9c6e"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_project_types.fy",
+        "sha256": "fccd8c241ae28cc54bca5e38cafca3056ce9d845dfa2d51e849d323b37bd98c9"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_public_interface.fy",
+        "sha256": "d51f0695987bc04a70697a88918050c7d4cec3adf206cc17a45308be196a83a7"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_public_interface_model.fy",
+        "sha256": "029b9a86471765d1dd2ff5878e5c0d0adcfaa8e6f5b8c81e1bbe9656c4f3b2f0"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_public_interface_write.fy",
+        "sha256": "9a8868217c8bb3a7eef097e13c4890393dc0ef7deaa70f1df49d65437acf9e24"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_public_type_ids.fy",
+        "sha256": "54f0bd46e8a41427c2354e76632169f3884bf30e855ff8c8348ecbee1139dbdb"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_public_type_text.fy",
+        "sha256": "ed556ced640de710634d0cb9488daea169f9e005bd9b6e8f34187cabb975f36f"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_region_types.fy",
+        "sha256": "97b3591aaf20279007c5826fbde0c610fb5a2a995a9f34ffe451382e82968266"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_registry.fy",
+        "sha256": "9e0af7c32bf001bb81d7839a41869ce7710bf51e00f72cb866909e53ad03bb34"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_sdk_artifact.fy",
+        "sha256": "95e096838fedfc480db23b095ad9b6b2e4db0943b897791f36ce30f680f4c12b"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_signatures.fy",
+        "sha256": "23264b8665a9853bbfae34d8356bba67032abee1bac084215241331837d661fd"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_source_provenance.fy",
+        "sha256": "90ae98dd5d59e28aaec58255b356e0d1ac16ff4594dcd82af19fc1d7a7e99fb4"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_source_specializations.fy",
+        "sha256": "73373584837e19b7a0669c33c1003b4d6476c39b7d1ad8323add4d0dcb382f07"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_state_artifact.fy",
+        "sha256": "ceb980725fc8069825f41786197ab0fe9e794c525652658ecddaa6ca2a7c3439"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_state_declarations.fy",
+        "sha256": "e3884d4fbc099047b614798ba1280a2deed316ec0d3fcea6e224d122e91dd752"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_state_interface.fy",
+        "sha256": "3e21f30e1e1148dac0faa322d3a4cac809ac99c268cb4587ace971d2a6c1c501"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_state_layout.fy",
+        "sha256": "0db50bbffc1000f1f0161dc093108a5e7831b516c48c6e2eca73f416bd66f493"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_types.fy",
+        "sha256": "c6c14b967f19efb28f3432a295846c7b75aa5f6b3d4dd9ddd62aceb24eb6d2b6"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_argument_collect.fy",
+        "sha256": "bbaf15c74ebadd026b87411d4a69d3f4b31e80257d92c10dfee237298466f059"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_argument_types.fy",
+        "sha256": "d4ef49012e23ba8262ad0cd2cc39ab5548bc13f51a5e35425cf2f84e5ee6c73a"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_bind.fy",
+        "sha256": "5106831b0fcb353475e5bb76943d31b7a5a9034c23fb9ee30996aa6065033b54"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_bodies.fy",
+        "sha256": "3b8eeeecf1b28f20368791dfdafb5de09aee0ea279059257a1b384e6bd416468"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_body_ast.fy",
+        "sha256": "ed55fa60ada35557187babc02bc6b0334a074914aee725773418bdeb3828b70f"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_body_ir_enums.fy",
+        "sha256": "ab01bd0e9a0759d434aab437e8fd5f8b7d308241282c36480d0cf5a5336a0458"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_body_ir_lookup.fy",
+        "sha256": "c54f4a781b7f712a271b9e5edf041fc64975f27f7fa92a51050f16c71d203f00"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_body_ir_lower.fy",
+        "sha256": "f9d646bf0a1f6abd7c053cbd4185ddffb1d783184fb9ca248245f168b47f7b8f"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_body_ir_model.fy",
+        "sha256": "0365d2db6683149de6cb12389bddd2bb440f88479e3a6df6413599cbcdda38b0"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_body_ir_storage.fy",
+        "sha256": "368519e6e79512f4f8d18a5ebaa37e2d691d4e0438d4f2125bd3430ce7bc8263"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_body_ir_switches.fy",
+        "sha256": "3e7cab96e8eb4f84fb0b0f7018fe815640c1b7bb59064de7a42f165a2a8bdadd"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_body_ir_verify.fy",
+        "sha256": "fe455790d73658d7cfd8eb8268155ea53aaf3c37a17d3e0f4733fb036d25d96a"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_body_types.fy",
+        "sha256": "846c26cedf47e47c67c0eed4831f7c3ff97c5a33544a00519f85a2014ec2ac8f"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_c_callable_index.fy",
+        "sha256": "364294da38f73021c44dbe7274816e9f9ab278d71abe4e8e5fc9781a2bc66c2f"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_c_frame_index.fy",
+        "sha256": "4b738125ad631fd086eb4d620c53d27d765c65700235970549befc4cdb3509f1"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_call_closure.fy",
+        "sha256": "7b12aa9d59ce03a914246fb8c54f8e2639cc63c2a8f27763e7b410354cd0f1a6"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_call_contracts.fy",
+        "sha256": "5cc2b684e82aa0583a606cd55fc0baa002887b495191f2e2c76db76d730e3229"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_calls.fy",
+        "sha256": "7f20448075c09d8d4684eb6f1302c22ceca85ad9d7d7f85a4cc06d5f4f809137"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_cleanup_liveness.fy",
+        "sha256": "13baed64de4f79425be35db95e54e89e0a69e1dbf13a0fdab822a1cf6027ea32"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_cleanup_mir_lower.fy",
+        "sha256": "5caf9d61cc8f717e94ed211924f08f2ed25c933a28115c0e2be62ad0d838b4af"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_cleanup_mir_model.fy",
+        "sha256": "158054ab681e0709e15e0e252003910dbd1e7d6ff149a1036c2317bf90440391"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_cleanup_mir_types.fy",
+        "sha256": "092467f19ce33791e8671a6a9b2bb4cc280ed443ec5d0a8ba9769de776eca34c"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_cleanup_mir_verify.fy",
+        "sha256": "e95f121171704d3520533399fba302961b3c8ae192a1bf18a64d75f688f0aac1"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_cleanup_policy.fy",
+        "sha256": "569ab0f85bd2ff2c1cab34a9ffca2d795b9a6ab70313c1c126dd8981f342e0b1"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_constants.fy",
+        "sha256": "a2bf7587822ea307fe4009643cedc3600fa666b974f05da6a528121cb82df6d6"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_drops.fy",
+        "sha256": "028fecbadedcf8966a9e4c165561be55ca490a07c2824f053ed452919b54bbea"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_generic_cleanup.fy",
+        "sha256": "366d3f36e4c1f189e0d17ebd2258b58e5f30ac2fa188e678d2c6872966dde738"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_generic_copy.fy",
+        "sha256": "0afe27a411f8b85b4e0979a5e4aa850e6fcf56ff1298f580d4b3ab6ac850d0f6"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_generics.fy",
+        "sha256": "d78f6c48c4db843c0ce2d3b10fdd135f909c0190d84d294bb75e2c8bc5ac4f4e"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_interface_annotations.fy",
+        "sha256": "b90e5a47521ae999f61fff6123cf5d8344433d94c308965e23826913489b98b1"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_interface_declarations.fy",
+        "sha256": "fa5def06ebc0efcbf9e707c26858d84247ff6e8ac860e0f54a9e183709416944"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_interface_work.fy",
+        "sha256": "575d2ba14a7f0b3c4a45531742efae88d9a40825460e8c88bee761804eb222ac"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_interfaces.fy",
+        "sha256": "c422497ea7dd55d7a90e31788fb93d61a6a5099b91f6a4ebac94c8de81cd17c3"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_loan_checks.fy",
+        "sha256": "341b6460db802834678eaadb7b7a187f53089a67a9caf89ee981eba9292a144d"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_loan_facts.fy",
+        "sha256": "307f0a820e5439aeee4c77a10094dd71f635ccad94a8b5c50d2bc93eb7ea3f05"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_loan_generations.fy",
+        "sha256": "f9c1435a8fa5eb1d823217754954715586e41d6e9dd8d3358efd807f45c01059"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_loan_iteration.fy",
+        "sha256": "018e9dca19d96f107f1f7c5722b2adf74f55d921187f25a151e018abd1fadde7"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_loan_live_control.fy",
+        "sha256": "386b5df1b8a5219ef490d9d00f7cbf8bee0e795df1d9200c7f553dce509a3e1d"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_loan_live_maps.fy",
+        "sha256": "ee006e228f22fa8274186d6fa85b16592939239ef0544836ae707047301f4ff6"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_loan_live_model.fy",
+        "sha256": "83201ecf9152770e50d3afccd7a6086c69b32f109e672997819b949a3a658238"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_loan_live_walk.fy",
+        "sha256": "9ea1b82fc3e3740c5928c6dcb0a6b7c7595bf85a7bf10fb43592b2ec668e99d1"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_loan_liveness.fy",
+        "sha256": "564eab78d4f49746852d47d141db4d25e91cd325e0962653932096322fa9048c"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_loan_model.fy",
+        "sha256": "7d5b3cf3c691e3f27eea95fe283fbd280bbd72a8ce5dc7a9929431cd1c9f480f"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_loan_owner_reads.fy",
+        "sha256": "e186447b50acf0c015e8c5d01a33a85d2cd749b2f4c5450a0d397ec792f726e4"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_loan_reference.fy",
+        "sha256": "8cfe4aee4f356b168ab6d42dcc76d240845b1067c20c4a3accd03bb219669650"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_loop_control.fy",
+        "sha256": "7442c5d32e3939519252a507c4548cb2bc80edb6b45dfa89abeacb06ddae1489"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_move_control.fy",
+        "sha256": "6d6426d3f58573ba8bfa2b98272dfcfa987a18118575dd81b06a42b8d3422b67"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_move_model.fy",
+        "sha256": "84bc5c8e94e208666fcb888a7b4b0a1a4377e3bc383ddab2552f3287c914606c"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_move_walk.fy",
+        "sha256": "95ac4403a0484f6145d32f785619072632d00f855ec9d8b8f29637f28cf912bf"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_moves.fy",
+        "sha256": "9f7d41e71e8d877a392255edd6b7e89febf81a029a14399812226454c761c9b3"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_name_model.fy",
+        "sha256": "67b6a9fd5dbac5577fe47dfa330c5c3ee484c7804d79157950ed7bdfbe813187"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_name_walk.fy",
+        "sha256": "1fc7c36aa6452cf3907d97b1520a3155c0a0e6baa7a0b38d5a45a8118dd52bac"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_names.fy",
+        "sha256": "6e41be8d025a57f50a313c84dbcfaab90c15aa5e2ceeb79ef05c77c4c652fb7b"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_ordinary_names.fy",
+        "sha256": "69c9d7891ced748ca215484f70bebb7dac01a20de7e43084ef56e9ef9b19768b"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_origin_diagnostics.fy",
+        "sha256": "573dc968c6828e2028d144221312ef8ae0d9cd7578c2306c5db97031064d9d4d"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_origin_flow.fy",
+        "sha256": "b18c0f8e369541d96ca3f9545a584b8d92b491f84d9a744f3f5428dc70acc701"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_origin_flow_control.fy",
+        "sha256": "011cb92385adb7ff7dc23187a69265d177a3a653f50ff09600db85b821da7bbd"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_origin_flow_model.fy",
+        "sha256": "825a6834aa2dad4af6d42ddc0452af2c98a1b94bd39e983e416f23926878cc1e"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_origin_inputs.fy",
+        "sha256": "dbcba47a8035d95d0ad829d7311442afdfafd7b90c230d696953f346d428f24f"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_origin_match.fy",
+        "sha256": "34125cbf2c537ea660f3cd84669855aa981707333a4689e2237b5d474712d1e6"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_origin_provenance.fy",
+        "sha256": "70381599968c8fd17d9d814b0137bdf9e1ada64b0c24d8d49bd38d7eec55f398"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_origin_returns.fy",
+        "sha256": "3d4271121556fda18fa5580a140ab9ce2eab56f1076573f7e993b9eb824c58b5"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_origin_sets.fy",
+        "sha256": "ac90cda4997dee2c9c7946d527168e4ba83a576befd568b888aaad36ace1bef6"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_origin_shape.fy",
+        "sha256": "63dc0360810b488112f8194bf62022c7e951854238bec74d99dbc8e5cca58469"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_region_demands.fy",
+        "sha256": "33b74e9036b8508387622e1a86a84bf630f89dc7ec8f105ffcbfab16f15251b3"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_region_events.fy",
+        "sha256": "6fb06cf0871cb184157eb43903fd9969b2cd80da6e3b2806fc09bf0e8362a9b7"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_region_lifecycle.fy",
+        "sha256": "28b283a12c34d9c533c18f900cf489d702f1aa019924e44b318308c000671e95"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_region_model.fy",
+        "sha256": "fb18ec377e505fe72ff4d0cbb6874509a6c325bf9dec67837d13265059dc9b76"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_region_sources.fy",
+        "sha256": "a103953240f6662fbd9b3dbb595209f36cd99f777898f831c3023103b9efb3d3"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_region_walk.fy",
+        "sha256": "45fd348cbbf6b9f195fcc18a16d528fe6ae84003516af49a6efef7f809591f1f"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_sdk_authority.fy",
+        "sha256": "9e157f32a03d5825e1ffedaa237c110e04487b228536a71e7d58c6d6e1068be4"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_sdk_sources.fy",
+        "sha256": "57fdf9d38dae306555c493388d116ce3c676d9408b54f452e6be81260ac15aea"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_shape_contracts.fy",
+        "sha256": "4ab7900ef6afd684016bf12fc72fe07d309c18ba321034b549dad01b45d1515f"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_value_array.fy",
+        "sha256": "1a8d9bd945da466fb61e7e6a5df57e013a4be4f0479baae862d876d437c37b5b"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_value_assignment.fy",
+        "sha256": "6e6f04f10228817ce467d2d54185f50d8751d75241b6002354bf29c96db2982f"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_value_builtin.fy",
+        "sha256": "b24026c18caa711dd540c995845e2f74be91e38db121a6aac95064599737aa86"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_value_collect.fy",
+        "sha256": "4493da99bbf5c0bff2f60bb87159cc0933a01b8441d9b771aeb0b27afdddccb5"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_value_completion.fy",
+        "sha256": "6289992325bcaf6484e57019e0e387c12edab371b870589444e7204571714f23"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_value_control.fy",
+        "sha256": "af3b919cb5ebf21c86f52600d626a9fea4cad22530a5ce08c147c303a37e9389"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_value_field.fy",
+        "sha256": "acfe169d2abf6c8dac35c2ae5f9d9375c7a0975f756fdbe7fa884806a1f5954b"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_value_index.fy",
+        "sha256": "b2e2a366f33d2c93c894b90b1c267345f420d5cae3f612b937b3e0b027f7998c"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_value_iteration.fy",
+        "sha256": "8fe7889081575792ad5414303884b0e21d4b06925e9eea878ec225bbcb90f316"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_value_match.fy",
+        "sha256": "5e46ab5a172f17f2e788953a9494493c241d86e47b52b014e0316ded8b511632"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_value_model.fy",
+        "sha256": "0ef5851bdf1cca88b30c99fba90107def15a1ff85effe2eecfb76639468cc338"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_value_place.fy",
+        "sha256": "f607d25f079a4f5425738d1ce18cb5b06dfef1731c5925a5f43d975d062c07b9"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_value_record.fy",
+        "sha256": "0c4d8f9c29ea7d82bd72c7b61d6d8ae2de6f8eb2e8fe7c34dd93c123a6594023"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_value_region.fy",
+        "sha256": "23e158fb692dd83062b735705ed458076916cc17257355f03196c24e84cc0f61"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_value_result.fy",
+        "sha256": "84604696c6060359df313cc1bd28d377cb789b12db32eabac876b40d54efd11b"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_value_scalar.fy",
+        "sha256": "229981b91eedcb2ff29e83ca0bb93363e50774d27d9c82d07fdf1eeb1a7fe050"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_value_shapes.fy",
+        "sha256": "f1af2d4f0b0e8054301abb35a3e0bc33d4b300adf0899a5cf8eb2c5460ba0f59"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_value_storage.fy",
+        "sha256": "697aee14022901b339c7fc3f95240c02450dc0c6588ed3bcb264409faa8c80f7"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_value_terminal.fy",
+        "sha256": "f431ae15b7a597c184ab1e23f1ad7b30235c0e80d6525399eebbffbf32348a0c"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_value_variant.fy",
+        "sha256": "a6b3e5ffbd0d010a9878833405c79c85db5d97476538ba03d361295183635094"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_value_view.fy",
+        "sha256": "c19b8710ddf31ec537d51f3d78b5463c33e2bb0e5941f0b9b317c400045f1621"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_value_walk.fy",
+        "sha256": "d8805604440ec58b584ed3d5beee61b053719479efd9b2ca58d26245a8fb8456"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_unit_values.fy",
+        "sha256": "d7163ee06a4b31e8d05ffb546726624b56d7c37a34800a0067b37e9a09bb2b8e"
+      },
+      {
+        "path": "examples/lexer_candidate/src/module_units.fy",
+        "sha256": "21a3419b12ae369f316142f8ecfb39838bbe7b932144824f037707e0e5ceb079"
+      },
+      {
+        "path": "examples/lexer_candidate/src/nominal_identity.fy",
+        "sha256": "634cba7ac0667481c0863953640668841216554d852e0e1b1b245c8bc1606958"
+      },
+      {
+        "path": "examples/lexer_candidate/src/nominal_types.fy",
+        "sha256": "67f08ae69f35b1bcdf1d53eb080b5a5fa043a244ab0c48de2a1af26d38a63072"
+      },
+      {
+        "path": "examples/lexer_candidate/src/numbers.fy",
+        "sha256": "ee8b40b5e8061317d70d3594c386c9e4c70d95132a7e4243ea6402947a4c3556"
+      },
+      {
+        "path": "examples/lexer_candidate/src/parse_tokens.fy",
+        "sha256": "91984eb1086ff7faafa4a6c64a232fc2ddce365b8cd7c2ef23b143bb91d4c9a6"
+      },
+      {
+        "path": "examples/lexer_candidate/src/pointer_identity.fy",
+        "sha256": "31458fda72821f98d8383339f8b272f3aa1c78385fb23504cbe9f1aaa021ae3d"
+      },
+      {
+        "path": "examples/lexer_candidate/src/pointer_types.fy",
+        "sha256": "7cca6293336feedbf785912759ee6c50a17010ad9d966acb81877ad32cd55297"
+      },
+      {
+        "path": "examples/lexer_candidate/src/project_cache_encoding.fy",
+        "sha256": "16d4e8749fde2b78d43314f7a01c29f056a67237a750b43e1fa3421c7fada0da"
+      },
+      {
+        "path": "examples/lexer_candidate/src/project_compiler_input.fy",
+        "sha256": "ba73aebc8d3c4fd4aae052849589e301dc5f6aec88c97dc8a6ac094d4f15c475"
+      },
+      {
+        "path": "examples/lexer_candidate/src/project_content_hash.fy",
+        "sha256": "68d867b37b8cc817382e6d6602aa4d66f4d66be8784e7fbe119c806832839a0e"
+      },
+      {
+        "path": "examples/lexer_candidate/src/project_directory.fy",
+        "sha256": "70321e8a7cc84f131573eec91013fccad38d0162f781768bc0e47b136cf4ebc6"
+      },
+      {
+        "path": "examples/lexer_candidate/src/project_import_path.fy",
+        "sha256": "bc0e5e10905ee833b36ffe94ae8ff835f6f33caccfc59970cd379537dcbb0c54"
+      },
+      {
+        "path": "examples/lexer_candidate/src/project_instance_graph.fy",
+        "sha256": "9a47a2cae4fbef1a6129b0805e683782be26c819ae2f41dd233129279cc226e9"
+      },
+      {
+        "path": "examples/lexer_candidate/src/project_instance_identity.fy",
+        "sha256": "797920212852438398bcfaa5acd34225c9ff2de722744c67d9c68c9d2c56e8dd"
+      },
+      {
+        "path": "examples/lexer_candidate/src/project_json_string.fy",
+        "sha256": "03e76c4239b19ef6fba1a9ebdf97aeb9407d2fb97529fa9f2c6f1d8fbfce6c53"
+      },
+      {
+        "path": "examples/lexer_candidate/src/project_key_index.fy",
+        "sha256": "34ee26a1092361c5bc60860795a86c0974243eec3cfc5f829710d192fdf7ea28"
+      },
+      {
+        "path": "examples/lexer_candidate/src/project_manifest.fy",
+        "sha256": "943c3e163ddc04afb03a82ef4a0485aa6a618a67708e657086b8ed1acd56658a"
+      },
+      {
+        "path": "examples/lexer_candidate/src/project_manifest_values.fy",
+        "sha256": "4f21b9dedf744ffc449d1b843282f9aba2ecc221c61f043594bea70c4d56387d"
+      },
+      {
+        "path": "examples/lexer_candidate/src/project_module_path.fy",
+        "sha256": "b4217fe0f797e5f0fb4bab8ebc75435e6674b5f72b60d0129b5269c627709cb2"
+      },
+      {
+        "path": "examples/lexer_candidate/src/project_module_visibility.fy",
+        "sha256": "a03c433d5302f904620df34585697e99e67e417b3b2121a474432839108ab0bb"
+      },
+      {
+        "path": "examples/lexer_candidate/src/project_package_input.fy",
+        "sha256": "fe1a75622fbf72b03fe5bfba3ce0c158eb2e03033e31acfdaef05afea9ec68c8"
+      },
+      {
+        "path": "examples/lexer_candidate/src/project_path.fy",
+        "sha256": "20bde13864e5ba8752b33a616eab22b08caf8a20d6a435d2d2c2cc68f443f1a5"
+      },
+      {
+        "path": "examples/lexer_candidate/src/project_path_unicode_data.fy",
+        "sha256": "9cf3af27796644304493561591e1641c70c5c653bf739ed71a65e492db510fbd"
+      },
+      {
+        "path": "examples/lexer_candidate/src/project_sdk_bundle.fy",
+        "sha256": "a7bde8c483cc986a6bf6b38f56ab1852cc46a4d27a21a48b0868064bf1eb8217"
+      },
+      {
+        "path": "examples/lexer_candidate/src/project_sdk_data_alloc_0.fy",
+        "sha256": "ac58625000197a88c33f322770c7f89fecc64126b3ff4479d6757aa4bfb16301"
+      },
+      {
+        "path": "examples/lexer_candidate/src/project_sdk_data_bytes_0.fy",
+        "sha256": "18734fec4d058c90a8b38cc729d711789b2ebfd2f4cd08756ccdad56ae9665b3"
+      },
+      {
+        "path": "examples/lexer_candidate/src/project_sdk_data_fs_0.fy",
+        "sha256": "a6c26d37224e5a43231d9068bfe1638ac9b357b971eddcaf628291d5c906ea0f"
+      },
+      {
+        "path": "examples/lexer_candidate/src/project_sdk_data_fs_1.fy",
+        "sha256": "0c2a6d16571e5681296d324293543771c69665b3a90606090b675d33e0fc5f17"
+      },
+      {
+        "path": "examples/lexer_candidate/src/project_sdk_data_fs_2.fy",
+        "sha256": "c20e6ac9ab0d7be6a84af43a52191ae76b402efef6d76bdd7ce0e1e3dffafea0"
+      },
+      {
+        "path": "examples/lexer_candidate/src/project_sdk_data_io_0.fy",
+        "sha256": "8527d39e50702591dcdf07e71663128bd4f61a8ad62f30e8b42998f30a548104"
+      },
+      {
+        "path": "examples/lexer_candidate/src/project_sdk_data_num_0.fy",
+        "sha256": "1859e2ffa80b3e675096cc50cec693bb33aa060dd47886feb837d4df37c2eda8"
+      },
+      {
+        "path": "examples/lexer_candidate/src/project_sdk_data_process_0.fy",
+        "sha256": "b14ace85f2736dee51a63f064cf7619ad925384797e0945c6053ba767f725f6c"
+      },
+      {
+        "path": "examples/lexer_candidate/src/project_sdk_data_text_0.fy",
+        "sha256": "a0d6b93d966f75b803a1677cfa0e3cd6504b1006bd4a10a1c2598668a5442d19"
+      },
+      {
+        "path": "examples/lexer_candidate/src/project_sdk_data_vec_0.fy",
+        "sha256": "6201186e9a75bb1957596eb9717e447194e67b6c5828355e44af98941a103a31"
+      },
+      {
+        "path": "examples/lexer_candidate/src/project_sdk_embedded.fy",
+        "sha256": "8c49d481331933981777e9bd90fa5f45621956010b6a3fea38a2ada4dd31d943"
+      },
+      {
+        "path": "examples/lexer_candidate/src/project_source_catalog.fy",
+        "sha256": "5dd5b1a6f848968cf20676084af8ddcaf039cfc74e1837685c12c601c53fb131"
+      },
+      {
+        "path": "examples/lexer_candidate/src/project_source_file.fy",
+        "sha256": "6d1307e99f7ae9fb387fc447f3b6c36f6c0e77aebc90faca55e75665aad2d282"
+      },
+      {
+        "path": "examples/lexer_candidate/src/project_source_identity.fy",
+        "sha256": "354bed4ced07109403b58f4432e8beddc765760a1ee083b3ca72fa0880c9f359"
+      },
+      {
+        "path": "examples/lexer_candidate/src/project_source_modules.fy",
+        "sha256": "d7d7e5b30a270389a1572f6e26cf3c0603db33e0125bd33fa17f4f177a0f7a1c"
+      },
+      {
+        "path": "examples/lexer_candidate/src/project_source_root.fy",
+        "sha256": "e6d896a57fde407db5e7042e244d6f2a35dddc4e113ad20555c4408f24842127"
+      },
+      {
+        "path": "examples/lexer_candidate/src/project_source_set.fy",
+        "sha256": "c4b70409d8aa627a1ef46488e5232d3deea7b07c0e796c26ef28449f367a98e1"
+      },
+      {
+        "path": "examples/lexer_candidate/src/project_toml_context.fy",
+        "sha256": "1682260043feced2ac662198fd3b29f4badb2a4a9f9b02a8e1f81462f3b3cc0f"
+      },
+      {
+        "path": "examples/lexer_candidate/src/project_toml_document.fy",
+        "sha256": "0bc3782206da0d9320ba8a39ea6a1f9ded52ec1bbf855580e31c1a1786f4b3a8"
+      },
+      {
+        "path": "examples/lexer_candidate/src/project_toml_model.fy",
+        "sha256": "4a6c295108e704749fc557204de4d8a0287e3228e59da396c50867ec8894b11e"
+      },
+      {
+        "path": "examples/lexer_candidate/src/project_toml_scalars.fy",
+        "sha256": "137d5dbdce313f22e91a9be87f8b34eb6f10011933b152f649421a895e274cb9"
+      },
+      {
+        "path": "examples/lexer_candidate/src/project_toml_strings.fy",
+        "sha256": "bc7e71acaaa68af5755d066c90fa1f763625de32c8fa2a6778e8447eebc187bb"
+      },
+      {
+        "path": "examples/lexer_candidate/src/project_toml_values.fy",
+        "sha256": "24255d1fdf0f34b6761f5304d383127667e8b127488a80409b3f35a13f62e81c"
+      },
+      {
+        "path": "examples/lexer_candidate/src/project_workspace_catalog.fy",
+        "sha256": "bc800dda99247aba4d8b80abdcbc092d9cb27ac5193cfb7a33bd405ec753c936"
+      },
+      {
+        "path": "examples/lexer_candidate/src/project_workspace_graph.fy",
+        "sha256": "bac53290ea919d58d825f7a663c716b97541404a1973aa8585da891bfb689dc1"
+      },
+      {
+        "path": "examples/lexer_candidate/src/project_workspace_input.fy",
+        "sha256": "18a8a35c400eaa8c32da09ea55a70d704953e8b9a762998b44c9af4dd76689fd"
+      },
+      {
+        "path": "examples/lexer_candidate/src/raw_view_intrinsics.fy",
+        "sha256": "d01c264221b717c7344f8119a9e645794037b0ce7b589e4eac31228c2b4af0d5"
+      },
+      {
+        "path": "examples/lexer_candidate/src/records.fy",
+        "sha256": "e2d1d3540285509aded981b476d4b2340857d8c7370364f4b1410bfd6883f6dd"
+      },
+      {
+        "path": "examples/lexer_candidate/src/reference_types.fy",
+        "sha256": "f529bb686f06fe07d95f864e28fbde211200fce11a11c6aae260356103639b57"
+      },
+      {
+        "path": "examples/lexer_candidate/src/repr_c_declarations.fy",
+        "sha256": "20a8e1725551f932fb702e2049eda8edd24ea77a5b55be62e72d32fd5b2d47b8"
+      },
+      {
+        "path": "examples/lexer_candidate/src/resource_abilities.fy",
+        "sha256": "1dc0a26ba65e173ca7eb5825831e97a1e853593f8761131f10a6a6bf1ca186d1"
+      },
+      {
+        "path": "examples/lexer_candidate/src/resource_identity.fy",
+        "sha256": "7d85c65df4d6cc02f004f854d5108ec3cc7ba8ddb4885ea54c634f88f93594aa"
+      },
+      {
+        "path": "examples/lexer_candidate/src/resource_properties.fy",
+        "sha256": "fe0372ce1c546422e8b09d5ae9c9aa16f1bc11682fdded971e0820e96d30bac2"
+      },
+      {
+        "path": "examples/lexer_candidate/src/scalar_casts.fy",
+        "sha256": "4976894d09b88b1df8253b04d654626b99efeb64298acf8dfa0ca1b8947d235e"
+      },
+      {
+        "path": "examples/lexer_candidate/src/scalar_views.fy",
+        "sha256": "ab3044f3a36a81611a11a46fed80dd41546a9de3f953d4817b2d8e40bc6037bc"
+      },
+      {
+        "path": "examples/lexer_candidate/src/scanner.fy",
+        "sha256": "3755e569fe63003f63b2c9b8272df2ba656c844791cedbc0da4f9245b8809cf7"
+      },
+      {
+        "path": "examples/lexer_candidate/src/sdk_authority.fy",
+        "sha256": "ae0f2e21819a625a6bb5fe331173dd3366599486f3c203a523693680a0c4ee6c"
+      },
+      {
+        "path": "examples/lexer_candidate/src/sdk_file_rules.fy",
+        "sha256": "a7c5bc7224e12d29d54d284c54f31f34fa66f1067397e0fcb57de9dabe901e5b"
+      },
+      {
+        "path": "examples/lexer_candidate/src/sdk_scopes.fy",
+        "sha256": "7aabc14d6c8a54f959e4c454df8fccb4fc49c2a7efbefa882f8d939a131717e6"
+      },
+      {
+        "path": "examples/lexer_candidate/src/sdk_vector_plan.fy",
+        "sha256": "2968107bfb7e73d6371ccd248c94fe3060ce1e19cc0a3c47972aafb2900582a2"
+      },
+      {
+        "path": "examples/lexer_candidate/src/sha256.fy",
+        "sha256": "eb89211fd749f7f527e8d2b72e97d70f8d9613bbac428bc95d975bef7c53bfa1"
+      },
+      {
+        "path": "examples/lexer_candidate/src/sha256_block.fy",
+        "sha256": "bc48b9e751205bba8aeaf09987ea8681694d26bc989e24f4ecb3afa4c6e00fd4"
+      },
+      {
+        "path": "examples/lexer_candidate/src/sha256_stream.fy",
+        "sha256": "b5f97a9b5be679418a1365a6007028abfab5ba66ee3ae5c08b3e5b863fcfc8b9"
+      },
+      {
+        "path": "internal/sdkstdlib/sources/std/bytes.fy",
+        "sha256": "4740a506e93349fb002c383967dcc44d182d20f09f2094b83b5464a4ab252982"
+      },
+      {
+        "path": "internal/sdkstdlib/sources/std/fs.fy",
+        "sha256": "fd7ddfa9f0deed98304cecf94911644087d1e2a46e8be8995c35acbcb183b335"
+      },
+      {
+        "path": "internal/sdkstdlib/sources/std/io.fy",
+        "sha256": "4b89c3aeb8b4de4887395d29723095d364c5660c6b773c5696fb1f65f5365f48"
+      },
+      {
+        "path": "internal/sdkstdlib/sources/std/num.fy",
+        "sha256": "09aa0d45f075aa4212049527ded7bb48d99ceb6ffed56b310e267421bae20bb3"
+      },
+      {
+        "path": "internal/sdkstdlib/sources/std/process.fy",
+        "sha256": "9680a1481df4f761f481d5a039af7bdbefeb312d1091961194f8e7bc0681ae24"
+      },
+      {
+        "path": "internal/sdkstdlib/sources/std/text.fy",
+        "sha256": "cccd47e090fda11c9da063ffb321489dd8753fe9996855fc432833e05a79e695"
+      },
+      {
+        "path": "internal/sdkstdlib/sources/optional/std/vec.fy",
+        "sha256": "0ae4c395bf98c39079ad620bde035b3b590d51417864802e698edc069281db5b"
+      },
+      {
+        "path": "examples/lexer_candidate/src/storage_intrinsics.fy",
+        "sha256": "15d2394baf23343cf6a678e9fb5d4949cd53b99f42d61e3e67e9985dedfda5b0"
+      },
+      {
+        "path": "examples/lexer_candidate/src/strings.fy",
+        "sha256": "8f26db7c4d4039c8c8d9fbc6078097859c8f714ca5887957fdf0e69269dca521"
+      },
+      {
+        "path": "examples/lexer_candidate/src/syntax.fy",
+        "sha256": "cb9244a18ea93777694d60e5b63eb67738d224297d097542bb84db2b7f31d5e6"
+      },
+      {
+        "path": "examples/lexer_candidate/src/syntax_arena_copy.fy",
+        "sha256": "89969f5d7d8bd0deb3070032d9c9ffd58afbc972ee95316c04236952e27ff098"
+      },
+      {
+        "path": "examples/lexer_candidate/src/syntax_parse_driver.fy",
+        "sha256": "9db6518c69f6c2394ef1c697d7d2d07b0a78ec3336a907c92e9d2e2087e5b756"
+      },
+      {
+        "path": "examples/lexer_candidate/src/tagged_encoding.fy",
+        "sha256": "bfc4c8398d4cac37cb15056a19814216e1faf437d88b22d61d52c5482aa37d2a"
+      },
+      {
+        "path": "examples/lexer_candidate/src/tagged_types.fy",
+        "sha256": "431f283e07d9dbea60c698d1f70f7e7009e1552314cf660688b10b09daad8338"
+      },
+      {
+        "path": "examples/lexer_candidate/tests/module_state_artifact_fixture.fy",
+        "sha256": "6ea0ba56975d63dcd277ef0fc31c82ab03fcdeb430fb86bad50698806ee9465b"
+      },
+      {
+        "path": "examples/lexer_candidate/src/type_state.fy",
+        "sha256": "7dbbf7d50be1e9513dc8aafd99b11afda5d8e2d7ce87d96b6436c4752c2123a0"
+      },
+      {
+        "path": "examples/lexer_candidate/src/types.fy",
+        "sha256": "53a77948af92724f00de0609837fd1507899df8e2b59b6d2778ef1f3c344395a"
+      },
+      {
+        "path": "examples/lexer_candidate/src/utf8.fy",
+        "sha256": "4a5425cea9efbfb1bff2c31a38c2bd8e392c6792af09f24e906c9a743621870d"
+      },
+      {
+        "path": "examples/lexer_candidate/tests/module_state_artifact.fy",
+        "sha256": "6d50dd688805bf6990fd9d1491e5ef4836ae9ec0476b5a06e5da1ebb085decdd"
+      },
+      {
+        "path": "tools/verify-candidate-private-tests.py",
+        "sha256": "4dbdfcfcbd696ae8ca1ad43d27f3a6fab65d2fce757b66645d8532fc7b520f25"
+      },
+      {
+        "path": ".cache/state-artifact-20261014/golden.bin",
+        "sha256": "5d7d46f013d9c8c182c5391b013e5748b533aa5dd70d8a7c3b685563116e2965"
+      },
+      {
+        "path": "examples/lexer_candidate/fairy.toml",
+        "sha256": "5dd473fe42d35270b362d16d383627167d9981244761a925e42a45f57c8b737f"
+      }
+    ],
+    "tools": {
+      "compiler": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-frontend-oracle-current-20261012.exe",
+        "sha256": "3ecc4501ee3bb47ecc39e7288200266b31cbcd8bf6ffec302ae54867705ce5d1"
+      },
+      "candidate": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-cleanup-20261013\\current-driver\\driver-release.exe",
+        "sha256": "67be18bdabb9d6499edcfcd8b7d3e3245dd932fd265ba79ab4cd7136748ec0ac"
+      },
+      "builder": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-rooted-builder-stack-20261012.exe",
+        "sha256": "02abe2328daa9921705910c7b995e82c1312cb960fe024106c11468569aefff0"
+      }
+    },
+    "native": {
+      "schemaVersion": "fairyc.test-report/v4",
+      "engine": "native",
+      "target": "x86_64-windows-msvc",
+      "profile": "development",
+      "tests": [
+        {
+          "identity": "tests::module_state_artifact::source_state_roundtrip_reassembles_all_program_components",
+          "outcome": "passed",
+          "trapCategory": null,
+          "stdoutBase64": "",
+          "stderrBase64": ""
+        },
+        {
+          "identity": "tests::module_state_artifact::state_binary_matches_golden_and_preserves_detached_identity",
+          "outcome": "passed",
+          "trapCategory": null,
+          "stdoutBase64": "",
+          "stderrBase64": ""
+        },
+        {
+          "identity": "tests::module_state_artifact::state_codec_accounts_for_hash_work_and_exact_boundaries",
+          "outcome": "passed",
+          "trapCategory": null,
+          "stdoutBase64": "",
+          "stderrBase64": ""
+        },
+        {
+          "identity": "tests::module_state_artifact::state_codec_rejects_truncation_bad_hashes_and_noncanonical_fields",
+          "outcome": "passed",
+          "trapCategory": null,
+          "stdoutBase64": "",
+          "stderrBase64": ""
+        }
+      ],
+      "count": 4,
+      "passed": 4,
+      "failed": 0,
+      "status": "ok",
+      "lock": "verified"
+    },
+    "nativeTests": 4,
+    "authoredTestsExecuted": 4,
+    "candidateOnly": false,
+    "lockSHA256": "68fc86643264fa72200b12975844b1ac0a9d9af8a877d21265af3d36bc32ea46",
+    "candidateInputFiles": 274,
+    "candidatePacketSHA256": "55d7efe08038a3e53258cc05ca420c38d2aaded4e3e64eaddae70356ebfc315c",
+    "candidateExecutions": [
+      {
+        "profile": "development",
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\development.exe",
+        "sha256": "3659875f74bc4ebd4ffd38db042873166fa39b2d403abfdf8739703581129263",
+        "exit": 0
+      },
+      {
+        "profile": "release",
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\release.exe",
+        "sha256": "78fa3d4bd1e06304ec1d8328edd1dda9cf976cba1bf780a6eb778320cee06ca1",
+        "exit": 0
+      }
+    ],
+    "invocations": [
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-frontend-oracle-current-20261012.exe",
+          "check"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0",
+        "seconds": 10.388111100008246,
+        "exit": 0,
+        "stdoutBytes": 80,
+        "stdoutSHA256": "4aed8e21cb32439434512b6f984d8bb98ee832a0f65addc6c29f2c1c7441e099",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-frontend-oracle-current-20261012.exe",
+          "test",
+          "--native",
+          "--locked",
+          "--json",
+          "--capture-output",
+          "--exact",
+          "tests::module_state_artifact::state_binary_matches_golden_and_preserves_detached_identity",
+          "--exact",
+          "tests::module_state_artifact::state_codec_accounts_for_hash_work_and_exact_boundaries",
+          "--exact",
+          "tests::module_state_artifact::state_codec_rejects_truncation_bad_hashes_and_noncanonical_fields",
+          "--exact",
+          "tests::module_state_artifact::source_state_roundtrip_reassembles_all_program_components",
+          "--",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\golden.bin"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0",
+        "seconds": 60.033667300012894,
+        "exit": 0,
+        "stdoutBytes": 909,
+        "stdoutSHA256": "4dc4d8c7af1d003224d6db533b548dfb26b23ed0157c6b06e7c5b2ecb2b8778c",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-cleanup-20261013\\current-driver\\driver-release.exe",
+          "--c-project-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\sources.list"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+        "seconds": 97.53483970003435,
+        "exit": 0,
+        "stdoutBytes": 15458680,
+        "stdoutSHA256": "55d7efe08038a3e53258cc05ca420c38d2aaded4e3e64eaddae70356ebfc315c",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-rooted-builder-stack-20261012.exe",
+          "--packet",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\candidate-packet.bin",
+          "--packet-sha256",
+          "55d7efe08038a3e53258cc05ca420c38d2aaded4e3e64eaddae70356ebfc315c",
+          "--output",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\development.exe",
+          "--stack-reserve-bytes",
+          "16777216"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+        "seconds": 14.53843960002996,
+        "exit": 0,
+        "stdoutBytes": 172,
+        "stdoutSHA256": "491a80f1abdd03729224fe07dcb0b7b1ac38b2ef6ddfbc5306b9362fdd3cb9db",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\development.exe",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\golden.bin"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+        "seconds": 0.23410930001409724,
+        "exit": 0,
+        "stdoutBytes": 0,
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-rooted-builder-stack-20261012.exe",
+          "--packet",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\candidate-packet.bin",
+          "--packet-sha256",
+          "55d7efe08038a3e53258cc05ca420c38d2aaded4e3e64eaddae70356ebfc315c",
+          "--output",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\release.exe",
+          "--release",
+          "--stack-reserve-bytes",
+          "16777216"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+        "seconds": 142.27917970001,
+        "exit": 0,
+        "stdoutBytes": 174,
+        "stdoutSHA256": "274b33a5008901699a8b67d7f76a96afd7509bcc9746b747d971f0aa09b75b8a",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\release.exe",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\golden.bin"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+        "seconds": 0.09044910001102835,
+        "exit": 0,
+        "stdoutBytes": 0,
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderr": ""
+      }
+    ],
+    "publicApiChanged": false,
+    "dbChanged": false,
+    "ciChanged": false,
+    "pushed": false,
+    "selection": {
+      "mode": "all-authored",
+      "authoredTests": 4,
+      "selectedTests": 4
+    },
+    "frontendTimeoutSeconds": 900,
+    "executionTimeoutSeconds": 900,
+    "productTimeoutChanged": false,
+    "stackReserveBytes": 16777216,
+    "wrapperEffects": [
+      "filesystem",
+      "console"
+    ],
+    "nativeIsolation": {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0",
+      "localSourceFiles": 267,
+      "inputFingerprint": "f02b6ccd62a4c8f2d5d0f6186bfbd0bf29ac5f5a3b321d50c9725ce94a910c46",
+      "copiedInputs": [
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\fairy.toml",
+          "sha256": "5dd473fe42d35270b362d16d383627167d9981244761a925e42a45f57c8b737f"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\tests\\module_state_artifact.fy",
+          "sha256": "6d50dd688805bf6990fd9d1491e5ef4836ae9ec0476b5a06e5da1ebb085decdd"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\array_identity.fy",
+          "sha256": "8b501b0f72bb2805c00abc59afb195b5ba2c199796982122b62958bab64966ee"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\array_types.fy",
+          "sha256": "661e57ec5f65ea1d0be93eef637ce5235fc6e3f84e4ddf5babd8a4afd89f6688"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\attributes.fy",
+          "sha256": "c1d0eb0c7db61c6e46acac84ca74ec413f2a14061a37d6848ddc13f7191e70bf"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\bodies.fy",
+          "sha256": "ea9bfd6dc1b3bce9dc407970b82d871185db33e7daadad35d348de84ab6ba294"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\body_state.fy",
+          "sha256": "0f4e1924d07e4d21bc5fbe35a4fb8f0c2b617206b6d63191e7a625300ec5bb3e"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\borrow_shapes.fy",
+          "sha256": "36b2214d9530980d60b11956f3738c1959cf66d29fcb80ec2bc4bad853c421e3"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\budget.fy",
+          "sha256": "c2793aa302279b9d27f0af32edd71f70de4e93cb4f76f55facd3e757641cc494"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\c_abi_types.fy",
+          "sha256": "2a4c6efd7b00dd4fef5ccc47950d9f70c21ed3ae2ac0eaa9817d80c0e03fdfa0"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\candidate_artifact_wire.fy",
+          "sha256": "a0d5fa478e74e853d7959e5f9db18d3816ed33d050e0ccd6739c8db98db8573e"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\candidate_limits.fy",
+          "sha256": "a1402b90455c05f052334ecd8cb6c26375979e6813ce9e0b996e1fa613f6faa5"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\cleanup_syntax.fy",
+          "sha256": "1374cdcbfa6139a5e82e4e74606cc28ba46d9e81df62f7a0dd397f856fb0ad6f"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\diagnostics.fy",
+          "sha256": "ee95f81ed3b3224702196fceef2888434e9713341b81abf01e03945592c4de8b"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\effect_declarations.fy",
+          "sha256": "5fc47d2d48f4422b7cd897eaf3894f3feb984b4e09127a2ebf025e89e4ae1739"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\enum_types.fy",
+          "sha256": "d257e7cb599fd4f3bafc1f7d9ccf11d00d19f2719df063271186cf7c432f0a96"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\ffi_symbols.fy",
+          "sha256": "bf90ce5c6b76ad6d60fd499c5c168079520edbf5720ea757e705b99489b6cd29"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\file_source.fy",
+          "sha256": "1a7ac7f6c69ef27e78e734aa74dab90b895742a5500a32931baaed19379b938f"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\foreign_declarations.fy",
+          "sha256": "8d18c542522789399c131786d618a50b3058ef961317a89f24a0c9f0dede5a08"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\generic_concrete_types.fy",
+          "sha256": "7d0b322eaddfcc56f87f3df28bb9e5d2a44d7aea7ef69fb71131177ab91fffcc"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\generic_identity.fy",
+          "sha256": "af82d3b359138f3efaea398e0c0faeb353b0fd94728f3c60179b1a481ba53fd3"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\generic_package_bindings.fy",
+          "sha256": "9298a084674ea2327639fef7e0efb269ca92a943b15f564728ac1d817c41a6b2"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\generic_package_context.fy",
+          "sha256": "e13300607b3da9142b8fc6dbffd2cdc1452735a4b094d530b049f4d29b0daa02"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\generic_scalar_arguments.fy",
+          "sha256": "e8203b5dfe3ebdcd69d737e336196b263613f7c1ce7d4d98d11dfffbe953a544"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\generic_source_aggregate_json.fy",
+          "sha256": "a49222c0b0b606155adc17bff2832fdd68ca82ea8380216184107ee64dd4aa5c"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\generic_source_arguments.fy",
+          "sha256": "b6dff24c73b194f3de417b3b4b8a32d66df7a0c271cca06982dc1aa2f5991744"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\generic_source_catalog.fy",
+          "sha256": "cd4152c247f41ee290fb747c4b154c0b211875d0c18bb52f2c87459d38537a87"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\generic_source_declaration_json.fy",
+          "sha256": "d60cf894b43fe313247d19e53991c0731d736141b0206e1dbf4a9fcfa92b663e"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\generic_source_dependencies.fy",
+          "sha256": "e416ef6fe8f191fdc00c6e2ad15ce4ff31912bdbd7c5fc63a452ad6c6c110456"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\generic_source_dependency_model.fy",
+          "sha256": "f95fc9930ddc1db55bd1a0d25475bbaef9087d906df4ec2f57963d1802627ee3"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\generic_source_dependency_walk.fy",
+          "sha256": "c9884cab82be619aa6d2c150428db489c8a2a8bc234e0b81674ee92b465eb105"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\generic_source_documentation.fy",
+          "sha256": "fd2b7d8461938ce5ef9303ce488984a2a15c4fa28bd6b6f01a64a063eaa1c063"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\generic_source_expression_fields.fy",
+          "sha256": "b0a81a4076947c7a3ac334fa00a3a6636acfa90149c1412702ff31333ff76ade"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\generic_source_expression_json.fy",
+          "sha256": "44d147d7cd08bc405361d8e42d5e214bd0675b4a4e2ded0dc66d13ecb5e04827"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\generic_source_function_json.fy",
+          "sha256": "5955eac9f38ab6a98bce5a5acb9e8cebdea3f812b958befe03e1fa941b58592f"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\generic_source_item_json.fy",
+          "sha256": "e0344f3251dcd0f100af155727862a8644a33b4f09efe87131dcf01dc7664b1d"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\generic_source_json.fy",
+          "sha256": "ba8087871f463c8d9e655e57fe64de816bc7971a96d25ec7b340ba5bb483d3a9"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\generic_source_module_json.fy",
+          "sha256": "33dcb9228499f6abda57c8ad311584e8167143e77d1af44c7f2736807cc1a615"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\generic_source_observations.fy",
+          "sha256": "231687176559ae09ce81eb9be7b28fca207dd2bd79d3b04ff6146d7b5531d312"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\generic_source_plan.fy",
+          "sha256": "3e467f987f2156b09be1c8bf5aca06e804fb6b2925b957417627aa3d96e03215"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\generic_source_plan_input.fy",
+          "sha256": "1e92df9a867a97888867d93907995d0d5c891f6a6c6d363a44de8512fc401e42"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\generic_source_requests.fy",
+          "sha256": "9ab65a4b2fbc7e64158d997f13260dbcf9b1c85e90dbeede6f21b02531d4da5f"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\generic_source_statement_fields.fy",
+          "sha256": "c955c78e10b9d25a837123af9f9a654fa874149af56bf2a79cb4ce79a3cbb7af"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\generic_source_tokens.fy",
+          "sha256": "fc91de43a0983de7e4156585a9fac50e8fb708b333317290bcfa75bdb57e98cf"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\generic_source_type_json.fy",
+          "sha256": "0743f95519c13e680eba1076a8149a47031df6ed087f686bdf38c4966a0bfe18"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\generic_source_view_loop_json.fy",
+          "sha256": "cda15b92da26e2dafa4847b3161aaebbfada6796a9d86270ff9672891218464d"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\generic_specialization_identity.fy",
+          "sha256": "fb316b186d871ac0e6ae0b8a970ae766e3a67dbd73e9239270198ee38291c932"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\literal_types.fy",
+          "sha256": "bce967c2f7b001144642642503af9bb4cf83bae1e50f99262676d16afb9ac7f6"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\module_ast_join.fy",
+          "sha256": "f758470311f4db82d1f0472c6d826a96d57a26d26237169fe1ec227341f0119c"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\module_bind.fy",
+          "sha256": "d426503990475626492fee579d5da4b53178c76976ae3c5d21bae39f931c2f8f"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\module_body_artifact_decode.fy",
+          "sha256": "728bd23372422f1093a08579c9a507ed623b2f601e44e667b71ab989c03ed34d"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\module_body_artifact_encode.fy",
+          "sha256": "79205d8c69e5dffe529090e632161e60376af0e578d20f77b4a3dd2c56466743"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\module_body_artifact_wire.fy",
+          "sha256": "207ab2f4c6b85dd92733a1c9cfa1f262422f01f91d1ee3904ba9f048ad12878a"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\module_catalog.fy",
+          "sha256": "1a025ad3452dcd9dd9302802ab6202ea2ccb47a9d6404063c44f32fac9920657"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\module_cleanup_artifact_decode.fy",
+          "sha256": "b08bafe4ea1f010fd0981da53e78a95d418c956c371a33cf359a8d4be8fa5207"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\module_cleanup_artifact_encode.fy",
+          "sha256": "dcdd6be1dbb225bf5b707dce2b7063784729af02272771af41dfabdc961e1858"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\module_const_eval_declarations.fy",
+          "sha256": "8e93ea3fe0035090ad946bc920862cfa3d9281bb65f7b7270cc18c64edf3e129"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\module_constant_arithmetic.fy",
+          "sha256": "2dfa422a86601064b62d2a76f74dd3f0a92fef0ae76b2150f8c191dfda718211"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\module_constant_engine.fy",
+          "sha256": "47c8b387e4c095a78586d93ad01f92f5914188f7ae95425fb24bf892c72bc939"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\module_constant_graph.fy",
+          "sha256": "f4d9f1e5f0bfeb89d36c4c89f4caf41400ce455858070495144561fe51c4a4d3"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\module_constant_model.fy",
+          "sha256": "f3f3becaf100e5cc877f9ef495dbb02a57cecf206eb150419ccf7b5354de5299"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\module_constant_runtime.fy",
+          "sha256": "88c585280ae602c666242fae9d4e59b7cb1118e9e548ac63bedb1f864f860b59"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\module_constant_types.fy",
+          "sha256": "4c5a93d8bd47995a2d1654d623c0946bc245177a9085354fb1f12a7800dd8ee3"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\module_identified_ir.fy",
+          "sha256": "f6834c8a1e7bb46f043ffe0dce1cdd7b6ed25e0c566783176887916c99bcda55"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\module_metadata_artifact_decode.fy",
+          "sha256": "423b096ee7a4b9c82fc5ae3257b6e4dbe4357e12d4660fec8be933ea3220e089"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\module_metadata_artifact_encode.fy",
+          "sha256": "c2b5a767edc49a67238ba2cfed52164735a4ffb7996687e2c62f60623db60c52"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\module_metadata_artifact_model.fy",
+          "sha256": "a91b007e98440d7ddb534226cb211653b7a61898c18b9f369fa4a4336db0d66a"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\module_project_body.fy",
+          "sha256": "e762021268515ae8b196716cfec7e2dc3dd606edca6857f151a6d20c1573ff83"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\module_project_body_equal.fy",
+          "sha256": "e34fd3eb412d35221ff29a19341adc36dd2bd82ab968af5314c0d4cf56614a70"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\module_project_calls.fy",
+          "sha256": "0c032232662b83d8fa070ec57091a0f2cffcc57367b54d39cf75a99ca289e955"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\module_project_cleanup.fy",
+          "sha256": "c13781333e193fe3d1e738b25e98fbced663e2950015ef32b202d3e2d7393d9d"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\module_project_compile.fy",
+          "sha256": "8960197e137483a410d8f5fffa01be29ee74afb4415893db649ba8f3e3be7cbf"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\module_project_frames.fy",
+          "sha256": "d40228c39c3150b04f843ef69628b8d59bff805e273985fcd766f50116aa9e57"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\module_project_identified_compile.fy",
+          "sha256": "46ed8eb35af978bdb9845455b7491162653b5280e408c7536c8ff95e412ab6e3"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\module_project_inputs.fy",
+          "sha256": "5cd6fd546fafb12894f4979cf14012159fa1dee25bae116dbf9f1c99208ac5a1"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\module_project_link.fy",
+          "sha256": "22ead90c86362550544adb82ba56f3d96bd6d1074a36ef8774878f3dd9a71502"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\module_project_metadata.fy",
+          "sha256": "4c3abaf9a9d09113e1e326de136cff6695eede88974cbb13f5fd9736ac3d9c6e"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\module_project_types.fy",
+          "sha256": "fccd8c241ae28cc54bca5e38cafca3056ce9d845dfa2d51e849d323b37bd98c9"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\module_public_interface.fy",
+          "sha256": "d51f0695987bc04a70697a88918050c7d4cec3adf206cc17a45308be196a83a7"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\module_public_interface_model.fy",
+          "sha256": "029b9a86471765d1dd2ff5878e5c0d0adcfaa8e6f5b8c81e1bbe9656c4f3b2f0"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\module_public_interface_write.fy",
+          "sha256": "9a8868217c8bb3a7eef097e13c4890393dc0ef7deaa70f1df49d65437acf9e24"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\module_public_type_ids.fy",
+          "sha256": "54f0bd46e8a41427c2354e76632169f3884bf30e855ff8c8348ecbee1139dbdb"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\module_public_type_text.fy",
+          "sha256": "ed556ced640de710634d0cb9488daea169f9e005bd9b6e8f34187cabb975f36f"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\module_region_types.fy",
+          "sha256": "97b3591aaf20279007c5826fbde0c610fb5a2a995a9f34ffe451382e82968266"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\module_registry.fy",
+          "sha256": "9e0af7c32bf001bb81d7839a41869ce7710bf51e00f72cb866909e53ad03bb34"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\module_sdk_artifact.fy",
+          "sha256": "95e096838fedfc480db23b095ad9b6b2e4db0943b897791f36ce30f680f4c12b"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\module_signatures.fy",
+          "sha256": "23264b8665a9853bbfae34d8356bba67032abee1bac084215241331837d661fd"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\module_source_provenance.fy",
+          "sha256": "90ae98dd5d59e28aaec58255b356e0d1ac16ff4594dcd82af19fc1d7a7e99fb4"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\module_source_specializations.fy",
+          "sha256": "73373584837e19b7a0669c33c1003b4d6476c39b7d1ad8323add4d0dcb382f07"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\module_state_artifact.fy",
+          "sha256": "ceb980725fc8069825f41786197ab0fe9e794c525652658ecddaa6ca2a7c3439"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\module_state_declarations.fy",
+          "sha256": "e3884d4fbc099047b614798ba1280a2deed316ec0d3fcea6e224d122e91dd752"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\module_state_interface.fy",
+          "sha256": "3e21f30e1e1148dac0faa322d3a4cac809ac99c268cb4587ace971d2a6c1c501"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\module_state_layout.fy",
+          "sha256": "0db50bbffc1000f1f0161dc093108a5e7831b516c48c6e2eca73f416bd66f493"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\module_types.fy",
+          "sha256": "c6c14b967f19efb28f3432a295846c7b75aa5f6b3d4dd9ddd62aceb24eb6d2b6"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\module_unit_argument_collect.fy",
+          "sha256": "bbaf15c74ebadd026b87411d4a69d3f4b31e80257d92c10dfee237298466f059"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\module_unit_argument_types.fy",
+          "sha256": "d4ef49012e23ba8262ad0cd2cc39ab5548bc13f51a5e35425cf2f84e5ee6c73a"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\module_unit_bind.fy",
+          "sha256": "5106831b0fcb353475e5bb76943d31b7a5a9034c23fb9ee30996aa6065033b54"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\module_unit_bodies.fy",
+          "sha256": "3b8eeeecf1b28f20368791dfdafb5de09aee0ea279059257a1b384e6bd416468"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\module_unit_body_ast.fy",
+          "sha256": "ed55fa60ada35557187babc02bc6b0334a074914aee725773418bdeb3828b70f"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\module_unit_body_ir_enums.fy",
+          "sha256": "ab01bd0e9a0759d434aab437e8fd5f8b7d308241282c36480d0cf5a5336a0458"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\module_unit_body_ir_lookup.fy",
+          "sha256": "c54f4a781b7f712a271b9e5edf041fc64975f27f7fa92a51050f16c71d203f00"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\module_unit_body_ir_lower.fy",
+          "sha256": "f9d646bf0a1f6abd7c053cbd4185ddffb1d783184fb9ca248245f168b47f7b8f"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\module_unit_body_ir_model.fy",
+          "sha256": "0365d2db6683149de6cb12389bddd2bb440f88479e3a6df6413599cbcdda38b0"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\module_unit_body_ir_storage.fy",
+          "sha256": "368519e6e79512f4f8d18a5ebaa37e2d691d4e0438d4f2125bd3430ce7bc8263"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\module_unit_body_ir_switches.fy",
+          "sha256": "3e7cab96e8eb4f84fb0b0f7018fe815640c1b7bb59064de7a42f165a2a8bdadd"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\module_unit_body_ir_verify.fy",
+          "sha256": "fe455790d73658d7cfd8eb8268155ea53aaf3c37a17d3e0f4733fb036d25d96a"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\module_unit_body_types.fy",
+          "sha256": "846c26cedf47e47c67c0eed4831f7c3ff97c5a33544a00519f85a2014ec2ac8f"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\module_unit_c_callable_index.fy",
+          "sha256": "364294da38f73021c44dbe7274816e9f9ab278d71abe4e8e5fc9781a2bc66c2f"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\module_unit_c_frame_index.fy",
+          "sha256": "4b738125ad631fd086eb4d620c53d27d765c65700235970549befc4cdb3509f1"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\module_unit_call_closure.fy",
+          "sha256": "7b12aa9d59ce03a914246fb8c54f8e2639cc63c2a8f27763e7b410354cd0f1a6"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\module_unit_call_contracts.fy",
+          "sha256": "5cc2b684e82aa0583a606cd55fc0baa002887b495191f2e2c76db76d730e3229"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\module_unit_calls.fy",
+          "sha256": "7f20448075c09d8d4684eb6f1302c22ceca85ad9d7d7f85a4cc06d5f4f809137"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\module_unit_cleanup_liveness.fy",
+          "sha256": "13baed64de4f79425be35db95e54e89e0a69e1dbf13a0fdab822a1cf6027ea32"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\module_unit_cleanup_mir_lower.fy",
+          "sha256": "5caf9d61cc8f717e94ed211924f08f2ed25c933a28115c0e2be62ad0d838b4af"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\module_unit_cleanup_mir_model.fy",
+          "sha256": "158054ab681e0709e15e0e252003910dbd1e7d6ff149a1036c2317bf90440391"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\module_unit_cleanup_mir_types.fy",
+          "sha256": "092467f19ce33791e8671a6a9b2bb4cc280ed443ec5d0a8ba9769de776eca34c"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\module_unit_cleanup_mir_verify.fy",
+          "sha256": "e95f121171704d3520533399fba302961b3c8ae192a1bf18a64d75f688f0aac1"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\module_unit_cleanup_policy.fy",
+          "sha256": "569ab0f85bd2ff2c1cab34a9ffca2d795b9a6ab70313c1c126dd8981f342e0b1"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\module_unit_constants.fy",
+          "sha256": "a2bf7587822ea307fe4009643cedc3600fa666b974f05da6a528121cb82df6d6"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\module_unit_drops.fy",
+          "sha256": "028fecbadedcf8966a9e4c165561be55ca490a07c2824f053ed452919b54bbea"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\module_unit_generic_cleanup.fy",
+          "sha256": "366d3f36e4c1f189e0d17ebd2258b58e5f30ac2fa188e678d2c6872966dde738"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\module_unit_generic_copy.fy",
+          "sha256": "0afe27a411f8b85b4e0979a5e4aa850e6fcf56ff1298f580d4b3ab6ac850d0f6"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\module_unit_generics.fy",
+          "sha256": "d78f6c48c4db843c0ce2d3b10fdd135f909c0190d84d294bb75e2c8bc5ac4f4e"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\module_unit_interface_annotations.fy",
+          "sha256": "b90e5a47521ae999f61fff6123cf5d8344433d94c308965e23826913489b98b1"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\module_unit_interface_declarations.fy",
+          "sha256": "fa5def06ebc0efcbf9e707c26858d84247ff6e8ac860e0f54a9e183709416944"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\module_unit_interface_work.fy",
+          "sha256": "575d2ba14a7f0b3c4a45531742efae88d9a40825460e8c88bee761804eb222ac"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\module_unit_interfaces.fy",
+          "sha256": "c422497ea7dd55d7a90e31788fb93d61a6a5099b91f6a4ebac94c8de81cd17c3"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\module_unit_loan_checks.fy",
+          "sha256": "341b6460db802834678eaadb7b7a187f53089a67a9caf89ee981eba9292a144d"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\module_unit_loan_facts.fy",
+          "sha256": "307f0a820e5439aeee4c77a10094dd71f635ccad94a8b5c50d2bc93eb7ea3f05"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\module_unit_loan_generations.fy",
+          "sha256": "f9c1435a8fa5eb1d823217754954715586e41d6e9dd8d3358efd807f45c01059"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\module_unit_loan_iteration.fy",
+          "sha256": "018e9dca19d96f107f1f7c5722b2adf74f55d921187f25a151e018abd1fadde7"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\module_unit_loan_live_control.fy",
+          "sha256": "386b5df1b8a5219ef490d9d00f7cbf8bee0e795df1d9200c7f553dce509a3e1d"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\module_unit_loan_live_maps.fy",
+          "sha256": "ee006e228f22fa8274186d6fa85b16592939239ef0544836ae707047301f4ff6"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\module_unit_loan_live_model.fy",
+          "sha256": "83201ecf9152770e50d3afccd7a6086c69b32f109e672997819b949a3a658238"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\module_unit_loan_live_walk.fy",
+          "sha256": "9ea1b82fc3e3740c5928c6dcb0a6b7c7595bf85a7bf10fb43592b2ec668e99d1"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\module_unit_loan_liveness.fy",
+          "sha256": "564eab78d4f49746852d47d141db4d25e91cd325e0962653932096322fa9048c"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\module_unit_loan_model.fy",
+          "sha256": "7d5b3cf3c691e3f27eea95fe283fbd280bbd72a8ce5dc7a9929431cd1c9f480f"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\module_unit_loan_owner_reads.fy",
+          "sha256": "e186447b50acf0c015e8c5d01a33a85d2cd749b2f4c5450a0d397ec792f726e4"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\module_unit_loan_reference.fy",
+          "sha256": "8cfe4aee4f356b168ab6d42dcc76d240845b1067c20c4a3accd03bb219669650"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\module_unit_loop_control.fy",
+          "sha256": "7442c5d32e3939519252a507c4548cb2bc80edb6b45dfa89abeacb06ddae1489"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\module_unit_move_control.fy",
+          "sha256": "6d6426d3f58573ba8bfa2b98272dfcfa987a18118575dd81b06a42b8d3422b67"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\module_unit_move_model.fy",
+          "sha256": "84bc5c8e94e208666fcb888a7b4b0a1a4377e3bc383ddab2552f3287c914606c"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\module_unit_move_walk.fy",
+          "sha256": "95ac4403a0484f6145d32f785619072632d00f855ec9d8b8f29637f28cf912bf"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\module_unit_moves.fy",
+          "sha256": "9f7d41e71e8d877a392255edd6b7e89febf81a029a14399812226454c761c9b3"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\module_unit_name_model.fy",
+          "sha256": "67b6a9fd5dbac5577fe47dfa330c5c3ee484c7804d79157950ed7bdfbe813187"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\module_unit_name_walk.fy",
+          "sha256": "1fc7c36aa6452cf3907d97b1520a3155c0a0e6baa7a0b38d5a45a8118dd52bac"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\module_unit_names.fy",
+          "sha256": "6e41be8d025a57f50a313c84dbcfaab90c15aa5e2ceeb79ef05c77c4c652fb7b"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\module_unit_ordinary_names.fy",
+          "sha256": "69c9d7891ced748ca215484f70bebb7dac01a20de7e43084ef56e9ef9b19768b"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\module_unit_origin_diagnostics.fy",
+          "sha256": "573dc968c6828e2028d144221312ef8ae0d9cd7578c2306c5db97031064d9d4d"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\module_unit_origin_flow.fy",
+          "sha256": "b18c0f8e369541d96ca3f9545a584b8d92b491f84d9a744f3f5428dc70acc701"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\module_unit_origin_flow_control.fy",
+          "sha256": "011cb92385adb7ff7dc23187a69265d177a3a653f50ff09600db85b821da7bbd"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\module_unit_origin_flow_model.fy",
+          "sha256": "825a6834aa2dad4af6d42ddc0452af2c98a1b94bd39e983e416f23926878cc1e"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\module_unit_origin_inputs.fy",
+          "sha256": "dbcba47a8035d95d0ad829d7311442afdfafd7b90c230d696953f346d428f24f"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\module_unit_origin_match.fy",
+          "sha256": "34125cbf2c537ea660f3cd84669855aa981707333a4689e2237b5d474712d1e6"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\module_unit_origin_provenance.fy",
+          "sha256": "70381599968c8fd17d9d814b0137bdf9e1ada64b0c24d8d49bd38d7eec55f398"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\module_unit_origin_returns.fy",
+          "sha256": "3d4271121556fda18fa5580a140ab9ce2eab56f1076573f7e993b9eb824c58b5"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\module_unit_origin_sets.fy",
+          "sha256": "ac90cda4997dee2c9c7946d527168e4ba83a576befd568b888aaad36ace1bef6"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\module_unit_origin_shape.fy",
+          "sha256": "63dc0360810b488112f8194bf62022c7e951854238bec74d99dbc8e5cca58469"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\module_unit_region_demands.fy",
+          "sha256": "33b74e9036b8508387622e1a86a84bf630f89dc7ec8f105ffcbfab16f15251b3"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\module_unit_region_events.fy",
+          "sha256": "6fb06cf0871cb184157eb43903fd9969b2cd80da6e3b2806fc09bf0e8362a9b7"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\module_unit_region_lifecycle.fy",
+          "sha256": "28b283a12c34d9c533c18f900cf489d702f1aa019924e44b318308c000671e95"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\module_unit_region_model.fy",
+          "sha256": "fb18ec377e505fe72ff4d0cbb6874509a6c325bf9dec67837d13265059dc9b76"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\module_unit_region_sources.fy",
+          "sha256": "a103953240f6662fbd9b3dbb595209f36cd99f777898f831c3023103b9efb3d3"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\module_unit_region_walk.fy",
+          "sha256": "45fd348cbbf6b9f195fcc18a16d528fe6ae84003516af49a6efef7f809591f1f"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\module_unit_sdk_authority.fy",
+          "sha256": "9e157f32a03d5825e1ffedaa237c110e04487b228536a71e7d58c6d6e1068be4"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\module_unit_sdk_sources.fy",
+          "sha256": "57fdf9d38dae306555c493388d116ce3c676d9408b54f452e6be81260ac15aea"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\module_unit_shape_contracts.fy",
+          "sha256": "4ab7900ef6afd684016bf12fc72fe07d309c18ba321034b549dad01b45d1515f"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\module_unit_value_array.fy",
+          "sha256": "1a8d9bd945da466fb61e7e6a5df57e013a4be4f0479baae862d876d437c37b5b"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\module_unit_value_assignment.fy",
+          "sha256": "6e6f04f10228817ce467d2d54185f50d8751d75241b6002354bf29c96db2982f"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\module_unit_value_builtin.fy",
+          "sha256": "b24026c18caa711dd540c995845e2f74be91e38db121a6aac95064599737aa86"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\module_unit_value_collect.fy",
+          "sha256": "4493da99bbf5c0bff2f60bb87159cc0933a01b8441d9b771aeb0b27afdddccb5"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\module_unit_value_completion.fy",
+          "sha256": "6289992325bcaf6484e57019e0e387c12edab371b870589444e7204571714f23"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\module_unit_value_control.fy",
+          "sha256": "af3b919cb5ebf21c86f52600d626a9fea4cad22530a5ce08c147c303a37e9389"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\module_unit_value_field.fy",
+          "sha256": "acfe169d2abf6c8dac35c2ae5f9d9375c7a0975f756fdbe7fa884806a1f5954b"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\module_unit_value_index.fy",
+          "sha256": "b2e2a366f33d2c93c894b90b1c267345f420d5cae3f612b937b3e0b027f7998c"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\module_unit_value_iteration.fy",
+          "sha256": "8fe7889081575792ad5414303884b0e21d4b06925e9eea878ec225bbcb90f316"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\module_unit_value_match.fy",
+          "sha256": "5e46ab5a172f17f2e788953a9494493c241d86e47b52b014e0316ded8b511632"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\module_unit_value_model.fy",
+          "sha256": "0ef5851bdf1cca88b30c99fba90107def15a1ff85effe2eecfb76639468cc338"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\module_unit_value_place.fy",
+          "sha256": "f607d25f079a4f5425738d1ce18cb5b06dfef1731c5925a5f43d975d062c07b9"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\module_unit_value_record.fy",
+          "sha256": "0c4d8f9c29ea7d82bd72c7b61d6d8ae2de6f8eb2e8fe7c34dd93c123a6594023"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\module_unit_value_region.fy",
+          "sha256": "23e158fb692dd83062b735705ed458076916cc17257355f03196c24e84cc0f61"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\module_unit_value_result.fy",
+          "sha256": "84604696c6060359df313cc1bd28d377cb789b12db32eabac876b40d54efd11b"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\module_unit_value_scalar.fy",
+          "sha256": "229981b91eedcb2ff29e83ca0bb93363e50774d27d9c82d07fdf1eeb1a7fe050"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\module_unit_value_shapes.fy",
+          "sha256": "f1af2d4f0b0e8054301abb35a3e0bc33d4b300adf0899a5cf8eb2c5460ba0f59"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\module_unit_value_storage.fy",
+          "sha256": "697aee14022901b339c7fc3f95240c02450dc0c6588ed3bcb264409faa8c80f7"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\module_unit_value_terminal.fy",
+          "sha256": "f431ae15b7a597c184ab1e23f1ad7b30235c0e80d6525399eebbffbf32348a0c"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\module_unit_value_variant.fy",
+          "sha256": "a6b3e5ffbd0d010a9878833405c79c85db5d97476538ba03d361295183635094"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\module_unit_value_view.fy",
+          "sha256": "c19b8710ddf31ec537d51f3d78b5463c33e2bb0e5941f0b9b317c400045f1621"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\module_unit_value_walk.fy",
+          "sha256": "d8805604440ec58b584ed3d5beee61b053719479efd9b2ca58d26245a8fb8456"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\module_unit_values.fy",
+          "sha256": "d7163ee06a4b31e8d05ffb546726624b56d7c37a34800a0067b37e9a09bb2b8e"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\module_units.fy",
+          "sha256": "21a3419b12ae369f316142f8ecfb39838bbe7b932144824f037707e0e5ceb079"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\nominal_identity.fy",
+          "sha256": "634cba7ac0667481c0863953640668841216554d852e0e1b1b245c8bc1606958"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\nominal_types.fy",
+          "sha256": "67f08ae69f35b1bcdf1d53eb080b5a5fa043a244ab0c48de2a1af26d38a63072"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\numbers.fy",
+          "sha256": "ee8b40b5e8061317d70d3594c386c9e4c70d95132a7e4243ea6402947a4c3556"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\parse_tokens.fy",
+          "sha256": "91984eb1086ff7faafa4a6c64a232fc2ddce365b8cd7c2ef23b143bb91d4c9a6"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\pointer_identity.fy",
+          "sha256": "31458fda72821f98d8383339f8b272f3aa1c78385fb23504cbe9f1aaa021ae3d"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\pointer_types.fy",
+          "sha256": "7cca6293336feedbf785912759ee6c50a17010ad9d966acb81877ad32cd55297"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\project_cache_encoding.fy",
+          "sha256": "16d4e8749fde2b78d43314f7a01c29f056a67237a750b43e1fa3421c7fada0da"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\project_compiler_input.fy",
+          "sha256": "ba73aebc8d3c4fd4aae052849589e301dc5f6aec88c97dc8a6ac094d4f15c475"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\project_content_hash.fy",
+          "sha256": "68d867b37b8cc817382e6d6602aa4d66f4d66be8784e7fbe119c806832839a0e"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\project_directory.fy",
+          "sha256": "70321e8a7cc84f131573eec91013fccad38d0162f781768bc0e47b136cf4ebc6"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\project_import_path.fy",
+          "sha256": "bc0e5e10905ee833b36ffe94ae8ff835f6f33caccfc59970cd379537dcbb0c54"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\project_instance_graph.fy",
+          "sha256": "9a47a2cae4fbef1a6129b0805e683782be26c819ae2f41dd233129279cc226e9"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\project_instance_identity.fy",
+          "sha256": "797920212852438398bcfaa5acd34225c9ff2de722744c67d9c68c9d2c56e8dd"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\project_json_string.fy",
+          "sha256": "03e76c4239b19ef6fba1a9ebdf97aeb9407d2fb97529fa9f2c6f1d8fbfce6c53"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\project_key_index.fy",
+          "sha256": "34ee26a1092361c5bc60860795a86c0974243eec3cfc5f829710d192fdf7ea28"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\project_manifest.fy",
+          "sha256": "943c3e163ddc04afb03a82ef4a0485aa6a618a67708e657086b8ed1acd56658a"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\project_manifest_values.fy",
+          "sha256": "4f21b9dedf744ffc449d1b843282f9aba2ecc221c61f043594bea70c4d56387d"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\project_module_path.fy",
+          "sha256": "b4217fe0f797e5f0fb4bab8ebc75435e6674b5f72b60d0129b5269c627709cb2"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\project_module_visibility.fy",
+          "sha256": "a03c433d5302f904620df34585697e99e67e417b3b2121a474432839108ab0bb"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\project_package_input.fy",
+          "sha256": "fe1a75622fbf72b03fe5bfba3ce0c158eb2e03033e31acfdaef05afea9ec68c8"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\project_path.fy",
+          "sha256": "20bde13864e5ba8752b33a616eab22b08caf8a20d6a435d2d2c2cc68f443f1a5"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\project_path_unicode_data.fy",
+          "sha256": "9cf3af27796644304493561591e1641c70c5c653bf739ed71a65e492db510fbd"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\project_sdk_bundle.fy",
+          "sha256": "a7bde8c483cc986a6bf6b38f56ab1852cc46a4d27a21a48b0868064bf1eb8217"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\project_sdk_data_alloc_0.fy",
+          "sha256": "ac58625000197a88c33f322770c7f89fecc64126b3ff4479d6757aa4bfb16301"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\project_sdk_data_bytes_0.fy",
+          "sha256": "18734fec4d058c90a8b38cc729d711789b2ebfd2f4cd08756ccdad56ae9665b3"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\project_sdk_data_fs_0.fy",
+          "sha256": "a6c26d37224e5a43231d9068bfe1638ac9b357b971eddcaf628291d5c906ea0f"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\project_sdk_data_fs_1.fy",
+          "sha256": "0c2a6d16571e5681296d324293543771c69665b3a90606090b675d33e0fc5f17"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\project_sdk_data_fs_2.fy",
+          "sha256": "c20e6ac9ab0d7be6a84af43a52191ae76b402efef6d76bdd7ce0e1e3dffafea0"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\project_sdk_data_io_0.fy",
+          "sha256": "8527d39e50702591dcdf07e71663128bd4f61a8ad62f30e8b42998f30a548104"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\project_sdk_data_num_0.fy",
+          "sha256": "1859e2ffa80b3e675096cc50cec693bb33aa060dd47886feb837d4df37c2eda8"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\project_sdk_data_process_0.fy",
+          "sha256": "b14ace85f2736dee51a63f064cf7619ad925384797e0945c6053ba767f725f6c"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\project_sdk_data_text_0.fy",
+          "sha256": "a0d6b93d966f75b803a1677cfa0e3cd6504b1006bd4a10a1c2598668a5442d19"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\project_sdk_data_vec_0.fy",
+          "sha256": "6201186e9a75bb1957596eb9717e447194e67b6c5828355e44af98941a103a31"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\project_sdk_embedded.fy",
+          "sha256": "8c49d481331933981777e9bd90fa5f45621956010b6a3fea38a2ada4dd31d943"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\project_source_catalog.fy",
+          "sha256": "5dd5b1a6f848968cf20676084af8ddcaf039cfc74e1837685c12c601c53fb131"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\project_source_file.fy",
+          "sha256": "6d1307e99f7ae9fb387fc447f3b6c36f6c0e77aebc90faca55e75665aad2d282"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\project_source_identity.fy",
+          "sha256": "354bed4ced07109403b58f4432e8beddc765760a1ee083b3ca72fa0880c9f359"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\project_source_modules.fy",
+          "sha256": "d7d7e5b30a270389a1572f6e26cf3c0603db33e0125bd33fa17f4f177a0f7a1c"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\project_source_root.fy",
+          "sha256": "e6d896a57fde407db5e7042e244d6f2a35dddc4e113ad20555c4408f24842127"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\project_source_set.fy",
+          "sha256": "c4b70409d8aa627a1ef46488e5232d3deea7b07c0e796c26ef28449f367a98e1"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\project_toml_context.fy",
+          "sha256": "1682260043feced2ac662198fd3b29f4badb2a4a9f9b02a8e1f81462f3b3cc0f"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\project_toml_document.fy",
+          "sha256": "0bc3782206da0d9320ba8a39ea6a1f9ded52ec1bbf855580e31c1a1786f4b3a8"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\project_toml_model.fy",
+          "sha256": "4a6c295108e704749fc557204de4d8a0287e3228e59da396c50867ec8894b11e"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\project_toml_scalars.fy",
+          "sha256": "137d5dbdce313f22e91a9be87f8b34eb6f10011933b152f649421a895e274cb9"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\project_toml_strings.fy",
+          "sha256": "bc7e71acaaa68af5755d066c90fa1f763625de32c8fa2a6778e8447eebc187bb"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\project_toml_values.fy",
+          "sha256": "24255d1fdf0f34b6761f5304d383127667e8b127488a80409b3f35a13f62e81c"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\project_workspace_catalog.fy",
+          "sha256": "bc800dda99247aba4d8b80abdcbc092d9cb27ac5193cfb7a33bd405ec753c936"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\project_workspace_graph.fy",
+          "sha256": "bac53290ea919d58d825f7a663c716b97541404a1973aa8585da891bfb689dc1"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\project_workspace_input.fy",
+          "sha256": "18a8a35c400eaa8c32da09ea55a70d704953e8b9a762998b44c9af4dd76689fd"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\raw_view_intrinsics.fy",
+          "sha256": "d01c264221b717c7344f8119a9e645794037b0ce7b589e4eac31228c2b4af0d5"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\records.fy",
+          "sha256": "e2d1d3540285509aded981b476d4b2340857d8c7370364f4b1410bfd6883f6dd"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\reference_types.fy",
+          "sha256": "f529bb686f06fe07d95f864e28fbde211200fce11a11c6aae260356103639b57"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\repr_c_declarations.fy",
+          "sha256": "20a8e1725551f932fb702e2049eda8edd24ea77a5b55be62e72d32fd5b2d47b8"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\resource_abilities.fy",
+          "sha256": "1dc0a26ba65e173ca7eb5825831e97a1e853593f8761131f10a6a6bf1ca186d1"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\resource_identity.fy",
+          "sha256": "7d85c65df4d6cc02f004f854d5108ec3cc7ba8ddb4885ea54c634f88f93594aa"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\resource_properties.fy",
+          "sha256": "fe0372ce1c546422e8b09d5ae9c9aa16f1bc11682fdded971e0820e96d30bac2"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\scalar_casts.fy",
+          "sha256": "4976894d09b88b1df8253b04d654626b99efeb64298acf8dfa0ca1b8947d235e"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\scalar_views.fy",
+          "sha256": "ab3044f3a36a81611a11a46fed80dd41546a9de3f953d4817b2d8e40bc6037bc"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\scanner.fy",
+          "sha256": "3755e569fe63003f63b2c9b8272df2ba656c844791cedbc0da4f9245b8809cf7"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\sdk_authority.fy",
+          "sha256": "ae0f2e21819a625a6bb5fe331173dd3366599486f3c203a523693680a0c4ee6c"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\sdk_file_rules.fy",
+          "sha256": "a7c5bc7224e12d29d54d284c54f31f34fa66f1067397e0fcb57de9dabe901e5b"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\sdk_scopes.fy",
+          "sha256": "7aabc14d6c8a54f959e4c454df8fccb4fc49c2a7efbefa882f8d939a131717e6"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\sdk_vector_plan.fy",
+          "sha256": "2968107bfb7e73d6371ccd248c94fe3060ce1e19cc0a3c47972aafb2900582a2"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\sha256.fy",
+          "sha256": "eb89211fd749f7f527e8d2b72e97d70f8d9613bbac428bc95d975bef7c53bfa1"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\sha256_block.fy",
+          "sha256": "bc48b9e751205bba8aeaf09987ea8681694d26bc989e24f4ecb3afa4c6e00fd4"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\sha256_stream.fy",
+          "sha256": "b5f97a9b5be679418a1365a6007028abfab5ba66ee3ae5c08b3e5b863fcfc8b9"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\storage_intrinsics.fy",
+          "sha256": "15d2394baf23343cf6a678e9fb5d4949cd53b99f42d61e3e67e9985dedfda5b0"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\strings.fy",
+          "sha256": "8f26db7c4d4039c8c8d9fbc6078097859c8f714ca5887957fdf0e69269dca521"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\syntax.fy",
+          "sha256": "cb9244a18ea93777694d60e5b63eb67738d224297d097542bb84db2b7f31d5e6"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\syntax_arena_copy.fy",
+          "sha256": "89969f5d7d8bd0deb3070032d9c9ffd58afbc972ee95316c04236952e27ff098"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\syntax_parse_driver.fy",
+          "sha256": "9db6518c69f6c2394ef1c697d7d2d07b0a78ec3336a907c92e9d2e2087e5b756"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\tagged_encoding.fy",
+          "sha256": "bfc4c8398d4cac37cb15056a19814216e1faf437d88b22d61d52c5482aa37d2a"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\tagged_types.fy",
+          "sha256": "431f283e07d9dbea60c698d1f70f7e7009e1552314cf660688b10b09daad8338"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\tests\\module_state_artifact_fixture.fy",
+          "sha256": "6ea0ba56975d63dcd277ef0fc31c82ab03fcdeb430fb86bad50698806ee9465b"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\type_state.fy",
+          "sha256": "7dbbf7d50be1e9513dc8aafd99b11afda5d8e2d7ce87d96b6436c4752c2123a0"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\types.fy",
+          "sha256": "53a77948af92724f00de0609837fd1507899df8e2b59b6d2778ef1f3c344395a"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\utf8.fy",
+          "sha256": "4a5425cea9efbfb1bff2c31a38c2bd8e392c6792af09f24e906c9a743621870d"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\state-artifact-20261014\\tests\\native-project-f02b6ccd62a4c8f2d5d0\\src\\main.fy",
+          "sha256": "b7e7795830a146ea3dcec47f5a4ef9cae3cf6b5e22c2e7ba9b621338d401b78c"
+        }
+      ]
+    }
+  },
+  "assertions": {
+    "truncatedPrefixesRejected": 816,
+    "mutationsRejected": 21,
+    "trailingBytesRejected": true,
+    "fieldPrefixesAndLayoutHashesRecomputed": true,
+    "allLayoutFieldAndNameLeavesCompared": true,
+    "emptyAndMultipleOwners": true,
+    "freshHashWorkChargedOnSuccessAndFailure": true,
+    "exactWorkAndExhaustion": true,
+    "detachedStateOwner": true,
+    "sourceUnicodeEscapedUidRestored": true,
+    "allFiveComponentsReassembled": true,
+    "fullProgramVerifierReentered": true,
+    "freshProducerHistoryZero": true
+  },
+  "sourceCheck": {
+    "argv": [
+      ".cache/candidate-frontend-oracle-current-20261012.exe",
+      "check",
+      "--locked"
+    ],
+    "cwd": "examples/lexer_candidate",
+    "exit": 0,
+    "output": "check ok: 2 instance(s), 474 source file(s), 6047 MIR function(s), lock verified\n"
+  },
+  "completeProgramArtifact": false,
+  "sourceCheckedOwnerRestored": false,
+  "cacheLookupConnected": false,
+  "persistentStoreConnected": false,
+  "publicCliChanged": false,
+  "sdkAbiChanged": false,
+  "ciChanged": false,
+  "productStackChanged": false,
+  "productTimeoutChanged": false,
+  "pushed": false,
+  "remaining": [
+    "whole-program artifact envelope and source identities",
+    "checked-owner package rebinding",
+    "persistent cache lookup/publication/reuse",
+    "current whole-source fixed point and product/platform promotion"
+  ]
+}
