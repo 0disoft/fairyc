@@ -1,5 +1,32 @@
 # Fairy 컴파일러 전환: 후속 작업 목록
 
+## Original generic planning failure locations (2026-10-13)
+
+`generic_source_plan` keeps the exact original input on any failed attempt and
+seals only a successful complete computation. The error-only original AST
+request scan matches the retained canonical request key and orders equivalent
+aliases by coordinate namespace, module and span. `project_source_plan` phase 5
+retains the original location for cycle, budget and scalar-ability failures;
+stale inputs, invalid roots and the shared budget fail closed without a partial
+plan.
+
+The actual Go PreparePackages/PrepareSDKStoragePackages oracle covers seven
+cases, Direct, Aliases, Reordered, OwnerOrder, PerDeclaration, Depth and the SDK
+Vec type-root, and nine authored tests pass across Go native and both candidate C
+profiles: four `generic_source_root_location` tests and the five existing
+`generic_source_plan` regressions, whose earlier run completed both profiles but
+failed its final root-lock snapshot when an independent check refreshed the lock
+concurrently. The refreshed fixture stays byte-identical to the linked receipt.
+
+Root check and locked check both pass 446 files / 5765 MIR functions; the
+unlocked run reports the lock unchanged and the locked run verifies it.
+
+Next: identified CLI/cache consumers, the latest-source full image and fixed
+point, product stack deadlines, Linux, the full suite and same-head CI. This is a
+private-API-only change; the public API, SDK ABI, DB and CI are unchanged and no
+push occurred. Receipt:
+[evidence](evidence/candidate-source-root-location-20261013.json).
+
 ## Complete project owner publication (2026-10-13)
 
 `project_compiler_core` `build_complete`/`build_complete_sources` runs the original

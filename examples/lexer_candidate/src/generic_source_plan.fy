@@ -18,15 +18,23 @@ pub struct Problem{u32 code;usize root;usize template_index;}
 pub struct Node{usize template_index;usize count;usize[8] arguments;records::Text key;records::Text id;usize first;usize dependencies;usize next;u32 state;}
 struct Request{usize template_index;usize count;usize[8] arguments;records::Text key;}
 struct Frame{usize node;usize next;usize first;usize count;usize names_first;usize[32] children;}
-pub resource Plan{source::Input input;bytes::Buffer names;v::Vec<Node> nodes;v::Vec<usize> edges;v::Vec<usize> roots;v::Vec<usize> order;cleanup{}}
-pub fn ref source::Input input(ref Plan p){return ref p.input;}
-pub fn usize count(ref Plan p){return v::len<Node>(ref p.nodes);}
-pub fn Node at(ref Plan p,usize at){assert(at<count(p));return *v::at<Node>(ref p.nodes,at);}
-pub fn ref u8[] text(ref Plan p,records::Text t){assert(t.start<=t.end && t.end<=bytes::len(ref p.names));return bytes::view(ref p.names)[t.start..t.end];}
-pub fn usize root_count(ref Plan p){return v::len<usize>(ref p.roots);}
-pub fn usize root_at(ref Plan p,usize at){assert(at<root_count(p));return *v::at<usize>(ref p.roots,at);}
-pub fn usize ordered_at(ref Plan p,usize at){assert(at<v::len<usize>(ref p.order));return *v::at<usize>(ref p.order,at);}
-pub fn usize dependency_at(ref Plan p,usize at){assert(at<v::len<usize>(ref p.edges));return *v::at<usize>(ref p.edges,at);}
+resource Computed{bytes::Buffer names;v::Vec<Node> nodes;v::Vec<usize> edges;v::Vec<usize> roots;v::Vec<usize> order;cleanup{}}
+// Keep the exact original input available when bounded planning fails. Neither
+// a partial computation nor an unrelated input can be sealed into a Plan.
+pub resource Attempt{source::Input input;v::Vec<Computed> values;Problem problem;cleanup{}}
+pub resource Plan{Attempt attempt;cleanup{}}
+pub fn ref source::Input attempt_input(ref Attempt p){return ref p.input;}
+pub fn Problem problem(ref Attempt p){return p.problem;}
+fn ref Computed computed(ref Plan p){return v::at<Computed>(ref p.attempt.values,0);}
+pub fn Plan seal(Attempt p){assert(p.problem.code==0 && v::len<Computed>(ref p.values)==1);return Plan{.attempt=p};}
+pub fn ref source::Input input(ref Plan p){return ref p.attempt.input;}
+pub fn usize count(ref Plan p){return v::len<Node>(ref computed(p).nodes);}
+pub fn Node at(ref Plan p,usize at){assert(at<count(p));return *v::at<Node>(ref computed(p).nodes,at);}
+pub fn ref u8[] text(ref Plan p,records::Text t){assert(t.start<=t.end && t.end<=bytes::len(ref computed(p).names));return bytes::view(ref computed(p).names)[t.start..t.end];}
+pub fn usize root_count(ref Plan p){return v::len<usize>(ref computed(p).roots);}
+pub fn usize root_at(ref Plan p,usize at){assert(at<root_count(p));return *v::at<usize>(ref computed(p).roots,at);}
+pub fn usize ordered_at(ref Plan p,usize at){assert(at<v::len<usize>(ref computed(p).order));return *v::at<usize>(ref computed(p).order,at);}
+pub fn usize dependency_at(ref Plan p,usize at){assert(at<v::len<usize>(ref computed(p).edges));return *v::at<usize>(ref computed(p).edges,at);}
 pub fn ref u8[] error_code(u32 code){if(code==2003){return b"G2003";}if(code==2005){return b"G2005";}if(code==2006){return b"G2006";}return b"";}
 fn Result<records::Text,u32> retain(ref mut bytes::Buffer names,ref u8[] value,ref mut usize work){if(value.len>1048576 || bytes::len(names)>1048576-value.len || !budget::charge(work,value.len+1)){return .err(10);}let start=bytes::len(names);if(!bytes::append(names,value).is_ok){return .err(11);}return .ok(records::Text{.start,.end=bytes::len(names)});}
 fn Result<Request,u32> request(ref source::Input input,usize template_index,usize count,usize[8] arguments,ref mut bytes::Buffer names,ref mut usize work){
@@ -61,13 +69,18 @@ fn u32 complete(ref source::Input input,ref mut bytes::Buffer names,ref mut byte
     let node=*v::at<Node>(nodes,frame.node-1);let result=switch(identity(input,node,frame,names,nodes,work)){case .ok(value):{value}case .err(code):{return code;}};let id=switch(retain(names,bytes::view(ref result),work)){case .ok(value):{value}case .err(code):{return code;}};let first=v::len<usize>(edges);i=0;while(i<frame.count){if(!budget::charge(work,1)){return 10;}if(!v::push<usize>(edges,frame.children[i]).is_ok){return 11;}i+=1;}
     {let slot=v::at_mut<Node>(nodes,frame.node-1);slot.id=id;slot.first=first;slot.dependencies=frame.count;slot.state=2;}if(!v::push<usize>(order,frame.node).is_ok){return 11;}while(v::len<Request>(pending)>frame.first){discard v::pop<Request>(pending);}if(!bytes::truncate(pending_names,frame.names_first).is_ok){return 9;}discard v::pop<Frame>(stack);return 0;
 }
-pub fn Result<Plan,Problem> build(source::Input input,Limits limits,ref mut usize work){
-    if(limits.total==0 || limits.total>4096 || limits.per_template==0 || limits.per_template>256 || limits.depth==0 || limits.depth>64){return .err(Problem{.code=2006,.root=0,.template_index=0});}if(*work>16777216){return .err(Problem{.code=10,.root=0,.template_index=0});}let templates=source::templates(ref input);var bytes::Buffer names=bytes::empty();var bytes::Buffer pending_names=bytes::empty();var v::Vec<Node> nodes=v::empty<Node>();var v::Vec<usize> heads=v::empty<usize>();var v::Vec<usize> counts=v::empty<usize>();var v::Vec<Request> pending=v::empty<Request>();var v::Vec<Frame> stack=v::empty<Frame>();var v::Vec<usize> edges=v::empty<usize>();var v::Vec<usize> roots=v::empty<usize>();var v::Vec<usize> order=v::empty<usize>();var usize i=0;
+fn Result<Computed,Problem> compute(ref source::Input input,Limits limits,ref mut usize work){
+    if(limits.total==0 || limits.total>4096 || limits.per_template==0 || limits.per_template>256 || limits.depth==0 || limits.depth>64){return .err(Problem{.code=2006,.root=0,.template_index=0});}if(*work>16777216){return .err(Problem{.code=10,.root=0,.template_index=0});}let templates=source::templates(input);var bytes::Buffer names=bytes::empty();var bytes::Buffer pending_names=bytes::empty();var v::Vec<Node> nodes=v::empty<Node>();var v::Vec<usize> heads=v::empty<usize>();var v::Vec<usize> counts=v::empty<usize>();var v::Vec<Request> pending=v::empty<Request>();var v::Vec<Frame> stack=v::empty<Frame>();var v::Vec<usize> edges=v::empty<usize>();var v::Vec<usize> roots=v::empty<usize>();var v::Vec<usize> order=v::empty<usize>();var usize i=0;
     while(i<catalog::count(templates)){if(!budget::charge(work,1)){return .err(Problem{.code=10,.root=0,.template_index=i});}if(!v::push<usize>(ref mut heads,0).is_ok || !v::push<usize>(ref mut counts,0).is_ok){return .err(Problem{.code=11,.root=0,.template_index=i});}i+=1;}
-    let data=source::roots(ref input);i=0;while(i<model::edge_count(data)){let e=model::edge_at(data,i);var usize[8] arguments=[0;8];var usize j=0;while(j<e.count){arguments[j]=source::root_argument(ref input,e.first+j);j+=1;}let root=switch(request(ref input,e.target-1,e.count,arguments,ref mut pending_names,work)){case .ok(value):{value}case .err(code):{return .err(Problem{.code,.root=i+1,.template_index=e.target-1});}};let selected=switch(enter(ref input,root,limits,ref mut names,ref mut pending_names,ref mut nodes,ref mut heads,ref mut counts,ref mut pending,ref mut stack,work)){case .ok(value):{value}case .err(code):{return .err(Problem{.code,.root=i+1,.template_index=e.target-1});}};if(!v::push<usize>(ref mut roots,selected).is_ok){return .err(Problem{.code=11,.root=i+1,.template_index=e.target-1});}
+    let data=source::roots(input);i=0;while(i<model::edge_count(data)){let e=model::edge_at(data,i);var usize[8] arguments=[0;8];var usize j=0;while(j<e.count){arguments[j]=source::root_argument(input,e.first+j);j+=1;}let root=switch(request(input,e.target-1,e.count,arguments,ref mut pending_names,work)){case .ok(value):{value}case .err(code):{return .err(Problem{.code,.root=i+1,.template_index=e.target-1});}};let selected=switch(enter(input,root,limits,ref mut names,ref mut pending_names,ref mut nodes,ref mut heads,ref mut counts,ref mut pending,ref mut stack,work)){case .ok(value):{value}case .err(code):{return .err(Problem{.code,.root=i+1,.template_index=e.target-1});}};if(!v::push<usize>(ref mut roots,selected).is_ok){return .err(Problem{.code=11,.root=i+1,.template_index=e.target-1});}
         while(v::len<Frame>(ref stack)!=0){if(!budget::charge(work,1)){return .err(Problem{.code=10,.root=i+1,.template_index=e.target-1});}let current=*v::at<Frame>(ref stack,v::len<Frame>(ref stack)-1);var u32 code=0;var usize target=e.target-1;
-            if(current.next<current.count){let incoming=*v::at<Request>(ref pending,current.first+current.next);target=incoming.template_index;let next=switch(enter(ref input,incoming,limits,ref mut names,ref mut pending_names,ref mut nodes,ref mut heads,ref mut counts,ref mut pending,ref mut stack,work)){case .ok(value):{value}case .err(error):{return .err(Problem{.code=error,.root=i+1,.template_index=target});}};let parent_at=if(v::at<Frame>(ref stack,v::len<Frame>(ref stack)-1).node==current.node){v::len<Frame>(ref stack)-1}else{v::len<Frame>(ref stack)-2};let parent=v::at_mut<Frame>(ref mut stack,parent_at);parent.children[current.next]=next;parent.next+=1;}
-            else{target=v::at<Node>(ref nodes,current.node-1).template_index;code=complete(ref input,ref mut names,ref mut pending_names,ref mut nodes,ref mut pending,ref mut stack,ref mut edges,ref mut order,work);}if(code!=0){return .err(Problem{.code,.root=i+1,.template_index=target});}
+            if(current.next<current.count){let incoming=*v::at<Request>(ref pending,current.first+current.next);target=incoming.template_index;let next=switch(enter(input,incoming,limits,ref mut names,ref mut pending_names,ref mut nodes,ref mut heads,ref mut counts,ref mut pending,ref mut stack,work)){case .ok(value):{value}case .err(error):{return .err(Problem{.code=error,.root=i+1,.template_index=target});}};let parent_at=if(v::at<Frame>(ref stack,v::len<Frame>(ref stack)-1).node==current.node){v::len<Frame>(ref stack)-1}else{v::len<Frame>(ref stack)-2};let parent=v::at_mut<Frame>(ref mut stack,parent_at);parent.children[current.next]=next;parent.next+=1;}
+            else{target=v::at<Node>(ref nodes,current.node-1).template_index;code=complete(input,ref mut names,ref mut pending_names,ref mut nodes,ref mut pending,ref mut stack,ref mut edges,ref mut order,work);}if(code!=0){return .err(Problem{.code,.root=i+1,.template_index=target});}
         }discard bytes::clear(ref mut pending_names);i+=1;
-    }return .ok(Plan{.input,.names,.nodes,.edges,.roots,.order});
+    }return .ok(Computed{.names,.nodes,.edges,.roots,.order});
 }
+
+pub fn Attempt attempt(source::Input input,Limits limits,ref mut usize work){
+    var v::Vec<Computed> values=v::empty<Computed>();switch(compute(ref input,limits,work)){case .ok(p):{if(!v::push<Computed>(ref mut values,p).is_ok){return Attempt{.input,.values,.problem=Problem{.code=11,.root=0,.template_index=0}};}}case .err(e):{return Attempt{.input,.values,.problem=e};}};return Attempt{.input,.values,.problem=Problem{.code=0,.root=0,.template_index=0}};
+}
+pub fn Result<Plan,Problem> build(source::Input input,Limits limits,ref mut usize work){let result=attempt(input,limits,work);let failed=problem(ref result);if(failed.code!=0){return .err(failed);}return .ok(seal(result));}

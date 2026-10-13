@@ -11,6 +11,7 @@ import project_path as budget;
 import syntax as syntax;
 import std::vec as v;
 import module_catalog as modules;
+import generic_source_root_location as locations;
 
 // One current project input owns the source order, package owners and resolved
 // imports. No caller-created template/plan can replace any of those facts.
@@ -26,5 +27,7 @@ pub fn Result<source::Plan,Problem> build_sources(ref v::Vec<syntax::Parsed> sou
     let roots=switch(requests::build(catalog,sources,work)){case .ok(p):{p}case .err(e):{return .err(Problem{.stage=3,.code=e.code,.module_index=e.module_index,.start=e.start,.end=e.end});}};
     var context::Budget scoped=context::empty();scoped.work=*work;
     let original=switch(prepared::build(roots,sources,ref mut scoped)){case .ok(p):{p}case .err(e):{*work=scoped.work;return .err(Problem{.stage=4,.code=e.source.code,.module_index=e.source.module_index,.start=e.source.start,.end=e.source.end});}};*work=scoped.work;
-    return switch(source::build(original,source::defaults(),work)){case .ok(p):{.ok(p)}case .err(e):{.err(fail(sources,5,e.code,0,0))}};
+    let attempt=source::attempt(original,source::defaults(),work);let problem=source::problem(ref attempt);if(problem.code==0){return .ok(source::seal(attempt));}
+    if(problem.root!=0 && (problem.code==2003 || problem.code==2005 || problem.code==2006)){let located=locations::find(source::attempt_input(ref attempt),sources,problem.root,work);if(located.code==0){return .err(Problem{.stage=5,.code=problem.code,.module_index=located.module_index,.start=located.start,.end=located.end});}if(located.code==10 || located.code==11 || located.code==12){return .err(fail(sources,5,located.code,0,0));}}
+    return .err(fail(sources,5,problem.code,0,0));
 }

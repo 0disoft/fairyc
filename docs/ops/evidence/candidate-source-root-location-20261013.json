@@ -1,0 +1,238 @@
+{
+  "schema": "fairyc.candidate-source-root-location/v1",
+  "passed": true,
+  "parentCommit": "3fa4a589a2bc10cd055945d47639381926acb81e",
+  "scope": "Retain exact failed planning input and reconstruct original canonical root location only on failure; no partial plan publication.",
+  "sourceInventories": [
+    {
+      "path": "docs/ops/evidence/candidate-source-root-location-inputs-20261013-1.json",
+      "bytes": 19232,
+      "sha256": "4f19c0550c1f492e3d9768a93490abda576ccb29cb274bcbd27bce7231ce1913"
+    },
+    {
+      "path": "docs/ops/evidence/candidate-source-root-location-inputs-20261013-2.json",
+      "bytes": 11750,
+      "sha256": "5542035fb78225c5280503745644b5e4a2f748317711c9171cebcd405880b17b"
+    }
+  ],
+  "sourceInputsVerified": 164,
+  "oracle": {
+    "observer": {
+      "path": "tools/verify-candidate-source-locations.go",
+      "bytes": 6291,
+      "sha256": "98225f4cf2b6f71e47d138b8069090e1be03db1ae8f55a2f7b61c9bb5a762936"
+    },
+    "fixture": {
+      "path": ".cache/source-root-location-20261013/fixture.bin",
+      "bytes": 11136,
+      "sha256": "2d573559c29743e9ebcfd71afd5c93069e336379a1bc057d80d83d8415fb4f6c"
+    },
+    "refreshedFixture": {
+      "path": ".cache/source-root-location-20261013/fixture-refresh.bin",
+      "bytes": 11136,
+      "sha256": "2d573559c29743e9ebcfd71afd5c93069e336379a1bc057d80d83d8415fb4f6c"
+    },
+    "cases": [
+      {
+        "case": "Direct",
+        "code": "G2005",
+        "end": 83,
+        "excerpt": "cycle<i32>",
+        "module": "root",
+        "moduleIndex": 0,
+        "owner": "package_coordinate_v1_1111111111111111111111111111111111111111111111111111111111111111",
+        "start": 73
+      },
+      {
+        "case": "Aliases",
+        "code": "G2005",
+        "end": 88,
+        "excerpt": "a::cycle<i32>",
+        "module": "acaller",
+        "moduleIndex": 2,
+        "owner": "package_coordinate_v1_1111111111111111111111111111111111111111111111111111111111111111",
+        "start": 75
+      },
+      {
+        "case": "Reordered",
+        "code": "G2005",
+        "end": 88,
+        "excerpt": "a::cycle<i32>",
+        "module": "acaller",
+        "moduleIndex": 1,
+        "owner": "package_coordinate_v1_1111111111111111111111111111111111111111111111111111111111111111",
+        "start": 75
+      },
+      {
+        "case": "OwnerOrder",
+        "code": "G2005",
+        "end": 71,
+        "excerpt": "z::cycle<i32>",
+        "module": "zcaller",
+        "moduleIndex": 2,
+        "owner": "package_coordinate_v1_1111111111111111111111111111111111111111111111111111111111111111",
+        "start": 58
+      },
+      {
+        "case": "PerDeclaration",
+        "code": "G2006",
+        "end": 85,
+        "excerpt": "id<u8>",
+        "module": "root",
+        "moduleIndex": 0,
+        "owner": "package_coordinate_v1_1111111111111111111111111111111111111111111111111111111111111111",
+        "start": 79
+      },
+      {
+        "case": "Depth",
+        "code": "G2006",
+        "end": 102,
+        "excerpt": "outer<i32>",
+        "module": "root",
+        "moduleIndex": 0,
+        "owner": "package_coordinate_v1_1111111111111111111111111111111111111111111111111111111111111111",
+        "start": 92
+      },
+      {
+        "case": "Vec",
+        "code": "G2006",
+        "end": 3405,
+        "excerpt": "Vec<i32>",
+        "module": "std::vec",
+        "moduleIndex": 1,
+        "owner": "package_coordinate_v1_3333333333333333333333333333333333333333333333333333333333333333",
+        "start": 3397
+      }
+    ],
+    "source": "actual PreparePackages/PrepareSDKStoragePackages located RequestError failures"
+  },
+  "modules": [
+    {
+      "module": "generic_source_root_location",
+      "authoredTests": 4,
+      "receipt": {
+        "path": ".cache/source-root-location-20261013/verification/receipt.json",
+        "bytes": 84799,
+        "sha256": "848a9780299cc6241e09e49c164b3c2a301eef91c1b678a49da2922e392b8f4f"
+      },
+      "native": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\source-root-location-20261013\\verification\\native-project-23aa97a2ebce51397fb0\\build\\lexer-candidate.exe",
+        "sha256": "eca66cdcc84e1289abe3babf8064f691a934692418b379dd9f127e144b87d24b",
+        "selectedTests": [
+          "tests::generic_source_root_location::actual_go_cycle_growth_and_sdk_type_request_locations_match",
+          "tests::generic_source_root_location::failed_attempt_retains_exact_input_after_source_owners_close",
+          "tests::generic_source_root_location::recovery_honors_shared_budget_and_rejects_stale_or_invalid_roots",
+          "tests::generic_source_root_location::successful_attempt_seals_the_same_complete_plan_without_extra_work"
+        ],
+        "stdoutBytes": 0,
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stack": {
+          "reserveBytes": 16777216,
+          "originalReserveBytes": 1048576,
+          "originalSHA256": "eac77911609df681ad2bfe8d2ba3f77543c362980eed4c97850986efb92e81c5"
+        }
+      },
+      "candidateExecutions": [
+        {
+          "profile": "development",
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\source-root-location-20261013\\verification\\development.exe",
+          "sha256": "0a0b45858910ca59c481ad6893c02ff45cf1a77b58aebc0c76ab95183fe422b9",
+          "exit": 0
+        },
+        {
+          "profile": "release",
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\source-root-location-20261013\\verification\\release.exe",
+          "sha256": "5dc005e32811a4a2a65e83368fec171a5600007fa1c7203e588d8af46446fe96",
+          "exit": 0
+        }
+      ],
+      "packet": {
+        "path": ".cache/source-root-location-20261013/verification/candidate-packet.bin",
+        "bytes": 4686412,
+        "sha256": "996916e5fb236e6e8bfc23ede6f1d85d68f5138806347c27f1841c82cee391a5"
+      },
+      "rootLockAtExecution": "04b94621fcd56bc673fd35ec2e8f97168daf5c286efda9f82067c1f1ddf1da07"
+    },
+    {
+      "module": "generic_source_plan",
+      "authoredTests": 5,
+      "receipt": {
+        "path": ".cache/source-root-location-20261013/plan-regression-serial/receipt.json",
+        "bytes": 86463,
+        "sha256": "70a509553f5763c551c23fc580ca732d67cf9cb5d9613952518c1cab59de3847"
+      },
+      "native": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\source-root-location-20261013\\plan-regression-serial\\native-project-c257e17446e7ed17cad1\\build\\lexer-candidate.exe",
+        "sha256": "c5109c914f77fea589c1387fc13eaa9403713f47f324f2a88443e2ea72f4d677",
+        "selectedTests": [
+          "tests::generic_source_plan::complete_source_plan_ids_roots_and_order_match_go",
+          "tests::generic_source_plan::cycles_abilities_and_all_growth_limits_match_kernel_categories",
+          "tests::generic_source_plan::detached_plan_deduplicates_substituted_edges_and_shared_instances",
+          "tests::generic_source_plan::empty_plan_preserves_limits_and_rejects_invalid_initial_work",
+          "tests::generic_source_plan::plan_shares_exact_work_and_publishes_no_partial_success"
+        ],
+        "stdoutBytes": 0,
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stack": {
+          "reserveBytes": 16777216,
+          "originalReserveBytes": 1048576,
+          "originalSHA256": "48a9f6227f4cd64c853ede5392b4d31cb5c34521f53d4f240dc6c02dde22779f"
+        }
+      },
+      "candidateExecutions": [
+        {
+          "profile": "development",
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\source-root-location-20261013\\plan-regression-serial\\development.exe",
+          "sha256": "7f4d52217939792481fb898594e7916da44cd6d1add1a457874c7b8895f74859",
+          "exit": 0
+        },
+        {
+          "profile": "release",
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\source-root-location-20261013\\plan-regression-serial\\release.exe",
+          "sha256": "9edce7ac156442e72d9af2a1a6de452f6e6a1d8f785288fb8a12944bc504c14b",
+          "exit": 0
+        }
+      ],
+      "packet": {
+        "path": ".cache/source-root-location-20261013/plan-regression-serial/candidate-packet.bin",
+        "bytes": 4636427,
+        "sha256": "35a227cf381bfd456278c5f7731f80d6f32d13a484d2a774836727b40af308ca"
+      },
+      "rootLockAtExecution": "b4acab3363d1266429261f9e6b7d44d01c9cb74a5a5993f6b60d8d1b00920762"
+    }
+  ],
+  "sourceChecks": [
+    {
+      "output": "check ok: 2 instance(s), 446 source file(s), 5765 MIR function(s), lock unchanged",
+      "log": {
+        "path": ".cache/source-root-location-20261013/root-check.txt",
+        "bytes": 83,
+        "sha256": "6cb53c567dd3b0d24696c3daa3c1ecaf57723cebae5104c3fd76982c2344f560"
+      }
+    },
+    {
+      "output": "check ok: 2 instance(s), 446 source file(s), 5765 MIR function(s), lock verified",
+      "log": {
+        "path": ".cache/source-root-location-20261013/root-locked-check.txt",
+        "bytes": 82,
+        "sha256": "0cc14e25df78eb48f18737b093072b630f95eaf087b826523d2e34efdee88860"
+      }
+    }
+  ],
+  "reuse": "Locator source inputs, copied native inputs, all tools, packet and images rehashed unchanged. Its isolated tests do not consume the subsequently refreshed original root lock. Original root check/locked check and final serial plan regression cover the current lock.",
+  "preservedFailure": "Earlier plan regression completed profiles but failed final root-lock snapshot after concurrent root check; replaced by passing sequential verification.",
+  "privateStackReserveBytes": 16777216,
+  "productStackChanged": false,
+  "productTimeoutChanged": false,
+  "publicApiChanged": false,
+  "sdkAbiChanged": false,
+  "dbChanged": false,
+  "ciChanged": false,
+  "pushed": false,
+  "remaining": [
+    "identified CLI/cache consumers",
+    "latest complete fixed point",
+    "product stack/deadlines",
+    "Linux/full suite/same-head CI"
+  ]
+}
