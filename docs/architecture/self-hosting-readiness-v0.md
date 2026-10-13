@@ -3,8 +3,10 @@
 Cache-key v4/v0 encoders and the checked ordinary state-body identity are now
 verified: [key checkpoint](../ops/candidate-generic-cache-key-20261014.md) and
 [body checkpoint](../ops/candidate-cache-body-identity-20261014.md). Remaining
-SDK/target/cache environment composition, complete-owner keys and actual artifact
-reuse stay open. The actual running Windows compiler image identity is verified
+Complete-owner package key composition and actual artifact reuse stay open.
+The current candidate-owned IR environment is verified in the
+[environment checkpoint](../ops/candidate-cache-environment-20261014.md).
+The actual running Windows compiler image identity is verified
 in the [compiler identity checkpoint](../ops/candidate-compiler-identity-20261014.md).
 Exact loaded workspace facts are verified in the
 [workspace checkpoint](../ops/candidate-cache-workspace-20261014.md). Complete

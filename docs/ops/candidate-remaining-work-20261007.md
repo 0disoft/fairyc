@@ -13,8 +13,9 @@ Exact loaded workspace facts matched to the complete owner are now verified in
 the [workspace checkpoint](candidate-cache-workspace-20261014.md).
 The actual running Windows compiler image identity is now verified in the
 [compiler identity checkpoint](candidate-compiler-identity-20261014.md).
-SDK/target/cache environment composition, complete-owner keys and actual reuse
-remain open.
+The actual candidate-owned IR cache environment is now verified in the
+[environment checkpoint](candidate-cache-environment-20261014.md).
+Complete-owner package key composition and actual artifact reuse remain open.
 
 Current source-identified build/run integration:
 [2026-10-14 native checkpoint](candidate-identified-native-20261014.md).

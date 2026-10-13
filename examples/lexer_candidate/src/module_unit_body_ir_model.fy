@@ -27,6 +27,9 @@ pub resource Program {
     v::Vec<interfaces::Field> fields;v::Vec<interfaces::Callable> callables;
     v::Vec<usize> parameters;bytes::Buffer names;usize work;cleanup{}
 }
+// Private checked body/cleanup/layout model compatibility, separate from the
+// Go MIR codec and from any future independently versioned artifact envelope.
+pub fn ref u8[] cache_revision(){return b"fairyc.candidate-owned-body-ir/0";}
 pub fn ref clean_ir::Program cleanup_ir(ref Program p){return ref p.cleanup_ir;}
 pub fn ref state::Plan state_layouts(ref Program p){return ref p.states;}
 pub fn ref sdk_sources::Sources sdk_units(ref Program p){return ref p.sdk_sources;}
