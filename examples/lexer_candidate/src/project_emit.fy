@@ -6,6 +6,7 @@ import project_compiler_core as compiler;
 import project_compiler_entry as entry;
 import project_check as check;
 import module_unit_c_emit as c;
+import module_project_complete_c as complete_c;
 import module_unit_cleanup_mir_model as clean;
 import std::vec as v;
 import std::bytes as bytes;
@@ -15,6 +16,9 @@ import project_instance_graph as instances;
 import project_workspace_input as spaces;
 import project_workspace_catalog as catalog;
 import project_manifest as manifest;
+import project_coordinate_graph as coordinates;
+import module_project_identified_ir as identified;
+import generic_signature_diagnostics as diagnostics;
 
 // Successful emission keeps the publication metadata from this exact load.
 // Source/graph owners can be released once the checked bundle is complete.
@@ -38,10 +42,12 @@ pub fn clean::Problem emission_error(ref Error e){assert(e.phase==3);return e.em
 pub fn Result<Plan,Error> evaluate(ref u8[] root,bool locked){
     var source_set::Budget budget=source_set::Budget{.files=0,.bytes=0};var usize meter=0;
     let loaded=switch(loader::load(root,locked,ref mut budget,ref mut meter)){case .ok(p):{p}case .err(e):{return .err(frontend_failure(check::load_failure(e)));}};
+    let table=switch(coordinates::collect(visibility::workspace_graph(loader::workspace(ref loaded)),ref mut meter)){case .ok(p):{p}case .err(e):{return .err(frontend_failure(check::projection_failure(loaded,input::Problem{.code=e.code,.reason=2,.owner=e.owner,.module_index=0,.declaration=0})));}};
     let projected=switch(input::project(loader::workspace(ref loaded),ref mut meter)){case .ok(p):{p}case .err(e):{return .err(frontend_failure(check::projection_failure(loaded,e)));}};
-    let program=switch(compiler::build(ref projected)){case .ok(p):{p}case .err(e):{return .err(frontend_failure(check::compile_failure(loaded,projected,e)));}};
-    var usize entry_work=0;let selected=switch(entry::select(ref projected,ref program,ref mut entry_work)){case .ok(p):{p}case .err(e):{return .err(output_failure(loaded,projected,2,e,clean::Problem{.code=0,.module_index=0,.start=0,.end=0}));}};
-    let bundle=switch(c::partition_entry(program,selected,128)){case .ok(p):{p}case .err(e):{return .err(output_failure(loaded,projected,3,entry::Problem{.kind=0,.module_index=0,.start=0,.end=0},e));}};
+    var usize source_work=0;var usize link_work=0;var v::Vec<diagnostics::Reports> reports=v::empty<diagnostics::Reports>();
+    let complete=switch(compiler::build_complete_reporting(ref projected,ref table,ref mut reports,ref mut source_work,ref mut link_work)){case .ok(p):{p}case .err(e):{return .err(frontend_failure(check::compile_failure_reports(loaded,projected,e,reports)));}};
+    var usize entry_work=0;let selected=switch(entry::select(ref projected,identified::ir_program(compiler::checked_program(ref complete)),ref mut entry_work)){case .ok(p):{p}case .err(e):{return .err(output_failure(loaded,projected,2,e,clean::Problem{.code=0,.module_index=0,.start=0,.end=0}));}};
+    let bundle=switch(complete_c::partition_entry(complete,selected,128)){case .ok(p):{p}case .err(e):{return .err(output_failure(loaded,projected,3,entry::Problem{.kind=0,.module_index=0,.start=0,.end=0},e));}};
     let local=spaces::local_catalog(instances::input(visibility::instance_graph(loader::workspace(ref loaded))));
     let name=switch(bytes::copy(manifest::package_value(catalog::package(local,0),b"name"))){case .ok(p):{p}case .err(_):{return .err(output_failure(loaded,projected,4,entry::Problem{.kind=0,.module_index=0,.start=0,.end=0},clean::Problem{.code=0,.module_index=0,.start=0,.end=0}));}};
     return .ok(Plan{.bundle,.name,.lock_state=loader::state(ref loaded)});

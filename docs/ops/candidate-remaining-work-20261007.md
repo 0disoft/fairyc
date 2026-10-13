@@ -1,5 +1,11 @@
 # Fairy 컴파일러 전환: 후속 작업 목록
 
+Current source-identified build/run integration:
+[2026-10-14 native checkpoint](candidate-identified-native-20261014.md).
+Remaining priorities are cache consumers, current complete fixed point,
+product defaults/performance, broader diagnostics and platform/CI promotion.
+The dated entries below retain their original narrower scopes.
+
 ## Ordinary type application diagnostics (2026-10-13)
 
 The original-source request collector separates three states. With no templates,

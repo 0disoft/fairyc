@@ -59,6 +59,26 @@ for profile in profiles:
     absent=work/(profile+'-missing-driver');absent.mkdir(exist_ok=True);shutil.copyfile(image,absent/'fairyc.exe')
     run([absent/'fairyc.exe','build','--locked'],base,6,err=None,label=profile+' missing companion')
     assert sha(product)==prior
+    for name,source,helper in [
+        ('identified-vector','module main;import helper as a;import helper as b;import std::vec as vec;fn i32 main(){var vec::Vec<i32> values=vec::empty<i32>();assert(vec::push<i32>(ref mut values,a::id<i32>(20)).is_ok);assert(vec::push<i32>(ref mut values,b::id<i32>(22)).is_ok);return *vec::at<i32>(ref values,0)+*vec::at<i32>(ref values,1);}', 'module helper;pub fn T id<T>(T value){return value;}'),
+        ('identified-phantom','module main;import helper as a;import helper as b;fn i32 main(){discard a::constant<u16>();discard b::constant<u64>();return b::constant<u16>();}', 'module helper;pub fn i32 constant<T>(){return 42;}'),
+    ]:
+        project=fixture(profile,name,source)
+        (project/'src/helper.fy').write_text(helper,encoding='utf-8',newline='\n')
+        run([image,'run'],project,42,label=profile+' '+name+' run')
+        run([image,'build','--locked'],project,out=b'built: build/native-app.exe (x86_64-windows-msvc, development, lock verified)\n',label=profile+' '+name+' build')
+        run([project/'build/native-app.exe'],project,42,label=profile+' '+name+' built executable')
+        if name=='identified-vector':
+            (project/'src/main.fy').write_text('module main;fn T id<T>(T value){return value;}fn i32 main(){return id<u16>(42);}',encoding='utf-8',newline='\n')
+            preserved=sha(project/'build/native-app.exe')
+            rejected=run([image,'check'],project,3,err=None,label=profile+' unsupported signature check')
+            expected_error=rejected.stderr
+            assert expected_error
+            if selected.reference:
+                run([selected.reference.resolve(),'check','--locked'],project,3,err=expected_error,label=profile+' Go unsupported signature diagnostics')
+            run([image,'build','--locked'],project,3,err=expected_error,label=profile+' unsupported signature build')
+            run([image,'run','--locked'],project,3,err=expected_error,label=profile+' unsupported signature run')
+            assert sha(project/'build/native-app.exe')==preserved
     (base/'src/main.fy').write_text('module main;fn i32 main(){return 43;}\n',encoding='utf-8',newline='\n')
     run([image,'build','--locked'],base,7,err=None,label=profile+' stale lock')
     assert sha(product)==prior
@@ -83,4 +103,4 @@ for profile in profiles:
     run([image,'run','--locked'],missing,7,err=None,label=profile+' missing lock')
     oversized=fixture(profile,'output-limit',r'''module main;import std::io as io;@effects(console) fn i32 main(){var u8[4096] data=[65;4096];var usize i=0;while(i<17){assert(io::write_bytes(ref data).is_ok);i+=1;}return 0;}''')
     run([image,'run'],oversized,6,err=None,label=profile+' bounded combined output')
-save(work/'execution-receipt.json',dict(schema='fairyc.candidate-native-cli-execution/v1',passed=True,executions=rows,profiles=profiles,images={p:dict(path=str(images[p]),sha256=sha(images[p]),driverSHA256=sha(images[p].parent/'fairyc-candidate-build.exe')) for p in profiles},productGoFrontendInvoked=False,goReferenceInvocations=sum(r['label']=='Go reference exact program streams' for r in rows),arguments=dict(values=args[:-1],lastRepeatedByte='x',lastBytes=8192),stdinSHA256=hashlib.sha256(stdin).hexdigest(),programStdoutSHA256=hashlib.sha256(expected).hexdigest(),scratchDirectoryLeaks=False,verifierSHA256=sha(Path(__file__))))
+save(work/'execution-receipt.json',dict(schema='fairyc.candidate-native-cli-execution/v1',passed=True,executions=rows,profiles=profiles,images={p:dict(path=str(images[p]),sha256=sha(images[p]),driverSHA256=sha(images[p].parent/'fairyc-candidate-build.exe')) for p in profiles},productGoFrontendInvoked=False,goReferenceInvocations=sum('Go ' in r['label'] for r in rows),arguments=dict(values=args[:-1],lastRepeatedByte='x',lastBytes=8192),stdinSHA256=hashlib.sha256(stdin).hexdigest(),programStdoutSHA256=hashlib.sha256(expected).hexdigest(),scratchDirectoryLeaks=False,verifierSHA256=sha(Path(__file__))))

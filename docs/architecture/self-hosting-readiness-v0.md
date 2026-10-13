@@ -1,5 +1,11 @@
 # Self-hosting readiness v0
 
+Current source-identified build/run integration and its 51 process observations:
+[2026-10-14 native checkpoint](../ops/candidate-identified-native-20261014.md).
+Cache consumers, latest complete fixed point, product defaults/performance and
+platform/CI promotion remain open; the historical entries below retain their
+original scope.
+
 ## Ordinary type application diagnostics (2026-10-13)
 
 The original-source request collector separates three states. With no templates,
