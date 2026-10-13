@@ -1,5 +1,9 @@
 # Fairy 컴파일러 전환: 후속 작업 목록
 
+Whole-package cache-key v4 encoding is now verified in the
+[2026-10-14 cache-key checkpoint](candidate-package-cache-key-20261014.md).
+Generic keys, complete-owner facts and actual verified artifact reuse remain open.
+
 Current source-identified build/run integration:
 [2026-10-14 native checkpoint](candidate-identified-native-20261014.md).
 Remaining priorities are cache consumers, current complete fixed point,
