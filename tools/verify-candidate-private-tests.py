@@ -129,7 +129,7 @@ def main():
     main_source = output / 'main.fy'
     main_source.write_text(authored, encoding='utf-8', newline='\n')
     modules = {}
-    for base in (PROJECT / 'src', ROOT / 'internal/sdkstdlib/sources'):
+    for base in (PROJECT / 'src', PROJECT / 'tests', ROOT / 'internal/sdkstdlib/sources'):
         for path in base.rglob('*.fy'):
             name = re.search(r'^module\s+([\w:]+);', path.read_text(encoding='utf-8'))[1]
             assert name not in modules
@@ -207,7 +207,7 @@ def main():
         native_project = PROJECT
         copied_inputs = []
         if args.isolated_native:
-            originals = ([main_source] if args.native_program else [test_source]) + [path for path in paths[1:] if path.is_relative_to(PROJECT / 'src')]
+            originals = ([main_source] if args.native_program else [test_source]) + [path for path in paths[1:] if path.is_relative_to(PROJECT)]
             manifest_bytes = (PROJECT / 'fairy.toml').read_bytes()
             source_inputs.append(dict(path=(PROJECT / 'fairy.toml').relative_to(ROOT).as_posix(), sha256=hashlib.sha256(manifest_bytes).hexdigest()))
             fingerprint = hashlib.sha256(manifest_bytes + b''.join(str(Path('src/main.fy') if path == main_source else path.relative_to(PROJECT)).encode() + bytes.fromhex(digest(path)) for path in originals)).hexdigest()
