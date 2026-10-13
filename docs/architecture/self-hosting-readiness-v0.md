@@ -1,5 +1,29 @@
 # Self-hosting readiness v0
 
+## Complete source-identified Vec SDK interfaces (2026-10-13)
+
+The identified source-interface helper combines original public template closures
+with the checked source-identified ordinary descriptor. Both the template graph
+and specialization plan must match current source bytes, package owners,
+resolved import providers and coordinate namespaces. Completed phase histories
+retain their existing bounds and fold into the shared 16MiB project ledger.
+
+Six actual Go graphs match all 113 public-template triples, 18 ordinary hashes
+and 18 generic hashes, including all six Vec SDK package interfaces previously
+rejected with 4503. Cases cover private edits, source/owner reorder, inert views,
+multi-module ownership and no public user templates. Three authored tests and
+five existing source-interface regressions pass Go native and candidate C
+development/release. Exact/exhausted work, invalid initial work, changed/missing
+coordinates, different plan namespaces and stale plans/graphs fail closed.
+Root check and locked check pass 440 files / 5677 MIR functions.
+
+Next: owning dispatcher/cache consumers must gate publication on completed
+body/Flow checking. These interface facts alone admit no executable or cached
+artifact. Latest full-image/fixed-point promotion, product timing/stack
+integration, Linux/full suite and hosted CI remain open. Private test images use
+16MiB stacks; public API, SDK ABI, limits, DB and CI are unchanged; no push.
+Receipt: [evidence](../ops/evidence/candidate-source-interface-identified-20261013.json).
+
 ## Identified public descriptor extraction (2026-10-13)
 
 Identified public descriptor extraction validates the complete source/type-name
