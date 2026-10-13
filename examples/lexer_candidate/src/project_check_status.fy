@@ -18,4 +18,4 @@ pub fn i32 load(ref loader::Error e){
     let input=instances::input_error(local);let problem=workspace::error(input);if(problem.code==7){return 4;}if(!workspace::has_catalog_error(input)){return 7;}
     let c=workspace::nested_catalog_error(input);if(catalog::error(c).code==10){return 4;}if(!catalog::has_input_error(c)){return 7;}return package_input(catalog::input_error(c));
 }
-pub fn i32 error(ref check::Error e){let phase=check::phase(e);if(phase==1){return load(check::load_error(e));}if(phase==2 || phase==4){return 4;}let p=check::compiler_error(e);if(p.phase==4 || p.code==10 || p.code==11 || p.code==12 || p.code==1001 || p.code==1002 || p.code==1003 || p.code==4503){return 4;}return 3;}
+pub fn i32 error(ref check::Error e){let phase=check::phase(e);if(phase==1){return load(check::load_error(e));}if(phase==2 || phase==4){return 4;}let p=check::compiler_error(e);if(p.phase==4 || p.phase==6 || p.phase==5 && p.code==9 || p.code==10 || p.code==11 || p.code==12 || p.code==1001 || p.code==1002 || p.code==1003 || p.code==4503){return 4;}return 3;}

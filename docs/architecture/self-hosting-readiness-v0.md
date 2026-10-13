@@ -1,5 +1,39 @@
 # Self-hosting readiness v0
 
+## Identified check command (2026-10-13)
+
+`project_check` collects the exact loaded-workspace coordinates, calls
+`build_complete` and derives its Stats from the checked identified IR, rejecting
+the phase 6 publication as internal 4. The candidate Vec count is 178 and matches
+Go 178 on all three images after five separately counted verified glue entries;
+the earlier 173-against-178 probe stays as the failure record and the ordinary
+core SDK count of 166 is intact.
+
+The original generic request traversal returns exact original AST node spans and
+separates arity/implicit/nominal (4502), missing (101) and private (13) requests;
+the source plan diagnostic maps these to E4502/E0101/E0103 and cycles to E4503,
+with the declaration E4501 summary registered. Four `generic_source_requests` and
+four `generic_source_root_location` regressions pass Go native and candidate C
+development/release. Root check passes 446 files / 5767 MIR functions with the lock
+unchanged, and the final `--locked` check verifies 446 files / 5767 MIR functions.
+
+The native image and both candidate C images pass all 21 original process
+comparisons (63/63) and every one of the 14 generic statuses (42/42). Twelve of
+fourteen generic cases match exact stdout and first diagnostic on each image;
+ordinary nongeneric explicit type application (Go unsupported call target against
+E4502) and unsupported scalar u16 (Go unsupported template signature positions
+against E0101 at the actual type argument) remain the two diagnostics-only
+mismatches.
+
+The receipt records the two expected/actual diagnostics, the failed history and
+verified inputs, tools, images and copies, and reports `connected=true` with
+`stableCheckComplete=false` and `genericDifferentialPassed=false`. This is a
+private-API-only change; the public API, SDK ABI, DB and CI are unchanged and no
+push occurred. Private test images keep 16MiB stacks. Next, first the two
+unsupported diagnostics, then the identified build/run/cache, the latest full
+fixed point and the remaining platform and CI gates. Receipt:
+[evidence](../ops/evidence/candidate-identified-check-20261013.json).
+
 ## Original generic planning failure locations (2026-10-13)
 
 `generic_source_plan` keeps the exact original input on any failed attempt and

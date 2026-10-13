@@ -3,6 +3,9 @@ module project_diagnostic_codes;
 // Catalog/name lookup codes overlap internal capacity and type statuses.
 // Translate them only at the phase that owns their resolution meaning.
 pub fn u32 code(u32 phase,u32 stage,u32 raw){
+    if(phase==5 && stage==5 && (raw==2005 || raw==2006)){return 4503;}
+    if(phase==5 && stage==2 && raw==4501){return 4501;}
+    if(phase==5 && (stage==3 || stage==4)){if(raw==13){return 103;}if(raw==101 || raw==4501 || raw==4502){return raw;}}
     if(phase==1 && raw==2){return 102;}
     if(phase==3 && stage==2 && (raw==4 || raw==5)){return 101;}
     if(phase==3 && stage==3 && raw==1){return 101;}
@@ -28,6 +31,9 @@ pub fn ref u8[] summary(u32 code){
     if(code==4304){return b"compile-time dependency cycle or evaluator budget exhausted";}
     if(code==4305){return b"static_assert evaluates to false";}
     if(code==4401){return b"source_location requires its reserved exact call form";}
+    if(code==4501){return b"Generic source preparation rejects a malformed, colliding, shadowing, or reserved declaration or binding.";}
+    if(code==4502){return b"A generic call requires supported explicit scalar type arguments with the declared arity.";}
+    if(code==4503){return b"A generic declaration or concrete request exceeds a catalog or expansion limit, or triggers a specialization cycle.";}
     if(code==5101){return b"unchecked operation is outside an unsafe boundary";}
     if(code==5102){return b"raw foreign signature contains a safe reference";}
     if(code==5106){return b"invalid or conflicting link_name declaration";}
