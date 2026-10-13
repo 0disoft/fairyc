@@ -23,6 +23,8 @@ The per-body IR component now has verified binary transport, detached ownership
 and fresh verification accounting: [body receipt](evidence/candidate-body-artifact-20261014.json).
 The SDK-source component now restores exact bytes through fresh authentication:
 [SDK receipt](evidence/candidate-sdk-artifact-20261014.json).
+Fresh Program assembly now re-enters full verification with measured state,
+cleanup and body costs: [owner receipt](evidence/candidate-program-artifact-owner-20261014.json).
 Whole-program artifacts, checked-owner rebinding and cache reuse remain open.
 
 Current source-identified build/run integration:

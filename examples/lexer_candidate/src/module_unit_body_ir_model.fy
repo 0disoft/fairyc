@@ -85,3 +85,9 @@ pub fn Result<Program,clean_ir::Problem> assemble_sdk_states(state::Plan states,
 pub fn Result<Program,clean_ir::Problem> assemble(clean_ir::Program cleanup_ir,v::Vec<Body> bodies,v::Vec<Layout> layouts,v::Vec<interfaces::Field> fields,v::Vec<interfaces::Callable> callables,v::Vec<usize> parameters,bytes::Buffer names,usize work){
     return assemble_sdk(sdk_sources::empty(),cleanup_ir,bodies,layouts,fields,callables,parameters,names,work);
 }
+// Fresh component reconstruction still passes the complete ordinary verifier.
+// This owner is not the source-authenticated Complete publication boundary.
+pub fn Result<Program,clean_ir::Problem> assemble_artifact(state::Plan states,sdk_sources::Sources sdk_sources,clean_ir::Program cleanup_ir,v::Vec<Body> bodies,v::Vec<Layout> layouts,v::Vec<interfaces::Field> fields,v::Vec<interfaces::Callable> callables,v::Vec<usize> parameters,bytes::Buffer names,ref mut usize verification_work){
+    let p=Program{.states,.sdk_sources,.cleanup_ir,.bodies,.layouts,.fields,.callables,.parameters,.names,.work=0};
+    let checked=proof::check_metered(ref p,verification_work);if(checked.code!=0){return .err(checked);}return .ok(p);
+}
