@@ -1,9 +1,7 @@
 module module_identity_artifact_model;
 import module_project_identities as identities;
-import module_project_identified_ir as project;
 import module_source_specializations as selection;
 import module_public_interface_model as records;
-import module_unit_body_ir_model as ir;
 import module_unit_cleanup_mir_model as clean;
 import candidate_limits as limits;
 import project_cache_encoding as budget;
@@ -35,9 +33,4 @@ pub fn u32 check(ref Snapshot p,ref clean::Program context,ref mut usize work){
 pub fn Result<Snapshot,u32> assemble(bytes::Buffer names,v::Vec<selection::Row> types,v::Vec<selection::Row> frames,ref clean::Program context,ref mut usize work){let p=Snapshot{.names,.types,.frames};let code=check(ref p,context,work);if(code!=0){return .err(code);}return .ok(p);}
 pub fn Result<Snapshot,u32> extract(ref identities::Table input,ref clean::Program context,ref mut usize work){if(!budget::charge(work,1)){return .err(1002);}if(identities::type_count(input)>4096 || identities::frame_count(input)>limits::project_frames() || identities::names_view(input).len>1048576){return .err(1002);}if(!budget::charge(work,identities::names_view(input).len+1)){return .err(1002);}let names=switch(bytes::copy(identities::names_view(input))){case .ok(p):{p}case .err(_):{return .err(1003);}};
     var v::Vec<selection::Row> types=v::empty<selection::Row>();var v::Vec<selection::Row> frames=v::empty<selection::Row>();var usize i=1;while(i<=identities::type_count(input)){if(!budget::charge(work,1)){return .err(1002);}if(!v::push<selection::Row>(ref mut types,identities::type_at(input,i)).is_ok){return .err(1003);}i+=1;}i=1;while(i<=identities::frame_count(input)){if(!budget::charge(work,1)){return .err(1002);}if(!v::push<selection::Row>(ref mut frames,identities::frame_at(input,i)).is_ok){return .err(1003);}i+=1;}return assemble(names,types,frames,context,work);
-}
-// Match source-derived g0 identities, never producer-local planner ordinals.
-// A later owner factory must rederive its planner handles from current input.
-pub fn u32 matches_current(ref Snapshot saved,ref project::Program current,ref mut usize work){let context=ir::cleanup_ir(project::ir_program(current));let checked=check(saved,context,work);if(checked!=0){return checked;}var usize i=1;
-    while(i<=type_count(saved)+frame_count(saved)){if(!budget::charge(work,1)){return 1002;}let a=at(saved,i);let b=if(i<=type_count(saved)){project::type_at(current,i)}else{project::frame_at(current,i-type_count(saved))};let id=project::identity(current,b);if(!budget::charge(work,id.len+1)){return 1002;}if((a.node!=0)!=(b.node!=0) || !bytes::equal(identity(saved,a),id)){return 1001;}i+=1;}return 0;
 }

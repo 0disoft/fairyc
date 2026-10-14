@@ -5,6 +5,8 @@ import module_project_identified_compile as units;
 import module_signatures as signatures;
 import std::vec as v;
 import module_project_identities as identities;
+import module_identity_artifact_model as snapshot;
+import project_cache_encoding as snapshot_work;
 import module_source_specializations as selection;
 import module_unit_body_ir_model as ir;
 import module_unit_cleanup_mir_model as clean;
@@ -14,6 +16,7 @@ import generic_package_bindings as bindings;
 import module_source_provenance as provenance;
 import module_public_type_text as coordinates;
 import syntax as syntax;
+import std::bytes as bytes;
 
 pub resource Program{ir::Program program;identities::Table identities;targets::Index targets;bindings::Bindings provenance;cleanup{}}
 pub fn ref bindings::Bindings source_provenance(ref Program p){return ref p.provenance;}
@@ -24,6 +27,11 @@ pub fn usize frame_count(ref Program p){return identities::frame_count(ref p.ide
 pub fn selection::Row frame_at(ref Program p,usize id){return identities::frame_at(ref p.identities,id);}
 pub fn selection::Row type_at(ref Program p,usize id){return identities::type_at(ref p.identities,id);}
 pub fn ref u8[] identity(ref Program p,selection::Row row){return identities::identity(ref p.identities,row);}
+// The owner-facing comparison belongs above the detached snapshot model.
+// Source-derived g0 bytes match independently of producer-local planner handles.
+pub fn u32 matches_snapshot(ref Program current,ref snapshot::Snapshot saved,ref mut usize work){let context=ir::cleanup_ir(ir_program(current));let checked=snapshot::check(saved,context,work);if(checked!=0){return checked;}var usize i=1;
+    while(i<=snapshot::type_count(saved)+snapshot::frame_count(saved)){if(!snapshot_work::charge(work,1)){return 1002;}let a=if(i<=snapshot::type_count(saved)){snapshot::type_at(saved,i)}else{snapshot::frame_at(saved,i-snapshot::type_count(saved))};let b=if(i<=snapshot::type_count(saved)){type_at(current,i)}else{frame_at(current,i-snapshot::type_count(saved))};let id=identity(current,b);if(!snapshot_work::charge(work,id.len+1)){return 1002;}if((a.node!=0)!=(b.node!=0) || !bytes::equal(snapshot::identity(saved,a),id)){return 1001;}i+=1;}return 0;
+}
 fn clean::Problem fail(u32 code){return clean::Problem{.code,.module_index=0,.start=0,.end=0};}
 // The checked program and its identity table are derived from the same owners;
 // callers cannot supply an unrelated detached table to this factory.

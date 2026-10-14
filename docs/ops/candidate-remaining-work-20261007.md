@@ -68,6 +68,10 @@ and owner reordering, including exact UID/codec/name/order/span/hash facts:
 Restored SDK selection now matches exact current module indices, SDK IDs
 and authenticated bytes, rejecting missing/extra/misbound authority:
 [SDK match receipt](evidence/candidate-project-artifact-sdk-20261014.json).
+The identity comparison now belongs to the checked project owner; detached
+snapshots and restored-admission consumers have no dependency on that owner.
+Golden transport and source-ID comparison preserve their existing semantics:
+[dependency receipt](evidence/candidate-identity-owner-dependency-20261014.json).
 Checked Complete-owner rebinding and actual cache reuse remain open.
 
 Current source-identified build/run integration:
