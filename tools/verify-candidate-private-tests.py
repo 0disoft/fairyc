@@ -85,6 +85,8 @@ def main():
     parser.add_argument('--fixture', type=Path, help='hash and forward one binary oracle fixture to every execution')
     parser.add_argument('--candidate-only', action='store_true', help='execute private host-ABI tests only through candidate C; Go native cannot link these private adapters')
     parser.add_argument('--isolated-native', action='store_true', help='run Go native tests on exact copies of the selected module import closure; retain the original workspace source-check separately')
+    parser.add_argument('--native-host-builder', type=Path, help='verification-only Go C/private host builder, required by native-private-host')
+    parser.add_argument('--native-private-host', action='store_true', help='build the Go-native program through its emitted C and the private builder, enabling only the existing closed candidate host ABI')
     parser.add_argument('--native-program', action='store_true', help='build and directly execute the selected authored test entry with Go for outputs beyond the 64KiB native-test report bound; requires --isolated-native')
     parser.add_argument('--native-stack-editor', type=Path, help='explicit MSVC editbin for applying --stack-reserve-bytes to the private Go-native program; requires --native-program')
     parser.add_argument('--stdin-fixture', type=Path, help='exact binary input for each candidate C execution')
@@ -105,6 +107,10 @@ def main():
         parser.error('isolated-native requires Go native execution')
     if args.native_program and (not args.isolated_native or args.candidate_only):
         parser.error('native-program requires isolated-native and Go execution')
+    if args.native_private_host and (not args.native_program or not args.native_host_builder):
+        parser.error('native-private-host requires native-program and native-host-builder')
+    if args.native_host_builder and not args.native_private_host:
+        parser.error('native-host-builder requires native-private-host')
     if args.native_stack_editor and (not args.native_program or not args.stack_reserve_bytes):
         parser.error('native-stack-editor requires native-program and a nonzero stack reserve')
     if args.stdout_executable_identity and (args.stdout_fixture or not (args.native_program or args.candidate_only)):
@@ -181,6 +187,9 @@ def main():
         source_inputs.append(dict(path=fixture.relative_to(ROOT).as_posix(), sha256=digest(fixture)))
         arguments = [str(fixture)]
     images = {name: dict(path=str(path.resolve()), sha256=digest(path)) for name, path in [('compiler', args.compiler), ('candidate', args.candidate), ('builder', args.builder)]}
+    if args.native_host_builder:
+        images['nativeHostBuilder'] = dict(path=str(args.native_host_builder.resolve()), sha256=digest(args.native_host_builder))
+        source_inputs.append(dict(path='tools/verify-candidate-private-host.go', sha256=digest(ROOT / 'tools/verify-candidate-private-host.go')))
     if args.native_stack_editor:
         images['nativeStackEditor'] = dict(path=str(args.native_stack_editor.resolve()), sha256=digest(args.native_stack_editor))
     streams = {}
@@ -247,7 +256,17 @@ def main():
             run([args.compiler.resolve(), 'check'], cwd=native_project, timeout=600)
             native_isolation = dict(path=str(native_project), localSourceFiles=len(expected_sources)-1, inputFingerprint=fingerprint, copiedInputs=[dict(path=str(path), sha256=sha) for path, sha in copied_inputs])
         if args.native_program:
-            run([args.compiler.resolve(), 'build', '--locked'], cwd=native_project, timeout=600)
+            if args.native_private_host:
+                # Keep the Go frontend as the oracle. Private runtime linkage is
+                # supplied by the same closed builder used for candidate C.
+                emitted = run([args.compiler.resolve(), 'experimental', 'emit-workspace-c', '--target', 'x86_64-windows-msvc', '--locked'], cwd=native_project, timeout=600)
+                assert emitted.stdout and not emitted.stdout.startswith(b'FYCPARTS1'), 'expected Go-generated C source'
+                (output / 'go-native.c').write_bytes(emitted.stdout)
+                native_image = native_project / 'build' / 'lexer-candidate.exe'
+                native_image.parent.mkdir(exist_ok=True)
+                run([args.native_host_builder.resolve(), '--source', output / 'go-native.c', '--source-sha256', digest(output / 'go-native.c'), '--output', native_image, *(['--stack-reserve-bytes', str(args.stack_reserve_bytes)] if args.stack_reserve_bytes else [])], timeout=900)
+            else:
+                run([args.compiler.resolve(), 'build', '--locked'], cwd=native_project, timeout=600)
             built = list((native_project / 'build').glob('*.exe'))
             assert len(built) == 1, 'Go build must publish exactly one Windows test program'
             native_stack = None
@@ -281,6 +300,8 @@ def main():
                 assert spoofed.stdout == expected_stdout, 'Go current image identity followed spoofed argv[0]'
             native_program = dict(path=str(built[0]), sha256=digest(built[0]), selectedTests=sorted(expected), stdoutBytes=len(native.stdout), stdoutSHA256=hashlib.sha256(native.stdout).hexdigest())
             native_program['stack'] = native_stack
+            if args.native_private_host:
+                native_program['privateHost'] = dict(frontend='Go experimental emit-workspace-c', sourceSHA256=digest(output / 'go-native.c'), builderSHA256=digest(args.native_host_builder), publicLinkContractChanged=False)
         else:
             native = run([args.compiler.resolve(), 'test', '--native', '--locked', '--json', '--capture-output', *selection, *(['--', *arguments] if arguments else [])], cwd=native_project, timeout=600)
             report = json.loads(native.stdout)

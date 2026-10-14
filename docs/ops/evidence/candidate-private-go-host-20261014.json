@@ -1,0 +1,120 @@
+{
+  "schema": "fairyc.candidate-private-go-host/v0",
+  "parentCommit": "32ee3dcaf6c5376469fd7bf218bbbe9b796f0e76",
+  "passed": true,
+  "sourceInputs": [
+    {
+      "path": "tools/verify-candidate-private-host.go",
+      "sha256": "75fb2a808a0245addb45354384d0574c8a955b434732260f48c5483955cf8336"
+    },
+    {
+      "path": "tools/verify-candidate-private-tests.py",
+      "sha256": "74fb6ae6ef0305f800486bd262b1eb0f849ef54fd73046094b23e2b068cc0035"
+    }
+  ],
+  "nativeHostBuilderSHA256": "6c71c1ec44df8c3f78ba723b662683f665701c821aeedca9c76aa9e14037796b",
+  "goSourceSHA256": "3844ef6d5ede1e567bc92f6a7444405055bbcbb8cab4518e5c7e521f00c84b9a",
+  "goSourceBytes": 25800957,
+  "goReferenceProgram": {
+    "argv": [
+      "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\cache-artifact-20261014\\private-host-direct\\native-project-8db7f8149496aa656cd2\\build\\lexer-candidate.exe",
+      "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\complete-keys-20261014\\root.txt"
+    ],
+    "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\cache-artifact-20261014\\private-host-direct\\native-project-8db7f8149496aa656cd2",
+    "seconds": 54.012687500042375,
+    "exit": 0,
+    "stdoutBytes": 61186,
+    "stdoutSHA256": "ff04f2dbdeea9831a4d9ee5e9600370f9a872243a5ba3636a07513f76d22e436",
+    "stderr": ""
+  },
+  "nativeBuildInvocations": [
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-frontend-oracle-current-20261012.exe",
+        "check"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\cache-artifact-20261014\\private-host-direct\\native-project-8db7f8149496aa656cd2",
+      "seconds": 16.802755999960937,
+      "exit": 0,
+      "stdoutBytes": 80,
+      "stdoutSHA256": "f0a990a30adddcd9dc7d0f28cf46a5a7281ab3b72167f7690f7d8e8f6444356c",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-frontend-oracle-current-20261012.exe",
+        "experimental",
+        "emit-workspace-c",
+        "--target",
+        "x86_64-windows-msvc",
+        "--locked"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\cache-artifact-20261014\\private-host-direct\\native-project-8db7f8149496aa656cd2",
+      "seconds": 21.40710670000408,
+      "exit": 0,
+      "stdoutBytes": 25800957,
+      "stdoutSHA256": "3844ef6d5ede1e567bc92f6a7444405055bbcbb8cab4518e5c7e521f00c84b9a",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\cache-artifact-20261014\\native-host-builder.exe",
+        "--source",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\cache-artifact-20261014\\private-host-direct\\go-native.c",
+        "--source-sha256",
+        "3844ef6d5ede1e567bc92f6a7444405055bbcbb8cab4518e5c7e521f00c84b9a",
+        "--output",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\cache-artifact-20261014\\private-host-direct\\native-project-8db7f8149496aa656cd2\\build\\lexer-candidate.exe",
+        "--stack-reserve-bytes",
+        "16777216"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+      "seconds": 8.952540999976918,
+      "exit": 0,
+      "stdoutBytes": 250,
+      "stdoutSHA256": "0c66b0690c4cec666587ef32cb9b02f12574acfc9dc54883d99667c62d1b1962",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\editbin.exe",
+        "/nologo",
+        "/stack:16777216",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\cache-artifact-20261014\\private-host-direct\\native-project-8db7f8149496aa656cd2\\build\\lexer-candidate.exe"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\cache-artifact-20261014\\private-host-direct\\native-project-8db7f8149496aa656cd2",
+      "seconds": 0.0704729999997653,
+      "exit": 0,
+      "stdoutBytes": 0,
+      "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\cache-artifact-20261014\\private-host-direct\\native-project-8db7f8149496aa656cd2\\build\\lexer-candidate.exe",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\complete-keys-20261014\\root.txt"
+      ],
+      "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\cache-artifact-20261014\\private-host-direct\\native-project-8db7f8149496aa656cd2",
+      "seconds": 54.012687500042375,
+      "exit": 0,
+      "stdoutBytes": 61186,
+      "stdoutSHA256": "ff04f2dbdeea9831a4d9ee5e9600370f9a872243a5ba3636a07513f76d22e436",
+      "stderr": ""
+    }
+  ],
+  "guards": {
+    "passed": true,
+    "mismatchedSourceSHARejected": true,
+    "existingImageSHA256": "83ecf22bfa22a0e8c11fb26e64a5f6d691928b09ad768cca413b28f3e75a8ed9",
+    "existingImagePreserved": true,
+    "invalidPrivateHostOptionsRejected": true,
+    "nativeBuilderSHA256": "6c71c1ec44df8c3f78ba723b662683f665701c821aeedca9c76aa9e14037796b"
+  },
+  "scope": "verification-only exact Go C and closed private Windows host ABI; cache implementation verification continues separately",
+  "publicApiChanged": false,
+  "sdkAbiChanged": false,
+  "productTimeoutChanged": false,
+  "runnerChanged": true,
+  "ciChanged": false,
+  "pushed": false
+}
