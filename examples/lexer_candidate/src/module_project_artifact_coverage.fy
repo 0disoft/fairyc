@@ -58,6 +58,18 @@ fn u32 tables(ref ir::Program p,Domains d,ref mut v::Vec<u8> seen,ref mut usize 
     i=1;while(i<=clean::type_count(cleaned)){if(!budget::charge(work,1)){return 1002;}let g=clean::glue_at(cleaned,i);if(g.kind==1 && *v::at<u8>(ref shaped,i-1)==0 && (g.frame!=0 || g.nonempty || g.effects!=0 || g.abilities!=0 || g.field_start!=0 || g.field_count!=0)){return 1001;}i+=1;}
     i=0;while(i<v::len<u8>(seen)){if(!budget::charge(work,1)){return 1002;}if(*v::at<u8>(seen,i)!=1){return 1001;}i+=1;}return 0;
 }
+// One package-owned range must cover the entire saved unit, not merely a
+// matching subset. Fresh checking owns the source/Flow diagnostics; no lowering
+// is needed to reject injected frames, tables, operands or cleanup authority.
+pub fn Result<Covered,Problem> checked_range(ref ir::Program p,ref identities::Snapshot ids,ref source::Plan plan,ref compile::CheckedBodies checked,ref v::Vec<syntax::Parsed> sources,ref signatures::Program metadata,ref mut usize work){
+    let r=compile::checked_range(checked);if(r.first>=r.stop || r.stop>v::len<syntax::Parsed>(sources)){return .err(fail(1,1001,r.first,r.stop));}
+    if(!budget::charge(work,0)){return .err(fail(1,1002,r.first,r.stop));}var usize measured=0;let valid=proof::check_metered(p,ref mut measured);if(!budget::charge(work,measured)){return .err(fail(1,1002,r.first,r.stop));}if(valid.code!=0){return .err(fail(1,valid.code,r.first,r.stop));}
+    measured=0;let original=identities::check(ids,ir::cleanup_ir(p),ref mut measured);if(!budget::charge(work,measured)){return .err(fail(1,1002,r.first,r.stop));}if(original!=0){return .err(fail(1,original,r.first,r.stop));}
+    let d=domains(p);var v::Vec<u8> seen=v::empty<u8>();var usize i=0;while(i<d.end){if(!budget::charge(work,1)){return .err(fail(1,1002,r.first,r.stop));}if(!v::push<u8>(ref mut seen,0).is_ok){return .err(fail(1,1003,r.first,r.stop));}i+=1;}
+    let matched=switch(matching::match_unit(p,ids,compile::checked_state(checked),plan,sources,metadata,work)){case .ok(p):{p}case .err(code):{return .err(fail(3,code,r.first,r.stop));}};
+    let covered=unit(p,ref matched,d,ref mut seen,work);if(covered!=0){return .err(fail(3,covered,r.first,r.stop));}let code=tables(p,d,ref mut seen,work);if(code!=0){return .err(fail(4,code,r.first,r.stop));}
+    return .ok(Covered{.stats=Stats{.files=r.stop-r.first,.units=1,.retries=0,.frames=ir::count(p),.types=clean::type_count(ir::cleanup_ir(p)),.layouts=ir::layout_count(p),.fields=ir::field_count(p),.cleanup_fields=clean::field_count(ir::cleanup_ir(p)),.callables=ir::callable_count(p),.parameters=ir::parameter_count(p),.names=ir::name_bytes(p)}});
+}
 pub fn Result<Covered,Problem> build(ref ir::Program p,ref identities::Snapshot ids,ref source::Plan plan,ref v::Vec<syntax::Parsed> sources,ref signatures::Program metadata,ref mut usize work){
     if(!budget::charge(work,0)){return .err(fail(1,1002,0,0));}var usize measured=0;let valid=proof::check_metered(p,ref mut measured);if(!budget::charge(work,measured)){return .err(fail(1,1002,0,0));}if(valid.code!=0){return .err(fail(1,valid.code,0,0));}
     measured=0;let original=identities::check(ids,ir::cleanup_ir(p),ref mut measured);if(!budget::charge(work,measured)){return .err(fail(1,1002,0,0));}if(original!=0){return .err(fail(1,original,0,0));}

@@ -29,8 +29,10 @@ fn Result<v::Vec<usize>,u32> destructors(ref clean::Program saved,ref values::Pl
     while(i<=clean::type_count(saved)){if(!budget::charge(work,1)){return .err(1002);}if(!v::push<usize>(ref mut slots,0).is_ok){return .err(1003);}i+=1;}
     i=0;while(i<values::count(typed)){if(!budget::charge(work,1)){return .err(1002);}if(body::frame(values::at(typed,i)).kind==2){let id=frames::mapped(map,i+1);if(id==0 || id>clean::frame_count(saved)){return .err(1001);}let f=clean::frame_at(saved,id);if(f.kind!=2 || f.receiver_type==0 || f.receiver_type>clean::type_count(saved) || *v::at<usize>(ref slots,f.receiver_type)!=0){return .err(1001);}let cell=v::at_mut<usize>(ref mut slots,f.receiver_type);*cell=id;}i+=1;}return .ok(slots);
 }
-pub fn Result<frames::Mapping,u32> match(ref ir::Program program,ref identities::Snapshot ids,ref checking::Plan checked,ref source::Plan plan,ref v::Vec<syntax::Parsed> sources,ref signatures::Program metadata,ref mut usize work){
-    let map=switch(drops::match(program,ids,checked,plan,sources,metadata,work)){case .ok(p):{p}case .err(code):{return .err(code);}};
+pub fn Result<frames::Mapping,u32> match(ref ir::Program program,ref identities::Snapshot ids,ref checking::Plan checked,ref source::Plan plan,ref v::Vec<syntax::Parsed> sources,ref signatures::Program metadata,ref mut usize work){return match_mode(program,ids,checked,plan,sources,metadata,false,work);}
+pub fn Result<frames::Mapping,u32> match_unit(ref ir::Program program,ref identities::Snapshot ids,ref checking::Plan checked,ref source::Plan plan,ref v::Vec<syntax::Parsed> sources,ref signatures::Program metadata,ref mut usize work){return match_mode(program,ids,checked,plan,sources,metadata,true,work);}
+fn Result<frames::Mapping,u32> match_mode(ref ir::Program program,ref identities::Snapshot ids,ref checking::Plan checked,ref source::Plan plan,ref v::Vec<syntax::Parsed> sources,ref signatures::Program metadata,bool partial,ref mut usize work){
+    let map=switch(if(partial){drops::match_unit(program,ids,checked,plan,sources,metadata,work)}else{drops::match(program,ids,checked,plan,sources,metadata,work)}){case .ok(p):{p}case .err(code):{return .err(code);}};
     let typed=checking::checked_values(checked);let imported=checking::checked_interfaces(checked);let saved=ir::cleanup_ir(program);
     let indexed=switch(shapes(typed,imported,work)){case .ok(p):{p}case .err(code):{return .err(code);}};
     let bodies=switch(destructors(saved,typed,ref map,work)){case .ok(p):{p}case .err(code):{return .err(code);}};
