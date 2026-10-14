@@ -1,4 +1,5 @@
 module tests::module_unit_c_arrays;
+import module_unit_c_borrowed_arrays as borrowed_arrays;
 import module_unit_c_emit as emit;
 import module_unit_body_ir_model as ir;
 import module_unit_cfg_model as cfg;
@@ -59,4 +60,16 @@ fn usize entry(ref ir::Program p){var usize found=0;var usize i=1;while(i<=ir::c
 }
 @test @effects(console) fn void array_c_reads_inert_struct_fields_without_recursive_stack_copies(){
     let p=retained(b"module main;struct Frame{usize[512] spare;usize n;}struct Context{Frame frame;}fn usize recurse(ref Context c,usize depth){let Frame f=c.frame;var usize total=0;total+=f.n;total+=f.n;total+=f.n;total+=f.n;total+=f.n;total+=f.n;total+=f.n;total+=f.n;total+=f.n;total+=f.n;total+=f.n;total+=f.n;total+=f.n;total+=f.n;total+=f.n;total+=f.n;total+=f.n;total+=f.n;total+=f.n;total+=f.n;total+=f.n;total+=f.n;total+=f.n;total+=f.n;if(depth==0){return total;}return recurse(c,depth-1)+total;}fn i32 main(){let Context c=Context{.frame=Frame{.spare=[0;512],.n=1}};assert(recurse(ref c,32)==792);return 0;}",b"");output(ref p,entry(ref p));
+}
+
+@test @effects(console)
+fn void scalar_bodies_skip_projection_scans_and_keep_exact_work_boundaries(){
+    let p=retained(b"module main;fn i32 main(){var i32 total=0;for(var i32 i=0;i<32;i+=1){total+=i;}return total;}",b"");
+    let graphs=switch(flow::lower_all(ref p)){case .ok(g):{g}case .err(_):{assert(false);return;}};
+    let frame=entry(ref p);let b=ir::at(ref p,frame);let graph=v::at<cfg::Graph>(ref graphs,frame-1);var usize work=0;
+    let plan=switch(borrowed_arrays::build(ref p,b,graph,ref mut work)){case .ok(p):{p}case .err(_):{assert(false);return;}};
+    let cost=ir::node_count(b)+1;assert(work==cost && cost>1);var usize i=0;while(i<=ir::node_count(b)+1){assert(!borrowed_arrays::omitted(ref plan,i) && !borrowed_arrays::field_omitted(ref plan,i));i+=1;}
+    work=1048576-cost;assert(switch(borrowed_arrays::build(ref p,b,graph,ref mut work)){case .ok(_):{true}case .err(_):{false}} && work==1048576);
+    work=1048576-cost+1;assert(switch(borrowed_arrays::build(ref p,b,graph,ref mut work)){case .ok(_):{false}case .err(code):{code==1002}} && work==1048576);
+    work=1048577;assert(switch(borrowed_arrays::build(ref p,b,graph,ref mut work)){case .ok(_):{false}case .err(code):{code==1002}} && work==1048577);
 }

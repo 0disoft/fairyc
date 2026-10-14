@@ -1,0 +1,241 @@
+{
+  "schema": "fairyc.candidate-c-projection-fast-path/v0",
+  "passed": true,
+  "parentCommit": "804dc78f9f2af4d72a9d3a6c7ba9fdb0a070ea53",
+  "sourceInputs": [
+    {
+      "path": "examples/lexer_candidate/src/module_unit_c_borrowed_arrays.fy",
+      "sha256": "6d31d5d6f2fe48bb8b952f5ee79d59616cfebdad5cee243a8ac265888fe7ef04"
+    },
+    {
+      "path": "examples/lexer_candidate/tests/module_unit_c_arrays.fy",
+      "sha256": "fade8a442d4e459cf78a793c817950716def0bfcd72f8458011fa18711b88e18"
+    }
+  ],
+  "sourceCheck": {
+    "scope": "HEAD plus two projection paths; unrelated pending value diagnostics excluded",
+    "checks": [
+      {
+        "argv": [
+          "check"
+        ],
+        "exit": 0,
+        "stdout": "check ok: 2 instance(s), 518 source file(s), 6378 MIR function(s), lock updated\n",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "check",
+          "--locked"
+        ],
+        "exit": 0,
+        "stdout": "check ok: 2 instance(s), 518 source file(s), 6378 MIR function(s), lock verified\n",
+        "stderr": ""
+      }
+    ],
+    "lockSHA256": "45b2a197bc5385c841da62f5e30bab871e5aa9233e822a48d11922c2df7e5b43"
+  },
+  "tests": {
+    "receiptPath": ".cache\\check-cache-cli-20261014\\projection-fast-path-tests\\receipt.json",
+    "receiptSHA256": "afb681ea54b4c3c5e2528efe4a5f420a1b538cbf7b59fd5af698ae46fcd520f0",
+    "authoredTests": 5,
+    "profiles": [
+      "Go-native",
+      "development",
+      "release"
+    ],
+    "executions": [
+      {
+        "profile": "development",
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\check-cache-cli-20261014\\projection-fast-path-tests\\development.exe",
+        "sha256": "e2527b4888be01e8bf5b98a5e7217f2460946c9249f400bdf720ff82703b5500",
+        "exit": 0
+      },
+      {
+        "profile": "release",
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\check-cache-cli-20261014\\projection-fast-path-tests\\release.exe",
+        "sha256": "f55961550cf174e29fe0eebd28b08f0e272e68eac45cddc664f06b1ec8afa3f2",
+        "exit": 0
+      }
+    ],
+    "stdout": {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\check-cache-cli-20261014\\projection-fast-path-tests\\verified-stdout.bin",
+      "bytes": 49442,
+      "sha256": "9e000258e53a7e557cf07c095f322ab6800975080963f6217c50d0836b2223c5",
+      "profiles": [
+        "Go-native",
+        "development",
+        "release"
+      ],
+      "publication": "after complete stream equality and all input/tool/lock freshness checks"
+    }
+  },
+  "sampleExecutions": [
+    {
+      "case": "borrowed-recursion",
+      "profile": "development",
+      "compiler": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+      "sourceSHA256": "2b933dbc0152eba97e4bf95d3e320ef73c269d3ddd636f9e46a8c136b1928c88",
+      "imageSHA256": "7b8795b233eaebcdb89e94bb40c195e938ce0d40929fd2bfe13ecbfd4e76478d",
+      "buildExit": 0,
+      "runExit": 0,
+      "stdoutBytes": 0,
+      "stderrBytes": 0,
+      "trapShimSHA256": "7c8e404d10c7ff48191462e1c8d27cab87011746050a11b78d8d22680cbb254f",
+      "defaultStack": true,
+      "seconds": 0.37064450001344085
+    },
+    {
+      "case": "borrowed-recursion",
+      "profile": "release",
+      "compiler": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+      "sourceSHA256": "2b933dbc0152eba97e4bf95d3e320ef73c269d3ddd636f9e46a8c136b1928c88",
+      "imageSHA256": "ad81a3e98cf4bba1c2b9fe6ff8458d0359257539e5c5f6fef5b8d70573e82d67",
+      "buildExit": 0,
+      "runExit": 0,
+      "stdoutBytes": 0,
+      "stderrBytes": 0,
+      "trapShimSHA256": "7c8e404d10c7ff48191462e1c8d27cab87011746050a11b78d8d22680cbb254f",
+      "defaultStack": true,
+      "seconds": 0.9642718000104651
+    },
+    {
+      "case": "effectful-index-snapshot",
+      "profile": "development",
+      "compiler": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+      "sourceSHA256": "3d34753d770666f14d5d5601a75e0cfa2e5babce55819060996c68358b37998d",
+      "imageSHA256": "83ccb004bfde788f11ede09e7fcde0048efaf9aa6f2fe0d69b653376805dca10",
+      "buildExit": 0,
+      "runExit": 0,
+      "stdoutBytes": 0,
+      "stderrBytes": 0,
+      "trapShimSHA256": "7c8e404d10c7ff48191462e1c8d27cab87011746050a11b78d8d22680cbb254f",
+      "defaultStack": true,
+      "seconds": 0.3111092999461107
+    },
+    {
+      "case": "effectful-index-snapshot",
+      "profile": "release",
+      "compiler": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+      "sourceSHA256": "3d34753d770666f14d5d5601a75e0cfa2e5babce55819060996c68358b37998d",
+      "imageSHA256": "604a59e443029177e0cde3bddac3d30d979574275988e8d4c21025c907886942",
+      "buildExit": 0,
+      "runExit": 0,
+      "stdoutBytes": 0,
+      "stderrBytes": 0,
+      "trapShimSHA256": "7c8e404d10c7ff48191462e1c8d27cab87011746050a11b78d8d22680cbb254f",
+      "defaultStack": true,
+      "seconds": 0.3110441999742761
+    },
+    {
+      "case": "borrowed-bounds-trap",
+      "profile": "development",
+      "compiler": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+      "sourceSHA256": "bc1d30715525e17b2f7c96ec700cc785ba6f50c830ebeeee9b65a0d50314c54e",
+      "imageSHA256": "31335522695c38458fe3eb14aacb2541faddbc7b74c994cceffa4cecfb221d53",
+      "buildExit": 0,
+      "runExit": 106,
+      "stdoutBytes": 0,
+      "stderrBytes": 0,
+      "trapShimSHA256": "7c8e404d10c7ff48191462e1c8d27cab87011746050a11b78d8d22680cbb254f",
+      "defaultStack": true,
+      "seconds": 0.30566579999867827
+    },
+    {
+      "case": "borrowed-bounds-trap",
+      "profile": "release",
+      "compiler": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+      "sourceSHA256": "bc1d30715525e17b2f7c96ec700cc785ba6f50c830ebeeee9b65a0d50314c54e",
+      "imageSHA256": "a9a1eb8e69255bb5c07f7f909fec1118c966fc323e8436f6769d7e453f738ab9",
+      "buildExit": 0,
+      "runExit": 106,
+      "stdoutBytes": 0,
+      "stderrBytes": 0,
+      "trapShimSHA256": "7c8e404d10c7ff48191462e1c8d27cab87011746050a11b78d8d22680cbb254f",
+      "defaultStack": true,
+      "seconds": 0.385183300008066
+    },
+    {
+      "case": "inert-recursion",
+      "profile": "development",
+      "compiler": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+      "sourceSHA256": "8df503c47e0c202542c8080a80f96e99b73e543fadef9f64abe4b75538e26e1d",
+      "imageSHA256": "69a2c579de6889017af435d4638f40e5ee1a261f1ff0a19c449d6e5d69ea125d",
+      "buildExit": 0,
+      "runExit": 0,
+      "stdoutBytes": 0,
+      "stderrBytes": 0,
+      "trapShimSHA256": "7c8e404d10c7ff48191462e1c8d27cab87011746050a11b78d8d22680cbb254f",
+      "defaultStack": true,
+      "seconds": 0.33419629995478317
+    },
+    {
+      "case": "inert-recursion",
+      "profile": "release",
+      "compiler": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
+      "sourceSHA256": "8df503c47e0c202542c8080a80f96e99b73e543fadef9f64abe4b75538e26e1d",
+      "imageSHA256": "836e06c5168b460ee452fbb298dabb00c3c2ebc6b5dccec0920e06e1e442b827",
+      "buildExit": 0,
+      "runExit": 0,
+      "stdoutBytes": 0,
+      "stderrBytes": 0,
+      "trapShimSHA256": "7c8e404d10c7ff48191462e1c8d27cab87011746050a11b78d8d22680cbb254f",
+      "defaultStack": true,
+      "seconds": 0.622941899986472
+    }
+  ],
+  "priorOutput": {
+    "receiptPath": ".cache\\candidate-tagged\\sdk-c-execution\\native-projection.json",
+    "receiptSHA256": "05b9618014268c69d3fe384644213dd33931d19883cff437baa75e09a2d9831a",
+    "identical": true,
+    "cases": [
+      {
+        "name": "array_c_reads_borrowed_fields_without_recursive_stack_copies",
+        "bytes": 23886,
+        "sha256": "2b933dbc0152eba97e4bf95d3e320ef73c269d3ddd636f9e46a8c136b1928c88"
+      },
+      {
+        "name": "array_c_keeps_borrowed_field_snapshot_before_effectful_index",
+        "bytes": 5270,
+        "sha256": "3d34753d770666f14d5d5601a75e0cfa2e5babce55819060996c68358b37998d"
+      },
+      {
+        "name": "array_c_traps_borrowed_field_index_at_extent",
+        "bytes": 3978,
+        "sha256": "bc1d30715525e17b2f7c96ec700cc785ba6f50c830ebeeee9b65a0d50314c54e"
+      },
+      {
+        "name": "array_c_reads_inert_struct_fields_without_recursive_stack_copies",
+        "bytes": 16308,
+        "sha256": "8df503c47e0c202542c8080a80f96e99b73e543fadef9f64abe4b75538e26e1d"
+      }
+    ]
+  },
+  "diagnostic": {
+    "scope": "prior source bytes copied to isolated snapshot paths; diagnostic C only",
+    "receiptPath": ".cache\\check-cache-cli-20261014\\body-work-trace\\execution.json",
+    "receiptSHA256": "53b7c961dd7ab1ccf3efdff003a1c4bd0e71f92f380b8d35197d66653efa86a2",
+    "sourceCount": 507,
+    "sourceIdentitySHA256": "3e9c920994f97fd54c0db62ba0e92032d940b1cd334a11647fd4d6054ffbb313",
+    "preparationWork": 3085167,
+    "bodyAttempts": 61,
+    "retries": 0,
+    "projectBeforeFailedCharge": 8356062,
+    "failedCharge": 134663,
+    "arraysWork": 2424124,
+    "orderWork": 30565,
+    "lookupWork": 212715,
+    "targetWork": 357514,
+    "foreignWork": 8027,
+    "renderWork": 5405558
+  },
+  "scalarFastPathRetainsZeroMarkers": true,
+  "scalarSetupCost": "node_count + 1",
+  "exactExhaustedWorkVerified": true,
+  "limitsChanged": false,
+  "publicApiChanged": false,
+  "sdkAbiChanged": false,
+  "ciChanged": false,
+  "pushed": false,
+  "fullDispatcherVerified": false
+}

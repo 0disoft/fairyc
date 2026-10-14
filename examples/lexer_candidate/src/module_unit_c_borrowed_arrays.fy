@@ -18,8 +18,12 @@ pub fn bool field_omitted(ref Plan p,usize id){return id<v::len<u8>(ref p.omitte
 fn Result<bool,u32> field_place(ref ir::Program p,ref ir::Body b,usize id,ref mut usize work){var usize current=id;var usize depth=0;while(current!=0 && depth<64){if(!budget::charge(work,1)){return .err(1002);}let e=ir::node_at(b,current-1).value;if(e.kind==2){return .ok(e.binding!=0);}if(e.kind==4){return .ok(bytes::equal(ir::node_text(b,current-1),b"*"));}if(e.kind!=8 || e.field.id==0){return .ok(false);}let left=lookup::node(b,e.left);if(left==0){return .ok(false);}let rt=clean::type_at(ir::cleanup_ir(p),ir::node_at(b,left-1).value.type);if(rt.kind==7 || rt.kind==8){return .ok(true);}if(rt.kind!=2){return .ok(false);}current=left;depth+=1;}return .ok(false);}
 fn bool bump(ref ir::Body b,usize original,ref mut v::Vec<usize> uses){let id=lookup::node(b,original);if(id!=0){let slot=v::at_mut<usize>(uses,id);*slot+=1;}return true;}
 pub fn Result<Plan,u32> build(ref ir::Program p,ref ir::Body b,ref cfg::Graph g,ref mut usize work){
-    var v::Vec<usize> uses=v::empty<usize>();var v::Vec<usize> evaluations=v::empty<usize>();var v::Vec<u8> flags=v::empty<u8>();var usize i=0;
-    while(i<=ir::node_count(b)){if(!budget::charge(work,1)){return .err(1002);}if(!v::push<usize>(ref mut uses,0).is_ok || !v::push<usize>(ref mut evaluations,0).is_ok || !v::push<u8>(ref mut flags,0).is_ok){return .err(1003);}i+=1;}
+    var v::Vec<usize> uses=v::empty<usize>();var v::Vec<usize> evaluations=v::empty<usize>();var v::Vec<u8> flags=v::empty<u8>();var usize i=0;var bool candidate=false;
+    while(i<=ir::node_count(b)){if(!budget::charge(work,1)){return .err(1002);}if(!v::push<usize>(ref mut uses,0).is_ok || !v::push<usize>(ref mut evaluations,0).is_ok || !v::push<u8>(ref mut flags,0).is_ok){return .err(1003);}
+        if(i<ir::node_count(b)){let e=ir::node_at(b,i).value;if(e.state==1 && (e.kind==2 || e.kind==8)){let t=clean::type_at(ir::cleanup_ir(p),e.type);if(t.kind==2 || e.kind==8 && e.field.id!=0 && t.kind==16){candidate=true;}}}i+=1;}
+    // Neither fusion rule can match without an inert struct place or an array
+    // field. Keep the zero markers and avoid unrelated use/statement/CFG scans.
+    if(!candidate){return .ok(Plan{.omitted=flags});}
     i=0;while(i<ir::node_count(b)){if(!budget::charge(work,1)){return .err(1002);}let e=ir::node_at(b,i).value;discard bump(b,e.left,ref mut uses);discard bump(b,e.right,ref mut uses);i+=1;}
     i=0;while(i<ir::statement_count(b)){if(!budget::charge(work,1)){return .err(1002);}let s=ir::statement_at(b,i).value;discard bump(b,s.expression,ref mut uses);discard bump(b,s.target,ref mut uses);i+=1;}
     i=1;while(i<=cfg::count(g)){if(!budget::charge(work,1)){return .err(1002);}let n=cfg::at(g,i);if(n.kind==1){let slot=v::at_mut<usize>(ref mut evaluations,n.source);*slot+=1;}i+=1;}

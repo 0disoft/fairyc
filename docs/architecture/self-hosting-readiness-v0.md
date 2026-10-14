@@ -1,5 +1,17 @@
 # Self-hosting readiness v0
 
+## C projection fast path (2026-10-14)
+
+An isolated diagnostic snapshot completes preparation, then exceeds project work
+without output retries. Projection analysis uses 2424124 of 5405558 body work.
+Bodies without inert-struct or borrowed-array candidates now keep their zero
+markers after bounded setup and skip unrelated use/statement/CFG scans. Five
+authored tests pass Go-native and both candidate C profiles; eight actual MSVC
+sample runs preserve recursion, snapshot ordering and trap 106. All four prior C
+outputs remain byte-identical. Ordinary/locked checks pass 518 files / 6378 MIR
+functions. Work/output/stack limits are unchanged; full dispatcher replay remains
+pending. Receipt: [candidate-c-projection-fast-path-20261014.json](../ops/evidence/candidate-c-projection-fast-path-20261014.json).
+
 ## C invocation lookup (2026-10-14)
 
 Each body checks its call-table order once. Larger ordered tables use charged

@@ -1,5 +1,15 @@
 # Fairy 컴파일러 전환: 후속 작업 목록
 
+## C projection fast path (2026-10-14)
+
+Projection analysis accounts for 2424124 of 5405558 body work in the isolated
+diagnostic snapshot; there are no output retries. Candidate-free bodies now skip
+use/statement/CFG rescans after bounded setup. Five authored tests pass Go-native
+and both candidate C profiles; eight MSVC sample runs pass, including trap 106,
+and four prior C outputs remain exact. Ordinary/locked checks pass 518 files /
+6378 MIR functions. Limits remain unchanged. Full dispatcher replay is pending.
+Receipt: [candidate-c-projection-fast-path-20261014.json](evidence/candidate-c-projection-fast-path-20261014.json).
+
 ## C invocation lookup (2026-10-14)
 
 Charged binary lookup replaces repeated scans of larger ordered call tables.
