@@ -39,8 +39,11 @@ Restored types, source-identified frames, body values/statements and calls now
 match fresh source-bound checks. Cleanup requests also match local/temporary
 operands, all nine exit reasons and per-frame order without replacement MIR:
 [drop receipt](../ops/evidence/candidate-project-artifact-drops-20261014.json).
-Cleanup recipes, complete metadata and whole-project coverage still precede
-checked Complete-owner rebinding and cache reuse.
+Resource/Vec cleanup recipes now match current checked interfaces, including
+body links, effects, abilities and ordered field types without replacement MIR:
+[recipe receipt](../ops/evidence/candidate-project-artifact-recipes-20261014.json).
+Complete metadata and whole-project coverage still precede checked
+Complete-owner rebinding and cache reuse.
 The current candidate-owned IR environment is verified in the
 [environment checkpoint](../ops/candidate-cache-environment-20261014.md).
 The actual running Windows compiler image identity is verified
