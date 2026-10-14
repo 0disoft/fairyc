@@ -91,6 +91,7 @@ def main():
     parser.add_argument('--stdout-fixture', type=Path, help='expected complete candidate stdout, empty by default')
     parser.add_argument('--stdout-executable-identity', action='store_true', help='expect the exact running image SHA-256 identity on stdout and verify a spoofed argv[0] launch too')
     parser.add_argument('--stdout-package-cache-keys', action='store_true', help='verify a binary package-key ledger against full executed image identity and Python SHA-256')
+    parser.add_argument('--stdout-artifact', action='store_true', help='compare complete nonempty Go-native and both candidate stdout streams, then save verified-stdout.bin under --output; requires native-program')
     parser.add_argument('--stderr-fixture', type=Path, help='expected complete candidate stderr, empty by default')
     parser.add_argument('--unchanged-paths', type=Path, help='JSON list of repository-relative paths whose bytes and modification times must remain unchanged')
     args = parser.parse_args()
@@ -110,6 +111,8 @@ def main():
         parser.error('stdout-executable-identity requires native-program or candidate-only and excludes stdout-fixture')
     if args.stdout_package_cache_keys and (args.stdout_fixture or args.stdout_executable_identity or not (args.native_program or args.candidate_only)):
         parser.error('stdout-package-cache-keys requires native-program or candidate-only and excludes other stdout modes')
+    if args.stdout_artifact and (not args.native_program or args.stdout_fixture or args.stdout_executable_identity or args.stdout_package_cache_keys):
+        parser.error('stdout-artifact requires native-program and excludes other stdout modes')
     if not __debug__:
         parser.error('verification requires Python without -O')
     if not re.fullmatch(r'[a-z][a-z0-9_]*', args.module):
@@ -213,6 +216,7 @@ def main():
     native_isolation = None
     native_program = None
     key_ledgers = []
+    stdout_artifact = None
     if not args.candidate_only:
         native_project = PROJECT
         copied_inputs = []
@@ -264,7 +268,10 @@ def main():
                 native_stack = dict(reserveBytes=args.stack_reserve_bytes, originalReserveBytes=struct.unpack_from('<Q', before, offset + 72)[0], originalSHA256=hashlib.sha256(before).hexdigest())
             native = run([built[0], *arguments], cwd=native_project, timeout=args.execution_timeout, stdin=streams.get('stdin', b''))
             expected_stdout = (b'fairyc.compiler-executable-sha256/v1:' + digest(built[0]).encode() + b'\n') if args.stdout_executable_identity else streams.get('stdout', b'')
-            if args.stdout_package_cache_keys:
+            if args.stdout_artifact:
+                assert 0 < len(native.stdout) <= 16777216, 'private stdout artifact must be in 1..16MiB'
+                stdout_artifact = native.stdout
+            elif args.stdout_package_cache_keys:
                 key_ledgers.append(dict(profile='Go-native', facts=package_key_ledger(native.stdout, built[0])))
                 (output / 'native-key-ledger.bin').write_bytes(native.stdout)
             else:
@@ -298,7 +305,9 @@ def main():
             assert struct.unpack_from('<H', pe, offset)[0] == 0x20b and struct.unpack_from('<Q', pe, offset + 72)[0] == args.stack_reserve_bytes, 'PE stack reserve differs from the explicit test setting'
         executed = run([image, *arguments],timeout=args.execution_timeout,stdin=streams.get('stdin'),stderr=streams.get('stderr',b''))
         expected_stdout = (b'fairyc.compiler-executable-sha256/v1:' + digest(image).encode() + b'\n') if args.stdout_executable_identity else streams.get('stdout',b'')
-        if args.stdout_package_cache_keys:
+        if args.stdout_artifact:
+            assert executed.stdout == stdout_artifact, 'candidate stdout differs from the complete Go-native artifact'
+        elif args.stdout_package_cache_keys:
             key_ledgers.append(dict(profile=profile, facts=package_key_ledger(executed.stdout, image)))
             (output / (profile + '-key-ledger.bin')).write_bytes(executed.stdout)
         else:
@@ -331,6 +340,10 @@ def main():
         receipt['streamVerification'] = {name:dict(bytes=len(data),sha256=hashlib.sha256(data).hexdigest()) for name,data in streams.items()}
     if snapshots:
         receipt['unchangedPaths'] = [dict(path=name, snapshot=before) for name, _, before in snapshots]
+    if args.stdout_artifact:
+        artifact_path = output / 'verified-stdout.bin'
+        artifact_path.write_bytes(stdout_artifact)
+        receipt['stdoutArtifact'] = dict(path=str(artifact_path), bytes=len(stdout_artifact), sha256=digest(artifact_path), profiles=['Go-native', 'development', 'release'], publication='after complete stream equality and all input/tool/lock freshness checks')
     save(output / 'receipt.json', receipt)
     print(args.module, 'passed:', len(expected), 'authored tests in both candidate C profiles' + ('' if args.candidate_only else ' and Go-native'), flush=True)
 
