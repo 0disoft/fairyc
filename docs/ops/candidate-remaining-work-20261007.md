@@ -1,5 +1,21 @@
 # Fairy 컴파일러 전환: 후속 작업 목록
 
+A candidate cache envelope now binds every canonical package v4/v0 key preimage
+to its complete IR/source/identity payload. Restore re-enters current source,
+body/Flow, state, SDK and interface admission, regenerates keys from the actual
+compiler environment and loaded graph, and returns Complete only after every
+instance-ordered preimage matches. It performs no replacement IR lowering.
+Four authored tests pass Go-generated native C and candidate C dev/release;
+reordered owners, state, unused generic requests, Vec, poisoned key preimages,
+stale source, malformed framing and five independent exact/exhausted histories
+are covered. The identical native output packet executes at both Windows
+profiles with exit 42. Root/locked checks pass 509 files / 6279 MIR functions.
+[Cache artifact receipt](evidence/candidate-cache-artifact-20261014.json).
+The Go private-host verification prerequisite is committed in 85d50983. Actual
+disk lookup/publication, package extraction/mixed-hit reassembly, CLI selection,
+current full fixed point, product defaults/performance and platform/CI promotion
+remain open. Existing Go package-cache formats and public CLI/SDK ABI are unchanged.
+
 Checked restored IR now publishes one Complete owner retaining its admitted
 IR, detached current identity/call-target tables and all public interfaces.
 Independent source/artifact/link histories pass exact-fit and exhausted bounds;
