@@ -1,5 +1,14 @@
 # Fairy 컴파일러 전환: 후속 작업 목록
 
+One restored IR now passes current provenance, whole-source/table coverage,
+state and SDK matching before publication as an owned Admitted value. It
+retains the exact IR plus detached current specialization rows and provenance;
+no replacement IR is lowered. Four authored tests pass Go native and both C
+profiles, including independently valid changed-body/state rejection, exact
+and exhausted work, stale source and reordered generic/Vec/field/state owners.
+Root/locked checks pass 506 files / 6242 MIR functions. [Admission receipt](evidence/candidate-project-artifact-admission-20261014.json).
+Checked Complete-owner/interface rebinding and actual cache reuse remain open.
+
 Cold-owner snapshot extraction now belongs to a separate adapter. Detached
 identity validation and all restored consumers depend on neither the cold
 identity table nor the checked project owner. Four authored identity/codec
