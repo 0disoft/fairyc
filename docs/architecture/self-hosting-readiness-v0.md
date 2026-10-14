@@ -1,5 +1,32 @@
 # Self-hosting readiness v0
 
+## Package mixed cache reuse (2026-10-15)
+
+Per-package partial cache reuse binds the compiler environment, target, SDK,
+package instance and topology, and admits saved units against current source
+checks and exact IR coverage. Three compiler-API tests pass Go-native and both
+candidate C profiles: a private dependency-body edit reuses two packages and
+rebuilds one; a consumed public effect change reuses one and rebuilds two;
+selected generic-body changes invalidate consumers; invalid source publishes no
+successful cache prefix. Parsing and checking still run; lowering can be reused.
+Contract: [package unit cache](candidate-package-unit-cache-v0.md). API receipt:
+[mixed compiler](../ops/evidence/candidate-mixed-package-cache-20261015.json).
+
+The 410-source check/build/run probe emits a 30,521,644-byte C packet through
+the Fairy-built seed without Go frontend fallback and builds both native profiles.
+All 108 process observations pass: 38 mixed-cache cases, 42 check regressions and
+28 build/run observations. They cover corrupt unit/project recovery, private and
+root edits, public effects, generic selected bodies, Vec dependency reuse,
+native execution, exact Go diagnostics and retained cache/executable bytes.
+This proof covers the authored command entry points, with private 16 MiB stacks;
+it does not verify the full private dispatcher. Product defaults and performance
+policy stay unchanged. Receipt: [mixed cache commands](../ops/evidence/candidate-mixed-package-cache-cli-20261015.json).
+
+The earlier 507-source fixed point below predates these additions. The full
+511-source dispatcher currently stops in project linking with code 1002; its
+latest full image/fixed point, measured product policy/performance, the full
+frontend differential and Linux/hosted CI remain open. Promotion stays blocked.
+
 ## Cached dispatcher Stage1/Stage2 fixed point (2026-10-15)
 
 The 507-source dispatcher at `3ce18653` completes consecutive C-part generations.
@@ -1656,7 +1683,7 @@ The start gate is closed while any `start` row is `blocked`. A row becomes `read
 | Source maps and durable source identity | start | ready | Lossless source ownership, source spans, Atlas durable anchors, emitted-source mapping and diagnostic source-location contracts under `docs/atlas/` and compiler fixtures | none; #48 is editor tooling, not a bootstrap prerequisite |
 | Diagnostics suitable for differential comparison | start | ready | Stable diagnostic catalog/codes, structured diagnostics, source anchors and compile-fail fixtures under `docs/diagnostics/` | none |
 | Test runner suitable for bootstrap comparison | start | ready | Stable package test discovery/execution plus versioned list/report JSON documented by the CLI and exercised by native test fixtures | none |
-| Reproducible two-stage bootstrap evidence | promotion | blocked | The 507-source Windows C-part candidate has exact Stage1/Stage2 packet and full-image equality plus 249 Go lexer cases; see the 2026-10-15 cached dispatcher receipt above | full frontend differential, Linux and current-commit hosted CI remain; the bounded fixed point alone does not promote the candidate |
+| Reproducible two-stage bootstrap evidence | promotion | blocked | Historical 507-source Windows C-part candidate: exact Stage1/Stage2 packet and full-image equality plus 249 Go lexer cases | The current 511-source full dispatcher stops in project linking with code 1002; full image/fixed point, full frontend differential, Linux and current-commit hosted CI remain |
 
 ## First component after the gate opens
 

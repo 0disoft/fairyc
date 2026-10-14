@@ -1,5 +1,29 @@
 # Fairy 컴파일러 전환: 후속 작업 목록
 
+## Package mixed cache reuse (2026-10-15)
+
+Per-package partial cache reuse is implemented. Current-source checking and exact
+IR coverage gate each unit, and ordinary project linking/interfaces gate cache
+publication. Three compiler-API tests pass Go-native and both candidate C profiles:
+private dependency-body changes reuse two packages and rebuild one, consumed
+public effect changes rebuild two, generic selected-body changes invalidate
+consumers, and source errors publish no successful prefix. Contract:
+[package unit cache](../architecture/candidate-package-unit-cache-v0.md). Receipt:
+[mixed compiler](evidence/candidate-mixed-package-cache-20261015.json).
+
+The 410-source check/build/run probe builds both candidate C profiles from a
+30,521,644-byte Fairy-emitted packet without Go frontend fallback. All 108 process
+observations pass (38 mixed-cache, 42 check, 28 build/run), covering corrupt unit
+and project recovery, private/root/public/generic edits, Vec reuse and native
+results, exact diagnostics and retained cache/executable bytes. The probe covers
+the authored command entry points with private 16 MiB stacks; full-dispatcher
+verification is separate. Receipt: [mixed cache commands](evidence/candidate-mixed-package-cache-cli-20261015.json).
+
+Next: resolve the full 511-source dispatcher's project-link code 1002 and rerun
+its full image/fixed point. The 507-source proof below predates these additions.
+Measured product cache/deadline/stack policies and performance, the full frontend
+differential and Linux/current-commit hosted CI remain open; promotion is blocked.
+
 ## Cached dispatcher bootstrap complete (2026-10-15)
 
 The latest 507-source dispatcher at `3ce18653` passes consecutive Stage1/Stage2

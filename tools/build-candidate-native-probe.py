@@ -23,6 +23,8 @@ def main():
     parser.add_argument('--builder', type=Path, required=True)
     parser.add_argument('--output', type=Path, required=True)
     parser.add_argument('--stack-reserve-bytes', type=int, default=0)
+    parser.add_argument('--commands-only', action='store_true',
+                        help='verify the authored check/build/run command entry points without unrelated private frontend commands')
     args = parser.parse_args()
     if not __debug__:
         parser.error('verification requires Python without -O')
@@ -31,7 +33,21 @@ def main():
     output = args.output.resolve()
     output.mkdir(parents=True, exist_ok=False)
     entry = output / 'main.fy'
-    entry.write_text('module main;\nimport file_cli as cli;\n@effects(filesystem,console,environment,clock) fn i32 main(){return cli::run();}\n', encoding='utf-8', newline='\n')
+    command_entry = '''module main;
+import project_check_cli as check;
+import native_cli as native;
+import std::bytes as bytes;
+import std::process as process;
+@effects(filesystem,console,environment,clock) fn i32 main(){
+    if(process::arg_count()<2){return 2;}var u8[16] name=[0;16];
+    let n=switch(process::arg(1,ref mut name)){case .ok(p):{p}case .err(_):{return 2;}};
+    let ref u8[] view=ref name;
+    if(bytes::equal(view[..n],b"check")){return check::arguments();}
+    if(bytes::equal(view[..n],b"build")){return native::run(false);}
+    if(bytes::equal(view[..n],b"run")){return native::run(true);}return 2;
+}
+'''
+    entry.write_text(command_entry if args.commands_only else 'module main;\nimport file_cli as cli;\n@effects(filesystem,console,environment,clock) fn i32 main(){return cli::run();}\n', encoding='utf-8', newline='\n')
     modules = {}
     for base in (PROJECT / 'src', ROOT / 'internal/sdkstdlib/sources'):
         for path in base.rglob('*.fy'):
@@ -86,7 +102,7 @@ def main():
     assert all(sha(ROOT / s['path']) == s['sha256'] for s in sources)
     assert all(sha(Path(t['path'])) == t['sha256'] for t in tools.values())
     assert sha(PROJECT / 'fairy.lock') == lock_sha
-    receipt = dict(schema='fairyc.candidate-native-probe-build/v1', passed=True, entryScope='authored file_cli::run with real OS argv', sources=sources, tools=tools, lockSHA256=lock_sha, images=images, candidatePacketSHA256=sha(packet), invocations=calls, stackReserveBytes=args.stack_reserve_bytes, goFrontendInvoked=False, productStackChanged=False, productTimeoutChanged=False)
+    receipt = dict(schema='fairyc.candidate-native-probe-build/v1', passed=True, entryScope='authored check/build/run entry points with real OS argv' if args.commands_only else 'authored file_cli::run with real OS argv', commandsOnly=args.commands_only, sources=sources, tools=tools, lockSHA256=lock_sha, images=images, candidatePacketSHA256=sha(packet), invocations=calls, stackReserveBytes=args.stack_reserve_bytes, goFrontendInvoked=False, productStackChanged=False, productTimeoutChanged=False)
     (output / 'receipt.json').write_text(json.dumps(receipt, indent=2) + '\n', encoding='utf-8', newline='\n')
 
 
