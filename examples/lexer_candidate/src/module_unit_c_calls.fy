@@ -23,7 +23,20 @@ pub fn bool signature(ref ir::Program p,ref names::Table named,usize frame,ref m
     var usize i=1;var usize count=0;while(i<=ir::local_count(b)){let l=ir::local_at(b,i);if(l.kind==1){if(scalar::scalar(p,l.type)==7){s.code=1004;return false;}if(count!=0 && !w::text(out,s,b",")){return false;}if(!aggregate::type(p,l.type,out,s) || !w::text(out,s,b" ") || !w::local(out,s,i)){return false;}count+=1;}i+=1;}
     return (count!=0 || w::text(out,s,b"void")) && w::text(out,s,b")");
 }
-fn usize invocation(ref ir::Body b,usize expression,ref mut usize work){var usize i=0;while(i<ir::call_count(b)){if(!budget::charge(work,1)){return 0;}if(ir::call_at(b,i).expression==expression){return i+1;}i+=1;}return 0;}
+// Check ordering once per immutable body. Short or reordered tables retain the
+// original first-match search; ordinary larger tables use bounded binary lookup.
+pub resource InvocationIndex {usize count;bool ordered;cleanup{}}
+pub fn Result<InvocationIndex,u32> invocation_index(ref ir::Body b,ref mut usize work){
+    let count=ir::call_count(b);if(count<8){return .ok(InvocationIndex{.count,.ordered=false});}
+    var usize prior=0;var usize i=0;while(i<count){if(!budget::charge(work,1)){return .err(1002);}let expression=ir::call_at(b,i).expression;if(expression<=prior){return .ok(InvocationIndex{.count,.ordered=false});}prior=expression;i+=1;}
+    return .ok(InvocationIndex{.count,.ordered=true});
+}
+pub fn usize invocation(ref InvocationIndex index,ref ir::Body b,usize expression,ref mut usize work,ref mut u32 code){
+    if(*code!=0){return 0;}if(index.count!=ir::call_count(b)){*code=1001;return 0;}
+    if(index.ordered){var usize low=0;var usize high=index.count;while(low<high){if(!budget::charge(work,1)){*code=1002;return 0;}let middle=low+(high-low)/2;if(ir::call_at(b,middle).expression<expression){low=middle+1;}else{high=middle;}}
+        if(low<index.count){if(!budget::charge(work,1)){*code=1002;return 0;}if(ir::call_at(b,low).expression==expression){return low+1;}}return 0;}
+    var usize i=0;while(i<index.count){if(!budget::charge(work,1)){*code=1002;return 0;}if(ir::call_at(b,i).expression==expression){return i+1;}i+=1;}return 0;
+}
 fn bool foreign_type(ref ir::Program p,ref sdk::Plan plan,bool authenticated,usize id,bool result){if(id==0 || id>clean::type_count(ir::cleanup_ir(p))){return false;}if(authenticated && sdk::allowed(p,plan,id,result)){return true;}let t=clean::type_at(ir::cleanup_ir(p),id);return if(t.kind==12){t.first==0 && ffi::scalar(t.scalar,result)}else{ffi::scalar(scalar::scalar(p,id),result)};}
 fn usize target(ref ir::Program p,ref targets::Index body_index,ref ir::Body b,usize caller,usize invocation,ref mut usize work,ref mut w::State s){
     if(invocation==0){return 0;}let c=ir::call_at(b,invocation-1);if(!c.checked || c.kind!=1 && c.kind!=2){return 0;}
@@ -41,8 +54,8 @@ pub fn bool foreign_signatures(ref ir::Program p,ref sdk::Plan plan,ref contract
     var v::Vec<usize> seen=v::empty<usize>();var usize frame=1;while(frame<=ir::count(p)){let b=ir::at(p,frame);var usize i=1;while(i<=ir::call_count(b)){if(!budget::charge(work,1)){s.code=1002;return false;}let id=foreign(p,plan,indexed,b,frame,i,work,s);if(s.code!=0){return false;}if(id!=0){let c=ir::callable_at(p,id-1);var bool duplicate=false;var usize j=0;while(j<v::len<usize>(ref seen)){if(!budget::charge(work,1)){s.code=1002;return false;}let before=*v::at<usize>(ref seen,j);if(bytes::equal(ir::linker_name(p,before-1),ir::linker_name(p,id-1))){let old=ir::callable_at(p,before-1);if(old.result!=c.result || old.parameter_count!=c.parameter_count){s.code=1001;return false;}var usize k=0;while(k<c.parameter_count){if(ir::parameter_at(p,c.parameter_start+k)!=ir::parameter_at(p,old.parameter_start+k)){s.code=1001;return false;}k+=1;}duplicate=true;break;}j+=1;}
             if(!duplicate){if(!v::push<usize>(ref mut seen,id).is_ok){s.code=1003;return false;}if(sdk::rule(plan,id-1)!=0){if(!sdk::signature(p,plan,id,out,s,work)){return false;}}else{if(!w::text(out,s,b"extern ") || !aggregate::type(p,c.result,out,s) || !w::text(out,s,b" ") || !w::text(out,s,ir::linker_name(p,id-1)) || !w::text(out,s,b"(")){return false;}j=0;while(j<c.parameter_count){if(j!=0 && !w::text(out,s,b",")){return false;}if(!aggregate::type(p,ir::parameter_at(p,c.parameter_start+j),out,s)){return false;}j+=1;}if(c.parameter_count==0 && !w::text(out,s,b"void")){return false;}if(!w::text(out,s,b");\n")){return false;}}}}i+=1;}frame+=1;}return true;
 }
-pub fn bool call(ref ir::Program p,ref names::Table named,ref sdk::Plan plan,ref contracts::Index indexed,ref targets::Index body_index,ref cfg::Graph g,usize expression,usize site,ref mut bytes::Buffer out,ref mut w::State s,ref mut usize work){
-    let b=ir::at(p,cfg::frame(g));let index=if(site==0){invocation(b,expression,work)}else{cfg::deferred_at(g,site).invocation};let callee=target(p,body_index,b,cfg::frame(g),index,work,s);
+pub fn bool call(ref ir::Program p,ref names::Table named,ref sdk::Plan plan,ref contracts::Index indexed,ref targets::Index body_index,ref InvocationIndex invocations,ref cfg::Graph g,usize expression,usize site,ref mut bytes::Buffer out,ref mut w::State s,ref mut usize work){
+    let b=ir::at(p,cfg::frame(g));let index=if(site==0){invocation(invocations,b,expression,work,ref mut s.code)}else{cfg::deferred_at(g,site).invocation};let callee=target(p,body_index,b,cfg::frame(g),index,work,s);
     let usize external=if(callee==0){foreign(p,plan,indexed,b,cfg::frame(g),index,work,s)}else{0};
     if(s.code!=0){return false;}if(callee==0 && external==0){s.code=if(*work>=1048576){1002}else{1004};return false;}let c=ir::call_at(b,index-1);let type=scalar::scalar(p,ir::node_at(b,expression-1).value.type);
     if(site==0 && type!=7 && (!scalar::value(out,s,expression) || !w::text(out,s,b"="))){return false;}

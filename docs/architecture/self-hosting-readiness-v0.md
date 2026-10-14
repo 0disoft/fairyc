@@ -1,5 +1,16 @@
 # Self-hosting readiness v0
 
+## C invocation lookup (2026-10-14)
+
+Each body checks its call-table order once. Larger ordered tables use charged
+binary lookup; short, reordered and duplicate tables keep first-match lookup.
+All six authored cases pass Go-native and candidate C development/release.
+The 128-call packet executes at both MSVC profiles, and the three prior packet
+outputs remain byte-identical. Ordinary/locked isolated checks pass 518 files /
+6378 MIR functions. The 428-source emitter builds from Fairy-generated C without
+Go fallback; the full dispatcher replay is pending. Work/output limits are unchanged.
+Receipt: [candidate-c-invocation-index-20261014.json](../ops/evidence/candidate-c-invocation-index-20261014.json).
+
 Private check cache CLI (2026-10-14): `project_check_cli` and
 `project_check_options` add an opt-in `check --cache-root <dir> [--cache-status]`
 route over the private coordinator; the default check and the Go product CLI keep

@@ -1,0 +1,190 @@
+{
+  "schema": "fairyc.candidate-c-invocation-index/v0",
+  "passed": true,
+  "parentCommit": "6474f82140a89b75da225a8e3db5cfdaeb0c978e",
+  "sourceInputs": [
+    {
+      "path": "examples/lexer_candidate/src/module_unit_c_calls.fy",
+      "sha256": "87b40bc4ac754a6b8344177de5ec153d5d57146dad45ff66172dd51fc7b5d3fb"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_unit_c_function.fy",
+      "sha256": "bb8aa9aba9c2b78d857e72706f8348199a5c1467f29c45ac0a33d56bb6b1ec73"
+    },
+    {
+      "path": "examples/lexer_candidate/tests/module_unit_c_invocations.fy",
+      "sha256": "ec10209b14d4e4048c468aa072fbe1a33902bd9f5e9648cb83c5469b644d42ba"
+    },
+    {
+      "path": "examples/lexer_candidate/tests/module_unit_c_invocation_render.fy",
+      "sha256": "98e0e0deae650c652c01568036d93715917af29a9aab38f484b9b4c552a11b98"
+    }
+  ],
+  "sourceCheck": {
+    "scope": "HEAD plus C call/function paths and lookup fixture; the 128-call fixture also checks in its authored harness",
+    "checks": [
+      {
+        "argv": [
+          "check"
+        ],
+        "exit": 0,
+        "stdout": "check ok: 2 instance(s), 518 source file(s), 6378 MIR function(s), lock updated\n",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "check",
+          "--locked"
+        ],
+        "exit": 0,
+        "stdout": "check ok: 2 instance(s), 518 source file(s), 6378 MIR function(s), lock verified\n",
+        "stderr": ""
+      }
+    ],
+    "lockSHA256": "3f0e62b448a7b4954a50957ba2f028e1d6cefdabd939de30ef610ddf834a6edb"
+  },
+  "tests": [
+    {
+      "receipt": {
+        "path": ".cache\\check-cache-cli-20261014\\invocation-tests-final\\receipt.json",
+        "sha256": "7baf248e853d4308ef08f130386f373f2e9e4ba628654f8f5d3fe4ed6a0612fa"
+      },
+      "tests": 2,
+      "profiles": [
+        "Go-native",
+        "development",
+        "release"
+      ],
+      "candidateExecutions": [
+        {
+          "profile": "development",
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\check-cache-cli-20261014\\invocation-tests-final\\development.exe",
+          "sha256": "6446fb53761df8578be618ec6e924188eaed9310cd7febd82ab46b3c995539cc",
+          "exit": 0
+        },
+        {
+          "profile": "release",
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\check-cache-cli-20261014\\invocation-tests-final\\release.exe",
+          "sha256": "34d112531eed7f572c8697a83c3ded61b329e6044f204a1614b713c42eb9ca1c",
+          "exit": 0
+        }
+      ],
+      "output": null
+    },
+    {
+      "receipt": {
+        "path": ".cache\\check-cache-cli-20261014\\invocation-render-tests\\receipt.json",
+        "sha256": "55f2f79ba1c7be4c9d9d56f3ed89165a0443b5ac64758937f90e365e4b5105b7"
+      },
+      "tests": 3,
+      "profiles": [
+        "Go-native",
+        "development",
+        "release"
+      ],
+      "candidateExecutions": [
+        {
+          "profile": "development",
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\check-cache-cli-20261014\\invocation-render-tests\\development.exe",
+          "sha256": "ea945cdd78847e54238c8cf43a99942655af72d6e4a9eab60ce880faa4823b30",
+          "exit": 0
+        },
+        {
+          "profile": "release",
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\check-cache-cli-20261014\\invocation-render-tests\\release.exe",
+          "sha256": "c1eb73432268b06ab6daf7d9fc38d53748b2560d1215752532b6a1190b7de845",
+          "exit": 0
+        }
+      ],
+      "output": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\check-cache-cli-20261014\\invocation-render-tests\\verified-stdout.bin",
+        "bytes": 7155,
+        "sha256": "8952bf7b8a8014a4e9b612e05b57e5121c189350edff76a794958f8b78b925ca",
+        "profiles": [
+          "Go-native",
+          "development",
+          "release"
+        ],
+        "publication": "after complete stream equality and all input/tool/lock freshness checks"
+      }
+    },
+    {
+      "receipt": {
+        "path": ".cache\\check-cache-cli-20261014\\invocation-many-calls\\receipt.json",
+        "sha256": "43377de28b3dce67700ab1a9ecdf20eea1d554afd1c684721efe8c94a2bd58d6"
+      },
+      "tests": 1,
+      "profiles": [
+        "Go-native",
+        "development",
+        "release"
+      ],
+      "candidateExecutions": [
+        {
+          "profile": "development",
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\check-cache-cli-20261014\\invocation-many-calls\\development.exe",
+          "sha256": "d2419057d87808683123def2fb87cf374702cf40572798591d1074f3d932077e",
+          "exit": 0
+        },
+        {
+          "profile": "release",
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\check-cache-cli-20261014\\invocation-many-calls\\release.exe",
+          "sha256": "b87366646a01cf7d6817595d23ff27b343f7c05f9d14ff53c54cec326469b41d",
+          "exit": 0
+        }
+      ],
+      "output": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\check-cache-cli-20261014\\invocation-many-calls\\verified-stdout.bin",
+        "bytes": 59368,
+        "sha256": "cae264a5daac8b664192c49c407e588faac62650b1cabc7cdb14e24e3d4d52b9",
+        "profiles": [
+          "Go-native",
+          "development",
+          "release"
+        ],
+        "publication": "after complete stream equality and all input/tool/lock freshness checks"
+      }
+    }
+  ],
+  "executable128Calls": [
+    {
+      "profile": "development",
+      "packetSHA256": "cae264a5daac8b664192c49c407e588faac62650b1cabc7cdb14e24e3d4d52b9",
+      "imageSHA256": "d077893756a72f805dad3a5208a038c64ff24fc86213500638d9742d7449a4c9",
+      "buildExit": 0,
+      "runExit": 0,
+      "stdoutBytes": 0,
+      "stderrBytes": 0,
+      "seconds": 0.5888251999858767
+    },
+    {
+      "profile": "release",
+      "packetSHA256": "cae264a5daac8b664192c49c407e588faac62650b1cabc7cdb14e24e3d4d52b9",
+      "imageSHA256": "58a56952589599b33f0a955526bf628e45132e6e97258b52ef85d813602cb474",
+      "buildExit": 0,
+      "runExit": 0,
+      "stdoutBytes": 0,
+      "stderrBytes": 0,
+      "seconds": 1.3823038999689743
+    }
+  ],
+  "previousSmallPacketsUnchanged": true,
+  "orderedLookupUsesBinarySearch": true,
+  "reorderedAndDuplicateTablesKeepFirstMatch": true,
+  "lookupAndOrderingWorkCharged": true,
+  "workLimitsChanged": false,
+  "fullDispatcherVerified": false,
+  "seed": {
+    "receiptPath": ".cache\\check-cache-cli-20261014\\emitter-invocations\\receipt.json",
+    "receiptSHA256": "3045c9a1b59d6678557ab359e9bd70a407eaf51650465923cb974334a2d085b5",
+    "sources": 428,
+    "packetSHA256": "88a0a8d51df1dd4686b069e2f05e20105ac0b1465530163571fda659bd4a471f",
+    "imageSHA256": "2eb552ddcba14602198f0aa74abe147d3da9f5774403000606046b23e41d1dcb",
+    "goFrontendInvoked": false
+  },
+  "privateApiChanged": true,
+  "publicGoCliChanged": false,
+  "sdkAbiChanged": false,
+  "ciChanged": false,
+  "pushed": false
+}

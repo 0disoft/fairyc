@@ -1,5 +1,15 @@
 # Fairy 컴파일러 전환: 후속 작업 목록
 
+## C invocation lookup (2026-10-14)
+
+Charged binary lookup replaces repeated scans of larger ordered call tables.
+Short, reordered and duplicate tables retain first-match behavior. Six authored
+cases pass Go-native and both candidate C profiles; the 128-call packet executes
+at both MSVC profiles, and prior packet bytes remain unchanged. Isolated ordinary
+and locked checks pass 518 files / 6378 MIR functions. The 428-source Fairy-built
+emitter is ready; full dispatcher replay is pending. Limits are unchanged.
+Receipt: [candidate-c-invocation-index-20261014.json](evidence/candidate-c-invocation-index-20261014.json).
+
 Private check cache CLI (2026-10-14): `project_check_cli` and
 `project_check_options` add an opt-in `check --cache-root <dir> [--cache-status]`
 route over the private coordinator; the default check and the Go product CLI keep
