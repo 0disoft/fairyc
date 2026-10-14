@@ -22,3 +22,18 @@ fn cli::Problem rejected(bool run,ref v::Vec<bytes::Buffer> input){return switch
 @test fn void grows_real_process_argument_storage_without_a_fixed_path_limit(){
     var u8[4096] data=[0;4096];let size=switch(process::arg(1,ref mut data)){case .ok(n):{n}case .err(_):{assert(false);return;}};assert(size>128);let actual=switch(cli::read(1)){case .ok(p):{p}case .err(_):{assert(false);return;}};let ref u8[] expected=ref data;assert(v::len<bytes::Buffer>(ref actual)==1 && bytes::equal(bytes::view(v::at<bytes::Buffer>(ref actual,0)),expected[..size]));let empty=switch(cli::read(process::arg_count())){case .ok(p):{p}case .err(_):{assert(false);return;}};assert(v::len<bytes::Buffer>(ref empty)==0 && !cli::read(process::arg_count()+1).is_ok);
 }
+@test fn void admits_explicit_cache_flags_and_keeps_program_flags_after_delimiter(){
+    var v::Vec<bytes::Buffer> input=v::empty<bytes::Buffer>();let empty=parsed(false,ref input);assert(!cli::cache_status(ref empty) && cli::cache_root(ref empty).len==0);
+    add(ref mut input,b"--cache-status");add(ref mut input,b"--cache-root");add(ref mut input,b"cache root \xed\x95\x9c\xea\xb8\x80");add(ref mut input,b"--release");add(ref mut input,b"--locked");
+    let build=parsed(false,ref input);assert(cli::cache_status(ref build) && cli::locked(ref build) && cli::release(ref build) && bytes::equal(cli::cache_root(ref build),b"cache root \xed\x95\x9c\xea\xb8\x80"));
+    add(ref mut input,b"--");add(ref mut input,b"--cache-root");add(ref mut input,b"--cache-status");add(ref mut input,b"forwarded");let run=parsed(true,ref input);assert(cli::cache_status(ref run) && v::len<bytes::Buffer>(cli::arguments(ref run))==3 && bytes::equal(bytes::view(v::at<bytes::Buffer>(cli::arguments(ref run),0)),b"--cache-root"));
+}
+@test fn void rejects_invalid_cache_configuration_with_existing_nul_precedence(){
+    var v::Vec<bytes::Buffer> input=v::empty<bytes::Buffer>();add(ref mut input,b"--cache-status");let no_root=rejected(false,ref input);assert(no_root.kind==7 && cli::exit_code(no_root)==2);var bytes::Buffer text=bytes::empty();assert(cli::diagnostic(false,no_root,ref mut text) && bytes::equal(bytes::view(ref text),b"fairyc: --cache-status requires --cache-root\n"));
+    assert(v::clear<bytes::Buffer>(ref mut input)==1);add(ref mut input,b"--cache-root");assert(rejected(false,ref input).kind==6);add(ref mut input,b"");assert(rejected(false,ref input).kind==6);
+    assert(v::clear<bytes::Buffer>(ref mut input)==2);add(ref mut input,b"--cache-root");add(ref mut input,b"--locked");assert(rejected(false,ref input).kind==6);
+    assert(v::clear<bytes::Buffer>(ref mut input)==2);add(ref mut input,b"--cache-root");add(ref mut input,b"bad\0path");assert(rejected(false,ref input).kind==6);
+    assert(v::clear<bytes::Buffer>(ref mut input)==2);add(ref mut input,b"--cache-root");add(ref mut input,b"cache");add(ref mut input,b"--cache-root");add(ref mut input,b"second");let duplicate=rejected(true,ref input);assert(duplicate.kind==2 && duplicate.flag==3 && duplicate.index==2);assert(bytes::resize_zeroed(ref mut text,0).is_ok && cli::diagnostic(true,duplicate,ref mut text) && bytes::equal(bytes::view(ref text),b"fairyc: command \"run\" received --cache-root more than once\n"));
+    assert(v::clear<bytes::Buffer>(ref mut input)==4);add(ref mut input,b"--cache-status");add(ref mut input,b"--cache-status");let repeated=rejected(false,ref input);assert(repeated.kind==2 && repeated.flag==4);
+    assert(v::clear<bytes::Buffer>(ref mut input)==2);add(ref mut input,b"--cache-root");add(ref mut input,b"--");add(ref mut input,b"bad\0argument");assert(rejected(true,ref input).kind==3);
+}
