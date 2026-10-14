@@ -1,5 +1,13 @@
 # Self-hosting readiness v0
 
+Detached public type ordering now gives current signatures a canonical prefix
+while retaining executable IR numbering. Bidirectional maps rebind composite
+references and preserve array lengths, cold numbering and bounded accounting.
+Four authored tests pass Go native and both C profiles, including actual rebased
+generic/Vec/state input; root/locked checks pass 507 files / 6250 MIR functions.
+[Type-order receipt](../ops/evidence/candidate-project-public-type-order-20261014.json). Public-view consumers, Complete
+restoration and actual cache reuse remain open.
+
 One restored IR now passes current provenance, whole-source/table coverage,
 state and SDK matching before publication as an owned Admitted value. It
 retains the exact IR plus detached current specialization rows and provenance;
