@@ -18,6 +18,9 @@ import generic_source_plan as original_plan;
 import generic_signature_diagnostics as diagnostics;
 import std::vec as v;
 import module_catalog as modules;
+import project_cache_unit_store as unit_cache;
+import project_cache_disk as disk;
+import project_cache_environment as environment;
 
 // 1 declaration catalog, 2 signatures, 3 checked units, 4 project link,
 // Stage/expected/actual retain the original semantic failure.
@@ -72,6 +75,23 @@ pub fn Result<Complete,Problem> build_complete_reporting_sources(ref v::Vec<synt
     let program=switch(link_identified(sources,ref metadata,ref original,source_work,link_work)){case .ok(p):{p}case .err(e):{return .err(e);}};
     let interfaces=switch(interfaces::build(ref program,ref original,sources,ref metadata,table,source_work)){case .ok(p):{p}case .err(e):{return .err(fail(6,0,e,0,0,0,0,0));}};
     return .ok(Complete{.program,.interfaces});
+}
+// Package units are admitted or cold-lowered independently, then passed through
+// the same whole-project linker and interface factory. No unit is published
+// before every source and the complete linked owner have succeeded.
+@effects(filesystem,clock)
+pub fn Result<Complete,Problem> build_complete_mixed(ref disk::Store store,ref environment::Environment env,ref input::Input input,ref coordinates::Coordinates table,ref mut v::Vec<diagnostics::Reports> reports,ref mut unit_cache::Work cache_work,ref mut usize source_work,ref mut usize link_work){
+    if(v::len<diagnostics::Reports>(reports)!=0){return .err(fail(5,6,9,0,0,0,0,0));}let sources=input::sources(input);
+    let catalog=switch(modules::build_scoped(sources,input::owners(input),input::bindings(input))){case .ok(p):{p}case .err(e):{return .err(fail(1,0,e.code,e.module_index,e.start,e.end,0,0));}};
+    let scope=switch(modules::build_scoped(sources,input::owners(input),input::bindings(input))){case .ok(p):{p}case .err(e):{return .err(fail(1,0,e.code,e.module_index,e.start,e.end,0,0));}};
+    let metadata=switch(signatures::build_catalog(sources,catalog)){case .ok(p):{p}case .err(e):{return .err(fail(2,0,e.code,e.module_index,e.start,e.end,0,0));}};
+    let original=switch(source_plan::build(input,table,source_work)){case .ok(p):{p}case .err(e):{return .err(fail(5,e.stage,e.code,e.module_index,e.start,e.end,0,0));}};
+    let unsupported=switch(diagnostics::collect(ref original,sources,source_work)){case .ok(p):{p}case .err(code):{return .err(fail(5,6,code,0,0,0,0,0));}};
+    if(diagnostics::count(ref unsupported)!=0){let first=diagnostics::at(ref unsupported,0);if(!v::push<diagnostics::Reports>(reports,unsupported).is_ok){return .err(fail(5,6,11,0,0,0,0,0));}return .err(fail(5,6,4505,first.module_index,first.start,first.end,0,0));}
+    let units=switch(identified_units::build_cached(store,env,input,ref scope,ref metadata,ref original,source_work,cache_work)){case .ok(p):{p}case .err(e):{var p=fail(3,e.stage,e.code,e.module_index,e.start,e.end,e.expected,e.actual);p.declaration_start=e.declaration_start;p.declaration_end=e.declaration_end;p.move_start=e.move_start;p.move_end=e.move_end;p.header_start=e.header_start;p.header_end=e.header_end;p.field_module=e.field_module;p.field_start=e.field_start;p.field_end=e.field_end;return .err(p);}};
+    let program=switch(identified::build(ref metadata,ref units,link_work)){case .ok(p):{p}case .err(e):{return .err(fail(4,0,e.code,e.module_index,e.start,e.end,0,0));}};
+    let interfaces=switch(interfaces::build(ref program,ref original,sources,ref metadata,table,source_work)){case .ok(p):{p}case .err(code):{return .err(fail(6,0,code,0,0,0,0,0));}};
+    identified_units::publish_cached(store,env,input,ref original,ref units,cache_work);return .ok(Complete{.program,.interfaces});
 }
 // Restore keeps independent 16MiB source, aggregate artifact and 8MiB link
 // histories. Neither IR nor interfaces escape until their same-owner result is complete.

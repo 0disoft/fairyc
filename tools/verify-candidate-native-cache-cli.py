@@ -73,7 +73,8 @@ let m=switch(p::arg(2,ref mut data)){case .ok(n):{n}case .err(_):{return 0;}};le
         product = project/'build/cache-app.exe'
         assert run(product, project, None, expected=42, label=profile+' built program') == (b'', b'')
         leaves = list(cache.glob('fyproject0-*.fyc'))
-        assert len(leaves) == 1
+        assert len(leaves) == 2
+        assert {p.read_bytes()[16:24] for p in leaves} == {b'FYCKEYS0', b'FYPUNIT0'}
         retained = {p.name: (sha(p), p.stat().st_mtime_ns) for p in leaves}
         actual = run(image, project, 'run', locked, 42, b'cache: hit\n', profile+' checked hit run')
         assert actual == run(reference, project, 'run', ['--locked'], 42, label=profile+' Go run oracle') == (b'', b'')

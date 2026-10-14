@@ -67,7 +67,9 @@ def main():
         out, err = run(image,base,flags,status=b'cache: cold stored\n',label=profile+' cold population')
         assert not err and b'lock updated' in out
         leaves = list(cache.glob('fyproject0-*.fyc'))
-        assert len(leaves)==1 and leaves[0].read_bytes().startswith(b'FYCACHE0')
+        projects = [p for p in leaves if p.read_bytes()[16:24] == b'FYCKEYS0']
+        units = [p for p in leaves if p.read_bytes()[16:24] == b'FYPUNIT0']
+        assert len(projects) == 1 and len(units) == 1 and len(leaves) == 2
         before = {p.name:(sha(p),p.stat().st_mtime_ns) for p in leaves}
         locked = ['--locked',*flags]
         actual = run(image,base,locked,status=b'cache: hit\n',label=profile+' fresh-process verified hit')
@@ -75,8 +77,8 @@ def main():
         assert actual == oracle
         assert before == {p.name:(sha(p),p.stat().st_mtime_ns) for p in cache.glob('fyproject0-*.fyc')}
         assert run(image,base,['--locked','--cache-root',cache],label=profile+' silent hit') == oracle
-        leaves[0].write_bytes(b'broken')
-        assert run(image,base,locked,status=b'cache: cold stored\n',label=profile+' corrupt generation fallback') == oracle
+        projects[0].write_bytes(b'broken')
+        assert run(image,base,locked,status=b'cache: units hit\n',label=profile+' corrupt project generation uses checked unit') == oracle
         assert run(image,base,locked,status=b'cache: hit\n',label=profile+' repaired generation hit') == oracle
         assert run(image,base,['--locked','--cache-root',cache/'missing','--cache-status'],status=b'cache: cold uncached\n',label=profile+' unavailable root fallback') == oracle
 

@@ -21,7 +21,7 @@ pub fn i32 run(ref u8[] root,bool locked){return render(check::evaluate(root,loc
 @effects(filesystem,console,environment,clock)
 pub fn i32 run_cached(ref u8[] root,bool locked,ref u8[] cache_root,bool status){var observed=cached::empty();
     let result=check::evaluate_cached(root,locked,cache_root,cache_path::command_limits(),ref mut observed);
-    if(status){let ref str text=if(observed.path==2){"cache: hit\n"}else if(observed.path==1 && observed.stored){"cache: cold stored\n"}else if(observed.path==1){"cache: cold uncached\n"}else{"cache: skipped\n"};if(!io::write_stderr(text).is_ok){discard result;return 4;}}
+    if(status){let ref str text=if(observed.path==2){"cache: hit\n"}else if(observed.path==3){"cache: mixed\n"}else if(observed.path==4){"cache: units hit\n"}else if(observed.path==1 && observed.stored){"cache: cold stored\n"}else if(observed.path==1){"cache: cold uncached\n"}else{"cache: skipped\n"};if(!io::write_stderr(text).is_ok){discard result;return 4;}}
     return render(result);
 }
 @effects(filesystem,console,environment,clock)
