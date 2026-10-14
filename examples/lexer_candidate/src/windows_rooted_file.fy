@@ -12,6 +12,8 @@ import windows_host_paths as paths;
 @effects(filesystem) @link_name("fairyc_private_windows_root_file_sync_v1") unsafe extern C fn i32 file_sync(usize file);
 @effects(filesystem) @link_name("fairyc_private_windows_root_file_delete_v1") unsafe extern C fn i32 file_delete(usize file);
 @effects(filesystem) @link_name("fairyc_private_windows_root_file_rename_v1") unsafe extern C fn i32 file_rename(usize file,usize root,ptr u8 leaf,usize size);
+@effects(filesystem) @link_name("fairyc_private_windows_root_file_publish_new_v1") unsafe extern C fn i32 file_publish_new(usize file,usize root,ptr u8 leaf,usize size);
+@effects(clock) @link_name("fairyc_private_windows_root_file_time_v1") unsafe extern C fn usize file_time();
 @effects(filesystem) @link_name("fairyc_private_windows_root_file_close_v1") unsafe extern C fn i32 close_handle(usize handle);
 @effects(filesystem) @link_name("fairyc_private_windows_root_file_info_v1") unsafe extern C fn i32 file_info(usize handle,ptr mut void output);
 @effects(filesystem) @link_name("fairyc_private_windows_root_directory_query_v1") unsafe extern C fn i32 directory_query(usize handle,ptr mut u8 output,usize size,u32 restart);
@@ -41,6 +43,10 @@ fn Result<bytes::Buffer,Problem> wide(ref u8[] input,bool leaf){if(leaf && !vali
 @effects(filesystem) pub fn Result<bool,Problem> sync(ref mut File file){return if(unsafe{file_sync(file.raw)}!=0){.ok(true)}else{.err(native(8,0))};}
 @effects(filesystem) pub fn Result<bool,Problem> publish(ref Directory root,ref mut File file,ref u8[] leaf){if(!file.staged){return .err(fail(1,0,0));}let encoded=switch(wide(leaf,true)){case .ok(p):{p}case .err(e):{return .err(e);}};if(unsafe{file_rename(file.raw,root.raw,bytes::view(ref encoded) as ptr u8,bytes::len(ref encoded)-2)}==0){return .err(native(9,0));}file.staged=false;return .ok(true);}
 // Consume and clear before close: an uncertain close is never retried by glue.
+@effects(filesystem) pub fn Result<bool,Problem> publish_new(ref Directory root,ref mut File file,ref u8[] leaf){if(!file.staged){return .err(fail(1,0,0));}let encoded=switch(wide(leaf,true)){case .ok(p):{p}case .err(e):{return .err(e);}};if(unsafe{file_publish_new(file.raw,root.raw,bytes::view(ref encoded) as ptr u8,bytes::len(ref encoded)-2)}==0){return .err(native(9,0));}file.staged=false;return .ok(true);}
+// Windows absolute file-time units (100ns since 1601), for retention only.
+@effects(clock) pub fn usize now(){return unsafe{file_time()};}
+// Consume and clear before close: an uncertain close is never retried by glue.
 @effects(filesystem) pub fn Result<bool,Problem> close(File input){var File file=input;var Problem problem=fail(0,0,0);if(file.staged && unsafe{file_delete(file.raw)}==0){problem=native(10,0);}let raw=file.raw;file.raw=0;if(unsafe{close_handle(raw)}==0){let code=unsafe{last_error()};if(problem.stage==0){problem=fail(11,code,0);}else{problem.close_code=code;}}return if(problem.stage==0){.ok(true)}else{.err(problem)};}
 
 @repr(C) pub struct Metadata{usize identity;usize modified;usize size;u32 attributes;}
@@ -69,7 +75,7 @@ fn Result<bool,Problem> batch(ref u8[] raw,ref mut v::Vec<bytes::Buffer> names,r
 pub fn Result<Entries,Problem> decode_batch(ref u8[] raw,usize maximum,ref mut usize work){if(raw.len>65536 || maximum==0 || maximum>4096 || !charge(work,1)){return .err(fail(14,0,0));}var v::Vec<bytes::Buffer> names=v::empty<bytes::Buffer>();var v::Vec<usize> facts=v::empty<usize>();switch(batch(raw,ref mut names,ref mut facts,maximum,work)){case .ok(_):{}case .err(e):{return .err(e);}};return .ok(Entries{.names,.facts});}
 // A separate bounded scan history restarts the same retained handle. No path
 // lookup, FindFirstFile or independent directory reopen occurs here.
-@effects(filesystem) pub fn Result<Entries,Problem> scan(ref mut Directory root,usize maximum,ref mut usize work){if(maximum==0 || maximum>4096 || !charge(work,65537)){return .err(fail(14,0,0));}var raw=bytes::empty();if(!bytes::resize_zeroed(ref mut raw,65536).is_ok){return .err(fail(2,0,0));}var v::Vec<bytes::Buffer> names=v::empty<bytes::Buffer>();var v::Vec<usize> facts=v::empty<usize>();var bool first=true;
+@effects(filesystem) pub fn Result<Entries,Problem> scan(ref Directory root,usize maximum,ref mut usize work){if(maximum==0 || maximum>4096 || !charge(work,65537)){return .err(fail(14,0,0));}var raw=bytes::empty();if(!bytes::resize_zeroed(ref mut raw,65536).is_ok){return .err(fail(2,0,0));}var v::Vec<bytes::Buffer> names=v::empty<bytes::Buffer>();var v::Vec<usize> facts=v::empty<usize>();var bool first=true;
     while(true){if(!charge(work,1)){return .err(fail(14,0,0));}if(unsafe{directory_query(root.raw,bytes::view_mut(ref mut raw) as ptr mut u8,65536,if(first){1}else{0})}==0){let code=unsafe{last_error()};if(code==18){return .ok(Entries{.names,.facts});}return .err(fail(12,code,0));}first=false;
         switch(batch(bytes::view(ref raw),ref mut names,ref mut facts,maximum,work)){case .ok(_):{}case .err(e):{return .err(e);}};
     }return .err(fail(12,0,0));

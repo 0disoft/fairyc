@@ -39,8 +39,10 @@ var admitted = map[string]bool{
 	"fairyc_private_windows_root_file_read_v1":  true,
 	"fairyc_private_windows_root_file_close_v1": true,
 	"fairyc_private_windows_root_file_sync_v1":  true, "fairyc_private_windows_root_file_delete_v1": true,
-	"fairyc_private_windows_root_file_rename_v1": true,
-	"fairyc_private_windows_root_file_info_v1":   true, "fairyc_private_windows_root_directory_query_v1": true,
+	"fairyc_private_windows_root_file_rename_v1":      true,
+	"fairyc_private_windows_root_file_publish_new_v1": true,
+	"fairyc_private_windows_root_file_time_v1":        true,
+	"fairyc_private_windows_root_file_info_v1":        true, "fairyc_private_windows_root_directory_query_v1": true,
 }
 
 func WindowsSource(header string) (string, error) {

@@ -1,0 +1,629 @@
+{
+  "schema": "fairyc.candidate-project-disk-cache/v0",
+  "parentCommit": "d17174230fa81c58b8944ed3ce5d62a4882cf659",
+  "passed": true,
+  "sourceInputs": [
+    {
+      "path": "examples/lexer_candidate/src/project_cache_disk.fy",
+      "sha256": "528458f564761a256d507de524640030ec8f6720c76a053d3b91d4fb2af9c3c5"
+    },
+    {
+      "path": "examples/lexer_candidate/tests/project_cache_disk.fy",
+      "sha256": "fb2ecb08db03d6323a97d9bed15bcd69fb61635caf3461cd8252b6075ea055d8"
+    },
+    {
+      "path": "examples/lexer_candidate/src/windows_rooted_file.fy",
+      "sha256": "2630642bf5c9cd4fd0427cfea5cc073f35eb32a7218da2f7fb8b746075103a30"
+    },
+    {
+      "path": "internal/candidatehost/runtime.go",
+      "sha256": "3759f92a560a5abe7738770dba1b2a814a296de1a10994f2d63d93c9b4135e62"
+    },
+    {
+      "path": "internal/candidatehost/runtime_test.go",
+      "sha256": "54f5dca67e680a1a8d7f3c6687f816be2c5cdffae2c1a7b7fd9911a28b401191"
+    },
+    {
+      "path": "internal/candidatehost/windows_rooted_file.c",
+      "sha256": "0e014f17a4d87b60d00d842fa28d2f22d165bb83f16e75f9a352bb0f8c3a0d32"
+    }
+  ],
+  "sourceCheck": {
+    "files": 512,
+    "mirFunctions": 6347,
+    "unlockedExit": 0,
+    "lockedExit": 0,
+    "lockSHA256": "427cf46b7a51267fb49069a86d4fafef6426541892f133dfbeda6377c1520215"
+  },
+  "hostSelectionGoTests": {
+    "command": "go test ./internal/candidatehost",
+    "exit": 0
+  },
+  "transportTests": {
+    "schema": "fairyc.candidate-private-tests/v1",
+    "passed": true,
+    "module": "project_cache_disk",
+    "tools": {
+      "compiler": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-frontend-oracle-current-20261012.exe",
+        "sha256": "3ecc4501ee3bb47ecc39e7288200266b31cbcd8bf6ffec302ae54867705ce5d1"
+      },
+      "candidate": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\rooted-file-20261014\\emitter\\driver-release.exe",
+        "sha256": "e1c622988da81f5a070f24294eeeb6d21661a2390bb64c57e07b5eb04eccad73"
+      },
+      "builder": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\cache-disk-builder-20261014.exe",
+        "sha256": "9568d0029ab4616fbd6400d9e6a0899352f482677cdce378236d6f07c8b8abe8"
+      },
+      "nativeHostBuilder": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\cache-disk-private-host-20261014.exe",
+        "sha256": "a5b3f86f611111e3d92d95d0537484462f26b59141bdb63fe8ecdb6ec4444a8f"
+      },
+      "nativeStackEditor": {
+        "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\editbin.exe",
+        "sha256": "be37ead809e0cab3b62ff7c141fece6655b6c6ab1e2951a118abbaef48acbc07"
+      }
+    },
+    "native": null,
+    "nativeTests": 5,
+    "authoredTestsExecuted": 5,
+    "candidateOnly": false,
+    "lockSHA256": "427cf46b7a51267fb49069a86d4fafef6426541892f133dfbeda6377c1520215",
+    "candidateInputFiles": 14,
+    "candidatePacketSHA256": "63d7cf379cbe644b7576bd106b2e37c7b656cbd6bfb808b32153fa630f71b191",
+    "candidateExecutions": [
+      {
+        "profile": "development",
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\cache-disk-20261014\\tests-repair\\development.exe",
+        "sha256": "b849a17965f8dc526b431676dcec47dde0f99b7b887fb87ea4e58575c2dc106e",
+        "exit": 0
+      },
+      {
+        "profile": "release",
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\cache-disk-20261014\\tests-repair\\release.exe",
+        "sha256": "16224d028ca834c0fa40214e8ac516b18307c3a205dc220acded31831daae045",
+        "exit": 0
+      }
+    ],
+    "invocations": [
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-frontend-oracle-current-20261012.exe",
+          "check"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\cache-disk-20261014\\tests-repair\\native-project-59620b6bec30da28c280",
+        "seconds": 0.4808599000098184,
+        "exit": 0,
+        "stdoutBytes": 78,
+        "stdoutSHA256": "dc46ba50ac7f71a9ba2c230b94f82889f107ad9d286e8137928a92c34dd62649",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-frontend-oracle-current-20261012.exe",
+          "experimental",
+          "emit-workspace-c",
+          "--target",
+          "x86_64-windows-msvc",
+          "--locked"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\cache-disk-20261014\\tests-repair\\native-project-59620b6bec30da28c280",
+        "seconds": 0.8244853999931365,
+        "exit": 0,
+        "stdoutBytes": 616664,
+        "stdoutSHA256": "1bb2e045a7a78fd5c1464d7c9f993b62a38f4eb907da3cb4a0c952b78ca339c7",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\cache-disk-private-host-20261014.exe",
+          "--source",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\cache-disk-20261014\\tests-repair\\go-native.c",
+          "--source-sha256",
+          "1bb2e045a7a78fd5c1464d7c9f993b62a38f4eb907da3cb4a0c952b78ca339c7",
+          "--output",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\cache-disk-20261014\\tests-repair\\native-project-59620b6bec30da28c280\\build\\lexer-candidate.exe",
+          "--stack-reserve-bytes",
+          "16777216"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+        "seconds": 1.6773573000100441,
+        "exit": 0,
+        "stdoutBytes": 247,
+        "stdoutSHA256": "e3c08c3436ed7e2be779c2e90d7d6238e47073bafe65d78db2b3997ee88325d9",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\editbin.exe",
+          "/nologo",
+          "/stack:16777216",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\cache-disk-20261014\\tests-repair\\native-project-59620b6bec30da28c280\\build\\lexer-candidate.exe"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\cache-disk-20261014\\tests-repair\\native-project-59620b6bec30da28c280",
+        "seconds": 0.08321420004358515,
+        "exit": 0,
+        "stdoutBytes": 0,
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\cache-disk-20261014\\tests-repair\\native-project-59620b6bec30da28c280\\build\\lexer-candidate.exe",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\cache-disk-20261014\\fixture-repair\\root.txt"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\cache-disk-20261014\\tests-repair\\native-project-59620b6bec30da28c280",
+        "seconds": 0.4155785999610089,
+        "exit": 0,
+        "stdoutBytes": 0,
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\rooted-file-20261014\\emitter\\driver-release.exe",
+          "--c-project-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\cache-disk-20261014\\tests-repair\\sources.list"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+        "seconds": 6.243497400020715,
+        "exit": 0,
+        "stdoutBytes": 653871,
+        "stdoutSHA256": "63d7cf379cbe644b7576bd106b2e37c7b656cbd6bfb808b32153fa630f71b191",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\cache-disk-builder-20261014.exe",
+          "--packet",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\cache-disk-20261014\\tests-repair\\candidate-packet.bin",
+          "--packet-sha256",
+          "63d7cf379cbe644b7576bd106b2e37c7b656cbd6bfb808b32153fa630f71b191",
+          "--output",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\cache-disk-20261014\\tests-repair\\development.exe",
+          "--stack-reserve-bytes",
+          "16777216"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+        "seconds": 1.7279711999581195,
+        "exit": 0,
+        "stdoutBytes": 173,
+        "stdoutSHA256": "b84ee266bc7062747bfe3dc6b09803aeba3b14e187c2f02213968ade9b250bb9",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\cache-disk-20261014\\tests-repair\\development.exe",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\cache-disk-20261014\\fixture-repair\\root.txt"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+        "seconds": 1.7081708000041544,
+        "exit": 0,
+        "stdoutBytes": 0,
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\cache-disk-builder-20261014.exe",
+          "--packet",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\cache-disk-20261014\\tests-repair\\candidate-packet.bin",
+          "--packet-sha256",
+          "63d7cf379cbe644b7576bd106b2e37c7b656cbd6bfb808b32153fa630f71b191",
+          "--output",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\cache-disk-20261014\\tests-repair\\release.exe",
+          "--release",
+          "--stack-reserve-bytes",
+          "16777216"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+        "seconds": 17.656961800006684,
+        "exit": 0,
+        "stdoutBytes": 175,
+        "stdoutSHA256": "e150c980ea53953d7ca0eb3079f8febab3a10226a5c87cf68133183b49efd0be",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\cache-disk-20261014\\tests-repair\\release.exe",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\cache-disk-20261014\\fixture-repair\\root.txt"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+        "seconds": 0.19971869996516034,
+        "exit": 0,
+        "stdoutBytes": 0,
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderr": ""
+      }
+    ],
+    "publicApiChanged": false,
+    "dbChanged": false,
+    "ciChanged": false,
+    "pushed": false,
+    "nativeProgram": {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\cache-disk-20261014\\tests-repair\\native-project-59620b6bec30da28c280\\build\\lexer-candidate.exe",
+      "sha256": "c97724729491fca1c3654e61f43d815920dd77fad6d5bd81b38a510f3ad92fbf",
+      "selectedTests": [
+        "tests::project_cache_disk::content_hash_matches_independent_padding_vectors_and_exact_work",
+        "tests::project_cache_disk::corruption_is_skipped_and_exact_observed_collision_is_repaired",
+        "tests::project_cache_disk::immutable_binary_generations_round_trip_and_preserve_collision_metadata",
+        "tests::project_cache_disk::orphan_recovery_skips_live_stage_and_publication_failure_preserves_previous_bytes",
+        "tests::project_cache_disk::retention_enforces_exact_entry_byte_limits_and_preserves_data_on_early_failure"
+      ],
+      "stdoutBytes": 0,
+      "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stack": {
+        "reserveBytes": 16777216,
+        "originalReserveBytes": 16777216,
+        "originalSHA256": "14eed1a331438e58d323b583eb6797d48d66f7de3fbdb65cc998fc5edc58ca48"
+      },
+      "privateHost": {
+        "frontend": "Go experimental emit-workspace-c",
+        "sourceSHA256": "1bb2e045a7a78fd5c1464d7c9f993b62a38f4eb907da3cb4a0c952b78ca339c7",
+        "builderSHA256": "a5b3f86f611111e3d92d95d0537484462f26b59141bdb63fe8ecdb6ec4444a8f",
+        "publicLinkContractChanged": false
+      }
+    },
+    "selection": {
+      "mode": "all-authored",
+      "authoredTests": 5,
+      "selectedTests": 5
+    },
+    "frontendTimeoutSeconds": 900,
+    "executionTimeoutSeconds": 900,
+    "productTimeoutChanged": false,
+    "stackReserveBytes": 16777216,
+    "wrapperEffects": [
+      "filesystem",
+      "console",
+      "clock"
+    ],
+    "unchangedPaths": [
+      {
+        "path": ".cache/cache-disk-20261014/fixture-repair/rooted \ud30c\uc77c/reparse/external/marker.bin",
+        "snapshot": {
+          "directory": false,
+          "size": 11,
+          "modifiedNS": 1791970341610665800,
+          "sha256": "9801e9b08642dcd43027f7abf31a75632cabd3924e118fc4c2fcf941ba1c6082"
+        }
+      }
+    ]
+  },
+  "rootedRegressions": {
+    "schema": "fairyc.candidate-private-tests/v1",
+    "passed": true,
+    "module": "windows_rooted_file",
+    "tools": {
+      "compiler": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-frontend-oracle-current-20261012.exe",
+        "sha256": "3ecc4501ee3bb47ecc39e7288200266b31cbcd8bf6ffec302ae54867705ce5d1"
+      },
+      "candidate": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\rooted-file-20261014\\emitter\\driver-release.exe",
+        "sha256": "e1c622988da81f5a070f24294eeeb6d21661a2390bb64c57e07b5eb04eccad73"
+      },
+      "builder": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\cache-disk-builder-20261014.exe",
+        "sha256": "9568d0029ab4616fbd6400d9e6a0899352f482677cdce378236d6f07c8b8abe8"
+      },
+      "nativeHostBuilder": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\cache-disk-private-host-20261014.exe",
+        "sha256": "a5b3f86f611111e3d92d95d0537484462f26b59141bdb63fe8ecdb6ec4444a8f"
+      },
+      "nativeStackEditor": {
+        "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\editbin.exe",
+        "sha256": "be37ead809e0cab3b62ff7c141fece6655b6c6ab1e2951a118abbaef48acbc07"
+      }
+    },
+    "native": null,
+    "nativeTests": 7,
+    "authoredTestsExecuted": 7,
+    "candidateOnly": false,
+    "lockSHA256": "427cf46b7a51267fb49069a86d4fafef6426541892f133dfbeda6377c1520215",
+    "candidateInputFiles": 12,
+    "candidatePacketSHA256": "3ca6d71571efb49e65be0e264b1db06ed43e98d92d67e64f4a34b2005e298e43",
+    "candidateExecutions": [
+      {
+        "profile": "development",
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\cache-disk-20261014\\rooted-regressions\\development.exe",
+        "sha256": "90a2bfc9685cb68d8af09a40856f7eda1fae414630152160dbdfc729924557ba",
+        "exit": 0
+      },
+      {
+        "profile": "release",
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\cache-disk-20261014\\rooted-regressions\\release.exe",
+        "sha256": "bac6c9c330bbad581c69e33515d10b5de7f70c3a041a3f6333bc4b36bf19e4b9",
+        "exit": 0
+      }
+    ],
+    "invocations": [
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-frontend-oracle-current-20261012.exe",
+          "check"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\cache-disk-20261014\\rooted-regressions\\native-project-72605b065a3a6df6f474",
+        "seconds": 0.4857468999689445,
+        "exit": 0,
+        "stdoutBytes": 78,
+        "stdoutSHA256": "29a146d50b8c2ae407c38805f9b2c294f5af2ba8bc2826fd582781181e2ac28c",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-frontend-oracle-current-20261012.exe",
+          "experimental",
+          "emit-workspace-c",
+          "--target",
+          "x86_64-windows-msvc",
+          "--locked"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\cache-disk-20261014\\rooted-regressions\\native-project-72605b065a3a6df6f474",
+        "seconds": 0.7395671000122093,
+        "exit": 0,
+        "stdoutBytes": 486614,
+        "stdoutSHA256": "d3444cf23d1e409e8c9cc99766f4adee5398d3f2733e59c9491b0533040ebfcb",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\cache-disk-private-host-20261014.exe",
+          "--source",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\cache-disk-20261014\\rooted-regressions\\go-native.c",
+          "--source-sha256",
+          "d3444cf23d1e409e8c9cc99766f4adee5398d3f2733e59c9491b0533040ebfcb",
+          "--output",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\cache-disk-20261014\\rooted-regressions\\native-project-72605b065a3a6df6f474\\build\\lexer-candidate.exe",
+          "--stack-reserve-bytes",
+          "16777216"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+        "seconds": 1.159980700002052,
+        "exit": 0,
+        "stdoutBytes": 247,
+        "stdoutSHA256": "3b74b28d441688ec0ced9c7e6d92a0f9513596db674f993eef0283637052d2ab",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\editbin.exe",
+          "/nologo",
+          "/stack:16777216",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\cache-disk-20261014\\rooted-regressions\\native-project-72605b065a3a6df6f474\\build\\lexer-candidate.exe"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\cache-disk-20261014\\rooted-regressions\\native-project-72605b065a3a6df6f474",
+        "seconds": 0.05047260003630072,
+        "exit": 0,
+        "stdoutBytes": 0,
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\cache-disk-20261014\\rooted-regressions\\native-project-72605b065a3a6df6f474\\build\\lexer-candidate.exe",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\cache-disk-20261014\\fixture-final\\root.txt"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\cache-disk-20261014\\rooted-regressions\\native-project-72605b065a3a6df6f474",
+        "seconds": 2.487115600029938,
+        "exit": 0,
+        "stdoutBytes": 0,
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\rooted-file-20261014\\emitter\\driver-release.exe",
+          "--c-project-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\cache-disk-20261014\\rooted-regressions\\sources.list"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+        "seconds": 5.21246660000179,
+        "exit": 0,
+        "stdoutBytes": 511404,
+        "stdoutSHA256": "3ca6d71571efb49e65be0e264b1db06ed43e98d92d67e64f4a34b2005e298e43",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\cache-disk-builder-20261014.exe",
+          "--packet",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\cache-disk-20261014\\rooted-regressions\\candidate-packet.bin",
+          "--packet-sha256",
+          "3ca6d71571efb49e65be0e264b1db06ed43e98d92d67e64f4a34b2005e298e43",
+          "--output",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\cache-disk-20261014\\rooted-regressions\\development.exe",
+          "--stack-reserve-bytes",
+          "16777216"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+        "seconds": 1.686961799976416,
+        "exit": 0,
+        "stdoutBytes": 179,
+        "stdoutSHA256": "9a7b5f03c04ba171917b5ab9a6a0185bd52561299c1e615a5aa0016373086e2b",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\cache-disk-20261014\\rooted-regressions\\development.exe",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\cache-disk-20261014\\fixture-final\\root.txt"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+        "seconds": 2.2837486999924295,
+        "exit": 0,
+        "stdoutBytes": 0,
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\cache-disk-builder-20261014.exe",
+          "--packet",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\cache-disk-20261014\\rooted-regressions\\candidate-packet.bin",
+          "--packet-sha256",
+          "3ca6d71571efb49e65be0e264b1db06ed43e98d92d67e64f4a34b2005e298e43",
+          "--output",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\cache-disk-20261014\\rooted-regressions\\release.exe",
+          "--release",
+          "--stack-reserve-bytes",
+          "16777216"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+        "seconds": 16.604940099990927,
+        "exit": 0,
+        "stdoutBytes": 181,
+        "stdoutSHA256": "db112e567cdd0c23ff73821204f08f467f37a76cc00cf7f41b26e8cdeba09dcd",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\cache-disk-20261014\\rooted-regressions\\release.exe",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\cache-disk-20261014\\fixture-final\\root.txt"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+        "seconds": 2.096290100016631,
+        "exit": 0,
+        "stdoutBytes": 0,
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderr": ""
+      }
+    ],
+    "publicApiChanged": false,
+    "dbChanged": false,
+    "ciChanged": false,
+    "pushed": false,
+    "nativeProgram": {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\cache-disk-20261014\\rooted-regressions\\native-project-72605b065a3a6df6f474\\build\\lexer-candidate.exe",
+      "sha256": "5d199961d42414f469d0e7b1d307610615cb1163cfe438095ac6f266f22a726a",
+      "selectedTests": [
+        "tests::windows_rooted_file::invalid_leaves_collisions_and_failed_publication_preserve_existing_bytes",
+        "tests::windows_rooted_file::native_batch_decoder_rejects_malformed_suffixes_and_exhaustion",
+        "tests::windows_rooted_file::opened_directory_survives_root_path_replacement_and_binary_publication",
+        "tests::windows_rooted_file::real_reparse_points_and_raw_namespace_escapes_reject",
+        "tests::windows_rooted_file::retained_inventory_handles_multiple_batches_unicode_and_exact_bounds",
+        "tests::windows_rooted_file::stale_inventory_preserves_replacements_and_current_metadata_deletes",
+        "tests::windows_rooted_file::unpublished_files_and_failed_reads_release_all_handles"
+      ],
+      "stdoutBytes": 0,
+      "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stack": {
+        "reserveBytes": 16777216,
+        "originalReserveBytes": 16777216,
+        "originalSHA256": "ed23eadae935504b651b5ff9b4278b9474b7c023f2c990b1bb9832e09b726115"
+      },
+      "privateHost": {
+        "frontend": "Go experimental emit-workspace-c",
+        "sourceSHA256": "d3444cf23d1e409e8c9cc99766f4adee5398d3f2733e59c9491b0533040ebfcb",
+        "builderSHA256": "a5b3f86f611111e3d92d95d0537484462f26b59141bdb63fe8ecdb6ec4444a8f",
+        "publicLinkContractChanged": false
+      }
+    },
+    "selection": {
+      "mode": "all-authored",
+      "authoredTests": 7,
+      "selectedTests": 7
+    },
+    "frontendTimeoutSeconds": 900,
+    "executionTimeoutSeconds": 900,
+    "productTimeoutChanged": false,
+    "stackReserveBytes": 16777216,
+    "wrapperEffects": [
+      "filesystem",
+      "console"
+    ],
+    "unchangedPaths": [
+      {
+        "path": ".cache/cache-disk-20261014/fixture-final/rooted \ud30c\uc77c/reparse/external/marker.bin",
+        "snapshot": {
+          "directory": false,
+          "size": 11,
+          "modifiedNS": 1791970103110382500,
+          "sha256": "9801e9b08642dcd43027f7abf31a75632cabd3924e118fc4c2fcf941ba1c6082"
+        }
+      }
+    ]
+  },
+  "emitterReuse": {
+    "inputFiles": 425,
+    "allCurrentDigestsMatched": true,
+    "imageSHA256": "e1c622988da81f5a070f24294eeeb6d21661a2390bb64c57e07b5eb04eccad73",
+    "goFrontendInvoked": false
+  },
+  "independentSHA256Oracle": {
+    "implementation": "Python hashlib SHA-256",
+    "vectors": [
+      "empty",
+      "abc",
+      "55/56/64 zero bytes",
+      "131073 binary bytes with FYCACHE0 prefix and two nonzero suffix bytes"
+    ],
+    "binaryBytes": 131073,
+    "binarySHA256": "fb520ef494cfccbf7d0c20538ca75005fee3ab6cf7833c7686e79781c05a61f2"
+  },
+  "coverage": [
+    "no-replace immutable generation and byte-identical collision retains file ID/time",
+    "actual binary multi-chunk store/load and reopening Directory",
+    "corrupt latest generation skipped and exact observed collision safely repaired",
+    "exact byte retention and entry retention with new generation preserved",
+    "oversize and exhausted work preserve existing bytes",
+    "expired two-digit orphan stage collected; live staged writer survives",
+    "writer-held target publication failure preserves earlier complete generation",
+    "all seven existing root containment/inventory regressions, unchanged external marker"
+  ],
+  "bounds": {
+    "maxEntries": 4096,
+    "maxTotalBytes": 1073741824,
+    "maxRecordBytes": 268435456,
+    "ioWork": 1073741824,
+    "scanWork": 16777216,
+    "chunkBytes": 65536,
+    "exclusiveStageAttempts": 16,
+    "mandatoryCallerLimits": true,
+    "sourceShaLimitChanged": false,
+    "sourceFileCapChanged": false
+  },
+  "failedHistory": [
+    {
+      "path": ".cache/cache-disk-20261014/tests/invocations.json",
+      "exit": 3,
+      "stderr": "main.fy:23:210: E1104: branch join leaves resource ownership path-dependent [bytes 2859..3050]\n  declaration: main.fy:23:98 [bytes 2747..2751]\n  move: main.fy:23:390 [bytes 3039..3043]\n",
+      "resolution": "short-circuit test helper consumed its File on only one branch; split operations"
+    },
+    {
+      "path": ".cache/cache-disk-20261014/tests-2/invocations.json",
+      "exit": 106,
+      "stderr": "",
+      "resolution": "test helper reopened long generation pathname through the general file API; use retained-root read"
+    },
+    {
+      "path": ".cache/cache-disk-20261014/tests-3/invocations.json",
+      "exit": 106,
+      "stderr": "",
+      "resolution": "test helper created a long generation pathname directory through the general API; use a retained-root writer-held obstruction"
+    }
+  ],
+  "rawBytesGrantReuseAuthority": false,
+  "actualCheckedArtifactDiskReuse": false,
+  "cliCacheConnected": false,
+  "concurrentGlobalBoundClaimed": false,
+  "powerLossRetentionClaimed": false,
+  "publicApiChanged": false,
+  "sdkAbiChanged": false,
+  "privateHostAbiChanged": true,
+  "dbChanged": false,
+  "ciChanged": false,
+  "pushed": false,
+  "skipped": [
+    "Linux",
+    "full repository suite",
+    "latest complete Stage1/Stage2",
+    "hosted CI",
+    "physical power loss and real disk exhaustion"
+  ],
+  "next": [
+    "full checked artifact restoration from disk",
+    "CLI cold/miss/hit/fallback integration",
+    "per-package mixed reuse"
+  ]
+}

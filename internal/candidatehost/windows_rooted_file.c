@@ -113,12 +113,12 @@ int32_t fairyc_private_windows_root_file_delete_v1(size_t file) {
     FILE_DISPOSITION_INFO information = { TRUE };
     return SetFileInformationByHandle((HANDLE)(uintptr_t)file, FileDispositionInfo, &information, sizeof(information));
 }
-int32_t fairyc_private_windows_root_file_rename_v1(size_t file, size_t root, const uint8_t *leaf, size_t bytes) {
+static int32_t fy_root_file_rename(size_t file, size_t root, const uint8_t *leaf, size_t bytes, BOOLEAN replace) {
     if (root == 0) { SetLastError(ERROR_INVALID_PARAMETER); return 0; }
     if (!fy_root_leaf(leaf, bytes)) { return 0; }
     struct { FILE_RENAME_INFO information; WCHAR tail[255]; } buffer;
     memset(&buffer, 0, sizeof(buffer));
-    buffer.information.ReplaceIfExists = TRUE;
+    buffer.information.ReplaceIfExists = replace;
     buffer.information.RootDirectory = (HANDLE)(uintptr_t)root;
     buffer.information.FileNameLength = (DWORD)bytes;
     memcpy(buffer.information.FileName, leaf, bytes);
@@ -132,6 +132,18 @@ int32_t fairyc_private_windows_root_file_rename_v1(size_t file, size_t root, con
         (ULONG)(sizeof(FILE_RENAME_INFO) + bytes), (FILE_INFORMATION_CLASS)10);
     if (status < 0) { SetLastError(error(status)); return 0; }
     return 1;
+}
+
+int32_t fairyc_private_windows_root_file_rename_v1(size_t file, size_t root, const uint8_t *leaf, size_t bytes) {
+    return fy_root_file_rename(file, root, leaf, bytes, TRUE);
+}
+int32_t fairyc_private_windows_root_file_publish_new_v1(size_t file, size_t root, const uint8_t *leaf, size_t bytes) {
+    return fy_root_file_rename(file, root, leaf, bytes, FALSE);
+}
+size_t fairyc_private_windows_root_file_time_v1(void) {
+    FILETIME now;
+    GetSystemTimeAsFileTime(&now);
+    return (size_t)(((uint64_t)now.dwHighDateTime << 32) | now.dwLowDateTime);
 }
 
 struct fy_root_file_metadata_v1 { size_t identity; size_t modified; size_t size; uint32_t attributes; };

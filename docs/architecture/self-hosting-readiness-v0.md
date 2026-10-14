@@ -1,5 +1,18 @@
 # Self-hosting readiness v0
 
+Private candidate disk store (2026-10-14): `examples/lexer_candidate/src/project_cache_disk.fy`
+now persists raw `FYCACHE0` candidates as content-addressed generations under a
+caller-supplied dedicated non-reparse root, staging exclusively, publishing without
+replacement and sweeping back to the declared entry and byte limits. All five
+authored disk tests pass Go-native and candidate C development/release alongside the
+seven rooted-file regressions, the source input hashes match the final receipts, and
+the root and locked source checks pass 512 files / 6347 MIR functions. Cached bytes
+grant no authority: actual checked artifact restoration from disk and CLI reuse,
+per-package mixed reuse, the current complete fixed point, product
+defaults/performance, Linux/full suite and same-head CI remain open. Contract:
+[candidate-project-disk-cache-v0.md](candidate-project-disk-cache-v0.md).
+Receipt: [candidate-project-disk-cache-20261014.json](../ops/evidence/candidate-project-disk-cache-20261014.json).
+
 Private retained-root enumeration and metadata-guarded retention (2026-10-14):
 a new private Directory scan reads `FILE_ID_BOTH_DIR_INFO` batches of at most
 64 KiB through the same non-reparse handle, visits at most 4096 entries under a
