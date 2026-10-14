@@ -7,7 +7,7 @@ import std::vec as v;
 pub resource Index {v::Vec<usize> slots;cleanup{}}
 fn usize bucket(usize module_index,usize declaration,usize mask){return (module_index*104729 ^ declaration*3266489917)&mask;}
 pub fn Result<Index,u32> build(ref ir::Program p,ref mut usize work){
-    let count=ir::callable_count(p);if(count>4096){return .err(1002);}var usize size=1;while(size<count*2){size*=2;}
+    let count=ir::callable_count(p);if(count>limits::project_callables()){return .err(1002);}var usize size=1;while(size<count*2){size*=2;}
     var v::Vec<usize> slots=v::empty<usize>();var usize i=0;while(i<size){if(!budget::charge(work,1)){return .err(1002);}if(!v::push<usize>(ref mut slots,0).is_ok){return .err(1003);}i+=1;}
     i=0;while(i<count){let c=ir::callable_at(p,i);if(c.module_index>=limits::source_files() || c.declaration==0 || c.declaration>1048576){return .err(1001);}var usize at=bucket(c.module_index,c.declaration,size-1);
         while(true){if(!budget::charge(work,1)){return .err(1002);}let id=*v::at<usize>(ref slots,at);if(id==0){let cell=v::at_mut<usize>(ref mut slots,at);*cell=i+1;break;}let old=ir::callable_at(p,id-1);if(old.module_index==c.module_index && old.declaration==c.declaration){return .err(1001);}at=(at+1)&(size-1);}i+=1;

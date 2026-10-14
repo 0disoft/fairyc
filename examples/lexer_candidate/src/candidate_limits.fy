@@ -34,8 +34,9 @@ pub fn usize program_expressions(){return 16384;}
 // Files, types, callables, bytes and work keep their independent bounds.
 pub fn usize project_frames(){return 8192;}
 
-// Callable prototypes combine separately bounded unit interfaces.
-pub fn usize project_callables(){return 4096;}
+// The cache-connected dispatcher crosses 4096 original signatures. Prototypes
+// cannot outgrow the existing declaration catalog; keep those bounds aligned.
+pub fn usize project_callables(){return project_declarations();}
 
 // Whole-project rebinding combines independently capped producer histories.
 // The complete dispatcher exceeds 4 MiB during owned IR revalidation. Each

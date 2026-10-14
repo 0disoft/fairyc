@@ -1,4 +1,5 @@
 module module_signatures;
+import candidate_limits as limits;
 import module_catalog as catalog;
 import module_state_declarations as state_declarations;
 import module_state_layout as state;
@@ -76,7 +77,7 @@ pub fn Result<Program,catalog::Problem> build_catalog(ref v::Vec<syntax::Parsed>
                 let bool repr_result=t.kind==2 && repr::read(v::at<syntax::Parsed>(sources,t.module_index),t.declaration-1).repr_c;
                 let ffi=foreign::read_signature(p,index,repr_result || ffi_type(sources,ref graph,result.type,true),true);
                 if(ffi.code!=0){return .err(fail(ffi.code,module_index,ffi.start,ffi.end));}link_start=bytes::len(ref links);let name=syntax::source_view(p)[ffi.link_start..ffi.link_end];if(name.len>1048576-bytes::len(ref links) || !bytes::append(ref mut links,name).is_ok){return .err(fail(11,module_index,d.start,d.end));}link_end=bytes::len(ref links);}
-            if(v::len<usize>(ref parameters)-parameter_start>128 || v::len<Signature>(ref signatures)>=4096){return .err(fail(10,module_index,d.start,d.end));}
+            if(v::len<usize>(ref parameters)-parameter_start>128 || v::len<Signature>(ref signatures)>=limits::project_callables()){return .err(fail(10,module_index,d.start,d.end));}
             let usize parameter_count=v::len<usize>(ref parameters)-parameter_start;
             if(d.kind==9){var usize previous=0;while(previous<v::len<Signature>(ref signatures)){let old=*v::at<Signature>(ref signatures,previous);if(old.foreign && bytes::equal(bytes::view(ref links)[old.link_start..old.link_end],bytes::view(ref links)[link_start..link_end])){if(old.result!=result.type || old.parameter_count!=parameter_count){return .err(fail(5106,module_index,d.start,d.end));}var usize n=0;while(n<parameter_count){if(*v::at<usize>(ref parameters,old.parameter_start+n)!=*v::at<usize>(ref parameters,parameter_start+n)){return .err(fail(5106,module_index,d.start,d.end));}n+=1;}}previous+=1;}}
             if(!v::push<Signature>(ref mut signatures,Signature{.module_index,.declaration=index+1,.public=d.public,.result=result.type,.parameter_start,.parameter_count,.effects=contract.bits,.must_use=contract.must_use,.unsafe_call=d.unsafe_end!=0,.foreign=d.kind==9,.link_start,.link_end}).is_ok){return .err(fail(11,module_index,d.start,d.end));}
