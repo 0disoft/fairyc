@@ -65,8 +65,10 @@ structurally valid extra rows and preserving late source-check locations:
 Restored state now matches freshly derived current declarations across row
 and owner reordering, including exact UID/codec/name/order/span/hash facts:
 [state match receipt](evidence/candidate-project-artifact-state-20261014.json).
-Current SDK reconciliation still precedes checked Complete-owner rebinding
-and cache reuse.
+Restored SDK selection now matches exact current module indices, SDK IDs
+and authenticated bytes, rejecting missing/extra/misbound authority:
+[SDK match receipt](evidence/candidate-project-artifact-sdk-20261014.json).
+Checked Complete-owner rebinding and actual cache reuse remain open.
 
 Current source-identified build/run integration:
 [2026-10-14 native checkpoint](candidate-identified-native-20261014.md).
