@@ -87,3 +87,34 @@ regressions run with them on the same three paths, Go-native and candidate C
 development/release, and the root and locked source checks pass 512 files / 6347 MIR
 functions. Evidence:
 [candidate-project-disk-cache-20261014.json](../ops/evidence/candidate-project-disk-cache-20261014.json).
+
+## Checked disk owner admission
+
+`project_cache_artifact.from_disk` and `to_disk` connect the private store to
+checked compiler owners without widening the store contract. `from_disk` derives
+the exact loaded-source, SDK and compiler route, inventories the retained root
+once, then tries matching generations newest to oldest. Every candidate re-enters
+the existing `restore` path with no shortcut: full current source, body, Flow,
+state, SDK and table coverage plus exact instance-ordered v4/v0 key preimages.
+Only an opaque `core::Complete` escapes, so a stale or hostile generation is never
+lowered into replacement IR.
+
+A permanent admission failure rejects only the leaf observed during that
+successful read, matched by file ID, modification time, size and attributes, so a
+concurrent replacement, active writer or reparse leaf survives. Bound and
+allocation codes 10/11/1002/1003 stop the attempt and leave valid generations
+intact. Every attempt shares one monotonic `DiskWork`: lookup, scan, projection,
+source and key histories are 16 MiB each, I/O and artifact are 1 GiB each, and link
+is 8 MiB. `Candidates` and `Candidate` are detached private owners usable only with
+the same live `Store`; the numeric cursor index stays monotonic and every visited
+row is charged.
+
+`to_disk` checks the caller's original `Complete`, encodes and routes it, then
+delegates immutable disk publication. No default CLI cache is enabled yet. The
+three checked disk restore tests pass on all three profiles, Go-native, C
+development and C release, and their stdout matches byte-for-byte at 61,968 bytes
+per run (SHA-256 8acc48cf048cbee1998f7efd3dffcb6a3f39155e2f5b0bcded824b97819e7947). The five disk
+transport regressions also pass on all three profiles and write no stdout. In the
+development and release profiles the restored Vec executions build at exit 0, run
+at exit 42 and leave empty streams.
+Receipt: [candidate-checked-disk-owner-20261014.json](../ops/evidence/candidate-checked-disk-owner-20261014.json).

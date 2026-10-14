@@ -1,5 +1,33 @@
 # Fairy 컴파일러 전환: 후속 작업 목록
 
+Checked disk owner reuse (2026-10-14): `project_cache_artifact.from_disk` and
+`to_disk` now connect the private store to checked compiler owners. `from_disk`
+derives the exact loaded-source, SDK and compiler route, inventories the retained
+root once and tries matching generations newest to oldest; each candidate re-enters
+the existing `restore` with full current source, body, Flow, state, SDK and table
+coverage plus exact instance-ordered v4/v0 key preimages, so only an opaque
+`core::Complete` escapes. A permanent admission failure rejects only the leaf
+observed during that read, by ID, time, size and attributes, so a concurrent
+replacement, writer or reparse leaf survives, while codes 10/11/1002/1003 stop the
+attempt and keep valid generations. All attempts share one monotonic `DiskWork`
+(lookup/scan/projection/source/key 16 MiB each, I/O/artifact 1 GiB each, link
+8 MiB), and `Candidates`/`Candidate` are detached private owners used with the
+same live `Store` under a monotonic cursor index with every visited row charged.
+`to_disk` checks the original `Complete`, encodes and routes, then delegates
+immutable disk publication. The three checked disk restore tests and the five disk
+immutable disk publication. The three checked disk restore tests pass on all three
+profiles, Go-native, C development and C release, over real Plain, scalar generic,
+State and Vec sources, and their stdout matches byte-for-byte at 61,968 bytes per
+run (SHA-256 8acc48cf048cbee1998f7efd3dffcb6a3f39155e2f5b0bcded824b97819e7947). The five disk transport
+regressions also pass on all three profiles and write no stdout. In the development
+and release profiles the restored Vec executions build at exit 0, run at exit 42 and
+leave empty streams. Receipt:
+[candidate-checked-disk-owner-20261014.json](evidence/candidate-checked-disk-owner-20261014.json). The root source check and
+the locked root run both pass 512 files / 6361 MIR functions with the lock verified
+and exit 0. No default CLI cache is enabled yet: CLI
+selection and cold fallback, per-package mixed reuse, the current complete fixed
+point, product defaults/performance, Linux/full suite and same-head CI remain open.
+
 Private candidate disk store (2026-10-14): `examples/lexer_candidate/src/project_cache_disk.fy`
 now persists raw `FYCACHE0` candidates as content-addressed generations under a
 caller-supplied dedicated non-reparse root, staging exclusively, publishing without
