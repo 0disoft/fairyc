@@ -1,5 +1,20 @@
 # Self-hosting readiness v0
 
+## Candidate-built check cache command (2026-10-15)
+
+The 507-input full dispatcher now emits its 39118523-byte C packet through the
+Fairy-built emitter without a Go frontend fallback and builds at both private
+Windows profiles. All 42 fresh-process observations pass: 32 candidate commands
+and 10 Go oracle commands. Cold publication, verified and silent hits, corrupt
+record repair, missing-root fallback, private-body invalidation, exact invalid-body
+diagnostics, option errors and imported generic/Vec reuse retain the expected
+streams and statuses. Candidate source and image hashes remain exact during the
+run. The private images use explicit 16MiB stacks; product stack/deadline/cache
+policy is unchanged. This supersedes the earlier unverified full cache-command
+image notes for this snapshot. Build/run cache connection, package mixed reuse,
+latest full fixed point and platform/CI promotion remain open. Receipt:
+[candidate-check-cache-c-cli-20261015.json](../ops/evidence/candidate-check-cache-c-cli-20261015.json).
+
 ## C projection fast path (2026-10-14)
 
 An isolated diagnostic snapshot completes preparation, then exceeds project work
