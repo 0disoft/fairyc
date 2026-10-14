@@ -46,8 +46,12 @@ Unit metadata now matches current checked layout names/flags/spans, ordered
 fields and enum payload relations, ordinary/template callable contracts,
 parameters and linker names. Detached maps retain the matched metadata IDs:
 [metadata match receipt](../ops/evidence/candidate-project-artifact-metadata-20261014.json).
-Whole-project coverage and current state/SDK reconciliation still precede
-checked Complete-owner rebinding and cache reuse.
+Every source range and retained frame/type/layout/field/cleanup-field/callable/
+parameter/name-byte table now has exact whole-project coverage, rejecting
+structurally valid extra rows and preserving late source-check locations:
+[coverage receipt](../ops/evidence/candidate-project-artifact-coverage-20261014.json).
+Current state/SDK reconciliation still precedes checked Complete-owner
+rebinding and cache reuse.
 The current candidate-owned IR environment is verified in the
 [environment checkpoint](../ops/candidate-cache-environment-20261014.md).
 The actual running Windows compiler image identity is verified
