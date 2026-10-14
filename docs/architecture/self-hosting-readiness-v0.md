@@ -1,5 +1,25 @@
 # Self-hosting readiness v0
 
+## Cached dispatcher Stage1/Stage2 fixed point (2026-10-15)
+
+The 507-source dispatcher at `3ce18653` completes consecutive C-part generations.
+Both generated C packets match exactly (39,217,329 bytes), and the complete
+Stage1/Stage2 PE images match exactly (5,531,648 bytes, no excluded bytes).
+Both stages pass 249 current Go lexer cases plus malformed framing checks.
+The recorded seed is an emitter-only Fairy candidate; its lexer protocol is not
+claimed. Native images use a private 16 MiB stack and the frontend verification
+allowance is 900 seconds; product defaults are unchanged.
+
+The receipt was revalidated against all 507 current source hashes, both packets,
+both images, the seed and the reference lexer. The maintained verifier reused
+the completed native builds and reran the lexer differential. This closes the
+latest-source fixed-point item for this snapshot and supersedes older pending
+fixed-point notes below. It does not establish full frontend equivalence.
+Per-package mixed cache reuse, product policies/performance, full frontend
+differential, Linux and current-commit hosted CI remain open. Promotion stays
+blocked and Go remains the bootstrap/reference implementation.
+Receipt: [cached dispatcher bootstrap](../ops/evidence/candidate-complete-cache-bootstrap-20261015.json).
+
 ## Private cached build and run commands (2026-10-15)
 
 The private native dispatcher accepts explicit `--cache-root <existing directory>`
@@ -1636,7 +1656,7 @@ The start gate is closed while any `start` row is `blocked`. A row becomes `read
 | Source maps and durable source identity | start | ready | Lossless source ownership, source spans, Atlas durable anchors, emitted-source mapping and diagnostic source-location contracts under `docs/atlas/` and compiler fixtures | none; #48 is editor tooling, not a bootstrap prerequisite |
 | Diagnostics suitable for differential comparison | start | ready | Stable diagnostic catalog/codes, structured diagnostics, source anchors and compile-fail fixtures under `docs/diagnostics/` | none |
 | Test runner suitable for bootstrap comparison | start | ready | Stable package test discovery/execution plus versioned list/report JSON documented by the CLI and exercised by native test fixtures | none |
-| Reproducible two-stage bootstrap evidence | promotion | blocked | The Go compiler is the only authoritative stage-0 implementation; no Fairy compiler stage has been admitted | the first bounded candidate must produce matching stage1/stage2 artifacts and differential results |
+| Reproducible two-stage bootstrap evidence | promotion | blocked | The 507-source Windows C-part candidate has exact Stage1/Stage2 packet and full-image equality plus 249 Go lexer cases; see the 2026-10-15 cached dispatcher receipt above | full frontend differential, Linux and current-commit hosted CI remain; the bounded fixed point alone does not promote the candidate |
 
 ## First component after the gate opens
 
@@ -2111,7 +2131,7 @@ The eventual bootstrap gate requires `stage1` and `stage2` to match under the re
 
 ## Authority and rollback
 
-Until all rows are ready and the two-stage evidence lands, the Go compiler remains the sole bootstrap and reference semantics implementation. A Fairy port is an experimental differential implementation and may be deleted without a compatibility promise.
+Until all promotion rows are ready, the Go compiler remains the sole authoritative bootstrap and reference semantics implementation. The bounded two-stage evidence above does not replace that authority. A Fairy port is an experimental differential implementation and may be deleted without a compatibility promise.
 
 If a prerequisite regresses, self-hosting promotion stops. Existing Go release and bootstrap paths remain the recovery path; no release may require the Fairy-written compiler while this gate is closed.
 

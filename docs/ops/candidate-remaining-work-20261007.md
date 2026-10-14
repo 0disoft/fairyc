@@ -1,5 +1,22 @@
 # Fairy 컴파일러 전환: 후속 작업 목록
 
+## Cached dispatcher bootstrap complete (2026-10-15)
+
+The latest 507-source dispatcher at `3ce18653` passes consecutive Stage1/Stage2
+verification: exact 39,217,329-byte C packets, exact 5,531,648-byte PE images and
+249 Go lexer cases plus malformed framing checks. The maintained reuse verifier
+rechecks current sources and recorded artifacts and reruns the lexer cases;
+native C emission/builds were reused, not repeated for this documentation update.
+The seed is emitter-only, with private 16 MiB stage stacks and a 900-second
+frontend verification allowance. Product defaults and promotion remain unchanged.
+
+This supersedes earlier latest-source fixed-point pending notes for this snapshot.
+Next: per-package hit/miss reuse and reassembly with interface/body/generic/SDK
+invalidation, followed by measured product policies and the broader frontend,
+Linux and current-commit hosted CI gates. Full frontend equivalence and candidate
+promotion are still open. Receipt:
+[cached dispatcher bootstrap](evidence/candidate-complete-cache-bootstrap-20261015.json).
+
 ## Private cached build and run commands (2026-10-15)
 
 The private native dispatcher accepts explicit `--cache-root <existing directory>`
