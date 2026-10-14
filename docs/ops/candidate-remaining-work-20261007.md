@@ -1,5 +1,12 @@
 # Fairy 컴파일러 전환: 후속 작업 목록
 
+Cold-owner snapshot extraction now belongs to a separate adapter. Detached
+identity validation and all restored consumers depend on neither the cold
+identity table nor the checked project owner. Four authored identity/codec
+tests pass Go native and both C profiles; root/locked checks pass 505 files
+and 6234 MIR functions. [Extraction receipt](evidence/candidate-identity-snapshot-extract-20261014.json).
+Complete-owner restoration and actual cache reuse remain open.
+
 Whole-package cache-key v4 encoding is now verified in the
 [2026-10-14 cache-key checkpoint](candidate-package-cache-key-20261014.md).
 Source-generic cache-key v0 encoding is also verified in the

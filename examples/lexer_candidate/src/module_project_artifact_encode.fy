@@ -4,13 +4,14 @@ import module_unit_body_ir_model as ir;
 import module_source_artifact_model as source_model;
 import module_source_artifact_encode as sources;
 import module_identity_artifact_model as identity_model;
+import module_identity_artifact_extract as snapshot_extract;
 import module_identity_artifact_encode as identities;
 import module_program_artifact_encode as programs;
 import module_project_artifact_model as model;
 import module_program_artifact_wire as wire;
 import candidate_artifact_wire as component;
 
-pub fn Result<component::Payload,u32> encode(ref project::Program p,ref mut usize work){if(!wire::charge(work,0)){return .err(1002);}var usize measured=0;let stamps=switch(source_model::extract(project::source_provenance(p),ref mut measured)){case .ok(p):{p}case .err(code):{if(!wire::charge(work,measured)){return .err(1002);}return .err(code);}};if(!wire::charge(work,measured)){return .err(1002);}measured=0;let ids=switch(identity_model::extract(project::source_identities(p),ir::cleanup_ir(project::ir_program(p)),ref mut measured)){case .ok(p):{p}case .err(code):{if(!wire::charge(work,measured)){return .err(1002);}return .err(code);}};if(!wire::charge(work,measured)){return .err(1002);}
+pub fn Result<component::Payload,u32> encode(ref project::Program p,ref mut usize work){if(!wire::charge(work,0)){return .err(1002);}var usize measured=0;let stamps=switch(source_model::extract(project::source_provenance(p),ref mut measured)){case .ok(p):{p}case .err(code):{if(!wire::charge(work,measured)){return .err(1002);}return .err(code);}};if(!wire::charge(work,measured)){return .err(1002);}measured=0;let ids=switch(snapshot_extract::extract(project::source_identities(p),ir::cleanup_ir(project::ir_program(p)),ref mut measured)){case .ok(p):{p}case .err(code):{if(!wire::charge(work,measured)){return .err(1002);}return .err(code);}};if(!wire::charge(work,measured)){return .err(1002);}
     return components(project::ir_program(p),ref stamps,ref ids,work);
 }
 pub fn Result<component::Payload,u32> restored(ref model::Restored p,ref mut usize work){return components(model::program(p),model::source_provenance(p),model::source_identities(p),work);}

@@ -1,5 +1,12 @@
 # Self-hosting readiness v0
 
+Cold-owner snapshot extraction now belongs to a separate adapter. Detached
+identity validation and all restored consumers depend on neither the cold
+identity table nor the checked project owner. Four authored identity/codec
+tests pass Go native and both C profiles; root/locked checks pass 505 files
+and 6234 MIR functions. [Extraction receipt](../ops/evidence/candidate-identity-snapshot-extract-20261014.json).
+Complete-owner restoration and actual cache reuse remain open.
+
 Cache-key v4/v0 encoders and the checked ordinary state-body identity are now
 verified: [key checkpoint](../ops/candidate-generic-cache-key-20261014.md) and
 [body checkpoint](../ops/candidate-cache-body-identity-20261014.md).

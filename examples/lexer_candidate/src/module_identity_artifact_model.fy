@@ -1,5 +1,4 @@
 module module_identity_artifact_model;
-import module_project_identities as identities;
 import module_source_specializations as selection;
 import module_public_interface_model as records;
 import module_unit_cleanup_mir_model as clean;
@@ -31,6 +30,3 @@ pub fn u32 check(ref Snapshot p,ref clean::Program context,ref mut usize work){
     }if(!budget::charge(work,names(p).len+1)){return 1002;}let covered=bytes::view(ref coverage);i=0;while(i<covered.len){if(covered[i]!=1){return 1001;}i+=1;}return 0;
 }
 pub fn Result<Snapshot,u32> assemble(bytes::Buffer names,v::Vec<selection::Row> types,v::Vec<selection::Row> frames,ref clean::Program context,ref mut usize work){let p=Snapshot{.names,.types,.frames};let code=check(ref p,context,work);if(code!=0){return .err(code);}return .ok(p);}
-pub fn Result<Snapshot,u32> extract(ref identities::Table input,ref clean::Program context,ref mut usize work){if(!budget::charge(work,1)){return .err(1002);}if(identities::type_count(input)>4096 || identities::frame_count(input)>limits::project_frames() || identities::names_view(input).len>1048576){return .err(1002);}if(!budget::charge(work,identities::names_view(input).len+1)){return .err(1002);}let names=switch(bytes::copy(identities::names_view(input))){case .ok(p):{p}case .err(_):{return .err(1003);}};
-    var v::Vec<selection::Row> types=v::empty<selection::Row>();var v::Vec<selection::Row> frames=v::empty<selection::Row>();var usize i=1;while(i<=identities::type_count(input)){if(!budget::charge(work,1)){return .err(1002);}if(!v::push<selection::Row>(ref mut types,identities::type_at(input,i)).is_ok){return .err(1003);}i+=1;}i=1;while(i<=identities::frame_count(input)){if(!budget::charge(work,1)){return .err(1002);}if(!v::push<selection::Row>(ref mut frames,identities::frame_at(input,i)).is_ok){return .err(1003);}i+=1;}return assemble(names,types,frames,context,work);
-}
