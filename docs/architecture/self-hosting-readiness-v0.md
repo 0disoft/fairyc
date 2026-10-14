@@ -42,8 +42,12 @@ operands, all nine exit reasons and per-frame order without replacement MIR:
 Resource/Vec cleanup recipes now match current checked interfaces, including
 body links, effects, abilities and ordered field types without replacement MIR:
 [recipe receipt](../ops/evidence/candidate-project-artifact-recipes-20261014.json).
-Complete metadata and whole-project coverage still precede checked
-Complete-owner rebinding and cache reuse.
+Unit metadata now matches current checked layout names/flags/spans, ordered
+fields and enum payload relations, ordinary/template callable contracts,
+parameters and linker names. Detached maps retain the matched metadata IDs:
+[metadata match receipt](../ops/evidence/candidate-project-artifact-metadata-20261014.json).
+Whole-project coverage and current state/SDK reconciliation still precede
+checked Complete-owner rebinding and cache reuse.
 The current candidate-owned IR environment is verified in the
 [environment checkpoint](../ops/candidate-cache-environment-20261014.md).
 The actual running Windows compiler image identity is verified
