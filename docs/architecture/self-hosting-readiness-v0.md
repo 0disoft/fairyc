@@ -1,5 +1,19 @@
 # Self-hosting readiness v0
 
+The pre-compilation whole-project lookup hint now binds the actual compiler
+image/closed IR profile, root, exact source/SDK instance IDs and resolved binding
+edges in canonical package/binding order. It requires no Complete owner and
+confers no reuse authority: selected envelopes still require complete source
+admission and every v4/v0 preimage comparison. Two authored tests pass Go-native
+and candidate C development/release; independent Python decoding checks all 27
+routes, current-image SHA, canonical framing and unchanged-root private-body,
+binding and feature invalidation. Nine workspaces reproduce all 54 source and
+manifest files exactly. Exact/exhausted 16MiB budgets pass; root and locked
+checks pass 510 files / 6289 MIR functions. [Lookup receipt](../ops/evidence/candidate-project-lookup-20261014.json).
+Disk reading/atomic publication and CLI selection are next; per-package mixed
+reuse, current full fixed point, product defaults/performance and platform/CI
+promotion remain open. No public CLI/SDK ABI, CI or push change.
+
 A candidate cache envelope now binds every canonical package v4/v0 key preimage
 to its complete IR/source/identity payload. Restore re-enters current source,
 body/Flow, state, SDK and interface admission, regenerates keys from the actual

@@ -7,6 +7,7 @@ import re
 import struct
 import subprocess
 import time
+from candidate_lookup_receipt import lookup_ledger
 
 ROOT = Path(__file__).resolve().parents[1]
 PROJECT = ROOT / 'examples/lexer_candidate'
@@ -94,6 +95,7 @@ def main():
     parser.add_argument('--stdout-executable-identity', action='store_true', help='expect the exact running image SHA-256 identity on stdout and verify a spoofed argv[0] launch too')
     parser.add_argument('--stdout-package-cache-keys', action='store_true', help='verify a binary package-key ledger against full executed image identity and Python SHA-256')
     parser.add_argument('--stdout-artifact', action='store_true', help='compare complete nonempty Go-native and both candidate stdout streams, then save verified-stdout.bin under --output; requires native-program')
+    parser.add_argument('--stdout-project-lookup', action='store_true', help='verify lookup preimages, current executable SHA, graph ordering and cross-image equality with Python')
     parser.add_argument('--stderr-fixture', type=Path, help='expected complete candidate stderr, empty by default')
     parser.add_argument('--unchanged-paths', type=Path, help='JSON list of repository-relative paths whose bytes and modification times must remain unchanged')
     args = parser.parse_args()
@@ -119,6 +121,8 @@ def main():
         parser.error('stdout-package-cache-keys requires native-program or candidate-only and excludes other stdout modes')
     if args.stdout_artifact and (not args.native_program or args.stdout_fixture or args.stdout_executable_identity or args.stdout_package_cache_keys):
         parser.error('stdout-artifact requires native-program and excludes other stdout modes')
+    if args.stdout_project_lookup and (not args.native_program or args.stdout_fixture or args.stdout_executable_identity or args.stdout_package_cache_keys or args.stdout_artifact):
+        parser.error('stdout-project-lookup requires native-program and excludes other stdout modes')
     if not __debug__:
         parser.error('verification requires Python without -O')
     if not re.fullmatch(r'[a-z][a-z0-9_]*', args.module):
@@ -293,6 +297,9 @@ def main():
             elif args.stdout_package_cache_keys:
                 key_ledgers.append(dict(profile='Go-native', facts=package_key_ledger(native.stdout, built[0])))
                 (output / 'native-key-ledger.bin').write_bytes(native.stdout)
+            elif args.stdout_project_lookup:
+                key_ledgers.append(dict(profile='Go-native', facts=lookup_ledger(native.stdout, built[0])))
+                (output / 'native-lookup-ledger.bin').write_bytes(native.stdout)
             else:
                 assert native.stdout == expected_stdout, 'Go program output differs from the expected complete fixture'
             if args.stdout_executable_identity:
@@ -331,6 +338,12 @@ def main():
         elif args.stdout_package_cache_keys:
             key_ledgers.append(dict(profile=profile, facts=package_key_ledger(executed.stdout, image)))
             (output / (profile + '-key-ledger.bin')).write_bytes(executed.stdout)
+        elif args.stdout_project_lookup:
+            facts = lookup_ledger(executed.stdout, image)
+            normalized = lambda value: [(row['case'], row['normalizedSHA256']) for row in value['rows']]
+            assert normalized(facts) == normalized(key_ledgers[0]['facts']), 'lookup graph/profile facts differ from Go-native'
+            key_ledgers.append(dict(profile=profile, facts=facts))
+            (output / (profile + '-lookup-ledger.bin')).write_bytes(executed.stdout)
         else:
             assert executed.stdout == expected_stdout, invocations[-1]
         if args.stdout_executable_identity:
@@ -343,6 +356,8 @@ def main():
     if native_program is not None:
         assert digest(Path(native_program['path'])) == native_program['sha256'], 'Go native program changed during verification'
     receipt = dict(schema='fairyc.candidate-private-tests/v1', passed=True, module=args.module, sourceInputs=source_inputs, tools=images, native=report, nativeTests=0 if args.candidate_only else len(expected), authoredTestsExecuted=len(expected), candidateOnly=args.candidate_only, lockSHA256=lock_sha256, candidateInputFiles=len(paths), candidatePacketSHA256=digest(packet_path), candidateExecutions=executions, invocations=invocations, publicApiChanged=False, dbChanged=False, ciChanged=False, pushed=False)
+    if args.stdout_project_lookup:
+        receipt['projectLookupLedgers'] = key_ledgers
     if native_program is not None:
         receipt['nativeProgram'] = native_program
     receipt['selection'] = dict(mode='explicit-subset' if args.selected_tests_only else 'all-authored', authoredTests=len(test_names), selectedTests=len(expected))

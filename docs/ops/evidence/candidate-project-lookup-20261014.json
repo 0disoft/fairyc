@@ -1,0 +1,829 @@
+{
+  "schema": "fairyc.candidate-project-lookup/v0",
+  "parentCommit": "a4e1afcf698bd1adf318a3ef5447da3891f8e4ac",
+  "passed": true,
+  "sourceInputs": [
+    {
+      "path": "examples/lexer_candidate/src/project_cache_lookup.fy",
+      "sha256": "77f40605f544b8d13650eb2a12d6c2ac73c57868da8a6962ec1ba7d26b61a4f6"
+    },
+    {
+      "path": "examples/lexer_candidate/tests/project_cache_lookup.fy",
+      "sha256": "d3c5b27cd56add32f698662e6627af063639193571e6261c06f13a342509159c"
+    },
+    {
+      "path": "tools/verify-candidate-private-tests.py",
+      "sha256": "b12b6342e09b2ccfb890f53e72584f3fa50f96be37802a13d57c8409f3663c44"
+    },
+    {
+      "path": "tools/candidate_lookup_receipt.py",
+      "sha256": "061cff80e80e2cd6d79b27f8bd8883c7d0da8d58f6d613220585adc268ccf7d3"
+    },
+    {
+      "path": "tools/prepare-candidate-project-lookup-fixture.py",
+      "sha256": "3faa083f37df45d3710ab6d965dbe54f1b6a8aba7529e3dd2c8a81a0625e0fbd"
+    }
+  ],
+  "sourceCheck": {
+    "files": 510,
+    "mirFunctions": 6289,
+    "unlocked": {
+      "exit": 0,
+      "stdout": "check ok: 2 instance(s), 510 source file(s), 6289 MIR function(s), lock updated"
+    },
+    "locked": {
+      "exit": 0,
+      "stdout": "check ok: 2 instance(s), 510 source file(s), 6289 MIR function(s), lock verified"
+    },
+    "lockSHA256": "6d1d77338e564fafb661f190e719eb6ed7c43ce31ad83fe7ffbcab64663e5263"
+  },
+  "tests": {
+    "schema": "fairyc.candidate-private-tests/v1",
+    "passed": true,
+    "module": "project_cache_lookup",
+    "tools": {
+      "compiler": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-frontend-oracle-current-20261012.exe",
+        "sha256": "3ecc4501ee3bb47ecc39e7288200266b31cbcd8bf6ffec302ae54867705ce5d1"
+      },
+      "candidate": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-fields-emitter-20261014\\driver-release.exe",
+        "sha256": "454aafa618a1930f024a461c8b274301a72280abc457971d2905ce0ddce9e9c2"
+      },
+      "builder": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-rooted-builder-stack-20261012.exe",
+        "sha256": "02abe2328daa9921705910c7b995e82c1312cb960fe024106c11468569aefff0"
+      },
+      "nativeHostBuilder": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\cache-artifact-20261014\\native-host-builder.exe",
+        "sha256": "6c71c1ec44df8c3f78ba723b662683f665701c821aeedca9c76aa9e14037796b"
+      },
+      "nativeStackEditor": {
+        "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\editbin.exe",
+        "sha256": "be37ead809e0cab3b62ff7c141fece6655b6c6ab1e2951a118abbaef48acbc07"
+      }
+    },
+    "native": null,
+    "nativeTests": 2,
+    "authoredTestsExecuted": 2,
+    "candidateOnly": false,
+    "lockSHA256": "6d1d77338e564fafb661f190e719eb6ed7c43ce31ad83fe7ffbcab64663e5263",
+    "candidateInputFiles": 161,
+    "candidatePacketSHA256": "244b89b91b29fda66ea0a1aea41aa2014790a497f9ac893f1722ccc3c8beb183",
+    "candidateExecutions": [
+      {
+        "profile": "development",
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\cache-lookup-20261014\\tests\\development.exe",
+        "sha256": "94d60ed8644fcc14d4bfb0e1ac506aaf96d25886a766655fb5657c9c3241326b",
+        "exit": 0
+      },
+      {
+        "profile": "release",
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\cache-lookup-20261014\\tests\\release.exe",
+        "sha256": "dff1e9eff507265f2586e37c311eaaede5733797c735a987fd78b82536ba1e8c",
+        "exit": 0
+      }
+    ],
+    "invocations": [
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-frontend-oracle-current-20261012.exe",
+          "check"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\cache-lookup-20261014\\tests\\native-project-f143249dc01c8f6964ab",
+        "seconds": 8.78603740001563,
+        "exit": 0,
+        "stdoutBytes": 80,
+        "stdoutSHA256": "115744f086e228de99b231d88447fe018beb246e5c1e3b5be93beda2a085eb16",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-frontend-oracle-current-20261012.exe",
+          "experimental",
+          "emit-workspace-c",
+          "--target",
+          "x86_64-windows-msvc",
+          "--locked"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\cache-lookup-20261014\\tests\\native-project-f143249dc01c8f6964ab",
+        "seconds": 10.22793960000854,
+        "exit": 0,
+        "stdoutBytes": 5428745,
+        "stdoutSHA256": "fa1331c114d68e4f8618e76127a65abf87b0094eecafb78f7258c76dc2ccc467",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\cache-artifact-20261014\\native-host-builder.exe",
+          "--source",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\cache-lookup-20261014\\tests\\go-native.c",
+          "--source-sha256",
+          "fa1331c114d68e4f8618e76127a65abf87b0094eecafb78f7258c76dc2ccc467",
+          "--output",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\cache-lookup-20261014\\tests\\native-project-f143249dc01c8f6964ab\\build\\lexer-candidate.exe",
+          "--stack-reserve-bytes",
+          "16777216"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+        "seconds": 3.203421799989883,
+        "exit": 0,
+        "stdoutBytes": 249,
+        "stdoutSHA256": "4f2f1bd68ccae9a5e82f609b87a574c408cdf17f596b22c16279a470c86e0ba6",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\editbin.exe",
+          "/nologo",
+          "/stack:16777216",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\cache-lookup-20261014\\tests\\native-project-f143249dc01c8f6964ab\\build\\lexer-candidate.exe"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\cache-lookup-20261014\\tests\\native-project-f143249dc01c8f6964ab",
+        "seconds": 0.05993240000680089,
+        "exit": 0,
+        "stdoutBytes": 0,
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\cache-lookup-20261014\\tests\\native-project-f143249dc01c8f6964ab\\build\\lexer-candidate.exe",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\cache-lookup-20261014\\root.txt"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\cache-lookup-20261014\\tests\\native-project-f143249dc01c8f6964ab",
+        "seconds": 1.2840040000155568,
+        "exit": 0,
+        "stdoutBytes": 14146,
+        "stdoutSHA256": "c2cd9b66f1d6e8e16e590adacf05290f80cc203a513d274d6ef2b728b40c65c2",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-fields-emitter-20261014\\driver-release.exe",
+          "--c-project-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\cache-lookup-20261014\\tests\\sources.list"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+        "seconds": 39.76162910001585,
+        "exit": 0,
+        "stdoutBytes": 5087335,
+        "stdoutSHA256": "244b89b91b29fda66ea0a1aea41aa2014790a497f9ac893f1722ccc3c8beb183",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-rooted-builder-stack-20261012.exe",
+          "--packet",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\cache-lookup-20261014\\tests\\candidate-packet.bin",
+          "--packet-sha256",
+          "244b89b91b29fda66ea0a1aea41aa2014790a497f9ac893f1722ccc3c8beb183",
+          "--output",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\cache-lookup-20261014\\tests\\development.exe",
+          "--stack-reserve-bytes",
+          "16777216"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+        "seconds": 6.358380899997428,
+        "exit": 0,
+        "stdoutBytes": 170,
+        "stdoutSHA256": "727bdfdb9fdacd748603a130ceb2311ab5992c4f5e57e397665005bf5b56f4bd",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\cache-lookup-20261014\\tests\\development.exe",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\cache-lookup-20261014\\root.txt"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+        "seconds": 11.628787299967371,
+        "exit": 0,
+        "stdoutBytes": 14146,
+        "stdoutSHA256": "c1e975273c419f56aff3f0fc2bfc768da1dd37b291efcbc175bad0260ea7214d",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-rooted-builder-stack-20261012.exe",
+          "--packet",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\cache-lookup-20261014\\tests\\candidate-packet.bin",
+          "--packet-sha256",
+          "244b89b91b29fda66ea0a1aea41aa2014790a497f9ac893f1722ccc3c8beb183",
+          "--output",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\cache-lookup-20261014\\tests\\release.exe",
+          "--release",
+          "--stack-reserve-bytes",
+          "16777216"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+        "seconds": 88.49106470000697,
+        "exit": 0,
+        "stdoutBytes": 171,
+        "stdoutSHA256": "c6d8e687d1b5745f0d16af1d61dc86976eab22541b1a52645afe373d5a4bc205",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\cache-lookup-20261014\\tests\\release.exe",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\cache-lookup-20261014\\root.txt"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+        "seconds": 0.48351809999439865,
+        "exit": 0,
+        "stdoutBytes": 14146,
+        "stdoutSHA256": "9f9109b823376895006ef3901b1b6fb2b0aa52a62357d58968afaf2b7e8889f5",
+        "stderr": ""
+      }
+    ],
+    "publicApiChanged": false,
+    "dbChanged": false,
+    "ciChanged": false,
+    "pushed": false,
+    "projectLookupLedgers": [
+      {
+        "profile": "Go-native",
+        "facts": {
+          "compiler": "fairyc.compiler-executable-sha256/v1:950f856a3c1bf3e60128e38b36ff7e860ee1a6b1e9dd48d61fe8b713caa0a7f9",
+          "rows": [
+            {
+              "case": "Aliases",
+              "root": "fypi1-sha256-ecd68ceecc7ce5c9a7dbe2346b2007e7f7e0dad0b1b7d2b3bd8d4e66a0758a40",
+              "packages": 3,
+              "sdkPackages": 0,
+              "canonicalBytes": 1402,
+              "key": "fylookup0-sha256-edd84a10f4e37cec30baa6759fcfa0d5b1ad22b61de53264304ee3e21a57027d",
+              "normalizedSHA256": "f2691deb79014bd8827f3ca9c90b1cc3baee53e5f334233f6da4ef06be49a9dd"
+            },
+            {
+              "case": "Reordered",
+              "root": "fypi1-sha256-ecd68ceecc7ce5c9a7dbe2346b2007e7f7e0dad0b1b7d2b3bd8d4e66a0758a40",
+              "packages": 3,
+              "sdkPackages": 0,
+              "canonicalBytes": 1402,
+              "key": "fylookup0-sha256-edd84a10f4e37cec30baa6759fcfa0d5b1ad22b61de53264304ee3e21a57027d",
+              "normalizedSHA256": "f2691deb79014bd8827f3ca9c90b1cc3baee53e5f334233f6da4ef06be49a9dd"
+            },
+            {
+              "case": "Plain",
+              "root": "fypi1-sha256-2cb6baeb9272434d9c65ea0246c0b1cfb103b5af1c4e17a9c455281c161c18fa",
+              "packages": 3,
+              "sdkPackages": 0,
+              "canonicalBytes": 1402,
+              "key": "fylookup0-sha256-59911554d8c4b8e0ea1d21392edce2e4e065194e257d2b6728808dff667b436e",
+              "normalizedSHA256": "0c3d82a5a80d90bc49a866682c1523b28fc187333ff65377e7823e7b86e3df4b"
+            },
+            {
+              "case": "PrivateEdit",
+              "root": "fypi1-sha256-ecd68ceecc7ce5c9a7dbe2346b2007e7f7e0dad0b1b7d2b3bd8d4e66a0758a40",
+              "packages": 3,
+              "sdkPackages": 0,
+              "canonicalBytes": 1402,
+              "key": "fylookup0-sha256-b6954cd145b70b6e07be563cde580dedd1a7eb3eed161ac4957f47f94b085817",
+              "normalizedSHA256": "460a0e164d7a84f6fbec1fa11681cbf2f07b78e81e1a3f67c40c3042e6e82094"
+            },
+            {
+              "case": "State",
+              "root": "fypi1-sha256-22cfd2a763d5b79f43f63455c856d1da7b3090b53d4f4eaaf9dfc39a0dc97417",
+              "packages": 3,
+              "sdkPackages": 0,
+              "canonicalBytes": 1402,
+              "key": "fylookup0-sha256-d8dfb43b2bbc5bc080e33cf999ecaf6bd63d4e0fb75e9cdd63d7572be5dfe16b",
+              "normalizedSHA256": "5c37440777b36441e0ba90de4dc81f5a32b989dd344a43f11db460a4bd453269"
+            },
+            {
+              "case": "Vec",
+              "root": "fypi1-sha256-07494873c2c0a11f6b05e559127f643c0414c3d894de32fde8293302769c0207",
+              "packages": 4,
+              "sdkPackages": 1,
+              "canonicalBytes": 1896,
+              "key": "fylookup0-sha256-3bc22929699d22676e983ef80b5fd1383a51e00a7ea57d0805ae8be698d15d90",
+              "normalizedSHA256": "4b33cd933ccbb6e2f2f06e202f1c14468eba9bb80f4d6d94fffb0fdb1393d8ea"
+            },
+            {
+              "case": "BindingEdit",
+              "root": "fypi1-sha256-ecd68ceecc7ce5c9a7dbe2346b2007e7f7e0dad0b1b7d2b3bd8d4e66a0758a40",
+              "packages": 3,
+              "sdkPackages": 0,
+              "canonicalBytes": 1402,
+              "key": "fylookup0-sha256-66b173ee9e3e21c27d2e0fe68143aa44ce8f980d14f66fe83ca83cb753a0f6dd",
+              "normalizedSHA256": "696a8be2cde84630b1b11478a494391a1e430da7355a163f47e7357fa41ec92f"
+            },
+            {
+              "case": "FeatureEdit",
+              "root": "fypi1-sha256-ecd68ceecc7ce5c9a7dbe2346b2007e7f7e0dad0b1b7d2b3bd8d4e66a0758a40",
+              "packages": 3,
+              "sdkPackages": 0,
+              "canonicalBytes": 1402,
+              "key": "fylookup0-sha256-62b87883babeee79e6a3d12391baed9a5fd85a933ef89ea53397f4c5d57994e0",
+              "normalizedSHA256": "4f9347e7ac9a3a90355afcc46f85329b22742d817b35c83a09e7c25aafcaa613"
+            },
+            {
+              "case": "InvalidBody",
+              "root": "fypi1-sha256-0404acbbb2a4e05995c176c4f1107ced655a1d0ce95271f6fb69f0831bda60a5",
+              "packages": 3,
+              "sdkPackages": 0,
+              "canonicalBytes": 1402,
+              "key": "fylookup0-sha256-c45b26c1bc92e3fc301852cb1eb492bb270780424d47bbb4f5f145bdfe3d034b",
+              "normalizedSHA256": "1436df13f3a13af4edf4ad86d820736d5e81fdeef5e54f241da61e8b0a522ba8"
+            }
+          ]
+        }
+      },
+      {
+        "profile": "development",
+        "facts": {
+          "compiler": "fairyc.compiler-executable-sha256/v1:94d60ed8644fcc14d4bfb0e1ac506aaf96d25886a766655fb5657c9c3241326b",
+          "rows": [
+            {
+              "case": "Aliases",
+              "root": "fypi1-sha256-ecd68ceecc7ce5c9a7dbe2346b2007e7f7e0dad0b1b7d2b3bd8d4e66a0758a40",
+              "packages": 3,
+              "sdkPackages": 0,
+              "canonicalBytes": 1402,
+              "key": "fylookup0-sha256-d10e09542c2ab61082a733e15533cf59317210a7378c450b49ae597888f31384",
+              "normalizedSHA256": "f2691deb79014bd8827f3ca9c90b1cc3baee53e5f334233f6da4ef06be49a9dd"
+            },
+            {
+              "case": "Reordered",
+              "root": "fypi1-sha256-ecd68ceecc7ce5c9a7dbe2346b2007e7f7e0dad0b1b7d2b3bd8d4e66a0758a40",
+              "packages": 3,
+              "sdkPackages": 0,
+              "canonicalBytes": 1402,
+              "key": "fylookup0-sha256-d10e09542c2ab61082a733e15533cf59317210a7378c450b49ae597888f31384",
+              "normalizedSHA256": "f2691deb79014bd8827f3ca9c90b1cc3baee53e5f334233f6da4ef06be49a9dd"
+            },
+            {
+              "case": "Plain",
+              "root": "fypi1-sha256-2cb6baeb9272434d9c65ea0246c0b1cfb103b5af1c4e17a9c455281c161c18fa",
+              "packages": 3,
+              "sdkPackages": 0,
+              "canonicalBytes": 1402,
+              "key": "fylookup0-sha256-cd1eaf37ddb184308839fb75e47aa0758158b761d11d7974fad559929d70b282",
+              "normalizedSHA256": "0c3d82a5a80d90bc49a866682c1523b28fc187333ff65377e7823e7b86e3df4b"
+            },
+            {
+              "case": "PrivateEdit",
+              "root": "fypi1-sha256-ecd68ceecc7ce5c9a7dbe2346b2007e7f7e0dad0b1b7d2b3bd8d4e66a0758a40",
+              "packages": 3,
+              "sdkPackages": 0,
+              "canonicalBytes": 1402,
+              "key": "fylookup0-sha256-521cbc4e7c4c887cdfa9349c986bcea313afaea73904570b8302be0419d36ec9",
+              "normalizedSHA256": "460a0e164d7a84f6fbec1fa11681cbf2f07b78e81e1a3f67c40c3042e6e82094"
+            },
+            {
+              "case": "State",
+              "root": "fypi1-sha256-22cfd2a763d5b79f43f63455c856d1da7b3090b53d4f4eaaf9dfc39a0dc97417",
+              "packages": 3,
+              "sdkPackages": 0,
+              "canonicalBytes": 1402,
+              "key": "fylookup0-sha256-e7f08d7f39461869f66aa08175fec4dc614b8c8c054f6ba1ce173b4d4dd0c3e6",
+              "normalizedSHA256": "5c37440777b36441e0ba90de4dc81f5a32b989dd344a43f11db460a4bd453269"
+            },
+            {
+              "case": "Vec",
+              "root": "fypi1-sha256-07494873c2c0a11f6b05e559127f643c0414c3d894de32fde8293302769c0207",
+              "packages": 4,
+              "sdkPackages": 1,
+              "canonicalBytes": 1896,
+              "key": "fylookup0-sha256-72cca995f4a0df3fb41cb1cb46a449d963ec92d424410a189c7704164ae7eb7c",
+              "normalizedSHA256": "4b33cd933ccbb6e2f2f06e202f1c14468eba9bb80f4d6d94fffb0fdb1393d8ea"
+            },
+            {
+              "case": "BindingEdit",
+              "root": "fypi1-sha256-ecd68ceecc7ce5c9a7dbe2346b2007e7f7e0dad0b1b7d2b3bd8d4e66a0758a40",
+              "packages": 3,
+              "sdkPackages": 0,
+              "canonicalBytes": 1402,
+              "key": "fylookup0-sha256-4653edf3d1fd7b59e9330b9f0275fdc1e927742cf6508bc9b76985a99d50e2b0",
+              "normalizedSHA256": "696a8be2cde84630b1b11478a494391a1e430da7355a163f47e7357fa41ec92f"
+            },
+            {
+              "case": "FeatureEdit",
+              "root": "fypi1-sha256-ecd68ceecc7ce5c9a7dbe2346b2007e7f7e0dad0b1b7d2b3bd8d4e66a0758a40",
+              "packages": 3,
+              "sdkPackages": 0,
+              "canonicalBytes": 1402,
+              "key": "fylookup0-sha256-336c9a45cae86c3128ebeff9d1f08883aee7562709240978988ec4fa2906e61a",
+              "normalizedSHA256": "4f9347e7ac9a3a90355afcc46f85329b22742d817b35c83a09e7c25aafcaa613"
+            },
+            {
+              "case": "InvalidBody",
+              "root": "fypi1-sha256-0404acbbb2a4e05995c176c4f1107ced655a1d0ce95271f6fb69f0831bda60a5",
+              "packages": 3,
+              "sdkPackages": 0,
+              "canonicalBytes": 1402,
+              "key": "fylookup0-sha256-c34286eb205e89ba4902d0754c9f3c0266805e214b93fb58316a13b5349e3eee",
+              "normalizedSHA256": "1436df13f3a13af4edf4ad86d820736d5e81fdeef5e54f241da61e8b0a522ba8"
+            }
+          ]
+        }
+      },
+      {
+        "profile": "release",
+        "facts": {
+          "compiler": "fairyc.compiler-executable-sha256/v1:dff1e9eff507265f2586e37c311eaaede5733797c735a987fd78b82536ba1e8c",
+          "rows": [
+            {
+              "case": "Aliases",
+              "root": "fypi1-sha256-ecd68ceecc7ce5c9a7dbe2346b2007e7f7e0dad0b1b7d2b3bd8d4e66a0758a40",
+              "packages": 3,
+              "sdkPackages": 0,
+              "canonicalBytes": 1402,
+              "key": "fylookup0-sha256-45645e01fb827554f2689c0bf7ee45fee5845bc6395d7c535eba61450e5ad699",
+              "normalizedSHA256": "f2691deb79014bd8827f3ca9c90b1cc3baee53e5f334233f6da4ef06be49a9dd"
+            },
+            {
+              "case": "Reordered",
+              "root": "fypi1-sha256-ecd68ceecc7ce5c9a7dbe2346b2007e7f7e0dad0b1b7d2b3bd8d4e66a0758a40",
+              "packages": 3,
+              "sdkPackages": 0,
+              "canonicalBytes": 1402,
+              "key": "fylookup0-sha256-45645e01fb827554f2689c0bf7ee45fee5845bc6395d7c535eba61450e5ad699",
+              "normalizedSHA256": "f2691deb79014bd8827f3ca9c90b1cc3baee53e5f334233f6da4ef06be49a9dd"
+            },
+            {
+              "case": "Plain",
+              "root": "fypi1-sha256-2cb6baeb9272434d9c65ea0246c0b1cfb103b5af1c4e17a9c455281c161c18fa",
+              "packages": 3,
+              "sdkPackages": 0,
+              "canonicalBytes": 1402,
+              "key": "fylookup0-sha256-4d2bbee274fc27af930d9bd319e708d6d63fa46f9d118183bef495dcb3824d7a",
+              "normalizedSHA256": "0c3d82a5a80d90bc49a866682c1523b28fc187333ff65377e7823e7b86e3df4b"
+            },
+            {
+              "case": "PrivateEdit",
+              "root": "fypi1-sha256-ecd68ceecc7ce5c9a7dbe2346b2007e7f7e0dad0b1b7d2b3bd8d4e66a0758a40",
+              "packages": 3,
+              "sdkPackages": 0,
+              "canonicalBytes": 1402,
+              "key": "fylookup0-sha256-8a0525f83b133360a47b99f431875372656e23445ea5db76be9003729a308b5b",
+              "normalizedSHA256": "460a0e164d7a84f6fbec1fa11681cbf2f07b78e81e1a3f67c40c3042e6e82094"
+            },
+            {
+              "case": "State",
+              "root": "fypi1-sha256-22cfd2a763d5b79f43f63455c856d1da7b3090b53d4f4eaaf9dfc39a0dc97417",
+              "packages": 3,
+              "sdkPackages": 0,
+              "canonicalBytes": 1402,
+              "key": "fylookup0-sha256-9bfff190d3ff3b98c7876c30ff980dc00bb00e17a544de2fa4fee446c6aa027f",
+              "normalizedSHA256": "5c37440777b36441e0ba90de4dc81f5a32b989dd344a43f11db460a4bd453269"
+            },
+            {
+              "case": "Vec",
+              "root": "fypi1-sha256-07494873c2c0a11f6b05e559127f643c0414c3d894de32fde8293302769c0207",
+              "packages": 4,
+              "sdkPackages": 1,
+              "canonicalBytes": 1896,
+              "key": "fylookup0-sha256-0e8d712a0d4ee5497089ea230b8e43116ce7ba106c4e9172fdf5be421a0bc02c",
+              "normalizedSHA256": "4b33cd933ccbb6e2f2f06e202f1c14468eba9bb80f4d6d94fffb0fdb1393d8ea"
+            },
+            {
+              "case": "BindingEdit",
+              "root": "fypi1-sha256-ecd68ceecc7ce5c9a7dbe2346b2007e7f7e0dad0b1b7d2b3bd8d4e66a0758a40",
+              "packages": 3,
+              "sdkPackages": 0,
+              "canonicalBytes": 1402,
+              "key": "fylookup0-sha256-4728f1c83f32be54f0ae246044899b70a696c003adf4c008be8c181ad9f6016b",
+              "normalizedSHA256": "696a8be2cde84630b1b11478a494391a1e430da7355a163f47e7357fa41ec92f"
+            },
+            {
+              "case": "FeatureEdit",
+              "root": "fypi1-sha256-ecd68ceecc7ce5c9a7dbe2346b2007e7f7e0dad0b1b7d2b3bd8d4e66a0758a40",
+              "packages": 3,
+              "sdkPackages": 0,
+              "canonicalBytes": 1402,
+              "key": "fylookup0-sha256-ec67c2a9289151bb0893bf075bfd8a6ad566bff83672f3130f28dce696c74255",
+              "normalizedSHA256": "4f9347e7ac9a3a90355afcc46f85329b22742d817b35c83a09e7c25aafcaa613"
+            },
+            {
+              "case": "InvalidBody",
+              "root": "fypi1-sha256-0404acbbb2a4e05995c176c4f1107ced655a1d0ce95271f6fb69f0831bda60a5",
+              "packages": 3,
+              "sdkPackages": 0,
+              "canonicalBytes": 1402,
+              "key": "fylookup0-sha256-cf005b3e0f9fa2b3b08832b5f7cde0ab72bc76b7b841a36b837d3cebdcd658c0",
+              "normalizedSHA256": "1436df13f3a13af4edf4ad86d820736d5e81fdeef5e54f241da61e8b0a522ba8"
+            }
+          ]
+        }
+      }
+    ],
+    "nativeProgram": {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\cache-lookup-20261014\\tests\\native-project-f143249dc01c8f6964ab\\build\\lexer-candidate.exe",
+      "sha256": "950f856a3c1bf3e60128e38b36ff7e860ee1a6b1e9dd48d61fe8b713caa0a7f9",
+      "selectedTests": [
+        "tests::project_cache_lookup::canonical_routes_survive_owner_order_and_invalidate_changed_inputs",
+        "tests::project_cache_lookup::independent_exact_budget_rejects_without_publishing_a_route"
+      ],
+      "stdoutBytes": 14146,
+      "stdoutSHA256": "c2cd9b66f1d6e8e16e590adacf05290f80cc203a513d274d6ef2b728b40c65c2",
+      "stack": {
+        "reserveBytes": 16777216,
+        "originalReserveBytes": 16777216,
+        "originalSHA256": "b93ff13b0d691a08a5cc19a3993fd9e25d4112e5d870147f3c3f6ac74f53ef0c"
+      },
+      "privateHost": {
+        "frontend": "Go experimental emit-workspace-c",
+        "sourceSHA256": "fa1331c114d68e4f8618e76127a65abf87b0094eecafb78f7258c76dc2ccc467",
+        "builderSHA256": "6c71c1ec44df8c3f78ba723b662683f665701c821aeedca9c76aa9e14037796b",
+        "publicLinkContractChanged": false
+      }
+    },
+    "selection": {
+      "mode": "all-authored",
+      "authoredTests": 2,
+      "selectedTests": 2
+    },
+    "frontendTimeoutSeconds": 900,
+    "executionTimeoutSeconds": 900,
+    "productTimeoutChanged": false,
+    "stackReserveBytes": 16777216,
+    "wrapperEffects": [
+      "filesystem",
+      "console",
+      "environment"
+    ],
+    "nativeIsolation": {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\cache-lookup-20261014\\tests\\native-project-f143249dc01c8f6964ab",
+      "localSourceFiles": 153,
+      "inputFingerprint": "f143249dc01c8f6964ab805577241e7adba8a41738bee2130f2925179fa41c45",
+      "copiedInputManifest": {
+        "files": 155,
+        "sha256": "8334fa6f935bc070848adbc4d7e916c335e2336cf6893f965a7ea52294c87b41",
+        "encoding": "JSON sorted keys and compact separators in copiedInputs order"
+      }
+    },
+    "sourceClosure": {
+      "files": 166,
+      "manifestSHA256": "efabb0c49a065a63b4751fa220d6f880c1163623c3b2112b22e7a5b325c3b77f",
+      "encoding": "JSON sorted keys and compact separators in sourceInputs order"
+    }
+  },
+  "independentGuards": {
+    "passed": true,
+    "guards": {
+      "trailingBytes": true,
+      "truncated": true,
+      "contradictoryHash": true,
+      "wrongImage": true,
+      "invalidMode": true
+    },
+    "validCases": 9
+  },
+  "fixtureInputs": [
+    {
+      "path": ".cache/cache-lookup-20261014/fixture/Aliases/fairy.toml",
+      "sha256": "cd9f7f8088942dbf3a9f3f1d84d7fd4d06a0ce4ec60e0638445cd14abe9431e0"
+    },
+    {
+      "path": ".cache/cache-lookup-20261014/fixture/Aliases/left/fairy.toml",
+      "sha256": "211f07319425e3e0613bf8072456410c4a4cc90c6cf56908c3f2d1b266253152"
+    },
+    {
+      "path": ".cache/cache-lookup-20261014/fixture/Aliases/left/src/left.fy",
+      "sha256": "22b77d3b396aac268ec25a9c2853d8ca60294e1bd780d0744b02c7914eb95fd1"
+    },
+    {
+      "path": ".cache/cache-lookup-20261014/fixture/Aliases/right/fairy.toml",
+      "sha256": "2999e55297df61ac2cad004ec84b3d486adab540f015de88618439126532b127"
+    },
+    {
+      "path": ".cache/cache-lookup-20261014/fixture/Aliases/right/src/right.fy",
+      "sha256": "bf37af7bc91bd794bb9ac6056c53e902089ab3af8568016828e1ae8555a53262"
+    },
+    {
+      "path": ".cache/cache-lookup-20261014/fixture/Aliases/src/main.fy",
+      "sha256": "573802a31489cf1242064c057cbb78872b5c0147ffe91cf53d6a6aab1b508e91"
+    },
+    {
+      "path": ".cache/cache-lookup-20261014/fixture/BindingEdit/fairy.toml",
+      "sha256": "882320b45522e8b2ee9c60da6f5312952ab6e1d00c3b9991dc3fbdc17089e7b8"
+    },
+    {
+      "path": ".cache/cache-lookup-20261014/fixture/BindingEdit/left/fairy.toml",
+      "sha256": "211f07319425e3e0613bf8072456410c4a4cc90c6cf56908c3f2d1b266253152"
+    },
+    {
+      "path": ".cache/cache-lookup-20261014/fixture/BindingEdit/left/src/left.fy",
+      "sha256": "22b77d3b396aac268ec25a9c2853d8ca60294e1bd780d0744b02c7914eb95fd1"
+    },
+    {
+      "path": ".cache/cache-lookup-20261014/fixture/BindingEdit/right/fairy.toml",
+      "sha256": "2999e55297df61ac2cad004ec84b3d486adab540f015de88618439126532b127"
+    },
+    {
+      "path": ".cache/cache-lookup-20261014/fixture/BindingEdit/right/src/right.fy",
+      "sha256": "bf37af7bc91bd794bb9ac6056c53e902089ab3af8568016828e1ae8555a53262"
+    },
+    {
+      "path": ".cache/cache-lookup-20261014/fixture/BindingEdit/src/main.fy",
+      "sha256": "573802a31489cf1242064c057cbb78872b5c0147ffe91cf53d6a6aab1b508e91"
+    },
+    {
+      "path": ".cache/cache-lookup-20261014/fixture/FeatureEdit/fairy.toml",
+      "sha256": "8b4a4081096c1b99b7d8b7089edd80b1252bb1d9899c10eb9d258d9de43f6cb6"
+    },
+    {
+      "path": ".cache/cache-lookup-20261014/fixture/FeatureEdit/left/fairy.toml",
+      "sha256": "211f07319425e3e0613bf8072456410c4a4cc90c6cf56908c3f2d1b266253152"
+    },
+    {
+      "path": ".cache/cache-lookup-20261014/fixture/FeatureEdit/left/src/left.fy",
+      "sha256": "22b77d3b396aac268ec25a9c2853d8ca60294e1bd780d0744b02c7914eb95fd1"
+    },
+    {
+      "path": ".cache/cache-lookup-20261014/fixture/FeatureEdit/right/fairy.toml",
+      "sha256": "2999e55297df61ac2cad004ec84b3d486adab540f015de88618439126532b127"
+    },
+    {
+      "path": ".cache/cache-lookup-20261014/fixture/FeatureEdit/right/src/right.fy",
+      "sha256": "bf37af7bc91bd794bb9ac6056c53e902089ab3af8568016828e1ae8555a53262"
+    },
+    {
+      "path": ".cache/cache-lookup-20261014/fixture/FeatureEdit/src/main.fy",
+      "sha256": "573802a31489cf1242064c057cbb78872b5c0147ffe91cf53d6a6aab1b508e91"
+    },
+    {
+      "path": ".cache/cache-lookup-20261014/fixture/InvalidBody/fairy.toml",
+      "sha256": "cd9f7f8088942dbf3a9f3f1d84d7fd4d06a0ce4ec60e0638445cd14abe9431e0"
+    },
+    {
+      "path": ".cache/cache-lookup-20261014/fixture/InvalidBody/left/fairy.toml",
+      "sha256": "211f07319425e3e0613bf8072456410c4a4cc90c6cf56908c3f2d1b266253152"
+    },
+    {
+      "path": ".cache/cache-lookup-20261014/fixture/InvalidBody/left/src/left.fy",
+      "sha256": "22b77d3b396aac268ec25a9c2853d8ca60294e1bd780d0744b02c7914eb95fd1"
+    },
+    {
+      "path": ".cache/cache-lookup-20261014/fixture/InvalidBody/right/fairy.toml",
+      "sha256": "2999e55297df61ac2cad004ec84b3d486adab540f015de88618439126532b127"
+    },
+    {
+      "path": ".cache/cache-lookup-20261014/fixture/InvalidBody/right/src/right.fy",
+      "sha256": "bf37af7bc91bd794bb9ac6056c53e902089ab3af8568016828e1ae8555a53262"
+    },
+    {
+      "path": ".cache/cache-lookup-20261014/fixture/InvalidBody/src/main.fy",
+      "sha256": "651c611c19d92dfb4459607f7de0c514e061adda42b798a8a1696af91e1f924e"
+    },
+    {
+      "path": ".cache/cache-lookup-20261014/fixture/Plain/fairy.toml",
+      "sha256": "cd9f7f8088942dbf3a9f3f1d84d7fd4d06a0ce4ec60e0638445cd14abe9431e0"
+    },
+    {
+      "path": ".cache/cache-lookup-20261014/fixture/Plain/left/fairy.toml",
+      "sha256": "211f07319425e3e0613bf8072456410c4a4cc90c6cf56908c3f2d1b266253152"
+    },
+    {
+      "path": ".cache/cache-lookup-20261014/fixture/Plain/left/src/left.fy",
+      "sha256": "22b77d3b396aac268ec25a9c2853d8ca60294e1bd780d0744b02c7914eb95fd1"
+    },
+    {
+      "path": ".cache/cache-lookup-20261014/fixture/Plain/right/fairy.toml",
+      "sha256": "2999e55297df61ac2cad004ec84b3d486adab540f015de88618439126532b127"
+    },
+    {
+      "path": ".cache/cache-lookup-20261014/fixture/Plain/right/src/right.fy",
+      "sha256": "bf37af7bc91bd794bb9ac6056c53e902089ab3af8568016828e1ae8555a53262"
+    },
+    {
+      "path": ".cache/cache-lookup-20261014/fixture/Plain/src/main.fy",
+      "sha256": "e76f608f99f2ddc0bd057eba7d9bef78c33f2e1ab6b0619f5bb01a29c4993c26"
+    },
+    {
+      "path": ".cache/cache-lookup-20261014/fixture/PrivateEdit/fairy.toml",
+      "sha256": "cd9f7f8088942dbf3a9f3f1d84d7fd4d06a0ce4ec60e0638445cd14abe9431e0"
+    },
+    {
+      "path": ".cache/cache-lookup-20261014/fixture/PrivateEdit/left/fairy.toml",
+      "sha256": "211f07319425e3e0613bf8072456410c4a4cc90c6cf56908c3f2d1b266253152"
+    },
+    {
+      "path": ".cache/cache-lookup-20261014/fixture/PrivateEdit/left/src/left.fy",
+      "sha256": "3a524324742a7fc0f4d6274443aa4defa8d32a4fc182864add5105baad99b8f9"
+    },
+    {
+      "path": ".cache/cache-lookup-20261014/fixture/PrivateEdit/right/fairy.toml",
+      "sha256": "2999e55297df61ac2cad004ec84b3d486adab540f015de88618439126532b127"
+    },
+    {
+      "path": ".cache/cache-lookup-20261014/fixture/PrivateEdit/right/src/right.fy",
+      "sha256": "bf37af7bc91bd794bb9ac6056c53e902089ab3af8568016828e1ae8555a53262"
+    },
+    {
+      "path": ".cache/cache-lookup-20261014/fixture/PrivateEdit/src/main.fy",
+      "sha256": "573802a31489cf1242064c057cbb78872b5c0147ffe91cf53d6a6aab1b508e91"
+    },
+    {
+      "path": ".cache/cache-lookup-20261014/fixture/Reordered/fairy.toml",
+      "sha256": "d62d8d047ba553a9151ab5ce239bb967d75043604e127f12c06554e07e177603"
+    },
+    {
+      "path": ".cache/cache-lookup-20261014/fixture/Reordered/left/fairy.toml",
+      "sha256": "211f07319425e3e0613bf8072456410c4a4cc90c6cf56908c3f2d1b266253152"
+    },
+    {
+      "path": ".cache/cache-lookup-20261014/fixture/Reordered/left/src/left.fy",
+      "sha256": "22b77d3b396aac268ec25a9c2853d8ca60294e1bd780d0744b02c7914eb95fd1"
+    },
+    {
+      "path": ".cache/cache-lookup-20261014/fixture/Reordered/right/fairy.toml",
+      "sha256": "2999e55297df61ac2cad004ec84b3d486adab540f015de88618439126532b127"
+    },
+    {
+      "path": ".cache/cache-lookup-20261014/fixture/Reordered/right/src/right.fy",
+      "sha256": "bf37af7bc91bd794bb9ac6056c53e902089ab3af8568016828e1ae8555a53262"
+    },
+    {
+      "path": ".cache/cache-lookup-20261014/fixture/Reordered/src/main.fy",
+      "sha256": "573802a31489cf1242064c057cbb78872b5c0147ffe91cf53d6a6aab1b508e91"
+    },
+    {
+      "path": ".cache/cache-lookup-20261014/fixture/State/fairy.toml",
+      "sha256": "cd9f7f8088942dbf3a9f3f1d84d7fd4d06a0ce4ec60e0638445cd14abe9431e0"
+    },
+    {
+      "path": ".cache/cache-lookup-20261014/fixture/State/left/fairy.toml",
+      "sha256": "211f07319425e3e0613bf8072456410c4a4cc90c6cf56908c3f2d1b266253152"
+    },
+    {
+      "path": ".cache/cache-lookup-20261014/fixture/State/left/src/left.fy",
+      "sha256": "22b77d3b396aac268ec25a9c2853d8ca60294e1bd780d0744b02c7914eb95fd1"
+    },
+    {
+      "path": ".cache/cache-lookup-20261014/fixture/State/right/fairy.toml",
+      "sha256": "2999e55297df61ac2cad004ec84b3d486adab540f015de88618439126532b127"
+    },
+    {
+      "path": ".cache/cache-lookup-20261014/fixture/State/right/src/right.fy",
+      "sha256": "bf37af7bc91bd794bb9ac6056c53e902089ab3af8568016828e1ae8555a53262"
+    },
+    {
+      "path": ".cache/cache-lookup-20261014/fixture/State/src/main.fy",
+      "sha256": "f97ad3e8c99bfea5998c5195a58921f4328b158199f5e20ae295c34200638a29"
+    },
+    {
+      "path": ".cache/cache-lookup-20261014/fixture/Vec/fairy.toml",
+      "sha256": "cd9f7f8088942dbf3a9f3f1d84d7fd4d06a0ce4ec60e0638445cd14abe9431e0"
+    },
+    {
+      "path": ".cache/cache-lookup-20261014/fixture/Vec/left/fairy.toml",
+      "sha256": "211f07319425e3e0613bf8072456410c4a4cc90c6cf56908c3f2d1b266253152"
+    },
+    {
+      "path": ".cache/cache-lookup-20261014/fixture/Vec/left/src/left.fy",
+      "sha256": "22b77d3b396aac268ec25a9c2853d8ca60294e1bd780d0744b02c7914eb95fd1"
+    },
+    {
+      "path": ".cache/cache-lookup-20261014/fixture/Vec/right/fairy.toml",
+      "sha256": "2999e55297df61ac2cad004ec84b3d486adab540f015de88618439126532b127"
+    },
+    {
+      "path": ".cache/cache-lookup-20261014/fixture/Vec/right/src/right.fy",
+      "sha256": "bf37af7bc91bd794bb9ac6056c53e902089ab3af8568016828e1ae8555a53262"
+    },
+    {
+      "path": ".cache/cache-lookup-20261014/fixture/Vec/src/main.fy",
+      "sha256": "202d5aba9d6af23f14d0299c83139f2a92cd44387241a84b795c4e7aeb0682e4"
+    }
+  ],
+  "fixtureReproduction": {
+    "files": 54,
+    "allBytesEqual": true,
+    "generator": "tools/prepare-candidate-project-lookup-fixture.py",
+    "initialCorrection": "PrivateEdit uses the generic root source; generator corrected before exact 54-file reproduction passed."
+  },
+  "additionalOfflineValidation": {
+    "allThreeLedgersDecodedWithCurrentValidator": true,
+    "privateBodyInvalidationWithUnchangedRoot": true,
+    "bindingAndFeatureInvalidationWithUnchangedRoot": true,
+    "eachCaseHasThreeDistinctImageBoundKeys": true
+  },
+  "authority": {
+    "preCompilationRoutingHintOnly": true,
+    "usesLoadedGraphWithoutComplete": true,
+    "compilerImageAndClosedProfileBound": true,
+    "rootAndAllResolvedBindingEdgesBound": true,
+    "exactSourceAndSDKIdentityBound": true,
+    "requiresExistingCompleteArtifactAdmission": true,
+    "diskLookupAndPublication": false,
+    "cliSelection": false
+  },
+  "failedHistory": [
+    "Initial source check rejected assignment through a call expression; named mutable reference helper replaced it before both source checks and all native validations passed."
+  ],
+  "publicApiChanged": false,
+  "sdkAbiChanged": false,
+  "dbChanged": false,
+  "ciChanged": false,
+  "pushed": false,
+  "deferred": [
+    "disk lookup and atomic publication",
+    "CLI cache selection",
+    "per-package extraction and mixed hit/miss reassembly",
+    "current complete fixed point",
+    "product stack/deadlines/performance",
+    "Linux/full suite/same-head CI"
+  ]
+}
