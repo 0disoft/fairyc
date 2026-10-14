@@ -1,5 +1,6 @@
 module module_project_interfaces;
 import module_project_identified_ir as checked;
+import module_project_artifact_admission as admitted;
 import module_project_public_view as view;
 import module_public_interface_extract as extract;
 import module_public_interface_model as model;
@@ -43,8 +44,12 @@ fn Result<Record,u32> package(ref view::View facts,ref plans::Plan plan,ref v::V
 // Independent descriptor/hash/closure histories fold into the 16MiB ledger.
 // Return no package prefix if a later package or the shared budget fails.
 pub fn Result<Records,u32> build(ref checked::Program program,ref plans::Plan plan,ref v::Vec<syntax::Parsed> sources,ref signatures::Program metadata,ref coordinates::Coordinates table,ref mut usize work){
-    let facts=switch(view::build(program,sources,metadata,table,work)){case .ok(p):{p}case .err(e):{return .err(e);}};let current=provenance::current(catalog::packages(input::templates(plans::input(plan))),sources,metadata,table,work);if(current!=0){return .err(current);}
+    let facts=switch(view::build(program,sources,metadata,table,work)){case .ok(p):{p}case .err(e):{return .err(e);}};return collect(ref facts,plan,sources,metadata,table,work);
+}
+fn Result<Records,u32> collect(ref view::View facts,ref plans::Plan plan,ref v::Vec<syntax::Parsed> sources,ref signatures::Program metadata,ref coordinates::Coordinates table,ref mut usize work){
+    let current=provenance::current(catalog::packages(input::templates(plans::input(plan))),sources,metadata,table,work);if(current!=0){return .err(current);}
     var bool[512] owners=[false;512];var usize i=0;while(i<signatures::module_count(metadata)){if(!budget::charge(work,1)){return .err(10);}let owner=signatures::module_owner(metadata,i);if(owner>=512){return .err(9);}owners[owner]=true;i+=1;}
-    var v::Vec<Record> packages=v::empty<Record>();i=0;while(i<512){if(!budget::charge(work,1)){return .err(10);}if(owners[i]){let record=switch(package(ref facts,plan,sources,metadata,table,i,work)){case .ok(p):{p}case .err(e):{return .err(e);}};if(!v::push<Record>(ref mut packages,record).is_ok){return .err(11);}}i+=1;}
+    var v::Vec<Record> packages=v::empty<Record>();i=0;while(i<512){if(!budget::charge(work,1)){return .err(10);}if(owners[i]){let record=switch(package(facts,plan,sources,metadata,table,i,work)){case .ok(p):{p}case .err(e):{return .err(e);}};if(!v::push<Record>(ref mut packages,record).is_ok){return .err(11);}}i+=1;}
     return .ok(Records{.packages});
 }
+pub fn Result<Records,u32> build_admitted(ref admitted::Admitted program,ref plans::Plan plan,ref v::Vec<syntax::Parsed> sources,ref signatures::Program metadata,ref coordinates::Coordinates table,ref mut usize work){let facts=switch(view::build_admitted(program,sources,metadata,table,work)){case .ok(p):{p}case .err(code):{return .err(code);}};return collect(ref facts,plan,sources,metadata,table,work);}

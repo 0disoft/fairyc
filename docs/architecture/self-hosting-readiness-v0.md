@@ -1,5 +1,15 @@
 # Self-hosting readiness v0
 
+Admitted restored IR now produces detached public views and all package
+interfaces with current signature numbering. Field, callable, parameter and
+Vec-name IDs rebind without changing IR bytes. Reordered generic/Vec/state
+ordinary/generic hashes and specialization lists match fresh cold Complete
+compilation; stale sources/owners/coordinates/plans and exhausted work reject.
+Three integration and two cold regression tests pass Go native and both C
+profiles; root/locked checks pass 507 files / 6256 MIR functions.
+[Public-view receipt](../ops/evidence/candidate-project-public-admitted-view-20261014.json). Checked Complete-owner
+restoration and actual cache reuse remain open.
+
 Detached public type ordering now gives current signatures a canonical prefix
 while retaining executable IR numbering. Bidirectional maps rebind composite
 references and preserve array lengths, cold numbering and bounded accounting.
