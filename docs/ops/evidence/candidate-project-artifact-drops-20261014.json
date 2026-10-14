@@ -1,0 +1,338 @@
+{
+  "schema": "fairyc.candidate-project-artifact-drops/v0",
+  "date": "2026-10-14",
+  "parentCommit": "dbbba8273ffd0fcb2f7f2a04c50a5118c8d121d4",
+  "passed": true,
+  "sourceInputs": [
+    {
+      "path": "examples/lexer_candidate/src/module_project_artifact_drops.fy",
+      "sha256": "25a4a89313fa5a42b3edb2409322e0ed2b024b8146f6e95d24fc059de5fde80f"
+    },
+    {
+      "path": "examples/lexer_candidate/tests/module_project_artifact_drops.fy",
+      "sha256": "5c8e8681d8aa4a8e8e2a6fd02c5749b0b01477296e54985407024582df39ca4c"
+    },
+    {
+      "path": "examples/lexer_candidate/fairy.lock",
+      "sha256": "ab006a560e4cb5d38e0639f2792d7619ce48fd7092fd05e9502c4976039a77a9"
+    }
+  ],
+  "comparison": {
+    "source": "fresh source-bound checked move owner and original-source specialization plan",
+    "replacementCleanupIrBuilt": false,
+    "canonicalTypeAndFrameMaps": true,
+    "localAndTemporaryOperands": true,
+    "operandTypesIdsAndSpans": true,
+    "exitReasons": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9
+    ],
+    "orderedDropsPerFrame": true,
+    "dropExitSpans": true,
+    "matchedFrameDropCoverage": true,
+    "unusedOperandsRejected": true,
+    "sharedWorkLimit": 1073741824,
+    "partialMapsRejected": true
+  },
+  "sourceCheck": {
+    "files": 499,
+    "mirFunctions": 6204,
+    "unlockedExit": 0,
+    "lockedExit": 0,
+    "lock": "verified",
+    "lockSHA256": "ab006a560e4cb5d38e0639f2792d7619ce48fd7092fd05e9502c4976039a77a9",
+    "invocations": [
+      {
+        "argv": [
+          "check"
+        ],
+        "exit": 0,
+        "stdout": "check ok: 2 instance(s), 499 source file(s), 6204 MIR function(s), lock unchanged\n",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "check",
+          "--locked"
+        ],
+        "exit": 0,
+        "stdout": "check ok: 2 instance(s), 499 source file(s), 6204 MIR function(s), lock verified\n",
+        "stderr": ""
+      }
+    ]
+  },
+  "tests": {
+    "selection": {
+      "mode": "all-authored",
+      "authoredTests": 4,
+      "selectedTests": 4
+    },
+    "authoredTestsExecuted": 4,
+    "tools": {
+      "compiler": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-frontend-oracle-current-20261012.exe",
+        "sha256": "3ecc4501ee3bb47ecc39e7288200266b31cbcd8bf6ffec302ae54867705ce5d1"
+      },
+      "candidate": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-cleanup-20261013\\current-driver\\driver-release.exe",
+        "sha256": "67be18bdabb9d6499edcfcd8b7d3e3245dd932fd265ba79ab4cd7136748ec0ac"
+      },
+      "builder": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-rooted-builder-stack-20261012.exe",
+        "sha256": "02abe2328daa9921705910c7b995e82c1312cb960fe024106c11468569aefff0"
+      },
+      "nativeStackEditor": {
+        "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\editbin.exe",
+        "sha256": "be37ead809e0cab3b62ff7c141fece6655b6c6ab1e2951a118abbaef48acbc07"
+      }
+    },
+    "nativeProgram": {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-artifact-drops-20261014\\owned\\native-project-e165516cdb7e0c970b0d\\build\\lexer-candidate.exe",
+      "sha256": "b02643abcbc43af2edbfd84e9d67dd5c8c792f5796f8ffd49ae3908d19e362c2",
+      "selectedTests": [
+        "tests::module_project_artifact_drops::exact_exhausted_invalid_and_stale_drop_checks_publish_no_partial_map",
+        "tests::module_project_artifact_drops::rebased_generic_vec_state_drops_match_each_source_unit",
+        "tests::module_project_artifact_drops::source_move_requests_match_local_and_temporary_drop_exits",
+        "tests::module_project_artifact_drops::structurally_valid_drop_mutations_and_orphans_reject"
+      ],
+      "stdoutBytes": 0,
+      "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stack": {
+        "reserveBytes": 16777216,
+        "originalReserveBytes": 1048576,
+        "originalSHA256": "b3e90e84ec9d8e1747be7954c6d1bd2d70488a02ac95c9816b27a605bf4bc65c"
+      }
+    },
+    "candidateExecutions": [
+      {
+        "profile": "development",
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-artifact-drops-20261014\\owned\\development.exe",
+        "sha256": "98dd37949d49d6924fcffa855b3481d7cd29995eaf8fe1cbfa6d6cf2487917e1",
+        "exit": 0
+      },
+      {
+        "profile": "release",
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-artifact-drops-20261014\\owned\\release.exe",
+        "sha256": "567f2d23e54bf9bd727e1ed1a11e66e15a9c4eea7d168766e0a5a60f3d217ced",
+        "exit": 0
+      }
+    ],
+    "invocations": [
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-frontend-oracle-current-20261012.exe",
+          "check"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-artifact-drops-20261014\\owned\\native-project-e165516cdb7e0c970b0d",
+        "seconds": 11.98249169997871,
+        "exit": 0,
+        "stdoutBytes": 80,
+        "stdoutSHA256": "76ebd07ae0cb3d43e93c2b81b710dbe6168e55a948c6d16453cc38546bdfa136",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-frontend-oracle-current-20261012.exe",
+          "build",
+          "--locked"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-artifact-drops-20261014\\owned\\native-project-e165516cdb7e0c970b0d",
+        "seconds": 23.78334600001108,
+        "exit": 0,
+        "stdoutBytes": 83,
+        "stdoutSHA256": "913d882a721755f5b674b0837a5dcdb182de237ba6bbcc5f15b49489af2c8bf9",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\editbin.exe",
+          "/nologo",
+          "/stack:16777216",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-artifact-drops-20261014\\owned\\native-project-e165516cdb7e0c970b0d\\build\\lexer-candidate.exe"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-artifact-drops-20261014\\owned\\native-project-e165516cdb7e0c970b0d",
+        "seconds": 0.06589959998382255,
+        "exit": 0,
+        "stdoutBytes": 0,
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-artifact-drops-20261014\\owned\\native-project-e165516cdb7e0c970b0d\\build\\lexer-candidate.exe",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-artifact-rebase-20261014\\fixture.bin"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-artifact-drops-20261014\\owned\\native-project-e165516cdb7e0c970b0d",
+        "seconds": 37.07067649997771,
+        "exit": 0,
+        "stdoutBytes": 0,
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-cleanup-20261013\\current-driver\\driver-release.exe",
+          "--c-project-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-artifact-drops-20261014\\owned\\sources.list"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+        "seconds": 148.60577159997774,
+        "exit": 0,
+        "stdoutBytes": 24882286,
+        "stdoutSHA256": "8ee5e445a02dd8aa47d1e044785b233c14ad6d3855c08f625dca799b8fcd12a7",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-rooted-builder-stack-20261012.exe",
+          "--packet",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-artifact-drops-20261014\\owned\\candidate-packet.bin",
+          "--packet-sha256",
+          "8ee5e445a02dd8aa47d1e044785b233c14ad6d3855c08f625dca799b8fcd12a7",
+          "--output",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-artifact-drops-20261014\\owned\\development.exe",
+          "--stack-reserve-bytes",
+          "16777216"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+        "seconds": 19.968138099997304,
+        "exit": 0,
+        "stdoutBytes": 180,
+        "stdoutSHA256": "ec07bb1a684d54ac90fb06e97755bc120c69919348726bf7774f639b28f7534f",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-artifact-drops-20261014\\owned\\development.exe",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-artifact-rebase-20261014\\fixture.bin"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+        "seconds": 180.30205170001136,
+        "exit": 0,
+        "stdoutBytes": 0,
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-rooted-builder-stack-20261012.exe",
+          "--packet",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-artifact-drops-20261014\\owned\\candidate-packet.bin",
+          "--packet-sha256",
+          "8ee5e445a02dd8aa47d1e044785b233c14ad6d3855c08f625dca799b8fcd12a7",
+          "--output",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-artifact-drops-20261014\\owned\\release.exe",
+          "--release",
+          "--stack-reserve-bytes",
+          "16777216"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+        "seconds": 218.30968469998334,
+        "exit": 0,
+        "stdoutBytes": 182,
+        "stdoutSHA256": "35e4183ba0dbfb9a23dbf1a48920483a6bf2dcf52e93e5a7fb75b8aab6c3c146",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-artifact-drops-20261014\\owned\\release.exe",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-artifact-rebase-20261014\\fixture.bin"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+        "seconds": 14.977913999988232,
+        "exit": 0,
+        "stdoutBytes": 0,
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderr": ""
+      }
+    ],
+    "unchangedPaths": [
+      {
+        "path": ".cache/project-artifact-rebase-20261014/workspace/fairy.toml",
+        "snapshot": {
+          "directory": false,
+          "size": 150,
+          "modifiedNS": 1791936305533578600,
+          "sha256": "6d0f30b6ccdb432b5f3f0953730152582744cd48ecb3ba5172e5027f6d17450d"
+        }
+      },
+      {
+        "path": ".cache/project-artifact-rebase-20261014/workspace/fairy.lock",
+        "snapshot": {
+          "directory": false,
+          "size": 1697,
+          "modifiedNS": 1791936305605249400,
+          "sha256": "3f5df4f505989098d5190c1e40d8271f22a59cdcaae13a04dc3273de1a74e8de"
+        }
+      },
+      {
+        "path": ".cache/project-artifact-rebase-20261014/workspace/src/helper.fy",
+        "snapshot": {
+          "directory": false,
+          "size": 73,
+          "modifiedNS": 1791936305534577500,
+          "sha256": "cd286fc09c906e60264398646308179c8e808c12f75fdf4a6be95dd61c41e48e"
+        }
+      },
+      {
+        "path": ".cache/project-artifact-rebase-20261014/workspace/src/main.fy",
+        "snapshot": {
+          "directory": false,
+          "size": 320,
+          "modifiedNS": 1791936305534577500,
+          "sha256": "fc063dabd9d1f2dd4a35e04101cf6c8a68df9c3cbc65c37d6719ba81364fb412"
+        }
+      }
+    ],
+    "inputLedger": {
+      "path": ".cache/project-artifact-drops-20261014/owned/receipt.json",
+      "sha256": "d31a9eb5fcf6991947167f2bf626dc25145332a1c69b3f4cc433b206c8f89995",
+      "count": 332,
+      "sha256OfCanonicalSourceInputs": "3418d5bfaadd8c4106e9bd223ed1428619821697547643b38e3a748a47685af7"
+    }
+  },
+  "verifiedCases": [
+    "source move requests match restored local and temporary drops for all nine exit reasons, including partial construction and tagged payload cleanup",
+    "seven structurally valid mutations still decode and pass source call comparison but reject swapped drop order, wrong exit reason, drop span, operand span, different local, missing drop and unused operand",
+    "exact-fit, exhausted and invalid work plus stale source rejection publish no partial maps",
+    "all source units of a transported generic/Vec/state fixture match drops after source and owner reorder"
+  ],
+  "admission": {
+    "bodyValuesAndStatementsCompared": true,
+    "regionLifecycleCompared": true,
+    "calledContractsCompared": true,
+    "callCompared": true,
+    "cleanupRequestsCompared": true,
+    "cleanupRecipesCompared": false,
+    "wholeMetadataCompared": false,
+    "sourceCheckedCompleteArtifactOwner": false,
+    "cacheReuse": false,
+    "currentFullFixedPoint": false
+  },
+  "publicApiChanged": false,
+  "privateCandidateApiChanged": true,
+  "sdkAbiChanged": false,
+  "dbChanged": false,
+  "ciChanged": false,
+  "runnerChanged": false,
+  "productStackChanged": false,
+  "productTimeoutChanged": false,
+  "verificationStackReserveBytes": 16777216,
+  "pushed": false,
+  "postVerificationEdits": [
+    {
+      "path": "examples/lexer_candidate/tests/module_project_artifact_drops.fy",
+      "change": "remove the extra blank line at EOF only",
+      "verifiedInputSHA256": "aa32531054fda5c2a2bc6a0bbe6e3657599ced77276bd610f699ebb5884b7608",
+      "currentSHA256": "5c8e8681d8aa4a8e8e2a6fd02c5749b0b01477296e54985407024582df39ca4c",
+      "semanticBytesUnchanged": true
+    }
+  ]
+}

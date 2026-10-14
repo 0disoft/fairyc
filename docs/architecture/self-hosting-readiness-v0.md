@@ -35,6 +35,12 @@ Whole IR now rebinds module/package indices through fresh complete verification;
 rebased generic/Vec/field/state C executes at both Windows profiles:
 [IR rebase receipt](../ops/evidence/candidate-project-artifact-rebase-20261014.json).
 Checked Complete-owner rebinding and cache reuse remain open.
+Restored types, source-identified frames, body values/statements and calls now
+match fresh source-bound checks. Cleanup requests also match local/temporary
+operands, all nine exit reasons and per-frame order without replacement MIR:
+[drop receipt](../ops/evidence/candidate-project-artifact-drops-20261014.json).
+Cleanup recipes, complete metadata and whole-project coverage still precede
+checked Complete-owner rebinding and cache reuse.
 The current candidate-owned IR environment is verified in the
 [environment checkpoint](../ops/candidate-cache-environment-20261014.md).
 The actual running Windows compiler image identity is verified
