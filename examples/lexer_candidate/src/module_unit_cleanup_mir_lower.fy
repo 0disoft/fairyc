@@ -1,6 +1,7 @@
 module module_unit_cleanup_mir_lower;
 import module_unit_cleanup_mir_model as ir;
 import module_unit_cleanup_policy as policy;
+import module_unit_checked_bodies as checking;
 import module_unit_values as values;
 import module_unit_cleanup_liveness as liveness;
 import module_unit_value_model as m;
@@ -28,7 +29,12 @@ fn Result<usize,ir::Problem> operand(ref values::Plan typed,move::Fact request,r
 pub fn Result<ir::Program,ir::Problem> lower(ref v::Vec<syntax::Parsed> sources,ref values::Plan typed,ref interfaces::Interfaces imported,ref moves::Plan moved){
     if(moves::count(moved)!=0){let e=moves::at(moved,0);return .err(fail(e.code,e.module_index,e.start,e.end));}
     let checked=switch(policy::build(sources,typed,imported,moved)){case .ok(p):{p}case .err(p):{return .err(fail(p.code,p.module_index,p.start,p.end));}};
-    if(policy::count(ref checked)!=0){let e=policy::at(ref checked,0);return .err(fail(e.code,e.module_index,e.start,e.end));}var usize work=policy::work(ref checked);
+    if(policy::count(ref checked)!=0){let e=policy::at(ref checked,0);return .err(fail(e.code,e.module_index,e.start,e.end));}return lower_policy(sources,typed,imported,moved,policy::work(ref checked));
+}
+// Only this source-bound owner can skip policy construction. Raw callers keep
+// the original checked entry above; the implementation entry stays private.
+pub fn Result<ir::Program,ir::Problem> lower_checked(ref v::Vec<syntax::Parsed> sources,ref checking::Plan checked){var usize validation=0;let valid=checking::validate_sources(checked,sources,ref mut validation);if(valid.code!=0){return .err(fail(valid.code,valid.module_index,valid.start,valid.end));}return lower_policy(sources,checking::checked_values(checked),checking::checked_interfaces(checked),checking::checked_moves(checked),policy::work(checking::cleanup_policy(checked)));}
+fn Result<ir::Program,ir::Problem> lower_policy(ref v::Vec<syntax::Parsed> sources,ref values::Plan typed,ref interfaces::Interfaces imported,ref moves::Plan moved,usize prior_work){var usize work=prior_work;
     let used_types=switch(liveness::build(typed,ref mut work)){case .ok(p):{p}case .err(e):{return .err(e);}};
     var v::Vec<types::Type> graph=v::empty<types::Type>();var v::Vec<ir::Frame> frames=v::empty<ir::Frame>();var v::Vec<ir::Glue> glues=v::empty<ir::Glue>();var v::Vec<ir::Field> fields=v::empty<ir::Field>();var v::Vec<ir::Operand> operands=v::empty<ir::Operand>();var v::Vec<ir::Drop> drops=v::empty<ir::Drop>();var usize i=1;
     while(i<=values::type_count(typed)){if(!m::charge(ref mut work,1)){return .err(fail(1002,0,0,0));}let t=values::type_at(typed,i);if(!v::push<types::Type>(ref mut graph,t).is_ok){return .err(fail(1003,0,0,0));}i+=1;}

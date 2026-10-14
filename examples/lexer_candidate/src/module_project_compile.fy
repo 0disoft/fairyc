@@ -1,11 +1,9 @@
 module module_project_compile;
 import module_units as grouping;
-import module_unit_bind as binding;
-import module_unit_call_closure as closure;
+import module_unit_checked_bodies as checking;
 import module_unit_values as values;
 import module_unit_moves as moves;
-import module_unit_origin_returns as origins;
-import module_unit_origin_diagnostics as diagnostics;
+import module_unit_cleanup_policy as policy;
 import module_unit_body_ir_lower as lower;
 import module_unit_body_ir_model as ir;
 import module_unit_interfaces as interfaces;
@@ -18,36 +16,21 @@ import std::vec as v;
 // Stages: 1 grouping, 2 binding, 3 closure, 4 values, 5 moves, 6 owned IR, 7 borrows.
 pub struct Problem {u32 stage;u32 code;usize module_index;usize start;usize end;usize first;usize stop;usize expected;usize actual;usize declaration_start;usize declaration_end;usize move_start;usize move_end;usize header_start;usize header_end;usize field_module;usize field_start;usize field_end;}
 pub struct Range {usize first;usize stop;}
-// Own the exact closure, typed values and move facts after visible borrow errors
-// are rejected. Cleanup-policy checking, lowering, identity attachment and
-// complete-project publication remain later gates; this is not a cache hit.
-pub resource CheckedBodies {closure::Ready ready;values::Plan typed;moves::Plan moved;Range range;cleanup{}}
-pub fn ref values::Plan checked_values(ref CheckedBodies p){return ref p.typed;}
-pub fn ref moves::Plan checked_moves(ref CheckedBodies p){return ref p.moved;}
-pub fn ref interfaces::Interfaces checked_interfaces(ref CheckedBodies p){return closure::imported(ref p.ready);}
+// Source-bound body and cleanup checks precede lowering and identity attachment.
+// Restored-IR comparison and Complete publication remain later gates.
+pub resource CheckedBodies {checking::Plan checked;Range range;cleanup{}}
+pub fn ref values::Plan checked_values(ref CheckedBodies p){return checking::checked_values(ref p.checked);}
+pub fn ref moves::Plan checked_moves(ref CheckedBodies p){return checking::checked_moves(ref p.checked);}
+pub fn ref interfaces::Interfaces checked_interfaces(ref CheckedBodies p){return checking::checked_interfaces(ref p.checked);}
+pub fn ref policy::Plan checked_cleanup(ref CheckedBodies p){return checking::cleanup_policy(ref p.checked);}
+pub fn ref checking::Plan checked_state(ref CheckedBodies p){return ref p.checked;}
 pub fn Range checked_range(ref CheckedBodies p){return p.range;}
 pub resource Plan {v::Vec<ir::Program> units;v::Vec<Range> ranges;usize files;usize retries;cleanup{}}
 fn Problem failed(u32 stage,u32 code,usize module_index,usize start,usize end,usize first,usize stop,usize expected,usize actual){return Problem{.stage,.code,.module_index,.start,.end,.first,.stop,.expected,.actual,.declaration_start=0,.declaration_end=0,.move_start=0,.move_end=0,.header_start=0,.header_end=0,.field_module=0,.field_start=0,.field_end=0};}
-fn Result<CheckedBodies,Problem> checked(ref v::Vec<syntax::Parsed> sources,ref signatures::Program metadata,closure::Ready ready,usize first,usize stop){
-    let typed=switch(values::build(sources,metadata,ref ready)){case .ok(p):{p}case .err(e):{return .err(failed(4,e.code,e.module_index,e.start,e.end,first,stop,e.expected,e.actual));}};
-    // Values and ownership are separately checked phases. A completed type
-    // pass must not consume the ownership pass's traversal allowance.
-    let moved=switch(moves::build(sources,ref typed,0)){case .ok(p):{p}case .err(e):{return .err(failed(5,e.code,e.module_index,e.start,e.end,first,stop,e.expected,e.actual));}};
-    if(moves::count(ref moved)!=0){let e=moves::at(ref moved,0);var Problem p=failed(5,e.code,e.module_index,e.start,e.end,first,stop,0,0);p.declaration_start=e.declaration_start;p.declaration_end=e.declaration_end;p.move_start=e.move_start;p.move_end=e.move_end;p.header_start=e.header_start;p.header_end=e.header_end;p.field_module=e.field_module;p.field_start=e.field_start;p.field_end=e.field_end;return .err(p);}
-    // Infer the transitive borrowed-result providers before admitting owned IR.
-    // Ownership and borrow traversals have independent bounded work allowances.
-    let inferred=switch(origins::build(sources,metadata,ref typed)){case .ok(p):{p}case .err(e):{return .err(failed(7,e.code,e.module_index,e.start,e.end,first,stop,e.expected,e.actual));}};
-    let report=switch(diagnostics::collect(ref inferred)){case .ok(p):{p}case .err(e):{return .err(failed(7,e.code,e.module_index,e.start,e.end,first,stop,e.expected,e.actual));}};
-    var usize diagnostic=0;while(diagnostic<diagnostics::count(ref report)){if(diagnostics::visible_at(ref report,diagnostic)){let e=diagnostics::at(ref report,diagnostic);return .err(failed(7,e.code,e.module_index,e.start,e.end,first,stop,0,0));}diagnostic+=1;}
-    return .ok(CheckedBodies{.ready,.typed,.moved,.range=Range{.first,.stop}});
-}
-fn Result<ir::Program,Problem> lowered(ref v::Vec<syntax::Parsed> sources,ref CheckedBodies p){return switch(lower::lower(sources,ref p.typed,closure::imported(ref p.ready),ref p.moved)){case .ok(p):{.ok(p)}case .err(e):{.err(failed(6,e.code,e.module_index,e.start,e.end,p.range.first,p.range.stop,0,0))}};}
-fn Result<closure::Ready,Problem> prepare(ref v::Vec<syntax::Parsed> sources,ref signatures::Program metadata,usize first,usize stop){
-    let bound=switch(binding::bind(sources,metadata,first,stop)){case .ok(p):{p}case .err(e):{return .err(failed(2,e.code,e.module_index,e.start,e.end,first,stop,0,0));}};
-    return switch(closure::build_unit(sources,metadata,ref bound)){case .ok(p):{.ok(p)}case .err(e):{.err(failed(3,e.code,e.module_index,e.start,e.end,first,stop,0,0))}};
-}
+fn Problem checked_failure(checking::Problem e,usize first,usize stop){var Problem p=failed(e.stage,e.code,e.module_index,e.start,e.end,first,stop,e.expected,e.actual);p.declaration_start=e.declaration_start;p.declaration_end=e.declaration_end;p.move_start=e.move_start;p.move_end=e.move_end;p.header_start=e.header_start;p.header_end=e.header_end;p.field_module=e.field_module;p.field_start=e.field_start;p.field_end=e.field_end;return p;}
+fn Result<ir::Program,Problem> lowered(ref v::Vec<syntax::Parsed> sources,ref CheckedBodies p){return switch(lower::lower_checked(sources,ref p.checked)){case .ok(p):{.ok(p)}case .err(e):{.err(failed(6,e.code,e.module_index,e.start,e.end,p.range.first,p.range.stop,0,0))}};}
 pub fn Result<CheckedBodies,Problem> check_range(ref v::Vec<syntax::Parsed> sources,ref signatures::Program metadata,usize first,usize stop){
-    let ready=switch(prepare(sources,metadata,first,stop)){case .ok(p):{p}case .err(e):{return .err(e);}};return checked(sources,metadata,ready,first,stop);
+    return switch(checking::build(sources,metadata,first,stop)){case .ok(p):{.ok(CheckedBodies{.checked=p,.range=Range{.first,.stop}})}case .err(e):{.err(checked_failure(e,first,stop))}};
 }
 pub fn Result<ir::Program,Problem> range(ref v::Vec<syntax::Parsed> sources,ref signatures::Program metadata,usize first,usize stop){
     let p=switch(check_range(sources,metadata,first,stop)){case .ok(p):{p}case .err(e):{return .err(e);}};return lowered(sources,ref p);
@@ -57,7 +40,7 @@ pub fn Result<ir::Program,Problem> range(ref v::Vec<syntax::Parsed> sources,ref 
 pub fn Result<identified::Program,Problem> range_identified(ref v::Vec<syntax::Parsed> sources,ref signatures::Program metadata,ref source_plan::Plan plan,usize first,usize stop,ref mut usize work){
     let p=switch(check_range(sources,metadata,first,stop)){case .ok(p):{p}case .err(e):{return .err(e);}};
     let program=switch(lowered(sources,ref p)){case .ok(p):{p}case .err(e):{return .err(e);}};
-    return switch(identified::build(program,plan,sources,metadata,closure::imported(ref p.ready),work)){case .ok(p):{.ok(p)}case .err(e):{.err(failed(8,e.code,e.module_index,e.start,e.end,first,stop,e.kind as usize,e.id))}};
+    return switch(identified::build(program,plan,sources,metadata,checked_interfaces(ref p),work)){case .ok(p):{.ok(p)}case .err(e):{.err(failed(8,e.code,e.module_index,e.start,e.end,first,stop,e.kind as usize,e.id))}};
 }
 // Cleanup policy retains raw code 10 through the owned-IR lowerer; later
 // IR construction and verification use 1002 for the same capacity class.

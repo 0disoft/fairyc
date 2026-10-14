@@ -2,6 +2,7 @@ module module_unit_body_ir_lower;
 import module_unit_body_ir_model as ir;
 import module_unit_cleanup_mir_model as clean_ir;
 import module_unit_cleanup_mir_lower as cleaning;
+import module_unit_checked_bodies as checking;
 import module_unit_values as values;
 import module_unit_value_model as m;
 import module_unit_interfaces as interfaces;
@@ -28,7 +29,10 @@ fn Result<ir::Body,clean_ir::Problem> body(ref syntax::Parsed source,ref m::Valu
     return .ok(ir::assemble_body_regions(root,syntax::source_view(source).len,start,end,nodes,statements,locals,calls,arguments,regions,placements,resets,text));
 }
 pub fn Result<ir::Program,clean_ir::Problem> lower(ref v::Vec<syntax::Parsed> sources,ref values::Plan typed,ref interfaces::Interfaces imported,ref moves::Plan moved){
-    let cleaned=switch(cleaning::lower(sources,typed,imported,moved)){case .ok(p):{p}case .err(p):{return .err(p);}};var usize work=clean_ir::work(ref cleaned);var v::Vec<ir::Body> bodies=v::empty<ir::Body>();var v::Vec<ir::Layout> layouts=v::empty<ir::Layout>();var v::Vec<interfaces::Field> fields=v::empty<interfaces::Field>();var v::Vec<interfaces::Callable> callables=v::empty<interfaces::Callable>();var v::Vec<usize> parameters=v::empty<usize>();var bytes::Buffer names=bytes::empty();var usize i=0;
+    let cleaned=switch(cleaning::lower(sources,typed,imported,moved)){case .ok(p):{p}case .err(p):{return .err(p);}};return lower_body(sources,typed,imported,cleaned);
+}
+pub fn Result<ir::Program,clean_ir::Problem> lower_checked(ref v::Vec<syntax::Parsed> sources,ref checking::Plan checked){let cleaned=switch(cleaning::lower_checked(sources,checked)){case .ok(p):{p}case .err(p):{return .err(p);}};return lower_body(sources,checking::checked_values(checked),checking::checked_interfaces(checked),cleaned);}
+fn Result<ir::Program,clean_ir::Problem> lower_body(ref v::Vec<syntax::Parsed> sources,ref values::Plan typed,ref interfaces::Interfaces imported,clean_ir::Program cleaned){var usize work=clean_ir::work(ref cleaned);var v::Vec<ir::Body> bodies=v::empty<ir::Body>();var v::Vec<ir::Layout> layouts=v::empty<ir::Layout>();var v::Vec<interfaces::Field> fields=v::empty<interfaces::Field>();var v::Vec<interfaces::Callable> callables=v::empty<interfaces::Callable>();var v::Vec<usize> parameters=v::empty<usize>();var bytes::Buffer names=bytes::empty();var usize i=0;
     while(i<values::count(typed)){let value=values::at(typed,i);let f=m::frame(value);let owned=switch(body(v::at<syntax::Parsed>(sources,f.module_index),value,typed,ref mut work)){case .ok(p):{p}case .err(p):{return .err(p);}};if(!v::push<ir::Body>(ref mut bodies,owned).is_ok){return .err(fail(1003,f.module_index,0,0));}i+=1;}
     i=0;while(i<interfaces::shape_count(imported)){let s=interfaces::shape_at(imported,i);let source=v::at<syntax::Parsed>(sources,s.module_index);let d=syntax::declaration_at(source,s.declaration-1);let name=syntax::source_view(source)[d.name_start..d.name_end];let name_start=bytes::len(ref names);if(!m::charge(ref mut work,name.len+1)){return .err(fail(1002,s.module_index,s.start,s.end));}if(!bytes::append(ref mut names,name).is_ok || !v::push<ir::Layout>(ref mut layouts,ir::Layout{.value=s,.name_start,.name_end=bytes::len(ref names)}).is_ok){return .err(fail(1003,s.module_index,s.start,s.end));}i+=1;}
     i=0;while(i<interfaces::field_count(imported)){var f=interfaces::field_at(imported,i);let name=interfaces::field_name(imported,i);f.name_start=bytes::len(ref names);if(!m::charge(ref mut work,name.len+1)){return .err(fail(1002,f.module_index,f.start,f.end));}if(!bytes::append(ref mut names,name).is_ok){return .err(fail(1003,f.module_index,f.start,f.end));}f.name_end=bytes::len(ref names);if(!v::push<interfaces::Field>(ref mut fields,f).is_ok){return .err(fail(1003,f.module_index,f.start,f.end));}i+=1;}
