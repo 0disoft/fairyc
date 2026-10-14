@@ -43,7 +43,10 @@ re-encodes byte-identically and rejects SDK/source contradictions:
 Current source facts and specialization handles now rebind across source/owner
 renumbering and reject stale sources and mismatched original templates:
 [current artifact receipt](evidence/candidate-project-artifact-current-20261014.json).
-Whole-IR renumbering, checked Complete-owner rebinding and cache reuse remain open.
+Whole IR now rebinds module/package indices through fresh complete verification;
+rebased generic/Vec/field/state C executes at both Windows profiles:
+[IR rebase receipt](evidence/candidate-project-artifact-rebase-20261014.json).
+Checked Complete-owner rebinding and cache reuse remain open.
 
 Current source-identified build/run integration:
 [2026-10-14 native checkpoint](candidate-identified-native-20261014.md).

@@ -1,0 +1,494 @@
+{
+  "schema": "fairyc.candidate-project-artifact-rebase/v0",
+  "date": "2026-10-14",
+  "parentCommit": "2f307d719f4605d36a95a8bc037dd356e5647b4f",
+  "passed": true,
+  "sourceInputs": [
+    {
+      "path": "examples/lexer_candidate/src/module_project_artifact_rebase.fy",
+      "bytes": 3390,
+      "sha256": "cce7edbfe31de43343c334166a84ce9187834cb9f6cb5b5d142f9b1b1b916c0e"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_project_artifact_rebase_cleanup.fy",
+      "bytes": 2312,
+      "sha256": "8404788616637fe6d7f1a62af8e6d8b017810838b74258faadde62a36097a799"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_project_artifact_rebase_aux.fy",
+      "bytes": 2787,
+      "sha256": "aa85efb726524f68e70cffe2415f891920eb83718dce3b1eba9b91562e23ce56"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_project_artifact_rebase_body.fy",
+      "bytes": 2961,
+      "sha256": "9c1d135f5d1c0b7c3b99d67495ea9402140b1037111d9a91182eb781af5a0915"
+    },
+    {
+      "path": "examples/lexer_candidate/tests/module_project_artifact_rebase.fy",
+      "bytes": 7379,
+      "sha256": "b355435f3b006009f2b2ba3e40de3a47ac0a718f440fc7bcceb1f65bedc7087d"
+    },
+    {
+      "path": "tools/prepare-candidate-artifact-rebase-fixture.py",
+      "bytes": 3324,
+      "sha256": "4e71be1fab2f118f2b28baec2c7aacf0f1d2211084d416a1e5ee162606fad580"
+    },
+    {
+      "path": "tools/verify-candidate-private-tests.py",
+      "bytes": 25245,
+      "sha256": "e1bb609ba78f7b9034043f68594cbd577cc73a8e1052b6e507676e4385348946"
+    },
+    {
+      "path": "examples/lexer_candidate/fairy.lock",
+      "bytes": 1698,
+      "sha256": "73321ed1d9f9229b9759828708e0ec065679e3f8392b5f32cd56b13d68dd7eb1"
+    }
+  ],
+  "verified": [
+    "nominal/Vec types, body and cleanup frames, layouts, fields, callables and call targets use current modules",
+    "field-expression module references use the same mapped field/type context",
+    "SDK rows and raw bytes rebuilt in increasing current module order and freshly authenticated",
+    "state owner/module indices rebind while exact UID/fields/canonical hashes remain unchanged",
+    "type/frame/field and call-instance IDs, byte spans and body text remain intact",
+    "identity mapping reencodes whole IR byte-identically",
+    "zero producer histories and fresh complete IR verification",
+    "exact-fit/exhausted/invalid 1GiB aggregate rebase work",
+    "current source provenance and specialization identities agree with the rebased IR"
+  ],
+  "sourceCheck": {
+    "files": 493,
+    "mirFunctions": 6134,
+    "unlockedExit": 0,
+    "lockedExit": 0,
+    "lock": "verified"
+  },
+  "fixture": {
+    "schema": "fairyc.candidate-artifact-rebase-fixture/v0",
+    "passed": true,
+    "compiler": {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-frontend-oracle-current-20261012.exe",
+      "sha256": "3ecc4501ee3bb47ecc39e7288200266b31cbcd8bf6ffec302ae54867705ce5d1"
+    },
+    "workspace": ".cache/project-artifact-rebase-20261014/workspace",
+    "observations": [
+      {
+        "argv": [
+          "check"
+        ],
+        "exit": 0,
+        "stdout": "check ok: 2 instance(s), 10 source file(s), 178 MIR function(s), lock updated\n",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "check",
+          "--locked"
+        ],
+        "exit": 0,
+        "stdout": "check ok: 2 instance(s), 10 source file(s), 178 MIR function(s), lock verified\n",
+        "stderr": ""
+      }
+    ],
+    "fixture": {
+      "path": ".cache/project-artifact-rebase-20261014/fixture.bin",
+      "sha256": "f79ad6e431f76b874a0aeb64fb9982b153a5e2e7a11ba27b41d1ae89eeb42cb2"
+    },
+    "workspaceInputs": [
+      {
+        "path": ".cache/project-artifact-rebase-20261014/workspace/fairy.toml",
+        "sha256": "6d0f30b6ccdb432b5f3f0953730152582744cd48ecb3ba5172e5027f6d17450d"
+      },
+      {
+        "path": ".cache/project-artifact-rebase-20261014/workspace/fairy.lock",
+        "sha256": "3f5df4f505989098d5190c1e40d8271f22a59cdcaae13a04dc3273de1a74e8de"
+      },
+      {
+        "path": ".cache/project-artifact-rebase-20261014/workspace/src/helper.fy",
+        "sha256": "cd286fc09c906e60264398646308179c8e808c12f75fdf4a6be95dd61c41e48e"
+      },
+      {
+        "path": ".cache/project-artifact-rebase-20261014/workspace/src/main.fy",
+        "sha256": "fc063dabd9d1f2dd4a35e04101cf6c8a68df9c3cbc65c37d6719ba81364fb412"
+      }
+    ]
+  },
+  "tests": {
+    "selection": {
+      "mode": "all-authored",
+      "authoredTests": 1,
+      "selectedTests": 1
+    },
+    "authoredTestsExecuted": 1,
+    "nativeProgram": {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-artifact-rebase-20261014\\tests\\native-project-ebddf731d12e09021324\\build\\lexer-candidate.exe",
+      "sha256": "0e1025f360dc6332bef648c26f45c2d955bf55e3798f9e5a94892425526a5043",
+      "selectedTests": [
+        "tests::module_project_artifact_rebase::whole_ir_rebase_preserves_links_fields_state_sdk_and_work_then_emits_native_packet"
+      ],
+      "stdoutBytes": 61058,
+      "stdoutSHA256": "31f29960070a6fb6f4a84938e5aecf7bafffa88e91ff1bad02eff779e73f8fe4",
+      "stack": {
+        "reserveBytes": 16777216,
+        "originalReserveBytes": 1048576,
+        "originalSHA256": "4c9f8e621a70e38350e0d3dcf93d90449cf934dd2d0453041f0df22567d2c352"
+      }
+    },
+    "tools": {
+      "compiler": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-frontend-oracle-current-20261012.exe",
+        "sha256": "3ecc4501ee3bb47ecc39e7288200266b31cbcd8bf6ffec302ae54867705ce5d1"
+      },
+      "candidate": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-cleanup-20261013\\current-driver\\driver-release.exe",
+        "sha256": "67be18bdabb9d6499edcfcd8b7d3e3245dd932fd265ba79ab4cd7136748ec0ac"
+      },
+      "builder": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-rooted-builder-stack-20261012.exe",
+        "sha256": "02abe2328daa9921705910c7b995e82c1312cb960fe024106c11468569aefff0"
+      },
+      "nativeStackEditor": {
+        "path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\editbin.exe",
+        "sha256": "be37ead809e0cab3b62ff7c141fece6655b6c6ab1e2951a118abbaef48acbc07"
+      }
+    },
+    "candidateInputFiles": 354,
+    "candidatePacketSHA256": "9f0bcbf0693138fc8f838ae85a071d9b51abcc2011b3c7098936de73afbf686e",
+    "candidateExecutions": [
+      {
+        "profile": "development",
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-artifact-rebase-20261014\\tests\\development.exe",
+        "sha256": "11f55c453ed0958184cbf8948f374faf25ba186796b13a785ab395d2f40f3bc9",
+        "exit": 0
+      },
+      {
+        "profile": "release",
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-artifact-rebase-20261014\\tests\\release.exe",
+        "sha256": "a81af9faf35e90b3de9eaf5bd26910f3d1600dc0d69171176111faada40bb9a1",
+        "exit": 0
+      }
+    ],
+    "invocations": [
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-frontend-oracle-current-20261012.exe",
+          "check"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-artifact-rebase-20261014\\tests\\native-project-ebddf731d12e09021324",
+        "seconds": 13.618362899986096,
+        "exit": 0,
+        "stdoutBytes": 80,
+        "stdoutSHA256": "43cd157889360da920db8a61d81a270e17b95a34f099a86ef4b30e1d3fa2f437",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-frontend-oracle-current-20261012.exe",
+          "build",
+          "--locked"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-artifact-rebase-20261014\\tests\\native-project-ebddf731d12e09021324",
+        "seconds": 27.03827869996894,
+        "exit": 0,
+        "stdoutBytes": 83,
+        "stdoutSHA256": "913d882a721755f5b674b0837a5dcdb182de237ba6bbcc5f15b49489af2c8bf9",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\editbin.exe",
+          "/nologo",
+          "/stack:16777216",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-artifact-rebase-20261014\\tests\\native-project-ebddf731d12e09021324\\build\\lexer-candidate.exe"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-artifact-rebase-20261014\\tests\\native-project-ebddf731d12e09021324",
+        "seconds": 0.06795190001139417,
+        "exit": 0,
+        "stdoutBytes": 0,
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-artifact-rebase-20261014\\tests\\native-project-ebddf731d12e09021324\\build\\lexer-candidate.exe",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-artifact-rebase-20261014\\fixture.bin"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-artifact-rebase-20261014\\tests\\native-project-ebddf731d12e09021324",
+        "seconds": 42.71620409999741,
+        "exit": 0,
+        "stdoutBytes": 61058,
+        "stdoutSHA256": "31f29960070a6fb6f4a84938e5aecf7bafffa88e91ff1bad02eff779e73f8fe4",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\empty-cleanup-20261013\\current-driver\\driver-release.exe",
+          "--c-project-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-artifact-rebase-20261014\\tests\\sources.list"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+        "seconds": 164.23333320004167,
+        "exit": 0,
+        "stdoutBytes": 26279615,
+        "stdoutSHA256": "9f0bcbf0693138fc8f838ae85a071d9b51abcc2011b3c7098936de73afbf686e",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-rooted-builder-stack-20261012.exe",
+          "--packet",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-artifact-rebase-20261014\\tests\\candidate-packet.bin",
+          "--packet-sha256",
+          "9f0bcbf0693138fc8f838ae85a071d9b51abcc2011b3c7098936de73afbf686e",
+          "--output",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-artifact-rebase-20261014\\tests\\development.exe",
+          "--stack-reserve-bytes",
+          "16777216"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+        "seconds": 20.61802280001575,
+        "exit": 0,
+        "stdoutBytes": 181,
+        "stdoutSHA256": "4951af891e7242adb8712f9afb1d0688204983cfca655343da33e61ddcd9e2c1",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-artifact-rebase-20261014\\tests\\development.exe",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-artifact-rebase-20261014\\fixture.bin"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+        "seconds": 206.8809111000155,
+        "exit": 0,
+        "stdoutBytes": 61058,
+        "stdoutSHA256": "31f29960070a6fb6f4a84938e5aecf7bafffa88e91ff1bad02eff779e73f8fe4",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-rooted-builder-stack-20261012.exe",
+          "--packet",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-artifact-rebase-20261014\\tests\\candidate-packet.bin",
+          "--packet-sha256",
+          "9f0bcbf0693138fc8f838ae85a071d9b51abcc2011b3c7098936de73afbf686e",
+          "--output",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-artifact-rebase-20261014\\tests\\release.exe",
+          "--release",
+          "--stack-reserve-bytes",
+          "16777216"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+        "seconds": 217.93243709998205,
+        "exit": 0,
+        "stdoutBytes": 183,
+        "stdoutSHA256": "59510c32f3041b55967ebdc512a42eb9fb4370ae4de32c21739cfcb9c9ac048d",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-artifact-rebase-20261014\\tests\\release.exe",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-artifact-rebase-20261014\\fixture.bin"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+        "seconds": 17.22827550000511,
+        "exit": 0,
+        "stdoutBytes": 61058,
+        "stdoutSHA256": "31f29960070a6fb6f4a84938e5aecf7bafffa88e91ff1bad02eff779e73f8fe4",
+        "stderr": ""
+      }
+    ],
+    "unchangedPaths": [
+      {
+        "path": ".cache/project-artifact-rebase-20261014/workspace/fairy.toml",
+        "snapshot": {
+          "directory": false,
+          "size": 150,
+          "modifiedNS": 1791936305533578600,
+          "sha256": "6d0f30b6ccdb432b5f3f0953730152582744cd48ecb3ba5172e5027f6d17450d"
+        }
+      },
+      {
+        "path": ".cache/project-artifact-rebase-20261014/workspace/fairy.lock",
+        "snapshot": {
+          "directory": false,
+          "size": 1697,
+          "modifiedNS": 1791936305605249400,
+          "sha256": "3f5df4f505989098d5190c1e40d8271f22a59cdcaae13a04dc3273de1a74e8de"
+        }
+      },
+      {
+        "path": ".cache/project-artifact-rebase-20261014/workspace/src/helper.fy",
+        "snapshot": {
+          "directory": false,
+          "size": 73,
+          "modifiedNS": 1791936305534577500,
+          "sha256": "cd286fc09c906e60264398646308179c8e808c12f75fdf4a6be95dd61c41e48e"
+        }
+      },
+      {
+        "path": ".cache/project-artifact-rebase-20261014/workspace/src/main.fy",
+        "snapshot": {
+          "directory": false,
+          "size": 320,
+          "modifiedNS": 1791936305534577500,
+          "sha256": "fc063dabd9d1f2dd4a35e04101cf6c8a68df9c3cbc65c37d6719ba81364fb412"
+        }
+      }
+    ],
+    "stdoutArtifact": {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-artifact-rebase-20261014\\tests\\verified-stdout.bin",
+      "bytes": 61058,
+      "sha256": "31f29960070a6fb6f4a84938e5aecf7bafffa88e91ff1bad02eff779e73f8fe4",
+      "profiles": [
+        "Go-native",
+        "development",
+        "release"
+      ],
+      "publication": "after complete stream equality and all input/tool/lock freshness checks"
+    }
+  },
+  "generatedProgram": {
+    "schema": "fairyc.candidate-rebased-ir-native/v0",
+    "passed": true,
+    "artifact": {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-artifact-rebase-20261014\\tests\\verified-stdout.bin",
+      "bytes": 61058,
+      "sha256": "31f29960070a6fb6f4a84938e5aecf7bafffa88e91ff1bad02eff779e73f8fe4",
+      "profiles": [
+        "Go-native",
+        "development",
+        "release"
+      ],
+      "publication": "after complete stream equality and all input/tool/lock freshness checks"
+    },
+    "builder": {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-rooted-builder-stack-20261012.exe",
+      "sha256": "02abe2328daa9921705910c7b995e82c1312cb960fe024106c11468569aefff0"
+    },
+    "executions": [
+      {
+        "profile": "development",
+        "path": ".cache/project-artifact-rebase-20261014/rebased-program-development.exe",
+        "sha256": "a992292ad521ce34d2c3fd6fc4b394cd7611976f65dc49ab934d8071c6a5bb5c",
+        "build": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-rooted-builder-stack-20261012.exe",
+            "--packet",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-artifact-rebase-20261014\\tests\\verified-stdout.bin",
+            "--packet-sha256",
+            "31f29960070a6fb6f4a84938e5aecf7bafffa88e91ff1bad02eff779e73f8fe4",
+            "--output",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-artifact-rebase-20261014\\rebased-program-development.exe"
+          ],
+          "seconds": 1.011870899994392,
+          "exit": 0,
+          "stdout": "built: C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-artifact-rebase-20261014\\rebased-program-development.exe (low, 2 C units, 161792 bytes)\n",
+          "stderr": ""
+        },
+        "execution": {
+          "seconds": 0.025623800000175834,
+          "exit": 42,
+          "stdoutHex": "",
+          "stderrHex": ""
+        },
+        "observedStackReserveBytes": 1048576
+      },
+      {
+        "profile": "release",
+        "path": ".cache/project-artifact-rebase-20261014/rebased-program-release.exe",
+        "sha256": "87fed65ae59fceff534e8ce4f344fd23180e723d63a5569a8eba40cf75a28654",
+        "build": {
+          "argv": [
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-rooted-builder-stack-20261012.exe",
+            "--packet",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-artifact-rebase-20261014\\tests\\verified-stdout.bin",
+            "--packet-sha256",
+            "31f29960070a6fb6f4a84938e5aecf7bafffa88e91ff1bad02eff779e73f8fe4",
+            "--output",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-artifact-rebase-20261014\\rebased-program-release.exe",
+            "--release"
+          ],
+          "seconds": 1.3099232999957167,
+          "exit": 0,
+          "stdout": "built: C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\project-artifact-rebase-20261014\\rebased-program-release.exe (optimized, 2 C units, 110592 bytes)\n",
+          "stderr": ""
+        },
+        "execution": {
+          "seconds": 0.023439600015990436,
+          "exit": 42,
+          "stdoutHex": "",
+          "stderrHex": ""
+        },
+        "observedStackReserveBytes": 1048576
+      }
+    ],
+    "applicationStackOverride": false,
+    "frontendFallback": false
+  },
+  "inputLedger": {
+    "path": ".cache/project-artifact-rebase-20261014/tests/receipt.json",
+    "sha256": "28486468e9115b0342add1dd0d9a7ca0023f942807beef0510d4bcf3b3179606",
+    "sourceCount": 358,
+    "canonicalSourceLedgerSHA256": "df8ac7db028479a110a1eaae175376c7ad524ae9ebe1f472c57bbaf22c0c725c"
+  },
+  "stdoutModeRejections": {
+    "passed": true,
+    "cases": [
+      {
+        "flags": [],
+        "exit": 2,
+        "stdout": "",
+        "stderr": "usage: verify-candidate-private-tests.py [-h] --compiler COMPILER\r\n                                         --candidate CANDIDATE\r\n                                         --builder BUILDER --module MODULE\r\n                                         --test TEST [--selected-tests-only]\r\n                                         [--frontend-timeout FRONTEND_TIMEOUT]\r\n                                         [--execution-timeout EXECUTION_TIMEOUT]\r\n                                         [--stack-reserve-bytes STACK_RESERVE_BYTES]\r\n                                         --output OUTPUT [--fixture FIXTURE]\r\n                                         [--candidate-only]\r\n                                         [--isolated-native]\r\n                                         [--native-program]\r\n                                         [--native-stack-editor NATIVE_STACK_EDITOR]\r\n                                         [--stdin-fixture STDIN_FIXTURE]\r\n                                         [--stdout-fixture STDOUT_FIXTURE]\r\n                                         [--stdout-executable-identity]\r\n                                         [--stdout-package-cache-keys]\r\n                                         [--stdout-artifact]\r\n                                         [--stderr-fixture STDERR_FIXTURE]\r\n                                         [--unchanged-paths UNCHANGED_PATHS]\r\nverify-candidate-private-tests.py: error: stdout-artifact requires native-program and excludes other stdout modes\r\n"
+      },
+      {
+        "flags": [
+          "--isolated-native",
+          "--native-program",
+          "--stdout-package-cache-keys"
+        ],
+        "exit": 2,
+        "stdout": "",
+        "stderr": "usage: verify-candidate-private-tests.py [-h] --compiler COMPILER\r\n                                         --candidate CANDIDATE\r\n                                         --builder BUILDER --module MODULE\r\n                                         --test TEST [--selected-tests-only]\r\n                                         [--frontend-timeout FRONTEND_TIMEOUT]\r\n                                         [--execution-timeout EXECUTION_TIMEOUT]\r\n                                         [--stack-reserve-bytes STACK_RESERVE_BYTES]\r\n                                         --output OUTPUT [--fixture FIXTURE]\r\n                                         [--candidate-only]\r\n                                         [--isolated-native]\r\n                                         [--native-program]\r\n                                         [--native-stack-editor NATIVE_STACK_EDITOR]\r\n                                         [--stdin-fixture STDIN_FIXTURE]\r\n                                         [--stdout-fixture STDOUT_FIXTURE]\r\n                                         [--stdout-executable-identity]\r\n                                         [--stdout-package-cache-keys]\r\n                                         [--stdout-artifact]\r\n                                         [--stderr-fixture STDERR_FIXTURE]\r\n                                         [--unchanged-paths UNCHANGED_PATHS]\r\nverify-candidate-private-tests.py: error: stdout-artifact requires native-program and excludes other stdout modes\r\n"
+      },
+      {
+        "flags": [
+          "--isolated-native",
+          "--native-program",
+          "--stdout-executable-identity"
+        ],
+        "exit": 2,
+        "stdout": "",
+        "stderr": "usage: verify-candidate-private-tests.py [-h] --compiler COMPILER\r\n                                         --candidate CANDIDATE\r\n                                         --builder BUILDER --module MODULE\r\n                                         --test TEST [--selected-tests-only]\r\n                                         [--frontend-timeout FRONTEND_TIMEOUT]\r\n                                         [--execution-timeout EXECUTION_TIMEOUT]\r\n                                         [--stack-reserve-bytes STACK_RESERVE_BYTES]\r\n                                         --output OUTPUT [--fixture FIXTURE]\r\n                                         [--candidate-only]\r\n                                         [--isolated-native]\r\n                                         [--native-program]\r\n                                         [--native-stack-editor NATIVE_STACK_EDITOR]\r\n                                         [--stdin-fixture STDIN_FIXTURE]\r\n                                         [--stdout-fixture STDOUT_FIXTURE]\r\n                                         [--stdout-executable-identity]\r\n                                         [--stdout-package-cache-keys]\r\n                                         [--stdout-artifact]\r\n                                         [--stderr-fixture STDERR_FIXTURE]\r\n                                         [--unchanged-paths UNCHANGED_PATHS]\r\nverify-candidate-private-tests.py: error: stdout-artifact requires native-program and excludes other stdout modes\r\n"
+      },
+      {
+        "flags": [
+          "--isolated-native",
+          "--native-program",
+          "--stdout-fixture",
+          "missing.bin"
+        ],
+        "exit": 2,
+        "stdout": "",
+        "stderr": "usage: verify-candidate-private-tests.py [-h] --compiler COMPILER\r\n                                         --candidate CANDIDATE\r\n                                         --builder BUILDER --module MODULE\r\n                                         --test TEST [--selected-tests-only]\r\n                                         [--frontend-timeout FRONTEND_TIMEOUT]\r\n                                         [--execution-timeout EXECUTION_TIMEOUT]\r\n                                         [--stack-reserve-bytes STACK_RESERVE_BYTES]\r\n                                         --output OUTPUT [--fixture FIXTURE]\r\n                                         [--candidate-only]\r\n                                         [--isolated-native]\r\n                                         [--native-program]\r\n                                         [--native-stack-editor NATIVE_STACK_EDITOR]\r\n                                         [--stdin-fixture STDIN_FIXTURE]\r\n                                         [--stdout-fixture STDOUT_FIXTURE]\r\n                                         [--stdout-executable-identity]\r\n                                         [--stdout-package-cache-keys]\r\n                                         [--stdout-artifact]\r\n                                         [--stderr-fixture STDERR_FIXTURE]\r\n                                         [--unchanged-paths UNCHANGED_PATHS]\r\nverify-candidate-private-tests.py: error: stdout-artifact requires native-program and excludes other stdout modes\r\n"
+      }
+    ]
+  },
+  "admission": {
+    "wholeIrRenumbered": true,
+    "generatedWindowsExecution": true,
+    "sourceCheckedCompleteOwner": false,
+    "cacheReuse": false,
+    "currentFullFixedPoint": false
+  },
+  "publicApiChanged": false,
+  "privateCandidateApiChanged": true,
+  "sdkAbiChanged": false,
+  "dbChanged": false,
+  "ciChanged": false,
+  "verificationRunnerChanged": true,
+  "productRunnerChanged": false,
+  "productStackChanged": false,
+  "productTimeoutChanged": false,
+  "verificationStackReserveBytes": 16777216,
+  "pushed": false
+}

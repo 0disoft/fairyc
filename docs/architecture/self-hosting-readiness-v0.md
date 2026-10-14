@@ -31,7 +31,10 @@ re-encodes byte-identically and rejects SDK/source contradictions:
 Current source facts and specialization handles now rebind across source/owner
 renumbering and reject stale sources and mismatched original templates:
 [current artifact receipt](../ops/evidence/candidate-project-artifact-current-20261014.json).
-Whole-IR renumbering, checked Complete-owner rebinding and cache reuse remain open.
+Whole IR now rebinds module/package indices through fresh complete verification;
+rebased generic/Vec/field/state C executes at both Windows profiles:
+[IR rebase receipt](../ops/evidence/candidate-project-artifact-rebase-20261014.json).
+Checked Complete-owner rebinding and cache reuse remain open.
 The current candidate-owned IR environment is verified in the
 [environment checkpoint](../ops/candidate-cache-environment-20261014.md).
 The actual running Windows compiler image identity is verified
