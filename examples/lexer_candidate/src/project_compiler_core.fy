@@ -1,5 +1,9 @@
 module project_compiler_core;
 import project_compiler_input as input;
+import module_project_artifact_model as artifacts;
+import module_project_artifact_current as rebinding;
+import module_project_artifact_rebase as rebasing;
+import module_project_artifact_admission as admission;
 import module_signatures as signatures;
 import module_project_compile as compile;
 import module_project_link as link;
@@ -68,4 +72,15 @@ pub fn Result<Complete,Problem> build_complete_reporting_sources(ref v::Vec<synt
     let program=switch(link_identified(sources,ref metadata,ref original,source_work,link_work)){case .ok(p):{p}case .err(e):{return .err(e);}};
     let interfaces=switch(interfaces::build(ref program,ref original,sources,ref metadata,table,source_work)){case .ok(p):{p}case .err(e):{return .err(fail(6,0,e,0,0,0,0,0));}};
     return .ok(Complete{.program,.interfaces});
+}
+// Restore keeps independent 16MiB source, aggregate artifact and 8MiB link
+// histories. Neither IR nor interfaces escape until their same-owner result is complete.
+pub fn Result<Complete,Problem> restore_complete_sources(artifacts::Restored saved,ref v::Vec<syntax::Parsed> sources,ref v::Vec<usize> owners,ref v::Vec<modules::Binding> imports,ref coordinates::Coordinates table,ref mut usize source_work,ref mut usize artifact_work,ref mut usize link_work){
+    let current=switch(rebinding::build_sources(saved,sources,owners,imports,table,source_work)){case .ok(p):{p}case .err(code):{return .err(fail(7,1,code,0,0,0,0,0));}};
+    let scope=switch(modules::build_scoped(sources,owners,imports)){case .ok(p):{p}case .err(e):{return .err(fail(1,0,e.code,e.module_index,e.start,e.end,0,0));}};
+    let metadata_scope=switch(modules::build_scoped(sources,owners,imports)){case .ok(p):{p}case .err(e):{return .err(fail(1,0,e.code,e.module_index,e.start,e.end,0,0));}};let metadata=switch(signatures::build_catalog(sources,metadata_scope)){case .ok(p):{p}case .err(e):{return .err(fail(2,0,e.code,e.module_index,e.start,e.end,0,0));}};
+    let raw=switch(rebasing::build(ref current,artifact_work)){case .ok(p):{p}case .err(code):{return .err(fail(7,2,code,0,0,0,0,0));}};
+    let admitted=switch(admission::build(raw,ref current,sources,ref scope,ref metadata,table,artifact_work)){case .ok(p):{p}case .err(e):{if(e.source.stage!=0){var Problem p=fail(3,e.source.stage,e.source.code,e.source.module_index,e.source.start,e.source.end,e.source.expected,e.source.actual);p.declaration_start=e.source.declaration_start;p.declaration_end=e.source.declaration_end;p.move_start=e.source.move_start;p.move_end=e.source.move_end;p.header_start=e.source.header_start;p.header_end=e.source.header_end;p.field_module=e.source.field_module;p.field_start=e.source.field_start;p.field_end=e.source.field_end;return .err(p);}return .err(fail(7,2+e.stage,e.code,0,0,0,0,0));}};
+    let interfaces=switch(interfaces::build_admitted(ref admitted,rebinding::source_plan(ref current),sources,ref metadata,table,source_work)){case .ok(p):{p}case .err(code):{return .err(fail(6,0,code,0,0,0,0,0));}};
+    let program=switch(identified::from_admitted(admitted,link_work)){case .ok(p):{p}case .err(e):{return .err(fail(4,0,e.code,e.module_index,e.start,e.end,0,0));}};return .ok(Complete{.program,.interfaces});
 }

@@ -1,5 +1,18 @@
 # Fairy 컴파일러 전환: 후속 작업 목록
 
+Checked restored IR now publishes one Complete owner retaining its admitted
+IR, detached current identity/call-target tables and all public interfaces.
+Independent source/artifact/link histories pass exact-fit and exhausted bounds;
+changed bodies and state declarations reject. Three authored tests pass Go
+native and candidate C development/release. Their complete 62,258-byte packet
+matches byte-for-byte; the reordered generic/Vec/state program executes at both
+Windows profiles with exit 42 and the ordinary 1MiB program stack. Root/locked
+checks pass 507 files / 6265 MIR functions.
+[Restored Complete receipt](evidence/candidate-restored-complete-20261014.json).
+The initial foreign-call assertion and obsolete seed declaration-limit failures
+are retained in the receipt. Actual cache lookup/publication/reuse, current full
+fixed point, product defaults/performance and platform/CI promotion remain open.
+
 Admitted restored IR now produces detached public views and all package
 interfaces with current signature numbering. Field, callable, parameter and
 Vec-name IDs rebind without changing IR bytes. Reordered generic/Vec/state

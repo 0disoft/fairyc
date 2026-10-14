@@ -1,5 +1,7 @@
 module module_project_identities;
 import candidate_limits as limits;
+import module_project_artifact_admission as admitted;
+import module_identity_artifact_model as snapshots;
 import module_project_identified_compile as units;
 import module_identified_ir as identified;
 import module_source_specializations as selection;
@@ -34,4 +36,12 @@ pub fn Result<Table,clean::Problem> build(ref units::Plan input,ref types::Plan 
     }
     let result=Table{.names,.types=selected_types,.frames=selected_frames};i=1;while(i<=frames::count(functions)){if(!limits::project_charge(work,1)){return .err(fail(1002));}let f=frames::at(functions,i);let row=frame_at(ref result,i);if(row.node!=0 && f.kind!=1 && f.kind!=2){return .err(fail(1001));}if(f.kind==2){let receiver=type_at(ref result,f.receiver_type);let id=identity(ref result,row);if(!limits::project_charge(work,id.len+1)){return .err(fail(1002));}if(!bytes::equal(id,identity(ref result,receiver))){return .err(fail(1001));}}i+=1;}
     return .ok(result);
+}
+// The sole restored-table entry consumes facts from complete same-owner
+// source/body/state/SDK admission, never a caller-assembled detached snapshot.
+pub fn Result<Table,clean::Problem> from_admitted(ref admitted::Admitted p,ref mut usize work){
+    let input=admitted::source_identities(p);let context=ir::cleanup_ir(admitted::program(p));var usize measured=0;let checked=snapshots::check(input,context,ref mut measured);if(!limits::project_charge(work,measured)){return .err(fail(1002));}if(checked!=0){return .err(fail(checked));}
+    let raw=snapshots::names(input);if(!limits::project_charge(work,raw.len+1)){return .err(fail(1002));}let names=switch(bytes::copy(raw)){case .ok(p):{p}case .err(_):{return .err(fail(1003));}};var v::Vec<selection::Row> types=v::empty<selection::Row>();var v::Vec<selection::Row> frames=v::empty<selection::Row>();var usize i=1;
+    while(i<=snapshots::type_count(input)){if(!limits::project_charge(work,1)){return .err(fail(1002));}if(!v::push<selection::Row>(ref mut types,snapshots::type_at(input,i)).is_ok){return .err(fail(1003));}i+=1;}i=1;
+    while(i<=snapshots::frame_count(input)){if(!limits::project_charge(work,1)){return .err(fail(1002));}if(!v::push<selection::Row>(ref mut frames,snapshots::frame_at(input,i)).is_ok){return .err(fail(1003));}i+=1;}return .ok(Table{.names,.types,.frames});
 }
