@@ -1,0 +1,291 @@
+{
+  "schema": "fairyc.candidate-check-cache-options/v0",
+  "passed": true,
+  "parentCommit": "2872222eb183f1d53732d125c44ccb03686d0d30",
+  "sourceInputs": [
+    {
+      "path": "examples/lexer_candidate/src/project_check_options.fy",
+      "sha256": "f089ea439dfab04857421e962a38bc73aa1ec8162f55401357e56f024e689cd7"
+    },
+    {
+      "path": "examples/lexer_candidate/tests/project_check_options.fy",
+      "sha256": "77edcdae1620c5dca78dd6a06a990b1b77958554d5e82aa7742dc0b18ab80df7"
+    }
+  ],
+  "tests": {
+    "schema": "fairyc.candidate-private-tests/v1",
+    "passed": true,
+    "module": "project_check_options",
+    "sourceInputs": [
+      {
+        "path": "examples/lexer_candidate/src/native_cli_options.fy",
+        "sha256": "dbb6a0e1d461e8445191173e708d2c08eafc24e1f956744bef76e7dfdb5b862b"
+      },
+      {
+        "path": "examples/lexer_candidate/src/project_check_options.fy",
+        "sha256": "f089ea439dfab04857421e962a38bc73aa1ec8162f55401357e56f024e689cd7"
+      },
+      {
+        "path": "internal/sdkstdlib/sources/std/bytes.fy",
+        "sha256": "4740a506e93349fb002c383967dcc44d182d20f09f2094b83b5464a4ab252982"
+      },
+      {
+        "path": "internal/sdkstdlib/sources/std/process.fy",
+        "sha256": "9680a1481df4f761f481d5a039af7bdbefeb312d1091961194f8e7bc0681ae24"
+      },
+      {
+        "path": "internal/sdkstdlib/sources/optional/std/vec.fy",
+        "sha256": "0ae4c395bf98c39079ad620bde035b3b590d51417864802e698edc069281db5b"
+      },
+      {
+        "path": "examples/lexer_candidate/tests/project_check_options.fy",
+        "sha256": "77edcdae1620c5dca78dd6a06a990b1b77958554d5e82aa7742dc0b18ab80df7"
+      },
+      {
+        "path": "tools/verify-candidate-private-tests.py",
+        "sha256": "b12b6342e09b2ccfb890f53e72584f3fa50f96be37802a13d57c8409f3663c44"
+      },
+      {
+        "path": "examples/lexer_candidate/fairy.toml",
+        "sha256": "5dd473fe42d35270b362d16d383627167d9981244761a925e42a45f57c8b737f"
+      }
+    ],
+    "tools": {
+      "compiler": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-frontend-oracle-current-20261012.exe",
+        "sha256": "3ecc4501ee3bb47ecc39e7288200266b31cbcd8bf6ffec302ae54867705ce5d1"
+      },
+      "candidate": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\rooted-file-20261014\\emitter\\driver-release.exe",
+        "sha256": "e1c622988da81f5a070f24294eeeb6d21661a2390bb64c57e07b5eb04eccad73"
+      },
+      "builder": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\cache-disk-builder-20261014.exe",
+        "sha256": "9568d0029ab4616fbd6400d9e6a0899352f482677cdce378236d6f07c8b8abe8"
+      }
+    },
+    "native": {
+      "schemaVersion": "fairyc.test-report/v4",
+      "engine": "native",
+      "target": "x86_64-windows-msvc",
+      "profile": "development",
+      "tests": [
+        {
+          "identity": "tests::project_check_options::cache_selection_preserves_old_flags_and_owns_unicode_path",
+          "outcome": "passed",
+          "trapCategory": null,
+          "stdoutBase64": "",
+          "stderrBase64": ""
+        },
+        {
+          "identity": "tests::project_check_options::malformed_duplicate_and_unbound_cache_flags_reject",
+          "outcome": "passed",
+          "trapCategory": null,
+          "stdoutBase64": "",
+          "stderrBase64": ""
+        }
+      ],
+      "count": 2,
+      "passed": 2,
+      "failed": 0,
+      "status": "ok",
+      "lock": "verified"
+    },
+    "nativeTests": 2,
+    "authoredTestsExecuted": 2,
+    "candidateOnly": false,
+    "lockSHA256": "c9661e83c17536149093f24b8a50959b2a69647691b87e72d20c04926077a6ba",
+    "candidateInputFiles": 6,
+    "candidatePacketSHA256": "f1d8b5d071a282ef710b5b220c1c02b61562d6531de70b9e06ae02aec61d218f",
+    "candidateExecutions": [
+      {
+        "profile": "development",
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\check-cache-cli-20261014\\options\\development.exe",
+        "sha256": "ac655acfddf9c01e63747b313a3991720cfe596ce61d510862a05ce38560d7dd",
+        "exit": 0
+      },
+      {
+        "profile": "release",
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\check-cache-cli-20261014\\options\\release.exe",
+        "sha256": "b94d4c55cf63d6840b338448b539d6364516213cdc9864476a4214bc05da42b7",
+        "exit": 0
+      }
+    ],
+    "invocations": [
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-frontend-oracle-current-20261012.exe",
+          "check"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\check-cache-cli-20261014\\options\\native-project-62f196796e363d106a9d",
+        "seconds": 0.5182032000157051,
+        "exit": 0,
+        "stdoutBytes": 78,
+        "stdoutSHA256": "80fdb7b66de2f77d225a52fb2b4af97e2416278c8896d9c26e3efdd97091ff34",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-frontend-oracle-current-20261012.exe",
+          "test",
+          "--native",
+          "--locked",
+          "--json",
+          "--capture-output",
+          "--exact",
+          "tests::project_check_options::cache_selection_preserves_old_flags_and_owns_unicode_path",
+          "--exact",
+          "tests::project_check_options::malformed_duplicate_and_unbound_cache_flags_reject"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\check-cache-cli-20261014\\options\\native-project-62f196796e363d106a9d",
+        "seconds": 4.127020100015216,
+        "exit": 0,
+        "stdoutBytes": 538,
+        "stdoutSHA256": "65366b13d822f817de2dc620c42f21ca3499bdbd266a5d7ec381c77ae404ed0c",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\rooted-file-20261014\\emitter\\driver-release.exe",
+          "--c-project-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\check-cache-cli-20261014\\options\\sources.list"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+        "seconds": 0.5267905999789946,
+        "exit": 0,
+        "stdoutBytes": 78416,
+        "stdoutSHA256": "f1d8b5d071a282ef710b5b220c1c02b61562d6531de70b9e06ae02aec61d218f",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\cache-disk-builder-20261014.exe",
+          "--packet",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\check-cache-cli-20261014\\options\\candidate-packet.bin",
+          "--packet-sha256",
+          "f1d8b5d071a282ef710b5b220c1c02b61562d6531de70b9e06ae02aec61d218f",
+          "--output",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\check-cache-cli-20261014\\options\\development.exe"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+        "seconds": 1.0158626000047661,
+        "exit": 0,
+        "stdoutBytes": 173,
+        "stdoutSHA256": "f81f8a80b9cf37aad3f58cc8e5ea7702ad520021d6424a424f676430e5cea3a2",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\check-cache-cli-20261014\\options\\development.exe"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+        "seconds": 0.026989600039087236,
+        "exit": 0,
+        "stdoutBytes": 0,
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\cache-disk-builder-20261014.exe",
+          "--packet",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\check-cache-cli-20261014\\options\\candidate-packet.bin",
+          "--packet-sha256",
+          "f1d8b5d071a282ef710b5b220c1c02b61562d6531de70b9e06ae02aec61d218f",
+          "--output",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\check-cache-cli-20261014\\options\\release.exe",
+          "--release"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+        "seconds": 1.258438200049568,
+        "exit": 0,
+        "stdoutBytes": 175,
+        "stdoutSHA256": "eae6d282abe21cf1830f5ed2144c6e1d90d72214371d64ae561609f40191e5db",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\check-cache-cli-20261014\\options\\release.exe"
+        ],
+        "cwd": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc",
+        "seconds": 0.02792100002989173,
+        "exit": 0,
+        "stdoutBytes": 0,
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderr": ""
+      }
+    ],
+    "publicApiChanged": false,
+    "dbChanged": false,
+    "ciChanged": false,
+    "pushed": false,
+    "selection": {
+      "mode": "all-authored",
+      "authoredTests": 2,
+      "selectedTests": 2
+    },
+    "frontendTimeoutSeconds": 60,
+    "executionTimeoutSeconds": 60,
+    "productTimeoutChanged": false,
+    "stackReserveBytes": 0,
+    "wrapperEffects": [
+      "filesystem",
+      "console"
+    ],
+    "nativeIsolation": {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\check-cache-cli-20261014\\options\\native-project-62f196796e363d106a9d",
+      "localSourceFiles": 3,
+      "inputFingerprint": "62f196796e363d106a9d447c8853658c1cb94331b68d9c76b25b208146dd7348",
+      "copiedInputs": [
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\check-cache-cli-20261014\\options\\native-project-62f196796e363d106a9d\\fairy.toml",
+          "sha256": "5dd473fe42d35270b362d16d383627167d9981244761a925e42a45f57c8b737f"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\check-cache-cli-20261014\\options\\native-project-62f196796e363d106a9d\\tests\\project_check_options.fy",
+          "sha256": "77edcdae1620c5dca78dd6a06a990b1b77958554d5e82aa7742dc0b18ab80df7"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\check-cache-cli-20261014\\options\\native-project-62f196796e363d106a9d\\src\\native_cli_options.fy",
+          "sha256": "dbb6a0e1d461e8445191173e708d2c08eafc24e1f956744bef76e7dfdb5b862b"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\check-cache-cli-20261014\\options\\native-project-62f196796e363d106a9d\\src\\project_check_options.fy",
+          "sha256": "f089ea439dfab04857421e962a38bc73aa1ec8162f55401357e56f024e689cd7"
+        },
+        {
+          "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\check-cache-cli-20261014\\options\\native-project-62f196796e363d106a9d\\src\\main.fy",
+          "sha256": "b7e7795830a146ea3dcec47f5a4ef9cae3cf6b5e22c2e7ba9b621338d401b78c"
+        }
+      ]
+    }
+  },
+  "sourceCheck": {
+    "scope": "HEAD plus options parser and tests; pending CLI route and origin diagnostics excluded",
+    "checks": [
+      {
+        "argv": [
+          "check"
+        ],
+        "exit": 0,
+        "stdout": "check ok: 2 instance(s), 514 source file(s), 6369 MIR function(s), lock updated\n",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "check",
+          "--locked"
+        ],
+        "exit": 0,
+        "stdout": "check ok: 2 instance(s), 514 source file(s), 6369 MIR function(s), lock verified\n",
+        "stderr": ""
+      }
+    ],
+    "lockSHA256": "911ced91f468cae9390c6bff7276e7dd54d047131fc28ad8904cee2b8cb6d90d"
+  },
+  "cliConnected": false,
+  "publicApiChanged": false,
+  "dbChanged": false,
+  "ciChanged": false,
+  "pushed": false
+}
