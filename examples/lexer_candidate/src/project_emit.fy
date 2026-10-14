@@ -19,6 +19,9 @@ import project_manifest as manifest;
 import project_coordinate_graph as coordinates;
 import module_project_identified_ir as identified;
 import generic_signature_diagnostics as diagnostics;
+import project_compiler_cached as cached;
+import project_compiler_cache_path as cache_path;
+import project_cache_disk as disk;
 
 // Successful emission keeps the publication metadata from this exact load.
 // Source/graph owners can be released once the checked bundle is complete.
@@ -46,9 +49,26 @@ pub fn Result<Plan,Error> evaluate(ref u8[] root,bool locked){
     let projected=switch(input::project(loader::workspace(ref loaded),ref mut meter)){case .ok(p):{p}case .err(e):{return .err(frontend_failure(check::projection_failure(loaded,e)));}};
     var usize source_work=0;var usize link_work=0;var v::Vec<diagnostics::Reports> reports=v::empty<diagnostics::Reports>();
     let complete=switch(compiler::build_complete_reporting(ref projected,ref table,ref mut reports,ref mut source_work,ref mut link_work)){case .ok(p):{p}case .err(e):{return .err(frontend_failure(check::compile_failure_reports(loaded,projected,e,reports)));}};
+    return finish(loaded,projected,complete);
+}
+
+fn Result<Plan,Error> finish(loader::Loaded loaded,input::Input projected,compiler::Complete complete){
     var usize entry_work=0;let selected=switch(entry::select(ref projected,identified::ir_program(compiler::checked_program(ref complete)),ref mut entry_work)){case .ok(p):{p}case .err(e):{return .err(output_failure(loaded,projected,2,e,clean::Problem{.code=0,.module_index=0,.start=0,.end=0}));}};
     let bundle=switch(complete_c::partition_entry(complete,selected,128)){case .ok(p):{p}case .err(e):{return .err(output_failure(loaded,projected,3,entry::Problem{.kind=0,.module_index=0,.start=0,.end=0},e));}};
     let local=spaces::local_catalog(instances::input(visibility::instance_graph(loader::workspace(ref loaded))));
     let name=switch(bytes::copy(manifest::package_value(catalog::package(local,0),b"name"))){case .ok(p):{p}case .err(_):{return .err(output_failure(loaded,projected,4,entry::Problem{.kind=0,.module_index=0,.start=0,.end=0},clean::Problem{.code=0,.module_index=0,.start=0,.end=0}));}};
     return .ok(Plan{.bundle,.name,.lock_state=loader::state(ref loaded)});
+}
+
+// Private opt-in emission uses the same Complete owner and entry/output path.
+// Loader/lock/projection failures keep their existing diagnostic owners.
+@effects(filesystem,environment,clock)
+pub fn Result<Plan,Error> evaluate_cached(ref u8[] root,bool locked,ref u8[] cache_root,disk::Limits policy,ref mut cached::Observation observed){
+    *observed=cached::empty();var source_set::Budget budget=source_set::Budget{.files=0,.bytes=0};var usize meter=0;
+    let loaded=switch(loader::load(root,locked,ref mut budget,ref mut meter)){case .ok(p):{p}case .err(e):{return .err(frontend_failure(check::load_failure(e)));}};
+    let table=switch(coordinates::collect(visibility::workspace_graph(loader::workspace(ref loaded)),ref mut meter)){case .ok(p):{p}case .err(e):{return .err(frontend_failure(check::projection_failure(loaded,input::Problem{.code=e.code,.reason=2,.owner=e.owner,.module_index=0,.declaration=0})));}};
+    let projected=switch(input::project(loader::workspace(ref loaded),ref mut meter)){case .ok(p):{p}case .err(e):{return .err(frontend_failure(check::projection_failure(loaded,e)));}};
+    var usize source_work=0;var usize link_work=0;var v::Vec<diagnostics::Reports> reports=v::empty<diagnostics::Reports>();
+    let complete=switch(cache_path::build(cache_root,policy,loader::workspace(ref loaded),ref projected,ref table,ref mut reports,ref mut source_work,ref mut link_work,observed)){case .ok(p):{p}case .err(e):{return .err(frontend_failure(check::compile_failure_reports(loaded,projected,e,reports)));}};
+    return finish(loaded,projected,complete);
 }
