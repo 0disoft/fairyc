@@ -7,7 +7,7 @@ import std::bytes as bytes;
 
 // Windows storage functions transport the File descriptor with memcpy. The
 // private carrier keeps its integer handle and never aliases a HANDLE lvalue.
-pub fn bool admitted(usize code){return code>=33 && code<=36 || code==39 || code==42 || code>=45 && code<=50 || code==55 || code==56 || code>=57 && code<=69;}
+pub fn bool admitted(usize code){return code>=33 && code<=36 || code==38 || code==39 || code==40 || code==42 || code>=45 && code<=50 || code==55 || code==56 || code>=57 && code<=69;}
 pub fn usize fields(usize record){return if(record==6 || record==7 || record==8 || record==9 || record==11 || record==12 || record==13 || record==14){rules::field_count(record)}else{0};}
 fn ref u8[] slot(ref u8[] pool,usize index){var usize start=0;var usize i=0;while(i<index){while(pool[start]!=0){start+=1;}start+=1;i+=1;}var usize end=start;while(pool[end]!=0){end+=1;}return pool[start..end];}
 pub fn ref u8[] wire_name(usize record){let pool=b"fy_std_windows_file_result_v0\0fy_std_windows_file_position_result_v0\0fy_std_windows_file_size_result_v0\0fy_std_windows_file_buffer_result_v0\0fy_std_windows_open_options_v0\0fy_std_directory_entry_result_v0\0fy_std_windows_file_kind_result_v0\0fy_std_windows_file_id_v0\0";return slot(pool,if(record==6){0}else if(record==7){1}else if(record==8){2}else if(record==11){3}else if(record==13){4}else if(record==14){5}else if(record==9){6}else{7});}

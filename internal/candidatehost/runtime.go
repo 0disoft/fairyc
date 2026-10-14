@@ -6,10 +6,14 @@ import (
 	_ "embed"
 	"fmt"
 	"regexp"
+	"strings"
 )
 
 //go:embed windows_process.c
 var windowsProcess string
+
+//go:embed windows_rooted_file.c
+var windowsRootedFile string
 
 var symbols = regexp.MustCompile(`\bfairyc_private_windows_[A-Za-z0-9_]+\s*\(`)
 var admitted = map[string]bool{
@@ -30,6 +34,12 @@ var admitted = map[string]bool{
 	"fairyc_private_windows_kill_process_v1": true, "fairyc_private_windows_close_v1": true,
 	"fairyc_private_windows_std_handle_v1": true, "fairyc_private_windows_error_v1": true,
 	"fairyc_private_windows_startup_size_v1": true, "fairyc_private_windows_job_size_v1": true,
+	"fairyc_private_windows_directory_open_v1": true, "fairyc_private_windows_root_file_open_v1": true,
+	"fairyc_private_windows_root_file_size_v1": true, "fairyc_private_windows_root_file_write_v1": true,
+	"fairyc_private_windows_root_file_read_v1":  true,
+	"fairyc_private_windows_root_file_close_v1": true,
+	"fairyc_private_windows_root_file_sync_v1":  true, "fairyc_private_windows_root_file_delete_v1": true,
+	"fairyc_private_windows_root_file_rename_v1": true,
 }
 
 func WindowsSource(header string) (string, error) {
@@ -37,6 +47,7 @@ func WindowsSource(header string) (string, error) {
 	if len(matches) == 0 {
 		return "", nil
 	}
+	rooted := false
 	for _, match := range matches {
 		name := match[:len(match)-1]
 		for len(name) > 0 && (name[len(name)-1] == ' ' || name[len(name)-1] == '\t' || name[len(name)-1] == '\n' || name[len(name)-1] == '\r') {
@@ -45,6 +56,12 @@ func WindowsSource(header string) (string, error) {
 		if !admitted[name] {
 			return "", fmt.Errorf("unknown private Windows host symbol %s", name)
 		}
+		if name == "fairyc_private_windows_directory_open_v1" || strings.HasPrefix(name, "fairyc_private_windows_root_file_") {
+			rooted = true
+		}
+	}
+	if rooted {
+		return windowsProcess + "\n" + windowsRootedFile, nil
 	}
 	return windowsProcess, nil
 }

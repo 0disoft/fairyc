@@ -1,0 +1,57 @@
+module tests::windows_rooted_file;
+import windows_rooted_file as rooted;
+import file_source as files;
+import std::bytes as bytes;
+import std::text as text;
+import std::fs as fs;
+import std::process as process;
+import std::io as io;
+import windows_command as command;
+
+@link_name("fairyc_private_windows_handle_count_v1") unsafe extern C fn i32 handle_count(ptr mut u32 count);
+@effects(filesystem) @link_name("fairyc_private_windows_directory_open_v1") unsafe extern C fn usize raw_directory(ptr u8 name,usize count);
+@effects(filesystem) @link_name("fairyc_private_windows_root_file_open_v1") unsafe extern C fn usize raw_file(usize root,ptr u8 name,usize count,u32 mode);
+@effects(filesystem) @link_name("fairyc_private_windows_root_file_close_v1") unsafe extern C fn i32 raw_close(usize handle);
+@link_name("fairyc_private_windows_error_v1") unsafe extern C fn u32 raw_error();
+fn u32 handles(){var u32 count=0;assert(unsafe{handle_count(ref mut count as ptr mut u32)}!=0);return count;}
+fn bytes::Buffer path(ref u8[] root,ref u8[] leaf){var out=bytes::empty();assert(bytes::append(ref mut out,root).is_ok && bytes::append_byte(ref mut out,47).is_ok && bytes::append(ref mut out,leaf).is_ok);return out;}
+fn text::CString cstr(ref u8[] raw){let value=switch(text::validate_utf8(raw)){case .ok(p):{p}case .err(_):{assert(false);return cstr(raw);}};return switch(text::cstring_from_text(value)){case .ok(p):{p}case .err(_):{assert(false);cstr(raw)}};}
+@effects(filesystem) fn bytes::Buffer base(){var u8[4096] data=[0;4096];let n=switch(process::arg(1,ref mut data)){case .ok(n):{n}case .err(_):{assert(false);0}};let ref u8[] arg=ref data;return switch(files::manifest(arg[..n])){case .ok(p):{p}case .err(_):{assert(false);bytes::empty()}};}
+@effects(filesystem) fn void mkdir(ref u8[] raw){let p=cstr(raw);assert(fs::create_dir(text::cstring_as_cstr(ref p)).is_ok);}
+@effects(filesystem) fn void rmdir(ref u8[] raw){let p=cstr(raw);assert(fs::remove_dir(text::cstring_as_cstr(ref p)).is_ok);}
+@effects(filesystem) fn void unlink(ref u8[] raw){let p=cstr(raw);assert(fs::remove_file(text::cstring_as_cstr(ref p)).is_ok);}
+@effects(filesystem,console) fn rooted::Directory open(ref u8[] raw){return switch(rooted::open(raw)){case .ok(p):{p}case .err(e):{discard io::write_stderr("root open ");discard io::write_stderr_u32(e.stage);discard io::write_stderr_u32(e.os_code);assert(false);open(raw)}};}
+@effects(filesystem,console) fn rooted::File create(ref rooted::Directory root,ref u8[] leaf){return switch(rooted::create_new(root,leaf)){case .ok(p):{p}case .err(e):{discard io::write_stderr("root create ");discard io::write_stderr_u32(e.stage);discard io::write_stderr_u32(e.os_code);assert(false);create(root,leaf)}};}
+@effects(console) fn void expect(Result<bool,rooted::Problem> result){switch(result){case .ok(done):{assert(done);}case .err(e):{discard io::write_stderr("root operation ");discard io::write_stderr_u32(e.stage);discard io::write_stderr(" ");discard io::write_stderr_u32(e.os_code);discard io::write_stderr("\n");assert(false);}};}
+@effects(filesystem,console) fn void save(ref rooted::Directory root,ref u8[] leaf,ref u8[] value){var file=create(root,b".stage");assert(rooted::write_all(ref mut file,value).is_ok);expect(rooted::sync(ref mut file));expect(rooted::publish(root,ref mut file,leaf));expect(rooted::sync(ref mut file));expect(rooted::close(file));}
+@effects(filesystem) fn bytes::Buffer read(ref rooted::Directory root,ref u8[] leaf){var file=switch(rooted::open_read(root,leaf)){case .ok(p):{p}case .err(_):{assert(false);return read(root,leaf);}};let size=switch(rooted::size(ref file)){case .ok(n):{n}case .err(_):{assert(false);0}};var bytes::Buffer out=bytes::empty();assert(size<=200000 && bytes::resize_zeroed(ref mut out,size).is_ok);var usize offset=0;while(offset<size){let usize count=if(size-offset>65536){65536}else{size-offset};let used=switch(rooted::read(ref mut file,bytes::view_mut(ref mut out)[offset..offset+count])){case .ok(n):{n}case .err(_):{assert(false);0}};assert(used>0);offset+=used;}var u8[1] extra=[0;1];assert(switch(rooted::read(ref mut file,ref mut extra)){case .ok(n):{n==0}case .err(_):{false}});assert(rooted::close(file).is_ok);return out;}
+@test @effects(filesystem,console)
+fn void opened_directory_survives_root_path_replacement_and_binary_publication(){
+    let base=base();let original=path(bytes::view(ref base),b"root-owned");let moved=path(bytes::view(ref base),b"root-moved");mkdir(bytes::view(ref original));
+    {let root=open(bytes::view(ref original));let old=cstr(bytes::view(ref original));let new=cstr(bytes::view(ref moved));assert(fs::rename_dir(text::cstring_as_cstr(ref old),text::cstring_as_cstr(ref new)).is_ok);mkdir(bytes::view(ref original));
+        var bytes::Buffer body=bytes::empty();assert(bytes::resize_zeroed(ref mut body,131073).is_ok);{let values=bytes::view_mut(ref mut body);values[0]=255;values[65536]=42;values[131072]=254;}save(ref root,b"saved.bin",bytes::view(ref body));let loaded=read(ref root,b"saved.bin");assert(bytes::equal(bytes::view(ref loaded),bytes::view(ref body)));let replacement=open(bytes::view(ref original));assert(switch(rooted::open_read(ref replacement,b"saved.bin")){case .ok(_):{false}case .err(e):{rooted::missing(e)}});
+        let actual=path(bytes::view(ref moved),b"saved.bin");let text=cstr(bytes::view(ref actual));assert(fs::path_kind(text::cstring_as_cstr(ref text)).is_ok);
+    }
+    let actual=path(bytes::view(ref moved),b"saved.bin");unlink(bytes::view(ref actual));rmdir(bytes::view(ref original));rmdir(bytes::view(ref moved));
+}
+@test @effects(filesystem,console)
+fn void invalid_leaves_collisions_and_failed_publication_preserve_existing_bytes(){
+    let base=base();let directory=path(bytes::view(ref base),b"root-failures");mkdir(bytes::view(ref directory));let obstruction=path(bytes::view(ref directory),b"blocked");mkdir(bytes::view(ref obstruction));
+    {let root=open(bytes::view(ref directory));save(ref root,b"kept.bin",b"old\x00\xff");assert(switch(rooted::create_new(ref root,b"kept.bin")){case .ok(_):{false}case .err(e):{rooted::collision(e)}});
+        assert(!rooted::valid_leaf(b"") && !rooted::valid_leaf(b".") && !rooted::valid_leaf(b"..") && !rooted::valid_leaf(b"../outside") && !rooted::valid_leaf(b"a\\b") && !rooted::valid_leaf(b"a:b") && !rooted::valid_leaf(b"x\x00y"));assert(!rooted::create_new(ref root,b"../outside").is_ok && !rooted::open_read(ref root,b"blocked").is_ok);
+        var file=create(ref root,b".failed");assert(rooted::write_all(ref mut file,b"new").is_ok && rooted::sync(ref mut file).is_ok);assert(switch(rooted::publish(ref root,ref mut file,b"blocked")){case .ok(_):{false}case .err(e):{e.stage==9}});assert(rooted::close(file).is_ok);assert(switch(rooted::open_read(ref root,b".failed")){case .ok(_):{false}case .err(e):{rooted::missing(e)}});let kept=read(ref root,b"kept.bin");assert(bytes::equal(bytes::view(ref kept),b"old\x00\xff"));
+        save(ref root,b"kept.bin",b"replacement");let replaced=read(ref root,b"kept.bin");assert(bytes::equal(bytes::view(ref replaced),b"replacement"));save(ref root,b"x",b"one");let short=read(ref root,b"x");assert(bytes::equal(bytes::view(ref short),b"one"));
+    }let saved=path(bytes::view(ref directory),b"kept.bin");unlink(bytes::view(ref saved));let short=path(bytes::view(ref directory),b"x");unlink(bytes::view(ref short));rmdir(bytes::view(ref obstruction));rmdir(bytes::view(ref directory));
+}
+@test @effects(filesystem,console)
+fn void unpublished_files_and_failed_reads_release_all_handles(){
+    let base=base();let directory=path(bytes::view(ref base),b"root-cleanup");mkdir(bytes::view(ref directory));{let root=open(bytes::view(ref directory));{let warm=create(ref root,b".warm");}assert(switch(rooted::open_read(ref root,b".warm")){case .ok(_):{false}case .err(e):{rooted::missing(e)}});let before=handles();var usize i=0;while(i<12){{let another=open(bytes::view(ref directory));var file=create(ref another,b".unpublished");assert(rooted::write_all(ref mut file,b"unpublished").is_ok);assert(!rooted::open_read(ref another,b"missing").is_ok);}assert(switch(rooted::open_read(ref root,b".unpublished")){case .ok(_):{false}case .err(e):{rooted::missing(e)}});i+=1;}assert(handles()==before);}rmdir(bytes::view(ref directory));
+}
+@test @effects(filesystem,console)
+fn void real_reparse_points_and_raw_namespace_escapes_reject(){
+    let base=base();let actual=path(bytes::view(ref base),b"reparse/actual");let link=path(bytes::view(ref base),b"reparse/root-link");assert(switch(rooted::open(bytes::view(ref link))){case .ok(_):{false}case .err(e):{e.stage==3}});let root=open(bytes::view(ref actual));assert(!rooted::open_read(ref root,b"redirect").is_ok);
+    let optional=path(bytes::view(ref actual),b"file-link");let optional_name=cstr(bytes::view(ref optional));if(fs::path_kind(text::cstring_as_cstr(ref optional_name)).is_ok){assert(!rooted::open_read(ref root,b"file-link").is_ok);}
+    let encoded=switch(command::path(bytes::view(ref actual))){case .ok(p):{p}case .err(_):{assert(false);return;}};let before=handles();let raw=unsafe{raw_directory(bytes::view(ref encoded) as ptr u8,bytes::len(ref encoded))};assert(raw!=0);
+    let escape=switch(command::path(b"../external/escape-created.bin")){case .ok(p):{p}case .err(_):{assert(false);return;}};assert(unsafe{raw_file(raw,bytes::view(ref escape) as ptr u8,bytes::len(ref escape)-2,2)}==0 && unsafe{raw_error()}==123);let stream=switch(command::path(b"marker:stream")){case .ok(p):{p}case .err(_):{assert(false);return;}};assert(unsafe{raw_file(raw,bytes::view(ref stream) as ptr u8,bytes::len(ref stream)-2,1)}==0 && unsafe{raw_error()}==123);assert(unsafe{raw_file(raw,bytes::view(ref stream) as ptr u8,0,1)}==0 && unsafe{raw_error()}==123);assert(unsafe{raw_file(raw,bytes::view(ref stream) as ptr u8,bytes::len(ref stream)-2,3)}==0 && unsafe{raw_error()}==87);assert(unsafe{raw_close(raw)}!=0 && handles()==before);
+    let marker=path(bytes::view(ref base),b"reparse/external/marker.bin");let value=switch(files::manifest(bytes::view(ref marker))){case .ok(p):{p}case .err(_):{assert(false);return;}};assert(bytes::equal(bytes::view(ref value),b"untouched\x00\xff"));
+}
