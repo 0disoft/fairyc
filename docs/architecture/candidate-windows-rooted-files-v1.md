@@ -56,6 +56,39 @@ frontend fallback to execute those paths. [Receipt](../ops/evidence/candidate-ro
 This is the cache I/O prerequisite. Bounded cache namespace/read/publication
 policy, verified cache reuse and CLI selection remain separate work.
 
+## Retained-root enumeration and retention (2026-10-14)
+
+A private Directory scan enumerates children of the retained non-reparse
+Directory in `FILE_ID_BOTH_DIR_INFO` batches of at most 64 KiB read through
+`GetFileInformationByHandleEx`, so continuation resolves against the same root
+handle instead of a reopened pathname. One scan visits at most 4096 entries and
+draws on a separate 16 MiB work budget from payload I/O. The entire result fails
+closed: an oversize or malformed batch, an unreadable record, or an exhausted
+entry or work bound discards the whole scan rather than returning a partial
+listing.
+
+Enumeration is not an atomic snapshot; it observes whatever the retained handle
+resolves at each call. Metadata (file ID, timestamps, size, attributes) is a
+retention hint only and never authority. `erase_if` reopens the same relative
+leaf with DELETE access, denies write and delete sharing, and compares the
+current metadata against the recorded hint; it marks the handle for deletion
+only when they match, so a replaced or modified file is left in place, and it
+refuses junction metadata outright. Metadata equality does not prove content
+equality, so future cache consumers must fully verify restored bytes rather than
+trust an ID or timestamp match.
+
+All seven authored tests pass Go-native and candidate-generated C
+development/release, extending the four existing rooted-file regressions with
+601-entry multi-batch enumeration of Unicode names after root pathname
+replacement, exact/exhausted 16 MiB work and maximum rows, changed-file
+retention with current-metadata delete, malformed batch rejection, and real
+junction/file-symlink flags on scanned entries. Root and locked source checks
+pass 511 files / 6319 MIR functions. Actual disk cache storage and reuse are
+still pending, and the public SDK and public CLI contracts are unchanged.
+[Inventory receipt](../ops/evidence/candidate-rooted-inventory-20261014.json).
+
 Windows ABI references: [NtCreateFile RootDirectory and reparse options](https://learn.microsoft.com/en-us/windows/win32/api/winternl/nf-winternl-ntcreatefile),
 [relative rename information](https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/ntifs/ns-ntifs-_file_rename_information),
-and [NtSetInformationFile classes](https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/ntifs/nf-ntifs-ntsetinformationfile).
+[NtSetInformationFile classes](https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/ntifs/nf-ntifs-ntsetinformationfile),
+[FILE_ID_BOTH_DIR_INFO](https://learn.microsoft.com/en-us/windows/win32/api/winbase/ns-winbase-file_id_both_dir_info),
+and [GetFileInformationByHandleEx](https://learn.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-getfileinformationbyhandleex).

@@ -40,6 +40,7 @@ var admitted = map[string]bool{
 	"fairyc_private_windows_root_file_close_v1": true,
 	"fairyc_private_windows_root_file_sync_v1":  true, "fairyc_private_windows_root_file_delete_v1": true,
 	"fairyc_private_windows_root_file_rename_v1": true,
+	"fairyc_private_windows_root_file_info_v1":   true, "fairyc_private_windows_root_directory_query_v1": true,
 }
 
 func WindowsSource(header string) (string, error) {
@@ -56,7 +57,7 @@ func WindowsSource(header string) (string, error) {
 		if !admitted[name] {
 			return "", fmt.Errorf("unknown private Windows host symbol %s", name)
 		}
-		if name == "fairyc_private_windows_directory_open_v1" || strings.HasPrefix(name, "fairyc_private_windows_root_file_") {
+		if name == "fairyc_private_windows_directory_open_v1" || strings.HasPrefix(name, "fairyc_private_windows_root_file_") || strings.HasPrefix(name, "fairyc_private_windows_root_directory_") {
 			rooted = true
 		}
 	}

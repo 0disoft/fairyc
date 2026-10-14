@@ -47,7 +47,7 @@ size_t fairyc_private_windows_directory_open_v1(const uint8_t *path, size_t byte
     for (size_t i = 0; i + 1 < bytes / 2; i++) {
         if (((const WCHAR *)path)[i] == 0) { SetLastError(ERROR_INVALID_NAME); return 0; }
     }
-    HANDLE directory = CreateFileW((LPCWSTR)path, FILE_TRAVERSE | FILE_READ_ATTRIBUTES | SYNCHRONIZE,
+    HANDLE directory = CreateFileW((LPCWSTR)path, FILE_LIST_DIRECTORY | FILE_TRAVERSE | FILE_READ_ATTRIBUTES | SYNCHRONIZE,
         FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE, NULL, OPEN_EXISTING,
         FILE_FLAG_BACKUP_SEMANTICS | FILE_FLAG_OPEN_REPARSE_POINT, NULL);
     if (directory == INVALID_HANDLE_VALUE) { return 0; }
@@ -63,7 +63,7 @@ size_t fairyc_private_windows_directory_open_v1(const uint8_t *path, size_t byte
 }
 
 size_t fairyc_private_windows_root_file_open_v1(size_t root, const uint8_t *leaf, size_t bytes, uint32_t mode) {
-    if (root == 0 || (mode != 1 && mode != 2)) { SetLastError(ERROR_INVALID_PARAMETER); return 0; }
+    if (root == 0 || mode < 1 || mode > 3) { SetLastError(ERROR_INVALID_PARAMETER); return 0; }
     if (!fy_root_leaf(leaf, bytes)) { return 0; }
     HMODULE module = GetModuleHandleW(L"ntdll.dll");
     if (module == NULL) { return 0; }
@@ -76,8 +76,9 @@ size_t fairyc_private_windows_root_file_open_v1(size_t root, const uint8_t *leaf
     HANDLE file = NULL;
     ACCESS_MASK access = GENERIC_READ | SYNCHRONIZE;
     if (mode == 2) { access |= GENERIC_WRITE | DELETE; }
+    if (mode == 3) { access |= DELETE; }
     NTSTATUS status = create(&file, access, &attributes, &io, NULL, FILE_ATTRIBUTE_NORMAL,
-        FILE_SHARE_READ | FILE_SHARE_DELETE, mode == 1 ? 1u : 2u,
+        mode == 3 ? FILE_SHARE_READ : FILE_SHARE_READ | FILE_SHARE_DELETE, mode == 2 ? 2u : 1u,
         0x00000040u | 0x00000020u | 0x00200000u, NULL, 0);
     if (status < 0) { SetLastError(error(status)); return 0; }
     if (!fy_root_regular(file)) {
@@ -131,4 +132,31 @@ int32_t fairyc_private_windows_root_file_rename_v1(size_t file, size_t root, con
         (ULONG)(sizeof(FILE_RENAME_INFO) + bytes), (FILE_INFORMATION_CLASS)10);
     if (status < 0) { SetLastError(error(status)); return 0; }
     return 1;
+}
+
+struct fy_root_file_metadata_v1 { size_t identity; size_t modified; size_t size; uint32_t attributes; };
+int32_t fairyc_private_windows_root_file_info_v1(size_t file, void *output) {
+    BY_HANDLE_FILE_INFORMATION info;
+    if (output == NULL) { SetLastError(ERROR_INVALID_PARAMETER); return 0; }
+    if (!GetFileInformationByHandle((HANDLE)(uintptr_t)file, &info)) { return 0; }
+    struct fy_root_file_metadata_v1 value = {
+        (size_t)(((uint64_t)info.nFileIndexHigh << 32) | info.nFileIndexLow),
+        (size_t)(((uint64_t)info.ftLastWriteTime.dwHighDateTime << 32) | info.ftLastWriteTime.dwLowDateTime),
+        (size_t)(((uint64_t)info.nFileSizeHigh << 32) | info.nFileSizeLow), info.dwFileAttributes
+    };
+    memcpy(output, &value, sizeof(value)); return 1;
+}
+_Static_assert(offsetof(FILE_ID_BOTH_DIR_INFO, FileName) == 104, "private directory name offset");
+_Static_assert(offsetof(FILE_ID_BOTH_DIR_INFO, FileId) == 96, "private directory ID offset");
+_Static_assert(offsetof(FILE_ID_BOTH_DIR_INFO, LastWriteTime) == 24, "private directory time offset");
+_Static_assert(offsetof(FILE_ID_BOTH_DIR_INFO, EndOfFile) == 40, "private directory size offset");
+_Static_assert(offsetof(FILE_ID_BOTH_DIR_INFO, FileAttributes) == 56, "private directory attributes offset");
+_Static_assert(offsetof(FILE_ID_BOTH_DIR_INFO, FileNameLength) == 60, "private directory length offset");
+int32_t fairyc_private_windows_root_directory_query_v1(size_t root, uint8_t *data, size_t size, uint32_t restart) {
+    if (root == 0 || data == NULL || size < sizeof(FILE_ID_BOTH_DIR_INFO) || size > 65536 ||
+        ((uintptr_t)data & 7u) != 0 || restart > 1) {
+        SetLastError(ERROR_INVALID_PARAMETER); return 0;
+    }
+    return GetFileInformationByHandleEx((HANDLE)(uintptr_t)root,
+        restart != 0 ? FileIdBothDirectoryRestartInfo : FileIdBothDirectoryInfo, data, (DWORD)size);
 }

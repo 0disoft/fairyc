@@ -1,5 +1,25 @@
 # Self-hosting readiness v0
 
+Private retained-root enumeration and metadata-guarded retention (2026-10-14):
+a new private Directory scan reads `FILE_ID_BOTH_DIR_INFO` batches of at most
+64 KiB through the same non-reparse handle, visits at most 4096 entries under a
+separate 16 MiB work budget, and fails the whole result closed on an oversize or
+malformed batch or an exhausted entry or work bound. Metadata (file ID, time,
+size, attributes) is a retention hint and never authority: `erase_if` reopens
+the same relative leaf with DELETE, denies write and delete sharing, compares
+current metadata against the recorded hint and marks the handle for deletion
+only on a match, and refuses junction metadata outright. Enumeration is not an
+atomic snapshot and metadata equality does not prove content, so future cache
+consumers must fully verify restored bytes. All seven authored tests pass
+Go-native and candidate C development/release, extending the four existing
+rooted-file regressions with 601-entry multi-batch enumeration of Unicode names
+after root pathname replacement, exact/exhausted 16 MiB work and maximum rows,
+changed-file retention and current-metadata delete, malformed batch rejection,
+and real junction/file-symlink flags on scanned entries. Root and locked source
+checks pass 511 files / 6319 MIR functions.
+[Inventory receipt](../ops/evidence/candidate-rooted-inventory-20261014.json).
+No public SDK or CLI change; actual disk cache storage and reuse remain open.
+
 Private Windows handle-relative I/O now retains a non-reparse Directory, opens
 flat regular-file leaves, creates exclusive staging, writes in 64KiB chunks and
 publishes through the same root handle. Fairy owns all sequencing and cleanup;

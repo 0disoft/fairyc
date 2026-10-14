@@ -30,4 +30,10 @@ func TestPrivateWindowsRootFileSymbolSelection(t *testing.T) {
 	if _, err := WindowsSource("fairyc_private_windows_root_file_unknown_v1("); err == nil {
 		t.Fatal("unknown rooted operation admitted")
 	}
+	for _, name := range []string{"fairyc_private_windows_root_file_info_v1", "fairyc_private_windows_root_directory_query_v1"} {
+		source, err := WindowsSource(name + "(")
+		if err != nil || source != rooted {
+			t.Fatalf("missing inventory adapter for %s: %v", name, err)
+		}
+	}
 }
