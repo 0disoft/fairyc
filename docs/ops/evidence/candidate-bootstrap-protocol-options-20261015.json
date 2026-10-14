@@ -1,0 +1,55 @@
+{
+  "schema": "fairyc.candidate-bootstrap-protocol-options/v0",
+  "passed": true,
+  "inputs": [
+    {
+      "path": "tools/verify-candidate-bootstrap.py",
+      "sha256": "83b31270c63617cadf317f6b37c2f0d97adfd06a3762aa52e8932b7b09bc1104"
+    }
+  ],
+  "checks": [
+    {
+      "argv": [
+        "--help"
+      ],
+      "exit": 0,
+      "stdout": "usage: verify-candidate-bootstrap.py [-h] --seed SEED [--builder BUILDER]\r\n                                     --reference REFERENCE --output OUTPUT\r\n                                     [--reuse-receipt REUSE_RECEIPT]\r\n                                     [--seed-emitter-only]\r\n                                     [--frontend-timeout FRONTEND_TIMEOUT]\r\n                                     [--stack-reserve-bytes STACK_RESERVE_BYTES]\r\n\r\nBuild or verify consecutive Fairy C-part generations without a Go frontend\r\nfallback.\r\n\r\noptions:\r\n  -h, --help            show this help message and exit\r\n  --seed SEED\r\n  --builder BUILDER\r\n  --reference REFERENCE\r\n  --output OUTPUT\r\n  --reuse-receipt REUSE_RECEIPT\r\n  --seed-emitter-only   seed supports C-project emission but not lexer stdin;\r\n                        both complete generated stages still require the Go\r\n                        lexer differential\r\n  --frontend-timeout FRONTEND_TIMEOUT\r\n                        verification-only frontend allowance, 1..900 seconds\r\n  --stack-reserve-bytes STACK_RESERVE_BYTES\r\n                        private compiler image stack: zero/default or 64 KiB\r\n                        aligned, at most 16 MiB\r\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "--seed",
+        "unused",
+        "--reference",
+        "unused",
+        "--output",
+        ".cache/unused-bootstrap-guard",
+        "--seed-emitter-only",
+        "--frontend-timeout",
+        "0"
+      ],
+      "exit": 2,
+      "stdout": "",
+      "stderr": "usage: verify-candidate-bootstrap.py [-h] --seed SEED [--builder BUILDER]\r\n                                     --reference REFERENCE --output OUTPUT\r\n                                     [--reuse-receipt REUSE_RECEIPT]\r\n                                     [--seed-emitter-only]\r\n                                     [--frontend-timeout FRONTEND_TIMEOUT]\r\n                                     [--stack-reserve-bytes STACK_RESERVE_BYTES]\r\nverify-candidate-bootstrap.py: error: frontend timeout must be in 1..900 seconds\r\n"
+    },
+    {
+      "argv": [
+        "--seed",
+        "unused",
+        "--reference",
+        "unused",
+        "--output",
+        ".cache/unused-bootstrap-guard",
+        "--stack-reserve-bytes",
+        "1"
+      ],
+      "exit": 2,
+      "stdout": "",
+      "stderr": "usage: verify-candidate-bootstrap.py [-h] --seed SEED [--builder BUILDER]\r\n                                     --reference REFERENCE --output OUTPUT\r\n                                     [--reuse-receipt REUSE_RECEIPT]\r\n                                     [--seed-emitter-only]\r\n                                     [--frontend-timeout FRONTEND_TIMEOUT]\r\n                                     [--stack-reserve-bytes STACK_RESERVE_BYTES]\r\nverify-candidate-bootstrap.py: error: stack reserve must be zero/default or 64 KiB aligned, at most 16 MiB\r\n"
+    }
+  ],
+  "stageProofsExecuted": false,
+  "fullStageImageAndLexerComparisonsRetained": true,
+  "productTimeoutChanged": false,
+  "pushed": false
+}

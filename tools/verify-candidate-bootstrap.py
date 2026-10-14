@@ -62,6 +62,7 @@ def main():
     parser.add_argument('--reference', type=Path, required=True)
     parser.add_argument('--output', type=Path, required=True)
     parser.add_argument('--reuse-receipt', type=Path)
+    parser.add_argument('--seed-emitter-only', action='store_true', help='seed supports C-project emission but not lexer stdin; both complete generated stages still require the Go lexer differential')
     parser.add_argument('--frontend-timeout', type=int, default=60, help='verification-only frontend allowance, 1..900 seconds')
     parser.add_argument('--stack-reserve-bytes', type=int, default=0, help='private compiler image stack: zero/default or 64 KiB aligned, at most 16 MiB')
     args = parser.parse_args()
@@ -87,6 +88,7 @@ def main():
         assert receipt['sourceFiles'] == len(original)
         assert receipt['frontendTimeoutSeconds'] == args.frontend_timeout
         assert receipt.get('stackReserveBytes', 0) == args.stack_reserve_bytes, 'stack reserve differs from the recorded build'
+        assert receipt.get('seedLexerCompared', True) == (not args.seed_emitter_only), 'seed protocol scope differs from the recorded proof'
         assert len(receipt['builds']) == 2 and all(item['exit'] == 0 and not item['stderr'] for item in receipt['builds'])
         images = [checked_artifact(receipt[name]) for name in ('stage1', 'stage2')]
         assert images[0].read_bytes() == images[1].read_bytes()
@@ -116,6 +118,7 @@ def main():
             emit_argv = [str(compiler.resolve()), '--c-project-file', str(manifest.resolve())]
             emit = subprocess.run(emit_argv, cwd=ROOT, capture_output=True, timeout=args.frontend_timeout)
             frontends.append(dict(stage=stage, argv=emit_argv, seconds=time.monotonic()-start, exit=emit.returncode, stdoutBytes=len(emit.stdout), stderr=emit.stderr.decode('utf-8', errors='replace')))
+            (args.output/'progress.json').write_text(json.dumps(dict(passed=False, phase='frontend', stage=stage, sourceInventorySHA256=inventory_sha, sourceInputs=original, frontends=frontends, builds=observations), indent=2)+'\n', encoding='utf-8')
             assert emit.returncode == 0 and not emit.stderr and 0 < len(emit.stdout) <= 96 << 20
             packet = args.output / f'stage{stage}-input.bin'
             packet.write_bytes(emit.stdout)
@@ -127,8 +130,10 @@ def main():
                 argv.extend(['--stack-reserve-bytes', str(args.stack_reserve_bytes)])
             start = time.monotonic()
             built = subprocess.run(argv, cwd=ROOT, capture_output=True, timeout=600)
-            assert built.returncode == 0 and not built.stderr, built.stderr
             observations.append(dict(stage=stage, argv=argv, seconds=time.monotonic()-start, exit=built.returncode, stdout=built.stdout.decode('utf-8'), stderr=built.stderr.decode('utf-8')))
+            observed_images = images + ([image] if built.returncode == 0 and image.is_file() else [])
+            (args.output/'progress.json').write_text(json.dumps(dict(passed=False, phase='build', stage=stage, sourceInventorySHA256=inventory_sha, sourceInputs=original, frontends=frontends, builds=observations, images=[artifact(p) for p in observed_images]), indent=2)+'\n', encoding='utf-8')
+            assert built.returncode == 0 and not built.stderr, built.stderr
             packets.append(packet)
             images.append(image)
             compiler = image
@@ -139,11 +144,12 @@ def main():
     if args.stack_reserve_bytes:
         assert image_stacks == [args.stack_reserve_bytes] * 2, 'compiler image stack reserve differs from the requested build'
     proof_dir = args.output / 'lexer'
-    checked = subprocess.run([sys.executable, str(ROOT/'tools/verify-candidate-bootstrap-lexer.py'), '--reference', str(args.reference.resolve()), '--fixtures', str(ROOT/'spec/fixtures/lexer/candidate-bootstrap-v1.json'), '--stage1', str(images[0].resolve()), '--stage2', str(images[1].resolve()), '--seed', str(args.seed.resolve()), '--output', str(proof_dir.resolve())], cwd=ROOT, capture_output=True, timeout=60)
+    seed_lexer = [] if args.seed_emitter_only else ['--seed', str(args.seed.resolve())]
+    checked = subprocess.run([sys.executable, str(ROOT/'tools/verify-candidate-bootstrap-lexer.py'), '--reference', str(args.reference.resolve()), '--fixtures', str(ROOT/'spec/fixtures/lexer/candidate-bootstrap-v1.json'), '--stage1', str(images[0].resolve()), '--stage2', str(images[1].resolve()), *seed_lexer, '--output', str(proof_dir.resolve())], cwd=ROOT, capture_output=True, timeout=60)
     assert checked.returncode == 0 and not checked.stderr, checked.stderr
     assert sources() == original, 'compiler sources changed during verification'
     assert artifact(args.seed) == seed_identity, 'seed changed during verification'
-    receipt.update(scope='Consecutive C-part generations from the recorded input seed; image equality compares Stage1 and Stage2', seedImageSHA256=digest(args.seed), manifestSHA256=digest(manifest), stackReserveBytes=args.stack_reserve_bytes, imageStackReserveBytes=image_stacks, lexerDifferential=json.loads((proof_dir/'receipt.json').read_bytes()), productTimeoutChanged=False, promotionGateReady=False, deferred=['Full frontend differential', 'Linux', 'Current-commit hosted CI'], pushed=False)
+    receipt.update(scope='Consecutive C-part generations from the recorded input seed; image equality compares Stage1 and Stage2', seedImageSHA256=digest(args.seed), seedLexerCompared=not args.seed_emitter_only, seedProtocolScope='C-project emitter only' if args.seed_emitter_only else 'C-project emitter and lexer stdin', manifestSHA256=digest(manifest), sourceInputs=original, stackReserveBytes=args.stack_reserve_bytes, imageStackReserveBytes=image_stacks, lexerDifferential=json.loads((proof_dir/'receipt.json').read_bytes()), productTimeoutChanged=False, promotionGateReady=False, deferred=['Full frontend differential', 'Linux', 'Current-commit hosted CI'], pushed=False)
     (args.output/'receipt.json').write_text(json.dumps(receipt, indent=2)+'\n', encoding='utf-8', newline='\n')
     print('Consecutive compiler images and', receipt['lexerDifferential']['cases'], 'Go lexer cases verified')
 
