@@ -163,3 +163,47 @@ and default policy, per-package mixed reuse, the latest complete fixed point and
 platform promotion remain open. The previous disk-owner checkpoint keeps its 512
 files / 6361 MIR functions. Receipt:
 [candidate-cached-compiler-20261014.json](../ops/evidence/candidate-cached-compiler-20261014.json).
+
+## Private check cache CLI
+
+`project_check_cli` and `project_check_options` expose the coordinator through a
+private opt-in `check --cache-root <dir> [--cache-status]` route. Without
+`--cache-root` the command runs the existing uncached `evaluate` path and still
+accepts only the optional `--locked` flag, so the default check and the Go product
+CLI keep their current behavior and no default cache location or enablement exists.
+
+The root is parsed as a nonempty, NUL-free directory that must not look like
+another option. A missing, empty, option-like or NUL-containing path, a duplicate
+root, a repeated `--cache-status` or `--cache-status` without a root are usage
+problems that exit 2; an internal allocation or argv decoding failure exits 4. The
+root is opened with a private opt-in `disk::Limits` of 64 entries, 1 GiB total,
+256 MiB per record and a 10 minute temporary age, which are the private command
+policy rather than the measured product defaults.
+
+`evaluate_cached` keeps the loader/lock and coordinate/input projection gates in
+front of the cache: a load, lock or projection failure returns the original error
+owner exactly as the uncached path does, and only the post-projection `Complete`
+selection changes. A missing root, an environment initialization failure and any
+lookup, admission, restoration or storage failure fall back to the cold
+`build_complete_reporting` path, so a cache error is a disposable miss rather than a
+source diagnostic. `--cache-status` adds exactly one stderr line derived from the
+private `Observation` (`cache: hit`, `cache: cold stored`, `cache: cold uncached`
+or `cache: skipped`) and leaves the ordinary stdout and stderr contracts untouched.
+`module_signatures` accepts the complete 8192-declaration catalog, rejects the
+8193rd with code 10 and keeps the 128 parameter and 32768 aggregate parameter unit
+caps, and the C callable index reuses the same `project_callables()` bound as the
+project metadata. Two option tests pass Go-native and candidate C development/release. The
+isolated HEAD plus four command paths passes ordinary and locked checks with
+518 files / 6377 MIR functions. A Go-frontend-built current authored dispatcher
+passes 21 fresh-process observations: cold storage, verified hits, silent hits,
+corruption repair, missing-root fallback, body invalidation, unchanged error
+diagnostics and imported generic/Vec reuse. The first generic fixture omitted
+its explicit workspace member and was corrected before the passing run.
+
+The candidate-generated full command image remains unverified. Diagnostic-only
+C tracing passes all preparation histories (3084149 total work), then exhausts
+the unchanged 8388608 project ledger during body output at work 8229686 with a
+189380 next charge. C body-work reduction, build/run cache connection, current
+complete fixed point, per-package mixed reuse, product defaults, Linux/full suite
+and same-head CI remain open. No default cache or public Go CLI change. Receipt:
+[candidate-check-cache-command-20261014.json](../ops/evidence/candidate-check-cache-command-20261014.json).

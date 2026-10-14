@@ -11,6 +11,9 @@ import module_project_identified_ir as identified;
 import project_coordinate_graph as coordinates;
 import module_unit_cleanup_mir_model as cleanup_ir;
 import generic_signature_diagnostics as diagnostics;
+import project_compiler_cached as cached;
+import project_compiler_cache_path as cache_path;
+import project_cache_disk as disk;
 import std::vec as v;
 
 pub struct Stats{usize instances;usize files;usize functions;u32 lock;}
@@ -43,5 +46,19 @@ pub fn Result<Stats,Error> evaluate(ref u8[] root,bool locked){var sources::Budg
     let projected=switch(input::project(loader::workspace(ref loaded),ref mut meter)){case .ok(value):{value}case .err(e):{return .err(projection_failure(loaded,e));}};
     var usize source_work=0;var usize link_work=0;
     var v::Vec<diagnostics::Reports> reports=v::empty<diagnostics::Reports>();let files=input::count(ref projected);let complete=switch(compiler::build_complete_reporting(ref projected,ref table,ref mut reports,ref mut source_work,ref mut link_work)){case .ok(value):{value}case .err(e):{return .err(compile_failure_reports(loaded,projected,e,reports));}};
+    return .ok(Stats{.instances,.files,.functions=functions(identified::ir_program(compiler::checked_program(ref complete))),.lock});
+}
+
+// Private opt-in path keeps loader/lock/projection error owners and command
+// statistics identical. Only Complete selection changes after those gates.
+@effects(filesystem,environment,clock)
+pub fn Result<Stats,Error> evaluate_cached(ref u8[] root,bool locked,ref u8[] cache_root,disk::Limits policy,ref mut cached::Observation observed){
+    *observed=cached::empty();var sources::Budget budget=sources::Budget{.files=0,.bytes=0};var usize meter=0;
+    let loaded=switch(loader::load(root,locked,ref mut budget,ref mut meter)){case .ok(p):{p}case .err(e):{return .err(load_failure(e));}};
+    let instances=graph::node_count(visibility::workspace_graph(loader::workspace(ref loaded)));let lock=locks::state_code(loader::state(ref loaded));
+    let table=switch(coordinates::collect(visibility::workspace_graph(loader::workspace(ref loaded)),ref mut meter)){case .ok(p):{p}case .err(e):{return .err(projection_failure(loaded,input::Problem{.code=e.code,.reason=2,.owner=e.owner,.module_index=0,.declaration=0}));}};
+    let projected=switch(input::project(loader::workspace(ref loaded),ref mut meter)){case .ok(p):{p}case .err(e):{return .err(projection_failure(loaded,e));}};
+    var usize source_work=0;var usize link_work=0;var v::Vec<diagnostics::Reports> reports=v::empty<diagnostics::Reports>();let files=input::count(ref projected);
+    let complete=switch(cache_path::build(cache_root,policy,loader::workspace(ref loaded),ref projected,ref table,ref mut reports,ref mut source_work,ref mut link_work,observed)){case .ok(p):{p}case .err(e):{return .err(compile_failure_reports(loaded,projected,e,reports));}};
     return .ok(Stats{.instances,.files,.functions=functions(identified::ir_program(compiler::checked_program(ref complete))),.lock});
 }

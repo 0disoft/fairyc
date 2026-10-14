@@ -1,5 +1,41 @@
 # Self-hosting readiness v0
 
+Private check cache CLI (2026-10-14): `project_check_cli` and
+`project_check_options` add an opt-in `check --cache-root <dir> [--cache-status]`
+route over the private coordinator; the default check and the Go product CLI keep
+their current behavior. Without `--cache-root` the command runs the existing
+uncached `evaluate` path and still accepts only the optional `--locked` flag. With
+a root, the parser rejects a missing, empty, option-like or NUL-containing path
+(2), a duplicate root (3), a repeated `--cache-status` (4), `--cache-status`
+without a root (5) and an internal allocation or argv failure (6), exiting 2 for
+usage problems and 4 for 6, and opens the root under a private opt-in
+`disk::Limits` of 64 entries, 1 GiB total, 256 MiB per record and a 10 minute
+temporary age that are not the measured product defaults.
+
+`evaluate_cached` keeps the loader/lock and coordinate/input projection gates ahead
+of the cache: a load, lock or projection failure returns the original owner exactly
+as the uncached path and the run reports `cache: skipped`, while a missing root, an
+environment initialization failure and any lookup, admission, restoration or
+storage failure fall back to the cold `build_complete_reporting` path, so a cache
+error stays a disposable miss. With `--cache-status` the CLI writes exactly one
+stderr line (`cache: hit`, `cache: cold stored`, `cache: cold uncached` or
+`cache: skipped`) and ordinary stdout and stderr keep their existing meaning.
+`module_signatures` accepts the complete 8192-declaration catalog and rejects the
+8193rd with code 10, the 128 parameter and 32768 aggregate parameter caps are
+unchanged, and the C callable index reuses the same `project_callables()` bound as
+the project metadata. Two option tests pass Go-native and candidate C development/release. Isolated
+HEAD plus four cache command paths passes ordinary and locked checks: 518 files /
+6377 MIR functions. The Go-frontend-built current authored dispatcher passes 21
+fresh-process observations covering cold/hit, corruption repair, missing-root
+fallback, body invalidation, exact error preservation and imported generic/Vec
+reuse. The initial generic fixture omitted its workspace member and was fixed.
+The candidate-generated full CLI image remains unverified: diagnostic C tracing
+passes preparation at 3084149 work, then body output exceeds the unchanged
+8388608 project ledger (8229686 + 189380). Body-work reduction, build/run cache
+connection, current fixed point, per-package mixed reuse, product defaults,
+Linux/full suite and same-head CI remain open. Receipt:
+[candidate-check-cache-command-20261014.json](../ops/evidence/candidate-check-cache-command-20261014.json).
+
 Shared project compile coordinator (2026-10-14): `examples/lexer_candidate/src/project_compiler_cached.fy`
 adds one private `build` in front of the existing cold path and the checked disk
 store, using the caller's already-verified `Store`/`Environment` and the same live
