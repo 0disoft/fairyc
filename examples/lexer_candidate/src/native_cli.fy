@@ -11,6 +11,8 @@ import windows_run_control as control;
 import std::bytes as bytes;
 import std::vec as v;
 import std::io as io;
+import project_compiler_cached as cached;
+import project_compiler_cache_path as cache_path;
 
 @effects(console) fn i32 failure(ref str message,i32 code){return if(io::write_stderr(message).is_ok){code}else{4};}
 @effects(console) fn bool stderr(ref u8[] data){return switch(io::write_stderr_bytes(data)){case .ok(n):{n==data.len}case .err(_):{false}};}
@@ -24,7 +26,9 @@ fn Result<bytes::Buffer,u32> build_path(ref emit::Plan plan){var bytes::Buffer o
 @effects(filesystem,console,environment,clock) pub fn i32 run(bool execute){
     let selected=switch(options::from_process(execute)){case .ok(p):{p}case .err(e):{var bytes::Buffer out=bytes::empty();if(!options::diagnostic(execute,e,ref mut out)){return 4;}return if(stderr(bytes::view(ref out))){options::exit_code(e)}else{4};}};
     let root=switch(paths::current()){case .ok(p):{p}case .err(e):{return failure("fairyc: build failed: current directory query failed\n",if(e.kind==2){4}else{6});}};
-    let plan=switch(emit::evaluate(bytes::view(ref root),options::locked(ref selected))){case .ok(p):{p}case .err(e):{var bytes::Buffer out=bytes::empty();if(!diagnostics::error(ref e,ref mut out)){return 4;}return if(stderr(bytes::view(ref out))){diagnostics::exit_code(ref e)}else{4};}};
+    var observed=cached::empty();let result=if(options::cache_root(ref selected).len==0){emit::evaluate(bytes::view(ref root),options::locked(ref selected))}else{emit::evaluate_cached(bytes::view(ref root),options::locked(ref selected),options::cache_root(ref selected),cache_path::command_limits(),ref mut observed)};
+    if(options::cache_status(ref selected)){let ref str text=if(observed.path==2){"cache: hit\n"}else if(observed.path==1 && observed.stored){"cache: cold stored\n"}else if(observed.path==1){"cache: cold uncached\n"}else{"cache: skipped\n"};if(!io::write_stderr(text).is_ok){discard result;return 4;}}
+    let plan=switch(result){case .ok(p):{p}case .err(e):{var bytes::Buffer out=bytes::empty();if(!diagnostics::error(ref e,ref mut out)){return 4;}return if(stderr(bytes::view(ref out))){diagnostics::exit_code(ref e)}else{4};}};
     let temp=switch(paths::temporary()){case .ok(p):{p}case .err(_):{return failure("fairyc: build failed: temporary directory query failed\n",6);}};let directory=switch(scratch::create(bytes::view(ref temp))){case .ok(p):{p}case .err(_):{return failure("fairyc: build failed: temporary directory creation failed\n",6);}};
     let input=switch(joined(scratch::path(ref directory),b"packet.bin")){case .ok(p):{p}case .err(_):{return 4;}};switch(packet::write(emit::output_bundle(ref plan),bytes::view(ref input))){case .ok(_):{}case .err(e):{return failure("fairyc: build failed: native packet preparation failed\n",if(e.stage<=2){4}else{6});}};
     let driver=switch(paths::driver()){case .ok(p):{p}case .err(_):{return failure("fairyc: build failed: native driver path query failed\n",6);}};

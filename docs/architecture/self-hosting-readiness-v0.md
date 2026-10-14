@@ -1,5 +1,25 @@
 # Self-hosting readiness v0
 
+## Private cached build and run commands (2026-10-15)
+
+The private native dispatcher accepts explicit `--cache-root <existing directory>`
+and optional `--cache-status` for build/run. Cached Complete owners enter the same
+entry selection, C partition and native driver path as cold owners. The two
+emission API tests pass Go-native and both candidate C profiles, including exact
+cold/cache C-component equality for scalar and imported generic/Vec projects,
+missing-root fallback and retained frontend/entry diagnostics. The five option
+cases also pass all three profiles.
+
+The 507-input dispatcher emits 39150946 C packet bytes without Go frontend
+fallback and builds both native profiles. All 28 actual command/program/oracle
+observations pass: cold builds, verified/silent runs, unavailable-root fallback,
+exact invalid-body diagnostics, prior executable/cache preservation, generic Vec
+build/execution/reuse, configuration errors and program flag forwarding. Ordinary
+and locked integration checks pass 518 files / 6383 MIR functions. Private API and
+compiler images retain explicit 16MiB stacks; product defaults stay unchanged.
+Package mixed reuse, the latest full fixed point, product policy/performance and
+platform/CI promotion remain open. Receipts: [emission API](../ops/evidence/candidate-cached-project-emission-20261015.json), [native commands](../ops/evidence/candidate-native-cache-command-20261015.json).
+
 ## Candidate-built check cache command (2026-10-15)
 
 The 507-input full dispatcher now emits its 39118523-byte C packet through the
