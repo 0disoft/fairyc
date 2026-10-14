@@ -62,8 +62,11 @@ Every source range and retained frame/type/layout/field/cleanup-field/callable/
 parameter/name-byte table now has exact whole-project coverage, rejecting
 structurally valid extra rows and preserving late source-check locations:
 [coverage receipt](evidence/candidate-project-artifact-coverage-20261014.json).
-Current state/SDK reconciliation still precedes checked Complete-owner
-rebinding and cache reuse.
+Restored state now matches freshly derived current declarations across row
+and owner reordering, including exact UID/codec/name/order/span/hash facts:
+[state match receipt](evidence/candidate-project-artifact-state-20261014.json).
+Current SDK reconciliation still precedes checked Complete-owner rebinding
+and cache reuse.
 
 Current source-identified build/run integration:
 [2026-10-14 native checkpoint](candidate-identified-native-20261014.md).

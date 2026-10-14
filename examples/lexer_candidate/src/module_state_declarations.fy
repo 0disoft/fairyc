@@ -20,9 +20,14 @@ fn catalog::Problem declaration(ref syntax::Parsed p,usize module_index,usize in
 }
 struct Owner{usize module_index;usize declaration;usize package;}
 pub fn Result<state::Plan,catalog::Problem> build(ref v::Vec<syntax::Parsed> sources,ref catalog::Catalog c){
-    var usize work=0;var v::Vec<Owner> owners=v::empty<Owner>();var usize module_index=0;
-    while(module_index<v::len<syntax::Parsed>(sources)){let p=v::at<syntax::Parsed>(sources,module_index);if(!catalog::source_matches(c,module_index,p)){return .err(fail(9,module_index,0,0));}var usize i=0;while(i<syntax::declaration_count(p)){if(!state::charge(ref mut work,1)){return .err(fail(10,module_index,0,0));}let d=syntax::declaration_at(p,i);if(d.kind==10){let package=catalog::module_owner(c,module_index);var usize j=0;while(j<v::len<Owner>(ref owners)){if(!state::charge(ref mut work,1)){return .err(fail(10,module_index,d.start,d.end));}if(v::at<Owner>(ref owners,j).package==package){return .err(fail(7201,module_index,d.start,d.end));}j+=1;}if(!v::push<Owner>(ref mut owners,Owner{.module_index,.declaration=i,.package}).is_ok){return .err(fail(11,module_index,d.start,d.end));}}i+=1;}module_index+=1;}
+    var usize work=0;return build_metered(sources,c,ref mut work);
+}
+// Preserve the independent 1MiB declaration history while allowing an artifact
+// consumer to account for its actual work in the shared project ledger.
+pub fn Result<state::Plan,catalog::Problem> build_metered(ref v::Vec<syntax::Parsed> sources,ref catalog::Catalog c,ref mut usize work){
+    if(!state::charge(work,0)){return .err(fail(10,0,0,0));}var v::Vec<Owner> owners=v::empty<Owner>();var usize module_index=0;
+    while(module_index<v::len<syntax::Parsed>(sources)){let p=v::at<syntax::Parsed>(sources,module_index);if(!catalog::source_matches(c,module_index,p)){return .err(fail(9,module_index,0,0));}var usize i=0;while(i<syntax::declaration_count(p)){if(!state::charge(work,1)){return .err(fail(10,module_index,0,0));}let d=syntax::declaration_at(p,i);if(d.kind==10){let package=catalog::module_owner(c,module_index);var usize j=0;while(j<v::len<Owner>(ref owners)){if(!state::charge(work,1)){return .err(fail(10,module_index,d.start,d.end));}if(v::at<Owner>(ref owners,j).package==package){return .err(fail(7201,module_index,d.start,d.end));}j+=1;}if(!v::push<Owner>(ref mut owners,Owner{.module_index,.declaration=i,.package}).is_ok){return .err(fail(11,module_index,d.start,d.end));}}i+=1;}module_index+=1;}
     var bytes::Buffer names=bytes::empty();var v::Vec<state::Layout> layouts=v::empty<state::Layout>();var v::Vec<state::Field> fields=v::empty<state::Field>();var usize i=0;
-    while(i<v::len<Owner>(ref owners)){let owner=*v::at<Owner>(ref owners,i);let problem=declaration(v::at<syntax::Parsed>(sources,owner.module_index),owner.module_index,owner.declaration,owner.package,ref mut names,ref mut layouts,ref mut fields,ref mut work);if(problem.code!=0){return .err(problem);}i+=1;}
+    while(i<v::len<Owner>(ref owners)){let owner=*v::at<Owner>(ref owners,i);let problem=declaration(v::at<syntax::Parsed>(sources,owner.module_index),owner.module_index,owner.declaration,owner.package,ref mut names,ref mut layouts,ref mut fields,work);if(problem.code!=0){return .err(problem);}i+=1;}
     return .ok(state::assemble(names,layouts,fields));
 }
