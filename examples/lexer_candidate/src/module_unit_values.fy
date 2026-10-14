@@ -42,7 +42,13 @@ pub fn Result<Plan,m::Problem> build(ref v::Vec<syntax::Parsed> sources,ref sign
             let usize result=if(kind==1){bodies::signature(bodies::at(owned,i)).result}else if(kind==2){m::atom(ref atoms,7)}else{signatures::at(metadata,signatures::identity(metadata,module_index,declaration)).result};let frame=m::Frame{.kind,.context=i,.module_index,.declaration,.result};
             if(kind==3){while(module_at<module_index){if(!m::charge(ref mut work,1)){return .err(m::fail(frame,10,0,0,0,0));}offset+=syntax::expression_count(v::at<syntax::Parsed>(sources,module_at));type_offset+=syntax::type_count(v::at<syntax::Parsed>(sources,module_at));module_at+=1;}}
             let p=if(kind==3){switch(original_body(sources,source,metadata,ready,frame,offset,type_offset,ref mut graph,ref atoms,ref mut cursor,ref mut work,ref constants)){case .ok(p):{p}case .err(p):{return .err(p);}}}else{switch(concrete_body(sources,metadata,source,ready,frame,ref mut graph,ref atoms,ref mut cursor,ref mut work,ref constants)){case .ok(p):{p}case .err(p):{return .err(p);}}};
-            if(!m::charge(ref mut work,m::work(ref p)) || expressions>16384-m::expression_count(ref p) || locals>16384-m::local_count(ref p) || returns>8192-m::return_count(ref p) || invocations>16384-m::call_count(ref p) || arguments>16384-m::argument_count(ref p) || v::len<m::Values>(ref contexts)>=1024){return .err(m::fail(frame,10,0,0,0,0));}
+            if(!m::charge(ref mut work,m::work(ref p))){return .err(m::fail(frame,10,0,0,1048576,work+m::work(ref p)));}
+            if(expressions>16384-m::expression_count(ref p)){return .err(m::fail(frame,10,0,0,16384,expressions+m::expression_count(ref p)));}
+            if(locals>16384-m::local_count(ref p)){return .err(m::fail(frame,10,0,0,16384,locals+m::local_count(ref p)));}
+            if(returns>8192-m::return_count(ref p)){return .err(m::fail(frame,10,0,0,8192,returns+m::return_count(ref p)));}
+            if(invocations>16384-m::call_count(ref p)){return .err(m::fail(frame,10,0,0,16384,invocations+m::call_count(ref p)));}
+            if(arguments>16384-m::argument_count(ref p)){return .err(m::fail(frame,10,0,0,16384,arguments+m::argument_count(ref p)));}
+            if(v::len<m::Values>(ref contexts)>=1024){return .err(m::fail(frame,10,0,0,1024,v::len<m::Values>(ref contexts)+1));}
             expressions+=m::expression_count(ref p);locals+=m::local_count(ref p);returns+=m::return_count(ref p);unresolved+=m::unresolved(ref p);inferred+=m::inferred(ref p);checked_returns+=m::checked_returns(ref p);invocations+=m::call_count(ref p);arguments+=m::argument_count(ref p);checked_calls+=m::checked_calls(ref p);checked_arguments+=m::checked_arguments(ref p);shared_arguments+=m::shared_arguments(ref p);
             if(!v::push<m::Values>(ref mut contexts,p).is_ok){return .err(m::fail(frame,11,0,0,0,0));}i+=1;
         }kind+=1;

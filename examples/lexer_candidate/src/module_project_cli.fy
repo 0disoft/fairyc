@@ -16,15 +16,16 @@ import std::bytes as bytes;
 import std::vec as v;
 import std::io as io;
 
-pub struct Problem {u32 phase;u32 stage;u32 code;usize module_index;usize start;usize end;}
-fn Problem fail(u32 phase,u32 stage,u32 code,usize module_index,usize start,usize end){return Problem{.phase,.stage,.code,.module_index,.start,.end};}
+pub struct Problem {u32 phase;u32 stage;u32 code;usize module_index;usize start;usize end;usize expected;usize actual;}
+fn Problem fail(u32 phase,u32 stage,u32 code,usize module_index,usize start,usize end){return Problem{.phase,.stage,.code,.module_index,.start,.end,.expected=0,.actual=0};}
+fn Problem checked_failure(compile::Problem e){var p=fail(2,e.stage,e.code,e.module_index,e.start,e.end);p.expected=e.expected;p.actual=e.actual;return p;}
 
 // The first manifest source owns the entry. Names in dependencies do not
 // select an entry, and the C emitter still checks the exact result/parameters.
 pub fn Result<emit::Bundle,Problem> build(ref v::Vec<syntax::Parsed> sources){
     if(v::len<syntax::Parsed>(sources)==0){return .err(fail(1,0,1001,0,0,0));}
     let metadata=switch(signatures::build(sources)){case .ok(p):{p}case .err(e):{return .err(fail(1,0,e.code,e.module_index,e.start,e.end));}};
-    let units=switch(compile::build(sources,ref metadata)){case .ok(p):{p}case .err(e):{return .err(fail(2,e.stage,e.code,e.module_index,e.start,e.end));}};
+    let units=switch(compile::build(sources,ref metadata)){case .ok(p):{p}case .err(e):{return .err(checked_failure(e));}};
     let linked=switch(link::build(ref metadata,compile::programs(ref units))){case .ok(p):{p}case .err(e):{return .err(fail(3,0,e.code,e.module_index,e.start,e.end));}};
     var usize entry=0;var usize i=1;let root=v::at<syntax::Parsed>(sources,0);
     while(i<=ir::count(ref linked)){
@@ -74,7 +75,9 @@ pub fn i32 run(ref u8[] path){
         case .ok(p):{p}
         case .err(e):{
             if(e.module_index<v::len<manifests::Path>(ref paths)){let entry=*v::at<manifests::Path>(ref paths,e.module_index);output::prefix(syntax::source_view(v::at<syntax::Parsed>(ref sources,e.module_index)),text[entry.start..entry.end],e.start);}
-            discard io::write_stderr("project phase ");discard io::write_stderr_u32(e.phase);discard io::write_stderr(" stage ");discard io::write_stderr_u32(e.stage);discard io::write_stderr(" code ");discard io::write_stderr_u32(e.code);output::range(e.start,e.end);return 2;
+            discard io::write_stderr("project phase ");discard io::write_stderr_u32(e.phase);discard io::write_stderr(" stage ");discard io::write_stderr_u32(e.stage);discard io::write_stderr(" code ");discard io::write_stderr_u32(e.code);
+            if(e.code==10 && e.expected!=0){discard io::write_stderr(" limit ");discard io::write_stderr_usize(e.expected);discard io::write_stderr(" attempted ");discard io::write_stderr_usize(e.actual);}
+            output::range(e.start,e.end);return 2;
         }
     };
     return packet(ref bundle);
