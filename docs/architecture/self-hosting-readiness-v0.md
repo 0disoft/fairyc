@@ -1,5 +1,27 @@
 # Self-hosting readiness v0
 
+Shared project compile coordinator (2026-10-14): `examples/lexer_candidate/src/project_compiler_cached.fy`
+adds one private `build` in front of the existing cold path and the checked disk
+store, using the caller's already-verified `Store`/`Environment` and the same live
+loaded owner with its derived sources and coordinates. It tries `from_disk` first
+and passes a checked hit through opaquely; on a lookup, admission, storage or
+budget error it falls back to the existing `core::build_complete_reporting` under
+independent source and link budgets and returns its exact error or report. A
+`to_disk` failure after a cold success keeps the result and records the store
+phase and code, and a non-empty reporting sink is delegated to core rather than
+answered from the cache. Both authored tests pass on Go-native and candidate C
+development and release with the functional sources, tools and images re-hashed:
+`cold_then_disk_hit_skips_lowering_and_budget_failure_falls_back` covers a storing
+cold build, a checked hit that leaves the cold source and link histories at zero
+while current-source admission is charged to `DiskWork`, and an exhausted-budget
+fallback, and `cache_miss_preserves_exact_cold_compiler_error`
+reproduces the cold error exactly on a miss. The coordinator's source scope is 513
+files / 6363 MIR functions, with the unlocked root check updating the lock and the
+locked rerun verifying it, both at exit 0 across two instances. The coordinator is
+not connected to a CLI (cliConnected=false): CLI and default policy, per-package
+mixed reuse, the latest complete fixed point and platform promotion remain open.
+Receipt: [candidate-cached-compiler-20261014.json](../ops/evidence/candidate-cached-compiler-20261014.json).
+
 Checked disk owner reuse (2026-10-14): `project_cache_artifact.from_disk` and
 `to_disk` now connect the private store to checked compiler owners. `from_disk`
 derives the exact loaded-source, SDK and compiler route, inventories the retained

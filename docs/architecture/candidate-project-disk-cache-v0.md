@@ -118,3 +118,48 @@ transport regressions also pass on all three profiles and write no stdout. In th
 development and release profiles the restored Vec executions build at exit 0, run
 at exit 42 and leave empty streams.
 Receipt: [candidate-checked-disk-owner-20261014.json](../ops/evidence/candidate-checked-disk-owner-20261014.json).
+
+## Shared project compile coordinator
+
+`examples/lexer_candidate/src/project_compiler_cached.fy` adds one private
+`build` in front of the existing cold path and the checked disk store. It takes
+the caller's already-verified `Store` and `Environment`, the caller's same live
+`visibility::Resolved` loaded owner with its derived `input::Input` sources and
+`coordinates::Coordinates` table, plus the reporting sink and observation outputs.
+It attempts `artifacts::from_disk` first: a returned `Complete` is a checked disk
+hit and is passed through opaquely, while an error records its phase and code and
+falls back to the cold path.
+
+The cold path is the existing `core::build_complete_reporting`, run under its own
+independent source and link budgets, and the coordinator returns its exact error
+or report unchanged. After a successful cold build it attempts `artifacts::to_disk`;
+a store failure never discards the result, which is returned with the store phase
+and code recorded. The fallback is limited to `from_disk` lookup, admission,
+storage and budget errors, including a plain miss, a rejected leaf, the bind and
+allocation codes and an exhausted I/O budget. A non-empty reporting sink at entry
+is not a cache case: the coordinator delegates straight to
+`core::build_complete_reporting`, so the existing core contract owns the rejection
+and the cache path does not route around it.
+
+`Observation` is private and never changes command output or compiler diagnostics.
+`path` is 0 unattempted, 1 cold or 2 checked hit; `stored` reports a successful
+publication; `lookup_phase`/`lookup_code` and `store_phase`/`store_code` carry the
+failed lookup and store phases.
+
+Two authored tests in `examples/lexer_candidate/tests/project_compiler_cached.fy`
+pass on all three profiles, Go-native and candidate C development and release, with
+the functional sources, tools and images re-hashed against their actual values.
+`cold_then_disk_hit_skips_lowering_and_budget_failure_falls_back` observes a
+storing cold build, a checked hit that leaves the cold compiler source and link
+histories at zero while current-source admission is charged to `DiskWork` (the
+fresh IR work check stays zero), and an exhausted cache budget that falls back to
+a full cold build with empty reports.
+`cache_miss_preserves_exact_cold_compiler_error` reproduces the cold error phase,
+stage, code, module index, span, expected and actual values exactly on a miss. The
+coordinator's source scope is 513 files / 6363 MIR functions: the unlocked root
+check updates the lock and the locked rerun verifies it, both at exit 0 across two
+instances. The coordinator is not connected to a CLI (cliConnected=false), and CLI
+and default policy, per-package mixed reuse, the latest complete fixed point and
+platform promotion remain open. The previous disk-owner checkpoint keeps its 512
+files / 6361 MIR functions. Receipt:
+[candidate-cached-compiler-20261014.json](../ops/evidence/candidate-cached-compiler-20261014.json).
