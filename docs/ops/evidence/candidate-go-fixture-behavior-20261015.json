@@ -1,0 +1,2665 @@
+{
+  "schema": "fairyc.candidate-go-fixture-behavior/v1",
+  "date": "2026-10-15",
+  "sourceHead": "d629667c2635f61debf1983b51abb4bae6d2fcb5",
+  "comparisonCompleted": true,
+  "fullParity": false,
+  "scope": "authored check/build/run entry points with real OS argv",
+  "goFrontendFallback": false,
+  "developmentReleaseObservationsEqual": true,
+  "observations": 388,
+  "uniqueCheckCases": 169,
+  "meaningfulFrontendCases": 163,
+  "meaningfulFrontendAcceptanceMatch": 151,
+  "firstDiagnosticIsNotFullOutputParity": true,
+  "runZeroStatusIsNotAcceptance": true,
+  "fixturesAreCheckedAsWorkspacesNotInternalIR": true,
+  "fixtureWorkspaceAdapterLimitations": [
+    {
+      "family": "region",
+      "id": "pass.flow.param-local-use",
+      "reason": "fairyc: package workspace failure: workspace .:std::alloc invalid-standard-library: module namespace is reserved by the SDK"
+    },
+    {
+      "family": "region",
+      "id": "pass.flow.param-return",
+      "reason": "fairyc: package workspace failure: workspace .:std::alloc invalid-standard-library: module namespace is reserved by the SDK"
+    },
+    {
+      "family": "region",
+      "id": "fail.flow.resource-placement",
+      "reason": "fairyc: package workspace failure: workspace .:std::alloc invalid-standard-library: module namespace is reserved by the SDK"
+    },
+    {
+      "family": "mir",
+      "id": "pass.mir.region-reset",
+      "reason": "fairyc: package workspace failure: workspace .:std::alloc invalid-standard-library: module namespace is reserved by the SDK"
+    },
+    {
+      "family": "mir",
+      "id": "pass.mir.region-early-exit",
+      "reason": "fairyc: package workspace failure: workspace .:std::alloc invalid-standard-library: module namespace is reserved by the SDK"
+    },
+    {
+      "family": "mir",
+      "id": "pass.mir.loop-control-cleanup",
+      "reason": "fairyc: package workspace failure: workspace .:std::alloc invalid-standard-library: module namespace is reserved by the SDK"
+    }
+  ],
+  "byFamily": [
+    {
+      "family": "semantic",
+      "cases": 63,
+      "acceptanceMatch": 63,
+      "firstDiagnosticMatch": 63,
+      "allDiagnosticsMatch": 61,
+      "exactMatch": 27
+    },
+    {
+      "family": "resource",
+      "cases": 12,
+      "acceptanceMatch": 12,
+      "firstDiagnosticMatch": 12,
+      "allDiagnosticsMatch": 12,
+      "exactMatch": 2
+    },
+    {
+      "family": "region",
+      "cases": 5,
+      "acceptanceMatch": 5,
+      "firstDiagnosticMatch": 3,
+      "allDiagnosticsMatch": 3,
+      "exactMatch": 0
+    },
+    {
+      "family": "result",
+      "cases": 24,
+      "acceptanceMatch": 14,
+      "firstDiagnosticMatch": 12,
+      "allDiagnosticsMatch": 12,
+      "exactMatch": 12
+    },
+    {
+      "family": "mir",
+      "cases": 13,
+      "acceptanceMatch": 12,
+      "firstDiagnosticMatch": 12,
+      "allDiagnosticsMatch": 12,
+      "exactMatch": 4
+    },
+    {
+      "family": "c-emission",
+      "cases": 52,
+      "acceptanceMatch": 51,
+      "firstDiagnosticMatch": 51,
+      "allDiagnosticsMatch": 51,
+      "exactMatch": 41
+    }
+  ],
+  "runs": [
+    {
+      "path": ".cache/go-candidate-differential-20261015/check/receipt.json",
+      "sha256": "1fddea574f5605ee0310d5323fd23c5387a6ec671da73500f16c37758957b0c0",
+      "profile": "release",
+      "cases": 169,
+      "summary": {
+        "completed": 169,
+        "acceptanceMatch": 157,
+        "exitMatch": 157,
+        "firstDiagnosticMatch": 153,
+        "allDiagnosticsMatch": 151,
+        "stdoutMatch": 135,
+        "stderrMatch": 108,
+        "exactMatch": 86
+      },
+      "skipped": [
+        {
+          "family": "region",
+          "id": "fail.flow.local-region-escape",
+          "reason": "direct fixture packageGraph requires a separate workspace adapter"
+        }
+      ],
+      "sourceInputs": 2081,
+      "sourceInputDigestSHA256": "693b87df6e82f35c3cf82e402ef58222594642beff1ea03cf1d5ba5c80e56eaf",
+      "candidate": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\package-mixed-20261015\\commands\\release\\fairyc.exe",
+        "sha256": "407496df41cbe863f4d5c02598a3e931b265f333e404ab69d7feae3f1b8fa47a"
+      },
+      "reference": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-candidate-differential-20261015\\fairyc-go.exe",
+        "sha256": "47ec6039da761e2a01115e7e2d765aa40e86dcf053f054b4d78fa78f383406aa"
+      }
+    },
+    {
+      "path": ".cache/go-candidate-differential-20261015/check-development/receipt.json",
+      "sha256": "81a7dbee240ba2453f9138d4feb82934109633d651d41843be9fb0c25631de34",
+      "profile": "development",
+      "cases": 169,
+      "summary": {
+        "completed": 169,
+        "acceptanceMatch": 157,
+        "exitMatch": 157,
+        "firstDiagnosticMatch": 153,
+        "allDiagnosticsMatch": 151,
+        "stdoutMatch": 135,
+        "stderrMatch": 108,
+        "exactMatch": 86
+      },
+      "skipped": [
+        {
+          "family": "region",
+          "id": "fail.flow.local-region-escape",
+          "reason": "direct fixture packageGraph requires a separate workspace adapter"
+        }
+      ],
+      "sourceInputs": 2081,
+      "sourceInputDigestSHA256": "693b87df6e82f35c3cf82e402ef58222594642beff1ea03cf1d5ba5c80e56eaf",
+      "candidate": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\package-mixed-20261015\\commands\\development\\fairyc.exe",
+        "sha256": "2572561466e79c14475e332b044e611793acfd580f193c52bf0766610a85cd9d"
+      },
+      "reference": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-candidate-differential-20261015\\fairyc-go.exe",
+        "sha256": "47ec6039da761e2a01115e7e2d765aa40e86dcf053f054b4d78fa78f383406aa"
+      }
+    },
+    {
+      "path": ".cache/go-candidate-differential-20261015/run/receipt.json",
+      "sha256": "a6f69afc77f1fd891f19e0f5a5a0c00b08b43113e184be0e3942bc777e478b3b",
+      "profile": "release",
+      "cases": 50,
+      "summary": {
+        "completed": 50,
+        "acceptanceMatch": 50,
+        "exitMatch": 49,
+        "firstDiagnosticMatch": 49,
+        "allDiagnosticsMatch": 49,
+        "stdoutMatch": 50,
+        "stderrMatch": 49,
+        "exactMatch": 49
+      },
+      "skipped": [
+        {
+          "family": "c-emission",
+          "id": "pass.c-emission.fixed-array-bounds",
+          "reason": "no passing main::main native entry"
+        },
+        {
+          "family": "c-emission",
+          "id": "pass.c-emission.mutable-fixed-array-byte-view-bounds",
+          "reason": "no passing main::main native entry"
+        }
+      ],
+      "sourceInputs": 1953,
+      "sourceInputDigestSHA256": "206e86bff4b8d80e09887ca868c0932e769a7e27d3f99f1b1fb6ed3c592ca097",
+      "candidate": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\package-mixed-20261015\\commands\\release\\fairyc.exe",
+        "sha256": "407496df41cbe863f4d5c02598a3e931b265f333e404ab69d7feae3f1b8fa47a"
+      },
+      "reference": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-candidate-differential-20261015\\fairyc-go.exe",
+        "sha256": "47ec6039da761e2a01115e7e2d765aa40e86dcf053f054b4d78fa78f383406aa"
+      }
+    }
+  ],
+  "checkDifferences": [
+    {
+      "family": "semantic",
+      "id": "fail.flow.must-use-ignored",
+      "different": [
+        "stderrMatch",
+        "exactMatch"
+      ],
+      "go": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:7:5: E4202: @must_use call result must be consumed or explicitly discarded [bytes 75..83]\n  must-use-declaration: main.fy:3:1 [bytes 14..23]\n",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E4202",
+            "start": 75,
+            "end": 83
+          }
+        ]
+      },
+      "candidate": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:7:5: E4202: must_use call result is ignored without discard [bytes 75..83]\n",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E4202",
+            "start": 75,
+            "end": 83
+          }
+        ]
+      }
+    },
+    {
+      "family": "semantic",
+      "id": "fail.type.must-use-invalid",
+      "different": [
+        "stderrMatch",
+        "exactMatch"
+      ],
+      "go": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:3:1: E4201: @must_use must appear once without arguments on a callable with an eligible inert result [bytes 14..23]\n  result-type: main.fy:4:4 [bytes 27..31]\n",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E4201",
+            "start": 14,
+            "end": 23
+          }
+        ]
+      },
+      "candidate": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:3:1: E4201: invalid must_use declaration [bytes 14..23]\n",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E4201",
+            "start": 14,
+            "end": 23
+          }
+        ]
+      }
+    },
+    {
+      "family": "semantic",
+      "id": "fail.resolve.unresolved-name",
+      "different": [
+        "stderrMatch",
+        "exactMatch"
+      ],
+      "go": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:4:12: E0101: unresolved name or path [bytes 43..50]\n",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E0101",
+            "start": 43,
+            "end": 50
+          }
+        ]
+      },
+      "candidate": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:4:12: E0101: name or qualified path cannot be resolved [bytes 43..50]\n",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E0101",
+            "start": 43,
+            "end": 50
+          }
+        ]
+      }
+    },
+    {
+      "family": "semantic",
+      "id": "fail.resolve.duplicate-declaration",
+      "different": [
+        "stderrMatch",
+        "exactMatch"
+      ],
+      "go": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:7:8: E0102: duplicate declaration in one scope [bytes 55..60]\n  previous-declaration: main.fy:3:8 [bytes 21..26]\n",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E0102",
+            "start": 55,
+            "end": 60
+          }
+        ]
+      },
+      "candidate": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:7:8: E0102: declaration duplicates a name in the same scope [bytes 55..60]\n",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E0102",
+            "start": 55,
+            "end": 60
+          }
+        ]
+      }
+    },
+    {
+      "family": "semantic",
+      "id": "fail.type.type-mismatch",
+      "different": [
+        "stderrMatch",
+        "exactMatch"
+      ],
+      "go": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:4:22: E1006: incompatible expected and actual types [bytes 53..54]\n  expected-type: main.fy:4:9 [bytes 40..44]\n",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E1006",
+            "start": 53,
+            "end": 54
+          }
+        ]
+      },
+      "candidate": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:4:22: E1006: incompatible expected and actual types [bytes 53..54]\n",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E1006",
+            "start": 53,
+            "end": 54
+          }
+        ]
+      }
+    },
+    {
+      "family": "semantic",
+      "id": "fail.type.integer-literal-range",
+      "different": [
+        "stderrMatch",
+        "exactMatch"
+      ],
+      "go": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:4:19: E1013: Integer literal is outside the range of its selected `i32`, `u8`, `u32`, or `usize` type. [bytes 48..53]\n",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E1013",
+            "start": 48,
+            "end": 53
+          }
+        ]
+      },
+      "candidate": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:4:19: E1013: integer literal is outside the selected type's range [bytes 48..53]\n",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E1013",
+            "start": 48,
+            "end": 53
+          }
+        ]
+      }
+    },
+    {
+      "family": "semantic",
+      "id": "fail.type.non-bool-condition",
+      "different": [
+        "stderrMatch",
+        "exactMatch"
+      ],
+      "go": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:4:16: E1007: condition or logical operand must be bool [bytes 47..48]\n",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E1007",
+            "start": 47,
+            "end": 48
+          }
+        ]
+      },
+      "candidate": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:4:16: E1007: condition or logical operand is not bool [bytes 47..48]\n",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E1007",
+            "start": 47,
+            "end": 48
+          }
+        ]
+      }
+    },
+    {
+      "family": "semantic",
+      "id": "fail.type.loop-control-outside-loop",
+      "different": [
+        "allDiagnosticsMatch",
+        "stderrMatch",
+        "exactMatch"
+      ],
+      "go": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:4:5: E1012: break and continue require an enclosing loop [bytes 37..43]\nmain.fy:5:5: E1012: break and continue require an enclosing loop [bytes 48..57]\n",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E1012",
+            "start": 37,
+            "end": 43
+          },
+          {
+            "source": "main.fy",
+            "code": "E1012",
+            "start": 48,
+            "end": 57
+          }
+        ]
+      },
+      "candidate": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:4:5: E1012: loop control is outside a loop [bytes 37..43]\n",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E1012",
+            "start": 37,
+            "end": 43
+          }
+        ]
+      }
+    },
+    {
+      "family": "semantic",
+      "id": "fail.type.foreign-call-outside-unsafe",
+      "different": [
+        "stderrMatch",
+        "exactMatch"
+      ],
+      "go": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:6:12: E5101: Raw-pointer or unchecked operation appears outside an unsafe boundary. [bytes 86..97]\n  declaration: main.fy:3:24 [bytes 37..44]\n",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E5101",
+            "start": 86,
+            "end": 97
+          }
+        ]
+      },
+      "candidate": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:6:12: E5101: unchecked operation is outside an unsafe boundary [bytes 86..97]\n",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E5101",
+            "start": 86,
+            "end": 97
+          }
+        ]
+      }
+    },
+    {
+      "family": "semantic",
+      "id": "fail.type.foreign-safe-reference",
+      "different": [
+        "stderrMatch",
+        "exactMatch"
+      ],
+      "go": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:3:32: E5102: Raw foreign signature contains a safe reference. [bytes 45..52]\n  declaration: main.fy:3:24 [bytes 37..44]\n",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E5102",
+            "start": 45,
+            "end": 52
+          }
+        ]
+      },
+      "candidate": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:3:32: E5102: raw foreign signature contains a safe reference [bytes 45..52]\n  declaration: main.fy:3:24 [bytes 37..44]\n",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E5102",
+            "start": 45,
+            "end": 52
+          }
+        ]
+      }
+    },
+    {
+      "family": "semantic",
+      "id": "fail.flow.borrow-conflict",
+      "different": [
+        "stderrMatch",
+        "exactMatch"
+      ],
+      "go": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:6:5: E2101: Access conflicts with an active shared or mutable loan. [bytes 95..100]\n  last-use: main.fy:7:13 [bytes 118..122]\n  loan: main.fy:5:24 [bytes 80..89]\n",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E2101",
+            "start": 95,
+            "end": 100
+          }
+        ]
+      },
+      "candidate": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:6:5: E2101: borrow conflicts with a live loan [bytes 95..100]\n",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E2101",
+            "start": 95,
+            "end": 100
+          }
+        ]
+      }
+    },
+    {
+      "family": "semantic",
+      "id": "fail.flow.return-local-borrow",
+      "different": [
+        "allDiagnosticsMatch",
+        "stderrMatch",
+        "exactMatch"
+      ],
+      "go": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:5:12: E2102: Returned borrow originates from a local value. [bytes 71..80]\n  origin: main.fy:4:13 [bytes 49..54]\nmain.fy:9:12: E2102: Returned borrow originates from a local value. [bytes 138..147]\n  origin: main.fy:8:34 [bytes 118..123]\n",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E2102",
+            "start": 71,
+            "end": 80
+          },
+          {
+            "source": "main.fy",
+            "code": "E2102",
+            "start": 138,
+            "end": 147
+          }
+        ]
+      },
+      "candidate": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:5:12: E2102: returned borrow escapes a local owner [bytes 71..80]\n",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E2102",
+            "start": 71,
+            "end": 80
+          }
+        ]
+      }
+    },
+    {
+      "family": "semantic",
+      "id": "fail.flow.borrow-reassignment-branch",
+      "different": [
+        "stderrMatch",
+        "exactMatch"
+      ],
+      "go": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:6:12: E2103: Returned borrow has multiple possible input origins. [bytes 182..189]\n  candidate-origin: main.fy:3:38 [bytes 51..55]\n  candidate-origin: main.fy:3:52 [bytes 65..70]\n",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E2103",
+            "start": 182,
+            "end": 189
+          }
+        ]
+      },
+      "candidate": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:6:12: E2103: returned borrow has multiple origins [bytes 182..189]\n",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E2103",
+            "start": 182,
+            "end": 189
+          }
+        ]
+      }
+    },
+    {
+      "family": "semantic",
+      "id": "fail.flow.loop-borrow-break-origin",
+      "different": [
+        "stderrMatch",
+        "exactMatch"
+      ],
+      "go": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:9:12: E2103: Returned borrow has multiple possible input origins. [bytes 180..187]\n  candidate-origin: main.fy:3:37 [bytes 50..54]\n  candidate-origin: main.fy:3:51 [bytes 64..69]\n",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E2103",
+            "start": 180,
+            "end": 187
+          }
+        ]
+      },
+      "candidate": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:9:12: E2103: returned borrow has multiple origins [bytes 180..187]\n",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E2103",
+            "start": 180,
+            "end": 187
+          }
+        ]
+      }
+    },
+    {
+      "family": "semantic",
+      "id": "fail.flow.borrow-return-summary-loan",
+      "different": [
+        "stderrMatch",
+        "exactMatch"
+      ],
+      "go": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:11:5: E2101: Access conflicts with an active shared or mutable loan. [bytes 218..223]\n  last-use: main.fy:12:12 [bytes 242..250]\n  loan: main.fy:10:46 [bytes 202..211]\n",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E2101",
+            "start": 218,
+            "end": 223
+          }
+        ]
+      },
+      "candidate": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:11:5: E2101: borrow conflicts with a live loan [bytes 218..223]\n",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E2101",
+            "start": 218,
+            "end": 223
+          }
+        ]
+      }
+    },
+    {
+      "family": "semantic",
+      "id": "fail.flow.multiple-return-origins",
+      "different": [
+        "stderrMatch",
+        "exactMatch"
+      ],
+      "go": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:4:12: E2103: Returned borrow has multiple possible input origins. [bytes 85..118]\n  candidate-origin: main.fy:3:38 [bytes 51..55]\n  candidate-origin: main.fy:3:52 [bytes 65..70]\n",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E2103",
+            "start": 85,
+            "end": 118
+          }
+        ]
+      },
+      "candidate": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:4:12: E2103: returned borrow has multiple origins [bytes 85..118]\n",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E2103",
+            "start": 85,
+            "end": 118
+          }
+        ]
+      }
+    },
+    {
+      "family": "semantic",
+      "id": "fail.type.malformed-link-name",
+      "different": [
+        "stderrMatch",
+        "exactMatch"
+      ],
+      "go": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:3:1: E5106: @link_name requires exactly one nonempty string and may appear only once [bytes 14..27]\n  declaration: main.fy:4:24 [bytes 51..58]\n",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E5106",
+            "start": 14,
+            "end": 27
+          }
+        ]
+      },
+      "candidate": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:3:1: E5106: invalid or conflicting link_name declaration [bytes 14..27]\n",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E5106",
+            "start": 14,
+            "end": 27
+          }
+        ]
+      }
+    },
+    {
+      "family": "semantic",
+      "id": "fail.type.duplicate-link-name",
+      "different": [
+        "stderrMatch",
+        "exactMatch"
+      ],
+      "go": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:4:1: E5106: @link_name requires exactly one nonempty string and may appear only once [bytes 41..68]\n  declaration: main.fy:5:24 [bytes 92..99]\n",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E5106",
+            "start": 41,
+            "end": 68
+          }
+        ]
+      },
+      "candidate": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:4:1: E5106: invalid or conflicting link_name declaration [bytes 41..68]\n",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E5106",
+            "start": 41,
+            "end": 68
+          }
+        ]
+      }
+    },
+    {
+      "family": "semantic",
+      "id": "fail.type.missing-call-effect",
+      "different": [
+        "stderrMatch",
+        "exactMatch"
+      ],
+      "go": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:6:24: E7102: A call or compiler-scheduled resource cleanup requires one or more effects not declared by the enclosing function. [bytes 88..92]\n  effect-declaration: main.fy:3:1 [bytes 14..34]\n",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E7102",
+            "start": 88,
+            "end": 92
+          }
+        ]
+      },
+      "candidate": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:6:24: E7102: call or resource cleanup exceeds the declared effects [bytes 88..92]\n  effect-declaration: main.fy:3:1 [bytes 14..34]\n",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E7102",
+            "start": 88,
+            "end": 92
+          }
+        ]
+      }
+    },
+    {
+      "family": "semantic",
+      "id": "fail.flow.missing-resource-drop-effect",
+      "different": [
+        "stderrMatch",
+        "exactMatch"
+      ],
+      "go": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:14:5: E7102: A call or compiler-scheduled resource cleanup requires one or more effects not declared by the enclosing function. [bytes 193..202]\n  effect-declaration: main.fy:3:1 [bytes 14..34]\n",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E7102",
+            "start": 193,
+            "end": 202
+          }
+        ]
+      },
+      "candidate": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:14:5: E7102: call or resource cleanup exceeds the declared effects [bytes 193..202]\n",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E7102",
+            "start": 193,
+            "end": 202
+          }
+        ]
+      }
+    },
+    {
+      "family": "semantic",
+      "id": "fail.type.unknown-effect",
+      "different": [
+        "stderrMatch",
+        "exactMatch"
+      ],
+      "go": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:3:10: E7101: `@effects` is empty, duplicated, malformed, or names an effect outside the Stage 0 vocabulary. [bytes 23..31]\n  declaration: main.fy:4:8 [bytes 40..44]\n",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E7101",
+            "start": 23,
+            "end": 31
+          }
+        ]
+      },
+      "candidate": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:3:10: E7101: invalid effects declaration [bytes 23..31]\n",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E7101",
+            "start": 23,
+            "end": 31
+          }
+        ]
+      }
+    },
+    {
+      "family": "semantic",
+      "id": "fail.type.duplicate-effect",
+      "different": [
+        "stderrMatch",
+        "exactMatch"
+      ],
+      "go": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:3:19: E7101: `@effects` is empty, duplicated, malformed, or names an effect outside the Stage 0 vocabulary. [bytes 32..39]\n  declaration: main.fy:4:8 [bytes 48..52]\n",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E7101",
+            "start": 32,
+            "end": 39
+          }
+        ]
+      },
+      "candidate": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:3:19: E7101: invalid effects declaration [bytes 32..39]\n",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E7101",
+            "start": 32,
+            "end": 39
+          }
+        ]
+      }
+    },
+    {
+      "family": "semantic",
+      "id": "fail.type.immutable-parameter-assignment",
+      "different": [
+        "stderrMatch",
+        "exactMatch"
+      ],
+      "go": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:3:5: E1008: assignment target is not mutable [bytes 44..49]\n",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E1008",
+            "start": 44,
+            "end": 49
+          }
+        ]
+      },
+      "candidate": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:3:5: E1008: assignment target is not a mutable place [bytes 44..49]\n",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E1008",
+            "start": 44,
+            "end": 49
+          }
+        ]
+      }
+    },
+    {
+      "family": "semantic",
+      "id": "pass.flow.borrowed-view-raw-parts",
+      "different": [
+        "stdoutMatch",
+        "exactMatch"
+      ],
+      "go": {
+        "exit": 0,
+        "stdout": "check ok: 1 instance(s), 1 source file(s), 2 MIR function(s), lock verified\n",
+        "stderr": "",
+        "diagnostics": []
+      },
+      "candidate": {
+        "exit": 0,
+        "stdout": "check ok: 1 instance(s), 1 source file(s), 3 MIR function(s), lock verified\n",
+        "stderr": "",
+        "diagnostics": []
+      }
+    },
+    {
+      "family": "semantic",
+      "id": "fail.type.borrowed-view-raw-parts-outside-unsafe",
+      "different": [
+        "stderrMatch",
+        "exactMatch"
+      ],
+      "go": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:11:12: E5101: Raw-pointer or unchecked operation appears outside an unsafe boundary. [bytes 141..193]\n",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E5101",
+            "start": 141,
+            "end": 193
+          }
+        ]
+      },
+      "candidate": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:11:12: E5101: unchecked operation is outside an unsafe boundary [bytes 141..193]\n",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E5101",
+            "start": 141,
+            "end": 193
+          }
+        ]
+      }
+    },
+    {
+      "family": "semantic",
+      "id": "fail.flow.borrowed-view-owner-move",
+      "different": [
+        "stderrMatch",
+        "exactMatch"
+      ],
+      "go": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:23:38: E2105: Borrow outlives or moves its owner. [bytes 431..436]\n  last-use: main.fy:24:16 [bytes 454..458]\n  loan: main.fy:22:31 [bytes 382..391]\n  owner: main.fy:21:16 [bytes 306..311]\n",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E2105",
+            "start": 431,
+            "end": 436
+          }
+        ]
+      },
+      "candidate": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:23:38: E2105: owner is moved while borrowed [bytes 431..436]\n",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E2105",
+            "start": 431,
+            "end": 436
+          }
+        ]
+      }
+    },
+    {
+      "family": "semantic",
+      "id": "fail.resolve.compile-time-invalid",
+      "different": [
+        "stderrMatch",
+        "exactMatch"
+      ],
+      "go": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:3:1: E4301: A module constant or `@const_eval` declaration is malformed, misplaced, public, or otherwise ineligible. [bytes 14..36]\n",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E4301",
+            "start": 14,
+            "end": 36
+          }
+        ]
+      },
+      "candidate": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:3:1: E4301: invalid compile-time declaration [bytes 14..36]\n",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E4301",
+            "start": 14,
+            "end": 36
+          }
+        ]
+      }
+    },
+    {
+      "family": "semantic",
+      "id": "fail.type.compile-time-excluded",
+      "different": [
+        "stderrMatch",
+        "exactMatch"
+      ],
+      "go": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:7:17: E4302: A well-typed expression is outside the admitted compile-time subset. [bytes 67..77]\n",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E4302",
+            "start": 67,
+            "end": 77
+          }
+        ]
+      },
+      "candidate": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:7:17: E4302: expression is outside the supported compile-time subset [bytes 67..77]\n",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E4302",
+            "start": 67,
+            "end": 77
+          }
+        ]
+      }
+    },
+    {
+      "family": "semantic",
+      "id": "fail.type.compile-time-trap",
+      "different": [
+        "stderrMatch",
+        "exactMatch"
+      ],
+      "go": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:3:17: E4303: Compile-time evaluation traps on arithmetic, division, shift, or cast semantics. [bytes 30..35]\n",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E4303",
+            "start": 30,
+            "end": 35
+          }
+        ]
+      },
+      "candidate": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:3:17: E4303: compile-time evaluation traps [bytes 30..35]\n",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E4303",
+            "start": 30,
+            "end": 35
+          }
+        ]
+      }
+    },
+    {
+      "family": "semantic",
+      "id": "fail.type.compile-time-cycle",
+      "different": [
+        "stderrMatch",
+        "exactMatch"
+      ],
+      "go": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:3:11: E4304: A compile-time dependency cycle or deterministic evaluator budget prevents a result. [bytes 24..29]\n",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E4304",
+            "start": 24,
+            "end": 29
+          }
+        ]
+      },
+      "candidate": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:3:11: E4304: compile-time dependency cycle or evaluator budget exhausted [bytes 24..29]\n",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E4304",
+            "start": 24,
+            "end": 29
+          }
+        ]
+      }
+    },
+    {
+      "family": "semantic",
+      "id": "fail.type.compile-time-assert",
+      "different": [
+        "stderrMatch",
+        "exactMatch"
+      ],
+      "go": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:3:1: E4305: A module-level `static_assert` evaluates to false. [bytes 14..35]\n",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E4305",
+            "start": 14,
+            "end": 35
+          }
+        ]
+      },
+      "candidate": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:3:1: E4305: static_assert evaluates to false [bytes 14..35]\n",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E4305",
+            "start": 14,
+            "end": 35
+          }
+        ]
+      }
+    },
+    {
+      "family": "semantic",
+      "id": "fail.resolve.source-location-reserved",
+      "different": [
+        "stderrMatch",
+        "exactMatch"
+      ],
+      "go": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:3:8: E4401: The reserved `source_location` intrinsic name is declared, bound, or used without its exact call form. [bytes 21..36]\n",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E4401",
+            "start": 21,
+            "end": 36
+          }
+        ]
+      },
+      "candidate": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:3:8: E4401: source_location requires its reserved exact call form [bytes 21..36]\n",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E4401",
+            "start": 21,
+            "end": 36
+          }
+        ]
+      }
+    },
+    {
+      "family": "semantic",
+      "id": "fail.type.source-location-non-call",
+      "different": [
+        "stderrMatch",
+        "exactMatch"
+      ],
+      "go": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:4:12: E4401: The reserved `source_location` intrinsic name is declared, bound, or used without its exact call form. [bytes 44..59]\n",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E4401",
+            "start": 44,
+            "end": 59
+          }
+        ]
+      },
+      "candidate": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:4:12: E4401: source_location requires its reserved exact call form [bytes 44..59]\n",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E4401",
+            "start": 44,
+            "end": 59
+          }
+        ]
+      }
+    },
+    {
+      "family": "semantic",
+      "id": "fail.type.source-location-const-eval",
+      "different": [
+        "stderrMatch",
+        "exactMatch"
+      ],
+      "go": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:5:12: E4302: A well-typed expression is outside the admitted compile-time subset. [bytes 52..73]\n",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E4302",
+            "start": 52,
+            "end": 73
+          }
+        ]
+      },
+      "candidate": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:5:12: E4302: expression is outside the supported compile-time subset [bytes 52..73]\n",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E4302",
+            "start": 52,
+            "end": 73
+          }
+        ]
+      }
+    },
+    {
+      "family": "semantic",
+      "id": "pass.type.explicit-factory-construction",
+      "different": [
+        "stdoutMatch",
+        "exactMatch"
+      ],
+      "go": {
+        "exit": 0,
+        "stdout": "check ok: 1 instance(s), 2 source file(s), 2 MIR function(s), lock verified\n",
+        "stderr": "",
+        "diagnostics": []
+      },
+      "candidate": {
+        "exit": 0,
+        "stdout": "check ok: 1 instance(s), 2 source file(s), 3 MIR function(s), lock verified\n",
+        "stderr": "",
+        "diagnostics": []
+      }
+    },
+    {
+      "family": "semantic",
+      "id": "fail.type.package-state-codec",
+      "different": [
+        "stderrMatch",
+        "exactMatch"
+      ],
+      "go": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "state.fy:3:14: E7203: A package state field uses an unsupported or malformed storage codec declaration. [bytes 58..64]\n",
+        "diagnostics": [
+          {
+            "source": "state.fy",
+            "code": "E7203",
+            "start": 58,
+            "end": 64
+          }
+        ]
+      },
+      "candidate": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "state.fy:3:14: E7203: unsupported or malformed package state storage codec [bytes 58..64]\n",
+        "diagnostics": [
+          {
+            "source": "state.fy",
+            "code": "E7203",
+            "start": 58,
+            "end": 64
+          }
+        ]
+      }
+    },
+    {
+      "family": "resource",
+      "id": "pass.flow.whole-move",
+      "different": [
+        "stdoutMatch",
+        "exactMatch"
+      ],
+      "go": {
+        "exit": 0,
+        "stdout": "check ok: 1 instance(s), 1 source file(s), 2 MIR function(s), lock verified\n",
+        "stderr": "",
+        "diagnostics": []
+      },
+      "candidate": {
+        "exit": 0,
+        "stdout": "check ok: 1 instance(s), 1 source file(s), 3 MIR function(s), lock verified\n",
+        "stderr": "",
+        "diagnostics": []
+      }
+    },
+    {
+      "family": "resource",
+      "id": "pass.flow.scope-cleanup",
+      "different": [
+        "stdoutMatch",
+        "exactMatch"
+      ],
+      "go": {
+        "exit": 0,
+        "stdout": "check ok: 1 instance(s), 1 source file(s), 2 MIR function(s), lock verified\n",
+        "stderr": "",
+        "diagnostics": []
+      },
+      "candidate": {
+        "exit": 0,
+        "stdout": "check ok: 1 instance(s), 1 source file(s), 3 MIR function(s), lock verified\n",
+        "stderr": "",
+        "diagnostics": []
+      }
+    },
+    {
+      "family": "resource",
+      "id": "pass.flow.balanced-branch",
+      "different": [
+        "stdoutMatch",
+        "exactMatch"
+      ],
+      "go": {
+        "exit": 0,
+        "stdout": "check ok: 1 instance(s), 1 source file(s), 2 MIR function(s), lock verified\n",
+        "stderr": "",
+        "diagnostics": []
+      },
+      "candidate": {
+        "exit": 0,
+        "stdout": "check ok: 1 instance(s), 1 source file(s), 3 MIR function(s), lock verified\n",
+        "stderr": "",
+        "diagnostics": []
+      }
+    },
+    {
+      "family": "resource",
+      "id": "pass.flow.reassign-live",
+      "different": [
+        "stdoutMatch",
+        "exactMatch"
+      ],
+      "go": {
+        "exit": 0,
+        "stdout": "check ok: 1 instance(s), 1 source file(s), 1 MIR function(s), lock verified\n",
+        "stderr": "",
+        "diagnostics": []
+      },
+      "candidate": {
+        "exit": 0,
+        "stdout": "check ok: 1 instance(s), 1 source file(s), 2 MIR function(s), lock verified\n",
+        "stderr": "",
+        "diagnostics": []
+      }
+    },
+    {
+      "family": "resource",
+      "id": "pass.flow.reassign-dead",
+      "different": [
+        "stdoutMatch",
+        "exactMatch"
+      ],
+      "go": {
+        "exit": 0,
+        "stdout": "check ok: 1 instance(s), 1 source file(s), 2 MIR function(s), lock verified\n",
+        "stderr": "",
+        "diagnostics": []
+      },
+      "candidate": {
+        "exit": 0,
+        "stdout": "check ok: 1 instance(s), 1 source file(s), 3 MIR function(s), lock verified\n",
+        "stderr": "",
+        "diagnostics": []
+      }
+    },
+    {
+      "family": "resource",
+      "id": "fail.flow.partial-field-move",
+      "different": [
+        "stderrMatch",
+        "exactMatch"
+      ],
+      "go": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:21:27: E1103: moving a field out of a resource is not supported [bytes 289..298]\n  field: main.fy:10:11 [bytes 91..95]\n  owner: main.fy:17:14 [bytes 165..169]\n",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E1103",
+            "start": 289,
+            "end": 298
+          }
+        ]
+      },
+      "candidate": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:21:27: E1103: resource field cannot be moved separately [bytes 289..298]\n  declaration: main.fy:17:14 [bytes 165..169]\n",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E1103",
+            "start": 289,
+            "end": 298
+          }
+        ]
+      }
+    },
+    {
+      "family": "resource",
+      "id": "fail.flow.branch-maybe-live",
+      "different": [
+        "stderrMatch",
+        "exactMatch"
+      ],
+      "go": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:15:22: E1104: branch join leaves resource ownership path-dependent [bytes 215..254]\n  declaration: main.fy:14:15 [bytes 164..169]\n  move: main.fy:15:42 [bytes 235..240]\n",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E1104",
+            "start": 215,
+            "end": 254
+          }
+        ]
+      },
+      "candidate": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:15:22: E1104: resource ownership differs between branches [bytes 215..254]\n  declaration: main.fy:14:15 [bytes 164..169]\n  move: main.fy:15:42 [bytes 235..240]\n",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E1104",
+            "start": 215,
+            "end": 254
+          }
+        ]
+      }
+    },
+    {
+      "family": "resource",
+      "id": "fail.flow.loop-state-mismatch",
+      "different": [
+        "stderrMatch",
+        "exactMatch"
+      ],
+      "go": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:15:5: E1105: loop body changes the resource state required by the next iteration [bytes 198..242]\n  declaration: main.fy:14:15 [bytes 164..169]\n  loop-header: main.fy:15:5 [bytes 198..209]\n  move: main.fy:16:17 [bytes 229..234]\n",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E1105",
+            "start": 198,
+            "end": 242
+          }
+        ]
+      },
+      "candidate": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:15:5: E1105: resource ownership differs at loop entry [bytes 198..242]\n  declaration: main.fy:14:15 [bytes 164..169]\n  move: main.fy:16:17 [bytes 229..234]\n  loop-header: main.fy:15:5 [bytes 198..209]\n",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E1105",
+            "start": 198,
+            "end": 242
+          }
+        ]
+      }
+    },
+    {
+      "family": "resource",
+      "id": "fail.flow.break-state-mismatch",
+      "different": [
+        "stderrMatch",
+        "exactMatch"
+      ],
+      "go": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:15:5: E1105: loop body changes the resource state required by the next iteration [bytes 198..257]\n  declaration: main.fy:14:15 [bytes 164..169]\n  loop-header: main.fy:15:5 [bytes 198..209]\n  move: main.fy:16:17 [bytes 229..234]\n",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E1105",
+            "start": 198,
+            "end": 257
+          }
+        ]
+      },
+      "candidate": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:15:5: E1105: resource ownership differs at loop entry [bytes 198..257]\n  declaration: main.fy:14:15 [bytes 164..169]\n  move: main.fy:16:17 [bytes 229..234]\n  loop-header: main.fy:15:5 [bytes 198..209]\n",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E1105",
+            "start": 198,
+            "end": 257
+          }
+        ]
+      }
+    },
+    {
+      "family": "resource",
+      "id": "fail.flow.continue-state-mismatch",
+      "different": [
+        "stderrMatch",
+        "exactMatch"
+      ],
+      "go": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:15:5: E1105: loop body changes the resource state required by the next iteration [bytes 198..260]\n  declaration: main.fy:14:15 [bytes 164..169]\n  loop-header: main.fy:15:5 [bytes 198..209]\n  move: main.fy:16:17 [bytes 229..234]\n",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E1105",
+            "start": 198,
+            "end": 260
+          }
+        ]
+      },
+      "candidate": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:15:5: E1105: resource ownership differs at loop entry [bytes 198..260]\n  declaration: main.fy:14:15 [bytes 164..169]\n  move: main.fy:16:17 [bytes 229..234]\n  loop-header: main.fy:15:5 [bytes 198..209]\n",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E1105",
+            "start": 198,
+            "end": 260
+          }
+        ]
+      }
+    },
+    {
+      "family": "region",
+      "id": "pass.flow.param-local-use",
+      "different": [
+        "stderrMatch",
+        "exactMatch"
+      ],
+      "go": {
+        "exit": 7,
+        "stdout": "",
+        "stderr": "fairyc: package workspace failure: workspace .:std::alloc invalid-standard-library: module namespace is reserved by the SDK\n",
+        "diagnostics": []
+      },
+      "candidate": {
+        "exit": 7,
+        "stdout": "",
+        "stderr": "fairyc: package workspace failure: invalid-standard-library\n",
+        "diagnostics": []
+      }
+    },
+    {
+      "family": "region",
+      "id": "pass.flow.param-return",
+      "different": [
+        "stderrMatch",
+        "exactMatch"
+      ],
+      "go": {
+        "exit": 7,
+        "stdout": "",
+        "stderr": "fairyc: package workspace failure: workspace .:std::alloc invalid-standard-library: module namespace is reserved by the SDK\n",
+        "diagnostics": []
+      },
+      "candidate": {
+        "exit": 7,
+        "stdout": "",
+        "stderr": "fairyc: package workspace failure: invalid-standard-library\n",
+        "diagnostics": []
+      }
+    },
+    {
+      "family": "region",
+      "id": "fail.flow.resource-placement",
+      "different": [
+        "stderrMatch",
+        "exactMatch"
+      ],
+      "go": {
+        "exit": 7,
+        "stdout": "",
+        "stderr": "fairyc: package workspace failure: workspace .:std::alloc invalid-standard-library: module namespace is reserved by the SDK\n",
+        "diagnostics": []
+      },
+      "candidate": {
+        "exit": 7,
+        "stdout": "",
+        "stderr": "fairyc: package workspace failure: invalid-standard-library\n",
+        "diagnostics": []
+      }
+    },
+    {
+      "family": "region",
+      "id": "fail.type.capability-storage",
+      "different": [
+        "firstDiagnosticMatch",
+        "allDiagnosticsMatch",
+        "stderrMatch",
+        "exactMatch"
+      ],
+      "go": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:4:5: E3103: compiler-owned Region capability cannot be stored [bytes 34..40]\n  capability: main.fy:4:12 [bytes 41..48]\n",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E3103",
+            "start": 34,
+            "end": 40
+          }
+        ]
+      },
+      "candidate": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:4:5: source is outside the supported compiler subset [bytes 34..40]\n",
+        "diagnostics": []
+      }
+    },
+    {
+      "family": "region",
+      "id": "fail.type.direct-construction",
+      "different": [
+        "firstDiagnosticMatch",
+        "allDiagnosticsMatch",
+        "stderrMatch",
+        "exactMatch"
+      ],
+      "go": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:4:26: E3104: compiler-owned Region capability cannot be constructed directly [bytes 58..67]\n",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E3104",
+            "start": 58,
+            "end": 67
+          }
+        ]
+      },
+      "candidate": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:4:26: E0101: name or qualified path cannot be resolved [bytes 58..64]\n",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E0101",
+            "start": 58,
+            "end": 64
+          }
+        ]
+      }
+    },
+    {
+      "family": "result",
+      "id": "fail.flow.unused-result",
+      "different": [
+        "acceptanceMatch",
+        "exitMatch",
+        "firstDiagnosticMatch",
+        "allDiagnosticsMatch",
+        "stdoutMatch",
+        "stderrMatch",
+        "exactMatch"
+      ],
+      "go": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:8:5: E4101: Result value must be returned, propagated, matched, or explicitly discarded [bytes 89..94]\n",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E4101",
+            "start": 89,
+            "end": 94
+          }
+        ]
+      },
+      "candidate": {
+        "exit": 0,
+        "stdout": "check ok: 1 instance(s), 1 source file(s), 1 MIR function(s), lock verified\n",
+        "stderr": "",
+        "diagnostics": []
+      }
+    },
+    {
+      "family": "result",
+      "id": "fail.flow.stored-unhandled",
+      "different": [
+        "acceptanceMatch",
+        "exitMatch",
+        "firstDiagnosticMatch",
+        "allDiagnosticsMatch",
+        "stdoutMatch",
+        "stderrMatch",
+        "exactMatch"
+      ],
+      "go": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:4:36: E4101: Result value must be returned, propagated, matched, or explicitly discarded [bytes 68..75]\n",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E4101",
+            "start": 68,
+            "end": 75
+          }
+        ]
+      },
+      "candidate": {
+        "exit": 0,
+        "stdout": "check ok: 1 instance(s), 1 source file(s), 1 MIR function(s), lock verified\n",
+        "stderr": "",
+        "diagnostics": []
+      }
+    },
+    {
+      "family": "result",
+      "id": "fail.flow.parameter-unhandled",
+      "different": [
+        "acceptanceMatch",
+        "exitMatch",
+        "firstDiagnosticMatch",
+        "allDiagnosticsMatch",
+        "stdoutMatch",
+        "stderrMatch",
+        "exactMatch"
+      ],
+      "go": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:3:33: E4101: Result value must be returned, propagated, matched, or explicitly discarded [bytes 46..51]\n",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E4101",
+            "start": 46,
+            "end": 51
+          }
+        ]
+      },
+      "candidate": {
+        "exit": 0,
+        "stdout": "check ok: 1 instance(s), 1 source file(s), 1 MIR function(s), lock verified\n",
+        "stderr": "",
+        "diagnostics": []
+      }
+    },
+    {
+      "family": "result",
+      "id": "fail.flow.overwrite-unhandled",
+      "different": [
+        "acceptanceMatch",
+        "exitMatch",
+        "firstDiagnosticMatch",
+        "allDiagnosticsMatch",
+        "stdoutMatch",
+        "stderrMatch",
+        "exactMatch"
+      ],
+      "go": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:4:36: E4101: Result value must be returned, propagated, matched, or explicitly discarded [bytes 68..74]\n",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E4101",
+            "start": 68,
+            "end": 74
+          }
+        ]
+      },
+      "candidate": {
+        "exit": 0,
+        "stdout": "check ok: 1 instance(s), 1 source file(s), 1 MIR function(s), lock verified\n",
+        "stderr": "",
+        "diagnostics": []
+      }
+    },
+    {
+      "family": "result",
+      "id": "fail.flow.branch-partial-handle",
+      "different": [
+        "acceptanceMatch",
+        "exitMatch",
+        "firstDiagnosticMatch",
+        "allDiagnosticsMatch",
+        "stdoutMatch",
+        "stderrMatch",
+        "exactMatch"
+      ],
+      "go": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:3:33: E4101: Result value must be returned, propagated, matched, or explicitly discarded [bytes 46..51]\n",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E4101",
+            "start": 46,
+            "end": 51
+          }
+        ]
+      },
+      "candidate": {
+        "exit": 0,
+        "stdout": "check ok: 1 instance(s), 1 source file(s), 1 MIR function(s), lock verified\n",
+        "stderr": "",
+        "diagnostics": []
+      }
+    },
+    {
+      "family": "result",
+      "id": "fail.flow.loop-overwrite",
+      "different": [
+        "acceptanceMatch",
+        "exitMatch",
+        "firstDiagnosticMatch",
+        "allDiagnosticsMatch",
+        "stdoutMatch",
+        "stderrMatch",
+        "exactMatch"
+      ],
+      "go": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:7:19: E4101: Result value must be returned, propagated, matched, or explicitly discarded [bytes 143..149]\n",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E4101",
+            "start": 143,
+            "end": 149
+          }
+        ]
+      },
+      "candidate": {
+        "exit": 0,
+        "stdout": "check ok: 1 instance(s), 1 source file(s), 1 MIR function(s), lock verified\n",
+        "stderr": "",
+        "diagnostics": []
+      }
+    },
+    {
+      "family": "result",
+      "id": "fail.flow.early-return-unhandled",
+      "different": [
+        "acceptanceMatch",
+        "exitMatch",
+        "firstDiagnosticMatch",
+        "allDiagnosticsMatch",
+        "stdoutMatch",
+        "stderrMatch",
+        "exactMatch"
+      ],
+      "go": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:4:36: E4101: Result value must be returned, propagated, matched, or explicitly discarded [bytes 77..84]\n",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E4101",
+            "start": 77,
+            "end": 84
+          }
+        ]
+      },
+      "candidate": {
+        "exit": 0,
+        "stdout": "check ok: 1 instance(s), 1 source file(s), 1 MIR function(s), lock verified\n",
+        "stderr": "",
+        "diagnostics": []
+      }
+    },
+    {
+      "family": "result",
+      "id": "fail.type.question-non-result",
+      "different": [
+        "firstDiagnosticMatch",
+        "allDiagnosticsMatch",
+        "stderrMatch",
+        "exactMatch"
+      ],
+      "go": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:4:17: E4102: postfix ? requires a Result value [bytes 58..59]\n  result-expression: main.fy:4:12 [bytes 53..58]\n",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E4102",
+            "start": 58,
+            "end": 59
+          }
+        ]
+      },
+      "candidate": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:4:17: source is outside the supported compiler subset [bytes 58..59]\n",
+        "diagnostics": []
+      }
+    },
+    {
+      "family": "result",
+      "id": "fail.type.incompatible-error",
+      "different": [
+        "firstDiagnosticMatch",
+        "allDiagnosticsMatch",
+        "stderrMatch",
+        "exactMatch"
+      ],
+      "go": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:12:26: E4103: propagated Result error type does not match the enclosing return type [bytes 212..213]\n  actual-error: main.fy:11:49 [bytes 130..141]\n  expected-error: main.fy:11:16 [bytes 97..108]\n",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E4103",
+            "start": 212,
+            "end": 213
+          }
+        ]
+      },
+      "candidate": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:12:26: source is outside the supported compiler subset [bytes 212..213]\n",
+        "diagnostics": []
+      }
+    },
+    {
+      "family": "result",
+      "id": "fail.flow.break-pending",
+      "different": [
+        "acceptanceMatch",
+        "exitMatch",
+        "firstDiagnosticMatch",
+        "allDiagnosticsMatch",
+        "stdoutMatch",
+        "stderrMatch",
+        "exactMatch"
+      ],
+      "go": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:5:40: E4101: Result value must be returned, propagated, matched, or explicitly discarded [bytes 100..106]\n",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E4101",
+            "start": 100,
+            "end": 106
+          }
+        ]
+      },
+      "candidate": {
+        "exit": 0,
+        "stdout": "check ok: 1 instance(s), 1 source file(s), 1 MIR function(s), lock verified\n",
+        "stderr": "",
+        "diagnostics": []
+      }
+    },
+    {
+      "family": "result",
+      "id": "fail.flow.continue-pending",
+      "different": [
+        "acceptanceMatch",
+        "exitMatch",
+        "firstDiagnosticMatch",
+        "allDiagnosticsMatch",
+        "stdoutMatch",
+        "stderrMatch",
+        "exactMatch"
+      ],
+      "go": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:5:40: E4101: Result value must be returned, propagated, matched, or explicitly discarded [bytes 100..106]\n",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E4101",
+            "start": 100,
+            "end": 106
+          }
+        ]
+      },
+      "candidate": {
+        "exit": 0,
+        "stdout": "check ok: 1 instance(s), 1 source file(s), 1 MIR function(s), lock verified\n",
+        "stderr": "",
+        "diagnostics": []
+      }
+    },
+    {
+      "family": "result",
+      "id": "fail.flow.continue-overwrite",
+      "different": [
+        "acceptanceMatch",
+        "exitMatch",
+        "firstDiagnosticMatch",
+        "allDiagnosticsMatch",
+        "stdoutMatch",
+        "stderrMatch",
+        "exactMatch"
+      ],
+      "go": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:7:19: E4101: Result value must be returned, propagated, matched, or explicitly discarded [bytes 143..149]\n",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E4101",
+            "start": 143,
+            "end": 149
+          }
+        ]
+      },
+      "candidate": {
+        "exit": 0,
+        "stdout": "check ok: 1 instance(s), 1 source file(s), 1 MIR function(s), lock verified\n",
+        "stderr": "",
+        "diagnostics": []
+      }
+    },
+    {
+      "family": "mir",
+      "id": "pass.mir.resource-call-move",
+      "different": [
+        "stdoutMatch",
+        "exactMatch"
+      ],
+      "go": {
+        "exit": 0,
+        "stdout": "check ok: 1 instance(s), 1 source file(s), 2 MIR function(s), lock verified\n",
+        "stderr": "",
+        "diagnostics": []
+      },
+      "candidate": {
+        "exit": 0,
+        "stdout": "check ok: 1 instance(s), 1 source file(s), 3 MIR function(s), lock verified\n",
+        "stderr": "",
+        "diagnostics": []
+      }
+    },
+    {
+      "family": "mir",
+      "id": "pass.mir.reverse-scope-cleanup",
+      "different": [
+        "stdoutMatch",
+        "exactMatch"
+      ],
+      "go": {
+        "exit": 0,
+        "stdout": "check ok: 1 instance(s), 1 source file(s), 1 MIR function(s), lock verified\n",
+        "stderr": "",
+        "diagnostics": []
+      },
+      "candidate": {
+        "exit": 0,
+        "stdout": "check ok: 1 instance(s), 1 source file(s), 2 MIR function(s), lock verified\n",
+        "stderr": "",
+        "diagnostics": []
+      }
+    },
+    {
+      "family": "mir",
+      "id": "pass.mir.result-error-cleanup",
+      "different": [
+        "acceptanceMatch",
+        "exitMatch",
+        "firstDiagnosticMatch",
+        "allDiagnosticsMatch",
+        "stdoutMatch",
+        "stderrMatch",
+        "exactMatch"
+      ],
+      "go": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:15:72: E4101: Result value must be returned, propagated, matched, or explicitly discarded [bytes 186..194]\n",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E4101",
+            "start": 186,
+            "end": 194
+          }
+        ]
+      },
+      "candidate": {
+        "exit": 0,
+        "stdout": "check ok: 1 instance(s), 1 source file(s), 3 MIR function(s), lock verified\n",
+        "stderr": "",
+        "diagnostics": []
+      }
+    },
+    {
+      "family": "mir",
+      "id": "pass.mir.resource-option-match",
+      "different": [
+        "stdoutMatch",
+        "exactMatch"
+      ],
+      "go": {
+        "exit": 0,
+        "stdout": "check ok: 1 instance(s), 1 source file(s), 1 MIR function(s), lock verified\n",
+        "stderr": "",
+        "diagnostics": []
+      },
+      "candidate": {
+        "exit": 0,
+        "stdout": "check ok: 1 instance(s), 1 source file(s), 2 MIR function(s), lock verified\n",
+        "stderr": "",
+        "diagnostics": []
+      }
+    },
+    {
+      "family": "mir",
+      "id": "pass.mir.resource-reassignment",
+      "different": [
+        "stdoutMatch",
+        "exactMatch"
+      ],
+      "go": {
+        "exit": 0,
+        "stdout": "check ok: 1 instance(s), 1 source file(s), 4 MIR function(s), lock verified\n",
+        "stderr": "",
+        "diagnostics": []
+      },
+      "candidate": {
+        "exit": 0,
+        "stdout": "check ok: 1 instance(s), 1 source file(s), 5 MIR function(s), lock verified\n",
+        "stderr": "",
+        "diagnostics": []
+      }
+    },
+    {
+      "family": "mir",
+      "id": "pass.mir.region-reset",
+      "different": [
+        "stderrMatch",
+        "exactMatch"
+      ],
+      "go": {
+        "exit": 7,
+        "stdout": "",
+        "stderr": "fairyc: package workspace failure: workspace .:std::alloc invalid-standard-library: module namespace is reserved by the SDK\n",
+        "diagnostics": []
+      },
+      "candidate": {
+        "exit": 7,
+        "stdout": "",
+        "stderr": "fairyc: package workspace failure: invalid-standard-library\n",
+        "diagnostics": []
+      }
+    },
+    {
+      "family": "mir",
+      "id": "pass.mir.region-early-exit",
+      "different": [
+        "stderrMatch",
+        "exactMatch"
+      ],
+      "go": {
+        "exit": 7,
+        "stdout": "",
+        "stderr": "fairyc: package workspace failure: workspace .:std::alloc invalid-standard-library: module namespace is reserved by the SDK\n",
+        "diagnostics": []
+      },
+      "candidate": {
+        "exit": 7,
+        "stdout": "",
+        "stderr": "fairyc: package workspace failure: invalid-standard-library\n",
+        "diagnostics": []
+      }
+    },
+    {
+      "family": "mir",
+      "id": "pass.mir.loop-control-cleanup",
+      "different": [
+        "stderrMatch",
+        "exactMatch"
+      ],
+      "go": {
+        "exit": 7,
+        "stdout": "",
+        "stderr": "fairyc: package workspace failure: workspace .:std::alloc invalid-standard-library: module namespace is reserved by the SDK\n",
+        "diagnostics": []
+      },
+      "candidate": {
+        "exit": 7,
+        "stdout": "",
+        "stderr": "fairyc: package workspace failure: invalid-standard-library\n",
+        "diagnostics": []
+      }
+    },
+    {
+      "family": "mir",
+      "id": "pass.mir.trap-skips-cleanup",
+      "different": [
+        "stdoutMatch",
+        "exactMatch"
+      ],
+      "go": {
+        "exit": 0,
+        "stdout": "check ok: 1 instance(s), 1 source file(s), 1 MIR function(s), lock verified\n",
+        "stderr": "",
+        "diagnostics": []
+      },
+      "candidate": {
+        "exit": 0,
+        "stdout": "check ok: 1 instance(s), 1 source file(s), 2 MIR function(s), lock verified\n",
+        "stderr": "",
+        "diagnostics": []
+      }
+    },
+    {
+      "family": "c-emission",
+      "id": "pass.c-emission.resource-call-move",
+      "different": [
+        "stdoutMatch",
+        "exactMatch"
+      ],
+      "go": {
+        "exit": 0,
+        "stdout": "check ok: 1 instance(s), 1 source file(s), 2 MIR function(s), lock verified\n",
+        "stderr": "",
+        "diagnostics": []
+      },
+      "candidate": {
+        "exit": 0,
+        "stdout": "check ok: 1 instance(s), 1 source file(s), 3 MIR function(s), lock verified\n",
+        "stderr": "",
+        "diagnostics": []
+      }
+    },
+    {
+      "family": "c-emission",
+      "id": "pass.c-emission.resource-local",
+      "different": [
+        "stdoutMatch",
+        "exactMatch"
+      ],
+      "go": {
+        "exit": 0,
+        "stdout": "check ok: 1 instance(s), 1 source file(s), 1 MIR function(s), lock verified\n",
+        "stderr": "",
+        "diagnostics": []
+      },
+      "candidate": {
+        "exit": 0,
+        "stdout": "check ok: 1 instance(s), 1 source file(s), 2 MIR function(s), lock verified\n",
+        "stderr": "",
+        "diagnostics": []
+      }
+    },
+    {
+      "family": "c-emission",
+      "id": "pass.c-emission.flat-copy-resource",
+      "different": [
+        "stdoutMatch",
+        "exactMatch"
+      ],
+      "go": {
+        "exit": 0,
+        "stdout": "check ok: 1 instance(s), 1 source file(s), 1 MIR function(s), lock verified\n",
+        "stderr": "",
+        "diagnostics": []
+      },
+      "candidate": {
+        "exit": 0,
+        "stdout": "check ok: 1 instance(s), 1 source file(s), 2 MIR function(s), lock verified\n",
+        "stderr": "",
+        "diagnostics": []
+      }
+    },
+    {
+      "family": "c-emission",
+      "id": "pass.c-emission.resource-option-none",
+      "different": [
+        "stdoutMatch",
+        "exactMatch"
+      ],
+      "go": {
+        "exit": 0,
+        "stdout": "check ok: 1 instance(s), 1 source file(s), 1 MIR function(s), lock verified\n",
+        "stderr": "",
+        "diagnostics": []
+      },
+      "candidate": {
+        "exit": 0,
+        "stdout": "check ok: 1 instance(s), 1 source file(s), 2 MIR function(s), lock verified\n",
+        "stderr": "",
+        "diagnostics": []
+      }
+    },
+    {
+      "family": "c-emission",
+      "id": "pass.c-emission.resource-option-some",
+      "different": [
+        "stdoutMatch",
+        "exactMatch"
+      ],
+      "go": {
+        "exit": 0,
+        "stdout": "check ok: 1 instance(s), 1 source file(s), 1 MIR function(s), lock verified\n",
+        "stderr": "",
+        "diagnostics": []
+      },
+      "candidate": {
+        "exit": 0,
+        "stdout": "check ok: 1 instance(s), 1 source file(s), 2 MIR function(s), lock verified\n",
+        "stderr": "",
+        "diagnostics": []
+      }
+    },
+    {
+      "family": "c-emission",
+      "id": "pass.c-emission.resource-reassign-live",
+      "different": [
+        "stdoutMatch",
+        "exactMatch"
+      ],
+      "go": {
+        "exit": 0,
+        "stdout": "check ok: 1 instance(s), 1 source file(s), 1 MIR function(s), lock verified\n",
+        "stderr": "",
+        "diagnostics": []
+      },
+      "candidate": {
+        "exit": 0,
+        "stdout": "check ok: 1 instance(s), 1 source file(s), 2 MIR function(s), lock verified\n",
+        "stderr": "",
+        "diagnostics": []
+      }
+    },
+    {
+      "family": "c-emission",
+      "id": "pass.c-emission.resource-result-err",
+      "different": [
+        "stdoutMatch",
+        "exactMatch"
+      ],
+      "go": {
+        "exit": 0,
+        "stdout": "check ok: 1 instance(s), 1 source file(s), 1 MIR function(s), lock verified\n",
+        "stderr": "",
+        "diagnostics": []
+      },
+      "candidate": {
+        "exit": 0,
+        "stdout": "check ok: 1 instance(s), 1 source file(s), 2 MIR function(s), lock verified\n",
+        "stderr": "",
+        "diagnostics": []
+      }
+    },
+    {
+      "family": "c-emission",
+      "id": "pass.c-emission.resource-result-ok",
+      "different": [
+        "stdoutMatch",
+        "exactMatch"
+      ],
+      "go": {
+        "exit": 0,
+        "stdout": "check ok: 1 instance(s), 1 source file(s), 1 MIR function(s), lock verified\n",
+        "stderr": "",
+        "diagnostics": []
+      },
+      "candidate": {
+        "exit": 0,
+        "stdout": "check ok: 1 instance(s), 1 source file(s), 2 MIR function(s), lock verified\n",
+        "stderr": "",
+        "diagnostics": []
+      }
+    },
+    {
+      "family": "c-emission",
+      "id": "pass.c-emission.resource-result-propagate-err",
+      "different": [
+        "stdoutMatch",
+        "exactMatch"
+      ],
+      "go": {
+        "exit": 0,
+        "stdout": "check ok: 1 instance(s), 1 source file(s), 2 MIR function(s), lock verified\n",
+        "stderr": "",
+        "diagnostics": []
+      },
+      "candidate": {
+        "exit": 0,
+        "stdout": "check ok: 1 instance(s), 1 source file(s), 3 MIR function(s), lock verified\n",
+        "stderr": "",
+        "diagnostics": []
+      }
+    },
+    {
+      "family": "c-emission",
+      "id": "pass.c-emission.resource-result-propagate-ok",
+      "different": [
+        "stdoutMatch",
+        "exactMatch"
+      ],
+      "go": {
+        "exit": 0,
+        "stdout": "check ok: 1 instance(s), 1 source file(s), 2 MIR function(s), lock verified\n",
+        "stderr": "",
+        "diagnostics": []
+      },
+      "candidate": {
+        "exit": 0,
+        "stdout": "check ok: 1 instance(s), 1 source file(s), 3 MIR function(s), lock verified\n",
+        "stderr": "",
+        "diagnostics": []
+      }
+    },
+    {
+      "family": "c-emission",
+      "id": "pass.c-emission.repr-c-safe-identifiers",
+      "different": [
+        "acceptanceMatch",
+        "exitMatch",
+        "firstDiagnosticMatch",
+        "allDiagnosticsMatch",
+        "stdoutMatch",
+        "stderrMatch",
+        "exactMatch"
+      ],
+      "go": {
+        "exit": 0,
+        "stdout": "check ok: 1 instance(s), 1 source file(s), 1 MIR function(s), lock verified\n",
+        "stderr": "",
+        "diagnostics": []
+      },
+      "candidate": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:5:9: E5106: invalid or conflicting link_name declaration [bytes 59..65]\n",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E5106",
+            "start": 59,
+            "end": 65
+          }
+        ]
+      }
+    }
+  ],
+  "nativeDifferences": [
+    {
+      "family": "c-emission",
+      "id": "pass.c-emission.repr-c-safe-identifiers",
+      "different": [
+        "exitMatch",
+        "firstDiagnosticMatch",
+        "allDiagnosticsMatch",
+        "stderrMatch",
+        "exactMatch"
+      ],
+      "go": {
+        "exit": 42,
+        "stdout": "",
+        "stderr": "",
+        "diagnostics": []
+      },
+      "candidate": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "main.fy:5:9: E5106: invalid or conflicting link_name declaration [bytes 59..65]\n",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E5106",
+            "start": 59,
+            "end": 65
+          }
+        ]
+      }
+    }
+  ],
+  "semanticPriority": [
+    "Unconsumed Result obligations: ten Result fixtures and one MIR fixture are accepted without E4101.",
+    "repr(C) member _value is rejected as E5106; Go admits it and its native program returns 42.",
+    "Two Result and two Region negative cases agree on rejection but disagree on diagnostic code or supported-subset reporting."
+  ],
+  "notChecked": [
+    "Parser AST or HIR/MIR structural equivalence",
+    "Region stub fixtures through direct semantic/package-graph adapter",
+    "Full 511-source dispatcher build and latest fixed point",
+    "Linux execution or current-head hosted CI",
+    "Stable new/test/explain/targets/help/version routes outside the commands-only image",
+    "Performance or product resource-limit defaults"
+  ],
+  "compilerChanged": false,
+  "publicApiChanged": false,
+  "sdkAbiChanged": false,
+  "dbChanged": false,
+  "ciChanged": false,
+  "pushed": false
+}
