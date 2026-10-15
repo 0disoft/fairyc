@@ -1,5 +1,22 @@
 # Fairy 컴파일러 전환: 후속 작업 목록
 
+## Filesystem CLI rebuild after hard-link admission (2026-10-15)
+
+The authored check/build/run dispatcher is rebuilt from 415 sources through
+`aba24ba8`, including authenticated hard-link C admission. Both development and
+optimized native images build through the verified Fairy stage2 seed without
+invoking a Go frontend. Source, seed and image hashes are verified in the
+[build receipt](evidence/candidate-std-fs-cli-rebuild-hard-link-20261015.json).
+The private 16MiB stack setting and product deadlines are unchanged. This is
+the command dispatcher scope; full dispatcher/fixed-point promotion stays open.
+
+The development compiler checks the shipped filesystem workspace with exact
+Go output (2 instances, 12 files, 217 MIR functions). Build passes the hard-link
+call and stops at `std::fs::copy_file_bytes`, `file_copy_bytes_raw` / SDK rule 44,
+`std/fs.fy:583:9`, private C code 1004, exit 2. The optimized compiler's complete
+command matrix is pending at this build checkpoint. CLI build success does not
+establish filesystem native parity; candidate promotion remains blocked.
+
 ## Hard-link C admission (2026-10-15)
 
 The file C adapter now admits authenticated SDK rule 43, `file_hard_link_raw`.
@@ -18,12 +35,10 @@ repeated-link collision, shared writes through the two names, source-name remova
 and surviving alias bytes. No link-count metadata adapter is added for this test.
 Receipt: [hard-link C](evidence/candidate-hard-link-20261015.json).
 
-The prior rebuilt CLI still reproduces code 1004 at `std/fs.fy:569:9`. This
-focused source fix does not rebuild that CLI or rerun the complete shipped
-workspace. The command matrix below is a historical pre-fix observation.
-Rule 44 (`file_copy_bytes_raw`) remains excluded in the current C allowlist;
-that is source inspection, not a newly observed full-example failure. Full CLI
-integration, other filesystem bridges and promotion gates remain open.
+The focused source fix originally left the command CLI unchanged. The newer
+rebuild above passes this call and observes rule 44 as the next C emission gap.
+The command matrix below remains a historical pre-hard-link-fix observation.
+Other filesystem bridges and promotion gates remain open.
 
 ## Filesystem command CLI rebuild (2026-10-15)
 

@@ -1,5 +1,22 @@
 # Self-hosting readiness v0
 
+## Filesystem CLI rebuild after hard-link admission (2026-10-15)
+
+The 415-source authored check/build/run dispatcher now includes hard-link C
+admission through `aba24ba8`. Development and optimized native images build
+through the verified Fairy stage2 seed without Go frontend fallback. Source,
+seed and image hashes are verified in the
+[build receipt](../ops/evidence/candidate-std-fs-cli-rebuild-hard-link-20261015.json).
+This remains the command dispatcher scope. The private 16MiB stack setting and
+product deadlines are unchanged; full dispatcher/fixed-point promotion is open.
+
+The development compiler's check output exactly matches Go (2 instances, 12
+files, 217 MIR functions). Build passes hard-link emission and reaches
+`std::fs::copy_file_bytes` / `file_copy_bytes_raw`, SDK rule 44, at
+`std/fs.fy:583:9`; private C code 1004 returns exit 2. The optimized compiler's
+complete command matrix is pending at this build checkpoint. Native parity
+is not established and promotion remains blocked.
+
 ## Hard-link C admission (2026-10-15)
 
 Authenticated SDK rule 43 (`file_hard_link_raw`) now uses the existing file-result
@@ -15,12 +32,11 @@ shared writes and surviving alias bytes after removing the source name. Seven
 opens, closes and resource drops balance; all fixture files are cleaned up.
 Receipt: [hard-link C](../ops/evidence/candidate-hard-link-20261015.json).
 
-The previous rebuilt command image still reproduces code 1004 at the old call
-span. No new command image or complete shipped-workspace parity run is claimed
-for this focused C-emitter fix. The integration checkpoint below predates it.
-Rule 44 remains outside the current file C allowlist by source inspection;
-other filesystem bridges, full CLI integration, fixed point, broader parity,
-performance and platform/CI gates remain open. Promotion stays blocked.
+The focused C-emitter checkpoint originally left the command image unchanged.
+The newer rebuild above passes this call and observes rule 44 as the next C
+emission gap. The integration checkpoint below predates hard-link admission.
+Other filesystem bridges, fixed point, broader parity, performance and
+platform/CI gates remain open. Promotion stays blocked.
 
 ## Filesystem command CLI integration recheck (2026-10-15)
 
