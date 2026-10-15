@@ -46,7 +46,8 @@ pub fn Result<bool,m::Problem> expression(ref v::Vec<syntax::Parsed> sources,ref
     if(e.kind==12 || e.kind==31){return control::block(sources,primary,body,owners,env,edges,diagnostics,facts,e.left,consuming,depth+1,c);}
     if(e.kind==23){return expression(sources,primary,body,owners,env,edges,diagnostics,facts,e.left,false,depth+1,c);}
     if(e.kind==3){return expression(sources,primary,body,owners,env,edges,diagnostics,facts,e.left,consuming,depth+1,c);}
-    if(e.kind==13 || e.kind==15){return control::branch(sources,primary,body,owners,env,edges,diagnostics,facts,e,consuming,depth+1,c);}
+    // Dispatching the same expression to its branch helper is not an AST edge.
+    if(e.kind==13 || e.kind==15){return control::branch(sources,primary,body,owners,env,edges,diagnostics,facts,e,consuming,depth,c);}
     let op=syntax::expression_text(source,id);
     if(e.kind==5 && (bytes::equal(op,b"&&") || bytes::equal(op,b"||"))){return logical(sources,primary,body,owners,env,edges,diagnostics,facts,ref e,consuming,depth,c);}
     if(e.kind==6 || e.kind==10 || e.kind==24){let base=c.pending_count;let result=operands(sources,primary,body,owners,env,edges,diagnostics,facts,e,depth,c);c.pending_count=base;return result;}

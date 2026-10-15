@@ -75,3 +75,14 @@ fn void rejected(ref u8[] text,u32 stage,u32 code){
     let changed=source(b"module main;fn i32 main(){return 43;}");
     switch(compile::check_range(ref changed,ref metadata,0,1)){case .ok(_):{assert(false);}case .err(e):{assert(e.stage>=2 && e.stage<=3 && e.code==12);}};
 }
+
+fn bytes::Buffer branch_chain(bool moved){
+    var bytes::Buffer out=bytes::empty();assert(bytes::append(ref mut out,b"module main;resource Owner{i32 n;cleanup{}}fn void take(Owner p){}fn i32 f(i32 n){let Owner owner=Owner{.n=42};return ").is_ok);var usize i=0;
+    while(i<40){assert(bytes::append(ref mut out,b"if(n==").is_ok && bytes::append_usize(ref mut out,i).is_ok && bytes::append(ref mut out,b"){0}else ").is_ok);i+=1;}
+    assert(bytes::append(ref mut out,if(moved){b"{take(owner);owner.n};}fn i32 main(){return f(99);}"}else{b"{owner.n};}fn i32 main(){return f(99);}"}).is_ok);return out;
+}
+@test fn void branch_dispatch_counts_ast_edges_and_retains_late_move_errors(){
+    var usize mode=0;while(mode<2){let text=branch_chain(mode!=0);let sources=source(bytes::view(ref text));let metadata=switch(signatures::build(ref sources)){case .ok(p):{p}case .err(_):{assert(false);return;}};
+        switch(compile::check_range(ref sources,ref metadata,0,1)){case .ok(_):{assert(mode==0);}case .err(e):{assert(mode==1 && e.stage==5 && e.code==1101);assert(bytes::equal(syntax::source_view(v::at<syntax::Parsed>(ref sources,0))[e.start..e.end],b"owner"));}};mode+=1;
+    }
+}
