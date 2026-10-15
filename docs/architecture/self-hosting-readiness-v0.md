@@ -13,9 +13,24 @@ product deadlines are unchanged; full dispatcher/fixed-point promotion is open.
 The development compiler's check output exactly matches Go (2 instances, 12
 files, 217 MIR functions). Build passes hard-link emission and reaches
 `std::fs::copy_file_bytes` / `file_copy_bytes_raw`, SDK rule 44, at
-`std/fs.fy:583:9`; private C code 1004 returns exit 2. The optimized compiler's
-complete command matrix is pending at this build checkpoint. Native parity
-is not established and promotion remains blocked.
+`std/fs.fy:583:9`; private C code 1004 returns exit 2.
+
+The optimized compiler's complete selected matrix records 17 observations.
+Check exactly matches Go; cache cold storage and repeated hit succeed. Both
+generated-program profiles' build/run and cached build/run fail at the same
+copy call (six commands, exit 2). Two direct candidate artifact runs are skipped
+after failed builds; candidate program execution is not reached. No observation
+times out. The verifier records `passed: false` and exits 1.
+
+The fresh Go CLI builds both output profiles and its direct artifacts return 42
+with the existing host smoke metadata fixtures. Go run returns 356 in fresh
+scratch directories without those fixtures. The development compiler's check
+and build observations are also bound in the
+[matrix receipt](../ops/evidence/candidate-std-fs-cli-matrix-hard-link-20261015.json).
+Copy-file C admission is the next observed blocker. Native parity and promotion
+remain blocked; broader equivalence and platform/performance gates stay open.
+Public API, SDK/runtime ABI, database, repository hygiene and CI/runner
+configuration are unchanged.
 
 ## Hard-link C admission (2026-10-15)
 

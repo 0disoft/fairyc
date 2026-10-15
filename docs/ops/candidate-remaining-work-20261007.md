@@ -13,9 +13,23 @@ the command dispatcher scope; full dispatcher/fixed-point promotion stays open.
 The development compiler checks the shipped filesystem workspace with exact
 Go output (2 instances, 12 files, 217 MIR functions). Build passes the hard-link
 call and stops at `std::fs::copy_file_bytes`, `file_copy_bytes_raw` / SDK rule 44,
-`std/fs.fy:583:9`, private C code 1004, exit 2. The optimized compiler's complete
-command matrix is pending at this build checkpoint. CLI build success does not
-establish filesystem native parity; candidate promotion remains blocked.
+`std/fs.fy:583:9`, private C code 1004, exit 2.
+
+The optimized compiler's complete selected matrix has 17 observations. Check
+matches Go exactly, and cache cold storage and repeated hit succeed. Both
+generated-program profiles' build/run and cached build/run fail at that same
+copy call (six commands, exit 2). Two direct candidate artifact executions are
+skipped after failed builds; candidate program execution is not reached. No
+observation times out. The verifier records `passed: false` and exits 1.
+
+The fresh Go CLI builds both output profiles; their direct artifacts return 42
+with the existing host smoke metadata fixtures. Go run returns 356 in fresh
+scratch directories without those fixtures. The development compiler's check
+and build observations are included in the
+[matrix receipt](evidence/candidate-std-fs-cli-matrix-hard-link-20261015.json).
+The next observed blocker is copy-file C admission. Native parity, broader
+equivalence and promotion gates remain open. No public API, SDK/runtime ABI,
+database, repository hygiene or CI/runner configuration changes are made.
 
 ## Hard-link C admission (2026-10-15)
 
@@ -69,8 +83,8 @@ The freshly rebuilt Go CLI builds both output profiles and its artifacts return
 scratch directories without those external fixtures; that comparison is not
 the successful artifact-execution result. Candidate program execution is not
 reached. Receipt: [full selected matrix](evidence/candidate-std-fs-cli-matrix-20261015.json).
-The hard-link source fix above supersedes this integration checkpoint's first
-blocker; a new CLI build and full matrix are still needed after that fix.
+The hard-link source fix and newest CLI matrix above supersede this historical
+integration checkpoint; copy-file C admission is the next observed blocker.
 Full dispatcher/fixed point, broader parity, performance
 and platform/CI gates remain open.
 
