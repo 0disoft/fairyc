@@ -2,6 +2,7 @@ module module_unit_checked_bodies;
 import module_unit_bind as binding;
 import module_unit_call_closure as closure;
 import module_unit_values as values;
+import module_unit_result_flow as results;
 import module_unit_moves as moves;
 import module_unit_origin_returns as origins;
 import module_unit_origin_diagnostics as diagnostics;
@@ -36,6 +37,7 @@ pub fn Result<Plan,Problem> build(ref v::Vec<syntax::Parsed> sources,ref signatu
     // Preserve stage 6 and the original move-plus-policy work history.
     let checked=switch(policy::build(sources,ref typed,closure::imported(ref ready),ref moved)){case .ok(p):{p}case .err(e):{return .err(failed(6,e.code,e.module_index,e.start,e.end,0,0));}};
     if(policy::count(ref checked)!=0){let e=policy::at(ref checked,0);return .err(failed(6,e.code,e.module_index,e.start,e.end,0,0));}
+    let result_flow=results::check(sources,ref typed);if(result_flow.code!=0){return .err(failed(9,result_flow.code,result_flow.module_index,result_flow.start,result_flow.end,0,0));}
     if(v::len<syntax::Parsed>(sources)>512){return .err(failed(6,10,0,0,0,0,0));}var v::Vec<Stamp> stamps=v::empty<Stamp>();i=0;
     while(i<v::len<syntax::Parsed>(sources)){if(!v::push<Stamp>(ref mut stamps,Stamp{.bytes=syntax::source_view(v::at<syntax::Parsed>(sources,i)).len,.digest=signatures::source_digest(metadata,i)}).is_ok){return .err(failed(6,11,i,0,0,0,0));}i+=1;}
     return .ok(Plan{.ready,.typed,.moved,.cleanup_policy=checked,.sources=stamps});

@@ -24,6 +24,7 @@ pub fn ref u8[] summary(u32 code){
     if(code==1013){return b"integer literal is outside the selected type's range";}
     if(code==1014){return b"call argument label does not match its position or target";}
     if(code==4201){return b"invalid must_use declaration";}
+    if(code==4101){return b"Result value must be returned, propagated, matched, or explicitly discarded";}
     if(code==4202){return b"must_use call result is ignored without discard";}
     if(code==4301){return b"invalid compile-time declaration";}
     if(code==4302){return b"expression is outside the supported compile-time subset";}

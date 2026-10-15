@@ -141,7 +141,8 @@ fn void statement(ref syntax::Parsed p,ref v::Vec<state::Slot> types,ref v::Vec<
         loop_edge(nodes,c,frame);let usize destination=if(s.kind==9){c.breaks[frame]}else{c.continues[frame]};jump(nodes,c,destination);return;
     }
     if(s.kind==11 && syntax::expression_at(p,s.expression).kind==1 && bytes::equal(syntax::expression_text(p,s.expression),b"false")){c.current=0;return;}
-    if(s.kind==8 || s.kind==14){
+    if(s.kind==17){expression(p,types,columns,nodes,c,s.expression,0,depth+1);block(p,types,columns,nodes,c,s.first,0,0,depth+1);return;}
+    if(s.kind==8 || s.kind==14 || s.kind==18){
         let header=syntax::statement_at(p,if(s.kind==14){s.second}else{id});
         if(s.kind==14){statement(p,types,columns,nodes,c,header.first,depth+1);}
         let usize test=fresh(nodes,c,0,0,s.start,s.end);jump(nodes,c,test);c.current=test;
@@ -177,6 +178,17 @@ pub fn usize count(ref Graph p){return v::len<Node>(ref p.nodes);}
 pub fn usize root_column(ref Graph p,usize symbol){return column(ref p.columns,symbol);}
 pub fn usize width(ref Graph p){return p.width;}
 pub fn Node at(ref Graph p,usize id){return *v::at<Node>(ref p.nodes,id-1);}
+
+// Module checking projects only Result membership and lexical local identities.
+// The control graph never interprets the payload identities in these tables.
+pub fn Result<Graph,state::Problem> projected(ref syntax::Parsed p,ref v::Vec<state::Slot> types,v::Vec<usize> columns,usize width,v::Vec<Node> parameters,usize body){
+    var v::Vec<Node> nodes=v::empty<Node>();
+    var Context c=Context{.current=0,.scopes=[0;64],.captures=[0;64],.scope_depth=0,.breaks=[0;64],.continues=[0;64],.loop_base=[0;64],.loop_states=[0;64],.loop_ends=[0;64],.loops=0,.work=0,.ownership=false,.problem=state::ok()};
+    c.current=fresh(ref mut nodes,ref mut c,0,0,0,0);var usize i=0;
+    while(i<v::len<Node>(ref parameters)){let n=*v::at<Node>(ref parameters,i);discard emit(ref mut nodes,ref mut c,2,n.column,n.start,n.end);i+=1;}
+    block(p,types,ref columns,ref mut nodes,ref mut c,body,4,0,0);let b=syntax::statement_at(p,body);discard emit(ref mut nodes,ref mut c,5,0,b.start,b.end);
+    if(c.problem.code!=0){return .err(c.problem);}return .ok(Graph{.nodes,.columns,.width});
+}
 
 // The same control graph owns expression order and abrupt edges for both
 // analyses; ownership emits root reads/moves from the typed consumption flags.

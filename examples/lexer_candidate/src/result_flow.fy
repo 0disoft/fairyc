@@ -7,7 +7,7 @@ import std::vec as v;
 fn void put(ref mut v::Vec<usize> values,usize at,usize value){let ref mut usize slot=v::at_mut<usize>(values,at);*slot=value;}
 fn void byte(ref mut v::Vec<u8> values,usize at,u8 value){let ref mut u8 slot=v::at_mut<u8>(values,at);*slot=value;}
 fn usize earlier(ref graph::Graph g,usize a,usize b){if(a==0){return b;}if(b==0){return a;}let x=graph::at(g,a);let y=graph::at(g,b);return if(x.start<y.start || x.start==y.start && x.end<=y.end){a}else{b};}
-fn state::Problem analyze(ref graph::Graph g){
+pub fn state::Problem analyze(ref graph::Graph g){
     // A dummy column preserves reachability for bare unhandled Result calls.
     let usize width=if(graph::width(g)==0){1}else{graph::width(g)};let usize count=graph::count(g);
     if(count>262144/width){return state::fail(10,0,0,0,0);}

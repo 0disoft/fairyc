@@ -13,7 +13,8 @@ import generic_source_plan as source_plan;
 import syntax as syntax;
 import std::vec as v;
 
-// Stages: 1 grouping, 2 binding, 3 closure, 4 values, 5 moves, 6 owned IR, 7 borrows.
+// Stages: 1 grouping, 2 binding, 3 closure, 4 values, 5 moves, 6 owned IR,
+// 7 borrows, 8 source identity attachment, 9 Result obligations.
 pub struct Problem {u32 stage;u32 code;usize module_index;usize start;usize end;usize first;usize stop;usize expected;usize actual;usize declaration_start;usize declaration_end;usize move_start;usize move_end;usize header_start;usize header_end;usize field_module;usize field_start;usize field_end;}
 pub struct Range {usize first;usize stop;}
 // Source-bound body and cleanup checks precede lowering and identity attachment.
@@ -44,7 +45,7 @@ pub fn Result<identified::Program,Problem> range_identified(ref v::Vec<syntax::P
 }
 // Cleanup policy retains raw code 10 through the owned-IR lowerer; later
 // IR construction and verification use 1002 for the same capacity class.
-pub fn bool capacity_failure(Problem p){return (p.stage>=2 && p.stage<=7 && p.code==10) || (p.stage==3 || p.stage==7) && p.code==4503 || p.stage==6 && p.code==1002;}
+pub fn bool capacity_failure(Problem p){return (p.stage>=2 && p.stage<=7 || p.stage==9) && p.code==10 || (p.stage==3 || p.stage==7) && p.code==4503 || p.stage==6 && p.code==1002;}
 fn Problem append_range(ref v::Vec<syntax::Parsed> sources,ref signatures::Program metadata,usize first,usize stop,usize depth,ref mut v::Vec<ir::Program> programs,ref mut v::Vec<Range> ranges,ref mut usize retries){
     switch(range(sources,metadata,first,stop)){
         case .ok(p):{
