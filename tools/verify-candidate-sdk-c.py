@@ -48,7 +48,7 @@ FILE_CASES.update(FILE_SOURCE_CASES)
 
 def loader_fixtures(folder):
     data = {
-        "small-貫.bin": b"A\0\xce\xbbZ",
+        "small-λ.bin": b"A\0\xce\xbbZ",
         "empty.bin": b"",
         "exact.bin": bytes(index % 251 for index in range(65536)),
         "too-big.bin": bytes(index % 251 for index in range(65537)),
@@ -89,13 +89,13 @@ CASES = {
     "root_only_transitive_imports_keep_owned_identity":
         ([], [], ""),
     "sdk_c_executes_process_arguments_through_exact_result_bridge":
-        (["stage0_windows_process_args.c"], ["abc", "貫"], ""),
+        (["stage0_windows_process_args.c"], ["abc", "λ"], ""),
     "sdk_c_executes_arena_factory_switch_and_owned_cleanup":
         (["stage0_system_heap.c", "stage0_arena.c"], [], ""),
     "sdk_c_executes_console_numbers_bytes_and_record_result_bridges":
-        (["stage0_windows_console.c"], [], "42|-7|9|-9223372036854775808|貫\n"),
+        (["stage0_windows_console.c"], [], "42|-7|9|-9223372036854775808|λ\n"),
     "sdk_c_executes_stdin_and_stderr_byte_results":
-        (["stage0_windows_console.c"], [], "A\0貫Z"),
+        (["stage0_windows_console.c"], [], "A\0λZ"),
     "sdk_c_executes_region_lifecycle_and_cleanup_edges":
         (["stage0_system_heap.c", "stage0_arena.c"], [], "B,2,1,S,B,4,3,S,B,B,6,S,5,S,B,11,S,B,12,S,"),
     "sdk_c_executes_region_placement_and_param_origin":
@@ -345,7 +345,7 @@ def main():
             assert build["exit"] == 0, build
             reading = name == "sdk_c_executes_stdin_and_stderr_byte_results"
             stdin = b"A\0\xce\xbbZ" if reading else None
-            expected_stderr = "42|-7|9|-9223372036854775808|true|貫\n" if reading else ""
+            expected_stderr = "42|-7|9|-9223372036854775808|true|λ\n" if reading else ""
             failures = (file_failure,) if filing else (text_failure,) if textual else (1, 2) if name == "sdk_c_executes_region_storage_or_tracking_failure_as_result" else (buffer_failure,) if buffered else (vector_failure,) if vector else (None,)
             for failure in failures:
                 run_environment = dict(os.environ)

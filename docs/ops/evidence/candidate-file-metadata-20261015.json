@@ -1440,7 +1440,7 @@
     },
     {
       "path": "examples/lexer_candidate/tests/module_unit_c_fs.fy",
-      "sha256": "dc9af95746d55067f4b7b11cedb4d5aa1cae50cf2955ab7aefa00bcb5ffc9c86"
+      "sha256": "a7246a7990cfaf78a6e3d832dba4110df3cfc8b0fbee7a3dfec7b9583bd07921"
     },
     {
       "path": "examples/lexer_candidate/src/type_state.fy",
@@ -1480,7 +1480,7 @@
     },
     {
       "path": "tools/verify-candidate-sdk-c.py",
-      "sha256": "7a24da087c23b7db440aba2ed0ad386a0ef748f3e949cb4cd115449aec49718f"
+      "sha256": "25ba02a1ca307a04574b0a9510a8adfc1abf6a20806e4b2817d4364940130b3e"
     },
     {
       "path": "tools/verify-candidate-module-c.py",
@@ -1509,7 +1509,7 @@
       ],
       "exit": 0,
       "timedOut": false,
-      "seconds": 14.315114900000026,
+      "seconds": 16.411056399999893,
       "stdout": "check ok: 2 instance(s), 367 source file(s), 5207 MIR function(s), lock updated\n",
       "stderr": "",
       "stdoutSHA256": "2da3ea11ed7ed6f24fb590b2374d04105057182a15b8cbbbcc402cd652d291d0",
@@ -1530,11 +1530,11 @@
         "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\internal\\sdkstdlib\\sources\\std\\fs.fy",
         "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\internal\\sdkstdlib\\sources\\std\\bytes.fy",
         "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\tools\\fixtures\\candidate-file-metadata.fy",
-        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\file-metadata-20261015\\api\\candidate.c"
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\file-metadata-20261015\\api-utf8\\candidate.c"
       ],
       "exit": 0,
       "timedOut": false,
-      "seconds": 39.17153880000001,
+      "seconds": 43.81001780000008,
       "stderr": "",
       "stdoutSHA256": "4b48fcbf0d1b087294637e5dedf09a57ec062454890924a0500fb613bcd2fe6b",
       "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
@@ -1545,19 +1545,19 @@
       "argv": [
         "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\tools\\verify-candidate-sdk-c.py",
         "--report",
-        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\file-metadata-20261015\\api\\native.json",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\file-metadata-20261015\\api-utf8\\native.json",
         "--case",
         "sdk_c_executes_file_metadata_readonly_links_and_allocation",
         "--vcvars",
         "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Auxiliary\\Build\\vcvarsall.bat",
         "--output",
-        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\file-metadata-20261015\\api\\c-execution",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\file-metadata-20261015\\api-utf8\\c-execution",
         "--source-file",
-        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\file-metadata-20261015\\api\\candidate.c"
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\file-metadata-20261015\\api-utf8\\candidate.c"
       ],
       "exit": 0,
       "timedOut": false,
-      "seconds": 6.803895900000043,
+      "seconds": 6.188493900000026,
       "stdout": "SDK C execution passed: 2 runs\r\n",
       "stderr": "",
       "stdoutSHA256": "18fe9747d64f11286a48f7d5dab6388e56ded4034eb563fa4dafadf0656a64bf",
@@ -1571,7 +1571,7 @@
       ],
       "exit": 0,
       "timedOut": false,
-      "seconds": 0.1474539000000732,
+      "seconds": 0.16170469999997295,
       "stdout": "check ok: 2 instance(s), 8 source file(s), 155 MIR function(s), lock updated\n",
       "stderr": "",
       "stdoutSHA256": "915239660496879a2c5c9830a73a8627adc901aed62de0649a629dac4e6ff869",
@@ -1586,7 +1586,7 @@
       ],
       "exit": 2,
       "timedOut": false,
-      "seconds": 6.287808799999993,
+      "seconds": 7.378789600000005,
       "stdout": "",
       "stderr": "@sdk/stdlib/std/fs.fy:735:9: fairyc: candidate workspace C emission failed (code 1004)\n",
       "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
@@ -1601,7 +1601,7 @@
       ],
       "exit": 0,
       "timedOut": false,
-      "seconds": 1.3903909000000567,
+      "seconds": 1.094081200000005,
       "stdout": "built: build/file-metadata-probe.exe (x86_64-windows-msvc, development, lock verified)\n",
       "stderr": "",
       "stdoutSHA256": "c01eb8f249e3a02919952ddd546667a0f35bac8f70f2cccef7f247dd5b79e2d2",
@@ -1613,7 +1613,7 @@
       "argv": [],
       "exit": 0,
       "timedOut": false,
-      "seconds": 0.0510729000000083,
+      "seconds": 0.05061409999996158,
       "stdout": "",
       "stderr": "",
       "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
@@ -1628,7 +1628,7 @@
       ],
       "exit": 0,
       "timedOut": false,
-      "seconds": 1.3890640999999277,
+      "seconds": 1.1170759999999973,
       "stdout": "",
       "stderr": "",
       "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
@@ -1644,7 +1644,7 @@
       ],
       "exit": 0,
       "timedOut": false,
-      "seconds": 1.5903279999999995,
+      "seconds": 1.2866355999999541,
       "stdout": "built: build/file-metadata-probe.exe (x86_64-windows-msvc, release, lock verified)\n",
       "stderr": "",
       "stdoutSHA256": "cbc87e356fc329d214ef17819a6d0f7aac9fd299e479c6bd9363684fd45869d8",
@@ -1656,7 +1656,7 @@
       "argv": [],
       "exit": 0,
       "timedOut": false,
-      "seconds": 0.03608699999995224,
+      "seconds": 0.04326919999994061,
       "stdout": "",
       "stderr": "",
       "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
@@ -1672,7 +1672,7 @@
       ],
       "exit": 0,
       "timedOut": false,
-      "seconds": 1.6054887000000235,
+      "seconds": 1.294269100000065,
       "stdout": "",
       "stderr": "",
       "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
@@ -1685,7 +1685,7 @@
     "passed": true,
     "reports": [
       {
-        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\file-metadata-20261015\\api\\native.json",
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\file-metadata-20261015\\api-utf8\\native.json",
         "sha256": "4b48fcbf0d1b087294637e5dedf09a57ec062454890924a0500fb613bcd2fe6b"
       }
     ],
@@ -1738,10 +1738,10 @@
             "/TC",
             "/Od",
             "/DFY_CANDIDATE_NO_MAIN",
-            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\file-metadata-20261015\\api\\c-execution\\sdk_c_executes_file_metadata_readonly_links_and_allocation.c",
-            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\file-metadata-20261015\\api\\c-execution\\sdk_c_executes_file_metadata_readonly_links_and_allocation-runtime.c",
-            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\file-metadata-20261015\\api\\c-execution\\trap.c",
-            "/Fe:C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\file-metadata-20261015\\api\\c-execution\\sdk_c_executes_file_metadata_readonly_links_and_allocation-low.exe",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\file-metadata-20261015\\api-utf8\\c-execution\\sdk_c_executes_file_metadata_readonly_links_and_allocation.c",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\file-metadata-20261015\\api-utf8\\c-execution\\sdk_c_executes_file_metadata_readonly_links_and_allocation-runtime.c",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\file-metadata-20261015\\api-utf8\\c-execution\\trap.c",
+            "/Fe:C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\file-metadata-20261015\\api-utf8\\c-execution\\sdk_c_executes_file_metadata_readonly_links_and_allocation-low.exe",
             "/link",
             "/INCREMENTAL:NO"
           ],
@@ -1751,7 +1751,7 @@
         },
         "run": {
           "argv": [
-            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\file-metadata-20261015\\api\\c-execution\\sdk_c_executes_file_metadata_readonly_links_and_allocation-low.exe"
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\file-metadata-20261015\\api-utf8\\c-execution\\sdk_c_executes_file_metadata_readonly_links_and_allocation-low.exe"
           ],
           "exit": 0,
           "stdout": "",
@@ -1806,10 +1806,10 @@
             "/TC",
             "/O2",
             "/DFY_CANDIDATE_NO_MAIN",
-            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\file-metadata-20261015\\api\\c-execution\\sdk_c_executes_file_metadata_readonly_links_and_allocation.c",
-            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\file-metadata-20261015\\api\\c-execution\\sdk_c_executes_file_metadata_readonly_links_and_allocation-runtime.c",
-            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\file-metadata-20261015\\api\\c-execution\\trap.c",
-            "/Fe:C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\file-metadata-20261015\\api\\c-execution\\sdk_c_executes_file_metadata_readonly_links_and_allocation-optimized.exe",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\file-metadata-20261015\\api-utf8\\c-execution\\sdk_c_executes_file_metadata_readonly_links_and_allocation.c",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\file-metadata-20261015\\api-utf8\\c-execution\\sdk_c_executes_file_metadata_readonly_links_and_allocation-runtime.c",
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\file-metadata-20261015\\api-utf8\\c-execution\\trap.c",
+            "/Fe:C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\file-metadata-20261015\\api-utf8\\c-execution\\sdk_c_executes_file_metadata_readonly_links_and_allocation-optimized.exe",
             "/link",
             "/INCREMENTAL:NO"
           ],
@@ -1819,7 +1819,7 @@
         },
         "run": {
           "argv": [
-            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\file-metadata-20261015\\api\\c-execution\\sdk_c_executes_file_metadata_readonly_links_and_allocation-optimized.exe"
+            "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\file-metadata-20261015\\api-utf8\\c-execution\\sdk_c_executes_file_metadata_readonly_links_and_allocation-optimized.exe"
           ],
           "exit": 0,
           "stdout": "",
@@ -1829,7 +1829,7 @@
     ],
     "compiler": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe",
     "generatedSourceInput": {
-      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\file-metadata-20261015\\api\\candidate.c",
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\file-metadata-20261015\\api-utf8\\candidate.c",
       "sha256": "48fd5e638e9572e5799f75e912b2e0793fd830b8e07ea40e72846dc83ceee987"
     },
     "source": "Private Fairy emitter; actual repository C runtime components, no SDK stand-ins"

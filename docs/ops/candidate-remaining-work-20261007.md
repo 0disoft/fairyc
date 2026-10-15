@@ -1,5 +1,26 @@
 # Fairy 컴파일러 전환: 후속 작업 목록
 
+## File metadata C adapters (2026-10-16)
+
+Authenticated SDK rules 51–54 now use the existing read-only query/mutation,
+hard-link count and allocated-size runtimes. The C wire bridge includes record
+10, `raw_file_attribute_result`, with its three `u32` fields and exact `enabled`
+field mapping. SDK authentication, public API and runtime ABI are unchanged.
+Behavior remains owned by ADRs 0306, 0307, 0309, 0310 and current SDK/runtime.
+
+The current authored Fairy emitter passes real Windows C execution at low and
+optimized profiles. The same fixture passes Go build/artifact/run at both
+profiles (exit zero, empty output). It covers bool results and repeated toggles,
+link counts 1/2/1, allocation and size, Unicode paths, exact access-denied errors
+and continued owner use, preserved cursor/content and cleanup. Three public
+opens, closes and drops balance, with no leftover fixture files.
+Receipt: [metadata C](evidence/candidate-file-metadata-20261015.json).
+
+The previous command image reproduces the rule-51 error at `std/fs.fy:735:9`.
+At this source-fix checkpoint the command image is not rebuilt; full CLI parity,
+remaining Go differences and current-source full-dispatcher bootstrap are the
+next verification stages. Promotion stays blocked.
+
 ## Filesystem CLI rebuild after copy-file admission (2026-10-15)
 
 The authored check/build/run dispatcher is rebuilt from 415 sources through
