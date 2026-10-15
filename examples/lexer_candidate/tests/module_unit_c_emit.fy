@@ -41,6 +41,10 @@ fn usize entry(ref ir::Program p){var usize i=1;while(i<=ir::count(p)){let f=cle
 @test @effects(console) fn void module_c_emits_closed_integer_widths_and_normalized_literals(){
     let p=retained(b"module main;fn i32 main(){let i64 lo=-9223372036854775808;let i64 hi=9223372036854775807;assert(lo<hi);assert((hi-1)+1==hi);assert((lo+1)-1==lo);let u8 small=0xff;assert(small/3==85);let u32 top=4_294_967_295;assert((top & 0xff)==255);let usize huge=18446744073709551615;assert(huge>>63==1);let i32 bits=-8;assert(bits>>2==-2);assert(~bits==7);return 0;}",b"");output(ref p,entry(ref p));
 }
+@test @effects(console) fn void module_c_emits_repr_c_safe_identifiers(){
+    // spec/fixtures/c-emission/cases/pass/repr-c-safe-identifiers/src/main.fy
+    let p=retained(b"module main;@repr(C)struct fairyc_safe_record{i32 _value;}fn i32 main(){let fairyc_safe_record record=fairyc_safe_record{._value=42};return record._value;}",b"");output(ref p,entry(ref p));
+}
 @test @effects(console) fn void module_c_emits_overflow_trap(){let p=retained(b"module main;fn i32 main(){var i32 n=2147483647;return n+1;}",b"");output(ref p,entry(ref p));}
 @test @effects(console) fn void module_c_emits_divide_by_zero_trap(){let p=retained(b"module main;fn i32 main(){var i32 n=0;return 1/n;}",b"");output(ref p,entry(ref p));}
 @test @effects(console) fn void module_c_rejects_foreign_text_abi_and_bad_entry_without_partial_output(){
