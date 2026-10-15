@@ -1,5 +1,16 @@
 # Fairy 컴파일러 전환: 후속 작업 목록
 
+## Metadata CLI integration (2026-10-16)
+
+The 415-source check/build/run dispatcher builds at both compiler profiles
+through the verified Fairy stage2 seed with no Go frontend fallback. Current
+source/image hashes are bound in the [build receipt](evidence/candidate-std-fs-cli-rebuild-metadata-20261016.json).
+The development compiler checks the filesystem example with exact Go output,
+builds it successfully and executes the artifact with the existing metadata
+fixtures (expected exit 42, empty output). The optimized compiler's full matrix
+and broader Go comparison follow this build checkpoint. The command image is
+separate from full-dispatcher bootstrap; product policies remain unchanged.
+
 ## File metadata C adapters (2026-10-16)
 
 Authenticated SDK rules 51–54 now use the existing read-only query/mutation,
