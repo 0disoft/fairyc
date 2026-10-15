@@ -1,5 +1,19 @@
 # Fairy 컴파일러 전환: 후속 작업 목록
 
+## Refreshed bootstrap emitter seed (2026-10-16)
+
+The verified prior Fairy stage2 image builds a current 454-source emitter-only
+seed through candidate C parts: emission succeeds in 489.64 seconds and the
+optimized native image builds in 156.77 seconds. This passing seed chain invokes
+no Go frontend. The exact bounded argv entry is retained in the receipt, along
+with every source hash, parent seed, packet, builder and image identity. The
+seed supports C-project emission; lexer stdin remains a requirement for both
+subsequent complete generated compiler stages.
+Receipt: [emitter seed](evidence/candidate-bootstrap-emitter-seed-20261016.json).
+The monolithic Go-C seed experiments failed the existing native object validator
+and are recorded as discarded attempts. The C-parts path retains that validator
+and all native limits. Full 512-source consecutive generation is the next gate.
+
 ## Bootstrap whole-project work admission (2026-10-16)
 
 The full 512-source input compiles into 140 units. Type, frame and metadata
