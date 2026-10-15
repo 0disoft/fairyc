@@ -1,5 +1,22 @@
 # Fairy 컴파일러 전환: 후속 작업 목록
 
+## Filesystem CLI rebuild after copy-file admission (2026-10-15)
+
+The authored check/build/run dispatcher is rebuilt from 415 sources through
+`d733fae1`, including authenticated byte-copy C admission. Development and
+optimized native images build through the verified Fairy stage2 seed without
+invoking a Go frontend. Source, seed and image hashes are verified in the
+[build receipt](evidence/candidate-std-fs-cli-rebuild-copy-20261015.json).
+This remains the command dispatcher scope; the private 16MiB stack setting and
+product deadlines are unchanged. Full dispatcher/fixed-point promotion is open.
+
+The development compiler checks the shipped filesystem workspace with exact
+Go output (2 instances, 12 files, 217 MIR functions). Build passes byte-copy
+emission and stops at `std::fs::is_read_only`, `file_read_only_raw` / SDK rule 51,
+`std/fs.fy:735:9`, private C code 1004, exit 2. The optimized compiler's complete
+command matrix is pending at this build checkpoint. Native parity and candidate
+promotion remain blocked.
+
 ## Copy-file C admission (2026-10-15)
 
 The file C adapter now admits authenticated SDK rule 44, `file_copy_bytes_raw`.
@@ -23,9 +40,10 @@ Receipt: [copy-file C](evidence/candidate-copy-file-bytes-20261015.json).
 The 68,171-byte generated C travels through a test-owned file, with its byte
 count checked against the native report and its hash recorded by the runtime
 verifier. Product console limits, stack and deadlines are unchanged. This
-focused source fix reproduces the previous command image's code 1004 at
-`std/fs.fy:583:9`; it does not rebuild the command CLI or rerun full-workspace
-native parity. The matrix below is a historical pre-copy-fix observation.
+focused source fix reproduced the previous command image's code 1004 at
+`std/fs.fy:583:9`. The newer rebuild above passes that call and observes
+read-only metadata as the next C emission gap. The older matrix below remains
+a historical pre-copy-fix observation.
 Full CLI integration, other filesystem adapters and promotion gates remain open.
 
 ## Filesystem CLI rebuild after hard-link admission (2026-10-15)

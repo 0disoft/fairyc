@@ -1,5 +1,22 @@
 # Self-hosting readiness v0
 
+## Filesystem CLI rebuild after copy-file admission (2026-10-15)
+
+The 415-source authored check/build/run dispatcher includes byte-copy C
+admission through `d733fae1`. Development and optimized native images build
+through the verified Fairy stage2 seed without Go frontend fallback. Source,
+seed and image hashes are verified in the
+[build receipt](../ops/evidence/candidate-std-fs-cli-rebuild-copy-20261015.json).
+This remains the command dispatcher scope. The private 16MiB stack setting and
+product deadlines stay unchanged; full dispatcher/fixed-point promotion is open.
+
+The development compiler's check exactly matches Go (2 instances, 12 files,
+217 MIR functions). Build passes byte-copy emission and reaches
+`std::fs::is_read_only` / `file_read_only_raw`, SDK rule 51, at
+`std/fs.fy:735:9`; private C code 1004 returns exit 2. The optimized compiler's
+complete command matrix is pending at this build checkpoint. Native parity and
+promotion remain blocked.
+
 ## Copy-file C admission (2026-10-15)
 
 Authenticated SDK rule 44 (`file_copy_bytes_raw`) now reaches the existing
@@ -21,9 +38,9 @@ Receipt: [copy-file C](../ops/evidence/candidate-copy-file-bytes-20261015.json).
 The 68,171-byte C output uses a test-owned file; its byte count is checked
 against the native report and its hash is recorded for runtime verification.
 Product console, stack and deadline policies stay unchanged. The previous
-command image reproduces the fixture's code 1004 at `std/fs.fy:583:9`. No new
-command image or full shipped-workspace parity run is claimed for this focused
-fix. The integration matrix below predates copy admission. Full CLI integration,
+command image reproduced the fixture's code 1004 at `std/fs.fy:583:9`. The newer
+rebuild above passes that call and observes read-only metadata as the next C
+emission gap. The older integration matrix below predates copy admission. Full CLI integration,
 other filesystem adapters, fixed point, broader parity, performance and
 platform/CI gates remain open. Promotion stays blocked.
 
