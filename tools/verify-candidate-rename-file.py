@@ -12,6 +12,7 @@ ROOT = Path(__file__).resolve().parents[1]
 PROJECT = ROOT / 'examples/lexer_candidate'
 OPERATIONS = {
     'rename-file': ('sdk_c_executes_file_rename_preserves_paths_and_live_owner', 541, 'rename-probe'),
+    'file-metadata': ('sdk_c_executes_file_metadata_readonly_links_and_allocation', 735, 'file-metadata-probe'),
     'hard-link': ('sdk_c_executes_file_hard_link_shared_writes_and_alias_survival', 569, 'hard-link-probe'),
     'copy-file-bytes': ('sdk_c_executes_file_copy_bytes_count_and_destination_preservation', 583, 'copy-file-bytes-probe'),
 }
@@ -77,7 +78,7 @@ def main():
     succeeds(execute(reference, native, ['check'], 'emitter/check'))
     argv = ['test', '--native', '--locked', '--json', '--capture-output', '--exact', identity, '--',
             ROOT / 'internal/sdkstdlib/sources/std/fs.fy', ROOT / 'internal/sdkstdlib/sources/std/bytes.fy', fixture]
-    source_file = output / 'candidate.c' if args.operation == 'copy-file-bytes' else None
+    source_file = output / 'candidate.c' if args.operation in {'copy-file-bytes', 'file-metadata'} else None
     if source_file:
         argv.append(source_file)
     row = execute(reference, native, argv, 'emitter/native', capture=True)

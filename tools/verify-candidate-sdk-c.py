@@ -28,6 +28,7 @@ TEXT_CASES = {
 # Successful opens, explicit closes, cleanup calls, cleanup of open owners,
 # heap attempts and injected failure. Programs run in isolated scratch folders.
 FILE_CASES = {
+    "sdk_c_executes_file_metadata_readonly_links_and_allocation": (3, 3, 3, 0, 0, None),
     "sdk_c_executes_file_copy_bytes_count_and_destination_preservation": (10, 10, 10, 0, 0, None),
     "sdk_c_executes_file_hard_link_shared_writes_and_alias_survival": (7, 7, 7, 0, 0, None),
     "sdk_c_executes_file_rename_preserves_paths_and_live_owner": (6, 6, 6, 0, 0, None),
@@ -47,7 +48,7 @@ FILE_CASES.update(FILE_SOURCE_CASES)
 
 def loader_fixtures(folder):
     data = {
-        "small-λ.bin": b"A\0\xce\xbbZ",
+        "small-貫.bin": b"A\0\xce\xbbZ",
         "empty.bin": b"",
         "exact.bin": bytes(index % 251 for index in range(65536)),
         "too-big.bin": bytes(index % 251 for index in range(65537)),
@@ -88,13 +89,13 @@ CASES = {
     "root_only_transitive_imports_keep_owned_identity":
         ([], [], ""),
     "sdk_c_executes_process_arguments_through_exact_result_bridge":
-        (["stage0_windows_process_args.c"], ["abc", "λ"], ""),
+        (["stage0_windows_process_args.c"], ["abc", "貫"], ""),
     "sdk_c_executes_arena_factory_switch_and_owned_cleanup":
         (["stage0_system_heap.c", "stage0_arena.c"], [], ""),
     "sdk_c_executes_console_numbers_bytes_and_record_result_bridges":
-        (["stage0_windows_console.c"], [], "42|-7|9|-9223372036854775808|λ\n"),
+        (["stage0_windows_console.c"], [], "42|-7|9|-9223372036854775808|貫\n"),
     "sdk_c_executes_stdin_and_stderr_byte_results":
-        (["stage0_windows_console.c"], [], "A\0λZ"),
+        (["stage0_windows_console.c"], [], "A\0貫Z"),
     "sdk_c_executes_region_lifecycle_and_cleanup_edges":
         (["stage0_system_heap.c", "stage0_arena.c"], [], "B,2,1,S,B,4,3,S,B,B,6,S,5,S,B,11,S,B,12,S,"),
     "sdk_c_executes_region_placement_and_param_origin":
@@ -106,7 +107,8 @@ CASES.update({name: (["stage0_system_heap.c", "stage0_buffer.c", "stage0_text_vi
               for name in TEXT_CASES})
 CASES.update({name: ((["stage0_system_heap.c", "stage0_buffer.c"] if "file_buffer_" in name else []) +
                     ["stage0_windows_file.c", "stage0_windows_file_portable.c"] +
-                    (["stage0_windows_file_link.c"] if "file_hard_link_" in name else []) +
+                    (["stage0_windows_file_link.c"] if "file_hard_link_" in name or "file_metadata_" in name else []) +
+                    (["stage0_windows_file_metadata.c"] if "file_metadata_" in name else []) +
                     (["stage0_windows_file_buffer.c"] if "file_buffer_" in name else []), [], "")
               for name in FILE_CASES})
 CASES.update({name: (["stage0_system_heap.c", "stage0_buffer.c", "stage0_text_view.c",
@@ -343,7 +345,7 @@ def main():
             assert build["exit"] == 0, build
             reading = name == "sdk_c_executes_stdin_and_stderr_byte_results"
             stdin = b"A\0\xce\xbbZ" if reading else None
-            expected_stderr = "42|-7|9|-9223372036854775808|true|λ\n" if reading else ""
+            expected_stderr = "42|-7|9|-9223372036854775808|true|貫\n" if reading else ""
             failures = (file_failure,) if filing else (text_failure,) if textual else (1, 2) if name == "sdk_c_executes_region_storage_or_tracking_failure_as_result" else (buffer_failure,) if buffered else (vector_failure,) if vector else (None,)
             for failure in failures:
                 run_environment = dict(os.environ)
