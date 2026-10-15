@@ -1,5 +1,33 @@
 # Fairy 컴파일러 전환: 후속 작업 목록
 
+## Recursive directory C admission (2026-10-15)
+
+The candidate file adapter now admits authenticated SDK rule 37,
+`directory_create_all_raw`. It uses the existing `raw_file_result` wire bridge
+and `fy_std_windows_directory_ensure_v0` runtime implementation. Original SDK
+source/signature authentication remains required; the public API, runtime ABI,
+stack and deadline policies are unchanged. Behavior follows ADR 0296 and the
+current bundled filesystem source.
+
+The CLI regression in `tools/verify-candidate-create-dir-all.py` uses the authored
+`tools/fixtures/candidate-create-dir-all.fy` program. It covers Unicode nested
+paths, existing directories, invalid arguments rejected before effects, retained
+prefixes after a later failure, file collisions and exact error fields. It also
+reproduces the old C rejection with the previous command image.
+
+Go and the rebuilt optimized candidate exactly match build and run observations
+at both generated-program profiles. All direct artifacts and CLI runs return 42
+without output. The development compiler also builds and runs the fixture
+successfully; its directly executed artifact returns 42 and leaves no files.
+Receipt: [recursive-directory CLI](evidence/candidate-create-dir-all-20261015.json).
+
+The original `std_fs_quickstart` still checks with exact Go output. Native build
+passes the old recursive-directory rejection and now stops at `rename_file`
+(`file_rename_raw`, SDK rule 41), `std/fs.fy:541:9`, private C code 1004. The full
+native-parity verifier fails at this next gap; candidate example execution is
+not reached. Extend the remaining file adapters next. Full-dispatcher/fixed-point,
+broader parity, performance and platform/CI gates remain separate.
+
 ## Filesystem example frontend fixes (2026-10-15)
 
 Two internal errors in `std_fs_quickstart` are fixed: source identity encoding
@@ -24,11 +52,12 @@ functions. Optimized cold/cache-hit checks pass with a stored and reused cache.
 The development check took about 99 seconds; no product timeout was increased.
 Receipt: [filesystem commands](evidence/candidate-std-fs-cli-20261015.json).
 
-Native parity is still open. Go builds and executes both output profiles with
-the host smoke's metadata fixtures (exit 42). Candidate build now reaches C
-emission, then rejects SDK `std::fs::create_dir_all` at `std/fs.fy:488:9` with
+At this frontend-fix checkpoint native parity was still open. Go built and
+executed both output profiles with the host smoke's metadata fixtures (exit 42).
+Candidate build reached C emission, then rejected SDK `std::fs::create_dir_all` at `std/fs.fy:488:9` with
 private code 1004 (foreign rule 37 is outside the admitted file C adapters).
-Candidate run was not reached. Extend the filesystem C adapters next, then
+Candidate run was not reached. The recursive-directory update above supersedes
+this specific blocker. Extend the remaining filesystem C adapters next, then
 continue struct-iteration/other C gaps. Full dispatcher/fixed-point, broader
 parity, product performance and platform/CI gates remain separate.
 

@@ -1,5 +1,30 @@
 # Self-hosting readiness v0
 
+## Recursive directory C admission (2026-10-15)
+
+Authenticated SDK rule 37 (`directory_create_all_raw`) now reaches the existing
+file-result C adapter and real Windows recursive-directory runtime. SDK source
+and signature authentication remain unchanged. This extends candidate C
+admission without changing the public filesystem API or runtime ABI.
+
+The targeted CLI fixture covers nested Unicode paths, existing directories,
+pre-effect invalid-argument rejection, retained prefixes, file collisions and
+exact error results. The verifier compares real build/artifact/run observations
+with Go and reproduces the previous command image's code 1004 rejection.
+
+The rebuilt optimized candidate and Go pass build/artifact/run comparisons for
+both generated-program profiles (exit 42, empty output). The development compiler
+also builds and runs the fixture with exit 42; a directly executed artifact
+verifies cleanup. Receipt:
+[recursive-directory CLI](../ops/evidence/candidate-create-dir-all-20261015.json).
+
+The shipped filesystem example's check still matches Go. Its native build now
+passes `create_dir_all` and reaches the next unsupported file adapter:
+`rename_file` / `file_rename_raw`, rule 41, `std/fs.fy:541:9`, C code 1004.
+The full-example parity verifier therefore still fails, and candidate example
+execution is not reached. Full dispatcher/fixed point, broader parity,
+performance and platform/CI gates remain open; promotion remains blocked.
+
 ## Filesystem example frontend fixes (2026-10-15)
 
 The filesystem example's internal errors came from a monolithic observation
@@ -20,10 +45,11 @@ checks also pass. Receipts:
 [move depth](../ops/evidence/candidate-std-fs-move-depth-20261015.json), and
 [commands](../ops/evidence/candidate-std-fs-cli-20261015.json).
 
-The internal check errors are closed; native parity is not. Candidate build
-stops at `std::fs::create_dir_all` C emission with private code 1004 (file adapter
-rule 37 is not admitted). Go artifacts return 42 with the existing metadata
-fixtures at both profiles; candidate execution was not reached.
+At this frontend-fix checkpoint the internal check errors were closed. Candidate
+build stopped at `std::fs::create_dir_all` C emission with private code 1004 (file
+adapter rule 37 was not admitted). Go artifacts returned 42 with the existing
+metadata fixtures at both profiles; candidate execution was not reached. The
+recursive-directory update above supersedes this specific blocker.
 
 Full-dispatcher/current fixed-point, broader equivalence, measured performance
 and platform/CI gates remain open. Candidate promotion stays blocked.
