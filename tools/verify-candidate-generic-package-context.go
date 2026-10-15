@@ -236,6 +236,28 @@ func run() error {
 	if err = write(filepath.Join(base, "scale-context.bin"), scale.Bytes()); err != nil {
 		return err
 	}
+	bindingSource, err := os.ReadFile("examples/std_fs_quickstart/src/main.fy")
+	if err != nil {
+		return err
+	}
+	// Identity encoding needs syntax only. Remove imports for a one-module oracle.
+	bindingSource = regexp.MustCompile(`(?m)^import[^\n]*\n`).ReplaceAll(bindingSource, nil)
+	bindingModule, err := parse(bindingSource)
+	if err != nil {
+		return err
+	}
+	bindingWire, bindingContext, err := closed([]entry{{genericplan.PackageID(fmt.Sprintf("package_coordinate_v1_%064x", 1)), bindingModule, map[string]genericplan.PackageID{}}})
+	if err != nil {
+		return err
+	}
+	var sidecar bytes.Buffer
+	sidecar.WriteString("FYGPSID1")
+	number(&sidecar, len(bindingWire))
+	field(&sidecar, []byte(bindingContext))
+	field(&sidecar, bindingSource)
+	if err = write(filepath.Join(base, "sidecar-context.bin"), sidecar.Bytes()); err != nil {
+		return err
+	}
 	var files []map[string]any
 	var paths []string
 	if err = filepath.WalkDir(base, func(path string, e fs.DirEntry, err error) error {

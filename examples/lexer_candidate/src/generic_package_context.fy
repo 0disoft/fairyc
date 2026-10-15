@@ -15,7 +15,7 @@ import syntax as syntax;
 import std::bytes as bytes;
 import std::vec as v;
 
-// Independent scopes: 16MiB graph bookkeeping, 1MiB per declaration/sidecar
+// Independent scopes: 16MiB graph bookkeeping, 1MiB per declaration/observation
 // writer, 1GiB cumulative encoding work, and 96MiB streamed hash input. Neither
 // the complete graph nor complete module JSON is retained between fragments.
 pub struct Budget{usize work;usize encoded_work;usize hashed_bytes;u32 code;}
@@ -49,9 +49,15 @@ fn bool quoted(ref mut Stream s,ref u8[] value,ref mut Budget b){var json::Ledge
 fn bool declaration_list(ref syntax::Parsed p,u32 kind,ref mut Stream s,ref mut Budget b){var usize count=0;var usize at=1;while(at<syntax::declaration_count(p)){if(!charge(b,1)){return false;}if(syntax::declaration_at(p,at).kind==kind){count+=1;}at+=1;}if(count==0){return raw(s,b"null",b);}if(!raw(s,b"[",b)){return false;}var usize written=0;at=1;
     while(at<syntax::declaration_count(p)){if(!charge(b,1)){return false;}let d=syntax::declaration_at(p,at);if(d.kind==kind){if(written!=0 && !raw(s,b",",b)){return false;}var json::Ledger ledger=json::empty();var bytes::Buffer data=bytes::empty();let ok=if(kind==3){functions::value(p,at,ref mut data,ref mut ledger)}else if(kind==4 || kind==6 || kind==11){aggregates::value(p,at,ref mut data,ref mut ledger)}else{items::value(p,at,ref mut data,ref mut ledger)};if(!piece(s,ref data,ledger,b) || !ok){return false;}written+=1;}at+=1;}return raw(s,b"]",b);
 }
+fn bool sidecar(ref syntax::Parsed p,bool binding_rows,ref mut Stream s,ref mut Budget b){
+    var json::Ledger ledger=json::empty();let rows=switch(observations::prepare(p,binding_rows,ref mut ledger)){case .ok(value):{value}case .err(code):{discard encoded(b,ledger.used);return reject(b,code);}};
+    let empty=bytes::empty();if(!piece(s,ref empty,ledger,b)){return false;}
+    if(observations::count(ref rows)==0){return raw(s,b"null",b);}if(!raw(s,b"[",b)){return false;}var usize at=0;
+    while(at<observations::count(ref rows)){if(at!=0 && !raw(s,b",",b)){return false;}ledger=json::empty();var bytes::Buffer data=bytes::empty();let ok=observations::row(ref rows,p,at,ref mut data,ref mut ledger);if(!piece(s,ref data,ledger,b) || !ok){return false;}at+=1;}return raw(s,b"]",b);
+}
 fn bool module_value(ref syntax::Parsed p,ref mut Stream s,ref mut Budget b){var json::Ledger ledger=json::empty();var bytes::Buffer header=bytes::empty();let ok=modules::header(p,ref mut header,ref mut ledger);if(!piece(s,ref header,ledger,b) || !ok){return false;}
     if(!raw(s,b",\"Imports\":",b) || !declaration_list(p,2,s,b) || !raw(s,b",\"Constants\":",b) || !declaration_list(p,7,s,b) || !raw(s,b",\"StaticAssertions\":",b) || !declaration_list(p,8,s,b) || !raw(s,b",\"States\":",b) || !declaration_list(p,10,s,b) || !raw(s,b",\"Structs\":",b) || !declaration_list(p,4,s,b) || !raw(s,b",\"Resources\":",b) || !declaration_list(p,6,s,b) || !raw(s,b",\"Enums\":",b) || !declaration_list(p,11,s,b) || !raw(s,b",\"ForeignFunctions\":",b) || !declaration_list(p,9,s,b) || !raw(s,b",\"Functions\":",b) || !declaration_list(p,3,s,b) || !raw(s,b",\"Bindings\":",b)){return false;}
-    ledger=json::empty();var bytes::Buffer binding_values=bytes::empty();let bound=observations::bindings(p,ref mut binding_values,ref mut ledger);if(!piece(s,ref binding_values,ledger,b) || !bound || !raw(s,b",\"Literals\":",b)){return false;}ledger=json::empty();var bytes::Buffer literal_values=bytes::empty();let literals=observations::literals(p,ref mut literal_values,ref mut ledger);return piece(s,ref literal_values,ledger,b) && literals && raw(s,b"}",b);
+    return sidecar(p,true,s,b) && raw(s,b",\"Literals\":",b) && sidecar(p,false,s,b) && raw(s,b"}",b);
 }
 fn bool entry(ref bindings::Bindings table,usize at,ref syntax::Parsed p,ref mut Stream s,ref mut Budget b){let m=bindings::module_at(table,at);let imports=switch(order(table,m.first,m.count,true,b)){case .ok(value):{value}case .err(_):{return false;}};if(!raw(s,b"{\"Owner\":",b) || !quoted(s,bindings::text(table,m.namespace),b) || !raw(s,b",\"Module\":",b) || !module_value(p,s,b) || !raw(s,b",\"Imports\":{",b)){return false;}var usize i=0;
     while(i<m.count){if(i!=0 && !raw(s,b",",b)){return false;}let row=bindings::import_at(table,*v::at<usize>(ref imports,i));let provider=bindings::module_at(table,row.target);if(!quoted(s,bindings::text(table,row.alias),b) || !raw(s,b":",b) || !quoted(s,bindings::text(table,provider.namespace),b)){return false;}i+=1;}return raw(s,b"}}",b);

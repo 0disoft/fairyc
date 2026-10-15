@@ -1,5 +1,6 @@
 module tests::generic_package_context;
 import generic_package_context as context;
+import generic_source_observations as observations;
 import generic_package_bindings as bindings;
 import project_coordinate_graph as coordinate_graph;
 import project_source_set as sources;
@@ -67,4 +68,14 @@ fn void honors_independent_exact_fit_and_exhausted_histories(){let sources=sourc
 @test
 @effects(filesystem,console)
 fn void streams_graph_larger_than_one_module_json_allowance(){let path=root();let fixture=read(bytes::view(ref path),b"scale-context.bin");let wire=bytes::view(ref fixture);assert(bytes::equal(wire[..8],b"FYGPSCL1"));var usize at=8;let count=number(wire,ref mut at);let size=number(wire,ref mut at);let expected=field(wire,ref mut at);let raw=field(wire,ref mut at);assert(count==8 && size>1048576 && at==wire.len);let p=parsed(raw);var v::Vec<syntax::Parsed> sources=v::empty<syntax::Parsed>();var v::Vec<usize> own=v::empty<usize>();var usize i=0;while(i<count){var usize work=0;let copy=switch(syntax::copy(ref p,ref mut work)){case .ok(value):{value}case .err(_):{assert(false);return;}};assert(v::push<syntax::Parsed>(ref mut sources,copy).is_ok && v::push<usize>(ref mut own,i+100).is_ok);i+=1;}let imports=v::empty<catalog::Binding>();let coords=table(count,100,false);var usize meter=0;let bindings=switch(bindings::build(ref sources,ref own,ref imports,ref coords,ref mut meter)){case .ok(value):{value}case .err(_):{assert(false);return;}};var context::Budget b=context::empty();let result=computed(ref sources,ref bindings,ref mut b);assert(context::json_bytes(ref result)==size && context::peak_chunk_bytes(ref result)<1048576 && context::peak_chunk_work(ref result)<1048576 && b.encoded_work>1048576 && bytes::equal(context::digest(ref result),expected));
+}
+
+@test
+@effects(filesystem,console)
+fn void streams_large_binding_sidecar_without_changing_go_identity(){
+    let path=root();let fixture=read(bytes::view(ref path),b"sidecar-context.bin");let wire=bytes::view(ref fixture);assert(bytes::equal(wire[..8],b"FYGPSID1"));var usize at=8;let size=number(wire,ref mut at);let expected=field(wire,ref mut at);let raw=field(wire,ref mut at);assert(at==wire.len);
+    let p=parsed(raw);var usize monolithic=0;switch(observations::encode(ref p,true,ref mut monolithic)){case .ok(_):{assert(false);}case .err(code):{assert(code==10 && monolithic<=1048576);}};
+    var v::Vec<syntax::Parsed> sources=v::empty<syntax::Parsed>();assert(v::push<syntax::Parsed>(ref mut sources,p).is_ok);var v::Vec<usize> own=v::empty<usize>();assert(v::push<usize>(ref mut own,0).is_ok);let imports=v::empty<catalog::Binding>();let coords=table(1,0,false);var usize meter=0;
+    let bindings=switch(bindings::build(ref sources,ref own,ref imports,ref coords,ref mut meter)){case .ok(value):{value}case .err(_):{assert(false);return;}};
+    var context::Budget b=context::empty();let result=computed(ref sources,ref bindings,ref mut b);assert(context::json_bytes(ref result)==size && bytes::equal(context::digest(ref result),expected));assert(context::peak_chunk_bytes(ref result)<1048576 && context::peak_chunk_work(ref result)<1048576 && b.encoded_work>1048576);
 }
