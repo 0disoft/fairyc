@@ -1,5 +1,33 @@
 # Self-hosting readiness v0
 
+## Filesystem command CLI integration recheck (2026-10-15)
+
+The 415-source authored check/build/run dispatcher now includes both directory
+creation and file-rename C admission fixes. Development and optimized native
+images rebuild through the verified Fairy stage2 seed without Go frontend
+fallback. Receipt: [command build](../ops/evidence/candidate-std-fs-cli-rebuild-20261015.json).
+This remains the command dispatcher scope, not a full-dispatcher/fixed-point
+promotion; the private stack setting and product deadlines are unchanged.
+
+Both compiler profiles check the shipped filesystem workspace with exact Go
+statistics (2 instances, 12 files, 217 MIR functions). Development build reaches
+the next unsupported C adapter: `std::fs::hard_link` / `file_hard_link_raw`, rule
+43, `std/fs.fy:569:9`, private code 1004.
+
+The optimized compiler's 17-observation matrix covers both output profiles and
+cache paths. Six build/run commands fail at the same hard-link call with exit 2;
+cold storage and repeated check hit succeed. Two candidate artifact runs are
+explicitly skipped after failed builds. Native parity is false and the verifier
+exits 1; candidate program execution is not reached.
+
+The fresh Go oracle's direct artifacts return 42 with the host smoke metadata
+fixtures at both profiles. Go run returns 356 in fixture-free scratch directories,
+which is recorded separately from successful artifact execution. Receipt:
+[command matrix](../ops/evidence/candidate-std-fs-cli-matrix-20261015.json).
+Next is hard-link C admission and the remaining filesystem adapters. Broader
+parity, fixed point, performance and platform/CI gates remain open; promotion
+remains blocked.
+
 ## File rename C admission (2026-10-15)
 
 Authenticated SDK rule 41, `file_rename_raw`, now uses the existing file-result
@@ -14,9 +42,10 @@ and continued handle use, successful rename, old-path disappearance, Unicode
 paths, invalid paths, directories, exact error fields and balanced cleanup.
 Receipt: [file rename C](../ops/evidence/candidate-rename-file-20261015.json).
 
-The previous command image still reproduces C code 1004 at `std/fs.fy:541:9`.
-The full command image was not rebuilt and shipped-workspace parity was not
-rerun for this focused adapter fix. Other file adapters, full CLI integration,
+The previous command image reproduced C code 1004 at `std/fs.fy:541:9`.
+At this focused API checkpoint the command image had not been rebuilt and
+workspace parity had not been rerun. The newer integration result above
+supersedes that limitation. Other file adapters, full CLI integration,
 fixed point, broader parity, performance and platform/CI gates remain open;
 candidate promotion remains blocked.
 

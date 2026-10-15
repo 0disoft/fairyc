@@ -11,6 +11,28 @@ The private 16MiB stack setting is unchanged; this is a command-dispatcher build
 not a full-dispatcher or fixed-point promotion. Command integration results are
 recorded separately from this successful build.
 
+Both compiler profiles check `std_fs_quickstart` with exact Go output: 2
+instances, 12 source files and 217 MIR functions. The development compiler's
+build passes the previously fixed calls and stops at `std::fs::hard_link`,
+`file_hard_link_raw` / SDK rule 43, `std/fs.fy:569:9`, private C code 1004.
+
+The optimized compiler's full selected matrix has 17 observations. Both output
+profiles' build/run commands and cached build/run fail at that same source span
+with exit 2 (six failing commands). Cold cache storage and repeated check hit
+succeed. Two direct candidate artifact runs are skipped because their builds
+failed; no stale artifact is executed. The verifier records `passed: false` and
+exits 1, rather than stopping at the first build gap or treating the remaining
+commands as passes. Strict mode continues to fail immediately.
+
+The freshly rebuilt Go CLI builds both output profiles and its artifacts return
+42 with the existing host smoke metadata fixtures. Go run returns 356 in fresh
+scratch directories without those external fixtures; that comparison is not
+the successful artifact-execution result. Candidate program execution is not
+reached. Receipt: [full selected matrix](evidence/candidate-std-fs-cli-matrix-20261015.json).
+Next work is the authenticated hard-link C adapter, followed by the remaining
+filesystem bridges. Full dispatcher/fixed point, broader parity, performance
+and platform/CI gates remain open.
+
 ## File rename C admission (2026-10-15)
 
 The file C adapter now admits authenticated SDK rule 41, `file_rename_raw`.
@@ -31,9 +53,10 @@ old-path disappearance, exact error fields and cleanup.
 Receipt: [file rename C](evidence/candidate-rename-file-20261015.json).
 
 The previous candidate command image reproduces the fixture's C code 1004 at
-`std/fs.fy:541:9`. This source fix is verified through the C-emitter API; the
-full candidate command image was not rebuilt, and shipped-workspace parity was
-not rerun. The older command-image observation below remains historical.
+`std/fs.fy:541:9`. At that focused checkpoint this source fix was verified through
+the C-emitter API; the command image was not rebuilt and workspace parity was
+not rerun. The command rebuild and integration results above supersede that
+limitation. The older command-image observation below remains historical.
 Other filesystem C adapters, full CLI integration, broader parity and promotion
 gates remain open.
 
