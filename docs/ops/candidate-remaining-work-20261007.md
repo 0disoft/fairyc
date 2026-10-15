@@ -1,5 +1,30 @@
 # Fairy 컴파일러 전환: 후속 작업 목록
 
+## Hard-link C admission (2026-10-15)
+
+The file C adapter now admits authenticated SDK rule 43, `file_hard_link_raw`.
+It uses the existing two-path signature, `raw_file_result` bridge and real
+`fy_std_windows_file_hard_link_v0` runtime in `stage0_windows_file_link.c`.
+SDK source/signature authentication, public API and runtime ABI are unchanged;
+ADR 0308 and current SDK/runtime sources remain the behavior contracts.
+
+The current authored Fairy emitter executes through the Go native test driver.
+Its emitted C passes low and optimized MSVC executions against the real runtime,
+with seven successful opens, closes and resource drops, and no leftover files.
+The same fixture passes Go build/artifact/run at both output profiles (exit zero,
+empty output). It covers argument order, Unicode paths, invalid paths,
+missing-source no-create behavior, destination collision preserving both files,
+repeated-link collision, shared writes through the two names, source-name removal
+and surviving alias bytes. No link-count metadata adapter is added for this test.
+Receipt: [hard-link C](evidence/candidate-hard-link-20261015.json).
+
+The prior rebuilt CLI still reproduces code 1004 at `std/fs.fy:569:9`. This
+focused source fix does not rebuild that CLI or rerun the complete shipped
+workspace. The command matrix below is a historical pre-fix observation.
+Rule 44 (`file_copy_bytes_raw`) remains excluded in the current C allowlist;
+that is source inspection, not a newly observed full-example failure. Full CLI
+integration, other filesystem bridges and promotion gates remain open.
+
 ## Filesystem command CLI rebuild (2026-10-15)
 
 The authored check/build/run dispatcher was rebuilt from 415 current sources,
@@ -29,8 +54,9 @@ The freshly rebuilt Go CLI builds both output profiles and its artifacts return
 scratch directories without those external fixtures; that comparison is not
 the successful artifact-execution result. Candidate program execution is not
 reached. Receipt: [full selected matrix](evidence/candidate-std-fs-cli-matrix-20261015.json).
-Next work is the authenticated hard-link C adapter, followed by the remaining
-filesystem bridges. Full dispatcher/fixed point, broader parity, performance
+The hard-link source fix above supersedes this integration checkpoint's first
+blocker; a new CLI build and full matrix are still needed after that fix.
+Full dispatcher/fixed point, broader parity, performance
 and platform/CI gates remain open.
 
 ## File rename C admission (2026-10-15)

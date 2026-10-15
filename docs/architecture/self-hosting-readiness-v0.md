@@ -1,5 +1,27 @@
 # Self-hosting readiness v0
 
+## Hard-link C admission (2026-10-15)
+
+Authenticated SDK rule 43 (`file_hard_link_raw`) now uses the existing file-result
+C bridge and real Windows hard-link runtime. SDK source/signature authentication,
+public API and runtime ABI remain unchanged.
+
+The current authored Fairy emitter, compiled by the Go native test driver,
+generates C that passes low and optimized MSVC runtime executions. The same
+fixture passes Go build/artifact/run at both output profiles (exit zero, empty
+output). Coverage includes success, exact errors, invalid paths, missing-source
+no-create behavior, destination preservation, repeated-link collision, Unicode,
+shared writes and surviving alias bytes after removing the source name. Seven
+opens, closes and resource drops balance; all fixture files are cleaned up.
+Receipt: [hard-link C](../ops/evidence/candidate-hard-link-20261015.json).
+
+The previous rebuilt command image still reproduces code 1004 at the old call
+span. No new command image or complete shipped-workspace parity run is claimed
+for this focused C-emitter fix. The integration checkpoint below predates it.
+Rule 44 remains outside the current file C allowlist by source inspection;
+other filesystem bridges, full CLI integration, fixed point, broader parity,
+performance and platform/CI gates remain open. Promotion stays blocked.
+
 ## Filesystem command CLI integration recheck (2026-10-15)
 
 The 415-source authored check/build/run dispatcher now includes both directory
@@ -24,7 +46,8 @@ The fresh Go oracle's direct artifacts return 42 with the host smoke metadata
 fixtures at both profiles. Go run returns 356 in fixture-free scratch directories,
 which is recorded separately from successful artifact execution. Receipt:
 [command matrix](../ops/evidence/candidate-std-fs-cli-matrix-20261015.json).
-Next is hard-link C admission and the remaining filesystem adapters. Broader
+The later hard-link source fix above supersedes that first blocker; the command
+image and matrix here remain the pre-fix snapshot. Broader
 parity, fixed point, performance and platform/CI gates remain open; promotion
 remains blocked.
 

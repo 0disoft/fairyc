@@ -28,6 +28,7 @@ TEXT_CASES = {
 # Successful opens, explicit closes, cleanup calls, cleanup of open owners,
 # heap attempts and injected failure. Programs run in isolated scratch folders.
 FILE_CASES = {
+    "sdk_c_executes_file_hard_link_shared_writes_and_alias_survival": (7, 7, 7, 0, 0, None),
     "sdk_c_executes_file_rename_preserves_paths_and_live_owner": (6, 6, 6, 0, 0, None),
     "sdk_c_executes_file_utf8_roundtrip_seek_and_close": (2, 2, 2, 0, 0, None),
     "sdk_c_executes_file_partial_eof_and_scope_cleanup": (2, 0, 2, 2, 0, None),
@@ -104,6 +105,7 @@ CASES.update({name: (["stage0_system_heap.c", "stage0_buffer.c", "stage0_text_vi
               for name in TEXT_CASES})
 CASES.update({name: ((["stage0_system_heap.c", "stage0_buffer.c"] if "file_buffer_" in name else []) +
                     ["stage0_windows_file.c", "stage0_windows_file_portable.c"] +
+                    (["stage0_windows_file_link.c"] if "file_hard_link_" in name else []) +
                     (["stage0_windows_file_buffer.c"] if "file_buffer_" in name else []), [], "")
               for name in FILE_CASES})
 CASES.update({name: (["stage0_system_heap.c", "stage0_buffer.c", "stage0_text_view.c",
