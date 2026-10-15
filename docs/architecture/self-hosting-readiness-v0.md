@@ -1,5 +1,50 @@
 # Self-hosting readiness v0
 
+## Broader Go comparison and current-source bootstrap (2026-10-16)
+
+The rebuilt metadata compiler has completed four fresh Go comparison suites.
+
+| Suite | Cases | Acceptance or command-exit matches | Exact output/status matches |
+| --- | ---: | ---: | ---: |
+| Compiler fixture check | 169 | 168 acceptance | 97 |
+| C-emission native run | 50 | 49 command exits | 49 |
+| Shipped example commands | 73 | 67 command exits | 59 |
+| CLI options | 17 | 14 command exits | 2 |
+
+The only fixture admission mismatch is `pass.c-emission.repr-c-safe-identifiers`:
+Go accepts it, while the candidate reports E5106. It also accounts for the sole
+native fixture exit mismatch. The six example command failures are
+`checked_byte_codec_quickstart`, `repeated_array`, `shared_reborrow`,
+`token_page_cli` (check), `copied_mutable_struct_quickstart` and `struct_vec_view`
+(run/C emission). Successful filesystem operations remain covered by the full
+selected matrix below. Three CLI help invocations incorrectly return exit 2;
+other exact-output differences include usage/diagnostic text and success counts.
+Diagnostic codes also differ for capability storage, direct resource construction,
+non-Result `?`, incompatible Result errors and multiple-error reporting.
+
+Skipped inputs are explicit: the local-region-escape fixture needs a package-graph
+workspace adapter; two C fixtures have no passing main entry; the contract-state
+example is rejected by Go's manifest loader; compiler self-source is covered
+separately; repeated-array native execution cannot follow its failed check.
+No executed comparison timed out. AST/HIR/MIR structural equivalence was not
+checked. Full Go parity and promotion remain false.
+Receipt: [fresh Go comparison](../ops/evidence/candidate-go-comparison-metadata-20261016.json).
+
+Current full-dispatcher bootstrap was attempted with all 512 current source files
+and the verified prior stage2 seed. Legacy manifest emission stopped after
+616.38 seconds at `project_key_index.fy`, project phase 3/stage 0/code 1002
+(exit 2). An isolated workspace-emission trial stopped after 2.01 seconds at
+`module_unit_value_collect.fy` with invalid package input (exit 7). Both stopped
+before building Stage1; no current-source fixed point is claimed. The underlying
+budget or linker cause has not been confirmed. The temporary failed workspace
+harness was removed. Product bounds, timeouts and stack policy are unchanged.
+Receipt: [bootstrap attempts](../ops/evidence/candidate-bootstrap-attempts-metadata-20261016.json).
+
+The next implementation priorities are the bootstrap admission failure,
+`repr(C)` safe identifiers, the six example failures, and CLI/diagnostic output
+alignment. Public API, SDK/runtime ABI, database, repository hygiene and CI/runner
+configuration are unchanged. All evidence is local; nothing was pushed.
+
 ## Metadata CLI integration (2026-10-16)
 
 The 415-source check/build/run dispatcher builds at both compiler profiles
@@ -15,9 +60,9 @@ those fixtures, exactly matching Go. Nothing is skipped or timed out; the
 verifier records `passed: true` and exits zero.
 Receipt: [filesystem matrix](../ops/evidence/candidate-std-fs-cli-matrix-metadata-20261016.json).
 
-This closes the shipped filesystem command integration gaps. Broader Go
-comparison and full-dispatcher bootstrap remain separate stages; product
-policies, public API, SDK/runtime ABI and CI configuration are unchanged.
+This closes the shipped filesystem command integration gaps. The newer broader
+comparison and full-dispatcher bootstrap attempts are recorded above. Full parity
+and promotion remain open; public API, SDK/runtime ABI and CI are unchanged.
 
 ## File metadata C adapters (2026-10-16)
 
