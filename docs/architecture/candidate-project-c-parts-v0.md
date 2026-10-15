@@ -1,5 +1,17 @@
 # Candidate project C partitions v0
 
+## Current whole-project work and bootstrap (2026-10-16)
+
+The shared `candidate_limits::project_work()` ledger is now 16,777,216. Each
+independent preparation/body meter retains its 1,048,576 bound; output-part byte,
+frame, packet and native object validation limits are unchanged. The complete
+512-source compiler emits byte-identical 39,546,346-byte C packets across two
+consecutive generations, and the optimized native PE images are exactly equal.
+Both images pass the current Go lexer differential (249 cases each) and seven
+malformed framing cases each. See [fixed-point evidence](../ops/evidence/candidate-bootstrap-fixed-20261016.json)
+and [whole-project admission](../ops/evidence/candidate-bootstrap-project-work-20261016.json).
+Earlier dated 8Mi work observations below describe their original checkpoints.
+
 ## Source-identified project owners
 
 `partition_project` and `partition_project_entry` consume the checked

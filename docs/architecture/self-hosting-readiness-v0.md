@@ -1,5 +1,36 @@
 # Self-hosting readiness v0
 
+## Current-source bootstrap fixed point (2026-10-16)
+
+The two measured bootstrap failures are fixed: source-name comparisons retain
+UTF-8 and file-identity checks within the unchanged shared path budget, and the
+whole-project work ledger now admits 16,777,216 while independent unit/body
+limits remain 1,048,576. All 512 current input files are hash-bound and unchanged.
+
+Both complete generated compiler stages pass C emission and optimized Windows
+native building. Their 39,546,346-byte C packets are exactly equal, and their
+5,606,400-byte PE images are exactly equal with no excluded bytes. Both image
+SHA-256 values are `6f92bfc47658e6cde9466bb99fa481c967164e5c6d762217bd12831233e7e75e`.
+Emission takes 549.48 and 792.91 seconds; native builds take 373.49 and 571.71
+seconds. The passing generation chain uses the prior verified Fairy seed plus
+the current emitter seed, invoking no Go frontend for generation. The current
+Go lexer oracle separately matches 249 canonical token/cooked-byte/diagnostic/span
+cases per complete compiler; seven malformed framing cases per compiler also
+pass. The emitter-only input seed is intentionally excluded from lexer stdin.
+
+Receipt: [complete fixed-point evidence](../ops/evidence/candidate-bootstrap-fixed-20261016.json).
+The original trailing lexer invocation selected the regular CLI by mistake.
+After the dedicated current Go lexer oracle passed, the standard reuse verifier
+rechecked the successful generations, exact source/packet/image identities and
+lexer evidence without rebuilding unchanged artifacts. The receipt records this
+recovery and the oracle's current Go source and binary identities.
+
+This closes the current-source consecutive-generation gate. Full frontend
+parity, Linux and current-commit hosted CI remain outside this verification;
+promotion stays false. Public API, SDK/runtime ABI, database, repository hygiene,
+CI/runner, product deadlines and the existing private stack policy are unchanged.
+All results and commits are local; nothing was pushed.
+
 ## Complete current-source Stage1 (2026-10-16)
 
 The refreshed Fairy emitter builds the complete 512-source compiler. Stage1 C
