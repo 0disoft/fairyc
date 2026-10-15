@@ -1,5 +1,17 @@
 # Self-hosting readiness v0
 
+## Complete current-source Stage1 (2026-10-16)
+
+The refreshed Fairy emitter builds the complete 512-source compiler. Stage1 C
+emission passes in 549.48 seconds (39,546,346 packet bytes); optimized native
+building passes in 373.49 seconds across 63 C units. The 5,606,400-byte image
+answers `--help` successfully with empty stderr. Its SHA-256 is
+`6f92bfc47658e6cde9466bb99fa481c967164e5c6d762217bd12831233e7e75e`.
+No Go frontend is invoked in this generation. All input hashes are rechecked.
+Receipt: [current Stage1](../ops/evidence/candidate-bootstrap-stage1-fixed-20261016.json).
+Stage2 self-regeneration and consecutive C/image equality are still running at
+this checkpoint; this receipt does not mark the fixed-point gate complete.
+
 ## Refreshed bootstrap emitter seed (2026-10-16)
 
 The verified prior Fairy stage2 image builds a current 454-source emitter-only
