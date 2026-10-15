@@ -1,5 +1,27 @@
 # Fairy 컴파일러 전환: 후속 작업 목록
 
+## Go behavior comparison (2026-10-15)
+
+The current Go CLI and the 410-source candidate command image still differ.
+Both candidate profiles give the same observations on 169 workspace-adapted
+fixtures: 12 admission differences, including 11 missing Result obligations and
+one rejected `@repr(C)` member `_value`. Six SDK-stub adapter rejections are not
+frontend coverage; one package-graph fixture is skipped. Native C fixture runs
+match exit/stdout/stderr in 49 of 50 cases; `_value` prevents the remaining run.
+Receipt: [fixture comparison](evidence/candidate-go-fixture-behavior-20261015.json).
+
+Of 48 Go-admitted shipped workspaces, candidate check accepts 43. Selected run
+comparisons match 16/18 and build comparisons 6/6. Fix Result obligation checking
+first, then the `std_fs_quickstart` internal error, unsupported repeated-array /
+reborrow / slice-iteration cases, copied mutable-struct C emission and member
+identifier rules. Shared CLI options match status in 14/17 cases; all three
+`--help` routes fail in the candidate. Diagnostic text and MIR counts also differ.
+Stable command inventory and explicit skips are in the
+[workspace comparison](evidence/candidate-go-workspace-behavior-20261015.json).
+These comparisons leave internal AST/HIR/MIR equivalence, the full 511-source
+dispatcher/fixed point, product policies/performance, Linux and hosted CI open.
+Go remains the reference; candidate promotion stays blocked.
+
 ## Package mixed cache reuse (2026-10-15)
 
 Per-package partial cache reuse is implemented. Current-source checking and exact

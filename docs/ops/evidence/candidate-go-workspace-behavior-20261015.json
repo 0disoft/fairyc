@@ -1,0 +1,1113 @@
+{
+  "schema": "fairyc.candidate-go-workspace-behavior/v1",
+  "date": "2026-10-15",
+  "sourceHeadAtSummary": "f4e5c0f8b9d84baf8df3073baec965ba80eacd35",
+  "comparisonCompleted": true,
+  "fullParity": false,
+  "scope": "authored check/build/run entry points with real OS argv",
+  "goFrontendFallback": false,
+  "comparisonPairs": 89,
+  "shippedWorkspaceRoots": 50,
+  "admittedReferenceWorkspaces": 48,
+  "examplesByCommand": [
+    {
+      "command": "check",
+      "cases": 48,
+      "exitAndOutputMatch": 35,
+      "exitMatch": 43,
+      "candidateZeroExit": 43
+    },
+    {
+      "command": "run",
+      "cases": 18,
+      "exitAndOutputMatch": 16,
+      "exitMatch": 16,
+      "candidateZeroExit": 7
+    },
+    {
+      "command": "build",
+      "cases": 6,
+      "exitAndOutputMatch": 6,
+      "exitMatch": 6,
+      "candidateZeroExit": 6
+    }
+  ],
+  "observations": [
+    {
+      "path": ".cache/go-candidate-differential-20261015/examples/receipt.json",
+      "sha256": "e683fe84f163c8cc4d39eadb0bdddabc12d971e59e3e99af203015bd30db0402",
+      "profile": "release",
+      "cases": 72,
+      "summary": {
+        "completed": 72,
+        "acceptanceMatch": 65,
+        "exitMatch": 65,
+        "firstDiagnosticMatch": 72,
+        "allDiagnosticsMatch": 72,
+        "stdoutMatch": 57,
+        "stderrMatch": 65,
+        "exactMatch": 57
+      },
+      "skipped": [
+        {
+          "id": "contract_state_declaration_quickstart",
+          "reason": "Go cannot admit this shipped workspace",
+          "go": {
+            "argv": [
+              "check"
+            ],
+            "exit": 7,
+            "timedOut": false,
+            "seconds": 0.08064899999999398,
+            "stdout": "",
+            "stderr": "fairyc: package workspace failure: workspace ./fairy.toml invalid-project-manifest: manifest package.features unknown-field: field is not part of manifest v1\n",
+            "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "stderrSHA256": "23dd571c49d699720c326fd77090d51fc9fe8d8eb6e0fec153368584dcd06aa4",
+            "diagnostics": []
+          }
+        },
+        {
+          "id": "lexer_candidate",
+          "reason": "compiler self-source is a separate bootstrap/fixed-point gate"
+        },
+        {
+          "id": "repeated_array/native",
+          "reason": "candidate workspace check fails"
+        },
+        {
+          "id": "std_fs_quickstart/native",
+          "reason": "candidate workspace check fails"
+        }
+      ],
+      "sourceInputs": 2110,
+      "sourceInputDigestSHA256": "ee59aa4211773576e16c6dc4234fb983fe77a6e7dbcfe734cca7b739580b0dff",
+      "reference": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-candidate-differential-20261015\\fairyc-go.exe",
+        "sha256": "47ec6039da761e2a01115e7e2d765aa40e86dcf053f054b4d78fa78f383406aa"
+      },
+      "candidate": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\package-mixed-20261015\\commands\\release\\fairyc.exe",
+        "sha256": "407496df41cbe863f4d5c02598a3e931b265f333e404ab69d7feae3f1b8fa47a"
+      }
+    },
+    {
+      "path": ".cache/go-candidate-differential-20261015/cli/receipt.json",
+      "sha256": "fe9e56a247cc16f728015d98ef325cdb09b9044b0dad8d0228d200dad8730638",
+      "profile": "release",
+      "cases": 17,
+      "summary": {
+        "completed": 17,
+        "acceptanceMatch": 14,
+        "exitMatch": 14,
+        "firstDiagnosticMatch": 17,
+        "allDiagnosticsMatch": 17,
+        "stdoutMatch": 14,
+        "stderrMatch": 2,
+        "exactMatch": 2
+      },
+      "skipped": [],
+      "sourceInputs": 1909,
+      "sourceInputDigestSHA256": "923676c7831e47a069f6f9da9c1b8255b8d1c84a3e698bd6686a343060161fdf",
+      "reference": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-candidate-differential-20261015\\fairyc-go.exe",
+        "sha256": "47ec6039da761e2a01115e7e2d765aa40e86dcf053f054b4d78fa78f383406aa"
+      },
+      "candidate": {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\package-mixed-20261015\\commands\\release\\fairyc.exe",
+        "sha256": "407496df41cbe863f4d5c02598a3e931b265f333e404ab69d7feae3f1b8fa47a"
+      }
+    }
+  ],
+  "workspaceDifferences": [
+    {
+      "id": "checked_byte_codec_quickstart/check",
+      "different": [
+        "acceptanceMatch",
+        "exitMatch",
+        "stdoutMatch",
+        "stderrMatch",
+        "exactMatch"
+      ],
+      "go": {
+        "argv": [
+          "check",
+          "--locked"
+        ],
+        "exit": 0,
+        "stdoutSHA256": "c9109520edbd0906e9633ca6e6f6db0674ab108697f2f79887b5dbc2d39d2689",
+        "stdoutPreview": "check ok: 2 instance(s), 10 source file(s), 166 MIR function(s), lock verified\n",
+        "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderrPreview": ""
+      },
+      "candidate": {
+        "argv": [
+          "check",
+          "--locked"
+        ],
+        "exit": 3,
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdoutPreview": "",
+        "stderrSHA256": "f44a74ba26278d543caa6eeb65783855a7a7a583382b63784269a007be71ba17",
+        "stderrPreview": "codec.fy:66:33: source is outside the supported compiler subset [bytes 2528..2540]\n"
+      }
+    },
+    {
+      "id": "contract_capabilities_quickstart/check",
+      "different": [
+        "stdoutMatch",
+        "exactMatch"
+      ],
+      "go": {
+        "argv": [
+          "check",
+          "--locked"
+        ],
+        "exit": 0,
+        "stdoutSHA256": "98e9d41449e9f3314e6b6a880d63b5733ee9267bb207202f49d99f47ea4225c1",
+        "stdoutPreview": "check ok: 1 instance(s), 1 source file(s), 2 MIR function(s), lock verified\n",
+        "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderrPreview": ""
+      },
+      "candidate": {
+        "argv": [
+          "check",
+          "--locked"
+        ],
+        "exit": 0,
+        "stdoutSHA256": "013c9dbbf048b60cd0b7576d52656713cc114149635aa907927adaa87298d308",
+        "stdoutPreview": "check ok: 1 instance(s), 1 source file(s), 3 MIR function(s), lock verified\n",
+        "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderrPreview": ""
+      }
+    },
+    {
+      "id": "copied_mutable_struct_quickstart/check",
+      "different": [
+        "stdoutMatch",
+        "exactMatch"
+      ],
+      "go": {
+        "argv": [
+          "check",
+          "--locked"
+        ],
+        "exit": 0,
+        "stdoutSHA256": "638caf57779a1a999e54b89e1757868b8f432ff5dad40add06c135865324c7a0",
+        "stdoutPreview": "check ok: 2 instance(s), 10 source file(s), 183 MIR function(s), lock verified\n",
+        "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderrPreview": ""
+      },
+      "candidate": {
+        "argv": [
+          "check",
+          "--locked"
+        ],
+        "exit": 0,
+        "stdoutSHA256": "9970b23bf070bd9dd5b1aa979115daa3674714106990587cbee5b7cc861d5253",
+        "stdoutPreview": "check ok: 2 instance(s), 10 source file(s), 184 MIR function(s), lock verified\n",
+        "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderrPreview": ""
+      }
+    },
+    {
+      "id": "copied_mutable_struct_quickstart/run",
+      "different": [
+        "acceptanceMatch",
+        "exitMatch",
+        "stdoutMatch",
+        "stderrMatch",
+        "exactMatch"
+      ],
+      "go": {
+        "argv": [
+          "run",
+          "--locked"
+        ],
+        "exit": 0,
+        "stdoutSHA256": "c75e7793629b761f47238ac2844e0e30513af8e8075a4efae2d35552006ab0bd",
+        "stdoutPreview": "before=-5 after=0\nbefore=4000000000 after=10\nbefore=7 after=7\n",
+        "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderrPreview": ""
+      },
+      "candidate": {
+        "argv": [
+          "run",
+          "--locked"
+        ],
+        "exit": 2,
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdoutPreview": "",
+        "stderrSHA256": "32b6cb5bdd6c786fc6ebe7b1d56bef949c665c885498ee90054bf09c4f863dcb",
+        "stderrPreview": "main.fy:27:5: fairyc: candidate workspace C emission failed (code 1004)\n"
+      }
+    },
+    {
+      "id": "repeated_array/check",
+      "different": [
+        "acceptanceMatch",
+        "exitMatch",
+        "stdoutMatch",
+        "stderrMatch",
+        "exactMatch"
+      ],
+      "go": {
+        "argv": [
+          "check",
+          "--locked"
+        ],
+        "exit": 0,
+        "stdoutSHA256": "98e9d41449e9f3314e6b6a880d63b5733ee9267bb207202f49d99f47ea4225c1",
+        "stdoutPreview": "check ok: 1 instance(s), 1 source file(s), 2 MIR function(s), lock verified\n",
+        "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderrPreview": ""
+      },
+      "candidate": {
+        "argv": [
+          "check",
+          "--locked"
+        ],
+        "exit": 3,
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdoutPreview": "",
+        "stderrSHA256": "1baa02da0e920429043b7c7348e2e04db71976a70049a0c11c077d1b404c29aa",
+        "stderrPreview": "main.fy:6:49: source is outside the supported compiler subset [bytes 174..179]\n"
+      }
+    },
+    {
+      "id": "shared_reborrow/check",
+      "different": [
+        "acceptanceMatch",
+        "exitMatch",
+        "stdoutMatch",
+        "stderrMatch",
+        "exactMatch"
+      ],
+      "go": {
+        "argv": [
+          "check",
+          "--locked"
+        ],
+        "exit": 0,
+        "stdoutSHA256": "6939768ff90f4fed2b9aa448ac28a2ac8525dfeb5187dd935c2fd59ed5e83ece",
+        "stdoutPreview": "check ok: 1 instance(s), 1 source file(s), 9 MIR function(s), lock verified\n",
+        "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderrPreview": ""
+      },
+      "candidate": {
+        "argv": [
+          "check",
+          "--locked"
+        ],
+        "exit": 3,
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdoutPreview": "",
+        "stderrSHA256": "58e2c0b17944b2cf8a10e2261d656de962c12ee07be93714173edd7fbca09754",
+        "stderrPreview": "main.fy:4:1: source is outside the supported compiler subset [bytes 43..101]\n"
+      }
+    },
+    {
+      "id": "shared_struct_ref_quickstart/check",
+      "different": [
+        "stdoutMatch",
+        "exactMatch"
+      ],
+      "go": {
+        "argv": [
+          "check",
+          "--locked"
+        ],
+        "exit": 0,
+        "stdoutSHA256": "9970b23bf070bd9dd5b1aa979115daa3674714106990587cbee5b7cc861d5253",
+        "stdoutPreview": "check ok: 2 instance(s), 10 source file(s), 184 MIR function(s), lock verified\n",
+        "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderrPreview": ""
+      },
+      "candidate": {
+        "argv": [
+          "check",
+          "--locked"
+        ],
+        "exit": 0,
+        "stdoutSHA256": "4552125bd6be6b926b0e19e4332d72bfa18f917cd2316c6b330c1d7632743f3f",
+        "stdoutPreview": "check ok: 2 instance(s), 10 source file(s), 185 MIR function(s), lock verified\n",
+        "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderrPreview": ""
+      }
+    },
+    {
+      "id": "std_fs_quickstart/check",
+      "different": [
+        "acceptanceMatch",
+        "exitMatch",
+        "stdoutMatch",
+        "stderrMatch",
+        "exactMatch"
+      ],
+      "go": {
+        "argv": [
+          "check",
+          "--locked"
+        ],
+        "exit": 0,
+        "stdoutSHA256": "185e778d84a821813bd7e583b6c4e65081fa8c080af9420f7df151d973d1438d",
+        "stdoutPreview": "check ok: 2 instance(s), 12 source file(s), 217 MIR function(s), lock verified\n",
+        "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderrPreview": ""
+      },
+      "candidate": {
+        "argv": [
+          "check",
+          "--locked"
+        ],
+        "exit": 4,
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdoutPreview": "",
+        "stderrSHA256": "2a15f0b85819eb6eb819d52d69b77047bcea480bac881591bbd95832be872ec0",
+        "stderrPreview": "fairyc: internal compiler invariant failed\n"
+      }
+    },
+    {
+      "id": "std_vec_quickstart/check",
+      "different": [
+        "stdoutMatch",
+        "exactMatch"
+      ],
+      "go": {
+        "argv": [
+          "check",
+          "--locked"
+        ],
+        "exit": 0,
+        "stdoutSHA256": "78551863d83647d029b56a13a545b73afe7d8a9372f20261ffb747ff3e9370f3",
+        "stdoutPreview": "check ok: 2 instance(s), 9 source file(s), 182 MIR function(s), lock verified\n",
+        "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderrPreview": ""
+      },
+      "candidate": {
+        "argv": [
+          "check",
+          "--locked"
+        ],
+        "exit": 0,
+        "stdoutSHA256": "00539a25756810a9290b4b920aa69109750689ff2032c2374a4e12e4c52b2f20",
+        "stdoutPreview": "check ok: 2 instance(s), 9 source file(s), 183 MIR function(s), lock verified\n",
+        "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderrPreview": ""
+      }
+    },
+    {
+      "id": "struct_vec_view/run",
+      "different": [
+        "acceptanceMatch",
+        "exitMatch",
+        "stdoutMatch",
+        "stderrMatch",
+        "exactMatch"
+      ],
+      "go": {
+        "argv": [
+          "run",
+          "--locked"
+        ],
+        "exit": 0,
+        "stdoutSHA256": "24d53afb184453c7713b18b3cb2eb9508af6d1be1920f2795adcfa6516ba88fb",
+        "stdoutPreview": "tokens\t10\nidentifiers\t3\nnumbers\t2\nsum\t4000000007\nfirst_tokens\t6\nfirst_identifiers\t2\nfirst_numbers\t1\n",
+        "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderrPreview": ""
+      },
+      "candidate": {
+        "argv": [
+          "run",
+          "--locked"
+        ],
+        "exit": 2,
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdoutPreview": "",
+        "stderrSHA256": "f839b68a0ee3a1ce0dc907a06638739564d7099d3d36c74e8941eb00749c4ca7",
+        "stderrPreview": "main.fy:22:5: fairyc: candidate workspace C emission failed (code 1004)\n"
+      }
+    },
+    {
+      "id": "token_page_cli/check",
+      "different": [
+        "acceptanceMatch",
+        "exitMatch",
+        "stdoutMatch",
+        "stderrMatch",
+        "exactMatch"
+      ],
+      "go": {
+        "argv": [
+          "check",
+          "--locked"
+        ],
+        "exit": 0,
+        "stdoutSHA256": "d4a62d5661ce9ff35bea0dbdc64a70ed7dbb66d77702135a861546bf47903708",
+        "stdoutPreview": "check ok: 2 instance(s), 13 source file(s), 186 MIR function(s), lock verified\n",
+        "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderrPreview": ""
+      },
+      "candidate": {
+        "argv": [
+          "check",
+          "--locked"
+        ],
+        "exit": 3,
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdoutPreview": "",
+        "stderrSHA256": "0054b98a8a4a88bbdf7fd7adc0e456821769149d224bf64dce5f0bd49cbc5f01",
+        "stderrPreview": "evaluator.fy:28:37: source is outside the supported compiler subset [bytes 957..977]\n"
+      }
+    },
+    {
+      "id": "vec_i64_mut_view/check",
+      "different": [
+        "stdoutMatch",
+        "exactMatch"
+      ],
+      "go": {
+        "argv": [
+          "check",
+          "--locked"
+        ],
+        "exit": 0,
+        "stdoutSHA256": "228700532eea42626f24df5271e7ca5851271ba458cfac9fac13a55bfe673ccd",
+        "stdoutPreview": "check ok: 2 instance(s), 9 source file(s), 186 MIR function(s), lock verified\n",
+        "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderrPreview": ""
+      },
+      "candidate": {
+        "argv": [
+          "check",
+          "--locked"
+        ],
+        "exit": 0,
+        "stdoutSHA256": "a567787cd6916e848f21785c761a552a590be52bfd20b0767d5ea60e004bf4ed",
+        "stdoutPreview": "check ok: 2 instance(s), 9 source file(s), 187 MIR function(s), lock verified\n",
+        "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderrPreview": ""
+      }
+    },
+    {
+      "id": "vec_i64_view/check",
+      "different": [
+        "stdoutMatch",
+        "exactMatch"
+      ],
+      "go": {
+        "argv": [
+          "check",
+          "--locked"
+        ],
+        "exit": 0,
+        "stdoutSHA256": "9bed665700a98dda31dadcc8200dcd6aebac8ac574ee1372782fd72b5df60d35",
+        "stdoutPreview": "check ok: 2 instance(s), 9 source file(s), 185 MIR function(s), lock verified\n",
+        "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderrPreview": ""
+      },
+      "candidate": {
+        "argv": [
+          "check",
+          "--locked"
+        ],
+        "exit": 0,
+        "stdoutSHA256": "228700532eea42626f24df5271e7ca5851271ba458cfac9fac13a55bfe673ccd",
+        "stdoutPreview": "check ok: 2 instance(s), 9 source file(s), 186 MIR function(s), lock verified\n",
+        "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderrPreview": ""
+      }
+    },
+    {
+      "id": "vec_integer_views/check",
+      "different": [
+        "stdoutMatch",
+        "exactMatch"
+      ],
+      "go": {
+        "argv": [
+          "check",
+          "--locked"
+        ],
+        "exit": 0,
+        "stdoutSHA256": "863e370bd1803816b42b106488c18360ae8a9ea273424b4992a89ebe665c93c0",
+        "stdoutPreview": "check ok: 2 instance(s), 9 source file(s), 221 MIR function(s), lock verified\n",
+        "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderrPreview": ""
+      },
+      "candidate": {
+        "argv": [
+          "check",
+          "--locked"
+        ],
+        "exit": 0,
+        "stdoutSHA256": "75991c7ed2392c29526d1dfbdf146870da61cdf39d3627ba5ff0a3d6d3047910",
+        "stdoutPreview": "check ok: 2 instance(s), 9 source file(s), 224 MIR function(s), lock verified\n",
+        "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderrPreview": ""
+      }
+    },
+    {
+      "id": "vec_u8_view/check",
+      "different": [
+        "stdoutMatch",
+        "exactMatch"
+      ],
+      "go": {
+        "argv": [
+          "check",
+          "--locked"
+        ],
+        "exit": 0,
+        "stdoutSHA256": "9d557e73bf5de713407086d00816ec7453bcf3465b9741444cf089ed890f809a",
+        "stdoutPreview": "check ok: 2 instance(s), 9 source file(s), 188 MIR function(s), lock verified\n",
+        "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderrPreview": ""
+      },
+      "candidate": {
+        "argv": [
+          "check",
+          "--locked"
+        ],
+        "exit": 0,
+        "stdoutSHA256": "80ba98d48285987810e7d94a9ee28f73bb9a4f3011dec01379c35a8cf2490e5e",
+        "stdoutPreview": "check ok: 2 instance(s), 9 source file(s), 189 MIR function(s), lock verified\n",
+        "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderrPreview": ""
+      }
+    }
+  ],
+  "cliDifferences": [
+    {
+      "id": "cli-1",
+      "different": [
+        "stderrMatch",
+        "exactMatch"
+      ],
+      "go": {
+        "argv": [
+          "check",
+          "--bad"
+        ],
+        "exit": 2,
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdoutPreview": "",
+        "stderrSHA256": "0171c24b6a9984414ed5a8861c1c844b7ce15c3a5c528aaacddf95c8e92ed824",
+        "stderrPreview": "fairyc: command \"check\" accepts only optional --locked\n\nFairy C Stage 0 compiler prototype\n\nUsage:\n  fairyc new <package-name> --uid <package-uid>\n  fairyc chec"
+      },
+      "candidate": {
+        "argv": [
+          "check",
+          "--bad"
+        ],
+        "exit": 2,
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdoutPreview": "",
+        "stderrSHA256": "dc6eb59d844b8ff90b868882c67f634a8c25bc50520aea63b39355b4d0d865f4",
+        "stderrPreview": "fairyc: command \"check\" accepts only optional --locked\n"
+      }
+    },
+    {
+      "id": "cli-2",
+      "different": [
+        "stderrMatch",
+        "exactMatch"
+      ],
+      "go": {
+        "argv": [
+          "check",
+          "--locked",
+          "--locked"
+        ],
+        "exit": 2,
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdoutPreview": "",
+        "stderrSHA256": "0171c24b6a9984414ed5a8861c1c844b7ce15c3a5c528aaacddf95c8e92ed824",
+        "stderrPreview": "fairyc: command \"check\" accepts only optional --locked\n\nFairy C Stage 0 compiler prototype\n\nUsage:\n  fairyc new <package-name> --uid <package-uid>\n  fairyc chec"
+      },
+      "candidate": {
+        "argv": [
+          "check",
+          "--locked",
+          "--locked"
+        ],
+        "exit": 2,
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdoutPreview": "",
+        "stderrSHA256": "dc6eb59d844b8ff90b868882c67f634a8c25bc50520aea63b39355b4d0d865f4",
+        "stderrPreview": "fairyc: command \"check\" accepts only optional --locked\n"
+      }
+    },
+    {
+      "id": "cli-3",
+      "different": [
+        "acceptanceMatch",
+        "exitMatch",
+        "stdoutMatch",
+        "stderrMatch",
+        "exactMatch"
+      ],
+      "go": {
+        "argv": [
+          "check",
+          "--help"
+        ],
+        "exit": 0,
+        "stdoutSHA256": "2ba34760dd719f3d5d47ffdc23552decd0508ad4916fabb296877032ff6fd572",
+        "stdoutPreview": "Fairy C Stage 0 compiler prototype\n\nUsage:\n  fairyc new <package-name> --uid <package-uid>\n  fairyc check [--locked]\n  fairyc build [--release] [--locked]\n  fai",
+        "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderrPreview": ""
+      },
+      "candidate": {
+        "argv": [
+          "check",
+          "--help"
+        ],
+        "exit": 2,
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdoutPreview": "",
+        "stderrSHA256": "dc6eb59d844b8ff90b868882c67f634a8c25bc50520aea63b39355b4d0d865f4",
+        "stderrPreview": "fairyc: command \"check\" accepts only optional --locked\n"
+      }
+    },
+    {
+      "id": "cli-4",
+      "different": [
+        "stderrMatch",
+        "exactMatch"
+      ],
+      "go": {
+        "argv": [
+          "check",
+          "--cache-status"
+        ],
+        "exit": 2,
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdoutPreview": "",
+        "stderrSHA256": "0171c24b6a9984414ed5a8861c1c844b7ce15c3a5c528aaacddf95c8e92ed824",
+        "stderrPreview": "fairyc: command \"check\" accepts only optional --locked\n\nFairy C Stage 0 compiler prototype\n\nUsage:\n  fairyc new <package-name> --uid <package-uid>\n  fairyc chec"
+      },
+      "candidate": {
+        "argv": [
+          "check",
+          "--cache-status"
+        ],
+        "exit": 2,
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdoutPreview": "",
+        "stderrSHA256": "cbdd3390fac0e45e30087cfe0bd51a18a8f4fbbcd1d7ffac6f8be0a83c8718d3",
+        "stderrPreview": "fairyc: --cache-status requires --cache-root\n"
+      }
+    },
+    {
+      "id": "cli-5",
+      "different": [
+        "stderrMatch",
+        "exactMatch"
+      ],
+      "go": {
+        "argv": [
+          "check",
+          "--release"
+        ],
+        "exit": 2,
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdoutPreview": "",
+        "stderrSHA256": "0171c24b6a9984414ed5a8861c1c844b7ce15c3a5c528aaacddf95c8e92ed824",
+        "stderrPreview": "fairyc: command \"check\" accepts only optional --locked\n\nFairy C Stage 0 compiler prototype\n\nUsage:\n  fairyc new <package-name> --uid <package-uid>\n  fairyc chec"
+      },
+      "candidate": {
+        "argv": [
+          "check",
+          "--release"
+        ],
+        "exit": 2,
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdoutPreview": "",
+        "stderrSHA256": "dc6eb59d844b8ff90b868882c67f634a8c25bc50520aea63b39355b4d0d865f4",
+        "stderrPreview": "fairyc: command \"check\" accepts only optional --locked\n"
+      }
+    },
+    {
+      "id": "cli-6",
+      "different": [
+        "stderrMatch",
+        "exactMatch"
+      ],
+      "go": {
+        "argv": [
+          "check",
+          "--",
+          "argument"
+        ],
+        "exit": 2,
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdoutPreview": "",
+        "stderrSHA256": "0171c24b6a9984414ed5a8861c1c844b7ce15c3a5c528aaacddf95c8e92ed824",
+        "stderrPreview": "fairyc: command \"check\" accepts only optional --locked\n\nFairy C Stage 0 compiler prototype\n\nUsage:\n  fairyc new <package-name> --uid <package-uid>\n  fairyc chec"
+      },
+      "candidate": {
+        "argv": [
+          "check",
+          "--",
+          "argument"
+        ],
+        "exit": 2,
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdoutPreview": "",
+        "stderrSHA256": "dc6eb59d844b8ff90b868882c67f634a8c25bc50520aea63b39355b4d0d865f4",
+        "stderrPreview": "fairyc: command \"check\" accepts only optional --locked\n"
+      }
+    },
+    {
+      "id": "cli-7",
+      "different": [
+        "stderrMatch",
+        "exactMatch"
+      ],
+      "go": {
+        "argv": [
+          "build",
+          "--bad"
+        ],
+        "exit": 2,
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdoutPreview": "",
+        "stderrSHA256": "83d85ac0b83b9b2352ef5c620dbd30d268f31fa5ca04bade271cafaa78470d2a",
+        "stderrPreview": "fairyc: command \"build\" accepts only optional --release and --locked\n\nFairy C Stage 0 compiler prototype\n\nUsage:\n  fairyc new <package-name> --uid <package-uid>"
+      },
+      "candidate": {
+        "argv": [
+          "build",
+          "--bad"
+        ],
+        "exit": 2,
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdoutPreview": "",
+        "stderrSHA256": "ba275feb2a66716e66b37ec04a57b2ee14a7579f875bdcc8507c0631aef6a49f",
+        "stderrPreview": "fairyc: command \"build\" accepts only optional --release and --locked\n"
+      }
+    },
+    {
+      "id": "cli-8",
+      "different": [
+        "stderrMatch",
+        "exactMatch"
+      ],
+      "go": {
+        "argv": [
+          "run",
+          "--bad"
+        ],
+        "exit": 2,
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdoutPreview": "",
+        "stderrSHA256": "ff05d1553159af175b5b9116aea96b0cc5ffead57f1eedc5a9088bd7fac3f436",
+        "stderrPreview": "fairyc: command \"run\" accepts only optional --release and --locked\n\nFairy C Stage 0 compiler prototype\n\nUsage:\n  fairyc new <package-name> --uid <package-uid>\n "
+      },
+      "candidate": {
+        "argv": [
+          "run",
+          "--bad"
+        ],
+        "exit": 2,
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdoutPreview": "",
+        "stderrSHA256": "6a4f3b7a4841321be9c68c8c5106237761286666a6e80c960e9c37ac427738db",
+        "stderrPreview": "fairyc: command \"run\" accepts only optional --release and --locked\n"
+      }
+    },
+    {
+      "id": "cli-9",
+      "different": [
+        "stderrMatch",
+        "exactMatch"
+      ],
+      "go": {
+        "argv": [
+          "build",
+          "--locked",
+          "--locked"
+        ],
+        "exit": 2,
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdoutPreview": "",
+        "stderrSHA256": "0e7e834598e407a138f678e933204d877a3f000ba31f2330c2f374cb93d5088a",
+        "stderrPreview": "fairyc: command \"build\" received --locked more than once\n\nFairy C Stage 0 compiler prototype\n\nUsage:\n  fairyc new <package-name> --uid <package-uid>\n  fairyc ch"
+      },
+      "candidate": {
+        "argv": [
+          "build",
+          "--locked",
+          "--locked"
+        ],
+        "exit": 2,
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdoutPreview": "",
+        "stderrSHA256": "d1712c64eefdaa9b3f8e35af3dc74d98de1b54f95728db9c84ea7cf08e3fcfc6",
+        "stderrPreview": "fairyc: command \"build\" received --locked more than once\n"
+      }
+    },
+    {
+      "id": "cli-10",
+      "different": [
+        "stderrMatch",
+        "exactMatch"
+      ],
+      "go": {
+        "argv": [
+          "run",
+          "--locked",
+          "--locked"
+        ],
+        "exit": 2,
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdoutPreview": "",
+        "stderrSHA256": "3df9b63ad846c5a1c6ff8027d4d65c343df214074b9b2b649b9efbd9360e1916",
+        "stderrPreview": "fairyc: command \"run\" received --locked more than once\n\nFairy C Stage 0 compiler prototype\n\nUsage:\n  fairyc new <package-name> --uid <package-uid>\n  fairyc chec"
+      },
+      "candidate": {
+        "argv": [
+          "run",
+          "--locked",
+          "--locked"
+        ],
+        "exit": 2,
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdoutPreview": "",
+        "stderrSHA256": "fa09d3e6521e4f65bb2908f52536c7e7827bcbb1b1da526a10fe3cd9172e00be",
+        "stderrPreview": "fairyc: command \"run\" received --locked more than once\n"
+      }
+    },
+    {
+      "id": "cli-11",
+      "different": [
+        "stderrMatch",
+        "exactMatch"
+      ],
+      "go": {
+        "argv": [
+          "build",
+          "--release",
+          "--release"
+        ],
+        "exit": 2,
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdoutPreview": "",
+        "stderrSHA256": "ce18b1aa18a83ed0f7b4c8e00173705882daeb6880ce6905c6516deb8cb9ff55",
+        "stderrPreview": "fairyc: command \"build\" received --release more than once\n\nFairy C Stage 0 compiler prototype\n\nUsage:\n  fairyc new <package-name> --uid <package-uid>\n  fairyc c"
+      },
+      "candidate": {
+        "argv": [
+          "build",
+          "--release",
+          "--release"
+        ],
+        "exit": 2,
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdoutPreview": "",
+        "stderrSHA256": "df1dc50a28d610f6e8aea47699273e1c729878afb9ff3e109d056fb1f0754289",
+        "stderrPreview": "fairyc: command \"build\" received --release more than once\n"
+      }
+    },
+    {
+      "id": "cli-12",
+      "different": [
+        "stderrMatch",
+        "exactMatch"
+      ],
+      "go": {
+        "argv": [
+          "run",
+          "--release",
+          "--release"
+        ],
+        "exit": 2,
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdoutPreview": "",
+        "stderrSHA256": "b30c81dd7388d985a23e6fa4849135cb2a021cc27ab53f9144a863c6aaf6c9e1",
+        "stderrPreview": "fairyc: command \"run\" received --release more than once\n\nFairy C Stage 0 compiler prototype\n\nUsage:\n  fairyc new <package-name> --uid <package-uid>\n  fairyc che"
+      },
+      "candidate": {
+        "argv": [
+          "run",
+          "--release",
+          "--release"
+        ],
+        "exit": 2,
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdoutPreview": "",
+        "stderrSHA256": "d4b6b27f9f44994efa7da980a19658325cc31f6205a74fbe53607620be16e727",
+        "stderrPreview": "fairyc: command \"run\" received --release more than once\n"
+      }
+    },
+    {
+      "id": "cli-13",
+      "different": [
+        "acceptanceMatch",
+        "exitMatch",
+        "stdoutMatch",
+        "stderrMatch",
+        "exactMatch"
+      ],
+      "go": {
+        "argv": [
+          "build",
+          "--help"
+        ],
+        "exit": 0,
+        "stdoutSHA256": "2ba34760dd719f3d5d47ffdc23552decd0508ad4916fabb296877032ff6fd572",
+        "stdoutPreview": "Fairy C Stage 0 compiler prototype\n\nUsage:\n  fairyc new <package-name> --uid <package-uid>\n  fairyc check [--locked]\n  fairyc build [--release] [--locked]\n  fai",
+        "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderrPreview": ""
+      },
+      "candidate": {
+        "argv": [
+          "build",
+          "--help"
+        ],
+        "exit": 2,
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdoutPreview": "",
+        "stderrSHA256": "ba275feb2a66716e66b37ec04a57b2ee14a7579f875bdcc8507c0631aef6a49f",
+        "stderrPreview": "fairyc: command \"build\" accepts only optional --release and --locked\n"
+      }
+    },
+    {
+      "id": "cli-14",
+      "different": [
+        "acceptanceMatch",
+        "exitMatch",
+        "stdoutMatch",
+        "stderrMatch",
+        "exactMatch"
+      ],
+      "go": {
+        "argv": [
+          "run",
+          "--help"
+        ],
+        "exit": 0,
+        "stdoutSHA256": "2ba34760dd719f3d5d47ffdc23552decd0508ad4916fabb296877032ff6fd572",
+        "stdoutPreview": "Fairy C Stage 0 compiler prototype\n\nUsage:\n  fairyc new <package-name> --uid <package-uid>\n  fairyc check [--locked]\n  fairyc build [--release] [--locked]\n  fai",
+        "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderrPreview": ""
+      },
+      "candidate": {
+        "argv": [
+          "run",
+          "--help"
+        ],
+        "exit": 2,
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdoutPreview": "",
+        "stderrSHA256": "6a4f3b7a4841321be9c68c8c5106237761286666a6e80c960e9c37ac427738db",
+        "stderrPreview": "fairyc: command \"run\" accepts only optional --release and --locked\n"
+      }
+    },
+    {
+      "id": "cli-15",
+      "different": [
+        "stderrMatch",
+        "exactMatch"
+      ],
+      "go": {
+        "argv": [
+          "build",
+          "--",
+          "argument"
+        ],
+        "exit": 2,
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdoutPreview": "",
+        "stderrSHA256": "83d85ac0b83b9b2352ef5c620dbd30d268f31fa5ca04bade271cafaa78470d2a",
+        "stderrPreview": "fairyc: command \"build\" accepts only optional --release and --locked\n\nFairy C Stage 0 compiler prototype\n\nUsage:\n  fairyc new <package-name> --uid <package-uid>"
+      },
+      "candidate": {
+        "argv": [
+          "build",
+          "--",
+          "argument"
+        ],
+        "exit": 2,
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdoutPreview": "",
+        "stderrSHA256": "ba275feb2a66716e66b37ec04a57b2ee14a7579f875bdcc8507c0631aef6a49f",
+        "stderrPreview": "fairyc: command \"build\" accepts only optional --release and --locked\n"
+      }
+    }
+  ],
+  "priority": [
+    {
+      "priority": 1,
+      "issue": "Missing Result obligation rejection E4101",
+      "evidence": "candidate-go-fixture-behavior-20261015.json"
+    },
+    {
+      "priority": 2,
+      "issue": "std_fs_quickstart check exits 4 (internal invariant); Go exits 0",
+      "cause": "not established by this comparison"
+    },
+    {
+      "priority": 2,
+      "issue": "Copied mutable struct iteration and struct Vec view check successfully but native C emission exits 2 with code 1004"
+    },
+    {
+      "priority": 2,
+      "issue": "Four shipped workspaces are rejected as outside the supported subset: checked_byte_codec_quickstart, repeated_array, shared_reborrow, token_page_cli"
+    },
+    {
+      "priority": 2,
+      "issue": "repr(C) member-scope _value is rejected",
+      "evidence": "candidate-go-fixture-behavior-20261015.json"
+    },
+    {
+      "priority": 3,
+      "issue": "check/build/run --help return 2; Go returns 0. Usage text and successful MIR counts also differ."
+    }
+  ],
+  "staticCommandInventory": {
+    "sources": [
+      "internal/cli/run.go",
+      "examples/lexer_candidate/src/file_cli.fy"
+    ],
+    "sourceSHA256": {
+      "internal/cli/run.go": "566b3f8144e401777313f836ba427f152889c93235118f18b4d4c4c801202207",
+      "examples/lexer_candidate/src/file_cli.fy": "1ff45b12d49ad1dc29a49e1395c38466299c7e71f7632eef4ed2e0e8d52cc712"
+    },
+    "sharedRoutes": [
+      "check",
+      "build",
+      "run"
+    ],
+    "goStableRoutesWithoutCandidateDispatcherRoutes": [
+      "new",
+      "test",
+      "explain",
+      "targets",
+      "--help",
+      "--version"
+    ],
+    "runtimeClaim": false,
+    "intentionalPrivateCandidateExtensions": [
+      "--cache-root",
+      "--cache-status"
+    ]
+  },
+  "coverageLimits": [
+    "Native examples are a selected subset, not every shipped main or test.",
+    "The contract_state_declaration_quickstart manifest is rejected by Go (unknown package.features); compiler self-source is a separate gate.",
+    "No stable new/test/explain/targets/help/version equivalence claim from the commands-only image.",
+    "No internal parser/HIR/MIR or cross-platform/performance equivalence claim.",
+    "The complete 511-source dispatcher and latest fixed point remain separate unresolved work."
+  ],
+  "runnerChanges": [
+    "tools/compare-candidate-go-behavior.py",
+    "tools/compare-candidate-go-workspaces.py"
+  ],
+  "compilerChanged": false,
+  "publicApiChanged": false,
+  "sdkAbiChanged": false,
+  "dbChanged": false,
+  "ciChanged": false,
+  "pushed": false
+}

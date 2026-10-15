@@ -1,5 +1,25 @@
 # Self-hosting readiness v0
 
+## Go behavior comparison (2026-10-15)
+
+The current comparison does not meet the full-frontend equivalence gate. Both
+candidate profiles reproduce the same 12 admission differences across 169
+workspace-adapted fixtures: 11 missing Result obligations and one `@repr(C)`
+member rejection. Six SDK-stub adapter rejections do not establish frontend
+equivalence; one package-graph fixture is skipped. Native C fixture runs match
+exit/stdout/stderr in 49/50 cases. Shipped workspace check accepts 43/48
+Go-admitted examples; selected runs match 16/18 and builds match 6/6. The
+filesystem example exits with an internal error, two struct-iteration examples
+fail C emission after successful checking, and shared `--help` routes differ.
+
+Receipts: [fixtures](../ops/evidence/candidate-go-fixture-behavior-20261015.json)
+and [workspaces/CLI](../ops/evidence/candidate-go-workspace-behavior-20261015.json).
+These are command observations from the 410-source check/build/run image, not
+internal AST/HIR/MIR structural proofs or the full dispatcher. Go remains the
+reference and promotion stays blocked. Fix Result obligations and shipped
+workspace failures before revisiting diagnostic/CLI parity and the remaining
+full-dispatcher, policy/performance and platform/CI gates.
+
 ## Package mixed cache reuse (2026-10-15)
 
 Per-package partial cache reuse binds the compiler environment, target, SDK,
