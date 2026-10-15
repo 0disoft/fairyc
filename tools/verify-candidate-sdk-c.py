@@ -28,6 +28,7 @@ TEXT_CASES = {
 # Successful opens, explicit closes, cleanup calls, cleanup of open owners,
 # heap attempts and injected failure. Programs run in isolated scratch folders.
 FILE_CASES = {
+    "sdk_c_executes_file_rename_preserves_paths_and_live_owner": (6, 6, 6, 0, 0, None),
     "sdk_c_executes_file_utf8_roundtrip_seek_and_close": (2, 2, 2, 0, 0, None),
     "sdk_c_executes_file_partial_eof_and_scope_cleanup": (2, 0, 2, 2, 0, None),
     "sdk_c_executes_file_open_error_and_exclusive_preservation": (2, 2, 5, 0, 0, None),

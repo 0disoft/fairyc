@@ -1,5 +1,31 @@
 # Fairy 컴파일러 전환: 후속 작업 목록
 
+## File rename C admission (2026-10-15)
+
+The file C adapter now admits authenticated SDK rule 41, `file_rename_raw`.
+Its existing two-path signature and `raw_file_result` wire bridge call the
+existing `fy_std_windows_file_rename_v0` runtime. SDK source/signature checks,
+public API, runtime ABI, stack and deadline policies are unchanged. ADR 0292
+and the current SDK/runtime sources remain the behavior contracts.
+
+The focused regression executes the current authored Fairy emitter through the
+Go native test driver, then compiles its emitted C at low and optimized MSVC
+profiles against the real runtime. Both pass, with six successful opens, six
+explicit closes, six resource drops and no leftover files. The same authored
+fixture passes Go build, direct artifact execution and run at both output
+profiles, with exit zero and empty output. It covers argument order, Unicode
+paths, no-replace collisions with both contents preserved, live-owner sharing
+failure and subsequent owner use, directory/invalid-path rejection, success,
+old-path disappearance, exact error fields and cleanup.
+Receipt: [file rename C](evidence/candidate-rename-file-20261015.json).
+
+The previous candidate command image reproduces the fixture's C code 1004 at
+`std/fs.fy:541:9`. This source fix is verified through the C-emitter API; the
+full candidate command image was not rebuilt, and shipped-workspace parity was
+not rerun. The older command-image observation below remains historical.
+Other filesystem C adapters, full CLI integration, broader parity and promotion
+gates remain open.
+
 ## Recursive directory C admission (2026-10-15)
 
 The candidate file adapter now admits authenticated SDK rule 37,
@@ -21,11 +47,12 @@ without output. The development compiler also builds and runs the fixture
 successfully; its directly executed artifact returns 42 and leaves no files.
 Receipt: [recursive-directory CLI](evidence/candidate-create-dir-all-20261015.json).
 
-The original `std_fs_quickstart` still checks with exact Go output. Native build
-passes the old recursive-directory rejection and now stops at `rename_file`
+At the recursive-directory checkpoint, `std_fs_quickstart` checked with exact
+Go output. Native build passed the recursive-directory rejection and stopped at `rename_file`
 (`file_rename_raw`, SDK rule 41), `std/fs.fy:541:9`, private C code 1004. The full
-native-parity verifier fails at this next gap; candidate example execution is
-not reached. Extend the remaining file adapters next. Full-dispatcher/fixed-point,
+native-parity verifier failed at that gap; candidate example execution was
+not reached. The file-rename API fix above supersedes this source limitation;
+the command image from this checkpoint has not been rebuilt. Full-dispatcher/fixed-point,
 broader parity, performance and platform/CI gates remain separate.
 
 ## Filesystem example frontend fixes (2026-10-15)

@@ -1,5 +1,25 @@
 # Self-hosting readiness v0
 
+## File rename C admission (2026-10-15)
+
+Authenticated SDK rule 41, `file_rename_raw`, now uses the existing file-result
+C bridge and Windows no-replace rename runtime. Original SDK authentication,
+public API and runtime ABI remain unchanged.
+
+The current authored Fairy C emitter runs through the Go native test driver.
+Its emitted C passes both low and optimized MSVC runtime executions; the same
+fixture passes Go build/artifact/run at both output profiles (exit zero, empty
+output). Coverage includes collision preservation, live-owner sharing failure
+and continued handle use, successful rename, old-path disappearance, Unicode
+paths, invalid paths, directories, exact error fields and balanced cleanup.
+Receipt: [file rename C](../ops/evidence/candidate-rename-file-20261015.json).
+
+The previous command image still reproduces C code 1004 at `std/fs.fy:541:9`.
+The full command image was not rebuilt and shipped-workspace parity was not
+rerun for this focused adapter fix. Other file adapters, full CLI integration,
+fixed point, broader parity, performance and platform/CI gates remain open;
+candidate promotion remains blocked.
+
 ## Recursive directory C admission (2026-10-15)
 
 Authenticated SDK rule 37 (`directory_create_all_raw`) now reaches the existing
@@ -18,11 +38,12 @@ also builds and runs the fixture with exit 42; a directly executed artifact
 verifies cleanup. Receipt:
 [recursive-directory CLI](../ops/evidence/candidate-create-dir-all-20261015.json).
 
-The shipped filesystem example's check still matches Go. Its native build now
-passes `create_dir_all` and reaches the next unsupported file adapter:
+At the recursive-directory checkpoint the filesystem example's check matched
+Go, and native build passed `create_dir_all` before reaching the next unsupported file adapter:
 `rename_file` / `file_rename_raw`, rule 41, `std/fs.fy:541:9`, C code 1004.
-The full-example parity verifier therefore still fails, and candidate example
-execution is not reached. Full dispatcher/fixed point, broader parity,
+The full-example parity verifier therefore failed, and candidate example
+execution was not reached. The file-rename API fix above supersedes this source
+limitation; the old command image is unchanged. Full dispatcher/fixed point, broader parity,
 performance and platform/CI gates remain open; promotion remains blocked.
 
 ## Filesystem example frontend fixes (2026-10-15)
