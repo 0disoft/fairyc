@@ -52,18 +52,33 @@ fn void empty_and_unsupported_value_lanes_are_rejected(){
     assert(struct_code(b"module m;struct Pair<T>{i32 a;}")==0);
 }
 fn void non_c_identifiers_and_duplicate_fields_are_rejected(){
-    assert(struct_code(b"module m;@repr(C)struct S{i32 main;}")==5106);
-    assert(struct_code(b"module m;@repr(C)struct S{i32 fy_x;}")==5106);
-    assert(struct_code(b"module m;@repr(C)struct main{i32 x;}")==5106);
+    assert(struct_code(b"module m;@repr(C)struct S{i32 _Upper;}")==5106);
+    assert(struct_code(b"module m;@repr(C)struct S{i32 __value;}")==5106);
+    assert(struct_code(b"module m;@repr(C)struct _record{i32 x;}")==5106);
     assert(struct_code(b"module m;@repr(C)struct S{i32 int32_t;}")==5106);
     assert(struct_code(b"module m;@repr(C)struct S{i32 x;i32 x;}")==5106);
     assert(!struct_layout(b"module m;@repr(C)struct S{i32 x;i32 x;}"));
+    assert(struct_code(b"module m;@repr(C)struct fy_region{i32 x;}")==5106);
+    assert(struct_code(b"module m;@repr(C)struct fy_struct_slice{i32 x;}")==5106);
+    assert(struct_code(b"module m;@repr(C)struct S{i32 FY_value;}")==5106);
+    assert(struct_code(b"module m;@repr(C)struct S{i32 INT_FAST16_MAX;}")==5106);
+    assert(struct_code(b"module m;@repr(C)struct S{i32 offsetof;}")==5106);
+    let ref u8[] input=b"module m;@repr(C)struct S{i32 _Upper;}";
+    let bad=read_struct(input,0);assert(bytes::equal(input[bad.start..bad.end],b"_Upper"));
+}
+fn void safe_record_and_member_names_are_admitted(){
+    let ref u8[] input=b"module main;@repr(C)struct fairyc_safe_record{i32 _value;}fn i32 main(){let fairyc_safe_record record=fairyc_safe_record{._value=42};return record._value;}";
+    let info=read_struct(input,0);assert(info.repr_c && info.code==0 && struct_layout(input));
+    let p=parsed(b"module m;@repr(C)struct main{i32 main;i32 fy_x;i32 INTvalue;i32 UINTvalue;i32 int64_t;i32 bool;i32 memcpy;i32 _;}@repr(C)struct fy_std_record{i32 x;}");
+    assert(repr_c::read(ref p,struct_at(ref p,0)).code==0);
+    assert(repr_c::read(ref p,struct_at(ref p,1)).code==0);
 }
 fn void non_struct_declarations_are_ignored(){
     let p=parsed(b"module m;");let info=repr_c::read(ref p,0);assert(!info.repr_c && info.code==0 && !repr_c::layout(ref p,0));
     let q=parsed(b"module m;fn i32 f(){return 0;}");let fn_info=repr_c::read(ref q,1);assert(!fn_info.repr_c && fn_info.code==0);
 }
 @test fn void repr_c_declaration_native_contract(){
+    safe_record_and_member_names_are_admitted();
     admitted_marker_and_value_lane();
     plain_struct_without_marker_is_not_repr_c();
     malformed_attributes_are_rejected();

@@ -13,8 +13,9 @@ Code contract (declaration-local, never a public compiler diagnostic ID):
   0    not an inert repr(C) struct, or a fully approved one.
   5106 malformed shape: a bad or duplicated @repr, a non-C spelling, any
        other struct attribute such as @effects, a non-C tag or field name
-       (C keywords, runtime namespaces fy_/FY_/INT/UINT, libc names, and
-       main, all named by ffi_symbols::valid), a duplicate field name, or a
+       (C11 keywords, header macros, generated scalar names, the FY_ prefix,
+       implementation-reserved underscores, and exact backend record tags,
+       checked by ffi_symbols::record/member under ADR 0320), a duplicate field name, or a
        generic struct.
   5102 well-formed @repr(C) whose value lane is not admitted here: an empty
        body, a field type outside fixed scalar / closed C scalar / raw pointer
@@ -32,3 +33,6 @@ structs, arrays, borrows, resources, and tagged/generic types wait for later
 units and are rejected here.
 Tag and field-name lane plus value types. 5106 is a name/structure violation,
 5102 a value-lane violation, 0 an admissible inert layout.
+Record tags reject every leading underscore; members admit `_value` and `_`
+but reject `__value` and `_Upper`. External-link restrictions such as `main`
+and the target-authenticated `fy_` prefix do not govern record or member names.
