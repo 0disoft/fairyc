@@ -9,6 +9,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--root', type=Path, required=True)
     parser.add_argument('--root-bin', type=Path, required=True)
+    parser.add_argument('--wide', action='store_true', help='include a 512-file shared-work regression directory')
     args = parser.parse_args()
     if os.name != 'nt':
         parser.error('the current SDK directory adapter requires Windows')
@@ -46,6 +47,10 @@ def main():
     }
     for name, source in sources.items():
         (base / name).write_text(source, encoding='utf-8', newline='\n')
+    if args.wide:
+        (base / 'Wide').mkdir(exist_ok=True)
+        for index in range(512):
+            (base / 'Wide' / f'p{index}_module_unit_long_source_fixture_for_work.fy').write_bytes(b'module fixture;\n')
     (base / 'Reads/binary.fy').write_bytes(b'\x00\xff\r')
     (base / 'Reads/large.fy').write_bytes(b'a' * 65536 + b'z')
     (base / 'Reads/empty.fy').write_bytes(b'')

@@ -15,13 +15,15 @@ fn u32 directory_code(u32 code){return if(code==3 || code==2){2}else if(code==4)
 fn Result<bytes::Buffer,Error> observe(ref u8[] root,ref u8[] relative,ref mut usize work){
     if(root.len==0 || root.len>4095 || relative.len>4095){return .err(fail(5,0,0,relative.len));}if(!text::validate_utf8(root).is_ok){return .err(fail(7,0,0,0));}
     if(!paths::source_relative(relative)){return .err(fail(2,0,0,relative.len));}var usize leaf=0;var usize index=0;while(index<relative.len){if(relative[index]==47){leaf=index+1;}index+=1;}
+    let ref str expected=switch(text::validate_utf8(relative[leaf..])){case .ok(value):{value}case .err(_):{return .err(fail(7,0,leaf,relative.len));}};
     var bytes::Buffer parent=if(leaf>0){switch(directory::resolve_source(root,relative[..leaf-1],work)){case .ok(value):{value}case .err(e):{return .err(fail(directory_code(e.code),e.os_code,e.start,e.end));}}}else{var bytes::Buffer copy=bytes::empty();if(!bytes::append(ref mut copy,root).is_ok){return .err(fail(6,0,0,leaf));}copy};
     if(bytes::len(ref parent)==0 || bytes::len(ref parent)+relative.len-leaf+1>4095 || !paths::charge(work,bytes::len(ref parent)+relative.len-leaf+1)){return .err(fail(5,0,leaf,relative.len));}
     let ref str path=switch(text::validate_utf8(bytes::view(ref parent))){case .ok(value):{value}case .err(_):{return .err(fail(7,0,0,leaf));}};
     var fs::ReadDir stream=switch(fs::read_dir_utf8(path)){case .ok(value):{value}case .err(e):{return .err(fail(if(e.os_code==1920){8}else{1},e.os_code,0,leaf));}};
     var u8[4096] name=[0;4096];var usize matches=0;var bool exact=false;var bool reparse=false;var bool regular=false;
     while(true){let fs::DirEntry entry=switch(fs::next_dir(ref mut stream,ref mut name)){case .ok(value):{value}case .err(e):{return .err(fail(1,e.os_code,leaf,relative.len));}};if(!entry.has_entry){break;}if(entry.name_length>4096){return .err(fail(5,0,leaf,relative.len));}let ref u8[] view=ref name;
-        let bool equal=switch(paths::equal_fold(view[..entry.name_length],relative[leaf..],work)){case .ok(value):{value}case .err(code):{return .err(fail(if(code==4){5}else{7},0,leaf,relative.len));}};
+        let ref str actual=switch(text::validate_utf8(view[..entry.name_length])){case .ok(value):{value}case .err(_):{return .err(fail(7,0,leaf,relative.len));}};
+        let bool equal=switch(paths::equal_fold_text(actual,expected,work)){case .ok(value):{value}case .err(code):{return .err(fail(if(code==4){5}else{7},0,leaf,relative.len));}};
         if(equal){matches+=1;exact=bytes::equal(view[..entry.name_length],relative[leaf..]);reparse=entry.is_reparse;regular=fs::path_kind_is_file(entry.kind);}
     }
     switch(fs::close_dir(stream)){case .ok(_):{}case .err(e):{return .err(fail(1,e.os_code,leaf,relative.len));}};

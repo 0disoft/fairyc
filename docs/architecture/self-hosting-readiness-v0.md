@@ -1,5 +1,25 @@
 # Self-hosting readiness v0
 
+## Bootstrap workspace source-read work (2026-10-16)
+
+The workspace bootstrap loader exhausted the unchanged 16,777,216 shared path
+work budget during repeated directory-name comparisons (phase 4, reason 5,
+work 16,777,169). Source reads now compare validated `ref str` names and charge
+only the scalar bytes actually examined. Full UTF-8 validation, Unicode folding,
+exact spelling, fold collisions, reparse rejection, two directory observations
+and opened-file identity checks remain in place. The same complete source
+workspace now loads successfully at work 4,487,311.
+
+Two name/Unicode/work-boundary tests and two real source-file tests pass with Go
+native and both candidate C profiles. The latter include 512 files sharing one
+work counter plus the existing byte, size, wrong-case, missing, directory,
+reparse and identity boundaries. The first optimized test build hit its default
+two-minute compile allowance; the same packet succeeded with an explicit
+verification-only five-minute allowance. Product limits are unchanged.
+Receipt: [source-read regression](../ops/evidence/candidate-bootstrap-source-work-20261016.json).
+Manifest linking and the full current-source fixed point are separate pending
+checks at this checkpoint.
+
 ## Broader Go comparison and current-source bootstrap (2026-10-16)
 
 The rebuilt metadata compiler has completed four fresh Go comparison suites.

@@ -9,6 +9,15 @@ import std::fs as fs;
 fn void rejected(ref u8[] root,ref u8[] path,usize remaining,u32 code){var usize work=0;switch(source::read(root,path,remaining,ref mut work)){case .ok(_):{assert(false);}case .err(e):{assert(e.code==code && e.start<=e.end && e.end<=path.len);}};}
 @test
 @effects(filesystem,console)
+fn void wide_directory_reads_fit_the_unchanged_shared_work_bound(){
+    var u8[4096] argument=[0;4096];let usize length=switch(process::arg(1,ref mut argument)){case .ok(n):{n}case .err(_):{assert(false);0}};
+    let fixture=switch(files::manifest(ref argument[..length])){case .ok(value):{value}case .err(_):{assert(false);bytes::empty()}};var usize work=0;var usize index=0;
+    while(index<512){var bytes::Buffer path=bytes::empty();assert(bytes::append(ref mut path,b"Wide/p").is_ok && bytes::append_usize(ref mut path,index).is_ok && bytes::append(ref mut path,b"_module_unit_long_source_fixture_for_work.fy").is_ok);
+        switch(source::read(bytes::view(ref fixture),bytes::view(ref path),16,ref mut work)){case .ok(value):{assert(bytes::equal(bytes::view(ref value),b"module fixture;\n"));}case .err(_):{assert(false);}};index+=1;
+    }assert(work<8388608);
+}
+@test
+@effects(filesystem,console)
 fn void retains_exact_bytes_and_checks_file_boundaries(){
     var u8[4096] argument=[0;4096];let usize length=switch(process::arg(1,ref mut argument)){case .ok(n):{n}case .err(_):{assert(false);0}};
     let ref u8[] argument_path=ref argument;let fixture=switch(files::manifest(argument_path[..length])){case .ok(value):{value}case .err(_):{assert(false);bytes::empty()}};let ref u8[] root=bytes::view(ref fixture);var usize work=0;
