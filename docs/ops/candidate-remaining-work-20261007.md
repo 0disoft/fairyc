@@ -1,5 +1,16 @@
 # Fairy 컴파일러 전환: 후속 작업 목록
 
+## Filesystem command CLI rebuild (2026-10-15)
+
+The authored check/build/run dispatcher was rebuilt from 415 current sources,
+including the recursive-directory and file-rename C fixes through `626154c3`.
+Both development and optimized native images were built by the verified Fairy
+stage2 seed without invoking a Go frontend. Source, image and seed hashes are
+bound by the [build receipt](evidence/candidate-std-fs-cli-rebuild-20261015.json).
+The private 16MiB stack setting is unchanged; this is a command-dispatcher build,
+not a full-dispatcher or fixed-point promotion. Command integration results are
+recorded separately from this successful build.
+
 ## File rename C admission (2026-10-15)
 
 The file C adapter now admits authenticated SDK rule 41, `file_rename_raw`.
