@@ -13,9 +13,23 @@ product deadlines are unchanged. Full dispatcher/fixed-point promotion is open.
 The development compiler checks the shipped filesystem workspace with exact
 Go output (2 instances, 12 files, 217 MIR functions). Build passes byte-copy
 emission and stops at `std::fs::is_read_only`, `file_read_only_raw` / SDK rule 51,
-`std/fs.fy:735:9`, private C code 1004, exit 2. The optimized compiler's complete
-command matrix is pending at this build checkpoint. Native parity and candidate
-promotion remain blocked.
+`std/fs.fy:735:9`, private C code 1004, exit 2.
+
+The optimized compiler's complete selected matrix has 17 observations. Check
+exactly matches Go, and cache cold storage and repeated hit succeed. Both
+generated-program profiles' build/run and cached build/run fail at that same
+read-only query (six commands, exit 2). Two direct candidate artifact executions
+are skipped after failed builds; candidate program execution is not reached.
+No observation times out. The verifier records `passed: false` and exits 1.
+
+The fresh Go CLI builds both output profiles; direct artifacts return 42 with
+the existing host smoke metadata fixtures. Go run returns 356 in fresh scratch
+directories without those fixtures. The development compiler's check and build
+observations are included in the
+[matrix receipt](evidence/candidate-std-fs-cli-matrix-copy-20261015.json).
+Read-only metadata C admission is the next observed blocker. Native parity,
+broader equivalence and promotion gates remain open. No public API, SDK/runtime
+ABI, database, repository hygiene or CI/runner configuration changes are made.
 
 ## Copy-file C admission (2026-10-15)
 
@@ -74,8 +88,8 @@ scratch directories without those fixtures. The development compiler's check
 and build observations are included in the
 [matrix receipt](evidence/candidate-std-fs-cli-matrix-hard-link-20261015.json).
 At this integration checkpoint copy-file C admission was the first observed
-blocker. The source fix above supersedes it; a new command CLI build and full
-matrix are still needed. Native parity, broader
+blocker. The copy source fix and latest command CLI matrix above supersede it;
+read-only metadata is the next observed gap. Native parity, broader
 equivalence and promotion gates remain open. No public API, SDK/runtime ABI,
 database, repository hygiene or CI/runner configuration changes are made.
 
