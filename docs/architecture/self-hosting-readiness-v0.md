@@ -1,5 +1,32 @@
 # Self-hosting readiness v0
 
+## Copy-file C admission (2026-10-15)
+
+Authenticated SDK rule 44 (`file_copy_bytes_raw`) now reaches the existing
+file-result C bridge and real Windows byte-copy runtime. Original SDK source
+and signature authentication, public API and runtime ABI are unchanged.
+ADR 0297 and current SDK/runtime sources remain the behavior contracts.
+
+The current authored Fairy emitter, compiled by the Go native test driver,
+generates C that passes low and optimized MSVC runtime executions. The same
+fixture passes Go build/artifact/run at both output profiles (exit zero, empty
+output). It covers 65,537 bytes across the runtime's 64KiB window, exact count
+and all bytes, Unicode, invalid paths, missing-source no-create behavior,
+destination preservation, repeated-copy collision, live-source sharing failure
+and retained owner use, independent bytes after source mutation/removal, empty
+files and cleanup. Ten public opens, closes and resource drops balance, with no
+leftover files. Later I/O failure injection is outside this adapter regression.
+Receipt: [copy-file C](../ops/evidence/candidate-copy-file-bytes-20261015.json).
+
+The 68,171-byte C output uses a test-owned file; its byte count is checked
+against the native report and its hash is recorded for runtime verification.
+Product console, stack and deadline policies stay unchanged. The previous
+command image reproduces the fixture's code 1004 at `std/fs.fy:583:9`. No new
+command image or full shipped-workspace parity run is claimed for this focused
+fix. The integration matrix below predates copy admission. Full CLI integration,
+other filesystem adapters, fixed point, broader parity, performance and
+platform/CI gates remain open. Promotion stays blocked.
+
 ## Filesystem CLI rebuild after hard-link admission (2026-10-15)
 
 The 415-source authored check/build/run dispatcher now includes hard-link C
@@ -27,8 +54,10 @@ with the existing host smoke metadata fixtures. Go run returns 356 in fresh
 scratch directories without those fixtures. The development compiler's check
 and build observations are also bound in the
 [matrix receipt](../ops/evidence/candidate-std-fs-cli-matrix-hard-link-20261015.json).
-Copy-file C admission is the next observed blocker. Native parity and promotion
-remain blocked; broader equivalence and platform/performance gates stay open.
+Copy-file C admission was this integration checkpoint's first blocker. The
+focused source fix above supersedes it; a new CLI build and full command matrix
+remain needed. Native parity and promotion remain blocked; broader equivalence
+and platform/performance gates stay open.
 Public API, SDK/runtime ABI, database, repository hygiene and CI/runner
 configuration are unchanged.
 

@@ -18,6 +18,8 @@ import std::bytes as bytes;
 import std::vec as v;
 import std::process as process;
 import std::io as io;
+import std::fs as fs;
+import std::text as text;
 
 fn syntax::Parsed parsed(ref u8[] text){let b=switch(bytes::copy(text)){case .ok(b):{b}case .err(_):{assert(false);return parsed(b"module empty;");}};let s=switch(scanner::collect(b,false,65536,1048576,256,16777216)){case .ok(s):{s}case .err(_):{assert(false);return parsed(b"module empty;");}};let p=switch(syntax::parse(s,512)){case .ok(p):{p}case .err(_):{assert(false);return parsed(b"module empty;");}};assert(syntax::problem_count(ref p)==0);return p;}
 @effects(filesystem) fn bytes::Buffer input(usize index){var bytes::Buffer path=bytes::empty();assert(bytes::resize_zeroed(ref mut path,4096).is_ok);let n=switch(process::arg(index,bytes::view_mut(ref mut path))){case .ok(n):{n}case .err(_):{assert(false);return bytes::empty();}};return switch(files::load(bytes::view(ref path)[..n])){case .ok(b):{b}case .err(_):{assert(false);bytes::empty()}};}
@@ -40,3 +42,14 @@ fn usize entry(ref ir::Program p){var usize found=0;var usize i=1;while(i<=ir::c
 @test @effects(console,filesystem) fn void sdk_c_executes_file_buffer_failure_preserves_cursor(){let p=retained(b"module main;import std::fs as f;import std::bytes as b;@effects(filesystem) fn i32 main(){var f::File output=switch(f::create_truncate(c\"failure.bin\")){case .ok(v):{v}case .err(_):{return 1;}};assert(f::write_all(ref mut output,b\"AB\").is_ok);assert(f::close(output).is_ok);var f::File input=switch(f::open_read(c\"failure.bin\")){case .ok(v):{v}case .err(_):{return 1;}};var b::Buffer data=switch(b::copy(b\"P\")){case .ok(v):{v}case .err(_):{return 1;}};switch(f::read_append(ref mut input,ref mut data,65536)){case .ok(_):{assert(false);}case .err(error):{assert(f::read_append_error_file_status(error)==0 && f::read_append_error_os_code(error)==0 && f::read_append_error_allocation_status(error)==1);}};assert(b::len(ref data)==1 && b::view(ref data)[0]==80);assert(switch(f::position(ref mut input)){case .ok(n):{n==0}case .err(_):{false}});var u8[2] original=[0;2];assert(f::read_exact(ref mut input,ref mut original).is_ok && original[0]==65 && original[1]==66);assert(f::close(input).is_ok && f::remove_file(c\"failure.bin\").is_ok);return 0;}");output(ref p);}
 @test @effects(console,filesystem) fn void sdk_c_executes_file_rename_preserves_paths_and_live_owner(){let root=input(3);let p=retained(bytes::view(ref root));output(ref p);}
 @test @effects(console,filesystem) fn void sdk_c_executes_file_hard_link_shared_writes_and_alias_survival(){let root=input(3);let p=retained(bytes::view(ref root));output(ref p);}
+// Large generated C travels through a file without changing console bounds.
+@effects(console,filesystem) fn void output_file(ref ir::Program p){
+    var bytes::Buffer c=bytes::empty();let result=emit::render(p,entry(p),ref mut c);
+    if(result.code!=0){discard io::write("C ");error(result.code,result.start,result.end);}
+    var u8[4096] path=[0;4096];let n=switch(process::arg(4,ref mut path)){case .ok(n):{n}case .err(_):{assert(false);return;}};
+    let name=switch(text::validate_utf8(ref path[..n])){case .ok(s):{s}case .err(_):{assert(false);return;}};
+    var file=switch(fs::create_truncate_utf8(name)){case .ok(f):{f}case .err(_):{assert(false);return;}};
+    assert(switch(fs::write_all(ref mut file,bytes::view(ref c))){case .ok(n):{n==bytes::len(ref c)}case .err(_):{false}});
+    assert(fs::close(file).is_ok);discard io::write_usize(bytes::len(ref c));discard io::write("\n");
+}
+@test @effects(console,filesystem) fn void sdk_c_executes_file_copy_bytes_count_and_destination_preservation(){let root=input(3);let p=retained(bytes::view(ref root));output_file(ref p);}

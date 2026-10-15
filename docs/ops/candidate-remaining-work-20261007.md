@@ -1,5 +1,33 @@
 # Fairy 컴파일러 전환: 후속 작업 목록
 
+## Copy-file C admission (2026-10-15)
+
+The file C adapter now admits authenticated SDK rule 44, `file_copy_bytes_raw`.
+It uses the existing two-path signature, `raw_file_result` bridge and real
+`fy_std_windows_file_copy_bytes_v0` runtime in `stage0_windows_file.c`.
+SDK source/signature authentication, public API and runtime ABI are unchanged;
+ADR 0297 and current SDK/runtime sources remain the behavior contracts.
+
+The current authored Fairy emitter executes through the Go native test driver.
+Its emitted C passes low and optimized MSVC executions against the real runtime.
+The same fixture passes Go build/artifact/run at both output profiles (exit zero,
+empty output). Coverage includes a 65,537-byte copy across the runtime's 64KiB
+window, exact count and all bytes, Unicode paths, invalid paths, missing-source
+no-create behavior, destination preservation, repeated-copy collision, live
+source sharing failure and continued owner use, independent destination bytes
+after source mutation/removal, empty files and cleanup. Ten successful public
+opens, closes and resource drops balance; no fixture files remain. Later I/O
+failure injection is not part of this adapter regression.
+Receipt: [copy-file C](evidence/candidate-copy-file-bytes-20261015.json).
+
+The 68,171-byte generated C travels through a test-owned file, with its byte
+count checked against the native report and its hash recorded by the runtime
+verifier. Product console limits, stack and deadlines are unchanged. This
+focused source fix reproduces the previous command image's code 1004 at
+`std/fs.fy:583:9`; it does not rebuild the command CLI or rerun full-workspace
+native parity. The matrix below is a historical pre-copy-fix observation.
+Full CLI integration, other filesystem adapters and promotion gates remain open.
+
 ## Filesystem CLI rebuild after hard-link admission (2026-10-15)
 
 The authored check/build/run dispatcher is rebuilt from 415 sources through
@@ -27,7 +55,9 @@ with the existing host smoke metadata fixtures. Go run returns 356 in fresh
 scratch directories without those fixtures. The development compiler's check
 and build observations are included in the
 [matrix receipt](evidence/candidate-std-fs-cli-matrix-hard-link-20261015.json).
-The next observed blocker is copy-file C admission. Native parity, broader
+At this integration checkpoint copy-file C admission was the first observed
+blocker. The source fix above supersedes it; a new command CLI build and full
+matrix are still needed. Native parity, broader
 equivalence and promotion gates remain open. No public API, SDK/runtime ABI,
 database, repository hygiene or CI/runner configuration changes are made.
 
@@ -84,7 +114,8 @@ scratch directories without those external fixtures; that comparison is not
 the successful artifact-execution result. Candidate program execution is not
 reached. Receipt: [full selected matrix](evidence/candidate-std-fs-cli-matrix-20261015.json).
 The hard-link source fix and newest CLI matrix above supersede this historical
-integration checkpoint; copy-file C admission is the next observed blocker.
+integration checkpoint; copy-file C admission was the next observed blocker
+before the focused source fix above.
 Full dispatcher/fixed point, broader parity, performance
 and platform/CI gates remain open.
 

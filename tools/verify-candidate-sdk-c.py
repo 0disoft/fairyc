@@ -28,6 +28,7 @@ TEXT_CASES = {
 # Successful opens, explicit closes, cleanup calls, cleanup of open owners,
 # heap attempts and injected failure. Programs run in isolated scratch folders.
 FILE_CASES = {
+    "sdk_c_executes_file_copy_bytes_count_and_destination_preservation": (10, 10, 10, 0, 0, None),
     "sdk_c_executes_file_hard_link_shared_writes_and_alias_survival": (7, 7, 7, 0, 0, None),
     "sdk_c_executes_file_rename_preserves_paths_and_live_owner": (6, 6, 6, 0, 0, None),
     "sdk_c_executes_file_utf8_roundtrip_seek_and_close": (2, 2, 2, 0, 0, None),
@@ -121,7 +122,10 @@ def main():
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--vcvars", type=Path, required=True)
     parser.add_argument("--case", choices=CASES, action="append")
+    parser.add_argument("--source-file", type=Path,
+                        help="C emitted to a file by one selected test; captured stdout must report its exact byte count")
     args = parser.parse_args()
+    assert not args.source_file or args.case and len(args.case) == 1
     outcomes = {}
     reports = []
     for path in args.report:
@@ -161,7 +165,10 @@ def main():
     executions = []
     for name in dict.fromkeys(args.case or CASES):
         components, argv, expected = CASES[name]
-        source = base64.b64decode(outcomes[name]["stdoutBase64"], validate=True)
+        captured = base64.b64decode(outcomes[name]["stdoutBase64"], validate=True)
+        source = args.source_file.read_bytes() if args.source_file else captured
+        if args.source_file:
+            assert captured == f"{len(source)}\n".encode(), "emitted C byte count differs from native test report"
         assert source.startswith(b"/* fairyc.candidate-module-owned-c/v1 */\n")
         if name == "sdk_c_compares_exact_byte_views_with_authenticated_bulk_reads":
             assert b"memcmp(" in source
@@ -374,6 +381,8 @@ def main():
                                                   for path in inputs], build=build, run=run))
     receipt = dict(schema="fairyc.candidate-sdk-c-execution/v1", passed=True,
                    reports=reports, executions=executions, compiler=str(compiler),
+                   generatedSourceInput=dict(path=str(args.source_file.resolve()),
+                                             sha256=hashlib.sha256(source).hexdigest()) if args.source_file else None,
                    source="Private Fairy emitter; actual repository C runtime components, no SDK stand-ins")
     (output / "receipt.json").write_text(json.dumps(receipt, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     print(f"SDK C execution passed: {len(executions)} runs")

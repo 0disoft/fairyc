@@ -13,6 +13,7 @@ PROJECT = ROOT / 'examples/lexer_candidate'
 OPERATIONS = {
     'rename-file': ('sdk_c_executes_file_rename_preserves_paths_and_live_owner', 541, 'rename-probe'),
     'hard-link': ('sdk_c_executes_file_hard_link_shared_writes_and_alias_survival', 569, 'hard-link-probe'),
+    'copy-file-bytes': ('sdk_c_executes_file_copy_bytes_count_and_destination_preservation', 583, 'copy-file-bytes-probe'),
 }
 spec = importlib.util.spec_from_file_location('behavior', ROOT / 'tools/compare-candidate-go-behavior.py')
 behavior = importlib.util.module_from_spec(spec)
@@ -76,6 +77,9 @@ def main():
     succeeds(execute(reference, native, ['check'], 'emitter/check'))
     argv = ['test', '--native', '--locked', '--json', '--capture-output', '--exact', identity, '--',
             ROOT / 'internal/sdkstdlib/sources/std/fs.fy', ROOT / 'internal/sdkstdlib/sources/std/bytes.fy', fixture]
+    source_file = output / 'candidate.c' if args.operation == 'copy-file-bytes' else None
+    if source_file:
+        argv.append(source_file)
     row = execute(reference, native, argv, 'emitter/native', capture=True)
     (output / 'native.json').write_text(row['stdout'], encoding='utf-8', newline='\n')
     succeeds(row)
@@ -84,7 +88,8 @@ def main():
     assert [r['identity'] for r in report['tests']] == [identity]
     row = execute(Path(sys.executable), ROOT, [ROOT / 'tools/verify-candidate-sdk-c.py',
         '--report', output / 'native.json', '--case', case, '--vcvars', args.vcvars.resolve(),
-        '--output', output / 'c-execution'], 'candidate/C-execution')
+        '--output', output / 'c-execution',
+        *(['--source-file', source_file] if source_file else [])], 'candidate/C-execution')
     succeeds(row)
 
     oracle = output / 'Go'
