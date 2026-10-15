@@ -1,5 +1,28 @@
 # Fairy 컴파일러 전환: 후속 작업 목록
 
+## Result obligation rejection fixed (2026-10-15)
+
+The checked module-body gate now runs Result obligation analysis before lowering
+and cache admission. It retains lexical local identity and the existing control
+graph for overwrites, branch/loop joins, abrupt exits, captures, propagation and
+short-circuit expressions. The private stage is 9; the public diagnostic is
+`E4101`. Four authored tests covering 24 source programs pass Go-native and both
+candidate C profiles. Receipt: [Result API](evidence/candidate-result-flow-api-20261015.json).
+
+The current 415-source command image builds at both profiles without a Go
+frontend fallback. All 11 prior missing diagnostics match Go exactly; handled
+Results and added iteration/Region cases retain their expected admission.
+Cold and cached check/build/run reject pending Results while preserving prior
+cache records and the built executable. The 169-case development regression
+changes only the intended 11 observations; the other 158 are byte-identical.
+Receipt: [Result commands](evidence/candidate-result-flow-command-20261015.json).
+
+The E4101 omission in the comparison below is closed. Next priorities remain the
+filesystem example's internal error, struct-iteration C emission, other subset
+and C-member identifier gaps, then diagnostic/CLI parity. The full dispatcher
+and current fixed point, product policies/performance, Linux and hosted CI remain
+separate gates; candidate promotion stays blocked.
+
 ## Go behavior comparison (2026-10-15)
 
 The current Go CLI and the 410-source candidate command image still differ.

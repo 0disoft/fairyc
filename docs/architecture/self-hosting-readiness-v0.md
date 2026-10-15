@@ -1,5 +1,23 @@
 # Self-hosting readiness v0
 
+## Result obligation rejection restored (2026-10-15)
+
+Module checking now applies Result obligation analysis before lowering and saved
+unit admission. Its private stage 9 publishes `E4101` with the original producer
+span. Four authored tests covering 24 source programs pass Go-native and both
+candidate C profiles. The current 415-source check/build/run image builds at both
+profiles without Go frontend fallback, and all 11 prior E4101 differences now
+match Go exactly. Added iteration/Region cases and handled Result cases pass.
+Cold and cached failures preserve existing cache records and executable bytes.
+The 169-case development regression changes only the intended 11 observations.
+Receipts: [API](../ops/evidence/candidate-result-flow-api-20261015.json) and
+[commands](../ops/evidence/candidate-result-flow-command-20261015.json).
+
+This closes the Result omission recorded below. Other frontend, native emission,
+diagnostic and CLI differences remain. Full-dispatcher/current fixed-point,
+measured product-policy/performance and platform/CI gates remain open, and Go
+continues as the reference implementation.
+
 ## Go behavior comparison (2026-10-15)
 
 The current comparison does not meet the full-frontend equivalence gate. Both

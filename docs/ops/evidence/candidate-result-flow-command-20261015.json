@@ -1,0 +1,1086 @@
+{
+  "schema": "fairyc.candidate-result-flow-command/v1",
+  "passed": true,
+  "date": "2026-10-15",
+  "sourceHeadBeforeCommit": "88d4f7f8d09d71f8d5ff2f6fbbd127a9bd2b7442",
+  "sourceInputs": [
+    {
+      "path": "examples/lexer_candidate/src/module_unit_result_flow.fy",
+      "sha256": "0fa5e8eb3753319aa057696c7afd8a5611d5c8be000088a3a0361bc461fff3df"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_unit_checked_bodies.fy",
+      "sha256": "156996d4f55614d93d8038484ceccbbe0dd2fc9475a7101ed81d2bd5ab65e720"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_project_compile.fy",
+      "sha256": "ac124cea56eb13c37cca35b17e448ef52bbdfb8d957820c23e4585f37c4f6dc2"
+    },
+    {
+      "path": "examples/lexer_candidate/src/result_flow.fy",
+      "sha256": "e1b769bcd8cb83e49622c389a662a71946e1aef6e2b3574a0a7a62f0773a42b0"
+    },
+    {
+      "path": "examples/lexer_candidate/src/result_flow_graph.fy",
+      "sha256": "8e67b6d54914db89967ece0934b9de45d5792d3046cf46001a4b0c38140fa082"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_diagnostic_codes.fy",
+      "sha256": "310802b67a039f8b49e2413c25238120b1f8f559ef8f71f48558308fd2d5e740"
+    },
+    {
+      "path": "examples/lexer_candidate/tests/module_unit_result_flow.fy",
+      "sha256": "91ee2ee820388a7dae1d26cca3b217d028e83e5675fc32d6a7d456d21ee6edd4"
+    },
+    {
+      "path": "tools/verify-candidate-result-flow.py",
+      "sha256": "c91c163ab935f9d3ac80b2d62c0e278bb04ed4126609b9c67e3e1e18c0796993"
+    },
+    {
+      "path": "tools/compare-candidate-go-behavior.py",
+      "sha256": "c1430624c0e76b15a6ff02446f823bf29321ba85ee7dc5f576f71cdd1b7160fe"
+    },
+    {
+      "path": "tools/build-candidate-native-probe.py",
+      "sha256": "0a1e6fef7253cd216915b1685ac1b0fcb41ab00860cf0257aa3b042d062353a4"
+    }
+  ],
+  "build": {
+    "path": ".cache/result-flow-20261015/commands/receipt.json",
+    "sha256": "2df2200c7b6a20d5c2c68bfb2a88c2d46c80803dee5c1de9785a9c126aee95b0",
+    "sourceInputs": 415,
+    "sourceInputsDigestSHA256": "f055971e52c85cf76eabd7a01457fd0694945f8d9f424895073ff66ede82f11c"
+  },
+  "commandVerification": {
+    "path": ".cache/result-flow-20261015/cli/receipt.json",
+    "sha256": "449d71797c9df32715970f3722e0348dae335f7862987d5199a871284e27a18d",
+    "sourceInputs": 443,
+    "sourceInputsDigestSHA256": "32d21a777c38fb2352cc38a59dafc9a4d7548ed1bab77aa20f26e896bb82a9b4"
+  },
+  "candidateImages": [
+    {
+      "profile": "development",
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\result-flow-20261015\\commands\\development\\fairyc.exe",
+      "sha256": "01d43eeeb1be6b8533d6986786b5560bb9908ae69845e559e1556c56ab47a4bb",
+      "driverSHA256": "9568d0029ab4616fbd6400d9e6a0899352f482677cdce378236d6f07c8b8abe8"
+    },
+    {
+      "profile": "release",
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\result-flow-20261015\\commands\\release\\fairyc.exe",
+      "sha256": "301460f4a9ec7d6f1ef4a06e9de3948be83b81beb6f415f4395d36d128880c46",
+      "driverSHA256": "9568d0029ab4616fbd6400d9e6a0899352f482677cdce378236d6f07c8b8abe8"
+    }
+  ],
+  "reference": {
+    "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\go-candidate-differential-20261015\\fairyc-go.exe",
+    "sha256": "47ec6039da761e2a01115e7e2d765aa40e86dcf053f054b4d78fa78f383406aa"
+  },
+  "candidateSources": 415,
+  "candidatePacketBytes": 30898941,
+  "candidatePacketSHA256": "f69ee1c34f45e7e2862d1b44200d4af230b0cdd5e3e8af7d7bf3bd7a403da28d",
+  "candidateGoFrontendFallback": false,
+  "scope": "authored check/build/run entry points with real OS argv",
+  "privateStackReserveBytes": 16777216,
+  "fixtureCases": 27,
+  "baselineE4101Cases": 11,
+  "additionalPendingCases": 2,
+  "acceptedCases": 14,
+  "commandObservations": 80,
+  "fixtures": [
+    {
+      "id": "pass.flow.return-result",
+      "goExit": 0,
+      "diagnostics": [],
+      "profiles": [
+        {
+          "profile": "development",
+          "exit": 0,
+          "stdoutMatch": true,
+          "stderrMatch": true
+        },
+        {
+          "profile": "release",
+          "exit": 0,
+          "stdoutMatch": true,
+          "stderrMatch": true
+        }
+      ]
+    },
+    {
+      "id": "pass.flow.discard-result",
+      "goExit": 0,
+      "diagnostics": [],
+      "profiles": [
+        {
+          "profile": "development",
+          "exit": 0,
+          "stdoutMatch": true,
+          "stderrMatch": true
+        },
+        {
+          "profile": "release",
+          "exit": 0,
+          "stdoutMatch": true,
+          "stderrMatch": true
+        }
+      ]
+    },
+    {
+      "id": "pass.flow.propagate-result",
+      "goExit": 0,
+      "diagnostics": [],
+      "profiles": [
+        {
+          "profile": "development",
+          "exit": 0,
+          "stdoutMatch": true,
+          "stderrMatch": true
+        },
+        {
+          "profile": "release",
+          "exit": 0,
+          "stdoutMatch": true,
+          "stderrMatch": true
+        }
+      ]
+    },
+    {
+      "id": "pass.flow.construct-result",
+      "goExit": 0,
+      "diagnostics": [],
+      "profiles": [
+        {
+          "profile": "development",
+          "exit": 0,
+          "stdoutMatch": true,
+          "stderrMatch": true
+        },
+        {
+          "profile": "release",
+          "exit": 0,
+          "stdoutMatch": true,
+          "stderrMatch": true
+        }
+      ]
+    },
+    {
+      "id": "pass.flow.match-result",
+      "goExit": 0,
+      "diagnostics": [],
+      "profiles": [
+        {
+          "profile": "development",
+          "exit": 0,
+          "stdoutMatch": true,
+          "stderrMatch": true
+        },
+        {
+          "profile": "release",
+          "exit": 0,
+          "stdoutMatch": true,
+          "stderrMatch": true
+        }
+      ]
+    },
+    {
+      "id": "pass.flow.stored-discard",
+      "goExit": 0,
+      "diagnostics": [],
+      "profiles": [
+        {
+          "profile": "development",
+          "exit": 0,
+          "stdoutMatch": true,
+          "stderrMatch": true
+        },
+        {
+          "profile": "release",
+          "exit": 0,
+          "stdoutMatch": true,
+          "stderrMatch": true
+        }
+      ]
+    },
+    {
+      "id": "pass.flow.branch-all-handled",
+      "goExit": 0,
+      "diagnostics": [],
+      "profiles": [
+        {
+          "profile": "development",
+          "exit": 0,
+          "stdoutMatch": true,
+          "stderrMatch": true
+        },
+        {
+          "profile": "release",
+          "exit": 0,
+          "stdoutMatch": true,
+          "stderrMatch": true
+        }
+      ]
+    },
+    {
+      "id": "pass.flow.transfer-parameter",
+      "goExit": 0,
+      "diagnostics": [],
+      "profiles": [
+        {
+          "profile": "development",
+          "exit": 0,
+          "stdoutMatch": true,
+          "stderrMatch": true
+        },
+        {
+          "profile": "release",
+          "exit": 0,
+          "stdoutMatch": true,
+          "stderrMatch": true
+        }
+      ]
+    },
+    {
+      "id": "pass.flow.branch-produced-local",
+      "goExit": 0,
+      "diagnostics": [],
+      "profiles": [
+        {
+          "profile": "development",
+          "exit": 0,
+          "stdoutMatch": true,
+          "stderrMatch": true
+        },
+        {
+          "profile": "release",
+          "exit": 0,
+          "stdoutMatch": true,
+          "stderrMatch": true
+        }
+      ]
+    },
+    {
+      "id": "pass.flow.local-transfer",
+      "goExit": 0,
+      "diagnostics": [],
+      "profiles": [
+        {
+          "profile": "development",
+          "exit": 0,
+          "stdoutMatch": true,
+          "stderrMatch": true
+        },
+        {
+          "profile": "release",
+          "exit": 0,
+          "stdoutMatch": true,
+          "stderrMatch": true
+        }
+      ]
+    },
+    {
+      "id": "pass.flow.handled-reassignment",
+      "goExit": 0,
+      "diagnostics": [],
+      "profiles": [
+        {
+          "profile": "development",
+          "exit": 0,
+          "stdoutMatch": true,
+          "stderrMatch": true
+        },
+        {
+          "profile": "release",
+          "exit": 0,
+          "stdoutMatch": true,
+          "stderrMatch": true
+        }
+      ]
+    },
+    {
+      "id": "fail.flow.unused-result",
+      "goExit": 3,
+      "diagnostics": [
+        {
+          "source": "main.fy",
+          "code": "E4101",
+          "start": 89,
+          "end": 94
+        }
+      ],
+      "profiles": [
+        {
+          "profile": "development",
+          "exit": 3,
+          "stdoutMatch": true,
+          "stderrMatch": true
+        },
+        {
+          "profile": "release",
+          "exit": 3,
+          "stdoutMatch": true,
+          "stderrMatch": true
+        }
+      ]
+    },
+    {
+      "id": "fail.flow.stored-unhandled",
+      "goExit": 3,
+      "diagnostics": [
+        {
+          "source": "main.fy",
+          "code": "E4101",
+          "start": 68,
+          "end": 75
+        }
+      ],
+      "profiles": [
+        {
+          "profile": "development",
+          "exit": 3,
+          "stdoutMatch": true,
+          "stderrMatch": true
+        },
+        {
+          "profile": "release",
+          "exit": 3,
+          "stdoutMatch": true,
+          "stderrMatch": true
+        }
+      ]
+    },
+    {
+      "id": "fail.flow.parameter-unhandled",
+      "goExit": 3,
+      "diagnostics": [
+        {
+          "source": "main.fy",
+          "code": "E4101",
+          "start": 46,
+          "end": 51
+        }
+      ],
+      "profiles": [
+        {
+          "profile": "development",
+          "exit": 3,
+          "stdoutMatch": true,
+          "stderrMatch": true
+        },
+        {
+          "profile": "release",
+          "exit": 3,
+          "stdoutMatch": true,
+          "stderrMatch": true
+        }
+      ]
+    },
+    {
+      "id": "fail.flow.overwrite-unhandled",
+      "goExit": 3,
+      "diagnostics": [
+        {
+          "source": "main.fy",
+          "code": "E4101",
+          "start": 68,
+          "end": 74
+        }
+      ],
+      "profiles": [
+        {
+          "profile": "development",
+          "exit": 3,
+          "stdoutMatch": true,
+          "stderrMatch": true
+        },
+        {
+          "profile": "release",
+          "exit": 3,
+          "stdoutMatch": true,
+          "stderrMatch": true
+        }
+      ]
+    },
+    {
+      "id": "fail.flow.branch-partial-handle",
+      "goExit": 3,
+      "diagnostics": [
+        {
+          "source": "main.fy",
+          "code": "E4101",
+          "start": 46,
+          "end": 51
+        }
+      ],
+      "profiles": [
+        {
+          "profile": "development",
+          "exit": 3,
+          "stdoutMatch": true,
+          "stderrMatch": true
+        },
+        {
+          "profile": "release",
+          "exit": 3,
+          "stdoutMatch": true,
+          "stderrMatch": true
+        }
+      ]
+    },
+    {
+      "id": "fail.flow.loop-overwrite",
+      "goExit": 3,
+      "diagnostics": [
+        {
+          "source": "main.fy",
+          "code": "E4101",
+          "start": 143,
+          "end": 149
+        }
+      ],
+      "profiles": [
+        {
+          "profile": "development",
+          "exit": 3,
+          "stdoutMatch": true,
+          "stderrMatch": true
+        },
+        {
+          "profile": "release",
+          "exit": 3,
+          "stdoutMatch": true,
+          "stderrMatch": true
+        }
+      ]
+    },
+    {
+      "id": "fail.flow.early-return-unhandled",
+      "goExit": 3,
+      "diagnostics": [
+        {
+          "source": "main.fy",
+          "code": "E4101",
+          "start": 77,
+          "end": 84
+        }
+      ],
+      "profiles": [
+        {
+          "profile": "development",
+          "exit": 3,
+          "stdoutMatch": true,
+          "stderrMatch": true
+        },
+        {
+          "profile": "release",
+          "exit": 3,
+          "stdoutMatch": true,
+          "stderrMatch": true
+        }
+      ]
+    },
+    {
+      "id": "pass.flow.loop-control-handled",
+      "goExit": 0,
+      "diagnostics": [],
+      "profiles": [
+        {
+          "profile": "development",
+          "exit": 0,
+          "stdoutMatch": true,
+          "stderrMatch": true
+        },
+        {
+          "profile": "release",
+          "exit": 0,
+          "stdoutMatch": true,
+          "stderrMatch": true
+        }
+      ]
+    },
+    {
+      "id": "fail.flow.break-pending",
+      "goExit": 3,
+      "diagnostics": [
+        {
+          "source": "main.fy",
+          "code": "E4101",
+          "start": 100,
+          "end": 106
+        }
+      ],
+      "profiles": [
+        {
+          "profile": "development",
+          "exit": 3,
+          "stdoutMatch": true,
+          "stderrMatch": true
+        },
+        {
+          "profile": "release",
+          "exit": 3,
+          "stdoutMatch": true,
+          "stderrMatch": true
+        }
+      ]
+    },
+    {
+      "id": "fail.flow.continue-pending",
+      "goExit": 3,
+      "diagnostics": [
+        {
+          "source": "main.fy",
+          "code": "E4101",
+          "start": 100,
+          "end": 106
+        }
+      ],
+      "profiles": [
+        {
+          "profile": "development",
+          "exit": 3,
+          "stdoutMatch": true,
+          "stderrMatch": true
+        },
+        {
+          "profile": "release",
+          "exit": 3,
+          "stdoutMatch": true,
+          "stderrMatch": true
+        }
+      ]
+    },
+    {
+      "id": "fail.flow.continue-overwrite",
+      "goExit": 3,
+      "diagnostics": [
+        {
+          "source": "main.fy",
+          "code": "E4101",
+          "start": 143,
+          "end": 149
+        }
+      ],
+      "profiles": [
+        {
+          "profile": "development",
+          "exit": 3,
+          "stdoutMatch": true,
+          "stderrMatch": true
+        },
+        {
+          "profile": "release",
+          "exit": 3,
+          "stdoutMatch": true,
+          "stderrMatch": true
+        }
+      ]
+    },
+    {
+      "id": "pass.mir.result-error-cleanup",
+      "goExit": 3,
+      "diagnostics": [
+        {
+          "source": "main.fy",
+          "code": "E4101",
+          "start": 186,
+          "end": 194
+        }
+      ],
+      "profiles": [
+        {
+          "profile": "development",
+          "exit": 3,
+          "stdoutMatch": true,
+          "stderrMatch": true
+        },
+        {
+          "profile": "release",
+          "exit": 3,
+          "stdoutMatch": true,
+          "stderrMatch": true
+        }
+      ]
+    },
+    {
+      "id": "iteration-pending",
+      "goExit": 3,
+      "diagnostics": [
+        {
+          "source": "main.fy",
+          "code": "E4101",
+          "start": 90,
+          "end": 96
+        }
+      ],
+      "profiles": [
+        {
+          "profile": "development",
+          "exit": 3,
+          "stdoutMatch": true,
+          "stderrMatch": true
+        },
+        {
+          "profile": "release",
+          "exit": 3,
+          "stdoutMatch": true,
+          "stderrMatch": true
+        }
+      ]
+    },
+    {
+      "id": "iteration-handled",
+      "goExit": 0,
+      "diagnostics": [],
+      "profiles": [
+        {
+          "profile": "development",
+          "exit": 0,
+          "stdoutMatch": true,
+          "stderrMatch": true
+        },
+        {
+          "profile": "release",
+          "exit": 0,
+          "stdoutMatch": true,
+          "stderrMatch": true
+        }
+      ]
+    },
+    {
+      "id": "region-pending",
+      "goExit": 3,
+      "diagnostics": [
+        {
+          "source": "main.fy",
+          "code": "E4101",
+          "start": 144,
+          "end": 150
+        }
+      ],
+      "profiles": [
+        {
+          "profile": "development",
+          "exit": 3,
+          "stdoutMatch": true,
+          "stderrMatch": true
+        },
+        {
+          "profile": "release",
+          "exit": 3,
+          "stdoutMatch": true,
+          "stderrMatch": true
+        }
+      ]
+    },
+    {
+      "id": "region-handled",
+      "goExit": 0,
+      "diagnostics": [],
+      "profiles": [
+        {
+          "profile": "development",
+          "exit": 0,
+          "stdoutMatch": true,
+          "stderrMatch": true
+        },
+        {
+          "profile": "release",
+          "exit": 0,
+          "stdoutMatch": true,
+          "stderrMatch": true
+        }
+      ]
+    }
+  ],
+  "cacheObservations": [
+    {
+      "label": "development/Go valid",
+      "exit": 0,
+      "stdoutSHA256": "c5dfb3e591f7df770c252a29e63497314d6bbcbf5e06bc17cda65d5ec2d67b57",
+      "stderr": ""
+    },
+    {
+      "label": "development/cold cached build",
+      "exit": 0,
+      "stdoutSHA256": "6f48b25a12a7735f274d1673460a7427304414dd6af9a100aaa6decf35360db7",
+      "stderr": "cache: cold stored\n"
+    },
+    {
+      "label": "development/verified project hit",
+      "exit": 0,
+      "stdoutSHA256": "40ba8afe8a5a9a8d8687ab9fe3bf1bd7aed42ed0cfa886c1288066aa494d8ac6",
+      "stderr": "cache: hit\n"
+    },
+    {
+      "label": "development/valid cached run",
+      "exit": 42,
+      "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr": "cache: hit\n"
+    },
+    {
+      "label": "development/Go pending Result",
+      "exit": 3,
+      "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr": "main.fy:1:46: E4101: Result value must be returned, propagated, matched, or explicitly discarded [bytes 45..54]\n"
+    },
+    {
+      "label": "development/cold invalid check",
+      "exit": 3,
+      "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr": "main.fy:1:46: E4101: Result value must be returned, propagated, matched, or explicitly discarded [bytes 45..54]\n"
+    },
+    {
+      "label": "development/mixed invalid check",
+      "exit": 3,
+      "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr": "cache: cold uncached\nmain.fy:1:46: E4101: Result value must be returned, propagated, matched, or explicitly discarded [bytes 45..54]\n"
+    },
+    {
+      "label": "development/cold invalid build",
+      "exit": 3,
+      "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr": "main.fy:1:46: E4101: Result value must be returned, propagated, matched, or explicitly discarded [bytes 45..54]\n"
+    },
+    {
+      "label": "development/mixed invalid build",
+      "exit": 3,
+      "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr": "cache: cold uncached\nmain.fy:1:46: E4101: Result value must be returned, propagated, matched, or explicitly discarded [bytes 45..54]\n"
+    },
+    {
+      "label": "development/cold invalid run",
+      "exit": 3,
+      "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr": "main.fy:1:46: E4101: Result value must be returned, propagated, matched, or explicitly discarded [bytes 45..54]\n"
+    },
+    {
+      "label": "development/mixed invalid run",
+      "exit": 3,
+      "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr": "cache: cold uncached\nmain.fy:1:46: E4101: Result value must be returned, propagated, matched, or explicitly discarded [bytes 45..54]\n"
+    },
+    {
+      "label": "development/Go restored valid",
+      "exit": 0,
+      "stdoutSHA256": "c5dfb3e591f7df770c252a29e63497314d6bbcbf5e06bc17cda65d5ec2d67b57",
+      "stderr": ""
+    },
+    {
+      "label": "development/restored valid hit",
+      "exit": 0,
+      "stdoutSHA256": "40ba8afe8a5a9a8d8687ab9fe3bf1bd7aed42ed0cfa886c1288066aa494d8ac6",
+      "stderr": "cache: hit\n"
+    },
+    {
+      "label": "release/Go valid",
+      "exit": 0,
+      "stdoutSHA256": "c5dfb3e591f7df770c252a29e63497314d6bbcbf5e06bc17cda65d5ec2d67b57",
+      "stderr": ""
+    },
+    {
+      "label": "release/cold cached build",
+      "exit": 0,
+      "stdoutSHA256": "6f48b25a12a7735f274d1673460a7427304414dd6af9a100aaa6decf35360db7",
+      "stderr": "cache: cold stored\n"
+    },
+    {
+      "label": "release/verified project hit",
+      "exit": 0,
+      "stdoutSHA256": "40ba8afe8a5a9a8d8687ab9fe3bf1bd7aed42ed0cfa886c1288066aa494d8ac6",
+      "stderr": "cache: hit\n"
+    },
+    {
+      "label": "release/valid cached run",
+      "exit": 42,
+      "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr": "cache: hit\n"
+    },
+    {
+      "label": "release/Go pending Result",
+      "exit": 3,
+      "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr": "main.fy:1:46: E4101: Result value must be returned, propagated, matched, or explicitly discarded [bytes 45..54]\n"
+    },
+    {
+      "label": "release/cold invalid check",
+      "exit": 3,
+      "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr": "main.fy:1:46: E4101: Result value must be returned, propagated, matched, or explicitly discarded [bytes 45..54]\n"
+    },
+    {
+      "label": "release/mixed invalid check",
+      "exit": 3,
+      "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr": "cache: cold uncached\nmain.fy:1:46: E4101: Result value must be returned, propagated, matched, or explicitly discarded [bytes 45..54]\n"
+    },
+    {
+      "label": "release/cold invalid build",
+      "exit": 3,
+      "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr": "main.fy:1:46: E4101: Result value must be returned, propagated, matched, or explicitly discarded [bytes 45..54]\n"
+    },
+    {
+      "label": "release/mixed invalid build",
+      "exit": 3,
+      "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr": "cache: cold uncached\nmain.fy:1:46: E4101: Result value must be returned, propagated, matched, or explicitly discarded [bytes 45..54]\n"
+    },
+    {
+      "label": "release/cold invalid run",
+      "exit": 3,
+      "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr": "main.fy:1:46: E4101: Result value must be returned, propagated, matched, or explicitly discarded [bytes 45..54]\n"
+    },
+    {
+      "label": "release/mixed invalid run",
+      "exit": 3,
+      "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr": "cache: cold uncached\nmain.fy:1:46: E4101: Result value must be returned, propagated, matched, or explicitly discarded [bytes 45..54]\n"
+    },
+    {
+      "label": "release/Go restored valid",
+      "exit": 0,
+      "stdoutSHA256": "c5dfb3e591f7df770c252a29e63497314d6bbcbf5e06bc17cda65d5ec2d67b57",
+      "stderr": ""
+    },
+    {
+      "label": "release/restored valid hit",
+      "exit": 0,
+      "stdoutSHA256": "40ba8afe8a5a9a8d8687ab9fe3bf1bd7aed42ed0cfa886c1288066aa494d8ac6",
+      "stderr": "cache: hit\n"
+    }
+  ],
+  "cacheAndExecutablePreserved": true,
+  "regression": {
+    "before": {
+      "path": ".cache/go-candidate-differential-20261015/check-development/receipt.json",
+      "sha256": "81a7dbee240ba2453f9138d4feb82934109633d651d41843be9fb0c25631de34",
+      "sourceInputs": 2081,
+      "sourceInputsDigestSHA256": "693b87df6e82f35c3cf82e402ef58222594642beff1ea03cf1d5ba5c80e56eaf"
+    },
+    "after": {
+      "path": ".cache/result-flow-20261015/check-development/receipt.json",
+      "sha256": "4be877365c530011793d87802f374f33120e6b2f8713ea8a7a4a32bee62e036a",
+      "sourceInputs": 2086,
+      "sourceInputsDigestSHA256": "ff42f1038bf7bdd1f8cb6c2ba3d22820550e957aae96955391a1e3c7ed9bd535"
+    },
+    "cases": 169,
+    "goObservationsUnchanged": 169,
+    "otherCandidateObservationsUnchanged": 158,
+    "summaryBefore": {
+      "completed": 169,
+      "acceptanceMatch": 157,
+      "exitMatch": 157,
+      "firstDiagnosticMatch": 153,
+      "allDiagnosticsMatch": 151,
+      "stdoutMatch": 135,
+      "stderrMatch": 108,
+      "exactMatch": 86
+    },
+    "summaryAfter": {
+      "completed": 169,
+      "acceptanceMatch": 168,
+      "exitMatch": 168,
+      "firstDiagnosticMatch": 164,
+      "allDiagnosticsMatch": 162,
+      "stdoutMatch": 146,
+      "stderrMatch": 119,
+      "exactMatch": 97
+    },
+    "changed": [
+      {
+        "id": "fail.flow.unused-result",
+        "goExit": 3,
+        "previousCandidateExit": 0,
+        "currentCandidateExit": 3,
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E4101",
+            "start": 89,
+            "end": 94
+          }
+        ],
+        "stderr": "main.fy:8:5: E4101: Result value must be returned, propagated, matched, or explicitly discarded [bytes 89..94]\n"
+      },
+      {
+        "id": "fail.flow.stored-unhandled",
+        "goExit": 3,
+        "previousCandidateExit": 0,
+        "currentCandidateExit": 3,
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E4101",
+            "start": 68,
+            "end": 75
+          }
+        ],
+        "stderr": "main.fy:4:36: E4101: Result value must be returned, propagated, matched, or explicitly discarded [bytes 68..75]\n"
+      },
+      {
+        "id": "fail.flow.parameter-unhandled",
+        "goExit": 3,
+        "previousCandidateExit": 0,
+        "currentCandidateExit": 3,
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E4101",
+            "start": 46,
+            "end": 51
+          }
+        ],
+        "stderr": "main.fy:3:33: E4101: Result value must be returned, propagated, matched, or explicitly discarded [bytes 46..51]\n"
+      },
+      {
+        "id": "fail.flow.overwrite-unhandled",
+        "goExit": 3,
+        "previousCandidateExit": 0,
+        "currentCandidateExit": 3,
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E4101",
+            "start": 68,
+            "end": 74
+          }
+        ],
+        "stderr": "main.fy:4:36: E4101: Result value must be returned, propagated, matched, or explicitly discarded [bytes 68..74]\n"
+      },
+      {
+        "id": "fail.flow.branch-partial-handle",
+        "goExit": 3,
+        "previousCandidateExit": 0,
+        "currentCandidateExit": 3,
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E4101",
+            "start": 46,
+            "end": 51
+          }
+        ],
+        "stderr": "main.fy:3:33: E4101: Result value must be returned, propagated, matched, or explicitly discarded [bytes 46..51]\n"
+      },
+      {
+        "id": "fail.flow.loop-overwrite",
+        "goExit": 3,
+        "previousCandidateExit": 0,
+        "currentCandidateExit": 3,
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E4101",
+            "start": 143,
+            "end": 149
+          }
+        ],
+        "stderr": "main.fy:7:19: E4101: Result value must be returned, propagated, matched, or explicitly discarded [bytes 143..149]\n"
+      },
+      {
+        "id": "fail.flow.early-return-unhandled",
+        "goExit": 3,
+        "previousCandidateExit": 0,
+        "currentCandidateExit": 3,
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E4101",
+            "start": 77,
+            "end": 84
+          }
+        ],
+        "stderr": "main.fy:4:36: E4101: Result value must be returned, propagated, matched, or explicitly discarded [bytes 77..84]\n"
+      },
+      {
+        "id": "fail.flow.break-pending",
+        "goExit": 3,
+        "previousCandidateExit": 0,
+        "currentCandidateExit": 3,
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E4101",
+            "start": 100,
+            "end": 106
+          }
+        ],
+        "stderr": "main.fy:5:40: E4101: Result value must be returned, propagated, matched, or explicitly discarded [bytes 100..106]\n"
+      },
+      {
+        "id": "fail.flow.continue-pending",
+        "goExit": 3,
+        "previousCandidateExit": 0,
+        "currentCandidateExit": 3,
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E4101",
+            "start": 100,
+            "end": 106
+          }
+        ],
+        "stderr": "main.fy:5:40: E4101: Result value must be returned, propagated, matched, or explicitly discarded [bytes 100..106]\n"
+      },
+      {
+        "id": "fail.flow.continue-overwrite",
+        "goExit": 3,
+        "previousCandidateExit": 0,
+        "currentCandidateExit": 3,
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E4101",
+            "start": 143,
+            "end": 149
+          }
+        ],
+        "stderr": "main.fy:7:19: E4101: Result value must be returned, propagated, matched, or explicitly discarded [bytes 143..149]\n"
+      },
+      {
+        "id": "pass.mir.result-error-cleanup",
+        "goExit": 3,
+        "previousCandidateExit": 0,
+        "currentCandidateExit": 3,
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E4101",
+            "start": 186,
+            "end": 194
+          }
+        ],
+        "stderr": "main.fy:15:72: E4101: Result value must be returned, propagated, matched, or explicitly discarded [bytes 186..194]\n"
+      }
+    ],
+    "fixtureAdapterSkips": [
+      {
+        "family": "region",
+        "id": "fail.flow.local-region-escape",
+        "reason": "direct fixture packageGraph requires a separate workspace adapter"
+      }
+    ]
+  },
+  "skipped": [
+    {
+      "id": "fail.type.question-non-result",
+      "reason": "E4102/E4103 diagnostic parity is outside this fix"
+    },
+    {
+      "id": "fail.type.incompatible-error",
+      "reason": "E4102/E4103 diagnostic parity is outside this fix"
+    },
+    {
+      "id": "full-dispatcher-fixed-point-linux-hosted-ci",
+      "reason": "outside this targeted Result fix; existing gates remain open"
+    }
+  ],
+  "productStackChanged": false,
+  "productTimeoutChanged": false,
+  "publicApiChanged": false,
+  "sdkAbiChanged": false,
+  "dbChanged": false,
+  "ciChanged": false,
+  "pushed": false
+}
