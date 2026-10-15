@@ -5,11 +5,19 @@
 The 415-source check/build/run dispatcher builds at both compiler profiles
 through the verified Fairy stage2 seed with no Go frontend fallback. Current
 source/image hashes are bound in the [build receipt](../ops/evidence/candidate-std-fs-cli-rebuild-metadata-20261016.json).
-The development compiler checks the filesystem example with exact Go output,
-builds it successfully and executes the artifact with the existing metadata
-fixtures (expected exit 42, empty output). The optimized compiler's full matrix
-and broader Go comparison follow this build checkpoint. The command image is
-separate from full-dispatcher bootstrap; product policies remain unchanged.
+Both compiler profiles check the filesystem example with exact Go output
+(2 instances, 12 files, 217 MIR functions). The development compiler builds and
+executes its artifact with the existing metadata fixtures (exit 42, empty output).
+The optimized compiler's 19-observation complete selected matrix passes both
+output profiles' check/build/artifact/run and cold/hit/cached build/run paths.
+Direct artifacts return 42 with the fixtures; isolated run returns 356 without
+those fixtures, exactly matching Go. Nothing is skipped or timed out; the
+verifier records `passed: true` and exits zero.
+Receipt: [filesystem matrix](../ops/evidence/candidate-std-fs-cli-matrix-metadata-20261016.json).
+
+This closes the shipped filesystem command integration gaps. Broader Go
+comparison and full-dispatcher bootstrap remain separate stages; product
+policies, public API, SDK/runtime ABI and CI configuration are unchanged.
 
 ## File metadata C adapters (2026-10-16)
 
@@ -28,7 +36,8 @@ opens, closes and drops balance, with no leftover fixture files.
 Receipt: [metadata C](../ops/evidence/candidate-file-metadata-20261015.json).
 
 The previous command image reproduces the rule-51 error at `std/fs.fy:735:9`.
-At this source-fix checkpoint the command image is not rebuilt; full CLI parity,
+At the original source-fix checkpoint the command image was not rebuilt. The
+newer integration above supersedes that limitation; broader parity,
 remaining Go differences and current-source full-dispatcher bootstrap are the
 next verification stages. Promotion stays blocked.
 
