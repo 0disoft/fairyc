@@ -1,5 +1,33 @@
 # Self-hosting readiness v0
 
+## Filesystem example frontend fixes (2026-10-15)
+
+The filesystem example's internal errors came from a monolithic observation
+writer exhausting its 1MiB ledger and duplicate depth counting in move-analysis
+branch dispatch. Observations now stream per row with identical canonical Go
+identity; branch dispatch retains the current depth. Existing writer, graph,
+hash, traversal, stack and deadline bounds remain unchanged.
+
+Six context tests pass Go-native and optimized candidate C, and the targeted
+large-sidecar regression passes both candidate profiles. The combined six-test
+development context image exceeded its private 180-second execution allowance.
+The new 40-branch ownership regression passes Go-native and both candidate
+profiles, including rejection of a late moved-value read. The current 415-source
+command probe checks the original example at both compiler profiles with exact
+Go output (2 instances, 12 files, 217 MIR functions); optimized cold/cache-hit
+checks also pass. Receipts:
+[context](../ops/evidence/candidate-std-fs-api-20261015.json) and
+[move depth](../ops/evidence/candidate-std-fs-move-depth-20261015.json), and
+[commands](../ops/evidence/candidate-std-fs-cli-20261015.json).
+
+The internal check errors are closed; native parity is not. Candidate build
+stops at `std::fs::create_dir_all` C emission with private code 1004 (file adapter
+rule 37 is not admitted). Go artifacts return 42 with the existing metadata
+fixtures at both profiles; candidate execution was not reached.
+
+Full-dispatcher/current fixed-point, broader equivalence, measured performance
+and platform/CI gates remain open. Candidate promotion stays blocked.
+
 ## Result obligation rejection restored (2026-10-15)
 
 Module checking now applies Result obligation analysis before lowering and saved

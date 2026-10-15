@@ -1,5 +1,37 @@
 # Fairy 컴파일러 전환: 후속 작업 목록
 
+## Filesystem example frontend fixes (2026-10-15)
+
+Two internal errors in `std_fs_quickstart` are fixed: source identity encoding
+now streams binding/literal observations individually, and move analysis counts
+AST edges instead of counting branch-helper dispatch a second time. The 1MiB
+writer and 64-level traversal bounds remain in place; cumulative encoding/hash
+budgets and product stack/deadline policies are unchanged.
+
+The one-module syntax fixture derived from the shipped filesystem main has
+1,398,670 bytes of canonical Go JSON. Its streamed identity matches Go exactly,
+while the monolithic binding writer still correctly exhausts its own ledger.
+Six context tests pass Go-native and optimized candidate C; the targeted
+regression passes both candidate profiles. The combined development context
+suite exceeded its 180-second verification allowance. A separate 40-branch
+regression accepts valid ownership and retains a late `E1101`; it passes Go-native
+and both candidate profiles. Receipts: [context API](evidence/candidate-std-fs-api-20261015.json)
+and [move-depth API](evidence/candidate-std-fs-move-depth-20261015.json).
+
+The rebuilt 415-source command probe accepts the original shipped workspace at
+both compiler profiles, exactly matching Go: 2 instances, 12 files and 217 MIR
+functions. Optimized cold/cache-hit checks pass with a stored and reused cache.
+The development check took about 99 seconds; no product timeout was increased.
+Receipt: [filesystem commands](evidence/candidate-std-fs-cli-20261015.json).
+
+Native parity is still open. Go builds and executes both output profiles with
+the host smoke's metadata fixtures (exit 42). Candidate build now reaches C
+emission, then rejects SDK `std::fs::create_dir_all` at `std/fs.fy:488:9` with
+private code 1004 (foreign rule 37 is outside the admitted file C adapters).
+Candidate run was not reached. Extend the filesystem C adapters next, then
+continue struct-iteration/other C gaps. Full dispatcher/fixed-point, broader
+parity, product performance and platform/CI gates remain separate.
+
 ## Result obligation rejection fixed (2026-10-15)
 
 The checked module-body gate now runs Result obligation analysis before lowering
@@ -17,8 +49,8 @@ cache records and the built executable. The 169-case development regression
 changes only the intended 11 observations; the other 158 are byte-identical.
 Receipt: [Result commands](evidence/candidate-result-flow-command-20261015.json).
 
-The E4101 omission in the comparison below is closed. Next priorities remain the
-filesystem example's internal error, struct-iteration C emission, other subset
+The E4101 omission in the comparison below is closed. Next priorities remain
+filesystem C adapters, struct-iteration C emission, other subset
 and C-member identifier gaps, then diagnostic/CLI parity. The full dispatcher
 and current fixed point, product policies/performance, Linux and hosted CI remain
 separate gates; candidate promotion stays blocked.
