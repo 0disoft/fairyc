@@ -1,5 +1,23 @@
 # Self-hosting readiness v0
 
+## Bootstrap whole-project work admission (2026-10-16)
+
+The full 512-source input compiles into 140 units. Type, frame and metadata
+preparation succeed: 2,673 types, 7,938 frames and 4,239 callables. The frame
+count remains below its unchanged 8,192 cap. A scoped capacity probe identifies
+the failure as the old 8,388,608 whole-project work ceiling: linking crosses
+that ceiling and completes at maximum attempted work 8,562,899 when the ledger
+admits 16,777,216. The 16Mi limit is now authored in `candidate_limits.fy`.
+The independent 1Mi unit/body limits and file, byte, frame and path limits stay
+unchanged. The exact new ceiling, above-ceiling rejection, independent owned-IR
+revalidation and unchanged unit admission pass two real Go-native tests.
+Receipt: [project-work regression](../ops/evidence/candidate-bootstrap-project-work-20261016.json).
+
+This closes the measured full-link rejection. Complete C emission, native
+rebuilding and consecutive-generation equality are still pending at this
+checkpoint. No public API, SDK/runtime ABI, database, repository hygiene,
+CI/runner, product timeout or stack-policy change is made.
+
 ## Bootstrap workspace source-read work (2026-10-16)
 
 The workspace bootstrap loader exhausted the unchanged 16,777,216 shared path
