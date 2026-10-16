@@ -1,0 +1,611 @@
+{
+  "schema": "fairyc.candidate-test-list-cli-evidence/v1",
+  "passed": true,
+  "scope": "Stable test identity discovery/listing only, including workspace/package/file/directory selection, source locations, JSON schemas, Unicode quoting and source diagnostics.",
+  "sourceInputs": [
+    {
+      "path": "examples/lexer_candidate/src/file_cli.fy",
+      "sha256": "29807d396620e3bb7dba2ccd2f7b2eff0429248994611a66133041b70186f517"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_test_cli.fy",
+      "sha256": "ab916dafe58a9cfd5652603c5e8b680b2ad9fde4c28e0053652c6fd3e09f772c"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_test_options.fy",
+      "sha256": "0601eed268fb5d157b87f029ab4027023252ce0d49570ac9b4b5e0edd95616f1"
+    },
+    {
+      "path": "tools/verify-candidate-test-list-cli.py",
+      "sha256": "9c2ba35712fb9b7781f2313528202b5105cc6882ecba00cbdfccbcc3156eb688"
+    }
+  ],
+  "proof": {
+    "path": ".cache/candidate-parity-fixes-20261016/v3-test-list-release/receipt.json",
+    "sha256": "e84add1f5f8b42b9573112a306afba83092903b63e9a29a9a1ed22b8d11ab0a3"
+  },
+  "cases": 89,
+  "exactMatches": 89,
+  "profiles": [
+    "release"
+  ],
+  "productionLocksUnchanged": true,
+  "caseResults": [
+    {
+      "id": "root-text",
+      "profile": "release",
+      "exact": true,
+      "expectedExit": 0
+    },
+    {
+      "id": "root-json",
+      "profile": "release",
+      "exact": true,
+      "expectedExit": 0
+    },
+    {
+      "id": "root-locations",
+      "profile": "release",
+      "exact": true,
+      "expectedExit": 0
+    },
+    {
+      "id": "root-located-text",
+      "profile": "release",
+      "exact": true,
+      "expectedExit": 0
+    },
+    {
+      "id": "workspace-text",
+      "profile": "release",
+      "exact": true,
+      "expectedExit": 0
+    },
+    {
+      "id": "workspace-json",
+      "profile": "release",
+      "exact": true,
+      "expectedExit": 0
+    },
+    {
+      "id": "workspace-locations",
+      "profile": "release",
+      "exact": true,
+      "expectedExit": 0
+    },
+    {
+      "id": "member",
+      "profile": "release",
+      "exact": true,
+      "expectedExit": 0
+    },
+    {
+      "id": "member-locations",
+      "profile": "release",
+      "exact": true,
+      "expectedExit": 0
+    },
+    {
+      "id": "workspace-file",
+      "profile": "release",
+      "exact": true,
+      "expectedExit": 0
+    },
+    {
+      "id": "workspace-dir",
+      "profile": "release",
+      "exact": true,
+      "expectedExit": 0
+    },
+    {
+      "id": "root-file",
+      "profile": "release",
+      "exact": true,
+      "expectedExit": 0
+    },
+    {
+      "id": "root-dir",
+      "profile": "release",
+      "exact": true,
+      "expectedExit": 0
+    },
+    {
+      "id": "duplicate-list",
+      "profile": "release",
+      "exact": true,
+      "expectedExit": 2
+    },
+    {
+      "id": "duplicate-json",
+      "profile": "release",
+      "exact": true,
+      "expectedExit": 2
+    },
+    {
+      "id": "duplicate-locations",
+      "profile": "release",
+      "exact": true,
+      "expectedExit": 2
+    },
+    {
+      "id": "duplicate-locked",
+      "profile": "release",
+      "exact": true,
+      "expectedExit": 2
+    },
+    {
+      "id": "list-exact",
+      "profile": "release",
+      "exact": true,
+      "expectedExit": 2
+    },
+    {
+      "id": "list-native",
+      "profile": "release",
+      "exact": true,
+      "expectedExit": 2
+    },
+    {
+      "id": "list-release",
+      "profile": "release",
+      "exact": true,
+      "expectedExit": 2
+    },
+    {
+      "id": "list-stdin",
+      "profile": "release",
+      "exact": true,
+      "expectedExit": 2
+    },
+    {
+      "id": "list-input",
+      "profile": "release",
+      "exact": true,
+      "expectedExit": 2
+    },
+    {
+      "id": "list-timeout",
+      "profile": "release",
+      "exact": true,
+      "expectedExit": 2
+    },
+    {
+      "id": "list-capture",
+      "profile": "release",
+      "exact": true,
+      "expectedExit": 2
+    },
+    {
+      "id": "workspace-package",
+      "profile": "release",
+      "exact": true,
+      "expectedExit": 2
+    },
+    {
+      "id": "file-exact",
+      "profile": "release",
+      "exact": true,
+      "expectedExit": 2
+    },
+    {
+      "id": "dir-file",
+      "profile": "release",
+      "exact": true,
+      "expectedExit": 2
+    },
+    {
+      "id": "dir-exact",
+      "profile": "release",
+      "exact": true,
+      "expectedExit": 2
+    },
+    {
+      "id": "duplicate-file",
+      "profile": "release",
+      "exact": true,
+      "expectedExit": 2
+    },
+    {
+      "id": "duplicate-dir",
+      "profile": "release",
+      "exact": true,
+      "expectedExit": 2
+    },
+    {
+      "id": "duplicate-exact",
+      "profile": "release",
+      "exact": true,
+      "expectedExit": 2
+    },
+    {
+      "id": "duplicate-package",
+      "profile": "release",
+      "exact": true,
+      "expectedExit": 2
+    },
+    {
+      "id": "missing-package",
+      "profile": "release",
+      "exact": true,
+      "expectedExit": 2
+    },
+    {
+      "id": "missing-file",
+      "profile": "release",
+      "exact": true,
+      "expectedExit": 2
+    },
+    {
+      "id": "missing-dir",
+      "profile": "release",
+      "exact": true,
+      "expectedExit": 2
+    },
+    {
+      "id": "missing-exact",
+      "profile": "release",
+      "exact": true,
+      "expectedExit": 2
+    },
+    {
+      "id": "missing-input",
+      "profile": "release",
+      "exact": true,
+      "expectedExit": 2
+    },
+    {
+      "id": "missing-timeout",
+      "profile": "release",
+      "exact": true,
+      "expectedExit": 2
+    },
+    {
+      "id": "flag-instead-value",
+      "profile": "release",
+      "exact": true,
+      "expectedExit": 2
+    },
+    {
+      "id": "bad-timeout",
+      "profile": "release",
+      "exact": true,
+      "expectedExit": 2
+    },
+    {
+      "id": "unknown-flag",
+      "profile": "release",
+      "exact": true,
+      "expectedExit": 2
+    },
+    {
+      "id": "unknown-package",
+      "profile": "release",
+      "exact": true,
+      "expectedExit": 2
+    },
+    {
+      "id": "unknown-file",
+      "profile": "release",
+      "exact": true,
+      "expectedExit": 2
+    },
+    {
+      "id": "unknown-dir",
+      "profile": "release",
+      "exact": true,
+      "expectedExit": 2
+    },
+    {
+      "id": "noncanonical-file",
+      "profile": "release",
+      "exact": true,
+      "expectedExit": 2
+    },
+    {
+      "id": "missing-order",
+      "profile": "release",
+      "exact": true,
+      "expectedExit": 2
+    },
+    {
+      "id": "delimiter",
+      "profile": "release",
+      "exact": true,
+      "expectedExit": 2
+    },
+    {
+      "id": "quoted-file-0",
+      "profile": "release",
+      "exact": true,
+      "expectedExit": 2
+    },
+    {
+      "id": "quoted-duplicate-0",
+      "profile": "release",
+      "exact": true,
+      "expectedExit": 2
+    },
+    {
+      "id": "quoted-file-1",
+      "profile": "release",
+      "exact": true,
+      "expectedExit": 2
+    },
+    {
+      "id": "quoted-duplicate-1",
+      "profile": "release",
+      "exact": true,
+      "expectedExit": 2
+    },
+    {
+      "id": "quoted-file-2",
+      "profile": "release",
+      "exact": true,
+      "expectedExit": 2
+    },
+    {
+      "id": "quoted-duplicate-2",
+      "profile": "release",
+      "exact": true,
+      "expectedExit": 2
+    },
+    {
+      "id": "quoted-file-3",
+      "profile": "release",
+      "exact": true,
+      "expectedExit": 2
+    },
+    {
+      "id": "quoted-duplicate-3",
+      "profile": "release",
+      "exact": true,
+      "expectedExit": 2
+    },
+    {
+      "id": "quoted-file-4",
+      "profile": "release",
+      "exact": true,
+      "expectedExit": 2
+    },
+    {
+      "id": "quoted-duplicate-4",
+      "profile": "release",
+      "exact": true,
+      "expectedExit": 2
+    },
+    {
+      "id": "quoted-file-5",
+      "profile": "release",
+      "exact": true,
+      "expectedExit": 2
+    },
+    {
+      "id": "quoted-duplicate-5",
+      "profile": "release",
+      "exact": true,
+      "expectedExit": 2
+    },
+    {
+      "id": "empty-package",
+      "profile": "release",
+      "exact": true,
+      "expectedExit": 0
+    },
+    {
+      "id": "empty-workspace-package",
+      "profile": "release",
+      "exact": true,
+      "expectedExit": 0
+    },
+    {
+      "id": "empty-input",
+      "profile": "release",
+      "exact": true,
+      "expectedExit": 0
+    },
+    {
+      "id": "empty-file",
+      "profile": "release",
+      "exact": true,
+      "expectedExit": 2
+    },
+    {
+      "id": "empty-dir",
+      "profile": "release",
+      "exact": true,
+      "expectedExit": 2
+    },
+    {
+      "id": "duplicate-timeout",
+      "profile": "release",
+      "exact": true,
+      "expectedExit": 2
+    },
+    {
+      "id": "long-timeout",
+      "profile": "release",
+      "exact": true,
+      "expectedExit": 2
+    },
+    {
+      "id": "empty-delimiter",
+      "profile": "release",
+      "exact": true,
+      "expectedExit": 2
+    },
+    {
+      "id": "empty-1",
+      "profile": "release",
+      "exact": true,
+      "expectedExit": 0
+    },
+    {
+      "id": "empty-2",
+      "profile": "release",
+      "exact": true,
+      "expectedExit": 0
+    },
+    {
+      "id": "empty-3",
+      "profile": "release",
+      "exact": true,
+      "expectedExit": 0
+    },
+    {
+      "id": "empty-4",
+      "profile": "release",
+      "exact": true,
+      "expectedExit": 0
+    },
+    {
+      "id": "trap-list",
+      "profile": "release",
+      "exact": true,
+      "expectedExit": 0
+    },
+    {
+      "id": "nested-locations",
+      "profile": "release",
+      "exact": true,
+      "expectedExit": 0
+    },
+    {
+      "id": "nested-dir",
+      "profile": "release",
+      "exact": true,
+      "expectedExit": 0
+    },
+    {
+      "id": "nested-file",
+      "profile": "release",
+      "exact": true,
+      "expectedExit": 0
+    },
+    {
+      "id": "repeated-dirs",
+      "profile": "release",
+      "exact": true,
+      "expectedExit": 0
+    },
+    {
+      "id": "repeated-files",
+      "profile": "release",
+      "exact": true,
+      "expectedExit": 0
+    },
+    {
+      "id": "empty-test-file",
+      "profile": "release",
+      "exact": true,
+      "expectedExit": 0
+    },
+    {
+      "id": "empty-module-dir",
+      "profile": "release",
+      "exact": true,
+      "expectedExit": 0
+    },
+    {
+      "id": "invalid-arguments",
+      "profile": "release",
+      "exact": true,
+      "expectedExit": 3
+    },
+    {
+      "id": "invalid-duplicate",
+      "profile": "release",
+      "exact": true,
+      "expectedExit": 3
+    },
+    {
+      "id": "invalid-public",
+      "profile": "release",
+      "exact": true,
+      "expectedExit": 3
+    },
+    {
+      "id": "invalid-unsafe",
+      "profile": "release",
+      "exact": true,
+      "expectedExit": 3
+    },
+    {
+      "id": "invalid-parameters",
+      "profile": "release",
+      "exact": true,
+      "expectedExit": 3
+    },
+    {
+      "id": "invalid-result",
+      "profile": "release",
+      "exact": true,
+      "expectedExit": 3
+    },
+    {
+      "id": "invalid-record",
+      "profile": "release",
+      "exact": true,
+      "expectedExit": 3
+    },
+    {
+      "id": "sdk-tests-only",
+      "profile": "release",
+      "exact": true,
+      "expectedExit": 0
+    },
+    {
+      "id": "vector",
+      "profile": "release",
+      "exact": true,
+      "expectedExit": 0
+    },
+    {
+      "id": "semantic-outside-file-filter",
+      "profile": "release",
+      "exact": true,
+      "expectedExit": 3
+    }
+  ],
+  "executionModes": [
+    {
+      "profile": "release",
+      "mode": "semantic",
+      "implemented": false,
+      "candidate": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "fairyc: candidate semantic test interpreter is not implemented\n",
+        "seconds": 0.02935449998767581
+      }
+    },
+    {
+      "profile": "release",
+      "mode": "native",
+      "implemented": false,
+      "candidate": {
+        "exit": 3,
+        "stdout": "",
+        "stderr": "fairyc: candidate native test execution is not implemented\n",
+        "seconds": 0.027448399996501394
+      }
+    }
+  ],
+  "fullNativeBuild": {
+    "path": ".cache/candidate-parity-fixes-20261016/final-public-cli-v3/receipt.json",
+    "sha256": "d92f0b6dd3f7c5d8eefc87b9cbd35439b90ddd969d9c39ace6b69d3c87a1ddd8"
+  },
+  "goOriginalSourceCheck": {
+    "exit": 0,
+    "stdout": "check ok: 2 instance(s), 523 source file(s), 6562 MIR function(s), lock updated\n",
+    "stderr": "",
+    "seconds": 27.83653559999948
+  },
+  "remainingFeatureGaps": [
+    "Semantic test interpreter execution is not implemented in the candidate.",
+    "Isolated native test execution is not implemented in the candidate."
+  ],
+  "publicGoCliChanged": false,
+  "sdkAbiChanged": false,
+  "ciChanged": false,
+  "pushed": false
+}

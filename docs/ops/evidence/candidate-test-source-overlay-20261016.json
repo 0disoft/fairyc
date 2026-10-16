@@ -104,8 +104,11 @@
     "timedOutCases": 1
   },
   "finalNativeIntegration": {
-    "passed": false,
-    "reason": "Full dispatcher emission fails phase 5 code 1002; diagnosis ongoing."
+    "passed": true,
+    "listingCases": 89,
+    "exactMatches": 89,
+    "developmentAndReleaseBuilt": true,
+    "evidence": "candidate-test-list-cli-20261016.json"
   },
   "publicGoCliChanged": false,
   "sdkAbiChanged": false,
