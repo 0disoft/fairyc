@@ -10,6 +10,7 @@ import module_unit_moves as moves;
 import module_unit_interfaces as interfaces;
 import module_types as types;
 import syntax as syntax;
+import module_signatures as signatures;
 import effect_declarations as effects;
 import std::vec as v;
 
@@ -51,3 +52,5 @@ fn Result<ir::Program,ir::Problem> lower_policy(ref v::Vec<syntax::Parsed> sourc
     i=0;while(i<moves::cleanup_count(moved)){let request=moves::cleanup_at(moved,i);if(request.kind!=5 || request.frame==0 || request.frame>v::len<ir::Frame>(ref frames)){return .err(fail(1001,0,request.start,request.end));}let value=switch(operand(typed,request,ref mut operands,ref mut work)){case .ok(n):{n}case .err(p):{return .err(p);}};if(!m::charge(ref mut work,1)){return .err(fail(1002,0,request.start,request.end));}if(!v::push<ir::Drop>(ref mut drops,ir::Drop{.operand=value,.exit=request.exit,.start=request.start,.end=request.end}).is_ok){return .err(fail(1003,0,request.start,request.end));}i+=1;}
     return ir::assemble(graph,frames,glues,fields,operands,drops,work);
 }
+
+pub fn Result<ir::Program,ir::Problem> lower_checked_catalog(ref v::Vec<syntax::Parsed> sources,ref checking::Plan checked,ref signatures::Program metadata){var usize validation=0;let valid=checking::validate_sources_catalog(checked,sources,metadata,ref mut validation);if(valid.code!=0){return .err(fail(valid.code,valid.module_index,valid.start,valid.end));}return lower_policy(sources,checking::checked_values(checked),checking::checked_interfaces(checked),checking::checked_moves(checked),policy::work(checking::cleanup_policy(checked)));}

@@ -10,6 +10,7 @@ import module_unit_region_model as regions;
 import module_unit_moves as moves;
 import module_unit_sdk_sources as sdk_sources;
 import syntax as syntax;
+import module_signatures as signatures;
 import literal_types as literals;
 import std::bytes as bytes;
 import std::vec as v;
@@ -40,3 +41,5 @@ fn Result<ir::Program,clean_ir::Problem> lower_body(ref v::Vec<syntax::Parsed> s
         if(!m::charge(ref mut work,link.len+1)){return .err(fail(1002,c.module_index,0,0));}if(!bytes::append(ref mut names,link).is_ok){return .err(fail(1003,c.module_index,0,0));}c.link_end=bytes::len(ref names);if(!v::push<interfaces::Callable>(ref mut callables,c).is_ok){return .err(fail(1003,c.module_index,0,0));}i+=1;
     }let sdk=switch(sdk_sources::collect(sources,ref mut work)){case .ok(s):{s}case .err(e):{return .err(e);}};return ir::assemble_sdk(sdk,cleaned,bodies,layouts,fields,callables,parameters,names,work);
 }
+
+pub fn Result<ir::Program,clean_ir::Problem> lower_checked_catalog(ref v::Vec<syntax::Parsed> sources,ref checking::Plan checked,ref signatures::Program metadata){let cleaned=switch(cleaning::lower_checked_catalog(sources,checked,metadata)){case .ok(p):{p}case .err(p):{return .err(p);}};return lower_body(sources,checking::checked_values(checked),checking::checked_interfaces(checked),cleaned);}

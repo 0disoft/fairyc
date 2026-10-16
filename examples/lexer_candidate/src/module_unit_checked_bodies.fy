@@ -49,3 +49,11 @@ pub fn Problem validate_sources(ref Plan p,ref v::Vec<syntax::Parsed> sources,re
     while(i<v::len<Stamp>(ref p.sources)){let stamp=v::at<Stamp>(ref p.sources,i);let raw=syntax::source_view(v::at<syntax::Parsed>(sources,i));if(!budget::charge(work,raw.len+1)){return failed(6,10,i,0,0,0,0);}if(raw.len!=stamp.bytes){return failed(6,12,i,0,0,0,0);}let digest=sha::digest(raw);var usize j=0;while(j<8){if(digest[j]!=stamp.digest[j]){return failed(6,12,i,0,0,0,0);}j+=1;}i+=1;
     }return failed(0,0,0,0,0,0,0);
 }
+
+// A source-authenticated catalog already retains the exact immutable bytes and
+// their digest. Reuse that proof rather than hashing every source per unit.
+pub fn Problem validate_sources_catalog(ref Plan p,ref v::Vec<syntax::Parsed> sources,ref signatures::Program metadata,ref mut usize work){
+    if(!budget::charge(work,0)){return failed(6,10,0,0,0,0,0);}if(v::len<syntax::Parsed>(sources)!=v::len<Stamp>(ref p.sources) || signatures::module_count(metadata)!=v::len<Stamp>(ref p.sources)){return failed(6,12,0,0,0,0,0);}var usize i=0;
+    while(i<v::len<Stamp>(ref p.sources)){let stamp=v::at<Stamp>(ref p.sources,i);let source=v::at<syntax::Parsed>(sources,i);let raw=syntax::source_view(source);if(!budget::charge(work,raw.len+1)){return failed(6,10,i,0,0,0,0);}if(raw.len!=stamp.bytes || !signatures::source_matches(metadata,i,source)){return failed(6,12,i,0,0,0,0);}let digest=signatures::source_digest(metadata,i);var usize j=0;while(j<8){if(digest[j]!=stamp.digest[j]){return failed(6,12,i,0,0,0,0);}j+=1;}i+=1;
+    }return failed(0,0,0,0,0,0,0);
+}
