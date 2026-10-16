@@ -9,6 +9,8 @@ import subprocess
 import sys
 import time
 
+from candidate_build_version import generate as generate_version
+
 ROOT = Path(__file__).resolve().parents[1]
 
 
@@ -34,13 +36,15 @@ def stack_reserve(path):
     return struct.unpack_from('<Q', image, pe+24+72)[0]
 
 
-def sources():
+def sources(version_source=None):
     modules = {}
     for base in (ROOT / 'examples/lexer_candidate/src', ROOT / 'internal/sdkstdlib/sources'):
         for path in base.rglob('*.fy'):
             match = re.search(r'^module\s+([\w:]+);', path.read_text(encoding='utf-8'))
             assert match and match[1] not in modules, path
             modules[match[1]] = path
+    if version_source is not None:
+        modules['public_cli_data'] = version_source
     seen, pending = set(), ['main']
     while pending:
         name = pending.pop()
@@ -75,7 +79,8 @@ def main():
         parser.error('verification requires Python without -O')
     seed_identity = artifact(args.seed)
     args.output.mkdir(parents=True, exist_ok=True)
-    original = sources()
+    version_source, build_version = generate_version(args.output)
+    original = sources(version_source)
     inventory = ''.join(item['path']+' '+item['sha256']+'\n' for item in original)
     inventory_sha = hashlib.sha256(inventory.encode()).hexdigest()
     manifest = args.output / 'self-source.manifest'
@@ -147,7 +152,14 @@ def main():
     seed_lexer = [] if args.seed_emitter_only else ['--seed', str(args.seed.resolve())]
     checked = subprocess.run([sys.executable, str(ROOT/'tools/verify-candidate-bootstrap-lexer.py'), '--reference', str(args.reference.resolve()), '--fixtures', str(ROOT/'spec/fixtures/lexer/candidate-bootstrap-v1.json'), '--stage1', str(images[0].resolve()), '--stage2', str(images[1].resolve()), *seed_lexer, '--output', str(proof_dir.resolve())], cwd=ROOT, capture_output=True, timeout=60)
     assert checked.returncode == 0 and not checked.stderr, checked.stderr
-    assert sources() == original, 'compiler sources changed during verification'
+    assert sources(version_source) == original, 'compiler sources changed during verification'
+    assert digest(ROOT / build_version['template']['path']) == build_version['template']['sha256']
+    assert digest(Path(build_version['oracle']['path'])) == build_version['oracle']['sha256']
+    for image in images:
+        version = subprocess.run([str(image.resolve()), '--version'], cwd=args.output,
+                                 capture_output=True, check=True, timeout=30)
+        assert not version.stderr and version.stdout == build_version['text'].encode('utf-8')
+    receipt['buildVersion'] = build_version
     assert artifact(args.seed) == seed_identity, 'seed changed during verification'
     receipt.update(scope='Consecutive C-part generations from the recorded input seed; image equality compares Stage1 and Stage2', seedImageSHA256=digest(args.seed), seedLexerCompared=not args.seed_emitter_only, seedProtocolScope='C-project emitter only' if args.seed_emitter_only else 'C-project emitter and lexer stdin', manifestSHA256=digest(manifest), sourceInputs=original, stackReserveBytes=args.stack_reserve_bytes, imageStackReserveBytes=image_stacks, lexerDifferential=json.loads((proof_dir/'receipt.json').read_bytes()), productTimeoutChanged=False, promotionGateReady=False, deferred=['Full frontend differential', 'Linux', 'Current-commit hosted CI'], pushed=False)
     (args.output/'receipt.json').write_text(json.dumps(receipt, indent=2)+'\n', encoding='utf-8', newline='\n')

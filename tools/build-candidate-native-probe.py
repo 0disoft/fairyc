@@ -9,6 +9,8 @@ import struct
 import subprocess
 import time
 
+from candidate_build_version import generate as generate_version
+
 ROOT = Path(__file__).resolve().parents[1]
 PROJECT = ROOT / 'examples/lexer_candidate'
 
@@ -83,6 +85,9 @@ import std::bytes as bytes;
             assert name not in modules
             modules[name] = path
     modules['main'] = entry
+    build_version = None
+    if not args.commands_only and not args.compiler_only:
+        modules['public_cli_data'], build_version = generate_version(output)
     seen, pending = set(), ['main']
     while pending:
         name = pending.pop()
@@ -102,10 +107,17 @@ import std::bytes as bytes;
         snapshot_path = prior / 'source-snapshot.json'
         snapshot = json.loads(snapshot_path.read_text(encoding='utf-8'))
         original = snapshot['sources']
-        # Only the generated entry's path may differ. Bind all bytes, every
-        # other source identity, the seed executable, and the production lock.
+        # Generated source paths may differ. Bind all bytes, every authored
+        # source identity, the seed executable, and the production lock.
         assert original[0]['sha256'] == sources[0]['sha256']
-        assert original[1:] == sources[1:]
+        for old, new in zip(original[1:], sources[1:], strict=True):
+            # The generated version module, like main, lives in this build's
+            # output directory. Its bytes (and frozen identity) must still match.
+            expected = dict(new)
+            if build_version and new['path'] == build_version['generated']['path']:
+                expected['path'] = old['path']
+            assert old == expected
+        assert (snapshot.get('buildVersion') or {}).get('text') == (build_version or {}).get('text')
         assert snapshot['tools']['candidate'] == tools['candidate']
         assert snapshot['lockSHA256'] == lock_sha
         assert all(sha(ROOT / row['path']) == row['sha256'] for row in original)
@@ -124,10 +136,13 @@ import std::bytes as bytes;
                               invocationsSHA256=sha(prior_calls_path), packetSHA256=sha(reused_packet))
     manifest.write_text(''.join(row['path'] + '\n' for row in sources), encoding='utf-8', newline='\n')
     (output / 'source-snapshot.json').write_text(
-        json.dumps(dict(sources=sources, tools=tools, lockSHA256=lock_sha), indent=2) + '\n',
+        json.dumps(dict(sources=sources, tools=tools, lockSHA256=lock_sha, buildVersion=build_version), indent=2) + '\n',
         encoding='utf-8', newline='\n')
 
     def receipt(path, images):
+        if build_version:
+            assert sha(ROOT / build_version['template']['path']) == build_version['template']['sha256']
+            assert sha(Path(build_version['oracle']['path'])) == build_version['oracle']['sha256']
         assert all(sha(ROOT / s['path']) == s['sha256'] for s in sources)
         assert all(sha(Path(t['path'])) == t['sha256'] for t in tools.values())
         assert all(sha(Path(row['path'])) == row['sha256'] for row in images)
@@ -135,6 +150,7 @@ import std::bytes as bytes;
         data = dict(schema='fairyc.candidate-native-probe-build/v1', passed=True,
                     entryScope='private --c-project-file transport only' if args.compiler_only else 'authored check/build/run entry points with real OS argv' if args.commands_only else 'authored file_cli::run with real OS argv',
                     commandsOnly=args.commands_only, compilerOnly=args.compiler_only, sources=sources, tools=tools,
+                    buildVersion=build_version,
                     frontendReuse=frontend_reuse,
                     lockSHA256=lock_sha, images=images, candidatePacketSHA256=sha(packet),
                     invocations=calls, stackReserveBytes=args.stack_reserve_bytes,
@@ -168,6 +184,8 @@ import std::bytes as bytes;
         image = directory / 'fairyc.exe'
         reserve = ['--stack-reserve-bytes', str(args.stack_reserve_bytes)] if args.stack_reserve_bytes else []
         run([args.builder.resolve(), '--packet', packet, '--packet-sha256', sha(packet), '--output', image, *flags, *reserve], 900)
+        if build_version:
+            assert run([image, '--version'], 30) == build_version['text'].encode('utf-8')
         if args.stack_reserve_bytes:
             data = image.read_bytes()
             offset = struct.unpack_from('<I', data, 60)[0]

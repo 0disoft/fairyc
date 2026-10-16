@@ -12,6 +12,27 @@ The exact command and flag inventory is the compiler-owned `usage` value in `int
 
 The stable top-level commands are `new`, `check`, `build`, `run`, `test`, `explain`, and `targets`, with source-independent `--help` and `--version` inspection. The removed `emit` spelling is a stable rejection/migration surface. Every command below `experimental` is owned by `internal/cli` but remains explicitly unstable.
 
+Candidate source builds made by `tools/build-candidate-native-probe.py` or
+`tools/verify-candidate-bootstrap.py` freeze a fresh source Go build's `--version`
+report into an isolated `public_cli_data.fy` before candidate C emission. No extra
+flag is required. This includes Go's module version (tags or pseudo-version and
+`+dirty`), revision, modified status, SDK, language, and runtime identities. The
+bootstrap seed's identity is not copied. Go is required on the build host only;
+version inspection in the resulting candidate reads no workspace or Go process.
+Receipts retain the report and source/oracle hashes, and built images must return
+the exact report. Frontend reuse requires identical frozen version bytes, so an
+older unstamped packet must be rebuilt. Both bootstrap generations use the same
+generated module to preserve their image-equality comparison.
+
+For a manually assembled source manifest, run
+`python tools/candidate_build_version.py --output .cache/<build-directory>` and
+replace the manifest's authored `public_cli_data.fy` path with the returned
+`generated.path`; include exactly one copy of that module. The checked-in module
+is a deterministic template: a direct build that bypasses this step retains
+`development` and unknown VCS fields. The narrow executable regression is
+`python tools/verify-candidate-build-version.py --candidate <seed.exe> --builder <builder.exe> --output .cache/<new-directory>`;
+it compares both native profiles in the repository and an unrelated workspace.
+
 ## Exit taxonomy
 
 The compiler failure namespace is fixed to these non-overlapping values:
