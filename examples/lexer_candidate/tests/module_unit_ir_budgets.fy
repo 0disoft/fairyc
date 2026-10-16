@@ -30,7 +30,7 @@ fn Result<ir::Program,clean::Problem> empty_project(usize producer_work){
     return ir::assemble(cleaned,v::empty<ir::Body>(),v::empty<ir::Layout>(),v::empty<interfaces::Field>(),v::empty<interfaces::Callable>(),v::empty<usize>(),bytes::empty(),producer_work);
 }
 @test fn void project_ir_work_capacity_keeps_an_exact_ceiling_and_unit_budget(){
-    assert(limits::project_work()==16777216);var usize work=limits::project_work()-1;assert(limits::project_charge(ref mut work,1) && work==limits::project_work());assert(!limits::project_charge(ref mut work,1) && work==limits::project_work());
+    assert(limits::project_frames()==16384 && limits::project_work()==16777216);var usize work=limits::project_work()-1;assert(limits::project_charge(ref mut work,1) && work==limits::project_work());assert(!limits::project_charge(ref mut work,1) && work==limits::project_work());
     let p=switch(empty_project(limits::project_work())){case .ok(p):{p}case .err(_):{assert(false);return;}};assert(ir::work(ref p)==limits::project_work() && proof::check(ref p).code==0);
     switch(empty_project(limits::project_work()+1)){case .ok(_):{assert(false);}case .err(e):{assert(e.code==1002);}};
     switch(empty(1048577)){case .ok(_):{assert(false);}case .err(e):{assert(e.code==1002);}};

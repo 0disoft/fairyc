@@ -30,16 +30,16 @@ pub fn usize project_fields(){return 8192;}
 pub fn usize program_expressions(){return 16384;}
 
 // Rebound project functions span many independently bounded source units.
-// The current 285-source dispatcher reaches the previous 4096-frame cap.
+// The 512-source semantic-test dispatcher exceeds 8192 rebound frames.
 // Files, types, callables, bytes and work keep their independent bounds.
-pub fn usize project_frames(){return 8192;}
+pub fn usize project_frames(){return 16384;}
 
 // The cache-connected dispatcher crosses 4096 original signatures. Prototypes
 // cannot outgrow the existing declaration catalog; keep those bounds aligned.
 pub fn usize project_callables(){return project_declarations();}
 
 // Whole-project rebinding combines independently capped producer histories.
-// The 512-source dispatcher exceeds 8 MiB while rebinding retained IR. Each
-// source unit and body retains its separate 1 MiB budget; only the sum grows.
+// The complete dispatcher exceeds 8 MiB while rebinding retained IR. Each
+// source unit and body retains its separate 1 MiB budget.
 pub fn usize project_work(){return 16777216;}
 pub fn bool project_charge(ref mut usize work,usize amount){if(*work>project_work() || amount>project_work()-*work){return false;};*work+=amount;return true;}
