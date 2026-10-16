@@ -16,6 +16,8 @@ import project_compiler_cached as cached;
 import project_compiler_cache_path as cache_path;
 import project_cache_disk as disk;
 import std::vec as v;
+import std::bytes as bytes;
+import syntax as syntax;
 
 pub struct Stats{usize instances;usize files;usize functions;u32 lock;}
 // 1 load/lock, 2 compiler-input/coordinate projection, 3 semantic/IR compilation,
@@ -36,12 +38,44 @@ pub fn ref loader::Loaded compiler_workspace(ref Error e){assert(e.phase==3);ret
 pub fn usize report_count(ref Error e){return v::len<diagnostics::Reports>(ref e.reports);}
 pub fn ref diagnostics::Reports signature_reports(ref Error e){assert(e.phase==3 && report_count(e)==1);return v::at<diagnostics::Reports>(ref e.reports,0);}
 pub fn compiler::Problem compiler_error(ref Error e){assert(e.phase==3);return e.compilation;}
-// SDK Vec destructors live in verified glue rather than ordinary Body records.
-// Include each concrete destructor in the same MIR-function statistic as Go.
-fn usize functions(ref ir::Program program){var usize total=0;let glue=ir::cleanup_ir(program);var usize i=1;
-    // Go emits source cleanup functions only for nonempty cleanup bodies.
-    // Empty bodies stay represented in the candidate ownership proof.
-    while(i<=ir::count(program)){let f=cleanup_ir::frame_at(glue,i);let b=ir::at(program,i);let root=ir::statement_at(b,lookup::statement(b,ir::body(b))-1).value;if(f.kind!=2 || root.second!=0 || root.expression!=0){total+=1;}i+=1;}i=1;while(i<=cleanup_ir::type_count(glue)){if(cleanup_ir::type_at(glue,i).kind==13 && cleanup_ir::glue_at(glue,i).kind==1){total+=1;}i+=1;}return total;}
+// Go retains the private SDK take_slot<T> function. Candidate cleanup MIR
+// folds that leaf into storage_take, but an ordinary pop/clear path may also
+// materialize the very same specialization. Count the missing function once.
+fn bool folded_take(ref ir::Program program,usize frame){
+    let glue=ir::cleanup_ir(program);let f=cleanup_ir::frame_at(glue,frame);
+    if(f.kind!=2 || f.receiver_type==0){return false;}
+    let receiver=cleanup_ir::type_at(glue,f.receiver_type);if(receiver.kind!=13){return false;}
+    let body=ir::at(program,frame);var usize i=0;
+    while(i<ir::node_count(body)){let e=ir::node_at(body,i).value;
+        if(e.kind==6 && e.builtin.kind==103 && e.builtin.element==receiver.first){
+            let generic=lookup::node(body,e.left);if(generic!=0){let base=lookup::node(body,ir::node_at(body,generic-1).value.left);
+                if(base!=0 && bytes::equal(ir::node_text(body,base-1),b"take_slot")){return true;}}
+        }i+=1;
+    }return false;
+}
+fn bool materialized_take(ref ir::Program program,ref input::Input sources,usize frame){
+    let glue=ir::cleanup_ir(program);let f=cleanup_ir::frame_at(glue,frame);
+    let element=cleanup_ir::type_at(glue,f.receiver_type).first;let source=input::source(sources,f.module_index);
+    var usize declaration=0;var usize i=0;
+    while(i<syntax::declaration_count(source)){let d=syntax::declaration_at(source,i);
+        if(d.kind==3 && bytes::equal(syntax::source_view(source)[d.name_start..d.name_end],b"take_slot")){declaration=i+1;break;}i+=1;
+    }
+    // The verified folded call belongs to the authenticated SDK Vec source.
+    assert(declaration!=0);i=1;
+    while(i<=ir::count(program)){let candidate=cleanup_ir::frame_at(glue,i);
+        if(candidate.kind==1 && candidate.module_index==f.module_index && candidate.declaration==declaration && candidate.result==element){return true;}i+=1;
+    }return false;
+}
+fn usize functions(ref ir::Program program,ref input::Input sources){
+    var usize total=0;let glue=ir::cleanup_ir(program);var usize i=1;
+    while(i<=ir::count(program)){let f=cleanup_ir::frame_at(glue,i);let b=ir::at(program,i);
+        let root=ir::statement_at(b,lookup::statement(b,ir::body(b))-1).value;
+        // Go omits empty source cleanup functions; ownership MIR retains them.
+        if(f.kind!=2 || root.second!=0 || root.expression!=0){total+=1;}
+        if(folded_take(program,i) && !materialized_take(program,sources,i)){total+=1;}
+        i+=1;
+    }return total;
+}
 @effects(filesystem)
 pub fn Result<Stats,Error> evaluate(ref u8[] root,bool locked){var sources::Budget budget=sources::Budget{.files=0,.bytes=0};var usize meter=0;
     let loaded=switch(loader::load(root,locked,ref mut budget,ref mut meter)){case .ok(value):{value}case .err(e):{return .err(load_failure(e));}};
@@ -50,7 +84,7 @@ pub fn Result<Stats,Error> evaluate(ref u8[] root,bool locked){var sources::Budg
     let projected=switch(input::project(loader::workspace(ref loaded),ref mut meter)){case .ok(value):{value}case .err(e):{return .err(projection_failure(loaded,e));}};
     var usize source_work=0;var usize link_work=0;
     var v::Vec<diagnostics::Reports> reports=v::empty<diagnostics::Reports>();let files=input::count(ref projected);let complete=switch(compiler::build_complete_reporting(ref projected,ref table,ref mut reports,ref mut source_work,ref mut link_work)){case .ok(value):{value}case .err(e):{return .err(compile_failure_reports(loaded,projected,e,reports));}};
-    return .ok(Stats{.instances,.files,.functions=functions(identified::ir_program(compiler::checked_program(ref complete))),.lock});
+    return .ok(Stats{.instances,.files,.functions=functions(identified::ir_program(compiler::checked_program(ref complete)),ref projected),.lock});
 }
 
 // Private opt-in path keeps loader/lock/projection error owners and command
@@ -64,5 +98,5 @@ pub fn Result<Stats,Error> evaluate_cached(ref u8[] root,bool locked,ref u8[] ca
     let projected=switch(input::project(loader::workspace(ref loaded),ref mut meter)){case .ok(p):{p}case .err(e):{return .err(projection_failure(loaded,e));}};
     var usize source_work=0;var usize link_work=0;var v::Vec<diagnostics::Reports> reports=v::empty<diagnostics::Reports>();let files=input::count(ref projected);
     let complete=switch(cache_path::build(cache_root,policy,loader::workspace(ref loaded),ref projected,ref table,ref mut reports,ref mut source_work,ref mut link_work,observed)){case .ok(p):{p}case .err(e):{return .err(compile_failure_reports(loaded,projected,e,reports));}};
-    return .ok(Stats{.instances,.files,.functions=functions(identified::ir_program(compiler::checked_program(ref complete))),.lock});
+    return .ok(Stats{.instances,.files,.functions=functions(identified::ir_program(compiler::checked_program(ref complete)),ref projected),.lock});
 }

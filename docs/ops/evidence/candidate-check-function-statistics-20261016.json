@@ -1,0 +1,42 @@
+{
+  "schema": "fairyc.candidate-check-function-statistics/v1",
+  "passed": true,
+  "source": {
+    "path": "examples/lexer_candidate/src/project_check.fy",
+    "sha256": "0ecce8c088467e61d910cbb16e883071a828653b6471511a1296e1497b722a93"
+  },
+  "cause": "The Go MIR inventory retains SDK take_slot<T> specializations that candidate destructor IR folds to storage_take. Supplement only folded specializations absent as ordinary frames; Vec drop frames are already counted.",
+  "cases": 12,
+  "cacheCases": 2,
+  "scope": "All seven final release statistic mismatches, matching struct_vec_view control, scalar-only, scalar Vec, bool Vec, struct Vec, cold/warm cache.",
+  "proofs": [
+    {
+      "path": ".cache/candidate-parity-fixes-20261016/stats-investigation/result.json",
+      "sha256": "381c97ae76c2e09320eea61ad91a218931581efc37c13ff047396c54c2945d6b"
+    },
+    {
+      "path": ".cache/candidate-parity-fixes-20261016/stats-investigation/reconciliation.json",
+      "sha256": "4f531721f3ff97ac70acce978c7d1028293254441661806544b27f0b32d32356"
+    },
+    {
+      "path": ".cache/candidate-parity-fixes-20261016/stats-investigation/fixed/receipt.json",
+      "sha256": "c4a356d4867b61c1ff9463d17b4344af025c82c4518264a9fbd136835efd4f43"
+    },
+    {
+      "path": ".cache/candidate-parity-fixes-20261016/stats-investigation/fixed/verification.json",
+      "sha256": "0d4e4363e05543d21b1a12b03aadd08165232d5eca408809d3de522c8619c702"
+    }
+  ],
+  "assertions": [
+    "existing Vec cleanup frames are counted once",
+    "a folded SDK take_slot specialization contributes only when its ordinary frame is absent",
+    "same-element specializations shared by clear/pop and cleanup are not counted twice",
+    "empty source cleanup still follows the Go MIR statistic"
+  ],
+  "fullNativeCliIntegrationPending": true,
+  "publicApiChanged": false,
+  "sdkAbiChanged": false,
+  "dbChanged": false,
+  "ciChanged": false,
+  "pushed": false
+}
