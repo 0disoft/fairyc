@@ -1,5 +1,6 @@
 module windows_run_capture;
 import windows_process as child;
+import windows_command as command;
 import windows_run_control as control;
 import std::bytes as bytes;
 import std::vec as v;
@@ -9,12 +10,20 @@ import std::vec as v;
 @effects(filesystem) @link_name("fairyc_private_windows_peek_v1") unsafe extern C fn i32 peek(ptr mut void handle,ptr mut u32 available);
 @effects(filesystem) @link_name("fairyc_private_windows_read_v1") unsafe extern C fn i32 read(ptr mut void handle,ptr mut u8 data,u32 size,ptr mut u32 count);
 @effects(filesystem) @link_name("fairyc_private_windows_close_v1") unsafe extern C fn i32 close(ptr mut void handle);
+@effects(filesystem) @link_name("fairyc_private_windows_input_file_v1") unsafe extern C fn ptr mut void input_file(ptr u8 path);
 @link_name("fairyc_private_windows_handle_value_v1") unsafe extern C fn usize handle_value(ptr mut void handle);
 @link_name("fairyc_private_windows_error_v1") unsafe extern C fn u32 last_error();
 @effects(clock) @link_name("fairyc_private_windows_ticks_v1") unsafe extern C fn usize ticks();
 
 @effects(filesystem) resource Pipe{ptr mut void reader;ptr mut void writer;cleanup{unsafe{if(this.writer!=null){discard close(this.writer);}if(this.reader!=null){discard close(this.reader);}};}}
 pub resource Captured{u32 status;u32 trap;u32 pid;bytes::Buffer output;bytes::Buffer error;cleanup{}}
+@effects(filesystem) resource Input{ptr mut void raw;bool owned;cleanup{if(this.owned && this.raw!=null){unsafe{discard close(this.raw);};}}}
+// 0 inherits caller input, 1 supplies EOF, 2 reopens a private replay file.
+@effects(filesystem,console) fn Result<Input,child::Problem> input(u32 mode,ref u8[] path){
+    if(mode==0){return .ok(Input{.raw=child::inherited_handles().input,.owned=false});}
+    if(mode==1){var ptr mut void reader=null;var ptr mut void writer=null;let made=unsafe{create_pipe(ref mut reader as ptr mut void,ref mut writer as ptr mut void)};let p=Input{.raw=reader,.owned=true};if(made==0){return .err(fail(9,unsafe{last_error()},0));}if(unsafe{close(writer)}==0 || unsafe{inherit(p.raw,1)}==0){return .err(fail(9,unsafe{last_error()},0));}return .ok(p);}
+    if(mode!=2){return .err(fail(1,0,0));}let encoded=switch(command::path(path)){case .ok(p):{p}case .err(_):{return .err(fail(1,0,0));}};let p=Input{.raw=unsafe{input_file(bytes::view(ref encoded) as ptr u8)},.owned=true};if(p.raw==null){return .err(fail(9,unsafe{last_error()},0));}return .ok(p);
+}
 pub fn u32 status(ref Captured result){return result.status;}
 pub fn u32 trap(ref Captured result){return result.trap;}
 pub fn u32 pid(ref Captured result){return result.pid;}
@@ -39,11 +48,15 @@ fn child::Problem fail(u32 kind,u32 os_code,u32 pid){return child::Problem{.kind
 }
 @effects(filesystem,console,environment,clock)
 pub fn Result<Captured,child::Problem> run(ref u8[] program,ref v::Vec<bytes::Buffer> arguments,ref u8[] directory,u32 timeout){
+    return run_input(program,arguments,directory,timeout,0,b"");
+}
+@effects(filesystem,console,environment,clock)
+pub fn Result<Captured,child::Problem> run_input(ref u8[] program,ref v::Vec<bytes::Buffer> arguments,ref u8[] directory,u32 timeout,u32 input_mode,ref u8[] input_path){
     if(timeout==0 || timeout>600000){return .err(fail(1,0,0));}
     let output=switch(pipe()){case .ok(p):{p}case .err(e):{return .err(e);}};let error=switch(pipe()){case .ok(p):{p}case .err(e):{return .err(e);}};let receipt=switch(pipe()){case .ok(p):{p}case .err(e):{return .err(e);}};
     let inherited=switch(control::snapshot()){case .ok(p):{p}case .err(e):{return .err(e);}};let environment=switch(control::with_handle(bytes::view(ref inherited),unsafe{handle_value(receipt.writer)})){case .ok(p):{p}case .err(e):{return .err(e);}};
     var bytes::Buffer scratch=bytes::empty();if(!bytes::resize_zeroed(ref mut scratch,4096).is_ok){return .err(fail(2,0,0));}var bytes::Buffer out=bytes::empty();var bytes::Buffer err=bytes::empty();var bytes::Buffer signal=bytes::empty();var usize retained=0;var usize signal_retained=0;var bool truncated=false;var bool signal_truncated=false;
-    let standard=child::inherited_handles();let started=unsafe{ticks()};let running=switch(child::start(program,arguments,directory,bytes::view(ref environment),child::Handles{.input=standard.input,.output=output.writer,.error=error.writer})){case .ok(p):{p}case .err(e):{return .err(e);}};
+    let standard=switch(input(input_mode,input_path)){case .ok(p):{p}case .err(e):{return .err(e);}};let started=unsafe{ticks()};let running=switch(child::start(program,arguments,directory,bytes::view(ref environment),child::Handles{.input=standard.raw,.output=output.writer,.error=error.writer})){case .ok(p):{p}case .err(e):{return .err(e);}};
     let id=child::pid(ref running);var bool stopped=false;var child::Outcome completed=child::Outcome{.exit_code=0,.pid=id};var usize collected=0;
     while(true){
         let a=switch(pump(ref output,ref mut out,ref mut scratch,ref mut retained,65536,ref mut truncated,id)){case .ok(p):{p}case .err(e):{child::terminate(ref running);return .err(e);}};

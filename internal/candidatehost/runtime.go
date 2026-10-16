@@ -17,6 +17,7 @@ var windowsRootedFile string
 
 var symbols = regexp.MustCompile(`\bfairyc_private_windows_[A-Za-z0-9_]+\s*\(`)
 var admitted = map[string]bool{
+	"fairyc_private_windows_input_file_v1":   true,
 	"fairyc_private_windows_current_path_v1": true,
 	"fairyc_private_windows_temp_path_v1":    true,
 	"fairyc_private_windows_image_path_v1":   true,

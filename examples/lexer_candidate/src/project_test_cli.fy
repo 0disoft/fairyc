@@ -24,6 +24,7 @@ import std::vec as v;
 
 import project_check_cli as checking;
 import project_test_options as test_options;
+import native_cli as native;
 struct TestAttributeError{usize start;usize end;}
 
 @effects(console) fn i32 failure(ref str message,i32 code){return if(io::write_stderr(message).is_ok){code}else{4};}
@@ -76,7 +77,7 @@ fn i32 test_declarations(ref syntax::Parsed parsed,ref test_options::TestOptions
     return 0;
 }
 
-@effects(filesystem,console)
+@effects(filesystem,console,environment,clock)
 pub fn i32 run_test_list(ref u8[] root,ref test_options::TestOptions options){
     var sources::Budget budget=sources::Budget{.files=0,.bytes=0};var usize meter=0;
     let production=switch(loader::load(root,test_options::flags(options).locked,ref mut budget,ref mut meter)){case .ok(p):{p}case .err(e):{return test_error(check::load_failure(e));}};
@@ -97,12 +98,18 @@ pub fn i32 run_test_list(ref u8[] root,ref test_options::TestOptions options){
     }
     if(bytes::len(ref diagnostics)>0){return if(io::write_stderr_bytes(bytes::view(ref diagnostics)).is_ok){3}else{4};}
     let missing_dirs=test_missing(test_options::dirs(options),ref dirs,true);if(missing_dirs!=0){return missing_dirs;}let missing_files=test_missing(test_options::files(options),ref files,false);if(missing_files!=0){return missing_files;}
+    var v::Vec<usize> chosen=v::empty<usize>();if(!test_options::test_choose(options,ref tests,ref mut chosen)){return 4;}
+    var v::Vec<bytes::Buffer> identities=v::empty<bytes::Buffer>();var usize exact_i=0;while(exact_i<v::len<test_options::TestIdentity>(ref tests)){if(!test_options::test_add(ref mut identities,test_options::test_name(v::at<test_options::TestIdentity>(ref tests,exact_i)))){return 4;}exact_i+=1;}
+    let missing_exact=test_missing_exact(test_options::exact(options),ref identities);if(missing_exact!=0){return missing_exact;}
     var usize source_work=0;var usize link_work=0;var v::Vec<signatures::Reports> reports=v::empty<signatures::Reports>();
-    let complete=switch(compiler::build_complete_reporting(ref projected,ref table,ref mut reports,ref mut source_work,ref mut link_work)){case .ok(p):{p}case .err(e):{return test_error(check::compile_failure_reports(loaded,projected,e,reports));}};discard complete;
+    let complete=switch(compiler::build_complete_reporting(ref projected,ref table,ref mut reports,ref mut source_work,ref mut link_work)){case .ok(p):{p}case .err(e):{return test_error(check::compile_failure_reports(loaded,projected,e,reports));}};
+    if(test_options::flags(options).stdin && v::len<usize>(ref chosen)!=1){return test_invocation(b"command \"test\" requires exactly one selected test when --stdin is supplied");}
+    if(!test_options::flags(options).list){return native::tests(complete,ref projected,ref table,options,ref tests,ref chosen,root,locks::state_code(lock));}discard complete;
     return test_options::test_render(options,ref tests,ref projected,locks::state_code(lock));
 }
 
-@effects(filesystem,console)
-pub fn i32 run(ref u8[] root,ref v::Vec<bytes::Buffer> argv){let selected=switch(test_options::parse_test_options(argv)){case .ok(p):{p}case .err(e):{return test_invocation(test_options::error_text(ref e));}};if(!test_options::flags(ref selected).list){return failure(if(test_options::flags(ref selected).native){"fairyc: candidate native test execution is not implemented\n"}else{"fairyc: candidate semantic test interpreter is not implemented\n"},3);}return run_test_list(root,ref selected);}
-@effects(filesystem,console)
+@effects(console) fn i32 test_missing_exact(ref v::Vec<bytes::Buffer> requested,ref v::Vec<bytes::Buffer> available){var v::Vec<bytes::Buffer> missing=v::empty<bytes::Buffer>();var usize i=0;while(i<v::len<bytes::Buffer>(requested)){let value=bytes::view(v::at<bytes::Buffer>(requested,i));if(!test_options::test_contains(available,value) && !test_options::test_add(ref mut missing,value)){return 4;}i+=1;}if(v::len<bytes::Buffer>(ref missing)==0){return 0;}var v::Vec<usize> order=v::empty<usize>();if(!test_options::test_sort_strings(ref missing,ref mut order)){return 4;}var bytes::Buffer message=bytes::empty();if(!test_options::test_append(ref mut message,b"command \"test\" exact test selection was not found: ")){return 4;}i=0;while(i<v::len<usize>(ref order)){if(i>0 && !test_options::test_append(ref mut message,b", ")){return 4;}if(!test_options::test_diagnostic_quote(ref mut message,bytes::view(v::at<bytes::Buffer>(ref missing,*v::at<usize>(ref order,i))))){return 4;}i+=1;}return test_invocation(bytes::view(ref message));}
+@effects(filesystem,console,environment,clock)
+pub fn i32 run(ref u8[] root,ref v::Vec<bytes::Buffer> argv){let selected=switch(test_options::parse_test_options(argv)){case .ok(p):{p}case .err(e):{return test_invocation(test_options::error_text(ref e));}};if(!test_options::flags(ref selected).list && !test_options::flags(ref selected).native){return failure("fairyc: candidate semantic test interpreter is not implemented\n",3);}return run_test_list(root,ref selected);}
+@effects(filesystem,console,environment,clock)
 pub fn i32 arguments(){var v::Vec<bytes::Buffer> argv=v::empty<bytes::Buffer>();var usize i=2;while(i<process::arg_count()){var bytes::Buffer data=bytes::empty();if(!bytes::resize_zeroed(ref mut data,4096).is_ok){return 4;}let n=switch(process::arg(i,bytes::view_mut(ref mut data))){case .ok(p):{p}case .err(_):{return failure("fairyc: argument exceeds the supported byte limit\n",2);}};if(!test_options::test_add(ref mut argv,bytes::view(ref data)[..n])){return 4;}i+=1;}return run(b".",ref argv);}

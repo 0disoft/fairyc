@@ -8,6 +8,8 @@ import project_manifest_values as lexical;
 import project_compiler_input as input;
 import syntax as syntax;
 import sha256_stream as sha;
+import windows_run_capture as capture;
+import windows_run_control as control;
 pub struct TestFlags{bool list;bool json;bool locations;bool workspace;bool locked;bool native;bool release;bool stdin;bool capture;bool timeout;}
 pub resource TestOptions{TestFlags flags;usize timeout_ms;bytes::Buffer package;bytes::Buffer stdin_file;v::Vec<bytes::Buffer> arguments;v::Vec<bytes::Buffer> files;v::Vec<bytes::Buffer> dirs;v::Vec<bytes::Buffer> exact;cleanup{}}
 pub resource TestOptionError{bytes::Buffer text;cleanup{}}
@@ -69,6 +71,9 @@ pub fn ref v::Vec<bytes::Buffer> exact(ref TestOptions o){return ref o.exact;}
 pub fn ref u8[] error_text(ref TestOptionError e){return bytes::view(ref e.text);}
 
 pub resource TestIdentity{bytes::Buffer identity;bytes::Buffer file;bytes::Buffer uid;usize module_index;usize declaration;cleanup{}}
+pub fn ref u8[] test_name(ref TestIdentity test){return bytes::view(ref test.identity);}
+pub fn usize test_module(ref TestIdentity test){return test.module_index;}
+pub fn usize test_declaration(ref TestIdentity test){return test.declaration;}
 
 pub fn TestIdentity identity(bytes::Buffer identity,bytes::Buffer file,bytes::Buffer uid,usize module_index,usize declaration){return TestIdentity{.identity,.file,.uid,.module_index,.declaration};}
 pub fn bool test_sort_strings(ref v::Vec<bytes::Buffer> values,ref mut v::Vec<usize> order){var usize i=0;while(i<v::len<bytes::Buffer>(values)){if(!v::push<usize>(order,i).is_ok){return false;}var usize j=i;while(j>0){let before=*v::at<usize>(order,j-1);if(!lexical::before(bytes::view(v::at<bytes::Buffer>(values,i)),bytes::view(v::at<bytes::Buffer>(values,before)))){break;}let slot=v::at_mut<usize>(order,j);*slot=before;j-=1;}let slot=v::at_mut<usize>(order,j);*slot=i;i+=1;}return true;}
@@ -101,3 +106,25 @@ pub fn i32 test_render(ref TestOptions options,ref v::Vec<TestIdentity> tests,re
 }
 
 pub fn bool test_diagnostic_quote(ref mut bytes::Buffer out,ref u8[] value){var usize work=0;let quoted=switch(quoted::quote_diagnostic(value,ref mut work)){case .ok(p):{p}case .err(_):{return false;}};return test_append(out,bytes::view(ref quoted));}
+
+fn bool test_base64(ref mut bytes::Buffer out,ref u8[] data){
+    let alphabet=b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";var usize i=0;
+    if(!test_append(out,b"\"")){return false;}while(i<data.len){let a=data[i] as usize;let usize b=if(i+1<data.len){data[i+1] as usize}else{0};let usize c=if(i+2<data.len){data[i+2] as usize}else{0};var u8[4] encoded=[0;4];encoded[0]=alphabet[a/4];encoded[1]=alphabet[(a%4)*16+b/16];encoded[2]=if(i+1<data.len){alphabet[(b%16)*4+c/64]}else{61};encoded[3]=if(i+2<data.len){alphabet[c%64]}else{61};if(!test_append(out,ref encoded)){return false;}i+=3;}return test_append(out,b"\"");
+}
+fn bool test_location(ref mut bytes::Buffer out,ref TestIdentity test,ref input::Input projected){let parsed=input::source(projected,test.module_index);let d=syntax::declaration_at(parsed,test.declaration);let source=syntax::source_view(parsed);return test_append(out,b" at ") && test_append(out,bytes::view(ref test.file)) && test_append(out,b":") && test_number(out,test_line(source,d.name_start)) && test_append(out,b":") && test_number(out,test_column(source,d.name_start));}
+@effects(console) pub fn i32 test_report(ref TestOptions selected,ref v::Vec<TestIdentity> tests,ref v::Vec<usize> chosen,ref input::Input projected,ref v::Vec<capture::Captured> results,u32 lock_code){
+    if(v::len<usize>(chosen)!=v::len<capture::Captured>(results)){return 4;}let flags=flags(selected);var usize failed=0;var usize i=0;while(i<v::len<capture::Captured>(results)){if(capture::trap(v::at<capture::Captured>(results,i))!=0){failed+=1;}i+=1;}let count=v::len<usize>(chosen);let lock=if(lock_code==1){b"unchanged"}else if(lock_code==2){b"updated"}else{b"verified"};var bytes::Buffer out=bytes::empty();
+    if(flags.json){
+        if(!test_append(ref mut out,b"{\"schemaVersion\":\"") || !test_append(ref mut out,if(flags.capture){b"fairyc.test-report/v4"}else if(flags.locations){b"fairyc.test-report/v3"}else if(flags.workspace){b"fairyc.test-report/v2"}else{b"fairyc.test-report/v1"}) || !test_append(ref mut out,b"\",\"engine\":\"native\",\"target\":\"x86_64-windows-msvc\",\"profile\":\"") || !test_append(ref mut out,if(flags.release){b"release"}else{b"development"}) || !test_append(ref mut out,b"\",\"tests\":[")){return 4;}
+        i=0;while(i<count){let test=v::at<TestIdentity>(tests,*v::at<usize>(chosen,i));let result=v::at<capture::Captured>(results,i);let trap=capture::trap(result);if(i>0 && !test_append(ref mut out,b",")){return 4;}
+            if(!test_append(ref mut out,b"{\"identity\":") || !test_quote(ref mut out,bytes::view(ref test.identity)) || !test_append(ref mut out,if(trap==0){b",\"outcome\":\"passed\",\"trapCategory\":null"}else{b",\"outcome\":\"failed\",\"trapCategory\":"}) || trap!=0 && !test_quote(ref mut out,control::category(trap))){return 4;}
+            if(flags.locations && (!test_append(ref mut out,b",\"source\":") || !test_source_json(test,projected,ref mut out))){return 4;}
+            if(flags.capture && (!test_append(ref mut out,b",\"stdoutBase64\":") || !test_base64(ref mut out,capture::stdout(result)) || !test_append(ref mut out,b",\"stderrBase64\":") || !test_base64(ref mut out,capture::stderr(result)))){return 4;}if(!test_append(ref mut out,b"}")){return 4;}i+=1;
+        }
+        if(!test_append(ref mut out,b"],\"count\":") || !test_number(ref mut out,count) || !test_append(ref mut out,b",\"passed\":") || !test_number(ref mut out,count-failed) || !test_append(ref mut out,b",\"failed\":") || !test_number(ref mut out,failed) || !test_append(ref mut out,b",\"status\":\"") || !test_append(ref mut out,if(failed==0){b"ok"}else{b"failed"}) || !test_append(ref mut out,b"\",\"lock\":\"") || !test_append(ref mut out,lock) || !test_append(ref mut out,b"\"}\n")){return 4;}
+    }else{
+        i=0;while(i<count){let test=v::at<TestIdentity>(tests,*v::at<usize>(chosen,i));let trap=capture::trap(v::at<capture::Captured>(results,i));if(!test_append(ref mut out,b"test ") || !test_append(ref mut out,bytes::view(ref test.identity)) || flags.locations && !test_location(ref mut out,test,projected) || !test_append(ref mut out,if(trap==0){b" ... ok\n"}else{b" ... FAILED ("}) || trap!=0 && (!test_append(ref mut out,control::category(trap)) || !test_append(ref mut out,b")\n"))){return 4;}i+=1;}
+        if(!test_append(ref mut out,b"test result: ") || !test_append(ref mut out,if(failed==0){b"ok"}else{b"FAILED"}) || !test_append(ref mut out,b". ") || !test_number(ref mut out,count-failed) || !test_append(ref mut out,b" passed; ") || !test_number(ref mut out,failed) || !test_append(ref mut out,b" failed; lock ") || !test_append(ref mut out,lock) || !test_append(ref mut out,b"\n")){return 4;}
+    }
+    return if(switch(io::write_bytes(bytes::view(ref out))){case .ok(n):{n==bytes::len(ref out)}case .err(_):{false}}){if(failed==0){0}else{5}}else{4};
+}

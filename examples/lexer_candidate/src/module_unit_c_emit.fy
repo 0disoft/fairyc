@@ -58,13 +58,13 @@ fn clean::Problem render_named(ref ir::Program p,ref names::Table named,usize en
     if(bytes::len(out)>2097152 || bytes::len(ref text)>2097152-bytes::len(out)){return fail(1002,0,0,0);}return fail(if(bytes::append(out,bytes::view(ref text)).is_ok){0}else{1003},0,0,0);
 }
 
-resource Prepared {owner::Program program;names::Table named;v::Vec<cfg::Graph> graphs;sdk::Plan sdk_plan;contracts::Index indexed;targets::Index body_index;reachable::Plan selected;bytes::Buffer header;bytes::Buffer literal_source;usize entry;usize work;cleanup{}}
+resource Prepared {owner::Program program;names::Table named;v::Vec<cfg::Graph> graphs;sdk::Plan sdk_plan;contracts::Index indexed;targets::Index body_index;reachable::Plan selected;bytes::Buffer header;bytes::Buffer literal_source;usize entry;bool test_entry;usize work;cleanup{}}
 resource Unit {usize first;usize stop;bytes::Buffer text;cleanup{}}
 pub resource Bundle {Prepared prepared;v::Vec<Unit> units;usize frames;usize work;usize retries;cleanup{}}
 fn u32 error_code(w::State s){return if(s.code<1000){if(s.code==3){1003}else{1002}}else{s.code};}
-fn Result<Prepared,clean::Problem> prepare_project(owner::Program p,names::Table named,usize entry,bool entry_only){
+fn Result<Prepared,clean::Problem> prepare_project(owner::Program p,names::Table named,usize entry,bool entry_only,bool test_entry){
     let raw=owner::ir_program(ref p);
-    let checked=proof::check(raw);if(checked.code!=0){return .err(checked);}if(!clean::project(ir::cleanup_ir(raw)) || entry==0 || entry>ir::count(raw)){return .err(fail(1001,0,0,0));}let f=clean::frame_at(ir::cleanup_ir(raw),entry);if(scalar::scalar(raw,f.result)!=1 || calls::parameters(ir::at(raw,entry))!=0){return .err(fail(1001,f.module_index,0,0));}
+    let checked=proof::check(raw);if(checked.code!=0){return .err(checked);}if(!clean::project(ir::cleanup_ir(raw)) || entry==0 || entry>ir::count(raw)){return .err(fail(1001,0,0,0));}let f=clean::frame_at(ir::cleanup_ir(raw),entry);if(scalar::scalar(raw,f.result)!=if(test_entry){7}else{1} || calls::parameters(ir::at(raw,entry))!=0){return .err(fail(1001,f.module_index,0,0));}
     let graphs=switch(flow::lower_all(raw)){case .ok(g):{g}case .err(e):{return .err(e);}};var usize work=0;var usize i=0;while(i<v::len<cfg::Graph>(ref graphs)){if(!budget::charge(ref mut work,cfg::count(v::at<cfg::Graph>(ref graphs,i)))){return .err(fail(1002,0,0,0));}i+=1;}
     let sdk_plan=switch(sdk::build(raw,ref mut work)){case .ok(p):{p}case .err(e):{return .err(e);}};let indexed=switch(contracts::build(raw,ref mut work)){case .ok(p):{p}case .err(e):{return .err(fail(e,0,0,0));}};
     let body_index=switch(targets::build(raw,ref indexed,ref mut work)){case .ok(p):{p}case .err(e):{return .err(fail(e,0,0,0));}};
@@ -82,13 +82,13 @@ fn Result<Prepared,clean::Problem> prepare_project(owner::Program p,names::Table
     i=1;while(i<=ir::count(raw)){if(reachable::frame(ref selected,i) && (!calls::signature(raw,ref named,i,ref mut header,ref mut s,true) || !w::text(ref mut header,ref mut s,b";\n"))){return .err(fail(error_code(s),clean::frame_at(ir::cleanup_ir(raw),i).module_index,ir::start(ir::at(raw,i)),ir::end(ir::at(raw,i))));}i+=1;}
     if(!aggregate::drops_named(raw,ref named,if(entry_only){reachable::drops(ref selected)}else{ref marks},ref mut header,ref mut s,ref mut work) || !w::text(ref mut header,ref mut s,b"#endif\n")){return .err(fail(error_code(s),0,0,0));}
     if(!limits::project_charge(ref mut total,work)){return .err(fail(1002,0,0,0));}
-    return .ok(Prepared{.program=p,.named,.graphs,.sdk_plan,.indexed,.body_index,.selected,.header,.literal_source,.entry,.work=total});
+    return .ok(Prepared{.program=p,.named,.graphs,.sdk_plan,.indexed,.body_index,.selected,.header,.literal_source,.entry,.test_entry,.work=total});
 }
 fn Result<bytes::Buffer,clean::Problem> project_unit(ref Prepared p,usize first,usize stop,ref mut usize work){
     let raw=owner::ir_program(ref p.program);
     var bytes::Buffer text=bytes::empty();var w::State s=w::State{.code=0};if(!w::text(ref mut text,ref mut s,b"/* fairyc.candidate-project-unit-c/v1 */\n#include \"fy_project.h\"\n")){return .err(fail(error_code(s),0,0,0));}var usize i=first;
     while(i<stop){if(reachable::frame(ref p.selected,i)){var usize start=ir::start(ir::at(raw,i));var usize end=ir::end(ir::at(raw,i));if(!function_emit::render(raw,ref p.named,ref p.sdk_plan,ref p.indexed,ref p.body_index,v::at<cfg::Graph>(ref p.graphs,i-1),ref mut text,ref mut s,work,ref mut start,ref mut end,true)){return .err(fail(error_code(s),clean::frame_at(ir::cleanup_ir(raw),i).module_index,start,end));}}i+=1;}
-    if(first<=p.entry && p.entry<stop && (!w::text(ref mut text,ref mut s,b"int32_t fy_candidate_entry(void){return ") || !names::function(ref p.named,p.entry,ref mut text,ref mut s) || !w::text(ref mut text,ref mut s,b"();}\n#ifndef FY_CANDIDATE_NO_MAIN\nint main(void){return (int)fy_candidate_entry();}\n#endif\n"))){return .err(fail(error_code(s),0,0,0));}return .ok(text);
+    if(first<=p.entry && p.entry<stop && (!w::text(ref mut text,ref mut s,if(p.test_entry){b"int32_t fy_candidate_entry(void){"}else{b"int32_t fy_candidate_entry(void){return "}) || !names::function(ref p.named,p.entry,ref mut text,ref mut s) || !w::text(ref mut text,ref mut s,if(p.test_entry){b"();return 0;}\n"}else{b"();}\n"}) || !w::text(ref mut text,ref mut s,b"#ifndef FY_CANDIDATE_NO_MAIN\nint main(void){return (int)fy_candidate_entry();}\n#endif\n"))){return .err(fail(error_code(s),0,0,0));}return .ok(text);
 }
 fn clean::Problem append_project_units(ref Prepared p,usize first,usize stop,usize depth,ref mut v::Vec<Unit> units,ref mut usize total,ref mut usize retries){
     var usize work=0;switch(project_unit(p,first,stop,ref mut work)){
@@ -99,8 +99,10 @@ fn clean::Problem append_project_units(ref Prepared p,usize first,usize stop,usi
 // A complete project owns its validated IR and never exposes a successful prefix.
 // Analysis, common declarations and each body attempt retain 1 MiB work;
 // output buffers retain 2 MiB. All histories share limits::project_work().
-pub fn Result<Bundle,clean::Problem> partition_scoped(owner::Program program,names::Table named,usize entry,usize max_frames,bool entry_only){
-    if(max_frames==0 || max_frames>limits::project_frames()){return .err(fail(1001,0,0,0));}let p=switch(prepare_project(program,named,entry,entry_only)){case .ok(p):{p}case .err(e):{return .err(e);}};let frames=ir::count(owner::ir_program(ref p.program));var usize total=p.work;var usize retries=0;var v::Vec<Unit> units=v::empty<Unit>();var usize first=1;
+pub fn Result<Bundle,clean::Problem> partition_scoped(owner::Program program,names::Table named,usize entry,usize max_frames,bool entry_only){return partition_mode(program,named,entry,max_frames,entry_only,false);}
+pub fn Result<Bundle,clean::Problem> partition_test(owner::Program program,names::Table named,usize entry,usize max_frames){return partition_mode(program,named,entry,max_frames,true,true);}
+fn Result<Bundle,clean::Problem> partition_mode(owner::Program program,names::Table named,usize entry,usize max_frames,bool entry_only,bool test_entry){
+    if(max_frames==0 || max_frames>limits::project_frames()){return .err(fail(1001,0,0,0));}let p=switch(prepare_project(program,named,entry,entry_only,test_entry)){case .ok(p):{p}case .err(e):{return .err(e);}};let frames=ir::count(owner::ir_program(ref p.program));var usize total=p.work;var usize retries=0;var v::Vec<Unit> units=v::empty<Unit>();var usize first=1;
     while(first<=frames){let stop=if(max_frames<frames+1-first){first+max_frames}else{frames+1};let e=append_project_units(ref p,first,stop,0,ref mut units,ref mut total,ref mut retries);if(e.code!=0){return .err(e);}first=stop;}
     let usize count=v::len<Unit>(ref units);var usize index=0;var usize next=1;while(index<count){let unit=v::at<Unit>(ref units,index);if(unit.first!=next || unit.first>=unit.stop){return .err(fail(1001,0,0,0));}next=unit.stop;index+=1;}if(next!=frames+1){return .err(fail(1001,0,0,0));}
     return .ok(Bundle{.prepared=p,.units,.frames,.work=total,.retries});

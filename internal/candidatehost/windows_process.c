@@ -43,6 +43,12 @@ int32_t fairyc_private_windows_read_v1(void *handle, uint8_t *data, uint32_t siz
     return ReadFile(handle, data, size, (LPDWORD)read, NULL);
 }
 size_t fairyc_private_windows_handle_value_v1(void *handle) { return (size_t)(uintptr_t)handle; }
+void *fairyc_private_windows_input_file_v1(const uint8_t *path) {
+    SECURITY_ATTRIBUTES attributes = {sizeof(SECURITY_ATTRIBUTES), NULL, TRUE};
+    HANDLE handle = CreateFileW((LPCWSTR)path, GENERIC_READ, FILE_SHARE_READ, &attributes,
+                                OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+    return handle == INVALID_HANDLE_VALUE ? NULL : handle;
+}
 uint8_t *fairyc_private_windows_environment_v1(void) { return (uint8_t *)GetEnvironmentStringsW(); }
 int32_t fairyc_private_windows_free_environment_v1(uint8_t *environment) { return FreeEnvironmentStringsW((LPWCH)environment); }
 uint32_t fairyc_private_windows_environment_word_v1(uint8_t *environment, size_t index) {

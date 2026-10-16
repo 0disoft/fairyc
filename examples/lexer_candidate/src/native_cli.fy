@@ -1,4 +1,17 @@
 module native_cli;
+import std::text as text;
+import std::fs as fs;
+import project_path as portable;
+import module_public_type_text as coordinates;
+import project_source_file as source_file;
+import module_unit_c_emit as c;
+import module_project_complete_c as complete_c;
+import module_unit_cleanup_mir_model as clean;
+import module_unit_body_ir_model as ir;
+import module_project_identified_ir as identified;
+import project_compiler_input as input;
+import project_compiler_core as compiler;
+import project_test_options as test_options;
 import native_cli_options as options;
 import public_cli_data as public;
 import project_emit as emit;
@@ -38,4 +51,37 @@ fn Result<bytes::Buffer,u32> build_path(ref emit::Plan plan){var bytes::Buffer o
     if(!execute && (!argument(ref mut arguments,b"--output-root") || !argument(ref mut arguments,bytes::view(ref root)))){return 4;}
     let built_image=switch(capture::run(bytes::view(ref driver),ref arguments,bytes::view(ref root),600000)){case .ok(p):{p}case .err(_):{return failure("fairyc: build failed: native driver execution failed\n",6);}};if(capture::status(ref built_image)!=0 || capture::trap(ref built_image)!=0){return bridge_failure(capture::stderr(ref built_image));}
     return if(execute){executed(directory,bytes::view(ref output),options::arguments(ref selected))}else{built(directory,ref plan,options::release(ref selected))};
+}
+
+fn usize test_entry(ref compiler::Complete complete,ref test_options::TestIdentity test){let p=identified::ir_program(compiler::checked_program(complete));var usize i=1;while(i<=ir::count(p)){let f=clean::frame_at(ir::cleanup_ir(p),i);if(f.kind==3 && f.module_index==test_options::test_module(test) && f.declaration==test_options::test_declaration(test)+1){return i;}i+=1;}return 0;}
+@effects(console) fn i32 test_input_error(ref u8[] path,u32 kind){var bytes::Buffer message=bytes::empty();if(!test_options::test_append(ref mut message,if(kind==1){b"fairyc: package workspace failure: open native test stdin file "}else{b"fairyc: package workspace failure: native test stdin file "}) || !test_options::test_diagnostic_quote(ref mut message,path) || !test_options::test_append(ref mut message,if(kind==1){b"\n"}else if(kind==2){b" is not a canonical portable workspace file\n"}else if(kind==3){b" exceeds 65536 bytes\n"}else{b" is not a regular file\n"})){return 4;}return if(io::write_stderr_bytes(bytes::view(ref message)).is_ok){7}else{4};}
+@effects(filesystem) fn bool test_replay(ref u8[] path,ref u8[] contents){let valid=switch(text::validate_utf8(path)){case .ok(p):{p}case .err(_):{return false;}};let name=switch(text::cstring_from_text(valid)){case .ok(p):{p}case .err(_):{return false;}};var fs::File file=switch(fs::create_new(text::cstring_as_cstr(ref name))){case .ok(p):{p}case .err(_):{return false;}};let wrote=switch(fs::write_all(ref mut file,contents)){case .ok(n):{n==contents.len}case .err(_):{false}};let closed=fs::close(file).is_ok;return wrote && closed;}
+@effects(filesystem,console,environment,clock) fn Result<capture::Captured,i32> test_execute(ref c::Bundle bundle,ref test_options::TestOptions selected,ref u8[] root,ref u8[] input){
+    let temp=switch(paths::temporary()){case .ok(p):{p}case .err(_):{return .err(failure("fairyc: build failed: temporary directory query failed\n",6));}};let directory=switch(scratch::create(bytes::view(ref temp))){case .ok(p):{p}case .err(_):{return .err(failure("fairyc: build failed: temporary directory creation failed\n",6));}};
+    let packet_path=switch(joined(scratch::path(ref directory),b"packet.bin")){case .ok(p):{p}case .err(_):{return .err(4);}};let program=switch(joined(scratch::path(ref directory),b"test.exe")){case .ok(p):{p}case .err(_):{return .err(4);}};let input_path=switch(joined(scratch::path(ref directory),b"input.bin")){case .ok(p):{p}case .err(_):{return .err(4);}};
+    switch(packet::write(bundle,bytes::view(ref packet_path))){case .ok(_):{}case .err(_):{return .err(failure("fairyc: build failed: native test packet preparation failed\n",6));}};
+    let driver=switch(paths::driver()){case .ok(p):{p}case .err(_):{return .err(failure("fairyc: build failed: native driver path query failed\n",6));}};var v::Vec<bytes::Buffer> arguments=v::empty<bytes::Buffer>();
+    if(!test_options::test_add(ref mut arguments,b"--packet-input") || !test_options::test_add(ref mut arguments,bytes::view(ref packet_path)) || !test_options::test_add(ref mut arguments,b"--output") || !test_options::test_add(ref mut arguments,bytes::view(ref program)) || !test_options::test_add(ref mut arguments,b"--compile-timeout") || !test_options::test_add(ref mut arguments,b"1m") || !test_options::test_add(ref mut arguments,b"--run-trap-control") || test_options::flags(selected).release && !test_options::test_add(ref mut arguments,b"--release")){return .err(4);}
+    let built=switch(capture::run(bytes::view(ref driver),ref arguments,root,600000)){case .ok(p):{p}case .err(_):{return .err(failure("fairyc: build failed: native test driver execution failed\n",6));}};if(capture::status(ref built)!=0 || capture::trap(ref built)!=0){if(!io::write_stderr("fairyc: build failed: ").is_ok || !io::write_stderr_bytes(capture::stderr(ref built)).is_ok){return .err(4);}return .err(6);}
+    let has_file=test_options::stdin_file(selected).len!=0;if(has_file && !test_replay(bytes::view(ref input_path),input)){return .err(failure("fairyc: build failed: native test input preparation failed\n",6));}var u32 timeout=0;var usize elapsed=0;while(elapsed<test_options::timeout_ms(selected)){elapsed+=1000;timeout+=1000;}
+    let result=switch(capture::run_input(bytes::view(ref program),test_options::arguments(selected),scratch::path(ref directory),timeout,if(test_options::flags(selected).stdin){0}else if(has_file){2}else{1},bytes::view(ref input_path))){case .ok(p):{p}case .err(e):{return .err(failure(if(e.kind==8){"fairyc: build failed: native test execution timed out\n"}else if(e.kind==11){"fairyc: build failed: native test output exceeds 65536 bytes\n"}else{"fairyc: build failed: native test execution failed\n"},6));}};
+    switch(scratch::close(directory)){case .ok(_):{}case .err(_):{return .err(failure("fairyc: build failed: temporary directory cleanup failed\n",6));}};return .ok(result);
+}
+@effects(filesystem,console,environment,clock) fn Result<capture::Captured,i32> test_one(compiler::Complete complete,ref test_options::TestIdentity test,ref test_options::TestOptions selected,ref u8[] root,ref u8[] input){
+    let target=test_entry(ref complete,test);if(target==0){return .err(failure("fairyc: internal native test entry invariant failed\n",4));}
+    let bundle=switch(complete_c::partition_test(complete,target,128)){case .ok(p):{p}case .err(_):{return .err(failure("fairyc: unsupported subset capability: native test C emission\n",3));}};return test_execute(ref bundle,selected,root,input);
+}
+@effects(filesystem,console,environment,clock) pub fn i32 tests(compiler::Complete initial,ref input::Input projected,ref coordinates::Coordinates table,ref test_options::TestOptions selected,ref v::Vec<test_options::TestIdentity> tests,ref v::Vec<usize> chosen,ref u8[] root,u32 lock_code){
+    var v::Vec<compiler::Complete> pending=v::empty<compiler::Complete>();if(!v::push<compiler::Complete>(ref mut pending,initial).is_ok){return 4;}var bytes::Buffer input=bytes::empty();if(test_options::stdin_file(selected).len!=0){let path=test_options::stdin_file(selected);if(!portable::source_relative(path)){return test_input_error(path,2);}var usize work=0;input=switch(source_file::read(root,path,65536,ref mut work)){case .ok(p):{p}case .err(e):{return test_input_error(path,if(e.code==3 || e.code==4){3}else if(e.code==8 || e.code==9){4}else{1});}};}
+    var v::Vec<capture::Captured> results=v::empty<capture::Captured>();var usize i=0;while(i<v::len<usize>(chosen)){let test=v::at<test_options::TestIdentity>(tests,*v::at<usize>(chosen,i));
+        let outcome=switch(v::pop<compiler::Complete>(ref mut pending)){case .some(p):{test_one(p,test,selected,root,bytes::view(ref input))}case .none:{.err(4)}};
+        let result=switch(outcome){case .ok(p):{p}case .err(e):{return e;}};
+        if(!test_options::flags(selected).capture && (capture::stdout(ref result).len!=0 || capture::stderr(ref result).len!=0)){var bytes::Buffer message=bytes::empty();if(!test_options::test_append(ref mut message,b"fairyc: requested workspace is outside the native test subset: ") || !test_options::test_append(ref mut message,test_options::test_name(test)) || !test_options::test_append(ref mut message,b" produced program output\n")){return 4;}return if(io::write_stderr_bytes(bytes::view(ref message)).is_ok){2}else{4};}
+        if(capture::trap(ref result)==0 && capture::status(ref result)!=0){return failure("fairyc: build failed: native test exited without valid trap control\n",6);}if(!v::push<capture::Captured>(ref mut results,result).is_ok){return 4;}
+        // Complete and its generated C share one resource owner. Keep that
+        // boundary intact; rebuild from the retained parsed input for each
+        // later image, without reading source or resolving the lock again.
+        i+=1;if(i<v::len<usize>(chosen)){var usize source_work=0;var usize link_work=0;let next=switch(compiler::build_complete(projected,table,ref mut source_work,ref mut link_work)){case .ok(p):{p}case .err(_):{return failure("fairyc: internal native test compilation invariant failed\n",4);}};if(!v::push<compiler::Complete>(ref mut pending,next).is_ok){return 4;}}
+    }
+    return test_options::test_report(selected,tests,chosen,projected,ref results,lock_code);
 }
