@@ -1,0 +1,144 @@
+{
+  "schema": "fairyc.candidate-repeated-array-constant/v1",
+  "passed": true,
+  "profile": "development",
+  "sourceInputs": [
+    {
+      "path": "examples/lexer_candidate/src/module_unit_value_array.fy",
+      "sha256": "3239d3c57f010ee4d25091c20f30464955250886ae34453101f7e4da9ddf331d"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_unit_c_aggregate.fy",
+      "sha256": "94d0c56e673314774306d69daf94e21fca82c2a36cc7293567b998d191b7d93c"
+    },
+    {
+      "path": "examples/repeated_array/README.md",
+      "sha256": "4d4cf11f35f4e7d1e4c68812256d81f33e8378064cd191d0d53be648fd2d0a41"
+    },
+    {
+      "path": "examples/repeated_array/fairy.toml",
+      "sha256": "b63decb5533c6d18aa31b77b43e7832f4611eac832abddec4729922e6008aab2"
+    },
+    {
+      "path": "examples/repeated_array/src/main.fy",
+      "sha256": "d5067d22434e4e4972936863cc62a3a47c3b633e68329043c0e8bd2fcebdc7ff"
+    }
+  ],
+  "compilerBuildReceipt": {
+    "path": ".cache\\candidate-parity-fixes-20261016\\array-cli\\receipt.json",
+    "sha256": "2af3779d4223778b829ca17e7f4aa69c535499f2b8f1b222c1ac672344c5ef74"
+  },
+  "comparisonReceipt": {
+    "path": ".cache/candidate-parity-fixes-20261016/repeated-array-fixed/receipt.json",
+    "sha256": "758d9910c3f4ad82df0828a82d1740c4299cbea1890037f20bb15342e0caca73"
+  },
+  "candidate": {
+    "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-parity-fixes-20261016\\array-cli\\development\\fairyc.exe",
+    "sha256": "19647d30ec45a8ea765563c7ee5a1786643a3c32f5b9f8b4f57fed9455455acb"
+  },
+  "reference": {
+    "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\repr-c-cli-parity-20261016\\fairyc-go.exe",
+    "sha256": "8862917cfea6f98fad327b81ef78b0b5429a8915fefd9aea70fcbf817d121551"
+  },
+  "cases": 2,
+  "summary": {
+    "completed": 2,
+    "acceptanceMatch": 2,
+    "exitMatch": 2,
+    "firstDiagnosticMatch": 2,
+    "allDiagnosticsMatch": 2,
+    "stdoutMatch": 2,
+    "stderrMatch": 2,
+    "exactMatch": 2
+  },
+  "rows": [
+    {
+      "id": "repeated_array/check",
+      "go": {
+        "argv": [
+          "check",
+          "--locked"
+        ],
+        "exit": 0,
+        "timedOut": false,
+        "seconds": 0.19377389999863226,
+        "stdout": "check ok: 1 instance(s), 1 source file(s), 2 MIR function(s), lock verified\n",
+        "stderr": "",
+        "stdoutSHA256": "98e9d41449e9f3314e6b6a880d63b5733ee9267bb207202f49d99f47ea4225c1",
+        "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "diagnostics": []
+      },
+      "candidate": {
+        "argv": [
+          "check",
+          "--locked"
+        ],
+        "exit": 0,
+        "timedOut": false,
+        "seconds": 0.5615382000105456,
+        "stdout": "check ok: 1 instance(s), 1 source file(s), 2 MIR function(s), lock verified\n",
+        "stderr": "",
+        "stdoutSHA256": "98e9d41449e9f3314e6b6a880d63b5733ee9267bb207202f49d99f47ea4225c1",
+        "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "diagnostics": []
+      },
+      "comparison": {
+        "completed": true,
+        "acceptanceMatch": true,
+        "exitMatch": true,
+        "firstDiagnosticMatch": true,
+        "allDiagnosticsMatch": true,
+        "stdoutMatch": true,
+        "stderrMatch": true,
+        "exactMatch": true
+      }
+    },
+    {
+      "id": "repeated_array/run",
+      "go": {
+        "argv": [
+          "run",
+          "--locked"
+        ],
+        "exit": 0,
+        "timedOut": false,
+        "seconds": 2.6201031999953557,
+        "stdout": "",
+        "stderr": "",
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "diagnostics": []
+      },
+      "candidate": {
+        "argv": [
+          "run",
+          "--locked"
+        ],
+        "exit": 0,
+        "timedOut": false,
+        "seconds": 3.168866199994227,
+        "stdout": "",
+        "stderr": "",
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "diagnostics": []
+      },
+      "comparison": {
+        "completed": true,
+        "acceptanceMatch": true,
+        "exitMatch": true,
+        "firstDiagnosticMatch": true,
+        "allDiagnosticsMatch": true,
+        "stdoutMatch": true,
+        "stderrMatch": true,
+        "exactMatch": true
+      }
+    }
+  ],
+  "goFrontendInvoked": false,
+  "publicApiChanged": false,
+  "sdkAbiChanged": false,
+  "dbChanged": false,
+  "ciChanged": false,
+  "pushed": false
+}
