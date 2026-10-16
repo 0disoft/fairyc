@@ -1,0 +1,505 @@
+{
+  "schema": "fairyc.candidate-native-tests-cli-evidence/v1",
+  "passed": true,
+  "scope": "Windows AMD64 MSVC candidate test --native; release comparison suite, development SDK smoke and both test-list suites",
+  "implementationCommits": [
+    "e689f2a0",
+    "a6fff341"
+  ],
+  "sourceInputs": [
+    {
+      "path": "examples/lexer_candidate/src/project_test_options.fy",
+      "sha256": "cefb21907103a51bfacbbae7639b4c3313170271c801bc4aaba147da532e8de1"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_test_cli.fy",
+      "sha256": "b0a71da2d38069e87fc5092115066fa2beef791a30b32b6d7cf597c9b78b6f49"
+    },
+    {
+      "path": "examples/lexer_candidate/src/native_cli.fy",
+      "sha256": "6f1ccc229720feea5af3f26b625f5f13f6cae256976979aa5b7b95b5e5662d27"
+    },
+    {
+      "path": "examples/lexer_candidate/src/windows_run_capture.fy",
+      "sha256": "9e2d773f0f6fffc49e56a40262bfa4f80b4cdc39b50fce4403e2ff26938d63d1"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_unit_c_emit.fy",
+      "sha256": "fd3564603fcaf3fd3650e905d6f0d680e5b03115824d487405453307e7b275cf"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_project_complete_c.fy",
+      "sha256": "d51fa4a3134857ed8f32fc077fdf3f465954be28dc9ae967bd2be3d2a30d74fe"
+    },
+    {
+      "path": "examples/lexer_candidate/tests/project_native_test_options.fy",
+      "sha256": "6613a5623f1da8f919044b041734021098f2d1f1064192c6304f06255294e6b9"
+    },
+    {
+      "path": "internal/candidatehost/runtime.go",
+      "sha256": "afda41815768de6b6d5245a1290627ccb0d67c59029548a7fe9bc64acb7190cc"
+    },
+    {
+      "path": "internal/candidatehost/windows_process.c",
+      "sha256": "b7ebc22103aadeefac6e4d5bdf2fcff6248b1fffb79ff085e70b1a1bc58f4f66"
+    },
+    {
+      "path": "tools/build-candidate-native-probe.py",
+      "sha256": "90d5690d5aca563b28efb55d9017aca4368af60c817d9163a06125d371748602"
+    },
+    {
+      "path": "tools/verify-candidate-native-tests-cli.py",
+      "sha256": "df49464cb86d492bf9f63dca2a82371b2c4728b4475541a088bf92f054ed6014"
+    },
+    {
+      "path": "tools/verify-candidate-test-list-cli.py",
+      "sha256": "9c2ba35712fb9b7781f2313528202b5105cc6882ecba00cbdfccbcc3156eb688"
+    }
+  ],
+  "proof": {
+    "build": {
+      "path": ".cache/native-test-20261017/cli-baseline-stack/receipt.json",
+      "sha256": "f94d2556fbad500f489b22baaf84027b4ced88f7b3391c3b9b0c2aaca73856b6"
+    },
+    "nativeRelease": {
+      "path": ".cache/native-test-20261017/final-native-release/receipt.json",
+      "sha256": "cb6c44f7a4cb97358636b5f04ee3957b8498e6cd0a24deaaf584d4c7114332dc"
+    },
+    "nativeDevelopmentSDK": {
+      "path": ".cache/native-test-20261017/final-native-dev-sdk/receipt.json",
+      "sha256": "c0e182365d38dca599f8f2685de9d2644ba95b69244c0989984fe8ef903bc4b8"
+    },
+    "testListDevelopment": {
+      "path": ".cache/native-test-20261017/final-list-dev/receipt.json",
+      "sha256": "01e14d637bb4a05e2dfcf856a0b0d78abef6a6bad64ad77fc8ca9ac1cdd873fe"
+    },
+    "testListRelease": {
+      "path": ".cache/native-test-20261017/final-list-release/receipt.json",
+      "sha256": "d26f1f09bd87dbb2d88b678d4e65e65c6896ce0c9690f9fe3b74f8bbdaf89135"
+    },
+    "compilerHostReservationPreflight": {
+      "path": ".cache/native-test-20261017/build-host-reserve-preflight.json",
+      "sha256": "e1a645b3aa823af3d1fecb8d636f5e423914f737f1b18b3e58560bd553bc19c0"
+    }
+  },
+  "results": {
+    "nativeReleaseComparisons": 29,
+    "nativeReleaseExactMatches": 28,
+    "nativeReleaseGoObservationsReused": 29,
+    "nativeDevelopmentSDKComparisons": 1,
+    "nativeDevelopmentExactMatches": 1,
+    "testListComparisons": 178,
+    "testListExactMatches": 178,
+    "compilerHostReservationBytes": 16777216,
+    "sourceFiles": 512,
+    "goFrontendUsedToBuildCandidate": false,
+    "productionLocksUnchanged": true
+  },
+  "nativeCases": [
+    {
+      "id": "mixed-text",
+      "argv": [
+        "--native"
+      ],
+      "exit": 5,
+      "exactMatch": true,
+      "stdoutSHA256": "1cd2f356cf9ae658880ba9f4ef8b5bf2359835c63277aed5f058545abcb67c96",
+      "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "id": "mixed-json",
+      "argv": [
+        "--native",
+        "--json"
+      ],
+      "exit": 5,
+      "exactMatch": true,
+      "stdoutSHA256": "92549dba9a19db8324fef44484badbf89e6da128f7b19417ce45d500e5a76052",
+      "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "id": "mixed-locations",
+      "argv": [
+        "--native",
+        "--locations",
+        "--json"
+      ],
+      "exit": 5,
+      "exactMatch": true,
+      "stdoutSHA256": "d9ea7836ff9517bf41a48df1520fe163678c290cec5a80d514916821de431030",
+      "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "id": "mixed-located-text",
+      "argv": [
+        "--native",
+        "--locations"
+      ],
+      "exit": 5,
+      "exactMatch": true,
+      "stdoutSHA256": "18660b6194652896d0d5e613b4b1ad8e9ed30f0287bedcea4ff263756bcce24e",
+      "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "id": "mixed-release",
+      "argv": [
+        "--native",
+        "--release",
+        "--json"
+      ],
+      "exit": 5,
+      "exactMatch": true,
+      "stdoutSHA256": "d2c062423614ef2af126e8fbd21ada020018863def8cf99b84cc0c1c21b0df18",
+      "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "id": "mixed-capture",
+      "argv": [
+        "--native",
+        "--capture-output",
+        "--json",
+        "--locations"
+      ],
+      "exit": 5,
+      "exactMatch": true,
+      "stdoutSHA256": "4b87781d873bc5a435a0595e92dab8343b0a6c3958593f6ba92ac28fc233a458",
+      "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "id": "exact-pass",
+      "argv": [
+        "--native",
+        "--exact",
+        "tests::mixed::z_passes"
+      ],
+      "exit": 0,
+      "exactMatch": true,
+      "stdoutSHA256": "addd4edee74c6f1b40c48aa61a4424188a59d656594cfba5c1d418b10cf483e6",
+      "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "id": "exact-fail",
+      "argv": [
+        "--native",
+        "--exact",
+        "tests::mixed::a_fails"
+      ],
+      "exit": 5,
+      "exactMatch": true,
+      "stdoutSHA256": "036bcaca36993deed0dce485f41390f243bdeb7c6efb89527ca373cf0696281e",
+      "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "id": "missing-exact",
+      "argv": [
+        "--native",
+        "--exact",
+        "tests::mixed::missing"
+      ],
+      "exit": 2,
+      "exactMatch": true,
+      "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrSHA256": "4b0c7ef8261262027857fa71388f1d53ace77587ff280896197237f87a462796"
+    },
+    {
+      "id": "file-selection",
+      "argv": [
+        "--native",
+        "--file",
+        "tests/mixed.fy",
+        "--json"
+      ],
+      "exit": 5,
+      "exactMatch": true,
+      "stdoutSHA256": "92549dba9a19db8324fef44484badbf89e6da128f7b19417ce45d500e5a76052",
+      "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "id": "dir-selection",
+      "argv": [
+        "--native",
+        "--dir",
+        "tests",
+        "--json"
+      ],
+      "exit": 5,
+      "exactMatch": true,
+      "stdoutSHA256": "92549dba9a19db8324fef44484badbf89e6da128f7b19417ce45d500e5a76052",
+      "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "id": "stdin-ambiguous",
+      "argv": [
+        "--native",
+        "--stdin"
+      ],
+      "exit": 2,
+      "exactMatch": true,
+      "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrSHA256": "4f791240df4a105aac76b5c5dd6c66a4bedc06274900226d37124a908f6068c8"
+    },
+    {
+      "id": "empty-json",
+      "argv": [
+        "--native",
+        "--json"
+      ],
+      "exit": 0,
+      "exactMatch": true,
+      "stdoutSHA256": "26bddb73cc4fe4fd9a407cb8cd251525684d3b04ef4a9b17415c36132d5da251",
+      "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "id": "empty-release",
+      "argv": [
+        "--native",
+        "--release"
+      ],
+      "exit": 0,
+      "exactMatch": true,
+      "stdoutSHA256": "20553a508517d2ba28606a25aedd09e77d86d7284c4ee13a4f3920862a13f56f",
+      "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "id": "default-eof",
+      "argv": [
+        "--native"
+      ],
+      "exit": 0,
+      "exactMatch": true,
+      "stdoutSHA256": "e21de21aecfa0e9a766521fa7bd7c6ff733a7237d42203010907b87c555b1e91",
+      "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "id": "trap-categories",
+      "argv": [
+        "--native",
+        "--json",
+        "--capture-output"
+      ],
+      "exit": 5,
+      "exactMatch": true,
+      "stdoutSHA256": "62cbffd82c2b03b3b48ce9279088eebd33f23c7e624de3ffb8db75d65f0f69ed",
+      "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "id": "workspace-locations",
+      "argv": [
+        "--native",
+        "--workspace",
+        "--json",
+        "--locations"
+      ],
+      "exit": 0,
+      "exactMatch": true,
+      "stdoutSHA256": "e334cf3d27961d57a022658ea3098da53f5e5d332ecca187818959711b0a4572",
+      "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "id": "package",
+      "argv": [
+        "--native",
+        "--package",
+        "example.workspace-quickstart.answer",
+        "--json"
+      ],
+      "exit": 0,
+      "exactMatch": true,
+      "stdoutSHA256": "c9b64d39a92991dbe28bab18a8716c2728966cd94b4239b87bf7c73527a402ce",
+      "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "id": "resource-sdk",
+      "argv": [
+        "--native",
+        "--json"
+      ],
+      "exit": 0,
+      "exactMatch": true,
+      "stdoutSHA256": "84e3117f2a017c377f68efc64fb44921ec288a945540bdbc55c46ebcb29d3538",
+      "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "id": "args",
+      "argv": [
+        "--native",
+        "--json",
+        "--",
+        "--locked",
+        "",
+        "\ud55c\uae00\u03bb"
+      ],
+      "exit": 0,
+      "exactMatch": true,
+      "stdoutSHA256": "bc25d44e3aef56a8cfa623fe1c9e4004bc839853ea5bc98ec4892409608ded0a",
+      "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "id": "binary-output",
+      "argv": [
+        "--native",
+        "--json",
+        "--capture-output"
+      ],
+      "exit": 5,
+      "exactMatch": true,
+      "stdoutSHA256": "d4e4ddfe19a8e45226831a310ad68ad6a5843a3838375ee52b52f3195b4e48b1",
+      "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "id": "unrequested-output",
+      "argv": [
+        "--native"
+      ],
+      "exit": 2,
+      "exactMatch": true,
+      "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrSHA256": "e17ccf7d0938334be5fe23f31462d5a78e7e22712e6072690c6bcf7c5d2e0acb"
+    },
+    {
+      "id": "stdin-binary",
+      "argv": [
+        "--native",
+        "--stdin",
+        "--exact",
+        "tests::stdin::caller_input_is_forwarded"
+      ],
+      "exit": 0,
+      "exactMatch": true,
+      "stdoutSHA256": "56dc0a1208dc3a57d6c0a33f98fa31e30a22fa63d042d89d5902e6c299aa28d7",
+      "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "id": "stdin-replay-each",
+      "argv": [
+        "--native",
+        "--stdin-file",
+        "tests/fixtures/input.txt",
+        "--json"
+      ],
+      "exit": 0,
+      "exactMatch": true,
+      "stdoutSHA256": "c4de76af0c3315eeabf32fb1f7a33b52dc0fd089edbbc0f822c404dafa87f813",
+      "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "id": "stdin-missing",
+      "argv": [
+        "--native",
+        "--stdin-file",
+        "missing.bin"
+      ],
+      "exit": 7,
+      "exactMatch": true,
+      "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrSHA256": "615f251250996d3d98d19053dfedee328dc37b4762a95e278d3d2ca219af88d6"
+    },
+    {
+      "id": "stdin-parent",
+      "argv": [
+        "--native",
+        "--stdin-file",
+        "../escape.bin"
+      ],
+      "exit": 7,
+      "exactMatch": true,
+      "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrSHA256": "f3ff7fcb4b8b748f220eb1e98b7d09db5009ca93269b2c564203b3ef6e0b6e6c"
+    },
+    {
+      "id": "stdin-oversize",
+      "argv": [
+        "--native",
+        "--stdin-file",
+        "large.bin"
+      ],
+      "exit": 7,
+      "exactMatch": true,
+      "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrSHA256": "30e002fb92738b6520f29f1088bb013cad0904320f55da6a4bd4fd19c0f61483"
+    },
+    {
+      "id": "deadline",
+      "argv": [
+        "--native",
+        "--timeout-seconds",
+        "1"
+      ],
+      "exit": 6,
+      "exactMatch": false,
+      "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrSHA256": "cf2728c298b01d6d24feb19f623f0b4ea020fde25946a7ea2bf8179d173299ec"
+    },
+    {
+      "id": "deadline-nonhanging",
+      "argv": [
+        "--native",
+        "--timeout-seconds",
+        "1",
+        "--",
+        "skip"
+      ],
+      "exit": 0,
+      "exactMatch": true,
+      "stdoutSHA256": "ed5d08d72f3ab107c5fae62442a405dc1dd95fb01024604cab23fb581f698ac6",
+      "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "diagnosticDifference": "The deadline case checks infrastructure exit 6 and absence of a report; exact platform diagnostic wording is not claimed.",
+  "compilerHostReservation": {
+    "baseline": {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-parity-fixes-20261016\\final-public-cli-v3\\release\\fairyc.exe",
+      "sha256": "1c2f825e884d3544362bba8a5429202d010be4e95a48e3dcf966a239591d1929"
+    },
+    "adjustments": [
+      {
+        "profile": "development",
+        "originalPath": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\native-test-20261017\\cli-v5\\development\\fairyc.exe",
+        "originalSHA256": "9eeb285eda6ac151413c832877d651f512a1aa1923ce6d2b7dbe7c806b5626d9",
+        "originalReserveBytes": 1048576,
+        "reserveBytes": 16777216,
+        "codeAndDataIdentical": true,
+        "allowedMetadata": [
+          "PE stack reservation",
+          "PE checksum"
+        ],
+        "seconds": 0.27156920000015816
+      },
+      {
+        "profile": "release",
+        "originalPath": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\native-test-20261017\\cli-v5\\release\\fairyc.exe",
+        "originalSHA256": "60ad3e506a7738de22189521578a32563633c59a0c150b945c2f4d17c43b26bb",
+        "originalReserveBytes": 1048576,
+        "reserveBytes": 16777216,
+        "codeAndDataIdentical": true,
+        "allowedMetadata": [
+          "PE stack reservation",
+          "PE checksum"
+        ],
+        "seconds": 0.2201201999996556
+      }
+    ],
+    "codeAndDataUnchanged": true,
+    "buildHelperDefault": "inherit seed PE stack reservation",
+    "generatedChildReservationChanged": false
+  },
+  "correctedFailedAttempt": {
+    "profile": "development",
+    "case": "default-eof",
+    "exit": 3221225725,
+    "windowsStatus": "0xC00000FD",
+    "cause": "Rebuild omitted existing seed host reservation: 1 MiB instead of 16 MiB. Restored the baseline without code/data edits; the same case then passed.",
+    "proofPath": ".cache/native-test-20261017/native-dev/observations.json",
+    "proofSHA256": "89e26b8dba3444242b1651ec030e8982e690fc7e25e4d2c7a827a8ee0df4d47b"
+  },
+  "limitations": [
+    "Candidate Windows transport only; semantic interpreter remains unimplemented.",
+    "Input replay rejects reparse/symlink paths through the existing bounded reader.",
+    "Later selected tests rebuild checked IR from retained parsed input.",
+    "Full development native suite, Linux execution and stage1/stage2 fixed-point bootstrap were not rerun."
+  ],
+  "publicGoCliChanged": false,
+  "sdkAbiChanged": false,
+  "ciChanged": false,
+  "pushed": false
+}

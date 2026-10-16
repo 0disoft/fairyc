@@ -20,9 +20,14 @@ def main():
     parser.add_argument('--reference', type=Path, required=True)
     parser.add_argument('--output', type=Path, required=True)
     parser.add_argument('--profile', choices=['development', 'release'])
+    parser.add_argument('--case', action='append', default=[], help='run only these named comparisons')
+    parser.add_argument('--invocation-timeout-seconds', type=int, default=120,
+                        help='verification-only whole CLI allowance, 1..900; child deadlines are unchanged')
     parser.add_argument('--reference-receipt', type=Path,
                         help='reuse identical Go observations authenticated by tool, image and fixture hashes')
     args = parser.parse_args()
+    if not 1 <= args.invocation_timeout_seconds <= 900:
+        parser.error('invocation timeout must be in 1..900 seconds')
     assert __debug__
     output = args.output.resolve()
     assert output.is_relative_to(ROOT / '.cache') and not output.exists()
@@ -39,7 +44,7 @@ def main():
     reference_cache = {}
     if args.reference_receipt:
         prior = json.loads(args.reference_receipt.read_text(encoding='utf-8'))
-        assert prior['passed'] and prior['verifierSHA256'] == digest(Path(__file__))
+        assert prior['passed'] and prior['schema'] == 'fairyc.candidate-native-tests-cli/v1'
         assert prior['reference']['sha256'] == digest(reference)
         for row in prior['comparisons']:
             key = (row['id'], tuple(row['argv']), row['stdinSHA256'], row['fixtureSHA256'])
@@ -48,7 +53,7 @@ def main():
     def run(image, argv, cwd, stdin=b''):
         start = time.monotonic()
         result = subprocess.run([str(image), *argv], cwd=cwd, input=stdin,
-                                capture_output=True, timeout=120)
+                                capture_output=True, timeout=args.invocation_timeout_seconds)
         return dict(exit=result.returncode, stdout=result.stdout.decode('utf-8'),
                     stderr=result.stderr.decode('utf-8'), seconds=time.monotonic() - start)
 
@@ -83,6 +88,8 @@ def main():
             return name
 
         def compare(name, home_name, argv, code=0, stdin=b'', exact=True):
+            if args.case and name not in args.case:
+                return
             home, lock = homes[home_name]
             fixture_inputs = [(p.relative_to(home).as_posix(), digest(p)) for p in sorted(home.rglob('*'))
                               if p.is_file() and p.name != 'fairy.lock' and 'build' not in p.relative_to(home).parts]
@@ -159,6 +166,7 @@ def main():
         compare('deadline-nonhanging', deadline, ['--native', '--timeout-seconds', '1', '--', 'skip'])
 
     assert rows, 'no candidate profile selected'
+    assert not (set(args.case) - {row['id'] for row in rows}), 'unknown case selected'
     assert digest(args.build_receipt) == build_sha and digest(reference) == reference_sha
     assert digest(Path(__file__)) == verifier_sha
     for source in build['sources']:
@@ -168,6 +176,9 @@ def main():
         assert digest(Path(image['path']).with_name('fairyc-candidate-build.exe')) == image['driverSHA256']
     receipt = dict(schema='fairyc.candidate-native-tests-cli/v1', passed=True,
                    verifierSHA256=digest(Path(__file__)),
+                   invocationTimeoutSeconds=args.invocation_timeout_seconds,
+                   referenceReuse=(dict(path=str(args.reference_receipt.resolve()),
+                                        sha256=digest(args.reference_receipt)) if args.reference_receipt else None),
                    buildReceipt=str(args.build_receipt.resolve()), buildReceiptSHA256=digest(args.build_receipt),
                    reference=dict(path=str(reference), sha256=digest(reference)), comparisons=rows,
                    exactComparisons=sum(row['exactMatch'] for row in rows),

@@ -4,6 +4,11 @@ The candidate implements recognition, typing, owned HIR/MIR and C emission in
 Fairy source. Go stage0 still builds this Windows AMD64 MSVC candidate; compiler
 promotion and self-hosted stages are pending.
 
+The dispatcher supports Windows `test --native`, including selection, isolated
+execution, input replay and captured reports. See the
+[native test CLI notes](../../docs/ops/candidate-native-tests-20261017.md)
+for its current limits and verification commands.
+
 Read the [current module and SDK progress](../../docs/ops/candidate-module-progress-20261008.md)
 and [numbered remaining work](../../docs/ops/candidate-remaining-work-20261007.md)
 for maintained support and evidence. The guide below preserves the earlier

@@ -22,7 +22,8 @@ def main():
     parser.add_argument('--candidate', type=Path, required=True)
     parser.add_argument('--builder', type=Path, required=True)
     parser.add_argument('--output', type=Path, required=True)
-    parser.add_argument('--stack-reserve-bytes', type=int, default=0)
+    parser.add_argument('--stack-reserve-bytes', type=int,
+                        help='private compiler-host reservation; omitted inherits the seed PE, zero uses the linker default')
     parser.add_argument('--profile', action='append', choices=['development', 'release'],
                         help='build only the selected compiler profile; repeat for both (default: both)')
     parser.add_argument('--commands-only', action='store_true',
@@ -30,6 +31,13 @@ def main():
     args = parser.parse_args()
     if not __debug__:
         parser.error('verification requires Python without -O')
+    inherited_stack = args.stack_reserve_bytes is None
+    if inherited_stack:
+        seed = args.candidate.read_bytes()
+        assert seed[:2] == b'MZ', 'candidate must be a Windows PE image'
+        offset = struct.unpack_from('<I', seed, 60)[0]
+        assert seed[offset:offset+4] == b'PE\0\0' and struct.unpack_from('<H', seed, offset+24)[0] == 0x20b
+        args.stack_reserve_bytes = struct.unpack_from('<Q', seed, offset+24+72)[0]
     if args.stack_reserve_bytes and not (65536 <= args.stack_reserve_bytes <= 16777216 and args.stack_reserve_bytes % 65536 == 0):
         parser.error('stack reserve must be zero or 64KiB aligned in [64KiB,16MiB]')
     output = args.output.resolve()
@@ -84,6 +92,7 @@ import std::process as process;
                     commandsOnly=args.commands_only, sources=sources, tools=tools,
                     lockSHA256=lock_sha, images=images, candidatePacketSHA256=sha(packet),
                     invocations=calls, stackReserveBytes=args.stack_reserve_bytes,
+                    stackReserveOrigin='seed PE' if inherited_stack else 'explicit',
                     goFrontendInvoked=False, productStackChanged=False, productTimeoutChanged=False)
         path.write_text(json.dumps(data, indent=2) + '\n', encoding='utf-8', newline='\n')
 
