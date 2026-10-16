@@ -85,6 +85,8 @@ fn bool compilation(ref check::Error e,ref mut bytes::Buffer out){let p=check::c
             if(!append(out,b"fairyc: semantic subset does not support type ") || !append(out,signatures::name(reports,i)) || !append(out,b" at ") || !append(out,input::file(sources,d.module_index)) || !range(out,d.start,d.end)){return false;}i+=1;
         }return true;
     }
+    // Private subset reason, matching the reference without inventing an E-code.
+    if(p.code==4506){return append(out,b"fairyc: semantic subset does not support match scrutinee outside the implemented Result, Option, and restricted enum subset at ") && append(out,input::file(sources,p.module_index)) && range(out,p.start,p.end);}
     if(p.phase==5 && p.stage==3 && p.code==4504){return append(out,b"fairyc: semantic subset does not support call target that is not a function at ") && append(out,input::file(sources,p.module_index)) && range(out,p.start,p.end);}
     if(p.phase==2 && p.code==5){return append(out,b"fairyc: semantic subset does not support type ") && append(out,source[p.start..p.end]) && append(out,b" at ") && append(out,input::file(sources,p.module_index)) && range(out,p.start,p.end);}
     if((p.code==2101 || p.code==2102 || p.code==2103 || p.code==2105) && origin_lines(e,out)){return true;}

@@ -26,12 +26,21 @@ operation/block accounting. Traps fail individual tests and execution continues.
 Capability or execution-limit rejection aborts with code 2 and no partial report.
 Internal invariant/allocation failures return code 4.
 
-Enum/Option/Result values, resources and their cleanup,
-references/views, Region operations and host/foreign calls are
-outside this initial interpreter slice. Reached unsupported operations are
-rejected; unselected test bodies are still source-checked, but never interpreted.
-`--native` remains available for supported native workloads. This is an explicit
-capability gap relative to the Go interpreter, not full interpreter parity.
+Enum/Option/Result construction, exhaustive tagged switches, active payloads,
+`Result.is_ok`, `?` and resource cleanup now execute in the interpreter. Cleanup
+runs before reverse-order resource fields; traps stop that cleanup and fail its
+test. Explicit burn follows the checked CFG without running cleanup.
+
+Safe scalar/record references, mutable calls, scalar/record array views, slicing,
+static UTF-8/byte literals, and copy/shared/mutable element iteration use frozen
+place descriptors into per-test root cells. They never retain host pointers or
+addresses into vectors. `source_location()` uses exact retained source paths
+and UTF-8 geometry, including lexical generic-function locations.
+
+Region operations, general raw-pointer execution and host/foreign calls remain
+outside the implemented candidate interpreter slice. Native execution retains
+its existing separate admission. Matching the measured stable CLI cases does
+not establish universal Go interpreter or cross-platform equivalence.
 
 Text and JSON execution reports share the existing writer. Default reports use
 `engine: "interpreter"`, null target/profile fields and no captured-output fields. Existing
@@ -70,7 +79,7 @@ Build with `tools/build-candidate-native-probe.py`, then verify with
 The verifier authenticates source/image hashes, copies only each candidate
 compiler image without its native build companion, compares real reports with
 Go, and checks locked workspace file bytes and modification times after every
-invocation. Selected unsupported resource cases are recorded as capability differences.
+invocation. All current verifier cases require exact stdout, stderr and status equality.
 The existing native and test-list verifiers cover the shared report writer and
 discovery regressions.
 
@@ -135,3 +144,14 @@ aggregate branch/block values, and bounds traps that continue to later tests.
 The initial Go-authored diagnostic image passes 38 comparisons: 37 exact and
 one explicitly retained resource-cleanup capability rejection. This diagnostic
 is not proof of current-source candidate C emission; that full build is separate.
+
+## Expanded value and cleanup execution
+
+The source-authenticated Go-authored diagnostic image passes 98 strict CLI
+comparisons, with no tolerated differences. The suite includes all former
+record/array/resource boundaries, tagged values and propagation, cleanup traps
+and order, scalar/record references and views, slices, long literals, element
+iteration and lexical source-location geometry. It also checks matching
+rejection messages for scalar/bool switch subjects. The updated Go MIR oracle
+now drops discarded owned temporaries instead of skipping their cleanup.
+These diagnostic results precede the separate complete candidate C rebuild.

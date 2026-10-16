@@ -7,6 +7,8 @@ import shutil
 import subprocess
 import time
 
+from candidate_semantic_test_cases import extend
+
 ROOT = Path(__file__).resolve().parents[1]
 MANIFEST = ('schema = "fairyc.manifest/v1"\n[package]\nuid = "probe.semantic-tests"\n'
             'name = "semantic-tests"\nversion = "0.1.0"\nlanguage = "fairyc-language/20"\nsource = "src"\n')
@@ -30,6 +32,8 @@ def main():
     args = parser.parse_args()
     if not __debug__:
         parser.error('verification requires Python without -O')
+    definitions = Path(__file__).with_name('candidate_semantic_test_cases.py')
+    definitions_sha = digest(definitions)
     build = json.loads(args.build_receipt.read_text(encoding='utf-8'))
     assert build['passed'] and not build['goFrontendInvoked'] and not build.get('commandsOnly') and not build.get('compilerOnly')
     for row in build['sources']:
@@ -68,29 +72,25 @@ def main():
             for relative, text in (files or {}).items():
                 p = home / relative
                 p.parent.mkdir(parents=True, exist_ok=True)
-                p.write_text(text, encoding='utf-8')
+                p.write_text(text, encoding='utf-8', newline='\n')
             checked = run(reference, ['check'], home)
             assert checked['exit'] == 0, checked
             homes[name] = home
             return name
 
-        def compare(name, home_name, argv=(), code=0, capability=False, limit=None):
+        def compare(name, home_name, argv=(), code=0, limit=None):
             home = homes[home_name]
             before = snapshot(home)
             go = run(reference, ['test', '--locked', *argv], home)
             candidate = run(executable, ['test', '--locked', *argv], home)
             exact = all(go[k] == candidate[k] for k in ('exit', 'stdout', 'stderr'))
             row = dict(profile=profile, id=name, argv=list(argv), go=go, candidate=candidate,
-                       exactMatch=exact, expectedExit=code, capabilityBoundary=capability)
+                       exactMatch=exact, expectedExit=code, capabilityBoundary=False)
             rows.append(row)
             (output / 'observations.json').write_text(json.dumps(rows, indent=2) + '\n', encoding='utf-8')
             assert snapshot(home) == before, 'test wrote workspace files or changed their timestamps'
             assert candidate['exit'] == code, row
-            if capability:
-                assert not candidate['stdout'] and 'outside the semantic test interpreter subset:' in candidate['stderr'], row
-                assert go['exit'] == 0, row
-            else:
-                assert exact and go['exit'] == code, row
+            assert exact and go['exit'] == code, row
             if limit:
                 assert limit in candidate['stderr'] and not candidate['stdout'], row
 
@@ -228,17 +228,20 @@ resource R{i32 value;cleanup{}}
 @test fn void a_before(){assert(true);}
 @test fn void owning_resource(){let R r=R{.value=42};assert(r.value==42);}
 '''})
-        compare('resource-capability', unsupported, ['--json'], 2, capability=True)
+        compare('owning-resource', unsupported, ['--json'])
+        extend(fixture, compare)
         bad = fixture('invalid', {'tests/bad.fy': 'module tests::bad;@test fn i32 bad(){return 0;}\n'})
         compare('invalid-test-declaration', bad, code=3)
         # The compiler directory also stays free of native tooling/artifacts.
         assert list(executable.parent.iterdir()) == [executable]
 
     assert rows
+    assert digest(definitions) == definitions_sha, 'case definitions changed during verification'
     for row in build['sources']:
         assert digest(ROOT / row['path']) == row['sha256'], row['path']
     receipt = dict(schema='fairyc.candidate-semantic-tests-cli/v1', passed=True,
                    buildReceiptSHA256=digest(args.build_receipt), verifierSHA256=digest(Path(__file__)),
+                   caseDefinitionsSHA256=definitions_sha,
                    referenceSHA256=digest(reference), comparisons=rows,
                    exactMatches=sum(r['exactMatch'] for r in rows), cases=len(rows),
                    nativeDriverPresent=False, lockedWorkspaceFilesUnchanged=True)
