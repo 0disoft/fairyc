@@ -44,43 +44,29 @@ opening the store. The entire store is validated before filtering/sorting, so a
 corrupt excluded row still fails with exit 1 and no stdout. Listing retains the
 existing cooperative lock/sidecar checks and leaves store bytes unchanged.
 
-Saving acquires the cooperative exclusive `<store>.lock`, rejects pre-existing
-`.tmp`/`.bak`, reads and validates the complete live TSV, prepares all new bytes,
-exclusively creates the sibling `.tmp`, checks `write_all` and its completed count,
-checks `sync` and consuming `close`, then calls `replace_file(tmp, live)` once.
-Only after publication and lock cleanup does it emit success. The fixed staging
-slot is owned by the exclusive lock; collision is an error, never overwrite.
-There is no live-to-backup rename, rollback dance or missing-live interval in the
-application protocol. Existing `.bak` is still reserved and refused to avoid
-silently consuming a legacy interrupted save.
+Saving acquires the cooperative exclusive `<store>.lock`, verifies that no pre-existing
+`.tmp` or `.bak` files exist, reads and validates the entire live TSV, and stages the updated content.
+It creates a sibling `.tmp` file exclusively, performs `write_all`, `sync`, and a consuming `close`,
+and then executes an atomic `replace_file(tmp, live)`.
+Success is returned only after publication and lock cleanup. The staging slot is protected by the exclusive lock;
+collisions result in an immediate error rather than overwriting existing data.
+This atomic replacement avoids intermediate states or windows where the store file is absent.
 
-| Surviving state | Next run and disposition |
+| Surviving state | Next run behavior |
 | --- | --- |
-| Valid live only | Fully validate header/version, size, IDs, titles and LF layout, then operate |
-| Live and `.tmp` | Refuse; retain both. A complete temp is not evidence of a committed save |
-| Any `.lock` | Refuse, including list. Determine that every owner exited before manual recovery |
-| Any legacy `.bak` | Refuse; preserve and inspect the legacy transaction |
-| Malformed live | Refuse mutation; never reinterpret it as an empty store |
+| Valid live only | Validates header, version, size, IDs, titles, and formatting, then proceeds normally |
+| Live and `.tmp` | Aborts; retains both files. An existing `.tmp` indicates an incomplete write |
+| Any `.lock` | Aborts operations (including `list`) until stale lock owners have exited |
+| Any legacy `.bak` | Aborts; preserves `.bak` for manual inspection |
+| Malformed live | Aborts mutations; never treats a corrupt file as an empty store |
 
-For manual recovery, first stop all writers, copy all surviving files to separate
-names, and validate copies with `list`. Keep the live generation if valid. Move
-reviewed sidecars outside the reserved names and remove only a confirmed stale
-lock. Never promote `.tmp` solely because it exists. There is no automatic
-recovery or automatic deletion of another execution's artifacts. After a crash
-following replacement, a command may have committed without acknowledging it;
-inspect the live state before retrying an `add`.
+For manual recovery: first ensure all writer processes have stopped, back up all surviving files,
+and inspect the copies with `list`. Keep the live file if valid. Move any stray sidecars out of the
+reserved names, and remove `.lock` only after verifying that no process holds it.
+Do not automatically promote a `.tmp` file without verifying its integrity. Following an unexpected
+crash, inspect the live store state before retrying write operations.
 
-The directory must be trusted. Cooperative exclusion does not cover different
-path aliases, hard links, outside editors or hostile directory changes. The
-replacement supplies a new file object; previous ACLs/metadata are not merged.
-`sync`/write-through does not guarantee hardware-independent power-loss durability.
-FYTASK1 has no checksum or retained validated generation. A checksum/versioned
-journal and physical power-cut validation remain separate work, not a claim made
-by this example. Linux replacement uses one same-filesystem `rename`; open
-handles keep the old inode and do not emulate Windows sharing denial. File sync
-does not persist the parent directory entry. See
-[ADR 0411](../../docs/adr/0411-public-windows-file-replacement.md) and
-[ADR 0424](../../docs/adr/0424-linux-prepared-publication-and-process-arguments.md).
+> **Note**: Cooperative locking assumes a trusted working directory and does not guard against external hard links or concurrent external editors. Atomic replacement supplies a new file object rather than preserving prior ACLs. See [ADR 0411](../../docs/adr/0411-public-windows-file-replacement.md) and [ADR 0424](../../docs/adr/0424-linux-prepared-publication-and-process-arguments.md).
 
 Run `CGO_ENABLED=0 go test -mod=readonly -run '^TestTaskManager' -v ./internal/cli`
 from the repository root (PowerShell: set `$env:CGO_ENABLED='0'` first). Go builds

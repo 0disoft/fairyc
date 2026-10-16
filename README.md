@@ -12,36 +12,22 @@ Fairy C is an experimental systems programming language for new native software 
 
 The project is not trying to beat every hand-tuned C program or make every C ownership graph safe. Its intended advantage is that ordinary Fairy C code carries enough ownership, aliasing, bounds, and effect information for the compiler to reject common failures and generate competitive machine code without relying on build-mode-dependent undefined behavior.
 
-## Human quickstart
+## Quickstart
 
 ### Get the compiler
 
-There is no approved public installer or binary release yet. For a source checkout,
-follow the [Windows compiler build guide](DEVELOPMENT.md#local-windows-compiler-executable).
-If you received the separately verified experimental ZIP, extract it and keep its
-license files together. Go and Bun are compiler-build tools, not prerequisites for
-using that executable.
+Fairy C does not yet offer pre-built public installers. To build the compiler from source, follow the [Windows compiler build guide](DEVELOPMENT.md#local-windows-compiler-executable). If using an experimental ZIP distribution, extract it and keep the license files together. Go and Bun are required only for building the compiler from source, not for running the built executable.
 
-The verified starter path is native Windows/AMD64 with x64 MSVC and a Windows SDK.
+The recommended environment is Windows (x86_64/AMD64) with MSVC and the Windows SDK.
 Install Microsoft's [C++ Build Tools](https://learn.microsoft.com/en-us/cpp/overview/acquire-msvc)
-with the Desktop development with C++ workload for native tests and execution.
-WSL2, Linux and a virtual machine are not required. Source checking and semantic
-tests do not require the C compiler. Other target mechanisms and CI probes are not
-a promise of equivalent end-user support.
+(Desktop development with C++ workload) to enable native compilation and testing.
+WSL2 or a virtual machine is not required; basic source checking and semantic analysis run independently of the C toolchain. Other targets and CI probes are experimental and not yet guaranteed for general use.
 
-Contributors can build and test the compiler on Linux using Go and GCC/Clang,
-without PowerShell, Bun or a maintainer's artifact cache; see
-[Contributing](CONTRIBUTING.md). SDK stage0.79 adds Linux companions for prepared
-file replacement, exact reads, removal and UTF-8 process arguments. The
-[task-manager example](examples/task_manager_cli/README.md) now uses ordinary
-`fairyc build/run/test --native` on Linux GNU amd64 with GCC or Clang. Native
-Linux execution for these changes is still unverified on this Windows host.
+Contributors can also build and test the compiler on Linux using Go with GCC or Clang (see [Contributing](CONTRIBUTING.md)). SDK stage0.79 provides Linux support for atomic file replacement, exact reads, file removal, and UTF-8 process arguments. For example, the [task-manager example](examples/task_manager_cli/README.md) supports native builds and tests via `fairyc build/run/test --native` on Linux (amd64) with GCC or Clang.
 
-### Create, test and run
+### Create, test, and run
 
-With a built `fairyc` executable, run these product commands manually from a scratch parent
-directory to create one explicit-identity starter. The commands below assume the
-executable is on PATH; in PowerShell you can instead use its absolute path with `&`.
+Once `fairyc` is built, run the following commands from any working directory to create and test a new project starter. (If `fairyc` is not on your PATH, use its relative or absolute path):
 
 ```text
 fairyc new hello-fairy --uid example.hello-fairy
@@ -57,7 +43,7 @@ fairyc run --locked
 fairyc run --release --locked
 ```
 
-The generated `src/main.fy` is a small complete program:
+The generated `src/main.fy` contains a minimal complete program:
 
 ```text
 module main;
@@ -71,34 +57,17 @@ fn i32 main() {
 }
 ```
 
-Its test reports one passed, zero failed. Both run modes exit zero without output.
+The test runner reports one passed test and zero failures, and both run modes exit cleanly with code 0.
 
-The first check validates the generated source and publishes `fairy.lock`. On Windows/amd64 with
-local x64 MSVC, `fairyc test --native --locked` compiles each generated test into an isolated
-temporary image, while `fairyc run --locked` compiles the `.fy` program through generated C and runs
-its temporary native image with the caller's stdin attached after successful compilation. The
-generated `README.md` contains the exact next steps and a safe
-`std::io::write` example for direct stable execution. `fairyc new` never merges, upgrades, or
-overwrites an existing path.
+The initial check validates the source files and generates `fairy.lock`. On Windows/amd64 with MSVC installed, `fairyc test --native --locked` compiles each test into an isolated binary image, while `fairyc run --locked` compiles the program via generated C and executes the resulting native binary with stdin attached. The generated `README.md` provides next steps, including a `std::io::write` example. `fairyc new` will never overwrite or merge into an existing directory.
 
-### Experimental limits and reporting
+### Project status and reporting issues
 
-This is the Go Stage 0 compiler, not the experimental Fairy-written parser or a
-self-hosted release. No production-readiness, stable compatibility or complete
-language/backend coverage is promised. See the [readiness evidence](docs/ops/parser-public-readiness.md)
-for local and second-laptop evidence, exact candidate hashes, and the
-[successful CI run on `34fe041c`](https://github.com/0disoft/fairyc/actions/runs/35103049037).
+This repository provides the Go-based Stage 0 prototype compiler, rather than a self-hosted or production-ready release. Language features, backend support, and stability guarantees are actively evolving. For background verification details, see [readiness evidence](docs/ops/parser-public-readiness.md) and the [CI run on `34fe041c`](https://github.com/0disoft/fairyc/actions/runs/35103049037).
 
-For non-sensitive bugs, use [GitHub Issues](https://github.com/0disoft/fairyc/issues)
-with the compiler commit or executable hash, OS/toolchain versions, a minimal
-reproducer, expected/actual behavior and redacted diagnostics. Issues are enabled;
-while the repository is private, repository access is required.
+For general bug reports and feedback, please use [GitHub Issues](https://github.com/0disoft/fairyc/issues) with the following details: compiler commit or build hash, OS/toolchain version, a minimal reproducible example, expected vs. actual behavior, and compiler diagnostic output.
 
-A private vulnerability-reporting channel has not yet been confirmed. Do not post
-credentials, private code, personal data or vulnerability details in public issues.
-Confirm a private reporting channel with the maintainer before sending sensitive
-details. Establishing that channel remains a public-launch prerequisite; no
-response-time or supported-version commitment is implied.
+Please avoid posting sensitive credentials, confidential code, or security vulnerability details in public issues. For security-related reports, please contact the maintainer directly.
 
 ## Current phase
 

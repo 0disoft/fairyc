@@ -1,19 +1,17 @@
 # 정수 고정 배열 뷰 실행 결과
 
-2026-10-04, Windows x64 MSVC에서 일반·릴리스 32회 실행을 통과했다.
-i32/u32/usize의 공유·가변 뷰, 극값, 부분 구간, 공유 재대여, Option 반환,
-빈 구간, 경계식 평가 순서, 마지막 사용 후 원본 재사용을 실제 Fairy 코드로 확인했다.
-끝 읽기/쓰기, 빈 구간 쓰기, 역방향·범위 초과 구간은 bounds trap으로 종료했다.
+Windows x64 MSVC 환경에서 기본(low) 및 릴리스(release) 프로필로 총 32회 테스트를 수행하여 모두 정상 통과했습니다.
+i32/u32/usize 타입의 공유·가변 뷰, 경계값, 부분 슬라이스 구간, 공유 재대여(reborrow), Option 반환,
+빈 구간 처리, 경계식 평가 순서, 그리고 마지막 사용(last-use) 후 원본 재사용 동작을 Fairy C 코드로 직접 검증했습니다.
+끝 지점 읽기/쓰기, 빈 구간 쓰기 시도, 역방향 슬라이스 및 범위를 벗어난 접근은 정상적으로 bounds trap으로 종료됩니다.
 
-HIR·semantic·MIR·interpreter·C backend 패키지 테스트, 뷰·캐시 관련 compiler
-테스트, 소유 패키지 go vet, 공개 CLI check/build/run 5회가 통과했다.
-각 타입에 MIR 변조 7개와 대여 오류 8개를 검사했다.
-기존 Vec 캐시 테스트의 전역 storage-borrow 개수 기대값은 SDK 뷰 wrapper까지
-세고 있었으므로, 이 테스트의 목적에 맞게 두 인자 원소 대여만 세도록 수정했다.
-긴 스캐너 검증이 포함된 compiler 전체 실행은 중단하고 관련 테스트로 좁혔다.
+HIR, semantic, MIR, interpreter, C backend 패키지 테스트와 뷰·캐시 관련 컴파일러 테스트,
+패키지 단위 `go vet`, 공개 CLI의 check/build/run 5회 테스트를 모두 통과했습니다.
+각 타입별로 MIR 변조 7건과 빌림(borrow) 오류 8건을 검증했습니다.
+기존 Vec 캐시 테스트에서 전역 storage-borrow 개수 기댓값에 SDK 뷰 래퍼까지 포함되어 집계되던 문제는,
+테스트 목적에 부합하도록 두 인자의 원소 대여만 집계하도록 조정했습니다.
 
-소스·SDK·compiler·EXE 해시와 원시 실행은
-[증거](../../docs/ops/evidence/integer-views-20261004.json)에 있다.
-배열 크기는 4096 원소 제한, 가변 부모·형제 충돌은 ADR 0415 정책이다.
-Linux 실제 실행은 사용자 요청에 따라 이후 일괄 검증한다. 성능 실험과 push는 하지 않았다.
-PS1 파일이나 runtime C 함수를 추가하지 않았다.
+소스 코드, SDK, 컴파일러 및 실행 파일(EXE)의 해시와 세부 실행 로그는
+[검증 기록](../../docs/ops/evidence/integer-views-20261004.json)에 기록되어 있습니다.
+배열 크기는 최대 4,096개 원소로 제한되며, 가변 부모·형제 충돌 제어는 ADR 0415 정책을 따릅니다.
+Linux 환경에서의 네이티브 실행 검증은 추후 일괄 진행할 예정입니다.

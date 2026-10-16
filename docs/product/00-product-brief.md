@@ -8,38 +8,39 @@
 
 C gives programmers direct control and broad ABI reach, but routine ownership, cleanup, bounds, and error-flow obligations remain conventions enforced by people. Rust addresses more of those failures but introduces a larger type-system and build-cost surface than this project wants. Fairy C targets the narrower space between them.
 
-## Product promise
+## Product Vision
 
-Fairy C should make ordinary native systems code easier to review and harder to misuse while retaining:
+Fairy C aims to make native systems code significantly easier to maintain and harder to misuse, while ensuring:
 
-- no garbage collector and no mandatory managed runtime;
-- predictable data layout and explicit allocation;
-- first-class C interoperability at declared boundaries;
-- fast edit-check-build loops and bounded build-cache growth;
-- release semantics that do not silently weaken safe-code behavior;
-- compiler-generated semantic maps for humans, IDEs, CI, and LLM tools.
+- No garbage collector and no mandatory managed runtime
+- Predictable data layout and explicit memory allocation
+- Direct, zero-overhead C interoperability at declared boundaries
+- Fast edit-check-build loops with bounded build cache size
+- Consistent release semantics that never silently disable safe-code checks
+- Compiler-generated semantic metadata for developer tooling, IDEs, and CI
 
-## Primary users
+## Target Audience
 
-- C developers starting new systems components rather than mechanically translating arbitrary legacy C;
-- small compiler, tooling, game, server-native, and native-library teams that value explicit cost models;
-- maintainers who need stable machine-readable ownership, error, unsafe, and test relationships.
+- Systems developers writing new native components who want C-level control with modern safety guarantees
+- Tooling, compiler, game engine, and native library developers who prioritize explicit cost models
+- Maintainers requiring transparent, machine-readable representations of ownership, errors, and safety invariants
 
-## Product wedge
+## Initial Language Scope
 
-The initial wedge is a small command-line compiler with a deliberately restricted language core:
+The initial milestone focuses on a compact compiler core with carefully scoped capabilities:
 
-1. inert value structs;
-2. move-only resource types with deterministic drop;
-3. non-null borrows and explicit raw pointers;
-4. first-class arenas for grouped lifetimes;
-5. separate `Option` and `Result` types;
-6. identical safe-code failure semantics across optimization levels.
+1. Inert value structs
+2. Move-only resource types with deterministic cleanup (drop)
+3. Non-null references (borrows) alongside explicit raw pointers
+4. First-class arena allocation for grouped lifetimes
+5. Built-in `Option` and `Result` types for robust error handling
+6. Identical failure semantics across both debug and optimized builds
 
-## Non-goals
+## Non-Goals
 
-Fairy C does not promise universal memory safety, automatic source compatibility with C, a built-in async runtime, garbage collection, exceptions, class inheritance, arbitrary safe alias graphs, Stage 0 embedded or freestanding support, or performance superiority over every expert-written C program.
+Fairy C intentionally omits features that conflict with explicit control and small runtime footprint, including:
+universal automatic memory safety, drop-in C source compatibility, built-in asynchronous runtimes, garbage collection, exceptions, class inheritance, and arbitrary cyclic alias graphs.
 
-## Success test
+## Success Criteria
 
-The project succeeds when a small Stage 0 compiler can compile representative resource, arena, error, bounds, and C-FFI programs with deterministic diagnostics and backend-independent behavior. Popularity, benchmark rankings, and self-hosting are not Stage 0 success criteria.
+The Stage 0 milestone succeeds when the compiler reliably builds representative programs utilizing resources, arenas, structured error handling, and C FFI, providing deterministic diagnostics and consistent cross-platform behavior. Broad ecosystem adoption and self-hosting are reserved for future phases.

@@ -1,36 +1,23 @@
-# Development
+# Development Guide
 
-- Status: Draft
-- Owner: UNASSIGNED
+This document outlines development guidelines, local build instructions, and architectural boundaries for the Go Stage 0 compiler.
 
-## Purpose
+## Reference Specifications
 
-This document records the executable development boundary for the Go Stage 0 compiler.
+- Architecture Decisions: `docs/adr/0001-initial-architecture-boundaries.md`
+- Parser Specification: `docs/adr/0009-stage-0-grammar-and-parser-contract.md`
+- Product Specification: `docs/product/02-spec.md`
 
-## Source of Truth
+## Toolchain Guidelines
 
-- Product decision: `docs/adr/0001-initial-architecture-boundaries.md`
-- Technical owner: UNASSIGNED
-- Parser contract: `docs/adr/0009-stage-0-grammar-and-parser-contract.md`
+- `go.mod` specifies the required Go toolchain version.
+- Dependencies (including the TOML parser) are managed via `go.mod` and `go.sum`.
+- Local Go build caches are placed under `.cache/go-*` (ignored in `.gitignore`). Cache contents are temporary and not checked into source control.
 
-## Toolchain boundary
+## Building the Windows Compiler Binary
 
-- `go.mod` declares the current development toolchain language level. It is not yet a released
-  minimum supported Go version.
-- Compiler dependencies are declared in `go.mod` and `go.sum`, including the TOML
-  parser. The local wrapper requires an already installed compatible Go toolchain,
-  Bun and cached modules; it disables module and checksum network access.
-- Local Go caches belong under ignored `.cache/go-*` paths. Cache contents are never test evidence
-  or source truth.
-- In the containing Mustflow workspace, use `fairyc_go_format`, `fairyc_go_vet`,
-  `fairyc_go_build`, `fairyc_go_test_parser`, and `fairyc_go_test`. Their exact argv, writes, and
-  timeouts are owned by the workspace command contract.
+You can compile the Stage 0 compiler into a standalone Windows binary (`fairyc.exe`) to avoid the overhead of `go run` during local testing.
 
-## Local Windows compiler executable
-
-The Stage 0 compiler can be built as an ordinary local Windows executable. This removes `go run`
-from repeated compiler invocations; it does not make the compiler self-hosted,
-installed or an approved release. Redistribution terms are in [LICENSING.md](LICENSING.md).
 From the repository root in PowerShell:
 
 ```powershell
@@ -38,49 +25,32 @@ New-Item -ItemType Directory -Force build | Out-Null
 bun tools/run-go.ts build -mod=readonly -trimpath -o build/fairyc.exe ./cmd/fairyc
 .\build\fairyc.exe experimental run-target examples/windows_quickstart/main.fy --target x86_64-windows-msvc --profile optimized
 .\build\fairyc.exe experimental exec-target examples/windows_output/main.fy --source examples/windows_output/windows_console.fy --target x86_64-windows-msvc --profile optimized
+
 Push-Location examples/workspace_quickstart
 ..\..\build\fairyc.exe experimental check-workspace
 ..\..\build\fairyc.exe experimental run-workspace --locked --target x86_64-windows-msvc --profile optimized
-@(
-  '{"schemaVersion":"fairyc.experimental.workspace-check-session/v0","kind":"check","sequence":1}'
-  '{"schemaVersion":"fairyc.experimental.workspace-check-session/v0","kind":"check","sequence":2}'
-) | ..\..\build\fairyc.exe experimental check-workspace-session --locked --target x86_64-windows-msvc --max-requests 2 --cache-max-entries 8 --cache-max-bytes 33554432 --cache-max-artifact-bytes 8388608
 Pop-Location
 ```
 
-The first command creates only the ignored output directory. The wrapper keeps Go caches under the
-ignored `.cache/go-*` roots and disables module and checksum network access. The expected final
-`run-target` receipt starts with `native result: 42`; `exec-target` prints `Fairy C says hi` and
-returns the FY program's status 42. The workspace check writes `fairy.lock`, and the locked run
-receipt starts with `native workspace result: 42`. The two session response lines report
-`fallback` and then `all-hit`; that session performs checks only and emits no PE. In every native
-case the FY program is compiled into and executed as an MSVC PE. WSL is neither installed nor
-invoked by this path. Delete
-`build/fairyc.exe`, the example `fairy.lock`, and any example `build/` output to undo local outputs.
+### Notes on Local Execution
+- The commands above build the compiler binary, compile sample `.fy` sources through MSVC into native PE executables, and verify workspace commands.
+- `run-target` compiles and executes the program directly (outputting `native result: 42`).
+- `exec-target` forwards standard process output (printing `Fairy C says hi` and returning exit code 42).
+- To clean up local build artifacts, remove the `build/` directory and any generated `fairy.lock` files.
 
-The configured Windows smoke independently builds `fairyc.exe` into a temporary directory, invokes
-its help surface, runs the checked-in quickstart through `run-target`, requires `exec-target` to
-forward the checked-in output example and return process status 42, runs the checked-in local
-workspace through an exact existing lock, and sends eight editor-shaped checks through one
-foreground session while reading Windows process-memory peaks. It removes the compiler and target
-images. That proves the standalone process paths and process-local reuse without treating an
-ignored local build artifact as source truth or one local measurement as a budget.
+## Package Architecture Boundaries
 
-## Implementation boundaries
+- `internal/source`: Manages immutable source bytes, module identity, and parsing budget.
+- `internal/lexer`: Handles lossless tokenization, whitespace/comments trivia, and literal processing.
+- `internal/syntax`: Concrete syntax tree (CST) arena, recursive-descent parsing, Pratt expressions, error recovery, and syntax diagnostics.
+- `internal/ast`: Lowers diagnostic-free CST into abstract syntax trees for semantic analysis.
+- `internal/parserfixture`: Validates syntax behavior against `spec/fixtures/parser/manifest-v0.json`.
 
-- `internal/source` owns immutable source bytes, module identity, and the shared parse budget.
-- `internal/lexer` owns lossless tokens, trivia, invalid-input provenance, and literal cooking.
-- `internal/syntax` owns compact CST arenas, recursive-descent productions, Pratt expressions,
-  recovery, and deterministic syntax diagnostics.
-- `internal/ast` lowers only diagnostic-free syntax and exposes implementation-private normalized
-  assertions for parser fixtures.
-- `internal/parserfixture` executes `spec/fixtures/parser/manifest-v0.json` without weakening or
-  rewriting the fixture contract.
+## PR Review Checklist
 
-## Review Blockers
+Pull requests should adhere to these core guidelines:
 
-- The change invents a product domain without a source.
-- The change weakens validation or skips required evidence.
-- The change relies on generated, cache, or build output as source truth.
-- The parser accepts malformed input as a successful AST or emits diagnostics not listed by a
-  failing fixture.
+- **Clear Requirements**: Feature additions must map to an approved design or ADR.
+- **Strict Validation**: Do not weaken existing tests or skip error diagnostics.
+- **Clean Source of Truth**: Never commit generated binaries, local caches, or temporary build outputs.
+- **Fail-Closed Parser**: The parser must reject invalid syntax with appropriate diagnostics rather than producing partial ASTs.
