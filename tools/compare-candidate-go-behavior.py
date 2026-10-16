@@ -72,6 +72,7 @@ def main():
     parser.add_argument('--profile', choices=['development', 'release'], default='release')
     parser.add_argument('--suite', choices=['check', 'run', 'cli'], required=True)
     parser.add_argument('--family', action='append', choices=list(FAMILIES))
+    parser.add_argument('--case', action='append', help='compare only these exact fixture or CLI ids')
     parser.add_argument('--timeout', type=int, default=60)
     parser.add_argument('--output', type=Path, required=True)
     args = parser.parse_args()
@@ -142,6 +143,8 @@ def main():
             data = json.loads(manifest.read_bytes())
             inputs[manifest.relative_to(ROOT).as_posix()] = dict(path=manifest.relative_to(ROOT).as_posix(), sha256=sha(manifest))
             for index, case in enumerate(data['cases']):
+                if args.case and case['id'] not in args.case:
+                    continue
                 if case.get('packageGraph'):
                     skipped.append(dict(family=family, id=case['id'], reason='direct fixture packageGraph requires a separate workspace adapter'))
                     continue
@@ -177,9 +180,12 @@ def main():
         invocations = [[], ['check', '--locked'], ['check', '--bad'], ['check', '--locked', '--locked'],
                        ['build', '--bad'], ['run', '--bad'], ['check', '--cache-status']]
         for index, argv in enumerate(invocations):
+            if args.case and f'cli-{index}' not in args.case:
+                continue
             go = execute(reference, argv, path, args.timeout)
             other = execute(candidate, argv, path, args.timeout)
             record(dict(family='cli', id=f'cli-{index}', go=go, candidate=other, comparison=comparison(go, other)))
+    assert rows, 'no matching executable cases'
     assert sha(reference) == reference_sha and sha(candidate) == selected['sha256']
     for row in inputs.values():
         assert sha(ROOT / row['path']) == row['sha256'], row['path']

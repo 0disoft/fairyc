@@ -23,6 +23,8 @@ def main():
     parser.add_argument('--builder', type=Path, required=True)
     parser.add_argument('--output', type=Path, required=True)
     parser.add_argument('--stack-reserve-bytes', type=int, default=0)
+    parser.add_argument('--profile', action='append', choices=['development', 'release'],
+                        help='build only the selected compiler profile; repeat for both (default: both)')
     parser.add_argument('--commands-only', action='store_true',
                         help='verify the authored check/build/run command entry points without unrelated private frontend commands')
     args = parser.parse_args()
@@ -83,6 +85,8 @@ import std::process as process;
     print('authored dispatcher emitted:', len(paths), 'sources,', packet.stat().st_size, 'packet bytes', flush=True)
     images = []
     for profile, flags in [('development', []), ('release', ['--release'])]:
+        if args.profile and profile not in args.profile:
+            continue
         directory = output / profile
         directory.mkdir()
         image = directory / 'fairyc.exe'

@@ -26,6 +26,7 @@ def main():
     parser.add_argument('--candidate-build-receipt', type=Path, required=True)
     parser.add_argument('--profile', choices=['development', 'release'], default='release')
     parser.add_argument('--suite', choices=['examples', 'cli'], required=True)
+    parser.add_argument('--case', action='append', help='compare only these example directory names or CLI ids')
     parser.add_argument('--timeout', type=int, default=60)
     parser.add_argument('--output', type=Path, required=True)
     args = parser.parse_args()
@@ -77,6 +78,8 @@ def main():
     if args.suite == 'examples':
         for manifest in sorted((ROOT / 'examples').glob('*/fairy.toml')):
             name = manifest.parent.name
+            if args.case and name not in args.case:
+                continue
             if name == 'lexer_candidate':
                 skipped.append(dict(id=name, reason='compiler self-source is a separate bootstrap/fixed-point gate'))
                 continue
@@ -114,7 +117,10 @@ def main():
             ['experimental', '--help'], ['emit'],
         ]
         for index, argv in enumerate(invocations):
+            if args.case and f'cli-{index}' not in args.case:
+                continue
             run(f'cli-{index}', argv, path)
+    assert rows, 'no matching executable cases'
     assert behavior.sha(reference) == reference_sha and behavior.sha(candidate) == selected['sha256']
     for row in inputs.values():
         assert behavior.sha(ROOT / row['path']) == row['sha256'], row['path']
