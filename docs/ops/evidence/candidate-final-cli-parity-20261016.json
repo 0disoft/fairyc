@@ -1,0 +1,404 @@
+{
+  "schema": "fairyc.candidate-final-cli-parity/v1",
+  "verificationCompleted": true,
+  "scopedChecksPassed": true,
+  "completeGoCliReplacement": false,
+  "sourceFilesInNativeClosure": 512,
+  "goOriginalSourceCheck": {
+    "exit": 0,
+    "stdout": "check ok: 2 instance(s), 523 source file(s), 6562 MIR function(s), lock updated\n",
+    "stderr": "",
+    "seconds": 27.83653559999948
+  },
+  "nativeProfiles": [
+    {
+      "profile": "development",
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-parity-fixes-20261016\\final-public-cli-v3\\development\\fairyc.exe",
+      "sha256": "bb5a2aed257490a934077a16d97af9553ddbd58099f17e9ba89dd983677b404d",
+      "driverSHA256": "6cc41b173179c54729254335b298f7e95a9919b2b5fb17644ee65e9bb78eb7cd"
+    },
+    {
+      "profile": "release",
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-parity-fixes-20261016\\final-public-cli-v3\\release\\fairyc.exe",
+      "sha256": "1c2f825e884d3544362bba8a5429202d010be4e95a48e3dcf966a239591d1929",
+      "driverSHA256": "6cc41b173179c54729254335b298f7e95a9919b2b5fb17644ee65e9bb78eb7cd"
+    }
+  ],
+  "candidateCGeneratedWithoutGoFrontend": true,
+  "cPacketSHA256": "ed0ee9bf1be69ce01d41366113ec617877550df0cb1414035dc2183052bcb3f2",
+  "cPacketBytes": 40948281,
+  "selfCGeneration": {
+    "passed": true,
+    "sourceFiles": 512,
+    "byteIdentical": true,
+    "seconds": 442.2848864000116,
+    "imageByteFixedPointChecked": false
+  },
+  "checks": {
+    "development": {
+      "cases": 169,
+      "summary": {
+        "completed": 169,
+        "acceptanceMatch": 169,
+        "exitMatch": 169,
+        "firstDiagnosticMatch": 169,
+        "allDiagnosticsMatch": 169,
+        "stdoutMatch": 169,
+        "stderrMatch": 169,
+        "exactMatch": 169
+      },
+      "skipped": [
+        {
+          "family": "region",
+          "id": "fail.flow.local-region-escape",
+          "reason": "direct fixture packageGraph requires a separate workspace adapter"
+        }
+      ]
+    },
+    "release": {
+      "cases": 169,
+      "summary": {
+        "completed": 169,
+        "acceptanceMatch": 169,
+        "exitMatch": 169,
+        "firstDiagnosticMatch": 169,
+        "allDiagnosticsMatch": 169,
+        "stdoutMatch": 169,
+        "stderrMatch": 169,
+        "exactMatch": 169
+      },
+      "skipped": [
+        {
+          "family": "region",
+          "id": "fail.flow.local-region-escape",
+          "reason": "direct fixture packageGraph requires a separate workspace adapter"
+        }
+      ]
+    }
+  },
+  "cli": {
+    "development": {
+      "cases": 30,
+      "summary": {
+        "completed": 30,
+        "acceptanceMatch": 30,
+        "exitMatch": 30,
+        "firstDiagnosticMatch": 30,
+        "allDiagnosticsMatch": 30,
+        "stdoutMatch": 29,
+        "stderrMatch": 30,
+        "exactMatch": 29
+      },
+      "differences": [
+        {
+          "id": "cli-19",
+          "argv": [
+            "--version"
+          ],
+          "goStdout": "Fairy C Stage 0\ncompiler: v0.0.0-20261016113147-73bfa5fb8b9a+dirty\nsdk: fairyc-sdk-stdlib/0 0.0.0-stage0.86\nlanguage: fairyc-language/20\nruntime: fairyc-runtime/0\nrevision: 73bfa5fb8b9a74fc15f853f8cbb0e203dd54043d\nmodified: true\n",
+          "candidateStdout": "Fairy C Stage 0\ncompiler: development\nsdk: fairyc-sdk-stdlib/0 0.0.0-stage0.86\nlanguage: fairyc-language/20\nruntime: fairyc-runtime/0\nrevision: unknown\nmodified: unknown\n"
+        }
+      ]
+    },
+    "release": {
+      "cases": 30,
+      "summary": {
+        "completed": 30,
+        "acceptanceMatch": 30,
+        "exitMatch": 30,
+        "firstDiagnosticMatch": 30,
+        "allDiagnosticsMatch": 30,
+        "stdoutMatch": 29,
+        "stderrMatch": 30,
+        "exactMatch": 29
+      },
+      "differences": [
+        {
+          "id": "cli-19",
+          "argv": [
+            "--version"
+          ],
+          "goStdout": "Fairy C Stage 0\ncompiler: v0.0.0-20261016113147-73bfa5fb8b9a+dirty\nsdk: fairyc-sdk-stdlib/0 0.0.0-stage0.86\nlanguage: fairyc-language/20\nruntime: fairyc-runtime/0\nrevision: 73bfa5fb8b9a74fc15f853f8cbb0e203dd54043d\nmodified: true\n",
+          "candidateStdout": "Fairy C Stage 0\ncompiler: development\nsdk: fairyc-sdk-stdlib/0 0.0.0-stage0.86\nlanguage: fairyc-language/20\nruntime: fairyc-runtime/0\nrevision: unknown\nmodified: unknown\n"
+        }
+      ]
+    }
+  },
+  "examples": {
+    "cases": 78,
+    "summary": {
+      "completed": 78,
+      "acceptanceMatch": 78,
+      "exitMatch": 78,
+      "firstDiagnosticMatch": 78,
+      "allDiagnosticsMatch": 78,
+      "stdoutMatch": 78,
+      "stderrMatch": 78,
+      "exactMatch": 78
+    },
+    "skipped": [
+      {
+        "id": "lexer_candidate",
+        "reason": "compiler self-source is a separate bootstrap/fixed-point gate"
+      }
+    ],
+    "filesystemRuntimeExits": [
+      {
+        "id": "std_fs_quickstart/build-development",
+        "expected": 0,
+        "go": 0,
+        "candidate": 0
+      },
+      {
+        "id": "std_fs_quickstart/execute-built-development",
+        "expected": 42,
+        "go": 42,
+        "candidate": 42
+      },
+      {
+        "id": "std_fs_quickstart/build-release",
+        "expected": 0,
+        "go": 0,
+        "candidate": 0
+      },
+      {
+        "id": "std_fs_quickstart/execute-built-release",
+        "expected": 42,
+        "go": 42,
+        "candidate": 42
+      }
+    ]
+  },
+  "testListing": {
+    "cases": 89,
+    "exactMatches": 89,
+    "productionLocksUnchanged": true
+  },
+  "starter": {
+    "development": {
+      "passed": true,
+      "cases": 14
+    },
+    "release": {
+      "passed": true,
+      "cases": 14
+    }
+  },
+  "publicMetadata": {
+    "cases": 88,
+    "allExact": true,
+    "profile": "development"
+  },
+  "cache": {
+    "v3-check-cache-release": {
+      "passed": true,
+      "executions": 21
+    },
+    "v3-native-cache-release": {
+      "passed": true,
+      "executions": 14
+    },
+    "v3-mixed-cache-release": {
+      "passed": true,
+      "executions": 19
+    }
+  },
+  "proofs": [
+    {
+      "path": ".cache/candidate-parity-fixes-20261016/final-public-cli-v3/receipt.json",
+      "sha256": "d92f0b6dd3f7c5d8eefc87b9cbd35439b90ddd969d9c39ace6b69d3c87a1ddd8"
+    },
+    {
+      "path": ".cache/candidate-parity-fixes-20261016/v3-self-c-fixed-point/receipt.json",
+      "sha256": "dd936fe98df6bac2804c2b083ea786b71dce41d3a23cf4b91cd41e157346e269"
+    },
+    {
+      "path": ".cache/candidate-parity-fixes-20261016/v3-check-development/receipt.json",
+      "sha256": "713a5350e7648613a2f025d3aeb9c6e39385b143474fa68b8d04b6af942ed90d"
+    },
+    {
+      "path": ".cache/candidate-parity-fixes-20261016/v3-check-release/receipt.json",
+      "sha256": "5cc76d0450ba4fa4f638f0a32bafadc263489b3103e9229a8b488ed669949998"
+    },
+    {
+      "path": ".cache/candidate-parity-fixes-20261016/v3-cli-development/receipt.json",
+      "sha256": "6b142376373186a320a3b7aae03746af14e8e9f236f44983041248c54ea87c55"
+    },
+    {
+      "path": ".cache/candidate-parity-fixes-20261016/v3-cli-release/receipt.json",
+      "sha256": "977f548c2a5fa40119cfb9aadeb4e08cf0ac476933187fae011af9539ef0850f"
+    },
+    {
+      "path": ".cache/candidate-parity-fixes-20261016/v3-examples-release/receipt.json",
+      "sha256": "4897d25a058cca4abb826cfdc293a9979ee74a02fbacd84c069ef992b7dad3a4"
+    },
+    {
+      "path": ".cache/candidate-parity-fixes-20261016/v3-test-list-release/receipt.json",
+      "sha256": "e84add1f5f8b42b9573112a306afba83092903b63e9a29a9a1ed22b8d11ab0a3"
+    },
+    {
+      "path": ".cache/candidate-parity-fixes-20261016/v3-check-cache-release/receipt.json",
+      "sha256": "f7f2a84d2e74b9f47e0fcd20cde6f47aca777e5ec7af1af304b2576bff157069"
+    },
+    {
+      "path": ".cache/candidate-parity-fixes-20261016/v3-native-cache-release/receipt.json",
+      "sha256": "4810b346701b1bd9f8cdcdc1668982712e12cfffe778c3b6e4edcd59651ba57a"
+    },
+    {
+      "path": ".cache/candidate-parity-fixes-20261016/v3-mixed-cache-release/receipt.json",
+      "sha256": "3db2e5de29e6e81529e6867d23a564cb755680b90f977d582f8694b8cedc9be0"
+    },
+    {
+      "path": ".cache/candidate-parity-fixes-20261016/v3-starter-development/receipt.json",
+      "sha256": "5a3d50243ba92d18aa741f7aa499262548db6b1e06ed82736cc6f27245723ed2"
+    },
+    {
+      "path": ".cache/candidate-parity-fixes-20261016/v3-starter-release/receipt.json",
+      "sha256": "6f4d2a7e001401c1f69f80a1c8dda365a214bb8b9fae8a43dbb9b68b44e3826f"
+    },
+    {
+      "path": ".cache/candidate-parity-fixes-20261016/v3-public-metadata-development/receipt.json",
+      "sha256": "36a1ad57ca9a6e635e90e737096f96f19afc872561ebb3f177af022586392f2a"
+    },
+    {
+      "path": ".cache/candidate-parity-fixes-20261016/literal-pool-controls/receipt.json",
+      "sha256": "9515ef32c7342c1f75496357898b7a6db1d416ffd83204313258c14365d8d2bd"
+    }
+  ],
+  "remainingFeatureGaps": [
+    "Candidate semantic test interpreter execution is not implemented.",
+    "Candidate isolated native test execution is not implemented."
+  ],
+  "limits": [
+    "One direct packageGraph Region fixture is not adapted to stable workspace CLI; 169 executable fixture cases were compared.",
+    "Native examples exclude lexer_candidate; its reachable 512-source C closure is verified by the separate self-generation gate.",
+    "Full internal/compiler Go tests hit the default 10-minute timeout during native builds; genericplan, genericsource and four focused compiler regressions pass.",
+    "Linux host execution, complete development-cache stress and a second image-byte bootstrap generation were not rerun."
+  ],
+  "repositoryHygiene": {
+    "archivedLocalBranches": [
+      {
+        "branch": "task/pr16-fixed-width-arithmetic",
+        "commit": "17a9936a8b4b2651ac2c0520d8804fbd1d1fc73d",
+        "archiveRef": "refs/archive/20261016/task/pr16-fixed-width-arithmetic",
+        "equivalentCommits": 2
+      },
+      {
+        "branch": "task/pr17-deterministic-profile",
+        "commit": "2a80740dabe002a768505930cc3ae565fb9af09e",
+        "archiveRef": "refs/archive/20261016/task/pr17-deterministic-profile",
+        "equivalentCommits": 15
+      },
+      {
+        "branch": "task/pr55-integration",
+        "commit": "4cd627f261d5f3c07074614d7d9a330fcc823b44",
+        "archiveRef": "refs/archive/20261016/task/pr55-integration",
+        "equivalentCommits": 1
+      },
+      {
+        "branch": "task/pr57-integration",
+        "commit": "5ceec5c88e74e6e0d936414b48d44d3fc3e18c9b",
+        "archiveRef": "refs/archive/20261016/task/pr57-integration",
+        "equivalentCommits": 1
+      },
+      {
+        "branch": "task/pr58-integration",
+        "commit": "db1210b802051b1b241ccd6ea1258a12dca94232",
+        "archiveRef": "refs/archive/20261016/task/pr58-integration",
+        "equivalentCommits": 1
+      },
+      {
+        "branch": "task/pr59-integration",
+        "commit": "5cb44dc670079f83c1d1015809ecfb8cded01318",
+        "archiveRef": "refs/archive/20261016/task/pr59-integration",
+        "equivalentCommits": 1
+      },
+      {
+        "branch": "task/pr60-integration",
+        "commit": "ca15403edee03cf11fe3128a7d2d760556b81011",
+        "archiveRef": "refs/archive/20261016/task/pr60-integration",
+        "equivalentCommits": 1
+      },
+      {
+        "branch": "task/pr61-refresh",
+        "commit": "d792b7997c73653439bd46ada4f9eb15e932b48a",
+        "archiveRef": "refs/archive/20261016/task/pr61-refresh",
+        "equivalentCommits": 1
+      },
+      {
+        "branch": "task/pr62-refresh",
+        "commit": "a47ca8756d84d3518ad7c8da1d86f74af4dc2f43",
+        "archiveRef": "refs/archive/20261016/task/pr62-refresh",
+        "equivalentCommits": 1
+      },
+      {
+        "branch": "task/pr52-contract-state-race",
+        "commit": "309085cdc89a36a39db53192075f4de4e9b7b7d5",
+        "archiveRef": "refs/archive/20261016/task/pr52-contract-state-race",
+        "pr": 52,
+        "prState": "MERGED",
+        "mergedHead": "309085cdc89a36a39db53192075f4de4e9b7b7d5",
+        "mergeCommit": "5abe0004c45e6de2d98509cf4aeb2532b0bfbb59",
+        "exactMergedHead": true
+      },
+      {
+        "branch": "task/pr53-layout-upgrades",
+        "commit": "5b65bb76e2ce5aee73783d752146880aa1e649c2",
+        "archiveRef": "refs/archive/20261016/task/pr53-layout-upgrades",
+        "pr": 53,
+        "prState": "MERGED",
+        "mergedHead": "5b65bb76e2ce5aee73783d752146880aa1e649c2",
+        "mergeCommit": "4e7b469cd917b54194d7e656448d07b0277c9e30",
+        "exactMergedHead": true
+      },
+      {
+        "branch": "task/pr54-explicit-retry",
+        "commit": "8c11a88dd78efd8e7efd4a4c84099ca41c4cbf63",
+        "archiveRef": "refs/archive/20261016/task/pr54-explicit-retry",
+        "pr": 54,
+        "prState": "MERGED",
+        "mergedHead": "8c11a88dd78efd8e7efd4a4c84099ca41c4cbf63",
+        "mergeCommit": "b8d93d2564e950c5a3125b0f0d59b1bd9f31eb7b",
+        "exactMergedHead": true
+      },
+      {
+        "branch": "task/pr61-integration",
+        "commit": "d38dbf57a63513f8b0afe7e3dace44db58f49a89",
+        "archiveRef": "refs/archive/20261016/task/pr61-integration",
+        "pr": 61,
+        "prState": "MERGED",
+        "mergedHead": "d792b7997c73653439bd46ada4f9eb15e932b48a",
+        "mergeCommit": "5bc7825683ca1bd196e37658beb58cecbe29536e",
+        "exactMergedHead": false
+      },
+      {
+        "branch": "task/pr62-integration",
+        "commit": "cbe9d2de18b5bf2b1ca5f2a9b46f9488e780f8e9",
+        "archiveRef": "refs/archive/20261016/task/pr62-integration",
+        "pr": 62,
+        "prState": "MERGED",
+        "mergedHead": "a47ca8756d84d3518ad7c8da1d86f74af4dc2f43",
+        "mergeCommit": "d53988cde8a33bdb775c670e23de93da110da5c9",
+        "exactMergedHead": false
+      }
+    ],
+    "activeOtherWorktreesPreserved": 4,
+    "unrelatedLockAndEvidenceFilesPreserved": true,
+    "openPullRequests": 0,
+    "newIssues": 0
+  },
+  "runnerChanges": [
+    "Persist source snapshot before C emission and authenticate each completed native profile independently.",
+    "Add durable public starter and test-list comparison tools.",
+    "Compare diagnostic quoting with control characters in public CLI errors.",
+    "Prepare filesystem smoke fixtures and require actual expected program exit 42."
+  ],
+  "candidateCliChanged": true,
+  "referenceGoCliChanged": true,
+  "sdkAbiChanged": false,
+  "databaseChanged": false,
+  "ciChanged": false,
+  "pushed": false,
+  "referenceGoCliContractChanged": false,
+  "referenceGoScaffoldFix": "Preserve preexisting dangling directory symlinks when fairyc new refuses an existing destination."
+}

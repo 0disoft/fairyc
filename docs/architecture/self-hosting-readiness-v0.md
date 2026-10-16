@@ -4554,8 +4554,7 @@ functions in 38.58s; the boundary checks and source digests are recorded in
 [candidate-generic-budget-20261016.json](../ops/evidence/candidate-generic-budget-20261016.json).
 The generic-source package and four focused compiler regressions also passed.
 The broader internal/compiler run hit its default ten-minute timeout while
-repeating native C builds; it is not a passing result. The full native CLI C build
-remains pending. This change does not promote language syntax, SDK ABI, unbounded
+repeating native C builds; it is not a passing result. Both native CLI profiles build successfully. This change does not promote language syntax, SDK ABI, unbounded
 expansion or backend capacity.
 
 ## Literal-storage checkpoints (2026-10-16)
@@ -4566,11 +4565,17 @@ reading 11 localizes it to `module_unit_c_literals::shared_storage`, not the
 aggregate project ledger of 16,777,216 work units.
 [module_unit_c_literals.fy](../../examples/lexer_candidate/src/module_unit_c_literals.fy)
 now takes one collection checkpoint per body plus separate sorting and storage
-checkpoints, so each pass retains its own 1,048,576-work-unit bound while every returned count is
-charged to the unchanged project ledger of 16,777,216 work units; the standalone unit
-shared-storage cap and the 2 MiB C output buffers are unchanged. The Go reference
+checkpoints, each bounded by 1,048,576 work units. Every count still enters the
+unchanged project ledger of 16,777,216 work units; the bound for standalone
+emission and the 2 MiB C output buffers are unchanged. The Go reference
 check of the real original 515 sources plus 8 SDK sources passes 6562 MIR functions.
 The corrected native bridge builds successfully, and two literal controls retain
 byte-identical generated C and successful native execution
 ([evidence](../ops/evidence/candidate-project-literal-budget-20261016.json)).
-The final full native CLI run remains pending.
+Both native profiles build, and the release compiler re-emits all 512 reachable
+sources into the exact same 40,948,281-byte C packet. The final comparison records
+169 diagnostic cases per native profile, 78 example cases, 89 test-list cases,
+28 starter cases and 54 cache observations; all completed cases match Go except
+compiler build provenance in `--version`
+([final evidence](../ops/evidence/candidate-final-cli-parity-20261016.json)).
+Candidate semantic and isolated native test execution remain unimplemented.

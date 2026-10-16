@@ -160,6 +160,7 @@ def main():
             ['test', '--list', '--json', '--locked'],
             ['explain', 'E4101'], ['targets', '--json'],
             ['experimental', '--help'], ['emit'],
+            ['<>&"'], ['\a\b\f\n\r\t\v\x01\x1f\x7f'],
         ]
         for index, argv in enumerate(invocations):
             if args.case and f'cli-{index}' not in args.case:

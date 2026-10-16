@@ -45,7 +45,7 @@
   ],
   "wholeSourceFiles": 523,
   "authoredSources": 515,
-  "nativeBuildPending": true,
+  "nativeBuildPending": false,
   "pushed": false,
   "broaderCompilerSuite": {
     "passed": false,
@@ -67,5 +67,7 @@
     "stderr": "",
     "seconds": 34.78200300000026
   },
-  "originalAuthoredSourceCount": 515
+  "originalAuthoredSourceCount": 515,
+  "nativeBuildAndSelfGenerationPassed": true,
+  "finalEvidence": "candidate-final-cli-parity-20261016.json"
 }

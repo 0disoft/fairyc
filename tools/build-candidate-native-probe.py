@@ -70,6 +70,22 @@ import std::process as process;
     manifest = output / 'sources.list'
     manifest.write_text(''.join(p.relative_to(ROOT).as_posix() + '\n' for p in paths), encoding='utf-8', newline='\n')
     calls = []
+    (output / 'source-snapshot.json').write_text(
+        json.dumps(dict(sources=sources, tools=tools, lockSHA256=lock_sha), indent=2) + '\n',
+        encoding='utf-8', newline='\n')
+
+    def receipt(path, images):
+        assert all(sha(ROOT / s['path']) == s['sha256'] for s in sources)
+        assert all(sha(Path(t['path'])) == t['sha256'] for t in tools.values())
+        assert all(sha(Path(row['path'])) == row['sha256'] for row in images)
+        assert sha(PROJECT / 'fairy.lock') == lock_sha
+        data = dict(schema='fairyc.candidate-native-probe-build/v1', passed=True,
+                    entryScope='authored check/build/run entry points with real OS argv' if args.commands_only else 'authored file_cli::run with real OS argv',
+                    commandsOnly=args.commands_only, sources=sources, tools=tools,
+                    lockSHA256=lock_sha, images=images, candidatePacketSHA256=sha(packet),
+                    invocations=calls, stackReserveBytes=args.stack_reserve_bytes,
+                    goFrontendInvoked=False, productStackChanged=False, productTimeoutChanged=False)
+        path.write_text(json.dumps(data, indent=2) + '\n', encoding='utf-8', newline='\n')
 
     def run(argv, timeout):
         started = time.monotonic()
@@ -102,12 +118,9 @@ import std::process as process;
         shutil.copyfile(args.builder.resolve(), companion)
         assert sha(companion) == tools['builder']['sha256']
         images.append(dict(profile=profile, path=str(image), sha256=sha(image), driverSHA256=sha(companion)))
+        receipt(output / f'receipt-{profile}.json', images[-1:])
         print(profile, 'native dispatcher built', flush=True)
-    assert all(sha(ROOT / s['path']) == s['sha256'] for s in sources)
-    assert all(sha(Path(t['path'])) == t['sha256'] for t in tools.values())
-    assert sha(PROJECT / 'fairy.lock') == lock_sha
-    receipt = dict(schema='fairyc.candidate-native-probe-build/v1', passed=True, entryScope='authored check/build/run entry points with real OS argv' if args.commands_only else 'authored file_cli::run with real OS argv', commandsOnly=args.commands_only, sources=sources, tools=tools, lockSHA256=lock_sha, images=images, candidatePacketSHA256=sha(packet), invocations=calls, stackReserveBytes=args.stack_reserve_bytes, goFrontendInvoked=False, productStackChanged=False, productTimeoutChanged=False)
-    (output / 'receipt.json').write_text(json.dumps(receipt, indent=2) + '\n', encoding='utf-8', newline='\n')
+    receipt(output / 'receipt.json', images)
 
 
 if __name__ == '__main__':

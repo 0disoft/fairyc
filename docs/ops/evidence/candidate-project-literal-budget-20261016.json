@@ -73,7 +73,17 @@
     "stderr": "",
     "seconds": 27.83653559999948
   },
-  "fullNativeDispatcherVerification": "pending",
+  "fullNativeDispatcherVerification": {
+    "passed": true,
+    "profiles": [
+      "development",
+      "release"
+    ],
+    "sourceFiles": 512,
+    "cPacketBytes": 40948281,
+    "selfCByteFixedPoint": true,
+    "evidence": "candidate-final-cli-parity-20261016.json"
+  },
   "publicApiChanged": false,
   "sdkAbiChanged": false,
   "ciChanged": false,
