@@ -1,18 +1,17 @@
 module module_unit_cfg_iteration;
 import module_unit_cfg_model as cfg;
 import module_unit_body_ir_model as ir;
-import module_unit_body_ir_lookup as lookup;
 import module_unit_cleanup_mir_model as clean;
 import module_unit_value_model as m;
 import std::vec as v;
 import scalar_views as views;
 
 fn clean::Problem fail(u32 code,usize module_index,usize start,usize end){return clean::Problem{.code,.module_index,.start,.end};}
-fn bool named(ref ir::Body b,usize id,usize depth,ref mut usize work){if(id==0 || depth>=64 || !m::charge(work,1)){return false;}let e=ir::node_at(b,id-1).value;if(e.kind==3 || e.kind==8 || e.kind==26 || e.kind==21 || e.kind==22){return named(b,lookup::node(b,e.left),depth+1,work);}if(e.kind!=2 || e.binding==0 || e.binding>ir::local_count(b)){return false;}let l=ir::local_at(b,e.binding);return (l.kind==1 || l.kind==2 || l.kind==3) && l.type==e.type;}
+fn bool named(ref ir::Body b,usize id,usize depth,ref mut usize work){if(id==0 || depth>=64 || !m::charge(work,1)){return false;}let e=ir::node_at(b,id-1).value;if(e.kind==3 || e.kind==8 || e.kind==26 || e.kind==21 || e.kind==22){return named(b,ir::node(b,e.left),depth+1,work);}if(e.kind!=2 || e.binding==0 || e.binding>ir::local_count(b)){return false;}let l=ir::local_at(b,e.binding);return (l.kind==1 || l.kind==2 || l.kind==3) && l.type==e.type;}
 // Copy or borrow the exact scalar/plain-struct element from a checked array
 // or view. The Values and loan passes retain mutability and lifetime ownership.
 pub fn Result<usize,clean::Problem> binding(ref ir::Program p,ref ir::Body b,usize frame,usize statement,ref mut usize work){let module_index=clean::frame_at(ir::cleanup_ir(p),frame).module_index;
-    if(statement==0 || statement>ir::statement_count(b)){return .err(fail(1001,module_index,0,0));}let s=ir::statement_at(b,statement-1).value;let source=lookup::node(b,s.expression);
+    if(statement==0 || statement>ir::statement_count(b)){return .err(fail(1001,module_index,0,0));}let s=ir::statement_at(b,statement-1).value;let source=ir::node(b,s.expression);
     if(s.kind!=18 || source==0){return .err(fail(1001,module_index,s.start,s.end));}let e=ir::node_at(b,source-1).value;let carrier=clean::type_at(ir::cleanup_ir(p),e.type);if(e.state!=1 || (carrier.kind!=16 && carrier.kind!=10 && carrier.kind!=11 && carrier.kind!=15 && carrier.kind!=17 && carrier.kind!=18) || !named(b,source,0,work)){return .err(fail(if(*work>=1048576){1002}else{1004},module_index,s.start,s.end));}
     var usize found=0;var usize i=1;while(i<=ir::local_count(b)){if(!m::charge(work,1)){return .err(fail(1002,module_index,s.start,s.end));}let l=ir::local_at(b,i);if(l.kind==5 && l.source_index==s.target){let t=clean::type_at(ir::cleanup_ir(p),l.type);let borrowed=t.kind==7 || t.kind==8;let element=if(borrowed){t.first}else{l.type};let item=clean::type_at(ir::cleanup_ir(p),element);let u32 expected=if(carrier.kind==10 || carrier.kind==11){3}else if(carrier.kind==15){views::element(carrier.scalar)}else{0};if(found!=0 || (item.kind!=1 && item.kind!=2) || clean::glue_at(ir::cleanup_ir(p),element).kind!=0 || ((carrier.kind==16 || carrier.kind==17 || carrier.kind==18) && carrier.first!=element) || (expected!=0 && (item.kind!=1 || item.scalar!=expected)) || (t.kind==8 && carrier.kind!=16 && carrier.kind!=11 && carrier.kind!=18 && !(carrier.kind==15 && views::mutable(carrier.scalar)))){return .err(fail(1004,module_index,s.start,s.end));}found=i;}i+=1;}return if(found==0){.err(fail(1001,module_index,s.start,s.end))}else{.ok(found)};
 }
@@ -25,7 +24,7 @@ fn Result<bool,clean::Problem> before_capture(ref cfg::Graph g,usize capture,usi
 // Bounds are tested by the step before loading the iteration binding.
 pub fn clean::Problem check(ref ir::Program p,ref cfg::Graph g,ref mut usize work){let b=ir::at(p,cfg::frame(g));let module_index=clean::frame_at(ir::cleanup_ir(p),cfg::frame(g)).module_index;var usize statement=1;
     while(statement<=ir::statement_count(b)){if(!m::charge(work,1)){return fail(1002,module_index,0,0);}let s=ir::statement_at(b,statement-1).value;if(s.kind==18){let valid=switch(binding(p,b,cfg::frame(g),statement,work)){case .ok(n):{n}case .err(e):{return e;}};var usize capture=0;var usize step=0;var usize i=1;
-            while(i<=cfg::count(g)){if(!m::charge(work,1)){return fail(1002,module_index,s.start,s.end);}let n=cfg::at(g,i);if(n.target==statement && (n.kind==20 || n.kind==21)){if(n.source!=lookup::node(b,s.expression) || n.start!=s.start || n.end!=s.end || n.drop!=0){return fail(1001,module_index,s.start,s.end);}if(n.kind==20){if(capture!=0){return fail(1001,module_index,s.start,s.end);}capture=i;}else{if(step!=0){return fail(1001,module_index,s.start,s.end);}step=i;}}i+=1;}
+            while(i<=cfg::count(g)){if(!m::charge(work,1)){return fail(1002,module_index,s.start,s.end);}let n=cfg::at(g,i);if(n.target==statement && (n.kind==20 || n.kind==21)){if(n.source!=ir::node(b,s.expression) || n.start!=s.start || n.end!=s.end || n.drop!=0){return fail(1001,module_index,s.start,s.end);}if(n.kind==20){if(capture!=0){return fail(1001,module_index,s.start,s.end);}capture=i;}else{if(step!=0){return fail(1001,module_index,s.start,s.end);}step=i;}}i+=1;}
             if(valid==0 || capture==0 || step==0 || cfg::at(g,capture).first!=step){return fail(1001,module_index,s.start,s.end);}let bypass=switch(before_capture(g,capture,step,module_index,work)){case .ok(b):{b}case .err(e):{return e;}};if(bypass){return fail(1001,module_index,s.start,s.end);}
         }statement+=1;
     }var usize i=1;while(i<=cfg::count(g)){if(!m::charge(work,1)){return fail(1002,module_index,0,0);}let n=cfg::at(g,i);if((n.kind==20 || n.kind==21) && ir::statement_at(b,n.target-1).value.kind!=18){return fail(1001,module_index,n.start,n.end);}i+=1;}return fail(0,module_index,0,0);

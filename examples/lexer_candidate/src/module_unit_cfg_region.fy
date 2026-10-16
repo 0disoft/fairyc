@@ -1,7 +1,6 @@
 module module_unit_cfg_region;
 import module_unit_cfg_model as cfg;
 import module_unit_body_ir_model as ir;
-import module_unit_body_ir_lookup as lookup;
 import module_unit_cleanup_mir_model as clean_ir;
 import module_unit_value_model as m;
 import std::vec as v;
@@ -35,7 +34,7 @@ pub fn clean_ir::Problem check(ref ir::Program p,ref cfg::Graph g,ref mut usize 
     let b=ir::at(p,cfg::frame(g));let module_index=clean_ir::frame_at(ir::cleanup_ir(p),cfg::frame(g)).module_index;var v::Vec<u8> begins=v::empty<u8>();var v::Vec<u8> resets=v::empty<u8>();var usize i=0;
     while(i<ir::region_count(b)){if(!m::charge(work,1)){return fail(1002,module_index,0,0);}if(!v::push<u8>(ref mut begins,0).is_ok){return fail(1003,module_index,0,0);}i+=1;}i=0;while(i<ir::reset_count(b)){if(!m::charge(work,1)){return fail(1002,module_index,0,0);}if(!v::push<u8>(ref mut resets,0).is_ok){return fail(1003,module_index,0,0);}i+=1;}
     i=1;while(i<=cfg::count(g)){if(!m::charge(work,1)){return fail(1002,module_index,0,0);}let n=cfg::at(g,i);
-        if(n.kind==15){let r=ir::region_at(b,n.target-1);if(n.source!=lookup::node(b,r.source) || n.start!=r.start || n.end!=r.end || *v::at<u8>(ref begins,n.target-1)!=0){return fail(1001,module_index,n.start,n.end);}let e=ir::node_at(b,n.source-1).value;let t=clean_ir::type_at(ir::cleanup_ir(p),e.type);if(e.type!=r.source_type || t.kind!=8 || t.first!=r.arena_type){return fail(1001,module_index,n.start,n.end);}let slot=v::at_mut<u8>(ref mut begins,n.target-1);*slot=1;}
+        if(n.kind==15){let r=ir::region_at(b,n.target-1);if(n.source!=ir::node(b,r.source) || n.start!=r.start || n.end!=r.end || *v::at<u8>(ref begins,n.target-1)!=0){return fail(1001,module_index,n.start,n.end);}let e=ir::node_at(b,n.source-1).value;let t=clean_ir::type_at(ir::cleanup_ir(p),e.type);if(e.type!=r.source_type || t.kind!=8 || t.first!=r.arena_type){return fail(1001,module_index,n.start,n.end);}let slot=v::at_mut<u8>(ref mut begins,n.target-1);*slot=1;}
         else if(n.kind==16){let e=ir::reset_at(b,n.target-1);if(n.source!=0 || n.start!=e.start || n.end!=e.end){return fail(1001,module_index,n.start,n.end);}var usize j=0;while(j<ir::reset_count(b)){if(!m::charge(work,1)){return fail(1002,module_index,n.start,n.end);}let other=ir::reset_at(b,j);if(other.region_id==e.region_id && other.kind==e.kind && other.order==e.order && other.start==e.start && other.end==e.end){if(*v::at<u8>(ref resets,j)!=0){return fail(1001,module_index,n.start,n.end);}let slot=v::at_mut<u8>(ref mut resets,j);*slot=1;}j+=1;}}i+=1;
     }
     i=0;while(i<v::len<u8>(ref begins)){if(*v::at<u8>(ref begins,i)==0){return fail(1001,module_index,0,0);}i+=1;}i=0;while(i<v::len<u8>(ref resets)){if(*v::at<u8>(ref resets,i)==0){return fail(1001,module_index,0,0);}i+=1;}return fail(0,0,0,0);

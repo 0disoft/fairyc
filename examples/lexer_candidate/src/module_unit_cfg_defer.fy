@@ -1,7 +1,6 @@
 module module_unit_cfg_defer;
 import module_unit_cfg_model as cfg;
 import module_unit_body_ir_model as ir;
-import module_unit_body_ir_lookup as lookup;
 import module_unit_cleanup_mir_model as clean_ir;
 import module_unit_value_model as m;
 import std::vec as v;
@@ -19,7 +18,7 @@ fn clean_ir::Problem target(ref ir::Program p,usize frame,usize invocation,ref m
 }
 pub fn Result<usize,clean_ir::Problem> prepare(ref ir::Program p,usize frame,usize statement,ref mut v::Vec<cfg::Deferred> sites,ref mut v::Vec<cfg::Capture> captures,ref mut usize work){
     let old=find(sites,statement);if(old!=0){return .ok(old);}let b=ir::at(p,frame);let f=clean_ir::frame_at(ir::cleanup_ir(p),frame);let s=ir::statement_at(b,statement-1).value;
-    if(s.kind!=13){return .err(fail(1001,f.module_index,s.start,s.end));}let expr=lookup::node(b,s.expression);var usize invocation=0;var usize i=0;
+    if(s.kind!=13){return .err(fail(1001,f.module_index,s.start,s.end));}let expr=ir::node(b,s.expression);var usize invocation=0;var usize i=0;
     while(i<ir::call_count(b)){if(!m::charge(work,1)){return .err(fail(1002,f.module_index,s.start,s.end));}if(ir::call_at(b,i).expression==expr){invocation=i+1;break;}i+=1;}let checked=target(p,frame,invocation,work);if(checked.code!=0){return .err(checked);}let call=ir::call_at(b,invocation-1);
     if(v::len<cfg::Deferred>(sites)>=256 || v::len<cfg::Capture>(captures)>4096 || call.argument_count>4096-v::len<cfg::Capture>(captures)){return .err(fail(1002,f.module_index,s.start,s.end));}
     let id=v::len<cfg::Deferred>(sites)+1;let start=v::len<cfg::Capture>(captures);i=0;
@@ -32,7 +31,7 @@ pub fn clean_ir::Problem check(ref ir::Program p,ref cfg::Graph g,ref mut usize 
     while(i<=nc){if(!v::push<u8>(ref mut captures,0).is_ok){return fail(1003,f.module_index,0,0);}i+=1;}i=1;
     while(i<=nd){if(!m::charge(work,1)){return fail(1002,f.module_index,0,0);}let d=cfg::deferred_at(g,i);
         if(d.statement==0 || d.statement>ir::statement_count(b) || d.capture_start!=expected_start || d.capture_count>nc-expected_start){return fail(1001,f.module_index,0,0);}let s=ir::statement_at(b,d.statement-1).value;let checked=target(p,cfg::frame(g),d.invocation,work);if(checked.code!=0){return checked;}let call=ir::call_at(b,d.invocation-1);
-        if(s.kind!=13 || lookup::node(b,s.expression)!=call.expression || d.capture_count!=call.argument_count){return fail(1001,f.module_index,s.start,s.end);}
+        if(s.kind!=13 || ir::node(b,s.expression)!=call.expression || d.capture_count!=call.argument_count){return fail(1001,f.module_index,s.start,s.end);}
         var usize j=1;while(j<i){if(!m::charge(work,1)){return fail(1002,f.module_index,s.start,s.end);}if(cfg::deferred_at(g,j).statement==d.statement){return fail(1001,f.module_index,s.start,s.end);}j+=1;}
         j=0;while(j<d.capture_count){if(!m::charge(work,1)){return fail(1002,f.module_index,s.start,s.end);}let c=cfg::capture_at(g,d.capture_start+j+1);let a=ir::argument_at(b,call.argument_start+j);if(c.deferred!=i || c.position!=j || c.source!=a.expression || c.type!=a.actual){return fail(1001,f.module_index,a.start,a.end);}j+=1;}expected_start+=d.capture_count;i+=1;
     }

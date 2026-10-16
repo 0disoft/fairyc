@@ -7,7 +7,6 @@ import project_compiler_input as input;
 import project_compiler_core as compiler;
 import project_source_set as sources;
 import module_unit_body_ir_model as ir;
-import module_unit_body_ir_lookup as lookup;
 import module_project_identified_ir as identified;
 import project_coordinate_graph as coordinates;
 import module_unit_cleanup_mir_model as cleanup_ir;
@@ -48,7 +47,7 @@ fn bool folded_take(ref ir::Program program,usize frame){
     let body=ir::at(program,frame);var usize i=0;
     while(i<ir::node_count(body)){let e=ir::node_at(body,i).value;
         if(e.kind==6 && e.builtin.kind==103 && e.builtin.element==receiver.first){
-            let generic=lookup::node(body,e.left);if(generic!=0){let base=lookup::node(body,ir::node_at(body,generic-1).value.left);
+            let generic=ir::node(body,e.left);if(generic!=0){let base=ir::node(body,ir::node_at(body,generic-1).value.left);
                 if(base!=0 && bytes::equal(ir::node_text(body,base-1),b"take_slot")){return true;}}
         }i+=1;
     }return false;
@@ -69,7 +68,7 @@ fn bool materialized_take(ref ir::Program program,ref input::Input sources,usize
 fn usize functions(ref ir::Program program,ref input::Input sources){
     var usize total=0;let glue=ir::cleanup_ir(program);var usize i=1;
     while(i<=ir::count(program)){let f=cleanup_ir::frame_at(glue,i);let b=ir::at(program,i);
-        let root=ir::statement_at(b,lookup::statement(b,ir::body(b))-1).value;
+        let root=ir::statement_at(b,ir::statement(b,ir::body(b))-1).value;
         // Go omits empty source cleanup functions; ownership MIR retains them.
         if(f.kind!=2 || root.second!=0 || root.expression!=0){total+=1;}
         if(folded_take(program,i) && !materialized_take(program,sources,i)){total+=1;}

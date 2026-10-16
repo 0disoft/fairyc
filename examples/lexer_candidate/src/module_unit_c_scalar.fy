@@ -1,6 +1,5 @@
 module module_unit_c_scalar;
 import module_unit_body_ir_model as ir;
-import module_unit_body_ir_lookup as lookup;
 import module_unit_cleanup_mir_model as clean;
 import c_text as w;
 import c_abi_types as casts;
@@ -23,7 +22,7 @@ fn bool literal(ref ir::Body b,usize id,u32 type,ref mut bytes::Buffer out,ref m
     return (type!=1 && type!=2 || w::text(out,s,b"fy_unit_bits(")) && w::text(out,s,b"UINT64_C(") && w::text(out,s,text) && w::text(out,s,b")") && (type!=1 && type!=2 || w::text(out,s,if(type==1){b",32)"}else{b",64)"}));
 }
 pub fn bool expression(ref ir::Program p,ref ir::Body b,usize id,ref mut bytes::Buffer out,ref mut w::State s){
-    let e=ir::node_at(b,id-1).value;let type=scalar(p,e.type);let left=lookup::node(b,e.left);let right=lookup::node(b,e.right);let op=operator(ir::node_text(b,id-1));
+    let e=ir::node_at(b,id-1).value;let type=scalar(p,e.type);let left=ir::node(b,e.left);let right=ir::node(b,e.right);let op=operator(ir::node_text(b,id-1));
     if(type==0 || type==7 || type>6 && e.kind!=23){s.code=1004;return false;}
     if(e.kind==23){
         if(left==0 || e.target!=e.type || !bytes::equal(ir::node_text(b,id-1),b"as")){s.code=1001;return false;}

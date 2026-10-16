@@ -1,7 +1,6 @@
 module module_unit_body_ir_enums;
 import module_unit_body_ir_model as ir;
 import candidate_limits as limits;
-import module_unit_body_ir_lookup as lookup;
 import module_unit_cleanup_mir_model as clean;
 import module_unit_value_model as budget;
 import module_unit_interfaces as interfaces;
@@ -39,10 +38,10 @@ fn bool inert(ref ir::Program p,usize id,ref mut v::Vec<u8> marks,ref mut usize 
 }
 fn bool construction(ref ir::Program p,ref ir::Body b,usize id,ref mut usize work,ref mut u32 code){
     let e=ir::node_at(b,id-1).value;let found=layout(p,e.type,work,code);if(found==0 || e.target!=e.type || !member(p,e.field,e.type,3)){return false;}let s=ir::layout_at(p,found-1).value;let selected=e.field.id-1;let f=ir::field_at(p,selected);
-    if(selected<s.field_start || selected>=s.field_start+s.field_count){return false;}let callee=if(e.kind==28){id}else{lookup::node(b,e.left)};if(callee==0 || !charge(work,ir::field_name(p,selected).len+1,code) || !bytes::equal(ir::node_text(b,callee-1),ir::field_name(p,selected))){return false;}
+    if(selected<s.field_start || selected>=s.field_start+s.field_count){return false;}let callee=if(e.kind==28){id}else{ir::node(b,e.left)};if(callee==0 || !charge(work,ir::field_name(p,selected).len+1,code) || !bytes::equal(ir::node_text(b,callee-1),ir::field_name(p,selected))){return false;}
     if(e.kind==28){return f.payload_count==0 && e.left==0 && e.right==0;}if(ir::node_at(b,callee-1).value.kind!=28 || ir::node_at(b,callee-1).value.state!=2){return false;}
     var v::Vec<u8> seen=v::empty<u8>();var usize i=0;while(i<f.payload_count){if(!charge(work,1,code)){return false;}if(!v::push<u8>(ref mut seen,0).is_ok){*code=1003;return false;}i+=1;}var usize link=e.right;var usize count=0;
-    while(link!=0){if(count>=f.payload_count || !charge(work,1,code)){return false;}let pair=lookup::node(b,link);if(pair==0){return false;}let row=ir::node_at(b,pair-1).value;let child=lookup::node(b,row.left);
+    while(link!=0){if(count>=f.payload_count || !charge(work,1,code)){return false;}let pair=ir::node(b,link);if(pair==0){return false;}let row=ir::node_at(b,pair-1).value;let child=ir::node(b,row.left);
         if(row.kind!=11 || child==0 || !member(p,row.field,e.type,4) || row.field.id<=f.payload_start || row.field.id>f.payload_start+f.payload_count){return false;}let position=row.field.id-1-f.payload_start;let payload=ir::field_at(p,row.field.id-1);let value=ir::node_at(b,child-1).value;
         if(*v::at<u8>(ref seen,position)!=0 || value.state!=1 || value.type!=payload.type || row.expected!=payload.type || !charge(work,ir::field_name(p,row.field.id-1).len+1,code) || !bytes::equal(ir::node_text(b,pair-1),ir::field_name(p,row.field.id-1))){return false;}{let slot=v::at_mut<u8>(ref mut seen,position);*slot=1;}count+=1;link=row.right;
     }return count==f.payload_count;

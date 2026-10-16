@@ -1,6 +1,5 @@
 module module_unit_c_borrowed_arrays;
 import module_unit_body_ir_model as ir;
-import module_unit_body_ir_lookup as lookup;
 import module_unit_cfg_model as cfg;
 import module_unit_cleanup_mir_model as clean;
 import module_unit_value_model as budget;
@@ -15,8 +14,8 @@ import std::vec as v;
 pub resource Plan {v::Vec<u8> omitted;cleanup{}}
 pub fn bool omitted(ref Plan p,usize id){return id<v::len<u8>(ref p.omitted) && *v::at<u8>(ref p.omitted,id)!=0;}
 pub fn bool field_omitted(ref Plan p,usize id){return id<v::len<u8>(ref p.omitted) && *v::at<u8>(ref p.omitted,id)==2;}
-fn Result<bool,u32> field_place(ref ir::Program p,ref ir::Body b,usize id,ref mut usize work){var usize current=id;var usize depth=0;while(current!=0 && depth<64){if(!budget::charge(work,1)){return .err(1002);}let e=ir::node_at(b,current-1).value;if(e.kind==2){return .ok(e.binding!=0);}if(e.kind==4){return .ok(bytes::equal(ir::node_text(b,current-1),b"*"));}if(e.kind!=8 || e.field.id==0){return .ok(false);}let left=lookup::node(b,e.left);if(left==0){return .ok(false);}let rt=clean::type_at(ir::cleanup_ir(p),ir::node_at(b,left-1).value.type);if(rt.kind==7 || rt.kind==8){return .ok(true);}if(rt.kind!=2){return .ok(false);}current=left;depth+=1;}return .ok(false);}
-fn bool bump(ref ir::Body b,usize original,ref mut v::Vec<usize> uses){let id=lookup::node(b,original);if(id!=0){let slot=v::at_mut<usize>(uses,id);*slot+=1;}return true;}
+fn Result<bool,u32> field_place(ref ir::Program p,ref ir::Body b,usize id,ref mut usize work){var usize current=id;var usize depth=0;while(current!=0 && depth<64){if(!budget::charge(work,1)){return .err(1002);}let e=ir::node_at(b,current-1).value;if(e.kind==2){return .ok(e.binding!=0);}if(e.kind==4){return .ok(bytes::equal(ir::node_text(b,current-1),b"*"));}if(e.kind!=8 || e.field.id==0){return .ok(false);}let left=ir::node(b,e.left);if(left==0){return .ok(false);}let rt=clean::type_at(ir::cleanup_ir(p),ir::node_at(b,left-1).value.type);if(rt.kind==7 || rt.kind==8){return .ok(true);}if(rt.kind!=2){return .ok(false);}current=left;depth+=1;}return .ok(false);}
+fn bool bump(ref ir::Body b,usize original,ref mut v::Vec<usize> uses){let id=ir::node(b,original);if(id!=0){let slot=v::at_mut<usize>(uses,id);*slot+=1;}return true;}
 pub fn Result<Plan,u32> build(ref ir::Program p,ref ir::Body b,ref cfg::Graph g,ref mut usize work){
     var v::Vec<usize> uses=v::empty<usize>();var v::Vec<usize> evaluations=v::empty<usize>();var v::Vec<u8> flags=v::empty<u8>();var usize i=0;var bool candidate=false;
     while(i<=ir::node_count(b)){if(!budget::charge(work,1)){return .err(1002);}if(!v::push<usize>(ref mut uses,0).is_ok || !v::push<usize>(ref mut evaluations,0).is_ok || !v::push<u8>(ref mut flags,0).is_ok){return .err(1003);}
@@ -32,14 +31,14 @@ pub fn Result<Plan,u32> build(ref ir::Program p,ref ir::Body b,ref cfg::Graph g,
         let placeable=if(type.kind==2 && (e.kind==2 || e.kind==8)){switch(field_place(p,b,n.source,work)){case .ok(b):{b}case .err(code):{return .err(code);}}}else{false};
         if(placeable){let next=cfg::at(g,n.first);if(next.kind==1){let read=ir::node_at(b,next.source-1).value;if(read.kind==8 && read.field.id!=0 && read.left==e.source_index){let slot=v::at_mut<u8>(ref mut flags,n.source);*slot=2;}}continue;}
         if(e.kind!=8 || e.field.id==0 || type.kind!=16){continue;}
-        let receiver=lookup::node(b,e.left);if(receiver==0){continue;}let rt=clean::type_at(ir::cleanup_ir(p),ir::node_at(b,receiver-1).value.type);if(rt.kind!=7 && rt.kind!=8){continue;}
+        let receiver=ir::node(b,e.left);if(receiver==0){continue;}let rt=clean::type_at(ir::cleanup_ir(p),ir::node_at(b,receiver-1).value.type);if(rt.kind!=7 && rt.kind!=8){continue;}
         let index=cfg::at(g,n.first);if(index.kind!=1 || index.first==0){continue;}let ie=ir::node_at(b,index.source-1).value;if((ie.kind!=1 && ie.kind!=2) || scalar::scalar(p,ie.type)!=5){continue;}
         let read=cfg::at(g,index.first);if(read.kind!=1){continue;}let re=ir::node_at(b,read.source-1).value;if(re.kind!=9 || re.left!=e.source_index || re.right!=ie.source_index){continue;}
         let slot=v::at_mut<u8>(ref mut flags,n.source);*slot=1;
     }return .ok(Plan{.omitted=flags});
 }
 pub fn bool read(ref ir::Program p,ref ir::Body b,usize id,ref mut bytes::Buffer out,ref mut w::State s){
-    let e=ir::node_at(b,id-1).value;let left=lookup::node(b,e.left);let right=lookup::node(b,e.right);let t=clean::type_at(ir::cleanup_ir(p),ir::node_at(b,left-1).value.type);
+    let e=ir::node_at(b,id-1).value;let left=ir::node(b,e.left);let right=ir::node(b,e.right);let t=clean::type_at(ir::cleanup_ir(p),ir::node_at(b,left-1).value.type);
     return w::text(out,s,b"if(") && scalar::value(out,s,right) && w::text(out,s,b">=") && w::number(out,s,t.second) && w::text(out,s,b")fy_runtime_trap(6);\n")
         && scalar::value(out,s,id) && w::text(out,s,b"=") && aggregate::place(p,b,left,out,s,0) && w::text(out,s,b".fy_items[") && scalar::value(out,s,right) && w::text(out,s,b"];\n");
 }

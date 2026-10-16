@@ -91,3 +91,10 @@ pub fn Result<Program,clean_ir::Problem> assemble_artifact(state::Plan states,sd
     let p=Program{.states,.sdk_sources,.cleanup_ir,.bodies,.layouts,.fields,.callables,.parameters,.names,.work=0};
     let checked=proof::check_metered(ref p,verification_work);if(checked.code!=0){return .err(checked);}return .ok(p);
 }
+
+// Canonical body-table ID lookup, shared by consumers without another unit.
+pub fn usize node(ref Body b,usize id){var usize low=0;var usize high=node_count(b);while(low<high){let mid=low+(high-low)/2;if(node_at(b,mid).value.source_index<id){low=mid+1;}else{high=mid;}}return if(low<node_count(b) && node_at(b,low).value.source_index==id){low+1}else{0};}
+pub fn usize statement(ref Body b,usize id){var usize low=0;var usize high=statement_count(b);while(low<high){let mid=low+(high-low)/2;if(statement_at(b,mid).source_index<id){low=mid+1;}else{high=mid;}}return if(low<statement_count(b) && statement_at(b,low).source_index==id){low+1}else{0};}
+// A declaration entry ID can equal a payload expression ID. Store destinations
+// belong to the entry arena; pattern, iteration and Region slots do not.
+pub fn usize local(ref Body b,usize source_index){var usize i=1;while(i<=local_count(b)){let l=local_at(b,i);if((l.kind==2 || l.kind==3) && l.source_index==source_index){return i;}i+=1;}return 0;}

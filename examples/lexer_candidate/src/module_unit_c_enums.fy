@@ -1,6 +1,5 @@
 module module_unit_c_enums;
 import module_unit_body_ir_model as ir;
-import module_unit_body_ir_lookup as lookup;
 import module_unit_body_ir_enums as proof;
 import module_unit_cleanup_mir_model as clean;
 import module_unit_value_model as budget;
@@ -23,7 +22,7 @@ pub fn bool expression(ref ir::Program p,ref ir::Body b,usize id,ref mut bytes::
     let e=ir::node_at(b,id-1).value;let index=proof::layout(p,e.type,work,ref mut s.code);if(index==0 || (e.kind!=28 && e.kind!=10) || !proof::member(p,e.field,e.type,3)){if(s.code==0){s.code=1001;}return false;}
     let shape=ir::layout_at(p,index-1).value;var usize tag=0;var usize i=shape.field_start;while(i+1<e.field.id){if(!budget::charge(work,1)){s.code=1002;return false;}if(ir::field_at(p,i).kind==3){tag+=1;}i+=1;}
     if(!scalar::value(out,s,id) || !w::text(out,s,b"=(") || !aggregate::type(p,e.type,out,s) || !w::text(out,s,b"){.fy_tag=") || !w::number(out,s,tag) || !w::text(out,s,b"};\n")){return false;}
-    var usize link=e.right;while(link!=0){if(!budget::charge(work,1)){s.code=1002;return false;}let pair=lookup::node(b,link);if(pair==0){s.code=1001;return false;}let row=ir::node_at(b,pair-1).value;let child=lookup::node(b,row.left);if(child==0 || !proof::member(p,row.field,e.type,4)){s.code=1001;return false;}
+    var usize link=e.right;while(link!=0){if(!budget::charge(work,1)){s.code=1002;return false;}let pair=ir::node(b,link);if(pair==0){s.code=1001;return false;}let row=ir::node_at(b,pair-1).value;let child=ir::node(b,row.left);if(child==0 || !proof::member(p,row.field,e.type,4)){s.code=1001;return false;}
         if(!scalar::value(out,s,id) || !w::text(out,s,b".fy_payload.") || !variant(out,s,e.field.id) || !w::text(out,s,b".") || !aggregate::field(out,s,row.field.id) || !w::text(out,s,b"=") || !scalar::value(out,s,child) || !w::text(out,s,b";\n")){return false;}link=row.right;
     }return true;
 }

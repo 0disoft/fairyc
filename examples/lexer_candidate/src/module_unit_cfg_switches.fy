@@ -1,7 +1,6 @@
 module module_unit_cfg_switches;
 import module_unit_cfg_model as cfg;
 import module_unit_body_ir_model as ir;
-import module_unit_body_ir_lookup as lookup;
 import module_unit_cleanup_mir_model as clean;
 import module_unit_value_model as m;
 import std::vec as v;
@@ -15,12 +14,12 @@ pub fn clean::Problem check(ref ir::Program p,ref cfg::Graph g,ref mut usize wor
     let b=ir::at(p,cfg::frame(g));let module_index=clean::frame_at(ir::cleanup_ir(p),cfg::frame(g)).module_index;
     var v::Vec<usize> owners=v::empty<usize>();var v::Vec<usize> cases=v::empty<usize>();var v::Vec<usize> seeds=v::empty<usize>();var usize i=0;
     while(i<ir::node_count(b)){if(!m::charge(work,1)){return fail(1002,module_index,0,0);}if(!v::push<usize>(ref mut owners,0).is_ok || !v::push<usize>(ref mut cases,0).is_ok || !v::push<usize>(ref mut seeds,0).is_ok){return fail(1003,module_index,0,0);}i+=1;}
-    i=0;while(i<ir::node_count(b)){if(!m::charge(work,1)){return fail(1002,module_index,0,0);}let e=ir::node_at(b,i).value;if(e.kind==15){var usize link=e.right;while(link!=0){if(!m::charge(work,1)){return fail(1002,module_index,e.start,e.end);}let pair=lookup::node(b,link);if(pair==0){return fail(1001,module_index,e.start,e.end);}let row=ir::node_at(b,pair-1).value;let arm=lookup::node(b,row.left);if(row.kind!=19 || !put(ref mut owners,arm,i+1)){return fail(1001,module_index,e.start,e.end);}link=row.right;}}i+=1;}
+    i=0;while(i<ir::node_count(b)){if(!m::charge(work,1)){return fail(1002,module_index,0,0);}let e=ir::node_at(b,i).value;if(e.kind==15){var usize link=e.right;while(link!=0){if(!m::charge(work,1)){return fail(1002,module_index,e.start,e.end);}let pair=ir::node(b,link);if(pair==0){return fail(1001,module_index,e.start,e.end);}let row=ir::node_at(b,pair-1).value;let arm=ir::node(b,row.left);if(row.kind!=19 || !put(ref mut owners,arm,i+1)){return fail(1001,module_index,e.start,e.end);}link=row.right;}}i+=1;}
     i=1;while(i<=cfg::count(g)){if(!m::charge(work,1)){return fail(1002,module_index,0,0);}let n=cfg::at(g,i);if(n.kind==18 || n.kind==19){
         if(n.source==0 || n.target==0 || ir::node_at(b,n.source-1).value.kind!=15 || *v::at<usize>(ref owners,n.target-1)!=n.source){return fail(1001,module_index,n.start,n.end);}let a=ir::node_at(b,n.target-1).value;if(a.kind!=18 || a.start!=n.start || a.end!=n.end || !(if(n.kind==18){put(ref mut cases,n.target,i)}else{put(ref mut seeds,n.target,i)})){return fail(1001,module_index,n.start,n.end);}
     }i+=1;}
     i=0;while(i<ir::node_count(b)){if(!m::charge(work,1)){return fail(1002,module_index,0,0);}let e=ir::node_at(b,i).value;if(e.kind==15){
-        var usize link=e.right;var usize previous=0;while(link!=0){if(!m::charge(work,1)){return fail(1002,module_index,e.start,e.end);}let row=ir::node_at(b,lookup::node(b,link)-1).value;let arm=lookup::node(b,row.left);let branch=*v::at<usize>(ref cases,arm-1);let seed=*v::at<usize>(ref seeds,arm-1);if(branch==0 || seed==0){return fail(1001,module_index,e.start,e.end);}let n=cfg::at(g,branch);if(n.first!=seed || cfg::entry(g)==seed){return fail(1001,module_index,e.start,e.end);}
+        var usize link=e.right;var usize previous=0;while(link!=0){if(!m::charge(work,1)){return fail(1002,module_index,e.start,e.end);}let row=ir::node_at(b,ir::node(b,link)-1).value;let arm=ir::node(b,row.left);let branch=*v::at<usize>(ref cases,arm-1);let seed=*v::at<usize>(ref seeds,arm-1);if(branch==0 || seed==0){return fail(1001,module_index,e.start,e.end);}let n=cfg::at(g,branch);if(n.first!=seed || cfg::entry(g)==seed){return fail(1001,module_index,e.start,e.end);}
             if(previous==0){let trap=cfg::at(g,n.second);if(trap.kind!=12 || trap.start!=e.start || trap.end!=e.end){return fail(1001,module_index,e.start,e.end);}}else if(n.second!=previous){return fail(1001,module_index,e.start,e.end);}previous=branch;link=row.right;
         }
         // Every predecessor of a payload seed must be its own successful

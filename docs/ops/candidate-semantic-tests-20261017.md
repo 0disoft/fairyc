@@ -48,8 +48,9 @@ exact/file/directory/package/workspace selection, source locations, lock state,
 exit codes and JSON schema versions are retained. Native reports keep their
 existing target, profile and optional captured output.
 
-The full dispatcher remains within its 512-source limit. The scalar runtime lives
-in `module_unit_interpreter.fy`; runtime arithmetic adapters sit beside the
+The full dispatcher remains within its 512-source limit. Execution lives in
+`module_unit_interpreter.fy`; aggregate cells and place descriptors live in
+`module_unit_interpreter_values.fy`. Runtime arithmetic adapters sit beside the
 exact-bit constant evaluator in `module_constant_arithmetic.fy`. Production
 callers share the cast-admission rule in `c_abi_types.fy`; `scalar_casts.fy`
 retains its compatibility wrapper for authored tests. This makes room for the
@@ -155,3 +156,13 @@ iteration and lexical source-location geometry. It also checks matching
 rejection messages for scalar/bool switch subjects. The updated Go MIR oracle
 now drops discarded owned temporaries instead of skipping their cleanup.
 These diagnostic results precede the separate complete candidate C rebuild.
+
+## Preserve the complete source and work budgets
+
+The complete C frontend rejected the expanded single interpreter unit with
+phase 2/stage 3/code 10 at `rx_array_view`. Splitting the value/place helpers
+keeps each unit within its existing 1 MiB analysis allowance. Canonical body
+node/statement/local lookup now lives in the body model; its earlier module
+remains a thin compatibility wrapper for authored tests. Production consumers
+use the model directly, freeing one source slot for the interpreter value unit.
+The complete dispatcher remains at 512 sources and all work limits stay intact.

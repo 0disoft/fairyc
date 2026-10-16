@@ -1,6 +1,5 @@
 module module_unit_c_region;
 import module_unit_body_ir_model as ir;
-import module_unit_body_ir_lookup as lookup;
 import module_unit_cleanup_mir_model as clean;
 import module_unit_cfg_model as cfg;
 import module_unit_c_sdk as sdk;
@@ -25,12 +24,12 @@ pub fn bool definitions(ref ir::Program p,ref sdk::Plan plan,ref mut bytes::Buff
 pub fn bool locals(ref ir::Body b,ref mut bytes::Buffer out,ref mut w::State s,ref mut usize work){var usize i=1;while(i<=ir::region_count(b)){if(!budget::charge(work,1)){s.code=1002;return false;}if(!w::text(out,s,b"struct fy_unit_region_bridge ") || !name(out,s,i) || !w::text(out,s,b";\n")){return false;}i+=1;}return true;}
 pub fn bool block(ref ir::Body b,cfg::Block n,ref mut bytes::Buffer out,ref mut w::State s){let id=if(n.kind==15){n.target}else{ir::reset_at(b,n.target-1).region_id};return w::text(out,s,if(n.kind==15){b"fy_unit_region_begin(&"}else{b"fy_unit_region_reset(&"}) && name(out,s,id) && (n.kind!=15 || w::text(out,s,b",") && scalar::value(out,s,n.source)) && w::text(out,s,b");\n");}
 pub fn bool value(ref ir::Body b,usize id,ref mut bytes::Buffer out,ref mut w::State s,ref mut usize work){let e=ir::node_at(b,id-1).value;if(!scalar::value(out,s,id) || !w::text(out,s,b"=")){return false;}
-    if(e.kind==3){let left=lookup::node(b,e.left);if(left==0 || ir::node_at(b,left-1).value.type!=e.type){s.code=1001;return false;}return scalar::value(out,s,left) && w::text(out,s,b";\n");}
+    if(e.kind==3){let left=ir::node(b,e.left);if(left==0 || ir::node_at(b,left-1).value.type!=e.type){s.code=1001;return false;}return scalar::value(out,s,left) && w::text(out,s,b";\n");}
     if(e.kind!=2 || e.binding==0 || ir::local_at(b,e.binding).type!=e.type){s.code=1001;return false;}let local=ir::local_at(b,e.binding);if(local.kind==1){return w::local(out,s,e.binding) && w::text(out,s,b";\n");}if(local.kind!=6){s.code=1001;return false;}var usize i=0;
     while(i<ir::region_count(b)){if(!budget::charge(work,1)){s.code=1002;return false;}if(ir::region_at(b,i).capability==e.binding){return w::text(out,s,b"&") && name(out,s,i+1) && w::text(out,s,b";\n");}i+=1;}s.code=1001;return false;
 }
 pub fn bool placement(ref ir::Program p,ref sdk::Plan plan,ref ir::Body b,usize id,ref mut bytes::Buffer out,ref mut w::State s,ref mut usize work){var usize i=0;
-    while(i<ir::placement_count(b)){if(!budget::charge(work,1)){s.code=1002;return false;}let x=ir::placement_at(b,i);if(lookup::node(b,x.expression)==id){let argument=lookup::node(b,x.argument);
+    while(i<ir::placement_count(b)){if(!budget::charge(work,1)){s.code=1002;return false;}let x=ir::placement_at(b,i);if(ir::node(b,x.expression)==id){let argument=ir::node(b,x.argument);
         if(!w::text(out,s,b"{void *storage=NULL;uint32_t status=fy_std_region_allocate_zeroed_v0(&")){return false;}
         if(x.region_id==0){if(!w::local(out,s,x.capability) || !w::text(out,s,b"->region")){return false;}}else if(!name(out,s,x.region_id) || !w::text(out,s,b".region")){return false;}
         if(!w::text(out,s,b",sizeof(") || !aggregate::type(p,x.owner_type,out,s) || !w::text(out,s,b"),_Alignof(") || !aggregate::type(p,x.owner_type,out,s) || !w::text(out,s,b"),&storage);if(!status){fy_unit_copy(storage,&") || !scalar::value(out,s,argument) || !w::text(out,s,b",sizeof(") || !aggregate::type(p,x.owner_type,out,s) || !w::text(out,s,b"));") || !scalar::value(out,s,id) || !w::text(out,s,b"=(") || !aggregate::type(p,x.result_type,out,s) || !w::text(out,s,b"){.fy_tag=1,.fy_payload.fy_ok=storage};}else{") || !scalar::value(out,s,id) || !w::text(out,s,b"=(") || !aggregate::type(p,x.result_type,out,s) || !w::text(out,s,b"){.fy_tag=0,.fy_payload.fy_err=(") || !aggregate::type(p,x.error_type,out,s) || !w::text(out,s,b"){") || !w::text(out,s,b".") || !aggregate::field(out,s,sdk::status_field(p,plan)) || !w::text(out,s,b"=status}};}\n}\n")){return false;}return true;
