@@ -212,6 +212,14 @@ func Create(parentPath string, spec Spec) error {
 	}
 	defer parent.Close()
 
+	// On Windows, Root.Mkdir can succeed for a dangling directory symlink.
+	// Reject existing entries before creation can acquire rollback ownership.
+	if _, err := parent.Lstat(spec.Name); err == nil {
+		return classifyCreateError(spec.Name, fs.ErrExist, true)
+	} else if !errors.Is(err, fs.ErrNotExist) {
+		return classifyCreateError(spec.Name, err, true)
+	}
+
 	if err := parent.Mkdir(spec.Name, 0o755); err != nil {
 		return classifyCreateError(spec.Name, err, true)
 	}
