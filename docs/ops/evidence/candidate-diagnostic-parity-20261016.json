@@ -1,0 +1,634 @@
+{
+  "schema": "fairyc.candidate-diagnostic-parity/v1",
+  "passed": true,
+  "profile": "development",
+  "baseCompilerSources": {
+    "path": "docs\\ops\\evidence\\candidate-cli-rebuild-repr-c-20261016.json",
+    "sha256": "5368e4204e85d4c33956f6d8077ec617a2c826d0ac8a8945ef2f64710f1b2646"
+  },
+  "sourceOverrides": [
+    {
+      "path": ".cache/candidate-parity-fixes-20261016/diagnostics-cli/main.fy",
+      "sha256": "cde4c1e51979a38e3fe70da25513a905abc5ac80106a422dc44446e038047ab4"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_unit_name_walk.fy",
+      "sha256": "fdc6ed093e376daf26045afc076ff8f824dde17bfdd95ce68bb65ae7fa612cde"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_check_text.fy",
+      "sha256": "0ef050354dc8e23aa9d0f5508aa8ee9c706f1540e93a3d3184f5bf5b824f8d5c"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_diagnostic_codes.fy",
+      "sha256": "93ba485c8ee2a91cbecb7543c049fd192723db267870837b198efc9613ffeb24"
+    }
+  ],
+  "sourceFiles": 512,
+  "sourceInventorySHA256": "b51dc3178f8741f7c3477da5c6027dd48596824809debf4bf32bd743f73f9c91",
+  "candidate": {
+    "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-parity-fixes-20261016\\diagnostics-cli\\development\\fairyc.exe",
+    "sha256": "f1caa769caa203cefc6cf6cb372925edf4915900c33e876a9c5d7464eac189c0"
+  },
+  "referenceSHA256": "8862917cfea6f98fad327b81ef78b0b5429a8915fefd9aea70fcbf817d121551",
+  "fixtureInputs": [
+    {
+      "path": "spec/fixtures/region/manifest-v1.json",
+      "sha256": "3c450f2dc62cc64ffb20992c50b17ba2ba331fbf29fb1a0a1209e2ed15f78c72"
+    },
+    {
+      "path": "spec/fixtures/region/cases/fail/capability-storage/src/main.fy",
+      "sha256": "cdc0f6e7cca4560bf463c8af52dbda043551c9bdbfb7c99960039d39fb4f2001"
+    },
+    {
+      "path": "spec/fixtures/region/cases/fail/direct-construction/src/main.fy",
+      "sha256": "dedae8fad279c003192f8bab62dec417a9e280e1c64fda44b41af909be8300c3"
+    },
+    {
+      "path": "spec/fixtures/result/manifest-v0.json",
+      "sha256": "7f3224765e51b57aae90ebb9a1f31a91c68c3e0544af45276e25b9853c67addd"
+    },
+    {
+      "path": "spec/fixtures/result/cases/pass/propagate-result/src/main.fy",
+      "sha256": "0c1b4fe4c515d647d1d6f1c66acfb12042a6ec1be1b3058b211cf75487d0ffcd"
+    },
+    {
+      "path": "spec/fixtures/result/cases/fail/question-non-result/src/main.fy",
+      "sha256": "79a52026a527b12fb4c58d9931ed750dbeb88c3451b8db1898da158d96616655"
+    },
+    {
+      "path": "spec/fixtures/result/cases/fail/incompatible-error/src/main.fy",
+      "sha256": "293212b93f5c970b527d62a3b5ad30d6b778b732c07cbfd810a8cc0ae97d9202"
+    }
+  ],
+  "buildInvocations": [
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\repr-c-cli-parity-20261016\\full-cli\\release\\fairyc.exe",
+        "--c-project-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-parity-fixes-20261016\\diagnostics-cli\\sources.list"
+      ],
+      "seconds": 693.6766205999957,
+      "exit": 0,
+      "stdoutBytes": 39545564,
+      "stdoutSHA256": "2e6959cf2bc80a4e1150acf74161f089eead3fcec07317e5b8114ef27b9f7b3a",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\repr-c-cli-parity-20261016\\fairyc-candidate-build.exe",
+        "--packet",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-parity-fixes-20261016\\diagnostics-cli\\candidate-packet.bin",
+        "--packet-sha256",
+        "2e6959cf2bc80a4e1150acf74161f089eead3fcec07317e5b8114ef27b9f7b3a",
+        "--output",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-parity-fixes-20261016\\diagnostics-cli\\development\\fairyc.exe",
+        "--stack-reserve-bytes",
+        "16777216"
+      ],
+      "seconds": 35.40629949999857,
+      "exit": 0,
+      "stdoutBytes": 198,
+      "stdoutSHA256": "854429d588418559727208ca6d384e3d63ab9586c78d7136aa8bb28bd9a261ad",
+      "stderr": ""
+    }
+  ],
+  "rows": [
+    {
+      "id": "fail.type.capability-storage",
+      "go": {
+        "argv": [
+          "check",
+          "--locked"
+        ],
+        "exit": 3,
+        "timedOut": false,
+        "seconds": 0.15675920000649057,
+        "stdout": "",
+        "stderr": "main.fy:4:5: E3103: compiler-owned Region capability cannot be stored [bytes 34..40]\n  capability: main.fy:4:12 [bytes 41..48]\n",
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderrSHA256": "4655043bbc7c4577d276dc77d8c79d5c2c8a8e1a543b38017609178bae2c8ed4",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E3103",
+            "start": 34,
+            "end": 40
+          }
+        ]
+      },
+      "candidate": {
+        "argv": [
+          "check",
+          "--locked"
+        ],
+        "exit": 3,
+        "timedOut": false,
+        "seconds": 0.10126600000512553,
+        "stdout": "",
+        "stderr": "main.fy:4:5: E3103: compiler-owned Region capability cannot be stored [bytes 34..40]\n  capability: main.fy:4:12 [bytes 41..48]\n",
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderrSHA256": "4655043bbc7c4577d276dc77d8c79d5c2c8a8e1a543b38017609178bae2c8ed4",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E3103",
+            "start": 34,
+            "end": 40
+          }
+        ]
+      },
+      "comparison": {
+        "completed": true,
+        "acceptanceMatch": true,
+        "exitMatch": true,
+        "firstDiagnosticMatch": true,
+        "allDiagnosticsMatch": true,
+        "stdoutMatch": true,
+        "stderrMatch": true,
+        "exactMatch": true
+      }
+    },
+    {
+      "id": "fail.type.direct-construction",
+      "go": {
+        "argv": [
+          "check",
+          "--locked"
+        ],
+        "exit": 3,
+        "timedOut": false,
+        "seconds": 0.11342960000183666,
+        "stdout": "",
+        "stderr": "main.fy:4:26: E3104: compiler-owned Region capability cannot be constructed directly [bytes 58..67]\n",
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderrSHA256": "753aedbec1b47eea2432c4a9b0525301f60309932f3249bd5e28b74fab923c08",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E3104",
+            "start": 58,
+            "end": 67
+          }
+        ]
+      },
+      "candidate": {
+        "argv": [
+          "check",
+          "--locked"
+        ],
+        "exit": 3,
+        "timedOut": false,
+        "seconds": 0.0787516999989748,
+        "stdout": "",
+        "stderr": "main.fy:4:26: E3104: compiler-owned Region capability cannot be constructed directly [bytes 58..67]\n",
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderrSHA256": "753aedbec1b47eea2432c4a9b0525301f60309932f3249bd5e28b74fab923c08",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E3104",
+            "start": 58,
+            "end": 67
+          }
+        ]
+      },
+      "comparison": {
+        "completed": true,
+        "acceptanceMatch": true,
+        "exitMatch": true,
+        "firstDiagnosticMatch": true,
+        "allDiagnosticsMatch": true,
+        "stdoutMatch": true,
+        "stderrMatch": true,
+        "exactMatch": true
+      }
+    },
+    {
+      "id": "fail.type.question-non-result",
+      "go": {
+        "argv": [
+          "check",
+          "--locked"
+        ],
+        "exit": 3,
+        "timedOut": false,
+        "seconds": 0.1222453999944264,
+        "stdout": "",
+        "stderr": "main.fy:4:17: E4102: postfix ? requires a Result value [bytes 58..59]\n  result-expression: main.fy:4:12 [bytes 53..58]\n",
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderrSHA256": "5aa393cec0f86ddd09a0aaaf0ff5762e33becea5327739916a567e35f154b0cc",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E4102",
+            "start": 58,
+            "end": 59
+          }
+        ]
+      },
+      "candidate": {
+        "argv": [
+          "check",
+          "--locked"
+        ],
+        "exit": 3,
+        "timedOut": false,
+        "seconds": 0.09627529999852413,
+        "stdout": "",
+        "stderr": "main.fy:4:17: E4102: postfix ? requires a Result value [bytes 58..59]\n  result-expression: main.fy:4:12 [bytes 53..58]\n",
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderrSHA256": "5aa393cec0f86ddd09a0aaaf0ff5762e33becea5327739916a567e35f154b0cc",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E4102",
+            "start": 58,
+            "end": 59
+          }
+        ]
+      },
+      "comparison": {
+        "completed": true,
+        "acceptanceMatch": true,
+        "exitMatch": true,
+        "firstDiagnosticMatch": true,
+        "allDiagnosticsMatch": true,
+        "stdoutMatch": true,
+        "stderrMatch": true,
+        "exactMatch": true
+      }
+    },
+    {
+      "id": "fail.type.incompatible-error",
+      "go": {
+        "argv": [
+          "check",
+          "--locked"
+        ],
+        "exit": 3,
+        "timedOut": false,
+        "seconds": 0.13425260000076378,
+        "stdout": "",
+        "stderr": "main.fy:12:26: E4103: propagated Result error type does not match the enclosing return type [bytes 212..213]\n  actual-error: main.fy:11:49 [bytes 130..141]\n  expected-error: main.fy:11:16 [bytes 97..108]\n",
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderrSHA256": "45dcbe93b9c47779d8125ad502fd6c752fa063306f19c55ac1fcfbe4abb8bc6e",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E4103",
+            "start": 212,
+            "end": 213
+          }
+        ]
+      },
+      "candidate": {
+        "argv": [
+          "check",
+          "--locked"
+        ],
+        "exit": 3,
+        "timedOut": false,
+        "seconds": 0.13099829999555368,
+        "stdout": "",
+        "stderr": "main.fy:12:26: E4103: propagated Result error type does not match the enclosing return type [bytes 212..213]\n  actual-error: main.fy:11:49 [bytes 130..141]\n  expected-error: main.fy:11:16 [bytes 97..108]\n",
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderrSHA256": "45dcbe93b9c47779d8125ad502fd6c752fa063306f19c55ac1fcfbe4abb8bc6e",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E4103",
+            "start": 212,
+            "end": 213
+          }
+        ]
+      },
+      "comparison": {
+        "completed": true,
+        "acceptanceMatch": true,
+        "exitMatch": true,
+        "firstDiagnosticMatch": true,
+        "allDiagnosticsMatch": true,
+        "stdoutMatch": true,
+        "stderrMatch": true,
+        "exactMatch": true
+      }
+    },
+    {
+      "id": "pass.flow.propagate-result",
+      "go": {
+        "argv": [
+          "check",
+          "--locked"
+        ],
+        "exit": 0,
+        "timedOut": false,
+        "seconds": 0.1819346999982372,
+        "stdout": "check ok: 1 instance(s), 1 source file(s), 1 MIR function(s), lock verified\n",
+        "stderr": "",
+        "stdoutSHA256": "97769a156229639cb536363b323234c3af77edd1043695ea8f67e84f2729bb3b",
+        "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "diagnostics": []
+      },
+      "candidate": {
+        "argv": [
+          "check",
+          "--locked"
+        ],
+        "exit": 0,
+        "timedOut": false,
+        "seconds": 0.330332500001532,
+        "stdout": "check ok: 1 instance(s), 1 source file(s), 1 MIR function(s), lock verified\n",
+        "stderr": "",
+        "stdoutSHA256": "97769a156229639cb536363b323234c3af77edd1043695ea8f67e84f2729bb3b",
+        "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "diagnostics": []
+      },
+      "comparison": {
+        "completed": true,
+        "acceptanceMatch": true,
+        "exitMatch": true,
+        "firstDiagnosticMatch": true,
+        "allDiagnosticsMatch": true,
+        "stdoutMatch": true,
+        "stderrMatch": true,
+        "exactMatch": true
+      }
+    }
+  ],
+  "releaseExecutionChecked": true,
+  "goFrontendInvoked": false,
+  "publicApiChanged": false,
+  "sdkAbiChanged": false,
+  "dbChanged": false,
+  "ciChanged": false,
+  "pushed": false,
+  "releaseCandidateSHA256": "9d6c517fb5d72bee26c05b4b1fc2d896e2d50f3280f14d901acc08346ddedf66",
+  "releaseRows": [
+    {
+      "id": "fail.type.capability-storage",
+      "go": {
+        "argv": [
+          "check",
+          "--locked"
+        ],
+        "exit": 3,
+        "timedOut": false,
+        "seconds": 0.10552840000309516,
+        "stdout": "",
+        "stderr": "main.fy:4:5: E3103: compiler-owned Region capability cannot be stored [bytes 34..40]\n  capability: main.fy:4:12 [bytes 41..48]\n",
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderrSHA256": "4655043bbc7c4577d276dc77d8c79d5c2c8a8e1a543b38017609178bae2c8ed4",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E3103",
+            "start": 34,
+            "end": 40
+          }
+        ]
+      },
+      "candidate": {
+        "argv": [
+          "check",
+          "--locked"
+        ],
+        "exit": 3,
+        "timedOut": false,
+        "seconds": 0.06210960000316845,
+        "stdout": "",
+        "stderr": "main.fy:4:5: E3103: compiler-owned Region capability cannot be stored [bytes 34..40]\n  capability: main.fy:4:12 [bytes 41..48]\n",
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderrSHA256": "4655043bbc7c4577d276dc77d8c79d5c2c8a8e1a543b38017609178bae2c8ed4",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E3103",
+            "start": 34,
+            "end": 40
+          }
+        ]
+      },
+      "comparison": {
+        "completed": true,
+        "acceptanceMatch": true,
+        "exitMatch": true,
+        "firstDiagnosticMatch": true,
+        "allDiagnosticsMatch": true,
+        "stdoutMatch": true,
+        "stderrMatch": true,
+        "exactMatch": true
+      }
+    },
+    {
+      "id": "fail.type.direct-construction",
+      "go": {
+        "argv": [
+          "check",
+          "--locked"
+        ],
+        "exit": 3,
+        "timedOut": false,
+        "seconds": 0.09802340000169352,
+        "stdout": "",
+        "stderr": "main.fy:4:26: E3104: compiler-owned Region capability cannot be constructed directly [bytes 58..67]\n",
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderrSHA256": "753aedbec1b47eea2432c4a9b0525301f60309932f3249bd5e28b74fab923c08",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E3104",
+            "start": 58,
+            "end": 67
+          }
+        ]
+      },
+      "candidate": {
+        "argv": [
+          "check",
+          "--locked"
+        ],
+        "exit": 3,
+        "timedOut": false,
+        "seconds": 0.05574909999995725,
+        "stdout": "",
+        "stderr": "main.fy:4:26: E3104: compiler-owned Region capability cannot be constructed directly [bytes 58..67]\n",
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderrSHA256": "753aedbec1b47eea2432c4a9b0525301f60309932f3249bd5e28b74fab923c08",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E3104",
+            "start": 58,
+            "end": 67
+          }
+        ]
+      },
+      "comparison": {
+        "completed": true,
+        "acceptanceMatch": true,
+        "exitMatch": true,
+        "firstDiagnosticMatch": true,
+        "allDiagnosticsMatch": true,
+        "stdoutMatch": true,
+        "stderrMatch": true,
+        "exactMatch": true
+      }
+    },
+    {
+      "id": "fail.type.question-non-result",
+      "go": {
+        "argv": [
+          "check",
+          "--locked"
+        ],
+        "exit": 3,
+        "timedOut": false,
+        "seconds": 0.08696320000308333,
+        "stdout": "",
+        "stderr": "main.fy:4:17: E4102: postfix ? requires a Result value [bytes 58..59]\n  result-expression: main.fy:4:12 [bytes 53..58]\n",
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderrSHA256": "5aa393cec0f86ddd09a0aaaf0ff5762e33becea5327739916a567e35f154b0cc",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E4102",
+            "start": 58,
+            "end": 59
+          }
+        ]
+      },
+      "candidate": {
+        "argv": [
+          "check",
+          "--locked"
+        ],
+        "exit": 3,
+        "timedOut": false,
+        "seconds": 0.06121020000136923,
+        "stdout": "",
+        "stderr": "main.fy:4:17: E4102: postfix ? requires a Result value [bytes 58..59]\n  result-expression: main.fy:4:12 [bytes 53..58]\n",
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderrSHA256": "5aa393cec0f86ddd09a0aaaf0ff5762e33becea5327739916a567e35f154b0cc",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E4102",
+            "start": 58,
+            "end": 59
+          }
+        ]
+      },
+      "comparison": {
+        "completed": true,
+        "acceptanceMatch": true,
+        "exitMatch": true,
+        "firstDiagnosticMatch": true,
+        "allDiagnosticsMatch": true,
+        "stdoutMatch": true,
+        "stderrMatch": true,
+        "exactMatch": true
+      }
+    },
+    {
+      "id": "fail.type.incompatible-error",
+      "go": {
+        "argv": [
+          "check",
+          "--locked"
+        ],
+        "exit": 3,
+        "timedOut": false,
+        "seconds": 0.0977874999953201,
+        "stdout": "",
+        "stderr": "main.fy:12:26: E4103: propagated Result error type does not match the enclosing return type [bytes 212..213]\n  actual-error: main.fy:11:49 [bytes 130..141]\n  expected-error: main.fy:11:16 [bytes 97..108]\n",
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderrSHA256": "45dcbe93b9c47779d8125ad502fd6c752fa063306f19c55ac1fcfbe4abb8bc6e",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E4103",
+            "start": 212,
+            "end": 213
+          }
+        ]
+      },
+      "candidate": {
+        "argv": [
+          "check",
+          "--locked"
+        ],
+        "exit": 3,
+        "timedOut": false,
+        "seconds": 0.05392610000126297,
+        "stdout": "",
+        "stderr": "main.fy:12:26: E4103: propagated Result error type does not match the enclosing return type [bytes 212..213]\n  actual-error: main.fy:11:49 [bytes 130..141]\n  expected-error: main.fy:11:16 [bytes 97..108]\n",
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderrSHA256": "45dcbe93b9c47779d8125ad502fd6c752fa063306f19c55ac1fcfbe4abb8bc6e",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E4103",
+            "start": 212,
+            "end": 213
+          }
+        ]
+      },
+      "comparison": {
+        "completed": true,
+        "acceptanceMatch": true,
+        "exitMatch": true,
+        "firstDiagnosticMatch": true,
+        "allDiagnosticsMatch": true,
+        "stdoutMatch": true,
+        "stderrMatch": true,
+        "exactMatch": true
+      }
+    },
+    {
+      "id": "pass.flow.propagate-result",
+      "go": {
+        "argv": [
+          "check",
+          "--locked"
+        ],
+        "exit": 0,
+        "timedOut": false,
+        "seconds": 0.09156670000083977,
+        "stdout": "check ok: 1 instance(s), 1 source file(s), 1 MIR function(s), lock verified\n",
+        "stderr": "",
+        "stdoutSHA256": "97769a156229639cb536363b323234c3af77edd1043695ea8f67e84f2729bb3b",
+        "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "diagnostics": []
+      },
+      "candidate": {
+        "argv": [
+          "check",
+          "--locked"
+        ],
+        "exit": 0,
+        "timedOut": false,
+        "seconds": 0.08956609999586362,
+        "stdout": "check ok: 1 instance(s), 1 source file(s), 1 MIR function(s), lock verified\n",
+        "stderr": "",
+        "stdoutSHA256": "97769a156229639cb536363b323234c3af77edd1043695ea8f67e84f2729bb3b",
+        "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "diagnostics": []
+      },
+      "comparison": {
+        "completed": true,
+        "acceptanceMatch": true,
+        "exitMatch": true,
+        "firstDiagnosticMatch": true,
+        "allDiagnosticsMatch": true,
+        "stdoutMatch": true,
+        "stderrMatch": true,
+        "exactMatch": true
+      }
+    }
+  ],
+  "buildReceipt": {
+    "path": ".cache/candidate-parity-fixes-20261016/diagnostics-cli/receipt.json",
+    "sha256": "8fbb0b3b24375e21802241ceb51750f33073ed1668b9978559a4dccfa41919a3"
+  }
+}

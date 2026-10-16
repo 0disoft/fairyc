@@ -25,6 +25,10 @@ pub fn ref u8[] summary(u32 code){
     if(code==1014){return b"call argument label does not match its position or target";}
     if(code==4201){return b"invalid must_use declaration";}
     if(code==4101){return b"Result value must be returned, propagated, matched, or explicitly discarded";}
+    if(code==4102){return b"postfix ? requires a Result value";}
+    if(code==4103){return b"propagated Result error type does not match the enclosing return type";}
+    if(code==3103){return b"compiler-owned Region capability cannot be stored";}
+    if(code==3104){return b"compiler-owned Region capability cannot be constructed directly";}
     if(code==4202){return b"must_use call result is ignored without discard";}
     if(code==4301){return b"invalid compile-time declaration";}
     if(code==4302){return b"expression is outside the supported compile-time subset";}
