@@ -1,0 +1,126 @@
+{
+  "schema": "fairyc.candidate-typed-native-iteration/v1",
+  "passed": true,
+  "sourceInputs": [
+    {
+      "path": "examples/lexer_candidate/src/module_unit_cfg_iteration.fy",
+      "sha256": "31d37ffd874ecd7ba7db85b65dc620d124d9f5931489afc8cdbd37d9f6f00ad0"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_unit_c_iteration.fy",
+      "sha256": "ec11ceed43637e52b2aba3f29d881af2108afe24f43e30bc88d134ce19378490"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_unit_c_function.fy",
+      "sha256": "68d64cb2e1b85277019d73b1f3aee8c5262fe1f1c9fd5a53ec0ca35d7de1df6a"
+    }
+  ],
+  "compilerBuildReceipt": {
+    "path": ".cache/candidate-parity-fixes-20261016/notes-public-iteration-cli-v3/receipt.json",
+    "sha256": "9835434cf0b835c9e435453ef0204bdf0e67ccb0df9e297e8f89d7dd7f9785a1"
+  },
+  "releaseComparisonReceipt": {
+    "path": ".cache/candidate-parity-fixes-20261016/iteration-examples-release/receipt.json",
+    "sha256": "fad99dff3cc71b828984ba19d1f980cb5d83dd4c623b5e9e2bb92bb44676cd78"
+  },
+  "releaseSummary": {
+    "completed": 6,
+    "acceptanceMatch": 6,
+    "exitMatch": 6,
+    "firstDiagnosticMatch": 6,
+    "allDiagnosticsMatch": 6,
+    "stdoutMatch": 5,
+    "stderrMatch": 6,
+    "exactMatch": 5
+  },
+  "developmentNativeRows": [
+    {
+      "id": "copied_mutable_struct_quickstart/run",
+      "go": {
+        "argv": [
+          "run",
+          "--locked"
+        ],
+        "exit": 0,
+        "timedOut": false,
+        "seconds": 40.934886199989705,
+        "stdout": "before=-5 after=0\nbefore=4000000000 after=10\nbefore=7 after=7\n",
+        "stderr": "",
+        "stdoutSHA256": "c75e7793629b761f47238ac2844e0e30513af8e8075a4efae2d35552006ab0bd",
+        "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "diagnostics": []
+      },
+      "candidate": {
+        "argv": [
+          "run",
+          "--locked"
+        ],
+        "exit": 0,
+        "timedOut": false,
+        "seconds": 163.40109909999592,
+        "stdout": "before=-5 after=0\nbefore=4000000000 after=10\nbefore=7 after=7\n",
+        "stderr": "",
+        "stdoutSHA256": "c75e7793629b761f47238ac2844e0e30513af8e8075a4efae2d35552006ab0bd",
+        "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "diagnostics": []
+      },
+      "comparison": {
+        "completed": true,
+        "acceptanceMatch": true,
+        "exitMatch": true,
+        "firstDiagnosticMatch": true,
+        "allDiagnosticsMatch": true,
+        "stdoutMatch": true,
+        "stderrMatch": true,
+        "exactMatch": true
+      }
+    },
+    {
+      "id": "struct_vec_view/run",
+      "go": {
+        "argv": [
+          "run",
+          "--locked"
+        ],
+        "exit": 0,
+        "timedOut": false,
+        "seconds": 46.95642470000894,
+        "stdout": "tokens\t10\nidentifiers\t3\nnumbers\t2\nsum\t4000000007\nfirst_tokens\t6\nfirst_identifiers\t2\nfirst_numbers\t1\n",
+        "stderr": "",
+        "stdoutSHA256": "24d53afb184453c7713b18b3cb2eb9508af6d1be1920f2795adcfa6516ba88fb",
+        "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "diagnostics": []
+      },
+      "candidate": {
+        "argv": [
+          "run",
+          "--locked"
+        ],
+        "exit": 0,
+        "timedOut": false,
+        "seconds": 186.73578040000575,
+        "stdout": "tokens\t10\nidentifiers\t3\nnumbers\t2\nsum\t4000000007\nfirst_tokens\t6\nfirst_identifiers\t2\nfirst_numbers\t1\n",
+        "stderr": "",
+        "stdoutSHA256": "24d53afb184453c7713b18b3cb2eb9508af6d1be1920f2795adcfa6516ba88fb",
+        "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "diagnostics": []
+      },
+      "comparison": {
+        "completed": true,
+        "acceptanceMatch": true,
+        "exitMatch": true,
+        "firstDiagnosticMatch": true,
+        "allDiagnosticsMatch": true,
+        "stdoutMatch": true,
+        "stderrMatch": true,
+        "exactMatch": true
+      }
+    }
+  ],
+  "remainingDifference": "copied_mutable_struct_quickstart check reports one additional MIR function; native output and status are exact in both profiles",
+  "fullProductParity": false,
+  "publicApiChanged": false,
+  "sdkAbiChanged": false,
+  "dbChanged": false,
+  "ciChanged": false
+}
