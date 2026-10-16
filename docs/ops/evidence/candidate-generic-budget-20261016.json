@@ -46,5 +46,26 @@
   "wholeSourceFiles": 523,
   "authoredSources": 515,
   "nativeBuildPending": true,
-  "pushed": false
+  "pushed": false,
+  "broaderCompilerSuite": {
+    "passed": false,
+    "reason": "default 10m package timeout during repeated Windows native builds",
+    "seconds": 600.231
+  },
+  "genericSourcePackage": {
+    "passed": true,
+    "seconds": 0.119
+  },
+  "focusedCompilerRegressions": {
+    "passed": true,
+    "cases": 4,
+    "seconds": 1.564
+  },
+  "goOriginalEntrySourceCheck": {
+    "exit": 0,
+    "stdout": "check ok: 2 instance(s), 523 source file(s), 6561 MIR function(s), lock updated\n",
+    "stderr": "",
+    "seconds": 34.78200300000026
+  },
+  "originalAuthoredSourceCount": 515
 }

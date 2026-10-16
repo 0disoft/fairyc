@@ -2,6 +2,7 @@ module module_unit_c_literals;
 import module_unit_body_ir_model as ir;
 import module_unit_cleanup_mir_model as clean;
 import module_unit_value_model as budget;
+import candidate_limits as limits;
 import module_types as types;
 import c_text as w;
 import sha256 as sha;
@@ -35,21 +36,28 @@ fn bool symbol(u32[8] hash,ref mut bytes::Buffer out,ref mut w::State s){
 }
 // Numeric static storage has no dependence on C string spelling or host encoding.
 // Full SHA-256 symbol order and exact-byte collision checks match ADRs 0065-0067.
+// Project collection is bounded per body, then sorting and storage separately.
+// Retain every pass in the project ledger; a standalone unit keeps one cap.
+fn bool checkpoint(bool shared,ref mut usize work,ref mut usize total,ref mut w::State s){
+    if(!shared){return true;}if(!budget::charge(work,0) || !limits::project_charge(total,*work)){s.code=1002;return false;};*work=0;return true;
+}
 fn bool emit_pool(ref ir::Program p,ref mut bytes::Buffer out,ref mut w::State s,ref mut usize work,ref mut bytes::Buffer storage,bool shared){
+    var usize total=0;
     var v::Vec<Literal> pool=v::empty<Literal>();var v::Vec<usize> slots=v::empty<usize>();var usize frame=1;
     while(frame<=ir::count(p)){let b=ir::at(p,frame);var usize node=0;while(node<ir::node_count(b)){
         if(!budget::charge(work,1)){s.code=1002;return false;}let n=ir::node_at(b,node);
         if(n.value.kind==1 && n.value.state==1 && descriptor(clean::type_at(ir::cleanup_ir(p),n.value.type))){
             let data=ir::node_cooked(b,node);if(!budget::charge(work,data.len+1)){s.code=1002;return false;}let entry=Literal{.hash=sha::digest(data),.frame,.node};if(!insert(p,entry,ref mut pool,ref mut slots,s,work)){return false;}
         }node+=1;
-    }frame+=1;}
-    var v::Vec<usize> order=v::empty<usize>();if(!sorted(ref pool,ref mut order,s,work)){return false;}var usize i=0;while(i<v::len<Literal>(ref pool)){let entry=*v::at<Literal>(ref pool,*v::at<usize>(ref order,i));let data=ir::node_cooked(ir::at(p,entry.frame),entry.node);
+    }if(!checkpoint(shared,work,ref mut total,s)){return false;}frame+=1;}
+    if(!checkpoint(shared,work,ref mut total,s)){return false;}
+    var v::Vec<usize> order=v::empty<usize>();if(!sorted(ref pool,ref mut order,s,work) || !checkpoint(shared,work,ref mut total,s)){return false;}var usize i=0;while(i<v::len<Literal>(ref pool)){let entry=*v::at<Literal>(ref pool,*v::at<usize>(ref order,i));let data=ir::node_cooked(ir::at(p,entry.frame),entry.node);
         if(shared){if(!w::text(out,s,b"extern const uint8_t ") || !symbol(entry.hash,out,s) || !w::text(out,s,b"[];\n")){return false;}}
         let target=if(shared){storage}else{out};
         if(!w::text(target,s,if(shared){b"const uint8_t "}else{b"static const uint8_t "}) || !symbol(entry.hash,target,s) || !w::text(target,s,b"[]={")){return false;}
         var usize j=0;while(j<data.len){if(!budget::charge(work,1)){s.code=1002;return false;}if(j!=0 && !w::text(target,s,b",")){return false;}if(!w::number(target,s,data[j] as usize)){return false;}j+=1;}
         if(data.len==0 && !w::text(target,s,b"0")){return false;}if(!w::text(target,s,b"};\n")){return false;}i+=1;
-    }return true;
+    }if(!checkpoint(shared,work,ref mut total,s)){return false;}if(shared){*work=total;}return true;
 }
 pub fn bool definitions(ref ir::Program p,ref mut bytes::Buffer out,ref mut w::State s,ref mut usize work){var bytes::Buffer unused=bytes::empty();return emit_pool(p,out,s,work,ref mut unused,false);}
 // One program-wide pool keeps pointer identity across C translation units.

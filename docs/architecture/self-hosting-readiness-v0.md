@@ -4552,7 +4552,25 @@ passes in 0.107s including the named 512-boundary test in
 523-source workspace check against the rebuilt Go 512 reference passes 6559 MIR
 functions in 38.58s; the boundary checks and source digests are recorded in
 [candidate-generic-budget-20261016.json](../ops/evidence/candidate-generic-budget-20261016.json).
-The broader internal/compiler plus generic-source command and the full native CLI
-C build are still running, so full native C verification stays pending, and
-nothing here promotes language syntax, SDK ABI, unbounded expansion or backend
-capacity.
+The generic-source package and four focused compiler regressions also passed.
+The broader internal/compiler run hit its default ten-minute timeout while
+repeating native C builds; it is not a passing result. The full native CLI C build
+remains pending. This change does not promote language syntax, SDK ABI, unbounded
+expansion or backend capacity.
+
+## Literal-storage checkpoints (2026-10-16)
+
+A full-target diagnostic seed emission of the 512-source public CLI closure returned
+code 1002 at bytes 11..1048576 after 395.965s, and the instrumented stage field
+reading 11 localizes it to `module_unit_c_literals::shared_storage`, not the
+aggregate project ledger of 16,777,216 work units.
+[module_unit_c_literals.fy](../../examples/lexer_candidate/src/module_unit_c_literals.fy)
+now takes one collection checkpoint per body plus separate sorting and storage
+checkpoints, so each pass retains its own 1,048,576-work-unit bound while every returned count is
+charged to the unchanged project ledger of 16,777,216 work units; the standalone unit
+shared-storage cap and the 2 MiB C output buffers are unchanged. The Go reference
+check of the real original 515 sources plus 8 SDK sources passes 6562 MIR functions.
+The corrected native bridge builds successfully, and two literal controls retain
+byte-identical generated C and successful native execution
+([evidence](../ops/evidence/candidate-project-literal-budget-20261016.json)).
+The final full native CLI run remains pending.
