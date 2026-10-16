@@ -1,0 +1,135 @@
+{
+  "schema": "fairyc.candidate-final-frontend-verification/v1",
+  "scopedComparisonsPassed": true,
+  "completeGoCliReplacement": false,
+  "sourceRevision": "0b612610aa6ade0e2b42a7a4fd863ad0364314ec",
+  "sourceIntegrity": {
+    "receipt": ".cache/candidate-final-verification-20261017/integrity.json",
+    "sha256": "9fb72bed57e752566166943a139275817e40221a05355946a5c13e014544b89c",
+    "candidateSources": 512,
+    "trackedInputsVerifiedUnchanged": 3009
+  },
+  "authenticatedPriorComparison": {
+    "path": "docs/ops/evidence/candidate-cli-parity-20261017.json",
+    "sha256": "806209f6619a88f8d344b8a2c2e570548722f3e1afa47921485bbf27505a2f1b",
+    "cases": 440,
+    "exactMatches": 440
+  },
+  "checks": [
+    {
+      "suite": "check",
+      "profile": "development",
+      "cases": 169,
+      "exactMatches": 169,
+      "receipt": ".cache/candidate-final-verification-20261017/check-development/receipt.json",
+      "sha256": "b251616a372c63480a7fc5825bf267697b0bd79b505fcfa18ffaded523ad51cc",
+      "skipped": [
+        {
+          "family": "region",
+          "id": "fail.flow.local-region-escape",
+          "reason": "direct fixture packageGraph requires a separate workspace adapter"
+        }
+      ],
+      "fixtureAdmissionOnly": [
+        {
+          "id": "pass.flow.param-local-use",
+          "reason": "fairyc: package workspace failure: workspace .:std::alloc invalid-standard-library: module namespace is reserved by the SDK\n"
+        },
+        {
+          "id": "pass.flow.param-return",
+          "reason": "fairyc: package workspace failure: workspace .:std::alloc invalid-standard-library: module namespace is reserved by the SDK\n"
+        },
+        {
+          "id": "fail.flow.resource-placement",
+          "reason": "fairyc: package workspace failure: workspace .:std::alloc invalid-standard-library: module namespace is reserved by the SDK\n"
+        }
+      ]
+    },
+    {
+      "suite": "check",
+      "profile": "release",
+      "cases": 169,
+      "exactMatches": 169,
+      "receipt": ".cache/candidate-final-verification-20261017/check-release/receipt.json",
+      "sha256": "7a588c1d9de52c2fad8e91c73ae01745c19b0abbac35bcfd80b6e419b9a9ea36",
+      "skipped": [
+        {
+          "family": "region",
+          "id": "fail.flow.local-region-escape",
+          "reason": "direct fixture packageGraph requires a separate workspace adapter"
+        }
+      ],
+      "fixtureAdmissionOnly": [
+        {
+          "id": "pass.flow.param-local-use",
+          "reason": "fairyc: package workspace failure: workspace .:std::alloc invalid-standard-library: module namespace is reserved by the SDK\n"
+        },
+        {
+          "id": "pass.flow.param-return",
+          "reason": "fairyc: package workspace failure: workspace .:std::alloc invalid-standard-library: module namespace is reserved by the SDK\n"
+        },
+        {
+          "id": "fail.flow.resource-placement",
+          "reason": "fairyc: package workspace failure: workspace .:std::alloc invalid-standard-library: module namespace is reserved by the SDK\n"
+        }
+      ]
+    },
+    {
+      "suite": "run",
+      "profile": "development",
+      "cases": 50,
+      "exactMatches": 50,
+      "receipt": ".cache/candidate-final-verification-20261017/run-development/receipt.json",
+      "sha256": "d07497835cfcbd7defeadf9cc2fe6ecbca255961a5a08f7650a9c36d7ec5083f",
+      "skipped": [
+        {
+          "family": "c-emission",
+          "id": "pass.c-emission.fixed-array-bounds",
+          "reason": "no passing main::main native entry"
+        },
+        {
+          "family": "c-emission",
+          "id": "pass.c-emission.mutable-fixed-array-byte-view-bounds",
+          "reason": "no passing main::main native entry"
+        }
+      ],
+      "fixtureAdmissionOnly": []
+    },
+    {
+      "suite": "run",
+      "profile": "release",
+      "cases": 50,
+      "exactMatches": 50,
+      "receipt": ".cache/candidate-final-verification-20261017/run-release/receipt.json",
+      "sha256": "c401997c861600ac3e3f83d6b11e13ab1a5039e2d8ddf43addc0e1c67537fc37",
+      "skipped": [
+        {
+          "family": "c-emission",
+          "id": "pass.c-emission.fixed-array-bounds",
+          "reason": "no passing main::main native entry"
+        },
+        {
+          "family": "c-emission",
+          "id": "pass.c-emission.mutable-fixed-array-byte-view-bounds",
+          "reason": "no passing main::main native entry"
+        }
+      ],
+      "fixtureAdmissionOnly": []
+    }
+  ],
+  "freshComparisons": 438,
+  "freshExactMatches": 438,
+  "limitations": [
+    "Three Region fixtures per profile compare SDK namespace admission only; they do not exercise their direct-fixture flow expectations.",
+    "One packageGraph fixture per profile needs a workspace adapter; two native fixtures per profile have no passing main::main entry.",
+    "Windows source-authenticated builds are reused; Linux and current Stage1/Stage2 fixed-point equality are not verified.",
+    "Development native integration hit a 120-second verification timeout and remains under separate investigation."
+  ],
+  "normativeContractsChanged": false,
+  "publicApiChanged": false,
+  "sdkAbiChanged": false,
+  "databaseChanged": false,
+  "ciRunnerChanged": false,
+  "repositoryHygieneChanged": false,
+  "pushed": false
+}
