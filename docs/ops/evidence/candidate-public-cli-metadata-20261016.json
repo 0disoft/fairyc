@@ -1,0 +1,69 @@
+{
+  "passed": true,
+  "sourceInputs": [
+    {
+      "path": ".cache/candidate-parity-fixes-20261016/metadata-probe/main.fy",
+      "sha256": "66c5605f3125673dc2cde8f123c421a54b8b7a34245f3003eb832f2e76dd3d2f"
+    },
+    {
+      "path": "examples/lexer_candidate/src/public_cli_data.fy",
+      "sha256": "19896b13da9fbbfb0f5c889a31bb74b988fe6c14f91650c9b634cff4010dd6dc"
+    },
+    {
+      "path": "internal/sdkstdlib/sources/std/bytes.fy",
+      "sha256": "4740a506e93349fb002c383967dcc44d182d20f09f2094b83b5464a4ab252982"
+    },
+    {
+      "path": "internal/sdkstdlib/sources/std/io.fy",
+      "sha256": "4b89c3aeb8b4de4887395d29723095d364c5660c6b773c5696fb1f65f5365f48"
+    },
+    {
+      "path": "internal/sdkstdlib/sources/std/process.fy",
+      "sha256": "9680a1481df4f761f481d5a039af7bdbefeb312d1091961194f8e7bc0681ae24"
+    },
+    {
+      "path": "cmd/fairyc-candidate-cli-embed/main.go",
+      "sha256": "334e618009b46c04a04cafa0d3212d967e2013a1e4d5c3e4ddd053fc73414922"
+    }
+  ],
+  "imageSHA256": "24f96c6090b8abf313323439f00d4601d14691177b57503beb915a4c0a49c8f7",
+  "rows": [
+    {
+      "argv": [
+        "--help"
+      ],
+      "exit": 0,
+      "stdoutBytes": 7173,
+      "stdoutSHA256": "2ba34760dd719f3d5d47ffdc23552decd0508ad4916fabb296877032ff6fd572",
+      "stderrBytes": 0
+    },
+    {
+      "argv": [
+        "targets"
+      ],
+      "exit": 0,
+      "stdoutBytes": 688,
+      "stdoutSHA256": "54b4164a04681722918475292e2409384b4f4d775bf81b49e09fcb9e6414472c",
+      "stderrBytes": 0
+    },
+    {
+      "argv": [
+        "explain",
+        "E4101"
+      ],
+      "exit": 0,
+      "stdoutBytes": 187,
+      "stdoutSHA256": "82c3423abc1aa17c20650908842c769c74140e7c56c5e43460627cb569423e47",
+      "stderrBytes": 0
+    }
+  ],
+  "version": "Fairy C Stage 0\ncompiler: development\nsdk: fairyc-sdk-stdlib/0 0.0.0-stage0.86\nlanguage: fairyc-language/20\nruntime: fairyc-runtime/0\nrevision: unknown\nmodified: unknown\n",
+  "scope": "standalone metadata module; full dispatcher wiring pending",
+  "schema": "fairyc.candidate-public-cli-metadata/v1",
+  "publicApiChanged": false,
+  "sdkAbiChanged": false,
+  "dbChanged": false,
+  "ciChanged": false,
+  "runnerChanged": true,
+  "pushed": false
+}
