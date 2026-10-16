@@ -11,7 +11,7 @@
   },
   "authenticatedPriorComparison": {
     "path": "docs/ops/evidence/candidate-cli-parity-20261017.json",
-    "sha256": "806209f6619a88f8d344b8a2c2e570548722f3e1afa47921485bbf27505a2f1b",
+    "sha256": "fd2ef62c607eb2d0b50bee1d3739a6e09b1510f13e374c4612c959185e85b8cc",
     "cases": 440,
     "exactMatches": 440
   },

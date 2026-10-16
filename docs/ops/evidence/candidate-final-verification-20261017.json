@@ -1,0 +1,485 @@
+{
+  "schema": "fairyc.candidate-final-verification/v1",
+  "checkedAtUTC": "2026-10-16T20:30:30.820341+00:00",
+  "scopedChecksPassed": true,
+  "strictParityPassed": false,
+  "completedWithoutTimeouts": false,
+  "completeGoCliReplacement": false,
+  "completeDevelopmentNativeSuite": false,
+  "developmentNativeCasesNotRun": [
+    "workspace-locations",
+    "package",
+    "resource-sdk",
+    "args",
+    "binary-output",
+    "unrequested-output",
+    "stdin-binary",
+    "stdin-replay-each",
+    "stdin-missing",
+    "stdin-parent",
+    "stdin-oversize",
+    "deadline",
+    "deadline-nonhanging"
+  ],
+  "sourceRevision": "0b612610aa6ade0e2b42a7a4fd863ad0364314ec",
+  "buildSourceRevision": "abb465b0",
+  "sourceIntegrity": {
+    "receipt": ".cache/candidate-final-verification-20261017/integrity.json",
+    "sha256": "9fb72bed57e752566166943a139275817e40221a05355946a5c13e014544b89c",
+    "candidateSources": 512,
+    "trackedInputsVerifiedUnchanged": 3009,
+    "images": [
+      {
+        "profile": "development",
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\cli-parity-rest-20261017\\final-candidate-split-verified\\development\\fairyc.exe",
+        "sha256": "f1f4e06bf567b2ad5175eaaaa60b9f287434ea51b6709b25ae8cc3980b2f210d",
+        "driverSHA256": "68917e76329f3952d352c6cf37ebbe0c19fcd84fb6f68b72dcf8d32e272ff512"
+      },
+      {
+        "profile": "release",
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\cli-parity-rest-20261017\\final-candidate-split-verified\\release\\fairyc.exe",
+        "sha256": "ce72b40800a0849b3fc6040d2d411168e819dbaa440e0258ea2b26471a9e34b6",
+        "driverSHA256": "68917e76329f3952d352c6cf37ebbe0c19fcd84fb6f68b72dcf8d32e272ff512"
+      }
+    ],
+    "goFrontendInvoked": false,
+    "sourceVersionMetadata": "Fairy C Stage 0\ncompiler: v0.0.0-20261016195004-abb465b04103+dirty\nsdk: fairyc-sdk-stdlib/0 0.0.0-stage0.86\nlanguage: fairyc-language/20\nruntime: fairyc-runtime/0\nrevision: abb465b04103ebf004f0ec690e74f0b4b4014944\nmodified: true\n"
+  },
+  "reusedVerification": {
+    "path": "docs/ops/evidence/candidate-cli-parity-20261017.json",
+    "sha256": "fd2ef62c607eb2d0b50bee1d3739a6e09b1510f13e374c4612c959185e85b8cc",
+    "cases": 440,
+    "exactMatches": 440,
+    "reason": "Source, image, driver, packet, receipt and detailed comparison hashes authenticated before reuse."
+  },
+  "freshChecks": [
+    {
+      "suite": "check",
+      "profile": "development",
+      "cases": 169,
+      "exactMatches": 169,
+      "diagnosticDifferences": [],
+      "receipt": ".cache/candidate-final-verification-20261017/check-development/receipt.json",
+      "sha256": "b251616a372c63480a7fc5825bf267697b0bd79b505fcfa18ffaded523ad51cc",
+      "completed": true,
+      "fixtureAdmissionOnly": [
+        {
+          "id": "pass.flow.param-local-use",
+          "goExit": 7,
+          "reason": "fairyc: package workspace failure: workspace .:std::alloc invalid-standard-library: module namespace is reserved by the SDK\n"
+        },
+        {
+          "id": "pass.flow.param-return",
+          "goExit": 7,
+          "reason": "fairyc: package workspace failure: workspace .:std::alloc invalid-standard-library: module namespace is reserved by the SDK\n"
+        },
+        {
+          "id": "fail.flow.resource-placement",
+          "goExit": 7,
+          "reason": "fairyc: package workspace failure: workspace .:std::alloc invalid-standard-library: module namespace is reserved by the SDK\n"
+        }
+      ],
+      "skipped": [
+        {
+          "family": "region",
+          "id": "fail.flow.local-region-escape",
+          "reason": "direct fixture packageGraph requires a separate workspace adapter"
+        }
+      ],
+      "nativeContractFailures": []
+    },
+    {
+      "suite": "check",
+      "profile": "release",
+      "cases": 169,
+      "exactMatches": 169,
+      "diagnosticDifferences": [],
+      "receipt": ".cache/candidate-final-verification-20261017/check-release/receipt.json",
+      "sha256": "7a588c1d9de52c2fad8e91c73ae01745c19b0abbac35bcfd80b6e419b9a9ea36",
+      "completed": true,
+      "fixtureAdmissionOnly": [
+        {
+          "id": "pass.flow.param-local-use",
+          "goExit": 7,
+          "reason": "fairyc: package workspace failure: workspace .:std::alloc invalid-standard-library: module namespace is reserved by the SDK\n"
+        },
+        {
+          "id": "pass.flow.param-return",
+          "goExit": 7,
+          "reason": "fairyc: package workspace failure: workspace .:std::alloc invalid-standard-library: module namespace is reserved by the SDK\n"
+        },
+        {
+          "id": "fail.flow.resource-placement",
+          "goExit": 7,
+          "reason": "fairyc: package workspace failure: workspace .:std::alloc invalid-standard-library: module namespace is reserved by the SDK\n"
+        }
+      ],
+      "skipped": [
+        {
+          "family": "region",
+          "id": "fail.flow.local-region-escape",
+          "reason": "direct fixture packageGraph requires a separate workspace adapter"
+        }
+      ],
+      "nativeContractFailures": []
+    },
+    {
+      "suite": "run",
+      "profile": "development",
+      "cases": 50,
+      "exactMatches": 50,
+      "diagnosticDifferences": [],
+      "receipt": ".cache/candidate-final-verification-20261017/run-development/receipt.json",
+      "sha256": "d07497835cfcbd7defeadf9cc2fe6ecbca255961a5a08f7650a9c36d7ec5083f",
+      "completed": true,
+      "fixtureAdmissionOnly": [],
+      "skipped": [
+        {
+          "family": "c-emission",
+          "id": "pass.c-emission.fixed-array-bounds",
+          "reason": "no passing main::main native entry"
+        },
+        {
+          "family": "c-emission",
+          "id": "pass.c-emission.mutable-fixed-array-byte-view-bounds",
+          "reason": "no passing main::main native entry"
+        }
+      ],
+      "nativeContractFailures": []
+    },
+    {
+      "suite": "run",
+      "profile": "release",
+      "cases": 50,
+      "exactMatches": 50,
+      "diagnosticDifferences": [],
+      "receipt": ".cache/candidate-final-verification-20261017/run-release/receipt.json",
+      "sha256": "c401997c861600ac3e3f83d6b11e13ab1a5039e2d8ddf43addc0e1c67537fc37",
+      "completed": true,
+      "fixtureAdmissionOnly": [],
+      "skipped": [
+        {
+          "family": "c-emission",
+          "id": "pass.c-emission.fixed-array-bounds",
+          "reason": "no passing main::main native entry"
+        },
+        {
+          "family": "c-emission",
+          "id": "pass.c-emission.mutable-fixed-array-byte-view-bounds",
+          "reason": "no passing main::main native entry"
+        }
+      ],
+      "nativeContractFailures": []
+    },
+    {
+      "suite": "examples",
+      "profile": "development",
+      "cases": 9,
+      "exactMatches": 9,
+      "diagnosticDifferences": [],
+      "receipt": ".cache/candidate-final-verification-20261017/examples-development/observations.json",
+      "sha256": "d34f0ac753248ccefbe9862ae227cb7c862b3e862423f0c2dd713e1c31ad406d",
+      "completed": false,
+      "fixtureAdmissionOnly": [],
+      "skipped": [],
+      "nativeContractFailures": []
+    },
+    {
+      "suite": "examples",
+      "profile": "release",
+      "cases": 78,
+      "exactMatches": 78,
+      "diagnosticDifferences": [],
+      "receipt": ".cache/candidate-final-verification-20261017/examples-release/receipt.json",
+      "sha256": "2e0fa46fdecde7db0721da0bd7376009433504010b24e0c67355eb73e400789c",
+      "completed": true,
+      "fixtureAdmissionOnly": [],
+      "skipped": [
+        {
+          "id": "lexer_candidate",
+          "reason": "compiler self-source is a separate bootstrap/fixed-point gate"
+        }
+      ],
+      "nativeContractFailures": []
+    },
+    {
+      "suite": "native",
+      "profile": "development",
+      "cases": 15,
+      "exactMatches": 15,
+      "diagnosticDifferences": [],
+      "receipt": ".cache/candidate-final-verification-20261017/native-development/observations.json",
+      "sha256": "d6d035becb76bbbc210a30e89438c43bf286d97b21efa78fe9f873d77e2cf64d",
+      "completed": false,
+      "fixtureAdmissionOnly": [],
+      "skipped": [],
+      "nativeContractFailures": []
+    },
+    {
+      "suite": "native",
+      "profile": "release",
+      "cases": 29,
+      "exactMatches": 28,
+      "diagnosticDifferences": [
+        {
+          "id": "deadline",
+          "exactMatch": false,
+          "programContractMatch": null,
+          "goExit": 6,
+          "candidateExit": 6,
+          "goStderr": "fairyc: build failed: execute native test tests::timeout::hangs: MSVC target executable exceeded 1s\n",
+          "candidateStderr": "fairyc: build failed: native test execution timed out\n"
+        }
+      ],
+      "receipt": ".cache/candidate-final-verification-20261017/native-release/receipt.json",
+      "sha256": "5c6242bf4bded2a46194d9549fc6b45dec36ad4f41ab91d5284943c5cdc148fc",
+      "completed": true,
+      "fixtureAdmissionOnly": [],
+      "skipped": [],
+      "nativeContractFailures": []
+    },
+    {
+      "suite": "native-trap-retry",
+      "profile": "development",
+      "cases": 1,
+      "exactMatches": 1,
+      "receipt": ".cache/candidate-final-verification-20261017/native-development-trap-retry/receipt.json",
+      "sha256": "26d85ba1fe4e9f7d88c2fce79f1b97631c2783009895d555061b0ac083111592",
+      "completed": true,
+      "invocationTimeoutSeconds": 900,
+      "candidateSeconds": 456.40719420000096,
+      "skipped": []
+    }
+  ],
+  "freshComparisons": 570,
+  "freshExactMatches": 569,
+  "totalComparisons": 1010,
+  "totalExactMatches": 1009,
+  "remainingIssues": [
+    {
+      "id": "native-deadline-diagnostic",
+      "profile": "release",
+      "behavior": "Both engines exit 6 without a partial report; stderr wording differs.",
+      "go": "fairyc: build failed: execute native test tests::timeout::hangs: MSVC target executable exceeded 1s",
+      "candidate": "fairyc: build failed: native test execution timed out"
+    },
+    {
+      "id": "development-native-trap-duration",
+      "profile": "development",
+      "behavior": "The six-test trap group exceeded the initial 120-second whole-CLI verification deadline."
+    }
+  ],
+  "earlierFrontendCheckpoint": {
+    "path": "docs/ops/evidence/candidate-final-frontend-verification-20261017.json",
+    "sha256": "8d2a462a6e0e5019edf6f34b4af711a6003f0512bbd1c0b4df0e691e0f7d1a7b",
+    "initialCommit": "aaed407c"
+  },
+  "initialTimeout": {
+    "suite": "native",
+    "profile": "development",
+    "id": "trap-categories",
+    "invocationTimeoutSeconds": 120,
+    "expectedExit": 5,
+    "observedExit": null,
+    "log": ".cache/candidate-final-verification-20261017/native-development.log",
+    "logSHA256": "44567285a71c2c62ad078639f580c4aec40d519a592898cbc6d188858735ba49",
+    "retryReceipt": ".cache/candidate-final-verification-20261017/native-development-trap-retry/receipt.json",
+    "retryInvocationTimeoutSeconds": 900,
+    "productTimeoutChanged": false,
+    "functionalComparisonRecovered": true,
+    "performanceRiskUnresolved": true
+  },
+  "trapReplayTiming": {
+    "goSeconds": 6.443083599999227,
+    "candidateSeconds": 456.40719420000096,
+    "releaseGoSeconds": 5.8705458999975235,
+    "releaseCandidateSeconds": 44.266253400001006,
+    "note": "Observed wall time from these verification invocations; concurrent work and unoptimized candidate affect timing. This is not a controlled benchmark."
+  },
+  "commands": [
+    {
+      "suite": "check",
+      "profile": "development",
+      "argv": [
+        "python",
+        "tools/compare-candidate-go-behavior.py",
+        "--suite",
+        "check",
+        "--candidate-build-receipt",
+        ".cache\\cli-parity-rest-20261017\\final-candidate-split-verified\\receipt.json",
+        "--timeout",
+        "120",
+        "--reference",
+        ".cache/cli-parity-rest-20261017/final-candidate-split-verified/source-version.exe",
+        "--profile",
+        "development",
+        "--output",
+        ".cache/candidate-final-verification-20261017/check-development"
+      ]
+    },
+    {
+      "suite": "check",
+      "profile": "release",
+      "argv": [
+        "python",
+        "tools/compare-candidate-go-behavior.py",
+        "--suite",
+        "check",
+        "--candidate-build-receipt",
+        ".cache\\cli-parity-rest-20261017\\final-candidate-split-verified\\receipt.json",
+        "--timeout",
+        "120",
+        "--reference",
+        ".cache/cli-parity-rest-20261017/final-candidate-split-verified/source-version.exe",
+        "--profile",
+        "release",
+        "--output",
+        ".cache/candidate-final-verification-20261017/check-release"
+      ]
+    },
+    {
+      "suite": "run",
+      "profile": "development",
+      "argv": [
+        "python",
+        "tools/compare-candidate-go-behavior.py",
+        "--suite",
+        "run",
+        "--candidate-build-receipt",
+        ".cache\\cli-parity-rest-20261017\\final-candidate-split-verified\\receipt.json",
+        "--timeout",
+        "120",
+        "--reference",
+        ".cache/cli-parity-rest-20261017/final-candidate-split-verified/source-version.exe",
+        "--profile",
+        "development",
+        "--output",
+        ".cache/candidate-final-verification-20261017/run-development"
+      ]
+    },
+    {
+      "suite": "run",
+      "profile": "release",
+      "argv": [
+        "python",
+        "tools/compare-candidate-go-behavior.py",
+        "--suite",
+        "run",
+        "--candidate-build-receipt",
+        ".cache\\cli-parity-rest-20261017\\final-candidate-split-verified\\receipt.json",
+        "--timeout",
+        "120",
+        "--reference",
+        ".cache/cli-parity-rest-20261017/final-candidate-split-verified/source-version.exe",
+        "--profile",
+        "release",
+        "--output",
+        ".cache/candidate-final-verification-20261017/run-release"
+      ]
+    },
+    {
+      "suite": "examples",
+      "profile": "development",
+      "argv": [
+        "python",
+        "tools/compare-candidate-go-workspaces.py",
+        "--suite",
+        "examples",
+        "--candidate-build-receipt",
+        ".cache\\cli-parity-rest-20261017\\final-candidate-split-verified\\receipt.json",
+        "--timeout",
+        "120",
+        "--reference",
+        ".cache/cli-parity-rest-20261017/final-candidate-split-verified/source-version.exe",
+        "--profile",
+        "development",
+        "--output",
+        ".cache/candidate-final-verification-20261017/examples-development",
+        "--case",
+        "std_fs_quickstart",
+        "--case",
+        "std_vec_quickstart",
+        "--case",
+        "std_io_scalar_quickstart",
+        "--case",
+        "workspace_quickstart"
+      ]
+    },
+    {
+      "suite": "examples",
+      "profile": "release",
+      "argv": [
+        "python",
+        "tools/compare-candidate-go-workspaces.py",
+        "--suite",
+        "examples",
+        "--candidate-build-receipt",
+        ".cache\\cli-parity-rest-20261017\\final-candidate-split-verified\\receipt.json",
+        "--timeout",
+        "120",
+        "--reference",
+        ".cache/cli-parity-rest-20261017/final-candidate-split-verified/source-version.exe",
+        "--profile",
+        "release",
+        "--output",
+        ".cache/candidate-final-verification-20261017/examples-release"
+      ]
+    },
+    {
+      "suite": "native",
+      "profile": "development",
+      "argv": [
+        "python",
+        "tools/verify-candidate-native-tests-cli.py",
+        "--build-receipt",
+        ".cache/cli-parity-rest-20261017/final-candidate-split-verified/receipt-development.json",
+        "--reference",
+        ".cache/cli-parity-rest-20261017/final-candidate-split-verified/source-version.exe",
+        "--profile",
+        "development",
+        "--output",
+        ".cache/candidate-final-verification-20261017/native-development"
+      ]
+    },
+    {
+      "suite": "native",
+      "profile": "release",
+      "argv": [
+        "python",
+        "tools/verify-candidate-native-tests-cli.py",
+        "--build-receipt",
+        ".cache/cli-parity-rest-20261017/final-candidate-split-verified/receipt-release.json",
+        "--reference",
+        ".cache/cli-parity-rest-20261017/final-candidate-split-verified/source-version.exe",
+        "--profile",
+        "release",
+        "--output",
+        ".cache/candidate-final-verification-20261017/native-release"
+      ]
+    }
+  ],
+  "limitations": [
+    "Region, general raw-pointer execution and host/foreign calls remain outside the candidate default interpreter slice.",
+    "Candidate CFG/allocation/path work accounting is independent of Go MIR accounting; numerical exhaustion points may differ.",
+    "Skipped packageGraph fixtures need a workspace adapter; rejected Go examples and non-main native fixtures are listed in freshChecks.",
+    "The native suite compares native test CLI behavior, not every test in the full compiler repository.",
+    "Existing source-authenticated builds are reused; no new Stage1/Stage2 fixed-point, Linux build or full compiler test suite is claimed.",
+    "The development trap group exceeded the initial 120-second verification allowance; the larger-allowance replay checks results and does not resolve its performance risk.",
+    "Remaining development native cases are explicitly not run; the complete native CLI comparison matrix runs on the release candidate."
+  ],
+  "scopeNotes": [
+    "Three Region fixtures per profile are compared only at SDK namespace admission; their original flow expectations require the dedicated fixture runner.",
+    "The first development all-example sweep was stopped to bound verification cost, after four exact observations and without a completed receipt.",
+    "The selected development sweep was stopped after exact filesystem and scalar-I/O observations to avoid repeated 60-100 second compilations. Its raw observations are preserved; no completed suite receipt is claimed.",
+    "Development std_vec_quickstart, workspace_quickstart and the final standalone scalar-I/O release build were not completed in that sweep. Release uses all examples."
+  ],
+  "normativeContractsChanged": false,
+  "publicApiChanged": false,
+  "sdkAbiChanged": false,
+  "databaseChanged": false,
+  "repositoryHygieneChanged": false,
+  "ciRunnerChanged": false,
+  "existingUnrelatedChangesPreserved": true,
+  "pushed": false,
+  "released": false
+}
