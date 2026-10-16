@@ -79,3 +79,40 @@ pub fn Computed cast(u32 source,u32 target,usize value){
     if(source==1 && target==2){return result(target,if(value<=2147483647){value}else{18446744073709551615-(4294967295-value)});}
     return fail(4303);
 }
+
+// Same exact-width bits as the constant evaluator. Runtime failures retain
+// language trap categories; usize arithmetic never converts through signed i64.
+pub struct RuntimeValue{usize bits;u32 scalar;u32 trap;bool supported;}
+fn RuntimeValue runtime_value(u32 scalar,usize bits){return RuntimeValue{.bits,.scalar,.trap=0,.supported=true};}
+fn RuntimeValue runtime_trap(u32 category){return RuntimeValue{.bits=0,.scalar=0,.trap=category,.supported=true};}
+pub fn RuntimeValue runtime_unsupported(){return RuntimeValue{.bits=0,.scalar=0,.trap=0,.supported=false};}
+fn bool runtime_negative(u32 scalar,usize bits){return scalar==1 && bits>2147483647 || scalar==2 && bits>9223372036854775807;}
+pub fn RuntimeValue runtime_prefix(u32 scalar,ref u8[] op,usize bits){
+    if(scalar==5){return if(bytes::equal(op,b"~")){runtime_value(5,bits^18446744073709551615)}else{runtime_unsupported()};}
+    let r=prefix(scalar,op,bits);return if(r.code==0){runtime_value(r.scalar,r.bits)}else if(r.code==4303){runtime_trap(2)}else{runtime_unsupported()};
+}
+pub fn RuntimeValue runtime_binary(u32 scalar,ref u8[] op,usize left,usize right){
+    if(bytes::equal(op,b"/") || bytes::equal(op,b"%")){
+        if(right==0){return runtime_trap(3);}if((scalar==1 && left==2147483648 || scalar==2 && left==9223372036854775808) && right==if(scalar==1){4294967295}else{18446744073709551615}){return runtime_trap(4);}
+    }
+    if(bytes::equal(op,b"<<") || bytes::equal(op,b">>")){
+        let usize width=if(scalar==3){8}else if(scalar==1 || scalar==4){32}else{64};if(runtime_negative(scalar,right) || right>=width){return runtime_trap(5);}
+    }
+    if(scalar==5){
+        let usize maximum=18446744073709551615;
+        if(bytes::equal(op,b"+")){return if(left>maximum-right){runtime_trap(2)}else{runtime_value(5,left+right)};}
+        if(bytes::equal(op,b"-")){return if(left<right){runtime_trap(2)}else{runtime_value(5,left-right)};}
+        if(bytes::equal(op,b"*")){return if(right!=0 && left>maximum/right){runtime_trap(2)}else{runtime_value(5,left*right)};}
+        if(bytes::equal(op,b"/")){return runtime_value(5,left/right);}if(bytes::equal(op,b"%")){return runtime_value(5,left%right);}
+        if(bytes::equal(op,b"<<")){return if(left>(maximum>>right)){runtime_trap(2)}else{runtime_value(5,left<<right)};}
+        if(bytes::equal(op,b">>")){return runtime_value(5,left>>right);}
+        if(bytes::equal(op,b"&")){return runtime_value(5,left&right);}if(bytes::equal(op,b"|")){return runtime_value(5,left|right);}if(bytes::equal(op,b"^")){return runtime_value(5,left^right);}
+        let yes=bytes::equal(op,b"==") && left==right || bytes::equal(op,b"!=") && left!=right || bytes::equal(op,b"<") && left<right || bytes::equal(op,b"<=") && left<=right || bytes::equal(op,b">") && left>right || bytes::equal(op,b">=") && left>=right;
+        if(bytes::equal(op,b"==") || bytes::equal(op,b"!=") || bytes::equal(op,b"<") || bytes::equal(op,b"<=") || bytes::equal(op,b">") || bytes::equal(op,b">=")){return runtime_value(6,if(yes){1}else{0});}return runtime_unsupported();
+    }
+    let r=binary(scalar,op,left,right);return if(r.code==0){runtime_value(r.scalar,r.bits)}else if(r.code==4303){runtime_trap(2)}else{runtime_unsupported()};
+}
+pub fn RuntimeValue runtime_cast(u32 source,u32 target,usize bits){
+    if(target==5 && (source==3 || source==4)){return runtime_value(5,bits);}
+    let r=cast(source,target,bits);return if(r.code==0){runtime_value(r.scalar,r.bits)}else{runtime_unsupported()};
+}
