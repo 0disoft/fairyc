@@ -5,6 +5,7 @@ import json
 from pathlib import Path
 import shutil
 import subprocess
+import tempfile
 
 ROOT = Path(__file__).resolve().parents[1]
 spec = importlib.util.spec_from_file_location('behavior', ROOT / 'tools/compare-candidate-go-behavior.py')
@@ -49,14 +50,55 @@ def main():
     tracked = [Path(raw.decode('utf-8')) for raw in files if raw]
     rows, skipped = [], []
 
-    def run(name, argv, path):
-        go = behavior.execute(reference, argv, path, args.timeout)
-        other = behavior.execute(candidate, argv, path, args.timeout)
+    def record(name, go, other, expected_exit=None):
         row = dict(id=name, go=go, candidate=other, comparison=behavior.comparison(go, other))
+        if expected_exit is not None:
+            row['expectedExit'] = expected_exit
+            row['programContractMatch'] = not go['timedOut'] and not other['timedOut'] and go['exit'] == other['exit'] == expected_exit
         rows.append(row)
         behavior.save(output / 'observations.json', rows)
         print(name, go['exit'], other['exit'], flush=True)
         return row
+
+    def run(name, argv, path):
+        return record(name, behavior.execute(reference, argv, path, args.timeout),
+                      behavior.execute(candidate, argv, path, args.timeout))
+
+    def filesystem_native(path):
+        # The stable run command executes in its own scratch directory. This
+        # quickstart requires host-prepared metadata files, so build and execute
+        # each image in a fresh retained directory, as the native smoke does.
+        with tempfile.TemporaryDirectory(prefix='fy-fs-', dir=ROOT / '.cache') as temporary:
+            runtime_root = Path(temporary).resolve()
+            assert runtime_root.is_relative_to(ROOT / '.cache')
+            filesystem_profiles(path, runtime_root)
+
+    def filesystem_profiles(path, runtime_root):
+        for profile, flags in [('development', []), ('release', ['--release'])]:
+            projects = []
+            built = []
+            for engine, image in [('go', reference), ('candidate', candidate)]:
+                project = runtime_root / profile / engine
+                shutil.copytree(path, project)
+                projects.append(project)
+                built.append(behavior.execute(image, ['build', *flags, '--locked'], project, args.timeout))
+            row = record('std_fs_quickstart/build-' + profile, *built, expected_exit=0)
+            if not row['programContractMatch']:
+                continue
+            executed = []
+            for project in projects:
+                runtime = project / 'build'
+                readonly = runtime / 'fairyc-std-fs-read-only-metadata.tmp'
+                readonly.write_bytes(b'metadata')
+                readonly.chmod(0o444)
+                linked = runtime / 'fairyc-std-fs-hard-link-metadata.tmp'
+                linked.write_bytes(b'metadata')
+                (runtime / 'fairyc-std-fs-hard-link-metadata-alias.tmp').hardlink_to(linked)
+                try:
+                    executed.append(behavior.execute(runtime / 'std-fs-quickstart.exe', [], runtime, args.timeout))
+                finally:
+                    readonly.chmod(0o666)
+            record('std_fs_quickstart/execute-built-' + profile, *executed, expected_exit=42)
 
     def copy_example(name):
         source = Path('examples') / name
@@ -92,6 +134,9 @@ def main():
             if name not in NATIVE or row['candidate']['exit'] != 0:
                 if name in NATIVE:
                     skipped.append(dict(id=name + '/native', reason='candidate workspace check fails'))
+                continue
+            if name == 'std_fs_quickstart':
+                filesystem_native(path)
                 continue
             run(name + '/run', ['run', '--locked'], path)
             if name in ['workspace_quickstart', 'std_io_scalar_quickstart', 'std_vec_quickstart']:
@@ -130,7 +175,8 @@ def main():
                   suite=args.suite, profile=args.profile, cases=len(rows), summary=summary, skipped=skipped,
                   scope=build['entryScope'], candidate=dict(path=str(candidate), sha256=behavior.sha(candidate)),
                   reference=dict(path=str(reference), sha256=reference_sha), sourceInputs=list(inputs.values()),
-                  rows=rows, parity=bool(rows) and all(r['comparison']['exactMatch'] for r in rows) and not skipped,
+                  rows=rows, nativeContractFailures=[r['id'] for r in rows if not r.get('programContractMatch', True)],
+                  parity=bool(rows) and all(r['comparison']['exactMatch'] and r.get('programContractMatch', True) for r in rows) and not skipped,
                   note='Run status is a program status; check/build status is a compiler status. No timing or IR equality claim.',
                   publicApiChanged=False, sdkAbiChanged=False, ciChanged=False, pushed=False)
     behavior.save(output / 'receipt.json', report)

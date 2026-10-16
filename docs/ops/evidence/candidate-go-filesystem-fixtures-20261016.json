@@ -1,0 +1,115 @@
+{
+  "schema": "fairyc.candidate-go-filesystem-fixtures/v1",
+  "passed": true,
+  "runner": {
+    "path": "tools/compare-candidate-go-workspaces.py",
+    "sha256": "b90aa1cecf541c7b775dde0438ee7b39393130145a5019c006e3a19e9ae7ea2f"
+  },
+  "reference": {
+    "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-parity-fixes-20261016\\fairyc-go-final.exe",
+    "sha256": "f54930de46e778e4bcdda8b2b8f3dc6f7c046ca8ced6a0f0a31a92ba367bd272"
+  },
+  "candidate": {
+    "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-parity-fixes-20261016\\methods-perf-cli\\release\\fairyc.exe",
+    "sha256": "11122a2dadfc0ed9652625665ae54bfc04713635d71825aecff437585eaaa6b4"
+  },
+  "receipt": {
+    "path": ".cache/candidate-parity-fixes-20261016/fs-fixtures-short-comparison/receipt.json",
+    "sha256": "d01b021d4a5c14febf10e5c720e508a2282903c48c926d730a91c049f59713fa"
+  },
+  "cases": [
+    {
+      "id": "std_fs_quickstart/check",
+      "goExit": 0,
+      "candidateExit": 0,
+      "expectedExit": null,
+      "comparison": {
+        "completed": true,
+        "acceptanceMatch": true,
+        "exitMatch": true,
+        "firstDiagnosticMatch": true,
+        "allDiagnosticsMatch": true,
+        "stdoutMatch": true,
+        "stderrMatch": true,
+        "exactMatch": true
+      }
+    },
+    {
+      "id": "std_fs_quickstart/build-development",
+      "goExit": 0,
+      "candidateExit": 0,
+      "expectedExit": 0,
+      "comparison": {
+        "completed": true,
+        "acceptanceMatch": true,
+        "exitMatch": true,
+        "firstDiagnosticMatch": true,
+        "allDiagnosticsMatch": true,
+        "stdoutMatch": true,
+        "stderrMatch": true,
+        "exactMatch": true
+      }
+    },
+    {
+      "id": "std_fs_quickstart/execute-built-development",
+      "goExit": 42,
+      "candidateExit": 42,
+      "expectedExit": 42,
+      "comparison": {
+        "completed": true,
+        "acceptanceMatch": true,
+        "exitMatch": true,
+        "firstDiagnosticMatch": true,
+        "allDiagnosticsMatch": true,
+        "stdoutMatch": true,
+        "stderrMatch": true,
+        "exactMatch": true
+      }
+    },
+    {
+      "id": "std_fs_quickstart/build-release",
+      "goExit": 0,
+      "candidateExit": 0,
+      "expectedExit": 0,
+      "comparison": {
+        "completed": true,
+        "acceptanceMatch": true,
+        "exitMatch": true,
+        "firstDiagnosticMatch": true,
+        "allDiagnosticsMatch": true,
+        "stdoutMatch": true,
+        "stderrMatch": true,
+        "exactMatch": true
+      }
+    },
+    {
+      "id": "std_fs_quickstart/execute-built-release",
+      "goExit": 42,
+      "candidateExit": 42,
+      "expectedExit": 42,
+      "comparison": {
+        "completed": true,
+        "acceptanceMatch": true,
+        "exitMatch": true,
+        "firstDiagnosticMatch": true,
+        "allDiagnosticsMatch": true,
+        "stdoutMatch": true,
+        "stderrMatch": true,
+        "exactMatch": true
+      }
+    }
+  ],
+  "assertions": [
+    "fresh retained products are built separately by Go and the native candidate",
+    "read-only metadata and a hard-linked pair match the existing host smoke fixture contract",
+    "short contained temporary roots avoid MAX_PATH changing invalid-name diagnostics",
+    "both development and release products return the expected status 42",
+    "an identical unexpected status cannot count as filesystem runtime parity"
+  ],
+  "sourceOfTruthChanged": false,
+  "publicApiChanged": false,
+  "sdkAbiChanged": false,
+  "dbChanged": false,
+  "ciChanged": false,
+  "pushed": false
+}
