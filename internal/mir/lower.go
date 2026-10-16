@@ -381,7 +381,7 @@ func (l *functionLowerer) lowerStatements(statements []hir.Statement) (bool, err
 			}
 			return true, nil
 		case "discard", "expression-statement":
-			if _, err := l.lowerExpression(statement.Expression); err != nil {
+			if err := l.lowerIgnoredExpression(statement.Expression); err != nil {
 				return false, err
 			}
 		case "burn":

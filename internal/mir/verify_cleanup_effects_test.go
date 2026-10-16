@@ -9,6 +9,8 @@ const cleanupEffectSource = `module main;@effects(console)resource R{i32 n;clean
 
 func TestVerifyRejectsMissingTransitiveCleanupAuthority(t *testing.T) {
 	for _, body := range []string{
+		`discard make();`,
+		`make();`,
 		`let R value=R{.n=1};`,
 		`let Box value=make();`,
 		`let Option<Box> value=.some(make());`,
