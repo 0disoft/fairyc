@@ -34,7 +34,7 @@ def main():
     build = json.loads(args.build_receipt.read_text(encoding='utf-8'))
     build_sha = digest(args.build_receipt)
     verifier_sha = digest(Path(__file__))
-    assert build['passed'] and not build['goFrontendInvoked'] and not build.get('commandsOnly')
+    assert build['passed'] and not build['goFrontendInvoked'] and not build.get('commandsOnly') and not build.get('compilerOnly')
     for source in build['sources']:
         assert digest(ROOT / source['path']) == source['sha256'], source['path']
     output.mkdir(parents=True)
@@ -182,7 +182,7 @@ def main():
                    buildReceipt=str(args.build_receipt.resolve()), buildReceiptSHA256=digest(args.build_receipt),
                    reference=dict(path=str(reference), sha256=digest(reference)), comparisons=rows,
                    exactComparisons=sum(row['exactMatch'] for row in rows),
-                   limitations=['Windows native candidate only; semantic interpreter remains unimplemented',
+                   limitations=['Windows native candidate only; default scalar interpreter is verified separately',
                                 'Deadline infrastructure diagnostics compared by exit and empty report; platform wording may differ'])
     (output / 'receipt.json').write_text(json.dumps(receipt, indent=2) + '\n', encoding='utf-8')
     print('passed:', len(rows), 'native test comparisons', flush=True)

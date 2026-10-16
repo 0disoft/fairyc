@@ -28,7 +28,11 @@ def main():
                         help='build only the selected compiler profile; repeat for both (default: both)')
     parser.add_argument('--commands-only', action='store_true',
                         help='verify the authored check/build/run command entry points without unrelated private frontend commands')
+    parser.add_argument('--compiler-only', action='store_true',
+                        help='build only the private --c-project-file transport as a bounded bootstrap seed')
     args = parser.parse_args()
+    if args.commands_only and args.compiler_only:
+        parser.error('commands-only and compiler-only are mutually exclusive')
     if not __debug__:
         parser.error('verification requires Python without -O')
     inherited_stack = args.stack_reserve_bytes is None
@@ -57,7 +61,19 @@ import std::process as process;
     if(bytes::equal(view[..n],b"run")){return native::run(true);}return 2;
 }
 '''
-    entry.write_text(command_entry if args.commands_only else 'module main;\nimport file_cli as cli;\n@effects(filesystem,console,environment,clock) fn i32 main(){return cli::run();}\n', encoding='utf-8', newline='\n')
+    compiler_entry = '''module main;
+import module_project_cli as project;
+import std::process as process;
+import std::bytes as bytes;
+@effects(filesystem,console) fn i32 main(){
+    if(process::arg_count()!=3){return 2;}
+    var u8[32] command=[0;32];let count=switch(process::arg(1,ref mut command)){case .ok(n):{n}case .err(_):{return 2;}};
+    let ref u8[] flag=ref command;if(!bytes::equal(flag[..count],b"--c-project-file")){return 2;}
+    var u8[4096] path=[0;4096];let size=switch(process::arg(2,ref mut path)){case .ok(n):{n}case .err(_):{return 2;}};
+    let ref u8[] name=ref path;return project::run(name[..size]);
+}
+'''
+    entry.write_text(compiler_entry if args.compiler_only else command_entry if args.commands_only else 'module main;\nimport file_cli as cli;\n@effects(filesystem,console,environment,clock) fn i32 main(){return cli::run();}\n', encoding='utf-8', newline='\n')
     modules = {}
     for base in (PROJECT / 'src', ROOT / 'internal/sdkstdlib/sources'):
         for path in base.rglob('*.fy'):
@@ -88,8 +104,8 @@ import std::process as process;
         assert all(sha(Path(row['path'])) == row['sha256'] for row in images)
         assert sha(PROJECT / 'fairy.lock') == lock_sha
         data = dict(schema='fairyc.candidate-native-probe-build/v1', passed=True,
-                    entryScope='authored check/build/run entry points with real OS argv' if args.commands_only else 'authored file_cli::run with real OS argv',
-                    commandsOnly=args.commands_only, sources=sources, tools=tools,
+                    entryScope='private --c-project-file transport only' if args.compiler_only else 'authored check/build/run entry points with real OS argv' if args.commands_only else 'authored file_cli::run with real OS argv',
+                    commandsOnly=args.commands_only, compilerOnly=args.compiler_only, sources=sources, tools=tools,
                     lockSHA256=lock_sha, images=images, candidatePacketSHA256=sha(packet),
                     invocations=calls, stackReserveBytes=args.stack_reserve_bytes,
                     stackReserveOrigin='seed PE' if inherited_stack else 'explicit',

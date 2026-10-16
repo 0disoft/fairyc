@@ -46,7 +46,7 @@ def main():
     build_path = args.build_receipt.resolve()
     build_sha = digest(build_path)
     build = json.loads(build_path.read_text(encoding='utf-8'))
-    assert build['passed'] and not build['goFrontendInvoked'] and not build.get('commandsOnly')
+    assert build['passed'] and not build['goFrontendInvoked'] and not build.get('commandsOnly') and not build.get('compilerOnly')
     assert 'sources' in build and 'images' in build, 'build receipt must carry repo-relative sources and profile images'
     source_inputs = build['sources'] + [
         dict(path=Path(__file__).relative_to(ROOT).as_posix(), sha256=digest(Path(__file__)))]
