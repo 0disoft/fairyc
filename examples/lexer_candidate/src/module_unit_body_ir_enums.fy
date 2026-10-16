@@ -1,5 +1,6 @@
 module module_unit_body_ir_enums;
 import module_unit_body_ir_model as ir;
+import candidate_limits as limits;
 import module_unit_body_ir_lookup as lookup;
 import module_unit_cleanup_mir_model as clean;
 import module_unit_value_model as budget;
@@ -46,11 +47,17 @@ fn bool construction(ref ir::Program p,ref ir::Body b,usize id,ref mut usize wor
         if(*v::at<u8>(ref seen,position)!=0 || value.state!=1 || value.type!=payload.type || row.expected!=payload.type || !charge(work,ir::field_name(p,row.field.id-1).len+1,code) || !bytes::equal(ir::node_text(b,pair-1),ir::field_name(p,row.field.id-1))){return false;}{let slot=v::at_mut<u8>(ref mut seen,position);*slot=1;}count+=1;link=row.right;
     }return count==f.payload_count;
 }
-pub fn clean::Problem check(ref ir::Program p,ref mut usize work){
+pub fn clean::Problem check(ref ir::Program p,ref mut usize work){var usize total=0;return check_scoped(p,work,ref mut total,false);}
+// Project scans retain the same 1 MiB prefix/body allowances and charge every
+// completed chunk once to the caller's bounded aggregate verification ledger.
+pub fn clean::Problem check_metered(ref ir::Program p,ref mut usize work,ref mut usize total){return check_scoped(p,work,total,clean::project(ir::cleanup_ir(p)));}
+fn bool checkpoint(bool project,ref mut usize work,ref mut usize total){if(!project){return true;}if(!limits::project_charge(total,*work)){return false;};*work=0;return true;}
+fn clean::Problem check_scoped(ref ir::Program p,ref mut usize work,ref mut usize total,bool project){
     var u32 problem=0;let code=ref mut problem;
     var v::Vec<u8> marks=v::empty<u8>();var usize i=0;while(i<clean::type_count(ir::cleanup_ir(p))){if(!charge(work,1,code)){return fail(1002,0,0,0);}if(!v::push<u8>(ref mut marks,0).is_ok){return fail(1003,0,0,0);}i+=1;}
     i=0;while(i<ir::layout_count(p)){let s=ir::layout_at(p,i).value;if(clean::type_at(ir::cleanup_ir(p),s.type).kind==4){if(layout(p,s.type,work,code)!=i+1 || !shape(p,i,work,code) || !inert(p,s.type,ref mut marks,work,0,code)){return fail(if(*code!=0){*code}else{1001},s.module_index,s.start,s.end);}}i+=1;}
+    if(!checkpoint(project,work,total)){return fail(1002,0,0,0);}
     var usize frame=1;while(frame<=ir::count(p)){let b=ir::at(p,frame);i=0;while(i<ir::node_count(b)){if(!charge(work,1,code)){return fail(1002,0,0,0);}let e=ir::node_at(b,i).value;
         if(e.state==1 && (e.kind==28 || e.kind==10) && clean::type_at(ir::cleanup_ir(p),e.type).kind==4 && !construction(p,b,i+1,work,code)){return fail(if(*code!=0){*code}else{1001},clean::frame_at(ir::cleanup_ir(p),frame).module_index,e.start,e.end);}i+=1;
-    }frame+=1;}return fail(0,0,0,0);
+    }if(!checkpoint(project,work,total)){return fail(1002,0,0,0);}frame+=1;}return fail(0,0,0,0);
 }
