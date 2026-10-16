@@ -1,3 +1,5 @@
+//go:build ignore
+
 // Run with bun tools/run-go.ts run tools/verify-candidate-generic-interface.go.
 package main
 

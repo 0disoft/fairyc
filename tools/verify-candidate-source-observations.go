@@ -1,3 +1,5 @@
+//go:build ignore
+
 // Compare original CST binding/literal observations to actual Go AST sidecars.
 // bun tools/run-go.ts run tools/verify-candidate-source-observations.go
 package main

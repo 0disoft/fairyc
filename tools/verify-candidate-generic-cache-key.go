@@ -1,3 +1,5 @@
+//go:build ignore
+
 // Existing Go ComputeGeneric is the hash oracle; the reconstructed envelope
 // must first hash to that independently computed key before becoming a fixture.
 package main

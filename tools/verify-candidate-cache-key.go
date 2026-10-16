@@ -1,3 +1,5 @@
+//go:build ignore
+
 // Run with tools/run-go.ts run tools/verify-candidate-cache-key.go --output <fixture>.
 // Existing Go packagecache owns every oracle byte; Fairy owns the implementation.
 package main

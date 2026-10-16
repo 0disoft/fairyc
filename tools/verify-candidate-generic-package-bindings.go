@@ -1,3 +1,5 @@
+//go:build ignore
+
 // Build exact resolved-import and definition oracles from real Go workspaces.
 // bun tools/run-go.ts run tools/verify-candidate-generic-package-bindings.go
 package main

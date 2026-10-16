@@ -1,3 +1,5 @@
+//go:build ignore
+
 // Compare exact source function JSON and the real Go template definition digest.
 // bun tools/run-go.ts run tools/verify-candidate-source-function-definition.go
 package main

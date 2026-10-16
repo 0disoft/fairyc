@@ -1,3 +1,5 @@
+//go:build ignore
+
 // Run from the repository root with:
 // bun tools/run-go.ts run tools/verify-candidate-public-interface-extract.go
 // The authored Fairy tests own the input bytes and expected values. This oracle

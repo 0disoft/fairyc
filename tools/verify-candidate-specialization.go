@@ -1,3 +1,5 @@
+//go:build ignore
+
 // Produce caller-resolved identity facts from the real Go planner and SDK Vec.
 // bun tools/run-go.ts run tools/verify-candidate-specialization.go
 package main

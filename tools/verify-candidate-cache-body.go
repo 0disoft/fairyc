@@ -1,3 +1,5 @@
+//go:build ignore
+
 // Observe the existing Go HIR state-body hash for authored ordinary source.
 // Oracle preimages are accepted only if they hash to that actual compiler value.
 package main

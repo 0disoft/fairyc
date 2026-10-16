@@ -1,3 +1,5 @@
+//go:build ignore
+
 // Exact Go JSON and DigestChunks oracle for closed nominal package contexts.
 // First generate the workspaces with verify-candidate-generic-package-bindings.go.
 package main

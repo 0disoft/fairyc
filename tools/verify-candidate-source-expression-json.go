@@ -1,3 +1,5 @@
+//go:build ignore
+
 // Verify original source expressions against the actual Go frontend AST.
 // bun tools/run-go.ts run tools/verify-candidate-source-expression-json.go
 package main

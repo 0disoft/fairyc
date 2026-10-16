@@ -1,3 +1,5 @@
+//go:build ignore
+
 // Build the source-type identity fixture using actual Go frontend AST values.
 // bun tools/run-go.ts run tools/verify-candidate-source-type-json.go
 package main

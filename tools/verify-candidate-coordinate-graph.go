@@ -1,3 +1,5 @@
+//go:build ignore
+
 // Generate a local source-edit corpus using the real Go workspace loader.
 // bun tools/run-go.ts run tools/verify-candidate-coordinate-graph.go
 package main

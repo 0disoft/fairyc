@@ -1,3 +1,5 @@
+//go:build ignore
+
 // Run from the repository root: bun tools/run-go.ts run tools/verify-candidate-coordinate.go
 // Read the authored Fairy inputs; the maintained Go encoder supplies the oracle.
 package main

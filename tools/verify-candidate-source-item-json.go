@@ -1,3 +1,5 @@
+//go:build ignore
+
 // Compare retained top-level item JSON to the actual Go syntax-only AST.
 // bun tools/run-go.ts run tools/verify-candidate-source-item-json.go
 package main

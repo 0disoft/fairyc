@@ -1,3 +1,5 @@
+//go:build ignore
+
 // Verify original source view loops against the actual Go frontend AST.
 // bun tools/run-go.ts run tools/verify-candidate-source-view-loop-json.go
 package main

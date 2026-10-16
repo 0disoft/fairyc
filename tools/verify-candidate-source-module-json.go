@@ -1,3 +1,5 @@
+//go:build ignore
+
 // Compare complete original module AST and nominal definitions to the Go owner.
 // bun tools/run-go.ts run tools/verify-candidate-source-module-json.go
 package main

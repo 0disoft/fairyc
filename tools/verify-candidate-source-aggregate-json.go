@@ -1,3 +1,5 @@
+//go:build ignore
+
 // Compare retained aggregate JSON and definition digests to the actual Go AST.
 // bun tools/run-go.ts run tools/verify-candidate-source-aggregate-json.go
 package main

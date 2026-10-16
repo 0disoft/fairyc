@@ -1,3 +1,5 @@
+//go:build ignore
+
 // Exact original declaration catalog from the real Go package expander and AST.
 // bun tools/run-go.ts run tools/verify-candidate-generic-source-catalog.go
 package main
