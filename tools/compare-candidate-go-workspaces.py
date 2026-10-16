@@ -107,6 +107,11 @@ def main():
             ['build', '--release', '--release'], ['run', '--release', '--release'],
             ['build', '--help'], ['run', '--help'], ['build', '--', 'argument'],
             ['run', '--locked', '--', '--program-option'],
+            [], ['--help'], ['--version'], ['--unknown'],
+            ['new', '--help'], ['test', '--help'],
+            ['test', '--list', '--json', '--locked'],
+            ['explain', 'E4101'], ['targets', '--json'],
+            ['experimental', '--help'], ['emit'],
         ]
         for index, argv in enumerate(invocations):
             run(f'cli-{index}', argv, path)
