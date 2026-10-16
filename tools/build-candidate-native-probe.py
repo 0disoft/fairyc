@@ -22,6 +22,8 @@ def main():
     parser.add_argument('--candidate', type=Path, required=True)
     parser.add_argument('--builder', type=Path, required=True)
     parser.add_argument('--output', type=Path, required=True)
+    parser.add_argument('--reuse-frontend', type=Path,
+                        help='reuse a successful source-authenticated C emission while rebuilding native images')
     parser.add_argument('--stack-reserve-bytes', type=int,
                         help='private compiler-host reservation; omitted inherits the seed PE, zero uses the linker default')
     parser.add_argument('--profile', action='append', choices=['development', 'release'],
@@ -92,8 +94,35 @@ import std::bytes as bytes;
     tools = {name: dict(path=str(p.resolve()), sha256=sha(p)) for name, p in [('candidate', args.candidate), ('builder', args.builder)]}
     lock_sha = sha(PROJECT / 'fairy.lock')
     manifest = output / 'sources.list'
-    manifest.write_text(''.join(p.relative_to(ROOT).as_posix() + '\n' for p in paths), encoding='utf-8', newline='\n')
     calls = []
+    frontend_reuse = None
+    reused_packet = None
+    if args.reuse_frontend:
+        prior = args.reuse_frontend.resolve()
+        snapshot_path = prior / 'source-snapshot.json'
+        snapshot = json.loads(snapshot_path.read_text(encoding='utf-8'))
+        original = snapshot['sources']
+        # Only the generated entry's path may differ. Bind all bytes, every
+        # other source identity, the seed executable, and the production lock.
+        assert original[0]['sha256'] == sources[0]['sha256']
+        assert original[1:] == sources[1:]
+        assert snapshot['tools']['candidate'] == tools['candidate']
+        assert snapshot['lockSHA256'] == lock_sha
+        assert all(sha(ROOT / row['path']) == row['sha256'] for row in original)
+        prior_manifest = prior / 'sources.list'
+        assert prior_manifest.read_text(encoding='utf-8') == ''.join(row['path'] + '\n' for row in original)
+        prior_calls_path = prior / 'invocations.json'
+        first = json.loads(prior_calls_path.read_text(encoding='utf-8'))[0]
+        assert first['argv'] == [str(args.candidate.resolve()), '--c-project-file', str(prior_manifest)]
+        reused_packet = prior / 'candidate-packet.bin'
+        assert first['exit'] == 0 and not first['stderr']
+        assert first['stdoutBytes'] == reused_packet.stat().st_size and first['stdoutSHA256'] == sha(reused_packet)
+        assert reused_packet.read_bytes().startswith(b'FYCPARTS1\n')
+        sources = original
+        calls.append(dict(first, reused=True))
+        frontend_reuse = dict(path=str(prior), sourceSnapshotSHA256=sha(snapshot_path),
+                              invocationsSHA256=sha(prior_calls_path), packetSHA256=sha(reused_packet))
+    manifest.write_text(''.join(row['path'] + '\n' for row in sources), encoding='utf-8', newline='\n')
     (output / 'source-snapshot.json').write_text(
         json.dumps(dict(sources=sources, tools=tools, lockSHA256=lock_sha), indent=2) + '\n',
         encoding='utf-8', newline='\n')
@@ -106,6 +135,7 @@ import std::bytes as bytes;
         data = dict(schema='fairyc.candidate-native-probe-build/v1', passed=True,
                     entryScope='private --c-project-file transport only' if args.compiler_only else 'authored check/build/run entry points with real OS argv' if args.commands_only else 'authored file_cli::run with real OS argv',
                     commandsOnly=args.commands_only, compilerOnly=args.compiler_only, sources=sources, tools=tools,
+                    frontendReuse=frontend_reuse,
                     lockSHA256=lock_sha, images=images, candidatePacketSHA256=sha(packet),
                     invocations=calls, stackReserveBytes=args.stack_reserve_bytes,
                     stackReserveOrigin='seed PE' if inherited_stack else 'explicit',
@@ -121,7 +151,12 @@ import std::bytes as bytes;
         return result.stdout
 
     packet = output / 'candidate-packet.bin'
-    packet.write_bytes(run([args.candidate.resolve(), '--c-project-file', manifest], 900))
+    if reused_packet:
+        shutil.copyfile(reused_packet, packet)
+        assert sha(packet) == frontend_reuse['packetSHA256']
+        (output / 'invocations.json').write_text(json.dumps(calls, indent=2) + '\n', encoding='utf-8')
+    else:
+        packet.write_bytes(run([args.candidate.resolve(), '--c-project-file', manifest], 900))
     assert packet.read_bytes().startswith(b'FYCPARTS1\n')
     print('authored dispatcher emitted:', len(paths), 'sources,', packet.stat().st_size, 'packet bytes', flush=True)
     images = []
