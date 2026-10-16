@@ -28,3 +28,6 @@ pub fn i32 run_cached(ref u8[] root,bool locked,ref u8[] cache_root,bool status)
 pub fn i32 arguments(){let selected=switch(options::from_process()){case .ok(p):{p}case .err(e):{return failure(options::diagnostic(e),if(e.code==6){4}else{2});}};
     return if(options::cache_root(ref selected).len==0){run(b".",options::locked(ref selected))}else{run_cached(b".",options::locked(ref selected),options::cache_root(ref selected),options::status(ref selected))};
 }
+
+@effects(console)
+pub fn i32 test_render_error(check::Error error){return render(.err(error));}

@@ -8,6 +8,7 @@ import records as records;
 import bodies as bodies;
 import body_state as state;
 import attributes as attributes;
+import std::bytes as bytes;
 
 // Arena IDs: docs/architecture/candidate-source-join-v0.md.
 pub struct Declaration { usize cleanup_attribute_start; usize cleanup_attribute_count; usize unsafe_start; usize unsafe_end; usize owner_start; usize owner_end; u32 kind; usize start; usize end; usize name_start; usize name_end; usize expression; usize entry_start; usize entry_count; usize body; usize result_type; usize field_start; usize field_count; bool public; usize public_start; usize public_end; usize attribute_start; usize attribute_count; usize cleanup_start; usize cleanup_end; usize cleanup_body; usize generic_parameters; usize generic_start; usize generic_end; }
@@ -254,16 +255,23 @@ pub fn Parsed assemble(scanner::Stream source,v::Vec<Declaration> declarations,v
 // Independently own the exact parser/scanner arenas; preserve physical entry
 // order, lexical IDs, cooked-token slots and original byte spans. No rescan or
 // reparse. The caller can close the original source set immediately afterward.
-pub fn Result<Parsed,u32> copy(ref Parsed original,ref mut usize work){
+pub fn Result<Parsed,u32> copy(ref Parsed original,ref mut usize work){return copy_mode(original,false,work);}
+pub fn Result<Parsed,u32> copy_tests(ref Parsed original,ref mut usize work){return copy_mode(original,true,work);}
+fn Result<Parsed,u32> copy_mode(ref Parsed original,bool tests,ref mut usize work){
     let source=switch(scanner::copy(ref original.source,work)){case .ok(value):{value}case .err(code):{return .err(code);}};
-    let declarations=switch(arenas::copy_declarations(ref original.declarations,work)){case .ok(value):{value}case .err(code):{return .err(code);}};
+    var declarations=switch(arenas::copy_declarations(ref original.declarations,work)){case .ok(value):{value}case .err(code):{return .err(code);}};
     let problems=switch(arenas::copy_problems(ref original.problems,work)){case .ok(value):{value}case .err(code):{return .err(code);}};
     let expressions=switch(arenas::copy_expressions(ref original.expressions,work)){case .ok(value):{value}case .err(code):{return .err(code);}};
     let entries=switch(arenas::copy_entries(ref original.entries,work)){case .ok(value):{value}case .err(code):{return .err(code);}};
     let statements=switch(arenas::copy_statements(ref original.statements,work)){case .ok(value):{value}case .err(code):{return .err(code);}};
     let types=switch(arenas::copy_types(ref original.types,work)){case .ok(value):{value}case .err(code):{return .err(code);}};
     let fields=switch(arenas::copy_fields(ref original.fields,work)){case .ok(value):{value}case .err(code):{return .err(code);}};
-    let attributes=switch(arenas::copy_attributes(ref original.attributes,work)){case .ok(value):{value}case .err(code):{return .err(code);}};
+    var attributes=switch(arenas::copy_attributes(ref original.attributes,work)){case .ok(value):{value}case .err(code):{return .err(code);}};
     let attribute_arguments=switch(arenas::copy_attribute_arguments(ref original.attribute_arguments,work)){case .ok(value):{value}case .err(code):{return .err(code);}};
+    if(tests){consume_test_metadata(source_view(original),ref mut declarations,ref mut attributes);}
     return .ok(Parsed{.source,.declarations,.problems,.expressions,.entries,.statements,.types,.fields,.attributes,.attribute_arguments});
 }
+
+
+
+fn void consume_test_metadata(ref u8[] source,ref mut v::Vec<Declaration> declarations,ref mut v::Vec<attributes::Attribute> attrs){var usize i=0;while(i<v::len<Declaration>(declarations)){var Declaration d=*v::at<Declaration>(declarations,i);var usize kept=0;var usize j=0;while(j<d.attribute_count){let a=*v::at<attributes::Attribute>(attrs,d.attribute_start+j);if(!bytes::equal(source[a.name_start..a.name_end],b"test")){let slot=v::at_mut<attributes::Attribute>(attrs,d.attribute_start+kept);*slot=a;kept+=1;}j+=1;}d.attribute_count=kept;let slot=v::at_mut<Declaration>(declarations,i);*slot=d;i+=1;}}

@@ -23,7 +23,9 @@ pub fn ref u8[] instance_id(ref Input input,usize at){let p=origin(input,at);ret
 pub fn ref u8[] file(ref Input input,usize at){let p=origin(input,at);return bytes::view(ref input.names)[p.path_start..p.path_end];}
 pub fn Result<catalog::Catalog,catalog::Problem> declarations(ref Input input){return catalog::build_scoped(ref input.sources,ref input.owners,ref input.bindings);}
 fn void put(ref mut v::Vec<usize> values,usize at,usize value){let slot=v::at_mut<usize>(values,at);*slot=value;}
-pub fn Result<Input,Problem> project(ref visibility::Resolved resolved,ref mut usize meter){
+pub fn Result<Input,Problem> project(ref visibility::Resolved resolved,ref mut usize meter){return project_mode(resolved,false,meter);}
+pub fn Result<Input,Problem> project_tests(ref visibility::Resolved resolved,ref mut usize meter){return project_mode(resolved,true,meter);}
+fn Result<Input,Problem> project_mode(ref visibility::Resolved resolved,bool tests,ref mut usize meter){
     let workspace=visibility::workspace_graph(resolved);let nodes=graph::node_count(workspace);
     if(nodes==0 || nodes>limits::source_files() || !work::charge(meter,nodes+1)){return .err(fail(1,0,0,0,0));}
     var v::Vec<usize> offsets=v::empty<usize>();var v::Vec<usize> positions=v::empty<usize>();var usize total=0;var usize owner=0;
@@ -36,7 +38,7 @@ pub fn Result<Input,Problem> project(ref visibility::Resolved resolved,ref mut u
         if(module_index>=graph::module_count(workspace,owner) || *v::at<usize>(ref positions,offset+module_index)!=0){return .err(fail(4,0,owner,module_index,0));}
         let parsed=graph::module_parser(workspace,owner,module_index);let size=syntax::source_view(parsed).len;
         if(size>limits::source_bytes() || size>limits::source_set_bytes()-source_bytes){return .err(fail(1,0,owner,module_index,0));}source_bytes+=size;
-        var usize copied_work=0;let copy=switch(syntax::copy(parsed,ref mut copied_work)){case .ok(value):{value}case .err(code):{return .err(fail(3,code,owner,module_index,0));}};
+        var usize copied_work=0;let copy=switch(if(tests && graph::module_is_test(workspace,owner,module_index)){syntax::copy_tests(parsed,ref mut copied_work)}else{syntax::copy(parsed,ref mut copied_work)}){case .ok(value):{value}case .err(code):{return .err(fail(3,code,owner,module_index,0));}};
         let id=graph::node_id(workspace,owner);let path=graph::module_file(workspace,owner,module_index);
         if(!work::charge(meter,copied_work+size+id.len+path.len+1)){return .err(fail(1,0,owner,module_index,0));}
         let identity_start=bytes::len(ref names);if(!bytes::append(ref mut names,id).is_ok){return .err(fail(2,0,owner,module_index,0));}let identity_end=bytes::len(ref names);let path_start=identity_end;if(!bytes::append(ref mut names,path).is_ok){return .err(fail(2,0,owner,module_index,0));}

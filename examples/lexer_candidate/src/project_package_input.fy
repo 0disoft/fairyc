@@ -35,3 +35,12 @@ pub fn Result<modules::Modules,Error> load_manifest(ref u8[] root,ref mut source
     let bytes::Buffer document=switch(files::read(root,b"fairy.toml",1048576,work)){case .ok(value):{value}case .err(e):{return .err(capture(Problem{.phase=0,.reason=e.code,.diagnostic=0,.status=0,.field=0,.os_code=e.os_code,.file=0,.start=e.start,.end=e.end},b"fairy.toml",b""));}};
     return load(root,bytes::view(ref document),budget,work);
 }
+
+
+@effects(filesystem)
+pub fn Result<modules::Modules,Error> load_manifest_tests(ref u8[] root,bool tests,ref mut sources::Budget budget,ref mut usize work){
+    if(!tests){return load_manifest(root,budget,work);}var sources::Budget staged=*budget;
+    let document=switch(files::read(root,b"fairy.toml",1048576,work)){case .ok(p):{p}case .err(e):{return .err(capture(Problem{.phase=0,.reason=e.code,.diagnostic=0,.status=0,.field=0,.os_code=e.os_code,.file=0,.start=e.start,.end=e.end},b"fairy.toml",b""));}};
+    let overlaid=switch(sources::load_tests(root,bytes::view(ref document),true,ref mut staged,work)){case .ok(p):{p}case .err(e):{return .err(source_error(ref e,bytes::view(ref document)));}};
+    let bound=switch(modules::bind(overlaid,work)){case .ok(p):{p}case .err(e):{return .err(module_error(ref e));}};*budget=staged;return .ok(bound);
+}

@@ -1,0 +1,114 @@
+{
+  "schema": "fairyc.candidate-test-source-overlay/v1",
+  "scope": "Isolated test-source loading, projected test metadata consumption, Go-compatible diagnostic quoting and two single-owner helper merges.",
+  "sourceInputs": [
+    {
+      "path": "examples/lexer_candidate/src/hir_origin_targets.fy",
+      "deleted": true,
+      "sha256": null
+    },
+    {
+      "path": "examples/lexer_candidate/src/hir_view_check.fy",
+      "deleted": false,
+      "sha256": "8ba96649eb5e67bd46305a410cd8b5492315cb2b0602bf52ecf965f102c1c4e7"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_cache_environment.fy",
+      "deleted": false,
+      "sha256": "bf35a192b06792ec04f035d850d7a21644bc35cd629771e60fcbf382229c9ddc"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_check_cli.fy",
+      "deleted": false,
+      "sha256": "6581d92f94632d2b64cf25c2a363379ed979160aeaaa7487de22621dd31ad4a7"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_compiler_identity.fy",
+      "deleted": true,
+      "sha256": null
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_compiler_input.fy",
+      "deleted": false,
+      "sha256": "fe22ea1cc60b77db0146e0655d563e4107dd7301d745a6d54962f6c9ef3ed144"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_instance_graph.fy",
+      "deleted": false,
+      "sha256": "5f1c3cebb9a1381971e10a94fa04581636aae7048f126ff7a7b78478c45725b8"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_json_string.fy",
+      "deleted": false,
+      "sha256": "8604ab9a90c3bdc4e202ae69dc478cb2c7ad629f4a7ab1883a55c081a7bcf5f5"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_module_visibility.fy",
+      "deleted": false,
+      "sha256": "21b073b0601e2e4b3af0cccf0608458df07a3abf72613d75418ac7fbb078a3be"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_package_input.fy",
+      "deleted": false,
+      "sha256": "469b9919a6debc51ce75f8662b8bff57066abcf7f6e6b016332b651c94fdf623"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_source_catalog.fy",
+      "deleted": false,
+      "sha256": "9c98125a18d0f93aa89534311e20bf41c8a4ca3bc5be0339423abc754dbd6ffb"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_source_set.fy",
+      "deleted": false,
+      "sha256": "06697a5f627f5b9158a0cd294064b4927564237fea82e9295e3b852976d744d0"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_workspace_catalog.fy",
+      "deleted": false,
+      "sha256": "3b81a8fe294b68082b521783cff379aa2a3c088f8987637c87226cc35546e4cc"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_workspace_graph.fy",
+      "deleted": false,
+      "sha256": "d8cfb83fa7b2799e95a5d5bafbe7799c563a644948bcec461637449309d00861"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_workspace_input.fy",
+      "deleted": false,
+      "sha256": "4ff4346c9aeda57e0b17c28ceea033728a987fa8eb8c510e4c94803186604298"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_workspace_lock.fy",
+      "deleted": false,
+      "sha256": "9f57f03e70e0ecd6ab9ba64c88c38c2da79ac319ae64777a4287132264b4316a"
+    },
+    {
+      "path": "examples/lexer_candidate/src/syntax.fy",
+      "deleted": false,
+      "sha256": "421b3e8e917bd0880156edac7bb6fe8d47e461e77c5c3f33b419bb40cc3e6648"
+    }
+  ],
+  "fullGoSourceCheck": {
+    "passed": true,
+    "authoredFiles": 515,
+    "sdkFiles": 8,
+    "exit": 0,
+    "stdout": "check ok: 2 instance(s), 523 source file(s), 6561 MIR function(s), lock updated\n",
+    "stderr": "",
+    "seconds": 34.78200300000026
+  },
+  "priorNativeStandalone": {
+    "completed": 88,
+    "exactMatches": 80,
+    "pendingCliDiagnostics": 8,
+    "timedOutCases": 1
+  },
+  "finalNativeIntegration": {
+    "passed": false,
+    "reason": "Full dispatcher emission fails phase 5 code 1002; diagnosis ongoing."
+  },
+  "publicGoCliChanged": false,
+  "sdkAbiChanged": false,
+  "ciChanged": false,
+  "pushed": false
+}

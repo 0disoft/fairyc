@@ -24,3 +24,7 @@ pub fn Result<Loaded,Error> load_embedded(ref u8[] root,bool candidate,bool lock
     let state=switch(locks::apply(root,ref workspace,locked,meter)){case .ok(value):{value}case .err(e):{return .err(lock_failure(e));}};
     *budget=staged;return .ok(Loaded{.workspace,.state});
 }
+
+
+pub fn Loaded from_tests(visibility::Resolved workspace,locks::State state){return Loaded{.workspace,.state};}
+pub fn Error test_failure(visibility::LoadError error){return input_failure(error);}

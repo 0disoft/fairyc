@@ -107,6 +107,8 @@ pub fn Result<Graph,Error> bind(workspace::Workspace input,ref mut usize meter){
 fn LoadError input_failure(workspace::Error e){var v::Vec<workspace::Error> errors=v::empty<workspace::Error>();let bool ok=v::push<workspace::Error>(ref mut errors,e).is_ok;return LoadError{.phase=if(ok){1}else{3},.input=errors,.graph=v::empty<Error>()};}
 fn LoadError graph_failure(Error e){var v::Vec<Error> errors=v::empty<Error>();let bool ok=v::push<Error>(ref mut errors,e).is_ok;return LoadError{.phase=if(ok){2}else{3},.input=v::empty<workspace::Error>(),.graph=errors};}
 @effects(filesystem)
-pub fn Result<Graph,LoadError> load(ref u8[] root,ref mut sources::Budget budget,ref mut usize meter){
-    var sources::Budget staged=*budget;let workspace::Workspace input=switch(workspace::load(root,ref mut staged,meter)){case .ok(value):{value}case .err(e):{return .err(input_failure(e));}};let Graph graph=switch(bind(input,meter)){case .ok(value):{value}case .err(e):{return .err(graph_failure(e));}};*budget=staged;return .ok(graph);
+pub fn Result<Graph,LoadError> load(ref u8[] root,ref mut sources::Budget budget,ref mut usize meter){let selected=v::empty<bytes::Buffer>();return load_tests(root,ref selected,budget,meter);}
+@effects(filesystem)
+pub fn Result<Graph,LoadError> load_tests(ref u8[] root,ref v::Vec<bytes::Buffer> selected,ref mut sources::Budget budget,ref mut usize meter){
+    var sources::Budget staged=*budget;let workspace::Workspace input=switch(workspace::load_tests(root,selected,ref mut staged,meter)){case .ok(value):{value}case .err(e):{return .err(input_failure(e));}};let Graph graph=switch(bind(input,meter)){case .ok(value):{value}case .err(e):{return .err(graph_failure(e));}};*budget=staged;return .ok(graph);
 }

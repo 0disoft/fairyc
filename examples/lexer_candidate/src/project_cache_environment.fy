@@ -1,5 +1,5 @@
 module project_cache_environment;
-import project_compiler_identity as compiler;
+import windows_host_paths as paths;
 import project_compiler_image_hash as image;
 import project_cache_profile as profile;
 import project_cache_key as key;
@@ -13,7 +13,7 @@ pub fn ref u8[] compiler_build(ref Environment p){return image::value(ref p.comp
 pub fn ref u8[] standard_library(ref Environment p){return profile::standard_library(ref p.profile);}
 @effects(filesystem,environment)
 pub fn Result<Environment,Problem> current(ref mut usize work){
-    if(!budget::charge(work,0)){return .err(error(1,10));}let build=switch(compiler::current(work)){case .ok(p):{p}case .err(e):{return .err(Problem{.phase=1,.code=if(e.stage==5){10}else if(e.stage==6){11}else{9},.image=e});}};
+    if(!budget::charge(work,0)){return .err(error(1,10));}let build=switch(compiler_current(work)){case .ok(p):{p}case .err(e):{return .err(Problem{.phase=1,.code=if(e.stage==5){10}else if(e.stage==6){11}else{9},.image=e});}};
     let selected=switch(profile::current(work)){case .ok(p):{p}case .err(code):{return .err(error(2,code));}};return .ok(Environment{.compiler=build,.profile=selected});
 }
 fn Result<bytes::Buffer,u32> copy(ref u8[] value,ref mut usize work){if(!budget::charge(work,value.len+1)){return .err(10);}return switch(bytes::copy(value)){case .ok(p):{.ok(p)}case .err(_):{.err(11)}};}
@@ -29,4 +29,13 @@ pub fn Result<key::Environment,u32> key_environment(ref Environment p,ref mut us
     let backend=switch(copy(profile::backend(),work)){case .ok(p):{p}case .err(e):{return .err(e);}};
     let runtime=switch(copy(profile::runtime_abi(),work)){case .ok(p):{p}case .err(e):{return .err(e);}};
     return .ok(key::environment_of(build,language,mir,target,abi,toolchain,backend,runtime));
+}
+
+// Windows obtains the actual module filename through its existing host adapter,
+// never argv[0], PATH, a companion executable or a caller-supplied build label.
+@effects(filesystem,environment)
+fn Result<image::Identity,image::Problem> compiler_current(ref mut usize work){
+    if(!budget::charge(work,0)){return .err(image::Problem{.stage=5,.status=0,.os_code=0,.completed=0});}
+    let path=switch(paths::executable()){case .ok(p):{p}case .err(e):{return .err(image::Problem{.stage=7,.status=e.kind,.os_code=e.os_code,.completed=0});}};
+    return image::read_path(bytes::view(ref path),work);
 }

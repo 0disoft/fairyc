@@ -49,12 +49,15 @@ fn Result<keys::Index,Error> members(ref manifest::Manifest root,ref mut usize m
 }
 fn Result<Entry,Error> entry(modules::Modules loaded,ref u8[] path,usize at){let bytes::Buffer digest=switch(packages::source_digest(ref loaded)){case .ok(value):{value}case .err(code):{return .err(fail(problem(9,code,at,0),path,b""));}};return .ok(Entry{.input=loaded,.digest});}
 @effects(filesystem)
-pub fn Result<Catalog,Error> load(ref u8[] root,ref mut sources::Budget budget,ref mut usize meter){
-    var sources::Budget staged=*budget;let modules::Modules first=switch(packages::load_manifest(root,ref mut staged,meter)){case .ok(value):{value}case .err(e):{return .err(input_failure(e,b".",0));}};
+pub fn Result<Catalog,Error> load(ref u8[] root,ref mut sources::Budget budget,ref mut usize meter){let selected=v::empty<bytes::Buffer>();return load_tests(root,ref selected,budget,meter);}
+fn bool selected_test(ref v::Vec<bytes::Buffer> selected,ref u8[] path){var usize i=0;while(i<v::len<bytes::Buffer>(selected)){if(bytes::equal(bytes::view(v::at<bytes::Buffer>(selected,i)),path)){return true;}i+=1;}return false;}
+@effects(filesystem)
+pub fn Result<Catalog,Error> load_tests(ref u8[] root,ref v::Vec<bytes::Buffer> selected,ref mut sources::Budget budget,ref mut usize meter){
+    var sources::Budget staged=*budget;let modules::Modules first=switch(packages::load_manifest_tests(root,selected_test(selected,b"."),ref mut staged,meter)){case .ok(value):{value}case .err(e):{return .err(input_failure(e,b".",0));}};
     let keys::Index paths=switch(members(packages::package(ref first),meter)){case .ok(value):{value}case .err(e):{return .err(e);}};var bytes::Buffer uid_names=bytes::empty();var v::Vec<keys::Span> uid_spans=v::empty<keys::Span>();if(!keys::append(ref mut uid_names,ref mut uid_spans,manifest::package_value(packages::package(ref first),b"uid"))){return .err(fail(problem(10,0,0,0),b".",b""));}
     var v::Vec<Entry> entries=v::empty<Entry>();let Entry first_entry=switch(entry(first,b".",0)){case .ok(value):{value}case .err(e):{return .err(e);}};if(!v::push<Entry>(ref mut entries,first_entry).is_ok){return .err(fail(problem(10,0,0,0),b".",b""));}
     var usize at=1;while(at<keys::count(ref paths)){let ref u8[] relative=keys::key(ref paths,at);let bytes::Buffer absolute=switch(directory::resolve(root,relative,meter)){case .ok(value):{value}case .err(e):{var Problem p=problem(7,e.code,at,0);p.os_code=e.os_code;p.start=e.start;p.end=e.end;return .err(fail(p,relative,b""));}};
-        let modules::Modules loaded=switch(packages::load_manifest(bytes::view(ref absolute),ref mut staged,meter)){case .ok(value):{value}case .err(e):{return .err(input_failure(e,relative,at));}};let ref manifest::Manifest m=packages::package(ref loaded);
+        let modules::Modules loaded=switch(packages::load_manifest_tests(bytes::view(ref absolute),selected_test(selected,relative),ref mut staged,meter)){case .ok(value):{value}case .err(e):{return .err(input_failure(e,relative,at));}};let ref manifest::Manifest m=packages::package(ref loaded);
         if(manifest::workspace_present(m)){return .err(fail(problem(4,0,at,0),relative,b""));}if(!keys::append(ref mut uid_names,ref mut uid_spans,manifest::package_value(m,b"uid"))){return .err(fail(problem(10,0,at,0),relative,b""));}
         let Entry retained=switch(entry(loaded,relative,at)){case .ok(value):{value}case .err(e):{return .err(e);}};if(!v::push<Entry>(ref mut entries,retained).is_ok){return .err(fail(problem(10,0,at,0),relative,b""));}at+=1;
     }

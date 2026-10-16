@@ -5,7 +5,6 @@ import hir_borrow_paths as paths;
 import borrow_shapes as borrows;
 import tagged_types as tagged;
 import hir_model as h;
-import hir_origin_targets as targets;
 import hir_mutable_check as exclusive;
 import std::vec as v;
 
@@ -86,7 +85,7 @@ fn usize trace_origin(ref h::Program p, ref mut Context c,ref mut v::Vec<usize> 
     }
     if (kind == 6) {
         let usize returned = summary(p,c,tables,sets,members,cache,e.binding,depth + 1); if (returned == 0 || c.problem.code != 0) { return 0; }if(returned==65538){return 65538;}
-        let usize parameter=targets::parameter(p,e.binding,returned);return if(parameter!=0){origin(p,c,tables,sets,members,cache,h::edge_at(p,e.edge_start+parameter-1),depth+1)}else{fail(c,2103,e.start,e.end)};
+        let usize parameter=origin_parameter(p,e.binding,returned);return if(parameter!=0){origin(p,c,tables,sets,members,cache,h::edge_at(p,e.edge_start+parameter-1),depth+1)}else{fail(c,2103,e.start,e.end)};
     } return fail(c,2103,e.start,e.end);
 }
 fn usize summary(ref h::Program p, ref mut Context c,ref mut v::Vec<usize> tables, ref mut v::Vec<owners::Entry> sets, ref mut v::Vec<usize> members, ref mut v::Vec<cached::Slot> cache, usize binding, usize depth) {
@@ -238,3 +237,6 @@ pub fn h::Problem check(ref h::Program p) {
     if (c.problem.code != 0) { return c.problem; }
     return exclusive::check(p,v::view_usize(ref tables)[..1153],v::view_usize(ref tables)[1153..2306],v::view_usize(ref tables)[2306..3459],ref origins,ref sets,ref members,ref cache);
 }
+
+// One-based parameter position; zero means no proven input-origin substitution.
+fn usize origin_parameter(ref h::Program p,usize callee,usize origin){var usize i=0;while(i<h::function_count(p)){let f=h::function_at(p,i);if(f.binding==callee){var usize j=0;while(j<f.parameter_count){if(h::edge_at(p,f.parameter_start+j)==origin){return j+1;}j+=1;}return 0;}i+=1;}return 0;}

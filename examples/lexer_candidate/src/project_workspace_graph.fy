@@ -63,3 +63,5 @@ pub fn Result<Graph,Error> inject(local::Graph input,sdk::Bundle library,ref mut
 }
 @effects(filesystem)
 pub fn Result<Graph,local::LoadError> load(ref u8[] root,ref mut sources::Budget budget,ref mut usize meter){let local::Graph input=switch(local::load(root,budget,meter)){case .ok(value):{value}case .err(e):{return .err(e);}};return .ok(without_sdk(input));}
+
+pub fn bool module_is_test(ref Graph g,usize owner,usize module_index){return !is_sdk(g,owner) && sources::is_test(modules::source_set(package(g,owner)),module_index);}

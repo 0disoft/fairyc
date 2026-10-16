@@ -36,7 +36,9 @@ fn bool source_name(ref u8[] name){return name.len>=3 && bytes::equal(name[name.
 // The file counter is cumulative across packages and commits only on success.
 // Sizes are enumeration observations; later byte reads must recheck their budget.
 @effects(filesystem)
-pub fn Result<Catalog,Error> collect(ref u8[] root,ref mut usize files,ref mut usize work){
+pub fn Result<Catalog,Error> collect(ref u8[] root,ref mut usize files,ref mut usize work){return collect_optional(root,false,files,work);}
+@effects(filesystem)
+pub fn Result<Catalog,Error> collect_optional(ref u8[] root,bool optional,ref mut usize files,ref mut usize work){
     if(root.len==0 || root.len>4095 || *files>4096){return .err(fail(6,0,root));}if(!text::validate_utf8(root).is_ok){return .err(fail(8,0,root));}
     var bytes::Buffer names=bytes::empty();var v::Vec<File> collected=v::empty<File>();
     var v::Vec<Span> directories=v::empty<Span>();if(!v::push<Span>(ref mut directories,Span{.start=0,.end=0}).is_ok){return .err(fail(7,0,root));}var usize directory=0;
@@ -65,7 +67,7 @@ pub fn Result<Catalog,Error> collect(ref u8[] root,ref mut usize files,ref mut u
         }
         switch(fs::close_dir(stream)){case .ok(_):{}case .err(e):{return .err(fail(1,e.os_code,bytes::view(ref absolute)));}};directory+=1;
     }
-    if(v::len<File>(ref collected)==0){return .err(fail(5,0,root));}
+    if(!optional && v::len<File>(ref collected)==0){return .err(fail(5,0,root));}
     var v::Vec<usize> folded=v::empty<usize>();let u32 folded_code=order(ref names,ref collected,true,ref mut folded,work);if(folded_code!=0){return .err(fail(folded_code,0,root));}
     var usize index=1;while(index<v::len<File>(ref collected)){let usize before=*v::at<usize>(ref folded,index-1);let usize after=*v::at<usize>(ref folded,index);let ref u8[] a=key(ref names,ref collected,before,true);let ref u8[] b=key(ref names,ref collected,after,true);if(!paths::charge(work,a.len+b.len+1)){return .err(fail(6,0,root));}if(bytes::equal(a,b)){return .err(fail(4,0,key(ref names,ref collected,after,false)));}index+=1;}
     var v::Vec<usize> sorted=v::empty<usize>();let u32 sorted_code=order(ref names,ref collected,false,ref mut sorted,work);if(sorted_code!=0){return .err(fail(sorted_code,0,root));};*files+=v::len<File>(ref collected);return .ok(Catalog{.names,.files=collected,.order=sorted});

@@ -60,7 +60,9 @@ fn Result<v::Vec<Edge>,Error> declarations(ref catalog::Catalog input,ref mut us
     }return .ok(edges);
 }
 @effects(filesystem)
-pub fn Result<Workspace,Error> load(ref u8[] root,ref mut sources::Budget budget,ref mut usize meter){
-    var sources::Budget staged=*budget;let catalog::Catalog loaded=switch(catalog::load(root,ref mut staged,meter)){case .ok(value):{value}case .err(e):{return .err(catalog_error(e));}};
+pub fn Result<Workspace,Error> load(ref u8[] root,ref mut sources::Budget budget,ref mut usize meter){let selected=v::empty<bytes::Buffer>();return load_tests(root,ref selected,budget,meter);}
+@effects(filesystem)
+pub fn Result<Workspace,Error> load_tests(ref u8[] root,ref v::Vec<bytes::Buffer> selected,ref mut sources::Budget budget,ref mut usize meter){
+    var sources::Budget staged=*budget;let catalog::Catalog loaded=switch(catalog::load_tests(root,selected,ref mut staged,meter)){case .ok(value):{value}case .err(e):{return .err(catalog_error(e));}};
     let v::Vec<Edge> edges=switch(declarations(ref loaded,meter)){case .ok(value):{value}case .err(e):{return .err(e);}};*budget=staged;return .ok(Workspace{.catalog=loaded,.edges});
 }
