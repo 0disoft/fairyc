@@ -1,0 +1,190 @@
+{
+  "schema": "fairyc.candidate-cli-parity/v2",
+  "scopedChecksPassed": true,
+  "completeGoCliReplacement": false,
+  "sourceRevision": "abb465b0",
+  "implementationCommits": [
+    "c939a442",
+    "5aaa8afe",
+    "8ba4f434",
+    "6ff78604",
+    "abb465b0"
+  ],
+  "build": {
+    "receipt": ".cache\\cli-parity-rest-20261017\\final-candidate-split-verified\\receipt.json",
+    "sha256": "f19118616e2096e7ed201b0d8a5785901f14fe9a536639da7ec6fef9f8462b68",
+    "sourceFiles": 512,
+    "packetBytes": 41750782,
+    "packetSHA256": "37a70865df16a5e3de7b6bd241a51d809be22ec366074ad24920496545182e52",
+    "goFrontendInvoked": false,
+    "metadataOnlyGoInvoked": true,
+    "version": "Fairy C Stage 0\ncompiler: v0.0.0-20261016195004-abb465b04103+dirty\nsdk: fairyc-sdk-stdlib/0 0.0.0-stage0.86\nlanguage: fairyc-language/20\nruntime: fairyc-runtime/0\nrevision: abb465b04103ebf004f0ec690e74f0b4b4014944\nmodified: true\n",
+    "images": [
+      {
+        "profile": "development",
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\cli-parity-rest-20261017\\final-candidate-split-verified\\development\\fairyc.exe",
+        "sha256": "f1f4e06bf567b2ad5175eaaaa60b9f287434ea51b6709b25ae8cc3980b2f210d",
+        "driverSHA256": "68917e76329f3952d352c6cf37ebbe0c19fcd84fb6f68b72dcf8d32e272ff512"
+      },
+      {
+        "profile": "release",
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\cli-parity-rest-20261017\\final-candidate-split-verified\\release\\fairyc.exe",
+        "sha256": "ce72b40800a0849b3fc6040d2d411168e819dbaa440e0258ea2b26471a9e34b6",
+        "driverSHA256": "68917e76329f3952d352c6cf37ebbe0c19fcd84fb6f68b72dcf8d32e272ff512"
+      }
+    ],
+    "invocations": [
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\cli-parity-rest-20261017\\candidate\\release\\fairyc.exe",
+          "--c-project-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\cli-parity-rest-20261017\\final-candidate-split-verified\\sources.list"
+        ],
+        "seconds": 447.57378339999923,
+        "exit": 0,
+        "stdoutBytes": 41750782,
+        "stdoutSHA256": "37a70865df16a5e3de7b6bd241a51d809be22ec366074ad24920496545182e52",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\semantic-test-20261017\\fairyc-candidate-build-16k.exe",
+          "--packet",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\cli-parity-rest-20261017\\final-candidate-split-verified\\candidate-packet.bin",
+          "--packet-sha256",
+          "37a70865df16a5e3de7b6bd241a51d809be22ec366074ad24920496545182e52",
+          "--output",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\cli-parity-rest-20261017\\final-candidate-split-verified\\development\\fairyc.exe",
+          "--stack-reserve-bytes",
+          "16777216"
+        ],
+        "seconds": 32.5996292000018,
+        "exit": 0,
+        "stdoutBytes": 206,
+        "stdoutSHA256": "b83531ae025d2c7af85cb85317801bdd7fd65a1b14ee0b20674131b3fdfad7c2",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\cli-parity-rest-20261017\\final-candidate-split-verified\\development\\fairyc.exe",
+          "--version"
+        ],
+        "seconds": 0.025461100001848536,
+        "exit": 0,
+        "stdoutBytes": 229,
+        "stdoutSHA256": "1d142e6334501e0821d95680da4fd55049a520631a696c768fe511186e9ec893",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\semantic-test-20261017\\fairyc-candidate-build-16k.exe",
+          "--packet",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\cli-parity-rest-20261017\\final-candidate-split-verified\\candidate-packet.bin",
+          "--packet-sha256",
+          "37a70865df16a5e3de7b6bd241a51d809be22ec366074ad24920496545182e52",
+          "--output",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\cli-parity-rest-20261017\\final-candidate-split-verified\\release\\fairyc.exe",
+          "--release",
+          "--stack-reserve-bytes",
+          "16777216"
+        ],
+        "seconds": 332.78978579999966,
+        "exit": 0,
+        "stdoutBytes": 207,
+        "stdoutSHA256": "d48ac55f116d3a3765c7e221517e40d79bd0e750b510a8bd75b6b3cc7ec862d7",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\cli-parity-rest-20261017\\final-candidate-split-verified\\release\\fairyc.exe",
+          "--version"
+        ],
+        "seconds": 0.022880000000441214,
+        "exit": 0,
+        "stdoutBytes": 229,
+        "stdoutSHA256": "1d142e6334501e0821d95680da4fd55049a520631a696c768fe511186e9ec893",
+        "stderr": ""
+      }
+    ]
+  },
+  "checks": {
+    "semantic-final": {
+      "cases": 196,
+      "exactMatches": 196,
+      "receipt": ".cache\\cli-parity-rest-20261017\\semantic-final\\receipt.json",
+      "sha256": "bec9a94440dcc96b824ac4d71bb05d70184ac5ab761b298b36df5cc1e5ea10af"
+    },
+    "list-final": {
+      "cases": 178,
+      "exactMatches": 178,
+      "receipt": ".cache\\cli-parity-rest-20261017\\list-final\\receipt.json",
+      "sha256": "e615d34e50e4b90aa1693ab403204d82ab1aa061325f1924e2fd56e4519d4a75"
+    },
+    "native-final": {
+      "cases": 6,
+      "exactMatches": 6,
+      "receipt": ".cache\\cli-parity-rest-20261017\\native-final\\receipt.json",
+      "sha256": "cdbdffc35bc6c06da7cc7e404180cb928a7b09876d288e5e55627f13d88f96e2"
+    },
+    "cli-final-development": {
+      "cases": 30,
+      "exactMatches": 30,
+      "receipt": ".cache\\cli-parity-rest-20261017\\cli-final-development\\receipt.json",
+      "sha256": "224f5ff4c626be6b94fc19f15b7137c3dc1a6c4c06cd4319bbaa6974bedf2fd3"
+    },
+    "cli-final-release": {
+      "cases": 30,
+      "exactMatches": 30,
+      "receipt": ".cache\\cli-parity-rest-20261017\\cli-final-release\\receipt.json",
+      "sha256": "c059798be1581bf9bcd91807528980f64db4dd479b74201d8d32d77cf22ceead"
+    }
+  },
+  "comparisons": 440,
+  "exactMatches": 440,
+  "goValidation": {
+    "commands": [
+      "go test ./internal/mir -run '^TestIgnoredResourceTemporaryCleanup' -count=1",
+      "go test ./internal/mir -count=1",
+      "go test ./internal/semantic -run 'Test(ResourceTemporary|ResourceLinearTemporary|AnalyzeRejectsDiscardedLinearTemporary)' -count=1"
+    ],
+    "passed": true,
+    "nativeIgnoredTemporaryRegression": {
+      "path": ".cache\\cli-parity-rest-20261017\\ignored-native-regression.json",
+      "sha256": "a44813abd22cb07cab4673516f3c41c03661a972e2ba07db07f744c6eab2b87e"
+    }
+  },
+  "sourceBudgets": {
+    "files": 512,
+    "perUnitWork": 1048576,
+    "projectWork": 16777216,
+    "changed": false
+  },
+  "evidenceNotes": [
+    "The 36KB single interpreter exceeded its unit analysis meter; value/place helpers are now a separate unit.",
+    "Body-table lookup is canonical in the existing body model; its old module remains a test compatibility wrapper outside the full CLI closure.",
+    "The earlier Go-authored diagnostic image passed 98 strict comparisons; final current-source candidate C results are the checks above.",
+    "The build uses Go only for source-version metadata, not Fairy frontend fallback."
+  ],
+  "limitations": [
+    "Region, general raw-pointer execution and host/foreign calls remain outside the candidate default interpreter slice.",
+    "Candidate CFG/allocation/path work accounting is independent of Go MIR accounting; numerical exhaustion points may differ.",
+    "Linux, the full native CLI/compiler suite and consecutive Stage1/Stage2 fixed-point equality were not rerun."
+  ],
+  "pushed": false,
+  "released": false,
+  "initialUnitBudgetRejection": {
+    "path": ".cache/cli-parity-rest-20261017/final-candidate/invocations.json",
+    "sha256": "c1b9cab49dd683d894f539fd984254b2c14e66f4f8b215f318fb76c4924b19f1",
+    "resolvedBy": "abb465b0"
+  },
+  "refactorAudits": [
+    {
+      "path": ".cache\\cli-parity-rest-20261017\\refactor-import-audit.json",
+      "sha256": "ca102bc894a36f7b79a860db557e6b13d3d194abb20447dbcb3d133c962cbff9"
+    },
+    {
+      "path": ".cache\\cli-parity-rest-20261017\\refactor-body-audit.json",
+      "sha256": "e60b934716285fa6af4389f3d9e1b2e2adb9a6af750f735ff452a5e6d64bf608"
+    }
+  ]
+}

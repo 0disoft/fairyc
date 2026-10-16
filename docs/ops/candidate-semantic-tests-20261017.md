@@ -20,9 +20,10 @@ Runtime arithmetic reuses the constant evaluator while retaining distinct
 language trap categories and unsigned host-width arithmetic.
 
 Each test gets fresh values, local slots, captures, compound-assignment snapshots
-and a one-million-CFG-step allowance. The call-depth limit is 256. These are
-candidate CFG steps; their numerical exhaustion point need not equal Go MIR's
-operation/block accounting. Traps fail individual tests and execution continues.
+and a one-million-step runtime work allowance. CFG operations, per-cell
+allocation/copying and descriptor traversal count toward that allowance. The
+call-depth limit is 256. Its numerical exhaustion point need not equal Go
+MIR operation/block accounting. Traps fail individual tests and execution continues.
 Capability or execution-limit rejection aborts with code 2 and no partial report.
 Internal invariant/allocation failures return code 4.
 
@@ -132,7 +133,7 @@ Initial scalar implementation results (superseded by later additions below):
 
 The complete source/image hashes, profile results and limited validation scope
 are recorded in [candidate-semantic-tests-cli-20261017.json](evidence/candidate-semantic-tests-cli-20261017.json).
-The current release CLI is
+The initial scalar release CLI was
 `.cache/semantic-test-20261017/cli-final-verified/release/fairyc.exe`, with its
 matching `fairyc-candidate-build.exe` companion in the same directory.
 
@@ -166,3 +167,32 @@ node/statement/local lookup now lives in the body model; its earlier module
 remains a thin compatibility wrapper for authored tests. Production consumers
 use the model directly, freeing one source slot for the interpreter value unit.
 The complete dispatcher remains at 512 sources and all work limits stay intact.
+
+## Final expanded candidate C validation
+
+The authored candidate frontend emits the complete 512-source C packet in
+447.574 seconds: 41,750,782 bytes. Development and release native builds pass
+in 32.600 and 332.790 seconds. Source, stack, frame and work ceilings are kept.
+The Go executable is used only for source-version metadata; Fairy frontend
+C generation uses the candidate with no Go frontend fallback.
+
+The final current-source images pass **440 exact comparisons**: 196 default
+semantic reports, 178 test-list comparisons, 60 shared CLI invocations and six
+native report comparisons. Every measured case requires identical status,
+stdout and stderr; no capability rejection is tolerated as a match. Default
+semantic cases run without an adjacent native driver and preserve locked
+workspace bytes and modification times. `--version` matches the fresh Go
+source-build oracle in both profiles.
+
+Go `internal/mir` tests and focused temporary/linear-resource semantic tests
+pass. The discarded constructor/returned-resource regression also matches
+through real native execution: both test entries trap as `assertion-failed`.
+Linux, the full native/compiler suite and consecutive Stage1/Stage2 fixed-point
+equality are not rerun. Region/raw-pointer/foreign execution and independent
+runtime work accounting remain the limits described above. No push or release
+is performed.
+
+The current release image and matching native driver are under
+`.cache/cli-parity-rest-20261017/final-candidate-split-verified/release/`.
+Full hashes, build invocations and comparison receipt hashes are recorded in
+[candidate-cli-parity-20261017.json](evidence/candidate-cli-parity-20261017.json).
