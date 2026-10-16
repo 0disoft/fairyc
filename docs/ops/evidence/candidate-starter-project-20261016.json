@@ -1,0 +1,70 @@
+{
+  "schema": "fairyc.candidate-starter-project/v1",
+  "passed": true,
+  "source": {
+    "path": "examples/lexer_candidate/src/file_cli.fy",
+    "sha256": "50fe5482884b3f941c6f255b257c39181fc3fd94fd245f39990a0f81e7b843ab"
+  },
+  "standalone": {
+    "path": "main.fy",
+    "sha256": "3289590ef9240395cd86364eeabe699a46170f87276bbec3f0073612f8d86722",
+    "bytes": 22178,
+    "sourceClosure": 57,
+    "goMIRFunctions": 963
+  },
+  "fullAuthoredGoCheck": {
+    "passed": true,
+    "authoredSources": 515,
+    "sdkSources": 8,
+    "sourceFiles": 523,
+    "mirFunctions": 6472,
+    "seconds": 61.333756300009554,
+    "receipt": "buffer-full-go-check.json"
+  },
+  "selectedCliCases": 26,
+  "selectedCliExactMatchesAgainstFixedGo": 26,
+  "outputFailureCases": 8,
+  "injectedFailureCases": 8,
+  "recordedEvidence": [
+    {
+      "path": ".cache/candidate-parity-fixes-20261016/scaffold-probe/build-receipt.json",
+      "sha256": "95566d93b3e84a1e9da39fb3c17bb871156473d2614bff9ab9d70059f8d7fb1b"
+    },
+    {
+      "path": ".cache/candidate-parity-fixes-20261016/scaffold-probe/buffer-full-go-check.json",
+      "sha256": "336502bf6db5b70607f42ce1469352355283733290164cefae31f360e48f03df"
+    },
+    {
+      "path": ".cache/candidate-parity-fixes-20261016/scaffold-probe/buffer-cli-comparison.json",
+      "sha256": "d38261fbd86ed2de3cd4fe7cd46e09a7a9c583fc5e96def252f4caef89d29440"
+    },
+    {
+      "path": ".cache/candidate-parity-fixes-20261016/scaffold-probe/output-failures.json",
+      "sha256": "c64daccf4af39bfc6261f6e50956fd45c0741411205317c335c0bdc9e675e1fb"
+    },
+    {
+      "path": ".cache/candidate-parity-fixes-20261016/scaffold-probe/fault-receipt.json",
+      "sha256": "196baed603f57fe0add871fd069bd9653817fba058bb1c07c0528fde37760de3"
+    },
+    {
+      "path": ".cache/candidate-parity-fixes-20261016/scaffold-probe/BUFFER-HANDOFF.md",
+      "sha256": "23f138c4d76edfcafb441c471378254dd352e5297476e8495ed13365cb68a7f3"
+    }
+  ],
+  "assertions": [
+    "the five completed files match the Go starter byte for byte",
+    "existing regular files, directories, live and dangling links are preserved",
+    "creation and rollback operate under retained contained directory pins",
+    "stdout failure after successful creation preserves the completed project",
+    "path and template storage reuse owned Buffer specializations without raising generic limits"
+  ],
+  "newSourceModules": 0,
+  "fullNativeCliIntegrationPending": true,
+  "scope": "Windows authored new command; Linux and paths beyond the SDK 4095-byte capacity not verified",
+  "sourceOfTruthChanged": false,
+  "publicApiChanged": false,
+  "sdkAbiChanged": false,
+  "dbChanged": false,
+  "ciChanged": false,
+  "pushed": false
+}
