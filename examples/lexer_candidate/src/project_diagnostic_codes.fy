@@ -15,37 +15,37 @@ pub fn u32 code(u32 phase,u32 stage,u32 raw){
 // Only named language diagnostics have a public E-code. Unknown subset,
 // allocation, capacity and invariant failures retain their existing fallback.
 pub fn ref u8[] summary(u32 code){
-    if(code==101){return b"name or qualified path cannot be resolved";}
-    if(code==102){return b"declaration duplicates a name in the same scope";}
+    if(code==101){return b"unresolved name or path";}
+    if(code==102){return b"duplicate declaration in one scope";}
     if(code==103){return b"item is not visible from this module";}
-    if(code==1007){return b"condition or logical operand is not bool";}
-    if(code==1008){return b"assignment target is not a mutable place";}
+    if(code==1007){return b"condition or logical operand must be bool";}
+    if(code==1008){return b"assignment target is not mutable";}
     if(code==1010){return b"call argument count does not match the declaration";}
-    if(code==1013){return b"integer literal is outside the selected type's range";}
-    if(code==1014){return b"call argument label does not match its position or target";}
-    if(code==4201){return b"invalid must_use declaration";}
+    if(code==1013){return b"Integer literal is outside the range of its selected `i32`, `u8`, `u32`, or `usize` type.";}
+    if(code==1014){return b"Call argument label does not match its position or the call target does not support labels.";}
+    if(code==4201){return b"@must_use must appear once without arguments on a callable with an eligible inert result";}
     if(code==4101){return b"Result value must be returned, propagated, matched, or explicitly discarded";}
     if(code==4102){return b"postfix ? requires a Result value";}
     if(code==4103){return b"propagated Result error type does not match the enclosing return type";}
     if(code==3103){return b"compiler-owned Region capability cannot be stored";}
     if(code==3104){return b"compiler-owned Region capability cannot be constructed directly";}
-    if(code==4202){return b"must_use call result is ignored without discard";}
-    if(code==4301){return b"invalid compile-time declaration";}
-    if(code==4302){return b"expression is outside the supported compile-time subset";}
-    if(code==4303){return b"compile-time evaluation traps";}
-    if(code==4304){return b"compile-time dependency cycle or evaluator budget exhausted";}
-    if(code==4305){return b"static_assert evaluates to false";}
-    if(code==4401){return b"source_location requires its reserved exact call form";}
+    if(code==4202){return b"@must_use call result must be consumed or explicitly discarded";}
+    if(code==4301){return b"A module constant or `@const_eval` declaration is malformed, misplaced, public, or otherwise ineligible.";}
+    if(code==4302){return b"A well-typed expression is outside the admitted compile-time subset.";}
+    if(code==4303){return b"Compile-time evaluation traps on arithmetic, division, shift, or cast semantics.";}
+    if(code==4304){return b"A compile-time dependency cycle or deterministic evaluator budget prevents a result.";}
+    if(code==4305){return b"A module-level `static_assert` evaluates to false.";}
+    if(code==4401){return b"The reserved `source_location` intrinsic name is declared, bound, or used without its exact call form.";}
     if(code==4501){return b"Generic source preparation rejects a malformed, colliding, shadowing, or reserved declaration or binding.";}
     if(code==4502){return b"A generic call requires supported explicit scalar type arguments with the declared arity.";}
     if(code==4503){return b"A generic declaration or concrete request exceeds a catalog or expansion limit, or triggers a specialization cycle.";}
-    if(code==5101){return b"unchecked operation is outside an unsafe boundary";}
-    if(code==5102){return b"raw foreign signature contains a safe reference";}
-    if(code==5106){return b"invalid or conflicting link_name declaration";}
-    if(code==7101){return b"invalid effects declaration";}
-    if(code==7102){return b"call or resource cleanup exceeds the declared effects";}
-    if(code==7201){return b"invalid package state declaration or contract UID authority";}
-    if(code==7202){return b"package state field name is declared more than once";}
-    if(code==7203){return b"unsupported or malformed package state storage codec";}
+    if(code==5101){return b"Raw-pointer or unchecked operation appears outside an unsafe boundary.";}
+    if(code==5102){return b"Raw foreign signature contains a safe reference.";}
+    if(code==5106){return b"@link_name requires exactly one nonempty string and may appear only once";}
+    if(code==7101){return b"`@effects` is empty, duplicated, malformed, or names an effect outside the Stage 0 vocabulary.";}
+    if(code==7102){return b"A call or compiler-scheduled resource cleanup requires one or more effects not declared by the enclosing function.";}
+    if(code==7201){return b"A package state declaration has malformed UID authority, invalid visibility, or more than one package owner.";}
+    if(code==7202){return b"A package state field name is declared more than once.";}
+    if(code==7203){return b"A package state field uses an unsupported or malformed storage codec declaration.";}
     return b"";
 }

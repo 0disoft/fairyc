@@ -73,16 +73,16 @@ fn bool compilation(ref check::Error e,ref mut bytes::Buffer out){let p=check::c
     if(p.phase==2 && p.code==5){return append(out,b"fairyc: semantic subset does not support type ") && append(out,source[p.start..p.end]) && append(out,b" at ") && append(out,input::file(sources,p.module_index)) && range(out,p.start,p.end);}
     if(!prefix(out,package,input::file(sources,p.module_index),source,p.start)){return false;}
     if(p.code==6){if(!append(out,b"E0103: item is not visible from this module")){return false;}}
-    else if(p.code==2101){if(!append(out,b"E2101: borrow conflicts with a live loan")){return false;}}
-    else if(p.code==2102){if(!append(out,b"E2102: returned borrow escapes a local owner")){return false;}}
-    else if(p.code==2103){if(!append(out,b"E2103: returned borrow has multiple origins")){return false;}}
-    else if(p.code==2105){if(!append(out,b"E2105: owner is moved while borrowed")){return false;}}
-    else if(p.code==3101){if(!append(out,b"E3101: borrow escapes a local Region")){return false;}}
-    else if(p.code==1012){if(!append(out,b"E1012: loop control is outside a loop")){return false;}}
+    else if(p.code==2101){if(!append(out,b"E2101: Access conflicts with an active shared or mutable loan.")){return false;}}
+    else if(p.code==2102){if(!append(out,b"E2102: Returned borrow originates from a local value.")){return false;}}
+    else if(p.code==2103){if(!append(out,b"E2103: Returned borrow has multiple possible input origins.")){return false;}}
+    else if(p.code==2105){if(!append(out,b"E2105: Borrow outlives or moves its owner.")){return false;}}
+    else if(p.code==3101){if(!append(out,b"E3101: Region-derived value escapes its lexical region")){return false;}}
+    else if(p.code==1012){if(!append(out,b"E1012: break and continue require an enclosing loop")){return false;}}
     else if(p.code==1101){if(!append(out,b"E1101: resource is used after ownership was moved")){return false;}}
-    else if(p.code==1102){if(!append(out,b"E1102: resource representation cannot be moved or overwritten")){return false;}}
-    else if(p.code==1103){if(!append(out,b"E1103: resource field cannot be moved separately")){return false;}}
-    else if(p.code==1104 || p.code==1105){if(!append(out,if(p.code==1104){b"E1104: resource ownership differs between branches"}else{b"E1105: resource ownership differs at loop entry"})){return false;}}
+    else if(p.code==1102){if(!append(out,b"E1102: Operation would create or execute a second cleanup obligation.")){return false;}}
+    else if(p.code==1103){if(!append(out,b"E1103: moving a field out of a resource is not supported")){return false;}}
+    else if(p.code==1104 || p.code==1105){if(!append(out,if(p.code==1104){b"E1104: branch join leaves resource ownership path-dependent"}else{b"E1105: loop body changes the resource state required by the next iteration"})){return false;}}
     else if(p.code==1006 || p.code==1009){var bool returned=p.code==1009;var usize at=1;while(at<=syntax::statement_count(parsed)){let s=syntax::statement_at(parsed,at);if(s.kind==3 && s.expression!=0){let value=syntax::expression_at(parsed,s.expression);returned=returned || value.start==p.start && value.end==p.end;}at+=1;}if(!append(out,if(returned){b"E1009: return value does not match the declared result type"}else{b"E1006: incompatible expected and actual types"})){return false;}}
     else{let code=diagnostics::code(p.phase,p.stage,p.code);if(code!=0){if(!code_text(out,code) || !append(out,b": ") || !append(out,diagnostics::summary(code))){return false;}}else if(!append(out,b"source is outside the supported compiler subset")){return false;}}
     if(!range(out,p.start,p.end)){return false;}let file=input::file(sources,p.module_index);

@@ -1,0 +1,1494 @@
+{
+  "schema": "fairyc.candidate-check-parity/v1",
+  "comparisonCompleted": true,
+  "fullParity": false,
+  "profile": "development",
+  "cases": 169,
+  "summary": {
+    "completed": 169,
+    "acceptanceMatch": 169,
+    "exitMatch": 169,
+    "firstDiagnosticMatch": 169,
+    "allDiagnosticsMatch": 167,
+    "stdoutMatch": 169,
+    "stderrMatch": 141,
+    "exactMatch": 141
+  },
+  "skipped": [
+    {
+      "family": "region",
+      "id": "fail.flow.local-region-escape",
+      "reason": "direct fixture packageGraph requires a separate workspace adapter"
+    }
+  ],
+  "sourceInputs": [
+    {
+      "path": "examples/lexer_candidate/src/project_check.fy",
+      "sha256": "e5a92c92bc8df2815a60884ec72fbe2a0bc259ff864ddbeb76878f26fd9d297d"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_check_text.fy",
+      "sha256": "1e4e1c2d653b232f96d586cb0932b38fc46b346a521ed63dee30f0906e5afa94"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_diagnostic_codes.fy",
+      "sha256": "8ec76877e468f6c7e7cc32012ec9b796d5b375ac15fb63ac1a1c3167f9cf61a4"
+    }
+  ],
+  "compilerBuildReceipt": {
+    "path": ".cache\\candidate-parity-fixes-20261016\\check-cli\\receipt.json",
+    "sha256": "7715ffbadcf8bd39133f7facd93e6b976b39546dd6ee74cb5b38511cdaa2558a"
+  },
+  "comparisonReceipt": {
+    "path": ".cache\\candidate-parity-fixes-20261016\\check-comparison\\receipt.json",
+    "sha256": "eee55a562bb29beafcb46e3c93263c754256675cec09581e9a41e313f3fcd2a8"
+  },
+  "remainingDifferences": [
+    {
+      "id": "fail.flow.must-use-ignored",
+      "comparison": {
+        "completed": true,
+        "acceptanceMatch": true,
+        "exitMatch": true,
+        "firstDiagnosticMatch": true,
+        "allDiagnosticsMatch": true,
+        "stdoutMatch": true,
+        "stderrMatch": false,
+        "exactMatch": false
+      },
+      "go": {
+        "argv": [
+          "check"
+        ],
+        "exit": 3,
+        "timedOut": false,
+        "seconds": 0.09557659999700263,
+        "stdout": "",
+        "stderr": "main.fy:7:5: E4202: @must_use call result must be consumed or explicitly discarded [bytes 75..83]\n  must-use-declaration: main.fy:3:1 [bytes 14..23]\n",
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderrSHA256": "1a90184d05c45536d666a113365a2975977ca65fc8e300414650c936d5b8ff40",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E4202",
+            "start": 75,
+            "end": 83
+          }
+        ]
+      },
+      "candidate": {
+        "argv": [
+          "check",
+          "--locked"
+        ],
+        "exit": 3,
+        "timedOut": false,
+        "seconds": 0.07966899999883026,
+        "stdout": "",
+        "stderr": "main.fy:7:5: E4202: @must_use call result must be consumed or explicitly discarded [bytes 75..83]\n",
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderrSHA256": "db0306618b042c5ddc164a40620ffd0ac379a0ba1a1afa5bd439be69ab63562e",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E4202",
+            "start": 75,
+            "end": 83
+          }
+        ]
+      }
+    },
+    {
+      "id": "fail.type.must-use-invalid",
+      "comparison": {
+        "completed": true,
+        "acceptanceMatch": true,
+        "exitMatch": true,
+        "firstDiagnosticMatch": true,
+        "allDiagnosticsMatch": true,
+        "stdoutMatch": true,
+        "stderrMatch": false,
+        "exactMatch": false
+      },
+      "go": {
+        "argv": [
+          "check"
+        ],
+        "exit": 3,
+        "timedOut": false,
+        "seconds": 0.10272969999641646,
+        "stdout": "",
+        "stderr": "main.fy:3:1: E4201: @must_use must appear once without arguments on a callable with an eligible inert result [bytes 14..23]\n  result-type: main.fy:4:4 [bytes 27..31]\n",
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderrSHA256": "49b9036d05f3e57b18f1612bbe9d1d8f388eab0241af384c1fca4c3e6f518b66",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E4201",
+            "start": 14,
+            "end": 23
+          }
+        ]
+      },
+      "candidate": {
+        "argv": [
+          "check",
+          "--locked"
+        ],
+        "exit": 3,
+        "timedOut": false,
+        "seconds": 0.055666499996732455,
+        "stdout": "",
+        "stderr": "main.fy:3:1: E4201: @must_use must appear once without arguments on a callable with an eligible inert result [bytes 14..23]\n",
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderrSHA256": "db661f6431f2a5871f174545d35487feb2459464fad484bb2c561372a187eb9b",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E4201",
+            "start": 14,
+            "end": 23
+          }
+        ]
+      }
+    },
+    {
+      "id": "fail.resolve.duplicate-declaration",
+      "comparison": {
+        "completed": true,
+        "acceptanceMatch": true,
+        "exitMatch": true,
+        "firstDiagnosticMatch": true,
+        "allDiagnosticsMatch": true,
+        "stdoutMatch": true,
+        "stderrMatch": false,
+        "exactMatch": false
+      },
+      "go": {
+        "argv": [
+          "check"
+        ],
+        "exit": 3,
+        "timedOut": false,
+        "seconds": 0.13376280000375118,
+        "stdout": "",
+        "stderr": "main.fy:7:8: E0102: duplicate declaration in one scope [bytes 55..60]\n  previous-declaration: main.fy:3:8 [bytes 21..26]\n",
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderrSHA256": "c276068373177ba233616481ed1e00de1e76a7444bebef56cde96e875021e292",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E0102",
+            "start": 55,
+            "end": 60
+          }
+        ]
+      },
+      "candidate": {
+        "argv": [
+          "check",
+          "--locked"
+        ],
+        "exit": 3,
+        "timedOut": false,
+        "seconds": 0.07402499999443535,
+        "stdout": "",
+        "stderr": "main.fy:7:8: E0102: duplicate declaration in one scope [bytes 55..60]\n",
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderrSHA256": "2e27d4f3efc3f53b8203af361c4a4c435896755f3462521c0f60e8049317f8c9",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E0102",
+            "start": 55,
+            "end": 60
+          }
+        ]
+      }
+    },
+    {
+      "id": "fail.type.type-mismatch",
+      "comparison": {
+        "completed": true,
+        "acceptanceMatch": true,
+        "exitMatch": true,
+        "firstDiagnosticMatch": true,
+        "allDiagnosticsMatch": true,
+        "stdoutMatch": true,
+        "stderrMatch": false,
+        "exactMatch": false
+      },
+      "go": {
+        "argv": [
+          "check"
+        ],
+        "exit": 3,
+        "timedOut": false,
+        "seconds": 0.09983339999598684,
+        "stdout": "",
+        "stderr": "main.fy:4:22: E1006: incompatible expected and actual types [bytes 53..54]\n  expected-type: main.fy:4:9 [bytes 40..44]\n",
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderrSHA256": "c9c2b064f0e86ebd2c662af34d7e12c014f3d71f7f883e5318c67191d77278cb",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E1006",
+            "start": 53,
+            "end": 54
+          }
+        ]
+      },
+      "candidate": {
+        "argv": [
+          "check",
+          "--locked"
+        ],
+        "exit": 3,
+        "timedOut": false,
+        "seconds": 0.07479970000713365,
+        "stdout": "",
+        "stderr": "main.fy:4:22: E1006: incompatible expected and actual types [bytes 53..54]\n",
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderrSHA256": "9e10981c5f20cf6e10f6a8037a22af14cf355c86c1c977f25269c3277f81f08a",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E1006",
+            "start": 53,
+            "end": 54
+          }
+        ]
+      }
+    },
+    {
+      "id": "fail.type.loop-control-outside-loop",
+      "comparison": {
+        "completed": true,
+        "acceptanceMatch": true,
+        "exitMatch": true,
+        "firstDiagnosticMatch": true,
+        "allDiagnosticsMatch": false,
+        "stdoutMatch": true,
+        "stderrMatch": false,
+        "exactMatch": false
+      },
+      "go": {
+        "argv": [
+          "check"
+        ],
+        "exit": 3,
+        "timedOut": false,
+        "seconds": 0.11779609999939566,
+        "stdout": "",
+        "stderr": "main.fy:4:5: E1012: break and continue require an enclosing loop [bytes 37..43]\nmain.fy:5:5: E1012: break and continue require an enclosing loop [bytes 48..57]\n",
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderrSHA256": "46adda02c46904f0113cae92331b24e1b3370d41c232996bff887c238a68f383",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E1012",
+            "start": 37,
+            "end": 43
+          },
+          {
+            "source": "main.fy",
+            "code": "E1012",
+            "start": 48,
+            "end": 57
+          }
+        ]
+      },
+      "candidate": {
+        "argv": [
+          "check",
+          "--locked"
+        ],
+        "exit": 3,
+        "timedOut": false,
+        "seconds": 0.08406120000290684,
+        "stdout": "",
+        "stderr": "main.fy:4:5: E1012: break and continue require an enclosing loop [bytes 37..43]\n",
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderrSHA256": "b4d0938d637fa8fc942cc0abc708868c7085bf75241bdc350ce4e56ea343c48f",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E1012",
+            "start": 37,
+            "end": 43
+          }
+        ]
+      }
+    },
+    {
+      "id": "fail.type.foreign-call-outside-unsafe",
+      "comparison": {
+        "completed": true,
+        "acceptanceMatch": true,
+        "exitMatch": true,
+        "firstDiagnosticMatch": true,
+        "allDiagnosticsMatch": true,
+        "stdoutMatch": true,
+        "stderrMatch": false,
+        "exactMatch": false
+      },
+      "go": {
+        "argv": [
+          "check"
+        ],
+        "exit": 3,
+        "timedOut": false,
+        "seconds": 0.1308290999950259,
+        "stdout": "",
+        "stderr": "main.fy:6:12: E5101: Raw-pointer or unchecked operation appears outside an unsafe boundary. [bytes 86..97]\n  declaration: main.fy:3:24 [bytes 37..44]\n",
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderrSHA256": "3a08f09abdab2aa7416bc5d4238636c47b784505d778fc85c1259ed4bf4c7c04",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E5101",
+            "start": 86,
+            "end": 97
+          }
+        ]
+      },
+      "candidate": {
+        "argv": [
+          "check",
+          "--locked"
+        ],
+        "exit": 3,
+        "timedOut": false,
+        "seconds": 0.07579999999870779,
+        "stdout": "",
+        "stderr": "main.fy:6:12: E5101: Raw-pointer or unchecked operation appears outside an unsafe boundary. [bytes 86..97]\n",
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderrSHA256": "ad0456140d06c12b617781a4e3503745de242bedb1bf6675f0a9abdc8327f5c8",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E5101",
+            "start": 86,
+            "end": 97
+          }
+        ]
+      }
+    },
+    {
+      "id": "fail.flow.borrow-conflict",
+      "comparison": {
+        "completed": true,
+        "acceptanceMatch": true,
+        "exitMatch": true,
+        "firstDiagnosticMatch": true,
+        "allDiagnosticsMatch": true,
+        "stdoutMatch": true,
+        "stderrMatch": false,
+        "exactMatch": false
+      },
+      "go": {
+        "argv": [
+          "check"
+        ],
+        "exit": 3,
+        "timedOut": false,
+        "seconds": 0.105713700002525,
+        "stdout": "",
+        "stderr": "main.fy:6:5: E2101: Access conflicts with an active shared or mutable loan. [bytes 95..100]\n  last-use: main.fy:7:13 [bytes 118..122]\n  loan: main.fy:5:24 [bytes 80..89]\n",
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderrSHA256": "8e82a9b798b1898837240df6a1ecdb3612cbdd47f7841ea63d5ed7633a0b124f",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E2101",
+            "start": 95,
+            "end": 100
+          }
+        ]
+      },
+      "candidate": {
+        "argv": [
+          "check",
+          "--locked"
+        ],
+        "exit": 3,
+        "timedOut": false,
+        "seconds": 0.0907839999999851,
+        "stdout": "",
+        "stderr": "main.fy:6:5: E2101: Access conflicts with an active shared or mutable loan. [bytes 95..100]\n",
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderrSHA256": "7db4579cfabaea7154fccfa7507f534cbaa930e81d7f9bb5d80f557922e9c427",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E2101",
+            "start": 95,
+            "end": 100
+          }
+        ]
+      }
+    },
+    {
+      "id": "fail.flow.return-local-borrow",
+      "comparison": {
+        "completed": true,
+        "acceptanceMatch": true,
+        "exitMatch": true,
+        "firstDiagnosticMatch": true,
+        "allDiagnosticsMatch": false,
+        "stdoutMatch": true,
+        "stderrMatch": false,
+        "exactMatch": false
+      },
+      "go": {
+        "argv": [
+          "check"
+        ],
+        "exit": 3,
+        "timedOut": false,
+        "seconds": 0.1098303999970085,
+        "stdout": "",
+        "stderr": "main.fy:5:12: E2102: Returned borrow originates from a local value. [bytes 71..80]\n  origin: main.fy:4:13 [bytes 49..54]\nmain.fy:9:12: E2102: Returned borrow originates from a local value. [bytes 138..147]\n  origin: main.fy:8:34 [bytes 118..123]\n",
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderrSHA256": "6d31fcf3fee29e704e92923445e46e80dc13bb2809ec328ed58d3dd8ed0bb732",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E2102",
+            "start": 71,
+            "end": 80
+          },
+          {
+            "source": "main.fy",
+            "code": "E2102",
+            "start": 138,
+            "end": 147
+          }
+        ]
+      },
+      "candidate": {
+        "argv": [
+          "check",
+          "--locked"
+        ],
+        "exit": 3,
+        "timedOut": false,
+        "seconds": 0.09202109999750974,
+        "stdout": "",
+        "stderr": "main.fy:5:12: E2102: Returned borrow originates from a local value. [bytes 71..80]\n",
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderrSHA256": "b7cf9f5d7a53863d9349e3978553542fafbddf38a645c22f339244e11d5f73be",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E2102",
+            "start": 71,
+            "end": 80
+          }
+        ]
+      }
+    },
+    {
+      "id": "fail.flow.borrow-reassignment-branch",
+      "comparison": {
+        "completed": true,
+        "acceptanceMatch": true,
+        "exitMatch": true,
+        "firstDiagnosticMatch": true,
+        "allDiagnosticsMatch": true,
+        "stdoutMatch": true,
+        "stderrMatch": false,
+        "exactMatch": false
+      },
+      "go": {
+        "argv": [
+          "check"
+        ],
+        "exit": 3,
+        "timedOut": false,
+        "seconds": 0.12523479999799747,
+        "stdout": "",
+        "stderr": "main.fy:6:12: E2103: Returned borrow has multiple possible input origins. [bytes 182..189]\n  candidate-origin: main.fy:3:38 [bytes 51..55]\n  candidate-origin: main.fy:3:52 [bytes 65..70]\n",
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderrSHA256": "370c9c2eb2fb86b5bf58d0986c8d581a118c1b9230acf7f2be863dfa32ee7f2a",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E2103",
+            "start": 182,
+            "end": 189
+          }
+        ]
+      },
+      "candidate": {
+        "argv": [
+          "check",
+          "--locked"
+        ],
+        "exit": 3,
+        "timedOut": false,
+        "seconds": 0.10522099999798229,
+        "stdout": "",
+        "stderr": "main.fy:6:12: E2103: Returned borrow has multiple possible input origins. [bytes 182..189]\n",
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderrSHA256": "d4cf55a9ae778f898d17567266428f304af3cc4533a8b6f301973476a61fa804",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E2103",
+            "start": 182,
+            "end": 189
+          }
+        ]
+      }
+    },
+    {
+      "id": "fail.flow.loop-borrow-break-origin",
+      "comparison": {
+        "completed": true,
+        "acceptanceMatch": true,
+        "exitMatch": true,
+        "firstDiagnosticMatch": true,
+        "allDiagnosticsMatch": true,
+        "stdoutMatch": true,
+        "stderrMatch": false,
+        "exactMatch": false
+      },
+      "go": {
+        "argv": [
+          "check"
+        ],
+        "exit": 3,
+        "timedOut": false,
+        "seconds": 0.10121209999488201,
+        "stdout": "",
+        "stderr": "main.fy:9:12: E2103: Returned borrow has multiple possible input origins. [bytes 180..187]\n  candidate-origin: main.fy:3:37 [bytes 50..54]\n  candidate-origin: main.fy:3:51 [bytes 64..69]\n",
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderrSHA256": "b183b86f006ef87bff14a0421faa056e3d804b601fab5eb786796b4c9161b0dc",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E2103",
+            "start": 180,
+            "end": 187
+          }
+        ]
+      },
+      "candidate": {
+        "argv": [
+          "check",
+          "--locked"
+        ],
+        "exit": 3,
+        "timedOut": false,
+        "seconds": 0.08524660000693984,
+        "stdout": "",
+        "stderr": "main.fy:9:12: E2103: Returned borrow has multiple possible input origins. [bytes 180..187]\n",
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderrSHA256": "3f6ede3da8c9b4d7ae19e5531d37de016a1eba8d0e7b6983b299402f5aca9390",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E2103",
+            "start": 180,
+            "end": 187
+          }
+        ]
+      }
+    },
+    {
+      "id": "fail.flow.borrow-return-summary-loan",
+      "comparison": {
+        "completed": true,
+        "acceptanceMatch": true,
+        "exitMatch": true,
+        "firstDiagnosticMatch": true,
+        "allDiagnosticsMatch": true,
+        "stdoutMatch": true,
+        "stderrMatch": false,
+        "exactMatch": false
+      },
+      "go": {
+        "argv": [
+          "check"
+        ],
+        "exit": 3,
+        "timedOut": false,
+        "seconds": 0.10314389999984996,
+        "stdout": "",
+        "stderr": "main.fy:11:5: E2101: Access conflicts with an active shared or mutable loan. [bytes 218..223]\n  last-use: main.fy:12:12 [bytes 242..250]\n  loan: main.fy:10:46 [bytes 202..211]\n",
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderrSHA256": "ebf3e9669f8a92165d95f6de314dccde5d682ba95e5155041296b9d089e78bd7",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E2101",
+            "start": 218,
+            "end": 223
+          }
+        ]
+      },
+      "candidate": {
+        "argv": [
+          "check",
+          "--locked"
+        ],
+        "exit": 3,
+        "timedOut": false,
+        "seconds": 0.12094470000010915,
+        "stdout": "",
+        "stderr": "main.fy:11:5: E2101: Access conflicts with an active shared or mutable loan. [bytes 218..223]\n",
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderrSHA256": "9bc62a399652d5d2b083a7f920f723d4739efe7ef5ef2abab6fc0c148a27d43d",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E2101",
+            "start": 218,
+            "end": 223
+          }
+        ]
+      }
+    },
+    {
+      "id": "fail.flow.multiple-return-origins",
+      "comparison": {
+        "completed": true,
+        "acceptanceMatch": true,
+        "exitMatch": true,
+        "firstDiagnosticMatch": true,
+        "allDiagnosticsMatch": true,
+        "stdoutMatch": true,
+        "stderrMatch": false,
+        "exactMatch": false
+      },
+      "go": {
+        "argv": [
+          "check"
+        ],
+        "exit": 3,
+        "timedOut": false,
+        "seconds": 0.10409339999750955,
+        "stdout": "",
+        "stderr": "main.fy:4:12: E2103: Returned borrow has multiple possible input origins. [bytes 85..118]\n  candidate-origin: main.fy:3:38 [bytes 51..55]\n  candidate-origin: main.fy:3:52 [bytes 65..70]\n",
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderrSHA256": "5d0a5735ca1744705b3830069b6da6233a19101508204e7393041576674592b4",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E2103",
+            "start": 85,
+            "end": 118
+          }
+        ]
+      },
+      "candidate": {
+        "argv": [
+          "check",
+          "--locked"
+        ],
+        "exit": 3,
+        "timedOut": false,
+        "seconds": 0.08268859999952838,
+        "stdout": "",
+        "stderr": "main.fy:4:12: E2103: Returned borrow has multiple possible input origins. [bytes 85..118]\n",
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderrSHA256": "3caa1bf1324a27ddf567366e1c755646240577490fb6b697e54cf44087e7b6ab",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E2103",
+            "start": 85,
+            "end": 118
+          }
+        ]
+      }
+    },
+    {
+      "id": "fail.type.malformed-link-name",
+      "comparison": {
+        "completed": true,
+        "acceptanceMatch": true,
+        "exitMatch": true,
+        "firstDiagnosticMatch": true,
+        "allDiagnosticsMatch": true,
+        "stdoutMatch": true,
+        "stderrMatch": false,
+        "exactMatch": false
+      },
+      "go": {
+        "argv": [
+          "check"
+        ],
+        "exit": 3,
+        "timedOut": false,
+        "seconds": 0.1128683999995701,
+        "stdout": "",
+        "stderr": "main.fy:3:1: E5106: @link_name requires exactly one nonempty string and may appear only once [bytes 14..27]\n  declaration: main.fy:4:24 [bytes 51..58]\n",
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderrSHA256": "2703ed37692fb88aac87964f0602370cc80beacc03af2229fb0f38a0cab07f9c",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E5106",
+            "start": 14,
+            "end": 27
+          }
+        ]
+      },
+      "candidate": {
+        "argv": [
+          "check",
+          "--locked"
+        ],
+        "exit": 3,
+        "timedOut": false,
+        "seconds": 0.0821217999982764,
+        "stdout": "",
+        "stderr": "main.fy:3:1: E5106: @link_name requires exactly one nonempty string and may appear only once [bytes 14..27]\n",
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderrSHA256": "bc2d864353033742aeaa7fd49892201d39df3274e495458c5402a637940610c3",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E5106",
+            "start": 14,
+            "end": 27
+          }
+        ]
+      }
+    },
+    {
+      "id": "fail.type.duplicate-link-name",
+      "comparison": {
+        "completed": true,
+        "acceptanceMatch": true,
+        "exitMatch": true,
+        "firstDiagnosticMatch": true,
+        "allDiagnosticsMatch": true,
+        "stdoutMatch": true,
+        "stderrMatch": false,
+        "exactMatch": false
+      },
+      "go": {
+        "argv": [
+          "check"
+        ],
+        "exit": 3,
+        "timedOut": false,
+        "seconds": 0.11004179999872576,
+        "stdout": "",
+        "stderr": "main.fy:4:1: E5106: @link_name requires exactly one nonempty string and may appear only once [bytes 41..68]\n  declaration: main.fy:5:24 [bytes 92..99]\n",
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderrSHA256": "44a11862c8ffc46749e37ec9509fa9c55aa1176960bdadd0f0f57ccf2dd7159f",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E5106",
+            "start": 41,
+            "end": 68
+          }
+        ]
+      },
+      "candidate": {
+        "argv": [
+          "check",
+          "--locked"
+        ],
+        "exit": 3,
+        "timedOut": false,
+        "seconds": 0.06528869999601739,
+        "stdout": "",
+        "stderr": "main.fy:4:1: E5106: @link_name requires exactly one nonempty string and may appear only once [bytes 41..68]\n",
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderrSHA256": "9156534a7c151213ca8014c3a444a61c46bd81f8380c439d7802178a026015b1",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E5106",
+            "start": 41,
+            "end": 68
+          }
+        ]
+      }
+    },
+    {
+      "id": "fail.flow.missing-resource-drop-effect",
+      "comparison": {
+        "completed": true,
+        "acceptanceMatch": true,
+        "exitMatch": true,
+        "firstDiagnosticMatch": true,
+        "allDiagnosticsMatch": true,
+        "stdoutMatch": true,
+        "stderrMatch": false,
+        "exactMatch": false
+      },
+      "go": {
+        "argv": [
+          "check"
+        ],
+        "exit": 3,
+        "timedOut": false,
+        "seconds": 0.09676489999401383,
+        "stdout": "",
+        "stderr": "main.fy:14:5: E7102: A call or compiler-scheduled resource cleanup requires one or more effects not declared by the enclosing function. [bytes 193..202]\n  effect-declaration: main.fy:3:1 [bytes 14..34]\n",
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderrSHA256": "552820e17f3fe7ce8e65d15ecb1762b3bae8bef7cbe289cf87e62fb260ee9f3a",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E7102",
+            "start": 193,
+            "end": 202
+          }
+        ]
+      },
+      "candidate": {
+        "argv": [
+          "check",
+          "--locked"
+        ],
+        "exit": 3,
+        "timedOut": false,
+        "seconds": 0.12614169999869773,
+        "stdout": "",
+        "stderr": "main.fy:14:5: E7102: A call or compiler-scheduled resource cleanup requires one or more effects not declared by the enclosing function. [bytes 193..202]\n",
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderrSHA256": "0f707b0a72e75e44b1205b433ea90c1b42a1c9cf6e943b01f79469b1601e7082",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E7102",
+            "start": 193,
+            "end": 202
+          }
+        ]
+      }
+    },
+    {
+      "id": "fail.type.unknown-effect",
+      "comparison": {
+        "completed": true,
+        "acceptanceMatch": true,
+        "exitMatch": true,
+        "firstDiagnosticMatch": true,
+        "allDiagnosticsMatch": true,
+        "stdoutMatch": true,
+        "stderrMatch": false,
+        "exactMatch": false
+      },
+      "go": {
+        "argv": [
+          "check"
+        ],
+        "exit": 3,
+        "timedOut": false,
+        "seconds": 0.10665779999544611,
+        "stdout": "",
+        "stderr": "main.fy:3:10: E7101: `@effects` is empty, duplicated, malformed, or names an effect outside the Stage 0 vocabulary. [bytes 23..31]\n  declaration: main.fy:4:8 [bytes 40..44]\n",
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderrSHA256": "bddf88f6827ce981981e147dfc1b8f70d3766fe3a3bf1e2fe03885579b54ca53",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E7101",
+            "start": 23,
+            "end": 31
+          }
+        ]
+      },
+      "candidate": {
+        "argv": [
+          "check",
+          "--locked"
+        ],
+        "exit": 3,
+        "timedOut": false,
+        "seconds": 0.06614039999840315,
+        "stdout": "",
+        "stderr": "main.fy:3:10: E7101: `@effects` is empty, duplicated, malformed, or names an effect outside the Stage 0 vocabulary. [bytes 23..31]\n",
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderrSHA256": "480385be95bd1b44cb4ee8845542095b07e7e2315f3e07f85415c4a0601e6b42",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E7101",
+            "start": 23,
+            "end": 31
+          }
+        ]
+      }
+    },
+    {
+      "id": "fail.type.duplicate-effect",
+      "comparison": {
+        "completed": true,
+        "acceptanceMatch": true,
+        "exitMatch": true,
+        "firstDiagnosticMatch": true,
+        "allDiagnosticsMatch": true,
+        "stdoutMatch": true,
+        "stderrMatch": false,
+        "exactMatch": false
+      },
+      "go": {
+        "argv": [
+          "check"
+        ],
+        "exit": 3,
+        "timedOut": false,
+        "seconds": 0.10719129999779398,
+        "stdout": "",
+        "stderr": "main.fy:3:19: E7101: `@effects` is empty, duplicated, malformed, or names an effect outside the Stage 0 vocabulary. [bytes 32..39]\n  declaration: main.fy:4:8 [bytes 48..52]\n",
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderrSHA256": "4df680d1c619f089930f3bf9ffd4e2859465b66c0080a871e4e5151bdb57469a",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E7101",
+            "start": 32,
+            "end": 39
+          }
+        ]
+      },
+      "candidate": {
+        "argv": [
+          "check",
+          "--locked"
+        ],
+        "exit": 3,
+        "timedOut": false,
+        "seconds": 0.062455499995849095,
+        "stdout": "",
+        "stderr": "main.fy:3:19: E7101: `@effects` is empty, duplicated, malformed, or names an effect outside the Stage 0 vocabulary. [bytes 32..39]\n",
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderrSHA256": "e911af051ca0293f62f577e202c976460517d8f2b3a391d951a4a995dc82bba1",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E7101",
+            "start": 32,
+            "end": 39
+          }
+        ]
+      }
+    },
+    {
+      "id": "fail.flow.borrowed-view-owner-move",
+      "comparison": {
+        "completed": true,
+        "acceptanceMatch": true,
+        "exitMatch": true,
+        "firstDiagnosticMatch": true,
+        "allDiagnosticsMatch": true,
+        "stdoutMatch": true,
+        "stderrMatch": false,
+        "exactMatch": false
+      },
+      "go": {
+        "argv": [
+          "check"
+        ],
+        "exit": 3,
+        "timedOut": false,
+        "seconds": 0.10977509999793256,
+        "stdout": "",
+        "stderr": "main.fy:23:38: E2105: Borrow outlives or moves its owner. [bytes 431..436]\n  last-use: main.fy:24:16 [bytes 454..458]\n  loan: main.fy:22:31 [bytes 382..391]\n  owner: main.fy:21:16 [bytes 306..311]\n",
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderrSHA256": "e9b671eca626fc74b3c19bc891c112a378c6b7f86b9a61e5b756303210a6754f",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E2105",
+            "start": 431,
+            "end": 436
+          }
+        ]
+      },
+      "candidate": {
+        "argv": [
+          "check",
+          "--locked"
+        ],
+        "exit": 3,
+        "timedOut": false,
+        "seconds": 0.1686349000010523,
+        "stdout": "",
+        "stderr": "main.fy:23:38: E2105: Borrow outlives or moves its owner. [bytes 431..436]\n",
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderrSHA256": "bf7c2067a7b92fbaaf10ede356a331dc649c68e73b563b6889f695d144125ad5",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E2105",
+            "start": 431,
+            "end": 436
+          }
+        ]
+      }
+    },
+    {
+      "id": "fail.flow.partial-field-move",
+      "comparison": {
+        "completed": true,
+        "acceptanceMatch": true,
+        "exitMatch": true,
+        "firstDiagnosticMatch": true,
+        "allDiagnosticsMatch": true,
+        "stdoutMatch": true,
+        "stderrMatch": false,
+        "exactMatch": false
+      },
+      "go": {
+        "argv": [
+          "check"
+        ],
+        "exit": 3,
+        "timedOut": false,
+        "seconds": 0.12706389999948442,
+        "stdout": "",
+        "stderr": "main.fy:21:27: E1103: moving a field out of a resource is not supported [bytes 289..298]\n  field: main.fy:10:11 [bytes 91..95]\n  owner: main.fy:17:14 [bytes 165..169]\n",
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderrSHA256": "747884eec73438ab73f1a355ec42a92832511e346eeedd9f91196f780a7f2a50",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E1103",
+            "start": 289,
+            "end": 298
+          }
+        ]
+      },
+      "candidate": {
+        "argv": [
+          "check",
+          "--locked"
+        ],
+        "exit": 3,
+        "timedOut": false,
+        "seconds": 0.22940489999746205,
+        "stdout": "",
+        "stderr": "main.fy:21:27: E1103: moving a field out of a resource is not supported [bytes 289..298]\n  declaration: main.fy:17:14 [bytes 165..169]\n",
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderrSHA256": "7e31882c5286234e65b341989089cea6bc12b591c91659a371eb8bb6affd0d4c",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E1103",
+            "start": 289,
+            "end": 298
+          }
+        ]
+      }
+    },
+    {
+      "id": "fail.flow.loop-state-mismatch",
+      "comparison": {
+        "completed": true,
+        "acceptanceMatch": true,
+        "exitMatch": true,
+        "firstDiagnosticMatch": true,
+        "allDiagnosticsMatch": true,
+        "stdoutMatch": true,
+        "stderrMatch": false,
+        "exactMatch": false
+      },
+      "go": {
+        "argv": [
+          "check"
+        ],
+        "exit": 3,
+        "timedOut": false,
+        "seconds": 0.1368700999955763,
+        "stdout": "",
+        "stderr": "main.fy:15:5: E1105: loop body changes the resource state required by the next iteration [bytes 198..242]\n  declaration: main.fy:14:15 [bytes 164..169]\n  loop-header: main.fy:15:5 [bytes 198..209]\n  move: main.fy:16:17 [bytes 229..234]\n",
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderrSHA256": "81b3710ba45487d14e5e862811656179d2037718661a21417208877c14750d63",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E1105",
+            "start": 198,
+            "end": 242
+          }
+        ]
+      },
+      "candidate": {
+        "argv": [
+          "check",
+          "--locked"
+        ],
+        "exit": 3,
+        "timedOut": false,
+        "seconds": 0.14029009999649134,
+        "stdout": "",
+        "stderr": "main.fy:15:5: E1105: loop body changes the resource state required by the next iteration [bytes 198..242]\n  declaration: main.fy:14:15 [bytes 164..169]\n  move: main.fy:16:17 [bytes 229..234]\n  loop-header: main.fy:15:5 [bytes 198..209]\n",
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderrSHA256": "20549f890adf9bcef5540cf4c579ec8633e8962ed066a18bfddca41968d86d9c",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E1105",
+            "start": 198,
+            "end": 242
+          }
+        ]
+      }
+    },
+    {
+      "id": "fail.flow.break-state-mismatch",
+      "comparison": {
+        "completed": true,
+        "acceptanceMatch": true,
+        "exitMatch": true,
+        "firstDiagnosticMatch": true,
+        "allDiagnosticsMatch": true,
+        "stdoutMatch": true,
+        "stderrMatch": false,
+        "exactMatch": false
+      },
+      "go": {
+        "argv": [
+          "check"
+        ],
+        "exit": 3,
+        "timedOut": false,
+        "seconds": 0.1413308999981382,
+        "stdout": "",
+        "stderr": "main.fy:15:5: E1105: loop body changes the resource state required by the next iteration [bytes 198..257]\n  declaration: main.fy:14:15 [bytes 164..169]\n  loop-header: main.fy:15:5 [bytes 198..209]\n  move: main.fy:16:17 [bytes 229..234]\n",
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderrSHA256": "cfccef444dad2f3b01f5ab9ec5a13b0b72739e0a4e5abfb07bf65969d432a4f1",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E1105",
+            "start": 198,
+            "end": 257
+          }
+        ]
+      },
+      "candidate": {
+        "argv": [
+          "check",
+          "--locked"
+        ],
+        "exit": 3,
+        "timedOut": false,
+        "seconds": 0.16694500000448897,
+        "stdout": "",
+        "stderr": "main.fy:15:5: E1105: loop body changes the resource state required by the next iteration [bytes 198..257]\n  declaration: main.fy:14:15 [bytes 164..169]\n  move: main.fy:16:17 [bytes 229..234]\n  loop-header: main.fy:15:5 [bytes 198..209]\n",
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderrSHA256": "ed37167fd00c09c293231a3c97bf6a61dd3c0bdfea50e98e6731c4ed29ff27d3",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E1105",
+            "start": 198,
+            "end": 257
+          }
+        ]
+      }
+    },
+    {
+      "id": "fail.flow.continue-state-mismatch",
+      "comparison": {
+        "completed": true,
+        "acceptanceMatch": true,
+        "exitMatch": true,
+        "firstDiagnosticMatch": true,
+        "allDiagnosticsMatch": true,
+        "stdoutMatch": true,
+        "stderrMatch": false,
+        "exactMatch": false
+      },
+      "go": {
+        "argv": [
+          "check"
+        ],
+        "exit": 3,
+        "timedOut": false,
+        "seconds": 0.1218661999955657,
+        "stdout": "",
+        "stderr": "main.fy:15:5: E1105: loop body changes the resource state required by the next iteration [bytes 198..260]\n  declaration: main.fy:14:15 [bytes 164..169]\n  loop-header: main.fy:15:5 [bytes 198..209]\n  move: main.fy:16:17 [bytes 229..234]\n",
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderrSHA256": "e8b91b57d4818910373f6f2689fb87cad5db07bfbc8e8e8a2e332dc3d0500734",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E1105",
+            "start": 198,
+            "end": 260
+          }
+        ]
+      },
+      "candidate": {
+        "argv": [
+          "check",
+          "--locked"
+        ],
+        "exit": 3,
+        "timedOut": false,
+        "seconds": 0.13255650000064634,
+        "stdout": "",
+        "stderr": "main.fy:15:5: E1105: loop body changes the resource state required by the next iteration [bytes 198..260]\n  declaration: main.fy:14:15 [bytes 164..169]\n  move: main.fy:16:17 [bytes 229..234]\n  loop-header: main.fy:15:5 [bytes 198..209]\n",
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderrSHA256": "b33baffc458c0cc84cd69af8340f1dd9f00171f2c54ae00e64b8b8745076f00e",
+        "diagnostics": [
+          {
+            "source": "main.fy",
+            "code": "E1105",
+            "start": 198,
+            "end": 260
+          }
+        ]
+      }
+    },
+    {
+      "id": "pass.flow.param-local-use",
+      "comparison": {
+        "completed": true,
+        "acceptanceMatch": true,
+        "exitMatch": true,
+        "firstDiagnosticMatch": true,
+        "allDiagnosticsMatch": true,
+        "stdoutMatch": true,
+        "stderrMatch": false,
+        "exactMatch": false
+      },
+      "go": {
+        "argv": [
+          "check"
+        ],
+        "exit": 7,
+        "timedOut": false,
+        "seconds": 0.11639260000083596,
+        "stdout": "",
+        "stderr": "fairyc: package workspace failure: workspace .:std::alloc invalid-standard-library: module namespace is reserved by the SDK\n",
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderrSHA256": "fd943f136c32cb4ce9e7144508b0eae6c2f874605c24874877f9ff3b35ea518d",
+        "diagnostics": []
+      },
+      "candidate": {
+        "argv": [
+          "check",
+          "--locked"
+        ],
+        "exit": 7,
+        "timedOut": false,
+        "seconds": 0.07037990000389982,
+        "stdout": "",
+        "stderr": "fairyc: package workspace failure: invalid-standard-library\n",
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderrSHA256": "cbc772b7216e6aeb9b129c552a55366fe355d311192831ebb928441961888faf",
+        "diagnostics": []
+      }
+    },
+    {
+      "id": "pass.flow.param-return",
+      "comparison": {
+        "completed": true,
+        "acceptanceMatch": true,
+        "exitMatch": true,
+        "firstDiagnosticMatch": true,
+        "allDiagnosticsMatch": true,
+        "stdoutMatch": true,
+        "stderrMatch": false,
+        "exactMatch": false
+      },
+      "go": {
+        "argv": [
+          "check"
+        ],
+        "exit": 7,
+        "timedOut": false,
+        "seconds": 0.11149000000295928,
+        "stdout": "",
+        "stderr": "fairyc: package workspace failure: workspace .:std::alloc invalid-standard-library: module namespace is reserved by the SDK\n",
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderrSHA256": "fd943f136c32cb4ce9e7144508b0eae6c2f874605c24874877f9ff3b35ea518d",
+        "diagnostics": []
+      },
+      "candidate": {
+        "argv": [
+          "check",
+          "--locked"
+        ],
+        "exit": 7,
+        "timedOut": false,
+        "seconds": 0.06624269999883836,
+        "stdout": "",
+        "stderr": "fairyc: package workspace failure: invalid-standard-library\n",
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderrSHA256": "cbc772b7216e6aeb9b129c552a55366fe355d311192831ebb928441961888faf",
+        "diagnostics": []
+      }
+    },
+    {
+      "id": "fail.flow.resource-placement",
+      "comparison": {
+        "completed": true,
+        "acceptanceMatch": true,
+        "exitMatch": true,
+        "firstDiagnosticMatch": true,
+        "allDiagnosticsMatch": true,
+        "stdoutMatch": true,
+        "stderrMatch": false,
+        "exactMatch": false
+      },
+      "go": {
+        "argv": [
+          "check"
+        ],
+        "exit": 7,
+        "timedOut": false,
+        "seconds": 0.0986607999948319,
+        "stdout": "",
+        "stderr": "fairyc: package workspace failure: workspace .:std::alloc invalid-standard-library: module namespace is reserved by the SDK\n",
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderrSHA256": "fd943f136c32cb4ce9e7144508b0eae6c2f874605c24874877f9ff3b35ea518d",
+        "diagnostics": []
+      },
+      "candidate": {
+        "argv": [
+          "check",
+          "--locked"
+        ],
+        "exit": 7,
+        "timedOut": false,
+        "seconds": 0.05805920000420883,
+        "stdout": "",
+        "stderr": "fairyc: package workspace failure: invalid-standard-library\n",
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderrSHA256": "cbc772b7216e6aeb9b129c552a55366fe355d311192831ebb928441961888faf",
+        "diagnostics": []
+      }
+    },
+    {
+      "id": "pass.mir.region-reset",
+      "comparison": {
+        "completed": true,
+        "acceptanceMatch": true,
+        "exitMatch": true,
+        "firstDiagnosticMatch": true,
+        "allDiagnosticsMatch": true,
+        "stdoutMatch": true,
+        "stderrMatch": false,
+        "exactMatch": false
+      },
+      "go": {
+        "argv": [
+          "check"
+        ],
+        "exit": 7,
+        "timedOut": false,
+        "seconds": 0.0991513999979361,
+        "stdout": "",
+        "stderr": "fairyc: package workspace failure: workspace .:std::alloc invalid-standard-library: module namespace is reserved by the SDK\n",
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderrSHA256": "fd943f136c32cb4ce9e7144508b0eae6c2f874605c24874877f9ff3b35ea518d",
+        "diagnostics": []
+      },
+      "candidate": {
+        "argv": [
+          "check",
+          "--locked"
+        ],
+        "exit": 7,
+        "timedOut": false,
+        "seconds": 0.05993940000189468,
+        "stdout": "",
+        "stderr": "fairyc: package workspace failure: invalid-standard-library\n",
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderrSHA256": "cbc772b7216e6aeb9b129c552a55366fe355d311192831ebb928441961888faf",
+        "diagnostics": []
+      }
+    },
+    {
+      "id": "pass.mir.region-early-exit",
+      "comparison": {
+        "completed": true,
+        "acceptanceMatch": true,
+        "exitMatch": true,
+        "firstDiagnosticMatch": true,
+        "allDiagnosticsMatch": true,
+        "stdoutMatch": true,
+        "stderrMatch": false,
+        "exactMatch": false
+      },
+      "go": {
+        "argv": [
+          "check"
+        ],
+        "exit": 7,
+        "timedOut": false,
+        "seconds": 0.10085579999577021,
+        "stdout": "",
+        "stderr": "fairyc: package workspace failure: workspace .:std::alloc invalid-standard-library: module namespace is reserved by the SDK\n",
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderrSHA256": "fd943f136c32cb4ce9e7144508b0eae6c2f874605c24874877f9ff3b35ea518d",
+        "diagnostics": []
+      },
+      "candidate": {
+        "argv": [
+          "check",
+          "--locked"
+        ],
+        "exit": 7,
+        "timedOut": false,
+        "seconds": 0.06755880000127945,
+        "stdout": "",
+        "stderr": "fairyc: package workspace failure: invalid-standard-library\n",
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderrSHA256": "cbc772b7216e6aeb9b129c552a55366fe355d311192831ebb928441961888faf",
+        "diagnostics": []
+      }
+    },
+    {
+      "id": "pass.mir.loop-control-cleanup",
+      "comparison": {
+        "completed": true,
+        "acceptanceMatch": true,
+        "exitMatch": true,
+        "firstDiagnosticMatch": true,
+        "allDiagnosticsMatch": true,
+        "stdoutMatch": true,
+        "stderrMatch": false,
+        "exactMatch": false
+      },
+      "go": {
+        "argv": [
+          "check"
+        ],
+        "exit": 7,
+        "timedOut": false,
+        "seconds": 0.10758899999927962,
+        "stdout": "",
+        "stderr": "fairyc: package workspace failure: workspace .:std::alloc invalid-standard-library: module namespace is reserved by the SDK\n",
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderrSHA256": "fd943f136c32cb4ce9e7144508b0eae6c2f874605c24874877f9ff3b35ea518d",
+        "diagnostics": []
+      },
+      "candidate": {
+        "argv": [
+          "check",
+          "--locked"
+        ],
+        "exit": 7,
+        "timedOut": false,
+        "seconds": 0.07747479999670759,
+        "stdout": "",
+        "stderr": "fairyc: package workspace failure: invalid-standard-library\n",
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderrSHA256": "cbc772b7216e6aeb9b129c552a55366fe355d311192831ebb928441961888faf",
+        "diagnostics": []
+      }
+    }
+  ],
+  "scope": "Check statistics and diagnostic summaries. This image also contains the in-progress constant array count change; native array C emission is a separate regression and is not covered here.",
+  "publicApiChanged": false,
+  "sdkAbiChanged": false,
+  "dbChanged": false,
+  "ciChanged": false,
+  "pushed": false
+}

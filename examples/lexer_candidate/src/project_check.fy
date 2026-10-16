@@ -7,6 +7,7 @@ import project_compiler_input as input;
 import project_compiler_core as compiler;
 import project_source_set as sources;
 import module_unit_body_ir_model as ir;
+import module_unit_body_ir_lookup as lookup;
 import module_project_identified_ir as identified;
 import project_coordinate_graph as coordinates;
 import module_unit_cleanup_mir_model as cleanup_ir;
@@ -37,7 +38,10 @@ pub fn ref diagnostics::Reports signature_reports(ref Error e){assert(e.phase==3
 pub fn compiler::Problem compiler_error(ref Error e){assert(e.phase==3);return e.compilation;}
 // SDK Vec destructors live in verified glue rather than ordinary Body records.
 // Include each concrete destructor in the same MIR-function statistic as Go.
-fn usize functions(ref ir::Program program){var usize total=ir::count(program);let glue=ir::cleanup_ir(program);var usize i=1;while(i<=cleanup_ir::type_count(glue)){if(cleanup_ir::type_at(glue,i).kind==13 && cleanup_ir::glue_at(glue,i).kind==1){total+=1;}i+=1;}return total;}
+fn usize functions(ref ir::Program program){var usize total=0;let glue=ir::cleanup_ir(program);var usize i=1;
+    // Go emits source cleanup functions only for nonempty cleanup bodies.
+    // Empty bodies stay represented in the candidate ownership proof.
+    while(i<=ir::count(program)){let f=cleanup_ir::frame_at(glue,i);let b=ir::at(program,i);let root=ir::statement_at(b,lookup::statement(b,ir::body(b))-1).value;if(f.kind!=2 || root.second!=0 || root.expression!=0){total+=1;}i+=1;}i=1;while(i<=cleanup_ir::type_count(glue)){if(cleanup_ir::type_at(glue,i).kind==13 && cleanup_ir::glue_at(glue,i).kind==1){total+=1;}i+=1;}return total;}
 @effects(filesystem)
 pub fn Result<Stats,Error> evaluate(ref u8[] root,bool locked){var sources::Budget budget=sources::Budget{.files=0,.bytes=0};var usize meter=0;
     let loaded=switch(loader::load(root,locked,ref mut budget,ref mut meter)){case .ok(value):{value}case .err(e):{return .err(load_failure(e));}};
