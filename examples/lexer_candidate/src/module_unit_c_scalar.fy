@@ -3,7 +3,7 @@ import module_unit_body_ir_model as ir;
 import module_unit_body_ir_lookup as lookup;
 import module_unit_cleanup_mir_model as clean;
 import c_text as w;
-import scalar_casts as casts;
+import c_abi_types as casts;
 import std::bytes as bytes;
 
 pub fn u32 scalar(ref ir::Program p,usize type){if(type==0 || type>clean::type_count(ir::cleanup_ir(p))){return 0;}let t=clean::type_at(ir::cleanup_ir(p),type);return if(t.kind==1){t.scalar}else{0};}

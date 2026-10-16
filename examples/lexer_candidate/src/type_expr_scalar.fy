@@ -3,7 +3,7 @@ import pointer_types as pointers;
 import reference_types as refs;
 import name_resolution as names;
 import syntax as syntax;
-import scalar_casts as casts;
+import c_abi_types as casts;
 import unsafe_scopes as unsafe_scopes;
 import type_state as state;
 import nominal_types as nominal;

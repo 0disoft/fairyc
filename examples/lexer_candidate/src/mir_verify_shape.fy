@@ -1,7 +1,7 @@
 module mir_verify_shape;
 import pointer_types as pointers;
 import mir_reference as refs;
-import scalar_casts as casts;
+import c_abi_types as casts;
 import mir_model as m;
 import std::bytes as bytes;
 import std::vec as v;

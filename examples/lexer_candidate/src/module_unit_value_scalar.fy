@@ -2,7 +2,7 @@ module module_unit_value_scalar;
 import module_unit_value_model as m;
 import module_types as types;
 import type_state as scalars;
-import scalar_casts as casts;
+import c_abi_types as casts;
 import module_unit_interfaces as interfaces;
 import module_unit_value_field as fields;
 import module_unit_value_place as places;

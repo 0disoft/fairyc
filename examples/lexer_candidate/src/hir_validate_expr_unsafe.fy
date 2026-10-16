@@ -3,7 +3,7 @@ import hir_model as h;
 import pointer_types as pointers;
 import raw_view_intrinsics as raw;
 import storage_intrinsics as storage;
-import scalar_casts as casts;
+import c_abi_types as casts;
 import reference_types as refs;
 import std::bytes as bytes;
 import std::vec as v;

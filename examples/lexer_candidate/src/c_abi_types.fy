@@ -12,3 +12,6 @@ pub fn ref u8[] spelling(u32 type){
     var usize end=start;while(names[end]!=124){end+=1;}return names[start..end];
 }
 pub fn bool cast(u32 source,u32 target){return source==1 && target==132 || source==132 && target==1;}
+
+// Exact subset of hir.ValuePreservingIntegerCast; target C ABI proof is unchanged.
+pub fn bool allowed(u32 source,u32 target){return cast(source,target) || source==3 && (target==1 || target==2 || target==4 || target==5) || source==1 && target==2 || source==4 && (target==2 || target==5);}
