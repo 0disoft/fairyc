@@ -184,10 +184,51 @@ struct Pair{i32 value;}
 @test fn void record(){let Pair p=Pair{.value=42};assert(p.value==42);}
 @test fn void array(){let i32[2] a=[1,2];assert(a[0]==1);}
 '''})
-        compare('record-capability', aggregates, ['--exact', 'tests::aggregates::record', '--json'], 2, capability=True)
-        compare('array-capability', aggregates, ['--exact', 'tests::aggregates::array'], 2, capability=True)
-        compare('capability-after-passed-test', aggregates, ['--json'], 2, capability=True)
+        compare('record', aggregates, ['--exact', 'tests::aggregates::record', '--json'])
+        compare('array', aggregates, ['--exact', 'tests::aggregates::array'])
+        compare('all-aggregates', aggregates, ['--json'])
         compare('unselected-capability', aggregates, ['--exact', 'tests::aggregates::a_before'])
+        copies = fixture('aggregate-copies', {'tests/copies.fy': r'''module tests::copies;
+struct Pair{i32 first;i32 second;}
+struct Nested{Pair pair;i32[3] items;}
+fn Pair mutate(Pair p){var Pair q=p;q.first=9;return q;}
+fn Nested update(Nested n){var Nested q=n;q.pair.second=17;q.items[1]=99;return q;}
+fn i32[3] array_return(i32[3] items){var i32[3] q=items;q[0]=42;return q;}
+@test fn void copies_and_calls(){
+ let Pair p=Pair{.second=2,.first=1};var Pair q=mutate(p);q.second=3;
+ assert(p.first==1 && p.second==2 && q.first==9 && q.second==3);
+ let Nested n=Nested{.items=[4,5,6],.pair=p};let Nested changed=update(n);
+ assert(n.pair.second==2 && n.items[1]==5 && changed.pair.second==17 && changed.items[1]==99);
+ let i32[3] a=[7;3];let i32[3] b=array_return(a);assert(a[0]==7 && b[0]==42 && a.len==3);
+}
+@test fn void nested_assignments(){
+ var Nested n=Nested{.pair=Pair{.first=1,.second=2},.items=[3,4,5]};let Nested before=n;
+ n.pair.first+=8;n.items[1]*=3;let i32 copied=n.items[1];n.items[2]=copied;
+ assert(n.pair.first==9 && n.items[1]==12 && n.items[2]==12 && before.pair.first==1 && before.items[1]==4);
+ var Pair[2] pairs=[Pair{.first=1,.second=2};2];pairs[0].first=77;assert(pairs[1].first==1);
+}
+@test fn void aggregate_control_flow(){
+ let Pair p=if(true){Pair{.first=1,.second=2}}else{Pair{.first=3,.second=4}};
+ let Pair q={let Pair x=p;x};assert(q.first==1 && q.second==2);
+ var i32[3] a=[0;3];var usize i=0;while(i<a.len){a[i]=7;i+=1;}assert(a[0]==7 && a[2]==7);
+}
+'''})
+        compare('aggregate-copies-json', copies, ['--json', '--locations'])
+        compare('aggregate-copies-file', copies, ['--file', 'tests/copies.fy'])
+        bounds = fixture('aggregate-bounds', {'tests/bounds.fy': '''module tests::bounds;
+@test fn void a_load(){let i32[2] a=[1,2];let usize i=2;discard a[i];}
+@test fn void b_store(){var i32[2] a=[1,2];let usize i=2;a[i]=7;}
+@test fn void c_compound(){var i32[2] a=[1,2];let usize i=2;a[i]+=7;}
+@test fn void d_after(){assert(true);}
+'''})
+        compare('aggregate-bounds-json', bounds, ['--json'], 5)
+        compare('aggregate-bounds-text', bounds, code=5)
+        unsupported = fixture('unsupported', {'tests/resources.fy': '''module tests::resources;
+resource R{i32 value;cleanup{}}
+@test fn void a_before(){assert(true);}
+@test fn void owning_resource(){let R r=R{.value=42};assert(r.value==42);}
+'''})
+        compare('resource-capability', unsupported, ['--json'], 2, capability=True)
         bad = fixture('invalid', {'tests/bad.fy': 'module tests::bad;@test fn i32 bad(){return 0;}\n'})
         compare('invalid-test-declaration', bad, code=3)
         # The compiler directory also stays free of native tooling/artifacts.

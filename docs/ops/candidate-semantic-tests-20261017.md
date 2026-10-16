@@ -6,11 +6,16 @@ native build driver. Workspace loading, production lock handling, test-source
 validation and canonical test selection use the same preparation as `--list`
 and `--native`.
 
-This first interpreter slice admits `i32`, `i64`, `u8`, `u32`, `usize`, `bool`
+The interpreter admits `i32`, `i64`, `u8`, `u32`, `usize`, `bool`
 and `void`: exact-width checked arithmetic, comparisons, bitwise operations,
 value-preserving casts, scalar bindings and assignments, function and generic
 calls, if/block expressions, short-circuit evaluation, while/classic-for loops,
-break/continue, assertions, returns and frozen scalar `defer` arguments.
+break/continue, assertions, returns and frozen scalar `defer` arguments. Copy-only structures and fixed arrays
+also support declaration-order fields, list/repeated construction, indexing and
+length, nested field/index stores, scalar compound stores, copying, function
+parameters/results and aggregate block/conditional values. Immutable per-test
+cells retain value semantics; stores rebuild the projected path. Allocation
+and copies consume the same step allowance and have a one-million-cell ceiling.
 Runtime arithmetic reuses the constant evaluator while retaining distinct
 language trap categories and unsigned host-width arithmetic.
 
@@ -21,7 +26,7 @@ operation/block accounting. Traps fail individual tests and execution continues.
 Capability or execution-limit rejection aborts with code 2 and no partial report.
 Internal invariant/allocation failures return code 4.
 
-Structures, arrays, enum/Option/Result values, resources and their cleanup,
+Enum/Option/Result values, resources and their cleanup,
 references/views, Region operations and host/foreign calls are
 outside this initial interpreter slice. Reached unsupported operations are
 rejected; unselected test bodies are still source-checked, but never interpreted.
@@ -65,7 +70,7 @@ Build with `tools/build-candidate-native-probe.py`, then verify with
 The verifier authenticates source/image hashes, copies only each candidate
 compiler image without its native build companion, compares real reports with
 Go, and checks locked workspace file bytes and modification times after every
-invocation. Unsupported aggregate cases are recorded as capability differences.
+invocation. Selected unsupported resource cases are recorded as capability differences.
 The existing native and test-list verifiers cover the shared report writer and
 discovery regressions.
 
@@ -102,7 +107,7 @@ in the source record, and the receipt explicitly records frontend reuse.
 Changed sources and changed packet bytes pass rejection probes. This permits a
 native-driver admission fix without repeating the expensive Fairy frontend.
 
-Final current-source results:
+Initial scalar implementation results (superseded by later additions below):
 
 - The full 512-source Fairy frontend emits the complete 41,406,363-byte packet
   in 515.997 seconds. Development and release native builds pass in 34.413 and
@@ -120,3 +125,13 @@ are recorded in [candidate-semantic-tests-cli-20261017.json](evidence/candidate-
 The current release CLI is
 `.cache/semantic-test-20261017/cli-final-verified/release/fairyc.exe`, with its
 matching `fairyc-candidate-build.exe` companion in the same directory.
+
+## Copy aggregate extension
+
+The three earlier record/array capability differences now require exact Go
+reports in the CLI verifier. Added coverage exercises reordered fields, nested
+record/array stores, repeated record elements, copy isolation across calls,
+aggregate branch/block values, and bounds traps that continue to later tests.
+The initial Go-authored diagnostic image passes 38 comparisons: 37 exact and
+one explicitly retained resource-cleanup capability rejection. This diagnostic
+is not proof of current-source candidate C emission; that full build is separate.
