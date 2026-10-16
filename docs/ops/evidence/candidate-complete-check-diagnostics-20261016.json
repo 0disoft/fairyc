@@ -1,0 +1,46 @@
+{
+  "schema": "fairyc.candidate-complete-check-diagnostics/v1",
+  "passed": true,
+  "cases": 169,
+  "summary": {
+    "completed": 169,
+    "acceptanceMatch": 169,
+    "exitMatch": 169,
+    "firstDiagnosticMatch": 169,
+    "allDiagnosticsMatch": 169,
+    "stdoutMatch": 169,
+    "stderrMatch": 169,
+    "exactMatch": 169
+  },
+  "skipped": [
+    {
+      "family": "region",
+      "id": "fail.flow.local-region-escape",
+      "reason": "direct fixture packageGraph requires a separate workspace adapter"
+    }
+  ],
+  "sourceInputs": [
+    {
+      "path": "examples/lexer_candidate/src/module_unit_checked_bodies.fy",
+      "sha256": "abd3bcf7655f8bfa4370aaf44a09c042b55fe537e5fe3ddd7e05a66e4ed9d6a5"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_check_text.fy",
+      "sha256": "a71f08f59f2614e402d25a36ba23be0b1be66c9f821950f662d1a894d046754f"
+    }
+  ],
+  "compilerBuildReceipt": {
+    "path": ".cache/candidate-parity-fixes-20261016/notes-public-iteration-cli-v3/development-receipt.json",
+    "sha256": "d8feed9766a425482eb88b72e5443c152280614119c4d9c76ed73df109dbe597"
+  },
+  "comparisonReceipt": {
+    "path": ".cache/candidate-parity-fixes-20261016/notes-check/receipt.json",
+    "sha256": "dbffeff563f795b4dafe0d0da0560d6ef3170f54a410493928642bfbbbdda097"
+  },
+  "scope": "Check diagnostics, including all visible borrow/control diagnostics, related locations and SDK-reserved module failure context",
+  "fullProductParity": false,
+  "goFrontendInvokedForCandidateBuild": false,
+  "publicApiChanged": false,
+  "dbChanged": false,
+  "ciChanged": false
+}
