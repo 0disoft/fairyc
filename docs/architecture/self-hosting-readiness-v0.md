@@ -1,5 +1,14 @@
 # Self-hosting readiness v0
 
+## Default semantic test implementation (2026-10-17)
+
+The candidate now implements the initial scalar default `test` runtime; its
+capability scope and CLI verification are tracked in [the semantic-test record](../ops/candidate-semantic-tests-20261017.md).
+The aggregate frame ceiling is 16,384; project work remains 16 MiB and
+independent body/unit work remains 1 MiB. Enum verification now checkpoints
+per function into that project ledger. The fixed-point evidence below
+describes its recorded 2026-10-16 source snapshot. Consecutive Stage1/Stage2 equality has not been rerun for these changes.
+
 ## Current-source bootstrap fixed point (2026-10-16)
 
 The two measured bootstrap failures are fixed: source-name comparisons retain

@@ -1,5 +1,14 @@
 # Bounded candidate compilation units
 
+## Default semantic test implementation (2026-10-17)
+
+The candidate now implements the initial scalar default `test` runtime; its
+capability scope and CLI verification are tracked in [the semantic-test record](../ops/candidate-semantic-tests-20261017.md).
+The aggregate frame ceiling is 16,384; project work remains 16 MiB and
+independent body/unit work remains 1 MiB. Enum verification now checkpoints
+per function into that project ledger. The fixed-point evidence below
+describes its recorded 2026-10-16 source snapshot. Consecutive Stage1/Stage2 equality has not been rerun for these changes.
+
 ## Current-source bootstrap fixed point (2026-10-16)
 
 The two measured bootstrap failures are fixed: source-name comparisons retain
@@ -2521,3 +2530,18 @@ remains cache-only and the product Release flags are unchanged. Linux, the full
 suite, Stage1/Stage2 gate and push were not run.
 
 Evidence: `docs/ops/evidence/candidate-project-work-capacity-20261011.json`.
+
+## 2026-10-17 semantic test dispatcher frame admission
+
+The 512-source default-test dispatcher exceeds 8,192 rebound frames at
+`windows_rooted_file`. The private frame ceiling is now 16,384; original
+callable declarations and generic specializations keep their independent
+8,192-entry limits. Project work remains 16 MiB; body/unit work remains 1 MiB.
+Source, byte, type, field, stack and execution-deadline bounds are unchanged.
+`tests/module_unit_ir_budgets.fy` retains exact work ceiling and unit tests.
+
+`tools/build-candidate-native-probe.py --compiler-only` can build a smaller
+private C-project transport when the available seed predates this frame limit.
+Its receipt identifies that restricted scope and is rejected by full CLI checks.
+Runtime capability and validation are documented in
+`docs/ops/candidate-semantic-tests-20261017.md`.

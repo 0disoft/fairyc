@@ -36,8 +36,9 @@ development SDK test. Restoring only the host PE reservation fixed the same
 case. The receipt proves all executable code and data bytes stayed identical;
 only stack-reservation and checksum metadata could change.
 
-Native execution is not compiler promotion. The candidate's semantic test
-interpreter and Linux native command transport remain separate work.
+Native execution is not compiler promotion. The candidate also has an
+[initial scalar semantic test interpreter](candidate-semantic-tests-20261017.md).
+Full interpreter coverage and Linux native command transport remain separate work.
 
 Reproduce a fresh candidate build with `tools/build-candidate-native-probe.py`,
 then run `tools/verify-candidate-native-tests-cli.py` with its `--build-receipt`,

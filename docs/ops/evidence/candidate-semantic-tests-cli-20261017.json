@@ -1,0 +1,833 @@
+{
+  "schema": "fairyc.candidate-semantic-tests-cli-summary/v1",
+  "passed": true,
+  "platform": "windows/amd64-msvc",
+  "scope": "Initial scalar default test interpreter; not full Go interpreter parity or compiler promotion",
+  "sources": [
+    {
+      "path": "examples/lexer_candidate/src/module_unit_interpreter.fy",
+      "sha256": "bbc1bc90fb9ebc249b3b6d3a321c6566d4fb8b49c9eb82912c406f21053a2839"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_constant_arithmetic.fy",
+      "sha256": "275fd793b9102f80d4f77af048492ea19694c9bdd5d2866813ab8b93e916ea29"
+    },
+    {
+      "path": "examples/lexer_candidate/src/c_abi_types.fy",
+      "sha256": "d82d8cd61fbd5e7873f85ae1effa25930f48e560762ab2337db8f7fceb95689d"
+    },
+    {
+      "path": "examples/lexer_candidate/src/scalar_casts.fy",
+      "sha256": "a68d35152e5e7b3da9ffc5663483cb0001b00b4399df373fd10300b22fc1c4d3"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_test_cli.fy",
+      "sha256": "6928e2b5969863f1dcab1ffd66fabb16932dc681578077bcd420c3580c987df5"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_test_options.fy",
+      "sha256": "61d92de21f2f772f004845004b0473b2be2ac325dde189cc37dbb6ee7b760b14"
+    },
+    {
+      "path": "examples/lexer_candidate/src/candidate_limits.fy",
+      "sha256": "604f72669a2f7a06b64931b9ea3e8bd55677af5de64b4533e29184419e2fd0e4"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_unit_body_ir_enums.fy",
+      "sha256": "7598a5cbb05f308ab114d7d70c89f24886e5cd911e1c5c0cbd10c905d4d1a45d"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_unit_body_ir_verify.fy",
+      "sha256": "6b6404565ee1c3ccfb130288b3ce2c906646b974a7e65874b4f3c522dd733875"
+    },
+    {
+      "path": "internal/candidatebuild/packet.go",
+      "sha256": "13a281da66a92daf8ead7bc775bbb545409615bef537d0da3331192cb5818143"
+    },
+    {
+      "path": "tools/build-candidate-native-probe.py",
+      "sha256": "e1a2ecd76e0f7b285dfb0779d6c2f96cd283fb0ac6944639d5996e7120c6d551"
+    },
+    {
+      "path": "tools/verify-candidate-semantic-tests-cli.py",
+      "sha256": "92be5cc14afe6e3d55b32aef708d84d8a77905014c4935f77fe5feb399903f07"
+    },
+    {
+      "path": "tools/verify-candidate-native-tests-cli.py",
+      "sha256": "555f1a77998ff83794e016835bb32520ddee866107f26848eab6cd8f1ec48dcf"
+    },
+    {
+      "path": "tools/verify-candidate-test-list-cli.py",
+      "sha256": "299daddc86da80eb4d9808e63755191b5da3c94ab15c8af9120ab00f9796abc5"
+    },
+    {
+      "path": "tools/verify-candidate-project-c-parts.py",
+      "sha256": "edc93de0d491ec5630c9a64d26186a14dc53b612011c55331660d45053e35018"
+    }
+  ],
+  "records": {
+    "cli-final-verified/receipt.json": {
+      "path": ".cache/semantic-test-20261017/cli-final-verified/receipt.json",
+      "sha256": "94d344f249f9a7786f59043d09ab243b132662f4d1c59880393bd319de39f92c"
+    },
+    "semantic-verified/receipt.json": {
+      "path": ".cache/semantic-test-20261017/semantic-verified/receipt.json",
+      "sha256": "2e176ec101f71e6a8022f563fb3a4e04f4db2247d3dc04b3dc752aa58c8bd0e3"
+    },
+    "list-verified/receipt.json": {
+      "path": ".cache/semantic-test-20261017/list-verified/receipt.json",
+      "sha256": "01bde6e5f3e894961cfb07806f6be3822ef00600449ab8b2a567ff5144e412ff"
+    },
+    "native-verified/receipt.json": {
+      "path": ".cache/semantic-test-20261017/native-verified/receipt.json",
+      "sha256": "40ee8254a6bea6a1ad6d674fdd895cf43c9019ead50a6d90802c173899e8a365"
+    },
+    "math-16k/receipt.json": {
+      "path": ".cache/semantic-test-20261017/math-16k/receipt.json",
+      "sha256": "21b98d0ec620fa3e08c264c214134580015f2a5c9f04889fb9805f9af4cac798"
+    },
+    "enum-meter-budgets-v2/receipt.json": {
+      "path": ".cache/semantic-test-20261017/enum-meter-budgets-v2/receipt.json",
+      "sha256": "8379a292aedff1f8ec429ff72a3573d363a213408c7ffb9fdeca19cad2c1d6df"
+    }
+  },
+  "build": {
+    "sourceFiles": 512,
+    "packet": {
+      "passed": true,
+      "packetSHA256": "b41a70a900a0306768c9d40105ff906c3a96b2c715091d78625c082530a56310",
+      "bytes": 41406363,
+      "units": 65,
+      "selectedFrames": 7566,
+      "maxOriginalFrame": 8236,
+      "sharedLiterals": 1976,
+      "frameLimit": 16384
+    },
+    "images": [
+      {
+        "profile": "development",
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\semantic-test-20261017\\cli-final-verified\\development\\fairyc.exe",
+        "sha256": "e4749bf6b19ad011f8c72b9d11dadee19b4a9b88e56a378ebd99a891fb70bdf0",
+        "driverSHA256": "68917e76329f3952d352c6cf37ebbe0c19fcd84fb6f68b72dcf8d32e272ff512",
+        "bytes": 15870976
+      },
+      {
+        "profile": "release",
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\semantic-test-20261017\\cli-final-verified\\release\\fairyc.exe",
+        "sha256": "05646587062840ca8f5ea5c4cfabfe785ce13b2890e7c3e91b0177ce78cdcde2",
+        "driverSHA256": "68917e76329f3952d352c6cf37ebbe0c19fcd84fb6f68b72dcf8d32e272ff512",
+        "bytes": 5869568
+      }
+    ],
+    "invocations": [
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\semantic-test-20261017\\go-seed-enum-chunks\\fairyc.exe",
+          "--c-project-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\semantic-test-20261017\\cli-enum-fixed\\sources.list"
+        ],
+        "seconds": 515.997413699999,
+        "exit": 0,
+        "stdoutBytes": 41406363,
+        "stdoutSHA256": "b41a70a900a0306768c9d40105ff906c3a96b2c715091d78625c082530a56310",
+        "stderr": "",
+        "reused": true
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\semantic-test-20261017\\fairyc-candidate-build-16k.exe",
+          "--packet",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\semantic-test-20261017\\cli-final-verified\\candidate-packet.bin",
+          "--packet-sha256",
+          "b41a70a900a0306768c9d40105ff906c3a96b2c715091d78625c082530a56310",
+          "--output",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\semantic-test-20261017\\cli-final-verified\\development\\fairyc.exe",
+          "--stack-reserve-bytes",
+          "16777216"
+        ],
+        "seconds": 34.41333990000203,
+        "exit": 0,
+        "stdoutBytes": 192,
+        "stdoutSHA256": "a81630a45bf7704523acf27ee580fc5aa16f8a0b9f910ffabeae715b4b8d858f",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\semantic-test-20261017\\fairyc-candidate-build-16k.exe",
+          "--packet",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\semantic-test-20261017\\cli-final-verified\\candidate-packet.bin",
+          "--packet-sha256",
+          "b41a70a900a0306768c9d40105ff906c3a96b2c715091d78625c082530a56310",
+          "--output",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\semantic-test-20261017\\cli-final-verified\\release\\fairyc.exe",
+          "--release",
+          "--stack-reserve-bytes",
+          "16777216"
+        ],
+        "seconds": 341.24592549999943,
+        "exit": 0,
+        "stdoutBytes": 193,
+        "stdoutSHA256": "eabdc0af34b4b9b046458492f483aa8742b1fde0db9950a47898e6a592700243",
+        "stderr": ""
+      }
+    ],
+    "frontendReuse": {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\semantic-test-20261017\\cli-enum-fixed",
+      "sourceSnapshotSHA256": "1406a7fe2289d90e692e9fb70042bf0bb7957aa61ae07177f4c9ab807826d031",
+      "invocationsSHA256": "50cacc733b24fb3fa39dc58026d2e4c8102c2309c9c24f75dc375e869ff61940",
+      "packetSHA256": "b41a70a900a0306768c9d40105ff906c3a96b2c715091d78625c082530a56310"
+    },
+    "goFrontendInvoked": false,
+    "stackReserveBytes": 16777216
+  },
+  "bootstrapSeed": {
+    "goFrontendUsed": true,
+    "sourceSHA256": "43932aa5c88d298d25e1b11203f4343f006fe537a4e4c22f70399b10f93aebe0",
+    "build": {
+      "exit": 0,
+      "seconds": 93.43834179999976,
+      "stdout": "{\"imageBytes\":4803584,\"passed\":true,\"privateHost\":true,\"publicLinkContractChanged\":false,\"sourceBytes\":38803056,\"sourceSHA256\":\"43932aa5c88d298d25e1b11203f4343f006fe537a4e4c22f70399b10f93aebe0\",\"stackReserveBytes\":16777216,\"toolchain\":\"14.51.36231\"}\n",
+      "stderr": "",
+      "privateSeedFlags": "/O2 /Ob1 /Gy- /Gw-"
+    },
+    "note": "Go creates the initial authored-compiler seed; the Fairy frontend emits the final candidate C. Private seed optimization is separate from unchanged final candidate native profiles."
+  },
+  "semantic": {
+    "cases": 66,
+    "exactMatches": 60,
+    "capabilityRejections": 6,
+    "nativeDriverPresent": false,
+    "lockedWorkspaceFilesUnchanged": true,
+    "casesByProfile": [
+      {
+        "profile": "development",
+        "id": "plain",
+        "exactMatch": true,
+        "expectedExit": 0,
+        "capabilityBoundary": false
+      },
+      {
+        "profile": "development",
+        "id": "json",
+        "exactMatch": true,
+        "expectedExit": 0,
+        "capabilityBoundary": false
+      },
+      {
+        "profile": "development",
+        "id": "locations",
+        "exactMatch": true,
+        "expectedExit": 0,
+        "capabilityBoundary": false
+      },
+      {
+        "profile": "development",
+        "id": "json-locations",
+        "exactMatch": true,
+        "expectedExit": 0,
+        "capabilityBoundary": false
+      },
+      {
+        "profile": "development",
+        "id": "workspace-json",
+        "exactMatch": true,
+        "expectedExit": 0,
+        "capabilityBoundary": false
+      },
+      {
+        "profile": "development",
+        "id": "package-json",
+        "exactMatch": true,
+        "expectedExit": 0,
+        "capabilityBoundary": false
+      },
+      {
+        "profile": "development",
+        "id": "file",
+        "exactMatch": true,
+        "expectedExit": 0,
+        "capabilityBoundary": false
+      },
+      {
+        "profile": "development",
+        "id": "directory",
+        "exactMatch": true,
+        "expectedExit": 0,
+        "capabilityBoundary": false
+      },
+      {
+        "profile": "development",
+        "id": "exact",
+        "exactMatch": true,
+        "expectedExit": 0,
+        "capabilityBoundary": false
+      },
+      {
+        "profile": "development",
+        "id": "repeated-exact",
+        "exactMatch": true,
+        "expectedExit": 2,
+        "capabilityBoundary": false
+      },
+      {
+        "profile": "development",
+        "id": "dependency-call",
+        "exactMatch": true,
+        "expectedExit": 0,
+        "capabilityBoundary": false
+      },
+      {
+        "profile": "development",
+        "id": "member-execution",
+        "exactMatch": true,
+        "expectedExit": 0,
+        "capabilityBoundary": false
+      },
+      {
+        "profile": "development",
+        "id": "workspace-execution",
+        "exactMatch": true,
+        "expectedExit": 0,
+        "capabilityBoundary": false
+      },
+      {
+        "profile": "development",
+        "id": "workspace-member-file",
+        "exactMatch": true,
+        "expectedExit": 0,
+        "capabilityBoundary": false
+      },
+      {
+        "profile": "development",
+        "id": "traps-continue",
+        "exactMatch": true,
+        "expectedExit": 5,
+        "capabilityBoundary": false
+      },
+      {
+        "profile": "development",
+        "id": "traps-json-locations",
+        "exactMatch": true,
+        "expectedExit": 5,
+        "capabilityBoundary": false
+      },
+      {
+        "profile": "development",
+        "id": "selected-after-traps",
+        "exactMatch": true,
+        "expectedExit": 0,
+        "capabilityBoundary": false
+      },
+      {
+        "profile": "development",
+        "id": "zero-tests",
+        "exactMatch": true,
+        "expectedExit": 0,
+        "capabilityBoundary": false
+      },
+      {
+        "profile": "development",
+        "id": "zero-tests-json-workspace-locations",
+        "exactMatch": true,
+        "expectedExit": 0,
+        "capabilityBoundary": false
+      },
+      {
+        "profile": "development",
+        "id": "missing-selection",
+        "exactMatch": true,
+        "expectedExit": 2,
+        "capabilityBoundary": false
+      },
+      {
+        "profile": "development",
+        "id": "native-only-release",
+        "exactMatch": true,
+        "expectedExit": 2,
+        "capabilityBoundary": false
+      },
+      {
+        "profile": "development",
+        "id": "native-only-capture-output",
+        "exactMatch": true,
+        "expectedExit": 2,
+        "capabilityBoundary": false
+      },
+      {
+        "profile": "development",
+        "id": "native-only-stdin",
+        "exactMatch": true,
+        "expectedExit": 2,
+        "capabilityBoundary": false
+      },
+      {
+        "profile": "development",
+        "id": "native-only-timeout-seconds",
+        "exactMatch": true,
+        "expectedExit": 2,
+        "capabilityBoundary": false
+      },
+      {
+        "profile": "development",
+        "id": "step-limit",
+        "exactMatch": true,
+        "expectedExit": 2,
+        "capabilityBoundary": false
+      },
+      {
+        "profile": "development",
+        "id": "depth-limit",
+        "exactMatch": true,
+        "expectedExit": 2,
+        "capabilityBoundary": false
+      },
+      {
+        "profile": "development",
+        "id": "no-partial-report",
+        "exactMatch": true,
+        "expectedExit": 2,
+        "capabilityBoundary": false
+      },
+      {
+        "profile": "development",
+        "id": "fresh-step-budgets",
+        "exactMatch": true,
+        "expectedExit": 0,
+        "capabilityBoundary": false
+      },
+      {
+        "profile": "development",
+        "id": "record-capability",
+        "exactMatch": false,
+        "expectedExit": 2,
+        "capabilityBoundary": true
+      },
+      {
+        "profile": "development",
+        "id": "array-capability",
+        "exactMatch": false,
+        "expectedExit": 2,
+        "capabilityBoundary": true
+      },
+      {
+        "profile": "development",
+        "id": "capability-after-passed-test",
+        "exactMatch": false,
+        "expectedExit": 2,
+        "capabilityBoundary": true
+      },
+      {
+        "profile": "development",
+        "id": "unselected-capability",
+        "exactMatch": true,
+        "expectedExit": 0,
+        "capabilityBoundary": false
+      },
+      {
+        "profile": "development",
+        "id": "invalid-test-declaration",
+        "exactMatch": true,
+        "expectedExit": 3,
+        "capabilityBoundary": false
+      },
+      {
+        "profile": "release",
+        "id": "plain",
+        "exactMatch": true,
+        "expectedExit": 0,
+        "capabilityBoundary": false
+      },
+      {
+        "profile": "release",
+        "id": "json",
+        "exactMatch": true,
+        "expectedExit": 0,
+        "capabilityBoundary": false
+      },
+      {
+        "profile": "release",
+        "id": "locations",
+        "exactMatch": true,
+        "expectedExit": 0,
+        "capabilityBoundary": false
+      },
+      {
+        "profile": "release",
+        "id": "json-locations",
+        "exactMatch": true,
+        "expectedExit": 0,
+        "capabilityBoundary": false
+      },
+      {
+        "profile": "release",
+        "id": "workspace-json",
+        "exactMatch": true,
+        "expectedExit": 0,
+        "capabilityBoundary": false
+      },
+      {
+        "profile": "release",
+        "id": "package-json",
+        "exactMatch": true,
+        "expectedExit": 0,
+        "capabilityBoundary": false
+      },
+      {
+        "profile": "release",
+        "id": "file",
+        "exactMatch": true,
+        "expectedExit": 0,
+        "capabilityBoundary": false
+      },
+      {
+        "profile": "release",
+        "id": "directory",
+        "exactMatch": true,
+        "expectedExit": 0,
+        "capabilityBoundary": false
+      },
+      {
+        "profile": "release",
+        "id": "exact",
+        "exactMatch": true,
+        "expectedExit": 0,
+        "capabilityBoundary": false
+      },
+      {
+        "profile": "release",
+        "id": "repeated-exact",
+        "exactMatch": true,
+        "expectedExit": 2,
+        "capabilityBoundary": false
+      },
+      {
+        "profile": "release",
+        "id": "dependency-call",
+        "exactMatch": true,
+        "expectedExit": 0,
+        "capabilityBoundary": false
+      },
+      {
+        "profile": "release",
+        "id": "member-execution",
+        "exactMatch": true,
+        "expectedExit": 0,
+        "capabilityBoundary": false
+      },
+      {
+        "profile": "release",
+        "id": "workspace-execution",
+        "exactMatch": true,
+        "expectedExit": 0,
+        "capabilityBoundary": false
+      },
+      {
+        "profile": "release",
+        "id": "workspace-member-file",
+        "exactMatch": true,
+        "expectedExit": 0,
+        "capabilityBoundary": false
+      },
+      {
+        "profile": "release",
+        "id": "traps-continue",
+        "exactMatch": true,
+        "expectedExit": 5,
+        "capabilityBoundary": false
+      },
+      {
+        "profile": "release",
+        "id": "traps-json-locations",
+        "exactMatch": true,
+        "expectedExit": 5,
+        "capabilityBoundary": false
+      },
+      {
+        "profile": "release",
+        "id": "selected-after-traps",
+        "exactMatch": true,
+        "expectedExit": 0,
+        "capabilityBoundary": false
+      },
+      {
+        "profile": "release",
+        "id": "zero-tests",
+        "exactMatch": true,
+        "expectedExit": 0,
+        "capabilityBoundary": false
+      },
+      {
+        "profile": "release",
+        "id": "zero-tests-json-workspace-locations",
+        "exactMatch": true,
+        "expectedExit": 0,
+        "capabilityBoundary": false
+      },
+      {
+        "profile": "release",
+        "id": "missing-selection",
+        "exactMatch": true,
+        "expectedExit": 2,
+        "capabilityBoundary": false
+      },
+      {
+        "profile": "release",
+        "id": "native-only-release",
+        "exactMatch": true,
+        "expectedExit": 2,
+        "capabilityBoundary": false
+      },
+      {
+        "profile": "release",
+        "id": "native-only-capture-output",
+        "exactMatch": true,
+        "expectedExit": 2,
+        "capabilityBoundary": false
+      },
+      {
+        "profile": "release",
+        "id": "native-only-stdin",
+        "exactMatch": true,
+        "expectedExit": 2,
+        "capabilityBoundary": false
+      },
+      {
+        "profile": "release",
+        "id": "native-only-timeout-seconds",
+        "exactMatch": true,
+        "expectedExit": 2,
+        "capabilityBoundary": false
+      },
+      {
+        "profile": "release",
+        "id": "step-limit",
+        "exactMatch": true,
+        "expectedExit": 2,
+        "capabilityBoundary": false
+      },
+      {
+        "profile": "release",
+        "id": "depth-limit",
+        "exactMatch": true,
+        "expectedExit": 2,
+        "capabilityBoundary": false
+      },
+      {
+        "profile": "release",
+        "id": "no-partial-report",
+        "exactMatch": true,
+        "expectedExit": 2,
+        "capabilityBoundary": false
+      },
+      {
+        "profile": "release",
+        "id": "fresh-step-budgets",
+        "exactMatch": true,
+        "expectedExit": 0,
+        "capabilityBoundary": false
+      },
+      {
+        "profile": "release",
+        "id": "record-capability",
+        "exactMatch": false,
+        "expectedExit": 2,
+        "capabilityBoundary": true
+      },
+      {
+        "profile": "release",
+        "id": "array-capability",
+        "exactMatch": false,
+        "expectedExit": 2,
+        "capabilityBoundary": true
+      },
+      {
+        "profile": "release",
+        "id": "capability-after-passed-test",
+        "exactMatch": false,
+        "expectedExit": 2,
+        "capabilityBoundary": true
+      },
+      {
+        "profile": "release",
+        "id": "unselected-capability",
+        "exactMatch": true,
+        "expectedExit": 0,
+        "capabilityBoundary": false
+      },
+      {
+        "profile": "release",
+        "id": "invalid-test-declaration",
+        "exactMatch": true,
+        "expectedExit": 3,
+        "capabilityBoundary": false
+      }
+    ]
+  },
+  "listing": {
+    "cases": 178,
+    "exactMatches": 178,
+    "executionModes": [
+      {
+        "profile": "development",
+        "mode": "semantic",
+        "implemented": true,
+        "reference": {
+          "exit": 0,
+          "stdout": "test result: ok. 0 passed; 0 failed; lock verified\n",
+          "stderr": "",
+          "seconds": 0.06447429999752785
+        },
+        "candidate": {
+          "exit": 0,
+          "stdout": "test result: ok. 0 passed; 0 failed; lock verified\n",
+          "stderr": "",
+          "seconds": 0.14651729999968666
+        }
+      },
+      {
+        "profile": "development",
+        "mode": "native",
+        "implemented": true,
+        "reference": {
+          "exit": 0,
+          "stdout": "test result: ok. 0 passed; 0 failed; lock verified\n",
+          "stderr": "",
+          "seconds": 0.060504799999762326
+        },
+        "candidate": {
+          "exit": 0,
+          "stdout": "test result: ok. 0 passed; 0 failed; lock verified\n",
+          "stderr": "",
+          "seconds": 0.1495801000019128
+        }
+      },
+      {
+        "profile": "release",
+        "mode": "semantic",
+        "implemented": true,
+        "reference": {
+          "exit": 0,
+          "stdout": "test result: ok. 0 passed; 0 failed; lock verified\n",
+          "stderr": "",
+          "seconds": 0.0553159000010055
+        },
+        "candidate": {
+          "exit": 0,
+          "stdout": "test result: ok. 0 passed; 0 failed; lock verified\n",
+          "stderr": "",
+          "seconds": 0.0533806999992521
+        }
+      },
+      {
+        "profile": "release",
+        "mode": "native",
+        "implemented": true,
+        "reference": {
+          "exit": 0,
+          "stdout": "test result: ok. 0 passed; 0 failed; lock verified\n",
+          "stderr": "",
+          "seconds": 0.052695099999255035
+        },
+        "candidate": {
+          "exit": 0,
+          "stdout": "test result: ok. 0 passed; 0 failed; lock verified\n",
+          "stderr": "",
+          "seconds": 0.05319239999880665
+        }
+      }
+    ]
+  },
+  "native": {
+    "cases": 6,
+    "exactMatches": 6,
+    "selectedCases": [
+      "empty-json",
+      "mixed-capture",
+      "mixed-text"
+    ]
+  },
+  "componentChecks": {
+    "runtimeArithmeticAndCasts": {
+      "authoredTests": 3,
+      "profiles": [
+        "Go native",
+        "candidate C development",
+        "candidate C release"
+      ]
+    },
+    "enumWorkMeter": {
+      "authoredTests": 2,
+      "profiles": [
+        "Go native",
+        "candidate C development",
+        "candidate C release"
+      ]
+    },
+    "packetBounds": {
+      "command": "go test ./internal/candidatebuild -run TestPacket -count=1",
+      "passed": true,
+      "maxFrames": 16384
+    }
+  },
+  "frontendReuseRejections": [
+    {
+      "case": "stale-source",
+      "rejected": true,
+      "exit": 1
+    },
+    {
+      "case": "changed-packet",
+      "rejected": true,
+      "exit": 1
+    }
+  ],
+  "compilerOnlyRejections": [
+    {
+      "tool": "verify-candidate-semantic-tests-cli.py",
+      "exit": 1,
+      "rejectedCompilerOnly": true
+    },
+    {
+      "tool": "verify-candidate-native-tests-cli.py",
+      "exit": 1,
+      "rejectedCompilerOnly": true
+    },
+    {
+      "tool": "verify-candidate-test-list-cli.py",
+      "exit": 1,
+      "rejectedCompilerOnly": true
+    }
+  ],
+  "limits": {
+    "sourceFiles": 512,
+    "projectFrames": 16384,
+    "unitWork": 1048576,
+    "projectWork": 16777216,
+    "interpreterCFGStepsPerTest": 1000000,
+    "interpreterCallDepth": 256
+  },
+  "limitations": [
+    "Structures, arrays, enum/Option/Result, resources/cleanup, references/views, Region and host/foreign execution remain outside the scalar interpreter subset.",
+    "Candidate CFG-step exhaustion need not numerically equal Go MIR operation/block accounting."
+  ],
+  "skipped": [
+    {
+      "check": "Linux",
+      "reason": "This candidate native bridge is Windows-specific."
+    },
+    {
+      "check": "Full compiler suite and full native CLI matrix",
+      "reason": "Only changed runtime, admission and shared reporting paths were verified."
+    },
+    {
+      "check": "Consecutive Stage1/Stage2 bootstrap equality",
+      "reason": "This is one candidate C generation plus development/release verification, not a promotion run."
+    }
+  ],
+  "publicGoApiChanged": false,
+  "publicSDKABIChanged": false,
+  "dbChanged": false,
+  "ciChanged": false,
+  "privatePacketFrameCapChanged": true,
+  "pushed": false
+}
