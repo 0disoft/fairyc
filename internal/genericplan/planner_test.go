@@ -1,10 +1,46 @@
 package genericplan
 
 import (
+	"fmt"
 	"slices"
 	"sync"
 	"testing"
 )
+
+func TestDefaultPlanAdmitsCompilerScaleConcreteTypesWithinBounds(t *testing.T) {
+	builder, err := NewBuilder(DefaultCatalogLimits())
+	if err != nil {
+		t.Fatal(err)
+	}
+	declaration := Declaration{ID: "app::hold", Owner: "app", Parameters: []TypeParameter{{Name: "T"}}, Definition: DigestText("declaration", "hold/v1")}
+	if err := builder.AddDeclaration(declaration); err != nil {
+		t.Fatal(err)
+	}
+	requests := make([]Request, 513)
+	for i := range requests {
+		id := TypeID(fmt.Sprintf("app::Element%d", i))
+		if err := builder.AddType(TypeDescriptor{ID: id, Owner: "app", Definition: DigestText("type", string(id))}); err != nil {
+			t.Fatal(err)
+		}
+		requests[i] = Request{Declaration: declaration.ID, Arguments: []TypeID{id}}
+	}
+	catalog, err := builder.Build()
+	if err != nil {
+		t.Fatal(err)
+	}
+	plan, err := catalog.Plan(requests[:512], DefaultPlanLimits())
+	if err != nil || len(plan.Specializations) != 512 {
+		t.Fatalf("512 compiler types: specializations=%d, error=%v", len(plan.Specializations), err)
+	}
+	if _, err := catalog.Plan(requests, DefaultPlanLimits()); ErrorCode(err) != CodePlanningBudgetExceeded {
+		t.Fatalf("513 types: error=%v, want bounded rejection", err)
+	}
+	limits := DefaultPlanLimits()
+	limits.MaxSpecializationsPerDeclaration = 256
+	if _, err := catalog.Plan(requests[:257], limits); ErrorCode(err) != CodePlanningBudgetExceeded {
+		t.Fatalf("explicit smaller limit: error=%v, want bounded rejection", err)
+	}
+}
 
 func TestPlanBuildsDependencyFirstStaticStorageSpecializations(t *testing.T) {
 	catalog := testCatalog(t, catalogVariant{addressProviderBody: "encode-address/v1"})

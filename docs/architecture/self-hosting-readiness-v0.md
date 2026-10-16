@@ -4536,3 +4536,23 @@ passes. Go-native is skipped for private adapter linkage. Public build/run wirin
 broader differential, Linux/full suite and promotion remain open. Private API and
 clock adapter changed; public API, SDK ABI, DB and CI are unchanged; no push.
 Receipt: [candidate-windows-run-capture-20261012.json](../ops/evidence/candidate-windows-run-capture-20261012.json).
+
+## Compiler-scale per-declaration default 512 (2026-10-16)
+
+The Go reference defaults in
+[planner.go](../../internal/genericplan/planner.go) and the candidate's
+[generic_source_plan.fy](../../examples/lexer_candidate/src/generic_source_plan.fy)
+now use 512 per declaration / per template, raised from 256 because the full
+523-file authored compiler workspace exceeded 256 distinct SDK `Vec<T>` element
+specializations once the stable test identity-listing implementation landed. The
+overall 4096 total and 64 expansion depth are unchanged, and the candidate's
+explicit maximum per-template bound is now 512. `go test ./internal/genericplan`
+passes in 0.107s including the named 512-boundary test in
+[planner_test.go](../../internal/genericplan/planner_test.go), and a freshly copied
+523-source workspace check against the rebuilt Go 512 reference passes 6559 MIR
+functions in 38.58s; the boundary checks and source digests are recorded in
+[candidate-generic-budget-20261016.json](../ops/evidence/candidate-generic-budget-20261016.json).
+The broader internal/compiler plus generic-source command and the full native CLI
+C build are still running, so full native C verification stays pending, and
+nothing here promotes language syntax, SDK ABI, unbounded expansion or backend
+capacity.

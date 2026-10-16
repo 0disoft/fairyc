@@ -1,0 +1,50 @@
+{
+  "schema": "fairyc.candidate-generic-budget/v1",
+  "defaultPerDeclaration": 512,
+  "previousDefault": 256,
+  "totalLimit": 4096,
+  "depthLimit": 64,
+  "verification": {
+    "command": "go test ./internal/genericplan",
+    "passed": true,
+    "boundary": [
+      {
+        "types": 512,
+        "accepted": true
+      },
+      {
+        "types": 513,
+        "accepted": false
+      },
+      {
+        "explicitLimit": 256,
+        "types": 257,
+        "accepted": false
+      }
+    ]
+  },
+  "goWholeSourceCheck": {
+    "exit": 0,
+    "stdout": "check ok: 2 instance(s), 523 source file(s), 6559 MIR function(s), lock updated\n",
+    "stderr": "",
+    "seconds": 38.58251279999968
+  },
+  "sourceInputs": [
+    {
+      "path": "examples/lexer_candidate/src/generic_source_plan.fy",
+      "sha256": "9eca3fea83c3f523da8e097216c4932b576d707b57e0657125dc38910890455d"
+    },
+    {
+      "path": "internal/genericplan/planner.go",
+      "sha256": "d1b0094e07ecdb5fb63b57b31702d992169de8cd4aee11800c2377a456e6947e"
+    },
+    {
+      "path": "internal/genericplan/planner_test.go",
+      "sha256": "51f269653e1f3713a9d5407c83188921eec2daf74fc69f9d97361e0d44a7e8a3"
+    }
+  ],
+  "wholeSourceFiles": 523,
+  "authoredSources": 515,
+  "nativeBuildPending": true,
+  "pushed": false
+}

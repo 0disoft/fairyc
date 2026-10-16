@@ -17,7 +17,7 @@ type PlanLimits struct {
 func DefaultPlanLimits() PlanLimits {
 	return PlanLimits{
 		MaxSpecializations:               4096,
-		MaxSpecializationsPerDeclaration: 256,
+		MaxSpecializationsPerDeclaration: 512,
 		MaxExpansionDepth:                64,
 	}
 }
