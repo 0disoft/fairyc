@@ -27,6 +27,9 @@ def main():
     assert {row['profile'] for row in build['images']} == {'development', 'release'}
     reference = args.reference.resolve()
     reference_sha = sha(reference)
+    help_result = subprocess.run([str(reference), '--help'], capture_output=True, timeout=30)
+    assert help_result.returncode == 0 and not help_result.stderr
+    invocation_suffix = b'\n' + help_result.stdout
     source_inputs = build['sources'] + [dict(path=Path(__file__).relative_to(ROOT).as_posix(), sha256=sha(Path(__file__)))]
     for row in source_inputs:
         assert sha(ROOT / row['path']) == row['sha256'], row['path']
@@ -86,8 +89,8 @@ let m=switch(p::arg(2,ref mut data)){case .ok(n):{n}case .err(_):{return 0;}};le
         actual = run(image, project, 'build', flags, 3, b'cache: cold uncached\n', profile+' invalid-body cached build')
         assert actual == run(reference, project, 'build', ['--locked'], 3, label=profile+' Go invalid-body diagnostic')
         assert sha(product) == prior and retained == {p.name: (sha(p), p.stat().st_mtime_ns) for p in cache.glob('fyproject0-*.fyc')}
-        assert run(image, project, 'build', ['--cache-status'], 2, label=profile+' status without root') == (b'', b'fairyc: --cache-status requires --cache-root\n')
-        assert run(image, project, 'run', ['--cache-root', cache, '--cache-root', cache], 2, label=profile+' duplicate run root') == (b'', b'fairyc: command "run" received --cache-root more than once\n')
+        assert run(image, project, 'build', ['--cache-status'], 2, label=profile+' status without root') == (b'', b'fairyc: --cache-status requires --cache-root\n' + invocation_suffix)
+        assert run(image, project, 'run', ['--cache-root', cache, '--cache-root', cache], 2, label=profile+' duplicate run root') == (b'', b'fairyc: command "run" received --cache-root more than once\n' + invocation_suffix)
         project = fixture(profile, 'generic-vec', vector)
         (project/'src/helper.fy').write_text('module helper;pub fn T id<T>(T value){return value;}\n', encoding='utf-8', newline='\n')
         assert run(image, project, 'build', flags, status=b'cache: cold stored\n', label=profile+' generic Vec cached build') == (b'built: build/cache-app.exe (x86_64-windows-msvc, development, lock updated)\n', b'')

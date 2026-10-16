@@ -38,6 +38,10 @@ def main():
         assert {p['profile'] for p in build['images']} == {'development', 'release'}
     reference = args.reference.resolve()
     reference_sha = sha(reference)
+    public_dispatch = not go_reference and not build.get('commandsOnly', False)
+    help_result = subprocess.run([str(reference), '--help'], capture_output=True, timeout=30)
+    assert help_result.returncode == 0 and not help_result.stderr
+    invocation_suffix = b'\n' + help_result.stdout if public_dispatch else b''
     rows = []
 
     def run(image, cwd, flags, expected=0, status=b'', label=''):
@@ -95,11 +99,11 @@ def main():
 
         # Private configuration errors are admitted before filesystem work.
         result = run(image,base,['--cache-status'],2,label=profile+' status requires root')
-        assert result == (b'',b'fairyc: --cache-status requires --cache-root\n')
+        assert result == (b'', (b'fairyc: command \"check\" accepts only optional --locked\n' + invocation_suffix) if public_dispatch else b'fairyc: --cache-status requires --cache-root\n')
         result = run(image,base,['--cache-root',cache,'--cache-root',cache],2,label=profile+' duplicate root')
-        assert result == (b'',b'fairyc: command "check" received --cache-root more than once\n')
+        assert result == (b'',b'fairyc: command "check" received --cache-root more than once\n' + invocation_suffix)
         result = run(image,base,['--bad'],2,label=profile+' legacy invalid option')
-        assert result == (b'',b'fairyc: command "check" accepts only optional --locked\n')
+        assert result == (b'',b'fairyc: command "check" accepts only optional --locked\n' + invocation_suffix)
         assert not list(cache.glob('.stage*'))
 
         for name, body in (

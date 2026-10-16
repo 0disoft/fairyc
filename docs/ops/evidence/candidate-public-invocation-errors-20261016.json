@@ -1,0 +1,529 @@
+{
+  "schema": "fairyc.candidate-public-invocation-errors/v1",
+  "passed": true,
+  "sourceInputs": [
+    {
+      "path": "examples/lexer_candidate/src/file_cli.fy",
+      "sha256": "9b4fb5afafd62b6c3fb48fa748ebb4731a1003219a269506cc3c0162b1fcb95b"
+    },
+    {
+      "path": "examples/lexer_candidate/src/native_cli.fy",
+      "sha256": "e7ea74d17c0b04ca98471b629d9a59a9d4febf678faf14f81ca7043b88002459"
+    },
+    {
+      "path": "tools/verify-candidate-check-cache-cli.py",
+      "sha256": "4100f61a12134b187ab340325695269dd4cbdfc612aacd2abbbf290ac9b81db3"
+    },
+    {
+      "path": "tools/verify-candidate-native-cache-cli.py",
+      "sha256": "be763fdea8e3fd08817d4d3de723e2a66d726dad999a3209fc18dc3305eacd25"
+    }
+  ],
+  "candidate": {
+    "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-parity-fixes-20261016\\methods-perf-cli\\development\\fairyc.exe",
+    "sha256": "aced5391229416e1ab6bd866d4afd44c490e202471a6c92e8ee699aa535a9769"
+  },
+  "reference": {
+    "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\repr-c-cli-parity-20261016\\fairyc-go.exe",
+    "sha256": "8862917cfea6f98fad327b81ef78b0b5429a8915fefd9aea70fcbf817d121551"
+  },
+  "cases": [
+    {
+      "id": "cli-0",
+      "argv": [
+        "check",
+        "--locked"
+      ],
+      "comparison": {
+        "completed": true,
+        "acceptanceMatch": true,
+        "exitMatch": true,
+        "firstDiagnosticMatch": true,
+        "allDiagnosticsMatch": true,
+        "stdoutMatch": true,
+        "stderrMatch": true,
+        "exactMatch": true
+      }
+    },
+    {
+      "id": "cli-1",
+      "argv": [
+        "check",
+        "--bad"
+      ],
+      "comparison": {
+        "completed": true,
+        "acceptanceMatch": true,
+        "exitMatch": true,
+        "firstDiagnosticMatch": true,
+        "allDiagnosticsMatch": true,
+        "stdoutMatch": true,
+        "stderrMatch": true,
+        "exactMatch": true
+      }
+    },
+    {
+      "id": "cli-2",
+      "argv": [
+        "check",
+        "--locked",
+        "--locked"
+      ],
+      "comparison": {
+        "completed": true,
+        "acceptanceMatch": true,
+        "exitMatch": true,
+        "firstDiagnosticMatch": true,
+        "allDiagnosticsMatch": true,
+        "stdoutMatch": true,
+        "stderrMatch": true,
+        "exactMatch": true
+      }
+    },
+    {
+      "id": "cli-3",
+      "argv": [
+        "check",
+        "--help"
+      ],
+      "comparison": {
+        "completed": true,
+        "acceptanceMatch": true,
+        "exitMatch": true,
+        "firstDiagnosticMatch": true,
+        "allDiagnosticsMatch": true,
+        "stdoutMatch": true,
+        "stderrMatch": true,
+        "exactMatch": true
+      }
+    },
+    {
+      "id": "cli-4",
+      "argv": [
+        "check",
+        "--cache-status"
+      ],
+      "comparison": {
+        "completed": true,
+        "acceptanceMatch": true,
+        "exitMatch": true,
+        "firstDiagnosticMatch": true,
+        "allDiagnosticsMatch": true,
+        "stdoutMatch": true,
+        "stderrMatch": true,
+        "exactMatch": true
+      }
+    },
+    {
+      "id": "cli-5",
+      "argv": [
+        "check",
+        "--release"
+      ],
+      "comparison": {
+        "completed": true,
+        "acceptanceMatch": true,
+        "exitMatch": true,
+        "firstDiagnosticMatch": true,
+        "allDiagnosticsMatch": true,
+        "stdoutMatch": true,
+        "stderrMatch": true,
+        "exactMatch": true
+      }
+    },
+    {
+      "id": "cli-6",
+      "argv": [
+        "check",
+        "--",
+        "argument"
+      ],
+      "comparison": {
+        "completed": true,
+        "acceptanceMatch": true,
+        "exitMatch": true,
+        "firstDiagnosticMatch": true,
+        "allDiagnosticsMatch": true,
+        "stdoutMatch": true,
+        "stderrMatch": true,
+        "exactMatch": true
+      }
+    },
+    {
+      "id": "cli-7",
+      "argv": [
+        "build",
+        "--bad"
+      ],
+      "comparison": {
+        "completed": true,
+        "acceptanceMatch": true,
+        "exitMatch": true,
+        "firstDiagnosticMatch": true,
+        "allDiagnosticsMatch": true,
+        "stdoutMatch": true,
+        "stderrMatch": true,
+        "exactMatch": true
+      }
+    },
+    {
+      "id": "cli-8",
+      "argv": [
+        "run",
+        "--bad"
+      ],
+      "comparison": {
+        "completed": true,
+        "acceptanceMatch": true,
+        "exitMatch": true,
+        "firstDiagnosticMatch": true,
+        "allDiagnosticsMatch": true,
+        "stdoutMatch": true,
+        "stderrMatch": true,
+        "exactMatch": true
+      }
+    },
+    {
+      "id": "cli-9",
+      "argv": [
+        "build",
+        "--locked",
+        "--locked"
+      ],
+      "comparison": {
+        "completed": true,
+        "acceptanceMatch": true,
+        "exitMatch": true,
+        "firstDiagnosticMatch": true,
+        "allDiagnosticsMatch": true,
+        "stdoutMatch": true,
+        "stderrMatch": true,
+        "exactMatch": true
+      }
+    },
+    {
+      "id": "cli-10",
+      "argv": [
+        "run",
+        "--locked",
+        "--locked"
+      ],
+      "comparison": {
+        "completed": true,
+        "acceptanceMatch": true,
+        "exitMatch": true,
+        "firstDiagnosticMatch": true,
+        "allDiagnosticsMatch": true,
+        "stdoutMatch": true,
+        "stderrMatch": true,
+        "exactMatch": true
+      }
+    },
+    {
+      "id": "cli-11",
+      "argv": [
+        "build",
+        "--release",
+        "--release"
+      ],
+      "comparison": {
+        "completed": true,
+        "acceptanceMatch": true,
+        "exitMatch": true,
+        "firstDiagnosticMatch": true,
+        "allDiagnosticsMatch": true,
+        "stdoutMatch": true,
+        "stderrMatch": true,
+        "exactMatch": true
+      }
+    },
+    {
+      "id": "cli-12",
+      "argv": [
+        "run",
+        "--release",
+        "--release"
+      ],
+      "comparison": {
+        "completed": true,
+        "acceptanceMatch": true,
+        "exitMatch": true,
+        "firstDiagnosticMatch": true,
+        "allDiagnosticsMatch": true,
+        "stdoutMatch": true,
+        "stderrMatch": true,
+        "exactMatch": true
+      }
+    },
+    {
+      "id": "cli-13",
+      "argv": [
+        "build",
+        "--help"
+      ],
+      "comparison": {
+        "completed": true,
+        "acceptanceMatch": true,
+        "exitMatch": true,
+        "firstDiagnosticMatch": true,
+        "allDiagnosticsMatch": true,
+        "stdoutMatch": true,
+        "stderrMatch": true,
+        "exactMatch": true
+      }
+    },
+    {
+      "id": "cli-14",
+      "argv": [
+        "run",
+        "--help"
+      ],
+      "comparison": {
+        "completed": true,
+        "acceptanceMatch": true,
+        "exitMatch": true,
+        "firstDiagnosticMatch": true,
+        "allDiagnosticsMatch": true,
+        "stdoutMatch": true,
+        "stderrMatch": true,
+        "exactMatch": true
+      }
+    },
+    {
+      "id": "cli-15",
+      "argv": [
+        "build",
+        "--",
+        "argument"
+      ],
+      "comparison": {
+        "completed": true,
+        "acceptanceMatch": true,
+        "exitMatch": true,
+        "firstDiagnosticMatch": true,
+        "allDiagnosticsMatch": true,
+        "stdoutMatch": true,
+        "stderrMatch": true,
+        "exactMatch": true
+      }
+    },
+    {
+      "id": "cli-16",
+      "argv": [
+        "run",
+        "--locked",
+        "--",
+        "--program-option"
+      ],
+      "comparison": {
+        "completed": true,
+        "acceptanceMatch": true,
+        "exitMatch": true,
+        "firstDiagnosticMatch": true,
+        "allDiagnosticsMatch": true,
+        "stdoutMatch": true,
+        "stderrMatch": true,
+        "exactMatch": true
+      }
+    },
+    {
+      "id": "cli-17",
+      "argv": [],
+      "comparison": {
+        "completed": true,
+        "acceptanceMatch": true,
+        "exitMatch": true,
+        "firstDiagnosticMatch": true,
+        "allDiagnosticsMatch": true,
+        "stdoutMatch": true,
+        "stderrMatch": true,
+        "exactMatch": true
+      }
+    },
+    {
+      "id": "cli-18",
+      "argv": [
+        "--help"
+      ],
+      "comparison": {
+        "completed": true,
+        "acceptanceMatch": true,
+        "exitMatch": true,
+        "firstDiagnosticMatch": true,
+        "allDiagnosticsMatch": true,
+        "stdoutMatch": true,
+        "stderrMatch": true,
+        "exactMatch": true
+      }
+    },
+    {
+      "id": "cli-20",
+      "argv": [
+        "--unknown"
+      ],
+      "comparison": {
+        "completed": true,
+        "acceptanceMatch": true,
+        "exitMatch": true,
+        "firstDiagnosticMatch": true,
+        "allDiagnosticsMatch": true,
+        "stdoutMatch": true,
+        "stderrMatch": true,
+        "exactMatch": true
+      }
+    },
+    {
+      "id": "cli-21",
+      "argv": [
+        "new",
+        "--help"
+      ],
+      "comparison": {
+        "completed": true,
+        "acceptanceMatch": true,
+        "exitMatch": true,
+        "firstDiagnosticMatch": true,
+        "allDiagnosticsMatch": true,
+        "stdoutMatch": true,
+        "stderrMatch": true,
+        "exactMatch": true
+      }
+    },
+    {
+      "id": "cli-22",
+      "argv": [
+        "test",
+        "--help"
+      ],
+      "comparison": {
+        "completed": true,
+        "acceptanceMatch": true,
+        "exitMatch": true,
+        "firstDiagnosticMatch": true,
+        "allDiagnosticsMatch": true,
+        "stdoutMatch": true,
+        "stderrMatch": true,
+        "exactMatch": true
+      }
+    },
+    {
+      "id": "cli-24",
+      "argv": [
+        "explain",
+        "E4101"
+      ],
+      "comparison": {
+        "completed": true,
+        "acceptanceMatch": true,
+        "exitMatch": true,
+        "firstDiagnosticMatch": true,
+        "allDiagnosticsMatch": true,
+        "stdoutMatch": true,
+        "stderrMatch": true,
+        "exactMatch": true
+      }
+    },
+    {
+      "id": "cli-25",
+      "argv": [
+        "targets",
+        "--json"
+      ],
+      "comparison": {
+        "completed": true,
+        "acceptanceMatch": true,
+        "exitMatch": true,
+        "firstDiagnosticMatch": true,
+        "allDiagnosticsMatch": true,
+        "stdoutMatch": true,
+        "stderrMatch": true,
+        "exactMatch": true
+      }
+    },
+    {
+      "id": "cli-26",
+      "argv": [
+        "experimental",
+        "--help"
+      ],
+      "comparison": {
+        "completed": true,
+        "acceptanceMatch": true,
+        "exitMatch": true,
+        "firstDiagnosticMatch": true,
+        "allDiagnosticsMatch": true,
+        "stdoutMatch": true,
+        "stderrMatch": true,
+        "exactMatch": true
+      }
+    },
+    {
+      "id": "cli-27",
+      "argv": [
+        "emit"
+      ],
+      "comparison": {
+        "completed": true,
+        "acceptanceMatch": true,
+        "exitMatch": true,
+        "firstDiagnosticMatch": true,
+        "allDiagnosticsMatch": true,
+        "stdoutMatch": true,
+        "stderrMatch": true,
+        "exactMatch": true
+      }
+    }
+  ],
+  "ordinaryProgramStatusTwo": [
+    {
+      "image": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\repr-c-cli-parity-20261016\\fairyc-go.exe",
+      "sha256": "8862917cfea6f98fad327b81ef78b0b5429a8915fefd9aea70fcbf817d121551",
+      "exit": 2,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "image": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-parity-fixes-20261016\\methods-perf-cli\\development\\fairyc.exe",
+      "sha256": "aced5391229416e1ab6bd866d4afd44c490e202471a6c92e8ee699aa535a9769",
+      "exit": 2,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "image": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-parity-fixes-20261016\\methods-perf-cli\\release\\fairyc.exe",
+      "sha256": "11122a2dadfc0ed9652625665ae54bfc04713635d71825aecff437585eaaa6b4",
+      "exit": 2,
+      "stdout": "",
+      "stderr": ""
+    }
+  ],
+  "fullComparison": {
+    "cases": 28,
+    "summary": {
+      "completed": 28,
+      "acceptanceMatch": 27,
+      "exitMatch": 27,
+      "firstDiagnosticMatch": 28,
+      "allDiagnosticsMatch": 28,
+      "stdoutMatch": 26,
+      "stderrMatch": 27,
+      "exactMatch": 26
+    }
+  },
+  "remaining": [
+    {
+      "id": "cli-19",
+      "reason": "private native image reports its unknown VCS build provenance"
+    },
+    {
+      "id": "cli-23",
+      "reason": "test listing implementation pending"
+    }
+  ],
+  "scope": "stable invocation errors include canonical help; program exit status 2 remains an unadorned program status",
+  "publicApiChanged": false,
+  "sdkAbiChanged": false,
+  "dbChanged": false,
+  "ciChanged": false,
+  "pushed": false
+}

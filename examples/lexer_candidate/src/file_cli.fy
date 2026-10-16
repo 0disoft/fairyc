@@ -28,6 +28,8 @@ fn ref str usage() { return "usage: lexer-candidate check [--locked] [--cache-ro
 @effects(console)
 fn i32 invocation(ref str message){if(!io::write_stderr("fairyc: ").is_ok || !io::write_stderr(message).is_ok || !io::write_stderr("\n\n").is_ok || !io::write_stderr(public::help()).is_ok){return 4;}return 2;}
 @effects(console)
+fn i32 check_status(i32 code){if(code!=2){return code;}if(!io::write_stderr("\n").is_ok || !io::write_stderr(public::help()).is_ok){return 4;}return 2;}
+@effects(console)
 fn i32 public_output(ref str message){return if(io::write(message).is_ok){0}else{4};}
 fn bool is_help(ref u8[] flag){return bytes::equal(flag,b"--help") || bytes::equal(flag,b"-h") || bytes::equal(flag,b"help");}
 @effects(console)
@@ -57,7 +59,7 @@ pub fn i32 run() {
     if(bytes::equal(flag,b"targets")){return if(argc==2){public_output(public::targets())}else{invocation("command \"targets\" does not accept arguments")};}
     if(bytes::equal(flag,b"explain")){return invocation("command \"explain\" expects exactly one diagnostic code");}
     if(bytes::equal(flag,b"emit")){return invocation("command \"emit\" is not a stable product command; for compiler debugging use \"fairyc experimental emit-workspace-c --target <target-id> [--locked]\"");}
-    if (bytes::equal(flag,b"check")) { return checking::arguments(); }
+    if (bytes::equal(flag,b"check")) { if(argc==3){var u8[64] option=[0;64];let n=switch(process::arg(2,ref mut option)){case .ok(p):{p}case .err(_):{0}};let ref u8[] value=ref option;if(bytes::equal(value[..n],b"--cache-status")){return invocation("command \"check\" accepts only optional --locked");}}return check_status(checking::arguments()); }
     if (bytes::equal(flag,b"build")) { return native::run(false); }
     if (bytes::equal(flag,b"run")) { return native::run(true); }
     if (bytes::equal(flag,b"--c-workspace")) { return workspace_c::arguments(); }
