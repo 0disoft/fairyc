@@ -15,7 +15,7 @@ import (
 const maxPacket = 96 * 1024 * 1024
 
 // Matches candidate_limits::project_frames; C unit count is separately bounded.
-const maxProjectFrames = 8192
+const maxProjectFrames = 16384
 
 type Packet struct {
 	Header, Literals string

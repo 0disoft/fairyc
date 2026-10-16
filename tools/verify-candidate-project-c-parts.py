@@ -65,7 +65,7 @@ def packet(data, complete=True, identified=False):
         assert all(re.fullmatch(symbol, name) for name in spellings), "Noncanonical function/cleanup identifier"
         frames = [name for unit in units for name in re.findall(rb"^extern [^\n]+ (" + symbol + rb")\([^\n]*\)\{", unit, re.M)]
         declared = re.findall(rb"^extern [^\n]+ (" + symbol + rb")\([^\n]*\);$", header, re.M)
-        assert frames and len(frames) == len(set(frames)) <= 8192
+        assert frames and len(frames) == len(set(frames)) <= 16384
         assert declared == frames, "Each selected declaration must have exactly one ordered definition"
         references = set(re.findall(rb"\b(" + symbol + rb")\(", b"\n".join([header, *units])))
         assert references == set(frames), "Every function/cleanup reference must resolve in the bundle"
@@ -73,7 +73,7 @@ def packet(data, complete=True, identified=False):
         assert any(name.startswith(b"fy_cleanup_g0_") for name in frames)
     else:
         frames = [int(frame) for unit in units for frame in re.findall(rb"^extern [^\n]+ fy_fn_([0-9]+)\([^\n]*\)\{", unit, re.M)]
-        assert frames == sorted(set(frames)) and frames and frames[-1] <= 8192
+        assert frames == sorted(set(frames)) and frames and frames[-1] <= 16384
         if complete:
             assert frames == list(range(1, len(frames) + 1)), "Every frame must be defined once in original order"
     assert sum(unit.count(b"int32_t fy_candidate_entry(void){") for unit in units) == 1
