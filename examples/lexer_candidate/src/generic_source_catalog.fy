@@ -50,7 +50,7 @@ fn u32 namespace_names(ref syntax::Parsed p,ref mut usize work){
         // Source state is not in the generic expander's value/type namespace.
         if(d.kind!=2 && d.kind!=3 && d.kind!=4 && d.kind!=6 && d.kind!=7 && d.kind!=9 && d.kind!=11){i+=1;continue;}
         if(d.name_start>=d.name_end || d.name_end>raw.len || !budget::charge(work,d.name_end-d.name_start+1)){return 9;}let name=raw[d.name_start..d.name_end];if(generated(name)){return 4501;}
-        var usize j=1;while(j<i){if(!budget::charge(work,1)){return 10;}let old=syntax::declaration_at(p,j);if(old.kind==2 || old.kind==3 || old.kind==4 || old.kind==6 || old.kind==7 || old.kind==9 || old.kind==11){if(old.name_start>=old.name_end || old.name_end>raw.len){return 9;}if(!budget::charge(work,name.len+1)){return 10;}if(bytes::equal(name,raw[old.name_start..old.name_end])){return 4501;}}j+=1;}i+=1;
+        var usize j=1;while(j<i){if(!budget::charge(work,1)){return 10;}let old=syntax::declaration_at(p,j);if(old.kind==2 || old.kind==3 || old.kind==4 || old.kind==6 || old.kind==7 || old.kind==9 || old.kind==11){if(old.name_start>=old.name_end || old.name_end>raw.len){return 9;}if(!budget::charge(work,name.len+1)){return 10;}if(bytes::equal(name,raw[old.name_start..old.name_end]) && ((d.owner_end==0 && old.owner_end==0) || (d.owner_end!=0 && old.owner_end!=0 && bytes::equal(raw[d.owner_start..d.owner_end],raw[old.owner_start..old.owner_end])))){return 4501;}}j+=1;}i+=1;
     }return 0;
 }
 fn Result<Template,u32> collect_template(ref bindings::Bindings resolved,usize module_index,ref syntax::Parsed p,usize declaration,bool vector,ref mut bytes::Buffer names,ref mut v::Vec<Parameter> parameters,ref mut usize work){

@@ -1,0 +1,104 @@
+{
+  "schema": "fairyc.candidate-reference-method-calls/v1",
+  "passed": true,
+  "sourceInputs": [
+    {
+      "path": "examples/lexer_candidate/src/module_catalog.fy",
+      "sha256": "9aacf9b3a38de87deaa25349f9fa603fa119a2f45ecf628acb9ca6941be0f067"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_signatures.fy",
+      "sha256": "13ab87e3acfb98b1ff241ca8623e61593d61dd9fbfb59b0a319fc27d5076ce8d"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_unit_calls.fy",
+      "sha256": "17f1ecb1864054e40ab485789095d188aab231e44806af983e52b82340001e63"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_unit_argument_collect.fy",
+      "sha256": "7458fff1ba98d27efb4b2ab283f0a7c2069e430d8367f1cacebddb887e75affd"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_unit_value_collect.fy",
+      "sha256": "058fb4edb4fc0f31ee510c19258d0027837e1c7deae531ee7d12860d9e84a0e4"
+    },
+    {
+      "path": "examples/lexer_candidate/src/generic_source_catalog.fy",
+      "sha256": "589a0070709a9f3e6486662f8d74059d2fa51d46a856d52eba7f4ce84e635043"
+    }
+  ],
+  "fixture": {
+    "path": "examples/shared_reborrow/src/main.fy",
+    "sha256": "a621fc13118a130e4205f40518c058b9b391159c2e1346e8e2cc585cf805c737"
+  },
+  "nativeProbeMain": "module main;\nimport module_unit_checked_bodies as checking;\nimport module_signatures as signatures;\nimport scanner as scanner;\nimport syntax as syntax;\nimport std::bytes as bytes;\nimport std::vec as v;\nfn v::Vec<syntax::Parsed> sources(ref u8[] raw){\n let data=switch(bytes::copy(raw)){case .ok(p):{p}case .err(_):{assert(false);return v::empty<syntax::Parsed>();}};\n let stream=switch(scanner::collect(data,false,65536,1048576,256,16777216)){case .ok(p):{p}case .err(_):{assert(false);return v::empty<syntax::Parsed>();}};\n let parsed=switch(syntax::parse(stream,512)){case .ok(p):{p}case .err(_):{assert(false);return v::empty<syntax::Parsed>();}};\n var result=v::empty<syntax::Parsed>();assert(v::push<syntax::Parsed>(ref mut result,parsed).is_ok);return result;\n}\nfn i32 main(){let original=sources(b\"module main;\\n\\nstruct State { i32 number; }\\nfn i32 State::read(ref State this) { return this.number; }\\n\\nfn i32 read(ref i32 value) { return *value; }\\nfn ref i32 retain(ref i32 value) { return value; }\\nfn ref i32 forward(ref mut i32 value) { return retain(value); }\\nfn Option<ref i32> optional(ref i32 value) { return .some(value); }\\nfn void edit(ref mut i32 value) { *value = *value + 1; }\\nfn u8 first(ref u8[] view) { return view[0]; }\\nfn void fill(ref mut u8[] view) { view[0] = 9; }\\n\\nfn i32 main() {\\n    var i32 number = 41;\\n    let ref mut i32 view = ref mut number;\\n    assert(read(view) == 41);\\n    edit(view);\\n    let ref i32 child = forward(view);\\n    assert(*child == 42);\\n    edit(view);\\n    let Option<ref i32> tagged = optional(view);\\n    switch (tagged) { case .some(value): { assert(*value == 43); } case .none: { assert(false); } };\\n    edit(view);\\n    assert(read(view) == 44);\\n    var u8[2] data = [3, 4];\\n    let ref mut u8[] buffer = ref mut data;\\n    assert(first(buffer) == 3);\\n    fill(buffer);\\n    assert(first(buffer) == 9);\\n    var State state = State { .number = 7 };\\n    let ref mut State receiver = ref mut state;\\n    assert(receiver.read() == 7);\\n    receiver.number = 8;\\n    assert(receiver.read() == 8);\\n    return 0;\\n}\\n\");let metadata=switch(signatures::build(ref original)){case .ok(p):{p}case .err(_):{return 1;}};let plan=switch(checking::build(ref original,ref metadata,0,1)){case .ok(p):{p}case .err(_):{return 2;}};discard plan;\n{let bad=sources(b\"module main;struct State{i32 value;}fn i32 State::read(ref i32 this){return *this;}fn i32 main(){return 0;}\");switch(signatures::build(ref bad)){case .ok(p):{discard p;assert(false);}case .err(e):{assert(e.code==4501);}};}\n{let bad=sources(b\"module main;struct State{i32 value;}unsafe fn i32 State::read(ref State this){return this.value;}fn i32 main(){var State state=State{.value=7};let ref State receiver=ref state;return receiver.read();}\");let meta=switch(signatures::build(ref bad)){case .ok(p):{p}case .err(_):{return 3;}};switch(checking::build(ref bad,ref meta,0,1)){case .ok(p):{discard p;assert(false);}case .err(e):{assert(e.code==5101);}};}\nreturn 42;}\n",
+  "nativeProbeImage": {
+    "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-parity-fixes-20261016\\method-probe\\probe.exe",
+    "sha256": "f209f97b73640f25fa5856e9f58cb2a08c7b4b6d5d7bc2c6095b1529f105b637"
+  },
+  "nativeProbeInvocations": [
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-parity-fixes-20261016\\diagnostics-cli\\release\\fairyc.exe",
+        "--c-project-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-parity-fixes-20261016\\method-probe\\sources.list"
+      ],
+      "exit": 0,
+      "seconds": 111.77015100000426,
+      "stdoutBytes": 11920722,
+      "stdoutSHA256": "b9eda4f5431c52c8d61b27072791f6864f52e1ce7940ea3f4de09317a1c34dfd",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\repr-c-cli-parity-20261016\\fairyc-candidate-build.exe",
+        "--packet",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-parity-fixes-20261016\\method-probe\\packet.bin",
+        "--packet-sha256",
+        "b9eda4f5431c52c8d61b27072791f6864f52e1ce7940ea3f4de09317a1c34dfd",
+        "--output",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-parity-fixes-20261016\\method-probe\\probe.exe",
+        "--stack-reserve-bytes",
+        "16777216"
+      ],
+      "exit": 0,
+      "seconds": 53.04947589999938,
+      "stdoutBytes": 181,
+      "stdoutSHA256": "959455b93cadf63a7b28cc7b4fb8b6fa31cb9449162d2fb1cbfba9a51a4bf20d",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-parity-fixes-20261016\\method-probe\\probe.exe"
+      ],
+      "exit": 42,
+      "seconds": 0.7652109999908134,
+      "stdoutBytes": 0,
+      "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr": ""
+    }
+  ],
+  "nativeProbeReceipt": {
+    "path": ".cache/candidate-parity-fixes-20261016/method-probe/receipt.json",
+    "sha256": "99d6466a64bf584b8306624357e1aecf8c03e55252269a46a5da98cfd9506c1f"
+  },
+  "goSourceValidation": {
+    "exit": 0,
+    "stdout": "check ok: 2 instance(s), 523 source file(s), 6446 MIR function(s), lock updated\n",
+    "stderr": "",
+    "seconds": 87.76665270001104
+  },
+  "assertions": [
+    "shared_reborrow complete source passes typed, move and borrow checks",
+    "method and free function with the same short name have distinct identities",
+    "receiver type must match its owner",
+    "unsafe method invocation outside unsafe context is rejected"
+  ],
+  "scope": "ordinary instance methods called through explicitly typed reference locals; generic methods and implicit owner-to-reference receiver conversion remain outside this bounded candidate admission",
+  "workspaceCliIntegrationPending": true,
+  "fullProductParity": false,
+  "publicApiChanged": false,
+  "sdkAbiChanged": false,
+  "dbChanged": false,
+  "ciChanged": false
+}
