@@ -4,6 +4,7 @@ import module_unit_body_ir_verify as proof;
 import module_unit_cleanup_mir_model as cleanup_ir;
 import module_unit_cleanup_mir_types as identity;
 import module_unit_checked_bodies as checking;
+import module_signatures as signatures;
 import module_unit_values as values;
 import module_types as types;
 import module_program_artifact_wire as budget;
@@ -33,8 +34,8 @@ pub fn Result<Index,u32> build(ref ir::Program p,ref mut usize work){
 fn Result<usize,u32> find(ref Index p,types::Type row,ref mut usize work){var usize slot=identity::bucket(row);var usize probes=0;
     while(probes<8192){if(!budget::charge(work,1)){return .err(1002);}let id=*v::at<usize>(ref p.slots,slot);if(id==0){return .err(1001);}if(identity::same(row,type_at(p,id))){return .ok(id);}slot=(slot+1)&8191;probes+=1;}return .err(1002);
 }
-pub fn Result<Mapping,u32> match(ref Index p,ref checking::Plan checked,ref v::Vec<syntax::Parsed> sources,ref mut usize work){
-    if(!budget::charge(work,0)){return .err(1002);}var usize measured=0;let current=checking::validate_sources(checked,sources,ref mut measured);if(!budget::charge(work,measured)){return .err(1002);}if(current.code!=0){return .err(if(current.code==10){1002}else if(current.code==11){1003}else{1001});}
+pub fn Result<Mapping,u32> match(ref Index p,ref checking::Plan checked,ref v::Vec<syntax::Parsed> sources,ref signatures::Program metadata,ref mut usize work){
+    if(!budget::charge(work,0)){return .err(1002);}var usize measured=0;let current=checking::validate_sources_catalog(checked,sources,metadata,ref mut measured);if(!budget::charge(work,measured)){return .err(1002);}if(current.code!=0){return .err(if(current.code==10){1002}else if(current.code==11){1003}else{1001});}
     let typed=checking::checked_values(checked);if(values::type_count(typed)==0 || values::type_count(typed)>4096){return .err(1001);}var v::Vec<usize> ids=v::empty<usize>();var v::Vec<u8> used=v::empty<u8>();var usize i=0;
     while(i<type_count(p)){if(!budget::charge(work,1)){return .err(1002);}if(!v::push<u8>(ref mut used,0).is_ok){return .err(1003);}i+=1;}i=1;
     while(i<=values::type_count(typed)){if(!budget::charge(work,1)){return .err(1002);}var row=values::type_at(typed,i);

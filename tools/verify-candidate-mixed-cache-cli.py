@@ -15,6 +15,8 @@ def main():
     parser.add_argument('--build-receipt', type=Path, required=True)
     parser.add_argument('--reference', type=Path, required=True)
     parser.add_argument('--output', type=Path, required=True)
+    parser.add_argument('--profile', action='append', choices=['development', 'release'],
+                        help='verify only this native compiler profile (default: both)')
     args = parser.parse_args()
     assert __debug__, 'verification requires Python without -O'
     output = args.output.resolve()
@@ -49,7 +51,9 @@ def main():
     def projects(cache):
         return {p.name for p in cache.glob('fyproject0-*.fyc') if p.read_bytes()[16:24] == b'FYCKEYS0'}
 
-    for selected in build['images']:
+    selected_images = [p for p in build['images'] if not args.profile or p['profile'] in args.profile]
+    assert selected_images
+    for selected in selected_images:
         profile = selected['profile']
         image = Path(selected['path'])
         assert sha(image) == selected['sha256']
@@ -105,7 +109,7 @@ def main():
     assert sha(reference) == reference_sha
     report = dict(schema='fairyc.candidate-mixed-cache-cli/v0', passed=True,
                   sourceInputs=inputs, buildReceiptSHA256=sha(args.build_receipt),
-                  referenceSHA256=reference_sha, executions=rows,
+                  referenceSHA256=reference_sha, images=selected_images, executions=rows,
                   publicApiChanged=False, sdkAbiChanged=False, dbChanged=False, ciChanged=False, pushed=False)
     (output / 'receipt.json').write_text(json.dumps(report, indent=2)+'\n', encoding='utf-8')
     print('Mixed package commands passed:', len(rows), 'process observations')

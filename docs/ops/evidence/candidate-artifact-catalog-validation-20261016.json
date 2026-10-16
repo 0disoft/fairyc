@@ -1,0 +1,197 @@
+{
+  "schema": "fairyc.candidate-artifact-catalog-validation/v1",
+  "passed": true,
+  "sourceInputs": [
+    {
+      "path": "examples/lexer_candidate/src/module_project_artifact_types.fy",
+      "sha256": "6409b5a55f94fa7e7328281e6a6a50ba9879eae2172cec2b453c575d5935ae4c"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_project_artifact_frames.fy",
+      "sha256": "179e55df7a3eb86d3bca2575b17292609a6314d8bd8ee68906fc8fd4e22ca74e"
+    },
+    {
+      "path": "tools/verify-candidate-check-cache-cli.py",
+      "sha256": "4e35c03cd35ad163e8f4605bf769cc4b3759b7e14d9027acff641f24943f1f05"
+    },
+    {
+      "path": "tools/verify-candidate-native-cache-cli.py",
+      "sha256": "1e7cad22c32d22d1b55c59bd1e341d597279baf84d3f246fd8b161a684f0e9ff"
+    },
+    {
+      "path": "tools/verify-candidate-mixed-cache-cli.py",
+      "sha256": "0b699e7efdae46cd05cae672f400e255121056075e656a0e8a21b2b84191a155"
+    }
+  ],
+  "buildReceipt": {
+    "path": ".cache/candidate-parity-fixes-20261016/methods-perf-cli/receipt.json",
+    "sha256": "6edab85253e26ecb504969fb26e994d759be3ddd223d0fc6e08ff98ec4dddf42"
+  },
+  "images": [
+    {
+      "profile": "development",
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-parity-fixes-20261016\\methods-perf-cli\\development\\fairyc.exe",
+      "sha256": "aced5391229416e1ab6bd866d4afd44c490e202471a6c92e8ee699aa535a9769",
+      "driverSHA256": "6cc41b173179c54729254335b298f7e95a9919b2b5fb17644ee65e9bb78eb7cd"
+    },
+    {
+      "profile": "release",
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-parity-fixes-20261016\\methods-perf-cli\\release\\fairyc.exe",
+      "sha256": "11122a2dadfc0ed9652625665ae54bfc04713635d71825aecff437585eaaa6b4",
+      "driverSHA256": "6cc41b173179c54729254335b298f7e95a9919b2b5fb17644ee65e9bb78eb7cd"
+    }
+  ],
+  "assertions": [
+    "artifact type matching reuses the current source-authenticated immutable signature catalog",
+    "work is still charged and mismatching source/digest remains rejected",
+    "whole-project and per-package cache hits, corruption repair, private-body edits, public-contract invalidation and generic/Vec mixed execution retain behavior"
+  ],
+  "releaseReports": [
+    {
+      "kind": "check",
+      "receipt": {
+        "path": ".cache/candidate-parity-fixes-20261016/final-check-cache-release/receipt.json",
+        "sha256": "281bc74103662c437fdc633f9fe8b604191c752b657a381c2bce96839ea7ed28"
+      },
+      "profiles": [
+        "release"
+      ],
+      "observations": 21,
+      "cases": [
+        "release cold population",
+        "release fresh-process verified hit",
+        "release Go locked oracle",
+        "release silent hit",
+        "release corrupt project generation uses checked unit",
+        "release repaired generation hit",
+        "release unavailable root fallback",
+        "release changed body cold population",
+        "release changed body verified hit",
+        "release changed body Go oracle",
+        "release invalid body fallback",
+        "release exact invalid-body Go diagnostic",
+        "release status requires root",
+        "release duplicate root",
+        "release legacy invalid option",
+        "release generic cold population",
+        "release generic cross-process hit",
+        "release generic Go oracle",
+        "release vec cold population",
+        "release vec cross-process hit",
+        "release vec Go oracle"
+      ]
+    },
+    {
+      "kind": "native",
+      "receipt": {
+        "path": ".cache/candidate-parity-fixes-20261016/final-native-cache-release/receipt.json",
+        "sha256": "299b7dc0286d2b1b39df4cc58f4c52eb777b831e68371a8783ad587e8bae9552"
+      },
+      "profiles": [
+        "release"
+      ],
+      "observations": 14,
+      "cases": [
+        "release cold cached build",
+        "release built program",
+        "release checked hit run",
+        "release Go run oracle",
+        "release silent hit run",
+        "release unavailable-root cold run",
+        "release invalid-body cached build",
+        "release Go invalid-body diagnostic",
+        "release status without root",
+        "release duplicate run root",
+        "release generic Vec cached build",
+        "release generic Vec built program",
+        "release generic Vec hit run",
+        "release cache flags forwarded after delimiter"
+      ]
+    },
+    {
+      "kind": "mixed",
+      "receipt": {
+        "path": ".cache/candidate-parity-fixes-20261016/final-mixed-cache-release/receipt.json",
+        "sha256": "5de4d4e2b3d53f403f1468932f7a98c2d25b742a6413edb68129336dd519a207"
+      },
+      "profiles": [
+        "release"
+      ],
+      "observations": 19,
+      "cases": [
+        "release cold population",
+        "release project hit",
+        "release Go baseline oracle",
+        "release corrupt unit rebuilds beside valid units",
+        "release repaired project hit",
+        "release private dependency edit",
+        "release mixed result executes",
+        "release root edit mixed build",
+        "release mixed build execution",
+        "release corrupt project uses admitted units",
+        "release Go recovered oracle",
+        "release invalid body",
+        "release Go diagnostic oracle",
+        "release public effect invalidates caller",
+        "release public contract result",
+        "release generic body population",
+        "release generic body mixed execution",
+        "release Vec ordinary dependency population",
+        "release Vec ordinary dependency mixed execution"
+      ]
+    }
+  ],
+  "developmentPartialObservations": [
+    {
+      "kind": "check",
+      "completedObservations": 7,
+      "labels": [
+        "development cold population",
+        "development fresh-process verified hit",
+        "development Go locked oracle",
+        "development silent hit",
+        "development corrupt project generation uses checked unit",
+        "development repaired generation hit",
+        "development unavailable root fallback"
+      ],
+      "suiteCompleted": false,
+      "reason": "Stopped after initial development-profile reuse checks; remaining scenarios verified with optimized compiler profile. Every process authenticates the full native image."
+    },
+    {
+      "kind": "native",
+      "completedObservations": 6,
+      "labels": [
+        "development cold cached build",
+        "development built program",
+        "development checked hit run",
+        "development Go run oracle",
+        "development silent hit run",
+        "development unavailable-root cold run"
+      ],
+      "suiteCompleted": false,
+      "reason": "Stopped after initial development-profile reuse checks; remaining scenarios verified with optimized compiler profile. Every process authenticates the full native image."
+    },
+    {
+      "kind": "mixed",
+      "completedObservations": 6,
+      "labels": [
+        "development cold population",
+        "development project hit",
+        "development Go baseline oracle",
+        "development corrupt unit rebuilds beside valid units",
+        "development repaired project hit",
+        "development private dependency edit"
+      ],
+      "suiteCompleted": false,
+      "reason": "Stopped after initial development-profile reuse checks; remaining scenarios verified with optimized compiler profile. Every process authenticates the full native image."
+    }
+  ],
+  "verificationDefaultProfilesUnchanged": true,
+  "goFrontendInvoked": false,
+  "fullProductParity": false,
+  "publicApiChanged": false,
+  "sdkAbiChanged": false,
+  "dbChanged": false,
+  "ciChanged": false,
+  "pushed": false
+}

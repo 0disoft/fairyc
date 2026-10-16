@@ -17,6 +17,8 @@ def main():
                         help='Go-frontend private command receipt; does not verify candidate C')
     parser.add_argument('--reference', type=Path, required=True)
     parser.add_argument('--output', type=Path, required=True)
+    parser.add_argument('--profile', action='append', choices=['development', 'release'],
+                        help='verify only this native compiler profile (default: both)')
     args = parser.parse_args()
     assert __debug__, 'verification requires Python without -O'
     output = args.output.resolve()
@@ -27,6 +29,7 @@ def main():
     build = json.loads(build_path.read_text(encoding='utf-8'))
     assert build['passed'] and build['goFrontendInvoked'] == go_reference
     if go_reference:
+        assert not args.profile, '--profile requires a native candidate build'
         build = {**build, 'sources': build['inputs'],
                  'images': [{'profile': 'go-reference', **build['image']}]}
     sha = lambda p: hashlib.sha256(p.read_bytes()).hexdigest()
@@ -56,7 +59,9 @@ def main():
 
     manifest = "schema='fairyc.manifest/v1'\n[package]\nuid='example.check-cache.{name}'\nname='cache-app'\nversion='0.1.0'\nlanguage='fairyc-language/20'\nsource='src'\n"
     program = 'module main;fn i32 main(){return 42;}\n'
-    for selected in build['images']:
+    selected_images = [p for p in build['images'] if not args.profile or p['profile'] in args.profile]
+    assert selected_images
+    for selected in selected_images:
         profile = selected['profile']
         image = Path(selected['path'])
         assert sha(image) == selected['sha256']
@@ -127,7 +132,7 @@ def main():
     for row in build['sources']:
         assert sha(ROOT/row['path'])==row['sha256']
     assert sha(ROOT/'examples/lexer_candidate/fairy.lock')==lock_sha
-    report=dict(schema='fairyc.candidate-check-cache-cli/v0',passed=True,goFrontendInvoked=go_reference,candidateCVerified=not go_reference,buildReceipt=dict(path=str(build_path.relative_to(ROOT)),sha256=sha(build_path)),sourceInputs=build['sources'],rootLockSHA256=lock_sha,reference=dict(path=str(reference),sha256=reference_sha),images=build['images'],executions=rows,explicitRoot=True,defaultCacheEnabled=False,publicGoCliChanged=False,ciChanged=False,pushed=False)
+    report=dict(schema='fairyc.candidate-check-cache-cli/v0',passed=True,goFrontendInvoked=go_reference,candidateCVerified=not go_reference,buildReceipt=dict(path=str(build_path.relative_to(ROOT)),sha256=sha(build_path)),sourceInputs=build['sources'],rootLockSHA256=lock_sha,reference=dict(path=str(reference),sha256=reference_sha),images=selected_images,executions=rows,explicitRoot=True,defaultCacheEnabled=False,publicGoCliChanged=False,ciChanged=False,pushed=False)
     (output/'receipt.json').write_text(json.dumps(report,indent=2)+'\n',encoding='utf-8')
     print('private check cache CLI passed:',len(rows),'fresh process observations',flush=True)
 

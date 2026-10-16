@@ -14,6 +14,8 @@ def main():
     parser.add_argument('--build-receipt', type=Path, required=True)
     parser.add_argument('--reference', type=Path, required=True)
     parser.add_argument('--output', type=Path, required=True)
+    parser.add_argument('--profile', action='append', choices=['development', 'release'],
+                        help='verify only this native compiler profile (default: both)')
     args = parser.parse_args()
     assert __debug__, 'verification requires Python without -O'
     output = args.output.resolve()
@@ -62,7 +64,9 @@ fn i32 main(){if(p::arg_count()!=3){return 0;}var u8[64] data=[0;64];
 let n=switch(p::arg(1,ref mut data)){case .ok(n):{n}case .err(_):{return 0;}};{let ref u8[] view=ref data;if(!b::equal(view[..n],b"--cache-root")){return 0;}}
 let m=switch(p::arg(2,ref mut data)){case .ok(n):{n}case .err(_):{return 0;}};let ref u8[] view=ref data;return if(b::equal(view[..m],b"--cache-status")){42}else{0};}
 '''
-    for selected in build['images']:
+    selected_images = [p for p in build['images'] if not args.profile or p['profile'] in args.profile]
+    assert selected_images
+    for selected in selected_images:
         profile = selected['profile']
         image = Path(selected['path'])
         assert sha(image) == selected['sha256']
@@ -108,7 +112,7 @@ let m=switch(p::arg(2,ref mut data)){case .ok(n):{n}case .err(_):{return 0;}};le
         assert sha(ROOT/row['path']) == row['sha256'], row['path']
     report = dict(schema='fairyc.candidate-native-cache-cli/v0', passed=True, candidateCVerified=True,
                   buildReceipt=dict(path=str(build_path.relative_to(ROOT)), sha256=build_sha), sourceInputs=source_inputs,
-                  reference=dict(path=str(reference), sha256=reference_sha), images=build['images'], executions=rows,
+                  reference=dict(path=str(reference), sha256=reference_sha), images=selected_images, executions=rows,
                   explicitRoot=True, defaultCacheEnabled=False, publicGoCliChanged=False, ciChanged=False, pushed=False)
     (output/'receipt.json').write_text(json.dumps(report, indent=2)+'\n', encoding='utf-8')
     print('native cached build/run passed:', len(rows), 'process observations', flush=True)
