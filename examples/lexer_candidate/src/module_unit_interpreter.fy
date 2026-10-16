@@ -8,6 +8,10 @@ import module_project_identified_ir as identified;
 import module_constant_arithmetic as math;
 import std::bytes as bytes;
 import std::vec as v;
+import std::io as io;
+import project_compiler_core as compiler;
+import project_test_options as test_options;
+import project_compiler_input as input;
 
 // An interpreter consumes checked owned IR and verified CFGs only. It cannot
 // emit C, launch a process, or invoke a host adapter. Values are scalar bits.
@@ -65,4 +69,14 @@ fn Outcome execute(ref identified::Program owned,ref Plan plan,usize frame,ref v
 pub fn Outcome execute_void(ref identified::Program owned,ref Plan plan,usize frame){
     let p=identified::ir_program(owned);if(frame==0 || frame>ir::count(p) || v::len<cfg::Graph>(ref plan.graphs)!=ir::count(p)){return failure(4);}if(scalar(p,clean::frame_at(ir::cleanup_ir(p),frame).result)!=7){return failure(4);}
     let arguments=v::empty<usize>();var usize steps=1000000;return execute(owned,plan,frame,ref arguments,ref mut steps,0);
+}
+
+@effects(console) fn i32 report_failure(ref str message,i32 code){return if(io::write_stderr(message).is_ok){code}else{4};}
+@effects(console) pub fn i32 tests(ref compiler::Complete complete,ref test_options::TestOptions options,ref v::Vec<test_options::TestIdentity> tests,ref v::Vec<usize> chosen,ref input::Input projected,u32 lock_code){
+    var v::Vec<u32> traps=v::empty<u32>();if(v::len<usize>(chosen)==0){return test_options::test_semantic_report(options,tests,chosen,projected,ref traps,lock_code);}
+    let owned=compiler::checked_program(complete);let p=identified::ir_program(owned);let plan=switch(prepare(p)){case .ok(p):{p}case .err(code):{return report_failure(if(code==4){"fairyc: internal semantic test preparation failed\n"}else{"fairyc: requested workspace is outside the semantic test interpreter subset: candidate interpreter CFG preparation limit exceeded\n"},if(code==4){4}else{2});}};
+    var usize i=0;while(i<v::len<usize>(chosen)){let test=v::at<test_options::TestIdentity>(tests,*v::at<usize>(chosen,i));var usize frame=1;while(frame<=ir::count(p)){let f=clean::frame_at(ir::cleanup_ir(p),frame);if(f.kind==3 && f.module_index==test_options::test_module(test) && f.declaration==test_options::test_declaration(test)+1){break;}frame+=1;}
+        let outcome=execute_void(owned,ref plan,frame);if(outcome.error!=0){if(outcome.error==4){return report_failure("fairyc: internal semantic test execution failed\n",4);}var bytes::Buffer message=bytes::empty();if(!test_options::test_append(ref mut message,b"fairyc: requested workspace is outside the semantic test interpreter subset: ") || !test_options::test_append(ref mut message,test_options::test_name(test)) || !test_options::test_append(ref mut message,b": ") || !test_options::test_append(ref mut message,detail(outcome.error)) || !test_options::test_append(ref mut message,b"\n")){return 4;}return if(io::write_stderr_bytes(bytes::view(ref message)).is_ok){2}else{4};}
+        if(!v::push<u32>(ref mut traps,outcome.trap).is_ok){return 4;}i+=1;
+    }return test_options::test_semantic_report(options,tests,chosen,projected,ref traps,lock_code);
 }

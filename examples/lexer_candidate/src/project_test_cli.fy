@@ -26,9 +26,6 @@ import project_check_cli as checking;
 import project_test_options as test_options;
 import native_cli as native;
 import module_unit_interpreter as interpreter;
-import module_unit_body_ir_model as ir;
-import module_unit_cleanup_mir_model as clean;
-import module_project_identified_ir as identified;
 struct TestAttributeError{usize start;usize end;}
 
 @effects(console) fn i32 failure(ref str message,i32 code){return if(io::write_stderr(message).is_ok){code}else{4};}
@@ -40,7 +37,6 @@ fn ref workspace_catalog::Catalog test_catalog(ref loader::Loaded loaded){return
 fn ref u8[] test_package_path(ref loader::Loaded loaded,usize owner){let g=visibility::workspace_graph(loader::workspace(loaded));return workspace_catalog::path(test_catalog(loaded),graph::node(g,owner).package_index);}
 fn ref u8[] test_package_uid(ref loader::Loaded loaded,usize owner){let g=visibility::workspace_graph(loader::workspace(loaded));return manifest::package_value(workspace_catalog::package(test_catalog(loaded),graph::node(g,owner).package_index),b"uid");}
 fn bool test_path(ref mut bytes::Buffer out,ref u8[] package,ref u8[] file){return (bytes::equal(package,b".") || test_options::test_append(out,package) && test_options::test_append(out,b"/")) && test_options::test_append(out,file);}
-fn bool test_is_file(ref u8[] file){return test_options::test_starts(file,b"tests/");}
 fn bool test_module_name(ref syntax::Parsed parsed,ref mut bytes::Buffer out){let d=syntax::declaration_at(parsed,0);var usize i=0;while(i<syntax::token_count(parsed)){let t=syntax::token_info(parsed,i);if(d.name_start<=t.start && t.end<=d.name_end && t.kind!=2 && !test_options::test_append(out,syntax::source_view(parsed)[t.start..t.end])){return false;}i+=1;}return true;}
 
 
@@ -89,11 +85,11 @@ pub fn i32 run_test_list(ref u8[] root,ref test_options::TestOptions options){
     var sources::Budget overlay_budget=sources::Budget{.files=0,.bytes=0};meter=0;let resolved=switch(visibility::load_tests(root,false,ref selected,ref mut overlay_budget,ref mut meter)){case .ok(p):{p}case .err(e):{return test_error(check::load_failure(loader::test_failure(e)));}};let loaded=loader::from_tests(resolved,lock);
     let table=switch(coordinates::collect(visibility::workspace_graph(loader::workspace(ref loaded)),ref mut meter)){case .ok(p):{p}case .err(e):{return test_error(check::projection_failure(loaded,input::Problem{.code=e.code,.reason=2,.owner=e.owner,.module_index=0,.declaration=0}));}};
     var projected=switch(input::project_tests(loader::workspace(ref loaded),ref mut meter)){case .ok(p):{p}case .err(e):{return test_error(check::projection_failure(loaded,e));}};
-    var v::Vec<test_options::TestIdentity> tests=v::empty<test_options::TestIdentity>();var v::Vec<usize> modules=v::empty<usize>();var v::Vec<bytes::Buffer> files=v::empty<bytes::Buffer>();var v::Vec<bytes::Buffer> dirs=v::empty<bytes::Buffer>();var bytes::Buffer diagnostics=bytes::empty();var bool diagnosed=false;var usize diagnosed_owner=0;var usize source_cursor=0;var v::Vec<usize> source_order=v::empty<usize>();
+    var v::Vec<test_options::TestIdentity> tests=v::empty<test_options::TestIdentity>();var v::Vec<bytes::Buffer> files=v::empty<bytes::Buffer>();var v::Vec<bytes::Buffer> dirs=v::empty<bytes::Buffer>();var bytes::Buffer diagnostics=bytes::empty();var bool diagnosed=false;var usize diagnosed_owner=0;var usize source_cursor=0;var v::Vec<usize> source_order=v::empty<usize>();
     var usize sort_i=0;while(sort_i<input::count(ref projected)){if(!v::push<usize>(ref mut source_order,sort_i).is_ok){return 4;}var usize j=sort_i;while(j>0){let previous=*v::at<usize>(ref source_order,j-1);let a=input::origin(ref projected,sort_i);let b=input::origin(ref projected,previous);let sg=visibility::workspace_graph(loader::workspace(ref loaded));var bool before=false;
         if(!graph::is_sdk(sg,a.owner) && !graph::is_sdk(sg,b.owner)){let au=test_package_uid(ref loaded,a.owner);let bu=test_package_uid(ref loaded,b.owner);before=if(test_options::flags(options).workspace && !bytes::equal(au,bu)){lexical::before(au,bu)}else{lexical::before(input::file(ref projected,sort_i),input::file(ref projected,previous))};}if(!before){break;}let slot=v::at_mut<usize>(ref mut source_order,j);*slot=previous;j-=1;}let slot=v::at_mut<usize>(ref mut source_order,j);*slot=sort_i;sort_i+=1;}
     while(source_cursor<v::len<usize>(ref source_order)){let source_index=*v::at<usize>(ref source_order,source_cursor);let origin=input::origin(ref projected,source_index);let source_file=input::file(ref projected,source_index);if(graph::is_sdk(visibility::workspace_graph(loader::workspace(ref loaded)),origin.owner) || !test_options::test_contains(ref selected,test_package_path(ref loaded,origin.owner)) || !graph::module_is_test(visibility::workspace_graph(loader::workspace(ref loaded)),origin.owner,origin.module_index)){source_cursor+=1;continue;}
-        if(diagnosed && origin.owner!=diagnosed_owner){break;}if(!v::push<usize>(ref mut modules,source_index).is_ok){return 4;}var bytes::Buffer file=bytes::empty();if(!test_path(ref mut file,test_package_path(ref loaded,origin.owner),source_file) || !test_options::test_add(ref mut files,bytes::view(ref file))){return 4;}
+        if(diagnosed && origin.owner!=diagnosed_owner){break;}var bytes::Buffer file=bytes::empty();if(!test_path(ref mut file,test_package_path(ref loaded,origin.owner),source_file) || !test_options::test_add(ref mut files,bytes::view(ref file))){return 4;}
         var usize end=bytes::len(ref file);var usize minimum=if(bytes::equal(test_package_path(ref loaded,origin.owner),b".")){5}else{test_package_path(ref loaded,origin.owner).len+6};while(end>minimum){end-=1;if(bytes::view(ref file)[end]==47){let p=bytes::view(ref file)[..end];if(!test_options::test_contains(ref dirs,p) && !test_options::test_add(ref mut dirs,p)){return 4;}if(end==minimum){break;}}}
         let parsed=graph::module_parser(visibility::workspace_graph(loader::workspace(ref loaded)),origin.owner,origin.module_index);let source=syntax::source_view(parsed);var v::Vec<TestAttributeError> invalid=v::empty<TestAttributeError>();var usize declaration=0;
         let declarations=test_declarations(parsed,options,test_package_uid(ref loaded,origin.owner),bytes::view(ref file),source_index,ref mut tests,ref mut invalid);if(declarations!=0){return declarations;}
@@ -108,7 +104,7 @@ pub fn i32 run_test_list(ref u8[] root,ref test_options::TestOptions options){
     var usize source_work=0;var usize link_work=0;var v::Vec<signatures::Reports> reports=v::empty<signatures::Reports>();
     let complete=switch(compiler::build_complete_reporting(ref projected,ref table,ref mut reports,ref mut source_work,ref mut link_work)){case .ok(p):{p}case .err(e):{return test_error(check::compile_failure_reports(loaded,projected,e,reports));}};
     if(test_options::flags(options).stdin && v::len<usize>(ref chosen)!=1){return test_invocation(b"command \"test\" requires exactly one selected test when --stdin is supplied");}
-    if(!test_options::flags(options).list && !test_options::flags(options).native){return test_interpret(ref complete,options,ref tests,ref chosen,ref projected,locks::state_code(lock));}
+    if(!test_options::flags(options).list && !test_options::flags(options).native){return interpreter::tests(ref complete,options,ref tests,ref chosen,ref projected,locks::state_code(lock));}
     if(!test_options::flags(options).list){return native::tests(complete,ref projected,ref table,options,ref tests,ref chosen,root,locks::state_code(lock));}discard complete;
     return test_options::test_render(options,ref tests,ref projected,locks::state_code(lock));
 }
@@ -118,12 +114,3 @@ pub fn i32 run_test_list(ref u8[] root,ref test_options::TestOptions options){
 pub fn i32 run(ref u8[] root,ref v::Vec<bytes::Buffer> argv){let selected=switch(test_options::parse_test_options(argv)){case .ok(p):{p}case .err(e):{return test_invocation(test_options::error_text(ref e));}};return run_test_list(root,ref selected);}
 @effects(filesystem,console,environment,clock)
 pub fn i32 arguments(){var v::Vec<bytes::Buffer> argv=v::empty<bytes::Buffer>();var usize i=2;while(i<process::arg_count()){var bytes::Buffer data=bytes::empty();if(!bytes::resize_zeroed(ref mut data,4096).is_ok){return 4;}let n=switch(process::arg(i,bytes::view_mut(ref mut data))){case .ok(p):{p}case .err(_):{return failure("fairyc: argument exceeds the supported byte limit\n",2);}};if(!test_options::test_add(ref mut argv,bytes::view(ref data)[..n])){return 4;}i+=1;}return run(b".",ref argv);}
-
-@effects(console) fn i32 test_interpret(ref compiler::Complete complete,ref test_options::TestOptions options,ref v::Vec<test_options::TestIdentity> tests,ref v::Vec<usize> chosen,ref input::Input projected,u32 lock_code){
-    var v::Vec<u32> traps=v::empty<u32>();if(v::len<usize>(chosen)==0){return test_options::test_semantic_report(options,tests,chosen,projected,ref traps,lock_code);}
-    let owned=compiler::checked_program(complete);let p=identified::ir_program(owned);let plan=switch(interpreter::prepare(p)){case .ok(p):{p}case .err(code):{return failure(if(code==4){"fairyc: internal semantic test preparation failed\n"}else{"fairyc: requested workspace is outside the semantic test interpreter subset: candidate interpreter CFG preparation limit exceeded\n"},if(code==4){4}else{2});}};
-    var usize i=0;while(i<v::len<usize>(chosen)){let test=v::at<test_options::TestIdentity>(tests,*v::at<usize>(chosen,i));var usize frame=1;while(frame<=ir::count(p)){let f=clean::frame_at(ir::cleanup_ir(p),frame);if(f.kind==3 && f.module_index==test_options::test_module(test) && f.declaration==test_options::test_declaration(test)+1){break;}frame+=1;}
-        let outcome=interpreter::execute_void(owned,ref plan,frame);if(outcome.error!=0){if(outcome.error==4){return failure("fairyc: internal semantic test execution failed\n",4);}var bytes::Buffer message=bytes::empty();if(!test_options::test_append(ref mut message,b"fairyc: requested workspace is outside the semantic test interpreter subset: ") || !test_options::test_append(ref mut message,test_options::test_name(test)) || !test_options::test_append(ref mut message,b": ") || !test_options::test_append(ref mut message,interpreter::detail(outcome.error)) || !test_options::test_append(ref mut message,b"\n")){return 4;}return if(io::write_stderr_bytes(bytes::view(ref message)).is_ok){2}else{4};}
-        if(!v::push<u32>(ref mut traps,outcome.trap).is_ok){return 4;}i+=1;
-    }return test_options::test_semantic_report(options,tests,chosen,projected,ref traps,lock_code);
-}
