@@ -1,5 +1,5 @@
 module sha256_stream;
-import sha256_block as blocks;
+import sha256 as blocks;
 import std::bytes as bytes;
 
 // This private state keeps one partial block, independent of total input size.

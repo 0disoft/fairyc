@@ -1,0 +1,84 @@
+{
+  "passed": true,
+  "sourceInputs": [
+    {
+      "path": ".cache/candidate-parity-fixes-20261016/sha-probe/main.fy",
+      "sha256": "e13ce8cc077fe39e4f5c83b37430a554e75d5c45f6069607c569d028c40254bd"
+    },
+    {
+      "path": "examples/lexer_candidate/src/sha256.fy",
+      "sha256": "3ff678ea5999ea41efea3cd3333f96fc461bce7b8620caad65a27946978c286f"
+    },
+    {
+      "path": "examples/lexer_candidate/src/sha256_stream.fy",
+      "sha256": "5056fff001ea1e40cbef0002a86bf07a49f37bf990cf7efbde77745286d57151"
+    },
+    {
+      "path": "internal/sdkstdlib/sources/std/bytes.fy",
+      "sha256": "4740a506e93349fb002c383967dcc44d182d20f09f2094b83b5464a4ab252982"
+    }
+  ],
+  "image": {
+    "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-parity-fixes-20261016\\sha-probe\\probe.exe",
+    "sha256": "d6e0625022f7f403290978859d81fe4ae9e5eb29c0c663c6c2e457e4f9578568"
+  },
+  "seed": {
+    "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-parity-fixes-20261016\\diagnostics-cli\\release\\fairyc.exe",
+    "sha256": "9d6c517fb5d72bee26c05b4b1fc2d896e2d50f3280f14d901acc08346ddedf66"
+  },
+  "builder": {
+    "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\repr-c-cli-parity-20261016\\fairyc-candidate-build.exe",
+    "sha256": "6cc41b173179c54729254335b298f7e95a9919b2b5fb17644ee65e9bb78eb7cd"
+  },
+  "invocations": [
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-parity-fixes-20261016\\diagnostics-cli\\release\\fairyc.exe",
+        "--c-project-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-parity-fixes-20261016\\sha-probe\\sources.list"
+      ],
+      "exit": 0,
+      "seconds": 0.6979653999878792,
+      "stdoutBytes": 97043,
+      "stdoutSHA256": "ca94508d7091b0ab769502840d70a27f6b75ee0239e069733d11c0084068c5ec",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\repr-c-cli-parity-20261016\\fairyc-candidate-build.exe",
+        "--packet",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-parity-fixes-20261016\\sha-probe\\packet.bin",
+        "--packet-sha256",
+        "ca94508d7091b0ab769502840d70a27f6b75ee0239e069733d11c0084068c5ec",
+        "--output",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-parity-fixes-20261016\\sha-probe\\probe.exe",
+        "--stack-reserve-bytes",
+        "16777216"
+      ],
+      "exit": 0,
+      "seconds": 11.551407799997833,
+      "stdoutBytes": 176,
+      "stdoutSHA256": "cb3e5b402758f55d660a6d7ee022a4bc9295786096bdeca1720d2247d8776b64",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\candidate-parity-fixes-20261016\\sha-probe\\probe.exe"
+      ],
+      "exit": 42,
+      "seconds": 0.2984134999860544,
+      "stdoutBytes": 0,
+      "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr": ""
+    }
+  ],
+  "goFrontendInvoked": false,
+  "schema": "fairyc.candidate-sha-consolidation/v1",
+  "assertions": [
+    "SHA256 empty vector",
+    "SHA256 abc vector",
+    "streaming abc split across updates"
+  ],
+  "removedModule": "sha256_block",
+  "moduleFileBudgetUnchanged": true
+}

@@ -1,6 +1,6 @@
 module project_cache_disk;
 import windows_rooted_file as rooted;
-import sha256_block as blocks;
+import sha256 as blocks;
 import std::bytes as bytes;
 import std::vec as v;
 
