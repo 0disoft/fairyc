@@ -241,5 +241,8 @@ func analyzeEmission(program mir.Program, entry string, profile Profile, storage
 		return nil, err
 	}
 
-	return &value.emissionAnalysis, nil
+	// Detach the published plan from the builder allocation, so output does not
+	// retain the analysis-only layout engine through an interior pointer.
+	plan := value.emissionAnalysis
+	return &plan, nil
 }

@@ -1,0 +1,165 @@
+{
+  "scope": "compiler responsibility split; no language or generated-C transport change",
+  "date": "2026-10-17",
+  "baselineCommit": "b49cfbfb",
+  "codeCommits": [
+    "d91d5d6b",
+    "f90e127d",
+    "2f239543"
+  ],
+  "files": [
+    {
+      "path": "internal/cbackend/emit.go",
+      "before": {
+        "lines": 4860,
+        "bytes": 203437
+      },
+      "after": {
+        "lines": 97,
+        "bytes": 3312
+      }
+    },
+    {
+      "path": "internal/mir/lower.go",
+      "before": {
+        "lines": 2876,
+        "bytes": 116970
+      },
+      "after": {
+        "lines": 52,
+        "bytes": 1448
+      }
+    },
+    {
+      "path": "internal/semantic/typecheck.go",
+      "before": {
+        "lines": 2304,
+        "bytes": 91879
+      },
+      "after": {
+        "lines": 102,
+        "bytes": 3372
+      }
+    },
+    {
+      "path": "internal/cbackendnative/runner.go",
+      "before": {
+        "lines": 2840,
+        "bytes": 110960
+      },
+      "after": {
+        "lines": 409,
+        "bytes": 16525
+      }
+    }
+  ],
+  "cbackend": {
+    "writerFields": [
+      "analysis *emissionAnalysis",
+      "output strings.Builder"
+    ],
+    "analysisBuilder": "owns mutable requirement collection and layout engine; detached plan copy returned after successful validation",
+    "analysisPlan": "read-only functions, types, requirements, local types, block reachability, storage layouts, drop sites and static storage",
+    "outputPhases": [
+      "preamble",
+      "declarations",
+      "functions",
+      "operations",
+      "terminators"
+    ],
+    "lateMutationRemoved": "resource-burn feature is collected from executable blocks before output",
+    "layoutRecomputationRemoved": "storage-layout queries and storage element-address sizes read precomputed metadata during output",
+    "largestProductionSource": {
+      "path": "internal/cbackend/operations.go",
+      "bytes": 33714
+    }
+  },
+  "pureMoveAudit": {
+    "method": "compare declaration ASTs before and after moves, excluding source positions, comments and identifier object links; declarations and raw literal values must match",
+    "baselineCommit": "d91d5d6b",
+    "unchangedDeclarations": {
+      "internal/mir/lower.go": 85,
+      "internal/semantic/typecheck.go": 66,
+      "internal/cbackendnative/runner.go": 100
+    },
+    "status": "passed"
+  },
+  "transportRegression": {
+    "test": "TestEmissionTransportAcrossResponsibilitySplit",
+    "method": "JSON encoding of complete Unit values including generated C, feature metadata and drop sites from all 52 existing C emission fixtures in production and drop-trace profiles",
+    "baselineMeasuredBeforeEdits": true,
+    "units": 104,
+    "bytes": 392816,
+    "sha256": "42a758b79df7b3f0139a3ed9a7617ebe21b1b11e1b1bbd6bc845ea2819270c8a",
+    "status": "byte-compatible"
+  },
+  "validations": [
+    {
+      "command": "go test ./internal/cbackend ./internal/cbackendfixture",
+      "status": "passed"
+    },
+    {
+      "command": "go test ./internal/semantic ./internal/mir ./internal/cbackendnative ./internal/cbackendfixture ./internal/packageartifact ./internal/interpreterfixture ./internal/semanticfixture ./internal/resourcefixture ./internal/regionfixture ./internal/resultfixture ./internal/mirverifyfixture",
+      "status": "passed"
+    },
+    {
+      "command": "go test ./... -run '^$'",
+      "status": "passed",
+      "coverage": "all Go packages and test binaries compile; test bodies not executed"
+    },
+    {
+      "command": "go test ./internal/compiler -run '^(TestCheckProducesVerifiedMIR|TestCheckProducesVerifiedMIRForOwnedTextExample|TestCheckProducesVerifiedMIRForFallibleRegionPlacement|TestPrivateVectorPersistentCacheCrossProcess)$' -count=1",
+      "status": "passed",
+      "coverage": "focused compiler smoke, fresh-process disk-cache reuse and Windows native vector execution"
+    },
+    {
+      "command": "go test ./internal/cbackend -run '^TestCompletedAnalysisSupportsIndependentWriters$' -count=1",
+      "status": "passed",
+      "coverage": "requirement collection precedes output; independent concurrent writers from one plan agree across four target/instrumentation profiles"
+    },
+    {
+      "command": "go test ./internal/cbackendfixture -run '^TestEmissionTransportAcrossResponsibilitySplit$' -count=1",
+      "status": "passed"
+    },
+    {
+      "command": "gofmt and git diff --check",
+      "status": "passed"
+    }
+  ],
+  "notRun": [
+    {
+      "check": "complete Linux native compiler/sanitizer matrix",
+      "reason": "Windows host; native runner explicitly requires linux/amd64"
+    },
+    {
+      "check": "candidate CLI bootstrap rebuild and full CLI comparison",
+      "reason": "internal Go source organization change; generated transport checked against pre-edit bytes and focused Windows native smoke used"
+    },
+    {
+      "check": "performance benchmarks",
+      "reason": "no speed or memory performance claim for this responsibility split"
+    }
+  ],
+  "changes": {
+    "sourceOfTruth": "docs/architecture/02-runtime-flow.md",
+    "publicGoApi": false,
+    "languageSyntax": false,
+    "stableCli": false,
+    "reportSchema": false,
+    "database": false,
+    "dependencies": false,
+    "runnerImplementation": true,
+    "runnerCommandContract": false,
+    "ciWorkflows": false,
+    "repositoryHygiene": false
+  },
+  "limitations": [
+    "other pre-existing large source files, including MIR verification and semantic borrow-flow analysis, are outside this four-file split"
+  ],
+  "preservedUnrelatedPaths": [
+    "examples/lexer_candidate/fairy.lock",
+    "docs/ops/evidence/candidate-borrow-cache-mixed-regression-20261009.json",
+    "docs/ops/evidence/candidate-self-source-inventory-20261007.json"
+  ],
+  "pushed": false
+}
