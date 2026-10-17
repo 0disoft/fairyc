@@ -1,0 +1,251 @@
+{
+  "schema": "fairyc.candidate-native-test-reuse-verification/v1",
+  "scopedChecksPassed": true,
+  "checkedAtUTC": "2026-10-17T10:02:10.058785+00:00",
+  "implementationRevision": "f603703568ab2f7c58e41c0fbf2de63f06f5954d",
+  "candidateBuild": {
+    "receipt": {
+      "path": ".cache/native-test-performance-20261017/candidate-compact/receipt.json",
+      "sha256": "86ea4c968e0457498e17bd3c0c3aadfc14f0bdfe600d0c11b0e8900f786d27eb"
+    },
+    "sources": 512,
+    "packetSHA256": "fb1bfb2e8d67405067e0f00150bdf36ddea97c00936177a03b660258670e6a03",
+    "packetBytes": 41744870,
+    "images": [
+      {
+        "profile": "development",
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\native-test-performance-20261017\\candidate-compact\\development\\fairyc.exe",
+        "sha256": "f381225366439514964efdf8b500449d6621049690f395aef91fc4f506cdfcec",
+        "driverSHA256": "68917e76329f3952d352c6cf37ebbe0c19fcd84fb6f68b72dcf8d32e272ff512"
+      },
+      {
+        "profile": "release",
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\native-test-performance-20261017\\candidate-compact\\release\\fairyc.exe",
+        "sha256": "dad87999b5650949f1530ccbade840687c51b198917e50734fcb224366c00317",
+        "driverSHA256": "68917e76329f3952d352c6cf37ebbe0c19fcd84fb6f68b72dcf8d32e272ff512"
+      }
+    ],
+    "goFrontendInvoked": false,
+    "buildVersion": "Fairy C Stage 0\ncompiler: v0.0.0-20261017093225-f603703568ab+dirty\nsdk: fairyc-sdk-stdlib/0 0.0.0-stage0.86\nlanguage: fairyc-language/20\nruntime: fairyc-runtime/0\nrevision: f603703568ab2f7c58e41c0fbf2de63f06f5954d\nmodified: true\n"
+  },
+  "focusedNativeRegression": {
+    "argv": [
+      "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\cli-parity-rest-20261017\\final-candidate-split-verified\\source-version.exe",
+      "test",
+      "--native",
+      "--locked",
+      "--json",
+      "--exact",
+      "tests::module_project_complete_c::native_test_emission_reuses_checked_ir_and_owns_output"
+    ],
+    "exit": 0,
+    "stdout": "{\"schemaVersion\":\"fairyc.test-report/v1\",\"engine\":\"native\",\"target\":\"x86_64-windows-msvc\",\"profile\":\"development\",\"tests\":[{\"identity\":\"tests::module_project_complete_c::native_test_emission_reuses_checked_ir_and_owns_output\",\"outcome\":\"passed\",\"trapCategory\":null}],\"count\":1,\"passed\":1,\"failed\":0,\"status\":\"ok\",\"lock\":\"verified\"}\n",
+    "stderr": "",
+    "seconds": 98.63326119999692,
+    "referenceSHA256": "81d454176aeaedc66e639a1de8150c0af4d20be5dec61f48b2777ea19a4c2eea",
+    "fixture": {
+      "path": "examples/lexer_candidate/tests/module_project_complete_c.fy",
+      "sha256": "c4b753fb30009344eacb37c624928e03cd44085dfcc88c6f6d92fbf3c485eb49"
+    }
+  },
+  "nativeComparisons": 5,
+  "exactNativeComparisons": 5,
+  "observations": [
+    {
+      "profile": "development",
+      "id": "trap-categories",
+      "argv": [
+        "--native",
+        "--json",
+        "--capture-output"
+      ],
+      "go": {
+        "exit": 5,
+        "stdout": "{\"schemaVersion\":\"fairyc.test-report/v4\",\"engine\":\"native\",\"target\":\"x86_64-windows-msvc\",\"profile\":\"development\",\"tests\":[{\"identity\":\"tests::traps::a_bounds\",\"outcome\":\"failed\",\"trapCategory\":\"bounds\",\"stdoutBase64\":\"\",\"stderrBase64\":\"\"},{\"identity\":\"tests::traps::b_overflow\",\"outcome\":\"failed\",\"trapCategory\":\"integer-overflow\",\"stdoutBase64\":\"\",\"stderrBase64\":\"\"},{\"identity\":\"tests::traps::c_division\",\"outcome\":\"failed\",\"trapCategory\":\"division-by-zero\",\"stdoutBase64\":\"\",\"stderrBase64\":\"\"},{\"identity\":\"tests::traps::d_signed_division\",\"outcome\":\"failed\",\"trapCategory\":\"signed-division-overflow\",\"stdoutBase64\":\"\",\"stderrBase64\":\"\"},{\"identity\":\"tests::traps::e_shift\",\"outcome\":\"failed\",\"trapCategory\":\"invalid-shift\",\"stdoutBase64\":\"\",\"stderrBase64\":\"\"},{\"identity\":\"tests::traps::z_after_traps\",\"outcome\":\"passed\",\"trapCategory\":null,\"stdoutBase64\":\"\",\"stderrBase64\":\"\"}],\"count\":6,\"passed\":1,\"failed\":5,\"status\":\"failed\",\"lock\":\"verified\"}\n",
+        "stderr": "",
+        "seconds": 15.49187990000064
+      },
+      "candidate": {
+        "exit": 5,
+        "stdout": "{\"schemaVersion\":\"fairyc.test-report/v4\",\"engine\":\"native\",\"target\":\"x86_64-windows-msvc\",\"profile\":\"development\",\"tests\":[{\"identity\":\"tests::traps::a_bounds\",\"outcome\":\"failed\",\"trapCategory\":\"bounds\",\"stdoutBase64\":\"\",\"stderrBase64\":\"\"},{\"identity\":\"tests::traps::b_overflow\",\"outcome\":\"failed\",\"trapCategory\":\"integer-overflow\",\"stdoutBase64\":\"\",\"stderrBase64\":\"\"},{\"identity\":\"tests::traps::c_division\",\"outcome\":\"failed\",\"trapCategory\":\"division-by-zero\",\"stdoutBase64\":\"\",\"stderrBase64\":\"\"},{\"identity\":\"tests::traps::d_signed_division\",\"outcome\":\"failed\",\"trapCategory\":\"signed-division-overflow\",\"stdoutBase64\":\"\",\"stderrBase64\":\"\"},{\"identity\":\"tests::traps::e_shift\",\"outcome\":\"failed\",\"trapCategory\":\"invalid-shift\",\"stdoutBase64\":\"\",\"stderrBase64\":\"\"},{\"identity\":\"tests::traps::z_after_traps\",\"outcome\":\"passed\",\"trapCategory\":null,\"stdoutBase64\":\"\",\"stderrBase64\":\"\"}],\"count\":6,\"passed\":1,\"failed\":5,\"status\":\"failed\",\"lock\":\"verified\"}\n",
+        "stderr": "",
+        "seconds": 255.97680770000443
+      },
+      "exactMatch": true,
+      "fixtureSHA256": "e93d2b94f0b2b9a007f4396cfd3303cb25c3c3c2c0bc8db47ebd92d16c9304ba",
+      "stdinSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "profile": "release",
+      "id": "mixed-release",
+      "argv": [
+        "--native",
+        "--release",
+        "--json"
+      ],
+      "go": {
+        "exit": 5,
+        "stdout": "{\"schemaVersion\":\"fairyc.test-report/v1\",\"engine\":\"native\",\"target\":\"x86_64-windows-msvc\",\"profile\":\"release\",\"tests\":[{\"identity\":\"tests::mixed::a_fails\",\"outcome\":\"failed\",\"trapCategory\":\"assertion-failed\"},{\"identity\":\"tests::mixed::z_passes\",\"outcome\":\"passed\",\"trapCategory\":null}],\"count\":2,\"passed\":1,\"failed\":1,\"status\":\"failed\",\"lock\":\"verified\"}\n",
+        "stderr": "",
+        "seconds": 3.3682340000086697
+      },
+      "candidate": {
+        "exit": 5,
+        "stdout": "{\"schemaVersion\":\"fairyc.test-report/v1\",\"engine\":\"native\",\"target\":\"x86_64-windows-msvc\",\"profile\":\"release\",\"tests\":[{\"identity\":\"tests::mixed::a_fails\",\"outcome\":\"failed\",\"trapCategory\":\"assertion-failed\"},{\"identity\":\"tests::mixed::z_passes\",\"outcome\":\"passed\",\"trapCategory\":null}],\"count\":2,\"passed\":1,\"failed\":1,\"status\":\"failed\",\"lock\":\"verified\"}\n",
+        "stderr": "",
+        "seconds": 3.288167999999132
+      },
+      "exactMatch": true,
+      "fixtureSHA256": "2d35de38b3f296d57a7ff9b08351fd13f702ecdcfcd8df2321f3c89622494a83",
+      "stdinSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "profile": "release",
+      "id": "trap-categories",
+      "argv": [
+        "--native",
+        "--json",
+        "--capture-output"
+      ],
+      "go": {
+        "exit": 5,
+        "stdout": "{\"schemaVersion\":\"fairyc.test-report/v4\",\"engine\":\"native\",\"target\":\"x86_64-windows-msvc\",\"profile\":\"development\",\"tests\":[{\"identity\":\"tests::traps::a_bounds\",\"outcome\":\"failed\",\"trapCategory\":\"bounds\",\"stdoutBase64\":\"\",\"stderrBase64\":\"\"},{\"identity\":\"tests::traps::b_overflow\",\"outcome\":\"failed\",\"trapCategory\":\"integer-overflow\",\"stdoutBase64\":\"\",\"stderrBase64\":\"\"},{\"identity\":\"tests::traps::c_division\",\"outcome\":\"failed\",\"trapCategory\":\"division-by-zero\",\"stdoutBase64\":\"\",\"stderrBase64\":\"\"},{\"identity\":\"tests::traps::d_signed_division\",\"outcome\":\"failed\",\"trapCategory\":\"signed-division-overflow\",\"stdoutBase64\":\"\",\"stderrBase64\":\"\"},{\"identity\":\"tests::traps::e_shift\",\"outcome\":\"failed\",\"trapCategory\":\"invalid-shift\",\"stdoutBase64\":\"\",\"stderrBase64\":\"\"},{\"identity\":\"tests::traps::z_after_traps\",\"outcome\":\"passed\",\"trapCategory\":null,\"stdoutBase64\":\"\",\"stderrBase64\":\"\"}],\"count\":6,\"passed\":1,\"failed\":5,\"status\":\"failed\",\"lock\":\"verified\"}\n",
+        "stderr": "",
+        "seconds": 10.635395499994047
+      },
+      "candidate": {
+        "exit": 5,
+        "stdout": "{\"schemaVersion\":\"fairyc.test-report/v4\",\"engine\":\"native\",\"target\":\"x86_64-windows-msvc\",\"profile\":\"development\",\"tests\":[{\"identity\":\"tests::traps::a_bounds\",\"outcome\":\"failed\",\"trapCategory\":\"bounds\",\"stdoutBase64\":\"\",\"stderrBase64\":\"\"},{\"identity\":\"tests::traps::b_overflow\",\"outcome\":\"failed\",\"trapCategory\":\"integer-overflow\",\"stdoutBase64\":\"\",\"stderrBase64\":\"\"},{\"identity\":\"tests::traps::c_division\",\"outcome\":\"failed\",\"trapCategory\":\"division-by-zero\",\"stdoutBase64\":\"\",\"stderrBase64\":\"\"},{\"identity\":\"tests::traps::d_signed_division\",\"outcome\":\"failed\",\"trapCategory\":\"signed-division-overflow\",\"stdoutBase64\":\"\",\"stderrBase64\":\"\"},{\"identity\":\"tests::traps::e_shift\",\"outcome\":\"failed\",\"trapCategory\":\"invalid-shift\",\"stdoutBase64\":\"\",\"stderrBase64\":\"\"},{\"identity\":\"tests::traps::z_after_traps\",\"outcome\":\"passed\",\"trapCategory\":null,\"stdoutBase64\":\"\",\"stderrBase64\":\"\"}],\"count\":6,\"passed\":1,\"failed\":5,\"status\":\"failed\",\"lock\":\"verified\"}\n",
+        "stderr": "",
+        "seconds": 26.37510889999976
+      },
+      "exactMatch": true,
+      "fixtureSHA256": "e93d2b94f0b2b9a007f4396cfd3303cb25c3c3c2c0bc8db47ebd92d16c9304ba",
+      "stdinSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "profile": "release",
+      "id": "resource-sdk",
+      "argv": [
+        "--native",
+        "--json"
+      ],
+      "go": {
+        "exit": 0,
+        "stdout": "{\"schemaVersion\":\"fairyc.test-report/v1\",\"engine\":\"native\",\"target\":\"x86_64-windows-msvc\",\"profile\":\"development\",\"tests\":[{\"identity\":\"tests::vector::sum_after_pop_and_clear\",\"outcome\":\"passed\",\"trapCategory\":null}],\"count\":1,\"passed\":1,\"failed\":0,\"status\":\"ok\",\"lock\":\"verified\"}\n",
+        "stderr": "",
+        "seconds": 1.7658219000004465
+      },
+      "candidate": {
+        "exit": 0,
+        "stdout": "{\"schemaVersion\":\"fairyc.test-report/v1\",\"engine\":\"native\",\"target\":\"x86_64-windows-msvc\",\"profile\":\"development\",\"tests\":[{\"identity\":\"tests::vector::sum_after_pop_and_clear\",\"outcome\":\"passed\",\"trapCategory\":null}],\"count\":1,\"passed\":1,\"failed\":0,\"status\":\"ok\",\"lock\":\"verified\"}\n",
+        "stderr": "",
+        "seconds": 8.033874500004458
+      },
+      "exactMatch": true,
+      "fixtureSHA256": "23d11e50a7801d0ca95ba500d52eee7a643e2b03c8721052f26585a24b9ac6fd",
+      "stdinSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "profile": "release",
+      "id": "stdin-replay-each",
+      "argv": [
+        "--native",
+        "--stdin-file",
+        "tests/fixtures/input.txt",
+        "--json"
+      ],
+      "go": {
+        "exit": 0,
+        "stdout": "{\"schemaVersion\":\"fairyc.test-report/v1\",\"engine\":\"native\",\"target\":\"x86_64-windows-msvc\",\"profile\":\"development\",\"tests\":[{\"identity\":\"tests::stdin::caller_input_is_forwarded\",\"outcome\":\"passed\",\"trapCategory\":null},{\"identity\":\"tests::stdin::fixture_input_is_replayed\",\"outcome\":\"passed\",\"trapCategory\":null}],\"count\":2,\"passed\":2,\"failed\":0,\"status\":\"ok\",\"lock\":\"verified\"}\n",
+        "stderr": "",
+        "seconds": 2.1303126999991946
+      },
+      "candidate": {
+        "exit": 0,
+        "stdout": "{\"schemaVersion\":\"fairyc.test-report/v1\",\"engine\":\"native\",\"target\":\"x86_64-windows-msvc\",\"profile\":\"development\",\"tests\":[{\"identity\":\"tests::stdin::caller_input_is_forwarded\",\"outcome\":\"passed\",\"trapCategory\":null},{\"identity\":\"tests::stdin::fixture_input_is_replayed\",\"outcome\":\"passed\",\"trapCategory\":null}],\"count\":2,\"passed\":2,\"failed\":0,\"status\":\"ok\",\"lock\":\"verified\"}\n",
+        "stderr": "",
+        "seconds": 10.985397500000545
+      },
+      "exactMatch": true,
+      "fixtureSHA256": "ae98dc0035d3760de3126a6e2f9830b952a8af13f02b7080c44b86d1df79c7c0",
+      "stdinSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "performance": [
+    {
+      "compilerProfile": "development",
+      "childProfile": "development",
+      "case": "trap-categories",
+      "selectedTests": 6,
+      "beforeSeconds": 456.40719420000096,
+      "afterSeconds": 255.97680770000443,
+      "reductionPercent": 43.91481752414413,
+      "previousReceipt": {
+        "path": ".cache/candidate-final-verification-20261017/native-development-trap-retry/receipt.json",
+        "sha256": "26d85ba1fe4e9f7d88c2fce79f1b97631c2783009895d555061b0ac083111592"
+      },
+      "currentReceipt": {
+        "path": ".cache/native-test-performance-20261017/native-development/receipt.json",
+        "sha256": "6f4a45da06021bae72cc8a0a1698fd09ae4335d194d97dc2b939ac157066463a"
+      },
+      "exactOutputAndExitMatch": true
+    },
+    {
+      "compilerProfile": "release",
+      "childProfile": "development",
+      "case": "trap-categories",
+      "selectedTests": 6,
+      "beforeSeconds": 44.266253400001006,
+      "afterSeconds": 26.37510889999976,
+      "reductionPercent": 40.41711942127192,
+      "previousReceipt": {
+        "path": ".cache/candidate-final-verification-20261017/native-release/receipt.json",
+        "sha256": "5c6242bf4bded2a46194d9549fc6b45dec36ad4f41ab91d5284943c5cdc148fc"
+      },
+      "currentReceipt": {
+        "path": ".cache/native-test-performance-20261017/native-release/receipt.json",
+        "sha256": "d44671421b3ff6093c0355cf37b779152a9a523f698682365a9872dc57438988"
+      },
+      "exactOutputAndExitMatch": true
+    }
+  ],
+  "owningBundleRunSmoke": {
+    "argv": [
+      "run",
+      "--locked",
+      "--release"
+    ],
+    "project": ".cache/native-test-performance-20261017/native-release/release/vector",
+    "passed": true,
+    "lockPreserved": true,
+    "results": {
+      "go": {
+        "imageSHA256": "81d454176aeaedc66e639a1de8150c0af4d20be5dec61f48b2777ea19a4c2eea",
+        "exit": 0,
+        "stdout": "42",
+        "stderr": "",
+        "seconds": 1.4107615999964764
+      },
+      "candidate": {
+        "imageSHA256": "dad87999b5650949f1530ccbade840687c51b198917e50734fcb224366c00317",
+        "exit": 0,
+        "stdout": "42",
+        "stderr": "",
+        "seconds": 8.960344899998745
+      }
+    }
+  },
+  "originalLockPreserved": true,
+  "originalLockSHA256": "a6b52c6270c15ca237c31aed8ece8bbffc745556620c3b2c8dd5c651adc75e30",
+  "stableCLIChanged": false,
+  "languageRulesChanged": false,
+  "sdkABIChanged": false,
+  "databaseChanged": false,
+  "ciChanged": false,
+  "limitations": [
+    "Single before/after observation per compiler profile; elapsed times depend on machine load and are not a controlled benchmark.",
+    "This is scoped native-test verification, not a rerun of every CLI, bootstrap fixed-point, release or non-Windows suite.",
+    "C preparation and native compilation still run separately for each isolated child; only repeated Complete construction was removed."
+  ]
+}

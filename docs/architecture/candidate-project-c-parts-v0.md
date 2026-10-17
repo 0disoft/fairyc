@@ -15,11 +15,22 @@ framing, write/sync/close handling, child deadlines and reports are unchanged.
 
 Existing `partition*` APIs still consume and retain their IR in a `Bundle`,
 which now contains the owner alongside its independent `Emission`. Existing
-bundle accessors delegate to that emission; the single-buffer `render` APIs
+bundle accessors expose that emission's bytes and metadata; the single-buffer `render` APIs
 are unchanged. The regression fixture emits two different entries, repeats the
 first entry, rejects an invalid entry, then consumes the original `Complete`.
 It compares the independent output against the owning test partition byte for
 byte, including frame intervals, selected counts and work totals.
+
+Scoped verification rebuilt both compiler profiles from one 512-source,
+41,744,870-byte packet emitted by the C candidate. Five native-test CLI
+comparisons match Go's complete stdout, stderr and exit status, covering trap
+recovery, optimized children, SDK resources and per-test stdin replay.
+
+For the same six-test trap fixture, development compiler time changed from
+456.4 to 256.0 seconds and release compiler time from 44.3 to 26.4 seconds.
+These are single before/after observations under uncontrolled machine load.
+C preparation and native compilation still run separately for each test.
+See [verification evidence](../ops/evidence/candidate-native-test-reuse-verification-20261017.json).
 
 ## Current whole-project work and bootstrap (2026-10-16)
 
