@@ -81,7 +81,7 @@ func buildWindowsRuntimeCached(toolchain WindowsHostToolchain, profile Profile, 
 		var err error
 		artifact, err = buildWindowsMSVCWithOptions(toolchain, profile, C11ConsumerMode,
 			[]windowsMSVCSource{{Name: "unit.c", Contents: unitSource}},
-			windowsMSVCBuildOptions{PrebuiltObjects: []WindowsHostObject{{Name: "runtime.obj", Bytes: object}}})
+			WindowsMSVCBuildOptions{PrebuiltObjects: []WindowsHostObject{{Name: "runtime.obj", Bytes: object}}})
 		return err
 	})
 	artifact.RuntimeCache = status

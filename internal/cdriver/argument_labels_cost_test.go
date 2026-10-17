@@ -33,7 +33,7 @@ func TestArgumentLabelDebugCost(t *testing.T) {
 				t.Fatal(err)
 			}
 			for _, profile := range []Profile{LowProfile, OptimizedProfile} {
-				artifact, err := buildWindowsMSVCWithOptions(toolchain, profile, C11ConsumerMode, []windowsMSVCSource{{Name: "unit.c", Contents: string(unit)}, {Name: "runtime.c", Contents: string(support)}}, windowsMSVCBuildOptions{CaptureProgramDatabase: true, EmbeddedCodeView: true})
+				artifact, err := buildWindowsMSVCWithOptions(toolchain, profile, C11ConsumerMode, []windowsMSVCSource{{Name: "unit.c", Contents: string(unit)}, {Name: "runtime.c", Contents: string(support)}}, WindowsMSVCBuildOptions{CaptureProgramDatabase: true, EmbeddedCodeView: true})
 				if err != nil {
 					t.Fatal(err)
 				}

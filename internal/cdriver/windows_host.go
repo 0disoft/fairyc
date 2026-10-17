@@ -76,195 +76,6 @@ type WindowsHostOutcome struct {
 	TrapControl string
 }
 
-// ResolveWindowsHostMSVC locates the latest complete x64 MSVC and Windows SDK installation.
-func ResolveWindowsHostMSVC() (WindowsHostToolchain, error) {
-	if runtime.GOOS != "windows" || runtime.GOARCH != "amd64" {
-		return WindowsHostToolchain{}, fmt.Errorf("MSVC host smoke requires windows/amd64, got %s/%s", runtime.GOOS, runtime.GOARCH)
-	}
-	programFilesX86, err := resolveProgramFilesX86()
-	if err != nil {
-		return WindowsHostToolchain{}, err
-	}
-	vswhere := filepath.Join(programFilesX86, "Microsoft Visual Studio", "Installer", "vswhere.exe")
-	if info, err := os.Stat(vswhere); err != nil || !info.Mode().IsRegular() {
-		return WindowsHostToolchain{}, fmt.Errorf("MSVC host smoke requires Visual Studio Installer vswhere.exe")
-	}
-	installationOutput, err := runWindowsHostCommand(vswhere, nil, "",
-		"-latest", "-products", "*", "-requires", "Microsoft.VisualStudio.Component.VC.Tools.x86.x64", "-property", "installationPath")
-	if err != nil {
-		return WindowsHostToolchain{}, fmt.Errorf("locate Visual Studio: %w", err)
-	}
-	installation := strings.TrimSpace(installationOutput)
-	if installation == "" || !filepath.IsAbs(installation) {
-		return WindowsHostToolchain{}, fmt.Errorf("Visual Studio Installer returned an invalid installation path")
-	}
-	versionPath := filepath.Join(installation, "VC", "Auxiliary", "Build", "Microsoft.VCToolsVersion.default.txt")
-	versionBytes, err := os.ReadFile(versionPath)
-	if err != nil {
-		return WindowsHostToolchain{}, fmt.Errorf("read MSVC tool version: %w", err)
-	}
-	version := strings.TrimSpace(string(versionBytes))
-	if version == "" || strings.ContainsAny(version, "\\/") {
-		return WindowsHostToolchain{}, fmt.Errorf("MSVC tool version file is invalid")
-	}
-	msvcRoot := filepath.Join(installation, "VC", "Tools", "MSVC", version)
-	compilerPath := filepath.Join(msvcRoot, "bin", "Hostx64", "x64", "cl.exe")
-	if info, err := os.Stat(compilerPath); err != nil || !info.Mode().IsRegular() {
-		return WindowsHostToolchain{}, fmt.Errorf("MSVC x64 compiler is missing for tool version %s", version)
-	}
-	sdkRoot := filepath.Join(programFilesX86, "Windows Kits", "10")
-	sdkVersion, err := latestWindowsSDKVersion(sdkRoot)
-	if err != nil {
-		return WindowsHostToolchain{}, err
-	}
-	environment, err := windowsHostEnvironment(os.Environ(), msvcRoot, sdkRoot, sdkVersion)
-	if err != nil {
-		return WindowsHostToolchain{}, err
-	}
-	return WindowsHostToolchain{Name: "msvc", Path: compilerPath, Version: version, Environment: environment}, nil
-}
-
-func resolveProgramFilesX86() (string, error) {
-	var candidates []string
-	if value := os.Getenv("ProgramFiles(x86)"); value != "" {
-		candidates = append(candidates, value)
-	}
-	if value := os.Getenv("ProgramFiles"); value != "" {
-		candidates = append(candidates, value+" (x86)")
-	}
-	if executable, err := os.Executable(); err == nil {
-		if volume := filepath.VolumeName(executable); volume != "" {
-			candidates = append(candidates, filepath.Join(volume+string(os.PathSeparator), "Program Files (x86)"))
-		}
-	}
-	seen := make(map[string]struct{}, len(candidates))
-	for _, candidate := range candidates {
-		clean := filepath.Clean(candidate)
-		key := strings.ToLower(clean)
-		if _, duplicate := seen[key]; duplicate {
-			continue
-		}
-		seen[key] = struct{}{}
-		vswhere := filepath.Join(clean, "Microsoft Visual Studio", "Installer", "vswhere.exe")
-		if info, err := os.Stat(vswhere); err == nil && info.Mode().IsRegular() {
-			return clean, nil
-		}
-	}
-	return "", fmt.Errorf("MSVC host smoke cannot locate Program Files (x86) with Visual Studio Installer")
-}
-
-// BuildWindowsHost compiles generated C for a target-neutral Windows host smoke only.
-func BuildWindowsHost(toolchain WindowsHostToolchain, profile Profile, unitSource, runtimeSource string) (WindowsHostArtifact, error) {
-	return buildWindowsHostWithMap(toolchain, profile, unitSource, runtimeSource, false)
-}
-
-// BuildWindowsHostWithMap retains the MSVC link map for local size attribution.
-func BuildWindowsHostWithMap(toolchain WindowsHostToolchain, profile Profile, unitSource, runtimeSource string) (WindowsHostArtifact, error) {
-	return buildWindowsHostWithMap(toolchain, profile, unitSource, runtimeSource, true)
-}
-
-// BuildWindowsHostWithDebugMap retains a PDB and map for private native size attribution.
-func BuildWindowsHostWithDebugMap(toolchain WindowsHostToolchain, profile Profile, unitSource, runtimeSource string) (WindowsHostArtifact, error) {
-	if runtime.GOOS != "windows" || runtime.GOARCH != "amd64" {
-		return WindowsHostArtifact{}, fmt.Errorf("MSVC host build requires windows/amd64, got %s/%s", runtime.GOOS, runtime.GOARCH)
-	}
-	if unitSource == "" || runtimeSource == "" {
-		return WindowsHostArtifact{}, fmt.Errorf("C unit and runtime source must be non-empty")
-	}
-	return buildWindowsMSVCWithOptions(toolchain, profile, C11ConsumerMode, []windowsMSVCSource{
-		{Name: "unit.c", Contents: unitSource},
-		{Name: "runtime.c", Contents: runtimeSource},
-	}, windowsMSVCBuildOptions{CaptureMap: true, CaptureProgramDatabase: true, EmbeddedCodeView: true, PreserveOptimizedLinking: true})
-}
-
-// BuildWindowsHostWithLibraryLog retains bounded MSVC library-selection output.
-func BuildWindowsHostWithLibraryLog(toolchain WindowsHostToolchain, profile Profile, unitSource, runtimeSource string) (WindowsHostArtifact, error) {
-	if runtime.GOOS != "windows" || runtime.GOARCH != "amd64" {
-		return WindowsHostArtifact{}, fmt.Errorf("MSVC host build requires windows/amd64, got %s/%s", runtime.GOOS, runtime.GOARCH)
-	}
-	if unitSource == "" || runtimeSource == "" {
-		return WindowsHostArtifact{}, fmt.Errorf("C unit and runtime source must be non-empty")
-	}
-	return buildWindowsMSVCWithOptions(toolchain, profile, C11ConsumerMode, []windowsMSVCSource{
-		{Name: "unit.c", Contents: unitSource},
-		{Name: "runtime.c", Contents: runtimeSource},
-	}, windowsMSVCBuildOptions{CaptureMap: true, CaptureLibraryLog: true})
-}
-
-func buildWindowsHostWithMap(toolchain WindowsHostToolchain, profile Profile, unitSource, runtimeSource string, captureMap bool) (WindowsHostArtifact, error) {
-	if runtime.GOOS != "windows" || runtime.GOARCH != "amd64" {
-		return WindowsHostArtifact{}, fmt.Errorf("MSVC host build requires windows/amd64, got %s/%s", runtime.GOOS, runtime.GOARCH)
-	}
-	if unitSource == "" || runtimeSource == "" {
-		return WindowsHostArtifact{}, fmt.Errorf("C unit and runtime source must be non-empty")
-	}
-	return buildWindowsMSVCWithOptions(toolchain, profile, C11ConsumerMode, []windowsMSVCSource{
-		{Name: "unit.c", Contents: unitSource},
-		{Name: "runtime.c", Contents: runtimeSource},
-	}, windowsMSVCBuildOptions{CaptureMap: captureMap})
-}
-
-// BuildWindowsMSVCTarget compiles a unit emitted for the declared
-// x86_64-windows-msvc profile. Local paths remain toolchain-resolution data.
-func BuildWindowsMSVCTarget(toolchain WindowsHostToolchain, profile Profile, unitSource, runtimeSource string) (WindowsHostArtifact, error) {
-	if runtime.GOOS != "windows" || runtime.GOARCH != "amd64" {
-		return WindowsHostArtifact{}, fmt.Errorf("MSVC target build requires windows/amd64, got %s/%s", runtime.GOOS, runtime.GOARCH)
-	}
-	if unitSource == "" || runtimeSource == "" {
-		return WindowsHostArtifact{}, fmt.Errorf("target C unit and runtime source must be non-empty")
-	}
-	return buildWindowsMSVC(toolchain, profile, C11ConsumerMode, []windowsMSVCSource{
-		{Name: "unit.c", Contents: unitSource},
-		{Name: "runtime.c", Contents: runtimeSource},
-	})
-}
-
-// BuildWindowsMSVCProbe compiles one closed target-evidence probe with local x64 MSVC.
-func BuildWindowsMSVCProbe(toolchain WindowsHostToolchain, profile Profile, probeSource string) (WindowsHostArtifact, error) {
-	return buildWindowsMSVCProbeWithMap(toolchain, profile, probeSource, false)
-}
-
-// BuildWindowsMSVCProbeWithMap retains the MSVC link map for local C comparison.
-func BuildWindowsMSVCProbeWithMap(toolchain WindowsHostToolchain, profile Profile, probeSource string) (WindowsHostArtifact, error) {
-	return buildWindowsMSVCProbeWithMap(toolchain, profile, probeSource, true)
-}
-
-// BuildWindowsMSVCProbeWithDebugMap retains private C symbols for a local size comparison.
-func BuildWindowsMSVCProbeWithDebugMap(toolchain WindowsHostToolchain, profile Profile, probeSource string) (WindowsHostArtifact, error) {
-	if runtime.GOOS != "windows" || runtime.GOARCH != "amd64" {
-		return WindowsHostArtifact{}, fmt.Errorf("MSVC layout probe requires windows/amd64, got %s/%s", runtime.GOOS, runtime.GOARCH)
-	}
-	if probeSource == "" {
-		return WindowsHostArtifact{}, fmt.Errorf("MSVC layout probe source must be non-empty")
-	}
-	return buildWindowsMSVCWithOptions(toolchain, profile, C11ConsumerMode,
-		[]windowsMSVCSource{{Name: "probe.c", Contents: probeSource}},
-		windowsMSVCBuildOptions{CaptureMap: true, CaptureProgramDatabase: true, EmbeddedCodeView: true, PreserveOptimizedLinking: true})
-}
-
-// BuildWindowsMSVCProbeWithLibraryLog retains bounded MSVC library-selection output.
-func BuildWindowsMSVCProbeWithLibraryLog(toolchain WindowsHostToolchain, profile Profile, probeSource string) (WindowsHostArtifact, error) {
-	if runtime.GOOS != "windows" || runtime.GOARCH != "amd64" {
-		return WindowsHostArtifact{}, fmt.Errorf("MSVC layout probe requires windows/amd64, got %s/%s", runtime.GOOS, runtime.GOARCH)
-	}
-	if probeSource == "" {
-		return WindowsHostArtifact{}, fmt.Errorf("MSVC layout probe source must be non-empty")
-	}
-	return buildWindowsMSVCWithOptions(toolchain, profile, C11ConsumerMode,
-		[]windowsMSVCSource{{Name: "probe.c", Contents: probeSource}},
-		windowsMSVCBuildOptions{CaptureMap: true, CaptureLibraryLog: true})
-}
-
-func buildWindowsMSVCProbeWithMap(toolchain WindowsHostToolchain, profile Profile, probeSource string, captureMap bool) (WindowsHostArtifact, error) {
-	if runtime.GOOS != "windows" || runtime.GOARCH != "amd64" {
-		return WindowsHostArtifact{}, fmt.Errorf("MSVC layout probe requires windows/amd64, got %s/%s", runtime.GOOS, runtime.GOARCH)
-	}
-	if probeSource == "" {
-		return WindowsHostArtifact{}, fmt.Errorf("MSVC layout probe source must be non-empty")
-	}
-	return buildWindowsMSVCWithOptions(toolchain, profile, C11ConsumerMode, []windowsMSVCSource{{Name: "probe.c", Contents: probeSource}}, windowsMSVCBuildOptions{CaptureMap: captureMap})
-}
-
 // BuildWindowsMSVCABIProbe compiles one caller and one callee translation unit
 // separately before linking them with local x64 MSVC.
 func BuildWindowsMSVCABIProbe(toolchain WindowsHostToolchain, profile Profile, callerSource, calleeSource string) (WindowsHostArtifact, error) {
@@ -311,7 +122,7 @@ func BuildWindowsMSVCRelocationProbe(toolchain WindowsHostToolchain, profile Pro
 	return buildWindowsMSVCWithOptions(toolchain, profile, C11ConsumerMode, []windowsMSVCSource{
 		{Name: "caller.c", Contents: callerSource},
 		{Name: "target.c", Contents: targetSource},
-	}, windowsMSVCBuildOptions{
+	}, WindowsMSVCBuildOptions{
 		CaptureMap:             true,
 		CaptureProgramDatabase: true,
 		DisableICF:             true,
@@ -580,7 +391,7 @@ func BuildWindowsMSVCUnwindProbe(toolchain WindowsHostToolchain, profile Profile
 		{Name: "catcher.c", Contents: catcherSource},
 		{Name: "frame.c", Contents: frameSource},
 		{Name: "raiser.c", Contents: raiserSource},
-	}, windowsMSVCBuildOptions{CaptureMap: true})
+	}, WindowsMSVCBuildOptions{CaptureMap: true})
 }
 
 type windowsMSVCSource struct {
@@ -588,21 +399,11 @@ type windowsMSVCSource struct {
 	Contents string
 }
 
-type windowsMSVCBuildOptions struct {
-	CaptureMap               bool
-	CaptureLibraryLog        bool
-	CaptureProgramDatabase   bool
-	DisableICF               bool
-	EmbeddedCodeView         bool
-	PreserveOptimizedLinking bool
-	PrebuiltObjects          []WindowsHostObject
-}
-
 func buildWindowsMSVC(toolchain WindowsHostToolchain, profile Profile, consumerMode ConsumerMode, sources []windowsMSVCSource) (WindowsHostArtifact, error) {
-	return buildWindowsMSVCWithOptions(toolchain, profile, consumerMode, sources, windowsMSVCBuildOptions{})
+	return buildWindowsMSVCWithOptions(toolchain, profile, consumerMode, sources, WindowsMSVCBuildOptions{})
 }
 
-func buildWindowsMSVCWithOptions(toolchain WindowsHostToolchain, profile Profile, consumerMode ConsumerMode, sources []windowsMSVCSource, options windowsMSVCBuildOptions) (WindowsHostArtifact, error) {
+func buildWindowsMSVCWithOptions(toolchain WindowsHostToolchain, profile Profile, consumerMode ConsumerMode, sources []windowsMSVCSource, options WindowsMSVCBuildOptions) (WindowsHostArtifact, error) {
 	if profile != LowProfile && profile != OptimizedProfile {
 		return WindowsHostArtifact{}, fmt.Errorf("unsupported C profile %q", profile.Name)
 	}
