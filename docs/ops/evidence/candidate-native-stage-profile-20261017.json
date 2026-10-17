@@ -1,0 +1,110 @@
+{
+  "schema": "fairyc.candidate-native-stage-profile/v1",
+  "checkedAtUTC": "2026-10-17T09:10:26.126192+00:00",
+  "diagnosticOnly": true,
+  "productSourceChangedByProfiling": false,
+  "baselineSourceRevision": "abb465b0",
+  "sourcePacketSHA256": "37a70865df16a5e3de7b6bd241a51d809be22ec366074ad24920496545182e52",
+  "profilePacketSHA256": "09812981dce21791d81324f7b85f934e3e86d07d87047f9d6665f1864cfd3ea7",
+  "functions": {
+    "fy_fn_2645": {
+      "label": "c-generation",
+      "signature": "extern struct fy_unit_t_632 fy_fn_2645(struct fy_unit_t_603 fy_l_1,uintptr_t fy_l_2,uintptr_t fy_l_3){"
+    },
+    "fy_fn_5800": {
+      "label": "native-stage",
+      "signature": "extern struct fy_unit_t_1183 fy_fn_5800(struct fy_unit_t_614 const * fy_l_1,struct fy_unit_t_972 const * fy_l_2,struct fy_unit_t_5 fy_l_3,struct fy_unit_t_5 fy_l_4){"
+    },
+    "fy_fn_5802": {
+      "label": "test-loop",
+      "signature": "extern int32_t fy_fn_5802(struct fy_unit_t_603 fy_l_1,struct fy_unit_t_158 const * fy_l_2,struct fy_unit_t_149 const * fy_l_3,struct fy_unit_t_972 const * fy_l_4,struct fy_unit_t_975 const * fy_l_5,struct fy_unit_t_42 const * fy_l_6,struct fy_unit_t_5 fy_l_7,uint32_t fy_l_8){"
+    },
+    "fy_fn_5829": {
+      "label": "packet-write",
+      "signature": "extern struct fy_unit_t_1194 fy_fn_5829(struct fy_unit_t_614 const * fy_l_1,struct fy_unit_t_5 fy_l_2){"
+    },
+    "fy_fn_6221": {
+      "label": "rebuild",
+      "signature": "extern struct fy_unit_t_1309 fy_fn_6221(struct fy_unit_t_158 const * fy_l_1,struct fy_unit_t_149 const * fy_l_2,uintptr_t * fy_l_3,uintptr_t * fy_l_4){"
+    },
+    "fy_fn_6224": {
+      "label": "analysis",
+      "signature": "extern struct fy_unit_t_1309 fy_fn_6224(struct fy_unit_t_117 const * fy_l_1,struct fy_unit_t_42 const * fy_l_2,struct fy_unit_t_156 const * fy_l_3,struct fy_unit_t_149 const * fy_l_4,struct fy_unit_t_1294 * fy_l_5,uintptr_t * fy_l_6,uintptr_t * fy_l_7){"
+    },
+    "fy_fn_8272": {
+      "label": "child-process",
+      "signature": "extern struct fy_unit_t_1754 fy_fn_8272(struct fy_unit_t_5 fy_l_1,struct fy_unit_t_99 const * fy_l_2,struct fy_unit_t_5 fy_l_3,uint32_t fy_l_4,uint32_t fy_l_5,struct fy_unit_t_5 fy_l_6){"
+    }
+  },
+  "aggregate": {
+    "analysis": {
+      "calls": 2,
+      "milliseconds": 171000
+    },
+    "c-generation": {
+      "calls": 2,
+      "milliseconds": 53703
+    },
+    "packet-write": {
+      "calls": 2,
+      "milliseconds": 0
+    },
+    "child-process": {
+      "calls": 4,
+      "milliseconds": 3766
+    },
+    "native-stage": {
+      "calls": 2,
+      "milliseconds": 3766
+    },
+    "rebuild": {
+      "calls": 1,
+      "milliseconds": 72906
+    },
+    "test-loop": {
+      "calls": 1,
+      "milliseconds": 130390
+    }
+  },
+  "probeSeconds": 229.02367159999267,
+  "goSeconds": 5.574494899992715,
+  "selectedTests": [
+    "tests::traps::a_bounds",
+    "tests::traps::z_after_traps"
+  ],
+  "timingReceipt": {
+    "path": ".cache/native-test-performance-20261017/baseline-profile/timing-receipt.json",
+    "sha256": "5f10ee1364a491cf3f75bc1620fdf5fc17d8332fda4ba73eb753c639504ffd77"
+  },
+  "tool": {
+    "path": "tools/profile-candidate-c-packet.py",
+    "sha256": "b703fa48e6adba044c279750171ba554c731c8d8748715978c1f874d6be64840"
+  },
+  "build": {
+    "profile": "development",
+    "sourceUnits": 65,
+    "stackReserveBytes": 16777216,
+    "goFrontendInvoked": false
+  },
+  "result": {
+    "exit": 5,
+    "goMatchesAfterRemovingExplicitTimerLines": true,
+    "stdoutExact": true,
+    "normalStderrEmpty": true
+  },
+  "findings": [
+    "Two full analysis calls consumed 171000 ms; one post-test rebuild alone consumed 72906 ms.",
+    "Per-test C generation also consumed 53703 ms; native stage consumed 3766 ms."
+  ],
+  "limitations": [
+    "Inclusive times overlap: rebuild is inside analysis; packet writing and child processes are inside native-stage. Do not sum every row.",
+    "The probe inserts timing wrappers into a prior authenticated generated C packet; it is not a rebuild of current Fairy sources.",
+    "This is a focused two-test timing observation under current machine load, not a controlled six-test benchmark or product parity claim."
+  ],
+  "publicApiChanged": false,
+  "sdkAbiChanged": false,
+  "databaseChanged": false,
+  "ciRunnerChanged": false,
+  "repositoryHygieneChanged": false,
+  "pushed": false
+}
