@@ -89,26 +89,26 @@ func TestHIRStateOwnerTrapBoundaryClassifiesClosedForms(t *testing.T) {
 		function  hir.Function
 		wantError bool
 	}{
-		{name: "unary minus", function: trapOwnerExpression("prefix", "-"), wantError: true},
-		{name: "bitwise complement", function: trapOwnerExpression("prefix", "~")},
-		{name: "array index", function: trapOwnerExpression("array-index", "[]"), wantError: true},
-		{name: "view index", function: trapOwnerExpression("view-index", "[]"), wantError: true},
-		{name: "view slice", function: trapOwnerExpression("view-slice", ".."), wantError: true},
-		{name: "scalar cast", function: trapOwnerExpression("scalar-cast", "as")},
+		{name: "unary minus", function: trapOwnerExpression(hir.ExpressionPrefix, "-"), wantError: true},
+		{name: "bitwise complement", function: trapOwnerExpression(hir.ExpressionPrefix, "~")},
+		{name: "array index", function: trapOwnerExpression(hir.ExpressionArrayIndex, "[]"), wantError: true},
+		{name: "view index", function: trapOwnerExpression(hir.ExpressionViewIndex, "[]"), wantError: true},
+		{name: "view slice", function: trapOwnerExpression(hir.ExpressionViewSlice, ".."), wantError: true},
+		{name: "scalar cast", function: trapOwnerExpression(hir.ExpressionScalarCast, "as")},
 	}
 	for _, operator := range []string{"+", "-", "*", "/", "%", "<<", ">>"} {
 		tests = append(tests, struct {
 			name      string
 			function  hir.Function
 			wantError bool
-		}{name: "binary " + operator, function: trapOwnerExpression("binary", operator), wantError: true})
+		}{name: "binary " + operator, function: trapOwnerExpression(hir.ExpressionBinary, operator), wantError: true})
 	}
 	for _, operator := range []string{"==", "!=", "<", "<=", ">", ">=", "&", "|", "^"} {
 		tests = append(tests, struct {
 			name      string
 			function  hir.Function
 			wantError bool
-		}{name: "safe binary " + operator, function: trapOwnerExpression("binary", operator)})
+		}{name: "safe binary " + operator, function: trapOwnerExpression(hir.ExpressionBinary, operator)})
 	}
 	for _, operator := range []string{"+=", "-=", "*=", "/=", "%=", "<<=", ">>="} {
 		tests = append(tests, struct {
@@ -145,8 +145,8 @@ func TestHIRStateOwnerLifetimeBoundaryClassifiesOwnedValuesAndRegions(t *testing
 		{name: "owned parameter", function: hir.Function{Parameters: []hir.Parameter{{Type: resourceType}}}, contains: "owned resource values are not admitted"},
 		{name: "owned result", function: hir.Function{ResultType: hir.Option(resourceType)}, contains: "owned resource values are not admitted"},
 		{name: "owned local", function: hir.Function{Locals: []hir.Local{{Type: resourceType}}}, contains: "owned resource values are not admitted"},
-		{name: "nested owned expression", function: hir.Function{Body: hir.Block{Tail: &hir.Expression{Kind: "group", Children: []hir.Expression{{Kind: "path", Type: resourceType}}}}}, contains: "owned resource values are not admitted"},
-		{name: "nested lexical region", function: hir.Function{Body: hir.Block{Tail: &hir.Expression{Kind: "group", Children: []hir.Expression{{Kind: "region"}}}}}, contains: "lexical regions are not admitted"},
+		{name: "nested owned expression", function: hir.Function{Body: hir.Block{Tail: &hir.Expression{Kind: hir.ExpressionGroup, Children: []hir.Expression{{Kind: hir.ExpressionPath, Type: resourceType}}}}}, contains: "owned resource values are not admitted"},
+		{name: "nested lexical region", function: hir.Function{Body: hir.Block{Tail: &hir.Expression{Kind: hir.ExpressionGroup, Children: []hir.Expression{{Kind: hir.ExpressionRegion}}}}}, contains: "lexical regions are not admitted"},
 		{name: "borrowed resource", function: hir.Function{Parameters: []hir.Parameter{{Type: hir.SharedBorrow(resourceType)}}}},
 		{name: "static resource namespace", function: hir.Function{OwnerType: resourceType}},
 	}
@@ -165,17 +165,17 @@ func TestHIRStateOwnerLifetimeBoundaryClassifiesOwnedValuesAndRegions(t *testing
 
 func TestHIRStateOwnerClosedFormBoundaryUsesPositiveAllowlists(t *testing.T) {
 	allowedExpressions := []hir.Expression{
-		{Kind: "literal"}, {Kind: "path"}, {Kind: "group"}, {Kind: "record"}, {Kind: "array"},
-		{Kind: "array-view-borrow"}, {Kind: "array-length"}, {Kind: "field-expression"},
-		{Kind: "view-length"}, {Kind: "view-empty"}, {Kind: "scalar-cast"},
-		{Kind: "result-variant"}, {Kind: "option-variant"}, {Kind: "enum-variant"},
-		{Kind: "block", Block: &hir.Block{}},
+		{Kind: hir.ExpressionLiteral}, {Kind: hir.ExpressionPath}, {Kind: hir.ExpressionGroup}, {Kind: hir.ExpressionRecord}, {Kind: hir.ExpressionArray},
+		{Kind: hir.ExpressionArrayViewBorrow}, {Kind: hir.ExpressionArrayLength}, {Kind: hir.ExpressionFieldExpression},
+		{Kind: hir.ExpressionViewLength}, {Kind: hir.ExpressionViewEmpty}, {Kind: hir.ExpressionScalarCast},
+		{Kind: hir.ExpressionResultVariant}, {Kind: hir.ExpressionOptionVariant}, {Kind: hir.ExpressionEnumVariant},
+		{Kind: hir.ExpressionBlock, Block: &hir.Block{}},
 	}
 	for _, operator := range []string{"+", "!", "~", "&", "&mut", "*"} {
-		allowedExpressions = append(allowedExpressions, hir.Expression{Kind: "prefix", Operator: operator})
+		allowedExpressions = append(allowedExpressions, hir.Expression{Kind: hir.ExpressionPrefix, Operator: operator})
 	}
 	for _, operator := range []string{"==", "!=", "<", "<=", ">", ">=", "&", "|", "^"} {
-		allowedExpressions = append(allowedExpressions, hir.Expression{Kind: "binary", Operator: operator})
+		allowedExpressions = append(allowedExpressions, hir.Expression{Kind: hir.ExpressionBinary, Operator: operator})
 	}
 	for _, expression := range allowedExpressions {
 		if err := verifyHIRStateOwnerClosedFormBoundary(hir.Function{Body: hir.Block{Tail: &expression}}); err != nil {
@@ -183,9 +183,9 @@ func TestHIRStateOwnerClosedFormBoundaryUsesPositiveAllowlists(t *testing.T) {
 		}
 	}
 	for _, statement := range []hir.Statement{
-		{Kind: "binding"}, {Kind: "return"}, {Kind: "discard"}, {Kind: "expression-statement"},
-		{Kind: "assignment"}, {Kind: "assignment", Operator: "="}, {Kind: "assignment", Operator: "&="},
-		{Kind: "assignment", Operator: "|="}, {Kind: "assignment", Operator: "^="},
+		{Kind: hir.StatementBinding}, {Kind: hir.StatementReturn}, {Kind: hir.StatementDiscard}, {Kind: hir.StatementExpressionStatement},
+		{Kind: hir.StatementAssignment}, {Kind: hir.StatementAssignment, Operator: "="}, {Kind: hir.StatementAssignment, Operator: "&="},
+		{Kind: hir.StatementAssignment, Operator: "|="}, {Kind: hir.StatementAssignment, Operator: "^="},
 	} {
 		if err := verifyHIRStateOwnerClosedFormBoundary(hir.Function{Body: hir.Block{Statements: []hir.Statement{statement}}}); err != nil {
 			t.Errorf("allowed statement %q/%q rejected: %v", statement.Kind, statement.Operator, err)
@@ -196,16 +196,16 @@ func TestHIRStateOwnerClosedFormBoundaryUsesPositiveAllowlists(t *testing.T) {
 		function hir.Function
 		contains string
 	}{
-		{name: "future statement", function: hir.Function{Body: hir.Block{Statements: []hir.Statement{{Kind: "future-statement"}}}}, contains: "statement kind \"future-statement\" is not admitted"},
-		{name: "future assignment", function: hir.Function{Body: hir.Block{Statements: []hir.Statement{{Kind: "assignment", Operator: "??="}}}}, contains: "assignment operator \"??=\" is not admitted"},
-		{name: "hidden loop payload", function: hir.Function{Body: hir.Block{Statements: []hir.Statement{{Kind: "binding", For: &hir.ForLoop{}}}}}, contains: "carries loop state"},
-		{name: "future expression", function: hir.Function{Body: hir.Block{Tail: &hir.Expression{Kind: "future-expression"}}}, contains: "expression kind \"future-expression\" is not admitted"},
-		{name: "future prefix", function: hir.Function{Body: hir.Block{Tail: &hir.Expression{Kind: "prefix", Operator: "future"}}}, contains: "prefix operator \"future\" is not admitted"},
-		{name: "future binary", function: hir.Function{Body: hir.Block{Tail: &hir.Expression{Kind: "binary", Operator: "future"}}}, contains: "binary operator \"future\" is not admitted"},
-		{name: "expression effects", function: hir.Function{Body: hir.Block{Tail: &hir.Expression{Kind: "literal", Effects: []hir.Effect{hir.EffectStorageRead}}}}, contains: "carries expression-local effects"},
-		{name: "nested child", function: hir.Function{Body: hir.Block{Tail: &hir.Expression{Kind: "group", Children: []hir.Expression{{Kind: "future-child"}}}}}, contains: "future-child"},
-		{name: "nested block", function: hir.Function{Body: hir.Block{Tail: &hir.Expression{Kind: "block", Block: &hir.Block{Tail: &hir.Expression{Kind: "future-block"}}}}}, contains: "future-block"},
-		{name: "nested arm", function: hir.Function{Body: hir.Block{Tail: &hir.Expression{Kind: "enum-variant", Arms: []hir.MatchArm{{Expression: hir.Expression{Kind: "future-arm"}}}}}}, contains: "future-arm"},
+		{name: "future statement", function: hir.Function{Body: hir.Block{Statements: []hir.Statement{{Kind: hir.StatementKind(255)}}}}, contains: "statement kind \"StatementKind(255)\" is not admitted"},
+		{name: "future assignment", function: hir.Function{Body: hir.Block{Statements: []hir.Statement{{Kind: hir.StatementAssignment, Operator: "??="}}}}, contains: "assignment operator \"??=\" is not admitted"},
+		{name: "hidden loop payload", function: hir.Function{Body: hir.Block{Statements: []hir.Statement{{Kind: hir.StatementBinding, For: &hir.ForLoop{}}}}}, contains: "carries loop state"},
+		{name: "future expression", function: hir.Function{Body: hir.Block{Tail: &hir.Expression{Kind: hir.ExpressionKind(255)}}}, contains: "expression kind \"ExpressionKind(255)\" is not admitted"},
+		{name: "future prefix", function: hir.Function{Body: hir.Block{Tail: &hir.Expression{Kind: hir.ExpressionPrefix, Operator: "future"}}}, contains: "prefix operator \"future\" is not admitted"},
+		{name: "future binary", function: hir.Function{Body: hir.Block{Tail: &hir.Expression{Kind: hir.ExpressionBinary, Operator: "future"}}}, contains: "binary operator \"future\" is not admitted"},
+		{name: "expression effects", function: hir.Function{Body: hir.Block{Tail: &hir.Expression{Kind: hir.ExpressionLiteral, Effects: []hir.Effect{hir.EffectStorageRead}}}}, contains: "carries expression-local effects"},
+		{name: "nested child", function: hir.Function{Body: hir.Block{Tail: &hir.Expression{Kind: hir.ExpressionGroup, Children: []hir.Expression{{Kind: hir.ExpressionKind(254)}}}}}, contains: "ExpressionKind(254)"},
+		{name: "nested block", function: hir.Function{Body: hir.Block{Tail: &hir.Expression{Kind: hir.ExpressionBlock, Block: &hir.Block{Tail: &hir.Expression{Kind: hir.ExpressionKind(253)}}}}}, contains: "ExpressionKind(253)"},
+		{name: "nested arm", function: hir.Function{Body: hir.Block{Tail: &hir.Expression{Kind: hir.ExpressionEnumVariant, Arms: []hir.MatchArm{{Expression: hir.Expression{Kind: hir.ExpressionKind(252)}}}}}}, contains: "ExpressionKind(252)"},
 	}
 	for _, test := range rejected {
 		t.Run(test.name, func(t *testing.T) {
@@ -217,10 +217,10 @@ func TestHIRStateOwnerClosedFormBoundaryUsesPositiveAllowlists(t *testing.T) {
 	}
 }
 
-func trapOwnerExpression(kind, operator string) hir.Function {
+func trapOwnerExpression(kind hir.ExpressionKind, operator string) hir.Function {
 	return hir.Function{Body: hir.Block{Tail: &hir.Expression{Kind: kind, Operator: operator}}}
 }
 
 func trapOwnerAssignment(operator string) hir.Function {
-	return hir.Function{Body: hir.Block{Statements: []hir.Statement{{Kind: "assignment", Operator: operator}}}}
+	return hir.Function{Body: hir.Block{Statements: []hir.Statement{{Kind: hir.StatementAssignment, Operator: operator}}}}
 }

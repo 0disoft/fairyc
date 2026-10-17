@@ -55,7 +55,7 @@ fn i32 main() {
 				t.Fatal("query fixture shape changed")
 			}
 			expression := function.Body.Statements[0].Expression
-			*expression = hir.Expression{Kind: "storage-layout", Type: hir.TypeUSize, TargetType: query.typ,
+			*expression = hir.Expression{Kind: hir.ExpressionStorageLayout, Type: hir.TypeUSize, TargetType: query.typ,
 				Operator: query.field, Symbol: hir.NoSymbol, Span: expression.Span}
 			count++
 		}

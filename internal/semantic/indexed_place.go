@@ -50,14 +50,14 @@ func (c *typeChecker) indexedViewBorrow(source *ast.Expression, child *hir.Expre
 		return hir.Expression{}, false
 	}
 	index := *child
-	for index.Kind == "group" && len(index.Children) == 1 {
+	for index.Kind == hir.ExpressionGroup && len(index.Children) == 1 {
 		index = index.Children[0]
 	}
 	return indexedElementBorrow(index, mutable)
 }
 
 func indexedElementBorrow(index hir.Expression, mutable bool) (hir.Expression, bool) {
-	if index.Kind != "view-index" || len(index.Children) != 2 {
+	if index.Kind != hir.ExpressionViewIndex || len(index.Children) != 2 {
 		return hir.Expression{}, false
 	}
 	element, indexed := hir.IndexedViewElement(index.Children[0].Type)
@@ -68,7 +68,7 @@ func indexedElementBorrow(index hir.Expression, mutable bool) (hir.Expression, b
 	if mutable {
 		typ = hir.MutableBorrow(element)
 	}
-	return hir.Expression{Kind: "view-element-borrow", Type: typ, Span: index.Span, Symbol: hir.NoSymbol, Operator: "[]", Children: index.Children}, true
+	return hir.Expression{Kind: hir.ExpressionViewElementBorrow, Type: typ, Span: index.Span, Symbol: hir.NoSymbol, Operator: "[]", Children: index.Children}, true
 }
 
 func (f *borrowFlowAnalyzer) evaluateIndexedPlace(index *ast.Expression, mutable, retain bool, environment borrowEnvironment) (borrowValueState, bool) {
@@ -107,10 +107,10 @@ func (c *typeChecker) indexedArrayBorrow(source *ast.Expression, child *hir.Expr
 	}
 	if arrayFieldRoot(index.Children[0]) != nil && child != nil {
 		lowered := *child
-		for lowered.Kind == "group" && len(lowered.Children) == 1 {
+		for lowered.Kind == hir.ExpressionGroup && len(lowered.Children) == 1 {
 			lowered = lowered.Children[0]
 		}
-		if (lowered.Kind != "array-index" && lowered.Kind != "view-index") || len(lowered.Children) != 2 {
+		if (lowered.Kind != hir.ExpressionArrayIndex && lowered.Kind != hir.ExpressionViewIndex) || len(lowered.Children) != 2 {
 			return hir.Expression{}, false
 		}
 		field, _ := c.checkExpression(index.Children[0], hir.TypeInvalid)
@@ -118,7 +118,7 @@ func (c *typeChecker) indexedArrayBorrow(source *ast.Expression, child *hir.Expr
 		if !ok {
 			return hir.Expression{}, false
 		}
-		lowered.Kind, lowered.Children[0] = "view-index", view
+		lowered.Kind, lowered.Children[0] = hir.ExpressionViewIndex, view
 		return indexedElementBorrow(lowered, mutable)
 	}
 	owner := c.analyzer.resolved[assignmentRootPath(index.Children[0])]
@@ -130,10 +130,10 @@ func (c *typeChecker) indexedArrayBorrow(source *ast.Expression, child *hir.Expr
 		return hir.Expression{}, false
 	}
 	lowered := *child
-	for lowered.Kind == "group" && len(lowered.Children) == 1 {
+	for lowered.Kind == hir.ExpressionGroup && len(lowered.Children) == 1 {
 		lowered = lowered.Children[0]
 	}
-	if lowered.Kind != "array-index" || len(lowered.Children) != 2 || lowered.Type != element || lowered.Children[0].Type != owner.typ {
+	if lowered.Kind != hir.ExpressionArrayIndex || len(lowered.Children) != 2 || lowered.Type != element || lowered.Children[0].Type != owner.typ {
 		return hir.Expression{}, false
 	}
 	view := hir.SharedBorrow(hir.Type("[" + string(element) + "]"))
@@ -145,9 +145,9 @@ func (c *typeChecker) indexedArrayBorrow(source *ast.Expression, child *hir.Expr
 	if !hir.ArrayViewBorrow(owner.typ, view, operator) {
 		return hir.Expression{}, false
 	}
-	lowered.Kind = "view-index"
+	lowered.Kind = hir.ExpressionViewIndex
 	lowered.Children = []hir.Expression{
-		{Kind: "array-view-borrow", Type: view, Span: lowered.Children[0].Span, Symbol: hir.NoSymbol, Operator: operator, Children: []hir.Expression{lowered.Children[0]}},
+		{Kind: hir.ExpressionArrayViewBorrow, Type: view, Span: lowered.Children[0].Span, Symbol: hir.NoSymbol, Operator: operator, Children: []hir.Expression{lowered.Children[0]}},
 		lowered.Children[1],
 	}
 	return indexedElementBorrow(lowered, mutable)

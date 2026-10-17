@@ -44,7 +44,7 @@ func (c *typeChecker) checkSourceLocation(expression *ast.Expression, result *hi
 		c.analyzer.addDiagnostic("E4402", span(c.module.file.Path, expression.Span))
 		return hir.TypeInvalid
 	}
-	result.Kind = string(syntax.KindLiteral)
+	result.Kind = hir.ExpressionLiteral
 	result.Value = strconv.Quote(location)
 	result.Cooked = hex.EncodeToString([]byte(location))
 	result.Symbol = hir.NoSymbol

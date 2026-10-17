@@ -17,10 +17,10 @@ func (l *functionLowerer) lowerIgnoredExpression(expression *hir.Expression) err
 	// As in semantic resourcePlaceExpression, reading a named local (possibly
 	// grouped) leaves its obligation with that local until lexical cleanup.
 	place := expression
-	for place.Kind == "group" && len(place.Children) == 1 {
+	for place.Kind == hir.ExpressionGroup && len(place.Children) == 1 {
 		place = &place.Children[0]
 	}
-	if place.Kind == "path" {
+	if place.Kind == hir.ExpressionPath {
 		return nil
 	}
 	if value.Kind == OperandInvalid {

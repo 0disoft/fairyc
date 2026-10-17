@@ -29,7 +29,7 @@ fn i32 main() { return ANSWER; }
 	}
 	mainFunction := result.HIR.Modules[0].Functions[1]
 	returned := mainFunction.Body.Statements[0].Expression
-	if returned == nil || returned.Kind != "literal" || returned.Type != hir.TypeI32 || returned.Value != "42" || returned.Symbol != hir.NoSymbol {
+	if returned == nil || returned.Kind != hir.ExpressionLiteral || returned.Type != hir.TypeI32 || returned.Value != "42" || returned.Symbol != hir.NoSymbol {
 		t.Fatalf("folded return = %+v", returned)
 	}
 }

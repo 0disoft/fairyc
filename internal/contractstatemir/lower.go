@@ -319,7 +319,7 @@ func hirExpressionContainsCall(expression *hir.Expression) bool {
 	if expression == nil {
 		return false
 	}
-	if expression.Kind == "call" {
+	if expression.Kind == hir.ExpressionCall {
 		return true
 	}
 	for index := range expression.Children {
@@ -346,14 +346,14 @@ func hirStaticStateCalls(block hir.Block) ([]hir.SymbolID, error) {
 		if expression == nil {
 			return nil
 		}
-		if expression.Kind == "call" {
+		if expression.Kind == hir.ExpressionCall {
 			if expression.Symbol == hir.NoSymbol || expression.ForeignABI != "" || expression.Type != hir.TypeVoid || len(expression.Children) != 1 {
 				return fmt.Errorf("state transaction owner contains a call; calls are not admitted unless resolved to an internal void transaction helper with no arguments")
 			}
 			result = append(result, expression.Symbol)
 		}
 		for index := range expression.Children {
-			if expression.Kind == "call" && index == 0 {
+			if expression.Kind == hir.ExpressionCall && index == 0 {
 				continue
 			}
 			if err := visitExpression(&expression.Children[index]); err != nil {
@@ -414,7 +414,7 @@ func verifyHIRStateCallEffects(block hir.Block, functions map[hir.SymbolID]hir.F
 		if expression == nil {
 			return nil
 		}
-		if expression.Kind == "call" {
+		if expression.Kind == hir.ExpressionCall {
 			callee, found := functions[expression.Symbol]
 			if !found || !slices.Equal(expression.Effects, callee.Effects) {
 				return fmt.Errorf("state helper call effects do not match the resolved callee")
@@ -465,7 +465,7 @@ func hirStatementContainsDynamicControlFlow(statement *hir.Statement) bool {
 		return false
 	}
 	switch statement.Kind {
-	case "assert", "while", "for", "break", "continue":
+	case hir.StatementAssert, hir.StatementWhile, hir.StatementFor, hir.StatementBreak, hir.StatementContinue:
 		return true
 	}
 	if hirExpressionContainsDynamicControlFlow(statement.Target) || hirExpressionContainsDynamicControlFlow(statement.Expression) {
@@ -484,9 +484,9 @@ func hirExpressionContainsDynamicControlFlow(expression *hir.Expression) bool {
 		return false
 	}
 	switch expression.Kind {
-	case "if", "match", "while", "propagate":
+	case hir.ExpressionIf, hir.ExpressionMatch, hir.ExpressionWhile, hir.ExpressionPropagate:
 		return true
-	case "binary":
+	case hir.ExpressionBinary:
 		if expression.Operator == "&&" || expression.Operator == "||" {
 			return true
 		}

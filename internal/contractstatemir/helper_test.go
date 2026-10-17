@@ -143,7 +143,7 @@ func helperHIRPackage() hir.Package {
 }
 
 func helperCallExpression(symbol hir.SymbolID, effects []hir.Effect) *hir.Expression {
-	return &hir.Expression{Kind: "call", Type: hir.TypeVoid, Symbol: symbol, Effects: effects, Children: []hir.Expression{{Kind: "path", Symbol: symbol}}}
+	return &hir.Expression{Kind: hir.ExpressionCall, Type: hir.TypeVoid, Symbol: symbol, Effects: effects, Children: []hir.Expression{{Kind: hir.ExpressionPath, Symbol: symbol}}}
 }
 
 func mustEncodeU64(t *testing.T, value uint64) []byte {

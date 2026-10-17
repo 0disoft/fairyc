@@ -20,11 +20,11 @@ func (l *functionLowerer) lowerFieldStore(statement hir.Statement) error {
 	owner := &target.Children[0]
 	var fields []string
 	for {
-		if owner.Kind == "group" && len(owner.Children) == 1 {
+		if owner.Kind == hir.ExpressionGroup && len(owner.Children) == 1 {
 			owner = &owner.Children[0]
 			continue
 		}
-		if owner.Kind != "field-expression" {
+		if owner.Kind != hir.ExpressionFieldExpression {
 			break
 		}
 		if len(owner.Children) != 1 || owner.Operator == "" {
@@ -34,14 +34,14 @@ func (l *functionLowerer) lowerFieldStore(statement hir.Statement) error {
 		owner = &owner.Children[0]
 	}
 	slices.Reverse(fields)
-	indexed := owner.Kind == "view-index" || owner.Kind == "array-index"
+	indexed := owner.Kind == hir.ExpressionViewIndex || owner.Kind == hir.ExpressionArrayIndex
 	if indexed {
 		borrowed, ok := mutableIndexedOwner(*owner)
 		if !ok {
 			return unsupported
 		}
 		owner = &borrowed
-	} else if owner.Kind != "path" {
+	} else if owner.Kind != hir.ExpressionPath {
 		return unsupported
 	}
 	if _, mutable, borrowed := hir.BorrowElement(owner.Type); borrowed && !mutable {
@@ -90,7 +90,7 @@ func (l *functionLowerer) lowerFieldStore(statement hir.Statement) error {
 	}
 	if operator != "" && operator != "=" {
 		binary, _ := hir.CompoundAssignmentBinary(operator)
-		combined := &hir.Expression{Kind: "binary", Type: target.Type, Span: statement.Span,
+		combined := &hir.Expression{Kind: hir.ExpressionBinary, Type: target.Type, Span: statement.Span,
 			Operator: binary, Children: []hir.Expression{*target, *statement.Expression}}
 		value, err = l.lowerBinaryOperands(combined, prior, value)
 		if err != nil {
@@ -137,7 +137,7 @@ func mutableIndexedOwner(index hir.Expression) (hir.Expression, bool) {
 	if len(index.Children) != 2 {
 		return hir.Expression{}, false
 	}
-	if index.Kind == "array-index" {
+	if index.Kind == hir.ExpressionArrayIndex {
 		element, length, array := hir.FixedArrayParts(index.Children[0].Type)
 		if !array || element != index.Type || !hir.ExecutableFixedArrayShape(element, length) {
 			return hir.Expression{}, false
@@ -147,7 +147,7 @@ func mutableIndexedOwner(index hir.Expression) (hir.Expression, bool) {
 			return hir.Expression{}, false
 		}
 		index.Children = []hir.Expression{
-			{Kind: "array-view-borrow", Type: view, Span: index.Children[0].Span,
+			{Kind: hir.ExpressionArrayViewBorrow, Type: view, Span: index.Children[0].Span,
 				Symbol: hir.NoSymbol, Operator: "&mut", Children: []hir.Expression{index.Children[0]}},
 			index.Children[1],
 		}
@@ -156,7 +156,7 @@ func mutableIndexedOwner(index hir.Expression) (hir.Expression, bool) {
 	if !nominal || !hir.MutableIndexedView(index.Children[0].Type) || element != index.Type {
 		return hir.Expression{}, false
 	}
-	return hir.Expression{Kind: "view-element-borrow", Type: hir.MutableBorrow(element), Span: index.Span, Symbol: hir.NoSymbol, Operator: "[]", Children: index.Children}, true
+	return hir.Expression{Kind: hir.ExpressionViewElementBorrow, Type: hir.MutableBorrow(element), Span: index.Span, Symbol: hir.NoSymbol, Operator: "[]", Children: index.Children}, true
 }
 
 // Compound assignment reads through the already selected receiver. Index

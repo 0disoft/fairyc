@@ -354,7 +354,7 @@ func (l *functionLowerer) lowerStatements(statements []hir.Statement) (bool, err
 			return true, nil
 		}
 		switch statement.Kind {
-		case "binding":
+		case hir.StatementBinding:
 			value, err := l.lowerExpression(statement.Expression)
 			if err != nil {
 				return false, err
@@ -375,17 +375,17 @@ func (l *functionLowerer) lowerStatements(statements []hir.Statement) (bool, err
 			} else if value.Kind != OperandInvalid {
 				l.appendOperation(Operation{Kind: OperationAssign, Span: statement.Span, DestinationLocal: LocalID(statement.Binding), Operands: []Operand{value}})
 			}
-		case "return":
+		case hir.StatementReturn:
 			if err := l.lowerReturn(statement.Expression, expressionSpan(statement.Expression, statement.Span)); err != nil {
 				return false, err
 			}
 			return true, nil
-		case "discard", "expression-statement":
+		case hir.StatementDiscard, hir.StatementExpressionStatement:
 			if err := l.lowerIgnoredExpression(statement.Expression); err != nil {
 				return false, err
 			}
-		case "burn":
-			if statement.Expression == nil || statement.Expression.Kind != "path" {
+		case hir.StatementBurn:
+			if statement.Expression == nil || statement.Expression.Kind != hir.ExpressionPath {
 				return false, fmt.Errorf("burn requires one direct resource path")
 			}
 			binding, found := l.bindings[statement.Expression.Symbol]
@@ -400,20 +400,20 @@ func (l *functionLowerer) lowerStatements(statements []hir.Statement) (bool, err
 				DestinationLocal: NoLocal, Type: binding.typ,
 			})
 			l.live[statement.Expression.Symbol] = false
-		case "assignment":
-			if statement.Target != nil && statement.Target.Kind == "prefix" && statement.Target.Operator == "*" {
+		case hir.StatementAssignment:
+			if statement.Target != nil && statement.Target.Kind == hir.ExpressionPrefix && statement.Target.Operator == "*" {
 				if err := l.lowerDerefStore(statement); err != nil {
 					return false, err
 				}
 				continue
 			}
-			if statement.Target != nil && statement.Target.Kind == "field-expression" {
+			if statement.Target != nil && statement.Target.Kind == hir.ExpressionFieldExpression {
 				if err := l.lowerFieldStore(statement); err != nil {
 					return false, err
 				}
 				continue
 			}
-			if statement.Target != nil && (statement.Target.Kind == "array-index" || statement.Target.Kind == "view-index") {
+			if statement.Target != nil && (statement.Target.Kind == hir.ExpressionArrayIndex || statement.Target.Kind == hir.ExpressionViewIndex) {
 				if err := l.lowerIndexedAssignment(statement); err != nil {
 					return false, err
 				}
@@ -427,7 +427,7 @@ func (l *functionLowerer) lowerStatements(statements []hir.Statement) (bool, err
 			var err error
 			if operator != "=" && statement.Target != nil && statement.Expression != nil {
 				binary, ok := hir.CompoundAssignmentBinary(operator)
-				if !ok || statement.Target.Kind != "path" || !hir.CompoundAssignmentType(operator, statement.Target.Type) {
+				if !ok || statement.Target.Kind != hir.ExpressionPath || !hir.CompoundAssignmentType(operator, statement.Target.Type) {
 					return false, fmt.Errorf("malformed compound assignment %q", operator)
 				}
 				prior, lowerErr := l.lowerExpression(statement.Target)
@@ -440,7 +440,7 @@ func (l *functionLowerer) lowerStatements(statements []hir.Statement) (bool, err
 					return false, lowerErr
 				}
 				combined := &hir.Expression{
-					Kind: "binary", Type: statement.Target.Type, Span: statement.Span, Operator: binary,
+					Kind: hir.ExpressionBinary, Type: statement.Target.Type, Span: statement.Span, Operator: binary,
 					Children: []hir.Expression{*statement.Target, *statement.Expression},
 				}
 				value, err = l.lowerBinaryOperands(combined, prior, right)
@@ -450,7 +450,7 @@ func (l *functionLowerer) lowerStatements(statements []hir.Statement) (bool, err
 			if err != nil {
 				return false, err
 			}
-			if statement.Target == nil || statement.Target.Kind != "path" || value.Kind == OperandInvalid {
+			if statement.Target == nil || statement.Target.Kind != hir.ExpressionPath || value.Kind == OperandInvalid {
 				continue
 			}
 			binding, found := l.bindings[statement.Target.Symbol]
@@ -475,28 +475,28 @@ func (l *functionLowerer) lowerStatements(statements []hir.Statement) (bool, err
 			} else {
 				l.appendOperation(Operation{Kind: OperationAssign, Span: statement.Span, DestinationLocal: LocalID(statement.Target.Symbol), Operands: []Operand{value}})
 			}
-		case "assert":
+		case hir.StatementAssert:
 			if err := l.lowerAssert(statement.Expression, statement.Span); err != nil {
 				return false, err
 			}
-		case "defer":
+		case hir.StatementDefer:
 			if err := l.lowerDefer(statement); err != nil {
 				return false, err
 			}
-		case "while":
+		case hir.StatementWhile:
 			if _, err := l.lowerWhile(statement.Expression); err != nil {
 				return false, err
 			}
-		case "for":
+		case hir.StatementFor:
 			if err := l.lowerFor(statement.For); err != nil {
 				return false, err
 			}
-		case "break", "continue":
+		case hir.StatementBreak, hir.StatementContinue:
 			if err := l.lowerLoopControl(statement.Kind, statement.Span); err != nil {
 				return false, err
 			}
 			return true, nil
-		case "region":
+		case hir.StatementRegion:
 			if _, err := l.lowerExpression(statement.Expression); err != nil {
 				return false, err
 			}
@@ -540,7 +540,7 @@ func (l *functionLowerer) lowerIndexedAssignment(statement hir.Statement) error 
 	checkKind := OperationArrayIndexCheck
 	storeKind := OperationArrayIndexStore
 	switchKind := "checked-array-index"
-	if target.Kind == "view-index" {
+	if target.Kind == hir.ExpressionViewIndex {
 		element, indexed := hir.IndexedViewElement(target.Children[0].Type)
 		if !indexed || !hir.MutableIndexedView(target.Children[0].Type) || target.Type != element {
 			return fmt.Errorf("mutable byte-view assignment has incompatible type metadata")
@@ -551,7 +551,7 @@ func (l *functionLowerer) lowerIndexedAssignment(statement hir.Statement) error 
 		receiver = l.freezeScalarOperand(receiver, target.Children[0].Span)
 	} else {
 		elementType, _, array := hir.FixedArrayParts(target.Children[0].Type)
-		if target.Kind != "array-index" || !array || elementType != target.Type {
+		if target.Kind != hir.ExpressionArrayIndex || !array || elementType != target.Type {
 			return fmt.Errorf("fixed-array assignment has incompatible type metadata")
 		}
 	}
@@ -582,7 +582,7 @@ func (l *functionLowerer) lowerIndexedAssignment(statement hir.Statement) error 
 	var prior Operand
 	if operator != "=" {
 		loadKind := OperationArrayIndex
-		if target.Kind == "view-index" {
+		if target.Kind == hir.ExpressionViewIndex {
 			loadKind = OperationViewIndex
 		}
 		destination := l.newTemporary()
@@ -606,7 +606,7 @@ func (l *functionLowerer) lowerIndexedAssignment(statement hir.Statement) error 
 	if operator != "=" {
 		binary, _ := hir.CompoundAssignmentBinary(operator)
 		combined := &hir.Expression{
-			Kind: "binary", Type: target.Type, Span: statement.Span, Operator: binary,
+			Kind: hir.ExpressionBinary, Type: target.Type, Span: statement.Span, Operator: binary,
 			Children: []hir.Expression{{Type: target.Type, Span: target.Span}, *statement.Expression},
 		}
 		value, err = l.lowerBinaryOperands(combined, prior, value)
@@ -633,7 +633,7 @@ func (l *functionLowerer) freezeScalarOperand(value Operand, at hir.Span) Operan
 
 func (l *functionLowerer) lowerDefer(statement hir.Statement) error {
 	expression := statement.Expression
-	if expression == nil || expression.Kind != "call" || expression.Type != hir.TypeVoid ||
+	if expression == nil || expression.Kind != hir.ExpressionCall || expression.Type != hir.TypeVoid ||
 		expression.Symbol == hir.NoSymbol || expression.ForeignABI != "" || len(expression.Children) == 0 || l.currentScope.Source == "" {
 		return fmt.Errorf("malformed defer statement")
 	}
@@ -669,7 +669,7 @@ func (l *functionLowerer) lowerAssert(expression *hir.Expression, statementSpan 
 	if expression == nil || expression.Type != hir.TypeBool {
 		return fmt.Errorf("malformed assert statement")
 	}
-	if expression.Kind == "literal" && expression.Value == "false" {
+	if expression.Kind == hir.ExpressionLiteral && expression.Value == "false" {
 		l.terminate(Terminator{Kind: TerminatorTrap, Span: statementSpan, UnwindSuccessor: NoBlock, TrapCategories: []string{"assertion-failed"}})
 		l.result.TrapPaths = append(l.result.TrapPaths, TrapPathFact{
 			Operation: statementSpan, Categories: []string{"assertion-failed"}, CleanupActions: []CleanupAction{}, HasSuccessor: false,
@@ -736,7 +736,7 @@ func (l *functionLowerer) lowerExpression(expression *hir.Expression) (Operand, 
 		return Operand{}, nil
 	}
 	switch expression.Kind {
-	case "literal":
+	case hir.ExpressionLiteral:
 		if expression.Type == hir.SharedBorrow(hir.TypeStr) && strings.HasPrefix(expression.Value, "\"") {
 			decoded, err := hex.DecodeString(expression.Cooked)
 			if err != nil || !utf8.Valid(decoded) {
@@ -805,54 +805,54 @@ func (l *functionLowerer) lowerExpression(expression *hir.Expression) (Operand, 
 			}
 			return Operand{}, fmt.Errorf("unsupported literal %q of type %q", expression.Value, expression.Type)
 		}
-	case "path":
+	case hir.ExpressionPath:
 		return Operand{Kind: OperandLocal, Local: LocalID(expression.Symbol)}, nil
-	case "group":
+	case hir.ExpressionGroup:
 		if len(expression.Children) != 1 {
 			return Operand{}, fmt.Errorf("group expression has %d children", len(expression.Children))
 		}
 		return l.lowerExpression(&expression.Children[0])
-	case "record":
+	case hir.ExpressionRecord:
 		return l.lowerAggregateConstruction(expression)
-	case "array":
+	case hir.ExpressionArray:
 		return l.lowerArrayConstruction(expression)
-	case "array-view-borrow":
+	case hir.ExpressionArrayViewBorrow:
 		return l.lowerArrayBorrowView(expression)
-	case "array-length":
+	case hir.ExpressionArrayLength:
 		return l.lowerArrayLength(expression)
-	case "storage-layout":
+	case hir.ExpressionStorageLayout:
 		return l.lowerStorageLayout(expression)
-	case "storage-take":
+	case hir.ExpressionStorageTake:
 		return l.lowerStorageTake(expression)
-	case "storage-put":
+	case hir.ExpressionStoragePut:
 		return l.lowerStoragePut(expression)
-	case "storage-borrow", "storage-borrow-mut":
+	case hir.ExpressionStorageBorrow, hir.ExpressionStorageBorrowMut:
 		return l.lowerStorageBorrow(expression)
-	case "storage-element-address":
+	case hir.ExpressionStorageElementAddress:
 		return l.lowerStorageElementAddress(expression)
-	case "field-expression":
+	case hir.ExpressionFieldExpression:
 		return l.lowerFieldRead(expression)
-	case "field-borrow":
+	case hir.ExpressionFieldBorrow:
 		return l.lowerFieldBorrow(expression)
-	case "view-length":
+	case hir.ExpressionViewLength:
 		return l.lowerViewLength(expression)
-	case "view-empty":
+	case hir.ExpressionViewEmpty:
 		return l.lowerViewEmpty(expression)
-	case "view-index", "view-element-borrow":
+	case hir.ExpressionViewIndex, hir.ExpressionViewElementBorrow:
 		return l.lowerViewIndex(expression)
-	case "array-index":
+	case hir.ExpressionArrayIndex:
 		return l.lowerArrayIndex(expression)
-	case "view-slice":
+	case hir.ExpressionViewSlice:
 		return l.lowerViewSlice(expression)
-	case "scalar-cast":
+	case hir.ExpressionScalarCast:
 		return l.lowerScalarCast(expression)
-	case "shared-reborrow":
+	case hir.ExpressionSharedReborrow:
 		return l.lowerSharedReborrow(expression)
-	case "cast":
+	case hir.ExpressionCast:
 		return l.lowerRawAddressCast(expression)
-	case "borrowed-view-from-raw-parts":
+	case hir.ExpressionBorrowedViewFromRawParts:
 		return l.lowerBorrowedViewFromRawParts(expression)
-	case "prefix":
+	case hir.ExpressionPrefix:
 		if len(expression.Children) != 1 {
 			return Operand{}, fmt.Errorf("prefix expression has %d children", len(expression.Children))
 		}
@@ -870,23 +870,23 @@ func (l *functionLowerer) lowerExpression(expression *hir.Expression) (Operand, 
 			Type: expression.Type, Operator: expression.Operator,
 		})
 		return Operand{Kind: OperandLocal, Local: destination}, nil
-	case "call":
+	case hir.ExpressionCall:
 		if expression.Operator == "place" && len(expression.Children) == 2 && expression.Children[0].Type == hir.TypeRegion {
 			return l.lowerRegionPlace(expression)
 		}
 		return l.lowerCall(expression)
-	case "unsafe":
+	case hir.ExpressionUnsafe:
 		if len(expression.Children) != 1 {
 			return Operand{}, fmt.Errorf("unsafe expression has %d children", len(expression.Children))
 		}
 		return l.lowerExpression(&expression.Children[0])
-	case "result-variant":
+	case hir.ExpressionResultVariant:
 		return l.lowerResultVariant(expression)
-	case "option-variant":
+	case hir.ExpressionOptionVariant:
 		return l.lowerOptionVariant(expression)
-	case "enum-variant":
+	case hir.ExpressionEnumVariant:
 		return l.lowerEnumVariant(expression)
-	case "binary":
+	case hir.ExpressionBinary:
 		if len(expression.Children) != 2 {
 			return Operand{}, fmt.Errorf("binary expression has %d children", len(expression.Children))
 		}
@@ -912,21 +912,21 @@ func (l *functionLowerer) lowerExpression(expression *hir.Expression) (Operand, 
 			return Operand{}, nil
 		}
 		return l.lowerBinaryOperands(expression, left, right)
-	case "propagate":
+	case hir.ExpressionPropagate:
 		return l.lowerPropagate(expression)
-	case "if":
+	case hir.ExpressionIf:
 		return l.lowerIf(expression)
-	case "match":
+	case hir.ExpressionMatch:
 		return l.lowerMatch(expression)
-	case "while":
+	case hir.ExpressionWhile:
 		return l.lowerWhile(expression)
-	case "block":
+	case hir.ExpressionBlock:
 		if expression.Block == nil {
 			return Operand{}, fmt.Errorf("block expression has no block")
 		}
 		value, _, err := l.lowerNestedBlock(*expression.Block, true)
 		return value, err
-	case "region":
+	case hir.ExpressionRegion:
 		return l.lowerRegion(expression)
 	default:
 		return Operand{}, fmt.Errorf("unsupported HIR expression %q", expression.Kind)
@@ -1206,7 +1206,7 @@ func (l *functionLowerer) lowerRawAddressCast(expression *hir.Expression) (Opera
 		})
 		return Operand{Kind: OperandLocal, Local: destination}, nil
 	}
-	if borrow.Kind == "path" && borrow.Symbol != hir.NoSymbol {
+	if borrow.Kind == hir.ExpressionPath && borrow.Symbol != hir.NoSymbol {
 		sourceElement, sourceMutable, sourceBorrow := hir.BorrowElement(borrow.Type)
 		targetElement, targetMutable, targetPointer := hir.RawPointerElement(expression.Type)
 		if sourceBorrow && targetPointer && (targetElement == sourceElement || targetElement == hir.TypeVoid) &&
@@ -1237,11 +1237,11 @@ func (l *functionLowerer) lowerRawAddressCast(expression *hir.Expression) (Opera
 			return Operand{Kind: OperandLocal, Local: destination}, nil
 		}
 	}
-	if borrow.Kind != "prefix" || (borrow.Operator != "&" && borrow.Operator != "&mut") || len(borrow.Children) != 1 {
+	if borrow.Kind != hir.ExpressionPrefix || (borrow.Operator != "&" && borrow.Operator != "&mut") || len(borrow.Children) != 1 {
 		return Operand{}, fmt.Errorf("raw-address cast source is not a direct borrow")
 	}
 	place := &borrow.Children[0]
-	if place.Kind != "path" || place.Symbol == hir.NoSymbol {
+	if place.Kind != hir.ExpressionPath || place.Symbol == hir.NoSymbol {
 		return Operand{}, fmt.Errorf("raw-address cast source is not a direct local place")
 	}
 	element, _, pointer := hir.RawPointerElement(expression.Type)
@@ -1328,7 +1328,7 @@ func (l *functionLowerer) lowerRegion(expression *hir.Expression) (Operand, erro
 		return Operand{}, fmt.Errorf("malformed lexical region")
 	}
 	arena := &expression.Children[0]
-	if arena.Kind != "prefix" || arena.Operator != "&mut" || len(arena.Children) != 1 || arena.Children[0].Kind != "path" {
+	if arena.Kind != hir.ExpressionPrefix || arena.Operator != "&mut" || len(arena.Children) != 1 || arena.Children[0].Kind != hir.ExpressionPath {
 		return Operand{}, fmt.Errorf("executable lexical region source must be a direct &mut local")
 	}
 	if _, active := l.regions[expression.Symbol]; active {
@@ -1370,7 +1370,7 @@ func (l *functionLowerer) lowerRegion(expression *hir.Expression) (Operand, erro
 
 func (l *functionLowerer) lowerRegionPlace(expression *hir.Expression) (Operand, error) {
 	receiver := &expression.Children[0]
-	if receiver.Kind != "path" || receiver.Symbol == hir.NoSymbol {
+	if receiver.Kind != hir.ExpressionPath || receiver.Symbol == hir.NoSymbol {
 		return Operand{}, fmt.Errorf("Region.place receiver is not one region capability")
 	}
 	factIndex, active := l.regions[receiver.Symbol]
@@ -1526,7 +1526,7 @@ func (l *functionLowerer) lowerViewIndex(expression *hir.Expression) (Operand, e
 	element, indexed := hir.IndexedViewElement(expression.Children[0].Type)
 	resultType := element
 	kind := OperationViewIndex
-	if expression.Kind == "view-element-borrow" {
+	if expression.Kind == hir.ExpressionViewElementBorrow {
 		referent, mutable, borrowed := hir.BorrowElement(expression.Type)
 		if !borrowed || referent != element || mutable && !hir.MutableIndexedView(expression.Children[0].Type) {
 			return Operand{}, fmt.Errorf("invalid indexed element reference")
@@ -1614,7 +1614,7 @@ func (l *functionLowerer) lowerViewSlice(expression *hir.Expression) (Operand, e
 		receiver = l.freezeScalarOperand(receiver, expression.Children[0].Span)
 	}
 	start := Operand{Kind: OperandUSize, U64: 0}
-	if expression.Children[1].Kind == "omitted-range-bound" {
+	if expression.Children[1].Kind == hir.ExpressionOmittedRangeBound {
 		if expression.Children[1].Operator != "start" {
 			return Operand{}, fmt.Errorf("malformed omitted byte-view slice start")
 		}
@@ -1631,7 +1631,7 @@ func (l *functionLowerer) lowerViewSlice(expression *hir.Expression) (Operand, e
 		}
 	}
 	var end Operand
-	if expression.Children[2].Kind == "omitted-range-bound" {
+	if expression.Children[2].Kind == hir.ExpressionOmittedRangeBound {
 		if expression.Children[2].Operator != "end" {
 			return Operand{}, fmt.Errorf("malformed omitted byte-view slice end")
 		}
@@ -1655,10 +1655,10 @@ func (l *functionLowerer) lowerViewSlice(expression *hir.Expression) (Operand, e
 	}
 	operands := []Operand{receiver, start, end}
 	sequence := []hir.Span{expression.Children[0].Span}
-	if expression.Children[1].Kind != "omitted-range-bound" {
+	if expression.Children[1].Kind != hir.ExpressionOmittedRangeBound {
 		sequence = append(sequence, expression.Children[1].Span)
 	}
-	if expression.Children[2].Kind != "omitted-range-bound" {
+	if expression.Children[2].Kind != hir.ExpressionOmittedRangeBound {
 		sequence = append(sequence, expression.Children[2].Span)
 	}
 	l.result.OrderedEvaluations = append(l.result.OrderedEvaluations, OrderedEvaluationFact{
@@ -2120,22 +2120,22 @@ func (l *functionLowerer) lowerWhile(expression *hir.Expression) (Operand, error
 	return Operand{}, nil
 }
 
-func (l *functionLowerer) lowerLoopControl(kind string, exit hir.Span) error {
+func (l *functionLowerer) lowerLoopControl(kind hir.StatementKind, exit hir.Span) error {
 	if len(l.loopStack) == 0 {
 		return fmt.Errorf("%s has no enclosing loop after type validation", kind)
 	}
 	loop := l.loopStack[len(l.loopStack)-1]
 	actions := l.emitDeferredCallsForLoopExit(loop, exit)
-	actions = append(actions, l.emitLoopControlCleanup(l.live, loop, exit, kind)...)
+	actions = append(actions, l.emitLoopControlCleanup(l.live, loop, exit, kind.String())...)
 	if !matchesLoopHeader(loop.headerLive, l.live) {
 		return fmt.Errorf("%s edge changes resource state after Flow validation", kind)
 	}
-	l.result.CleanupPaths = append(l.result.CleanupPaths, CleanupPathFact{Exit: exit, ExitKind: kind, Actions: actions})
+	l.result.CleanupPaths = append(l.result.CleanupPaths, CleanupPathFact{Exit: exit, ExitKind: kind.String(), Actions: actions})
 	if cleanupContainsDrop(actions) {
 		l.result.EliminatedForms = append(l.result.EliminatedForms, EliminatedFormFact{Form: "implicit-drop", RemainingCount: 0})
 	}
 	target := loop.continueTarget
-	if kind == "break" {
+	if kind == hir.StatementBreak {
 		target = loop.exit
 	}
 	l.terminate(Terminator{Kind: TerminatorGoto, Span: exit, Successors: []BlockID{target}, UnwindSuccessor: NoBlock})
@@ -2168,7 +2168,7 @@ func (l *functionLowerer) lowerFor(loop *hir.ForLoop) error {
 	l.live = cloneLive(headerLive)
 	conditionExpression := loop.Condition
 	if conditionExpression == nil {
-		conditionExpression = &hir.Expression{Kind: "literal", Type: hir.TypeBool, Span: loop.Span, Value: "true", Cooked: "true", Symbol: hir.NoSymbol}
+		conditionExpression = &hir.Expression{Kind: hir.ExpressionLiteral, Type: hir.TypeBool, Span: loop.Span, Value: "true", Cooked: "true", Symbol: hir.NoSymbol}
 	}
 	condition, err := l.lowerExpression(conditionExpression)
 	if err != nil {
@@ -2743,17 +2743,17 @@ func (l *functionLowerer) liveResourcePath(expression *hir.Expression) *hir.Expr
 		return nil
 	}
 	switch expression.Kind {
-	case "group", "unsafe":
+	case hir.ExpressionGroup, hir.ExpressionUnsafe:
 		if len(expression.Children) == 1 {
 			return l.liveResourcePath(&expression.Children[0])
 		}
 		return nil
-	case "block":
+	case hir.ExpressionBlock:
 		if expression.Block != nil && expression.Block.Tail != nil {
 			return l.liveResourcePath(expression.Block.Tail)
 		}
 		return nil
-	case "path":
+	case hir.ExpressionPath:
 		if expression.Symbol == hir.NoSymbol || !l.live[expression.Symbol] {
 			return nil
 		}
@@ -2822,7 +2822,7 @@ func containsCall(expression *hir.Expression) bool {
 	if expression == nil {
 		return false
 	}
-	if expression.Kind == "call" {
+	if expression.Kind == hir.ExpressionCall {
 		return true
 	}
 	for index := range expression.Children {

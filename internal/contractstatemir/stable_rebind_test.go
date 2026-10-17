@@ -128,7 +128,7 @@ func TestStableStateBodyRebindRejectsIdentityAndCurrentHIRDrift(t *testing.T) {
 			input.Modules[0].Functions[0].Unsafe = true
 		}, contains: "unsafe owners are not admitted"},
 		{name: "current unsafe owner body", mutateHIR: func(input *hir.Package) {
-			input.Modules[0].Functions[0].Body.Tail = &hir.Expression{Kind: "unsafe"}
+			input.Modules[0].Functions[0].Body.Tail = &hir.Expression{Kind: hir.ExpressionUnsafe}
 		}, contains: "unsafe code is not admitted"},
 		{name: "current raw-pointer owner local", mutateHIR: func(input *hir.Package) {
 			input.Modules[0].Functions[0].Locals = []hir.Local{{Type: hir.RawPointer(hir.TypeU8, false)}}
@@ -141,7 +141,7 @@ func TestStableStateBodyRebindRejectsIdentityAndCurrentHIRDrift(t *testing.T) {
 			input.Modules[0].Functions[0].DropGlueFor = hir.TypeU32
 		}, contains: "signature does not match"},
 		{name: "current potentially trapping owner", mutateHIR: func(input *hir.Package) {
-			input.Modules[0].Functions[0].Body.Tail = &hir.Expression{Kind: "binary", Operator: "/"}
+			input.Modules[0].Functions[0].Body.Tail = &hir.Expression{Kind: hir.ExpressionBinary, Operator: "/"}
 		}, contains: "potentially trapping operations are not admitted"},
 		{name: "current owned resource local", mutateHIR: func(input *hir.Package) {
 			resourceType := hir.Type("ledger::FreshHandle")
@@ -149,13 +149,13 @@ func TestStableStateBodyRebindRejectsIdentityAndCurrentHIRDrift(t *testing.T) {
 			input.Modules[0].Functions[0].Locals = []hir.Local{{Type: resourceType}}
 		}, contains: "owned resource values are not admitted"},
 		{name: "current future owner expression", mutateHIR: func(input *hir.Package) {
-			input.Modules[0].Functions[0].Body.Tail = &hir.Expression{Kind: "future-expression"}
-		}, contains: "expression kind \"future-expression\" is not admitted"},
+			input.Modules[0].Functions[0].Body.Tail = &hir.Expression{Kind: hir.ExpressionKind(255)}
+		}, contains: "expression kind \"ExpressionKind(255)\" is not admitted"},
 		{name: "current owner call", mutateHIR: func(input *hir.Package) {
-			input.Modules[0].Functions[0].Body.Tail = &hir.Expression{Kind: "call"}
+			input.Modules[0].Functions[0].Body.Tail = &hir.Expression{Kind: hir.ExpressionCall}
 		}, contains: "contains a call; calls are not admitted"},
 		{name: "current owner control flow", mutateHIR: func(input *hir.Package) {
-			input.Modules[0].Functions[0].Body.Tail = &hir.Expression{Kind: "match"}
+			input.Modules[0].Functions[0].Body.Tail = &hir.Expression{Kind: hir.ExpressionMatch}
 		}, contains: "contains dynamic control flow; dynamic control flow is not admitted"},
 		{name: "shared fresh symbol", mutateHIR: func(input *hir.Package) { input.Modules[0].Functions[1].Symbol = input.Modules[0].Functions[0].Symbol }, contains: "share fresh symbol"},
 	}

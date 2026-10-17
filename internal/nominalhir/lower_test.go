@@ -13,14 +13,14 @@ import (
 )
 
 func literal(t hir.Type, value string) hir.Expression {
-	return hir.Expression{Kind: "literal", Type: t, Value: value}
+	return hir.Expression{Kind: hir.ExpressionLiteral, Type: t, Value: value}
 }
 func path(t hir.Type, id hir.SymbolID) hir.Expression {
-	return hir.Expression{Kind: "path", Type: t, Symbol: id}
+	return hir.Expression{Kind: hir.ExpressionPath, Type: t, Symbol: id}
 }
 func pointer(e hir.Expression) *hir.Expression { return &e }
 func call(t hir.Type, id hir.SymbolID, args ...hir.Expression) hir.Expression {
-	return hir.Expression{Kind: "call", Type: t, Symbol: id, Children: append([]hir.Expression{{Kind: "path", Symbol: id}}, args...)}
+	return hir.Expression{Kind: hir.ExpressionCall, Type: t, Symbol: id, Children: append([]hir.Expression{{Kind: hir.ExpressionPath, Symbol: id}}, args...)}
 }
 
 func fixture(nominal bool) Program {
@@ -32,24 +32,24 @@ func fixture(nominal bool) Program {
 	}
 	wrap := func(e hir.Expression) hir.Expression {
 		if nominal {
-			return hir.Expression{Kind: "nominal-wrap", Type: typ, Children: []hir.Expression{e}}
+			return hir.Expression{Kind: hir.ExpressionNominalWrap, Type: typ, Children: []hir.Expression{e}}
 		}
 		return e
 	}
 	unwrap := func(e hir.Expression) hir.Expression {
 		if nominal {
-			return hir.Expression{Kind: "nominal-unwrap", Type: hir.TypeUSize, Children: []hir.Expression{e}}
+			return hir.Expression{Kind: hir.ExpressionNominalUnwrap, Type: hir.TypeUSize, Children: []hir.Expression{e}}
 		}
 		return e
 	}
 	identity := hir.Function{Symbol: 1, Name: "identity", ResultType: typ, Parameters: []hir.Parameter{{Symbol: 10, Name: "index", Type: typ}}, Body: hir.Block{Tail: pointer(path(typ, 10))}}
 	next := hir.Function{Symbol: 2, Name: "next", ResultType: hir.TypeUSize, Body: hir.Block{Tail: pointer(literal(hir.TypeUSize, "7"))}}
 	main := hir.Function{Symbol: 3, Name: "main", ResultType: hir.TypeI32, Locals: []hir.Local{{Symbol: 20, Name: "index", Type: typ, Mutable: true}}, Body: hir.Block{Statements: []hir.Statement{
-		{Kind: "binding", Binding: 20, Expression: pointer(wrap(call(hir.TypeUSize, 2)))},
-		{Kind: "assignment", Operator: "=", Target: pointer(path(typ, 20)), Expression: pointer(call(typ, 1, path(typ, 20)))},
-		{Kind: "discard", Expression: pointer(hir.Expression{Kind: "binary", Type: hir.TypeBool, Operator: "==", Children: []hir.Expression{path(typ, 20), wrap(literal(hir.TypeUSize, "7"))}})},
-		{Kind: "discard", Expression: pointer(unwrap(path(typ, 20)))},
-		{Kind: "return", Expression: pointer(literal(hir.TypeI32, "0"))},
+		{Kind: hir.StatementBinding, Binding: 20, Expression: pointer(wrap(call(hir.TypeUSize, 2)))},
+		{Kind: hir.StatementAssignment, Operator: "=", Target: pointer(path(typ, 20)), Expression: pointer(call(typ, 1, path(typ, 20)))},
+		{Kind: hir.StatementDiscard, Expression: pointer(hir.Expression{Kind: hir.ExpressionBinary, Type: hir.TypeBool, Operator: "==", Children: []hir.Expression{path(typ, 20), wrap(literal(hir.TypeUSize, "7"))}})},
+		{Kind: hir.StatementDiscard, Expression: pointer(unwrap(path(typ, 20)))},
+		{Kind: hir.StatementReturn, Expression: pointer(literal(hir.TypeI32, "0"))},
 	}}}
 	return Program{Declarations: []Declaration{index, offset}, Modules: []hir.Module{{Path: "scanner", Functions: []hir.Function{identity, next, main}}}}
 }
@@ -157,7 +157,7 @@ func TestLowerNominalRejectsBeforeErasure(t *testing.T) {
 		},
 		"aggregate":           func(p *Program) { p.Modules[0].Structs = []hir.Struct{{Name: "No"}} },
 		"foreign":             func(p *Program) { p.Modules[0].ForeignFunctions = []hir.ForeignFunction{{Name: "No"}} },
-		"unsupported control": func(p *Program) { p.Modules[0].Functions[2].Body.Statements[0].Kind = "while" },
+		"unsupported control": func(p *Program) { p.Modules[0].Functions[2].Body.Statements[0].Kind = hir.StatementWhile },
 		"use before initialization": func(p *Program) {
 			p.Modules[0].Functions[2].Body.Statements[0].Expression = pointer(path(p.Declarations[0].Type(), 20))
 		},
@@ -202,7 +202,7 @@ func TestNominalIdentityAndDiagnostic(t *testing.T) {
 func TestNominalExtractionPreservesCheckedArithmetic(t *testing.T) {
 	p := fixture(true)
 	value := p.Modules[0].Functions[2].Body.Statements[0].Expression
-	value.Children[0] = hir.Expression{Kind: "binary", Type: hir.TypeUSize, Operator: "+", Children: []hir.Expression{
+	value.Children[0] = hir.Expression{Kind: hir.ExpressionBinary, Type: hir.TypeUSize, Operator: "+", Children: []hir.Expression{
 		literal(hir.TypeUSize, "18446744073709551615"), literal(hir.TypeUSize, "1"),
 	}}
 	program, err := Lower(p)

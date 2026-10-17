@@ -24,7 +24,7 @@ func TestAnalyzeExpandsSourceLocationWithExactOriginalByteGeometry(t *testing.T)
 		t.Fatalf("HIR = %+v", result.HIR)
 	}
 	returned := soleReturnExpression(t, result.HIR.Modules[0].Functions[0])
-	if returned.Kind != "literal" || returned.Type != hir.SharedBorrow(hir.TypeStr) || returned.Value != fmt.Sprintf("%q", want) ||
+	if returned.Kind != hir.ExpressionLiteral || returned.Type != hir.SharedBorrow(hir.TypeStr) || returned.Value != fmt.Sprintf("%q", want) ||
 		returned.Cooked != hex.EncodeToString([]byte(want)) || returned.Symbol != hir.NoSymbol || returned.Span.StartByte != start {
 		t.Fatalf("source location HIR = %+v, want %q", returned, want)
 	}

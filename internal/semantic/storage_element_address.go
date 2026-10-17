@@ -34,6 +34,6 @@ func (c *typeChecker) checkStorageElementAddress(expression *ast.Expression, res
 		scope := c.unsafeScopes[len(c.unsafeScopes)-1]
 		result.UnsafeScope = &scope
 	}
-	result.Kind, result.Value, result.TargetType = "storage-element-address", "", typ
+	result.Kind, result.Value, result.TargetType = hir.ExpressionStorageElementAddress, "", typ
 	return hir.RawPointer(hir.TypeVoid, true)
 }

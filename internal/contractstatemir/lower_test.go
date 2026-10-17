@@ -161,7 +161,7 @@ func TestLowerHIRTransactionsRejectsBoundaryDrift(t *testing.T) {
 			input.Modules[0].Functions[0].Unsafe = true
 		}, contains: "unsafe owners are not admitted"},
 		{name: "unsafe owner body", mutate: func(input *hir.Package) {
-			input.Modules[0].Functions[0].Body.Tail = &hir.Expression{Kind: "unsafe"}
+			input.Modules[0].Functions[0].Body.Tail = &hir.Expression{Kind: hir.ExpressionUnsafe}
 		}, contains: "unsafe code is not admitted"},
 		{name: "raw-pointer owner local", mutate: func(input *hir.Package) {
 			input.Modules[0].Functions[0].Locals = []hir.Local{{Type: hir.RawPointer(hir.TypeU8, false)}}
@@ -179,13 +179,13 @@ func TestLowerHIRTransactionsRejectsBoundaryDrift(t *testing.T) {
 			input.Modules[0].Functions[0].DropGlueFor = hir.Type("ledger::Handle")
 		}, contains: "drop-glue owners are not admitted"},
 		{name: "owner checked arithmetic", mutate: func(input *hir.Package) {
-			input.Modules[0].Functions[0].Body.Tail = &hir.Expression{Kind: "binary", Operator: "+"}
+			input.Modules[0].Functions[0].Body.Tail = &hir.Expression{Kind: hir.ExpressionBinary, Operator: "+"}
 		}, contains: "potentially trapping operations are not admitted"},
 		{name: "nested owner bounds access", mutate: func(input *hir.Package) {
-			input.Modules[0].Functions[0].Body.Tail = &hir.Expression{Kind: "group", Children: []hir.Expression{{Kind: "view-slice"}}}
+			input.Modules[0].Functions[0].Body.Tail = &hir.Expression{Kind: hir.ExpressionGroup, Children: []hir.Expression{{Kind: hir.ExpressionViewSlice}}}
 		}, contains: "potentially trapping operations are not admitted"},
 		{name: "owner checked compound assignment", mutate: func(input *hir.Package) {
-			input.Modules[0].Functions[0].Body.Statements = []hir.Statement{{Kind: "assignment", Operator: "+="}}
+			input.Modules[0].Functions[0].Body.Statements = []hir.Statement{{Kind: hir.StatementAssignment, Operator: "+="}}
 		}, contains: "potentially trapping operations are not admitted"},
 		{name: "owner owned resource parameter", mutate: func(input *hir.Package) {
 			resourceType := hir.Type("ledger::Handle")
@@ -193,35 +193,35 @@ func TestLowerHIRTransactionsRejectsBoundaryDrift(t *testing.T) {
 			input.Modules[0].Functions[0].Parameters = []hir.Parameter{{Type: resourceType}}
 		}, contains: "owned resource values are not admitted"},
 		{name: "nested owner lexical region", mutate: func(input *hir.Package) {
-			input.Modules[0].Functions[0].Body.Tail = &hir.Expression{Kind: "group", Children: []hir.Expression{{Kind: "region"}}}
+			input.Modules[0].Functions[0].Body.Tail = &hir.Expression{Kind: hir.ExpressionGroup, Children: []hir.Expression{{Kind: hir.ExpressionRegion}}}
 		}, contains: "lexical regions are not admitted"},
 		{name: "future owner statement", mutate: func(input *hir.Package) {
-			input.Modules[0].Functions[0].Body.Statements = []hir.Statement{{Kind: "future-statement"}}
-		}, contains: "statement kind \"future-statement\" is not admitted"},
+			input.Modules[0].Functions[0].Body.Statements = []hir.Statement{{Kind: hir.StatementKind(255)}}
+		}, contains: "statement kind \"StatementKind(255)\" is not admitted"},
 		{name: "nested future owner expression", mutate: func(input *hir.Package) {
-			input.Modules[0].Functions[0].Body.Tail = &hir.Expression{Kind: "group", Children: []hir.Expression{{Kind: "future-expression"}}}
-		}, contains: "expression kind \"future-expression\" is not admitted"},
+			input.Modules[0].Functions[0].Body.Tail = &hir.Expression{Kind: hir.ExpressionGroup, Children: []hir.Expression{{Kind: hir.ExpressionKind(255)}}}
+		}, contains: "expression kind \"ExpressionKind(255)\" is not admitted"},
 		{name: "owner expression-local effects", mutate: func(input *hir.Package) {
-			input.Modules[0].Functions[0].Body.Tail = &hir.Expression{Kind: "literal", Effects: []hir.Effect{hir.EffectStorageRead}}
+			input.Modules[0].Functions[0].Body.Tail = &hir.Expression{Kind: hir.ExpressionLiteral, Effects: []hir.Effect{hir.EffectStorageRead}}
 		}, contains: "carries expression-local effects"},
 		{name: "owner call", mutate: func(input *hir.Package) {
-			input.Modules[0].Functions[0].Body.Tail = &hir.Expression{Kind: "call"}
+			input.Modules[0].Functions[0].Body.Tail = &hir.Expression{Kind: hir.ExpressionCall}
 		}, contains: "contains a call; calls are not admitted"},
 		{name: "nested owner call", mutate: func(input *hir.Package) {
 			input.Modules[0].Functions[0].Body.Statements = []hir.Statement{{For: &hir.ForLoop{
-				Body: hir.Block{Tail: &hir.Expression{Kind: "group", Children: []hir.Expression{{Kind: "call"}}}},
+				Body: hir.Block{Tail: &hir.Expression{Kind: hir.ExpressionGroup, Children: []hir.Expression{{Kind: hir.ExpressionCall}}}},
 			}}}
 		}, contains: "contains a call; calls are not admitted"},
 		{name: "owner conditional", mutate: func(input *hir.Package) {
-			input.Modules[0].Functions[0].Body.Tail = &hir.Expression{Kind: "if"}
+			input.Modules[0].Functions[0].Body.Tail = &hir.Expression{Kind: hir.ExpressionIf}
 		}, contains: "contains dynamic control flow; dynamic control flow is not admitted"},
 		{name: "nested owner short circuit", mutate: func(input *hir.Package) {
-			input.Modules[0].Functions[0].Body.Tail = &hir.Expression{Kind: "group", Children: []hir.Expression{{
-				Kind: "binary", Operator: "&&",
+			input.Modules[0].Functions[0].Body.Tail = &hir.Expression{Kind: hir.ExpressionGroup, Children: []hir.Expression{{
+				Kind: hir.ExpressionBinary, Operator: "&&",
 			}}}
 		}, contains: "contains dynamic control flow; dynamic control flow is not admitted"},
 		{name: "owner assertion", mutate: func(input *hir.Package) {
-			input.Modules[0].Functions[0].Body.Statements = []hir.Statement{{Kind: "assert"}}
+			input.Modules[0].Functions[0].Body.Statements = []hir.Statement{{Kind: hir.StatementAssert}}
 		}, contains: "contains dynamic control flow; dynamic control flow is not admitted"},
 		{name: "noncanonical effects", mutate: func(input *hir.Package) {
 			input.Modules[0].Functions[0].Effects = []hir.Effect{hir.EffectStorageWrite, hir.EffectStorageRead}
@@ -255,7 +255,7 @@ func TestLowerHIRTransactionsPreservesSafeBorrowAndResourceNamespaces(t *testing
 	}
 	input.Modules[0].Functions[0].Locals = []hir.Local{{Type: hir.MutableBorrow(hir.TypeU32)}}
 	input.Modules[0].Functions[0].OwnerType = resourceType
-	input.Modules[0].Functions[0].Body.Tail = &hir.Expression{Kind: "binary", Operator: "&", Children: []hir.Expression{{Kind: "literal"}, {Kind: "literal"}}}
+	input.Modules[0].Functions[0].Body.Tail = &hir.Expression{Kind: hir.ExpressionBinary, Operator: "&", Children: []hir.Expression{{Kind: hir.ExpressionLiteral}, {Kind: hir.ExpressionLiteral}}}
 	if _, err := LowerHIRTransactions(input); err != nil {
 		t.Fatalf("safe static-associated owner types rejected: %v", err)
 	}

@@ -569,7 +569,7 @@ type Block struct {
 
 // Statement is one typed source statement.
 type Statement struct {
-	Kind       string
+	Kind       StatementKind
 	Span       Span
 	Operator   string
 	Binding    SymbolID
@@ -590,7 +590,7 @@ type ForLoop struct {
 
 // Expression is one typed HIR expression.
 type Expression struct {
-	Kind        string
+	Kind        ExpressionKind
 	Type        Type
 	Span        Span
 	Value       string

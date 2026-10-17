@@ -12,10 +12,10 @@ func (l *functionLowerer) lowerDerefStore(statement hir.Statement) error {
 		return unsupported
 	}
 	reference := &target.Children[0]
-	for reference.Kind == "group" && len(reference.Children) == 1 {
+	for reference.Kind == hir.ExpressionGroup && len(reference.Children) == 1 {
 		reference = &reference.Children[0]
 	}
-	if reference.Kind != "path" || reference.Type != hir.MutableBorrow(target.Type) {
+	if reference.Kind != hir.ExpressionPath || reference.Type != hir.MutableBorrow(target.Type) {
 		return unsupported
 	}
 	receiver, err := l.lowerExpression(reference)
@@ -47,7 +47,7 @@ func (l *functionLowerer) lowerDerefStore(statement hir.Statement) error {
 	}
 	if compound {
 		binary, _ := hir.CompoundAssignmentBinary(operator)
-		combined := &hir.Expression{Kind: "binary", Type: target.Type, Span: statement.Span,
+		combined := &hir.Expression{Kind: hir.ExpressionBinary, Type: target.Type, Span: statement.Span,
 			Operator: binary, Children: []hir.Expression{*target, *statement.Expression}}
 		value, err = l.lowerBinaryOperands(combined, prior, value)
 		if err != nil {

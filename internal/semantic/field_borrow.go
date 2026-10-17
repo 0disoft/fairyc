@@ -33,47 +33,47 @@ func (c *typeChecker) sharedFieldBorrow(source *ast.Expression, field hir.Expres
 // Shorten the named root before projecting shared addresses. Rebuild the HIR
 // children so the original mutable place and its type facts stay unchanged.
 func shareFieldRoot(field hir.Expression) hir.Expression {
-	if field.Kind == "path" {
+	if field.Kind == hir.ExpressionPath {
 		element, mutable, borrowed := hir.BorrowElement(field.Type)
 		if borrowed && mutable {
-			return hir.Expression{Kind: string(ast.PrivateSharedReborrow), Type: hir.SharedBorrow(element),
+			return hir.Expression{Kind: hir.ExpressionSharedReborrow, Type: hir.SharedBorrow(element),
 				Span: field.Span, Symbol: hir.NoSymbol, Children: []hir.Expression{field}}
 		}
-	} else if (field.Kind == "field-expression" || field.Kind == "group") && len(field.Children) == 1 {
+	} else if (field.Kind == hir.ExpressionFieldExpression || field.Kind == hir.ExpressionGroup) && len(field.Children) == 1 {
 		field.Children = []hir.Expression{shareFieldRoot(field.Children[0])}
 	}
 	return field
 }
 
 func projectFieldBorrow(field hir.Expression, mutable bool) (hir.Expression, bool) {
-	if field.Kind == "group" && len(field.Children) == 1 {
+	if field.Kind == hir.ExpressionGroup && len(field.Children) == 1 {
 		return projectFieldBorrow(field.Children[0], mutable)
 	}
-	if field.Kind != "field-expression" || len(field.Children) != 1 || field.Type == hir.TypeInvalid {
+	if field.Kind != hir.ExpressionFieldExpression || len(field.Children) != 1 || field.Type == hir.TypeInvalid {
 		return hir.Expression{}, false
 	}
 	if element, length, array := hir.FixedArrayParts(field.Type); array && !hir.ExecutableFixedArrayShape(element, length) {
 		return hir.Expression{}, false
 	}
 	owner := field.Children[0]
-	for owner.Kind == "group" && len(owner.Children) == 1 {
+	for owner.Kind == hir.ExpressionGroup && len(owner.Children) == 1 {
 		owner = owner.Children[0]
 	}
 	if _, ownerMutable, borrowed := hir.BorrowElement(owner.Type); borrowed && ownerMutable != mutable {
 		return hir.Expression{}, false
 	} else if !borrowed {
-		if owner.Kind == "view-index" {
+		if owner.Kind == hir.ExpressionViewIndex {
 			var ok bool
 			owner, ok = indexedElementBorrow(owner, mutable)
 			if !ok {
 				return hir.Expression{}, false
 			}
-		} else if owner.Kind == "path" && owner.Symbol != hir.NoSymbol {
+		} else if owner.Kind == hir.ExpressionPath && owner.Symbol != hir.NoSymbol {
 			borrowType, operator := hir.SharedBorrow(owner.Type), "&"
 			if mutable {
 				borrowType, operator = hir.MutableBorrow(owner.Type), "&mut"
 			}
-			owner = hir.Expression{Kind: "prefix", Type: borrowType,
+			owner = hir.Expression{Kind: hir.ExpressionPrefix, Type: borrowType,
 				Span: owner.Span, Symbol: hir.NoSymbol, Operator: operator, Children: []hir.Expression{owner}}
 		} else {
 			var ok bool
@@ -87,7 +87,7 @@ func projectFieldBorrow(field hir.Expression, mutable bool) (hir.Expression, boo
 	if mutable {
 		borrowType = hir.MutableBorrow(field.Type)
 	}
-	return hir.Expression{Kind: "field-borrow", Type: borrowType,
+	return hir.Expression{Kind: hir.ExpressionFieldBorrow, Type: borrowType,
 		Span: field.Span, Symbol: hir.NoSymbol, Operator: field.Operator, Children: []hir.Expression{owner}}, true
 }
 
@@ -140,19 +140,19 @@ func (c *typeChecker) mutableFieldBorrow(source *ast.Expression, child *hir.Expr
 // Never borrow a copied array-index value. Rebuild children without mutating
 // the ordinary field-read HIR; every projected reference retains one root loan.
 func (c *typeChecker) arrayFieldBorrow(source *ast.Expression, field hir.Expression, mutable bool) (hir.Expression, bool) {
-	for field.Kind == "group" && len(field.Children) == 1 {
+	for field.Kind == hir.ExpressionGroup && len(field.Children) == 1 {
 		field = field.Children[0]
 	}
-	if field.Kind != "field-expression" || len(field.Children) != 1 {
+	if field.Kind != hir.ExpressionFieldExpression || len(field.Children) != 1 {
 		return hir.Expression{}, false
 	}
 	owner := field.Children[0]
-	for owner.Kind == "group" && len(owner.Children) == 1 {
+	for owner.Kind == hir.ExpressionGroup && len(owner.Children) == 1 {
 		owner = owner.Children[0]
 	}
 	var borrowed hir.Expression
 	var ok bool
-	if (owner.Kind == "array-index" || owner.Kind == "view-index") && c.analyzer.plainViewStruct(owner.Type) {
+	if (owner.Kind == hir.ExpressionArrayIndex || owner.Kind == hir.ExpressionViewIndex) && c.analyzer.plainViewStruct(owner.Type) {
 		borrowed, ok = c.indexedArrayBorrow(source, &owner, mutable)
 	} else {
 		borrowed, ok = c.arrayFieldBorrow(source, owner, mutable)

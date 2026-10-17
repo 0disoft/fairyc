@@ -67,7 +67,7 @@ func (c *typeChecker) checkBorrowedViewConstructor(
 	path string,
 	constructor borrowedViewConstructor,
 ) hir.Type {
-	result.Kind = "borrowed-view-from-raw-parts"
+	result.Kind = hir.ExpressionBorrowedViewFromRawParts
 	result.Operator = path
 
 	arguments := expression.Children[1:]

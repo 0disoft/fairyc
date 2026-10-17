@@ -59,7 +59,7 @@ func (a *analyzer) allocErrorType() (hir.Type, bool) {
 }
 
 func (c *typeChecker) checkRegion(expression *ast.Expression, expectedTail hir.Type) (*hir.Expression, bool) {
-	result := &hir.Expression{Kind: string(syntax.KindRegion), Type: hir.TypeVoid, Span: span(c.module.file.Path, expression.Span), Symbol: hir.NoSymbol, Operator: expression.Text}
+	result := &hir.Expression{Kind: hir.ExpressionRegion, Type: hir.TypeVoid, Span: span(c.module.file.Path, expression.Span), Symbol: hir.NoSymbol, Operator: expression.Text}
 	if len(expression.Children) != 2 {
 		return result, false
 	}

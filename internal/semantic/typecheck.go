@@ -380,7 +380,7 @@ func (c *typeChecker) checkBlock(block *ast.Block, expectedTail hir.Type) (hir.B
 	hasReturn := false
 	for index := range block.Statements {
 		statement := &block.Statements[index]
-		hirStatement := hir.Statement{Kind: string(statement.Kind), Span: span(c.module.file.Path, statement.Span), Binding: hir.NoSymbol}
+		hirStatement := hir.Statement{Kind: statementKind(statement.Kind), Span: span(c.module.file.Path, statement.Span), Binding: hir.NoSymbol}
 		switch {
 		case statement.Binding != nil:
 			binding := statement.Binding
@@ -453,7 +453,7 @@ func (c *typeChecker) checkBlock(block *ast.Block, expectedTail hir.Type) (hir.B
 			if statement.Expression != nil {
 				primary := span(c.module.file.Path, statement.Expression.Span)
 				expectedSpan := span(c.module.file.Path, statement.Target.Span)
-				if target != nil && target.Kind == "field-expression" &&
+				if target != nil && target.Kind == hir.ExpressionFieldExpression &&
 					(c.analyzer.structTypes[targetType] != nil || c.analyzer.structTypes[actual] != nil) {
 					c.requireDetailedType(primary, actual, targetType, expectedSpan)
 				} else {
@@ -461,7 +461,7 @@ func (c *typeChecker) checkBlock(block *ast.Block, expectedTail hir.Type) (hir.B
 				}
 			}
 			if hirStatement.Operator != "=" {
-				validPlace := target != nil && (target.Kind == "path" || target.Kind == "array-index" || target.Kind == "view-index" || target.Kind == "field-expression" || derefAssignmentTarget(statement.Target))
+				validPlace := target != nil && (target.Kind == hir.ExpressionPath || target.Kind == hir.ExpressionArrayIndex || target.Kind == hir.ExpressionViewIndex || target.Kind == hir.ExpressionFieldExpression || derefAssignmentTarget(statement.Target))
 				if !validPlace || !hir.CompoundAssignmentType(hirStatement.Operator, targetType) {
 					c.analyzer.addUnsupported(c.module.file.Path, statement.Span, "compound assignment "+hirStatement.Operator+" on "+string(targetType))
 				}
@@ -501,7 +501,7 @@ func (c *typeChecker) checkBlock(block *ast.Block, expectedTail hir.Type) (hir.B
 				c.analyzer.addUnsupported(c.module.file.Path, issueSpan, reason)
 			} else {
 				hirStatement.Expression, _ = c.checkExpression(statement.Expression, hir.TypeVoid)
-				hirStatement.Kind = string(syntax.KindExprStmt)
+				hirStatement.Kind = hir.StatementExpressionStatement
 			}
 		case statement.Kind == syntax.KindBreak || statement.Kind == syntax.KindContinue:
 			if c.loopDepth == 0 {
@@ -524,7 +524,7 @@ func (c *typeChecker) checkBlock(block *ast.Block, expectedTail hir.Type) (hir.B
 }
 
 func validDeferredCall(source *ast.Expression, checked *hir.Expression, actual hir.Type) bool {
-	if source == nil || source.Kind != syntax.KindCall || checked == nil || checked.Kind != string(syntax.KindCall) ||
+	if source == nil || source.Kind != syntax.KindCall || checked == nil || checked.Kind != hir.ExpressionCall ||
 		actual != hir.TypeVoid || checked.Symbol == hir.NoSymbol || checked.ForeignABI != "" || len(checked.Children) == 0 {
 		return false
 	}
@@ -589,7 +589,7 @@ func validForInitializer(source *ast.Statement, checked *hir.Statement) bool {
 		return false
 	}
 	if source.Binding != nil {
-		return checked.Kind == string(syntax.KindBinding) && checked.Expression != nil &&
+		return checked.Kind == hir.StatementBinding && checked.Expression != nil &&
 			forHeaderScalar(checked.Expression.Type) && plainForHeaderExpression(source.Binding.Expression)
 	}
 	return validForScalarAssignment(source, checked)
@@ -602,7 +602,7 @@ func validForPost(source *ast.Statement, checked *hir.Statement) bool {
 func validForScalarAssignment(source *ast.Statement, checked *hir.Statement) bool {
 	return source != nil && checked != nil && source.Kind == syntax.KindAssignment &&
 		source.Target != nil && source.Target.Kind == syntax.KindPath &&
-		checked.Target != nil && checked.Target.Kind == string(syntax.KindPath) &&
+		checked.Target != nil && checked.Target.Kind == hir.ExpressionPath &&
 		checked.Expression != nil && forHeaderScalar(checked.Target.Type) &&
 		checked.Expression.Type == checked.Target.Type && plainForHeaderExpression(source.Expression)
 }
@@ -640,7 +640,7 @@ func (c *typeChecker) checkExpression(expression *ast.Expression, expected hir.T
 		return nil, hir.TypeVoid
 	}
 	result := &hir.Expression{
-		Kind:   string(expression.Kind),
+		Kind:   expressionKind(expression.Kind),
 		Span:   span(c.module.file.Path, expression.Span),
 		Value:  expression.Text,
 		Cooked: expression.Cooked,
@@ -682,7 +682,7 @@ func (c *typeChecker) checkExpression(expression *ast.Expression, expected hir.T
 			actual = hir.TypeInvalid
 		} else if symbol := c.analyzer.resolved[expression]; symbol != nil {
 			if value, constant := c.analyzer.constantValues[symbol]; constant {
-				result.Kind = string(syntax.KindLiteral)
+				result.Kind = hir.ExpressionLiteral
 				result.Value = value.canonical()
 				result.Cooked = ""
 				actual = value.typ
@@ -726,7 +726,7 @@ func (c *typeChecker) checkExpression(expression *ast.Expression, expected hir.T
 		actual = c.checkIf(expression, result, expected)
 	case syntax.KindSwitch:
 		actual = c.checkMatch(expression, result, expected)
-		result.Kind = string(syntax.KindMatch)
+		result.Kind = hir.ExpressionMatch
 	case syntax.KindWhile:
 		actual = c.checkWhile(expression, result)
 	case syntax.KindRecord:
@@ -816,7 +816,7 @@ func (c *typeChecker) checkArray(expression *ast.Expression, result *hir.Express
 		c.analyzer.addUnsupported(c.module.file.Path, expression.Span, fmt.Sprintf("fixed-array literal with %d elements", length))
 		return hir.TypeInvalid
 	}
-	result.Kind = "array"
+	result.Kind = hir.ExpressionArray
 	result.Operator = "list"
 	return hir.FixedArray(elementType, length)
 }
@@ -847,15 +847,15 @@ func (c *typeChecker) checkIndex(expression *ast.Expression, result *hir.Express
 	}
 	if fixedArray {
 		if view, ok := c.arrayFieldView(expression.Children[0], *receiver, false); ok {
-			result.Kind, result.Operator = "view-index", "[]"
+			result.Kind, result.Operator = hir.ExpressionViewIndex, "[]"
 			result.Children[0] = view
 			return arrayElement
 		}
-		result.Kind = "array-index"
+		result.Kind = hir.ExpressionArrayIndex
 		result.Operator = "[]"
 		return arrayElement
 	}
-	result.Kind = "view-index"
+	result.Kind = hir.ExpressionViewIndex
 	result.Operator = "[]"
 	return viewElement
 }
@@ -865,15 +865,15 @@ func (c *typeChecker) mutableAssignmentTarget(source *ast.Expression, target *hi
 		return false
 	}
 	switch target.Kind {
-	case "path":
+	case hir.ExpressionPath:
 		resolved := c.analyzer.resolved[source]
 		return resolved != nil && resolved.mutable
-	case "array-index":
+	case hir.ExpressionArrayIndex:
 		if len(source.Children) != 2 || len(target.Children) != 2 {
 			return false
 		}
 		if view, ok := c.arrayFieldView(source.Children[0], target.Children[0], true); ok {
-			target.Kind = "view-index"
+			target.Kind = hir.ExpressionViewIndex
 			target.Children[0] = view
 			return true
 		}
@@ -881,7 +881,7 @@ func (c *typeChecker) mutableAssignmentTarget(source *ast.Expression, target *hi
 		resolved := c.analyzer.resolved[receiver]
 		_, _, fixedArray := hir.FixedArrayParts(target.Children[0].Type)
 		return fixedArray && resolved != nil && resolved.mutable
-	case "view-index":
+	case hir.ExpressionViewIndex:
 		if len(source.Children) == 2 && arrayFieldRoot(source.Children[0]) != nil {
 			field, _ := c.checkExpression(source.Children[0], hir.TypeInvalid)
 			view, ok := c.arrayFieldView(source.Children[0], *field, true)
@@ -892,29 +892,29 @@ func (c *typeChecker) mutableAssignmentTarget(source *ast.Expression, target *hi
 			return true
 		}
 		return len(target.Children) == 2 && hir.MutableIndexedView(target.Children[0].Type)
-	case "prefix":
+	case hir.ExpressionPrefix:
 		if !derefAssignmentTarget(source) || target.Operator != "*" || len(target.Children) != 1 ||
 			(!hir.FixedArrayScalarElement(target.Type) && !c.analyzer.plainViewStruct(target.Type)) || !directDerefBorrowPath(source.Children[0]) {
 			return false
 		}
 		element, mutable, borrowed := hir.BorrowElement(target.Children[0].Type)
 		return borrowed && mutable && element == target.Type
-	case "field-expression":
+	case hir.ExpressionFieldExpression:
 		if len(source.Children) != 1 || len(target.Children) != 1 {
 			return false
 		}
 		root := target
 		depth := 0
-		for root.Kind == "field-expression" || root.Kind == "group" {
+		for root.Kind == hir.ExpressionFieldExpression || root.Kind == hir.ExpressionGroup {
 			if len(root.Children) != 1 {
 				return false
 			}
-			if root.Kind == "field-expression" {
+			if root.Kind == hir.ExpressionFieldExpression {
 				depth++
 			}
 			root = &root.Children[0]
 		}
-		if root.Kind == "view-index" {
+		if root.Kind == hir.ExpressionViewIndex {
 			if index := indexedPlace(source); index != nil && arrayFieldRoot(index.Children[0]) != nil {
 				_, stored := c.indexedArrayBorrow(index, root, true)
 				return stored && c.analyzer.plainViewStruct(root.Type) &&
@@ -922,12 +922,12 @@ func (c *typeChecker) mutableAssignmentTarget(source *ast.Expression, target *hi
 			}
 			return c.indexedStructPlace(source) && hir.MutableIndexedView(root.Children[0].Type) && (hir.FixedArrayScalarElement(target.Type) || c.analyzer.plainViewStruct(target.Type))
 		}
-		if root.Kind == "array-index" {
+		if root.Kind == hir.ExpressionArrayIndex {
 			_, stored := c.indexedArrayBorrow(borrowPlaceRoot(source), root, true)
 			return stored && c.analyzer.plainViewStruct(root.Type) &&
 				(hir.FixedArrayScalarElement(target.Type) || c.analyzer.plainViewStruct(target.Type))
 		}
-		if root.Kind != "path" {
+		if root.Kind != hir.ExpressionPath {
 			return false
 		}
 		rootType := root.Type
@@ -993,7 +993,7 @@ func (c *typeChecker) checkSliceRange(expression *ast.Expression, result *hir.Ex
 	if startType != hir.TypeUSize || endType != hir.TypeUSize {
 		return hir.TypeInvalid
 	}
-	result.Kind = "view-slice"
+	result.Kind = hir.ExpressionViewSlice
 	result.Operator = ".."
 	return receiverType
 }
@@ -1005,7 +1005,7 @@ func (c *typeChecker) checkSliceBound(expression *ast.Expression, position strin
 			return nil, hir.TypeInvalid
 		}
 		return &hir.Expression{
-			Kind: "omitted-range-bound", Type: hir.TypeUSize, Span: span(c.module.file.Path, expression.Span),
+			Kind: hir.ExpressionOmittedRangeBound, Type: hir.TypeUSize, Span: span(c.module.file.Path, expression.Span),
 			Operator: position, Symbol: hir.NoSymbol,
 		}, hir.TypeUSize
 	}
@@ -1023,15 +1023,15 @@ func (c *typeChecker) checkCast(expression *ast.Expression, result *hir.Expressi
 	child, sourceType := c.checkExpression(expression.Children[0], hir.TypeInvalid)
 	result.Children = appendExpression(result.Children, child)
 	if hir.ValuePreservingIntegerCast(sourceType, targetType) {
-		result.Kind = "scalar-cast"
+		result.Kind = hir.ExpressionScalarCast
 		return targetType
 	}
 	sourceElement, sourceMutable, sourceBorrow := hir.BorrowElement(sourceType)
 	targetElement, targetMutable, targetPointer := hir.RawPointerElement(targetType)
 	sameElement := sourceElement == targetElement && (sourceMutable || !targetMutable)
-	directLocalBorrow := child != nil && child.Kind == "prefix" && (child.Operator == "&" || child.Operator == "&mut") &&
-		len(child.Children) == 1 && child.Children[0].Kind == "path"
-	borrowValue := child != nil && child.Kind == "path"
+	directLocalBorrow := child != nil && child.Kind == hir.ExpressionPrefix && (child.Operator == "&" || child.Operator == "&mut") &&
+		len(child.Children) == 1 && child.Children[0].Kind == hir.ExpressionPath
+	borrowValue := child != nil && child.Kind == hir.ExpressionPath
 	opaqueElement := targetElement == hir.TypeVoid && (sourceMutable || !targetMutable) &&
 		(directLocalBorrow || borrowValue)
 	byteSliceBytes := sourceElement == hir.TypeByteSlice && targetElement == hir.TypeU8 && (sourceMutable || !targetMutable)
@@ -1160,7 +1160,7 @@ func (c *typeChecker) checkContextualEnumPath(expression *ast.Expression, result
 		c.analyzer.addUnsupported(c.module.file.Path, expression.Span, "enum payload variant used without record construction")
 		return hir.TypeInvalid
 	}
-	result.Kind = "enum-variant"
+	result.Kind = hir.ExpressionEnumVariant
 	result.Symbol = info.symbol.id
 	result.Variant = name
 	return expected
@@ -1181,7 +1181,7 @@ func (c *typeChecker) checkContextualEnumRecord(expression *ast.Expression, resu
 		c.analyzer.addUnsupported(c.module.file.Path, expression.Span, "unknown contextual enum variant "+name)
 		return hir.TypeInvalid
 	}
-	result.Kind = "enum-variant"
+	result.Kind = hir.ExpressionEnumVariant
 	result.Symbol = info.symbol.id
 	result.Variant = name
 	seen := make(map[string]struct{}, len(expression.Children)-1)
@@ -1214,7 +1214,7 @@ func (c *typeChecker) checkField(expression *ast.Expression, result *hir.Express
 	receiver, receiverType := c.checkExpression(expression.Children[0], hir.TypeInvalid)
 	result.Children = appendExpression(result.Children, receiver)
 	if successType, errorType, isResult := hir.ResultElements(receiverType); isResult && expression.Text == "is_ok" {
-		result.Kind = "match"
+		result.Kind = hir.ExpressionMatch
 		for _, arm := range []struct {
 			variant string
 			value   string
@@ -1228,7 +1228,7 @@ func (c *typeChecker) checkField(expression *ast.Expression, result *hir.Express
 			c.hir.Locals = append(c.hir.Locals, hir.Local{Symbol: binding, Name: "_", Type: payloadType, Span: bindingSpan})
 			result.Arms = append(result.Arms, hir.MatchArm{
 				Variant: arm.variant, Binding: binding, BindingSpan: bindingSpan,
-				Expression: hir.Expression{Kind: "literal", Type: hir.TypeBool, Span: bindingSpan, Value: arm.value, Symbol: hir.NoSymbol},
+				Expression: hir.Expression{Kind: hir.ExpressionLiteral, Type: hir.TypeBool, Span: bindingSpan, Value: arm.value, Symbol: hir.NoSymbol},
 			})
 		}
 		return hir.TypeBool
@@ -1236,11 +1236,11 @@ func (c *typeChecker) checkField(expression *ast.Expression, result *hir.Express
 	if element, _, borrow := hir.BorrowElement(receiverType); borrow && (element == hir.TypeStr || element == hir.TypeByteSlice || hir.NonByteIndexedView(receiverType)) {
 		switch expression.Text {
 		case "len":
-			result.Kind = "view-length"
+			result.Kind = hir.ExpressionViewLength
 			result.Operator = "len"
 			return hir.TypeUSize
 		case "is_empty":
-			result.Kind = "view-empty"
+			result.Kind = hir.ExpressionViewEmpty
 			result.Operator = "is_empty"
 			return hir.TypeBool
 		default:
@@ -1250,7 +1250,7 @@ func (c *typeChecker) checkField(expression *ast.Expression, result *hir.Express
 	}
 	if element, length, array := hir.FixedArrayParts(receiverType); array && hir.ExecutableFixedArrayShape(element, length) {
 		if expression.Text == "len" {
-			result.Kind = "array-length"
+			result.Kind = hir.ExpressionArrayLength
 			result.Operator = "len"
 			return hir.TypeUSize
 		}
@@ -1295,13 +1295,13 @@ func (c *typeChecker) checkPrefix(expression *ast.Expression, result *hir.Expres
 		return typ
 	}
 	if expression.Text == "-" && expected == hir.TypeI64 && directSignedMinimumLiteral(expression.Children[0], 64) {
-		result.Kind = "literal"
+		result.Kind = hir.ExpressionLiteral
 		result.Value = "-9223372036854775808"
 		result.Operator = ""
 		return hir.TypeI64
 	}
 	if expression.Text == "-" && expected != hir.TypeI64 && directI32MinimumLiteral(expression.Children[0]) {
-		result.Kind = "literal"
+		result.Kind = hir.ExpressionLiteral
 		result.Value = "-2147483648"
 		result.Operator = ""
 		return hir.TypeI32
@@ -1370,7 +1370,7 @@ func (c *typeChecker) checkPrefix(expression *ast.Expression, result *hir.Expres
 			return hir.TypeInvalid
 		}
 		if hir.ArrayViewBorrow(childType, expected, "&") {
-			result.Kind = "array-view-borrow"
+			result.Kind = hir.ExpressionArrayViewBorrow
 			return expected
 		}
 		return hir.SharedBorrow(childType)
@@ -1405,7 +1405,7 @@ func (c *typeChecker) checkPrefix(expression *ast.Expression, result *hir.Expres
 			return hir.TypeInvalid
 		}
 		if hir.ArrayViewBorrow(childType, expected, "&mut") {
-			result.Kind = "array-view-borrow"
+			result.Kind = hir.ExpressionArrayViewBorrow
 			return expected
 		}
 		return hir.MutableBorrow(childType)
@@ -1560,7 +1560,7 @@ func (c *typeChecker) checkCall(expression *ast.Expression, result *hir.Expressi
 	result.Symbol = callee.id
 	c.checkCallEffects(calleeExpression, result, callee)
 	result.Children = append(result.Children, hir.Expression{
-		Kind:   string(calleeExpression.Kind),
+		Kind:   expressionKind(calleeExpression.Kind),
 		Type:   hir.TypeInvalid,
 		Span:   span(c.module.file.Path, calleeExpression.Span),
 		Symbol: callee.id,
@@ -1665,7 +1665,7 @@ func (c *typeChecker) checkMethodCall(expression *ast.Expression, result *hir.Ex
 		}
 		calleeExpression.Children[0] = borrowExpression
 		receiver = &hir.Expression{
-			Kind: string(syntax.KindPrefix), Span: span(c.module.file.Path, receiverExpression.Span), Operator: operator,
+			Kind: hir.ExpressionPrefix, Span: span(c.module.file.Path, receiverExpression.Span), Operator: operator,
 			Type: expectedReceiver, Symbol: hir.NoSymbol, Children: []hir.Expression{*receiver},
 		}
 		receiverType = expectedReceiver
@@ -1676,7 +1676,7 @@ func (c *typeChecker) checkMethodCall(expression *ast.Expression, result *hir.Ex
 	result.Symbol = callee.id
 	c.checkCallEffects(calleeExpression, result, callee)
 	result.Children = append(result.Children, hir.Expression{
-		Kind: string(syntax.KindPath), Type: hir.TypeInvalid, Span: span(c.module.file.Path, calleeExpression.Span), Symbol: callee.id,
+		Kind: hir.ExpressionPath, Type: hir.TypeInvalid, Span: span(c.module.file.Path, calleeExpression.Span), Symbol: callee.id,
 	})
 	result.Children = appendExpression(result.Children, receiver)
 	arguments := expression.Children[1:]
@@ -1752,7 +1752,7 @@ func (c *typeChecker) checkForeignCall(expression *ast.Expression, result *hir.E
 	result.Symbol = callee.id
 	result.ForeignABI = declaration.ABI
 	result.Children = append(result.Children, hir.Expression{
-		Kind: string(syntax.KindPath), Type: hir.TypeInvalid,
+		Kind: hir.ExpressionPath, Type: hir.TypeInvalid,
 		Span: span(c.module.file.Path, expression.Children[0].Span), Symbol: callee.id,
 	})
 	if len(c.unsafeScopes) == 0 {
@@ -1796,7 +1796,7 @@ func (c *typeChecker) checkOptionPath(expression *ast.Expression, result *hir.Ex
 		c.analyzer.addUnsupported(c.module.file.Path, expression.Span, ".none without contextual Option type")
 		return hir.TypeInvalid
 	}
-	result.Kind = "option-variant"
+	result.Kind = hir.ExpressionOptionVariant
 	result.Variant = optionVariantNone
 	return expected
 }
@@ -1817,7 +1817,7 @@ func (c *typeChecker) checkOptionConstructor(expression *ast.Expression, result 
 	}
 	payload, actual := c.checkExpression(expression.Children[1], payloadType)
 	c.requireType("E1006", span(c.module.file.Path, expression.Children[1].Span), actual, payloadType, span(c.module.file.Path, expression.Span))
-	result.Kind = "option-variant"
+	result.Kind = hir.ExpressionOptionVariant
 	result.Variant = optionVariantSome
 	result.Children = appendExpression(result.Children, payload)
 	return expected
@@ -1839,7 +1839,7 @@ func (c *typeChecker) checkResultConstructor(expression *ast.Expression, result 
 	}
 	payload, actual := c.checkExpression(expression.Children[1], payloadType)
 	c.requireType("E1006", span(c.module.file.Path, expression.Children[1].Span), actual, payloadType, span(c.module.file.Path, expression.Span))
-	result.Kind = "result-variant"
+	result.Kind = hir.ExpressionResultVariant
 	result.Variant = variant
 	result.Children = appendExpression(result.Children, payload)
 	return expected

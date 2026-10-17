@@ -135,7 +135,7 @@ func observeOracleBlock(block hir.Block, symbols map[string]hirOracleSymbol) (hi
 
 func observeOracleStatement(statement hir.Statement, symbols map[string]hirOracleSymbol) (hir.Statement, error) {
 	switch statement.Kind {
-	case "binding", "assignment", "expression-statement", "while", "for", "return", "defer", "assert", "discard", "break", "continue":
+	case hir.StatementBinding, hir.StatementAssignment, hir.StatementExpressionStatement, hir.StatementWhile, hir.StatementFor, hir.StatementReturn, hir.StatementDefer, hir.StatementAssert, hir.StatementDiscard, hir.StatementBreak, hir.StatementContinue:
 	default:
 		return hir.Statement{}, fmt.Errorf("unobserved statement kind %q", statement.Kind)
 	}
@@ -184,17 +184,17 @@ func observeOracleExpression(expression *hir.Expression, symbols map[string]hirO
 		return nil, nil
 	}
 	switch expression.Kind {
-	case "literal", "path", "group", "prefix", "binary", "call", "block", "if", "while", "record", "field-expression":
+	case hir.ExpressionLiteral, hir.ExpressionPath, hir.ExpressionGroup, hir.ExpressionPrefix, hir.ExpressionBinary, hir.ExpressionCall, hir.ExpressionBlock, hir.ExpressionIf, hir.ExpressionWhile, hir.ExpressionRecord, hir.ExpressionFieldExpression:
 	default:
 		return nil, fmt.Errorf("unobserved expression kind %q", expression.Kind)
 	}
 	result := *expression
-	if expression.Symbol != hir.NoSymbol && expression.Kind != "record" {
+	if expression.Symbol != hir.NoSymbol && expression.Kind != hir.ExpressionRecord {
 		if _, found := symbols[strconv.Itoa(int(expression.Symbol))]; !found {
 			return nil, fmt.Errorf("unknown expression target %d", expression.Symbol)
 		}
 	}
-	if result.Kind == "literal" && result.Type != hir.TypeBool {
+	if result.Kind == hir.ExpressionLiteral && result.Type != hir.TypeBool {
 		value, err := oracleCanonicalInteger(result.Value)
 		if err != nil {
 			return nil, err

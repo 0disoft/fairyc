@@ -75,13 +75,13 @@ func TestTokenIndexNominalScannerPatch(t *testing.T) {
 						if !ok {
 							return v
 						}
-						if kind == "erasure-drift" && e.Kind == "literal" && e.Type == hir.TypeI32 {
+						if kind == "erasure-drift" && e.Kind == hir.ExpressionLiteral && e.Type == hir.TypeI32 {
 							e.Value = "19"
 							changes++
 						}
-						if e.Kind == "call" && len(e.Children) == 3 && e.Children[2].Type == p.Declarations[0].Type() {
+						if e.Kind == hir.ExpressionCall && len(e.Children) == 3 && e.Children[2].Type == p.Declarations[0].Type() {
 							if kind == "raw" {
-								e.Children[2] = hir.Expression{Kind: "literal", Type: hir.TypeUSize, Value: "2"}
+								e.Children[2] = hir.Expression{Kind: hir.ExpressionLiteral, Type: hir.TypeUSize, Value: "2"}
 								changes++
 							}
 							if kind == "wrong-domain" {

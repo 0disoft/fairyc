@@ -51,7 +51,7 @@ func (c *typeChecker) arrayFieldView(source *ast.Expression, field hir.Expressio
 	if !hir.ArrayViewBorrow(address.Type, view, operator) {
 		return hir.Expression{}, false
 	}
-	return hir.Expression{Kind: "array-view-borrow", Type: view, Operator: operator, Span: field.Span, Symbol: hir.NoSymbol, Children: []hir.Expression{address}}, true
+	return hir.Expression{Kind: hir.ExpressionArrayViewBorrow, Type: view, Operator: operator, Span: field.Span, Symbol: hir.NoSymbol, Children: []hir.Expression{address}}, true
 }
 
 // Reserve the complete struct owner before bounds and retain it through use.

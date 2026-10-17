@@ -30,6 +30,6 @@ func (c *typeChecker) checkStorageTake(expression *ast.Expression, result *hir.E
 		scope := c.unsafeScopes[len(c.unsafeScopes)-1]
 		result.UnsafeScope = &scope
 	}
-	result.Kind, result.Value, result.TargetType = "storage-take", "", typ
+	result.Kind, result.Value, result.TargetType = hir.ExpressionStorageTake, "", typ
 	return typ
 }

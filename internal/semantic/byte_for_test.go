@@ -20,7 +20,7 @@ func TestByteViewForLowersToVerifiedMIR(t *testing.T) {
 		t.Fatalf("prepared HIR = %+v", result.HIR)
 	}
 	statements := result.HIR.Modules[0].Functions[0].Body.Statements
-	if len(statements) != 1 || statements[0].Kind != "expression-statement" || statements[0].Expression == nil || statements[0].Expression.Block == nil {
+	if len(statements) != 1 || statements[0].Kind != hir.StatementExpressionStatement || statements[0].Expression == nil || statements[0].Expression.Block == nil {
 		t.Fatalf("prepared statement = %+v", statements)
 	}
 	prepared := statements[0].Expression.Block.Statements

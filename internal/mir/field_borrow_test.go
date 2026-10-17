@@ -10,9 +10,9 @@ import (
 func TestLowerFieldBorrowAssignmentFailsClosed(t *testing.T) {
 	_, err := Lower(hir.Package{Modules: []hir.Module{{Path: "main", Functions: []hir.Function{{
 		Symbol: 1, Name: "edit", ResultType: hir.TypeVoid,
-		Body: hir.Block{Statements: []hir.Statement{{Kind: "assignment", Operator: "=",
-			Target:     &hir.Expression{Kind: "field-expression", Type: hir.TypeI32},
-			Expression: &hir.Expression{Kind: "integer", Type: hir.TypeI32, Value: "1"},
+		Body: hir.Block{Statements: []hir.Statement{{Kind: hir.StatementAssignment, Operator: "=",
+			Target:     &hir.Expression{Kind: hir.ExpressionFieldExpression, Type: hir.TypeI32},
+			Expression: &hir.Expression{Kind: hir.ExpressionKind(251), Type: hir.TypeI32, Value: "1"},
 		}}},
 	}}}}})
 	var unsupported *Unsupported

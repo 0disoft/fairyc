@@ -249,7 +249,7 @@ func runMutation(definition manifest, mutation mutationDefinition) *Failure {
 	case "helper-cycle":
 		helper := &input.StateTransactions[1]
 		helper.Accesses = append([]hir.StateAccess{{Kind: hir.StateAccessCall, Callee: helper.Function, Cost: 1}}, helper.Accesses...)
-		input.Modules[0].Functions[1].Body.Statements = append([]hir.Statement{{Kind: "expression-statement", Expression: helperCallExpression(helper.Function, input.Modules[0].Functions[1].Effects)}}, input.Modules[0].Functions[1].Body.Statements...)
+		input.Modules[0].Functions[1].Body.Statements = append([]hir.Statement{{Kind: hir.StatementExpressionStatement, Expression: helperCallExpression(helper.Function, input.Modules[0].Functions[1].Effects)}}, input.Modules[0].Functions[1].Body.Statements...)
 	case "helper-effect":
 		input.Modules[0].Functions[0].Effects = nil
 	case "borrow-invalidate":
@@ -450,7 +450,7 @@ func fixtureCallStatements(operations []operation, blocks []blockDefinition, sym
 	appendCalls := func(values []operation) {
 		for _, operation := range values {
 			if operation.Kind == "call" {
-				result = append(result, hir.Statement{Kind: "expression-statement", Expression: helperCallExpression(symbols[operation.Callee], effects[operation.Callee])})
+				result = append(result, hir.Statement{Kind: hir.StatementExpressionStatement, Expression: helperCallExpression(symbols[operation.Callee], effects[operation.Callee])})
 			}
 		}
 	}
@@ -462,7 +462,7 @@ func fixtureCallStatements(operations []operation, blocks []blockDefinition, sym
 }
 
 func helperCallExpression(symbol hir.SymbolID, effects []hir.Effect) *hir.Expression {
-	return &hir.Expression{Kind: "call", Type: hir.TypeVoid, Symbol: symbol, Effects: effects, Children: []hir.Expression{{Kind: "path", Symbol: symbol}}}
+	return &hir.Expression{Kind: hir.ExpressionCall, Type: hir.TypeVoid, Symbol: symbol, Effects: effects, Children: []hir.Expression{{Kind: hir.ExpressionPath, Symbol: symbol}}}
 }
 
 func fixtureBodyEffects(operations []operation, blocks []blockDefinition, helpers []helperDefinition, active map[string]bool) []hir.Effect {

@@ -43,7 +43,7 @@ func (l *functionLowerer) lowerStorageBorrow(expression *hir.Expression) (Operan
 	if _, view := hir.IndexedViewElement(expression.Type); view {
 		return l.lowerStorageView(expression)
 	}
-	mutable := expression.Kind == string(OperationStorageBorrowMut)
+	mutable := expression.Kind == hir.ExpressionStorageBorrowMut
 	wantType := hir.SharedBorrow(expression.TargetType)
 	if mutable {
 		wantType = hir.MutableBorrow(expression.TargetType)

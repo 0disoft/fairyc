@@ -18,7 +18,7 @@ func (c *typeChecker) checkStorageLayout(expression *ast.Expression, result *hir
 		c.analyzer.addUnsupported(c.module.file.Path, expression.Span, "unsupported private storage query type")
 		return hir.TypeInvalid
 	}
-	result.Kind = "storage-layout"
+	result.Kind = hir.ExpressionStorageLayout
 	result.Value = ""
 	result.TargetType = typ
 	result.Operator = expression.Text

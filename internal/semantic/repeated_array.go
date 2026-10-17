@@ -5,7 +5,6 @@ import (
 
 	"github.com/0disoft/fairyc/internal/ast"
 	"github.com/0disoft/fairyc/internal/hir"
-	"github.com/0disoft/fairyc/internal/syntax"
 )
 
 func (c *typeChecker) checkRepeatedArray(expression *ast.Expression, result *hir.Expression, expected hir.Type) hir.Type {
@@ -18,7 +17,7 @@ func (c *typeChecker) checkRepeatedArray(expression *ast.Expression, result *hir
 		return hir.TypeInvalid
 	}
 	length, validCount := parsePositiveArrayLength(count.Value)
-	if count.Kind != string(syntax.KindLiteral) || !isIntegerLiteral(count.Value) || !validCount || length > hir.MaxExecutableFixedArrayElements {
+	if count.Kind != hir.ExpressionLiteral || !isIntegerLiteral(count.Value) || !validCount || length > hir.MaxExecutableFixedArrayElements {
 		c.analyzer.addUnsupported(c.module.file.Path, expression.Children[1].Span,
 			fmt.Sprintf("repeated fixed-array count outside constant integer range 1..=%d", hir.MaxExecutableFixedArrayElements))
 		return hir.TypeInvalid
@@ -39,7 +38,7 @@ func (c *typeChecker) checkRepeatedArray(expression *ast.Expression, result *hir
 		c.analyzer.addUnsupported(c.module.file.Path, expression.Span, "fixed-array element type "+string(elementType))
 		return hir.TypeInvalid
 	}
-	result.Kind = "array"
+	result.Kind = hir.ExpressionArray
 	result.Operator = "repeat"
 	result.Children = appendExpression(result.Children, initializer)
 	return hir.FixedArray(elementType, length)

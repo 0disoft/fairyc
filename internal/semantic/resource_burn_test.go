@@ -1,6 +1,7 @@
 package semantic_test
 
 import (
+	"github.com/0disoft/fairyc/internal/hir"
 	"testing"
 
 	"github.com/0disoft/fairyc/internal/semantic"
@@ -19,7 +20,7 @@ fn i32 burn_coin(Coin coin) {
 	assertCleanTypeResult(t, result)
 	if len(result.HIR.Modules) != 1 || len(result.HIR.Modules[0].Functions) != 1 ||
 		len(result.HIR.Modules[0].Functions[0].Body.Statements) != 2 ||
-		result.HIR.Modules[0].Functions[0].Body.Statements[0].Kind != "burn" {
+		result.HIR.Modules[0].Functions[0].Body.Statements[0].Kind != hir.StatementBurn {
 		t.Fatalf("burn HIR = %+v", result.HIR)
 	}
 }

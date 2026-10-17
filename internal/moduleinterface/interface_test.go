@@ -184,7 +184,7 @@ func TestExtractIgnoresPrivateItemsBodiesAndDeclarationOrder(t *testing.T) {
 		Package: 1,
 		Path:    "api",
 		Functions: []hir.Function{
-			{Name: "zeta", Public: true, Parameters: []hir.Parameter{{Type: hir.TypeI32}}, ResultType: hir.TypeI32, Body: hir.Block{Statements: []hir.Statement{{Kind: "first-body"}}}},
+			{Name: "zeta", Public: true, Parameters: []hir.Parameter{{Type: hir.TypeI32}}, ResultType: hir.TypeI32, Body: hir.Block{Statements: []hir.Statement{{Kind: hir.StatementKind(253)}}}},
 			{Name: "private", Public: false, ResultType: hir.TypeBool},
 			{Name: "alpha", Public: true, ResultType: hir.TypeBool},
 		},
@@ -193,7 +193,7 @@ func TestExtractIgnoresPrivateItemsBodiesAndDeclarationOrder(t *testing.T) {
 		Package: 1,
 		Path:    "api",
 		Functions: []hir.Function{
-			{Name: "alpha", Public: true, ResultType: hir.TypeBool, Body: hir.Block{Statements: []hir.Statement{{Kind: "changed-body"}}}},
+			{Name: "alpha", Public: true, ResultType: hir.TypeBool, Body: hir.Block{Statements: []hir.Statement{{Kind: hir.StatementKind(254)}}}},
 			{Name: "another-private", Public: false, ResultType: hir.TypeU32},
 			{Name: "zeta", Public: true, Parameters: []hir.Parameter{{Name: "renamed", Mutable: true, Type: hir.TypeI32}}, ResultType: hir.TypeI32},
 		},

@@ -36,10 +36,10 @@ func hirStatementMayTrap(statement *hir.Statement) bool {
 	if statement == nil {
 		return false
 	}
-	if statement.Kind == "assert" {
+	if statement.Kind == hir.StatementAssert {
 		return true
 	}
-	if statement.Kind == "assignment" {
+	if statement.Kind == hir.StatementAssignment {
 		if operator, ok := hir.CompoundAssignmentBinary(statement.Operator); ok && hirOperatorMayTrap(operator) {
 			return true
 		}
@@ -60,9 +60,9 @@ func hirExpressionMayTrap(expression *hir.Expression) bool {
 		return false
 	}
 	switch expression.Kind {
-	case "array-index", "view-index", "view-slice":
+	case hir.ExpressionArrayIndex, hir.ExpressionViewIndex, hir.ExpressionViewSlice:
 		return true
-	case "prefix", "binary":
+	case hir.ExpressionPrefix, hir.ExpressionBinary:
 		if hirOperatorMayTrap(expression.Operator) {
 			return true
 		}
@@ -251,7 +251,7 @@ func hirExpressionContainsLexicalRegion(expression *hir.Expression) bool {
 	if expression == nil {
 		return false
 	}
-	if expression.Kind == "region" {
+	if expression.Kind == hir.ExpressionRegion {
 		return true
 	}
 	for index := range expression.Children {
@@ -291,8 +291,8 @@ func verifyHIRStateOwnerStatementClosedForm(statement *hir.Statement) error {
 		return nil
 	}
 	switch statement.Kind {
-	case "binding", "return", "discard", "expression-statement":
-	case "assignment":
+	case hir.StatementBinding, hir.StatementReturn, hir.StatementDiscard, hir.StatementExpressionStatement:
+	case hir.StatementAssignment:
 		operator := statement.Operator
 		if operator == "" {
 			operator = "="
@@ -318,20 +318,20 @@ func verifyHIRStateOwnerExpressionClosedForm(expression *hir.Expression) error {
 	if expression == nil {
 		return nil
 	}
-	if len(expression.Effects) != 0 && expression.Kind != "call" {
+	if len(expression.Effects) != 0 && expression.Kind != hir.ExpressionCall {
 		return fmt.Errorf("expression kind %q carries expression-local effects", expression.Kind)
 	}
 	switch expression.Kind {
-	case "literal", "path", "group", "record", "array", "array-view-borrow", "array-length",
-		"field-expression", "view-length", "view-empty", "scalar-cast", "result-variant",
-		"option-variant", "enum-variant", "block", "call":
-	case "prefix":
+	case hir.ExpressionLiteral, hir.ExpressionPath, hir.ExpressionGroup, hir.ExpressionRecord, hir.ExpressionArray, hir.ExpressionArrayViewBorrow, hir.ExpressionArrayLength,
+		hir.ExpressionFieldExpression, hir.ExpressionViewLength, hir.ExpressionViewEmpty, hir.ExpressionScalarCast, hir.ExpressionResultVariant,
+		hir.ExpressionOptionVariant, hir.ExpressionEnumVariant, hir.ExpressionBlock, hir.ExpressionCall:
+	case hir.ExpressionPrefix:
 		switch expression.Operator {
 		case "+", "!", "~", "&", "&mut", "*":
 		default:
 			return fmt.Errorf("prefix operator %q is not admitted", expression.Operator)
 		}
-	case "binary":
+	case hir.ExpressionBinary:
 		switch expression.Operator {
 		case "==", "!=", "<", "<=", ">", ">=", "&", "|", "^":
 		default:
@@ -399,7 +399,7 @@ func hirExpressionContainsUnsafeCode(expression *hir.Expression) bool {
 	if expression == nil {
 		return false
 	}
-	if expression.Kind == "unsafe" || expression.UnsafeScope != nil {
+	if expression.Kind == hir.ExpressionUnsafe || expression.UnsafeScope != nil {
 		return true
 	}
 	for index := range expression.Children {

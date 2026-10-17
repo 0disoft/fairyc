@@ -48,15 +48,15 @@ fn i32 main() { return exercise() + unsafe { finished() }; }
 				continue
 			}
 			unsafe := function.Body.Statements[0].Expression
-			if unsafe.Kind != "unsafe" || len(unsafe.Children) != 1 || unsafe.Children[0].Block == nil {
+			if unsafe.Kind != hir.ExpressionUnsafe || len(unsafe.Children) != 1 || unsafe.Children[0].Block == nil {
 				t.Fatal("fixture unsafe block changed")
 			}
 			record := unsafe.Children[0].Block.Tail
-			if record == nil || record.Kind != "record" || len(record.Children) != 1 {
+			if record == nil || record.Kind != hir.ExpressionRecord || len(record.Children) != 1 {
 				t.Fatal("fixture record changed")
 			}
 			pointer, span, typ, scope := record.Children[0], record.Span, record.Type, unsafe.Span
-			*record = hir.Expression{Kind: "storage-take", Type: typ, TargetType: typ, Span: span,
+			*record = hir.Expression{Kind: hir.ExpressionStorageTake, Type: typ, TargetType: typ, Span: span,
 				Symbol: hir.NoSymbol, UnsafeScope: &scope, Children: []hir.Expression{pointer}}
 			inserted = true
 		}

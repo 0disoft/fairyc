@@ -119,27 +119,27 @@ func annotateTokenScanner(t *testing.T, modules []hir.Module) nominalhir.Program
 			f.Body = mapNominalHIR(reflect.ValueOf(f.Body), func(v reflect.Value) reflect.Value {
 				switch e := v.Interface().(type) {
 				case hir.Expression:
-					if e.Kind == "path" {
+					if e.Kind == hir.ExpressionPath {
 						if typ, ok := bindings[e.Symbol]; ok {
 							e.Type = typ
-							return reflect.ValueOf(hir.Expression{Kind: "nominal-unwrap", Type: hir.TypeUSize, Span: e.Span, Children: []hir.Expression{e}})
+							return reflect.ValueOf(hir.Expression{Kind: hir.ExpressionNominalUnwrap, Type: hir.TypeUSize, Span: e.Span, Children: []hir.Expression{e}})
 						}
 					}
-					if e.Kind == "call" && e.Symbol == callee {
+					if e.Kind == hir.ExpressionCall && e.Symbol == callee {
 						if len(e.Children) != 3 {
 							t.Fatal("call boundary drift")
 						}
 						a := e.Children[2]
-						if a.Kind == "nominal-unwrap" {
+						if a.Kind == hir.ExpressionNominalUnwrap {
 							e.Children[2] = a.Children[0]
 						}
 						return reflect.ValueOf(e)
 					}
 				case hir.Statement:
-					if e.Kind == "binding" {
+					if e.Kind == hir.StatementBinding {
 						if typ, ok := bindings[e.Binding]; ok {
 							child := *e.Expression
-							e.Expression = &hir.Expression{Kind: "nominal-wrap", Type: typ, Span: child.Span, Children: []hir.Expression{child}}
+							e.Expression = &hir.Expression{Kind: hir.ExpressionNominalWrap, Type: typ, Span: child.Span, Children: []hir.Expression{child}}
 							return reflect.ValueOf(e)
 						}
 					}
@@ -222,18 +222,18 @@ func TestTokenIndexNominalScannerBoundary(t *testing.T) {
 						if !ok {
 							return v
 						}
-						if wrong == "missing-extraction" && e.Kind == "nominal-unwrap" {
+						if wrong == "missing-extraction" && e.Kind == hir.ExpressionNominalUnwrap {
 							changed++
 							return reflect.ValueOf(e.Children[0])
 						}
-						if wrong == "baseline-drift" && e.Kind == "literal" && e.Type == hir.TypeI32 {
+						if wrong == "baseline-drift" && e.Kind == hir.ExpressionLiteral && e.Type == hir.TypeI32 {
 							e.Value = "17"
 							changed++
 							return reflect.ValueOf(e)
 						}
-						if e.Kind == "call" && len(e.Children) == 3 && e.Children[2].Type == p.Declarations[0].Type() {
+						if e.Kind == hir.ExpressionCall && len(e.Children) == 3 && e.Children[2].Type == p.Declarations[0].Type() {
 							if wrong == "raw" {
-								e.Children[2] = hir.Expression{Kind: "literal", Type: hir.TypeUSize, Value: "2"}
+								e.Children[2] = hir.Expression{Kind: hir.ExpressionLiteral, Type: hir.TypeUSize, Value: "2"}
 								changed++
 							}
 							if wrong == "offset" {

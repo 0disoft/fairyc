@@ -185,10 +185,10 @@ func (c *checker) function(f hir.Function) (hir.Function, error) {
 		}
 		copy := hir.Statement{Kind: s.Kind, Span: s.Span, Binding: s.Binding, Expression: &value}
 		switch s.Kind {
-		case "binding", "assignment":
+		case hir.StatementBinding, hir.StatementAssignment:
 			id := s.Binding
-			if s.Kind == "assignment" {
-				if s.Target == nil || s.Target.Kind != "path" || s.Operator != "=" {
+			if s.Kind == hir.StatementAssignment {
+				if s.Target == nil || s.Target.Kind != hir.ExpressionPath || s.Operator != "=" {
 					return hir.Function{}, fmt.Errorf("only direct assignment is supported")
 				}
 				target, err := c.expression(*s.Target, bindings, 0)
@@ -202,7 +202,7 @@ func (c *checker) function(f hir.Function) (hir.Function, error) {
 				return hir.Function{}, fmt.Errorf("malformed binding")
 			}
 			b, found := bindings[id]
-			if !found || (s.Kind == "binding" && b.ready) || (s.Kind == "assignment" && (!b.ready || !b.mutable)) {
+			if !found || (s.Kind == hir.StatementBinding && b.ready) || (s.Kind == hir.StatementAssignment && (!b.ready || !b.mutable)) {
 				return hir.Function{}, fmt.Errorf("invalid binding or assignment %d", id)
 			}
 			if b.typ != s.Expression.Type {
@@ -210,7 +210,7 @@ func (c *checker) function(f hir.Function) (hir.Function, error) {
 			}
 			b.ready = true
 			bindings[id] = b
-		case "return":
+		case hir.StatementReturn:
 			if s.Target != nil || s.Operator != "" {
 				return hir.Function{}, fmt.Errorf("malformed return")
 			}
@@ -218,7 +218,7 @@ func (c *checker) function(f hir.Function) (hir.Function, error) {
 				return hir.Function{}, mismatch(f.ResultType, s.Expression.Type, s.Span)
 			}
 			returned = true
-		case "discard", "expression-statement":
+		case hir.StatementDiscard, hir.StatementExpressionStatement:
 			if s.Target != nil || s.Operator != "" {
 				return hir.Function{}, fmt.Errorf("malformed expression statement")
 			}

@@ -31,6 +31,6 @@ func (c *typeChecker) checkStoragePut(expression *ast.Expression, result *hir.Ex
 		scope := c.unsafeScopes[len(c.unsafeScopes)-1]
 		result.UnsafeScope = &scope
 	}
-	result.Kind, result.Value, result.TargetType = "storage-put", "", typ
+	result.Kind, result.Value, result.TargetType = hir.ExpressionStoragePut, "", typ
 	return hir.TypeVoid
 }

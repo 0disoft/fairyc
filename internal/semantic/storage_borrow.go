@@ -58,9 +58,9 @@ func (c *typeChecker) checkStorageBorrow(expression *ast.Expression, result *hir
 		scope := c.unsafeScopes[len(c.unsafeScopes)-1]
 		result.UnsafeScope = &scope
 	}
-	result.Kind, result.Value, result.TargetType = "storage-borrow", "", typ
+	result.Kind, result.Value, result.TargetType = hir.ExpressionStorageBorrow, "", typ
 	if mutable {
-		result.Kind = "storage-borrow-mut"
+		result.Kind = hir.ExpressionStorageBorrowMut
 		return hir.MutableBorrow(typ)
 	}
 	return hir.SharedBorrow(typ)

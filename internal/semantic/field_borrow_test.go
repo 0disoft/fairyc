@@ -1,6 +1,9 @@
 package semantic_test
 
-import "testing"
+import (
+	"github.com/0disoft/fairyc/internal/hir"
+	"testing"
+)
 
 func TestAnalyzeFieldBorrowAssignmentPreservesTypedForm(t *testing.T) {
 	for name, body := range map[string]string{
@@ -14,7 +17,7 @@ func TestAnalyzeFieldBorrowAssignmentPreservesTypedForm(t *testing.T) {
 			found := false
 			for _, function := range result.HIR.Modules[0].Functions {
 				for _, statement := range function.Body.Statements {
-					if statement.Kind == "assignment" && statement.Target != nil && statement.Target.Kind == "field-expression" {
+					if statement.Kind == hir.StatementAssignment && statement.Target != nil && statement.Target.Kind == hir.ExpressionFieldExpression {
 						found = true
 					}
 				}

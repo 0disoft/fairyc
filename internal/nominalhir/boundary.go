@@ -89,14 +89,14 @@ func (b *boundary) expression(e hir.Expression) (hir.Expression, error) {
 			return e, fmt.Errorf("unsupported nominal target type")
 		}
 	}
-	if e.Kind == "nominal-wrap" || e.Kind == "nominal-unwrap" {
+	if e.Kind == hir.ExpressionNominalWrap || e.Kind == hir.ExpressionNominalUnwrap {
 		if len(e.Children) != 1 || e.Operator != "" || e.Block != nil || len(e.Arms)+len(e.Fields)+len(e.Effects) != 0 || e.UnsafeScope != nil || e.ForeignABI != "" || e.TargetType != "" || e.Cooked != "" || e.Variant != "" {
 			return e, fmt.Errorf("invalid boundary conversion")
 		}
 		child := e.Children[0]
 		_, outer := b.types[e.Type]
 		_, inner := b.types[child.Type]
-		if !(e.Kind == "nominal-wrap" && outer && child.Type == hir.TypeUSize || e.Kind == "nominal-unwrap" && inner && e.Type == hir.TypeUSize) {
+		if !(e.Kind == hir.ExpressionNominalWrap && outer && child.Type == hir.TypeUSize || e.Kind == hir.ExpressionNominalUnwrap && inner && e.Type == hir.TypeUSize) {
 			return e, fmt.Errorf("invalid boundary conversion types")
 		}
 		if _, err := b.scalar(e.Type); err != nil {
@@ -104,7 +104,7 @@ func (b *boundary) expression(e hir.Expression) (hir.Expression, error) {
 		}
 		return child, nil
 	}
-	if e.Kind == "path" {
+	if e.Kind == hir.ExpressionPath {
 		if want, exists := b.bindings[e.Symbol]; exists && (b.nominal(want) || b.nominal(e.Type)) && want != e.Type {
 			return e, mismatch(want, e.Type, e.Span)
 		}
@@ -114,7 +114,7 @@ func (b *boundary) expression(e hir.Expression) (hir.Expression, error) {
 			}
 		}
 	}
-	if e.Kind == "call" {
+	if e.Kind == hir.ExpressionCall {
 		f, exists := b.functions[e.Symbol]
 		if exists {
 			if len(e.Children) != len(f.Parameters)+1 {
@@ -142,7 +142,7 @@ func (b *boundary) expression(e hir.Expression) (hir.Expression, error) {
 	}
 	if b.nominal(e.Type) {
 		switch e.Kind {
-		case "path", "call", "group":
+		case hir.ExpressionPath, hir.ExpressionCall, hir.ExpressionGroup:
 		default:
 			return e, fmt.Errorf("unsupported nominal expression %s", e.Kind)
 		}
@@ -152,12 +152,12 @@ func (b *boundary) expression(e hir.Expression) (hir.Expression, error) {
 			continue
 		}
 		switch e.Kind {
-		case "call": // Checked against the exact callee above.
-		case "group":
+		case hir.ExpressionCall: // Checked against the exact callee above.
+		case hir.ExpressionGroup:
 			if len(e.Children) != 1 || e.Type != child.Type {
 				return e, fmt.Errorf("nominal group mismatch")
 			}
-		case "binary":
+		case hir.ExpressionBinary:
 			if len(e.Children) != 2 || e.Children[0].Type != e.Children[1].Type || e.Type != hir.TypeBool {
 				return e, fmt.Errorf("nominal comparison mismatch")
 			}
@@ -229,11 +229,11 @@ func (b *boundary) walk(v reflect.Value, depth int) (reflect.Value, error) {
 				actual := x.Expression.Type
 				want := hir.Type("")
 				switch x.Kind {
-				case "binding":
+				case hir.StatementBinding:
 					want = b.bindings[x.Binding]
-				case "return":
+				case hir.StatementReturn:
 					want = b.result
-				case "assignment":
+				case hir.StatementAssignment:
 					if x.Target != nil {
 						want = x.Target.Type
 					}
@@ -254,7 +254,7 @@ func (b *boundary) walk(v reflect.Value, depth int) (reflect.Value, error) {
 			if err != nil {
 				return reflect.Value{}, err
 			}
-			if x.Kind == "nominal-wrap" || x.Kind == "nominal-unwrap" {
+			if x.Kind == hir.ExpressionNominalWrap || x.Kind == hir.ExpressionNominalUnwrap {
 				return b.walk(reflect.ValueOf(checked), depth+1)
 			}
 			checked.Type, err = b.scalar(checked.Type)

@@ -33,12 +33,12 @@ func validStorageViewShape(op Operation, properties typeProperties) bool {
 
 func (l *functionLowerer) lowerStorageView(expression *hir.Expression) (Operand, error) {
 	kind := OperationStorageBorrow
-	if expression.Kind == string(OperationStorageBorrowMut) {
+	if expression.Kind == hir.ExpressionStorageBorrowMut {
 		kind = OperationStorageBorrowMut
 	}
 	_, view := hir.IndexedViewElement(expression.Type)
 	target, mutable, _ := hir.BorrowElement(expression.Type)
-	if expression.Kind != string(kind) || !view || target != expression.TargetType || mutable != (kind == OperationStorageBorrowMut) ||
+	if expression.Kind != hir.ExpressionStorageBorrow && expression.Kind != hir.ExpressionStorageBorrowMut || !view || target != expression.TargetType || mutable != (kind == OperationStorageBorrowMut) ||
 		len(expression.Children) != 3 || expression.Children[2].Type != hir.TypeUSize ||
 		expression.UnsafeScope == nil || expression.Operator != "" || len(expression.Effects) != 0 {
 		return Operand{}, fmt.Errorf("malformed private storage view")

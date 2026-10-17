@@ -17,7 +17,7 @@ func (c *typeChecker) sharedCallArgument(source **ast.Expression, child *hir.Exp
 	original := *source
 	*source = &ast.Expression{Kind: ast.PrivateSharedReborrow, Span: original.Span, Children: []*ast.Expression{original}}
 	c.analyzer.expressionTypes[*source] = expected
-	return &hir.Expression{Kind: string(ast.PrivateSharedReborrow), Type: expected, Span: child.Span, Symbol: hir.NoSymbol, Children: []hir.Expression{*child}}, expected
+	return &hir.Expression{Kind: hir.ExpressionSharedReborrow, Type: expected, Span: child.Span, Symbol: hir.NoSymbol, Children: []hir.Expression{*child}}, expected
 }
 
 type borrowCallAccess struct {

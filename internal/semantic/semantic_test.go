@@ -244,7 +244,7 @@ func TestAnalyzeFoldsDirectI32MinimumLiteral(t *testing.T) {
 			})
 			assertCleanTypeResult(t, result)
 			expression := soleReturnExpression(t, result.HIR.Modules[0].Functions[0])
-			if expression.Kind != "literal" || expression.Type != hir.TypeI32 || expression.Value != "-2147483648" || len(expression.Children) != 0 {
+			if expression.Kind != hir.ExpressionLiteral || expression.Type != hir.TypeI32 || expression.Value != "-2147483648" || len(expression.Children) != 0 {
 				t.Fatalf("folded minimum = %+v", expression)
 			}
 		})
@@ -343,7 +343,7 @@ func TestAnalyzeTypesCStringLiteralWithStaticBorrowOrigin(t *testing.T) {
 		t.Fatalf("body = %+v", function.Body)
 	}
 	literal := function.Body.Statements[0].Expression
-	if literal.Kind != "literal" || literal.Type != wantType || literal.Value != "c\"fairy\"" || literal.Cooked != "666169727900" {
+	if literal.Kind != hir.ExpressionLiteral || literal.Type != wantType || literal.Value != "c\"fairy\"" || literal.Cooked != "666169727900" {
 		t.Fatalf("literal = %+v", literal)
 	}
 
@@ -372,7 +372,7 @@ func TestAnalyzeTypesByteStringLiteralWithStaticBorrowOrigin(t *testing.T) {
 		t.Fatalf("body = %+v", function.Body)
 	}
 	literal := function.Body.Statements[0].Expression
-	if literal.Kind != "literal" || literal.Type != wantType || literal.Value != `b"\x00A"` || literal.Cooked != "0041" {
+	if literal.Kind != hir.ExpressionLiteral || literal.Type != wantType || literal.Value != `b"\x00A"` || literal.Cooked != "0041" {
 		t.Fatalf("literal = %+v", literal)
 	}
 
@@ -405,12 +405,12 @@ fn i32 unwrap(Result<i32, i32> input) {
 	}
 	classify := result.HIR.Modules[0].Functions[0]
 	classifyReturn := soleReturnExpression(t, classify)
-	if classifyReturn.Kind != "if" {
+	if classifyReturn.Kind != hir.ExpressionIf {
 		t.Fatalf("classify return = %+v", classifyReturn)
 	}
 	unwrap := result.HIR.Modules[0].Functions[1]
 	unwrapReturn := soleReturnExpression(t, unwrap)
-	if unwrapReturn.Kind != "match" || len(unwrapReturn.Arms) != 2 {
+	if unwrapReturn.Kind != hir.ExpressionMatch || len(unwrapReturn.Arms) != 2 {
 		t.Fatalf("unwrap return = %+v", unwrapReturn)
 	}
 	if unwrapReturn.Arms[0].Variant != "ok" || unwrapReturn.Arms[1].Variant != "err" {
@@ -432,7 +432,7 @@ fn bool scalar(Result<i32, i32> input) { return input.is_ok; }
 	}
 	for _, function := range result.HIR.Modules[0].Functions {
 		value := soleReturnExpression(t, function)
-		if value.Kind != "match" || value.Type != hir.TypeBool || len(value.Arms) != 2 ||
+		if value.Kind != hir.ExpressionMatch || value.Type != hir.TypeBool || len(value.Arms) != 2 ||
 			value.Arms[0].Variant != "ok" || value.Arms[0].Expression.Value != "true" ||
 			value.Arms[1].Variant != "err" || value.Arms[1].Expression.Value != "false" {
 			t.Fatalf("%s is_ok = %+v", function.Name, value)
@@ -486,14 +486,14 @@ fn i32 unwrap(Option<i32> input) {
 	}
 	choose := result.HIR.Modules[0].Functions[0]
 	chooseReturn := soleReturnExpression(t, choose)
-	if chooseReturn.Kind != "if" || len(chooseReturn.Children) != 3 ||
-		chooseReturn.Children[1].Block == nil || chooseReturn.Children[1].Block.Tail == nil || chooseReturn.Children[1].Block.Tail.Kind != "option-variant" ||
+	if chooseReturn.Kind != hir.ExpressionIf || len(chooseReturn.Children) != 3 ||
+		chooseReturn.Children[1].Block == nil || chooseReturn.Children[1].Block.Tail == nil || chooseReturn.Children[1].Block.Tail.Kind != hir.ExpressionOptionVariant ||
 		chooseReturn.Children[2].Block == nil || chooseReturn.Children[2].Block.Tail == nil || chooseReturn.Children[2].Block.Tail.Variant != "none" {
 		t.Fatalf("choose return = %+v", chooseReturn)
 	}
 	unwrap := result.HIR.Modules[0].Functions[1]
 	unwrapReturn := soleReturnExpression(t, unwrap)
-	if unwrapReturn.Kind != "match" || len(unwrapReturn.Arms) != 2 {
+	if unwrapReturn.Kind != hir.ExpressionMatch || len(unwrapReturn.Arms) != 2 {
 		t.Fatalf("unwrap return = %+v", unwrapReturn)
 	}
 	if unwrapReturn.Arms[0].Variant != "some" || unwrapReturn.Arms[1].Variant != "none" || unwrapReturn.Arms[1].Binding != hir.NoSymbol {
@@ -597,7 +597,7 @@ fn i32 unwrap(Result<i32, i32> input) {
 		t.Fatalf("unwrap body = %+v", unwrap.Body)
 	}
 	lowered := unwrap.Body.Statements[0].Expression
-	if lowered.Kind != "match" || len(lowered.Arms) != 2 || lowered.Arms[0].Variant != "ok" || lowered.Arms[1].Variant != "err" {
+	if lowered.Kind != hir.ExpressionMatch || len(lowered.Arms) != 2 || lowered.Arms[0].Variant != "ok" || lowered.Arms[1].Variant != "err" {
 		t.Fatalf("lowered switch = %+v", lowered)
 	}
 }
@@ -689,7 +689,7 @@ fn i32 main() {
 	}
 	main := result.HIR.Modules[0].Functions[1]
 	call := main.Body.Statements[1].Expression
-	if call == nil || call.Kind != "call" || call.Symbol != method.Symbol || len(call.Children) != 2 || call.Children[1].Kind != "prefix" || call.Children[1].Operator != "&" {
+	if call == nil || call.Kind != hir.ExpressionCall || call.Symbol != method.Symbol || len(call.Children) != 2 || call.Children[1].Kind != hir.ExpressionPrefix || call.Children[1].Operator != "&" {
 		t.Fatalf("method call = %+v", call)
 	}
 }
@@ -757,12 +757,12 @@ fn i32 main() { return score(make()); }
 	assertCleanTypeResult(t, result)
 	makeFunction := result.HIR.Modules[0].Functions[0]
 	constructed := makeFunction.Body.Statements[0].Expression
-	if constructed == nil || constructed.Kind != "enum-variant" || constructed.Variant != "Pair" || !slices.Equal(constructed.Fields, []string{"left", "right"}) {
+	if constructed == nil || constructed.Kind != hir.ExpressionEnumVariant || constructed.Variant != "Pair" || !slices.Equal(constructed.Fields, []string{"left", "right"}) {
 		t.Fatalf("constructed enum = %+v", constructed)
 	}
 	score := result.HIR.Modules[0].Functions[1]
 	lowered := score.Body.Statements[0].Expression
-	if lowered == nil || lowered.Kind != "match" || len(lowered.Arms) != 2 || lowered.Arms[0].Variant != "Empty" || lowered.Arms[1].Variant != "Pair" {
+	if lowered == nil || lowered.Kind != hir.ExpressionMatch || len(lowered.Arms) != 2 || lowered.Arms[0].Variant != "Empty" || lowered.Arms[1].Variant != "Pair" {
 		t.Fatalf("lowered switch = %+v", lowered)
 	}
 }
@@ -791,7 +791,7 @@ fn i32 main() {
 		t.Fatalf("struct fields = %+v", structure.Fields)
 	}
 	main := result.HIR.Modules[0].Functions[0]
-	if len(main.Locals) != 1 || main.Locals[0].Type != hir.Type("main::Packet") || soleReturnExpression(t, main).Kind != "if" {
+	if len(main.Locals) != 1 || main.Locals[0].Type != hir.Type("main::Packet") || soleReturnExpression(t, main).Kind != hir.ExpressionIf {
 		t.Fatalf("main = %+v", main)
 	}
 }
@@ -850,7 +850,7 @@ fn i32 main() { return score(.Pair { .left = 20, .right = 22 }); }
 	}
 	score := result.HIR.Modules[0].Functions[0]
 	scoreReturn := soleReturnExpression(t, score)
-	if scoreReturn.Kind != "match" || len(scoreReturn.Arms) != 3 {
+	if scoreReturn.Kind != hir.ExpressionMatch || len(scoreReturn.Arms) != 3 {
 		t.Fatalf("score = %+v", score)
 	}
 	if scoreReturn.Arms[0].Variant != "Empty" || len(scoreReturn.Arms[0].Bindings) != 0 {
@@ -861,7 +861,7 @@ fn i32 main() { return score(.Pair { .left = 20, .right = 22 }); }
 	}
 	main := result.HIR.Modules[0].Functions[1]
 	mainReturn := soleReturnExpression(t, main)
-	if mainReturn.Kind != "call" || len(mainReturn.Children) != 2 || mainReturn.Children[1].Kind != "enum-variant" || mainReturn.Children[1].Variant != "Pair" {
+	if mainReturn.Kind != hir.ExpressionCall || len(mainReturn.Children) != 2 || mainReturn.Children[1].Kind != hir.ExpressionEnumVariant || mainReturn.Children[1].Variant != "Pair" {
 		t.Fatalf("main = %+v", main)
 	}
 }
@@ -876,11 +876,11 @@ func TestAnalyzeResolvesPublicEnumVariantAcrossImportAlias(t *testing.T) {
 	main := result.HIR.Modules[1].Functions[0]
 	if len(main.Locals) != 2 || main.Locals[0].Name != "status" || main.Locals[0].Type != hir.Type("api::Status") ||
 		len(main.Body.Statements) != 2 || main.Body.Statements[0].Expression == nil ||
-		main.Body.Statements[0].Expression.Kind != "enum-variant" || main.Body.Statements[0].Expression.Variant != "Code" {
+		main.Body.Statements[0].Expression.Kind != hir.ExpressionEnumVariant || main.Body.Statements[0].Expression.Variant != "Code" {
 		t.Fatalf("imported enum construction = %+v", main)
 	}
 	switched := soleReturnExpression(t, main)
-	if switched.Kind != "match" || len(switched.Arms) != 2 || switched.Arms[0].Variant != "Ready" || switched.Arms[1].Variant != "Code" {
+	if switched.Kind != hir.ExpressionMatch || len(switched.Arms) != 2 || switched.Arms[0].Variant != "Ready" || switched.Arms[1].Variant != "Code" {
 		t.Fatalf("imported enum switch = %+v", switched)
 	}
 }
@@ -1115,11 +1115,11 @@ func TestAnalyzeTypesForeignCallInsideUnsafeBlock(t *testing.T) {
 		t.Fatalf("foreign function = %+v", foreign)
 	}
 	returned := soleReturnExpression(t, result.HIR.Modules[0].Functions[0])
-	if returned.Kind != "unsafe" || len(returned.Children) != 1 || returned.Children[0].Block == nil || returned.Children[0].Block.Tail == nil {
+	if returned.Kind != hir.ExpressionUnsafe || len(returned.Children) != 1 || returned.Children[0].Block == nil || returned.Children[0].Block.Tail == nil {
 		t.Fatalf("main return = %+v", returned)
 	}
 	call := returned.Children[0].Block.Tail
-	if call.Kind != "call" || call.ForeignABI != "C" || call.UnsafeScope == nil || call.Symbol != foreign.Symbol {
+	if call.Kind != hir.ExpressionCall || call.ForeignABI != "C" || call.UnsafeScope == nil || call.Symbol != foreign.Symbol {
 		t.Fatalf("foreign call = %+v", call)
 	}
 }
@@ -1148,11 +1148,11 @@ fn i32 main() { return unsafe { consume_c_int(make_c_int()) }; }
 		t.Fatalf("consumer = %+v", consumer)
 	}
 	returned := soleReturnExpression(t, result.HIR.Modules[0].Functions[0])
-	if returned.Kind != "unsafe" || len(returned.Children) != 1 || returned.Children[0].Block == nil || returned.Children[0].Block.Tail == nil {
+	if returned.Kind != hir.ExpressionUnsafe || len(returned.Children) != 1 || returned.Children[0].Block == nil || returned.Children[0].Block.Tail == nil {
 		t.Fatalf("main return = %+v", returned)
 	}
 	outer := returned.Children[0].Block.Tail
-	if outer.Kind != "call" || outer.Type != hir.TypeI32 || len(outer.Children) != 2 || outer.Children[1].Kind != "call" || outer.Children[1].Type != hir.TypeCInt {
+	if outer.Kind != hir.ExpressionCall || outer.Type != hir.TypeI32 || len(outer.Children) != 2 || outer.Children[1].Kind != hir.ExpressionCall || outer.Children[1].Type != hir.TypeCInt {
 		t.Fatalf("nested foreign calls = %+v", outer)
 	}
 }
@@ -1389,7 +1389,7 @@ fn i32 main() { return unsafe { raw_sync() }; }
 		t.Fatalf("foreign effects = %v", foreign.Effects)
 	}
 	body := result.HIR.Modules[0].Functions[0].Body
-	if len(body.Statements) != 1 || body.Statements[0].Kind != "return" || body.Statements[0].Expression == nil {
+	if len(body.Statements) != 1 || body.Statements[0].Kind != hir.StatementReturn || body.Statements[0].Expression == nil {
 		t.Fatalf("main body = %+v", body)
 	}
 	call := body.Statements[0].Expression.Children[0].Block.Tail
@@ -1464,7 +1464,7 @@ fn i32 main() { return remote::fetch(); }
 		t.Fatalf("HIR modules = %+v", result.HIR.Modules)
 	}
 	body := result.HIR.Modules[1].Functions[0].Body
-	if len(body.Statements) != 1 || body.Statements[0].Kind != "return" {
+	if len(body.Statements) != 1 || body.Statements[0].Kind != hir.StatementReturn {
 		t.Fatalf("main body = %+v", body)
 	}
 	call := body.Statements[0].Expression
@@ -1509,15 +1509,15 @@ func TestAnalyzeTypesRawPointerAndTargetScalarForeignCall(t *testing.T) {
 		t.Fatalf("foreign signature = %+v", foreign)
 	}
 	body := result.HIR.Modules[0].Functions[0].Body
-	if len(body.Statements) != 1 || body.Statements[0].Kind != "return" {
+	if len(body.Statements) != 1 || body.Statements[0].Kind != hir.StatementReturn {
 		t.Fatalf("main body = %+v", body)
 	}
 	tail := body.Statements[0].Expression
-	if tail == nil || tail.Kind != "if" || len(tail.Children) < 1 {
+	if tail == nil || tail.Kind != hir.ExpressionIf || len(tail.Children) < 1 {
 		t.Fatalf("main tail = %+v", tail)
 	}
 	condition := &tail.Children[0]
-	if condition.Kind != "binary" || len(condition.Children) != 2 || condition.Children[0].Kind != "unsafe" || len(condition.Children[0].Children) != 1 {
+	if condition.Kind != hir.ExpressionBinary || len(condition.Children) != 2 || condition.Children[0].Kind != hir.ExpressionUnsafe || len(condition.Children[0].Children) != 1 {
 		t.Fatalf("if condition = %+v", condition)
 	}
 	unsafeBlock := &condition.Children[0].Children[0]
@@ -1525,7 +1525,7 @@ func TestAnalyzeTypesRawPointerAndTargetScalarForeignCall(t *testing.T) {
 		t.Fatalf("unsafe block = %+v", unsafeBlock)
 	}
 	call := unsafeBlock.Block.Tail
-	if call.Kind != "call" || call.Type != hir.TypeU32 || len(call.Children) != 5 {
+	if call.Kind != hir.ExpressionCall || call.Type != hir.TypeU32 || len(call.Children) != 5 {
 		t.Fatalf("foreign call = %+v", call)
 	}
 	for index, want := range wantParameters {
@@ -1581,7 +1581,7 @@ fn i32 main() {
 	})
 	assertCleanTypeResult(t, result)
 	main := result.HIR.Modules[0].Functions[0]
-	if len(main.Body.Statements) != 2 || main.Body.Statements[1].Kind != "return" || main.Body.Statements[1].Expression == nil {
+	if len(main.Body.Statements) != 2 || main.Body.Statements[1].Kind != hir.StatementReturn || main.Body.Statements[1].Expression == nil {
 		t.Fatalf("main body = %+v", main.Body)
 	}
 	condition := &main.Body.Statements[1].Expression.Children[0]
@@ -1592,7 +1592,7 @@ fn i32 main() {
 	}
 	cast := &call.Children[1]
 	wantType := hir.RawPointer(hir.Type("main::Packet"), true)
-	if cast.Kind != "cast" || cast.Operator != "as" || cast.Type != wantType || cast.TargetType != wantType || cast.UnsafeScope == nil || len(cast.Children) != 1 || cast.Children[0].Type != hir.MutableBorrow(hir.Type("main::Packet")) {
+	if cast.Kind != hir.ExpressionCast || cast.Operator != "as" || cast.Type != wantType || cast.TargetType != wantType || cast.UnsafeScope == nil || len(cast.Children) != 1 || cast.Children[0].Type != hir.MutableBorrow(hir.Type("main::Packet")) {
 		t.Fatalf("cast = %+v", cast)
 	}
 }
@@ -1702,7 +1702,7 @@ fn i32 main() {
 	}
 	for _, expectation := range want {
 		expression := statements[expectation.statement].Expression
-		if expression == nil || expression.Kind != "scalar-cast" || expression.Type != expectation.target || expression.TargetType != expectation.target ||
+		if expression == nil || expression.Kind != hir.ExpressionScalarCast || expression.Type != expectation.target || expression.TargetType != expectation.target ||
 			expression.Operator != "as" || expression.UnsafeScope != nil || len(expression.Children) != 1 || expression.Children[0].Type != expectation.source {
 			t.Fatalf("cast statement %d = %+v", expectation.statement, expression)
 		}
@@ -1764,7 +1764,7 @@ fn i32 main() {
 	wantOwners := []hir.Type{hir.TypeBool, hir.TypeI32, hir.TypeU8, hir.TypeU32, hir.TypeUSize}
 	for index, owner := range wantOwners {
 		expression := statements[index+4].Expression
-		if expression == nil || expression.Kind != "binary" || expression.Type != hir.TypeBool ||
+		if expression == nil || expression.Kind != hir.ExpressionBinary || expression.Type != hir.TypeBool ||
 			len(expression.Children) != 2 || expression.Children[0].Type != owner || expression.Children[1].Type != owner {
 			t.Fatalf("comparison statement %d = %+v", index+4, expression)
 		}
@@ -1825,7 +1825,7 @@ fn i32 main() {
 	}
 	for _, expectation := range want {
 		expression := statements[expectation.statement].Expression
-		if expression == nil || expression.Kind != "binary" || expression.Operator != expectation.operator ||
+		if expression == nil || expression.Kind != hir.ExpressionBinary || expression.Operator != expectation.operator ||
 			expression.Type != expectation.typ || len(expression.Children) != 2 ||
 			expression.Children[0].Type != expectation.typ || expression.Children[1].Type != expectation.typ {
 			t.Fatalf("checked arithmetic statement %d = %+v", expectation.statement, expression)
@@ -1980,7 +1980,7 @@ fn i32 main() {
 		typ       hir.Type
 	}{{1, hir.TypeU8}, {3, hir.TypeU32}, {5, hir.TypeUSize}} {
 		expression := statements[expectation.statement].Expression
-		if expression == nil || expression.Kind != "prefix" || expression.Operator != "~" ||
+		if expression == nil || expression.Kind != hir.ExpressionPrefix || expression.Operator != "~" ||
 			expression.Type != expectation.typ || len(expression.Children) != 1 || expression.Children[0].Type != expectation.typ {
 			t.Fatalf("bitwise-not statement %d = %+v", expectation.statement, expression)
 		}
@@ -2018,7 +2018,7 @@ fn i32 main() {
 	}
 	cast := unsafeExpression.Children[0].Block.Tail
 	wantType := hir.RawPointer(hir.TypeU8, false)
-	if cast == nil || cast.Kind != "cast" || cast.Type != wantType || cast.TargetType != wantType || cast.UnsafeScope == nil || len(cast.Children) != 1 || cast.Children[0].Type != hir.SharedBorrow(hir.TypeCStr) {
+	if cast == nil || cast.Kind != hir.ExpressionCast || cast.Type != wantType || cast.TargetType != wantType || cast.UnsafeScope == nil || len(cast.Children) != 1 || cast.Children[0].Type != hir.SharedBorrow(hir.TypeCStr) {
 		t.Fatalf("cast = %+v", cast)
 	}
 }
@@ -2044,7 +2044,7 @@ fn i32 main() {
 	}
 	cast := unsafeExpression.Children[0].Block.Tail
 	wantType := hir.RawPointer(hir.TypeU8, false)
-	if cast == nil || cast.Kind != "cast" || cast.Type != wantType || cast.TargetType != wantType || cast.UnsafeScope == nil || len(cast.Children) != 1 || cast.Children[0].Type != hir.SharedBorrow(hir.TypeByteSlice) {
+	if cast == nil || cast.Kind != hir.ExpressionCast || cast.Type != wantType || cast.TargetType != wantType || cast.UnsafeScope == nil || len(cast.Children) != 1 || cast.Children[0].Type != hir.SharedBorrow(hir.TypeByteSlice) {
 		t.Fatalf("cast = %+v", cast)
 	}
 }
@@ -2215,7 +2215,7 @@ func TestAnalyzeTypesUTF8StringLiteralWithStaticBorrowOrigin(t *testing.T) {
 		t.Fatalf("body = %+v", function.Body)
 	}
 	literal := function.Body.Statements[0].Expression
-	if literal.Kind != "literal" || literal.Type != wantType || literal.Value != `"λ"` || literal.Cooked != "cebb" {
+	if literal.Kind != hir.ExpressionLiteral || literal.Type != wantType || literal.Value != `"λ"` || literal.Cooked != "cebb" {
 		t.Fatalf("literal = %+v", literal)
 	}
 
@@ -2248,7 +2248,7 @@ fn i32 main() {
 	}
 	cast := unsafeExpression.Children[0].Block.Tail
 	wantType := hir.RawPointer(hir.TypeU8, false)
-	if cast == nil || cast.Kind != "cast" || cast.Type != wantType || cast.TargetType != wantType || cast.UnsafeScope == nil || len(cast.Children) != 1 || cast.Children[0].Type != hir.SharedBorrow(hir.TypeStr) {
+	if cast == nil || cast.Kind != hir.ExpressionCast || cast.Type != wantType || cast.TargetType != wantType || cast.UnsafeScope == nil || len(cast.Children) != 1 || cast.Children[0].Type != hir.SharedBorrow(hir.TypeStr) {
 		t.Fatalf("cast = %+v", cast)
 	}
 }
@@ -2275,14 +2275,14 @@ fn i32 main() {
 	}
 	for index, wantOwner := range []hir.Type{hir.SharedBorrow(hir.TypeStr), hir.SharedBorrow(hir.TypeByteSlice)} {
 		expression := main.Body.Statements[index+2].Expression
-		if expression == nil || expression.Kind != "view-length" || expression.Type != hir.TypeUSize || expression.Operator != "len" ||
+		if expression == nil || expression.Kind != hir.ExpressionViewLength || expression.Type != hir.TypeUSize || expression.Operator != "len" ||
 			len(expression.Children) != 1 || expression.Children[0].Type != wantOwner {
 			t.Fatalf("length expression %d = %+v, want owner %q", index, expression, wantOwner)
 		}
 	}
 	for index, wantOwner := range []hir.Type{hir.SharedBorrow(hir.TypeStr), hir.SharedBorrow(hir.TypeByteSlice)} {
 		expression := main.Body.Statements[index+4].Expression
-		if expression == nil || expression.Kind != "view-empty" || expression.Type != hir.TypeBool || expression.Operator != "is_empty" ||
+		if expression == nil || expression.Kind != hir.ExpressionViewEmpty || expression.Type != hir.TypeBool || expression.Operator != "is_empty" ||
 			len(expression.Children) != 1 || expression.Children[0].Type != wantOwner {
 			t.Fatalf("emptiness expression %d = %+v, want owner %q", index, expression, wantOwner)
 		}
@@ -2301,7 +2301,7 @@ fn i32 main() {
 	})
 	assertCleanTypeResult(t, result)
 	expression := result.HIR.Modules[0].Functions[0].Body.Statements[0].Expression
-	if expression == nil || expression.Kind != "view-index" || expression.Type != hir.TypeU8 || expression.Operator != "[]" ||
+	if expression == nil || expression.Kind != hir.ExpressionViewIndex || expression.Type != hir.TypeU8 || expression.Operator != "[]" ||
 		len(expression.Children) != 2 || expression.Children[0].Type != hir.SharedBorrow(hir.TypeByteSlice) || expression.Children[1].Type != hir.TypeUSize {
 		t.Fatalf("index expression = %+v", expression)
 	}
@@ -2314,12 +2314,12 @@ func TestAnalyzeTypesScalarFixedArrayLiteralAndIndex(t *testing.T) {
 	assertCleanTypeResult(t, result)
 	main := result.HIR.Modules[0].Functions[1]
 	array := main.Body.Statements[0].Expression
-	if array == nil || array.Kind != "array" || array.Type != hir.FixedArray(hir.TypeU8, 3) || array.Operator != "list" || len(array.Children) != 3 {
+	if array == nil || array.Kind != hir.ExpressionArray || array.Type != hir.FixedArray(hir.TypeU8, 3) || array.Operator != "list" || len(array.Children) != 3 {
 		t.Fatalf("array expression = %+v", array)
 	}
 	pick := result.HIR.Modules[0].Functions[0]
 	index := soleReturnExpression(t, pick)
-	if index.Kind != "array-index" || index.Type != hir.TypeU8 || index.Operator != "[]" || len(index.Children) != 2 {
+	if index.Kind != hir.ExpressionArrayIndex || index.Type != hir.TypeU8 || index.Operator != "[]" || len(index.Children) != 2 {
 		t.Fatalf("array index = %+v", index)
 	}
 }
@@ -2331,11 +2331,11 @@ func TestAnalyzeTypesScalarFixedArrayLength(t *testing.T) {
 	})
 	assertCleanTypeResult(t, result)
 	body := result.HIR.Modules[0].Functions[0].Body
-	if len(body.Statements) != 1 || body.Statements[0].Kind != "return" {
+	if len(body.Statements) != 1 || body.Statements[0].Kind != hir.StatementReturn {
 		t.Fatalf("trim body = %+v", body)
 	}
 	expression := body.Statements[0].Expression
-	if expression == nil || expression.Kind != "array-length" || expression.Type != hir.TypeUSize || expression.Operator != "len" ||
+	if expression == nil || expression.Kind != hir.ExpressionArrayLength || expression.Type != hir.TypeUSize || expression.Operator != "len" ||
 		len(expression.Children) != 1 || expression.Children[0].Type != hir.FixedArray(hir.TypeU32, 3) {
 		t.Fatalf("array length expression = %+v", expression)
 	}
@@ -2359,7 +2359,7 @@ fn i32 main() {
 		t.Fatalf("main statements = %+v", main.Body.Statements)
 	}
 	borrow := main.Body.Statements[1].Expression
-	if borrow.Kind != "array-view-borrow" || borrow.Operator != "&" || borrow.Type != hir.SharedBorrow(hir.TypeByteSlice) ||
+	if borrow.Kind != hir.ExpressionArrayViewBorrow || borrow.Operator != "&" || borrow.Type != hir.SharedBorrow(hir.TypeByteSlice) ||
 		len(borrow.Children) != 1 || borrow.Children[0].Type != hir.FixedArray(hir.TypeU8, 3) {
 		t.Fatalf("array byte-view borrow = %+v", borrow)
 	}
@@ -2380,15 +2380,15 @@ fn i32 main() {
 	assertCleanTypeResult(t, result)
 	main := result.HIR.Modules[0].Functions[1]
 	condition := soleReturnExpression(t, main)
-	if condition.Kind != "if" || len(condition.Children) == 0 {
+	if condition.Kind != hir.ExpressionIf || len(condition.Children) == 0 {
 		t.Fatalf("main return = %+v", condition)
 	}
 	call := condition.Children[0].Children[0]
-	if call.Kind != "call" || len(call.Children) != 2 {
+	if call.Kind != hir.ExpressionCall || len(call.Children) != 2 {
 		t.Fatalf("mutable byte-view call = %+v", call)
 	}
 	borrow := call.Children[1]
-	if borrow.Kind != "array-view-borrow" || borrow.Operator != "&mut" || borrow.Type != hir.MutableBorrow(hir.TypeByteSlice) ||
+	if borrow.Kind != hir.ExpressionArrayViewBorrow || borrow.Operator != "&mut" || borrow.Type != hir.MutableBorrow(hir.TypeByteSlice) ||
 		len(borrow.Children) != 1 || borrow.Children[0].Type != hir.FixedArray(hir.TypeU8, 3) {
 		t.Fatalf("mutable array byte-view borrow = %+v", borrow)
 	}
@@ -2416,17 +2416,17 @@ fn i32 main() { return 0; }
 		t.Fatalf("functions = %+v", functions)
 	}
 	arrayTarget := functions[0].Body.Statements[1].Target
-	if arrayTarget == nil || arrayTarget.Kind != "array-index" || arrayTarget.Type != hir.TypeU8 ||
+	if arrayTarget == nil || arrayTarget.Kind != hir.ExpressionArrayIndex || arrayTarget.Type != hir.TypeU8 ||
 		len(arrayTarget.Children) != 2 || arrayTarget.Children[0].Type != hir.FixedArray(hir.TypeU8, 3) {
 		t.Fatalf("array assignment target = %+v", arrayTarget)
 	}
 	viewTarget := functions[1].Body.Statements[0].Target
-	if viewTarget == nil || viewTarget.Kind != "view-index" || viewTarget.Type != hir.TypeU8 ||
+	if viewTarget == nil || viewTarget.Kind != hir.ExpressionViewIndex || viewTarget.Type != hir.TypeU8 ||
 		len(viewTarget.Children) != 2 || viewTarget.Children[0].Type != hir.MutableBorrow(hir.TypeByteSlice) {
 		t.Fatalf("view assignment target = %+v", viewTarget)
 	}
 	viewRead := soleReturnExpression(t, functions[1])
-	if viewRead.Kind != "view-index" || viewRead.Children[0].Type != hir.MutableBorrow(hir.TypeByteSlice) {
+	if viewRead.Kind != hir.ExpressionViewIndex || viewRead.Children[0].Type != hir.MutableBorrow(hir.TypeByteSlice) {
 		t.Fatalf("mutable view read = %+v", viewRead)
 	}
 }
@@ -3076,7 +3076,7 @@ fn ref str relay(ref String value) { return as_str(value); }
 		}
 		constructor = returned.Children[0].Block.Tail
 	}
-	if constructor == nil || constructor.Kind != "borrowed-view-from-raw-parts" || constructor.Type != hir.SharedBorrow(hir.TypeStr) ||
+	if constructor == nil || constructor.Kind != hir.ExpressionBorrowedViewFromRawParts || constructor.Type != hir.SharedBorrow(hir.TypeStr) ||
 		constructor.Operator != "str::from_raw_parts" || constructor.UnsafeScope == nil || len(constructor.Children) != 3 {
 		t.Fatalf("constructor = %+v", constructor)
 	}
@@ -3128,7 +3128,7 @@ fn ref mut u8[] view_mut(ref mut Buffer value) {
 			t.Fatalf("%s return = %+v", function.Name, returned)
 		}
 		constructor := returned.Children[0].Block.Tail
-		if constructor == nil || constructor.Kind != "borrowed-view-from-raw-parts" || constructor.Type != expected.typeName ||
+		if constructor == nil || constructor.Kind != hir.ExpressionBorrowedViewFromRawParts || constructor.Type != expected.typeName ||
 			constructor.Operator != expected.operator || constructor.UnsafeScope == nil || len(constructor.Children) != 3 {
 			t.Fatalf("%s constructor = %+v", function.Name, constructor)
 		}
@@ -3257,7 +3257,7 @@ fn ref u8[] trim(ref u8[] bytes) { return bytes[1..2]; }
 	assertCleanTypeResult(t, result)
 	expression := soleReturnExpression(t, result.HIR.Modules[0].Functions[0])
 	wantView := hir.SharedBorrow(hir.TypeByteSlice)
-	if expression == nil || expression.Kind != "view-slice" || expression.Type != wantView || expression.Operator != ".." ||
+	if expression == nil || expression.Kind != hir.ExpressionViewSlice || expression.Type != wantView || expression.Operator != ".." ||
 		len(expression.Children) != 3 || expression.Children[0].Type != wantView ||
 		expression.Children[1].Type != hir.TypeUSize || expression.Children[2].Type != hir.TypeUSize {
 		t.Fatalf("slice expression = %+v", expression)
@@ -3283,13 +3283,13 @@ func TestAnalyzeTypesImmutableByteViewSliceWithOmittedBounds(t *testing.T) {
 			})
 			assertCleanTypeResult(t, result)
 			expression := soleReturnExpression(t, result.HIR.Modules[0].Functions[0])
-			if expression.Kind != "view-slice" || len(expression.Children) != 3 {
+			if expression.Kind != hir.ExpressionViewSlice || len(expression.Children) != 3 {
 				t.Fatalf("slice expression = %+v", expression)
 			}
-			if got := expression.Children[1].Kind == "omitted-range-bound"; got != test.omittedStart {
+			if got := expression.Children[1].Kind == hir.ExpressionOmittedRangeBound; got != test.omittedStart {
 				t.Fatalf("start kind = %q, omitted = %v", expression.Children[1].Kind, got)
 			}
-			if got := expression.Children[2].Kind == "omitted-range-bound"; got != test.omittedEnd {
+			if got := expression.Children[2].Kind == hir.ExpressionOmittedRangeBound; got != test.omittedEnd {
 				t.Fatalf("end kind = %q, omitted = %v", expression.Children[2].Kind, got)
 			}
 		})
@@ -3368,7 +3368,7 @@ func TestAnalyzeTypesAlwaysCheckedAssertCondition(t *testing.T) {
 	})
 	assertCleanTypeResult(t, result)
 	statement := result.HIR.Modules[0].Functions[0].Body.Statements[1]
-	if statement.Kind != "assert" || statement.Expression == nil || statement.Expression.Type != hir.TypeBool {
+	if statement.Kind != hir.StatementAssert || statement.Expression == nil || statement.Expression.Type != hir.TypeBool {
 		t.Fatalf("assert statement = %+v", statement)
 	}
 }
@@ -3448,7 +3448,7 @@ fn i32 main() {
 	function := result.HIR.Modules[0].Functions[0]
 	var operators []string
 	for _, statement := range function.Body.Statements {
-		if statement.Kind == "assignment" {
+		if statement.Kind == hir.StatementAssignment {
 			operators = append(operators, statement.Operator)
 		}
 	}
@@ -3475,7 +3475,7 @@ func TestAnalyzeTypesLexicalDeferWithCopyScalarArguments(t *testing.T) {
 	})
 	assertCleanTypeResult(t, result)
 	statement := result.HIR.Modules[0].Functions[1].Body.Statements[0]
-	if statement.Kind != "defer" || statement.Expression == nil || statement.Expression.Kind != "call" || statement.Expression.Type != hir.TypeVoid {
+	if statement.Kind != hir.StatementDefer || statement.Expression == nil || statement.Expression.Kind != hir.ExpressionCall || statement.Expression.Type != hir.TypeVoid {
 		t.Fatalf("defer statement = %+v", statement)
 	}
 }
@@ -3608,7 +3608,7 @@ func soleReturnExpression(t *testing.T, function hir.Function) *hir.Expression {
 	var returned *hir.Expression
 	for statementIndex := range function.Body.Statements {
 		statement := &function.Body.Statements[statementIndex]
-		if statement.Kind != "return" {
+		if statement.Kind != hir.StatementReturn {
 			continue
 		}
 		if returned != nil {
