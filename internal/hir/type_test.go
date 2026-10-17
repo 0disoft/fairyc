@@ -94,4 +94,13 @@ func TestParsedTypeUsesStructuredChildren(t *testing.T) {
 			t.Fatalf("malformed type admitted: %s", text)
 		}
 	}
+	for _, text := range []string{"[ i32 ]", "[ main::Token ]", "[main::Token; 2]"} {
+		value := ParseType(text)
+		if _, ok := ScalarViewElement(value); ok {
+			t.Fatalf("noncanonical/non-slice scalar view admitted: %s", text)
+		}
+		if _, ok := StructSliceElement(value); ok {
+			t.Fatalf("noncanonical/non-slice nominal view admitted: %s", text)
+		}
+	}
 }

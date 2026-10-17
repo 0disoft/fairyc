@@ -1,0 +1,92 @@
+{
+  "scope": "Go compiler HIR node enums and interned structured type identities",
+  "date": "2026-10-17",
+  "baselineCommit": "b22396e6",
+  "typeMigrationCommit": "8e138d8c",
+  "environment": {
+    "go": "go1.27.1",
+    "os": "windows",
+    "architecture": "amd64",
+    "cpu": "AMD Ryzen 5 7430U with Radeon Graphics",
+    "cgoEnabled": false
+  },
+  "representation": {
+    "typeIdentity": "opaque comparable TypeID backed by unique.Handle",
+    "typeStructure": "TypeKind and direct child TypeID references",
+    "compoundAccessorsParseStrings": false,
+    "statementKind": "uint8 enum",
+    "expressionKind": "uint8 enum",
+    "nodePayloads": "existing structs retained",
+    "transport": "existing string spellings; no serialized handle identities",
+    "retention": "Go unique interner permits garbage collection of unused entries"
+  },
+  "validation": [
+    {
+      "command": "go test ./... -run '^$'",
+      "status": "passed",
+      "coverage": "all Go packages and test binaries compile; test bodies not executed"
+    },
+    {
+      "command": "go test ./internal/hir ./internal/semantic ./internal/mir ./internal/mircodec ./internal/semanticfixture ./internal/resourcefixture ./internal/regionfixture ./internal/resultfixture ./internal/mirfixture ./internal/mirverifyfixture ./internal/interpreterfixture ./internal/cbackendfixture ./internal/moduleinterfacefixture ./internal/packageartifact ./internal/semanticsnapshot ./internal/workspacecompiler ./internal/contractstatemir ./internal/contractstatefixture",
+      "status": "failed",
+      "failures": [
+        "mirfixture/TestMIRManifestV0: pass.mir.result-error-cleanup reports E4101 at bytes 186..194",
+        "semanticsnapshot/TestGenericStructViewHeaderRejectsNonNominalSliceChildren: slice of bool admitted"
+      ],
+      "otherPackages": "passed"
+    },
+    {
+      "command": "go test ./internal/mirfixture ./internal/semanticsnapshot -run 'TestMIRManifestV0|TestGenericStructViewHeaderRejectsNonNominalSliceChildren'",
+      "checkout": "separate git archive of b22396e6 before type migration",
+      "status": "same two failures reproduced"
+    },
+    {
+      "command": "go test ./internal/cbackend ./internal/interpreter ./internal/moduleinterface ./internal/nominalhir ./internal/semanticsnapshot -skip '^TestGenericStructViewHeaderRejectsNonNominalSliceChildren$'",
+      "status": "passed",
+      "skipReason": "known baseline failure reproduced separately"
+    },
+    {
+      "command": "go test ./internal/compiler -run '^(TestCheckProducesVerifiedMIR|TestCheckProducesVerifiedMIRForOwnedTextExample|TestCheckProducesVerifiedMIRForFallibleRegionPlacement|TestPrivateVectorPersistentCacheCrossProcess)$' -count=1",
+      "status": "passed"
+    },
+    {
+      "command": "go test ./internal/packageartifact -run '^TestTypeRepresentationPreservesArtifactEncoding$' -count=1",
+      "status": "passed",
+      "coverage": "SHA-256 and byte lengths measured from pre-migration artifact bytes match new output"
+    }
+  ],
+  "artifactCompatibility": [
+    { "artifact": "whole-mir", "bytes": 7441, "sha256": "b13bc264b1ebf6a101d36ce7cc3c5a64a43972b15236303e57569c6ea817bfeb" },
+    { "artifact": "package-1", "bytes": 2772, "sha256": "bf1ed839cca485af8e6f7903b21b7165103d30be302b80d324419817554c9eac" },
+    { "artifact": "package-2", "bytes": 6088, "sha256": "7cb67cc6bf1506314c073f6f63e9de7a9ddfdf173b9097d76f8e935362b44ee0" }
+  ],
+  "microbenchmarks": {
+    "command": "go test ./internal/hir -run '^$' -bench BenchmarkType -benchmem -count=1",
+    "method": "identical benchmark source in pre-migration git archive and current checkout; one sample each; no whole-compiler performance claim",
+    "construction": {
+      "before": { "nsPerOp": 190.4, "bytesPerOp": 48, "allocationsPerOp": 1 },
+      "after": { "nsPerOp": 368.9, "bytesPerOp": 0, "allocationsPerOp": 0 }
+    },
+    "decomposition": {
+      "before": { "nsPerOp": 144.0, "bytesPerOp": 0, "allocationsPerOp": 0 },
+      "after": { "nsPerOp": 33.16, "bytesPerOp": 0, "allocationsPerOp": 0 }
+    },
+    "limitation": "interning reduces allocation and decomposition cost but increases repeated construction CPU time in this microbenchmark"
+  },
+  "notRun": [
+    { "check": "race detector", "reason": "local Go configuration has CGO disabled" },
+    { "check": "full native matrix and self-hosted candidate rebuild", "reason": "private Go HIR representation change; focused native/cache compiler tests and existing C emission fixtures used" }
+  ],
+  "changes": {
+    "languageSyntax": false,
+    "stableCliSchema": false,
+    "cacheSchema": false,
+    "internalGoApi": true,
+    "dependencies": false,
+    "database": false,
+    "runner": false,
+    "repositoryHygiene": false,
+    "sourceOfTruth": "docs/architecture/01-domain-model.md"
+  },
+  "pushed": false
+}

@@ -15,14 +15,11 @@ const (
 	StatementBinding
 	StatementBreak
 	StatementBurn
-
 	StatementContinue
 	StatementDefer
 	StatementDiscard
 	StatementExpressionStatement
-
 	StatementFor
-
 	StatementRegion
 	StatementReturn
 	StatementWhile
@@ -36,7 +33,12 @@ func (k StatementKind) String() string {
 	}
 	return fmt.Sprintf("StatementKind(%d)", k)
 }
-func (k StatementKind) MarshalJSON() ([]byte, error) { return json.Marshal(k.String()) }
+func (k StatementKind) MarshalJSON() ([]byte, error) {
+	if int(k) >= len(statementNames) {
+		return nil, fmt.Errorf("unknown HIR statement kind %d", k)
+	}
+	return json.Marshal(k.String())
+}
 func (k *StatementKind) UnmarshalJSON(data []byte) error {
 	var s *string
 	if err := json.Unmarshal(data, &s); err != nil {
@@ -109,7 +111,12 @@ func (k ExpressionKind) String() string {
 	}
 	return fmt.Sprintf("ExpressionKind(%d)", k)
 }
-func (k ExpressionKind) MarshalJSON() ([]byte, error) { return json.Marshal(k.String()) }
+func (k ExpressionKind) MarshalJSON() ([]byte, error) {
+	if int(k) >= len(expressionNames) {
+		return nil, fmt.Errorf("unknown HIR expression kind %d", k)
+	}
+	return json.Marshal(k.String())
+}
 func (k *ExpressionKind) UnmarshalJSON(data []byte) error {
 	var s *string
 	if err := json.Unmarshal(data, &s); err != nil {

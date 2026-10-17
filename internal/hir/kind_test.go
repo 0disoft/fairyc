@@ -6,6 +6,12 @@ import (
 )
 
 func TestNodeKindsPreserveTextTransport(t *testing.T) {
+	if _, err := json.Marshal(StatementKind(255)); err == nil {
+		t.Fatal("encoded unknown statement kind")
+	}
+	if _, err := json.Marshal(ExpressionKind(255)); err == nil {
+		t.Fatal("encoded unknown expression kind")
+	}
 	for k := StatementInvalid; int(k) < len(statementNames); k++ {
 		data, err := json.Marshal(k)
 		if err != nil {
