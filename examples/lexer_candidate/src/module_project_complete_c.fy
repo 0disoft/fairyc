@@ -24,3 +24,13 @@ pub fn Result<c::Emission,clean::Problem> emit_test(ref compiler::Complete progr
     var usize work=0;let named=switch(names::build_project(compiler::checked_program(program),ref mut work)){case .ok(p):{p}case .err(e):{return .err(e);}};
     return c::emit_test(identified::ir_program(compiler::checked_program(program)),named,entry,max_frames);
 }
+
+// A test invocation owns one immutable program and its proven CFGs. There is no
+// cross-invocation cache, mutable IR access, or separately replaceable graph set.
+pub resource TestSession {owner::Lowered lowered;cleanup{}}
+pub fn Result<TestSession,clean::Problem> prepare_tests(compiler::Complete program){let owned=switch(owner::complete(program)){case .ok(p):{p}case .err(e):{return .err(e);}};let lowered=switch(owner::lower(owned)){case .ok(p):{p}case .err(e):{return .err(e);}};return .ok(TestSession{.lowered});}
+pub fn ref compiler::Complete test_program(ref TestSession p){return owner::complete_project(owner::lowered_program(ref p.lowered));}
+pub fn Result<c::Emission,clean::Problem> emit_prepared_test(ref TestSession p,usize entry,usize max_frames){
+    if(max_frames==0 || max_frames>limits::project_frames()){return .err(clean::Problem{.code=1001,.module_index=0,.start=0,.end=0});}
+    var usize work=0;let named=switch(names::build_project(compiler::checked_program(test_program(p)),ref mut work)){case .ok(p):{p}case .err(e):{return .err(e);}};return c::emit_lowered_test(ref p.lowered,named,entry,max_frames);
+}

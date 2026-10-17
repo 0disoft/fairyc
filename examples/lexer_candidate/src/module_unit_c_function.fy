@@ -1,4 +1,9 @@
 module module_unit_c_function;
+import std::vec as v;
+import c_abi_contract as abi;
+import module_identified_ir as identified;
+import module_unit_cfg_lower as flow;
+import module_unit_body_ir_verify as proof;
 import module_unit_body_ir_model as ir;
 import module_unit_cfg_model as cfg;
 import module_unit_cleanup_mir_model as clean;
@@ -76,4 +81,38 @@ pub fn bool render(ref ir::Program p,ref names::Table named,ref sdk::Plan plan,r
         else if(n.kind!=7){s.code=1004;return false;}
         if(n.kind!=3 && n.kind!=4 && n.kind!=6 && n.kind!=9 && n.kind!=12 && n.kind!=18 && n.kind!=21 && !w::jump(out,s,n.first)){return false;}i+=1;
     }return w::text(out,s,b"}\n");
+}
+
+// Legacy single-buffer rendering shares the existing body-rendering source unit.
+fn clean::Problem fail(u32 code,usize module_index,usize start,usize end){return clean::Problem{.code,.module_index,.start,.end};}
+pub fn bool project_prologue(ref ir::Program p,ref mut bytes::Buffer text,ref mut w::State s,ref mut usize work){
+    var usize i=1;var bool posix=false;while(i<=clean::type_count(ir::cleanup_ir(p))){if(!budget::charge(work,1)){s.code=1002;return false;}let t=clean::type_at(ir::cleanup_ir(p),i);if(t.kind==1 && t.scalar==138){posix=true;}i+=1;}
+    if(posix && !abi::posix_header(text,s)){return false;}
+    if(!w::text(text,s,b"/* fairyc.candidate-module-owned-c/v1 */\n#include <stdint.h>\n#include <limits.h>\n#include <string.h>\n_Static_assert(CHAR_BIT==8 && UINTPTR_MAX==UINT64_MAX,\"requires 64-bit target\");\n_Static_assert(INT32_MIN==(-INT32_MAX-1) && INT64_MIN==(-INT64_MAX-1),\"requires two's complement\");\n_Noreturn void fy_runtime_trap(uint32_t category);\n") || !scalar::helpers(text,s)){return false;}
+    // Keep aggregate reads from live owner storage behind an opaque CRT copy
+    // on MSVC. Inline aggregate copies cached a pre-view-write array element
+    // under /O2; the scalar helpers keep their normal intrinsic behavior.
+    if(!w::text(text,s,b"#ifdef _MSC_VER\n#pragma function(memcpy)\n__declspec(noinline)\n#endif\nstatic void fy_unit_copy(void *destination,const void *source,uintptr_t count){memcpy(destination,source,count);}\n#ifdef _MSC_VER\n#pragma intrinsic(memcpy)\n#endif\n")){return false;}
+    return true;
+}
+// A private transport from owned bodies through freshly lowered
+// CFGs. No parser/source owner or source join is used. Output is transactional.
+pub fn clean::Problem render_project(ref ir::Program p,usize entry,ref mut bytes::Buffer out){let named=names::empty();return render_named(p,ref named,entry,out);}
+pub fn clean::Problem render_identified(ref identified::Program program,usize entry,ref mut bytes::Buffer out){var usize work=0;let named=switch(names::build(program,ref mut work)){case .ok(p):{p}case .err(e):{return e;}};return render_named(identified::ir_program(program),ref named,entry,out);}
+fn clean::Problem render_named(ref ir::Program p,ref names::Table named,usize entry,ref mut bytes::Buffer out){
+    let checked=proof::check(p);if(checked.code!=0){return checked;}if(entry==0 || entry>ir::count(p)){return fail(1001,0,0,0);}let f=clean::frame_at(ir::cleanup_ir(p),entry);if(scalar::scalar(p,f.result)!=1 || calls::parameters(ir::at(p,entry))!=0){return fail(1001,f.module_index,0,0);}
+    let graphs=switch(flow::lower_all(p)){case .ok(g):{g}case .err(e):{return e;}};var usize work=0;if(!budget::charge(ref mut work,names::work(named)) || !names::matches(named,p,ref mut work)){return fail(if(work>=1048576){1002}else{1001},0,0,0);}var usize i=1;while(i<=v::len<cfg::Graph>(ref graphs)){if(!budget::charge(ref mut work,cfg::count(v::at<cfg::Graph>(ref graphs,i-1)))){return fail(1002,0,0,0);}i+=1;}
+    let sdk_plan=switch(sdk::build(p,ref mut work)){case .ok(p):{p}case .err(e):{return e;}};
+    let indexed=switch(contracts::build(p,ref mut work)){case .ok(index):{index}case .err(e):{return fail(e,0,0,0);}};
+    var bytes::Buffer text=bytes::empty();var w::State s=w::State{.code=0};
+    if(!project_prologue(p,ref mut text,ref mut s,ref mut work)){return fail(if(s.code==3){1003}else{1002},0,0,0);}
+    let marks=switch(aggregate::definitions(p,ref mut text,ref mut s,ref mut work)){case .ok(m):{m}case .err(e):{return fail(if(e<1000){if(e==3){1003}else{1002}}else{e},0,0,0);}};
+    if(!literals::definitions(p,ref mut text,ref mut s,ref mut work)){return fail(if(s.code<1000){if(s.code==3){1003}else{1002}}else{s.code},0,0,0);}
+    if(!w::text(ref mut text,ref mut s,b"#include <stddef.h>\n") || !sdk::definitions(p,ref sdk_plan,ref mut text,ref mut s,ref mut work) || !lifecycle::definitions(p,ref sdk_plan,ref mut text,ref mut s,ref mut work) || !calls::foreign_signatures(p,ref sdk_plan,ref indexed,ref mut text,ref mut s,ref mut work)){return fail(if(s.code<1000){if(s.code==3){1003}else{1002}}else{s.code},0,0,0);}
+    i=1;while(i<=ir::count(p)){if(!calls::signature(p,named,i,ref mut text,ref mut s,false) || !w::text(ref mut text,ref mut s,b";\n")){return fail(if(s.code<1000){if(s.code==3){1003}else{1002}}else{s.code},clean::frame_at(ir::cleanup_ir(p),i).module_index,ir::start(ir::at(p,i)),ir::end(ir::at(p,i)));}i+=1;}
+    if(!aggregate::drops_named(p,named,ref marks,ref mut text,ref mut s,ref mut work)){return fail(if(s.code<1000){if(s.code==3){1003}else{1002}}else{s.code},0,0,0);}
+    let body_index=switch(targets::build(p,ref indexed,ref mut work)){case .ok(index):{index}case .err(e):{return fail(e,0,0,0);}};
+    i=1;while(i<=ir::count(p)){var usize failed_start=ir::start(ir::at(p,i));var usize failed_end=ir::end(ir::at(p,i));if(!render(p,named,ref sdk_plan,ref indexed,ref body_index,v::at<cfg::Graph>(ref graphs,i-1),ref mut text,ref mut s,ref mut work,ref mut failed_start,ref mut failed_end,false)){return fail(if(s.code<1000){if(s.code==3){1003}else{1002}}else{s.code},clean::frame_at(ir::cleanup_ir(p),i).module_index,failed_start,failed_end);}i+=1;}
+    if(!w::text(ref mut text,ref mut s,b"int32_t fy_candidate_entry(void){return ") || !names::function(named,entry,ref mut text,ref mut s) || !w::text(ref mut text,ref mut s,b"();}\n#ifndef FY_CANDIDATE_NO_MAIN\nint main(void){return (int)fy_candidate_entry();}\n#endif\n")){return fail(if(s.code==3){1003}else{1002},0,0,0);}
+    if(bytes::len(out)>2097152 || bytes::len(ref text)>2097152-bytes::len(out)){return fail(1002,0,0,0);}return fail(if(bytes::append(out,bytes::view(ref text)).is_ok){0}else{1003},0,0,0);
 }

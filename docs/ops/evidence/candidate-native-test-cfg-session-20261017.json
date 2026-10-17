@@ -1,0 +1,86 @@
+{
+  "schema": "fairyc.candidate-native-test-cfg-session/v1",
+  "passed": true,
+  "sourceCheck": {
+    "argv": [
+      "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\cli-parity-rest-20261017\\final-candidate-split-verified\\source-version.exe",
+      "check"
+    ],
+    "exit": 0,
+    "stdout": "check ok: 2 instance(s), 525 source file(s), 6684 MIR function(s), lock updated\n",
+    "stderr": "",
+    "seconds": 27.33182609999494,
+    "referenceSHA256": "81d454176aeaedc66e639a1de8150c0af4d20be5dec61f48b2777ea19a4c2eea"
+  },
+  "nativeRegression": {
+    "argv": [
+      "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\cli-parity-rest-20261017\\final-candidate-split-verified\\source-version.exe",
+      "test",
+      "--native",
+      "--locked",
+      "--json",
+      "--exact",
+      "tests::module_project_complete_c::native_test_cfg_session_reuses_graphs_and_detaches_outputs"
+    ],
+    "exit": 0,
+    "stdout": "{\"schemaVersion\":\"fairyc.test-report/v1\",\"engine\":\"native\",\"target\":\"x86_64-windows-msvc\",\"profile\":\"development\",\"tests\":[{\"identity\":\"tests::module_project_complete_c::native_test_cfg_session_reuses_graphs_and_detaches_outputs\",\"outcome\":\"passed\",\"trapCategory\":null}],\"count\":1,\"passed\":1,\"failed\":0,\"status\":\"ok\",\"lock\":\"verified\"}\n",
+    "stderr": "",
+    "seconds": 59.72023320000153,
+    "referenceSHA256": "81d454176aeaedc66e639a1de8150c0af4d20be5dec61f48b2777ea19a4c2eea"
+  },
+  "fixture": {
+    "path": "examples/lexer_candidate/tests/module_project_complete_c.fy",
+    "sha256": "d5ef62bf1b0d0ccfef77b0cdd1f9af5889e2f4bb53148ed3712dcff996188a08"
+  },
+  "sourceInventorySHA256": "2fba7daa2f239cf0bf19369fd2b4730362eb3796bfb71e8a920db73a6d396fd3",
+  "sources": 517,
+  "changedSources": [
+    {
+      "path": "examples/lexer_candidate/src/module_project_c_owner.fy",
+      "sha256": "e78fb17f7fc6738a62d1c6ad4a79e5068e300412df76c111d88e83aec7bcc136"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_project_complete_c.fy",
+      "sha256": "adf7f418b4cac4e896d8bc1ca071772e98334ad777fa76a3b953d65195afb05b"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_unit_c_emit.fy",
+      "sha256": "677a7704b70d74d6248919b7b6507f9549ec557003e10c3648689860784e6194"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_unit_c_function.fy",
+      "sha256": "3cb424bac66a329720a14a97370a024b049fe1a9f66cda85585b1fc93551fe6a"
+    },
+    {
+      "path": "examples/lexer_candidate/src/native_cli.fy",
+      "sha256": "7f05e57d33c2538b35cd79e2798e376f6de6781f4160f0e670e248eaced36d2e"
+    }
+  ],
+  "legacyRendererMove": {
+    "movedBodySHA256": "c28421b7e690b501e3de7b981b8db05fc8a1a7cfe95a848b34d8c082865e83db",
+    "movedBodyBytes": 5483,
+    "newModuleAdded": false,
+    "reason": "Retain headroom below the previously reached 1048576 per-source borrow-analysis bound while adding the CFG session.",
+    "normalizedLegacyFunctionBodiesUnchanged": true,
+    "normalizedLegacySHA256": "f16ec8492581cc2775fb4029d368198ddd9c3a41985e2da1b7d89552f155f3fe"
+  },
+  "originalLockSHA256": "a6b52c6270c15ca237c31aed8ece8bbffc745556620c3b2c8dd5c651adc75e30",
+  "originalLockPreserved": true,
+  "assertions": [
+    "Two entries and repeated first emission match uncached C buffers, ranges, selected frames, work and retries.",
+    "Invalid entries and frame bounds return 1001 without consuming the session.",
+    "Destroying the session leaves prior output bytes valid.",
+    "A fresh session for a different program matches its own uncached output.",
+    "Graph preparation remains bounded and cached graph counts still enter each image ledger."
+  ],
+  "limitations": [
+    "Current-source C candidate CLI rebuild and end-to-end timing are a separate verification checkpoint.",
+    "Native regression ran in development on Windows; release and non-Windows not rerun."
+  ],
+  "stableCLIChanged": false,
+  "languageRulesChanged": false,
+  "sdkABIChanged": false,
+  "databaseChanged": false,
+  "ciChanged": false,
+  "limitsChanged": false
+}

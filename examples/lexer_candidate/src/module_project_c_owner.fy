@@ -4,6 +4,8 @@ import module_unit_body_ir_model as ir;
 import module_unit_cleanup_mir_model as clean;
 import project_compiler_core as compiler;
 import std::vec as v;
+import module_unit_cfg_model as cfg;
+import module_unit_cfg_lower as flow;
 
 // One owner retains ordinary, identified or complete IR through all C partitions.
 // Both borrow branches originate from this owner; no resource field is moved out.
@@ -15,3 +17,10 @@ pub fn Result<Program,clean::Problem> complete(compiler::Complete program){var v
 pub fn bool has_complete(ref Program p){return v::len<compiler::Complete>(ref p.complete)==1;}
 pub fn ref compiler::Complete complete_project(ref Program p){assert(has_complete(p));return v::at<compiler::Complete>(ref p.complete,0);}
 pub fn ref ir::Program ir_program(ref Program p){assert(v::len<ir::Program>(ref p.ordinary)+v::len<identified::Program>(ref p.identified)+v::len<compiler::Complete>(ref p.complete)==1);return if(v::len<ir::Program>(ref p.ordinary)==1){v::at<ir::Program>(ref p.ordinary,0)}else if(has_complete(p)){identified::ir_program(compiler::checked_program(complete_project(p)))}else{identified::ir_program(v::at<identified::Program>(ref p.identified,0))};}
+
+// The graph cache and its immutable IR owner cannot be assembled independently.
+// lower_all proves the complete IR before constructing any reusable graph.
+pub resource Lowered {Program program;v::Vec<cfg::Graph> graphs;cleanup{}}
+pub fn Result<Lowered,clean::Problem> lower(Program program){let graphs=switch(flow::lower_all(ir_program(ref program))){case .ok(p):{p}case .err(e):{return .err(e);}};return .ok(Lowered{.program,.graphs});}
+pub fn ref Program lowered_program(ref Lowered p){return ref p.program;}
+pub fn ref v::Vec<cfg::Graph> lowered_graphs(ref Lowered p){return ref p.graphs;}

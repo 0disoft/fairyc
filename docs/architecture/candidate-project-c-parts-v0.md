@@ -1,10 +1,44 @@
 # Candidate project C partitions v0
 
+## Reuse validated CFGs across native tests (2026-10-17)
+
+`module_project_complete_c::prepare_tests` consumes one `Complete` into a
+`TestSession`. Its private `module_project_c_owner::Lowered` retains both the
+immutable program and the graphs built by `flow::lower_all`. That constructor
+performs the full IR proof and graph checks before publishing the session.
+There is no mutable owner access, independently replaceable graph set, disk
+cache or reuse across CLI invocations.
+
+Each test borrows that session while generating its own names, SDK plan,
+indexes, entry reachability and C output. The returned `Emission` owns its
+buffers and metadata and retains neither graphs nor a session reference.
+Cached graph counts still enter every image's preparation/project work ledger;
+all work, frame, output and child-process bounds remain unchanged. With no
+selected tests, the CLI reports directly without creating a session.
+
+The scoped diagnostic measured 52.266 seconds in C generation across two tests:
+36.328 seconds in four IR proofs and 15.797 seconds in SDK planning. CFG lowering
+(17.781 seconds) includes two of those proofs; inclusive stages must not be
+summed. Reuse therefore targets the validated graph preparation, while SDK
+planning remains per-test. These are single development-profile observations
+under uncontrolled load, not a general benchmark. See
+[stage profile](../ops/evidence/candidate-native-c-emission-stage-profile-20261017.json).
+
+Legacy single-buffer rendering lives in the existing `module_unit_c_function`
+source unit, preserving its function bodies and the existing emitter API while
+leaving room under the per-source borrow-analysis limit. This adds no source
+module and does not increase the 512-file manifest bound.
+
+The focused native regression compares cached and uncached output, rejects invalid
+entries/frame bounds, destroys the session before reading its output again, and
+checks a fresh session for changed source. Source check and this regression pass.
+See [implementation evidence](../ops/evidence/candidate-native-test-cfg-session-20261017.json).
+
 ## Reuse checked IR across native tests (2026-10-17)
 
 `module_project_complete_c::emit_test` borrows the caller's checked `Complete`
 and returns an owned `Emission`. Preparation and C body rendering read that IR
-only during the call. The result owns its name table, CFGs, indexes, selected
+only during the call. The result owns its name table, indexes, selected
 frame metadata and C buffers; it retains no IR reference or resource owner.
 Invalid entries and exhausted budgets still return no output.
 
@@ -29,7 +63,8 @@ recovery, optimized children, SDK resources and per-test stdin replay.
 For the same six-test trap fixture, development compiler time changed from
 456.4 to 256.0 seconds and release compiler time from 44.3 to 26.4 seconds.
 These are single before/after observations under uncontrolled machine load.
-C preparation and native compilation still run separately for each test.
+At this earlier checkpoint, C preparation and native compilation still ran
+separately for each test.
 See [verification evidence](../ops/evidence/candidate-native-test-reuse-verification-20261017.json).
 
 ## Current whole-project work and bootstrap (2026-10-16)

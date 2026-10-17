@@ -35,3 +35,24 @@ fn void same_emission(ref c::Emission a,ref c::Emission b){assert(bytes::equal(c
     // Moving the original Complete proves these outputs carry no borrow of it.
     let packed=switch(complete_c::partition_test(result,first,1)){case .ok(p):{p}case .err(_):{assert(false);return;}};assert(complete_c::has_complete(ref packed));same_emission(ref a,c::project_emission(ref packed));
 }
+
+fn void finish_session(complete_c::TestSession p){assert(interfaces::count(core::public_interfaces(complete_c::test_program(ref p)))==1);}
+@test fn void native_test_cfg_session_reuses_graphs_and_detaches_outputs(){
+    let result=detached_source(b"module main;pub fn T id<T>(T value){return value;}fn i32 main(){return 0;}fn void alpha(){assert(id<i32>(42)==42);}fn void beta(){assert(true);}");let first=void_entry(ref result,0);let second=void_entry(ref result,1);
+    let expected=switch(complete_c::emit_test(ref result,first,1)){case .ok(p):{p}case .err(_):{assert(false);return;}};
+    let expected_second=switch(complete_c::emit_test(ref result,second,1)){case .ok(p):{p}case .err(_):{assert(false);return;}};
+    let session=switch(complete_c::prepare_tests(result)){case .ok(p):{p}case .err(_):{assert(false);return;}};
+    let a=switch(complete_c::emit_prepared_test(ref session,first,1)){case .ok(p):{p}case .err(_):{assert(false);return;}};
+    let b=switch(complete_c::emit_prepared_test(ref session,second,1)){case .ok(p):{p}case .err(_):{assert(false);return;}};same_emission(ref expected,ref a);same_emission(ref expected_second,ref b);
+    assert(switch(complete_c::emit_prepared_test(ref session,0,1)){case .ok(_):{false}case .err(e):{e.code==1001}});
+    assert(switch(complete_c::emit_prepared_test(ref session,100000,1)){case .ok(_):{false}case .err(e):{e.code==1001}});
+    assert(switch(complete_c::emit_prepared_test(ref session,first,0)){case .ok(_):{false}case .err(e):{e.code==1001}});
+    assert(switch(complete_c::emit_prepared_test(ref session,first,100000)){case .ok(_):{false}case .err(e):{e.code==1001}});
+    let again=switch(complete_c::emit_prepared_test(ref session,first,1)){case .ok(p):{p}case .err(_):{assert(false);return;}};same_emission(ref a,ref again);
+    // Session destruction must not invalidate any previously returned emission.
+    finish_session(session);same_emission(ref expected,ref a);same_emission(ref expected_second,ref b);
+    let changed=detached_source(b"module main;pub fn T id<T>(T value){return value;}fn i32 main(){return 0;}fn void alpha(){assert(id<i32>(7)==7);}");let changed_entry=void_entry(ref changed,0);
+    let changed_expected=switch(complete_c::emit_test(ref changed,changed_entry,1)){case .ok(p):{p}case .err(_):{assert(false);return;}};
+    let fresh=switch(complete_c::prepare_tests(changed)){case .ok(p):{p}case .err(_):{assert(false);return;}};
+    let changed_actual=switch(complete_c::emit_prepared_test(ref fresh,changed_entry,1)){case .ok(p):{p}case .err(_):{assert(false);return;}};finish_session(fresh);same_emission(ref changed_expected,ref changed_actual);
+}
