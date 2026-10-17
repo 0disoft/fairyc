@@ -120,23 +120,21 @@ pub fn Result<Bundle,clean::Problem> partition_project(project::Program program,
 pub fn Result<Bundle,clean::Problem> partition_project_entry(project::Program program,usize entry,usize max_frames){return partition_named(program,entry,max_frames,true);}
 pub fn ref owner::Program project_owner(ref Bundle p){return ref p.program;}
 pub fn ref Emission project_emission(ref Bundle p){return ref p.emission;}
-pub fn ref u8[] project_header(ref Bundle p){return emission_header(ref p.emission);}
-pub fn ref u8[] project_literals(ref Bundle p){return emission_literals(ref p.emission);}
-pub fn usize project_unit_count(ref Bundle p){return emission_unit_count(ref p.emission);}
-pub fn usize project_frames(ref Bundle p){return emission_frames(ref p.emission);}
-pub fn usize project_selected_frames(ref Bundle p){return emission_selected_frames(ref p.emission);}
-pub fn usize project_work(ref Bundle p){return emission_work(ref p.emission);}
-pub fn usize project_retries(ref Bundle p){return emission_retries(ref p.emission);}
-pub fn usize project_first(ref Bundle p,usize index){return emission_first(ref p.emission,index);}
-pub fn usize project_stop(ref Bundle p,usize index){return emission_stop(ref p.emission,index);}
-pub fn ref u8[] project_source(ref Bundle p,usize index){return emission_source(ref p.emission,index);}
+pub fn ref u8[] project_header(ref Bundle p){return bytes::view(ref p.emission.prepared.header);}
+pub fn ref u8[] project_literals(ref Bundle p){return bytes::view(ref p.emission.prepared.literal_source);}
+pub fn usize project_unit_count(ref Bundle p){return v::len<Unit>(ref p.emission.units);}
+pub fn usize project_frames(ref Bundle p){return p.emission.frames;}
+pub fn usize project_selected_frames(ref Bundle p){return reachable::count(ref p.emission.prepared.selected);}
+pub fn usize project_work(ref Bundle p){return p.emission.work;}
+pub fn usize project_retries(ref Bundle p){return p.emission.retries;}
+pub fn usize project_first(ref Bundle p,usize index){return v::at<Unit>(ref p.emission.units,index).first;}
+pub fn usize project_stop(ref Bundle p,usize index){return v::at<Unit>(ref p.emission.units,index).stop;}
+pub fn ref u8[] project_source(ref Bundle p,usize index){return bytes::view(ref v::at<Unit>(ref p.emission.units,index).text);}
 pub fn ref u8[] emission_header(ref Emission p){return bytes::view(ref p.prepared.header);}
 pub fn ref u8[] emission_literals(ref Emission p){return bytes::view(ref p.prepared.literal_source);}
 pub fn usize emission_unit_count(ref Emission p){return v::len<Unit>(ref p.units);}
-pub fn usize emission_frames(ref Emission p){return p.frames;}
-pub fn usize emission_selected_frames(ref Emission p){return reachable::count(ref p.prepared.selected);}
-pub fn usize emission_work(ref Emission p){return p.work;}
-pub fn usize emission_retries(ref Emission p){return p.retries;}
-pub fn usize emission_first(ref Emission p,usize index){return v::at<Unit>(ref p.units,index).first;}
-pub fn usize emission_stop(ref Emission p,usize index){return v::at<Unit>(ref p.units,index).stop;}
 pub fn ref u8[] emission_source(ref Emission p,usize index){return bytes::view(ref v::at<Unit>(ref p.units,index).text);}
+pub struct EmissionStats {usize frames;usize selected;usize work;usize retries;}
+pub struct UnitRange {usize first;usize stop;}
+pub fn EmissionStats emission_stats(ref Emission p){return EmissionStats{.frames=p.frames,.selected=reachable::count(ref p.prepared.selected),.work=p.work,.retries=p.retries};}
+pub fn UnitRange emission_range(ref Emission p,usize index){let unit=v::at<Unit>(ref p.units,index);return UnitRange{.first=unit.first,.stop=unit.stop};}

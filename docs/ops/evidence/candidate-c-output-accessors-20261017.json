@@ -1,0 +1,40 @@
+{
+  "schema": "fairyc.candidate-c-output-accessor-compaction/v1",
+  "sourceCheckPassed": true,
+  "failedBootstrap": {
+    "argv": [
+      "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\cli-parity-rest-20261017\\final-candidate-split-verified\\release\\fairyc.exe",
+      "--c-project-file",
+      "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\native-test-performance-20261017\\candidate\\sources.list"
+    ],
+    "seconds": 144.96013979999407,
+    "exit": 2,
+    "stdoutBytes": 0,
+    "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stderr": "examples/lexer_candidate/src/module_unit_c_emit.fy:1:1: error: project phase 2 stage 7 code 10 limit 1048576 attempted 1051760 (bytes 0..0)\n"
+  },
+  "sourceCheck": {
+    "argv": [
+      "check"
+    ],
+    "exit": 0,
+    "stdout": "check ok: 2 instance(s), 525 source file(s), 6672 MIR function(s), lock updated\n"
+  },
+  "change": "Keep Bundle getters direct and group detached-output metadata into EmissionStats and UnitRange, reducing four functions without exposing resource fields or adding modules.",
+  "sources": [
+    {
+      "path": "examples/lexer_candidate/src/module_unit_c_emit.fy",
+      "sha256": "17c821da63aed4c5645bf67aa52718dd3a2ef140d057b0615c09cbf10e34fa1a"
+    },
+    {
+      "path": "examples/lexer_candidate/tests/module_project_complete_c.fy",
+      "sha256": "c4b753fb30009344eacb37c624928e03cd44085dfcc88c6f6d92fbf3c485eb49"
+    }
+  ],
+  "limitsChanged": false,
+  "sourceModulesAdded": false,
+  "resourceFieldsExposed": false,
+  "limitations": [
+    "Full candidate bootstrap is retried after this source-check checkpoint."
+  ]
+}
