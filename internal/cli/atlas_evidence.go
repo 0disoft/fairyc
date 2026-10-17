@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"strings"
 
 	"github.com/0disoft/fairyc/internal/atlasmap"
 	"github.com/0disoft/fairyc/internal/attributedtext"
@@ -87,44 +86,38 @@ func runAtlasEvidence(arguments []string, sourceRoot string, stdout, stderr io.W
 func parseAtlasEvidenceOptions(arguments []string) (atlasEvidenceOptions, error) {
 	const command = "atlas-evidence show"
 	result := atlasEvidenceOptions{}
-	seen := make(map[string]bool, 4)
 	relationArguments := make([]string, 0, len(arguments))
-	for position := 0; position < len(arguments); {
-		flag := arguments[position]
-		if !isAtlasEvidenceLimit(flag) && flag != "--bundle-version" {
-			relationArguments = append(relationArguments, flag)
-			position++
-			continue
-		}
-		if seen[flag] {
-			return atlasEvidenceOptions{}, fmt.Errorf("experimental command %q received %s more than once", command, flag)
-		}
-		if position+1 >= len(arguments) || strings.HasPrefix(arguments[position+1], "--") {
-			return atlasEvidenceOptions{}, fmt.Errorf("experimental command %q requires a value for %s", command, flag)
-		}
-		seen[flag] = true
+	_, err := parseCommandFlags(arguments, flagSchema{Command: command, Experimental: true,
+		Flags: []flagDefinition{
+			{Name: "--bundle-version", Kind: flagScalar},
+			{Name: "--max-fragment-bytes", Kind: flagScalar},
+			{Name: "--max-text-bytes", Kind: flagScalar},
+			{Name: "--max-facts-bytes", Kind: flagScalar},
+			{Name: "--max-text-document-bytes", Kind: flagScalar},
+		},
+		Required: []string{
+			"--max-fragment-bytes", "--max-text-bytes", "--max-facts-bytes", "--max-text-document-bytes",
+		}, Forward: &relationArguments}, func(flag, valueText string) error {
 		if flag == "--bundle-version" {
-			version := arguments[position+1]
-			if version != "0" && version != "1" && version != "2" {
-				return atlasEvidenceOptions{}, fmt.Errorf("experimental command %q requires --bundle-version as 0, 1 or 2", command)
+			if valueText != "0" && valueText != "1" && valueText != "2" {
+				return fmt.Errorf("experimental command %q requires --bundle-version as 0, 1 or 2", command)
 			}
-			result.bundleVersion = version
-			position += 2
-			continue
+			result.bundleVersion = valueText
+			return nil
 		}
-		value, err := parseAtlasPositiveLimit(command, flag, arguments[position+1], maxAtlasPackBytes)
+		value, err := parseAtlasPositiveLimit(command, flag, valueText, maxAtlasPackBytes)
 		if err != nil {
-			return atlasEvidenceOptions{}, err
+			return err
 		}
 		switch flag {
 		case "--max-fragment-bytes":
 			if value > attributedtext.MaxFragmentBytesGuard {
-				return atlasEvidenceOptions{}, fmt.Errorf("experimental command %q requires %s as a canonical decimal from 1 through %d", command, flag, attributedtext.MaxFragmentBytesGuard)
+				return fmt.Errorf("experimental command %q requires %s as a canonical decimal from 1 through %d", command, flag, attributedtext.MaxFragmentBytesGuard)
 			}
 			result.maxFragmentBytes = value
 		case "--max-text-bytes":
 			if value > attributedtext.MaxTextBytesGuard {
-				return atlasEvidenceOptions{}, fmt.Errorf("experimental command %q requires %s as a canonical decimal from 1 through %d", command, flag, attributedtext.MaxTextBytesGuard)
+				return fmt.Errorf("experimental command %q requires %s as a canonical decimal from 1 through %d", command, flag, attributedtext.MaxTextBytesGuard)
 			}
 			result.maxTextBytes = value
 		case "--max-facts-bytes":
@@ -132,17 +125,13 @@ func parseAtlasEvidenceOptions(arguments []string) (atlasEvidenceOptions, error)
 		case "--max-text-document-bytes":
 			result.maxTextDocumentBytes = value
 		}
-		position += 2
+		return nil
+	})
+	if err != nil {
+		return atlasEvidenceOptions{}, err
 	}
-	for _, flag := range []string{
-		"--max-fragment-bytes", "--max-text-bytes", "--max-facts-bytes", "--max-text-document-bytes",
-	} {
-		if !seen[flag] {
-			return atlasEvidenceOptions{}, fmt.Errorf("experimental command %q requires %s", command, flag)
-		}
-	}
-	if result.maxFragmentBytes > result.maxTextBytes {
-		return atlasEvidenceOptions{}, fmt.Errorf("experimental command %q requires --max-fragment-bytes no greater than --max-text-bytes", command)
+	if err := validateFlagRules(flagRule{Invalid: result.maxFragmentBytes > result.maxTextBytes, Message: fmt.Sprintf("experimental command %q requires --max-fragment-bytes no greater than --max-text-bytes", command)}); err != nil {
+		return atlasEvidenceOptions{}, err
 	}
 	relation, err := parseAtlasRelationOptions(command, "show", relationArguments)
 	if err != nil {
@@ -150,9 +139,4 @@ func parseAtlasEvidenceOptions(arguments []string) (atlasEvidenceOptions, error)
 	}
 	result.relation = relation
 	return result, nil
-}
-
-func isAtlasEvidenceLimit(flag string) bool {
-	return flag == "--max-fragment-bytes" || flag == "--max-text-bytes" ||
-		flag == "--max-facts-bytes" || flag == "--max-text-document-bytes"
 }

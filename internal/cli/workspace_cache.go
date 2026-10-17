@@ -157,7 +157,16 @@ func runWorkspaceCacheCheck(arguments []string, sourceRoot string, stdout, stder
 func parseWorkspaceCacheOptions(arguments []string) (workspaceCacheOptions, error) {
 	options := workspaceCacheOptions{}
 	_, err := parseCommandFlags(arguments, flagSchema{Command: "check-workspace-cache", Experimental: true,
-		Flags: []flagDefinition{{Name: "--target", Kind: flagScalar}, {Name: "--cache-dir", Kind: flagScalar}, {Name: "--cache-max-entries", Kind: flagScalar}, {Name: "--cache-max-bytes", Kind: flagScalar}, {Name: "--cache-max-record-bytes", Kind: flagScalar}, {Name: "--cache-max-artifact-bytes", Kind: flagScalar}, {Name: "--cache-temp-max-age-seconds", Kind: flagScalar}, {Name: "--locked", Kind: flagSwitch}}, Required: []string{"--target", "--cache-dir", "--cache-max-entries", "--cache-max-bytes", "--cache-max-record-bytes", "--cache-max-artifact-bytes", "--cache-temp-max-age-seconds"}}, func(flag, value string) error {
+		Flags: []flagDefinition{
+			{Name: "--target", Kind: flagScalar},
+			{Name: "--cache-dir", Kind: flagScalar},
+			{Name: "--cache-max-entries", Kind: flagScalar},
+			{Name: "--cache-max-bytes", Kind: flagScalar},
+			{Name: "--cache-max-record-bytes", Kind: flagScalar},
+			{Name: "--cache-max-artifact-bytes", Kind: flagScalar},
+			{Name: "--cache-temp-max-age-seconds", Kind: flagScalar},
+			{Name: "--locked", Kind: flagSwitch},
+		}, Required: []string{"--target", "--cache-dir", "--cache-max-entries", "--cache-max-bytes", "--cache-max-record-bytes", "--cache-max-artifact-bytes", "--cache-temp-max-age-seconds"}}, func(flag, value string) error {
 		switch flag {
 		case "--locked":
 			options.locked = true

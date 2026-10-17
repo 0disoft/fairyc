@@ -144,7 +144,14 @@ func runWorkspaceCheckSession(arguments []string, sourceRoot string, stdin io.Re
 func parseWorkspaceSessionOptions(arguments []string) (workspaceSessionOptions, error) {
 	options := workspaceSessionOptions{}
 	_, err := parseCommandFlags(arguments, flagSchema{Command: "check-workspace-session", Experimental: true,
-		Flags: []flagDefinition{{Name: "--target", Kind: flagScalar}, {Name: "--max-requests", Kind: flagScalar}, {Name: "--cache-max-entries", Kind: flagScalar}, {Name: "--cache-max-bytes", Kind: flagScalar}, {Name: "--cache-max-artifact-bytes", Kind: flagScalar}, {Name: "--locked", Kind: flagSwitch}}, Required: []string{"--target", "--max-requests", "--cache-max-entries", "--cache-max-bytes", "--cache-max-artifact-bytes"}}, func(flag, value string) error {
+		Flags: []flagDefinition{
+			{Name: "--target", Kind: flagScalar},
+			{Name: "--max-requests", Kind: flagScalar},
+			{Name: "--cache-max-entries", Kind: flagScalar},
+			{Name: "--cache-max-bytes", Kind: flagScalar},
+			{Name: "--cache-max-artifact-bytes", Kind: flagScalar},
+			{Name: "--locked", Kind: flagSwitch},
+		}, Required: []string{"--target", "--max-requests", "--cache-max-entries", "--cache-max-bytes", "--cache-max-artifact-bytes"}}, func(flag, value string) error {
 		switch flag {
 		case "--locked":
 			options.locked = true

@@ -76,83 +76,70 @@ func runAtlasText(arguments []string, sourceRoot string, stdout, stderr io.Write
 func parseAtlasTextOptions(action string, arguments []string) (atlasTextOptions, error) {
 	command := "atlas-text " + action
 	options := atlasTextOptions{}
-	seen := make(map[string]bool, 8)
-	for position := 0; position < len(arguments); {
-		flag := arguments[position]
-		if flag == "--locked" {
-			if seen[flag] {
-				return atlasTextOptions{}, fmt.Errorf("experimental command %q received %s more than once", command, flag)
-			}
-			seen[flag], options.locked = true, true
-			position++
-			continue
-		}
+	_, err := parseCommandFlags(arguments, flagSchema{Command: command, Experimental: true, Flags: []flagDefinition{
+		{Name: "--package-uid", Kind: flagScalar},
+		{Name: "--symbol", Kind: flagScalar},
+		{Name: "--origin", Kind: flagScalar},
+		{Name: "--max-fragments", Kind: flagScalar},
+		{Name: "--max-fragment-bytes", Kind: flagScalar},
+		{Name: "--max-text-bytes", Kind: flagScalar},
+		{Name: "--max-output-bytes", Kind: flagScalar},
+		{Name: "--locked", Kind: flagSwitch},
+	}, Required: []string{
+		"--package-uid", "--symbol", "--origin", "--max-fragments",
+		"--max-fragment-bytes", "--max-text-bytes", "--max-output-bytes",
+	}}, func(flag, value string) error {
 		switch flag {
-		case "--package-uid", "--symbol", "--origin", "--max-fragments", "--max-fragment-bytes", "--max-text-bytes", "--max-output-bytes":
-		default:
-			return atlasTextOptions{}, fmt.Errorf("experimental command %q does not accept flag %q", command, flag)
-		}
-		if seen[flag] {
-			return atlasTextOptions{}, fmt.Errorf("experimental command %q received %s more than once", command, flag)
-		}
-		if position+1 >= len(arguments) || strings.HasPrefix(arguments[position+1], "--") {
-			return atlasTextOptions{}, fmt.Errorf("experimental command %q requires a value for %s", command, flag)
-		}
-		seen[flag] = true
-		value := arguments[position+1]
-		switch flag {
+		case "--locked":
+			options.locked = true
 		case "--package-uid":
 			if err := validateAtlasPackageUID(command, value); err != nil {
-				return atlasTextOptions{}, err
+				return err
 			}
 			options.packageUID = value
 		case "--symbol":
 			if err := validateAtlasTextSymbol(command, value); err != nil {
-				return atlasTextOptions{}, err
+				return err
 			}
 			options.symbol = value
 		case "--origin":
 			options.origin = attributedtext.Origin(value)
 			if options.origin != attributedtext.OriginWorkspaceAuthored {
-				return atlasTextOptions{}, fmt.Errorf("experimental command %q supports only --origin workspace-authored", command)
+				return fmt.Errorf("experimental command %q supports only --origin workspace-authored", command)
 			}
 		case "--max-fragments":
 			parsed, err := parseAtlasPositiveLimit(command, flag, value, attributedtext.MaxFragmentsGuard)
 			if err != nil {
-				return atlasTextOptions{}, err
+				return err
 			}
 			options.maxFragments = int(parsed)
 		case "--max-fragment-bytes":
 			parsed, err := parseAtlasPositiveLimit(command, flag, value, attributedtext.MaxFragmentBytesGuard)
 			if err != nil {
-				return atlasTextOptions{}, err
+				return err
 			}
 			options.maxFragmentBytes = parsed
 		case "--max-text-bytes":
 			parsed, err := parseAtlasPositiveLimit(command, flag, value, attributedtext.MaxTextBytesGuard)
 			if err != nil {
-				return atlasTextOptions{}, err
+				return err
 			}
 			options.maxTextBytes = parsed
 		case "--max-output-bytes":
 			parsed, err := parseAtlasPositiveLimit(command, flag, value, maxAtlasPackBytes)
 			if err != nil {
-				return atlasTextOptions{}, err
+				return err
 			}
 			options.maxOutputBytes = parsed
 		}
-		position += 2
+		return nil
+	})
+	if err != nil {
+		return atlasTextOptions{}, err
 	}
-	for _, flag := range []string{
-		"--package-uid", "--symbol", "--origin", "--max-fragments",
-		"--max-fragment-bytes", "--max-text-bytes", "--max-output-bytes",
-	} {
-		if !seen[flag] {
-			return atlasTextOptions{}, fmt.Errorf("experimental command %q requires %s", command, flag)
-		}
-	}
-	if options.maxFragmentBytes > options.maxTextBytes {
-		return atlasTextOptions{}, fmt.Errorf("experimental command %q requires --max-fragment-bytes no greater than --max-text-bytes", command)
+
+	if err := validateFlagRules(flagRule{Invalid: options.maxFragmentBytes > options.maxTextBytes, Message: fmt.Sprintf("experimental command %q requires --max-fragment-bytes no greater than --max-text-bytes", command)}); err != nil {
+		return atlasTextOptions{}, err
 	}
 	return options, nil
 }

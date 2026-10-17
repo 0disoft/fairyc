@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"strings"
 
 	"github.com/0disoft/fairyc/internal/atlasmap"
 	"github.com/0disoft/fairyc/internal/symbolidentity"
@@ -83,78 +82,65 @@ func runAtlasCalls(arguments []string, sourceRoot string, stdout, stderr io.Writ
 
 func parseAtlasCallsOptions(arguments []string) (atlasCallsOptions, error) {
 	options := atlasCallsOptions{}
-	seen := make(map[string]bool, 7)
-	for position := 0; position < len(arguments); {
-		flag := arguments[position]
-		if flag == "--locked" {
-			if seen[flag] {
-				return atlasCallsOptions{}, fmt.Errorf("experimental command \"atlas-calls list\" received %s more than once", flag)
-			}
-			seen[flag], options.locked = true, true
-			position++
-			continue
-		}
+	_, err := parseCommandFlags(arguments, flagSchema{Command: "atlas-calls list", Experimental: true, Flags: []flagDefinition{
+		{Name: "--catalog-version", Kind: flagScalar},
+		{Name: "--package-uid", Kind: flagScalar},
+		{Name: "--symbol", Kind: flagScalar},
+		{Name: "--direction", Kind: flagScalar},
+		{Name: "--max-packages", Kind: flagScalar},
+		{Name: "--max-calls", Kind: flagScalar},
+		{Name: "--max-output-bytes", Kind: flagScalar},
+		{Name: "--locked", Kind: flagSwitch},
+	}, Required: []string{"--package-uid", "--symbol", "--direction", "--max-packages", "--max-calls", "--max-output-bytes"}}, func(flag, value string) error {
 		switch flag {
-		case "--catalog-version", "--package-uid", "--symbol", "--direction", "--max-packages", "--max-calls", "--max-output-bytes":
-		default:
-			return atlasCallsOptions{}, fmt.Errorf("experimental command \"atlas-calls list\" does not accept flag %q", flag)
-		}
-		if seen[flag] {
-			return atlasCallsOptions{}, fmt.Errorf("experimental command \"atlas-calls list\" received %s more than once", flag)
-		}
-		if position+1 >= len(arguments) || strings.HasPrefix(arguments[position+1], "--") {
-			return atlasCallsOptions{}, fmt.Errorf("experimental command \"atlas-calls list\" requires a value for %s", flag)
-		}
-		seen[flag] = true
-		value := arguments[position+1]
-		switch flag {
+		case "--locked":
+			options.locked = true
 		case "--catalog-version":
 			if value != "0" && value != "1" && value != "2" {
-				return atlasCallsOptions{}, fmt.Errorf("experimental command \"atlas-calls list\" requires --catalog-version as 0, 1 or 2")
+				return fmt.Errorf("experimental command \"atlas-calls list\" requires --catalog-version as 0, 1 or 2")
 			}
 			options.catalogVersion = value
 		case "--package-uid":
 			if err := validateAtlasPackageUID("atlas-calls list", value); err != nil {
-				return atlasCallsOptions{}, err
+				return err
 			}
 			options.packageUID = value
 		case "--symbol":
 			if _, err := symbolidentity.ParseVisibleID(value); err != nil {
 				if _, fullErr := symbolidentity.ParseFullDigest(value); fullErr != nil {
-					return atlasCallsOptions{}, fmt.Errorf("experimental command \"atlas-calls list\" requires --symbol as a canonical visible or full SymbolId")
+					return fmt.Errorf("experimental command \"atlas-calls list\" requires --symbol as a canonical visible or full SymbolId")
 				}
 			}
 			options.symbol = value
 		case "--direction":
 			options.direction = atlasmap.QueryDirection(value)
 			if options.direction != atlasmap.DirectionOutgoing && options.direction != atlasmap.DirectionIncoming && options.direction != atlasmap.DirectionBoth {
-				return atlasCallsOptions{}, fmt.Errorf("experimental command \"atlas-calls list\" does not support direction %q", value)
+				return fmt.Errorf("experimental command \"atlas-calls list\" does not support direction %q", value)
 			}
 		case "--max-packages":
 			parsed, err := parseAtlasPositiveLimit("atlas-calls list", flag, value, maxAtlasPackRecords)
 			if err != nil {
-				return atlasCallsOptions{}, err
+				return err
 			}
 			options.maxPackages = int(parsed)
 		case "--max-calls":
 			parsed, err := parseAtlasPositiveLimit("atlas-calls list", flag, value, maxAtlasPackRecords)
 			if err != nil {
-				return atlasCallsOptions{}, err
+				return err
 			}
 			options.maxCalls = int(parsed)
 		case "--max-output-bytes":
 			parsed, err := parseAtlasPositiveLimit("atlas-calls list", flag, value, maxAtlasPackBytes)
 			if err != nil {
-				return atlasCallsOptions{}, err
+				return err
 			}
 			options.maxOutputBytes = parsed
 		}
-		position += 2
+		return nil
+	})
+	if err != nil {
+		return atlasCallsOptions{}, err
 	}
-	for _, flag := range []string{"--package-uid", "--symbol", "--direction", "--max-packages", "--max-calls", "--max-output-bytes"} {
-		if !seen[flag] {
-			return atlasCallsOptions{}, fmt.Errorf("experimental command \"atlas-calls list\" requires %s", flag)
-		}
-	}
+
 	return options, nil
 }

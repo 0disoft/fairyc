@@ -75,60 +75,55 @@ func parseAtlasPackRelationOptions(query string, arguments []string) (atlasPackR
 
 func parseAtlasRelationOptions(command, query string, arguments []string) (atlasPackRelationOptions, error) {
 	options := atlasPackRelationOptions{}
-	seen := make(map[string]bool, 10)
-	for position := 0; position < len(arguments); {
-		flag := arguments[position]
-		if flag == "--locked" {
-			if seen[flag] {
-				return atlasPackRelationOptions{}, fmt.Errorf("experimental command %q received %s more than once", command, flag)
-			}
-			seen[flag], options.locked = true, true
-			position++
-			continue
-		}
-		allowed := flag == "--package-uid" || flag == "--symbol" || flag == "--direction" ||
-			flag == "--relation" || flag == "--max-records" || flag == "--max-relations" ||
-			flag == "--max-selection-bytes" || flag == "--max-output-bytes" || query == "around" && flag == "--max-depth" ||
-			flag == "--pack-version" && (command == "atlas-pack show" || command == "atlas-pack around")
-		if !allowed {
-			return atlasPackRelationOptions{}, fmt.Errorf("experimental command %q does not accept flag %q", command, flag)
-		}
-		if flag != "--relation" && seen[flag] {
-			return atlasPackRelationOptions{}, fmt.Errorf("experimental command %q received %s more than once", command, flag)
-		}
-		if position+1 >= len(arguments) || strings.HasPrefix(arguments[position+1], "--") {
-			return atlasPackRelationOptions{}, fmt.Errorf("experimental command %q requires a value for %s", command, flag)
-		}
-		seen[flag] = true
-		value := arguments[position+1]
+	required := []string{"--package-uid", "--symbol", "--direction", "--max-records", "--max-relations", "--max-selection-bytes", "--max-output-bytes"}
+	if query == "around" {
+		required = append(required, "--max-depth")
+	}
+	flags := []flagDefinition{
+		{Name: "--package-uid", Kind: flagScalar},
+		{Name: "--symbol", Kind: flagScalar},
+		{Name: "--direction", Kind: flagScalar},
+		{Name: "--max-records", Kind: flagScalar},
+		{Name: "--max-relations", Kind: flagScalar},
+		{Name: "--max-selection-bytes", Kind: flagScalar},
+		{Name: "--max-output-bytes", Kind: flagScalar},
+		{Name: "--relation", Kind: flagSlice, DuplicateValue: fmt.Sprintf("experimental command %q repeats relation %%q", command)},
+		{Name: "--locked", Kind: flagSwitch},
+	}
+	if query == "around" {
+		flags = append(flags, flagDefinition{Name: "--max-depth", Kind: flagScalar})
+	}
+	if command == "atlas-pack show" || command == "atlas-pack around" {
+		flags = append(flags, flagDefinition{Name: "--pack-version", Kind: flagScalar})
+	}
+	_, err := parseCommandFlags(arguments, flagSchema{Command: command, Experimental: true, Flags: flags, Required: required}, func(flag, value string) error {
 		switch flag {
+		case "--locked":
+			options.locked = true
 		case "--pack-version":
 			if value != "1" && value != "2" && value != "3" {
-				return atlasPackRelationOptions{}, fmt.Errorf("experimental command %q requires --pack-version as 1, 2 or 3", command)
+				return fmt.Errorf("experimental command %q requires --pack-version as 1, 2 or 3", command)
 			}
 			options.packVersion = value
 		case "--package-uid":
 			if err := validateAtlasPackageUID(command, value); err != nil {
-				return atlasPackRelationOptions{}, err
+				return err
 			}
 			options.packageUID = value
 		case "--symbol":
 			if err := validateAtlasSymbol(value); err != nil {
-				return atlasPackRelationOptions{}, err
+				return err
 			}
 			options.symbol = value
 		case "--direction":
 			options.direction = atlasmap.QueryDirection(value)
 			if !slices.Contains([]atlasmap.QueryDirection{atlasmap.DirectionOutgoing, atlasmap.DirectionIncoming, atlasmap.DirectionBoth}, options.direction) {
-				return atlasPackRelationOptions{}, fmt.Errorf("experimental command %q does not support direction %q", command, value)
+				return fmt.Errorf("experimental command %q does not support direction %q", command, value)
 			}
 		case "--relation":
 			relation := atlasmap.RelationKind(value)
 			if !slices.Contains(atlasmap.AllRelationKinds(), relation) {
-				return atlasPackRelationOptions{}, fmt.Errorf("experimental command %q does not support relation %q", command, value)
-			}
-			if slices.Contains(options.relations, relation) {
-				return atlasPackRelationOptions{}, fmt.Errorf("experimental command %q repeats relation %q", command, value)
+				return fmt.Errorf("experimental command %q does not support relation %q", command, value)
 			}
 			options.relations = append(options.relations, relation)
 		case "--max-records", "--max-relations", "--max-selection-bytes", "--max-output-bytes":
@@ -138,7 +133,7 @@ func parseAtlasRelationOptions(command, query string, arguments []string) (atlas
 			}
 			parsed, err := parseAtlasPositiveLimit(command, flag, value, maximum)
 			if err != nil {
-				return atlasPackRelationOptions{}, err
+				return err
 			}
 			switch flag {
 			case "--max-records":
@@ -153,23 +148,17 @@ func parseAtlasRelationOptions(command, query string, arguments []string) (atlas
 		case "--max-depth":
 			parsed, err := parseAtlasNonnegativeLimit(command, flag, value, maxAtlasPackDepth)
 			if err != nil {
-				return atlasPackRelationOptions{}, err
+				return err
 			}
 			options.maxDepth = int(parsed)
 		}
-		position += 2
+		return nil
+	})
+	if err != nil {
+		return atlasPackRelationOptions{}, err
 	}
-	required := []string{"--package-uid", "--symbol", "--direction", "--max-records", "--max-relations", "--max-selection-bytes", "--max-output-bytes"}
-	if query == "around" {
-		required = append(required, "--max-depth")
-	}
-	for _, flag := range required {
-		if !seen[flag] {
-			return atlasPackRelationOptions{}, fmt.Errorf("experimental command %q requires %s", command, flag)
-		}
-	}
-	if len(options.relations) == 0 {
-		return atlasPackRelationOptions{}, fmt.Errorf("experimental command %q requires at least one --relation", command)
+	if err := validateFlagRules(flagRule{Invalid: len(options.relations) == 0, Message: fmt.Sprintf("experimental command %q requires at least one --relation", command)}); err != nil {
+		return atlasPackRelationOptions{}, err
 	}
 	slices.Sort(options.relations)
 	return options, nil

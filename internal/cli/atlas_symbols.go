@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"io"
 	"slices"
-	"strings"
 
 	"github.com/0disoft/fairyc/internal/atlasmap"
 	"github.com/0disoft/fairyc/internal/semanticsnapshot"
@@ -71,93 +70,79 @@ func runAtlasSymbols(arguments []string, sourceRoot string, stdout, stderr io.Wr
 
 func parseAtlasSymbolsOptions(arguments []string) (atlasSymbolsOptions, error) {
 	options := atlasSymbolsOptions{}
-	seen := make(map[string]bool, 9)
-	for position := 0; position < len(arguments); {
-		flag := arguments[position]
-		if flag == "--locked" {
-			if seen[flag] {
-				return atlasSymbolsOptions{}, fmt.Errorf("experimental command \"atlas-symbols list\" received %s more than once", flag)
-			}
-			seen[flag], options.locked = true, true
-			position++
-			continue
-		}
+	_, err := parseCommandFlags(arguments, flagSchema{Command: "atlas-symbols list", Experimental: true, Flags: []flagDefinition{
+		{Name: "--catalog-version", Kind: flagScalar},
+		{Name: "--package-uid", Kind: flagScalar},
+		{Name: "--module", Kind: flagScalar},
+		{Name: "--name", Kind: flagScalar},
+		{Name: "--after", Kind: flagScalar},
+		{Name: "--max-symbols", Kind: flagScalar},
+		{Name: "--max-selection-bytes", Kind: flagScalar},
+		{Name: "--max-output-bytes", Kind: flagScalar},
+		{Name: "--kind", Kind: flagSlice, DuplicateValue: `experimental command "atlas-symbols list" repeats declaration kind %q`},
+		{Name: "--locked", Kind: flagSwitch},
+	}, Required: []string{"--package-uid", "--max-symbols", "--max-selection-bytes", "--max-output-bytes"}}, func(flag, value string) error {
 		switch flag {
-		case "--catalog-version", "--package-uid", "--module", "--name", "--kind", "--after", "--max-symbols", "--max-selection-bytes", "--max-output-bytes":
-		default:
-			return atlasSymbolsOptions{}, fmt.Errorf("experimental command \"atlas-symbols list\" does not accept flag %q", flag)
-		}
-		if flag != "--kind" && seen[flag] {
-			return atlasSymbolsOptions{}, fmt.Errorf("experimental command \"atlas-symbols list\" received %s more than once", flag)
-		}
-		if position+1 >= len(arguments) || strings.HasPrefix(arguments[position+1], "--") {
-			return atlasSymbolsOptions{}, fmt.Errorf("experimental command \"atlas-symbols list\" requires a value for %s", flag)
-		}
-		seen[flag] = true
-		value := arguments[position+1]
-		switch flag {
+		case "--locked":
+			options.locked = true
 		case "--catalog-version":
 			if value != "1" && value != "2" && value != "3" {
-				return atlasSymbolsOptions{}, fmt.Errorf("experimental command \"atlas-symbols list\" requires --catalog-version as 1, 2 or 3")
+				return fmt.Errorf("experimental command \"atlas-symbols list\" requires --catalog-version as 1, 2 or 3")
 			}
 			options.catalogVersion = value
 		case "--package-uid":
 			if err := validateAtlasPackageUID("atlas-symbols list", value); err != nil {
-				return atlasSymbolsOptions{}, err
+				return err
 			}
 			options.packageUID = value
 		case "--module":
 			if value == "" || len(value) > 512 {
-				return atlasSymbolsOptions{}, fmt.Errorf("experimental command \"atlas-symbols list\" requires --module as 1 through 512 bytes")
+				return fmt.Errorf("experimental command \"atlas-symbols list\" requires --module as 1 through 512 bytes")
 			}
 			options.module = value
 		case "--name":
 			if len(value) > 512 || !source.ValidIdentifier(value) {
-				return atlasSymbolsOptions{}, fmt.Errorf("experimental command \"atlas-symbols list\" requires --name as an exact Stage 0 identifier of at most 512 bytes")
+				return fmt.Errorf("experimental command \"atlas-symbols list\" requires --name as an exact Stage 0 identifier of at most 512 bytes")
 			}
 			options.name = value
 		case "--kind":
 			kind := semanticsnapshot.DeclarationKind(value)
 			if !slices.Contains(atlasmap.AllDeclarationKinds(), kind) {
-				return atlasSymbolsOptions{}, fmt.Errorf("experimental command \"atlas-symbols list\" does not support declaration kind %q", value)
-			}
-			if slices.Contains(options.kinds, kind) {
-				return atlasSymbolsOptions{}, fmt.Errorf("experimental command \"atlas-symbols list\" repeats declaration kind %q", value)
+				return fmt.Errorf("experimental command \"atlas-symbols list\" does not support declaration kind %q", value)
 			}
 			options.kinds = append(options.kinds, kind)
 		case "--after":
 			if _, err := symbolidentity.ParseFullDigest(value); err != nil {
-				return atlasSymbolsOptions{}, fmt.Errorf("experimental command \"atlas-symbols list\" requires --after as a canonical full SymbolId")
+				return fmt.Errorf("experimental command \"atlas-symbols list\" requires --after as a canonical full SymbolId")
 			}
 			options.after = value
 		case "--max-symbols":
 			parsed, err := parseAtlasPositiveLimit("atlas-symbols list", flag, value, maxAtlasPackRecords)
 			if err != nil {
-				return atlasSymbolsOptions{}, err
+				return err
 			}
 			options.maxSymbols = int(parsed)
 		case "--max-selection-bytes":
 			parsed, err := parseAtlasPositiveLimit("atlas-symbols list", flag, value, maxAtlasPackBytes)
 			if err != nil {
-				return atlasSymbolsOptions{}, err
+				return err
 			}
 			options.maxSelectionBytes = parsed
 		case "--max-output-bytes":
 			parsed, err := parseAtlasPositiveLimit("atlas-symbols list", flag, value, maxAtlasPackBytes)
 			if err != nil {
-				return atlasSymbolsOptions{}, err
+				return err
 			}
 			options.maxOutputBytes = parsed
 		}
-		position += 2
+		return nil
+	})
+	if err != nil {
+		return atlasSymbolsOptions{}, err
 	}
-	for _, flag := range []string{"--package-uid", "--max-symbols", "--max-selection-bytes", "--max-output-bytes"} {
-		if !seen[flag] {
-			return atlasSymbolsOptions{}, fmt.Errorf("experimental command \"atlas-symbols list\" requires %s", flag)
-		}
-	}
-	if len(options.kinds) == 0 {
-		return atlasSymbolsOptions{}, fmt.Errorf("experimental command \"atlas-symbols list\" requires at least one --kind")
+
+	if err := validateFlagRules(flagRule{Invalid: len(options.kinds) == 0, Message: fmt.Sprintf("experimental command \"atlas-symbols list\" requires at least one --kind")}); err != nil {
+		return atlasSymbolsOptions{}, err
 	}
 	slices.Sort(options.kinds)
 	return options, nil

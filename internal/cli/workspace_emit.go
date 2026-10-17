@@ -81,7 +81,10 @@ func rejectRemovedStableEmit(stderr io.Writer) int {
 func parseExperimentalWorkspaceEmitOptions(arguments []string) (experimentalWorkspaceEmitOptions, error) {
 	options := experimentalWorkspaceEmitOptions{}
 	_, err := parseCommandFlags(arguments, flagSchema{Command: experimentalWorkspaceCCommand, Experimental: true,
-		Flags: []flagDefinition{{Name: "--locked", Kind: flagSwitch}, {Name: "--target", Kind: flagScalar}}, Required: []string{"--target"},
+		Flags: []flagDefinition{
+			{Name: "--locked", Kind: flagSwitch},
+			{Name: "--target", Kind: flagScalar},
+		}, Required: []string{"--target"},
 		Unknown: func(flag string) error {
 			return fmt.Errorf(`experimental command %q does not accept argument %q`, experimentalWorkspaceCCommand, flag)
 		},

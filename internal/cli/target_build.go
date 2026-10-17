@@ -123,7 +123,12 @@ func parseTargetBuildOptions(arguments []string) (targetBuildOptions, error) {
 		return targetBuildOptions{}, fmt.Errorf("experimental command \"build-target\" expects the source file before its flags")
 	}
 	_, err := parseCommandFlags(arguments[1:], flagSchema{Command: "build-target", Experimental: true,
-		Flags: []flagDefinition{{Name: "--source", Kind: flagSlice}, {Name: "--target", Kind: flagScalar}, {Name: "--profile", Kind: flagScalar}, {Name: "--output", Kind: flagScalar}}, Required: []string{"--target", "--profile", "--output"}}, func(flag, value string) error {
+		Flags: []flagDefinition{
+			{Name: "--source", Kind: flagSlice},
+			{Name: "--target", Kind: flagScalar},
+			{Name: "--profile", Kind: flagScalar},
+			{Name: "--output", Kind: flagScalar},
+		}, Required: []string{"--target", "--profile", "--output"}}, func(flag, value string) error {
 		switch flag {
 		case "--source":
 			if err := appendProgramSource("build-target", &options.additionalSources, value); err != nil {

@@ -48,7 +48,11 @@ func parseHostBuildOptions(arguments []string) (hostBuildOptions, error) {
 		return hostBuildOptions{}, fmt.Errorf("experimental command \"build-host\" expects the source file before its flags")
 	}
 	_, err := parseCommandFlags(arguments[1:], flagSchema{Command: "build-host", Experimental: true,
-		Flags: []flagDefinition{{Name: "--source", Kind: flagSlice}, {Name: "--profile", Kind: flagScalar}, {Name: "--output", Kind: flagScalar}}, Required: []string{"--profile", "--output"}}, func(flag, value string) error {
+		Flags: []flagDefinition{
+			{Name: "--source", Kind: flagSlice},
+			{Name: "--profile", Kind: flagScalar},
+			{Name: "--output", Kind: flagScalar},
+		}, Required: []string{"--profile", "--output"}}, func(flag, value string) error {
 		switch flag {
 		case "--source":
 			if err := appendProgramSource("build-host", &options.additionalSources, value); err != nil {

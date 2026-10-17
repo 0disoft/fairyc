@@ -159,7 +159,10 @@ func splitStableProgramArguments(command string, arguments []string) (compilerAr
 func parseStableNativeOptions(command string, arguments []string) (stableNativeOptions, error) {
 	options := stableNativeOptions{}
 	_, err := parseCommandFlags(arguments, flagSchema{Command: command,
-		Flags: []flagDefinition{{Name: "--locked", Kind: flagSwitch}, {Name: "--release", Kind: flagSwitch}},
+		Flags: []flagDefinition{
+			{Name: "--locked", Kind: flagSwitch},
+			{Name: "--release", Kind: flagSwitch},
+		},
 		Unknown: func(string) error {
 			return fmt.Errorf(`command %q accepts only optional --release and --locked`, command)
 		},
@@ -261,7 +264,11 @@ func runWorkspaceTarget(arguments []string, sourceRoot string, stdout, stderr io
 
 func parseWorkspaceTargetOptions(command string, arguments []string, requireOutput bool) (workspaceTargetOptions, error) {
 	options := workspaceTargetOptions{}
-	flags := []flagDefinition{{Name: "--locked", Kind: flagSwitch}, {Name: "--target", Kind: flagScalar}, {Name: "--profile", Kind: flagScalar}}
+	flags := []flagDefinition{
+		{Name: "--locked", Kind: flagSwitch},
+		{Name: "--target", Kind: flagScalar},
+		{Name: "--profile", Kind: flagScalar},
+	}
 	required := []string{"--target", "--profile"}
 	if requireOutput {
 		flags = append(flags, flagDefinition{Name: "--output", Kind: flagScalar})

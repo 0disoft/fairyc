@@ -64,7 +64,11 @@ func parseTargetExecutionOptions(command string, arguments []string) (targetRunO
 		return targetRunOptions{}, fmt.Errorf("experimental command %q expects the source file before its flags", command)
 	}
 	_, err := parseCommandFlags(arguments[1:], flagSchema{Command: command, Experimental: true,
-		Flags: []flagDefinition{{Name: "--source", Kind: flagSlice}, {Name: "--target", Kind: flagScalar}, {Name: "--profile", Kind: flagScalar}}, Required: []string{"--target", "--profile"}}, func(flag, value string) error {
+		Flags: []flagDefinition{
+			{Name: "--source", Kind: flagSlice},
+			{Name: "--target", Kind: flagScalar},
+			{Name: "--profile", Kind: flagScalar},
+		}, Required: []string{"--target", "--profile"}}, func(flag, value string) error {
 		switch flag {
 		case "--source":
 			if err := appendProgramSource(command, &options.additionalSources, value); err != nil {

@@ -83,7 +83,10 @@ func parseHostRunOptions(arguments []string) (hostRunOptions, error) {
 		return hostRunOptions{}, fmt.Errorf("experimental command \"run-host\" expects the entry source file before its flags")
 	}
 	options := hostRunOptions{source: arguments[0]}
-	_, err := parseCommandFlags(arguments[1:], flagSchema{Command: "run-host", Experimental: true, Flags: []flagDefinition{{Name: "--source", Kind: flagSlice}, {Name: "--profile", Kind: flagScalar}}, Required: []string{"--profile"}}, func(flag, value string) error {
+	_, err := parseCommandFlags(arguments[1:], flagSchema{Command: "run-host", Experimental: true, Flags: []flagDefinition{
+		{Name: "--source", Kind: flagSlice},
+		{Name: "--profile", Kind: flagScalar},
+	}, Required: []string{"--profile"}}, func(flag, value string) error {
 		switch flag {
 		case "--source":
 			if err := appendProgramSource("run-host", &options.additionalSources, value); err != nil {

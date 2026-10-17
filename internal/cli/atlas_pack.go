@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io"
 	"strconv"
-	"strings"
 
 	"github.com/0disoft/fairyc/internal/atlasmap"
 	"github.com/0disoft/fairyc/internal/buildidentity"
@@ -229,67 +228,52 @@ func selectAtlasPartition(partitions []atlasmap.Partition, packageUID string) (a
 
 func parseAtlasPackOverviewOptions(arguments []string) (atlasPackOverviewOptions, error) {
 	options := atlasPackOverviewOptions{}
-	seen := make(map[string]bool, 5)
-	for index := 0; index < len(arguments); {
-		flag := arguments[index]
-		if flag == "--locked" {
-			if seen[flag] {
-				return atlasPackOverviewOptions{}, fmt.Errorf("experimental command \"atlas-pack overview\" received %s more than once", flag)
-			}
-			seen[flag], options.locked = true, true
-			index++
-			continue
-		}
+	_, err := parseCommandFlags(arguments, flagSchema{Command: "atlas-pack overview", Experimental: true, Flags: []flagDefinition{
+		{Name: "--pack-version", Kind: flagScalar},
+		{Name: "--package-uid", Kind: flagScalar},
+		{Name: "--max-records", Kind: flagScalar},
+		{Name: "--max-selection-bytes", Kind: flagScalar},
+		{Name: "--max-output-bytes", Kind: flagScalar},
+		{Name: "--locked", Kind: flagSwitch},
+	}, Required: []string{"--package-uid", "--max-records", "--max-selection-bytes", "--max-output-bytes"}}, func(flag, value string) error {
 		switch flag {
-		case "--pack-version", "--package-uid", "--max-records", "--max-selection-bytes", "--max-output-bytes":
-		default:
-			return atlasPackOverviewOptions{}, fmt.Errorf("experimental command \"atlas-pack overview\" does not accept flag %q", flag)
-		}
-		if seen[flag] {
-			return atlasPackOverviewOptions{}, fmt.Errorf("experimental command \"atlas-pack overview\" received %s more than once", flag)
-		}
-		if index+1 >= len(arguments) || strings.HasPrefix(arguments[index+1], "--") {
-			return atlasPackOverviewOptions{}, fmt.Errorf("experimental command \"atlas-pack overview\" requires a value for %s", flag)
-		}
-		seen[flag] = true
-		value := arguments[index+1]
-		switch flag {
+		case "--locked":
+			options.locked = true
 		case "--pack-version":
 			if value != "1" && value != "2" && value != "3" {
-				return atlasPackOverviewOptions{}, fmt.Errorf("experimental command \"atlas-pack overview\" requires --pack-version as 1, 2 or 3")
+				return fmt.Errorf("experimental command \"atlas-pack overview\" requires --pack-version as 1, 2 or 3")
 			}
 			options.packVersion = value
 		case "--package-uid":
 			if err := validateAtlasPackageUID("atlas-pack overview", value); err != nil {
-				return atlasPackOverviewOptions{}, err
+				return err
 			}
 			options.packageUID = value
 		case "--max-records":
 			parsed, err := parseAtlasPositiveLimit("atlas-pack overview", flag, value, maxAtlasPackRecords)
 			if err != nil {
-				return atlasPackOverviewOptions{}, err
+				return err
 			}
 			options.maxRecords = int(parsed)
 		case "--max-selection-bytes":
 			parsed, err := parseAtlasPositiveLimit("atlas-pack overview", flag, value, maxAtlasPackBytes)
 			if err != nil {
-				return atlasPackOverviewOptions{}, err
+				return err
 			}
 			options.maxSelectionBytes = parsed
 		case "--max-output-bytes":
 			parsed, err := parseAtlasPositiveLimit("atlas-pack overview", flag, value, maxAtlasPackBytes)
 			if err != nil {
-				return atlasPackOverviewOptions{}, err
+				return err
 			}
 			options.maxOutputBytes = parsed
 		}
-		index += 2
+		return nil
+	})
+	if err != nil {
+		return atlasPackOverviewOptions{}, err
 	}
-	for _, flag := range []string{"--package-uid", "--max-records", "--max-selection-bytes", "--max-output-bytes"} {
-		if !seen[flag] {
-			return atlasPackOverviewOptions{}, fmt.Errorf("experimental command \"atlas-pack overview\" requires %s", flag)
-		}
-	}
+
 	return options, nil
 }
 

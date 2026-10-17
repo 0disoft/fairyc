@@ -52,7 +52,7 @@ func parseCommandFlags(arguments []string, schema flagSchema, apply func(string,
 		definitions[d.Name] = d
 	}
 	seen := make(map[string]bool, len(definitions))
-	values := make(map[string]map[string]bool)
+	var values map[string]map[string]bool
 	for index := 0; index < len(arguments); {
 		name := arguments[index]
 		definition, found := definitions[name]
@@ -83,6 +83,9 @@ func parseCommandFlags(arguments []string, schema flagSchema, apply func(string,
 			index++
 		}
 		if definition.DuplicateValue != "" {
+			if values == nil {
+				values = make(map[string]map[string]bool)
+			}
 			if values[name] == nil {
 				values[name] = make(map[string]bool)
 			}
