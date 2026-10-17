@@ -1,5 +1,26 @@
 # Candidate project C partitions v0
 
+## Reuse checked IR across native tests (2026-10-17)
+
+`module_project_complete_c::emit_test` borrows the caller's checked `Complete`
+and returns an owned `Emission`. Preparation and C body rendering read that IR
+only during the call. The result owns its name table, CFGs, indexes, selected
+frame metadata and C buffers; it retains no IR reference or resource owner.
+Invalid entries and exhausted budgets still return no output.
+
+The native test loop retains one `Complete` for all selected tests. Each test
+gets fresh reachability selection, C output, a packet and an isolated child
+process. It no longer rebuilds the checked program between tests. Packet bounds,
+framing, write/sync/close handling, child deadlines and reports are unchanged.
+
+Existing `partition*` APIs still consume and retain their IR in a `Bundle`,
+which now contains the owner alongside its independent `Emission`. Existing
+bundle accessors delegate to that emission; the single-buffer `render` APIs
+are unchanged. The regression fixture emits two different entries, repeats the
+first entry, rejects an invalid entry, then consumes the original `Complete`.
+It compares the independent output against the owning test partition byte for
+byte, including frame intervals, selected counts and work totals.
+
 ## Current whole-project work and bootstrap (2026-10-16)
 
 The shared `candidate_limits::project_work()` ledger is now 16,777,216. Each

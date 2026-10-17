@@ -105,7 +105,7 @@ pub fn i32 run_test_list(ref u8[] root,ref test_options::TestOptions options){
     let complete=switch(compiler::build_complete_reporting(ref projected,ref table,ref mut reports,ref mut source_work,ref mut link_work)){case .ok(p):{p}case .err(e):{return test_error(check::compile_failure_reports(loaded,projected,e,reports));}};
     if(test_options::flags(options).stdin && v::len<usize>(ref chosen)!=1){return test_invocation(b"command \"test\" requires exactly one selected test when --stdin is supplied");}
     if(!test_options::flags(options).list && !test_options::flags(options).native){return interpreter::tests(ref complete,options,ref tests,ref chosen,ref projected,locks::state_code(lock));}
-    if(!test_options::flags(options).list){return native::tests(complete,ref projected,ref table,options,ref tests,ref chosen,root,locks::state_code(lock));}discard complete;
+    if(!test_options::flags(options).list){return native::tests(complete,ref projected,options,ref tests,ref chosen,root,locks::state_code(lock));}discard complete;
     return test_options::test_render(options,ref tests,ref projected,locks::state_code(lock));
 }
 

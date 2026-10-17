@@ -1,0 +1,106 @@
+{
+  "schema": "fairyc.candidate-native-test-ir-reuse/v1",
+  "passed": true,
+  "implementationRevisionBeforeCommit": "0d9ee102ff07a87017b959625848ce5e1c135e69",
+  "sourceCheck": {
+    "engine": "Go Stage 0 reference",
+    "argv": [
+      "check"
+    ],
+    "workingDirectory": ".cache/native-test-performance-20261017/regression/project",
+    "exit": 0,
+    "stdout": "check ok: 2 instance(s), 525 source file(s), 6676 MIR function(s), lock updated\n"
+  },
+  "regression": {
+    "engine": "Go Stage 0 native test builder; authored Fairy test runs as Windows C image",
+    "argv": [
+      "test",
+      "--native",
+      "--locked",
+      "--file",
+      "tests/module_project_complete_c.fy",
+      "--json"
+    ],
+    "report": {
+      "schemaVersion": "fairyc.test-report/v1",
+      "engine": "native",
+      "target": "x86_64-windows-msvc",
+      "profile": "development",
+      "tests": [
+        {
+          "identity": "tests::module_project_complete_c::complete_partition_rejects_invalid_entry_and_frame_limit",
+          "outcome": "passed",
+          "trapCategory": null
+        },
+        {
+          "identity": "tests::module_project_complete_c::complete_partition_retains_detached_interfaces_and_named_entry_closure",
+          "outcome": "passed",
+          "trapCategory": null
+        },
+        {
+          "identity": "tests::module_project_complete_c::native_test_emission_reuses_checked_ir_and_owns_output",
+          "outcome": "passed",
+          "trapCategory": null
+        }
+      ],
+      "count": 3,
+      "passed": 3,
+      "failed": 0,
+      "status": "ok",
+      "lock": "verified"
+    },
+    "referenceSHA256": "81d454176aeaedc66e639a1de8150c0af4d20be5dec61f48b2777ea19a4c2eea",
+    "fixture": {
+      "path": "examples/lexer_candidate/tests/module_project_complete_c.fy",
+      "sha256": "7e67665e1f0941ba52167562f8a7bc141803aa8c31e07d634af246a8c4faf0b8"
+    }
+  },
+  "originalLockSHA256": "a6b52c6270c15ca237c31aed8ece8bbffc745556620c3b2c8dd5c651adc75e30",
+  "originalLockPreserved": true,
+  "sourceInventory": {
+    "count": 517,
+    "canonicalJSONSHA256": "acfb464f65cb1a23adc3ee22f343016f9f778633559f9550b3be73ba02750916"
+  },
+  "changedSources": [
+    {
+      "path": "examples/lexer_candidate/src/module_project_complete_c.fy",
+      "sha256": "15a06d46425c471867f4df5deb3f9a519266f12eba31a09ea3456462b0caa96d"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_unit_c_emit.fy",
+      "sha256": "1b97e38eeccfa8073300f537ae3ce5087ef3be815e3a4e9ff4ed87a9ab8ae867"
+    },
+    {
+      "path": "examples/lexer_candidate/src/native_cli.fy",
+      "sha256": "a9410821ab880cc1bd6addd76171db6ed811714bb4b80ceab742c587a97fc44a"
+    },
+    {
+      "path": "examples/lexer_candidate/src/native_packet.fy",
+      "sha256": "916daf47d8319ce84094d6c10a20d7a202089e51977a18965fef80e893e27459"
+    },
+    {
+      "path": "examples/lexer_candidate/src/native_packet_file.fy",
+      "sha256": "3d59a2c787d415031266547ebfb3d8b8655793de2252853713830de0e96fc34b"
+    },
+    {
+      "path": "examples/lexer_candidate/src/project_test_cli.fy",
+      "sha256": "a878fad0d87870f9c38fae5f5004d61c1791c56aa45349ed382da24907d67a1a"
+    }
+  ],
+  "assertions": [
+    "Different test entries emitted from one live Complete",
+    "Repeated entry emission is deterministic",
+    "Invalid entry rejected without consuming Complete",
+    "Original Complete can subsequently move into owning Bundle",
+    "Header, literals, body sources, intervals, work/retries and selected counts match owning path"
+  ],
+  "limitations": [
+    "This checkpoint does not claim a rebuilt full candidate CLI or measured speedup",
+    "Release regression and non-Windows targets not run at this checkpoint"
+  ],
+  "stableCLIChanged": false,
+  "languageRulesChanged": false,
+  "sdkABIChanged": false,
+  "databaseChanged": false,
+  "ciChanged": false
+}

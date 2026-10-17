@@ -2,6 +2,7 @@ module module_project_complete_c;
 import module_unit_c_emit as c;
 import module_project_c_owner as owner;
 import module_unit_c_names as names;
+import module_project_identified_ir as identified;
 import module_unit_cleanup_mir_model as clean;
 import project_compiler_core as compiler;
 import candidate_limits as limits;
@@ -17,3 +18,9 @@ pub fn Result<c::Bundle,clean::Problem> partition_test(compiler::Complete progra
 }
 pub fn bool has_complete(ref c::Bundle p){return owner::has_complete(c::project_owner(p));}
 pub fn ref compiler::Complete complete(ref c::Bundle p){return owner::complete_project(c::project_owner(p));}
+// A native test emits from a live Complete without consuming its checked IR.
+pub fn Result<c::Emission,clean::Problem> emit_test(ref compiler::Complete program,usize entry,usize max_frames){
+    if(max_frames==0 || max_frames>limits::project_frames()){return .err(clean::Problem{.code=1001,.module_index=0,.start=0,.end=0});}
+    var usize work=0;let named=switch(names::build_project(compiler::checked_program(program),ref mut work)){case .ok(p):{p}case .err(e):{return .err(e);}};
+    return c::emit_test(identified::ir_program(compiler::checked_program(program)),named,entry,max_frames);
+}
