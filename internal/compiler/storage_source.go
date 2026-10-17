@@ -3,10 +3,10 @@ package compiler
 import (
 	"fmt"
 
+	"github.com/0disoft/fairyc/internal/admission"
 	"github.com/0disoft/fairyc/internal/genericplan"
 	"github.com/0disoft/fairyc/internal/genericsource"
 	"github.com/0disoft/fairyc/internal/hir"
-	"github.com/0disoft/fairyc/internal/mir"
 	"github.com/0disoft/fairyc/internal/packagegraph"
 	"github.com/0disoft/fairyc/internal/semantic"
 )
@@ -14,30 +14,26 @@ import (
 // CheckStorageGenericFunctions is the private source-to-native preparation lane.
 // Its MIR may contain symbolic queries rejected by ordinary artifact consumers.
 func CheckStorageGenericFunctions(file semantic.File, coordinate packagegraph.CoordinateID, limits genericplan.PlanLimits) (Result, genericplan.Plan, error) {
-	return checkStorageGenericFunctions(file, coordinate, limits, false)
+	return checkStorageGenericFunctions(file, coordinate, limits, admission.Capabilities{Storage: admission.StorageQueries, Arguments: admission.NominalArguments})
 }
 
 // CheckStorageTransferFunctions explicitly admits unsafe source storage transfers.
 // Its output requires the matching private verifier and C emission entry point.
 func CheckStorageTransferFunctions(file semantic.File, coordinate packagegraph.CoordinateID, limits genericplan.PlanLimits) (Result, genericplan.Plan, error) {
-	return checkStorageGenericFunctions(file, coordinate, limits, true)
+	return checkStorageGenericFunctions(file, coordinate, limits, admission.Capabilities{Storage: admission.StorageTransfers, Arguments: admission.NominalArguments})
 }
 
-func checkStorageGenericFunctions(file semantic.File, coordinate packagegraph.CoordinateID, limits genericplan.PlanLimits, transfers bool) (Result, genericplan.Plan, error) {
+func checkStorageGenericFunctions(file semantic.File, coordinate packagegraph.CoordinateID, limits genericplan.PlanLimits, capabilities admission.Capabilities) (Result, genericplan.Plan, error) {
 	if coordinate == (packagegraph.CoordinateID{}) {
 		return Result{}, genericplan.Plan{}, fmt.Errorf("storage generic source requires a nonzero package coordinate")
 	}
 	original, owner := file, genericPackageOwner(coordinate)
-	prepare, verify := genericsource.PrepareStorageModule, mir.VerifyStorageQueries
-	if transfers {
-		prepare, verify = genericsource.PrepareStorageTransferModule, mir.VerifyStorageTransfers
-	}
-	expansion, err := prepare(file.Module, owner, limits)
+	expansion, err := genericsource.PrepareModuleWithCapabilities(file.Module, owner, limits, capabilities)
 	if err != nil {
 		return Result{}, genericplan.Plan{}, err
 	}
 	file.Module = expansion.Modules[0]
-	result, err := lowerWithVerifier(semantic.Analyze([]semantic.File{file}), verify)
+	result, err := lowerWithCapabilities(semantic.Analyze([]semantic.File{file}), capabilities)
 	if err == nil && result.Verified {
 		result.GenericProvenance, err = genericProvenance(semantic.PackageInput{Files: []semantic.File{original}},
 			map[hir.PackageID]genericplan.PackageID{file.Package: owner}, expansion, result.Semantic.NominalTypes)
@@ -52,13 +48,13 @@ func checkStorageGenericFunctions(file semantic.File, coordinate packagegraph.Co
 // CheckStorageGenericPackages enables private scalar storage queries across a
 // resolved graph. It does not publish a stable interface or artifact-cache key.
 func CheckStorageGenericPackages(input semantic.PackageInput, coordinates map[hir.PackageID]packagegraph.CoordinateID, limits genericplan.PlanLimits) (Result, genericplan.Plan, error) {
-	return checkStorageGenericPackages(input, coordinates, limits, false, false)
+	return checkStorageGenericPackages(input, coordinates, limits, admission.Policy[hir.PackageID]{Capabilities: admission.Capabilities{Storage: admission.StorageQueries}})
 }
 
 // CheckNominalStoragePackages admits source-visible nominal arguments through
 // exact private bindings, without adding imports or publishing a stable cache key.
 func CheckNominalStoragePackages(input semantic.PackageInput, coordinates map[hir.PackageID]packagegraph.CoordinateID, limits genericplan.PlanLimits) (Result, genericplan.Plan, error) {
-	return checkStorageGenericPackages(input, coordinates, limits, true, false)
+	return checkStorageGenericPackages(input, coordinates, limits, admission.Policy[hir.PackageID]{Capabilities: admission.Capabilities{Storage: admission.StorageQueries, Arguments: admission.NominalArguments}})
 }
 
 // CheckStorageTransferPackages is the private closed-graph ownership-transfer
@@ -77,45 +73,30 @@ func CheckStorageTransferPackages(input semantic.PackageInput, coordinates map[h
 // ordinary lowering closed to transfers and publishes provenance only with MIR
 // accepted by the transfer verifier.
 func LowerAnalyzedStorageTransfers(analysis Analysis) (Result, error) {
-	result, err := lowerWithVerifier(analysis.Semantic, mir.VerifyStorageTransfers)
-	if err == nil && result.Verified {
-		result.GenericProvenance = analysis.GenericProvenance
-	}
-	return result, err
+	return LowerAnalyzedWithCapabilities(analysis, admission.Capabilities{Storage: admission.StorageTransfers, Arguments: admission.NominalArguments})
 }
 
 // AnalyzeStorageTransferPackages publishes private closed-graph source identities
 // after bound nominal Flow analysis, without publishing executable MIR or cache
 // admission. Nominal specialization definitions retain their conservative closure.
 func AnalyzeStorageTransferPackages(input semantic.PackageInput, coordinates map[hir.PackageID]packagegraph.CoordinateID, limits genericplan.PlanLimits) (GenericAnalysis, error) {
-	analysis, expansion, err := analyzeStoragePackageGraph(input, coordinates, limits, true, true)
-	if err != nil {
-		return GenericAnalysis{}, err
-	}
-	return publishGenericAnalysis(input, coordinates, expansion, Analysis{Semantic: analysis})
-}
-
-func analyzeStoragePackageGraph(input semantic.PackageInput, coordinates map[hir.PackageID]packagegraph.CoordinateID, limits genericplan.PlanLimits, nominal, transfers bool) (semantic.Result, genericsource.PackageExpansion, error) {
-	return analyzeStoragePackageGraphOwned(input, coordinates, limits, nominal, transfers, nil, false)
+	return analyzeWithPolicy(input, coordinates, limits, admission.Policy[hir.PackageID]{Capabilities: admission.Capabilities{Storage: admission.StorageTransfers, Arguments: admission.NominalArguments}})
 }
 
 // AnalyzeOwnedStorageTransferPackages is the owner-restricted integration lane.
 // The caller must authenticate the selected source packages; this function does
 // not derive authority from a module name, SDK label, or import spelling.
 func AnalyzeOwnedStorageTransferPackages(input semantic.PackageInput, coordinates map[hir.PackageID]packagegraph.CoordinateID, limits genericplan.PlanLimits, storageOwners []hir.PackageID) (GenericAnalysis, error) {
-	return analyzeOwnedStorageTransferPackages(input, coordinates, limits, storageOwners, false)
+	return analyzeOwnedStorageTransferPackages(input, coordinates, limits, storageOwners, admission.OrdinaryTemplates)
 }
 
 // AnalyzeSDKStoragePackages preserves scalar-only consumer templates while
 // admitting the exact authenticated SDK's generic container implementations.
 func AnalyzeSDKStoragePackages(input semantic.PackageInput, coordinates map[hir.PackageID]packagegraph.CoordinateID, limits genericplan.PlanLimits, storageOwners []hir.PackageID) (GenericAnalysis, error) {
-	analysis, err := analyzeOwnedStorageTransferPackages(input, coordinates, limits, storageOwners, true)
-	if err != nil {
-		if rejection, sourceOwned := genericSourceDiagnostic(err, input, coordinates); sourceOwned {
-			return GenericAnalysis{Analysis: Analysis{Semantic: semantic.Result{FailedPhase: semantic.PhaseResolve, Diagnostics: []semantic.Diagnostic{rejection}}}}, nil
-		}
+	if len(storageOwners) == 0 {
+		return GenericAnalysis{}, fmt.Errorf("storage operation owners must be explicit")
 	}
-	return analysis, err
+	return AnalyzeWithPolicy(input, coordinates, limits, admission.Policy[hir.PackageID]{Capabilities: admission.Capabilities{Storage: admission.StorageTransfers, Arguments: admission.NominalArguments, Templates: admission.SDKOwnerTemplates}, StorageOwners: storageOwners})
 }
 
 // AnalyzeSDKVectorCandidatePackages checks vector-loop source and Flow only in
@@ -125,35 +106,23 @@ func AnalyzeSDKVectorCandidatePackages(input semantic.PackageInput, coordinates 
 	if len(storageOwners) == 0 {
 		return GenericAnalysis{}, fmt.Errorf("SDK vector candidate requires authenticated storage owners")
 	}
-	analysis, expansion, err := analyzeStoragePackageGraphOwnedVectorCandidate(input, coordinates, limits, true, true, storageOwners, true, true)
-	if err != nil {
-		return GenericAnalysis{}, err
-	}
-	return publishGenericAnalysis(input, coordinates, expansion, Analysis{Semantic: analysis})
+	return analyzeWithPolicy(input, coordinates, limits, admission.Policy[hir.PackageID]{Capabilities: admission.Capabilities{Storage: admission.StorageTransfers, Arguments: admission.NominalArguments, Templates: admission.SDKOwnerTemplates, Vectors: admission.CandidateVectors}, StorageOwners: storageOwners})
 }
 
-func analyzeOwnedStorageTransferPackages(input semantic.PackageInput, coordinates map[hir.PackageID]packagegraph.CoordinateID, limits genericplan.PlanLimits, storageOwners []hir.PackageID, sdkTemplates bool) (GenericAnalysis, error) {
+func analyzeOwnedStorageTransferPackages(input semantic.PackageInput, coordinates map[hir.PackageID]packagegraph.CoordinateID, limits genericplan.PlanLimits, storageOwners []hir.PackageID, templates admission.TemplateMode) (GenericAnalysis, error) {
 	if len(storageOwners) == 0 {
 		return GenericAnalysis{}, fmt.Errorf("storage operation owners must be explicit")
 	}
-	analysis, expansion, err := analyzeStoragePackageGraphOwned(input, coordinates, limits, true, true, storageOwners, sdkTemplates)
-	if err != nil {
-		return GenericAnalysis{}, err
-	}
-	return publishGenericAnalysis(input, coordinates, expansion, Analysis{Semantic: analysis})
+	return analyzeWithPolicy(input, coordinates, limits, admission.Policy[hir.PackageID]{Capabilities: admission.Capabilities{Storage: admission.StorageTransfers, Arguments: admission.NominalArguments, Templates: templates}, StorageOwners: storageOwners})
 }
 
-func analyzeStoragePackageGraphOwned(input semantic.PackageInput, coordinates map[hir.PackageID]packagegraph.CoordinateID, limits genericplan.PlanLimits, nominal, transfers bool, storageOwners []hir.PackageID, sdkTemplates bool) (semantic.Result, genericsource.PackageExpansion, error) {
-	return analyzeStoragePackageGraphOwnedVectorCandidate(input, coordinates, limits, nominal, transfers, storageOwners, sdkTemplates, false)
-}
-
-func analyzeStoragePackageGraphOwnedVectorCandidate(input semantic.PackageInput, coordinates map[hir.PackageID]packagegraph.CoordinateID, limits genericplan.PlanLimits, nominal, transfers bool, storageOwners []hir.PackageID, sdkTemplates, vectorCandidate bool) (semantic.Result, genericsource.PackageExpansion, error) {
-	prepared, expansion, err := prepareGenericPackageGraphOwned(input, coordinates, limits, true, nominal, transfers, storageOwners, sdkTemplates)
+func analyzePackageGraph(input semantic.PackageInput, coordinates map[hir.PackageID]packagegraph.CoordinateID, limits genericplan.PlanLimits, policy admission.Policy[hir.PackageID]) (semantic.Result, genericsource.PackageExpansion, error) {
+	prepared, expansion, err := prepareGenericPackageGraph(input, coordinates, limits, policy)
 	if err != nil {
 		return semantic.Result{}, genericsource.PackageExpansion{}, err
 	}
 	var analysis semantic.Result
-	if nominal {
+	if policy.Capabilities.AllowsNominalArguments() {
 		byOwner := map[genericplan.PackageID]hir.PackageID{}
 		for _, file := range input.Files {
 			byOwner[genericPackageOwner(coordinates[file.Package])] = file.Package
@@ -166,9 +135,9 @@ func analyzeStoragePackageGraphOwnedVectorCandidate(input semantic.PackageInput,
 			}
 			bindings = append(bindings, semantic.NominalTypeBinding{Key: string(binding.ID), Package: id, Module: binding.Module, Name: binding.Name})
 		}
-		if vectorCandidate {
+		if policy.Capabilities.VectorCandidate() {
 			selected := map[genericplan.PackageID]bool{}
-			for _, owner := range storageOwners {
+			for _, owner := range policy.StorageOwners {
 				selected[genericPackageOwner(coordinates[owner])] = true
 			}
 			vectorDeclarations := map[genericplan.DeclarationID]hir.PackageID{}
@@ -199,16 +168,12 @@ func analyzeStoragePackageGraphOwnedVectorCandidate(input semantic.PackageInput,
 	return analysis, expansion, nil
 }
 
-func checkStorageGenericPackages(input semantic.PackageInput, coordinates map[hir.PackageID]packagegraph.CoordinateID, limits genericplan.PlanLimits, nominal, transfers bool) (Result, genericplan.Plan, error) {
-	analysis, expansion, err := analyzeStoragePackageGraph(input, coordinates, limits, nominal, transfers)
+func checkStorageGenericPackages(input semantic.PackageInput, coordinates map[hir.PackageID]packagegraph.CoordinateID, limits genericplan.PlanLimits, policy admission.Policy[hir.PackageID]) (Result, genericplan.Plan, error) {
+	analysis, expansion, err := analyzePackageGraph(input, coordinates, limits, policy)
 	if err != nil {
 		return Result{}, genericplan.Plan{}, err
 	}
-	verify := mir.VerifyStorageQueries
-	if transfers {
-		verify = mir.VerifyStorageTransfers
-	}
-	result, err := lowerWithVerifier(analysis, verify)
+	result, err := lowerWithCapabilities(analysis, policy.Capabilities)
 	if err == nil && result.Verified {
 		owners := make(map[hir.PackageID]genericplan.PackageID, len(coordinates))
 		for id, coordinate := range coordinates {

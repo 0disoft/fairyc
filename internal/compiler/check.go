@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/0disoft/fairyc/internal/admission"
 	"github.com/0disoft/fairyc/internal/contractstatemir"
 	"github.com/0disoft/fairyc/internal/mir"
 	"github.com/0disoft/fairyc/internal/semantic"
@@ -96,7 +97,12 @@ func AnalyzePackages(input semantic.PackageInput) (Analysis, error) {
 // LowerAnalyzed lowers one semantic result and publishes MIR only after the ordinary closed-world
 // verifier accepts it. Cache coordinators must call this exact boundary on every fallback path.
 func LowerAnalyzed(analysis Analysis) (Result, error) {
-	result, err := lowerVerified(analysis.Semantic)
+	return LowerAnalyzedWithCapabilities(analysis, admission.Capabilities{})
+}
+
+// LowerAnalyzedWithCapabilities applies the source admission at MIR handoff.
+func LowerAnalyzedWithCapabilities(analysis Analysis, capabilities admission.Capabilities) (Result, error) {
+	result, err := lowerWithCapabilities(analysis.Semantic, capabilities)
 	if err == nil && result.Verified {
 		result.GenericProvenance = analysis.GenericProvenance
 	}
@@ -104,10 +110,13 @@ func LowerAnalyzed(analysis Analysis) (Result, error) {
 }
 
 func lowerVerified(semanticResult semantic.Result) (Result, error) {
-	return lowerWithVerifier(semanticResult, mir.Verify)
+	return lowerWithCapabilities(semanticResult, admission.Capabilities{})
 }
 
-func lowerWithVerifier(semanticResult semantic.Result, verify func(mir.Program) []mir.VerificationError) (Result, error) {
+func lowerWithCapabilities(semanticResult semantic.Result, capabilities admission.Capabilities) (Result, error) {
+	if err := capabilities.Validate(); err != nil {
+		return Result{}, &Error{Stage: StageMIRVerify, Cause: err}
+	}
 	result := Result{Semantic: semanticResult}
 	if semanticResult.CompletedThrough != semantic.PhaseFlow || semanticResult.FailedPhase != semantic.PhaseNone ||
 		len(semanticResult.Diagnostics) != 0 || len(semanticResult.Unsupported) != 0 {
@@ -122,7 +131,7 @@ func lowerWithVerifier(semanticResult semantic.Result, verify func(mir.Program) 
 		}
 		return result, &Error{Stage: StageMIRLower, Cause: err}
 	}
-	if failures := verify(program); len(failures) != 0 {
+	if failures := mir.VerifyWithCapabilities(program, capabilities); len(failures) != 0 {
 		return result, &Error{Stage: StageMIRVerify, Verification: failures}
 	}
 	stateTransactions, err := contractstatemir.LowerHIRTransactions(semanticResult.HIR)

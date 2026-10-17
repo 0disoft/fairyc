@@ -3,6 +3,7 @@ package compiler
 import (
 	"slices"
 
+	"github.com/0disoft/fairyc/internal/admission"
 	"github.com/0disoft/fairyc/internal/genericplan"
 	"github.com/0disoft/fairyc/internal/genericsource"
 	"github.com/0disoft/fairyc/internal/hir"
@@ -23,18 +24,39 @@ type GenericAnalysis struct {
 }
 
 func AnalyzeGenericPackages(input semantic.PackageInput, coordinates map[hir.PackageID]packagegraph.CoordinateID, limits genericplan.PlanLimits) (GenericAnalysis, error) {
-	prepared, expansion, err := prepareGenericPackages(input, coordinates, limits)
+	return AnalyzeWithPolicy(input, coordinates, limits, admission.Policy[hir.PackageID]{})
+}
+
+// AnalyzeWithPolicy is the shared source-to-HIR pipeline for resolved generic
+// packages. Source-owned rejections become diagnostics; plumbing failures remain
+// errors. Storage owners must already have been authenticated by the caller.
+func AnalyzeWithPolicy(input semantic.PackageInput, coordinates map[hir.PackageID]packagegraph.CoordinateID, limits genericplan.PlanLimits, policy admission.Policy[hir.PackageID]) (GenericAnalysis, error) {
+	analysis, err := analyzeWithPolicy(input, coordinates, limits, policy)
 	if err != nil {
 		if rejection, sourceOwned := genericSourceDiagnostic(err, input, coordinates); sourceOwned {
 			return GenericAnalysis{Analysis: Analysis{Semantic: semantic.Result{FailedPhase: semantic.PhaseResolve, Diagnostics: []semantic.Diagnostic{rejection}}}}, nil
 		}
-		return GenericAnalysis{}, err
 	}
-	analysis, err := AnalyzePackages(prepared)
+	return analysis, err
+}
+
+// Legacy private proof lanes keep returning source expansion errors directly.
+func analyzeWithPolicy(input semantic.PackageInput, coordinates map[hir.PackageID]packagegraph.CoordinateID, limits genericplan.PlanLimits, policy admission.Policy[hir.PackageID]) (GenericAnalysis, error) {
+	analysis, expansion, err := analyzePackageGraph(input, coordinates, limits, policy)
 	if err != nil {
 		return GenericAnalysis{}, err
 	}
-	return publishGenericAnalysis(input, coordinates, expansion, analysis)
+	return publishGenericAnalysis(input, coordinates, expansion, Analysis{Semantic: analysis})
+}
+
+// CheckWithPolicy uses one policy for source admission, semantics and MIR.
+func CheckWithPolicy(input semantic.PackageInput, coordinates map[hir.PackageID]packagegraph.CoordinateID, limits genericplan.PlanLimits, policy admission.Policy[hir.PackageID]) (Result, genericplan.Plan, error) {
+	analysis, err := AnalyzeWithPolicy(input, coordinates, limits, policy)
+	if err != nil {
+		return Result{}, genericplan.Plan{}, err
+	}
+	result, err := LowerAnalyzedWithCapabilities(analysis.Analysis, policy.Capabilities)
+	return result, analysis.Plan, err
 }
 
 // Publish source interface identities only after the owning semantic lane has

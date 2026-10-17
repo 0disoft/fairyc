@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"slices"
 
+	"github.com/0disoft/fairyc/internal/admission"
 	"github.com/0disoft/fairyc/internal/genericplan"
 	"github.com/0disoft/fairyc/internal/genericsource"
 	"github.com/0disoft/fairyc/internal/hir"
@@ -25,15 +26,10 @@ func CheckGenericPackages(input semantic.PackageInput, coordinates map[hir.Packa
 	return result, analysis.Plan, err
 }
 
-func prepareGenericPackages(input semantic.PackageInput, coordinates map[hir.PackageID]packagegraph.CoordinateID, limits genericplan.PlanLimits) (semantic.PackageInput, genericsource.PackageExpansion, error) {
-	return prepareGenericPackageGraph(input, coordinates, limits, false, false, false)
-}
-
-func prepareGenericPackageGraph(input semantic.PackageInput, coordinates map[hir.PackageID]packagegraph.CoordinateID, limits genericplan.PlanLimits, storage, nominal, transfers bool) (semantic.PackageInput, genericsource.PackageExpansion, error) {
-	return prepareGenericPackageGraphOwned(input, coordinates, limits, storage, nominal, transfers, nil, false)
-}
-
-func prepareGenericPackageGraphOwned(input semantic.PackageInput, coordinates map[hir.PackageID]packagegraph.CoordinateID, limits genericplan.PlanLimits, storage, nominal, transfers bool, storageOwners []hir.PackageID, sdkTemplates bool) (semantic.PackageInput, genericsource.PackageExpansion, error) {
+func prepareGenericPackageGraph(input semantic.PackageInput, coordinates map[hir.PackageID]packagegraph.CoordinateID, limits genericplan.PlanLimits, policy admission.Policy[hir.PackageID]) (semantic.PackageInput, genericsource.PackageExpansion, error) {
+	if err := policy.Validate(); err != nil {
+		return semantic.PackageInput{}, genericsource.PackageExpansion{}, err
+	}
 	owners := map[hir.PackageID]genericplan.PackageID{}
 	seen := map[packagegraph.CoordinateID]hir.PackageID{}
 	for _, file := range input.Files {
@@ -70,33 +66,18 @@ func prepareGenericPackageGraphOwned(input semantic.PackageInput, coordinates ma
 		}
 		modules[i] = genericsource.PackageModule{Module: file.Module, Owner: owners[file.Package], Imports: bindings[file.Package]}
 	}
-	prepare := genericsource.PreparePackages
-	if transfers {
-		prepare = genericsource.PrepareStorageTransferPackages
-	} else if nominal {
-		prepare = genericsource.PrepareNominalStoragePackages
-	} else if storage {
-		prepare = genericsource.PrepareStoragePackages
-	}
-	var expansion genericsource.PackageExpansion
-	var err error
-	if storageOwners != nil {
-		selected := make([]genericplan.PackageID, len(storageOwners))
-		for i, owner := range storageOwners {
+	sourcePolicy := admission.Policy[genericplan.PackageID]{Capabilities: policy.Capabilities}
+	if policy.StorageOwners != nil {
+		sourcePolicy.StorageOwners = make([]genericplan.PackageID, len(policy.StorageOwners))
+		for i, owner := range policy.StorageOwners {
 			var exists bool
-			selected[i], exists = owners[owner]
+			sourcePolicy.StorageOwners[i], exists = owners[owner]
 			if !exists {
 				return semantic.PackageInput{}, genericsource.PackageExpansion{}, fmt.Errorf("storage operation owner is absent from package input")
 			}
 		}
-		prepareOwned := genericsource.PrepareOwnedStorageTransferPackages
-		if sdkTemplates {
-			prepareOwned = genericsource.PrepareSDKStoragePackages
-		}
-		expansion, err = prepareOwned(modules, limits, selected)
-	} else {
-		expansion, err = prepare(modules, limits)
 	}
+	expansion, err := genericsource.PrepareWithPolicy(modules, limits, sourcePolicy)
 	if err != nil {
 		return semantic.PackageInput{}, genericsource.PackageExpansion{}, err
 	}
