@@ -87,7 +87,7 @@ def main():
             homes[name] = (home, digest(home / 'fairy.lock'))
             return name
 
-        def compare(name, home_name, argv, code=0, stdin=b'', exact=True):
+        def compare(name, home_name, argv, code=0, stdin=b''):
             if args.case and name not in args.case:
                 return
             home, lock = homes[home_name]
@@ -109,10 +109,7 @@ def main():
             (output / 'observations.json').write_text(json.dumps(rows, indent=2) + '\n', encoding='utf-8')
             assert digest(home / 'fairy.lock') == lock, 'locked execution changed lock'
             assert go['exit'] == code and other['exit'] == code, row
-            if exact:
-                assert matched, row
-            else:
-                assert not go['stdout'] and not other['stdout'] and other['stderr'], row
+            assert matched, row
             print('passed:', profile, name, flush=True)
 
         mixed = fixture('mixed', tests={'tests/mixed.fy': 'module tests::mixed;\n'
@@ -162,7 +159,7 @@ def main():
         (homes[inputs][0] / 'large.bin').write_bytes(b'x' * 65537)
         compare('stdin-oversize', inputs, ['--native', '--stdin-file', 'large.bin'], 7)
         deadline = fixture('timeout', 'native_test_timeout_quickstart')
-        compare('deadline', deadline, ['--native', '--timeout-seconds', '1'], 6, exact=False)
+        compare('deadline', deadline, ['--native', '--timeout-seconds', '1'], 6)
         compare('deadline-nonhanging', deadline, ['--native', '--timeout-seconds', '1', '--', 'skip'])
 
     assert rows, 'no candidate profile selected'
@@ -183,7 +180,7 @@ def main():
                    reference=dict(path=str(reference), sha256=digest(reference)), comparisons=rows,
                    exactComparisons=sum(row['exactMatch'] for row in rows),
                    limitations=['Windows native candidate only; default scalar interpreter is verified separately',
-                                'Deadline infrastructure diagnostics compared by exit and empty report; platform wording may differ'])
+                                'Every selected comparison, including deadline diagnostics, requires exact exit, stdout and stderr equality'])
     (output / 'receipt.json').write_text(json.dumps(receipt, indent=2) + '\n', encoding='utf-8')
     print('passed:', len(rows), 'native test comparisons', flush=True)
 

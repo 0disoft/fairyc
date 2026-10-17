@@ -1,0 +1,98 @@
+{
+  "schema": "fairyc.candidate-native-timeout-diagnostic/v1",
+  "checkedAtUTC": "2026-10-17T08:48:40.594403+00:00",
+  "baseRevision": "ed14676b738ed4640ed0b781d6a4c2a592982cb4",
+  "sourceFixVerified": true,
+  "candidateCliRebuilt": false,
+  "completeCandidateCliParityVerified": false,
+  "goFrontendUsedForRegressionPrograms": true,
+  "changedSources": [
+    {
+      "path": "examples/lexer_candidate/src/native_cli.fy",
+      "sha256": "26a913e9f540a955d6fa4493fdfaf9db27518d633c33f5a426b1a3ec72d64d4e"
+    },
+    {
+      "path": "examples/lexer_candidate/tests/native_cli_timeout.fy",
+      "sha256": "f274860006487ec2a109fe8951bed54c4e2892c5eb61fef4354c9444b32b8ace"
+    },
+    {
+      "path": "tools/verify-candidate-native-tests-cli.py",
+      "sha256": "fce9166b02c9968bd1615d0104973d6b430d7ad922c271b82995b6f5ea2d4d26"
+    }
+  ],
+  "sourceSnapshot": {
+    "path": ".cache/native-timeout-diagnostic-20261017/sources.json",
+    "sha256": "af00be80ce607d7fb7f561207c07ead400785e85e73c9a1ff76955745137a90c",
+    "authoredFiles": 518
+  },
+  "sourceCheck": {
+    "passed": true,
+    "engine": "Go Stage 0",
+    "workspace": ".cache/native-timeout-diagnostic-20261017/project",
+    "sourceFiles": 525,
+    "mirFunctions": 6660,
+    "instances": 2,
+    "initialLockedAdmission": "Original workspace lock is stale; verification used an isolated copy with a generated lock. Original lock bytes preserved."
+  },
+  "nativeFormatterChecks": [
+    {
+      "profile": "development",
+      "passed": true,
+      "testCount": 1,
+      "durationCases": 4,
+      "receipt": ".cache/native-timeout-diagnostic-20261017/development-receipt.json",
+      "sha256": "549b0ab749bc7684e8aad88dbac21a513826a05052f8719c33782b1d3827068a",
+      "seconds": 55.30866569999489
+    },
+    {
+      "profile": "release",
+      "passed": true,
+      "testCount": 1,
+      "durationCases": 4,
+      "receipt": ".cache/native-timeout-diagnostic-20261017/release-receipt.json",
+      "sha256": "839fc203a0d99d55fbe1ec28b64a5ceea7320b16f53dd0e4875c776a90477d1e",
+      "seconds": 55.4197215000022
+    }
+  ],
+  "pythonVerifierSyntaxPassed": true,
+  "timeoutComparisonRequiresExactStderr": true,
+  "durationSamples": [
+    {
+      "milliseconds": 1000,
+      "goDuration": "1s"
+    },
+    {
+      "milliseconds": 2000,
+      "goDuration": "2s"
+    },
+    {
+      "milliseconds": 59000,
+      "goDuration": "59s"
+    },
+    {
+      "milliseconds": 60000,
+      "goDuration": "1m0s"
+    }
+  ],
+  "sampleDiagnostic": "fairyc: build failed: execute native test tests::timeout::hangs: MSVC target executable exceeded 1s\n",
+  "commandBehavior": {
+    "timeoutExitCode": 6,
+    "diagnosticWriteFailureExitCode": 4,
+    "partialReport": false,
+    "processTimeoutUnchanged": true
+  },
+  "normativeContractsChanged": false,
+  "languageChanged": false,
+  "sdkAbiChanged": false,
+  "databaseChanged": false,
+  "ciRunnerChanged": false,
+  "repositoryHygieneChanged": false,
+  "limitations": [
+    "The focused native regression programs are compiled by the Go Stage 0 frontend from the changed Fairy sources.",
+    "The complete candidate CLI images and actual hanging-process comparison are not rebuilt or rerun in this step; they are queued with the performance changes.",
+    "The previous full verification evidence remains historical and is not a validation of newly rebuilt candidate binaries.",
+    "Linux and full compiler suites are outside this focused diagnostic fix."
+  ],
+  "pushed": false,
+  "released": false
+}
