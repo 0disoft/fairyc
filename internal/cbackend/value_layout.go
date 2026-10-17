@@ -74,12 +74,13 @@ func preparedStorageLayout(value hir.Type, targetID target.ID, engine *layout.En
 		SizeBytes: computed.SizeBytes, AlignmentBytes: computed.AlignmentBytes}, nil
 }
 
-func (e *emitter) storageQueryValue(operation mir.Operation) (uint64, error) {
+func (e *analysisBuilder) storageQueryValue(operation mir.Operation) (uint64, error) {
 	computed, err := preparedStorageLayout(operation.OwnerType, e.targetID, e.layoutEngine,
 		e.structTypes, e.structByType, e.enumTypes, e.enumByType, e.resourceTypes, e.resourceByType)
 	if err != nil {
 		return 0, err
 	}
+	e.storageLayouts[operation.OwnerType] = computed
 	if operation.Field == "size" {
 		return computed.SizeBytes, nil
 	}
@@ -98,4 +99,15 @@ func emissionTarget(profile Profile) (target.Spec, error) {
 		return target.Spec{}, fmt.Errorf("C emission target %q is invalid: %w", profile.Target, err)
 	}
 	return spec, nil
+}
+
+func (e *emissionAnalysis) storageQueryValue(operation mir.Operation) (uint64, error) {
+	computed, ok := e.storageLayouts[operation.OwnerType]
+	if !ok {
+		return 0, fmt.Errorf("storage layout for type %q was not analyzed", operation.OwnerType)
+	}
+	if operation.Field == "size" {
+		return computed.SizeBytes, nil
+	}
+	return computed.AlignmentBytes, nil
 }

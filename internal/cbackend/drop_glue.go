@@ -9,15 +9,15 @@ import (
 )
 
 func (e *emitter) emitDropGlue(output *strings.Builder, functionIndex int, operation mir.Operation) error {
-	resource, found := e.resourceLocals[functionIndex][operation.Symbol]
+	resource, found := e.analysis.resourceLocals[functionIndex][operation.Symbol]
 	if !found {
 		return fmt.Errorf("drop glue names undeclared resource local %d", operation.Symbol)
 	}
 	expression := fmt.Sprintf("fy_l_%d", operation.Symbol)
-	if _, direct := e.resourceByType[resource.Type]; direct {
+	if _, direct := e.analysis.resourceByType[resource.Type]; direct {
 		return e.emitDirectDropGlue(output, resource.Type, expression, "", operation.Span)
 	}
-	tagged, found := e.taggedType(resource.Type)
+	tagged, found := e.analysis.taggedType(resource.Type)
 	if !found {
 		return fmt.Errorf("drop glue has unsupported resource type %q", resource.Type)
 	}
@@ -42,12 +42,12 @@ func (e *emitter) emitDropGlue(output *strings.Builder, functionIndex int, opera
 }
 
 func (e *emitter) emitDirectDropGlue(output *strings.Builder, resourceType hir.Type, expression, condition string, span hir.Span) error {
-	resourceIndex, found := e.resourceByType[resourceType]
+	resourceIndex, found := e.analysis.resourceByType[resourceType]
 	if !found {
 		return nil
 	}
-	definition := e.resourceTypes[resourceIndex].definition
-	if condition != "" && e.resourceHasNestedFields(resourceType) {
+	definition := e.analysis.resourceTypes[resourceIndex].definition
+	if condition != "" && e.analysis.resourceHasNestedFields(resourceType) {
 		fmt.Fprintf(output, "    if (%s) {\n", condition)
 		if err := e.emitDirectDropGlue(output, resourceType, expression, "", span); err != nil {
 			return err
@@ -56,11 +56,11 @@ func (e *emitter) emitDirectDropGlue(output *strings.Builder, resourceType hir.T
 		return nil
 	}
 	if definition.DropKind != hir.ResourceDropEmpty {
-		functionIndex, found := e.bySymbol[definition.DropSymbol]
+		functionIndex, found := e.analysis.bySymbol[definition.DropSymbol]
 		if !found {
 			return fmt.Errorf("resource %q names missing drop symbol %d", resourceType, definition.DropSymbol)
 		}
-		if e.resourceHasNestedFields(resourceType) {
+		if e.analysis.resourceHasNestedFields(resourceType) {
 			fmt.Fprintf(output, "    %s = fy_fn_%d(%s);\n", expression, functionIndex, expression)
 		} else if condition == "" {
 			fmt.Fprintf(output, "    fy_fn_%d(%s);\n", functionIndex, expression)
@@ -70,10 +70,10 @@ func (e *emitter) emitDirectDropGlue(output *strings.Builder, resourceType hir.T
 	}
 	for index := len(definition.Fields) - 1; index >= 0; index-- {
 		field := definition.Fields[index]
-		if _, nested := e.resourceByType[field.Type]; !nested {
+		if _, nested := e.analysis.resourceByType[field.Type]; !nested {
 			continue
 		}
-		if e.instrumentation == InstrumentationDropTraceV0 {
+		if e.analysis.instrumentation == InstrumentationDropTraceV0 {
 			if err := e.emitDropTraceCall(output, field.Type, span, ""); err != nil {
 				return err
 			}

@@ -8,7 +8,7 @@ import (
 	"github.com/0disoft/fairyc/internal/mir"
 )
 
-func (e *emitter) inspectStorageElementAddress(functionIndex int, operation mir.Operation) error {
+func (e *analysisBuilder) inspectStorageElementAddress(functionIndex int, operation mir.Operation) error {
 	base, index, err := twoOperands(operation.Operands)
 	if err != nil {
 		return err
@@ -27,6 +27,7 @@ func (e *emitter) inspectStorageElementAddress(functionIndex int, operation mir.
 	if layout.SizeBytes == 0 {
 		return fmt.Errorf("private storage element address does not admit zero-sized elements")
 	}
+	e.storageLayouts[operation.OwnerType] = layout
 	return nil
 }
 
@@ -39,10 +40,9 @@ func (e *emitter) writeStorageElementAddress(output *strings.Builder, operation 
 	if err != nil {
 		return err
 	}
-	layout, err := preparedStorageLayout(operation.OwnerType, e.targetID, e.layoutEngine,
-		e.structTypes, e.structByType, e.enumTypes, e.enumByType, e.resourceTypes, e.resourceByType)
-	if err != nil || layout.SizeBytes == 0 {
-		return fmt.Errorf("private storage element address layout: %v", err)
+	layout, analyzed := e.analysis.storageLayouts[operation.OwnerType]
+	if !analyzed || layout.SizeBytes == 0 {
+		return fmt.Errorf("private storage element address layout was not analyzed")
 	}
 	size := fmt.Sprintf("((uintptr_t)UINT64_C(%d))", layout.SizeBytes)
 	fmt.Fprintf(output, "    if (%s == NULL || %s > UINTPTR_MAX / %s) { fy_l_%d = NULL; } else { fy_l_%d = (void *)((unsigned char *)%s + %s * %s); }\n",

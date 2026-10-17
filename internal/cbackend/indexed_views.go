@@ -30,7 +30,7 @@ func indexedViewCType(value hir.Type) (descriptor, pointer string, ok bool) {
 func (e *emitter) emitIntegerViewTypes(output *strings.Builder) {
 	for _, slice := range []hir.Type{hir.TypeBoolSlice, hir.TypeI32Slice, hir.TypeU32Slice, hir.TypeUsizeSlice} {
 		for _, value := range []hir.Type{hir.SharedBorrow(slice), hir.MutableBorrow(slice)} {
-			if !e.integerViews[value] {
+			if !e.analysis.integerViews[value] {
 				continue
 			}
 			descriptor, pointer, _ := indexedViewCType(value)

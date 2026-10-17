@@ -351,7 +351,7 @@ func taggedPayloadLayout(
 	return resources[index].layoutType, true
 }
 
-func (e *emitter) supportedNeedsDropType(value hir.Type) bool {
+func (e *emissionAnalysis) supportedNeedsDropType(value hir.Type) bool {
 	if _, direct := e.resourceByType[value]; direct {
 		return true
 	}
@@ -359,7 +359,7 @@ func (e *emitter) supportedNeedsDropType(value hir.Type) bool {
 	return found && tagged.needsDrop
 }
 
-func (e *emitter) taggedType(value hir.Type) (*taggedCType, bool) {
+func (e *emissionAnalysis) taggedType(value hir.Type) (*taggedCType, bool) {
 	index, found := e.taggedByType[value]
 	if !found {
 		return nil, false
@@ -367,7 +367,7 @@ func (e *emitter) taggedType(value hir.Type) (*taggedCType, bool) {
 	return &e.taggedTypes[index], true
 }
 
-func (e *emitter) optionCSpec(value hir.Type) (hir.Type, string, bool) {
+func (e *emissionAnalysis) optionCSpec(value hir.Type) (hir.Type, string, bool) {
 	if isOptionI32(value) {
 		return hir.TypeI32, "scalar-option", true
 	}
@@ -382,7 +382,7 @@ func (e *emitter) optionCSpec(value hir.Type) (hir.Type, string, bool) {
 	return tagged.payloads[0], feature, true
 }
 
-func (e *emitter) resultCSpec(value hir.Type) (hir.Type, hir.Type, string, bool) {
+func (e *emissionAnalysis) resultCSpec(value hir.Type) (hir.Type, hir.Type, string, bool) {
 	if isResultI32I32(value) {
 		return hir.TypeI32, hir.TypeI32, "scalar-result", true
 	}
@@ -398,12 +398,12 @@ func (e *emitter) resultCSpec(value hir.Type) (hir.Type, hir.Type, string, bool)
 }
 
 func (e *emitter) emitTaggedTypes(output *strings.Builder, directCopyScalar bool) error {
-	for index, tagged := range e.taggedTypes {
+	for index, tagged := range e.analysis.taggedTypes {
 		_, direct := copyScalarTaggedAggregateLayout(tagged.typ)
 		if direct != directCopyScalar {
 			continue
 		}
-		if !direct && e.taggedParticipatesInAggregateGraph(index) {
+		if !direct && e.analysis.taggedParticipatesInAggregateGraph(index) {
 			continue
 		}
 		if err := e.emitTaggedType(output, index); err != nil {
@@ -413,7 +413,7 @@ func (e *emitter) emitTaggedTypes(output *strings.Builder, directCopyScalar bool
 	return nil
 }
 
-func (e *emitter) taggedParticipatesInAggregateGraph(index int) bool {
+func (e *emissionAnalysis) taggedParticipatesInAggregateGraph(index int) bool {
 	tagged := e.taggedTypes[index]
 	if _, direct := copyScalarTaggedAggregateLayout(tagged.typ); direct || tagged.needsDrop {
 		return false
@@ -448,13 +448,13 @@ func (e *emitter) taggedParticipatesInAggregateGraph(index int) bool {
 }
 
 func (e *emitter) emitTaggedType(output *strings.Builder, index int) error {
-	tagged := e.taggedTypes[index]
+	tagged := e.analysis.taggedTypes[index]
 	output.WriteString("typedef struct {\n")
-	if !sharedBorrowOptionNiche(tagged.typ, e.structByType, e.resourceByType, e.arrayByType) {
+	if !sharedBorrowOptionNiche(tagged.typ, e.analysis.structByType, e.analysis.resourceByType, e.analysis.arrayByType) {
 		output.WriteString("    uint32_t tag;\n")
 	}
 	for payloadIndex, payload := range tagged.payloads {
-		cType, err := e.cValueType(payload)
+		cType, err := e.analysis.cValueType(payload)
 		if err != nil {
 			return fmt.Errorf("tagged type %q payload %d: %w", tagged.typ, payloadIndex, err)
 		}
@@ -465,7 +465,7 @@ func (e *emitter) emitTaggedType(output *strings.Builder, index int) error {
 	fmt.Fprintf(output, "_Static_assert(_Alignof(fy_tagged_%d) == UINT64_C(%d), \"fairyc tagged %d alignment\");\n", index, tagged.layout.AlignmentBytes, index)
 	for fieldIndex, field := range tagged.layout.Fields {
 		fieldName := "tag"
-		if sharedBorrowOptionNiche(tagged.typ, e.structByType, e.resourceByType, e.arrayByType) {
+		if sharedBorrowOptionNiche(tagged.typ, e.analysis.structByType, e.analysis.resourceByType, e.analysis.arrayByType) {
 			fieldName = fmt.Sprintf("p_%d", fieldIndex)
 		} else if fieldIndex > 0 {
 			fieldName = fmt.Sprintf("p_%d", fieldIndex-1)

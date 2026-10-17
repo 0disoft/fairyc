@@ -14,7 +14,7 @@ func EmitStorageTransfers(program mir.Program, entry string, profile Profile) (U
 	return emit(program, entry, profile, true)
 }
 
-func (e *emitter) inspectStorageTake(functionIndex int, operation mir.Operation) error {
+func (e *analysisBuilder) inspectStorageTake(functionIndex int, operation mir.Operation) error {
 	operand, err := oneOperand(operation.Operands)
 	if err != nil {
 		return err

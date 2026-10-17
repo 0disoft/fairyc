@@ -7,7 +7,7 @@ import (
 	"github.com/0disoft/fairyc/internal/mir"
 )
 
-func (e *emitter) inspectDerefStore(functionIndex int, operation mir.Operation) error {
+func (e *analysisBuilder) inspectDerefStore(functionIndex int, operation mir.Operation) error {
 	if !mir.ValidDerefStoreShape(operation) && !mir.ValidPlainStructDerefStoreShape(operation, e.fieldStoreStruct) {
 		return fmt.Errorf("invalid dereference store shape")
 	}

@@ -8,16 +8,20 @@ import (
 // Inspect all verified MIR for capability errors, but emit static integer helpers
 // only for executable C uses. Pruned guards and continuations must not leave
 // unused static functions for strict C consumers.
-func (e *emitter) refreshIntegerHelperDemand() {
+func (e *analysisBuilder) prepareExecutableRequirements() {
 	e.needsBitcast, e.needsShift = false, false
 	e.i64Helpers = i64Helpers{}
-	for _, fn := range e.functions {
+	for functionIndex, fn := range e.functions {
 		reachable := reachableBlocksForC(fn, e.nonReturning, e.checkedFailures[fn.Symbol])
+		e.reachableBlocks[functionIndex] = reachable
 		for i, block := range fn.Blocks {
 			if !reachable[i] {
 				continue
 			}
 			for _, op := range block.Operations {
+				if op.Kind == mir.OperationBurn {
+					e.features["resource-burn"] = struct{}{}
+				}
 				if op.Kind != mir.OperationUnary && op.Kind != mir.OperationBinary {
 					continue
 				}

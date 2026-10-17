@@ -8,7 +8,7 @@ import (
 	"github.com/0disoft/fairyc/internal/mir"
 )
 
-func (e *emitter) inspectStoragePut(functionIndex int, operation mir.Operation) error {
+func (e *analysisBuilder) inspectStoragePut(functionIndex int, operation mir.Operation) error {
 	pointer, value, err := twoOperands(operation.Operands)
 	if err != nil {
 		return err

@@ -51,7 +51,7 @@ func orderResourceDefinitions(definitions []mir.ResourceType) ([]mir.ResourceTyp
 	return ordered, nil
 }
 
-func (e *emitter) resourceHasNestedFields(value hir.Type) bool {
+func (e *emissionAnalysis) resourceHasNestedFields(value hir.Type) bool {
 	index, found := e.resourceByType[value]
 	if !found {
 		return false
@@ -67,7 +67,7 @@ func (e *emitter) resourceHasNestedFields(value hir.Type) bool {
 // Nested cleanup bodies return their post-cleanup local storage to the private
 // drop caller. Child destruction must observe any changes the body made to this,
 // not a stale by-value copy. The source and MIR cleanup signatures remain void.
-func (e *emitter) emittedFunctionResultType(function *mir.Function) (string, error) {
+func (e *emissionAnalysis) emittedFunctionResultType(function *mir.Function) (string, error) {
 	if e.nonReturning[function.Symbol] {
 		return "void", nil
 	}

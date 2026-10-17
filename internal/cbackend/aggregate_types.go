@@ -404,7 +404,7 @@ type aggregateEmissionNode struct {
 	array       int
 }
 
-func (e *emitter) aggregateEmissionOrder() ([]aggregateEmissionNode, error) {
+func (e *emissionAnalysis) aggregateEmissionOrder() ([]aggregateEmissionNode, error) {
 	nodes := make(map[hir.Type]aggregateEmissionNode, len(e.structTypes)+len(e.enumTypes))
 	for index, value := range e.structTypes {
 		nodes[value.definition.Type] = aggregateEmissionNode{typ: value.definition.Type, structure: index, enumeration: -1, tagged: -1, array: -1}
@@ -499,7 +499,7 @@ func (e *emitter) aggregateEmissionOrder() ([]aggregateEmissionNode, error) {
 }
 
 func (e *emitter) emitAggregateTypes(output *strings.Builder) error {
-	ordered, err := e.aggregateEmissionOrder()
+	ordered, err := e.analysis.aggregateEmissionOrder()
 	if err != nil {
 		return err
 	}
@@ -526,7 +526,7 @@ func (e *emitter) emitAggregateTypes(output *strings.Builder) error {
 }
 
 func (e *emitter) emitStructType(output *strings.Builder, index int) error {
-	structure := e.structTypes[index]
+	structure := e.analysis.structTypes[index]
 	if structure.definition.ReprC {
 		fmt.Fprintf(output, "struct %s {\n", structure.definition.Name)
 	} else {
@@ -536,13 +536,13 @@ func (e *emitter) emitStructType(output *strings.Builder, index int) error {
 		output.WriteString("    uint8_t f_0;\n")
 	}
 	for fieldIndex, field := range structure.definition.Fields {
-		cType, err := e.cValueType(field.Type)
+		cType, err := e.analysis.cValueType(field.Type)
 		if err != nil {
 			return fmt.Errorf("emit struct %q field %q: %w", structure.definition.Type, field.Name, err)
 		}
-		fmt.Fprintf(output, "    %s %s;\n", cType, e.structCFieldName(index, fieldIndex))
+		fmt.Fprintf(output, "    %s %s;\n", cType, e.analysis.structCFieldName(index, fieldIndex))
 	}
-	cType := e.structCTypeName(index)
+	cType := e.analysis.structCTypeName(index)
 	if structure.definition.ReprC {
 		output.WriteString("};\n")
 	} else {
@@ -551,14 +551,14 @@ func (e *emitter) emitStructType(output *strings.Builder, index int) error {
 	fmt.Fprintf(output, "_Static_assert(sizeof(%s) == UINT64_C(%d), \"fairyc struct %d size\");\n", cType, structure.layout.SizeBytes, index)
 	fmt.Fprintf(output, "_Static_assert(_Alignof(%s) == UINT64_C(%d), \"fairyc struct %d alignment\");\n", cType, structure.layout.AlignmentBytes, index)
 	for fieldIndex, field := range structure.layout.Fields {
-		fmt.Fprintf(output, "_Static_assert(offsetof(%s, %s) == UINT64_C(%d), \"fairyc struct %d field %d offset\");\n", cType, e.structCFieldName(index, fieldIndex), field.OffsetBytes, index, fieldIndex)
+		fmt.Fprintf(output, "_Static_assert(offsetof(%s, %s) == UINT64_C(%d), \"fairyc struct %d field %d offset\");\n", cType, e.analysis.structCFieldName(index, fieldIndex), field.OffsetBytes, index, fieldIndex)
 	}
 	output.WriteByte('\n')
 	return nil
 }
 
 func (e *emitter) emitEnumType(output *strings.Builder, enumIndex int) error {
-	enumeration := e.enumTypes[enumIndex]
+	enumeration := e.analysis.enumTypes[enumIndex]
 	output.WriteString("typedef union {\n    uint8_t unused;\n")
 	for variantIndex, variant := range enumeration.definition.Variants {
 		if len(variant.Fields) == 0 {
@@ -566,7 +566,7 @@ func (e *emitter) emitEnumType(output *strings.Builder, enumIndex int) error {
 		}
 		output.WriteString("    struct {\n")
 		for fieldIndex, field := range variant.Fields {
-			cType, err := e.enumPayloadCType(field.Type)
+			cType, err := e.analysis.enumPayloadCType(field.Type)
 			if err != nil {
 				return fmt.Errorf("emit enum %q variant %q field %q: %w", enumeration.definition.Type, variant.Name, field.Name, err)
 			}

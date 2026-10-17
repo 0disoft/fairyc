@@ -8,7 +8,7 @@ import (
 	"github.com/0disoft/fairyc/internal/mir"
 )
 
-func (e *emitter) inspectFieldStore(functionIndex int, operation mir.Operation) error {
+func (e *analysisBuilder) inspectFieldStore(functionIndex int, operation mir.Operation) error {
 	valid := mir.ValidFieldStoreShape(operation) || mir.ValidPlainStructFieldStoreShape(operation, e.fieldStoreStruct)
 	if index, found := e.structByType[operation.Type]; found {
 		valid = valid || mir.ValidOneWordStructFieldStoreShape(operation, &e.structTypes[index].definition)
@@ -48,7 +48,7 @@ func (e *emitter) writeFieldStore(output *strings.Builder, operation mir.Operati
 		return err
 	}
 	if len(operation.Fields) > 0 {
-		path, ok := mir.ResolveNestedFieldStore(operation, e.fieldStoreStruct)
+		path, ok := mir.ResolveNestedFieldStore(operation, e.analysis.fieldStoreStruct)
 		if !ok {
 			return fmt.Errorf("invalid nested field store path")
 		}
@@ -59,8 +59,8 @@ func (e *emitter) writeFieldStore(output *strings.Builder, operation mir.Operati
 			access = "->"
 		}
 		for _, field := range path {
-			index := e.structByType[typ]
-			place += access + e.structCFieldName(index, e.structTypes[index].fieldIndex[field.Name])
+			index := e.analysis.structByType[typ]
+			place += access + e.analysis.structCFieldName(index, e.analysis.structTypes[index].fieldIndex[field.Name])
 			access = "."
 			typ = field.Type
 		}
@@ -69,14 +69,14 @@ func (e *emitter) writeFieldStore(output *strings.Builder, operation mir.Operati
 	}
 	aggregate := fieldAggregateType(operation.OwnerType)
 	name := ""
-	if index, found := e.structByType[aggregate]; found {
-		field, found := e.structTypes[index].fieldIndex[operation.Field]
+	if index, found := e.analysis.structByType[aggregate]; found {
+		field, found := e.analysis.structTypes[index].fieldIndex[operation.Field]
 		if !found {
 			return fmt.Errorf("missing stored struct field")
 		}
-		name = e.structCFieldName(index, field)
-	} else if index, found := e.resourceByType[aggregate]; found {
-		field, found := e.resourceTypes[index].fieldIndex[operation.Field]
+		name = e.analysis.structCFieldName(index, field)
+	} else if index, found := e.analysis.resourceByType[aggregate]; found {
+		field, found := e.analysis.resourceTypes[index].fieldIndex[operation.Field]
 		if !found {
 			return fmt.Errorf("missing stored resource field")
 		}
@@ -92,7 +92,7 @@ func (e *emitter) writeFieldStore(output *strings.Builder, operation mir.Operati
 	return nil
 }
 
-func (e *emitter) fieldStoreStruct(typ hir.Type) *mir.StructType {
+func (e *emissionAnalysis) fieldStoreStruct(typ hir.Type) *mir.StructType {
 	if index, ok := e.structByType[typ]; ok {
 		return &e.structTypes[index].definition
 	}

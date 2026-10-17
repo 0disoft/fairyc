@@ -15,7 +15,7 @@ type dropSiteKey struct {
 	span         hir.Span
 }
 
-func (e *emitter) prepareDropTraceSites() error {
+func (e *analysisBuilder) prepareDropTraceSites() error {
 	if e.instrumentation == "" {
 		return nil
 	}
@@ -77,7 +77,7 @@ func compareDropSiteKey(left, right dropSiteKey) int {
 	return cmp.Compare(left.span.EndByte, right.span.EndByte)
 }
 
-func (e *emitter) dropLeafTypes(value hir.Type) []hir.Type {
+func (e *emissionAnalysis) dropLeafTypes(value hir.Type) []hir.Type {
 	if index, direct := e.resourceByType[value]; direct {
 		result := []hir.Type{value}
 		fields := e.resourceTypes[index].definition.Fields
@@ -100,28 +100,28 @@ func (e *emitter) dropLeafTypes(value hir.Type) []hir.Type {
 }
 
 func (e *emitter) emitDropTrace(output *strings.Builder, functionIndex int, operation mir.Operation) error {
-	resource, found := e.resourceLocals[functionIndex][operation.Symbol]
+	resource, found := e.analysis.resourceLocals[functionIndex][operation.Symbol]
 	if !found {
 		return fmt.Errorf("drop trace names undeclared resource local %d", operation.Symbol)
 	}
-	if _, direct := e.resourceByType[resource.Type]; direct {
+	if _, direct := e.analysis.resourceByType[resource.Type]; direct {
 		return e.emitDropTraceCall(output, resource.Type, operation.Span, "")
 	}
-	tagged, found := e.taggedType(resource.Type)
+	tagged, found := e.analysis.taggedType(resource.Type)
 	if !found {
 		return fmt.Errorf("drop trace has unsupported resource type %q", resource.Type)
 	}
 	switch tagged.kind {
 	case taggedOption:
 		payload := tagged.payloads[0]
-		if _, direct := e.resourceByType[payload]; !direct {
+		if _, direct := e.analysis.resourceByType[payload]; !direct {
 			return nil
 		}
 		condition := fmt.Sprintf("fy_l_%d.tag == FY_OPTION_SOME", operation.Symbol)
 		return e.emitDropTraceCall(output, payload, operation.Span, condition)
 	case taggedResult:
 		for index, payload := range tagged.payloads {
-			if _, direct := e.resourceByType[payload]; !direct {
+			if _, direct := e.analysis.resourceByType[payload]; !direct {
 				continue
 			}
 			tag := "FY_RESULT_OK"
@@ -140,7 +140,7 @@ func (e *emitter) emitDropTrace(output *strings.Builder, functionIndex int, oper
 }
 
 func (e *emitter) emitDropTraceCall(output *strings.Builder, resourceType hir.Type, span hir.Span, condition string) error {
-	id, found := e.dropSiteByKey[dropSiteKey{resourceType: resourceType, span: span}]
+	id, found := e.analysis.dropSiteByKey[dropSiteKey{resourceType: resourceType, span: span}]
 	if !found {
 		return fmt.Errorf("drop trace site is missing for %q at %s:%d-%d", resourceType, span.Source, span.StartByte, span.EndByte)
 	}

@@ -8,7 +8,7 @@ import (
 	"github.com/0disoft/fairyc/internal/mir"
 )
 
-func (e *emitter) inspectStorageBorrow(functionIndex int, operation mir.Operation) error {
+func (e *analysisBuilder) inspectStorageBorrow(functionIndex int, operation mir.Operation) error {
 	if _, view := hir.IndexedViewElement(operation.Type); view {
 		return e.inspectStorageView(functionIndex, operation)
 	}
@@ -60,7 +60,7 @@ func (e *emitter) writeStorageBorrow(output *strings.Builder, operation mir.Oper
 	return nil
 }
 
-func (e *emitter) inspectStorageView(functionIndex int, operation mir.Operation) error {
+func (e *analysisBuilder) inspectStorageView(functionIndex int, operation mir.Operation) error {
 	wantsMutable := operation.Kind == mir.OperationStorageBorrowMut
 	_, view := hir.IndexedViewElement(operation.Type)
 	if (operation.Kind != mir.OperationStorageBorrow && !wantsMutable) || len(operation.Operands) != 3 || !view || hir.MutableIndexedView(operation.Type) != wantsMutable {

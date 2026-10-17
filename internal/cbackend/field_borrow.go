@@ -8,7 +8,7 @@ import (
 	"github.com/0disoft/fairyc/internal/mir"
 )
 
-func (e *emitter) inspectFieldBorrow(functionIndex int, operation mir.Operation) error {
+func (e *analysisBuilder) inspectFieldBorrow(functionIndex int, operation mir.Operation) error {
 	element, mutable, borrowed := hir.BorrowElement(operation.Type)
 	_, ownerMutable, ownerBorrowed := hir.BorrowElement(operation.OwnerType)
 	if !borrowed || !ownerBorrowed || mutable != ownerMutable {
@@ -33,14 +33,14 @@ func (e *emitter) writeFieldBorrow(output *strings.Builder, operation mir.Operat
 	}
 	aggregate := fieldAggregateType(operation.OwnerType)
 	fieldName := ""
-	if index, found := e.structByType[aggregate]; found {
-		field, found := e.structTypes[index].fieldIndex[operation.Field]
+	if index, found := e.analysis.structByType[aggregate]; found {
+		field, found := e.analysis.structTypes[index].fieldIndex[operation.Field]
 		if !found {
 			return fmt.Errorf("unknown borrowed struct field %q", operation.Field)
 		}
-		fieldName = e.structCFieldName(index, field)
-	} else if index, found := e.resourceByType[aggregate]; found {
-		field, found := e.resourceTypes[index].fieldIndex[operation.Field]
+		fieldName = e.analysis.structCFieldName(index, field)
+	} else if index, found := e.analysis.resourceByType[aggregate]; found {
+		field, found := e.analysis.resourceTypes[index].fieldIndex[operation.Field]
 		if !found {
 			return fmt.Errorf("unknown borrowed resource field %q", operation.Field)
 		}

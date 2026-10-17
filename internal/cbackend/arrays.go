@@ -104,12 +104,12 @@ func scalarArrayLayoutType(value hir.Type) (layout.Type, bool) {
 	return layout.Type{Kind: layout.KindArray, Element: &elementLayout, Length: length}, true
 }
 
-func (e *emitter) arrayCTypeName(index int) string {
+func (e *emissionAnalysis) arrayCTypeName(index int) string {
 	return fmt.Sprintf("fy_array_%d", index)
 }
 
 func (e *emitter) emitScalarArrayTypes(output *strings.Builder, nominal bool) error {
-	for index, array := range e.arrayTypes {
+	for index, array := range e.analysis.arrayTypes {
 		if nominal == hir.FixedArrayScalarElement(array.element) {
 			continue
 		}
@@ -117,18 +117,18 @@ func (e *emitter) emitScalarArrayTypes(output *strings.Builder, nominal bool) er
 			return err
 		}
 	}
-	if len(e.arrayTypes) != 0 {
+	if len(e.analysis.arrayTypes) != 0 {
 		output.WriteString("\n")
 	}
 	return nil
 }
 
 func (e *emitter) emitArrayType(output *strings.Builder, index int) error {
-	array := e.arrayTypes[index]
-	elementType, err := e.cValueType(array.element)
+	array := e.analysis.arrayTypes[index]
+	elementType, err := e.analysis.cValueType(array.element)
 	if err != nil {
 		return fmt.Errorf("emit fixed array %q: %w", array.typ, err)
 	}
-	fmt.Fprintf(output, "typedef struct { %s data[UINT64_C(%d)]; } %s;\n", elementType, array.length, e.arrayCTypeName(index))
+	fmt.Fprintf(output, "typedef struct { %s data[UINT64_C(%d)]; } %s;\n", elementType, array.length, e.analysis.arrayCTypeName(index))
 	return nil
 }
