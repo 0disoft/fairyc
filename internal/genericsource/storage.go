@@ -3,6 +3,7 @@ package genericsource
 import (
 	"fmt"
 
+	"github.com/0disoft/fairyc/internal/admission"
 	"github.com/0disoft/fairyc/internal/ast"
 	"github.com/0disoft/fairyc/internal/genericplan"
 	"github.com/0disoft/fairyc/internal/hir"
@@ -15,7 +16,7 @@ func PrepareStorageModule(module *ast.Module, owner genericplan.PackageID, limit
 	if module == nil || len(module.Imports) != 0 {
 		return PackageExpansion{}, fmt.Errorf("private storage queries require an import-free module")
 	}
-	return prepareModule(module, owner, limits, true, true, false)
+	return PrepareModuleWithCapabilities(module, owner, limits, admission.Capabilities{Arguments: admission.NominalArguments, Storage: admission.StorageQueries})
 }
 
 // PrepareStorageTransferModule also enables unsafe source ownership transfers.
@@ -23,7 +24,7 @@ func PrepareStorageTransferModule(module *ast.Module, owner genericplan.PackageI
 	if module == nil || len(module.Imports) != 0 {
 		return PackageExpansion{}, fmt.Errorf("private storage transfers require an import-free module")
 	}
-	return prepareModule(module, owner, limits, true, true, true)
+	return PrepareModuleWithCapabilities(module, owner, limits, admission.Capabilities{Arguments: admission.NominalArguments, Storage: admission.StorageTransfers})
 }
 
 func (x *expander) storageSelector(name string) string {

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"slices"
 
+	"github.com/0disoft/fairyc/internal/admission"
 	"github.com/0disoft/fairyc/internal/hir"
 )
 
@@ -32,22 +33,27 @@ type verificationState struct {
 
 // Verify checks the executable invariants required before MIR handoff.
 func Verify(program Program) []VerificationError {
-	return verify(program, false, false)
+	return VerifyWithCapabilities(program, admission.Capabilities{})
 }
 
 // VerifyStorageQueries permits only the additional compiler-private symbolic
 // storage query. Standard interpreter and artifact verification remain closed.
 func VerifyStorageQueries(program Program) []VerificationError {
-	return verify(program, true, false)
+	return VerifyWithCapabilities(program, admission.Capabilities{Storage: admission.StorageQueries})
 }
 
 // VerifyStorageTransfers additionally admits unsafe value/storage ownership moves.
 // Ordinary, query-only, interpreter and artifact entry points remain closed.
 func VerifyStorageTransfers(program Program) []VerificationError {
-	return verify(program, true, true)
+	return VerifyWithCapabilities(program, admission.Capabilities{Storage: admission.StorageTransfers})
 }
 
-func verify(program Program, allowStorageQueries, allowStorageTransfers bool) []VerificationError {
+// VerifyWithCapabilities verifies MIR using the same admission selected for source
+// preparation. Invalid capabilities fail before any executable IR is accepted.
+func VerifyWithCapabilities(program Program, capabilities admission.Capabilities) []VerificationError {
+	if err := capabilities.Validate(); err != nil {
+		return []VerificationError{{Code: "V1001", Entity: "program", Detail: err.Error()}}
+	}
 	structTypes, failures := verifyStructTypes(program.StructTypes)
 	enumTypes, enumFailures := verifyEnumTypes(program.EnumTypes)
 	failures = append(failures, enumFailures...)
@@ -76,25 +82,25 @@ func verify(program Program, allowStorageQueries, allowStorageTransfers bool) []
 		for _, block := range program.Functions[index].Blocks {
 			for operationIndex, operation := range block.Operations {
 				if operation.Kind == OperationStorageBorrow || operation.Kind == OperationStorageBorrowMut {
-					if !allowStorageTransfers || !validStorageBorrowShape(operation, properties) ||
+					if !capabilities.AllowsStorageTransfers() || !validStorageBorrowShape(operation, properties) ||
 						!validStorageTransferProvenance(&program.Functions[index], operation) {
 						failures = append(failures, VerificationError{Code: "V1001", Entity: operationEntity(block.ID, operationIndex, operation), Detail: "private storage borrow is unadmitted or malformed"})
 					}
 				}
 				if operation.Kind == OperationStorageElementAddress {
-					if !allowStorageTransfers || !validStorageElementAddressShape(operation, properties) ||
+					if !capabilities.AllowsStorageTransfers() || !validStorageElementAddressShape(operation, properties) ||
 						!validStorageTransferProvenance(&program.Functions[index], operation) {
 						failures = append(failures, VerificationError{Code: "V1001", Entity: operationEntity(block.ID, operationIndex, operation), Detail: "private storage element address is unadmitted or malformed"})
 					}
 				}
 				if operation.Kind == OperationStorageTake {
-					if !allowStorageTransfers || !validStorageTakeShape(operation) || !storageQueryType(operation.Type, properties) ||
+					if !capabilities.AllowsStorageTransfers() || !validStorageTakeShape(operation) || !storageQueryType(operation.Type, properties) ||
 						!validStorageTransferProvenance(&program.Functions[index], operation) {
 						failures = append(failures, VerificationError{Code: "V1001", Entity: operationEntity(block.ID, operationIndex, operation), Detail: "private storage take is unadmitted or malformed"})
 					}
 				}
 				if operation.Kind == OperationStoragePut {
-					if !allowStorageTransfers || !validStoragePutShape(operation) || !storageQueryType(operation.OwnerType, properties) ||
+					if !capabilities.AllowsStorageTransfers() || !validStoragePutShape(operation) || !storageQueryType(operation.OwnerType, properties) ||
 						!validStorageTransferProvenance(&program.Functions[index], operation) {
 						failures = append(failures, VerificationError{Code: "V1001", Entity: operationEntity(block.ID, operationIndex, operation), Detail: "private storage put is unadmitted or malformed"})
 					}
@@ -102,7 +108,7 @@ func verify(program Program, allowStorageQueries, allowStorageTransfers bool) []
 				if operation.Kind != OperationStorageLayout {
 					continue
 				}
-				if !allowStorageQueries || !validStorageQueryShape(operation) || !storageQueryType(operation.OwnerType, properties) {
+				if !capabilities.AllowsStorageQueries() || !validStorageQueryShape(operation) || !storageQueryType(operation.OwnerType, properties) {
 					failures = append(failures, VerificationError{Code: "V1001", Entity: operationEntity(block.ID, operationIndex, operation), Detail: "private storage query is unadmitted or malformed"})
 				}
 			}

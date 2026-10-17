@@ -5,6 +5,7 @@ import (
 	"slices"
 	"strings"
 
+	"github.com/0disoft/fairyc/internal/admission"
 	"github.com/0disoft/fairyc/internal/ast"
 	"github.com/0disoft/fairyc/internal/genericplan"
 )
@@ -29,28 +30,24 @@ func ExpandPackages(inputs []PackageModule, limits genericplan.PlanLimits) ([]*a
 // PreparePackages also retains public template identities before specialization
 // erases their declarations. No template summary is returned on expansion failure.
 func PreparePackages(inputs []PackageModule, limits genericplan.PlanLimits) (PackageExpansion, error) {
-	return preparePackages(inputs, limits, false, false, false)
+	return PrepareWithPolicy(inputs, limits, admission.Policy[genericplan.PackageID]{})
 }
 
 // PrepareStoragePackages enables symbolic queries across an exact resolved graph.
 // Arguments remain scalar; nominal arguments need cross-owner type binding.
 func PrepareStoragePackages(inputs []PackageModule, limits genericplan.PlanLimits) (PackageExpansion, error) {
-	return preparePackages(inputs, limits, true, false, false)
+	return PrepareWithPolicy(inputs, limits, admission.Policy[genericplan.PackageID]{Capabilities: admission.Capabilities{Storage: admission.StorageQueries}})
 }
 
 // PrepareNominalStoragePackages is a private, closed-graph nominal and layout lane.
 func PrepareNominalStoragePackages(inputs []PackageModule, limits genericplan.PlanLimits) (PackageExpansion, error) {
-	return preparePackages(inputs, limits, true, true, false)
+	return PrepareWithPolicy(inputs, limits, admission.Policy[genericplan.PackageID]{Capabilities: admission.Capabilities{Storage: admission.StorageQueries, Arguments: admission.NominalArguments}})
 }
 
 // PrepareStorageTransferPackages admits explicit unsafe transfers with exact
 // nominal bindings. Ordinary and query-only package preparation remain closed.
 func PrepareStorageTransferPackages(inputs []PackageModule, limits genericplan.PlanLimits) (PackageExpansion, error) {
-	return preparePackages(inputs, limits, true, true, true)
-}
-
-func preparePackages(inputs []PackageModule, limits genericplan.PlanLimits, storage, nominal, transfers bool) (PackageExpansion, error) {
-	return preparePackagesOwned(inputs, limits, storage, nominal, transfers, nil, false)
+	return PrepareWithPolicy(inputs, limits, admission.Policy[genericplan.PackageID]{Capabilities: admission.Capabilities{Storage: admission.StorageTransfers, Arguments: admission.NominalArguments}})
 }
 
 // PrepareOwnedStorageTransferPackages restricts private storage operations to
@@ -58,40 +55,48 @@ func preparePackages(inputs []PackageModule, limits genericplan.PlanLimits, stor
 // source authority; module names and import aliases never grant permission.
 // Ordinary generic/nominal use and calls to the provider remain available.
 func PrepareOwnedStorageTransferPackages(inputs []PackageModule, limits genericplan.PlanLimits, owners []genericplan.PackageID) (PackageExpansion, error) {
-	return prepareOwnedStorageTransferPackages(inputs, limits, owners, false)
+	return prepareOwnedStorageTransferPackages(inputs, limits, owners, admission.OrdinaryTemplates)
 }
 
 // PrepareSDKStoragePackages admits aggregate and nominal-argument templates only
 // in authenticated SDK owners. Consumer templates retain scalar-only arguments.
 func PrepareSDKStoragePackages(inputs []PackageModule, limits genericplan.PlanLimits, owners []genericplan.PackageID) (PackageExpansion, error) {
-	return prepareOwnedStorageTransferPackages(inputs, limits, owners, true)
+	return prepareOwnedStorageTransferPackages(inputs, limits, owners, admission.SDKOwnerTemplates)
 }
 
-func prepareOwnedStorageTransferPackages(inputs []PackageModule, limits genericplan.PlanLimits, owners []genericplan.PackageID, sdkTemplates bool) (PackageExpansion, error) {
+func prepareOwnedStorageTransferPackages(inputs []PackageModule, limits genericplan.PlanLimits, owners []genericplan.PackageID, templates admission.TemplateMode) (PackageExpansion, error) {
 	if len(owners) == 0 {
 		return PackageExpansion{}, fmt.Errorf("storage operation owners must be explicit")
 	}
-	allowed := make(map[genericplan.PackageID]bool, len(owners))
-	for _, owner := range owners {
-		if owner == "" || allowed[owner] {
-			return PackageExpansion{}, fmt.Errorf("storage operation owner is empty or duplicated")
-		}
-		found := false
-		for _, input := range inputs {
-			if input.Owner == owner {
-				found = true
-				break
-			}
-		}
-		if !found {
-			return PackageExpansion{}, fmt.Errorf("storage operation owner is absent from source graph")
-		}
-		allowed[owner] = true
-	}
-	return preparePackagesOwned(inputs, limits, true, true, true, allowed, sdkTemplates)
+	return PrepareWithPolicy(inputs, limits, admission.Policy[genericplan.PackageID]{
+		Capabilities: admission.Capabilities{Storage: admission.StorageTransfers, Arguments: admission.NominalArguments, Templates: templates}, StorageOwners: owners,
+	})
 }
 
-func preparePackagesOwned(inputs []PackageModule, limits genericplan.PlanLimits, storage, nominal, transfers bool, storageOwners map[genericplan.PackageID]bool, sdkTemplates bool) (PackageExpansion, error) {
+// PrepareWithPolicy is the shared resolved-graph expansion boundary. Owner
+// authentication belongs to the caller; validation prevents malformed scopes.
+func PrepareWithPolicy(inputs []PackageModule, limits genericplan.PlanLimits, policy admission.Policy[genericplan.PackageID]) (PackageExpansion, error) {
+	if err := policy.Validate(); err != nil {
+		return PackageExpansion{}, err
+	}
+	capabilities := policy.Capabilities
+	var storageOwners map[genericplan.PackageID]bool
+	if policy.StorageOwners != nil {
+		storageOwners = make(map[genericplan.PackageID]bool, len(policy.StorageOwners))
+		graphOwners := make(map[genericplan.PackageID]bool, len(inputs))
+		for _, input := range inputs {
+			graphOwners[input.Owner] = true
+		}
+		for _, owner := range policy.StorageOwners {
+			if owner == "" {
+				return PackageExpansion{}, fmt.Errorf("storage operation owner is empty or duplicated")
+			}
+			if !graphOwners[owner] {
+				return PackageExpansion{}, fmt.Errorf("storage operation owner is absent from source graph")
+			}
+			storageOwners[owner] = true
+		}
+	}
 	type moduleKey struct {
 		owner genericplan.PackageID
 		path  string
@@ -107,8 +112,8 @@ func preparePackagesOwned(inputs []PackageModule, limits genericplan.PlanLimits,
 			return PackageExpansion{}, fmt.Errorf("duplicate generic module %q", input.Module.Path)
 		}
 		allowStorage := storageOwners == nil || storageOwners[input.Owner]
-		x := &expander{module: input.Module, owner: input.Owner, templates: map[string]ast.Function{}, names: map[string]bool{}, imports: map[string]*expander{}, allowPublic: true, allowStorage: storage && allowStorage, allowNominal: nominal, packageNominal: nominal, allowStorageTransfers: transfers && allowStorage}
-		x.scalarTemplatesOnly = sdkTemplates && !allowStorage
+		x := &expander{module: input.Module, owner: input.Owner, templates: map[string]ast.Function{}, names: map[string]bool{}, imports: map[string]*expander{}, allowPublic: true, allowStorage: capabilities.AllowsStorageQueries() && allowStorage, allowNominal: capabilities.AllowsNominalArguments(), packageNominal: capabilities.AllowsNominalArguments(), allowStorageTransfers: capabilities.AllowsStorageTransfers() && allowStorage}
+		x.scalarTemplatesOnly = capabilities.SDKTemplates() && !allowStorage
 		modules[key], ordered[i] = x, x
 	}
 	for i, input := range inputs {
@@ -124,7 +129,7 @@ func preparePackagesOwned(inputs []PackageModule, limits genericplan.PlanLimits,
 			ordered[i].imports[imported.Alias] = target
 		}
 	}
-	if sdkTemplates {
+	if capabilities.SDKTemplates() {
 		for _, module := range ordered {
 			if err := module.activateSDKVectorLoops(); err != nil {
 				return PackageExpansion{}, err
@@ -132,7 +137,7 @@ func preparePackagesOwned(inputs []PackageModule, limits genericplan.PlanLimits,
 		}
 	}
 	var templates []PublicTemplate
-	if nominal {
+	if capabilities.AllowsNominalArguments() {
 		if err := bindNominalContext(ordered); err != nil {
 			return PackageExpansion{}, err
 		}
@@ -148,7 +153,7 @@ func preparePackagesOwned(inputs []PackageModule, limits genericplan.PlanLimits,
 		return PackageExpansion{}, err
 	}
 	result := PackageExpansion{Modules: expanded, Plan: plan, Templates: templates, Specializations: map[genericplan.PackageID][]genericplan.SpecializationID{}}
-	if nominal && len(ordered) != 0 {
+	if capabilities.AllowsNominalArguments() && len(ordered) != 0 {
 		for _, binding := range ordered[0].boundNominals {
 			result.NominalBindings = append(result.NominalBindings, binding)
 		}

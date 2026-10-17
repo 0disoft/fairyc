@@ -6,6 +6,7 @@ import (
 	"slices"
 	"strings"
 
+	"github.com/0disoft/fairyc/internal/admission"
 	"github.com/0disoft/fairyc/internal/ast"
 	"github.com/0disoft/fairyc/internal/diagnostic"
 	"github.com/0disoft/fairyc/internal/genericplan"
@@ -31,7 +32,7 @@ func Expand(module *ast.Module, owner genericplan.PackageID, limits genericplan.
 // PrepareModule retains detached declaration and specialization provenance for
 // the private module-local path, without claiming a public package interface.
 func PrepareModule(module *ast.Module, owner genericplan.PackageID, limits genericplan.PlanLimits) (PackageExpansion, error) {
-	return prepareModule(module, owner, limits, false, false, false)
+	return PrepareModuleWithCapabilities(module, owner, limits, admission.Capabilities{})
 }
 
 // PrepareNominalModule is an opt-in private lane for local ordinary nominal
@@ -40,14 +41,25 @@ func PrepareNominalModule(module *ast.Module, owner genericplan.PackageID, limit
 	if module != nil && len(module.Imports) != 0 {
 		return PackageExpansion{}, fmt.Errorf("private nominal generic source requires one import-free module")
 	}
-	return prepareModule(module, owner, limits, true, false, false)
+	return PrepareModuleWithCapabilities(module, owner, limits, admission.Capabilities{Arguments: admission.NominalArguments})
 }
 
-func prepareModule(module *ast.Module, owner genericplan.PackageID, limits genericplan.PlanLimits, nominal, storage, transfers bool) (PackageExpansion, error) {
+// PrepareModuleWithCapabilities prepares one import-free module. Owner-scoped SDK
+// templates require the resolved package graph boundary instead.
+func PrepareModuleWithCapabilities(module *ast.Module, owner genericplan.PackageID, limits genericplan.PlanLimits, capabilities admission.Capabilities) (PackageExpansion, error) {
+	if err := capabilities.Validate(); err != nil {
+		return PackageExpansion{}, err
+	}
+	if capabilities.SDKTemplates() {
+		return PackageExpansion{}, fmt.Errorf("SDK templates require a resolved owner-scoped graph")
+	}
+	if module != nil && len(module.Imports) != 0 && (capabilities.AllowsNominalArguments() || capabilities.AllowsStorageQueries()) {
+		return PackageExpansion{}, fmt.Errorf("private generic capabilities require an import-free module")
+	}
 	if module == nil {
 		return PackageExpansion{}, fmt.Errorf("generic source module is nil")
 	}
-	x := expander{module: module, owner: owner, templates: map[string]ast.Function{}, names: map[string]bool{}, allowNominal: nominal, allowStorage: storage, allowStorageTransfers: transfers}
+	x := expander{module: module, owner: owner, templates: map[string]ast.Function{}, names: map[string]bool{}, allowNominal: capabilities.AllowsNominalArguments(), allowStorage: capabilities.AllowsStorageQueries(), allowStorageTransfers: capabilities.AllowsStorageTransfers()}
 	modules, plan, err := expandAll([]*expander{&x}, limits)
 	if err != nil {
 		return PackageExpansion{}, err
