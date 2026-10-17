@@ -1,0 +1,724 @@
+{
+  "schema": "fairyc.candidate-sdk-plan-reuse-final-verification/v1",
+  "passed": true,
+  "scope": "Windows full file_cli dispatcher; both compiler profiles against freshly built Go; consecutive full CLI C generations",
+  "implementationCommit": "c1179d8e",
+  "fixedPointToolBaseCommit": "09cf20a8",
+  "buildReceipt": {
+    "path": ".cache/sdk-plan-reuse-20261017/candidate/receipt.json",
+    "sha256": "f09abdd7f97f701f02bbe1539d2713b2afed65f283b788ff3cf841275ac07b82",
+    "bytes": 102249
+  },
+  "sourceFiles": 512,
+  "sourceInputsSHA256": "f5f57cf2c2cfc6c3a5d275d44f2404908c6aff49de9ee4b7ca4acb0f829bc71d",
+  "packetSHA256": "d1024402e7a4a71961972a658bc31b48d735f7f4faa1f3770346ce5734aa874c",
+  "packetBytes": 41766237,
+  "buildVersion": "Fairy C Stage 0\ncompiler: v0.0.0-20261017104851-09cf20a84c9b+dirty\nsdk: fairyc-sdk-stdlib/0 0.0.0-stage0.86\nlanguage: fairyc-language/20\nruntime: fairyc-runtime/0\nrevision: 09cf20a84c9b5c173ef7323b2015dcdef0a62907\nmodified: true\n",
+  "reference": {
+    "path": ".cache/sdk-plan-reuse-20261017/candidate/source-version.exe",
+    "sha256": "d6a31d4fba6da23674d6274b622949e4bd333535ee6421ff370e1835cbd011d0",
+    "bytes": 17484288
+  },
+  "images": [
+    {
+      "profile": "development",
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\sdk-plan-reuse-20261017\\candidate\\development\\fairyc.exe",
+      "sha256": "bda8e7ac7c6bdf49412196d9f4e0ece149b013341e7f266fa16338a4b4fc9001",
+      "driverSHA256": "68917e76329f3952d352c6cf37ebbe0c19fcd84fb6f68b72dcf8d32e272ff512"
+    },
+    {
+      "profile": "release",
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\sdk-plan-reuse-20261017\\candidate\\release\\fairyc.exe",
+      "sha256": "6b439556c674bb06229f456e8fc755940af10b253ddd6be7ae85531b1a99eabf",
+      "driverSHA256": "68917e76329f3952d352c6cf37ebbe0c19fcd84fb6f68b72dcf8d32e272ff512"
+    }
+  ],
+  "buildInvocations": [
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\native-test-performance-20261017\\candidate-compact\\release\\fairyc.exe",
+        "--c-project-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\sdk-plan-reuse-20261017\\candidate\\sources.list"
+      ],
+      "seconds": 808.8022287000058,
+      "exit": 0,
+      "stdoutBytes": 41766237,
+      "stdoutSHA256": "d1024402e7a4a71961972a658bc31b48d735f7f4faa1f3770346ce5734aa874c",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\semantic-test-20261017\\fairyc-candidate-build-16k.exe",
+        "--packet",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\sdk-plan-reuse-20261017\\candidate\\candidate-packet.bin",
+        "--packet-sha256",
+        "d1024402e7a4a71961972a658bc31b48d735f7f4faa1f3770346ce5734aa874c",
+        "--output",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\sdk-plan-reuse-20261017\\candidate\\development\\fairyc.exe",
+        "--stack-reserve-bytes",
+        "16777216"
+      ],
+      "seconds": 59.631224400000065,
+      "exit": 0,
+      "stdoutBytes": 184,
+      "stdoutSHA256": "19efa39ddd14b31a77e025adfa8240e43872dd1054e1a059dc2e2cb57bd748a2",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\sdk-plan-reuse-20261017\\candidate\\development\\fairyc.exe",
+        "--version"
+      ],
+      "seconds": 0.04956150001089554,
+      "exit": 0,
+      "stdoutBytes": 229,
+      "stdoutSHA256": "5626b0679dd73d1b5daf330f900975fc84c8db000aab3fa19bda7a992ebe0755",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\semantic-test-20261017\\fairyc-candidate-build-16k.exe",
+        "--packet",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\sdk-plan-reuse-20261017\\candidate\\candidate-packet.bin",
+        "--packet-sha256",
+        "d1024402e7a4a71961972a658bc31b48d735f7f4faa1f3770346ce5734aa874c",
+        "--output",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\sdk-plan-reuse-20261017\\candidate\\release\\fairyc.exe",
+        "--release",
+        "--stack-reserve-bytes",
+        "16777216"
+      ],
+      "seconds": 570.1546513000067,
+      "exit": 0,
+      "stdoutBytes": 185,
+      "stdoutSHA256": "7a3228e148363c7bd136814e27fd43fbf46161ec95d1b60d55aa613345c06bf2",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\sdk-plan-reuse-20261017\\candidate\\release\\fairyc.exe",
+        "--version"
+      ],
+      "seconds": 0.035622800001874566,
+      "exit": 0,
+      "stdoutBytes": 229,
+      "stdoutSHA256": "5626b0679dd73d1b5daf330f900975fc84c8db000aab3fa19bda7a992ebe0755",
+      "stderr": ""
+    }
+  ],
+  "suites": [
+    {
+      "profile": "development",
+      "suite": "check",
+      "cases": 169,
+      "exactMatches": 169,
+      "differences": [],
+      "skippedCases": 1,
+      "seconds": 177.0318450999912,
+      "receipt": {
+        "path": ".cache/sdk-plan-reuse-20261017/check-development/receipt.json",
+        "sha256": "9f8ac4eca1b23f59cae9162c91bb64d1ffbff03464211831d0ec8ff223ea41fe",
+        "bytes": 791197
+      }
+    },
+    {
+      "profile": "development",
+      "suite": "run",
+      "cases": 50,
+      "exactMatches": 50,
+      "differences": [],
+      "skippedCases": 2,
+      "seconds": 341.2388527000003,
+      "receipt": {
+        "path": ".cache/sdk-plan-reuse-20261017/run-development/receipt.json",
+        "sha256": "8b21d30c2c0e9556884e572a1e207f623622426264d98eea4812bae200e4daa4",
+        "bytes": 440356
+      }
+    },
+    {
+      "profile": "development",
+      "suite": "cli",
+      "cases": 30,
+      "exactMatches": 30,
+      "differences": [],
+      "skippedCases": 0,
+      "seconds": 18.805148199986434,
+      "receipt": {
+        "path": ".cache/sdk-plan-reuse-20261017/cli-development/receipt.json",
+        "sha256": "5214a88e4c4139b01474757b3c93439d0e8f95f6d06fb5c3c5b50666ec319ad2",
+        "bytes": 730414
+      }
+    },
+    {
+      "profile": "development",
+      "suite": "semantic",
+      "cases": 98,
+      "exactMatches": 98,
+      "differences": [],
+      "skippedCases": 0,
+      "seconds": 69.78199380000297,
+      "receipt": {
+        "path": ".cache/sdk-plan-reuse-20261017/semantic-development/receipt.json",
+        "sha256": "1af735c4edf4c146f9976769a53d215a9527b28bd73ed14dd5585eb700f687d0",
+        "bytes": 254157
+      }
+    },
+    {
+      "profile": "development",
+      "suite": "list",
+      "cases": 89,
+      "exactMatches": 89,
+      "differences": [],
+      "skippedCases": 0,
+      "seconds": 184.09043759999622,
+      "receipt": {
+        "path": ".cache/sdk-plan-reuse-20261017/list-development/receipt.json",
+        "sha256": "324222d55acb44ebfef60330c8b1b29a4588616ca41e4931e4755a9ae3817478",
+        "bytes": 929848
+      }
+    },
+    {
+      "profile": "development",
+      "suite": "native",
+      "cases": 30,
+      "exactMatches": 30,
+      "differences": [],
+      "skippedCases": 0,
+      "seconds": 1421.623339999991,
+      "receipt": {
+        "path": ".cache/sdk-plan-reuse-20261017/native-development/receipt.json",
+        "sha256": "fb453e0d3e31f4dd05e15f1a019c75ab1bef67c3b29b2162f23217bf29547ee0",
+        "bytes": 72172
+      },
+      "invocationTimeoutSeconds": 900
+    },
+    {
+      "profile": "development",
+      "suite": "examples",
+      "cases": 78,
+      "exactMatches": 78,
+      "differences": [],
+      "skippedCases": 1,
+      "seconds": 998.5490138000023,
+      "receipt": {
+        "path": ".cache/sdk-plan-reuse-20261017/examples-development-sharded/receipt.json",
+        "sha256": "58b78aadf7b499dfd0d09327c2643aeb50f5f6d9af4419578e6b263684e8ed32",
+        "bytes": 473852
+      },
+      "shards": [
+        {
+          "index": 0,
+          "names": [
+            "std_io_scalar_quickstart",
+            "struct_vec_view",
+            "std_alloc_quickstart",
+            "integer_array_element_refs",
+            "io_i64_quickstart",
+            "shared_struct_ref_quickstart",
+            "vec_i64_view",
+            "asset_burn_quickstart",
+            "repeated_array",
+            "contract_state_declaration_quickstart",
+            "native_test_output_quickstart",
+            "i64_for"
+          ],
+          "cases": 20,
+          "seconds": 938.1905705999961,
+          "receipt": {
+            "path": ".cache/sdk-plan-reuse-20261017/examples-development-sharded/0/receipt.json",
+            "sha256": "a18b2b70a35ff87b44bb1015ab497d8d71af215b4a93a8699b82e68e13d051e6",
+            "bytes": 360781
+          }
+        },
+        {
+          "index": 1,
+          "names": [
+            "std_vec_quickstart",
+            "regions",
+            "std_bytes_quickstart",
+            "checked_offset_quickstart",
+            "digits_only_quickstart",
+            "vec_integer_views",
+            "vec_u8_view",
+            "vec_i64_mut_view",
+            "native_test_timeout_quickstart",
+            "i64_mut_view",
+            "contextual_integer",
+            "exclusive_subview",
+            "shared_reborrow"
+          ],
+          "cases": 19,
+          "seconds": 996.8793776999955,
+          "receipt": {
+            "path": ".cache/sdk-plan-reuse-20261017/examples-development-sharded/1/receipt.json",
+            "sha256": "356a053dcdbbd18c51b35f06825a9598dd58753d4d5f50799c44b4f578cf226c",
+            "bytes": 359077
+          }
+        },
+        {
+          "index": 2,
+          "names": [
+            "std_fs_quickstart",
+            "i64_quickstart",
+            "std_text_quickstart",
+            "csv_aggregator_i64",
+            "integer_array_for_quickstart",
+            "integer_element_refs",
+            "shared_integer_ref_quickstart",
+            "task_manager_cli",
+            "workspace_quickstart",
+            "contract_capabilities_quickstart"
+          ],
+          "cases": 21,
+          "seconds": 883.7315082999994,
+          "receipt": {
+            "path": ".cache/sdk-plan-reuse-20261017/examples-development-sharded/2/receipt.json",
+            "sha256": "4eb75206642a94297c793932b926a5052df04275cce867bc6aecf13573b688ee",
+            "bytes": 365261
+          }
+        },
+        {
+          "index": 3,
+          "names": [
+            "copied_mutable_struct_quickstart",
+            "process_args_quickstart",
+            "std_io_quickstart",
+            "std_text_from_buffer_quickstart",
+            "checked_byte_codec_quickstart",
+            "integer_view_iteration",
+            "bool_view_quickstart",
+            "token_page_cli",
+            "struct_array_quickstart",
+            "native_test_stdin_quickstart",
+            "mut_view_for",
+            "integer_views",
+            "i64_view",
+            "native_test_args_quickstart",
+            "lexer_candidate"
+          ],
+          "cases": 18,
+          "seconds": 888.2667091000039,
+          "receipt": {
+            "path": ".cache/sdk-plan-reuse-20261017/examples-development-sharded/3/receipt.json",
+            "sha256": "07169f438149ee2736b83676faafff1464e11c4b1fdc8ab9aa42cdcee05c8e31",
+            "bytes": 361543
+          }
+        }
+      ],
+      "scheduling": {
+        "mode": "four disjoint workspace shards",
+        "supersededSerialRunCounted": false,
+        "supersededSerialRunExit": 1,
+        "reason": "The agent intentionally stopped the slow serial examples run and reran all examples in disjoint parallel shards; no superseded observation is counted as a pass.",
+        "serialRun": {
+          "path": ".cache/sdk-plan-reuse-20261017/examples-development-sharded/superseded-profile.json",
+          "sha256": "bddfc723851aa8f247d282907ac7c9f749f2452d0c287daa28cd3e367ee9ebd2",
+          "bytes": 9531
+        },
+        "schedule": {
+          "path": ".cache/sdk-plan-reuse-20261017/examples-development-sharded/schedule.json",
+          "sha256": "39f6b12cfdaff77d057af78b6ecc4373b5f0cd98750c4109d3a74c8b78c14143",
+          "bytes": 20669
+        }
+      }
+    },
+    {
+      "profile": "release",
+      "suite": "check",
+      "cases": 169,
+      "exactMatches": 169,
+      "differences": [],
+      "skippedCases": 1,
+      "seconds": 48.84123960000579,
+      "receipt": {
+        "path": ".cache/sdk-plan-reuse-20261017/check-release/receipt.json",
+        "sha256": "35019f1a40abe03704e9aaad388f7f0c5bff1f525d5ce787f334a7be5fbff088",
+        "bytes": 791363
+      }
+    },
+    {
+      "profile": "release",
+      "suite": "run",
+      "cases": 50,
+      "exactMatches": 50,
+      "differences": [],
+      "skippedCases": 2,
+      "seconds": 273.9998074000032,
+      "receipt": {
+        "path": ".cache/sdk-plan-reuse-20261017/run-release/receipt.json",
+        "sha256": "efbeec5bd6da73a8765fd731883e89bf7c59539e3026158447e879c8945e175c",
+        "bytes": 440353
+      }
+    },
+    {
+      "profile": "release",
+      "suite": "cli",
+      "cases": 30,
+      "exactMatches": 30,
+      "differences": [],
+      "skippedCases": 0,
+      "seconds": 10.579925899990485,
+      "receipt": {
+        "path": ".cache/sdk-plan-reuse-20261017/cli-release/receipt.json",
+        "sha256": "c34ba11b7f04fd2d02f6c2fc408469eef3c384b8c0484bdfca8a4744d31f815f",
+        "bytes": 730427
+      }
+    },
+    {
+      "profile": "release",
+      "suite": "semantic",
+      "cases": 98,
+      "exactMatches": 98,
+      "differences": [],
+      "skippedCases": 0,
+      "seconds": 36.40952200000174,
+      "receipt": {
+        "path": ".cache/sdk-plan-reuse-20261017/semantic-release/receipt.json",
+        "sha256": "1bc4fbfdf0cb503b15aec364efd760bb2ba58f8e8feff1894bf6ca430c4c2682",
+        "bytes": 253809
+      }
+    },
+    {
+      "profile": "release",
+      "suite": "list",
+      "cases": 89,
+      "exactMatches": 89,
+      "differences": [],
+      "skippedCases": 0,
+      "seconds": 39.562211299999035,
+      "receipt": {
+        "path": ".cache/sdk-plan-reuse-20261017/list-release/receipt.json",
+        "sha256": "301ae8f85b54601c2a1403048e328ff86a5383b41d91e63c5fefcfc516abd3a5",
+        "bytes": 929364
+      }
+    },
+    {
+      "profile": "release",
+      "suite": "native",
+      "cases": 30,
+      "exactMatches": 30,
+      "differences": [],
+      "skippedCases": 0,
+      "seconds": 231.22061119999853,
+      "receipt": {
+        "path": ".cache/sdk-plan-reuse-20261017/native-release/receipt.json",
+        "sha256": "cb95a1831f95ba118a8d0e8ea733d9abc297efe6f64d2e3ab62227669cfaefcd",
+        "bytes": 72054
+      },
+      "invocationTimeoutSeconds": 900
+    },
+    {
+      "profile": "release",
+      "suite": "examples",
+      "cases": 78,
+      "exactMatches": 78,
+      "differences": [],
+      "skippedCases": 1,
+      "seconds": 557.9659249999968,
+      "receipt": {
+        "path": ".cache/sdk-plan-reuse-20261017/examples-release/receipt.json",
+        "sha256": "80dfc0ae28185161bd7743c21323e38597035e20543af6a05040983cac99f4cf",
+        "bytes": 464347
+      }
+    }
+  ],
+  "totalExactComparisons": 1088,
+  "differences": [],
+  "skippedBySuite": {
+    "check": {
+      "direct fixture packageGraph requires a separate workspace adapter": [
+        "region/fail.flow.local-region-escape"
+      ]
+    },
+    "run": {
+      "no passing main::main native entry": [
+        "c-emission/pass.c-emission.fixed-array-bounds",
+        "c-emission/pass.c-emission.mutable-fixed-array-byte-view-bounds"
+      ]
+    },
+    "cli": {},
+    "semantic": {},
+    "list": {},
+    "native": {},
+    "examples": {
+      "compiler self-source is a separate bootstrap/fixed-point gate": [
+        "lexer_candidate"
+      ]
+    }
+  },
+  "nativeSDKAndTrapComparisons": [
+    {
+      "profile": "development",
+      "id": "trap-categories",
+      "argv": [
+        "--native",
+        "--json",
+        "--capture-output"
+      ],
+      "go": {
+        "exit": 5,
+        "stdout": "{\"schemaVersion\":\"fairyc.test-report/v4\",\"engine\":\"native\",\"target\":\"x86_64-windows-msvc\",\"profile\":\"development\",\"tests\":[{\"identity\":\"tests::traps::a_bounds\",\"outcome\":\"failed\",\"trapCategory\":\"bounds\",\"stdoutBase64\":\"\",\"stderrBase64\":\"\"},{\"identity\":\"tests::traps::b_overflow\",\"outcome\":\"failed\",\"trapCategory\":\"integer-overflow\",\"stdoutBase64\":\"\",\"stderrBase64\":\"\"},{\"identity\":\"tests::traps::c_division\",\"outcome\":\"failed\",\"trapCategory\":\"division-by-zero\",\"stdoutBase64\":\"\",\"stderrBase64\":\"\"},{\"identity\":\"tests::traps::d_signed_division\",\"outcome\":\"failed\",\"trapCategory\":\"signed-division-overflow\",\"stdoutBase64\":\"\",\"stderrBase64\":\"\"},{\"identity\":\"tests::traps::e_shift\",\"outcome\":\"failed\",\"trapCategory\":\"invalid-shift\",\"stdoutBase64\":\"\",\"stderrBase64\":\"\"},{\"identity\":\"tests::traps::z_after_traps\",\"outcome\":\"passed\",\"trapCategory\":null,\"stdoutBase64\":\"\",\"stderrBase64\":\"\"}],\"count\":6,\"passed\":1,\"failed\":5,\"status\":\"failed\",\"lock\":\"verified\"}\n",
+        "stderr": "",
+        "seconds": 9.752483599993866
+      },
+      "candidate": {
+        "exit": 5,
+        "stdout": "{\"schemaVersion\":\"fairyc.test-report/v4\",\"engine\":\"native\",\"target\":\"x86_64-windows-msvc\",\"profile\":\"development\",\"tests\":[{\"identity\":\"tests::traps::a_bounds\",\"outcome\":\"failed\",\"trapCategory\":\"bounds\",\"stdoutBase64\":\"\",\"stderrBase64\":\"\"},{\"identity\":\"tests::traps::b_overflow\",\"outcome\":\"failed\",\"trapCategory\":\"integer-overflow\",\"stdoutBase64\":\"\",\"stderrBase64\":\"\"},{\"identity\":\"tests::traps::c_division\",\"outcome\":\"failed\",\"trapCategory\":\"division-by-zero\",\"stdoutBase64\":\"\",\"stderrBase64\":\"\"},{\"identity\":\"tests::traps::d_signed_division\",\"outcome\":\"failed\",\"trapCategory\":\"signed-division-overflow\",\"stdoutBase64\":\"\",\"stderrBase64\":\"\"},{\"identity\":\"tests::traps::e_shift\",\"outcome\":\"failed\",\"trapCategory\":\"invalid-shift\",\"stdoutBase64\":\"\",\"stderrBase64\":\"\"},{\"identity\":\"tests::traps::z_after_traps\",\"outcome\":\"passed\",\"trapCategory\":null,\"stdoutBase64\":\"\",\"stderrBase64\":\"\"}],\"count\":6,\"passed\":1,\"failed\":5,\"status\":\"failed\",\"lock\":\"verified\"}\n",
+        "stderr": "",
+        "seconds": 96.69911639999191
+      },
+      "exactMatch": true,
+      "expectedExit": 5,
+      "referenceReused": false,
+      "stdinSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "fixtureSHA256": "e93d2b94f0b2b9a007f4396cfd3303cb25c3c3c2c0bc8db47ebd92d16c9304ba"
+    },
+    {
+      "profile": "development",
+      "id": "resource-sdk",
+      "argv": [
+        "--native",
+        "--json"
+      ],
+      "go": {
+        "exit": 0,
+        "stdout": "{\"schemaVersion\":\"fairyc.test-report/v1\",\"engine\":\"native\",\"target\":\"x86_64-windows-msvc\",\"profile\":\"development\",\"tests\":[{\"identity\":\"tests::vector::sum_after_pop_and_clear\",\"outcome\":\"passed\",\"trapCategory\":null}],\"count\":1,\"passed\":1,\"failed\":0,\"status\":\"ok\",\"lock\":\"verified\"}\n",
+        "stderr": "",
+        "seconds": 1.6135645999893313
+      },
+      "candidate": {
+        "exit": 0,
+        "stdout": "{\"schemaVersion\":\"fairyc.test-report/v1\",\"engine\":\"native\",\"target\":\"x86_64-windows-msvc\",\"profile\":\"development\",\"tests\":[{\"identity\":\"tests::vector::sum_after_pop_and_clear\",\"outcome\":\"passed\",\"trapCategory\":null}],\"count\":1,\"passed\":1,\"failed\":0,\"status\":\"ok\",\"lock\":\"verified\"}\n",
+        "stderr": "",
+        "seconds": 103.71147599999676
+      },
+      "exactMatch": true,
+      "expectedExit": 0,
+      "referenceReused": false,
+      "stdinSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "fixtureSHA256": "23d11e50a7801d0ca95ba500d52eee7a643e2b03c8721052f26585a24b9ac6fd"
+    },
+    {
+      "profile": "development",
+      "id": "resource-sdk-reuse",
+      "argv": [
+        "--native",
+        "--json"
+      ],
+      "go": {
+        "exit": 0,
+        "stdout": "{\"schemaVersion\":\"fairyc.test-report/v1\",\"engine\":\"native\",\"target\":\"x86_64-windows-msvc\",\"profile\":\"development\",\"tests\":[{\"identity\":\"tests::reuse::a_scalar\",\"outcome\":\"passed\",\"trapCategory\":null},{\"identity\":\"tests::reuse::z_owned\",\"outcome\":\"passed\",\"trapCategory\":null},{\"identity\":\"tests::vector::sum_after_pop_and_clear\",\"outcome\":\"passed\",\"trapCategory\":null}],\"count\":3,\"passed\":3,\"failed\":0,\"status\":\"ok\",\"lock\":\"verified\"}\n",
+        "stderr": "",
+        "seconds": 5.014234999995097
+      },
+      "candidate": {
+        "exit": 0,
+        "stdout": "{\"schemaVersion\":\"fairyc.test-report/v1\",\"engine\":\"native\",\"target\":\"x86_64-windows-msvc\",\"profile\":\"development\",\"tests\":[{\"identity\":\"tests::reuse::a_scalar\",\"outcome\":\"passed\",\"trapCategory\":null},{\"identity\":\"tests::reuse::z_owned\",\"outcome\":\"passed\",\"trapCategory\":null},{\"identity\":\"tests::vector::sum_after_pop_and_clear\",\"outcome\":\"passed\",\"trapCategory\":null}],\"count\":3,\"passed\":3,\"failed\":0,\"status\":\"ok\",\"lock\":\"verified\"}\n",
+        "stderr": "",
+        "seconds": 114.52378000000317
+      },
+      "exactMatch": true,
+      "expectedExit": 0,
+      "referenceReused": false,
+      "stdinSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "fixtureSHA256": "85f310389c71d9ef1fec599e908cdca9668288b5ed2534474c1f747f68836514"
+    },
+    {
+      "profile": "release",
+      "id": "trap-categories",
+      "argv": [
+        "--native",
+        "--json",
+        "--capture-output"
+      ],
+      "go": {
+        "exit": 5,
+        "stdout": "{\"schemaVersion\":\"fairyc.test-report/v4\",\"engine\":\"native\",\"target\":\"x86_64-windows-msvc\",\"profile\":\"development\",\"tests\":[{\"identity\":\"tests::traps::a_bounds\",\"outcome\":\"failed\",\"trapCategory\":\"bounds\",\"stdoutBase64\":\"\",\"stderrBase64\":\"\"},{\"identity\":\"tests::traps::b_overflow\",\"outcome\":\"failed\",\"trapCategory\":\"integer-overflow\",\"stdoutBase64\":\"\",\"stderrBase64\":\"\"},{\"identity\":\"tests::traps::c_division\",\"outcome\":\"failed\",\"trapCategory\":\"division-by-zero\",\"stdoutBase64\":\"\",\"stderrBase64\":\"\"},{\"identity\":\"tests::traps::d_signed_division\",\"outcome\":\"failed\",\"trapCategory\":\"signed-division-overflow\",\"stdoutBase64\":\"\",\"stderrBase64\":\"\"},{\"identity\":\"tests::traps::e_shift\",\"outcome\":\"failed\",\"trapCategory\":\"invalid-shift\",\"stdoutBase64\":\"\",\"stderrBase64\":\"\"},{\"identity\":\"tests::traps::z_after_traps\",\"outcome\":\"passed\",\"trapCategory\":null,\"stdoutBase64\":\"\",\"stderrBase64\":\"\"}],\"count\":6,\"passed\":1,\"failed\":5,\"status\":\"failed\",\"lock\":\"verified\"}\n",
+        "stderr": "",
+        "seconds": 6.616277699999046
+      },
+      "candidate": {
+        "exit": 5,
+        "stdout": "{\"schemaVersion\":\"fairyc.test-report/v4\",\"engine\":\"native\",\"target\":\"x86_64-windows-msvc\",\"profile\":\"development\",\"tests\":[{\"identity\":\"tests::traps::a_bounds\",\"outcome\":\"failed\",\"trapCategory\":\"bounds\",\"stdoutBase64\":\"\",\"stderrBase64\":\"\"},{\"identity\":\"tests::traps::b_overflow\",\"outcome\":\"failed\",\"trapCategory\":\"integer-overflow\",\"stdoutBase64\":\"\",\"stderrBase64\":\"\"},{\"identity\":\"tests::traps::c_division\",\"outcome\":\"failed\",\"trapCategory\":\"division-by-zero\",\"stdoutBase64\":\"\",\"stderrBase64\":\"\"},{\"identity\":\"tests::traps::d_signed_division\",\"outcome\":\"failed\",\"trapCategory\":\"signed-division-overflow\",\"stdoutBase64\":\"\",\"stderrBase64\":\"\"},{\"identity\":\"tests::traps::e_shift\",\"outcome\":\"failed\",\"trapCategory\":\"invalid-shift\",\"stdoutBase64\":\"\",\"stderrBase64\":\"\"},{\"identity\":\"tests::traps::z_after_traps\",\"outcome\":\"passed\",\"trapCategory\":null,\"stdoutBase64\":\"\",\"stderrBase64\":\"\"}],\"count\":6,\"passed\":1,\"failed\":5,\"status\":\"failed\",\"lock\":\"verified\"}\n",
+        "stderr": "",
+        "seconds": 15.991745499995886
+      },
+      "exactMatch": true,
+      "expectedExit": 5,
+      "referenceReused": false,
+      "stdinSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "fixtureSHA256": "e93d2b94f0b2b9a007f4396cfd3303cb25c3c3c2c0bc8db47ebd92d16c9304ba"
+    },
+    {
+      "profile": "release",
+      "id": "resource-sdk",
+      "argv": [
+        "--native",
+        "--json"
+      ],
+      "go": {
+        "exit": 0,
+        "stdout": "{\"schemaVersion\":\"fairyc.test-report/v1\",\"engine\":\"native\",\"target\":\"x86_64-windows-msvc\",\"profile\":\"development\",\"tests\":[{\"identity\":\"tests::vector::sum_after_pop_and_clear\",\"outcome\":\"passed\",\"trapCategory\":null}],\"count\":1,\"passed\":1,\"failed\":0,\"status\":\"ok\",\"lock\":\"verified\"}\n",
+        "stderr": "",
+        "seconds": 1.5889292000065325
+      },
+      "candidate": {
+        "exit": 0,
+        "stdout": "{\"schemaVersion\":\"fairyc.test-report/v1\",\"engine\":\"native\",\"target\":\"x86_64-windows-msvc\",\"profile\":\"development\",\"tests\":[{\"identity\":\"tests::vector::sum_after_pop_and_clear\",\"outcome\":\"passed\",\"trapCategory\":null}],\"count\":1,\"passed\":1,\"failed\":0,\"status\":\"ok\",\"lock\":\"verified\"}\n",
+        "stderr": "",
+        "seconds": 7.4819371000048704
+      },
+      "exactMatch": true,
+      "expectedExit": 0,
+      "referenceReused": false,
+      "stdinSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "fixtureSHA256": "23d11e50a7801d0ca95ba500d52eee7a643e2b03c8721052f26585a24b9ac6fd"
+    },
+    {
+      "profile": "release",
+      "id": "resource-sdk-reuse",
+      "argv": [
+        "--native",
+        "--json"
+      ],
+      "go": {
+        "exit": 0,
+        "stdout": "{\"schemaVersion\":\"fairyc.test-report/v1\",\"engine\":\"native\",\"target\":\"x86_64-windows-msvc\",\"profile\":\"development\",\"tests\":[{\"identity\":\"tests::reuse::a_scalar\",\"outcome\":\"passed\",\"trapCategory\":null},{\"identity\":\"tests::reuse::z_owned\",\"outcome\":\"passed\",\"trapCategory\":null},{\"identity\":\"tests::vector::sum_after_pop_and_clear\",\"outcome\":\"passed\",\"trapCategory\":null}],\"count\":3,\"passed\":3,\"failed\":0,\"status\":\"ok\",\"lock\":\"verified\"}\n",
+        "stderr": "",
+        "seconds": 3.951874999998836
+      },
+      "candidate": {
+        "exit": 0,
+        "stdout": "{\"schemaVersion\":\"fairyc.test-report/v1\",\"engine\":\"native\",\"target\":\"x86_64-windows-msvc\",\"profile\":\"development\",\"tests\":[{\"identity\":\"tests::reuse::a_scalar\",\"outcome\":\"passed\",\"trapCategory\":null},{\"identity\":\"tests::reuse::z_owned\",\"outcome\":\"passed\",\"trapCategory\":null},{\"identity\":\"tests::vector::sum_after_pop_and_clear\",\"outcome\":\"passed\",\"trapCategory\":null}],\"count\":3,\"passed\":3,\"failed\":0,\"status\":\"ok\",\"lock\":\"verified\"}\n",
+        "stderr": "",
+        "seconds": 11.736984699993627
+      },
+      "exactMatch": true,
+      "expectedExit": 0,
+      "referenceReused": false,
+      "stdinSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "fixtureSHA256": "85f310389c71d9ef1fec599e908cdca9668288b5ed2534474c1f747f68836514"
+    }
+  ],
+  "consecutiveGeneration": {
+    "receipt": {
+      "path": ".cache/sdk-plan-reuse-20261017/fixed-point/receipt.json",
+      "sha256": "211626dc8c84623964322be6426c17f288e3ee182227a6cfbcac1f81a95d3d55",
+      "bytes": 102845
+    },
+    "schema": "fairyc.candidate-native-cli-fixed-point/v1",
+    "passed": true,
+    "scope": "Consecutive full file_cli C-part generations; exact complete packet and optimized PE bytes",
+    "sourceFiles": 512,
+    "invocations": [
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\sdk-plan-reuse-20261017\\candidate\\release\\fairyc.exe",
+          "--c-project-file",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\sdk-plan-reuse-20261017\\candidate\\sources.list"
+        ],
+        "exit": 0,
+        "timedOut": false,
+        "seconds": 633.084105899994,
+        "stdoutBytes": 41766237,
+        "stdoutSHA256": "d1024402e7a4a71961972a658bc31b48d735f7f4faa1f3770346ce5734aa874c",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\semantic-test-20261017\\fairyc-candidate-build-16k.exe",
+          "--packet",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\sdk-plan-reuse-20261017\\fixed-point\\stage2-input.bin",
+          "--packet-sha256",
+          "d1024402e7a4a71961972a658bc31b48d735f7f4faa1f3770346ce5734aa874c",
+          "--output",
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\sdk-plan-reuse-20261017\\fixed-point\\stage2.exe",
+          "--release",
+          "--stack-reserve-bytes",
+          "16777216"
+        ],
+        "exit": 0,
+        "timedOut": false,
+        "seconds": 432.580057500003,
+        "stdoutBytes": 179,
+        "stdoutSHA256": "cec8fff50dd0cdc62b572533640b2a9515839f4a67b6a971b195b220857f9b04",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\sdk-plan-reuse-20261017\\fixed-point\\stage2.exe",
+          "--version"
+        ],
+        "exit": 0,
+        "timedOut": false,
+        "seconds": 0.05895809999492485,
+        "stdoutBytes": 229,
+        "stdoutSHA256": "5626b0679dd73d1b5daf330f900975fc84c8db000aab3fa19bda7a992ebe0755",
+        "stderr": ""
+      }
+    ],
+    "packets": [
+      {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\sdk-plan-reuse-20261017\\candidate\\candidate-packet.bin",
+        "bytes": 41766237,
+        "sha256": "d1024402e7a4a71961972a658bc31b48d735f7f4faa1f3770346ce5734aa874c"
+      },
+      {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\sdk-plan-reuse-20261017\\fixed-point\\stage2-input.bin",
+        "bytes": 41766237,
+        "sha256": "d1024402e7a4a71961972a658bc31b48d735f7f4faa1f3770346ce5734aa874c"
+      }
+    ],
+    "stage1": {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\sdk-plan-reuse-20261017\\candidate\\release\\fairyc.exe",
+      "bytes": 5907968,
+      "sha256": "6b439556c674bb06229f456e8fc755940af10b253ddd6be7ae85531b1a99eabf"
+    },
+    "stage2": {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\sdk-plan-reuse-20261017\\fixed-point\\stage2.exe",
+      "bytes": 5907968,
+      "sha256": "6b439556c674bb06229f456e8fc755940af10b253ddd6be7ae85531b1a99eabf"
+    },
+    "builder": {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\semantic-test-20261017\\fairyc-candidate-build-16k.exe",
+      "bytes": 4804096,
+      "sha256": "68917e76329f3952d352c6cf37ebbe0c19fcd84fb6f68b72dcf8d32e272ff512"
+    },
+    "packetBytesEqual": true,
+    "optimizedImageBytesEqual": true,
+    "excludedImageBytes": [],
+    "stackReserveBytes": 16777216,
+    "goFrontendInvoked": false,
+    "productTimeoutChanged": false,
+    "limitations": [
+      "Windows full file_cli dispatcher only; stdin lexer protocol and non-Windows targets are not included."
+    ],
+    "verifier": {
+      "path": "tools/verify-candidate-native-fixed-point.py",
+      "sha256": "9a7832945d4c9ec07adddada7249cc8e32c416ae5c8d7aac6735942070f8e150",
+      "bytes": 8105
+    },
+    "verificationStageTimeoutSeconds": {
+      "frontend": 1800,
+      "compile": 1800
+    }
+  },
+  "originalLockPreserved": true,
+  "originalLockSHA256": "a6b52c6270c15ca237c31aed8ece8bbffc745556620c3b2c8dd5c651adc75e30",
+  "publicApiChanged": false,
+  "sdkABIChanged": false,
+  "languageRulesChanged": false,
+  "limitsChanged": false,
+  "databaseChanged": false,
+  "ciChanged": false,
+  "githubActionsRuns": 0,
+  "goFrontendInvoked": false,
+  "productTimeoutChanged": false,
+  "pushed": false,
+  "limitations": [
+    "Selected comparison corpus only; explicit skipped cases are grouped by suite and reason.",
+    "Windows x86_64 only; no Linux/macOS/cross-target run in this checkpoint.",
+    "Timings are individual observations under uncontrolled concurrent machine load, not a controlled performance benchmark.",
+    "Frozen build version metadata is taken from the Go oracle; all candidate frontend C generation is native Fairy C."
+  ]
+}

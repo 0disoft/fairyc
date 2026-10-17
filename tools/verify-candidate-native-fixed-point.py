@@ -34,10 +34,12 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--build-receipt', type=Path, required=True)
     parser.add_argument('--output', type=Path, required=True)
-    parser.add_argument('--frontend-timeout', type=int, default=900)
-    parser.add_argument('--compile-timeout', type=int, default=900)
+    parser.add_argument('--frontend-timeout', type=int, default=900,
+                        help='verification-only stage allowance, 1..1800 seconds')
+    parser.add_argument('--compile-timeout', type=int, default=900,
+                        help='verification-only stage allowance, 1..1800 seconds')
     args = parser.parse_args()
-    assert __debug__ and 1 <= args.frontend_timeout <= 900 and 1 <= args.compile_timeout <= 900
+    assert __debug__ and 1 <= args.frontend_timeout <= 1800 and 1 <= args.compile_timeout <= 1800
     receipt_path = args.build_receipt.resolve()
     receipt_identity = artifact(receipt_path)
     built = json.loads(receipt_path.read_text(encoding='utf-8'))

@@ -17,9 +17,35 @@ misses. Entry reachability, declarations, bodies and output remain per-test.
 Source check and the cached-versus-uncached native regression pass, including
 exact C bytes, partition ranges, selected counts, work/retries and output use
 after session destruction. The new real-CLI fixture has three tests spanning
-scalar and owned Buffer vectors and passes Go native execution. Current-source
-candidate builds and end-to-end/fixed-point verification are separate next gates.
+scalar and owned Buffer vectors and passes Go native execution.
 See [implementation evidence](../ops/evidence/candidate-sdk-plan-session-20261017.json).
+
+The current-source build covers 512 source files. The native Fairy C frontend
+compiled them into one 41,766,237-byte C packet, and both full `file_cli`
+compiler profiles were built from that packet without invoking the Go frontend.
+Go still supplied the version metadata oracle and remains the bridge that turns a
+C packet into a native Windows build.
+Development and release `--version` match the authenticated text, and the
+candidate project lock, `examples/lexer_candidate/fairy.lock`, is unchanged.
+
+The release profile regenerated the whole packet byte for byte, and the optimized
+Windows PE rebuilt from that regenerated packet matches the first generation
+exactly: 5,907,968 bytes, identical SHA-256, no excluded bytes. `--version`
+matches again.
+
+Both profiles then ran all seven Go comparison suites: 544 exact comparisons
+each, 1,088 together, with no differences. Per profile those are check 169,
+run 50, cli 30, semantic 98, list 89, native 30 and examples 78. Recorded skips
+are unchanged: one check fixture that needs a packageGraph workspace adapter and
+two run fixtures with no passing native `main::main` entry. The native suite has
+no skips, and the `lexer_candidate` example fixture is checked separately by the
+full `file_cli` bootstrap fixed point above. See
+[final verification](../ops/evidence/candidate-sdk-plan-reuse-final-verification-20261017.json).
+
+This checkpoint covers the Windows full `file_cli` dispatcher. Non-Windows targets
+and the separate stdin lexer protocol are not covered. Stage times were single
+observations under uncontrolled load, not a performance benchmark. No product API,
+SDK ABI, work limit, product timeout, database or CI change.
 
 ## Reuse validated CFGs across native tests (2026-10-17)
 
@@ -33,6 +59,8 @@ cache or reuse across CLI invocations.
 Each test borrows that session while generating its own names, SDK plan,
 indexes, entry reachability and C output. The returned `Emission` owns its
 buffers and metadata and retains neither graphs nor a session reference.
+Per-test SDK planning is an observation at this checkpoint; the session above
+retains one authenticated plan and charges its work to every image.
 Cached graph counts still enter every image's preparation/project work ledger;
 all work, frame, output and child-process bounds remain unchanged. With no
 selected tests, the CLI reports directly without creating a session.
@@ -41,8 +69,9 @@ The scoped diagnostic measured 52.266 seconds in C generation across two tests:
 36.328 seconds in four IR proofs and 15.797 seconds in SDK planning. CFG lowering
 (17.781 seconds) includes two of those proofs; inclusive stages must not be
 summed. Reuse therefore targets the validated graph preparation, while SDK
-planning remains per-test. These are single development-profile observations
-under uncontrolled load, not a general benchmark. See
+planning remained per-test at this checkpoint. These are single
+development-profile observations under uncontrolled load, not a general
+benchmark. See
 [stage profile](../ops/evidence/candidate-native-c-emission-stage-profile-20261017.json).
 
 Legacy single-buffer rendering lives in the existing `module_unit_c_function`
