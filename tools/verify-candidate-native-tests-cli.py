@@ -145,6 +145,15 @@ def main():
         compare('package', workspace, ['--native', '--package', 'example.workspace-quickstart.answer', '--json'])
         vector = fixture('vector', 'std_vec_quickstart')
         compare('resource-sdk', vector, ['--native', '--json'])
+        vector_reuse = fixture('vector-reuse', 'std_vec_quickstart', tests={
+            'tests/reuse.fy': 'module tests::reuse;\nimport std::vec as v;\nimport std::bytes as bytes;\n'
+                '@test fn void a_scalar(){var v::Vec<i32> values=v::empty<i32>();'
+                'assert(v::push<i32>(ref mut values,7).is_ok);assert(*v::at<i32>(ref values,0)==7);v::clear<i32>(ref mut values);assert(v::len<i32>(ref values)==0);}\n'
+                '@test fn void z_owned(){var v::Vec<bytes::Buffer> values=v::empty<bytes::Buffer>();'
+                'let item=switch(bytes::copy(b"sdk")){case .ok(p):{p}case .err(_):{assert(false);return;}};'
+                'assert(v::push<bytes::Buffer>(ref mut values,item).is_ok);assert(bytes::len(v::at<bytes::Buffer>(ref values,0))==3);'
+                'v::clear<bytes::Buffer>(ref mut values);assert(v::len<bytes::Buffer>(ref values)==0);}\n'})
+        compare('resource-sdk-reuse', vector_reuse, ['--native', '--json'])
         arguments = fixture('args', 'native_test_args_quickstart')
         compare('args', arguments, ['--native', '--json', '--', '--locked', '', '한글λ'])
         streams = fixture('output', 'native_test_output_quickstart')

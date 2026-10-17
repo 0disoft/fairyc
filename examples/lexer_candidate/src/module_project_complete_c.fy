@@ -25,7 +25,7 @@ pub fn Result<c::Emission,clean::Problem> emit_test(ref compiler::Complete progr
     return c::emit_test(identified::ir_program(compiler::checked_program(program)),named,entry,max_frames);
 }
 
-// A test invocation owns one immutable program and its proven CFGs. There is no
+// A test invocation owns one immutable program, proven CFGs and SDK plan. No
 // cross-invocation cache, mutable IR access, or separately replaceable graph set.
 pub resource TestSession {owner::Lowered lowered;cleanup{}}
 pub fn Result<TestSession,clean::Problem> prepare_tests(compiler::Complete program){let owned=switch(owner::complete(program)){case .ok(p):{p}case .err(e):{return .err(e);}};let lowered=switch(owner::lower(owned)){case .ok(p):{p}case .err(e):{return .err(e);}};return .ok(TestSession{.lowered});}

@@ -1,5 +1,26 @@
 # Candidate project C partitions v0
 
+## Reuse authenticated SDK plans across native tests (2026-10-17)
+
+The test session now retains its authenticated `sdk::Plan` alongside the same
+immutable IR and proven CFGs. Construction lowers and proves the IR, charges the
+same graph counts, then authenticates SDK declarations against that retained
+source snapshot. There is no separately replaceable plan or mutable owner API.
+A new invocation or changed program creates a fresh session.
+
+Every image starts its preparation meter with the recorded graph-plus-SDK work
+before building callable/frame indexes. The original combined preparation cap
+and whole-project ledger therefore account for the same work on cache hits and
+misses. Entry reachability, declarations, bodies and output remain per-test.
+`Emission` retains neither the SDK plan nor a reference to the session.
+
+Source check and the cached-versus-uncached native regression pass, including
+exact C bytes, partition ranges, selected counts, work/retries and output use
+after session destruction. The new real-CLI fixture has three tests spanning
+scalar and owned Buffer vectors and passes Go native execution. Current-source
+candidate builds and end-to-end/fixed-point verification are separate next gates.
+See [implementation evidence](../ops/evidence/candidate-sdk-plan-session-20261017.json).
+
 ## Reuse validated CFGs across native tests (2026-10-17)
 
 `module_project_complete_c::prepare_tests` consumes one `Complete` into a

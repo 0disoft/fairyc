@@ -29,16 +29,16 @@ fn clean::Problem fail(u32 code,usize module_index,usize start,usize end){return
 pub fn clean::Problem render(ref ir::Program p,usize entry,ref mut bytes::Buffer out){return function_emit::render_project(p,entry,out);}
 pub fn clean::Problem render_identified(ref identified::Program program,usize entry,ref mut bytes::Buffer out){return function_emit::render_identified(program,entry,out);}
 
-resource Prepared {names::Table named;sdk::Plan sdk_plan;contracts::Index indexed;targets::Index body_index;reachable::Plan selected;bytes::Buffer header;bytes::Buffer literal_source;usize entry;bool test_entry;usize work;cleanup{}}
+resource Prepared {names::Table named;contracts::Index indexed;targets::Index body_index;reachable::Plan selected;bytes::Buffer header;bytes::Buffer literal_source;usize entry;bool test_entry;usize work;cleanup{}}
 resource Unit {usize first;usize stop;bytes::Buffer text;cleanup{}}
 pub resource Emission {Prepared prepared;v::Vec<Unit> units;usize frames;usize work;usize retries;cleanup{}}
 pub resource Bundle {owner::Program program;Emission emission;cleanup{}}
 fn u32 error_code(w::State s){return if(s.code<1000){if(s.code==3){1003}else{1002}}else{s.code};}
 fn clean::Problem project_entry(ref ir::Program raw,usize entry,bool test_entry){if(!clean::project(ir::cleanup_ir(raw)) || entry==0 || entry>ir::count(raw)){return fail(1001,0,0,0);}let f=clean::frame_at(ir::cleanup_ir(raw),entry);return fail(if(scalar::scalar(raw,f.result)!=if(test_entry){7}else{1} || calls::parameters(ir::at(raw,entry))!=0){1001}else{0},f.module_index,0,0);}
-fn Result<Prepared,clean::Problem> prepare_project(ref ir::Program raw,ref v::Vec<cfg::Graph> graphs,names::Table named,usize entry,bool entry_only,bool test_entry){
+fn Result<Prepared,clean::Problem> prepare_project(ref ir::Program raw,ref v::Vec<cfg::Graph> graphs,ref sdk::Plan sdk_plan,usize preparation_work,names::Table named,usize entry,bool entry_only,bool test_entry){
     let checked=project_entry(raw,entry,test_entry);if(checked.code!=0){return .err(checked);}
-    var usize work=0;var usize i=0;while(i<v::len<cfg::Graph>(graphs)){if(!budget::charge(ref mut work,cfg::count(v::at<cfg::Graph>(graphs,i)))){return .err(fail(1002,0,0,0));}i+=1;}
-    let sdk_plan=switch(sdk::build(raw,ref mut work)){case .ok(p):{p}case .err(e):{return .err(e);}};let indexed=switch(contracts::build(raw,ref mut work)){case .ok(p):{p}case .err(e):{return .err(fail(e,0,0,0));}};
+    // Replay the same graph/SDK preparation cost on every image, including hits.
+    var usize work=preparation_work;var usize i=0;let indexed=switch(contracts::build(raw,ref mut work)){case .ok(p):{p}case .err(e):{return .err(fail(e,0,0,0));}};
     let body_index=switch(targets::build(raw,ref indexed,ref mut work)){case .ok(p):{p}case .err(e):{return .err(fail(e,0,0,0));}};
     // Index/SDK preparation and the reachability fixed point each retain their
     // own work bound. Every completed history enters the whole-project ledger.
@@ -50,21 +50,21 @@ fn Result<Prepared,clean::Problem> prepare_project(ref ir::Program raw,ref v::Ve
     if(!limits::project_charge(ref mut total,work)){return .err(fail(1002,0,0,0));}work=0;
     var bytes::Buffer literal_source=bytes::empty();if(!literals::shared_storage(raw,ref mut header,ref mut literal_source,ref mut s,ref mut work)){return .err(fail(error_code(s),0,0,0));}
     if(!limits::project_charge(ref mut total,work)){return .err(fail(1002,0,0,0));}work=0;
-    if(!w::text(ref mut header,ref mut s,b"#include <stddef.h>\n") || !sdk::definitions(raw,ref sdk_plan,ref mut header,ref mut s,ref mut work) || !lifecycle::definitions(raw,ref sdk_plan,ref mut header,ref mut s,ref mut work) || !calls::foreign_signatures(raw,ref sdk_plan,ref indexed,ref mut header,ref mut s,ref mut work)){return .err(fail(error_code(s),0,0,0));}
+    if(!w::text(ref mut header,ref mut s,b"#include <stddef.h>\n") || !sdk::definitions(raw,sdk_plan,ref mut header,ref mut s,ref mut work) || !lifecycle::definitions(raw,sdk_plan,ref mut header,ref mut s,ref mut work) || !calls::foreign_signatures(raw,sdk_plan,ref indexed,ref mut header,ref mut s,ref mut work)){return .err(fail(error_code(s),0,0,0));}
     i=1;while(i<=ir::count(raw)){if(reachable::frame(ref selected,i) && (!calls::signature(raw,ref named,i,ref mut header,ref mut s,true) || !w::text(ref mut header,ref mut s,b";\n"))){return .err(fail(error_code(s),clean::frame_at(ir::cleanup_ir(raw),i).module_index,ir::start(ir::at(raw,i)),ir::end(ir::at(raw,i))));}i+=1;}
     if(!aggregate::drops_named(raw,ref named,if(entry_only){reachable::drops(ref selected)}else{ref marks},ref mut header,ref mut s,ref mut work) || !w::text(ref mut header,ref mut s,b"#endif\n")){return .err(fail(error_code(s),0,0,0));}
     if(!limits::project_charge(ref mut total,work)){return .err(fail(1002,0,0,0));}
-    return .ok(Prepared{.named,.sdk_plan,.indexed,.body_index,.selected,.header,.literal_source,.entry,.test_entry,.work=total});
+    return .ok(Prepared{.named,.indexed,.body_index,.selected,.header,.literal_source,.entry,.test_entry,.work=total});
 }
-fn Result<bytes::Buffer,clean::Problem> project_unit(ref ir::Program raw,ref v::Vec<cfg::Graph> graphs,ref Prepared p,usize first,usize stop,ref mut usize work){
+fn Result<bytes::Buffer,clean::Problem> project_unit(ref ir::Program raw,ref v::Vec<cfg::Graph> graphs,ref sdk::Plan sdk_plan,ref Prepared p,usize first,usize stop,ref mut usize work){
     var bytes::Buffer text=bytes::empty();var w::State s=w::State{.code=0};if(!w::text(ref mut text,ref mut s,b"/* fairyc.candidate-project-unit-c/v1 */\n#include \"fy_project.h\"\n")){return .err(fail(error_code(s),0,0,0));}var usize i=first;
-    while(i<stop){if(reachable::frame(ref p.selected,i)){var usize start=ir::start(ir::at(raw,i));var usize end=ir::end(ir::at(raw,i));if(!function_emit::render(raw,ref p.named,ref p.sdk_plan,ref p.indexed,ref p.body_index,v::at<cfg::Graph>(graphs,i-1),ref mut text,ref mut s,work,ref mut start,ref mut end,true)){return .err(fail(error_code(s),clean::frame_at(ir::cleanup_ir(raw),i).module_index,start,end));}}i+=1;}
+    while(i<stop){if(reachable::frame(ref p.selected,i)){var usize start=ir::start(ir::at(raw,i));var usize end=ir::end(ir::at(raw,i));if(!function_emit::render(raw,ref p.named,sdk_plan,ref p.indexed,ref p.body_index,v::at<cfg::Graph>(graphs,i-1),ref mut text,ref mut s,work,ref mut start,ref mut end,true)){return .err(fail(error_code(s),clean::frame_at(ir::cleanup_ir(raw),i).module_index,start,end));}}i+=1;}
     if(first<=p.entry && p.entry<stop && (!w::text(ref mut text,ref mut s,if(p.test_entry){b"int32_t fy_candidate_entry(void){"}else{b"int32_t fy_candidate_entry(void){return "}) || !names::function(ref p.named,p.entry,ref mut text,ref mut s) || !w::text(ref mut text,ref mut s,if(p.test_entry){b"();return 0;}\n"}else{b"();}\n"}) || !w::text(ref mut text,ref mut s,b"#ifndef FY_CANDIDATE_NO_MAIN\nint main(void){return (int)fy_candidate_entry();}\n#endif\n"))){return .err(fail(error_code(s),0,0,0));}return .ok(text);
 }
-fn clean::Problem append_project_units(ref ir::Program raw,ref v::Vec<cfg::Graph> graphs,ref Prepared p,usize first,usize stop,usize depth,ref mut v::Vec<Unit> units,ref mut usize total,ref mut usize retries){
-    var usize work=0;switch(project_unit(raw,graphs,p,first,stop,ref mut work)){
+fn clean::Problem append_project_units(ref ir::Program raw,ref v::Vec<cfg::Graph> graphs,ref sdk::Plan sdk_plan,ref Prepared p,usize first,usize stop,usize depth,ref mut v::Vec<Unit> units,ref mut usize total,ref mut usize retries){
+    var usize work=0;switch(project_unit(raw,graphs,sdk_plan,p,first,stop,ref mut work)){
         case .ok(text):{if(!limits::project_charge(total,work)){return fail(1002,0,0,0);}if(v::len<Unit>(units)>=limits::project_frames()){return fail(1002,0,0,0);}if(!v::push<Unit>(units,Unit{.first,.stop,.text}).is_ok){return fail(1003,0,0,0);}return fail(0,0,0,0);}
-        case .err(e):{if(!limits::project_charge(total,work)){return fail(1002,0,0,0);}if(e.code!=1002 || stop-first<=1 || depth>=12){return e;};*retries=*retries+1;let middle=first+(stop-first)/2;let left=append_project_units(raw,graphs,p,first,middle,depth+1,units,total,retries);if(left.code!=0){return left;}return append_project_units(raw,graphs,p,middle,stop,depth+1,units,total,retries);}
+        case .err(e):{if(!limits::project_charge(total,work)){return fail(1002,0,0,0);}if(e.code!=1002 || stop-first<=1 || depth>=12){return e;};*retries=*retries+1;let middle=first+(stop-first)/2;let left=append_project_units(raw,graphs,sdk_plan,p,first,middle,depth+1,units,total,retries);if(left.code!=0){return left;}return append_project_units(raw,graphs,sdk_plan,p,middle,stop,depth+1,units,total,retries);}
     };return fail(1001,0,0,0);
 }
 // A complete project owns its validated IR and never exposes a successful prefix.
@@ -78,13 +78,13 @@ fn Result<Bundle,clean::Problem> partition_mode(owner::Program program,names::Ta
 // The caller retains the checked IR. Every returned field owns its storage;
 // no IR reference or owner is retained across test images.
 pub fn Result<Emission,clean::Problem> emit_test(ref ir::Program raw,names::Table named,usize entry,usize max_frames){return emit_mode(raw,named,entry,max_frames,true,true);}
-pub fn Result<Emission,clean::Problem> emit_lowered_test(ref owner::Lowered program,names::Table named,usize entry,usize max_frames){return emit_graphs(owner::ir_program(owner::lowered_program(program)),owner::lowered_graphs(program),named,entry,max_frames,true,true);}
+pub fn Result<Emission,clean::Problem> emit_lowered_test(ref owner::Lowered program,names::Table named,usize entry,usize max_frames){return emit_graphs(owner::ir_program(owner::lowered_program(program)),owner::lowered_graphs(program),owner::lowered_sdk(program),owner::lowered_work(program),named,entry,max_frames,true,true);}
 fn Result<Emission,clean::Problem> emit_mode(ref ir::Program raw,names::Table named,usize entry,usize max_frames,bool entry_only,bool test_entry){
-    if(max_frames==0 || max_frames>limits::project_frames()){return .err(fail(1001,0,0,0));}let checked=proof::check(raw);if(checked.code!=0){return .err(checked);}let valid=project_entry(raw,entry,test_entry);if(valid.code!=0){return .err(valid);}let graphs=switch(flow::lower_all(raw)){case .ok(p):{p}case .err(e):{return .err(e);}};return emit_graphs(raw,ref graphs,named,entry,max_frames,entry_only,test_entry);
+    if(max_frames==0 || max_frames>limits::project_frames()){return .err(fail(1001,0,0,0));}let checked=proof::check(raw);if(checked.code!=0){return .err(checked);}let valid=project_entry(raw,entry,test_entry);if(valid.code!=0){return .err(valid);}let graphs=switch(flow::lower_all(raw)){case .ok(p):{p}case .err(e):{return .err(e);}};var usize work=0;var usize i=0;while(i<v::len<cfg::Graph>(ref graphs)){if(!budget::charge(ref mut work,cfg::count(v::at<cfg::Graph>(ref graphs,i)))){return .err(fail(1002,0,0,0));}i+=1;}let sdk_plan=switch(sdk::build(raw,ref mut work)){case .ok(p):{p}case .err(e):{return .err(e);}};return emit_graphs(raw,ref graphs,ref sdk_plan,work,named,entry,max_frames,entry_only,test_entry);
 }
-fn Result<Emission,clean::Problem> emit_graphs(ref ir::Program raw,ref v::Vec<cfg::Graph> graphs,names::Table named,usize entry,usize max_frames,bool entry_only,bool test_entry){
-    if(max_frames==0 || max_frames>limits::project_frames()){return .err(fail(1001,0,0,0));}let p=switch(prepare_project(raw,graphs,named,entry,entry_only,test_entry)){case .ok(p):{p}case .err(e):{return .err(e);}};let frames=ir::count(raw);var usize total=p.work;var usize retries=0;var v::Vec<Unit> units=v::empty<Unit>();var usize first=1;
-    while(first<=frames){let stop=if(max_frames<frames+1-first){first+max_frames}else{frames+1};let e=append_project_units(raw,graphs,ref p,first,stop,0,ref mut units,ref mut total,ref mut retries);if(e.code!=0){return .err(e);}first=stop;}
+fn Result<Emission,clean::Problem> emit_graphs(ref ir::Program raw,ref v::Vec<cfg::Graph> graphs,ref sdk::Plan sdk_plan,usize preparation_work,names::Table named,usize entry,usize max_frames,bool entry_only,bool test_entry){
+    if(max_frames==0 || max_frames>limits::project_frames()){return .err(fail(1001,0,0,0));}let p=switch(prepare_project(raw,graphs,sdk_plan,preparation_work,named,entry,entry_only,test_entry)){case .ok(p):{p}case .err(e):{return .err(e);}};let frames=ir::count(raw);var usize total=p.work;var usize retries=0;var v::Vec<Unit> units=v::empty<Unit>();var usize first=1;
+    while(first<=frames){let stop=if(max_frames<frames+1-first){first+max_frames}else{frames+1};let e=append_project_units(raw,graphs,sdk_plan,ref p,first,stop,0,ref mut units,ref mut total,ref mut retries);if(e.code!=0){return .err(e);}first=stop;}
     let usize count=v::len<Unit>(ref units);var usize index=0;var usize next=1;while(index<count){let unit=v::at<Unit>(ref units,index);if(unit.first!=next || unit.first>=unit.stop){return .err(fail(1001,0,0,0));}next=unit.stop;index+=1;}if(next!=frames+1){return .err(fail(1001,0,0,0));}
     return .ok(Emission{.prepared=p,.units,.frames,.work=total,.retries});
 }

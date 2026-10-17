@@ -1,0 +1,90 @@
+{
+  "schema": "fairyc.candidate-sdk-plan-session/v1",
+  "passed": true,
+  "sourceCheck": {
+    "argv": [
+      "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\cli-parity-rest-20261017\\final-candidate-split-verified\\source-version.exe",
+      "check"
+    ],
+    "exit": 0,
+    "stdout": "check ok: 2 instance(s), 525 source file(s), 6686 MIR function(s), lock updated\n",
+    "stderr": "",
+    "seconds": 24.77771790001134,
+    "referenceSHA256": "81d454176aeaedc66e639a1de8150c0af4d20be5dec61f48b2777ea19a4c2eea"
+  },
+  "nativeRegression": {
+    "argv": [
+      "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\cli-parity-rest-20261017\\final-candidate-split-verified\\source-version.exe",
+      "test",
+      "--native",
+      "--locked",
+      "--json",
+      "--exact",
+      "tests::module_project_complete_c::native_test_cfg_session_reuses_graphs_and_detaches_outputs"
+    ],
+    "exit": 0,
+    "stdout": "{\"schemaVersion\":\"fairyc.test-report/v1\",\"engine\":\"native\",\"target\":\"x86_64-windows-msvc\",\"profile\":\"development\",\"tests\":[{\"identity\":\"tests::module_project_complete_c::native_test_cfg_session_reuses_graphs_and_detaches_outputs\",\"outcome\":\"passed\",\"trapCategory\":null}],\"count\":1,\"passed\":1,\"failed\":0,\"status\":\"ok\",\"lock\":\"verified\"}\n",
+    "stderr": "",
+    "seconds": 56.97798440000042,
+    "referenceSHA256": "81d454176aeaedc66e639a1de8150c0af4d20be5dec61f48b2777ea19a4c2eea"
+  },
+  "sdkFixtureGoNative": [
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\cli-parity-rest-20261017\\final-candidate-split-verified\\source-version.exe",
+        "check"
+      ],
+      "exit": 0,
+      "stdout": "check ok: 2 instance(s), 9 source file(s), 182 MIR function(s), lock updated\n",
+      "stderr": "",
+      "seconds": 0.22358979999262374
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\cli-parity-rest-20261017\\final-candidate-split-verified\\source-version.exe",
+        "test",
+        "--native",
+        "--locked",
+        "--json"
+      ],
+      "exit": 0,
+      "stdout": "{\"schemaVersion\":\"fairyc.test-report/v1\",\"engine\":\"native\",\"target\":\"x86_64-windows-msvc\",\"profile\":\"development\",\"tests\":[{\"identity\":\"tests::reuse::a_scalar\",\"outcome\":\"passed\",\"trapCategory\":null},{\"identity\":\"tests::reuse::z_owned\",\"outcome\":\"passed\",\"trapCategory\":null},{\"identity\":\"tests::vector::sum_after_pop_and_clear\",\"outcome\":\"passed\",\"trapCategory\":null}],\"count\":3,\"passed\":3,\"failed\":0,\"status\":\"ok\",\"lock\":\"verified\"}\n",
+      "stderr": "",
+      "seconds": 5.1977277000114555
+    }
+  ],
+  "changedSources": [
+    {
+      "path": "examples/lexer_candidate/src/module_project_c_owner.fy",
+      "sha256": "a8f88ccd57eb292e3276a1b5c1baa18d83cd50909d6ef3c6ef03851b2dc7efb9"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_project_complete_c.fy",
+      "sha256": "ee34d742d964c7d1d8c35c68e979e88c6590b03a23c2ed6285d97e9d67ccef49"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_unit_c_emit.fy",
+      "sha256": "070fccc49ff5224e97974eafab7d609c7cb51010cdd25f958bdc4d25c42d57b7"
+    }
+  ],
+  "sourceInventorySHA256": "f239e138d202fd6a35ff08429e31987094077578ea2ce53cc528c70411dde1c2",
+  "originalLockPreserved": true,
+  "originalLockSHA256": "a6b52c6270c15ca237c31aed8ece8bbffc745556620c3b2c8dd5c651adc75e30",
+  "assertions": [
+    "The SDK plan and immutable IR/CFGs share one non-replaceable owner.",
+    "Every emission starts with the recorded graph+SDK preparation work before callable/frame indexes; budgets and total work match the uncached path.",
+    "Returned C buffers and metadata remain valid after session destruction.",
+    "Changed source requires a fresh session.",
+    "The new three-test SDK fixture covers both scalar and owned Buffer vector instances."
+  ],
+  "limitations": [
+    "Current-source candidate CLI rebuild, full Go comparisons and consecutive-generation checks follow in separate checkpoints."
+  ],
+  "stableCLIChanged": false,
+  "sdkABIChanged": false,
+  "languageRulesChanged": false,
+  "limitsChanged": false,
+  "databaseChanged": false,
+  "ciChanged": false,
+  "pushed": false
+}
