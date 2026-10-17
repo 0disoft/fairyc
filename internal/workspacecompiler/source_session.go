@@ -17,10 +17,6 @@ type sourceCacheSession interface {
 	Close() error
 }
 
-// SourceSession owns one active cache family. A source-mode transition releases
-// the old session before constructing the next, rather than keeping two LRUs.
-// Disk bounds and statistics apply to the selected format namespace, not every
-// historical format directory below the configured root.
 type sourceMode uint8
 
 const (
@@ -29,6 +25,10 @@ const (
 	sourceSDKStorage
 )
 
+// SourceSession owns one active cache family. A source-mode transition releases
+// the old session before constructing the next, rather than keeping two LRUs.
+// Disk bounds and statistics apply to the selected format namespace, not every
+// historical format directory below the configured root.
 type SourceSession struct {
 	configuration Configuration
 	active        sourceCacheSession

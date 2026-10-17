@@ -44,6 +44,28 @@ Semantic acceptance is split into resolver, type, and Flow phases. The versioned
 
 An immutable green tree and incremental reparse are deferred. The parser boundary preserves trivia so those features can be added without making them a prerequisite for executable semantics.
 
+`internal/admission` owns the typed `Capabilities` and `Policy[Owner]` values shared
+by generic source preparation, compiler analysis and MIR verification. The zero
+value selects ordinary scalar admission. Storage queries and transfers form an
+explicit enum; nominal arguments, SDK template ownership and vector candidates
+have separate typed modes. Invalid combinations and explicit empty or duplicate
+owner scopes fail before expansion. Build-local package owner zero remains valid.
+
+`compiler.AnalyzeWithPolicy` and `CheckWithPolicy` use one resolved-graph path;
+`LowerAnalyzedWithCapabilities` and `mir.VerifyWithCapabilities` apply its MIR
+admission. Existing named entry points remain compatibility facades, including the
+private proof lanes that return expansion errors directly. Source-facing policy
+entry points convert source-owned failures into the existing diagnostics.
+
+Workspace sessions bind SDK storage authority from the current loader-authenticated
+source on every check. A configured SDK profile without authenticated SDK owners
+uses ordinary source admission and ordinary MIR verification. Consumer templates
+retain their scalar restrictions. `genericArtifactPolicy` selects cache creation,
+extraction, reassembly and identity family together. Existing ordinary and storage
+cache namespaces, formats and versions remain separate. Candidate vector policy
+has no workspace-cache admission. Source-family transitions release the previous
+session before selecting the next cache family.
+
 ## Semantic lowering
 
 Typed HIR preserves source concepts. Resource definitions retain canonical identity, ordered resolved

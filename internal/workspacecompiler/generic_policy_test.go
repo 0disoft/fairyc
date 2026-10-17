@@ -69,9 +69,9 @@ func TestSDKCapabilitySessionReauthenticatesBeforeLowering(t *testing.T) {
 			if err != nil || !warm.Compiler.Verified || warm.Cache.Outcome != OutcomeAllHit || calls != 1 {
 				t.Fatalf("warm: %v %+v", err, warm.Cache)
 			}
-			writeFile(t, filepath.Join(root, "src", "main.fy"), strings.Replace(genericMain, "42", "storage_size<i32>() as i32", 1))
+			writeFile(t, filepath.Join(root, "src", "main.fy"), `module main; fn usize size<T>() { return storage_size<T>(); } fn i32 main() { return if (size<i32>() == 4) { 42 } else { 0 }; }`)
 			rejected, err := session.Check(loadCacheWorkspace(t, root))
-			if err != nil || rejected.Compiler.Verified || rejected.Cache.Hits != 0 {
+			if err != nil || rejected.Compiler.Verified || rejected.Cache.Hits != 0 || len(rejected.Compiler.Semantic.Diagnostics) == 0 {
 				t.Fatalf("unauthenticated private query: %v %+v", err, rejected)
 			}
 			writeFile(t, filepath.Join(root, "src", "main.fy"), genericMain)

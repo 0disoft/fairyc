@@ -1,6 +1,9 @@
 package compiler_test
 
 import (
+	"reflect"
+	"testing"
+
 	"github.com/0disoft/fairyc/internal/admission"
 	"github.com/0disoft/fairyc/internal/compiler"
 	"github.com/0disoft/fairyc/internal/genericplan"
@@ -8,8 +11,6 @@ import (
 	"github.com/0disoft/fairyc/internal/mir"
 	"github.com/0disoft/fairyc/internal/packagegraph"
 	"github.com/0disoft/fairyc/internal/semantic"
-	"reflect"
-	"testing"
 )
 
 func TestPolicyScalarCompatibility(t *testing.T) {

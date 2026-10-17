@@ -7,27 +7,43 @@ import (
 	"path"
 	"path/filepath"
 	"strconv"
+	"strings"
 	"testing"
 )
 
 func TestSourceToMIRFixtureRunnersUseSharedCompilerBoundary(t *testing.T) {
 	t.Parallel()
 	runners := []string{
-		filepath.Join("..", "cbackendfixture", "runner.go"),
-		filepath.Join("..", "cbackendnative", "runner.go"),
-		filepath.Join("..", "interpreterfixture", "runner.go"),
-		filepath.Join("..", "mirfixture", "runner.go"),
+		filepath.Join("..", "cbackendfixture"),
+		filepath.Join("..", "cbackendnative"),
+		filepath.Join("..", "interpreterfixture"),
+		filepath.Join("..", "mirfixture"),
 	}
 	for _, runner := range runners {
 		runner := runner
 		t.Run(filepath.ToSlash(runner), func(t *testing.T) {
 			t.Parallel()
-			assertSharedCompilerBoundary(t, runner)
+			files, err := filepath.Glob(filepath.Join(runner, "*.go"))
+			if err != nil {
+				t.Fatal(err)
+			}
+			hasCompilerCheck := false
+			for _, filename := range files {
+				if strings.HasSuffix(filename, "_test.go") {
+					continue
+				}
+				// Inspect every production file, even after finding the shared entry point.
+				checked := inspectSharedCompilerBoundary(t, filename)
+				hasCompilerCheck = hasCompilerCheck || checked
+			}
+			if !hasCompilerCheck {
+				t.Errorf("%s does not call compiler.Check", runner)
+			}
 		})
 	}
 }
 
-func assertSharedCompilerBoundary(t *testing.T, filename string) {
+func inspectSharedCompilerBoundary(t *testing.T, filename string) bool {
 	t.Helper()
 	parsed, err := parser.ParseFile(token.NewFileSet(), filename, nil, parser.SkipObjectResolution)
 	if err != nil {
@@ -75,7 +91,5 @@ func assertSharedCompilerBoundary(t *testing.T, filename string) {
 		}
 		return true
 	})
-	if !hasCompilerCheck {
-		t.Errorf("%s does not call compiler.Check", filename)
-	}
+	return hasCompilerCheck
 }

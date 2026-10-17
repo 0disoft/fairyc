@@ -1,0 +1,138 @@
+{
+  "schema": "fairyc.compiler-admission-policy-verification/v1",
+  "date": "2026-10-17",
+  "status": "verified-with-pre-existing-mir-fixture-failure",
+  "scope": "Go compiler capability policy and workspace cache dispatch; no language or cache-format promotion",
+  "implementationCommits": [
+    "02d68e6e",
+    "93c419ea",
+    "305bc4f2"
+  ],
+  "boundaries": [
+    "Zero policy keeps ordinary scalar generic admission and ordinary MIR verification.",
+    "Storage query and transfer admission, nominal arguments, SDK templates and vector candidates use typed enum modes.",
+    "Empty and duplicate explicit owner scopes are rejected; build-local HIR owner zero is valid.",
+    "SDK owners are authenticated from current loaded source for every check; no-owner fallback uses ordinary capabilities through lowering.",
+    "Consumer template restrictions and current ordinary/storage cache identities, namespaces and formats are preserved.",
+    "Legacy entry points delegate to policy-based paths; private proof expansion errors retain their existing return convention.",
+    "Workspace cache construction, extraction, reassembly and rebind are selected together; query-only and vector-candidate cache admission remain closed."
+  ],
+  "checks": [
+    {
+      "command": "go test ./internal/admission ./internal/genericsource ./internal/mir",
+      "status": "passed"
+    },
+    {
+      "command": "go test ./internal/compiler -run TestPolicy -count=1",
+      "status": "passed"
+    },
+    {
+      "command": "go test ./internal/compiler -run Test(Policy|GenericPackages|PrivateStorageQuery|Nominal) -count=1",
+      "status": "passed"
+    },
+    {
+      "command": "go test ./internal/workspacecompiler",
+      "status": "passed",
+      "note": "Includes memory/disk cold and warm paths, fallback, source changes and rejected source."
+    },
+    {
+      "command": "go test ./internal/workspacecompiler -run Test(CapabilitySession|SDKCapability) -count=1",
+      "status": "passed"
+    },
+    {
+      "command": "go test ./internal/workspacecompiler -run ^TestSDKCapabilitySessionReauthenticatesBeforeLowering$ -count=1",
+      "status": "passed",
+      "note": "Final valid private-query rejection fixture; lowering observes ordinary capabilities without authenticated SDK owners."
+    },
+    {
+      "command": "go test ./... -run '^$'",
+      "status": "passed",
+      "note": "All repository packages compile; this does not execute their test suites."
+    },
+    {
+      "command": "go test ./internal/packageartifact ./internal/mirverifyfixture ./internal/architecturecontract",
+      "status": "passed",
+      "note": "Executed as part of the related-package batch."
+    },
+    {
+      "command": "go test ./internal/cli -run ^(TestExplicitGenericCLICommands|TestExplicitGenericMissingImportKeepsResolveDiagnostic|TestWorkspaceGenericPersistentCacheCommand|TestWindowsVectorStableCLI)$ -count=1",
+      "status": "passed",
+      "note": "SDK vector check, dev/release MSVC build/run/native-test, consumer rejection and generic cache diagnostics."
+    },
+    {
+      "command": "go test ./internal/cli -run ^TestWorkspaceSessionSwitchesSourceFamiliesAndRecovers$ -count=1",
+      "status": "passed"
+    },
+    {
+      "command": "go test ./internal/compiler",
+      "status": "initial-failure-fixed",
+      "elapsedSeconds": 440.714,
+      "failure": "Only reported failure: boundary test still required compiler.Check in cbackendnative/runner.go after the earlier responsibility split moved it to probes_source.go. The same failure reproduces at pre-change commit a040a8a0.",
+      "repair": "Inspect all production Go files in each fixture-runner package, retaining bypass checks per file.",
+      "reuse": "Unchanged product implementation and the remaining tests reuse this completed suite run; a second entire native suite was not run."
+    },
+    {
+      "command": "go test ./internal/compiler -run ^(TestSourceToMIRFixtureRunnersUseSharedCompilerBoundary|TestPolicy.*|TestPrivateVectorSDKWorkspaceCache)$ -count=1",
+      "status": "passed",
+      "note": "Final boundary repair plus policy checks and authenticated SDK SourceSession cold/warm memory/disk cache and source authority checks."
+    },
+    {
+      "command": "gofmt; git diff --check",
+      "status": "passed"
+    }
+  ],
+  "preExistingFailures": [
+    {
+      "command": "go test ./internal/mirfixture",
+      "status": "failed-before-and-after",
+      "baselineCommit": "a040a8a0",
+      "case": "pass.mir.result-error-cleanup",
+      "diagnostic": "E4101",
+      "phase": "type",
+      "source": "main.fy",
+      "span": [
+        186,
+        194
+      ],
+      "baselineVerification": "git archive of pre-change Go/internal sources and MIR fixtures extracted into a temporary directory; go test ./internal/mirfixture -count=1 reproduces the identical diagnostic.",
+      "disposition": "Existing fixture/admission mismatch left unchanged; no claim that the entire repository test suite is green."
+    }
+  ],
+  "notRun": [
+    {
+      "check": "Second full compiler native suite after the test-only scanner repair",
+      "reason": "Reuse completed unchanged-product tests; repaired boundary and policy/SDK cache integration checks rerun directly."
+    },
+    {
+      "check": "Candidate CLI bootstrap rebuild and full candidate/Go comparison",
+      "reason": "This change is scoped to internal Go pipeline admission; focused CLI and Windows native SDK checks cover the affected entrypoints."
+    },
+    {
+      "check": "Full Linux native compiler/sanitizer matrix",
+      "reason": "Windows host; no cross-target parity or promotion claim."
+    },
+    {
+      "check": "Performance benchmarks",
+      "reason": "Structural change; no quantitative speed or allocation claim."
+    }
+  ],
+  "changes": {
+    "sourceOfTruth": "docs/architecture/02-runtime-flow.md",
+    "internalGoAPI": "Added policy-based entry points; existing named facades retained.",
+    "publicGoAPI": false,
+    "stableCLI": false,
+    "languageSyntax": false,
+    "cacheFormat": false,
+    "database": false,
+    "dependencies": false,
+    "repositoryHygieneConfig": false,
+    "runner": false,
+    "CI": false
+  },
+  "preservedUnrelatedPaths": [
+    "examples/lexer_candidate/fairy.lock",
+    "docs/ops/evidence/candidate-borrow-cache-mixed-regression-20261009.json",
+    "docs/ops/evidence/candidate-self-source-inventory-20261007.json"
+  ],
+  "remote": "Not pushed"
+}
