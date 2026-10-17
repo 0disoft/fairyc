@@ -261,35 +261,23 @@ func runWorkspaceTarget(arguments []string, sourceRoot string, stdout, stderr io
 
 func parseWorkspaceTargetOptions(command string, arguments []string, requireOutput bool) (workspaceTargetOptions, error) {
 	options := workspaceTargetOptions{}
-	seen := make(map[string]bool, 4)
-	for index := 0; index < len(arguments); {
-		flag := arguments[index]
-		if flag == "--locked" {
-			if seen[flag] {
-				return workspaceTargetOptions{}, fmt.Errorf("experimental command %q received %s more than once", command, flag)
-			}
-			seen[flag] = true
-			options.locked = true
-			index++
-			continue
-		}
-		if flag != "--target" && flag != "--profile" && !(requireOutput && flag == "--output") &&
-			!(flag == "--cc" && (requireOutput || command == "run-workspace")) {
-			return workspaceTargetOptions{}, fmt.Errorf("experimental command %q does not accept flag %q", command, flag)
-		}
-		if seen[flag] {
-			return workspaceTargetOptions{}, fmt.Errorf("experimental command %q received %s more than once", command, flag)
-		}
-		if index+1 >= len(arguments) || strings.HasPrefix(arguments[index+1], "--") {
-			return workspaceTargetOptions{}, fmt.Errorf("experimental command %q requires a value for %s", command, flag)
-		}
-		seen[flag] = true
-		value := arguments[index+1]
+	flags := []flagDefinition{{Name: "--locked", Kind: flagSwitch}, {Name: "--target", Kind: flagScalar}, {Name: "--profile", Kind: flagScalar}}
+	required := []string{"--target", "--profile"}
+	if requireOutput {
+		flags = append(flags, flagDefinition{Name: "--output", Kind: flagScalar})
+		required = append(required, "--output")
+	}
+	if requireOutput || command == "run-workspace" {
+		flags = append(flags, flagDefinition{Name: "--cc", Kind: flagScalar})
+	}
+	seen, err := parseCommandFlags(arguments, flagSchema{Command: command, Experimental: true, Flags: flags, Required: required}, func(flag, value string) error {
 		switch flag {
+		case "--locked":
+			options.locked = true
 		case "--target":
 			if target.ID(value) != target.X8664WindowsMSVC &&
 				!((command == "build-workspace" || command == "run-workspace") && target.ID(value) == target.X8664LinuxGNU) {
-				return workspaceTargetOptions{}, fmt.Errorf("experimental %s currently requires --target %s", command, target.X8664WindowsMSVC)
+				return fmt.Errorf("experimental %s currently requires --target %s", command, target.X8664WindowsMSVC)
 			}
 			options.targetID = target.ID(value)
 		case "--profile":
@@ -299,45 +287,37 @@ func parseWorkspaceTargetOptions(command string, arguments []string, requireOutp
 			case cdriver.OptimizedProfile.Name:
 				options.profile = cdriver.OptimizedProfile
 			default:
-				return workspaceTargetOptions{}, fmt.Errorf("experimental command %q requires --profile low or --profile optimized", command)
+				return fmt.Errorf("experimental command %q requires --profile low or --profile optimized", command)
 			}
 		case "--output":
 			normalized, err := validateBuildOutput(value)
 			if err != nil {
-				return workspaceTargetOptions{}, err
+				return err
 			}
 			options.output = normalized
 		case "--cc":
 			if value != "gcc" && value != "clang" {
-				return workspaceTargetOptions{}, fmt.Errorf("experimental %s requires --cc gcc or --cc clang", command)
+				return fmt.Errorf("experimental %s requires --cc gcc or --cc clang", command)
 			}
 			options.compilerName = value
 		}
-		index += 2
+		return nil
+	})
+	if err != nil {
+		return workspaceTargetOptions{}, err
 	}
-	for _, flag := range []string{"--target", "--profile"} {
-		if !seen[flag] {
-			return workspaceTargetOptions{}, fmt.Errorf("experimental command %q requires %s", command, flag)
-		}
+
+	linux := options.targetID == target.X8664LinuxGNU
+	executable := strings.HasSuffix(strings.ToLower(options.output), ".exe")
+	if err := validateFlagRules(
+		flagRule{Invalid: linux && !seen["--cc"], Message: fmt.Sprintf("experimental %s with Linux target requires --cc gcc or --cc clang", command)},
+		flagRule{Invalid: linux && executable, Message: "experimental build-workspace Linux output must not end with .exe"},
+		flagRule{Invalid: !linux && seen["--cc"], Message: fmt.Sprintf("experimental %s Windows target does not accept --cc", command)},
+		flagRule{Invalid: !linux && requireOutput && !executable, Message: "experimental build-workspace Windows output must end with .exe"},
+	); err != nil {
+		return workspaceTargetOptions{}, err
 	}
-	if requireOutput && !seen["--output"] {
-		return workspaceTargetOptions{}, fmt.Errorf("experimental command %q requires --output", command)
-	}
-	if options.targetID == target.X8664LinuxGNU {
-		if !seen["--cc"] {
-			return workspaceTargetOptions{}, fmt.Errorf("experimental %s with Linux target requires --cc gcc or --cc clang", command)
-		}
-		if strings.HasSuffix(strings.ToLower(options.output), ".exe") {
-			return workspaceTargetOptions{}, fmt.Errorf("experimental build-workspace Linux output must not end with .exe")
-		}
-	} else {
-		if seen["--cc"] {
-			return workspaceTargetOptions{}, fmt.Errorf("experimental %s Windows target does not accept --cc", command)
-		}
-		if requireOutput && !strings.HasSuffix(strings.ToLower(options.output), ".exe") {
-			return workspaceTargetOptions{}, fmt.Errorf("experimental build-workspace Windows output must end with .exe")
-		}
-	}
+
 	return options, nil
 }
 

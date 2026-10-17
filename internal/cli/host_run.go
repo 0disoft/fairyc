@@ -83,38 +83,26 @@ func parseHostRunOptions(arguments []string) (hostRunOptions, error) {
 		return hostRunOptions{}, fmt.Errorf("experimental command \"run-host\" expects the entry source file before its flags")
 	}
 	options := hostRunOptions{source: arguments[0]}
-	seenProfile := false
-	for index := 1; index < len(arguments); index += 2 {
-		flag := arguments[index]
-		if flag != "--source" && flag != "--profile" {
-			return hostRunOptions{}, fmt.Errorf("experimental command \"run-host\" does not accept flag %q", flag)
-		}
-		if flag == "--profile" && seenProfile {
-			return hostRunOptions{}, fmt.Errorf("experimental command \"run-host\" received --profile more than once")
-		}
-		if index+1 >= len(arguments) || strings.HasPrefix(arguments[index+1], "--") {
-			return hostRunOptions{}, fmt.Errorf("experimental command \"run-host\" requires a value for %s", flag)
-		}
-		value := arguments[index+1]
+	_, err := parseCommandFlags(arguments[1:], flagSchema{Command: "run-host", Experimental: true, Flags: []flagDefinition{{Name: "--source", Kind: flagSlice}, {Name: "--profile", Kind: flagScalar}}, Required: []string{"--profile"}}, func(flag, value string) error {
 		switch flag {
 		case "--source":
 			if err := appendProgramSource("run-host", &options.additionalSources, value); err != nil {
-				return hostRunOptions{}, err
+				return err
 			}
 		case "--profile":
-			seenProfile = true
 			switch value {
 			case cdriver.LowProfile.Name:
 				options.profile = cdriver.LowProfile
 			case cdriver.OptimizedProfile.Name:
 				options.profile = cdriver.OptimizedProfile
 			default:
-				return hostRunOptions{}, fmt.Errorf("experimental command \"run-host\" requires --profile low or --profile optimized")
+				return fmt.Errorf("experimental command \"run-host\" requires --profile low or --profile optimized")
 			}
 		}
-	}
-	if !seenProfile {
-		return hostRunOptions{}, fmt.Errorf("experimental command \"run-host\" requires --profile")
+		return nil
+	})
+	if err != nil {
+		return hostRunOptions{}, err
 	}
 	return options, nil
 }

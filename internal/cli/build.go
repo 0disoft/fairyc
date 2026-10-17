@@ -127,30 +127,16 @@ func parseBuildOptions(arguments []string) (buildOptions, error) {
 	if options.source == "" || strings.HasPrefix(options.source, "-") {
 		return buildOptions{}, fmt.Errorf("experimental command \"build\" expects the source file before its flags")
 	}
-	seen := make(map[string]bool, 3)
-	for index := 1; index < len(arguments); {
-		flag := arguments[index]
-		if flag != "--source" && flag != "--cc" && flag != "--profile" && flag != "--output" {
-			return buildOptions{}, fmt.Errorf("experimental command \"build\" does not accept flag %q", flag)
-		}
-		if flag != "--source" && seen[flag] {
-			return buildOptions{}, fmt.Errorf("experimental command \"build\" received %s more than once", flag)
-		}
-		if index+1 >= len(arguments) || strings.HasPrefix(arguments[index+1], "--") {
-			return buildOptions{}, fmt.Errorf("experimental command \"build\" requires a value for %s", flag)
-		}
-		if flag != "--source" {
-			seen[flag] = true
-		}
-		value := arguments[index+1]
+	_, err := parseCommandFlags(arguments[1:], flagSchema{Command: "build", Experimental: true,
+		Flags: []flagDefinition{{Name: "--source", Kind: flagSlice}, {Name: "--cc", Kind: flagScalar}, {Name: "--profile", Kind: flagScalar}, {Name: "--output", Kind: flagScalar}}, Required: []string{"--cc", "--profile", "--output"}}, func(flag, value string) error {
 		switch flag {
 		case "--source":
 			if err := appendProgramSource("build", &options.additionalSources, value); err != nil {
-				return buildOptions{}, err
+				return err
 			}
 		case "--cc":
 			if value != "clang" && value != "gcc" {
-				return buildOptions{}, fmt.Errorf("experimental command \"build\" requires --cc clang or --cc gcc")
+				return fmt.Errorf("experimental command \"build\" requires --cc clang or --cc gcc")
 			}
 			options.compilerName = value
 		case "--profile":
@@ -160,22 +146,21 @@ func parseBuildOptions(arguments []string) (buildOptions, error) {
 			case cdriver.OptimizedProfile.Name:
 				options.profile = cdriver.OptimizedProfile
 			default:
-				return buildOptions{}, fmt.Errorf("experimental command \"build\" requires --profile low or --profile optimized")
+				return fmt.Errorf("experimental command \"build\" requires --profile low or --profile optimized")
 			}
 		case "--output":
 			normalized, err := validateBuildOutput(value)
 			if err != nil {
-				return buildOptions{}, err
+				return err
 			}
 			options.output = normalized
 		}
-		index += 2
+		return nil
+	})
+	if err != nil {
+		return buildOptions{}, err
 	}
-	for _, flag := range []string{"--cc", "--profile", "--output"} {
-		if !seen[flag] {
-			return buildOptions{}, fmt.Errorf("experimental command \"build\" requires %s", flag)
-		}
-	}
+
 	return options, nil
 }
 

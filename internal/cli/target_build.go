@@ -122,30 +122,16 @@ func parseTargetBuildOptions(arguments []string) (targetBuildOptions, error) {
 	if options.source == "" || strings.HasPrefix(options.source, "-") {
 		return targetBuildOptions{}, fmt.Errorf("experimental command \"build-target\" expects the source file before its flags")
 	}
-	seen := make(map[string]bool, 3)
-	for index := 1; index < len(arguments); {
-		flag := arguments[index]
-		if flag != "--source" && flag != "--target" && flag != "--profile" && flag != "--output" {
-			return targetBuildOptions{}, fmt.Errorf("experimental command \"build-target\" does not accept flag %q", flag)
-		}
-		if flag != "--source" && seen[flag] {
-			return targetBuildOptions{}, fmt.Errorf("experimental command \"build-target\" received %s more than once", flag)
-		}
-		if index+1 >= len(arguments) || strings.HasPrefix(arguments[index+1], "--") {
-			return targetBuildOptions{}, fmt.Errorf("experimental command \"build-target\" requires a value for %s", flag)
-		}
-		if flag != "--source" {
-			seen[flag] = true
-		}
-		value := arguments[index+1]
+	_, err := parseCommandFlags(arguments[1:], flagSchema{Command: "build-target", Experimental: true,
+		Flags: []flagDefinition{{Name: "--source", Kind: flagSlice}, {Name: "--target", Kind: flagScalar}, {Name: "--profile", Kind: flagScalar}, {Name: "--output", Kind: flagScalar}}, Required: []string{"--target", "--profile", "--output"}}, func(flag, value string) error {
 		switch flag {
 		case "--source":
 			if err := appendProgramSource("build-target", &options.additionalSources, value); err != nil {
-				return targetBuildOptions{}, err
+				return err
 			}
 		case "--target":
 			if target.ID(value) != target.X8664WindowsMSVC {
-				return targetBuildOptions{}, fmt.Errorf("experimental build-target currently requires --target %s", target.X8664WindowsMSVC)
+				return fmt.Errorf("experimental build-target currently requires --target %s", target.X8664WindowsMSVC)
 			}
 			options.targetID = target.X8664WindowsMSVC
 		case "--profile":
@@ -155,25 +141,24 @@ func parseTargetBuildOptions(arguments []string) (targetBuildOptions, error) {
 			case cdriver.OptimizedProfile.Name:
 				options.profile = cdriver.OptimizedProfile
 			default:
-				return targetBuildOptions{}, fmt.Errorf("experimental command \"build-target\" requires --profile low or --profile optimized")
+				return fmt.Errorf("experimental command \"build-target\" requires --profile low or --profile optimized")
 			}
 		case "--output":
 			normalized, err := validateBuildOutput(value)
 			if err != nil {
-				return targetBuildOptions{}, err
+				return err
 			}
 			if !strings.HasSuffix(strings.ToLower(normalized), ".exe") {
-				return targetBuildOptions{}, fmt.Errorf("experimental build-target Windows output must end with .exe")
+				return fmt.Errorf("experimental build-target Windows output must end with .exe")
 			}
 			options.output = normalized
 		}
-		index += 2
+		return nil
+	})
+	if err != nil {
+		return targetBuildOptions{}, err
 	}
-	for _, flag := range []string{"--target", "--profile", "--output"} {
-		if !seen[flag] {
-			return targetBuildOptions{}, fmt.Errorf("experimental command \"build-target\" requires %s", flag)
-		}
-	}
+
 	return options, nil
 }
 

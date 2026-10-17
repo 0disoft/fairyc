@@ -63,30 +63,16 @@ func parseTargetExecutionOptions(command string, arguments []string) (targetRunO
 	if options.source == "" || strings.HasPrefix(options.source, "-") {
 		return targetRunOptions{}, fmt.Errorf("experimental command %q expects the source file before its flags", command)
 	}
-	seen := make(map[string]bool, 2)
-	for index := 1; index < len(arguments); {
-		flag := arguments[index]
-		if flag != "--source" && flag != "--target" && flag != "--profile" {
-			return targetRunOptions{}, fmt.Errorf("experimental command %q does not accept flag %q", command, flag)
-		}
-		if flag != "--source" && seen[flag] {
-			return targetRunOptions{}, fmt.Errorf("experimental command %q received %s more than once", command, flag)
-		}
-		if index+1 >= len(arguments) || strings.HasPrefix(arguments[index+1], "--") {
-			return targetRunOptions{}, fmt.Errorf("experimental command %q requires a value for %s", command, flag)
-		}
-		if flag != "--source" {
-			seen[flag] = true
-		}
-		value := arguments[index+1]
+	_, err := parseCommandFlags(arguments[1:], flagSchema{Command: command, Experimental: true,
+		Flags: []flagDefinition{{Name: "--source", Kind: flagSlice}, {Name: "--target", Kind: flagScalar}, {Name: "--profile", Kind: flagScalar}}, Required: []string{"--target", "--profile"}}, func(flag, value string) error {
 		switch flag {
 		case "--source":
 			if err := appendProgramSource(command, &options.additionalSources, value); err != nil {
-				return targetRunOptions{}, err
+				return err
 			}
 		case "--target":
 			if target.ID(value) != target.X8664WindowsMSVC {
-				return targetRunOptions{}, fmt.Errorf("experimental %s currently requires --target %s", command, target.X8664WindowsMSVC)
+				return fmt.Errorf("experimental %s currently requires --target %s", command, target.X8664WindowsMSVC)
 			}
 			options.targetID = target.X8664WindowsMSVC
 		case "--profile":
@@ -96,15 +82,14 @@ func parseTargetExecutionOptions(command string, arguments []string) (targetRunO
 			case cdriver.OptimizedProfile.Name:
 				options.profile = cdriver.OptimizedProfile
 			default:
-				return targetRunOptions{}, fmt.Errorf("experimental command %q requires --profile low or --profile optimized", command)
+				return fmt.Errorf("experimental command %q requires --profile low or --profile optimized", command)
 			}
 		}
-		index += 2
+		return nil
+	})
+	if err != nil {
+		return targetRunOptions{}, err
 	}
-	for _, flag := range []string{"--target", "--profile"} {
-		if !seen[flag] {
-			return targetRunOptions{}, fmt.Errorf("experimental command %q requires %s", command, flag)
-		}
-	}
+
 	return options, nil
 }

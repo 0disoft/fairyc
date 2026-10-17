@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"io"
 	"strconv"
-	"strings"
 	"unicode/utf8"
 
 	"github.com/0disoft/fairyc/internal/packagecache"
@@ -144,70 +143,50 @@ func runWorkspaceCheckSession(arguments []string, sourceRoot string, stdin io.Re
 
 func parseWorkspaceSessionOptions(arguments []string) (workspaceSessionOptions, error) {
 	options := workspaceSessionOptions{}
-	seen := make(map[string]bool, 6)
-	for index := 0; index < len(arguments); {
-		flag := arguments[index]
+	_, err := parseCommandFlags(arguments, flagSchema{Command: "check-workspace-session", Experimental: true,
+		Flags: []flagDefinition{{Name: "--target", Kind: flagScalar}, {Name: "--max-requests", Kind: flagScalar}, {Name: "--cache-max-entries", Kind: flagScalar}, {Name: "--cache-max-bytes", Kind: flagScalar}, {Name: "--cache-max-artifact-bytes", Kind: flagScalar}, {Name: "--locked", Kind: flagSwitch}}, Required: []string{"--target", "--max-requests", "--cache-max-entries", "--cache-max-bytes", "--cache-max-artifact-bytes"}}, func(flag, value string) error {
 		switch flag {
 		case "--locked":
-			if seen[flag] {
-				return workspaceSessionOptions{}, fmt.Errorf("experimental command \"check-workspace-session\" received %s more than once", flag)
-			}
-			seen[flag], options.locked = true, true
-			index++
-			continue
-		case "--target", "--max-requests", "--cache-max-entries", "--cache-max-bytes", "--cache-max-artifact-bytes":
-		default:
-			return workspaceSessionOptions{}, fmt.Errorf("experimental command \"check-workspace-session\" does not accept flag %q", flag)
-		}
-		if seen[flag] {
-			return workspaceSessionOptions{}, fmt.Errorf("experimental command \"check-workspace-session\" received %s more than once", flag)
-		}
-		if index+1 >= len(arguments) || strings.HasPrefix(arguments[index+1], "--") {
-			return workspaceSessionOptions{}, fmt.Errorf("experimental command \"check-workspace-session\" requires a value for %s", flag)
-		}
-		seen[flag] = true
-		value := arguments[index+1]
-		switch flag {
+			options.locked = true
 		case "--target":
 			candidate := target.ID(value)
 			if _, found := target.Lookup(candidate); !found {
-				return workspaceSessionOptions{}, fmt.Errorf("experimental command \"check-workspace-session\" requires a known --target")
+				return fmt.Errorf("experimental command \"check-workspace-session\" requires a known --target")
 			}
 			options.target = candidate
 		case "--max-requests":
 			parsed, err := parseWorkspaceSessionLimit(flag, value, maxWorkspaceSessionRequests)
 			if err != nil {
-				return workspaceSessionOptions{}, err
+				return err
 			}
 			options.maxRequests = parsed
 		case "--cache-max-entries":
 			parsed, err := parseWorkspaceSessionLimit(flag, value, maxWorkspaceSessionCacheEntries)
 			if err != nil {
-				return workspaceSessionOptions{}, err
+				return err
 			}
 			options.cacheEntries = parsed
 		case "--cache-max-bytes":
 			parsed, err := parseWorkspaceSessionByteLimit(flag, value, maxWorkspaceSessionCacheBytes)
 			if err != nil {
-				return workspaceSessionOptions{}, err
+				return err
 			}
 			options.cacheBytes = parsed
 		case "--cache-max-artifact-bytes":
 			parsed, err := parseWorkspaceSessionByteLimit(flag, value, maxWorkspaceSessionArtifactBytes)
 			if err != nil {
-				return workspaceSessionOptions{}, err
+				return err
 			}
 			options.maxArtifactBytes = parsed
 		}
-		index += 2
+		return nil
+	})
+	if err != nil {
+		return workspaceSessionOptions{}, err
 	}
-	for _, flag := range []string{"--target", "--max-requests", "--cache-max-entries", "--cache-max-bytes", "--cache-max-artifact-bytes"} {
-		if !seen[flag] {
-			return workspaceSessionOptions{}, fmt.Errorf("experimental command \"check-workspace-session\" requires %s", flag)
-		}
-	}
-	if options.maxArtifactBytes > options.cacheBytes {
-		return workspaceSessionOptions{}, fmt.Errorf("experimental command \"check-workspace-session\" requires --cache-max-artifact-bytes not to exceed --cache-max-bytes")
+
+	if err := validateFlagRules(flagRule{Invalid: options.maxArtifactBytes > options.cacheBytes, Message: fmt.Sprintf("experimental command \"check-workspace-session\" requires --cache-max-artifact-bytes not to exceed --cache-max-bytes")}); err != nil {
+		return workspaceSessionOptions{}, err
 	}
 	return options, nil
 }

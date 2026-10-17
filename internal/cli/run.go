@@ -335,16 +335,11 @@ func parseExplicitSourceSet(command, firstRole string, arguments []string) ([]st
 		return nil, fmt.Errorf("experimental command %q expects the %s source file before its flags", command, firstRole)
 	}
 	additional := make([]string, 0, (len(arguments)-1)/2)
-	for index := 1; index < len(arguments); index += 2 {
-		if arguments[index] != "--source" {
-			return nil, fmt.Errorf("experimental command %q does not accept flag %q", command, arguments[index])
-		}
-		if index+1 >= len(arguments) || strings.HasPrefix(arguments[index+1], "--") {
-			return nil, fmt.Errorf("experimental command %q requires a value for --source", command)
-		}
-		if err := appendProgramSource(command, &additional, arguments[index+1]); err != nil {
-			return nil, err
-		}
+	_, err := parseCommandFlags(arguments[1:], flagSchema{Command: command, Experimental: true, Flags: []flagDefinition{{Name: "--source", Kind: flagSlice}}}, func(_, value string) error {
+		return appendProgramSource(command, &additional, value)
+	})
+	if err != nil {
+		return nil, err
 	}
 	return programSourceSet(arguments[0], additional), nil
 }

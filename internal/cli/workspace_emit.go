@@ -80,37 +80,29 @@ func rejectRemovedStableEmit(stderr io.Writer) int {
 
 func parseExperimentalWorkspaceEmitOptions(arguments []string) (experimentalWorkspaceEmitOptions, error) {
 	options := experimentalWorkspaceEmitOptions{}
-	seen := make(map[string]bool, 2)
-	for index := 0; index < len(arguments); {
-		flag := arguments[index]
+	_, err := parseCommandFlags(arguments, flagSchema{Command: experimentalWorkspaceCCommand, Experimental: true,
+		Flags: []flagDefinition{{Name: "--locked", Kind: flagSwitch}, {Name: "--target", Kind: flagScalar}}, Required: []string{"--target"},
+		Unknown: func(flag string) error {
+			return fmt.Errorf(`experimental command %q does not accept argument %q`, experimentalWorkspaceCCommand, flag)
+		},
+		RequiredError: func(string) error {
+			return fmt.Errorf(`experimental command %q requires --target <target-id>`, experimentalWorkspaceCCommand)
+		},
+	}, func(flag, value string) error {
 		switch flag {
 		case "--locked":
-			if seen[flag] {
-				return experimentalWorkspaceEmitOptions{}, fmt.Errorf(`experimental command %q received --locked more than once`, experimentalWorkspaceCCommand)
-			}
-			seen[flag] = true
 			options.locked = true
-			index++
 		case "--target":
-			if seen[flag] {
-				return experimentalWorkspaceEmitOptions{}, fmt.Errorf(`experimental command %q received --target more than once`, experimentalWorkspaceCCommand)
-			}
-			if index+1 >= len(arguments) || strings.HasPrefix(arguments[index+1], "--") {
-				return experimentalWorkspaceEmitOptions{}, fmt.Errorf(`experimental command %q requires a value for --target`, experimentalWorkspaceCCommand)
-			}
-			seen[flag] = true
-			candidate := target.ID(arguments[index+1])
+			candidate := target.ID(value)
 			if candidate != target.X8664LinuxGNU && candidate != target.X8664WindowsMSVC {
-				return experimentalWorkspaceEmitOptions{}, fmt.Errorf(`experimental command %q does not know target %q`, experimentalWorkspaceCCommand, arguments[index+1])
+				return fmt.Errorf(`experimental command %q does not know target %q`, experimentalWorkspaceCCommand, value)
 			}
 			options.targetID = candidate
-			index += 2
-		default:
-			return experimentalWorkspaceEmitOptions{}, fmt.Errorf(`experimental command %q does not accept argument %q`, experimentalWorkspaceCCommand, flag)
 		}
-	}
-	if !seen["--target"] {
-		return experimentalWorkspaceEmitOptions{}, fmt.Errorf(`experimental command %q requires --target <target-id>`, experimentalWorkspaceCCommand)
+		return nil
+	})
+	if err != nil {
+		return experimentalWorkspaceEmitOptions{}, err
 	}
 	return options, nil
 }

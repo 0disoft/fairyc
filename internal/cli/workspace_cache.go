@@ -156,86 +156,62 @@ func runWorkspaceCacheCheck(arguments []string, sourceRoot string, stdout, stder
 
 func parseWorkspaceCacheOptions(arguments []string) (workspaceCacheOptions, error) {
 	options := workspaceCacheOptions{}
-	seen := make(map[string]bool, 8)
-	for index := 0; index < len(arguments); {
-		flag := arguments[index]
-		if flag == "--locked" {
-			if seen[flag] {
-				return workspaceCacheOptions{}, fmt.Errorf("experimental command \"check-workspace-cache\" received %s more than once", flag)
-			}
-			seen[flag], options.locked = true, true
-			index++
-			continue
-		}
+	_, err := parseCommandFlags(arguments, flagSchema{Command: "check-workspace-cache", Experimental: true,
+		Flags: []flagDefinition{{Name: "--target", Kind: flagScalar}, {Name: "--cache-dir", Kind: flagScalar}, {Name: "--cache-max-entries", Kind: flagScalar}, {Name: "--cache-max-bytes", Kind: flagScalar}, {Name: "--cache-max-record-bytes", Kind: flagScalar}, {Name: "--cache-max-artifact-bytes", Kind: flagScalar}, {Name: "--cache-temp-max-age-seconds", Kind: flagScalar}, {Name: "--locked", Kind: flagSwitch}}, Required: []string{"--target", "--cache-dir", "--cache-max-entries", "--cache-max-bytes", "--cache-max-record-bytes", "--cache-max-artifact-bytes", "--cache-temp-max-age-seconds"}}, func(flag, value string) error {
 		switch flag {
-		case "--target", "--cache-dir", "--cache-max-entries", "--cache-max-bytes", "--cache-max-record-bytes", "--cache-max-artifact-bytes", "--cache-temp-max-age-seconds":
-		default:
-			return workspaceCacheOptions{}, fmt.Errorf("experimental command \"check-workspace-cache\" does not accept flag %q", flag)
-		}
-		if seen[flag] {
-			return workspaceCacheOptions{}, fmt.Errorf("experimental command \"check-workspace-cache\" received %s more than once", flag)
-		}
-		if index+1 >= len(arguments) || strings.HasPrefix(arguments[index+1], "--") {
-			return workspaceCacheOptions{}, fmt.Errorf("experimental command \"check-workspace-cache\" requires a value for %s", flag)
-		}
-		seen[flag] = true
-		value := arguments[index+1]
-		switch flag {
+		case "--locked":
+			options.locked = true
 		case "--target":
 			candidate := target.ID(value)
 			if _, found := target.Lookup(candidate); !found {
-				return workspaceCacheOptions{}, fmt.Errorf("experimental command \"check-workspace-cache\" requires a known --target")
+				return fmt.Errorf("experimental command \"check-workspace-cache\" requires a known --target")
 			}
 			options.target = candidate
 		case "--cache-dir":
 			parsed, err := validateWorkspaceCacheDirectory(value)
 			if err != nil {
-				return workspaceCacheOptions{}, err
+				return err
 			}
 			options.cacheDirectory = parsed
 		case "--cache-max-entries":
 			parsed, err := parseWorkspaceCacheLimit(flag, value, uint64(maxWorkspaceSessionCacheEntries))
 			if err != nil {
-				return workspaceCacheOptions{}, err
+				return err
 			}
 			options.cacheEntries = int(parsed)
 		case "--cache-max-bytes":
 			parsed, err := parseWorkspaceCacheLimit(flag, value, maxWorkspaceSessionCacheBytes)
 			if err != nil {
-				return workspaceCacheOptions{}, err
+				return err
 			}
 			options.cacheBytes = parsed
 		case "--cache-max-record-bytes":
 			parsed, err := parseWorkspaceCacheLimit(flag, value, maxWorkspaceSessionCacheBytes)
 			if err != nil {
-				return workspaceCacheOptions{}, err
+				return err
 			}
 			options.maxRecordBytes = parsed
 		case "--cache-max-artifact-bytes":
 			parsed, err := parseWorkspaceCacheLimit(flag, value, maxWorkspaceSessionArtifactBytes)
 			if err != nil {
-				return workspaceCacheOptions{}, err
+				return err
 			}
 			options.maxArtifactBytes = parsed
 		case "--cache-temp-max-age-seconds":
 			parsed, err := parseWorkspaceCacheLimit(flag, value, maxWorkspaceCacheTempAgeSeconds)
 			if err != nil {
-				return workspaceCacheOptions{}, err
+				return err
 			}
 			options.tempMaxAge = time.Duration(parsed) * time.Second
 		}
-		index += 2
+		return nil
+	})
+	if err != nil {
+		return workspaceCacheOptions{}, err
 	}
-	for _, flag := range []string{"--target", "--cache-dir", "--cache-max-entries", "--cache-max-bytes", "--cache-max-record-bytes", "--cache-max-artifact-bytes", "--cache-temp-max-age-seconds"} {
-		if !seen[flag] {
-			return workspaceCacheOptions{}, fmt.Errorf("experimental command \"check-workspace-cache\" requires %s", flag)
-		}
-	}
-	if options.maxRecordBytes > options.cacheBytes {
-		return workspaceCacheOptions{}, fmt.Errorf("experimental command \"check-workspace-cache\" requires --cache-max-record-bytes not to exceed --cache-max-bytes")
-	}
-	if options.maxArtifactBytes > options.maxRecordBytes {
-		return workspaceCacheOptions{}, fmt.Errorf("experimental command \"check-workspace-cache\" requires --cache-max-artifact-bytes not to exceed --cache-max-record-bytes")
+
+	if err := validateFlagRules(flagRule{Invalid: options.maxRecordBytes > options.cacheBytes, Message: fmt.Sprintf("experimental command \"check-workspace-cache\" requires --cache-max-record-bytes not to exceed --cache-max-bytes")}, flagRule{Invalid: options.maxArtifactBytes > options.maxRecordBytes, Message: fmt.Sprintf("experimental command \"check-workspace-cache\" requires --cache-max-artifact-bytes not to exceed --cache-max-record-bytes")}); err != nil {
+		return workspaceCacheOptions{}, err
 	}
 	return options, nil
 }

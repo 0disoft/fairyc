@@ -47,26 +47,12 @@ func parseHostBuildOptions(arguments []string) (hostBuildOptions, error) {
 	if options.source == "" || strings.HasPrefix(options.source, "-") {
 		return hostBuildOptions{}, fmt.Errorf("experimental command \"build-host\" expects the source file before its flags")
 	}
-	seen := make(map[string]bool, 2)
-	for index := 1; index < len(arguments); {
-		flag := arguments[index]
-		if flag != "--source" && flag != "--profile" && flag != "--output" {
-			return hostBuildOptions{}, fmt.Errorf("experimental command \"build-host\" does not accept flag %q", flag)
-		}
-		if flag != "--source" && seen[flag] {
-			return hostBuildOptions{}, fmt.Errorf("experimental command \"build-host\" received %s more than once", flag)
-		}
-		if index+1 >= len(arguments) || strings.HasPrefix(arguments[index+1], "--") {
-			return hostBuildOptions{}, fmt.Errorf("experimental command \"build-host\" requires a value for %s", flag)
-		}
-		if flag != "--source" {
-			seen[flag] = true
-		}
-		value := arguments[index+1]
+	_, err := parseCommandFlags(arguments[1:], flagSchema{Command: "build-host", Experimental: true,
+		Flags: []flagDefinition{{Name: "--source", Kind: flagSlice}, {Name: "--profile", Kind: flagScalar}, {Name: "--output", Kind: flagScalar}}, Required: []string{"--profile", "--output"}}, func(flag, value string) error {
 		switch flag {
 		case "--source":
 			if err := appendProgramSource("build-host", &options.additionalSources, value); err != nil {
-				return hostBuildOptions{}, err
+				return err
 			}
 		case "--profile":
 			switch value {
@@ -75,24 +61,23 @@ func parseHostBuildOptions(arguments []string) (hostBuildOptions, error) {
 			case cdriver.OptimizedProfile.Name:
 				options.profile = cdriver.OptimizedProfile
 			default:
-				return hostBuildOptions{}, fmt.Errorf("experimental command \"build-host\" requires --profile low or --profile optimized")
+				return fmt.Errorf("experimental command \"build-host\" requires --profile low or --profile optimized")
 			}
 		case "--output":
 			normalized, err := validateBuildOutput(value)
 			if err != nil {
-				return hostBuildOptions{}, err
+				return err
 			}
 			if !strings.HasSuffix(strings.ToLower(normalized), ".exe") {
-				return hostBuildOptions{}, fmt.Errorf("experimental build-host output must end with .exe")
+				return fmt.Errorf("experimental build-host output must end with .exe")
 			}
 			options.output = normalized
 		}
-		index += 2
+		return nil
+	})
+	if err != nil {
+		return hostBuildOptions{}, err
 	}
-	for _, flag := range []string{"--profile", "--output"} {
-		if !seen[flag] {
-			return hostBuildOptions{}, fmt.Errorf("experimental command \"build-host\" requires %s", flag)
-		}
-	}
+
 	return options, nil
 }
