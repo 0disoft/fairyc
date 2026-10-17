@@ -20,7 +20,7 @@ func displayResultType(module string, value hir.Type) string {
 	if ok {
 		return "Result<" + displayResultType(module, success) + ", " + displayResultType(module, failure) + ">"
 	}
-	return strings.TrimPrefix(string(value), module+"::")
+	return strings.TrimPrefix(value.String(), module+"::")
 }
 
 func (c *typeChecker) checkPropagate(expression *ast.Expression, result *hir.Expression) hir.Type {

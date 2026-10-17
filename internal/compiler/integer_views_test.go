@@ -62,7 +62,7 @@ func TestIntegerViewArtifactExecution(t *testing.T) {
 			"wrong bound type":         {mir.OperationViewIndex, func(op *mir.Operation) { op.Operands[1] = mir.Operand{Kind: mir.OperandI64, I64: 0} }},
 			"missing slice guard":      {mir.OperationViewSliceCheck, func(op *mir.Operation) { op.Kind = mir.OperationUse; op.Symbol = hir.SymbolID(op.Operands[0].Local) }},
 		} {
-			t.Run(string(element)+"/"+name, func(t *testing.T) {
+			t.Run(element.String()+"/"+name, func(t *testing.T) {
 				program, err := mircodec.Decode(encoded, 1<<20)
 				if err != nil {
 					t.Fatal(err)

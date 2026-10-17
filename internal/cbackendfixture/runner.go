@@ -166,7 +166,7 @@ func runCase(manifestDirectory string, fixture caseDefinition, emitted *EmittedC
 
 func dropEventHasSite(event interpreter.DropEvent, sites []cbackend.DropSite) bool {
 	for _, site := range sites {
-		if site.ResourceType == string(event.ResourceType) && site.Package == event.Binding.Package && site.Source == event.Binding.Source &&
+		if site.ResourceType == event.ResourceType.String() && site.Package == event.Binding.Package && site.Source == event.Binding.Source &&
 			site.StartByte == event.Binding.StartByte && site.EndByte == event.Binding.EndByte {
 			return true
 		}

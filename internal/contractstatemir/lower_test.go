@@ -167,16 +167,16 @@ func TestLowerHIRTransactionsRejectsBoundaryDrift(t *testing.T) {
 			input.Modules[0].Functions[0].Locals = []hir.Local{{Type: hir.RawPointer(hir.TypeU8, false)}}
 		}, contains: "raw-pointer types are not admitted"},
 		{name: "aggregate-nested raw-pointer owner parameter", mutate: func(input *hir.Package) {
-			wrapperType := hir.Type("ledger::RawEnvelope")
+			wrapperType := hir.ParseType("ledger::RawEnvelope")
 			input.Modules[0].Structs = []hir.Struct{{Type: wrapperType, Fields: []hir.StructField{{Type: hir.RawPointer(hir.TypeU8, true)}}}}
 			input.Modules[0].Functions[0].Parameters = []hir.Parameter{{Type: wrapperType}}
 		}, contains: "raw-pointer types are not admitted"},
 		{name: "receiver-bound owner", mutate: func(input *hir.Package) {
-			input.Modules[0].Functions[0].OwnerType = hir.Type("ledger::Counter")
+			input.Modules[0].Functions[0].OwnerType = hir.ParseType("ledger::Counter")
 			input.Modules[0].Functions[0].Receiver = "shared"
 		}, contains: "receiver-bound owners are not admitted"},
 		{name: "drop-glue owner", mutate: func(input *hir.Package) {
-			input.Modules[0].Functions[0].DropGlueFor = hir.Type("ledger::Handle")
+			input.Modules[0].Functions[0].DropGlueFor = hir.ParseType("ledger::Handle")
 		}, contains: "drop-glue owners are not admitted"},
 		{name: "owner checked arithmetic", mutate: func(input *hir.Package) {
 			input.Modules[0].Functions[0].Body.Tail = &hir.Expression{Kind: hir.ExpressionBinary, Operator: "+"}
@@ -188,7 +188,7 @@ func TestLowerHIRTransactionsRejectsBoundaryDrift(t *testing.T) {
 			input.Modules[0].Functions[0].Body.Statements = []hir.Statement{{Kind: hir.StatementAssignment, Operator: "+="}}
 		}, contains: "potentially trapping operations are not admitted"},
 		{name: "owner owned resource parameter", mutate: func(input *hir.Package) {
-			resourceType := hir.Type("ledger::Handle")
+			resourceType := hir.ParseType("ledger::Handle")
 			input.Modules[0].Resources = []hir.Resource{{Type: resourceType, DropKind: hir.ResourceDropEmpty}}
 			input.Modules[0].Functions[0].Parameters = []hir.Parameter{{Type: resourceType}}
 		}, contains: "owned resource values are not admitted"},
@@ -247,7 +247,7 @@ func TestLowerHIRTransactionsRejectsBoundaryDrift(t *testing.T) {
 
 func TestLowerHIRTransactionsPreservesSafeBorrowAndResourceNamespaces(t *testing.T) {
 	input := baseHIRTransaction()
-	resourceType := hir.Type("ledger::Handle")
+	resourceType := hir.ParseType("ledger::Handle")
 	input.Modules[0].Resources = []hir.Resource{{Type: resourceType, DropKind: hir.ResourceDropEmpty, Fields: []hir.ResourceField{{Type: hir.TypeU32}}}}
 	input.Modules[0].Functions[0].Parameters = []hir.Parameter{
 		{Type: hir.SharedBorrow(hir.TypeI32)},

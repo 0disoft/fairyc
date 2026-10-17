@@ -1213,7 +1213,7 @@ fn i32 main() { return unsafe { consume_%[1]s(make_%[1]s()) }; }
 func TestEmitKeepsCScalarPointersOutsideByValueTransportSlice(t *testing.T) {
 	t.Parallel()
 	for _, cScalar := range hir.CScalarTypes() {
-		typeRef := string(cScalar)
+		typeRef := cScalar.String()
 		t.Run(typeRef, func(t *testing.T) {
 			program := lowerSource(t, "module main;\nunsafe extern C fn i32 consume_pointer(ptr "+typeRef+" value);\nfn i32 main() { return unsafe { consume_pointer(null) }; }\n")
 			_, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())

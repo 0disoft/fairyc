@@ -16,7 +16,7 @@ func fieldStoreLocalTypes(function *Function, functions map[hir.SymbolID]*Functi
 	types := make(map[LocalID]hir.Type)
 	conflicted := false
 	set := func(local LocalID, typ hir.Type) bool {
-		if local < 0 || typ == "" || typ == hir.TypeInvalid {
+		if local < 0 || typ == hir.ParseType("") || typ == hir.TypeInvalid {
 			return false
 		}
 		if previous, exists := types[local]; exists {

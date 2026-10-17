@@ -54,13 +54,13 @@ func assertAggregateCacheOrigins(t *testing.T, result compiler.Result) {
 			}
 		case genericsource.OriginStruct:
 			for _, value := range result.MIR.StructTypes {
-				if value.Type == hir.Type(qualified) {
+				if value.Type == hir.ParseType(qualified) {
 					matches++
 				}
 			}
 		case genericsource.OriginResource:
 			for _, value := range result.MIR.ResourceTypes {
-				if value.Type == hir.Type(qualified) {
+				if value.Type == hir.ParseType(qualified) {
 					matches++
 				}
 			}

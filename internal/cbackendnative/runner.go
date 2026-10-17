@@ -2762,7 +2762,7 @@ func expectedDropSiteIDs(fixture cbackendfixture.EmittedCase) ([]uint32, error) 
 	for _, event := range fixture.DropTrace {
 		found := false
 		for _, site := range fixture.TraceUnit.DropSites {
-			if site.ResourceType != string(event.ResourceType) || site.Package != event.Binding.Package || site.Source != event.Binding.Source ||
+			if site.ResourceType != event.ResourceType.String() || site.Package != event.Binding.Package || site.Source != event.Binding.Source ||
 				site.StartByte != event.Binding.StartByte || site.EndByte != event.Binding.EndByte {
 				continue
 			}

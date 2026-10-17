@@ -463,7 +463,7 @@ func (c *typeChecker) checkBlock(block *ast.Block, expectedTail hir.Type) (hir.B
 			if hirStatement.Operator != "=" {
 				validPlace := target != nil && (target.Kind == hir.ExpressionPath || target.Kind == hir.ExpressionArrayIndex || target.Kind == hir.ExpressionViewIndex || target.Kind == hir.ExpressionFieldExpression || derefAssignmentTarget(statement.Target))
 				if !validPlace || !hir.CompoundAssignmentType(hirStatement.Operator, targetType) {
-					c.analyzer.addUnsupported(c.module.file.Path, statement.Span, "compound assignment "+hirStatement.Operator+" on "+string(targetType))
+					c.analyzer.addUnsupported(c.module.file.Path, statement.Span, "compound assignment "+hirStatement.Operator+" on "+targetType.String())
 				}
 			}
 		case statement.Kind == syntax.KindAssert:
@@ -808,7 +808,7 @@ func (c *typeChecker) checkArray(expression *ast.Expression, result *hir.Express
 		return hir.TypeInvalid
 	}
 	if !hir.FixedArrayScalarElement(elementType) && !c.analyzer.plainViewStruct(elementType) {
-		c.analyzer.addUnsupported(c.module.file.Path, expression.Span, "fixed-array element type "+string(elementType))
+		c.analyzer.addUnsupported(c.module.file.Path, expression.Span, "fixed-array element type "+elementType.String())
 		return hir.TypeInvalid
 	}
 	length := uint64(len(expression.Children))
@@ -1335,7 +1335,7 @@ func (c *typeChecker) checkPrefix(expression *ast.Expression, result *hir.Expres
 		return hir.TypeI32
 	case "~":
 		if childType != hir.TypeInvalid && !hir.BitwiseNotType(childType) {
-			c.analyzer.addUnsupported(c.module.file.Path, expression.Span, "bitwise not on "+string(childType))
+			c.analyzer.addUnsupported(c.module.file.Path, expression.Span, "bitwise not on "+childType.String())
 		}
 		return childType
 	case "&":
@@ -1454,7 +1454,7 @@ func (c *typeChecker) checkBinary(expression *ast.Expression, result *hir.Expres
 			c.analyzer.addDiagnostic("E1006", span(c.module.file.Path, expression.Children[1].Span))
 		} else if leftType != hir.TypeInvalid && !hir.ScalarEqualityType(leftType) {
 			if _, _, pointer := hir.RawPointerElement(leftType); !pointer {
-				c.analyzer.addUnsupported(c.module.file.Path, expression.Span, "equality comparison on "+string(leftType))
+				c.analyzer.addUnsupported(c.module.file.Path, expression.Span, "equality comparison on "+leftType.String())
 			}
 		}
 		return hir.TypeBool
@@ -1462,7 +1462,7 @@ func (c *typeChecker) checkBinary(expression *ast.Expression, result *hir.Expres
 		if leftType != hir.TypeInvalid && rightType != hir.TypeInvalid && leftType != rightType {
 			c.analyzer.addDiagnostic("E1006", span(c.module.file.Path, expression.Children[1].Span))
 		} else if leftType != hir.TypeInvalid && !hir.ScalarOrderedType(leftType) {
-			c.analyzer.addUnsupported(c.module.file.Path, expression.Span, "ordered comparison on "+string(leftType))
+			c.analyzer.addUnsupported(c.module.file.Path, expression.Span, "ordered comparison on "+leftType.String())
 		}
 		return hir.TypeBool
 	case "<<":
@@ -1471,7 +1471,7 @@ func (c *typeChecker) checkBinary(expression *ast.Expression, result *hir.Expres
 			return leftType
 		}
 		if leftType != hir.TypeInvalid && !hir.CheckedShiftType(leftType) {
-			c.analyzer.addUnsupported(c.module.file.Path, expression.Span, "checked left shift on "+string(leftType))
+			c.analyzer.addUnsupported(c.module.file.Path, expression.Span, "checked left shift on "+leftType.String())
 		}
 		return leftType
 	case "+", "-", "*":
@@ -1480,7 +1480,7 @@ func (c *typeChecker) checkBinary(expression *ast.Expression, result *hir.Expres
 			return leftType
 		}
 		if leftType != hir.TypeInvalid && !hir.CheckedArithmeticType(leftType) {
-			c.analyzer.addUnsupported(c.module.file.Path, expression.Span, "checked arithmetic on "+string(leftType))
+			c.analyzer.addUnsupported(c.module.file.Path, expression.Span, "checked arithmetic on "+leftType.String())
 		}
 		return leftType
 	case "/", "%":
@@ -1489,7 +1489,7 @@ func (c *typeChecker) checkBinary(expression *ast.Expression, result *hir.Expres
 			return leftType
 		}
 		if leftType != hir.TypeInvalid && !hir.CheckedDivisionType(leftType) {
-			c.analyzer.addUnsupported(c.module.file.Path, expression.Span, "checked division on "+string(leftType))
+			c.analyzer.addUnsupported(c.module.file.Path, expression.Span, "checked division on "+leftType.String())
 		}
 		return leftType
 	case ">>":
@@ -1498,7 +1498,7 @@ func (c *typeChecker) checkBinary(expression *ast.Expression, result *hir.Expres
 			return leftType
 		}
 		if leftType != hir.TypeInvalid && !hir.CheckedShiftType(leftType) {
-			c.analyzer.addUnsupported(c.module.file.Path, expression.Span, "checked right shift on "+string(leftType))
+			c.analyzer.addUnsupported(c.module.file.Path, expression.Span, "checked right shift on "+leftType.String())
 		}
 		return leftType
 	case "&", "^", "|":
@@ -1507,7 +1507,7 @@ func (c *typeChecker) checkBinary(expression *ast.Expression, result *hir.Expres
 			return leftType
 		}
 		if leftType != hir.TypeInvalid && !hir.BitwiseIntegerType(leftType) {
-			c.analyzer.addUnsupported(c.module.file.Path, expression.Span, "bitwise operation on "+string(leftType))
+			c.analyzer.addUnsupported(c.module.file.Path, expression.Span, "bitwise operation on "+leftType.String())
 		}
 		return leftType
 	default:

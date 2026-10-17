@@ -18,7 +18,7 @@ func validStoragePutShape(op Operation) bool {
 		op.Operands[0].Local >= 0 && op.Operands[1].Local >= 0 && op.Operands[0].Local != op.Operands[1].Local &&
 		len(op.Fields) == 0 && len(op.TrapCategories) == 0 && op.Operator == "" &&
 		op.Destination == "" && op.ProjectionEntity == "" && op.DropFlagEntity == "" &&
-		op.IndexType == "" && op.Field == "" && op.Variant == "" &&
+		op.IndexType == hir.ParseType("") && op.Field == "" && op.Variant == "" &&
 		!op.MovePayload && !op.FlagClearedFirst && op.SourceForm == "" && op.ExitKind == ""
 }
 

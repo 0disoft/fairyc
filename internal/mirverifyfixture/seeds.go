@@ -16,8 +16,8 @@ const (
 )
 
 var (
-	seedArenaType      = hir.Type("seed::Arena")
-	seedAllocErrorType = hir.Type("seed::AllocError")
+	seedArenaType      = hir.ParseType("seed::Arena")
+	seedAllocErrorType = hir.ParseType("seed::AllocError")
 )
 
 func constructSeed(id string) (mir.Program, error) {
@@ -29,13 +29,13 @@ func constructSeed(id string) (mir.Program, error) {
 	case "resource-return":
 		function = resourceReturnSeed()
 		resourceTypes = []mir.ResourceType{{
-			Type: hir.Type("seed::Token"), Entity: "resource-type:seed-token",
+			Type: hir.ParseType("seed::Token"), Entity: "resource-type:seed-token",
 			Fields: []mir.ResourceField{{Name: "value", Type: hir.TypeI32}}, DropKind: hir.ResourceDropEmpty, DropSymbol: hir.NoSymbol,
 		}}
 	case "resource-burn":
 		function = resourceBurnSeed()
 		resourceTypes = []mir.ResourceType{{
-			Type: hir.Type("seed::Token"), Entity: "resource-type:seed-token",
+			Type: hir.ParseType("seed::Token"), Entity: "resource-type:seed-token",
 			Fields: []mir.ResourceField{{Name: "value", Type: hir.TypeI32}}, DropKind: hir.ResourceDropEmpty, DropSymbol: hir.NoSymbol,
 		}}
 	case "borrow-return":
@@ -70,12 +70,12 @@ func resourceBurnSeed() mir.Function {
 		Entities: []string{
 			"local:token", "operation:burn-token", "resource-type:seed-token", "terminator:return",
 		},
-		Resources: []mir.ResourceLocal{{Symbol: tokenSymbol, Type: hir.Type("seed::Token"), Parameter: true, Entity: "local:token"}},
+		Resources: []mir.ResourceLocal{{Symbol: tokenSymbol, Type: hir.ParseType("seed::Token"), Parameter: true, Entity: "local:token"}},
 		Blocks: []mir.Block{{
 			ID: 0,
 			Operations: []mir.Operation{{
 				Kind: mir.OperationBurn, Entity: "operation:burn-token", Symbol: tokenSymbol,
-				DestinationLocal: mir.NoLocal, Type: hir.Type("seed::Token"),
+				DestinationLocal: mir.NoLocal, Type: hir.ParseType("seed::Token"),
 			}},
 			Terminator: mir.Terminator{Kind: mir.TerminatorReturn, Entity: "terminator:return", UnwindSuccessor: mir.NoBlock},
 		}},
@@ -119,7 +119,7 @@ func resourceReturnSeed() mir.Function {
 			"resource-type:seed-token",
 			"statement:clear-token-flag", "statement:drop-token", "statement:init-token-flag", "terminator:return",
 		},
-		Resources: []mir.ResourceLocal{{Symbol: tokenSymbol, Type: hir.Type("seed::Token"), Parameter: true, Entity: "local:token"}},
+		Resources: []mir.ResourceLocal{{Symbol: tokenSymbol, Type: hir.ParseType("seed::Token"), Parameter: true, Entity: "local:token"}},
 		DropFlags: []mir.DropFlag{{Entity: "flag:token-live", Symbol: tokenSymbol}},
 		Blocks: []mir.Block{
 			{

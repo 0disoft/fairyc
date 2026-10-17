@@ -7,8 +7,8 @@ import (
 )
 
 func TestInlineNominalArrayFieldBorrowGuard(t *testing.T) {
-	token := hir.Type("main::Token")
-	owner := hir.Type("main::Owner")
+	token := hir.ParseType("main::Token")
+	owner := hir.ParseType("main::Owner")
 	nominal := hir.FixedArray(token, 2)
 	scalar := hir.FixedArray(hir.TypeI64, 2)
 	lookup := func(typ hir.Type) *StructType {
@@ -25,7 +25,7 @@ func TestInlineNominalArrayFieldBorrowGuard(t *testing.T) {
 		if !validMutableFieldBorrow(Operation{OwnerType: borrow(owner), Type: borrow(nominal)}, lookup) {
 			t.Fatal("valid nominal array field address rejected")
 		}
-		for _, invalid := range []hir.Type{hir.FixedArray(hir.Type("main::Missing"), 2), hir.FixedArray(token, 4097)} {
+		for _, invalid := range []hir.Type{hir.FixedArray(hir.ParseType("main::Missing"), 2), hir.FixedArray(token, 4097)} {
 			if validMutableFieldBorrow(Operation{OwnerType: borrow(owner), Type: borrow(invalid)}, lookup) {
 				t.Fatal("invalid nominal array address admitted")
 			}

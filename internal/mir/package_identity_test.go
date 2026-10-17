@@ -52,7 +52,7 @@ func TestLowerPreservesBuildLocalPackageIdentity(t *testing.T) {
 	for _, structure := range program.StructTypes {
 		structTypes = append(structTypes, structure.Type)
 	}
-	wantStructTypes := []hir.Type{"$p3::util::Token", "$p4::util::Token"}
+	wantStructTypes := []hir.Type{hir.ParseType("$p3::util::Token"), hir.ParseType("$p4::util::Token")}
 	if !slices.Equal(structTypes, wantStructTypes) {
 		t.Fatalf("Lower() struct types = %v, want %v", structTypes, wantStructTypes)
 	}

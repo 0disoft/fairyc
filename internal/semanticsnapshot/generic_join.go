@@ -57,7 +57,7 @@ func joinGenericImplementations(provenance compiler.GenericProvenance, originals
 			if index < 0 || bound[index] {
 				return nil, nil, fmt.Errorf("specialization binding does not match an original parameter")
 			}
-			argument, err := normalizeType(hir.Type(binding.Type), metadata)
+			argument, err := normalizeType(hir.ParseType(string(binding.Type)), metadata)
 			if err != nil || argument.Kind != TypeBuiltin {
 				return nil, nil, fmt.Errorf("specialization argument has no admitted concrete type")
 			}

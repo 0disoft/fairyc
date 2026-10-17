@@ -97,7 +97,7 @@ func TestPackageArtifactReassemblyRejectsMissingProviderAndContextDrift(t *testi
 	drifted := cloneArtifactsForTest(artifacts)
 	driftIndex := 1
 	drifted[driftIndex].Context.StructTypes = append(drifted[driftIndex].Context.StructTypes, mir.StructType{
-		Type: hir.Type(hir.QualifiedModulePath(drifted[driftIndex].PackageID, "drift") + "::Type"),
+		Type: hir.ParseType(hir.QualifiedModulePath(drifted[driftIndex].PackageID, "drift") + "::Type"),
 		Name: "Type", Span: hir.Span{Package: drifted[driftIndex].PackageID}, Entity: "struct-type:drift-type",
 	})
 	drifted[driftIndex].StableContext, err = DescribeContext(

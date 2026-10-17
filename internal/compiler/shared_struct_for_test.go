@@ -96,7 +96,7 @@ func TestSharedStructForMIR(t *testing.T) {
 							element, _, _ := hir.BorrowElement(op.Type)
 							op.Type = hir.MutableBorrow(element)
 						} else {
-							op.Type = hir.SharedBorrow(hir.Type(hir.QualifiedModulePath(1, "main") + "::Other"))
+							op.Type = hir.SharedBorrow(hir.ParseType(hir.QualifiedModulePath(1, "main") + "::Other"))
 						}
 					}
 				}

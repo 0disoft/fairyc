@@ -12,11 +12,11 @@ import (
 
 func TestMutableStructViewCopiesAndBounds(t *testing.T) {
 	child := copyTestStruct(t)
-	token, err := structValue(&mir.StructType{Type: "main::Token", Fields: []mir.StructField{{Name: "nested", Type: child.typ}}}, []runtimeValue{child})
+	token, err := structValue(&mir.StructType{Type: hir.ParseType("main::Token"), Fields: []mir.StructField{{Name: "nested", Type: child.typ}}}, []runtimeValue{child})
 	if err != nil {
 		t.Fatal(err)
 	}
-	typ := hir.MutableBorrow(hir.Type("[main::Token]"))
+	typ := hir.MutableBorrow(hir.ParseType("[main::Token]"))
 	backing := &arrayState{elements: []runtimeValue{token.cloneForValueCopy(), token.cloneForValueCopy()}}
 	view := runtimeValue{kind: valueView, typ: typ, view: &indexedViewState{array: backing, length: 2, mutable: true}}
 	if err := view.storeIndexed(0, token); err != nil {
@@ -50,12 +50,12 @@ func TestMutableStructViewCopiesAndBounds(t *testing.T) {
 		}
 	}
 	wrong := token
-	wrong.typ = "main::Other"
+	wrong.typ = hir.ParseType("main::Other")
 	if err := view.storeIndexed(0, wrong); err == nil {
 		t.Fatal("wrong nominal accepted")
 	}
 	shared := view
-	shared.typ = hir.SharedBorrow(hir.Type("[main::Token]"))
+	shared.typ = hir.SharedBorrow(hir.ParseType("[main::Token]"))
 	if err := shared.storeIndexed(0, token); err == nil {
 		t.Fatal("shared store accepted")
 	}
@@ -63,7 +63,7 @@ func TestMutableStructViewCopiesAndBounds(t *testing.T) {
 
 func TestIndexedStructFieldReference(t *testing.T) {
 	token := copyTestStruct(t)
-	typ := hir.MutableBorrow(hir.Type("[" + string(token.typ) + "]"))
+	typ := hir.MutableBorrow(hir.Slice(token.typ))
 	backing := &arrayState{elements: []runtimeValue{token.cloneForValueCopy()}}
 	view := runtimeValue{kind: valueView, typ: typ, view: &indexedViewState{array: backing, length: 1, mutable: true}}
 	borrowed, err := view.borrowStructElement(0, hir.MutableBorrow(token.typ))
@@ -85,7 +85,7 @@ func TestIndexedStructFieldReference(t *testing.T) {
 		}
 	}
 	shared := view
-	shared.typ = hir.SharedBorrow(hir.Type("[" + string(token.typ) + "]"))
+	shared.typ = hir.SharedBorrow(hir.Slice(token.typ))
 	if _, err := shared.borrowStructElement(0, hir.MutableBorrow(token.typ)); err == nil {
 		t.Fatal("shared owner became exclusive")
 	}
@@ -120,7 +120,7 @@ func TestMutableStructForInterpreter(t *testing.T) {
 		d := &program.StructTypes[i]
 		r.structTypes[d.Type] = d
 	}
-	definition := r.structTypes["main::Token"]
+	definition := r.structTypes[hir.ParseType("main::Token")]
 	for _, values := range [][]int32{{}, {1, 2, 3, 4}} {
 		backing := &arrayState{}
 		for _, v := range values {
@@ -130,7 +130,7 @@ func TestMutableStructForInterpreter(t *testing.T) {
 			}
 			backing.elements = append(backing.elements, token)
 		}
-		typ := hir.MutableBorrow(hir.Type("[main::Token]"))
+		typ := hir.MutableBorrow(hir.ParseType("[main::Token]"))
 		view := runtimeValue{kind: valueView, typ: typ, view: &indexedViewState{array: backing, length: uint64(len(values)), mutable: true}}
 		completion, e := r.call(r.byName["main::edit"], []runtimeValue{view}, 0)
 		if e != nil || completion.trapCategory != "" {

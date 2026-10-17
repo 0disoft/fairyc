@@ -95,7 +95,7 @@ func scalarStoreValueMatches(value runtimeValue, typ hir.Type) bool {
 	if typ == hir.TypeI64 {
 		return comparisonRuntimeMatches(value, typ)
 	}
-	return typ == hir.TypeI32 && value.kind == valueI32 && (value.typ == "" || value.typ == hir.TypeI32) ||
+	return typ == hir.TypeI32 && value.kind == valueI32 && (value.typ == hir.ParseType("") || value.typ == hir.TypeI32) ||
 		typ == hir.TypeBool && value.kind == valueI32 && value.typ == hir.TypeBool && (value.i32 == 0 || value.i32 == 1) ||
 		typ == hir.TypeUSize && value.kind == valueUSize && value.typ == hir.TypeUSize ||
 		typ == hir.TypeU8 && value.kind == valueU8 && value.typ == hir.TypeU8 && value.u64 <= 255 ||

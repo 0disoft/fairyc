@@ -58,7 +58,7 @@ func TestByteForRegionResetOnContinueAndBreak(t *testing.T) {
 	} {
 		drop := outcome.DropTrace[index]
 		start := strings.Index(byteForRegionSource, expected.binding+" =")
-		if start < 0 || string(drop.ResourceType) != expected.resourceType || drop.Binding.Source != "std/alloc.fy" || drop.Binding.StartByte != start {
+		if start < 0 || drop.ResourceType.String() != expected.resourceType || drop.Binding.Source != "std/alloc.fy" || drop.Binding.StartByte != start {
 			t.Fatalf("drop %d: %+v", index, outcome.DropTrace[index])
 		}
 	}

@@ -60,14 +60,14 @@ func scannerMIROperandShapes(program mir.Program, name string, specializations m
 		}
 		for _, block := range function.Blocks {
 			for _, operation := range block.Operations {
-				typeName, err := scannerMIRCanonicalType(string(operation.Type), specializations)
+				typeName, err := scannerMIRCanonicalType(operation.Type.String(), specializations)
 				if err != nil {
 					return nil, err
 				}
 				key := fmt.Sprintf("%s type=%s operator=%s field=%s", operation.Kind, typeName,
 					operation.Operator, operation.Field)
 				for _, operand := range operation.Operands {
-					typeName, err := scannerMIRCanonicalType(string(operand.Type), specializations)
+					typeName, err := scannerMIRCanonicalType(operand.Type.String(), specializations)
 					if err != nil {
 						return nil, err
 					}

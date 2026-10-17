@@ -69,7 +69,7 @@ func TestAssertCheckedAddressedLocalInvalidation(t *testing.T) {
 }
 
 func TestAssertCheckedPureReturnBoundary(t *testing.T) {
-	f := mir.Function{Symbol: 1, Parameters: []mir.LocalID{1}, ParameterTypes: []hir.Type{hir.Type("&i64")}, ResultType: hir.Type("&i64"), Blocks: []mir.Block{{Terminator: mir.Terminator{Kind: mir.TerminatorReturn, ReturnValue: mir.Operand{Kind: mir.OperandLocal, Local: 1}, UnwindSuccessor: mir.NoBlock}}}}
+	f := mir.Function{Symbol: 1, Parameters: []mir.LocalID{1}, ParameterTypes: []hir.Type{hir.ParseType("&i64")}, ResultType: hir.ParseType("&i64"), Blocks: []mir.Block{{Terminator: mir.Terminator{Kind: mir.TerminatorReturn, ReturnValue: mir.Operand{Kind: mir.OperandLocal, Local: 1}, UnwindSuccessor: mir.NoBlock}}}}
 	if len(pureFieldReturns([]mir.Function{f})) != 1 {
 		t.Fatal("identity reference helper not recognized")
 	}

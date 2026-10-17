@@ -28,7 +28,7 @@ func buildGenericCleanupSummaries(result compiler.Result, implementations map[De
 	keys := map[DeclarationKey]DeclarationKey{}
 	selected := map[hir.SymbolID]bool{}
 	for _, function := range result.MIR.Functions {
-		if function.DropGlueFor == "" {
+		if function.DropGlueFor == hir.ParseType("") {
 			continue
 		}
 		typ, err := normalizeType(function.DropGlueFor, metadata)
@@ -55,7 +55,7 @@ func buildGenericCleanupSummaries(result compiler.Result, implementations map[De
 		keys[key], bounds[key], symbols[function.Symbol], selected[function.Symbol] = owner, span, key, true
 		// Only the summary view treats this verified private body as a function.
 		// Neither source declarations nor the executable MIR are changed.
-		function.DropGlueFor = ""
+		function.DropGlueFor = hir.ParseType("")
 		program.Functions = append(program.Functions, function)
 	}
 	var ordinary, cleanup []semantic.BorrowFact

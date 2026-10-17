@@ -25,7 +25,7 @@ func validStorageQueryShape(op Operation) bool {
 		(op.Field == "size" || op.Field == "alignment") && len(op.Operands) == 0 &&
 		len(op.Fields) == 0 && len(op.TrapCategories) == 0 && op.Operator == "" &&
 		op.Destination == "" && op.ProjectionEntity == "" && op.DropFlagEntity == "" &&
-		op.IndexType == "" && op.Variant == "" && !op.MovePayload && !op.FlagClearedFirst &&
+		op.IndexType == hir.ParseType("") && op.Variant == "" && !op.MovePayload && !op.FlagClearedFirst &&
 		op.UnsafeScope == (hir.Span{}) && op.SourceForm == "" && op.ExitKind == ""
 }
 

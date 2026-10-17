@@ -392,7 +392,7 @@ func resourceTypeEntity(value hir.Type) string {
 func aggregateTypeEntity(prefix string, value hir.Type) string {
 	var name strings.Builder
 	separator := false
-	for _, value := range strings.ToLower(string(value)) {
+	for _, value := range strings.ToLower(value.String()) {
 		if value >= 'a' && value <= 'z' || value >= '0' && value <= '9' {
 			if separator && name.Len() > 0 {
 				name.WriteByte('-')

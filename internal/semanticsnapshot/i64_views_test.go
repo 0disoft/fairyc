@@ -15,7 +15,7 @@ func TestBuildI64ViewDeclaration(t *testing.T) {
 		t.Fatal(err)
 	}
 	tail := findDeclaration(t, snapshot.Declarations(), semanticsnapshot.DeclarationFunction, "tail")
-	if len(tail.Parameters) != 1 || tail.Parameters[0].Type.Kind != semanticsnapshot.TypeBorrow || tail.Parameters[0].Type.Mutable || len(tail.Parameters[0].Type.Arguments) != 1 || tail.Parameters[0].Type.Arguments[0].Name != string(hir.TypeI64Slice) {
+	if len(tail.Parameters) != 1 || tail.Parameters[0].Type.Kind != semanticsnapshot.TypeBorrow || tail.Parameters[0].Type.Mutable || len(tail.Parameters[0].Type.Arguments) != 1 || tail.Parameters[0].Type.Arguments[0].Name != hir.TypeI64Slice.String() {
 		t.Fatalf("wrong typed-view declaration: %+v", tail)
 	}
 }

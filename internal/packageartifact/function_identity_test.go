@@ -53,15 +53,15 @@ func TestFunctionIdentityIsStableAcrossBuildLocalPackageNumbers(t *testing.T) {
 	dependency := testCoordinateID(t, "dependency")
 	left := mir.Function{
 		Name: "$p1::api::Reader::read", Span: hir.Span{Package: 1},
-		ParameterTypes: []hir.Type{hir.SharedBorrow("$p1::api::Reader")},
-		ResultType:     hir.Result("$p2::model::Packet", hir.TypeI32),
+		ParameterTypes: []hir.Type{hir.SharedBorrow(hir.ParseType("$p1::api::Reader"))},
+		ResultType:     hir.Result(hir.ParseType("$p2::model::Packet"), hir.TypeI32),
 		Effects:        []hir.Effect{hir.EffectFilesystem},
 	}
 	right := left
 	right.Name = "$p7::api::Reader::read"
 	right.Span.Package = 7
-	right.ParameterTypes = []hir.Type{hir.SharedBorrow("$p7::api::Reader")}
-	right.ResultType = hir.Result("$p9::model::Packet", hir.TypeI32)
+	right.ParameterTypes = []hir.Type{hir.SharedBorrow(hir.ParseType("$p7::api::Reader"))}
+	right.ResultType = hir.Result(hir.ParseType("$p9::model::Packet"), hir.TypeI32)
 
 	leftDescriptor, err := DescribeFunction(left, map[hir.PackageID]packagegraph.CoordinateID{1: owner, 2: dependency})
 	if err != nil {
@@ -108,24 +108,24 @@ func TestStableTypeRebindsAcrossFreshPackageNumbers(t *testing.T) {
 	leftInstances := map[hir.PackageID]packagegraph.CoordinateID{1: owner, 2: dependency}
 	rightInstances := map[hir.PackageID]packagegraph.CoordinateID{7: owner, 9: dependency}
 	types := []hir.Type{
-		hir.SharedBorrow("[$p2::model::Packet]"),
-		hir.Option(hir.SharedBorrow("[$p1::api::Reader]")),
+		hir.SharedBorrow(hir.ParseType("[$p2::model::Packet]")),
+		hir.Option(hir.SharedBorrow(hir.ParseType("[$p1::api::Reader]"))),
 		hir.TypeI32,
-		hir.SharedBorrow("$p1::api::Reader"),
-		hir.MutableBorrow(hir.Option("$p2::model::Packet")),
-		hir.RawPointer("$p2::model::Packet", true),
+		hir.SharedBorrow(hir.ParseType("$p1::api::Reader")),
+		hir.MutableBorrow(hir.Option(hir.ParseType("$p2::model::Packet"))),
+		hir.RawPointer(hir.ParseType("$p2::model::Packet"), true),
 		hir.FixedArray(hir.TypeU8, 32),
-		hir.Result(hir.Option("$p2::model::Packet"), hir.SharedBorrow("$p1::api::Reader")),
+		hir.Result(hir.Option(hir.ParseType("$p2::model::Packet")), hir.SharedBorrow(hir.ParseType("$p1::api::Reader"))),
 	}
 	want := []hir.Type{
-		hir.SharedBorrow("[$p9::model::Packet]"),
-		hir.Option(hir.SharedBorrow("[$p7::api::Reader]")),
+		hir.SharedBorrow(hir.ParseType("[$p9::model::Packet]")),
+		hir.Option(hir.SharedBorrow(hir.ParseType("[$p7::api::Reader]"))),
 		hir.TypeI32,
-		hir.SharedBorrow("$p7::api::Reader"),
-		hir.MutableBorrow(hir.Option("$p9::model::Packet")),
-		hir.RawPointer("$p9::model::Packet", true),
+		hir.SharedBorrow(hir.ParseType("$p7::api::Reader")),
+		hir.MutableBorrow(hir.Option(hir.ParseType("$p9::model::Packet"))),
+		hir.RawPointer(hir.ParseType("$p9::model::Packet"), true),
 		hir.FixedArray(hir.TypeU8, 32),
-		hir.Result(hir.Option("$p9::model::Packet"), hir.SharedBorrow("$p7::api::Reader")),
+		hir.Result(hir.Option(hir.ParseType("$p9::model::Packet")), hir.SharedBorrow(hir.ParseType("$p7::api::Reader"))),
 	}
 	for index, sourceType := range types {
 		stable, err := stableType(sourceType, leftInstances)
@@ -165,7 +165,7 @@ func TestFunctionIdentityRejectsIncompleteOrBuildLocalInputs(t *testing.T) {
 	if _, err := DescribeFunction(mir.Function{Name: "$p2::api::read", Span: hir.Span{Package: 1}, ResultType: hir.TypeVoid}, map[hir.PackageID]packagegraph.CoordinateID{1: owner}); err == nil {
 		t.Fatal("DescribeFunction accepted mismatched function owner prefix")
 	}
-	if _, err := DescribeFunction(mir.Function{Name: "$p1::api::read", Span: hir.Span{Package: 1}, ParameterTypes: []hir.Type{"$p2::dep::Token"}, ResultType: hir.TypeVoid}, map[hir.PackageID]packagegraph.CoordinateID{1: owner}); err == nil {
+	if _, err := DescribeFunction(mir.Function{Name: "$p1::api::read", Span: hir.Span{Package: 1}, ParameterTypes: []hir.Type{hir.ParseType("$p2::dep::Token")}, ResultType: hir.TypeVoid}, map[hir.PackageID]packagegraph.CoordinateID{1: owner}); err == nil {
 		t.Fatal("DescribeFunction accepted an unmapped nominal type")
 	}
 	if _, err := ComputeFunctionID(FunctionDescriptor{Package: owner, Name: "$p1::api::read", ResultType: "void"}); err == nil {

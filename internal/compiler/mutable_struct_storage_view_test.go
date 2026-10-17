@@ -15,7 +15,7 @@ func mutableStructStorageSource() string {
 	return strings.Replace(source, "if(values.len > 0) {let Token copy = values[0]; assert(copy.active);}", `if(values.len > 0) {let Other other=Other{.kind=1,.offset=1,.value=1,.active=false};values[0]=Token{.kind=2,.offset=3,.value=4000000000,.active=true};let Token copy=values[0];assert(copy.active);}`, 1)
 }
 func TestMutableStructStorageViewMIR(t *testing.T) {
-	slice := hir.Type("[" + hir.QualifiedModulePath(1, "main") + "::Token]")
+	slice := hir.ParseType("[" + hir.QualifiedModulePath(1, "main") + "::Token]")
 	checkStorageViewMIR(t, mutableStructStorageSource(), true, slice)
 	analysis, err := analyzeStorageBorrow(t, mutableStructStorageSource())
 	if err != nil {
@@ -55,7 +55,7 @@ func TestMutableStructStorageViewMIR(t *testing.T) {
 							op.OwnerType = hir.SharedBorrow(slice)
 							changed = true
 						case "wrong-value-nominal":
-							op.Type = hir.Type(hir.QualifiedModulePath(1, "main") + "::Other")
+							op.Type = hir.ParseType(hir.QualifiedModulePath(1, "main") + "::Other")
 							changed = true
 						case "value-annotation":
 							op.Operands[2] = op.Operands[0]
@@ -72,9 +72,9 @@ func TestMutableStructStorageViewMIR(t *testing.T) {
 			if mutation == "missing-definition" || mutation == "nested-pointer" {
 				for i := range program.StructTypes {
 					s := &program.StructTypes[i]
-					if strings.HasSuffix(string(s.Type), "::Token") {
+					if strings.HasSuffix(s.Type.String(), "::Token") {
 						if mutation == "missing-definition" {
-							s.Type = "main::Missing"
+							s.Type = hir.ParseType("main::Missing")
 						} else {
 							s.Fields[0].Type = hir.RawPointer(hir.TypeI64, true)
 						}

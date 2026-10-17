@@ -114,7 +114,7 @@ func DescribeFunction(function mir.Function, coordinates map[hir.PackageID]packa
 		}
 		descriptor.Effects = append(descriptor.Effects, string(effect))
 	}
-	if function.DropGlueFor != "" {
+	if function.DropGlueFor != hir.ParseType("") {
 		descriptor.DropGlueFor, err = stableType(function.DropGlueFor, coordinates)
 		if err != nil {
 			return FunctionDescriptor{}, fmt.Errorf("function %q drop-glue type: %w", function.Name, err)
@@ -203,7 +203,7 @@ func validStableType(value string) bool {
 	if value == "" || !utf8.ValidString(value) || strings.Contains(value, "$p") {
 		return false
 	}
-	if builtinType(hir.Type(value)) {
+	if builtinType(hir.ParseType(value)) {
 		return true
 	}
 	for _, prefix := range []string{"ref mut ", "ref ", "ptr mut ", "ptr "} {
@@ -211,11 +211,11 @@ func validStableType(value string) bool {
 			return validStableType(strings.TrimPrefix(value, prefix))
 		}
 	}
-	if element, ok := hir.OptionElement(hir.Type(value)); ok {
-		return validStableType(string(element))
+	if element, ok := hir.OptionElement(hir.ParseType(value)); ok {
+		return validStableType(element.String())
 	}
-	if success, failure, ok := hir.ResultElements(hir.Type(value)); ok {
-		return validStableType(string(success)) && validStableType(string(failure))
+	if success, failure, ok := hir.ResultElements(hir.ParseType(value)); ok {
+		return validStableType(success.String()) && validStableType(failure.String())
 	}
 	if strings.HasSuffix(value, "[]") {
 		element := strings.TrimSuffix(value, "[]")
@@ -271,7 +271,7 @@ func stableType(value hir.Type, coordinates map[hir.PackageID]packagegraph.Coord
 		return stable + "[]", nil
 	}
 	if builtinType(value) {
-		return string(value), nil
+		return value.String(), nil
 	}
 	if element, mutable, ok := hir.BorrowElement(value); ok {
 		stable, err := stableType(element, coordinates)
@@ -340,8 +340,8 @@ func rebindStableType(value string, coordinates map[hir.PackageID]packagegraph.C
 }
 
 func rebindValidatedStableType(value string, coordinates map[hir.PackageID]packagegraph.CoordinateID) (hir.Type, error) {
-	if builtinType(hir.Type(value)) {
-		return hir.Type(value), nil
+	if builtinType(hir.ParseType(value)) {
+		return hir.ParseType(value), nil
 	}
 	for _, prefix := range []struct {
 		stable  string
@@ -368,19 +368,19 @@ func rebindValidatedStableType(value string, coordinates map[hir.PackageID]packa
 		}
 		return hir.SharedBorrow(element), nil
 	}
-	if element, ok := hir.OptionElement(hir.Type(value)); ok {
-		rebound, err := rebindValidatedStableType(string(element), coordinates)
+	if element, ok := hir.OptionElement(hir.ParseType(value)); ok {
+		rebound, err := rebindValidatedStableType(element.String(), coordinates)
 		if err != nil {
 			return hir.TypeInvalid, err
 		}
 		return hir.Option(rebound), nil
 	}
-	if success, failure, ok := hir.ResultElements(hir.Type(value)); ok {
-		reboundSuccess, err := rebindValidatedStableType(string(success), coordinates)
+	if success, failure, ok := hir.ResultElements(hir.ParseType(value)); ok {
+		reboundSuccess, err := rebindValidatedStableType(success.String(), coordinates)
 		if err != nil {
 			return hir.TypeInvalid, err
 		}
-		reboundFailure, err := rebindValidatedStableType(string(failure), coordinates)
+		reboundFailure, err := rebindValidatedStableType(failure.String(), coordinates)
 		if err != nil {
 			return hir.TypeInvalid, err
 		}
@@ -391,7 +391,7 @@ func rebindValidatedStableType(value string, coordinates map[hir.PackageID]packa
 		if err != nil {
 			return hir.TypeInvalid, err
 		}
-		return hir.Type("[" + string(element) + "]"), nil
+		return hir.Slice(element), nil
 	}
 	if strings.HasSuffix(value, "]") {
 		separator := strings.LastIndexByte(value, '[')
@@ -430,11 +430,11 @@ func rebindValidatedStableType(value string, coordinates map[hir.PackageID]packa
 		return hir.TypeInvalid, fmt.Errorf("stable type %q references unknown PackageCoordinateId %s", value, coordinate)
 	}
 	logicalName := value[separator+3:]
-	return hir.Type(hir.QualifiedModulePath(packageID, logicalName)), nil
+	return hir.ParseType(hir.QualifiedModulePath(packageID, logicalName)), nil
 }
 
 func nominalTypeParts(value hir.Type) (hir.PackageID, string, bool) {
-	text := string(value)
+	text := value.String()
 	if strings.HasPrefix(text, "$p") {
 		separator := strings.Index(text, "::")
 		if separator <= 2 || separator+2 >= len(text) {

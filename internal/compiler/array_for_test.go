@@ -84,7 +84,7 @@ func TestArrayForRoundTrip(t *testing.T) {
 						op := &b.Operations[oi]
 						if name == "array-owner" {
 							if op.Kind == mir.OperationArrayBorrowView {
-								op.OwnerType = hir.Type("[bool; 1]")
+								op.OwnerType = hir.ParseType("[bool; 1]")
 								found = true
 							}
 							continue

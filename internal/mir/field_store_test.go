@@ -7,7 +7,7 @@ import (
 )
 
 func TestVerifyFieldStore(t *testing.T) {
-	owner := hir.Type("main::State")
+	owner := hir.ParseType("main::State")
 	op := Operation{Kind: OperationFieldStore, Symbol: hir.NoSymbol, DestinationLocal: NoLocal,
 		OwnerType: hir.MutableBorrow(owner), Type: hir.TypeI32, Field: "count",
 		Operands: []Operand{{Kind: OperandLocal, Local: 2}, {Kind: OperandI32, I32: 42}}}
@@ -45,7 +45,7 @@ func TestVerifyFieldStore(t *testing.T) {
 	}{
 		{hir.TypeU8, OperandU8, 255}, {hir.TypeU32, OperandU32, 4294967295},
 	} {
-		t.Run(string(scalar.typ), func(t *testing.T) {
+		t.Run(scalar.typ.String(), func(t *testing.T) {
 			store := op
 			store.Type = scalar.typ
 			store.Operands = []Operand{op.Operands[0], {Kind: scalar.kind, U64: scalar.max}}
@@ -64,8 +64,8 @@ func TestVerifyFieldStore(t *testing.T) {
 }
 
 func TestVerifyOneWordStructFieldStore(t *testing.T) {
-	const token = hir.Type("main::TokenIndex")
-	const cursor = hir.Type("main::Cursor")
+	var token = hir.ParseType("main::TokenIndex")
+	var cursor = hir.ParseType("main::Cursor")
 	makeProgram := func() Program {
 		return Program{
 			StructTypes: []StructType{

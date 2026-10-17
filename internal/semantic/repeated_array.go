@@ -35,7 +35,7 @@ func (c *typeChecker) checkRepeatedArray(expression *ast.Expression, result *hir
 		return hir.TypeInvalid
 	}
 	if !hir.FixedArrayScalarElement(elementType) && !c.analyzer.plainViewStruct(elementType) {
-		c.analyzer.addUnsupported(c.module.file.Path, expression.Span, "fixed-array element type "+string(elementType))
+		c.analyzer.addUnsupported(c.module.file.Path, expression.Span, "fixed-array element type "+elementType.String())
 		return hir.TypeInvalid
 	}
 	result.Kind = hir.ExpressionArray

@@ -1,6 +1,7 @@
 package semantic_test
 
 import (
+	"github.com/0disoft/fairyc/internal/hir"
 	"strings"
 	"testing"
 
@@ -14,7 +15,7 @@ func TestCallTypeDiagnostics(t *testing.T) {
 		t.Fatalf("result = %+v", result)
 	}
 	d := result.Diagnostics[0]
-	if d.Code != "E1006" || d.ExpectedType != "bool" || d.ActualType != "i32" || len(d.Related) != 1 || d.Related[0].Role != "expected-type" {
+	if d.Code != "E1006" || d.ExpectedType != hir.ParseType("bool") || d.ActualType != hir.ParseType("i32") || len(d.Related) != 1 || d.Related[0].Role != "expected-type" {
 		t.Fatalf("diagnostic = %+v", d)
 	}
 	argument := strings.Index(text, "42")
@@ -30,7 +31,7 @@ func TestCallTypeDiagnosticsQualifiedNames(t *testing.T) {
 		"main.fy":  "module main; import left as l; import right as r; fn void caller() { let r::Index value = r::Index { .raw = 0 }; l::take(value); }",
 	}
 	result := analyzeText(t, sources)
-	if len(result.Diagnostics) != 1 || result.Diagnostics[0].ExpectedType != "left::Index" || result.Diagnostics[0].ActualType != "right::Index" {
+	if len(result.Diagnostics) != 1 || result.Diagnostics[0].ExpectedType != hir.ParseType("left::Index") || result.Diagnostics[0].ActualType != hir.ParseType("right::Index") {
 		t.Fatalf("result = %+v", result)
 	}
 	d := result.Diagnostics[0]

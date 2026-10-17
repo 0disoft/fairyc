@@ -72,7 +72,7 @@ func TestIndexedStructFieldsMIR(t *testing.T) {
 							}
 						case "wrong-nominal":
 							element, mut, _ := hir.BorrowElement(op.Type)
-							element = hir.Type(strings.Replace(string(element), "::Token", "::Other", 1))
+							element = hir.ParseType(strings.Replace(element.String(), "::Token", "::Other", 1))
 							op.Type = hir.SharedBorrow(element)
 							if mut {
 								op.Type = hir.MutableBorrow(element)
@@ -101,7 +101,7 @@ func TestIndexedStructFieldsMIR(t *testing.T) {
 			}
 			if mutation == "nonplain" {
 				for si := range program.StructTypes {
-					if strings.HasSuffix(string(program.StructTypes[si].Type), "::Token") {
+					if strings.HasSuffix((program.StructTypes[si].Type).String(), "::Token") {
 						program.StructTypes[si].Fields[0].Type = hir.RawPointer(hir.TypeI64, true)
 						changed = true
 					}

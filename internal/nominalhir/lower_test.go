@@ -115,7 +115,7 @@ func TestLowerNominalRejectsBeforeErasure(t *testing.T) {
 		"wrong base":            func(p *Program) { p.Declarations[0].Underlying = hir.TypeU32 },
 		"unknown owner":         func(p *Program) { p.Declarations[0].Module = "absent" },
 		"cross package":         func(p *Program) { p.Declarations[0].Package = 1 },
-		"unknown type":          func(p *Program) { p.Modules[0].Functions[0].Parameters[0].Type = "@nominal:missing" },
+		"unknown type":          func(p *Program) { p.Modules[0].Functions[0].Parameters[0].Type = hir.ParseType("@nominal:missing") },
 		"raw argument": func(p *Program) {
 			p.Modules[0].Functions[2].Body.Statements[1].Expression.Children[1] = literal(hir.TypeUSize, "2")
 		},

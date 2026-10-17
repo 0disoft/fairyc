@@ -33,7 +33,7 @@ func TestPrivateNominalBindingPreservesExactOwner(t *testing.T) {
 			t.Fatalf("bound type: %v %+v", err, result)
 		}
 		function := result.HIR.Modules[0].Functions[0]
-		want := hir.Type(hir.QualifiedModulePath(owner, "owned") + "::Token")
+		want := hir.ParseType(hir.QualifiedModulePath(owner, "owned") + "::Token")
 		if function.ResultType != want || function.Parameters[0].Type != want {
 			t.Fatalf("owner identity lost: %q %q, want %q", function.ResultType, function.Parameters[0].Type, want)
 		}

@@ -145,7 +145,7 @@ func prepareTaggedTypes(
 		orderedTypes = append(orderedTypes, value)
 	}
 	slices.SortFunc(orderedTypes, func(left, right hir.Type) int {
-		return strings.Compare(string(left), string(right))
+		return strings.Compare(left.String(), right.String())
 	})
 	result := make([]taggedCType, 0, len(orderedTypes))
 	byType := make(map[hir.Type]int, len(orderedTypes))
@@ -254,7 +254,7 @@ func copyScalarTaggedPayloadLayout(value hir.Type) (layout.Type, bool) {
 	value = canonicalCValueType(value)
 	switch value {
 	case hir.TypeU8, hir.TypeI32, hir.TypeI64, hir.TypeU32, hir.TypeUSize:
-		return layout.Type{Kind: layout.KindLanguageScalar, Name: string(value)}, true
+		return layout.Type{Kind: layout.KindLanguageScalar, Name: value.String()}, true
 	default:
 		return layout.Type{}, false
 	}
@@ -325,7 +325,7 @@ func taggedPayloadLayout(
 		return layout.Type{Kind: layout.KindPointer}, true
 	}
 	if value == hir.TypeU8 || value == hir.TypeI32 || value == hir.TypeI64 || value == hir.TypeU32 || value == hir.TypeUSize {
-		return layout.Type{Kind: layout.KindLanguageScalar, Name: string(value)}, true
+		return layout.Type{Kind: layout.KindLanguageScalar, Name: value.String()}, true
 	}
 	if index, found := structByType[value]; found {
 		return structures[index].layoutType, true

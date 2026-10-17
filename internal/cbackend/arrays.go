@@ -82,7 +82,7 @@ func prepareScalarArrayTypes(functions []mir.Function, structures ...[]structCTy
 		values = append(values, value)
 	}
 	slices.SortFunc(values, func(left, right arrayCType) int {
-		return strings.Compare(string(left.typ), string(right.typ))
+		return strings.Compare(left.typ.String(), right.typ.String())
 	})
 	byType := make(map[hir.Type]int, len(values))
 	for index := range values {
@@ -100,7 +100,7 @@ func scalarArrayLayoutType(value hir.Type) (layout.Type, bool) {
 	if element != hir.TypeU8 && element != hir.TypeI32 && element != hir.TypeI64 && element != hir.TypeU32 && element != hir.TypeUSize {
 		return layout.Type{}, false
 	}
-	elementLayout := layout.Type{Kind: layout.KindLanguageScalar, Name: string(element)}
+	elementLayout := layout.Type{Kind: layout.KindLanguageScalar, Name: element.String()}
 	return layout.Type{Kind: layout.KindArray, Element: &elementLayout, Length: length}, true
 }
 

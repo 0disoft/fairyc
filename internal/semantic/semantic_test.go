@@ -71,14 +71,14 @@ func TestAnalyzeCarriesExactTopLevelDocumentationSpansIntoHIR(t *testing.T) {
 		{name: "foreign", span: module.ForeignFunctions[0].DocumentationSpan, want: "/// Foreign docs."},
 	}
 	for _, function := range module.Functions {
-		if function.Name == "run" && function.DropGlueFor == "" {
+		if function.Name == "run" && function.DropGlueFor == hir.ParseType("") {
 			spans = append(spans, struct {
 				name string
 				span hir.Span
 				want string
 			}{name: "function", span: function.DocumentationSpan, want: "/// Function docs."})
 		}
-		if function.DropGlueFor != "" && function.DocumentationSpan != (hir.Span{}) {
+		if function.DropGlueFor != hir.ParseType("") && function.DocumentationSpan != (hir.Span{}) {
 			t.Fatalf("compiler-private drop glue inherited documentation: %+v", function)
 		}
 	}
@@ -612,7 +612,7 @@ func TestAnalyzePreservesOrderedResourceDefinitionWithEmptyDrop(t *testing.T) {
 		t.Fatalf("HIR modules = %+v", result.HIR.Modules)
 	}
 	resource := result.HIR.Modules[0].Resources[0]
-	if resource.Name != "Pair" || resource.Type != hir.Type("main::Pair") || resource.DropKind != hir.ResourceDropEmpty || len(resource.Fields) != 2 {
+	if resource.Name != "Pair" || resource.Type != hir.ParseType("main::Pair") || resource.DropKind != hir.ResourceDropEmpty || len(resource.Fields) != 2 {
 		t.Fatalf("resource = %+v", resource)
 	}
 	if resource.Fields[0].Name != "left" || resource.Fields[0].Type != hir.TypeI32 || resource.Fields[1].Name != "right" || resource.Fields[1].Type != hir.TypeBool {
@@ -661,7 +661,7 @@ fn i32 main() { return Counter::double(21); }
 		t.Fatalf("HIR modules = %+v", result.HIR.Modules)
 	}
 	associated := result.HIR.Modules[0].Functions[0]
-	if associated.Name != "Counter::double" || associated.OwnerType != hir.Type("main::Counter") {
+	if associated.Name != "Counter::double" || associated.OwnerType != hir.ParseType("main::Counter") {
 		t.Fatalf("associated function = %+v", associated)
 	}
 	main := result.HIR.Modules[0].Functions[1]
@@ -684,7 +684,7 @@ fn i32 main() {
 	})
 	assertCleanTypeResult(t, result)
 	method := result.HIR.Modules[0].Functions[0]
-	if method.Name != "Counter::get" || method.Receiver != "shared" || method.OwnerType != hir.Type("main::Counter") {
+	if method.Name != "Counter::get" || method.Receiver != "shared" || method.OwnerType != hir.ParseType("main::Counter") {
 		t.Fatalf("method = %+v", method)
 	}
 	main := result.HIR.Modules[0].Functions[1]
@@ -784,14 +784,14 @@ fn i32 main() {
 		t.Fatalf("HIR modules = %+v", result.HIR.Modules)
 	}
 	structure := result.HIR.Modules[0].Structs[0]
-	if structure.Name != "Packet" || structure.Type != hir.Type("main::Packet") || !structure.ReprC || len(structure.Fields) != 2 {
+	if structure.Name != "Packet" || structure.Type != hir.ParseType("main::Packet") || !structure.ReprC || len(structure.Fields) != 2 {
 		t.Fatalf("struct = %+v", structure)
 	}
 	if structure.Fields[0].Name != "code" || structure.Fields[0].Type != hir.TypeU32 || structure.Fields[1].Name != "length" || structure.Fields[1].Type != hir.TypeUSize {
 		t.Fatalf("struct fields = %+v", structure.Fields)
 	}
 	main := result.HIR.Modules[0].Functions[0]
-	if len(main.Locals) != 1 || main.Locals[0].Type != hir.Type("main::Packet") || soleReturnExpression(t, main).Kind != hir.ExpressionIf {
+	if len(main.Locals) != 1 || main.Locals[0].Type != hir.ParseType("main::Packet") || soleReturnExpression(t, main).Kind != hir.ExpressionIf {
 		t.Fatalf("main = %+v", main)
 	}
 }
@@ -813,14 +813,14 @@ fn i32 main() { return 0; }
 		t.Fatalf("HIR modules = %+v", result.HIR.Modules)
 	}
 	enumeration := result.HIR.Modules[0].Enums[0]
-	if enumeration.Name != "ParseError" || enumeration.Type != hir.Type("main::ParseError") || len(enumeration.Variants) != 2 {
+	if enumeration.Name != "ParseError" || enumeration.Type != hir.ParseType("main::ParseError") || len(enumeration.Variants) != 2 {
 		t.Fatalf("enum = %+v", enumeration)
 	}
 	if enumeration.Variants[0].Name != "Empty" || len(enumeration.Variants[0].Fields) != 0 {
 		t.Fatalf("payloadless variant = %+v", enumeration.Variants[0])
 	}
 	variant := enumeration.Variants[1]
-	if variant.Name != "Unexpected" || len(variant.Fields) != 2 || variant.Fields[0].Name != "position" || variant.Fields[0].Type != hir.Type("main::Position") || variant.Fields[1].Name != "byte" || variant.Fields[1].Type != hir.TypeU8 {
+	if variant.Name != "Unexpected" || len(variant.Fields) != 2 || variant.Fields[0].Name != "position" || variant.Fields[0].Type != hir.ParseType("main::Position") || variant.Fields[1].Name != "byte" || variant.Fields[1].Type != hir.TypeU8 {
 		t.Fatalf("payload variant = %+v", variant)
 	}
 }
@@ -874,7 +874,7 @@ func TestAnalyzeResolvesPublicEnumVariantAcrossImportAlias(t *testing.T) {
 	})
 	assertCleanTypeResult(t, result)
 	main := result.HIR.Modules[1].Functions[0]
-	if len(main.Locals) != 2 || main.Locals[0].Name != "status" || main.Locals[0].Type != hir.Type("api::Status") ||
+	if len(main.Locals) != 2 || main.Locals[0].Name != "status" || main.Locals[0].Type != hir.ParseType("api::Status") ||
 		len(main.Body.Statements) != 2 || main.Body.Statements[0].Expression == nil ||
 		main.Body.Statements[0].Expression.Kind != hir.ExpressionEnumVariant || main.Body.Statements[0].Expression.Variant != "Code" {
 		t.Fatalf("imported enum construction = %+v", main)
@@ -1278,7 +1278,7 @@ fn i32 main() { return unsafe { consume_%[1]s(make_%[1]s()) }; }
 func TestAnalyzeKeepsCScalarImmediatesDeferred(t *testing.T) {
 	t.Parallel()
 	for _, cScalar := range hir.CScalarTypes() {
-		typeRef := string(cScalar)
+		typeRef := cScalar.String()
 		t.Run(typeRef+" immediate", func(t *testing.T) {
 			text := "module main;\nfn i32 deferred(" + typeRef + " value) { let " + typeRef + " copy = 1; return 0; }\nfn i32 main() { return 0; }\n"
 			result := analyzeText(t, map[string]string{"main.fy": text})
@@ -1591,8 +1591,8 @@ fn i32 main() {
 		t.Fatalf("call = %+v", call)
 	}
 	cast := &call.Children[1]
-	wantType := hir.RawPointer(hir.Type("main::Packet"), true)
-	if cast.Kind != hir.ExpressionCast || cast.Operator != "as" || cast.Type != wantType || cast.TargetType != wantType || cast.UnsafeScope == nil || len(cast.Children) != 1 || cast.Children[0].Type != hir.MutableBorrow(hir.Type("main::Packet")) {
+	wantType := hir.RawPointer(hir.ParseType("main::Packet"), true)
+	if cast.Kind != hir.ExpressionCast || cast.Operator != "as" || cast.Type != wantType || cast.TargetType != wantType || cast.UnsafeScope == nil || len(cast.Children) != 1 || cast.Children[0].Type != hir.MutableBorrow(hir.ParseType("main::Packet")) {
 		t.Fatalf("cast = %+v", cast)
 	}
 }
@@ -1649,7 +1649,7 @@ fn i32 main() { return if (call(Packet { .code = 0 }) == 0) { 42 } else { 1 }; }
 	}
 	cast := &call.Children[1]
 	if cast.Type != hir.RawPointer(hir.TypeVoid, true) || cast.TargetType != cast.Type ||
-		len(cast.Children) != 1 || cast.Children[0].Type != hir.MutableBorrow(hir.Type("main::Packet")) || cast.UnsafeScope == nil {
+		len(cast.Children) != 1 || cast.Children[0].Type != hir.MutableBorrow(hir.ParseType("main::Packet")) || cast.UnsafeScope == nil {
 		t.Fatalf("opaque cast = %+v", cast)
 	}
 }
@@ -3546,7 +3546,7 @@ func TestAnalyzePreservesMustUseOnMethodsAndForeignFunctions(t *testing.T) {
 	if len(module.ForeignFunctions) != 1 || !module.ForeignFunctions[0].MustUse {
 		t.Fatalf("foreign functions = %+v", module.ForeignFunctions)
 	}
-	if len(module.Functions) != 2 || !module.Functions[0].MustUse || module.Functions[0].OwnerType == "" {
+	if len(module.Functions) != 2 || !module.Functions[0].MustUse || module.Functions[0].OwnerType == hir.ParseType("") {
 		t.Fatalf("functions = %+v", module.Functions)
 	}
 }

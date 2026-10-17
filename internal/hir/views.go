@@ -1,27 +1,17 @@
 package hir
 
-import "strings"
-
 // IndexedViewElement returns the element of an executable borrowed slice.
 // The closed set admits the executable integer elements and borrowed nominal shapes. Nominal elements require
 // stage-owned scalar-leaf struct validation before execution.
 func IndexedViewElement(value Type) (Type, bool) {
-	switch value {
-	case SharedBorrow(TypeBoolSlice), MutableBorrow(TypeBoolSlice):
-		return TypeBool, true
-	case SharedBorrow(TypeByteSlice), MutableBorrow(TypeByteSlice):
-		return TypeU8, true
-	case SharedBorrow(TypeI64Slice), MutableBorrow(TypeI64Slice):
-		return TypeI64, true
-	case SharedBorrow(TypeI32Slice), MutableBorrow(TypeI32Slice):
-		return TypeI32, true
-	case SharedBorrow(TypeU32Slice), MutableBorrow(TypeU32Slice):
-		return TypeU32, true
-	case SharedBorrow(TypeUsizeSlice), MutableBorrow(TypeUsizeSlice):
-		return TypeUSize, true
-	default:
-		return StructViewElement(value)
+	slice, _, borrowed := BorrowElement(value)
+	if !borrowed {
+		return TypeInvalid, false
 	}
+	if element, scalar := ScalarViewElement(slice); scalar {
+		return element, true
+	}
+	return StructSliceElement(slice)
 }
 
 // ArrayViewBorrow matches the exact fixed-array element and borrow kind.
@@ -56,8 +46,11 @@ func I64View(value Type) bool {
 
 // ScalarViewElement recognizes unsized bool/integer slices without admitting ownership.
 func ScalarViewElement(value Type) (Type, bool) {
-	element, ok := IndexedViewElement(SharedBorrow(value))
-	return element, ok && FixedArrayScalarElement(element)
+	d := value.Descriptor()
+	if d.Kind != TypeKindSlice || !value.canonicalCompound() || !FixedArrayScalarElement(d.Element) {
+		return TypeInvalid, false
+	}
+	return d.Element, true
 }
 
 // NonByteIndexedView selects typed storage views rather than static byte data.
@@ -69,15 +62,11 @@ func NonByteIndexedView(value Type) bool {
 // StructSliceElement recognizes only canonical unsized nominal shapes. It is
 // structural: semantic analysis and MIR must resolve the definition separately.
 func StructSliceElement(value Type) (Type, bool) {
-	text := string(value)
-	if len(text) < 5 || text[0] != '[' || text[len(text)-1] != ']' {
+	d := value.Descriptor()
+	if d.Kind != TypeKindSlice || !value.canonicalCompound() || d.Element.Descriptor().Kind != TypeKindNominal {
 		return TypeInvalid, false
 	}
-	element := text[1 : len(text)-1]
-	if !strings.Contains(element, "::") || strings.ContainsAny(element, "[];&<> *\t\r\n") {
-		return TypeInvalid, false
-	}
-	return Type(element), true
+	return d.Element, true
 }
 
 // StructViewElement recognizes nominal shared or exclusive descriptors.

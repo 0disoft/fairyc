@@ -113,7 +113,7 @@ func validateAnalysisPatch(analysis semantic.Result, patch BoundaryPatch, retain
 		edited[f.Symbol] = true
 		b.functions[f.Symbol] = f
 		if !reflect.DeepEqual(f.Parameters, o.function.Parameters) || f.ResultType != o.function.ResultType {
-			if o.function.OwnerType != "" {
+			if o.function.OwnerType != hir.ParseType("") {
 				return fmt.Errorf("method signature patches are not supported")
 			}
 			changed[f.Symbol] = true

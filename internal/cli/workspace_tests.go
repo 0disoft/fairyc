@@ -852,7 +852,7 @@ func prepareWorkspaceTests(workspace *workspaceloader.Workspace, packagePath, pa
 			valid := len(declarations) == 1 && len(declarations[0].Arguments) == 0 &&
 				!function.Public && !function.Unsafe && function.Owner == "" &&
 				len(function.Parameters) == 0 && function.ResultType.Kind == ast.TypeKindNamed &&
-				function.ResultType.Path == string(hir.TypeVoid)
+				function.ResultType.Path == hir.TypeVoid.String()
 			if !valid {
 				diagnostics = append(diagnostics, diagnostic.Diagnostic{
 					Code: "E9001", Span: declarations[0].Span, Repair: diagnostic.RepairNone,

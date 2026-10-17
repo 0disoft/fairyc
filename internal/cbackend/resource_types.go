@@ -19,7 +19,7 @@ func orderResourceDefinitions(definitions []mir.ResourceType) ([]mir.ResourceTyp
 		byType[definition.Type] = definition
 		roots = append(roots, definition.Type)
 	}
-	slices.SortFunc(roots, func(a, b hir.Type) int { return strings.Compare(string(a), string(b)) })
+	slices.SortFunc(roots, func(a, b hir.Type) int { return strings.Compare(a.String(), b.String()) })
 	state := make(map[hir.Type]uint8, len(definitions))
 	ordered := make([]mir.ResourceType, 0, len(definitions))
 	var visit func(hir.Type) error

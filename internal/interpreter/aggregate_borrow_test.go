@@ -8,7 +8,7 @@ import (
 )
 
 func TestAggregateConstructionRetainsBorrowTypeAndIdentity(t *testing.T) {
-	typ := hir.Type(hir.QualifiedModulePath(2, "owned") + "::Value")
+	typ := hir.ParseType(hir.QualifiedModulePath(2, "owned") + "::Value")
 	for name, construct := range map[string]func() (runtimeValue, error){
 		"struct": func() (runtimeValue, error) {
 			return structValue(&mir.StructType{Type: typ, Fields: []mir.StructField{{Name: "value", Type: hir.TypeI32}}}, []runtimeValue{i32Value(42)})
@@ -39,7 +39,7 @@ func TestAggregateConstructionRetainsBorrowTypeAndIdentity(t *testing.T) {
 					borrowed.resource != value.resource || borrowed.structure != value.structure || borrowed.enum != value.enum {
 					t.Fatalf("borrow changed owner/type/state: %v %q", err, trap)
 				}
-				wrong := hir.Type(hir.QualifiedModulePath(3, "owned") + "::Value")
+				wrong := hir.ParseType(hir.QualifiedModulePath(3, "owned") + "::Value")
 				op.OwnerType, op.Type = wrong, hir.SharedBorrow(wrong)
 				if mutable {
 					op.Type = hir.MutableBorrow(wrong)

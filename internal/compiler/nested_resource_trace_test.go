@@ -46,7 +46,7 @@ fn i32 main() {
 	for _, event := range oracle.DropTrace {
 		found := false
 		for _, site := range unit.DropSites {
-			if site.ResourceType == string(event.ResourceType) && site.Package == event.Binding.Package &&
+			if site.ResourceType == event.ResourceType.String() && site.Package == event.Binding.Package &&
 				site.Source == event.Binding.Source && site.StartByte == event.Binding.StartByte && site.EndByte == event.Binding.EndByte {
 				fmt.Fprintf(&expected, "%d\n", site.ID)
 				found = true

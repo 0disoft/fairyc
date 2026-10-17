@@ -140,18 +140,18 @@ func stableContextFixture(packageID hir.PackageID, dropSymbol, foreignSymbol hir
 	span := hir.Span{Package: packageID}
 	context := mir.Program{
 		StructTypes: []mir.StructType{{
-			Type: hir.Type(prefix + "Point"), Name: "Point", Span: span, ReprC: true,
+			Type: hir.ParseType(prefix + "Point"), Name: "Point", Span: span, ReprC: true,
 			Fields: []mir.StructField{{Name: "x", Type: hir.TypeI32, Span: span}},
 		}},
 		EnumTypes: []mir.EnumType{{
-			Type: hir.Type(prefix + "Message"), Name: "Message", Span: span,
+			Type: hir.ParseType(prefix + "Message"), Name: "Message", Span: span,
 			Variants: []mir.EnumVariant{{
 				Name: "Point", Span: span,
-				Fields: []mir.EnumField{{Name: "value", Type: hir.Type(prefix + "Point"), Span: span}},
+				Fields: []mir.EnumField{{Name: "value", Type: hir.ParseType(prefix + "Point"), Span: span}},
 			}},
 		}},
 		ResourceTypes: []mir.ResourceType{{
-			Type: hir.Type(prefix + "Handle"), Span: span,
+			Type: hir.ParseType(prefix + "Handle"), Span: span,
 			Fields:      []mir.ResourceField{{Name: "raw", Type: hir.TypeUSize, Span: span}},
 			DropKind:    hir.ResourceDropNonEmpty,
 			DropSymbol:  dropSymbol,

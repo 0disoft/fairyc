@@ -289,7 +289,7 @@ func containsRawType(value hir.Type) bool {
 	if ok {
 		return true
 	}
-	return strings.Contains(string(value), "*")
+	return strings.Contains(value.String(), "*")
 }
 
 func anyRawType(values []hir.Type) bool {
@@ -309,7 +309,7 @@ func appendTargetTypeViolations(report *Report, owner string, span hir.Span, con
 	hasUSize := false
 	for _, value := range values {
 		hasCScalar = hasCScalar || containsCScalarType(value)
-		hasUSize = hasUSize || containsTypeToken(string(value), string(hir.TypeUSize))
+		hasUSize = hasUSize || containsTypeToken(value.String(), hir.TypeUSize.String())
 	}
 	if hasCScalar {
 		report.Violations = append(report.Violations, violationAt(
@@ -330,9 +330,9 @@ func appendTargetTypeViolations(report *Report, owner string, span hir.Span, con
 }
 
 func containsCScalarType(value hir.Type) bool {
-	text := string(value)
+	text := value.String()
 	for _, scalar := range deterministicProfileCScalars {
-		if containsTypeToken(text, string(scalar)) {
+		if containsTypeToken(text, scalar.String()) {
 			return true
 		}
 	}
@@ -359,7 +359,7 @@ func terminatorTypes(terminator mir.Terminator) []hir.Type {
 }
 
 func containsFloatType(value hir.Type) bool {
-	text := string(value)
+	text := value.String()
 	return containsTypeToken(text, "f32") ||
 		containsTypeToken(text, "f64") ||
 		containsTypeToken(text, "c::float") ||

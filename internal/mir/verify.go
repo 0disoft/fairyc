@@ -148,7 +148,7 @@ func verifyDropGlueLinks(resources []ResourceType, functions []Function, bySymbo
 	var failures []VerificationError
 	for index := range functions {
 		function := &functions[index]
-		if function.DropGlueFor == "" {
+		if function.DropGlueFor == hir.ParseType("") {
 			continue
 		}
 		if previous := byResource[function.DropGlueFor]; previous != nil {
@@ -194,7 +194,7 @@ func verifyEnumTypes(definitions []EnumType) (map[hir.Type]*EnumType, []Verifica
 	for index := range definitions {
 		definition := &definitions[index]
 		entity := fallbackEntity(definition.Entity, enumTypeEntity(definition.Type))
-		if definition.Type == "" || definition.Type == hir.TypeInvalid || definition.Name == "" {
+		if definition.Type == hir.ParseType("") || definition.Type == hir.TypeInvalid || definition.Name == "" {
 			failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "enum definition has no concrete identity"})
 			continue
 		}
@@ -216,7 +216,7 @@ func verifyEnumTypes(definitions []EnumType) (map[hir.Type]*EnumType, []Verifica
 			variantNames[variant.Name] = struct{}{}
 			fieldNames := make(map[string]struct{}, len(variant.Fields))
 			for _, field := range variant.Fields {
-				if field.Name == "" || field.Type == "" || field.Type == hir.TypeInvalid {
+				if field.Name == "" || field.Type == hir.ParseType("") || field.Type == hir.TypeInvalid {
 					failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "enum definition has an invalid payload field"})
 					continue
 				}
@@ -237,7 +237,7 @@ func verifyStructTypes(definitions []StructType) (map[hir.Type]*StructType, []Ve
 	for index := range definitions {
 		definition := &definitions[index]
 		entity := fallbackEntity(definition.Entity, structTypeEntity(definition.Type))
-		if definition.Type == "" || definition.Type == hir.TypeInvalid || definition.Name == "" {
+		if definition.Type == hir.ParseType("") || definition.Type == hir.TypeInvalid || definition.Name == "" {
 			failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "struct definition has no concrete identity"})
 			continue
 		}
@@ -251,7 +251,7 @@ func verifyStructTypes(definitions []StructType) (map[hir.Type]*StructType, []Ve
 		}
 		fieldNames := make(map[string]struct{}, len(definition.Fields))
 		for _, field := range definition.Fields {
-			if field.Name == "" || field.Type == "" || field.Type == hir.TypeInvalid {
+			if field.Name == "" || field.Type == hir.ParseType("") || field.Type == hir.TypeInvalid {
 				failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "struct definition has an invalid field"})
 				continue
 			}
@@ -266,7 +266,7 @@ func verifyStructTypes(definitions []StructType) (map[hir.Type]*StructType, []Ve
 	for _, definition := range definitions {
 		for _, field := range definition.Fields {
 			if _, _, array := hir.FixedArrayParts(field.Type); array && (definition.ReprC || !properties.inlineArrayField(field.Type)) {
-				failures = append(failures, VerificationError{Code: "V1001", Entity: fallbackEntity(definition.Entity, string(definition.Type)), Detail: "invalid inline array struct field"})
+				failures = append(failures, VerificationError{Code: "V1001", Entity: fallbackEntity(definition.Entity, definition.Type.String()), Detail: "invalid inline array struct field"})
 			}
 		}
 	}
@@ -280,7 +280,7 @@ func verifyForeignFunctions(definitions []ForeignFunction) (map[hir.SymbolID]*Fo
 	for index := range definitions {
 		definition := &definitions[index]
 		entity := fallbackEntity(definition.Entity, fmt.Sprintf("foreign:%d", definition.Symbol))
-		if definition.Symbol == hir.NoSymbol || definition.Name == "" || definition.LinkName == "" || definition.ABI != "C" || definition.ResultType == "" || definition.ResultType == hir.TypeInvalid {
+		if definition.Symbol == hir.NoSymbol || definition.Name == "" || definition.LinkName == "" || definition.ABI != "C" || definition.ResultType == hir.ParseType("") || definition.ResultType == hir.TypeInvalid {
 			failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "foreign declaration is incomplete or has an unsupported ABI"})
 			continue
 		}
@@ -300,7 +300,7 @@ func verifyForeignFunctions(definitions []ForeignFunction) (map[hir.SymbolID]*Fo
 			failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "foreign result exposes a safe borrow"})
 		}
 		for _, parameterType := range definition.ParameterTypes {
-			if parameterType == "" || parameterType == hir.TypeInvalid {
+			if parameterType == hir.ParseType("") || parameterType == hir.TypeInvalid {
 				failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "foreign parameter has no concrete type"})
 			}
 			if _, _, borrow := hir.BorrowElement(parameterType); borrow {
@@ -317,7 +317,7 @@ func verifyResourceTypes(definitions []ResourceType) (map[hir.Type]*ResourceType
 	for index := range definitions {
 		definition := &definitions[index]
 		entity := fallbackEntity(definition.Entity, resourceTypeEntity(definition.Type))
-		if definition.Type == "" || definition.Type == hir.TypeInvalid {
+		if definition.Type == hir.ParseType("") || definition.Type == hir.TypeInvalid {
 			failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "resource definition has no concrete type"})
 			continue
 		}
@@ -340,7 +340,7 @@ func verifyResourceTypes(definitions []ResourceType) (map[hir.Type]*ResourceType
 		}
 		fieldNames := make(map[string]struct{}, len(definition.Fields))
 		for _, field := range definition.Fields {
-			if field.Name == "" || field.Type == "" || field.Type == hir.TypeInvalid {
+			if field.Name == "" || field.Type == hir.ParseType("") || field.Type == hir.TypeInvalid {
 				failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "resource definition has an invalid field"})
 				continue
 			}
@@ -491,7 +491,7 @@ func verifyFunction(function *Function, structTypes map[hir.Type]*StructType, en
 				state.live[operation.Symbol] = false
 			case OperationBurn:
 				resource, found := resources[operation.Symbol]
-				if !found || operation.Type == "" || operation.Type == hir.TypeInvalid || found && operation.Type != resource.Type ||
+				if !found || operation.Type == hir.ParseType("") || operation.Type == hir.TypeInvalid || found && operation.Type != resource.Type ||
 					operation.ProjectionEntity != "" || operation.Destination != "" || operation.DestinationLocal != NoLocal ||
 					len(operation.Operands) != 0 || operation.DropFlagEntity != "" || operation.FlagClearedFirst {
 					failures = append(failures, VerificationError{Code: "V1104", Entity: entity, Detail: "burn does not name one direct declared resource root"})
@@ -630,7 +630,7 @@ func verifyFunction(function *Function, structTypes map[hir.Type]*StructType, en
 				if operation.Variant != "ok" && operation.Variant != "err" {
 					failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "Result operation has an invalid variant"})
 				}
-				if operation.Type == hir.TypeInvalid || operation.Type == "" {
+				if operation.Type == hir.TypeInvalid || operation.Type == hir.ParseType("") {
 					failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "Result payload has no concrete payload type"})
 				}
 				state.live[hir.SymbolID(operation.DestinationLocal)] = true
@@ -650,7 +650,7 @@ func verifyFunction(function *Function, structTypes map[hir.Type]*StructType, en
 				if operation.DestinationLocal == NoLocal || operation.Variant != "some" || len(operation.Operands) != 1 {
 					failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "Option payload extraction must target Some"})
 				}
-				if operation.Type == hir.TypeInvalid || operation.Type == "" {
+				if operation.Type == hir.TypeInvalid || operation.Type == hir.ParseType("") {
 					failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "Option payload has no concrete payload type"})
 				}
 				state.live[hir.SymbolID(operation.DestinationLocal)] = true
@@ -678,7 +678,7 @@ func verifyFunction(function *Function, structTypes map[hir.Type]*StructType, en
 				failures = append(failures, verifyOperands(state, operation.Operands, entity)...)
 				element, mutable, pointer := hir.RawPointerElement(operation.Type)
 				shapeValid := operation.DestinationLocal != NoLocal && len(operation.Operands) == 1 &&
-					operation.Operands[0].Kind == OperandLocal && operation.OwnerType != "" && operation.OwnerType != hir.TypeInvalid &&
+					operation.Operands[0].Kind == OperandLocal && operation.OwnerType != hir.ParseType("") && operation.OwnerType != hir.TypeInvalid &&
 					pointer && (element == operation.OwnerType || element == hir.TypeVoid) &&
 					(operation.Operator == "&" && !mutable || operation.Operator == "&mut")
 				if !shapeValid {
@@ -827,7 +827,7 @@ func verifyFunction(function *Function, structTypes map[hir.Type]*StructType, en
 				if definition == nil {
 					failures = append(failures, VerificationError{Code: "V1001", Entity: structTypeEntity(operation.Type), Detail: "struct construction type has no definition"})
 				}
-				if operation.DestinationLocal == NoLocal || operation.Type == "" || operation.Type == hir.TypeInvalid || len(operation.Fields) != len(operation.Operands) || !uniqueNonEmpty(operation.Fields) {
+				if operation.DestinationLocal == NoLocal || operation.Type == hir.ParseType("") || operation.Type == hir.TypeInvalid || len(operation.Fields) != len(operation.Operands) || !uniqueNonEmpty(operation.Fields) {
 					failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "struct construction shape is invalid"})
 				}
 				if definition != nil && !slices.Equal(operation.Fields, structFieldNames(definition.Fields)) {
@@ -840,7 +840,7 @@ func verifyFunction(function *Function, structTypes map[hir.Type]*StructType, en
 				if definition == nil {
 					failures = append(failures, VerificationError{Code: "V1001", Entity: resourceTypeEntity(operation.Type), Detail: "resource construction type has no definition"})
 				}
-				if operation.DestinationLocal == NoLocal || operation.Type == "" || operation.Type == hir.TypeInvalid || len(operation.Fields) == 0 || len(operation.Fields) != len(operation.Operands) || !uniqueNonEmpty(operation.Fields) {
+				if operation.DestinationLocal == NoLocal || operation.Type == hir.ParseType("") || operation.Type == hir.TypeInvalid || len(operation.Fields) == 0 || len(operation.Fields) != len(operation.Operands) || !uniqueNonEmpty(operation.Fields) {
 					failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "resource construction shape is invalid"})
 				}
 				if definition != nil && !slices.Equal(operation.Fields, resourceFieldNames(definition.Fields)) {
@@ -897,7 +897,7 @@ func verifyFunction(function *Function, structTypes map[hir.Type]*StructType, en
 				if resourceDefinition == nil && structDefinition == nil {
 					failures = append(failures, VerificationError{Code: "V1001", Entity: structTypeEntity(aggregateType), Detail: "field-read owner type has no aggregate definition"})
 				}
-				if operation.DestinationLocal == NoLocal || operation.OwnerType == "" || operation.OwnerType == hir.TypeInvalid || operation.Type == "" || operation.Type == hir.TypeInvalid || operation.Field == "" || len(operation.Operands) != 1 {
+				if operation.DestinationLocal == NoLocal || operation.OwnerType == hir.ParseType("") || operation.OwnerType == hir.TypeInvalid || operation.Type == hir.ParseType("") || operation.Type == hir.TypeInvalid || operation.Field == "" || len(operation.Operands) != 1 {
 					failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "field read shape is invalid"})
 				}
 				if resourceDefinition != nil {
@@ -984,8 +984,8 @@ func verifyFunction(function *Function, structTypes map[hir.Type]*StructType, en
 				successType, failureType, result := hir.ResultElements(operation.Type)
 				placedType, mutable, borrow := hir.BorrowElement(successType)
 				shapeValid := result && borrow && !mutable && placedType == operation.OwnerType &&
-					failureType != hir.TypeInvalid && failureType != "" && len(operation.Operands) == 1 &&
-					operation.DestinationLocal != NoLocal && operation.OwnerType != hir.TypeInvalid && operation.OwnerType != ""
+					failureType != hir.TypeInvalid && failureType != hir.ParseType("") && len(operation.Operands) == 1 &&
+					operation.DestinationLocal != NoLocal && operation.OwnerType != hir.TypeInvalid && operation.OwnerType != hir.ParseType("")
 				if _, active := state.regions[operation.Symbol]; !active || !shapeValid {
 					failures = append(failures, VerificationError{Code: "V1403", Entity: entity, Detail: "region placement does not name one active region and value"})
 				}
@@ -1140,7 +1140,7 @@ func validSwitchShape(terminator Terminator) bool {
 	case "option":
 		return len(terminator.SwitchOperands) == 1 && len(terminator.Successors) == 2
 	case "enum":
-		return terminator.SwitchType != "" && terminator.SwitchType != hir.TypeInvalid && len(terminator.SwitchOperands) == 1 && len(terminator.Successors) > 0 && len(terminator.Successors) == len(terminator.SwitchVariants) && uniqueNonEmpty(terminator.SwitchVariants)
+		return terminator.SwitchType != hir.ParseType("") && terminator.SwitchType != hir.TypeInvalid && len(terminator.SwitchOperands) == 1 && len(terminator.Successors) > 0 && len(terminator.Successors) == len(terminator.SwitchVariants) && uniqueNonEmpty(terminator.SwitchVariants)
 	case "checked-division":
 		return len(terminator.SwitchOperands) == 2 && len(terminator.Successors) == 2 &&
 			(terminator.Operator == "/" || terminator.Operator == "%") && hir.CheckedDivisionType(terminator.SwitchType)
@@ -1656,12 +1656,12 @@ func verifyOperands(state verificationState, operands []Operand, entity string) 
 				failures = append(failures, VerificationError{Code: "V1002", Entity: entity, Detail: fmt.Sprintf("local %d used before initialization", operand.Local)})
 			}
 		case OperandI32:
-			if operand.Type != "" && operand.Type != hir.TypeI32 && operand.Type != hir.TypeBool ||
+			if operand.Type != hir.ParseType("") && operand.Type != hir.TypeI32 && operand.Type != hir.TypeBool ||
 				operand.Type == hir.TypeBool && operand.I32 != 0 && operand.I32 != 1 {
 				failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "i32 operand has invalid scalar type metadata"})
 			}
 		case OperandI64:
-			if operand.Type != "" && operand.Type != hir.TypeI64 || operand.I32 != 0 || operand.U64 != 0 || operand.StaticData != "" {
+			if operand.Type != hir.ParseType("") && operand.Type != hir.TypeI64 || operand.I32 != 0 || operand.U64 != 0 || operand.StaticData != "" {
 				failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "i64 operand has invalid scalar metadata"})
 			}
 		case OperandU8:

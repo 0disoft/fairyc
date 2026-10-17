@@ -124,10 +124,10 @@ func TestAnalyzePackagesResolvesEqualModulePathsByPackage(t *testing.T) {
 			types[structure.Type] = struct{}{}
 		}
 	}
-	if _, found := types[hir.Type("$p3::util::Token")]; !found {
+	if _, found := types[hir.ParseType("$p3::util::Token")]; !found {
 		t.Fatalf("AnalyzePackages() struct types = %v", types)
 	}
-	if _, found := types[hir.Type("$p4::util::Token")]; !found {
+	if _, found := types[hir.ParseType("$p4::util::Token")]; !found {
 		t.Fatalf("AnalyzePackages() struct types = %v", types)
 	}
 }

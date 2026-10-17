@@ -82,7 +82,7 @@ func TestStructDerefStoreRoundTrip(t *testing.T) {
 						case "nonplain":
 							for i := range bad.StructTypes {
 								if bad.StructTypes[i].Type == op.Type {
-									bad.StructTypes[i].Fields[0].Type = hir.Type("*void")
+									bad.StructTypes[i].Fields[0].Type = hir.ParseType("*void")
 								}
 							}
 						case "move":

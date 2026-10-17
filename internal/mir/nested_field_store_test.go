@@ -7,8 +7,8 @@ import (
 )
 
 func TestVerifyNestedFieldStore(t *testing.T) {
-	const root = hir.Type("main::Token")
-	const child = hir.Type("main::Span")
+	var root = hir.ParseType("main::Token")
+	var child = hir.ParseType("main::Span")
 	makeProgram := func() Program {
 		return Program{StructTypes: []StructType{
 			{Type: root, Name: "Token", Fields: []StructField{{Name: "position", Type: child}, {Name: "other", Type: hir.TypeBool}}},

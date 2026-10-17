@@ -9,7 +9,7 @@ import (
 
 func copyTestStruct(t *testing.T) runtimeValue {
 	t.Helper()
-	v, err := structValue(&mir.StructType{Type: "main::State", Fields: []mir.StructField{{Name: "count", Type: hir.TypeI32}}}, []runtimeValue{i32Value(7)})
+	v, err := structValue(&mir.StructType{Type: hir.ParseType("main::State"), Fields: []mir.StructField{{Name: "count", Type: hir.TypeI32}}}, []runtimeValue{i32Value(7)})
 	if err != nil {
 		t.Fatal(err)
 	}

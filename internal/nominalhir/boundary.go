@@ -69,16 +69,16 @@ type boundary struct {
 	remaining int
 }
 
-func (b *boundary) nominal(t hir.Type) bool { return strings.Contains(string(t), "@nominal:") }
+func (b *boundary) nominal(t hir.Type) bool { return strings.Contains(t.String(), "@nominal:") }
 func (b *boundary) scalar(t hir.Type) (hir.Type, error) {
 	if d, ok := b.types[t]; ok {
 		if d.Package != b.owner {
-			return "", fmt.Errorf("cross-package nominal boundary")
+			return hir.ParseType(""), fmt.Errorf("cross-package nominal boundary")
 		}
 		return hir.TypeUSize, nil
 	}
 	if b.nominal(t) {
-		return "", fmt.Errorf("unknown or compound nominal type %s", t)
+		return hir.ParseType(""), fmt.Errorf("unknown or compound nominal type %s", t)
 	}
 	return t, nil
 }
@@ -90,7 +90,7 @@ func (b *boundary) expression(e hir.Expression) (hir.Expression, error) {
 		}
 	}
 	if e.Kind == hir.ExpressionNominalWrap || e.Kind == hir.ExpressionNominalUnwrap {
-		if len(e.Children) != 1 || e.Operator != "" || e.Block != nil || len(e.Arms)+len(e.Fields)+len(e.Effects) != 0 || e.UnsafeScope != nil || e.ForeignABI != "" || e.TargetType != "" || e.Cooked != "" || e.Variant != "" {
+		if len(e.Children) != 1 || e.Operator != "" || e.Block != nil || len(e.Arms)+len(e.Fields)+len(e.Effects) != 0 || e.UnsafeScope != nil || e.ForeignABI != "" || e.TargetType != hir.ParseType("") || e.Cooked != "" || e.Variant != "" {
 			return e, fmt.Errorf("invalid boundary conversion")
 		}
 		child := e.Children[0]
@@ -173,7 +173,7 @@ func (b *boundary) expression(e hir.Expression) (hir.Expression, error) {
 	return e, nil
 }
 
-var hirType = reflect.TypeOf(hir.Type(""))
+var hirType = reflect.TypeOf(hir.ParseType(""))
 
 func (b *boundary) walk(v reflect.Value, depth int) (reflect.Value, error) {
 	b.remaining--
@@ -227,7 +227,7 @@ func (b *boundary) walk(v reflect.Value, depth int) (reflect.Value, error) {
 		case hir.Statement:
 			if x.Expression != nil {
 				actual := x.Expression.Type
-				want := hir.Type("")
+				want := hir.ParseType("")
 				switch x.Kind {
 				case hir.StatementBinding:
 					want = b.bindings[x.Binding]
@@ -241,7 +241,7 @@ func (b *boundary) walk(v reflect.Value, depth int) (reflect.Value, error) {
 						return reflect.Value{}, fmt.Errorf("nominal compound assignment")
 					}
 				}
-				if want != "" && (b.nominal(want) || b.nominal(actual)) && want != actual {
+				if want != hir.ParseType("") && (b.nominal(want) || b.nominal(actual)) && want != actual {
 					return reflect.Value{}, mismatch(want, actual, x.Span)
 				}
 			}

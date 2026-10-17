@@ -214,9 +214,9 @@ func genericType(value ast.TypeReference, binders map[string]int, nominals map[s
 			if element.Kind == TypeNominal || element.Kind == TypeParameter {
 				return TypeRef{Kind: TypeSlice, Arguments: []TypeRef{element}}, nil
 			}
-			slice := hir.Type("[" + element.Name + "]")
+			slice := hir.ParseType("[" + element.Name + "]")
 			if _, admitted := hir.ScalarViewElement(slice); admitted {
-				return TypeRef{Kind: TypeBuiltin, Name: string(slice)}, nil
+				return TypeRef{Kind: TypeBuiltin, Name: slice.String()}, nil
 			}
 			return TypeRef{}, fmt.Errorf("generic slice element has no resolved slice identity")
 		}
@@ -246,7 +246,7 @@ func genericType(value ast.TypeReference, binders map[string]int, nominals map[s
 		if position, ok := binders[value.Path]; ok && len(value.Arguments) == 0 {
 			return TypeRef{Kind: TypeParameter, Name: strconv.Itoa(position)}, nil
 		}
-		if len(value.Arguments) == 0 && builtinType(hir.Type(value.Path)) {
+		if len(value.Arguments) == 0 && builtinType(hir.ParseType(value.Path)) {
 			return TypeRef{Kind: TypeBuiltin, Name: value.Path}, nil
 		}
 		if resolved, ok := nominals[value.Path]; ok && len(value.Arguments) == len(resolved.Arguments) {

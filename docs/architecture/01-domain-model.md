@@ -48,7 +48,7 @@ Generics, interfaces, dynamic dispatch, captured closures, async, self-reference
 
 ## Identity model
 
-Compiler arenas use typed integer IDs. These IDs are build-local unless a contract explicitly promotes them. Atlas omits node IDs, derives opaque symbol identities from versioned semantic coordinates, and reserves human-maintained anchors for a later schema.
+Compiler arenas use typed IDs. These IDs are build-local unless a contract explicitly promotes them. HIR/MIR types use opaque, garbage-collectable interned `hir.TypeID` handles with structured `TypeKind` descriptors and direct child references; text/JSON boundaries retain canonical type spellings, never handle identities. Atlas omits node IDs, derives opaque symbol identities from versioned semantic coordinates, and reserves human-maintained anchors for a later schema.
 
 ## Invariants
 
@@ -59,6 +59,7 @@ Compiler arenas use typed integer IDs. These IDs are build-local unless a contra
 - Resolver, type, and Flow failures retain source-byte spans and do not expose build-local IDs as language contracts.
 - Safe borrows are non-null and cannot outlive their one proven owner or region origin.
 - Backends receive explicit evaluation, failure, and cleanup control flow.
+- HIR statement and expression kinds use separate `uint8` enums; JSON observations retain their existing string names. AST-to-HIR lowering maps syntax kinds explicitly.
 - Target layout is never calculated from the host Go runtime or host C defaults.
 - Public output order does not depend on Go map iteration or parallel scheduling.
 - Atlas cannot feed authority or semantic decisions back into the frontend.

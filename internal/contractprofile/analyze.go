@@ -150,7 +150,7 @@ func Analyze(program mir.Program, loopBudgets map[string]uint64) Report {
 			if containsRawType(field.Type) {
 				report.Violations = append(report.Violations, violationAt(
 					"CP1003",
-					string(resource.Type),
+					resource.Type.String(),
 					field.Span,
 					"contract resource field contains a raw-pointer type",
 				))
@@ -158,17 +158,17 @@ func Analyze(program mir.Program, loopBudgets map[string]uint64) Report {
 			if containsFloatType(field.Type) {
 				report.Violations = append(report.Violations, violationAt(
 					"CP1013",
-					string(resource.Type),
+					resource.Type.String(),
 					field.Span,
 					"contract resource field contains a floating-point type",
 				))
 			}
-			appendTargetTypeViolations(&report, string(resource.Type), field.Span, "resource field", field.Type)
+			appendTargetTypeViolations(&report, resource.Type.String(), field.Span, "resource field", field.Type)
 		}
 		if len(resource.DropEffects) != 0 {
 			report.Violations = append(report.Violations, violationAt(
 				"CP1002",
-				string(resource.Type),
+				resource.Type.String(),
 				resource.DropSpan,
 				"resource cleanup requires external effects: "+joinEffects(resource.DropEffects),
 			))

@@ -14,7 +14,7 @@ func TestIntegerStorageViewsMIR(t *testing.T) {
 				if mutable {
 					source = mutableI64StorageViewSource()
 				}
-				checkStorageViewMIR(t, strings.ReplaceAll(source, "i64", element), mutable, hir.Type("["+element+"]"))
+				checkStorageViewMIR(t, strings.ReplaceAll(source, "i64", element), mutable, hir.ParseType("["+element+"]"))
 			})
 		}
 	}

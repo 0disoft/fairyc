@@ -1544,7 +1544,7 @@ func comparisonRuntimeMatches(value runtimeValue, ownerType hir.Type) bool {
 }
 
 func valuePreservingIntegerCast(value runtimeValue, sourceType, targetType hir.Type) (runtimeValue, error) {
-	sourceMatches := value.typ == sourceType || sourceType == hir.TypeI32 && value.kind == valueI32 && value.typ == ""
+	sourceMatches := value.typ == sourceType || sourceType == hir.TypeI32 && value.kind == valueI32 && value.typ == hir.ParseType("")
 	if !hir.ValuePreservingIntegerCast(sourceType, targetType) || !sourceMatches {
 		return runtimeValue{}, capabilityError("integer cast has incompatible source or target type")
 	}

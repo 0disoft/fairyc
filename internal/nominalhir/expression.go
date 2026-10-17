@@ -11,7 +11,7 @@ func (c *checker) expression(e hir.Expression, bindings map[hir.SymbolID]binding
 	if depth > 128 || c.remaining < 0 {
 		return hir.Expression{}, fmt.Errorf("nominal HIR expression budget exceeded")
 	}
-	if e.Block != nil || len(e.Arms)+len(e.Fields)+len(e.Effects) != 0 || e.UnsafeScope != nil || e.ForeignABI != "" || e.TargetType != "" || e.Cooked != "" || e.Variant != "" {
+	if e.Block != nil || len(e.Arms)+len(e.Fields)+len(e.Effects) != 0 || e.UnsafeScope != nil || e.ForeignABI != "" || e.TargetType != hir.ParseType("") || e.Cooked != "" || e.Variant != "" {
 		return hir.Expression{}, fmt.Errorf("unsupported nominal expression metadata")
 	}
 	if !c.valueType(e.Type) && !(e.Kind == hir.ExpressionCall && e.Type == hir.TypeVoid) {
@@ -27,7 +27,7 @@ func (c *checker) expression(e hir.Expression, bindings map[hir.SymbolID]binding
 			return hir.Expression{}, fmt.Errorf("invalid direct call")
 		}
 		head := e.Children[0]
-		if head.Kind != hir.ExpressionPath || head.Symbol != e.Symbol || len(head.Children) != 0 || head.Block != nil || len(head.Arms)+len(head.Fields)+len(head.Effects) != 0 || head.UnsafeScope != nil || head.ForeignABI != "" || head.TargetType != "" || head.Operator != "" || head.Cooked != "" || head.Variant != "" || head.Type != "" {
+		if head.Kind != hir.ExpressionPath || head.Symbol != e.Symbol || len(head.Children) != 0 || head.Block != nil || len(head.Arms)+len(head.Fields)+len(head.Effects) != 0 || head.UnsafeScope != nil || head.ForeignABI != "" || head.TargetType != hir.ParseType("") || head.Operator != "" || head.Cooked != "" || head.Variant != "" || head.Type != hir.ParseType("") {
 			return hir.Expression{}, fmt.Errorf("invalid direct callee")
 		}
 		if e.Type != f.ResultType {

@@ -53,7 +53,7 @@ func prepareAggregateTypes(
 		}
 		allTypes = append(allTypes, typ)
 	}
-	slices.SortFunc(allTypes, func(left, right hir.Type) int { return strings.Compare(string(left), string(right)) })
+	slices.SortFunc(allTypes, func(left, right hir.Type) int { return strings.Compare(left.String(), right.String()) })
 	for _, typ := range allTypes {
 		if _, err := resolver.resolve(typ); err != nil {
 			return nil, nil, nil, nil, err
@@ -93,7 +93,7 @@ func prepareAggregateTypes(
 
 	orderedEnums := slices.Clone(enumDefinitions)
 	slices.SortFunc(orderedEnums, func(left, right mir.EnumType) int {
-		return strings.Compare(string(left.Type), string(right.Type))
+		return strings.Compare(left.Type.String(), right.Type.String())
 	})
 	enumerations := make([]enumCType, 0, len(orderedEnums))
 	enumByType := make(map[hir.Type]int, len(orderedEnums))
@@ -121,9 +121,9 @@ func (r *aggregateLayoutResolver) resolve(typ hir.Type) (layout.Type, error) {
 	}
 	if r.state[typ] == 1 {
 		if _, structure := r.structures[typ]; structure {
-			return layout.Type{}, CapabilityError{Feature: "recursive struct dependency involving " + strconv.Quote(string(typ))}
+			return layout.Type{}, CapabilityError{Feature: "recursive struct dependency involving " + strconv.Quote(typ.String())}
 		}
-		return layout.Type{}, CapabilityError{Feature: "recursive aggregate dependency involving " + strconv.Quote(string(typ))}
+		return layout.Type{}, CapabilityError{Feature: "recursive aggregate dependency involving " + strconv.Quote(typ.String())}
 	}
 	r.state[typ] = 1
 	var value layout.Type
@@ -153,7 +153,7 @@ func (r *aggregateLayoutResolver) resolve(typ hir.Type) (layout.Type, error) {
 func (r *aggregateLayoutResolver) resolveStruct(definition mir.StructType) (layout.Type, error) {
 	if len(definition.Fields) == 0 {
 		if definition.ReprC {
-			return layout.Type{}, CapabilityError{Feature: "empty repr(C) struct type " + strconv.Quote(string(definition.Type))}
+			return layout.Type{}, CapabilityError{Feature: "empty repr(C) struct type " + strconv.Quote(definition.Type.String())}
 		}
 		// Private C11 transport needs storage, even for a fieldless source value.
 		// This byte is not a source field and does not change the public C ABI.
@@ -163,7 +163,7 @@ func (r *aggregateLayoutResolver) resolveStruct(definition mir.StructType) (layo
 	for index, field := range definition.Fields {
 		fieldType, err := r.resolveStructField(field.Type, definition.ReprC)
 		if err != nil {
-			return layout.Type{}, CapabilityError{Feature: "struct type " + strconv.Quote(string(definition.Type)) + " field " + strconv.Quote(field.Name) + " of type " + strconv.Quote(string(field.Type)) + ": " + err.Error()}
+			return layout.Type{}, CapabilityError{Feature: "struct type " + strconv.Quote(definition.Type.String()) + " field " + strconv.Quote(field.Name) + " of type " + strconv.Quote(field.Type.String()) + ": " + err.Error()}
 		}
 		name := fmt.Sprintf("f_%d", index)
 		if definition.ReprC {
@@ -215,7 +215,7 @@ func (r *aggregateLayoutResolver) resolveStructField(value hir.Type, reprC bool)
 	}
 	switch value {
 	case hir.TypeU8, hir.TypeI32, hir.TypeI64, hir.TypeU32, hir.TypeUSize:
-		return layout.Type{Kind: layout.KindLanguageScalar, Name: string(value)}, nil
+		return layout.Type{Kind: layout.KindLanguageScalar, Name: value.String()}, nil
 	default:
 		if transport, found := cScalarTransportForType(value); found && reprC {
 			return layout.Type{Kind: layout.KindCScalar, Name: transport.targetName}, nil
@@ -229,7 +229,7 @@ func (r *aggregateLayoutResolver) resolveStructField(value hir.Type, reprC bool)
 
 func (r *aggregateLayoutResolver) resolveEnum(definition mir.EnumType) (layout.Type, error) {
 	if len(definition.Variants) == 0 {
-		return layout.Type{}, CapabilityError{Feature: "empty enum type " + strconv.Quote(string(definition.Type))}
+		return layout.Type{}, CapabilityError{Feature: "empty enum type " + strconv.Quote(definition.Type.String())}
 	}
 	unionFields := []layout.Field{{Name: "unused", Type: layout.Type{Kind: layout.KindLanguageScalar, Name: "u8"}}}
 	for variantIndex, variant := range definition.Variants {
@@ -240,7 +240,7 @@ func (r *aggregateLayoutResolver) resolveEnum(definition mir.EnumType) (layout.T
 		for fieldIndex, field := range variant.Fields {
 			fieldType, err := r.resolveEnumField(field.Type)
 			if err != nil {
-				return layout.Type{}, CapabilityError{Feature: "enum type " + strconv.Quote(string(definition.Type)) + " variant " + strconv.Quote(variant.Name) + " field " + strconv.Quote(field.Name) + " of type " + strconv.Quote(string(field.Type))}
+				return layout.Type{}, CapabilityError{Feature: "enum type " + strconv.Quote(definition.Type.String()) + " variant " + strconv.Quote(variant.Name) + " field " + strconv.Quote(field.Name) + " of type " + strconv.Quote(field.Type.String())}
 			}
 			fields = append(fields, layout.Field{Name: fmt.Sprintf("f_%d", fieldIndex), Type: fieldType})
 		}
@@ -271,7 +271,7 @@ func (r *aggregateLayoutResolver) resolveEnumField(value hir.Type) (layout.Type,
 	}
 	switch value {
 	case hir.TypeU8, hir.TypeI32, hir.TypeI64, hir.TypeU32, hir.TypeUSize:
-		return layout.Type{Kind: layout.KindLanguageScalar, Name: string(value)}, nil
+		return layout.Type{Kind: layout.KindLanguageScalar, Name: value.String()}, nil
 	default:
 		if _, _, pointer := hir.RawPointerElement(value); pointer {
 			return layout.Type{Kind: layout.KindPointer}, nil
@@ -332,7 +332,7 @@ func (r *aggregateLayoutResolver) resolveAggregateTaggedPayload(value hir.Type) 
 	}
 	switch value {
 	case hir.TypeU8, hir.TypeI32, hir.TypeI64, hir.TypeU32, hir.TypeUSize:
-		return layout.Type{Kind: layout.KindLanguageScalar, Name: string(value)}, true, nil
+		return layout.Type{Kind: layout.KindLanguageScalar, Name: value.String()}, true, nil
 	}
 	if _, found := r.structures[value]; found {
 		resolved, err := r.resolve(value)
@@ -347,7 +347,9 @@ func (r *aggregateLayoutResolver) resolveAggregateTaggedPayload(value hir.Type) 
 
 func orderStructDefinitions(definitions []mir.StructType) ([]mir.StructType, error) {
 	sorted := slices.Clone(definitions)
-	slices.SortFunc(sorted, func(left, right mir.StructType) int { return strings.Compare(string(left.Type), string(right.Type)) })
+	slices.SortFunc(sorted, func(left, right mir.StructType) int {
+		return strings.Compare(left.Type.String(), right.Type.String())
+	})
 	byType := make(map[hir.Type]mir.StructType, len(sorted))
 	for _, definition := range sorted {
 		if _, duplicate := byType[definition.Type]; duplicate {
@@ -361,7 +363,7 @@ func orderStructDefinitions(definitions []mir.StructType) ([]mir.StructType, err
 	visit = func(definition mir.StructType) error {
 		switch state[definition.Type] {
 		case 1:
-			return CapabilityError{Feature: "recursive struct dependency involving " + strconv.Quote(string(definition.Type))}
+			return CapabilityError{Feature: "recursive struct dependency involving " + strconv.Quote(definition.Type.String())}
 		case 2:
 			return nil
 		}
@@ -376,7 +378,7 @@ func orderStructDefinitions(definitions []mir.StructType) ([]mir.StructType, err
 				dependencies = append(dependencies, dependency)
 			}
 		}
-		slices.SortFunc(dependencies, func(left, right hir.Type) int { return strings.Compare(string(left), string(right)) })
+		slices.SortFunc(dependencies, func(left, right hir.Type) int { return strings.Compare(left.String(), right.String()) })
 		for _, dependency := range slices.Compact(dependencies) {
 			if err := visit(byType[dependency]); err != nil {
 				return err
@@ -447,7 +449,7 @@ func (e *emitter) aggregateEmissionOrder() ([]aggregateEmissionNode, error) {
 			return nil
 		}
 		if state[typ] == 1 {
-			return CapabilityError{Feature: "recursive aggregate emission dependency involving " + strconv.Quote(string(typ))}
+			return CapabilityError{Feature: "recursive aggregate emission dependency involving " + strconv.Quote(typ.String())}
 		}
 		state[typ] = 1
 		node := nodes[typ]
@@ -478,7 +480,7 @@ func (e *emitter) aggregateEmissionOrder() ([]aggregateEmissionNode, error) {
 				}
 			}
 		}
-		slices.SortFunc(dependencies, func(left, right hir.Type) int { return strings.Compare(string(left), string(right)) })
+		slices.SortFunc(dependencies, func(left, right hir.Type) int { return strings.Compare(left.String(), right.String()) })
 		for _, dependency := range slices.Compact(dependencies) {
 			if err := visit(dependency); err != nil {
 				return err

@@ -60,9 +60,9 @@ func (c *typeChecker) checkArraySubviewBorrow(expression *ast.Expression, result
 		return hir.TypeInvalid, true
 	}
 	root, _ := c.checkExpression(selected.Children[0], hir.TypeInvalid)
-	view := hir.SharedBorrow(hir.Type("[" + string(element) + "]"))
+	view := hir.SharedBorrow(hir.Slice(element))
 	if mutable {
-		view = hir.MutableBorrow(hir.Type("[" + string(element) + "]"))
+		view = hir.MutableBorrow(hir.Slice(element))
 	}
 	borrow := &hir.Expression{Kind: hir.ExpressionArrayViewBorrow, Type: view, Span: root.Span, Symbol: hir.NoSymbol,
 		Operator: expression.Text, Children: []hir.Expression{*root}}

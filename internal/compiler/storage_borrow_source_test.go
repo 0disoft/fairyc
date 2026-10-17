@@ -74,8 +74,8 @@ func TestPrivateVectorStorageBorrowSourceMIRMutations(t *testing.T) {
 	for name, mutate := range map[string]func(*mir.Operation){
 		"owner omitted":        func(op *mir.Operation) { op.Operands = op.Operands[1:] },
 		"mutable result":       func(op *mir.Operation) { op.Type = hir.MutableBorrow(hir.TypeI32) },
-		"unknown element":      func(op *mir.Operation) { op.Type = hir.SharedBorrow("main::Missing") },
-		"mutable owner":        func(op *mir.Operation) { op.OwnerType = hir.MutableBorrow("main::Owner") },
+		"unknown element":      func(op *mir.Operation) { op.Type = hir.SharedBorrow(hir.ParseType("main::Missing")) },
+		"mutable owner":        func(op *mir.Operation) { op.OwnerType = hir.MutableBorrow(hir.ParseType("main::Owner")) },
 		"raw owner":            func(op *mir.Operation) { op.OwnerType = hir.RawPointer(hir.TypeVoid, false) },
 		"typed address":        func(op *mir.Operation) { op.IndexType = hir.RawPointer(hir.TypeI32, false) },
 		"unknown owner local":  func(op *mir.Operation) { op.Operands[0].Local = 900000 },
@@ -298,7 +298,7 @@ func TestPrivateVectorStorageBorrowSourceMutableMIR(t *testing.T) {
 				}
 				ownerElement, ownerMutable, ownerBorrowed := hir.BorrowElement(operation.OwnerType)
 				if operation.Type != hir.MutableBorrow(hir.TypeI32) ||
-					!ownerBorrowed || !ownerMutable || !strings.HasSuffix(string(ownerElement), "::main::Owner") ||
+					!ownerBorrowed || !ownerMutable || !strings.HasSuffix(ownerElement.String(), "::main::Owner") ||
 					operation.IndexType != hir.RawPointer(hir.TypeVoid, true) {
 					t.Fatalf("mutable storage borrow lost operand types: %+v", operation)
 				}

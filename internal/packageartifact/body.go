@@ -128,7 +128,7 @@ func describeStableBody(record FunctionRecord, context ContextDescriptor, coordi
 	function.Name = record.Descriptor.Name
 	if err := mapFunctionTypes(&function, func(value hir.Type) (hir.Type, error) {
 		stable, stableErr := stableType(value, coordinates)
-		return hir.Type(stable), stableErr
+		return hir.ParseType(stable), stableErr
 	}); err != nil {
 		return StableBodyArtifact{}, fmt.Errorf("stabilize function body types: %w", err)
 	}
@@ -253,7 +253,7 @@ func rebindStableBody(body StableBodyArtifact, context ContextDescriptor, coordi
 		}
 	}
 	if err := mapFunctionTypes(&function, func(value hir.Type) (hir.Type, error) {
-		return rebindStableType(string(value), coordinates)
+		return rebindStableType(value.String(), coordinates)
 	}); err != nil {
 		return mir.Function{}, fmt.Errorf("rebind function body types: %w", err)
 	}
@@ -400,7 +400,7 @@ func ValidateStableBody(body StableBodyArtifact) error {
 		return fmt.Errorf("stable function body has an extra or unsorted call binding")
 	}
 	if err := mapFunctionTypes(&canonical, func(value hir.Type) (hir.Type, error) {
-		if !validStableType(string(value)) {
+		if !validStableType(value.String()) {
 			return hir.TypeInvalid, fmt.Errorf("invalid stable body type %q", value)
 		}
 		return value, nil
@@ -425,13 +425,13 @@ func ValidateStableBody(body StableBodyArtifact) error {
 	}
 	descriptor := FunctionDescriptor{Package: body.Package, Name: body.Function.Name}
 	for _, parameterType := range body.Function.ParameterTypes {
-		descriptor.ParameterTypes = append(descriptor.ParameterTypes, string(parameterType))
+		descriptor.ParameterTypes = append(descriptor.ParameterTypes, parameterType.String())
 	}
-	descriptor.ResultType = string(body.Function.ResultType)
+	descriptor.ResultType = body.Function.ResultType.String()
 	for _, effect := range body.Function.Effects {
 		descriptor.Effects = append(descriptor.Effects, string(effect))
 	}
-	descriptor.DropGlueFor = string(body.Function.DropGlueFor)
+	descriptor.DropGlueFor = body.Function.DropGlueFor.String()
 	computed, err := ComputeFunctionID(descriptor)
 	if err != nil {
 		return fmt.Errorf("verify stable body function descriptor: %w", err)
@@ -534,7 +534,7 @@ func rebindStableContextFunctionSymbols(processContext mir.Program, stable Conte
 
 func mapFunctionTypes(function *mir.Function, transform func(hir.Type) (hir.Type, error)) error {
 	mapType := func(value *hir.Type) error {
-		if *value == "" {
+		if *value == hir.ParseType("") {
 			return nil
 		}
 		mapped, err := transform(*value)

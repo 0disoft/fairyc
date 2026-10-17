@@ -142,7 +142,7 @@ func stateBodyPackage(t *testing.T, packageID hir.PackageID, symbol hir.SymbolID
 	return hir.Package{
 		Modules: []hir.Module{{Package: packageID, Path: "ledger", Functions: []hir.Function{{
 			Symbol: symbol, Name: "apply", ResultType: hir.TypeVoid,
-			Parameters: []hir.Parameter{{Type: hir.Type(hir.QualifiedModulePath(packageID, "types::Account"))}},
+			Parameters: []hir.Parameter{{Type: hir.ParseType(hir.QualifiedModulePath(packageID, "types::Account"))}},
 			Effects:    []hir.Effect{hir.EffectStorageRead, hir.EffectStorageWrite},
 		}}}},
 		StateLayouts: []hir.StateLayout{{Package: packageID, ContractUID: "example.ledger", Fields: []hir.StateField{{

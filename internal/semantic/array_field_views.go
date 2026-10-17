@@ -44,9 +44,9 @@ func (c *typeChecker) arrayFieldView(source *ast.Expression, field hir.Expressio
 		return hir.Expression{}, false
 	}
 	element, _, _ := hir.FixedArrayParts(field.Type)
-	view := hir.SharedBorrow(hir.Type("[" + string(element) + "]"))
+	view := hir.SharedBorrow(hir.Slice(element))
 	if mutable {
-		view = hir.MutableBorrow(hir.Type("[" + string(element) + "]"))
+		view = hir.MutableBorrow(hir.Slice(element))
 	}
 	if !hir.ArrayViewBorrow(address.Type, view, operator) {
 		return hir.Expression{}, false

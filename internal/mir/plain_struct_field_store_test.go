@@ -6,9 +6,9 @@ import (
 )
 
 func TestVerifyPlainStructFieldStore(t *testing.T) {
-	const root = hir.Type("main::Token")
-	const position = hir.Type("main::Position")
-	const leaf = hir.Type("main::Span")
+	var root = hir.ParseType("main::Token")
+	var position = hir.ParseType("main::Position")
+	var leaf = hir.ParseType("main::Span")
 	makeProgram := func(nested bool) Program {
 		value, field, ancestors := position, "position", []string(nil)
 		if nested {

@@ -8,9 +8,9 @@ import (
 func TestCScalarVocabularyIsClosedAndOrdered(t *testing.T) {
 	t.Parallel()
 	want := []Type{
-		"c::bool", "c::char", "c::double", "c::float", "c::int", "c::long", "c::longlong",
-		"c::schar", "c::short", "c::size_t", "c::ssize_t", "c::uchar", "c::uint", "c::ulong",
-		"c::ulonglong", "c::ushort",
+		ParseType("c::bool"), ParseType("c::char"), ParseType("c::double"), ParseType("c::float"), ParseType("c::int"), ParseType("c::long"), ParseType("c::longlong"),
+		ParseType("c::schar"), ParseType("c::short"), ParseType("c::size_t"), ParseType("c::ssize_t"), ParseType("c::uchar"), ParseType("c::uint"), ParseType("c::ulong"),
+		ParseType("c::ulonglong"), ParseType("c::ushort"),
 	}
 	got := CScalarTypes()
 	if !slices.Equal(got, want) {
@@ -22,16 +22,16 @@ func TestCScalarVocabularyIsClosedAndOrdered(t *testing.T) {
 		}
 	}
 	got[0] = TypeInvalid
-	if CScalarTypes()[0] != TypeCBool || IsCScalar(Type("c::unknown")) {
+	if CScalarTypes()[0] != TypeCBool || IsCScalar(ParseType("c::unknown")) {
 		t.Fatal("C scalar vocabulary leaked mutation or accepted an unknown type")
 	}
 }
 
 func TestResultElementsPreservesNestedPayloads(t *testing.T) {
 	t.Parallel()
-	value := Result(Result(TypeI32, Type("main::InnerError")), Type("main::OuterError"))
+	value := Result(Result(TypeI32, ParseType("main::InnerError")), ParseType("main::OuterError"))
 	success, failure, ok := ResultElements(value)
-	if !ok || success != Result(TypeI32, Type("main::InnerError")) || failure != Type("main::OuterError") {
+	if !ok || success != Result(TypeI32, ParseType("main::InnerError")) || failure != ParseType("main::OuterError") {
 		t.Fatalf("ResultElements(%q) = %q, %q, %v", value, success, failure, ok)
 	}
 }
@@ -54,7 +54,7 @@ func TestOptionElementPreservesNestedPayload(t *testing.T) {
 
 func TestOptionElementRejectsMultiplePayloads(t *testing.T) {
 	t.Parallel()
-	if _, ok := OptionElement(Type("Option<i32, bool>")); ok {
+	if _, ok := OptionElement(ParseType("Option<i32, bool>")); ok {
 		t.Fatal("OptionElement() accepted two payload types")
 	}
 }
@@ -63,10 +63,10 @@ func TestFixedArrayPartsRoundTripsCanonicalScalarArray(t *testing.T) {
 	t.Parallel()
 	value := FixedArray(TypeU32, 3)
 	element, length, ok := FixedArrayParts(value)
-	if value != "[u32; 3]" || !ok || element != TypeU32 || length != 3 {
+	if value != ParseType("[u32; 3]") || !ok || element != TypeU32 || length != 3 {
 		t.Fatalf("FixedArray round trip = %q, %q, %d, %v", value, element, length, ok)
 	}
-	for _, invalid := range []Type{"[u32]", "[u32; 0]", "[u32; nope]", "[u32; 3; 4]"} {
+	for _, invalid := range []Type{ParseType("[u32]"), ParseType("[u32; 0]"), ParseType("[u32; nope]"), ParseType("[u32; 3; 4]")} {
 		if _, _, accepted := FixedArrayParts(invalid); accepted {
 			t.Fatalf("FixedArrayParts(%q) accepted invalid type", invalid)
 		}
@@ -84,8 +84,8 @@ func TestExecutableFixedArrayShapeEnforcesClosedElementAndLengthSet(t *testing.T
 		{element: TypeUSize, length: MaxExecutableFixedArrayElements, want: true},
 		{element: TypeI32, length: 0, want: false},
 		{element: TypeU8, length: MaxExecutableFixedArrayElements + 1, want: false},
-		{element: Type("main::Token"), length: 1, want: true}, // Nominal shape only; stage-owned definition checks remain required.
-		{element: Type("*mut i32"), length: 1, want: false},
+		{element: ParseType("main::Token"), length: 1, want: true}, // Nominal shape only; stage-owned definition checks remain required.
+		{element: ParseType("*mut i32"), length: 1, want: false},
 	} {
 		if got := ExecutableFixedArrayShape(test.element, test.length); got != test.want {
 			t.Errorf("ExecutableFixedArrayShape(%q, %d) = %v, want %v", test.element, test.length, got, test.want)

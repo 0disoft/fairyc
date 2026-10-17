@@ -50,12 +50,12 @@ func (a *analyzer) allocErrorType() (hir.Type, bool) {
 		if value == nil || !value.public || value.typ == hir.TypeInvalid {
 			continue
 		}
-		if result != "" && result != value.typ {
+		if result != hir.ParseType("") && result != value.typ {
 			return hir.TypeInvalid, false
 		}
 		result = value.typ
 	}
-	return result, result != ""
+	return result, result != hir.ParseType("")
 }
 
 func (c *typeChecker) checkRegion(expression *ast.Expression, expectedTail hir.Type) (*hir.Expression, bool) {

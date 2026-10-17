@@ -110,11 +110,11 @@ func (l *functionLowerer) lowerFieldStore(statement hir.Statement) error {
 
 func validFieldStoreCommonShape(op Operation) bool {
 	_, mutable, borrowed := hir.BorrowElement(op.OwnerType)
-	return op.OwnerType != "" && op.OwnerType != hir.TypeInvalid && (!borrowed || mutable) &&
+	return op.OwnerType != hir.ParseType("") && op.OwnerType != hir.TypeInvalid && (!borrowed || mutable) &&
 		op.Field != "" && op.DestinationLocal == NoLocal && op.Symbol == hir.NoSymbol &&
 		len(op.Operands) == 2 && op.Operands[0].Kind == OperandLocal && op.Operands[0].Local >= 0 &&
 		len(op.TrapCategories) == 0 && op.Operator == "" && op.Destination == "" &&
-		op.ProjectionEntity == "" && op.DropFlagEntity == "" && op.IndexType == "" && op.Variant == "" &&
+		op.ProjectionEntity == "" && op.DropFlagEntity == "" && op.IndexType == hir.ParseType("") && op.Variant == "" &&
 		!op.MovePayload && !op.FlagClearedFirst && op.UnsafeScope == (hir.Span{}) && op.SourceForm == "" && op.ExitKind == ""
 }
 
@@ -142,7 +142,7 @@ func mutableIndexedOwner(index hir.Expression) (hir.Expression, bool) {
 		if !array || element != index.Type || !hir.ExecutableFixedArrayShape(element, length) {
 			return hir.Expression{}, false
 		}
-		view := hir.MutableBorrow(hir.Type("[" + string(element) + "]"))
+		view := hir.MutableBorrow(hir.Slice(element))
 		if !hir.ArrayViewBorrow(index.Children[0].Type, view, "&mut") {
 			return hir.Expression{}, false
 		}

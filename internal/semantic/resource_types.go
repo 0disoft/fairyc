@@ -49,14 +49,14 @@ func (a *analyzer) prepareAggregateIdentities() {
 		for index := range module.file.Module.Enums {
 			enumeration := &module.file.Module.Enums[index]
 			if value := a.enums[enumeration]; value != nil {
-				value.typ = hir.Type(module.identityPath() + "::" + enumeration.Name)
+				value.typ = hir.ParseType(module.identityPath() + "::" + enumeration.Name)
 				a.enumTypes[value.typ] = &enumInfo{symbol: value, variants: make(map[string]enumVariant)}
 			}
 		}
 		for index := range module.file.Module.Structs {
 			structure := &module.file.Module.Structs[index]
 			if value := a.structs[structure]; value != nil {
-				value.typ = hir.Type(module.identityPath() + "::" + structure.Name)
+				value.typ = hir.ParseType(module.identityPath() + "::" + structure.Name)
 				a.structTypes[value.typ] = &structInfo{symbol: value, fields: make(map[string]resourceField)}
 			}
 		}
@@ -66,7 +66,7 @@ func (a *analyzer) prepareAggregateIdentities() {
 			if value == nil {
 				continue
 			}
-			value.typ = hir.Type(module.identityPath() + "::" + resource.Name)
+			value.typ = hir.ParseType(module.identityPath() + "::" + resource.Name)
 			a.resourceTypes[value.typ] = &resourceInfo{symbol: value, fields: make(map[string]resourceField)}
 		}
 	}
@@ -364,7 +364,7 @@ func (a *analyzer) canonicalTypeReference(module *moduleScope, reference ast.Typ
 		if !ok {
 			return hir.TypeInvalid, false
 		}
-		slice := hir.Type("[" + string(element) + "]")
+		slice := hir.Slice(element)
 		_, admitted := hir.ScalarViewElement(slice)
 		_, nominal := hir.StructSliceElement(slice)
 		return slice, admitted || nominal && a.structTypes[element] != nil
@@ -457,7 +457,7 @@ func (a *analyzer) canonicalNamedType(module *moduleScope, reference ast.TypeRef
 	case "Region":
 		return hir.TypeRegion, true
 	}
-	candidate := hir.Type(reference.Path)
+	candidate := hir.ParseType(reference.Path)
 	if hir.IsCScalar(candidate) {
 		return candidate, true
 	}

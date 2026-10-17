@@ -283,7 +283,7 @@ func buildDeclarations(hirPackage hir.Package, metadata map[hir.PackageID]packag
 			}
 		}
 		for _, function := range module.Functions {
-			if function.DropGlueFor != "" {
+			if function.DropGlueFor != hir.ParseType("") {
 				if function.Symbol == hir.NoSymbol {
 					return nil, nil, nil, nil, nil, nil, fmt.Errorf("compiler-private drop function in %q has no symbol", module.Path)
 				}
@@ -403,10 +403,10 @@ func buildDocumentationSpans(
 			}
 		}
 		for _, value := range module.Functions {
-			if value.DropGlueFor != "" && value.DocumentationSpan != (hir.Span{}) {
+			if value.DropGlueFor != hir.ParseType("") && value.DocumentationSpan != (hir.Span{}) {
 				return nil, fmt.Errorf("compiler-private drop glue carries declaration documentation")
 			}
-			if value.DropGlueFor == "" {
+			if value.DropGlueFor == hir.ParseType("") {
 				if err := appendDocumentation(DeclarationFunction, value.Span, value.DocumentationSpan); err != nil {
 					return nil, err
 				}
@@ -543,7 +543,7 @@ func resourceDeclaration(module hir.Module, value hir.Resource, metadata map[hir
 func functionDeclaration(module hir.Module, value hir.Function, metadata map[hir.PackageID]packageMetadata) (Declaration, error) {
 	name := value.Name
 	var owner *TypeRef
-	if value.OwnerType != "" {
+	if value.OwnerType != hir.ParseType("") {
 		normalized, err := normalizeType(value.OwnerType, metadata)
 		if err != nil {
 			return Declaration{}, err
@@ -675,7 +675,7 @@ func normalizeType(value hir.Type, metadata map[hir.PackageID]packageMetadata) (
 		return TypeRef{Kind: TypeSlice, Arguments: []TypeRef{argument}}, err
 	}
 	if builtinType(value) {
-		return TypeRef{Kind: TypeBuiltin, Name: string(value)}, nil
+		return TypeRef{Kind: TypeBuiltin, Name: value.String()}, nil
 	}
 	if element, mutable, ok := hir.BorrowElement(value); ok {
 		argument, err := normalizeType(element, metadata)
@@ -718,7 +718,7 @@ func normalizeType(value hir.Type, metadata map[hir.PackageID]packageMetadata) (
 }
 
 func nominalTypeParts(value hir.Type) (hir.PackageID, string, bool) {
-	text := string(value)
+	text := value.String()
 	if strings.HasPrefix(text, "$p") {
 		separator := strings.Index(text, "::")
 		if separator <= 2 || separator+2 >= len(text) {
@@ -758,7 +758,7 @@ func buildFunctionSummaries(
 	resolvedCalls := 0
 	externalCalls := 0
 	for _, function := range program.Functions {
-		if function.DropGlueFor != "" {
+		if function.DropGlueFor != hir.ParseType("") {
 			if _, known := privateSymbols[function.Symbol]; !known {
 				return nil, 0, 0, fmt.Errorf("MIR drop function %q has no HIR private-symbol owner", function.Name)
 			}

@@ -54,7 +54,7 @@ func (e *emitter) prepareDropTraceSites() error {
 		id := uint32(index)
 		e.dropSiteByKey[key] = id
 		e.dropSites[index] = DropSite{
-			ID: id, Package: key.span.Package, ResourceType: string(key.resourceType), Source: key.span.Source,
+			ID: id, Package: key.span.Package, ResourceType: key.resourceType.String(), Source: key.span.Source,
 			StartByte: key.span.StartByte, EndByte: key.span.EndByte,
 		}
 	}
@@ -62,7 +62,7 @@ func (e *emitter) prepareDropTraceSites() error {
 }
 
 func compareDropSiteKey(left, right dropSiteKey) int {
-	if compared := strings.Compare(string(left.resourceType), string(right.resourceType)); compared != 0 {
+	if compared := strings.Compare(left.resourceType.String(), right.resourceType.String()); compared != 0 {
 		return compared
 	}
 	if compared := cmp.Compare(left.span.Package, right.span.Package); compared != 0 {

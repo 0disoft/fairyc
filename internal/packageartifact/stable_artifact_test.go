@@ -152,7 +152,7 @@ func TestStablePackageArtifactBytesIgnoreUnreferencedWorkspaceDeclarations(t *te
 
 	mutated := mir.Clone(original)
 	mutated.StructTypes = append(mutated.StructTypes, mir.StructType{
-		Type: hir.Type(hir.QualifiedModulePath(rootPackage, "private::CacheNoise")),
+		Type: hir.ParseType(hir.QualifiedModulePath(rootPackage, "private::CacheNoise")),
 		Name: "CacheNoise",
 		Span: hir.Span{Package: rootPackage},
 	})

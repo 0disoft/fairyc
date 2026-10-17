@@ -8,13 +8,13 @@ import (
 
 func TestStructDerefStoreBackingAndCopy(t *testing.T) {
 	child := copyTestStruct(t)
-	definition := &mir.StructType{Type: "main::Token", Fields: []mir.StructField{{Name: "nested", Type: child.typ}}}
+	definition := &mir.StructType{Type: hir.ParseType("main::Token"), Fields: []mir.StructField{{Name: "nested", Type: child.typ}}}
 	token, e := structValue(definition, []runtimeValue{child})
 	if e != nil {
 		t.Fatal(e)
 	}
 	backing := &arrayState{elements: []runtimeValue{token.cloneForValueCopy()}}
-	view := runtimeValue{kind: valueView, typ: hir.MutableBorrow(hir.Type("[main::Token]")), view: &indexedViewState{array: backing, length: 1, mutable: true}}
+	view := runtimeValue{kind: valueView, typ: hir.MutableBorrow(hir.ParseType("[main::Token]")), view: &indexedViewState{array: backing, length: 1, mutable: true}}
 	selected, e := view.borrowStructElement(0, hir.MutableBorrow(token.typ))
 	if e != nil {
 		t.Fatal(e)

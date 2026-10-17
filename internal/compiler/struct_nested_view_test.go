@@ -37,14 +37,14 @@ func TestStructNestedStorageMIR(t *testing.T) {
 			}
 			var token hir.Type
 			for _, s := range program.StructTypes {
-				if strings.HasSuffix(string(s.Type), "::Token") {
+				if strings.HasSuffix(s.Type.String(), "::Token") {
 					token = s.Type
 				}
 			}
 			found := false
 			for i := range program.StructTypes {
 				s := &program.StructTypes[i]
-				if !strings.HasSuffix(string(s.Type), "::Span") {
+				if !strings.HasSuffix(s.Type.String(), "::Span") {
 					continue
 				}
 				found = true
@@ -52,7 +52,7 @@ func TestStructNestedStorageMIR(t *testing.T) {
 				case "empty":
 					s.Fields = nil
 				case "missing":
-					s.Fields[0].Type = hir.Type("main::Missing")
+					s.Fields[0].Type = hir.ParseType("main::Missing")
 				case "borrow":
 					s.Fields[0].Type = hir.SharedBorrow(hir.TypeI32)
 				case "pointer":
@@ -60,8 +60,8 @@ func TestStructNestedStorageMIR(t *testing.T) {
 				case "resource":
 					s.Fields[0].Type = program.ResourceTypes[0].Type
 				case "enum":
-					s.Fields[0].Type = hir.Type("main::Tag")
-					program.EnumTypes = append(program.EnumTypes, mir.EnumType{Type: hir.Type("main::Tag"), Name: "Tag"})
+					s.Fields[0].Type = hir.ParseType("main::Tag")
+					program.EnumTypes = append(program.EnumTypes, mir.EnumType{Type: hir.ParseType("main::Tag"), Name: "Tag"})
 				case "zero-array":
 					s.Fields[0].Type = hir.FixedArray(hir.TypeI32, 0)
 				case "oversize-array":

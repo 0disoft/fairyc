@@ -686,8 +686,8 @@ func TestDropTraceRecordsUseSourceLinkedSiteIDs(t *testing.T) {
 	fixture := cbackendfixture.EmittedCase{
 		ID: "drop",
 		DropTrace: []interpreter.DropEvent{
-			{ResourceType: "main::Token", Binding: span},
-			{ResourceType: "main::Token", Binding: span},
+			{ResourceType: hir.ParseType("main::Token"), Binding: span},
+			{ResourceType: hir.ParseType("main::Token"), Binding: span},
 		},
 		TraceUnit: cbackend.Unit{DropSites: []cbackend.DropSite{{
 			ID: 7, ResourceType: "main::Token", Source: "main.fy", StartByte: 10, EndByte: 15,

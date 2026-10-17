@@ -42,7 +42,7 @@ func TestPrivateStorageQuerySource(t *testing.T) {
 			for _, op := range block.Operations {
 				if op.Kind == mir.OperationStorageLayout {
 					count++
-					if len(op.Operands) != 0 || op.OwnerType == "" || op.Span.Source == "" {
+					if len(op.Operands) != 0 || op.OwnerType == hir.ParseType("") || op.Span.Source == "" {
 						t.Fatal("query lost source/type or acquired value operand")
 					}
 				}

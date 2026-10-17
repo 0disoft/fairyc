@@ -66,7 +66,7 @@ func TestCallTypeDiagnosticsMessage(t *testing.T) {
 		{"$p1::ids::Index", "$p2::ids::Index", `: expected "$p1::ids::Index", got "$p2::ids::Index"`},
 		{"", "", ""},
 	} {
-		d := semantic.Diagnostic{Code: "E1006", ExpectedType: hir.Type(test.expected), ActualType: hir.Type(test.actual)}
+		d := semantic.Diagnostic{Code: "E1006", ExpectedType: hir.ParseType(test.expected), ActualType: hir.ParseType(test.actual)}
 		if got, want := semanticDiagnosticMessage(d), semanticDiagnosticSummary("E1006")+test.suffix; got != want {
 			t.Fatalf("got %q, want %q", got, want)
 		}

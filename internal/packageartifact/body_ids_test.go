@@ -83,11 +83,11 @@ func TestFunctionGraphIDsRewriteBurnLocalSymbol(t *testing.T) {
 	t.Parallel()
 	function := mir.Function{
 		Name: "main::burn", Entry: 0,
-		Resources: []mir.ResourceLocal{{Symbol: 71, Type: hir.Type("main::Coin"), Parameter: true}},
+		Resources: []mir.ResourceLocal{{Symbol: 71, Type: hir.ParseType("main::Coin"), Parameter: true}},
 		Blocks: []mir.Block{{
 			ID: 0,
 			Operations: []mir.Operation{{
-				Kind: mir.OperationBurn, Symbol: 71, DestinationLocal: mir.NoLocal, Type: hir.Type("main::Coin"),
+				Kind: mir.OperationBurn, Symbol: 71, DestinationLocal: mir.NoLocal, Type: hir.ParseType("main::Coin"),
 			}},
 			Terminator: mir.Terminator{Kind: mir.TerminatorReturn, UnwindSuccessor: mir.NoBlock, DestinationLocal: mir.NoLocal},
 		}},

@@ -66,7 +66,7 @@ func TestGenericAggregateProvenanceRetainsKindsAndOriginalFields(t *testing.T) {
 			}
 		case genericsource.OriginResource:
 			for _, typ := range result.MIR.ResourceTypes {
-				if typ.Type == hir.Type("main::"+origin.GeneratedName) {
+				if typ.Type == hir.ParseType("main::"+origin.GeneratedName) {
 					matches++
 				}
 			}

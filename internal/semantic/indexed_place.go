@@ -136,10 +136,10 @@ func (c *typeChecker) indexedArrayBorrow(source *ast.Expression, child *hir.Expr
 	if lowered.Kind != hir.ExpressionArrayIndex || len(lowered.Children) != 2 || lowered.Type != element || lowered.Children[0].Type != owner.typ {
 		return hir.Expression{}, false
 	}
-	view := hir.SharedBorrow(hir.Type("[" + string(element) + "]"))
+	view := hir.SharedBorrow(hir.Slice(element))
 	operator := "&"
 	if mutable {
-		view = hir.MutableBorrow(hir.Type("[" + string(element) + "]"))
+		view = hir.MutableBorrow(hir.Slice(element))
 		operator = "&mut"
 	}
 	if !hir.ArrayViewBorrow(owner.typ, view, operator) {

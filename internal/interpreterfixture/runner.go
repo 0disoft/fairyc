@@ -275,7 +275,7 @@ func dropTraceEqual(actual []interpreter.DropEvent, expected []dropExpectation) 
 		return false
 	}
 	for index := range actual {
-		if string(actual[index].ResourceType) != expected[index].ResourceType ||
+		if (actual[index].ResourceType).String() != expected[index].ResourceType ||
 			actual[index].Binding.Package != hir.DefaultPackage ||
 			actual[index].Binding.Source != expected[index].Binding.Source ||
 			actual[index].Binding.StartByte != expected[index].Binding.StartByte ||

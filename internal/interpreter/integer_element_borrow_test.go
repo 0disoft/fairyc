@@ -8,9 +8,9 @@ import (
 
 func TestIntegerElementBorrowBacking(t *testing.T) {
 	for _, value := range []runtimeValue{{kind: valueU8, typ: hir.TypeU8, u64: 7}, runtimeValue{kind: valueI32, typ: hir.TypeI32, i32: 7}, {kind: valueI64, typ: hir.TypeI64, i64: 4000000000}, {kind: valueU32, typ: hir.TypeU32, u64: 4000000000}, {kind: valueUSize, typ: hir.TypeUSize, u64: 4000000000}} {
-		t.Run(string(value.typ), func(t *testing.T) {
+		t.Run(value.typ.String(), func(t *testing.T) {
 			backing := &arrayState{elements: []runtimeValue{value, value}}
-			view := runtimeValue{kind: valueView, typ: hir.MutableBorrow(hir.Type("[" + string(value.typ) + "]")), view: &indexedViewState{array: backing, offset: 1, length: 1, mutable: true}}
+			view := runtimeValue{kind: valueView, typ: hir.MutableBorrow(hir.Slice(value.typ)), view: &indexedViewState{array: backing, offset: 1, length: 1, mutable: true}}
 			borrowed, e := view.borrowViewElement(0, hir.MutableBorrow(value.typ))
 			if e != nil {
 				t.Fatal(e)
@@ -41,7 +41,7 @@ func TestIntegerElementBorrowBacking(t *testing.T) {
 					t.Fatal("bounds accepted")
 				}
 			}
-			view.typ = hir.SharedBorrow(hir.Type("[" + string(value.typ) + "]"))
+			view.typ = hir.SharedBorrow(hir.Slice(value.typ))
 			if _, e := view.borrowViewElement(0, hir.MutableBorrow(value.typ)); e == nil {
 				t.Fatal("shared receiver became mutable")
 			}

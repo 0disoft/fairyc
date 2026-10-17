@@ -44,7 +44,7 @@ func TestCopiedMutableStructForMIR(t *testing.T) {
 			for _, op := range b.Operations {
 				if op.Kind == mir.OperationViewIndex {
 					count++
-					if !hir.MutableIndexedView(op.OwnerType) || op.Type != hir.Type(hir.QualifiedModulePath(1, "main")+"::Token") {
+					if !hir.MutableIndexedView(op.OwnerType) || op.Type != hir.ParseType(hir.QualifiedModulePath(1, "main")+"::Token") {
 						t.Fatal("loop did not load a matching independent Token value")
 					}
 				}
@@ -90,9 +90,9 @@ func TestCopiedMutableStructForMIR(t *testing.T) {
 						}
 						found = true
 						if name == "wrong-nominal" {
-							op.Type = hir.Type(hir.QualifiedModulePath(1, "main") + "::Other")
+							op.Type = hir.ParseType(hir.QualifiedModulePath(1, "main") + "::Other")
 						} else {
-							op.OwnerType = hir.SharedBorrow(hir.Type("[" + hir.QualifiedModulePath(1, "main") + "::Token]"))
+							op.OwnerType = hir.SharedBorrow(hir.ParseType("[" + hir.QualifiedModulePath(1, "main") + "::Token]"))
 						}
 					}
 				}

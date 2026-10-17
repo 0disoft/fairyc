@@ -727,10 +727,10 @@ func prepareResourceTypes(definitions []mir.ResourceType, engine *layout.Engine,
 	byType := make(map[hir.Type]int, len(ordered))
 	for _, definition := range ordered {
 		if definition.DropKind != hir.ResourceDropEmpty && definition.DropKind != hir.ResourceDropNonEmpty {
-			return nil, nil, CapabilityError{Feature: "resource type " + strconv.Quote(string(definition.Type)) + " with unsupported drop behavior"}
+			return nil, nil, CapabilityError{Feature: "resource type " + strconv.Quote(definition.Type.String()) + " with unsupported drop behavior"}
 		}
 		if len(definition.Fields) == 0 {
-			return nil, nil, CapabilityError{Feature: "empty resource type " + strconv.Quote(string(definition.Type))}
+			return nil, nil, CapabilityError{Feature: "empty resource type " + strconv.Quote(definition.Type.String())}
 		}
 		fields := make([]layout.Field, 0, len(definition.Fields))
 		fieldIndex := make(map[string]int, len(definition.Fields))
@@ -752,7 +752,7 @@ func prepareResourceTypes(definitions []mir.ResourceType, engine *layout.Engine,
 				nestedResource = true
 			}
 			if !ok {
-				return nil, nil, CapabilityError{Feature: "resource type " + strconv.Quote(string(definition.Type)) + " field " + strconv.Quote(field.Name) + " of type " + strconv.Quote(string(field.Type))}
+				return nil, nil, CapabilityError{Feature: "resource type " + strconv.Quote(definition.Type.String()) + " field " + strconv.Quote(field.Name) + " of type " + strconv.Quote(field.Type.String())}
 			}
 			allI32 = allI32 && field.Type == hir.TypeI32
 			fieldIndex[field.Name] = index
@@ -794,7 +794,7 @@ func prepareResourceTypes(definitions []mir.ResourceType, engine *layout.Engine,
 func resourceFieldLayoutType(value hir.Type) (layout.Type, bool) {
 	canonical := canonicalCValueType(value)
 	if canonical == hir.TypeU8 || canonical == hir.TypeI32 || canonical == hir.TypeI64 || canonical == hir.TypeU32 || canonical == hir.TypeUSize {
-		return layout.Type{Kind: layout.KindLanguageScalar, Name: string(canonical)}, true
+		return layout.Type{Kind: layout.KindLanguageScalar, Name: canonical.String()}, true
 	}
 	if _, _, pointer := hir.RawPointerElement(value); pointer {
 		return layout.Type{Kind: layout.KindPointer}, true
@@ -844,7 +844,7 @@ func (e *emitter) inferLocalTypes(functionIndex int) (map[mir.LocalID]hir.Type, 
 					mir.OperationRegionPlace:
 					inferred = operation.Type
 				}
-				if operation.DestinationLocal == mir.NoLocal || inferred == hir.TypeInvalid || inferred == "" {
+				if operation.DestinationLocal == mir.NoLocal || inferred == hir.TypeInvalid || inferred == hir.ParseType("") {
 					continue
 				}
 				added, err := assignLocalType(localTypes, operation.DestinationLocal, inferred)
@@ -941,7 +941,7 @@ func (e *emitter) inspectEnumTypes() error {
 		for _, variant := range enumeration.definition.Variants {
 			for _, field := range variant.Fields {
 				if _, err := e.enumPayloadCType(field.Type); err != nil {
-					return CapabilityError{Feature: "enum type " + strconv.Quote(string(enumeration.definition.Type)) + " variant " + strconv.Quote(variant.Name) + " field " + strconv.Quote(field.Name) + " of type " + strconv.Quote(string(field.Type))}
+					return CapabilityError{Feature: "enum type " + strconv.Quote(enumeration.definition.Type.String()) + " variant " + strconv.Quote(variant.Name) + " field " + strconv.Quote(field.Name) + " of type " + strconv.Quote(field.Type.String())}
 				}
 			}
 		}
@@ -1054,7 +1054,7 @@ func assignLocalType(localTypes map[mir.LocalID]hir.Type, local mir.LocalID, val
 	if local < 0 {
 		return false, fmt.Errorf("local has invalid id %d", local)
 	}
-	if value == hir.TypeVoid || value == hir.TypeInvalid || value == "" {
+	if value == hir.TypeVoid || value == hir.TypeInvalid || value == hir.ParseType("") {
 		return false, fmt.Errorf("local %d has invalid value type %q", local, value)
 	}
 	if existing, found := localTypes[local]; found {
@@ -1277,7 +1277,7 @@ func (e *emitter) inspectFunction(functionIndex int) error {
 		}
 	}
 	if function.ResultType != hir.TypeVoid && !e.supportedCValueType(function.ResultType) {
-		return CapabilityError{Function: function.Name, Feature: "result type " + strconv.Quote(string(function.ResultType))}
+		return CapabilityError{Function: function.Name, Feature: "result type " + strconv.Quote(function.ResultType.String())}
 	}
 	e.recordCValueTypeRequirements(function.ResultType)
 	e.recordCScalarFeature(function.ResultType)
@@ -1286,14 +1286,14 @@ func (e *emitter) inspectFunction(functionIndex int) error {
 	}
 	for _, parameterType := range function.ParameterTypes {
 		if !e.supportedCValueType(parameterType) {
-			return CapabilityError{Function: function.Name, Feature: "parameter type " + strconv.Quote(string(parameterType))}
+			return CapabilityError{Function: function.Name, Feature: "parameter type " + strconv.Quote(parameterType.String())}
 		}
 		e.recordCValueTypeRequirements(parameterType)
 		e.recordCScalarFeature(parameterType)
 	}
 	for _, resource := range function.Resources {
 		if !e.supportedNeedsDropType(resource.Type) {
-			return CapabilityError{Function: function.Name, Feature: "resource local type " + strconv.Quote(string(resource.Type))}
+			return CapabilityError{Function: function.Name, Feature: "resource local type " + strconv.Quote(resource.Type.String())}
 		}
 	}
 	if len(function.DropFlags) != 0 {
@@ -1792,7 +1792,7 @@ func (e *emitter) inspectArrayConstruction(functionIndex int, operation mir.Oper
 		return fmt.Errorf("fixed-array construction in %s has incompatible type or length", function.Name)
 	}
 	if _, found := e.arrayByType[operation.Type]; !found {
-		return CapabilityError{Function: function.Name, Feature: "fixed-array type " + strconv.Quote(string(operation.Type))}
+		return CapabilityError{Function: function.Name, Feature: "fixed-array type " + strconv.Quote(operation.Type.String())}
 	}
 	for index, operand := range operation.Operands {
 		operandType, err := e.operandType(functionIndex, operand)
@@ -2073,7 +2073,7 @@ func (e *emitter) inspectUnary(functionIndex int, operation mir.Operation) error
 			return fmt.Errorf("safe borrow in %s has type %q, want %q", function.Name, operation.Type, wantType)
 		}
 		if _, ok := e.safeBorrowCType(operation.Type); !ok {
-			return CapabilityError{Function: function.Name, Feature: "safe borrow type " + strconv.Quote(string(operation.Type))}
+			return CapabilityError{Function: function.Name, Feature: "safe borrow type " + strconv.Quote(operation.Type.String())}
 		}
 		operandType, err := e.operandType(functionIndex, operand)
 		if err != nil {
@@ -2133,7 +2133,7 @@ func (e *emitter) inspectRegionOperation(functionIndex int, operation mir.Operat
 			return fmt.Errorf("Region entry in %s has incompatible Arena ownership", function.Name)
 		}
 		if _, found := e.resourceByType[operation.OwnerType]; !found {
-			return CapabilityError{Function: function.Name, Feature: "Region Arena type " + strconv.Quote(string(operation.OwnerType))}
+			return CapabilityError{Function: function.Name, Feature: "Region Arena type " + strconv.Quote(operation.OwnerType.String())}
 		}
 	case mir.OperationRegionPlace:
 		operand, err := oneOperand(operation.Operands)
@@ -2142,14 +2142,14 @@ func (e *emitter) inspectRegionOperation(functionIndex int, operation mir.Operat
 		}
 		ownerType, err := e.operandType(functionIndex, operand)
 		if err != nil || ownerType != operation.OwnerType || e.supportedNeedsDropType(operation.OwnerType) {
-			return CapabilityError{Function: function.Name, Feature: "Region placement type " + strconv.Quote(string(operation.OwnerType))}
+			return CapabilityError{Function: function.Name, Feature: "Region placement type " + strconv.Quote(operation.OwnerType.String())}
 		}
 		successType, failureType, feature, supported := e.resultCSpec(operation.Type)
 		placedType, mutable, borrow := hir.BorrowElement(successType)
 		errorIndex, errorStruct := e.structByType[failureType]
 		if !supported || !borrow || mutable || placedType != operation.OwnerType || !errorStruct ||
 			len(e.structTypes[errorIndex].definition.Fields) != 1 || e.structTypes[errorIndex].definition.Fields[0].Type != hir.TypeU32 {
-			return CapabilityError{Function: function.Name, Feature: "fallible Region placement result " + strconv.Quote(string(operation.Type))}
+			return CapabilityError{Function: function.Name, Feature: "fallible Region placement result " + strconv.Quote(operation.Type.String())}
 		}
 		e.features[feature] = struct{}{}
 	case mir.OperationRegionReset:
@@ -2238,7 +2238,7 @@ func (e *emitter) inspectRawAddress(functionIndex int, operation mir.Operation) 
 		return fmt.Errorf("raw address in %s has place type %q, want %q", function.Name, operandType, operation.OwnerType)
 	}
 	if _, err := e.cValueType(operation.Type); err != nil {
-		return CapabilityError{Function: function.Name, Feature: "raw address type " + strconv.Quote(string(operation.Type))}
+		return CapabilityError{Function: function.Name, Feature: "raw address type " + strconv.Quote(operation.Type.String())}
 	}
 	return nil
 }
@@ -2267,10 +2267,10 @@ func (e *emitter) inspectRawBorrowPointer(functionIndex int, operation mir.Opera
 		return fmt.Errorf("raw borrow pointer in %s has operand type %q, want %q", function.Name, operandType, operation.OwnerType)
 	}
 	if _, ok := e.safeBorrowCType(operation.OwnerType); !ok {
-		return CapabilityError{Function: function.Name, Feature: "raw borrow owner type " + strconv.Quote(string(operation.OwnerType))}
+		return CapabilityError{Function: function.Name, Feature: "raw borrow owner type " + strconv.Quote(operation.OwnerType.String())}
 	}
 	if _, err := e.cValueType(operation.Type); err != nil {
-		return CapabilityError{Function: function.Name, Feature: "raw borrow pointer type " + strconv.Quote(string(operation.Type))}
+		return CapabilityError{Function: function.Name, Feature: "raw borrow pointer type " + strconv.Quote(operation.Type.String())}
 	}
 	return nil
 }
@@ -2317,7 +2317,7 @@ func (e *emitter) inspectBorrowedViewFromRawParts(functionIndex int, operation m
 		return fmt.Errorf("borrowed-view raw-parts length in %s has type %q, want %q", function.Name, lengthType, hir.TypeUSize)
 	}
 	if _, err := e.cValueType(operation.Type); err != nil {
-		return CapabilityError{Function: function.Name, Feature: "borrowed-view raw-parts result type " + strconv.Quote(string(operation.Type))}
+		return CapabilityError{Function: function.Name, Feature: "borrowed-view raw-parts result type " + strconv.Quote(operation.Type.String())}
 	}
 	return nil
 }
@@ -2346,7 +2346,7 @@ func (e *emitter) inspectByteSliceDataAddress(functionIndex int, operation mir.O
 		return fmt.Errorf("byte-slice data address in %s has storage type %q, want %q", function.Name, operandType, operation.OwnerType)
 	}
 	if _, err := e.cValueType(operation.Type); err != nil {
-		return CapabilityError{Function: function.Name, Feature: "byte-slice data address type " + strconv.Quote(string(operation.Type))}
+		return CapabilityError{Function: function.Name, Feature: "byte-slice data address type " + strconv.Quote(operation.Type.String())}
 	}
 	return nil
 }
@@ -2372,7 +2372,7 @@ func (e *emitter) inspectStrDataAddress(functionIndex int, operation mir.Operati
 		return fmt.Errorf("string data address in %s has storage type %q, want %q", function.Name, operandType, operation.OwnerType)
 	}
 	if _, err := e.cValueType(operation.Type); err != nil {
-		return CapabilityError{Function: function.Name, Feature: "string data address type " + strconv.Quote(string(operation.Type))}
+		return CapabilityError{Function: function.Name, Feature: "string data address type " + strconv.Quote(operation.Type.String())}
 	}
 	return nil
 }
@@ -2398,7 +2398,7 @@ func (e *emitter) inspectCStrDataAddress(functionIndex int, operation mir.Operat
 		return fmt.Errorf("C string data address in %s has storage type %q, want %q", function.Name, operandType, operation.OwnerType)
 	}
 	if _, err := e.cValueType(operation.Type); err != nil {
-		return CapabilityError{Function: function.Name, Feature: "C string data address type " + strconv.Quote(string(operation.Type))}
+		return CapabilityError{Function: function.Name, Feature: "C string data address type " + strconv.Quote(operation.Type.String())}
 	}
 	return nil
 }
@@ -2409,7 +2409,7 @@ func (e *emitter) inspectStructOperation(functionIndex int, operation mir.Operat
 	case mir.OperationStructConstruct:
 		index, found := e.structByType[operation.Type]
 		if !found {
-			return CapabilityError{Function: function.Name, Feature: "struct construction type " + strconv.Quote(string(operation.Type))}
+			return CapabilityError{Function: function.Name, Feature: "struct construction type " + strconv.Quote(operation.Type.String())}
 		}
 		definition := &e.structTypes[index]
 		if len(operation.Fields) != len(definition.definition.Fields) || len(operation.Operands) != len(definition.definition.Fields) {
@@ -2430,7 +2430,7 @@ func (e *emitter) inspectStructOperation(functionIndex int, operation mir.Operat
 	case mir.OperationFieldRead:
 		index, found := e.structByType[fieldAggregateType(operation.OwnerType)]
 		if !found {
-			return CapabilityError{Function: function.Name, Feature: "field-read owner type " + strconv.Quote(string(operation.OwnerType))}
+			return CapabilityError{Function: function.Name, Feature: "field-read owner type " + strconv.Quote(operation.OwnerType.String())}
 		}
 		definition := &e.structTypes[index]
 		fieldIndex, found := definition.fieldIndex[operation.Field]
@@ -2460,7 +2460,7 @@ func (e *emitter) inspectEnumOperation(functionIndex int, operation mir.Operatio
 	}
 	index, found := e.enumByType[ownerType]
 	if !found {
-		return CapabilityError{Function: function.Name, Feature: "enum operation type " + strconv.Quote(string(ownerType))}
+		return CapabilityError{Function: function.Name, Feature: "enum operation type " + strconv.Quote(ownerType.String())}
 	}
 	definition := &e.enumTypes[index]
 	variantIndex, found := definition.variantIndex[operation.Variant]
@@ -2587,7 +2587,7 @@ func (e *emitter) inspectResourceInitialize(functionIndex int, operation mir.Ope
 		return fmt.Errorf("resource initialization in %s does not name its declared local", function.Name)
 	}
 	if !e.supportedNeedsDropType(resource.Type) {
-		return CapabilityError{Function: function.Name, Feature: "resource initialization type " + strconv.Quote(string(resource.Type))}
+		return CapabilityError{Function: function.Name, Feature: "resource initialization type " + strconv.Quote(resource.Type.String())}
 	}
 	operand, err := oneOperand(operation.Operands)
 	if err != nil {
@@ -2610,7 +2610,7 @@ func (e *emitter) inspectResourceDischarge(functionIndex int, operation mir.Oper
 		return fmt.Errorf("%s in %s names undeclared resource local %d", operation.Kind, function.Name, operation.Symbol)
 	}
 	if !e.supportedNeedsDropType(resource.Type) {
-		return CapabilityError{Function: function.Name, Feature: "resource discharge type " + strconv.Quote(string(resource.Type))}
+		return CapabilityError{Function: function.Name, Feature: "resource discharge type " + strconv.Quote(resource.Type.String())}
 	}
 	if operation.Kind == mir.OperationMove && operation.Destination == "" {
 		return fmt.Errorf("resource move in %s has no destination class", function.Name)
@@ -2630,7 +2630,7 @@ func (e *emitter) inspectResourceOperation(functionIndex int, operation mir.Oper
 	case mir.OperationResourceConstruct:
 		index, found := e.resourceByType[operation.Type]
 		if !found {
-			return CapabilityError{Function: function.Name, Feature: "resource construction type " + strconv.Quote(string(operation.Type))}
+			return CapabilityError{Function: function.Name, Feature: "resource construction type " + strconv.Quote(operation.Type.String())}
 		}
 		definition := &e.resourceTypes[index]
 		if len(operation.Fields) != len(definition.definition.Fields) || len(operation.Operands) != len(definition.definition.Fields) {
@@ -2654,7 +2654,7 @@ func (e *emitter) inspectResourceOperation(functionIndex int, operation mir.Oper
 	case mir.OperationFieldRead:
 		index, found := e.resourceByType[fieldAggregateType(operation.OwnerType)]
 		if !found {
-			return CapabilityError{Function: function.Name, Feature: "field-read owner type " + strconv.Quote(string(operation.OwnerType))}
+			return CapabilityError{Function: function.Name, Feature: "field-read owner type " + strconv.Quote(operation.OwnerType.String())}
 		}
 		definition := &e.resourceTypes[index]
 		fieldIndex, found := definition.fieldIndex[operation.Field]
@@ -2688,7 +2688,7 @@ func (e *emitter) inspectTaggedOperation(functionIndex int, operation mir.Operat
 	case mir.OperationResultConstruct:
 		successType, failureType, feature, supported := e.resultCSpec(operation.Type)
 		if !supported {
-			return CapabilityError{Function: function.Name, Feature: "Result construction type " + strconv.Quote(string(operation.Type))}
+			return CapabilityError{Function: function.Name, Feature: "Result construction type " + strconv.Quote(operation.Type.String())}
 		}
 		expectedType := successType
 		if operation.Variant == "err" {
@@ -2702,7 +2702,7 @@ func (e *emitter) inspectTaggedOperation(functionIndex int, operation mir.Operat
 		}
 		payloadType, err := e.operandType(functionIndex, operand)
 		if err != nil || canonicalCValueType(payloadType) != canonicalCValueType(expectedType) {
-			return CapabilityError{Function: function.Name, Feature: "Result payload type " + strconv.Quote(string(payloadType))}
+			return CapabilityError{Function: function.Name, Feature: "Result payload type " + strconv.Quote(payloadType.String())}
 		}
 		e.features[feature] = struct{}{}
 	case mir.OperationResultPayload:
@@ -2712,11 +2712,11 @@ func (e *emitter) inspectTaggedOperation(functionIndex int, operation mir.Operat
 		}
 		containerType, err := e.operandType(functionIndex, operand)
 		if err != nil {
-			return CapabilityError{Function: function.Name, Feature: "Result payload source type " + strconv.Quote(string(containerType))}
+			return CapabilityError{Function: function.Name, Feature: "Result payload source type " + strconv.Quote(containerType.String())}
 		}
 		successType, failureType, feature, supported := e.resultCSpec(containerType)
 		if !supported {
-			return CapabilityError{Function: function.Name, Feature: "Result payload source type " + strconv.Quote(string(containerType))}
+			return CapabilityError{Function: function.Name, Feature: "Result payload source type " + strconv.Quote(containerType.String())}
 		}
 		expectedType := successType
 		if operation.Variant == "err" {
@@ -2725,13 +2725,13 @@ func (e *emitter) inspectTaggedOperation(functionIndex int, operation mir.Operat
 			return fmt.Errorf("Result payload in %s has invalid variant %q", function.Name, operation.Variant)
 		}
 		if canonicalCValueType(operation.Type) != canonicalCValueType(expectedType) || operation.MovePayload != e.supportedNeedsDropType(expectedType) {
-			return CapabilityError{Function: function.Name, Feature: "Result payload extraction type " + strconv.Quote(string(operation.Type))}
+			return CapabilityError{Function: function.Name, Feature: "Result payload extraction type " + strconv.Quote(operation.Type.String())}
 		}
 		e.features[feature] = struct{}{}
 	case mir.OperationOptionConstruct:
 		elementType, feature, supported := e.optionCSpec(operation.Type)
 		if !supported {
-			return CapabilityError{Function: function.Name, Feature: "Option construction type " + strconv.Quote(string(operation.Type))}
+			return CapabilityError{Function: function.Name, Feature: "Option construction type " + strconv.Quote(operation.Type.String())}
 		}
 		if operation.Variant == "some" {
 			operand, err := oneOperand(operation.Operands)
@@ -2740,7 +2740,7 @@ func (e *emitter) inspectTaggedOperation(functionIndex int, operation mir.Operat
 			}
 			payloadType, err := e.operandType(functionIndex, operand)
 			if err != nil || canonicalCValueType(payloadType) != canonicalCValueType(elementType) {
-				return CapabilityError{Function: function.Name, Feature: "Option payload type " + strconv.Quote(string(payloadType))}
+				return CapabilityError{Function: function.Name, Feature: "Option payload type " + strconv.Quote(payloadType.String())}
 			}
 		} else if operation.Variant != "none" || len(operation.Operands) != 0 {
 			return fmt.Errorf("Option construction in %s has invalid variant %q", function.Name, operation.Variant)
@@ -2753,14 +2753,14 @@ func (e *emitter) inspectTaggedOperation(functionIndex int, operation mir.Operat
 		}
 		containerType, err := e.operandType(functionIndex, operand)
 		if err != nil {
-			return CapabilityError{Function: function.Name, Feature: "Option payload source type " + strconv.Quote(string(containerType))}
+			return CapabilityError{Function: function.Name, Feature: "Option payload source type " + strconv.Quote(containerType.String())}
 		}
 		elementType, feature, supported := e.optionCSpec(containerType)
 		if !supported {
-			return CapabilityError{Function: function.Name, Feature: "Option payload source type " + strconv.Quote(string(containerType))}
+			return CapabilityError{Function: function.Name, Feature: "Option payload source type " + strconv.Quote(containerType.String())}
 		}
 		if operation.Variant != "some" || canonicalCValueType(operation.Type) != canonicalCValueType(elementType) || operation.MovePayload != e.supportedNeedsDropType(elementType) {
-			return CapabilityError{Function: function.Name, Feature: "Option payload extraction type " + strconv.Quote(string(operation.Type))}
+			return CapabilityError{Function: function.Name, Feature: "Option payload extraction type " + strconv.Quote(operation.Type.String())}
 		}
 		e.features[feature] = struct{}{}
 	case mir.OperationResultSwitch:
@@ -2770,11 +2770,11 @@ func (e *emitter) inspectTaggedOperation(functionIndex int, operation mir.Operat
 		}
 		containerType, err := e.operandType(functionIndex, operand)
 		if err != nil {
-			return CapabilityError{Function: function.Name, Feature: "Result switch source type " + strconv.Quote(string(containerType))}
+			return CapabilityError{Function: function.Name, Feature: "Result switch source type " + strconv.Quote(containerType.String())}
 		}
 		_, _, feature, supported := e.resultCSpec(containerType)
 		if !supported {
-			return CapabilityError{Function: function.Name, Feature: "Result switch source type " + strconv.Quote(string(containerType))}
+			return CapabilityError{Function: function.Name, Feature: "Result switch source type " + strconv.Quote(containerType.String())}
 		}
 		e.features[feature] = struct{}{}
 	}
@@ -2786,7 +2786,7 @@ func (e *emitter) inspectSwitch(functionIndex int, terminator mir.Terminator, pr
 	if terminator.SwitchKind == "enum" {
 		index, found := e.enumByType[terminator.SwitchType]
 		if !found {
-			return CapabilityError{Function: function.Name, Feature: "enum switch type " + strconv.Quote(string(terminator.SwitchType))}
+			return CapabilityError{Function: function.Name, Feature: "enum switch type " + strconv.Quote(terminator.SwitchType.String())}
 		}
 		definition := &e.enumTypes[index]
 		if len(terminator.Successors) != len(definition.definition.Variants) || len(terminator.SwitchVariants) != len(definition.definition.Variants) {
@@ -2842,11 +2842,11 @@ func (e *emitter) inspectSwitch(functionIndex int, terminator mir.Terminator, pr
 		}
 		valueType, err := e.operandType(functionIndex, operand)
 		if err != nil {
-			return CapabilityError{Function: function.Name, Feature: "Option switch type " + strconv.Quote(string(valueType))}
+			return CapabilityError{Function: function.Name, Feature: "Option switch type " + strconv.Quote(valueType.String())}
 		}
 		_, feature, supported := e.optionCSpec(valueType)
 		if !supported {
-			return CapabilityError{Function: function.Name, Feature: "Option switch type " + strconv.Quote(string(valueType))}
+			return CapabilityError{Function: function.Name, Feature: "Option switch type " + strconv.Quote(valueType.String())}
 		}
 		e.features[feature] = struct{}{}
 		e.features["trap"] = struct{}{}
@@ -2859,11 +2859,11 @@ func (e *emitter) inspectSwitch(functionIndex int, terminator mir.Terminator, pr
 		}
 		valueType, err := e.operandType(functionIndex, operand)
 		if err != nil {
-			return CapabilityError{Function: function.Name, Feature: "Result switch type " + strconv.Quote(string(valueType))}
+			return CapabilityError{Function: function.Name, Feature: "Result switch type " + strconv.Quote(valueType.String())}
 		}
 		_, _, feature, supported := e.resultCSpec(valueType)
 		if !supported {
-			return CapabilityError{Function: function.Name, Feature: "Result switch type " + strconv.Quote(string(valueType))}
+			return CapabilityError{Function: function.Name, Feature: "Result switch type " + strconv.Quote(valueType.String())}
 		}
 		e.features[feature] = struct{}{}
 		e.features["trap"] = struct{}{}
@@ -3453,7 +3453,7 @@ func (e *emitter) emitOperation(output *strings.Builder, functionIndex int, oper
 	case mir.OperationEnumConstruct:
 		enumIndex, found := e.enumByType[operation.Type]
 		if !found {
-			return CapabilityError{Function: function, Feature: "enum construction type " + strconv.Quote(string(operation.Type))}
+			return CapabilityError{Function: function, Feature: "enum construction type " + strconv.Quote(operation.Type.String())}
 		}
 		enumeration := &e.enumTypes[enumIndex]
 		variantIndex, found := enumeration.variantIndex[operation.Variant]
@@ -3483,7 +3483,7 @@ func (e *emitter) emitOperation(output *strings.Builder, functionIndex int, oper
 	case mir.OperationEnumPayload:
 		enumIndex, found := e.enumByType[operation.OwnerType]
 		if !found {
-			return CapabilityError{Function: function, Feature: "enum payload type " + strconv.Quote(string(operation.OwnerType))}
+			return CapabilityError{Function: function, Feature: "enum payload type " + strconv.Quote(operation.OwnerType.String())}
 		}
 		enumeration := &e.enumTypes[enumIndex]
 		variantIndex, found := enumeration.variantIndex[operation.Variant]
@@ -3506,7 +3506,7 @@ func (e *emitter) emitOperation(output *strings.Builder, functionIndex int, oper
 	case mir.OperationStructConstruct:
 		index, found := e.structByType[operation.Type]
 		if !found {
-			return CapabilityError{Function: function, Feature: "struct construction type " + strconv.Quote(string(operation.Type))}
+			return CapabilityError{Function: function, Feature: "struct construction type " + strconv.Quote(operation.Type.String())}
 		}
 		fmt.Fprintf(output, "    fy_l_%d = (%s){ ", operation.DestinationLocal, e.structCTypeName(index))
 		if len(operation.Operands) == 0 {
@@ -3526,7 +3526,7 @@ func (e *emitter) emitOperation(output *strings.Builder, functionIndex int, oper
 	case mir.OperationResourceConstruct:
 		index, found := e.resourceByType[operation.Type]
 		if !found {
-			return CapabilityError{Function: function, Feature: "resource construction type " + strconv.Quote(string(operation.Type))}
+			return CapabilityError{Function: function, Feature: "resource construction type " + strconv.Quote(operation.Type.String())}
 		}
 		fmt.Fprintf(output, "    fy_l_%d = (fy_resource_%d){ ", operation.DestinationLocal, index)
 		for fieldIndex, operand := range operation.Operands {
@@ -3571,7 +3571,7 @@ func (e *emitter) emitOperation(output *strings.Builder, functionIndex int, oper
 		}
 		index, found := e.resourceByType[aggregateType]
 		if !found {
-			return CapabilityError{Function: function, Feature: "field-read owner type " + strconv.Quote(string(operation.OwnerType))}
+			return CapabilityError{Function: function, Feature: "field-read owner type " + strconv.Quote(operation.OwnerType.String())}
 		}
 		fieldIndex, found := e.resourceTypes[index].fieldIndex[operation.Field]
 		if !found {
@@ -3613,7 +3613,7 @@ func (e *emitter) emitOperation(output *strings.Builder, functionIndex int, oper
 	case mir.OperationArrayConstruct:
 		arrayIndex, found := e.arrayByType[operation.Type]
 		if !found {
-			return CapabilityError{Function: function, Feature: "fixed-array construction type " + strconv.Quote(string(operation.Type))}
+			return CapabilityError{Function: function, Feature: "fixed-array construction type " + strconv.Quote(operation.Type.String())}
 		}
 		fmt.Fprintf(output, "    fy_l_%d = (%s){ .data = { ", operation.DestinationLocal, e.arrayCTypeName(arrayIndex))
 		for index, operand := range operation.Operands {
@@ -4203,7 +4203,7 @@ func (e *emitter) emitSwitch(output *strings.Builder, functionIndex int, termina
 	if terminator.SwitchKind == "enum" {
 		enumIndex, found := e.enumByType[terminator.SwitchType]
 		if !found {
-			return CapabilityError{Function: function.Name, Feature: "enum switch type " + strconv.Quote(string(terminator.SwitchType))}
+			return CapabilityError{Function: function.Name, Feature: "enum switch type " + strconv.Quote(terminator.SwitchType.String())}
 		}
 		if len(terminator.Successors) != len(terminator.SwitchVariants) {
 			return fmt.Errorf("enum switch in %s has %d successors for %d variants", function.Name, len(terminator.Successors), len(terminator.SwitchVariants))

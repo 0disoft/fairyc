@@ -52,7 +52,7 @@ func TestInlineNominalArrayFieldRoundTrip(t *testing.T) {
 					case "repr-c":
 						s.ReprC = true
 					case "wrong-element":
-						s.Fields[0].Type = hir.FixedArray(hir.Type("main::Missing"), 2)
+						s.Fields[0].Type = hir.FixedArray(hir.ParseType("main::Missing"), 2)
 					case "recursive-array":
 						s.Fields[0].Type = hir.FixedArray(s.Type, 2)
 					}

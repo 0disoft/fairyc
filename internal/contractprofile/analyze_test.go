@@ -78,13 +78,13 @@ func TestAnalyzeRejectsAmbientAuthorityRawPointersAndRegionAllocation(t *testing
 	t.Parallel()
 	program := mir.Program{
 		StructTypes: []mir.StructType{{
-			Type:  hir.Type("main::FloatBox"),
+			Type:  hir.ParseType("main::FloatBox"),
 			Name:  "main::FloatBox",
 			ReprC: true,
 			Fields: []mir.StructField{
 				{
 					Name: "value",
-					Type: hir.Type("f64"),
+					Type: hir.ParseType("f64"),
 					Span: hir.Span{Source: "main.fy", StartByte: 0, EndByte: 4},
 				},
 				{

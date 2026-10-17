@@ -24,7 +24,7 @@ fn i32 main() {
 }`
 
 func TestStructStorageViewMIR(t *testing.T) {
-	slice := hir.Type("[" + hir.QualifiedModulePath(1, "main") + "::Token]")
+	slice := hir.ParseType("[" + hir.QualifiedModulePath(1, "main") + "::Token]")
 	checkStorageViewMIR(t, structStorageViewSource, false, slice)
 	analysis, err := analyzeStorageBorrow(t, structStorageViewSource)
 	if err != nil {
@@ -46,7 +46,7 @@ func TestStructStorageViewMIR(t *testing.T) {
 			}
 			for si := range program.StructTypes {
 				s := &program.StructTypes[si]
-				if strings.HasSuffix(string(s.Type), "::Token") {
+				if strings.HasSuffix(s.Type.String(), "::Token") {
 					switch mutation {
 					case "empty-struct":
 						s.Fields = nil
@@ -55,7 +55,7 @@ func TestStructStorageViewMIR(t *testing.T) {
 					case "resource-field":
 						s.Fields[0].Type = program.ResourceTypes[0].Type
 					case "missing-definition":
-						s.Type = hir.Type("main::Missing")
+						s.Type = hir.ParseType("main::Missing")
 					}
 				}
 			}
@@ -70,7 +70,7 @@ func TestStructStorageViewMIR(t *testing.T) {
 						if op.Kind == mir.OperationStorageBorrow {
 							switch mutation {
 							case "same-layout-nominal":
-								op.Type = hir.SharedBorrow(hir.Type("[" + hir.QualifiedModulePath(1, "main") + "::Other]"))
+								op.Type = hir.SharedBorrow(hir.ParseType("[" + hir.QualifiedModulePath(1, "main") + "::Other]"))
 								changed = true
 							case "mutable-result":
 								op.Type = hir.MutableBorrow(slice)
@@ -80,7 +80,7 @@ func TestStructStorageViewMIR(t *testing.T) {
 						if op.Kind == mir.OperationViewIndex {
 							switch mutation {
 							case "load-element":
-								op.Type = hir.Type(hir.QualifiedModulePath(1, "main") + "::Other")
+								op.Type = hir.ParseType(hir.QualifiedModulePath(1, "main") + "::Other")
 								changed = true
 							case "receiver-annotation":
 								op.OwnerType = hir.SharedBorrow(hir.TypeByteSlice)

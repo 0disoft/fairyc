@@ -21,7 +21,7 @@ type Declaration struct {
 }
 
 func (d Declaration) Type() hir.Type {
-	return hir.Type("@nominal:" + hir.QualifiedModulePath(d.Package, d.Module) + "::" + d.Name)
+	return hir.ParseType("@nominal:" + hir.QualifiedModulePath(d.Package, d.Module) + "::" + d.Name)
 }
 
 // Program is experimental typed HIR. Unlike ordinary hir.Package, it can contain
@@ -66,7 +66,7 @@ func Lower(input Program) (mir.Program, error) {
 		names := map[string]bool{}
 		for _, f := range m.Functions {
 			_, duplicate := c.functions[f.Symbol]
-			if duplicate || !validName(f.Name) || names[f.Name] || f.OwnerType != "" || f.Receiver != "" || f.DropGlueFor != "" || f.Unsafe || len(f.Effects) != 0 {
+			if duplicate || !validName(f.Name) || names[f.Name] || f.OwnerType != hir.ParseType("") || f.Receiver != "" || f.DropGlueFor != hir.ParseType("") || f.Unsafe || len(f.Effects) != 0 {
 				return mir.Program{}, fmt.Errorf("unsupported or duplicate function %q", f.Name)
 			}
 			for _, d := range input.Declarations {

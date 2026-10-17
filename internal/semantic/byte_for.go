@@ -23,7 +23,7 @@ func (c *typeChecker) byteForSourceIssue(loop *ast.ByteForLoop, prepared *ast.Ex
 		return "view iteration requires an exact bool/integer or scalar-field struct item binding"
 	}
 	wantElement, resolved := c.analyzer.canonicalTypeReference(c.module, itemType, false)
-	_, scalar := hir.ScalarViewElement(hir.Type("[" + string(wantElement) + "]"))
+	_, scalar := hir.ScalarViewElement(hir.Slice(wantElement))
 	nominal := c.analyzer.plainViewStruct(wantElement)
 	if !resolved || !scalar && !nominal {
 		return "view iteration requires an exact bool, u8, i32, i64, u32, usize or scalar-field struct item binding"

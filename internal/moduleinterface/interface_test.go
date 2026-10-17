@@ -236,9 +236,9 @@ func TestExtractRejectsPublicSignatureUsingPrivateLocalType(t *testing.T) {
 	value := hir.Package{Modules: []hir.Module{{
 		Package: 1,
 		Path:    "api",
-		Structs: []hir.Struct{{Name: "Hidden", Public: false, Type: "$p1::api::Hidden"}},
+		Structs: []hir.Struct{{Name: "Hidden", Public: false, Type: hir.ParseType("$p1::api::Hidden")}},
 		Functions: []hir.Function{{
-			Name: "leak", Public: true, Parameters: []hir.Parameter{{Type: "$p1::api::Hidden"}}, ResultType: hir.TypeVoid,
+			Name: "leak", Public: true, Parameters: []hir.Parameter{{Type: hir.ParseType("$p1::api::Hidden")}}, ResultType: hir.TypeVoid,
 		}},
 	}}}
 	_, err := Extract(value, 1, map[hir.PackageID]packagegraph.CoordinateID{1: self})
@@ -295,15 +295,15 @@ func TestExtractTracksPublicShapesEffectsAndForeignLinks(t *testing.T) {
 		Package: 1,
 		Path:    "api",
 		Structs: []hir.Struct{{
-			Name: "Pair", Public: true, Type: "$p1::api::Pair", ReprC: true,
+			Name: "Pair", Public: true, Type: hir.ParseType("$p1::api::Pair"), ReprC: true,
 			Fields: []hir.StructField{{Name: "left", Type: hir.TypeI32}, {Name: "right", Type: hir.TypeU32}},
 		}},
 		Enums: []hir.Enum{{
-			Name: "Status", Public: true, Type: "$p1::api::Status",
+			Name: "Status", Public: true, Type: hir.ParseType("$p1::api::Status"),
 			Variants: []hir.EnumVariant{{Name: "ready"}, {Name: "failed", Fields: []hir.EnumField{{Name: "code", Type: hir.TypeI32}}}},
 		}},
 		Resources: []hir.Resource{{
-			Name: "Handle", Public: true, Type: "$p1::api::Handle", Fields: []hir.ResourceField{{Name: "private", Type: hir.TypeI32}},
+			Name: "Handle", Public: true, Type: hir.ParseType("$p1::api::Handle"), Fields: []hir.ResourceField{{Name: "private", Type: hir.TypeI32}},
 			DropEffects: []hir.Effect{hir.EffectFilesystem},
 		}},
 		ForeignFunctions: []hir.ForeignFunction{{
@@ -364,7 +364,7 @@ func TestExtractRejectsNoncanonicalPublicResourceAbilities(t *testing.T) {
 			Package: 1,
 			Path:    "api",
 			Resources: []hir.Resource{{
-				Name: "Asset", Public: true, Type: "$p1::api::Asset", Abilities: abilities,
+				Name: "Asset", Public: true, Type: hir.ParseType("$p1::api::Asset"), Abilities: abilities,
 			}},
 		}}}
 		if _, err := Extract(value, 1, coordinates); err == nil {
@@ -426,8 +426,8 @@ func interfacePackage(self, dependency hir.PackageID) hir.Package {
 	return hir.Package{Modules: []hir.Module{{
 		Package:   self,
 		Path:      "api",
-		Structs:   []hir.Struct{{Name: "Packet", Public: true, Type: hir.Type(selfPrefix + "api::Packet"), Fields: []hir.StructField{{Name: "token", Type: hir.Type(dependencyPrefix + "dep::Token")}}}},
-		Functions: []hir.Function{{Name: "read", Public: true, Parameters: []hir.Parameter{{Type: hir.SharedBorrow(hir.Type(selfPrefix + "api::Packet"))}}, ResultType: hir.Type(dependencyPrefix + "dep::Token")}},
+		Structs:   []hir.Struct{{Name: "Packet", Public: true, Type: hir.ParseType(selfPrefix + "api::Packet"), Fields: []hir.StructField{{Name: "token", Type: hir.ParseType(dependencyPrefix + "dep::Token")}}}},
+		Functions: []hir.Function{{Name: "read", Public: true, Parameters: []hir.Parameter{{Type: hir.SharedBorrow(hir.ParseType(selfPrefix + "api::Packet"))}}, ResultType: hir.ParseType(dependencyPrefix + "dep::Token")}},
 	}}}
 }
 

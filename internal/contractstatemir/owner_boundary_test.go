@@ -8,10 +8,10 @@ import (
 )
 
 func TestHIRTypeContainsRawPointerTraversesOwnerTypeGraph(t *testing.T) {
-	structType := hir.Type("ledger::PointerStruct")
-	enumType := hir.Type("ledger::PointerEnum")
-	resourceType := hir.Type("ledger::PointerResource")
-	cycleType := hir.Type("ledger::Cycle")
+	structType := hir.ParseType("ledger::PointerStruct")
+	enumType := hir.ParseType("ledger::PointerEnum")
+	resourceType := hir.ParseType("ledger::PointerResource")
+	cycleType := hir.ParseType("ledger::Cycle")
 	input := hir.Package{Modules: []hir.Module{{
 		Structs: []hir.Struct{
 			{Type: structType, Fields: []hir.StructField{{Type: hir.RawPointer(hir.TypeU8, false)}}},
@@ -46,10 +46,10 @@ func TestHIRTypeContainsRawPointerTraversesOwnerTypeGraph(t *testing.T) {
 }
 
 func TestHIRTypeContainsOwnedResourceTraversesValueGraph(t *testing.T) {
-	resourceType := hir.Type("ledger::Handle")
-	structType := hir.Type("ledger::ResourceStruct")
-	enumType := hir.Type("ledger::ResourceEnum")
-	cycleType := hir.Type("ledger::Cycle")
+	resourceType := hir.ParseType("ledger::Handle")
+	structType := hir.ParseType("ledger::ResourceStruct")
+	enumType := hir.ParseType("ledger::ResourceEnum")
+	cycleType := hir.ParseType("ledger::Cycle")
 	input := hir.Package{Modules: []hir.Module{{
 		Structs: []hir.Struct{
 			{Type: structType, Fields: []hir.StructField{{Type: resourceType}}},
@@ -135,7 +135,7 @@ func TestHIRStateOwnerTrapBoundaryClassifiesClosedForms(t *testing.T) {
 }
 
 func TestHIRStateOwnerLifetimeBoundaryClassifiesOwnedValuesAndRegions(t *testing.T) {
-	resourceType := hir.Type("ledger::Handle")
+	resourceType := hir.ParseType("ledger::Handle")
 	input := hir.Package{Modules: []hir.Module{{Resources: []hir.Resource{{Type: resourceType, DropKind: hir.ResourceDropEmpty}}}}}
 	tests := []struct {
 		name     string

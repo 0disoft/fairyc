@@ -128,7 +128,7 @@ func projectArtifactContext(artifact Artifact) (ContextDescriptor, map[hir.Symbo
 }
 
 func collectStableNominalTypes(value string, result map[string]struct{}) {
-	if value == "" || builtinType(hir.Type(value)) {
+	if value == "" || builtinType(hir.ParseType(value)) {
 		return
 	}
 	for _, prefix := range []string{"ref mut ", "ref ", "ptr mut ", "ptr "} {
@@ -137,13 +137,13 @@ func collectStableNominalTypes(value string, result map[string]struct{}) {
 			return
 		}
 	}
-	if element, ok := hir.OptionElement(hir.Type(value)); ok {
-		collectStableNominalTypes(string(element), result)
+	if element, ok := hir.OptionElement(hir.ParseType(value)); ok {
+		collectStableNominalTypes(element.String(), result)
 		return
 	}
-	if success, failure, ok := hir.ResultElements(hir.Type(value)); ok {
-		collectStableNominalTypes(string(success), result)
-		collectStableNominalTypes(string(failure), result)
+	if success, failure, ok := hir.ResultElements(hir.ParseType(value)); ok {
+		collectStableNominalTypes(success.String(), result)
+		collectStableNominalTypes(failure.String(), result)
 		return
 	}
 	if strings.HasSuffix(value, "]") {

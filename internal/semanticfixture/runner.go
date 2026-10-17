@@ -211,7 +211,7 @@ func hasResolution(actual []semantic.Resolution, expected resolutionAssertion) b
 
 func hasType(actual []semantic.TypeFact, expected typeAssertion) bool {
 	for _, value := range actual {
-		if spanEqual(value.Expression, expected.Expression) && string(value.CanonicalType) == expected.CanonicalType {
+		if spanEqual(value.Expression, expected.Expression) && value.CanonicalType.String() == expected.CanonicalType {
 			return true
 		}
 	}
@@ -255,7 +255,7 @@ func hasEffect(actual []semantic.EffectFact, expected effectAssertion) bool {
 func hasConstant(actual []semantic.ConstantFact, expected constantAssertion) bool {
 	for _, value := range actual {
 		if value.Package == hir.DefaultPackage && value.Module == expected.Module && value.Name == expected.Name &&
-			spanEqual(value.Declaration, expected.Declaration) && string(value.Type) == expected.Type &&
+			spanEqual(value.Declaration, expected.Declaration) && value.Type.String() == expected.Type &&
 			value.Value == expected.Value && spanEqual(value.Span, expected.Span) {
 			return true
 		}

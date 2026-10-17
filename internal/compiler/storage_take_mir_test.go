@@ -99,8 +99,8 @@ func TestPrivateVectorStorageTakeConsumerBoundaries(t *testing.T) {
 
 func TestPrivateVectorStorageTakeRejectsMalformedMIR(t *testing.T) {
 	for name, mutate := range map[string]func(*mir.Operation){
-		"unknown type": func(op *mir.Operation) { op.Type = "main::Missing" },
-		"borrow":       func(op *mir.Operation) { op.Type = hir.SharedBorrow("main::Item") },
+		"unknown type": func(op *mir.Operation) { op.Type = hir.ParseType("main::Missing") },
+		"borrow":       func(op *mir.Operation) { op.Type = hir.SharedBorrow(hir.ParseType("main::Item")) },
 		"pointer":      func(op *mir.Operation) { op.OwnerType = hir.RawPointer(hir.TypeVoid, false) },
 		"result":       func(op *mir.Operation) { op.DestinationLocal = mir.NoLocal },
 		"operand":      func(op *mir.Operation) { op.Operands = nil },
@@ -149,7 +149,7 @@ func TestPrivateVectorStorageTakeUnreachableAndProvenance(t *testing.T) {
 					}
 				}
 			}
-			extra.Type = "main::Missing"
+			extra.Type = hir.ParseType("main::Missing")
 			function.Blocks = append(function.Blocks, mir.Block{ID: mir.BlockID(len(function.Blocks)),
 				Operations: []mir.Operation{extra}, Terminator: mir.Terminator{Kind: mir.TerminatorUnreachable}})
 		}

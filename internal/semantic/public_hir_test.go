@@ -1,6 +1,9 @@
 package semantic_test
 
-import "testing"
+import (
+	"github.com/0disoft/fairyc/internal/hir"
+	"testing"
+)
 
 func TestAnalyzePreservesPublicVisibilityInTypedHIR(t *testing.T) {
 	t.Parallel()
@@ -48,7 +51,7 @@ fn i32 hidden(i32 value) { return value; }
 	if len(module.Functions) != 3 || !module.Functions[0].Public || module.Functions[1].Public || module.Functions[2].Public {
 		t.Fatalf("function visibility = %+v", module.Functions)
 	}
-	if module.Functions[2].DropGlueFor == "" {
+	if module.Functions[2].DropGlueFor == hir.ParseType("") {
 		t.Fatalf("resource cleanup function = %+v", module.Functions[2])
 	}
 }

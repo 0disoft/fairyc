@@ -10,7 +10,7 @@ func verifyHIRStateOwnerEntryBoundary(function hir.Function) error {
 	if function.Receiver != "" {
 		return fmt.Errorf("state transaction owner has receiver mode %q; receiver-bound owners are not admitted", function.Receiver)
 	}
-	if function.DropGlueFor != "" {
+	if function.DropGlueFor != hir.ParseType("") {
 		return fmt.Errorf("state transaction owner is drop glue for %q; drop-glue owners are not admitted", function.DropGlueFor)
 	}
 	return nil
@@ -168,7 +168,7 @@ func hirExpressionUsesOwnedResource(input hir.Package, expression *hir.Expressio
 }
 
 func hirTypeContainsOwnedResource(input hir.Package, value hir.Type, visiting map[hir.Type]bool) bool {
-	if value == "" || value == hir.TypeInvalid {
+	if value == hir.ParseType("") || value == hir.TypeInvalid {
 		return false
 	}
 	if _, _, borrow := hir.BorrowElement(value); borrow {
@@ -484,7 +484,7 @@ func hirExpressionUsesRawPointer(input hir.Package, expression *hir.Expression) 
 }
 
 func hirTypeContainsRawPointer(input hir.Package, value hir.Type, visiting map[hir.Type]bool) bool {
-	if value == "" || value == hir.TypeInvalid {
+	if value == hir.ParseType("") || value == hir.TypeInvalid {
 		return false
 	}
 	if _, _, pointer := hir.RawPointerElement(value); pointer {

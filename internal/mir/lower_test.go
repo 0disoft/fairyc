@@ -29,7 +29,7 @@ fn i32 main() {
 		t.Fatalf("resource types = %+v", program.ResourceTypes)
 	}
 	definition := program.ResourceTypes[0]
-	if definition.Type != hir.Type("main::Pair") || definition.Entity != "resource-type:main-pair" || definition.DropKind != hir.ResourceDropEmpty || len(definition.Fields) != 2 {
+	if definition.Type != hir.ParseType("main::Pair") || definition.Entity != "resource-type:main-pair" || definition.DropKind != hir.ResourceDropEmpty || len(definition.Fields) != 2 {
 		t.Fatalf("resource definition = %+v", definition)
 	}
 	if definition.Fields[0].Name != "left" || definition.Fields[0].Type != hir.TypeI32 || definition.Fields[1].Name != "ready" || definition.Fields[1].Type != hir.TypeBool {
@@ -86,7 +86,7 @@ fn i32 main() {
 			}
 		}
 	}
-	if !owners[hir.SharedBorrow(hir.Type("main::Token"))] || !owners[hir.MutableBorrow(hir.Type("main::Token"))] {
+	if !owners[hir.SharedBorrow(hir.ParseType("main::Token"))] || !owners[hir.MutableBorrow(hir.ParseType("main::Token"))] {
 		t.Fatalf("borrowed field-read owner types = %v", owners)
 	}
 	if failures := Verify(program); len(failures) != 0 {
@@ -127,12 +127,12 @@ fn i32 main() {
 			}
 		}
 	}
-	arenaType := hir.Type("std::alloc::Arena")
+	arenaType := hir.ParseType("std::alloc::Arena")
 	if enter == nil || len(enter.Operands) != 1 || enter.Operands[0].Kind != OperandLocal ||
 		enter.OwnerType != arenaType || enter.Type != hir.MutableBorrow(arenaType) || enter.Operator != "&mut" {
 		t.Fatalf("region enter = %+v", enter)
 	}
-	wantPlaceType := hir.Result(hir.SharedBorrow(hir.TypeI32), hir.Type("std::alloc::AllocError"))
+	wantPlaceType := hir.Result(hir.SharedBorrow(hir.TypeI32), hir.ParseType("std::alloc::AllocError"))
 	if place == nil || place.OwnerType != hir.TypeI32 || place.Type != wantPlaceType {
 		t.Fatalf("region place = %+v", place)
 	}
@@ -202,7 +202,7 @@ fn i32 main() {
 		t.Fatalf("struct types = %+v", program.StructTypes)
 	}
 	definition := program.StructTypes[0]
-	if definition.Type != hir.Type("main::Packet") || definition.Name != "Packet" || definition.Entity != "struct-type:main-packet" || !definition.ReprC || len(definition.Fields) != 2 {
+	if definition.Type != hir.ParseType("main::Packet") || definition.Name != "Packet" || definition.Entity != "struct-type:main-packet" || !definition.ReprC || len(definition.Fields) != 2 {
 		t.Fatalf("struct definition = %+v", definition)
 	}
 	if definition.Fields[0].Name != "code" || definition.Fields[0].Type != hir.TypeU32 || definition.Fields[1].Name != "length" || definition.Fields[1].Type != hir.TypeUSize {
@@ -239,7 +239,7 @@ func TestLowerRejectsNonEmptyResourceWithoutDropGlue(t *testing.T) {
 	_, err := Lower(hir.Package{Modules: []hir.Module{{
 		Path: "main",
 		Resources: []hir.Resource{{
-			Name: "Token", Type: hir.Type("main::Token"), DropKind: hir.ResourceDropNonEmpty,
+			Name: "Token", Type: hir.ParseType("main::Token"), DropKind: hir.ResourceDropNonEmpty,
 			DropSymbol: hir.NoSymbol,
 			Fields:     []hir.ResourceField{{Name: "value", Type: hir.TypeI32}},
 		}},
@@ -669,8 +669,8 @@ fn i32 main() {
 			}
 		}
 	}
-	wantPointer := hir.RawPointer(hir.Type("main::Packet"), true)
-	if address == nil || address.Type != wantPointer || address.OwnerType != hir.Type("main::Packet") || address.Operator != "&mut" || address.Entity == "" || address.UnsafeScope.Source != "main.fy" || len(address.Operands) != 1 || address.Operands[0].Kind != OperandLocal {
+	wantPointer := hir.RawPointer(hir.ParseType("main::Packet"), true)
+	if address == nil || address.Type != wantPointer || address.OwnerType != hir.ParseType("main::Packet") || address.Operator != "&mut" || address.Entity == "" || address.UnsafeScope.Source != "main.fy" || len(address.Operands) != 1 || address.Operands[0].Kind != OperandLocal {
 		t.Fatalf("raw address = %+v", address)
 	}
 	if len(function.UnsafeOperations) != 2 {
@@ -725,7 +725,7 @@ fn i32 main() {
 			}
 		}
 	}
-	wantOwner := hir.Type("main::Packet")
+	wantOwner := hir.ParseType("main::Packet")
 	if address == nil || address.Type != hir.RawPointer(hir.TypeVoid, true) || address.OwnerType != wantOwner || address.Operator != "&mut" {
 		t.Fatalf("opaque raw address = %+v", address)
 	}
@@ -765,7 +765,7 @@ fn i32 main() {
 				operation := &program.Functions[functionIndex].Blocks[blockIndex].Operations[operationIndex]
 				switch operation.Kind {
 				case OperationUnary:
-					if operation.Operator == "&mut" && operation.OwnerType == hir.Type("main::Token") {
+					if operation.Operator == "&mut" && operation.OwnerType == hir.ParseType("main::Token") {
 						borrow = operation
 					}
 				case OperationRawBorrowPointer:
@@ -774,7 +774,7 @@ fn i32 main() {
 			}
 		}
 	}
-	wantBorrow := hir.MutableBorrow(hir.Type("main::Token"))
+	wantBorrow := hir.MutableBorrow(hir.ParseType("main::Token"))
 	if borrow == nil || borrow.Type != wantBorrow || len(borrow.Operands) != 1 || borrow.Operands[0].Kind != OperandLocal {
 		t.Fatalf("safe resource borrow = %+v", borrow)
 	}
@@ -1549,7 +1549,7 @@ fn i32 main() {
 func TestCloneDeepCopiesResourceDefinitions(t *testing.T) {
 	t.Parallel()
 	original := Program{ResourceTypes: []ResourceType{{
-		Type: hir.Type("main::Token"), DropKind: hir.ResourceDropEmpty, DropSymbol: hir.NoSymbol,
+		Type: hir.ParseType("main::Token"), DropKind: hir.ResourceDropEmpty, DropSymbol: hir.NoSymbol,
 		Fields: []ResourceField{{Name: "value", Type: hir.TypeI32}},
 	}}}
 	cloned := Clone(original)
@@ -1562,7 +1562,7 @@ func TestCloneDeepCopiesResourceDefinitions(t *testing.T) {
 func TestCloneDeepCopiesStructDefinitions(t *testing.T) {
 	t.Parallel()
 	original := Program{StructTypes: []StructType{{
-		Type: hir.Type("main::Packet"), Name: "Packet", ReprC: true,
+		Type: hir.ParseType("main::Packet"), Name: "Packet", ReprC: true,
 		Fields: []StructField{{Name: "code", Type: hir.TypeU32}},
 	}}}
 	cloned := Clone(original)
@@ -1669,7 +1669,7 @@ fn i32 main() {
     };
 }
 `)
-	if len(program.EnumTypes) != 1 || program.EnumTypes[0].Type != hir.Type("main::Message") || len(program.EnumTypes[0].Variants) != 2 {
+	if len(program.EnumTypes) != 1 || program.EnumTypes[0].Type != hir.ParseType("main::Message") || len(program.EnumTypes[0].Variants) != 2 {
 		t.Fatalf("enum types = %+v", program.EnumTypes)
 	}
 	function := program.Functions[0]
@@ -1686,14 +1686,14 @@ fn i32 main() {
 				}
 			case OperationEnumPayload:
 				payloads++
-				if operation.OwnerType != hir.Type("main::Message") || operation.Variant != "Pair" || operation.Type != hir.TypeI32 {
+				if operation.OwnerType != hir.ParseType("main::Message") || operation.Variant != "Pair" || operation.Type != hir.TypeI32 {
 					t.Fatalf("enum payload = %+v", operation)
 				}
 			}
 		}
 		if block.Terminator.Kind == TerminatorSwitch && block.Terminator.SwitchKind == "enum" {
 			switches++
-			if block.Terminator.SwitchType != hir.Type("main::Message") || !slices.Equal(block.Terminator.SwitchVariants, []string{"Empty", "Pair"}) || len(block.Terminator.Successors) != 2 {
+			if block.Terminator.SwitchType != hir.ParseType("main::Message") || !slices.Equal(block.Terminator.SwitchVariants, []string{"Empty", "Pair"}) || len(block.Terminator.Successors) != 2 {
 				t.Fatalf("enum switch = %+v", block.Terminator)
 			}
 		}
@@ -2195,7 +2195,7 @@ fn ref str as_str(ref String value) {
 		}
 	}
 	if functionIndex < 0 || constructor == nil || constructor.Type != hir.SharedBorrow(hir.TypeStr) ||
-		constructor.OwnerType != hir.SharedBorrow(hir.Type("main::String")) || len(constructor.Operands) != 3 || constructor.UnsafeScope.Source != "main.fy" {
+		constructor.OwnerType != hir.SharedBorrow(hir.ParseType("main::String")) || len(constructor.Operands) != 3 || constructor.UnsafeScope.Source != "main.fy" {
 		t.Fatalf("raw-parts constructor = %+v", constructor)
 	}
 	if failures := Verify(program); len(failures) != 0 {
@@ -2250,7 +2250,7 @@ fn ref mut u8[] view_mut(ref mut Buffer value) {
 		t.Fatalf("Verify() failures = %+v", failures)
 	}
 	mutated := Clone(program)
-	mutated.Functions[mutableFunction].Blocks[mutableBlock].Operations[mutableOperation].OwnerType = hir.SharedBorrow(hir.Type("main::Buffer"))
+	mutated.Functions[mutableFunction].Blocks[mutableBlock].Operations[mutableOperation].OwnerType = hir.SharedBorrow(hir.ParseType("main::Buffer"))
 	if failures := Verify(mutated); len(failures) == 0 || failures[0].Code != "V1001" {
 		t.Fatalf("Verify() shared-owner mutation failures = %+v", failures)
 	}

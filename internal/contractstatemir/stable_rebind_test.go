@@ -20,7 +20,7 @@ func TestStableStateBodyRebindsFreshOwnersCapabilitiesAndExecution(t *testing.T)
 	fresh := stableStateBodyPackage(t, 9, 501, 700)
 	fresh.StateTransactions = nil
 	fresh.Modules[0].Functions = append(fresh.Modules[0].Functions, hir.Function{
-		Symbol: 900, Name: "unrelated", ResultType: hir.Type("unsupported-local-test-type"),
+		Symbol: 900, Name: "unrelated", ResultType: hir.ParseType("unsupported-local-test-type"),
 	})
 	coordinates := map[hir.PackageID]packagegraph.CoordinateID{9: coordinate}
 
@@ -134,7 +134,7 @@ func TestStableStateBodyRebindRejectsIdentityAndCurrentHIRDrift(t *testing.T) {
 			input.Modules[0].Functions[0].Locals = []hir.Local{{Type: hir.RawPointer(hir.TypeU8, false)}}
 		}, contains: "raw-pointer types are not admitted"},
 		{name: "current receiver-bound owner", mutateHIR: func(input *hir.Package) {
-			input.Modules[0].Functions[0].OwnerType = hir.Type("ledger::Account")
+			input.Modules[0].Functions[0].OwnerType = hir.ParseType("ledger::Account")
 			input.Modules[0].Functions[0].Receiver = "shared"
 		}, contains: "receiver-bound owners are not admitted"},
 		{name: "current drop-glue owner", mutateHIR: func(input *hir.Package) {
@@ -144,7 +144,7 @@ func TestStableStateBodyRebindRejectsIdentityAndCurrentHIRDrift(t *testing.T) {
 			input.Modules[0].Functions[0].Body.Tail = &hir.Expression{Kind: hir.ExpressionBinary, Operator: "/"}
 		}, contains: "potentially trapping operations are not admitted"},
 		{name: "current owned resource local", mutateHIR: func(input *hir.Package) {
-			resourceType := hir.Type("ledger::FreshHandle")
+			resourceType := hir.ParseType("ledger::FreshHandle")
 			input.Modules[0].Resources = append(input.Modules[0].Resources, hir.Resource{Type: resourceType, DropKind: hir.ResourceDropEmpty})
 			input.Modules[0].Functions[0].Locals = []hir.Local{{Type: resourceType}}
 		}, contains: "owned resource values are not admitted"},

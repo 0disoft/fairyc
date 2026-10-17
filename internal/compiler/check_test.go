@@ -452,7 +452,7 @@ func statefulDropGlueCompilerAnalysis(t *testing.T) compiler.Analysis {
 		t.Fatal(err)
 	}
 	analysis, _ = attachStatefulCompilerFunction(t, analysis, "test.compiler-result-drop-glue", func(function *hir.Function) bool {
-		return function.DropGlueFor != ""
+		return function.DropGlueFor != hir.ParseType("")
 	})
 	analysis.Semantic.HIR.Modules[0].Resources[0].DropEffects = hir.CanonicalEffects([]hir.Effect{hir.EffectStorageRead, hir.EffectStorageWrite})
 	return analysis

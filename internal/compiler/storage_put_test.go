@@ -139,7 +139,7 @@ func TestPrivateVectorStoragePutBackendPointerGuard(t *testing.T) {
 func TestPrivateVectorStoragePutMIRGuards(t *testing.T) {
 	for name, mutate := range map[string]func(*mir.Operation){
 		"destination":  func(op *mir.Operation) { op.DestinationLocal = 99 },
-		"unknown type": func(op *mir.Operation) { op.OwnerType = "main::Missing" },
+		"unknown type": func(op *mir.Operation) { op.OwnerType = hir.ParseType("main::Missing") },
 		"scope":        func(op *mir.Operation) { op.UnsafeScope = hir.Span{} },
 		"operand":      func(op *mir.Operation) { op.Operands = nil },
 		"value result": func(op *mir.Operation) { op.Type = hir.TypeI32 },

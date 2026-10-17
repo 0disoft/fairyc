@@ -60,7 +60,7 @@ func lowerEnumTypes(input hir.Package) ([]EnumType, error) {
 	seen := make(map[hir.Type]struct{})
 	for _, module := range input.Modules {
 		for _, enumeration := range module.Enums {
-			if enumeration.Type == "" || enumeration.Type == hir.TypeInvalid || enumeration.Name == "" {
+			if enumeration.Type == hir.ParseType("") || enumeration.Type == hir.TypeInvalid || enumeration.Name == "" {
 				return nil, fmt.Errorf("enum %s::%s has no concrete identity", module.Path, enumeration.Name)
 			}
 			if _, duplicate := seen[enumeration.Type]; duplicate {
@@ -83,7 +83,7 @@ func lowerEnumTypes(input hir.Package) ([]EnumType, error) {
 				lowered := EnumVariant{Name: variant.Name, Span: variant.Span, Fields: make([]EnumField, 0, len(variant.Fields))}
 				fieldNames := make(map[string]struct{}, len(variant.Fields))
 				for _, field := range variant.Fields {
-					if field.Name == "" || field.Type == "" || field.Type == hir.TypeInvalid {
+					if field.Name == "" || field.Type == hir.ParseType("") || field.Type == hir.TypeInvalid {
 						return nil, fmt.Errorf("enum %q variant %q has an invalid field", enumeration.Type, variant.Name)
 					}
 					if _, duplicate := fieldNames[field.Name]; duplicate {
@@ -98,7 +98,7 @@ func lowerEnumTypes(input hir.Package) ([]EnumType, error) {
 		}
 	}
 	slices.SortFunc(result, func(left, right EnumType) int {
-		return strings.Compare(string(left.Type), string(right.Type))
+		return strings.Compare(left.Type.String(), right.Type.String())
 	})
 	return result, nil
 }
@@ -108,7 +108,7 @@ func lowerStructTypes(input hir.Package) ([]StructType, error) {
 	seen := make(map[hir.Type]struct{})
 	for _, module := range input.Modules {
 		for _, structure := range module.Structs {
-			if structure.Type == "" || structure.Type == hir.TypeInvalid || structure.Name == "" {
+			if structure.Type == hir.ParseType("") || structure.Type == hir.TypeInvalid || structure.Name == "" {
 				return nil, fmt.Errorf("struct %s::%s has no concrete identity", module.Path, structure.Name)
 			}
 			if _, duplicate := seen[structure.Type]; duplicate {
@@ -122,7 +122,7 @@ func lowerStructTypes(input hir.Package) ([]StructType, error) {
 			}
 			fieldNames := make(map[string]struct{}, len(structure.Fields))
 			for _, field := range structure.Fields {
-				if field.Name == "" || field.Type == "" || field.Type == hir.TypeInvalid {
+				if field.Name == "" || field.Type == hir.ParseType("") || field.Type == hir.TypeInvalid {
 					return nil, fmt.Errorf("struct %q has an invalid field definition", structure.Type)
 				}
 				if _, duplicate := fieldNames[field.Name]; duplicate {
@@ -135,7 +135,7 @@ func lowerStructTypes(input hir.Package) ([]StructType, error) {
 		}
 	}
 	slices.SortFunc(result, func(left, right StructType) int {
-		return strings.Compare(string(left.Type), string(right.Type))
+		return strings.Compare(left.Type.String(), right.Type.String())
 	})
 	return result, nil
 }
@@ -179,7 +179,7 @@ func lowerResourceTypes(input hir.Package) ([]ResourceType, error) {
 	seen := make(map[hir.Type]struct{})
 	for _, module := range input.Modules {
 		for _, resource := range module.Resources {
-			if resource.Type == "" || resource.Type == hir.TypeInvalid {
+			if resource.Type == hir.ParseType("") || resource.Type == hir.TypeInvalid {
 				return nil, fmt.Errorf("resource %s::%s has no concrete type", module.Path, resource.Name)
 			}
 			if _, duplicate := seen[resource.Type]; duplicate {
@@ -201,7 +201,7 @@ func lowerResourceTypes(input hir.Package) ([]ResourceType, error) {
 			}
 			fieldNames := make(map[string]struct{}, len(resource.Fields))
 			for _, field := range resource.Fields {
-				if field.Name == "" || field.Type == "" || field.Type == hir.TypeInvalid {
+				if field.Name == "" || field.Type == hir.ParseType("") || field.Type == hir.TypeInvalid {
 					return nil, fmt.Errorf("resource %q has an invalid field definition", resource.Type)
 				}
 				if _, duplicate := fieldNames[field.Name]; duplicate {
@@ -214,7 +214,7 @@ func lowerResourceTypes(input hir.Package) ([]ResourceType, error) {
 		}
 	}
 	slices.SortFunc(result, func(left, right ResourceType) int {
-		return strings.Compare(string(left.Type), string(right.Type))
+		return strings.Compare(left.Type.String(), right.Type.String())
 	})
 	return result, nil
 }
@@ -292,7 +292,7 @@ func (l *functionLowerer) lower() (Function, error) {
 		l.result.Parameters = append(l.result.Parameters, LocalID(parameter.Symbol))
 		l.result.ParameterTypes = append(l.result.ParameterTypes, parameter.Type)
 		l.bindings[parameter.Symbol] = bindingInfo{typ: parameter.Type, span: parameter.Span}
-		isDropReceiver := l.source.DropGlueFor != "" && index == 0 && parameter.Type == l.source.DropGlueFor
+		isDropReceiver := l.source.DropGlueFor != hir.ParseType("") && index == 0 && parameter.Type == l.source.DropGlueFor
 		if l.properties.NeedsDrop(parameter.Type) && !isDropReceiver {
 			l.live[parameter.Symbol] = true
 			l.result.Resources = append(l.result.Resources, ResourceLocal{

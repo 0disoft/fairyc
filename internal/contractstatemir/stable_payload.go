@@ -667,7 +667,7 @@ func validStableStateBodyType(value string) bool {
 }
 
 func canonicalStableStateBodyType(value string) (string, bool) {
-	if stateBodyBuiltinType(hir.Type(value)) {
+	if stateBodyBuiltinType(hir.ParseType(value)) {
 		return value, true
 	}
 	for _, prefix := range []string{"ref mut ", "ref ", "ptr mut ", "ptr "} {
@@ -679,16 +679,16 @@ func canonicalStableStateBodyType(value string) (string, bool) {
 			return prefix + element, true
 		}
 	}
-	if element, ok := hir.OptionElement(hir.Type(value)); ok {
-		canonical, valid := canonicalStableStateBodyType(string(element))
+	if element, ok := hir.OptionElement(hir.ParseType(value)); ok {
+		canonical, valid := canonicalStableStateBodyType(element.String())
 		if !valid {
 			return "", false
 		}
 		return "Option<" + canonical + ">", true
 	}
-	if success, failure, ok := hir.ResultElements(hir.Type(value)); ok {
-		canonicalSuccess, successValid := canonicalStableStateBodyType(string(success))
-		canonicalFailure, failureValid := canonicalStableStateBodyType(string(failure))
+	if success, failure, ok := hir.ResultElements(hir.ParseType(value)); ok {
+		canonicalSuccess, successValid := canonicalStableStateBodyType(success.String())
+		canonicalFailure, failureValid := canonicalStableStateBodyType(failure.String())
 		if !successValid || !failureValid {
 			return "", false
 		}

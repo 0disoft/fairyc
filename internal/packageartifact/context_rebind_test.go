@@ -23,7 +23,7 @@ func TestStableContextRebindsWithoutProcessLocalTypeOrForeignState(t *testing.T)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if rebound.StructTypes[0].Span.Package != 9 || rebound.StructTypes[0].Type != "$p9::types::Point" {
+	if rebound.StructTypes[0].Span.Package != 9 || rebound.StructTypes[0].Type != hir.ParseType("$p9::types::Point") {
 		t.Fatalf("rebound struct = %+v", rebound.StructTypes[0])
 	}
 	if rebound.ResourceTypes[0].DropSymbol != 801 || rebound.ForeignFunctions[0].Symbol != 901 {

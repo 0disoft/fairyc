@@ -40,8 +40,8 @@ fn i32 main() {
 		field string
 	}{
 		"bool_size": {hir.TypeBool, "size"}, "bool_alignment": {hir.TypeBool, "alignment"},
-		"padded_size": {"main::Padded", "size"}, "padded_alignment": {"main::Padded", "alignment"},
-		"owner_size": {"main::Owner", "size"}, "owner_alignment": {"main::Owner", "alignment"},
+		"padded_size": {hir.ParseType("main::Padded"), "size"}, "padded_alignment": {hir.ParseType("main::Padded"), "alignment"},
+		"owner_size": {hir.ParseType("main::Owner"), "size"}, "owner_alignment": {hir.ParseType("main::Owner"), "alignment"},
 	}
 	count := 0
 	for moduleIndex := range result.HIR.Modules {
@@ -86,7 +86,7 @@ func TestPrivateStorageQueryHIRAndConsumerBoundaries(t *testing.T) {
 			for _, op := range block.Operations {
 				if op.Kind == mir.OperationStorageLayout {
 					count++
-					if op.OwnerType == "" || len(op.Operands) != 0 || op.Type != hir.TypeUSize {
+					if op.OwnerType == hir.ParseType("") || len(op.Operands) != 0 || op.Type != hir.TypeUSize {
 						t.Fatal("query lost symbolic type or acquired an input value")
 					}
 				}
@@ -115,7 +115,7 @@ func TestPrivateStorageQueryRejectsMalformedMIR(t *testing.T) {
 	for name, mutate := range map[string]func(*mir.Operation){
 		"result":      func(op *mir.Operation) { op.Type = hir.TypeI32 },
 		"field":       func(op *mir.Operation) { op.Field = "offset" },
-		"type":        func(op *mir.Operation) { op.OwnerType = "main::Missing" },
+		"type":        func(op *mir.Operation) { op.OwnerType = hir.ParseType("main::Missing") },
 		"destination": func(op *mir.Operation) { op.DestinationLocal = mir.NoLocal },
 		"operand":     func(op *mir.Operation) { op.Operands = []mir.Operand{{Kind: mir.OperandI32, I32: 1}} },
 		"ownership":   func(op *mir.Operation) { op.MovePayload = true },
@@ -166,7 +166,7 @@ func TestPrivateStorageQueryGateIncludesUnreachableBlocks(t *testing.T) {
 	if len(mir.Verify(program)) == 0 || len(mir.VerifyStorageQueries(program)) != 0 {
 		t.Fatal("unreachable valid query did not retain its private admission gate")
 	}
-	function.Blocks[len(function.Blocks)-1].Operations[0].OwnerType = "main::Missing"
+	function.Blocks[len(function.Blocks)-1].Operations[0].OwnerType = hir.ParseType("main::Missing")
 	if len(mir.VerifyStorageQueries(program)) == 0 {
 		t.Fatal("unreachable malformed query escaped shape/type verification")
 	}

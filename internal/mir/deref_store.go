@@ -77,6 +77,6 @@ func validDerefStoreCommonShape(op Operation) bool {
 		op.DestinationLocal == NoLocal && op.Symbol == hir.NoSymbol && op.Field == "" &&
 		len(op.Operands) == 2 && op.Operands[0].Kind == OperandLocal && op.Operands[0].Local >= 0 &&
 		len(op.Fields) == 0 && len(op.TrapCategories) == 0 && op.Operator == "" && op.Destination == "" &&
-		op.ProjectionEntity == "" && op.DropFlagEntity == "" && op.IndexType == "" && op.Variant == "" &&
+		op.ProjectionEntity == "" && op.DropFlagEntity == "" && op.IndexType == hir.ParseType("") && op.Variant == "" &&
 		!op.MovePayload && !op.FlagClearedFirst && op.UnsafeScope == (hir.Span{}) && op.SourceForm == "" && op.ExitKind == ""
 }

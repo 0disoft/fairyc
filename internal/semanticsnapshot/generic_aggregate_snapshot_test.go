@@ -39,7 +39,7 @@ fn i32 main() { let Token value = Token { .value = 42 }; return 0; }`
 		t.Fatalf("private cleanup leaked into source function: %v %+v", err, snapshot.Functions())
 	}
 	for _, function := range compiled.MIR.Functions {
-		if function.DropGlueFor == "" {
+		if function.DropGlueFor == hir.ParseType("") {
 			compiled.Semantic.Borrows[0].Borrow = function.Span
 			break
 		}

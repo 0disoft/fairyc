@@ -152,8 +152,8 @@ func (s *server) analyze(d *document, root string) *analysis {
 			continue
 		}
 		message := diag.Code
-		if diag.ExpectedType != "" || diag.ActualType != "" {
-			message += ": expected " + string(diag.ExpectedType) + ", got " + string(diag.ActualType)
+		if diag.ExpectedType != hir.ParseType("") || diag.ActualType != hir.ParseType("") {
+			message += ": expected " + diag.ExpectedType.String() + ", got " + diag.ActualType.String()
 		}
 		a.add(f.Path, f.Text, diag.Primary.StartByte, diag.Primary.EndByte, diag.Code, message)
 	}

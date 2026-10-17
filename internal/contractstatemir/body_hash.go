@@ -377,7 +377,7 @@ func describeStateBodyFunction(module hir.Module, function hir.Function, coordin
 	for _, effect := range function.Effects {
 		descriptor.effects = append(descriptor.effects, string(effect))
 	}
-	if function.DropGlueFor != "" {
+	if function.DropGlueFor != hir.ParseType("") {
 		stable, err := stableStateBodyType(function.DropGlueFor, coordinates)
 		if err != nil {
 			return nil, fmt.Errorf("state function %q drop-glue type: %w", logicalName, err)
@@ -396,7 +396,7 @@ func stableStateBodyType(value hir.Type, coordinates map[hir.PackageID]packagegr
 		return stable + "[]", nil
 	}
 	if stateBodyBuiltinType(value) {
-		return string(value), nil
+		return value.String(), nil
 	}
 	if element, mutable, ok := hir.BorrowElement(value); ok {
 		stable, err := stableStateBodyType(element, coordinates)
@@ -468,7 +468,7 @@ func validStateBodyLogicalName(value string) bool {
 }
 
 func stateBodyNominalTypeParts(value hir.Type) (hir.PackageID, string, bool) {
-	text := string(value)
+	text := value.String()
 	if strings.HasPrefix(text, "$p") {
 		separator := strings.Index(text, "::")
 		if separator <= 2 || separator+2 >= len(text) {

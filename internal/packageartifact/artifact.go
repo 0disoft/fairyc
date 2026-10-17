@@ -437,7 +437,7 @@ func (signature FunctionSignature) stub() mir.Function {
 		Effects: slices.Clone(signature.Effects), DropGlueFor: signature.DropGlueFor,
 		Entry: 0, Blocks: []mir.Block{{ID: 0, Terminator: mir.Terminator{Kind: mir.TerminatorUnreachable, UnwindSuccessor: mir.NoBlock}}},
 	}
-	if signature.DropGlueFor != "" {
+	if signature.DropGlueFor != hir.ParseType("") {
 		function.Parameters = []mir.LocalID{0}
 	}
 	return function

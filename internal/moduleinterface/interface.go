@@ -248,7 +248,7 @@ func extractModule(source hir.Module, packageID hir.PackageID, coordinates map[h
 		result.Items = append(result.Items, item)
 	}
 	for _, function := range source.Functions {
-		if !function.Public || function.DropGlueFor != "" {
+		if !function.Public || function.DropGlueFor != hir.ParseType("") {
 			continue
 		}
 		effects, err := stableEffects(function.Effects)
@@ -256,7 +256,7 @@ func extractModule(source hir.Module, packageID hir.PackageID, coordinates map[h
 			return Module{}, fmt.Errorf("public function %q: %w", function.Name, err)
 		}
 		item := Item{Kind: "function", Name: function.Name, Unsafe: function.Unsafe, MustUse: function.MustUse, Effects: effects}
-		if function.OwnerType != "" {
+		if function.OwnerType != hir.ParseType("") {
 			stable, err := stableType(function.OwnerType, packageID, coordinates, publicTypes)
 			if err != nil {
 				return Module{}, fmt.Errorf("public function %q owner: %w", function.Name, err)
@@ -339,10 +339,10 @@ func stableType(value hir.Type, packageID hir.PackageID, coordinates map[hir.Pac
 		return stable + "[]", nil
 	}
 	if element, slice := hir.ScalarViewElement(value); slice {
-		return string(element) + "[]", nil
+		return element.String() + "[]", nil
 	}
 	if builtinType(value) {
-		return string(value), nil
+		return value.String(), nil
 	}
 	if element, mutable, ok := hir.BorrowElement(value); ok {
 		stable, err := stableType(element, packageID, coordinates, publicTypes)
@@ -408,7 +408,7 @@ func stableType(value hir.Type, packageID hir.PackageID, coordinates map[hir.Pac
 }
 
 func userTypeParts(value hir.Type, current hir.PackageID) (hir.PackageID, string, bool) {
-	text := string(value)
+	text := value.String()
 	if strings.HasPrefix(text, "$p") {
 		separator := strings.Index(text, "::")
 		if separator <= 2 || separator+2 >= len(text) {

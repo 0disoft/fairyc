@@ -337,7 +337,7 @@ func (a *analyzer) finish() {
 		if n := compareSpan(left.Expression, right.Expression); n != 0 {
 			return n
 		}
-		return cmp.Compare(left.CanonicalType, right.CanonicalType)
+		return strings.Compare(left.CanonicalType.String(), right.CanonicalType.String())
 	})
 	slices.SortFunc(a.borrows, func(left, right BorrowFact) int {
 		if n := compareSpan(left.Borrow, right.Borrow); n != 0 {

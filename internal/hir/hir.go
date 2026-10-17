@@ -7,43 +7,41 @@ import (
 	"strings"
 )
 
-// Type is one canonical Fairy C type in the implemented Stage 0 subset.
-type Type string
-
-const (
-	TypeInvalid    Type = "<invalid>"
-	TypeVoid       Type = "void"
-	TypeBool       Type = "bool"
-	TypeU8         Type = "u8"
-	TypeI32        Type = "i32"
-	TypeI64        Type = "i64"
-	TypeU32        Type = "u32"
-	TypeUSize      Type = "usize"
-	TypeByteSlice  Type = "[u8]"
-	TypeBoolSlice  Type = "[bool]"
-	TypeI64Slice   Type = "[i64]"
-	TypeI32Slice   Type = "[i32]"
-	TypeU32Slice   Type = "[u32]"
-	TypeUsizeSlice Type = "[usize]"
-	TypeStr        Type = "str"
-	TypeCStr       Type = "CStr"
-	TypeCBool      Type = "c::bool"
-	TypeCChar      Type = "c::char"
-	TypeCDouble    Type = "c::double"
-	TypeCFloat     Type = "c::float"
-	TypeCInt       Type = "c::int"
-	TypeCLong      Type = "c::long"
-	TypeCLongLong  Type = "c::longlong"
-	TypeCSChar     Type = "c::schar"
-	TypeCShort     Type = "c::short"
-	TypeCSizeT     Type = "c::size_t"
-	TypeCSSizeT    Type = "c::ssize_t"
-	TypeCUChar     Type = "c::uchar"
-	TypeCUInt      Type = "c::uint"
-	TypeCULong     Type = "c::ulong"
-	TypeCULongLong Type = "c::ulonglong"
-	TypeCUShort    Type = "c::ushort"
-	TypeRegion     Type = "Region"
+// Builtin identities share the same interner as constructed compound types.
+var (
+	TypeInvalid    Type = builtin("<invalid>")
+	TypeVoid       Type = builtin("void")
+	TypeBool       Type = builtin("bool")
+	TypeU8         Type = builtin("u8")
+	TypeI32        Type = builtin("i32")
+	TypeI64        Type = builtin("i64")
+	TypeU32        Type = builtin("u32")
+	TypeUSize      Type = builtin("usize")
+	TypeByteSlice  Type = Slice(TypeU8)
+	TypeBoolSlice  Type = Slice(TypeBool)
+	TypeI64Slice   Type = Slice(TypeI64)
+	TypeI32Slice   Type = Slice(TypeI32)
+	TypeU32Slice   Type = Slice(TypeU32)
+	TypeUsizeSlice Type = Slice(TypeUSize)
+	TypeStr        Type = builtin("str")
+	TypeCStr       Type = builtin("CStr")
+	TypeCBool      Type = builtin("c::bool")
+	TypeCChar      Type = builtin("c::char")
+	TypeCDouble    Type = builtin("c::double")
+	TypeCFloat     Type = builtin("c::float")
+	TypeCInt       Type = builtin("c::int")
+	TypeCLong      Type = builtin("c::long")
+	TypeCLongLong  Type = builtin("c::longlong")
+	TypeCSChar     Type = builtin("c::schar")
+	TypeCShort     Type = builtin("c::short")
+	TypeCSizeT     Type = builtin("c::size_t")
+	TypeCSSizeT    Type = builtin("c::ssize_t")
+	TypeCUChar     Type = builtin("c::uchar")
+	TypeCUInt      Type = builtin("c::uint")
+	TypeCULong     Type = builtin("c::ulong")
+	TypeCULongLong Type = builtin("c::ulonglong")
+	TypeCUShort    Type = builtin("c::ushort")
+	TypeRegion     Type = builtin("Region")
 )
 
 var cScalarTypes = []Type{
@@ -64,17 +62,17 @@ func IsCScalar(value Type) bool {
 
 // SharedBorrow returns the canonical non-null shared-borrow type for element.
 func SharedBorrow(element Type) Type {
-	return Type("&" + string(element))
+	return internType(TypeDescriptor{Kind: TypeKindBorrow, Element: element})
 }
 
 // MutableBorrow returns the canonical non-null exclusive-borrow type for element.
 func MutableBorrow(element Type) Type {
-	return Type("&mut " + string(element))
+	return internType(TypeDescriptor{Kind: TypeKindBorrow, Element: element, Mutable: true})
 }
 
 // FixedArray returns the canonical sized-array type for one positive element count.
 func FixedArray(element Type, length uint64) Type {
-	return Type("[" + string(element) + "; " + strconv.FormatUint(length, 10) + "]")
+	return internType(TypeDescriptor{Kind: TypeKindFixedArray, Element: element, Length: length})
 }
 
 // MaxExecutableFixedArrayElements is the provisional Stage 0 implementation guard for arrays
@@ -84,41 +82,11 @@ const MaxExecutableFixedArrayElements uint64 = 1 << 12
 
 // FixedArrayParts decomposes one canonical positive fixed-array type.
 func FixedArrayParts(value Type) (element Type, length uint64, ok bool) {
-	text := string(value)
-	if len(text) < 5 || text[0] != '[' || text[len(text)-1] != ']' {
+	d := value.node()
+	if d.kind != TypeKindFixedArray || d.length == 0 || d.element == (Type{}) {
 		return TypeInvalid, 0, false
 	}
-	inside := text[1 : len(text)-1]
-	depth := 0
-	separator := -1
-	for index := 0; index < len(inside); index++ {
-		switch inside[index] {
-		case '[', '<':
-			depth++
-		case ']', '>':
-			depth--
-			if depth < 0 {
-				return TypeInvalid, 0, false
-			}
-		case ';':
-			if depth == 0 {
-				if separator >= 0 {
-					return TypeInvalid, 0, false
-				}
-				separator = index
-			}
-		}
-	}
-	if depth != 0 || separator <= 0 || separator == len(inside)-1 {
-		return TypeInvalid, 0, false
-	}
-	elementText := strings.TrimSpace(inside[:separator])
-	lengthText := strings.TrimSpace(inside[separator+1:])
-	parsed, err := strconv.ParseUint(lengthText, 10, 64)
-	if err != nil || parsed == 0 || elementText == "" {
-		return TypeInvalid, 0, false
-	}
-	return Type(elementText), parsed, true
+	return d.element, d.length, true
 }
 
 // FixedArrayScalarElement reports the closed copy-scalar element set admitted by the first
@@ -131,33 +99,26 @@ func FixedArrayScalarElement(value Type) bool {
 // array shape. Nominal elements still require an actual plain struct definition in
 // semantic analysis and MIR verification before interpretation or C emission.
 func ExecutableFixedArrayShape(element Type, length uint64) bool {
-	_, nominal := StructSliceElement(Type("[" + string(element) + "]"))
-	return (FixedArrayScalarElement(element) || nominal) && length > 0 && length <= MaxExecutableFixedArrayElements
+	return (FixedArrayScalarElement(element) || element.Descriptor().Kind == TypeKindNominal) && length > 0 && length <= MaxExecutableFixedArrayElements
 }
 
 // RawPointer returns the canonical nullable raw-pointer type for element.
 func RawPointer(element Type, mutable bool) Type {
-	if mutable {
-		return Type("*mut " + string(element))
-	}
-	return Type("*" + string(element))
+	return internType(TypeDescriptor{Kind: TypeKindRawPointer, Element: element, Mutable: mutable})
 }
 
 // RawPointerElement decomposes one canonical raw-pointer type.
 func RawPointerElement(value Type) (element Type, mutable bool, ok bool) {
-	text := string(value)
-	if len(text) > len("*mut ") && strings.HasPrefix(text, "*mut ") {
-		return Type(text[len("*mut "):]), true, true
+	d := value.node()
+	if d.kind != TypeKindRawPointer || d.element == (Type{}) {
+		return TypeInvalid, false, false
 	}
-	if len(text) > 1 && text[0] == '*' {
-		return Type(text[1:]), false, true
-	}
-	return TypeInvalid, false, false
+	return d.element, d.mutable, true
 }
 
 // Option returns the canonical compiler-known Option type for one payload type.
 func Option(element Type) Type {
-	return Type("Option<" + string(element) + ">")
+	return internType(TypeDescriptor{Kind: TypeKindOption, Element: element})
 }
 
 // ValuePreservingIntegerCast reports the closed Stage 0 widening and exact-representation subset.
@@ -262,81 +223,34 @@ func CompoundAssignmentType(operator string, value Type) bool {
 
 // OptionElement decomposes one canonical compiler-known Option type.
 func OptionElement(value Type) (element Type, ok bool) {
-	text := string(value)
-	const prefix = "Option<"
-	if len(text) <= len(prefix)+1 || text[:len(prefix)] != prefix || text[len(text)-1] != '>' {
+	d := value.node()
+	if d.kind != TypeKindOption || d.element == (Type{}) {
 		return TypeInvalid, false
 	}
-	inside := strings.TrimSpace(text[len(prefix) : len(text)-1])
-	if inside == "" {
-		return TypeInvalid, false
-	}
-	depth := 0
-	for index := 0; index < len(inside); index++ {
-		switch inside[index] {
-		case '<':
-			depth++
-		case '>':
-			depth--
-			if depth < 0 {
-				return TypeInvalid, false
-			}
-		case ',':
-			if depth == 0 {
-				return TypeInvalid, false
-			}
-		}
-	}
-	if depth != 0 {
-		return TypeInvalid, false
-	}
-	return Type(inside), true
+	return d.element, true
 }
 
 // Result returns the canonical compiler-known Result type for two payload types.
 func Result(success, failure Type) Type {
-	return Type("Result<" + string(success) + ", " + string(failure) + ">")
+	return internType(TypeDescriptor{Kind: TypeKindResult, Element: success, Failure: failure})
 }
 
 // ResultElements decomposes one canonical compiler-known Result type.
 func ResultElements(value Type) (success Type, failure Type, ok bool) {
-	text := string(value)
-	const prefix = "Result<"
-	if len(text) <= len(prefix)+1 || text[:len(prefix)] != prefix || text[len(text)-1] != '>' {
+	d := value.node()
+	if d.kind != TypeKindResult || d.element == (Type{}) || d.failure == (Type{}) {
 		return TypeInvalid, TypeInvalid, false
 	}
-	inside := text[len(prefix) : len(text)-1]
-	depth := 0
-	for index := 0; index < len(inside); index++ {
-		switch inside[index] {
-		case '<':
-			depth++
-		case '>':
-			depth--
-		case ',':
-			if depth == 0 {
-				left := strings.TrimSpace(inside[:index])
-				right := strings.TrimSpace(inside[index+1:])
-				if left == "" || right == "" {
-					return TypeInvalid, TypeInvalid, false
-				}
-				return Type(left), Type(right), true
-			}
-		}
-	}
-	return TypeInvalid, TypeInvalid, false
+	return d.element, d.failure, true
 }
 
 // BorrowElement decomposes one canonical safe-borrow type.
 func BorrowElement(value Type) (element Type, mutable bool, ok bool) {
-	text := string(value)
-	if len(text) > len("&mut ") && text[:len("&mut ")] == "&mut " {
-		return Type(text[len("&mut "):]), true, true
+	d := value.node()
+	if d.kind != TypeKindBorrow || d.element == (Type{}) {
+		return TypeInvalid, false, false
 	}
-	if len(text) > 1 && text[0] == '&' {
-		return Type(text[1:]), false, true
-	}
-	return TypeInvalid, false, false
+	return d.element, d.mutable, true
 }
 
 // SymbolID is build-local and must not be serialized as a language compatibility fact.

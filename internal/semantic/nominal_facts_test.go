@@ -1,6 +1,7 @@
 package semantic_test
 
 import (
+	"github.com/0disoft/fairyc/internal/hir"
 	"reflect"
 	"slices"
 	"testing"
@@ -34,7 +35,7 @@ func TestVisibleNominalFactsUseResolvedProvidersAndVisibility(t *testing.T) {
 			right = fact
 		}
 	}
-	if left.CanonicalType == "" || right.CanonicalType == "" || left.CanonicalType == right.CanonicalType {
+	if left.CanonicalType == hir.ParseType("") || right.CanonicalType == hir.ParseType("") || left.CanonicalType == right.CanonicalType {
 		t.Fatalf("provider identity lost: %+v %+v", left, right)
 	}
 	slices.Reverse(input.Files)
