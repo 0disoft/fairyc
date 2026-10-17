@@ -158,21 +158,22 @@ func splitStableProgramArguments(command string, arguments []string) (compilerAr
 
 func parseStableNativeOptions(command string, arguments []string) (stableNativeOptions, error) {
 	options := stableNativeOptions{}
-	seen := make(map[string]bool, 2)
-	for _, argument := range arguments {
-		if argument != "--locked" && argument != "--release" {
-			return stableNativeOptions{}, fmt.Errorf(`command %q accepts only optional --release and --locked`, command)
-		}
-		if seen[argument] {
-			return stableNativeOptions{}, fmt.Errorf(`command %q received %s more than once`, command, argument)
-		}
-		seen[argument] = true
-		switch argument {
+	_, err := parseCommandFlags(arguments, flagSchema{Command: command,
+		Flags: []flagDefinition{{Name: "--locked", Kind: flagSwitch}, {Name: "--release", Kind: flagSwitch}},
+		Unknown: func(string) error {
+			return fmt.Errorf(`command %q accepts only optional --release and --locked`, command)
+		},
+	}, func(flag, value string) error {
+		switch flag {
 		case "--locked":
 			options.locked = true
 		case "--release":
 			options.release = true
 		}
+		return nil
+	})
+	if err != nil {
+		return stableNativeOptions{}, err
 	}
 	return options, nil
 }

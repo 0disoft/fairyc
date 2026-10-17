@@ -481,101 +481,26 @@ func parseStableTestOptions(arguments []string) (stableTestOptions, error) {
 
 func parseStableTestCompilerOptions(arguments []string) (stableTestOptions, error) {
 	options := stableTestOptions{timeoutSeconds: stableNativeTestTimeoutSeconds}
-	seen := make(map[string]bool, 7)
-	files := make(map[string]bool)
-	directories := make(map[string]bool)
-	exact := make(map[string]bool)
-	for index := 0; index < len(arguments); index++ {
-		argument := arguments[index]
-		if argument == "--package" {
-			if index+1 >= len(arguments) || strings.HasPrefix(arguments[index+1], "--") {
-				return stableTestOptions{}, fmt.Errorf(`command "test" requires a package UID after --package`)
-			}
-			if seen[argument] {
-				return stableTestOptions{}, fmt.Errorf(`command "test" received --package more than once`)
-			}
-			seen[argument] = true
-			options.packageUID = arguments[index+1]
-			index++
-			continue
-		}
-		if argument == "--stdin-file" {
-			if index+1 >= len(arguments) || strings.HasPrefix(arguments[index+1], "--") {
-				return stableTestOptions{}, fmt.Errorf(`command "test" requires a portable workspace file after --stdin-file`)
-			}
-			if seen[argument] {
-				return stableTestOptions{}, fmt.Errorf(`command "test" received --stdin-file more than once`)
-			}
-			seen[argument] = true
-			options.stdinFile = arguments[index+1]
-			index++
-			continue
-		}
-		if argument == "--timeout-seconds" {
-			if index+1 >= len(arguments) || strings.HasPrefix(arguments[index+1], "--") {
-				return stableTestOptions{}, fmt.Errorf(`command "test" requires canonical seconds after --timeout-seconds`)
-			}
-			if seen[argument] {
-				return stableTestOptions{}, fmt.Errorf(`command "test" received --timeout-seconds more than once`)
-			}
-			value := arguments[index+1]
-			seconds, err := strconv.Atoi(value)
-			if err != nil || strconv.Itoa(seconds) != value || seconds < 1 || seconds > stableNativeTestTimeoutSeconds {
-				return stableTestOptions{}, fmt.Errorf(`command "test" requires --timeout-seconds in canonical range 1 through %d`, stableNativeTestTimeoutSeconds)
-			}
-			seen[argument] = true
-			options.timeoutSeconds = seconds
-			options.timeoutExplicit = true
-			index++
-			continue
-		}
-		if argument == "--exact" {
-			if index+1 >= len(arguments) || strings.HasPrefix(arguments[index+1], "--") {
-				return stableTestOptions{}, fmt.Errorf(`command "test" requires a test identity after --exact`)
-			}
-			identity := arguments[index+1]
-			if exact[identity] {
-				return stableTestOptions{}, fmt.Errorf(`command "test" received exact test %q more than once`, identity)
-			}
-			exact[identity] = true
-			options.exact = append(options.exact, identity)
-			index++
-			continue
-		}
-		if argument == "--file" {
-			if index+1 >= len(arguments) || strings.HasPrefix(arguments[index+1], "--") {
-				return stableTestOptions{}, fmt.Errorf(`command "test" requires a test path after --file`)
-			}
-			path := arguments[index+1]
-			if files[path] {
-				return stableTestOptions{}, fmt.Errorf(`command "test" received test file %q more than once`, path)
-			}
-			files[path] = true
-			options.files = append(options.files, path)
-			index++
-			continue
-		}
-		if argument == "--dir" {
-			if index+1 >= len(arguments) || strings.HasPrefix(arguments[index+1], "--") {
-				return stableTestOptions{}, fmt.Errorf(`command "test" requires a test directory after --dir`)
-			}
-			directory := arguments[index+1]
-			if directories[directory] {
-				return stableTestOptions{}, fmt.Errorf(`command "test" received test directory %q more than once`, directory)
-			}
-			directories[directory] = true
-			options.directories = append(options.directories, directory)
-			index++
-			continue
-		}
-		if argument != "--locked" && argument != "--native" && argument != "--release" && argument != "--stdin" && argument != "--capture-output" && argument != "--list" && argument != "--json" && argument != "--locations" && argument != "--workspace" {
-			return stableTestOptions{}, fmt.Errorf(`command "test" accepts only optional --list, --json, --locations, --native, --release, --stdin, --stdin-file <portable-workspace-file>, --capture-output, --workspace, --package <package-uid>, --dir <portable-test-directory>, --file <portable-test-path>, --exact <test-identity>, and --locked`)
-		}
-		if seen[argument] {
-			return stableTestOptions{}, fmt.Errorf(`command "test" received %s more than once`, argument)
-		}
-		seen[argument] = true
-		switch argument {
+	_, err := parseCommandFlags(arguments, flagSchema{Command: "test", Flags: []flagDefinition{
+		{Name: "--locked", Kind: flagSwitch},
+		{Name: "--native", Kind: flagSwitch},
+		{Name: "--release", Kind: flagSwitch},
+		{Name: "--stdin", Kind: flagSwitch},
+		{Name: "--capture-output", Kind: flagSwitch},
+		{Name: "--list", Kind: flagSwitch},
+		{Name: "--json", Kind: flagSwitch},
+		{Name: "--locations", Kind: flagSwitch},
+		{Name: "--workspace", Kind: flagSwitch},
+		{Name: "--package", Kind: flagScalar, ValueFirst: true, Missing: `command "test" requires a package UID after --package`},
+		{Name: "--stdin-file", Kind: flagScalar, ValueFirst: true, Missing: `command "test" requires a portable workspace file after --stdin-file`},
+		{Name: "--timeout-seconds", Kind: flagScalar, ValueFirst: true, Missing: `command "test" requires canonical seconds after --timeout-seconds`},
+		{Name: "--exact", Kind: flagSlice, ValueFirst: true, Missing: `command "test" requires a test identity after --exact`, DuplicateValue: `command "test" received exact test %q more than once`},
+		{Name: "--file", Kind: flagSlice, ValueFirst: true, Missing: `command "test" requires a test path after --file`, DuplicateValue: `command "test" received test file %q more than once`},
+		{Name: "--dir", Kind: flagSlice, ValueFirst: true, Missing: `command "test" requires a test directory after --dir`, DuplicateValue: `command "test" received test directory %q more than once`},
+	}, Unknown: func(string) error {
+		return fmt.Errorf(`command "test" accepts only optional --list, --json, --locations, --native, --release, --stdin, --stdin-file <portable-workspace-file>, --capture-output, --workspace, --package <package-uid>, --dir <portable-test-directory>, --file <portable-test-path>, --exact <test-identity>, and --locked`)
+	}}, func(flag, value string) error {
+		switch flag {
 		case "--locked":
 			options.locked = true
 		case "--native":
@@ -594,40 +519,42 @@ func parseStableTestCompilerOptions(arguments []string) (stableTestOptions, erro
 			options.locations = true
 		case "--workspace":
 			options.workspace = true
+		case "--package":
+			options.packageUID = value
+		case "--stdin-file":
+			options.stdinFile = value
+		case "--exact":
+			options.exact = append(options.exact, value)
+		case "--file":
+			options.files = append(options.files, value)
+		case "--dir":
+			options.directories = append(options.directories, value)
+		case "--timeout-seconds":
+			seconds, err := strconv.Atoi(value)
+			if err != nil || strconv.Itoa(seconds) != value || seconds < 1 || seconds > stableNativeTestTimeoutSeconds {
+				return fmt.Errorf(`command "test" requires --timeout-seconds in canonical range 1 through %d`, stableNativeTestTimeoutSeconds)
+			}
+			options.timeoutSeconds, options.timeoutExplicit = seconds, true
 		}
+		return nil
+	})
+	if err != nil {
+		return stableTestOptions{}, err
 	}
-	if options.workspace && options.packageUID != "" {
-		return stableTestOptions{}, fmt.Errorf(`command "test" does not combine --workspace with --package`)
-	}
-	if len(options.files) != 0 && len(options.exact) != 0 {
-		return stableTestOptions{}, fmt.Errorf(`command "test" does not combine --file with --exact`)
-	}
-	if len(options.directories) != 0 && (len(options.files) != 0 || len(options.exact) != 0) {
-		return stableTestOptions{}, fmt.Errorf(`command "test" does not combine --dir with --file or --exact`)
-	}
-	if options.list && (options.native || options.release || options.stdin || options.stdinFile != "" || options.timeoutExplicit || options.captureOutput || len(options.exact) != 0) {
-		return stableTestOptions{}, fmt.Errorf(`command "test" does not combine --list with --native, --release, --stdin, --stdin-file, --capture-output, or --exact`)
-	}
-	if options.release && !options.native {
-		return stableTestOptions{}, fmt.Errorf(`command "test" requires --native when --release is supplied`)
-	}
-	if options.stdin && !options.native {
-		return stableTestOptions{}, fmt.Errorf(`command "test" requires --native when --stdin is supplied`)
-	}
-	if options.timeoutExplicit && !options.native {
-		return stableTestOptions{}, fmt.Errorf(`command "test" requires --native when --timeout-seconds is supplied`)
-	}
-	if options.stdinFile != "" && !options.native {
-		return stableTestOptions{}, fmt.Errorf(`command "test" requires --native when --stdin-file is supplied`)
-	}
-	if options.stdin && options.stdinFile != "" {
-		return stableTestOptions{}, fmt.Errorf(`command "test" does not combine --stdin with --stdin-file`)
-	}
-	if options.captureOutput && !options.native {
-		return stableTestOptions{}, fmt.Errorf(`command "test" requires --native when --capture-output is supplied`)
-	}
-	if options.captureOutput && !options.json {
-		return stableTestOptions{}, fmt.Errorf(`command "test" requires --json when --capture-output is supplied`)
+	if err := validateFlagRules(
+		flagRule{Invalid: options.workspace && options.packageUID != "", Message: fmt.Sprintf(`command "test" does not combine --workspace with --package`)},
+		flagRule{Invalid: len(options.files) != 0 && len(options.exact) != 0, Message: fmt.Sprintf(`command "test" does not combine --file with --exact`)},
+		flagRule{Invalid: len(options.directories) != 0 && (len(options.files) != 0 || len(options.exact) != 0), Message: fmt.Sprintf(`command "test" does not combine --dir with --file or --exact`)},
+		flagRule{Invalid: options.list && (options.native || options.release || options.stdin || options.stdinFile != "" || options.timeoutExplicit || options.captureOutput || len(options.exact) != 0), Message: fmt.Sprintf(`command "test" does not combine --list with --native, --release, --stdin, --stdin-file, --capture-output, or --exact`)},
+		flagRule{Invalid: options.release && !options.native, Message: fmt.Sprintf(`command "test" requires --native when --release is supplied`)},
+		flagRule{Invalid: options.stdin && !options.native, Message: fmt.Sprintf(`command "test" requires --native when --stdin is supplied`)},
+		flagRule{Invalid: options.timeoutExplicit && !options.native, Message: fmt.Sprintf(`command "test" requires --native when --timeout-seconds is supplied`)},
+		flagRule{Invalid: options.stdinFile != "" && !options.native, Message: fmt.Sprintf(`command "test" requires --native when --stdin-file is supplied`)},
+		flagRule{Invalid: options.stdin && options.stdinFile != "", Message: fmt.Sprintf(`command "test" does not combine --stdin with --stdin-file`)},
+		flagRule{Invalid: options.captureOutput && !options.native, Message: fmt.Sprintf(`command "test" requires --native when --capture-output is supplied`)},
+		flagRule{Invalid: options.captureOutput && !options.json, Message: fmt.Sprintf(`command "test" requires --json when --capture-output is supplied`)},
+	); err != nil {
+		return stableTestOptions{}, err
 	}
 	return options, nil
 }
