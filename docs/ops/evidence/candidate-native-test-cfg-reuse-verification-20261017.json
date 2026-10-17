@@ -1,0 +1,132 @@
+{
+  "schema": "fairyc.candidate-native-test-cfg-reuse-verification/v1",
+  "scopedChecksPassed": true,
+  "checkedAtUTC": "2026-10-17T10:37:52.638535+00:00",
+  "implementationRevision": "915ea9e39ad877bdf187966ff05b9c51d3fa74df",
+  "candidateBuild": {
+    "receipt": {
+      "path": ".cache/c-generation-reuse-20261017/candidate/receipt.json",
+      "sha256": "ed2871c2352df4e1fc2ba09b4c81858ef6cac7ee9a6e21908649aa33370687c4"
+    },
+    "sources": 512,
+    "packetBytes": 41758634,
+    "packetSHA256": "56c5591c9f17000217c11b1b7a3598d1bb4359784bea7b8867d31a8580c6d0fc",
+    "images": [
+      {
+        "profile": "development",
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\c-generation-reuse-20261017\\candidate\\development\\fairyc.exe",
+        "sha256": "018c9270fc3ffc11380e45c079565ea6bb109f5f2b19ff4b7a94270e04c837dc",
+        "driverSHA256": "68917e76329f3952d352c6cf37ebbe0c19fcd84fb6f68b72dcf8d32e272ff512"
+      }
+    ],
+    "goFrontendInvoked": false,
+    "buildVersion": "Fairy C Stage 0\ncompiler: v0.0.0-20261017102315-915ea9e39ad8+dirty\nsdk: fairyc-sdk-stdlib/0 0.0.0-stage0.86\nlanguage: fairyc-language/20\nruntime: fairyc-runtime/0\nrevision: 915ea9e39ad877bdf187966ff05b9c51d3fa74df\nmodified: true\n"
+  },
+  "implementationEvidence": {
+    "path": "docs/ops/evidence/candidate-native-test-cfg-session-20261017.json",
+    "sha256": "17086e3d24a359bbd46d5387f25e689a1b4dc3cb7b6f32148227ca19bebd1d43"
+  },
+  "stageProfile": {
+    "path": "docs/ops/evidence/candidate-native-c-emission-stage-profile-20261017.json",
+    "sha256": "5421705addf2f7f7ba9730d8072565453a9834a81866e49fedddbca28c0dcd57"
+  },
+  "exactNativeComparisons": 2,
+  "observations": [
+    {
+      "profile": "development",
+      "id": "trap-categories",
+      "argv": [
+        "--native",
+        "--json",
+        "--capture-output"
+      ],
+      "go": {
+        "exit": 5,
+        "stdout": "{\"schemaVersion\":\"fairyc.test-report/v4\",\"engine\":\"native\",\"target\":\"x86_64-windows-msvc\",\"profile\":\"development\",\"tests\":[{\"identity\":\"tests::traps::a_bounds\",\"outcome\":\"failed\",\"trapCategory\":\"bounds\",\"stdoutBase64\":\"\",\"stderrBase64\":\"\"},{\"identity\":\"tests::traps::b_overflow\",\"outcome\":\"failed\",\"trapCategory\":\"integer-overflow\",\"stdoutBase64\":\"\",\"stderrBase64\":\"\"},{\"identity\":\"tests::traps::c_division\",\"outcome\":\"failed\",\"trapCategory\":\"division-by-zero\",\"stdoutBase64\":\"\",\"stderrBase64\":\"\"},{\"identity\":\"tests::traps::d_signed_division\",\"outcome\":\"failed\",\"trapCategory\":\"signed-division-overflow\",\"stdoutBase64\":\"\",\"stderrBase64\":\"\"},{\"identity\":\"tests::traps::e_shift\",\"outcome\":\"failed\",\"trapCategory\":\"invalid-shift\",\"stdoutBase64\":\"\",\"stderrBase64\":\"\"},{\"identity\":\"tests::traps::z_after_traps\",\"outcome\":\"passed\",\"trapCategory\":null,\"stdoutBase64\":\"\",\"stderrBase64\":\"\"}],\"count\":6,\"passed\":1,\"failed\":5,\"status\":\"failed\",\"lock\":\"verified\"}\n",
+        "stderr": "",
+        "seconds": 10.635395499994047
+      },
+      "candidate": {
+        "exit": 5,
+        "stdout": "{\"schemaVersion\":\"fairyc.test-report/v4\",\"engine\":\"native\",\"target\":\"x86_64-windows-msvc\",\"profile\":\"development\",\"tests\":[{\"identity\":\"tests::traps::a_bounds\",\"outcome\":\"failed\",\"trapCategory\":\"bounds\",\"stdoutBase64\":\"\",\"stderrBase64\":\"\"},{\"identity\":\"tests::traps::b_overflow\",\"outcome\":\"failed\",\"trapCategory\":\"integer-overflow\",\"stdoutBase64\":\"\",\"stderrBase64\":\"\"},{\"identity\":\"tests::traps::c_division\",\"outcome\":\"failed\",\"trapCategory\":\"division-by-zero\",\"stdoutBase64\":\"\",\"stderrBase64\":\"\"},{\"identity\":\"tests::traps::d_signed_division\",\"outcome\":\"failed\",\"trapCategory\":\"signed-division-overflow\",\"stdoutBase64\":\"\",\"stderrBase64\":\"\"},{\"identity\":\"tests::traps::e_shift\",\"outcome\":\"failed\",\"trapCategory\":\"invalid-shift\",\"stdoutBase64\":\"\",\"stderrBase64\":\"\"},{\"identity\":\"tests::traps::z_after_traps\",\"outcome\":\"passed\",\"trapCategory\":null,\"stdoutBase64\":\"\",\"stderrBase64\":\"\"}],\"count\":6,\"passed\":1,\"failed\":5,\"status\":\"failed\",\"lock\":\"verified\"}\n",
+        "stderr": "",
+        "seconds": 137.47930560000532
+      },
+      "exactMatch": true,
+      "expectedExit": 5,
+      "referenceReused": true,
+      "stdinSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "fixtureSHA256": "e93d2b94f0b2b9a007f4396cfd3303cb25c3c3c2c0bc8db47ebd92d16c9304ba"
+    },
+    {
+      "profile": "development",
+      "id": "resource-sdk",
+      "argv": [
+        "--native",
+        "--json"
+      ],
+      "go": {
+        "exit": 0,
+        "stdout": "{\"schemaVersion\":\"fairyc.test-report/v1\",\"engine\":\"native\",\"target\":\"x86_64-windows-msvc\",\"profile\":\"development\",\"tests\":[{\"identity\":\"tests::vector::sum_after_pop_and_clear\",\"outcome\":\"passed\",\"trapCategory\":null}],\"count\":1,\"passed\":1,\"failed\":0,\"status\":\"ok\",\"lock\":\"verified\"}\n",
+        "stderr": "",
+        "seconds": 1.7658219000004465
+      },
+      "candidate": {
+        "exit": 0,
+        "stdout": "{\"schemaVersion\":\"fairyc.test-report/v1\",\"engine\":\"native\",\"target\":\"x86_64-windows-msvc\",\"profile\":\"development\",\"tests\":[{\"identity\":\"tests::vector::sum_after_pop_and_clear\",\"outcome\":\"passed\",\"trapCategory\":null}],\"count\":1,\"passed\":1,\"failed\":0,\"status\":\"ok\",\"lock\":\"verified\"}\n",
+        "stderr": "",
+        "seconds": 111.93856640000013
+      },
+      "exactMatch": true,
+      "expectedExit": 0,
+      "referenceReused": true,
+      "stdinSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "fixtureSHA256": "23d11e50a7801d0ca95ba500d52eee7a643e2b03c8721052f26585a24b9ac6fd"
+    }
+  ],
+  "performance": {
+    "compilerProfile": "development",
+    "childProfile": "development",
+    "case": "trap-categories",
+    "tests": 6,
+    "beforeSeconds": 255.97680770000443,
+    "afterSeconds": 137.47930560000532,
+    "reductionPercent": 46.292280603356026,
+    "beforeReceipt": {
+      "path": ".cache/native-test-performance-20261017/native-development/receipt.json",
+      "sha256": "6f4a45da06021bae72cc8a0a1698fd09ae4335d194d97dc2b939ac157066463a"
+    },
+    "afterReceipt": {
+      "path": ".cache/c-generation-reuse-20261017/native-development/receipt.json",
+      "sha256": "3ac7351747ffad9b16a13a98cb6620141d7107e99483dab6b226b8ca5f849fae"
+    },
+    "sameArgumentsAndFixtureAndOutput": true
+  },
+  "originalLockPreserved": true,
+  "originalLockSHA256": "a6b52c6270c15ca237c31aed8ece8bbffc745556620c3b2c8dd5c651adc75e30",
+  "stableCLIChanged": false,
+  "languageRulesChanged": false,
+  "sdkABIChanged": false,
+  "databaseChanged": false,
+  "ciChanged": false,
+  "limitsChanged": false,
+  "limitations": [
+    "Single before/after observation under uncontrolled machine load, not a controlled benchmark.",
+    "Only the development compiler was rebuilt; no current-source release compiler image is claimed.",
+    "Exact prior Go observations are reused by the verifier only for the identical reference image, arguments, stdin and fixture bytes.",
+    "Scoped native-test checks cover trap recovery and SDK resources; full CLI parity, fixed-point bootstrap and other platforms were not rerun.",
+    "Names, SDK preparation, reachability, C rendering and native compilation still run per selected test."
+  ],
+  "skippedValidation": [
+    {
+      "name": "Current-source release compiler rebuild and native execution",
+      "reason": "This bounded optimization checkpoint rebuilds the development compiler and exercises the changed native-test path; an additional full optimized compiler build is deferred.",
+      "remainingRisk": "Current-source optimized compiler behavior is not verified by this checkpoint."
+    },
+    {
+      "name": "Full CLI parity, fixed-point bootstrap, non-Windows and full native-test matrix",
+      "reason": "No stable CLI, language, SDK ABI, target or process-driver contract changes; scoped regression and two end-to-end cases cover this cache change.",
+      "remainingRisk": "Broader behavior retains previous evidence and was not re-established for this source revision."
+    }
+  ]
+}

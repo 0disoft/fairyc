@@ -34,6 +34,17 @@ entries/frame bounds, destroys the session before reading its output again, and
 checks a fresh session for changed source. Source check and this regression pass.
 See [implementation evidence](../ops/evidence/candidate-native-test-cfg-session-20261017.json).
 
+The current-source development compiler was rebuilt from a 512-source,
+41,758,634-byte packet produced by the C candidate, with no Go frontend fallback.
+Two end-to-end native-test comparisons exactly match the authenticated prior Go
+stdout, stderr and exit status for identical inputs: six trap cases (including
+continuation after traps), and SDK vector resources. The original lock is
+unchanged. The trap fixture took 137.479 seconds versus 255.977 seconds before
+CFG-session reuse, a 46.3% reduction in this single observation under uncontrolled
+load. This checkpoint does not rebuild the release compiler or repeat full CLI,
+fixed-point, platform and native-test matrices. See
+[scoped verification](../ops/evidence/candidate-native-test-cfg-reuse-verification-20261017.json).
+
 ## Reuse checked IR across native tests (2026-10-17)
 
 `module_project_complete_c::emit_test` borrows the caller's checked `Complete`
