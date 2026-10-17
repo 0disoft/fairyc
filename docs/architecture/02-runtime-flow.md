@@ -64,6 +64,20 @@ later fast path:       verified MIR -> measured fast backend -> object -> linker
 later optimized path:  verified/optimized MIR -> LLVM IR -> object -> linker
 ```
 
+The constrained C backend completes reachability, local typing, capability checks,
+runtime requirements, storage-layout queries, and drop-site planning before
+writing C. `analysisBuilder` owns mutable preparation and the layout engine;
+`emissionAnalysis` is read-only after preparation. Each `emitter` owns only its
+analysis reference and output buffer. Declaration, preamble, function, operation,
+and terminator writers consume that plan without adding requirements. These are
+separate files within `internal/cbackend`, not new package or public API boundaries.
+
+MIR lowering and semantic type checking keep their public coordinators in
+`lower.go` and `typecheck.go`; declaration, expression, control-flow, ownership,
+and call handling live in responsibility-specific files. The native C fixture
+runner keeps orchestration separate from smoke source data, probes, process
+execution, and result decoding.
+
 Package-aware workspace checks always perform loading and semantic analysis. Memory-cache mode can
 reuse process-bound package MIR inside one Session. Explicit persistent mode instead keys stable
 package MIR by the exact compiler build and complete compatibility vector, accepts only complete
