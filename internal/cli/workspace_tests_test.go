@@ -509,6 +509,7 @@ func TestStableWorkspaceTestValidatesHarnessOwnedDeclarations(t *testing.T) {
 		source string
 	}{
 		{name: "attribute arguments", source: "@test(\"extra\")\nfn void invalid() {}"},
+		{name: "generic test", source: "@test\nfn void invalid<T>() {}"},
 		{name: "duplicate attribute", source: "@test\n@test\nfn void invalid() {}"},
 		{name: "public", source: "@test\npub fn void invalid() {}"},
 		{name: "unsafe", source: "@test\nunsafe fn void invalid() {}"},

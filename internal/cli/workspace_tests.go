@@ -12,7 +12,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/0disoft/fairyc/internal/ast"
 	"github.com/0disoft/fairyc/internal/cdriver"
 	"github.com/0disoft/fairyc/internal/compiler"
 	"github.com/0disoft/fairyc/internal/diagnostic"
@@ -20,11 +19,11 @@ import (
 	"github.com/0disoft/fairyc/internal/interpreter"
 	"github.com/0disoft/fairyc/internal/mir"
 	"github.com/0disoft/fairyc/internal/packagecontent"
+	"github.com/0disoft/fairyc/internal/semantic"
 	"github.com/0disoft/fairyc/internal/workspacecompiler"
 	"github.com/0disoft/fairyc/internal/workspaceloader"
 )
 
-const testAttribute = "test"
 const stableTestListSchema = "fairyc.test-list/v1"
 const stableTestReportSchema = "fairyc.test-report/v1"
 const stableWorkspaceTestListSchema = "fairyc.test-list/v2"
@@ -164,7 +163,7 @@ func runLoadedStableTest(workspace workspaceloader.Workspace, lockState string, 
 			}
 			packageUID = loaded.Manifest.Package.UID
 		}
-		packageTests, packageTestFiles, prepareCode := prepareWorkspaceTests(&workspace, packagePath, packageUID, options.locations, stderr)
+		packageTests, packageTestFiles, prepareCode := prepareWorkspaceTests(workspace, packagePath, packageUID, options.locations, stderr)
 		if prepareCode != ExitSuccess {
 			return prepareCode
 		}
@@ -725,7 +724,7 @@ func workspaceTestSourcePath(packagePath, filePath string) string {
 	return packagePath + "/" + filePath
 }
 
-func prepareWorkspaceTests(workspace *workspaceloader.Workspace, packagePath, packageUID string, includeLocations bool, stderr io.Writer) ([]workspaceTest, []string, int) {
+func prepareWorkspaceTests(workspace workspaceloader.Workspace, packagePath, packageUID string, includeLocations bool, stderr io.Writer) ([]workspaceTest, []string, int) {
 	packageID, err := workspace.PackageID(packagePath)
 	if err != nil {
 		return nil, nil, packageFailure(stderr, err)
@@ -751,41 +750,10 @@ func prepareWorkspaceTests(workspace *workspaceloader.Workspace, packagePath, pa
 			fileIdentity, lineMapIdentity = packagecontent.ComputeFileIdentities(file.Bytes)
 			locationPath = portablePath
 		}
-		collectInvalidTestAttributes(file.Module.Structs, func(value ast.Struct) []ast.Attribute { return value.Attributes }, &diagnostics)
-		collectInvalidTestAttributes(file.Module.Enums, func(value ast.Enum) []ast.Attribute { return value.Attributes }, &diagnostics)
-		collectInvalidTestAttributes(file.Module.Resources, func(value ast.Resource) []ast.Attribute { return value.Attributes }, &diagnostics)
-		collectInvalidTestAttributes(file.Module.ForeignFunctions, func(value ast.ForeignFunction) []ast.Attribute { return value.Attributes }, &diagnostics)
-		for index := range file.Module.Resources {
-			cleanup := file.Module.Resources[index].Cleanup
-			if cleanup != nil {
-				appendInvalidTestAttributes(cleanup.Attributes, &diagnostics)
-			}
-		}
-		for index := range file.Module.Functions {
-			function := &file.Module.Functions[index]
-			attributes := function.Attributes[:0]
-			var declarations []ast.Attribute
-			for _, attribute := range function.Attributes {
-				if attribute.Name == testAttribute {
-					declarations = append(declarations, attribute)
-					continue
-				}
-				attributes = append(attributes, attribute)
-			}
-			function.Attributes = attributes
-			if len(declarations) == 0 {
-				continue
-			}
-			valid := len(declarations) == 1 && len(declarations[0].Arguments) == 0 &&
-				!function.Public && !function.Unsafe && function.Owner == "" &&
-				len(function.Parameters) == 0 && function.ResultType.Kind == ast.TypeKindNamed &&
-				function.ResultType.Path == hir.TypeVoid.String()
-			if !valid {
-				diagnostics = append(diagnostics, diagnostic.Diagnostic{
-					Code: "E9001", Span: declarations[0].Span, Repair: diagnostic.RepairNone,
-				})
-				continue
-			}
+		inspection := semantic.InspectTestDeclarations(file.Module)
+		diagnostics = append(diagnostics, inspection.Diagnostics...)
+		for _, index := range inspection.Functions {
+			function := file.Module.Functions[index]
 			display := file.Module.Path + "::" + function.Name
 			if packageUID != "" {
 				display = packageUID + "::" + display
@@ -829,20 +797,4 @@ func prepareWorkspaceTests(workspace *workspaceloader.Workspace, packagePath, pa
 	slices.SortFunc(tests, func(left, right workspaceTest) int { return strings.Compare(left.display, right.display) })
 	slices.Sort(testFiles)
 	return tests, testFiles, ExitSuccess
-}
-
-func collectInvalidTestAttributes[T any](values []T, attributes func(T) []ast.Attribute, diagnostics *[]diagnostic.Diagnostic) {
-	for _, value := range values {
-		appendInvalidTestAttributes(attributes(value), diagnostics)
-	}
-}
-
-func appendInvalidTestAttributes(attributes []ast.Attribute, diagnostics *[]diagnostic.Diagnostic) {
-	for _, attribute := range attributes {
-		if attribute.Name == testAttribute {
-			*diagnostics = append(*diagnostics, diagnostic.Diagnostic{
-				Code: "E9001", Span: attribute.Span, Repair: diagnostic.RepairNone,
-			})
-		}
-	}
 }

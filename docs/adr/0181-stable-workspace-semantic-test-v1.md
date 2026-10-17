@@ -6,7 +6,7 @@
 - CLI sources: `docs/cli/command-contract.md`, `docs/cli/output-and-exit-codes.md`
 - Loader source: `docs/package/workspace-loader-v1.md`
 - Implementation: `internal/workspaceloader/test_sources.go`, `internal/cli/workspace_tests.go`,
-  `internal/interpreter/`
+  `internal/semantic/test_declarations.go`, `internal/interpreter/`
 
 ## Context
 
@@ -36,10 +36,13 @@ Stabilize `fairyc test [--locked]` as a root-package semantic test command.
   may contain private helpers, and may import production modules or manifest-declared dependencies.
   Workspace-member test trees are not discovered by this v1 command.
 - `@test` is harness-owned and valid exactly once, without arguments, on a private safe
-  zero-argument free function returning `void`. The harness validates that shape as `E9001`, removes
-  only the accepted marker from the in-memory AST, and then runs the ordinary package-aware semantic,
-  Flow, MIR-lowering, and MIR-verifier pipeline. `@test` in production source remains outside ordinary
-  language compilation rather than silently becoming build metadata.
+  zero-argument nongeneric free function returning `void`. The loader marks test files explicitly
+  in semantic input. The semantic declaration inspector validates the shape as `E9001`; the CLI
+  reads its entry metadata without changing the AST. Ordinary semantic analysis recognizes the
+  retained marker only in admitted test files, and the compiler validates original test declarations
+  before generic expansion can erase them. Flow, MIR lowering and verification use the same input.
+  `@test` in production source remains outside ordinary language compilation; path or module spelling
+  alone does not admit test metadata. Misplaced markers on declarations remain `E9001` in test input.
 - Test identities are source-visible `<module>::<function>` strings sorted by unsigned UTF-8 bytes.
   Each selected function is rechecked as a zero-argument void MIR entry and runs in a fresh
   deterministic interpreter runtime. Mutable runtime state, step accounting, drop traces, and region

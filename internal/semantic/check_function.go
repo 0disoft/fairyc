@@ -8,6 +8,9 @@ import (
 func (c *typeChecker) checkFunction() hir.Function {
 	functionSymbol := c.analyzer.functions[c.function]
 	for _, attribute := range c.function.Attributes {
+		if attribute.Name == testAttribute && c.module.file.Test {
+			continue
+		}
 		if attribute.Name == effectsAttribute || attribute.Name == mustUseAttribute || attribute.Name == constEvalAttribute {
 			continue
 		}

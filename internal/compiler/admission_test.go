@@ -58,3 +58,25 @@ func TestPolicyStorageAdmission(t *testing.T) {
 		t.Fatal("lowering accepted unknown admission")
 	}
 }
+
+func TestPolicyRetainsTestAdmissionBeforeExpansion(t *testing.T) {
+	for _, genericTest := range []bool{false, true} {
+		text := `module main; fn T id<T>(T value) { return value; } @test fn void works() { assert(id<i32>(42)==42); }`
+		if genericTest {
+			text = `module main; @test fn void erased<T>() {}`
+		}
+		file := parseCompilerFile(t, hir.DefaultPackage, "main.fy", text)
+		file.Test = true
+		checked, plan, err := compiler.CheckWithPolicy(semantic.PackageInput{Files: []semantic.File{file}}, map[hir.PackageID]packagegraph.CoordinateID{file.Package: genericCoordinate(t)}, genericplan.DefaultPlanLimits(), admission.Policy[hir.PackageID]{})
+		if err != nil {
+			t.Fatal(err)
+		}
+		if genericTest {
+			if checked.Verified || len(checked.Semantic.Diagnostics) != 1 || checked.Semantic.Diagnostics[0].Code != "E9001" {
+				t.Fatalf("generic test marker erased before validation: %+v", checked.Semantic)
+			}
+		} else if !checked.Verified || len(plan.Specializations) != 1 {
+			t.Fatalf("test metadata lost in expansion: %+v", checked.Semantic)
+		}
+	}
+}

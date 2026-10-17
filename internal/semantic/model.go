@@ -24,6 +24,8 @@ const (
 
 // File is one syntax-clean AST with its source-root-relative identity.
 type File struct {
+	// Test is loader/harness-owned admission, never inferred from a source path.
+	Test    bool `json:"-"`
 	Package hir.PackageID
 	Path    string
 	Module  *ast.Module
@@ -211,13 +213,17 @@ func analyzeBoundNominalsWithVectorCandidate(files []File, bindings map[packageI
 		}
 		return cmp.Compare(a.Path, b.Path)
 	})
+	testDiagnostics := TestDeclarationDiagnostics(ordered)
 	for index := range ordered {
 		ordered[index].Path = hir.QualifiedSourcePath(ordered[index].Package, ordered[index].Path)
 	}
 	analyzer := newAnalyzer(ordered, bindings)
 	analyzer.nominalBindings = nominals
 	analyzer.vectorForTypes = vectorTypes
-	analyzer.resolve()
+	analyzer.diagnostics = testDiagnostics
+	if len(analyzer.diagnostics) == 0 {
+		analyzer.resolve()
+	}
 	if len(analyzer.diagnostics) > 0 {
 		analyzer.finish()
 		return Result{

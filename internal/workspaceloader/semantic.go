@@ -71,7 +71,7 @@ func (workspace Workspace) SemanticInput() (semantic.PackageInput, error) {
 			return semantic.PackageInput{}, fmt.Errorf("workspace package %q is missing", mapping.PackagePath)
 		}
 		for _, file := range loaded.Sources {
-			input.Files = append(input.Files, semantic.File{Package: packageID, Path: file.Path, Module: file.Module})
+			input.Files = append(input.Files, semantic.File{Package: packageID, Path: file.Path, Module: file.Module, Test: file.Test})
 		}
 	}
 

@@ -42,6 +42,13 @@ func AnalyzeWithPolicy(input semantic.PackageInput, coordinates map[hir.PackageI
 
 // Legacy private proof lanes keep returning source expansion errors directly.
 func analyzeWithPolicy(input semantic.PackageInput, coordinates map[hir.PackageID]packagegraph.CoordinateID, limits genericplan.PlanLimits, policy admission.Policy[hir.PackageID]) (GenericAnalysis, error) {
+	if err := policy.Validate(); err != nil {
+		return GenericAnalysis{}, err
+	}
+	if rejections := semantic.TestDeclarationDiagnostics(input.Files); len(rejections) != 0 {
+		return GenericAnalysis{Analysis: Analysis{Semantic: semantic.Result{FailedPhase: semantic.PhaseResolve, Diagnostics: rejections}}}, nil
+	}
+
 	analysis, expansion, err := analyzePackageGraph(input, coordinates, limits, policy)
 	if err != nil {
 		return GenericAnalysis{}, err
