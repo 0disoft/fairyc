@@ -1,0 +1,136 @@
+{
+  "schema": "fairyc.cli-declarative-flags-verification/v1",
+  "date": "2026-10-17",
+  "status": "verified",
+  "scope": "Go internal/cli flag tokenization and ordered validation; command inventory, help bytes, exit taxonomy and report schemas unchanged",
+  "implementationCommits": [
+    "02c194d9",
+    "cf316fe6",
+    "28e5b22a"
+  ],
+  "migratedParserCount": 18,
+  "design": {
+    "core": "internal/cli/flags.go: flagDefinition, flagSchema, parseCommandFlags and ordered flagRule validation",
+    "tokenKinds": [
+      "switch",
+      "scalar",
+      "slice"
+    ],
+    "declaredConstraints": [
+      "accepted names",
+      "required flags in diagnostic order",
+      "scalar/switch multiplicity",
+      "slice value uniqueness",
+      "missing-value versus duplicate precedence",
+      "ordered exclusions and dependencies"
+    ],
+    "domainChecks": "Remain command-owned and run in original token order before examining later flags or missing required flags.",
+    "terminator": "Stable run/test retain command-owned -- splitting and program-argument validation.",
+    "atlasEvidence": "Explicitly forwards unclaimed tokens individually and retains extraction-before-relation validation order.",
+    "unchangedSmallParsers": "Fixed-arity positional parsing and the tiny optional --locked selector remain direct; the session JSON field decoder is not a CLI flag parser."
+  },
+  "compatibilityOracle": {
+    "initialBaselineCommit": "54090a3d",
+    "additionalAtlasSeedBaselineCommit": "cf316fe6",
+    "baselineNote": "Initial 24-parser snapshot captured before source edits. Valid around/evidence seeds expanded while their Atlas parsers were still unmodified, after stable/workspace comparisons passed.",
+    "comparedParserVariants": 24,
+    "comparedCases": 149365,
+    "allValuesAndErrorsEqual": true,
+    "comparison": "Full formatted option structs, including unexported fields, ordered slices, nil versus empty slices, defaults, and exact error strings.",
+    "corpus": "Per-flag values, repeated/missing arguments, valid command seeds and token mutations, 512 flag-presence combinations, and 1500 deterministic random sequences per parser (PCG seeds 3 and 7).",
+    "baselineSHA256": "2ede18328808662ec0aacd93acf8c6933b5e5dd2749f51e95c29b7974c821d37",
+    "currentSHA256": "2ede18328808662ec0aacd93acf8c6933b5e5dd2749f51e95c29b7974c821d37",
+    "casesByVariant": {
+      "atlas-around": 6427,
+      "atlas-calls": 6313,
+      "atlas-evidence": 6541,
+      "atlas-overview": 6237,
+      "atlas-show": 6389,
+      "atlas-symbols": 6275,
+      "atlas-text": 6351,
+      "build": 6218,
+      "build-host": 6180,
+      "build-target": 6218,
+      "cache": 6351,
+      "emit-workspace": 6123,
+      "explicit-check": 6104,
+      "explicit-run": 6142,
+      "locked": 6085,
+      "run-host": 6142,
+      "run-target": 6180,
+      "session": 6275,
+      "stable-native": 6085,
+      "test": 6085,
+      "test-compiler": 6085,
+      "workspace-build": 6199,
+      "workspace-other": 6161,
+      "workspace-run": 6199
+    },
+    "temporaryArtifacts": "Baseline/current snapshots and generator retained only in ignored .cache/cli-flags-refactor; temporary oracle test removed from source after comparison."
+  },
+  "checks": [
+    {
+      "command": "go test ./internal/cli -run ^TestFlagParserCompatibilityOracle$ -count=1",
+      "status": "passed",
+      "note": "Repeated after each migrated command family; final augmented snapshot bytes match the corresponding pre-migration oracle."
+    },
+    {
+      "command": "go test ./internal/cli -run ^(TestCommandFlags.*|TestStableTestFlagErrorPrecedence|TestFlagParserCompatibilityOracle|TestExperimentalAtlas.*|TestAtlas.*)$ -count=1",
+      "status": "passed"
+    },
+    {
+      "command": "go test ./internal/cli -run ^(TestCommandFlags.*|TestStableTestFlagErrorPrecedence|TestFlagParserCompatibilityOracle|TestParse(Workspace|StableNative|ExperimentalWorkspaceEmit|Build|HostBuild|HostRun|TargetBuild|TargetRun|ExecTarget|RunSources|CheckSources).*|TestStableNativeTestTimeoutOptionDomain|TestStableWorkspaceTest.*|TestSplitStableRunArguments.*|TestStableRunRejects.*|TestStableBuildRejectsProgramDelimiter|TestStableExitCodeContract|TestStableHelpInventoryOwnsTopLevelCommands|TestHelpAndInvocationErrorsAreSeparated|TestNativeWorkspaceTest.*|TestStableNativePortableExecution)$ -count=1",
+      "status": "passed",
+      "elapsedSeconds": 20.946,
+      "coverage": "Parser domains, required/duplicate flags, delimiter and NUL handling, native and semantic tests, exact/package/file/directory selection, JSON, stdin, capture and canonical timeout options."
+    },
+    {
+      "command": "go test ./internal/cli -run ^(TestDeclarativeFlagsInvocationContract|TestCommandFlags.*|TestStableTestFlagErrorPrecedence|TestFlagParserCompatibilityOracle)$ -count=1",
+      "status": "passed",
+      "coverage": "11 public RunWithInput failures assert numeric exit 2, empty stdout and exact stderr prefix/message/blank-line/help envelope."
+    },
+    {
+      "command": "go test ./... -run '^$'",
+      "status": "passed",
+      "note": "Repository-wide package compilation only; not a claim of full-suite execution."
+    },
+    {
+      "command": "gofmt; git diff --check",
+      "status": "passed"
+    }
+  ],
+  "notRun": [
+    {
+      "check": "Full repository and full CLI native suites",
+      "reason": "Focused affected-command suites, deterministic parser comparison and repository-wide compilation cover the refactor; unrelated compiler/native workloads were not repeated."
+    },
+    {
+      "check": "Candidate CLI bootstrap rebuild and full candidate/Go comparison",
+      "reason": "Only Go CLI parser internals changed; candidate sources and public CLI contracts are unchanged."
+    },
+    {
+      "check": "Performance benchmarks",
+      "reason": "No quantitative latency or allocation claim."
+    }
+  ],
+  "changes": {
+    "sourceOfTruth": "docs/cli/stable-cli-contract-v0.md (implementation ownership note)",
+    "publicAPI": false,
+    "stableCLIContract": false,
+    "help": false,
+    "exitCodes": false,
+    "errorFormats": false,
+    "reportSchemas": false,
+    "database": false,
+    "dependencies": false,
+    "repositoryHygieneConfig": false,
+    "runner": false,
+    "CI": false
+  },
+  "preservedUnrelatedPaths": [
+    "examples/lexer_candidate/fairy.lock",
+    "docs/ops/evidence/candidate-borrow-cache-mixed-regression-20261009.json",
+    "docs/ops/evidence/candidate-self-source-inventory-20261007.json"
+  ],
+  "remote": "Not pushed"
+}

@@ -1,8 +1,10 @@
 package cli
 
 import (
+	"bytes"
 	"errors"
 	"reflect"
+	"strings"
 	"testing"
 )
 
@@ -69,6 +71,34 @@ func TestStableTestFlagErrorPrecedence(t *testing.T) {
 		}
 		if got != tt.want {
 			t.Fatalf("%q: got %q, want %q", tt.args, got, tt.want)
+		}
+	}
+}
+
+// Assert the public error envelope as well as parser errors: status, stdout,
+// diagnostic prefix, blank line and help bytes remain compiler-owned.
+func TestDeclarativeFlagsInvocationContract(t *testing.T) {
+	for _, tt := range []struct {
+		args    []string
+		message string
+	}{
+		{[]string{"test", "--package", "pkg", "--package"}, `command "test" requires a package UID after --package`},
+		{[]string{"test", "--list", "--native"}, `command "test" does not combine --list with --native, --release, --stdin, --stdin-file, --capture-output, or --exact`},
+		{[]string{"test", "--native", "--capture-output"}, `command "test" requires --json when --capture-output is supplied`},
+		{[]string{"test", "--file", "a.fy", "--file", "a.fy"}, `command "test" received test file "a.fy" more than once`},
+		{[]string{"build", "--release", "--release"}, `command "build" received --release more than once`},
+		{[]string{"run", "--unknown", "--", "--release"}, `command "run" accepts only optional --release and --locked`},
+		{[]string{"experimental", "run", "main.fy", "--source"}, `experimental command "run" requires a value for --source`},
+		{[]string{"experimental", "build-target", "main.fy", "--target", "x86_64-windows-msvc", "--profile", "low", "--output"}, `experimental command "build-target" requires a value for --output`},
+		{[]string{"experimental", "build-workspace", "--target", "x86_64-linux-gnu", "--profile", "low", "--output", "build/a"}, `experimental build-workspace with Linux target requires --cc gcc or --cc clang`},
+		{[]string{"experimental", "atlas-calls", "list"}, `experimental command "atlas-calls list" requires --package-uid`},
+		{[]string{"experimental", "atlas-evidence", "show", "--unknown"}, `experimental command "atlas-evidence show" requires --max-fragment-bytes`},
+	} {
+		var stdout, stderr bytes.Buffer
+		code := RunWithInput(tt.args, t.TempDir(), strings.NewReader(""), &stdout, &stderr)
+		want := "fairyc: " + tt.message + "\n\n" + usage
+		if code != 2 || stdout.Len() != 0 || stderr.String() != want {
+			t.Fatalf("%q: code=%d stdout=%q stderr=%q", tt.args, code, stdout.String(), stderr.String())
 		}
 	}
 }

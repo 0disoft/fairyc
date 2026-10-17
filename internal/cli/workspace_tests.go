@@ -542,17 +542,17 @@ func parseStableTestCompilerOptions(arguments []string) (stableTestOptions, erro
 		return stableTestOptions{}, err
 	}
 	if err := validateFlagRules(
-		flagRule{Invalid: options.workspace && options.packageUID != "", Message: fmt.Sprintf(`command "test" does not combine --workspace with --package`)},
-		flagRule{Invalid: len(options.files) != 0 && len(options.exact) != 0, Message: fmt.Sprintf(`command "test" does not combine --file with --exact`)},
-		flagRule{Invalid: len(options.directories) != 0 && (len(options.files) != 0 || len(options.exact) != 0), Message: fmt.Sprintf(`command "test" does not combine --dir with --file or --exact`)},
-		flagRule{Invalid: options.list && (options.native || options.release || options.stdin || options.stdinFile != "" || options.timeoutExplicit || options.captureOutput || len(options.exact) != 0), Message: fmt.Sprintf(`command "test" does not combine --list with --native, --release, --stdin, --stdin-file, --capture-output, or --exact`)},
-		flagRule{Invalid: options.release && !options.native, Message: fmt.Sprintf(`command "test" requires --native when --release is supplied`)},
-		flagRule{Invalid: options.stdin && !options.native, Message: fmt.Sprintf(`command "test" requires --native when --stdin is supplied`)},
-		flagRule{Invalid: options.timeoutExplicit && !options.native, Message: fmt.Sprintf(`command "test" requires --native when --timeout-seconds is supplied`)},
-		flagRule{Invalid: options.stdinFile != "" && !options.native, Message: fmt.Sprintf(`command "test" requires --native when --stdin-file is supplied`)},
-		flagRule{Invalid: options.stdin && options.stdinFile != "", Message: fmt.Sprintf(`command "test" does not combine --stdin with --stdin-file`)},
-		flagRule{Invalid: options.captureOutput && !options.native, Message: fmt.Sprintf(`command "test" requires --native when --capture-output is supplied`)},
-		flagRule{Invalid: options.captureOutput && !options.json, Message: fmt.Sprintf(`command "test" requires --json when --capture-output is supplied`)},
+		flagRule{Invalid: options.workspace && options.packageUID != "", Message: `command "test" does not combine --workspace with --package`},
+		flagRule{Invalid: len(options.files) != 0 && len(options.exact) != 0, Message: `command "test" does not combine --file with --exact`},
+		flagRule{Invalid: len(options.directories) != 0 && (len(options.files) != 0 || len(options.exact) != 0), Message: `command "test" does not combine --dir with --file or --exact`},
+		flagRule{Invalid: options.list && (options.native || options.release || options.stdin || options.stdinFile != "" || options.timeoutExplicit || options.captureOutput || len(options.exact) != 0), Message: `command "test" does not combine --list with --native, --release, --stdin, --stdin-file, --capture-output, or --exact`},
+		flagRule{Invalid: options.release && !options.native, Message: `command "test" requires --native when --release is supplied`},
+		flagRule{Invalid: options.stdin && !options.native, Message: `command "test" requires --native when --stdin is supplied`},
+		flagRule{Invalid: options.timeoutExplicit && !options.native, Message: `command "test" requires --native when --timeout-seconds is supplied`},
+		flagRule{Invalid: options.stdinFile != "" && !options.native, Message: `command "test" requires --native when --stdin-file is supplied`},
+		flagRule{Invalid: options.stdin && options.stdinFile != "", Message: `command "test" does not combine --stdin with --stdin-file`},
+		flagRule{Invalid: options.captureOutput && !options.native, Message: `command "test" requires --native when --capture-output is supplied`},
+		flagRule{Invalid: options.captureOutput && !options.json, Message: `command "test" requires --json when --capture-output is supplied`},
 	); err != nil {
 		return stableTestOptions{}, err
 	}

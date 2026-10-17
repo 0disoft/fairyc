@@ -12,6 +12,19 @@ The exact command and flag inventory is the compiler-owned `usage` value in `int
 
 The stable top-level commands are `new`, `check`, `build`, `run`, `test`, `explain`, and `targets`, with source-independent `--help` and `--version` inspection. The removed `emit` spelling is a stable rejection/migration surface. Every command below `experimental` is owned by `internal/cli` but remains explicitly unstable.
 
+Flag tokenization, scalar/slice/switch multiplicity, value uniqueness and ordered
+required-option checks share the internal parser in `internal/cli/flags.go`.
+The shared command parsers declare accepted flags in a `flagSchema`, apply domain-value
+checks in token order, and describe post-parse exclusions and dependencies as
+ordered `flagRule` values. Missing-value versus duplicate precedence remains
+explicit per flag, including the stable test command's value-first checks.
+
+The parser accepts exact tokens only; it adds no aliases, equals syntax or implicit
+boolean values. Stable run/test keep command-owned `--` splitting and program-input
+validation. Atlas evidence retains its existing extraction-before-relation
+validation through explicit token forwarding. Invocation error prefixes, help
+bytes, status classification, and schema selection retain their existing contracts.
+
 Candidate source builds made by `tools/build-candidate-native-probe.py` or
 `tools/verify-candidate-bootstrap.py` freeze a fresh source Go build's `--version`
 report into an isolated `public_cli_data.fy` before candidate C emission. No extra
