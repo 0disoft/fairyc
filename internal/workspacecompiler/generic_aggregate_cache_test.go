@@ -11,6 +11,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/0disoft/fairyc/internal/admission"
 	"github.com/0disoft/fairyc/internal/compiler"
 	"github.com/0disoft/fairyc/internal/genericplan"
 	"github.com/0disoft/fairyc/internal/genericsource"
@@ -84,7 +85,10 @@ func TestGenericAggregateCacheColdWarmAndInvalidation(t *testing.T) {
 			workspace := loadCacheWorkspace(t, root)
 			lower := session.lower
 			calls := 0
-			session.lower = func(a compiler.Analysis) (compiler.Result, error) { calls++; return lower(a) }
+			session.lower = func(a compiler.Analysis, capabilities admission.Capabilities) (compiler.Result, error) {
+				calls++
+				return lower(a, capabilities)
+			}
 			cold, err := session.Check(workspace)
 			if err != nil || !cold.Compiler.Verified || cold.Cache.Stored != 2 || cold.Cache.Misses != 2 || calls != 1 {
 				t.Fatalf("cold: %v %+v", err, cold.Cache)
@@ -147,7 +151,7 @@ func TestGenericAggregatePersistentChild(t *testing.T) {
 		t.Skip("subprocess consumer only")
 	}
 	session := newGenericPersistentFixture(t, genericPersistentConfiguration(t, os.Getenv("FAIRYC_AGGREGATE_WORKSPACE_CACHE")))
-	session.lower = func(compiler.Analysis) (compiler.Result, error) {
+	session.lower = func(compiler.Analysis, admission.Capabilities) (compiler.Result, error) {
 		t.Fatal("warm aggregate child invoked lowering")
 		return compiler.Result{}, nil
 	}

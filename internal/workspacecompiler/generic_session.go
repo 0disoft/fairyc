@@ -6,6 +6,7 @@ import (
 	"maps"
 	"strings"
 
+	"github.com/0disoft/fairyc/internal/admission"
 	"github.com/0disoft/fairyc/internal/buildidentity"
 	"github.com/0disoft/fairyc/internal/compiler"
 	"github.com/0disoft/fairyc/internal/contractstatemir"
@@ -22,21 +23,27 @@ import (
 // GenericSession owns exactly one bounded memory or persistent generic MIR cache.
 // SourceSession selects this family when the loaded workspace contains generics.
 type GenericSession struct {
-	cache       *packageartifact.GenericCache
-	stableCache *packageartifact.GenericStableCache
-	storage     string
-	keys        Session
-	limits      genericplan.PlanLimits
-	lower       func(compiler.Analysis) (compiler.Result, error)
-	transfers   bool
-	sdkStorage  bool
+	cache        *packageartifact.GenericCache
+	stableCache  *packageartifact.GenericStableCache
+	storage      string
+	keys         Session
+	limits       genericplan.PlanLimits
+	lower        func(compiler.Analysis, admission.Capabilities) (compiler.Result, error)
+	capabilities admission.Capabilities
+	artifacts    genericArtifactPolicy
 }
 
 func NewGenericSession(configuration Configuration, limits genericplan.PlanLimits) (*GenericSession, error) {
-	return newGenericSession(configuration, limits, false)
+	return NewGenericSessionWithCapabilities(configuration, limits, admission.Capabilities{})
 }
 
-func newGenericSession(configuration Configuration, limits genericplan.PlanLimits, transfers bool) (*GenericSession, error) {
+// NewGenericSessionWithCapabilities selects one supported cache admission family.
+// SDK source owners are authenticated by the workspace on each Check, not here.
+func NewGenericSessionWithCapabilities(configuration Configuration, limits genericplan.PlanLimits, capabilities admission.Capabilities) (*GenericSession, error) {
+	artifacts, err := genericArtifactsFor(capabilities)
+	if err != nil {
+		return nil, err
+	}
 	if limits.MaxSpecializations <= 0 || limits.MaxSpecializationsPerDeclaration <= 0 || limits.MaxExpansionDepth <= 0 {
 		return nil, fmt.Errorf("generic workspace planning limits must be positive")
 	}
@@ -51,23 +58,13 @@ func newGenericSession(configuration Configuration, limits genericplan.PlanLimit
 	if err != nil {
 		return nil, err
 	}
-	session := &GenericSession{keys: Session{target: spec, standardLibrary: stdlib}, limits: limits, lower: compiler.LowerAnalyzed, storage: StorageMemory, transfers: transfers}
-	if transfers {
-		session.lower = compiler.LowerAnalyzedStorageTransfers
-	}
+	session := &GenericSession{keys: Session{target: spec, standardLibrary: stdlib}, limits: limits, lower: compiler.LowerAnalyzedWithCapabilities, storage: StorageMemory, capabilities: capabilities, artifacts: artifacts}
 	if configuration.Persistent == nil {
-		createCache := packageartifact.NewGenericCache
-		if transfers {
-			createCache = packageartifact.NewStorageTransferCache
-		}
-		session.cache, err = createCache(configuration.Cache, configuration.MaxArtifactBytes)
+		session.cache, err = artifacts.newMemory(configuration.Cache, configuration.MaxArtifactBytes)
 		if err != nil {
 			return nil, err
 		}
-		session.keys.compilerBuild = compilerProcessEncoding + session.cache.Identity() + ":generic-v0"
-		if transfers {
-			session.keys.compilerBuild += ":storage-transfer-v0"
-		}
+		session.keys.compilerBuild = compilerProcessEncoding + session.cache.Identity() + artifacts.processSuffix
 	} else {
 		if configuration.Cache != (packagecache.Limits{}) {
 			return nil, fmt.Errorf("generic workspace cannot combine memory and persistent cache policies")
@@ -77,27 +74,18 @@ func newGenericSession(configuration Configuration, limits genericplan.PlanLimit
 			return nil, fmt.Errorf("generic persistent cache requires an exact compiler executable identity: %w", err)
 		}
 		if persistent.RootBoundary == nil {
-			createCache := packageartifact.NewGenericStableCache
-			if transfers {
-				createCache = packageartifact.NewStorageTransferStableCache
-			}
-			session.stableCache, err = createCache(persistent.Root, persistent.Limits, configuration.MaxArtifactBytes)
+			session.stableCache, err = artifacts.newDisk(persistent.Root, persistent.Limits, configuration.MaxArtifactBytes)
 		} else {
-			createCache := packageartifact.NewGenericStableCacheInRoot
-			if transfers {
-				createCache = packageartifact.NewStorageTransferStableCacheInRoot
-			}
-			session.stableCache, err = createCache(persistent.RootBoundary, persistent.Root, persistent.Limits, configuration.MaxArtifactBytes)
+			session.stableCache, err = artifacts.newDiskInRoot(persistent.RootBoundary, persistent.Root, persistent.Limits, configuration.MaxArtifactBytes)
 		}
 		if err != nil {
 			return nil, err
 		}
-		family, version := "fairyc.compiler-generic-stable-cache/0", packageartifact.StableArtifactVersion
-		if transfers {
-			family, version = "fairyc.compiler-storage-stable-cache/0", packageartifact.StorageStableArtifactVersion
-		}
-		session.keys.compilerBuild = strings.Join([]string{family, persistent.CompilerBuild, version, packagecache.DiskRecordVersion}, ";")
+		session.keys.compilerBuild = strings.Join([]string{artifacts.family, persistent.CompilerBuild, artifacts.version, packagecache.DiskRecordVersion}, ";")
 		session.storage = StorageDisk
+	}
+	if capabilities.SDKTemplates() {
+		session.keys.compilerBuild += ":sdk-owned-storage-v1"
 	}
 	return session, nil
 }
@@ -129,35 +117,22 @@ func (session *GenericSession) Check(workspace workspaceloader.Workspace) (Resul
 	if err != nil {
 		return Result{}, err
 	}
-	analyze := compiler.AnalyzeGenericPackages
-	if session.transfers {
-		analyze = compiler.AnalyzeStorageTransferPackages
+	policy, err := workspaceAdmission(workspace, session.capabilities)
+	if err != nil {
+		return Result{}, err
 	}
-	var analysis compiler.GenericAnalysis
-	if session.sdkStorage {
-		owners, authorityErr := workspace.SDKStorageOwners()
-		if authorityErr != nil {
-			return Result{}, authorityErr
-		}
-		if len(owners) == 0 {
-			analysis, err = compiler.AnalyzeGenericPackages(input, coordinates, session.limits)
-		} else {
-			analysis, err = compiler.AnalyzeSDKStoragePackages(input, coordinates, session.limits, owners)
-		}
-	} else {
-		analysis, err = analyze(input, coordinates, session.limits)
-	}
+	analysis, err := compiler.AnalyzeWithPolicy(input, coordinates, session.limits, policy)
 	if err != nil {
 		return Result{}, err
 	}
 	if !semanticReady(analysis.Analysis.Semantic) || len(analysis.Analysis.Semantic.HIR.StateTransactions) != 0 {
-		compiled, err := session.lower(analysis.Analysis)
+		compiled, err := session.lower(analysis.Analysis, policy.Capabilities)
 		return Result{Compiler: compiled, Cache: Report{Outcome: OutcomeNotEligible, Storage: session.storage, Lowered: compiled.Verified}}, err
 	}
 	owners := functionOwners(analysis.Analysis.Semantic.HIR)
 	report := Report{Outcome: OutcomeFallback, Storage: session.storage, Packages: len(owners)}
 	if len(owners) == 0 {
-		compiled, err := session.lower(analysis.Analysis)
+		compiled, err := session.lower(analysis.Analysis, policy.Capabilities)
 		report.Lowered = compiled.Verified
 		return Result{Compiler: compiled, Cache: report}, err
 	}
@@ -186,7 +161,7 @@ func (session *GenericSession) Check(workspace workspaceloader.Workspace) (Resul
 		keys[id] = key
 	}
 	if session.stableCache != nil {
-		return session.checkGenericPersistent(analysis, identities, coordinates, owners, keys, report)
+		return session.checkGenericPersistent(analysis, identities, coordinates, owners, keys, report, policy.Capabilities)
 	}
 	var artifacts []packageartifact.Artifact
 	allHit := true
@@ -212,18 +187,14 @@ func (session *GenericSession) Check(workspace workspaceloader.Workspace) (Resul
 		}
 	}
 	if allHit {
-		reassemble := packageartifact.Reassemble
-		if session.transfers {
-			reassemble = packageartifact.ReassembleStorageTransfers
-		}
-		program, err := reassemble(artifacts)
+		program, err := session.artifacts.reassemble(artifacts)
 		if err == nil {
 			report.Outcome = OutcomeAllHit
 			return Result{Compiler: compiler.Result{Semantic: analysis.Analysis.Semantic, MIR: program, Verified: true, GenericProvenance: analysis.Analysis.GenericProvenance}, Cache: report}, nil
 		}
 		report.ReassemblyFallback = true
 	}
-	compiled, err := session.lower(analysis.Analysis)
+	compiled, err := session.lower(analysis.Analysis, policy.Capabilities)
 	if err != nil {
 		return Result{}, err
 	}
@@ -231,11 +202,7 @@ func (session *GenericSession) Check(workspace workspaceloader.Workspace) (Resul
 		return Result{Compiler: compiled, Cache: report}, nil
 	}
 	report.Lowered = true
-	extract := packageartifact.ExtractAll
-	if session.transfers {
-		extract = packageartifact.ExtractAllStorageTransfers
-	}
-	extracted, err := extract(compiled.MIR, identities, coordinates)
+	extracted, err := session.artifacts.extract(compiled.MIR, identities, coordinates)
 	if err != nil {
 		return Result{}, err
 	}

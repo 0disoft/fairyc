@@ -11,6 +11,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/0disoft/fairyc/internal/admission"
 	"github.com/0disoft/fairyc/internal/buildidentity"
 	"github.com/0disoft/fairyc/internal/compiler"
 	"github.com/0disoft/fairyc/internal/genericplan"
@@ -52,7 +53,10 @@ func TestGenericPersistentSessionColdWarmAndInvalidation(t *testing.T) {
 	reader := newGenericPersistentFixture(t, configuration)
 	lower := reader.lower
 	calls := 0
-	reader.lower = func(a compiler.Analysis) (compiler.Result, error) { calls++; return lower(a) }
+	reader.lower = func(a compiler.Analysis, capabilities admission.Capabilities) (compiler.Result, error) {
+		calls++
+		return lower(a, capabilities)
+	}
 	warm, err := reader.Check(workspace)
 	if err != nil || warm.Cache.Outcome != OutcomeAllHit || calls != 0 {
 		t.Fatalf("warm: %+v %v", warm.Cache, err)
@@ -118,7 +122,7 @@ func TestGenericPersistentSessionChild(t *testing.T) {
 		t.Skip("subprocess consumer only")
 	}
 	session := newGenericPersistentFixture(t, genericPersistentConfiguration(t, os.Getenv("FAIRYC_GENERIC_WORKSPACE_CACHE")))
-	session.lower = func(compiler.Analysis) (compiler.Result, error) {
+	session.lower = func(compiler.Analysis, admission.Capabilities) (compiler.Result, error) {
 		t.Fatal("warm child invoked lowering")
 		return compiler.Result{}, nil
 	}

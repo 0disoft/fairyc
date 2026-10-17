@@ -3,6 +3,7 @@ package workspacecompiler
 import (
 	"fmt"
 
+	"github.com/0disoft/fairyc/internal/admission"
 	"github.com/0disoft/fairyc/internal/genericplan"
 	"github.com/0disoft/fairyc/internal/packageartifact"
 	"github.com/0disoft/fairyc/internal/workspaceloader"
@@ -18,7 +19,7 @@ type StorageTransferSession struct {
 }
 
 func NewStorageTransferSession(configuration Configuration, limits genericplan.PlanLimits) (*StorageTransferSession, error) {
-	session, err := newGenericSession(configuration, limits, true)
+	session, err := NewGenericSessionWithCapabilities(configuration, limits, admission.Capabilities{Storage: admission.StorageTransfers, Arguments: admission.NominalArguments})
 	if err != nil {
 		return nil, err
 	}
@@ -28,13 +29,11 @@ func NewStorageTransferSession(configuration Configuration, limits genericplan.P
 // NewSDKStorageSession selects private operations only for the exact embedded
 // core-plus-vector SDK bundle. It never exposes the unrestricted test lane.
 func NewSDKStorageSession(configuration Configuration, limits genericplan.PlanLimits) (*StorageTransferSession, error) {
-	session, err := NewStorageTransferSession(configuration, limits)
+	session, err := NewGenericSessionWithCapabilities(configuration, limits, sdkStorageCapabilities())
 	if err != nil {
 		return nil, err
 	}
-	session.generic.sdkStorage = true
-	session.generic.keys.compilerBuild += ":sdk-owned-storage-v1"
-	return session, nil
+	return &StorageTransferSession{generic: session}, nil
 }
 
 func (session *StorageTransferSession) Check(workspace workspaceloader.Workspace) (Result, error) {

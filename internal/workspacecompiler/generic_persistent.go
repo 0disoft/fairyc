@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/0disoft/fairyc/internal/admission"
 	"github.com/0disoft/fairyc/internal/compiler"
 	"github.com/0disoft/fairyc/internal/hir"
 	"github.com/0disoft/fairyc/internal/packageartifact"
@@ -11,7 +12,7 @@ import (
 	"github.com/0disoft/fairyc/internal/packagegraph"
 )
 
-func (session *GenericSession) checkGenericPersistent(analysis compiler.GenericAnalysis, identities map[hir.PackageID]packagegraph.InstanceID, coordinates map[hir.PackageID]packagegraph.CoordinateID, owners []hir.PackageID, keys map[hir.PackageID]packagecache.GenericKey, report Report) (Result, error) {
+func (session *GenericSession) checkGenericPersistent(analysis compiler.GenericAnalysis, identities map[hir.PackageID]packagegraph.InstanceID, coordinates map[hir.PackageID]packagegraph.CoordinateID, owners []hir.PackageID, keys map[hir.PackageID]packagecache.GenericKey, report Report, capabilities admission.Capabilities) (Result, error) {
 	var artifacts []packageartifact.StableArtifact
 	allHit := true
 	for _, id := range owners {
@@ -39,18 +40,14 @@ func (session *GenericSession) checkGenericPersistent(analysis compiler.GenericA
 			}
 			functionCount += uint64(len(artifact.Functions))
 		}
-		rebind := packageartifact.RebindStableArtifacts
-		if session.transfers {
-			rebind = packageartifact.RebindStorageTransferStableArtifacts
-		}
-		program, err := rebind(artifacts, coordinates, 1, hir.SymbolID(functionCount)+1, 1)
+		program, err := session.artifacts.rebind(artifacts, coordinates, 1, hir.SymbolID(functionCount)+1, 1)
 		if err == nil {
 			report.Outcome = OutcomeAllHit
 			return Result{Compiler: compiler.Result{Semantic: analysis.Analysis.Semantic, MIR: program, Verified: true, GenericProvenance: analysis.Analysis.GenericProvenance}, Cache: report}, nil
 		}
 		report.ReassemblyFallback = true
 	}
-	compiled, err := session.lower(analysis.Analysis)
+	compiled, err := session.lower(analysis.Analysis, capabilities)
 	if err != nil {
 		return Result{}, err
 	}
@@ -58,11 +55,7 @@ func (session *GenericSession) checkGenericPersistent(analysis compiler.GenericA
 		return Result{Compiler: compiled, Cache: report}, nil
 	}
 	report.Lowered = true
-	extract := packageartifact.ExtractAll
-	if session.transfers {
-		extract = packageartifact.ExtractAllStorageTransfers
-	}
-	extracted, err := extract(compiled.MIR, identities, coordinates)
+	extracted, err := session.artifacts.extract(compiled.MIR, identities, coordinates)
 	if err != nil {
 		return Result{}, err
 	}

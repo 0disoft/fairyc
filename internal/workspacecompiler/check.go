@@ -1,8 +1,10 @@
 package workspacecompiler
 
 import (
+	"github.com/0disoft/fairyc/internal/admission"
 	"github.com/0disoft/fairyc/internal/compiler"
 	"github.com/0disoft/fairyc/internal/genericplan"
+	"github.com/0disoft/fairyc/internal/hir"
 	"github.com/0disoft/fairyc/internal/semantic"
 	"github.com/0disoft/fairyc/internal/workspaceloader"
 )
@@ -20,27 +22,19 @@ func Check(workspace workspaceloader.Workspace) (compiler.Result, error) {
 	if err != nil {
 		return compiler.Result{}, err
 	}
-	if len(owners) != 0 {
-		coordinates, err := workspace.PackageCoordinates()
-		if err != nil {
-			return compiler.Result{}, err
-		}
-		analysis, err := compiler.AnalyzeSDKStoragePackages(input, coordinates, genericplan.DefaultPlanLimits(), owners)
-		if err != nil {
-			return compiler.Result{}, err
-		}
-		return compiler.LowerAnalyzedStorageTransfers(analysis.Analysis)
-	}
-	if hasGenericAggregates(input) || !hasGenericDeclarations(input) {
-		// Preserve ordinary analysis and the unsupported-aggregate boundary;
-		// compiler-private aggregate admission is not a stable language promotion.
+	if len(owners) == 0 && (hasGenericAggregates(input) || !hasGenericDeclarations(input)) {
+		// Preserve ordinary analysis and the unsupported-aggregate boundary.
 		return compiler.CheckPackages(input)
+	}
+	policy := admission.Policy[hir.PackageID]{}
+	if len(owners) != 0 {
+		policy = admission.Policy[hir.PackageID]{Capabilities: sdkStorageCapabilities(), StorageOwners: owners}
 	}
 	coordinates, err := workspace.PackageCoordinates()
 	if err != nil {
 		return compiler.Result{}, err
 	}
-	result, _, err := compiler.CheckGenericPackages(input, coordinates, genericplan.DefaultPlanLimits())
+	result, _, err := compiler.CheckWithPolicy(input, coordinates, genericplan.DefaultPlanLimits(), policy)
 	return result, err
 }
 

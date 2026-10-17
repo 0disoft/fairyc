@@ -3,6 +3,7 @@ package workspacecompiler
 import (
 	"fmt"
 
+	"github.com/0disoft/fairyc/internal/admission"
 	"github.com/0disoft/fairyc/internal/compiler"
 	"github.com/0disoft/fairyc/internal/genericplan"
 	"github.com/0disoft/fairyc/internal/packageartifact"
@@ -20,11 +21,18 @@ type sourceCacheSession interface {
 // the old session before constructing the next, rather than keeping two LRUs.
 // Disk bounds and statistics apply to the selected format namespace, not every
 // historical format directory below the configured root.
+type sourceMode uint8
+
+const (
+	sourceOrdinary sourceMode = iota
+	sourceGeneric
+	sourceSDKStorage
+)
+
 type SourceSession struct {
 	configuration Configuration
 	active        sourceCacheSession
-	generic       bool
-	sdkStorage    bool
+	mode          sourceMode
 	closed        bool
 }
 
@@ -61,8 +69,13 @@ func (session *SourceSession) Check(workspace workspaceloader.Workspace) (Result
 		}
 		return Result{Compiler: compiled, Cache: Report{Outcome: OutcomeNotEligible, Storage: storage}}, err
 	}
-	generic := hasGenericDeclarations(input) || sdkStorage
-	if session.active == nil || session.generic != generic || session.sdkStorage != sdkStorage {
+	mode := sourceOrdinary
+	if sdkStorage {
+		mode = sourceSDKStorage
+	} else if hasGenericDeclarations(input) {
+		mode = sourceGeneric
+	}
+	if session.active == nil || session.mode != mode {
 		if session.active != nil {
 			old := session.active
 			session.active = nil
@@ -70,19 +83,20 @@ func (session *SourceSession) Check(workspace workspaceloader.Workspace) (Result
 				return Result{}, err
 			}
 		}
-		if sdkStorage {
-			session.active, err = NewSDKStorageSession(session.configuration, genericplan.DefaultPlanLimits())
-		} else if generic {
-			session.active, err = NewGenericSession(session.configuration, genericplan.DefaultPlanLimits())
-		} else {
+		if mode == sourceOrdinary {
 			session.active, err = NewSession(session.configuration)
+		} else {
+			capabilities := admission.Capabilities{}
+			if mode == sourceSDKStorage {
+				capabilities = sdkStorageCapabilities()
+			}
+			session.active, err = NewGenericSessionWithCapabilities(session.configuration, genericplan.DefaultPlanLimits(), capabilities)
 		}
 		if err != nil {
 			session.active = nil
 			return Result{}, err
 		}
-		session.generic = generic
-		session.sdkStorage = sdkStorage
+		session.mode = mode
 	}
 	return session.active.Check(workspace)
 }

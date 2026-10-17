@@ -6,6 +6,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/0disoft/fairyc/internal/admission"
 	"github.com/0disoft/fairyc/internal/compiler"
 	"github.com/0disoft/fairyc/internal/genericplan"
 	"github.com/0disoft/fairyc/internal/packagecache"
@@ -41,7 +42,9 @@ func testStorageTransferSessionLowering(t *testing.T, configuration Configuratio
 		t.Fatal(err)
 	}
 	sentinel := errors.New("lowering reached")
-	session.generic.lower = func(compiler.Analysis) (compiler.Result, error) { return compiler.Result{}, sentinel }
+	session.generic.lower = func(compiler.Analysis, admission.Capabilities) (compiler.Result, error) {
+		return compiler.Result{}, sentinel
+	}
 	warm, err := session.Check(workspace)
 	if err != nil || warm.Cache.Outcome != OutcomeAllHit || warm.Cache.Lowered {
 		t.Fatalf("warm cache invoked lowering: %v %+v", err, warm.Cache)

@@ -5,6 +5,7 @@ import (
 	"runtime"
 	"testing"
 
+	"github.com/0disoft/fairyc/internal/admission"
 	"github.com/0disoft/fairyc/internal/cbackend"
 	"github.com/0disoft/fairyc/internal/cdriver"
 	"github.com/0disoft/fairyc/internal/compiler"
@@ -34,7 +35,10 @@ func TestGenericSessionSkipsLoweringOnlyOnCurrentCompleteHits(t *testing.T) {
 	session, root := genericWorkspaceSession(t, 32<<20)
 	lower := session.lower
 	calls := 0
-	session.lower = func(analysis compiler.Analysis) (compiler.Result, error) { calls++; return lower(analysis) }
+	session.lower = func(analysis compiler.Analysis, capabilities admission.Capabilities) (compiler.Result, error) {
+		calls++
+		return lower(analysis, capabilities)
+	}
 	workspace := loadCacheWorkspace(t, root)
 	cold, err := session.Check(workspace)
 	if err != nil || !cold.Compiler.Verified || cold.Cache.Stored != 2 || cold.Cache.Misses != 2 || calls != 1 {
