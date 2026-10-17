@@ -1,0 +1,358 @@
+{
+  "schema": "fairyc.candidate-c-generation-profile/v1",
+  "diagnosticOnly": true,
+  "functionalResultMatchesGoAfterRemovingTimerLines": true,
+  "sourceBuildReceiptSHA256": "86ea4c968e0457498e17bd3c0c3aadfc14f0bdfe600d0c11b0e8900f786d27eb",
+  "sourcePacketSHA256": "fb1bfb2e8d67405067e0f00150bdf36ddea97c00936177a03b660258670e6a03",
+  "profilePacketReceiptSHA256": "471e969ebe833ad13633d91e8459235eafacc982be169ef32d8d4875f81c2e28",
+  "argv": [
+    "test",
+    "--locked",
+    "--native",
+    "--json",
+    "--capture-output",
+    "--exact",
+    "tests::traps::a_bounds",
+    "--exact",
+    "tests::traps::z_after_traps"
+  ],
+  "project": ".cache/candidate-final-verification-20261017/native-release/release/traps",
+  "results": {
+    "go": {
+      "exit": 5,
+      "stdout": "{\"schemaVersion\":\"fairyc.test-report/v4\",\"engine\":\"native\",\"target\":\"x86_64-windows-msvc\",\"profile\":\"development\",\"tests\":[{\"identity\":\"tests::traps::a_bounds\",\"outcome\":\"failed\",\"trapCategory\":\"bounds\",\"stdoutBase64\":\"\",\"stderrBase64\":\"\"},{\"identity\":\"tests::traps::z_after_traps\",\"outcome\":\"passed\",\"trapCategory\":null,\"stdoutBase64\":\"\",\"stderrBase64\":\"\"}],\"count\":2,\"passed\":1,\"failed\":1,\"status\":\"failed\",\"lock\":\"verified\"}\n",
+      "stderr": "",
+      "seconds": 6.29353130000527,
+      "imageSHA256": "81d454176aeaedc66e639a1de8150c0af4d20be5dec61f48b2777ea19a4c2eea",
+      "timers": []
+    },
+    "probe": {
+      "exit": 5,
+      "stdout": "{\"schemaVersion\":\"fairyc.test-report/v4\",\"engine\":\"native\",\"target\":\"x86_64-windows-msvc\",\"profile\":\"development\",\"tests\":[{\"identity\":\"tests::traps::a_bounds\",\"outcome\":\"failed\",\"trapCategory\":\"bounds\",\"stdoutBase64\":\"\",\"stderrBase64\":\"\"},{\"identity\":\"tests::traps::z_after_traps\",\"outcome\":\"passed\",\"trapCategory\":null,\"stdoutBase64\":\"\",\"stderrBase64\":\"\"}],\"count\":2,\"passed\":1,\"failed\":1,\"status\":\"failed\",\"lock\":\"verified\"}\n",
+      "stderr": "",
+      "seconds": 139.81671869999263,
+      "imageSHA256": "ec59f37189af4781182ee844112a1fc32df8d543128afa25ffadb6dd85f5b754",
+      "timers": [
+        {
+          "stage": "names",
+          "milliseconds": 0
+        },
+        {
+          "stage": "ir-proof",
+          "milliseconds": 7079
+        },
+        {
+          "stage": "ir-proof",
+          "milliseconds": 8921
+        },
+        {
+          "stage": "cfg-lower",
+          "milliseconds": 8953
+        },
+        {
+          "stage": "sdk-plan",
+          "milliseconds": 6000
+        },
+        {
+          "stage": "callable-index",
+          "milliseconds": 0
+        },
+        {
+          "stage": "frame-index",
+          "milliseconds": 0
+        },
+        {
+          "stage": "reachability",
+          "milliseconds": 0
+        },
+        {
+          "stage": "prologue",
+          "milliseconds": 0
+        },
+        {
+          "stage": "aggregate-definitions",
+          "milliseconds": 0
+        },
+        {
+          "stage": "literal-storage",
+          "milliseconds": 0
+        },
+        {
+          "stage": "sdk-definitions",
+          "milliseconds": 15
+        },
+        {
+          "stage": "region-definitions",
+          "milliseconds": 0
+        },
+        {
+          "stage": "foreign-signatures",
+          "milliseconds": 16
+        },
+        {
+          "stage": "drop-definitions",
+          "milliseconds": 0
+        },
+        {
+          "stage": "prepare",
+          "milliseconds": 22063
+        },
+        {
+          "stage": "body-unit",
+          "milliseconds": 0
+        },
+        {
+          "stage": "body-unit",
+          "milliseconds": 0
+        },
+        {
+          "stage": "c-generation",
+          "milliseconds": 22063
+        },
+        {
+          "stage": "names",
+          "milliseconds": 0
+        },
+        {
+          "stage": "ir-proof",
+          "milliseconds": 11563
+        },
+        {
+          "stage": "ir-proof",
+          "milliseconds": 8765
+        },
+        {
+          "stage": "cfg-lower",
+          "milliseconds": 8828
+        },
+        {
+          "stage": "sdk-plan",
+          "milliseconds": 9797
+        },
+        {
+          "stage": "callable-index",
+          "milliseconds": 0
+        },
+        {
+          "stage": "frame-index",
+          "milliseconds": 0
+        },
+        {
+          "stage": "reachability",
+          "milliseconds": 0
+        },
+        {
+          "stage": "prologue",
+          "milliseconds": 0
+        },
+        {
+          "stage": "aggregate-definitions",
+          "milliseconds": 0
+        },
+        {
+          "stage": "literal-storage",
+          "milliseconds": 15
+        },
+        {
+          "stage": "sdk-definitions",
+          "milliseconds": 0
+        },
+        {
+          "stage": "region-definitions",
+          "milliseconds": 0
+        },
+        {
+          "stage": "foreign-signatures",
+          "milliseconds": 0
+        },
+        {
+          "stage": "drop-definitions",
+          "milliseconds": 0
+        },
+        {
+          "stage": "prepare",
+          "milliseconds": 30203
+        },
+        {
+          "stage": "body-unit",
+          "milliseconds": 0
+        },
+        {
+          "stage": "body-unit",
+          "milliseconds": 0
+        },
+        {
+          "stage": "c-generation",
+          "milliseconds": 30203
+        }
+      ]
+    }
+  },
+  "aggregate": {
+    "names": {
+      "calls": 2,
+      "milliseconds": 0
+    },
+    "ir-proof": {
+      "calls": 4,
+      "milliseconds": 36328
+    },
+    "cfg-lower": {
+      "calls": 2,
+      "milliseconds": 17781
+    },
+    "sdk-plan": {
+      "calls": 2,
+      "milliseconds": 15797
+    },
+    "callable-index": {
+      "calls": 2,
+      "milliseconds": 0
+    },
+    "frame-index": {
+      "calls": 2,
+      "milliseconds": 0
+    },
+    "reachability": {
+      "calls": 2,
+      "milliseconds": 0
+    },
+    "prologue": {
+      "calls": 2,
+      "milliseconds": 0
+    },
+    "aggregate-definitions": {
+      "calls": 2,
+      "milliseconds": 0
+    },
+    "literal-storage": {
+      "calls": 2,
+      "milliseconds": 15
+    },
+    "sdk-definitions": {
+      "calls": 2,
+      "milliseconds": 15
+    },
+    "region-definitions": {
+      "calls": 2,
+      "milliseconds": 0
+    },
+    "foreign-signatures": {
+      "calls": 2,
+      "milliseconds": 16
+    },
+    "drop-definitions": {
+      "calls": 2,
+      "milliseconds": 0
+    },
+    "prepare": {
+      "calls": 2,
+      "milliseconds": 52266
+    },
+    "body-unit": {
+      "calls": 4,
+      "milliseconds": 0
+    },
+    "c-generation": {
+      "calls": 2,
+      "milliseconds": 52266
+    }
+  },
+  "limitations": [
+    "Inclusive timings overlap; cfg-lower includes IR proof.",
+    "Diagnostic packet derived from authenticated current candidate, not a source rebuild.",
+    "Single-threaded scoped timer; single observation under uncontrolled load."
+  ],
+  "profilingFunctions": {
+    "fy_fn_2649": {
+      "label": "c-generation",
+      "signature": "extern struct fy_unit_t_634 fy_fn_2649(struct fy_unit_t_603 const * fy_l_1,uintptr_t fy_l_2,uintptr_t fy_l_3){"
+    },
+    "fy_fn_3708": {
+      "label": "ir-proof",
+      "signature": "extern struct fy_unit_t_580 fy_fn_3708(struct fy_unit_t_402 const * fy_l_1){"
+    },
+    "fy_fn_3750": {
+      "label": "aggregate-definitions",
+      "signature": "extern struct fy_unit_t_817 fy_fn_3750(struct fy_unit_t_402 const * fy_l_1,struct fy_unit_t_20 * fy_l_2,struct fy_unit_t_50 * fy_l_3,uintptr_t * fy_l_4){"
+    },
+    "fy_fn_3754": {
+      "label": "drop-definitions",
+      "signature": "extern int32_t fy_fn_3754(struct fy_unit_t_402 const * fy_l_1,struct fy_unit_t_819 const * fy_l_2,struct fy_unit_t_528 const * fy_l_3,struct fy_unit_t_20 * fy_l_4,struct fy_unit_t_50 * fy_l_5,uintptr_t * fy_l_6){"
+    },
+    "fy_fn_3778": {
+      "label": "callable-index",
+      "signature": "extern struct fy_unit_t_826 fy_fn_3778(struct fy_unit_t_402 const * fy_l_1,uintptr_t * fy_l_2){"
+    },
+    "fy_fn_3787": {
+      "label": "foreign-signatures",
+      "signature": "extern int32_t fy_fn_3787(struct fy_unit_t_402 const * fy_l_1,struct fy_unit_t_830 const * fy_l_2,struct fy_unit_t_520 const * fy_l_3,struct fy_unit_t_20 * fy_l_4,struct fy_unit_t_50 * fy_l_5,uintptr_t * fy_l_6){"
+    },
+    "fy_fn_3797": {
+      "label": "prologue",
+      "signature": "extern int32_t fy_fn_3797(struct fy_unit_t_402 const * fy_l_1,struct fy_unit_t_20 * fy_l_2,struct fy_unit_t_50 * fy_l_3,uintptr_t * fy_l_4){"
+    },
+    "fy_fn_3802": {
+      "label": "prepare",
+      "signature": "extern struct fy_unit_t_833 fy_fn_3802(struct fy_unit_t_402 const * fy_l_1,struct fy_unit_t_819 fy_l_2,uintptr_t fy_l_3,int32_t fy_l_4,int32_t fy_l_5){"
+    },
+    "fy_fn_3803": {
+      "label": "body-unit",
+      "signature": "extern struct fy_unit_t_834 fy_fn_3803(struct fy_unit_t_402 const * fy_l_1,struct fy_unit_t_832 const * fy_l_2,uintptr_t fy_l_3,uintptr_t fy_l_4,uintptr_t * fy_l_5){"
+    },
+    "fy_fn_3878": {
+      "label": "frame-index",
+      "signature": "extern struct fy_unit_t_842 fy_fn_3878(struct fy_unit_t_402 const * fy_l_1,struct fy_unit_t_520 const * fy_l_2,uintptr_t * fy_l_3){"
+    },
+    "fy_fn_3900": {
+      "label": "literal-storage",
+      "signature": "extern int32_t fy_fn_3900(struct fy_unit_t_402 const * fy_l_1,struct fy_unit_t_20 * fy_l_2,struct fy_unit_t_20 * fy_l_3,struct fy_unit_t_50 * fy_l_4,uintptr_t * fy_l_5){"
+    },
+    "fy_fn_3911": {
+      "label": "names",
+      "signature": "extern struct fy_unit_t_852 fy_fn_3911(struct fy_unit_t_472 const * fy_l_1,uintptr_t * fy_l_2){"
+    },
+    "fy_fn_3917": {
+      "label": "reachability",
+      "signature": "extern struct fy_unit_t_854 fy_fn_3917(struct fy_unit_t_402 const * fy_l_1,struct fy_unit_t_855 const * fy_l_2,struct fy_unit_t_520 const * fy_l_3,struct fy_unit_t_517 const * fy_l_4,uintptr_t fy_l_5,uintptr_t * fy_l_6){"
+    },
+    "fy_fn_3924": {
+      "label": "region-definitions",
+      "signature": "extern int32_t fy_fn_3924(struct fy_unit_t_402 const * fy_l_1,struct fy_unit_t_830 const * fy_l_2,struct fy_unit_t_20 * fy_l_3,struct fy_unit_t_50 * fy_l_4,uintptr_t * fy_l_5){"
+    },
+    "fy_fn_3967": {
+      "label": "sdk-plan",
+      "signature": "extern struct fy_unit_t_858 fy_fn_3967(struct fy_unit_t_402 const * fy_l_1,uintptr_t * fy_l_2){"
+    },
+    "fy_fn_3971": {
+      "label": "sdk-definitions",
+      "signature": "extern int32_t fy_fn_3971(struct fy_unit_t_402 const * fy_l_1,struct fy_unit_t_830 const * fy_l_2,struct fy_unit_t_20 * fy_l_3,struct fy_unit_t_50 * fy_l_4,uintptr_t * fy_l_5){"
+    },
+    "fy_fn_4105": {
+      "label": "cfg-lower",
+      "signature": "extern struct fy_unit_t_900 fy_fn_4105(struct fy_unit_t_402 const * fy_l_1){"
+    }
+  },
+  "scope": "fy_fn_2649",
+  "probeBuild": {
+    "argv": [
+      "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\semantic-test-20261017\\fairyc-candidate-build-16k.exe",
+      "--packet",
+      "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\c-generation-reuse-20261017\\profile-v2\\profile-packet.bin",
+      "--packet-sha256",
+      "d5edae243879dbbf880cd5af617cc0e85e93006007d6a2f8235e3d7153dcd3be",
+      "--output",
+      "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\c-generation-reuse-20261017\\profile-v2\\development\\fairyc.exe",
+      "--stack-reserve-bytes",
+      "16777216"
+    ],
+    "exit": 0,
+    "stdout": "built: C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\c-generation-reuse-20261017\\profile-v2\\development\\fairyc.exe (low, 65 C units, 16034816 bytes)\n",
+    "stderr": "",
+    "seconds": 63.129907900001854
+  },
+  "sourceBuildReceipt": ".cache/native-test-performance-20261017/candidate-compact/receipt.json",
+  "profileReceiptSHA256": "471e969ebe833ad13633d91e8459235eafacc982be169ef32d8d4875f81c2e28",
+  "observedSourceRevision": "5bc267c78edc01ff2febf20d39703e4531c21598",
+  "decision": "Reuse a lowered-CFG session that retains its immutable IR owner; lower_all performs the IR proof once per session, while entry selection and C outputs stay per-test."
+}
