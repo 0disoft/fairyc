@@ -283,7 +283,7 @@ fn i32 main() {
 	}
 	failures := Verify(program)
 	if len(failures) != 1 || failures[0].Code != CodeDropGlue || !strings.Contains(failures[0].Detail, "effects") {
-		t.Fatalf("Verify() failures = %+v, want one drop-effect V1001", failures)
+		t.Fatalf("Verify() failures = %+v, want one drop-glue failure", failures)
 	}
 }
 

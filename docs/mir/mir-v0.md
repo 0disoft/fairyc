@@ -17,6 +17,14 @@ a default branch alone does not count as coverage. Interpreter-only metadata rem
 an explicit no-op, while native-only operations report capability errors even when
 their results are unused.
 
+Verifier entry points remain in `internal/mir/verify.go`. Aggregate and function
+definitions are checked in `verify_aggregates.go` and `verify_functions.go`;
+`verify_function.go` owns the per-function worklist. Operation checks reuse one
+function context in `verify_operations.go` and `verify_pointer_operations.go`,
+while `verify_storage.go` owns private storage admission. Shape predicates,
+checked-control-flow proofs, and worklist state have separate files. Each operation
+updates the same path-local state maps as before the split.
+
 ADR 0414 adds `shared-reborrow`: one local of exact `ref mut T` OwnerType
 produces `ref T` with operator `share`, preserving referent identity. The
 verifier derives the operand type from definitions and rejects mismatched

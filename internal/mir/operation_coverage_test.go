@@ -36,7 +36,7 @@ func TestOperationDispatchCoverage(t *testing.T) {
 		t.Fatal("operation inventory and declarations disagree")
 	}
 	for _, consumer := range []struct{ directory, function string }{
-		{".", "verifyFunction"},
+		{".", "verifyOperation"},
 		{filepath.Join("..", "interpreter"), "call"},
 		{filepath.Join("..", "cbackend"), "inspectFunction"},
 		{filepath.Join("..", "cbackend"), "emitOperation"},
