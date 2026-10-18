@@ -1,6 +1,7 @@
 package workspacecompiler
 
 import (
+	"context"
 	"path/filepath"
 	"runtime"
 	"testing"
@@ -35,9 +36,9 @@ func TestGenericSessionSkipsLoweringOnlyOnCurrentCompleteHits(t *testing.T) {
 	session, root := genericWorkspaceSession(t, 32<<20)
 	lower := session.lower
 	calls := 0
-	session.lower = func(analysis compiler.Analysis, capabilities admission.Capabilities) (compiler.Result, error) {
+	session.lower = func(ctx context.Context, analysis compiler.Analysis, capabilities admission.Capabilities) (compiler.Result, error) {
 		calls++
-		return lower(analysis, capabilities)
+		return lower(ctx, analysis, capabilities)
 	}
 	workspace := loadCacheWorkspace(t, root)
 	cold, err := session.Check(workspace)

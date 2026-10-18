@@ -1,6 +1,7 @@
 package workspacecompiler
 
 import (
+	"context"
 	"errors"
 	"fmt"
 
@@ -12,10 +13,13 @@ import (
 	"github.com/0disoft/fairyc/internal/packagegraph"
 )
 
-func (session *GenericSession) checkGenericPersistent(analysis compiler.GenericAnalysis, identities map[hir.PackageID]packagegraph.InstanceID, coordinates map[hir.PackageID]packagegraph.CoordinateID, owners []hir.PackageID, keys map[hir.PackageID]packagecache.GenericKey, report Report, capabilities admission.Capabilities) (Result, error) {
+func (session *GenericSession) checkGenericPersistent(ctx context.Context, analysis compiler.GenericAnalysis, identities map[hir.PackageID]packagegraph.InstanceID, coordinates map[hir.PackageID]packagegraph.CoordinateID, owners []hir.PackageID, keys map[hir.PackageID]packagecache.GenericKey, report Report, capabilities admission.Capabilities) (Result, error) {
 	var artifacts []packageartifact.StableArtifact
 	allHit := true
 	for _, id := range owners {
+		if err := ctx.Err(); err != nil {
+			return Result{}, err
+		}
 		lookup := session.stableCache.Get(keys[id], analysis.Interfaces[id], identities[id], coordinates[id])
 		switch lookup.Status {
 		case packageartifact.LookupHit:
@@ -47,7 +51,7 @@ func (session *GenericSession) checkGenericPersistent(analysis compiler.GenericA
 		}
 		report.ReassemblyFallback = true
 	}
-	compiled, err := session.lower(analysis.Analysis, capabilities)
+	compiled, err := session.lower(ctx, analysis.Analysis, capabilities)
 	if err != nil {
 		return Result{}, err
 	}
@@ -60,6 +64,9 @@ func (session *GenericSession) checkGenericPersistent(analysis compiler.GenericA
 		return Result{}, err
 	}
 	for _, artifact := range extracted {
+		if err := ctx.Err(); err != nil {
+			return Result{}, err
+		}
 		key, found := keys[artifact.PackageID]
 		if !found {
 			return Result{}, fmt.Errorf("generic persistent artifact has no current key")

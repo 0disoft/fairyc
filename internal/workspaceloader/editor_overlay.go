@@ -1,6 +1,7 @@
 package workspaceloader
 
 import (
+	"context"
 	"fmt"
 	"github.com/0disoft/fairyc/internal/source"
 	"path/filepath"
@@ -11,6 +12,13 @@ import (
 // LoadEditorOverlays applies immutable unsaved .fy contents to the ordinary local
 // loader. Manifests, SDK ownership, graph resolution and disk contents remain unchanged.
 func LoadEditorOverlays(root string, overlays map[string][]byte) (Workspace, error) {
+	return LoadEditorOverlaysContext(context.Background(), root, overlays)
+}
+
+func LoadEditorOverlaysContext(ctx context.Context, root string, overlays map[string][]byte) (Workspace, error) {
+	if err := ctx.Err(); err != nil {
+		return Workspace{}, err
+	}
 	canonical, err := resolveRoot(root)
 	if err != nil {
 		return Workspace{}, err
@@ -35,5 +43,5 @@ func LoadEditorOverlays(root string, overlays map[string][]byte) (Workspace, err
 		total += len(data)
 		copied[absolute] = slices.Clone(data)
 	}
-	return loadWorkspaceOverlays(canonical, false, copied)
+	return loadWorkspaceOverlaysContext(ctx, canonical, false, copied)
 }

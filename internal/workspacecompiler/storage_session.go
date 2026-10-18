@@ -1,9 +1,11 @@
 package workspacecompiler
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/0disoft/fairyc/internal/admission"
+	"github.com/0disoft/fairyc/internal/compiler"
 	"github.com/0disoft/fairyc/internal/genericplan"
 	"github.com/0disoft/fairyc/internal/packageartifact"
 	"github.com/0disoft/fairyc/internal/workspaceloader"
@@ -37,10 +39,22 @@ func NewSDKStorageSession(configuration Configuration, limits genericplan.PlanLi
 }
 
 func (session *StorageTransferSession) Check(workspace workspaceloader.Workspace) (Result, error) {
+	return session.CheckContext(context.Background(), workspace)
+}
+
+func (session *StorageTransferSession) CheckContext(ctx context.Context, workspace workspaceloader.Workspace) (result Result, err error) {
+	if err := ctx.Err(); err != nil {
+		return Result{}, &compiler.Error{Stage: compiler.StageSemantic, Cause: err}
+	}
+	defer func() {
+		if canceled := ctx.Err(); canceled != nil {
+			result, err = Result{}, &compiler.Error{Stage: compiler.StageSemantic, Cause: canceled}
+		}
+	}()
 	if session == nil || session.generic == nil {
 		return Result{}, fmt.Errorf("storage transfer session is not initialized")
 	}
-	return session.generic.Check(workspace)
+	return session.generic.CheckContext(ctx, workspace)
 }
 
 func (session *StorageTransferSession) Stats() packageartifact.CacheStats {

@@ -1,6 +1,7 @@
 package workspacecompiler
 
 import (
+	"context"
 	"github.com/0disoft/fairyc/internal/admission"
 	"github.com/0disoft/fairyc/internal/compiler"
 	"github.com/0disoft/fairyc/internal/genericplan"
@@ -14,6 +15,18 @@ import (
 // workspace; callers cannot supply a disconnected coordinate map. Stable workspace
 // commands share this entry point for ordinary and explicit scalar generic source.
 func Check(workspace workspaceloader.Workspace) (compiler.Result, error) {
+	return CheckContext(context.Background(), workspace)
+}
+
+func CheckContext(ctx context.Context, workspace workspaceloader.Workspace) (result compiler.Result, err error) {
+	if err := ctx.Err(); err != nil {
+		return compiler.Result{}, &compiler.Error{Stage: compiler.StageSemantic, Cause: err}
+	}
+	defer func() {
+		if canceled := ctx.Err(); canceled != nil {
+			result, err = compiler.Result{}, &compiler.Error{Stage: compiler.StageSemantic, Cause: canceled}
+		}
+	}()
 	input, err := workspace.SemanticInput()
 	if err != nil {
 		return compiler.Result{}, err
@@ -24,7 +37,7 @@ func Check(workspace workspaceloader.Workspace) (compiler.Result, error) {
 	}
 	if len(owners) == 0 && (hasGenericAggregates(input) || !hasGenericDeclarations(input)) {
 		// Preserve ordinary analysis and the unsupported-aggregate boundary.
-		return compiler.CheckPackages(input)
+		return compiler.CheckPackagesContext(ctx, input)
 	}
 	policy := admission.Policy[hir.PackageID]{}
 	if len(owners) != 0 {
@@ -34,8 +47,8 @@ func Check(workspace workspaceloader.Workspace) (compiler.Result, error) {
 	if err != nil {
 		return compiler.Result{}, err
 	}
-	result, _, err := compiler.CheckWithPolicy(input, coordinates, genericplan.DefaultPlanLimits(), policy)
-	return result, err
+	compiled, _, err := compiler.CheckWithPolicyContext(ctx, input, coordinates, genericplan.DefaultPlanLimits(), policy)
+	return compiled, err
 }
 
 // Stable source admission stays separate from compiler-private aggregate

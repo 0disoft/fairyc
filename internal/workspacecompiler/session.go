@@ -2,6 +2,7 @@
 package workspacecompiler
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"os"
@@ -90,7 +91,7 @@ type Session struct {
 	storage         string
 	target          target.Spec
 	standardLibrary packagegraph.InstanceID
-	lower           func(compiler.Analysis) (compiler.Result, error)
+	lower           func(context.Context, compiler.Analysis) (compiler.Result, error)
 }
 
 // NewSession validates every compatibility input before creating the bounded cache.
@@ -148,7 +149,7 @@ func NewSession(configuration Configuration) (*Session, error) {
 	return &Session{
 		cache: processCache, stableCache: stableCache, compilerBuild: compilerBuild, storage: storage,
 		target: targetSpec, standardLibrary: standardLibrary,
-		lower: compiler.LowerAnalyzed,
+		lower: compiler.LowerAnalyzedContext,
 	}, nil
 }
 
@@ -163,6 +164,18 @@ func (session *Session) Close() error {
 // Check performs semantic analysis on every request. It skips MIR lowering only when every
 // function-owning package is a verified cache hit and the complete artifact set reassembles.
 func (session *Session) Check(workspace workspaceloader.Workspace) (Result, error) {
+	return session.CheckContext(context.Background(), workspace)
+}
+
+func (session *Session) CheckContext(ctx context.Context, workspace workspaceloader.Workspace) (result Result, err error) {
+	if err := ctx.Err(); err != nil {
+		return Result{}, &compiler.Error{Stage: compiler.StageSemantic, Cause: err}
+	}
+	defer func() {
+		if canceled := ctx.Err(); canceled != nil {
+			result, err = Result{}, &compiler.Error{Stage: compiler.StageSemantic, Cause: canceled}
+		}
+	}()
 	if session == nil || session.cache == nil && session.stableCache == nil || session.lower == nil {
 		return Result{}, fmt.Errorf("workspace compiler session is not initialized")
 	}
@@ -182,12 +195,12 @@ func (session *Session) Check(workspace workspaceloader.Workspace) (Result, erro
 	if err != nil {
 		return Result{}, err
 	}
-	analysis, err := compiler.AnalyzePackages(input)
+	analysis, err := compiler.AnalyzePackagesContext(ctx, input)
 	if err != nil {
 		return Result{}, err
 	}
 	if !semanticReady(analysis.Semantic) {
-		compiled, lowerErr := session.lower(analysis)
+		compiled, lowerErr := session.lower(ctx, analysis)
 		return Result{Compiler: compiled, Cache: Report{Outcome: OutcomeNotEligible, Storage: session.storage}}, lowerErr
 	}
 
@@ -198,7 +211,7 @@ func (session *Session) Check(workspace workspaceloader.Workspace) (Result, erro
 	owners := functionOwners(analysis.Semantic.HIR)
 	report := Report{Outcome: OutcomeFallback, Storage: session.storage, Packages: len(owners)}
 	if len(owners) == 0 {
-		compiled, lowerErr := session.lower(analysis)
+		compiled, lowerErr := session.lower(ctx, analysis)
 		report.Lowered = compiled.Verified
 		return Result{Compiler: compiled, Cache: report}, lowerErr
 	}
@@ -211,12 +224,15 @@ func (session *Session) Check(workspace workspaceloader.Workspace) (Result, erro
 		return Result{}, err
 	}
 	if session.stableCache != nil {
-		return session.checkPersistent(analysis, identities, coordinates, interfaces, bodies, owners, keys, report)
+		return session.checkPersistent(ctx, analysis, identities, coordinates, interfaces, bodies, owners, keys, report)
 	}
 
 	artifacts := make([]packageartifact.Artifact, 0, len(owners))
 	allHit := true
 	for _, packageID := range owners {
+		if err := ctx.Err(); err != nil {
+			return Result{}, err
+		}
 		lookup := session.cache.Get(keys[packageID], interfaces[packageID])
 		switch lookup.Status {
 		case packageartifact.LookupHit:
@@ -241,7 +257,7 @@ func (session *Session) Check(workspace workspaceloader.Workspace) (Result, erro
 		report.ReassemblyFallback = true
 	}
 
-	compiled, err := session.lower(analysis)
+	compiled, err := session.lower(ctx, analysis)
 	if err != nil {
 		return Result{}, err
 	}
@@ -255,12 +271,18 @@ func (session *Session) Check(workspace workspaceloader.Workspace) (Result, erro
 	}
 	byPackage := make(map[hir.PackageID]packageartifact.Artifact, len(extracted))
 	for _, artifact := range extracted {
+		if err := ctx.Err(); err != nil {
+			return Result{}, err
+		}
 		if _, duplicate := byPackage[artifact.PackageID]; duplicate {
 			return Result{}, fmt.Errorf("lowered MIR produced duplicate package artifact %d", artifact.PackageID)
 		}
 		byPackage[artifact.PackageID] = artifact
 	}
 	for _, packageID := range owners {
+		if err := ctx.Err(); err != nil {
+			return Result{}, err
+		}
 		artifact, found := byPackage[packageID]
 		if !found {
 			return Result{}, fmt.Errorf("lowered MIR has no artifact for function-owning package %d", packageID)
@@ -293,10 +315,13 @@ func (session *Session) PersistentStats() (packageartifact.StableCacheStats, err
 	return session.stableCache.Stats()
 }
 
-func (session *Session) checkPersistent(analysis compiler.Analysis, identities map[hir.PackageID]packagegraph.InstanceID, coordinates map[hir.PackageID]packagegraph.CoordinateID, interfaces map[hir.PackageID]moduleinterface.Hash, bodies map[hir.PackageID]contractstatemir.StateBodyHash, owners []hir.PackageID, keys map[hir.PackageID]packagecache.Key, report Report) (Result, error) {
+func (session *Session) checkPersistent(ctx context.Context, analysis compiler.Analysis, identities map[hir.PackageID]packagegraph.InstanceID, coordinates map[hir.PackageID]packagegraph.CoordinateID, interfaces map[hir.PackageID]moduleinterface.Hash, bodies map[hir.PackageID]contractstatemir.StateBodyHash, owners []hir.PackageID, keys map[hir.PackageID]packagecache.Key, report Report) (Result, error) {
 	compilations := make([]packageartifact.StableCompilationArtifact, 0, len(owners))
 	allHit := true
 	for _, packageID := range owners {
+		if err := ctx.Err(); err != nil {
+			return Result{}, err
+		}
 		instance, found := identities[packageID]
 		if !found {
 			return Result{}, fmt.Errorf("function-owning package %d has no stable package identity", packageID)
@@ -337,7 +362,7 @@ func (session *Session) checkPersistent(analysis compiler.Analysis, identities m
 		report.ReassemblyFallback = true
 	}
 
-	compiled, err := session.lower(analysis)
+	compiled, err := session.lower(ctx, analysis)
 	if err != nil {
 		return Result{}, err
 	}
@@ -361,6 +386,9 @@ func (session *Session) checkPersistent(analysis compiler.Analysis, identities m
 		return Result{}, fmt.Errorf("describe stable package contract-state bodies: %w", err)
 	}
 	for _, packageID := range owners {
+		if err := ctx.Err(); err != nil {
+			return Result{}, err
+		}
 		artifact, found := byPackage[packageID]
 		if !found {
 			return Result{}, fmt.Errorf("lowered MIR has no artifact for function-owning package %d", packageID)

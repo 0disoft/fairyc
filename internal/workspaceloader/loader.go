@@ -2,6 +2,7 @@
 package workspaceloader
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"io/fs"
@@ -121,14 +122,16 @@ func (workspace Workspace) Package(path string) (Package, bool) {
 }
 
 type limits struct {
+	ctx   context.Context
 	files int
 	bytes int64
 }
 
 // Load reads only the named root manifest, its explicit members, and their explicit source roots.
 // It performs no parent search, recursive manifest discovery, network access, or lockfile writes.
-func Load(root string) (Workspace, error) {
-	return loadWorkspace(root, false)
+func Load(root string) (Workspace, error) { return LoadContext(context.Background(), root) }
+func LoadContext(ctx context.Context, root string) (Workspace, error) {
+	return loadWorkspaceOverlaysContext(ctx, root, false, nil)
 }
 
 func loadWorkspace(root string, vectorCandidate bool) (Workspace, error) {
@@ -136,6 +139,18 @@ func loadWorkspace(root string, vectorCandidate bool) (Workspace, error) {
 }
 
 func loadWorkspaceOverlays(root string, vectorCandidate bool, overlays map[string][]byte) (Workspace, error) {
+	return loadWorkspaceOverlaysContext(context.Background(), root, vectorCandidate, overlays)
+}
+
+func loadWorkspaceOverlaysContext(ctx context.Context, root string, vectorCandidate bool, overlays map[string][]byte) (result Workspace, err error) {
+	if err := ctx.Err(); err != nil {
+		return Workspace{}, err
+	}
+	defer func() {
+		if canceled := ctx.Err(); canceled != nil {
+			result, err = Workspace{}, canceled
+		}
+	}()
 	workspaceRoot, err := resolveRoot(root)
 	if err != nil {
 		return Workspace{}, err
@@ -157,8 +172,11 @@ func loadWorkspaceOverlays(root string, vectorCandidate bool, overlays map[strin
 	packages := make([]Package, 0, len(packagePaths))
 	uidPaths := make(map[string]string, len(packagePaths))
 	pathIndexes := make(map[string]int, len(packagePaths))
-	budget := limits{}
+	budget := limits{ctx: ctx}
 	for _, packagePath := range packagePaths {
+		if err := ctx.Err(); err != nil {
+			return Workspace{}, err
+		}
 		directory := workspaceRoot
 		manifest := rootManifest
 		if packagePath != "." {
@@ -290,9 +308,19 @@ func loadPackage(packagePath, directory, sourceRoot string, manifest projectmani
 }
 
 func loadPackageOverlays(packagePath, directory, sourceRoot string, manifest projectmanifest.Manifest, budget *limits, overlays map[string][]byte) (Package, error) {
+	if budget.ctx != nil {
+		if err := budget.ctx.Err(); err != nil {
+			return Package{}, err
+		}
+	}
 	var relativePaths []string
 	foldedPaths := make(map[string]string)
 	err := filepath.WalkDir(sourceRoot, func(path string, entry fs.DirEntry, walkErr error) error {
+		if budget.ctx != nil {
+			if err := budget.ctx.Err(); err != nil {
+				return err
+			}
+		}
 		if walkErr != nil {
 			return walkErr
 		}
@@ -355,6 +383,11 @@ func loadPackageOverlays(packagePath, directory, sourceRoot string, manifest pro
 	modules := make([]packagegraph.Module, 0, len(relativePaths))
 	modulePaths := make(map[string]string, len(relativePaths))
 	for _, relative := range relativePaths {
+		if budget.ctx != nil {
+			if err := budget.ctx.Err(); err != nil {
+				return Package{}, err
+			}
+		}
 		absolute := filepath.Join(sourceRoot, filepath.FromSlash(relative))
 		contents, overlaid := overlays[absolute]
 		var err error

@@ -2,6 +2,7 @@ package workspacecompiler
 
 import (
 	"bytes"
+	"context"
 	"maps"
 	"os"
 	"path/filepath"
@@ -85,9 +86,9 @@ func TestSessionSkipsMIRLoweringOnlyAfterCompleteVerifiedHits(t *testing.T) {
 	}
 	lower := session.lower
 	lowerCalls := 0
-	session.lower = func(analysis compiler.Analysis) (compiler.Result, error) {
+	session.lower = func(ctx context.Context, analysis compiler.Analysis) (compiler.Result, error) {
 		lowerCalls++
-		return lower(analysis)
+		return lower(ctx, analysis)
 	}
 
 	workspace := loadCacheWorkspace(t, root)
@@ -128,9 +129,9 @@ func TestSessionInvalidatesSourceAndFallsBackFromMixedArtifactContexts(t *testin
 	}
 	lower := session.lower
 	lowerCalls := 0
-	session.lower = func(analysis compiler.Analysis) (compiler.Result, error) {
+	session.lower = func(ctx context.Context, analysis compiler.Analysis) (compiler.Result, error) {
 		lowerCalls++
-		return lower(analysis)
+		return lower(ctx, analysis)
 	}
 
 	base := loadCacheWorkspace(t, root)
@@ -244,9 +245,9 @@ func TestPersistentSessionReusesStableMIRAcrossIndependentSessions(t *testing.T)
 	}
 	firstLower := firstSession.lower
 	firstLowerCalls := 0
-	firstSession.lower = func(analysis compiler.Analysis) (compiler.Result, error) {
+	firstSession.lower = func(ctx context.Context, analysis compiler.Analysis) (compiler.Result, error) {
 		firstLowerCalls++
-		return firstLower(analysis)
+		return firstLower(ctx, analysis)
 	}
 	workspace := loadCacheWorkspace(t, root)
 	first, err := firstSession.Check(workspace)
@@ -264,7 +265,7 @@ func TestPersistentSessionReusesStableMIRAcrossIndependentSessions(t *testing.T)
 		t.Fatal(err)
 	}
 	secondLowerCalls := 0
-	secondSession.lower = func(analysis compiler.Analysis) (compiler.Result, error) {
+	secondSession.lower = func(ctx context.Context, analysis compiler.Analysis) (compiler.Result, error) {
 		secondLowerCalls++
 		return compiler.LowerAnalyzed(analysis)
 	}
@@ -291,9 +292,9 @@ func TestPersistentSessionReusesStableMIRAcrossIndependentSessions(t *testing.T)
 	}
 	incompatibleLower := incompatibleSession.lower
 	incompatibleLowerCalls := 0
-	incompatibleSession.lower = func(analysis compiler.Analysis) (compiler.Result, error) {
+	incompatibleSession.lower = func(ctx context.Context, analysis compiler.Analysis) (compiler.Result, error) {
 		incompatibleLowerCalls++
-		return incompatibleLower(analysis)
+		return incompatibleLower(ctx, analysis)
 	}
 	incompatible, err := incompatibleSession.Check(workspace)
 	if err != nil {
@@ -327,7 +328,7 @@ func TestPersistentSessionReassemblesCachedStateWithMIRSymbols(t *testing.T) {
 		t.Fatal(err)
 	}
 	t.Cleanup(func() { _ = reader.Close() })
-	reader.lower = func(compiler.Analysis) (compiler.Result, error) {
+	reader.lower = func(context.Context, compiler.Analysis) (compiler.Result, error) {
 		t.Fatal("persistent all-hit state reassembly invoked ordinary MIR lowering")
 		return compiler.Result{}, nil
 	}
@@ -467,7 +468,7 @@ func checkPersistentAnalysis(t *testing.T, session *Session, workspace workspace
 	if stripCurrentOperations {
 		analysis.Semantic.HIR.StateTransactions = nil
 	}
-	result, err := session.checkPersistent(
+	result, err := session.checkPersistent(context.Background(),
 		analysis, identities, coordinates, interfaces, bodies, owners, keys,
 		Report{Outcome: OutcomeFallback, Storage: StorageDisk, Packages: len(owners)},
 	)

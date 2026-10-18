@@ -85,9 +85,9 @@ func TestGenericAggregateCacheColdWarmAndInvalidation(t *testing.T) {
 			workspace := loadCacheWorkspace(t, root)
 			lower := session.lower
 			calls := 0
-			session.lower = func(a compiler.Analysis, capabilities admission.Capabilities) (compiler.Result, error) {
+			session.lower = func(ctx context.Context, a compiler.Analysis, capabilities admission.Capabilities) (compiler.Result, error) {
 				calls++
-				return lower(a, capabilities)
+				return lower(ctx, a, capabilities)
 			}
 			cold, err := session.Check(workspace)
 			if err != nil || !cold.Compiler.Verified || cold.Cache.Stored != 2 || cold.Cache.Misses != 2 || calls != 1 {
@@ -151,7 +151,7 @@ func TestGenericAggregatePersistentChild(t *testing.T) {
 		t.Skip("subprocess consumer only")
 	}
 	session := newGenericPersistentFixture(t, genericPersistentConfiguration(t, os.Getenv("FAIRYC_AGGREGATE_WORKSPACE_CACHE")))
-	session.lower = func(compiler.Analysis, admission.Capabilities) (compiler.Result, error) {
+	session.lower = func(context.Context, compiler.Analysis, admission.Capabilities) (compiler.Result, error) {
 		t.Fatal("warm aggregate child invoked lowering")
 		return compiler.Result{}, nil
 	}

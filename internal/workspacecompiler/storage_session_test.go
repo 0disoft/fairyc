@@ -1,6 +1,7 @@
 package workspacecompiler
 
 import (
+	"context"
 	"errors"
 	"path/filepath"
 	"strings"
@@ -42,7 +43,7 @@ func testStorageTransferSessionLowering(t *testing.T, configuration Configuratio
 		t.Fatal(err)
 	}
 	sentinel := errors.New("lowering reached")
-	session.generic.lower = func(compiler.Analysis, admission.Capabilities) (compiler.Result, error) {
+	session.generic.lower = func(context.Context, compiler.Analysis, admission.Capabilities) (compiler.Result, error) {
 		return compiler.Result{}, sentinel
 	}
 	warm, err := session.Check(workspace)

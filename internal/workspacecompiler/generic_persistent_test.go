@@ -53,9 +53,9 @@ func TestGenericPersistentSessionColdWarmAndInvalidation(t *testing.T) {
 	reader := newGenericPersistentFixture(t, configuration)
 	lower := reader.lower
 	calls := 0
-	reader.lower = func(a compiler.Analysis, capabilities admission.Capabilities) (compiler.Result, error) {
+	reader.lower = func(ctx context.Context, a compiler.Analysis, capabilities admission.Capabilities) (compiler.Result, error) {
 		calls++
-		return lower(a, capabilities)
+		return lower(ctx, a, capabilities)
 	}
 	warm, err := reader.Check(workspace)
 	if err != nil || warm.Cache.Outcome != OutcomeAllHit || calls != 0 {
@@ -122,7 +122,7 @@ func TestGenericPersistentSessionChild(t *testing.T) {
 		t.Skip("subprocess consumer only")
 	}
 	session := newGenericPersistentFixture(t, genericPersistentConfiguration(t, os.Getenv("FAIRYC_GENERIC_WORKSPACE_CACHE")))
-	session.lower = func(compiler.Analysis, admission.Capabilities) (compiler.Result, error) {
+	session.lower = func(context.Context, compiler.Analysis, admission.Capabilities) (compiler.Result, error) {
 		t.Fatal("warm child invoked lowering")
 		return compiler.Result{}, nil
 	}

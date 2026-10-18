@@ -1,6 +1,7 @@
 package workspacecompiler
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"maps"
@@ -28,7 +29,7 @@ type GenericSession struct {
 	storage      string
 	keys         Session
 	limits       genericplan.PlanLimits
-	lower        func(compiler.Analysis, admission.Capabilities) (compiler.Result, error)
+	lower        func(context.Context, compiler.Analysis, admission.Capabilities) (compiler.Result, error)
 	capabilities admission.Capabilities
 	artifacts    genericArtifactPolicy
 }
@@ -58,7 +59,7 @@ func NewGenericSessionWithCapabilities(configuration Configuration, limits gener
 	if err != nil {
 		return nil, err
 	}
-	session := &GenericSession{keys: Session{target: spec, standardLibrary: stdlib}, limits: limits, lower: compiler.LowerAnalyzedWithCapabilities, storage: StorageMemory, capabilities: capabilities, artifacts: artifacts}
+	session := &GenericSession{keys: Session{target: spec, standardLibrary: stdlib}, limits: limits, lower: compiler.LowerAnalyzedWithCapabilitiesContext, storage: StorageMemory, capabilities: capabilities, artifacts: artifacts}
 	if configuration.Persistent == nil {
 		session.cache, err = artifacts.newMemory(configuration.Cache, configuration.MaxArtifactBytes)
 		if err != nil {
@@ -98,6 +99,18 @@ func (session *GenericSession) Close() error {
 }
 
 func (session *GenericSession) Check(workspace workspaceloader.Workspace) (Result, error) {
+	return session.CheckContext(context.Background(), workspace)
+}
+
+func (session *GenericSession) CheckContext(ctx context.Context, workspace workspaceloader.Workspace) (result Result, err error) {
+	if err := ctx.Err(); err != nil {
+		return Result{}, &compiler.Error{Stage: compiler.StageSemantic, Cause: err}
+	}
+	defer func() {
+		if canceled := ctx.Err(); canceled != nil {
+			result, err = Result{}, &compiler.Error{Stage: compiler.StageSemantic, Cause: canceled}
+		}
+	}()
 	if session == nil || session.cache == nil && session.stableCache == nil || session.lower == nil {
 		return Result{}, fmt.Errorf("generic workspace session is not initialized")
 	}
@@ -121,18 +134,18 @@ func (session *GenericSession) Check(workspace workspaceloader.Workspace) (Resul
 	if err != nil {
 		return Result{}, err
 	}
-	analysis, err := compiler.AnalyzeWithPolicy(input, coordinates, session.limits, policy)
+	analysis, err := compiler.AnalyzeWithPolicyContext(ctx, input, coordinates, session.limits, policy)
 	if err != nil {
 		return Result{}, err
 	}
 	if !semanticReady(analysis.Analysis.Semantic) || len(analysis.Analysis.Semantic.HIR.StateTransactions) != 0 {
-		compiled, err := session.lower(analysis.Analysis, policy.Capabilities)
+		compiled, err := session.lower(ctx, analysis.Analysis, policy.Capabilities)
 		return Result{Compiler: compiled, Cache: Report{Outcome: OutcomeNotEligible, Storage: session.storage, Lowered: compiled.Verified}}, err
 	}
 	owners := functionOwners(analysis.Analysis.Semantic.HIR)
 	report := Report{Outcome: OutcomeFallback, Storage: session.storage, Packages: len(owners)}
 	if len(owners) == 0 {
-		compiled, err := session.lower(analysis.Analysis, policy.Capabilities)
+		compiled, err := session.lower(ctx, analysis.Analysis, policy.Capabilities)
 		report.Lowered = compiled.Verified
 		return Result{Compiler: compiled, Cache: report}, err
 	}
@@ -150,6 +163,9 @@ func (session *GenericSession) Check(workspace workspaceloader.Workspace) (Resul
 	}
 	keys := map[hir.PackageID]packagecache.GenericKey{}
 	for _, id := range owners {
+		if err := ctx.Err(); err != nil {
+			return Result{}, err
+		}
 		var dependencies []packagecache.GenericDependency
 		for _, dependency := range base[id].Dependencies {
 			dependencies = append(dependencies, packagecache.GenericDependency{Coordinate: dependency.Coordinate, Interface: interfaces[dependency.Coordinate]})
@@ -161,11 +177,14 @@ func (session *GenericSession) Check(workspace workspaceloader.Workspace) (Resul
 		keys[id] = key
 	}
 	if session.stableCache != nil {
-		return session.checkGenericPersistent(analysis, identities, coordinates, owners, keys, report, policy.Capabilities)
+		return session.checkGenericPersistent(ctx, analysis, identities, coordinates, owners, keys, report, policy.Capabilities)
 	}
 	var artifacts []packageartifact.Artifact
 	allHit := true
 	for _, id := range owners {
+		if err := ctx.Err(); err != nil {
+			return Result{}, err
+		}
 		lookup := session.cache.Get(keys[id], analysis.Interfaces[id])
 		switch lookup.Status {
 		case packageartifact.LookupMiss:
@@ -194,7 +213,7 @@ func (session *GenericSession) Check(workspace workspaceloader.Workspace) (Resul
 		}
 		report.ReassemblyFallback = true
 	}
-	compiled, err := session.lower(analysis.Analysis, policy.Capabilities)
+	compiled, err := session.lower(ctx, analysis.Analysis, policy.Capabilities)
 	if err != nil {
 		return Result{}, err
 	}
@@ -207,6 +226,9 @@ func (session *GenericSession) Check(workspace workspaceloader.Workspace) (Resul
 		return Result{}, err
 	}
 	for _, artifact := range extracted {
+		if err := ctx.Err(); err != nil {
+			return Result{}, err
+		}
 		key, found := keys[artifact.PackageID]
 		if !found {
 			return Result{}, fmt.Errorf("generic artifact has no current cache key")

@@ -1,6 +1,7 @@
 package workspacecompiler
 
 import (
+	"context"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -54,12 +55,12 @@ func TestSDKCapabilitySessionReauthenticatesBeforeLowering(t *testing.T) {
 			}
 			lower := session.lower
 			calls := 0
-			session.lower = func(analysis compiler.Analysis, capabilities admission.Capabilities) (compiler.Result, error) {
+			session.lower = func(ctx context.Context, analysis compiler.Analysis, capabilities admission.Capabilities) (compiler.Result, error) {
 				calls++
 				if capabilities != (admission.Capabilities{}) {
 					t.Fatal("session profile granted unauthenticated source capabilities")
 				}
-				return lower(analysis, capabilities)
+				return lower(ctx, analysis, capabilities)
 			}
 			cold, err := session.Check(workspace)
 			if err != nil || !cold.Compiler.Verified || !cold.Cache.Lowered || calls != 1 {

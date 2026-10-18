@@ -1,6 +1,7 @@
 package workspacecompiler
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/0disoft/fairyc/internal/admission"
@@ -12,6 +13,7 @@ import (
 
 type sourceCacheSession interface {
 	Check(workspaceloader.Workspace) (Result, error)
+	CheckContext(context.Context, workspaceloader.Workspace) (Result, error)
 	Stats() packageartifact.CacheStats
 	PersistentStats() (packageartifact.StableCacheStats, error)
 	Close() error
@@ -49,6 +51,18 @@ func NewSourceSession(configuration Configuration) (*SourceSession, error) {
 }
 
 func (session *SourceSession) Check(workspace workspaceloader.Workspace) (Result, error) {
+	return session.CheckContext(context.Background(), workspace)
+}
+
+func (session *SourceSession) CheckContext(ctx context.Context, workspace workspaceloader.Workspace) (result Result, err error) {
+	if err := ctx.Err(); err != nil {
+		return Result{}, &compiler.Error{Stage: compiler.StageSemantic, Cause: err}
+	}
+	defer func() {
+		if canceled := ctx.Err(); canceled != nil {
+			result, err = Result{}, &compiler.Error{Stage: compiler.StageSemantic, Cause: canceled}
+		}
+	}()
 	if session == nil || session.closed {
 		return Result{}, fmt.Errorf("source workspace session is closed")
 	}
@@ -62,7 +76,7 @@ func (session *SourceSession) Check(workspace workspaceloader.Workspace) (Result
 	}
 	sdkStorage := len(owners) != 0
 	if hasGenericAggregates(input) && !sdkStorage {
-		compiled, err := compiler.CheckPackages(input)
+		compiled, err := compiler.CheckPackagesContext(ctx, input)
 		storage := StorageMemory
 		if session.configuration.Persistent != nil {
 			storage = StorageDisk
@@ -98,7 +112,7 @@ func (session *SourceSession) Check(workspace workspaceloader.Workspace) (Result
 		}
 		session.mode = mode
 	}
-	return session.active.Check(workspace)
+	return session.active.CheckContext(ctx, workspace)
 }
 
 func (session *SourceSession) Stats() packageartifact.CacheStats {
