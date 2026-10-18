@@ -1,0 +1,84 @@
+{
+  "schema": "fairyc.candidate-region-interpreter-review/v1",
+  "date": "2026-10-19",
+  "passedInRecordedScope": true,
+  "baseRevision": "4443de54b056a8a1f8e3bd3cc56cb5f4ec9dc60e",
+  "sources": {
+    "examples/lexer_candidate/src/module_unit_interpreter.fy": "530bd302fd10f19ee19f24fff424e9b442324a94f46d83b35e83bbdfb2412b81",
+    "examples/lexer_candidate/src/module_unit_interpreter_values.fy": "44d98daf367dcb70298cd002712ae8073924a23047b3e0de3f8cef29a28d0667",
+    "examples/lexer_candidate/tests/module_unit_interpreter_regions.fy": "5cf5cf2f329d573216f7c4d195a349c9a15d6bf8b276766a7638300749e0b2cd",
+    "tools/verify-candidate-region-interpreter.py": "1dc88358094e3692bc7446c32081a80a9e19cb0c49d78a352258b8a036e47c2a"
+  },
+  "scope": "Authored interpreter executes verified CFG Region operations using abstract Arena inputs; native Go-built test harness, not public CLI parity or native allocator evidence.",
+  "baseline": {
+    "revision": "4443de54",
+    "executeVisibilityShimOnly": true,
+    "exit": 5,
+    "interpreterError": 1,
+    "trap": 0,
+    "observations": {
+      "path": ".cache/evidence/region-interpreter-20261019/baseline.json",
+      "sha256": "f4659cf2ab4e9208cffd57c081c3211a9f3cca94336854c9a286d97374e359e5"
+    }
+  },
+  "harness": {
+    "profile": "development",
+    "passed": 2,
+    "failed": 0,
+    "checkedProgramScenarios": 9,
+    "scenarios": [
+      "scalar placements and dereference",
+      "Region parameter forwarding",
+      "inert struct and array placement",
+      "nested early return",
+      "continue/break/reentry",
+      "resource cleanup on return",
+      "Result error propagation",
+      "body trap without reset",
+      "cleanup trap before reset"
+    ],
+    "activationUnit": "reset invalidation, double-reset refusal and fresh activation identity",
+    "authenticSDK": true,
+    "abstractArenaArguments": true,
+    "receipt": {
+      "path": ".cache/evidence/region-interpreter-20261019/final-bounded/receipt.json",
+      "sha256": "c04cdb0473c3e7bfb92ebd3f3c24c11f32e109ad108e10382b49db4d33865534"
+    },
+    "referenceSHA256": "b4b1811a891749d51523afff2d2db6034343cd4b03bb743c7b3b5524043a7852"
+  },
+  "validation": [
+    {
+      "command": "fairyc-go-fixed.exe check (examples/lexer_candidate)",
+      "passed": true,
+      "sourceFiles": 525,
+      "mirFunctions": 6689
+    },
+    {
+      "command": "go test ./internal/compiler -run '^TestByteForRegion' -count=1",
+      "passed": true
+    },
+    {
+      "command": "python -m py_compile tools/verify-candidate-region-interpreter.py",
+      "passed": true
+    },
+    {
+      "command": "git diff --check",
+      "passed": true
+    }
+  ],
+  "fullCLIInputCount": 512,
+  "publicCLIChanged": false,
+  "languageContractChanged": false,
+  "abiChanged": false,
+  "ciChanged": false,
+  "fullCandidateRebuilt": false,
+  "fullFixedPointReplayed": false,
+  "publicCLIRegionParity": false,
+  "completeGoCliReplacement": false,
+  "skipped": [
+    "Whole candidate CLI rebuild and broad CLI comparison are separate validation slices.",
+    "SDK Arena construction/destruction still require unsupported host/raw operations in semantic tests.",
+    "Linux deferred by user; no WSL setup.",
+    "Unrelated full candidate test tree includes a stale project_compiler_identity import; focused harness copies only its own source closure."
+  ]
+}

@@ -2,7 +2,7 @@
 
 ## Current status (2026-10-19)
 
-Reviewed Windows evidence for the current candidate is
+Reviewed Windows evidence for the last complete candidate build is
 [candidate-cli-local-validation-20261018.json](../ops/evidence/candidate-cli-local-validation-20261018.json).
 The development and release candidate profiles each match the Go reference on all
 447 recorded comparisons (metadata 122, cli 30, semantic 98, native 30, examples 78,
@@ -21,9 +21,17 @@ two 5,913,600-byte release PE images match exactly, with zero excluded bytes;
 the frozen `--version` output also matches exactly. The Go-built C-packet bridge
 and MSVC remain part of this bootstrap.
 
-Full Go replacement remains false. The candidate interpreter still excludes Region
-operations, general raw-pointer execution and host/foreign calls, and no Linux execution
-has been recorded: the candidate native and file CLI modules are Windows-only
+The authored interpreter now executes abstract Region enter/place/reset operations,
+including normal, nested, return, propagation and loop exits. The focused
+[Region interpreter record](../ops/evidence/candidate-region-interpreter-20261019.json)
+uses checked IR, the authenticated SDK and injected abstract Arena arguments. It
+does not run SDK Arena host constructors/destructors through default semantic tests.
+The full CLI images and fixed-point records above attest the earlier source snapshot;
+they have not been regenerated after this interpreter change.
+
+Full Go replacement remains false. General raw-pointer execution and host/foreign
+calls remain outside the semantic interpreter, and no Linux execution has been
+recorded: the candidate native and file CLI modules are Windows-only
 (`native_cli` imports the `windows_host_paths`, `windows_run_capture` and
 `windows_run_control` modules, and `file_cli` declares `@link_name("CreateFileW")` and
 related Win32 externs). The example suite excludes the compiler self-source

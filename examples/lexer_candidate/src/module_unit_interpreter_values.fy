@@ -12,7 +12,7 @@ pub fn Outcome result(usize bits){return Outcome{.error=0,.trap=0,.bits};}
 pub fn Outcome failure(u32 error){return Outcome{.error,.trap=0,.bits=0};}
 pub fn Outcome trapped(u32 trap){return Outcome{.error=0,.trap,.bits=0};}
 pub fn u32 scalar(ref ir::Program p,usize type){let t=clean::type_at(ir::cleanup_ir(p),type);return if(t.kind==1){t.scalar}else{0};}
-pub fn bool admitted(ref ir::Program p,usize type){if(rx_reference(p,type) || rx_view(p,type)){return true;}let t=clean::type_at(ir::cleanup_ir(p),type);return t.kind==1 && t.scalar<=7 || t.kind>=2 && t.kind<=6 || t.kind==16;}
+pub fn bool admitted(ref ir::Program p,usize type){if(rx_reference(p,type) || rx_view(p,type)){return true;}let t=clean::type_at(ir::cleanup_ir(p),type);return t.kind==1 && t.scalar<=7 || t.kind>=2 && t.kind<=6 || t.kind==16 || t.kind==19;}
 pub fn Outcome allocate(ref mut v::Vec<usize> heap,usize count,ref mut usize steps){
     if(count>999999 || *steps<count+1 || v::len<usize>(heap)>1000000-count-1){return failure(2);};
     *steps=*steps-count-1;let id=v::len<usize>(heap)+1;
@@ -107,4 +107,32 @@ pub fn Outcome rx_slice(ref ir::Program p,ref ir::Body b,usize id,ref v::Vec<usi
     let base=rx_array_view(p,b,left,locals,values,heap,steps);if(base.error!=0 || base.trap!=0){return base;}let length=item(heap,base.bits,3);let offset=item(heap,base.bits,2);
     let usize start=if(pair.left==0){0}else{*v::at<usize>(values,ir::node(b,pair.left))};let end=if(pair.right==0){length.bits}else{*v::at<usize>(values,ir::node(b,pair.right))};
     if(start>end || end>length.bits){return trapped(1);}let root=item(heap,base.bits,0);let path=item(heap,base.bits,1);return rx_descriptor(heap,root.bits,path.bits,offset.bits+start,end-start,steps);
+}
+
+// Abstract lifetime oracle, not a host allocator. A fresh activation owns
+// [active, Arena descriptor]. Reset invalidates capabilities passed to callees;
+// heap cells stay address-stable until the enclosing test finishes.
+pub fn Outcome region_begin(usize owner,ref mut v::Vec<usize> heap,ref mut usize steps){
+    let arena=rx_get(heap,owner,steps);if(arena.error!=0 || arena.trap!=0){return arena;}
+    let cell=allocate(heap,2,steps);if(cell.error!=0){return cell;}
+    {let slot=v::at_mut<usize>(heap,cell.bits);*slot=1;}
+    {let slot=v::at_mut<usize>(heap,cell.bits+1);*slot=owner;}return cell;
+}
+pub fn Outcome region_reset(usize activation,ref mut v::Vec<usize> heap){
+    let active=item(heap,activation,0);if(active.error!=0 || active.trap!=0 || active.bits!=1){return failure(4);}
+    {let slot=v::at_mut<usize>(heap,activation);*slot=0;}return result(0);
+}
+pub fn Outcome region_place(ref ir::Body b,usize id,ref v::Vec<usize> locals,ref v::Vec<usize> values,ref mut v::Vec<usize> heap,ref mut usize steps){
+    var usize i=0;while(i<ir::placement_count(b)){if(*steps==0){return failure(2);};*steps=*steps-1;let x=ir::placement_at(b,i);
+        if(ir::node(b,x.expression)==id){
+            let capability=item(heap,*v::at<usize>(locals,x.capability),0);if(capability.error!=0 || capability.trap!=0){return capability;}
+            let active=item(heap,capability.bits,0);if(active.error!=0 || active.trap!=0 || active.bits!=1){return failure(4);}
+            let argument=ir::node(b,x.argument);if(argument==0){return failure(4);}
+            let cell=rx_cell(heap,*v::at<usize>(values,argument),steps);if(cell.error!=0){return cell;}
+            let borrow=rx_descriptor(heap,cell.bits,0,0,0,steps);if(borrow.error!=0){return borrow;}
+            let result=allocate(heap,2,steps);if(result.error!=0){return result;}
+            {let slot=v::at_mut<usize>(heap,result.bits);*slot=1;}
+            {let slot=v::at_mut<usize>(heap,result.bits+1);*slot=borrow.bits;}return result;
+        }i+=1;
+    }return failure(4);
 }

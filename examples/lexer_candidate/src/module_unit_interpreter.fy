@@ -105,30 +105,40 @@ fn runtime::Outcome expression(ref identified::Program owned,ref Plan plan,usize
     if(e.kind==4){if(e.minimum){return runtime::result(if(type==1){2147483648}else{9223372036854775808});}return runtime::computed(math::runtime_prefix(type,op,*v::at<usize>(values,left)));}
     if(e.kind==5){return runtime::computed(math::runtime_binary(runtime::scalar(p,ir::node_at(b,left-1).value.type),op,*v::at<usize>(values,left),*v::at<usize>(values,right)));}
     if(e.kind==23){return runtime::computed(math::runtime_cast(runtime::scalar(p,ir::node_at(b,left-1).value.type),type,*v::at<usize>(values,left)));}
-    if(e.kind==6){if(e.builtin.kind==200){return location_value(plan,frame,id,heap,steps);}if(e.builtin.kind!=0){return runtime::failure(1);}var usize i=0;while(i<ir::call_count(b)){if(ir::call_at(b,i).expression==id){return invoke(owned,plan,frame,i+1,0,values,captures,heap,steps,depth);}i+=1;}return runtime::failure(4);}
+    if(e.kind==6){if(e.builtin.kind==300){return runtime::region_place(b,id,locals,values,heap,steps);}if(e.builtin.kind==200){return location_value(plan,frame,id,heap,steps);}if(e.builtin.kind!=0){return runtime::failure(1);}var usize i=0;while(i<ir::call_count(b)){if(ir::call_at(b,i).expression==id){return invoke(owned,plan,frame,i+1,0,values,captures,heap,steps,depth);}i+=1;}return runtime::failure(4);}
     return runtime::failure(1);
 }
-fn runtime::Outcome execute(ref identified::Program owned,ref Plan plan,usize frame,ref v::Vec<usize> arguments,ref mut v::Vec<usize> heap,ref mut usize steps,usize depth){
-    if(depth>=256){return runtime::failure(3);}let p=identified::ir_program(owned);let b=ir::at(p,frame);let g=v::at<cfg::Graph>(ref plan.graphs,frame-1);
+// Internal checked-frame entry also permits abstract Arena arguments in tests.
+pub fn runtime::Outcome execute(ref identified::Program owned,ref Plan plan,usize frame,ref v::Vec<usize> arguments,ref mut v::Vec<usize> heap,ref mut usize steps,usize depth){
+    if(depth>=256){return runtime::failure(3);}let p=identified::ir_program(owned);if(frame==0 || frame>ir::count(p) || v::len<cfg::Graph>(ref plan.graphs)!=ir::count(p)){return runtime::failure(4);}let b=ir::at(p,frame);let g=v::at<cfg::Graph>(ref plan.graphs,frame-1);
     if(!runtime::admitted(p,clean::frame_at(ir::cleanup_ir(p),frame).result)){return runtime::failure(1);}
     var v::Vec<usize> values=v::empty<usize>();var v::Vec<usize> locals=v::empty<usize>();var v::Vec<usize> captures=v::empty<usize>();var v::Vec<usize> snapshots=v::empty<usize>();var v::Vec<usize> iter_views=v::empty<usize>();var v::Vec<usize> iter_indices=v::empty<usize>();var v::Vec<usize> iter_bindings=v::empty<usize>();
     if(!runtime::slots(ref mut values,ir::node_count(b)+1) || !runtime::slots(ref mut locals,ir::local_count(b)+1) || !runtime::slots(ref mut captures,cfg::capture_count(g)+1) || !runtime::slots(ref mut snapshots,ir::statement_count(b)+1) || !runtime::slots(ref mut iter_views,ir::statement_count(b)+1) || !runtime::slots(ref mut iter_indices,ir::statement_count(b)+1) || !runtime::slots(ref mut iter_bindings,ir::statement_count(b)+1)){return runtime::failure(4);}
     var usize rx_local=0;while(rx_local<v::len<usize>(ref locals)){let root=runtime::rx_cell(heap,0,steps);if(root.error!=0){return root;}{let slot=v::at_mut<usize>(ref mut locals,rx_local);*slot=root.bits;}rx_local+=1;}
     var usize parameter=0;var usize i=1;while(i<=ir::local_count(b)){let l=ir::local_at(b,i);if(l.kind==1 || l.kind==10){if(parameter>=v::len<usize>(arguments)){return runtime::failure(4);}if(!runtime::admitted(p,l.type)){return runtime::failure(1);}let slot=v::at_mut<usize>(heap,*v::at<usize>(ref locals,i));*slot=*v::at<usize>(arguments,parameter);parameter+=1;}i+=1;}if(parameter!=v::len<usize>(arguments)){return runtime::failure(4);}
+    var v::Vec<usize> active_regions=v::empty<usize>();if(!runtime::slots(ref mut active_regions,ir::region_count(b)+1)){return runtime::failure(4);}var usize region_count=0;
     var usize current=cfg::entry(g);while(current!=0){if(*steps==0){return runtime::failure(2);};*steps=*steps-1;let n=cfg::at(g,current);var runtime::Outcome r=runtime::result(0);var usize next=n.first;
         if(n.kind==1){r=expression(owned,plan,frame,n.source,ref values,ref locals,ref captures,heap,steps,depth);if(r.error==0 && r.trap==0){let slot=v::at_mut<usize>(ref mut values,n.source);*slot=r.bits;}}
         else if(n.kind==2){let stmt=ir::statement_at(b,n.target-1).value;let destination=ir::node(b,stmt.target);let usize local=if(stmt.kind==2){ir::local(b,stmt.entry)}else{0};var usize bits=*v::at<usize>(ref values,n.source);let op=ir::assignment_operator(b,n.target-1);if(stmt.kind==4 && !bytes::equal(op,b"=")){r=runtime::computed(math::runtime_binary(runtime::scalar(p,ir::node_at(b,destination-1).value.type),op[..op.len-1],*v::at<usize>(ref snapshots,n.target),bits));bits=r.bits;}if(r.error==0 && r.trap==0){if(local!=0){let slot=v::at_mut<usize>(heap,*v::at<usize>(ref locals,local));*slot=bits;}else{r=runtime::write_place(p,b,destination,bits,ref mut locals,ref values,heap,steps,0);}}}
         else if(n.kind==3){next=if(*v::at<usize>(ref values,n.source)!=0){n.first}else{n.second};}
         else if(n.kind==4){r=runtime::item(heap,*v::at<usize>(ref values,n.source),0);next=if(r.bits==1){n.first}else{n.second};}
         else if(n.kind==5){let d=clean::drop_at(ir::cleanup_ir(p),n.drop-1);let o=clean::operand_at(ir::cleanup_ir(p),d.operand);let id=if(o.kind==1){o.id}else{ir::node(b,o.id)};if(id==0){return runtime::failure(4);}let bits=if(o.kind==1){*v::at<usize>(heap,*v::at<usize>(ref locals,id))}else{*v::at<usize>(ref values,id)};r=drop_value(owned,plan,o.type,bits,heap,steps,depth+1);}
-        else if(n.kind==6){let f=clean::frame_at(ir::cleanup_ir(p),frame);return runtime::result(if(f.kind==2){*v::at<usize>(heap,*v::at<usize>(ref locals,f.receiver))}else if(n.source==0){0}else{*v::at<usize>(ref values,n.source)});}
-        else if(n.kind==9){let bits=*v::at<usize>(ref values,n.source);r=runtime::item(heap,bits,0);if(r.error!=0 || r.trap!=0){return r;}if(r.bits!=0){return runtime::failure(4);}return runtime::result(bits);}
+        else if(n.kind==6){if(region_count!=0){return runtime::failure(4);}let f=clean::frame_at(ir::cleanup_ir(p),frame);return runtime::result(if(f.kind==2){*v::at<usize>(heap,*v::at<usize>(ref locals,f.receiver))}else if(n.source==0){0}else{*v::at<usize>(ref values,n.source)});}
+        else if(n.kind==9){if(region_count!=0){return runtime::failure(4);}let bits=*v::at<usize>(ref values,n.source);r=runtime::item(heap,bits,0);if(r.error!=0 || r.trap!=0){return r;}if(r.bits!=0){return runtime::failure(4);}return runtime::result(bits);}
         else if(n.kind==18 || n.kind==19){r=switch_payload(p,b,n,ref values,ref mut locals,heap,steps);if(n.kind==18){next=if(r.bits!=0){n.first}else{n.second};}}
         else if(n.kind==8){if(*v::at<usize>(ref values,n.source)==0){return runtime::trapped(6);}}
         else if(n.kind==10 || n.kind==11){if(n.target!=0){let bits=*v::at<usize>(ref values,n.target);let slot=v::at_mut<usize>(ref mut values,n.source);*slot=bits;}}
         else if(n.kind==12){return runtime::trapped(7);}
         else if(n.kind==13){let bits=*v::at<usize>(ref values,n.source);let slot=v::at_mut<usize>(ref mut captures,n.target);*slot=bits;}
         else if(n.kind==14){r=invoke(owned,plan,frame,cfg::deferred_at(g,n.target).invocation,n.target,ref values,ref captures,heap,steps,depth);}
+        else if(n.kind==15){
+            if(*v::at<usize>(ref active_regions,n.target)!=0){return runtime::failure(4);}r=runtime::region_begin(*v::at<usize>(ref values,n.source),heap,steps);
+            if(r.error==0 && r.trap==0){let scope=ir::region_at(b,n.target-1);let stored=runtime::rx_set_cell(heap,*v::at<usize>(ref locals,scope.capability),r.bits);if(stored.error!=0 || stored.trap!=0){return stored;}{let slot=v::at_mut<usize>(ref mut active_regions,n.target);*slot=r.bits;}region_count+=1;}
+        }
+        else if(n.kind==16){
+            let reset=ir::reset_at(b,n.target-1);let activation=*v::at<usize>(ref active_regions,reset.region_id);if(activation==0 || region_count==0){return runtime::failure(4);}r=runtime::region_reset(activation,heap);
+            if(r.error==0 && r.trap==0){{let slot=v::at_mut<usize>(ref mut active_regions,reset.region_id);*slot=0;}region_count-=1;}
+        }
         else if(n.kind==20){
             r=runtime::rx_array_view(p,b,n.source,ref locals,ref values,heap,steps);if(r.error==0 && r.trap==0){var usize work=0;let binding=switch(iteration::binding(p,b,frame,n.target,ref mut work)){case .ok(n):{n}case .err(_):{return runtime::failure(4);}};if(work>*steps){return runtime::failure(2);};*steps=*steps-work;
                 {let slot=v::at_mut<usize>(ref mut iter_views,n.target);*slot=r.bits;}{let slot=v::at_mut<usize>(ref mut iter_indices,n.target);*slot=0;}{let slot=v::at_mut<usize>(ref mut iter_bindings,n.target);*slot=binding;}
