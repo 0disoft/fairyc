@@ -1,0 +1,497 @@
+{
+  "schema": "fairyc.candidate-cli-local-validation/v1",
+  "date": "2026-10-18",
+  "passedInRecordedScope": true,
+  "execution": "Independent development example/native partitions reuse only completed observations; all remaining cases run in separate fixture copies.",
+  "note": "Reviewed Windows candidate dev/release command and workspace comparison. Counts cover the named suites only; excluded bootstrap input remains a separate gate.",
+  "naming": "candidate-cli-local-validation-YYYYMMDD.json is a reviewed local execution summary; raw generated receipts remain in ignored .cache/evidence.",
+  "buildSourceRevision": "a2aaf5351ef601f24df7f5293647dd915853e2c2",
+  "behaviorReferenceRevision": "4b2b1693b42a838c1d1d7526e7b2d8c2b227dd40",
+  "sourceFiles": 512,
+  "buildVersion": "Fairy C Stage 0\ncompiler: v0.0.0-20261018092209-a2aaf5351ef6\nsdk: fairyc-sdk-stdlib/0 0.0.0-stage0.86\nlanguage: fairyc-language/20\nruntime: fairyc-runtime/0\nrevision: a2aaf5351ef601f24df7f5293647dd915853e2c2\nmodified: false\n",
+  "references": {
+    "frozen": {
+      "sha256": "21454b07045f5afc20b5c37ed4965d08ec39da4fdafe594dae7603f140514d02",
+      "revision": "a2aaf5351ef601f24df7f5293647dd915853e2c2",
+      "version": "Fairy C Stage 0\ncompiler: v0.0.0-20261018092209-a2aaf5351ef6\nsdk: fairyc-sdk-stdlib/0 0.0.0-stage0.86\nlanguage: fairyc-language/20\nruntime: fairyc-runtime/0\nrevision: a2aaf5351ef601f24df7f5293647dd915853e2c2\nmodified: false\n"
+    },
+    "current": {
+      "sha256": "b4b1811a891749d51523afff2d2db6034343cd4b03bb743c7b3b5524043a7852",
+      "revision": "4b2b1693b42a838c1d1d7526e7b2d8c2b227dd40",
+      "version": "Fairy C Stage 0\ncompiler: v0.0.0-20261018094450-4b2b1693b42a\nsdk: fairyc-sdk-stdlib/0 0.0.0-stage0.86\nlanguage: fairyc-language/20\nruntime: fairyc-runtime/0\nrevision: 4b2b1693b42a838c1d1d7526e7b2d8c2b227dd40\nmodified: false\n"
+    }
+  },
+  "images": [
+    {
+      "profile": "development",
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\evidence\\candidate-parity-20261018-a2aaf535\\candidate\\development\\fairyc.exe",
+      "sha256": "b6fa70ab5d450652d61554645316c63de4813af21d31cb3464d9c7a902311b5c",
+      "driverSHA256": "b91ad328587813bb333b9a2c9b1a950984604ad65905b304e95b6dbecef8a24f"
+    },
+    {
+      "profile": "release",
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\evidence\\candidate-parity-20261018-a2aaf535\\candidate\\release\\fairyc.exe",
+      "sha256": "484585272f4b36b57b952d9a7e837472b236b24d9acb3cd1d7065bb28d89d911",
+      "driverSHA256": "b91ad328587813bb333b9a2c9b1a950984604ad65905b304e95b6dbecef8a24f"
+    }
+  ],
+  "toolchain": {
+    "arch": "amd64",
+    "go": "go1.27.1",
+    "msvc": "14.51.36231",
+    "os": "windows"
+  },
+  "candidatePacketSHA256": "09956e230a74ad2c6888d314c669899204f19c3168012d062574e89925c77b28",
+  "stackReserveBytes": 16777216,
+  "goFrontendInvoked": false,
+  "versionComparison": "Candidate --version was compared with the clean Go source-version image from the same build revision. Semantic/native/example/list behavior uses the Go image rebuilt after the enum payload fix.",
+  "suites": [
+    {
+      "gate": "metadata",
+      "profile": "development",
+      "comparisons": 122,
+      "exactComparisons": 122,
+      "timedOut": 0,
+      "invocationTimeoutSeconds": 30,
+      "excluded": [],
+      "executionPartitions": null,
+      "referenceRevision": "a2aaf5351ef601f24df7f5293647dd915853e2c2",
+      "receipt": {
+        "path": ".cache/evidence/candidate-parity-20261018-a2aaf535/metadata-development/receipt.json",
+        "sha256": "100675df88fd4d6bb86216fd00f81aa5619e264cc0595e47eb810e44ec325837"
+      }
+    },
+    {
+      "gate": "cli",
+      "profile": "development",
+      "comparisons": 30,
+      "exactComparisons": 30,
+      "timedOut": 0,
+      "invocationTimeoutSeconds": 60,
+      "excluded": [],
+      "executionPartitions": null,
+      "referenceRevision": "a2aaf5351ef601f24df7f5293647dd915853e2c2",
+      "receipt": {
+        "path": ".cache/evidence/candidate-parity-20261018-a2aaf535/cli-development/receipt.json",
+        "sha256": "3deac44da093a93b9f0e3501d6768696a9c4e50cacb96ab54c16c6d530035138"
+      }
+    },
+    {
+      "gate": "semantic",
+      "profile": "development",
+      "comparisons": 98,
+      "exactComparisons": 98,
+      "timedOut": 0,
+      "invocationTimeoutSeconds": 120,
+      "excluded": [],
+      "executionPartitions": null,
+      "referenceRevision": "4b2b1693b42a838c1d1d7526e7b2d8c2b227dd40",
+      "receipt": {
+        "path": ".cache/evidence/candidate-parity-20261018-a2aaf535/semantic-development-fixed/receipt.json",
+        "sha256": "c2af930fa8043d13189502d6baec019431da82c1f4346e03d20bf7fc423db13e"
+      }
+    },
+    {
+      "gate": "native",
+      "profile": "development",
+      "comparisons": 30,
+      "exactComparisons": 30,
+      "timedOut": 0,
+      "invocationTimeoutSeconds": 900,
+      "excluded": [],
+      "executionPartitions": {
+        "reusedComparisons": 19,
+        "partitions": 3,
+        "records": [
+          {
+            "path": ".cache/evidence/candidate-parity-20261018-a2aaf535/native-development/observations.json",
+            "sha256": "c239c0a1b90c0a841a9fb7f64f0d1e7ca0f348ebdbe02f059d170b6310d5e16f"
+          },
+          {
+            "path": ".cache/evidence/candidate-parity-20261018-a2aaf535/native-dev-shard-0/receipt.json",
+            "sha256": "b073f7145ddf77044c133d7120360d6a00a50eb5ed8c6063bb4640cf21fa34fa"
+          },
+          {
+            "path": ".cache/evidence/candidate-parity-20261018-a2aaf535/native-dev-shard-1/receipt.json",
+            "sha256": "4fe3f61f03a0cd7b80e4c92b240655da5c8fb832e3a6de901f0354ea9003dbb7"
+          },
+          {
+            "path": ".cache/evidence/candidate-parity-20261018-a2aaf535/native-dev-shard-2/receipt.json",
+            "sha256": "79c4ec3a4fd9db4230e777cd450f877052fa8fea7f58f14ea5574d8cd0bc1b36"
+          }
+        ],
+        "coordinatorSHA256": "75d12585d1845eb769ae29fa7da78528e0f58647181d3bd9cb0cd6b938603c92",
+        "note": "Retains completed comparisons from the interrupted sequential driver; all remaining case IDs from the full release suite were run in isolated development partitions."
+      },
+      "referenceRevision": "4b2b1693b42a838c1d1d7526e7b2d8c2b227dd40",
+      "receipt": {
+        "path": ".cache/evidence/candidate-parity-20261018-a2aaf535/native-development-complete/receipt.json",
+        "sha256": "8544e1f19849187f0e08960baa01b910ea25517a3e4e2f7eebbc327d1f1bed31"
+      }
+    },
+    {
+      "gate": "examples",
+      "profile": "development",
+      "comparisons": 78,
+      "exactComparisons": 78,
+      "timedOut": 0,
+      "invocationTimeoutSeconds": 900,
+      "excluded": [
+        {
+          "id": "lexer_candidate",
+          "reason": "compiler self-source is a separate bootstrap/fixed-point gate"
+        }
+      ],
+      "executionPartitions": {
+        "reusedCompletedComparisons": 36,
+        "reusedCompleteExamples": [
+          "asset_burn_quickstart",
+          "bool_view_quickstart",
+          "checked_byte_codec_quickstart",
+          "checked_offset_quickstart",
+          "contextual_integer",
+          "contract_capabilities_quickstart",
+          "contract_state_declaration_quickstart",
+          "copied_mutable_struct_quickstart",
+          "csv_aggregator_i64",
+          "digits_only_quickstart",
+          "exclusive_subview",
+          "i64_for",
+          "i64_mut_view",
+          "i64_quickstart",
+          "i64_view",
+          "integer_array_element_refs",
+          "integer_array_for_quickstart",
+          "integer_element_refs",
+          "integer_view_iteration",
+          "integer_views",
+          "io_i64_quickstart",
+          "mut_view_for",
+          "native_test_args_quickstart",
+          "native_test_output_quickstart",
+          "native_test_stdin_quickstart",
+          "native_test_timeout_quickstart",
+          "process_args_quickstart",
+          "repeated_array",
+          "shared_integer_ref_quickstart",
+          "shared_struct_ref_quickstart"
+        ],
+        "partitions": 6,
+        "invocationTimeoutSeconds": 900,
+        "records": [
+          {
+            "path": ".cache/evidence/candidate-parity-20261018-a2aaf535/examples-development/observations.json",
+            "sha256": "3eafc988b45096ee8f6137bf0c9940af5200b3fb3672d7cc87920d9925d8f391"
+          },
+          {
+            "path": ".cache/evidence/candidate-parity-20261018-a2aaf535/examples-dev-shard-0/observations.json",
+            "sha256": "2393e7e8c3762fcd664e2f80f37028f6a4e567696818505711195bfe59a2ba9c"
+          },
+          {
+            "path": ".cache/evidence/candidate-parity-20261018-a2aaf535/examples-dev-shard-1/observations.json",
+            "sha256": "40ab5c25a3088a00ac3d1b50013c859b9245ac7046ebdbd8de4af950cc8e96f9"
+          },
+          {
+            "path": ".cache/evidence/candidate-parity-20261018-a2aaf535/examples-dev-shard-2/observations.json",
+            "sha256": "c74cf8bfd1c35b6685c0812340fb6c116977845f3a49973a5919c43516232a26"
+          },
+          {
+            "path": ".cache/evidence/candidate-parity-20261018-a2aaf535/examples-dev-round2-0/receipt.json",
+            "sha256": "dd1159663629676773abfd9625de07ab7331a5e493b7c626cb24a74909ad1e49"
+          },
+          {
+            "path": ".cache/evidence/candidate-parity-20261018-a2aaf535/examples-dev-round2-1/receipt.json",
+            "sha256": "726887797ddee56d74d916775be23d86f85bb22ebb54accc3289ecd9ff17ac2a"
+          },
+          {
+            "path": ".cache/evidence/candidate-parity-20261018-a2aaf535/examples-dev-round2-2/receipt.json",
+            "sha256": "d9198c8666d999d29fb0e515cb59bd2765ed53d657c11d77bef4c30a9499501f"
+          },
+          {
+            "path": ".cache/evidence/candidate-parity-20261018-a2aaf535/examples-dev-round2-3/receipt.json",
+            "sha256": "af0966b967e735d11bab049fd07de7a54cbd202915de2b81e51f4c5d06d7dbae"
+          },
+          {
+            "path": ".cache/evidence/candidate-parity-20261018-a2aaf535/examples-dev-round2-4/receipt.json",
+            "sha256": "5f800f2a7769e017de32a3bff1eecaef4976233f58b01b0c7c492360eb00a040"
+          },
+          {
+            "path": ".cache/evidence/candidate-parity-20261018-a2aaf535/examples-dev-round2-5/receipt.json",
+            "sha256": "2fecacc51339f7963d9ec12786e08109a26447c628329d1fbff030f89b732207"
+          }
+        ],
+        "coordinatorSHA256": "525eb53d1ed352601c14ef1ddaba8f8d42281238d141b06961766aebee3af0e3",
+        "note": "Original sequential driver stopped before its next observation. Only fully completed example groups were reused; uncompleted groups were compared in isolated partitions."
+      },
+      "referenceRevision": "4b2b1693b42a838c1d1d7526e7b2d8c2b227dd40",
+      "receipt": {
+        "path": ".cache/evidence/candidate-parity-20261018-a2aaf535/examples-development-complete/receipt.json",
+        "sha256": "79368dca32e37e75cd56cbb331ad3207e29fde004a25e579346a5914694c4646"
+      }
+    },
+    {
+      "gate": "metadata",
+      "profile": "release",
+      "comparisons": 122,
+      "exactComparisons": 122,
+      "timedOut": 0,
+      "invocationTimeoutSeconds": 30,
+      "excluded": [],
+      "executionPartitions": null,
+      "referenceRevision": "a2aaf5351ef601f24df7f5293647dd915853e2c2",
+      "receipt": {
+        "path": ".cache/evidence/candidate-parity-20261018-a2aaf535/metadata-release/receipt.json",
+        "sha256": "3f75c1ebad62b0d8d3cacff5a525b9b97bee6cf02885925b10adf8e8410cb6fc"
+      }
+    },
+    {
+      "gate": "cli",
+      "profile": "release",
+      "comparisons": 30,
+      "exactComparisons": 30,
+      "timedOut": 0,
+      "invocationTimeoutSeconds": 60,
+      "excluded": [],
+      "executionPartitions": null,
+      "referenceRevision": "a2aaf5351ef601f24df7f5293647dd915853e2c2",
+      "receipt": {
+        "path": ".cache/evidence/candidate-parity-20261018-a2aaf535/cli-release/receipt.json",
+        "sha256": "c258786a385129cb41f23cc6f05c1f63dcf9d3b4b6cbcf960d93c1d842d09e35"
+      }
+    },
+    {
+      "gate": "semantic",
+      "profile": "release",
+      "comparisons": 98,
+      "exactComparisons": 98,
+      "timedOut": 0,
+      "invocationTimeoutSeconds": 120,
+      "excluded": [],
+      "executionPartitions": null,
+      "referenceRevision": "4b2b1693b42a838c1d1d7526e7b2d8c2b227dd40",
+      "receipt": {
+        "path": ".cache/evidence/candidate-parity-20261018-a2aaf535/semantic-release-fixed/receipt.json",
+        "sha256": "bdcb987b46d6496c04a89c56b2007bb52c19f3a9abf9358700da5204ce0bded0"
+      }
+    },
+    {
+      "gate": "native",
+      "profile": "release",
+      "comparisons": 30,
+      "exactComparisons": 30,
+      "timedOut": 0,
+      "invocationTimeoutSeconds": 120,
+      "excluded": [],
+      "executionPartitions": null,
+      "referenceRevision": "4b2b1693b42a838c1d1d7526e7b2d8c2b227dd40",
+      "receipt": {
+        "path": ".cache/evidence/candidate-parity-20261018-a2aaf535/native-release/receipt.json",
+        "sha256": "4eb052a01cc0122412a447361e6dd518162a455b28ee27d17e70b84312c4f726"
+      }
+    },
+    {
+      "gate": "examples",
+      "profile": "release",
+      "comparisons": 78,
+      "exactComparisons": 78,
+      "timedOut": 0,
+      "invocationTimeoutSeconds": 60,
+      "excluded": [
+        {
+          "id": "lexer_candidate",
+          "reason": "compiler self-source is a separate bootstrap/fixed-point gate"
+        }
+      ],
+      "executionPartitions": null,
+      "referenceRevision": "4b2b1693b42a838c1d1d7526e7b2d8c2b227dd40",
+      "receipt": {
+        "path": ".cache/evidence/candidate-parity-20261018-a2aaf535/examples-release/receipt.json",
+        "sha256": "83fbac8998708aa2eea5736c86b76055df4cdc2482073d710ea9a70265d02918"
+      }
+    },
+    {
+      "gate": "test-list",
+      "profile": "development",
+      "comparisons": 89,
+      "exactComparisons": 89,
+      "timedOut": 0,
+      "invocationTimeoutSeconds": 900,
+      "excluded": [],
+      "referenceRevision": "4b2b1693b42a838c1d1d7526e7b2d8c2b227dd40",
+      "receipt": {
+        "path": ".cache/evidence/candidate-parity-20261018-a2aaf535/list-both-complete/receipt.json",
+        "sha256": "f14f9c104cb6dedce50956d93ca75b91756afd8188e237f71ba0cfe0d4fb60d4"
+      }
+    },
+    {
+      "gate": "test-list",
+      "profile": "release",
+      "comparisons": 89,
+      "exactComparisons": 89,
+      "timedOut": 0,
+      "invocationTimeoutSeconds": 900,
+      "excluded": [],
+      "referenceRevision": "4b2b1693b42a838c1d1d7526e7b2d8c2b227dd40",
+      "receipt": {
+        "path": ".cache/evidence/candidate-parity-20261018-a2aaf535/list-both-complete/receipt.json",
+        "sha256": "f14f9c104cb6dedce50956d93ca75b91756afd8188e237f71ba0cfe0d4fb60d4"
+      }
+    }
+  ],
+  "totalComparisons": 894,
+  "exactComparisons": 894,
+  "correction": {
+    "commit": "4b2b1693b42a838c1d1d7526e7b2d8c2b227dd40",
+    "problem": "Go interpreter rejected named enum payload initializers written out of declaration order; candidate accepted them correctly.",
+    "validation": "go test -mod=readonly ./internal/interpreter ./internal/interpreterfixture",
+    "regressions": [
+      "side-effecting named initializers retain evaluation order",
+      "nested enum aggregate payload uses declaration slots"
+    ]
+  },
+  "initialObservations": [
+    {
+      "kind": "correctness mismatch",
+      "suite": "semantic-development",
+      "case": "tagged-json-locations",
+      "resolution": "Go enum field mapping fixed, and all 98 semantic comparisons repeated for each candidate profile."
+    },
+    {
+      "kind": "timeout",
+      "suite": "list-both",
+      "case": "development/sdk-tests-only",
+      "seconds": 90,
+      "resolution": "Repeated both full 89-case profile suites with a 900-second invocation limit; the timeout is excluded from passing counts."
+    }
+  ],
+  "records": [
+    {
+      "path": ".cache/evidence/candidate-parity-20261018-a2aaf535/candidate/receipt.json",
+      "sha256": "e236fef685588a4b6b71454b85ce202e7e72e2381eb91d990cda1ac4edd95903"
+    },
+    {
+      "path": ".cache/evidence/candidate-parity-20261018-a2aaf535/candidate/receipt-development.json",
+      "sha256": "077a128c78e2789da1c9fcb4999a12bd6af4ebb898bb8e64b19433595879ea2c"
+    },
+    {
+      "path": ".cache/evidence/candidate-parity-20261018-a2aaf535/candidate/receipt-release.json",
+      "sha256": "a748d3e16f6dde41f5d5b5ee244ab0f5e5410251fadc6dd8130b83344cc322e9"
+    },
+    {
+      "path": ".cache/evidence/candidate-parity-20261018-a2aaf535/candidate/source-snapshot.json",
+      "sha256": "aaa59cd215df4cfe52c2706a694a515821c8cf574f84e6f68ebc6d8afb68c472"
+    },
+    {
+      "path": ".cache/evidence/candidate-parity-20261018-a2aaf535/metadata-development/receipt.json",
+      "sha256": "100675df88fd4d6bb86216fd00f81aa5619e264cc0595e47eb810e44ec325837"
+    },
+    {
+      "path": ".cache/evidence/candidate-parity-20261018-a2aaf535/cli-development/receipt.json",
+      "sha256": "3deac44da093a93b9f0e3501d6768696a9c4e50cacb96ab54c16c6d530035138"
+    },
+    {
+      "path": ".cache/evidence/candidate-parity-20261018-a2aaf535/semantic-development-fixed/receipt.json",
+      "sha256": "c2af930fa8043d13189502d6baec019431da82c1f4346e03d20bf7fc423db13e"
+    },
+    {
+      "path": ".cache/evidence/candidate-parity-20261018-a2aaf535/native-development/observations.json",
+      "sha256": "c239c0a1b90c0a841a9fb7f64f0d1e7ca0f348ebdbe02f059d170b6310d5e16f"
+    },
+    {
+      "path": ".cache/evidence/candidate-parity-20261018-a2aaf535/native-dev-shard-0/receipt.json",
+      "sha256": "b073f7145ddf77044c133d7120360d6a00a50eb5ed8c6063bb4640cf21fa34fa"
+    },
+    {
+      "path": ".cache/evidence/candidate-parity-20261018-a2aaf535/native-dev-shard-1/receipt.json",
+      "sha256": "4fe3f61f03a0cd7b80e4c92b240655da5c8fb832e3a6de901f0354ea9003dbb7"
+    },
+    {
+      "path": ".cache/evidence/candidate-parity-20261018-a2aaf535/native-dev-shard-2/receipt.json",
+      "sha256": "79c4ec3a4fd9db4230e777cd450f877052fa8fea7f58f14ea5574d8cd0bc1b36"
+    },
+    {
+      "path": ".cache/evidence/candidate-parity-20261018-a2aaf535/native-development-complete/receipt.json",
+      "sha256": "8544e1f19849187f0e08960baa01b910ea25517a3e4e2f7eebbc327d1f1bed31"
+    },
+    {
+      "path": ".cache/evidence/candidate-parity-20261018-a2aaf535/examples-development/observations.json",
+      "sha256": "3eafc988b45096ee8f6137bf0c9940af5200b3fb3672d7cc87920d9925d8f391"
+    },
+    {
+      "path": ".cache/evidence/candidate-parity-20261018-a2aaf535/examples-dev-shard-0/observations.json",
+      "sha256": "2393e7e8c3762fcd664e2f80f37028f6a4e567696818505711195bfe59a2ba9c"
+    },
+    {
+      "path": ".cache/evidence/candidate-parity-20261018-a2aaf535/examples-dev-shard-1/observations.json",
+      "sha256": "40ab5c25a3088a00ac3d1b50013c859b9245ac7046ebdbd8de4af950cc8e96f9"
+    },
+    {
+      "path": ".cache/evidence/candidate-parity-20261018-a2aaf535/examples-dev-shard-2/observations.json",
+      "sha256": "c74cf8bfd1c35b6685c0812340fb6c116977845f3a49973a5919c43516232a26"
+    },
+    {
+      "path": ".cache/evidence/candidate-parity-20261018-a2aaf535/examples-dev-round2-0/receipt.json",
+      "sha256": "dd1159663629676773abfd9625de07ab7331a5e493b7c626cb24a74909ad1e49"
+    },
+    {
+      "path": ".cache/evidence/candidate-parity-20261018-a2aaf535/examples-dev-round2-1/receipt.json",
+      "sha256": "726887797ddee56d74d916775be23d86f85bb22ebb54accc3289ecd9ff17ac2a"
+    },
+    {
+      "path": ".cache/evidence/candidate-parity-20261018-a2aaf535/examples-dev-round2-2/receipt.json",
+      "sha256": "d9198c8666d999d29fb0e515cb59bd2765ed53d657c11d77bef4c30a9499501f"
+    },
+    {
+      "path": ".cache/evidence/candidate-parity-20261018-a2aaf535/examples-dev-round2-3/receipt.json",
+      "sha256": "af0966b967e735d11bab049fd07de7a54cbd202915de2b81e51f4c5d06d7dbae"
+    },
+    {
+      "path": ".cache/evidence/candidate-parity-20261018-a2aaf535/examples-dev-round2-4/receipt.json",
+      "sha256": "5f800f2a7769e017de32a3bff1eecaef4976233f58b01b0c7c492360eb00a040"
+    },
+    {
+      "path": ".cache/evidence/candidate-parity-20261018-a2aaf535/examples-dev-round2-5/receipt.json",
+      "sha256": "2fecacc51339f7963d9ec12786e08109a26447c628329d1fbff030f89b732207"
+    },
+    {
+      "path": ".cache/evidence/candidate-parity-20261018-a2aaf535/examples-development-complete/receipt.json",
+      "sha256": "79368dca32e37e75cd56cbb331ad3207e29fde004a25e579346a5914694c4646"
+    },
+    {
+      "path": ".cache/evidence/candidate-parity-20261018-a2aaf535/metadata-release/receipt.json",
+      "sha256": "3f75c1ebad62b0d8d3cacff5a525b9b97bee6cf02885925b10adf8e8410cb6fc"
+    },
+    {
+      "path": ".cache/evidence/candidate-parity-20261018-a2aaf535/cli-release/receipt.json",
+      "sha256": "c258786a385129cb41f23cc6f05c1f63dcf9d3b4b6cbcf960d93c1d842d09e35"
+    },
+    {
+      "path": ".cache/evidence/candidate-parity-20261018-a2aaf535/semantic-release-fixed/receipt.json",
+      "sha256": "bdcb987b46d6496c04a89c56b2007bb52c19f3a9abf9358700da5204ce0bded0"
+    },
+    {
+      "path": ".cache/evidence/candidate-parity-20261018-a2aaf535/native-release/receipt.json",
+      "sha256": "4eb052a01cc0122412a447361e6dd518162a455b28ee27d17e70b84312c4f726"
+    },
+    {
+      "path": ".cache/evidence/candidate-parity-20261018-a2aaf535/examples-release/receipt.json",
+      "sha256": "83fbac8998708aa2eea5736c86b76055df4cdc2482073d710ea9a70265d02918"
+    },
+    {
+      "path": ".cache/evidence/candidate-parity-20261018-a2aaf535/list-both-complete/receipt.json",
+      "sha256": "f14f9c104cb6dedce50956d93ca75b91756afd8188e237f71ba0cfe0d4fb60d4"
+    }
+  ],
+  "limitations": [
+    "Windows x64 MSVC only; Linux execution not run",
+    "Compiler self-source lexer_candidate is excluded from the example suite and requires separate bootstrap/fixed-point verification",
+    "No IR equality or performance claim",
+    "No universal parity claim beyond these recorded invocations",
+    "Raw receipts and binaries are local ignored build artifacts"
+  ],
+  "sourceOfTruthDocumentsChanged": [],
+  "publicApiChanged": false,
+  "sdkAbiChanged": false,
+  "ciChanged": false,
+  "pushed": false
+}
