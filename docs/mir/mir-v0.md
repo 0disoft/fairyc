@@ -408,6 +408,15 @@ The source cases do not test malformed graphs. `spec/fixtures/mir-verifier/manif
 
 ## Interpreter
 
+The Go harness accepts `Options.MaxSteps`, `Options.MaxCallDepth`, and an optional
+`context.Context` for both i32 and void execution (`ExecuteWithOptions` and
+`ExecuteVoidWithOptions`). Zero limits retain 1,000,000 block/operation steps and
+256 call frames; negative limits are rejected. Cancellation is checked before
+execution, at call and step checkpoints, and during cleanup. It returns `canceled`
+with the original context error, separately from `step-limit`, `call-depth-limit`,
+and `output-limit`. Existing entry wrappers retain their default budgets. These
+are caller-controlled interpreter budgets, not language traps or new CLI flags.
+
 The first semantic oracle is a small MIR interpreter supporting scalars, safe borrow and dereference
 transport, tagged `Option` and `Result`, restricted inert user enums, borrowed UTF-8 and byte views
 with byte-length reads, moves, drop traces, region mark and reset, branches, and traps. Region entry

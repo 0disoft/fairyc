@@ -4,7 +4,7 @@ package interpreter
 // Check the runtime shape too: caller-supplied MIR must not silently leak an
 // owned payload hidden inside a struct. The bound also rejects cyclic state.
 func inertDropValue(value runtimeValue, depth int) bool {
-	if depth >= maxCallDepth {
+	if depth >= maxValueNesting {
 		return false
 	}
 	switch value.kind {

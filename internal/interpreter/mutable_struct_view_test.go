@@ -110,7 +110,7 @@ func TestMutableStructForInterpreter(t *testing.T) {
 	if errs := mir.Verify(program); len(errs) != 0 {
 		t.Fatal(errs)
 	}
-	r := runtime{byName: map[string]*mir.Function{}, bySymbol: map[hir.SymbolID]*mir.Function{}, structTypes: map[hir.Type]*mir.StructType{}, steps: maxSteps}
+	r := executionState{byName: map[string]*mir.Function{}, bySymbol: map[hir.SymbolID]*mir.Function{}, structTypes: map[hir.Type]*mir.StructType{}, steps: DefaultMaxSteps, callDepthLimit: DefaultMaxCallDepth}
 	for i := range program.Functions {
 		f := &program.Functions[i]
 		r.byName[f.Name] = f

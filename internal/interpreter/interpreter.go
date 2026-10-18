@@ -2,6 +2,7 @@
 package interpreter
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"math"
@@ -22,16 +23,9 @@ const (
 	LimitOutput                                    = "output-limit"
 	TestIntrinsicWriteStdoutByte TestIntrinsicKind = "write-stdout-byte"
 	TestIntrinsicWriteStderrByte TestIntrinsicKind = "write-stderr-byte"
-	maxCallDepth                                   = 256
-	maxSteps                                       = 1_000_000
-	maxConfiguredTestOutputBytes                   = 1 << 20
-)
 
-// Options enables closed interpreter-harness behavior that is not part of the Fairy C language.
-type Options struct {
-	TestIntrinsics map[string]TestIntrinsicKind
-	OutputLimit    int
-}
+	maxConfiguredTestOutputBytes = 1 << 20
+)
 
 // Outcome is one bounded interpreter completion.
 type Outcome struct {
@@ -94,16 +88,29 @@ func ExecuteWithOptions(program mir.Program, entry string, options Options) (Out
 }
 
 // ExecuteVoid verifies program and invokes one zero-argument void entry function in a fresh,
-// deterministic runtime. It is the semantic test-runner entry and exposes no fixture intrinsics.
+// deterministic engine. It is the semantic test-runner entry and exposes no fixture intrinsics.
 func ExecuteVoid(program mir.Program, entry string) (Outcome, error) {
-	return executeEntry(program, entry, hir.TypeVoid, Options{})
+	return ExecuteVoidWithOptions(program, entry, Options{})
+}
+
+// ExecuteVoidWithOptions runs a fresh semantic-test entry with caller budgets and cancellation.
+func ExecuteVoidWithOptions(program mir.Program, entry string, options Options) (Outcome, error) {
+	return executeEntry(program, entry, hir.TypeVoid, options)
 }
 
 func executeEntry(program mir.Program, entry string, resultType hir.Type, options Options) (Outcome, error) {
+	var err error
+	options, err = options.normalized()
+	if err != nil {
+		return Outcome{}, err
+	}
+	if err := options.Context.Err(); err != nil {
+		return Outcome{Kind: OutcomeCanceled}, err
+	}
 	if failures := mir.Verify(program); len(failures) != 0 {
 		return Outcome{}, fmt.Errorf("verify MIR before interpretation: %v", failures)
 	}
-	runtime := runtime{
+	engine := executionState{
 		byName:         make(map[string]*mir.Function, len(program.Functions)),
 		bySymbol:       make(map[hir.SymbolID]*mir.Function, len(program.Functions)),
 		structTypes:    make(map[hir.Type]*mir.StructType, len(program.StructTypes)),
@@ -111,63 +118,68 @@ func executeEntry(program mir.Program, entry string, resultType hir.Type, option
 		resourceTypes:  make(map[hir.Type]*mir.ResourceType, len(program.ResourceTypes)),
 		testIntrinsics: make(map[hir.SymbolID]TestIntrinsicKind, len(options.TestIntrinsics)),
 		outputLimit:    options.OutputLimit,
-		steps:          maxSteps,
+		steps:          options.MaxSteps,
+		callDepthLimit: options.MaxCallDepth,
+		context:        options.Context,
 	}
 	for index := range program.StructTypes {
 		definition := &program.StructTypes[index]
-		runtime.structTypes[definition.Type] = definition
+		engine.structTypes[definition.Type] = definition
 	}
 	for index := range program.EnumTypes {
 		definition := &program.EnumTypes[index]
-		runtime.enumTypes[definition.Type] = definition
+		engine.enumTypes[definition.Type] = definition
 	}
 	for index := range program.ResourceTypes {
 		definition := &program.ResourceTypes[index]
-		runtime.resourceTypes[definition.Type] = definition
+		engine.resourceTypes[definition.Type] = definition
 	}
 	for index := range program.Functions {
 		function := &program.Functions[index]
-		if _, duplicate := runtime.byName[function.Name]; duplicate {
+		if _, duplicate := engine.byName[function.Name]; duplicate {
 			return Outcome{}, fmt.Errorf("duplicate MIR function name %q", function.Name)
 		}
-		if _, duplicate := runtime.bySymbol[function.Symbol]; duplicate {
+		if _, duplicate := engine.bySymbol[function.Symbol]; duplicate {
 			return Outcome{}, fmt.Errorf("duplicate MIR function symbol %d", function.Symbol)
 		}
-		runtime.byName[function.Name] = function
-		runtime.bySymbol[function.Symbol] = function
+		engine.byName[function.Name] = function
+		engine.bySymbol[function.Symbol] = function
 	}
-	function := runtime.byName[entry]
+	function := engine.byName[entry]
 	if function == nil {
 		return Outcome{}, capabilityError("entry function %q is missing", entry)
 	}
 	if len(function.Parameters) != 0 || function.ResultType != resultType {
 		return Outcome{}, capabilityError("entry function %q must have type fn() -> %s", entry, resultType)
 	}
-	if err := runtime.configureTestIntrinsics(entry, options); err != nil {
+	if err := engine.configureTestIntrinsics(entry, options); err != nil {
 		return Outcome{}, err
 	}
-	completion, err := runtime.call(function, nil, 0)
+	completion, err := engine.call(function, nil, 0)
 	if err != nil {
 		var capability CapabilityError
-		if errors.As(err, &capability) && capability.Kind != "" {
-			return runtime.outcome(OutcomeLimit, 0, ""), err
+		if errors.Is(err, context.Canceled) || errors.Is(err, context.DeadlineExceeded) {
+			return engine.outcome(OutcomeCanceled, 0, ""), err
+		}
+		if errors.As(err, &capability) && (capability.Kind == LimitStep || capability.Kind == LimitCallDepth || capability.Kind == LimitOutput) {
+			return engine.outcome(OutcomeLimit, 0, ""), err
 		}
 		return Outcome{}, err
 	}
 	if completion.trapCategory != "" {
-		return runtime.outcome(OutcomeTrap, 0, completion.trapCategory), nil
+		return engine.outcome(OutcomeTrap, 0, completion.trapCategory), nil
 	}
 	if resultType == hir.TypeVoid {
-		return runtime.outcome(OutcomeReturn, 0, ""), nil
+		return engine.outcome(OutcomeReturn, 0, ""), nil
 	}
 	value, err := completion.value.asI32()
 	if err != nil {
 		return Outcome{}, fmt.Errorf("entry function %q: %w", entry, err)
 	}
-	return runtime.outcome(OutcomeReturn, value, ""), nil
+	return engine.outcome(OutcomeReturn, value, ""), nil
 }
 
-type runtime struct {
+type executionState struct {
 	byName         map[string]*mir.Function
 	bySymbol       map[hir.SymbolID]*mir.Function
 	structTypes    map[hir.Type]*mir.StructType
@@ -176,6 +188,8 @@ type runtime struct {
 	testIntrinsics map[hir.SymbolID]TestIntrinsicKind
 	outputLimit    int
 	steps          int
+	callDepthLimit int
+	context        context.Context
 	dropTrace      []DropEvent
 	regionTrace    []RegionEvent
 	stdout         []byte
@@ -183,7 +197,7 @@ type runtime struct {
 	ioTrace        []IOEvent
 }
 
-func (r *runtime) configureTestIntrinsics(entry string, options Options) error {
+func (r *executionState) configureTestIntrinsics(entry string, options Options) error {
 	if len(options.TestIntrinsics) == 0 {
 		if options.OutputLimit != 0 {
 			return fmt.Errorf("test output limit requires at least one configured test intrinsic")
@@ -223,7 +237,7 @@ func (r *runtime) configureTestIntrinsics(entry string, options Options) error {
 	return nil
 }
 
-func (r *runtime) outcome(kind string, value int32, trapCategory string) Outcome {
+func (r *executionState) outcome(kind string, value int32, trapCategory string) Outcome {
 	return Outcome{
 		Kind: kind, Value: value, TrapCategory: trapCategory,
 		DropTrace: slices.Clone(r.dropTrace), RegionTrace: slices.Clone(r.regionTrace),
@@ -231,7 +245,7 @@ func (r *runtime) outcome(kind string, value int32, trapCategory string) Outcome
 	}
 }
 
-func (r *runtime) callTestIntrinsic(kind TestIntrinsicKind, arguments []runtimeValue) (runtimeValue, error) {
+func (r *executionState) callTestIntrinsic(kind TestIntrinsicKind, arguments []runtimeValue) (runtimeValue, error) {
 	if len(arguments) != 1 {
 		return runtimeValue{}, fmt.Errorf("test intrinsic %q received %d arguments, want 1", kind, len(arguments))
 	}
@@ -597,9 +611,12 @@ type runtimeRegion struct {
 	placements []runtimeValue
 }
 
-func (r *runtime) call(function *mir.Function, arguments []runtimeValue, depth int) (callCompletion, error) {
-	if depth >= maxCallDepth {
-		return callCompletion{}, capabilityErrorKind("call-depth-limit", "interpreter call-depth limit exceeded")
+func (r *executionState) call(function *mir.Function, arguments []runtimeValue, depth int) (callCompletion, error) {
+	if err := r.checkCancellation(); err != nil {
+		return callCompletion{}, err
+	}
+	if depth >= r.callDepthLimit {
+		return callCompletion{}, capabilityErrorKind(LimitCallDepth, "interpreter call-depth limit exceeded")
 	}
 	if len(arguments) != len(function.Parameters) {
 		return callCompletion{}, fmt.Errorf("call %q received %d argument(s), want %d", function.Name, len(arguments), len(function.Parameters))
@@ -611,19 +628,17 @@ func (r *runtime) call(function *mir.Function, arguments []runtimeValue, depth i
 	}
 	current := function.Entry
 	for {
-		if r.steps <= 0 {
-			return callCompletion{}, capabilityErrorKind(LimitStep, "interpreter step limit exceeded")
+		if err := r.consumeStep(); err != nil {
+			return callCompletion{}, err
 		}
-		r.steps--
 		if int(current) < 0 || int(current) >= len(function.Blocks) {
 			return callCompletion{}, fmt.Errorf("function %q jumps to missing block %d", function.Name, current)
 		}
 		block := function.Blocks[current]
 		for _, operation := range block.Operations {
-			if r.steps <= 0 {
-				return callCompletion{}, capabilityErrorKind(LimitStep, "interpreter step limit exceeded")
+			if err := r.consumeStep(); err != nil {
+				return callCompletion{}, err
 			}
-			r.steps--
 			switch operation.Kind {
 			case mir.OperationUse, mir.OperationDropFlagInit, mir.OperationDropFlagClear,
 				mir.OperationArithmeticCheck, mir.OperationCheckedDivision, mir.OperationResultSwitch:
@@ -1124,7 +1139,10 @@ func (r *runtime) call(function *mir.Function, arguments []runtimeValue, depth i
 	}
 }
 
-func (r *runtime) dropValue(value runtimeValue, binding hir.Span, depth int) (string, error) {
+func (r *executionState) dropValue(value runtimeValue, binding hir.Span, depth int) (string, error) {
+	if err := r.checkCancellation(); err != nil {
+		return "", err
+	}
 	switch value.kind {
 	case valueI32, valueI64, valueU8, valueU32, valueUSize, valueNull:
 		return "", nil
