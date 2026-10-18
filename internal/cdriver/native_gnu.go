@@ -12,7 +12,8 @@ import (
 // unsupported-host errors must work on every compiler host.
 type linuxNativeToolchain struct{ toolchain Toolchain }
 
-func resolveLinuxNative(name string) (NativeToolchain, error) {
+func resolveLinuxNative(name string) (result NativeToolchain, err error) {
+	defer func() { err = driverError(ErrorToolchain, "resolveLinuxNative", err) }()
 	if name == "" {
 		for _, candidate := range []string{"gcc", "clang"} {
 			if _, err := exec.LookPath(candidate); err == nil {
@@ -31,12 +32,14 @@ func resolveLinuxNative(name string) (NativeToolchain, error) {
 	return linuxNativeToolchain{toolchain: toolchain}, nil
 }
 
-func (toolchain linuxNativeToolchain) Build(options NativeBuildOptions) (NativeArtifact, error) {
+func (toolchain linuxNativeToolchain) Build(options NativeBuildOptions) (result NativeArtifact, err error) {
+	defer func() { err = driverError(ErrorBuild, "Build", err) }()
 	artifact, err := BuildCached(toolchain.toolchain, options.Profile, options.UnitSource, options.RuntimeSource)
 	return NativeArtifact{Artifact: artifact, TrapControl: options.TrapControl}, err
 }
 
-func (toolchain linuxNativeToolchain) Execute(artifact NativeArtifact, options NativeExecutionOptions) (NativeOutcome, error) {
+func (toolchain linuxNativeToolchain) Execute(artifact NativeArtifact, options NativeExecutionOptions) (result NativeOutcome, err error) {
+	defer func() { err = driverError(ErrorExecution, "Execute", err) }()
 	if err := validateNativeArtifact(artifact, target.X8664LinuxGNU); err != nil {
 		return NativeOutcome{}, err
 	}

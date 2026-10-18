@@ -68,7 +68,8 @@ type MemoryStore struct {
 }
 
 // NewMemoryStore rejects missing bounds instead of falling back to an unbounded cache.
-func NewMemoryStore(limits Limits) (*MemoryStore, error) {
+func NewMemoryStore(limits Limits) (result *MemoryStore, err error) {
+	defer func() { err = cacheError(ErrorConfiguration, err) }()
 	if limits.MaxEntries <= 0 || limits.MaxBytes == 0 {
 		return nil, fmt.Errorf("package cache limits require positive MaxEntries and MaxBytes")
 	}
@@ -81,7 +82,8 @@ func NewMemoryStore(limits Limits) (*MemoryStore, error) {
 
 // Put copies one valid record into the store and evicts least-recently-used records as needed.
 // An oversized record is rejected without disturbing an existing record under the same key.
-func (store *MemoryStore) Put(record Record) error {
+func (store *MemoryStore) Put(record Record) (err error) {
+	defer func() { err = cacheError(ErrorRecord, err) }()
 	size, err := validateRecord(record)
 	if err != nil {
 		return err

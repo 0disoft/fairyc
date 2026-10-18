@@ -17,7 +17,8 @@ func ClassifyWindowsNativeOutcome(outcome WindowsHostOutcome) (NativeOutcome, er
 	return classifyNativeOutcome("Windows workspace", outcome.ExitCode, outcome.Stdout, outcome.Stderr, outcome.TrapControl)
 }
 
-func resolveWindowsNative(name string) (NativeToolchain, error) {
+func resolveWindowsNative(name string) (result NativeToolchain, err error) {
+	defer func() { err = driverError(ErrorToolchain, "resolveWindowsNative", err) }()
 	if name != "" {
 		return nil, fmt.Errorf("Windows native target does not accept --cc")
 	}
@@ -28,7 +29,8 @@ func resolveWindowsNative(name string) (NativeToolchain, error) {
 	return windowsNativeToolchain{toolchain: toolchain}, nil
 }
 
-func (toolchain windowsNativeToolchain) Build(options NativeBuildOptions) (NativeArtifact, error) {
+func (toolchain windowsNativeToolchain) Build(options NativeBuildOptions) (result NativeArtifact, err error) {
+	defer func() { err = driverError(ErrorBuild, "Build", err) }()
 	artifact, err := BuildWindowsMSVCTargetCached(toolchain.toolchain, options.Profile, options.UnitSource, options.RuntimeSource)
 	if err != nil {
 		return NativeArtifact{}, err
@@ -45,7 +47,8 @@ func (toolchain windowsNativeToolchain) Build(options NativeBuildOptions) (Nativ
 	}, TrapControl: options.TrapControl}, nil
 }
 
-func (toolchain windowsNativeToolchain) Execute(artifact NativeArtifact, options NativeExecutionOptions) (NativeOutcome, error) {
+func (toolchain windowsNativeToolchain) Execute(artifact NativeArtifact, options NativeExecutionOptions) (result NativeOutcome, err error) {
+	defer func() { err = driverError(ErrorExecution, "Execute", err) }()
 	if err := validateNativeArtifact(artifact, target.X8664WindowsMSVC); err != nil {
 		return NativeOutcome{}, err
 	}

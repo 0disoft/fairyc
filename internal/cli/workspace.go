@@ -45,7 +45,7 @@ func checkWorkspace(sourceRoot string, locked, stable bool, successLabel string,
 	}
 	result, err := workspacecompiler.Check(workspace)
 	if err != nil {
-		return internalError(stderr)
+		return pipelineFailure(stderr, err)
 	}
 	if len(result.Semantic.Diagnostics) != 0 {
 		if err := writeWorkspaceDiagnostics(stderr, workspace, result.Semantic.Diagnostics); err != nil {

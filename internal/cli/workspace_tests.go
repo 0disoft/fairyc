@@ -210,7 +210,7 @@ func runLoadedStableTest(workspace workspaceloader.Workspace, lockState string, 
 				workspaceCompilePolicy{stableDiagnostics: true}, stderr, "semantic test", failure.Cause,
 			)
 		}
-		return internalError(stderr)
+		return pipelineFailure(stderr, pipelineErr)
 	}
 	if !checked.Verified {
 		return internalError(stderr)

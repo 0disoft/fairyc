@@ -52,6 +52,7 @@ const (
 
 // LoadError provides stable internal failure categories without freezing public diagnostics.
 type LoadError struct {
+	Cause              error
 	Reason             string
 	Path               string
 	Detail             string
@@ -59,6 +60,8 @@ type LoadError struct {
 	Diagnostics        []diagnostic.Diagnostic
 	AbsoluteSourcePath string
 }
+
+func (e *LoadError) Unwrap() error { return e.Cause }
 
 func (e *LoadError) Error() string {
 	if e.Path == "" {
@@ -177,7 +180,7 @@ func loadWorkspaceOverlays(root string, vectorCandidate bool, overlays map[strin
 		uidPaths[manifest.Package.UID] = packagePath
 		sourceRoot, err := resolveDirectory(directory, manifest.Package.Source)
 		if err != nil {
-			return Workspace{}, &LoadError{Reason: ReasonSourceRoot, Path: packagePath + "/" + manifest.Package.Source, Detail: err.Error()}
+			return Workspace{}, &LoadError{Reason: ReasonSourceRoot, Path: packagePath + "/" + manifest.Package.Source, Cause: err, Detail: err.Error()}
 		}
 		loaded, err := loadPackageOverlays(packagePath, directory, sourceRoot, manifest, &budget, overlays)
 		if err != nil {
@@ -196,7 +199,7 @@ func loadWorkspaceOverlays(root string, vectorCandidate bool, overlays map[strin
 	}
 	resolution, rejection, err := packagegraph.Resolve(graph)
 	if err != nil {
-		return Workspace{}, &LoadError{Reason: ReasonPackageGraph, Detail: err.Error()}
+		return Workspace{}, &LoadError{Reason: ReasonPackageGraph, Cause: err, Detail: err.Error()}
 	}
 	if rejection != nil {
 		return Workspace{}, &LoadError{Reason: ReasonPackageGraph, Detail: fmt.Sprintf("%s: %v", rejection.Reason, rejection.Subjects)}
@@ -207,11 +210,11 @@ func loadWorkspaceOverlays(root string, vectorCandidate bool, overlays map[strin
 func resolveRoot(root string) (string, error) {
 	absolute, err := filepath.Abs(root)
 	if err != nil {
-		return "", &LoadError{Reason: ReasonRoot, Detail: err.Error()}
+		return "", &LoadError{Reason: ReasonRoot, Cause: err, Detail: err.Error()}
 	}
 	info, err := os.Lstat(absolute)
 	if err != nil {
-		return "", &LoadError{Reason: ReasonRoot, Path: absolute, Detail: err.Error()}
+		return "", &LoadError{Reason: ReasonRoot, Path: absolute, Cause: err, Detail: err.Error()}
 	}
 	if info.Mode()&os.ModeSymlink != 0 {
 		return "", &LoadError{Reason: ReasonSymlink, Path: absolute, Detail: "workspace root cannot be a symlink"}
@@ -226,11 +229,11 @@ func readManifest(directory, packagePath string) (projectmanifest.Manifest, erro
 	path := filepath.Join(directory, projectmanifest.FileName)
 	contents, err := readBoundedRegularFile(path, projectmanifest.MaxBytes)
 	if err != nil {
-		return projectmanifest.Manifest{}, &LoadError{Reason: ReasonManifest, Path: packagePath + "/" + projectmanifest.FileName, Detail: err.Error()}
+		return projectmanifest.Manifest{}, &LoadError{Reason: ReasonManifest, Path: packagePath + "/" + projectmanifest.FileName, Cause: err, Detail: err.Error()}
 	}
 	manifest, err := projectmanifest.Parse(contents)
 	if err != nil {
-		return projectmanifest.Manifest{}, &LoadError{Reason: ReasonManifest, Path: packagePath + "/" + projectmanifest.FileName, Detail: err.Error()}
+		return projectmanifest.Manifest{}, &LoadError{Reason: ReasonManifest, Path: packagePath + "/" + projectmanifest.FileName, Cause: err, Detail: err.Error()}
 	}
 	return manifest, nil
 }
@@ -240,7 +243,7 @@ func resolveDirectory(base, relative string) (string, error) {
 	for _, segment := range strings.Split(relative, "/") {
 		entries, err := os.ReadDir(current)
 		if err != nil {
-			return "", &LoadError{Reason: ReasonPath, Path: relative, Detail: err.Error()}
+			return "", &LoadError{Reason: ReasonPath, Path: relative, Cause: err, Detail: err.Error()}
 		}
 		folded := make([]string, 0, 1)
 		for _, entry := range entries {
@@ -254,7 +257,7 @@ func resolveDirectory(base, relative string) (string, error) {
 		current = filepath.Join(current, segment)
 		info, err := os.Lstat(current)
 		if err != nil {
-			return "", &LoadError{Reason: ReasonPath, Path: relative, Detail: err.Error()}
+			return "", &LoadError{Reason: ReasonPath, Path: relative, Cause: err, Detail: err.Error()}
 		}
 		if info.Mode()&os.ModeSymlink != 0 {
 			return "", &LoadError{Reason: ReasonSymlink, Path: relative, Detail: "directory path contains a symlink"}
@@ -362,7 +365,7 @@ func loadPackageOverlays(packagePath, directory, sourceRoot string, manifest pro
 			err = fmt.Errorf("overlay exceeds source byte limit")
 		}
 		if err != nil {
-			return Package{}, &LoadError{Reason: ReasonSourceRoot, Path: portablePath(packagePath, sourceRoot, absolute), Detail: err.Error()}
+			return Package{}, &LoadError{Reason: ReasonSourceRoot, Path: portablePath(packagePath, sourceRoot, absolute), Cause: err, Detail: err.Error()}
 		}
 		budget.bytes += int64(len(contents))
 		if budget.bytes > MaxSourceBytes {
@@ -370,7 +373,7 @@ func loadPackageOverlays(packagePath, directory, sourceRoot string, manifest pro
 		}
 		analysis, err := frontend.AnalyzeSyntax(source.NewFile(relative, contents), source.DefaultLimits())
 		if err != nil {
-			return Package{}, &LoadError{Reason: ReasonSourceSyntax, Path: portablePath(packagePath, sourceRoot, absolute), Detail: err.Error()}
+			return Package{}, &LoadError{Reason: ReasonSourceSyntax, Path: portablePath(packagePath, sourceRoot, absolute), Cause: err, Detail: err.Error()}
 		}
 		if analysis.AST == nil || len(analysis.Tree.Diagnostics) != 0 {
 			return Package{}, &LoadError{
@@ -394,7 +397,7 @@ func loadPackageOverlays(packagePath, directory, sourceRoot string, manifest pro
 	slices.SortFunc(modules, func(left, right packagegraph.Module) int { return strings.Compare(left.Path, right.Path) })
 	digest, err := packagecontent.Compute(digestFiles)
 	if err != nil {
-		return Package{}, &LoadError{Reason: ReasonSourceRoot, Path: packagePath, Detail: err.Error()}
+		return Package{}, &LoadError{Reason: ReasonSourceRoot, Path: packagePath, Cause: err, Detail: err.Error()}
 	}
 	return Package{Path: packagePath, Directory: directory, SourceRoot: sourceRoot, Manifest: manifest, Sources: sources, Modules: modules, Digest: digest, SourceKind: SourceKindLocal}, nil
 }
@@ -427,7 +430,7 @@ func injectStandardLibrary(packages []Package, graph packagegraph.Graph, instanc
 	}
 	definition, err := loadSDK()
 	if err != nil {
-		return nil, packagegraph.Graph{}, nil, &LoadError{Reason: ReasonStandardLibrary, Detail: err.Error()}
+		return nil, packagegraph.Graph{}, nil, &LoadError{Reason: ReasonStandardLibrary, Cause: err, Detail: err.Error()}
 	}
 	manifest := projectmanifest.Manifest{Schema: projectmanifest.SchemaVersion, Package: projectmanifest.Package{UID: sdkstdlib.PackageUID, Name: sdkstdlib.PackageName, Version: sdkstdlib.Version, Language: sdkstdlib.LanguageRevision, Source: "src"}}
 	sources := make([]SourceFile, len(definition.Sources))
@@ -604,5 +607,5 @@ func normalizeLoadError(reason, path string, err error) error {
 	if _, ok := err.(*LoadError); ok {
 		return err
 	}
-	return &LoadError{Reason: reason, Path: path, Detail: err.Error()}
+	return &LoadError{Reason: reason, Path: path, Cause: err, Detail: err.Error()}
 }

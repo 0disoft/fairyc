@@ -337,7 +337,7 @@ func lowerLoadedWorkspaceExecutable(workspace workspaceloader.Workspace, lockSta
 		if errors.As(pipelineErr, &failure) && failure.Stage == compiler.StageMIRLower {
 			return loweredWorkspace{}, workspaceSubsetCapabilityError(policy, stderr, subset, failure.Cause)
 		}
-		return loweredWorkspace{}, internalError(stderr)
+		return loweredWorkspace{}, pipelineFailure(stderr, pipelineErr)
 	}
 	if !checked.Verified {
 		return loweredWorkspace{}, internalError(stderr)

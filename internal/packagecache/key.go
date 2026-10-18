@@ -73,7 +73,8 @@ func (key *Key) UnmarshalText(text []byte) error {
 }
 
 // ParseKey accepts only the complete lowercase v4 representation.
-func ParseKey(value string) (Key, error) {
+func ParseKey(value string) (_ Key, err error) {
+	defer func() { err = cacheError(ErrorKey, err) }()
 	var result Key
 	if !strings.HasPrefix(value, KeyPrefix) {
 		return result, fmt.Errorf("package cache key has invalid prefix")
@@ -100,7 +101,8 @@ func Compute(inputs Inputs) (Key, error) {
 }
 
 // Encode returns the versioned, platform-independent cache-key bytes.
-func Encode(inputs Inputs) ([]byte, error) {
+func Encode(inputs Inputs) (result []byte, err error) {
+	defer func() { err = cacheError(ErrorKey, err) }()
 	if err := validateInputs(inputs); err != nil {
 		return nil, err
 	}

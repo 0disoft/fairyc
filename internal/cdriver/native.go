@@ -101,7 +101,8 @@ type NativeOutcome struct {
 	Stdout, Stderr, TrapCategory string
 }
 
-func ResolveNativeToolchain(id target.ID, compiler string) (NativeToolchain, error) {
+func ResolveNativeToolchain(id target.ID, compiler string) (result NativeToolchain, err error) {
+	defer func() { err = driverError(ErrorToolchain, "ResolveNativeToolchain", err) }()
 	adapter, found := nativeAdapters[id]
 	if !found {
 		return nil, fmt.Errorf("unsupported native target %q", id)

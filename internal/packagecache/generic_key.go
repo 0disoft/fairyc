@@ -33,7 +33,8 @@ type GenericInputs struct {
 	Specializations  []genericplan.SpecializationID
 }
 
-func ComputeGeneric(inputs GenericInputs) (GenericKey, error) {
+func ComputeGeneric(inputs GenericInputs) (result GenericKey, err error) {
+	defer func() { err = cacheError(ErrorKey, err) }()
 	base, err := Encode(inputs.Base)
 	if err != nil {
 		return GenericKey{}, err

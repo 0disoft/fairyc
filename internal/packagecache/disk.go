@@ -97,7 +97,8 @@ func NewDiskStore(root string, limits DiskLimits) (*DiskStore, error) {
 
 // NewNamespacedDiskStore isolates records while sharing retention bounds with
 // the ordinary, generic-v0 and storage-transfer-v0 stores beneath root.
-func NewNamespacedDiskStore(root, namespace string, limits DiskLimits) (*DiskStore, error) {
+func NewNamespacedDiskStore(root, namespace string, limits DiskLimits) (result *DiskStore, err error) {
+	defer func() { err = cacheError(ErrorIO, err) }()
 	if err := validateDiskStoreInputs(root, limits); err != nil {
 		return nil, err
 	}
@@ -125,7 +126,8 @@ func NewDiskStoreInRoot(boundary *os.Root, root string, limits DiskLimits) (*Dis
 
 // NewNamespacedDiskStoreInRoot retains the caller's filesystem boundary for
 // both namespace-local access and collection across the supported namespaces.
-func NewNamespacedDiskStoreInRoot(boundary *os.Root, root, namespace string, limits DiskLimits) (*DiskStore, error) {
+func NewNamespacedDiskStoreInRoot(boundary *os.Root, root, namespace string, limits DiskLimits) (result *DiskStore, err error) {
+	defer func() { err = cacheError(ErrorIO, err) }()
 	if boundary == nil {
 		return nil, fmt.Errorf("package cache filesystem boundary must be initialized")
 	}
@@ -165,7 +167,8 @@ func NewNamespacedDiskStoreInRoot(boundary *os.Root, root, namespace string, lim
 	return store, nil
 }
 
-func validateDiskStoreInputs(root string, limits DiskLimits) error {
+func validateDiskStoreInputs(root string, limits DiskLimits) (err error) {
+	defer func() { err = cacheError(ErrorConfiguration, err) }()
 	if root == "" {
 		return fmt.Errorf("package cache disk root must be nonempty")
 	}
@@ -190,7 +193,8 @@ func (store *DiskStore) Close() error {
 // file through the host contract, and runs bounded collection. An oversized record cannot disturb
 // an existing generation. Durability failure is a cache-store failure even if a verifiable file
 // became visible; callers must never treat cache retention as source truth.
-func (store *DiskStore) Put(record Record) error {
+func (store *DiskStore) Put(record Record) (err error) {
+	defer func() { err = cacheError(ErrorIO, err) }()
 	return store.put(record, diskPutHooks{})
 }
 
@@ -337,7 +341,8 @@ func (store *DiskStore) DeleteIfMatch(expected Record) bool {
 
 // Sweep removes expired temporary files and oldest immutable generations until both caller bounds
 // hold. Creation/modification time is only an eviction hint; cache correctness never depends on it.
-func (store *DiskStore) Sweep() error {
+func (store *DiskStore) Sweep() (err error) {
+	defer func() { err = cacheError(ErrorIO, err) }()
 	if store == nil {
 		return fmt.Errorf("package cache disk store is not initialized")
 	}
@@ -378,7 +383,8 @@ func (store *DiskStore) Sweep() error {
 }
 
 // Stats scans retained state so other-process writes are visible, then adds local counters.
-func (store *DiskStore) Stats() (DiskStats, error) {
+func (store *DiskStore) Stats() (result DiskStats, err error) {
+	defer func() { err = cacheError(ErrorIO, err) }()
 	if store == nil {
 		return DiskStats{}, fmt.Errorf("package cache disk store is not initialized")
 	}
@@ -454,7 +460,8 @@ func readCacheDirectory(root *os.Root, name string) ([]os.DirEntry, error) {
 	return entries, nil
 }
 
-func encodeDiskRecord(record Record, maxBytes uint64) ([]byte, error) {
+func encodeDiskRecord(record Record, maxBytes uint64) (result []byte, err error) {
+	defer func() { err = cacheError(ErrorRecord, err) }()
 	if maxBytes == 0 {
 		return nil, fmt.Errorf("package cache disk record byte limit must be positive")
 	}

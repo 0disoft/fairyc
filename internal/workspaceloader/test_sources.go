@@ -35,7 +35,7 @@ func WithRootTests(workspace Workspace) (Workspace, error) {
 func WithWorkspaceTests(workspace Workspace) (Workspace, error) {
 	packagePaths, err := workspace.RootReachableLocalPackagePaths()
 	if err != nil {
-		return Workspace{}, &LoadError{Reason: ReasonTestSourceRoot, Detail: err.Error()}
+		return Workspace{}, &LoadError{Reason: ReasonTestSourceRoot, Cause: err, Detail: err.Error()}
 	}
 	withTests := workspace
 	for _, packagePath := range packagePaths {
@@ -126,7 +126,7 @@ func WithPackageTests(workspace Workspace, packagePath string) (Workspace, error
 	}
 	resolution, rejection, err := packagegraph.Resolve(graph)
 	if err != nil {
-		return Workspace{}, &LoadError{Reason: ReasonPackageGraph, Detail: err.Error()}
+		return Workspace{}, &LoadError{Reason: ReasonPackageGraph, Cause: err, Detail: err.Error()}
 	}
 	if rejection != nil {
 		return Workspace{}, &LoadError{Reason: ReasonPackageGraph, Detail: fmt.Sprintf("%s: %v", rejection.Reason, rejection.Subjects)}
@@ -139,7 +139,7 @@ func WithPackageTests(workspace Workspace, packagePath string) (Workspace, error
 func optionalExactDirectory(parent, name string) (string, bool, error) {
 	entries, err := os.ReadDir(parent)
 	if err != nil {
-		return "", false, &LoadError{Reason: ReasonTestSourceRoot, Path: name, Detail: err.Error()}
+		return "", false, &LoadError{Reason: ReasonTestSourceRoot, Path: name, Cause: err, Detail: err.Error()}
 	}
 	var matches []string
 	for _, entry := range entries {
@@ -156,7 +156,7 @@ func optionalExactDirectory(parent, name string) (string, bool, error) {
 	absolute := filepath.Join(parent, name)
 	info, err := os.Lstat(absolute)
 	if err != nil {
-		return "", false, &LoadError{Reason: ReasonTestSourceRoot, Path: name, Detail: err.Error()}
+		return "", false, &LoadError{Reason: ReasonTestSourceRoot, Path: name, Cause: err, Detail: err.Error()}
 	}
 	if info.Mode()&os.ModeSymlink != 0 {
 		return "", false, &LoadError{Reason: ReasonSymlink, Path: name, Detail: "test source root cannot be a symlink"}
@@ -213,7 +213,7 @@ func loadTestSources(testRoot string, budget *limits) ([]SourceFile, []packagegr
 		absolute := filepath.Join(testRoot, filepath.FromSlash(relative))
 		contents, err := readBoundedRegularFile(absolute, source.DefaultLimits().MaxBytes)
 		if err != nil {
-			return nil, nil, &LoadError{Reason: ReasonTestSourceRoot, Path: virtualPath, Detail: err.Error()}
+			return nil, nil, &LoadError{Reason: ReasonTestSourceRoot, Path: virtualPath, Cause: err, Detail: err.Error()}
 		}
 		budget.bytes += int64(len(contents))
 		if budget.bytes > MaxSourceBytes {
@@ -221,7 +221,7 @@ func loadTestSources(testRoot string, budget *limits) ([]SourceFile, []packagegr
 		}
 		analysis, err := frontend.AnalyzeSyntax(source.NewFile(virtualPath, contents), source.DefaultLimits())
 		if err != nil {
-			return nil, nil, &LoadError{Reason: ReasonSourceSyntax, Path: virtualPath, Detail: err.Error()}
+			return nil, nil, &LoadError{Reason: ReasonSourceSyntax, Path: virtualPath, Cause: err, Detail: err.Error()}
 		}
 		if analysis.AST == nil || len(analysis.Tree.Diagnostics) != 0 {
 			return nil, nil, &LoadError{
@@ -271,7 +271,7 @@ func appendTestSources(loaded *Package, testSources []SourceFile, testModules []
 	}
 	digest, err := packagecontent.Compute(digestFiles)
 	if err != nil {
-		return &LoadError{Reason: ReasonTestSourceRoot, Path: TestSourceDirectory, Detail: err.Error()}
+		return &LoadError{Reason: ReasonTestSourceRoot, Path: TestSourceDirectory, Cause: err, Detail: err.Error()}
 	}
 	loaded.Digest = digest
 	return nil
