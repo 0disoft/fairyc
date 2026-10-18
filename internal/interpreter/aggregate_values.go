@@ -23,11 +23,21 @@ func enumValue(definition *mir.EnumType, variantName string, fieldNames []string
 	}
 	state := &enumState{definition: definition, variant: variantName, fields: make([]runtimeValue, len(values))}
 	for index, field := range variant.Fields {
-		// MIR verification already fixes declaration order; defend this private boundary too.
-		if field.Name == "" || fieldNames[index] != field.Name {
-			return runtimeValue{}, fmt.Errorf("enum %q variant %q has mismatched field order", definition.Type, variantName)
+		// Enum MIR preserves written initializer order. Store the already evaluated
+		// values in declaration slots without changing their evaluation order.
+		source := -1
+		for position, name := range fieldNames {
+			if name == field.Name {
+				if source >= 0 {
+					return runtimeValue{}, fmt.Errorf("enum %q variant %q has duplicate field %q", definition.Type, variantName, name)
+				}
+				source = position
+			}
 		}
-		state.fields[index] = values[index].cloneForValueCopy()
+		if field.Name == "" || source < 0 {
+			return runtimeValue{}, fmt.Errorf("enum %q variant %q has mismatched fields", definition.Type, variantName)
+		}
+		state.fields[index] = values[source].cloneForValueCopy()
 	}
 	return runtimeValue{kind: valueEnum, typ: definition.Type, payload: state}, nil
 }
