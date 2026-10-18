@@ -13,12 +13,14 @@ import (
 
 // NativeTarget describes command-facing conventions without discovering a local compiler.
 type NativeTarget struct {
-	ID               target.ID
-	Platform         string
-	ExecutableSuffix string
-	Compilers        []string
-	ResultLabel      string
-	RunInWorkspace   bool
+	ID                        target.ID
+	Platform                  string
+	ExecutableSuffix          string
+	Compilers                 []string
+	ResultLabel               string
+	RunInWorkspace            bool
+	EmissionLabel             string
+	ForbiddenExecutableSuffix string
 }
 
 type nativeAdapter struct {
@@ -28,11 +30,11 @@ type nativeAdapter struct {
 
 var nativeAdapters = map[target.ID]nativeAdapter{
 	target.X8664WindowsMSVC: {
-		description: NativeTarget{ID: target.X8664WindowsMSVC, Platform: "Windows", ExecutableSuffix: ".exe", ResultLabel: "result"},
+		description: NativeTarget{ID: target.X8664WindowsMSVC, Platform: "Windows", ExecutableSuffix: ".exe", ResultLabel: "result", EmissionLabel: "Windows target"},
 		resolve:     resolveWindowsNative,
 	},
 	target.X8664LinuxGNU: {
-		description: NativeTarget{ID: target.X8664LinuxGNU, Platform: "Linux", Compilers: []string{"gcc", "clang"}, ResultLabel: "status", RunInWorkspace: true},
+		description: NativeTarget{ID: target.X8664LinuxGNU, Platform: "Linux", Compilers: []string{"gcc", "clang"}, ResultLabel: "status", RunInWorkspace: true, EmissionLabel: "Linux workspace", ForbiddenExecutableSuffix: ".exe"},
 		resolve:     resolveLinuxNative,
 	},
 }
@@ -42,6 +44,15 @@ func LookupNativeTarget(id target.ID) (NativeTarget, bool) {
 	description := adapter.description
 	description.Compilers = slices.Clone(description.Compilers)
 	return description, found
+}
+
+func NativeCompilerSupported(name string) bool {
+	for _, adapter := range nativeAdapters {
+		if slices.Contains(adapter.description.Compilers, name) {
+			return true
+		}
+	}
+	return false
 }
 
 func HostNativeTarget() (target.ID, error) {
@@ -82,6 +93,7 @@ type NativeExecutionOptions struct {
 	Arguments        []string
 	WorkingDirectory string
 	Timeout          time.Duration
+	RejectOutput     bool
 }
 
 type NativeOutcome struct {
@@ -117,6 +129,17 @@ func classifyNativeOutcome(label string, exit int32, stdout, stderr, receipt str
 		return NativeOutcome{}, fmt.Errorf("%s executable produced invalid trap control data", label)
 	}
 	outcome.TrapCategory, _ = NativeTrapCategory(code)
+	return outcome, nil
+}
+
+func finishNativeOutcome(label string, exit int32, stdout, stderr, receipt string, options NativeExecutionOptions) (NativeOutcome, error) {
+	outcome, err := classifyNativeOutcome(label, exit, stdout, stderr, receipt)
+	if err != nil {
+		return NativeOutcome{}, err
+	}
+	if options.RejectOutput && (stdout != "" || stderr != "") {
+		return NativeOutcome{}, fmt.Errorf("%s executable produced unexpected output", label)
+	}
 	return outcome, nil
 }
 

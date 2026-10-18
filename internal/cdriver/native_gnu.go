@@ -56,5 +56,5 @@ func (toolchain linuxNativeToolchain) Execute(artifact NativeArtifact, options N
 	if outcome.TrapCategory != 0 {
 		receipt = string([]byte{outcome.TrapCategory})
 	}
-	return classifyNativeOutcome("Linux", outcome.ExitCode, outcome.Stdout, outcome.Stderr, receipt)
+	return finishNativeOutcome("Linux workspace", outcome.ExitCode, outcome.Stdout, outcome.Stderr, receipt, options)
 }

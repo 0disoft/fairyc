@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io"
 	"path"
-	"runtime"
 	"strings"
 
 	"github.com/0disoft/fairyc/internal/cdriver"
@@ -30,8 +29,8 @@ type stableNativeOptions struct {
 	release bool
 }
 
-type compiledWorkspace struct {
-	artifact        cdriver.WindowsHostArtifact
+type compiledNativeWorkspace struct {
+	nativeCompilation
 	lockState       string
 	rootPackageName string
 }
@@ -54,38 +53,38 @@ func runStableBuild(arguments []string, sourceRoot string, stdout, stderr io.Wri
 	if err != nil {
 		return invocationError(stderr, err.Error())
 	}
-	profile := cdriver.LowProfile
-	profileName := "development"
-	if options.release {
-		profile = cdriver.OptimizedProfile
-		profileName = "release"
+	native, err := stableNativeTargetOptions(options)
+	if err != nil {
+		return buildFailure(stderr, err)
 	}
-	if runtime.GOOS == "linux" {
-		return runStableLinuxBuild(sourceRoot, options, profile, profileName, stdout, stderr)
-	}
-	compiled, code := compileWindowsWorkspace(sourceRoot, workspaceTargetOptions{
-		targetID: target.X8664WindowsMSVC,
-		profile:  profile,
-		locked:   options.locked,
-	}, workspaceCompilePolicy{stableDiagnostics: true}, stderr)
+	compiled, code := compileWorkspace(sourceRoot, native, workspaceCompilePolicy{stableDiagnostics: true}, stderr)
 	if code != ExitSuccess {
 		return code
 	}
-	output := path.Join("build", compiled.rootPackageName+".exe")
+	output := path.Join("build", compiled.rootPackageName+compiled.target.ExecutableSuffix)
 	if err := replaceBuildArtifact(sourceRoot, output, compiled.artifact.Bytes); err != nil {
 		return buildFailure(stderr, err)
 	}
-	if _, err := fmt.Fprintf(
-		stdout,
-		"built: %s (%s, %s, lock %s)\n",
-		output,
-		target.X8664WindowsMSVC,
-		profileName,
-		compiled.lockState,
-	); err != nil {
+	profileName := "development"
+	if options.release {
+		profileName = "release"
+	}
+	if _, err := fmt.Fprintf(stdout, "built: %s (%s, %s, lock %s)\n", output, native.targetID, profileName, compiled.lockState); err != nil {
 		return outputError(stderr)
 	}
 	return ExitSuccess
+}
+
+func stableNativeTargetOptions(options stableNativeOptions) (workspaceTargetOptions, error) {
+	id, err := cdriver.HostNativeTarget()
+	if err != nil {
+		return workspaceTargetOptions{}, err
+	}
+	profile := cdriver.LowProfile
+	if options.release {
+		profile = cdriver.OptimizedProfile
+	}
+	return workspaceTargetOptions{targetID: id, profile: profile, locked: options.locked}, nil
 }
 
 func runStableRun(arguments []string, sourceRoot string, stdin io.Reader, stdout, stderr io.Writer) int {
@@ -97,36 +96,30 @@ func runStableRun(arguments []string, sourceRoot string, stdin io.Reader, stdout
 	if err != nil {
 		return invocationError(stderr, err.Error())
 	}
-	profile := cdriver.LowProfile
-	if options.release {
-		profile = cdriver.OptimizedProfile
+	native, err := stableNativeTargetOptions(options)
+	if err != nil {
+		return buildFailure(stderr, err)
 	}
-	if runtime.GOOS == "linux" {
-		return runStableLinuxRun(sourceRoot, options, profile, programArguments, stdin, stdout, stderr)
-	}
-	compiled, code := compileWindowsWorkspace(sourceRoot, workspaceTargetOptions{
-		targetID: target.X8664WindowsMSVC,
-		profile:  profile,
-		locked:   options.locked,
-	}, workspaceCompilePolicy{stableDiagnostics: true, runTrapReceipt: true}, stderr)
+	compiled, code := compileWorkspace(sourceRoot, native, workspaceCompilePolicy{stableDiagnostics: true, runTrapReceipt: true}, stderr)
 	if code != ExitSuccess {
 		return code
 	}
-	outcome, err := cdriver.ExecuteWindowsMSVCTargetWithInputAndArgs(compiled.artifact, stdin, programArguments)
+	execution := cdriver.NativeExecutionOptions{Input: stdin, Arguments: programArguments}
+	if compiled.target.RunInWorkspace {
+		execution.WorkingDirectory = sourceRoot
+	}
+	outcome, err := compiled.toolchain.Execute(compiled.artifact, execution)
 	if err != nil {
 		return buildFailure(stderr, err)
 	}
-	programStderr, category, err := classifyStableRunOutcome(outcome)
-	if err != nil {
-		return buildFailure(stderr, err)
-	}
-	if category != "" {
-		programStderr += fmt.Sprintf("trap: %s\n", category)
+	programStderr := outcome.Stderr
+	if outcome.TrapCategory != "" {
+		programStderr += fmt.Sprintf("trap: %s\n", outcome.TrapCategory)
 	}
 	if code := forwardProgramOutput(outcome.Stdout, programStderr, stdout, stderr); code != ExitSuccess {
 		return code
 	}
-	if category != "" {
+	if outcome.TrapCategory != "" {
 		return ExitProgramTrap
 	}
 	return int(uint32(outcome.ExitCode))
@@ -186,37 +179,16 @@ func runWorkspaceBuild(arguments []string, sourceRoot string, stdout, stderr io.
 	if err != nil {
 		return invocationError(stderr, err.Error())
 	}
-	if options.targetID == target.X8664LinuxGNU {
-		artifact, lockState, code := compileLinuxWorkspace(sourceRoot, options, false, stderr)
-		if code != ExitSuccess {
-			return code
-		}
-		if err := writeBuildArtifact(sourceRoot, options.output, artifact.Bytes); err != nil {
-			return buildFailure(stderr, err)
-		}
-		if _, err := fmt.Fprintf(stdout, "built workspace: %s (%s, %s %s, %s, lock %s)\n",
-			options.output, options.targetID, artifact.Toolchain.Name, artifact.Toolchain.Version,
-			artifact.Profile.Name, lockState); err != nil {
-			return outputError(stderr)
-		}
-		return ExitSuccess
-	}
-	compiled, code := compileWindowsWorkspace(sourceRoot, options, workspaceCompilePolicy{}, stderr)
+	compiled, code := compileWorkspace(sourceRoot, options, workspaceCompilePolicy{}, stderr)
 	if code != ExitSuccess {
 		return code
 	}
 	if err := writeBuildArtifact(sourceRoot, options.output, compiled.artifact.Bytes); err != nil {
 		return buildFailure(stderr, err)
 	}
-	if _, err := fmt.Fprintf(
-		stdout,
-		"built workspace: %s (%s, msvc %s, %s, lock %s)\n",
-		options.output,
-		options.targetID,
-		compiled.artifact.Toolchain.Version,
-		compiled.artifact.Profile.Name,
-		compiled.lockState,
-	); err != nil {
+	if _, err := fmt.Fprintf(stdout, "built workspace: %s (%s, %s %s, %s, lock %s)\n",
+		options.output, options.targetID, compiled.artifact.Toolchain.Name, compiled.artifact.Toolchain.Version,
+		compiled.artifact.Profile.Name, compiled.lockState); err != nil {
 		return outputError(stderr)
 	}
 	return ExitSuccess
@@ -227,36 +199,23 @@ func runWorkspaceTarget(arguments []string, sourceRoot string, stdout, stderr io
 	if err != nil {
 		return invocationError(stderr, err.Error())
 	}
-	if options.targetID == target.X8664LinuxGNU {
-		return runLinuxWorkspaceTarget(sourceRoot, options, stdout, stderr)
-	}
-	compiled, code := compileWindowsWorkspace(sourceRoot, options, workspaceCompilePolicy{runTrapReceipt: true}, stderr)
+	compiled, code := compileWorkspace(sourceRoot, options, workspaceCompilePolicy{runTrapReceipt: true}, stderr)
 	if code != ExitSuccess {
 		return code
 	}
-	outcome, err := cdriver.ExecuteWindowsMSVCTarget(compiled.artifact)
+	outcome, err := compiled.toolchain.Execute(compiled.artifact, cdriver.NativeExecutionOptions{RejectOutput: true})
 	if err != nil {
 		return buildFailure(stderr, err)
 	}
-	result, category, err := classifyWorkspaceRunOutcome(outcome)
-	if err != nil {
-		return buildFailure(stderr, err)
-	}
-	if category != "" {
-		if _, err := fmt.Fprintf(stderr, "trap: %s\n", category); err != nil {
+	if outcome.TrapCategory != "" {
+		if _, err := fmt.Fprintf(stderr, "trap: %s\n", outcome.TrapCategory); err != nil {
 			return ExitInternalFailure
 		}
 		return ExitProgramTrap
 	}
-	if _, err := fmt.Fprintf(
-		stdout,
-		"native workspace result: %d (%s, msvc %s, %s, lock %s)\n",
-		result,
-		options.targetID,
-		compiled.artifact.Toolchain.Version,
-		compiled.artifact.Profile.Name,
-		compiled.lockState,
-	); err != nil {
+	if _, err := fmt.Fprintf(stdout, "native workspace %s: %d (%s, %s %s, %s, lock %s)\n",
+		compiled.target.ResultLabel, outcome.ExitCode, options.targetID, compiled.artifact.Toolchain.Name,
+		compiled.artifact.Toolchain.Version, compiled.artifact.Profile.Name, compiled.lockState); err != nil {
 		return outputError(stderr)
 	}
 	return ExitSuccess
@@ -282,8 +241,7 @@ func parseWorkspaceTargetOptions(command string, arguments []string, requireOutp
 		case "--locked":
 			options.locked = true
 		case "--target":
-			if target.ID(value) != target.X8664WindowsMSVC &&
-				!((command == "build-workspace" || command == "run-workspace") && target.ID(value) == target.X8664LinuxGNU) {
+			if _, found := cdriver.LookupNativeTarget(target.ID(value)); !found {
 				return fmt.Errorf("experimental %s currently requires --target %s", command, target.X8664WindowsMSVC)
 			}
 			options.targetID = target.ID(value)
@@ -303,7 +261,7 @@ func parseWorkspaceTargetOptions(command string, arguments []string, requireOutp
 			}
 			options.output = normalized
 		case "--cc":
-			if value != "gcc" && value != "clang" {
+			if !cdriver.NativeCompilerSupported(value) {
 				return fmt.Errorf("experimental %s requires --cc gcc or --cc clang", command)
 			}
 			options.compilerName = value
@@ -314,13 +272,15 @@ func parseWorkspaceTargetOptions(command string, arguments []string, requireOutp
 		return workspaceTargetOptions{}, err
 	}
 
-	linux := options.targetID == target.X8664LinuxGNU
-	executable := strings.HasSuffix(strings.ToLower(options.output), ".exe")
+	native, _ := cdriver.LookupNativeTarget(options.targetID)
+	selectCompiler := len(native.Compilers) != 0
+	compilerFlags := "--cc " + strings.Join(native.Compilers, " or --cc ")
+	output := strings.ToLower(options.output)
 	if err := validateFlagRules(
-		flagRule{Invalid: linux && !seen["--cc"], Message: fmt.Sprintf("experimental %s with Linux target requires --cc gcc or --cc clang", command)},
-		flagRule{Invalid: linux && executable, Message: "experimental build-workspace Linux output must not end with .exe"},
-		flagRule{Invalid: !linux && seen["--cc"], Message: fmt.Sprintf("experimental %s Windows target does not accept --cc", command)},
-		flagRule{Invalid: !linux && requireOutput && !executable, Message: "experimental build-workspace Windows output must end with .exe"},
+		flagRule{Invalid: selectCompiler && !seen["--cc"], Message: fmt.Sprintf("experimental %s with %s target requires %s", command, native.Platform, compilerFlags)},
+		flagRule{Invalid: native.ForbiddenExecutableSuffix != "" && strings.HasSuffix(output, native.ForbiddenExecutableSuffix), Message: fmt.Sprintf("experimental build-workspace %s output must not end with %s", native.Platform, native.ForbiddenExecutableSuffix)},
+		flagRule{Invalid: !selectCompiler && seen["--cc"], Message: fmt.Sprintf("experimental %s %s target does not accept --cc", command, native.Platform)},
+		flagRule{Invalid: requireOutput && native.ExecutableSuffix != "" && !strings.HasSuffix(output, native.ExecutableSuffix), Message: fmt.Sprintf("experimental build-workspace %s output must end with %s", native.Platform, native.ExecutableSuffix)},
 	); err != nil {
 		return workspaceTargetOptions{}, err
 	}
@@ -328,18 +288,17 @@ func parseWorkspaceTargetOptions(command string, arguments []string, requireOutp
 	return options, nil
 }
 
-func compileWindowsWorkspace(sourceRoot string, options workspaceTargetOptions, policy workspaceCompilePolicy, stderr io.Writer) (compiledWorkspace, int) {
-	lowered, code := lowerWorkspaceExecutable(sourceRoot, options.locked, policy, "Windows workspace C-emission", stderr)
-	if code != ExitSuccess {
-		return compiledWorkspace{}, code
+func compileWorkspace(sourceRoot string, options workspaceTargetOptions, policy workspaceCompilePolicy, stderr io.Writer) (compiledNativeWorkspace, int) {
+	native, found := cdriver.LookupNativeTarget(options.targetID)
+	if !found {
+		return compiledNativeWorkspace{}, invocationError(stderr, fmt.Sprintf("unsupported native target %q", options.targetID))
 	}
-	artifact, code := compileWindowsProgramPolicy(lowered.program, lowered.entryName, options.targetID, options.profile, policy.runTrapReceipt, lowered.sdkStorage, stderr)
+	lowered, code := lowerWorkspaceExecutable(sourceRoot, options.locked, policy, native.Platform+" workspace C-emission", stderr)
 	if code != ExitSuccess {
-		return compiledWorkspace{}, code
+		return compiledNativeWorkspace{}, code
 	}
-	return compiledWorkspace{
-		artifact: artifact, lockState: lowered.lockState, rootPackageName: lowered.rootPackageName,
-	}, ExitSuccess
+	compiled, code := compileNativeProgram(lowered.program, lowered.entryName, options, policy, lowered.sdkStorage, stderr)
+	return compiledNativeWorkspace{nativeCompilation: compiled, lockState: lowered.lockState, rootPackageName: lowered.rootPackageName}, code
 }
 
 func lowerWorkspaceExecutable(sourceRoot string, locked bool, policy workspaceCompilePolicy, subset string, stderr io.Writer) (loweredWorkspace, int) {
@@ -418,44 +377,6 @@ func workspaceSubsetCapabilityError(policy workspaceCompilePolicy, stderr io.Wri
 		return ExitInternalFailure
 	}
 	return ExitInvalidInvocation
-}
-
-func classifyStableRunOutcome(outcome cdriver.WindowsHostOutcome) (string, string, error) {
-	category, trapped := windowsHostTrapCategory(outcome.ExitCode)
-	if !trapped {
-		if outcome.TrapControl != "" {
-			return "", "", fmt.Errorf("Windows workspace executable produced unexpected trap control data")
-		}
-		return outcome.Stderr, "", nil
-	}
-	trapCode := int(outcome.ExitCode) - productTrapExitBase
-	receipt := string([]byte{byte(trapCode)})
-	if outcome.TrapControl == "" {
-		return outcome.Stderr, "", nil
-	}
-	if outcome.TrapControl != receipt {
-		return "", "", fmt.Errorf("Windows workspace executable produced invalid trap control data")
-	}
-	return outcome.Stderr, category, nil
-}
-
-func classifyWorkspaceRunOutcome(outcome cdriver.WindowsHostOutcome) (int32, string, error) {
-	if outcome.Stdout != "" {
-		return 0, "", fmt.Errorf("Windows workspace executable produced unexpected output")
-	}
-	if outcome.Stderr == "" {
-		return outcome.ExitCode, "", nil
-	}
-	category, trapped := windowsHostTrapCategory(outcome.ExitCode)
-	if !trapped {
-		return 0, "", fmt.Errorf("Windows workspace executable produced unexpected output")
-	}
-	trapCode := int(outcome.ExitCode) - productTrapExitBase
-	expected := string([]byte{byte(trapCode)})
-	if outcome.Stderr != "" || outcome.TrapControl != expected {
-		return 0, "", fmt.Errorf("Windows workspace executable produced invalid trap control data")
-	}
-	return 0, category, nil
 }
 
 func workspaceEntryName(workspace workspaceloader.Workspace) (string, error) {

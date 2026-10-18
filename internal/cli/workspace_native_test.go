@@ -177,49 +177,6 @@ func TestStableBuildRejectsProgramDelimiter(t *testing.T) {
 	}
 }
 
-func TestClassifyStableRunOutcomeSeparatesProgramStreamsAndReservedResultFromTrap(t *testing.T) {
-	t.Parallel()
-	normalResult := int32(productTrapExitBase + 3)
-	programStderr, category, err := classifyStableRunOutcome(cdriver.WindowsHostOutcome{
-		ExitCode: normalResult,
-		Stdout:   "program stdout\n",
-		Stderr:   "program stderr\n",
-	})
-	if err != nil || programStderr != "program stderr\n" || category != "" {
-		t.Fatalf("normal reserved result = (%q, %q, %v)", programStderr, category, err)
-	}
-	programStderr, category, err = classifyStableRunOutcome(cdriver.WindowsHostOutcome{
-		ExitCode:    normalResult,
-		Stdout:      "program stdout\n",
-		Stderr:      "before trap\nfairyc-run-trap-v1:3",
-		TrapControl: string([]byte{3}),
-	})
-	if err != nil || programStderr != "before trap\nfairyc-run-trap-v1:3" || category != "division-by-zero" {
-		t.Fatalf("receipt trap = (%q, %q, %v)", programStderr, category, err)
-	}
-	for _, test := range []struct {
-		outcome cdriver.WindowsHostOutcome
-		stderr  string
-	}{
-		{outcome: cdriver.WindowsHostOutcome{ExitCode: normalResult, Stderr: "fairyc-run-trap-v1:3"}, stderr: "fairyc-run-trap-v1:3"},
-		{outcome: cdriver.WindowsHostOutcome{ExitCode: normalResult, Stderr: "ordinary\n"}, stderr: "ordinary\n"},
-	} {
-		programStderr, category, err := classifyStableRunOutcome(test.outcome)
-		if err != nil || programStderr != test.stderr || category != "" {
-			t.Errorf("classifyStableRunOutcome(%+v) = (%q, %q, %v)", test.outcome, programStderr, category, err)
-		}
-	}
-	for _, outcome := range []cdriver.WindowsHostOutcome{
-		{ExitCode: 42, TrapControl: string([]byte{3})},
-		{ExitCode: normalResult, TrapControl: string([]byte{2})},
-		{ExitCode: normalResult, TrapControl: string([]byte{3, 3})},
-	} {
-		if _, _, err := classifyStableRunOutcome(outcome); err == nil {
-			t.Errorf("classifyStableRunOutcome(%+v) accepted invalid control data", outcome)
-		}
-	}
-}
-
 func TestStableNativeCommandsPreserveWorkspaceFailureCategories(t *testing.T) {
 	t.Parallel()
 	for _, command := range []string{"build", "run"} {

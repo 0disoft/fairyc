@@ -11,6 +11,12 @@ import (
 
 type windowsNativeToolchain struct{ toolchain WindowsHostToolchain }
 
+// ClassifyWindowsNativeOutcome validates private receipts from low-level probes
+// using the same rules as NativeToolchain.Execute.
+func ClassifyWindowsNativeOutcome(outcome WindowsHostOutcome) (NativeOutcome, error) {
+	return classifyNativeOutcome("Windows workspace", outcome.ExitCode, outcome.Stdout, outcome.Stderr, outcome.TrapControl)
+}
+
 func resolveWindowsNative(name string) (NativeToolchain, error) {
 	if name != "" {
 		return nil, fmt.Errorf("Windows native target does not accept --cc")
@@ -66,5 +72,5 @@ func (toolchain windowsNativeToolchain) Execute(artifact NativeArtifact, options
 	if err != nil {
 		return NativeOutcome{}, err
 	}
-	return classifyNativeOutcome("Windows workspace", outcome.ExitCode, outcome.Stdout, outcome.Stderr, outcome.TrapControl)
+	return finishNativeOutcome("Windows workspace", outcome.ExitCode, outcome.Stdout, outcome.Stderr, outcome.TrapControl, options)
 }

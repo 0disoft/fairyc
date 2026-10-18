@@ -22,7 +22,7 @@ import (
 )
 
 const (
-	productTrapExitBase   = 128
+	productTrapExitBase   = cruntime.NativeTrapExitBase
 	maxBuildPathBytes     = 4096
 	maxBuildComponentSize = 255
 )
@@ -98,14 +98,6 @@ func combineProductSupportSource(standardLibrarySource string) (string, error) {
 
 func combineWindowsRunSupportSource(standardLibrarySource string) (string, error) {
 	runtimeSource, err := cruntime.WindowsRunSource(productTrapExitBase)
-	if err != nil {
-		return "", err
-	}
-	return combineStandardLibraryAndRuntime(standardLibrarySource, runtimeSource), nil
-}
-
-func combineLinuxRunSupportSource(standardLibrarySource string) (string, error) {
-	runtimeSource, err := cruntime.LinuxRunSource(productTrapExitBase)
 	if err != nil {
 		return "", err
 	}

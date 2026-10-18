@@ -98,6 +98,8 @@ Stable `build`, `run` and `test --native` select `x86_64-windows-msvc` on Window
 
 Stable Linux command admission does not promote the target's independent conformance or distribution status. See [ADR 0425](../adr/0425-stable-linux-build-and-run.md) and [ADR 0426](../adr/0426-linux-native-workspace-tests.md).
 
+CLI workspace build/run and native tests share `compileNativeProgram` and descriptor conventions keyed by target ID: compiler flags, executable suffix, and workspace result label. `internal/cdriver` owns platform execution, trap-channel receipt validation, output rejection, and process-status normalization. Stable arguments, output, and JSON schemas retain their documented contracts. Windows run stays isolated, Linux stable run uses the workspace root, and native tests run isolated on both platforms.
+
 The experimental `build-workspace --target x86_64-linux-gnu` path retains its explicit `--cc gcc` or `--cc clang`, Linux amd64 glibc host, and output-under-`build/` contract. It shares the private Linux storage transport with stable build/run.
 
 Native workspace compilation can reuse only the runtime/support object in the

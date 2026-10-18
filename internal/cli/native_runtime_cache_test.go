@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/0disoft/fairyc/internal/cdriver"
-	"github.com/0disoft/fairyc/internal/target"
 )
 
 func TestStableNativeRuntimeCache(t *testing.T) {
@@ -30,34 +29,18 @@ func TestStableNativeRuntimeCache(t *testing.T) {
 			var diag strings.Builder
 			options := workspaceTargetOptions{profile: profile, locked: true}
 			policy := workspaceCompilePolicy{stableDiagnostics: true, runTrapReceipt: true}
-			var status cdriver.RuntimeObjectCacheStatus
-			var exit int32
-			var stdout, stderr string
-			if runtime.GOOS == "windows" {
-				options.targetID = target.X8664WindowsMSVC
-				compiled, code := compileWindowsWorkspace(root, options, policy, &diag)
-				if code != 0 {
-					t.Fatalf("compile: %d %s", code, diag.String())
-				}
-				status = compiled.artifact.RuntimeCache
-				outcome, err := cdriver.ExecuteWindowsMSVCTargetWithInput(compiled.artifact, strings.NewReader("A"))
-				if err != nil {
-					t.Fatal(err)
-				}
-				exit, stdout, stderr = outcome.ExitCode, outcome.Stdout, outcome.Stderr
-			} else {
-				options.targetID = target.X8664LinuxGNU
-				compiled, code := compileLinuxWorkspacePolicy(root, options, policy, &diag)
-				if code != 0 {
-					t.Fatalf("compile: %d %s", code, diag.String())
-				}
-				status = compiled.artifact.RuntimeCache
-				outcome, err := cdriver.ExecuteLinuxTargetWithOptions(compiled.artifact, cdriver.LinuxExecutionOptions{Input: strings.NewReader("A"), Timeout: time.Minute})
-				if err != nil {
-					t.Fatal(err)
-				}
-				exit, stdout, stderr = outcome.ExitCode, outcome.Stdout, outcome.Stderr
+			options.targetID = nativeWorkspaceTarget()
+			compiled, code := compileWorkspace(root, options, policy, &diag)
+			if code != 0 {
+				t.Fatalf("compile: %d %s", code, diag.String())
 			}
+			status := compiled.artifact.RuntimeCache
+			outcome, err := compiled.toolchain.Execute(compiled.artifact, cdriver.NativeExecutionOptions{Input: strings.NewReader("A"), Timeout: time.Minute})
+			if err != nil {
+				t.Fatal(err)
+			}
+			exit, stdout, stderr := outcome.ExitCode, outcome.Stdout, outcome.Stderr
+
 			if status != want || exit != 131 || stdout != "한글\n" || stderr != "diagnostic\n" {
 				t.Fatalf("%s %s: cache=%s exit=%d stdout=%q stderr=%q", profile.Name, want, status, exit, stdout, stderr)
 			}

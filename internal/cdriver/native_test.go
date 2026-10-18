@@ -59,6 +59,18 @@ func TestNativeOutcomeReceipts(t *testing.T) {
 	}
 }
 
+func TestNativeRejectOutput(t *testing.T) {
+	for _, stream := range []struct{ stdout, stderr string }{{stdout: "out"}, {stderr: "err"}} {
+		if _, err := finishNativeOutcome("test", 0, stream.stdout, stream.stderr, "", NativeExecutionOptions{RejectOutput: true}); err == nil {
+			t.Fatal("unexpected output accepted")
+		}
+	}
+	outcome, err := finishNativeOutcome("test", NativeTrapExitBase+6, "", "", "\x06", NativeExecutionOptions{RejectOutput: true})
+	if err != nil || outcome.TrapCategory != "assertion-failed" {
+		t.Fatalf("silent trap: %+v %v", outcome, err)
+	}
+}
+
 func TestNativeToolchainBuildExecute(t *testing.T) {
 	id, err := HostNativeTarget()
 	if err != nil {

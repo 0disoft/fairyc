@@ -50,7 +50,7 @@ func TestNativeWorkspaceTestsContinueAfterTrapsAndPreserveOrder(t *testing.T) {
 			t.Fatalf("compile native test entry=%q profile=%+v", entry, profile)
 		}
 		compiled++
-		return nativeWorkspaceTestArtifact{windows: cdriver.WindowsHostArtifact{Bytes: []byte{byte(compiled)}}}, ExitSuccess
+		return nativeWorkspaceTestArtifact{artifact: cdriver.NativeArtifact{Artifact: cdriver.Artifact{Bytes: []byte{byte(compiled)}}}}, ExitSuccess
 	}
 	programArguments := []string{"--flag", "", "한글λ"}
 	execute := func(artifact nativeWorkspaceTestArtifact, stdin io.Reader, arguments []string, timeout time.Duration) (nativeWorkspaceTestOutcome, error) {
@@ -64,7 +64,7 @@ func TestNativeWorkspaceTestsContinueAfterTrapsAndPreserveOrder(t *testing.T) {
 		if !slices.Equal(arguments, programArguments) {
 			t.Fatalf("native test program arguments = %q, want %q", arguments, programArguments)
 		}
-		if artifact.windows.Bytes[0] == 1 {
+		if artifact.artifact.Bytes[0] == 1 {
 			code, found := cbackend.TrapCode("assertion-failed")
 			if !found {
 				t.Fatal("assertion-failed trap code is missing")
@@ -92,7 +92,7 @@ func TestNativeWorkspaceTestForwardsCallerInputToSelectedProcess(t *testing.T) {
 	program := nativeTestFixtureProgram()
 	tests := []workspaceTest{{display: "tests::native::passes", entry: "tests::native::passes"}}
 	compile := func(program mir.Program, entry string, profile cdriver.Profile, stderr io.Writer) (nativeWorkspaceTestArtifact, int) {
-		return nativeWorkspaceTestArtifact{windows: cdriver.WindowsHostArtifact{Bytes: []byte{1}}}, ExitSuccess
+		return nativeWorkspaceTestArtifact{artifact: cdriver.NativeArtifact{Artifact: cdriver.Artifact{Bytes: []byte{1}}}}, ExitSuccess
 	}
 	programArguments := []string{"--flag"}
 	execute := func(_ nativeWorkspaceTestArtifact, stdin io.Reader, arguments []string, _ time.Duration) (nativeWorkspaceTestOutcome, error) {
@@ -132,7 +132,7 @@ func TestNativeWorkspaceTestsReplayFixtureInputFromByteZero(t *testing.T) {
 		{display: "tests::native::passes", entry: "tests::native::passes"},
 	}
 	compile := func(program mir.Program, entry string, profile cdriver.Profile, stderr io.Writer) (nativeWorkspaceTestArtifact, int) {
-		return nativeWorkspaceTestArtifact{windows: cdriver.WindowsHostArtifact{Bytes: []byte(entry)}}, ExitSuccess
+		return nativeWorkspaceTestArtifact{artifact: cdriver.NativeArtifact{Artifact: cdriver.Artifact{Bytes: []byte(entry)}}}, ExitSuccess
 	}
 	executions := 0
 	execute := func(_ nativeWorkspaceTestArtifact, stdin io.Reader, _ []string, _ time.Duration) (nativeWorkspaceTestOutcome, error) {
@@ -162,7 +162,7 @@ func TestNativeWorkspaceTestsCaptureExactProgramStreamsApartFromTrapControl(t *t
 		{display: "tests::native::passes", entry: "tests::native::passes"},
 	}
 	compile := func(program mir.Program, entry string, profile cdriver.Profile, stderr io.Writer) (nativeWorkspaceTestArtifact, int) {
-		return nativeWorkspaceTestArtifact{windows: cdriver.WindowsHostArtifact{Bytes: []byte(entry)}}, ExitSuccess
+		return nativeWorkspaceTestArtifact{artifact: cdriver.NativeArtifact{Artifact: cdriver.Artifact{Bytes: []byte(entry)}}}, ExitSuccess
 	}
 	executions := 0
 	execute := func(nativeWorkspaceTestArtifact, io.Reader, []string, time.Duration) (nativeWorkspaceTestOutcome, error) {
@@ -197,7 +197,7 @@ func TestNativeWorkspaceTestsRejectProgramOutputAndUnreceiptedExit(t *testing.T)
 	program := nativeTestFixtureProgram()
 	tests := []workspaceTest{{display: "tests::native::passes", entry: "tests::native::passes"}}
 	compile := func(program mir.Program, entry string, profile cdriver.Profile, stderr io.Writer) (nativeWorkspaceTestArtifact, int) {
-		return nativeWorkspaceTestArtifact{windows: cdriver.WindowsHostArtifact{Bytes: []byte{1}}}, ExitSuccess
+		return nativeWorkspaceTestArtifact{artifact: cdriver.NativeArtifact{Artifact: cdriver.Artifact{Bytes: []byte{1}}}}, ExitSuccess
 	}
 	for _, test := range []struct {
 		name     string
