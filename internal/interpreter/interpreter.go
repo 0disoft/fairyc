@@ -625,6 +625,15 @@ func (r *runtime) call(function *mir.Function, arguments []runtimeValue, depth i
 			}
 			r.steps--
 			switch operation.Kind {
+			case mir.OperationUse, mir.OperationDropFlagInit, mir.OperationDropFlagClear,
+				mir.OperationArithmeticCheck, mir.OperationCheckedDivision, mir.OperationResultSwitch:
+				// Verification and the explicit control-flow edges own these markers.
+			case mir.OperationStrFromRawParts, mir.OperationCStrFromRawParts,
+				mir.OperationByteSliceFromRawParts, mir.OperationMutByteSliceFromRawParts,
+				mir.OperationStrDataAddress, mir.OperationCStrDataAddress, mir.OperationByteSliceDataAddress,
+				mir.OperationStorageLayout, mir.OperationStorageTake, mir.OperationStoragePut,
+				mir.OperationStorageBorrow, mir.OperationStorageBorrowMut, mir.OperationStorageElementAddress:
+				return callCompletion{}, capabilityErrorKind(operation.Kind.String(), "%s in %q requires a native backend", operation.Kind, function.Name)
 			case mir.OperationInitialize:
 				if len(operation.Operands) != 1 {
 					return callCompletion{}, capabilityError("resource initialization in %q has no executable value", function.Name)
@@ -1030,6 +1039,8 @@ func (r *runtime) call(function *mir.Function, arguments []runtimeValue, depth i
 					return callCompletion{}, fmt.Errorf("burn in %q names an incompatible resource local %d", function.Name, local)
 				}
 				delete(locals, local)
+			default:
+				return callCompletion{}, capabilityError("unsupported MIR operation %q", operation.Kind)
 			}
 		}
 

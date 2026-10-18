@@ -9,8 +9,6 @@ import (
 // OperationStorageLayout is a compiler-private, target-storage query. It has
 // no value operand or ownership effect; OwnerType is resolved, but its numeric
 // representation is selected only by a backend. Ordinary Verify rejects it.
-const OperationStorageLayout OperationKind = "storage-layout"
-
 func storageQueryType(value hir.Type, properties typeProperties) bool {
 	switch value {
 	case hir.TypeBool, hir.TypeU8, hir.TypeI32, hir.TypeI64, hir.TypeU32, hir.TypeUSize:

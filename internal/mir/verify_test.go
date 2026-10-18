@@ -218,7 +218,7 @@ func TestVerifyRejectsTaggedOperationsWithoutConcreteTypes(t *testing.T) {
 	}
 	for _, operation := range operations {
 		operation := operation
-		t.Run(string(operation.Kind), func(t *testing.T) {
+		t.Run(operation.Kind.String(), func(t *testing.T) {
 			t.Parallel()
 			program := Program{Functions: []Function{{
 				Name:  "main::main",

@@ -10,8 +10,6 @@ import (
 // The unsafe caller owns sufficient disjoint writable storage and must establish
 // exactly one initialized element obligation after the write. No allocation,
 // destruction, replacement of a live owner or recoverable failure is performed.
-const OperationStoragePut OperationKind = "storage-put"
-
 func validStoragePutShape(op Operation) bool {
 	return op.DestinationLocal == NoLocal && op.Symbol == hir.NoSymbol && op.Type == hir.TypeVoid &&
 		len(op.Operands) == 2 && op.Operands[0].Kind == OperandLocal && op.Operands[1].Kind == OperandLocal &&

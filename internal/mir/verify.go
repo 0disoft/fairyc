@@ -376,6 +376,10 @@ func verifyFunction(function *Function, structTypes map[hir.Type]*StructType, en
 		state := cloneVerificationState(item.state)
 		for operationIndex, operation := range block.Operations {
 			entity := operationEntity(item.id, operationIndex, operation)
+			if !operation.Kind.Valid() {
+				failures = append(failures, VerificationError{Code: CodeOperationKind, Entity: entity, Detail: fmt.Sprintf("unknown MIR operation kind %q", operation.Kind)})
+				continue
+			}
 			if detail := verifyIndexedViewOperands(operation, storeTypes); detail != "" {
 				failures = append(failures, VerificationError{Code: CodeStorageOperands, Entity: entity, Detail: detail})
 			}
@@ -1551,7 +1555,7 @@ func trappingOperationSpec(operation Operation) (string, OperationKind, []string
 		return switchKind, OperationArithmeticCheck, categories, valid && signedIntegerType(operation.OwnerType) && operation.Type == operation.OwnerType
 	}
 	if operation.Kind != OperationBinary {
-		return "", "", nil, false
+		return "", OperationInvalid, nil, false
 	}
 	if operation.Operator == "/" || operation.Operator == "%" {
 		categories, valid := divisionTrapCategories(operation.OwnerType)

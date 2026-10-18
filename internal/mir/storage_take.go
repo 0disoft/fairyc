@@ -10,8 +10,6 @@ import (
 // The unsafe caller owns that element, permits relocation, and retires its old
 // lifetime without dropping it. The operation neither clears nor frees storage.
 // It is not a safe pointer read or a proof of the caller's ownership obligations.
-const OperationStorageTake OperationKind = "storage-take"
-
 func validStorageTakeShape(op Operation) bool {
 	return op.DestinationLocal >= 0 && op.Symbol == hir.NoSymbol &&
 		op.OwnerType == hir.RawPointer(hir.TypeVoid, true) &&
@@ -24,7 +22,7 @@ func validStorageTakeShape(op Operation) bool {
 }
 
 func validStorageTransferProvenance(function *Function, op Operation) bool {
-	if op.Entity != sourceEntity(string(op.Kind), op.Span) || op.UnsafeScope.Source == "" ||
+	if op.Entity != sourceEntity(op.Kind.String(), op.Span) || op.UnsafeScope.Source == "" ||
 		!sameSpanSource(op.UnsafeScope, op.Span) || op.UnsafeScope.StartByte > op.Span.StartByte ||
 		op.UnsafeScope.EndByte < op.Span.EndByte {
 		return false

@@ -245,7 +245,7 @@ func (e *analysisBuilder) inspectFunction(functionIndex int) error {
 					return err
 				}
 				allowedUnsafeEntities[operation.Entity] = struct{}{}
-				e.features["private-"+string(operation.Kind)] = struct{}{}
+				e.features["private-"+operation.Kind.String()] = struct{}{}
 			case mir.OperationStorageElementAddress:
 				if err := e.inspectStorageElementAddress(functionIndex, *operation); err != nil {
 					return err
@@ -338,8 +338,10 @@ func (e *analysisBuilder) inspectFunction(functionIndex int) error {
 				if err := e.inspectTaggedOperation(functionIndex, *operation); err != nil {
 					return err
 				}
+			case mir.OperationDropFlagInit, mir.OperationDropFlagClear:
+				return CapabilityError{Function: function.Name, Feature: "MIR operation " + strconv.Quote(operation.Kind.String())}
 			default:
-				return CapabilityError{Function: function.Name, Feature: "MIR operation " + strconv.Quote(string(operation.Kind))}
+				return CapabilityError{Function: function.Name, Feature: "MIR operation " + strconv.Quote(operation.Kind.String())}
 			}
 		}
 		terminator := block.Terminator

@@ -83,7 +83,7 @@ func scannerMIRFunctionShape(program mir.Program, name string) (scannerMIRShape,
 	for _, block := range function.Blocks {
 		for _, operation := range block.Operations {
 			shape.Operations++
-			shape.OperationKinds[string(operation.Kind)]++
+			shape.OperationKinds[operation.Kind.String()]++
 		}
 		shape.Terminators[string(block.Terminator.Kind)]++
 		if block.Terminator.Kind == mir.TerminatorCall {

@@ -20,7 +20,7 @@ func (l *functionLowerer) lowerBuiltinMatch(expression *hir.Expression) (Operand
 	family := ""
 	firstVariant := ""
 	secondVariant := ""
-	payloadOperation := OperationKind("")
+	payloadOperation := OperationInvalid
 	if _, _, result := hir.ResultElements(expression.Children[0].Type); result {
 		family, firstVariant, secondVariant = "result", "ok", "err"
 		payloadOperation = OperationResultPayload

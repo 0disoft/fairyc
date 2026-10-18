@@ -741,8 +741,10 @@ func (e *emitter) emitOperation(output *strings.Builder, functionIndex int, oper
 		fmt.Fprintf(output, "    fy_l_%d = (%s).%s;\n", operation.DestinationLocal, container, field)
 	case mir.OperationUse, mir.OperationArithmeticCheck, mir.OperationCheckedDivision, mir.OperationViewIndexCheck, mir.OperationViewSliceCheck,
 		mir.OperationArrayIndexCheck, mir.OperationResultSwitch:
+	case mir.OperationDropFlagInit, mir.OperationDropFlagClear:
+		return CapabilityError{Function: function, Feature: "MIR operation " + strconv.Quote(operation.Kind.String())}
 	default:
-		return CapabilityError{Function: function, Feature: "MIR operation " + strconv.Quote(string(operation.Kind))}
+		return CapabilityError{Function: function, Feature: "MIR operation " + strconv.Quote(operation.Kind.String())}
 	}
 	return nil
 }

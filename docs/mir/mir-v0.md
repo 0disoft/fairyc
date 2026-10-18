@@ -6,6 +6,17 @@
 
 ## Role
 
+The Go `OperationKind` is a compiler-private integer enum with an invalid zero
+sentinel. Its numbers are never artifact identities: exact existing string names
+remain the JSON/cache representation through checked text encoding and decoding.
+Unknown numeric kinds fail verification as `V1030`; unknown wire names fail decoding.
+The operation inventory and explicit case coverage for verification, interpretation,
+C analysis, and C emission are checked by `internal/mir/operation_coverage_test.go`.
+Each consumer must implement, intentionally ignore, or explicitly reject every kind;
+a default branch alone does not count as coverage. Interpreter-only metadata remains
+an explicit no-op, while native-only operations report capability errors even when
+their results are unused.
+
 ADR 0414 adds `shared-reborrow`: one local of exact `ref mut T` OwnerType
 produces `ref T` with operator `share`, preserving referent identity. The
 verifier derives the operand type from definitions and rejects mismatched

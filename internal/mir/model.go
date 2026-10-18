@@ -244,67 +244,6 @@ type Block struct {
 	Terminator Terminator
 }
 
-// OperationKind identifies an already-normalized MIR operation.
-type OperationKind string
-
-const (
-	OperationInitialize               OperationKind = "initialize"
-	OperationMove                     OperationKind = "move"
-	OperationDrop                     OperationKind = "drop"
-	OperationBurn                     OperationKind = "burn"
-	OperationCheckedDivision          OperationKind = "checked-division"
-	OperationArithmeticCheck          OperationKind = "arithmetic-check"
-	OperationResultSwitch             OperationKind = "result-switch"
-	OperationUse                      OperationKind = "use"
-	OperationDropFlagInit             OperationKind = "drop-flag-init"
-	OperationDropFlagClear            OperationKind = "drop-flag-clear"
-	OperationAssign                   OperationKind = "assign"
-	OperationUnary                    OperationKind = "unary"
-	OperationBinary                   OperationKind = "binary"
-	OperationScalarCast               OperationKind = "scalar-cast"
-	OperationSharedReborrow           OperationKind = "shared-reborrow"
-	OperationArrayConstruct           OperationKind = "array-construct"
-	OperationArrayBorrowView          OperationKind = "array-borrow-view"
-	OperationArrayLength              OperationKind = "array-length"
-	OperationArrayIndexCheck          OperationKind = "array-index-check"
-	OperationArrayIndex               OperationKind = "array-index"
-	OperationArrayIndexStore          OperationKind = "array-index-store"
-	OperationResultConstruct          OperationKind = "result-construct"
-	OperationResultPayload            OperationKind = "result-payload"
-	OperationOptionConstruct          OperationKind = "option-construct"
-	OperationOptionPayload            OperationKind = "option-payload"
-	OperationEnumConstruct            OperationKind = "enum-construct"
-	OperationEnumPayload              OperationKind = "enum-payload"
-	OperationRawAddress               OperationKind = "raw-address"
-	OperationRawBorrowPointer         OperationKind = "raw-borrow-pointer"
-	OperationStrFromRawParts          OperationKind = "str-from-raw-parts"
-	OperationCStrFromRawParts         OperationKind = "cstr-from-raw-parts"
-	OperationByteSliceFromRawParts    OperationKind = "byte-slice-from-raw-parts"
-	OperationMutByteSliceFromRawParts OperationKind = "mut-byte-slice-from-raw-parts"
-	OperationCStrDataAddress          OperationKind = "cstr-data-address"
-	OperationStructConstruct          OperationKind = "struct-construct"
-	OperationResourceConstruct        OperationKind = "resource-construct"
-	OperationFieldRead                OperationKind = "field-read"
-	OperationFieldBorrow              OperationKind = "field-borrow"
-	OperationFieldStore               OperationKind = "field-store"
-	OperationDerefStore               OperationKind = "deref-store"
-	OperationViewLength               OperationKind = "view-length"
-	OperationViewEmpty                OperationKind = "view-empty"
-	OperationViewIndexCheck           OperationKind = "view-index-check"
-	OperationViewIndex                OperationKind = "view-index"
-	OperationViewElementBorrow        OperationKind = "view-element-borrow"
-	OperationViewIndexStore           OperationKind = "view-index-store"
-	OperationViewSliceCheck           OperationKind = "view-slice-check"
-	OperationViewSlice                OperationKind = "view-slice"
-	OperationRegionEnter              OperationKind = "region-enter"
-	OperationRegionPlace              OperationKind = "region-place"
-	OperationRegionReset              OperationKind = "region-reset"
-)
-
-const OperationByteSliceDataAddress OperationKind = "byte-slice-data-address"
-
-const OperationStrDataAddress OperationKind = "str-data-address"
-
 // LocalID identifies one source local, parameter, or compiler temporary.
 type LocalID int
 

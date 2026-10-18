@@ -9,8 +9,6 @@ import (
 // OperationStorageElementAddress calculates an SDK-private element address.
 // The unsafe caller must prove that the index names an initialized element in
 // the live allocation. A null base or size overflow yields a null pointer.
-const OperationStorageElementAddress OperationKind = "storage-element-address"
-
 func validStorageElementAddressShape(op Operation, properties typeProperties) bool {
 	return op.Kind == OperationStorageElementAddress &&
 		op.Type == hir.RawPointer(hir.TypeVoid, true) &&

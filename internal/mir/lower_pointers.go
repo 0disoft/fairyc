@@ -178,7 +178,7 @@ func (l *functionLowerer) lowerBorrowedViewFromRawParts(expression *hir.Expressi
 	if expression.UnsafeScope == nil || len(expression.Children) != 3 {
 		return Operand{}, fmt.Errorf("malformed borrowed-view raw-parts construction")
 	}
-	operationKind := OperationKind("")
+	operationKind := OperationInvalid
 	entityKind := ""
 	switch {
 	case expression.Operator == "str::from_raw_parts" && expression.Type == hir.SharedBorrow(hir.TypeStr):

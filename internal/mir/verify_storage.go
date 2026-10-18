@@ -31,13 +31,13 @@ func verifyStorageOperations(function *Function, properties typeProperties, capa
 			}
 			entity := operationEntity(block.ID, index, operation)
 			if !admitted {
-				failures = append(failures, VerificationError{Code: CodeStorageAdmission, Entity: entity, Detail: "private " + string(operation.Kind) + " is not admitted"})
+				failures = append(failures, VerificationError{Code: CodeStorageAdmission, Entity: entity, Detail: "private " + operation.Kind.String() + " is not admitted"})
 			}
 			if !valid {
-				failures = append(failures, VerificationError{Code: CodeStorageShape, Entity: entity, Detail: "private " + string(operation.Kind) + " has an invalid shape or element type"})
+				failures = append(failures, VerificationError{Code: CodeStorageShape, Entity: entity, Detail: "private " + operation.Kind.String() + " has an invalid shape or element type"})
 			}
 			if transfer && !validStorageTransferProvenance(function, operation) {
-				failures = append(failures, VerificationError{Code: CodeStorageProvenance, Entity: entity, Detail: "private " + string(operation.Kind) + " lacks matching unsafe provenance"})
+				failures = append(failures, VerificationError{Code: CodeStorageProvenance, Entity: entity, Detail: "private " + operation.Kind.String() + " lacks matching unsafe provenance"})
 			}
 		}
 	}

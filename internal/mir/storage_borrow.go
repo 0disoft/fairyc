@@ -8,12 +8,8 @@ import (
 
 // OperationStorageBorrow retains a shared owner alongside an unsafe element
 // address. It creates no owned value and transfers no destruction obligation.
-const OperationStorageBorrow OperationKind = "storage-borrow"
-
 // OperationStorageBorrowMut retains an exclusive owner while borrowing an
 // initialized element mutably. It creates no owned value or cleanup duty.
-const OperationStorageBorrowMut OperationKind = "storage-borrow-mut"
-
 func validStorageBorrowShape(op Operation, properties typeProperties) bool {
 	if _, view := hir.IndexedViewElement(op.Type); view {
 		return validStorageViewShape(op, properties)
