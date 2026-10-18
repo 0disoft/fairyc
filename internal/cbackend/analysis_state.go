@@ -1,6 +1,7 @@
 package cbackend
 
 import (
+	"context"
 	"github.com/0disoft/fairyc/internal/hir"
 	"github.com/0disoft/fairyc/internal/layout"
 	"github.com/0disoft/fairyc/internal/mir"
@@ -10,6 +11,7 @@ import (
 // emissionAnalysis is frozen after analyzeEmission returns. Output methods may
 // query its metadata but cannot invoke analysisBuilder capability checks.
 type emissionAnalysis struct {
+	ctx                context.Context
 	profile            Profile
 	reachableBlocks    [][]bool
 	storageLayouts     map[hir.Type]ValueStorageLayout

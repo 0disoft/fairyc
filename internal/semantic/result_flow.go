@@ -173,6 +173,9 @@ func (a *analyzer) resultFlowFor(module *moduleScope, loop *ast.ForLoop, environ
 }
 
 func (a *analyzer) resultFlowExpression(module *moduleScope, expression *ast.Expression, environment resultEnvironment, use resultUse) bool {
+	if a.canceled() {
+		return false
+	}
 	if expression == nil {
 		return true
 	}

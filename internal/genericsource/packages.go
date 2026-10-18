@@ -1,6 +1,7 @@
 package genericsource
 
 import (
+	"context"
 	"fmt"
 	"slices"
 	"strings"
@@ -76,6 +77,18 @@ func prepareOwnedStorageTransferPackages(inputs []PackageModule, limits genericp
 // PrepareWithPolicy is the shared resolved-graph expansion boundary. Owner
 // authentication belongs to the caller; validation prevents malformed scopes.
 func PrepareWithPolicy(inputs []PackageModule, limits genericplan.PlanLimits, policy admission.Policy[genericplan.PackageID]) (PackageExpansion, error) {
+	return PrepareWithPolicyContext(context.Background(), inputs, limits, policy)
+}
+
+func PrepareWithPolicyContext(ctx context.Context, inputs []PackageModule, limits genericplan.PlanLimits, policy admission.Policy[genericplan.PackageID]) (result PackageExpansion, err error) {
+	if err := ctx.Err(); err != nil {
+		return PackageExpansion{}, err
+	}
+	defer func() {
+		if canceled := ctx.Err(); canceled != nil {
+			result, err = PackageExpansion{}, canceled
+		}
+	}()
 	if err := policy.Validate(); err != nil {
 		return PackageExpansion{}, err
 	}
@@ -112,7 +125,7 @@ func PrepareWithPolicy(inputs []PackageModule, limits genericplan.PlanLimits, po
 			return PackageExpansion{}, fmt.Errorf("duplicate generic module %q", input.Module.Path)
 		}
 		allowStorage := storageOwners == nil || storageOwners[input.Owner]
-		x := &expander{module: input.Module, owner: input.Owner, templates: map[string]ast.Function{}, names: map[string]bool{}, imports: map[string]*expander{}, allowPublic: true, allowStorage: capabilities.AllowsStorageQueries() && allowStorage, allowNominal: capabilities.AllowsNominalArguments(), packageNominal: capabilities.AllowsNominalArguments(), allowStorageTransfers: capabilities.AllowsStorageTransfers() && allowStorage}
+		x := &expander{ctx: ctx, module: input.Module, owner: input.Owner, templates: map[string]ast.Function{}, names: map[string]bool{}, imports: map[string]*expander{}, allowPublic: true, allowStorage: capabilities.AllowsStorageQueries() && allowStorage, allowNominal: capabilities.AllowsNominalArguments(), packageNominal: capabilities.AllowsNominalArguments(), allowStorageTransfers: capabilities.AllowsStorageTransfers() && allowStorage}
 		x.scalarTemplatesOnly = capabilities.SDKTemplates() && !allowStorage
 		modules[key], ordered[i] = x, x
 	}
@@ -143,7 +156,7 @@ func PrepareWithPolicy(inputs []PackageModule, limits genericplan.PlanLimits, po
 		}
 	}
 	var declarations *genericplan.Catalog
-	expanded, plan, err := expandAll(ordered, limits, func(catalog *genericplan.Catalog) error {
+	expanded, plan, err := expandAllContext(ctx, ordered, limits, func(catalog *genericplan.Catalog) error {
 		declarations = catalog
 		var err error
 		templates, err = publicTemplates(ordered, catalog)
@@ -152,7 +165,7 @@ func PrepareWithPolicy(inputs []PackageModule, limits genericplan.PlanLimits, po
 	if err != nil {
 		return PackageExpansion{}, err
 	}
-	result := PackageExpansion{Modules: expanded, Plan: plan, Templates: templates, Specializations: map[genericplan.PackageID][]genericplan.SpecializationID{}}
+	result = PackageExpansion{Modules: expanded, Plan: plan, Templates: templates, Specializations: map[genericplan.PackageID][]genericplan.SpecializationID{}}
 	if capabilities.AllowsNominalArguments() && len(ordered) != 0 {
 		for _, binding := range ordered[0].boundNominals {
 			result.NominalBindings = append(result.NominalBindings, binding)
@@ -181,6 +194,13 @@ func PrepareWithPolicy(inputs []PackageModule, limits genericplan.PlanLimits, po
 }
 
 func expandAll(modules []*expander, limits genericplan.PlanLimits, observers ...func(*genericplan.Catalog) error) ([]*ast.Module, genericplan.Plan, error) {
+	return expandAllContext(context.Background(), modules, limits, observers...)
+}
+
+func expandAllContext(ctx context.Context, modules []*expander, limits genericplan.PlanLimits, observers ...func(*genericplan.Catalog) error) ([]*ast.Module, genericplan.Plan, error) {
+	if err := ctx.Err(); err != nil {
+		return nil, genericplan.Plan{}, err
+	}
 	builder, err := genericplan.NewBuilder(genericplan.DefaultCatalogLimits())
 	if err != nil {
 		return nil, genericplan.Plan{}, err
@@ -191,6 +211,9 @@ func expandAll(modules []*expander, limits genericplan.PlanLimits, observers ...
 		}
 	}
 	for _, module := range modules {
+		if err := ctx.Err(); err != nil {
+			return nil, genericplan.Plan{}, err
+		}
 		if err := module.collect(); err != nil {
 			return nil, genericplan.Plan{}, module.at(module.module.Span, FailureDeclaration, err)
 		}
@@ -201,6 +224,9 @@ func expandAll(modules []*expander, limits genericplan.PlanLimits, observers ...
 	var requests []genericplan.Request
 	bindNominalRegistry(modules)
 	for _, module := range modules {
+		if err := ctx.Err(); err != nil {
+			return nil, genericplan.Plan{}, err
+		}
 		roots, err := module.declare(builder)
 		if err != nil {
 			return nil, genericplan.Plan{}, err
@@ -216,7 +242,7 @@ func expandAll(modules []*expander, limits genericplan.PlanLimits, observers ...
 			return nil, genericplan.Plan{}, err
 		}
 	}
-	plan, err := catalog.Plan(requests, limits)
+	plan, err := catalog.PlanContext(ctx, requests, limits)
 	if err != nil {
 		return nil, genericplan.Plan{}, locatePlanningFailure(modules, err)
 	}

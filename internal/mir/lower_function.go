@@ -1,6 +1,7 @@
 package mir
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/0disoft/fairyc/internal/hir"
@@ -36,6 +37,7 @@ type deferredCall struct {
 }
 
 type functionLowerer struct {
+	ctx          context.Context
 	module       string
 	source       *hir.Function
 	properties   typeProperties
@@ -141,4 +143,11 @@ func (l *functionLowerer) terminate(terminator Terminator) {
 
 func (l *functionLowerer) blockTerminated(id BlockID) bool {
 	return l.result.Blocks[id].Terminator.Kind != ""
+}
+
+func (l *functionLowerer) contextError() error {
+	if l.ctx == nil {
+		return nil
+	}
+	return l.ctx.Err()
 }

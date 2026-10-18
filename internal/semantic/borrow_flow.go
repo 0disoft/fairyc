@@ -154,6 +154,9 @@ func (a *analyzer) inferBorrowReturnSummaries() {
 		queued[target.symbol] = true
 	}
 	for len(queue) > 0 {
+		if a.canceled() {
+			return
+		}
 		target := queue[0]
 		queue = queue[1:]
 		queued[target.symbol] = false
@@ -255,6 +258,9 @@ func (f *borrowFlowAnalyzer) parameterEnvironment() borrowEnvironment {
 }
 
 func (f *borrowFlowAnalyzer) evaluateBlock(block *ast.Block, environment borrowEnvironment, tailReturns bool) (borrowValueState, bool) {
+	if f.analyzer.canceled() {
+		return borrowValueState{}, false
+	}
 	if block == nil {
 		return borrowValueState{}, true
 	}
@@ -407,6 +413,9 @@ func (f *borrowFlowAnalyzer) evaluateFor(loop *ast.ForLoop, environment borrowEn
 }
 
 func (f *borrowFlowAnalyzer) evaluateExpression(expression *ast.Expression, environment borrowEnvironment) (borrowValueState, bool) {
+	if f.analyzer.canceled() {
+		return borrowValueState{}, false
+	}
 	if expression == nil {
 		return borrowValueState{}, true
 	}
@@ -1458,6 +1467,9 @@ func sameBorrowLive(left, right borrowLiveMap) bool {
 }
 
 func (f *borrowFlowAnalyzer) liveBlock(block *ast.Block, liveOut borrowLiveMap, context borrowLiveContext) borrowLiveMap {
+	if f.analyzer.canceled() {
+		return liveOut
+	}
 	live := cloneBorrowLive(liveOut)
 	if block == nil {
 		return live

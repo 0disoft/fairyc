@@ -9,6 +9,11 @@ import (
 )
 
 func (e *analysisBuilder) inspectFunction(functionIndex int) error {
+	if e.ctx != nil {
+		if err := e.ctx.Err(); err != nil {
+			return err
+		}
+	}
 	function := &e.functions[functionIndex]
 	predecessors := make([]uint32, len(function.Blocks))
 	for _, block := range function.Blocks {
@@ -51,6 +56,11 @@ func (e *analysisBuilder) inspectFunction(functionIndex int) error {
 			return fmt.Errorf("C emission requires canonical block ids in %s: block index %d has id %d", function.Name, blockIndex, block.ID)
 		}
 		for operationIndex := range block.Operations {
+			if e.ctx != nil {
+				if err := e.ctx.Err(); err != nil {
+					return err
+				}
+			}
 			operation := &block.Operations[operationIndex]
 			e.recordCValueTypeRequirements(operation.Type)
 			if err := validateOperationShape(function.Name, *operation); err != nil {

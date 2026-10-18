@@ -8,6 +8,9 @@ import (
 )
 
 func (c *typeChecker) checkExpression(expression *ast.Expression, expected hir.Type) (*hir.Expression, hir.Type) {
+	if c.analyzer.canceled() {
+		return &hir.Expression{Type: hir.TypeInvalid}, hir.TypeInvalid
+	}
 	if expression == nil {
 		return nil, hir.TypeVoid
 	}

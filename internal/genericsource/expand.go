@@ -1,6 +1,7 @@
 package genericsource
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"slices"
@@ -79,6 +80,7 @@ func PrepareModuleWithCapabilities(module *ast.Module, owner genericplan.Package
 }
 
 type expander struct {
+	ctx                   context.Context
 	module                *ast.Module
 	owner                 genericplan.PackageID
 	templates             map[string]ast.Function
@@ -104,6 +106,11 @@ func (x *expander) id(name string) genericplan.DeclarationID {
 }
 
 func (x *expander) collect() error {
+	if x.ctx != nil {
+		if err := x.ctx.Err(); err != nil {
+			return err
+		}
+	}
 	// Template removal must not hide an original module-namespace collision.
 	for _, v := range x.module.Constants {
 		x.names[v.Name] = true
@@ -223,6 +230,11 @@ func (x *expander) declare(b *genericplan.Builder) ([]genericplan.Request, error
 }
 
 func (x *expander) emit(plan genericplan.Plan, names map[string]string) (*ast.Module, error) {
+	if x.ctx != nil {
+		if err := x.ctx.Err(); err != nil {
+			return nil, err
+		}
+	}
 	result := *x.module
 	result.Functions = nil
 	for _, fn := range x.module.Functions {
@@ -313,6 +325,11 @@ func (x *expander) checkBinding(name string) error {
 }
 
 func (x *expander) checkExpression(e *ast.Expression) error {
+	if x.ctx != nil {
+		if err := x.ctx.Err(); err != nil {
+			return err
+		}
+	}
 	if e.Kind == syntax.KindPath && strings.Contains(e.Text, generatedPrefix) {
 		return fmt.Errorf("source cannot reference generated generic names")
 	}

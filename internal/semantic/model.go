@@ -3,6 +3,7 @@ package semantic
 
 import (
 	"cmp"
+	"context"
 	"fmt"
 	"slices"
 	"strings"
@@ -184,17 +185,29 @@ type Unsupported struct {
 
 // Analyze resolves every file before creating type facts or HIR.
 func Analyze(files []File) Result {
-	return analyze(files, nil)
+	result, _ := AnalyzeContext(context.Background(), files)
+	return result
+}
+
+func AnalyzeContext(ctx context.Context, files []File) (Result, error) {
+	return analyzeContext(ctx, files, nil, nil, nil)
 }
 
 // AnalyzePackages resolves an already-resolved multi-package input without choosing a public
 // manifest, lockfile, solver, source acquisition, or PackageInstanceId encoding.
 func AnalyzePackages(input PackageInput) (Result, error) {
+	return AnalyzePackagesContext(context.Background(), input)
+}
+
+func AnalyzePackagesContext(ctx context.Context, input PackageInput) (Result, error) {
+	if err := ctx.Err(); err != nil {
+		return Result{}, err
+	}
 	bindings, err := validatePackageInput(input)
 	if err != nil {
 		return Result{}, err
 	}
-	return analyze(input.Files, bindings), nil
+	return analyzeContext(ctx, input.Files, bindings, nil, nil)
 }
 
 func analyze(files []File, bindings map[packageImportKey]hir.PackageID) Result {
@@ -206,6 +219,23 @@ func analyzeBoundNominals(files []File, bindings map[packageImportKey]hir.Packag
 }
 
 func analyzeBoundNominalsWithVectorCandidate(files []File, bindings map[packageImportKey]hir.PackageID, nominals map[string]NominalTypeBinding, vectorTypes map[vectorTypeKey]bool) Result {
+	result, _ := analyzeContext(context.Background(), files, bindings, nominals, vectorTypes)
+	return result
+}
+
+func analyzeContext(ctx context.Context, files []File, bindings map[packageImportKey]hir.PackageID, nominals map[string]NominalTypeBinding, vectorTypes map[vectorTypeKey]bool) (Result, error) {
+	if err := ctx.Err(); err != nil {
+		return Result{}, err
+	}
+	result := analyzeWithContext(ctx, files, bindings, nominals, vectorTypes)
+	if err := ctx.Err(); err != nil {
+		return Result{}, err
+	}
+	return result, nil
+}
+
+func analyzeWithContext(ctx context.Context, files []File, bindings map[packageImportKey]hir.PackageID, nominals map[string]NominalTypeBinding, vectorTypes map[vectorTypeKey]bool) Result {
+
 	ordered := cloneResourceAbilityInputs(files)
 	slices.SortFunc(ordered, func(a, b File) int {
 		if byPackage := cmp.Compare(a.Package, b.Package); byPackage != 0 {
@@ -218,6 +248,7 @@ func analyzeBoundNominalsWithVectorCandidate(files []File, bindings map[packageI
 		ordered[index].Path = hir.QualifiedSourcePath(ordered[index].Package, ordered[index].Path)
 	}
 	analyzer := newAnalyzer(ordered, bindings)
+	analyzer.ctx = ctx
 	analyzer.nominalBindings = nominals
 	analyzer.vectorForTypes = vectorTypes
 	analyzer.diagnostics = testDiagnostics
@@ -233,9 +264,15 @@ func analyzeBoundNominalsWithVectorCandidate(files []File, bindings map[packageI
 			Unsupported: analyzer.unsupported,
 		}
 	}
+	if ctx.Err() != nil {
+		return Result{}
+	}
 	result := analyzer.typeCheck()
 	if len(analyzer.diagnostics) == 0 && len(analyzer.unsupported) == 0 {
 		analyzer.flowCheck()
+	}
+	if ctx.Err() != nil {
+		return Result{}
 	}
 	analyzer.finish()
 	result.Diagnostics = analyzer.diagnostics

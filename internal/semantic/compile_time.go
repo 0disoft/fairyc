@@ -356,6 +356,9 @@ func (e *compileTimeEvaluator) evalConstant(value *symbol, depth int) (compileTi
 }
 
 func (e *compileTimeEvaluator) eval(module *moduleScope, expression *ast.Expression, expected hir.Type, environment map[*symbol]compileTimeValue, depth int) (compileTimeValue, bool) {
+	if e.analyzer.canceled() {
+		return compileTimeValue{}, false
+	}
 	if expression == nil || module == nil {
 		return compileTimeValue{}, false
 	}

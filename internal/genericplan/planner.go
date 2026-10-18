@@ -2,6 +2,7 @@ package genericplan
 
 import (
 	"cmp"
+	"context"
 	"slices"
 	"strings"
 )
@@ -36,6 +37,7 @@ type plannedNode struct {
 }
 
 type planner struct {
+	ctx     context.Context
 	catalog *Catalog
 	limits  PlanLimits
 	nodes   map[string]*plannedNode
@@ -48,6 +50,18 @@ type planner struct {
 // dependency before every consumer. It is safe to call concurrently because the
 // catalog is immutable and all planning state is local to this call.
 func (c *Catalog) Plan(requests []Request, limits PlanLimits) (Plan, error) {
+	return c.PlanContext(context.Background(), requests, limits)
+}
+
+func (c *Catalog) PlanContext(ctx context.Context, requests []Request, limits PlanLimits) (result Plan, err error) {
+	if err := ctx.Err(); err != nil {
+		return Plan{}, err
+	}
+	defer func() {
+		if canceled := ctx.Err(); canceled != nil {
+			result, err = Plan{}, canceled
+		}
+	}()
 	if c == nil {
 		return Plan{}, fail(CodeUnknownCatalogItem, "catalog is nil")
 	}
@@ -63,7 +77,7 @@ func (c *Catalog) Plan(requests []Request, limits PlanLimits) (Plan, error) {
 	roots = slices.CompactFunc(roots, func(left, right Request) bool {
 		return compareRequest(left, right) == 0
 	})
-	value := &planner{
+	value := &planner{ctx: ctx,
 		catalog: c,
 		limits:  limits,
 		nodes:   make(map[string]*plannedNode),
@@ -85,6 +99,11 @@ func (c *Catalog) Plan(requests []Request, limits PlanLimits) (Plan, error) {
 }
 
 func (p *planner) expand(request Request, depth int) (SpecializationID, error) {
+	if p.ctx != nil {
+		if err := p.ctx.Err(); err != nil {
+			return "", err
+		}
+	}
 	if depth > p.limits.MaxExpansionDepth {
 		return "", fail(CodePlanningBudgetExceeded, "specialization expansion exceeds depth %d at %s", p.limits.MaxExpansionDepth, requestKey(request))
 	}

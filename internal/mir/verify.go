@@ -1,6 +1,9 @@
 package mir
 
-import "github.com/0disoft/fairyc/internal/admission"
+import (
+	"context"
+	"github.com/0disoft/fairyc/internal/admission"
+)
 
 // Verify checks the executable invariants required before MIR handoff.
 func Verify(program Program) []VerificationError {
@@ -20,8 +23,21 @@ func VerifyStorageTransfers(program Program) []VerificationError {
 // VerifyWithCapabilities uses the source-preparation admission policy. Invalid
 // capabilities fail before executable IR is accepted.
 func VerifyWithCapabilities(program Program, capabilities admission.Capabilities) []VerificationError {
+	failures, _ := VerifyWithCapabilitiesContext(context.Background(), program, capabilities)
+	return failures
+}
+
+func VerifyWithCapabilitiesContext(ctx context.Context, program Program, capabilities admission.Capabilities) (failures []VerificationError, err error) {
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
+	defer func() {
+		if canceled := ctx.Err(); canceled != nil {
+			failures, err = nil, canceled
+		}
+	}()
 	if err := capabilities.Validate(); err != nil {
-		return []VerificationError{{Code: CodeAdmission, Entity: "program", Detail: err.Error()}}
+		return []VerificationError{{Code: CodeAdmission, Entity: "program", Detail: err.Error()}}, nil
 	}
 	structTypes, failures := verifyStructTypes(program.StructTypes)
 	enumTypes, enumFailures := verifyEnumTypes(program.EnumTypes)
@@ -48,9 +64,12 @@ func VerifyWithCapabilities(program Program, capabilities admission.Capabilities
 	failures = append(failures, verifyDropGlueLinks(program.ResourceTypes, program.Functions, functions)...)
 	properties := newTypeProperties(program.ResourceTypes, program.StructTypes, program.EnumTypes)
 	for index := range program.Functions {
+		if err := ctx.Err(); err != nil {
+			return nil, err
+		}
 		failures = append(failures, verifyStorageOperations(&program.Functions[index], properties, capabilities)...)
 		failures = append(failures, verifyStructViewTypes(&program.Functions[index], properties)...)
-		failures = append(failures, verifyFunction(&program.Functions[index], structTypes, enumTypes, resourceTypes, foreignFunctions, functions)...)
+		failures = append(failures, verifyFunctionContext(ctx, &program.Functions[index], structTypes, enumTypes, resourceTypes, foreignFunctions, functions)...)
 	}
-	return canonicalVerificationErrors(failures)
+	return canonicalVerificationErrors(failures), nil
 }

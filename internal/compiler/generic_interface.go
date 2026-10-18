@@ -1,6 +1,7 @@
 package compiler
 
 import (
+	"context"
 	"slices"
 
 	"github.com/0disoft/fairyc/internal/admission"
@@ -31,7 +32,19 @@ func AnalyzeGenericPackages(input semantic.PackageInput, coordinates map[hir.Pac
 // packages. Source-owned rejections become diagnostics; plumbing failures remain
 // errors. Storage owners must already have been authenticated by the caller.
 func AnalyzeWithPolicy(input semantic.PackageInput, coordinates map[hir.PackageID]packagegraph.CoordinateID, limits genericplan.PlanLimits, policy admission.Policy[hir.PackageID]) (GenericAnalysis, error) {
-	analysis, err := analyzeWithPolicy(input, coordinates, limits, policy)
+	return AnalyzeWithPolicyContext(context.Background(), input, coordinates, limits, policy)
+}
+
+func AnalyzeWithPolicyContext(ctx context.Context, input semantic.PackageInput, coordinates map[hir.PackageID]packagegraph.CoordinateID, limits genericplan.PlanLimits, policy admission.Policy[hir.PackageID]) (result GenericAnalysis, err error) {
+	if err := ctx.Err(); err != nil {
+		return GenericAnalysis{}, &Error{Stage: StageSemantic, Cause: err}
+	}
+	defer func() {
+		if canceled := ctx.Err(); canceled != nil {
+			result, err = GenericAnalysis{}, &Error{Stage: StageSemantic, Cause: canceled}
+		}
+	}()
+	analysis, err := analyzeWithPolicyContext(ctx, input, coordinates, limits, policy)
 	if err != nil {
 		if rejection, sourceOwned := genericSourceDiagnostic(err, input, coordinates); sourceOwned {
 			return GenericAnalysis{Analysis: Analysis{Semantic: semantic.Result{FailedPhase: semantic.PhaseResolve, Diagnostics: []semantic.Diagnostic{rejection}}}}, nil
@@ -42,6 +55,10 @@ func AnalyzeWithPolicy(input semantic.PackageInput, coordinates map[hir.PackageI
 
 // Legacy private proof lanes keep returning source expansion errors directly.
 func analyzeWithPolicy(input semantic.PackageInput, coordinates map[hir.PackageID]packagegraph.CoordinateID, limits genericplan.PlanLimits, policy admission.Policy[hir.PackageID]) (GenericAnalysis, error) {
+	return analyzeWithPolicyContext(context.Background(), input, coordinates, limits, policy)
+}
+
+func analyzeWithPolicyContext(ctx context.Context, input semantic.PackageInput, coordinates map[hir.PackageID]packagegraph.CoordinateID, limits genericplan.PlanLimits, policy admission.Policy[hir.PackageID]) (GenericAnalysis, error) {
 	if err := policy.Validate(); err != nil {
 		return GenericAnalysis{}, err
 	}
@@ -49,7 +66,7 @@ func analyzeWithPolicy(input semantic.PackageInput, coordinates map[hir.PackageI
 		return GenericAnalysis{Analysis: Analysis{Semantic: semantic.Result{FailedPhase: semantic.PhaseResolve, Diagnostics: rejections}}}, nil
 	}
 
-	analysis, expansion, err := analyzePackageGraph(input, coordinates, limits, policy)
+	analysis, expansion, err := analyzePackageGraphContext(ctx, input, coordinates, limits, policy)
 	if err != nil {
 		return GenericAnalysis{}, err
 	}
@@ -58,11 +75,15 @@ func analyzeWithPolicy(input semantic.PackageInput, coordinates map[hir.PackageI
 
 // CheckWithPolicy uses one policy for source admission, semantics and MIR.
 func CheckWithPolicy(input semantic.PackageInput, coordinates map[hir.PackageID]packagegraph.CoordinateID, limits genericplan.PlanLimits, policy admission.Policy[hir.PackageID]) (Result, genericplan.Plan, error) {
-	analysis, err := AnalyzeWithPolicy(input, coordinates, limits, policy)
+	return CheckWithPolicyContext(context.Background(), input, coordinates, limits, policy)
+}
+
+func CheckWithPolicyContext(ctx context.Context, input semantic.PackageInput, coordinates map[hir.PackageID]packagegraph.CoordinateID, limits genericplan.PlanLimits, policy admission.Policy[hir.PackageID]) (Result, genericplan.Plan, error) {
+	analysis, err := AnalyzeWithPolicyContext(ctx, input, coordinates, limits, policy)
 	if err != nil {
 		return Result{}, genericplan.Plan{}, err
 	}
-	result, err := LowerAnalyzedWithCapabilities(analysis.Analysis, policy.Capabilities)
+	result, err := LowerAnalyzedWithCapabilitiesContext(ctx, analysis.Analysis, policy.Capabilities)
 	return result, analysis.Plan, err
 }
 

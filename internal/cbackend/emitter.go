@@ -8,3 +8,10 @@ type emitter struct {
 	analysis *emissionAnalysis
 	output   strings.Builder
 }
+
+func (e *emitter) contextError() error {
+	if e.analysis.ctx == nil {
+		return nil
+	}
+	return e.analysis.ctx.Err()
+}

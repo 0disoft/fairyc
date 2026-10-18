@@ -1,6 +1,7 @@
 package compiler
 
 import (
+	"context"
 	"fmt"
 	"slices"
 
@@ -27,6 +28,13 @@ func CheckGenericPackages(input semantic.PackageInput, coordinates map[hir.Packa
 }
 
 func prepareGenericPackageGraph(input semantic.PackageInput, coordinates map[hir.PackageID]packagegraph.CoordinateID, limits genericplan.PlanLimits, policy admission.Policy[hir.PackageID]) (semantic.PackageInput, genericsource.PackageExpansion, error) {
+	return prepareGenericPackageGraphContext(context.Background(), input, coordinates, limits, policy)
+}
+
+func prepareGenericPackageGraphContext(ctx context.Context, input semantic.PackageInput, coordinates map[hir.PackageID]packagegraph.CoordinateID, limits genericplan.PlanLimits, policy admission.Policy[hir.PackageID]) (semantic.PackageInput, genericsource.PackageExpansion, error) {
+	if err := ctx.Err(); err != nil {
+		return semantic.PackageInput{}, genericsource.PackageExpansion{}, err
+	}
 	if err := policy.Validate(); err != nil {
 		return semantic.PackageInput{}, genericsource.PackageExpansion{}, err
 	}
@@ -77,7 +85,7 @@ func prepareGenericPackageGraph(input semantic.PackageInput, coordinates map[hir
 			}
 		}
 	}
-	expansion, err := genericsource.PrepareWithPolicy(modules, limits, sourcePolicy)
+	expansion, err := genericsource.PrepareWithPolicyContext(ctx, modules, limits, sourcePolicy)
 	if err != nil {
 		return semantic.PackageInput{}, genericsource.PackageExpansion{}, err
 	}

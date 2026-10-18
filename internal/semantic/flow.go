@@ -25,6 +25,9 @@ func (a *analyzer) flowCheck() {
 	a.flowStarted = true
 	a.inferBorrowReturnSummaries()
 	for _, module := range a.moduleOrder {
+		if a.canceled() {
+			return
+		}
 		for index := range module.file.Module.Functions {
 			function := &module.file.Module.Functions[index]
 			if a.functions[function] != nil {
@@ -42,6 +45,9 @@ func (a *analyzer) flowCheck() {
 }
 
 func (a *analyzer) flowFunction(module *moduleScope, function *ast.Function) {
+	if a.canceled() {
+		return
+	}
 	if function.Body == nil {
 		return
 	}

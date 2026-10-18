@@ -11,6 +11,9 @@ import (
 )
 
 func (l *functionLowerer) lowerExpression(expression *hir.Expression) (Operand, error) {
+	if err := l.contextError(); err != nil {
+		return Operand{}, err
+	}
 	if expression == nil {
 		return Operand{}, nil
 	}

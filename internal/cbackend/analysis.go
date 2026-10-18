@@ -1,10 +1,12 @@
 package cbackend
 
 import (
+	"context"
 	"fmt"
 	"slices"
 	"strings"
 
+	"github.com/0disoft/fairyc/internal/admission"
 	"github.com/0disoft/fairyc/internal/hir"
 	"github.com/0disoft/fairyc/internal/layout"
 	"github.com/0disoft/fairyc/internal/mir"
@@ -12,15 +14,26 @@ import (
 )
 
 func analyzeEmission(program mir.Program, entry string, profile Profile, storageTransfers bool) (*emissionAnalysis, error) {
+	return analyzeEmissionContext(context.Background(), program, entry, profile, storageTransfers)
+}
+
+func analyzeEmissionContext(ctx context.Context, program mir.Program, entry string, profile Profile, storageTransfers bool) (*emissionAnalysis, error) {
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
 	targetSpec, err := emissionTarget(profile)
 	if err != nil {
 		return nil, err
 	}
-	verify := mir.VerifyStorageQueries
+	caps := admission.Capabilities{Storage: admission.StorageQueries}
 	if storageTransfers {
-		verify = mir.VerifyStorageTransfers
+		caps.Storage = admission.StorageTransfers
 	}
-	if failures := verify(program); len(failures) != 0 {
+	failures, err := mir.VerifyWithCapabilitiesContext(ctx, program, caps)
+	if err != nil {
+		return nil, err
+	}
+	if len(failures) != 0 {
 		return nil, fmt.Errorf("C emission requires verified MIR: %s at %s", failures[0].Code, failures[0].Entity)
 	}
 	if err := validateCScalarTransports(); err != nil {
@@ -110,7 +123,7 @@ func analyzeEmission(program mir.Program, entry string, profile Profile, storage
 	checkedFailures := assertedCheckedFailuresForC(functions)
 	value := &analysisBuilder{
 		layoutEngine: layoutEngine,
-		emissionAnalysis: emissionAnalysis{
+		emissionAnalysis: emissionAnalysis{ctx: ctx,
 			profile:            profile,
 			reachableBlocks:    make([][]bool, len(functions)),
 			storageLayouts:     make(map[hir.Type]ValueStorageLayout),
@@ -188,6 +201,9 @@ func analyzeEmission(program mir.Program, entry string, profile Profile, storage
 		}
 	}
 	for index := range functions {
+		if err := ctx.Err(); err != nil {
+			return nil, err
+		}
 		function := &functions[index]
 		if _, collision := value.foreignBySymbol[function.Symbol]; collision {
 			return nil, fmt.Errorf("MIR symbol %d is both internal and foreign", function.Symbol)
@@ -225,6 +241,9 @@ func analyzeEmission(program mir.Program, entry string, profile Profile, storage
 		return nil, fmt.Errorf("C entry %q must have type fn() -> i32", entry)
 	}
 	for index := range functions {
+		if err := ctx.Err(); err != nil {
+			return nil, err
+		}
 		localTypes, err := value.inferLocalTypes(index)
 		if err != nil {
 			return nil, err
@@ -232,6 +251,9 @@ func analyzeEmission(program mir.Program, entry string, profile Profile, storage
 		value.localTypes[index] = localTypes
 	}
 	for index := range functions {
+		if err := ctx.Err(); err != nil {
+			return nil, err
+		}
 		if err := value.inspectFunction(index); err != nil {
 			return nil, err
 		}

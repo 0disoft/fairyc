@@ -1,6 +1,7 @@
 package mir
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/0disoft/fairyc/internal/hir"
@@ -8,7 +9,17 @@ import (
 )
 
 // Lower normalizes typed HIR into executable mutable-local MIR.
-func Lower(input hir.Package) (Program, error) {
+func Lower(input hir.Package) (Program, error) { return LowerContext(context.Background(), input) }
+
+func LowerContext(ctx context.Context, input hir.Package) (result Program, err error) {
+	if err := ctx.Err(); err != nil {
+		return Program{}, err
+	}
+	defer func() {
+		if canceled := ctx.Err(); canceled != nil {
+			result, err = Program{}, canceled
+		}
+	}()
 	structTypes, err := lowerStructTypes(input)
 	if err != nil {
 		return Program{}, err
@@ -30,8 +41,12 @@ func Lower(input hir.Package) (Program, error) {
 	for _, module := range input.Modules {
 		moduleIdentity := hir.QualifiedModulePath(module.Package, module.Path)
 		for index := range module.Functions {
+			if err := ctx.Err(); err != nil {
+				return Program{}, err
+			}
 			function := &module.Functions[index]
 			lowerer := newFunctionLowerer(moduleIdentity, function, properties)
+			lowerer.ctx = ctx
 			lowered, err := lowerer.lower()
 			if err != nil {
 				return Program{}, fmt.Errorf("lower %s::%s: %w", moduleIdentity, function.Name, err)

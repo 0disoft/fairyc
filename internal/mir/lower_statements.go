@@ -25,6 +25,9 @@ func (l *functionLowerer) lowerBlock(block hir.Block) (bool, error) {
 
 func (l *functionLowerer) lowerStatements(statements []hir.Statement) (bool, error) {
 	for _, statement := range statements {
+		if err := l.contextError(); err != nil {
+			return false, err
+		}
 		if l.blockTerminated(l.current) {
 			return true, nil
 		}

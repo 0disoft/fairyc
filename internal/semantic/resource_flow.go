@@ -108,6 +108,9 @@ func (a *analyzer) resourceFlowDropFunction(module *moduleScope, function *ast.F
 }
 
 func (a *analyzer) resourceBlock(module *moduleScope, block *ast.Block, environment resourceEnvironment, scoped bool, tailMode resourceUse) bool {
+	if a.canceled() {
+		return false
+	}
 	if block == nil {
 		return true
 	}
@@ -258,6 +261,9 @@ func (a *analyzer) resourceAssignment(module *moduleScope, statement *ast.Statem
 }
 
 func (a *analyzer) resourceExpression(module *moduleScope, expression *ast.Expression, environment resourceEnvironment, mode resourceUse) bool {
+	if a.canceled() {
+		return false
+	}
 	if expression == nil {
 		return true
 	}

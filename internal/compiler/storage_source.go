@@ -1,6 +1,7 @@
 package compiler
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/0disoft/fairyc/internal/admission"
@@ -117,7 +118,11 @@ func analyzeOwnedStorageTransferPackages(input semantic.PackageInput, coordinate
 }
 
 func analyzePackageGraph(input semantic.PackageInput, coordinates map[hir.PackageID]packagegraph.CoordinateID, limits genericplan.PlanLimits, policy admission.Policy[hir.PackageID]) (semantic.Result, genericsource.PackageExpansion, error) {
-	prepared, expansion, err := prepareGenericPackageGraph(input, coordinates, limits, policy)
+	return analyzePackageGraphContext(context.Background(), input, coordinates, limits, policy)
+}
+
+func analyzePackageGraphContext(ctx context.Context, input semantic.PackageInput, coordinates map[hir.PackageID]packagegraph.CoordinateID, limits genericplan.PlanLimits, policy admission.Policy[hir.PackageID]) (semantic.Result, genericsource.PackageExpansion, error) {
+	prepared, expansion, err := prepareGenericPackageGraphContext(ctx, input, coordinates, limits, policy)
 	if err != nil {
 		return semantic.Result{}, genericsource.PackageExpansion{}, err
 	}
@@ -155,12 +160,12 @@ func analyzePackageGraph(input semantic.PackageInput, coordinates map[hir.Packag
 					})
 				}
 			}
-			analysis, err = semantic.AnalyzeBoundNominalVectorCandidatePackages(prepared, bindings, vectors)
+			analysis, err = semantic.AnalyzeBoundNominalPackagesContext(ctx, prepared, bindings, vectors)
 		} else {
-			analysis, err = semantic.AnalyzeBoundNominalPackages(prepared, bindings)
+			analysis, err = semantic.AnalyzeBoundNominalPackagesContext(ctx, prepared, bindings, nil)
 		}
 	} else {
-		analysis, err = semantic.AnalyzePackages(prepared)
+		analysis, err = semantic.AnalyzePackagesContext(ctx, prepared)
 	}
 	if err != nil {
 		return semantic.Result{}, genericsource.PackageExpansion{}, &Error{Stage: StagePackageInput, Cause: err}

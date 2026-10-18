@@ -1,6 +1,7 @@
 package semantic
 
 import (
+	"context"
 	"strings"
 
 	"github.com/0disoft/fairyc/internal/ast"
@@ -61,6 +62,7 @@ type lexicalScope struct {
 }
 
 type analyzer struct {
+	ctx                   context.Context
 	nominalBindings       map[string]NominalTypeBinding
 	vectorForTypes        map[vectorTypeKey]bool
 	files                 []File
@@ -604,6 +606,9 @@ func (a *analyzer) resolveFor(module *moduleScope, parent *lexicalScope, loop *a
 }
 
 func (a *analyzer) resolveExpression(module *moduleScope, scope *lexicalScope, expression *ast.Expression) {
+	if a.canceled() {
+		return
+	}
 	if expression == nil {
 		return
 	}
@@ -853,3 +858,5 @@ func sourceSpan(source string, start, end int) hir.Span {
 	packageID, sourcePath := hir.SourcePathParts(source)
 	return hir.Span{Package: packageID, Source: sourcePath, StartByte: start, EndByte: end}
 }
+
+func (a *analyzer) canceled() bool { return a.ctx != nil && a.ctx.Err() != nil }

@@ -1,6 +1,7 @@
 package mir
 
 import (
+	"context"
 	"fmt"
 	"slices"
 
@@ -8,6 +9,10 @@ import (
 )
 
 func verifyFunction(function *Function, structTypes map[hir.Type]*StructType, enumTypes map[hir.Type]*EnumType, resourceTypes map[hir.Type]*ResourceType, foreignFunctions map[hir.SymbolID]*ForeignFunction, functions map[hir.SymbolID]*Function) []VerificationError {
+	return verifyFunctionContext(context.Background(), function, structTypes, enumTypes, resourceTypes, foreignFunctions, functions)
+}
+
+func verifyFunctionContext(ctx context.Context, function *Function, structTypes map[hir.Type]*StructType, enumTypes map[hir.Type]*EnumType, resourceTypes map[hir.Type]*ResourceType, foreignFunctions map[hir.SymbolID]*ForeignFunction, functions map[hir.SymbolID]*Function) []VerificationError {
 	storeTypes := fieldStoreLocalTypes(function, functions, foreignFunctions)
 	if int(function.Entry) < 0 || int(function.Entry) >= len(function.Blocks) {
 		return []VerificationError{{Code: CodeControlFlow, Entity: function.Name, Detail: "entry block is missing"}}
@@ -65,6 +70,9 @@ func verifyFunction(function *Function, structTypes map[hir.Type]*StructType, en
 	queue := []pendingBlock{{id: function.Entry, state: initial}}
 	seen := make(map[BlockID]verificationState)
 	for len(queue) > 0 {
+		if ctx.Err() != nil {
+			return nil
+		}
 		item := queue[0]
 		queue = queue[1:]
 		if previous, found := seen[item.id]; found {

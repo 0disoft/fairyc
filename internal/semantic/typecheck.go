@@ -26,6 +26,9 @@ func (a *analyzer) typeCheck() Result {
 	a.prepareCompileTime()
 	result.HIR.StateLayouts = a.checkStateLayouts()
 	for _, module := range a.moduleOrder {
+		if a.canceled() {
+			return Result{}
+		}
 		_, sourcePath := hir.SourcePathParts(module.file.Path)
 		hirModule := hir.Module{Package: module.key.packageID, Path: module.file.Module.Path, SourcePath: sourcePath}
 		for index := range module.file.Module.Structs {
@@ -57,6 +60,9 @@ func (a *analyzer) typeCheck() Result {
 			hirModule.ForeignFunctions = append(hirModule.ForeignFunctions, a.checkForeignFunction(module, function))
 		}
 		for index := range module.file.Module.Functions {
+			if a.canceled() {
+				return Result{}
+			}
 			function := &module.file.Module.Functions[index]
 			if a.functions[function] == nil {
 				continue

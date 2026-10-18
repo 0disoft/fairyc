@@ -1,6 +1,7 @@
 package semantic
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/0disoft/fairyc/internal/ast"
@@ -46,6 +47,13 @@ func AnalyzeBoundNominalVectorCandidatePackages(input PackageInput, nominals []N
 }
 
 func analyzeBoundNominalPackages(input PackageInput, nominals []NominalTypeBinding, vectors []VectorTypeAdmission) (Result, error) {
+	return AnalyzeBoundNominalPackagesContext(context.Background(), input, nominals, vectors)
+}
+
+func AnalyzeBoundNominalPackagesContext(ctx context.Context, input PackageInput, nominals []NominalTypeBinding, vectors []VectorTypeAdmission) (Result, error) {
+	if err := ctx.Err(); err != nil {
+		return Result{}, err
+	}
 	imports, err := validatePackageInput(input)
 	if err != nil {
 		return Result{}, err
@@ -91,7 +99,7 @@ func analyzeBoundNominalPackages(input PackageInput, nominals []NominalTypeBindi
 		}
 		admitted[identity] = true
 	}
-	return analyzeBoundNominalsWithVectorCandidate(input.Files, imports, bindings, admitted), nil
+	return analyzeContext(ctx, input.Files, imports, bindings, admitted)
 }
 
 func (a *analyzer) canonicalBoundNominal(reference ast.TypeReference) (hir.Type, bool) {

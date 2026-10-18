@@ -11,6 +11,9 @@ import (
 )
 
 func (e *emitter) emitOperation(output *strings.Builder, functionIndex int, operation mir.Operation) error {
+	if err := e.contextError(); err != nil {
+		return err
+	}
 	function := e.analysis.functions[functionIndex].Name
 	switch operation.Kind {
 	case mir.OperationAssign, mir.OperationInitialize:

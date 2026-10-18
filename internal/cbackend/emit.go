@@ -2,6 +2,7 @@
 package cbackend
 
 import (
+	"context"
 	"fmt"
 	"slices"
 
@@ -15,7 +16,26 @@ func Emit(program mir.Program, entry string, profile Profile) (Unit, error) {
 }
 
 func emit(program mir.Program, entry string, profile Profile, storageTransfers bool) (Unit, error) {
-	plan, err := analyzeEmission(program, entry, profile, storageTransfers)
+	return emitContext(context.Background(), program, entry, profile, storageTransfers)
+}
+
+func EmitContext(ctx context.Context, program mir.Program, entry string, profile Profile) (Unit, error) {
+	return emitContext(ctx, program, entry, profile, false)
+}
+func EmitStorageTransfersContext(ctx context.Context, program mir.Program, entry string, profile Profile) (Unit, error) {
+	return emitContext(ctx, program, entry, profile, true)
+}
+
+func emitContext(ctx context.Context, program mir.Program, entry string, profile Profile, storageTransfers bool) (result Unit, err error) {
+	if err := ctx.Err(); err != nil {
+		return Unit{}, err
+	}
+	defer func() {
+		if canceled := ctx.Err(); canceled != nil {
+			result, err = Unit{}, canceled
+		}
+	}()
+	plan, err := analyzeEmissionContext(ctx, program, entry, profile, storageTransfers)
 	if err != nil {
 		return Unit{}, err
 	}
@@ -47,12 +67,18 @@ func (value *emitter) emitUnit() (Unit, error) {
 		output.WriteByte('\n')
 	}
 	for index := range functions {
+		if err := value.contextError(); err != nil {
+			return Unit{}, err
+		}
 		if err := value.emitPrototype(output, index); err != nil {
 			return Unit{}, err
 		}
 	}
 	output.WriteByte('\n')
 	for index := range functions {
+		if err := value.contextError(); err != nil {
+			return Unit{}, err
+		}
 		if err := value.emitFunction(output, index); err != nil {
 			return Unit{}, err
 		}
@@ -65,6 +91,9 @@ func (value *emitter) emitUnit() (Unit, error) {
 		output.WriteString("int main(void) {\n")
 	}
 	for index := range functions {
+		if err := value.contextError(); err != nil {
+			return Unit{}, err
+		}
 		if index != value.analysis.entryIndex {
 			fmt.Fprintf(output, "    (void)&fy_fn_%d;\n", index)
 		}
@@ -77,6 +106,9 @@ func (value *emitter) emitUnit() (Unit, error) {
 
 	names := make([]string, len(functions))
 	for index := range functions {
+		if err := value.contextError(); err != nil {
+			return Unit{}, err
+		}
 		names[index] = functions[index].Name
 	}
 	features := make([]string, 0, len(value.analysis.features))
