@@ -675,6 +675,10 @@ func executeWindowsMSVCArtifactWithInputAndArgs(artifact WindowsHostArtifact, la
 }
 
 func executeWindowsMSVCArtifactWithInputArgsAndTimeout(artifact WindowsHostArtifact, label string, stdin io.Reader, programArgs []string, timeout time.Duration) (WindowsHostOutcome, error) {
+	return executeWindowsMSVCArtifactWithOptions(artifact, label, stdin, programArgs, timeout, "")
+}
+
+func executeWindowsMSVCArtifactWithOptions(artifact WindowsHostArtifact, label string, stdin io.Reader, programArgs []string, timeout time.Duration, workingDirectory string) (WindowsHostOutcome, error) {
 	if len(artifact.Bytes) == 0 || len(artifact.Bytes) > maxArtifactBytes {
 		return WindowsHostOutcome{}, fmt.Errorf("%s executable has invalid size %d", label, len(artifact.Bytes))
 	}
@@ -695,6 +699,9 @@ func executeWindowsMSVCArtifactWithInputArgsAndTimeout(artifact WindowsHostArtif
 	}
 	command.Stdin = stdin
 	command.Dir = temporaryRoot
+	if workingDirectory != "" {
+		command.Dir = workingDirectory
+	}
 	output := newBoundedProcessOutput(maxProcessOutput)
 	command.Stdout = output.stdoutWriter()
 	command.Stderr = output.stderrWriter()

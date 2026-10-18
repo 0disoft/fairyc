@@ -9,6 +9,8 @@ import (
 )
 
 const (
+	// NativeTrapExitBase binds production native receipts to their process status.
+	NativeTrapExitBase            = 128
 	trapBasePlaceholder           = "@TRAP_EXIT_BASE@"
 	trapReceiptIncludePlaceholder = "@TRAP_RECEIPT_INCLUDE@"
 	trapReceiptWritePlaceholder   = "@TRAP_RECEIPT_WRITE@"
