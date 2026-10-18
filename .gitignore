@@ -22,3 +22,7 @@ tmp/
 *.tsbuildinfo
 /tools/__pycache__/
 # <<< ssealed ignore patterns <<<
+
+# Scratch evidence belongs in .cache/evidence/. Reviewed receipts are promoted
+# explicitly with git add -f; existing tracked historical receipts remain tracked.
+/docs/ops/evidence/*.json
