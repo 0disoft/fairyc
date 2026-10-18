@@ -30,7 +30,7 @@ func TestVerifyRejectsMissingTransitiveCleanupAuthority(t *testing.T) {
 			t.Fatalf("missing authority accepted: %s", body)
 		}
 		for _, failure := range failures {
-			if failure.Code != "V1001" || !strings.Contains(failure.Detail, "cleanup exceeds function effect authority") {
+			if failure.Code != CodeEffectAuthority || !strings.Contains(failure.Detail, "cleanup exceeds function effect authority") {
 				t.Fatalf("unexpected failure: %+v", failure)
 			}
 		}

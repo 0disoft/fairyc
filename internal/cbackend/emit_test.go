@@ -1479,7 +1479,7 @@ func TestEmitRejectsConflictingExternalDeclarations(t *testing.T) {
 		"main.fy":      "module main;\nfn i32 main() { return 0; }\n",
 	})
 	_, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
-	if err == nil || !strings.Contains(err.Error(), "C emission requires verified MIR: V1001") {
+	if err == nil || !strings.Contains(err.Error(), "C emission requires verified MIR: V1020") {
 		t.Fatalf("Emit() error = %v", err)
 	}
 }
@@ -3438,7 +3438,7 @@ func TestEmitUnknownInternalCalleeFailsClosed(t *testing.T) {
 	program.Functions[0].Blocks[0].Terminator.Callee = hir.SymbolID(9001)
 	if failures := mir.Verify(program); len(failures) == 0 {
 		t.Fatalf("verified MIR accepted an unknown internal callee")
-	} else if failures[0].Code != "V1001" {
+	} else if failures[0].Code != mir.CodeCallSignature {
 		t.Fatalf("verification failure = %+v", failures[0])
 	}
 }

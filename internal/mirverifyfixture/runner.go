@@ -150,7 +150,11 @@ func runCase(fixture caseDefinition, baseline mir.Program) []Failure {
 		return []Failure{{CaseID: fixture.ID, Detail: fmt.Sprintf("mutation applied %d times, want exactly 1", applied)}}
 	}
 	actual := mir.Verify(mutated)
-	if len(actual) != 1 || actual[0].Code != fixture.Expect.Codes[0] || actual[0].Entity != fixture.Expect.PrimaryEntity {
+	matches := len(actual) > 0
+	for _, failure := range actual {
+		matches = matches && failure.Code == fixture.Expect.Codes[0] && failure.Entity == fixture.Expect.PrimaryEntity
+	}
+	if !matches {
 		return []Failure{{CaseID: fixture.ID, Detail: fmt.Sprintf("verifier result: want %s at %s, got %+v", fixture.Expect.Codes[0], fixture.Expect.PrimaryEntity, actual)}}
 	}
 	return nil

@@ -1,6 +1,7 @@
 package mir
 
 import (
+	"slices"
 	"strings"
 	"testing"
 
@@ -17,7 +18,7 @@ func TestVerifyRejectsMissingInternalCallTarget(t *testing.T) {
 		},
 	}}}
 	failures := Verify(program)
-	if len(failures) != 1 || failures[0].Code != "V1001" || failures[0].Entity != "terminator:call" {
+	if len(failures) != 1 || failures[0].Code != CodeCallSignature || failures[0].Entity != "terminator:call" {
 		t.Fatalf("Verify() = %+v", failures)
 	}
 }
@@ -113,8 +114,8 @@ func TestVerifyRejectsMalformedBoolSwitch(t *testing.T) {
 		}},
 	}}}
 	failures := Verify(program)
-	if len(failures) != 1 || failures[0].Code != "V1001" {
-		t.Fatalf("Verify() failures = %+v, want one V1001", failures)
+	if len(failures) != 1 || failures[0].Code != CodeControlFlow {
+		t.Fatalf("Verify() failures = %+v, want the classified shape failure", failures)
 	}
 }
 
@@ -135,8 +136,8 @@ func TestVerifyRejectsMalformedBorrowedViewLength(t *testing.T) {
 		}},
 	}}}
 	failures := Verify(program)
-	if len(failures) != 1 || failures[0].Code != "V1001" {
-		t.Fatalf("Verify() failures = %+v, want one V1001", failures)
+	if len(failures) != 1 || failures[0].Code != CodeOperationShape {
+		t.Fatalf("Verify() failures = %+v, want the classified shape failure", failures)
 	}
 }
 
@@ -154,8 +155,13 @@ func TestVerifyRejectsMalformedResultOperation(t *testing.T) {
 		}},
 	}}}
 	failures := Verify(program)
-	if len(failures) != 1 || failures[0].Code != "V1001" {
-		t.Fatalf("Verify() failures = %+v, want one compacted V1001", failures)
+	expected := []VerificationError{
+		{Code: CodeOperationShape, Entity: "block:0.operation:0", Detail: "Result operation has an invalid variant"},
+		{Code: CodeOperationShape, Entity: "block:0.operation:0", Detail: "Result operation must have one operand and one destination"},
+		{Code: CodeOperationType, Entity: "block:0.operation:0", Detail: "Result construction has no concrete Result type"},
+	}
+	if !slices.Equal(failures, expected) {
+		t.Fatalf("Verify() failures = %+v, want all independent result failures", failures)
 	}
 }
 
@@ -177,8 +183,8 @@ func TestVerifyRejectsMalformedResultSwitch(t *testing.T) {
 		}},
 	}}}
 	failures := Verify(program)
-	if len(failures) != 1 || failures[0].Code != "V1001" {
-		t.Fatalf("Verify() failures = %+v, want one V1001", failures)
+	if len(failures) != 1 || failures[0].Code != CodeControlFlow {
+		t.Fatalf("Verify() failures = %+v, want the classified shape failure", failures)
 	}
 }
 
@@ -190,15 +196,15 @@ func TestVerifyRejectsOptionNoneWithPayload(t *testing.T) {
 		Blocks: []Block{{
 			ID: 0,
 			Operations: []Operation{{
-				Kind: OperationOptionConstruct, DestinationLocal: 1, Variant: "none",
+				Kind: OperationOptionConstruct, DestinationLocal: 1, Variant: "none", Type: hir.Option(hir.TypeI32),
 				Operands: []Operand{{Kind: OperandI32, I32: 42}},
 			}},
 			Terminator: Terminator{Kind: TerminatorReturn, UnwindSuccessor: NoBlock, ReturnValue: Operand{Kind: OperandI32, I32: 0}},
 		}},
 	}}}
 	failures := Verify(program)
-	if len(failures) != 1 || failures[0].Code != "V1001" {
-		t.Fatalf("Verify() failures = %+v, want one V1001", failures)
+	if len(failures) != 1 || failures[0].Code != CodeOperationShape {
+		t.Fatalf("Verify() failures = %+v, want the classified shape failure", failures)
 	}
 }
 
@@ -224,8 +230,8 @@ func TestVerifyRejectsTaggedOperationsWithoutConcreteTypes(t *testing.T) {
 				}},
 			}}}
 			failures := Verify(program)
-			if len(failures) != 1 || failures[0].Code != "V1001" {
-				t.Fatalf("Verify() failures = %+v, want one V1001", failures)
+			if len(failures) != 1 || failures[0].Code != CodeOperationType {
+				t.Fatalf("Verify() failures = %+v, want the classified shape failure", failures)
 			}
 		})
 	}
@@ -251,8 +257,8 @@ func TestVerifyRejectsResourceConstructionFieldMismatch(t *testing.T) {
 			}},
 		}}}
 	failures := Verify(program)
-	if len(failures) != 1 || failures[0].Code != "V1001" {
-		t.Fatalf("Verify() failures = %+v, want one V1001", failures)
+	if len(failures) != 1 || failures[0].Code != CodeOperationShape {
+		t.Fatalf("Verify() failures = %+v, want the classified shape failure", failures)
 	}
 }
 
@@ -276,7 +282,7 @@ fn i32 main() {
 		}
 	}
 	failures := Verify(program)
-	if len(failures) != 1 || failures[0].Code != "V1001" || !strings.Contains(failures[0].Detail, "effects") {
+	if len(failures) != 1 || failures[0].Code != CodeDropGlue || !strings.Contains(failures[0].Detail, "effects") {
 		t.Fatalf("Verify() failures = %+v, want one drop-effect V1001", failures)
 	}
 }
@@ -301,14 +307,14 @@ func TestVerifyRejectsStructConstructionFieldMismatch(t *testing.T) {
 		}},
 	}
 	failures := Verify(program)
-	if len(failures) != 1 || failures[0].Code != "V1001" {
-		t.Fatalf("Verify() failures = %+v, want one V1001", failures)
+	if len(failures) != 1 || failures[0].Code != CodeAggregateUse {
+		t.Fatalf("Verify() failures = %+v, want the classified shape failure", failures)
 	}
 	// An empty constructor is valid only for an actually fieldless definition.
 	program.Functions[0].Blocks[0].Operations[0].Fields = nil
 	program.Functions[0].Blocks[0].Operations[0].Operands = nil
 	failures = Verify(program)
-	if len(failures) != 1 || failures[0].Code != "V1001" {
+	if len(failures) != 1 || failures[0].Code != CodeAggregateUse {
 		t.Fatalf("empty constructor for nonempty type: %+v", failures)
 	}
 }
@@ -328,7 +334,7 @@ func TestVerifyRejectsPayloadMoveOnNonPayloadOperation(t *testing.T) {
 		}},
 	}}}
 	failures := Verify(program)
-	if len(failures) != 1 || failures[0].Code != "V1001" {
-		t.Fatalf("Verify() failures = %+v, want one V1001", failures)
+	if len(failures) != 1 || failures[0].Code != CodeOperationShape {
+		t.Fatalf("Verify() failures = %+v, want the classified shape failure", failures)
 	}
 }

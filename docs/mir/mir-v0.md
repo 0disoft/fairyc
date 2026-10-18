@@ -75,7 +75,7 @@ the frozen place operands and rejects any path, type, mutability, operator, valu
 The mutable byte view has metadata, checked read/store, and internal-call semantics. Inside verified
 unsafe provenance, `byte-slice-data-address` may produce internal `*mut u8` from source `ref mut u8[]`; the shared
 owner produces only internal immutable `*u8`. The verifier rejects a mismatched owner, element type, pointer
-mutability, static mutable storage request, or missing source operand as `V1001`.
+mutability, static mutable storage request, or missing source operand as `V1031`.
 ADR 0415 admits exclusive byte slicing through the existing checked slice
 operations with matching mutable owner/result types; general projections remain unsupported.
 
@@ -143,12 +143,12 @@ returns `bool`; ordering admits matching operands from the four Fairy integer ty
   `i32`, `u8`, `u32`, or `usize` operands and return that same type. `/` and `%` admit the same
   matching integer set with an exact typed checked-division marker and switch. `&`, `^`, and `|`
   admit the same matching set without a trap; `>>` admits it through an exact typed checked-shift
-  marker and switch. `V1001` rejects missing or forged type metadata,
+  marker and switch. `V1031` rejects missing or forged type metadata,
 invalid immediate families, mixed types, aggregate equality, pointer ordering, and boolean ordering.
 
 A scalar `unary` operation also records exact `OwnerType` and result `Type`. `~` admits `i32`,
 `u8`, `u32`, or `usize` and returns that same type; `!` remains `bool -> bool`, while unary `+` and
-checked unary `-` remain `i32 -> i32`. `V1001` rejects operator, operand, owner, result, immediate,
+checked unary `-` remain `i32 -> i32`. `V1031` rejects operator, operand, owner, result, immediate,
 or destination drift instead of letting an interpreter or backend infer `i32` from the opcode.
 
 Built-in `Option` and `Result` construction records the concrete constructed type. Inert struct,
@@ -156,7 +156,7 @@ restricted user enum, and resource construction use distinct operations backed b
 program-level definitions, so
 copyable layout values never acquire cleanup semantics by being mistaken for resources. Field reads
 name the owner type and are verified against exactly one aggregate definition. Payload extraction
-records the concrete extracted type. Missing type identity is `V1001`; an interpreter or backend
+records the concrete extracted type. Missing type identity is `V1032`; an interpreter or backend
 cannot infer it from source syntax, local numbering, or use sites.
 
 Each restricted user enum definition preserves declaration-ordered variants and declaration-ordered
@@ -164,13 +164,13 @@ named payload fields. `enum-construct` records the exact variant and a complete 
 `enum-payload` records owner type, active variant, field, and extracted type. An `enum` switch
 records the concrete enum type and a variant table in declaration order, with one successor per
 variant. The verifier rejects missing definitions, forged variants, incomplete or duplicate fields,
-payload type drift, and reordered or incomplete switch tables as `V1001`. Resource and safe-borrow
+payload type drift as `V1033`, and reordered or incomplete switch tables as `V1001`. Resource and safe-borrow
 payloads are rejected before MIR.
 
 The `view-length` operation accepts exactly one operand whose verified owner is a safe borrow of
 `str` or `[u8]`. It records that owner type, the exact `len` property, and a `usize` destination.
 The operation copies the existing byte-length metadata and has no call, allocation, scan, trap, or
-ownership effect. A mismatched operand family, owner, property, or result is `V1001`; backends may
+ownership effect. A mismatched operand family, owner, property, or result is `V1031`; backends may
 not reinterpret the count as Unicode scalars, graphemes, capacity, or a C terminator-inclusive size.
 
 The distinct `view-empty` operation accepts the same exact owner and operand shapes, records the
@@ -182,7 +182,7 @@ Immutable byte-view indexing uses a `view-index-check` marker, a two-successor
 the `view-index` load. The marker, switch, and load carry the same already-evaluated `&[u8]` receiver
 and `usize` index in source order. The load records the exact borrowed owner and a `u8` destination.
 The verifier rejects a mismatched family, index type, result type, operator, marker, trap category,
-or non-dominating check as `V1001` or `V1501`. It never infers safety from generated-C layout.
+or non-dominating check as `V1031` or `V1501`. It never infers safety from generated-C layout.
 
 Immutable byte-view slicing uses the parallel `view-slice-check`, `checked-view-slice`, non-returning
 `bounds` trap, and `view-slice` continuation shape. Marker, switch, and continuation carry the same
@@ -199,7 +199,7 @@ exact `i64`; slice/metadata operations keep element counts rather than byte
 counts. Actual local definitions must match the selected array/view and usize
 bounds, so receiver annotations cannot launder i64 storage into byte access.
 No new operation or serialized field is introduced.
-`V1001` rejects malformed view or bound metadata; `V1501` rejects a missing marker, reordered
+`V1031` rejects malformed view or bound metadata; `V1501` rejects a missing marker, reordered
 operands, wrong trap edge, or non-dominating check.
 
 Source omitted bounds exist only in typed HIR. An omitted start becomes `usize` zero; an omitted end
@@ -210,7 +210,7 @@ verified MIR, and receiver evaluation is never duplicated to obtain the default 
 The implemented raw-address operation accepts only a direct local place produced by an exact safe
 borrow-to-raw-pointer cast. It records pointee type, source borrow mutability, destination pointer
 type, source span, and containing unsafe scope. `V1701` rejects missing or forged scope provenance;
-`V1001` rejects a mismatched place, pointee, mutability, or operation shape. The C backend emits
+`V1031` rejects a mismatched place, pointee, mutability, or operation shape. The C backend emits
 `&local`; the interpreter reports a native-only capability boundary instead of fabricating an address.
 
 The separate `raw-borrow-pointer` operation consumes one already-evaluated safe-borrow local and
@@ -225,7 +225,7 @@ source span, declaration-ordered field names and resolved field types, and drop 
 Resource construction names that definition and lists exactly its declared fields in order. A field
 read records both the owning resource type and result type. Missing definitions, reordered or unknown
 fields, mismatched result types, duplicate definitions, invalid fields, and a drop classification
-other than the currently executable `empty` kind are `V1001`. The MIR lowering derives `NeedsDrop`
+other than the currently executable `empty` kind are `V1012`. The MIR lowering derives `NeedsDrop`
 from these definitions; callers cannot supply a separate AST-built resource-type side channel.
 
 Each arithmetic family has distinct operations. Backends cannot infer trapping or wrapping from a build profile.
@@ -308,7 +308,7 @@ type checking remains a backend responsibility in this prototype.
 The `scalar-cast` operation accepts one already-evaluated operand and records exact source and result
 types for one of the four value-preserving integer pairs. It has one destination and no trap,
 ownership, allocation, or unsafe provenance. The verifier rejects missing type identity, a forged
-pair, a mismatched immediate family, an extra operand, or a missing destination as `V1001`.
+pair, a mismatched immediate family, an extra operand, or a missing destination as `V1031`.
 Interpreters and backends must preserve the mathematical value rather than reinterpreting bits.
 
 A checked ordinary `+`, `-`, or `*` lowers one typed `binary`, one typed `checked-arithmetic` marker,
@@ -332,7 +332,7 @@ output slot; MIR still contains no raw load, store, arithmetic, or pointee conve
 
 Foreign declarations preserve separate source and external link identities. Declarations mapped to
 one link identity must have the same ABI, result type, and ordered parameter types or verification
-fails as `V1001`. Foreign calls cannot expose a safe reference in their raw MIR signature. Unknown
+fails as `V1020`. Foreign calls cannot expose a safe reference in their raw MIR signature. Unknown
 foreign functions receive no alias, no-unwind, read-only, or escape attributes unless an explicit
 wrapper contract proves them.
 
@@ -342,8 +342,27 @@ The verifier runs before every interpreter or backend handoff.
 
 | Code | Invariant |
 | --- | --- |
-| `V1001` | Every reachable block ends in exactly one terminator; each operation has its required shape and concrete type identity; every executable aggregate use agrees with one valid program-level definition; internal function symbols and call signature shapes are closed and consistent; and foreign declarations mapped to one link name have compatible signatures. |
+| `V1001` | Reachable control flow has valid entry, successor, terminator, and switch shapes. |
 | `V1002` | Every use is dominated by an initialized assignment on all incoming paths. |
+| `V1003` | Compiler admission capabilities must be valid. |
+| `V1010` | Aggregate definitions have unique concrete identities and cannot collide across kinds. |
+| `V1011` | Aggregate fields and variants have valid unique names and admitted field types. |
+| `V1012` | Resource drop declarations, signatures, ownership obligations, and effect sets agree with their glue. |
+| `V1020` | Foreign declarations have valid C ABI signatures and compatible link-name bindings. |
+| `V1021` | Internal function symbols are present, unique, and distinct from foreign symbols. |
+| `V1022` | Internal calls name an existing function and match its parameter count and result destination. |
+| `V1023` | Return values agree with the enclosing function result shape. |
+| `V1030` | Each operation has a known executable MIR kind. |
+| `V1031` | Operation operands, destinations, operators, and metadata have the required shape. |
+| `V1032` | Operation and signature types have concrete admitted identities. |
+| `V1033` | Aggregate operations agree with their declared owners, fields, and variants. |
+| `V1034` | Operands have known kinds, valid immediate ranges, and exact static or pointer types. |
+| `V1035` | Compiler-scheduled cleanup stays within the function effect authority. |
+| `V1040` | Private storage operations require explicit compiler admission. |
+| `V1041` | Private storage operations have valid shapes and admitted element types. |
+| `V1042` | Private storage and indexed-view operations use exact actual operand types. |
+| `V1043` | Private storage transfers carry matching source and unsafe-scope provenance. |
+| `V1044` | Returned storage views preserve their actual verified type. |
 | `V1101` | A resource root is moved, dropped, or burned at most once. |
 | `V1102` | A live resource on a normal exiting edge has exactly one cleanup obligation. |
 | `V1103` | No resource projection appears in a `Move` operand. |
@@ -453,3 +472,7 @@ dominate each address. Actual local owner types are checked for u8 array-view
 conversions as well as other integers. No new operation, codec field or runtime
 helper is introduced. Source Flow retains whole-array origins, exclusive child
 generations and the temporary owner hold during index evaluation.
+
+Verifier results retain every distinct `(Code, Entity, Detail)` triple. See
+[verification error classification](verification-errors.md) for machine-readable categories;
+`Detail` supplies context and is never parsed to select a code.

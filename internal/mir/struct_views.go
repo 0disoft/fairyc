@@ -49,7 +49,7 @@ func verifyStructViewTypes(function *Function, p typeProperties) []VerificationE
 	var failures []VerificationError
 	check := func(value hir.Type) {
 		if !p.validStructViewType(value) {
-			failures = append(failures, VerificationError{Code: "V1001", Entity: function.Name, Detail: "struct view requires an actual nonempty plain scalar-field struct"})
+			failures = append(failures, VerificationError{Code: CodeOperationType, Entity: function.Name, Detail: "struct view requires an actual nonempty plain scalar-field struct"})
 		}
 	}
 	check(function.ResultType)

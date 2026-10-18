@@ -152,16 +152,16 @@
   ],
   "cases": [
     {
-      "id": "fail.mir-verify.v1001.resource-type-definition-missing",
+      "id": "fail.mir-verify.v1033.resource-type-definition-missing",
       "seed": "resource-return",
       "mutation": { "kind": "remove-resource-type-definition", "target": "resource-type:seed-token" },
-      "expect": { "status": "reject", "codes": ["V1001"], "primaryEntity": "resource-type:seed-token" }
+      "expect": { "status": "reject", "codes": ["V1033"], "primaryEntity": "resource-type:seed-token" }
     },
     {
-      "id": "fail.mir-verify.v1001.tagged-type-missing",
+      "id": "fail.mir-verify.v1032.tagged-type-missing",
       "seed": "normalized-control",
       "mutation": { "kind": "remove-tagged-operation-type", "target": "operation:result-construct" },
-      "expect": { "status": "reject", "codes": ["V1001"], "primaryEntity": "operation:result-construct" }
+      "expect": { "status": "reject", "codes": ["V1032"], "primaryEntity": "operation:result-construct" }
     },
     {
       "id": "fail.mir-verify.v1001.missing-terminator",
@@ -280,10 +280,10 @@
       "expect": { "status": "reject", "codes": ["V1502"], "primaryEntity": "terminator:call" }
     },
     {
-      "id": "fail.mir-verify.v1001.internal-call-target-missing",
+      "id": "fail.mir-verify.v1022.internal-call-target-missing",
       "seed": "normal-call",
       "mutation": { "kind": "replace-call-callee-with-missing", "target": "terminator:call" },
-      "expect": { "status": "reject", "codes": ["V1001"], "primaryEntity": "terminator:call" }
+      "expect": { "status": "reject", "codes": ["V1022"], "primaryEntity": "terminator:call" }
     },
     {
       "id": "fail.mir-verify.v1601.source-form-remains",

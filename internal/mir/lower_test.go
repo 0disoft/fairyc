@@ -568,7 +568,7 @@ func TestVerifyKeepsI32AndCIntForeignSignaturesDistinct(t *testing.T) {
 	conflict.Entity = "foreign:other.fy:0:1"
 	program.ForeignFunctions = append(program.ForeignFunctions, conflict)
 	failures := Verify(program)
-	if len(failures) != 1 || failures[0].Code != "V1001" || failures[0].Entity != conflict.Entity || !strings.Contains(failures[0].Detail, "conflicting signatures") {
+	if len(failures) != 1 || failures[0].Code != CodeForeignDeclaration || failures[0].Entity != conflict.Entity || !strings.Contains(failures[0].Detail, "conflicting signatures") {
 		t.Fatalf("Verify() failures = %+v", failures)
 	}
 }
@@ -583,7 +583,7 @@ func TestVerifyRejectsConflictingForeignSignaturesForOneLinkName(t *testing.T) {
 	conflict.Entity = "foreign:other.fy:0:1"
 	program.ForeignFunctions = append(program.ForeignFunctions, conflict)
 	failures := Verify(program)
-	if len(failures) != 1 || failures[0].Code != "V1001" || failures[0].Entity != conflict.Entity || !strings.Contains(failures[0].Detail, "conflicting signatures") {
+	if len(failures) != 1 || failures[0].Code != CodeForeignDeclaration || failures[0].Entity != conflict.Entity || !strings.Contains(failures[0].Detail, "conflicting signatures") {
 		t.Fatalf("Verify() failures = %+v", failures)
 	}
 }
@@ -594,7 +594,7 @@ func TestVerifyRejectsEmptyForeignLinkName(t *testing.T) {
 	entity := program.ForeignFunctions[0].Entity
 	program.ForeignFunctions[0].LinkName = ""
 	failures := Verify(program)
-	if len(failures) != 1 || failures[0].Code != "V1001" || failures[0].Entity != entity || !strings.Contains(failures[0].Detail, "incomplete") {
+	if len(failures) != 1 || failures[0].Code != CodeForeignDeclaration || failures[0].Entity != entity || !strings.Contains(failures[0].Detail, "incomplete") {
 		t.Fatalf("Verify() failures = %+v", failures)
 	}
 }
@@ -643,7 +643,7 @@ func TestLowerPreservesRawPointerAndTargetScalarForeignOperands(t *testing.T) {
 			break
 		}
 	}
-	if failures := Verify(mutated); len(failures) != 1 || failures[0].Code != "V1001" {
+	if failures := Verify(mutated); len(failures) != 1 || failures[0].Code != CodeOperandShape {
 		t.Fatalf("Verify() invalid null type = %+v", failures)
 	}
 }
@@ -700,7 +700,7 @@ fn i32 main() {
 			}
 		}
 	}
-	if failures := Verify(mutated); len(failures) != 1 || failures[0].Code != "V1001" {
+	if failures := Verify(mutated); len(failures) != 1 || failures[0].Code != CodeOperationShape {
 		t.Fatalf("Verify() strengthened raw-address mutability = %+v", failures)
 	}
 }
@@ -741,7 +741,7 @@ fn i32 main() {
 			}
 		}
 	}
-	if failures := Verify(mutated); len(failures) != 1 || failures[0].Code != "V1001" {
+	if failures := Verify(mutated); len(failures) != 1 || failures[0].Code != CodeOperationShape {
 		t.Fatalf("Verify() mismatched opaque raw address = %+v", failures)
 	}
 }
@@ -795,7 +795,7 @@ fn i32 main() {
 			}
 		}
 	}
-	if failures := Verify(mutated); len(failures) != 1 || failures[0].Code != "V1001" {
+	if failures := Verify(mutated); len(failures) != 1 || failures[0].Code != CodeOperationShape {
 		t.Fatalf("Verify() mismatched raw borrow pointer = %+v", failures)
 	}
 }
@@ -834,7 +834,7 @@ fn i32 main() {
 			}
 		}
 	}
-	if failures := Verify(mutated); len(failures) != 1 || failures[0].Code != "V1001" {
+	if failures := Verify(mutated); len(failures) != 1 || failures[0].Code != CodeOperandShape {
 		t.Fatalf("Verify() unterminated C string failures = %+v", failures)
 	}
 }
@@ -929,7 +929,7 @@ fn i32 main() {
 			}
 		}
 	}
-	if failures := Verify(mutated); len(failures) != 1 || failures[0].Code != "V1001" {
+	if failures := Verify(mutated); len(failures) != 1 || failures[0].Code != CodeOperandShape {
 		t.Fatalf("Verify() byte-string type mutation failures = %+v", failures)
 	}
 }
@@ -968,7 +968,7 @@ fn i32 main() {
 			}
 		}
 	}
-	if failures := Verify(mutated); len(failures) == 0 || failures[0].Code != "V1001" {
+	if failures := Verify(mutated); len(failures) == 0 || failures[0].Code != CodeOperationShape {
 		t.Fatalf("Verify() view-empty type mutation failures = %+v", failures)
 	}
 }
@@ -1042,7 +1042,7 @@ fn i32 main() {
 		}
 	}
 	failures = Verify(mutated)
-	if len(failures) == 0 || failures[0].Code != "V1001" {
+	if len(failures) == 0 || failures[0].Code != CodeOperationShape {
 		t.Fatalf("Verify() index type mutation failures = %+v", failures)
 	}
 }
@@ -1237,7 +1237,7 @@ fn i32 main() {
 			}
 		}
 	}
-	if failures := Verify(mutated); len(failures) == 0 || failures[0].Code != "V1001" {
+	if failures := Verify(mutated); len(failures) == 0 || failures[0].Code != CodeOperationShape {
 		t.Fatalf("Verify() cast source mutation failures = %+v", failures)
 	}
 }
@@ -1276,7 +1276,7 @@ fn i32 main() {
 			}
 		}
 	}
-	if failures := Verify(mutated); len(failures) == 0 || failures[0].Code != "V1001" {
+	if failures := Verify(mutated); len(failures) == 0 || failures[0].Code != CodeOperationShape {
 		t.Fatalf("Verify() comparison owner mutation failures = %+v", failures)
 	}
 }
@@ -1510,7 +1510,7 @@ fn i32 main() {
 			}
 		}
 	}
-	if failures := Verify(mutated); len(failures) == 0 || failures[0].Code != "V1001" {
+	if failures := Verify(mutated); len(failures) == 0 || failures[0].Code != CodeOperationShape {
 		t.Fatalf("Verify() bitwise-not type mutation failures = %+v", failures)
 	}
 }
@@ -1767,8 +1767,12 @@ fn i32 main() {
 			mutated := Clone(program)
 			mutation.mutate(&mutated)
 			failures := Verify(mutated)
-			if len(failures) == 0 || failures[0].Code != "V1001" {
-				t.Fatalf("Verify() failures = %+v, want V1001", failures)
+			expectedCode := CodeAggregateUse
+			if mutation.name == "switch-table" {
+				expectedCode = CodeControlFlow
+			}
+			if len(failures) == 0 || failures[0].Code != expectedCode {
+				t.Fatalf("Verify() failures = %+v, want the classified invariant failure", failures)
 			}
 		})
 	}
@@ -1808,7 +1812,7 @@ fn i32 main() {
 			}
 		}
 	}
-	if failures := Verify(mutated); len(failures) != 1 || failures[0].Code != "V1001" {
+	if failures := Verify(mutated); len(failures) != 1 || failures[0].Code != CodeOperandShape {
 		t.Fatalf("Verify() UTF-8 string type mutation failures = %+v", failures)
 	}
 }
@@ -1885,7 +1889,7 @@ func TestLowerPreservesAlwaysCheckedAssert(t *testing.T) {
 			break
 		}
 	}
-	if failures := Verify(mutated); len(failures) == 0 || failures[0].Code != "V1001" {
+	if failures := Verify(mutated); len(failures) == 0 || failures[0].Code != CodeControlFlow {
 		t.Fatalf("Verify() assert operand-type mutation failures = %+v", failures)
 	}
 }
@@ -2020,7 +2024,7 @@ fn i32 main() {
 			}
 		}
 	}
-	if failures := Verify(mutated); len(failures) == 0 || failures[0].Code != "V1001" {
+	if failures := Verify(mutated); len(failures) == 0 || failures[0].Code != CodeOperationShape {
 		t.Fatalf("Verify() store mutation failures = %+v", failures)
 	}
 }
@@ -2070,7 +2074,7 @@ fn i32 main() { return if (make().len == 3) { 42 } else { 1 }; }
 			}
 		}
 	}
-	if failures := Verify(mutated); len(failures) == 0 || failures[0].Code != "V1001" {
+	if failures := Verify(mutated); len(failures) == 0 || failures[0].Code != CodeOperationShape {
 		t.Fatalf("Verify() array-length mutation failures = %+v", failures)
 	}
 }
@@ -2116,7 +2120,7 @@ fn i32 main() {
 			}
 		}
 	}
-	if failures := Verify(mutated); len(failures) == 0 || failures[0].Code != "V1001" {
+	if failures := Verify(mutated); len(failures) == 0 || failures[0].Code != CodeOperationShape {
 		t.Fatalf("Verify() array byte-view mutation failures = %+v", failures)
 	}
 }
@@ -2160,7 +2164,7 @@ fn i32 main() {
 			}
 		}
 	}
-	if failures := Verify(mutated); len(failures) == 0 || failures[0].Code != "V1001" {
+	if failures := Verify(mutated); len(failures) == 0 || failures[0].Code != CodeOperationShape {
 		t.Fatalf("Verify() mutable byte-view type mutation failures = %+v", failures)
 	}
 }
@@ -2251,7 +2255,7 @@ fn ref mut u8[] view_mut(ref mut Buffer value) {
 	}
 	mutated := Clone(program)
 	mutated.Functions[mutableFunction].Blocks[mutableBlock].Operations[mutableOperation].OwnerType = hir.SharedBorrow(hir.ParseType("main::Buffer"))
-	if failures := Verify(mutated); len(failures) == 0 || failures[0].Code != "V1001" {
+	if failures := Verify(mutated); len(failures) == 0 || failures[0].Code != CodeOperationShape {
 		t.Fatalf("Verify() shared-owner mutation failures = %+v", failures)
 	}
 }
