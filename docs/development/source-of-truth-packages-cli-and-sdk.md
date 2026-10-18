@@ -1,0 +1,362 @@
+# Source of Truth - Packages, CLI, and Standard Library
+
+Part 2 of 3 of the [source index](source-of-truth.md).
+
+## Package graph, interface identity, and digests
+
+
+- **Resolved package graph fixtures**
+  - `spec/fixtures/package/manifest-v1.json` with historical manifest-v0.json coverage
+- **Resolved package graph validation and lookup**
+  - `internal/packagegraph/`
+- **Resolved package graph fixture runner**
+  - `internal/packagefixture/`
+- **PackageInstanceId v1 fixtures**
+  - `spec/fixtures/package-identity/manifest-v1.json`
+- **PackageInstanceId v1 encoding and fixture runner**
+  - `internal/packagegraph/identity.go`
+  - `internal/packageidentityfixture/`
+- **PackageCoordinateId v1 encoding and workspace mapping**
+  - `internal/packagegraph/coordinate.go`
+  - `internal/workspaceloader/semantic.go`
+  - `docs/package/package-coordinate-id-v1.md`
+- **Public-interface hash v5 fixtures**
+  - `spec/fixtures/module-interface/manifest-v5.json` with historical manifest-v1.json through manifest-v4.json coverage
+- **Public-interface extraction, hashing, and fixture runner**
+  - `internal/moduleinterface/`
+  - `internal/moduleinterfacefixture/`
+- **Package-source digest v1 fixtures**
+  - `spec/fixtures/package-source/manifest-v1.json`
+- **Package-source digest and fixture runner**
+  - `internal/packagecontent/`
+  - `internal/packagecontentfixture/`
+- **Source-file content and line-map identities**
+  - `internal/packagecontent/file_identity.go`
+  - `docs/package/source-file-identities-v1.md`
+  - `docs/adr/0184-source-file-integrity-identities-v1.md`
+- **Generated lockfile v1**
+  - `internal/lockfile/`
+  - `docs/package/lockfile-v1.md`
+
+## Cache, artifacts, and compilation reuse
+
+
+- **Whole-package cache-key v4 fixtures**
+  - `spec/fixtures/package-cache/manifest-v8.json` with historical manifest-v1.json through manifest-v7.json coverage
+- **Whole-package cache key, bounded memory store, and fixture runner**
+  - `internal/packagecache/`
+  - `internal/packagecachefixture/`
+- **Exact running-compiler executable identity**
+  - `internal/buildidentity/`
+  - `docs/adr/0165-executable-digest-compiler-build-identity.md`
+- **Experimental persistent workspace-cache CLI and schema**
+  - `internal/cli/workspace_cache.go`
+  - `spec/cli/experimental-workspace-cache-check-v0.schema.json`
+  - `docs/adr/0166-experimental-persistent-workspace-cache-command.md`
+- **Bounded immutable disk cache and shared opened-root durable publication**
+  - `internal/packagecache/disk.go`
+  - `internal/durablefile/`
+  - `docs/adr/0163-bounded-immutable-disk-cache-store.md`
+  - `docs/adr/0169-opened-root-cache-containment.md`
+- **Compiler-private verified whole-program MIR artifact codec**
+  - `internal/mircodec/`
+  - `docs/adr/0149-verified-mir-artifact-codec.md`
+- **Compiler-private coordinate-stable function identity**
+  - `internal/packageartifact/`
+  - `docs/adr/0174-coordinate-stable-linking-and-cache-key-v2.md`
+- **Process-local package MIR artifact extraction, verification, and reassembly**
+  - `internal/packageartifact/artifact.go`
+  - `docs/package/process-local-mir-artifact-v0.md`
+- **Stable package type-context artifact and identity**
+  - `internal/packageartifact/context.go`
+  - `docs/adr/0161-stable-type-context-artifact.md`
+- **Stable cross-process package MIR bodies, package-scoped context projection/merge, codec, and checked rebind**
+  - `internal/packageartifact/body.go`
+  - `internal/packageartifact/context_projection.go`
+  - `internal/packageartifact/stable_artifact.go`
+  - `docs/adr/0171-package-scoped-stable-context.md`
+- **Process-bound package MIR artifact codec**
+  - `internal/packageartifact/codec.go`
+  - `docs/adr/0154-process-bound-package-artifact-codec.md`
+- **Bounded process-local package artifact cache**
+  - `internal/packageartifact/cache.go`
+  - `internal/packagecache/store.go`
+  - `docs/adr/0155-bounded-process-package-artifact-cache.md`
+- **Package-aware process-local MIR reuse coordinator**
+  - `internal/workspacecompiler/`
+  - `docs/adr/0156-all-hit-process-mir-reuse.md`
+- **Explicit stable disk package-compilation reuse coordinator**
+  - `internal/workspacecompiler/`
+  - `internal/packageartifact/stable_cache.go`
+  - `docs/adr/0164-verified-stable-disk-mir-reuse.md`
+  - `docs/adr/0353-stable-compilation-cache-records.md`
+  - `docs/adr/0354-combined-cached-state-reassembly.md`
+- **Bounded workspace check-session CLI and protocol schema**
+  - `internal/cli/workspace_session.go`
+  - `spec/cli/experimental-workspace-check-session-v0.schema.json`
+  - `docs/adr/0159-bounded-workspace-check-session.md`
+
+## Build measurement, manifest, scaffold, and workspace loading
+
+
+- **Build-measurement report schemas and configured Windows calibrations**
+  - `internal/buildmeasure/`
+  - `tools/dev/fairyc-windows-host-smoke/`
+  - `docs/adr/0150-no-cache-windows-build-calibration.md`
+  - `docs/adr/0157-process-cache-measurement-receipt.md`
+  - `docs/adr/0158-process-cache-edit-distributions.md`
+  - `docs/adr/0160-editor-shaped-session-process-measurement.md`
+  - `docs/adr/0167-paired-persistent-cache-process-measurement.md`
+  - `docs/adr/0171-package-scoped-stable-context.md`
+  - `docs/adr/0191-atlas-whole-package-rewrite-measurement.md`
+  - `docs/adr/0227-atlas-call-process-measurement-control.md`
+  - `docs/adr/0228-atlas-workspace-call-scaling-control.md`
+- **Human project-manifest v1 parser and fixtures**
+  - `internal/projectmanifest/`
+  - `internal/projectmanifestfixture/`
+  - `spec/fixtures/project-manifest/manifest-v1.json`
+- **Stable exact starter-project creation**
+  - `internal/projectscaffold/`
+  - `internal/cli/project_new.go`
+  - `docs/adr/0204-stable-starter-project-creation-v1.md`
+  - `docs/adr/0206-starter-project-guide-v2.md`
+  - `docs/adr/0208-starter-project-guide-v3.md`
+  - `docs/adr/0266-starter-guide-native-test-v4.md`
+- **Local workspace loader and fixtures**
+  - `internal/workspaceloader/`
+  - `internal/workspaceloaderfixture/`
+  - `spec/fixtures/workspace-loader/manifest-v1.json`
+
+## Stable CLI and workspace commands
+
+
+- **Stable semantic/native JSON test execution reports, schema drift guards, exact exit-code preservation, binary native stream attachments, and standalone optimized MSVC evidence**
+  - `internal/cli/workspace_tests.go`
+  - `internal/cli/schema_test.go`
+  - `spec/cli/stable-test-report-v1.schema.json`
+  - `spec/cli/stable-test-report-v4.schema.json`
+  - `tools/dev/fairyc-windows-host-smoke/main.go`
+  - `docs/adr/0287-stable-json-test-execution-report.md`
+  - `docs/adr/0314-stable-native-test-output-attachments.md`
+- **Stable bounded native-test stdin-file replay**
+  - `internal/cli/workspace_test_input.go`
+  - `examples/native_test_stdin_quickstart/`
+  - `tools/dev/fairyc-windows-host-smoke/native_test_stdin_proof.go`
+  - `docs/adr/0315-stable-native-test-stdin-file-replay.md`
+- **Stable bounded native-test process timeout**
+  - `internal/cdriver/windows_host.go`
+  - `internal/cli/workspace_tests.go`
+  - `examples/native_test_timeout_quickstart/`
+  - `tools/dev/fairyc-windows-host-smoke/native_test_timeout_proof.go`
+  - `docs/adr/0316-stable-native-test-timeout.md`
+- **Package-aware Windows workspace build/run CLI and native smoke**
+  - `internal/cli/workspace_native.go`
+  - `internal/cli/program_output.go`
+  - `internal/cdriver/windows_host.go`
+  - `tools/dev/fairyc-windows-host-smoke/`
+  - `examples/workspace_quickstart/`
+  - `examples/std_io_quickstart/`
+  - `examples/process_args_quickstart/`
+  - `docs/adr/0148-package-aware-windows-build-run.md`
+  - `docs/adr/0205-target-neutral-stage0-stdout-write.md`
+  - `docs/adr/0207-stable-windows-workspace-run-v2.md`
+  - `docs/adr/0212-stable-windows-workspace-run-v3.md`
+  - `docs/adr/0261-stable-run-program-argument-forwarding.md`
+
+## Standard library and SDK surface
+
+
+- **Compiler-bundled Stage 0 standard-library source package, public safe Arena creation, fallible native Region placement and generated-Fairy allocation-failure execution
+  byte Buffer with SDK-owned canonical scalar text append, owned text, allocation-free UTF-8 validation and immutable text-byte views, zero-copy Buffer-to-String conversion
+  Windows MSVC File ownership, partial/exact byte I/O, one-call partial write, append, exclusive create, open-or-create, existing-file update open, cursor-preserving length change
+  absolute positioning, shared size observation, exhaustive same-handle file-kind observation, bounded file-identity observation, file/directory path lifecycle and no-replace rename
+  user-enum Result C transport and propagation, user-enum Option C transport, console I/O, and process-argument APIs**
+  - `internal/sdkstdlib/`
+  - `internal/cbackend/`
+  - `internal/cstdlib/`
+  - `internal/cstdlibcontract/`
+  - `examples/std_alloc_quickstart/`
+  - `examples/regions/`
+  - `examples/std_bytes_quickstart/`
+  - `examples/std_text_quickstart/`
+  - `examples/std_text_from_buffer_quickstart/`
+  - `examples/std_fs_quickstart/`
+  - `examples/process_args_quickstart/`
+  - `examples/std_io_scalar_quickstart/`
+  - `docs/adr/0250-public-safe-arena-creation.md`
+  - `docs/adr/0251-fallible-region-placement.md`
+  - `docs/adr/0252-native-region-lifecycle-lowering.md`
+  - `docs/adr/0255-generated-fairy-region-failure-execution.md`
+  - `docs/adr/0256-generated-fairy-buffer-failure-execution.md`
+  - `docs/adr/0257-generated-fairy-string-append-failure-execution.md`
+  - `docs/adr/0258-entry-reachable-c-emission.md`
+  - `docs/adr/0259-generated-fairy-cstring-failure-execution.md`
+  - `docs/adr/0260-generated-fairy-string-copy-failure-execution.md`
+  - `docs/adr/0261-stable-run-program-argument-forwarding.md`
+  - `docs/adr/0262-scalar-and-bool-stdout-output.md`
+  - `docs/adr/0263-generated-fairy-buffer-to-string-conversion.md`
+  - `docs/adr/0302-public-allocation-free-text-byte-view.md`
+  - `docs/adr/0264-public-windows-stage0-files.md`
+  - `docs/adr/0269-public-windows-file-positioning.md`
+  - `docs/adr/0270-public-windows-file-size.md`
+  - `docs/adr/0271-public-windows-file-update-open.md`
+  - `docs/adr/0272-public-windows-file-length-change.md`
+  - `docs/adr/0274-public-windows-file-open-or-create.md`
+  - `docs/adr/0275-public-windows-file-exclusive-create.md`
+  - `docs/adr/0276-public-windows-file-append-open.md`
+  - `docs/adr/0277-public-windows-file-kind.md`
+  - `docs/adr/0278-public-windows-file-read-exact.md`
+  - `docs/adr/0279-public-windows-file-identity.md`
+  - `docs/adr/0280-result-user-enum-c-transport.md`
+  - `docs/adr/0281-public-windows-file-kind-enum.md`
+  - `docs/adr/0282-generated-user-enum-result-propagation.md`
+  - `docs/adr/0283-user-enum-option-c-transport.md`
+  - `docs/adr/0285-public-windows-file-partial-write.md`
+  - `docs/adr/0288-public-windows-file-buffer-read-append.md`
+  - `docs/adr/0290-public-windows-file-read-to-end.md`
+  - `docs/adr/0291-public-windows-file-removal.md`
+  - `docs/adr/0292-public-windows-file-no-replace-rename.md`
+  - `docs/adr/0293-public-windows-directory-lifecycle.md`
+  - `docs/adr/0294-public-windows-directory-no-replace-rename.md`
+  - `docs/adr/0246-public-safe-stage0-byte-buffer.md`
+  - `docs/adr/0247-public-safe-stage0-owned-text.md`
+  - `docs/adr/0248-public-allocation-free-utf8-validation.md`
+  - `docs/adr/0205-target-neutral-stage0-stdout-write.md`
+  - `docs/adr/0209-target-neutral-stage0-stderr-write.md`
+  - `docs/adr/0210-target-neutral-stage0-byte-output.md`
+  - `docs/adr/0211-target-neutral-stage0-stdin-read.md`
+  - `docs/adr/0215-allocation-free-stage0-i32-output.md`
+  - `docs/adr/0373-sdk-buffer-scalar-formatting.md`
+- **Public Windows directory lifecycle, no-replace rename, bounded recursive creation, dedicated raw probe ownership, and low/optimized generated-Fairy evidence**
+  - `internal/sdkstdlib/sources/std/fs.fy`
+  - `internal/cstdlib/stage0_windows_file.c`
+  - `internal/cstdlib/stage0_windows_file_probe.c`
+  - `internal/cstdlib/stage0_windows_file_directory_probe.c`
+  - `internal/cstdlibcontract/`
+  - `examples/std_fs_quickstart/`
+  - `tools/dev/fairyc-windows-host-smoke/`
+  - `docs/adr/0293-public-windows-directory-lifecycle.md`
+  - `docs/adr/0294-public-windows-directory-no-replace-rename.md`
+  - `docs/adr/0296-public-windows-recursive-directory-creation.md`
+- **Public PathKind file/directory predicates and SDK `0.0.0-stage0.46`**
+  - `internal/sdkstdlib/sources/std/fs.fy`
+  - `examples/std_fs_quickstart/src/path_ops.fy`
+  - `tools/dev/fairyc-windows-host-smoke/`
+  - `docs/adr/0317-public-path-kind-predicates.md`
+- **Allocation-free empty Buffer construction, zero-copy String-to-Buffer ownership transfer, and SDK `0.0.0-stage0.47`**
+  - `internal/sdkstdlib/sources/std/bytes.fy`
+  - `internal/sdkstdlib/sources/std/text.fy`
+  - `internal/cstdlib/stage0_owned_text.c`
+  - `internal/cstdlibcontract/`
+  - `examples/std_text_from_buffer_quickstart/`
+  - `tools/dev/fairyc-windows-host-smoke/`
+  - `docs/adr/0318-zero-copy-string-to-buffer-transfer.md`
+- **Dependency-ordered inert-enum struct fields, public sequential FileMetadata, and SDK `0.0.0-stage0.48`**
+  - `internal/cbackend/aggregate_types.go`
+  - `internal/sdkstdlib/sources/std/fs.fy`
+  - `spec/fixtures/c-emission/cases/pass/inert-enum-struct-field/`
+  - `examples/std_fs_quickstart/src/metadata.fy`
+  - `tools/dev/fairyc-windows-host-smoke/`
+  - `docs/adr/0319-public-file-metadata-snapshot.md`
+- **Target-neutral public File open/read/write/sync/close core and SDK `0.0.0-stage0.49`**
+  - `internal/sdkstdlib/sources/std/fs.fy`
+  - `internal/cstdlib/stage0_linux_file_portable.c`
+  - `internal/cstdlib/stage0_windows_file_portable.c`
+  - `internal/cstdlibcontract/`
+  - `internal/cbackendnative/`
+  - `docs/adr/0331-target-neutral-public-file-core.md`
+- **Target-neutral public File position/absolute-seek and SDK `0.0.0-stage0.50`**
+  - `internal/sdkstdlib/sources/std/fs.fy`
+  - `internal/cstdlib/stage0_linux_file_portable.c`
+  - `internal/cstdlib/stage0_windows_file_portable.c`
+  - `internal/cstdlibcontract/`
+  - `internal/cbackendnative/`
+  - `docs/adr/0332-target-neutral-public-file-positioning.md`
+- **Target-neutral public File size observation and SDK `0.0.0-stage0.51`**
+  - `internal/sdkstdlib/sources/std/fs.fy`
+  - `internal/cstdlib/stage0_linux_file_portable.c`
+  - `internal/cstdlib/stage0_windows_file_portable.c`
+  - `internal/cstdlibcontract/`
+  - `internal/cbackendnative/`
+  - `docs/adr/0333-target-neutral-public-file-size.md`
+- **Target-neutral public File relative/end seek and SDK `0.0.0-stage0.52`**
+  - `internal/sdkstdlib/sources/std/fs.fy`
+  - `internal/cstdlib/stage0_linux_file_portable.c`
+  - `internal/cstdlib/stage0_windows_file_portable.c`
+  - `internal/cstdlibcontract/`
+  - `internal/cbackendnative/`
+  - `docs/adr/0334-target-neutral-public-file-relative-end-seek.md`
+- **Public bounded Windows File-to-Buffer append reads, cross-component dependency closure, initialized-prefix commit semantics
+  and generated low/optimized MSVC allocation-failure evidence**
+  - `internal/sdkstdlib/sources/std/fs.fy`
+  - `internal/cstdlib/stage0_windows_file_buffer.c`
+  - `internal/cstdlibcontract/`
+  - `examples/std_fs_quickstart/`
+  - `tools/dev/fairyc-windows-host-smoke/read_append_failure_probe.go`
+  - `docs/adr/0288-public-windows-file-buffer-read-append.md`
+- **Allocation-free scalar stderr output, target-neutral numeric symbols, shared stack formatting, and low/optimized generated-Fairy evidence**
+  - `internal/sdkstdlib/sources/std/io.fy`
+  - `internal/cstdlib/stage0_linux_console.c`
+  - `internal/cstdlib/stage0_windows_console.c`
+  - `internal/cstdlibcontract/`
+  - `examples/std_io_scalar_quickstart/`
+  - `tools/dev/fairyc-windows-host-smoke/`
+  - `docs/adr/0303-allocation-free-scalar-stderr-output.md`
+- **Bounded Windows File current/end seek, same-handle target symbols, dedicated raw probe, and low/optimized private/public generated-Fairy evidence**
+  - `internal/sdkstdlib/sources/std/fs.fy`
+  - `internal/cstdlib/stage0_windows_file.c`
+  - `internal/cstdlib/stage0_windows_file_seek_probe.c`
+  - `internal/cstdlibcontract/`
+  - `examples/windows_file/`
+  - `examples/std_fs_quickstart/`
+  - `tools/dev/fairyc-windows-host-smoke/`
+  - `docs/adr/0305-public-windows-relative-end-seek.md`
+- **Same-handle Windows File read-only metadata, target-neutral bool mapping, dedicated implementation/probe owners, and low/optimized public generated-Fairy evidence**
+  - `internal/sdkstdlib/sources/std/fs.fy`
+  - `internal/cstdlib/stage0_windows_file.c`
+  - `internal/cstdlib/stage0_windows_file_metadata.c`
+  - `internal/cstdlib/stage0_windows_file_metadata_probe.c`
+  - `internal/cstdlibcontract/`
+  - `examples/std_fs_quickstart/`
+  - `tools/dev/fairyc-windows-host-smoke/`
+  - `docs/adr/0306-public-windows-file-read-only-metadata.md`
+- **Same-handle Windows File hard-link count, target-neutral usize mapping, real-link raw/public fixtures, and low/optimized generated-Fairy evidence**
+  - `internal/sdkstdlib/sources/std/fs.fy`
+  - `internal/cstdlib/stage0_windows_file_metadata.c`
+  - `internal/cstdlib/stage0_windows_file_metadata_probe.c`
+  - `internal/cstdlibcontract/`
+  - `examples/std_fs_quickstart/`
+  - `tools/dev/fairyc-windows-host-smoke/`
+  - `docs/adr/0307-public-windows-file-hard-link-count.md`
+- **No-replace Windows File hard-link creation, bounded pre-effect path validation, dedicated target/probe owners, shared-identity and alias-survival evidence**
+  - `internal/sdkstdlib/sources/std/fs.fy`
+  - `internal/cstdlib/stage0_windows_file_link.c`
+  - `internal/cstdlib/stage0_windows_file_link_probe.c`
+  - `internal/cstdlibcontract/`
+  - `examples/std_fs_quickstart/src/link_ops.fy`
+  - `tools/dev/fairyc-windows-host-smoke/`
+  - `docs/adr/0308-public-windows-file-hard-link-creation.md`
+- **Same-handle Windows File allocated size, target-neutral usize mapping, cursor/size preservation, and low/optimized raw plus generated-Fairy evidence**
+  - `internal/sdkstdlib/sources/std/fs.fy`
+  - `internal/cstdlib/stage0_windows_file_metadata.c`
+  - `internal/cstdlib/stage0_windows_file_metadata_probe.c`
+  - `internal/cstdlibcontract/`
+  - `examples/std_fs_quickstart/src/metadata.fy`
+  - `tools/dev/fairyc-windows-host-smoke/`
+  - `docs/adr/0309-public-windows-file-allocated-size.md`
+- **Same-handle Windows File read-only mutation, unrelated-attribute preservation, exact access-denied failure, and low/optimized raw plus generated-Fairy evidence**
+  - `internal/sdkstdlib/sources/std/fs.fy`
+  - `internal/cstdlib/stage0_windows_file_metadata.c`
+  - `internal/cstdlib/stage0_windows_file_metadata_probe.c`
+  - `internal/cstdlibcontract/`
+  - `examples/std_fs_quickstart/src/metadata.fy`
+  - `tools/dev/fairyc-windows-host-smoke/`
+  - `docs/adr/0310-public-windows-file-read-only-mutation.md`
+- **Root-protected Windows recursive directory removal, reparse-leaf handling, exact partial progress, and low/optimized raw plus generated-Fairy evidence**
+  - `internal/sdkstdlib/sources/std/fs.fy`
+  - `internal/cstdlib/stage0_windows_file_remove_tree.c`
+  - `internal/cstdlib/stage0_windows_file_remove_tree_probe.c`
+  - `internal/cstdlibcontract/`
+  - `examples/std_fs_quickstart/src/path_ops.fy`
+  - `tools/dev/fairyc-windows-host-smoke/`
+  - `docs/adr/0311-public-windows-recursive-directory-removal.md`

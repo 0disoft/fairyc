@@ -1,0 +1,61 @@
+# Design References
+
+References moved from the root README. Start with the [source index](source-of-truth.md) for current ownership. Paths below are repository-relative.
+
+
+- Product contract: `docs/product/02-spec.md`
+- Compiler and repository boundary: `docs/architecture/00-system-boundary.md`
+- Language concepts: `docs/architecture/01-domain-model.md`
+- Compilation flow: `docs/architecture/02-runtime-flow.md`
+- Quality targets: `docs/architecture/03-quality-attributes.md`
+- Initial compiler decision: `docs/adr/0001-initial-architecture-boundaries.md`
+- Contract ownership decision: `docs/adr/0002-contract-source-of-truth.md`
+- Stage 0 safety boundary: `docs/adr/0003-stage-0-safety-boundary.md`
+- Language semantics: `docs/language/`
+- Normative Stage 0 grammar: `spec/grammar/stage0.ebnf`
+- Parser acceptance fixtures: `spec/fixtures/parser/manifest-v0.json`
+- Semantic acceptance fixtures: `spec/fixtures/semantic/manifest-v0.json`
+- Resource Flow fixtures: `spec/fixtures/resource/manifest-v0.json`
+- Region fixtures: `spec/fixtures/region/manifest-v1.json`
+- Result fixtures: `spec/fixtures/result/manifest-v0.json`
+- MIR normalization fixtures: `spec/fixtures/mir/manifest-v0.json`
+- MIR verifier mutation fixtures: `spec/fixtures/mir-verifier/manifest-v0.json`
+- MIR interpreter fixtures: `spec/fixtures/interpreter/manifest-v0.json`
+- Constrained C emission fixtures: `spec/fixtures/c-emission/manifest-v0.json`
+- Shared constrained-C driver and embedded scalar runtime: `internal/cdriver/`, `internal/cruntime/`
+- Provisional target standard-library C sources: `internal/cstdlib/`
+- Linux scalar C differential runner: `internal/cbackendnative/`
+- Executable target description: `internal/target/`
+- Experimental target JSON schema: `spec/cli/experimental-target-spec-v0.schema.json`
+- Experimental bounded workspace-session schema: `spec/cli/experimental-workspace-check-session-v0.schema.json`
+- Experimental persistent workspace-cache schema: `spec/cli/experimental-workspace-cache-check-v0.schema.json`
+- Target layout engine and fixtures: `internal/layout/`, `spec/fixtures/layout/manifest-v0.json`, `spec/fixtures/layout/manifest-windows-msvc-v0.json`
+- Shared Windows MSVC C probe type emitter: `internal/msvccprobe/`
+- Shared generated-Fairy/C aggregate-result probe: `internal/foreignstructprobe/`
+- Windows MSVC native layout probe generator: `internal/windowslayoutprobe/`
+- Target C ABI classifiers and fixtures: `internal/cabi/`, `spec/fixtures/c-abi/manifest-v0.json`, `spec/fixtures/c-abi/manifest-windows-msvc-v0.json`
+- Windows MSVC native ABI probe generator: `internal/windowsabiprobe/`
+- Windows x64 native exception and virtual-unwind probe generator: `internal/windowsunwindprobe/`
+- Windows AMD64 PE, COFF object, and x64 unwind structure inspector: `internal/pecoff/`
+- Resolved acyclic package graph engine, fixture runner, and v1/v0 fixtures: `internal/packagegraph/`, `internal/packagefixture/`, `spec/fixtures/package/manifest-v1.json`
+- PackageInstanceId v1 encoding, vectors, and runner: `internal/packagegraph/identity.go`, `spec/fixtures/package-identity/manifest-v1.json`, `internal/packageidentityfixture/`
+- Public-interface hash v5 extraction with resource abilities and package-owned state layout identity, reusable package-set computation, fixtures, and runner: `internal/moduleinterface/`, `spec/fixtures/module-interface/manifest-v5.json`, `internal/moduleinterfacefixture/`
+- Package-source digest v1 encoding, fixtures, and runner: `internal/packagecontent/`, `spec/fixtures/package-source/manifest-v1.json`, `internal/packagecontentfixture/`
+- Whole-package cache-key v4, bounded memory store, current-interface/body invalidation, current v8 fixtures, and runner: `internal/packagecache/`, `spec/fixtures/package-cache/manifest-v8.json`, `internal/packagecachefixture/`; fixture manifests v1 through v7 remain historical
+- Exact-version verified whole-program MIR artifact codec: `internal/mircodec/`
+- Strict local-exact `fairy.toml` v1 parser, fixtures, and runner: `internal/projectmanifest/`, `spec/fixtures/project-manifest/manifest-v1.json`, `internal/projectmanifestfixture/`
+- Filesystem-safe local workspace loader, fixtures, and runner: `internal/workspaceloader/`, `spec/fixtures/workspace-loader/manifest-v1.json`, `internal/workspaceloaderfixture/`
+- Canonical generated `fairy.lock` v1 with strict parsing, stale comparison, and atomic replacement: `internal/lockfile/`
+- MIR and C backend contracts: `docs/mir/`
+- Package identity, visibility, source/interface hashing, per-file integrity, stable function identity, process-local MIR slices, and bounded whole-package cache: `docs/package/package-graph-v0.md`, `docs/package/package-instance-id-v1.md`, `docs/package/package-source-digest-v1.md`, `docs/package/source-file-identities-v1.md`, current `docs/package/public-interface-hash-v3.md`, `docs/package/package-function-id-v1.md`, `docs/package/process-local-mir-artifact-v0.md`, and current `docs/package/whole-package-cache-v2.md`; v1/v2 interface and v1 cache documents remain historical
+- Manifest and lockfile readiness audit: `docs/package/manifest-lockfile-readiness.md`
+- Project manifest v1: `docs/package/project-manifest-v1.md`
+- Local workspace loader v1: `docs/package/workspace-loader-v1.md`
+- Generated lockfile v1: `docs/package/lockfile-v1.md`
+- Target and C ABI: `docs/abi/c-abi-v0.md`
+- Runtime and standard library: `docs/runtime/runtime-stdlib-v0.md`
+- Compatibility and versioning: `docs/compatibility/versioning-v0.md`
+- Diagnostic catalog: `docs/diagnostics/catalog-v0.md`
+- Atlas semantic snapshot and documentation sidecar, provisional SymbolId, logical planning, canonical transport, contained current-source-validated store, bounded package-local queries, exact workspace-call catalog, canonical compiler-fact Context Packs, canonical exact retained-source/documentation attributed-text output, single-symbol Evidence Bundle v0, frontend-owned exact `///` attachment, exact catalog plus overview/show/around/calls/text/evidence CLI, whole-package rewrite measurement, fresh-process workspace-call control, and fixed-shape join-and-encode scaling control: `docs/atlas/`, `internal/lexer/documentation.go`, `internal/semanticsnapshot/`, `internal/atlasmap/`, `internal/workspacecallcatalog/`, `internal/contextpack/`, `internal/attributedtext/`, `internal/evidencebundle/`, `internal/workspaceloader/exact_source.go`, `internal/cli/atlas_pack*.go`, `internal/cli/atlas_calls.go`, `internal/cli/atlas_text.go`, `internal/cli/atlas_evidence.go`, `internal/buildmeasure/atlas_rewrite.go`, `internal/buildmeasure/atlas_call_process.go`, `internal/buildmeasure/atlas_call_scale.go`
+- CLI contract: `docs/cli/command-contract.md`
+- Workspace ownership: `docs/monorepo/package-ownership.md`

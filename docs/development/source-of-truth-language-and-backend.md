@@ -1,0 +1,292 @@
+# Source of Truth - Language, Frontend, and Backend
+
+Part 1 of 3 of the [source index](source-of-truth.md).
+
+## Product, architecture, and authority
+
+
+- **Product scope**
+  - `docs/product/02-spec.md`
+- **Architecture decisions**
+  - `docs/adr/*.md`
+- **Self-hosting start and promotion readiness**
+  - `docs/architecture/self-hosting-readiness-v0.md`
+  - `docs/product/01-roadmap.md`
+
+## Language contract and admission policy
+
+
+- **Stage 0 language semantics**
+  - `docs/language/*.md`
+  - `docs/adr/0213-classic-scalar-for-loop.md`
+  - `docs/adr/0216-checked-compound-assignment.md`
+  - `docs/adr/0217-bounded-lexical-defer.md`
+  - `docs/adr/0219-narrow-must-use-call-contract.md`
+  - `docs/adr/0220-bounded-scalar-compile-time-evaluation.md`
+  - `docs/adr/0221-explicit-source-location-intrinsic.md`
+  - `docs/adr/0222-retain-explicit-factory-construction.md`
+  - `docs/adr/0322-no-textual-preprocessing.md`
+- **Post-Stage 0 language and production-workload capability admission policy**
+  - `docs/adr/0218-modern-language-concept-admission-boundary.md`
+  - `docs/adr/0219-narrow-must-use-call-contract.md`
+  - `docs/adr/0220-bounded-scalar-compile-time-evaluation.md`
+  - `docs/adr/0221-explicit-source-location-intrinsic.md`
+  - `docs/adr/0222-retain-explicit-factory-construction.md`
+  - `docs/adr/0223-defer-static-interfaces-until-generics.md`
+  - `docs/adr/0224-defer-unproven-surface-shorthands.md`
+  - `docs/adr/0253-ada-pascal-concept-admission.md`
+  - `docs/adr/0254-defer-nominal-scalars-pending-user-domain-evidence.md`
+  - `docs/adr/0328-production-workload-capability-admission-gates.md`
+- **Normative Stage 0 grammar**
+  - `spec/grammar/stage0.ebnf`
+- **Parser acceptance fixtures**
+  - `spec/fixtures/parser/manifest-v0.json`
+
+## Frontend and compiler implementation
+
+
+- **Stage 0 frontend, exact `///` declaration-documentation attachment, classic scalar `for`, checked compound assignment, bounded lexical `defer`, narrow `@must_use`
+  bounded scalar compile-time evaluation, explicit `source_location()`, explicit resource-factory construction, verified-MIR coordinator, and MIR implementation**
+  - `internal/source/`
+  - `internal/lexer/`
+  - `internal/lexer/documentation.go`
+  - `internal/syntax/`
+  - `internal/ast/`
+  - `internal/frontend/`
+  - `internal/semantic/`
+  - `internal/hir/`
+  - `internal/compiler/`
+  - `internal/mir/`
+  - `docs/adr/0199-c-friendly-declaration-documentation-attachment.md`
+  - `docs/adr/0213-classic-scalar-for-loop.md`
+  - `docs/adr/0216-checked-compound-assignment.md`
+  - `docs/adr/0217-bounded-lexical-defer.md`
+  - `docs/adr/0219-narrow-must-use-call-contract.md`
+  - `docs/adr/0220-bounded-scalar-compile-time-evaluation.md`
+  - `docs/adr/0221-explicit-source-location-intrinsic.md`
+  - `docs/adr/0222-retain-explicit-factory-construction.md`
+- **Editor-internal immutable green tree and fail-closed full-file formatter**
+  - `internal/formatter/`
+  - `docs/adr/0375-immutable-green-tree-and-first-formatter.md`
+- **Stable starter creation, workspace check/build/run/semantic-and-native-test, diagnostic explanation, target maturity report
+  and cross-command stable CLI contract plus experimental compiler CLI and private workspace C transport implementation**
+  - `cmd/fairyc/`
+  - `internal/cli/`
+  - `internal/projectscaffold/`
+  - `docs/cli/stable-cli-contract-v0.md`
+  - `docs/adr/0175-stable-workspace-check-v1.md`
+  - `docs/adr/0176-stable-windows-workspace-build-v1.md`
+  - `docs/adr/0177-stable-windows-workspace-run-v1.md`
+  - `docs/adr/0178-stable-diagnostic-explain-v1.md`
+  - `docs/adr/0179-stable-target-maturity-report-v1.md`
+  - `docs/adr/0180-stable-workspace-c-emission-v1.md`
+  - `docs/adr/0181-stable-workspace-semantic-test-v1.md`
+  - `docs/adr/0204-stable-starter-project-creation-v1.md`
+  - `docs/adr/0206-starter-project-guide-v2.md`
+  - `docs/adr/0207-stable-windows-workspace-run-v2.md`
+  - `docs/adr/0208-starter-project-guide-v3.md`
+  - `docs/adr/0212-stable-windows-workspace-run-v3.md`
+  - `docs/adr/0261-stable-run-program-argument-forwarding.md`
+  - `docs/adr/0265-stable-isolated-windows-native-tests.md`
+  - `docs/adr/0266-starter-guide-native-test-v4.md`
+  - `docs/adr/0267-stable-exact-test-selection.md`
+  - `docs/adr/0268-stable-test-identity-listing.md`
+  - `docs/adr/0273-stable-json-test-identity-listing.md`
+  - `docs/adr/0287-stable-json-test-execution-report.md`
+  - `docs/adr/0289-stable-package-selected-workspace-tests.md`
+  - `docs/adr/0295-stable-root-reachable-workspace-tests.md`
+  - `docs/adr/0300-stable-test-source-locations.md`
+  - `docs/adr/0301-stable-test-file-selection.md`
+  - `docs/adr/0304-stable-test-directory-selection.md`
+  - `docs/adr/0312-stable-native-test-program-arguments.md`
+  - `docs/adr/0313-stable-single-native-test-stdin.md`
+  - `docs/adr/0314-stable-native-test-output-attachments.md`
+  - `docs/adr/0335-private-c11-bootstrap-transport.md`
+  - `spec/cli/stable-test-list-v3.schema.json`
+  - `spec/cli/stable-test-report-v3.schema.json`
+  - `spec/cli/stable-test-report-v4.schema.json`
+- **Direct Fairy source-byte lexing and no-textual-preprocessing contract**
+  - `internal/lexer/`
+  - `internal/projectmanifest/`
+  - `spec/grammar/stage0.ebnf`
+  - `docs/product/02-spec.md`
+  - `docs/package/project-manifest-v1.md`
+  - `docs/adr/0322-no-textual-preprocessing.md`
+
+## Acceptance fixtures and runners
+
+
+- **Parser fixture runner**
+  - `internal/parserfixture/`
+- **Semantic acceptance fixtures**
+  - `spec/fixtures/semantic/manifest-v0.json`
+- **Semantic fixture runner**
+  - `internal/semanticfixture/`
+- **Resource Flow fixtures**
+  - `spec/fixtures/resource/manifest-v0.json`
+- **Resource Flow fixture runner**
+  - `internal/resourcefixture/`
+- **Region fixtures**
+  - `spec/fixtures/region/manifest-v1.json`
+- **Region fixture runner**
+  - `internal/regionfixture/`
+- **Result fixtures**
+  - `spec/fixtures/result/manifest-v0.json`
+- **Result fixture runner**
+  - `internal/resultfixture/`
+- **MIR normalization fixtures**
+  - `spec/fixtures/mir/manifest-v0.json`
+- **MIR normalization fixture runner**
+  - `internal/mirfixture/`
+- **MIR verifier mutation fixtures**
+  - `spec/fixtures/mir-verifier/manifest-v0.json`
+- **MIR verifier mutation fixture runner**
+  - `internal/mirverifyfixture/`
+- **MIR interpreter fixtures**
+  - `spec/fixtures/interpreter/manifest-v0.json`
+- **MIR interpreter and fixture runner**
+  - `internal/interpreter/`
+  - `internal/interpreterfixture/`
+
+## C backend, targets, layout, and ABI
+
+
+- **Constrained C emitter**
+  - `internal/cbackend/`
+- **Constrained C emission fixtures**
+  - `spec/fixtures/c-emission/manifest-v0.json`
+- **Constrained C emission fixture runner**
+  - `internal/cbackendfixture/`
+- **Shared constrained-C driver and scalar runtime**
+  - `internal/cdriver/`
+  - `internal/cruntime/`
+- **Provisional target standard-library C sources and native probes**
+  - `internal/cstdlib/`
+- **Closed standard-library C symbol and component contract**
+  - `internal/cstdlibcontract/`
+- **Linux scalar C differential runner**
+  - `internal/cbackendnative/`
+  - `tools/dev/fairyc-native-fixtures/`
+- **Executable target description**
+  - `internal/target/`
+- **Experimental target JSON schema**
+  - `spec/cli/experimental-target-spec-v0.schema.json`
+- **Target layout engine**
+  - `internal/layout/`
+- **Target layout fixtures**
+  - `spec/fixtures/layout/manifest-v0.json`, `spec/fixtures/layout/manifest-windows-msvc-v0.json`
+- **Target layout fixture runner**
+  - `internal/layoutfixture/`
+- **Shared Windows MSVC C probe type emitter**
+  - `internal/msvccprobe/`
+- **Shared generated-Fairy/C aggregate-result probe**
+  - `internal/foreignstructprobe/`
+- **Windows MSVC native layout probe generator**
+  - `internal/windowslayoutprobe/`
+- **Target C ABI classifiers**
+  - `internal/cabi/`
+- **C ABI classification fixtures**
+  - `spec/fixtures/c-abi/manifest-v0.json`, `spec/fixtures/c-abi/manifest-windows-msvc-v0.json`
+- **C ABI fixture runner**
+  - `internal/cabifixture/`
+- **Windows MSVC native ABI probe generator**
+  - `internal/windowsabiprobe/`
+- **Windows x64 native exception and virtual-unwind probe generator**
+  - `internal/windowsunwindprobe/`
+- **Windows AMD64 PE, COFF object, and x64 unwind structure inspector**
+  - `internal/pecoff/`
+
+## Windows object, unwind, and link proofs
+
+
+- **Versioned exact raw and generated AMD64 COFF object fixtures and runner**
+  - `spec/fixtures/coff-object/manifest-v0.json`
+  - `spec/fixtures/coff-generated-object/manifest-v0.json`
+  - `internal/pecofffixture/`
+  - `docs/adr/0231-versioned-amd64-coff-object-fixtures.md`
+  - `docs/adr/0244-versioned-generated-amd64-coff-object-fixtures.md`
+- **Exact AMD64 REL32 object-to-image formula proof**
+  - `internal/pecoff/relocation_link.go`
+  - `internal/windowsrelocationprobe/`
+  - `internal/cdriver/`
+  - `tools/dev/fairyc-windows-host-smoke/`
+  - `docs/adr/0232-amd64-rel32-object-to-image-proof.md`
+- **Exact AMD64 REL32 through REL32_5 object-to-image formula proof**
+  - `internal/pecoff/relocation_variants.go`
+  - `internal/pecoff/relocation_variants_object.go`
+  - `internal/windowsrelocationprobe/`
+  - `internal/cdriver/`
+  - `tools/dev/fairyc-windows-host-smoke/`
+  - `docs/adr/0237-amd64-rel32-variant-object-to-image-proof.md`
+- **Exact MSVC CodeView SECTION/SECREL object-pair and final PE/PDB identity proof**
+  - `internal/pecoff/codeview_relocations.go`
+  - `internal/pecoff/program_database.go`
+  - `internal/windowsrelocationprobe/`
+  - `internal/cdriver/`
+  - `tools/dev/fairyc-windows-host-smoke/`
+  - `docs/adr/0238-msvc-codeview-section-secrel-and-pdb-association.md`
+- **Exact Windows DbgHelp function-and-source-line symbolication canary**
+  - `tools/dev/fairyc-windows-host-smoke/symbolication_windows.go`
+  - `tools/dev/fairyc-windows-host-smoke/symbolication.go`
+  - `internal/windowsrelocationprobe/`
+  - `docs/adr/0239-windows-dbghelp-symbolication-canary.md`
+- **Exact profile-specific AMD64 unwind-handler ADDR32NB object-to-image proof**
+  - `internal/pecoff/handler_link.go`
+  - `internal/windowsunwindprobe/`
+  - `internal/cdriver/`
+  - `tools/dev/fairyc-windows-host-smoke/`
+  - `docs/adr/0240-amd64-unwind-handler-relocation-proof.md`
+- **Exact AMD64 weak-external SEARCH_ALIAS fallback/strong-override proof**
+  - `internal/pecoff/weak_external_object.go`
+  - `internal/pecoff/weak_external_link.go`
+  - `internal/windowsrelocationprobe/`
+  - `internal/cdriver/`
+  - `tools/dev/fairyc-windows-host-smoke/`
+  - `docs/adr/0241-amd64-weak-external-link-proof.md`
+- **Exact AMD64 weak-external NOLIBRARY suppression and LIBRARY archive-extraction proof**
+  - `internal/pecoff/weak_external_object.go`
+  - `internal/pecoff/weak_search_link.go`
+  - `internal/windowsweaksearchprobe/`
+  - `internal/cdriver/`
+  - `tools/dev/fairyc-windows-host-smoke/`
+  - `docs/adr/0245-amd64-weak-archive-search-modes.md`
+- **Exact AMD64 relocation-overflow sentinel and real-LINK proof**
+  - `internal/pecoff/relocation_overflow_object.go`
+  - `internal/pecoff/relocation_overflow_link.go`
+  - `internal/windowsrelocationprobe/`
+  - `internal/cdriver/`
+  - `tools/dev/fairyc-windows-host-smoke/`
+  - `docs/adr/0242-amd64-relocation-overflow-link-proof.md`
+- **Exact AMD64 bigobj header/symbol and real-LINK proof**
+  - `internal/pecoff/big_object.go`
+  - `internal/pecoff/big_object_probe.go`
+  - `internal/pecoff/big_object_link.go`
+  - `internal/windowsrelocationprobe/`
+  - `internal/cdriver/`
+  - `tools/dev/fairyc-windows-host-smoke/`
+  - `docs/adr/0243-amd64-bigobj-link-proof.md`
+- **Exact AMD64 ADDR64 and unwind `.pdata` ADDR32NB object-to-image proof**
+  - `internal/pecoff/address_link.go`
+  - `internal/windowsrelocationprobe/`
+  - `internal/cdriver/`
+  - `tools/dev/fairyc-windows-host-smoke/`
+  - `docs/adr/0234-amd64-address-and-pdata-relocation-proof.md`
+- **Exact MSVC archive extraction and pick-any COMDAT final-selection proof**
+  - `internal/pecoff/archive.go`
+  - `internal/pecoff/archive_link.go`
+  - `internal/windowsarchiveprobe/`
+  - `internal/cdriver/`
+  - `tools/dev/fairyc-windows-host-smoke/`
+  - `docs/adr/0233-msvc-archive-and-comdat-selection-proof.md`
+- **Exact selected-parent associative `.pdata`/`.xdata` COMDAT proof**
+  - `internal/pecoff/associative_link.go`
+  - `internal/windowsarchiveprobe/`
+  - `internal/cdriver/`
+  - `tools/dev/fairyc-windows-host-smoke/`
+  - `docs/adr/0235-selected-associative-comdat-unwind-proof.md`
+- **Exact discarded-parent associative unwind elimination proof**
+  - `internal/pecoff/discarded_associative_link.go`
+  - `internal/windowsarchiveprobe/`
+  - `internal/cdriver/`
+  - `tools/dev/fairyc-windows-host-smoke/`
+  - `docs/adr/0236-discarded-associative-comdat-elimination-proof.md`

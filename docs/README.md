@@ -4,137 +4,47 @@
 
 ## Source of Truth
 
-- Product scope source: docs/product/02-spec.md
-- Architecture decisions source: docs/adr/*.md
-- Self-hosting start and promotion gate: docs/architecture/self-hosting-readiness-v0.md
-- Stage 0 language details: docs/language/*.md
+The topical index of every contract, implementation, and fixture owner lives in the development pages:
+
+- [Source of truth index](development/source-of-truth.md)
+- [Language, frontend, and backend](development/source-of-truth-language-and-backend.md)
+- [Packages, CLI, and standard library](development/source-of-truth-packages-cli-and-sdk.md)
+- [Capabilities, contract state, and Atlas](development/source-of-truth-capabilities-contracts-and-atlas.md)
+
+Supporting pages:
+
+- [Implementation status](development/implementation-status.md) - phase history moved out of the root README
+- [Prototype usage](development/prototype-usage.md) - manual developer examples moved out of the root README
+- [Agent context map](../.agents/context-map.md) - workflow and skill routes
+
+### Additional pointers
+
+These entries name paths that are not yet in the index pages above, so they stay here.
+
 - Checked x64 integer conversions: [ADR 0418](adr/0418-sdk-checked-integer-conversions.md), `internal/sdkstdlib/sources/std/num.fy`
-- Normative Stage 0 grammar: spec/grammar/stage0.ebnf
-- Parser fixture manifest: spec/fixtures/parser/manifest-v0.json
-- Editor-internal immutable green tree and full-file formatter: internal/formatter/, docs/adr/0375-immutable-green-tree-and-first-formatter.md
-- Semantic fixture manifest: spec/fixtures/semantic/manifest-v0.json
-- Resource Flow fixture manifest: spec/fixtures/resource/manifest-v0.json
-- Region fixture manifest: spec/fixtures/region/manifest-v1.json
-- Result fixture manifest: spec/fixtures/result/manifest-v0.json
-- MIR fixture manifest: spec/fixtures/mir/manifest-v0.json
-- MIR verifier mutation manifest: spec/fixtures/mir-verifier/manifest-v0.json
-- Constrained C emission manifest: spec/fixtures/c-emission/manifest-v0.json
-- Shared constrained-C driver: internal/cdriver/
 - Bounded native runtime object reuse, invalidation and fallback: docs/adr/0428-native-runtime-object-reuse.md, internal/cdriver/runtime_cache.go
-- Embedded scalar C runtime: internal/cruntime/
-- Provisional target standard-library C sources: internal/cstdlib/
-- Linux scalar C differential runner: internal/cbackendnative/
-- Resolved package graph fixture manifest: spec/fixtures/package/manifest-v1.json, including historical v0 cases
-- Resolved package graph engine and fixture runner: internal/packagegraph/, internal/packagefixture/
-- PackageInstanceId v1 vectors and runner: spec/fixtures/package-identity/manifest-v1.json, internal/packageidentityfixture/
-- Public-interface hash v5 fixtures and runner: spec/fixtures/module-interface/manifest-v5.json, with historical v1 through v4 vectors, internal/moduleinterface/, internal/moduleinterfacefixture/
-- Released language-11 resource abilities and linear no-drop analysis: docs/language/0009-resource-abilities-v0.md, docs/adr/0342-stable-resource-abilities-and-onchain-effects.md, internal/semantic/resource_abilities.go, internal/hir/hir.go, internal/moduleinterface/
-- Released language-11 target-neutral on-chain effects: docs/language/0008-effects-and-capabilities-v0.md, docs/adr/0342-stable-resource-abilities-and-onchain-effects.md, internal/hir/effect.go, internal/semantic/effects.go
-- Released language-12 declaration-owned explicit resource burn: docs/language/0009-resource-abilities-v0.md, docs/mir/drop-elaboration-v0.md, docs/adr/0343-declaration-owned-explicit-resource-burn.md, internal/semantic/resource_abilities.go, internal/mir/, internal/interpreter/, internal/cbackend/, examples/asset_burn_quickstart/
-- Experimental typed contract-state transaction and owner-bound borrow oracle: docs/contract-state/transaction-kernel-v0.md, docs/product/04-contract-profile-candidates.md, docs/adr/0338-typed-persistent-state-transaction-kernel.md, docs/adr/0380-owner-bound-state-borrow-oracle.md, internal/contractstate/
 - Compiler-published versioned contract-state transaction fixtures: spec/fixtures/contract-state/manifest-v3.json with historical manifest-v0.json through manifest-v2.json coverage, internal/contractstatefixture/, internal/compiler/check.go, docs/adr/0364-versioned-contract-state-transaction-fixtures.md, docs/adr/0365-versioned-contract-state-map-fixtures.md, docs/adr/0366-compiler-published-contract-state-fixtures.md, docs/adr/0378-data-dependent-contract-state-transaction-graphs.md, docs/adr/0379-verified-contract-state-helper-calls.md
-- Versioned contract-state conflict schedules and real-goroutine race evidence: spec/fixtures/contract-state-conflict/manifest-v1.json with historical manifest-v0.json coverage, internal/contractstateconflictfixture/, internal/contractstate/concurrency_conflict_test.go, docs/adr/0367-versioned-contract-state-conflict-fixtures.md, docs/adr/0368-versioned-contract-state-map-conflict-fixtures.md
-- Versioned contract-state layout publication fixtures: spec/fixtures/contract-state-layout/manifest-v0.json, internal/contractstatelayoutfixture/, docs/adr/0371-contract-state-layout-upgrade-fixtures.md
-- Explicit caller-visible contract-state retry policy and versioned fixtures: spec/fixtures/contract-state-retry/manifest-v0.json, internal/contractstate/retry_semantics_test.go, internal/contractstateretryfixture/, docs/adr/0372-explicit-caller-visible-contract-state-retry.md
 - Bounded read-only contract-state commitments and inclusion/absence proofs: internal/contractstate/commitment.go, docs/adr/0374-contract-state-merkle-commitments.md
 - Vendor-neutral contract-state persistence port and process-local reference adapter: internal/contractstate/persistence.go, internal/contractstate/persistence_test.go, docs/adr/0376-contract-state-persistence-port.md
-- Language-13 source package state declarations and typed-HIR lowering: spec/grammar/stage0.ebnf, spec/fixtures/parser/manifest-v0.json, spec/fixtures/semantic/manifest-v0.json, internal/semantic/state.go, examples/contract_state_declaration_quickstart/, docs/adr/0377-source-package-contract-state-declarations.md
-- Experimental contract-state MIR capability/effect verification, process-local HIR state-access lowering, exact package-body identity, cache-key v4 invalidation, bounded capability-free body payload, checked fresh-owner rebind, stable package-compilation bundle, exact-body persistent cache admission, combined cached MIR/state reassembly, unified verified compiler-result publication, represented-storage-only effect profile, and closed-form explicit-entry lifetime-free ordinary-trap-free safe bounded-helper straight-line raw-pointer-free current transaction owners: docs/mir/contract-state-transaction-mir-v0.md, docs/package/stable-package-compilation-v1.md, docs/adr/0346-contract-state-mir-capability-and-effect-verification.md, docs/adr/0347-source-independent-hir-state-access-lowering.md, docs/adr/0348-exact-contract-state-package-body-identity.md, docs/adr/0349-contract-state-body-cache-key-v4.md, docs/adr/0350-bounded-stable-contract-state-body-payload.md, docs/adr/0351-checked-fresh-owner-contract-state-body-rebind.md, docs/adr/0352-stable-package-compilation-artifact.md, docs/adr/0353-stable-compilation-cache-records.md, docs/adr/0354-combined-cached-state-reassembly.md, docs/adr/0355-unified-verified-compiler-result.md, docs/adr/0356-closed-contract-state-effect-profile.md, docs/adr/0357-call-free-contract-state-owners.md, docs/adr/0358-straight-line-contract-state-owners.md, docs/adr/0359-safe-contract-state-owner-memory-boundary.md, docs/adr/0360-explicit-entry-contract-state-owners.md, docs/adr/0361-potentially-trapping-owner-operations.md, docs/adr/0362-resource-lifetime-free-contract-state-owners.md, docs/adr/0363-closed-form-contract-state-owner-hir.md, docs/adr/0379-verified-contract-state-helper-calls.md, internal/hir/state.go, internal/contractstatemir/, internal/compiler/, internal/packageartifact/, internal/packagecache/, internal/workspacecompiler/
 - Bounded data-dependent contract-state transaction graphs and v2 stable transport: docs/adr/0378-data-dependent-contract-state-transaction-graphs.md, spec/fixtures/contract-state/manifest-v2.json, internal/contractstatemir/graph_verify.go, internal/contractstatemir/graph_execute.go
 - Bounded verified contract-state helper calls and v3 stable transport: docs/adr/0379-verified-contract-state-helper-calls.md, spec/fixtures/contract-state/manifest-v3.json, internal/contractstatemir/helpers.go, internal/contractstatemir/helper_execute.go
 - Experimental bounded static generic planner: docs/adr/0339-bounded-static-generic-specialization-kernel.md, internal/genericplan/; no source syntax, HIR substitution, MIR, or backend surface is admitted
-- Experimental chain-neutral contract IDL and bindings: docs/cli/contract-idl.md, docs/adr/0340-experimental-chain-neutral-contract-idl.md, spec/contract-idl/, internal/contractabi/, tools/dev/fairyc-contract-idl/, examples/contract_idl/
-- Experimental deterministic contract profile and bounded meter plan: docs/contract/deterministic-contract-profile-v0.md, docs/adr/0369-experimental-deterministic-contract-profile.md, spec/cli/experimental-contract-profile-v0.schema.json, internal/contractprofile/, tools/dev/fairyc-contract-profile/; backend, gas, persistent storage, and target selection remain closed
-- Compiler-private fixed-width unsigned arithmetic oracle: docs/adr/0370-fixed-width-unsigned-arithmetic-oracle.md, internal/chainprimitives/; source types, MIR, backends, ABI, nominal chain values, cryptography, fixed-point values, gas, and target selection remain closed
-- Package-source digest v1 fixtures and runner: spec/fixtures/package-source/manifest-v1.json, internal/packagecontent/, internal/packagecontentfixture/
-- Source-file content and line-map identities: docs/package/source-file-identities-v1.md, internal/packagecontent/file_identity.go
-- Deterministic per-package Atlas logical map plan: docs/atlas/fymap-logical-plan-v1.md, internal/atlasmap/
-- Bounded canonical `.fymap` v1 codec and checksum: docs/atlas/fymap-transport-v1.md, internal/atlasmap/codec*.go
-- Contained caller-bounded `.fymap` store and current-source reader: docs/atlas/fymap-store-v1.md, internal/atlasmap/store.go, internal/atlasmap/current.go
-- Bounded exact-current package-local `.fymap` queries: docs/atlas/fymap-query-v1.md, internal/atlasmap/query.go
-- Bounded exact-current workspace call join and reverse-call ledger: docs/atlas/workspace-call-join-v0.md, internal/atlasmap/workspace_call_join.go
-- Canonical workspace call catalog v0 output and experimental command: docs/atlas/workspace-call-catalog-v0.md, docs/adr/0226-experimental-workspace-call-catalog-command.md, internal/workspacecallcatalog/, internal/cli/atlas_calls.go
-- Exact-current full-SymbolId-ordered package catalog query with optional exact-name filtering: internal/atlasmap/query.go, docs/adr/0192-exact-current-symbol-catalog-query.md, docs/adr/0201-exact-name-symbol-catalog-v1.md
-- Canonical SymbolId Catalog v1 output and experimental command: docs/atlas/symbol-catalog-v1.md, internal/symbolcatalog/, internal/cli/atlas_symbols.go
-- Canonical compiler-fact-only Context Pack output: docs/atlas/context-pack-v1.md, internal/contextpack/
-- Canonical single-symbol Atlas Evidence Bundle v0 output and experimental command: docs/atlas/evidence-bundle-v0.md, docs/adr/0202-single-symbol-atlas-evidence-bundle-v0.md, internal/evidencebundle/, internal/cli/atlas_evidence.go
-- Experimental exact-package Atlas overview, show, and around Context Pack commands: internal/cli/atlas_pack.go, internal/cli/atlas_pack_relations.go, docs/adr/0190-experimental-atlas-overview-pack-command.md, docs/adr/0194-experimental-atlas-show-around-pack-commands.md
-- Attributed-text origin, integrity, safety, budget, and non-authority policy plus exact retained-workspace source/documentation extraction, canonical output-only JSON, experimental source/documentation commands, and frontend-owned exact `///` attachment: docs/atlas/attributed-text-v0.md, docs/adr/0195-attributed-text-boundary-v0.md, docs/adr/0196-exact-retained-source-excerpt-extraction.md, docs/adr/0197-canonical-attributed-text-json-v0.md, docs/adr/0198-experimental-atlas-text-source-command.md, docs/adr/0199-c-friendly-declaration-documentation-attachment.md, docs/adr/0200-exact-declaration-documentation-attributed-text-command.md, internal/lexer/documentation.go, internal/semanticsnapshot/, internal/attributedtext/, internal/workspaceloader/exact_source.go, internal/cli/atlas_text.go
-- Whole-package Atlas rewrite measurement schema and Windows harness: internal/buildmeasure/atlas_rewrite.go, tools/dev/fairyc-windows-host-smoke/, docs/adr/0191-atlas-whole-package-rewrite-measurement.md
-- Workspace-call fresh-process time, Windows memory-peak, and output-size control: internal/buildmeasure/atlas_call_process.go, tools/dev/fairyc-windows-host-smoke/atlas_call_process_measure.go, docs/adr/0227-atlas-call-process-measurement-control.md
-- Workspace-call fixed-shape join-and-encode scaling control: internal/buildmeasure/atlas_call_scale.go, tools/dev/fairyc-windows-host-smoke/atlas_call_scale_measure.go, docs/adr/0228-atlas-workspace-call-scaling-control.md
-- Workspace-call chain, diamond, and fan-in correctness corpus: tools/dev/fairyc-windows-host-smoke/atlas_call_topology_test.go, docs/adr/0229-atlas-workspace-call-topology-corpus.md
-- Workspace-call post-GC retained-heap batch control: internal/buildmeasure/atlas_call_retained.go, tools/dev/fairyc-windows-host-smoke/atlas_call_retained_measure.go, docs/adr/0230-atlas-workspace-call-retained-heap-control.md
-- Atlas Phase 4 exit evidence and executable one-way package-import boundary: docs/atlas/phase4-exit-evidence.md, docs/adr/0203-enforced-one-way-atlas-import-boundary.md, internal/architecturecontract/
-- Versioned exact AMD64 COFF symbol, relocation, and COMDAT fixtures: spec/fixtures/coff-object/manifest-v0.json, internal/pecofffixture/, docs/adr/0231-versioned-amd64-coff-object-fixtures.md
-- Versioned deterministic weak-external, relocation-overflow, and bigobj generator fixtures: spec/fixtures/coff-generated-object/manifest-v0.json, internal/pecofffixture/, docs/adr/0244-versioned-generated-amd64-coff-object-fixtures.md
-- Exact AMD64 REL32 object-to-image formula proof: internal/pecoff/relocation_link.go, internal/windowsrelocationprobe/, docs/adr/0232-amd64-rel32-object-to-image-proof.md
-- Exact AMD64 REL32 through REL32_5 object-to-image formula proof: internal/pecoff/relocation_variants.go, internal/pecoff/relocation_variants_object.go, internal/windowsrelocationprobe/, docs/adr/0237-amd64-rel32-variant-object-to-image-proof.md
-- Exact MSVC CodeView SECTION/SECREL object-pair and final PE/PDB identity proof: internal/pecoff/codeview_relocations.go, internal/pecoff/program_database.go, internal/windowsrelocationprobe/, docs/adr/0238-msvc-codeview-section-secrel-and-pdb-association.md
-- Exact Windows DbgHelp function-and-source-line symbolication canary: tools/dev/fairyc-windows-host-smoke/symbolication_windows.go, tools/dev/fairyc-windows-host-smoke/symbolication.go, docs/adr/0239-windows-dbghelp-symbolication-canary.md
-- Exact profile-specific AMD64 unwind-handler ADDR32NB object-to-image proof: internal/pecoff/handler_link.go, internal/windowsunwindprobe/, docs/adr/0240-amd64-unwind-handler-relocation-proof.md
-- Exact AMD64 weak-external SEARCH_ALIAS fallback/strong-override proof: internal/pecoff/weak_external_object.go, internal/pecoff/weak_external_link.go, internal/windowsrelocationprobe/, docs/adr/0241-amd64-weak-external-link-proof.md
-- Exact AMD64 weak-external NOLIBRARY suppression and LIBRARY archive-extraction proof: internal/pecoff/weak_search_link.go, internal/windowsweaksearchprobe/, docs/adr/0245-amd64-weak-archive-search-modes.md
-- Exact AMD64 relocation-overflow sentinel and real-LINK proof: internal/pecoff/relocation_overflow_object.go, internal/pecoff/relocation_overflow_link.go, internal/windowsrelocationprobe/, docs/adr/0242-amd64-relocation-overflow-link-proof.md
-- Exact AMD64 bigobj header/symbol and real-LINK proof: internal/pecoff/big_object.go, internal/pecoff/big_object_probe.go, internal/pecoff/big_object_link.go, internal/windowsrelocationprobe/, docs/adr/0243-amd64-bigobj-link-proof.md
-- Exact MSVC archive extraction and pick-any COMDAT final-selection proof: internal/pecoff/archive.go, internal/pecoff/archive_link.go, internal/windowsarchiveprobe/, docs/adr/0233-msvc-archive-and-comdat-selection-proof.md
-- Exact selected-parent associative `.pdata`/`.xdata` COMDAT proof: internal/pecoff/associative_link.go, internal/windowsarchiveprobe/, docs/adr/0235-selected-associative-comdat-unwind-proof.md
-- Exact discarded-parent associative unwind elimination proof: internal/pecoff/discarded_associative_link.go, internal/windowsarchiveprobe/, docs/adr/0236-discarded-associative-comdat-elimination-proof.md
-- Exact AMD64 ADDR64 and unwind `.pdata` ADDR32NB object-to-image proof: internal/pecoff/address_link.go, internal/windowsrelocationprobe/, docs/adr/0234-amd64-address-and-pdata-relocation-proof.md
-- Whole-package cache-key v4 fixtures and bounded store runner: spec/fixtures/package-cache/manifest-v8.json with historical v1 through v7, internal/packagecache/, internal/packagecachefixture/
 - Package-stable function IDs, process-local MIR slice reassembly, process-bound codec, and all-hit reuse coordinator: internal/packageartifact/, internal/workspacecompiler/, docs/package/package-function-id-v1.md, docs/package/process-local-mir-artifact-v0.md
-- Bounded workspace check-session CLI and NDJSON schema: internal/cli/workspace_session.go, spec/cli/experimental-workspace-check-session-v0.schema.json, docs/adr/0159-bounded-workspace-check-session.md
-- One-shot persistent workspace-cache CLI and JSON schema: internal/cli/workspace_cache.go, spec/cli/experimental-workspace-cache-check-v0.schema.json, docs/adr/0166-experimental-persistent-workspace-cache-command.md
-- Shared root-contained immutable derived-file publication and cache crash boundary: internal/durablefile/, internal/packagecache/disk.go, docs/adr/0169-opened-root-cache-containment.md
 - Package-scoped stable context and current persistent-cache growth staircase: internal/packageartifact/context_projection.go, internal/buildmeasure/persistent_cache_growth.go, docs/adr/0171-package-scoped-stable-context.md
-- Path-free no-cache, process-local, session, and persistent process-cache measurement schemas: internal/buildmeasure/, docs/adr/0150-no-cache-windows-build-calibration.md, docs/adr/0157-process-cache-measurement-receipt.md, docs/adr/0158-process-cache-edit-distributions.md, docs/adr/0160-editor-shaped-session-process-measurement.md, docs/adr/0167-paired-persistent-cache-process-measurement.md
-- Stable package type-context artifact and identity: internal/packageartifact/context.go, docs/adr/0161-stable-type-context-artifact.md
 - Source-independent package coordinate prerequisite: internal/packagegraph/coordinate.go, docs/package/package-coordinate-id-v1.md, docs/adr/0172-source-independent-package-coordinate.md
-- Project manifest v1 fixtures and strict TOML parser: spec/fixtures/project-manifest/manifest-v1.json, internal/projectmanifest/, internal/projectmanifestfixture/
-- Stable exact starter-project creation v4: internal/projectscaffold/, internal/cli/project_new.go, docs/adr/0204-stable-starter-project-creation-v1.md, docs/adr/0206-starter-project-guide-v2.md, docs/adr/0208-starter-project-guide-v3.md, docs/adr/0266-starter-guide-native-test-v4.md
-- Local workspace loader v1 fixtures and implementation: spec/fixtures/workspace-loader/manifest-v1.json, internal/workspaceloader/, internal/workspaceloaderfixture/
-- Compiler-bundled Stage 0 standard-library source package, public safe Arena/Region, byte Buffer with SDK-owned canonical scalar text append, owned text, allocation-free UTF-8 validation and immutable text-byte views, Windows MSVC File ownership, partial/exact byte I/O, append, exclusive create, open-or-create, existing-file update open, cursor-preserving length change, absolute positioning, shared logical size, allocated size, read-only observation/mutation, and hard-link metadata observation, no-replace hard-link creation, same-handle file-kind observation, and bounded file-identity observation, console I/O, and process arguments: internal/sdkstdlib/, internal/cstdlib/, internal/cstdlibcontract/, examples/std_alloc_quickstart/, examples/regions/, examples/std_bytes_quickstart/, examples/std_text_quickstart/, examples/std_text_from_buffer_quickstart/, examples/std_fs_quickstart/, examples/std_io_quickstart/, examples/std_io_scalar_quickstart/, examples/process_args_quickstart/, docs/adr/0246-public-safe-stage0-byte-buffer.md, docs/adr/0247-public-safe-stage0-owned-text.md, docs/adr/0248-public-allocation-free-utf8-validation.md, docs/adr/0302-public-allocation-free-text-byte-view.md, docs/adr/0250-public-safe-arena-creation.md through docs/adr/0264-public-windows-stage0-files.md, docs/adr/0269-public-windows-file-positioning.md, docs/adr/0270-public-windows-file-size.md, docs/adr/0271-public-windows-file-update-open.md, docs/adr/0272-public-windows-file-length-change.md, docs/adr/0274-public-windows-file-open-or-create.md, docs/adr/0275-public-windows-file-exclusive-create.md, docs/adr/0276-public-windows-file-append-open.md, docs/adr/0277-public-windows-file-kind.md, docs/adr/0278-public-windows-file-read-exact.md, docs/adr/0279-public-windows-file-identity.md, docs/adr/0307-public-windows-file-hard-link-count.md, docs/adr/0308-public-windows-file-hard-link-creation.md, docs/adr/0309-public-windows-file-allocated-size.md, docs/adr/0310-public-windows-file-read-only-mutation.md, docs/adr/0373-sdk-buffer-scalar-formatting.md
-- Target-neutral public File core: internal/sdkstdlib/sources/std/fs.fy, internal/cstdlib/stage0_linux_file_portable.c, internal/cstdlib/stage0_windows_file_portable.c, internal/cstdlibcontract/, internal/cbackendnative/, docs/adr/0331-target-neutral-public-file-core.md
-- Target-neutral public File positioning: internal/sdkstdlib/sources/std/fs.fy, internal/cstdlib/stage0_linux_file_portable.c, internal/cstdlib/stage0_windows_file_portable.c, internal/cstdlibcontract/, internal/cbackendnative/, docs/adr/0332-target-neutral-public-file-positioning.md
-- Target-neutral public File size: internal/sdkstdlib/sources/std/fs.fy, internal/cstdlib/stage0_linux_file_portable.c, internal/cstdlib/stage0_windows_file_portable.c, internal/cstdlibcontract/, internal/cbackendnative/, docs/adr/0333-target-neutral-public-file-size.md
-- Target-neutral public File relative/end seek: internal/sdkstdlib/sources/std/fs.fy, internal/cstdlib/stage0_linux_file_portable.c, internal/cstdlib/stage0_windows_file_portable.c, internal/cstdlibcontract/, internal/cbackendnative/, docs/adr/0334-target-neutral-public-file-relative-end-seek.md
-- Windows directory lifecycle, no-replace rename, and recursive creation: internal/cstdlib/stage0_windows_file_probe.c, internal/cstdlib/stage0_windows_file_directory_probe.c, examples/std_fs_quickstart/, tools/dev/fairyc-windows-host-smoke/, docs/adr/0293-public-windows-directory-lifecycle.md, docs/adr/0294-public-windows-directory-no-replace-rename.md, docs/adr/0296-public-windows-recursive-directory-creation.md
-- Allocation-free scalar stderr output: internal/sdkstdlib/sources/std/io.fy, internal/cstdlib/stage0_linux_console.c, internal/cstdlib/stage0_windows_console.c, internal/cstdlibcontract/, examples/std_io_scalar_quickstart/, tools/dev/fairyc-windows-host-smoke/, docs/adr/0303-allocation-free-scalar-stderr-output.md
 - Stable exact recursive test-directory selection: internal/cli/workspace_tests.go, internal/cli/workspace_tests_test.go, tools/dev/fairyc-windows-host-smoke/, docs/adr/0304-stable-test-directory-selection.md
-- Bounded Windows File current/end seek: internal/sdkstdlib/sources/std/fs.fy, internal/cstdlib/stage0_windows_file.c, internal/cstdlib/stage0_windows_file_seek_probe.c, internal/cstdlibcontract/, examples/windows_file/, examples/std_fs_quickstart/, tools/dev/fairyc-windows-host-smoke/, docs/adr/0305-public-windows-relative-end-seek.md
-- Same-handle Windows File read-only metadata: internal/sdkstdlib/sources/std/fs.fy, internal/cstdlib/stage0_windows_file.c, internal/cstdlib/stage0_windows_file_metadata.c, internal/cstdlib/stage0_windows_file_metadata_probe.c, internal/cstdlibcontract/, examples/std_fs_quickstart/, tools/dev/fairyc-windows-host-smoke/, docs/adr/0306-public-windows-file-read-only-metadata.md
-- Same-handle Windows File hard-link count: internal/sdkstdlib/sources/std/fs.fy, internal/cstdlib/stage0_windows_file_metadata.c, internal/cstdlib/stage0_windows_file_metadata_probe.c, internal/cstdlibcontract/, examples/std_fs_quickstart/, tools/dev/fairyc-windows-host-smoke/, docs/adr/0307-public-windows-file-hard-link-count.md
-- No-replace Windows File hard-link creation: internal/sdkstdlib/sources/std/fs.fy, internal/cstdlib/stage0_windows_file_link.c, internal/cstdlib/stage0_windows_file_link_probe.c, internal/cstdlibcontract/, examples/std_fs_quickstart/src/link_ops.fy, tools/dev/fairyc-windows-host-smoke/, docs/adr/0308-public-windows-file-hard-link-creation.md
-- Same-handle Windows File allocated size: internal/sdkstdlib/sources/std/fs.fy, internal/cstdlib/stage0_windows_file_metadata.c, internal/cstdlib/stage0_windows_file_metadata_probe.c, internal/cstdlibcontract/, examples/std_fs_quickstart/src/metadata.fy, tools/dev/fairyc-windows-host-smoke/, docs/adr/0309-public-windows-file-allocated-size.md
-- Same-handle Windows File read-only mutation: internal/sdkstdlib/sources/std/fs.fy, internal/cstdlib/stage0_windows_file_metadata.c, internal/cstdlib/stage0_windows_file_metadata_probe.c, internal/cstdlibcontract/, examples/std_fs_quickstart/src/metadata.fy, tools/dev/fairyc-windows-host-smoke/, docs/adr/0310-public-windows-file-read-only-mutation.md
-- Root-protected Windows recursive directory removal: internal/sdkstdlib/sources/std/fs.fy, internal/cstdlib/stage0_windows_file_remove_tree.c, internal/cstdlib/stage0_windows_file_remove_tree_probe.c, internal/cstdlibcontract/, examples/std_fs_quickstart/src/path_ops.fy, tools/dev/fairyc-windows-host-smoke/, docs/adr/0311-public-windows-recursive-directory-removal.md
-- Generated lockfile v1 implementation: internal/lockfile/
 - Stable local-workspace check v1: internal/cli/workspace.go, docs/adr/0175-stable-workspace-check-v1.md
 - Stable local Windows workspace build v1: internal/cli/workspace_native.go, internal/cli/build.go, docs/adr/0176-stable-windows-workspace-build-v1.md
-- Stable local Windows workspace run v3: internal/cli/workspace_native.go, internal/cli/program_output.go, internal/cdriver/windows_host.go, docs/adr/0177-stable-windows-workspace-run-v1.md, docs/adr/0207-stable-windows-workspace-run-v2.md, docs/adr/0212-stable-windows-workspace-run-v3.md
 - Stable diagnostic explanation v1: internal/cli/run.go, internal/diagnostic/catalog.go, docs/adr/0178-stable-diagnostic-explain-v1.md
 - Stable target maturity report v1: internal/cli/target.go, internal/target/spec.go, docs/adr/0179-stable-target-maturity-report-v1.md
 - Private workspace C11 bootstrap transport: internal/cli/workspace_emit.go, internal/cbackend/, docs/adr/0180-stable-workspace-c-emission-v1.md, docs/adr/0335-private-c11-bootstrap-transport.md
 - Stable isolated workspace semantic and Windows native tests with text/JSON identity listing and exact selection: internal/workspaceloader/test_sources.go, internal/cli/workspace_tests.go, internal/cli/workspace_native_tests.go, internal/interpreter/, internal/cbackend/, internal/cdriver/, spec/cli/stable-test-list-v1.schema.json, docs/adr/0181-stable-workspace-semantic-test-v1.md, docs/adr/0265-stable-isolated-windows-native-tests.md, docs/adr/0267-stable-exact-test-selection.md, docs/adr/0268-stable-test-identity-listing.md, docs/adr/0273-stable-json-test-identity-listing.md
-- Package-aware Windows quickstart: examples/workspace_quickstart/
-- Windows MSVC layout fixture manifest: spec/fixtures/layout/manifest-windows-msvc-v0.json
-- Windows MSVC C ABI fixture manifest: spec/fixtures/c-abi/manifest-windows-msvc-v0.json
-- Executable semantics and C transport: docs/mir/*.md
-- Package identity and visibility: docs/package/*.md
 - Manifest/lockfile readiness and local-exact recommendation: docs/package/manifest-lockfile-readiness.md
-- Human project manifest v1: docs/package/project-manifest-v1.md
 - Local workspace loader v1: docs/package/workspace-loader-v1.md
-- Generated lockfile v1: docs/package/lockfile-v1.md
-- Target and C ABI contract and Windows maturity ledger: docs/abi/*.md
-- Runtime and standard-library contract: docs/runtime/*.md
-- Compatibility and versioning contract: docs/compatibility/*.md
 - Planned C-shaped pre-1 source cutover: docs/adr/0136-c-shaped-source-surface.md
 - Constrained C11 transport baseline: docs/adr/0137-c11-transport-baseline.md
-- Diagnostic meanings: docs/diagnostics/catalog-v0.md
-- Atlas semantic snapshot and documentation sidecar, SymbolId, logical package-map plan, transport, contained store, package-local queries, exact-current workspace call join and catalog, canonical compiler-fact Context Pack, exact retained-source/documentation attributed text, single-symbol Evidence Bundle, executable one-way import boundary, Phase 4 exit evidence, and exact frontend-owned `///` attachment: docs/atlas/*.md, internal/architecturecontract/, internal/lexer/documentation.go, internal/semanticsnapshot/, internal/symbolidentity/, internal/atlasmap/, internal/workspacecallcatalog/, internal/contextpack/, internal/attributedtext/, internal/evidencebundle/, internal/workspaceloader/exact_source.go, internal/cli/atlas_calls.go, internal/cli/atlas_text.go, internal/cli/atlas_evidence.go
 - Operational standard source: docs/ops/00-operational-contract.md
 - Validation source: VALIDATION.md
-- Agent routing source: .agents/context-map.md
 - Repository hygiene source: .editorconfig, .gitattributes, .gitignore
 - CLI command and cross-command stable contract sources: docs/cli/command-contract.md, docs/cli/stable-cli-contract-v0.md
 - CLI config source: docs/cli/configuration.md
