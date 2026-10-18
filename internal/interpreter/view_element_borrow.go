@@ -6,10 +6,10 @@ import "github.com/0disoft/fairyc/internal/hir"
 func (v runtimeValue) borrowStructElement(index uint64, typ hir.Type) (runtimeValue, error) {
 	element, nominal := hir.StructViewElement(v.typ)
 	referent, mutable, borrowed := hir.BorrowElement(typ)
-	if !nominal || !borrowed || referent != element || mutable && (!hir.MutableIndexedView(v.typ) || v.view == nil || !v.view.mutable) || v.view == nil || v.view.array == nil || index >= v.view.length || v.view.offset+index >= uint64(len(v.view.array.elements)) {
+	if !nominal || !borrowed || referent != element || mutable && (!hir.MutableIndexedView(v.typ) || v.view() == nil || !v.view().mutable) || v.view() == nil || v.view().array == nil || index >= v.view().length || v.view().offset+index >= uint64(len(v.view().array.elements)) {
 		return runtimeValue{}, capabilityError("invalid indexed nominal reference")
 	}
-	value := v.view.array.elements[v.view.offset+index]
+	value := v.view().array.elements[v.view().offset+index]
 	if !indexedElementRuntimeMatches(value, element) {
 		return runtimeValue{}, capabilityError("indexed nominal reference backing type mismatch")
 	}
@@ -25,7 +25,7 @@ func (v runtimeValue) borrowViewElement(index uint64, typ hir.Type) (runtimeValu
 	}
 	element, indexed := hir.IndexedViewElement(v.typ)
 	referent, mutable, borrowed := hir.BorrowElement(typ)
-	if !indexed || !borrowed || referent != element || v.kind != valueView || v.view == nil || index >= v.view.length || mutable && (!hir.MutableIndexedView(v.typ) || !v.view.mutable || v.view.array == nil) {
+	if !indexed || !borrowed || referent != element || v.kind != valueView || v.view() == nil || index >= v.view().length || mutable && (!hir.MutableIndexedView(v.typ) || !v.view().mutable || v.view().array == nil) {
 		return runtimeValue{}, capabilityError("invalid indexed integer reference")
 	}
 	value, err := v.indexedAt(index)
@@ -33,10 +33,10 @@ func (v runtimeValue) borrowViewElement(index uint64, typ hir.Type) (runtimeValu
 		return runtimeValue{}, capabilityError("indexed integer reference backing type mismatch")
 	}
 	value.typ = typ
-	if v.view.array != nil {
-		value.reference = &scalarReference{array: v.view.array, index: v.view.offset + index}
+	if v.view().array != nil {
+		value.payload = &scalarReference{array: v.view().array, index: v.view().offset + index}
 	} else {
-		value.reference = &scalarReference{static: v.view, index: v.view.offset + index}
+		value.payload = &scalarReference{static: v.view(), index: v.view().offset + index}
 	}
 	return value, nil
 }

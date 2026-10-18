@@ -11,31 +11,31 @@ func (v runtimeValue) cloneForValueCopy() runtimeValue {
 	copy := v
 	switch v.kind {
 	case valueArray:
-		if v.array != nil {
-			elements := make([]runtimeValue, len(v.array.elements))
-			for index, element := range v.array.elements {
+		if v.array() != nil {
+			elements := make([]runtimeValue, len(v.array().elements))
+			for index, element := range v.array().elements {
 				elements[index] = element.cloneForValueCopy()
 			}
-			copy.array = &arrayState{elements: elements}
+			copy.payload = &arrayState{elements: elements}
 		}
 	case valueStruct:
-		if v.structure != nil {
-			copy.structure = &structState{definition: v.structure.definition, fields: copyValueFields(v.structure.fields)}
+		if v.structure() != nil {
+			copy.payload = &structState{definition: v.structure().definition, fields: copyValueFields(v.structure().fields)}
 		}
 	case valueEnum:
-		if v.enum != nil {
-			copy.enum = &enumState{definition: v.enum.definition, variant: v.enum.variant, fields: copyValueFields(v.enum.fields)}
+		if v.enum() != nil {
+			copy.payload = &enumState{definition: v.enum().definition, variant: v.enum().variant, fields: copyValueFields(v.enum().fields)}
 		}
 	case valueOption, valueResult:
 		// An owned resource payload uses the existing linear tagged state. Only
 		// inert wrappers may acquire an independent copy of that state.
-		if v.tagged != nil && inertDropValue(v, 0) {
-			state := *v.tagged
+		if v.tagged() != nil && inertDropValue(v, 0) {
+			state := *v.tagged()
 			if state.payload != nil {
 				payload := state.payload.cloneForValueCopy()
 				state.payload = &payload
 			}
-			copy.tagged = &state
+			copy.payload = &state
 		}
 	}
 	return copy

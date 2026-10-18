@@ -424,6 +424,14 @@ linear, and cleanup still visits resource fields in reverse declaration order.
 Scalar field references retain the stored owner's slice header and slot so replacing
 an aggregate's fields preserves its identity without retaining obsolete storage.
 
+The private value header keeps scalar bits inline alongside type and kind metadata.
+Its single closed payload slot accepts only existing compound-state or reference
+pointers. Signed scalar conversions preserve all 32/64 bits, and scalar copies do
+not allocate interface boxes. API orchestration, execution state, call dispatch,
+resource cleanup, scalar evaluation, operands, and branching have separate Go files.
+Local allocation measurements are recorded in
+[the interpreter value-model note](../engineering/interpreter-value-model.md).
+
 The first semantic oracle is a small MIR interpreter supporting scalars, safe borrow and dereference
 transport, tagged `Option` and `Result`, restricted inert user enums, borrowed UTF-8 and byte views
 with byte-length reads, moves, drop traces, region mark and reset, branches, and traps. Region entry

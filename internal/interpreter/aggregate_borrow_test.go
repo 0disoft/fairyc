@@ -36,7 +36,7 @@ func TestAggregateConstructionRetainsBorrowTypeAndIdentity(t *testing.T) {
 					Operands: []mir.Operand{{Kind: mir.OperandLocal, Local: 0}}}
 				borrowed, trap, err := evaluateUnary(locals, op)
 				if err != nil || trap != "" || borrowed.typ != borrowedType || locals[0] != value ||
-					borrowed.resource != value.resource || borrowed.structure != value.structure || borrowed.enum != value.enum {
+					borrowed.resource() != value.resource() || borrowed.structure() != value.structure() || borrowed.enum() != value.enum() {
 					t.Fatalf("borrow changed owner/type/state: %v %q", err, trap)
 				}
 				wrong := hir.ParseType(hir.QualifiedModulePath(3, "owned") + "::Value")

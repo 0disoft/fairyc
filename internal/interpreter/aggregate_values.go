@@ -29,7 +29,7 @@ func enumValue(definition *mir.EnumType, variantName string, fieldNames []string
 		}
 		state.fields[index] = values[index].cloneForValueCopy()
 	}
-	return runtimeValue{kind: valueEnum, typ: definition.Type, enum: state}, nil
+	return runtimeValue{kind: valueEnum, typ: definition.Type, payload: state}, nil
 }
 
 func resourceValue(definition *mir.ResourceType, values []runtimeValue) (runtimeValue, error) {
@@ -37,7 +37,7 @@ func resourceValue(definition *mir.ResourceType, values []runtimeValue) (runtime
 		return runtimeValue{}, fmt.Errorf("invalid resource construction definition")
 	}
 	state := &resourceState{definition: definition, fields: copyValueFields(values)}
-	return runtimeValue{kind: valueResource, typ: definition.Type, resource: state}, nil
+	return runtimeValue{kind: valueResource, typ: definition.Type, payload: state}, nil
 }
 
 func structValue(definition *mir.StructType, values []runtimeValue) (runtimeValue, error) {
@@ -45,7 +45,7 @@ func structValue(definition *mir.StructType, values []runtimeValue) (runtimeValu
 		return runtimeValue{}, fmt.Errorf("invalid struct construction definition")
 	}
 	state := &structState{definition: definition, fields: copyValueFields(values)}
-	return runtimeValue{kind: valueStruct, typ: definition.Type, structure: state}, nil
+	return runtimeValue{kind: valueStruct, typ: definition.Type, payload: state}, nil
 }
 
 func structFieldIndex(definition *mir.StructType, name string) int {
@@ -78,16 +78,16 @@ func indexedField(fields []runtimeValue, index int) (runtimeValue, bool) {
 }
 
 func (v runtimeValue) field(definition *mir.ResourceType, name string) (runtimeValue, error) {
-	if v.kind != valueResource || v.resource == nil {
+	if v.kind != valueResource || v.resource() == nil {
 		return runtimeValue{}, capabilityError("field read received a non-resource value")
 	}
-	if definition == nil || v.resource.definition == nil || v.resource.definition.Type != definition.Type {
+	if definition == nil || v.resource().definition == nil || v.resource().definition.Type != definition.Type {
 		return runtimeValue{}, fmt.Errorf("field read resource definition does not match the runtime value")
 	}
-	if v.resource.dropped {
-		return runtimeValue{}, fmt.Errorf("resource %q was read after drop", v.resource.definition.Type)
+	if v.resource().dropped {
+		return runtimeValue{}, fmt.Errorf("resource %q was read after drop", v.resource().definition.Type)
 	}
-	value, found := indexedField(v.resource.fields, resourceFieldIndex(definition, name))
+	value, found := indexedField(v.resource().fields, resourceFieldIndex(definition, name))
 	if !found {
 		return runtimeValue{}, fmt.Errorf("resource %q has no field %q", definition.Type, name)
 	}
@@ -95,13 +95,13 @@ func (v runtimeValue) field(definition *mir.ResourceType, name string) (runtimeV
 }
 
 func (v runtimeValue) structField(definition *mir.StructType, name string) (runtimeValue, error) {
-	if v.kind != valueStruct || v.structure == nil {
+	if v.kind != valueStruct || v.structure() == nil {
 		return runtimeValue{}, capabilityError("field read received a non-struct value")
 	}
-	if definition == nil || v.structure.definition == nil || v.structure.definition.Type != definition.Type {
+	if definition == nil || v.structure().definition == nil || v.structure().definition.Type != definition.Type {
 		return runtimeValue{}, fmt.Errorf("field read struct definition does not match the runtime value")
 	}
-	value, found := indexedField(v.structure.fields, structFieldIndex(definition, name))
+	value, found := indexedField(v.structure().fields, structFieldIndex(definition, name))
 	if !found {
 		return runtimeValue{}, fmt.Errorf("struct %q has no field %q", definition.Type, name)
 	}
@@ -109,10 +109,10 @@ func (v runtimeValue) structField(definition *mir.StructType, name string) (runt
 }
 
 func (v runtimeValue) enumPayload(definition *mir.EnumType, variant, field string) (runtimeValue, error) {
-	if v.kind != valueEnum || v.enum == nil || v.enum.definition == nil {
+	if v.kind != valueEnum || v.enum() == nil || v.enum().definition == nil {
 		return runtimeValue{}, capabilityError("enum payload received a non-enum value")
 	}
-	if definition == nil || v.enum.definition.Type != definition.Type || v.enum.variant != variant {
+	if definition == nil || v.enum().definition.Type != definition.Type || v.enum().variant != variant {
 		return runtimeValue{}, fmt.Errorf("enum payload definition or active variant does not match")
 	}
 	for _, declared := range definition.Variants {
@@ -121,7 +121,7 @@ func (v runtimeValue) enumPayload(definition *mir.EnumType, variant, field strin
 		}
 		for index, item := range declared.Fields {
 			if item.Name == field {
-				if value, found := indexedField(v.enum.fields, index); found {
+				if value, found := indexedField(v.enum().fields, index); found {
 					return value, nil
 				}
 			}

@@ -28,22 +28,22 @@ func storeField(locals map[mir.LocalID]runtimeValue, op mir.Operation, structs m
 		}
 	} else if _, _, array := hir.FixedArrayParts(op.Type); array && mir.ValidPlainStructFieldStoreShape(op, func(typ hir.Type) *mir.StructType { return structs[typ] }) {
 		element, length, _ := hir.FixedArrayParts(op.Type)
-		if value.kind != valueArray || value.typ != op.Type || value.array == nil || uint64(len(value.array.elements)) != length {
+		if value.kind != valueArray || value.typ != op.Type || value.array() == nil || uint64(len(value.array().elements)) != length {
 			return fmt.Errorf("invalid array field store")
 		}
-		for _, item := range value.array.elements {
+		for _, item := range value.array().elements {
 			if !indexedElementRuntimeMatches(item, element) {
 				return fmt.Errorf("invalid array field element")
 			}
 		}
 	} else {
-		if value.kind != valueStruct || value.typ != op.Type || value.structure == nil ||
-			(!mir.ValidOneWordStructFieldStoreShape(op, value.structure.definition) &&
+		if value.kind != valueStruct || value.typ != op.Type || value.structure() == nil ||
+			(!mir.ValidOneWordStructFieldStoreShape(op, value.structure().definition) &&
 				!mir.ValidPlainStructFieldStoreShape(op, func(typ hir.Type) *mir.StructType { return structs[typ] })) {
 			return fmt.Errorf("invalid struct field store")
 		}
-		if mir.ValidOneWordStructFieldStoreShape(op, value.structure.definition) {
-			if raw, found := indexedField(value.structure.fields, 0); !found || !scalarStoreValueMatches(raw, hir.TypeUSize) {
+		if mir.ValidOneWordStructFieldStoreShape(op, value.structure().definition) {
+			if raw, found := indexedField(value.structure().fields, 0); !found || !scalarStoreValueMatches(raw, hir.TypeUSize) {
 				return fmt.Errorf("invalid one-word struct field value")
 			}
 		}
@@ -51,38 +51,38 @@ func storeField(locals map[mir.LocalID]runtimeValue, op mir.Operation, structs m
 	if len(op.Fields) > 0 {
 		current := receiver
 		for _, name := range op.Fields {
-			if current.structure == nil || current.structure.definition == nil {
+			if current.structure() == nil || current.structure().definition == nil {
 				return fmt.Errorf("missing live nested field store owner")
 			}
-			child, found := indexedField(current.structure.fields, structFieldIndex(current.structure.definition, name))
-			if !found || child.structure == nil {
+			child, found := indexedField(current.structure().fields, structFieldIndex(current.structure().definition, name))
+			if !found || child.structure() == nil {
 				return fmt.Errorf("invalid live nested field store path")
 			}
 			current = child
 		}
-		if current.structure == nil || current.structure.definition == nil {
+		if current.structure() == nil || current.structure().definition == nil {
 			return fmt.Errorf("missing nested leaf owner")
 		}
-		for index, field := range current.structure.definition.Fields {
+		for index, field := range current.structure().definition.Fields {
 			if field.Name == op.Field && field.Type == op.Type {
-				current.structure.fields[index] = value.cloneForValueCopy()
+				current.structure().fields[index] = value.cloneForValueCopy()
 				return nil
 			}
 		}
 		return fmt.Errorf("nested field store leaf type mismatch")
 	}
 	aggregate := fieldAggregateType(op.OwnerType)
-	if receiver.structure != nil && receiver.structure.definition != nil && receiver.structure.definition.Type == aggregate {
-		for index, field := range receiver.structure.definition.Fields {
+	if receiver.structure() != nil && receiver.structure().definition != nil && receiver.structure().definition.Type == aggregate {
+		for index, field := range receiver.structure().definition.Fields {
 			if field.Name == op.Field && field.Type == op.Type {
-				receiver.structure.fields[index] = value.cloneForValueCopy()
+				receiver.structure().fields[index] = value.cloneForValueCopy()
 				return nil
 			}
 		}
-	} else if receiver.resource != nil && receiver.resource.definition != nil && receiver.resource.definition.Type == aggregate && !receiver.resource.dropped {
-		for index, field := range receiver.resource.definition.Fields {
+	} else if receiver.resource() != nil && receiver.resource().definition != nil && receiver.resource().definition.Type == aggregate && !receiver.resource().dropped {
+		for index, field := range receiver.resource().definition.Fields {
 			if field.Name == op.Field && field.Type == op.Type {
-				receiver.resource.fields[index] = value.cloneForValueCopy()
+				receiver.resource().fields[index] = value.cloneForValueCopy()
 				return nil
 			}
 		}
@@ -95,8 +95,8 @@ func scalarStoreValueMatches(value runtimeValue, typ hir.Type) bool {
 		return comparisonRuntimeMatches(value, typ)
 	}
 	return typ == hir.TypeI32 && value.kind == valueI32 && (value.typ == hir.ParseType("") || value.typ == hir.TypeI32) ||
-		typ == hir.TypeBool && value.kind == valueI32 && value.typ == hir.TypeBool && (value.i32 == 0 || value.i32 == 1) ||
+		typ == hir.TypeBool && value.kind == valueI32 && value.typ == hir.TypeBool && (value.i32() == 0 || value.i32() == 1) ||
 		typ == hir.TypeUSize && value.kind == valueUSize && value.typ == hir.TypeUSize ||
-		typ == hir.TypeU8 && value.kind == valueU8 && value.typ == hir.TypeU8 && value.u64 <= 255 ||
-		typ == hir.TypeU32 && value.kind == valueU32 && value.typ == hir.TypeU32 && value.u64 <= 4294967295
+		typ == hir.TypeU8 && value.kind == valueU8 && value.typ == hir.TypeU8 && value.u64() <= 255 ||
+		typ == hir.TypeU32 && value.kind == valueU32 && value.typ == hir.TypeU32 && value.u64() <= 4294967295
 }

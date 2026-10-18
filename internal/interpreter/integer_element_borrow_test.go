@@ -7,10 +7,10 @@ import (
 )
 
 func TestIntegerElementBorrowBacking(t *testing.T) {
-	for _, value := range []runtimeValue{{kind: valueU8, typ: hir.TypeU8, u64: 7}, runtimeValue{kind: valueI32, typ: hir.TypeI32, i32: 7}, {kind: valueI64, typ: hir.TypeI64, i64: 4000000000}, {kind: valueU32, typ: hir.TypeU32, u64: 4000000000}, {kind: valueUSize, typ: hir.TypeUSize, u64: 4000000000}} {
+	for _, value := range []runtimeValue{{kind: valueU8, typ: hir.TypeU8, scalar: 7}, runtimeValue{kind: valueI32, typ: hir.TypeI32, scalar: i32Bits(7)}, {kind: valueI64, typ: hir.TypeI64, scalar: i64Bits(4000000000)}, {kind: valueU32, typ: hir.TypeU32, scalar: 4000000000}, {kind: valueUSize, typ: hir.TypeUSize, scalar: 4000000000}} {
 		t.Run(value.typ.String(), func(t *testing.T) {
 			backing := &arrayState{elements: []runtimeValue{value, value}}
-			view := runtimeValue{kind: valueView, typ: hir.MutableBorrow(hir.Slice(value.typ)), view: &indexedViewState{array: backing, offset: 1, length: 1, mutable: true}}
+			view := runtimeValue{kind: valueView, typ: hir.MutableBorrow(hir.Slice(value.typ)), payload: &indexedViewState{array: backing, offset: 1, length: 1, mutable: true}}
 			borrowed, e := view.borrowViewElement(0, hir.MutableBorrow(value.typ))
 			if e != nil {
 				t.Fatal(e)
@@ -18,9 +18,7 @@ func TestIntegerElementBorrowBacking(t *testing.T) {
 			locals := map[mir.LocalID]runtimeValue{1: borrowed, 2: value}
 			op := mir.Operation{Kind: mir.OperationDerefStore, Symbol: hir.NoSymbol, DestinationLocal: mir.NoLocal, OwnerType: borrowed.typ, Type: value.typ, Operands: []mir.Operand{{Kind: mir.OperandLocal, Local: 1}, {Kind: mir.OperandLocal, Local: 2}}}
 			changed := value
-			changed.i32 = 9
-			changed.i64 = 9
-			changed.u64 = 9
+			changed.scalar = 9
 			locals[2] = changed
 			if e := storeScalarDeref(locals, op); e != nil {
 				t.Fatal(e)
@@ -32,7 +30,7 @@ func TestIntegerElementBorrowBacking(t *testing.T) {
 			if e != nil {
 				t.Fatal(e)
 			}
-			loaded, ok := shared.reference.load()
+			loaded, ok := shared.reference().load()
 			if !ok || loaded != changed {
 				t.Fatal("shared reference missed updated cell")
 			}
@@ -56,8 +54,8 @@ func TestIntegerElementBorrowBacking(t *testing.T) {
 	if e != nil {
 		t.Fatal(e)
 	}
-	value, ok := letter.reference.load()
-	if !ok || value.u64 != 122 {
+	value, ok := letter.reference().load()
+	if !ok || value.u64() != 122 {
 		t.Fatal("static subview reference offset")
 	}
 	if _, e := sub.borrowViewElement(0, hir.MutableBorrow(hir.TypeU8)); e == nil {

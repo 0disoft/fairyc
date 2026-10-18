@@ -21,16 +21,16 @@ func TestValueCopyDetachesNestedAggregateStorage(t *testing.T) {
 	for name, wrap := range map[string]func(runtimeValue) runtimeValue{
 		"struct": func(v runtimeValue) runtimeValue { return v },
 		"array": func(v runtimeValue) runtimeValue {
-			return runtimeValue{kind: valueArray, array: &arrayState{elements: []runtimeValue{v}}}
+			return runtimeValue{kind: valueArray, payload: &arrayState{elements: []runtimeValue{v}}}
 		},
 		"enum": func(v runtimeValue) runtimeValue {
-			return runtimeValue{kind: valueEnum, enum: &enumState{variant: "some", fields: []runtimeValue{v}}}
+			return runtimeValue{kind: valueEnum, payload: &enumState{variant: "some", fields: []runtimeValue{v}}}
 		},
 		"option": func(v runtimeValue) runtimeValue {
-			return runtimeValue{kind: valueOption, tagged: &taggedState{variant: "some", payload: &v}}
+			return runtimeValue{kind: valueOption, payload: &taggedState{variant: "some", payload: &v}}
 		},
 		"result": func(v runtimeValue) runtimeValue {
-			return runtimeValue{kind: valueResult, tagged: &taggedState{variant: "ok", payload: &v}}
+			return runtimeValue{kind: valueResult, payload: &taggedState{variant: "ok", payload: &v}}
 		},
 	} {
 		t.Run(name, func(t *testing.T) {
@@ -38,14 +38,14 @@ func TestValueCopyDetachesNestedAggregateStorage(t *testing.T) {
 			child := copy
 			switch copy.kind {
 			case valueArray:
-				child = copy.array.elements[0]
+				child = copy.array().elements[0]
 			case valueEnum:
-				child = copy.enum.fields[0]
+				child = copy.enum().fields[0]
 			case valueOption, valueResult:
-				child = *copy.tagged.payload
+				child = *copy.tagged().payload
 			}
-			child.structure.fields[0] = i32Value(42)
-			if original.structure.fields[0].i32 != 7 || child.structure.definition != original.structure.definition {
+			child.structure().fields[0] = i32Value(42)
+			if original.structure().fields[0].i32() != 7 || child.structure().definition != original.structure().definition {
 				t.Fatal("value copy changed original storage or declaration identity")
 			}
 		})
@@ -62,9 +62,9 @@ func TestValueCopyPreservesBorrowAndResourceIdentity(t *testing.T) {
 			t.Fatal("copying a borrow detached its referent")
 		}
 	}
-	resource := runtimeValue{kind: valueResource, resource: &resourceState{fields: []runtimeValue{value}}}
-	owned := runtimeValue{kind: valueResult, tagged: &taggedState{variant: "ok", payload: &resource}}
-	if owned.cloneForValueCopy().tagged != owned.tagged || resource.cloneForValueCopy().resource != resource.resource {
+	resource := runtimeValue{kind: valueResource, payload: &resourceState{fields: []runtimeValue{value}}}
+	owned := runtimeValue{kind: valueResult, payload: &taggedState{variant: "ok", payload: &resource}}
+	if owned.cloneForValueCopy().tagged() != owned.tagged() || resource.cloneForValueCopy().resource() != resource.resource() {
 		t.Fatal("copy manufactured resource ownership")
 	}
 }

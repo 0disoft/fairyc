@@ -6,7 +6,7 @@ import (
 )
 
 func i64Value(value int64) runtimeValue {
-	return runtimeValue{kind: valueI64, i64: value, typ: hir.TypeI64}
+	return runtimeValue{kind: valueI64, scalar: i64Bits(value), typ: hir.TypeI64}
 }
 
 func unaryI64(operator string, value runtimeValue) (runtimeValue, string, error) {
@@ -17,12 +17,12 @@ func unaryI64(operator string, value runtimeValue) (runtimeValue, string, error)
 	case "+":
 		return value, "", nil
 	case "-":
-		if value.i64 == math.MinInt64 {
+		if value.i64() == math.MinInt64 {
 			return runtimeValue{}, "integer-overflow", nil
 		}
-		return i64Value(-value.i64), "", nil
+		return i64Value(-value.i64()), "", nil
 	case "~":
-		return i64Value(^value.i64), "", nil
+		return i64Value(^value.i64()), "", nil
 	default:
 		return runtimeValue{}, "", capabilityError("unsupported i64 unary %q", operator)
 	}
@@ -32,7 +32,7 @@ func checkedI64Operation(operator string, left, right runtimeValue) (runtimeValu
 	if !comparisonRuntimeMatches(left, hir.TypeI64) || !comparisonRuntimeMatches(right, hir.TypeI64) {
 		return runtimeValue{}, "", capabilityError("invalid i64 arithmetic operands")
 	}
-	l, r := left.i64, right.i64
+	l, r := left.i64(), right.i64()
 	var result int64
 	overflow := false
 	switch operator {
