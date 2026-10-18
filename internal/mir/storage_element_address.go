@@ -51,7 +51,7 @@ func (l *functionLowerer) lowerStorageElementAddress(expression *hir.Expression)
 	retainedIndex := l.newTemporary()
 	l.appendOperation(Operation{Kind: OperationAssign, Span: expression.Children[1].Span,
 		DestinationLocal: retainedIndex, Type: hir.TypeUSize, Operands: []Operand{index}})
-	entity := sourceEntity(string(OperationStorageElementAddress), expression.Span)
+	entity := sourceEntity(OperationStorageElementAddress.String(), expression.Span)
 	op := Operation{Kind: OperationStorageElementAddress, Entity: entity, Span: expression.Span,
 		Symbol: hir.NoSymbol, DestinationLocal: l.newTemporary(), Type: expression.Type,
 		OwnerType: expression.TargetType, IndexType: hir.TypeUSize,

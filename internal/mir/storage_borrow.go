@@ -67,7 +67,7 @@ func (l *functionLowerer) lowerStorageBorrow(expression *hir.Expression) (Operan
 	if mutable {
 		kind = OperationStorageBorrowMut
 	}
-	op := Operation{Kind: kind, Entity: sourceEntity(string(kind), expression.Span),
+	op := Operation{Kind: kind, Entity: sourceEntity(kind.String(), expression.Span),
 		Span: expression.Span, Symbol: hir.NoSymbol, DestinationLocal: l.newTemporary(),
 		Type: expression.Type, OwnerType: expression.Children[0].Type, IndexType: expression.Children[1].Type,
 		Operands: []Operand{{Kind: OperandLocal, Local: retained}, address}, UnsafeScope: *expression.UnsafeScope}

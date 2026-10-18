@@ -61,7 +61,7 @@ func (l *functionLowerer) lowerStorageView(expression *hir.Expression) (Operand,
 		operands = append(operands, Operand{Kind: OperandLocal, Local: retained})
 		sequence = append(sequence, child.Span)
 	}
-	op := Operation{Kind: kind, Entity: sourceEntity(string(kind), expression.Span),
+	op := Operation{Kind: kind, Entity: sourceEntity(kind.String(), expression.Span),
 		Span: expression.Span, Symbol: hir.NoSymbol, DestinationLocal: l.newTemporary(),
 		Type: expression.Type, OwnerType: expression.Children[0].Type, IndexType: expression.Children[1].Type,
 		Operands: operands, UnsafeScope: *expression.UnsafeScope}
