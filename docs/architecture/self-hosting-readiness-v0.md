@@ -1,5 +1,42 @@
 # Self-hosting readiness v0
 
+## Current status (2026-10-19)
+
+Reviewed Windows evidence for the current candidate is
+[candidate-cli-local-validation-20261018.json](../ops/evidence/candidate-cli-local-validation-20261018.json).
+The development and release candidate profiles each match the Go reference on all
+447 recorded comparisons (metadata 122, cli 30, semantic 98, native 30, examples 78,
+test-list 89): 894 of 894 exact. The candidate C packet was generated without a
+Go frontend fallback; the comparison suites invoke the recorded Go reference images.
+
+The Go reference for the semantic, native, example and test-list suites is the image
+rebuilt after commit `4b2b1693`, which maps named enum payload initializers to declared
+payload slots; the candidate had accepted out-of-declaration-order initializers and Go
+had rejected them. The candidate source snapshot is unchanged at commit `a2aaf535`,
+512 source files.
+
+The reviewed [2026-10-19 full CLI C-part fixed-point record](../ops/evidence/candidate-native-fixed-point-20261019.json)
+passes with all 512 source hashes unchanged. The two 41,798,801-byte C packets and
+two 5,913,600-byte release PE images match exactly, with zero excluded bytes;
+the frozen `--version` output also matches exactly. The Go-built C-packet bridge
+and MSVC remain part of this bootstrap.
+
+Full Go replacement remains false. The candidate interpreter still excludes Region
+operations, general raw-pointer execution and host/foreign calls, and no Linux execution
+has been recorded: the candidate native and file CLI modules are Windows-only
+(`native_cli` imports the `windows_host_paths`, `windows_run_capture` and
+`windows_run_control` modules, and `file_cli` declares `@link_name("CreateFileW")` and
+related Win32 externs). The example suite excludes the compiler self-source
+`lexer_candidate`; its separate fixed-point verification is recorded above.
+Linux candidate verification is deferred to a later stage; Linux or WSL setup is
+outside this validation.
+
+## Historical records (2026-10-17 and earlier)
+
+The dated sections below are snapshots of the state at their own dates. They do not
+describe the current candidate; the current record is
+[above](#current-status-2026-10-19).
+
 ## Default semantic test implementation (2026-10-17)
 
 The candidate now implements the initial scalar default `test` runtime; its
@@ -4587,4 +4624,7 @@ sources into the exact same 40,948,281-byte C packet. The final comparison recor
 28 starter cases and 54 cache observations; all completed cases match Go except
 compiler build provenance in `--version`
 ([final evidence](../ops/evidence/candidate-final-cli-parity-20261016.json)).
-Candidate semantic and isolated native test execution remain unimplemented.
+Superseded: candidate semantic tests and isolated native test execution were implemented
+and locally verified after this 2026-10-16 record; see
+[current status](#current-status-2026-10-19). The statements above this line are a
+historical snapshot.
