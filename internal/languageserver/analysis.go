@@ -1,6 +1,7 @@
 package languageserver
 
 import (
+	"context"
 	"errors"
 	"github.com/0disoft/fairyc/internal/ast"
 	"github.com/0disoft/fairyc/internal/compiler"
@@ -56,6 +57,19 @@ func (s *server) projectRoot(filename string) string {
 	return ""
 }
 func (s *server) analyze(d *document, root string) *analysis {
+	result, _ := s.analyzeContext(context.Background(), d, root)
+	return result
+}
+
+func (s *server) analyzeContext(ctx context.Context, d *document, root string) (result *analysis, err error) {
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
+	defer func() {
+		if canceled := ctx.Err(); canceled != nil {
+			result, err = nil, canceled
+		}
+	}()
 	a := &analysis{files: map[sourceKey]sourceView{}, imports: map[sourceKey]hir.PackageID{}, diagnostics: map[string][]lspDiagnostic{}}
 	if root != "" {
 		overlays := map[string][]byte{}
@@ -64,7 +78,7 @@ func (s *server) analyze(d *document, root string) *analysis {
 				overlays[opened.Path] = opened.Text
 			}
 		}
-		workspace, err := workspaceloader.LoadEditorOverlays(root, overlays)
+		workspace, err := workspaceloader.LoadEditorOverlaysContext(ctx, root, overlays)
 		if err != nil {
 			var load *workspaceloader.LoadError
 			if errors.As(err, &load) && len(load.Diagnostics) > 0 {
@@ -82,12 +96,12 @@ func (s *server) analyze(d *document, root string) *analysis {
 					a.add(filename, text, 0, 0, "workspace-analysis-unavailable", internalDiagnostic(err))
 				}
 			}
-			return a
+			return a, nil
 		}
 		input, err := workspace.SemanticInput()
 		if err != nil {
 			a.add(d.Path, d.Text, 0, 0, "editor-analysis-failed", internalDiagnostic(err))
-			return a
+			return a, nil
 		}
 		for _, imported := range input.Imports {
 			a.imports[sourceKey{imported.FromPackage, imported.ImportPath}] = imported.ToPackage
@@ -95,7 +109,7 @@ func (s *server) analyze(d *document, root string) *analysis {
 		packages, err := workspace.SemanticPackages()
 		if err != nil {
 			a.add(d.Path, d.Text, 0, 0, "editor-analysis-failed", internalDiagnostic(err))
-			return a
+			return a, nil
 		}
 		for _, p := range packages {
 			loaded, ok := workspace.Package(p.Path)
@@ -110,7 +124,7 @@ func (s *server) analyze(d *document, root string) *analysis {
 				a.files[sourceKey{p.ID, file.Path}] = sourceView{physical, file.Bytes, file.Module}
 			}
 		}
-		result, err := workspacecompiler.Check(workspace)
+		result, err := workspacecompiler.CheckContext(ctx, workspace)
 		a.result = result.Semantic
 		if err != nil {
 			a.add(d.Path, d.Text, 0, 0, "editor-analysis-failed", internalDiagnostic(err))
@@ -131,16 +145,16 @@ func (s *server) analyze(d *document, root string) *analysis {
 		parsed, err := frontend.AnalyzeSyntax(source.NewFile(filepath.Base(d.Path), d.Text), source.DefaultLimits())
 		if err != nil {
 			a.add(d.Path, d.Text, 0, 0, "editor-analysis-failed", internalDiagnostic(err))
-			return a
+			return a, nil
 		}
 		for _, diag := range parsed.Tree.Diagnostics {
 			a.add(d.Path, d.Text, diag.Span.StartByte, diag.Span.EndByte, diag.Code, diag.Code)
 		}
 		a.files[sourceKey{0, filepath.Base(d.Path)}] = sourceView{d.Path, d.Text, parsed.AST}
 		if parsed.AST == nil {
-			return a
+			return a, nil
 		}
-		result, err := compiler.Check([]semantic.File{{Path: filepath.Base(d.Path), Module: parsed.AST}})
+		result, err := compiler.CheckContext(ctx, []semantic.File{{Path: filepath.Base(d.Path), Module: parsed.AST}})
 		a.result = result.Semantic
 		if err != nil {
 			a.add(d.Path, d.Text, 0, 0, "editor-analysis-failed", internalDiagnostic(err))
@@ -169,7 +183,7 @@ func (s *server) analyze(d *document, root string) *analysis {
 			break
 		}
 	}
-	return a
+	return a, nil
 }
 func (a *analysis) file(span hir.Span) (sourceView, bool) {
 	key := sourceKey{span.Package, span.Source}

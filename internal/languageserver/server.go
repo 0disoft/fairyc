@@ -1,6 +1,7 @@
 package languageserver
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"github.com/0disoft/fairyc/internal/source"
@@ -18,6 +19,7 @@ type document struct {
 	LastClean *analysis
 }
 type server struct {
+	ctx                   context.Context
 	out                   io.Writer
 	root                  string
 	initialized, shutdown bool
@@ -186,6 +188,13 @@ func (s *server) fits(uri, text string) bool {
 	return total <= 32<<20
 }
 func (s *server) recheck() error {
+	ctx := s.ctx
+	if ctx == nil {
+		ctx = context.Background()
+	}
+	if err := ctx.Err(); err != nil {
+		return err
+	}
 	keys := make([]string, 0, len(s.docs))
 	for uri := range s.docs {
 		keys = append(keys, uri)
@@ -201,8 +210,15 @@ func (s *server) recheck() error {
 		}
 		view := views[key]
 		if view == nil {
-			view = s.analyze(d, root)
+			var err error
+			view, err = s.analyzeContext(ctx, d, root)
+			if err != nil {
+				return err
+			}
 			views[key] = view
+		}
+		if err := ctx.Err(); err != nil {
+			return err
 		}
 		d.View = view
 		if view.clean {

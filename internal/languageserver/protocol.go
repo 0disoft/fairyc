@@ -3,6 +3,7 @@ package languageserver
 
 import (
 	"bufio"
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -95,26 +96,66 @@ func (s *server) response(id json.RawMessage, result any, code int, problem stri
 
 // Serve runs one foreground stdio session. It never builds, executes, downloads or writes files.
 func Serve(in io.Reader, out, stderr io.Writer) int {
-	s := server{out: out, docs: map[string]*document{}}
-	reader := bufio.NewReaderSize(in, 8192)
-	for {
-		m, err := readMessage(reader)
-		if err != nil {
-			if err != io.EOF {
-				fmt.Fprintln(stderr, err)
-				return 1
-			}
-			return 0
+	return ServeContext(context.Background(), in, out, stderr)
+}
+
+// ServeContext cancels compilation when its parent is canceled or a newer
+// document update supersedes an in-flight recheck. It owns the session input;
+// a blocking input must implement io.Closer to unblock reads on shutdown.
+func ServeContext(ctx context.Context, in io.Reader, out, stderr io.Writer) int {
+	ctx, stop := context.WithCancel(ctx)
+	defer func() {
+		stop()
+		if closer, ok := in.(io.Closer); ok {
+			_ = closer.Close()
 		}
-		if m.Method == "exit" {
-			if s.shutdown {
+	}()
+	s := server{out: out, docs: map[string]*document{}}
+	requests := newRequestControl()
+	incoming := make(chan incomingMessage)
+	go readMessages(ctx, bufio.NewReaderSize(in, 8192), requests, incoming)
+	fail := func(err error) int { fmt.Fprintln(stderr, err); return 1 }
+	for {
+		select {
+		case <-ctx.Done():
+			return 0
+		case next, ok := <-incoming:
+			if !ok {
 				return 0
 			}
-			return 1
-		}
-		if err = s.handle(m); err != nil {
-			fmt.Fprintln(stderr, err)
-			return 1
+			if next.err != nil {
+				if errors.Is(next.err, io.EOF) {
+					return 0
+				}
+				return fail(next.err)
+			}
+			m := next.message
+			if m.Method == "exit" {
+				requests.finish(next.token)
+				if s.shutdown {
+					return 0
+				}
+				return 1
+			}
+			s.ctx = next.ctx
+			var err error
+			if next.ctx.Err() != nil && len(m.ID) != 0 {
+				err = s.response(m.ID, nil, -32800, "Request cancelled")
+			} else {
+				err = s.handle(m)
+			}
+			requests.finish(next.token)
+			if errors.Is(err, context.Canceled) || errors.Is(err, context.DeadlineExceeded) {
+				if len(m.ID) != 0 {
+					if err = s.response(m.ID, nil, -32800, "Request cancelled"); err != nil {
+						return fail(err)
+					}
+				}
+				continue
+			}
+			if err != nil {
+				return fail(err)
+			}
 		}
 	}
 }
