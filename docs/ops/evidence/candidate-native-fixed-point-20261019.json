@@ -1,0 +1,140 @@
+{
+  "schema": "fairyc.candidate-full-cli-fixed-point-checkpoint/v1",
+  "date": "2026-10-19",
+  "passed": true,
+  "scope": "Consecutive full file_cli C-part generations; exact complete packet and optimized PE bytes",
+  "buildSourceRevision": "a2aaf5351ef601f24df7f5293647dd915853e2c2",
+  "sourceFiles": 512,
+  "sourceInventorySHA256": "1bbfc9fe5f81c83bf69a986bac959276ec7f80985bae2f4ec99af455fa897364",
+  "note": "Adopts the authenticated Oct18 CLI build. Its 512 Fairy source inputs remain unchanged; later Go interpreter and documentation commits do not change this candidate closure. No initial frontend rebuild was repeated.",
+  "naming": "candidate-native-fixed-point-YYYYMMDD.json is a reviewed local execution summary; raw generated receipts and binaries remain in ignored .cache/evidence.",
+  "adoptedStage1Build": {
+    "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\evidence\\candidate-parity-20261018-a2aaf535\\candidate\\receipt.json",
+    "bytes": 102577,
+    "sha256": "e236fef685588a4b6b71454b85ce202e7e72e2381eb91d990cda1ac4edd95903"
+  },
+  "frozenBuildVersion": "Fairy C Stage 0\ncompiler: v0.0.0-20261018092209-a2aaf5351ef6\nsdk: fairyc-sdk-stdlib/0 0.0.0-stage0.86\nlanguage: fairyc-language/20\nruntime: fairyc-runtime/0\nrevision: a2aaf5351ef601f24df7f5293647dd915853e2c2\nmodified: false\n",
+  "packets": [
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\evidence\\candidate-parity-20261018-a2aaf535\\candidate\\candidate-packet.bin",
+      "bytes": 41798801,
+      "sha256": "09956e230a74ad2c6888d314c669899204f19c3168012d062574e89925c77b28"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\evidence\\candidate-fixed-point-20261019\\stage2-input.bin",
+      "bytes": 41798801,
+      "sha256": "09956e230a74ad2c6888d314c669899204f19c3168012d062574e89925c77b28"
+    }
+  ],
+  "stage1": {
+    "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\evidence\\candidate-parity-20261018-a2aaf535\\candidate\\release\\fairyc.exe",
+    "bytes": 5913600,
+    "sha256": "484585272f4b36b57b952d9a7e837472b236b24d9acb3cd1d7065bb28d89d911"
+  },
+  "stage2": {
+    "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\evidence\\candidate-fixed-point-20261019\\stage2.exe",
+    "bytes": 5913600,
+    "sha256": "484585272f4b36b57b952d9a7e837472b236b24d9acb3cd1d7065bb28d89d911"
+  },
+  "builder": {
+    "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\evidence\\candidate-parity-20261018-a2aaf535\\fairyc-candidate-build.exe",
+    "bytes": 4940800,
+    "sha256": "b91ad328587813bb333b9a2c9b1a950984604ad65905b304e95b6dbecef8a24f"
+  },
+  "packetBytesEqual": true,
+  "optimizedImageBytesEqual": true,
+  "excludedImageBytes": [],
+  "stackReserveBytes": 16777216,
+  "goFrontendInvoked": false,
+  "commands": [
+    [
+      "python",
+      "tools/verify-candidate-native-fixed-point.py",
+      "--build-receipt",
+      ".cache\\evidence\\candidate-parity-20261018-a2aaf535\\candidate\\receipt.json",
+      "--output",
+      ".cache\\evidence\\candidate-fixed-point-20261019",
+      "--frontend-timeout",
+      "900",
+      "--compile-timeout",
+      "900"
+    ]
+  ],
+  "invocations": [
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\evidence\\candidate-parity-20261018-a2aaf535\\candidate\\release\\fairyc.exe",
+        "--c-project-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\evidence\\candidate-parity-20261018-a2aaf535\\candidate\\sources.list"
+      ],
+      "exit": 0,
+      "timedOut": false,
+      "seconds": 611.0096807999944,
+      "stdoutBytes": 41798801,
+      "stdoutSHA256": "09956e230a74ad2c6888d314c669899204f19c3168012d062574e89925c77b28",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\evidence\\candidate-parity-20261018-a2aaf535\\fairyc-candidate-build.exe",
+        "--packet",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\evidence\\candidate-fixed-point-20261019\\stage2-input.bin",
+        "--packet-sha256",
+        "09956e230a74ad2c6888d314c669899204f19c3168012d062574e89925c77b28",
+        "--output",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\evidence\\candidate-fixed-point-20261019\\stage2.exe",
+        "--release",
+        "--stack-reserve-bytes",
+        "16777216"
+      ],
+      "exit": 0,
+      "timedOut": false,
+      "seconds": 511.97739679997903,
+      "stdoutBytes": 183,
+      "stdoutSHA256": "ab079393570f15ef09414a3bcde68a55591b6765245ced4ee3deb45aa6fac0eb",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\evidence\\candidate-fixed-point-20261019\\stage2.exe",
+        "--version"
+      ],
+      "exit": 0,
+      "timedOut": false,
+      "seconds": 0.03502069998648949,
+      "stdoutBytes": 224,
+      "stdoutSHA256": "94cef277fe00af2093df929a1fc1b5e821e1ebb0020b71e75500ce26c578e489",
+      "stderr": ""
+    }
+  ],
+  "verifier": {
+    "path": "tools/verify-candidate-native-fixed-point.py",
+    "sha256": "9a7832945d4c9ec07adddada7249cc8e32c416ae5c8d7aac6735942070f8e150"
+  },
+  "rawReceipt": {
+    "path": ".cache/evidence/candidate-fixed-point-20261019/receipt.json",
+    "sha256": "7635c1606995782c14f25561d8c1d0a0048c61855d0995540b94cb617d9bace8"
+  },
+  "priorCliValidation": {
+    "path": "docs/ops/evidence/candidate-cli-local-validation-20261018.json",
+    "sha256": "b81b6b5e1e810ea6d107fbf5895f8aa6efd422c21d275d106a82542ae97e9501"
+  },
+  "fixedPointVerified": true,
+  "completeGoCliReplacement": false,
+  "promotionGateReady": false,
+  "limitations": [
+    "Windows x64 MSVC full file_cli C-part generation only",
+    "The Go-built native bridge and MSVC still compile/link generated C; this is not complete Go replacement",
+    "Linux candidate verification is deferred by the maintainer; no Linux/WSL setup was performed",
+    "No IR or performance equivalence claim",
+    "An independent stdin-lexer protocol comparison is outside this full-CLI generation check"
+  ],
+  "publicApiChanged": false,
+  "sdkAbiChanged": false,
+  "databaseChanged": false,
+  "ciChanged": false,
+  "runnerChanged": false,
+  "productTimeoutChanged": false,
+  "productStackChanged": false,
+  "pushed": false
+}
