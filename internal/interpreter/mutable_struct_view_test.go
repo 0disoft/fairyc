@@ -22,16 +22,16 @@ func TestMutableStructViewCopiesAndBounds(t *testing.T) {
 	if err := view.storeIndexed(0, token); err != nil {
 		t.Fatal(err)
 	}
-	token.structure.fields["nested"].structure.fields["count"] = i32Value(42)
+	token.structure.fields[0].structure.fields[0] = i32Value(42)
 	loaded, err := view.indexedAt(0)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if loaded.structure.fields["nested"].structure.fields["count"].i32 != 7 {
+	if loaded.structure.fields[0].structure.fields[0].i32 != 7 {
 		t.Fatal("stored value aliases source")
 	}
-	loaded.structure.fields["nested"].structure.fields["count"] = i32Value(99)
-	if backing.elements[0].structure.fields["nested"].structure.fields["count"].i32 != 7 {
+	loaded.structure.fields[0].structure.fields[0] = i32Value(99)
+	if backing.elements[0].structure.fields[0].structure.fields[0].i32 != 7 {
 		t.Fatal("copied load aliases owner")
 	}
 	sub, err := view.sliceIndexedView(1, 2)
@@ -41,7 +41,7 @@ func TestMutableStructViewCopiesAndBounds(t *testing.T) {
 	if err := sub.storeIndexed(0, token); err != nil {
 		t.Fatal(err)
 	}
-	if backing.elements[1].structure.fields["nested"].structure.fields["count"].i32 != 42 {
+	if backing.elements[1].structure.fields[0].structure.fields[0].i32 != 42 {
 		t.Fatal("subview store missed backing")
 	}
 	for _, index := range []uint64{2, ^uint64(0)} {
@@ -70,13 +70,13 @@ func TestIndexedStructFieldReference(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	borrowed.structure.fields["count"] = i32Value(42)
+	borrowed.structure.fields[0] = i32Value(42)
 	copied, err := view.indexedAt(0)
-	if err != nil || copied.structure.fields["count"].i32 != 42 {
+	if err != nil || copied.structure.fields[0].i32 != 42 {
 		t.Fatalf("copy: %+v %v", copied, err)
 	}
-	copied.structure.fields["count"] = i32Value(7)
-	if backing.elements[0].structure.fields["count"].i32 != 42 {
+	copied.structure.fields[0] = i32Value(7)
+	if backing.elements[0].structure.fields[0].i32 != 42 {
 		t.Fatal("copy changed borrowed storage")
 	}
 	for _, index := range []uint64{1, ^uint64(0)} {
@@ -140,7 +140,7 @@ func TestMutableStructForInterpreter(t *testing.T) {
 			if len(values) == 0 {
 				break
 			}
-			if got := backing.elements[i].structure.fields["value"].i32; got != want {
+			if got := backing.elements[i].structure.fields[0].i32; got != want {
 				t.Fatalf("element %d=%d want %d", i, got, want)
 			}
 		}

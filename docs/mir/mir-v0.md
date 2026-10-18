@@ -417,6 +417,13 @@ with the original context error, separately from `step-limit`, `call-depth-limit
 and `output-limit`. Existing entry wrappers retain their default budgets. These
 are caller-controlled interpreter budgets, not language traps or new CLI flags.
 
+Interpreter struct, enum, and resource fields occupy declaration-ordered value
+slices. Field names resolve against verified definitions rather than per-value
+hash maps. Inert copies detach those slices recursively, resource ownership stays
+linear, and cleanup still visits resource fields in reverse declaration order.
+Scalar field references retain the stored owner's slice header and slot so replacing
+an aggregate's fields preserves its identity without retaining obsolete storage.
+
 The first semantic oracle is a small MIR interpreter supporting scalars, safe borrow and dereference
 transport, tagged `Option` and `Result`, restricted inert user enums, borrowed UTF-8 and byte views
 with byte-length reads, moves, drop traces, region mark and reset, branches, and traps. Region entry

@@ -8,14 +8,17 @@ func inertDropValue(value runtimeValue, depth int) bool {
 		return false
 	}
 	switch value.kind {
-	case valueI32, valueU8, valueU32, valueUSize, valueNull:
+	case valueI64, valueI32, valueU8, valueU32, valueUSize, valueNull:
 		return true
 	case valueStruct:
 		if value.structure == nil || value.structure.definition == nil {
 			return false
 		}
-		for _, field := range value.structure.definition.Fields {
-			v, found := value.structure.fields[field.Name]
+		if len(value.structure.fields) != len(value.structure.definition.Fields) {
+			return false
+		}
+		for index := range value.structure.definition.Fields {
+			v, found := indexedField(value.structure.fields, index)
 			if !found || !inertDropValue(v, depth+1) {
 				return false
 			}

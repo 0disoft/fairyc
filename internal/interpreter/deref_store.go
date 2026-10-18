@@ -44,8 +44,7 @@ func (r *scalarReference) load() (runtimeValue, bool) {
 		return runtimeValue{kind: valueU8, typ: hir.TypeU8, u64: uint64(r.static.staticData[r.index])}, true
 	}
 	if r.fields != nil {
-		v, ok := r.fields[r.field]
-		return v, ok
+		return indexedField(*r.fields, r.field)
 	}
 	v, ok := r.locals[r.local]
 	return v, ok
@@ -56,7 +55,7 @@ func (r *scalarReference) store(v runtimeValue) {
 		return
 	}
 	if r.fields != nil {
-		r.fields[r.field] = v
+		(*r.fields)[r.field] = v
 	} else {
 		r.locals[r.local] = v
 	}

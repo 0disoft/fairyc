@@ -43,8 +43,7 @@ func storeField(locals map[mir.LocalID]runtimeValue, op mir.Operation, structs m
 			return fmt.Errorf("invalid struct field store")
 		}
 		if mir.ValidOneWordStructFieldStoreShape(op, value.structure.definition) {
-			field := value.structure.definition.Fields[0]
-			if raw, found := value.structure.fields[field.Name]; !found || !scalarStoreValueMatches(raw, hir.TypeUSize) {
+			if raw, found := indexedField(value.structure.fields, 0); !found || !scalarStoreValueMatches(raw, hir.TypeUSize) {
 				return fmt.Errorf("invalid one-word struct field value")
 			}
 		}
@@ -55,7 +54,7 @@ func storeField(locals map[mir.LocalID]runtimeValue, op mir.Operation, structs m
 			if current.structure == nil || current.structure.definition == nil {
 				return fmt.Errorf("missing live nested field store owner")
 			}
-			child, found := current.structure.fields[name]
+			child, found := indexedField(current.structure.fields, structFieldIndex(current.structure.definition, name))
 			if !found || child.structure == nil {
 				return fmt.Errorf("invalid live nested field store path")
 			}
@@ -64,9 +63,9 @@ func storeField(locals map[mir.LocalID]runtimeValue, op mir.Operation, structs m
 		if current.structure == nil || current.structure.definition == nil {
 			return fmt.Errorf("missing nested leaf owner")
 		}
-		for _, field := range current.structure.definition.Fields {
+		for index, field := range current.structure.definition.Fields {
 			if field.Name == op.Field && field.Type == op.Type {
-				current.structure.fields[op.Field] = value.cloneForValueCopy()
+				current.structure.fields[index] = value.cloneForValueCopy()
 				return nil
 			}
 		}
@@ -74,16 +73,16 @@ func storeField(locals map[mir.LocalID]runtimeValue, op mir.Operation, structs m
 	}
 	aggregate := fieldAggregateType(op.OwnerType)
 	if receiver.structure != nil && receiver.structure.definition != nil && receiver.structure.definition.Type == aggregate {
-		for _, field := range receiver.structure.definition.Fields {
+		for index, field := range receiver.structure.definition.Fields {
 			if field.Name == op.Field && field.Type == op.Type {
-				receiver.structure.fields[op.Field] = value.cloneForValueCopy()
+				receiver.structure.fields[index] = value.cloneForValueCopy()
 				return nil
 			}
 		}
 	} else if receiver.resource != nil && receiver.resource.definition != nil && receiver.resource.definition.Type == aggregate && !receiver.resource.dropped {
-		for _, field := range receiver.resource.definition.Fields {
+		for index, field := range receiver.resource.definition.Fields {
 			if field.Name == op.Field && field.Type == op.Type {
-				receiver.resource.fields[op.Field] = value.cloneForValueCopy()
+				receiver.resource.fields[index] = value.cloneForValueCopy()
 				return nil
 			}
 		}

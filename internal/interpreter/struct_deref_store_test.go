@@ -19,23 +19,23 @@ func TestStructDerefStoreBackingAndCopy(t *testing.T) {
 	if e != nil {
 		t.Fatal(e)
 	}
-	token.structure.fields["nested"].structure.fields["count"] = i32Value(42)
+	token.structure.fields[0].structure.fields[0] = i32Value(42)
 	locals := map[mir.LocalID]runtimeValue{1: selected, 2: token}
 	op := mir.Operation{Kind: mir.OperationDerefStore, Symbol: hir.NoSymbol, DestinationLocal: mir.NoLocal, OwnerType: selected.typ, Type: token.typ, Operands: []mir.Operand{{Kind: mir.OperandLocal, Local: 1}, {Kind: mir.OperandLocal, Local: 2}}}
 	structs := map[hir.Type]*mir.StructType{token.typ: definition, child.typ: child.structure.definition}
 	if e := storeDeref(locals, op, structs); e != nil {
 		t.Fatal(e)
 	}
-	token.structure.fields["nested"].structure.fields["count"] = i32Value(99)
+	token.structure.fields[0].structure.fields[0] = i32Value(99)
 	copied, e := view.indexedAt(0)
 	if e != nil {
 		t.Fatal(e)
 	}
-	if copied.structure.fields["nested"].structure.fields["count"].i32 != 42 || selected.structure != backing.elements[0].structure {
+	if copied.structure.fields[0].structure.fields[0].i32 != 42 || selected.structure != backing.elements[0].structure {
 		t.Fatal("store lost referent or aliased source")
 	}
-	copied.structure.fields["nested"].structure.fields["count"] = i32Value(100)
-	if selected.structure.fields["nested"].structure.fields["count"].i32 != 42 {
+	copied.structure.fields[0].structure.fields[0] = i32Value(100)
+	if selected.structure.fields[0].structure.fields[0].i32 != 42 {
 		t.Fatal("copy aliases replaced storage")
 	}
 	shared := selected

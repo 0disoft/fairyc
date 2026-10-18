@@ -294,18 +294,18 @@ const (
 
 type structState struct {
 	definition *mir.StructType
-	fields     map[string]runtimeValue
+	fields     []runtimeValue
 }
 
 type enumState struct {
 	definition *mir.EnumType
 	variant    string
-	fields     map[string]runtimeValue
+	fields     []runtimeValue
 }
 
 type resourceState struct {
 	definition *mir.ResourceType
-	fields     map[string]runtimeValue
+	fields     []runtimeValue
 	dropping   bool
 	dropped    bool
 }
@@ -332,8 +332,8 @@ type scalarReference struct {
 	array  *arrayState
 	index  uint64
 	static *indexedViewState
-	fields map[string]runtimeValue
-	field  string
+	fields *[]runtimeValue
+	field  int
 	locals map[mir.LocalID]runtimeValue
 	local  mir.LocalID
 }
@@ -450,72 +450,6 @@ func optionValue(variant string, payload *runtimeValue) (runtimeValue, error) {
 	}
 }
 
-func enumValue(definition *mir.EnumType, variantName string, fieldNames []string, values []runtimeValue) (runtimeValue, error) {
-	if definition == nil || definition.Type == hir.TypeInvalid || len(fieldNames) != len(values) {
-		return runtimeValue{}, fmt.Errorf("invalid enum construction definition")
-	}
-	var variant *mir.EnumVariant
-	for index := range definition.Variants {
-		if definition.Variants[index].Name == variantName {
-			variant = &definition.Variants[index]
-			break
-		}
-	}
-	if variant == nil || len(variant.Fields) != len(fieldNames) {
-		return runtimeValue{}, fmt.Errorf("enum %q has no matching variant %q", definition.Type, variantName)
-	}
-	declared := make(map[string]struct{}, len(variant.Fields))
-	for _, field := range variant.Fields {
-		declared[field.Name] = struct{}{}
-	}
-	state := &enumState{definition: definition, variant: variantName, fields: make(map[string]runtimeValue, len(fieldNames))}
-	for index, fieldName := range fieldNames {
-		if _, found := declared[fieldName]; !found {
-			return runtimeValue{}, fmt.Errorf("enum %q variant %q has no field %q", definition.Type, variantName, fieldName)
-		}
-		if _, duplicate := state.fields[fieldName]; duplicate {
-			return runtimeValue{}, fmt.Errorf("enum %q variant %q repeats field %q", definition.Type, variantName, fieldName)
-		}
-		state.fields[fieldName] = values[index].cloneForValueCopy()
-	}
-	return runtimeValue{kind: valueEnum, typ: definition.Type, enum: state}, nil
-}
-
-func resourceValue(definition *mir.ResourceType, values []runtimeValue) (runtimeValue, error) {
-	if definition == nil || definition.Type == hir.TypeInvalid || len(definition.Fields) == 0 || len(definition.Fields) != len(values) ||
-		definition.DropKind != hir.ResourceDropEmpty && definition.DropKind != hir.ResourceDropNonEmpty {
-		return runtimeValue{}, fmt.Errorf("invalid resource construction definition")
-	}
-	state := &resourceState{definition: definition, fields: make(map[string]runtimeValue, len(definition.Fields))}
-	for index, field := range definition.Fields {
-		if field.Name == "" {
-			return runtimeValue{}, fmt.Errorf("resource %q has an empty field name", definition.Type)
-		}
-		if _, duplicate := state.fields[field.Name]; duplicate {
-			return runtimeValue{}, fmt.Errorf("resource %q has duplicate field %q", definition.Type, field.Name)
-		}
-		state.fields[field.Name] = values[index].cloneForValueCopy()
-	}
-	return runtimeValue{kind: valueResource, typ: definition.Type, resource: state}, nil
-}
-
-func structValue(definition *mir.StructType, values []runtimeValue) (runtimeValue, error) {
-	if definition == nil || definition.Type == hir.TypeInvalid || len(definition.Fields) != len(values) {
-		return runtimeValue{}, fmt.Errorf("invalid struct construction definition")
-	}
-	state := &structState{definition: definition, fields: make(map[string]runtimeValue, len(definition.Fields))}
-	for index, field := range definition.Fields {
-		if field.Name == "" {
-			return runtimeValue{}, fmt.Errorf("struct %q has an empty field name", definition.Type)
-		}
-		if _, duplicate := state.fields[field.Name]; duplicate {
-			return runtimeValue{}, fmt.Errorf("struct %q has duplicate field %q", definition.Type, field.Name)
-		}
-		state.fields[field.Name] = values[index].cloneForValueCopy()
-	}
-	return runtimeValue{kind: valueStruct, typ: definition.Type, structure: state}, nil
-}
-
 func (v runtimeValue) asI32() (int32, error) {
 	if v.kind != valueI32 {
 		return 0, capabilityError("value is not an executable i32 scalar")
@@ -548,56 +482,11 @@ func (v runtimeValue) optionPayload(move bool) (runtimeValue, error) {
 	return payload, nil
 }
 
-func (v runtimeValue) field(definition *mir.ResourceType, name string) (runtimeValue, error) {
-	if v.kind != valueResource || v.resource == nil {
-		return runtimeValue{}, capabilityError("field read received a non-resource value")
-	}
-	if definition == nil || v.resource.definition == nil || v.resource.definition.Type != definition.Type {
-		return runtimeValue{}, fmt.Errorf("field read resource definition does not match the runtime value")
-	}
-	if v.resource.dropped {
-		return runtimeValue{}, fmt.Errorf("resource %q was read after drop", v.resource.definition.Type)
-	}
-	value, found := v.resource.fields[name]
-	if !found {
-		return runtimeValue{}, fmt.Errorf("resource %q has no field %q", v.resource.definition.Type, name)
-	}
-	return value, nil
-}
-
-func (v runtimeValue) structField(definition *mir.StructType, name string) (runtimeValue, error) {
-	if v.kind != valueStruct || v.structure == nil {
-		return runtimeValue{}, capabilityError("field read received a non-struct value")
-	}
-	if definition == nil || v.structure.definition == nil || v.structure.definition.Type != definition.Type {
-		return runtimeValue{}, fmt.Errorf("field read struct definition does not match the runtime value")
-	}
-	value, found := v.structure.fields[name]
-	if !found {
-		return runtimeValue{}, fmt.Errorf("struct %q has no field %q", v.structure.definition.Type, name)
-	}
-	return value, nil
-}
-
 func fieldAggregateType(value hir.Type) hir.Type {
 	if element, _, borrow := hir.BorrowElement(value); borrow {
 		return element
 	}
 	return value
-}
-
-func (v runtimeValue) enumPayload(definition *mir.EnumType, variant, field string) (runtimeValue, error) {
-	if v.kind != valueEnum || v.enum == nil || v.enum.definition == nil {
-		return runtimeValue{}, capabilityError("enum payload received a non-enum value")
-	}
-	if definition == nil || v.enum.definition.Type != definition.Type || v.enum.variant != variant {
-		return runtimeValue{}, fmt.Errorf("enum payload definition or active variant does not match")
-	}
-	value, found := v.enum.fields[field]
-	if !found {
-		return runtimeValue{}, fmt.Errorf("enum %q variant %q has no active field %q", definition.Type, variant, field)
-	}
-	return value, nil
 }
 
 type callCompletion struct {
@@ -979,13 +868,16 @@ func (r *executionState) call(function *mir.Function, arguments []runtimeValue, 
 				}
 				if operation.Kind == mir.OperationFieldBorrow {
 					if element, _, _ := hir.BorrowElement(operation.Type); hir.FixedArrayScalarElement(element) {
-						var fields map[string]runtimeValue
+						var fields *[]runtimeValue
+						fieldIndex := -1
 						if receiver.structure != nil {
-							fields = receiver.structure.fields
+							fields = &receiver.structure.fields
+							fieldIndex = structFieldIndex(receiver.structure.definition, operation.Field)
 						} else if receiver.resource != nil {
-							fields = receiver.resource.fields
+							fields = &receiver.resource.fields
+							fieldIndex = resourceFieldIndex(receiver.resource.definition, operation.Field)
 						}
-						value.reference = &scalarReference{fields: fields, field: operation.Field}
+						value.reference = &scalarReference{fields: fields, field: fieldIndex}
 					}
 					value.typ = operation.Type
 				}
@@ -1192,8 +1084,7 @@ func (r *executionState) dropValue(value runtimeValue, binding hir.Span, depth i
 		value.resource.dropping = false
 		value.resource.dropped = true
 		for index := len(value.resource.definition.Fields) - 1; index >= 0; index-- {
-			field := value.resource.definition.Fields[index]
-			trap, err := r.dropValue(value.resource.fields[field.Name], binding, depth)
+			trap, err := r.dropValue(value.resource.fields[index], binding, depth)
 			if err != nil || trap != "" {
 				return trap, err
 			}

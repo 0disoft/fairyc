@@ -41,10 +41,10 @@ func (v runtimeValue) cloneForValueCopy() runtimeValue {
 	return copy
 }
 
-func copyValueFields(fields map[string]runtimeValue) map[string]runtimeValue {
-	copy := make(map[string]runtimeValue, len(fields))
-	for name, value := range fields {
-		copy[name] = value.cloneForValueCopy()
+func copyValueFields(fields []runtimeValue) []runtimeValue {
+	copy := make([]runtimeValue, len(fields))
+	for index, value := range fields {
+		copy[index] = value.cloneForValueCopy()
 	}
 	return copy
 }
