@@ -43,7 +43,7 @@ def main():
                              check=True, capture_output=True, text=True).stdout.splitlines()
     files = [Path(p) for p in tracked if p.endswith('.fy') or p.endswith('/fairy.toml')]
     for path in files + [Path('tools/verify-candidate-std-fs.py'), Path('tools/compare-candidate-go-behavior.py'),
-                         Path('cmd/fairyc-windows-host-smoke/stdlib_quickstart_proofs.go')]:
+                         Path('tools/dev/fairyc-windows-host-smoke/stdlib_quickstart_proofs.go')]:
         inputs[path.as_posix()] = dict(path=path.as_posix(), sha256=behavior.sha(ROOT / path))
     observations = []
     failures = []

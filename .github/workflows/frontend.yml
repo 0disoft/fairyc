@@ -74,7 +74,7 @@ jobs:
           go-version-file: go.mod
           cache: false
       - name: Run Windows native target smoke
-        run: go run -mod=readonly ./cmd/fairyc-windows-host-smoke
+        run: go run -mod=readonly ./tools/dev/fairyc-windows-host-smoke
 
   windows-parser:
     name: Windows candidate proof (${{ matrix.group }})
@@ -103,7 +103,7 @@ jobs:
           go-version-file: go.mod
           cache: false
       - name: Run required Fairy native proof group
-        run: go test -mod=readonly -count=1 -v -run '${{ matrix.tests }}' ./...
+        run: go test -mod=readonly -count=1 -v -run '${{ matrix.tests }}' ./internal/cli
 
   native-c:
     name: C differential (Linux)
@@ -119,4 +119,4 @@ jobs:
           go-version-file: go.mod
           cache: false
       - name: Run C differential, sanitizer, layout, ABI, and product build checks
-        run: go run -mod=readonly ./cmd/fairyc-native-fixtures spec/fixtures/c-emission/manifest-v0.json
+        run: go run -mod=readonly ./tools/dev/fairyc-native-fixtures spec/fixtures/c-emission/manifest-v0.json

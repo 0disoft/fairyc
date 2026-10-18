@@ -58,7 +58,7 @@ def main():
     assert len(execution['candidateExecutions']) == 2 and {row['profile'] for row in execution['candidateExecutions']} == {'development', 'release'}
     assert all(row['exit'] == 0 and digest(Path(row['path'])) == row['sha256'] for row in execution['candidateExecutions'])
     assert digest(oracle) == oracle_digest
-    inputs = execution['sourceInputs'] + [dict(path=p.relative_to(ROOT).as_posix(), sha256=digest(p)) for p in [corpus_path, ROOT / 'cmd/fairyc-candidate-toml-scalar-reference/main.go', ROOT / 'go.mod', ROOT / 'go.sum', Path(__file__)]]
+    inputs = execution['sourceInputs'] + [dict(path=p.relative_to(ROOT).as_posix(), sha256=digest(p)) for p in [corpus_path, ROOT / 'tools/candidate/fairyc-candidate-toml-scalar-reference/main.go', ROOT / 'go.mod', ROOT / 'go.sum', Path(__file__)]]
     receipt = dict(schema='fairyc.candidate-toml-scalars/v1', passed=True, scope='Integer/float/date-time syntax and range classification for manifest error parity; values stay typed raw atoms', sourceInputs=inputs, cases=len(report['cases']), kinds={str(kind):sum(row['kind'] == kind for row in report['cases']) for kind in [0,6,7,8]}, reference=dict(path=str(oracle), sha256=oracle_digest, reportSHA256=digest(report_path)), fixtureSHA256=digest(fixture), fixtureBytes=fixture.stat().st_size, execution=execution, executionReused=bool(args.reuse_execution), fullTOMLParity=False, publicApiChanged=False, dbChanged=False, ciChanged=False, pushed=False)
     save(output / 'receipt.json', receipt)
     print(f'Scalar corpus passed: {len(report["cases"])} Go classifications; native 2 and both C profiles')

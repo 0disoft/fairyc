@@ -129,14 +129,14 @@ Portable verification uses a test-only Go reference fixture producer plus
 the repository root:
 
 ```sh
-go run ./cmd/fairyc-lexer-file-oracle .cache/lexer-file-cli/reference.json
+go run ./tools/dev/fairyc-lexer-file-oracle .cache/lexer-file-cli/reference.json
 python examples/lexer_candidate/verify.py --compiler /absolute/path/to/fairyc --reference .cache/lexer-file-cli/reference.json --receipt /path/to/evidence/receipt.json
 ```
 
 The `go run` form is the portable default; an optional workspace wrapper is:
 
 ```sh
-bun tools/run-go.ts run ./cmd/fairyc-lexer-file-oracle .cache/lexer-file-cli/reference.json
+bun tools/run-go.ts run ./tools/dev/fairyc-lexer-file-oracle .cache/lexer-file-cli/reference.json
 ```
 
 The file CLI passes on Windows development and release: 29 Go reference files per
@@ -200,8 +200,8 @@ Optional Windows executable form:
 repository root and needs both references:
 
 ```sh
-go run ./cmd/fairyc-lexer-file-oracle .cache/declarations-file-cli/tokens-reference.json
-go run ./cmd/fairyc-lexer-file-oracle --declarations .cache/declarations-file-cli/declarations-reference.json
+go run ./tools/dev/fairyc-lexer-file-oracle .cache/declarations-file-cli/tokens-reference.json
+go run ./tools/dev/fairyc-lexer-file-oracle --declarations .cache/declarations-file-cli/declarations-reference.json
 python examples/lexer_candidate/verify.py --compiler /absolute/path/to/fairyc --reference .cache/declarations-file-cli/tokens-reference.json --declarations-reference .cache/declarations-file-cli/declarations-reference.json --receipt /path/to/evidence/receipt.json
 ```
 
@@ -211,7 +211,7 @@ declaration set is 15 accepted, 9 syntax, 4 lexical and 1 limit. Declaration out
 compared exactly for kind, name, start, end, nameStart and nameEnd against Go
 `syntax.Parse` for accepted inputs, and negative inputs are checked against authored
 diagnostic goldens; original source hashes are preserved. `TestLexerFileCLIWorkspace`,
-`go vet ./internal/cli ./cmd/fairyc-lexer-file-oracle`, and the Linux and Windows
+`go vet ./internal/cli ./tools/dev/fairyc-lexer-file-oracle`, and the Linux and Windows
 `--locked` C emission checks pass, and the 619 compiler inputs match the manifest with
 the compiler EXE hash unchanged. The example package is version 0.2.0 with no compiler
 or SDK change. Evidence is `docs/ops/evidence/declarations-file-cli-20261005.json`; the
@@ -262,9 +262,9 @@ From the repository root, generate the three test references and run the portabl
 harness against the desired native compiler:
 
 ```sh
-go run ./cmd/fairyc-lexer-file-oracle .cache/names-file-cli/tokens-reference.json
-go run ./cmd/fairyc-lexer-file-oracle --declarations .cache/names-file-cli/declarations-reference.json
-go run ./cmd/fairyc-lexer-file-oracle --names .cache/names-file-cli/reference.json
+go run ./tools/dev/fairyc-lexer-file-oracle .cache/names-file-cli/tokens-reference.json
+go run ./tools/dev/fairyc-lexer-file-oracle --declarations .cache/names-file-cli/declarations-reference.json
+go run ./tools/dev/fairyc-lexer-file-oracle --names .cache/names-file-cli/reference.json
 python examples/lexer_candidate/verify.py --compiler /absolute/path/to/fairyc --reference .cache/names-file-cli/tokens-reference.json --declarations-reference .cache/names-file-cli/declarations-reference.json --names-reference .cache/names-file-cli/reference.json --receipt /path/to/evidence/receipt.json
 ```
 
@@ -364,10 +364,10 @@ Generate independent test data and run the portable harness from the repository
 root (no PowerShell runtime is required):
 
 ```sh
-go run ./cmd/fairyc-lexer-file-oracle .cache/types-file-cli/tokens-reference.json
-go run ./cmd/fairyc-lexer-file-oracle --declarations .cache/types-file-cli/declarations-reference.json
-go run ./cmd/fairyc-lexer-file-oracle --names .cache/types-file-cli/names-reference.json
-go run ./cmd/fairyc-lexer-file-oracle --types .cache/types-file-cli/reference.json
+go run ./tools/dev/fairyc-lexer-file-oracle .cache/types-file-cli/tokens-reference.json
+go run ./tools/dev/fairyc-lexer-file-oracle --declarations .cache/types-file-cli/declarations-reference.json
+go run ./tools/dev/fairyc-lexer-file-oracle --names .cache/types-file-cli/names-reference.json
+go run ./tools/dev/fairyc-lexer-file-oracle --types .cache/types-file-cli/reference.json
 python examples/lexer_candidate/verify.py --compiler /absolute/path/to/fairyc --reference .cache/types-file-cli/tokens-reference.json --declarations-reference .cache/types-file-cli/declarations-reference.json --names-reference .cache/types-file-cli/names-reference.json --types-reference .cache/types-file-cli/reference.json --receipt /path/to/evidence/receipt.json
 ```
 
@@ -431,7 +431,7 @@ lexer-candidate --check-types-file samples/control-names-demo.fy
 ```
 
 The portable `--types` oracle now adds normal and rejected control cases from
-`cmd/fairyc-lexer-file-oracle/control_types.go`; the existing verification command
+`tools/dev/fairyc-lexer-file-oracle/control_types.go`; the existing verification command
 uses freshly regenerated references. `tests/type_control.fy` reads actual retained
 branch and comparison types, contextual u8 branch values, and return/loop results
 in both native profiles. Evidence: `docs/ops/evidence/control-types-cli-20261005.json`.
@@ -483,7 +483,7 @@ remain outside this scalar component. Unsupported constructs fail closed.
 Generate Go semantic reference observations and verify both native profiles:
 
 ```text
-go run ./cmd/fairyc-lexer-file-oracle --modules .cache/modules-file-cli/reference.json
+go run ./tools/dev/fairyc-lexer-file-oracle --modules .cache/modules-file-cli/reference.json
 python examples/lexer_candidate/verify.py --compiler /absolute/path/to/fairyc --reference .cache/modules-file-cli/tokens-reference.json --declarations-reference .cache/modules-file-cli/declarations-reference.json --names-reference .cache/modules-file-cli/names-reference.json --types-reference .cache/modules-file-cli/types-reference.json --modules-reference .cache/modules-file-cli/reference.json --receipt /path/to/evidence/receipt.json
 ```
 

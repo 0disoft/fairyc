@@ -36,7 +36,7 @@ input in this mode.
 From the repository root, regenerate the independent Go HIR oracle with:
 
 ```sh
-go run ./cmd/fairyc-lexer-file-oracle --hir .cache/hir-file-cli/reference.json
+go run ./tools/dev/fairyc-lexer-file-oracle --hir .cache/hir-file-cli/reference.json
 ```
 
 Pass that file as `--hir-reference` to `verify.py`, together with the earlier
@@ -152,7 +152,7 @@ compilation of the input in this mode.
 From the repository root, regenerate the independent Go MIR oracle with:
 
 ```sh
-go run ./cmd/fairyc-lexer-file-oracle --mir .cache/mir-file-cli/reference.json
+go run ./tools/dev/fairyc-lexer-file-oracle --mir .cache/mir-file-cli/reference.json
 ```
 
 Pass that file as `--mir-reference` to `verify.py`, together with the earlier

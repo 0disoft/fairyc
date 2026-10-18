@@ -23,7 +23,7 @@ pin a runner image or toolchain baseline and does not promote either target.
   contract-state race check. Windows runs the Go suite excluding the lexer/parser proofs owned by
   separate Windows jobs and eight native cost-comparison tests. Those cost tests remain in the
   source suite for targeted local validation; they do not gate every push. The separate Windows
-  native-target job runs the default correctness mode of `cmd/fairyc-windows-host-smoke`. The
+  native-target job runs the default correctness mode of `tools/dev/fairyc-windows-host-smoke`. The
   command discovers the hosted runner's local x64 MSVC and
   Windows SDK without WSL, exercises single- and multi-source target-neutral paths plus the declared-target path, safe File and owned-text source lifecycles, layout, ABI,
   raw owned-text and Arena allocation-failure preservation, PE/COFF, and unwind probes, and retains no executable,
@@ -31,9 +31,12 @@ pin a runner image or toolchain baseline and does not promote either target.
   retained-heap measurements are not part of the push or pull-request gate.
 - The workflow uploads no build artifact and performs no deploy, release, publication, or write to
   repository state.
+- The four Windows lexer/parser proof groups target `./internal/cli`, where their selected tests
+  live. The full frontend suite still covers product and developer-tool packages through `./...`;
+  moving tools does not exclude them from that coverage.
 - Ordinary tests execute the fixed lexer and parser fuzz seeds. Timed fuzz campaigns remain
   unconfigured rather than pretending a short CI sample proves coverage.
-- A separate Ubuntu native-C job invokes `cmd/fairyc-native-fixtures`. The command requires
+- A separate Ubuntu native-C job invokes `tools/dev/fairyc-native-fixtures`. The command requires
   Linux/amd64, glibc, Clang, and GCC; compiles all 52 current C-emission cases at `-O0` and
   `-O2` with pedantic warnings as errors; links the scalar trap runtime plus the closed conformance
   drop recorder; plans 208 exact process-status and source-linked drop-sequence comparisons;
@@ -124,7 +127,7 @@ pin a runner image or toolchain baseline and does not promote either target.
 
 `.github/workflows/measurements.yml` owns the non-blocking Windows measurement lane. It runs weekly
 and through `workflow_dispatch`, not for pushes or pull requests. The lane invokes
-`cmd/fairyc-windows-host-smoke --with-measurements`, so the existing correctness setup establishes
+`tools/dev/fairyc-windows-host-smoke --with-measurements`, so the existing correctness setup establishes
 the compiler, source-root, MSVC, and workspace identities before collecting process-cache,
 workspace-build, persistent-cache, workspace-session, Atlas process/scaling, and retained-heap
 receipts. Reports remain bounded job-log output; the workflow uploads no artifact and has no

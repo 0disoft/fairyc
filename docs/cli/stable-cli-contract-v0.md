@@ -125,4 +125,4 @@ Adding or removing experimental commands does not by itself revise this stable c
 
 ## Validation ownership
 
-`internal/cli` tests own invocation, help, stdout/stderr separation, JSON schemas, workspace failures, locks, and stable native behavior. `cmd/fairyc-windows-host-smoke` owns the hosted Windows native path. Repository CI runs Go vet/tests on Linux and Windows and the Windows native smoke before native CLI claims are accepted.
+`internal/cli` tests own invocation, help, stdout/stderr separation, JSON schemas, workspace failures, locks, and stable native behavior. `tools/dev/fairyc-windows-host-smoke` owns the hosted Windows native path. Repository CI runs Go vet/tests on Linux and Windows and the Windows native smoke before native CLI claims are accepted.

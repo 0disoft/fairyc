@@ -40,8 +40,14 @@ import "github.com/0disoft/fairyc/internal/atlasmap"
 	writeArchitectureFile(t, root, "internal/runtime/atlas.go", `package runtime
 import "github.com/0disoft/fairyc/internal/workspacecallcatalog"
 `)
-	writeArchitectureFile(t, root, "cmd/fairyc-windows-host-smoke/main.go", `package main
+	writeArchitectureFile(t, root, "tools/dev/fairyc-windows-host-smoke/main.go", `package main
 import "github.com/0disoft/fairyc/internal/atlasmap"
+`)
+	writeArchitectureFile(t, root, "tools/candidate/unapproved/main.go", `package main
+import "github.com/0disoft/fairyc/internal/atlasmap"
+`)
+	writeArchitectureFile(t, root, "tools/dev/unapproved/main.go", `package main
+import "github.com/0disoft/fairyc/internal/contextpack"
 `)
 	writeArchitectureFile(t, root, "cmd/fairyc/main.go", `package main
 import "example.com/github.com/0disoft/fairyc/internal/atlasmap"
@@ -66,6 +72,16 @@ import "example.com/github.com/0disoft/fairyc/internal/atlasmap"
 			Importer: modulePath + "/internal/runtime",
 			Imported: modulePath + "/internal/workspacecallcatalog",
 			File:     "internal/runtime/atlas.go",
+		},
+		{
+			Importer: modulePath + "/tools/candidate/unapproved",
+			Imported: modulePath + "/internal/atlasmap",
+			File:     "tools/candidate/unapproved/main.go",
+		},
+		{
+			Importer: modulePath + "/tools/dev/unapproved",
+			Imported: modulePath + "/internal/contextpack",
+			File:     "tools/dev/unapproved/main.go",
 		},
 	}
 	if !reflect.DeepEqual(violations, want) {

@@ -30,7 +30,7 @@ parser/query tests do not establish a successful Zed/WASM installation.
 
 ## Maintaining syntax assets
 
-Run `go run ./cmd/fairyc-editor-assets` from the compiler repository to regenerate
+Run `go run ./tools/dev/fairyc-editor-assets` from the compiler repository to regenerate
 `editors/language.json` and the TextMate grammar. Reserved words are obtained
 directly from the compiler lexer. Contextual words remain distinct; the EBNF hash
 forces review whenever the grammar changes. Review Tree-sitter syntax separately

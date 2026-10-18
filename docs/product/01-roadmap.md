@@ -1309,7 +1309,7 @@ attributed-text v0 document through `experimental atlas-evidence show`. Each chi
 and independently checksummed, the wrapper has no authority, facts and untrusted text remain visibly
 separate, all query/text/component/final limits are explicit, and the existing formats stay
 byte-unchanged.
-ADR 0203 now parses every repository `cmd/` and `internal/` Go import and permits Atlas/export imports
+ADR 0203 now parses Go imports in `cmd/`, `internal/`, `tools/candidate/`, and `tools/dev/` and permits Atlas/export imports
 only inside that layer, CLI orchestration, and the Windows evidence harness. Mutation-sensitive tests
 require compiler and MIR imports to fail, closing the previously prose-only dependency direction.
 

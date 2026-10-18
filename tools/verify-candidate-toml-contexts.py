@@ -67,7 +67,7 @@ def main():
     for name in ('compiler', 'candidate', 'builder'):
         assert digest(getattr(args, name).resolve()) == execution['tools'][name]['sha256']
     assert digest(oracle) == oracle_sha
-    inputs = execution['sourceInputs'] + [dict(path=p.relative_to(ROOT).as_posix(), sha256=digest(p)) for p in (corpus_path, ROOT / 'cmd/fairyc-candidate-toml-document-reference/main.go', ROOT / 'go.mod', ROOT / 'go.sum', Path(__file__))]
+    inputs = execution['sourceInputs'] + [dict(path=p.relative_to(ROOT).as_posix(), sha256=digest(p)) for p in (corpus_path, ROOT / 'tools/candidate/fairyc-candidate-toml-document-reference/main.go', ROOT / 'go.mod', ROOT / 'go.sum', Path(__file__))]
     receipt = dict(schema='fairyc.candidate-toml-contexts/v1', passed=True, sourceInputs=inputs, cases=len(cases), accepted=sum(r['accepted'] for r in report['cases']), acceptanceOnly=True, fullTOMLParity=False, manifestParsingComplete=False, projectDiscoveryComplete=False, reference=dict(sha256=oracle_sha, reportSHA256=digest(report_path)), nativeTests=1, native=execution['native'], candidateExecutions=execution['candidateExecutions'], tools=execution['tools'], lockSHA256=execution['lockSHA256'], executionReceiptSHA256=digest(execution_path), publicApiChanged=False, dbChanged=False, ciChanged=False, pushed=False)
     save(output / 'receipt.json', receipt)
     print(f'Table contexts passed: {len(cases)} Go acceptance comparisons; native 1 and both candidate C profiles')

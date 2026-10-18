@@ -8,6 +8,9 @@
 
 | Boundary | Owns | Must not own |
 | --- | --- | --- |
+| `cmd/fairyc-lsp` and `internal/languageserver` | language-server transport and editor analysis orchestration | independent language semantics |
+| `tools/candidate` | private candidate bootstrap bridges and Go reference commands | product command entry points or language authority |
+| `tools/dev` | native proofs, fixture maintenance, migration, and evidence utilities | product command entry points or runtime dependencies |
 | `cmd/fairyc` and `internal/cli` | process exit plus command parsing, dispatch, workspace orchestration, user-facing output, explicit Atlas artifact selection, and caller-visible experimental limits | language semantics, Atlas query, attributed-text extraction/encoding, Context Pack encoding, target layout, backend-specific lowering, hidden paths, or hidden resource limits |
 | `internal/architecturecontract` | deterministic repository-local Go import parsing, the inverse Atlas/export consumer allowlist, canonical violation reporting, and mutation-sensitive one-way dependency tests | compiler behavior, general dependency linting, build-tag selection, `go list`, external dependency policy, CLI behavior, process isolation, or runtime permissions |
 | `internal/source` | files, spans, line maps, source identity | syntax or semantic decisions |

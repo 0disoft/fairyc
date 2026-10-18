@@ -5,7 +5,7 @@
 - Report identity: `fairyc.contract-profile-report/v0`
 - Cost identity: `fairyc-abstract-step/v0`
 - Implementation: `internal/contractprofile/`
-- CLI: `cmd/fairyc-contract-profile/`
+- CLI: `tools/dev/fairyc-contract-profile/`
 - JSON Schema: `spec/cli/experimental-contract-profile-v0.schema.json`
 
 ## Purpose
@@ -20,7 +20,7 @@ surfaces remain closed until they have separate versioned contracts.
 ## Invocation
 
 ```text
-go run ./cmd/fairyc-contract-profile main.fy helper.fy
+go run ./tools/dev/fairyc-contract-profile main.fy helper.fy
 ```
 
 Every argument is a source-root-relative `.fy` path. The command opens the supplied root once,

@@ -1522,7 +1522,8 @@ Unknown or incomplete edges remain explicit rather than being guessed.
 
 ADR 0203 makes the one-way semantic boundary executable. The eight current Atlas/export package
 roots may be imported only inside that layer, by `internal/cli` orchestration, or by the Windows
-evidence harness. A repository test parses all `cmd/` and `internal/` Go files, including tests and
+evidence harness. A repository test parses all Go files in `cmd/`, `internal/`, `tools/candidate/`,
+and `tools/dev/`, including tests and
 inactive build-tag files, so a new compiler, backend, runtime, or library package cannot consume
 Atlas without an explicit allowlist and architecture update. This is a direct-import boundary, not a
 plugin, process-isolation, package-initialization, or separately buildable-Atlas promise.

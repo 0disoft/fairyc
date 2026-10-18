@@ -33,14 +33,14 @@ def main():
     paths = [main_source] + [modules[name] for name in sorted(seen - {'main'})]
     manifest = output / 'sources.list'
     manifest.write_text(''.join(p.relative_to(ROOT).as_posix() + '\n' for p in paths), encoding='utf-8')
-    tracked = paths + [Path(__file__), ROOT / 'cmd/fairyc-candidate-lock-write-faults/main.go', args.candidate.resolve(), args.input.resolve()]
+    tracked = paths + [Path(__file__), ROOT / 'tools/candidate/fairyc-candidate-lock-write-faults/main.go', args.candidate.resolve(), args.input.resolve()]
     hashes = {str(p): hashlib.sha256(p.read_bytes()).hexdigest() for p in tracked}
     packet = output / 'packet.bin'
     emitted = subprocess.run([str(args.candidate.resolve()), '--c-project-file', str(manifest)], cwd=ROOT, capture_output=True, timeout=600)
     if emitted.returncode != 0 or emitted.stderr:
         raise RuntimeError('candidate emission failed: ' + emitted.stderr.decode('utf-8', errors='replace'))
     packet.write_bytes(emitted.stdout)
-    subprocess.run(['bun', 'tools/run-go.ts', 'run', './cmd/fairyc-candidate-lock-write-faults', str(packet), str(args.input.resolve()), str(output)], cwd=ROOT, check=True)
+    subprocess.run(['bun', 'tools/run-go.ts', 'run', './tools/candidate/fairyc-candidate-lock-write-faults', str(packet), str(args.input.resolve()), str(output)], cwd=ROOT, check=True)
     for path, digest in hashes.items():
         if hashlib.sha256(Path(path).read_bytes()).hexdigest() != digest:
             raise RuntimeError('verification input changed: ' + path)

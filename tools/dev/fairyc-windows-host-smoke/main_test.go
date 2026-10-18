@@ -415,27 +415,27 @@ func TestGeneratedFairyReadToEndFailureProbeRejectsIncompleteGeneratedC(t *testi
 
 func TestGeneratedFairyStdlibSourcesPassFullPipeline(t *testing.T) {
 	t.Parallel()
-	fromBufferMain, err := os.ReadFile(filepath.Join("..", "..", "examples", "std_text_from_buffer_quickstart", "src", "main.fy"))
+	fromBufferMain, err := os.ReadFile(filepath.Join("..", "..", "..", "examples", "std_text_from_buffer_quickstart", "src", "main.fy"))
 	if err != nil {
 		t.Fatal(err)
 	}
-	fsMain, err := os.ReadFile(filepath.Join("..", "..", "examples", "std_fs_quickstart", "src", "main.fy"))
+	fsMain, err := os.ReadFile(filepath.Join("..", "..", "..", "examples", "std_fs_quickstart", "src", "main.fy"))
 	if err != nil {
 		t.Fatal(err)
 	}
-	fsPathOps, err := os.ReadFile(filepath.Join("..", "..", "examples", "std_fs_quickstart", "src", "path_ops.fy"))
+	fsPathOps, err := os.ReadFile(filepath.Join("..", "..", "..", "examples", "std_fs_quickstart", "src", "path_ops.fy"))
 	if err != nil {
 		t.Fatal(err)
 	}
-	fsPositioning, err := os.ReadFile(filepath.Join("..", "..", "examples", "std_fs_quickstart", "src", "positioning.fy"))
+	fsPositioning, err := os.ReadFile(filepath.Join("..", "..", "..", "examples", "std_fs_quickstart", "src", "positioning.fy"))
 	if err != nil {
 		t.Fatal(err)
 	}
-	fsMetadata, err := os.ReadFile(filepath.Join("..", "..", "examples", "std_fs_quickstart", "src", "metadata.fy"))
+	fsMetadata, err := os.ReadFile(filepath.Join("..", "..", "..", "examples", "std_fs_quickstart", "src", "metadata.fy"))
 	if err != nil {
 		t.Fatal(err)
 	}
-	fsLinkOps, err := os.ReadFile(filepath.Join("..", "..", "examples", "std_fs_quickstart", "src", "link_ops.fy"))
+	fsLinkOps, err := os.ReadFile(filepath.Join("..", "..", "..", "examples", "std_fs_quickstart", "src", "link_ops.fy"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -529,8 +529,8 @@ func TestGeneratedFairyStdlibSourcesPassFullPipeline(t *testing.T) {
 				"fy_std_file_sync_v0", "fy_std_file_write_all_v0", "fy_std_file_write_v0",
 				"fy_std_windows_directory_create_v0", "fy_std_windows_directory_ensure_v0", "fy_std_windows_directory_remove_v0", "fy_std_windows_directory_rename_v0",
 				"fy_std_windows_dir_remove_all_v0",
-				"fy_std_windows_file_read_exact_v0", "fy_std_file_position_v0",
-				"fy_std_windows_file_remove_v0",
+				"fy_std_file_read_exact_v0", "fy_std_file_position_v0",
+				"fy_std_file_remove_v0",
 				"fy_std_windows_file_copy_bytes_v0",
 				"fy_std_windows_file_rename_v0",
 				"fy_std_windows_file_alloc_size_v0",
@@ -543,11 +543,11 @@ func TestGeneratedFairyStdlibSourcesPassFullPipeline(t *testing.T) {
 			},
 			foreignSymbols: []string{
 				"fy_std_buffer_append_v0", "fy_std_buffer_drop_v0", "fy_std_buffer_initialize_v0",
-				"fy_std_file_close_v0", "fy_std_file_drop_v0", "fy_std_file_open_utf8_v0", "fy_std_file_open_v0", "fy_std_file_position_v0", "fy_std_file_read_v0", "fy_std_file_seek_current_v0", "fy_std_file_seek_end_v0", "fy_std_file_seek_start_v0", "fy_std_file_size_v0", "fy_std_file_sync_v0", "fy_std_file_write_all_v0", "fy_std_file_write_v0",
+				"fy_std_file_close_v0", "fy_std_file_drop_v0", "fy_std_file_open_utf8_v0", "fy_std_file_open_v0", "fy_std_file_position_v0", "fy_std_file_read_exact_v0", "fy_std_file_read_v0", "fy_std_file_remove_v0", "fy_std_file_seek_current_v0", "fy_std_file_seek_end_v0", "fy_std_file_seek_start_v0", "fy_std_file_size_v0", "fy_std_file_sync_v0", "fy_std_file_write_all_v0", "fy_std_file_write_v0",
 				"fy_std_windows_dir_remove_all_v0",
 				"fy_std_windows_directory_create_v0", "fy_std_windows_directory_ensure_v0", "fy_std_windows_directory_remove_v0", "fy_std_windows_directory_rename_v0",
 				"fy_std_windows_file_alloc_size_v0", "fy_std_windows_file_copy_bytes_v0", "fy_std_windows_file_hard_link_v0", "fy_std_windows_file_id_v0", "fy_std_windows_file_kind_v0", "fy_std_windows_file_link_count_v0", "fy_std_windows_file_path_kind_v0",
-				"fy_std_windows_file_read_append_v0", "fy_std_windows_file_read_exact_v0", "fy_std_windows_file_read_only_v0", "fy_std_windows_file_remove_v0", "fy_std_windows_file_rename_v0",
+				"fy_std_windows_file_read_append_v0", "fy_std_windows_file_read_only_v0", "fy_std_windows_file_rename_v0",
 				"fy_std_windows_file_set_len_v0", "fy_std_windows_file_set_readonly_v0",
 			},
 		},
@@ -614,7 +614,7 @@ func TestGeneratedFairyStdlibSourcesPassFullPipeline(t *testing.T) {
 			foreignSymbols: []string{},
 		},
 	} {
-		manifestPath := filepath.Join("..", "..", "examples", tc.manifest, "fairy.toml")
+		manifestPath := filepath.Join("..", "..", "..", "examples", tc.manifest, "fairy.toml")
 		manifest, err := os.ReadFile(manifestPath)
 		if err != nil {
 			t.Fatalf("%s: read manifest: %v", tc.name, err)
@@ -674,7 +674,7 @@ func TestGeneratedFairyStdlibSourcesPassFullPipeline(t *testing.T) {
 
 func TestGeneratedFairyProbeImplementationJoinsScalarRuntime(t *testing.T) {
 	t.Parallel()
-	repoRoot := filepath.Join("..", "..")
+	repoRoot := filepath.Join("..", "..", "..")
 	for _, name := range []string{"Region and Buffer closure"} {
 		closure, err := generatedFairyProbeImplementation(repoRoot, []string{
 			"fy_std_region_allocate_zeroed_v0",
@@ -725,7 +725,7 @@ func TestGeneratedFairyProbeImplementationJoinsScalarRuntime(t *testing.T) {
 
 func TestGeneratedFairyProbeImplementationAcceptsProcessArgsSymbols(t *testing.T) {
 	t.Parallel()
-	closure, err := generatedFairyProbeImplementation(filepath.Join("..", ".."), []string{
+	closure, err := generatedFairyProbeImplementation(filepath.Join("..", "..", ".."), []string{
 		"fy_std_process_arg_count_v0",
 		"fy_std_process_arg_v0",
 	})
@@ -754,7 +754,7 @@ func TestGeneratedFairyProbeImplementationRejectsIncompleteOrDuplicate(t *testin
 	if err != nil {
 		t.Fatal(err)
 	}
-	repoRoot := filepath.Join("..", "..")
+	repoRoot := filepath.Join("..", "..", "..")
 	for _, tc := range []struct {
 		name       string
 		sourceRoot string

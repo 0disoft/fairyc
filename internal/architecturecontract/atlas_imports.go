@@ -29,7 +29,7 @@ var atlasPackageRoots = []string{
 
 var atlasConsumerRoots = append(slices.Clone(atlasPackageRoots),
 	modulePath+"/internal/cli",
-	modulePath+"/cmd/fairyc-windows-host-smoke",
+	modulePath+"/tools/dev/fairyc-windows-host-smoke",
 )
 
 // ImportViolation identifies one direct import that would let Atlas or its export bridge flow back
@@ -40,14 +40,14 @@ type ImportViolation struct {
 	File     string
 }
 
-// CheckAtlasOneWayImports parses every Go file below cmd and internal, including tests and files for
-// other build tags. It returns canonical sorted violations and never invokes the Go toolchain.
+// CheckAtlasOneWayImports parses product, compiler and developer-tool Go files,
+// including tests and files for other build tags. It never invokes the Go toolchain.
 func CheckAtlasOneWayImports(root string) ([]ImportViolation, error) {
 	if root == "" {
 		return nil, fmt.Errorf("Atlas import boundary requires a repository root")
 	}
 	var violations []ImportViolation
-	for _, subtree := range []string{"cmd", "internal"} {
+	for _, subtree := range []string{"cmd", "internal", "tools/candidate", "tools/dev"} {
 		base := filepath.Join(root, subtree)
 		info, err := os.Stat(base)
 		if err != nil || !info.IsDir() {

@@ -524,7 +524,7 @@ audit rejected a mixed-separator raw path; normalizing paths for file lookup
 fixed the audit without changing the source record or text comparison policy.
 
 The current gate tests run with `go test ./internal/adoptionaudit`. Audit a
-supplied retained run with `go run ./cmd/fairyc-evidence-audit -kind ledger
+supplied retained run with `go run ./tools/dev/fairyc-evidence-audit -kind ledger
 -receipt <receipt.json> -compiler <retained-compiler>`; use `log`, `pack` or `kv`
 for the other consumers. Set `CGO_ENABLED=0` for repository Go commands.
 These checks require retained local artifacts and the matching compiler file,
@@ -557,7 +557,7 @@ process tests use their own test executable for exact empty/quoted/Unicode/
 metacharacter argv, simultaneous large pipes, UTF-8 rejection and bounded timeout.
 Typed Go argv does not admit null/numeric elements. No PowerShell child is needed.
 
-`go run ./cmd/fairyc-evidence-audit -kind <ledger|log|pack|kv>
+`go run ./tools/dev/fairyc-evidence-audit -kind <ledger|log|pack|kv>
 -receipt <receipt.json> -compiler <retained-compiler>` reads one explicit receipt
 and emits its audit JSON to stdout. There are no personal-cache defaults or
 implicit artifact searches. The six historical Windows harness/helper scripts

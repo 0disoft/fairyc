@@ -104,7 +104,7 @@ func TestGeneratedFairyScalarFormattingFailureNative(t *testing.T) {
 	if !ok {
 		t.Fatal("resolve scalar formatting test path")
 	}
-	repositoryRoot := filepath.Clean(filepath.Join(filepath.Dir(testFile), "..", ".."))
+	repositoryRoot := filepath.Clean(filepath.Join(filepath.Dir(testFile), "..", "..", ".."))
 	images, err := runGeneratedFairyScalarFormattingFailureProbe(repositoryRoot, toolchain)
 	if err != nil {
 		t.Fatal(err)

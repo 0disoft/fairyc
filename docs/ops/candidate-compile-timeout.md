@@ -21,7 +21,7 @@ Failed compile/link paths still return no publishable image.
 Executed checks:
 
 - `bun tools/run-go.ts test ./internal/cdriver ./internal/candidatebuild
-  ./cmd/fairyc-candidate-build -run
+  ./tools/candidate/fairyc-candidate-build -run
   'TestToolCompileDeadline|TestCompileTimeoutRejected|TestWindowsProjectSeparateCompilationAndFailures|TestCachedPacketRejectsChangedBytes'
   -count=1` passed.
 - `bun tools/run-go.ts test ./internal/candidatebuild -count=1` passed.

@@ -9,7 +9,11 @@ The repository is a toolchain monorepo, not a collection of independently deploy
 ## Planned top-level boundaries
 
 ```text
-cmd/fairyc/        Go executable assembly
+cmd/fairyc/        product compiler executable
+cmd/fairyc-lsp/    product language-server executable
+tools/candidate/   private candidate bootstrap and Go reference commands
+tools/dev/         fixture, native-proof, migration, and evidence commands
+tools/             maintainer scripts and verification drivers
 internal/          Go compiler implementation packages
 runtime/           Fairy C runtime sources and target adapters
 std/               Fairy C standard library

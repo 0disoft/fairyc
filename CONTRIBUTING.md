@@ -61,9 +61,9 @@ FAIRYC_TEST_EVIDENCE_DIR="$PWD/.cache/linux-native-evidence" CGO_ENABLED=0 go te
 
 ## Historical Tools and Artifacts
 
-The `.ps1` scripts under `tools/` and audit tools under `cmd/fairyc-evidence-audit` are historical validation utilities. They are not required for regular development or testing:
+The `.ps1` scripts under `tools/` and audit tools under `tools/dev/fairyc-evidence-audit` are historical validation utilities. They are not required for regular development or testing:
 
 ```sh
-go run -mod=readonly ./cmd/fairyc-evidence-audit \
+go run -mod=readonly ./tools/dev/fairyc-evidence-audit \
   -kind ledger -receipt /path/to/run/receipt.json -compiler /path/to/retained/fairyc
 ```

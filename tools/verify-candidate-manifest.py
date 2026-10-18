@@ -40,7 +40,7 @@ def main():
             path.relative_to(ROOT)
             assert path.read_bytes() == source, 'canonical fixture drifted'
             canonical.append(path)
-    identities = [dict(path=p.relative_to(ROOT).as_posix(), sha256=digest(p)) for p in [corpus_path, ROOT / 'cmd/fairyc-candidate-toml-document-reference/main.go', ROOT / 'internal/projectmanifest/manifest.go', ROOT / 'go.mod', ROOT / 'go.sum', Path(__file__), *canonical]]
+    identities = [dict(path=p.relative_to(ROOT).as_posix(), sha256=digest(p)) for p in [corpus_path, ROOT / 'tools/candidate/fairyc-candidate-toml-document-reference/main.go', ROOT / 'internal/projectmanifest/manifest.go', ROOT / 'go.mod', ROOT / 'go.sum', Path(__file__), *canonical]]
     oracle = args.reference.resolve()
     oracle_sha256 = digest(oracle)
     request = output / 'reference-request.json'

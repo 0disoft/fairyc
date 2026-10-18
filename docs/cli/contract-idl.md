@@ -4,9 +4,9 @@
 canonical JSON IDL or a typed client to standard output.
 
 ```text
-go run ./cmd/fairyc-contract-idl --format json examples/contract_idl/token.fy
-go run ./cmd/fairyc-contract-idl --format typescript examples/contract_idl/token.fy > token.ts
-go run ./cmd/fairyc-contract-idl --format go --package tokenbindings examples/contract_idl/token.fy > token.go
+go run ./tools/dev/fairyc-contract-idl --format json examples/contract_idl/token.fy
+go run ./tools/dev/fairyc-contract-idl --format typescript examples/contract_idl/token.fy > token.ts
+go run ./tools/dev/fairyc-contract-idl --format go --package tokenbindings examples/contract_idl/token.fy > token.go
 ```
 
 The default format is `json`. `idl` aliases `json`, and `ts` aliases `typescript`. Go output uses

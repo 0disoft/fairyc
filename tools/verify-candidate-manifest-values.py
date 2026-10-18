@@ -39,7 +39,7 @@ def main():
     reference_name='fairyc-candidate-toml-reference' if strings else 'fairyc-candidate-manifest-reference'
     test_names=['decodes_tokens_keeps_cursors_and_rolls_back_errors','matches_pinned_go_toml_string_reference'] if strings else ['keeps_exact_manifest_names_paths_and_versions','matches_go_manifest_value_reference']
     identities_expected={f'tests::{module}::{name}' for name in test_names}
-    source_paths=[PROJECT/f'src/{module}.fy',PROJECT/f'tests/{module}.fy',ROOT/f'spec/fixtures/project-manifest/{corpus_name}',ROOT/f'cmd/{reference_name}/main.go',Path(__file__)]
+    source_paths=[PROJECT/f'src/{module}.fy',PROJECT/f'tests/{module}.fy',ROOT/f'spec/fixtures/project-manifest/{corpus_name}',ROOT/f'tools/candidate/{reference_name}/main.go',Path(__file__)]
     identities=[dict(path=p.relative_to(ROOT).as_posix(),sha256=digest(p)) for p in source_paths]
     images={name:dict(path=str(path.resolve()),sha256=digest(path)) for name,path in [('compiler',args.compiler),('reference',args.reference),('candidate',args.candidate),('builder',args.builder)]}
     invocations=[]

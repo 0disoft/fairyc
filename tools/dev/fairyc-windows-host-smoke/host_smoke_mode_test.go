@@ -49,7 +49,7 @@ func TestWorkflowRoutesCorrectnessAndMeasurementsSeparately(t *testing.T) {
 
 	frontend := readWorkflow(t, "frontend.yml")
 	measurements := readWorkflow(t, "measurements.yml")
-	const command = "go run -mod=readonly ./cmd/fairyc-windows-host-smoke"
+	const command = "go run -mod=readonly ./tools/dev/fairyc-windows-host-smoke"
 	if strings.Count(frontend, command) != 1 || strings.Contains(frontend, "--with-measurements") {
 		t.Fatalf("frontend workflow does not own exactly one correctness-only smoke command: %q", frontend)
 	}
@@ -70,7 +70,7 @@ func TestWorkflowRoutesCorrectnessAndMeasurementsSeparately(t *testing.T) {
 
 func readWorkflow(t *testing.T, name string) string {
 	t.Helper()
-	path := filepath.Join("..", "..", ".github", "workflows", name)
+	path := filepath.Join("..", "..", "..", ".github", "workflows", name)
 	content, err := os.ReadFile(path)
 	if err != nil {
 		t.Fatalf("read workflow %s: %v", name, err)

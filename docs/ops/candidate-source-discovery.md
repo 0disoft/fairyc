@@ -250,7 +250,7 @@ Full check passes 315 files and 4014 MIR functions. Evidence:
 `evidence/candidate-source-identity-20261011.json`.
 
 Reproduce the reference inputs with
-`bun tools/run-go.ts run ./cmd/fairyc-candidate-source-digest-reference <output>`;
+`bun tools/run-go.ts run ./tools/candidate/fairyc-candidate-source-digest-reference <output>`;
 pass its `root.bin` to the `project_source_identity` private-test verifier.
 
 ## Explicit local workspace catalog
@@ -293,7 +293,7 @@ discrepancy remain. Dependency declarations, feature instances, module-import
 visibility, SDK injection and lock projection are not validated by this catalog.
 
 Reference fixture command:
-`bun tools/run-go.ts run ./cmd/fairyc-candidate-workspace-catalog-reference <output>`.
+`bun tools/run-go.ts run ./tools/candidate/fairyc-candidate-workspace-catalog-reference <output>`.
 
 ## Validated local dependency declarations
 
@@ -329,7 +329,7 @@ source limits, while all failures preserve caller counters. Full check passes
 `evidence/candidate-workspace-input-20261011.json`.
 
 Reference fixture command:
-`bun tools/run-go.ts run ./cmd/fairyc-candidate-workspace-input-reference <output>`.
+`bun tools/run-go.ts run ./tools/candidate/fairyc-candidate-workspace-input-reference <output>`.
 
 The retained edges are catalog declarations, not resolved feature instances.
 Instance hashing/expansion, graph cycles, import visibility, SDK injection and
@@ -362,7 +362,7 @@ profiles pass. Full check passes 319 files and 4119 MIR functions. Evidence:
 `evidence/candidate-instance-identity-20261011.json`.
 
 Reference fixture command:
-`bun tools/run-go.ts run ./cmd/fairyc-candidate-instance-identity-reference <output>`.
+`bun tools/run-go.ts run ./tools/candidate/fairyc-candidate-instance-identity-reference <output>`.
 Feature graph expansion, cycle rejection and import visibility are still separate.
 
 ## Root-reachable feature-instance graph
@@ -399,7 +399,7 @@ source counters. Full check passes 320 files and 4199 MIR functions. Evidence:
 `evidence/candidate-instance-graph-20261011.json`.
 
 Reference fixture command:
-`bun tools/run-go.ts run ./cmd/fairyc-candidate-instance-graph-reference <output>`.
+`bun tools/run-go.ts run ./tools/candidate/fairyc-candidate-instance-graph-reference <output>`.
 With multiple available cycles, witness selection follows declaration order and
 can differ from Go's sorted-class traversal. Import visibility, SDK injection,
 lock projection and compiler/project-CLI consumption remain separate; earlier
@@ -443,7 +443,7 @@ commit/rollback are checked. Full check passes 322 files and 4269 MIR functions.
 Evidence: `evidence/candidate-module-visibility-20261012.json`.
 
 Reference fixture command:
-`bun tools/run-go.ts run ./cmd/fairyc-candidate-module-visibility-reference <output>`.
+`bun tools/run-go.ts run ./tools/candidate/fairyc-candidate-module-visibility-reference <output>`.
 The full Go loader confirms rejected cases but does not return their partial
 graph. For lookup-error observations, the helper obtains the loader's feature
 graph with import-free headers, restores every original file, replaces modules
@@ -500,7 +500,7 @@ and both candidate C profiles. Check passes 324 source files and 4297 MIR
 functions. Evidence: `evidence/candidate-sdk-bundle-20261012.json`.
 
 Reference fixture command:
-`bun tools/run-go.ts run ./cmd/fairyc-candidate-sdk-bundle-reference <output>`.
+`bun tools/run-go.ts run ./tools/candidate/fairyc-candidate-sdk-bundle-reference <output>`.
 Linux, the full suite and Stage1/Stage2 are deferred; these results establish only
 the private bundle/encoding slice. Stable API, SDK ABI/version, DB and CI are
 unchanged, and no push occurred.
@@ -532,7 +532,7 @@ passes 324 sources and 4301 MIR functions.
 Evidence: `evidence/candidate-sdk-selection-20261012.json`.
 
 Reference fixture command:
-`bun tools/run-go.ts run ./cmd/fairyc-candidate-sdk-selection-reference <output>`.
+`bun tools/run-go.ts run ./tools/candidate/fairyc-candidate-sdk-selection-reference <output>`.
 The reference calls the full owning loader and observes its injected SDK package
 and dependencies; it does not implement a second selection algorithm. SDK graph
 injection, visibility, embedding, lock projection and compiler/CLI consumers
@@ -588,7 +588,7 @@ Evidence: `evidence/candidate-sdk-graph-20261012.json`.
 
 The existing reference fixture command now also records full SDK graph and
 lookup observations:
-`bun tools/run-go.ts run ./cmd/fairyc-candidate-sdk-selection-reference <output>`.
+`bun tools/run-go.ts run ./tools/candidate/fairyc-candidate-sdk-selection-reference <output>`.
 Production SDK embedding, lock projection and compiler/project CLI consumption
 remain. Stable CLI/API, SDK ABI/version, DB and CI are unchanged. Linux, full
 suite and Stage1/Stage2 are deferred; no push occurred.
@@ -599,7 +599,7 @@ suite and Stage1/Stage2 are deferred; no push occurred.
 `project_sdk_embedded` supplies a pure, metered SDK factory. Ten generated Fairy
 byte-literal parts contain the exact eight current core/optional-vector source
 files from `internal/sdkstdlib`. The owning Go sources remain authoritative;
-`cmd/fairyc-candidate-sdk-embed` only quotes/chunks those bytes and verifies the
+`tools/candidate/fairyc-candidate-sdk-embed` only quotes/chunks those bytes and verifies the
 source set. It implements no runtime loading, hashing, selection or lookup logic.
 Literal chunks are at most 2048 raw bytes and generated source parts stay below
 40 kB (current maximum 18204 bytes). Each append charges the existing work meter.
@@ -617,7 +617,7 @@ budget. The supplied-bundle `load_sdk` remains available for private invariant
 checks. SDK-unneeded projects never invoke the factory.
 
 Generation and freshness commands:
-`bun tools/run-go.ts run ./cmd/fairyc-candidate-sdk-embed --write examples/lexer_candidate/src`
+`bun tools/run-go.ts run ./tools/candidate/fairyc-candidate-sdk-embed --write examples/lexer_candidate/src`
 and the same command with `--check`. The check compares exact source-derived file
 contents and rejects stale extra generated parts. Data regeneration and any pin
 or SDK metadata update require deliberate source review; there is no runtime

@@ -74,7 +74,7 @@ Portable verification uses Python only for fixtures and observation, with a Go
 test runner invoking the shared C driver; code generation remains Fairy C:
 
 ```sh
-go build -o .cache/c-file-cli/native-runner ./cmd/fairyc-candidate-c-native
+go build -o .cache/c-file-cli/native-runner ./tools/candidate/fairyc-candidate-c-native
 python examples/lexer_candidate/verify_c.py --images /path/to/dev /path/to/release --reference .cache/mir-defer-file-cli/reference.json --native-runner .cache/c-file-cli/native-runner --receipt .cache/c-file-cli/c-receipt.json
 ```
 
@@ -126,7 +126,7 @@ admitted nominal HIR while MIR/C still rejected it. The type-checking unit does
 not execute input struct operations.
 
 ```sh
-go run ./cmd/fairyc-lexer-file-oracle --nominal .cache/nominal-types-file-cli/reference.json
+go run ./tools/dev/fairyc-lexer-file-oracle --nominal .cache/nominal-types-file-cli/reference.json
 python examples/lexer_candidate/verify_nominal.py --images /path/to/dev /path/to/release --reference .cache/nominal-types-file-cli/reference.json --receipt .cache/nominal-types-file-cli/nominal-receipt.json
 ```
 
@@ -183,7 +183,7 @@ the nominal declaration or field respectively. Scalar tags and record columns
 are unchanged. This is an example-private format, not a stable CLI/SDK/ABI change.
 
 ```sh
-go run ./cmd/fairyc-lexer-file-oracle --nominal-hir .cache/nominal-hir-file-cli/reference.json
+go run ./tools/dev/fairyc-lexer-file-oracle --nominal-hir .cache/nominal-hir-file-cli/reference.json
 python examples/lexer_candidate/verify_nominal_hir.py --images /path/to/dev /path/to/release --reference .cache/nominal-hir-file-cli/reference.json --receipt .cache/nominal-hir-file-cli/hir-receipt.json
 ```
 

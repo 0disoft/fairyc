@@ -9,7 +9,7 @@ import (
 
 func TestMeasureAtlasRewriteProducesDeterministicWholePackageDistribution(t *testing.T) {
 	t.Parallel()
-	root := filepath.Join("..", "..", "examples", "workspace_quickstart")
+	root := filepath.Join("..", "..", "..", "examples", "workspace_quickstart")
 	clockResolution, err := observeMonotonicClockResolution()
 	if err != nil {
 		t.Fatal(err)
