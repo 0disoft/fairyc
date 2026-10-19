@@ -1,7 +1,7 @@
 """Run the authored Region interpreter against checked IR and the authentic SDK.
 
-Uses a native host harness to inject abstract Arena arguments, without pretending
-that public semantic tests can execute SDK Arena host constructors/destructors.
+Uses a native host harness for injected Arena arguments and authenticated SDK
+Arena construction/cleanup in the authored semantic interpreter.
 """
 import argparse
 import hashlib
@@ -74,7 +74,7 @@ def main():
     result = run(['test', '--native', '--locked', '--json', '--capture-output',
                   '--timeout-seconds', '60', *flags, '--', str(allocator)])
     report = json.loads(result.stdout)
-    assert report['count'] == report['passed'] == 2 and report['failed'] == 0, report
+    assert report['count'] == report['passed'] == 4 and report['failed'] == 0, report
     assert report['status'] == 'ok' and report['engine'] == 'native', report
     assert all(digest(ROOT / p) == sha for p, sha in snapshots.items())
     receipt = dict(schema='fairyc.candidate-region-interpreter/v1', passed=True,
@@ -82,6 +82,7 @@ def main():
                    referenceSHA256=digest(args.reference), verifierSHA256=digest(Path(__file__)),
                    sources=snapshots, invocations=calls, report=report,
                    authenticSDK=True, abstractArenaArguments=True,
+                   authenticatedArenaLifecycle=True,
                    publicCLIRegionParity=False, fullCandidateRebuilt=False)
     (output / 'receipt.json').write_text(json.dumps(receipt, indent=2) + '\n', encoding='utf-8')
     print('Region interpreter harness passed', flush=True)

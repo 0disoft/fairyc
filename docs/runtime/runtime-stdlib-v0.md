@@ -37,6 +37,10 @@ placement retains an independent value copy with the declared shared-borrow type
 Normal return and propagation preserve cleanup/reset order; traps do not unwind.
 This deterministic model does not simulate allocation failure or grant general
 foreign-call or raw-pointer execution. An SDK module name alone enables no adapter.
+The authored candidate interpreter authenticates retained bundled SDK bytes and
+the checked constructor/type relationship before enabling the same bounded model.
+Its per-test heap tracks Arena liveness, one active Region, and reset generations;
+the private execution cells do not define or change the native Arena ABI.
 
 The interpreter fixture harness may replace explicitly manifest-bound call symbols with bounded
 in-memory stdout or stderr byte sinks. This is test configuration, not a compiler-known operation,

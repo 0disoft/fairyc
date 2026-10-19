@@ -1,0 +1,83 @@
+{
+  "schema": "fairyc.candidate-arena-interpreter-review/v1",
+  "date": "2026-10-19",
+  "passedInRecordedScope": true,
+  "baseRevision": "eb94d5bd37a8e448c27ea5e77ff3ac627a629aa5",
+  "scope": "Host-free SDK Arena lifecycles in Go semantic tests and the authored candidate interpreter; focused native harness, not rebuilt candidate CLI parity.",
+  "sources": {
+    "examples/lexer_candidate/src/module_unit_interpreter.fy": "222ac5da76892e7e8dfb293d22c8a9ea7b3aba42a431de4644a331f1c7c3c631",
+    "examples/lexer_candidate/src/module_unit_interpreter_values.fy": "ff90dfe9735298126e812e2b32624adcc0f978e2862f38a89c7a8dba578f6a04",
+    "examples/lexer_candidate/src/module_unit_interpreter_arena.fy": "c604ee0eb8356400712d27cb2ff321882375087e7cf2d670c1d32c7e38107038",
+    "examples/lexer_candidate/tests/module_unit_interpreter_regions.fy": "d87a57b7e6b7a3cb4e8057def1338dd1ffb1010c18692e4e9c5f03b42619de1d",
+    "tools/verify-candidate-region-interpreter.py": "c1dedcf1460f1cc3d3ebd8b600fa1c97b843a38b61af04b9862ce80e2961de71",
+    "examples/lexer_candidate/fairy.lock": "cff68c7ce341ff2382dd8059ea2ef500487a9537d730273ee7119c7244703ce7",
+    "internal/cdriver/windows_host.go": "d599b0440e0f3e3df8db2e3296560c58e40456b9fa8cc8d47916ee3d121b29b5"
+  },
+  "authenticSDK": true,
+  "checkedProgramScenarios": 15,
+  "createdArenaScenarios": 6,
+  "freshHeapReplayForCreatedScenarios": true,
+  "profiles": [
+    {
+      "profile": "development",
+      "passed": 4,
+      "failed": 0,
+      "receipt": {
+        "path": ".cache/arena-interpreter-dev-20261019c/receipt.json",
+        "sha256": "dcb9f76323dd70cbf08d1f8e026792a959d3c40819c3acf7f323a08400fd0a3b"
+      },
+      "referenceSHA256": "f95cadef86ec4a04641d3dd5d4f46dfdce45335d85534ef0b2792f80a02dc51c"
+    },
+    {
+      "profile": "release",
+      "passed": 4,
+      "failed": 0,
+      "receipt": {
+        "path": ".cache/arena-interpreter-release-extended-20261019/receipt.json",
+        "sha256": "d05f710a15c4b8294bae1186529e0e356688254dc59463686f1a7f8ee9f17374"
+      },
+      "referenceSHA256": "772c72fd47f4ac26ac5c73a70b9fae4a612eaa26e37d5b31782e0e8d49c2a1f5"
+    }
+  ],
+  "goValidation": [
+    "go test ./internal/cli -run ^TestStableWorkspaceTestAbstractArena -count=1",
+    "go test ./internal/interpreter -count=1",
+    "go test ./internal/interpreter ./internal/compiler -run TestByteForRegion|Test.*Region|Test.*Execute -count=1"
+  ],
+  "candidateCheck": {
+    "sourceFiles": 526,
+    "mirFunctions": 6693
+  },
+  "lockedTestList": {
+    "count": 1177,
+    "lock": "verified",
+    "path": ".cache/arena-test-list-20261019.json",
+    "sha256": "8150028998eec231dc1a787dc6af88d30c40b11f6bc9168e00fe00e48da71ed2"
+  },
+  "fullCandidateRebuilt": false,
+  "publicCLIRegionParity": false,
+  "nativeAllocationEvidence": false,
+  "linuxExecution": false,
+  "remaining": [
+    "Rebuild final candidate CLI and compare against Go.",
+    "Regenerate fixed-point evidence for the changed source snapshot.",
+    "Linux execution is deferred by the user."
+  ],
+  "releaseCompileDeadline": {
+    "defaultAttempt": {
+      "exit": 6,
+      "detail": "MSVC host command exceeded 1m0s",
+      "observations": {
+        "path": ".cache/arena-interpreter-release-20261019/observations.json",
+        "sha256": "1f872a146e5a06d6bf56d04f1cbf4795014783ac23360c8a72fe590c084d1239"
+      }
+    },
+    "probeSeconds": 180,
+    "productDefaultChanged": false,
+    "mechanism": "Go build -overlay changes only runWindowsHostCommandWithLimit default from commandTimeout to 3*time.Minute; execution limits and FY sources are unchanged.",
+    "original": "return runWindowsHostCommandWithLimitAndTimeout(name, environment, directory, limit, commandTimeout, arguments...)",
+    "replacement": "return runWindowsHostCommandWithLimitAndTimeout(name, environment, directory, limit, 3*time.Minute, arguments...)",
+    "overlaySHA256": "0ec6465f52fb1a85965b959cca41408a1e4939c680fcf1b16ba7fa6ce430bedc",
+    "overlaySourceSHA256": "ab98a0a23ba9b29b57fb34a13564ea33e1b701f880ab0ab350e608a59a330d67"
+  }
+}

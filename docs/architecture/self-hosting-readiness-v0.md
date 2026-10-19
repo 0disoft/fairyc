@@ -24,8 +24,15 @@ and MSVC remain part of this bootstrap.
 The authored interpreter now executes abstract Region enter/place/reset operations,
 including normal, nested, return, propagation and loop exits. The focused
 [Region interpreter record](../ops/evidence/candidate-region-interpreter-20261019.json)
-uses checked IR, the authenticated SDK and injected abstract Arena arguments. It
-does not run SDK Arena host constructors/destructors through default semantic tests.
+uses checked IR, the authenticated SDK and injected abstract Arena arguments.
+The follow-up [Arena lifecycle record](../ops/evidence/candidate-arena-interpreter-20261019.json)
+adds host-free semantic construction and cleanup for the authenticated bundled
+`std::alloc::Arena`, including ownership transfer, nested cleanup, Region reentry,
+propagation, and trap isolation. The Go default test runner configures the same
+bounded model after authenticating SDK source bytes and AST. The candidate retains
+authenticated source ownership in its checked execution plan; it neither invokes
+the native allocator nor authorizes user-defined foreign functions. These focused
+tests do not establish public candidate CLI parity or native allocation behavior.
 The full CLI images and fixed-point records above attest the earlier source snapshot;
 they have not been regenerated after this interpreter change.
 

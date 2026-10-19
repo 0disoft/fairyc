@@ -52,5 +52,30 @@ fn syntax::Parsed parsed(ref u8[] text){let data=switch(bytes::copy(text)){case 
     run(b"module main;import std::alloc as alloc;fn void f(ref mut alloc::Arena a,ref mut alloc::Arena b){region r in a{let Guard g=Guard{};discard r.place(3);return;}}resource Guard{cleanup{assert(false);}}",source,6);
 }
 @test fn void reset_rejects_double_reset_and_preserves_activation_identity(){
-    var v::Vec<usize> heap=v::empty<usize>();var usize steps=100;let root=runtime::rx_cell(ref mut heap,0,ref mut steps);let owner=runtime::rx_descriptor(ref mut heap,root.bits,0,0,0,ref mut steps);let first=runtime::region_begin(owner.bits,ref mut heap,ref mut steps);assert(first.error==0 && runtime::region_reset(first.bits,ref mut heap).error==0 && runtime::region_reset(first.bits,ref mut heap).error==4);let second=runtime::region_begin(owner.bits,ref mut heap,ref mut steps);assert(second.error==0 && first.bits!=second.bits && runtime::item(ref heap,first.bits,0).bits==0 && runtime::item(ref heap,second.bits,0).bits==1);
+    var v::Vec<usize> heap=v::empty<usize>();var usize steps=100;let root=runtime::rx_cell(ref mut heap,0,ref mut steps);let owner=runtime::rx_descriptor(ref mut heap,root.bits,0,0,0,ref mut steps);let first=runtime::region_begin(owner.bits,ref mut heap,ref mut steps);assert(first.error==0 && runtime::region_reset(first.bits,ref mut heap,ref mut steps).error==0 && runtime::region_reset(first.bits,ref mut heap,ref mut steps).error==4);let second=runtime::region_begin(owner.bits,ref mut heap,ref mut steps);assert(second.error==0 && first.bits!=second.bits && runtime::item(ref heap,first.bits,0).bits==0 && runtime::item(ref heap,second.bits,0).bits==1);
+}
+@effects(console) fn void run_created(ref u8[] text,ref u8[] allocator,u32 trap,u32 error){
+    let owned=checked(text,allocator);let p=identified::ir_program(ref owned);let plan=switch(interpreter::prepare(p)){case .ok(p):{p}case .err(e):{discard io::write_u32(e);assert(false);return;}};
+    var usize frame=1;while(frame<=ir::count(p)){let f=clean::frame_at(ir::cleanup_ir(p),frame);if(f.module_index==0 && f.kind==3 && f.declaration==3){break;}frame+=1;}
+    var v::Vec<usize> heap=v::empty<usize>();var usize steps=1000000;let args=v::empty<usize>();let done=interpreter::execute(ref owned,ref plan,frame,ref args,ref mut heap,ref mut steps,0);
+    if(done.error!=error || done.trap!=trap){discard io::write_u32(done.error);discard io::write("/");discard io::write_u32(done.trap);discard io::write("\n");discard io::write_bytes(text);assert(false);}
+    let fresh=interpreter::execute_void(ref owned,ref plan,frame);assert(fresh.error==error && fresh.trap==trap);
+    var usize live=0;var usize active=0;var usize i=0;while(i<v::len<usize>(ref heap)){let size=*v::at<usize>(ref heap,i);if(size==4 && runtime::arena_modeled(ref heap,i+1)){live+=runtime::item(ref heap,i+1,3).bits;active+=runtime::item(ref heap,i+1,2).bits;}i+=size+1;}
+    assert(live==if(trap==0){0}else{1} && active==if(trap==0){0}else{1});
+}
+@test @effects(filesystem,console) fn void authenticated_arena_construction_and_cleanup(){
+    let sdk=allocator();let source=bytes::view(ref sdk);
+    run_created(b"module main;import std::alloc as alloc;fn void f(){var alloc::Arena arena=switch(alloc::create()){case .ok(a):{a}case .err(_):{assert(false);return;}};var i32 i=0;while(i<3){region r in ref mut arena{assert(switch(r.place(i)){case .ok(n):{*n==i}case .err(_):{false}});i+=1;continue;}}}",source,0,0);
+    run_created(b"module main;import std::alloc as alloc;fn void f(){let Holder owner=Holder{.arena=make()};}fn alloc::Arena make(){return switch(alloc::create()){case .ok(a):{a}case .err(_):{assert(false);make()}};}resource Holder{alloc::Arena arena;cleanup{}}",source,0,0);
+    run_created(b"module main;import std::alloc as alloc;fn void f(){assert(!route().is_ok);}fn Result<i32,i32> route(){var alloc::Arena arena=switch(alloc::create()){case .ok(a):{a}case .err(_):{assert(false);return .err(0);}};region r in ref mut arena{discard r.place(42);let i32 n=fail()?;return .ok(n);}}fn Result<i32,i32> fail(){return .err(7);}",source,0,0);
+    run_created(b"module main;import std::alloc as alloc;fn void f(){var alloc::Arena arena=switch(alloc::create()){case .ok(a):{a}case .err(_):{assert(false);return;}};region r in ref mut arena{discard r.place(42);assert(false);}}",source,6,0);
+    run_created(b"module main;import std::alloc as alloc;fn void f(){var alloc::Arena arena=switch(alloc::create()){case .ok(a):{a}case .err(_):{assert(false);return;}};region r in ref mut arena{let Guard g=Guard{};discard r.place(42);return;}}resource Guard{cleanup{assert(false);}}",source,6,0);
+    run_created(b"module main;import std::alloc as alloc;fn void f(){let u32 status=unsafe{arena_initialize_raw(null)};}@link_name(\"user_initialize\") unsafe extern C fn u32 arena_initialize_raw(ptr mut void output);",source,0,1);
+}
+@test fn void modeled_arena_liveness_and_region_state(){
+    var v::Vec<usize> heap=v::empty<usize>();var usize steps=200;let carrier=runtime::arena_create(ref mut heap,ref mut steps);assert(carrier.error==0);let arena=runtime::item(ref heap,carrier.bits,1).bits;
+    let root=runtime::rx_cell(ref mut heap,arena,ref mut steps);let owner=runtime::rx_descriptor(ref mut heap,root.bits,0,0,0,ref mut steps);let activation=runtime::region_begin(owner.bits,ref mut heap,ref mut steps);assert(activation.error==0 && runtime::item(ref heap,arena,2).bits==1);
+    assert(runtime::region_begin(owner.bits,ref mut heap,ref mut steps).error==4 && runtime::arena_drop(arena,ref mut heap).error==4);
+    assert(runtime::region_reset(activation.bits,ref mut heap,ref mut steps).error==0 && runtime::item(ref heap,arena,1).bits==2 && runtime::item(ref heap,arena,2).bits==0);
+    assert(runtime::arena_drop(arena,ref mut heap).error==0 && runtime::arena_drop(arena,ref mut heap).error==4 && runtime::region_begin(owner.bits,ref mut heap,ref mut steps).error==4);
 }

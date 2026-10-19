@@ -1,5 +1,6 @@
 module module_unit_interpreter;
 import module_unit_interpreter_values as runtime;
+import module_unit_interpreter_arena as arena;
 import module_unit_body_ir_model as ir;
 import module_unit_cleanup_mir_model as clean;
 import module_unit_cfg_model as cfg;
@@ -20,10 +21,10 @@ import syntax as syntax;
 // immutable per-test cells. Assignment rebuilds only the projected path.
 // Errors: 1 unsupported, 2 step limit, 3 call depth, 4 invariant/allocation.
 resource Location{usize frame;usize node;bytes::Buffer text;cleanup{}}
-pub resource Plan{v::Vec<cfg::Graph> graphs;v::Vec<Location> locations;cleanup{}}
+pub resource Plan{v::Vec<cfg::Graph> graphs;v::Vec<Location> locations;arena::Plan arena;cleanup{}}
 
 pub fn ref u8[] detail(u32 error){let text=b"interpreter step limit exceededinterpreter call-depth limit exceededcandidate interpreter reached an unsupported value or operation";return if(error==2){text[..31]}else if(error==3){text[31..68]}else{text[68..]};}
-pub fn Result<Plan,u32> prepare(ref ir::Program p){let graphs=switch(flow::lower_all(p)){case .ok(g):{g}case .err(e):{return .err(if(e.code==1002){1}else{4});}};return .ok(Plan{.graphs,.locations=v::empty<Location>()});}
+pub fn Result<Plan,u32> prepare(ref ir::Program p){let graphs=switch(flow::lower_all(p)){case .ok(g):{g}case .err(e):{return .err(if(e.code==1002){1}else{4});}};let arena=arena::prepare(p)?;return .ok(Plan{.graphs,.locations=v::empty<Location>(),.arena});}
 
 // The stable test input retains canonical file names and exact UTF-8 geometry.
 // No absolute paths or reconstructed source spellings enter this intrinsic.
@@ -36,7 +37,7 @@ fn Result<Plan,u32> prepare_sources(ref ir::Program p,ref input::Input sources){
             var bytes::Buffer text=bytes::empty();if(!bytes::append(ref mut text,file).is_ok || !bytes::append(ref mut text,b":").is_ok || !bytes::append_usize(ref mut text,line).is_ok || !bytes::append(ref mut text,b":").is_ok || !bytes::append_usize(ref mut text,e.start-start+1).is_ok || !bytes::append(ref mut text,b"@").is_ok || !bytes::append_usize(ref mut text,e.start).is_ok){return .err(4);}
             if(!v::push<Location>(ref mut locations,Location{.frame,.node=i+1,.text}).is_ok){return .err(4);}
         }i+=1;}frame+=1;
-    }return .ok(Plan{.graphs,.locations});
+    }let arena=arena::prepare(p)?;return .ok(Plan{.graphs,.locations,.arena});
 }
 fn runtime::Outcome location_value(ref Plan plan,usize frame,usize node,ref mut v::Vec<usize> heap,ref mut usize steps){
     var usize i=0;while(i<v::len<Location>(ref plan.locations)){if(*steps==0){return runtime::failure(2);};*steps=*steps-1;let row=v::at<Location>(ref plan.locations,i);if(row.frame==frame && row.node==node){
@@ -69,6 +70,7 @@ fn runtime::Outcome switch_payload(ref ir::Program p,ref ir::Body b,cfg::Block n
 // those drops, stops on traps, and retains the receiver after cleanup writes.
 fn runtime::Outcome drop_value(ref identified::Program owned,ref Plan plan,usize type,usize bits,ref mut v::Vec<usize> heap,ref mut usize steps,usize depth){
     if(depth>=256){return runtime::failure(3);}if(*steps==0){return runtime::failure(2);};*steps=*steps-1;let p=identified::ir_program(owned);let g=clean::glue_at(ir::cleanup_ir(p),type);let t=clean::type_at(ir::cleanup_ir(p),type);if(!runtime::admitted(p,type)){return runtime::failure(1);}
+    if(type==plan.arena.type){return runtime::arena_drop(bits,heap);}
     if(g.kind==0){return runtime::result(0);}
     if(g.kind==2 || g.kind==3){let tag=runtime::item(heap,bits,0);if(tag.error!=0 || tag.trap!=0){return tag;}if(tag.bits>1){return runtime::failure(4);}if(g.kind==2 && tag.bits==0){return runtime::result(0);}let payload=runtime::item(heap,bits,1);if(payload.error!=0 || payload.trap!=0){return payload;}return drop_value(owned,plan,if(tag.bits==1){t.first}else{t.second},payload.bits,heap,steps,depth+1);}
     if(g.kind!=1){return runtime::failure(1);}var usize current=bits;
@@ -112,6 +114,7 @@ fn runtime::Outcome expression(ref identified::Program owned,ref Plan plan,usize
 pub fn runtime::Outcome execute(ref identified::Program owned,ref Plan plan,usize frame,ref v::Vec<usize> arguments,ref mut v::Vec<usize> heap,ref mut usize steps,usize depth){
     if(depth>=256){return runtime::failure(3);}let p=identified::ir_program(owned);if(frame==0 || frame>ir::count(p) || v::len<cfg::Graph>(ref plan.graphs)!=ir::count(p)){return runtime::failure(4);}let b=ir::at(p,frame);let g=v::at<cfg::Graph>(ref plan.graphs,frame-1);
     if(!runtime::admitted(p,clean::frame_at(ir::cleanup_ir(p),frame).result)){return runtime::failure(1);}
+    if(frame==plan.arena.create){return if(v::len<usize>(arguments)==0){runtime::arena_create(heap,steps)}else{runtime::failure(4)};}
     var v::Vec<usize> values=v::empty<usize>();var v::Vec<usize> locals=v::empty<usize>();var v::Vec<usize> captures=v::empty<usize>();var v::Vec<usize> snapshots=v::empty<usize>();var v::Vec<usize> iter_views=v::empty<usize>();var v::Vec<usize> iter_indices=v::empty<usize>();var v::Vec<usize> iter_bindings=v::empty<usize>();
     if(!runtime::slots(ref mut values,ir::node_count(b)+1) || !runtime::slots(ref mut locals,ir::local_count(b)+1) || !runtime::slots(ref mut captures,cfg::capture_count(g)+1) || !runtime::slots(ref mut snapshots,ir::statement_count(b)+1) || !runtime::slots(ref mut iter_views,ir::statement_count(b)+1) || !runtime::slots(ref mut iter_indices,ir::statement_count(b)+1) || !runtime::slots(ref mut iter_bindings,ir::statement_count(b)+1)){return runtime::failure(4);}
     var usize rx_local=0;while(rx_local<v::len<usize>(ref locals)){let root=runtime::rx_cell(heap,0,steps);if(root.error!=0){return root;}{let slot=v::at_mut<usize>(ref mut locals,rx_local);*slot=root.bits;}rx_local+=1;}
@@ -136,7 +139,7 @@ pub fn runtime::Outcome execute(ref identified::Program owned,ref Plan plan,usiz
             if(r.error==0 && r.trap==0){let scope=ir::region_at(b,n.target-1);let stored=runtime::rx_set_cell(heap,*v::at<usize>(ref locals,scope.capability),r.bits);if(stored.error!=0 || stored.trap!=0){return stored;}{let slot=v::at_mut<usize>(ref mut active_regions,n.target);*slot=r.bits;}region_count+=1;}
         }
         else if(n.kind==16){
-            let reset=ir::reset_at(b,n.target-1);let activation=*v::at<usize>(ref active_regions,reset.region_id);if(activation==0 || region_count==0){return runtime::failure(4);}r=runtime::region_reset(activation,heap);
+            let reset=ir::reset_at(b,n.target-1);let activation=*v::at<usize>(ref active_regions,reset.region_id);if(activation==0 || region_count==0){return runtime::failure(4);}r=runtime::region_reset(activation,heap,steps);
             if(r.error==0 && r.trap==0){{let slot=v::at_mut<usize>(ref mut active_regions,reset.region_id);*slot=0;}region_count-=1;}
         }
         else if(n.kind==20){

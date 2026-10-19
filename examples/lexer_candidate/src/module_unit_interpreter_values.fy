@@ -112,14 +112,30 @@ pub fn Outcome rx_slice(ref ir::Program p,ref ir::Body b,usize id,ref v::Vec<usi
 // Abstract lifetime oracle, not a host allocator. A fresh activation owns
 // [active, Arena descriptor]. Reset invalidates capabilities passed to callees;
 // heap cells stay address-stable until the enclosing test finishes.
+// Four-cell Arenas carry a private provenance/liveness marker after the three
+// SDK fields. Only the authenticated constructor can publish such a resource.
+pub fn bool arena_modeled(ref v::Vec<usize> heap,usize bits){return bits!=0 && bits<=v::len<usize>(heap) && *v::at<usize>(heap,bits-1)==4 && v::len<usize>(heap)-bits>=4;}
+pub fn Outcome arena_create(ref mut v::Vec<usize> heap,ref mut usize steps){
+    let arena=allocate(heap,4,steps);if(arena.error!=0){return arena;}
+    {let slot=v::at_mut<usize>(heap,arena.bits+1);*slot=1;}{let slot=v::at_mut<usize>(heap,arena.bits+3);*slot=1;}
+    let carrier=allocate(heap,2,steps);if(carrier.error!=0){return carrier;}
+    {let slot=v::at_mut<usize>(heap,carrier.bits);*slot=1;}{let slot=v::at_mut<usize>(heap,carrier.bits+1);*slot=arena.bits;}return carrier;
+}
+pub fn Outcome arena_drop(usize bits,ref mut v::Vec<usize> heap){
+    if(!arena_modeled(heap,bits) || *v::at<usize>(heap,bits+3)!=1 || *v::at<usize>(heap,bits+2)!=0){return failure(4);}
+    {let slot=v::at_mut<usize>(heap,bits+3);*slot=0;}return result(0);
+}
 pub fn Outcome region_begin(usize owner,ref mut v::Vec<usize> heap,ref mut usize steps){
     let arena=rx_get(heap,owner,steps);if(arena.error!=0 || arena.trap!=0){return arena;}
+    if(arena_modeled(heap,arena.bits)){if(*v::at<usize>(heap,arena.bits+3)!=1 || *v::at<usize>(heap,arena.bits+2)!=0 || *v::at<usize>(heap,arena.bits+1)==0){return failure(4);}{let slot=v::at_mut<usize>(heap,arena.bits+2);*slot=1;}}
     let cell=allocate(heap,2,steps);if(cell.error!=0){return cell;}
     {let slot=v::at_mut<usize>(heap,cell.bits);*slot=1;}
     {let slot=v::at_mut<usize>(heap,cell.bits+1);*slot=owner;}return cell;
 }
-pub fn Outcome region_reset(usize activation,ref mut v::Vec<usize> heap){
+pub fn Outcome region_reset(usize activation,ref mut v::Vec<usize> heap,ref mut usize steps){
     let active=item(heap,activation,0);if(active.error!=0 || active.trap!=0 || active.bits!=1){return failure(4);}
+    let owner=item(heap,activation,1);if(owner.error!=0 || owner.trap!=0){return failure(4);}let arena=rx_get(heap,owner.bits,steps);if(arena.error!=0 || arena.trap!=0){return arena;}
+    if(arena_modeled(heap,arena.bits)){if(*v::at<usize>(heap,arena.bits+3)!=1 || *v::at<usize>(heap,arena.bits+2)!=1){return failure(4);}{let slot=v::at_mut<usize>(heap,arena.bits+2);*slot=0;}{let slot=v::at_mut<usize>(heap,arena.bits+1);*slot=if(*slot==18446744073709551615){1}else{*slot+1};}}
     {let slot=v::at_mut<usize>(heap,activation);*slot=0;}return result(0);
 }
 pub fn Outcome region_place(ref ir::Body b,usize id,ref v::Vec<usize> locals,ref v::Vec<usize> values,ref mut v::Vec<usize> heap,ref mut usize steps){
