@@ -2,6 +2,11 @@
 
 ## Current status (2026-10-19)
 
+The newer native-companion checkpoint below replaces the runtime Go builder in
+candidate distributions. The Arena build, 906-comparison and full fixed-point
+records in this opening section describe their earlier frozen source snapshot;
+they do not validate the newer companion.
+
 The fresh [Windows CLI build](../ops/evidence/candidate-arena-cli-build-20261019.json)
 contains the Arena interpreter changes at source commit `6b2697f8`, with 512 input
 files. Both development and release images report the frozen version from the Go
@@ -210,6 +215,57 @@ The source check reports 537 files and 6,852 MIR functions. The [candidate COFF
 record](../ops/evidence/candidate-coff-20261019.json) records this bounded scope.
 Public CLI and distribution wiring and a fresh full CLI rebuild and fixed point
 remain pending. General link-map, archive and PDB proof migration is not claimed.
+
+### Authored native CLI companion (2026-10-20)
+
+`native_build_cli.fy` implements the private companion invoked by public
+`build`, `run` and `test --native`. Its 31-source import closure is built as
+`fairyc-candidate-build.exe`; the public dispatcher's closure remains at 512
+files. Keeping this process boundary preserves the existing CLI calls without
+raising source admission limits. `tools/build-candidate-native-probe.py` now
+packages the authored companion by default, with optional reuse of an
+authenticated `tools/build-candidate-native-driver.py` receipt. Its explicit
+Go builder is used to bootstrap images rather than shipped as the companion.
+
+The companion reads fresh `FYCPARTS1` packets, resolves MSVC/SDK, assembles runtime
+C, compiles and links, and checks COFF/PE/unwind through the authored modules
+above. The only runtime pack location is `fairyc-runtime-assets.pack` beside the
+companion executable. Missing, oversized and hash-mismatched packs fail closed;
+cwd contents do not select a replacement. The pack now contains 147,033 bytes,
+SHA-256 `917d1c962364a01353281254c1991f29958f2b7a6edebe30e769c4abb4f318b5`.
+The updated packaging corpus compares 234 complete Go runtime outputs/errors
+under Go native and both candidate C profiles.
+
+`native_image_publish.fy` retains directory handles while creating output
+parents, stages and flushes a new file, and renames that handle into its retained
+parent. A new private `root_directory_open_v1` host adapter performs the single
+handle-relative directory operation; Fairy owns component traversal and
+publication policy. Observed directory aliases and nonregular destinations are
+rejected. Compile/link/asset failures preserve an existing output. Owned scratch
+and unpublished stages are cleaned up.
+
+The focused driver verification passes 20 executions across development and
+release companion images. It executes four SDK images with exit 42, confirms
+identical image bytes across companion profiles, and covers compile/link
+failures, missing/tampered packs, cwd fallback rejection and rooted publication.
+The source check passes 539 files and 6,867 MIR functions. The rebuilt public
+CLI passes 26 development and 25 release command executions, including native
+build/run, argument and binary stream forwarding, traps, ordinary exit codes,
+output containment and scratch cleanup. Release `test --native` passes all 30
+exact Go comparisons, including resource SDK, stdin, output and deadlines.
+The [native CLI record](../ops/evidence/candidate-authored-native-cli-20261020.json)
+binds these images, their Fairy companions and packs to their source hashes.
+It records recovery after a concurrent source check refreshed the workspace
+lock, which is not an input to the explicit C source-manifest emission. The
+recovery retained the authenticated packet and successful development build.
+Images retain the recorded pre-commit `73b622e2+dirty` version stamp. The companion
+accepts only the private fresh-packet flags actually sent by `native_cli`;
+the Go builder's cached-packet/bootstrap command interface is not replaced.
+
+This changes the private host ABI and candidate distribution tooling, without
+changing the public CLI interface, SDK/runtime ABI, database or CI. MSVC and the
+initial bootstrap builder remain required. Full CLI comparison/fixed-point
+renewal and Linux execution remain separate gates.
 
 ## Historical records
 

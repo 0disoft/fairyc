@@ -1,0 +1,172 @@
+{
+  "schema": "fairyc.candidate-authored-native-cli/v1",
+  "date": "2026-10-20",
+  "passed": true,
+  "implementationCommits": [
+    "45a52f74",
+    "23800d11"
+  ],
+  "sources": [
+    {
+      "path": "examples/lexer_candidate/src/native_build_cli.fy",
+      "bytes": 7122,
+      "sha256": "9b5729a64fe7bca501f379645e2902cf9b208f8e8b8bf390081f6769999bb7dc"
+    },
+    {
+      "path": "examples/lexer_candidate/src/native_image_publish.fy",
+      "bytes": 2575,
+      "sha256": "2149185553dcb96adca86d6365249d17be3348bf185613a916658d75c459115d"
+    },
+    {
+      "path": "examples/lexer_candidate/src/native_runtime_asset_pin.fy",
+      "bytes": 2486,
+      "sha256": "19667341633f834ba23f4efe296fa2c68d06437399f721d582cfbb94f5c01441"
+    },
+    {
+      "path": "examples/lexer_candidate/src/native_runtime_contract.fy",
+      "bytes": 11216,
+      "sha256": "847d05370e1a4ad5fb2906add9e87bea7f6f386fc491f8e39b8c9e772750a63a"
+    },
+    {
+      "path": "examples/lexer_candidate/src/windows_rooted_file.fy",
+      "bytes": 14205,
+      "sha256": "a04a06013907750c90cd958270a386bed7bde1ee40ef7de36ac655217e90fe51"
+    },
+    {
+      "path": "internal/candidatehost/windows_rooted_file.c",
+      "bytes": 11217,
+      "sha256": "88688f7727250f9706793d9d9db41985e6c752cf3a737d0e4edaf1c5185243d9"
+    },
+    {
+      "path": "internal/candidatehost/runtime.go",
+      "bytes": 3446,
+      "sha256": "04773eb735bbd7bbc36594989bb5b2716802774dd7d0eb740bbcab773ced6506"
+    },
+    {
+      "path": "internal/candidatehost/runtime_test.go",
+      "bytes": 1647,
+      "sha256": "f499f1a5901851b3ab2ce6ad0850d05f852f02c4380ecaa192fd12b92854d342"
+    },
+    {
+      "path": "tools/build-candidate-native-driver.py",
+      "bytes": 4726,
+      "sha256": "0105d770b1aabd9094151fe2c77ab45aaa7346a846064a3bc015593bb3b965dd"
+    },
+    {
+      "path": "tools/build-candidate-native-probe.py",
+      "bytes": 13952,
+      "sha256": "c713ffb06c2c02383d4287bca64fc152a6e4ecd53702dbf8a1c79e5d806fa5b7"
+    },
+    {
+      "path": "tools/verify-candidate-authored-driver.py",
+      "bytes": 6214,
+      "sha256": "dc2d814b751e2108439f55898a8cfb6c208b1c391a517c89e5c433a367b977f1"
+    },
+    {
+      "path": "tools/verify-candidate-native-cli.py",
+      "bytes": 10681,
+      "sha256": "1ca64e50ffeab2443c3380ca766119ca7e0e8797308e2198dba9a922f9d7e9ce"
+    }
+  ],
+  "records": {
+    "publicBuild": {
+      "path": ".cache/evidence/candidate-authored-builder-20261019/public-cli/receipt.json",
+      "bytes": 106549,
+      "sha256": "6bbe8b932b9e1661ebbe841e73fec82001bfbbaa38d5e14e8e2ea21701131999"
+    },
+    "driverVerification": {
+      "path": ".cache/evidence/candidate-authored-builder-20261019/verification/receipt.json",
+      "bytes": 33475,
+      "sha256": "8ef812d0628e0748f090114414f739a8095694150eced84b4d33ec079e370dd4"
+    },
+    "runtimePackaging": {
+      "path": ".cache/evidence/candidate-authored-builder-20261019/runtime-packaging/receipt.json",
+      "bytes": 7471,
+      "sha256": "b29aebaf786fdea1293bc552a33d4882e18d02571f24609bd27b564ab157a85a"
+    },
+    "developmentCommands": {
+      "path": ".cache/evidence/candidate-authored-builder-20261019/native-cli-development-v3/execution-receipt.json",
+      "bytes": 37384,
+      "sha256": "8b003372a8bc08c3b3c3721a3eb3975b7bc14f505d888ed617f460bd0c08155b"
+    },
+    "releaseCommands": {
+      "path": ".cache/evidence/candidate-authored-builder-20261019/native-cli-release/execution-receipt.json",
+      "bytes": 35832,
+      "sha256": "cc1988b6b7324e010dff1af946a36b60006fcdac584c757996088b87bc9c630f"
+    },
+    "releaseNativeTests": {
+      "path": ".cache/evidence/candidate-authored-builder-20261019/native-tests-release/receipt.json",
+      "bytes": 72093,
+      "sha256": "0c9e60fc8bf8591356dccfdfc84954de4044f890e7d450545beb2c26fbfbca88"
+    }
+  },
+  "publicSourceFiles": 512,
+  "driverSourceFiles": 31,
+  "fullSourceCheck": {
+    "files": 539,
+    "mirFunctions": 6867,
+    "lock": "updated then retained"
+  },
+  "commandExecutions": {
+    "developmentCommands": 26,
+    "releaseCommands": 25
+  },
+  "nativeTestComparisons": {
+    "profile": "release",
+    "exact": 30
+  },
+  "runtimePackagingComparisons": 234,
+  "directDriverExecutions": 20,
+  "images": [
+    {
+      "profile": "development",
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\evidence\\candidate-authored-builder-20261019\\public-cli\\development\\fairyc.exe",
+      "sha256": "f0e9582e444fd29bc36af699b75db77e7ebe42a807061f7607af16e80a7f41ae",
+      "driverSHA256": "41eb709c4813a0c0371d35d53a24263fc39f5949768d738c4c52aa61f2524240",
+      "driverImplementation": "authored Fairy",
+      "assetPath": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\evidence\\candidate-authored-builder-20261019\\public-cli\\development\\fairyc-runtime-assets.pack",
+      "assetSHA256": "917d1c962364a01353281254c1991f29958f2b7a6edebe30e769c4abb4f318b5"
+    },
+    {
+      "profile": "release",
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\evidence\\candidate-authored-builder-20261019\\public-cli\\release\\fairyc.exe",
+      "sha256": "85abffe940a5fd584a6b126a630beda4e3ab4ffb4932946d6ef6492491faa753",
+      "driverSHA256": "97c8c1d9a4ba049e611bb61d72ff5ae1b2009e820e98007012e187f91a8d29a1",
+      "driverImplementation": "authored Fairy",
+      "assetPath": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\evidence\\candidate-authored-builder-20261019\\public-cli\\release\\fairyc-runtime-assets.pack",
+      "assetSHA256": "917d1c962364a01353281254c1991f29958f2b7a6edebe30e769c4abb4f318b5"
+    }
+  ],
+  "versionStamp": "Fairy C Stage 0\ncompiler: v0.0.0-20261019140425-73b622e2cc13+dirty\nsdk: fairyc-sdk-stdlib/0 0.0.0-stage0.86\nlanguage: fairyc-language/20\nruntime: fairyc-runtime/0\nrevision: 73b622e2cc132625906ecf374599d7b18efe0de3\nmodified: true\n",
+  "bootstrapRecovery": {
+    "reason": "Concurrent source check refreshed non-input workspace lock; C emission uses explicit source manifest",
+    "originalLockSHA256": "193167d6e2956a6a4130784189b75517408b695abaa24f1aff97c96a6d13d13d",
+    "currentLockSHA256": "9c2474ca43be439ed0c718e0ef6389ca8e115078fb084c073fa5e924b34dfcab",
+    "sourceSnapshotSHA256": "02b2700fa5467adba8ef44415d085aa13d66d1275384f98960c3f3c000a024d1"
+  },
+  "validation": [
+    "Go candidatehost/candidatebuild focused tests",
+    "Python syntax compilation",
+    "git diff --check",
+    "539-file Go source check",
+    "Go-native/development/release runtime byte oracle",
+    "20 direct companion executions",
+    "51 public command executions",
+    "30 exact Go native-test comparisons"
+  ],
+  "limitations": [
+    "Initial public-build receipt stopped because a concurrent source check refreshed the non-input fairy.lock. The recovery authenticated the exact C-emission sources, manifest, packet and successful development build; only the release image remained to build.",
+    "Images retain the source-build version frozen before implementation commits; they report the recorded 73b622e2+dirty stamp.",
+    "Initial development command verification hit its 180-second harness limit; all commands subsequently passed with the existing 900-second verification allowance. Product child deadlines were unchanged.",
+    "The prior 906-comparison and full fixed-point records do not cover this change.",
+    "Development native-test full parity and Linux execution are deferred; direct authored driver tests cover both companion profiles.",
+    "Go remains an initial bootstrap reference; the authored companion accepts fresh-packet CLI inputs, not all Go developer builder flags."
+  ],
+  "runtimeGoBuilderRequired": false,
+  "publicCliChanged": false,
+  "privateHostAbiChanged": true,
+  "sdkRuntimeAbiChanged": false,
+  "databaseChanged": false,
+  "ciChanged": false,
+  "pushed": false
+}
