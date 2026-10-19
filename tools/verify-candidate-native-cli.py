@@ -8,8 +8,10 @@ parser.add_argument('--release',type=Path,required=True)
 parser.add_argument('--reference',type=Path)
 parser.add_argument('--profile',choices=['development','release','both'],default='both')
 parser.add_argument('--output',type=Path,required=True)
+parser.add_argument('--invocation-timeout-seconds',type=int,default=900,help='whole verification command allowance; native child deadlines stay unchanged')
 selected=parser.parse_args()
 if not __debug__:parser.error('verification requires Python without -O')
+if not 1<=selected.invocation_timeout_seconds<=900:parser.error('invocation timeout must be in 1..900 seconds')
 work=selected.output.resolve();work.mkdir(parents=True,exist_ok=True)
 profiles=['development','release'] if selected.profile=='both' else [selected.profile]
 images={'development':selected.development.resolve(),'release':selected.release.resolve()}
@@ -28,7 +30,7 @@ def fixture(profile,name,source):
     return path
 def run(argv,cwd,code=0,out=b'',err=b'',stdin=None,label=''):
     before=scratch_names();start=time.monotonic()
-    result=subprocess.run(list(map(str,argv)),cwd=cwd,input=stdin,capture_output=True,timeout=180)
+    result=subprocess.run(list(map(str,argv)),cwd=cwd,input=stdin,capture_output=True,timeout=selected.invocation_timeout_seconds)
     def logged(a):
         a=str(a);data=a.encode('utf-8');return a if len(data)<=256 else dict(bytes=len(data),sha256=hashlib.sha256(data).hexdigest())
     row=dict(label=label,argv=[logged(a) for a in argv],cwd=str(cwd),exit=result.returncode,seconds=time.monotonic()-start,stdoutBytes=len(result.stdout),stdoutSHA256=hashlib.sha256(result.stdout).hexdigest(),stderr=result.stderr.decode(errors='replace'))
@@ -49,8 +51,13 @@ stdin=b'binary\x00stdin\n';expected=''.join(a+'\n' for a in args).encode('utf-8'
 for profile in profiles:
     image=images[profile]
     base=fixture(profile,'simple','module main;fn i32 main(){return 42;}\n')
-    run([image,'build','--bad'],base,2,err=b'fairyc: command "build" accepts only optional --release and --locked\n',label=profile+' invalid build option')
-    run([image,'run','--locked','--locked'],base,2,err=b'fairyc: command "run" received --locked more than once\n',label=profile+' duplicate run option')
+    # The full public dispatcher appends usage to syntax failures. Earlier
+    # command-only probes predate that contract; use Go when supplied.
+    help_result=subprocess.run([str(selected.reference.resolve() if selected.reference else image),'--help'],cwd=base,capture_output=True,check=True,timeout=30)
+    assert help_result.stdout.startswith(b'Fairy C Stage 0') and not help_result.stderr
+    usage=b'\n'+help_result.stdout
+    run([image,'build','--bad'],base,2,err=b'fairyc: command "build" accepts only optional --release and --locked\n'+usage,label=profile+' invalid build option')
+    run([image,'run','--locked','--locked'],base,2,err=b'fairyc: command "run" received --locked more than once\n'+usage,label=profile+' duplicate run option')
     run([image,'build'],base,out=b'built: build/native-app.exe (x86_64-windows-msvc, development, lock updated)\n',label=profile+' default build')
     product=base/'build/native-app.exe';run([product],base,42,label=profile+' built executable')
     run([image,'build','--release','--locked'],base,out=b'built: build/native-app.exe (x86_64-windows-msvc, release, lock verified)\n',label=profile+' locked release build')
