@@ -86,10 +86,32 @@ stack reservations retain the existing 64 KiB alignment and 16 MiB ceiling.
 
 These modules are not connected to the public CLI. Runtime C is supplied to the
 builder, with Go reference selection used only in verification setup. Runtime
-selection/packaging and the full Go COFF COMDAT/unwind and PE proof still need
-migration before replacing the Go companion. The authored artifact checks are
-bounded structural checks, not a claim of complete verifier equivalence. No new
-full CLI fixed point, full Go replacement, Linux execution or promotion is claimed.
+selection now lives in authored Fairy; runtime C byte packaging and public CLI
+integration remain, as does the full Go COFF COMDAT/unwind and PE proof, before
+replacing the Go companion. The authored artifact checks are bounded structural
+checks, not a claim of complete verifier equivalence. No new full CLI fixed
+point, full Go replacement, Linux execution or promotion is claimed.
+
+### Authored runtime selection (2026-10-19)
+
+The private `native_runtime.fy` and `native_runtime_contract.fy` modules move
+symbol selection from Go `candidatebuild.runtimeSource` into authored Fairy.
+They cover 96 MSVC symbols and 44 private host symbols, closure and deterministic
+component link order, host and rooted selection, scalar exit 100 and trap 128
+behavior, and exact diagnostics. Standard errors are sorted; host errors keep
+source order. The emitted vectors imply a heap and 16-byte alignment policy: the
+vector marker adds the heap component; C macro bytes are still packaged by Go.
+Selection uses allocation-free offsets and masks only.
+
+The comparison set totals 1,573 fixtures across direct classification and header
+inputs, including the header of the 41,903,661-byte compiler packet. The
+[runtime selection
+record](../ops/evidence/candidate-runtime-selection-20261019.json) records
+`passed: true` for the frozen input, covering those 1,573 Go-oracle cases and two
+authored tests under each of the development, release and Go-native profiles. A
+full source check also passes with 531 files and 6,780 MIR functions. Public CLI
+wiring, full Go COFF/COMDAT/unwind/PE equivalence and a fresh full CLI fixed point
+remain pending. Linux execution remains deferred.
 
 ## Historical records
 
