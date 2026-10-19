@@ -1,0 +1,225 @@
+{
+  "schema": "fairyc.candidate-coff/v1",
+  "passed": true,
+  "inputs": [
+    {
+      "path": "internal/pecoff/object.go",
+      "bytes": 22054,
+      "sha256": "c5545d67f12fe89f433dc793e0459aaebda52ce568501994a4f1b60e20a4ea79"
+    },
+    {
+      "path": "internal/pecoff/big_object.go",
+      "bytes": 10239,
+      "sha256": "8431c998664b35c6f7cba1dee94fd3949522a19ff35c728423e9b519fc639bc7"
+    },
+    {
+      "path": "internal/cdriver/windows_project.go",
+      "bytes": 8066,
+      "sha256": "11a891d5158bc5efe58e7fe4dbead8a3de15f3cdabb020b610fd26b1e96ff3f5"
+    },
+    {
+      "path": "internal/pecoff/candidate_coff_oracle_test.go",
+      "bytes": 4523,
+      "sha256": "5bd78faf80aca78bdc32ed1597a0f6387dff8fc9207b1d5345e2dafb5c9b7581"
+    },
+    {
+      "path": "internal/cdriver/candidate_coff_oracle_test.go",
+      "bytes": 3140,
+      "sha256": "83a78f127ab5807eb00d70173280d0a23792fd31a80cc52475a6a25af73cffee"
+    },
+    {
+      "path": "examples/lexer_candidate/src/native_coff.fy",
+      "bytes": 7065,
+      "sha256": "43d8ed954b87b5ce54000ef83a8074fb9de128d88c5222bf5eadae0d06b87144"
+    },
+    {
+      "path": "examples/lexer_candidate/src/native_coff_layout.fy",
+      "bytes": 6374,
+      "sha256": "68a93e63e2b730f5914527cf5930e73c1896915afc0bd435e386b45d0769a91c"
+    },
+    {
+      "path": "examples/lexer_candidate/src/native_msvc_artifacts.fy",
+      "bytes": 2247,
+      "sha256": "7aa949b41273ed8a5e7397a5e4745ba32110d7b28f7b65c464265e455b2fe6df"
+    },
+    {
+      "path": "examples/lexer_candidate/tests/native_coff.fy",
+      "bytes": 4790,
+      "sha256": "0cbbb4ff3861aa33545fc235e8136d1e9675882318bf917e4afb0c1192c92c68"
+    },
+    {
+      "path": "tools/verify-candidate-coff.py",
+      "bytes": 4557,
+      "sha256": "fe8005a903d92ffce056434faa18a0931d2e07f1e2e4dd6529eb6f4c63a8c396"
+    }
+  ],
+  "goOracleCases": 3495,
+  "fixture": {
+    "path": ".cache/evidence/candidate-coff-20261019-final/cases.bin",
+    "bytes": 9282048,
+    "sha256": "eb0af32adf84a454158e8e83ebf3ed5d9d9cd20474b1def4c845b24048a7b3ba"
+  },
+  "execution": {
+    "path": ".cache/evidence/candidate-coff-20261019-final/execution/receipt.json",
+    "bytes": 12894,
+    "sha256": "65f7919a62e9cefc908800b2d67f4daa3bbdb2c798a1464fe977f5d7dc1cdd71"
+  },
+  "realObjects": [
+    {
+      "path": ".cache/evidence/candidate-coff-20261019-final/objects/code-O2-big.obj",
+      "bytes": 1288,
+      "sha256": "33eb7f1326dd32c6757003361805381136e08c1c26f99e7422c7998d996df768"
+    },
+    {
+      "path": ".cache/evidence/candidate-coff-20261019-final/objects/code-O2-regular.obj",
+      "bytes": 1210,
+      "sha256": "559c09549ea06bdbaf5e0cee129da71c0c9533234f20ba0147ad173a7803b69c"
+    },
+    {
+      "path": ".cache/evidence/candidate-coff-20261019-final/objects/code-Od-big.obj",
+      "bytes": 1300,
+      "sha256": "31df386c854131195af31566983afb88bd3a2f6bc2d84b01053c979d948c4e02"
+    },
+    {
+      "path": ".cache/evidence/candidate-coff-20261019-final/objects/code-Od-regular.obj",
+      "bytes": 1222,
+      "sha256": "7efeba0450d4642339be42a4dc47605d6ebe180265324e228dd0b6b621b41002"
+    },
+    {
+      "path": ".cache/evidence/candidate-coff-20261019-final/objects/empty-O2-big.obj",
+      "bytes": 643,
+      "sha256": "a47f6757f9c75f65f9907caa9f0cb14efb5d5c63a83c2c82be0492f50009fe79"
+    },
+    {
+      "path": ".cache/evidence/candidate-coff-20261019-final/objects/empty-O2-regular.obj",
+      "bytes": 595,
+      "sha256": "d083ae9924349dc0807df75cf51ac5262b5c3b7bc23c6c1ad5831a2d39b4996b"
+    },
+    {
+      "path": ".cache/evidence/candidate-coff-20261019-final/objects/empty-Od-big.obj",
+      "bytes": 643,
+      "sha256": "825207fd43da0c7caefa711f13984d44f28445a6d7b4b30417761504146d1819"
+    },
+    {
+      "path": ".cache/evidence/candidate-coff-20261019-final/objects/empty-Od-regular.obj",
+      "bytes": 595,
+      "sha256": "c57cadf3da94b2b6a13794a8b9a36b2df2fc100dda3204b2773616ed63956529"
+    },
+    {
+      "path": ".cache/evidence/candidate-coff-20261019-final/objects/literals-O2-big.obj",
+      "bytes": 773,
+      "sha256": "8b75937e27ff2b604dc5298357b5ecff876637c24591d8582f09bd8fa233a6a8"
+    },
+    {
+      "path": ".cache/evidence/candidate-coff-20261019-final/objects/literals-O2-regular.obj",
+      "bytes": 719,
+      "sha256": "e95f6ee47a101943eeddea40b6a5b3444e75ef6d84f8cbe1dea2cf838c4f04b6"
+    },
+    {
+      "path": ".cache/evidence/candidate-coff-20261019-final/objects/literals-Od-big.obj",
+      "bytes": 773,
+      "sha256": "054393bbbb2e7d224ceaa1764e530b02929a333fe1031e62866b9ea38821e75b"
+    },
+    {
+      "path": ".cache/evidence/candidate-coff-20261019-final/objects/literals-Od-regular.obj",
+      "bytes": 719,
+      "sha256": "138a36a64baa3afc3535c0da6c8dfdb18fdde3addf8897c7894e4712a3b0740b"
+    }
+  ],
+  "profiles": [
+    "Go-native",
+    "development",
+    "release"
+  ],
+  "compared": "strict full COFF reports and actual Go project driver admission",
+  "authoredBuilderIntegrated": true,
+  "diagnosticTextParity": false,
+  "cliIntegrated": false,
+  "fullCliFixedPointRefreshed": false,
+  "linuxExecuted": false,
+  "publicApiChanged": false,
+  "sdkAbiChanged": false,
+  "databaseChanged": false,
+  "ciChanged": false,
+  "pushed": false,
+  "date": "2026-10-19",
+  "scope": "Bounded ordinary COFF/bigobj reports, weak externals, relocation overflow, section definitions and COMDAT; exact Go project-driver data-only admission",
+  "strictAccepted": 1620,
+  "projectAccepted": 1666,
+  "sourceCheck": {
+    "passed": true,
+    "sources": 537,
+    "mirFunctions": 6852,
+    "lock": {
+      "path": "examples/lexer_candidate/fairy.lock",
+      "bytes": 1698,
+      "sha256": "c1551f81fd7223f50295f225ed9c933905b9f8d6007ac11bbee2b0b41a3a8489"
+    }
+  },
+  "records": [
+    {
+      "path": ".cache/evidence/candidate-coff-20261019-final/receipt.json",
+      "bytes": 5347,
+      "sha256": "02858af8634f75ae7beda1529f7169bfbe0440734375fbdb70ba519488114c01"
+    },
+    {
+      "path": ".cache/evidence/candidate-msvc-coff-20261019/receipt.json",
+      "bytes": 3482,
+      "sha256": "22b189c7e25559659bb3ae2a2d7587c6cca89f7a767ca044934ac4622141746d"
+    },
+    {
+      "path": ".cache/evidence/candidate-coff-20261019-final/execution/receipt.json",
+      "bytes": 12894,
+      "sha256": "65f7919a62e9cefc908800b2d67f4daa3bbdb2c798a1464fe977f5d7dc1cdd71"
+    },
+    {
+      "path": ".cache/evidence/candidate-msvc-coff-20261019/execution/receipt.json",
+      "bytes": 11317,
+      "sha256": "7e9229239cf119b40ebbea3d51f94298cd5103b0ab3215d1fdb90d18fef32ce8"
+    }
+  ],
+  "driver": {
+    "imagesExecuted": 4,
+    "artifacts": [
+      {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\evidence\\candidate-msvc-coff-20261019\\program.bin.images\\development-dev.exe",
+        "bytes": 158720,
+        "sha256": "e5b91925edbc48ecde54878ab76983f40fe1d7344ef1e7cf0fedc121d1e480fe"
+      },
+      {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\evidence\\candidate-msvc-coff-20261019\\program.bin.images\\development-opt.exe",
+        "bytes": 111616,
+        "sha256": "339e98d87406be07c4db3099278a9ff521fd4a6554858f7c38d4ad8d550a4630"
+      },
+      {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\evidence\\candidate-msvc-coff-20261019\\program.bin.images\\release-dev.exe",
+        "bytes": 158720,
+        "sha256": "e5b91925edbc48ecde54878ab76983f40fe1d7344ef1e7cf0fedc121d1e480fe"
+      },
+      {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\evidence\\candidate-msvc-coff-20261019\\program.bin.images\\release-opt.exe",
+        "bytes": 111616,
+        "sha256": "339e98d87406be07c4db3099278a9ff521fd4a6554858f7c38d4ad8d550a4630"
+      }
+    ],
+    "imagesEqualPreviousPECheckpoint": true,
+    "goPEInspectorPassed": true,
+    "scratchCleaned": true,
+    "compileAndLinkFailuresRejected": true,
+    "goChildBuilderInvoked": false,
+    "goRuntimeSelectionInvoked": false
+  },
+  "goValidation": [
+    "go test ./internal/pecoff -run 'TestInspectObject|TestBuildAMD64' -count=1",
+    "go test ./internal/cdriver ./internal/candidatebuild -run 'TestCandidateMSVC|TestPacket' -count=1"
+  ],
+  "completeGoCliReplacement": false,
+  "promotionGateReady": false,
+  "limitations": [
+    "Comparison proves the enumerated corpus, not all possible malformed byte sequences.",
+    "Private failure categories do not claim Go diagnostic text parity.",
+    "General archive/link-map/PDB proof tools are not migrated.",
+    "Public CLI/distribution wiring and a fresh full CLI rebuild/fixed point remain pending.",
+    "Linux execution is deferred by the user."
+  ]
+}

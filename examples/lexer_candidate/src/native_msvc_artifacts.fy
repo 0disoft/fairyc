@@ -1,6 +1,7 @@
 module native_msvc_artifacts;
 import std::bytes as bytes;
 import native_pe as pe;
+import native_coff as coff;
 import native_pe_unwind as unwind;
 import std::fs as fs;
 import std::text as text;
@@ -14,23 +15,9 @@ fn Problem fail(u32 stage,u32 status,u32 os_code){return Problem{.stage,.status,
     while(true){let usize used=bytes::len(ref data);let usize maximum=if(67108865-used<65536){67108865-used}else{65536};let usize n=switch(fs::read_append(ref mut file,ref mut data,maximum)){case .ok(n):{n}case .err(e):{return .err(fail(3,if(e.file_status!=0){e.file_status}else{e.allocation_status},e.os_code));}};if(bytes::len(ref data)>67108864){return .err(fail(2,1,0));}if(n==0){break;}}
     if(bytes::len(ref data)!=observed){return .err(fail(2,1,0));}switch(fs::close(file)){case .ok(_):{}case .err(e):{return .err(fail(4,e.status,e.os_code));}};return .ok(data);
 }
-fn usize half(ref u8[] data,usize at){return (data[at] as usize)+(data[at+1] as usize)*256;}
-fn usize word(ref u8[] data,usize at){return half(data,at)+half(data,at+2)*65536;}
-fn bool range(ref u8[] data,usize offset,usize length){return offset<=data.len && length<=data.len-offset;}
-// Bounded transport checks, not yet the complete pecoff COMDAT/unwind proof.
-// All artifacts in the integration harness also pass the existing Go inspector.
+// Match the Go project driver's strict code verifier plus data-only fallback.
 pub fn bool object(ref u8[] data){return object_problem(data)==0;}
-// Header, sections, symbols, strings, raw bytes, overflow count, relocations.
-pub fn u32 object_problem(ref u8[] data){
-    if(data.len<20 || data.len>67108864 || half(data,0)!=34404 || half(data,16)!=0){return 1;}let usize count=half(data,2);if(count==0 || count>16384 || !range(data,20,count*40)){return 2;}
-    let usize symbols=word(data,8);let usize entries=word(data,12);if(entries>262144 || entries>0 && (symbols<20+count*40 || !range(data,symbols,entries*18+4))){return 3;}
-    if(entries>0){let usize strings=symbols+entries*18;let usize length=word(data,strings);if(length<4 || !range(data,strings,length)){return 4;}}
-    var usize i=0;var usize relocations=0;var bool code=false;while(i<count){let usize section=20+i*40;let usize size=word(data,section+16);let usize offset=word(data,section+20);let usize rel=word(data,section+24);var usize n=half(data,section+32);let usize flags=word(data,section+36);if(size>0 && (flags&32!=0 || flags&536870912!=0)){code=true;}
-        if(size>0 && (offset==0 && flags&128==0 || offset!=0 && (offset<20+count*40 || !range(data,offset,size)))){return 5;}
-        if(flags&16777216!=0){if(n!=65535 || !range(data,rel,10)){return 6;}let usize extended=word(data,rel);if(extended<65536){return 6;}n=extended;}
-        if(n>1048576-relocations || n>0 && (rel<20+count*40 || !range(data,rel,n*10))){return 7;}relocations+=n;i+=1;
-    }return if(!code && count>96){2}else{0};
-}
+pub fn u32 object_problem(ref u8[] data){return coff::project_problem(data);}
 // Full PE structure; validate unwind when either exception-directory field exists.
 // A leaf image with no exception directory remains admitted.
 pub fn bool executable(ref u8[] data){

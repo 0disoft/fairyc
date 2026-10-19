@@ -86,13 +86,12 @@ stack reservations retain the existing 64 KiB alignment and 16 MiB ceiling.
 
 These modules are not connected to the public CLI. Runtime C is supplied to the
 builder; the original build record used Go reference selection in setup. Runtime
-selection and private runtime C byte packaging now live in authored Fairy; public
-CLI and distribution wiring remain, as does the remaining COFF symbol and
-relocation handling and COMDAT work, before replacing the Go companion. The
-authored artifact checks are bounded structural checks, not a claim of complete
-verifier equivalence. No new
-full CLI fixed point, full Go replacement, Linux execution or promotion is
-claimed.
+selection and private runtime C byte packaging now live in authored Fairy. Public
+CLI and distribution wiring remain before replacing the Go companion. The COFF
+object module is implemented within the bounded scope below; general link-map,
+archive and PDB proof migration is not claimed. The authored artifact checks are
+bounded structural checks. No new full CLI fixed point, full Go replacement,
+Linux execution or promotion is claimed.
 
 ### Authored runtime selection (2026-10-19)
 
@@ -113,9 +112,8 @@ record](../ops/evidence/candidate-runtime-selection-20261019.json) records
 `passed: true` for the frozen input, covering those 1,573 Go-oracle cases and two
 authored tests under each of the development, release and Go-native profiles. A
 full source check also passes with 531 files and 6,780 MIR functions. Public CLI
-wiring and distribution, the remaining COFF symbol/relocation and COMDAT work,
-and a fresh full CLI fixed point remain pending. Linux execution remains
-deferred.
+wiring and distribution and a fresh full CLI fixed point remain pending. Linux
+execution remains deferred.
 
 ### Authored runtime C packaging (2026-10-19)
 
@@ -141,9 +139,9 @@ across the existing 1,573 runtime-selection fixtures, compares the remaining
 tampering is rejected. The authored MSVC driver builds and executes four SDK
 program images using the assembled runtime; their hashes match the previous
 Go-runtime checkpoint, and the Go PE inspector passes. A full source check passes
-with 533 files and 6,792 MIR functions. Public CLI and distribution wiring, the
-remaining COFF symbol/relocation and COMDAT work, a fresh full CLI fixed point
-and Linux execution remain pending; none is claimed here.
+with 533 files and 6,792 MIR functions. Public CLI and distribution wiring, a
+fresh full CLI fixed point and Linux execution remain pending; none is claimed
+here.
 
 ### Authored PE and unwind verification (2026-10-19)
 
@@ -177,6 +175,41 @@ The [candidate PE and unwind
 record](../ops/evidence/candidate-pe-unwind-20261019.json) records this bounded
 scope. Public CLI and distribution wiring, a full CLI rebuild and fixed point,
 and Linux execution remain pending.
+
+### Authored COFF object verification (2026-10-19)
+
+The authored `native_coff_layout.fy` and `native_coff.fy` modules parse ordinary
+and bigobj AMD64 COFF objects. Ordinary objects use 18-byte symbols. Bigobj
+records use 20-byte symbols and name offsets, while the private layout remains
+immutable. Inspection covers strict symbol rules, weak external fallback, and
+relocations including the overflow sentinel with a semantic count. It also checks
+raw-range overlap, exact section-definition auxiliary records, COMDAT selections
+1 through 6, the first primary and following keys, and associative parents with
+cycle rejection. Bigobj enforces the same closed Go constraints without auxiliary or
+COMDAT records and with disjoint tables, raw data and relocations.
+
+`native_msvc_artifacts.object_problem` now applies the Go project driver's strict
+inspection and data-only fallback rules. Errors use private numeric codes; parity
+with Go diagnostic text is not claimed.
+
+The Go oracle's strict `InspectObject` reports and actual
+`cdriver.inspectProjectObject` admission are compared against synthetic mutations
+of ordinary, COMDAT, associative, weak, BSS, bigobj, 16,384-section fanout and
+relocation-overflow inputs. They also cover 12 fresh real MSVC objects built from
+include-only, literal-only and code inputs at `/Od` and `/O2`, in regular and
+bigobj modes. All 3,495 cases match under Go-native and both candidate C profiles:
+1,620 strict reports are accepted and 1,666 inputs pass the actual project-driver
+admission rule. Explicit associative cycles and non-COMDAT parents are rejected.
+
+The connected authored MSVC driver builds and executes four SDK program images
+with the expected output and exit 42. Their complete bytes match the previous
+PE/unwind checkpoint. Compile/link failure classification, scratch cleanup and
+the existing Go PE inspector also pass.
+
+The source check reports 537 files and 6,852 MIR functions. The [candidate COFF
+record](../ops/evidence/candidate-coff-20261019.json) records this bounded scope.
+Public CLI and distribution wiring and a fresh full CLI rebuild and fixed point
+remain pending. General link-map, archive and PDB proof migration is not claimed.
 
 ## Historical records
 
