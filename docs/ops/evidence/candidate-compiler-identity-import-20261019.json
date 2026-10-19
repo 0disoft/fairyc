@@ -1,0 +1,62 @@
+{
+  "schema": "fairyc.candidate-compiler-identity-import-review/v1",
+  "date": "2026-10-19",
+  "baseRevision": "1cd0ed6e585326714c0094a4e6b7f009d7d6b449",
+  "passedInRecordedScope": true,
+  "scope": "Reconnect the executable identity regression to the maintained cache-environment implementation; no whole CLI rebuild.",
+  "sources": {
+    "examples/lexer_candidate/src/project_cache_environment.fy": "12f55818c7b98c06212274952e5f05831bc5d7062e68036576d4f5b4c2bc0dfa",
+    "examples/lexer_candidate/tests/project_compiler_identity.fy": "c51a90b21c77fedb44a1b26300b1e5374fdbb3f0c153025b1bcaa8bce7f4a37a",
+    "examples/lexer_candidate/fairy.lock": "f61e1575a186d07d2737df5a62fb01b3c472b6290a16166abc38a392386a461c"
+  },
+  "receipt": {
+    "path": ".cache/evidence/compiler-identity-import-20261019-stable/receipt.json",
+    "sha256": "5593f435ecd8ab2185aaf15d8b03fb471b9881329458325496a74d06304f363b"
+  },
+  "candidateInputFiles": 150,
+  "authoredTestsExecuted": 1,
+  "candidateExecutions": [
+    {
+      "profile": "development",
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\evidence\\compiler-identity-import-20261019-stable\\development.exe",
+      "sha256": "9cfa82c40b3ccccf9dbc62ba6992c3cbcecca2710431f87a7dd7b385012e81d9",
+      "exit": 0
+    },
+    {
+      "profile": "release",
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\evidence\\compiler-identity-import-20261019-stable\\release.exe",
+      "sha256": "74758463c479e6b2f600e99cf4fcd875239522a1edaeed73bb3b2ebb2831fb11",
+      "exit": 0
+    }
+  ],
+  "executableIdentityVerification": {
+    "encoding": "fairyc.compiler-executable-sha256/v1",
+    "independentOracle": "Python hashlib SHA-256 of each complete executed image",
+    "spoofedArgvZeroPassed": true
+  },
+  "sourceCheck": {
+    "argv": [
+      "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\evidence\\candidate-parity-20261018-a2aaf535\\fairyc-go-fixed.exe",
+      "check"
+    ],
+    "exit": 0,
+    "seconds": 30.910899400012568,
+    "stdoutBytes": 80,
+    "stderr": ""
+  },
+  "fullTestListing": {
+    "passed": false,
+    "reason": "Seven pre-existing artifact type-map calls omit the current signatures argument.",
+    "receiptPath": ".cache/evidence/compiler-identity-import-discovery-20261019/listing-result.json"
+  },
+  "initialAttempt": {
+    "passed": false,
+    "reason": "The concurrent workspace check refreshed fairy.lock; the verifier correctly rejected the changed lock. Rerun sequentially with stable lock."
+  },
+  "publicCLIChanged": false,
+  "languageContractChanged": false,
+  "abiChanged": false,
+  "ciChanged": false,
+  "fullCandidateRebuilt": false,
+  "fullFixedPointReplayed": false
+}
