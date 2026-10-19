@@ -46,9 +46,15 @@ fn bool append_entry(ref mut bytes::Buffer output,ref bytes::Buffer entry){retur
 // case-insensitive Windows ordinal comparison. The caller's environment is never
 // modified. The private environment snapshot/output allowance is one MiB.
 pub fn Result<bytes::Buffer,child::Problem> with_handle(ref u8[] original,usize value){
+    var bytes::Buffer text=bytes::empty();if(!bytes::append_usize(ref mut text,value).is_ok){return .err(fail(2,0,0));}
+    return with_value(original,b"FAIRYC_TRAP_CONTROL_HANDLE_V1",bytes::view(ref text));
+}
+// Replace one ordinary name without mutating the parent process environment.
+pub fn Result<bytes::Buffer,child::Problem> with_value(ref u8[] original,ref u8[] name,ref u8[] value){
     if(original.len<4 || original.len>1048576 || original.len%2!=0 || word(original,original.len/2-1)!=0 || word(original,original.len/2-2)!=0){return .err(fail(9,0,0));}
-    let key=switch(command::path(b"FAIRYC_TRAP_CONTROL_HANDLE_V1")){case .ok(p):{p}case .err(_):{return .err(fail(2,0,0));}};
-    var bytes::Buffer text=bytes::empty();if(!bytes::append(ref mut text,b"FAIRYC_TRAP_CONTROL_HANDLE_V1=").is_ok || !bytes::append_usize(ref mut text,value).is_ok){return .err(fail(2,0,0));}
+    if(name.len==0){return .err(fail(1,0,0));}var usize n=0;while(n<name.len){if(name[n]==61 || name[n]==0){return .err(fail(1,0,0));}n+=1;}
+    let key=switch(command::path(name)){case .ok(p):{p}case .err(_):{return .err(fail(1,0,0));}};
+    var bytes::Buffer text=bytes::empty();if(!bytes::append(ref mut text,name).is_ok || !bytes::append_byte(ref mut text,61).is_ok || !bytes::append(ref mut text,value).is_ok){return .err(fail(2,0,0));}
     let entry=switch(command::path(bytes::view(ref text))){case .ok(p):{p}case .err(_):{return .err(fail(2,0,0));}};var bytes::Buffer output=bytes::empty();var usize at=0;var bool inserted=false;
     while(at<original.len/2 && word(original,at)!=0){let start=at;var usize separator=0;
         while(at<original.len/2 && word(original,at)!=0){if(at>start && separator==0 && word(original,at)==61){separator=at;}at+=1;}

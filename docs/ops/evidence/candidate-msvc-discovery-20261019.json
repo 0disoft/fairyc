@@ -1,0 +1,58 @@
+{
+  "schema": "fairyc.candidate-msvc-toolchain/v1",
+  "passed": true,
+  "goOracle": {
+    "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\evidence\\candidate-msvc-discovery-20261019-final\\toolchain.txt",
+    "sha256": "16ba250d7ce769c78b201a2205e5485c2dfc3008f14ac64b0c42ca59a500fa64"
+  },
+  "execution": {
+    "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\evidence\\candidate-msvc-discovery-20261019-final\\execution\\receipt.json",
+    "sha256": "2077327489519dc4d1670a84e262b60a4587ff2ace85f738192f6c8bc69cbaf0"
+  },
+  "authoredTests": 3,
+  "profiles": [
+    "development",
+    "release"
+  ],
+  "frontendGoInvokedByResolver": false,
+  "parentEnvironmentModified": false,
+  "cliIntegrated": false,
+  "pushed": false,
+  "date": "2026-10-19",
+  "sources": [
+    {
+      "path": "examples/lexer_candidate/src/windows_msvc_toolchain.fy",
+      "sha256": "3e6df272c1dc23512592cc751baa0bcf326dd6aaf4b55daaf3c20a63d6dc900b"
+    },
+    {
+      "path": "examples/lexer_candidate/src/windows_run_control.fy",
+      "sha256": "9df460f31a94b4451f2b255dfff72ea6484f77fa4a1932817197116539626a79"
+    },
+    {
+      "path": "examples/lexer_candidate/tests/windows_msvc_toolchain.fy",
+      "sha256": "8f8455458fb1e6f0905132a6a37ba196cc58c93372296ddcc80bfa0cdb86f1c5"
+    },
+    {
+      "path": "internal/cdriver/windows_msvc_candidate_oracle_test.go",
+      "sha256": "12fa298af24124e619f14e707dbdd7d1f7451738be53520790a5a0dfee9d8f5b"
+    },
+    {
+      "path": "tools/verify-candidate-msvc-toolchain.py",
+      "sha256": "717c0f270ab1690f54242fcee9d4e8b45880af5b6c35107b0506f526e347c0a4"
+    }
+  ],
+  "controlRegression": {
+    "path": ".cache/evidence/candidate-msvc-control-regression-20261019/receipt.json",
+    "sha256": "15c5e9d2ab022693961e08fcf0169268698772bde5a7db715d63686a0d3a8ed1"
+  },
+  "sourceCheck": {
+    "sources": 527,
+    "mirFunctions": 6742,
+    "passed": true
+  },
+  "limitations": [
+    "Go test adds its Go bin directory to inherited PATH; compare compiler-owned PATH prefix and preserve each caller suffix.",
+    "Resolver is not connected to the public CLI.",
+    "Linux is deferred."
+  ]
+}
