@@ -256,7 +256,43 @@ fn void bump(ref mut i32[] values){for(let ref mut i32 value in values){*value+=
     compare('source-location-text', home)
 
 
+def extend_arenas(fixture, compare):
+    home = fixture('arenas', {'tests/arena.fy': r'''module tests::arena;
+import std::alloc as alloc;
+struct Pair{i32 value;}
+resource Holder{alloc::Arena arena;cleanup{}}
+resource Guard{i32 value;cleanup{assert(this.value==42);}}
+resource Trap{i32 value;cleanup{assert(false);}}
+fn alloc::Arena make(){return switch(alloc::create()){case .ok(a):{a}case .err(_):{assert(false);make()}};}
+fn Result<i32,i32> fail(){return .err(7);}
+fn Result<i32,i32> route(bool propagate){
+ var alloc::Arena arena=make();region r in ref mut arena{
+  let Guard guard=Guard{.value=42};assert(switch(r.place(42)){case .ok(n):{*n==42}case .err(_):{false}});
+  if(propagate){let i32 n=fail()?;}return .ok(42);
+ }
+}
+@test fn void a_place_and_reenter(){
+ var alloc::Arena arena=make();var i32 i=0;
+ while(i<3){region r in ref mut arena{assert(switch(r.place(i)){case .ok(n):{*n==i}case .err(_):{false}});i+=1;continue;}}
+ region r in ref mut arena{var Pair original=Pair{.value=42};switch(r.place(original)){case .ok(stored):{original.value=0;assert(stored.value==42);}case .err(_):{assert(false);}};}
+ assert(i==3);
+}
+@test fn void b_transfer_and_propagation(){let Holder owner=Holder{.arena=make()};assert(route(false).is_ok);assert(switch(route(true)){case .ok(_):{false}case .err(n):{n==7}});}
+@test fn void c_independent_arenas(){var alloc::Arena first=make();var alloc::Arena second=make();region r in ref mut first{region s in ref mut second{discard r.place(20);discard s.place(22);return;}}}
+@test fn void d_body_trap(){var alloc::Arena arena=make();region r in ref mut arena{discard r.place(42);assert(false);}}
+@test fn void e_cleanup_trap(){var alloc::Arena arena=make();region r in ref mut arena{let Trap guard=Trap{.value=42};discard r.place(42);return;}}
+@test fn void z_fresh_after_traps(){var alloc::Arena arena=make();region r in ref mut arena{assert(r.place(42).is_ok);}}
+'''})
+    compare('arenas-json', home, ['--json'], 5)
+    compare('arenas-locations', home, ['--json', '--locations'], 5)
+    compare('arenas-text', home, code=5)
+    compare('arenas-placement', home, ['--exact', 'tests::arena::a_place_and_reenter', '--json'])
+    compare('arenas-transfer', home, ['--exact', 'tests::arena::b_transfer_and_propagation'])
+    compare('arenas-fresh-test', home, ['--exact', 'tests::arena::z_fresh_after_traps', '--json'])
+
+
 def extend(fixture, compare):
+    extend_arenas(fixture, compare)
     extend_tagged(fixture, compare)
     extend_references(fixture, compare)
     extend_iteration_and_locations(fixture, compare)

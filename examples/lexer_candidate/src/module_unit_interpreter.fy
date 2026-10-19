@@ -1,6 +1,6 @@
 module module_unit_interpreter;
 import module_unit_interpreter_values as runtime;
-import module_unit_interpreter_arena as arena;
+import module_unit_sdk_authority as sdk_authority;
 import module_unit_body_ir_model as ir;
 import module_unit_cleanup_mir_model as clean;
 import module_unit_cfg_model as cfg;
@@ -21,10 +21,10 @@ import syntax as syntax;
 // immutable per-test cells. Assignment rebuilds only the projected path.
 // Errors: 1 unsupported, 2 step limit, 3 call depth, 4 invariant/allocation.
 resource Location{usize frame;usize node;bytes::Buffer text;cleanup{}}
-pub resource Plan{v::Vec<cfg::Graph> graphs;v::Vec<Location> locations;arena::Plan arena;cleanup{}}
+pub resource Plan{v::Vec<cfg::Graph> graphs;v::Vec<Location> locations;sdk_authority::ArenaPlan arena;cleanup{}}
 
 pub fn ref u8[] detail(u32 error){let text=b"interpreter step limit exceededinterpreter call-depth limit exceededcandidate interpreter reached an unsupported value or operation";return if(error==2){text[..31]}else if(error==3){text[31..68]}else{text[68..]};}
-pub fn Result<Plan,u32> prepare(ref ir::Program p){let graphs=switch(flow::lower_all(p)){case .ok(g):{g}case .err(e):{return .err(if(e.code==1002){1}else{4});}};let arena=arena::prepare(p)?;return .ok(Plan{.graphs,.locations=v::empty<Location>(),.arena});}
+pub fn Result<Plan,u32> prepare(ref ir::Program p){let graphs=switch(flow::lower_all(p)){case .ok(g):{g}case .err(e):{return .err(if(e.code==1002){1}else{4});}};let arena=sdk_authority::prepare_arena_execution(p)?;return .ok(Plan{.graphs,.locations=v::empty<Location>(),.arena});}
 
 // The stable test input retains canonical file names and exact UTF-8 geometry.
 // No absolute paths or reconstructed source spellings enter this intrinsic.
@@ -37,7 +37,7 @@ fn Result<Plan,u32> prepare_sources(ref ir::Program p,ref input::Input sources){
             var bytes::Buffer text=bytes::empty();if(!bytes::append(ref mut text,file).is_ok || !bytes::append(ref mut text,b":").is_ok || !bytes::append_usize(ref mut text,line).is_ok || !bytes::append(ref mut text,b":").is_ok || !bytes::append_usize(ref mut text,e.start-start+1).is_ok || !bytes::append(ref mut text,b"@").is_ok || !bytes::append_usize(ref mut text,e.start).is_ok){return .err(4);}
             if(!v::push<Location>(ref mut locations,Location{.frame,.node=i+1,.text}).is_ok){return .err(4);}
         }i+=1;}frame+=1;
-    }let arena=arena::prepare(p)?;return .ok(Plan{.graphs,.locations,.arena});
+    }let arena=sdk_authority::prepare_arena_execution(p)?;return .ok(Plan{.graphs,.locations,.arena});
 }
 fn runtime::Outcome location_value(ref Plan plan,usize frame,usize node,ref mut v::Vec<usize> heap,ref mut usize steps){
     var usize i=0;while(i<v::len<Location>(ref plan.locations)){if(*steps==0){return runtime::failure(2);};*steps=*steps-1;let row=v::at<Location>(ref plan.locations,i);if(row.frame==frame && row.node==node){
