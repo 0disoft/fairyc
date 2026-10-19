@@ -49,8 +49,12 @@ def main():
     images.mkdir(exist_ok=True)
     env = os.environ.copy()
     env['FAIRYC_MSVC_BUILD_FIXTURE'] = str(fixture)
+    env['FAIRYC_MSVC_BUILD_RUNTIME_ASSETS'] = '1'
     run(['go', 'test', './internal/candidatebuild', '-run', '^TestPacketMSVCRuntimeFixture$', '-count=1'], env=env)
-    inputs = [fixture, Path(str(fixture)+'.runtime.c'), Path(str(fixture)+'.compile-error'), Path(str(fixture)+'.link-error')]
+    asset_pack = Path(str(fixture)+'.runtime.pack')
+    run([sys.executable, ROOT / 'tools/package-candidate-runtime-assets.py', '--output', asset_pack])
+    assert not Path(str(fixture)+'.runtime.c').exists(), 'use a fresh output directory without a Go runtime fixture'
+    inputs = [fixture, asset_pack, Path(str(fixture)+'.compile-error'), Path(str(fixture)+'.link-error')]
     before = [identity(path) for path in inputs]
     temporary = set(Path(tempfile.gettempdir()).glob('fairyc-native-*'))
     argv = [sys.executable, '-X', 'utf8', ROOT / 'tools/verify-candidate-private-tests.py',
@@ -81,7 +85,8 @@ def main():
                    candidateProfiles=['development', 'release'], imagesExecuted=4,
                    compileAndLinkFailuresRejected=True, scratchCleaned=True,
                    goPEInspectorPassed=True, goChildBuilderInvoked=False,
-                   runtimeAssets='Go reference prepared before execution; selection/packaging is not migrated',
+                   runtimeAssets='Python packs pinned raw sources; Fairy authenticates, selects and assembles runtime C',
+                   goRuntimeSelectionInvoked=False,
                    artifactValidation='Bounded authored COFF/PE checks; full Go COMDAT/unwind proof not ported',
                    cliIntegrated=False, pushed=False)
     (output / 'receipt.json').write_text(json.dumps(receipt, indent=2)+'\n', encoding='utf-8')

@@ -85,12 +85,13 @@ output bound. A response file bounds the link command line; optional private
 stack reservations retain the existing 64 KiB alignment and 16 MiB ceiling.
 
 These modules are not connected to the public CLI. Runtime C is supplied to the
-builder, with Go reference selection used only in verification setup. Runtime
-selection now lives in authored Fairy; runtime C byte packaging and public CLI
-integration remain, as does the full Go COFF COMDAT/unwind and PE proof, before
-replacing the Go companion. The authored artifact checks are bounded structural
-checks, not a claim of complete verifier equivalence. No new full CLI fixed
-point, full Go replacement, Linux execution or promotion is claimed.
+builder; the original build record used Go reference selection in setup. Runtime
+selection and private runtime C byte packaging now live in authored Fairy; public
+CLI and distribution wiring remain, as does the full Go COFF COMDAT/unwind and PE
+proof, before replacing the Go companion. The authored artifact checks are
+bounded structural checks, not a claim of complete verifier equivalence. No new
+full CLI fixed point, full Go replacement, Linux execution or promotion is
+claimed.
 
 ### Authored runtime selection (2026-10-19)
 
@@ -100,7 +101,8 @@ They cover 96 MSVC symbols and 44 private host symbols, closure and deterministi
 component link order, host and rooted selection, scalar exit 100 and trap 128
 behavior, and exact diagnostics. Standard errors are sorted; host errors keep
 source order. The emitted vectors imply a heap and 16-byte alignment policy: the
-vector marker adds the heap component; C macro bytes are still packaged by Go.
+vector marker adds the heap component; concrete C bytes are assembled by the
+authored packaging module described below.
 Selection uses allocation-free offsets and masks only.
 
 The comparison set totals 1,573 fixtures across direct classification and header
@@ -110,8 +112,36 @@ record](../ops/evidence/candidate-runtime-selection-20261019.json) records
 `passed: true` for the frozen input, covering those 1,573 Go-oracle cases and two
 authored tests under each of the development, release and Go-native profiles. A
 full source check also passes with 531 files and 6,780 MIR functions. Public CLI
-wiring, full Go COFF/COMDAT/unwind/PE equivalence and a fresh full CLI fixed point
-remain pending. Linux execution remains deferred.
+wiring and distribution, full Go COFF/COMDAT/unwind/PE equivalence and a fresh
+full CLI fixed point remain pending. Linux execution remains deferred.
+
+### Authored runtime C packaging (2026-10-19)
+
+The private `native_runtime_assets.fy` module and the generated
+`native_runtime_asset_pin.fy` pin now authenticate and assemble runtime C assets. The
+`tools/package-candidate-runtime-assets.py` packer encodes the 20 authoritative C
+sources as an `FYCRUNTIMEASSETS1` binary pack of 145,272 bytes with SHA-256
+`937b2e9b6dc3006a237d8839d62b7377737dcdf1918dd2575737454f4288f066`. Fairy
+accepts the complete pack only when its digest matches the pin. It reads
+explicitly passed owned bytes and performs no path search, fallback or Go child
+invocation.
+
+The authored assembly covers scalar template substitution, component order and
+newline separators, the 16-byte alignment macro, vectors and host runtime C. The Windows trap
+receipt snippet moved to `internal/cruntime/stage0_windows_trap_receipt.inc`;
+Go and Fairy now read that single source, and Go output remains unchanged.
+
+The [verification
+record](../ops/evidence/candidate-runtime-packaging-20261019.json) covers complete
+byte comparison and driver integration. Its run deduplicates identical outputs
+across the existing 1,573 runtime-selection fixtures, compares the remaining
+230 outputs/errors in full under Go-native and both candidate C profiles. Pin
+tampering is rejected. The authored MSVC driver builds and executes four SDK
+program images using the assembled runtime; their hashes match the previous
+Go-runtime checkpoint, and the Go PE inspector passes. A full source check passes
+with 533 files and 6,792 MIR functions. Public CLI and distribution
+wiring, full COFF/COMDAT/unwind/PE equivalence, a fresh full CLI fixed point and
+Linux execution remain pending; none is claimed here.
 
 ## Historical records
 

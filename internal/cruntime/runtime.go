@@ -30,6 +30,9 @@ const (
 //go:embed stage0_scalar.c
 var stage0ScalarTemplate string
 
+//go:embed stage0_windows_trap_receipt.inc
+var stage0WindowsTrapReceipt string
+
 //go:embed stage0_drop_trace.c
 var stage0DropTrace string
 
@@ -73,24 +76,7 @@ func renderScalarSource(trapExitBase uint8, receiptMode trapReceiptMode) (string
 	case trapReceiptNone:
 	case trapReceiptWindows:
 		include = "#include <windows.h>\n"
-		write = "    char fy_trap_handle_text[32];\n" +
-			"    DWORD fy_trap_handle_length = GetEnvironmentVariableA(\"" + RunTrapControlEnvironment + "\", fy_trap_handle_text, (DWORD)sizeof(fy_trap_handle_text));\n" +
-			"    uintptr_t fy_trap_handle_value = (uintptr_t)0;\n" +
-			"    if (fy_trap_handle_length == (DWORD)0 || fy_trap_handle_length >= (DWORD)sizeof(fy_trap_handle_text)) {\n" +
-			"        _Exit(254);\n" +
-			"    }\n" +
-			"    for (DWORD fy_index = (DWORD)0; fy_index < fy_trap_handle_length; ++fy_index) {\n" +
-			"        unsigned int fy_digit = (unsigned int)(unsigned char)fy_trap_handle_text[fy_index] - (unsigned int)'0';\n" +
-			"        if (fy_digit > UINT32_C(9) || fy_trap_handle_value > (UINTPTR_MAX - (uintptr_t)fy_digit) / (uintptr_t)10) {\n" +
-			"            _Exit(254);\n" +
-			"        }\n" +
-			"        fy_trap_handle_value = fy_trap_handle_value * (uintptr_t)10 + (uintptr_t)fy_digit;\n" +
-			"    }\n" +
-			"    unsigned char fy_trap_receipt = (unsigned char)category;\n" +
-			"    DWORD fy_trap_written = (DWORD)0;\n" +
-			"    if (fy_trap_handle_value == (uintptr_t)0 || !WriteFile((HANDLE)fy_trap_handle_value, &fy_trap_receipt, (DWORD)1, &fy_trap_written, NULL) || fy_trap_written != (DWORD)1) {\n" +
-			"        _Exit(254);\n" +
-			"    }\n"
+		write = stage0WindowsTrapReceipt
 	case trapReceiptLinux:
 		include = "#include <errno.h>\n#include <unistd.h>\n"
 		write = "    unsigned char fy_trap_receipt = (unsigned char)category;\n" +

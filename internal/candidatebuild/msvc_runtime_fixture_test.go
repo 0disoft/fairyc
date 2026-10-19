@@ -20,13 +20,15 @@ func TestPacketMSVCRuntimeFixture(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	support, err := runtimeSource(p.Header, false)
-	if err != nil {
-		t.Fatal(err)
+	fixtures := map[string][]byte{".compile-error": packetFixture("compile-error"), ".link-error": packetFixture("link-error")}
+	if os.Getenv("FAIRYC_MSVC_BUILD_RUNTIME_ASSETS") == "" {
+		support, err := runtimeSource(p.Header, false)
+		if err != nil {
+			t.Fatal(err)
+		}
+		fixtures[".runtime.c"] = []byte(support)
 	}
-	for suffix, data := range map[string][]byte{
-		".runtime.c": []byte(support), ".compile-error": packetFixture("compile-error"), ".link-error": packetFixture("link-error"),
-	} {
+	for suffix, data := range fixtures {
 		if err := os.WriteFile(path+suffix, data, 0600); err != nil {
 			t.Fatal(err)
 		}

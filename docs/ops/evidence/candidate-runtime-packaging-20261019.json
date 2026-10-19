@@ -1,0 +1,285 @@
+{
+  "schema": "fairyc.candidate-runtime-packaging/v1",
+  "passed": true,
+  "sources": [
+    {
+      "path": "internal/cruntime/stage0_scalar.c",
+      "bytes": 341,
+      "sha256": "360525a5c894edf19410aa502b6e68e8af915e5cc1b83d41e31f4b29e2cf40e3"
+    },
+    {
+      "path": "internal/cruntime/stage0_windows_trap_receipt.inc",
+      "bytes": 1111,
+      "sha256": "2549ae45cc837b3f4eae6e011a18896b27b869b42863a84822acf9621894b0ec"
+    },
+    {
+      "path": "internal/cstdlib/stage0_windows_console.c",
+      "bytes": 6731,
+      "sha256": "076bc219ff0ff8ab6945ef0838230c77a254de8cefc460dfd05a842549bab306"
+    },
+    {
+      "path": "internal/cstdlib/stage0_windows_file.c",
+      "bytes": 40342,
+      "sha256": "0b70e682e2d09f76b2565075ac99e08674d4c80e92a74f46d88cde52c94626d6"
+    },
+    {
+      "path": "internal/cstdlib/stage0_windows_file_portable.c",
+      "bytes": 3493,
+      "sha256": "d965ef1295434c6cbb2873f2f4934c63c6b13c128cf49992bd0e048104cd5faf"
+    },
+    {
+      "path": "internal/cstdlib/stage0_windows_file_metadata.c",
+      "bytes": 5875,
+      "sha256": "f4fef772142c92ad4a045500392907e2e0937c6ceba748398f90463c0e8c6ac7"
+    },
+    {
+      "path": "internal/cstdlib/stage0_windows_file_link.c",
+      "bytes": 1005,
+      "sha256": "ffead0862cc74a01628ed5e2d40c49342ed0d0c765f686a79ead23e5b9f38533"
+    },
+    {
+      "path": "internal/cstdlib/stage0_windows_file_remove_tree.c",
+      "bytes": 8237,
+      "sha256": "785a49d075b25b91e63406e7334e9d29768dea75016f730cfabc1696219cd3c7"
+    },
+    {
+      "path": "internal/cstdlib/stage0_windows_directory.c",
+      "bytes": 8634,
+      "sha256": "c72ecf7241098522d0cca5981b4bd8566a06a2c3769211de5a8d9c333f8c4290"
+    },
+    {
+      "path": "internal/cstdlib/stage0_windows_process_args.c",
+      "bytes": 4657,
+      "sha256": "8def696dd31522223fa626123ae6703967e2d0aca19c65a076b22f204c9c10d4"
+    },
+    {
+      "path": "internal/cstdlib/stage0_system_heap.c",
+      "bytes": 3411,
+      "sha256": "cae6664fa1ec70722b76025c3e2c3daadc133cd90d95fa9f02f2385915d3e55c"
+    },
+    {
+      "path": "internal/cstdlib/stage0_byte_compare.c",
+      "bytes": 610,
+      "sha256": "a961d61f84047d438490cacf1639f4bee588063427678bc8ec8d47300584fa25"
+    },
+    {
+      "path": "internal/cstdlib/stage0_buffer.c",
+      "bytes": 5239,
+      "sha256": "41c7a26acb8b9f22fd5e0f82c976f4b59964df2e2e73e7ddb5fa8bee70e8390c"
+    },
+    {
+      "path": "internal/cstdlib/stage0_windows_file_buffer.c",
+      "bytes": 3028,
+      "sha256": "211ff5c6023230b6ca1bfcea6dbc995bf4c5009669bb7d7e4519a36e78e05d59"
+    },
+    {
+      "path": "internal/cstdlib/stage0_arena.c",
+      "bytes": 5666,
+      "sha256": "e0bf426ef0b27238463ec598426cf764ae08f476f814cb9bdbff5ce946372ecb"
+    },
+    {
+      "path": "internal/cstdlib/stage0_text_view.c",
+      "bytes": 3846,
+      "sha256": "2e03c032878bedc7081b6cd9a465e5eff2d3a4ffda88d2449f5ce181a3f71aaf"
+    },
+    {
+      "path": "internal/cstdlib/stage0_owned_text.c",
+      "bytes": 14901,
+      "sha256": "6a739eeae3336c6d3277df204a3598e1565429c949668e29b77f00e0c19dca75"
+    },
+    {
+      "path": "internal/cstdlib/stage0_vector_storage.c",
+      "bytes": 13735,
+      "sha256": "eb9686951b480a7c40d6bfe670206d683548c5293387c42a44670ad0b6e5ccca"
+    },
+    {
+      "path": "internal/candidatehost/windows_process.c",
+      "bytes": 4852,
+      "sha256": "b7ebc22103aadeefac6e4d5bdf2fcff6248b1fffb79ff085e70b1a1bc58f4f66"
+    },
+    {
+      "path": "internal/candidatehost/windows_rooted_file.c",
+      "bytes": 9456,
+      "sha256": "0e014f17a4d87b60d00d842fa28d2f22d165bb83f16e75f9a352bb0f8c3a0d32"
+    },
+    {
+      "path": "examples/lexer_candidate/src/native_runtime_assets.fy",
+      "bytes": 3961,
+      "sha256": "c0985c0bc984c661c2de13fe323a3fb00e21f526bac25265175ea126180d0609"
+    },
+    {
+      "path": "examples/lexer_candidate/src/native_runtime_asset_pin.fy",
+      "bytes": 2486,
+      "sha256": "ef11e91a3f74f052c4c26583183c62dcd3429db00823915421d3b736900fde51"
+    },
+    {
+      "path": "examples/lexer_candidate/tests/native_runtime_assets.fy",
+      "bytes": 4037,
+      "sha256": "d2f2adb378917a86293eb8ab31c5882709ffe1925e0bbd87e3d8d0801975692a"
+    },
+    {
+      "path": "examples/lexer_candidate/src/native_runtime.fy",
+      "bytes": 4233,
+      "sha256": "f849d41602a3153ffd8ee042826afe841786c2311feea4c320b41d96a8ea3a34"
+    },
+    {
+      "path": "examples/lexer_candidate/src/native_runtime_contract.fy",
+      "bytes": 11129,
+      "sha256": "8dfc3558100e368f7e117ed05b65d3b4579c5b7be488e9b64611673d1897e2ed"
+    },
+    {
+      "path": "internal/candidatebuild/runtime_selection_oracle_test.go",
+      "bytes": 7225,
+      "sha256": "b49a3682f9736d36d701d0d110e09f587aa9f8dcb29fe1e89ce036370724f449"
+    },
+    {
+      "path": "internal/candidatebuild/runtime_packaging_oracle_test.go",
+      "bytes": 2460,
+      "sha256": "14d13af1b133125f6db35717d714575c395fb177c343a30fe340fee4dd0db8b3"
+    },
+    {
+      "path": "internal/candidatebuild/build.go",
+      "bytes": 9222,
+      "sha256": "a6af099240bfdbc10ba26047a897ddb74311c3ff8cabc000c296b7a726135e09"
+    },
+    {
+      "path": "internal/cruntime/runtime.go",
+      "bytes": 3930,
+      "sha256": "645921f56b2e3db4b0c6ce065f782be61efa25cbcffe59f3983acebe4fd8c924"
+    },
+    {
+      "path": "tools/package-candidate-runtime-assets.py",
+      "bytes": 3424,
+      "sha256": "39678686d2c241306efc812ff3882e36c77b5f652ace6ce4eb3c44180052cc3b"
+    },
+    {
+      "path": "tools/verify-candidate-runtime-packaging.py",
+      "bytes": 5037,
+      "sha256": "488e0578ec3ff86cfdebc51d26a08e5374c8c46ae1878616ef5d102ac0cf4a5a"
+    },
+    {
+      "path": ".cache/evidence/candidate-parity-20261019-arena/candidate/candidate-packet.bin",
+      "bytes": 41903661,
+      "sha256": "1c69d15c7158fbbf0600220a519099dac2c223578e77e4c59c2c211eac883538"
+    }
+  ],
+  "fixtures": [
+    {
+      "path": ".cache/evidence/candidate-runtime-packaging-20261019-final/cases.bin",
+      "bytes": 16596491,
+      "sha256": "9c3b1ddfcc94afc5d92dd537156bbf452c1e322538d5ad88bfc04945b20c7499"
+    },
+    {
+      "path": ".cache/evidence/candidate-runtime-packaging-20261019-final/cases.bin.assets",
+      "bytes": 145272,
+      "sha256": "937b2e9b6dc3006a237d8839d62b7377737dcdf1918dd2575737454f4288f066"
+    }
+  ],
+  "goOracleCases": 230,
+  "comparison": "complete runtime C bytes and exact admission diagnostics",
+  "rawAssets": 20,
+  "assetPack": {
+    "path": ".cache/evidence/candidate-runtime-packaging-20261019-final/cases.bin.assets",
+    "bytes": 145272,
+    "sha256": "937b2e9b6dc3006a237d8839d62b7377737dcdf1918dd2575737454f4288f066"
+  },
+  "execution": {
+    "path": ".cache/evidence/candidate-runtime-packaging-20261019-final/execution/receipt.json",
+    "bytes": 14332,
+    "sha256": "e5c84dae9df03b98a88b408968db018426dc9da4371cd12dbfe666c49c1e44d0"
+  },
+  "profiles": [
+    "Go-native",
+    "development",
+    "release"
+  ],
+  "authoredTests": 2,
+  "runtimeGoInvokedByAuthoredPackager": false,
+  "assetDelivery": "explicit pinned distribution pack",
+  "cliIntegrated": false,
+  "fullCliFixedPointRefreshed": false,
+  "linuxExecuted": false,
+  "publicApiChanged": false,
+  "sdkAbiChanged": false,
+  "databaseChanged": false,
+  "ciChanged": false,
+  "pushed": false,
+  "date": "2026-10-19",
+  "scope": "Private authenticated runtime asset ingestion and authored C assembly; public CLI/distribution wiring remains pending",
+  "driver": {
+    "passed": true,
+    "imagesExecuted": 4,
+    "artifacts": [
+      {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\evidence\\candidate-msvc-authored-runtime-20261019\\program.bin.images\\development-dev.exe",
+        "bytes": 158720,
+        "sha256": "e5b91925edbc48ecde54878ab76983f40fe1d7344ef1e7cf0fedc121d1e480fe"
+      },
+      {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\evidence\\candidate-msvc-authored-runtime-20261019\\program.bin.images\\development-opt.exe",
+        "bytes": 111616,
+        "sha256": "339e98d87406be07c4db3099278a9ff521fd4a6554858f7c38d4ad8d550a4630"
+      },
+      {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\evidence\\candidate-msvc-authored-runtime-20261019\\program.bin.images\\release-dev.exe",
+        "bytes": 158720,
+        "sha256": "e5b91925edbc48ecde54878ab76983f40fe1d7344ef1e7cf0fedc121d1e480fe"
+      },
+      {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\evidence\\candidate-msvc-authored-runtime-20261019\\program.bin.images\\release-opt.exe",
+        "bytes": 111616,
+        "sha256": "339e98d87406be07c4db3099278a9ff521fd4a6554858f7c38d4ad8d550a4630"
+      }
+    ],
+    "goRuntimeSelectionInvoked": false,
+    "goChildBuilderInvoked": false,
+    "goPEInspectorPassed": true,
+    "scratchCleaned": true,
+    "compileAndLinkFailuresRejected": true,
+    "imagesEqualPreviousGoRuntimeCheckpoint": true
+  },
+  "records": [
+    {
+      "path": ".cache/evidence/candidate-runtime-packaging-20261019-final/receipt.json",
+      "bytes": 7444,
+      "sha256": "187f9ab6ed66f775d2649df522114f49f19ff4c32bfcbdc59081fb1dfbee393b"
+    },
+    {
+      "path": ".cache/evidence/candidate-msvc-authored-runtime-20261019/receipt.json",
+      "bytes": 3590,
+      "sha256": "26ade410c561decfcedb1a5b0eb01dfed2e8d0fd9740394fef1504ee144d1710"
+    },
+    {
+      "path": ".cache/evidence/candidate-runtime-packaging-20261019-final/execution/receipt.json",
+      "bytes": 14332,
+      "sha256": "e5c84dae9df03b98a88b408968db018426dc9da4371cd12dbfe666c49c1e44d0"
+    },
+    {
+      "path": ".cache/evidence/candidate-msvc-authored-runtime-20261019/execution/receipt.json",
+      "bytes": 10821,
+      "sha256": "8e0937ed7ba0c7dbffd924117298ac61e12e87ad29c24743958b71753ce293fe"
+    }
+  ],
+  "sourceCheck": {
+    "passed": true,
+    "sources": 533,
+    "mirFunctions": 6792,
+    "lock": {
+      "path": "examples/lexer_candidate/fairy.lock",
+      "bytes": 1698,
+      "sha256": "cd90707bb7cd10f77de7423b9bc439170744bae16c83f3b8c1e582afed84f802"
+    }
+  },
+  "goValidation": [
+    "go test ./internal/cruntime -count=1",
+    "go test ./internal/cruntime ./internal/candidatebuild ./internal/cstdlib ./internal/candidatehost -run 'TestScalar|TestWindows|TestCandidate|TestPacket|TestPrivate' -count=1"
+  ],
+  "sharedTrapSnippetMatchesPreviousGoLiteral": true,
+  "completeGoCliReplacement": false,
+  "promotionGateReady": false,
+  "limitations": [
+    "The runtime asset pack is an explicit private distribution input; public CLI asset delivery/wiring remains pending.",
+    "Full Go COFF/COMDAT/unwind/PE verifier migration and fresh full CLI fixed point remain pending.",
+    "Linux execution is deferred by the user."
+  ]
+}
