@@ -1,0 +1,195 @@
+{
+  "schema": "fairyc.candidate-pe-unwind/v1",
+  "passed": true,
+  "inputs": [
+    {
+      "path": "internal/pecoff/executable.go",
+      "bytes": 8282,
+      "sha256": "1048e318fe3993b809ed45f3e988e69aedf7e69143257a1eda5c7ba91c023c2b"
+    },
+    {
+      "path": "internal/pecoff/unwind.go",
+      "bytes": 9445,
+      "sha256": "b81073da709ba81b2fc91ad8d416e1585e190a3087f440ad6ca73f65a5b9fd71"
+    },
+    {
+      "path": "internal/pecoff/executable_test.go",
+      "bytes": 4862,
+      "sha256": "90413a416237c3388d6fd2252489f13820b65ddcd04abbe15c136b968b3a16ad"
+    },
+    {
+      "path": "internal/pecoff/unwind_test.go",
+      "bytes": 7207,
+      "sha256": "8871d191441cd5445fa5eb7439ebf3748c0c3bb0bc8c974669b210563f410b52"
+    },
+    {
+      "path": "internal/pecoff/handler_link_test.go",
+      "bytes": 9477,
+      "sha256": "af36db1e4e99339392e38e05badf0c8dcc34ac806a2f3a974dee0fcb1b0aaa0e"
+    },
+    {
+      "path": "internal/pecoff/candidate_pe_oracle_test.go",
+      "bytes": 5997,
+      "sha256": "c4243907a44d9d450053133503bec20adf4fa1de2333952a29cc470ce44b8c7d"
+    },
+    {
+      "path": "examples/lexer_candidate/src/native_pe.fy",
+      "bytes": 6346,
+      "sha256": "1c97d830749638044c20ac2addbf27cffd135d679e68f6f58565bef6a1b973fd"
+    },
+    {
+      "path": "examples/lexer_candidate/src/native_pe_unwind.fy",
+      "bytes": 4399,
+      "sha256": "54084a6bb8ef50408f62a668547ba1a04aa4b3bde3ea69cb58703b3490ff5ddb"
+    },
+    {
+      "path": "examples/lexer_candidate/src/native_msvc_artifacts.fy",
+      "bytes": 3927,
+      "sha256": "b8dc62c3fe3f34747c556510ed04e3cefb8a3cb6d611226882dd5e32e04cc60d"
+    },
+    {
+      "path": "examples/lexer_candidate/tests/native_pe.fy",
+      "bytes": 5153,
+      "sha256": "6043f3e555c17151fd8b4e777ec833a567e089554cc4b2070f489d290a184e62"
+    },
+    {
+      "path": "tools/verify-candidate-pe.py",
+      "bytes": 4374,
+      "sha256": "e4eaa9f88c009548b9d9be34bcdcf14e03ece47d18a15e600c10944d25ba9f84"
+    },
+    {
+      "path": ".cache/evidence/candidate-parity-20261019-arena/candidate/release/fairyc.exe",
+      "bytes": 5933056,
+      "sha256": "4a1ee3e35d1ad77fecee9c6d9e699d456d4b81e2b239f4feef831714578afe8a"
+    },
+    {
+      "path": ".cache/evidence/candidate-msvc-authored-runtime-20261019/program.bin.images/development-dev.exe",
+      "bytes": 158720,
+      "sha256": "e5b91925edbc48ecde54878ab76983f40fe1d7344ef1e7cf0fedc121d1e480fe"
+    },
+    {
+      "path": ".cache/evidence/candidate-msvc-authored-runtime-20261019/program.bin.images/development-opt.exe",
+      "bytes": 111616,
+      "sha256": "339e98d87406be07c4db3099278a9ff521fd4a6554858f7c38d4ad8d550a4630"
+    },
+    {
+      "path": ".cache/evidence/candidate-msvc-authored-runtime-20261019/program.bin.images/release-dev.exe",
+      "bytes": 158720,
+      "sha256": "e5b91925edbc48ecde54878ab76983f40fe1d7344ef1e7cf0fedc121d1e480fe"
+    },
+    {
+      "path": ".cache/evidence/candidate-msvc-authored-runtime-20261019/program.bin.images/release-opt.exe",
+      "bytes": 111616,
+      "sha256": "339e98d87406be07c4db3099278a9ff521fd4a6554858f7c38d4ad8d550a4630"
+    }
+  ],
+  "goOracleCases": 11085,
+  "fixture": {
+    "path": ".cache/evidence/candidate-pe-20261019-final/cases.bin",
+    "bytes": 31158085,
+    "sha256": "e36d14a7c0d2addc4e94ade4ff87eaff72ae2d12eb1d01711539cc0a19de9fd9"
+  },
+  "execution": {
+    "path": ".cache/evidence/candidate-pe-20261019-final/execution/receipt.json",
+    "bytes": 12828,
+    "sha256": "db4dfab8db2395b7d4ea48765db6deba7e21d665ac0694a3683002f0282b5d19"
+  },
+  "profiles": [
+    "Go-native",
+    "development",
+    "release"
+  ],
+  "authoredBuilderIntegrated": true,
+  "realImages": 5,
+  "compared": "PE identity/sections/directories, unwind counts and function intervals, acceptance",
+  "diagnosticTextParity": false,
+  "fullCoffParity": false,
+  "cliIntegrated": false,
+  "fullCliFixedPointRefreshed": false,
+  "linuxExecuted": false,
+  "publicApiChanged": false,
+  "sdkAbiChanged": false,
+  "databaseChanged": false,
+  "ciChanged": false,
+  "pushed": false,
+  "date": "2026-10-19",
+  "scope": "Authored PE structure and AMD64 unwind reports; COFF symbol/relocation/COMDAT migration remains pending",
+  "acceptedPE": 8540,
+  "acceptedUnwind": 5501,
+  "sourceCheck": {
+    "passed": true,
+    "sources": 535,
+    "mirFunctions": 6809,
+    "lock": {
+      "path": "examples/lexer_candidate/fairy.lock",
+      "bytes": 1698,
+      "sha256": "a79341613a9b049a84761c248eeb18eaf91daf2aac90f271f485637d6e2dc680"
+    }
+  },
+  "records": [
+    {
+      "path": ".cache/evidence/candidate-pe-20261019-final/receipt.json",
+      "bytes": 4154,
+      "sha256": "208f237a82960b98782135503e134a4db6e5e3143afdac02bd5027855b6aafbe"
+    },
+    {
+      "path": ".cache/evidence/candidate-msvc-pe-unwind-20261019/receipt.json",
+      "bytes": 3527,
+      "sha256": "7c4a7de8a3d53592270cbb6f12bdcd223b8b1806a3e44e6a3e936e00ba06f52c"
+    },
+    {
+      "path": ".cache/evidence/candidate-pe-20261019-final/execution/receipt.json",
+      "bytes": 12828,
+      "sha256": "db4dfab8db2395b7d4ea48765db6deba7e21d665ac0694a3683002f0282b5d19"
+    },
+    {
+      "path": ".cache/evidence/candidate-msvc-pe-unwind-20261019/execution/receipt.json",
+      "bytes": 11055,
+      "sha256": "ef939928ea9dc6e93eb31a244c6c76f24eb6a5f0d0fc7f4e180ae6f26885cd52"
+    }
+  ],
+  "driver": {
+    "imagesExecuted": 4,
+    "artifacts": [
+      {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\evidence\\candidate-msvc-pe-unwind-20261019\\program.bin.images\\development-dev.exe",
+        "bytes": 158720,
+        "sha256": "e5b91925edbc48ecde54878ab76983f40fe1d7344ef1e7cf0fedc121d1e480fe"
+      },
+      {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\evidence\\candidate-msvc-pe-unwind-20261019\\program.bin.images\\development-opt.exe",
+        "bytes": 111616,
+        "sha256": "339e98d87406be07c4db3099278a9ff521fd4a6554858f7c38d4ad8d550a4630"
+      },
+      {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\evidence\\candidate-msvc-pe-unwind-20261019\\program.bin.images\\release-dev.exe",
+        "bytes": 158720,
+        "sha256": "e5b91925edbc48ecde54878ab76983f40fe1d7344ef1e7cf0fedc121d1e480fe"
+      },
+      {
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\evidence\\candidate-msvc-pe-unwind-20261019\\program.bin.images\\release-opt.exe",
+        "bytes": 111616,
+        "sha256": "339e98d87406be07c4db3099278a9ff521fd4a6554858f7c38d4ad8d550a4630"
+      }
+    ],
+    "imagesEqualPreviousRuntimeCheckpoint": true,
+    "goPEInspectorPassed": true,
+    "scratchCleaned": true,
+    "compileAndLinkFailuresRejected": true,
+    "goChildBuilderInvoked": false,
+    "goRuntimeSelectionInvoked": false
+  },
+  "goValidation": [
+    "go test ./internal/pecoff -run 'TestInspectExecutable|TestInspectAMD64Unwind' -count=1",
+    "go test ./internal/cdriver ./internal/candidatebuild -run 'TestCandidateMSVC|TestPacket' -count=1"
+  ],
+  "completeGoCliReplacement": false,
+  "promotionGateReady": false,
+  "limitations": [
+    "COFF symbol, relocation, COMDAT and data-only object verification still require migration.",
+    "Numeric private verifier failure codes are not Go diagnostic text parity.",
+    "PE/unwind comparison proves the enumerated corpus, not every possible malformed input or link-map proof.",
+    "Public CLI/distribution wiring and fresh full CLI fixed point remain pending.",
+    "Linux execution is deferred by the user."
+  ]
+}

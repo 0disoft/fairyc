@@ -1,5 +1,7 @@
 module native_msvc_artifacts;
 import std::bytes as bytes;
+import native_pe as pe;
+import native_pe_unwind as unwind;
 import std::fs as fs;
 import std::text as text;
 
@@ -29,16 +31,10 @@ pub fn u32 object_problem(ref u8[] data){
         if(n>1048576-relocations || n>0 && (rel<20+count*40 || !range(data,rel,n*10))){return 7;}relocations+=n;i+=1;
     }return if(!code && count>96){2}else{0};
 }
-fn bool power(usize value){return value>0 && value&(value-1)==0;}
+// Full PE structure; validate unwind when either exception-directory field exists.
+// A leaf image with no exception directory remains admitted.
 pub fn bool executable(ref u8[] data){
-    if(data.len<64 || data.len>67108864 || data[0]!=77 || data[1]!=90){return false;}let usize pe=word(data,60);if(pe<64 || !range(data,pe,24) || !bytes::equal(data[pe..pe+4],b"PE\0\0") || half(data,pe+4)!=34404){return false;}
-    let usize sections=half(data,pe+6);let usize optional=half(data,pe+20);let usize flags=half(data,pe+22);let usize first=pe+24;
-    if(sections==0 || sections>96 || optional<240 || flags&2==0 || flags&32==0 || flags&8192!=0 || !range(data,first,optional+sections*40) || half(data,first)!=523 || half(data,first+68)!=3){return false;}
-    let usize entry=word(data,first+16);let usize align=word(data,first+32);let usize file_align=word(data,first+36);let usize headers=word(data,first+60);let usize image=word(data,first+56);
-    if(entry==0 || (word(data,first+24)==0 && word(data,first+28)==0) || word(data,first+24)%65536!=0 || !power(align) || !power(file_align) || file_align<512 || file_align>65536 || align<file_align || headers==0 || headers>data.len || headers%file_align!=0 || image==0 || image%align!=0){return false;}
-    var usize i=0;var usize end=0;var bool entry_found=false;var bool text_found=false;
-    while(i<sections){let usize section=first+optional+i*40;let usize virtual_size=word(data,section+8);let usize address=word(data,section+12);let usize size=word(data,section+16);let usize offset=word(data,section+20);let usize attributes=word(data,section+36);let usize span=if(virtual_size>size){virtual_size}else{size};
-        if(address==0 || address%align!=0 || address<end || span>image || address>image-span || size>0 && (offset<headers || offset%file_align!=0 || size%file_align!=0 || !range(data,offset,size))){return false;}end=address+span;
-        if(attributes&32!=0 && attributes&536870912!=0 && size>0){text_found=true;if(entry>=address && entry-address<size){entry_found=true;}}i+=1;
-    }return entry_found && text_found;
+    let h=switch(pe::inspect(data)){case .ok(h):{h}case .err(_):{return false;}};
+    if(pe::directory_rva(data,h,3)==0 && pe::directory_size(data,h,3)==0){return true;}
+    return switch(unwind::inspect(data)){case .ok(_):{true}case .err(_):{false}};
 }

@@ -87,9 +87,10 @@ stack reservations retain the existing 64 KiB alignment and 16 MiB ceiling.
 These modules are not connected to the public CLI. Runtime C is supplied to the
 builder; the original build record used Go reference selection in setup. Runtime
 selection and private runtime C byte packaging now live in authored Fairy; public
-CLI and distribution wiring remain, as does the full Go COFF COMDAT/unwind and PE
-proof, before replacing the Go companion. The authored artifact checks are
-bounded structural checks, not a claim of complete verifier equivalence. No new
+CLI and distribution wiring remain, as does the remaining COFF symbol and
+relocation handling and COMDAT work, before replacing the Go companion. The
+authored artifact checks are bounded structural checks, not a claim of complete
+verifier equivalence. No new
 full CLI fixed point, full Go replacement, Linux execution or promotion is
 claimed.
 
@@ -112,8 +113,9 @@ record](../ops/evidence/candidate-runtime-selection-20261019.json) records
 `passed: true` for the frozen input, covering those 1,573 Go-oracle cases and two
 authored tests under each of the development, release and Go-native profiles. A
 full source check also passes with 531 files and 6,780 MIR functions. Public CLI
-wiring and distribution, full Go COFF/COMDAT/unwind/PE equivalence and a fresh
-full CLI fixed point remain pending. Linux execution remains deferred.
+wiring and distribution, the remaining COFF symbol/relocation and COMDAT work,
+and a fresh full CLI fixed point remain pending. Linux execution remains
+deferred.
 
 ### Authored runtime C packaging (2026-10-19)
 
@@ -139,9 +141,42 @@ across the existing 1,573 runtime-selection fixtures, compares the remaining
 tampering is rejected. The authored MSVC driver builds and executes four SDK
 program images using the assembled runtime; their hashes match the previous
 Go-runtime checkpoint, and the Go PE inspector passes. A full source check passes
-with 533 files and 6,792 MIR functions. Public CLI and distribution
-wiring, full COFF/COMDAT/unwind/PE equivalence, a fresh full CLI fixed point and
-Linux execution remain pending; none is claimed here.
+with 533 files and 6,792 MIR functions. Public CLI and distribution wiring, the
+remaining COFF symbol/relocation and COMDAT work, a fresh full CLI fixed point
+and Linux execution remain pending; none is claimed here.
+
+### Authored PE and unwind verification (2026-10-19)
+
+The authored `native_pe.fy` and `native_pe_unwind.fy` modules are used by
+`native_msvc_artifacts.executable`. PE64 inspection covers image identity,
+directory count and long section names, optional symbol tables, unique section
+names, virtual spans and order, and readable `.text` code and entry point.
+Mapped `.pdata` records and `UNWIND_INFO` version 1/2 operation slots, epilog
+descriptors, handlers, chains and shared-RVA deduplication follow the report fields in Go
+`internal/pecoff/executable.go` and `unwind.go`. Inspection failures carry
+private numeric codes; exact equivalence with Go's string diagnostics is not
+claimed.
+
+Leaf images whose exception directory has both fields zero are admitted; any
+present exception directory requires unwind inspection. The modules are wired
+into the native builder, while the public CLI still uses the Go companion.
+
+The Go oracle contains 11,085 fixtures, including four real SDK executables and
+the compiler executable. All 11,085 cases match Go-native, development and
+release profiles for admission and rejection, complete PE reports and complete
+unwind reports, including function ranges. PE inspection allows 8,540 cases and
+unwind inspection 5,501. A source check covers 535 files and 6,809 MIR
+functions.
+
+The strengthened `artifact.executable` connection passes through the MSVC
+driver: four images execute with exit 42 and expected stdout, and compile/link
+failure handling, scratch cleanup and the Go PE inspector all pass. All four
+executable hashes match the previous authored-runtime checkpoint.
+
+The [candidate PE and unwind
+record](../ops/evidence/candidate-pe-unwind-20261019.json) records this bounded
+scope. Public CLI and distribution wiring, a full CLI rebuild and fixed point,
+and Linux execution remain pending.
 
 ## Historical records
 
