@@ -1,0 +1,157 @@
+{
+  "schema": "fairyc.candidate-msvc-build/v1",
+  "passed": true,
+  "inputs": [
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\evidence\\candidate-msvc-build-20261019-final\\program.bin",
+      "bytes": 59984,
+      "sha256": "29f2ceb22ae4b7bba17102cbf27b90eab902d6427f30b1538a90d3b6708d0e89"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\evidence\\candidate-msvc-build-20261019-final\\program.bin.runtime.c",
+      "bytes": 115422,
+      "sha256": "d3aeb6c616a5d7528ddf453f3f735505897e7e2be110fb22935d4b06979e39b4"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\evidence\\candidate-msvc-build-20261019-final\\program.bin.compile-error",
+      "bytes": 457,
+      "sha256": "2d54e152d8b6d19916bd12856afeae5374599d19e0911b172cc9a2a183244748"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\evidence\\candidate-msvc-build-20261019-final\\program.bin.link-error",
+      "bytes": 442,
+      "sha256": "6ffad373a100621441d2943ee5aa386b5490c6bc4124dbdf1aaa2c3193687c0e"
+    }
+  ],
+  "execution": {
+    "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\evidence\\candidate-msvc-build-20261019-final\\execution\\receipt.json",
+    "bytes": 10095,
+    "sha256": "5bb9045db5726845dc5241acc246758bc118e202b61fe127bcf2dad58ad19da8"
+  },
+  "artifacts": [
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\evidence\\candidate-msvc-build-20261019-final\\program.bin.images\\development-dev.exe",
+      "bytes": 158720,
+      "sha256": "e5b91925edbc48ecde54878ab76983f40fe1d7344ef1e7cf0fedc121d1e480fe"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\evidence\\candidate-msvc-build-20261019-final\\program.bin.images\\development-opt.exe",
+      "bytes": 111616,
+      "sha256": "339e98d87406be07c4db3099278a9ff521fd4a6554858f7c38d4ad8d550a4630"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\evidence\\candidate-msvc-build-20261019-final\\program.bin.images\\release-dev.exe",
+      "bytes": 158720,
+      "sha256": "e5b91925edbc48ecde54878ab76983f40fe1d7344ef1e7cf0fedc121d1e480fe"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\evidence\\candidate-msvc-build-20261019-final\\program.bin.images\\release-opt.exe",
+      "bytes": 111616,
+      "sha256": "339e98d87406be07c4db3099278a9ff521fd4a6554858f7c38d4ad8d550a4630"
+    }
+  ],
+  "authoredTests": 3,
+  "buildProfiles": [
+    "development",
+    "release"
+  ],
+  "candidateProfiles": [
+    "development",
+    "release"
+  ],
+  "imagesExecuted": 4,
+  "compileAndLinkFailuresRejected": true,
+  "scratchCleaned": true,
+  "goPEInspectorPassed": true,
+  "goChildBuilderInvoked": false,
+  "runtimeAssets": "Go reference prepared before execution; selection/packaging is not migrated",
+  "artifactValidation": "Bounded authored COFF/PE checks; full Go COMDAT/unwind proof not ported",
+  "cliIntegrated": false,
+  "pushed": false,
+  "date": "2026-10-19",
+  "scope": "Independent authored MSVC build module; Go prepares runtime assets and bootstraps the test harness, not compiler/linker execution inside that harness",
+  "sources": [
+    {
+      "path": "examples/lexer_candidate/src/native_msvc_build.fy",
+      "bytes": 8558,
+      "sha256": "6d9930edb2e6f7e238b571c0bfd9026433beca6ce2517ed238cb5efe45fe5018"
+    },
+    {
+      "path": "examples/lexer_candidate/src/native_msvc_artifacts.fy",
+      "bytes": 5427,
+      "sha256": "74ece154232464f23820330560524bf7cb21ba30112eee7c010e551117659018"
+    },
+    {
+      "path": "examples/lexer_candidate/src/windows_run_capture.fy",
+      "bytes": 8985,
+      "sha256": "1c66baa18e7ac4cb0300fc5ff131a8885472e2e1454bbca830cb2e687e60078b"
+    },
+    {
+      "path": "examples/lexer_candidate/src/windows_msvc_toolchain.fy",
+      "bytes": 11908,
+      "sha256": "3e6df272c1dc23512592cc751baa0bcf326dd6aaf4b55daaf3c20a63d6dc900b"
+    },
+    {
+      "path": "examples/lexer_candidate/tests/native_msvc_build.fy",
+      "bytes": 5577,
+      "sha256": "49f44b3b263336b542fcd2054a86ccd5d1d934a41ef088972013f9a25d4ecabc"
+    },
+    {
+      "path": "internal/candidatebuild/msvc_runtime_fixture_test.go",
+      "bytes": 864,
+      "sha256": "1017a97cf51205b20050386b1a1f1f267aad5c4fa12f02fae69c2ded1dc9b9f6"
+    },
+    {
+      "path": "internal/cdriver/windows_msvc_candidate_images_test.go",
+      "bytes": 682,
+      "sha256": "f8d092b755944d2b0cc6ea852ff65e1dcb7a68b1104d57b9347a01d9bbd3c8ef"
+    },
+    {
+      "path": "tools/verify-candidate-msvc-build.py",
+      "bytes": 5616,
+      "sha256": "1a79c05b2817b510efd3e58e4e4ca8386ca3a290f8d3a654a4289af76d6348fa"
+    }
+  ],
+  "records": [
+    {
+      "path": ".cache/evidence/candidate-msvc-build-20261019-final/receipt.json",
+      "bytes": 3493,
+      "sha256": "0814a56f5dc4a7ce735a03033c8ab5cfb74241c6fb8cde06135d61fcc52589c2"
+    },
+    {
+      "path": ".cache/evidence/candidate-msvc-build-20261019-final/execution/receipt.json",
+      "bytes": 10095,
+      "sha256": "5bb9045db5726845dc5241acc246758bc118e202b61fe127bcf2dad58ad19da8"
+    },
+    {
+      "path": ".cache/evidence/candidate-msvc-build-20261019-final/invocations.json",
+      "bytes": 2847,
+      "sha256": "522542d6931af4975310853ab37f0842ebf2b44ce59ca1777ba0cbd36a41125c"
+    }
+  ],
+  "sourceCheck": {
+    "passed": true,
+    "sources": 529,
+    "mirFunctions": 6768,
+    "lock": {
+      "path": "examples/lexer_candidate/fairy.lock",
+      "bytes": 1698,
+      "sha256": "ee439527ccde5d18cc5761cbf5b69b731361e064310e0c75944a971b082b85a1"
+    }
+  },
+  "goValidation": [
+    "go test ./internal/cdriver ./internal/candidatebuild -run 'TestCandidateMSVC|TestPacket' -count=1"
+  ],
+  "publicApiChanged": false,
+  "sdkAbiChanged": false,
+  "databaseChanged": false,
+  "ciChanged": false,
+  "completeGoCliReplacement": false,
+  "promotionGateReady": false,
+  "limitations": [
+    "Runtime C selection/packaging still uses Go in test setup.",
+    "Authored object/image structural checks do not yet replace full Go COFF/COMDAT/unwind and PE verification.",
+    "Public CLI integration and a fresh full CLI fixed point were not run.",
+    "Linux execution is deferred by the user."
+  ]
+}

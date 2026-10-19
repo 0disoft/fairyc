@@ -61,10 +61,35 @@ markers and the single-entry requirement. No C compilation is performed here.
 The [reader comparison](../ops/evidence/candidate-packet-reader-20261019.json)
 passes 386 Go-oracle inputs, including the 41,903,661-byte compiler packet, and
 four authored tests through Go native and both candidate C profiles. The reader
-is a separate leaf and is not yet imported by the native CLI. All 512 sources in
-the previous full CLI build remain byte-identical; this does not rebuild that
-CLI or remove its Go companion. MSVC discovery, compilation/linking and CLI
-integration remain subsequent work. Linux execution remains deferred.
+is a separate leaf and is not yet imported by the native CLI. At that reader
+checkpoint all 512 previous full CLI inputs were byte-identical. That record
+does not rebuild the CLI or remove its Go companion. The MSVC follow-up below
+also changes shared process modules;
+CLI integration remains pending. Linux execution remains deferred.
+
+### Authored MSVC discovery and build (2026-10-19)
+
+The [discovery record](../ops/evidence/candidate-msvc-discovery-20261019.json)
+checks the authored resolver against the live Go MSVC/SDK paths and child
+INCLUDE/LIB/PATH setup. It selects the latest complete SDK and preserves the
+parent environment. A resolved toolchain is owned and reused by its caller.
+
+The [build record](../ops/evidence/candidate-msvc-build-20261019.json) exercises
+the authored driver with one real candidate-emitted packet using SDK byte-buffer
+and console APIs. Both candidate C profiles build and execute both /Od and /O2
+images: all four print the expected bytes and exit 42. Corresponding images are
+byte-identical across driver profiles and pass the existing Go PE inspector.
+Compile/link failures return distinct stages and retained diagnostics; owned
+scratch directories are removed. Each child keeps its own deadline and 64 KiB
+output bound. A response file bounds the link command line; optional private
+stack reservations retain the existing 64 KiB alignment and 16 MiB ceiling.
+
+These modules are not connected to the public CLI. Runtime C is supplied to the
+builder, with Go reference selection used only in verification setup. Runtime
+selection/packaging and the full Go COFF COMDAT/unwind and PE proof still need
+migration before replacing the Go companion. The authored artifact checks are
+bounded structural checks, not a claim of complete verifier equivalence. No new
+full CLI fixed point, full Go replacement, Linux execution or promotion is claimed.
 
 ## Historical records
 

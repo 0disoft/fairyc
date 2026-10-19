@@ -53,8 +53,15 @@ pub fn Result<Captured,child::Problem> run(ref u8[] program,ref v::Vec<bytes::Bu
 @effects(filesystem,console,environment,clock)
 pub fn Result<Captured,child::Problem> run_input(ref u8[] program,ref v::Vec<bytes::Buffer> arguments,ref u8[] directory,u32 timeout,u32 input_mode,ref u8[] input_path){
     if(timeout==0 || timeout>600000){return .err(fail(1,0,0));}
+    let inherited=switch(control::snapshot()){case .ok(p):{p}case .err(e):{return .err(e);}};
+    return run_environment(program,arguments,directory,timeout,input_mode,input_path,bytes::view(ref inherited));
+}
+// Compiler commands use a private child environment; the parent stays intact.
+@effects(filesystem,console,environment,clock)
+pub fn Result<Captured,child::Problem> run_environment(ref u8[] program,ref v::Vec<bytes::Buffer> arguments,ref u8[] directory,u32 timeout,u32 input_mode,ref u8[] input_path,ref u8[] inherited){
+    if(timeout==0 || timeout>600000){return .err(fail(1,0,0));}
     let output=switch(pipe()){case .ok(p):{p}case .err(e):{return .err(e);}};let error=switch(pipe()){case .ok(p):{p}case .err(e):{return .err(e);}};let receipt=switch(pipe()){case .ok(p):{p}case .err(e):{return .err(e);}};
-    let inherited=switch(control::snapshot()){case .ok(p):{p}case .err(e):{return .err(e);}};let environment=switch(control::with_handle(bytes::view(ref inherited),unsafe{handle_value(receipt.writer)})){case .ok(p):{p}case .err(e):{return .err(e);}};
+    let environment=switch(control::with_handle(inherited,unsafe{handle_value(receipt.writer)})){case .ok(p):{p}case .err(e):{return .err(e);}};
     var bytes::Buffer scratch=bytes::empty();if(!bytes::resize_zeroed(ref mut scratch,4096).is_ok){return .err(fail(2,0,0));}var bytes::Buffer out=bytes::empty();var bytes::Buffer err=bytes::empty();var bytes::Buffer signal=bytes::empty();var usize retained=0;var usize signal_retained=0;var bool truncated=false;var bool signal_truncated=false;
     let standard=switch(input(input_mode,input_path)){case .ok(p):{p}case .err(e):{return .err(e);}};let started=unsafe{ticks()};let running=switch(child::start(program,arguments,directory,bytes::view(ref environment),child::Handles{.input=standard.raw,.output=output.writer,.error=error.writer})){case .ok(p):{p}case .err(e):{return .err(e);}};
     let id=child::pid(ref running);var bool stopped=false;var child::Outcome completed=child::Outcome{.exit_code=0,.pid=id};var usize collected=0;
