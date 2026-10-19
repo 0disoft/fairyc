@@ -1,0 +1,118 @@
+{
+  "schema": "fairyc.candidate-packet-reader/v1",
+  "passed": true,
+  "sources": [
+    {
+      "path": "internal/candidatebuild/packet.go",
+      "bytes": 4452,
+      "sha256": "13a281da66a92daf8ead7bc775bbb545409615bef537d0da3331192cb5818143"
+    },
+    {
+      "path": "internal/candidatebuild/packet_decode_oracle_test.go",
+      "bytes": 7404,
+      "sha256": "e664487aeb3bbdddb6dbcf0f4e82a664c94df12859b95bebae07fd154c10b8f9"
+    },
+    {
+      "path": "examples/lexer_candidate/src/native_packet_decode.fy",
+      "bytes": 10918,
+      "sha256": "5e3dc23a2b328dc69d59cd1d9470746cdc725cfb7180dbdefa43144d52268034"
+    },
+    {
+      "path": "examples/lexer_candidate/tests/native_packet_decode.fy",
+      "bytes": 4797,
+      "sha256": "ca9ac972b4a7cd19131b07f88653573e370a343500b5be2de78cfcd4a2a61441"
+    },
+    {
+      "path": "tools/verify-candidate-packet-reader.py",
+      "bytes": 4683,
+      "sha256": "e272c4794e2be037f8d2389b490399cfc6d4baff1b28b40b988ae109ded1a7ce"
+    },
+    {
+      "path": ".cache/evidence/candidate-parity-20261019-arena/candidate/candidate-packet.bin",
+      "bytes": 41903661,
+      "sha256": "1c69d15c7158fbbf0600220a519099dac2c223578e77e4c59c2c211eac883538"
+    }
+  ],
+  "goOracleCases": 386,
+  "accepted": 13,
+  "rejected": 373,
+  "fixtures": [
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\evidence\\candidate-packet-reader-20261019-final\\go-packet-cases.bin",
+      "bytes": 46193672,
+      "sha256": "cc8691d09e9a076ed980e44e147efe54ea65992620d93c1b9e316d1bee88494e"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\evidence\\candidate-packet-reader-20261019-final\\go-packet-cases.bin.packet",
+      "bytes": 41903661,
+      "sha256": "1c69d15c7158fbbf0600220a519099dac2c223578e77e4c59c2c211eac883538"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\evidence\\candidate-packet-reader-20261019-final\\go-packet-cases.bin.invalid",
+      "bytes": 14,
+      "sha256": "a324b750dbb620ab2926a7319afcd37e6e769fd547bb303eb2bcd63d5dec47f0"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\evidence\\candidate-packet-reader-20261019-final\\go-packet-cases.bin.json",
+      "bytes": 23065,
+      "sha256": "7d2b62fd0eba88ed64465e35936c06e238bbb5b6d6123740b0b2b2782f7ebf1b"
+    }
+  ],
+  "realPacket": {
+    "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\evidence\\candidate-parity-20261019-arena\\candidate\\candidate-packet.bin",
+    "bytes": 41903661,
+    "sha256": "1c69d15c7158fbbf0600220a519099dac2c223578e77e4c59c2c211eac883538"
+  },
+  "authoredTests": 4,
+  "profiles": [
+    "Go-native",
+    "development",
+    "release"
+  ],
+  "execution": {
+    "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\evidence\\candidate-packet-reader-20261019-final\\execution\\receipt.json",
+    "bytes": 13557,
+    "sha256": "ee3d0192d2b4a4fbdf3b30e9ffd0045902f8da7527bc734c778497d87d44838e"
+  },
+  "fullCLIIntegrated": false,
+  "goBuildBridgeRemoved": false,
+  "publicApiChanged": false,
+  "sdkAbiChanged": false,
+  "ciChanged": false,
+  "pushed": false,
+  "date": "2026-10-19",
+  "baseRevision": "43d35ed9e520f147dd523cfe4403c6851193cb9b",
+  "scope": "Private owned packet reader only; no CLI/toolchain integration",
+  "receipt": {
+    "path": ".cache/evidence/candidate-packet-reader-20261019-final/receipt.json",
+    "bytes": 4031,
+    "sha256": "65e09e40a77ab9278c3cf732620116e64ee62fd52563ccc366e849e2f81cb82a"
+  },
+  "sourceCheck": {
+    "passed": true,
+    "sources": 526,
+    "mirFunctions": 6719,
+    "lock": {
+      "path": "examples/lexer_candidate/fairy.lock",
+      "bytes": 1698,
+      "sha256": "4b82ba842ca094c211ce38b5849e8e0320f4c36b90e976c66eb8719cec418742"
+    }
+  },
+  "priorCLIInputs": {
+    "count": 512,
+    "allHashesUnchanged": true,
+    "receipt": {
+      "path": ".cache/evidence/candidate-parity-20261019-arena/candidate/receipt.json",
+      "bytes": 102528,
+      "sha256": "356eede2866a8f1d8738f00613dd768be48d9d65dd6dc57075d41217f74102d6"
+    }
+  },
+  "goValidation": [
+    "go test ./internal/candidatebuild -run ^TestPacket -count=1"
+  ],
+  "limitations": [
+    "Go C-packet bridge and MSVC remain in native build/run/test paths.",
+    "Full CLI was not rebuilt; new reader is an unconnected leaf.",
+    "Linux execution remains deferred by the user."
+  ]
+}

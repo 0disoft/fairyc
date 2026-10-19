@@ -50,6 +50,22 @@ related Win32 externs). The example suite excludes the compiler self-source
 Linux candidate verification is deferred to a later stage; Linux or WSL setup is
 outside this validation.
 
+### Private C-packet reader (2026-10-19)
+
+The authored `native_packet_decode` module now reads fresh packet files and owns
+their validated bytes, exposing header, literal and unit slices by offset. Its
+96 MiB packet, 2 MiB part, 4096-unit and 16384-frame bounds match the Go decoder,
+as do canonical numbers, shared literal SHA-256 identities/order, frame order,
+markers and the single-entry requirement. No C compilation is performed here.
+
+The [reader comparison](../ops/evidence/candidate-packet-reader-20261019.json)
+passes 386 Go-oracle inputs, including the 41,903,661-byte compiler packet, and
+four authored tests through Go native and both candidate C profiles. The reader
+is a separate leaf and is not yet imported by the native CLI. All 512 sources in
+the previous full CLI build remain byte-identical; this does not rebuild that
+CLI or remove its Go companion. MSVC discovery, compilation/linking and CLI
+integration remain subsequent work. Linux execution remains deferred.
+
 ## Historical records
 
 The dated sections below are snapshots of the state at their own dates. They do not
