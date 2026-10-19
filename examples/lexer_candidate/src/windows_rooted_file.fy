@@ -5,6 +5,7 @@ import std::vec as v;
 import windows_host_paths as paths;
 
 @effects(filesystem) @link_name("fairyc_private_windows_directory_open_v1") unsafe extern C fn usize open_directory(ptr u8 path,usize size);
+@effects(filesystem) @link_name("fairyc_private_windows_root_directory_open_v1") unsafe extern C fn usize open_child_directory(usize root,ptr u8 leaf,usize size);
 @effects(filesystem) @link_name("fairyc_private_windows_root_file_open_v1") unsafe extern C fn usize open_file(usize root,ptr u8 leaf,usize size,u32 mode);
 @effects(filesystem) @link_name("fairyc_private_windows_root_file_size_v1") unsafe extern C fn i32 file_size(usize file,ptr mut usize size);
 @effects(filesystem) @link_name("fairyc_private_windows_root_file_read_v1") unsafe extern C fn i32 file_read(usize file,ptr mut u8 data,usize size,ptr mut usize copied);
@@ -34,6 +35,7 @@ pub fn bool collision(Problem p){return p.stage==4 && (p.os_code==80 || p.os_cod
 pub fn bool valid_leaf(ref u8[] leaf){if(leaf.len==0 || leaf.len>1020 || bytes::equal(leaf,b".") || bytes::equal(leaf,b"..")){return false;}var usize i=0;while(i<leaf.len){if(leaf[i]==0 || leaf[i]==47 || leaf[i]==92 || leaf[i]==58){return false;}i+=1;}return true;}
 fn Result<bytes::Buffer,Problem> wide(ref u8[] input,bool leaf){if(leaf && !valid_leaf(input)){return .err(fail(1,0,0));}let out=switch(command::path(input)){case .ok(p):{p}case .err(e):{return .err(fail(if(e.kind==3){2}else{1},0,e.offset));}};if(leaf && bytes::len(ref out)>512){return .err(fail(1,0,0));}return .ok(out);}
 @effects(filesystem) pub fn Result<Directory,Problem> open(ref u8[] path){let encoded=switch(wide(path,false)){case .ok(p):{p}case .err(e):{return .err(e);}};let raw=unsafe{open_directory(bytes::view(ref encoded) as ptr u8,bytes::len(ref encoded))};if(raw==0){return .err(native(3,0));}return .ok(Directory{.raw});}
+@effects(filesystem) pub fn Result<Directory,Problem> directory(ref Directory root,ref u8[] leaf){let encoded=switch(wide(leaf,true)){case .ok(p):{p}case .err(e):{return .err(e);}};let raw=unsafe{open_child_directory(root.raw,bytes::view(ref encoded) as ptr u8,bytes::len(ref encoded)-2)};if(raw==0){return .err(native(3,0));}return .ok(Directory{.raw});}
 @effects(filesystem) fn Result<File,Problem> child(ref Directory root,ref u8[] leaf,bool create){let encoded=switch(wide(leaf,true)){case .ok(p):{p}case .err(e):{return .err(e);}};let raw=unsafe{open_file(root.raw,bytes::view(ref encoded) as ptr u8,bytes::len(ref encoded)-2,if(create){2}else{1})};if(raw==0){return .err(native(4,0));}return .ok(File{.raw,.staged=create});}
 @effects(filesystem) pub fn Result<File,Problem> open_read(ref Directory root,ref u8[] leaf){return child(root,leaf,false);}
 @effects(filesystem) pub fn Result<File,Problem> create_new(ref Directory root,ref u8[] leaf){return child(root,leaf,true);}

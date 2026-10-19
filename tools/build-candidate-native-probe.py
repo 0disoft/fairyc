@@ -23,6 +23,8 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--candidate', type=Path, required=True)
     parser.add_argument('--builder', type=Path, required=True)
+    parser.add_argument('--authored-driver-receipt', type=Path,
+                        help='install the authenticated Fairy companion and pinned assets for each profile')
     parser.add_argument('--output', type=Path, required=True)
     parser.add_argument('--reuse-frontend', type=Path,
                         help='reuse a successful source-authenticated C emission while rebuilding native images')
@@ -97,6 +99,15 @@ import std::bytes as bytes;
     paths = [entry] + [modules[name] for name in sorted(seen - {'main'})]
     sources = [dict(path=p.relative_to(ROOT).as_posix(), sha256=sha(p), bytes=p.stat().st_size) for p in paths]
     tools = {name: dict(path=str(p.resolve()), sha256=sha(p)) for name, p in [('candidate', args.candidate), ('builder', args.builder)]}
+    driver_build = None
+    if args.authored_driver_receipt:
+        driver_build = json.loads(args.authored_driver_receipt.read_text(encoding='utf-8'))
+        assert driver_build['schema'] == 'fairyc.candidate-authored-driver-build/v1' and driver_build['passed']
+        assert not driver_build['runtimeGoBuilderRequired']
+        assert all(sha(ROOT / row['path']) == row['sha256']
+                   for row in driver_build['sources'] + driver_build['runtimeSources'])
+        tools['authoredDriverReceipt'] = dict(path=str(args.authored_driver_receipt.resolve()),
+                                             sha256=sha(args.authored_driver_receipt))
     lock_sha = sha(PROJECT / 'fairy.lock')
     manifest = output / 'sources.list'
     calls = []
@@ -155,7 +166,8 @@ import std::bytes as bytes;
                     lockSHA256=lock_sha, images=images, candidatePacketSHA256=sha(packet),
                     invocations=calls, stackReserveBytes=args.stack_reserve_bytes,
                     stackReserveOrigin='seed PE' if inherited_stack else 'explicit',
-                    goFrontendInvoked=False, productStackChanged=False, productTimeoutChanged=False)
+                    goFrontendInvoked=False, productStackChanged=False, productTimeoutChanged=False,
+                    runtimeGoBuilderRequired=driver_build is None)
         path.write_text(json.dumps(data, indent=2) + '\n', encoding='utf-8', newline='\n')
 
     def run(argv, timeout):
@@ -193,9 +205,20 @@ import std::bytes as bytes;
             assert struct.unpack_from('<H', data, offset+24)[0] == 0x20b
             assert struct.unpack_from('<Q', data, offset+24+72)[0] == args.stack_reserve_bytes
         companion = directory / 'fairyc-candidate-build.exe'
-        shutil.copyfile(args.builder.resolve(), companion)
-        assert sha(companion) == tools['builder']['sha256']
-        images.append(dict(profile=profile, path=str(image), sha256=sha(image), driverSHA256=sha(companion)))
+        extra = {}
+        if driver_build:
+            driver = next(row for row in driver_build['images'] if row['profile'] == profile)
+            assert sha(Path(driver['path'])) == driver['sha256']
+            assert sha(Path(driver['assetPath'])) == driver['assetSHA256']
+            shutil.copyfile(driver['path'], companion)
+            pack = directory / 'fairyc-runtime-assets.pack'
+            shutil.copyfile(driver['assetPath'], pack)
+            assert sha(pack) == driver['assetSHA256'] and sha(companion) == driver['sha256']
+            extra = dict(driverImplementation='authored Fairy', assetPath=str(pack), assetSHA256=sha(pack))
+        else:
+            shutil.copyfile(args.builder.resolve(), companion)
+            assert sha(companion) == tools['builder']['sha256']
+        images.append(dict(profile=profile, path=str(image), sha256=sha(image), driverSHA256=sha(companion), **extra))
         receipt(output / f'receipt-{profile}.json', images[-1:])
         print(profile, 'native dispatcher built', flush=True)
     receipt(output / 'receipt.json', images)
