@@ -252,7 +252,11 @@ func runLoadedStableTest(workspace workspaceloader.Workspace, lockState string, 
 		}
 		outcomes, code = runNativeWorkspaceTests(checked.MIR, tests, profile, nativeInput, options.programArgs, time.Duration(options.timeoutSeconds)*time.Second, options.captureOutput, sdkStorage, stderr)
 	} else {
-		outcomes, code = runInterpreterWorkspaceTests(checked.MIR, tests, stderr)
+		interpreterOptions, err := workspaceArenaInterpreterOptions(workspace)
+		if err != nil {
+			return internalError(stderr)
+		}
+		outcomes, code = runInterpreterWorkspaceTests(checked.MIR, tests, interpreterOptions, stderr)
 	}
 	if code != ExitSuccess {
 		return code
@@ -263,14 +267,14 @@ func runLoadedStableTest(workspace workspaceloader.Workspace, lockState string, 
 	return writeStableTestReport(outcomes, lockState, options, stdout, stderr)
 }
 
-func runInterpreterWorkspaceTests(program mir.Program, tests []workspaceTest, stderr io.Writer) ([]workspaceTestOutcome, int) {
+func runInterpreterWorkspaceTests(program mir.Program, tests []workspaceTest, options interpreter.Options, stderr io.Writer) ([]workspaceTestOutcome, int) {
 	outcomes := make([]workspaceTestOutcome, 0, len(tests))
 	for _, test := range tests {
 		entry, found := programEntry(program, test.entry)
 		if !found || len(entry.Parameters) != 0 || entry.ResultType != hir.TypeVoid {
 			return nil, internalError(stderr)
 		}
-		outcome, err := interpreter.ExecuteVoid(program, test.entry)
+		outcome, err := interpreter.ExecuteVoidWithOptions(program, test.entry, options)
 		if err != nil {
 			var capability interpreter.CapabilityError
 			if errors.As(err, &capability) {

@@ -153,6 +153,9 @@ func executeEntry(program mir.Program, entry string, resultType hir.Type, option
 	if err := engine.configureTestIntrinsics(entry, options); err != nil {
 		return Outcome{}, err
 	}
+	if err := engine.configureAbstractArenas(options); err != nil {
+		return Outcome{}, err
+	}
 	completion, err := engine.call(function, nil, 0)
 	if err != nil {
 		var capability CapabilityError

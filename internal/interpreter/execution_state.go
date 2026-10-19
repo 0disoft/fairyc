@@ -10,21 +10,23 @@ import (
 )
 
 type executionState struct {
-	byName         map[string]*mir.Function
-	bySymbol       map[hir.SymbolID]*mir.Function
-	structTypes    map[hir.Type]*mir.StructType
-	enumTypes      map[hir.Type]*mir.EnumType
-	resourceTypes  map[hir.Type]*mir.ResourceType
-	testIntrinsics map[hir.SymbolID]TestIntrinsicKind
-	outputLimit    int
-	steps          int
-	callDepthLimit int
-	context        context.Context
-	dropTrace      []DropEvent
-	regionTrace    []RegionEvent
-	stdout         []byte
-	stderr         []byte
-	ioTrace        []IOEvent
+	byName            map[string]*mir.Function
+	bySymbol          map[hir.SymbolID]*mir.Function
+	structTypes       map[hir.Type]*mir.StructType
+	enumTypes         map[hir.Type]*mir.EnumType
+	resourceTypes     map[hir.Type]*mir.ResourceType
+	arenaConstructors map[hir.SymbolID]*mir.ResourceType
+	abstractArenas    map[*resourceState]bool
+	testIntrinsics    map[hir.SymbolID]TestIntrinsicKind
+	outputLimit       int
+	steps             int
+	callDepthLimit    int
+	context           context.Context
+	dropTrace         []DropEvent
+	regionTrace       []RegionEvent
+	stdout            []byte
+	stderr            []byte
+	ioTrace           []IOEvent
 }
 
 func (r *executionState) configureTestIntrinsics(entry string, options Options) error {

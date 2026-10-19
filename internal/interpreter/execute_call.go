@@ -28,6 +28,13 @@ func (r *executionState) call(function *mir.Function, arguments []runtimeValue, 
 	if len(arguments) != len(function.Parameters) {
 		return callCompletion{}, fmt.Errorf("call %q received %d argument(s), want %d", function.Name, len(arguments), len(function.Parameters))
 	}
+	if definition := r.arenaConstructors[function.Symbol]; definition != nil {
+		if err := r.consumeStep(); err != nil {
+			return callCompletion{}, err
+		}
+		value, err := r.createAbstractArena(definition)
+		return callCompletion{value: value}, err
+	}
 	locals := make(map[mir.LocalID]runtimeValue)
 	regions := make(map[hir.SymbolID]*runtimeRegion)
 	for index, parameter := range function.Parameters {
@@ -413,6 +420,12 @@ func (r *executionState) call(function *mir.Function, arguments []runtimeValue, 
 					return callCompletion{}, fmt.Errorf("region enter in %q has incompatible Arena owner", function.Name)
 				}
 				regions[operation.Symbol] = &runtimeRegion{span: operation.Span, owner: owner.resource()}
+				if r.abstractArenas[owner.resource()] {
+					if owner.resource().fields[2].u64() != 0 || owner.resource().fields[1].u64() == 0 {
+						return callCompletion{trapCategory: "unreachable"}, nil
+					}
+					owner.resource().fields[2].scalar = 1
+				}
 			case mir.OperationRegionPlace:
 				region := regions[operation.Symbol]
 				if region == nil {
@@ -422,8 +435,14 @@ func (r *executionState) call(function *mir.Function, arguments []runtimeValue, 
 				if err != nil {
 					return callCompletion{}, fmt.Errorf("region place in %q: %w", function.Name, err)
 				}
-				region.placements = append(region.placements, value)
-				placed, err := resultValue("ok", value)
+				stored := value.cloneForValueCopy()
+				region.placements = append(region.placements, stored)
+				borrow, _, result := hir.ResultElements(operation.Type)
+				if !result || borrow != hir.SharedBorrow(operation.OwnerType) {
+					return callCompletion{}, fmt.Errorf("region placement has incompatible result type")
+				}
+				stored.typ = borrow
+				placed, err := resultValue("ok", stored)
 				if err != nil {
 					return callCompletion{}, fmt.Errorf("region place result in %q: %w", function.Name, err)
 				}
@@ -437,6 +456,14 @@ func (r *executionState) call(function *mir.Function, arguments []runtimeValue, 
 					Region: region.span, ExitKind: operation.ExitKind,
 					Placements: len(region.placements), DropCountBeforeReset: len(r.dropTrace),
 				})
+				if r.abstractArenas[region.owner] {
+					region.owner.fields[2].scalar = 0
+					generation := region.owner.fields[1].u64()
+					if generation == ^uint64(0) {
+						generation = 0
+					}
+					region.owner.fields[1].scalar = generation + 1
+				}
 				delete(regions, operation.Symbol)
 			case mir.OperationMove:
 				delete(locals, mir.LocalID(operation.Symbol))

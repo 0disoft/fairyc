@@ -43,7 +43,7 @@ func (r *executionState) dropValue(value runtimeValue, binding hir.Span, depth i
 		}
 		value.resource().dropping = true
 		r.dropTrace = append(r.dropTrace, DropEvent{ResourceType: value.resource().definition.Type, Binding: binding})
-		if value.resource().definition.DropKind == hir.ResourceDropNonEmpty {
+		if value.resource().definition.DropKind == hir.ResourceDropNonEmpty && !r.abstractArenas[value.resource()] {
 			glue := r.bySymbol[value.resource().definition.DropSymbol]
 			if glue == nil || glue.DropGlueFor != value.resource().definition.Type {
 				return "", fmt.Errorf("resource %q has no matching drop glue", value.resource().definition.Type)

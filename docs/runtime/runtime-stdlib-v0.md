@@ -29,6 +29,15 @@ successful allocation, and publishes no borrow on failure.
 
 Heap allocation, files, UTF-8 validation, strings, buffers, formatting, console access, and environment access are not intrinsics.
 
+The semantic test runner may configure a host-free Arena adapter only for an exact
+bundled SDK owner, after checking its source bytes and AST. This model returns
+`.ok` from `std::alloc::create`, gives each returned Arena independent ownership,
+and completes its declared cleanup without calling the native allocator. Region
+placement retains an independent value copy with the declared shared-borrow type.
+Normal return and propagation preserve cleanup/reset order; traps do not unwind.
+This deterministic model does not simulate allocation failure or grant general
+foreign-call or raw-pointer execution. An SDK module name alone enables no adapter.
+
 The interpreter fixture harness may replace explicitly manifest-bound call symbols with bounded
 in-memory stdout or stderr byte sinks. This is test configuration, not a compiler-known operation,
 runtime symbol, standard-library API, magic source name, or permission to access host streams.

@@ -3,6 +3,8 @@ package interpreter
 import (
 	"context"
 	"fmt"
+
+	"github.com/0disoft/fairyc/internal/hir"
 )
 
 const (
@@ -14,7 +16,7 @@ const (
 	maxValueNesting = 256
 )
 
-// Options selects interpreter budgets and optional fixture-only intrinsics.
+// Options selects interpreter budgets, fixture intrinsics and authenticated SDK adapters.
 // Zero budgets retain the defaults; negative budgets are rejected. A nil Context
 // means no caller cancellation. Steps count block entries and MIR operations.
 type Options struct {
@@ -23,6 +25,9 @@ type Options struct {
 	Context        context.Context
 	TestIntrinsics map[string]TestIntrinsicKind
 	OutputLimit    int
+	// AbstractArenaSDKPackages must come from authenticated bundled SDK owners.
+	// They enable host-free Arena construction, not arbitrary foreign calls.
+	AbstractArenaSDKPackages []hir.PackageID
 }
 
 func (options Options) normalized() (Options, error) {
