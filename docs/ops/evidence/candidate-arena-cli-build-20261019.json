@@ -1,0 +1,70 @@
+{
+  "schema": "fairyc.candidate-arena-cli-build-checkpoint/v1",
+  "passed": true,
+  "scope": "Fresh complete file_cli development/release images from the authored Fairy seed; source cap remains 512.",
+  "date": "2026-10-19",
+  "buildSourceRevision": "6b2697f8f8a6de10194aa06956b505fec7c2d593",
+  "sourceFiles": 512,
+  "buildVersion": "Fairy C Stage 0\ncompiler: v0.0.0-20261019093337-6b2697f8f8a6\nsdk: fairyc-sdk-stdlib/0 0.0.0-stage0.86\nlanguage: fairyc-language/20\nruntime: fairyc-runtime/0\nrevision: 6b2697f8f8a6de10194aa06956b505fec7c2d593\nmodified: false\n",
+  "images": [
+    {
+      "profile": "development",
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\evidence\\candidate-parity-20261019-arena\\candidate\\development\\fairyc.exe",
+      "sha256": "db30552a07260045dbc49208c35aab180c7052fc2f00711d77489451154c61db",
+      "driverSHA256": "65f2e5909b026e70943f0908d5cb91c69ce672d5bada9d9fa42d896de9cdc149"
+    },
+    {
+      "profile": "release",
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\evidence\\candidate-parity-20261019-arena\\candidate\\release\\fairyc.exe",
+      "sha256": "4a1ee3e35d1ad77fecee9c6d9e699d456d4b81e2b239f4feef831714578afe8a",
+      "driverSHA256": "65f2e5909b026e70943f0908d5cb91c69ce672d5bada9d9fa42d896de9cdc149"
+    }
+  ],
+  "candidatePacketSHA256": "1c69d15c7158fbbf0600220a519099dac2c223578e77e4c59c2c211eac883538",
+  "stackReserveBytes": 16777216,
+  "goFrontendInvoked": false,
+  "publicApiChanged": false,
+  "sdkAbiChanged": false,
+  "databaseChanged": false,
+  "ciChanged": false,
+  "productTimeoutChanged": false,
+  "productStackChanged": false,
+  "pushed": false,
+  "bootstrapTools": {
+    "candidate": {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\evidence\\candidate-parity-20261018-a2aaf535\\candidate\\release\\fairyc.exe",
+      "sha256": "484585272f4b36b57b952d9a7e837472b236b24d9acb3cd1d7065bb28d89d911"
+    },
+    "builder": {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\evidence\\candidate-parity-20261019-arena\\fairyc-candidate-build.exe",
+      "sha256": "65f2e5909b026e70943f0908d5cb91c69ce672d5bada9d9fa42d896de9cdc149"
+    }
+  },
+  "reference": {
+    "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\evidence\\candidate-parity-20261019-arena\\candidate\\source-version.exe",
+    "sha256": "751a8f6d744f17da68ca9e6a26bd67654ab02243c8c705830639881bea5bcd96"
+  },
+  "packetBytes": 41903661,
+  "records": [
+    {
+      "path": ".cache/evidence/candidate-parity-20261019-arena/candidate/receipt.json",
+      "sha256": "356eede2866a8f1d8738f00613dd768be48d9d65dd6dc57075d41217f74102d6"
+    },
+    {
+      "path": ".cache/evidence/candidate-parity-20261019-arena/candidate/source-snapshot.json",
+      "sha256": "e61b8507210e376c8e57f5c81844613de2956b7828ca27d12151eb77e9ae8659"
+    }
+  ],
+  "preparation": {
+    "commit": "6b2697f8f8a6de10194aa06956b505fec7c2d593",
+    "change": "Move Arena admission into the existing SDK authority module, keeping the entire compiler input closure within the 512-source cap.",
+    "validation": [
+      "Go candidate check: 525 source files and 6693 MIR functions.",
+      "Focused Region/Arena native harness: four passed.",
+      "Six new Go default test CLI expectations passed."
+    ]
+  },
+  "parityRevalidated": false,
+  "fixedPointRevalidated": false,
+  "completeGoCliReplacement": false
+}
