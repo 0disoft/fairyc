@@ -14,11 +14,15 @@ C packets and two 5,933,056-byte release PE images match exactly, with zero excl
 bytes; frozen `--version` output also matches. The Go-built C-packet bridge and
 MSVC remain part of this bootstrap; the Fairy candidate owns frontend work.
 
-Current development default-test comparison passes all 104 cases, including six
-Arena comparisons without the native build companion. A release Arena smoke test
-also matches Go exactly. Remaining full CLI, native, example and listing gates are
-still running. The earlier [894 exact comparisons](../ops/evidence/candidate-cli-local-validation-20261018.json)
-apply to source snapshot `a2aaf535`, before the Arena changes.
+The current [Windows comparison record](../ops/evidence/candidate-cli-local-validation-20261019.json)
+passes all 906 comparisons exactly across development and release. Each profile
+covers metadata 122, CLI 30, semantic tests 104, native tests 30, examples 78,
+and test listing 89, with zero timed-out comparisons. Both candidate and Go
+reference were built from clean source commit `6b2697f8`; the semantic suite adds
+six Arena comparisons per profile without a native companion. Fully completed
+development example groups were authenticated and reused; remaining groups ran
+in three isolated partitions. The compiler self-source example remains a separate
+bootstrap/fixed-point gate, covered above.
 
 The authored interpreter now executes abstract Region enter/place/reset operations,
 including normal, nested, return, propagation and loop exits. The focused
@@ -30,10 +34,11 @@ adds host-free semantic construction and cleanup for the authenticated bundled
 propagation, and trap isolation. The Go default test runner configures the same
 bounded model after authenticating SDK source bytes and AST. The candidate retains
 authenticated source ownership in its checked execution plan; it neither invokes
-the native allocator nor authorizes user-defined foreign functions. These focused
-tests do not establish public candidate CLI parity or native allocation behavior.
+the native allocator nor authorizes user-defined foreign functions. That focused
+harness alone does not establish public CLI parity or native allocation behavior.
 The fresh CLI images and fixed-point record above include this interpreter change.
-The complete current comparison record is pending the remaining regression gates.
+The current Windows comparison record above also covers default-test execution
+through those rebuilt public CLI images.
 
 Full Go replacement remains false. General raw-pointer execution and host/foreign
 calls remain outside the semantic interpreter, and no Linux execution has been

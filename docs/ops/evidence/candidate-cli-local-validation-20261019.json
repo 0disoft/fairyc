@@ -1,0 +1,320 @@
+{
+  "schema": "fairyc.candidate-cli-local-validation/v1",
+  "passedInRecordedScope": true,
+  "scope": "Fresh Windows full CLI exact exit/stdout/stderr comparisons against a Go reference from the same clean source commit.",
+  "date": "2026-10-19",
+  "buildSourceRevision": "6b2697f8f8a6de10194aa06956b505fec7c2d593",
+  "sourceFiles": 512,
+  "buildVersion": "Fairy C Stage 0\ncompiler: v0.0.0-20261019093337-6b2697f8f8a6\nsdk: fairyc-sdk-stdlib/0 0.0.0-stage0.86\nlanguage: fairyc-language/20\nruntime: fairyc-runtime/0\nrevision: 6b2697f8f8a6de10194aa06956b505fec7c2d593\nmodified: false\n",
+  "images": [
+    {
+      "profile": "development",
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\evidence\\candidate-parity-20261019-arena\\candidate\\development\\fairyc.exe",
+      "sha256": "db30552a07260045dbc49208c35aab180c7052fc2f00711d77489451154c61db",
+      "driverSHA256": "65f2e5909b026e70943f0908d5cb91c69ce672d5bada9d9fa42d896de9cdc149"
+    },
+    {
+      "profile": "release",
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\evidence\\candidate-parity-20261019-arena\\candidate\\release\\fairyc.exe",
+      "sha256": "4a1ee3e35d1ad77fecee9c6d9e699d456d4b81e2b239f4feef831714578afe8a",
+      "driverSHA256": "65f2e5909b026e70943f0908d5cb91c69ce672d5bada9d9fa42d896de9cdc149"
+    }
+  ],
+  "candidatePacketSHA256": "1c69d15c7158fbbf0600220a519099dac2c223578e77e4c59c2c211eac883538",
+  "stackReserveBytes": 16777216,
+  "goFrontendInvoked": false,
+  "publicApiChanged": false,
+  "sdkAbiChanged": false,
+  "databaseChanged": false,
+  "ciChanged": false,
+  "productTimeoutChanged": false,
+  "productStackChanged": false,
+  "pushed": false,
+  "behaviorReferenceRevision": "6b2697f8f8a6de10194aa06956b505fec7c2d593",
+  "reference": {
+    "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\evidence\\candidate-parity-20261019-arena\\candidate\\source-version.exe",
+    "sha256": "751a8f6d744f17da68ca9e6a26bd67654ab02243c8c705830639881bea5bcd96"
+  },
+  "toolchain": {
+    "arch": "amd64",
+    "go": "go1.27.1",
+    "msvc": "14.51.36231",
+    "os": "windows"
+  },
+  "suites": [
+    {
+      "gate": "metadata",
+      "profile": "development",
+      "comparisons": 122,
+      "exactComparisons": 122,
+      "timedOut": 0,
+      "excluded": [],
+      "receipt": {
+        "path": ".cache/evidence/candidate-parity-20261019-arena/metadata-development/receipt.json",
+        "sha256": "cded39dd4acfa0ac9bf0a9a9531f0726208d836a07adee8e93a047a8b9c33a4d"
+      }
+    },
+    {
+      "gate": "cli",
+      "profile": "development",
+      "comparisons": 30,
+      "exactComparisons": 30,
+      "timedOut": 0,
+      "excluded": [],
+      "receipt": {
+        "path": ".cache/evidence/candidate-parity-20261019-arena/cli-development/receipt.json",
+        "sha256": "b23ba19230a624794ccf863d3f3fe4836ac9183eedeede2f08c6e17161a6775a"
+      }
+    },
+    {
+      "gate": "semantic",
+      "profile": "development",
+      "comparisons": 104,
+      "exactComparisons": 104,
+      "timedOut": 0,
+      "excluded": [],
+      "receipt": {
+        "path": ".cache/evidence/candidate-parity-20261019-arena/semantic-development/receipt.json",
+        "sha256": "a7cefe82a86096ccbc5663bde3d58f32f6fd2f320dd1dd247b33ad67c57b5814"
+      }
+    },
+    {
+      "gate": "native",
+      "profile": "development",
+      "comparisons": 30,
+      "exactComparisons": 30,
+      "timedOut": 0,
+      "excluded": [],
+      "receipt": {
+        "path": ".cache/evidence/candidate-parity-20261019-arena/native-development/receipt.json",
+        "sha256": "efcec63024f74d47a384706dbe335562e7fd3939bc72605b839ae09eef085633"
+      }
+    },
+    {
+      "gate": "examples",
+      "profile": "development",
+      "comparisons": 78,
+      "exactComparisons": 78,
+      "timedOut": 0,
+      "excluded": [
+        {
+          "id": "lexer_candidate",
+          "reason": "compiler self-source is a separate bootstrap/fixed-point gate"
+        }
+      ],
+      "receipt": {
+        "path": ".cache/evidence/candidate-parity-20261019-arena/examples-development-complete/receipt.json",
+        "sha256": "3425f75a7aa195630fa8d002f5f5ea0a39a683e0c0286aee0f0620425548cc7a"
+      }
+    },
+    {
+      "gate": "metadata",
+      "profile": "release",
+      "comparisons": 122,
+      "exactComparisons": 122,
+      "timedOut": 0,
+      "excluded": [],
+      "receipt": {
+        "path": ".cache/evidence/candidate-parity-20261019-arena/metadata-release/receipt.json",
+        "sha256": "13b76e53ee431c743bc2b51a47cd410ed2aab96ce8098a78fea8bb5086ba95d7"
+      }
+    },
+    {
+      "gate": "cli",
+      "profile": "release",
+      "comparisons": 30,
+      "exactComparisons": 30,
+      "timedOut": 0,
+      "excluded": [],
+      "receipt": {
+        "path": ".cache/evidence/candidate-parity-20261019-arena/cli-release/receipt.json",
+        "sha256": "e3498419764ec90640a6d014a97f1ef6a6f7857827d69cf7f13c6db4a9f18fca"
+      }
+    },
+    {
+      "gate": "semantic",
+      "profile": "release",
+      "comparisons": 104,
+      "exactComparisons": 104,
+      "timedOut": 0,
+      "excluded": [],
+      "receipt": {
+        "path": ".cache/evidence/candidate-parity-20261019-arena/semantic-release/receipt.json",
+        "sha256": "4b7bcfae09f34127129ce5f89201f4af87f6790aba18fe1f7452739d728b954c"
+      }
+    },
+    {
+      "gate": "native",
+      "profile": "release",
+      "comparisons": 30,
+      "exactComparisons": 30,
+      "timedOut": 0,
+      "excluded": [],
+      "receipt": {
+        "path": ".cache/evidence/candidate-parity-20261019-arena/native-release/receipt.json",
+        "sha256": "ff9c990c5a6ab6640e5faa212647c5dd9439816abaf5bd71df226e0584caf8e5"
+      }
+    },
+    {
+      "gate": "examples",
+      "profile": "release",
+      "comparisons": 78,
+      "exactComparisons": 78,
+      "timedOut": 0,
+      "excluded": [
+        {
+          "id": "lexer_candidate",
+          "reason": "compiler self-source is a separate bootstrap/fixed-point gate"
+        }
+      ],
+      "receipt": {
+        "path": ".cache/evidence/candidate-parity-20261019-arena/examples-release/receipt.json",
+        "sha256": "c839314104f078876b13ab23a327c43e7ae3f401d4e03205eec0e458a280754f"
+      }
+    },
+    {
+      "gate": "test-list",
+      "profile": "development",
+      "comparisons": 89,
+      "exactComparisons": 89,
+      "timedOut": 0,
+      "excluded": [],
+      "receipt": {
+        "path": ".cache/evidence/candidate-parity-20261019-arena/list-both/receipt.json",
+        "sha256": "6808ad615fd67438b5c23d12d28a8a72ac42f20e69c5c662bfe800de2a06d065"
+      }
+    },
+    {
+      "gate": "test-list",
+      "profile": "release",
+      "comparisons": 89,
+      "exactComparisons": 89,
+      "timedOut": 0,
+      "excluded": [],
+      "receipt": {
+        "path": ".cache/evidence/candidate-parity-20261019-arena/list-both/receipt.json",
+        "sha256": "6808ad615fd67438b5c23d12d28a8a72ac42f20e69c5c662bfe800de2a06d065"
+      }
+    }
+  ],
+  "totalComparisons": 906,
+  "exactComparisons": 906,
+  "goReferenceFrontendInvoked": true,
+  "goFrontendScope": "goFrontendInvoked=false describes candidate C generation; the Go frontend is explicitly invoked as the behavioral oracle.",
+  "execution": "Completed example groups were authenticated and reused; the remaining development examples ran in three isolated partitions after deliberately stopping their sequential coordinator.",
+  "sourceOfTruthDocumentsChanged": [
+    "docs/architecture/self-hosting-readiness-v0.md"
+  ],
+  "runnerChanged": true,
+  "arenaDefaultTests": {
+    "comparisonsPerProfile": 6,
+    "nativeDriverPresent": false,
+    "scenarios": [
+      "create/place/reenter and value copies",
+      "ownership transfer and Result propagation",
+      "independent nested Arenas",
+      "body and cleanup traps",
+      "fresh test state after traps"
+    ]
+  },
+  "records": [
+    {
+      "path": ".cache/evidence/candidate-parity-20261019-arena/candidate/receipt.json",
+      "sha256": "356eede2866a8f1d8738f00613dd768be48d9d65dd6dc57075d41217f74102d6"
+    },
+    {
+      "path": ".cache/evidence/candidate-parity-20261019-arena/candidate/source-snapshot.json",
+      "sha256": "e61b8507210e376c8e57f5c81844613de2956b7828ca27d12151eb77e9ae8659"
+    },
+    {
+      "path": ".cache/evidence/candidate-parity-20261019-arena/metadata-development/receipt.json",
+      "sha256": "cded39dd4acfa0ac9bf0a9a9531f0726208d836a07adee8e93a047a8b9c33a4d"
+    },
+    {
+      "path": ".cache/evidence/candidate-parity-20261019-arena/cli-development/receipt.json",
+      "sha256": "b23ba19230a624794ccf863d3f3fe4836ac9183eedeede2f08c6e17161a6775a"
+    },
+    {
+      "path": ".cache/evidence/candidate-parity-20261019-arena/semantic-development/receipt.json",
+      "sha256": "a7cefe82a86096ccbc5663bde3d58f32f6fd2f320dd1dd247b33ad67c57b5814"
+    },
+    {
+      "path": ".cache/evidence/candidate-parity-20261019-arena/native-development/receipt.json",
+      "sha256": "efcec63024f74d47a384706dbe335562e7fd3939bc72605b839ae09eef085633"
+    },
+    {
+      "path": ".cache/evidence/candidate-parity-20261019-arena/examples-development-complete/receipt.json",
+      "sha256": "3425f75a7aa195630fa8d002f5f5ea0a39a683e0c0286aee0f0620425548cc7a"
+    },
+    {
+      "path": ".cache/evidence/candidate-parity-20261019-arena/examples-development/observations.json",
+      "sha256": "17b203fa41c996403bd63a20990ffea5b033b7411206768f853703ded8ef6591"
+    },
+    {
+      "path": ".cache/evidence/candidate-parity-20261019-arena/examples-dev-shard-0/receipt.json",
+      "sha256": "001f4a2f8f8f0af2e99672cf45478286b80dbc320be404016153dbced6577948"
+    },
+    {
+      "path": ".cache/evidence/candidate-parity-20261019-arena/examples-dev-shard-1/receipt.json",
+      "sha256": "8629f45a33e724dd46975bb4ccc01e28e571871d750ed75f12be1621e6dc904f"
+    },
+    {
+      "path": ".cache/evidence/candidate-parity-20261019-arena/examples-dev-shard-2/receipt.json",
+      "sha256": "95d1b45e27ba9c9660fa0d13f6d3b29613a8f1d0639bb199dfa41bbabe1d6236"
+    },
+    {
+      "path": ".cache/evidence/candidate-parity-20261019-arena/metadata-release/receipt.json",
+      "sha256": "13b76e53ee431c743bc2b51a47cd410ed2aab96ce8098a78fea8bb5086ba95d7"
+    },
+    {
+      "path": ".cache/evidence/candidate-parity-20261019-arena/cli-release/receipt.json",
+      "sha256": "e3498419764ec90640a6d014a97f1ef6a6f7857827d69cf7f13c6db4a9f18fca"
+    },
+    {
+      "path": ".cache/evidence/candidate-parity-20261019-arena/semantic-release/receipt.json",
+      "sha256": "4b7bcfae09f34127129ce5f89201f4af87f6790aba18fe1f7452739d728b954c"
+    },
+    {
+      "path": ".cache/evidence/candidate-parity-20261019-arena/native-release/receipt.json",
+      "sha256": "ff9c990c5a6ab6640e5faa212647c5dd9439816abaf5bd71df226e0584caf8e5"
+    },
+    {
+      "path": ".cache/evidence/candidate-parity-20261019-arena/examples-release/receipt.json",
+      "sha256": "c839314104f078876b13ab23a327c43e7ae3f401d4e03205eec0e458a280754f"
+    },
+    {
+      "path": ".cache/evidence/candidate-parity-20261019-arena/list-both/receipt.json",
+      "sha256": "6808ad615fd67438b5c23d12d28a8a72ac42f20e69c5c662bfe800de2a06d065"
+    },
+    {
+      "path": ".cache/evidence/candidate-parity-20261019-arena/gate-executions.json",
+      "sha256": "b10007e541f7d25b21ab06d710b1a04003ca60dfd4a19302d04b8e18c8881512"
+    },
+    {
+      "path": ".cache/evidence/candidate-parity-20261019-arena/examples-rescheduling.json",
+      "sha256": "3e426cc471e367ca9c0f22fa64992f914a6ece506ecf62253912e9ce55f44d3b"
+    },
+    {
+      "path": ".cache/evidence/candidate-parity-20261019-arena/shard-examples.py",
+      "sha256": "6b4cd0a13b37f2f12b588421b2821d97768c93d2cc838a78e56c42dc7805f0b6"
+    }
+  ],
+  "completeGoCliReplacement": false,
+  "limitations": [
+    "Windows x64 MSVC only; Linux execution is deferred by the user.",
+    "The compiler self-source example is covered by the separate fixed-point gate.",
+    "The native build companion remains a Go C-packet consumer.",
+    "No IR or performance equivalence claim."
+  ],
+  "schedulingInterruption": {
+    "gate": "examples-development",
+    "originalCoordinatorExit": 1,
+    "reason": "Deliberately stopped to replace sequential execution with isolated parallel groups; this exit is not a comparison result.",
+    "resolvedBy": {
+      "path": ".cache/evidence/candidate-parity-20261019-arena/examples-development-complete/receipt.json",
+      "sha256": "3425f75a7aa195630fa8d002f5f5ea0a39a683e0c0286aee0f0620425548cc7a"
+    },
+    "reusedComparisons": 19,
+    "partitions": 3
+  }
+}
