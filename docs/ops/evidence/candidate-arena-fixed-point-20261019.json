@@ -1,0 +1,119 @@
+{
+  "schema": "fairyc.candidate-full-cli-fixed-point-checkpoint/v1",
+  "date": "2026-10-19",
+  "passed": true,
+  "scope": "Consecutive full file_cli C-part generations; exact complete packet and optimized PE bytes",
+  "buildSourceRevision": "6b2697f8f8a6de10194aa06956b505fec7c2d593",
+  "sourceFiles": 512,
+  "sourceInventorySHA256": "fa6936f97a0ebdb9cfdc84befc99692ab901f3196b6e4d2e3ba0a04d6e3729a3",
+  "frozenBuildVersion": "Fairy C Stage 0\ncompiler: v0.0.0-20261019093337-6b2697f8f8a6\nsdk: fairyc-sdk-stdlib/0 0.0.0-stage0.86\nlanguage: fairyc-language/20\nruntime: fairyc-runtime/0\nrevision: 6b2697f8f8a6de10194aa06956b505fec7c2d593\nmodified: false\n",
+  "adoptedStage1Build": {
+    "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\evidence\\candidate-parity-20261019-arena\\candidate\\receipt.json",
+    "bytes": 102528,
+    "sha256": "356eede2866a8f1d8738f00613dd768be48d9d65dd6dc57075d41217f74102d6"
+  },
+  "packets": [
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\evidence\\candidate-parity-20261019-arena\\candidate\\candidate-packet.bin",
+      "bytes": 41903661,
+      "sha256": "1c69d15c7158fbbf0600220a519099dac2c223578e77e4c59c2c211eac883538"
+    },
+    {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\evidence\\candidate-fixed-point-20261019-arena\\stage2-input.bin",
+      "bytes": 41903661,
+      "sha256": "1c69d15c7158fbbf0600220a519099dac2c223578e77e4c59c2c211eac883538"
+    }
+  ],
+  "stage1": {
+    "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\evidence\\candidate-parity-20261019-arena\\candidate\\release\\fairyc.exe",
+    "bytes": 5933056,
+    "sha256": "4a1ee3e35d1ad77fecee9c6d9e699d456d4b81e2b239f4feef831714578afe8a"
+  },
+  "stage2": {
+    "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\evidence\\candidate-fixed-point-20261019-arena\\stage2.exe",
+    "bytes": 5933056,
+    "sha256": "4a1ee3e35d1ad77fecee9c6d9e699d456d4b81e2b239f4feef831714578afe8a"
+  },
+  "builder": {
+    "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\evidence\\candidate-parity-20261019-arena\\fairyc-candidate-build.exe",
+    "bytes": 4940800,
+    "sha256": "65f2e5909b026e70943f0908d5cb91c69ce672d5bada9d9fa42d896de9cdc149"
+  },
+  "packetBytesEqual": true,
+  "optimizedImageBytesEqual": true,
+  "excludedImageBytes": [],
+  "stackReserveBytes": 16777216,
+  "invocations": [
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\evidence\\candidate-parity-20261019-arena\\candidate\\release\\fairyc.exe",
+        "--c-project-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\evidence\\candidate-parity-20261019-arena\\candidate\\sources.list"
+      ],
+      "exit": 0,
+      "timedOut": false,
+      "seconds": 531.7131907999865,
+      "stdoutBytes": 41903661,
+      "stdoutSHA256": "1c69d15c7158fbbf0600220a519099dac2c223578e77e4c59c2c211eac883538",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\evidence\\candidate-parity-20261019-arena\\fairyc-candidate-build.exe",
+        "--packet",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\evidence\\candidate-fixed-point-20261019-arena\\stage2-input.bin",
+        "--packet-sha256",
+        "1c69d15c7158fbbf0600220a519099dac2c223578e77e4c59c2c211eac883538",
+        "--output",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\evidence\\candidate-fixed-point-20261019-arena\\stage2.exe",
+        "--release",
+        "--stack-reserve-bytes",
+        "16777216"
+      ],
+      "exit": 0,
+      "timedOut": false,
+      "seconds": 359.4964229000034,
+      "stdoutBytes": 189,
+      "stdoutSHA256": "21b7b72006fbea78cc6eab5bdf6275218cf5dc401285d52f18118d161238784e",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\evidence\\candidate-fixed-point-20261019-arena\\stage2.exe",
+        "--version"
+      ],
+      "exit": 0,
+      "timedOut": false,
+      "seconds": 0.05214519999572076,
+      "stdoutBytes": 224,
+      "stdoutSHA256": "68f398f6747225dc0b76d8abdb16a1adf6a5f887a9dab19bfbc8097f9a54625d",
+      "stderr": ""
+    }
+  ],
+  "goFrontendInvoked": false,
+  "fixedPointVerified": true,
+  "completeGoCliReplacement": false,
+  "promotionGateReady": false,
+  "records": [
+    {
+      "path": ".cache/evidence/candidate-fixed-point-20261019-arena/receipt.json",
+      "sha256": "491f720ca68d91481a53aa8eb39611485f2e997872c7e147616a6fb2be6d7cc9"
+    },
+    {
+      "path": ".cache/evidence/candidate-parity-20261019-arena/candidate/receipt.json",
+      "sha256": "356eede2866a8f1d8738f00613dd768be48d9d65dd6dc57075d41217f74102d6"
+    }
+  ],
+  "limitations": [
+    "Windows full file_cli only; Linux execution deferred by the user.",
+    "The Go C-packet bridge and MSVC remain part of the build.",
+    "No IR or performance equality claim."
+  ],
+  "publicApiChanged": false,
+  "sdkAbiChanged": false,
+  "databaseChanged": false,
+  "ciChanged": false,
+  "productTimeoutChanged": false,
+  "productStackChanged": false,
+  "pushed": false
+}

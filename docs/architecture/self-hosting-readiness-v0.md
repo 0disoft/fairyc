@@ -2,24 +2,23 @@
 
 ## Current status (2026-10-19)
 
-Reviewed Windows evidence for the last complete candidate build is
-[candidate-cli-local-validation-20261018.json](../ops/evidence/candidate-cli-local-validation-20261018.json).
-The development and release candidate profiles each match the Go reference on all
-447 recorded comparisons (metadata 122, cli 30, semantic 98, native 30, examples 78,
-test-list 89): 894 of 894 exact. The candidate C packet was generated without a
-Go frontend fallback; the comparison suites invoke the recorded Go reference images.
+The fresh [Windows CLI build](../ops/evidence/candidate-arena-cli-build-20261019.json)
+contains the Arena interpreter changes at source commit `6b2697f8`, with 512 input
+files. Both development and release images report the frozen version from the Go
+reference built at that same clean commit. Arena admission shares the existing SDK
+authority module, keeping the source closure within its unchanged 512-file cap.
 
-The Go reference for the semantic, native, example and test-list suites is the image
-rebuilt after commit `4b2b1693`, which maps named enum payload initializers to declared
-payload slots; the candidate had accepted out-of-declaration-order initializers and Go
-had rejected them. The candidate source snapshot is unchanged at commit `a2aaf535`,
-512 source files.
+The renewed [full CLI fixed-point record](../ops/evidence/candidate-arena-fixed-point-20261019.json)
+compares consecutive generations from that source snapshot. The two 41,903,661-byte
+C packets and two 5,933,056-byte release PE images match exactly, with zero excluded
+bytes; frozen `--version` output also matches. The Go-built C-packet bridge and
+MSVC remain part of this bootstrap; the Fairy candidate owns frontend work.
 
-The reviewed [2026-10-19 full CLI C-part fixed-point record](../ops/evidence/candidate-native-fixed-point-20261019.json)
-passes with all 512 source hashes unchanged. The two 41,798,801-byte C packets and
-two 5,913,600-byte release PE images match exactly, with zero excluded bytes;
-the frozen `--version` output also matches exactly. The Go-built C-packet bridge
-and MSVC remain part of this bootstrap.
+Current development default-test comparison passes all 104 cases, including six
+Arena comparisons without the native build companion. A release Arena smoke test
+also matches Go exactly. Remaining full CLI, native, example and listing gates are
+still running. The earlier [894 exact comparisons](../ops/evidence/candidate-cli-local-validation-20261018.json)
+apply to source snapshot `a2aaf535`, before the Arena changes.
 
 The authored interpreter now executes abstract Region enter/place/reset operations,
 including normal, nested, return, propagation and loop exits. The focused
@@ -33,8 +32,8 @@ bounded model after authenticating SDK source bytes and AST. The candidate retai
 authenticated source ownership in its checked execution plan; it neither invokes
 the native allocator nor authorizes user-defined foreign functions. These focused
 tests do not establish public candidate CLI parity or native allocation behavior.
-The full CLI images and fixed-point records above attest the earlier source snapshot;
-they have not been regenerated after this interpreter change.
+The fresh CLI images and fixed-point record above include this interpreter change.
+The complete current comparison record is pending the remaining regression gates.
 
 Full Go replacement remains false. General raw-pointer execution and host/foreign
 calls remain outside the semantic interpreter, and no Linux execution has been
@@ -46,7 +45,7 @@ related Win32 externs). The example suite excludes the compiler self-source
 Linux candidate verification is deferred to a later stage; Linux or WSL setup is
 outside this validation.
 
-## Historical records (2026-10-17 and earlier)
+## Historical records
 
 The dated sections below are snapshots of the state at their own dates. They do not
 describe the current candidate; the current record is
