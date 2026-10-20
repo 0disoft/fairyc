@@ -39,6 +39,7 @@ func runWindowsFairyFunctionTree(t *testing.T, probe func(*testing.T, func(strin
 		"module main;@effects(console) fn void f(){}",
 		"module main;@effects(console) pub unsafe fn T Owner::f<T>(ref mut T arg,){return arg;}",
 		"module main;@tag @tag() @tag(first,second,) fn void f(){}",
+		`module main;@tag(b"bytes", c"cstring") fn void f(){}`,
 		`module main;@pkg /* name */ :: note(pkg /* arg */ :: value,0xA_F,0b10_01,1_000,"a\n\u{AC00}",) fn void f(){}`,
 		"module main; /* 속성 */\r\n@note(\"pub unsafe fn\")\r\n@other() pub fn unsafe extern C fn void() f(){return value;}",
 		"module main;" + strings.Repeat("@tag ", 253) + "fn void f(){}",                           // 256
@@ -106,8 +107,6 @@ pub unsafe fn Pair<T,U> Owner::make<T,U>(ref mut T value,U extra,){
 		"module main;@tag(a fn void f(){}",
 		"module main;@tag(true) fn void f(){}",
 		"module main;@tag(1.5) fn void f(){}",
-		"module main;@tag(b\"bytes\") fn void f(){}",
-		"module main;@tag(c\"cstring\") fn void f(){}",
 		"module main;@tag(call()) fn void f(){}",
 		"module main;" + strings.Repeat("@tag ", 254) + "fn void f(){}",         // 257
 		"module main;@tag(" + strings.Repeat("value,", 253) + ") fn void f(){}", // 257

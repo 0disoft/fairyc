@@ -18,6 +18,7 @@ func TestWindowsFairyParserAttributes(t *testing.T) {
 		"module main; @effects(console) pub fn void f() {}",
 		"module main; @marker @ns::tag(a::b, 0xFF, \"한글\",) fn void f() {}",
 		"module main; @empty() @same @same struct R { u8 x; }",
+		`module main; @meta(b"bytes", c"cstring", "text") fn void f() {}`,
 		"module main; @bad resource R<T> { cleanup {} }",
 	} {
 		oracle, err := frontend.AnalyzeSyntax(source.NewFile("main.fy", []byte(input)), source.DefaultLimits())
@@ -49,7 +50,6 @@ func TestWindowsFairyParserAttributes(t *testing.T) {
 	for _, bad := range []string{
 		"@bad(,1) fn void bad() {}",
 		"@bad(true) fn void bad() {}",
-		"@bad(b\"x\") fn void bad() {}",
 		"@bad(x x) fn void bad() {}",
 		"@ns:: fn void bad() {}",
 		"@bad fn void bad() { let x = ; }",
@@ -58,9 +58,8 @@ func TestWindowsFairyParserAttributes(t *testing.T) {
 	} {
 		input := "module main; " + bad + " @kept fn void kept() {}"
 		oracle, err := frontend.AnalyzeSyntax(source.NewFile("main.fy", []byte(input)), source.DefaultLimits())
-		// Go's attribute parser accepts a broader expression set than the
-		// normative path/integer/text-string grammar. Preserve that boundary.
-		normativeOnly := strings.HasPrefix(bad, "@bad(true)") || strings.HasPrefix(bad, "@bad(b\"x\")")
+		// Boolean expressions remain outside the attribute argument grammar.
+		normativeOnly := strings.HasPrefix(bad, "@bad(true)")
 		if err != nil || oracle.Tree == nil || (!normativeOnly && len(oracle.Tree.Diagnostics) == 0) {
 			t.Fatalf("invalid attribute oracle %q: %v", bad, err)
 		}
@@ -99,7 +98,7 @@ func emitAttributeChecks(p *strings.Builder, input string, attributes []ast.Attr
 		for _, arg := range a.Arguments {
 			raw := input[arg.Span.StartByte:arg.Span.EndByte]
 			kind := 1
-			if strings.HasPrefix(raw, "\"") {
+			if strings.HasPrefix(raw, "\"") || strings.HasPrefix(raw, "b\"") || strings.HasPrefix(raw, "c\"") {
 				kind = 3
 			} else if raw[0] >= '0' && raw[0] <= '9' {
 				kind = 2

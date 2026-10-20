@@ -39,7 +39,7 @@ item_body = const_decl
 attribute = "@" path attribute_arguments? ;
 attribute_arguments = "(" attribute_argument_list? ")" ;
 attribute_argument_list = attribute_argument ("," attribute_argument)* ","? ;
-attribute_argument = path | integer_literal | string_literal ;
+attribute_argument = path | integer_literal | string_literal | byte_string_literal | c_string_literal ;
 
 const_decl = "const" type IDENT "=" expression ";" ;
 (* static_assert is contextual at module-item start, not a globally reserved identifier. *)

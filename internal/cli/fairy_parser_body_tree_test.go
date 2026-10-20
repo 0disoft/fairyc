@@ -82,7 +82,7 @@ func referenceComparisonTree(input string, header bool) (string, error) {
 							if token.Kind == lexer.Integer {
 								kind = 402
 							}
-							if token.Kind == lexer.String {
+							if token.Kind == lexer.String || token.Kind == lexer.ByteString || token.Kind == lexer.CString {
 								kind = 403
 							}
 							break

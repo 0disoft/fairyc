@@ -85,7 +85,7 @@ func TestWindowsFairyParserSDKCorpus(t *testing.T) {
 		}
 		writeTestSource(t, root, "src/"+name, string(data))
 	}
-	writeTestSource(t, root, "src/main.fy", parserFileCorpusProgram(t))
+	writeTestSource(t, root, "src/main.fy", parserSourceCorpusProgram(t, parserFileCorpusProgram(t)))
 	baseline := map[string]string{}
 	for _, profile := range []cdriver.Profile{cdriver.LowProfile, cdriver.OptimizedProfile} {
 		missing := requiredParserSDKFiles()
@@ -96,7 +96,7 @@ func TestWindowsFairyParserSDKCorpus(t *testing.T) {
 		}
 		for _, file := range files {
 			data, err := os.ReadFile(filepath.Join("..", "..", "internal", "sdkstdlib", "sources", filepath.FromSlash(file.disk)))
-			if err != nil || len(data) > 32768 {
+			if err != nil || len(data) > parserSourceCorpusBytes {
 				t.Fatalf("SDK %s size=%d: %v", file.disk, len(data), err)
 			}
 			oracle, err := frontend.AnalyzeSyntax(source.NewFile(file.name, data), source.DefaultLimits())

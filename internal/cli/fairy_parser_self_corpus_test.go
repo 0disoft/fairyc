@@ -63,6 +63,24 @@ import std::bytes as bytes; import std::io as io;
 }
 `
 
+// Full SDK and self sources can exceed the scalar comparison driver's 32 KiB.
+// Keep this transport budget separate from the canonical tree export limits.
+const parserSourceCorpusBytes = 65536
+
+func parserSourceCorpusProgram(t *testing.T, program string) string {
+	t.Helper()
+	for old, next := range map[string]string{
+		"if (length >= 32768)":                fmt.Sprintf("if (length >= %d)", parserSourceCorpusBytes),
+		"scanner::collect(input,false,32768,": fmt.Sprintf("scanner::collect(input,false,%d,", parserSourceCorpusBytes),
+	} {
+		if strings.Count(program, old) != 1 {
+			t.Fatalf("source corpus driver anchor drift: %q", old)
+		}
+		program = strings.Replace(program, old, next, 1)
+	}
+	return program
+}
+
 func TestWindowsFairyParserSelfCorpus(t *testing.T) {
 	if runtime.GOOS != "windows" || runtime.GOARCH != "amd64" {
 		t.Skip("requires Windows AMD64 MSVC")
@@ -89,7 +107,7 @@ func TestWindowsFairyParserSelfCorpus(t *testing.T) {
 		t.Fatal(err)
 	}
 	writeTestSource(t, root, "src/file_syntax.fy", string(identity))
-	writeTestSource(t, root, "src/main.fy", parserCorpusProgram)
+	writeTestSource(t, root, "src/main.fy", parserSourceCorpusProgram(t, parserCorpusProgram))
 	baseline := map[string]string{}
 	for _, profile := range []cdriver.Profile{cdriver.LowProfile, cdriver.OptimizedProfile} {
 		// These unchanged sources have passed complete syntax. Keep this explicit
@@ -140,7 +158,7 @@ func TestWindowsFairyParserSelfCorpus(t *testing.T) {
 				continue
 			}
 			data, err := os.ReadFile(filepath.Join(example, file.Name()))
-			if err != nil || len(data) > 32768 {
+			if err != nil || len(data) > parserSourceCorpusBytes {
 				t.Fatalf("source %s: size=%d err=%v", file.Name(), len(data), err)
 			}
 			full := observe(data)
