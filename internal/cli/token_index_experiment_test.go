@@ -29,12 +29,15 @@ func tokenIndexWorkspace(t *testing.T, wrapped bool) (string, map[string]string)
 		"fairy.toml":  "schema = \"fairyc.manifest/v1\"\n[package]\nuid = \"test.token-index\"\nname = \"token-index\"\nversion = \"1.0.0\"\nlanguage = \"" + sdkstdlib.LanguageRevision + "\"\nsource = \"src\"\n",
 		"src/main.fy": tokenIndexClient,
 	}
-	for _, name := range []string{"scanner", "numbers", "diagnostics", "utf8", "strings", "budget"} {
-		data, err := os.ReadFile(filepath.Join("..", "..", "examples", "lexer_candidate", "src", name+".fy"))
+	for _, name := range lexerCandidateSourceFiles {
+		if name == "fairy.toml" {
+			continue
+		}
+		data, err := os.ReadFile(filepath.Join("..", "..", "examples", "lexer_candidate", name))
 		if err != nil {
 			t.Fatal(err)
 		}
-		sources["src/"+name+".fy"] = string(data)
+		sources[name] = string(data)
 	}
 	if wrapped {
 		old := "pub fn TokenInfo token_info(ref Stream stream, usize index) {\n    let ref Token token = v::at<Token>(ref stream.tokens, index);"

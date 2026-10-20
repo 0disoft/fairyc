@@ -2,8 +2,6 @@ package cli
 
 import (
 	"fmt"
-	"os"
-	"path/filepath"
 	"runtime"
 	"slices"
 	"strings"
@@ -52,14 +50,7 @@ func TestWindowsFairyLexerCandidate(t *testing.T) {
 		}
 	}
 	root := t.TempDir()
-	example := filepath.Join("..", "..", "examples", "lexer_candidate")
-	for _, name := range []string{"fairy.toml", "src/scanner.fy", "src/numbers.fy", "src/diagnostics.fy", "src/utf8.fy", "src/strings.fy", "src/budget.fy"} {
-		data, err := os.ReadFile(filepath.Join(example, name))
-		if err != nil {
-			t.Fatal(err)
-		}
-		writeTestSource(t, root, name, string(data))
-	}
+	copyLexerExample(t, root)
 	var program, expected strings.Builder
 	program.WriteString("module main;\nimport scanner as scanner;\nimport diagnostics as diagnostics;\nimport budget as budget;\nimport std::vec as v;\nimport std::bytes as bytes;\nfn void budget_checks() {\n")
 	for _, limit := range []int{0, 1, 3, 16} {

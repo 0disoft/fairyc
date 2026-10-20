@@ -2,8 +2,6 @@ package cli
 
 import (
 	"fmt"
-	"os"
-	"path/filepath"
 	"runtime"
 	"strings"
 	"testing"
@@ -42,13 +40,7 @@ func TestWindowsFairyLexerWorkBudget(t *testing.T) {
 
 func testWindowsLexerWorkInputs(t *testing.T, inputs []string, extra, diagnosticLimit int) {
 	root := t.TempDir()
-	for _, name := range []string{"fairy.toml", "src/scanner.fy", "src/numbers.fy", "src/strings.fy", "src/diagnostics.fy", "src/utf8.fy", "src/budget.fy"} {
-		data, err := os.ReadFile(filepath.Join("..", "..", "examples", "lexer_candidate", name))
-		if err != nil {
-			t.Fatal(err)
-		}
-		writeTestSource(t, root, name, string(data))
-	}
+	copyLexerExample(t, root)
 	var program, expected strings.Builder
 	program.WriteString("module main; import scanner as scanner; @effects(console) fn i32 main() {\n")
 	var names []string

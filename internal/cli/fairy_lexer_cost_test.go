@@ -30,7 +30,7 @@ func TestWindowsFairyLexerCostBaseline(t *testing.T) {
 	}
 	sourceHash := sha256.New()
 	example := filepath.Join("..", "..", "examples", "lexer_candidate")
-	for _, name := range []string{"fairy.toml", "src/scanner.fy", "src/numbers.fy", "src/diagnostics.fy", "src/utf8.fy", "src/strings.fy", "src/budget.fy"} {
+	for _, name := range lexerCandidateSourceFiles {
 		data, err := os.ReadFile(filepath.Join(example, name))
 		if err != nil {
 			t.Fatal(err)
