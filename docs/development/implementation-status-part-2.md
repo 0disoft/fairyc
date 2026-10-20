@@ -325,10 +325,10 @@ verified-MIR cache across sequential caller-triggered checks; it is not a daemon
 persistent cache, or stable editor protocol. Program commands use one entry plus repeated
 `--source`; semantic checking uses its explicit positional module set. Stable project bootstrap is
 `fairyc new <package-name> --uid <package-uid>`. The stable workspace commands are
-`fairyc check [--locked]` and the Windows/amd64-local
-`fairyc build [--release] [--locked]`, and the Windows/amd64-local
-`fairyc run [--release] [--locked]`, and the semantic-by-default or Windows-native
-`fairyc test [--json] [--locations] [--native [--release] [--stdin | --stdin-file <portable-workspace-file>] [--timeout-seconds <1..60>] [--capture-output] [-- <program-args>...]] [--workspace | --package <package-uid>] [--dir <portable-test-directory>]... [--file <portable-test-path>]... [--exact <test-identity>]... [--locked]` and the execution-free
+`fairyc check [--locked]`, the Windows/amd64-local
+`fairyc build [--release] [--locked]` and
+`fairyc run [--release] [--locked]`, the semantic-by-default or Windows-native
+`fairyc test [--json] [--locations] [--native [--release] [--stdin | --stdin-file <portable-workspace-file>] [--timeout-seconds <1..60>] [--capture-output] [-- <program-args>...]] [--workspace | --package <package-uid>] [--dir <portable-test-directory>]... [--file <portable-test-path>]... [--exact <test-identity>]... [--locked]`, and the execution-free
 `fairyc test --list [--json] [--locations] [--workspace | --package <package-uid>] [--dir <portable-test-directory>]... [--file <portable-test-path>]... [--locked]`, plus source-independent
 `fairyc explain <diagnostic-code>` and `fairyc targets`. Compiler developers can inspect the private
 target-explicit C11 bootstrap through

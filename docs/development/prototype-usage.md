@@ -83,11 +83,10 @@ process, requires it to create a no-overwrite starter, check it, run its semanti
 its generated source through MSVC with conventional program status zero. The same executable runs
 `examples/windows_quickstart/main.fy` through MSVC with
 native result 42 by iterating two bytes with checked `usize` arithmetic and safely converting each
-indexed `u8` value to `i32`,
-then execute `examples/windows_output/main.fy` with exact stdout and process status
-42 while explicitly supplying its separate `windows_console.fy` module, and finally run the
-two-package `examples/workspace_quickstart` graph through an exact generated lock with native result
-42, and runs the safe `std::io` workspace with exact text and byte-view lines on separated
+indexed `u8` value to `i32`. It then executes `examples/windows_output/main.fy` with exact stdout
+and process status 42 while explicitly supplying its separate `windows_console.fy` module. Finally
+it runs the two-package `examples/workspace_quickstart` graph through an exact generated lock with
+native result 42, and the safe `std::io` workspace with exact text and byte-view lines on separated
 stdout/stderr and status zero. The same standalone
 compiler runs the isolated semantic test, a real native trap followed by a passing native test, and
 the checked-in native test at both MSVC profiles without changing the retained executable. It also
