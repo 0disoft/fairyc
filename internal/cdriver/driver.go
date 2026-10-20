@@ -93,31 +93,7 @@ func Resolve(targetID target.ID, name string) (Toolchain, error) {
 	if runtime.GOOS != spec.OperatingSystem || runtime.GOARCH != "amd64" {
 		return Toolchain{}, fmt.Errorf("C toolchain requires linux/amd64, got %s/%s", runtime.GOOS, runtime.GOARCH)
 	}
-	getconf, err := exec.LookPath("getconf")
-	if err != nil {
-		return Toolchain{}, fmt.Errorf("x86_64-linux-gnu requires getconf: %w", err)
-	}
-	libcOutput, err := runBounded(getconf, "GNU_LIBC_VERSION")
-	if err != nil {
-		return Toolchain{}, fmt.Errorf("probe glibc: %w", err)
-	}
-	libc := strings.TrimSpace(libcOutput)
-	if !strings.HasPrefix(libc, "glibc ") {
-		return Toolchain{}, fmt.Errorf("target requires glibc, getconf reported %q", libc)
-	}
-	path, err := exec.LookPath(name)
-	if err != nil {
-		return Toolchain{}, fmt.Errorf("resolve %s: %w", name, err)
-	}
-	versionOutput, err := runBounded(path, "--version")
-	if err != nil {
-		return Toolchain{}, fmt.Errorf("probe %s: %w", name, err)
-	}
-	version := firstLine(versionOutput)
-	if version == "" {
-		return Toolchain{}, fmt.Errorf("probe %s returned an empty version", name)
-	}
-	return Toolchain{Target: targetID, Name: name, Path: path, Version: version, Libc: libc}, nil
+	return resolveLinuxToolchain(name, exec.LookPath, runBounded)
 }
 
 // Build compiles and links one generated translation unit with one embedded runtime source.

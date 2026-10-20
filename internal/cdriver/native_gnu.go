@@ -1,8 +1,6 @@
 package cdriver
 
 import (
-	"fmt"
-	"os/exec"
 	"strings"
 
 	"github.com/0disoft/fairyc/internal/target"
@@ -14,18 +12,9 @@ type linuxNativeToolchain struct{ toolchain Toolchain }
 
 func resolveLinuxNative(name string) (result NativeToolchain, err error) {
 	defer func() { err = driverError(ErrorToolchain, "resolveLinuxNative", err) }()
-	if name == "" {
-		for _, candidate := range []string{"gcc", "clang"} {
-			if _, err := exec.LookPath(candidate); err == nil {
-				name = candidate
-				break
-			}
-		}
-		if name == "" {
-			return nil, fmt.Errorf("Linux native commands require GCC or Clang on PATH")
-		}
-	}
-	toolchain, err := Resolve(target.X8664LinuxGNU, name)
+	toolchain, err := selectLinuxToolchain(name, func(candidate string) (Toolchain, error) {
+		return Resolve(target.X8664LinuxGNU, candidate)
+	})
 	if err != nil {
 		return nil, err
 	}
