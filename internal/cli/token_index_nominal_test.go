@@ -158,8 +158,11 @@ func mapNominalHIR(v reflect.Value, visit func(reflect.Value) reflect.Value) ref
 	switch v.Kind() {
 	case reflect.Struct:
 		out := reflect.New(v.Type()).Elem()
+		out.Set(v)
 		for i := 0; i < v.NumField(); i++ {
-			out.Field(i).Set(mapNominalHIR(v.Field(i), visit))
+			if out.Field(i).CanSet() {
+				out.Field(i).Set(mapNominalHIR(v.Field(i), visit))
+			}
 		}
 		return visit(out)
 	case reflect.Slice:
