@@ -78,7 +78,7 @@ func copyLexerStreamExample(t *testing.T, root string) {
 	t.Helper()
 	copyLexerExample(t, root)
 	example := filepath.Join("..", "..", "examples", "lexer_candidate")
-	for _, name := range []string{"src/types.fy", "src/records.fy", "src/bodies.fy", "src/body_state.fy", "src/cleanup_syntax.fy", "src/parse_tokens.fy", "src/attributes.fy", "src/syntax.fy", "src/syntax_parse_driver.fy", "src/syntax_arena_copy.fy"} {
+	for _, name := range []string{"src/types.fy", "src/records.fy", "src/bodies.fy", "src/body_state.fy", "src/cleanup_syntax.fy", "src/parse_tokens.fy", "src/attributes.fy", "src/syntax.fy", "src/syntax_parse_driver.fy", "src/syntax_arena_copy.fy", "src/file_syntax.fy", "src/integrity.fy"} {
 		data, err := os.ReadFile(filepath.Join(example, name))
 		if err != nil {
 			t.Fatal(err)
