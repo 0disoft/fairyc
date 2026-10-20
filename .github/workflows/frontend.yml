@@ -41,7 +41,8 @@ jobs:
     needs: changes
     if: ${{ !cancelled() && (needs.changes.result != 'success' || needs.changes.outputs.run_tests != 'false') }}
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 10
+    # Windows core includes native compile/run regressions as well as Go tests.
+    timeout-minutes: ${{ matrix.os == 'windows-latest' && 20 || 10 }}
     strategy:
       fail-fast: false
       matrix:
@@ -75,7 +76,7 @@ jobs:
             '^TestArgumentLabelsParserNativeSizes$',
             '^TestByteViewRealLexerWorkloadComparison$'
           ) -join '|'
-          go test -mod=readonly -count=1 -v -skip $skip ./...
+          go test -mod=readonly -count=1 -timeout 15m -v -skip $skip ./...
       - name: Race-test contract-state concurrency
         if: runner.os == 'Linux'
         env:

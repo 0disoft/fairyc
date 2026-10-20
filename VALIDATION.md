@@ -50,6 +50,10 @@ diffs, new branches, tags, missing history, and failed path classification run c
 Manual Frontend runs also execute the full checks. The scheduled/manual Measurements workflow
 keeps its existing triggers.
 
+The Windows core job allows 20 minutes, with a 15-minute Go test timeout per package, because
+it includes native compile/run regressions. Linux and the separate native/parser jobs retain
+their 10-minute limits. The test selection and runner count are unchanged.
+
 Local routing checks: `python -B -m unittest discover -s .github/scripts -p 'test_ci_changes.py'`.
 Workflow syntax: `actionlint .github/workflows/frontend.yml .github/workflows/measurements.yml`.
 
