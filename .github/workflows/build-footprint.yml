@@ -1,0 +1,133 @@
+name: Build footprint (manual)
+
+on:
+  workflow_dispatch:
+    inputs:
+      languages:
+        description: Comma-separated languages
+        type: string
+        default: fairy,zig,rust,c
+      profiles:
+        description: Comma-separated profiles (dev,release,small-dev)
+        type: string
+        default: dev
+      workloads:
+        description: Comma-separated workloads (tokenizer,many-modules)
+        type: string
+        default: tokenizer
+      edits:
+        description: Successive source edits (0..1000)
+        type: number
+        default: 5
+      modules:
+        description: Helper modules for many-modules (2..64)
+        type: number
+        default: 16
+      repetitions:
+        description: Independent cold-to-clean sequences (1..100)
+        type: number
+        default: 1
+
+permissions:
+  contents: read
+
+concurrency:
+  group: build-footprint-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  CGO_ENABLED: "0"
+
+jobs:
+  benchmark:
+    name: Windows build outputs and caches
+    runs-on: windows-latest
+    timeout-minutes: 90
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v7
+      - name: Set up Go
+        uses: actions/setup-go@v7
+        with:
+          go-version-file: go.mod
+          cache: false
+      - name: Build benchmark runner
+        run: |
+          $taskTool = Join-Path $env:RUNNER_TEMP 'fairyc-bench.exe'
+          go build -mod=readonly -o $taskTool ./tools/dev/fairyc-bench
+          if ($LASTEXITCODE -ne 0) { throw 'Benchmark runner build failed' }
+      - name: Download and verify latest stable Zig
+        run: |
+          $taskIndex = Invoke-RestMethod https://ziglang.org/download/index.json
+          $taskRelease = $taskIndex.PSObject.Properties |
+            Where-Object { $_.Name -match '^\d+\.\d+\.\d+$' } |
+            Sort-Object { [version]$_.Name } -Descending |
+            Select-Object -First 1
+          if ($null -eq $taskRelease) { throw 'No stable Zig release found' }
+          $taskArtifact = $taskRelease.Value.'x86_64-windows'
+          $taskUri = [uri]$taskArtifact.tarball
+          if ($taskUri.Scheme -ne 'https' -or $taskUri.Host -ne 'ziglang.org') {
+            throw 'Unexpected Zig distribution URL'
+          }
+          $taskZigRoot = Join-Path $env:RUNNER_TEMP 'fairyc-bench-zig'
+          New-Item -ItemType Directory -Path $taskZigRoot | Out-Null
+          $taskArchive = Join-Path $taskZigRoot 'zig.zip'
+          Invoke-WebRequest $taskUri.AbsoluteUri -OutFile $taskArchive
+          $taskHash = (Get-FileHash -LiteralPath $taskArchive -Algorithm SHA256).Hash.ToLowerInvariant()
+          if ($taskHash -ne $taskArtifact.shasum) { throw 'Zig SHA-256 mismatch' }
+          Expand-Archive -LiteralPath $taskArchive -DestinationPath $taskZigRoot
+          $taskExecutables = @(Get-ChildItem -LiteralPath $taskZigRoot -Recurse -Filter zig.exe)
+          if ($taskExecutables.Count -ne 1) { throw 'Expected one extracted Zig executable' }
+          Add-Content -LiteralPath $env:GITHUB_ENV -Value "FAIRYC_BENCH_ZIG=$($taskExecutables[0].FullName)" -Encoding utf8
+      - name: Run selected benchmarks
+        id: benchmark
+        env:
+          BENCH_LANGUAGES: ${{ inputs.languages }}
+          BENCH_PROFILES: ${{ inputs.profiles }}
+          BENCH_WORKLOADS: ${{ inputs.workloads }}
+          BENCH_EDITS: ${{ inputs.edits }}
+          BENCH_MODULES: ${{ inputs.modules }}
+          BENCH_REPETITIONS: ${{ inputs.repetitions }}
+        run: |
+          $taskTool = Join-Path $env:RUNNER_TEMP 'fairyc-bench.exe'
+          $taskRoot = Join-Path $env:RUNNER_TEMP 'fairyc-bench-run'
+          $taskArguments = @(
+            'run', '--output', $taskRoot,
+            '--languages', $env:BENCH_LANGUAGES,
+            '--profiles', $env:BENCH_PROFILES,
+            '--workloads', $env:BENCH_WORKLOADS,
+            '--edits', $env:BENCH_EDITS,
+            '--modules', $env:BENCH_MODULES,
+            '--repetitions', $env:BENCH_REPETITIONS,
+            '--zig', $env:FAIRYC_BENCH_ZIG, '--timeout', '10m'
+          )
+          & $taskTool @taskArguments
+          if ($LASTEXITCODE -ne 0) { throw 'Benchmark failed; inspect uploaded receipt and command logs' }
+      - name: Render completed receipt (including failed cases)
+        if: ${{ always() && steps.benchmark.outcome != 'skipped' }}
+        run: |
+          $taskTool = Join-Path $env:RUNNER_TEMP 'fairyc-bench.exe'
+          $taskRoot = Join-Path $env:RUNNER_TEMP 'fairyc-bench-run'
+          $taskReceipt = Join-Path $taskRoot 'receipt.json'
+          if (Test-Path -LiteralPath $taskReceipt) {
+            $taskData = Get-Content -LiteralPath $taskReceipt -Raw | ConvertFrom-Json
+            if ($taskData.finished) {
+              & $taskTool render --input $taskReceipt --output (Join-Path $taskRoot 'report')
+              if ($LASTEXITCODE -ne 0) { throw 'Report export failed' }
+            } else {
+              Write-Warning 'Measurement stopped before the full matrix finished; uploading partial receipt only'
+            }
+          }
+      - name: Upload reports and raw receipt
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: build-footprint-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            ${{ runner.temp }}/fairyc-bench-run/receipt.json
+            ${{ runner.temp }}/fairyc-bench-run/report/
+          retention-days: 7
+          if-no-files-found: warn
